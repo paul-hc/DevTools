@@ -121,7 +121,7 @@ CCodingStandardPage::CCodingStandardPage( void )
 
 	m_breakSeparators = formatterOptions.m_breakSeparators;
 	m_braceRules = formatterOptions.m_braceRules;
-	m_operatorRules = formatterOptions.m_operatorRules;
+	m_operatorRules = formatterOptions.GetOperatorRules();
 }
 
 CCodingStandardPage::~CCodingStandardPage()

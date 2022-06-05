@@ -11,6 +11,8 @@
 #define new DEBUG_NEW
 #endif
 
+	ASSERT(uTimeout>=10&&uTimeout<=     30    );		// timeout must be between 10 and 30 seconds
+
 
 // TestPathNaturalSort:
 

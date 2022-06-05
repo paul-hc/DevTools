@@ -213,7 +213,7 @@ bool CModuleSession::EditOptions( void )
 	formattingOptions.m_deleteTrailingWhiteSpace = pCodingStandardPage->m_deleteTrailingWhiteSpace;
 	formattingOptions.m_breakSeparators = pCodingStandardPage->m_breakSeparators;
 	formattingOptions.m_braceRules = pCodingStandardPage->m_braceRules;
-	formattingOptions.m_operatorRules = pCodingStandardPage->m_operatorRules;
+	formattingOptions.SetOperatorRules( pCodingStandardPage->m_operatorRules );
 	m_splitMaxColumn = pCodingStandardPage->m_splitMaxColumn;
 
 	CCppImplFormattingPage* pCppFormattingPage = sheet.GetPageAs< CCppImplFormattingPage >( COptionsSheet::CppFormattingPage );

@@ -9,7 +9,7 @@
 namespace code
 {
 	enum TokenSpacing;
-	struct CFormatterOptions;
+	class CFormatterOptions;
 
 	typedef unsigned int TEditorColumn;
 
@@ -60,8 +60,9 @@ namespace code
 		CString getArgListCodeText( const std::vector< CString >& linesOfCode ) const;
 
 		// formatting
-		CString doFormatLineOfCode( const TCHAR* lineOfCode );
-		CString doAdjustWhitespaceLineOfCode( const TCHAR* lineOfCode );
+		CString doFormatLineOfCode( const TCHAR lineOfCode[] );
+		CString doAdjustWhitespaceLineOfCode( const TCHAR lineOfCode[] );
+		bool IsBraceCharAt( const TCHAR code[], size_t pos ) const;
 		TokenSpacing MustSpaceBrace( TCHAR chrBrace ) const;
 
 		int replaceMultipleWhiteSpace( CString& targetString, int pos, const TCHAR* newWhitespace = _T(" ") );

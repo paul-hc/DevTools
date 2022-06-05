@@ -8,8 +8,9 @@ namespace code
 	enum TokenSpacing { RemoveSpace, InsertOneSpace, PreserveSpace };
 
 
-	struct CFormatterOptions
+	class CFormatterOptions
 	{
+	public:
 		struct CBraceRule;
 		struct COperatorRule;
 
@@ -65,6 +66,8 @@ namespace code
 
 			void LoadFromRegistry( void );
 			void SaveToRegistry( void ) const;
+
+			size_t GetOperatorLength( void ) const { return str::GetLength( m_pOperator ); }
 		public:
 			const TCHAR* m_pOperator;
 			TokenSpacing m_spaceBefore;
@@ -72,6 +75,9 @@ namespace code
 		private:
 			std::tstring m_regEntry;
 		};
+	public:
+		const std::vector< COperatorRule >& GetOperatorRules( void ) const { return m_operatorRules; }
+		void SetOperatorRules( const std::vector< COperatorRule >& operatorRules ) { m_operatorRules = operatorRules; }
 	public:
 		std::vector< std::tstring > m_breakSeparators;
 		bool m_preserveMultipleWhiteSpace;
@@ -81,7 +87,9 @@ namespace code
 		bool m_commentOutDefaultParams;
 
 		std::vector< CBraceRule > m_braceRules;
+	private:
 		std::vector< COperatorRule > m_operatorRules;
+		std::vector< COperatorRule > m_sortedOperatorRules;		// rules ordered descending by length: longest-first - for looking up matches
 	};
 
 } // namespace code

@@ -24,6 +24,18 @@ namespace reg
 }
 
 
+namespace func
+{
+	struct ToOpRuleLength
+	{
+		size_t operator()( const code::CFormatterOptions::COperatorRule& opRule ) const
+		{
+			return opRule.GetOperatorLength();
+		}
+	};
+}
+
+
 namespace code
 {
 	CFormatterOptions::CFormatterOptions( void )
@@ -61,7 +73,7 @@ namespace code
 		m_operatorRules.push_back( COperatorRule( _T("."), RemoveSpace, RemoveSpace ) );
 		m_operatorRules.push_back( COperatorRule( _T("->"), RemoveSpace, RemoveSpace ) );
 		m_operatorRules.push_back( COperatorRule( _T("::"), PreserveSpace, RemoveSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T(":"), PreserveSpace, PreserveSpace ) );	// order is important, must come after ::
+		m_operatorRules.push_back( COperatorRule( _T(":"), PreserveSpace, PreserveSpace ) );		// order is important, must come after ::
 		m_operatorRules.push_back( COperatorRule( _T("=="), InsertOneSpace, InsertOneSpace ) );
 		m_operatorRules.push_back( COperatorRule( _T("!="), InsertOneSpace, InsertOneSpace ) );
 		m_operatorRules.push_back( COperatorRule( _T("="), InsertOneSpace, InsertOneSpace ) );		// order is important, must come after ==, !=
@@ -76,6 +88,11 @@ namespace code
 		m_operatorRules.push_back( COperatorRule( _T(">>"), InsertOneSpace, InsertOneSpace ) );
 		m_operatorRules.push_back( COperatorRule( _T("<"), InsertOneSpace, InsertOneSpace ) );		// order is important, must come after <<
 		m_operatorRules.push_back( COperatorRule( _T(">"), InsertOneSpace, InsertOneSpace ) );		// order is important, must come after >
+
+		m_sortedOperatorRules = m_operatorRules;
+		typedef pred::CompareAdapter<pred::CompareValue, func::ToOpRuleLength> TCompareOpRuleLength;
+		std::stable_sort( m_sortedOperatorRules.begin(), m_sortedOperatorRules.end(), pred::OrderByValue<TCompareOpRuleLength>( false ) );		// by length in descending order
+
 	}
 
 	CFormatterOptions::~CFormatterOptions()
@@ -141,8 +158,9 @@ namespace code
 
 	CFormatterOptions::COperatorRule* CFormatterOptions::FindOperatorRule( const TCHAR* pOpStart ) const
 	{
-		for ( std::vector< COperatorRule >::const_iterator itOpRule = m_operatorRules.begin(); itOpRule != m_operatorRules.end(); ++itOpRule )
-			if ( 0 == _tcsnicmp( itOpRule->m_pOperator, pOpStart, _tcslen( itOpRule->m_pOperator ) ) )
+		// lookup a match in descending order of operator length
+		for ( std::vector< COperatorRule >::const_iterator itOpRule = m_sortedOperatorRules.begin(); itOpRule != m_sortedOperatorRules.end(); ++itOpRule )
+			if ( 0 == _tcsncmp( itOpRule->m_pOperator, pOpStart, str::GetLength( itOpRule->m_pOperator ) ) )
 				return const_cast<COperatorRule*>( &*itOpRule );
 
 		return NULL;

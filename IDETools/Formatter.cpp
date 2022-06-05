@@ -304,7 +304,7 @@ namespace code
 	/**
 		Does the core formatting of a line of code (no line-ends inside, please)
 	*/
-	CString CFormatter::doFormatLineOfCode( const TCHAR* lineOfCode )
+	CString CFormatter::doFormatLineOfCode( const TCHAR lineOfCode[] )
 	{
 		CString outCode = lineOfCode;
 
@@ -320,7 +320,7 @@ namespace code
 				else
 					pos = str::safePos( statementEndPos, outCode ); // reached the protected line termination: [whitespaces] [comment] [whitespaces] [line-end]
 			}
-			else if ( isValidBraceChar( chr, m_validArgListOpenBraces ) )
+			else if ( IsBraceCharAt( outCode, pos ) )
 			{
 				if ( chr == _T('(') )
 					if ( m_multiWhitespacePolicy == UseSplitPrototypePolicy )
@@ -348,7 +348,7 @@ namespace code
 		return outCode;
 	}
 
-	CString CFormatter::doAdjustWhitespaceLineOfCode( const TCHAR* lineOfCode )
+	CString CFormatter::doAdjustWhitespaceLineOfCode( const TCHAR lineOfCode[] )
 	{
 		CString outCode = lineOfCode;
 
@@ -380,6 +380,21 @@ namespace code
 		}
 
 		return outCode;
+	}
+
+	bool CFormatter::IsBraceCharAt( const TCHAR code[], size_t pos ) const
+	{
+		TCHAR chr = str::charAt( code, pos );
+
+		if ( !isValidBraceChar( chr, m_validArgListOpenBraces ) )
+			return false;
+
+		// do we have a matching operator with length greater than of a brace?
+		if ( const CFormatterOptions::COperatorRule* pOpRule = m_options.FindOperatorRule( str::ptrAt( code, pos ) ) )
+			if ( pOpRule->GetOperatorLength() > 1 )
+				return false;							// operator match takes precedence, so not a brace
+
+		return true;
 	}
 
 	TokenSpacing CFormatter::MustSpaceBrace( TCHAR chrBrace ) const
@@ -991,7 +1006,7 @@ namespace code
 
 	void CFormatter::cppFilterPrototypeForImplementation( CString& targetString ) const
 	{
-		static const TCHAR* declarativeTokens[] =
+		static const TCHAR* s_declarativeTokens[] =
 		{
 			_T(";"),
 			_T("virtual"),
@@ -999,15 +1014,17 @@ namespace code
 			_T("friend"),
 			_T("explicit"),
 			_T("mutable"),
+//			_T("override"),
+			_T("final"),
 			_T("afx_msg"),
 			_T("public:"),
 			_T("protected:"),
 			_T("private:")
 		};
 
-		for ( int i = 0; i != COUNT_OF( declarativeTokens ); ++i )
+		for ( int i = 0; i != COUNT_OF( s_declarativeTokens ); ++i )
 		{
-			TokenRange foundToken = m_languageEngine.findString( targetString, declarativeTokens[ i ] );
+			TokenRange foundToken = m_languageEngine.findString( targetString, s_declarativeTokens[ i ] );
 
 			if ( foundToken.IsValid() )
 				if ( !_istalnum( str::charAt( targetString, foundToken.m_start ) ) || !_istalnum( str::charAt( targetString, foundToken.m_end ) ) )
