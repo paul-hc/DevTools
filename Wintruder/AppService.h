@@ -11,10 +11,20 @@ interface IWndObserver;
 interface IEventObserver;
 class CEnumTags;
 class CLogger;
-namespace app { enum Event; }
 
 
-enum { HotFieldColor = color::Blue, StaleWndColor = color::Red, MergeInsertWndColor = color::Green, SlowWndColor = color::html::PaleVioletRed2 };
+namespace app
+{
+	enum Event;
+
+	enum AppColors
+	{
+		HotFieldColor = color::Blue,
+		StaleWndColor = color::Red,
+		MergeInsertWndColor = color::Green,
+		SlowWndColor = color::html::PaleVioletRed2
+	};
+}
 
 
 class CAppService

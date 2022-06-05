@@ -25,6 +25,8 @@ private:
 	CTrackWndPickerStatic m_trackWndPicker;
 	CComboBox m_wndClassCombo;
 	CPopupSplitButton m_resetButton;
+
+	// generated stuff
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:

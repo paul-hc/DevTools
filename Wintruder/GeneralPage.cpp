@@ -377,6 +377,6 @@ HBRUSH CGeneralPage::OnCtlColor( CDC* dc, CWnd* pWnd, UINT ctlColor )
 {
 	HBRUSH hBrush = CLayoutPropertyPage::OnCtlColor( dc, pWnd, ctlColor );
 	if ( pWnd == m_pInfoEdit.get() )
-		dc->SetTextColor( HotFieldColor );
+		dc->SetTextColor( app::HotFieldColor );
 	return hBrush;
 }

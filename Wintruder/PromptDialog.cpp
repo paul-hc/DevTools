@@ -122,7 +122,7 @@ HBRUSH CPromptDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType )
 		switch ( pWnd->GetDlgCtrlID() )
 		{
 			case IDC_PROMPT_STATIC:
-				pDC->SetTextColor( HotFieldColor );
+				pDC->SetTextColor( app::HotFieldColor );
 				break;
 			case IDC_CHANGED_FIELDS_STATIC:
 				pDC->SetTextColor( !m_changedFields.empty() ? color::Red : color::Blue );

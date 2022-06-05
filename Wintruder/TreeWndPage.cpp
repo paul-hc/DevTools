@@ -300,7 +300,7 @@ void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM row
 	HWND hWnd = m_treeCtrl.GetItemDataAs<HWND>( hItem );
 
 	if ( !ui::IsValidWindow( hWnd ) )
-		rTextEffect.m_textColor = StaleWndColor;
+		rTextEffect.m_textColor = app::StaleWndColor;
 	else
 	{
 		if ( !ui::IsVisible( hWnd ) )
@@ -310,7 +310,7 @@ void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM row
 			rTextEffect.m_textColor = ::GetSysColor( COLOR_GRAYTEXT );
 
 		if ( wnd::IsSlowWindow( hWnd ) )
-			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_treeCtrl.GetActualTextColor(), SlowWndColor );
+			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_treeCtrl.GetActualTextColor(), app::SlowWndColor );
 	}
 }
 
@@ -432,7 +432,7 @@ HTREEITEM CTreeWndPage::RefreshBranchOf( HWND hWndTarget )	// refresh branch und
 
 		wt::CWndTreeBuilder builder( &m_treeCtrl, app::GetLogger() );
 
-		builder.SetInsertedEffect( ui::CTextEffect::MakeColor( MergeInsertWndColor ) );
+		builder.SetInsertedEffect( ui::CTextEffect::MakeColor( app::MergeInsertWndColor ) );
 
 		HTREEITEM hParentItem = builder.MergeBranchPath( branchPath.rbegin(), branchPath.rend() - 1 );	// step 1: merge excluding the deepest item
 		builder.BuildChildren( branchPath[ 1 ] );														// step 2: refresh entirely the parent of deepest item, so that all siblings are inserted

@@ -384,7 +384,7 @@ HBRUSH CMainDialog::OnCtlColor( CDC* dc, CWnd* pWnd, UINT ctlColor )
 	HBRUSH hBrush = __super::OnCtlColor( dc, pWnd, ctlColor );
 
 	if ( ctlColor == CTLCOLOR_STATIC && pWnd == &m_briefInfoEdit )
-		dc->SetTextColor( app::GetTargetWnd().IsValid() ? HotFieldColor : StaleWndColor );
+		dc->SetTextColor( app::GetTargetWnd().IsValid() ? app::HotFieldColor : app::StaleWndColor );
 
 	return hBrush;
 }
