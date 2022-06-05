@@ -164,24 +164,16 @@ namespace res
 {
 	HICON LoadIcon( const CIconId& iconId );
 
+	// image-list from bitmap: loads strip from whichever comes first - PNG:32bpp with alpha (if found), or BMP:4/8/24bpp
+	int LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor = color::Auto,
+						  int imageCount = -1, bool disabledEffect = false );
+
+	// image-list from an icon-strip of custom size and multiple images
+	int LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags = ILC_COLOR32 | ILC_MASK );
+
 	// image-list from individual icons
-	void LoadImageList( CImageList& rOutImageList, const UINT* pIconIds, size_t iconCount, IconStdSize iconStdSize = SmallIcon,
-						UINT ilFlags = ILC_COLOR32 | ILC_MASK );
-
-	// bitmap image-list: works with 32bpp PNG or 4/8/24bpp BMP (whichever comes first)
-	bool LoadImageList( CImageList& rOutImageList, UINT bitmapId, int imageCount, const CSize& imageSize,
-						COLORREF transpColor = color::Auto, bool disabledEffect = false );
-
-	// image-list from one icon-strip of custom size and multiple images
-	int LoadImageListFromIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags = ILC_COLOR32 | ILC_MASK );
-
-
-	typedef CIconId TStripId;
-
-	inline bool LoadImageList( CImageList& rOutImageList, const TStripId& stripId, int imageCount, COLORREF transpColor = color::Auto )
-	{
-		return LoadImageList( rOutImageList, stripId.m_id, imageCount, CIconSize::GetSizeOf( stripId.m_stdSize ), transpColor );
-	}
+	void LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize = SmallIcon,
+							 UINT ilFlags = ILC_COLOR32 | ILC_MASK );
 }
 
 

@@ -6,6 +6,8 @@
 namespace dbg
 {
 	void TraceWindow( HWND hWnd, const TCHAR tag[] );
+
+	void TraceTrayNotifyCode( UINT msgNotifyCode );
 }
 
 

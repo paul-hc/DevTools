@@ -98,8 +98,8 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	//GetLogger().LogLine( _T(""), false );					// new-line as session separator
 
 	// register stock images
-	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_STRIP );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_STRIP );
 
 	// activate "Windows Native" visual manager for enabling themes in MFC controls
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );

@@ -2,6 +2,8 @@
 #define Timer_h
 #pragma once
 
+#include <ctime>		// std::clock_t, etc
+
 
 class CTimer
 {

@@ -13,6 +13,7 @@
 #endif
 
 
+CBitmap* CDibSection::s_pNullMask = NULL;
 int CDibSection::m_testFlags = 0;
 
 CDibSection::CDibSection( HBITMAP hDib /*= NULL*/, bool ownsDib /*= false*/ )
@@ -293,13 +294,12 @@ CSize CDibSection::MakeImageList( CImageList& rDestImageList, int imageCount )
 	// imply image size from bitmap width and image count
 	CSize imageSize = m_bitmapSize;
 	imageSize.cx /= imageCount;
-	ENSURE( m_bitmapSize.cx == imageSize.cx * imageCount );
+	ENSURE( m_bitmapSize.cx == imageSize.cx * imageCount );		// whole division (no remainder)?
 
 	CreateEmptyImageList( rDestImageList, imageSize, imageCount );
-	static CBitmap* pNullMask = NULL;
 
 	if ( HasAlpha() )
-		rDestImageList.Add( this, pNullMask );		// use alpha channel (no ILC_MASK required)
+		rDestImageList.Add( this, s_pNullMask );		// use alpha channel (no ILC_MASK required)
 	else
 	{
 		// NOTE: this DIB will get altered, i.e. transparent background gets converted to black (due to image list internals).
@@ -307,7 +307,7 @@ CSize CDibSection::MakeImageList( CImageList& rDestImageList, int imageCount )
 		if ( HasTranspColor() )
 			rDestImageList.Add( this, m_transpColor );
 		else
-			rDestImageList.Add( this, pNullMask );
+			rDestImageList.Add( this, s_pNullMask );
 	}
 
 	return imageSize;

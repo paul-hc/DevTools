@@ -134,7 +134,7 @@ void CImageDialog::CreateEffectDibs( void )
 						imageCount = 1;
 				}
 
-				m_pImageList.reset( new CImageList );
+				m_pImageList.reset( new CImageList() );
 				pNewDib->MakeImageList( *m_pImageList, imageCount );
 			}
 			break;

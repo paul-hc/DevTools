@@ -211,7 +211,7 @@ bool CBalloonHostWnd::Create( CWnd* pParentWnd )
 
 bool CBalloonHostWnd::CreateToolTip( void )
 {
-	if ( !m_toolTipCtrl.Create( this, TTS_ALWAYSTIP | TTS_NOPREFIX | TTS_BALLOON ) )
+	if ( !m_toolTipCtrl.Create( this, TTS_BALLOON | TTS_ALWAYSTIP | TTS_NOPREFIX ) )
 		return false;
 
 	TOOLINFO toolInfo;

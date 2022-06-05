@@ -68,4 +68,43 @@ namespace dbg
 		hWnd, tag;
 	#endif //_DEBUG
 	}
+
+	void TraceTrayNotifyCode( UINT msgNotifyCode )
+	{
+	#ifdef _DEBUG
+		const TCHAR* pNotifyCode = NULL;
+
+		switch ( msgNotifyCode )
+		{
+			case WM_CONTEXTMENU: pNotifyCode = _T("WM_CONTEXTMENU"); break;
+			case WM_LBUTTONDOWN: pNotifyCode = _T("WM_LBUTTONDOWN"); break;
+			case WM_LBUTTONUP: pNotifyCode = _T("WM_LBUTTONUP"); break;
+			case WM_LBUTTONDBLCLK: pNotifyCode = _T("WM_LBUTTONDBLCLK"); break;
+			case WM_RBUTTONDOWN: pNotifyCode = _T("WM_RBUTTONDOWN"); break;
+			case WM_RBUTTONUP: pNotifyCode = _T("WM_RBUTTONUP"); break;
+			case WM_RBUTTONDBLCLK: pNotifyCode = _T("WM_RBUTTONDBLCLK"); break;
+			case NIN_SELECT: pNotifyCode = _T("NIN_SELECT"); break;
+			case NINF_KEY: pNotifyCode = _T("NINF_KEY"); break;
+			case NIN_KEYSELECT: pNotifyCode = _T("NIN_KEYSELECT"); break;
+			case NIN_BALLOONSHOW: pNotifyCode = _T("NIN_BALLOONSHOW"); break;
+			case NIN_BALLOONHIDE: pNotifyCode = _T("NIN_BALLOONHIDE"); break;
+			case NIN_BALLOONTIMEOUT: pNotifyCode = _T("NIN_BALLOONTIMEOUT"); break;
+			case NIN_BALLOONUSERCLICK: pNotifyCode = _T("NIN_BALLOONUSERCLICK"); break;
+			case NIN_POPUPOPEN: pNotifyCode = _T("NIN_POPUPOPEN"); break;
+			case NIN_POPUPCLOSE: pNotifyCode = _T("NIN_POPUPCLOSE"); break;
+			case WM_MOUSEMOVE:
+				return;		// avoid noisy output
+			default:
+			{
+				static TCHAR s_buffer[ 64 ];
+				_itot( msgNotifyCode, s_buffer, 10 );
+				pNotifyCode = s_buffer;
+			}
+		}
+		static int count = 0;
+		TRACE( _T(" OnTrayIconNotify(%d): NotifCode=%s\n"), count++, pNotifyCode );
+	#else
+		msgNotifyCode;
+	#endif //_DEBUG
+	}
 }

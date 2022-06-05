@@ -123,41 +123,15 @@ namespace res
 		return (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, LR_DEFAULTCOLOR );
 	}
 
-	void LoadImageList( CImageList& rOutImageList, const UINT* pIconIds, size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
-						UINT ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
-	{
-		if ( NULL == rOutImageList.GetSafeHandle() )
-		{
-			const CSize iconSize = CIconSize::GetSizeOf( iconStdSize );
-			VERIFY( rOutImageList.Create( iconSize.cx, iconSize.cy, ilFlags, 0, (int)iconCount ) );
-		}
-
-		for ( unsigned int i = 0; i != iconCount; ++i )
-			if ( pIconIds[ i ] != 0 )			// skip separator ids
-			{
-				CIconId iconId( pIconIds[ i ], iconStdSize );
-
-				if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( iconId ) )		// try exact icon size
-					rOutImageList.Add( pIcon->GetHandle() );
-				else if ( HICON hIcon = LoadIcon( iconId ) )								// try to load a scaled icon
-				{
-					rOutImageList.Add( hIcon );
-					::DestroyIcon( hIcon );
-				}
-				else
-					ASSERT( false );		// no image found
-			}
-	}
-
-	bool LoadImageList( CImageList& rOutImageList, UINT bitmapId, int imageCount, const CSize& imageSize,
-						COLORREF transpColor /*= color::Auto*/, bool disabledEffect /*= false*/ )
+	int LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor /*= color::Auto*/,
+						  int imageCount /*= -1*/, bool disabledEffect /*= false*/ )
 	{
 		// Use PNG only with 32bpp (alpha channel). PNG 24bpp breaks image list transparency (DIB issues?).
 		// Use BMP for 24bpp and lower.
 
 		CDibSection dibSection;
 		if ( !dibSection.LoadImage( bitmapId ) )		// PNG or BMP
-			return false;
+			return 0;
 
 		if ( color::Auto == transpColor )
 			dibSection.SetAutoTranspColor();
@@ -167,15 +141,17 @@ namespace res
 		if ( disabledEffect )
 		{
 			CDibPixels pixels( &dibSection );
-			pixels.ApplyDisabledGrayOut( GetSysColor( COLOR_BTNFACE ), 64 );
+			pixels.ApplyDisabledGrayOut( ::GetSysColor( COLOR_BTNFACE ), 64 );
 		}
 
+		if ( -1 == imageCount )
+			imageCount = dibSection.GetSize().cx / dibSection.GetSize().cy;		// assume nearly square images
+
 		CSize buttonSize = dibSection.MakeImageList( rOutImageList, imageCount );
-		VERIFY( buttonSize == imageSize );
-		return true;
+		return imageCount;
 	}
 
-	int LoadImageListFromIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
+	int LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
 	{
 		// load a strip from a custom size icon with multiple images; image count is inferred by strip_width/strip_height ratio.
 		ASSERT_PTR( pOutImageList );
@@ -202,6 +178,34 @@ namespace res
 		utl::AssignPtr( pOutImageSize, imageSize );
 
 		return imageCount;
+	}
+
+	void LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
+							 UINT ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
+	{
+		ASSERT_PTR( iconIds );
+
+		if ( NULL == rOutImageList.GetSafeHandle() )
+		{
+			const CSize iconSize = CIconSize::GetSizeOf( iconStdSize );
+			VERIFY( rOutImageList.Create( iconSize.cx, iconSize.cy, ilFlags, 0, (int)iconCount ) );
+		}
+
+		for ( unsigned int i = 0; i != iconCount; ++i )
+			if ( iconIds[ i ] != 0 )			// skip separator ids
+			{
+				CIconId iconId( iconIds[ i ], iconStdSize );
+
+				if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( iconId ) )		// try exact icon size
+					rOutImageList.Add( pIcon->GetHandle() );
+				else if ( HICON hIcon = LoadIcon( iconId ) )								// try to load a scaled icon
+				{
+					rOutImageList.Add( hIcon );
+					::DestroyIcon( hIcon );
+				}
+				else
+					ASSERT( false );		// no image found
+			}
 	}
 
 } //namespace res

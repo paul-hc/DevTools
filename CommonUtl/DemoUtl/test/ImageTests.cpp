@@ -96,10 +96,19 @@ void CImageTests::TestImageList( void )
 {
 	enum { Image_Fill = 4, ImageCount };
 
-	const CSize imageSize = CIconSize::GetSizeOf( SmallIcon );
 	CImageList imageList;
-	VERIFY( res::LoadImageList( imageList, IDR_IMAGE_STRIP, ImageCount, imageSize, color::Auto ) );
+
+	VERIFY( res::LoadImageListDIB( imageList, IDR_IMAGE_STRIP ) );		// use default image count, implied from the width/height ratio
+	CSize imageSize = gdi::GetImageIconSize( imageList );
 	ASSERT_EQUAL( ImageCount, imageList.GetImageCount() );
+	ASSERT( CIconSize::GetSizeOf( SmallIcon ) == imageSize );
+
+	{	// reload with explicit image count
+		CImageList imageList2;
+		VERIFY( res::LoadImageListDIB( imageList2, IDR_IMAGE_STRIP, color::Auto, ImageCount ) );
+		ASSERT_EQUAL( imageList.GetImageCount(), imageList2.GetImageCount() );
+		ASSERT( imageSize == gdi::GetImageIconSize( imageList2 ) );
+	}
 
 	IMAGEINFO imageInfo;
 	VERIFY( imageList.GetImageInfo( Image_Fill, &imageInfo ) );

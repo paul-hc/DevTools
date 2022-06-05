@@ -109,7 +109,8 @@ bool CToolImageList::LoadToolbar( UINT toolBarId, COLORREF transpColor /*= color
 	if ( imageCount != 0 )
 	{
 		m_pImageList.reset( new CImageList() );
-		res::LoadImageList( *m_pImageList, toolBarId, imageCount, m_imageSize.GetSize(), transpColor );
+		VERIFY( imageCount == res::LoadImageListDIB( *m_pImageList, toolBarId, transpColor ) );
+		ASSERT( m_imageSize.GetSize() == gdi::GetImageIconSize( *m_pImageList ) );
 	}
 	return imageCount != 0;
 }
@@ -121,7 +122,7 @@ bool CToolImageList::LoadIconStrip( UINT iconStripId, const UINT buttonIds[], si
 	StoreButtonIds( buttonIds, count );
 	m_pImageList.reset( new CImageList() );
 
-	int imageCount = res::LoadImageListFromIconStrip( m_pImageList.get(), &imageSize, iconStripId );
+	int imageCount = res::LoadImageListIconStrip( m_pImageList.get(), &imageSize, iconStripId );
 	m_imageSize.Reset( imageSize );
 	return imageCount == GetImageCount();		// all buttons images found?
 }

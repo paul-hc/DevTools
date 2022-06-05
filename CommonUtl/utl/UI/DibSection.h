@@ -10,12 +10,19 @@
 class CDibPixels;
 
 
-// works with 4/8/24/32 bpp DIBs loaded from BMP or PNG
+// works with PNGs or DIB-BMPp 4/8/24/32bpp loaded from file or resource
 
 class CDibSection : public CBitmap
-				  , public bmp::CSharedAccess
+	, public bmp::CSharedAccess
 {
-	enum DibFlags { F_IsPng = 1 << 0, F_HasAlpha = 1 << 1, F_AutoTranspColor = 1 << 2, F_NoAutoDelete = 1 << 5, _CopyMask = F_IsPng | F_HasAlpha | F_AutoTranspColor };
+	enum DibFlags
+	{
+		F_IsPng				= 1 << 0,
+		F_HasAlpha			= 1 << 1,
+		F_AutoTranspColor	= 1 << 2,
+		F_NoAutoDelete		= 1 << 5,
+			_CopyMask = F_IsPng | F_HasAlpha | F_AutoTranspColor
+	};
 public:
 	CDibSection( HBITMAP hDib = NULL, bool ownsDib = false );
 	virtual ~CDibSection();
@@ -96,6 +103,8 @@ private:
 	COLORREF m_transpColor;
 public:
 	enum { ForceCvtEqualBpp = 1 << 0, ForceCvtCopyPixels = 1 << 1 };
+
+	static CBitmap* s_pNullMask;
 	static int m_testFlags;
 };
 

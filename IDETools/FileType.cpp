@@ -78,10 +78,13 @@ namespace ft
 
 	CImageList& GetFileTypeImageList( void )
 	{
-		static CImageList imageList;
-		if ( NULL == imageList.GetSafeHandle() )
-			res::LoadImageList( imageList, IDB_FILE_TYPE_STRIP, ft::_ImageCount, CIconSize::GetSizeOf( SmallIcon ), color::ToolStripPink );
+		static CImageList s_imageListType;
+		if ( NULL == s_imageListType.GetSafeHandle() )
+		{
+			VERIFY( ft::_ImageCount == res::LoadImageListDIB( s_imageListType, IDB_FILE_TYPE_STRIP, color::ToolStripPink ) );
+			ASSERT( CIconSize::GetSizeOf( SmallIcon ) == gdi::GetImageIconSize( s_imageListType ) );
+		}
 
-		return imageList;
+		return s_imageListType;
 	}
 }

@@ -39,6 +39,7 @@
 
 
 #define abstract			// class not instantiable
+#define override			// method suffix to indicate a base override - note: replaces the CLR override keyword
 #define final				// don't override a method/don't subclass a class
 #define persist				// persistent data-member
 #define throws_( ... )

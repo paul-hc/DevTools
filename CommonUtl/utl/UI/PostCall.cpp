@@ -21,7 +21,7 @@ CBasePostCall::~CBasePostCall()
 {
 }
 
-LRESULT CBasePostCall::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CBasePostCall::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
 {
 	if ( WM_DELAYED_CALL == message )
 		if ( (void*)wParam == this )		// is this our call in a multiple posted sequence?
@@ -31,7 +31,7 @@ LRESULT CBasePostCall::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
 			return 0L;
 		}
 
-	return CWindowHook::WindowProc( message, wParam, lParam );
+	return __super::WindowProc( message, wParam, lParam );
 }
 
 bool CBasePostCall::PostCall( CWnd* pWnd )
