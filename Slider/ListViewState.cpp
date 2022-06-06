@@ -5,7 +5,7 @@
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/UI/ReportListControl.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

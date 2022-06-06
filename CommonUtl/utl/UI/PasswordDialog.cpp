@@ -4,7 +4,7 @@
 #include "LayoutEngine.h"
 #include "Path.h"
 #include "CmdUpdate.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 
 #ifdef _DEBUG

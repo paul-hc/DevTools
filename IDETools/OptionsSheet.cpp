@@ -8,7 +8,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
 #include "utl/TextClipboard.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/resource.h"
 #include <sstream>
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI

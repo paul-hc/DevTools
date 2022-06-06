@@ -9,7 +9,7 @@
 #include "utl/PathGenerator.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/MenuUtilities.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 
 #ifdef _DEBUG

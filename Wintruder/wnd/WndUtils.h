@@ -2,7 +2,7 @@
 #define WndUtils_h
 #pragma once
 
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 
 namespace wnd

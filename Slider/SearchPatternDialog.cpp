@@ -6,7 +6,7 @@
 #include "utl/UI/LayoutEngine.h"
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/ShellUtilities.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 #include <io.h>
 

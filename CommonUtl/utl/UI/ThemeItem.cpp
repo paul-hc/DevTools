@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "ThemeItem.h"
 #include "Icon.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "VisualTheme.h"
 
 #ifdef _DEBUG

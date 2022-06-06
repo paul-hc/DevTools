@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Direct2D.h"
 #include "BaseApp.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include <math.h>
 
 #pragma comment( lib, "d2d1" )		// link to Direct2D

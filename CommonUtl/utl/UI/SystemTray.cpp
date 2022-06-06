@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "SystemTray.h"
 #include "ISystemTrayCallback.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "MenuUtilities.h"
 #include "WindowDebug.h"
 #include "utl/ContainerUtilities.h"

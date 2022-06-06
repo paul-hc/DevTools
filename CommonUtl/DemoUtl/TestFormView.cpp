@@ -11,7 +11,7 @@
 #include "BuddyControlsDialog.h"
 #include "test/ImageTests.h"
 #include "utl/UI/CmdUpdate.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
 

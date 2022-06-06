@@ -1,5 +1,5 @@
-#ifndef Utilities_h
-#define Utilities_h
+#ifndef WndUtils_h_UI
+#define WndUtils_h_UI
 #pragma once
 
 #include "Dialog_fwd.h"
@@ -596,4 +596,4 @@ namespace ui
 }
 
 
-#endif // Utilities_h
+#endif // WndUtils_h_UI

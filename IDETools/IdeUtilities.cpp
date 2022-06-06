@@ -7,7 +7,7 @@
 #include "utl/Path.h"
 #include "utl/UI/ProcessUtils.h"
 #include "utl/Registry.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

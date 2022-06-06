@@ -6,7 +6,7 @@
 #include "LayoutEngine.h"
 #include "ReportListControl.h"
 #include "ThemeStatic.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "VersionInfo.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"

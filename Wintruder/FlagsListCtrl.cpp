@@ -10,7 +10,7 @@
 #include "utl/UI/CtrlUiState.h"
 #include "utl/UI/CheckStatePolicies.h"
 #include "utl/UI/MenuUtilities.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

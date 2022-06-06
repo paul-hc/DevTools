@@ -3,7 +3,7 @@
 #include "MfcUtilities.h"
 #include "Path.h"
 #include "Serialization.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

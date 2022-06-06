@@ -4,7 +4,7 @@
 #include "CustomTaskDialogs.h"
 #include "utl/EnumTags.h"
 #include "utl/UI/TaskDialog.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "resource.h"
 
 #ifdef _DEBUG

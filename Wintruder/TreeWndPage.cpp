@@ -13,7 +13,7 @@
 #include "utl/UI/AccelTable.h"
 #include "utl/UI/Icon.h"
 #include "utl/UI/MenuUtilities.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

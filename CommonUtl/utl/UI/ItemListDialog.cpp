@@ -5,7 +5,7 @@
 #include "EnumTags.h"
 #include "StringCompare.h"
 #include "TextEdit.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/TextClipboard.h"

@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "DragListCtrl.h"
 #include "GpUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG

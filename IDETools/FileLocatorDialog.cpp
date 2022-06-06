@@ -12,7 +12,7 @@
 #include "utl/TextClipboard.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ShellUtilities.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -22,7 +22,7 @@
 #include "utl/UI/ProgressService.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/ShellUtilities.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 #include "utl/UI/test/WicImageTests.h"

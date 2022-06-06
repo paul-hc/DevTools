@@ -8,7 +8,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/Logger.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

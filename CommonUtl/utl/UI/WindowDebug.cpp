@@ -3,7 +3,7 @@
 #include "WindowDebug.h"
 
 #ifdef _DEBUG
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/FlagTags.h"
 #include <sstream>
 #define new DEBUG_NEW

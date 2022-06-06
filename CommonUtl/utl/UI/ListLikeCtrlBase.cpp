@@ -3,7 +3,7 @@
 #include "ListLikeCtrlBase.h"
 #include "CustomDrawImager.h"
 #include "CmdIdStore.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "VisualTheme.h"
 
 #ifdef _DEBUG

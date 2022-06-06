@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "BaseZoomView.h"
 #include "Color.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 
 #ifdef _DEBUG

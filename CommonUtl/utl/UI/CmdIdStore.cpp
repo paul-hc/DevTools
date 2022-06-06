@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "CmdIdStore.h"
 #include "MenuUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

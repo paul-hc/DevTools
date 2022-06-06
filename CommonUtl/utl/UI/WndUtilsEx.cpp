@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "UtilitiesEx.h"
+#include "WndUtilsEx.h"
 #include "ScopedGdi.h"
 
 #ifdef _DEBUG

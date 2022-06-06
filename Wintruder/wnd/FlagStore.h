@@ -2,7 +2,7 @@
 #define FlagStore_h
 #pragma once
 
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "WindowClass.h"
 
 

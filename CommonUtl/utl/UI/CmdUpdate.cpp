@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "CmdUpdate.h"
 #include "MenuUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "VersionInfo.h"
 
 #ifdef _DEBUG

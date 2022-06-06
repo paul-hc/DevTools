@@ -3,7 +3,7 @@
 #include "TrackWndPickerStatic.h"
 #include "WndFinder.h"
 #include "WndHighlighter.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "BalloonMessageTip.h"
 #include "CmdInfoStore.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/Registry.h"

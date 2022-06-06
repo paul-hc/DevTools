@@ -13,7 +13,7 @@
 #include "resource.h"
 #include "utl/UI/DragListCtrl.h"
 #include "utl/UI/MenuUtilities.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/Thumbnailer.h"
 #include <memory>
 #include <algorithm>

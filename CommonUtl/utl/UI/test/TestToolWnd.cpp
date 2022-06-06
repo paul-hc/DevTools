@@ -10,7 +10,7 @@
 #include "ImagingWic.h"
 #include "WicDibSection.h"
 #include "ScopedGdi.h"
-#include "UtilitiesEx.h"
+#include "WndUtilsEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -6,7 +6,7 @@
 #include "resource.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/LayoutEngine.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

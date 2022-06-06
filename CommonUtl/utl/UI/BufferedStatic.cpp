@@ -3,7 +3,7 @@
 #include "BufferedStatic.h"
 #include "MemoryDC.h"
 #include "ScopedGdi.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

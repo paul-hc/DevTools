@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "SpinTargetButton.h"
 #include "SpinEdit.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

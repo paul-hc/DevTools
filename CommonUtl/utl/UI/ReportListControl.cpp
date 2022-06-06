@@ -10,7 +10,7 @@
 #include "OleDataSource.h"
 #include "StringUtilities.h"
 #include "StringRange.h"
-#include "UtilitiesEx.h"
+#include "WndUtilsEx.h"
 #include "CheckStatePolicies.h"
 #include "ComparePredicates.h"
 #include "ContainerUtilities.h"

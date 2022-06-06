@@ -19,7 +19,7 @@
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/PostCall.h"
 #include "utl/UI/ShellUtilities.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 

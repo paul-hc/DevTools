@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "DetailIconButton.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 
 #ifdef _DEBUG

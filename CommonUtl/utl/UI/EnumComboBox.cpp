@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "EnumComboBox.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/EnumTags.h"
 
 #ifdef _DEBUG

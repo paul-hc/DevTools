@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "EnumSplitButton.h"
 #include "EnumTags.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

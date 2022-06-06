@@ -5,7 +5,7 @@
 #include "CmdInfoStore.h"
 #include "Command.h"
 #include "CommandModel.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "PopupSplitButton.h"
 #include "MenuUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "VisualTheme.h"
 
 #ifdef _DEBUG

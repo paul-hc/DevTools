@@ -9,7 +9,7 @@
 #include "utl/TextClipboard.h"
 #include "utl/UI/LayoutEngine.h"
 #include "utl/UI/CmdUpdate.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/VisualTheme.h"
 #include "utl/UI/resource.h"
 #include "resource.h"

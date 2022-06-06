@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ShellDragImager.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include <afxole.h>
 
 #ifdef _DEBUG

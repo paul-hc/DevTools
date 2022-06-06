@@ -3,7 +3,7 @@
 #include "OleDropSource.h"
 #include "ShellDropTip.h"
 #include "OleUtils.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 
 #define DDWM_UPDATEWINDOW	( WM_USER + 3 )

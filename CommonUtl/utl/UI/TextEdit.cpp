@@ -5,7 +5,7 @@
 #include "Icon.h"
 #include "SyncScrolling.h"
 #include "StringUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/TextClipboard.h"
 
 #ifdef _DEBUG

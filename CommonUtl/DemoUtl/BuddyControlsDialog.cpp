@@ -12,7 +12,7 @@
 #include "utl/TimeUtils.h"
 #include "utl/UI/ResizeFrameStatic.h"
 #include "utl/UI/Icon.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
 

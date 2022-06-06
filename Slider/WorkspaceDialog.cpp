@@ -9,7 +9,7 @@
 #include "utl/UI/Dialog_fwd.h"
 #include "utl/UI/Direct2D.h"
 #include "utl/UI/ShellUtilities.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
 
 #ifdef _DEBUG

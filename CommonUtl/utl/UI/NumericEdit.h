@@ -4,7 +4,7 @@
 
 #include "TextEdit.h"
 #include "StringUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 
 namespace num { enum Format { Decimal, Hexa }; }

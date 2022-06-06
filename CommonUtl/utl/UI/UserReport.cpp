@@ -4,7 +4,7 @@
 #include "ContainerUtilities.h"
 #include "EnumTags.h"
 #include "RuntimeException.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

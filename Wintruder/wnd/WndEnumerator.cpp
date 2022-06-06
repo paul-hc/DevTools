@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "WndEnumerator.h"
 #include "WindowClass.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -3,7 +3,7 @@
 #include "MenuUtilities.h"
 #include "ContainerUtilities.h"
 #include "ImageStore.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #include "FlagTags.h"

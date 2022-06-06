@@ -6,7 +6,7 @@
 #include "SystemTray.h"
 #include "MenuUtilities.h"
 #include "StringUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "PostCall.h"
 #include "resource.h"
 

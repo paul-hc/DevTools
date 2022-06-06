@@ -2,7 +2,7 @@
 #define StockValuesComboBox_hxx
 
 #include "Dialog_fwd.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 
 namespace ui

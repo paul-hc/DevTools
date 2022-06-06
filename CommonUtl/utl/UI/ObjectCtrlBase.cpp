@@ -4,7 +4,7 @@
 #include "ShellContextMenuHost.h"
 #include "MenuUtilities.h"
 #include "PostCall.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/Path.h"
 #include "resource.h"
 

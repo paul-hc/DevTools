@@ -6,7 +6,7 @@
 #include "ModuleSession.h"
 #include "Application.h"
 #include "utl/UI/LayoutEngine.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
 

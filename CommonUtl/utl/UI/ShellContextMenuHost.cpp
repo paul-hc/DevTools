@@ -3,7 +3,7 @@
 #include "ShellContextMenuHost.h"
 #include "ContainerUtilities.h"
 #include "MenuUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "WindowHook.h"
 
 #ifdef _DEBUG

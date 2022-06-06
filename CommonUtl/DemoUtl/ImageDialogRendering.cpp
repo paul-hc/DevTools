@@ -7,7 +7,7 @@
 #include "utl/UI/DibSection.h"
 #include "utl/UI/DibPixels.h"
 #include "utl/UI/ImagingGdiPlus.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

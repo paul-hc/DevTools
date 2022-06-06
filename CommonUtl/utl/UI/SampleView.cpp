@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "SampleView.h"
 #include "GpUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 #include <afxpriv.h>
 

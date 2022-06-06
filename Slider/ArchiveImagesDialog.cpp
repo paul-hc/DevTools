@@ -8,7 +8,7 @@
 #include "resource.h"
 #include "utl/UI/PasswordDialog.h"
 #include "utl/UI/ShellDialogs.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

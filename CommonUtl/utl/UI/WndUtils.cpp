@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "LayoutEngine.h"
 #include "HistoryComboBox.h"
 #include "IconButton.h"

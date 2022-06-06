@@ -3,7 +3,7 @@
 #include "TestMiscDialog.h"
 #include "utl/AppTools.h"
 #include "utl/UI/ImageStore.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
 

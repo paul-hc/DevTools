@@ -4,7 +4,7 @@
 #include "AccelTable.h"
 #include "CmdUpdate.h"
 #include "MenuUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "TimeUtils.h"
 #include "utl/TextClipboard.h"
 #include "resource.h"

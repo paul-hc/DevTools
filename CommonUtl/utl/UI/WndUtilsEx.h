@@ -1,8 +1,8 @@
-#ifndef UtilitiesEx_h
-#define UtilitiesEx_h
+#ifndef WndUtilsEx_h_UI
+#define WndUtilsEx_h_UI
 #pragma once
 
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "WindowHook.h"
 
 
@@ -297,4 +297,4 @@ namespace app
 }
 
 
-#endif // UtilitiesEx_h
+#endif // WndUtilsEx_h_UI

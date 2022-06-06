@@ -7,7 +7,7 @@
 #include "CmdUpdate.h"
 #include "PopupDlgBase.h"
 #include "ToolStrip.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 

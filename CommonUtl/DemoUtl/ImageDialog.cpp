@@ -15,7 +15,7 @@
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Pixel.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/resource.h"
 
 #ifdef _DEBUG

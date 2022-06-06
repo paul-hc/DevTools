@@ -6,7 +6,7 @@
 #include "resource.h"
 #include "wnd/WindowClass.h"
 #include "wnd/WndUtils.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

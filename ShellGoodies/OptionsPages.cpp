@@ -13,7 +13,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 
 #ifdef _DEBUG

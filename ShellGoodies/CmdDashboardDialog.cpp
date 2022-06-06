@@ -12,7 +12,7 @@
 #include "utl/StringUtilities.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/ImageStore.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
 

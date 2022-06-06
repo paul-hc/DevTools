@@ -1,7 +1,7 @@
 
 #include "StdAfx.h"
 #include "ResizeFrameStatic.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

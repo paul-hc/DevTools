@@ -4,7 +4,7 @@
 #include "MemoryDC.h"
 #include "ScopedValue.h"
 #include "ContainerUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include <afxext.h>				// for CFormView
 
 #ifdef _DEBUG

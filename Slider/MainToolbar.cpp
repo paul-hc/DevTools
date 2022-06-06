@@ -11,7 +11,7 @@
 #include "utl/UI/CmdInfoStore.h"
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/StockValuesComboBox.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 
 #ifdef _DEBUG

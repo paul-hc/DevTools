@@ -5,7 +5,7 @@
 #include "Recycler.h"
 #include "Registry.h"
 #include "ContainerUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/FileSystem.h"
 #include <shlwapi.h>
 

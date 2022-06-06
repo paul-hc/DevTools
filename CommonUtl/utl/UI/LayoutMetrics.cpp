@@ -3,7 +3,7 @@
 #include "LayoutMetrics.h"
 #include "CtrlInterfaces.h"
 #include "ThemeItem.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

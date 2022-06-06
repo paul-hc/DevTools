@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ThumbPreviewCtrl.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
 
 #ifdef _DEBUG

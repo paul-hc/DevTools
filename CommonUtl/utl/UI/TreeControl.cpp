@@ -7,7 +7,7 @@
 #include "Icon.h"
 #include "ContainerUtilities.h"
 #include "MenuUtilities.h"
-#include "UtilitiesEx.h"
+#include "WndUtilsEx.h"
 #include "utl/TextClipboard.h"
 
 #ifdef _DEBUG

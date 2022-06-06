@@ -21,7 +21,7 @@
 #include "utl/UI/IconButton.h"
 #include "utl/UI/PasswordDialog.h"
 #include "utl/UI/ProgressService.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/Thumbnailer.h"

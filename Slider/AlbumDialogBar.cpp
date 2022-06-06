@@ -10,7 +10,7 @@
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/StockValuesComboBox.h"
 #include "utl/UI/TextEdit.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 
 #ifdef _DEBUG

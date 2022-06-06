@@ -18,7 +18,7 @@
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/PostCall.h"
 #include "utl/UI/ShellDialogs.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/WicImageCache.h"
 #include <map>
 

@@ -4,7 +4,7 @@
 #include "ResizeFrameStatic.h"
 #include "Color.h"
 #include "LayoutMetrics.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "ThemeItem.h"
 #include "resource.h"
 

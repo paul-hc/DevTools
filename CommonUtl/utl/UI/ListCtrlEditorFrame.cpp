@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "ListCtrlEditorFrame.h"
 #include "ReportListControl.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 
 #ifdef _DEBUG

@@ -1,7 +1,7 @@
 #ifndef BaseFrameHostCtrl_hxx
 #define BaseFrameHostCtrl_hxx
 
-#include "Utilities.h"
+#include "WndUtils.h"
 
 
 // CBaseFrameHostCtrl template code

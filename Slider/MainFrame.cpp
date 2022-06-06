@@ -10,7 +10,7 @@
 #include "resource.h"
 #include "utl/UI/BaseZoomView.h"
 #include "utl/UI/MenuUtilities.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 #include "utl/UI/WindowPlacement.h"

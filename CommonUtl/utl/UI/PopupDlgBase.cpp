@@ -5,7 +5,7 @@
 #include "AccelTable.h"
 #include "ImageStore.h"
 #include "MenuUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "VersionInfo.h"
 #include "utl/ContainerUtilities.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI

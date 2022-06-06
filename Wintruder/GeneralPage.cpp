@@ -8,7 +8,7 @@
 #include "wnd/WindowClass.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/LayoutBasePropertySheet.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "wnd/WndUtils.h"
 
 #ifdef _DEBUG

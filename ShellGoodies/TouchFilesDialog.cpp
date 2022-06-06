@@ -20,7 +20,7 @@
 #include "utl/UI/Color.h"
 #include "utl/UI/CmdInfoStore.h"
 #include "utl/UI/MenuUtilities.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/resource.h"
 #include "resource.h"

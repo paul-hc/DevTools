@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ProcessUtils.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/FileSystem_fwd.h"
 
 #ifdef _DEBUG

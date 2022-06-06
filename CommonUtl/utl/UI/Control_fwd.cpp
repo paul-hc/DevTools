@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "Control_fwd.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/ScopedValue.h"
 
 #ifdef _DEBUG

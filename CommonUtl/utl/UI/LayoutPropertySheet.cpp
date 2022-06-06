@@ -4,7 +4,7 @@
 #include "LayoutPropertyPage.h"
 #include "LayoutEngine.h"
 #include "CmdUpdate.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "StringUtilities.h"
 #include "BaseApp.h"
 #include <afxpriv.h>

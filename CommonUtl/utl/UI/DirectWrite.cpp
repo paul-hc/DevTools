@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "DirectWrite.h"
 #include "BaseApp.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #pragma comment(lib, "dwrite.lib")	// link to DirectWrite
 

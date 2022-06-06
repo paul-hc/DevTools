@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "DialogToolBar.h"
 #include "Dialog_fwd.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG

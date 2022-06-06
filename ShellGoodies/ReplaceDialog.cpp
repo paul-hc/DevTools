@@ -15,7 +15,7 @@
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/PostCall.h"
 #include "utl/UI/TextEditor.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/resource.h"
 
 

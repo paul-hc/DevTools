@@ -5,7 +5,7 @@
 #include "ClockStatic.h"
 #include "RuntimeException.h"
 #include "StringUtilities.h"
-#include "UtilitiesEx.h"
+#include "WndUtilsEx.h"
 #include "resource.h"
 #include <afxpriv.h>		// for WM_DISABLEMODAL
 

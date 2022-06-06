@@ -4,7 +4,7 @@
 #include "CtrlInterfaces.h"
 #include "Dialog_fwd.h"
 #include "ReportListControl.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "ThemeStatic.h"
 #include "utl/ContainerUtilities.h"
 

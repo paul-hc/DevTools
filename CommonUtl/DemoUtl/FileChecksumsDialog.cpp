@@ -10,7 +10,7 @@
 #include "utl/StringUtilities.h"
 #include "utl/Timer.h"
 #include "utl/UI/ShellUtilities.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
 #include <fstream>

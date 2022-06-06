@@ -4,7 +4,7 @@
 #include "LayoutEngine.h"
 #include "CmdInfoStore.h"
 #include "CmdUpdate.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG

@@ -13,7 +13,7 @@
 #ifdef _DEBUG
 #include "utl/test/Test.h"
 #include "ImageStore.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 
 #define new DEBUG_NEW
 #endif

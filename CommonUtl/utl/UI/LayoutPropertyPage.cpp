@@ -6,7 +6,7 @@
 #include "CmdInfoStore.h"
 #include "CmdUpdate.h"
 #include "PostCall.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include <afxpriv.h>
 
 #ifdef _DEBUG

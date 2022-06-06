@@ -2,7 +2,7 @@
 #define DesktopDC_h
 #pragma once
 
-#include "UtilitiesEx.h"
+#include "WndUtilsEx.h"
 
 
 class CDesktopDC : public CDC

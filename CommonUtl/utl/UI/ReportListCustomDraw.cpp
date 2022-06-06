@@ -3,7 +3,7 @@
 #include "ReportListCustomDraw.h"
 #include "Color.h"
 #include "GpUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG

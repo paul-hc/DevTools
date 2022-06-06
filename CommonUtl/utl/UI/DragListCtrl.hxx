@@ -7,7 +7,7 @@
 #include "Range.h"
 #include "Resequence.hxx"
 #include "ShellUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 
 

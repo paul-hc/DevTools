@@ -8,7 +8,7 @@
 #include "utl/UI/DibPixels.h"
 #include "utl/UI/ImageProxy.h"
 #include "utl/UI/Pixel.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include <set>
 #include <math.h>
 

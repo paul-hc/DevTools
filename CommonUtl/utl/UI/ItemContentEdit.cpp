@@ -3,7 +3,7 @@
 #include "ItemContentEdit.h"
 #include "ItemListDialog.h"
 #include "StringUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 

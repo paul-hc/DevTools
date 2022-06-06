@@ -4,7 +4,7 @@
 #include "TextEditor.h"
 #include "ItemListDialog.h"
 #include "MenuUtilities.h"
-#include "Utilities.h"
+#include "WndUtils.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 

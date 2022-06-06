@@ -5,7 +5,7 @@
 #include "ImagingD2DTests.h"
 #include "utl/UI/ImagingWic.h"
 #include "utl/UI/ImagingDirect2D.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/WindowTimer.h"
 #include "utl/UI/test/TestToolWnd.h"
 

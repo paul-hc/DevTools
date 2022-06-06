@@ -3,7 +3,7 @@
 #include "EditIdentPage.h"
 #include "AppService.h"
 #include "wnd/ValueRepository.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "resource.h"
 
 #ifdef _DEBUG

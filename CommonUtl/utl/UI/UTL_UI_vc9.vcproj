@@ -775,22 +775,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Utilities.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Utilities.h"
-				>
-			</File>
-			<File
-				RelativePath=".\UtilitiesEx.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\UtilitiesEx.h"
-				>
-			</File>
-			<File
 				RelativePath=".\VersionInfo.cpp"
 				>
 			</File>
@@ -848,6 +832,22 @@
 			</File>
 			<File
 				RelativePath=".\WindowTimer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WndUtils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WndUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WndUtilsEx.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WndUtilsEx.h"
 				>
 			</File>
 			<Filter
