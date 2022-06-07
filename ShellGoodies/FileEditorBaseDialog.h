@@ -14,7 +14,7 @@ class CReportListControl;
 
 
 abstract class CFileEditorBaseDialog : public CBaseMainDialog
-									 , public IFileEditor
+	, public IFileEditor
 {
 protected:
 	CFileEditorBaseDialog( CFileModel* pFileModel, cmd::CommandType nativeCmdType, UINT templateId, CWnd* pParent );
@@ -67,9 +67,9 @@ protected:
 	CDialogToolBar m_toolbar;
 
 	// generated stuff
-	public:
+public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnUndoRedo( UINT btnId );

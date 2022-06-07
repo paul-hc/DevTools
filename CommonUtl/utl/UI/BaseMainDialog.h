@@ -10,7 +10,7 @@ class CSystemTray;
 
 
 abstract class CBaseMainDialog : public CLayoutDialog
-	, private ui::ISystemTrayCallback
+	, protected ui::ISystemTrayCallback
 {
 protected:
 	CBaseMainDialog( UINT templateId, CWnd* pParent = NULL );
@@ -19,7 +19,7 @@ public:
 
 	static void ParseCommandLine( int argc, TCHAR* argv[] );
 
-	bool UseSysTrayMinimize( void ) const { return m_pSystemTrayInfo.get() != NULL; }
+	bool UseSysTrayMinimize( void ) const { return m_pSysTrayInfo.get() != NULL; }
 
 	void ShowAll( bool show );
 protected:
@@ -38,7 +38,7 @@ protected:
 		CMenu m_popupMenu;
 	};
 
-	std::auto_ptr<CSysTrayInfo> m_pSystemTrayInfo;
+	std::auto_ptr<CSysTrayInfo> m_pSysTrayInfo;
 	std::auto_ptr<CSystemTray> m_pSystemTray;
 public:
 	enum { ShellIconId = 100 };

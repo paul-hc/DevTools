@@ -78,7 +78,7 @@ CWnd* CBaseMainDialog::GetOwnerWnd( void ) override
 
 CMenu* CBaseMainDialog::GetTrayIconContextMenu( void ) override
 {
-	return m_pSystemTrayInfo.get() != NULL ? &m_pSystemTrayInfo->m_popupMenu : NULL;
+	return m_pSysTrayInfo.get() != NULL ? &m_pSysTrayInfo->m_popupMenu : NULL;
 }
 
 bool CBaseMainDialog::OnTrayIconNotify( UINT msgNotifyCode, UINT iconId, const CPoint& screenPos ) override

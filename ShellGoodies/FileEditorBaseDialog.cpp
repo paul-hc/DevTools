@@ -9,6 +9,8 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/UI/ReportListControl.h"
+#include "utl/UI/Icon.h"
+#include "utl/UI/SystemTray.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 
@@ -176,7 +178,14 @@ void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX )
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );
 
 	if ( firstInit )
+	{
 		SwitchMode( m_mode );
+
+		// add the hidden shell tray icon (for balloon notifications)
+		m_pSystemTray.reset( new CSystemTrayWndHook() );
+		m_pSystemTray->SetOwnerCallback( this );
+		m_pSystemTray->CreateTrayIcon( GetDlgIcon( DlgSmallIcon )->GetSafeHandle(), ShellIconId, ui::GetWindowText( this ).c_str(), true );
+	}
 
 	__super::DoDataExchange( pDX );
 }
