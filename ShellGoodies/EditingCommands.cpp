@@ -238,19 +238,24 @@ std::tstring CResetDestinationsCmd::Format( utl::Verbosity verbosity ) const ove
 
 // COnRenameListSortedCmd implementation
 
-COnRenameListSortedCmd::COnRenameListSortedCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl )
+COnRenameListSortedCmd::COnRenameListSortedCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl, const ren::TSortingPair& sorting )
 	: CObjectCommand<CFileModel>( cmd::OnRenameListSorted, pFileModel, &cmd::GetTags_CommandType() )
 	, m_pFileListCtrl( pFileListCtrl )
+	, m_sorting( sorting )
 {
-	ASSERT_PTR( m_pFileListCtrl );
 }
 
 bool COnRenameListSortedCmd::DoExecute( void ) override
 {
-	// fetch new rename items order
-	std::vector< CRenameItem* >& rRenameItems = m_pObject->LazyInitRenameItems();
+	if ( m_pFileListCtrl != NULL )		// invoked by sorted list?
+	{	// fetch new rename items order
+		std::vector< CRenameItem* > renameItems;
+		m_pFileListCtrl->QueryObjectsSequence( renameItems );
 
-	REQUIRE( (size_t)m_pFileListCtrl->GetItemCount() == rRenameItems.size() );		// is list consistent in size?
-	m_pFileListCtrl->QueryObjectsSequence( rRenameItems );
+		m_pObject->SwapRenameSequence( renameItems, m_sorting );
+	}
+	else
+		m_pObject->SetRenameSorting( m_sorting );
+
 	return true;
 }

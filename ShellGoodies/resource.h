@@ -106,6 +106,7 @@
 #define IDC_SHOW_EXTENSION_CHECK        1089
 #define IDC_TRIM_FNAME_CHECK            1090
 #define IDC_NORMALIZE_WHITESPACE_CHECK  1091
+#define IDC_SORT_ORDER_COMBO            1093
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_REPLACE_FILES_TIP_FORMAT    5005
@@ -195,7 +196,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        118
 #define _APS_NEXT_COMMAND_VALUE         32851
-#define _APS_NEXT_CONTROL_VALUE         1093
+#define _APS_NEXT_CONTROL_VALUE         1094
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

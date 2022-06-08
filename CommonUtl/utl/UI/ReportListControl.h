@@ -278,15 +278,20 @@ public:
 	bool GetSortInternally( void ) const { return HasFlag( m_optionFlags, SortInternally ); }
 	void SetSortInternally( bool sortInternally = true ) { SetFlag( m_optionFlags, SortInternally, sortInternally ); }
 
+	bool GetPersistSorting( void ) const { return HasFlag( m_optionFlags, PersistSorting ); }
+	void SetPersistSorting( bool persistSorting = true ) { SetFlag( m_optionFlags, PersistSorting, persistSorting ); }
+
 	PFNLVCOMPARE GetCompareFunc( void ) const { return m_pComparePtrFunc; }
 	void SetCompareFunc( PFNLVCOMPARE pComparePtrFunc ) { m_pComparePtrFunc = pComparePtrFunc; }
 
 	bool IsSortingEnabled( void ) const { return !HasFlag( GetStyle(), LVS_NOSORTHEADER ); }
-	bool SortList( void );
+	void SortList( void );
 	void InitialSortList( void );
 
 	void AddColumnCompare( TColumn column, const pred::IComparator* pComparator, bool defaultAscending = true );
 	void AddRecordCompare( const pred::IComparator* pComparator ) { AddColumnCompare( EntireRecord, pComparator ); }	// default record comparator
+	void ReleaseSharedComparators( void ) { m_comparators.clear(); }		// call before destruction to prevent deleting shared comparators (externally managed)
+
 	const pred::IComparator* FindCompare( TColumn column ) const;
 protected:
 	virtual pred::CompareResult CompareSubItems( const utl::ISubject* pLeft, const utl::ISubject* pRight ) const;
@@ -612,10 +617,11 @@ private:
 	{
 		UseAlternateRowColoring		= BIT_FLAG( 0 ),
 		SortInternally				= BIT_FLAG( 1 ),
-		AcceptDropFiles				= BIT_FLAG( 2 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
-		CommandFrame				= BIT_FLAG( 3 ),		// list is the command target FIRST, also owner of the paired toolbar (for multiple lists in the same dialog, that have similar commands) - optionally may use m_pFrameEditor
-		HighlightTextDiffsFrame		= BIT_FLAG( 4 ),		// highlight text differences with a filled frame
-		ToggleCheckSelItems			= BIT_FLAG( 5 )			// multi-selection: toggle checked state for the selected items
+		PersistSorting				= BIT_FLAG( 2 ),		// can be disabled if sorting is controlled externally (shared sorting criteria)
+		AcceptDropFiles				= BIT_FLAG( 3 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
+		CommandFrame				= BIT_FLAG( 4 ),		// list is the command target FIRST, also owner of the paired toolbar (for multiple lists in the same dialog, that have similar commands) - optionally may use m_pFrameEditor
+		HighlightTextDiffsFrame		= BIT_FLAG( 5 ),		// highlight text differences with a filled frame
+		ToggleCheckSelItems			= BIT_FLAG( 6 )			// multi-selection: toggle checked state for the selected items
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );
@@ -623,14 +629,14 @@ private:
 	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
 	std::tstring m_regSection;
-	std::vector< CColumnInfo > m_columnInfos;
+	persist std::vector< CColumnInfo > m_columnInfos;
 	std::vector< UINT > m_tileColumns;						// columns to be displayed as tile additional text (in gray)
 	int m_optionFlags;
 	bool m_subjectBased;									// objects stored as pointers are derived from utl::ISubject (polymorphic type)
 	const TCHAR* m_pTabularSep;								// NULL by default (copy Code column text); could be set to "\t" for a tab-separated copy to clipboard
 
-	TColumn m_sortByColumn;
-	bool m_sortAscending;
+	persist TColumn m_sortByColumn;
+	persist bool m_sortAscending;
 	PFNLVCOMPARE m_pComparePtrFunc;							// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pThis );
 
 	std::vector< CColumnComparator > m_comparators;

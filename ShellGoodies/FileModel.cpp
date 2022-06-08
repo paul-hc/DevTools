@@ -7,6 +7,7 @@
 #include "IFileEditor.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
+#include "PathItemSorting.h"
 #include "resource.h"
 #include "utl/Command.h"
 #include "utl/ContainerUtilities.h"
@@ -29,14 +30,30 @@
 #endif
 
 
+namespace reg
+{
+	static const TCHAR entry_renameOrder[] = _T("RenameOrder");
+	static const TCHAR entry_renameOrderAscending[] = _T("RenameOrderAscending");
+}
+
+
+const std::tstring CFileModel::section_filesSheet = _T("RenameDialog\\FilesSheet");
+
 CFileModel::CFileModel( svc::ICommandService* pCmdSvc )
 	: m_pCmdSvc( pCmdSvc )
+	, m_renameSorting( ren::SrcPathDirsFirst, true )
 {
 	ASSERT_PTR( m_pCmdSvc );
+
+	m_renameSorting.first = static_cast<ren::SortBy>( AfxGetApp()->GetProfileInt( section_filesSheet.c_str(), reg::entry_renameOrder, m_renameSorting.first ) );
+	m_renameSorting.second = AfxGetApp()->GetProfileInt( section_filesSheet.c_str(), reg::entry_renameOrderAscending, m_renameSorting.second ) != FALSE;
 }
 
 CFileModel::~CFileModel()
 {
+	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_renameOrder, m_renameSorting.first );
+	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_renameOrderAscending, m_renameSorting.second );
+
 	Clear();
 }
 
@@ -122,6 +139,8 @@ std::vector< CRenameItem* >& CFileModel::LazyInitRenameItems( void )
 			//pNewItem->StripDisplayCode( m_commonParentPath );		// use always filename.ext for path diffs
 			m_renameItems.push_back( pNewItem );
 		}
+
+		SortRenameItems();		// initial sort
 	}
 
 	return m_renameItems;
@@ -254,6 +273,19 @@ bool CFileModel::PromptExtensionChanges( const std::vector< fs::CPath >& destPat
 	}
 
 	return true;
+}
+
+void CFileModel::SortRenameItems( void )
+{
+	std::sort( m_renameItems.begin(), m_renameItems.end(), pred::MakeLessPtr( pred::CompareRenameItem( m_renameSorting ) ) );
+}
+
+void CFileModel::SwapRenameSequence( std::vector< CRenameItem* >& rListSequence, const ren::TSortingPair& renameSorting )
+{
+	// we do no sorting here - rListSequence contains the list items sorted according to current sort criteria in the list-ctrl
+	REQUIRE( m_renameItems.size() == rListSequence.size() );		// is list consistent in size?
+	m_renameItems.swap( rListSequence );			// input the sorted items
+	m_renameSorting = renameSorting;
 }
 
 

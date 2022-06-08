@@ -27,7 +27,7 @@ public:
 	EnumType GetEnum( void ) const { return (EnumType)GetValue(); }
 
 	template<>
-	bool GetEnum< bool >( void ) const { return GetValue() != 0; }
+	bool GetEnum<bool>( void ) const { return GetValue() != 0; }
 protected:
 	// hidden methods (use specialized getters & setters)
 	using CComboBox::GetCurSel;

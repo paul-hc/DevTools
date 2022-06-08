@@ -654,6 +654,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PathItemSorting.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PathItemSorting.h"
+					>
+				</File>
+				<File
 					RelativePath=".\RenameItem.cpp"
 					>
 				</File>

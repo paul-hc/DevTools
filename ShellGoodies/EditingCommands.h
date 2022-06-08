@@ -109,15 +109,18 @@ protected:
 };
 
 
+#include "Application_fwd.h"
+
 class CReportListControl;
 
 
 class COnRenameListSortedCmd : public CObjectCommand<CFileModel>
 {
 public:
-	COnRenameListSortedCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl );
+	COnRenameListSortedCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl, const ren::TSortingPair& sorting );
 
 	CReportListControl* GetListCtrl( void ) const { return m_pFileListCtrl; }
+	const ren::TSortingPair& GetSorting( void ) const { return m_sorting; }
 protected:
 	// base overrides
 	virtual bool DoExecute( void ) override;
@@ -129,6 +132,7 @@ protected:
 	}
 private:
 	CReportListControl* m_pFileListCtrl;		// the listCtrl that was just sorted by user (clicked on colum header)
+	ren::TSortingPair m_sorting;
 };
 
 

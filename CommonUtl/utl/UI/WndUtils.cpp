@@ -1177,9 +1177,9 @@ namespace ui
 
 	bool SortTreeChildren( const pred::IComparator* pComparator, CTreeCtrl& rTreeCtrl, HTREEITEM hParent /*= TVI_ROOT*/, RecursionDepth depth /*= Shallow*/ )
 	{
-		static const pred::Comparator< pred::TCompareCode > compareCodeAsc;
+		static const pred::Comparator<pred::TCompareCode> s_compareCodeAsc;
 		if ( NULL == pComparator )
-			pComparator = &compareCodeAsc;
+			pComparator = &s_compareCodeAsc;
 
 		if ( Deep == depth )
 			for ( HTREEITEM hChild = rTreeCtrl.GetChildItem( hParent ); hChild != NULL; hChild = rTreeCtrl.GetNextSiblingItem( hChild ) )

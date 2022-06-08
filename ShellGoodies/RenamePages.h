@@ -8,6 +8,7 @@
 #include "utl/UI/SyncScrolling.h"
 #include "utl/UI/TextEditor.h"
 #include "utl/UI/ThemeStatic.h"
+#include "Application_fwd.h"
 
 
 class CFileModel;
@@ -47,6 +48,7 @@ protected:
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 
 	virtual void DoSetupFileListView( void ) = 0;
+	virtual ren::TSortingPair GetListSorting( void ) const = 0;
 public:
 	virtual ~CBaseRenameListPage();
 private:
@@ -67,7 +69,6 @@ protected:
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX ) override;
 protected:
-	virtual void OnLvnCanSortByColumn_RenameList( NMHDR* pNmHdr, LRESULT* pResult ) = 0;
 	afx_msg void OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
@@ -78,13 +79,12 @@ class CRenameSimpleListPage : public CBaseRenameListPage
 {
 public:
 	CRenameSimpleListPage( CRenameFilesDialog* pParentDlg );
-
-	enum Column { SrcPath, Destination };
 protected:
-	virtual void DoSetupFileListView( void ) override;
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+	enum Column { SrcPath, DestPath };
 
-	virtual void OnLvnCanSortByColumn_RenameList( NMHDR* pNmHdr, LRESULT* pResult ) override;
+	virtual void DoSetupFileListView( void ) override;
+	virtual ren::TSortingPair GetListSorting( void ) const override;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 };
 
 
@@ -92,13 +92,10 @@ class CRenameDetailsListPage : public CBaseRenameListPage
 {
 public:
 	CRenameDetailsListPage( CRenameFilesDialog* pParentDlg );
-
-	enum Column { SrcPath, SrcSize, SrcDateModify, Destination };
 protected:
 	virtual void DoSetupFileListView( void ) override;
+	virtual ren::TSortingPair GetListSorting( void ) const override;
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
-
-	virtual void OnLvnCanSortByColumn_RenameList( NMHDR* pNmHdr, LRESULT* pResult ) override;
 };
 
 

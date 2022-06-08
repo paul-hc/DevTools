@@ -3,6 +3,7 @@
 #pragma once
 
 
+class CEnumTags;
 namespace svc { interface ICommandService; }
 
 
@@ -17,6 +18,14 @@ namespace app
 namespace popup
 {
 	enum PopupBar { FormatPicker, MoreRenameActions, TextTools, TouchList, DuplicatesList };
+}
+
+
+namespace ren
+{
+	enum SortBy { SrcPathDirsFirst = -1, SrcPath, SrcSize, SrcDateModify, DestPath };
+
+	typedef std::pair< SortBy, bool > TSortingPair;
 }
 
 

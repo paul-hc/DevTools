@@ -7,6 +7,7 @@
 #include "EditingCommands.h"
 #include "RenameService.h"
 #include "RenameItem.h"
+#include "PathItemSorting.h"
 #include "TextAlgorithms.h"
 #include "ReplaceDialog.h"
 #include "OptionsSheet.h"
@@ -35,7 +36,7 @@
 namespace reg
 {
 	static const TCHAR section_mainDialog[] = _T("RenameDialog");
-	static const TCHAR section_filesSheet[] = _T("RenameDialog\\FilesSheet");
+
 	static const TCHAR entry_formatHistory[] = _T("Format History");
 	static const TCHAR entry_autoGenerate[] = _T("Auto Generate");
 	static const TCHAR entry_seqCount[] = _T("Sequence Count");
@@ -91,6 +92,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_ignoreExtension( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, true ) != FALSE )
 	, m_pDisplayFilenameAdapter( new CDisplayFilenameAdapter( m_ignoreExtension ) )
 	, m_formatCombo( ui::EditShinkHost_MateOnRight )
+	, m_sortOrderCombo( &ren::ui::GetTags_UiSortBy() )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
 	, m_delimiterSetCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_delimStatic( CThemeItem( L"EXPLORERBAR", vt::EBP_IEBARMENU, vt::EBM_NORMAL ) )
@@ -103,7 +105,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_regSection = reg::section_mainDialog;
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
-	m_filesSheet.m_regSection = reg::section_filesSheet;
+	m_filesSheet.m_regSection = CFileModel::section_filesSheet;
 	m_filesSheet.AddPage( new CRenameSimpleListPage( this ) );
 	m_filesSheet.AddPage( new CRenameDetailsListPage( this ) );
 	m_filesSheet.AddPage( new CRenameEditPage( this ) );
@@ -233,10 +235,16 @@ void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMess
 	if ( m_hWnd != NULL )
 	{
 		if ( m_pFileModel == pSubject )
+		{
 			if ( NULL == m_pRenSvc.get() )
 				m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
 			else
 				m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
+
+			if ( COnRenameListSortedCmd* pListSortedCmd = dynamic_cast<COnRenameListSortedCmd*>( pMessage ) )
+				if ( pListSortedCmd->GetListCtrl() != NULL )		// triggered by a list-ctrl, not internally
+					m_sortOrderCombo.SetValue( ren::ui::FromSortingPair( pListSortedCmd->GetSorting() ) );
+		}
 
 		for ( int i = 0; i != m_filesSheet.GetPageCount(); ++i )
 			if ( utl::IObserver* pPage = m_filesSheet.GetCreatedPageAs< utl::IObserver >( i ) )
@@ -412,6 +420,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
 	DDX_Control( pDX, IDC_SEQ_COUNT_EDIT, m_seqCountEdit );
 	m_seqCountToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignLeft | V_AlignCenter );
+	DDX_Control( pDX, IDC_SORT_ORDER_COMBO, m_sortOrderCombo );
 	DDX_Control( pDX, IDC_CAPITALIZE_BUTTON, m_capitalizeButton );
 	DDX_Control( pDX, IDC_CHANGE_CASE_BUTTON, m_changeCaseButton );
 	DDX_Control( pDX, IDC_DELIMITER_SET_COMBO, m_delimiterSetCombo );
@@ -436,6 +445,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX )
 
 		m_seqCountEdit.SetNumericValue( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_seqCount, 1 ) );
 		CheckDlgButton( IDC_SHOW_EXTENSION_CHECK, !m_ignoreExtension );			// checkbox has inverted logic
+		m_sortOrderCombo.SetValue( ren::ui::FromSortingPair( m_pFileModel->GetRenameSorting() ) );
 
 		m_isInitialized = true;
 
@@ -474,6 +484,7 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_COMMAND( ID_SEQ_COUNT_AUTO_ADVANCE, OnSeqCountAutoAdvance )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_AUTO_ADVANCE, OnUpdateSeqCountAutoAdvance )
 	ON_BN_CLICKED( IDC_SHOW_EXTENSION_CHECK, OnToggle_ShowExtension )
+	ON_CBN_SELCHANGE( IDC_SORT_ORDER_COMBO, OnCbnSelChange_SortOrder )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestFiles )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
@@ -633,6 +644,13 @@ void CRenameFilesDialog::OnToggle_ShowExtension( void )
 	m_pDisplayFilenameAdapter->SetIgnoreExtension( m_ignoreExtension );
 
 	OnUpdate( m_pFileModel, NULL );
+}
+
+void CRenameFilesDialog::OnCbnSelChange_SortOrder( void )
+{
+	ren::TSortingPair sortingPair = ren::ui::ToSortingPair( m_sortOrderCombo.GetEnum<ren::ui::UiSortBy>() );
+
+	COnRenameListSortedCmd( m_pFileModel, NULL, sortingPair ).Execute();
 }
 
 void CRenameFilesDialog::OnBnClicked_CopySourceFiles( void )

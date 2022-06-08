@@ -6,6 +6,8 @@
 #include "utl/PathItemBase.h"
 #include "utl/ICommand.h"
 #include "utl/UI/InternalChange.h"
+#include "Application_fwd.h"
+
 
 class CRenameItem;
 class CTouchItem;
@@ -13,6 +15,7 @@ class CDisplayFilenameAdapter;
 interface IFileEditor;
 namespace fmt { enum PathFormat; }
 namespace cmd { enum CommandType; }
+
 
 namespace func
 {
@@ -70,11 +73,17 @@ public:
 
 	bool PromptExtensionChanges( const std::vector< fs::CPath >& destPaths ) const;
 
+	const ren::TSortingPair& GetRenameSorting( void ) const { return m_renameSorting; }
+	void SetRenameSorting( const ren::TSortingPair& renameSorting ) { m_renameSorting = renameSorting; SortRenameItems(); }
+	void SwapRenameSequence( std::vector< CRenameItem* >& rListSequence, const ren::TSortingPair& renameSorting );
+
 	// TOUCH
 	bool CopyClipSourceFileStates( CWnd* pWnd ) const;
 	utl::ICommand* MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_( CRuntimeException );
 private:
 	static std::tstring FormatPath( const fs::CPath& filePath, fmt::PathFormat format, const CDisplayFilenameAdapter* pDisplayAdapter );
+
+	void SortRenameItems( void );
 
 	template< typename ContainerT >
 	void StoreSourcePaths( const ContainerT& sourcePaths );
@@ -116,9 +125,13 @@ private:
 	std::vector< fs::CPath > m_sourcePaths;
 	fs::CPath m_commonParentPath;						// for paths in multiple directories
 
+	persist ren::TSortingPair m_renameSorting;
+
 	// lazy init
 	std::vector< CRenameItem* > m_renameItems;
 	std::vector< CTouchItem* > m_touchItems;
+public:
+	static const std::tstring section_filesSheet;
 
 	// generated stuff
 protected:

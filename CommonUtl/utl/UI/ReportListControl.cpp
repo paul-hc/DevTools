@@ -114,7 +114,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, CListLikeCtrlBase( this )
 	, m_columnLayoutId( 0 )
 	, m_listStyleEx( listStyleEx )
-	, m_optionFlags( SortInternally | HighlightTextDiffsFrame )
+	, m_optionFlags( SortInternally | PersistSorting | HighlightTextDiffsFrame )
 	, m_subjectBased( false )
 	, m_pTabularSep( NULL )
 	, m_sortByColumn( -1 )			// no sorting by default
@@ -614,24 +614,19 @@ void CReportListControl::UpdateColumnSortHeader( void )
 	}
 }
 
-bool CReportListControl::SortList( void )
+void CReportListControl::SortList( void )
 {
 	UpdateColumnSortHeader();
 
 	ui::CNmHdr nmHdr( this, lv::LVN_CustomSortList );
 
 	if ( 0L == nmHdr.NotifyParent() )			// give parent a chance to custom sort the list (or sort its groups); still sort items by default?
-		if ( -1 == m_sortByColumn )
+		if ( -1 == m_sortByColumn && !m_initialItemsOrder.empty() )				// default sorting and we have an initial order?
 		{
-			if ( m_initialItemsOrder.empty() )
-				return false;
-			else
-			{
-				SortItems( (PFNLVCOMPARE)&InitialOrderCompareProc, (LPARAM)this );		// restore initial item order; passes item LPARAMs (i.e. TRowKey) as left/right
+			SortItems( (PFNLVCOMPARE)&InitialOrderCompareProc, (LPARAM)this );	// restore initial item order; passes item LPARAMs (i.e. TRowKey) as left/right
 
-				if ( IsGroupViewEnabled() )
-					SortGroups( (PFNLVGROUPCOMPARE)&InitialGroupOrderCompareProc, this );
-			}
+			if ( IsGroupViewEnabled() )
+				SortGroups( (PFNLVGROUPCOMPARE)&InitialGroupOrderCompareProc, this );
 		}
 		else if ( GetSortInternally() )											// otherwise was sorted externally, just update sort header
 			if ( m_pComparePtrFunc != NULL )
@@ -645,7 +640,6 @@ bool CReportListControl::SortList( void )
 	int caretIndex = GetCaretIndex();
 	if ( caretIndex != -1 )
 		EnsureVisible( caretIndex, FALSE );
-	return true;
 }
 
 void CReportListControl::InitialSortList( void )
@@ -1154,7 +1148,7 @@ bool CReportListControl::LoadFromRegistry( void )
 		if ( stackingStyle != oldStackingStyle )
 			ModifyStyle( LVS_ALIGNMASK, stackingStyle );
 
-		if ( IsSortingEnabled() )
+		if ( IsSortingEnabled() && GetPersistSorting() )
 		{
 			m_sortByColumn = pApp->GetProfileInt( m_regSection.c_str(), reg::entry_sortByColumn, m_sortByColumn );
 			m_sortAscending = pApp->GetProfileInt( m_regSection.c_str(), reg::entry_sortAscending, m_sortAscending ) != FALSE;
@@ -1169,7 +1163,7 @@ void CReportListControl::SaveToRegistry( void )
 	ASSERT( HasLayoutInfo() && !m_regSection.empty() );
 
 	CWinApp* pApp = AfxGetApp();
-	pApp->WriteProfileInt( m_regSection.c_str(), _T(""), (int)m_columnInfos.size() ); // saved column count
+	pApp->WriteProfileInt( m_regSection.c_str(), _T(""), (int)m_columnInfos.size() );	// saved column count
 
 	std::vector< std::tstring > regColumnLayoutItems;
 	InputColumnLayout( regColumnLayoutItems );
@@ -1180,7 +1174,8 @@ void CReportListControl::SaveToRegistry( void )
 
 	pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_viewMode, GetView() );
 	pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_viewStacking, GetStyle() & LVS_ALIGNMASK );
-	if ( IsSortingEnabled() )
+
+	if ( IsSortingEnabled() && GetPersistSorting() )
 	{
 		pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_sortByColumn, m_sortByColumn );
 		pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_sortAscending, m_sortAscending );

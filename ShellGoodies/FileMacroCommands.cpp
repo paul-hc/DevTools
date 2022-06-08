@@ -28,8 +28,8 @@ namespace cmd
 
 	const CEnumTags& CUserFeedbackException::GetTags_Feedback( void )
 	{
-		static const CEnumTags tags( _T("Abort|Retry|Ignore") );
-		return tags;
+		static const CEnumTags s_tags( _T("Abort|Retry|Ignore") );
+		return s_tags;
 	}
 }
 

@@ -7,6 +7,7 @@
 #include "utl/Subject.h"
 #include "utl/UI/LayoutChildPropertySheet.h"
 #include "utl/UI/DialogToolBar.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/EnumSplitButton.h"
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/SplitPushButton.h"
@@ -88,6 +89,7 @@ private:
 	CHostToolbarCtrl<CHistoryComboBox> m_formatCombo;
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
+	CEnumComboBox m_sortOrderCombo;
 	CSplitPushButton m_capitalizeButton;
 	CEnumSplitButton m_changeCaseButton;
 	CHistoryComboBox m_delimiterSetCombo;
@@ -114,6 +116,7 @@ protected:
 	afx_msg void OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnToggle_ShowExtension( void );
+	afx_msg void OnCbnSelChange_SortOrder( void );
 	afx_msg void OnBnClicked_PasteDestFiles( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnBnClicked_CapitalizeDestFiles( void );

@@ -5,7 +5,7 @@
 #ifdef USE_UT		// no UT code in release builds
 
 #include "utl/PathRenamePairs.h"
-#include "test/UnitTest.h"
+#include "UnitTest.h"
 
 
 namespace ut

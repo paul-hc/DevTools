@@ -6,6 +6,7 @@
 #include "GeneralOptions.h"
 #include "FileModel.h"
 #include "EditingCommands.h"
+#include "PathItemSorting.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/TimeUtils.h"
@@ -17,13 +18,6 @@
 #endif
 
 #include "utl/UI/ReportListControl.hxx"
-
-
-namespace reg
-{
-	static const TCHAR section_SimpleList[] = _T("RenameDialog\\FilesSheet\\ListPage\\SimpleList");
-	static const TCHAR section_DetailsList[] = _T("RenameDialog\\FilesSheet\\ListPage\\DetailsList");
-}
 
 
 // CBaseRenameListPage implementation
@@ -47,7 +41,7 @@ CBaseRenameListPage::CBaseRenameListPage( CRenameFilesDialog* pParentDlg, UINT l
 
 	// display filenames depending on m_ignoreExtension
 	m_fileListCtrl.SetSubjectAdapter( m_pParentDlg->GetDisplayFilenameAdapter() );
-	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
+	m_fileListCtrl.AddRecordCompare( ren::CRenameItemCriteria::Instance()->GetComparator( ren::SrcPathDirsFirst ) );		// default row item comparator
 
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 	// Note: focus retangle is not painted properly without double-buffering
@@ -55,6 +49,7 @@ CBaseRenameListPage::CBaseRenameListPage( CRenameFilesDialog* pParentDlg, UINT l
 
 CBaseRenameListPage::~CBaseRenameListPage()
 {
+	m_fileListCtrl.ReleaseSharedComparators();		// avoid deleting comparators owned by ren::CRenameItemCriteria singleton
 }
 
 void CBaseRenameListPage::SetupFileListView( void )
@@ -66,7 +61,8 @@ void CBaseRenameListPage::SetupFileListView( void )
 
 	m_fileListCtrl.DeleteAllItems();
 	DoSetupFileListView();
-	m_fileListCtrl.InitialSortList();		// store original order and sort by current criteria
+
+	// note: items are already sorted in the shared sort order persisted in CFileModel
 }
 
 void CBaseRenameListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
@@ -119,7 +115,6 @@ void CBaseRenameListPage::DoDataExchange( CDataExchange* pDX ) override
 // message handlers
 
 BEGIN_MESSAGE_MAP( CBaseRenameListPage, CBaseRenamePage )
-	ON_NOTIFY( lv::LVN_CanSortByColumn, IDC_FILE_RENAME_LIST, OnLvnCanSortByColumn_RenameList )
 	ON_NOTIFY( lv::LVN_ListSorted, IDC_FILE_RENAME_LIST, OnLvnListSorted_RenameList )
 END_MESSAGE_MAP()
 
@@ -129,7 +124,7 @@ void CBaseRenameListPage::OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pR
 	*pResult = 0L;
 
 	if ( !m_fileListCtrl.IsInternalChange() )		// sorted by user?
-		COnRenameListSortedCmd( m_pParentDlg->GetFileModel(), &m_fileListCtrl ).Execute();		// fetch new items order into the file model, and notify observers
+		COnRenameListSortedCmd( m_pParentDlg->GetFileModel(), &m_fileListCtrl, GetListSorting() ).Execute();		// fetch sorted items sequence into the file model, and notify observers
 }
 
 
@@ -138,9 +133,12 @@ void CBaseRenameListPage::OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pR
 CRenameSimpleListPage::CRenameSimpleListPage( CRenameFilesDialog* pParentDlg )
 	: CBaseRenameListPage( pParentDlg, IDS_FILE_RENAME_SIMPLE_LIST_LAYOUT )
 {
-	m_fileListCtrl.SetSection( reg::section_SimpleList );
-	m_fileListCtrl.AddColumnCompare( SrcPath, pred::NewPropertyComparator<CRenameItem>( func::AsSrcPath() ) );
-	m_fileListCtrl.AddColumnCompare( Destination, pred::NewPropertyComparator<CRenameItem>( func::AsDestPath() ) );
+	m_fileListCtrl.SetSection( CFileModel::section_filesSheet + _T("\\ListPage\\SimpleList") );
+
+	const ren::CRenameItemCriteria* pCriteria = ren::CRenameItemCriteria::Instance();
+
+	m_fileListCtrl.AddColumnCompare( SrcPath, pCriteria->GetComparator( ren::SrcPath ) );
+	m_fileListCtrl.AddColumnCompare( DestPath, pCriteria->GetComparator( ren::DestPath ) );
 }
 
 void CRenameSimpleListPage::DoSetupFileListView( void ) override
@@ -152,11 +150,27 @@ void CRenameSimpleListPage::DoSetupFileListView( void ) override
 		CRenameItem* pRenameItem = m_pParentDlg->GetRenameItems()[ pos ];
 
 		m_fileListCtrl.InsertObjectItem( pos, pRenameItem );		// SrcPath
-		m_fileListCtrl.SetSubItemText( pos, Destination, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath() ) );
+		m_fileListCtrl.SetSubItemText( pos, DestPath, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath() ) );
 	}
 
-	m_fileListCtrl.SetupDiffColumnPair( SrcPath, Destination, path::TGetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( SrcPath, DestPath, path::TGetMatch() );
+}
 
+ren::TSortingPair CRenameSimpleListPage::GetListSorting( void ) const override
+{
+	std::pair<int, bool> sorting = m_fileListCtrl.GetSortByColumn();
+	ren::SortBy sortBy = ren::SrcPathDirsFirst;
+
+	switch ( sorting.first )
+	{
+		case SrcPath:
+			sortBy = ren::SrcPath;
+			break;
+		case DestPath:
+			sortBy = ren::DestPath;
+			break;
+	}
+	return ren::TSortingPair( sortBy, sorting.second );
 }
 
 void CRenameSimpleListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
@@ -164,30 +178,20 @@ void CRenameSimpleListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pM
 	if ( COnRenameListSortedCmd* pListSortedCmd = dynamic_cast<COnRenameListSortedCmd*>( pMessage ) )
 		if ( pListSortedCmd->GetListCtrl() != &m_fileListCtrl )		// external list has been sorted?
 		{
-			std::pair<CReportListControl::TColumn, bool> userSorting = pListSortedCmd->GetListCtrl()->GetSortByColumn();
+			std::pair<int, bool> userSorting = pListSortedCmd->GetSorting();
 
-			if ( CRenameDetailsListPage::SrcPath == userSorting.first )
-				userSorting.first = SrcPath;				// update column header to compatible sort order
-			else
-				userSorting = std::make_pair( -1, true );	// incompatible order (sort by size or date), reset sorting in column header
+			switch ( userSorting.first )
+			{
+				case ren::SrcPath:	userSorting.first = SrcPath; break;
+				case ren::DestPath:	userSorting.first = DestPath; break;
+				default:
+					userSorting = std::make_pair( -1, true );	// incompatible order (sort by size or date), reset sorting in column header
+			}
 
 			m_fileListCtrl.StoreSortByColumn( userSorting.first, userSorting.second );
 		}
 
-	__super::OnUpdate( pSubject, pMessage );
-}
-
-void CRenameSimpleListPage::OnLvnCanSortByColumn_RenameList( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	CListTraits::CNmCanSortByColumn* pNmCanSort = (CListTraits::CNmCanSortByColumn*)pNmHdr;
-	*pResult = FALSE;
-
-	switch ( pNmCanSort->m_sortByColumn )
-	{
-		case Destination:
-			*pResult = TRUE;		// column is disabled for sorting
-			break;					// sorted the groups, but keep on sorting the items
-	}
+	__super::OnUpdate( pSubject, pMessage );		// this will update list items
 }
 
 
@@ -198,11 +202,14 @@ CRenameDetailsListPage::CRenameDetailsListPage( CRenameFilesDialog* pParentDlg )
 {
 	SetTitle( _T("List Details") );
 
-	m_fileListCtrl.SetSection( reg::section_DetailsList );
-	m_fileListCtrl.AddColumnCompare( SrcPath, pred::NewPropertyComparator<CRenameItem>( func::AsSrcPath() ) );
-	m_fileListCtrl.AddColumnCompare( SrcSize, pred::NewPropertyComparator<CRenameItem>( func::AsFileSize() ), false );				// order size descending by default
-	m_fileListCtrl.AddColumnCompare( SrcDateModify, pred::NewPropertyComparator<CRenameItem>( func::AsModifyTime() ), false );		// order date-time descending by default
-	m_fileListCtrl.AddColumnCompare( Destination, pred::NewPropertyComparator<CRenameItem>( func::AsDestPath() ) );
+	m_fileListCtrl.SetSection( CFileModel::section_filesSheet + _T("\\ListPage\\DetailsList") );
+
+	const ren::CRenameItemCriteria* pCriteria = ren::CRenameItemCriteria::Instance();
+
+	m_fileListCtrl.AddColumnCompare( ren::SrcPath, pCriteria->GetComparator( ren::SrcPath ) );
+	m_fileListCtrl.AddColumnCompare( ren::SrcSize, pCriteria->GetComparator( ren::SrcSize ), false );					// order size descending by default
+	m_fileListCtrl.AddColumnCompare( ren::SrcDateModify, pCriteria->GetComparator( ren::SrcDateModify ), false );		// order date-time descending by default
+	m_fileListCtrl.AddColumnCompare( ren::DestPath, pCriteria->GetComparator( ren::DestPath ) );
 }
 
 void CRenameDetailsListPage::DoSetupFileListView( void ) override
@@ -213,13 +220,19 @@ void CRenameDetailsListPage::DoSetupFileListView( void ) override
 	{
 		CRenameItem* pRenameItem = m_pParentDlg->GetRenameItems()[ pos ];
 
-		m_fileListCtrl.InsertObjectItem( pos, pRenameItem );		// SrcPath
-		m_fileListCtrl.SetSubItemText( pos, SrcSize, num::FormatFileSize( pRenameItem->GetState().m_fileSize ) );
-		m_fileListCtrl.SetSubItemText( pos, SrcDateModify, time_utl::FormatTimestamp( pRenameItem->GetState().m_modifTime ) );
-		m_fileListCtrl.SetSubItemText( pos, Destination, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath() ) );
+		m_fileListCtrl.InsertObjectItem( pos, pRenameItem );		// ren::SrcPath
+		m_fileListCtrl.SetSubItemText( pos, ren::SrcSize, num::FormatFileSize( pRenameItem->GetState().m_fileSize ) );
+		m_fileListCtrl.SetSubItemText( pos, ren::SrcDateModify, time_utl::FormatTimestamp( pRenameItem->GetState().m_modifTime ) );
+		m_fileListCtrl.SetSubItemText( pos, ren::DestPath, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath() ) );
 	}
 
-	m_fileListCtrl.SetupDiffColumnPair( SrcPath, Destination, path::TGetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( ren::SrcPath, ren::DestPath, path::TGetMatch() );
+}
+
+ren::TSortingPair CRenameDetailsListPage::GetListSorting( void ) const override
+{
+	std::pair<int, bool> sorting = m_fileListCtrl.GetSortByColumn();
+	return ren::TSortingPair( static_cast<ren::SortBy>( sorting.first ), sorting.second );
 }
 
 void CRenameDetailsListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
@@ -227,30 +240,12 @@ void CRenameDetailsListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* p
 	if ( COnRenameListSortedCmd* pListSortedCmd = dynamic_cast<COnRenameListSortedCmd*>( pMessage ) )
 		if ( pListSortedCmd->GetListCtrl() != &m_fileListCtrl )		// external list has been sorted?
 		{
-			std::pair<CReportListControl::TColumn, bool> userSorting = pListSortedCmd->GetListCtrl()->GetSortByColumn();
-
-			if ( CRenameSimpleListPage::SrcPath == userSorting.first )
-				userSorting.first = SrcPath;				// update column header to compatible sort order
-			else
-				userSorting = std::make_pair( -1, true );	// incompatible order (sort by size or date), reset sorting in column header
+			std::pair<int, bool> userSorting = pListSortedCmd->GetSorting();		// one-to-one enum values with Column
 
 			m_fileListCtrl.StoreSortByColumn( userSorting.first, userSorting.second );
 		}
 
-	__super::OnUpdate( pSubject, pMessage );
-}
-
-void CRenameDetailsListPage::OnLvnCanSortByColumn_RenameList( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	CListTraits::CNmCanSortByColumn* pNmCanSort = (CListTraits::CNmCanSortByColumn*)pNmHdr;
-	*pResult = FALSE;
-
-	switch ( pNmCanSort->m_sortByColumn )
-	{
-		case Destination:
-			*pResult = TRUE;		// column is disabled for sorting
-			break;					// sorted the groups, but keep on sorting the items
-	}
+	__super::OnUpdate( pSubject, pMessage );		// this will update list items
 }
 
 

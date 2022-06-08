@@ -185,12 +185,29 @@ namespace pred
 		bool operator()( const fs::CPath& filePath ) const { return fs::IsValidFile( filePath.GetPtr() ); }
 	};
 
+
 	struct IsValidDirectory
 	{
 		bool operator()( const TCHAR* pFilePath ) const { return fs::IsValidDirectory( pFilePath ); }
 		bool operator()( const std::tstring& filePath ) const { return fs::IsValidDirectory( filePath.c_str() ); }
 		bool operator()( const fs::CPath& filePath ) const { return fs::IsValidDirectory( filePath.GetPtr() ); }
 	};
+
+
+	struct ComparePathRank : public BaseComparator
+	{
+		CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
+		{
+			return Compare_Scalar( GetPathRank( leftPath ), GetPathRank( rightPath ) );
+		}
+
+		static int GetPathRank( const fs::CPath& filePath )
+		{
+			return fs::IsValidDirectory( filePath.GetPtr() ) ? 0 : 1;
+		}
+	};
+
+	typedef JoinCompare<ComparePathRank, CompareNaturalPath> TComparePathDirsFirst;
 }
 
 

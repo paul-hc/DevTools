@@ -25,7 +25,7 @@ namespace pred
 
 	// implements pred::IComparator in terms of Compare
 
-	template< typename Compare >
+	template< typename Compare, typename ObjectType = utl::ISubject >
 	struct Comparator : public IComparator
 	{
 		Comparator( Compare compare = Compare() ) : m_compare( compare ) {}
@@ -34,17 +34,25 @@ namespace pred
 		// IComparator interface
 		virtual CompareResult CompareObjects( const utl::ISubject* pLeft, const utl::ISubject* pRight ) const
 		{
-			return m_compare( pLeft, pRight );
+			return m_compare( AsObject( pLeft ), AsObject( pRight ) );
 		}
+	private:
+		static const ObjectType* AsObject( const utl::ISubject* pSubject ) { return checked_static_cast<const ObjectType*>( pSubject ); }
 	private:
 		Compare m_compare;
 	};
 
 
+	template< typename ObjectType, typename Compare >
+	inline IComparator* NewComparatorAs( const Compare& compare )
+	{
+		return new Comparator<Compare, ObjectType>( compare );
+	}
+
 	template< typename Compare >
 	inline IComparator* NewComparator( const Compare& compare )
 	{
-		return new Comparator< Compare >( compare );
+		return new Comparator<Compare, utl::ISubject>( compare );
 	}
 
 
@@ -90,13 +98,13 @@ namespace pred
 	template< typename ObjectType, typename GetPropFunc >
 	IComparator* NewPropertyComparator( GetPropFunc getPropFunc )
 	{
-		return new PropertyComparator< ObjectType, GetPropFunc >( getPropFunc );		// use default pred::CompareValue
+		return new PropertyComparator<ObjectType, GetPropFunc>( getPropFunc );		// use default pred::CompareValue
 	}
 
 	template< typename ObjectType, typename Compare, typename GetPropFunc >
 	IComparator* NewPropertyComparator( GetPropFunc getPropFunc )
 	{
-		return new PropertyComparator< ObjectType, GetPropFunc, Compare >( getPropFunc );
+		return new PropertyComparator<ObjectType, GetPropFunc, Compare>( getPropFunc );
 	}
 }
 
