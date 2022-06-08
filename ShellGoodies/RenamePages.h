@@ -23,45 +23,82 @@ interface IRenamePage : public utl::IObserver
 
 
 abstract class CBaseRenamePage : public CLayoutPropertyPage
-							   , public IRenamePage
+	, public IRenamePage
 {
 protected:
-	CBaseRenamePage( UINT templateId, CRenameFilesDialog* pParentDlg );
+	CBaseRenamePage( UINT templateId, CRenameFilesDialog* pParentDlg )
+		: CLayoutPropertyPage( templateId )
+		, m_pParentDlg( pParentDlg )
+	{
+		ASSERT_PTR( m_pParentDlg );
+	}
 protected:
 	CRenameFilesDialog* m_pParentDlg;
 };
 
 
-class CRenameListPage : public CBaseRenamePage
-					  , private ui::ITextEffectCallback
+abstract class CBaseRenameListPage : public CBaseRenamePage
+	, private ui::ITextEffectCallback
 {
-public:
-	CRenameListPage( CRenameFilesDialog* pParentDlg );
-	virtual ~CRenameListPage();
-private:
-	// utl::IObserver interface (via IRenamePage)
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
+protected:
+	CBaseRenameListPage( CRenameFilesDialog* pParentDlg, UINT listLayoutId );
 
+	// utl::IObserver interface (via IRenamePage)
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+
+	virtual void DoSetupFileListView( void ) = 0;
+public:
+	virtual ~CBaseRenameListPage();
+private:
 	// IRenamePage interface
-	virtual void EnsureVisibleItem( const CRenameItem* pRenameItem );
-	virtual void InvalidateFiles( void );
+	virtual void EnsureVisibleItem( const CRenameItem* pRenameItem ) override;
+	virtual void InvalidateFiles( void ) override;
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override;
 
 	void SetupFileListView( void );
-private:
+protected:
 	// enum { IDD = IDD_REN_LIST_PAGE };
 
 	CReportListControl m_fileListCtrl;
 
-	enum Column { Source, Destination };
-
 	// generated stuff
-	protected:
-	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
+	virtual void DoDataExchange( CDataExchange* pDX ) override;
+protected:
+	virtual void OnLvnCanSortByColumn_RenameList( NMHDR* pNmHdr, LRESULT* pResult ) = 0;
+	afx_msg void OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
+
 	DECLARE_MESSAGE_MAP()
+};
+
+
+class CRenameSimpleListPage : public CBaseRenameListPage
+{
+public:
+	CRenameSimpleListPage( CRenameFilesDialog* pParentDlg );
+
+	enum Column { SrcPath, Destination };
+protected:
+	virtual void DoSetupFileListView( void ) override;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+
+	virtual void OnLvnCanSortByColumn_RenameList( NMHDR* pNmHdr, LRESULT* pResult ) override;
+};
+
+
+class CRenameDetailsListPage : public CBaseRenameListPage
+{
+public:
+	CRenameDetailsListPage( CRenameFilesDialog* pParentDlg );
+
+	enum Column { SrcPath, SrcSize, SrcDateModify, Destination };
+protected:
+	virtual void DoSetupFileListView( void ) override;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+
+	virtual void OnLvnCanSortByColumn_RenameList( NMHDR* pNmHdr, LRESULT* pResult ) override;
 };
 
 
@@ -75,10 +112,10 @@ public:
 	void CommitLocalEdits( void );
 private:
 	// utl::IObserver interface (via IRenamePage)
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 
 	// IRenamePage interface
-	virtual void EnsureVisibleItem( const CRenameItem* pRenameItem );
+	virtual void EnsureVisibleItem( const CRenameItem* pRenameItem ) override;
 
 	void SetupFileEdits( void );
 
@@ -96,7 +133,7 @@ private:
 	CSyncScrolling m_syncScrolling;
 
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType );

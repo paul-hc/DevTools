@@ -22,7 +22,7 @@ CBaseChangeDestCmd::CBaseChangeDestCmd( cmd::CommandType cmdType, CFileModel* pF
 	SetSubject( m_pFileModel );
 }
 
-std::tstring CBaseChangeDestCmd::Format( utl::Verbosity verbosity ) const
+std::tstring CBaseChangeDestCmd::Format( utl::Verbosity verbosity ) const override
 {
 	if ( !m_cmdTag.empty() )
 		return m_cmdTag;
@@ -30,12 +30,12 @@ std::tstring CBaseChangeDestCmd::Format( utl::Verbosity verbosity ) const
 	return __super::Format( verbosity );
 }
 
-bool CBaseChangeDestCmd::Execute( void )
+bool CBaseChangeDestCmd::Execute( void ) override
 {
 	return ToggleExecute();
 }
 
-bool CBaseChangeDestCmd::Unexecute( void )
+bool CBaseChangeDestCmd::Unexecute( void ) override
 {
 	// Since Execute() toggles between m_destPaths and OldDestPaths, calling the second time has the effect of Unexecute().
 	// This assumes that this command is always executed through the command model for UNDO/REDO.
@@ -43,7 +43,7 @@ bool CBaseChangeDestCmd::Unexecute( void )
 	return ToggleExecute();
 }
 
-bool CBaseChangeDestCmd::IsUndoable( void ) const
+bool CBaseChangeDestCmd::IsUndoable( void ) const override
 {
 	return Changed == EvalChange();
 }
@@ -65,7 +65,7 @@ CChangeDestPathsCmd::CChangeDestPathsCmd( CFileModel* pFileModel, std::vector< f
 	ENSURE( m_srcPaths.size() == m_destPaths.size() );
 }
 
-CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const
+CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const override
 {
 	REQUIRE( m_srcPaths.size() == m_destPaths.size() );
 
@@ -87,7 +87,7 @@ CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const
 	return changeType;
 }
 
-bool CChangeDestPathsCmd::ToggleExecute( void )
+bool CChangeDestPathsCmd::ToggleExecute( void ) override
 {
 	ChangeType changeType = EvalChange();
 	switch ( changeType )
@@ -142,7 +142,7 @@ CChangeDestFileStatesCmd::CChangeDestFileStatesCmd( CFileModel* pFileModel, std:
 	ENSURE( m_srcStates.size() == m_destStates.size() );
 }
 
-CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) const
+CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) const override
 {
 	REQUIRE( m_srcStates.size() == m_destStates.size() );
 
@@ -164,7 +164,7 @@ CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) cons
 	return changeType;
 }
 
-bool CChangeDestFileStatesCmd::ToggleExecute( void )
+bool CChangeDestFileStatesCmd::ToggleExecute( void ) override
 {
 	ChangeType changeType = EvalChange();
 	switch ( changeType )
@@ -227,7 +227,30 @@ CResetDestinationsCmd::CResetDestinationsCmd( CFileModel* pFileModel )
 	}
 }
 
-std::tstring CResetDestinationsCmd::Format( utl::Verbosity verbosity ) const
+std::tstring CResetDestinationsCmd::Format( utl::Verbosity verbosity ) const override
 {
 	return GetSubCommands().front()->Format( verbosity );
+}
+
+
+#include "utl/UI/ReportListControl.hxx"
+
+
+// COnRenameListSortedCmd implementation
+
+COnRenameListSortedCmd::COnRenameListSortedCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl )
+	: CObjectCommand<CFileModel>( cmd::OnRenameListSorted, pFileModel, &cmd::GetTags_CommandType() )
+	, m_pFileListCtrl( pFileListCtrl )
+{
+	ASSERT_PTR( m_pFileListCtrl );
+}
+
+bool COnRenameListSortedCmd::DoExecute( void ) override
+{
+	// fetch new rename items order
+	std::vector< CRenameItem* >& rRenameItems = m_pObject->LazyInitRenameItems();
+
+	REQUIRE( (size_t)m_pFileListCtrl->GetItemCount() == rRenameItems.size() );		// is list consistent in size?
+	m_pFileListCtrl->QueryObjectsSequence( rRenameItems );
+	return true;
 }

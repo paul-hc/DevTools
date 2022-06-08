@@ -3,6 +3,7 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/PathTests.h"
+#include "test/TempFilePairPool.h"
 #include "Path.h"
 #include "FlexPath.h"
 #include "StringUtilities.h"

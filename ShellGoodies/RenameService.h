@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/Path.h"
+#include "utl/PathRenamePairs.h"
 #include "AppCommands.h"
 
 
@@ -28,13 +29,13 @@ public:
 	void QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const;
 	bool FileExistOutsideWorkingSet( const fs::CPath& filePath ) const;		// collision with an existing file/dir outside working set (selected files)
 
-	static fs::CPath GetDestPath( fs::TPathPairMap::const_iterator itPair );
-	static std::tstring GetDestFname( fs::TPathPairMap::const_iterator itPair );
+	static fs::CPath GetDestPath( CPathRenamePairs::const_iterator itPair );
+	static std::tstring GetDestFname( CPathRenamePairs::const_iterator itPair );
 
 	// text tools
 	static std::tstring ApplyTextTool( UINT menuId, const std::tstring& text );
 private:
-	fs::TPathPairMap m_renamePairs;
+	CPathRenamePairs m_renamePairs;
 };
 
 

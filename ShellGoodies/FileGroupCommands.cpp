@@ -34,27 +34,27 @@ namespace cmd
 	{
 	}
 
-	bool CBaseFileGroupCmd::IsValid( void ) const
+	bool CBaseFileGroupCmd::IsValid( void ) const override
 	{
 		return true;
 	}
 
-	const CTime& CBaseFileGroupCmd::GetTimestamp( void ) const
+	const CTime& CBaseFileGroupCmd::GetTimestamp( void ) const override
 	{
 		return m_timestamp;
 	}
 
-	size_t CBaseFileGroupCmd::GetFileCount( void ) const
+	size_t CBaseFileGroupCmd::GetFileCount( void ) const override
 	{
 		return m_filePaths.size();
 	}
 
-	void CBaseFileGroupCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+	void CBaseFileGroupCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const override
 	{
 		utl::Assign( rLines, m_filePaths, func::tor::StringOf() );
 	}
 
-	std::tstring CBaseFileGroupCmd::Format( utl::Verbosity verbosity ) const
+	std::tstring CBaseFileGroupCmd::Format( utl::Verbosity verbosity ) const override
 	{
 		std::tstring text = FormatCmdTag( this, verbosity );
 		const TCHAR* pSep = GetSeparator( verbosity );
@@ -71,7 +71,7 @@ namespace cmd
 		return text;
 	}
 
-	void CBaseFileGroupCmd::Serialize( CArchive& archive )
+	void CBaseFileGroupCmd::Serialize( CArchive& archive ) override
 	{
 		__super::Serialize( archive );
 
@@ -79,7 +79,7 @@ namespace cmd
 		serial::SerializeValues( archive, m_filePaths );
 	}
 
-	bool CBaseFileGroupCmd::IsUndoable( void ) const
+	bool CBaseFileGroupCmd::IsUndoable( void ) const override
 	{
 		return true;		// let it unexecute with error rather than being skipped in UNDO
 	}
@@ -170,7 +170,7 @@ namespace cmd
 		m_destDirPath /= deepRelSubfolderPath;		// move dest folder deeper
 	}
 
-	void CBaseDeepTransferFilesCmd::Serialize( CArchive& archive )
+	void CBaseDeepTransferFilesCmd::Serialize( CArchive& archive ) override
 	{
 		__super::Serialize( archive );
 
@@ -179,7 +179,7 @@ namespace cmd
 		archive & m_topDestDirPath;
 	}
 
-	void CBaseDeepTransferFilesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+	void CBaseDeepTransferFilesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const override
 	{
 		std::vector< fs::CPath > destFilePaths;
 		MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
@@ -187,7 +187,7 @@ namespace cmd
 		QueryFilePairLines( rLines, GetSrcFilePaths(), destFilePaths );
 	}
 
-	std::tstring CBaseDeepTransferFilesCmd::GetDestHeaderInfo( void ) const
+	std::tstring CBaseDeepTransferFilesCmd::GetDestHeaderInfo( void ) const override
 	{
 		return str::Format( _T("-> %s"), m_destDirPath.GetPtr() );
 	}
@@ -225,7 +225,7 @@ CDeleteFilesCmd::~CDeleteFilesCmd()
 {
 }
 
-bool CDeleteFilesCmd::Execute( void )
+bool CDeleteFilesCmd::Execute( void ) override
 {
 	CWorkingSet workingSet( *this, fs::Write );
 
@@ -238,7 +238,7 @@ bool CDeleteFilesCmd::Execute( void )
 	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
 
-bool CDeleteFilesCmd::Unexecute( void )
+bool CDeleteFilesCmd::Unexecute( void ) override
 {
 	CUndeleteFilesCmd undoCmd( GetFilePaths() );
 	undoCmd.CopyTimestampOf( *this );
@@ -255,7 +255,7 @@ bool CDeleteFilesCmd::Unexecute( void )
 
 // CDeleteFilesCmd::CUndeleteFilesCmd implementation
 
-bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void )
+bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void ) override
 {
 	std::vector< fs::CPath > errorFilePaths;
 	size_t restoredCount = shell::UndeleteFiles( GetFilePaths(), GetParentOwner(), &errorFilePaths );
@@ -283,7 +283,7 @@ CCopyFilesCmd::~CCopyFilesCmd()
 {
 }
 
-bool CCopyFilesCmd::Execute( void )
+bool CCopyFilesCmd::Execute( void ) override
 {
 	CWorkingSet workingSet( *this, fs::ReadWrite );
 
@@ -299,7 +299,7 @@ bool CCopyFilesCmd::Execute( void )
 	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
 
-bool CCopyFilesCmd::Unexecute( void )
+bool CCopyFilesCmd::Unexecute( void ) override
 {
 	std::vector< fs::CPath > destFilePaths;
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
@@ -342,7 +342,7 @@ CMoveFilesCmd::~CMoveFilesCmd()
 {
 }
 
-bool CMoveFilesCmd::Execute( void )
+bool CMoveFilesCmd::Execute( void ) override
 {
 	CWorkingSet workingSet( *this, fs::ReadWrite );
 
@@ -358,7 +358,7 @@ bool CMoveFilesCmd::Execute( void )
 	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
 
-bool CMoveFilesCmd::Unexecute( void )
+bool CMoveFilesCmd::Unexecute( void ) override
 {
 	std::vector< fs::CPath > destFilePaths;
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
@@ -403,7 +403,7 @@ CCreateFoldersCmd::~CCreateFoldersCmd()
 {
 }
 
-bool CCreateFoldersCmd::Execute( void )
+bool CCreateFoldersCmd::Execute( void ) override
 {
 	CWorkingSet workingSet( *this, fs::Exist );
 
@@ -437,7 +437,7 @@ bool CCreateFoldersCmd::Execute( void )
 	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
 
-bool CCreateFoldersCmd::Unexecute( void )
+bool CCreateFoldersCmd::Unexecute( void ) override
 {
 	std::vector< fs::CPath > destFolderPaths;
 	MakeDestFilePaths( destFolderPaths, GetSrcFolderPaths() );

@@ -8,13 +8,13 @@
 
 
 CPathMaker::CPathMaker( void )
-	: m_pRenamePairs( new fs::TPathPairMap )
+	: m_pRenamePairs( new CPathRenamePairs() )
 	, m_mapOwnership( true )
 {
 	ASSERT_PTR( m_pRenamePairs );
 }
 
-CPathMaker::CPathMaker( fs::TPathPairMap* pRenamePairs )
+CPathMaker::CPathMaker( CPathRenamePairs* pRenamePairs )
 	: m_pRenamePairs( pRenamePairs )
 	, m_mapOwnership( false )
 {
@@ -31,12 +31,12 @@ bool CPathMaker::MakeDestRelative( const std::tstring& prefixDirPath )
 {
 	// for each copy SRC path to DEST path, and make relative DEST path by removing the reference dir path suffix.
 
-	for ( fs::TPathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
+	for ( CPathRenamePairs::TPairVector::iterator itPair = m_pRenamePairs->RefPairs().begin(); itPair != m_pRenamePairs->RefPairs().end(); ++itPair )
 	{
-		std::tstring destRelPath = it->first.GetPtr();
+		std::tstring destRelPath = itPair->first.GetPtr();
 
 		if ( path::StripPrefix( destRelPath, prefixDirPath.c_str() ) )
-			it->second.Set( destRelPath );
+			itPair->second.Set( destRelPath );
 		else
 			return false;			// SRC path does not share a common prefix with prefixDirPath
 	}
@@ -53,32 +53,17 @@ std::tstring CPathMaker::FindSrcCommonPrefix( void ) const
 {
 	std::tstring commonPrefix;
 
-	if ( !m_pRenamePairs->empty() )
+	if ( !m_pRenamePairs->GetPairs().empty() )
 	{
-		fs::TPathPairMap::const_iterator it = m_pRenamePairs->begin();
-		commonPrefix = it->first.GetParentPath().Get();
+		CPathRenamePairs::const_iterator itPair = m_pRenamePairs->Begin();
+		commonPrefix = itPair->first.GetParentPath().Get();
 
-		for ( ++it; it != m_pRenamePairs->end(); ++it )
+		for ( ++itPair; itPair != m_pRenamePairs->End(); ++itPair )
 		{
-			commonPrefix = path::FindCommonPrefix( it->first.GetPtr(), commonPrefix.c_str() );
+			commonPrefix = path::FindCommonPrefix( itPair->first.GetPtr(), commonPrefix.c_str() );
 			if ( commonPrefix.empty() )
 				break;						// no common prefix, abort search
 		}
 	}
 	return commonPrefix;
-}
-
-void CPathMaker::CopyDestPaths( const std::vector< fs::CPath >& destPaths )
-{
-	REQUIRE( m_pRenamePairs->size() == destPaths.size() );
-
-	size_t pos = 0;
-	for ( fs::TPathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it, ++pos )
-		it->second = destPaths[ pos ];
-}
-
-void CPathMaker::ResetDestPaths( void )
-{
-	for ( fs::TPathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
-		it->second = fs::CPath();
 }

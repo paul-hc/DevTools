@@ -9,6 +9,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/Logger.h"
 #include "utl/PathGenerator.h"
+#include "utl/test/TempFilePairPool.h"
 
 #define new DEBUG_NEW
 

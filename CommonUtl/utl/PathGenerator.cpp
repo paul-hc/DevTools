@@ -19,7 +19,7 @@ CPathGenerator::CPathGenerator( const CPathFormatter& formatter, UINT seqCount, 
 	ASSERT( m_seqCount < MaxSeqCount );
 }
 
-CPathGenerator::CPathGenerator( fs::TPathPairMap* pOutRenamePairs, const CPathFormatter& formatter, UINT seqCount, bool avoidDups /*= true*/ )
+CPathGenerator::CPathGenerator( CPathRenamePairs* pOutRenamePairs, const CPathFormatter& formatter, UINT seqCount, bool avoidDups /*= true*/ )
 	: CPathMaker( pOutRenamePairs )
 	, m_formatter( formatter )
 	, m_seqCount( seqCount )
@@ -29,8 +29,8 @@ CPathGenerator::CPathGenerator( fs::TPathPairMap* pOutRenamePairs, const CPathFo
 	ASSERT( m_seqCount < MaxSeqCount );
 }
 
-CPathGenerator::CPathGenerator( const fs::TPathPairMap& renamePairs, const CPathFormatter& formatter, UINT seqCount /*= 1*/, bool avoidDups /*= true*/ )
-	: CPathMaker( const_cast<fs::TPathPairMap*>( &renamePairs ) )
+CPathGenerator::CPathGenerator( const CPathRenamePairs& renamePairs, const CPathFormatter& formatter, UINT seqCount /*= 1*/, bool avoidDups /*= true*/ )
+	: CPathMaker( const_cast<CPathRenamePairs*>( &renamePairs ) )
 	, m_formatter( formatter )
 	, m_seqCount( seqCount )
 	, m_avoidDups( avoidDups )
@@ -51,11 +51,11 @@ bool CPathGenerator::GeneratePairs( void )
 	std::vector< fs::CPath > destPaths;
 	if ( !Generate( destPaths ) )
 	{
-		ResetDestPaths();
+		m_pRenamePairs->ResetDestPaths();
 		return false;
 	}
 
-	CopyDestPaths( destPaths );
+	m_pRenamePairs->CopyDestPaths( destPaths );
 	return true;
 }
 
@@ -68,9 +68,9 @@ bool CPathGenerator::Generate( std::vector< fs::CPath >& rDestPaths )
 		return false;
 
 	std::vector< fs::CPath > destPaths;
-	destPaths.reserve( m_pRenamePairs->size() );
+	destPaths.reserve( m_pRenamePairs->GetPairs().size() );
 
-	for ( fs::TPathPairMap::const_iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
+	for ( CPathRenamePairs::const_iterator it = m_pRenamePairs->Begin(); it != m_pRenamePairs->End(); ++it )
 	{
 		fs::CPath newPath;
 		if ( GeneratePath( newPath, it->first ) )
@@ -87,10 +87,10 @@ UINT CPathGenerator::FindNextAvailSeqCount( void ) const
 {
 	UINT nextAvailSeqCount = 1;
 
-	if ( m_formatter.IsNumericFormat() && !m_pRenamePairs->empty() )
+	if ( m_formatter.IsNumericFormat() && !m_pRenamePairs->IsEmpty() )
 	{
 		// sweep existing files (source + outside) that match current format for the lowest seq count that is not used
-		fs::CPath dirPath = m_pRenamePairs->begin()->first.GetParentPath();			// use first source file dir path
+		fs::CPath dirPath = m_pRenamePairs->Begin()->first.GetParentPath();			// use first source file dir path
 
 		std::vector< fs::CPath > existingFilePaths;
 		fs::EnumFilePaths( existingFilePaths, dirPath );
@@ -147,7 +147,7 @@ bool CPathGenerator::GeneratePath( fs::CPath& rNewPath, const fs::CPath& srcPath
 bool CPathGenerator::IsPathUnique( const fs::CPath& newPath ) const
 {
 	if ( newPath.FileExist() )
-		if ( m_pRenamePairs->find( newPath ) == m_pRenamePairs->end() )
+		if ( !m_pRenamePairs->ContainsSrc( newPath ) )
 			return false;							// collision with an existing file outside of current working set
 
 	return m_destSet.find( newPath ) == m_destSet.end();

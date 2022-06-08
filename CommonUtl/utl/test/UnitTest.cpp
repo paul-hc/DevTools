@@ -286,46 +286,6 @@ namespace ut
 	}
 
 
-	// CPathPairPool implementation
-
-	CPathPairPool::CPathPairPool( const TCHAR* pSourceFilenames, bool fullDestPaths /*= false*/ )
-		: m_fullDestPaths( fullDestPaths )
-	{
-		std::vector< std::tstring > srcFilenames;
-		str::Split( srcFilenames, pSourceFilenames, ut::CTempFilePool::m_sep );
-		for ( std::vector< std::tstring >::const_iterator itSrc = srcFilenames.begin(); itSrc != srcFilenames.end(); ++itSrc )
-			m_pathPairs[ *itSrc ].Clear();
-
-		ENSURE( m_pathPairs.size() == srcFilenames.size() );
-	}
-
-	std::tstring CPathPairPool::JoinDest( void )
-	{
-		std::vector< std::tstring > destFilenames; destFilenames.reserve( m_pathPairs.size() );
-		for ( fs::TPathPairMap::const_iterator itPair = m_pathPairs.begin(); itPair != m_pathPairs.end(); ++itPair )
-			destFilenames.push_back( m_fullDestPaths ? itPair->second.Get() : fs::CPathParts( itPair->second.Get() ).GetFilename() );
-
-		return str::Join( destFilenames, ut::CTempFilePool::m_sep );
-	}
-
-	void CPathPairPool::CopySrc( void )
-	{
-		for ( fs::TPathPairMap::iterator itPair = m_pathPairs.begin(); itPair != m_pathPairs.end(); ++itPair )
-			itPair->second = itPair->first;
-	}
-
-
-	// CTempFilePairPool implementation
-
-	CTempFilePairPool::CTempFilePairPool( const TCHAR* pSourceFilenames )
-		: CTempFilePool( pSourceFilenames )
-	{
-		if ( IsValidPool() )
-			for ( std::vector< fs::CPath >::const_iterator itSrcPath = GetFilePaths().begin(); itSrcPath != GetFilePaths().end(); ++itSrcPath )
-				m_pathPairs[ *itSrcPath ].Clear();
-	}
-
-
 	// file enumeration
 
 	std::tstring JoinFiles( const fs::CPathEnumerator& enumerator )

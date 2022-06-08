@@ -125,7 +125,7 @@ namespace pred
 					if ( fattr::FilterFileSameSizeAndDim == m_fileOrder && m_compareImageDim )
 						result = TCompareImageDimensions()( pLeft, pRight );
 
-				// also ordonate by filepath (if secondary comparison not disabled)
+				// also order by filepath (if secondary comparison not disabled)
 				if ( result == Equal && m_useSecondaryComparison )
 					result = TCompareFileAttrPath()( pLeft, pRight );
 				break;

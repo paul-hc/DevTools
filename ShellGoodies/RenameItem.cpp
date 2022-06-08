@@ -11,20 +11,21 @@
 
 namespace ren
 {
-	bool MakePairsFromItems( fs::TPathPairMap& rOutRenamePairs, const std::vector< CRenameItem* >& renameItems )
+	bool MakePairsFromItems( CPathRenamePairs* pOutRenamePairs, const std::vector< CRenameItem* >& renameItems )
 	{
-		rOutRenamePairs.clear();
-		for ( std::vector< CRenameItem* >::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
-			rOutRenamePairs[ ( *itItem )->GetSrcPath() ] = ( *itItem )->GetDestPath();
+		pOutRenamePairs->Clear();
 
-		return rOutRenamePairs.size() == renameItems.size();			// all SRC keys unique?
+		for ( std::vector< CRenameItem* >::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
+			pOutRenamePairs->AddPair( (*itItem)->GetSrcPath(), (*itItem)->GetDestPath() );
+
+		return pOutRenamePairs->GetPairs().size() == renameItems.size();			// all SRC keys unique?
 	}
 
-	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs )
+	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const CPathRenamePairs& renamePairs )
 	{
 		REQUIRE( rOutRenameItems.empty() );
 
-		for ( fs::TPathPairMap::const_iterator itPair = renamePairs.begin(); itPair != renamePairs.end(); ++itPair )
+		for ( CPathRenamePairs::const_iterator itPair = renamePairs.Begin(); itPair != renamePairs.End(); ++itPair )
 		{
 			CRenameItem* pItem = new CRenameItem( itPair->first );
 
@@ -33,12 +34,12 @@ namespace ren
 		}
 	}
 
-	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const fs::TPathPairMap& renamePairs )
+	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const CPathRenamePairs& renamePairs )
 	{
-		REQUIRE( items.size() == renamePairs.size() );
+		REQUIRE( items.size() == renamePairs.GetPairs().size() );
 
 		size_t pos = 0;
-		for ( fs::TPathPairMap::const_iterator itPair = renamePairs.begin(); itPair != renamePairs.end(); ++itPair, ++pos )
+		for ( CPathRenamePairs::const_iterator itPair = renamePairs.Begin(); itPair != renamePairs.End(); ++itPair, ++pos )
 		{
 			CRenameItem* pItem = items[ pos ];
 
@@ -94,7 +95,7 @@ namespace ren
 // CRenameItem implementation
 
 CRenameItem::CRenameItem( const fs::CPath& srcPath )
-	: CPathItemBase( srcPath )
+	: CFileStateItem( fs::CFileState::ReadFromFile( srcPath ) )
 {
 }
 

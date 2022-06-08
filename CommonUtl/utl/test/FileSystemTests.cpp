@@ -3,6 +3,7 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/FileSystemTests.h"
+#include "test/TempFilePairPool.h"
 #include "Path.h"
 #include "FileState.h"
 #include "FileContent.h"

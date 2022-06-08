@@ -46,22 +46,22 @@ namespace cmd
 	{
 	}
 
-	bool CFileMacroCmd::IsValid( void ) const
+	bool CFileMacroCmd::IsValid( void ) const override
 	{
 		return !IsEmpty();
 	}
 
-	const CTime& CFileMacroCmd::GetTimestamp( void ) const
+	const CTime& CFileMacroCmd::GetTimestamp( void ) const override
 	{
 		return m_timestamp;
 	}
 
-	size_t CFileMacroCmd::GetFileCount( void ) const
+	size_t CFileMacroCmd::GetFileCount( void ) const override
 	{
 		return GetSubCommands().size();
 	}
 
-	void CFileMacroCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+	void CFileMacroCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const override
 	{
 		rLines.clear();
 		rLines.reserve( m_subCommands.size() );
@@ -73,7 +73,7 @@ namespace cmd
 		}
 	}
 
-	std::tstring CFileMacroCmd::Format( utl::Verbosity verbosity ) const
+	std::tstring CFileMacroCmd::Format( utl::Verbosity verbosity ) const override
 	{
 		std::tstring text = FormatCmdTag( this, verbosity );
 		const TCHAR* pSep = GetSeparator( verbosity );
@@ -87,13 +87,13 @@ namespace cmd
 		return text;
 	}
 
-	bool CFileMacroCmd::Execute( void )
+	bool CFileMacroCmd::Execute( void ) override
 	{
 		ExecuteMacro( ExecuteMode );			// removes commands that failed
 		return !m_subCommands.empty();			// any succeeeded?
 	}
 
-	bool CFileMacroCmd::Unexecute( void )
+	bool CFileMacroCmd::Unexecute( void ) override
 	{
 		ExecuteMacro( UnexecuteMode );			// removes commands that failed
 		return !m_subCommands.empty();			// any succeeeded?
@@ -167,7 +167,7 @@ namespace cmd
 		}
 	}
 
-	bool CBaseFileCmd::Unexecute( void )
+	bool CBaseFileCmd::Unexecute( void ) override
 	{
 		std::auto_ptr<CBaseFileCmd> pUndoCmd( MakeUnexecuteCmd() );
 
@@ -220,7 +220,7 @@ CRenameFileCmd::~CRenameFileCmd()
 {
 }
 
-std::tstring CRenameFileCmd::Format( utl::Verbosity verbosity ) const
+std::tstring CRenameFileCmd::Format( utl::Verbosity verbosity ) const override
 {
 	std::tstring text;
 	if ( verbosity != utl::Brief )
@@ -237,18 +237,18 @@ bool CRenameFileCmd::Execute( void )
 	return true;
 }
 
-std::auto_ptr<cmd::CBaseFileCmd> CRenameFileCmd::MakeUnexecuteCmd( void ) const
+std::auto_ptr<cmd::CBaseFileCmd> CRenameFileCmd::MakeUnexecuteCmd( void ) const override
 {
 	return std::auto_ptr<cmd::CBaseFileCmd>( new CRenameFileCmd( m_destPath, m_srcPath ) );
 }
 
-bool CRenameFileCmd::IsUndoable( void ) const
+bool CRenameFileCmd::IsUndoable( void ) const override
 {
 	//return m_destPath.FileExist() && !m_srcPath.FileExist();
 	return true;		// let it unexecute with error rather than being skipped in UNDO
 }
 
-void CRenameFileCmd::Serialize( CArchive& archive )
+void CRenameFileCmd::Serialize( CArchive& archive ) override
 {
 	cmd::CBaseFileCmd::Serialize( archive );
 
@@ -273,7 +273,7 @@ CTouchFileCmd::~CTouchFileCmd()
 {
 }
 
-std::tstring CTouchFileCmd::Format( utl::Verbosity verbosity ) const
+std::tstring CTouchFileCmd::Format( utl::Verbosity verbosity ) const override
 {
 	std::tstring text;
 	if ( verbosity != utl::Brief )
@@ -283,7 +283,7 @@ std::tstring CTouchFileCmd::Format( utl::Verbosity verbosity ) const
 	return text;
 }
 
-bool CTouchFileCmd::Execute( void )
+bool CTouchFileCmd::Execute( void ) override
 {
 	if ( m_destState != m_srcState )
 	{
@@ -293,18 +293,18 @@ bool CTouchFileCmd::Execute( void )
 	return true;
 }
 
-std::auto_ptr<cmd::CBaseFileCmd> CTouchFileCmd::MakeUnexecuteCmd( void ) const
+std::auto_ptr<cmd::CBaseFileCmd> CTouchFileCmd::MakeUnexecuteCmd( void ) const override
 {
 	return std::auto_ptr<cmd::CBaseFileCmd>( new CTouchFileCmd( m_destState, m_srcState ) );
 }
 
-bool CTouchFileCmd::IsUndoable( void ) const
+bool CTouchFileCmd::IsUndoable( void ) const override
 {
 	//return m_srcState.FileExist() && m_srcState != fs::CFileState::ReadFromFile( m_srcState.m_fullPath );
 	return true;		// let it unexecute with error rather than being skipped in UNDO
 }
 
-void CTouchFileCmd::Serialize( CArchive& archive )
+void CTouchFileCmd::Serialize( CArchive& archive ) override
 {
 	cmd::CBaseFileCmd::Serialize( archive );
 

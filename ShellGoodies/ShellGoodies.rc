@@ -605,11 +605,14 @@ BEGIN
     IDS_NO_DELIMITER_SET    "Please enter the delimiters to replace!"
     IDS_REPLACE_FILES_TIP_FORMAT 
                             "Ctrl+Click to replace ""%s"" with ""%s"" (Ctrl+H)"
+    IDS_FILE_RENAME_SIMPLE_LIST_LAYOUT 
+                            "Source files=-50|Destination files=-50"
+    IDS_FILE_RENAME_DETAILS_LIST_LAYOUT 
+                            "Source files=-50|Size|Date Modified|Destination files=-50"
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_FILE_RENAME_LIST    "Source files=-50|Destination files=-50"
     IDC_CAPITALIZE_BUTTON   "Capitalize filename using sentence case, make extension lower case"
 END
 

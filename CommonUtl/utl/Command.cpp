@@ -18,7 +18,7 @@ CBaseCommand::CBaseCommand( int typeId, utl::ISubject* pSubject )
 {
 }
 
-int CBaseCommand::GetTypeID( void ) const
+int CBaseCommand::GetTypeID( void ) const override
 {
 	return m_typeId;
 }
@@ -47,19 +47,19 @@ CCommand::~CCommand()
 {
 }
 
-std::tstring CCommand::Format( utl::Verbosity verbosity ) const
+std::tstring CCommand::Format( utl::Verbosity verbosity ) const override
 {
 	ASSERT_PTR( m_pCmdTags );
 	return m_pCmdTags->Format( GetTypeID(), verbosity != utl::Brief ? CEnumTags::UiTag : CEnumTags::KeyTag );
 }
 
-bool CCommand::Unexecute( void )
+bool CCommand::Unexecute( void ) override
 {
 	ASSERT( false );
 	return false;
 }
 
-bool CCommand::IsUndoable( void ) const
+bool CCommand::IsUndoable( void ) const override
 {
 	return true;
 }
@@ -87,7 +87,7 @@ void CMacroCommand::AddCmd( utl::ICommand* pSubCmd )
 	m_subCommands.push_back( pSubCmd );
 }
 
-std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const
+std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const override
 {
 	if ( m_pMainCmd != NULL )
 		return m_pMainCmd->Format( verbosity );			// main commmand provides all the info
@@ -120,7 +120,7 @@ std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const
 	return text;
 }
 
-bool CMacroCommand::Execute( void )
+bool CMacroCommand::Execute( void ) override
 {
 	bool succeded = !m_subCommands.empty();
 
@@ -131,7 +131,7 @@ bool CMacroCommand::Execute( void )
 	return succeded;
 }
 
-bool CMacroCommand::Unexecute( void )
+bool CMacroCommand::Unexecute( void ) override
 {
 	bool succeded = !m_subCommands.empty();
 
@@ -142,7 +142,7 @@ bool CMacroCommand::Unexecute( void )
 	return succeded;
 }
 
-bool CMacroCommand::IsUndoable( void ) const
+bool CMacroCommand::IsUndoable( void ) const override
 {
 	for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
 		if ( ( *itSubCmd )->IsUndoable() )

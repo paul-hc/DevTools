@@ -28,6 +28,11 @@ namespace func
 {
 	// accessors for order predicates
 
+	struct AsFileSize
+	{
+		UINT64 operator()( const CFileStateItem* pItem ) const { return pItem->GetState().m_fileSize; }
+	};
+
 	struct AsCreationTime
 	{
 		const CTime& operator()( const CFileStateItem* pItem ) const { return pItem->GetState().m_creationTime; }

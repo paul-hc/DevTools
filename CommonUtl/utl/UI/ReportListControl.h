@@ -58,6 +58,7 @@ namespace lv
 		// via WM_NOTIFY:
 		LVN_CanSortByColumn = 1100,			// pass NMHDR; clients return TRUE if sorting is disabled for the clicked column (by default sorting is enabled on all columns)
 		LVN_CustomSortList,					// pass NMHDR; clients return TRUE if handled custom sorting, using current sorting criteria GetSortByColumn()
+		LVN_ListSorted,						// pass NMHDR
 		LVN_ToggleCheckState,				// pass lv::CNmToggleCheckState; client could return TRUE to reject default toggle
 		LVN_CheckStatesChanged,				// pass lv::CNmCheckStatesChanged
 		LVN_DropFiles,						// pass lv::CNmDropFiles
@@ -271,7 +272,8 @@ public:
 
 	// sorting
 	std::pair<TColumn, bool> GetSortByColumn( void ) const { return std::make_pair( m_sortByColumn, m_sortAscending ); }
-	void SetSortByColumn( TColumn sortByColumn, bool sortAscending = true );
+	void SetSortByColumn( TColumn sortByColumn, bool sortAscending = true );		// do sort the list
+	void StoreSortByColumn( TColumn sortByColumn, bool sortAscending = true );		// update the list column header sort order
 
 	bool GetSortInternally( void ) const { return HasFlag( m_optionFlags, SortInternally ); }
 	void SetSortInternally( bool sortInternally = true ) { SetFlag( m_optionFlags, SortInternally, sortInternally ); }
@@ -645,7 +647,7 @@ private:
 	std::list< CDiffColumnPair > m_diffColumnPairs;
 
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
-	std::auto_ptr<CLabelEdit> m_pLabelEdit;				// stores the label info during inline editing
+	std::auto_ptr<CLabelEdit> m_pLabelEdit;					// stores the label info during inline editing
 
 	ui::ICommandFrame* m_pFrameEditor;						// for frame editor command handling mode
 	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop

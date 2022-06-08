@@ -101,10 +101,11 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
 
 	m_regSection = reg::section_mainDialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
 	m_filesSheet.m_regSection = reg::section_filesSheet;
-	m_filesSheet.AddPage( new CRenameListPage( this ) );
+	m_filesSheet.AddPage( new CRenameSimpleListPage( this ) );
+	m_filesSheet.AddPage( new CRenameDetailsListPage( this ) );
 	m_filesSheet.AddPage( new CRenameEditPage( this ) );
 
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
@@ -360,8 +361,8 @@ bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter,
 
 	ClearFileErrors();
 
-	fs::TPathPairMap renamePairs;
-	ren::MakePairsFromItems( renamePairs, m_rRenameItems );
+	CPathRenamePairs renamePairs;
+	ren::MakePairsFromItems( &renamePairs, m_rRenameItems );
 
 	CPathGenerator generator( &renamePairs, pathFormatter, *pSeqCount );
 	if ( !generator.GeneratePairs() )
@@ -385,7 +386,7 @@ void CRenameFilesDialog::AutoGenerateFiles( void )
 
 bool CRenameFilesDialog::ChangeSeqCount( UINT seqCount )
 {
-	if ( m_seqCountEdit.GetNumber< UINT >() == seqCount )
+	if ( m_seqCountEdit.GetNumber<UINT>() == seqCount )
 		return false;
 
 	m_seqCountEdit.SetNumericValue( seqCount );
@@ -720,6 +721,7 @@ void CRenameFilesDialog::OnFieldChanged( void )
 
 void CRenameFilesDialog::OnPickFormatToken( void )
 {
+//DBG: OnUpdate(NULL, NULL);
 	CMenu popupMenu;
 	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::FormatPicker );
 

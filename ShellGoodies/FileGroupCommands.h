@@ -28,18 +28,18 @@ namespace cmd
 		void SetParentOwner( CWnd* pParentOwner ) { m_pParentOwner = pParentOwner; }
 
 		// base overrides
-		virtual std::tstring Format( utl::Verbosity verbosity ) const;
-		virtual bool IsUndoable( void ) const;
+		virtual std::tstring Format( utl::Verbosity verbosity ) const override;
+		virtual bool IsUndoable( void ) const override;
 
 		// cmd::IPersistentCmd
-		virtual bool IsValid( void ) const;
-		virtual const CTime& GetTimestamp( void ) const;
+		virtual bool IsValid( void ) const override;
+		virtual const CTime& GetTimestamp( void ) const override;
 
 		// cmd::IFileDetailsCmd
-		virtual size_t GetFileCount( void ) const;
-		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
+		virtual size_t GetFileCount( void ) const override;
+		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const override;
 
-		virtual void Serialize( CArchive& archive );
+		virtual void Serialize( CArchive& archive ) override;
 	protected:
 		virtual std::tstring GetDestHeaderInfo( void ) const;
 		static void QueryFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths );
@@ -86,12 +86,12 @@ namespace cmd
 		void SetDeepRelDirPath( const fs::CPath& deepRelSubfolderPath );		// for deeper transfers
 
 		// base overrides
-		virtual void Serialize( CArchive& archive );
-		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
+		virtual void Serialize( CArchive& archive ) override;
+		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const override;
 
 		// ICommand interface
 	protected:
-		virtual std::tstring GetDestHeaderInfo( void ) const;
+		virtual std::tstring GetDestHeaderInfo( void ) const override;
 
 		void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const;
 		fs::CPath MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const;
@@ -115,8 +115,8 @@ public:
 	virtual ~CDeleteFilesCmd();
 
 	// ICommand interface
-	virtual bool Execute( void );
-	virtual bool Unexecute( void );
+	virtual bool Execute( void ) override;
+	virtual bool Unexecute( void ) override;
 private:
 	struct CUndeleteFilesCmd : public cmd::CBaseFileGroupCmd
 	{
@@ -124,8 +124,8 @@ private:
 			: cmd::CBaseFileGroupCmd( cmd::Priv_UndeleteFiles, delFilePaths ) {}
 
 		// ICommand interface
-		virtual bool Execute( void );
-		virtual bool IsUndoable( void ) const { return false; }
+		virtual bool Execute( void ) override;
+		virtual bool IsUndoable( void ) const override { return false; }
 	};
 };
 
@@ -142,8 +142,8 @@ public:
 	virtual ~CCopyFilesCmd();
 
 	// ICommand interface
-	virtual bool Execute( void );
-	virtual bool Unexecute( void );
+	virtual bool Execute( void ) override;
+	virtual bool Unexecute( void ) override;
 };
 
 
@@ -159,8 +159,8 @@ public:
 	virtual ~CMoveFilesCmd();
 
 	// ICommand interface
-	virtual bool Execute( void );
-	virtual bool Unexecute( void );
+	virtual bool Execute( void ) override;
+	virtual bool Unexecute( void ) override;
 };
 
 
@@ -180,8 +180,8 @@ public:
 	const std::vector< fs::CPath >& GetSrcFolderPaths( void ) const { return GetSrcFilePaths(); }
 
 	// ICommand interface
-	virtual bool Execute( void );
-	virtual bool Unexecute( void );
+	virtual bool Execute( void ) override;
+	virtual bool Unexecute( void ) override;
 };
 
 

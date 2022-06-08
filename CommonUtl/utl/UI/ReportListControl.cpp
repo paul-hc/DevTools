@@ -579,9 +579,17 @@ void CReportListControl::SetSortByColumn( TColumn sortByColumn, bool sortAscendi
 	m_sortByColumn = sortByColumn;
 	m_sortAscending = sortAscending;
 
-	if ( m_hWnd != NULL )
-		if ( IsSortingEnabled() )
-			SortList();
+	if ( m_hWnd != NULL && IsSortingEnabled() )
+		SortList();
+}
+
+void CReportListControl::StoreSortByColumn( TColumn sortByColumn, bool sortAscending /*= true*/ )
+{
+	m_sortByColumn = sortByColumn;
+	m_sortAscending = sortAscending;
+
+	if ( m_hWnd != NULL && IsSortingEnabled() )
+		UpdateColumnSortHeader();
 }
 
 void CReportListControl::UpdateColumnSortHeader( void )
@@ -610,9 +618,9 @@ bool CReportListControl::SortList( void )
 {
 	UpdateColumnSortHeader();
 
-	ui::CNmHdr nmCustomSort( this, lv::LVN_CustomSortList );
+	ui::CNmHdr nmHdr( this, lv::LVN_CustomSortList );
 
-	if ( 0L == nmCustomSort.NotifyParent() )			// give parent a chance to custom sort the list (or sort its groups); still sort items by default?
+	if ( 0L == nmHdr.NotifyParent() )			// give parent a chance to custom sort the list (or sort its groups); still sort items by default?
 		if ( -1 == m_sortByColumn )
 		{
 			if ( m_initialItemsOrder.empty() )
@@ -630,6 +638,9 @@ bool CReportListControl::SortList( void )
 				SortItems( m_pComparePtrFunc, (LPARAM)this );					// passes item LPARAMs as left/right
 			else
 				SortItemsEx( (PFNLVCOMPARE)&TextCompareProc, (LPARAM)this );	// passes item indexes as left/right LPARAMs
+
+	nmHdr.code = lv::LVN_ListSorted;
+	nmHdr.NotifyParent();
 
 	int caretIndex = GetCaretIndex();
 	if ( caretIndex != -1 )

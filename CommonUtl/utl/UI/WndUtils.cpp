@@ -769,8 +769,13 @@ namespace ui
 			CSystemTraySingleton::StoreAppInfo( appIconId, appTipText );
 		}
 
+		bool HasSystemTray( void )
+		{
+			return CSystemTray::Instance() != NULL;
+		}
 
-		bool ShowBalloonTip( const TCHAR text[], const TCHAR* pTitle /*= NULL*/, DWORD infoFlag /*= NIIF_INFO*/, UINT timeoutSecs /*= 30*/ )
+
+		bool ShowBalloonTip( const TCHAR text[], const TCHAR* pTitle /*= NULL*/, DWORD infoFlag /*= NIIF_INFO*/, UINT timeoutSecs /*= 10*/ )
 		{
 			CSystemTray* pSystemTray = CSystemTray::Instance();
 

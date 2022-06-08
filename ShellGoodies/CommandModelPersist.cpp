@@ -119,7 +119,7 @@ namespace cmd
 	const TCHAR CTextLogSerializer::s_tagSeps[] = _T("<>");			// "<tag>"
 	const TCHAR CTextLogSerializer::s_tagEndOfBatch[] = _T("END OF BATCH");
 
-	bool CTextLogSerializer::Save( const fs::CPath& undoLogPath )
+	bool CTextLogSerializer::Save( const fs::CPath& undoLogPath ) override
 	{
 		std::ofstream output( undoLogPath.GetPtr(), std::ios_base::out | std::ios_base::trunc );
 
@@ -137,7 +137,7 @@ namespace cmd
 		return true;
 	}
 
-	bool CTextLogSerializer::Load( const fs::CPath& undoLogPath )
+	bool CTextLogSerializer::Load( const fs::CPath& undoLogPath ) override
 	{
 		std::ifstream input( undoLogPath.GetPtr() );
 
@@ -312,13 +312,13 @@ namespace cmd
 
 	// CBinaryLogSerializer implementation
 
-	bool CBinaryLogSerializer::Save( const fs::CPath& undoLogPath )
+	bool CBinaryLogSerializer::Save( const fs::CPath& undoLogPath ) override
 	{
 		ui::CAdapterDocument doc( this, undoLogPath.Get() );
 		return doc.Save();
 	}
 
-	bool CBinaryLogSerializer::Load( const fs::CPath& undoLogPath )
+	bool CBinaryLogSerializer::Load( const fs::CPath& undoLogPath ) override
 	{
 		ui::CAdapterDocument doc( this, undoLogPath.Get() );
 		return doc.Load();

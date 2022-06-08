@@ -11,8 +11,8 @@ class CFileModel;
 
 
 interface IFileEditor : public utl::IMemoryManaged
-					  , public utl::IObserver
-					  , public cmd::IErrorObserver
+	, public utl::IObserver
+	, public cmd::IErrorObserver
 {
 	virtual CFileModel* GetFileModel( void ) const = 0;
 	virtual CDialog* GetDialog( void ) = 0;

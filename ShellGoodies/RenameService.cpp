@@ -34,10 +34,10 @@ void CRenameService::StoreRenameItems( const std::vector< CRenameItem* >& rename
 {
 	REQUIRE( !renameItems.empty() );
 
-	m_renamePairs.clear();
-	ren::MakePairsFromItems( m_renamePairs, renameItems );
+	m_renamePairs.Clear();
+	ren::MakePairsFromItems( &m_renamePairs, renameItems );
 
-	ENSURE( m_renamePairs.size() == renameItems.size() );			// all SRC keys unique?
+	ENSURE( m_renamePairs.GetPairs().size() == renameItems.size() );			// all SRC keys unique?
 }
 
 UINT CRenameService::FindNextAvailSeqCount( const CPathFormatter& formatter ) const
@@ -54,7 +54,7 @@ bool CRenameService::CheckPathCollisions( cmd::IErrorObserver* pErrorObserver )
 	fs::TPathSet destPaths;
 	size_t dupCount = 0, emptyCount = 0;
 
-	for ( fs::TPathPairMap::const_iterator itPair = m_renamePairs.begin(); itPair != m_renamePairs.end(); ++itPair )
+	for ( CPathRenamePairs::const_iterator itPair = m_renamePairs.Begin(); itPair != m_renamePairs.End(); ++itPair )
 		if ( itPair->second.IsEmpty() )									// ignore empty dest paths
 			++emptyCount;
 		else if ( !destPaths.insert( itPair->second ).second ||			// not unique in the working set
@@ -72,16 +72,16 @@ bool CRenameService::CheckPathCollisions( cmd::IErrorObserver* pErrorObserver )
 bool CRenameService::FileExistOutsideWorkingSet( const fs::CPath& filePath ) const
 {
 	return
-		m_renamePairs.find( filePath ) == m_renamePairs.end() &&
+		!m_renamePairs.ContainsSrc( filePath ) &&
 		filePath.FileExist();
 }
 
 void CRenameService::QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const
 {
 	rDestFnames.clear();
-	rDestFnames.reserve( m_renamePairs.size() );
+	rDestFnames.reserve( m_renamePairs.GetPairs().size() );
 
-	for ( fs::TPathPairMap::const_iterator itPair = m_renamePairs.begin(); itPair != m_renamePairs.end(); ++itPair )
+	for ( CPathRenamePairs::const_iterator itPair = m_renamePairs.Begin(); itPair != m_renamePairs.End(); ++itPair )
 		rDestFnames.push_back( GetDestFname( itPair ) );
 
 	if ( rDestFnames.size() > PickFilenameMaxCount )
@@ -100,15 +100,15 @@ std::auto_ptr<CPickDataset> CRenameService::MakeFnamePickDataset( void ) const
 
 std::auto_ptr<CPickDataset> CRenameService::MakeDirPickDataset( void ) const
 {
-	return std::auto_ptr<CPickDataset>( new CPickDataset( GetDestPath( m_renamePairs.begin() ) ) );
+	return std::auto_ptr<CPickDataset>( new CPickDataset( GetDestPath( m_renamePairs.Begin() ) ) );
 }
 
-fs::CPath CRenameService::GetDestPath( fs::TPathPairMap::const_iterator itPair )
+fs::CPath CRenameService::GetDestPath( CPathRenamePairs::const_iterator itPair )
 {
 	return itPair->second.IsEmpty() ? itPair->first : itPair->second;
 }
 
-std::tstring CRenameService::GetDestFname( fs::TPathPairMap::const_iterator itPair )
+std::tstring CRenameService::GetDestFname( CPathRenamePairs::const_iterator itPair )
 {
 	fs::CPathParts destParts;
 	ren::SplitPath( &destParts, &itPair->first, GetDestPath( itPair ) );

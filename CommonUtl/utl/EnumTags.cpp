@@ -33,8 +33,7 @@ void CEnumTags::AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag /*= NULL*/
 	ASSERT_PTR( uiTag );
 	m_uiTags.push_back( uiTag );
 
-	if ( !str::IsEmpty( pKeyTag ) )
-		m_keyTags.push_back( pKeyTag );
+	m_keyTags.push_back( !str::IsEmpty( pKeyTag ) ? pKeyTag : uiTag );
 
 	ENSURE( m_keyTags.empty() || m_keyTags.size() == m_uiTags.size() );		// key tags: all or none defined
 }

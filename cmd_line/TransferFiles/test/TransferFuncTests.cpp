@@ -6,6 +6,7 @@
 #include "utl/FileSystem.h"
 #include "utl/ProcessCmd.h"
 #include "utl/StringUtilities.h"
+#include "utl/test/TempFilePairPool.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

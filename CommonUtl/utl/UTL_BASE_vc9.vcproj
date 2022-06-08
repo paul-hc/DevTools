@@ -732,6 +732,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PathRenamePairs.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PathRenamePairs.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PathUniqueMaker.cpp"
 					>
 				</File>
@@ -1098,6 +1106,14 @@
 			</File>
 			<File
 				RelativePath=".\test\StructuredStorageTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TempFilePairPool.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TempFilePairPool.h"
 				>
 			</File>
 			<File

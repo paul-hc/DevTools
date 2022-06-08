@@ -262,29 +262,6 @@ namespace ut
 	};
 
 
-	// no physical files
-	//
-	struct CPathPairPool
-	{
-		CPathPairPool( void ) : m_fullDestPaths( false ) {}
-		CPathPairPool( const TCHAR* pSourceFilenames, bool fullDestPaths = false );
-
-		std::tstring JoinDest( void );
-		void CopySrc( void );
-	public:
-		fs::TPathPairMap m_pathPairs;
-		bool m_fullDestPaths;				// format DEST in JoinDest using full paths
-	};
-
-
-	// physical files managed in a temporary _UT directory
-	//
-	struct CTempFilePairPool : public CTempFilePool, public CPathPairPool
-	{
-		CTempFilePairPool( const TCHAR* pSourceFilenames );
-	};
-
-
 	std::tstring JoinFiles( const fs::CPathEnumerator& enumerator );
 	std::tstring JoinSubDirs( const fs::CPathEnumerator& enumerator );
 

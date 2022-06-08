@@ -57,8 +57,8 @@ namespace cmd
 		CTextLogSerializer( CCommandModel* pCommandModel ) : CLogSerializer( pCommandModel ), m_parseLineNo( 0 ) {}
 
 		// base overrides
-		virtual bool Save( const fs::CPath& undoLogPath );
-		virtual bool Load( const fs::CPath& undoLogPath );
+		virtual bool Save( const fs::CPath& undoLogPath ) override;
+		virtual bool Load( const fs::CPath& undoLogPath ) override;
 
 		void Save( std::ostream& os ) const;
 		void Load( std::istream& is );
@@ -86,8 +86,8 @@ namespace cmd
 		CBinaryLogSerializer( CCommandModel* pCommandModel ) : CLogSerializer( pCommandModel ) {}
 
 		// base overrides
-		virtual bool Save( const fs::CPath& undoLogPath );
-		virtual bool Load( const fs::CPath& undoLogPath );
+		virtual bool Save( const fs::CPath& undoLogPath ) override;
+		virtual bool Load( const fs::CPath& undoLogPath ) override;
 	private:
 		// serial::IStreamable interface
 		virtual void Save( CArchive& archive ) throws_( CException* );

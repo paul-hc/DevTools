@@ -8,8 +8,7 @@
 class CFileModel;
 
 
-abstract class CBaseChangeDestCmd
-	: public CCommand
+abstract class CBaseChangeDestCmd : public CCommand
 	, public cmd::IFileDetailsCmd
 {
 protected:
@@ -21,12 +20,12 @@ protected:
 	virtual bool ToggleExecute( void ) = 0;
 public:
 	// utl::IMessage overrides
-	virtual std::tstring Format( utl::Verbosity verbosity ) const;			// override for special formatting
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override;			// override for special formatting
 
 	// ICommand overrides
-	virtual bool Execute( void );
-	virtual bool Unexecute( void );
-	virtual bool IsUndoable( void ) const;
+	virtual bool Execute( void ) override;
+	virtual bool Unexecute( void ) override;
+	virtual bool IsUndoable( void ) const override;
 private:
 	std::tstring m_cmdTag;
 protected:
@@ -45,8 +44,8 @@ public:
 	virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
 private:
 	// base overrides
-	virtual ChangeType EvalChange( void ) const;
-	virtual bool ToggleExecute( void );
+	virtual ChangeType EvalChange( void ) const override;
+	virtual bool ToggleExecute( void ) override;
 private:
 	std::vector< fs::CPath > m_srcPaths;
 	std::vector< fs::CPath > m_destPaths;
@@ -66,8 +65,8 @@ public:
 	virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
 private:
 	// base overrides
-	virtual ChangeType EvalChange( void ) const;
-	virtual bool ToggleExecute( void );
+	virtual ChangeType EvalChange( void ) const override;
+	virtual bool ToggleExecute( void ) override;
 private:
 	std::vector< fs::CFileState > m_srcStates;
 	std::vector< fs::CFileState > m_destStates;
@@ -80,21 +79,21 @@ public:
 	CResetDestinationsCmd( CFileModel* pFileModel );
 
 	// utl::IMessage overrides
-	virtual std::tstring Format( utl::Verbosity verbosity ) const;			// override for special formatting
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override;			// override for special formatting
 };
 
 
 template< typename OptionsT >
-class CEditOptionsCmd : public CObjectPropertyCommand< OptionsT, OptionsT >
+class CEditOptionsCmd : public CObjectPropertyCommand<OptionsT, OptionsT>
 {
 public:
 	CEditOptionsCmd( OptionsT* pDestOptions, const OptionsT& newOptions )
-		: CObjectPropertyCommand< OptionsT, OptionsT >( cmd::EditOptions, pDestOptions, newOptions, &cmd::GetTags_CommandType() )
+		: CObjectPropertyCommand<OptionsT, OptionsT>( cmd::EditOptions, pDestOptions, newOptions, &cmd::GetTags_CommandType() )
 	{
 	}
 protected:
 	// base overrides
-	virtual bool DoExecute( void )
+	virtual bool DoExecute( void ) override
 	{
 		m_oldValue = *m_pObject;
 		*m_pObject = m_value;
@@ -103,10 +102,33 @@ protected:
 		return true;
 	}
 
-	virtual bool Unexecute( void )
+	virtual bool Unexecute( void ) override
 	{
 		return CEditOptionsCmd( m_pObject, m_oldValue ).Execute();
 	}
+};
+
+
+class CReportListControl;
+
+
+class COnRenameListSortedCmd : public CObjectCommand<CFileModel>
+{
+public:
+	COnRenameListSortedCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl );
+
+	CReportListControl* GetListCtrl( void ) const { return m_pFileListCtrl; }
+protected:
+	// base overrides
+	virtual bool DoExecute( void ) override;
+
+	virtual bool Unexecute( void ) override
+	{
+		ASSERT( false );
+		return false;
+	}
+private:
+	CReportListControl* m_pFileListCtrl;		// the listCtrl that was just sorted by user (clicked on colum header)
 };
 
 

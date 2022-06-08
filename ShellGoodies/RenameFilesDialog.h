@@ -81,7 +81,7 @@ private:
 	std::auto_ptr<CPickDataset> m_pPickDataset;
 private:
 	// enum { IDD = IDD_RENAME_FILES_DIALOG };
-	enum Page { ListPage, EditPage };
+	enum Page { ListSimplePage, ListDetailsPage, EditPage };
 
 	CLayoutChildPropertySheet m_filesSheet;
 

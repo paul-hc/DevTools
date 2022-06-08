@@ -627,6 +627,9 @@ namespace fs
 	interface IEnumerator;
 
 
+	typedef std::pair<fs::CPath, fs::CPath> TPathPair;
+
+
 	// orders path keys using path equivalence (rather than CPath::operator< intuitive ordering)
 	typedef std::map< fs::CPath, fs::CPath, pred::TLess_NaturalPath > TPathPairMap;
 	typedef std::set< fs::CPath, pred::TLess_NaturalPath > TPathSet;

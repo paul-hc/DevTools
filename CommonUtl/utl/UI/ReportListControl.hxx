@@ -2,6 +2,7 @@
 #define ReportListControl_hxx
 
 #include "utl/ContainerUtilities.h"
+#include "ReportListControl.h"
 
 
 // CReportListControl template code
@@ -14,7 +15,7 @@ void CReportListControl::QueryObjectsSequence( std::vector< ObjectT* >& rObjects
 	rObjects.reserve( count );
 
 	for ( UINT i = 0; i != count; ++i )
-		rObjects.push_back( GetPtrAt< ObjectT >( i ) );
+		rObjects.push_back( GetPtrAt<ObjectT>( i ) );
 }
 
 template< typename ObjectT >
@@ -23,7 +24,7 @@ void CReportListControl::QueryObjectsByIndex( std::vector< ObjectT* >& rObjects,
 	rObjects.reserve( rObjects.size() + itemIndexes.size() );
 
 	for ( std::vector< int >::const_iterator itIndex = itemIndexes.begin(); itIndex != itemIndexes.end(); ++itIndex )
-		if ( ObjectT* pObject = GetPtrAt< ObjectT >( *itIndex ) )
+		if ( ObjectT* pObject = GetPtrAt<ObjectT>( *itIndex ) )
 			rObjects.push_back( pObject );
 }
 
@@ -32,7 +33,7 @@ bool CReportListControl::QueryObjectsWithCheckedState( std::vector< ObjectT* >& 
 {
 	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
 		if ( GetCheckState( i ) == checkState )
-			rCheckedObjects.push_back( GetPtrAt< ObjectT >( i ) );
+			rCheckedObjects.push_back( GetPtrAt<ObjectT>( i ) );
 
 	return !rCheckedObjects.empty();
 }
@@ -41,7 +42,7 @@ template< typename ObjectT >
 void CReportListControl::SetObjectsCheckedState( const std::vector< ObjectT* >* pObjects, int checkState /*= BST_CHECKED*/, bool uncheckOthers /*= true*/ )
 {
 	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
-		if ( NULL == pObjects || utl::Contains( *pObjects, GetPtrAt< ObjectT >( i ) ) )
+		if ( NULL == pObjects || utl::Contains( *pObjects, GetPtrAt<ObjectT>( i ) ) )
 			ModifyCheckState( i, checkState );
 		else if ( uncheckOthers )
 			ModifyCheckState( i, BST_UNCHECKED );
@@ -52,14 +53,14 @@ template< typename ObjectT >
 ObjectT* CReportListControl::GetCaretAs( void ) const
 {
 	int caretIndex = GetCaretIndex();
-	return caretIndex != -1 ? GetPtrAt< ObjectT >( caretIndex ) : NULL;
+	return caretIndex != -1 ? GetPtrAt<ObjectT>( caretIndex ) : NULL;
 }
 
 template< typename ObjectT >
 ObjectT* CReportListControl::GetSelected( void ) const
 {
 	int selIndex = GetCurSel();
-	return selIndex != -1 ? GetPtrAt< ObjectT >( selIndex ) : NULL;
+	return selIndex != -1 ? GetPtrAt<ObjectT>( selIndex ) : NULL;
 }
 
 template< typename ObjectT >

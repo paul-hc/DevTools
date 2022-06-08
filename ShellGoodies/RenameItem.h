@@ -2,7 +2,8 @@
 #define RenameItem_h
 #pragma once
 
-#include "utl/PathItemBase.h"
+#include "utl/FileStateItem.h"
+#include "utl/PathRenamePairs.h"
 
 
 class CRenameItem;
@@ -10,9 +11,9 @@ class CRenameItem;
 
 namespace ren
 {
-	bool MakePairsFromItems( fs::TPathPairMap& rOutRenamePairs, const std::vector< CRenameItem* >& renameItems );
-	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs );
-	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const fs::TPathPairMap& renamePairs );
+	bool MakePairsFromItems( CPathRenamePairs* pOutRenamePairs, const std::vector< CRenameItem* >& renameItems );
+	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const CPathRenamePairs& renamePairs );
+	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const CPathRenamePairs& renamePairs );
 	void QueryDestFnames( std::vector< std::tstring >& rDestFnames, const std::vector< CRenameItem* >& items );
 
 	// special directory handling: treat ext as part of fname (no file type by extension)
@@ -20,7 +21,7 @@ namespace ren
 }
 
 
-class CRenameItem : public CPathItemBase
+class CRenameItem : public CFileStateItem
 {
 public:
 	CRenameItem( const fs::CPath& srcPath );
@@ -72,6 +73,20 @@ private:
 private:
 	bool m_ignoreExtension;
 };
+
+
+namespace func
+{
+	struct AsSrcPath
+	{
+		const fs::CPath& operator()( const CRenameItem* pItem ) const { return pItem->GetSrcPath(); }
+	};
+
+	struct AsDestPath
+	{
+		const fs::CPath& operator()( const CRenameItem* pItem ) const { return pItem->GetDestPath(); }
+	};
+}
 
 
 #endif // RenameItem_h

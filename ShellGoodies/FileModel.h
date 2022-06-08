@@ -28,9 +28,9 @@ namespace func
 
 
 class CFileModel : public CCmdTarget
-				 , public TSubject
-				 , public CInternalChange
-				 , private utl::noncopyable
+	, public TSubject
+	, public CInternalChange
+	, private utl::noncopyable
 {
 public:
 	CFileModel( svc::ICommandService* pCmdSvc );

@@ -13,8 +13,8 @@ class CPathGenerator : public CPathMaker
 {
 public:
 	CPathGenerator( const CPathFormatter& formatter, UINT seqCount, bool avoidDups = true );			// allocates internal file map, with ownership
-	CPathGenerator( fs::TPathPairMap* pOutRenamePairs, const CPathFormatter& formatter, UINT seqCount, bool avoidDups = true );
-	CPathGenerator( const fs::TPathPairMap& renamePairs, const CPathFormatter& formatter, UINT seqCount = 1, bool avoidDups = true );		// read-only; for FindNextAvailSeqCount()
+	CPathGenerator( CPathRenamePairs* pOutRenamePairs, const CPathFormatter& formatter, UINT seqCount, bool avoidDups = true );
+	CPathGenerator( const CPathRenamePairs& renamePairs, const CPathFormatter& formatter, UINT seqCount = 1, bool avoidDups = true );		// read-only; for FindNextAvailSeqCount()
 
 	const CPathFormatter& GetFormat( void ) const { return m_formatter; }
 	void SetMoveDestDirPath( const fs::CPath& moveDestDirPath );	// generate for moving to destDirPath

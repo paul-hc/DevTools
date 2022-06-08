@@ -14,8 +14,7 @@ namespace cmd
 	enum UserFeedback { Abort, Retry, Ignore };
 
 
-	class CFileMacroCmd
-		: public CObject
+	class CFileMacroCmd : public CObject
 		, public CMacroCommand
 		, public IPersistentCmd
 	{
@@ -26,19 +25,19 @@ namespace cmd
 		CFileMacroCmd( CommandType subCmdType, const CTime& timestamp = CTime::GetCurrentTime() );
 
 		// base overrides
-		virtual std::tstring Format( utl::Verbosity verbosity ) const;
-		virtual bool Execute( void );
-		virtual bool Unexecute( void );
+		virtual std::tstring Format( utl::Verbosity verbosity ) const override;
+		virtual bool Execute( void ) override;
+		virtual bool Unexecute( void ) override;
 
 		// cmd::IPersistentCmd
-		virtual bool IsValid( void ) const;
-		virtual const CTime& GetTimestamp( void ) const;
+		virtual bool IsValid( void ) const override;
+		virtual const CTime& GetTimestamp( void ) const override;
 
 		// cmd::IFileDetailsCmd
-		virtual size_t GetFileCount( void ) const;
-		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
+		virtual size_t GetFileCount( void ) const override;
+		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const override;
 
-		virtual void Serialize( CArchive& archive );
+		virtual void Serialize( CArchive& archive ) override;
 	private:
 		enum Mode { ExecuteMode, UnexecuteMode };
 
@@ -58,7 +57,7 @@ namespace cmd
 		void ExecuteHandle( void ) throws_( CUserFeedbackException );
 
 		// base overrides
-		virtual bool Unexecute( void );
+		virtual bool Unexecute( void ) override;
 		virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const = 0;
 	private:
 		UserFeedback HandleFileError( CException* pExc, const fs::CPath& srcPath ) const;
@@ -81,13 +80,13 @@ public:
 	virtual ~CRenameFileCmd();
 
 	// ICommand interface
-	virtual std::tstring Format( utl::Verbosity verbosity ) const;
-	virtual bool Execute( void );
-	virtual bool IsUndoable( void ) const;
-	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const;
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
+	virtual bool Execute( void ) override;
+	virtual bool IsUndoable( void ) const override;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const override;
 
 	// base overrides
-	virtual void Serialize( CArchive& archive );
+	virtual void Serialize( CArchive& archive ) override;
 public:
 	persist fs::CPath m_destPath;
 };
@@ -106,13 +105,13 @@ public:
 	virtual ~CTouchFileCmd();
 
 	// ICommand interface
-	virtual std::tstring Format( utl::Verbosity verbosity ) const;
-	virtual bool Execute( void );
-	virtual bool IsUndoable( void ) const;
-	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const;
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
+	virtual bool Execute( void ) override;
+	virtual bool IsUndoable( void ) const override;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const override;
 
 	// base overrides
-	virtual void Serialize( CArchive& archive );
+	virtual void Serialize( CArchive& archive ) override;
 public:
 	persist fs::CFileState m_srcState;
 	persist fs::CFileState m_destState;
