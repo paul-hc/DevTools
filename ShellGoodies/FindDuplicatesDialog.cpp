@@ -446,9 +446,9 @@ void CFindDuplicatesDialog::SetupDialog( void )
 
 void CFindDuplicatesDialog::SetupPathsListItems( CPathItemListCtrl* pPathsListCtrl, const std::vector< CPathItem* >& pathItems )
 {
-	CScopedListTextSelection sel( pPathsListCtrl );
-	CScopedLockRedraw freeze( pPathsListCtrl );
 	CScopedInternalChange internalChange( pPathsListCtrl );
+	lv::TScopedStatus_ByText sel( pPathsListCtrl );
+	CScopedLockRedraw freeze( pPathsListCtrl );
 
 	pPathsListCtrl->DeleteAllItems();
 
@@ -518,10 +518,9 @@ void CFindDuplicatesDialog::PushNewPathsListItems( CPathItemListCtrl* pPathsList
 
 void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 {
-	CScopedListTextSelection sel( &m_dupsListCtrl );
-
-	CScopedLockRedraw freeze( &m_dupsListCtrl );
 	CScopedInternalChange internalChange( &m_dupsListCtrl );
+	lv::TScopedStatus_ByText sel( &m_dupsListCtrl );
+	CScopedLockRedraw freeze( &m_dupsListCtrl );
 
 	m_dupsListCtrl.DeleteAllItems();
 	m_dupsListCtrl.RemoveAllGroups();

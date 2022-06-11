@@ -39,21 +39,22 @@ public:
 	CDisplayFilenameAdapter* GetDisplayFilenameAdapter( void ) { return m_pDisplayFilenameAdapter.get(); }
 protected:
 	// IFileEditor interface (partial)
-	virtual void PostMakeDest( bool silent = false );
-	virtual void PopStackTop( svc::StackType stackType );
+	virtual void PostMakeDest( bool silent = false ) override;
+	virtual void PopStackTop( svc::StackType stackType ) override;
 
 	// utl::IObserver interface (via IFileEditor)
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 
 	// cmd::IErrorObserver interface (via IFileEditor)
-	virtual void ClearFileErrors( void );
-	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
+	virtual void ClearFileErrors( void ) override;
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
-	virtual void SwitchMode( Mode mode );
+	virtual void SwitchMode( Mode mode ) override;
 private:
+	void UpdateFormatLabel( void );
 	void CommitLocalEdits( void );
 
 	void AutoGenerateFiles( void );
@@ -66,6 +67,7 @@ private:
 	std::tstring GetSelFindWhat( void ) const;
 
 	CPathFormatter InputRenameFormatter( bool checkConsistent ) const;
+	bool IsFormatExtConsistent( void ) const;
 
 	bool GenerateDestPaths( const CPathFormatter& pathFormatter, UINT* pSeqCount );
 	void ReplaceFormatEditText( const std::tstring& text );
@@ -74,9 +76,10 @@ private:
 	std::auto_ptr<CRenameService> m_pRenSvc;
 	bool m_isInitialized;
 
-	bool m_autoGenerate;
-	bool m_seqCountAutoAdvance;
-	bool m_ignoreExtension;				// "Show Extension" checkbox has inverted logic
+	persist bool m_autoGenerate;
+	persist bool m_seqCountAutoAdvance;
+	persist bool m_ignoreExtension;				// "Show Extension" checkbox has inverted logic
+	persist UINT m_prevGenSeqCount;				// used in certain cases to roll-back sequence advance on generation
 
 	std::auto_ptr<CDisplayFilenameAdapter> m_pDisplayFilenameAdapter;
 	std::auto_ptr<CPickDataset> m_pPickDataset;
@@ -86,24 +89,26 @@ private:
 
 	CLayoutChildPropertySheet m_filesSheet;
 
-	CHostToolbarCtrl<CHistoryComboBox> m_formatCombo;
+	persist CHostToolbarCtrl<CHistoryComboBox> m_formatCombo;
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
+	CFrameHostCtrl<CButton> m_showExtButton;
 	CEnumComboBox m_sortOrderCombo;
 	CSplitPushButton m_capitalizeButton;
-	CEnumSplitButton m_changeCaseButton;
-	CHistoryComboBox m_delimiterSetCombo;
-	CTextEdit m_newDelimiterEdit;
+	persist CEnumSplitButton m_changeCaseButton;
+	persist CHistoryComboBox m_delimiterSetCombo;
+	persist CTextEdit m_newDelimiterEdit;
 	CThemeStatic m_delimStatic;
 	CPickMenuStatic m_pickRenameActionsStatic;
 
 	// generated stuff
 protected:
-	virtual void DoDataExchange( CDataExchange* pDX );
-	virtual BOOL OnInitDialog( void );
+	virtual void DoDataExchange( CDataExchange* pDX ) override;
+	virtual BOOL OnInitDialog( void ) override;
 protected:
-	virtual void OnOK( void );
+	virtual void OnOK( void ) override;
 	afx_msg void OnDestroy( void );
+	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColorType );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
 	afx_msg void OnChanged_Format( void );
@@ -112,8 +117,8 @@ protected:
 	afx_msg void OnUpdateSeqCountReset( CCmdUI* pCmdUI );
 	afx_msg void OnSeqCountFindNext( void );
 	afx_msg void OnUpdateSeqCountFindNext( CCmdUI* pCmdUI );
-	afx_msg void OnSeqCountAutoAdvance( void );
-	afx_msg void OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_SeqCountAutoAdvance( void );
+	afx_msg void OnUpdate_SeqCountAutoAdvance( CCmdUI* pCmdUI );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnToggle_ShowExtension( void );
 	afx_msg void OnCbnSelChange_SortOrder( void );
@@ -131,8 +136,8 @@ protected:
 	afx_msg void OnFormatTextToolPicked( UINT menuId );
 	afx_msg void OnGenerateNow( void );
 	afx_msg void OnUpdateGenerateNow( CCmdUI* pCmdUI );
-	afx_msg void OnToggleAutoGenerate( void );
-	afx_msg void OnUpdateAutoGenerate( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_AutoGenerate( void );
+	afx_msg void OnUpdate_AutoGenerate( CCmdUI* pCmdUI );
 	afx_msg void OnNumericSequence( UINT cmdId );
 	afx_msg void OnBnClicked_PickRenameActions( void );
 	afx_msg void OnChangeDestPathsTool( UINT menuId );

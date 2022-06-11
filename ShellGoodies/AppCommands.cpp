@@ -32,7 +32,8 @@ namespace cmd
 			s_tags.AddTagPair( _T("Change Destination File States"), _T("CHANGE_DEST_FILE_STATES") );
 			s_tags.AddTagPair( _T("Reset Destinations"), _T("RESET_DESTINATIONS") );
 			s_tags.AddTagPair( _T("Edit"), _T("EDIT") );
-			s_tags.AddTagPair( _T("OnListSorted") );
+			s_tags.AddTagPair( _T("SortRenameItems") );
+			s_tags.AddTagPair( _T("OnRenameListSelChanged") );
 			s_tags.AddTagPair( _T("Undelete Files"), _T("UNDELETE_FILES") );
 		}
 		return s_tags;

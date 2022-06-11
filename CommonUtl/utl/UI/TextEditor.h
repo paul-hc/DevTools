@@ -24,7 +24,7 @@ private:
 	CAccelTable m_editorAccel;
 
 	// generated stuff
-	public:
+public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );

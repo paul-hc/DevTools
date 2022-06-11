@@ -28,6 +28,8 @@ public:
 
 	template<>
 	bool GetEnum<bool>( void ) const { return GetValue() != 0; }
+
+	const CEnumTags* GetTags( void ) const { return m_pEnumTags; }
 protected:
 	// hidden methods (use specialized getters & setters)
 	using CComboBox::GetCurSel;

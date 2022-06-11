@@ -45,7 +45,7 @@ public:
 	virtual void UpdateAllObservers( utl::IMessage* pMessage )
 	{
 		for ( std::vector< utl::IObserver* >::const_iterator itObserver = m_observers.begin(); itObserver != m_observers.end(); ++itObserver )
-			( *itObserver )->OnUpdate( this, pMessage );
+			(*itObserver)->OnUpdate( this, pMessage );
 	}
 private:
 	std::vector< utl::IObserver* > m_observers;

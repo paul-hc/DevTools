@@ -2553,39 +2553,156 @@ const str::TMatchSequence* CReportListControl::CDiffColumnPair::FindRowSequence(
 }
 
 
-// CScopedListTextSelection implementation
-
-CScopedListTextSelection::CScopedListTextSelection( CReportListControl* pListCtrl )
-	: m_pListCtrl( pListCtrl )
+namespace lv
 {
-	ASSERT_PTR( m_pListCtrl );
+	// TScopedStatus_ByIndex aka CScopedStatus<int> - by-index explicit template instantiation
 
-	int caretIndex;
-	std::vector< int > selIndexes;
-	m_pListCtrl->GetSelection( selIndexes, &caretIndex );
-
-	m_pListCtrl->QueryItemsText( m_selTexts, selIndexes );
-	if ( caretIndex != -1 )
-		m_caretText = m_pListCtrl->GetItemText( caretIndex, 0 ).GetString();
-}
-
-CScopedListTextSelection::~CScopedListTextSelection()
-{
-	std::vector< int > selIndexes;
-	selIndexes.reserve( m_selTexts.size() );
-	for ( std::vector< std::tstring >::const_iterator itSelText = m_selTexts.begin(); itSelText != m_selTexts.end(); ++itSelText )
+	template<>
+	TScopedStatus_ByIndex::CScopedStatus( CReportListControl* pListCtrl, bool useTopItem /*= false*/ )
+		: m_pListCtrl( pListCtrl )
+		, m_topVisibleItem( -1 )
+		, m_caretItem( -1 )
 	{
-		int foundIndex = m_pListCtrl->FindItemIndex( *itSelText );
-		if ( foundIndex != -1 )
-			selIndexes.push_back( foundIndex );
+		ASSERT_PTR( m_pListCtrl->GetSafeHwnd() );
+
+		if ( m_pListCtrl->GetItemCount() != 0 )
+		{
+			m_pListCtrl->GetSelection( m_selItems, &m_caretItem, &m_topVisibleItem );
+
+			if ( !useTopItem )
+				m_topVisibleItem = -1;
+		}
 	}
-	std::sort( selIndexes.begin(), selIndexes.end() );
 
-	int caretIndex = !m_caretText.empty() ? m_pListCtrl->FindItemIndex( m_caretText ) : -1;
+	template<>
+	void TScopedStatus_ByIndex::Restore( void )
+	{
+		if ( m_pListCtrl != NULL && m_pListCtrl->GetItemCount() != 0 )
+		{
+			//CScopedInternalChange internalChange( m_pListCtrl );
+			m_pListCtrl->SetSelection( m_selItems, m_caretItem );
 
-	CScopedInternalChange internalChange( m_pListCtrl );
-	m_pListCtrl->SetSelection( selIndexes, caretIndex );			// internal change
-}
+			if ( m_topVisibleItem != -1 )
+				m_pListCtrl->EnsureVisible( m_topVisibleItem, FALSE );
+		}
+
+		m_pListCtrl = NULL;
+	}
+
+
+	// TScopedStatus_ByObject aka CScopedStatus<utl::ISubject*> - by-object explicit template instantiation
+
+	template<>
+	TScopedStatus_ByObject::CScopedStatus( CReportListControl* pListCtrl, bool useTopItem /*= false*/ )
+		: m_pListCtrl( pListCtrl )
+		, m_topVisibleItem( NULL )
+		, m_caretItem( NULL )
+	{
+		ASSERT_PTR( m_pListCtrl->GetSafeHwnd() );
+
+		if ( m_pListCtrl->GetItemCount() != 0 )
+		{
+			REQUIRE( m_pListCtrl->IsObjectBased() || 0 == m_pListCtrl->GetItemCount() );
+
+			if ( useTopItem )
+			{
+				int topIndex = m_pListCtrl->GetTopIndex();
+				if ( topIndex != -1 )
+					m_topVisibleItem = m_pListCtrl->GetSubjectAt( topIndex );
+			}
+
+			m_caretItem = m_pListCtrl->GetCaretAs<utl::ISubject>();
+			m_pListCtrl->QuerySelectionAs( m_selItems );
+		}
+	}
+
+	template<>
+	void TScopedStatus_ByObject::Restore( void )
+	{
+		if ( m_pListCtrl != NULL && m_pListCtrl->GetItemCount() != 0 )
+		{
+			//CScopedInternalChange internalChange( m_pListCtrl );
+
+			if ( m_pListCtrl->IsMultiSelectionList() )
+				m_pListCtrl->SelectObjects( m_selItems );
+			else if ( 1 == m_selItems.size() )
+				m_pListCtrl->Select( m_selItems.front() );
+
+			if ( m_caretItem != NULL && m_caretItem != m_pListCtrl->GetCaretAs<utl::ISubject>() )
+			{
+				int caretIndex = m_pListCtrl->FindItemIndex( m_caretItem );
+				if ( caretIndex != -1 )
+					m_pListCtrl->SetCaretIndex( caretIndex );
+			}
+
+			if ( m_topVisibleItem != NULL )
+				m_pListCtrl->EnsureVisibleObject( m_topVisibleItem );
+		}
+
+		m_pListCtrl = NULL;
+	}
+
+
+	// TScopedStatus_ByText aka CScopedStatus<std::tstring> - by-text explicit template instantiation
+
+	template<>
+	TScopedStatus_ByText::CScopedStatus( CReportListControl* pListCtrl, bool useTopItem /*= false*/ )
+		: m_pListCtrl( pListCtrl )
+	{
+		ASSERT_PTR( m_pListCtrl->GetSafeHwnd() );
+
+		if ( m_pListCtrl->GetItemCount() != 0 )
+		{
+			if ( useTopItem )
+			{
+				int topIndex = m_pListCtrl->GetTopIndex();
+				if ( topIndex != -1 )
+					m_topVisibleItem = m_pListCtrl->GetItemText( topIndex, 0 ).GetString();
+			}
+
+			int caretIndex;
+			std::vector< int > selIndexes;
+
+			m_pListCtrl->GetSelection( selIndexes, &caretIndex );
+			m_pListCtrl->QueryItemsText( m_selItems, selIndexes );
+
+			if ( caretIndex != -1 )
+				m_caretItem = m_pListCtrl->GetItemText( caretIndex, 0 ).GetString();
+		}
+	}
+
+	template<>
+	void TScopedStatus_ByText::Restore( void )
+	{
+		if ( m_pListCtrl != NULL && m_pListCtrl->GetItemCount() != 0 )
+		{
+			//CScopedInternalChange internalChange( m_pListCtrl );
+
+			std::vector< int > selIndexes;
+			selIndexes.reserve( m_selItems.size() );
+			for ( std::vector< std::tstring >::const_iterator itSelText = m_selItems.begin(); itSelText != m_selItems.end(); ++itSelText )
+			{
+				int foundIndex = m_pListCtrl->FindItemIndex( *itSelText );
+				if ( foundIndex != -1 )
+					selIndexes.push_back( foundIndex );
+			}
+			std::sort( selIndexes.begin(), selIndexes.end() );
+
+			int caretIndex = !m_caretItem.empty() ? m_pListCtrl->FindItemIndex( m_caretItem ) : -1;
+			m_pListCtrl->SetSelection( selIndexes, caretIndex );
+
+			if ( !m_topVisibleItem.empty() )
+			{
+				int topIndex = m_pListCtrl->FindItemIndex( m_topVisibleItem );
+				if ( topIndex != -1 )
+					m_pListCtrl->EnsureVisible( topIndex, FALSE );
+			}
+		}
+
+		m_pListCtrl = NULL;
+	}
+
+} //namespace lv
 
 
 // CSelFlowSequence implementation

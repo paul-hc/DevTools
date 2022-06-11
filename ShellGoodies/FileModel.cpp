@@ -32,8 +32,8 @@
 
 namespace reg
 {
-	static const TCHAR entry_renameOrder[] = _T("RenameOrder");
-	static const TCHAR entry_renameOrderAscending[] = _T("RenameOrderAscending");
+	static const TCHAR entry_sortBy[] = _T("SortBy");
+	static const TCHAR entry_sortAscending[] = _T("SortAscending");
 }
 
 
@@ -41,18 +41,18 @@ const std::tstring CFileModel::section_filesSheet = _T("RenameDialog\\FilesSheet
 
 CFileModel::CFileModel( svc::ICommandService* pCmdSvc )
 	: m_pCmdSvc( pCmdSvc )
-	, m_renameSorting( ren::SrcPathDirsFirst, true )
+	, m_renameSorting( ren::RecordDefault, true )
 {
 	ASSERT_PTR( m_pCmdSvc );
 
-	m_renameSorting.first = static_cast<ren::SortBy>( AfxGetApp()->GetProfileInt( section_filesSheet.c_str(), reg::entry_renameOrder, m_renameSorting.first ) );
-	m_renameSorting.second = AfxGetApp()->GetProfileInt( section_filesSheet.c_str(), reg::entry_renameOrderAscending, m_renameSorting.second ) != FALSE;
+	m_renameSorting.first = static_cast<ren::SortBy>( AfxGetApp()->GetProfileInt( section_filesSheet.c_str(), reg::entry_sortBy, m_renameSorting.first ) );
+	m_renameSorting.second = AfxGetApp()->GetProfileInt( section_filesSheet.c_str(), reg::entry_sortAscending, m_renameSorting.second ) != FALSE;
 }
 
 CFileModel::~CFileModel()
 {
-	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_renameOrder, m_renameSorting.first );
-	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_renameOrderAscending, m_renameSorting.second );
+	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortBy, m_renameSorting.first );
+	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortAscending, m_renameSorting.second );
 
 	Clear();
 }

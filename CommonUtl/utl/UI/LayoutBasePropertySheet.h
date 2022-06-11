@@ -4,6 +4,7 @@
 
 #include <afxdlgs.h>
 #include "Dialog_fwd.h"
+#include "utl/Subject.h"
 
 
 class CLayoutPropertyPage;
@@ -13,7 +14,8 @@ namespace utl { interface ICommandExecutor; }
 
 
 abstract class CLayoutBasePropertySheet : public CPropertySheet
-										, public ui::ICustomCmdInfo
+	, public TSubject
+	, public ui::ICustomCmdInfo
 {
 	friend class CScopedApplyMacroCmd;
 
@@ -59,6 +61,9 @@ public:
 
 	CToolTipCtrl* GetSheetTooltip( void ) const { return m_pTooltipCtrl.get(); }
 
+	// utl::ISubject interface (partial)
+	virtual const std::tstring& GetCode( void ) const override { return m_titleCode; }
+
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
@@ -79,6 +84,7 @@ protected:
 	void RegisterTabTooltips( void );
 private:
 	UINT m_initialPageIndex;						// force initial page activation (otherwise uses the one saved in registry, or default)
+	std::tstring m_titleCode;
 protected:
 	std::auto_ptr<CMacroCommand> m_pApplyMacroCmd;	// used optionally for Apply
 	utl::ICommandExecutor* m_pCommandExecutor;		// to execute Apply macro
@@ -93,9 +99,9 @@ public:
 
 	// generated stuff
 public:
-	virtual void BuildPropPageArray( void );
-	virtual BOOL PreTranslateMessage( MSG* pMsg );
-	virtual BOOL OnInitDialog( void );
+	virtual void BuildPropPageArray( void ) override;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
+	virtual BOOL OnInitDialog( void ) override;
 protected:
 	virtual void OnDestroy( void );
 	virtual void OnSize( UINT sizeType, int cx, int cy );

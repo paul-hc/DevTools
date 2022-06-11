@@ -570,10 +570,10 @@ void CPathTests::TestPathCompareFind( void )
 		ASSERT( !( windowsPath < unixPath ) );
 		ASSERT( !( unixPath < windowsPath ) );
 
-		ASSERT( windowsPath.HasExt( _T(".EXT") ) );
-		ASSERT( windowsPath.HasExt( _T(".ext") ) );
-		ASSERT( windowsPath.HasExt( _T(".ExT") ) );
-		ASSERT( !windowsPath.HasExt( _T(".extx") ) );
+		ASSERT( windowsPath.ExtEquals( _T(".EXT") ) );
+		ASSERT( windowsPath.ExtEquals( _T(".ext") ) );
+		ASSERT( windowsPath.ExtEquals( _T(".ExT") ) );
+		ASSERT( !windowsPath.ExtEquals( _T(".extx") ) );
 	}
 	{
 		path::TGetMatch getMatchFunc;

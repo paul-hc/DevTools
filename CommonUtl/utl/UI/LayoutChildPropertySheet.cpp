@@ -53,7 +53,7 @@ void CLayoutChildPropertySheet::CreateChildSheet( CWnd* pParent )
 	VERIFY( Create( pParent, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN, WS_EX_CONTROLPARENT ) );
 }
 
-CButton* CLayoutChildPropertySheet::GetSheetButton( UINT buttonId ) const
+CButton* CLayoutChildPropertySheet::GetSheetButton( UINT buttonId ) const override
 {
 	if ( CButton* pSheetButton = (CButton*)GetParent()->GetDlgItem( buttonId ) )		// usually parent has the button
 		return pSheetButton;
@@ -73,7 +73,7 @@ CRect CLayoutChildPropertySheet::GetTabControlRect( void )
 	return tabRect;
 }
 
-void CLayoutChildPropertySheet::LayoutSheet( void )
+void CLayoutChildPropertySheet::LayoutSheet( void ) override
 {
 	if ( CTabCtrl* pTabCtrl = GetTabControl() )
 	{
@@ -98,7 +98,7 @@ BEGIN_MESSAGE_MAP( CLayoutChildPropertySheet, CLayoutBasePropertySheet )
 	ON_COMMAND_RANGE( ID_NEXT_PANE, ID_PREV_PANE, OnNavigatePage )
 END_MESSAGE_MAP()
 
-BOOL CLayoutChildPropertySheet::PreTranslateMessage( MSG* pMsg )
+BOOL CLayoutChildPropertySheet::PreTranslateMessage( MSG* pMsg ) override
 {
 	if ( m_accel.Translate( pMsg, m_hWnd ) )
 		return TRUE;

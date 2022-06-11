@@ -1003,7 +1003,7 @@ namespace fs
 	{
 		if ( impl::GetDotExtCount( *this ) != impl::GetDotExtCount( right ) )
 			return MismatchDotsExt;
-		else if ( !HasExt( right.GetExt() ) )		// ignore case changes
+		else if ( !ExtEquals( right.GetExt() ) )		// ignore case changes
 			return MismatchExt;
 		else if ( std::tstring( GetExt() ) != std::tstring( right.GetExt() ) )
 			return MatchDiffCaseExt;

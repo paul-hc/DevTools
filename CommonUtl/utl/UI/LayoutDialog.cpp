@@ -73,22 +73,22 @@ bool CLayoutDialog::CreateModeless( UINT templateId /*= 0*/, CWnd* pParentWnd /*
 	return true;
 }
 
-CLayoutEngine& CLayoutDialog::GetLayoutEngine( void )
+CLayoutEngine& CLayoutDialog::GetLayoutEngine( void ) override
 {
 	return *m_pLayoutEngine;
 }
 
-void CLayoutDialog::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count )
+void CLayoutDialog::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override
 {
 	m_pLayoutEngine->RegisterCtrlLayout( layoutStyles, count );
 }
 
-bool CLayoutDialog::HasControlLayout( void ) const
+bool CLayoutDialog::HasControlLayout( void ) const override
 {
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
-void CLayoutDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CLayoutDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
 {
 	rText, cmdId, pTooltip;
 }
@@ -296,7 +296,7 @@ void CLayoutDialog::OnIdleUpdateControls( void )
 	SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, m_idleUpdateDeep, TRUE );			// update dialog toolbars
 }
 
-void CLayoutDialog::PreSubclassWindow( void )
+void CLayoutDialog::PreSubclassWindow( void ) override
 {
 	TMfcBaseDialog::PreSubclassWindow();
 
@@ -304,7 +304,7 @@ void CLayoutDialog::PreSubclassWindow( void )
 		CPopupWndPool::Instance()->AddWindow( this );
 }
 
-void CLayoutDialog::PostNcDestroy( void )
+void CLayoutDialog::PostNcDestroy( void ) override
 {
 	TMfcBaseDialog::PostNcDestroy();
 
@@ -312,7 +312,7 @@ void CLayoutDialog::PostNcDestroy( void )
 		delete this;
 }
 
-void CLayoutDialog::DoDataExchange( CDataExchange* pDX )
+void CLayoutDialog::DoDataExchange( CDataExchange* pDX ) override
 {
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		if ( !m_pLayoutEngine->IsInitialized() )
@@ -335,7 +335,7 @@ void CLayoutDialog::DoDataExchange( CDataExchange* pDX )
 	__super::DoDataExchange( pDX );
 }
 
-BOOL CLayoutDialog::DestroyWindow( void )
+BOOL CLayoutDialog::DestroyWindow( void ) override
 {
 	// fix for app losing activation when destroying the modeless dialog: https://stackoverflow.com/questions/3144004/wpf-app-loses-completely-focus-on-window-close
 	if ( IsModeless() && m_hWnd != NULL )
@@ -345,14 +345,14 @@ BOOL CLayoutDialog::DestroyWindow( void )
 	return __super::DestroyWindow();
 }
 
-BOOL CLayoutDialog::PreTranslateMessage( MSG* pMsg )
+BOOL CLayoutDialog::PreTranslateMessage( MSG* pMsg ) override
 {
 	return
 		m_accelPool.TranslateAccels( pMsg, m_hWnd ) ||
 		__super::PreTranslateMessage( pMsg );
 }
 
-BOOL CLayoutDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+BOOL CLayoutDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
 {
 	return
 		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
@@ -386,7 +386,7 @@ void CLayoutDialog::OnDestroy( void )
 	TMfcBaseDialog::OnDestroy();
 }
 
-void CLayoutDialog::OnOK( void )
+void CLayoutDialog::OnOK( void ) override
 {
 	if ( IsModeless() )
 	{
@@ -397,7 +397,7 @@ void CLayoutDialog::OnOK( void )
 		__super::OnOK();
 }
 
-void CLayoutDialog::OnCancel( void )
+void CLayoutDialog::OnCancel( void ) override
 {
 	if ( IsModeless() )
 		DestroyWindow();

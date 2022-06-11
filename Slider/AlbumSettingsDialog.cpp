@@ -226,7 +226,7 @@ void CAlbumSettingsDialog::SetupPatternsListView( void )
 void CAlbumSettingsDialog::SetupFoundImagesListView( void )
 {
 	CWaitCursor wait;
-	CScopedListTextSelection scopedSel( &m_imagesListCtrl );
+	lv::TScopedStatus_ByText scopedSel( &m_imagesListCtrl );
 
 	size_t count = m_model.GetFileAttrCount();
 	{

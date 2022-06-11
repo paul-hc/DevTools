@@ -5,7 +5,7 @@
 #include "ui_fwd.h"
 #include "AccelTable.h"
 #include "ItemContent.h"
-#include "BaseFrameHostCtrl.h"
+#include "FrameHostCtrl.h"
 
 
 #define ON_HCN_VALIDATEITEMS( id, memberFxn )		ON_CONTROL( CHistoryComboBox::HCN_VALIDATEITEMS, id, memberFxn )
@@ -15,10 +15,10 @@ class CComboDropList;
 class CTextEditor;
 
 
-class CHistoryComboBox : public CBaseFrameHostCtrl<CComboBox>
+class CHistoryComboBox : public CFrameHostCtrl<CComboBox>
 					   , public ui::IContentValidator
 {
-	typedef CBaseFrameHostCtrl<CComboBox> TBaseClass;
+	typedef CFrameHostCtrl<CComboBox> TBaseClass;
 public:
 	enum NotifCode { HCN_VALIDATEITEMS = CBN_SELENDCANCEL + 10 };		// note: notifications are suppressed during parent's UpdateData()
 	enum InternalCmds { Cmd_ResetDropSelIndex = 350 };

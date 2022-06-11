@@ -1270,14 +1270,6 @@
 				Name="Controls"
 				>
 				<File
-					RelativePath=".\BaseFrameHostCtrl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseFrameHostCtrl.hxx"
-					>
-				</File>
-				<File
 					RelativePath=".\BaseItemTooltipsCtrl.h"
 					>
 				</File>
@@ -1419,6 +1411,14 @@
 				</File>
 				<File
 					RelativePath=".\EnumSplitButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FrameHostCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FrameHostCtrl.hxx"
 					>
 				</File>
 				<File

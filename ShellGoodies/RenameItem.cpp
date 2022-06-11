@@ -43,7 +43,7 @@ namespace ren
 		{
 			CRenameItem* pItem = items[ pos ];
 
-			if ( pItem->GetSrcPath() == itPair->first )			// both containers must be in the same order
+			if ( pItem->GetSrcPath() == itPair->first )			// both containers must share the same order
 				pItem->RefDestPath() = itPair->second;
 			else
 			{
@@ -144,7 +144,7 @@ fs::CPath CDisplayFilenameAdapter::ParsePath( const std::tstring& inputPath, con
 {
 	fs::CPath filePath( inputPath );
 
-	if ( m_ignoreExtension && !filePath.HasExt( referencePath.GetExt() ) )		// avoid doubling the same extension
+	if ( m_ignoreExtension && !filePath.ExtEquals( referencePath.GetExt() ) )		// avoid doubling the same extension
 		filePath.Set( filePath.Get() + referencePath.GetExt() );
 
 	if ( !filePath.HasParentPath() )

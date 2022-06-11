@@ -37,12 +37,84 @@ public:
 	void ResetDestPaths( void );
 	void CopySrcToDestPaths( void );
 	void CopyDestPaths( const std::vector< fs::CPath >& destPaths );		// assume destPaths is in same order as m_pairs
+
+	// SRC setup
+	template< typename PairContainer >
+	void StoreSrcFromPairs( const PairContainer& srcPairs );
+
+	template< typename Container >
+	void StoreSrcFromPaths( const Container& srcPaths );
+
+	// DEST query
+	template< typename PairContainer >
+	void QueryDestToPairs( PairContainer& rDestPairs ) const;
+
+	template< typename Container >
+	void QueryDestToPaths( Container& rDestPaths ) const;
+
+	template< typename Func >
+	Func ForEachDestPath( Func func );
 private:
 	bool IsConsistent( void ) const { return m_pairs.size() == m_pathToIndexMap.size(); }
 private:
 	TPairVector m_pairs;										// maintains the order for sequence generation
 	stdext::hash_map< fs::CPath, size_t > m_pathToIndexMap;		// map src -> m_pairs.index
 };
+
+
+// CPathRenamePairs template methods
+
+template< typename PairContainer >
+void CPathRenamePairs::StoreSrcFromPairs( const PairContainer& srcPairs )
+{
+	Clear();
+	for ( typename PairContainer::const_iterator it = srcPairs.begin(); it != srcPairs.end(); ++it )
+		AddSrc( fs::traits::GetPath( it->first ) );
+}
+
+template< typename Container >
+void CPathRenamePairs::StoreSrcFromPaths( const Container& srcPaths )
+{
+	Clear();
+	for ( typename Container::const_iterator it = srcPaths.begin(); it != srcPaths.end(); ++it )
+		AddSrc( fs::traits::GetPath( *it ) );
+}
+
+template< typename PairContainer >
+void CPathRenamePairs::QueryDestToPairs( PairContainer& rDestPairs ) const
+{	// copy dest paths from map to the vector-like PairContainer
+	ASSERT( m_pairs.size() == rDestPairs.size() );			// ensure we don't have extra duplicates in rDestPairs
+
+	for ( typename PairContainer::iterator itDestPair = rDestPairs.begin(); itDestPair != rDestPairs.end(); ++itDestPair )
+	{
+		const fs::CPath* pDestPath = FindDestPath( itDestPair->first );
+		ASSERT_PTR( pDestPath );
+		itDestPair->second.Set( pDestPath->Get() );		// may convert from fs::CPath to fs::CFlexPath, if PairContainer uses fs::CFlexPath
+	}
+}
+
+template< typename Container >
+void CPathRenamePairs::QueryDestToPaths( Container& rDestPaths ) const
+{	// copy dest paths from map to the vector-like Container using path adapters
+	ASSERT( m_pairs.size() == rDestPaths.size() );
+
+	for ( typename Container::iterator itDestPath = rDestPaths.begin(); itDestPath != rDestPaths.end(); ++itDestPath )
+	{
+		const fs::CPath* pDestPath = FindDestPath( fs::traits::GetPath( *itDestPath ) );
+		ASSERT_PTR( pDestPath );
+
+		fs::traits::SetPath( *itDestPath, pDestPath->Get() );
+	}
+}
+
+template< typename Func > inline
+Func CPathRenamePairs::ForEachDestPath( Func func )
+{
+	for ( TPairVector::iterator it = m_pairs.begin(); it != m_pairs.end(); ++it )
+		func( it->second );
+
+	return func;
+}
 
 
 #endif // PathRenamePairs_h

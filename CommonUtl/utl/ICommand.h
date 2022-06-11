@@ -15,8 +15,7 @@ namespace utl
 	const CEnumTags& GetTags_ExecMode( void );
 
 
-	interface ICommand
-		: public utl::IMemoryManaged
+	interface ICommand : public utl::IMemoryManaged
 		, public IMessage
 	{
 		virtual bool Execute( void ) = 0;

@@ -18,6 +18,7 @@
 #endif
 
 #include "utl/UI/ReportListControl.hxx"
+#include "EditingCommands.hxx"
 
 
 // CBaseRenameListPage implementation
@@ -38,10 +39,11 @@ CBaseRenameListPage::CBaseRenameListPage( CRenameFilesDialog* pParentDlg, UINT l
 
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
+	m_fileListCtrl.SetPersistSorting( false );			// disable sorting persistence since CFileModel persists the shared sorting
 
 	// display filenames depending on m_ignoreExtension
 	m_fileListCtrl.SetSubjectAdapter( m_pParentDlg->GetDisplayFilenameAdapter() );
-	m_fileListCtrl.AddRecordCompare( ren::CRenameItemCriteria::Instance()->GetComparator( ren::SrcPathDirsFirst ) );		// default row item comparator
+	m_fileListCtrl.AddRecordCompare( ren::CRenameItemCriteria::Instance()->GetComparator( ren::RecordDefault ) );		// default row item comparator
 
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 	// Note: focus retangle is not painted properly without double-buffering
@@ -54,14 +56,13 @@ CBaseRenameListPage::~CBaseRenameListPage()
 
 void CBaseRenameListPage::SetupFileListView( void )
 {
-	CScopedListTextSelection sel( &m_fileListCtrl );
+	lv::TScopedStatus_ByObject listStatus( &m_fileListCtrl );
 
+	CScopedInternalChange listChange( &m_fileListCtrl );
 	CScopedLockRedraw freeze( &m_fileListCtrl );
-	CScopedInternalChange internalChange( &m_fileListCtrl );
 
 	m_fileListCtrl.DeleteAllItems();
 	DoSetupFileListView();
-
 	// note: items are already sorted in the shared sort order persisted in CFileModel
 }
 
@@ -70,10 +71,22 @@ void CBaseRenameListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMes
 	pMessage;
 	ASSERT_PTR( m_hWnd );
 
+	if ( IsInternalChange() )
+		return;			// skip updates from this
+
 	if ( m_pParentDlg->GetFileModel() == pSubject )
 		SetupFileListView();
 	else if ( &CGeneralOptions::Instance() == pSubject )
 		CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
+	else if ( GetParentSheet() == pSubject )
+	{
+		if ( COnRenameListSelChangedCmd* pSelChangedCmd = dynamic_cast<COnRenameListSelChangedCmd*>( pMessage ) )
+			if ( pSelChangedCmd->m_pPage != this )		// not this page has been sorted?
+			{
+				CScopedInternalChange listChange( &m_fileListCtrl );
+				m_fileListCtrl.Select( pSelChangedCmd->s_pSelItem );
+			}
+	}
 }
 
 void CBaseRenameListPage::EnsureVisibleItem( const CRenameItem* pRenameItem ) override
@@ -107,15 +120,25 @@ void CBaseRenameListPage::DoDataExchange( CDataExchange* pDX ) override
 	DDX_Control( pDX, IDC_FILE_RENAME_LIST, m_fileListCtrl );
 
 	if ( firstInit )
-		OnUpdate( m_pParentDlg->GetFileModel(), NULL );			// initialize the page
+		if ( m_pParentDlg->IsInitialized() )						// not first time sheet creation? - prevent double init if this was the last active page
+		{
+			OnUpdate( m_pParentDlg->GetFileModel(), NULL );			// initialize the page
 
-	CBaseRenamePage::DoDataExchange( pDX );
+			if ( COnRenameListSelChangedCmd::s_pSelItem != NULL && NULL == m_pParentDlg->GetFirstErrorItem<CRenameItem>() )
+			{
+				CScopedInternalChange listChange( &m_fileListCtrl );
+				m_fileListCtrl.Select( COnRenameListSelChangedCmd::s_pSelItem );		// initial shared selection
+			}
+		}
+
+	__super::DoDataExchange( pDX );
 }
 
 // message handlers
 
 BEGIN_MESSAGE_MAP( CBaseRenameListPage, CBaseRenamePage )
 	ON_NOTIFY( lv::LVN_ListSorted, IDC_FILE_RENAME_LIST, OnLvnListSorted_RenameList )
+	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FILE_RENAME_LIST, OnLvnItemChanged_RenameList )
 END_MESSAGE_MAP()
 
 void CBaseRenameListPage::OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pResult )
@@ -124,7 +147,19 @@ void CBaseRenameListPage::OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pR
 	*pResult = 0L;
 
 	if ( !m_fileListCtrl.IsInternalChange() )		// sorted by user?
-		COnRenameListSortedCmd( m_pParentDlg->GetFileModel(), &m_fileListCtrl, GetListSorting() ).Execute();		// fetch sorted items sequence into the file model, and notify observers
+		CSortRenameItemsCmd( m_pParentDlg->GetFileModel(), &m_fileListCtrl, GetListSorting() ).Execute();		// fetch sorted items sequence into the file model, and notify observers
+}
+
+void CBaseRenameListPage::OnLvnItemChanged_RenameList( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
+
+	if ( !IsInternalChange() && !m_fileListCtrl.IsInternalChange() )		// sorted by user?
+		if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED ) )
+			if ( pNmList->iItem != -1 && m_fileListCtrl.IsSelected( pNmList->iItem ) )
+				COnRenameListSelChangedCmd( this, CReportListControl::AsPtr<CRenameItem>( pNmList->lParam ) ).Execute();		// synchronize selection across pages
+
+	*pResult = 0;
 }
 
 
@@ -133,12 +168,15 @@ void CBaseRenameListPage::OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pR
 CRenameSimpleListPage::CRenameSimpleListPage( CRenameFilesDialog* pParentDlg )
 	: CBaseRenameListPage( pParentDlg, IDS_FILE_RENAME_SIMPLE_LIST_LAYOUT )
 {
-	m_fileListCtrl.SetSection( CFileModel::section_filesSheet + _T("\\ListPage\\SimpleList") );
+	m_fileListCtrl.SetSection( CFileModel::section_filesSheet + _T("\\List") );
 
 	const ren::CRenameItemCriteria* pCriteria = ren::CRenameItemCriteria::Instance();
 
 	m_fileListCtrl.AddColumnCompare( SrcPath, pCriteria->GetComparator( ren::SrcPath ) );
 	m_fileListCtrl.AddColumnCompare( DestPath, pCriteria->GetComparator( ren::DestPath ) );
+
+	std::pair<int, bool> listSorting = ToListSorting( m_pParentDlg->GetFileModel()->GetRenameSorting() );
+	m_fileListCtrl.StoreSortByColumn( listSorting.first, listSorting.second );
 }
 
 void CRenameSimpleListPage::DoSetupFileListView( void ) override
@@ -158,40 +196,50 @@ void CRenameSimpleListPage::DoSetupFileListView( void ) override
 
 ren::TSortingPair CRenameSimpleListPage::GetListSorting( void ) const override
 {
-	std::pair<int, bool> sorting = m_fileListCtrl.GetSortByColumn();
-	ren::SortBy sortBy = ren::SrcPathDirsFirst;
-
-	switch ( sorting.first )
-	{
-		case SrcPath:
-			sortBy = ren::SrcPath;
-			break;
-		case DestPath:
-			sortBy = ren::DestPath;
-			break;
-	}
-	return ren::TSortingPair( sortBy, sorting.second );
+	return FromListSorting( m_fileListCtrl.GetSortByColumn() );
 }
 
 void CRenameSimpleListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
 {
-	if ( COnRenameListSortedCmd* pListSortedCmd = dynamic_cast<COnRenameListSortedCmd*>( pMessage ) )
-		if ( pListSortedCmd->GetListCtrl() != &m_fileListCtrl )		// external list has been sorted?
-		{
-			std::pair<int, bool> userSorting = pListSortedCmd->GetSorting();
-
-			switch ( userSorting.first )
+	if ( !IsInternalChange() )
+		if ( CSortRenameItemsCmd* pSortCmd = dynamic_cast<CSortRenameItemsCmd*>( pMessage ) )
+			if ( pSortCmd->m_pPage != this )		// external list has been sorted?
 			{
-				case ren::SrcPath:	userSorting.first = SrcPath; break;
-				case ren::DestPath:	userSorting.first = DestPath; break;
-				default:
-					userSorting = std::make_pair( -1, true );	// incompatible order (sort by size or date), reset sorting in column header
+				std::pair<int, bool> listSorting = ToListSorting( pSortCmd->m_sorting );
+
+				m_fileListCtrl.StoreSortByColumn( listSorting.first, listSorting.second );
+				// base method will update list items
 			}
 
-			m_fileListCtrl.StoreSortByColumn( userSorting.first, userSorting.second );
-		}
+	__super::OnUpdate( pSubject, pMessage );
+}
 
-	__super::OnUpdate( pSubject, pMessage );		// this will update list items
+std::pair<int, bool> CRenameSimpleListPage::ToListSorting( const ren::TSortingPair& sorting )
+{
+	std::pair<int, bool> listSorting = sorting;
+
+	switch ( sorting.first )
+	{
+		case ren::SrcPath:	listSorting.first = SrcPath; break;
+		case ren::DestPath:	listSorting.first = DestPath; break;
+		default:
+			listSorting = std::make_pair( -1, true );	// incompatible order (sort by size or date), reset sorting in column header
+	}
+	return listSorting;
+}
+
+ren::TSortingPair CRenameSimpleListPage::FromListSorting( const std::pair<int, bool>& listSorting )
+{
+	ren::TSortingPair sorting( ren::RecordDefault, listSorting.second );
+
+	switch ( listSorting.first )
+	{
+		default:
+			ASSERT( false );
+		case -1:		return ren::TSortingPair( ren::RecordDefault, true );
+		case SrcPath:	return ren::TSortingPair( ren::SrcPath, listSorting.second );
+		case DestPath:	return ren::TSortingPair( ren::DestPath, listSorting.second );
+	}
 }
 
 
@@ -202,14 +250,17 @@ CRenameDetailsListPage::CRenameDetailsListPage( CRenameFilesDialog* pParentDlg )
 {
 	SetTitle( _T("List Details") );
 
-	m_fileListCtrl.SetSection( CFileModel::section_filesSheet + _T("\\ListPage\\DetailsList") );
+	m_fileListCtrl.SetSection( CFileModel::section_filesSheet + _T("\\ListDetails") );
 
 	const ren::CRenameItemCriteria* pCriteria = ren::CRenameItemCriteria::Instance();
 
 	m_fileListCtrl.AddColumnCompare( ren::SrcPath, pCriteria->GetComparator( ren::SrcPath ) );
-	m_fileListCtrl.AddColumnCompare( ren::SrcSize, pCriteria->GetComparator( ren::SrcSize ), false );					// order size descending by default
-	m_fileListCtrl.AddColumnCompare( ren::SrcDateModify, pCriteria->GetComparator( ren::SrcDateModify ), false );		// order date-time descending by default
+	m_fileListCtrl.AddColumnCompare( ren::SrcSize, pCriteria->GetComparator( ren::SrcSize ), false );					// order by size descending by default
+	m_fileListCtrl.AddColumnCompare( ren::SrcDateModify, pCriteria->GetComparator( ren::SrcDateModify ), false );		// order by date descending by default
 	m_fileListCtrl.AddColumnCompare( ren::DestPath, pCriteria->GetComparator( ren::DestPath ) );
+
+	std::pair<int, bool> listSorting = m_pParentDlg->GetFileModel()->GetRenameSorting();		// straight ren::SortBy to column correspondence
+	m_fileListCtrl.StoreSortByColumn( listSorting.first, listSorting.second );
 }
 
 void CRenameDetailsListPage::DoSetupFileListView( void ) override
@@ -237,15 +288,17 @@ ren::TSortingPair CRenameDetailsListPage::GetListSorting( void ) const override
 
 void CRenameDetailsListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
 {
-	if ( COnRenameListSortedCmd* pListSortedCmd = dynamic_cast<COnRenameListSortedCmd*>( pMessage ) )
-		if ( pListSortedCmd->GetListCtrl() != &m_fileListCtrl )		// external list has been sorted?
-		{
-			std::pair<int, bool> userSorting = pListSortedCmd->GetSorting();		// one-to-one enum values with Column
+	if ( !IsInternalChange() )
+		if ( CSortRenameItemsCmd* pSortCmd = dynamic_cast<CSortRenameItemsCmd*>( pMessage ) )
+			if ( pSortCmd->m_pPage != this )		// external list has been sorted?
+			{
+				std::pair<int, bool> userSorting = pSortCmd->m_sorting;		// one-to-one enum values with Column
 
-			m_fileListCtrl.StoreSortByColumn( userSorting.first, userSorting.second );
-		}
+				m_fileListCtrl.StoreSortByColumn( userSorting.first, userSorting.second );
+				// base method will update list items
+			}
 
-	__super::OnUpdate( pSubject, pMessage );		// this will update list items
+	__super::OnUpdate( pSubject, pMessage );
 }
 
 
@@ -268,6 +321,7 @@ CRenameEditPage::CRenameEditPage( CRenameFilesDialog* pParentDlg )
 	, m_srcStatic( CThemeItem( L"HEADER", HP_HEADERITEM, HIS_NORMAL ) )
 	, m_destStatic( CThemeItem( L"HEADER", HP_HEADERITEM, HIS_NORMAL ) )
 	, m_syncScrolling( SB_BOTH )
+	, m_lastCaretLinePos( -1 )
 {
 	RegisterCtrlLayout( ARRAY_PAIR( layout::stylesEdit ) );
 //	SetUseLazyUpdateData( true );			// need data transfer on OnSetActive()/OnKillActive()
@@ -285,38 +339,10 @@ CRenameEditPage::~CRenameEditPage()
 {
 }
 
-void CRenameEditPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
-{
-	pMessage;
-	ASSERT_PTR( m_hWnd );
-
-	if ( !IsInternalChange() )
-		if ( m_pParentDlg->GetFileModel() == pSubject )
-			SetupFileEdits();
-}
-
-void CRenameEditPage::EnsureVisibleItem( const CRenameItem* pRenameItem ) override
-{
-	if ( pRenameItem != NULL )
-	{
-		size_t linePos = utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem );
-		if ( linePos != utl::npos )
-		{
-			m_srcEdit.SetSelRange( m_srcEdit.GetLineRange( static_cast<CTextEdit::TLine>( linePos ) ) );
-			m_destEditor.SetSelRange( m_destEditor.GetLineRange( static_cast<CTextEdit::TLine>( linePos ) ) );
-		}
-	}
-}
-
-void CRenameEditPage::CommitLocalEdits( void )
-{
-	if ( m_hWnd != NULL && m_destEditor.GetModify() )
-		if ( InputDestPaths() && AnyChanges() )
-			m_pParentDlg->SafeExecuteCmd( new CChangeDestPathsCmd( m_pParentDlg->GetFileModel(), m_newDestPaths, _T("Edit destination filenames manually") ) );
-}
-
 void CRenameEditPage::SetupFileEdits( void )
 {
+	CScopedInternalChange pageChange( this );
+
 	const std::vector< CRenameItem* >& renameItems = m_pParentDlg->GetRenameItems();
 	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
 
@@ -330,13 +356,11 @@ void CRenameEditPage::SetupFileEdits( void )
 		destPaths.push_back( pDisplayAdapter->FormatFilename( ( *itRenameItem )->GetDestPath() ) );
 	}
 
-	bool firstSetup = 0 == ::GetWindowTextLength( m_srcEdit );
-
 	m_srcEdit.SetText( str::Join( srcPaths, CTextEdit::s_lineEnd ) );
 	m_destEditor.SetText( str::Join( destPaths, CTextEdit::s_lineEnd ) );
 
-	if ( firstSetup )
-		EnsureVisibleItem( m_pParentDlg->GetFirstErrorItem< CRenameItem >() );
+	if ( const CRenameItem* pRenameItem = COnRenameListSelChangedCmd::s_pSelItem != NULL ? COnRenameListSelChangedCmd::s_pSelItem : m_pParentDlg->GetFirstErrorItem<CRenameItem>() )
+		SelectItem( pRenameItem );
 
 	m_syncScrolling.Synchronize( &m_destEditor );			// sync v-scroll pos
 }
@@ -391,6 +415,81 @@ bool CRenameEditPage::AnyChanges( void ) const
 	return false;
 }
 
+bool CRenameEditPage::SelectItem( const CRenameItem* pRenameItem )
+{
+	return pRenameItem != NULL && SelectItemLine( static_cast<int>( utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem ) ) );
+}
+
+bool CRenameEditPage::SelectItemLine( int linePos )
+{
+	m_lastCaretLinePos = linePos;
+	if ( -1 == linePos )
+		return false;
+
+	CScopedInternalChange pageChange( this );
+
+	Range<CTextEdit::TCharPos> srcBeginRange( m_srcEdit.LineIndex( linePos ) );
+	m_srcEdit.SetSelRange( srcBeginRange );
+
+	m_destEditor.SetSelRange( m_destEditor.GetLineRange( linePos ) );
+
+	m_syncScrolling.Synchronize( &m_destEditor );			// sync v-scroll pos
+	return true;
+}
+
+void CRenameEditPage::EnsureVisibleItem( const CRenameItem* pRenameItem ) override
+{
+	if ( pRenameItem != NULL )
+		SelectItemLine( static_cast<int>( utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem ) ) );
+}
+
+void CRenameEditPage::CommitLocalEdits( void )
+{
+	if ( m_hWnd != NULL && m_destEditor.GetModify() )
+		if ( InputDestPaths() && AnyChanges() )
+			m_pParentDlg->SafeExecuteCmd( new CChangeDestPathsCmd( m_pParentDlg->GetFileModel(), m_newDestPaths, _T("Edit destination filenames manually") ) );
+}
+
+bool CRenameEditPage::SyncSelectItemLine( const CTextEdit& fromEdit, CTextEdit* pToEdit )
+{
+	if ( !IsInternalChange() )
+	{
+		int caretLinePos = fromEdit.GetCaretLineIndex();
+
+		if ( caretLinePos != m_lastCaretLinePos )
+		{
+			if ( caretLinePos >= 0 && caretLinePos < static_cast<int>( m_pParentDlg->GetRenameItems().size() ) )
+			{
+				COnRenameListSelChangedCmd( this, m_pParentDlg->GetRenameItems()[ caretLinePos ] ).Execute();		// synchronize selection across pages
+
+				pToEdit->SetSelRange( pToEdit->GetLineRange( caretLinePos ), true );
+			}
+
+			m_lastCaretLinePos = caretLinePos;
+			return true;
+		}
+	}
+	return false;
+}
+
+void CRenameEditPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
+{
+	pMessage;
+	ASSERT_PTR( m_hWnd );
+
+	if ( IsInternalChange() )
+		return;			// skip updates from this
+
+	if ( m_pParentDlg->GetFileModel() == pSubject )
+		SetupFileEdits();
+	else if ( GetParentSheet() == pSubject )
+	{
+		if ( COnRenameListSelChangedCmd* pSelChangedCmd = dynamic_cast<COnRenameListSelChangedCmd*>( pMessage ) )
+			if ( pSelChangedCmd->m_pPage != this )			// external page changed selection?
+				SelectItem( pSelChangedCmd->s_pSelItem );
+	}
+}
+
 void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override
 {
 	bool firstInit = NULL == m_srcEdit.m_hWnd;
@@ -407,7 +506,7 @@ void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override
 
 		if ( m_pParentDlg->IsInitialized() )						// not first time sheet creation? - prevent double init if this was the last active page
 		{
-			// page lazy activation
+			// page lazy initialization on activation
 			if ( !m_pParentDlg->HasDestPaths() )
 				CResetDestinationsCmd( m_pParentDlg->GetFileModel() ).Execute();	// this will call OnUpdate() for all observers
 			else
@@ -417,7 +516,7 @@ void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override
 		m_destEditor.EnsureCaretVisible();
 	}
 
-	CBaseRenamePage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -427,6 +526,8 @@ BEGIN_MESSAGE_MAP( CRenameEditPage, CBaseRenamePage )
 	ON_WM_CTLCOLOR()
 	ON_EN_CHANGE( IDC_RENAME_DEST_FILES_EDIT, OnEnChange_DestPaths )
 	ON_EN_KILLFOCUS( IDC_RENAME_DEST_FILES_EDIT, OnEnKillFocus_DestPaths )
+	ON_EN_USERSELCHANGE( IDC_RENAME_SRC_FILES_EDIT, OnEnUserSelChange_SrcPaths )
+	ON_EN_USERSELCHANGE( IDC_RENAME_DEST_FILES_EDIT, OnEnUserSelChange_DestPaths )
 END_MESSAGE_MAP()
 
 HBRUSH CRenameEditPage::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType )
@@ -445,7 +546,7 @@ HBRUSH CRenameEditPage::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType )
 
 void CRenameEditPage::OnEnChange_DestPaths( void )
 {
-	CScopedInternalChange scopedInternal( this );
+	CScopedInternalChange pageChange( this );
 
 	if ( !InputDestPaths() )
 	{
@@ -457,4 +558,14 @@ void CRenameEditPage::OnEnChange_DestPaths( void )
 void CRenameEditPage::OnEnKillFocus_DestPaths( void )
 {
 	CommitLocalEdits();
+}
+
+void CRenameEditPage::OnEnUserSelChange_SrcPaths( void )
+{
+	SyncSelectItemLine( m_srcEdit, &m_destEditor );
+}
+
+void CRenameEditPage::OnEnUserSelChange_DestPaths( void )
+{
+	SyncSelectItemLine( m_destEditor, &m_srcEdit );
 }

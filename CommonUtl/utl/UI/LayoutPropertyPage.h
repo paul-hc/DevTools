@@ -14,8 +14,8 @@ class CMacroCommand;
 
 
 class CLayoutPropertyPage : public CPropertyPage
-						  , public ui::ILayoutEngine
-						  , public ui::ICustomCmdInfo
+	, public ui::ILayoutEngine
+	, public ui::ICustomCmdInfo
 {
 protected:
 	CLayoutPropertyPage( UINT templateId, UINT titleId = 0 );
@@ -75,6 +75,7 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
+	afx_msg void OnDestroy( void );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo );
 	afx_msg BOOL OnEraseBkgnd( CDC* pDC );

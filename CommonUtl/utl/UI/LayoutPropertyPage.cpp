@@ -90,7 +90,7 @@ bool CLayoutPropertyPage::LayoutPage( void )
 
 void CLayoutPropertyPage::SetModified( bool changed )
 {
-	CPropertyPage::SetModified( changed );
+	__super::SetModified( changed );
 }
 
 bool CLayoutPropertyPage::StoreFocusControl( void )
@@ -120,7 +120,7 @@ void CLayoutPropertyPage::OnIdleUpdateControls( void )
 
 void CLayoutPropertyPage::DoDataExchange( CDataExchange* pDX )
 {
-	CPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -135,7 +135,7 @@ void CLayoutPropertyPage::DoDataExchange( CDataExchange* pDX )
 
 BOOL CLayoutPropertyPage::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
-	return CPropertyPage::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 //	return CWnd::OnCmdMsg( id, code, pExtra, pHandlerInfo );		// skip base CDialog::OnCmdMsg() to avoid infinite recursion
 }
 
@@ -144,7 +144,7 @@ BOOL CLayoutPropertyPage::OnSetActive( void )
 	ui::PostCall( this, &CLayoutPropertyPage::RestoreFocusControl );			// delayed focus so that it overrides page default behaviour: resetting the focus to first control in the page
 
 	if ( m_useLazyUpdateData )
-		return CPropertyPage::OnSetActive();
+		return __super::OnSetActive();
 
 	return TRUE;
 }
@@ -154,9 +154,16 @@ BOOL CLayoutPropertyPage::OnKillActive( void )
 	StoreFocusControl();
 
 	if ( m_useLazyUpdateData )
-		return CPropertyPage::OnKillActive();
+		return __super::OnKillActive();
 
 	return TRUE;
+}
+
+BOOL CLayoutPropertyPage::PreTranslateMessage( MSG* pMsg )
+{
+	return
+		m_accelPool.TranslateAccels( pMsg, m_hWnd ) ||
+		__super::PreTranslateMessage( pMsg );
 }
 
 
@@ -164,6 +171,7 @@ BOOL CLayoutPropertyPage::OnKillActive( void )
 
 BEGIN_MESSAGE_MAP( CLayoutPropertyPage, CPropertyPage )
 	ON_WM_CREATE()
+	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
 	ON_WM_ERASEBKGND()
@@ -173,26 +181,31 @@ BEGIN_MESSAGE_MAP( CLayoutPropertyPage, CPropertyPage )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
 END_MESSAGE_MAP()
 
-BOOL CLayoutPropertyPage::PreTranslateMessage( MSG* pMsg )
-{
-	return
-		m_accelPool.TranslateAccels( pMsg, m_hWnd ) ||
-		CPropertyPage::PreTranslateMessage( pMsg );
-}
-
 int CLayoutPropertyPage::OnCreate( CREATESTRUCT* pCreateStruct )
 {
-	if ( -1 == CPropertyPage::OnCreate( pCreateStruct ) )
+	if ( -1 == __super::OnCreate( pCreateStruct ) )
 		return -1;
 
 	ASSERT( !m_pLayoutEngine->IsInitialized() );
 	m_pLayoutEngine->StoreInitialSize( this );
+
+	if ( utl::IObserver* pObserverPage = dynamic_cast<utl::IObserver*>( this ) )
+		GetParentSheet()->AddObserver( pObserverPage );
+
 	return 0;
+}
+
+void CLayoutPropertyPage::OnDestroy( void )
+{
+	if ( utl::IObserver* pObserverPage = dynamic_cast<utl::IObserver*>( this ) )
+		GetParentSheet()->RemoveObserver( pObserverPage );
+
+	__super::OnDestroy();
 }
 
 void CLayoutPropertyPage::OnSize( UINT sizeType, int cx, int cy )
 {
-	CPropertyPage::OnSize( sizeType, cx, cy );
+	__super::OnSize( sizeType, cx, cy );
 
 	if ( sizeType == SIZE_MAXIMIZED || sizeType == SIZE_RESTORED )
 		LayoutPage();
@@ -200,7 +213,7 @@ void CLayoutPropertyPage::OnSize( UINT sizeType, int cx, int cy )
 
 void CLayoutPropertyPage::OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo )
 {
-	CPropertyPage::OnGetMinMaxInfo( pMinMaxInfo );
+	__super::OnGetMinMaxInfo( pMinMaxInfo );
 	m_pLayoutEngine->HandleGetMinMaxInfo( pMinMaxInfo );
 }
 
@@ -208,7 +221,7 @@ BOOL CLayoutPropertyPage::OnEraseBkgnd( CDC* pDC )
 {
 	return
 		m_pLayoutEngine->HandleEraseBkgnd( pDC ) ||
-		CPropertyPage::OnEraseBkgnd( pDC );
+		__super::OnEraseBkgnd( pDC );
 }
 
 void CLayoutPropertyPage::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
@@ -217,7 +230,7 @@ void CLayoutPropertyPage::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL i
 	if ( !isSysMenu )
 		ui::UpdateMenuUI( this, pPopupMenu );
 
-	CPropertyPage::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
+	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
 LRESULT CLayoutPropertyPage::OnKickIdle( WPARAM, LPARAM )

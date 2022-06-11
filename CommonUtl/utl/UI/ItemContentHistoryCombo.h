@@ -10,7 +10,7 @@
 
 class CItemContentHistoryCombo : public CBaseItemContentCtrl<CHistoryComboBox>
 {
-	typedef CBaseFrameHostCtrl<CComboBox> TBaseClass;
+	typedef CFrameHostCtrl<CComboBox> TBaseClass;
 public:
 	CItemContentHistoryCombo( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL );
 	virtual ~CItemContentHistoryCombo();

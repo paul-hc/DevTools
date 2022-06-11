@@ -6,6 +6,7 @@
 #include "SyncScrolling.h"
 #include "StringUtilities.h"
 #include "WndUtils.h"
+#include "PostCall.h"
 #include "utl/TextClipboard.h"
 
 #ifdef _DEBUG
@@ -27,7 +28,7 @@ static ACCEL s_editKeys[] =
 const TCHAR CTextEdit::s_lineEnd[] = _T("\r\n");
 
 CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
-	: CBaseFrameHostCtrl<CEdit>()
+	: CFrameHostCtrl<CEdit>()
 	, m_useFixedFont( useFixedFont )
 	, m_keepSelOnFocus( false )
 	, m_usePasteTransact( false )
@@ -35,6 +36,7 @@ CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	, m_visibleWhiteSpace( false )
 	, m_accel( ARRAY_PAIR( s_editKeys ) )
 	, m_pSyncScrolling( NULL )
+	, m_lastSelRange( 0, 0 )
 {
 }
 
@@ -136,6 +138,12 @@ bool CTextEdit::SetVisibleWhiteSpace( bool visibleWhiteSpace /*= true*/ )
 	return true;
 }
 
+void CTextEdit::SetSel( TCharPos startChar, TCharPos endChar, BOOL noCaretScroll /*= false*/ )
+{
+	m_lastSelRange.SetRange( startChar, endChar );
+	__super::SetSel( startChar, endChar, noCaretScroll );
+}
+
 std::tstring CTextEdit::GetSelText( void ) const
 {
 	Range<int> sel;
@@ -188,6 +196,20 @@ bool CTextEdit::IsInternalChange( void ) const
 
 void CTextEdit::OnValueChanged( void )
 {
+}
+
+void CTextEdit::_WatchSelChange( void )
+{
+	if ( !IsInternalChange() )
+	{
+		Range<TCharPos> selRange = GetSelRange<TCharPos>();
+
+		if ( selRange != m_lastSelRange )
+		{
+			m_lastSelRange = selRange;
+			ui::SendCommandToParent( m_hWnd, CTextEdit::EN_USERSELCHANGE );		// notify to parent of the selection change
+		}
+	}
 }
 
 void CTextEdit::PreSubclassWindow( void )
@@ -269,6 +291,9 @@ UINT CTextEdit::OnGetDlgCode( void )
 	if ( GetShowFocus() )
 		InvalidateFrame( FocusFrame );			// one of the few reliable ways to keep the focus rect properly drawn, since the edit draws directly to DC oftenly (without WM_PAINT)
 
+	// WM_GETDLGCODE gets called frequently while editing and changing text selection - this is the right time to monitor for selection changes
+	if ( !IsInternalChange() )
+		ui::PostCall( this, &CTextEdit::_WatchSelChange );
 	return code;
 }
 

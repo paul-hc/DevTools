@@ -97,7 +97,7 @@ private:
 	std::vector< CPathItem* > m_searchPathItems;
 	std::vector< CPathItem* > m_ignorePathItems;
 	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
-	std::vector< std::tstring > m_fileTypeSpecs;
+	persist std::vector< std::tstring > m_fileTypeSpecs;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
 	enum DupFileColumn { FileName, FolderPath, Size, Crc32, DateModified, DuplicateCount };
@@ -105,16 +105,16 @@ private:
 
 	CHostToolbarCtrl<CPathItemListCtrl> m_searchPathsListCtrl;
 	CHostToolbarCtrl<CPathItemListCtrl> m_ignorePathsListCtrl;
-	CEnumComboBox m_fileTypeCombo;
-	CTextEdit m_fileSpecEdit;
-	CHistoryComboBox m_minFileSizeCombo;
+	persist CEnumComboBox m_fileTypeCombo;
+	persist CTextEdit m_fileSpecEdit;
+	persist CHistoryComboBox m_minFileSizeCombo;
 
 	CHostToolbarCtrl<CPathItemListCtrl> m_dupsListCtrl;
 	CStatusStatic m_outcomeStatic;
 	CRegularStatic m_commitInfoStatic;
 	CAccelTable m_accel;
 
-	bool m_highlightDuplicates;
+	persist bool m_highlightDuplicates;
 	static const ui::CItemContent s_pathItemsContent;
 
 	// generated stuff

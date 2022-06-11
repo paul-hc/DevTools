@@ -28,6 +28,14 @@ CImageFileEnumerator::~CImageFileEnumerator()
 {
 }
 
+void CImageFileEnumerator::Clear( void ) override
+{
+	__super::Clear();
+
+	m_foundImages.Clear();
+	m_issueStore.Clear();
+}
+
 void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException )
 {
 	CWaitCursor wait;
@@ -133,7 +141,7 @@ void CImageFileEnumerator::PushMany( const std::vector< CFileAttr* >& fileAttrs 
 		Push( *itFileAttr );
 }
 
-void CImageFileEnumerator::OnAddFileInfo( const fs::CFileState& fileState )
+void CImageFileEnumerator::OnAddFileInfo( const fs::CFileState& fileState ) override
 {
 	if ( app::IsAlbumFile( fileState.m_fullPath.GetPtr() ) )		// found a catalog storage?
 	{
@@ -144,7 +152,7 @@ void CImageFileEnumerator::OnAddFileInfo( const fs::CFileState& fileState )
 		Push( new CFileAttr( fileState ) );
 }
 
-void CImageFileEnumerator::AddFoundFile( const fs::CPath& filePath )
+void CImageFileEnumerator::AddFoundFile( const fs::CPath& filePath ) override
 {
 	if ( app::IsAlbumFile( filePath.GetPtr() ) )
 	{

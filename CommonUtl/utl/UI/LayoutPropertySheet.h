@@ -30,15 +30,15 @@ public:
 	bool HasHelpButton( void ) const { return HasFlag( m_psh.dwFlags, PSH_HASHELP ); }
 
 	// ui::ILayoutEngine interface
-	virtual CLayoutEngine& GetLayoutEngine( void );
-	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
-	virtual bool HasControlLayout( void ) const;
+	virtual CLayoutEngine& GetLayoutEngine( void ) override;
+	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override;
+	virtual bool HasControlLayout( void ) const override;
 
 	// base overrides
-	virtual void LoadFromRegistry( void );
-	virtual void SaveToRegistry( void );
-	virtual bool IsSheetModified( void ) const;
-	virtual void LayoutSheet( void );
+	virtual void LoadFromRegistry( void ) override;
+	virtual void SaveToRegistry( void ) override;
+	virtual bool IsSheetModified( void ) const override;
+	virtual void LayoutSheet( void ) override;
 protected:
 	virtual void OnIdleUpdateControls( void );
 private:
@@ -63,15 +63,15 @@ public:
 
 	// generated stuff
 public:
-	virtual void BuildPropPageArray( void );
-	virtual BOOL PreTranslateMessage( MSG* pMsg );
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
-	virtual BOOL OnInitDialog( void );
+	virtual void BuildPropPageArray( void ) override;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
+	virtual BOOL OnInitDialog( void ) override;
 protected:
-	virtual void PreSubclassWindow( void );
-	virtual void PostNcDestroy( void );
+	virtual void PreSubclassWindow( void ) override;
+	virtual void PostNcDestroy( void ) override;
 protected:
-	virtual void OnDestroy( void );
+	virtual void OnDestroy( void ) override;
 	afx_msg BOOL OnNcCreate( CREATESTRUCT* pCreate );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );

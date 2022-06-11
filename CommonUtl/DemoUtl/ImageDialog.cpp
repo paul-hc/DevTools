@@ -527,7 +527,7 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 		m_sampleMode = static_cast<SampleMode>( m_modeSheet.GetActiveIndex() );
 	}
 
-	CLayoutDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 
 	// post dialog init
 	if ( firstInit )
@@ -575,7 +575,7 @@ void CImageDialog::OnOK( void )
 	m_imagePathCombo.SaveHistory( reg::section, reg::entry_imagePathHistory );
 	m_bkColorCombo.SaveHistory( reg::section, reg::entry_bkColorHistory );
 
-	CLayoutDialog::OnOK();
+	__super::OnOK();
 }
 
 void CImageDialog::OnDropFiles( HDROP hDropInfo )
@@ -603,7 +603,7 @@ void CImageDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 
 HBRUSH CImageDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColorType )
 {
-	HBRUSH hBrushFill = CLayoutDialog::OnCtlColor( pDC, pWnd, ctlColorType );
+	HBRUSH hBrushFill = __super::OnCtlColor( pDC, pWnd, ctlColorType );
 	if ( ctlColorType == CTLCOLOR_STATIC && pWnd != NULL )
 		switch ( pWnd->GetDlgCtrlID() )
 		{

@@ -36,8 +36,18 @@ private:
 
 struct CScopedInternalChange
 {
-	CScopedInternalChange( CInternalChange* pBaseCtrl ) : m_pBaseCtrl( pBaseCtrl ) { ASSERT_PTR( m_pBaseCtrl ); m_pBaseCtrl->AddInternalChange(); }
-	~CScopedInternalChange() { m_pBaseCtrl->ReleaseInternalChange(); }
+	CScopedInternalChange( CInternalChange* pBaseCtrl )
+		: m_pBaseCtrl( pBaseCtrl )
+	{
+		if ( m_pBaseCtrl != NULL )		// allow for external conditional logic (possibly passing NULL)
+			m_pBaseCtrl->AddInternalChange();
+	}
+
+	~CScopedInternalChange()
+	{
+		if ( m_pBaseCtrl != NULL )
+			m_pBaseCtrl->ReleaseInternalChange();
+	}
 private:
 	CInternalChange* m_pBaseCtrl;
 };

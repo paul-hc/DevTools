@@ -18,9 +18,9 @@
 // base class for resizable dialogs with dynamic control layout
 
 class CLayoutDialog : public TMfcBaseDialog
-					, public CPopupDlgBase
-					, public ui::ILayoutEngine
-					, public ui::ICustomCmdInfo
+	, public CPopupDlgBase
+	, public ui::ILayoutEngine
+	, public ui::ICustomCmdInfo
 {
 	void Construct( void );
 
@@ -40,12 +40,12 @@ public:
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 
 	// ui::ILayoutEngine interface
-	virtual CLayoutEngine& GetLayoutEngine( void );
-	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
-	virtual bool HasControlLayout( void ) const;
+	virtual CLayoutEngine& GetLayoutEngine( void ) override;
+	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override;
+	virtual bool HasControlLayout( void ) const override;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	// overridables
 	virtual void LoadFromRegistry( void );
@@ -70,15 +70,15 @@ protected:
 
 	// generated stuff
 protected:
-	virtual void PreSubclassWindow( void );
-	virtual void PostNcDestroy( void );
-	virtual void DoDataExchange( CDataExchange* pDX );
-	virtual void OnOK( void );
-	virtual void OnCancel( void );
+	virtual void PreSubclassWindow( void ) override;
+	virtual void PostNcDestroy( void ) override;
+	virtual void DoDataExchange( CDataExchange* pDX ) override;
+	virtual void OnOK( void ) override;
+	virtual void OnCancel( void ) override;
 public:
-	virtual BOOL DestroyWindow( void );
-	virtual BOOL PreTranslateMessage( MSG* pMsg );
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+	virtual BOOL DestroyWindow( void ) override;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
 protected:
 	virtual void OnDestroy( void );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );

@@ -31,7 +31,7 @@ namespace pred
 
 namespace ren
 {
-	class CRenameItemCriteria
+	class CRenameItemCriteria		// container of comparators for each sort order, including RecordDefault record order; shared by file model and list-ctrls
 	{
 		CRenameItemCriteria( void );
 		~CRenameItemCriteria() { Clear(); }
@@ -44,7 +44,7 @@ namespace ren
 
 		const pred::IComparator* GetComparator( SortBy sortBy ) const
 		{
-			return GetAtPos( static_cast<size_t>( sortBy + 1 ) );	// offset by 1 to account for -1 position of SrcPathDirsFirst
+			return GetAtPos( static_cast<size_t>( sortBy + 1 ) );	// offset by 1 to account for -1 position of RecordDefault
 		}
 	private:
 		std::vector< pred::IComparator* > m_comparators;

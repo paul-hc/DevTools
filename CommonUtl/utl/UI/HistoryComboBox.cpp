@@ -69,7 +69,7 @@ static ACCEL s_dropDownKeys[] =
 
 
 CHistoryComboBox::CHistoryComboBox( unsigned int maxCount /*= ui::HistoryMaxSize*/, const TCHAR* pItemSep /*= _T(";")*/, str::CaseType caseType /*= str::Case*/ )
-	: CBaseFrameHostCtrl<CComboBox>()
+	: CFrameHostCtrl<CComboBox>()
 	, m_maxCount( maxCount )
 	, m_pItemSep( pItemSep )
 	, m_caseType( caseType )

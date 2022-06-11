@@ -237,7 +237,8 @@ namespace fs
 		void SetFilename( const std::tstring& filename );
 
 		const TCHAR* GetExt( void ) const { return path::FindExt( m_filePath.c_str() ); }
-		bool HasExt( const TCHAR* pExt ) const { return path::EquivalentPtr( GetExt(), pExt ); }
+		bool HasExt( void ) const { return !str::IsEmpty( GetExt() ); }
+		bool ExtEquals( const TCHAR* pExt ) const { return path::EquivalentPtr( GetExt(), pExt ); }
 		ExtensionMatch GetExtensionMatch( const fs::CPath& right ) const;
 
 		void SplitFilename( std::tstring& rFname, std::tstring& rExt ) const;

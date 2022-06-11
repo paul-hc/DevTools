@@ -10,6 +10,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "EditingCommands.hxx"
+
 
 // CBaseChangeDestCmd implementation
 
@@ -236,16 +238,16 @@ std::tstring CResetDestinationsCmd::Format( utl::Verbosity verbosity ) const ove
 #include "utl/UI/ReportListControl.hxx"
 
 
-// COnRenameListSortedCmd implementation
+// CSortRenameItemsCmd implementation
 
-COnRenameListSortedCmd::COnRenameListSortedCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl, const ren::TSortingPair& sorting )
-	: CObjectCommand<CFileModel>( cmd::OnRenameListSorted, pFileModel, &cmd::GetTags_CommandType() )
+CSortRenameItemsCmd::CSortRenameItemsCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl, const ren::TSortingPair& sorting )
+	: CBaseRenamePageObjectCommand<CFileModel>( cmd::SortRenameItems, pFileModel, pFileListCtrl != NULL ? checked_static_cast<CBaseRenamePage*>( pFileListCtrl->GetParent() ) : NULL )
 	, m_pFileListCtrl( pFileListCtrl )
 	, m_sorting( sorting )
 {
 }
 
-bool COnRenameListSortedCmd::DoExecute( void ) override
+bool CSortRenameItemsCmd::DoExecute( void ) override
 {
 	if ( m_pFileListCtrl != NULL )		// invoked by sorted list?
 	{	// fetch new rename items order
@@ -258,4 +260,15 @@ bool COnRenameListSortedCmd::DoExecute( void ) override
 		m_pObject->SetRenameSorting( m_sorting );
 
 	return true;
+}
+
+
+// COnRenameListSelChangedCmd implementation
+
+CRenameItem* COnRenameListSelChangedCmd::s_pSelItem = NULL;
+
+COnRenameListSelChangedCmd::COnRenameListSelChangedCmd( CBaseRenamePage* pPage, CRenameItem* pSelItem )
+	: CBaseRenamePageObjectCommand<CLayoutBasePropertySheet>( cmd::OnRenameListSelChanged, pPage->GetParentSheet(), pPage )
+{
+	s_pSelItem = pSelItem;
 }

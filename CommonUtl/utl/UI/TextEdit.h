@@ -5,22 +5,29 @@
 #include "AccelTable.h"
 #include "InternalChange.h"
 #include "Range.h"
-#include "BaseFrameHostCtrl.h"
+#include "FrameHostCtrl.h"
 
 
 class CSyncScrolling;
 
 
+#define ON_EN_USERSELCHANGE( id, memberFxn )	ON_CONTROL( CTextEdit::EN_USERSELCHANGE, id, memberFxn )
+
+
 // inhibits EN_CHANGE notifications on internal changes;
 // resets the modify flag when setting text programatically.
 
-class CTextEdit : public CBaseFrameHostCtrl<CEdit>
-				, public CInternalChange
+class CTextEdit : public CFrameHostCtrl<CEdit>
+	, public CInternalChange
 {
-	typedef CBaseFrameHostCtrl<CEdit> TBaseClass;
+	typedef CFrameHostCtrl<CEdit> TBaseClass;
+
+	using TBaseClass::SetSel;		// hidden base methods
 public:
 	CTextEdit( bool useFixedFont = true );
 	virtual ~CTextEdit();
+
+	enum NotifCode { EN_USERSELCHANGE = EN_CHANGE + 10 };
 
 	void AddToSyncScrolling( CSyncScrolling* pSyncScrolling );
 
@@ -58,10 +65,11 @@ public:
 	typedef int TCharPos;											// position of text character in edit's text
 	typedef int TLine;
 
-	Range<TCharPos> GetLineRange( TLine linePos ) const;				// line startPos and endPos
-	std::tstring GetLineText( TLine linePos ) const;
-
 	enum { CaretPos = -1 };
+
+	TLine GetCaretLineIndex( void ) const { return LineFromChar( CaretPos ); }
+	Range<TCharPos> GetLineRange( TLine linePos ) const;			// line startPos and endPos
+	std::tstring GetLineText( TLine linePos ) const;
 
 	Range<TCharPos> GetLineRangeAt( TCharPos charPos = CaretPos ) const { return GetLineRange( LineFromChar( charPos ) ); }
 	std::tstring GetLineTextAt( TCharPos charPos = CaretPos ) const { return GetLineText( LineFromChar( charPos ) ); }		// by default: text of line with the caret
@@ -71,7 +79,9 @@ public:
 	Range<IntType> GetSelRange( void ) const;
 
 	template< typename IntType >
-	void SetSelRange( const Range<IntType>& sel ) { SetSel( static_cast<TCharPos>( sel.m_start ), static_cast<TCharPos>( sel.m_end ) ); }
+	void SetSelRange( const Range<IntType>& sel, bool noCaretScroll = false ) { SetSel( static_cast<TCharPos>( sel.m_start ), static_cast<TCharPos>( sel.m_end ), noCaretScroll ); }
+
+	void SetSel( TCharPos startChar, TCharPos endChar, BOOL noCaretScroll = false );	// has to stay BOOL to avoid overload resolution with base method
 
 	enum FontSize { Normal, Large };
 	static CFont* GetFixedFont( FontSize fontSize = Normal );
@@ -85,6 +95,8 @@ protected:
 
 	virtual void OnValueChanged( void );		// by the user
 private:
+	void _WatchSelChange( void );
+private:
 	bool m_useFixedFont;
 	bool m_keepSelOnFocus;						// true: keep old selection when focused; false: select all text when focused (default)
 	bool m_usePasteTransact;					// true: supress EN_CHANGE during WM_PASTE/WM_UNDO input, and send one EN_CHANGE after text pasted
@@ -93,12 +105,13 @@ private:
 	CAccelTable m_accel;
 
 	CSyncScrolling* m_pSyncScrolling;
+	Range<TCharPos> m_lastSelRange;
 protected:
 	CInternalChange m_userChange;				// allow derived classes to force user change mode (when spinning, etc)
 public:
 	static const TCHAR s_lineEnd[];
 
-	// generated function overrides
+	// generated stuff
 public:
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );

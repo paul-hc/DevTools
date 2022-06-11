@@ -9,7 +9,7 @@ namespace svc { interface ICommandService; }
 
 namespace app
 {
-	enum CustomColors { ColorErrorBk = color::PastelPink };
+	enum CustomColors { ColorErrorBk = color::PastelPink, ColorWarningText = color::SolidOrange };
 
 	svc::ICommandService* GetCmdSvc( void );
 }
@@ -23,9 +23,9 @@ namespace popup
 
 namespace ren
 {
-	enum SortBy { SrcPathDirsFirst = -1, SrcPath, SrcSize, SrcDateModify, DestPath };
+	enum SortBy { RecordDefault = -1, SrcPath, SrcSize, SrcDateModify, DestPath, SrcPathDirsFirst = RecordDefault };
 
-	typedef std::pair< SortBy, bool > TSortingPair;
+	typedef std::pair<SortBy, bool> TSortingPair;
 }
 
 

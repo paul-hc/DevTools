@@ -28,12 +28,12 @@ public:
 	bool SafeExecuteCmd( utl::ICommand* pCmd );
 
 	// IFileEditor interface (partial)
-	virtual CFileModel* GetFileModel( void ) const;
-	virtual CDialog* GetDialog( void );
-	virtual bool IsRollMode( void ) const;
+	virtual CFileModel* GetFileModel( void ) const override;
+	virtual CDialog* GetDialog( void ) override;
+	virtual bool IsRollMode( void ) const override;
 protected:
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	enum Mode					// determines the OK button label
 	{
@@ -68,9 +68,9 @@ protected:
 
 	// generated stuff
 public:
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
 protected:
-	virtual void DoDataExchange( CDataExchange* pDX );
+	virtual void DoDataExchange( CDataExchange* pDX ) override;
 protected:
 	afx_msg void OnUndoRedo( UINT btnId );
 	afx_msg void OnOptions( void );

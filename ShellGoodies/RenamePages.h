@@ -24,6 +24,7 @@ interface IRenamePage : public utl::IObserver
 
 
 abstract class CBaseRenamePage : public CLayoutPropertyPage
+	, public CInternalChange
 	, public IRenamePage
 {
 protected:
@@ -70,6 +71,7 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX ) override;
 protected:
 	afx_msg void OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnItemChanged_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -80,11 +82,14 @@ class CRenameSimpleListPage : public CBaseRenameListPage
 public:
 	CRenameSimpleListPage( CRenameFilesDialog* pParentDlg );
 protected:
-	enum Column { SrcPath, DestPath };
-
 	virtual void DoSetupFileListView( void ) override;
 	virtual ren::TSortingPair GetListSorting( void ) const override;
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+private:
+	enum Column { SrcPath, DestPath };
+
+	static std::pair<int, bool> ToListSorting( const ren::TSortingPair& sorting );
+	static ren::TSortingPair FromListSorting( const std::pair<int, bool>& listSorting );
 };
 
 
@@ -100,7 +105,6 @@ protected:
 
 
 class CRenameEditPage : public CBaseRenamePage
-					  , private CInternalChange
 {
 public:
 	CRenameEditPage( CRenameFilesDialog* pParentDlg );
@@ -118,6 +122,9 @@ private:
 
 	bool InputDestPaths( void );		// validated results in m_newDestPaths
 	bool AnyChanges( void ) const;
+	bool SelectItem( const CRenameItem* pRenameItem );
+	bool SelectItemLine( int linePos );
+	bool SyncSelectItemLine( const CTextEdit& fromEdit, CTextEdit* pToEdit );
 private:
 	std::vector< fs::CPath > m_newDestPaths;
 private:
@@ -128,6 +135,7 @@ private:
 	CTextEditor m_destEditor;
 
 	CSyncScrolling m_syncScrolling;
+	CTextEdit::TLine m_lastCaretLinePos;
 
 	// generated stuff
 protected:
@@ -136,6 +144,8 @@ protected:
 	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType );
 	afx_msg void OnEnChange_DestPaths( void );
 	afx_msg void OnEnKillFocus_DestPaths( void );
+	afx_msg void OnEnUserSelChange_SrcPaths( void );
+	afx_msg void OnEnUserSelChange_DestPaths( void );
 
 	DECLARE_MESSAGE_MAP()
 };

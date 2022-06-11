@@ -19,8 +19,8 @@ public:
 	utl::ISubject* GetSubject( void ) const { return m_pSubject; }
 	void SetSubject( utl::ISubject* pSubject ) { m_pSubject = pSubject; }		// for serializable commands
 
-	template< typename ObjectType >
-	ObjectType* GetSubjectAs( void ) const { return dynamic_cast<ObjectType*>( m_pSubject ); }
+	template< typename SubjectType >
+	SubjectType* GetSubjectAs( void ) const { return dynamic_cast<SubjectType*>( m_pSubject ); }
 
 	// utl::IMessage interface (partial)
 	virtual int GetTypeID( void ) const override;
@@ -85,20 +85,20 @@ protected:
 
 
 // Concrete command classes must define a constructor, and override: IsUndoable(), DoExecute() and Unexecute().
-// Note: ObjectType implements the utl::ISubject interface
+// Note: SubjectType implements the utl::ISubject interface
 //
-template< typename ObjectType >
+template< typename SubjectType >
 abstract class CObjectCommand : public CCommand
 {
 protected:
-	CObjectCommand( int typeId, ObjectType* pObject, const CEnumTags* pCmdTags = NULL )
+	CObjectCommand( int typeId, SubjectType* pObject, const CEnumTags* pCmdTags = NULL )
 		: CCommand( typeId, pObject, pCmdTags )
 		, m_pObject( pObject )
 	{
 		ASSERT_PTR( m_pObject );
 	}
 public:
-	ObjectType* GetObject( void ) const { return m_pObject; }
+	SubjectType* GetObject( void ) const { return m_pObject; }
 
 	// base overrides
 	virtual std::tstring Format( utl::Verbosity verbosity ) const override			// standard implementation
@@ -121,19 +121,19 @@ protected:
 	// overridables
 	virtual bool DoExecute( void ) = 0;
 protected:
-	ObjectType* m_pObject;
+	SubjectType* m_pObject;
 };
 
 
 // Abstract base for command classes that change an object property.
 // Concrete command class must implement IsUndoable(), DoExecute() and Unexecute().
 //
-template< typename ObjectType, typename PropertyType >
-class CObjectPropertyCommand : public CObjectCommand< ObjectType >
+template< typename SubjectType, typename PropertyType >
+class CObjectPropertyCommand : public CObjectCommand<SubjectType>
 {
 protected:
-	CObjectPropertyCommand( int typeId, ObjectType* pObject, const PropertyType& rValue, const CEnumTags* pCmdTags = NULL )
-		: CObjectCommand< ObjectType >( typeId, pObject, pCmdTags )
+	CObjectPropertyCommand( int typeId, SubjectType* pObject, const PropertyType& rValue, const CEnumTags* pCmdTags = NULL )
+		: CObjectCommand<SubjectType>( typeId, pObject, pCmdTags )
 		, m_value( rValue )
 		, m_oldValue( rValue )
 	{

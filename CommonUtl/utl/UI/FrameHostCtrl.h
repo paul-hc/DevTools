@@ -1,15 +1,15 @@
-#ifndef BaseFrameHostCtrl_h
-#define BaseFrameHostCtrl_h
+#ifndef FrameHostCtrl_h
+#define FrameHostCtrl_h
 #pragma once
 
 
 // abstract base for controls with an optional frame OR focus rect (edits, combos, etc)
 
 template< typename BaseCtrl >
-abstract class CBaseFrameHostCtrl : public BaseCtrl
+class CFrameHostCtrl : public BaseCtrl
 {
-protected:
-	CBaseFrameHostCtrl( COLORREF frameColor = CLR_NONE, bool showFocus = false )
+public:
+	CFrameHostCtrl( COLORREF frameColor = CLR_NONE, bool showFocus = false )
 		: BaseCtrl()
 		, m_frameColor( frameColor )
 		, m_showFocus( showFocus )
@@ -17,7 +17,7 @@ protected:
 		, m_focusMargins( 0, 0 )
 	{
 	}
-public:
+
 	COLORREF GetFrameColor( void ) const { return frameColor; }
 	bool SetFrameColor( COLORREF frameColor );
 
@@ -30,7 +30,7 @@ public:
 	enum FrameType { SolidFrame, FocusFrame };
 
 	CRect GetFrameRect( FrameType frameType ) const;
-	void InvalidateFrame( FrameType frameType );
+	CWnd* InvalidateFrame( FrameType frameType );
 protected:
 	void Refresh( void );
 private:
@@ -49,7 +49,7 @@ protected:
 };
 
 
-#include "BaseFrameHostCtrl.hxx"
+#include "FrameHostCtrl.hxx"
 
 
-#endif // BaseFrameHostCtrl_h
+#endif // FrameHostCtrl_h

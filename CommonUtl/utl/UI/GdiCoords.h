@@ -69,6 +69,13 @@ namespace ui
 			( srcSize.cx <= destBoundsSize.cx && srcSize.cy == destBoundsSize.cy );
 	}
 
+	inline bool InBounds( const RECT& boundsRect, const RECT& rect )
+	{
+		return
+			rect.left >= boundsRect.left && rect.top >= boundsRect.top &&
+			rect.right <= boundsRect.right && rect.bottom <= boundsRect.bottom;
+	}
+
 
 	inline __int64 GetSizeArea( const SIZE& size ) { return static_cast<__int64>( size.cx ) * static_cast<__int64>( size.cy ); }
 

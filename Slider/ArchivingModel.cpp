@@ -169,7 +169,7 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 
 	CPathFormatter formatter( format, false );
 	CPathGenerator generator( formatter, *pSeqCount );
-	generator.StoreSrcFromPairs( m_pathPairs );							// copy source paths from vector to map
+	generator.RefRenamePairs()->StoreSrcFromPairs( m_pathPairs );			// copy source paths from vector to map
 
 	switch ( destType )
 	{
@@ -185,14 +185,14 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 			{
 				generated = true;
 
-				generator.ForEachDestPath( func::NormalizeComplexPath() );	// convert any deep embedded storage paths to directory paths
+				generator.RefRenamePairs()->ForEachDestPath( func::NormalizeComplexPath() );	// convert any deep embedded storage paths to directory paths
 			}
 
 	if ( !generated )
 		if ( !generator.GeneratePairs() )
 			return false;
 
-	generator.QueryDestToPairs( m_pathPairs );							// copy dest paths from generated map to vector
+	generator.GetRenamePairs()->QueryDestToPairs( m_pathPairs );							// copy dest paths from generated map to vector
 	*pSeqCount = generator.GetSeqCount();
 	return true;
 }

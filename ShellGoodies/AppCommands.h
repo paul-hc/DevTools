@@ -16,7 +16,8 @@ namespace cmd
 		RenameFile = 100, TouchFile, FindDuplicates,
 		DeleteFiles, CopyFiles, PasteCopyFiles, MoveFiles, PasteMoveFiles, CreateFolders, PasteCreateFolders, PasteCreateDeepFolders,
 		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
-		EditOptions, OnRenameListSorted,
+		EditOptions,
+		SortRenameItems, OnRenameListSelChanged,
 
 		Priv_UndeleteFiles
 	};

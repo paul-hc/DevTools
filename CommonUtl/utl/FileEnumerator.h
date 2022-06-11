@@ -83,15 +83,15 @@ namespace fs
 		CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = NULL );
 	public:
 		// IEnumerator interface (partial)
-		virtual const TEnumFlags& GetEnumFlags( void ) const { return m_options.m_enumFlags; }
+		virtual const TEnumFlags& GetEnumFlags( void ) const override { return m_options.m_enumFlags; }
 	protected:
-		virtual void OnAddFileInfo( const fs::CFileState& fileState );	// no chaining via m_pChainEnum
-		virtual void AddFoundFile( const fs::CPath& filePath ) = 0;		// has implementation
-		virtual bool AddFoundSubDir( const fs::CPath& subDirPath );
-		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const;
-		virtual bool CanRecurse( void ) const;
-		virtual bool MustStop( void ) const;
-		virtual utl::ICounter* GetDepthCounter( void ) { return &m_depthCounter; }
+		virtual void OnAddFileInfo( const fs::CFileState& fileState ) override;		// no chaining via m_pChainEnum
+		virtual void AddFoundFile( const fs::CPath& filePath ) = 0 override;		// has implementation
+		virtual bool AddFoundSubDir( const fs::CPath& subDirPath ) override;
+		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const override;
+		virtual bool CanRecurse( void ) const override;
+		virtual bool MustStop( void ) const override;
+		virtual utl::ICounter* GetDepthCounter( void ) override { return &m_depthCounter; }
 
 		bool PassFileFilter( const fs::CFileState& fileState ) const;
 
@@ -139,11 +139,11 @@ namespace fs
 		CPathEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( enumFlags, pChainEnum ) {}
 
 		// base overrides
-		virtual size_t GetFileCount( void ) const { return m_filePaths.size(); }
-		virtual void Clear( void );
+		virtual size_t GetFileCount( void ) const override { return m_filePaths.size(); }
+		virtual void Clear( void ) override;
 	protected:
 		// IEnumerator interface
-		virtual void AddFoundFile( const fs::CPath& filePath );
+		virtual void AddFoundFile( const fs::CPath& filePath ) override;
 	public:
 		std::vector< fs::CPath > m_filePaths;
 	};

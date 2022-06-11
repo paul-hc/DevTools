@@ -109,30 +109,65 @@ protected:
 };
 
 
+class CBaseRenamePage;
+
+
+template< typename SubjectType >
+abstract class CBaseRenamePageObjectCommand : public CObjectCommand<SubjectType>
+{
+protected:
+	CBaseRenamePageObjectCommand( cmd::CommandType typeId, SubjectType* pObject, CBaseRenamePage* pPage )
+		: CObjectCommand<SubjectType>( typeId, pObject, &cmd::GetTags_CommandType() )
+		, m_pPage( pPage )
+	{
+		ASSERT_PTR( m_pObject );
+	}
+protected:
+	// base overrides
+	virtual bool Unexecute( void ) override { ASSERT( false ); return false; }
+public:
+	virtual bool Execute( void ) override;		// scoped page internal change during execution
+public:
+	CBaseRenamePage* m_pPage;				// page executing this command
+};
+
+
 #include "Application_fwd.h"
+
 
 class CReportListControl;
 
 
-class COnRenameListSortedCmd : public CObjectCommand<CFileModel>
+class CSortRenameItemsCmd : public CBaseRenamePageObjectCommand<CFileModel>
 {
 public:
-	COnRenameListSortedCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl, const ren::TSortingPair& sorting );
-
-	CReportListControl* GetListCtrl( void ) const { return m_pFileListCtrl; }
-	const ren::TSortingPair& GetSorting( void ) const { return m_sorting; }
+	CSortRenameItemsCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl, const ren::TSortingPair& sorting );
 protected:
 	// base overrides
 	virtual bool DoExecute( void ) override;
-
-	virtual bool Unexecute( void ) override
-	{
-		ASSERT( false );
-		return false;
-	}
 private:
 	CReportListControl* m_pFileListCtrl;		// the listCtrl that was just sorted by user (clicked on colum header)
-	ren::TSortingPair m_sorting;
+public:
+	const ren::TSortingPair m_sorting;
+};
+
+
+#include "utl/UI/LayoutBasePropertySheet.h"
+
+
+class CRenameItem;
+
+
+class COnRenameListSelChangedCmd : public CBaseRenamePageObjectCommand<CLayoutBasePropertySheet>
+{
+public:
+	COnRenameListSelChangedCmd( CBaseRenamePage* pPage, CRenameItem* pSelItem );
+protected:
+	// base overrides
+	virtual bool DoExecute( void ) override { return true; }
+	virtual bool Unexecute( void ) override { ASSERT( false ); return false; }
+public:
+	static CRenameItem* s_pSelItem;		// static so that it stores the shared selected item, for new page initialization on creation; pointer since is invariant to sorting
 };
 
 

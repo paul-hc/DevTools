@@ -376,6 +376,8 @@ protected:
 	// base overrides
 	virtual void OnFinalReleaseInternalChange( void );
 public:
+	bool IsObjectBased( void ) const { return m_subjectBased; }		// list content based on objects stored as utl::ISubject pointers?
+
 	// items and sub-items
 	template< typename Type >
 	Type* GetPtrAt( int index ) const { ASSERT( IsValidIndex( index ) ); return AsPtr<Type>( GetItemData( index ) ); }
@@ -717,43 +719,27 @@ public:
 };
 
 
-struct CListCtrlUiState
+namespace lv
 {
-public:
-	CListCtrlUiState( CReportListControl* pListCtrl )
-		: m_pListCtrl( pListCtrl )
-		, m_caretIndex( m_pListCtrl->GetCaretIndex() )
-		, m_topVisibleIndex( m_pListCtrl->GetTopIndex() )
+	template< typename ValueT >
+	struct CScopedStatus
 	{
-	}
+		CScopedStatus( CReportListControl* pListCtrl, bool useTopItem = false );	// pass useTopItem=true only if items order does not change during content change
+		~CScopedStatus() { Restore(); }
 
-	void Restore( void )
-	{
-		if ( m_pListCtrl->GetItemCount() != 0 )
-		{
-			if ( m_caretIndex != -1 )
-				m_pListCtrl->SetCaretIndex( m_caretIndex );
-
-			if ( m_topVisibleIndex != LB_ERR )
-				m_pListCtrl->EnsureVisible( m_topVisibleIndex, FALSE );
-		}
-	}
-public:
-	CReportListControl* m_pListCtrl;
-	int m_caretIndex;
-	int m_topVisibleIndex;
-};
+		void Restore( void );
+	public:
+		CReportListControl* m_pListCtrl;
+		ValueT m_topVisibleItem;
+		ValueT m_caretItem;
+		std::vector< ValueT > m_selItems;
+	};
 
 
-struct CScopedListTextSelection : private utl::noncopyable
-{
-	CScopedListTextSelection( CReportListControl* pListCtrl );
-	~CScopedListTextSelection();
-public:
-	CReportListControl* m_pListCtrl;
-	std::tstring m_caretText;
-	std::vector< std::tstring > m_selTexts;
-};
+	typedef CScopedStatus<int> TScopedStatus_ByIndex;
+	typedef CScopedStatus<utl::ISubject*> TScopedStatus_ByObject;
+	typedef CScopedStatus<std::tstring> TScopedStatus_ByText;
+}
 
 
 // adapter for swapping items in a list ctrl

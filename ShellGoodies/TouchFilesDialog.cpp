@@ -195,10 +195,10 @@ void CTouchFilesDialog::SetupDialog( void )
 
 void CTouchFilesDialog::SetupFileListView( void )
 {
-	CScopedListTextSelection sel( &m_fileListCtrl );
+	CScopedInternalChange internalChange( &m_fileListCtrl );
+	lv::TScopedStatus_ByObject sel( &m_fileListCtrl );
 
 	CScopedLockRedraw freeze( &m_fileListCtrl );
-	CScopedInternalChange internalChange( &m_fileListCtrl );
 
 	m_fileListCtrl.DeleteAllItems();
 

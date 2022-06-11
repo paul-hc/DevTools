@@ -113,7 +113,7 @@ void CCmdDashboardDialog::BuildCmdItems( void )
 
 void CCmdDashboardDialog::SetupCommandList( void )
 {
-	//CScopedListTextSelection sel( &m_commandsList );
+	//lv::TScopedStatus_ByText status( &m_commandsList );
 
 	CScopedLockRedraw freeze( &m_commandsList );
 	CScopedInternalChange internalChange( &m_commandsList );

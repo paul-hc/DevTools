@@ -24,11 +24,11 @@ public:
 	virtual CRect GetTabControlRect( void );
 
 	// base overrides
-	virtual void LayoutSheet( void );
+	virtual void LayoutSheet( void ) override;
 
 	using CLayoutBasePropertySheet::ApplyChanges;
 protected:
-	virtual CButton* GetSheetButton( UINT buttonId ) const;
+	virtual CButton* GetSheetButton( UINT buttonId ) const override;
 private:
 	// hide base creation methods
 	using CLayoutBasePropertySheet::Create;
@@ -41,7 +41,7 @@ private:
 
 	// generated stuff
 public:
-	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
 protected:
 	afx_msg LRESULT OnPageChanged( WPARAM wParam, LPARAM lParam );
 	afx_msg void OnNavigatePage( UINT cmdId );

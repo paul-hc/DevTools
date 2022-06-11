@@ -1,20 +1,25 @@
-#ifndef BaseFrameHostCtrl_hxx
-#define BaseFrameHostCtrl_hxx
+#ifndef FrameHostCtrl_hxx
+#define FrameHostCtrl_hxx
 
 #include "WndUtils.h"
 
 
-// CBaseFrameHostCtrl template code
+// CFrameHostCtrl template code
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl<BaseCtrl>::Refresh( void )
+void CFrameHostCtrl<BaseCtrl>::Refresh( void )
 {
 	if ( m_hWnd != NULL )
-		Invalidate();
+	{
+		InvalidateFrame( SolidFrame );
+
+		if ( m_showFocus )
+			InvalidateFrame( FocusFrame );
+	}
 }
 
 template< typename BaseCtrl >
-bool CBaseFrameHostCtrl<BaseCtrl>::SetFrameColor( COLORREF frameColor )
+bool CFrameHostCtrl<BaseCtrl>::SetFrameColor( COLORREF frameColor )
 {
 	if ( m_frameColor == frameColor )
 		return false;
@@ -25,7 +30,7 @@ bool CBaseFrameHostCtrl<BaseCtrl>::SetFrameColor( COLORREF frameColor )
 }
 
 template< typename BaseCtrl >
-bool CBaseFrameHostCtrl<BaseCtrl>::SetShowFocus( bool showFocus /*= true*/ )
+bool CFrameHostCtrl<BaseCtrl>::SetShowFocus( bool showFocus /*= true*/ )
 {
 	if ( m_showFocus == showFocus )
 		return false;
@@ -36,7 +41,7 @@ bool CBaseFrameHostCtrl<BaseCtrl>::SetShowFocus( bool showFocus /*= true*/ )
 }
 
 template< typename BaseCtrl >
-CRect CBaseFrameHostCtrl<BaseCtrl>::GetFrameRect( FrameType frameType ) const
+CRect CFrameHostCtrl<BaseCtrl>::GetFrameRect( FrameType frameType ) const
 {
 	CRect frameRect;
 	GetClientRect( &frameRect );
@@ -51,26 +56,38 @@ CRect CBaseFrameHostCtrl<BaseCtrl>::GetFrameRect( FrameType frameType ) const
 }
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl<BaseCtrl>::InvalidateFrame( FrameType frameType )
+CWnd* CFrameHostCtrl<BaseCtrl>::InvalidateFrame( FrameType frameType )
 {
+	CRect clientRect;
+	GetClientRect( &clientRect );
+
 	CRect frameRect = GetFrameRect( frameType );
+	CWnd* pRedrawWnd = this;
+
+	if ( !ui::InBounds( clientRect, frameRect ) )		// need smarties?
+	{	// frame is outside of client bounds: invalidate the parent dialog in its own client coordinates
+		pRedrawWnd = GetParent();
+		MapWindowPoints( pRedrawWnd, &frameRect );
+	}
+
 	CRgn frameRgn;
 	frameRgn.CreateRectRgnIndirect( &frameRect );
 
 	frameRect.DeflateRect( 1, 1 );
 	ui::CombineWithRegion( &frameRgn, frameRect, RGN_DIFF );
 
-	InvalidateRgn( &frameRgn );
+	pRedrawWnd->InvalidateRgn( &frameRgn );
+	return pRedrawWnd;
 }
 
-BEGIN_TEMPLATE_MESSAGE_MAP( CBaseFrameHostCtrl, BaseCtrl, BaseCtrl )
+BEGIN_TEMPLATE_MESSAGE_MAP( CFrameHostCtrl, BaseCtrl, BaseCtrl )
 	ON_WM_PAINT()
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
 END_MESSAGE_MAP()
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl<BaseCtrl>::OnPaint( void )
+void CFrameHostCtrl<BaseCtrl>::OnPaint( void )
 {
 	__super::OnPaint();
 
@@ -94,7 +111,7 @@ void CBaseFrameHostCtrl<BaseCtrl>::OnPaint( void )
 }
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl<BaseCtrl>::OnSetFocus( CWnd* pOldWnd )
+void CFrameHostCtrl<BaseCtrl>::OnSetFocus( CWnd* pOldWnd )
 {
 	__super::OnSetFocus( pOldWnd );
 
@@ -103,7 +120,7 @@ void CBaseFrameHostCtrl<BaseCtrl>::OnSetFocus( CWnd* pOldWnd )
 }
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl<BaseCtrl>::OnKillFocus( CWnd* pNewWnd )
+void CFrameHostCtrl<BaseCtrl>::OnKillFocus( CWnd* pNewWnd )
 {
 	__super::OnKillFocus( pNewWnd );
 
@@ -112,4 +129,4 @@ void CBaseFrameHostCtrl<BaseCtrl>::OnKillFocus( CWnd* pNewWnd )
 }
 
 
-#endif // BaseFrameHostCtrl_hxx
+#endif // FrameHostCtrl_hxx

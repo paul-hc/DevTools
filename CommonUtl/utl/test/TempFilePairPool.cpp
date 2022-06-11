@@ -18,8 +18,8 @@ namespace ut
 	{
 		std::vector< std::tstring > srcFilenames;
 		str::Split( srcFilenames, pSourceFilenames, ut::CTempFilePool::m_sep );
-		for ( std::vector< std::tstring >::const_iterator itSrc = srcFilenames.begin(); itSrc != srcFilenames.end(); ++itSrc )
-			m_pathPairs.AddSrc( *itSrc );
+
+		m_pathPairs.StoreSrcFromPaths( srcFilenames );
 
 		ENSURE( m_pathPairs.GetPairs().size() == srcFilenames.size() );
 	}
@@ -46,8 +46,7 @@ namespace ut
 		: CTempFilePool( pSourceFilenames )
 	{
 		if ( IsValidPool() )
-			for ( std::vector< fs::CPath >::const_iterator itSrcPath = GetFilePaths().begin(); itSrcPath != GetFilePaths().end(); ++itSrcPath )
-				m_pathPairs.AddSrc( *itSrcPath );
+			m_pathPairs.StoreSrcFromPaths( GetFilePaths() );
 	}
 }
 

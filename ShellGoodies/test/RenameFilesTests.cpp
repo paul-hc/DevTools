@@ -29,10 +29,10 @@ namespace ut
 		for ( std::vector< CRenameItem* >::const_iterator itItem = rRenameItems.begin(); itItem != rRenameItems.end(); ++itItem )
 		{
 			fs::CPathParts destParts;
-			( *itItem )->SplitSafeDestPath( &destParts );
+			(*itItem)->SplitSafeDestPath( &destParts );
 
 			func( destParts );
-			( *itItem )->RefDestPath() = destParts.MakePath();
+			(*itItem)->RefDestPath() = destParts.MakePath();
 		}
 	}
 }

@@ -20,22 +20,8 @@ public:
 
 	std::tstring FindSrcCommonPrefix( void ) const;
 
-	// src map setup
-	template< typename PairContainer >
-	void StoreSrcFromPairs( const PairContainer& srcPairs )
-	{
-		m_pRenamePairs->Clear();
-		for ( typename PairContainer::const_iterator it = srcPairs.begin(); it != srcPairs.end(); ++it )
-			m_pRenamePairs->AddSrc( fs::traits::GetPath( it->first ) );
-	}
-
-	template< typename Container >
-	void StoreSrcFromPaths( const Container& srcPaths )
-	{
-		m_pRenamePairs->Clear();
-		for ( typename Container::const_iterator it = srcPaths.begin(); it != srcPaths.end(); ++it )
-			m_pRenamePairs->AddSrc( fs::traits::GetPath( *it ) );
-	}
+	const CPathRenamePairs* GetRenamePairs( void ) const { return m_pRenamePairs; }
+	CPathRenamePairs* RefRenamePairs( void ) { return m_pRenamePairs; }
 protected:
 	CPathRenamePairs* m_pRenamePairs;
 private:
