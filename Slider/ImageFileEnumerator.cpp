@@ -6,7 +6,6 @@
 #include "ICatalogStorage.h"
 #include "AlbumDoc.h"
 #include "Application_fwd.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/RuntimeException.h"
 #include "utl/ErrorHandler.h"
 #include "utl/UI/ImagingWic.h"
@@ -63,7 +62,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 			{
 				case IDCANCEL:
 				case IDABORT:
-					throw new mfc::CUserAbortedException;
+					throw new mfc::CUserAbortedException();
 				case IDTRYAGAIN:
 				case IDRETRY:	continue;
 				case IDCONTINUE:

@@ -5,8 +5,8 @@
 #include "WndUtils.h"
 #include "MenuUtilities.h"
 #include "WindowDebug.h"
-#include "utl/ContainerUtilities.h"
 #include "resource.h"
+#include "utl/Algorithms.h"
 #include <shellapi.h>		// Shell_NotifyIcon()
 
 #ifdef _DEBUG
@@ -24,7 +24,7 @@ namespace hlp
 			pDestBuffer[ 0 ] = _T('\0');
 	}
 
-	UINT GetTooltipMaxLength( void ) { NOTIFYICONDATA niData; return COUNT_OF( niData.szTip ); }
+	UINT GetTooltipMaxLength( void ) { NOTIFYICONDATA niData; niData; return COUNT_OF( niData.szTip ); }
 	bool IsValidBaloonTimeout( UINT timeoutSecs ) { return timeoutSecs >= 10 && timeoutSecs <= 30; }		// must be between 10 and 30 seconds
 	bool IsValidBaloonInfoFlags( DWORD infoFlags ) { return NIIF_NONE == infoFlags || NIIF_INFO == infoFlags || NIIF_WARNING == infoFlags || NIIF_ERROR == infoFlags; }
 }

@@ -210,7 +210,7 @@ namespace app
 
 	CImageDocTemplate* CImageDocTemplate::Instance( void )
 	{
-		static CImageDocTemplate* s_pImageDocTemplate = new CImageDocTemplate;		// owned by the doc manager
+		static CImageDocTemplate* s_pImageDocTemplate = new CImageDocTemplate();		// owned by the doc manager
 		return s_pImageDocTemplate;
 	}
 
@@ -226,7 +226,7 @@ namespace app
 
 	CAlbumDocTemplate* CAlbumDocTemplate::Instance( void )
 	{
-		static CAlbumDocTemplate* s_pAlbumDocTemplate = new CAlbumDocTemplate;		// owned by the doc manager
+		static CAlbumDocTemplate* s_pAlbumDocTemplate = new CAlbumDocTemplate();		// owned by the doc manager
 		return s_pAlbumDocTemplate;
 	}
 

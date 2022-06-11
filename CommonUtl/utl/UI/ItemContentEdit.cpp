@@ -5,7 +5,6 @@
 #include "StringUtilities.h"
 #include "WndUtils.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

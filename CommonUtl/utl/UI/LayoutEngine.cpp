@@ -3,8 +3,8 @@
 #include "LayoutEngine.h"
 #include "MemoryDC.h"
 #include "ScopedValue.h"
-#include "ContainerUtilities.h"
 #include "WndUtils.h"
+#include "utl/Algorithms.h"
 #include <afxext.h>				// for CFormView
 
 #ifdef _DEBUG

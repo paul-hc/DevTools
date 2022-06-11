@@ -28,7 +28,7 @@ CConsoleApplication::CConsoleApplication( io::TranslationMode translationMode )
 	::setlocale( LC_ALL, "" );		// sets the locale to the default, which is obtained from the operating system
 
 	m_modulePath = fs::GetModuleFilePath( NULL );
-	m_pLogger.reset( new CLogger );
+	m_pLogger.reset( new CLogger() );
 }
 
 CConsoleApplication::~CConsoleApplication()
@@ -132,11 +132,11 @@ namespace io
 	{
 		if ( io::Utf16 == CConsoleApplication::GetTranslationMode() )
 			if ( &rStdOutStream == &std::cout )
-				m_pRedirector.reset( new CRedirectStream< std::ostream, std::wostream >( std::cout, std::wcout ) );		// redirect std::cout => std::wcout
+				m_pRedirector.reset( new CRedirectStream<std::ostream, std::wostream>( std::cout, std::wcout ) );		// redirect std::cout => std::wcout
 			else if ( &rStdOutStream == &std::cerr )
-				m_pRedirector.reset( new CRedirectStream< std::ostream, std::wostream >( std::cerr, std::wcerr ) );		// redirect std::cerr => std::wcerr
+				m_pRedirector.reset( new CRedirectStream<std::ostream, std::wostream>( std::cerr, std::wcerr ) );		// redirect std::cerr => std::wcerr
 			//else if ( &rStdOutStream == &std::clog )
-			//	m_pRedirector.reset( new CRedirectStream< std::ostream, std::wostream >( std::clog, std::wclog ) );		// redirect std::clog => std::wclog
+			//	m_pRedirector.reset( new CRedirectStream<std::ostream, std::wostream>( std::clog, std::wclog ) );		// redirect std::clog => std::wclog
 			else
 				ASSERT( false );		// unknown standard output stream?
 	}
@@ -145,11 +145,11 @@ namespace io
 	{
 		if ( io::Utf8 == CConsoleApplication::GetTranslationMode() )
 			if ( &rStdOutStream == &std::wcout )
-				m_pRedirector.reset( new CRedirectStream< std::wostream, std::ostream >( std::wcout, std::cout ) );		// redirect std::wcout => std::cout
+				m_pRedirector.reset( new CRedirectStream<std::wostream, std::ostream>( std::wcout, std::cout ) );		// redirect std::wcout => std::cout
 			else if ( &rStdOutStream == &std::wcerr )
-				m_pRedirector.reset( new CRedirectStream< std::wostream, std::ostream >( std::wcerr, std::cerr ) );		// redirect std::wcerr => std::cerr
+				m_pRedirector.reset( new CRedirectStream<std::wostream, std::ostream>( std::wcerr, std::cerr ) );		// redirect std::wcerr => std::cerr
 			//else if ( &rStdOutStream == &std::wclog )
-			//	m_pRedirector.reset( new CRedirectStream< std::wostream, std::ostream >( std::wclog, std::clog ) );		// redirect std::wclog => std::clog
+			//	m_pRedirector.reset( new CRedirectStream<std::wostream, std::ostream>( std::wclog, std::clog ) );		// redirect std::wclog => std::clog
 			else
 				ASSERT( false );		// unknown standard output stream?
 	}

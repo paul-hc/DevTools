@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "SyncScrolling.h"
 #include "WindowHook.h"
-#include "ContainerUtilities.h"
+#include "utl/Algorithms.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

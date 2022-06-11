@@ -8,7 +8,6 @@
 #include "AlbumDoc.h"
 #include "SearchPattern.h"
 #include "utl/AppTools.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/FileEnumerator.h"
 #include "utl/RuntimeException.h"
 #include "utl/UI/Thumbnailer.h"

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "DuplicateFilesEnumerator.h"
-#include "ContainerUtilities.h"
+#include "ContainerOwnership.h"
 #include "Guards.h"
 #include "IProgressService.h"
 

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "utl/ComparePredicates.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/Subject.h"
 #include "utl/UI/ThemeItem.h"
@@ -94,7 +93,7 @@ struct CThemePart : public CBaseNode
 	CThemePart( int partId, const std::wstring& partName, Relevance relevance, int flags )
 		: CBaseNode( relevance, flags ), m_partId( partId ), m_partName( partName ), m_pPreviewState( NULL ) {}
 
-	~CThemePart() { utl::ClearOwningContainer( m_states ); }
+	~CThemePart();
 
 	virtual const std::tstring& GetCode( void ) const { return m_partName; }
 	virtual NodeType GetNodeType( void ) const { return Part; }
@@ -119,7 +118,7 @@ private:
 struct CThemeClass : public CBaseNode
 {
 	CThemeClass( const std::wstring& className, Relevance relevance ) : CBaseNode( relevance, 0 ), m_className( className ), m_pPreviewPart( NULL ) {}
-	~CThemeClass() { utl::ClearOwningContainer( m_parts ); }
+	~CThemeClass();
 
 	virtual const std::tstring& GetCode( void ) const { return m_className; }
 	virtual NodeType GetNodeType( void ) const { return Class; }
@@ -144,7 +143,7 @@ private:
 struct CThemeStore
 {
 	CThemeStore( void ) { RegisterStandardClasses(); }
-	~CThemeStore() { utl::ClearOwningContainer( m_classes ); }
+	~CThemeStore();
 
 	CThemeClass* FindClass( const std::wstring& className ) const;
 	IThemeNode* FindNode( const std::wstring& code ) const;

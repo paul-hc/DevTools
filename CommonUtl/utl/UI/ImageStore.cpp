@@ -5,7 +5,8 @@
 #include "Dialog_fwd.h"
 #include "ThemeItem.h"
 #include "ToolImageList.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,6 +26,7 @@ namespace func
 	};
 }
 
+
 // CImageStore implementation
 
 CImageStore::CImageStore( void )
@@ -42,8 +44,8 @@ CImageStore::~CImageStore()
 
 void CImageStore::Clear( void )
 {
-	utl::ClearOwningAssocContainerValues( m_iconMap );
-	utl::ClearOwningAssocContainerValues( m_bitmapMap );
+	utl::ClearOwningMapValues( m_iconMap );
+	utl::ClearOwningMapValues( m_bitmapMap );
 	utl::ClearOwningContainer( m_menuBitmapMap, func::DeleteMenuBitmaps() );
 }
 
@@ -94,7 +96,7 @@ CBitmap* CImageStore::RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor
 	{
 		ASSERT( pIcon->IsValid() );
 
-		CBitmap* pBitmap = new CBitmap;
+		CBitmap* pBitmap = new CBitmap();
 		pIcon->MakeBitmap( *pBitmap, transpColor );
 		m_bitmapMap[ key ] = pBitmap;
 		return pBitmap;

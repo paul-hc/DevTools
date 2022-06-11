@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "CatalogStorageHost.h"
 #include "ICatalogStorage.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/UI/ImagingWic.h"
 
 #ifdef _DEBUG

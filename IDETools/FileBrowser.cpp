@@ -5,7 +5,8 @@
 #include "TrackMenuWnd.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/FileEnumerator.h"
 #include "utl/TextClipboard.h"
 #include "utl/UI/ProcessUtils.h"
@@ -601,7 +602,7 @@ CFileBrowser::CFileBrowser( void )
 	, m_pRootFolderItem( new CFolderItem( _T("[Root Files]") ) )
 {
 	if ( m_options.m_cutDuplicates )
-		m_pPathIndex.reset( new CPathIndex );
+		m_pPathIndex.reset( new CPathIndex() );
 }
 
 CFileBrowser::~CFileBrowser()

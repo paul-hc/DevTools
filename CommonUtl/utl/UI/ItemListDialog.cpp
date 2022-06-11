@@ -7,7 +7,7 @@
 #include "TextEdit.h"
 #include "WndUtils.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/TextClipboard.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 

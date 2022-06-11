@@ -14,6 +14,7 @@
 #include "FileOperation.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/Algorithms.h"
 #include "utl/MemLeakCheck.h"
 #include "utl/Serialization.h"
 #include "utl/TextClipboard.h"
@@ -92,7 +93,7 @@ void CAlbumDoc::FetchViewState( const fs::CPath& docPath )
 		m_slideData = pAlbumView->GetSlideData();
 		m_bkColor = pAlbumView->GetRawBkColor();
 
-		m_pImageState.reset( new CImageState );
+		m_pImageState.reset( new CImageState() );
 		pAlbumView->MakeImageState( m_pImageState.get() );
 		m_pImageState->SetDocFilePath( docPath.Get() );
 	}
@@ -193,7 +194,7 @@ void CAlbumDoc::PrepareToSave( const fs::CPath& docPath )
 	{
 		if ( path::EquivalentPtr( m_strPathName, docPath.GetPtr() ) )		// Save? (not Save As)
 			if ( !PromptSaveConvertModelSchema() )
-				throw new mfc::CUserAbortedException;
+				throw new mfc::CUserAbortedException();
 
 		m_model.StoreModelSchema( app::Slider_LatestModelSchema );			// save with latest model schema format
 	}

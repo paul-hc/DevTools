@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "PathGenerator.h"
-#include "ContainerUtilities.h"
 #include "FileEnumerator.h"
 
 #ifdef _DEBUG

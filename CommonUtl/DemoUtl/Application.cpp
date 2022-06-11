@@ -78,7 +78,7 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );
+	m_pGdiPlusInit.reset( new CScopedGdiPlusInit() );
 
 	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
@@ -134,7 +134,7 @@ BOOL CApplication::InitInstance( void )
 
 	m_nCmdShow = SW_SHOWMAXIMIZED;
 	// create main MDI Frame window
-	m_pMainWnd = new CMainFrame;
+	m_pMainWnd = new CMainFrame();
 	if ( !static_cast<CMainFrame*>( m_pMainWnd )->LoadFrame( IDR_MAINFRAME ) )
 	{
 		delete m_pMainWnd;

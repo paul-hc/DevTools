@@ -4,6 +4,7 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "ThumbnailTests.h"
 #include "Application.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/FileEnumerator.h"
 #include "utl/StructuredStorage.h"
 #include "utl/UI/Thumbnailer.h"
@@ -21,7 +22,7 @@ namespace ut
 		static std::auto_ptr<CThumbnailer> pThumbnailer;
 		if ( NULL == pThumbnailer.get() )
 		{
-			pThumbnailer.reset( new CThumbnailer );
+			pThumbnailer.reset( new CThumbnailer() );
 			app::GetApp()->GetSharedResources().AddAutoPtr( &pThumbnailer );			// auto-reset in ExitInstance()
 		}
 		return pThumbnailer.get();
@@ -163,7 +164,7 @@ void CThumbnailTests::TestImageThumbs( ut::CTestDevice* pTestDev )
 	}
 
 	DrawThumbs( pTestDev, thumbs );
-	utl::ClearOwningAssocContainerKeys( thumbs );
+	utl::ClearOwningMapKeys( thumbs );
 }
 
 void CThumbnailTests::TestThumbnailCache( ut::CTestDevice* pTestDev )

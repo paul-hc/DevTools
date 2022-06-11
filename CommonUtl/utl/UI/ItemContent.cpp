@@ -1,12 +1,12 @@
 
 #include "stdafx.h"
 #include "ItemContent.h"
-#include "ContainerUtilities.h"
-#include "EnumTags.h"
-#include "FileSystem.h"
 #include "ShellDialogs.h"
 #include "StringUtilities.h"
 #include "resource.h"
+#include "utl/Algorithms.h"
+#include "utl/EnumTags.h"
+#include "utl/FileSystem.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

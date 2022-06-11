@@ -240,7 +240,7 @@ void CAlbumThumbListView::GetListViewState( CListViewState& rLvState, bool files
 	CFileListDisplayPaths displayPaths( *m_pAlbumModel, filesMustExist );
 
 	// work on an index state for simplicity
-	std::auto_ptr<CListViewState::CImpl< int >> pIndexState( new CListViewState::CImpl< int > );
+	std::auto_ptr<CListViewState::CImpl< int >> pIndexState( new CListViewState::CImpl<int>() );
 	pIndexState->m_top = displayPaths.GetPos( pListBox->GetTopIndex() );
 
 	if ( IsMultiSelection() )

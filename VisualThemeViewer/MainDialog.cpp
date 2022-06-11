@@ -8,9 +8,9 @@
 #include "ThemeStore.h"
 #include "utl/StringUtilities.h"
 #include "utl/SubjectPredicates.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/MenuUtilities.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/StdColors.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
@@ -419,7 +419,7 @@ void CMainDialog::OnCopyTheme( UINT cmdId )
 	CThemeContext selTheme = GetSelThemeContext();
 	std::tstring text = ID_COPY_THEME == cmdId ? selTheme.FormatTheme() : selTheme.FormatThemePartAndState();
 
-	CClipboard::CopyText( text, this );
+	CTextClipboard::CopyText( text, m_hWnd );
 }
 
 void CMainDialog::OnUpdateCopyTheme( CCmdUI* pCmdUI )

@@ -6,7 +6,7 @@
 #include "RenameItem.h"
 #include "FileService.h"
 #include "TextAlgorithms.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/Logger.h"
 #include "utl/PathGenerator.h"
 #include "utl/test/TempFilePairPool.h"

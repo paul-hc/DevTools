@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ValueRepository.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

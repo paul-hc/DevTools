@@ -6,7 +6,6 @@
 #include "StringUtilities.h"
 #include "WndUtils.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/TextClipboard.h"
 
 #ifdef _DEBUG

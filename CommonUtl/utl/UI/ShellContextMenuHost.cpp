@@ -1,10 +1,10 @@
 
 #include "stdafx.h"
 #include "ShellContextMenuHost.h"
-#include "ContainerUtilities.h"
 #include "MenuUtilities.h"
 #include "WndUtils.h"
 #include "WindowHook.h"
+#include "utl/Algorithms.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

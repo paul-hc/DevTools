@@ -3,8 +3,6 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/MockObject.h"
-#include "ContainerUtilities.h"
-#include "StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

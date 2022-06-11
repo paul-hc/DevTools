@@ -89,14 +89,14 @@ void CApplication::OnInitAppResources( void )
 	CAboutBox::s_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );	// register stock images
-	GetSharedImageStore()->RegisterToolbarImages( IDR_TOOL_STRIP );	// register additional tool images
+	GetSharedImageStore()->RegisterToolbarImages( IDR_TOOL_STRIP );		// register additional tool images
 	GetSharedImageStore()->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );
 
 	ut::RegisterAppUnitTests();
 
 	CGeneralOptions::Instance().LoadFromRegistry();
 
-	m_pCmdSvc.reset( new CAppCmdService );
+	m_pCmdSvc.reset( new CAppCmdService() );
 	m_pCmdSvc->LoadCommandModel();
 }
 

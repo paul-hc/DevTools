@@ -4,7 +4,6 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "DuplicateFilesTests.h"
 #include "DuplicateFilesEnumerator.h"
-#include "ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

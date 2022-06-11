@@ -75,16 +75,16 @@ CMainDialog::CMainDialog( void )
 	app::GetSvc().AddObserver( this );
 
 	m_mainSheet.m_regSection = reg::section_mainSheet;
-	m_mainSheet.AddPage( new CGeneralPage );
-	m_mainSheet.AddPage( new CTreeWndPage );
-	m_mainSheet.AddPage( new COptionsPage );
+	m_mainSheet.AddPage( new CGeneralPage() );
+	m_mainSheet.AddPage( new CTreeWndPage() );
+	m_mainSheet.AddPage( new COptionsPage() );
 
 	m_detailsSheet.m_regSection = reg::section_detailsSheet;
-	m_detailsSheet.AddPage( new CEditCaptionPage );
-	m_detailsSheet.AddPage( new CEditIdentPage );
-	m_detailsSheet.AddPage( new CEditStylePage );
-	m_detailsSheet.AddPage( new CEditStyleExPage );
-	m_detailsSheet.AddPage( new CEditPlacementPage );
+	m_detailsSheet.AddPage( new CEditCaptionPage() );
+	m_detailsSheet.AddPage( new CEditIdentPage() );
+	m_detailsSheet.AddPage( new CEditStylePage() );
+	m_detailsSheet.AddPage( new CEditStyleExPage() );
+	m_detailsSheet.AddPage( new CEditPlacementPage() );
 
 	m_trackWndPicker.LoadTrackCursor( IDR_POINTER_CURSOR );
 	m_trackWndPicker.SetTrackIconId( CIconId( ID_TRANSPARENT, LargeIcon ) );
@@ -222,7 +222,7 @@ void CMainDialog::FlashTargetWnd( int flashCount )
 	{
 		ui::EnableWindow( m_highlightButton, false );
 		m_highlightButton.UpdateWindow();
-		m_pFlashHighlighter.reset( new CWndHighlighter );
+		m_pFlashHighlighter.reset( new CWndHighlighter() );
 		m_pFlashHighlighter->FlashWnd( m_hWnd, *pTargetWnd, flashCount );
 	}
 }

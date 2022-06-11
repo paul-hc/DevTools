@@ -42,7 +42,7 @@ void CTrackWndPickerStatic::OnTrack( void )
 		CWndSpot wndFound = finder.WindowFromPoint( GetCursorPos() );
 
 		if ( NULL == m_pWndHighlighter.get() )
-			m_pWndHighlighter.reset( new CWndHighlighter );
+			m_pWndHighlighter.reset( new CWndHighlighter() );
 
 		if ( m_pWndHighlighter->SetSelected( wndFound ) )		// highlighter refreshes the OLD window and highlights the NEW window
 			NotifyParent( TSWN_FOUNDWINDOW );

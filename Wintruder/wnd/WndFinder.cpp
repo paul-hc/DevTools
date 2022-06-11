@@ -5,7 +5,7 @@
 #include "WndSearchPattern.h"
 #include "WndUtils.h"
 #include "AppService.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/UI/ProcessUtils.h"
 #include "utl/UI/WndUtils.h"
 

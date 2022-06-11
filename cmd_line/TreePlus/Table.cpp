@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 #include "Table.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/TextFileIo.h"
 #include <hash_set>
 #include <deque>

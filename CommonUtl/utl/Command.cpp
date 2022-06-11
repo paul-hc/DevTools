@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Command.h"
+#include "Algorithms.h"
 #include "EnumTags.h"
 #include "Serialization.h"
 #include "SerializeStdTypes.h"
@@ -8,6 +9,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "Serialization.hxx"
 
 
 // CBaseCommand implementation

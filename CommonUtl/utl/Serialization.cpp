@@ -6,6 +6,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Serialization.hxx"
+
 
 namespace serial
 {

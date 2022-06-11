@@ -5,7 +5,7 @@
 #include "EnumTags.h"
 #include "FlexPath.h"
 #include "RuntimeException.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "TimeUtils.h"
 #include <stdexcept>
 #include <shlwapi.h>				// for PathRelativePathTo
@@ -320,7 +320,7 @@ namespace fs
 		static mfc::CAutoException< CFileException > s_fileError;
 		s_fileError.m_strFileName = filePath.GetPtr();
 
-		std::auto_ptr<CFile> pFile( new CFile );
+		std::auto_ptr<CFile> pFile( new CFile() );
 		if ( !pFile->Open( filePath.GetPtr(), mode | CFile::shareDenyWrite, &s_fileError ) )		// note: CFile::shareExclusive causes sharing violation
 			if ( throwMode )
 				throw &s_fileError;

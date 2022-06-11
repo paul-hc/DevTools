@@ -5,7 +5,7 @@
 #include "ThemeCustomDraw.h"
 #include "ThemeStore.h"
 #include "utl/SubjectPredicates.h"
-#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "resource.h"
 
 #ifdef _DEBUG

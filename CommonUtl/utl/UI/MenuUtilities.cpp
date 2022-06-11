@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 #include "MenuUtilities.h"
-#include "ContainerUtilities.h"
 #include "ImageStore.h"
 #include "WndUtils.h"
+#include "utl/Algorithms.h"
 
 #ifdef _DEBUG
 #include "FlagTags.h"

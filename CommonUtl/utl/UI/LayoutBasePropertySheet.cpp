@@ -15,7 +15,7 @@
 class CScopedApplyMacroCmd
 {
 public:
-	CScopedApplyMacroCmd( CLayoutBasePropertySheet* pSheet ) : m_pSheet( pSheet ) { m_pSheet->m_pApplyMacroCmd.reset( new CMacroCommand ); }
+	CScopedApplyMacroCmd( CLayoutBasePropertySheet* pSheet ) : m_pSheet( pSheet ) { m_pSheet->m_pApplyMacroCmd.reset( new CMacroCommand() ); }
 	~CScopedApplyMacroCmd() { m_pSheet->m_pApplyMacroCmd.reset(); }
 private:
 	CLayoutBasePropertySheet* m_pSheet;

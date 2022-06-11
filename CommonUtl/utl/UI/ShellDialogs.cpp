@@ -4,7 +4,7 @@
 #include "ShellTypes.h"
 #include "FileSystem_fwd.h"
 #include "TreeControl.h"
-#include "ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include <hash_map>
 
 #ifdef _DEBUG

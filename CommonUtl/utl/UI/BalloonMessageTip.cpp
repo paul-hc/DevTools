@@ -3,7 +3,7 @@
 #include "BalloonMessageTip.h"
 #include "CmdInfoStore.h"
 #include "WndUtils.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/Registry.h"
 

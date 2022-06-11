@@ -3,12 +3,15 @@
 #include "SearchModel.h"
 #include "SearchPattern.h"
 #include "ModelSchema.h"
+#include "utl/Algorithms.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/Serialization.hxx"
 
 
 const Range<UINT> CSearchModel::s_anyFileSizeRange( 0, UINT_MAX );

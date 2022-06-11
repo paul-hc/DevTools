@@ -155,7 +155,7 @@ code::CFormatterOptions& CModuleSession::GetCodeFormatterOptions( void )
 {
 	if ( NULL == m_pCodeFormatterOptions.get() )
 	{	// lazy creation/registry loading
-		m_pCodeFormatterOptions.reset( new code::CFormatterOptions );
+		m_pCodeFormatterOptions.reset( new code::CFormatterOptions() );
 		m_pCodeFormatterOptions->LoadFromRegistry();
 	}
 

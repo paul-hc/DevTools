@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "CtrlUiState.h"
-#include "ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -123,7 +123,7 @@ void CTreeCtrlUiState::SaveSelection( const CTreeCtrl& treeCtrl )
 
 	if ( HTREEITEM hSelected = treeCtrl.GetSelectedItem() )
 	{
-		CTreeItemPath* pSelItemPath = new CTreeItemPath;
+		CTreeItemPath* pSelItemPath = new CTreeItemPath();
 
 		pSelItemPath->BuildPath( treeCtrl, hSelected );
 		m_selectedItems.m_paths.push_back( pSelItemPath );

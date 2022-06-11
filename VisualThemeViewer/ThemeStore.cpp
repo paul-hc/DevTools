@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ThemeStore.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/ScopedValue.h"
 #include "utl/UI/VisualTheme.h"
 #include <vsstyle.h>
@@ -63,6 +64,11 @@ void CThemePart::SetDeepFlags( unsigned int addFlags )
 		pState->ModifyFlags( 0, addFlags );
 }
 
+CThemePart::~CThemePart()
+{
+	utl::ClearOwningContainer( m_states );
+}
+
 CThemeItemNode CThemePart::MakeThemeItem( void ) const
 {
 	if ( const CThemeState* pPreviewState = GetPreviewState() )
@@ -111,6 +117,11 @@ void CThemePart::SetPreviewState( const CThemeState* pPreviewState, RecursionDep
 
 
 // CThemeClass class
+
+CThemeClass::~CThemeClass()
+{
+	utl::ClearOwningContainer( m_parts );
+}
 
 IThemeNode* CThemeClass::FindNode( const std::wstring& code ) const
 {
@@ -174,6 +185,11 @@ const CThemePart* CThemeClass::GetPreviewPart( void ) const
 
 
 // CThemeStore class
+
+CThemeStore::~CThemeStore()
+{
+	utl::ClearOwningContainer( m_classes );
+}
 
 CThemeClass* CThemeStore::FindClass( const std::wstring& className ) const
 {

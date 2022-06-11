@@ -5,7 +5,7 @@
 #include "ImageStore.h"
 #include "ResourceData.h"
 #include "utl/AppTools.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

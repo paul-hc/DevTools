@@ -28,15 +28,15 @@ CApplication::CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );
+	m_pGdiPlusInit.reset( new CScopedGdiPlusInit() );
 
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	std::auto_ptr< CShellManager > pShellManager( new CShellManager );						// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
+	std::auto_ptr< CShellManager > pShellManager( new CShellManager() );						// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
 
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );		// activate "Windows Native" visual manager for enabling themes in MFC controls
-	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images
+	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );		// register stock images
 
 	COptions options;
 	CThemeStore themeStore;

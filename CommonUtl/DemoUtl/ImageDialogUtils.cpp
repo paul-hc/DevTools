@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 #include "ImageDialogUtils.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/Color.h"
@@ -107,6 +109,21 @@ void CColorTable::Clear( void )
 	m_totalColors = 0;
 	m_selPos = std::tstring::npos;
 	m_dupColorsPos.clear();
+}
+
+bool CColorTable::IsDuplicateAt( size_t pos ) const
+{
+	return utl::Contains( m_dupColorsPos, pos );
+}
+
+size_t CColorTable::FindUniqueColorPos( size_t pos ) const
+{
+	return utl::FindPos( m_colors, m_colors[ pos ] );
+}
+
+size_t CColorTable::FindColorPos( COLORREF color ) const
+{
+	return utl::FindPos( m_colors, color );
 }
 
 void CColorTable::Build( CDibSection* pDib )

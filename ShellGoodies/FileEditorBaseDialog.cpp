@@ -6,7 +6,7 @@
 #include "OptionsSheet.h"
 #include "Application_fwd.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/UI/ReportListControl.h"
 #include "utl/UI/Icon.h"

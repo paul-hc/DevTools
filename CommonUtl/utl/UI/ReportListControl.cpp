@@ -13,11 +13,11 @@
 #include "WndUtilsEx.h"
 #include "CheckStatePolicies.h"
 #include "ComparePredicates.h"
-#include "ContainerUtilities.h"
 #include "FileSystem.h"
 #include "ShellUtilities.h"
 #include "PostCall.h"
 #include "resource.h"
+#include "utl/Algorithms.h"
 #include "utl/Serialization.h"
 
 #ifdef _DEBUG
@@ -26,7 +26,7 @@
 
 #include "BaseTrackMenuWnd.hxx"
 #include "ReportListControl.hxx"
-#include "Resequence.hxx"
+#include "utl/Resequence.hxx"
 
 
 namespace reg
@@ -1820,7 +1820,7 @@ std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::v
 		SHDRAGIMAGE shDragImage;
 		if ( shell::GetDragImage( shDragImage, m_hWnd ) != NULL )
 		{
-			pDragImage.reset( new CImageList );
+			pDragImage.reset( new CImageList() );
 			pDragImage->Create( shDragImage.sizeDragImage.cx, shDragImage.sizeDragImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1 );		// 1 image with all items
 
 			// API level call to skip attaching a temp CBitmap; note that shell drag images owns the bitmap.

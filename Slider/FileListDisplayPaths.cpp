@@ -46,12 +46,12 @@ void CFileListDisplayPaths::SetListState( CListViewState& rLvState, std::auto_pt
 	}
 }
 
-CListViewState::CImpl< int >* CFileListDisplayPaths::MakeIndexState( const CListViewState& lvState, const CAlbumModel& model )
+CListViewState::CImpl<int>* CFileListDisplayPaths::MakeIndexState( const CListViewState& lvState, const CAlbumModel& model )
 {
 	if ( lvState.UseIndexes() )
-		return new CListViewState::CImpl< int >( *lvState.m_pIndexImpl );		// straight copy
+		return new CListViewState::CImpl<int>( *lvState.m_pIndexImpl );		// straight copy
 
-	CListViewState::CImpl< int >* pIndexState = new CListViewState::CImpl< int >;
+	CListViewState::CImpl<int>* pIndexState = new CListViewState::CImpl<int>();
 	pIndexState->m_caret = model.FindIndexFileAttrWithPath( lvState.m_pStringImpl->m_caret );
 	pIndexState->m_top = model.FindIndexFileAttrWithPath( lvState.m_pStringImpl->m_top );
 

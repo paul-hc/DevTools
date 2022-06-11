@@ -56,7 +56,7 @@ std::auto_ptr<CWicImage> CWicImage::CreateFromFile( const fs::TImagePathKey& ima
 		}
 	}
 	if ( NULL == pNewImage.get() )
-		pNewImage.reset( new CWicImage );
+		pNewImage.reset( new CWicImage() );
 
 	if ( !pNewImage->LoadDecoderFrame( decoder, imageKey ) )
 		pNewImage.reset();

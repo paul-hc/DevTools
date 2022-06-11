@@ -1,8 +1,9 @@
-#ifndef ContainerUtilities_h
-#define ContainerUtilities_h
+#ifndef Algorithms_h
+#define Algorithms_h
 #pragma once
 
-#include <type_traits>				// for std::tr1::remove_pointer
+#include <algorithm>
+#include <functional>
 
 
 namespace utl
@@ -25,7 +26,7 @@ namespace utl
 
 
 	template< typename ContainerT >
-	inline size_t ByteSize( const ContainerT& items ) { return items.size() * sizeof( ContainerT::value_type ); }		// for vector, deque
+	inline size_t ByteSize( const ContainerT& items ) { return items.size() * sizeof( ContainerT::value_type ); }	// for vector, deque
 
 	template< typename InputIterator, class OutputIterT >
 	OutputIterT Copy( InputIterator itFirst, InputIterator itLast, OutputIterT itDest )
@@ -41,20 +42,16 @@ namespace utl
 	inline void* WriteBuffer( void* pBuffer, const SrcT* pSrc, size_t size = 1 )
 	{
 		memcpy( pBuffer, pSrc, size * sizeof( SrcT ) );
-		return reinterpret_cast<SrcT*>( pBuffer ) + size;				// pointer arithmetic: next insert position in the DEST buffer
+		return reinterpret_cast<SrcT*>( pBuffer ) + size;			// pointer arithmetic: next insert position in the DEST buffer
 	}
 
 	template< typename DestT >
 	inline const void* ReadBuffer( DestT* pDest, const void* pBuffer, size_t size = 1 )
 	{
 		memcpy( pDest, pBuffer, size * sizeof( DestT ) );
-		return reinterpret_cast<const DestT*>( pBuffer ) + size;		// pointer arithmetic: next extract position in the SRC buffer
+		return reinterpret_cast<const DestT*>( pBuffer ) + size;	// pointer arithmetic: next extract position in the SRC buffer
 	}
 }
-
-
-#include <functional>
-#include <algorithm>
 
 
 namespace utl
@@ -109,164 +106,6 @@ namespace func
 	private:
 		NumericT m_value;
 		NumericT m_step;
-	};
-
-
-	/*
-		usage:
-			std::vector< Element* > elements;
-			std::for_each( elements.begin(), elements.end(), func::Delete() );
-		or
-			utl::for_each( elements, func::Delete() );
-	*/
-	struct Delete
-	{
-		template< typename Type >
-		void operator()( Type* pObject ) const
-		{
-			delete pObject;
-		}
-	};
-
-	struct DeleteFirst
-	{
-		template< typename PairType >
-		void operator()( const PairType& rPair ) const
-		{
-			delete const_cast<typename PairType::first_type>( rPair.first );
-		}
-	};
-
-
-	struct DeleteSecond
-	{
-		template< typename PairType >
-		void operator()( const PairType& rPair ) const
-		{
-			delete rPair.second;
-		}
-	};
-
-	struct ReleaseCom
-	{
-		template< typename InterfaceT >
-		void operator()( InterfaceT* pInterface ) const
-		{
-			pInterface->Release();
-		}
-	};
-
-
-	// std::map aliases
-	typedef DeleteFirst TDeleteKey;
-	typedef DeleteSecond TDeleteValue;
-}
-
-
-namespace utl
-{
-	template< typename Type, typename SmartPtrType >
-	inline bool ResetPtr( SmartPtrType& rPtr, Type* pObject ) { rPtr.reset( pObject ); return pObject != NULL; }
-
-	template< typename SmartPtrType >
-	inline bool ResetPtr( SmartPtrType& rPtr ) { rPtr.reset( NULL ); return false; }
-
-
-	/**
-		object ownership helpers - for containers of pointers with ownership
-	*/
-
-	template< typename PtrType >
-	inline PtrType* ReleaseOwnership( PtrType*& rPtr )		// release item ownership in owning containers of pointers
-	{
-		PtrType* ptr = rPtr;
-		rPtr = NULL;				// mark detached item as NULL to prevent being deleted
-		return ptr;
-	}
-
-
-	template< typename PtrContainerT >
-	void ClearOwningContainer( PtrContainerT& rContainer )
-	{
-		for_each( rContainer, func::Delete() );
-		rContainer.clear();
-	}
-
-	template< typename PtrContainerT >
-	void CreateOwningContainerObjects( PtrContainerT& rItemPtrs, size_t count )		// using default constructor
-	{
-		ClearOwningContainer( rItemPtrs );		// delete existing items
-
-		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type TItem;
-
-		rItemPtrs.reserve( count );
-		for ( size_t i = 0; i != count; ++i )
-			rItemPtrs.push_back( new TItem() );
-	}
-
-	template< typename PtrContainerT >
-	void CloneOwningContainerObjects( PtrContainerT& rItemPtrs, const PtrContainerT& srcItemPtrs )		// using copy constructor
-	{
-		ClearOwningContainer( rItemPtrs );		// delete existing items
-
-		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type TItem;
-
-		rItemPtrs.reserve( srcItemPtrs.size() );
-		for ( PtrContainerT::const_iterator itSrcItem = srcItemPtrs.begin(); itSrcItem != srcItemPtrs.end(); ++itSrcItem )
-			rItemPtrs.push_back( new TItem( **itSrcItem ) );
-	}
-
-
-	template< typename PtrContainer, typename ClearFunctor >
-	void ClearOwningContainer( PtrContainer& rContainer, ClearFunctor clearFunctor )
-	{
-		for_each( rContainer, clearFunctor );
-		rContainer.clear();
-	}
-
-	template< typename MapType >
-	void ClearOwningAssocContainer( MapType& rObjectToObjectMap )
-	{
-		for ( typename MapType::iterator it = rObjectToObjectMap.begin(); it != rObjectToObjectMap.end(); ++it )
-		{
-			delete it->first;
-			delete it->second;
-		}
-
-		rObjectToObjectMap.clear();
-	}
-
-	template< typename MapType >
-	void ClearOwningAssocContainerKeys( MapType& rObjectToValueMap )
-	{
-		for ( typename MapType::iterator it = rObjectToValueMap.begin(); it != rObjectToValueMap.end(); ++it )
-			delete it->first;
-
-		rObjectToValueMap.clear();
-	}
-
-	template< typename MapType >
-	void ClearOwningAssocContainerValues( MapType& rKeyToObjectMap )
-	{
-		for ( typename MapType::iterator it = rKeyToObjectMap.begin(); it != rKeyToObjectMap.end(); ++it )
-			delete it->second;
-
-		rKeyToObjectMap.clear();
-	}
-
-
-	// exception-safe owning container of pointers; use swap() at the end to exchange safely the new items (old items will be deleted by this).
-	//
-	template< typename ContainerT, typename DeleteFunc = func::Delete >
-	class COwningContainer : public ContainerT
-	{
-		using ContainerT::clear;
-	public:
-		COwningContainer( void ) : ContainerT() {}
-		~COwningContainer() { clear(); }
-
-		void clear( void ) { std::for_each( begin(), end(), DeleteFunc() ); Release(); }
-		void Release( void ) { ContainerT::clear(); }
 	};
 }
 
@@ -932,24 +771,24 @@ namespace utl
 				else
 				{
 					rPos = count - 1;
-					return false;					// overflow
+					return false;				// overflow
 				}
 		}
 		else
 		{
 			rPos -= step;
-			if ( rPos < 0 || rPos >= count )		// underflow for signed/unsigned?
+			if ( rPos < 0 || rPos >= count )	// underflow for signed/unsigned?
 				if ( wrap )
 					rPos = count - 1;
 				else
 				{
 					rPos = 0;
-					return false;					// underflow
+					return false;				// underflow
 				}
 		}
-		return true;								// no overflow
+		return true;							// no overflow
 	}
 }
 
 
-#endif // ContainerUtilities_h
+#endif // Algorithms_h

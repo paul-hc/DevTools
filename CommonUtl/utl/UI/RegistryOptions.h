@@ -280,9 +280,9 @@ namespace reg
 	// option factory template code
 
 	template< typename ValueT >
-	inline COption< ValueT >* MakeOption( ValueT* pDataMember, const TCHAR* pEntry )
+	inline COption<ValueT>* MakeOption( ValueT* pDataMember, const TCHAR* pEntry )
 	{
-		return new COption< ValueT >( pDataMember, pEntry );
+		return new COption<ValueT>( pDataMember, pEntry );
 	}
 
 	template< typename EnumT >
@@ -292,9 +292,9 @@ namespace reg
 	}
 
 	template< typename ValueT >
-	inline CMultipleOption< ValueT >* MakeMultipleOption( ValueT* pDataMember, const TCHAR* pEntry )
+	inline CMultipleOption<ValueT>* MakeMultipleOption( ValueT* pDataMember, const TCHAR* pEntry )
 	{
-		return new CMultipleOption< ValueT >( pDataMember, pEntry );
+		return new CMultipleOption<ValueT>( pDataMember, pEntry );
 	}
 
 } // namespace registry

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "AppCommands.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
 
 
@@ -51,7 +50,7 @@ namespace cmd
 			CWorkingSet( const CBaseFileGroupCmd& cmd, fs::AccessMode accessMode = fs::Read );
 
 			bool IsValid( void ) const { return m_existStatus != NoneExist; }
-			bool IsBadFilePath( const fs::CPath& filePath ) const { return !utl::Contains( m_badFilePaths, filePath ); }
+			bool IsBadFilePath( const fs::CPath& filePath ) const;
 		public:
 			std::vector< fs::CPath > m_currFilePaths;
 			std::vector< fs::CPath > m_badFilePaths;

@@ -7,10 +7,10 @@
 #include "Pixel.h"
 #include "ScopedGdi.h"
 #include "ToolImageList.h"
+#include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/Path.h"
 #include "utl/StreamStdTypes.h"
-#include "utl/ContainerUtilities.h"
 #include <commoncontrols.h>						// IImageList
 
 #ifdef _DEBUG
@@ -39,26 +39,26 @@ namespace ui
 	{
 		const TCHAR* pExt = path::FindExt( imageFilePath );
 
-		if ( str::Equals< str::IgnoreCase >( _T(".bmp"), pExt ) ||
-			 str::Equals< str::IgnoreCase >( _T(".dib"), pExt ) ||
-			 str::Equals< str::IgnoreCase >( _T(".rle"), pExt ) )
+		if ( str::Equals<str::IgnoreCase>( _T(".bmp"), pExt ) ||
+			 str::Equals<str::IgnoreCase>( _T(".dib"), pExt ) ||
+			 str::Equals<str::IgnoreCase>( _T(".rle"), pExt ) )
 			return BitmapFormat;
-		else if ( str::Equals< str::IgnoreCase >( _T(".jpg"), pExt ) ||
-			 str::Equals< str::IgnoreCase >( _T(".jpeg"), pExt ) ||
-			 str::Equals< str::IgnoreCase >( _T(".jpe"), pExt ) ||
-			 str::Equals< str::IgnoreCase >( _T(".jfif"), pExt ) )
+		else if ( str::Equals<str::IgnoreCase>( _T(".jpg"), pExt ) ||
+			 str::Equals<str::IgnoreCase>( _T(".jpeg"), pExt ) ||
+			 str::Equals<str::IgnoreCase>( _T(".jpe"), pExt ) ||
+			 str::Equals<str::IgnoreCase>( _T(".jfif"), pExt ) )
 			return JpegFormat;
-		else if ( str::Equals< str::IgnoreCase >( _T(".tif"), pExt ) ||
-				  str::Equals< str::IgnoreCase >( _T(".tiff"), pExt ) )
+		else if ( str::Equals<str::IgnoreCase>( _T(".tif"), pExt ) ||
+				  str::Equals<str::IgnoreCase>( _T(".tiff"), pExt ) )
 			return TiffFormat;
-		else if ( str::Equals< str::IgnoreCase >( _T(".gif"), pExt ) )
+		else if ( str::Equals<str::IgnoreCase>( _T(".gif"), pExt ) )
 			return GifFormat;
-		else if ( str::Equals< str::IgnoreCase >( _T(".png"), pExt ) )
+		else if ( str::Equals<str::IgnoreCase>( _T(".png"), pExt ) )
 			return PngFormat;
-		else if ( str::Equals< str::IgnoreCase >( _T(".wmp"), pExt ) )
+		else if ( str::Equals<str::IgnoreCase>( _T(".wmp"), pExt ) )
 			return WmpFormat;			// Windows Media Photo
-		else if ( str::Equals< str::IgnoreCase >( _T(".ico"), pExt ) ||
-				  str::Equals< str::IgnoreCase >( _T(".cur"), pExt ) )
+		else if ( str::Equals<str::IgnoreCase>( _T(".ico"), pExt ) ||
+				  str::Equals<str::IgnoreCase>( _T(".cur"), pExt ) )
 			return IconFormat;
 
 		return UnknownImageFormat;
@@ -571,7 +571,7 @@ CPalette* CDibSectionInfo::MakeColorPalette( const CDC* pDC )
 
 	if ( NULL == m_pPalette.get() )
 	{
-		m_pPalette.reset( new CPalette );
+		m_pPalette.reset( new CPalette() );
 		if ( m_colorTable.size() > 256 )
 			m_pPalette->CreateHalftonePalette( const_cast<CDC*>( pDC ) );
 		else
@@ -647,7 +647,7 @@ const std::vector< RGBQUAD >& CSysColorTable::GetSysRgbTable( void )
 	static std::vector< RGBQUAD > rgbTable;
 	if ( rgbTable.empty() )
 	{
-		std::auto_ptr<CPalette> pPalette( new CPalette );
+		std::auto_ptr<CPalette> pPalette( new CPalette() );
 		{
 			CWindowDC screenDC( NULL );
 			pPalette->CreateHalftonePalette( &screenDC );

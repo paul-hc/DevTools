@@ -7,7 +7,6 @@
 #include "ImagesModel.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
 #include "utl/FileEnumerator.h"
 #include "utl/RuntimeException.h"
@@ -25,6 +24,7 @@
 #endif
 
 #include "utl/IUnknownImpl.hxx"
+#include "utl/Serialization.hxx"
 
 
 // CImageCatalogStg implementation
@@ -216,7 +216,7 @@ void CImageCatalogStg::CreateImageFiles( CCatalogStorageService* pCatalogSvc ) t
 		{
 			switch ( app::GetUserReport().ReportError( pExc, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION ) )
 			{
-				case IDABORT:	throw new mfc::CUserAbortedException;
+				case IDABORT:	throw new mfc::CUserAbortedException();
 				case IDRETRY:	continue;
 				case IDIGNORE:
 					// remove the offender
@@ -274,7 +274,7 @@ void CImageCatalogStg::CreateThumbnailsSubStorage( const CCatalogStorageService*
 		{
 			switch ( app::GetUserReport().ReportError( pExc, MB_CANCELTRYCONTINUE | MB_ICONEXCLAMATION | MB_DEFBUTTON3 ) )
 			{
-				case IDCANCEL:		throw new mfc::CUserAbortedException;
+				case IDCANCEL:		throw new mfc::CUserAbortedException();
 				case IDTRYAGAIN:	continue;
 				case IDCONTINUE:	break;
 			}

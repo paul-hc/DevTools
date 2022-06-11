@@ -1,7 +1,6 @@
 #ifndef DragListCtrl_hxx
 #define DragListCtrl_hxx
 
-#include "ContainerUtilities.h"
 #include "OleDataSource.h"
 #include "OleDropTarget.h"
 #include "Range.h"

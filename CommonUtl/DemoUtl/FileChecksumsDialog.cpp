@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "FileChecksumsDialog.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/IoBin.h"
 #include "utl/FileEnumerator.h"
 #include "utl/FileStateEnumerator.h"

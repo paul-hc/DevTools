@@ -3,6 +3,7 @@
 #include "FileGroupCommands.h"
 #include "Application.h"
 #include "utl/AppTools.h"
+#include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/FileSystem.h"
@@ -149,6 +150,11 @@ namespace cmd
 
 		if ( m_currFilePaths.size() != filePaths.size() )
 			m_existStatus = !m_currFilePaths.empty() ? SomeExist : NoneExist;
+	}
+
+	bool CBaseFileGroupCmd::CWorkingSet::IsBadFilePath( const fs::CPath& filePath ) const
+	{
+		return !utl::Contains( m_badFilePaths, filePath );
 	}
 
 

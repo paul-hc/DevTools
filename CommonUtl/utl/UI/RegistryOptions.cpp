@@ -3,12 +3,12 @@
 #include "RegistryOptions.h"
 #include "RegistrySection.h"
 #include "CmdUpdate.h"
-#include "EnumTags.h"
-#include "Path.h"
-#include "RuntimeException.h"
-#include "ContainerUtilities.h"
-#include "StringUtilities.h"
 #include "ui_fwd.h"
+#include "utl/ContainerOwnership.h"
+#include "utl/EnumTags.h"
+#include "utl/Path.h"
+#include "utl/RuntimeException.h"
+#include "utl/StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,13 +68,13 @@ void CRegistryOptions::SaveAll( void ) const
 {
 	if ( IsPersistent() )
 		for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
-			( *itOption )->Save();
+			(*itOption)->Save();
 }
 
 bool CRegistryOptions::AnyNonDefaultValue( void ) const
 {
 	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
-		if ( !( *itOption )->HasDefaultValue() )
+		if ( !(*itOption)->HasDefaultValue() )
 			return true;
 
 	return false;
@@ -107,7 +107,7 @@ reg::CBaseOption& CRegistryOptions::LookupOption( const void* pDataMember ) cons
 	ASSERT_PTR( pDataMember );
 
 	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
-		if ( ( *itOption )->HasDataMember( pDataMember ) )
+		if ( (*itOption)->HasDataMember( pDataMember ) )
 			return **itOption;
 
 	ASSERT( false );
@@ -119,7 +119,7 @@ reg::CBaseOption* CRegistryOptions::FindOptionByID( UINT ctrlId ) const
 	ASSERT( ctrlId != 0 );
 
 	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
-		if ( ( *itOption )->HasCtrlId( ctrlId ) )
+		if ( (*itOption)->HasCtrlId( ctrlId ) )
 			return *itOption;
 
 	return NULL;
@@ -130,8 +130,8 @@ void CRegistryOptions::UpdateControls( CWnd* pTargetWnd )
 	ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
 
 	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
-		if ( ( *itOption )->GetCtrlId() != 0 )
-			if ( CWnd* pCtrl = pTargetWnd->GetDlgItem( ( *itOption )->GetCtrlId() ) )
+		if ( (*itOption)->GetCtrlId() != 0 )
+			if ( CWnd* pCtrl = pTargetWnd->GetDlgItem( (*itOption)->GetCtrlId() ) )
 				ui::UpdateControlUI( pCtrl->GetSafeHwnd(), pTargetWnd );
 }
 
@@ -193,9 +193,9 @@ namespace reg
 	const TCHAR* SkipDataMemberPrefix( const TCHAR* pEntry )
 	{
 		const TCHAR* pSkipped = pEntry;
-		pSkipped = str::SkipPrefix< str::Case >( pSkipped, _T("&") );		// strip "&" operator used to pass the address of data-member
-		pSkipped = str::SkipPrefix< str::Case >( pSkipped, _T("m_") );
-		pSkipped = str::SkipPrefix< str::Case >( pSkipped, _T("s_") );
+		pSkipped = str::SkipPrefix<str::Case>( pSkipped, _T("&") );		// strip "&" operator used to pass the address of data-member
+		pSkipped = str::SkipPrefix<str::Case>( pSkipped, _T("m_") );
+		pSkipped = str::SkipPrefix<str::Case>( pSkipped, _T("s_") );
 		return pSkipped;
 	}
 

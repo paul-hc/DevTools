@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "CommandService.h"
 #include "CommandModel.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "EnumTags.h"
 
 #ifdef _DEBUG
@@ -21,7 +21,7 @@ namespace svc
 
 
 CCommandService::CCommandService( void )
-	: m_pCommandModel( new CCommandModel )
+	: m_pCommandModel( new CCommandModel() )
 	, m_dirty( false )
 {
 }

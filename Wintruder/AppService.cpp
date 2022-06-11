@@ -5,7 +5,7 @@
 #include "Observers.h"
 #include "resource.h"
 #include "wnd/WndUtils.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/Logger.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/WndUtils.h"

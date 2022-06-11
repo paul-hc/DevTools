@@ -136,7 +136,7 @@ void CMainDialog::OnHighlight( void )
 	{
 		ui::EnableControl( m_hWnd, ID_HIGHLIGHT_WINDOW, false );
 
-		m_pHighlighter.reset( new CWndHighlighter );
+		m_pHighlighter.reset( new CWndHighlighter() );
 		m_pHighlighter->FlashWnd( m_hWnd, m_selWnd );
 	}
 	else

@@ -3,9 +3,9 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/RegistryTests.h"
-#include "Registry.h"
+#include "Algorithms.h"
 #include "MultiThreading.h"
-#include "ContainerUtilities.h"
+#include "Registry.h"
 #include "StringUtilities.h"
 #include <shobjidl.h>				// for IShellFolder
 

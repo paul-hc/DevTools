@@ -5,7 +5,6 @@
 #include "CommandModelSerializerTests.h"
 #include "CommandModelPersist.h"
 #include "FileMacroCommands.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/CommandModel.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"

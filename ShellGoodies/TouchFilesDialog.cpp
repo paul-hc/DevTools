@@ -8,7 +8,6 @@
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/Command.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"

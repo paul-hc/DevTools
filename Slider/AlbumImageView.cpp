@@ -13,6 +13,7 @@
 #include "Workspace.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/Algorithms.h"
 #include "utl/RuntimeException.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"

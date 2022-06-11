@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "PathGroup.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG

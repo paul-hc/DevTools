@@ -5,7 +5,7 @@
 #include "ModuleSession.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/FileSystem.h"
 #include "utl/TextClipboard.h"
 #include "utl/UI/WndUtilsEx.h"
@@ -30,11 +30,11 @@ COptionsSheet::COptionsSheet( CWnd* pParent )
 	SetSingleTransaction();
 	LoadDlgIcon( ID_OPTIONS );
 
-	AddPage( new CGeneralOptionsPage );
-	AddPage( new CCodingStandardPage );
-	AddPage( new CCppImplFormattingPage );
-	AddPage( new CBscPathPage );
-	AddPage( new CDirectoriesPage );
+	AddPage( new CGeneralOptionsPage() );
+	AddPage( new CCodingStandardPage() );
+	AddPage( new CCppImplFormattingPage() );
+	AddPage( new CBscPathPage() );
+	AddPage( new CDirectoriesPage() );
 }
 
 COptionsSheet::~COptionsSheet()

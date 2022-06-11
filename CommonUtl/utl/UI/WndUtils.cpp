@@ -6,7 +6,7 @@
 #include "IconButton.h"
 #include "ImageStore.h"
 #include "SystemTray.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/Path.h"
 #include "utl/PathItemBase.h"
 #include "utl/RuntimeException.h"
@@ -1467,7 +1467,7 @@ namespace ui
 	CFontEffectCache::~CFontEffectCache()
 	{
 		m_sourceFont.Detach();		// no ownership
-		utl::ClearOwningAssocContainerValues( m_effectFonts );
+		utl::ClearOwningMapValues( m_effectFonts );
 	}
 
 	CFont* CFontEffectCache::Lookup( TFontEffect fontEffect )

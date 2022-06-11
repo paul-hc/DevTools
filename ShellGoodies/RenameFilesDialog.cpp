@@ -13,7 +13,7 @@
 #include "OptionsSheet.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/NumericProcessor.h"

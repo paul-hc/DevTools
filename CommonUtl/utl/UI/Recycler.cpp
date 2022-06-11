@@ -1,8 +1,9 @@
 
 #include "stdafx.h"
 #include "Recycler.h"
-#include "ContainerUtilities.h"
 #include "ShellContextMenuHost.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include <ntquery.h>
 
 #ifdef _DEBUG

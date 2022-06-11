@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "FlexPath.h"
 #include "StructuredStorage.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG

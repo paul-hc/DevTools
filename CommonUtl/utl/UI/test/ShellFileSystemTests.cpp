@@ -9,7 +9,6 @@
 #include "ShellContextMenuHost.h"
 #include "WinExplorer.h"
 #include "StringUtilities.h"
-#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

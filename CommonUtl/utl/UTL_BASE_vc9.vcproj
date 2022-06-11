@@ -357,6 +357,10 @@
 			Name="utl"
 			>
 			<File
+				RelativePath=".\Algorithms.h"
+				>
+			</File>
+			<File
 				RelativePath=".\AppTools.cpp"
 				>
 			</File>
@@ -389,7 +393,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ContainerUtilities.h"
+				RelativePath=".\ContainerOwnership.h"
 				>
 			</File>
 			<File
@@ -510,6 +514,10 @@
 			</File>
 			<File
 				RelativePath=".\Resequence.hxx"
+				>
+			</File>
+			<File
+				RelativePath=".\ResourcePool.cpp"
 				>
 			</File>
 			<File
@@ -873,6 +881,10 @@
 				</File>
 				<File
 					RelativePath=".\Serialization.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Serialization.hxx"
 					>
 				</File>
 				<File

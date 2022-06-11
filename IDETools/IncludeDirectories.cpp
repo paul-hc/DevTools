@@ -4,7 +4,8 @@
 #include "IncludeOptions.h"
 #include "ModuleSession.h"
 #include "Application.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/Registry.h"
 
 #ifdef _DEBUG
@@ -36,7 +37,7 @@ CIncludeDirectories& CIncludeDirectories::Instance( void )
 
 void CIncludeDirectories::Clear( void )
 {
-	utl::ClearOwningAssocContainerValues( m_includePaths );
+	utl::ClearOwningMapValues( m_includePaths );
 	m_currSetPos = utl::npos;
 	m_searchSpecs.clear();
 }
@@ -55,7 +56,7 @@ void CIncludeDirectories::Reset( void )
 {
 	Clear();
 
-	CIncludePaths* pDefaultIncludePaths = new CIncludePaths;
+	CIncludePaths* pDefaultIncludePaths = new CIncludePaths();
 	pDefaultIncludePaths->InitFromIde();
 
 	m_includePaths[ s_defaultSetName ] = pDefaultIncludePaths;
@@ -68,7 +69,7 @@ CIncludePaths* CIncludeDirectories::Add( const std::tstring& setName, bool doSel
 
 	delete utl::FindValue( m_includePaths, setName );		// delete any existing set matching same name
 
-	CIncludePaths* pIncludePaths = new CIncludePaths;
+	CIncludePaths* pIncludePaths = new CIncludePaths();
 	m_includePaths[ setName ] = pIncludePaths;
 
 	if ( doSelect )

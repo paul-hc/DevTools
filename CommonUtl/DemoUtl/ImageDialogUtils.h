@@ -2,7 +2,6 @@
 #define ImageDialogUtils_h
 #pragma once
 
-#include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
 #include "utl/UI/Pixel.h"
 #include <map>
@@ -49,10 +48,10 @@ struct CColorTable : public CColorTableOptions
 	void Clear( void );
 	void Build( CDibSection* pDib );
 
-	bool IsDuplicateAt( size_t pos ) const { return utl::Contains( m_dupColorsPos, pos ); }
-	size_t FindUniqueColorPos( size_t pos ) const { return utl::FindPos( m_colors, m_colors[ pos ] ); }
+	bool IsDuplicateAt( size_t pos ) const;
+	size_t FindUniqueColorPos( size_t pos ) const;
 
-	size_t FindColorPos( COLORREF color ) const { return utl::FindPos( m_colors, color ); }
+	size_t FindColorPos( COLORREF color ) const;
 
 	bool HasSelectedColor( void ) const { return m_selPos != std::tstring::npos; }
 	bool SelectColor( COLORREF color );
@@ -141,7 +140,7 @@ public:
 	{
 		ASSERT_PTR( pRefEdit );
 		CScopedInternalChange scopedUserChange( &m_userChange );
-		SetNumber< BYTE >( pRefEdit->GetNumber< BYTE >() );
+		SetNumber<BYTE>( pRefEdit->GetNumber<BYTE>() );
 	}
 protected:
 	// base overrides

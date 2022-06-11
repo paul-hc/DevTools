@@ -6,7 +6,6 @@
 #include "MenuUtilities.h"
 #include "WndUtils.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -156,7 +155,7 @@ void CHistoryComboBox::PreSubclassWindow( void )
 		if ( cbInfo.hwndItem != NULL )
 		{
 			if ( NULL == m_pEdit.get() )
-				m_pEdit.reset( new CTextEditor );
+				m_pEdit.reset( new CTextEditor() );
 
 			m_pEdit->SubclassWindow( cbInfo.hwndItem );
 		}

@@ -4,7 +4,7 @@
 #include "FileGroupCommands.h"
 #include "AppCmdService.h"
 #include "utl/AppTools.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/FileEnumerator.h"
 #include "utl/Logger.h"
@@ -103,7 +103,7 @@ void CDropFilesModel::InitSrcFolders( void )
 
 void CDropFilesModel::InitDeepPasteFolders( void )
 {
-	m_pImageStore.reset( new CImageStore );
+	m_pImageStore.reset( new CImageStore() );
 
 	m_relFolderPathSeq.push_back( std::tstring() );		// the "." entry (shallow paste)
 	RegisterFolderImage( m_destDirPath );

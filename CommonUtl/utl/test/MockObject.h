@@ -91,9 +91,9 @@ namespace func
 	{
 		GenNewMockSeq( NumericT initialValue = NumericT(), NumericT step = 1 ) : m_value( initialValue ), m_step( step ) {}
 
-		ut::CMockValue< NumericT >* operator()( void )
+		ut::CMockValue<NumericT>* operator()( void )
 		{
-			ut::CMockValue< NumericT >* pNewMockValue = new ut::CMockValue< NumericT >( m_value );
+			ut::CMockValue<NumericT>* pNewMockValue = new ut::CMockValue<NumericT>( m_value );
 			m_value += m_step;
 			return pNewMockValue;
 		}

@@ -1,7 +1,7 @@
 
 #include "StdAfx.h"
 #include "IniFile.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "Path.h"
 #include "RuntimeException.h"
 #include "StringUtilities.h"

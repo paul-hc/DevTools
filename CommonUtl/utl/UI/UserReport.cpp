@@ -1,10 +1,11 @@
 
 #include "stdafx.h"
 #include "UserReport.h"
-#include "ContainerUtilities.h"
-#include "EnumTags.h"
-#include "RuntimeException.h"
 #include "WndUtils.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
+#include "utl/EnumTags.h"
+#include "utl/RuntimeException.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

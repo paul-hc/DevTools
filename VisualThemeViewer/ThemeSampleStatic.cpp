@@ -3,7 +3,7 @@
 #include "ThemeSampleStatic.h"
 #include "Options.h"
 #include "ThemeCustomDraw.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/WndUtils.h"
 #include "utl/UI/VisualTheme.h"
 
 #ifdef _DEBUG

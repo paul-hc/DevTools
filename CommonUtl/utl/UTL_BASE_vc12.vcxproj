@@ -181,6 +181,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Algorithms.h" />
     <ClInclude Include="AppTools.h" />
     <ClInclude Include="CacheLoader.h" />
     <ClInclude Include="CacheLoader.hxx" />
@@ -192,7 +193,7 @@
     <ClInclude Include="Compare_fwd.h" />
     <ClInclude Include="ConsoleApplication.h" />
     <ClInclude Include="Console_fwd.h" />
-    <ClInclude Include="ContainerUtilities.h" />
+    <ClInclude Include="ContainerOwnership.h" />
     <ClInclude Include="CRC32.h" />
     <ClInclude Include="DuplicateFileItem.h" />
     <ClInclude Include="DuplicateFilesEnumerator.h" />
@@ -241,6 +242,7 @@
     <ClInclude Include="PathItemBase.h" />
     <ClInclude Include="PathMaker.h" />
     <ClInclude Include="PathMap.h" />
+    <ClInclude Include="PathRenamePairs.h" />
     <ClInclude Include="PathUniqueMaker.h" />
     <ClInclude Include="Path_fwd.h" />
     <ClInclude Include="ProcessCmd.h" />
@@ -255,6 +257,7 @@
     <ClInclude Include="RuntimeException.h" />
     <ClInclude Include="ScopedValue.h" />
     <ClInclude Include="Serialization.h" />
+    <ClInclude Include="Serialization.hxx" />
     <ClInclude Include="Serialization_fwd.h" />
     <ClInclude Include="SerializeStdTypes.h" />
     <ClInclude Include="stdafx.h" />
@@ -288,11 +291,13 @@
     <ClInclude Include="test\StringRangeTests.h" />
     <ClInclude Include="test\StringTests.h" />
     <ClInclude Include="test\StructuredStorageTest.h" />
+    <ClInclude Include="test\TempFilePairPool.h" />
     <ClInclude Include="test\Test.h" />
     <ClInclude Include="test\TextFileIoTests.h" />
     <ClInclude Include="test\ThreadingTests.h" />
     <ClInclude Include="test\UnitTest.h" />
     <ClInclude Include="test\UtlConsoleTests.h" />
+    <ClInclude Include="TextClipboard.h" />
     <ClInclude Include="TextEncoding.h" />
     <ClInclude Include="TextFileIo.h" />
     <ClInclude Include="TextFileIo.hxx" />
@@ -338,10 +343,12 @@
     <ClCompile Include="PathGroup.cpp" />
     <ClCompile Include="PathItemBase.cpp" />
     <ClCompile Include="PathMaker.cpp" />
+    <ClCompile Include="PathRenamePairs.cpp" />
     <ClCompile Include="PathUniqueMaker.cpp" />
     <ClCompile Include="ProcessCmd.cpp" />
     <ClCompile Include="PropertyLineReader.cpp" />
     <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="ResourcePool.cpp" />
     <ClCompile Include="RuntimeException.cpp" />
     <ClCompile Include="Serialization.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -371,11 +378,13 @@
     <ClCompile Include="test\StringRangeTests.cpp" />
     <ClCompile Include="test\StringTests.cpp" />
     <ClCompile Include="test\StructuredStorageTest.cpp" />
+    <ClCompile Include="test\TempFilePairPool.cpp" />
     <ClCompile Include="test\Test.cpp" />
     <ClCompile Include="test\TextFileIoTests.cpp" />
     <ClCompile Include="test\ThreadingTests.cpp" />
     <ClCompile Include="test\UnitTest.cpp" />
     <ClCompile Include="test\UtlConsoleTests.cpp" />
+    <ClCompile Include="TextClipboard.cpp" />
     <ClCompile Include="TextEncoding.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimeUtils.cpp" />

@@ -28,7 +28,7 @@ BOOL CApplication::InitInstance( void )
 	CAboutBox::s_appIconId = IDD_MAIN_DIALOG;
 
 	// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
-	std::auto_ptr<CShellManager> pShellManager( new CShellManager );
+	std::auto_ptr<CShellManager> pShellManager( new CShellManager() );
 
 	CMainDialog dialog;
 	m_pMainWnd = &dialog;

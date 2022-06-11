@@ -3,7 +3,6 @@
 #include "TestDialog.h"
 #include "DemoTemplate.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/UI/CmdUpdate.h"
 
 #ifdef _DEBUG

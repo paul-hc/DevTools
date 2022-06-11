@@ -3,7 +3,8 @@
 #include "CatalogStorageService.h"
 #include "FileAttrAlgorithms.h"
 #include "AlbumDoc.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/PathUniqueMaker.h"
 #include "utl/IProgressService.h"
 

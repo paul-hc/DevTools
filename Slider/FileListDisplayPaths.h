@@ -18,7 +18,7 @@ public:
 	int GetPos( size_t pos ) const;
 	void SetListState( CListViewState& rLvState, std::auto_ptr< CListViewState::CImpl<int> >& pIndexState );
 
-	static CListViewState::CImpl< int >* MakeIndexState( const CListViewState& lvState, const CAlbumModel& model );
+	static CListViewState::CImpl<int>* MakeIndexState( const CListViewState& lvState, const CAlbumModel& model );
 private:
 	std::vector< const fs::CFlexPath* > m_paths;
 	bool m_filesMustExist;

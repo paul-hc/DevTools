@@ -5,6 +5,7 @@
 #include "ImageStore.h"
 #include "resource.h"
 #include "utl/AppTools.h"
+#include "utl/Algorithms.h"
 #include "utl/ResourcePool.h"
 
 #ifdef _DEBUG

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileMacroCommands.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/Logger.h"

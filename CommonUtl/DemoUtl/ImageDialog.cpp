@@ -2,7 +2,8 @@
 #include "stdafx.h"
 #include "ImageDialog.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/StringUtilities.h"
@@ -105,9 +106,9 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	, m_colorTableModeCombo( &CColorTable::GetTags_Mode() )
 
 	, m_transpColorSample( this )
-	, m_pImageToolbar( new CDialogToolBar )
+	, m_pImageToolbar( new CDialogToolBar() )
 	, m_sampleView( this )
-	, m_pPixelInfoSample( new CPixelInfoSample )
+	, m_pPixelInfoSample( new CPixelInfoSample() )
 	, m_pColorTableSample( new CColorTableSample( &m_colorTable, this ) )
 	, m_statusAlphaEdit( IDC_STATUS_ALPHA_EDIT, &m_statusAlpha )
 	, m_modeSheet( m_sampleMode )
@@ -248,7 +249,7 @@ void CImageDialog::LoadSampleImage( void )
 	m_framePos = std::max( 1u, m_framePos );
 	m_framePos = std::min( m_frameCount, m_framePos );
 
-	m_pDibSection.reset( new CDibSection );
+	m_pDibSection.reset( new CDibSection() );
 	if ( m_pDibSection->LoadFromFile( m_imagePath.c_str(), m_imagingApi, m_framePos - 1 ) )
 	{
 		m_pDibSection->SetTranspColor( m_transpColorCache.Lookup( m_imagePath ) );		// set the cached transparent color
@@ -259,7 +260,7 @@ void CImageDialog::LoadSampleImage( void )
 					 HasFlag( m_convertFlags, CDibSection::ForceCvtEqualBpp ) )
 				{
 					CScopedFlag< int > scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
-					std::auto_ptr<CDibSection> pCvtDib( new CDibSection );
+					std::auto_ptr<CDibSection> pCvtDib( new CDibSection() );
 					pCvtDib->Convert( *m_pDibSection, forceBpp );
 					m_pDibSection.reset( pCvtDib.release() );
 				}

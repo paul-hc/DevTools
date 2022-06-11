@@ -1,7 +1,7 @@
 
 #include "StdAfx.h"
 #include "RegistrySection.h"
-#include "ContainerUtilities.h"
+#include "utl/Algorithms.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

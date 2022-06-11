@@ -1,7 +1,7 @@
 #ifndef FileStateEnumerator_hxx
 #define FileStateEnumerator_hxx
 
-#include "ContainerUtilities.h"
+#include "ContainerOwnership.h"
 #include "PathItemBase.h"
 
 

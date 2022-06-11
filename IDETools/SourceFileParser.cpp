@@ -3,7 +3,8 @@
 #include "SourceFileParser.h"
 #include "IncludeNode.h"
 #include "SearchPathEngine.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/TokenIterator.h"
 
 #ifdef _DEBUG

@@ -4,7 +4,7 @@
 #include "AlbumImageView.h"
 #include "AlbumDoc.h"
 #include "FileAttr.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/UI/WicImage.h"
 
 #ifdef _DEBUG

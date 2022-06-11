@@ -20,7 +20,7 @@ namespace ui
 
 
 class CSpinEdit : public CTextEdit
-				, protected ui::ISpinTarget
+	, protected ui::ISpinTarget
 {
 public:
 	CSpinEdit( bool useSpin = true, const std::locale& loc = num::GetEmptyLocale() );
@@ -71,11 +71,11 @@ private:
 	std::locale m_locale;
 	Range<int> m_validRange;
 	std::auto_ptr<CSpinTargetButton> m_pSpinButton;
+
+	// generated stuff
 public:
-	// generated overrides
 	virtual void PreSubclassWindow( void );
 protected:
-	// generated message map functions
 	afx_msg void OnWindowPosChanged( WINDOWPOS* pWndPos );
 	afx_msg void OnEnable( BOOL enable );
 	afx_msg void OnStyleChanged( int styleType, STYLESTRUCT* pStyleStruct );
@@ -85,7 +85,6 @@ protected:
 
 
 // template code
-
 
 template< typename NumericT >
 bool CSpinEdit::ParseNumber( NumericT* pNumber ) const

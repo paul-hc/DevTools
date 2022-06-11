@@ -4,6 +4,7 @@
 #include "FileOperation.h"
 #include "Workspace.h"
 #include "Application.h"
+#include "utl/Algorithms.h"
 #include "utl/FileEnumerator.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/WndUtilsEx.h"
@@ -53,6 +54,14 @@ namespace ole
 CTempCloneFileSet::~CTempCloneFileSet()
 {
 	DeleteClones();
+}
+
+template< typename SrcContainerT >
+bool CTempCloneFileSet::SetInputFilePaths( const SrcContainerT& inputFilePaths )
+{
+	std::vector< fs::CFlexPath > flexPaths;
+	utl::Assign( flexPaths, inputFilePaths, func::tor::StringOf() );
+	return SetInputFilePaths( flexPaths );
 }
 
 bool CTempCloneFileSet::SetInputFilePaths( const std::vector< fs::CFlexPath >& inputFilePaths )

@@ -10,7 +10,6 @@
 #include "resource.h"
 #include "utl/CommandModel.h"
 #include "utl/CommandService.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/WndUtils.h"
@@ -33,8 +32,8 @@ COptionsSheet::COptionsSheet( CFileModel* pFileModel, CWnd* pParent, UINT initia
 	SetInitialPageIndex( initialPageIndex );
 	LoadDlgIcon( ID_OPTIONS );
 
-	AddPage( new CGeneralOptionsPage );
-	AddPage( new CCapitalizeOptionsPage );
+	AddPage( new CGeneralOptionsPage() );
+	AddPage( new CCapitalizeOptionsPage() );
 }
 
 void COptionsSheet::OnChangesApplied( void )
@@ -89,7 +88,7 @@ void CGeneralOptionsPage::UpdateStatus( void )
 void CGeneralOptionsPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 {
 	if ( m_options != CGeneralOptions::Instance() )
-		GetApplyMacroCmd()->AddCmd( new CEditOptionsCmd< CGeneralOptions >( &CGeneralOptions::Instance(), m_options ) );
+		GetApplyMacroCmd()->AddCmd( new CEditOptionsCmd<CGeneralOptions>( &CGeneralOptions::Instance(), m_options ) );
 }
 
 void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
@@ -228,7 +227,7 @@ void CCapitalizeOptionsPage::UpdateStatus( void )
 void CCapitalizeOptionsPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 {
 	if ( m_options != CCapitalizeOptions::Instance() )
-		GetApplyMacroCmd()->AddCmd( new CEditOptionsCmd< CCapitalizeOptions >( &CCapitalizeOptions::Instance(), m_options ) );
+		GetApplyMacroCmd()->AddCmd( new CEditOptionsCmd<CCapitalizeOptions>( &CCapitalizeOptions::Instance(), m_options ) );
 }
 
 void CCapitalizeOptionsPage::DoDataExchange( CDataExchange* pDX )

@@ -8,7 +8,6 @@
 #include "EditingCommands.h"
 #include "PathItemSorting.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/TimeUtils.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/UI/WndUtilsEx.h"

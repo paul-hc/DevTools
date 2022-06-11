@@ -23,7 +23,7 @@ namespace layout
 CFlagsListPage::CFlagsListPage( ui::IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle /*= NULL*/ )
 	: CLayoutPropertyPage( IDD_FLAG_LIST_PAGE )
 	, m_pParentCallback( pParentCallback )
-	, m_pFlagsListCtrl( new CFlagsListCtrl )
+	, m_pFlagsListCtrl( new CFlagsListCtrl() )
 {
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 

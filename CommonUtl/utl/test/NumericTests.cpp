@@ -486,7 +486,7 @@ void CNumericTests::TestMemLeakCheck( void )
 		MEM_LEAK_CHECK( testMemLeakCheck );
 		ASSERT_NO_LEAKS( testMemLeakCheck );
 
-		pNumber = new double;
+		pNumber = new double();
 
 		MEM_LEAK_CHECK( testMemLeakCheck );
 		//ASSERT_NO_LEAKS( testMemLeakCheck );

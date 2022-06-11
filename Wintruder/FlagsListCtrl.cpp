@@ -4,7 +4,6 @@
 #include "Application.h"
 #include "AppService.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/StringUtilities.h"
 #include "utl/TextClipboard.h"
 #include "utl/UI/CtrlUiState.h"

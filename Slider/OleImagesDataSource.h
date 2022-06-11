@@ -25,12 +25,7 @@ public:
 	bool SetInputFilePaths( const std::vector< fs::CFlexPath >& inputFilePaths );
 
 	template< typename SrcContainerT >
-	bool SetInputFilePaths( const SrcContainerT& inputFilePaths )
-	{
-		std::vector< fs::CFlexPath > flexPaths;
-		utl::Assign( flexPaths, inputFilePaths, func::tor::StringOf() );
-		return SetInputFilePaths( flexPaths );
-	}
+	bool SetInputFilePaths( const SrcContainerT& inputFilePaths );
 
 	void DeleteClones( void );
 

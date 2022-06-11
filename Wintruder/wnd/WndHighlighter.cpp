@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "WndHighlighter.h"
 #include "AppService.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/UI/DesktopDC.h"
 #include "utl/UI/WndUtils.h"
 
@@ -66,7 +66,7 @@ void CWndHighlighter::DrawWindowFrame( void )
 
 	// create screen DC on first draw
 	if ( NULL == m_pScreenDC.get() || !m_cacheDesktopDC )
-		m_pScreenDC.reset( new CDesktopDC );
+		m_pScreenDC.reset( new CDesktopDC() );
 
 	DrawWindowFrame( m_pScreenDC.get(), m_wndSpot );
 	if ( !m_cacheDesktopDC )

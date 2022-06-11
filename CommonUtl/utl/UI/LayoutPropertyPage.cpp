@@ -17,7 +17,7 @@
 CLayoutPropertyPage::CLayoutPropertyPage( UINT templateId, UINT titleId /*= 0*/ )
 	: CPropertyPage( templateId, titleId )
 	, m_templateId( templateId )
-	, m_pLayoutEngine( new CLayoutEngine )
+	, m_pLayoutEngine( new CLayoutEngine() )
 	, m_useLazyUpdateData( false )				// don't output on each page activation - contrary to CPropertyPage default behaviour
 	, m_hCtrlFocus( NULL )
 	, m_idleUpdateDeep( false )

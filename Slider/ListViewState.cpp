@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ListViewState.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/UI/ReportListControl.h"
@@ -67,19 +67,19 @@ CListViewState::CListViewState( StoreMode storeBy )
 {
 	switch ( storeBy )
 	{
-		case StoreByIndex: m_pIndexImpl.reset( new CImpl< int > ); break;
-		case StoreByString: m_pStringImpl.reset( new CImpl< std::tstring > ); break;
+		case StoreByIndex: m_pIndexImpl.reset( new CImpl<int>() ); break;
+		case StoreByString: m_pStringImpl.reset( new CImpl<std::tstring>() ); break;
 	}
 }
 
 CListViewState::CListViewState( std::vector< std::tstring >& rSelStrings )
-	: m_pStringImpl( new CImpl< std::tstring > )
+	: m_pStringImpl( new CImpl<std::tstring>() )
 {
 	m_pStringImpl->m_selItems.swap( rSelStrings );
 }
 
 CListViewState::CListViewState( const std::vector< int >& selIndexes )
-	: m_pIndexImpl( new CImpl< int > )
+	: m_pIndexImpl( new CImpl<int>() )
 {
 	m_pIndexImpl->m_selItems = selIndexes;
 }
@@ -95,9 +95,9 @@ CListViewState& CListViewState::operator=( const CListViewState& src )
 	{
 		Reset();
 		if ( src.UseIndexes() )
-			m_pIndexImpl.reset( new CImpl< int >( *src.m_pIndexImpl ) );
+			m_pIndexImpl.reset( new CImpl<int>( *src.m_pIndexImpl ) );
 		else if ( src.UseStrings() )
-			m_pStringImpl.reset( new CImpl< std::tstring >( *src.m_pStringImpl ) );
+			m_pStringImpl.reset( new CImpl<std::tstring>( *src.m_pStringImpl ) );
 	}
 	return *this;
 }
@@ -114,8 +114,8 @@ void CListViewState::Stream( CArchive& archive )
 		Reset();
 		switch ( storeBy )
 		{
-			case StoreByIndex: m_pIndexImpl.reset( new CImpl< int > ); break;
-			case StoreByString: m_pStringImpl.reset( new CImpl< std::tstring > ); break;
+			case StoreByIndex: m_pIndexImpl.reset( new CImpl<int>() ); break;
+			case StoreByString: m_pStringImpl.reset( new CImpl<std::tstring>() ); break;
 		}
 	}
 

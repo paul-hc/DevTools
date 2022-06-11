@@ -3,10 +3,10 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/StringTests.h"
+#include "Algorithms.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
 #include "FlexPath.h"
-#include "ContainerUtilities.h"
 #include "StringUtilities.h"
 #include "TimeUtils.h"
 

@@ -1,7 +1,7 @@
 #ifndef Resequence_hxx
 #define Resequence_hxx
 
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "Resequence.h"
 #include <list>
 

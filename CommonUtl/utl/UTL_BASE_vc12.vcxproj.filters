@@ -37,9 +37,6 @@
     <ClInclude Include="ComparePredicates.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="ContainerUtilities.h">
-      <Filter>utl</Filter>
-    </ClInclude>
     <ClInclude Include="EnumTags.h">
       <Filter>utl</Filter>
     </ClInclude>
@@ -388,6 +385,24 @@
     <ClInclude Include="IProgressService.h">
       <Filter>utl\Pattern</Filter>
     </ClInclude>
+    <ClInclude Include="test\TempFilePairPool.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ContainerOwnership.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="PathRenamePairs.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization.hxx">
+      <Filter>utl\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="TextClipboard.h">
+      <Filter>utl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EnumTags.cpp">
@@ -608,6 +623,18 @@
     </ClCompile>
     <ClCompile Include="IProgressService.cpp">
       <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TempFilePairPool.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="PathRenamePairs.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourcePool.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="TextClipboard.cpp">
+      <Filter>utl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

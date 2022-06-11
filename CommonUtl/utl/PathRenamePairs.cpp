@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "PathRenamePairs.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

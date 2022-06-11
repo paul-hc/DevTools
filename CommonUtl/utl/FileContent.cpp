@@ -5,7 +5,6 @@
 #include "FileEnumerator.h"
 #include "FileSystem.h"
 #include "Crc32.h"
-#include "ContainerUtilities.h"
 #include "TimeUtils.h"
 #include "StringUtilities.h"
 #include "StdHashValue.h"

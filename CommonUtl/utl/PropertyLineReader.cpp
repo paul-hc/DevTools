@@ -113,7 +113,7 @@ int CPropertyLineReader::ReadLine( void )
 				// double line buffer size on long lines
 				if ( lineSize == m_lineBufferSize )
 				{
-					char* extendedLineBuffer = new char[m_lineBufferSize * 2];
+					char* extendedLineBuffer = new char[ m_lineBufferSize * 2 ];
 					memcpy( extendedLineBuffer, m_lineBuffer.get(), m_lineBufferSize );
 
 					m_lineBufferSize *= 2;

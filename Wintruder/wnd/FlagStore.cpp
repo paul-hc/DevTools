@@ -2,7 +2,8 @@
 #include "stdafx.h"
 #include "FlagStore.h"
 #include "AppService.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/StringUtilities.h"
 
 #ifdef _DEBUG
@@ -152,7 +153,7 @@ CFlagStore::CFlagStore( const TCHAR* pWndClassAliases, CFlagInfo flagInfos[], un
 		else if ( needsGroups )
 		{
 			if ( m_groups.empty() || !m_groups.back()->CanGroup( pFlagInfo ) )
-				m_groups.push_back( new CFlagGroup );				// add an anonymous group when encountering a new mask
+				m_groups.push_back( new CFlagGroup() );				// add an anonymous group when encountering a new mask
 
 			m_groups.back()->AddToGroup( pFlagInfo );
 		}

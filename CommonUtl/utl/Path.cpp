@@ -4,7 +4,7 @@
 #include "FileState.h"
 #include "FileSystem.h"
 #include "Crc32.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "StringUtilities.h"
 #include "StringIntuitiveCompare.h"
 #include <io.h>

@@ -101,12 +101,6 @@
     <ClInclude Include="TooltipsHook.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities.h">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="UtilitiesEx.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="VersionInfo.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -344,12 +338,6 @@
     <ClInclude Include="TreeControl.h">
       <Filter>UI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="BaseFrameHostCtrl.h">
-      <Filter>UI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseFrameHostCtrl.hxx">
-      <Filter>UI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="BufferedStatic.h">
       <Filter>UI\Controls</Filter>
     </ClInclude>
@@ -581,6 +569,39 @@
     <ClInclude Include="WindowDebug.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="WndUtils.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="WndUtilsEx.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseTrackMenuWnd.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseTrackMenuWnd.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameHostCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameHostCtrl.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ISystemTrayCallback.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemTray.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ResizeFrameStatic.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ResizeGripBar.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolImageList.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutBox.cpp">
@@ -623,12 +644,6 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="TooltipsHook.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Utilities.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="UtilitiesEx.cpp">
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="VersionInfo.cpp">
@@ -1006,6 +1021,24 @@
     <ClCompile Include="WindowDebug.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="WndUtils.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="WndUtilsEx.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemTray.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ResizeFrameStatic.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ResizeGripBar.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolImageList.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="utl_ui.rc">
@@ -1026,6 +1059,15 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Transparent.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ArrowsDownUpStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ArrowsRightLeftStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Unknown.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -1049,6 +1091,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\TrackZoom.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ResizeSplitter-NS.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ResizeSplitter-WE.cur">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

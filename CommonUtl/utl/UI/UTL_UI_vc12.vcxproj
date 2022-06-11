@@ -187,14 +187,14 @@
     <ClInclude Include="BalloonMessageTip.h" />
     <ClInclude Include="BaseApp.h" />
     <ClInclude Include="BaseApp.hxx" />
-    <ClInclude Include="BaseFrameHostCtrl.h" />
-    <ClInclude Include="BaseFrameHostCtrl.hxx" />
     <ClInclude Include="BaseItemTooltipsCtrl.h" />
     <ClInclude Include="BaseItemTooltipsCtrl.hxx" />
     <ClInclude Include="BaseMainDialog.h" />
     <ClInclude Include="BaseSplitButton.h" />
     <ClInclude Include="BaseStockContentCtrl.h" />
     <ClInclude Include="BaseStockContentCtrl.hxx" />
+    <ClInclude Include="BaseTrackMenuWnd.h" />
+    <ClInclude Include="BaseTrackMenuWnd.hxx" />
     <ClInclude Include="BaseZoomView.h" />
     <ClInclude Include="BufferedStatic.h" />
     <ClInclude Include="CheckStatePolicies.h" />
@@ -229,6 +229,8 @@
     <ClInclude Include="EnumComboBox.h" />
     <ClInclude Include="EnumSplitButton.h" />
     <ClInclude Include="FilterStore.h" />
+    <ClInclude Include="FrameHostCtrl.h" />
+    <ClInclude Include="FrameHostCtrl.hxx" />
     <ClInclude Include="GdiCoords.h" />
     <ClInclude Include="GdiPlus_fwd.h" />
     <ClInclude Include="IImageZoomView.h" />
@@ -250,6 +252,7 @@
     <ClInclude Include="ImagingWic.h" />
     <ClInclude Include="ImagingWic_fwd.h" />
     <ClInclude Include="InternalChange.h" />
+    <ClInclude Include="ISystemTrayCallback.h" />
     <ClInclude Include="ItemContent.h" />
     <ClInclude Include="ItemContentEdit.h" />
     <ClInclude Include="ItemContentHistoryCombo.h" />
@@ -293,6 +296,8 @@
     <ClInclude Include="ReportListControl.h" />
     <ClInclude Include="ReportListControl.hxx" />
     <ClInclude Include="ReportListCustomDraw.h" />
+    <ClInclude Include="ResizeFrameStatic.h" />
+    <ClInclude Include="ResizeGripBar.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceData.h" />
     <ClInclude Include="SampleView.h" />
@@ -317,6 +322,7 @@
     <ClInclude Include="StockValuesComboBox.h" />
     <ClInclude Include="StockValuesComboBox.hxx" />
     <ClInclude Include="SyncScrolling.h" />
+    <ClInclude Include="SystemTray.h" />
     <ClInclude Include="TandemControls.h" />
     <ClInclude Include="TandemControls.hxx" />
     <ClInclude Include="TaskDialog.h" />
@@ -336,6 +342,7 @@
     <ClInclude Include="Thumbnailer_fwd.h" />
     <ClInclude Include="ThumbPreviewCtrl.h" />
     <ClInclude Include="ToolbarStrip.h" />
+    <ClInclude Include="ToolImageList.h" />
     <ClInclude Include="ToolStrip.h" />
     <ClInclude Include="TooltipsHook.h" />
     <ClInclude Include="TrackStatic.h" />
@@ -343,8 +350,6 @@
     <ClInclude Include="TreeControlCustomDraw.h" />
     <ClInclude Include="ui_fwd.h" />
     <ClInclude Include="UserReport.h" />
-    <ClInclude Include="Utilities.h" />
-    <ClInclude Include="UtilitiesEx.h" />
     <ClInclude Include="utl_ui.h" />
     <ClInclude Include="VersionInfo.h" />
     <ClInclude Include="VisualTheme.h" />
@@ -360,6 +365,8 @@
     <ClInclude Include="WindowPlacement.h" />
     <ClInclude Include="WindowTimer.h" />
     <ClInclude Include="WinExplorer.h" />
+    <ClInclude Include="WndUtils.h" />
+    <ClInclude Include="WndUtilsEx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutBox.cpp" />
@@ -450,6 +457,8 @@
     <ClCompile Include="RenderingDirect2D.cpp" />
     <ClCompile Include="ReportListControl.cpp" />
     <ClCompile Include="ReportListCustomDraw.cpp" />
+    <ClCompile Include="ResizeFrameStatic.cpp" />
+    <ClCompile Include="ResizeGripBar.cpp" />
     <ClCompile Include="ResourceData.cpp" />
     <ClCompile Include="SampleView.cpp" />
     <ClCompile Include="ShellContextMenuBuilder.cpp" />
@@ -472,6 +481,7 @@
     </ClCompile>
     <ClCompile Include="StockValuesComboBox.cpp" />
     <ClCompile Include="SyncScrolling.cpp" />
+    <ClCompile Include="SystemTray.cpp" />
     <ClCompile Include="TaskDialog.cpp" />
     <ClCompile Include="test\BaseImageTestCase.cpp" />
     <ClCompile Include="test\ColorTests.cpp" />
@@ -488,14 +498,13 @@
     <ClCompile Include="Thumbnailer.cpp" />
     <ClCompile Include="ThumbPreviewCtrl.cpp" />
     <ClCompile Include="ToolbarStrip.cpp" />
+    <ClCompile Include="ToolImageList.cpp" />
     <ClCompile Include="ToolStrip.cpp" />
     <ClCompile Include="TooltipsHook.cpp" />
     <ClCompile Include="TrackStatic.cpp" />
     <ClCompile Include="TreeControl.cpp" />
     <ClCompile Include="TreeControlCustomDraw.cpp" />
     <ClCompile Include="UserReport.cpp" />
-    <ClCompile Include="Utilities.cpp" />
-    <ClCompile Include="UtilitiesEx.cpp" />
     <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="VisualTheme.cpp" />
     <ClCompile Include="VisualThemeFallback.cpp" />
@@ -508,21 +517,28 @@
     <ClCompile Include="WindowPlacement.cpp" />
     <ClCompile Include="WindowTimer.cpp" />
     <ClCompile Include="WinExplorer.cpp" />
+    <ClCompile Include="WndUtils.cpp" />
+    <ClCompile Include="WndUtilsEx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="utl_ui.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\ArrowsDownUpStrip.bmp" />
+    <Image Include="res\ArrowsRightLeftStrip.bmp" />
     <Image Include="res\ListStrip.bmp" />
     <Image Include="res\ListStrip.png" />
     <Image Include="res\StdStrip.bmp" />
     <Image Include="res\StdStrip.png" />
     <Image Include="res\Transparent.ico" />
+    <Image Include="res\Unknown.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\DragDrop-Copy.cur" />
     <None Include="res\DragDrop-Move.cur" />
     <None Include="res\DragDrop-None.cur" />
+    <None Include="res\ResizeSplitter-NS.cur" />
+    <None Include="res\ResizeSplitter-WE.cur" />
     <None Include="res\Scrollable.cur" />
     <None Include="res\ScrollDrag.cur" />
     <None Include="res\TrackScroll.cur" />

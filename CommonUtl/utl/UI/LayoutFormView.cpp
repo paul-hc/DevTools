@@ -14,13 +14,13 @@
 
 CLayoutFormView::CLayoutFormView( UINT templateId )
 	: CFormView( templateId )
-	, m_pLayoutEngine( new CLayoutEngine )
+	, m_pLayoutEngine( new CLayoutEngine() )
 {
 }
 
 CLayoutFormView::CLayoutFormView( const TCHAR* pTemplateName )
 	: CFormView( pTemplateName )
-	, m_pLayoutEngine( new CLayoutEngine )
+	, m_pLayoutEngine( new CLayoutEngine() )
 {
 }
 

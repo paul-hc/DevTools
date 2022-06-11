@@ -3,7 +3,7 @@
 #include "ImagingDirect2D.h"
 #include "ImagingWic.h"
 #include "GdiCoords.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

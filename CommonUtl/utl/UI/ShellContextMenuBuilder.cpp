@@ -71,7 +71,7 @@ CBaseMenuBuilder* CSubMenuBuilder::GetParentBuilder( void ) const
 
 CMenu* CSubMenuBuilder::CreateEmptyPopupMenu( void )
 {
-	CMenu* pPopupMenu = new CMenu;
+	CMenu* pPopupMenu = new CMenu();
 	pPopupMenu->CreatePopupMenu();
 	return pPopupMenu;
 }

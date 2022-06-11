@@ -3,7 +3,7 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/Test.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "FileSystem.h"
 #include "Logger.h"
 #include "Path.h"

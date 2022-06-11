@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "MoveFileDialog.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
 #include "utl/UI/ItemContentHistoryCombo.h"
 #include "utl/UI/ShellUtilities.h"

@@ -3,7 +3,6 @@
 #pragma once
 
 #include <vector>
-#include "ContainerUtilities.h"
 
 
 namespace utl
@@ -15,19 +14,19 @@ namespace utl
 	{
 	public:
 		CResourcePool( void ) {}
-		virtual ~CResourcePool() { std::for_each( m_pResources.rbegin(), m_pResources.rend(), func::Delete() ); }		// delete in reverse order of registration
+		virtual ~CResourcePool();
 
 		template< typename Type >
 		void AddPointer( Type* pointer ) { m_pResources.push_back( new std::auto_ptr<Type>( pointer ) ); }
 
 		template< typename Type >
-		void AddAutoPtr( std::auto_ptr<Type>* pPtr ) { m_pResources.push_back( new CAutoPtrResource< Type >( pPtr ) ); }
+		void AddAutoPtr( std::auto_ptr<Type>* pPtr ) { m_pResources.push_back( new CAutoPtrResource<Type>( pPtr ) ); }
 
 		template< typename ComPtrType >
-		void AddComPtr( ComPtrType& rComPtr ) { m_pResources.push_back( new CComPtrResource< ComPtrType >( rComPtr ) ); }
+		void AddComPtr( ComPtrType& rComPtr ) { m_pResources.push_back( new CComPtrResource<ComPtrType>( rComPtr ) ); }
 
 		template< typename ObjectType >
-		void AddAutoClear( ObjectType* pClearable ) { m_pResources.push_back( new CAutoClearResource< ObjectType >( pClearable ) ); }
+		void AddAutoClear( ObjectType* pClearable ) { m_pResources.push_back( new CAutoClearResource<ObjectType>( pClearable ) ); }
 	private:
 		std::vector< utl::IMemoryManaged* > m_pResources;
 	};

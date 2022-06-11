@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "IncludeOptions.h"
 #include "Application.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
 #include "utl/StringUtilities.h"
 #include "resource.h"

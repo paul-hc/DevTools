@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "ToolStrip.h"
 #include "Icon.h"
-#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

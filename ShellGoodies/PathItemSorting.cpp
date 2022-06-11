@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "PathItemSorting.h"
 #include "RenameItem.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/EnumTags.h"
 
 #ifdef _DEBUG

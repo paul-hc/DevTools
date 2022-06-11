@@ -6,6 +6,7 @@
 #include "test/TempFilePairPool.h"
 #include "Path.h"
 #include "FlexPath.h"
+#include "ContainerOwnership.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG
@@ -685,7 +686,7 @@ void CPathTests::TestHasMultipleDirPaths( void )
 		pathMap[ new ut::CPathItem( _T("C:\\Images\\Drink\\coffee.jpg"), 30 ) ] = "Odd";
 		ASSERT( path::HasMultipleDirPaths( pathMap ) );
 
-		utl::ClearOwningAssocContainerKeys( pathMap );
+		utl::ClearOwningMapKeys( pathMap );
 	}
 }
 

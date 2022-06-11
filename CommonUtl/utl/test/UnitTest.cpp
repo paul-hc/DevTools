@@ -3,7 +3,7 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/UnitTest.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "TextFileIo.h"
 #include "FileEnumerator.h"
 #include "IoBin.h"

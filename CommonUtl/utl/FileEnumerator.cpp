@@ -3,7 +3,7 @@
 #include "FileEnumerator.h"
 #include "FileState.h"
 #include "RuntimeException.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "StringUtilities.h"
 #include <hash_set>
 

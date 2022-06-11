@@ -4,7 +4,6 @@
 #include "RenameItem.h"
 #include "TextAlgorithms.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/LongestCommonDuplicate.h"
 #include "utl/PathGenerator.h"
 #include "utl/StringUtilities.h"

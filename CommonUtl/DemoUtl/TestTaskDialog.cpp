@@ -91,7 +91,7 @@ CTaskDialog* CTestTaskDialog::MakeTaskDialog_MessageBox( void ) const
 
 CTaskDialog* CTestTaskDialog::MakeTaskDialog_ProgressBar( void ) const
 {
-	return new my::CProgressBarTaskDialog;
+	return new my::CProgressBarTaskDialog();
 }
 
 CTaskDialog* CTestTaskDialog::MakeTaskDialog_MarqueeProgressBar( void ) const
@@ -109,7 +109,7 @@ CTaskDialog* CTestTaskDialog::MakeTaskDialog_MarqueeProgressBar( void ) const
 
 CTaskDialog* CTestTaskDialog::MakeTaskDialog_Navigation( void ) const
 {
-	return new my::CFirstNavigationDialog;
+	return new my::CFirstNavigationDialog();
 }
 
 CTaskDialog* CTestTaskDialog::MakeTaskDialog_Complete( void ) const

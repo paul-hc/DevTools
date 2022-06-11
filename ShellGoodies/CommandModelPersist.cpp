@@ -4,7 +4,6 @@
 #include "FileMacroCommands.h"
 #include "utl/Command.h"
 #include "utl/CommandModel.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/FileSystem.h"
@@ -20,6 +19,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/Serialization.hxx"
 
 
 // CCommandModelPersist class

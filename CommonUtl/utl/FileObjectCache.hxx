@@ -1,7 +1,7 @@
 #ifndef FileObjectCache_hxx
 #define FileObjectCache_hxx
 
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
 #include "MfcUtilities.h"
 #include "StructuredStorage.h"
 

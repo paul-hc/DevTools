@@ -5,9 +5,9 @@
 #include "Color.h"
 #include "CustomDrawImager.h"
 #include "Icon.h"
-#include "ContainerUtilities.h"
 #include "MenuUtilities.h"
 #include "WndUtilsEx.h"
+#include "utl/Algorithms.h"
 #include "utl/TextClipboard.h"
 
 #ifdef _DEBUG

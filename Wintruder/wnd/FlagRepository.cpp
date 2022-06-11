@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "FlagRepository.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 #include <hash_map>
 
 #ifdef _DEBUG

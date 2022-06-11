@@ -4,8 +4,8 @@
 #include "ImagingWic.h"
 #include "Recycler.h"
 #include "Registry.h"
-#include "ContainerUtilities.h"
 #include "WndUtils.h"
+#include "utl/Algorithms.h"
 #include "utl/FileSystem.h"
 #include <shlwapi.h>
 

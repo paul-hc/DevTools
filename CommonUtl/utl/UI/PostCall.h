@@ -122,25 +122,25 @@ namespace ui
 	template< typename HostType, typename HostMethod >
 	void PostCall( HostType* pHost, HostMethod pMethod )
 	{
-		new CPostCall< HostType, HostMethod >( pHost, pMethod );
+		new CPostCall<HostType, HostMethod>( pHost, pMethod );
 	}
 
 	template< typename HostType, typename HostMethod, typename Arg1 >
 	void PostCall( HostType* pHost, HostMethod pMethod, Arg1 arg1 )
 	{
-		new CPostCallArg1< HostType, HostMethod, Arg1 >( pHost, pMethod, arg1 );
+		new CPostCallArg1<HostType, HostMethod, Arg1>( pHost, pMethod, arg1 );
 	}
 
 	template< typename HostType, typename HostMethod, typename Arg1, typename Arg2 >
 	void PostCall( HostType* pHost, HostMethod pMethod, Arg1 arg1, Arg2 arg2 )
 	{
-		new CPostCallArg2< HostType, HostMethod, Arg1, Arg2 >( pHost, pMethod, arg1, arg2 );
+		new CPostCallArg2<HostType, HostMethod, Arg1, Arg2>( pHost, pMethod, arg1, arg2 );
 	}
 
 	template< typename HostType, typename HostMethod, typename Arg1, typename Arg2, typename Arg3 >
 	void PostCall( HostType* pHost, HostMethod pMethod, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
 	{
-		new CPostCallArg3< HostType, HostMethod, Arg1, Arg2, Arg3 >( pHost, pMethod, arg1, arg2, arg3 );
+		new CPostCallArg3<HostType, HostMethod, Arg1, Arg2, Arg3>( pHost, pMethod, arg1, arg2, arg3 );
 	}
 }
 

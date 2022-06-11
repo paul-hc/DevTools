@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "PathFormatter.h"
-#include "ContainerUtilities.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG

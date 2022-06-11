@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 #include "DuplicateFileItem.h"
-#include "ContainerUtilities.h"
+#include "Algorithms.h"
+#include "ContainerOwnership.h"
 #include "Crc32.h"
 #include "ComparePredicates.h"
 #include "FileSystem.h"

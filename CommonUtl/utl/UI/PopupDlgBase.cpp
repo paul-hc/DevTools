@@ -7,7 +7,8 @@
 #include "MenuUtilities.h"
 #include "WndUtils.h"
 #include "VersionInfo.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Serialization_fwd.h"
-#include "ContainerUtilities.h"
 
 
 namespace serial
@@ -64,23 +63,10 @@ namespace serial
 	//
 
 	template< typename PtrContainerT >
-	void Save_CObjects_Dynamic( CArchive& archive, const PtrContainerT& objects )
-	{
-		archive.WriteCount( static_cast<DWORD_PTR>( rObjects.size() ) );			// WriteCount() for backwards compatibility
-
-		for ( typename PtrContainerT::iterator itPtr = objects.begin(); itPtr != objects.end(); ++itPtr )
-			archive << *itPtr;
-	}
+	void Save_CObjects_Dynamic( CArchive& archive, const PtrContainerT& objects );
 
 	template< typename PtrContainerT >
-	void Load_CObjects_Dynamic( CArchive& archive, PtrContainerT& rObjects )
-	{
-		utl::ClearOwningContainer( rObjects );			// delete existing owned objects
-		rObjects.resize( archive.ReadCount() );			// ReadCount() for backwards compatibility
-
-		for ( typename PtrContainerT::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
-			archive >> *itPtr;
-	}
+	void Load_CObjects_Dynamic( CArchive& archive, PtrContainerT& rObjects );
 
 	template< typename PtrContainerT >
 	inline void Serialize_CObjects_Dynamic( CArchive& archive, PtrContainerT& rObjects )
@@ -98,30 +84,10 @@ namespace serial
 	//
 
 	template< typename PtrContainerT >
-	void Save_CObjects_Mixed( CArchive& archive, const PtrContainerT& objects )
-	{
-		size_t mfcSerialCount = std::count_if( objects.begin(), objects.end(), pred::IsA< CObject >() );
-		archive.WriteCount( static_cast<DWORD_PTR>( mfcSerialCount ) );			// WriteCount() for backwards compatibility
-
-		for ( typename PtrContainerT::const_iterator itPtr = objects.begin(); itPtr != objects.end(); ++itPtr )
-			if ( CObject* pSerialObject = dynamic_cast<CObject*>( *itPtr ) )
-				archive << pSerialObject;
-	}
+	void Save_CObjects_Mixed( CArchive& archive, const PtrContainerT& objects );
 
 	template< typename PtrContainerT >
-	void Load_CObjects_Mixed( CArchive& archive, PtrContainerT& rObjects )
-	{
-		utl::ClearOwningContainer( rObjects );			// delete existing owned objects
-		rObjects.resize( archive.ReadCount() );			// ReadCount() for backwards compatibility
-
-		for ( typename PtrContainerT::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
-		{
-			CObject* pSerialObject = NULL;
-			archive >> pSerialObject;
-
-			*itPtr = dynamic_cast<typename PtrContainerT::value_type>( pSerialObject );
-		}
-	}
+	void Load_CObjects_Mixed( CArchive& archive, PtrContainerT& rObjects );
 
 	template< typename PtrContainerT >
 	inline void Serialize_CObjects_Mixed( CArchive& archive, PtrContainerT& rObjects )
@@ -171,7 +137,7 @@ namespace serial
 
 namespace serial
 {
-	// serialize ContainerT< Type > - container of scalar objects with method: void Type::Stream( CArchive& archive )
+	// serialize ContainerT<Type> - container of scalar objects with method: void Type::Stream( CArchive& archive )
 	//
 	template< typename ContainerT >
 	void StreamItems( CArchive& archive, ContainerT& rItems )
@@ -203,17 +169,7 @@ namespace serial
 	}
 
 	template< typename PtrContainerT >
-	void LoadOwningPtrs( CArchive& archive, PtrContainerT& rItemPtrs )
-	{
-		::portable::size_t count = 0;
-
-		archive >> count;
-		utl::CreateOwningContainerObjects( rItemPtrs, count );
-
-		// load each new item in container
-		for ( typename PtrContainerT::const_iterator itItemPtr = rItemPtrs.begin(); itItemPtr != rItemPtrs.end(); ++itItemPtr )
-			( *itItemPtr )->Stream( archive );
-	}
+	void LoadOwningPtrs( CArchive& archive, PtrContainerT& rItemPtrs );
 
 	// serialize ContainerT< Type* > - owning container of pointers to objects with:
 	//	- default constructor Type::Type()
@@ -253,7 +209,7 @@ namespace serial
 			if ( hasPtr )
 			{
 				if ( NULL == rPtr.get() )
-					rPtr.reset( new Type );
+					rPtr.reset( new Type() );
 
 				rPtr->Stream( archive );
 			}

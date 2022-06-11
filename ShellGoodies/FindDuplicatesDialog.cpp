@@ -6,7 +6,7 @@
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/Crc32.h"
 #include "utl/DuplicateFileItem.h"
 #include "utl/DuplicateFilesEnumerator.h"

@@ -9,7 +9,6 @@
 #include "TextAlgorithms.h"
 #include "Application_fwd.h"
 #include "resource.h"
-#include "utl/ContainerUtilities.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/LayoutEngine.h"
 #include "utl/UI/MenuUtilities.h"
