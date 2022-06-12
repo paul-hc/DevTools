@@ -91,6 +91,9 @@ namespace crc32
 
 namespace fs
 {
+	enum FileExpireStatus;
+
+
 	class CCrc32FileCache
 	{
 		CCrc32FileCache( void ) {}
@@ -102,9 +105,19 @@ namespace fs
 
 		UINT AcquireCrc32( const fs::CPath& filePath );
 	private:
-		typedef std::pair<UINT, CTime> TChecksumStampPair;		// Crc32 checksum, lastModifyTime
+		static fs::FileExpireStatus CheckExpireStatus( const fs::CPath& filePath, UINT64 fileSize, const CTime& modifyTime );
 
-		stdext::hash_map< fs::CPath, TChecksumStampPair > m_cachedChecksums;
+		struct CStamp
+		{
+			CStamp( UINT crc32Checksum = 0, UINT64 fileSize = 0, const CTime& modifyTime = CTime() ) : m_crc32Checksum( crc32Checksum ), m_fileSize( fileSize ), m_modifyTime( modifyTime ) {}
+		public:
+			UINT m_crc32Checksum;
+			UINT64 m_fileSize;
+			CTime m_modifyTime;
+		};
+
+	private:
+		stdext::hash_map< fs::CPath, CStamp > m_cachedChecksums;
 	};
 }
 

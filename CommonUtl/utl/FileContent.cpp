@@ -239,7 +239,7 @@ namespace fs
 
 	CDupFileEnumerator::CDupFileEnumerator( const CFileBackup& backup )
 		: m_backup( backup )
-		, m_srcContent( m_backup.GetSrcFilePath(), FileSize )
+		, m_srcContent( m_backup.GetSrcFilePath(), backup.GetMatchBy() )
 	{
 	}
 

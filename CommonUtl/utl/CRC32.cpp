@@ -3,6 +3,7 @@
 #include "Crc32.h"
 #include "FileSystem.h"
 #include "IoBin.h"
+#include "EnumTags.h"
 #include "AppTools.h"
 
 #ifdef _DEBUG
@@ -57,7 +58,10 @@ namespace crc32
 
 	UINT ComputeFileChecksum( const fs::CPath& filePath )
 	{
-		return io::bin::ReadCFile_NoThrow( filePath, func::ComputeChecksum<utl::TCrc32Checksum>() ).m_checksum.GetResult();
+		UINT checksum = io::bin::ReadCFile_NoThrow( filePath, func::ComputeChecksum<utl::TCrc32Checksum>() ).m_checksum.GetResult();
+
+		//TRACE( _T("crc32::ComputeFileChecksum(%s)=%08X\n"), filePath.GetPtr(), checksum );
+		return checksum;
 	}
 }
 
@@ -74,35 +78,44 @@ namespace fs
 
 	UINT CCrc32FileCache::AcquireCrc32( const fs::CPath& filePath )
 	{
-		stdext::hash_map< fs::CPath, TChecksumStampPair >::iterator itFound = m_cachedChecksums.find( filePath );
+		stdext::hash_map< fs::CPath, CStamp >::iterator itFound = m_cachedChecksums.find( filePath );
 		if ( itFound != m_cachedChecksums.end() )		// found cached?
 		{
-			switch ( fs::CheckExpireStatus( filePath, itFound->second.second ) )
+			fs::FileExpireStatus status = CheckExpireStatus( filePath, itFound->second.m_fileSize, itFound->second.m_modifyTime );
+
+			//TRACE( _T("CCrc32FileCache::AcquireCrc32( %s ) - '%s'\n"), filePath.GetPtr(), fs::GetTags_FileExpireStatus().FormatKey( status ).c_str() );
+			switch ( status )
 			{
-				case fs::ExpiredFileModified:
-					itFound->second.first = crc32::ComputeFileChecksum( filePath );
-					if ( 0 == itFound->second.first )		// error
-					{
-						m_cachedChecksums.erase( itFound );
-						break;
-					}
-					// fall-through
 				case fs::FileNotExpired:
-					return itFound->second.first;
-				case fs::ExpiredFileDeleted:
-					m_cachedChecksums.erase( itFound );
+					return itFound->second.m_crc32Checksum;		// cache hit
+				case fs::ExpiredFileModified:
+					m_cachedChecksums.erase( itFound );			// file modified in the meantime: refresh CRC
 					break;
-			}
-		}
-		else
-		{
-			if ( UINT crc32Checksum = crc32::ComputeFileChecksum( filePath ) )
-			{
-				m_cachedChecksums[ filePath ] = TChecksumStampPair( crc32Checksum, fs::ReadLastModifyTime( filePath ) );
-				return crc32Checksum;
+				case fs::ExpiredFileDeleted:
+					m_cachedChecksums.erase( itFound );			// file has been deleted
+					return 0;
 			}
 		}
 
+		if ( UINT crc32Checksum = crc32::ComputeFileChecksum( filePath ) )
+		{
+			m_cachedChecksums[ filePath ] = CStamp( crc32Checksum, fs::GetFileSize( filePath.GetPtr() ), fs::ReadLastModifyTime( filePath ) );
+			return crc32Checksum;
+		}
+
 		return 0;
+	}
+
+	fs::FileExpireStatus CCrc32FileCache::CheckExpireStatus( const fs::CPath& filePath, UINT64 fileSize, const CTime& modifyTime )
+	{
+		fs::FileExpireStatus status = fs::CheckExpireStatus( filePath, modifyTime );
+
+		if ( fs::FileNotExpired == status )
+		{	// fix issue in unit tests execution in quick sequence, when the modifyTime doesn't seem modified due to time resolution of 1s: also factor-in file size
+			if ( fileSize != fs::GetFileSize( filePath.GetPtr() ) )		// file content was modified?
+				return fs::ExpiredFileModified;							// we have an expired file (content changed)
+		}
+
+		return status;
 	}
 }

@@ -84,6 +84,7 @@ namespace fs
 		fs::AcquireResult CreateBackupFile( fs::CPath* pOutBackupFilePath ) throws_( CRuntimeException );	// create a backup copy of the original if none existing files matching "name*.ext" have identical content
 
 		const fs::CPath& GetSrcFilePath( void ) const { return m_srcFilePath; }
+		FileContentMatch GetMatchBy( void ) const { return m_matchBy; }
 	private:
 		fs::CPath m_srcFilePath;			// converted to absolute
 		fs::TDirPath m_backupDirPath;

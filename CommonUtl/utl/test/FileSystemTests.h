@@ -26,7 +26,8 @@ private:
 	void TestFileAndDirectoryState( void );
 	void TestTouchFile( void );
 	void TestFileTransferMatch( void );
-	void TestBackupFile( void );
+	void TestBackupFileFlat( void );
+	void TestBackupFileSubDir( void );
 };
 
 
