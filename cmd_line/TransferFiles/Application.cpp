@@ -34,7 +34,7 @@ namespace ut
 
 static const char s_helpMessage[] =
 	"Copies files recursively in target directory tree (Unicode paths).\n"
-	"    Written by Paul Cocoveanu, 2004-2021.\n"
+	"    Written by Paul Cocoveanu, 2004-2022. Built on 12 June 2022.\n"
 	"\n"
 	"xFer source_filter [target_dir]\n"
 	"     [/transfer=action]\n"

@@ -64,7 +64,7 @@ void CProgressService::AddFoundFile( const fs::CPath& filePath ) throws_( CUserA
 	GetService()->AdvanceItem( filePath.GetPtr() );
 }
 
-bool CProgressService::AddFoundSubDir( const fs::CPath& subDirPath ) throws_( CUserAbortedException )
+bool CProgressService::AddFoundSubDir( const fs::TDirPath& subDirPath ) throws_( CUserAbortedException )
 {
 	GetService()->AdvanceStage( subDirPath.GetPtr() );
 	return true;

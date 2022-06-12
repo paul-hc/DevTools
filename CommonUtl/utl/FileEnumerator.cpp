@@ -225,7 +225,7 @@ namespace fs
 			m_filePaths.push_back( path );
 	}
 
-	bool CPathMatchLookup::IsDirMatch( const fs::CPath& dirPath ) const
+	bool CPathMatchLookup::IsDirMatch( const fs::TDirPath& dirPath ) const
 	{
 		if ( !m_dirPaths.empty() )		// speed things up if empty - skip iterators creation
 			for ( std::vector< fs::TDirPath >::const_iterator itDirPath = m_dirPaths.begin(); itDirPath != m_dirPaths.end(); ++itDirPath )
@@ -349,7 +349,7 @@ namespace fs
 			m_pChainEnum->AddFoundFile( filePath );
 	}
 
-	bool CBaseEnumerator::AddFoundSubDir( const fs::CPath& subDirPath ) override
+	bool CBaseEnumerator::AddFoundSubDir( const fs::TDirPath& subDirPath ) override
 	{
 		fs::CPath _subDirPath = subDirPath;
 

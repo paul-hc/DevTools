@@ -47,7 +47,7 @@ namespace fs
 
 		bool IsEmpty( void ) const { return m_dirPaths.empty() && m_filePaths.empty() && m_wildSpecs.empty(); }
 
-		bool IsDirMatch( const fs::CPath& dirPath ) const;
+		bool IsDirMatch( const fs::TDirPath& dirPath ) const;
 		bool IsFileMatch( const fs::CPath& filePath ) const;
 	private:
 		bool IsWildcardMatch( const fs::CPath& anyPath ) const;
@@ -87,7 +87,7 @@ namespace fs
 	protected:
 		virtual void OnAddFileInfo( const fs::CFileState& fileState ) override;		// no chaining via m_pChainEnum
 		virtual void AddFoundFile( const fs::CPath& filePath ) = 0 override;		// has implementation
-		virtual bool AddFoundSubDir( const fs::CPath& subDirPath ) override;
+		virtual bool AddFoundSubDir( const fs::TDirPath& subDirPath ) override;
 		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const override;
 		virtual bool CanRecurse( void ) const override;
 		virtual bool MustStop( void ) const override;

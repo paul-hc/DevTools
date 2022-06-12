@@ -393,38 +393,62 @@ void CFileSystemTests::TestBackupFile( void )
 {
 	ut::CTempFilePool pool( _T("src.txt") );
 	const fs::TDirPath& srcPath = pool.GetFilePaths()[ 0 ];
-
 	fs::CPath bkFilePath;
+
+	// 1) backup to the same directory
 	{
 		fs::CFileBackup backup( srcPath );
-		ASSERT( !backup.FindFirstDuplicateFile( bkFilePath ) );
+		ASSERT( !backup.FindFirstDuplicateFile( &bkFilePath ) );
 
-		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+		{	// test would-be backup file path - to the same directory
+			fs::AcquireResult result = fs::CreationError;
+
+			ASSERT_EQUAL( _T("src-[2].txt"), backup.MakeBackupFilePath( &result ).GetFilename() );
+			ASSERT( fs::Created == result );		// though no collision, we need a new copy since it's a backup operation (source file is about to be modified)
+		}
+
+		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( &bkFilePath ) );
 		ASSERT_EQUAL( _T("src-[2].txt"), bkFilePath.GetFilename() );
 
 		bkFilePath.Clear();
-		ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( &bkFilePath ) );
 		ASSERT_EQUAL( _T("src-[2].txt"), bkFilePath.GetFilename() );
 
 		ut::ModifyFileText( srcPath );			// change SRC content
 
-		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( &bkFilePath ) );
 		ASSERT_EQUAL( _T("src-[3].txt"), bkFilePath.GetFilename() );
 
 		bkFilePath.Clear();
-		ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( &bkFilePath ) );
 		ASSERT_EQUAL( _T("src-[3].txt"), bkFilePath.GetFilename() );
 	}
 
+	// 2) backup to a sub-directory
 	{
-		fs::CFileBackup backup( srcPath, fs::CPath( _T("SubDirA\\SubDirB") ) );
-		ASSERT( !backup.FindFirstDuplicateFile( bkFilePath ) );
+		fs::TDirPath subDirPath( _T("SubDirA\\SubDirB") );
+		fs::CFileBackup backupSubDir( srcPath, subDirPath );
+		ASSERT( !backupSubDir.FindFirstDuplicateFile( &bkFilePath ) );
 
-		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+		// test would-be backup file path
+		fs::AcquireResult result = fs::CreationError;
+
+		bkFilePath = backupSubDir.MakeBackupFilePath( &result );
+		ASSERT_EQUAL( _T("SubDirA\\SubDirB\\src.txt"), path::StripDirPrefix( bkFilePath, pool.GetPoolDirPath() ) );
+		ASSERT_EQUAL( fs::Created, result );		// new file should be cloned to the sub-dir
+
+		// create backup #1
+		ASSERT_EQUAL( fs::Created, backupSubDir.CreateBackupFile( &bkFilePath ) );
 		ASSERT_EQUAL( _T("SubDirA\\SubDirB\\src.txt"), path::StripDirPrefix( bkFilePath, pool.GetPoolDirPath() ) );
 
+		// test would-be backup file-path #1
+		bkFilePath = backupSubDir.MakeBackupFilePath( &result );
+		ASSERT_EQUAL( _T("SubDirA\\SubDirB\\src.txt"), path::StripDirPrefix( bkFilePath, pool.GetPoolDirPath() ) );
+		ASSERT_EQUAL( fs::FoundExisting, result );	// backup is a distinct file with same content
+
+		// create backup #2
 		ut::ModifyFileText( srcPath, _T("Some new content.") );			// change SRC content
-		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( fs::Created, backupSubDir.CreateBackupFile( &bkFilePath ) );
 		ASSERT_EQUAL( _T("SubDirA\\SubDirB\\src-[2].txt"), path::StripDirPrefix( bkFilePath, pool.GetPoolDirPath() ) );
 	}
 }

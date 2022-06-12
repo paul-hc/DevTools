@@ -39,12 +39,12 @@ private:
 public:
 	bool m_helpMode;
 	bool m_recurseSubDirectories;
-	fs::CPath m_sourceDirPath;
-	fs::CPath m_targetDirPath;
+	fs::TDirPath m_sourceDirPath;
+	fs::TDirPath m_targetDirPath;
 	std::tstring m_searchSpecs;
 	std::tstring m_excludeWildSpec;						// multiple list separated by ';' or ','
 	std::vector< std::tstring > m_excludeFindSpecs;
-	std::auto_ptr<fs::CPath> m_pBackupDirPath;
+	std::auto_ptr<fs::TDirPath> m_pBackupDirPath;
 
 	BYTE m_mustHaveFileAttr;
 	BYTE m_mustNotHaveFileAttr;

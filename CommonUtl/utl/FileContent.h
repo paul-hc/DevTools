@@ -73,14 +73,18 @@ namespace fs
 	};
 
 
-	struct CFileBackup
+	class CFileBackup
 	{
-		CFileBackup( const fs::CPath& srcFilePath, fs::TDirPath backupDirPath = fs::CPath(), FileContentMatch matchBy = FileSize, const TCHAR fmtNumSuffix[] = _T("-[%d]") );
-
-		bool FindFirstDuplicateFile( fs::CPath& rDupFilePath ) const;
-
-		fs::AcquireResult CreateBackupFile( fs::CPath& rBackupFilePath ) throws_( CRuntimeException );	// create a backup copy of the original if none existing files matching "name*.ext" have identical content
 	public:
+		CFileBackup( const fs::CPath& srcFilePath, fs::TDirPath backupDirPath = fs::TDirPath(), FileContentMatch matchBy = FileSize, const TCHAR fmtNumSuffix[] = _T("-[%d]") );
+
+		bool FindFirstDuplicateFile( fs::CPath* pOutDupFilePath ) const;
+		fs::CPath MakeBackupFilePath( fs::AcquireResult* pOutResult = NULL ) const;							// would-be backup file path (no copying involved)
+
+		fs::AcquireResult CreateBackupFile( fs::CPath* pOutBackupFilePath ) throws_( CRuntimeException );	// create a backup copy of the original if none existing files matching "name*.ext" have identical content
+
+		const fs::CPath& GetSrcFilePath( void ) const { return m_srcFilePath; }
+	private:
 		fs::CPath m_srcFilePath;			// converted to absolute
 		fs::TDirPath m_backupDirPath;
 		FileContentMatch m_matchBy;

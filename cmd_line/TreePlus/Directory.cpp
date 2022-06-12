@@ -21,7 +21,7 @@ namespace app
 
 		// IEnumerator interface
 		virtual void AddFoundFile( const fs::CPath& filePath );
-		virtual bool AddFoundSubDir( const fs::CPath& subDirPath );
+		virtual bool AddFoundSubDir( const fs::TDirPath& subDirPath );
 
 		void OnCompleted( void );
 	private:
@@ -51,7 +51,7 @@ namespace app
 			++m_moreFilesCount;
 	}
 
-	bool CDirEnumerator::AddFoundSubDir( const fs::CPath& subDirPath )
+	bool CDirEnumerator::AddFoundSubDir( const fs::TDirPath& subDirPath )
 	{
 		m_subDirPaths.push_back( subDirPath );
 		return true;

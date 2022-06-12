@@ -25,7 +25,7 @@ private:
 	// file enumerator callbacks
 	virtual void OnAddFileInfo( const fs::CFileState& fileState );
 	virtual void AddFoundFile( const fs::CPath& filePath ) throws_( CUserAbortedException );
-	virtual bool AddFoundSubDir( const fs::CPath& subDirPath ) throws_( CUserAbortedException );
+	virtual bool AddFoundSubDir( const fs::TDirPath& subDirPath ) throws_( CUserAbortedException );
 private:
 	std::auto_ptr<CProgressDialog> m_pDlg;
 public:

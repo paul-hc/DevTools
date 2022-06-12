@@ -54,8 +54,15 @@ bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 			return false;
 
 	if ( m_transferOnlyToExistentTargetDirs )
-		if ( !fs::IsValidDirectory( transferNode.m_target.m_fullPath.GetPtr() ) )
+	{
+		fs::TDirPath targetDirPath = transferNode.m_target.m_fullPath;
+
+		if ( !fs::IsValidDirectory( targetDirPath.GetPtr() ) )
+			targetDirPath = targetDirPath.GetParentPath();
+
+		if ( !fs::IsValidDirectory( targetDirPath.GetPtr() ) )	// target directory exists?
 			return false;
+	}
 
 	if ( m_transferOnlyExistentTargetFiles )
 		if ( !transferNode.m_target.IsValid() )
@@ -185,7 +192,7 @@ void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntime
 			if ( arg::ParseValuePair( value, pSwitch, _T("TRANSFER|T") ) )
 				ParseFileAction( value );
 			else if ( arg::ParseOptionalValuePair( &value, pSwitch, _T("BK") ) )
-				m_pBackupDirPath.reset( new fs::CPath( value ) );
+				m_pBackupDirPath.reset( new fs::TDirPath( value ) );
 			else if ( arg::ParseOptionalValuePair( &value, pSwitch, _T("CH") ) )
 				ParseFileChangesFilter( value );
 			else if ( arg::ParseValuePair( value, pSwitch, _T("ATTRIBUTES|A") ) )

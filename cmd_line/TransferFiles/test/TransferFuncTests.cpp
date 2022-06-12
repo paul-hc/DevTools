@@ -47,6 +47,7 @@ int CTransferFuncTests::ExecuteProcess( utl::CProcessCmd& rProcess )
 	if ( m_debugChildProcs )
 		rProcess.AddParam( _T("-debug") );		// to debug command line parsing
 
+	TRACE( _T("Executing test process %s with command line:\n  %s\n"), rProcess.GetExePath().GetPtr(), rProcess.MakeCommandLine().c_str() );
 	return rProcess.Execute();
 }
 
@@ -262,7 +263,7 @@ void CTransferFuncTests::TestPullLossy( void )
 		utl::CProcessCmd moveLossy( __targv[ 0 ] );
 		moveLossy.AddParam( srcDirPath / s_lossyFilter );	// source_filter
 		moveLossy.AddParam( targetDirPath );
-		moveLossy.AddParam( _T("-transfer=move") );
+		moveLossy.AddParam( _T("-transfer=move") );			// Move source files to target.
 
 		ASSERT_EQUAL( 0, ExecuteProcess( moveLossy ) );
 	}
@@ -271,7 +272,8 @@ void CTransferFuncTests::TestPullLossy( void )
 		utl::CProcessCmd copyImages( __targv[ 0 ] );
 		copyImages.AddParam( srcDirPath / _T("f*.jp*") );
 		copyImages.AddParam( targetDirPath );
-		copyImages.AddParam( _T("-ud") );
+		copyImages.AddParam( _T("-ud") );					// Copies only files for which the destination directory exists.
+		//copyImages.AddParam( _T("-debug") );				// Break the program in debugger.
 
 		ASSERT_EQUAL( 0, ExecuteProcess( copyImages ) );	// no execution errors?
 	}

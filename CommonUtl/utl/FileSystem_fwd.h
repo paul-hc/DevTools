@@ -3,6 +3,7 @@
 #pragma once
 
 #include "FlagSet.h"
+#include "Path_fwd.h"
 
 
 namespace utl { interface ICounter; }
@@ -39,7 +40,7 @@ namespace fs
 		virtual const TEnumFlags& GetEnumFlags( void ) const = 0;
 
 		virtual void AddFoundFile( const fs::CPath& filePath ) = 0;
-		virtual bool AddFoundSubDir( const fs::CPath& subDirPath ) = 0;
+		virtual bool AddFoundSubDir( const fs::TDirPath& subDirPath ) = 0;
 
 		// advanced overrideables
 		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const = 0;

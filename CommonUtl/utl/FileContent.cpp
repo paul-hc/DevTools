@@ -157,7 +157,7 @@ namespace fs
 
 		// base overrides
 		virtual void AddFoundFile( const fs::CPath& filePath );
-		virtual bool AddFoundSubDir( const fs::CPath& subDirPath ) { subDirPath; return true; }
+		virtual bool AddFoundSubDir( const fs::TDirPath& subDirPath ) { subDirPath; return true; }
 		virtual bool MustStop( void ) const { return !m_dupFilePaths.empty(); }
 	private:
 		const CFileBackup& m_backup;
@@ -169,7 +169,7 @@ namespace fs
 
 	// CFileBackup class
 
-	CFileBackup::CFileBackup( const fs::CPath& srcFilePath, fs::TDirPath backupDirPath /*= fs::CPath()*/, FileContentMatch matchBy /*= FileSize*/, const TCHAR fmtNumSuffix[] /*= _T("-[%d]")*/ )
+	CFileBackup::CFileBackup( const fs::CPath& srcFilePath, fs::TDirPath backupDirPath /*= fs::TDirPath()*/, FileContentMatch matchBy /*= FileSize*/, const TCHAR fmtNumSuffix[] /*= _T("-[%d]")*/ )
 		: m_srcFilePath( srcFilePath )
 		, m_backupDirPath( backupDirPath )
 		, m_matchBy( matchBy )
@@ -179,14 +179,13 @@ namespace fs
 		CvtAbsoluteToCWD( m_srcFilePath );
 
 		if ( path::IsRelative( m_backupDirPath.GetPtr() ) )
-		{
 			m_backupDirPath = m_srcFilePath.GetParentPath() / m_backupDirPath;
-			CvtAbsoluteToCWD( m_backupDirPath );
-		}
 	}
 
-	bool CFileBackup::FindFirstDuplicateFile( fs::CPath& rDupFilePath ) const
+	bool CFileBackup::FindFirstDuplicateFile( fs::CPath* pOutDupFilePath ) const
 	{
+		ASSERT_PTR( pOutDupFilePath );
+
 		if ( !fs::IsValidDirectory( m_backupDirPath.GetPtr() ) )
 			return false;		// not yet created
 
@@ -199,13 +198,29 @@ namespace fs
 		if ( enumerator.m_dupFilePaths.empty() )
 			return false;
 
-		rDupFilePath = enumerator.m_dupFilePaths.front();			// first hit
+		*pOutDupFilePath = enumerator.m_dupFilePaths.front();			// first hit
 		return true;
 	}
 
-	fs::AcquireResult CFileBackup::CreateBackupFile( fs::CPath& rBackupFilePath ) throws_( CRuntimeException )
+	fs::CPath CFileBackup::MakeBackupFilePath( fs::AcquireResult* pOutResult /*= NULL*/ ) const
+	{	// would-be backup file path (no copying involved)
+		fs::CPath backupFilePath;
+
+		if ( FindFirstDuplicateFile( &backupFilePath ) )
+			utl::AssignPtr( pOutResult, fs::FoundExisting );		// found existing backed-up file matching "name*.ext" with matching content
+		else
+		{
+			backupFilePath = m_backupDirPath / m_srcFilePath.GetFilename();
+
+			backupFilePath = fs::MakeUniqueNumFilename( backupFilePath, m_pFmtNumSuffix );		// make unique backup file name by avoiding collisions with existing file backups
+			utl::AssignPtr( pOutResult, fs::Created );				// new backup file should be created
+		}
+		return backupFilePath;
+	}
+
+	fs::AcquireResult CFileBackup::CreateBackupFile( fs::CPath* pOutBackupFilePath ) throws_( CRuntimeException )
 	{
-		if ( FindFirstDuplicateFile( rBackupFilePath ) )
+		if ( FindFirstDuplicateFile( pOutBackupFilePath ) )
 			return fs::FoundExisting;			// found existing backed-up file matching "name*.ext" with matching content
 
 		fs::thr::CreateDirPath( m_backupDirPath.GetPtr() );
@@ -215,7 +230,7 @@ namespace fs
 		backupFilePath = fs::MakeUniqueNumFilename( backupFilePath, m_pFmtNumSuffix );		// make unique backup file name by avoiding collisions with existing file backups
 		fs::thr::CopyFile( m_srcFilePath.GetPtr(), backupFilePath.GetPtr(), FALSE );
 
-		rBackupFilePath = backupFilePath;
+		*pOutBackupFilePath = backupFilePath;
 		return fs::Created;
 	}
 
@@ -224,13 +239,13 @@ namespace fs
 
 	CDupFileEnumerator::CDupFileEnumerator( const CFileBackup& backup )
 		: m_backup( backup )
-		, m_srcContent( m_backup.m_srcFilePath, FileSize )
+		, m_srcContent( m_backup.GetSrcFilePath(), FileSize )
 	{
 	}
 
 	void CDupFileEnumerator::AddFoundFile( const fs::CPath& filePath )
 	{
-		if ( filePath != m_backup.m_srcFilePath )		// different than source file?
+		if ( filePath != m_backup.GetSrcFilePath() )		// different than source file?
 			if ( m_srcContent.IsContentMatch( filePath ) )
 				m_dupFilePaths.push_back( filePath );
 	}

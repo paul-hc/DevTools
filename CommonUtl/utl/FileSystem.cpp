@@ -58,11 +58,11 @@ namespace fs
 	}
 
 
-	void QueryFolderPaths( std::vector< fs::CPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly /*= true*/ )
+	void QueryFolderPaths( std::vector< fs::TDirPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly /*= true*/ )
 	{
 		for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 		{
-			fs::CPath folderPath;
+			fs::TDirPath folderPath;
 
 			if ( fs::IsValidDirectory( itFilePath->GetPtr() ) )
 				folderPath = *itFilePath;
@@ -79,10 +79,10 @@ namespace fs
 	}
 
 
-	fs::CPath GetCurrentDirectory( void )
+	fs::TDirPath GetCurrentDirectory( void )
 	{
 		TCHAR buffer[ MAX_PATH * 2 ];
-		CPath cwd;
+		TDirPath cwd;
 
 		if ( _tgetcwd( buffer, COUNT_OF( buffer ) ) != NULL )
 			cwd.Set( buffer );
@@ -90,7 +90,7 @@ namespace fs
 		return cwd;
 	}
 
-	fs::CPath GetModuleFilePath( HINSTANCE hInstance )
+	fs::TDirPath GetModuleFilePath( HINSTANCE hInstance )
 	{
 		TCHAR modulePath[ MAX_PATH ];
 		::GetModuleFileName( hInstance, modulePath, COUNT_OF( modulePath ) );				// may return short path, depending on how it was invoked
@@ -98,16 +98,16 @@ namespace fs
 		TCHAR longModulePath[ MAX_PATH ];
 		::GetLongPathName( modulePath, longModulePath, COUNT_OF( longModulePath ) );		// convert to long path
 
-		return fs::CPath( longModulePath );
+		return fs::TDirPath( longModulePath );
 	}
 
-	fs::CPath GetTempDirPath( void )
+	fs::TDirPath GetTempDirPath( void )
 	{
 		TCHAR dirPath[ MAX_PATH ];
 		if ( 0 == ::GetTempPath( MAX_PATH, dirPath ) )
 			dirPath[ 0 ] = _T('\0');
 
-		return fs::CPath( dirPath );
+		return fs::TDirPath( dirPath );
 	}
 
 
@@ -121,7 +121,7 @@ namespace fs
 		return fs::CPath( absolutePath );
 	}
 
-	fs::CPath MakeRelativeTo( const TCHAR* pFromPath, const fs::CPath& dirPath )
+	fs::CPath MakeRelativeTo( const TCHAR* pFromPath, const fs::TDirPath& dirPath )
 	{
 		std::tstring fromPath = path::MakeNormal( pFromPath );
 		DWORD fromAttr = IsValidDirectory( fromPath.c_str() ) ? FILE_ATTRIBUTE_DIRECTORY : 0;
@@ -212,9 +212,9 @@ namespace fs
 			return false;
 
 		fs::CPathEnumerator found;
-		fs::EnumFiles( &found, fs::CPath( pDirPath ), _T("*") );
+		fs::EnumFiles( &found, fs::TDirPath( pDirPath ), _T("*") );
 
-		for ( std::vector< fs::CPath >::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )
+		for ( std::vector< fs::TDirPath >::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )
 			if ( fs::DeleteDir( itSubDirPath->GetPtr() ) )
 				itSubDirPath = found.m_subDirPaths.erase( itSubDirPath );
 			else

@@ -92,7 +92,7 @@ void CFileTransfer::OnAddFileInfo( const fs::CFileState& fileState )
 	AddTransferItem( new CTransferItem( fileState, m_pOptions->m_sourceDirPath, m_pOptions->m_targetDirPath ) );
 }
 
-bool CFileTransfer::AddFoundSubDir( const fs::CPath& subDirPath )
+bool CFileTransfer::AddFoundSubDir( const fs::TDirPath& subDirPath )
 {
 	subDirPath;
 	return true;

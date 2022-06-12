@@ -18,18 +18,18 @@ namespace fs
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
 	bool IsProtectedFile( const TCHAR* pFilePath );
 
-	void QueryFolderPaths( std::vector< fs::CPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly = true );
+	void QueryFolderPaths( std::vector< fs::TDirPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly = true );
 
-	fs::CPath GetCurrentDirectory( void );					// current working directory
+	fs::TDirPath GetCurrentDirectory( void );				// current working directory
 	fs::CPath GetModuleFilePath( HINSTANCE hInstance );		// pass AfxGetApp()->m_hInstance in GUI apps, or NULL for the .exe
-	fs::CPath GetTempDirPath( void );
+	fs::TDirPath GetTempDirPath( void );
 
 
-	fs::CPath MakeAbsoluteToCWD( const TCHAR* pRelativePath );						// normalize, strip "./", "../", relative to CWD - current working directory
-	fs::CPath MakeRelativeTo( const TCHAR* pFromPath, const fs::CPath& dirPath );	// normalize, make relative to dirPath (such as "..\\.." etc)
+	fs::CPath MakeAbsoluteToCWD( const TCHAR* pRelativePath );							// normalize, strip "./", "../", relative to CWD - current working directory
+	fs::CPath MakeRelativeTo( const TCHAR* pFromPath, const fs::TDirPath& dirPath );	// normalize, make relative to dirPath (such as "..\\.." etc)
 
 	inline fs::CPath& CvtAbsoluteToCWD( fs::CPath& rPath ) { return rPath = MakeAbsoluteToCWD( rPath.GetPtr() ); }
-	inline fs::CPath& CvtRelativeTo( fs::CPath& rPath, const fs::CPath& dirPath ) { return rPath = MakeRelativeTo( rPath.GetPtr(), dirPath ); }
+	inline fs::CPath& CvtRelativeTo( fs::CPath& rPath, const fs::TDirPath& dirPath ) { return rPath = MakeRelativeTo( rPath.GetPtr(), dirPath ); }
 
 
 	fs::AcquireResult MakeFileWritable( const TCHAR* pFilePath );		// make file writable if read-only

@@ -195,7 +195,7 @@ bool CTransferItem::BackupExistingTarget( const CBackupInfo& backupInfo )
 	if ( !srcFilePath.FileExist() )
 		return false;			// no existing target file to backup
 
-	fs::CPath backupDirPath = srcFilePath.GetParentPath();
+	fs::TDirPath backupDirPath = srcFilePath.GetParentPath();
 	if ( !backupInfo.m_dirPath.IsEmpty() )
 		if ( path::IsRelative( backupInfo.m_dirPath.GetPtr() ) )
 		{
@@ -211,7 +211,7 @@ bool CTransferItem::BackupExistingTarget( const CBackupInfo& backupInfo )
 	try
 	{
 		fs::CFileBackup backup( srcFilePath, backupDirPath, backupInfo.m_matchContentBy );
-		if ( fs::Created == backup.CreateBackupFile( m_targetBackupFilePath ) )
+		if ( fs::Created == backup.CreateBackupFile( &m_targetBackupFilePath ) )
 			return true;
 
 		m_targetBackupFilePath.Clear();
