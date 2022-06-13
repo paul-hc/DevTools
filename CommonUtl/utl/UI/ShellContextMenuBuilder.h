@@ -6,7 +6,7 @@
 class CShellContextMenuBuilder;
 
 
-class CBaseMenuBuilder
+abstract class CBaseMenuBuilder
 {
 protected:
 	CBaseMenuBuilder( CShellContextMenuBuilder* pShellBuilder, CMenu* pPopupMenu, UINT indexMenu );

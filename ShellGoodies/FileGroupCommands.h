@@ -41,19 +41,22 @@ namespace cmd
 		virtual void Serialize( CArchive& archive ) override;
 	protected:
 		virtual std::tstring GetDestHeaderInfo( void ) const;
+
 		static void QueryFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths );
 
 		enum MultiFileStatus { AllExist, SomeExist, NoneExist };
 
 		struct CWorkingSet
 		{
-			CWorkingSet( const CBaseFileGroupCmd& cmd, fs::AccessMode accessMode = fs::Read );
+			CWorkingSet( const CBaseFileGroupCmd* pCmd, fs::AccessMode accessMode = fs::Read );
+			CWorkingSet( const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, fs::AccessMode accessMode = fs::Read );
 
 			bool IsValid( void ) const { return m_existStatus != NoneExist; }
 			bool IsBadFilePath( const fs::CPath& filePath ) const;
 		public:
 			std::vector< fs::CPath > m_currFilePaths;
 			std::vector< fs::CPath > m_badFilePaths;
+			std::vector< fs::CPath > m_currDestFilePaths;		// for commands that manage explicit destinations
 			MultiFileStatus m_existStatus;
 			bool m_succeeded;
 		};
@@ -62,9 +65,14 @@ namespace cmd
 	private:
 		persist CTime m_timestamp;
 		persist std::vector< fs::CPath > m_filePaths;
+
+		// transient data-members
 		CWnd* m_pParentOwner;
+	protected:
+		fs::AccessMode m_fileAccessMode;
 	public:
 		FILEOP_FLAGS m_opFlags;
+
 		static const TCHAR s_lineEnd[];
 	};
 
@@ -75,14 +83,23 @@ namespace cmd
 	{
 	protected:
 		CBaseDeepTransferFilesCmd( void ) {}
-		CBaseDeepTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath );
+		CBaseDeepTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath );
+
+		template< typename CmdT >
+		static CmdT* SetCommandType( CmdT* pNewCmd, CommandType cmdType )
+		{
+			ASSERT_PTR( pNewCmd );
+			pNewCmd->SetTypeID( cmdType );
+			return pNewCmd;
+		}
 	public:
 		const std::vector< fs::CPath >& GetSrcFilePaths( void ) const { return GetFilePaths(); }
-		const fs::CPath& GetSrcCommonDirPath( void ) const { return m_srcCommonDirPath; }
-		const fs::CPath& GetDestDirPath( void ) const { return m_destDirPath; }
-		const fs::CPath& GetTopDestDirPath( void ) const { return m_topDestDirPath; }		// root for post-move cleanup
+		const fs::TDirPath& GetSrcCommonDirPath( void ) const { return m_srcCommonDirPath; }
+		const fs::TDirPath& GetDestDirPath( void ) const { return m_destDirPath; }
+		const fs::TDirPath& GetTopDestDirPath( void ) const { return m_topDestDirPath; }		// root for post-move cleanup
 
-		void SetDeepRelDirPath( const fs::CPath& deepRelSubfolderPath );		// for deeper transfers
+		void SetDeepRelDirPath( const fs::TDirPath& deepRelSubfolderPath );		// for deeper transfers
+		bool QueryDestFilePaths( std::vector< fs::CPath >& rDestFilePaths ) const;
 
 		// base overrides
 		virtual void Serialize( CArchive& archive ) override;
@@ -93,11 +110,48 @@ namespace cmd
 		virtual std::tstring GetDestHeaderInfo( void ) const override;
 
 		void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const;
+	private:
 		fs::CPath MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const;
 	private:
-		persist fs::CPath m_srcCommonDirPath;
-		persist fs::CPath m_destDirPath;
-		persist fs::CPath m_topDestDirPath;		// parent folder of m_destDirPath (if using extra sub-folder depth), otherwise same as m_destDirPath
+		persist fs::TDirPath m_destDirPath;
+		persist fs::TDirPath m_srcCommonDirPath;
+		persist fs::TDirPath m_topDestDirPath;		// parent folder of m_destDirPath (if using extra sub-folder depth), otherwise same as m_destDirPath
+	};
+
+
+	// Abstract base for commands that operate shallow transfers of multiple files - such as Backup-Copy/Move.
+	// Keeps track of destination paths explicitly (unlike implicitly for Deep commands).
+	//
+	abstract class CBaseShallowTransferFilesCmd : public CBaseFileGroupCmd
+	{
+	protected:
+		CBaseShallowTransferFilesCmd( void ) {}
+		CBaseShallowTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath, const std::vector< fs::CPath >* pDestFilePaths = NULL );
+	public:
+		const std::vector< fs::CPath >& GetSrcFilePaths( void ) const { return GetFilePaths(); }
+		const std::vector< fs::CPath >& GetDestFilePaths( void ) const { return m_destFilePaths; }
+		const fs::TDirPath& GetDestDirPath( void ) const { return m_destDirPath; }
+
+		bool QueryDestFilePaths( std::vector< fs::CPath >& rDestFilePaths ) const;
+
+		// base overrides
+		virtual void Serialize( CArchive& archive ) override;
+		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const override;
+
+		// ICommand interface
+	protected:
+		virtual std::tstring GetDestHeaderInfo( void ) const override;
+
+		void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const;
+
+		// overridables
+		virtual fs::CPath DoMakeDestFilePath( const fs::CPath& srcFilePath ) const = 0;
+
+		fs::CPath MakeShallowDestFilePath( const fs::CPath& srcFilePath ) const;		// straight shallow SRC/DEST
+		fs::CPath MakeBackupDestFilePath( const fs::CPath& srcFilePath ) const;			// backup SRC/DEST
+	protected:
+		persist fs::TDirPath m_destDirPath;
+		persist std::vector< fs::CPath > m_destFilePaths;
 	};
 }
 
@@ -120,7 +174,10 @@ private:
 	struct CUndeleteFilesCmd : public cmd::CBaseFileGroupCmd
 	{
 		CUndeleteFilesCmd( const std::vector< fs::CPath >& delFilePaths )
-			: cmd::CBaseFileGroupCmd( cmd::Priv_UndeleteFiles, delFilePaths ) {}
+			: cmd::CBaseFileGroupCmd( cmd::Priv_UndeleteFiles, delFilePaths )
+		{
+			m_fileAccessMode = fs::Exist;
+		}
 
 		// ICommand interface
 		virtual bool Execute( void ) override;
@@ -137,8 +194,10 @@ class CCopyFilesCmd : public cmd::CBaseDeepTransferFilesCmd
 
 	CCopyFilesCmd( void ) {}
 public:
-	CCopyFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, bool isPaste = false );
+	CCopyFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath );
 	virtual ~CCopyFilesCmd();
+
+	static CCopyFilesCmd* MakePasteCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath );
 
 	// ICommand interface
 	virtual bool Execute( void ) override;
@@ -154,8 +213,10 @@ class CMoveFilesCmd : public cmd::CBaseDeepTransferFilesCmd
 
 	CMoveFilesCmd( void ) {}
 public:
-	CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, bool isPaste = false );
+	CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath );
 	virtual ~CMoveFilesCmd();
+
+	static CMoveFilesCmd* MakePasteCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath );
 
 	// ICommand interface
 	virtual bool Execute( void ) override;
@@ -173,7 +234,7 @@ class CCreateFoldersCmd : public cmd::CBaseDeepTransferFilesCmd
 public:
 	enum Structure { CreateNormal, PasteDirs, PasteDeepStruct };
 
-	CCreateFoldersCmd( const std::vector< fs::CPath >& srcFolderPaths, const fs::CPath& destDirPath, Structure structure = CreateNormal );
+	CCreateFoldersCmd( const std::vector< fs::CPath >& srcFolderPaths, const fs::TDirPath& destDirPath, Structure structure = CreateNormal );
 	virtual ~CCreateFoldersCmd();
 
 	const std::vector< fs::CPath >& GetSrcFolderPaths( void ) const { return GetSrcFilePaths(); }
@@ -181,6 +242,47 @@ public:
 	// ICommand interface
 	virtual bool Execute( void ) override;
 	virtual bool Unexecute( void ) override;
+};
+
+
+// Used for creating backup copies of files into a flat destination directory.
+//
+class CCopyPasteFilesAsBackupCmd : public cmd::CBaseShallowTransferFilesCmd
+{
+	DECLARE_SERIAL( CCopyPasteFilesAsBackupCmd )
+
+	CCopyPasteFilesAsBackupCmd( void ) {}
+public:
+	CCopyPasteFilesAsBackupCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath );
+	virtual ~CCopyPasteFilesAsBackupCmd();
+
+	// ICommand interface
+	virtual bool Execute( void ) override;
+	virtual bool Unexecute( void ) override;
+protected:
+	// base overrides
+	virtual fs::CPath DoMakeDestFilePath( const fs::CPath& srcFilePath ) const override { return MakeBackupDestFilePath( srcFilePath ); }
+};
+
+
+// Used for moving backup files into a flat destination directory.
+//
+class CCutPasteFilesAsBackupCmd : public cmd::CBaseShallowTransferFilesCmd
+{
+	DECLARE_SERIAL( CCutPasteFilesAsBackupCmd )
+
+	CCutPasteFilesAsBackupCmd( void ) {}
+	CCutPasteFilesAsBackupCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath, const std::vector< fs::CPath >& destFilePaths );	// only for unexecution
+public:
+	CCutPasteFilesAsBackupCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath );
+	virtual ~CCutPasteFilesAsBackupCmd();
+
+	// ICommand interface
+	virtual bool Execute( void ) override;
+	virtual bool Unexecute( void ) override;
+protected:
+	// base overrides
+	virtual fs::CPath DoMakeDestFilePath( const fs::CPath& srcFilePath ) const override { return MakeBackupDestFilePath( srcFilePath ); }
 };
 
 

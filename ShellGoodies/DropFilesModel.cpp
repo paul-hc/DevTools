@@ -7,6 +7,7 @@
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/FileEnumerator.h"
+#include "utl/FileSystem.h"
 #include "utl/Logger.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
@@ -14,6 +15,7 @@
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/ShellTypes.h"
 #include "utl/UI/ShellUtilities.h"
+#include "utl/UI/WndUtils.h"
 #include <deque>
 
 #ifdef _DEBUG
@@ -46,8 +48,15 @@ void CDropFilesModel::Clear( void )
 
 const CEnumTags& CDropFilesModel::GetTags_PasteOperation( void )
 {
-	static const CEnumTags tags( _T("n/a|DEEP PASTE - COPY|DEEP PASTE - CUT") );
-	return tags;
+	static const CEnumTags s_tags( _T("n/a|DEEP PASTE - COPY|DEEP PASTE - CUT") );
+	return s_tags;
+}
+
+bool CDropFilesModel::HasDropFilesOnly( void ) const
+{
+	return
+		HasDropPaths() &&
+		!utl::Any( m_dropPaths, pred::IsValidDirectory() );
 }
 
 CDropFilesModel::PasteOperation CDropFilesModel::GetPasteOperation( void ) const
@@ -182,8 +191,8 @@ bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOw
 
 	switch ( GetPasteOperation() )
 	{
-		case PasteCopyFiles:	pCmd = new CCopyFilesCmd( m_dropPaths, m_destDirPath, true ); break;
-		case PasteMoveFiles:	pCmd = new CMoveFilesCmd( m_dropPaths, m_destDirPath, true ); break;
+		case PasteCopyFiles:	pCmd = CCopyFilesCmd::MakePasteCmd( m_dropPaths, m_destDirPath ); break;
+		case PasteMoveFiles:	pCmd = CMoveFilesCmd::MakePasteCmd( m_dropPaths, m_destDirPath ); break;
 		default:
 			return false;
 	}
@@ -191,14 +200,39 @@ bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOw
 	pCmd->SetDeepRelDirPath( relFolderPath );
 	pCmd->SetParentOwner( pParentOwner );
 
-	fs::CPath destDeepDirPath = pCmd->GetDestDirPath();
+	std::vector< fs::CPath > destPaths;
+	pCmd->QueryDestFilePaths( destPaths );
 
 	if ( !app::GetCmdSvc()->SafeExecuteCmd( pCmd ) )
 		return false;
 
-	std::vector< fs::CPath > destPaths; destPaths.reserve( m_dropPaths.size() );
-	for ( std::vector< fs::CPath >::const_iterator itDropPath = m_dropPaths.begin(); itDropPath != m_dropPaths.end(); ++itDropPath )
-		destPaths.push_back( MakeDestFilePath( *itDropPath, destDeepDirPath ) );
+	std::vector< fs::CPath > newDropPaths;
+	DROPEFFECT newDropEffect = CClipboard::QueryDropFilePaths( newDropPaths );
+	if ( newDropEffect == m_dropEffect && newDropPaths == m_dropPaths )				// this was a long process: user did not do a new other copy & paste in the meantime?
+		CTextClipboard::CopyToLines( destPaths, pParentOwner->GetSafeHwnd() );		// clear clipboard after Paste, and add the destination paths as text
+
+	return true;
+}
+
+bool CDropFilesModel::PasteBackup( CWnd* pParentOwner )
+{
+	cmd::CBaseShallowTransferFilesCmd* pCmd = NULL;
+
+	switch ( GetPasteOperation() )
+	{
+		case PasteCopyFiles:	pCmd = new CCopyPasteFilesAsBackupCmd( m_dropPaths, m_destDirPath ); break;
+		case PasteMoveFiles:	pCmd = new CCutPasteFilesAsBackupCmd( m_dropPaths, m_destDirPath ); break;
+		default:
+			return false;
+	}
+
+	pCmd->SetParentOwner( pParentOwner );
+
+	std::vector< fs::CPath > destPaths;
+	pCmd->QueryDestFilePaths( destPaths );
+
+	if ( !app::GetCmdSvc()->SafeExecuteCmd( pCmd ) )
+		return false;
 
 	std::vector< fs::CPath > newDropPaths;
 	DROPEFFECT newDropEffect = CClipboard::QueryDropFilePaths( newDropPaths );

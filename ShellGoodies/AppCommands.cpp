@@ -15,8 +15,9 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void )
 	{
 		static CEnumTags s_tags( -1, RenameFile );
+
 		if ( s_tags.IsEmpty() )
-		{
+		{	// persistent commands
 			s_tags.AddTagPair( _T("Rename Files"), _T("RENAME") );
 			s_tags.AddTagPair( _T("Touch Files"), _T("TOUCH") );
 			s_tags.AddTagPair( _T("Find Duplicates"), _T("FIND_DUPLICATES") );
@@ -28,6 +29,10 @@ namespace cmd
 			s_tags.AddTagPair( _T("Create Folders"), _T("CREATE_FOLDERS") );
 			s_tags.AddTagPair( _T("Paste Create Folders"), _T("PASTE_CREATE_FOLDERS") );
 			s_tags.AddTagPair( _T("Paste Create Deep Folders"), _T("PASTE_CREATE_DEEP_FOLDERS") );
+			s_tags.AddTagPair( _T("Copy and Paste Files as Backup"), _T("COPY_PASTE_FILES_AS_BACKUP") );
+			s_tags.AddTagPair( _T("Cut and Paste Files as Backup"), _T("CUT_PASTE_FILES_AS_BACKUP") );
+
+			// transient commands
 			s_tags.AddTagPair( _T("Change Destination Paths"), _T("CHANGE_DEST_PATHS") );
 			s_tags.AddTagPair( _T("Change Destination File States"), _T("CHANGE_DEST_FILE_STATES") );
 			s_tags.AddTagPair( _T("Reset Destinations"), _T("RESET_DESTINATIONS") );

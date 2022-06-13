@@ -27,6 +27,8 @@ public:
 	const std::vector< fs::CPath >& GetDropPaths( void ) const { return m_dropPaths; }
 	std::tstring FormatDropCounts( void ) const;
 
+	bool HasDropFilesOnly( void ) const;		// no directories are copied/cut?
+
 	bool HasSrcFolderPaths( void ) const { return !m_srcFolderPaths.empty(); }
 	const std::vector< fs::CPath >& GetSrcFolderPaths( void ) const { return m_srcFolderPaths; }
 
@@ -39,6 +41,7 @@ public:
 
 	bool CreateFolders( RecursionDepth depth ) { return CreateFolders( Shallow == depth ? m_srcFolderPaths : m_srcDeepFolderPaths, depth ); }
 	bool PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner );
+	bool PasteBackup( CWnd* pParentOwner );
 private:
 	void Init( const std::vector< fs::CPath >& dropPaths, DROPEFFECT dropEffect );
 	void InitSrcFolders( void );

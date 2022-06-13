@@ -15,6 +15,7 @@
 #include "utl/UI/Clipboard.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/ShellContextMenuBuilder.h"
+#include "utl/UI/SystemTray.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
@@ -33,8 +34,9 @@ const CShellMenuController::CMenuCmdInfo CShellMenuController::s_commands[] =
 	{ Cmd_FindDuplicates, _T("Find &Duplicates..."), _T("Find duplicate files in selected folders or files, and allow the deletion of duplicates"), ID_FIND_DUPLICATE_FILES },
 	{ Cmd_Undo, _T("&Undo \"%s\" ..."), _T("Undo last operation on files"), ID_EDIT_UNDO },
 	{ Cmd_Redo, _T("&Redo \"%s\" ..."), _T("Redo last undo operation on files"), ID_EDIT_REDO },
+	{ Cmd_PasteAsBackup, _T("Paste as Bac&kup"), _T("Paste copied/cut files as a versioned backup file(s) in target folder"), ID_PASTE_AS_BACKUP },
+	{ Popup_PasteDeep, _T("Paste D&eep"), _T("Paste copied/cut files creating a deep folder"), ID_PASTE_DEEP_POPUP },
 	{ Popup_PasteFolderStruct, _T("Paste &Folder Structure"), _T("Open menu for creating folder structure based on files copied on clipboard"), ID_PASTE_FOLDER_STRUCT_POPUP },
-	{ Popup_PasteDeep, _T("Paste D&eep"), _T("Paste copied files creating a deep folder"), ID_PASTE_DEEP_POPUP },
 	{ Popup_MoreGoodies, _T("More &Goodies"), _T("Open more options"), 0 },
 #ifdef _DEBUG
 	{ Cmd_Separator },
@@ -97,10 +99,6 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 			if ( !itemText.empty() )
 				switch ( cmdInfo.m_cmd )
 				{
-					case Popup_PasteFolderStruct:
-						if ( HMENU hSubMenu = BuildCreateFoldersSubmenu( &menuBuilder ) )
-							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
-						break;
 					case Popup_PasteDeep:
 						if ( HMENU hSubMenu = BuildPasteDeepSubmenu( &menuBuilder ) )
 						{
@@ -108,10 +106,22 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
 						}
 						break;
+					case Popup_PasteFolderStruct:
+						if ( HMENU hSubMenu = BuildCreateFoldersSubmenu( &menuBuilder ) )
+							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
+						break;
 					case Popup_MoreGoodies:
 						if ( HMENU hSubMenu = BuildMoreGoodiesSubmenu( &menuBuilder ) )
 							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
 						break;
+					case Cmd_PasteAsBackup:
+						if ( m_pDropFilesModel.get() != NULL && m_pDropFilesModel->HasDropFilesOnly() )		// cant't do versioned backup of directories
+						{
+							itemText += str::Format( _T(" (%s)"), m_pDropFilesModel->FormatDropCounts().c_str() );
+							// fall-through
+						}
+						else
+							break;
 					default:
 						menuBuilder.AddCmdItem( cmdInfo.m_cmd, itemText, pItemBitmap );
 				}
@@ -119,24 +129,6 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 	}
 
 	return menuBuilder.GetNextCmdId();
-}
-
-HMENU CShellMenuController::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder )
-{
-	if ( m_pDropFilesModel.get() != NULL )
-		if ( m_pDropFilesModel->HasSrcFolderPaths() )
-		{
-			CSubMenuBuilder subMenuBuilder( pParentBuilder );
-
-			AddCmd( &subMenuBuilder, Cmd_CreateFolders, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcFolderPaths().size() ) );
-
-			if ( m_pDropFilesModel->HasSrcDeepFolderPaths() )
-				AddCmd( &subMenuBuilder, Cmd_CreateDeepFolderStruct, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcDeepFolderPaths().size() ) );
-
-			return subMenuBuilder.GetPopupMenu()->Detach();
-		}
-
-	return NULL;
 }
 
 HMENU CShellMenuController::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder )
@@ -153,6 +145,24 @@ HMENU CShellMenuController::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuil
 
 				subMenuBuilder.AddCmdItem( Cmd_PasteDeepBase + i, itemText, pFolderBitmap );
 			}
+
+			return subMenuBuilder.GetPopupMenu()->Detach();
+		}
+
+	return NULL;
+}
+
+HMENU CShellMenuController::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder )
+{
+	if ( m_pDropFilesModel.get() != NULL )
+		if ( m_pDropFilesModel->HasSrcFolderPaths() )
+		{
+			CSubMenuBuilder subMenuBuilder( pParentBuilder );
+
+			AddCmd( &subMenuBuilder, Cmd_CreateFolders, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcFolderPaths().size() ) );
+
+			if ( m_pDropFilesModel->HasSrcDeepFolderPaths() )
+				AddCmd( &subMenuBuilder, Cmd_CreateDeepFolderStruct, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcDeepFolderPaths().size() ) );
 
 			return subMenuBuilder.GetPopupMenu()->Detach();
 		}
@@ -243,7 +253,16 @@ bool CShellMenuController::ExecuteCommand( UINT cmdId, HWND hWnd )
 	if ( !scopedMainWnd.HasValidParentOwner() )
 		return ui::BeepSignal( MB_ICONERROR );
 
-	return HandleCommand( menuCmd, scopedMainWnd.GetParentOwnerWnd() );
+	CWnd* pParentOwnerWnd = scopedMainWnd.GetParentOwnerWnd();
+
+	if ( NULL == m_pSystemTray.get() )
+	{	// create once the sys-tray shared popup window
+		enum { DefaultIconId = 5 };
+		m_pSystemTray.reset( new CSystemTrayWnd() );
+		m_pSystemTray->CreateTrayIcon( IDD_RENAME_FILES_DIALOG, _T("Shell Goodies"), true );
+	}
+
+	return HandleCommand( menuCmd, pParentOwnerWnd );
 }
 
 bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwner )
@@ -304,6 +323,15 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 			sheet.DoModal();
 			return true;
 		}
+		case Cmd_PasteAsBackup:
+			if ( m_pDropFilesModel.get() != NULL && m_pDropFilesModel->HasDropFilesOnly() )
+			{
+				if ( !m_pDropFilesModel->PasteBackup( pParentOwner ) )
+					ui::BeepSignal();		// a file transfer error occured
+
+				return true;
+			}
+			break;
 		case Cmd_CreateFolders:
 		case Cmd_CreateDeepFolderStruct:
 			if ( m_pDropFilesModel.get() != NULL )

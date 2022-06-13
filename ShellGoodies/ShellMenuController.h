@@ -9,6 +9,7 @@
 
 class CDropFilesModel;
 class CBaseMenuBuilder;
+class CSystemTray;
 class CFlagTags;
 interface IFileEditor;
 
@@ -29,8 +30,8 @@ public:
 
 	static const CFlagTags& GetTags_ContextMenuFlags( void );
 private:
-	HMENU BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder );
 	HMENU BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder );
+	HMENU BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder );
 	HMENU BuildMoreGoodiesSubmenu( CBaseMenuBuilder* pParentBuilder );
 
 	enum MenuCommand
@@ -43,13 +44,14 @@ private:
 		Cmd_RunUnitTests,
 		Cmd_CreateFolders,
 		Cmd_CreateDeepFolderStruct,
+		Cmd_PasteAsBackup,
 		Cmd_PasteDeepBase,
 
 		Cmd_Separator = -1,
 
 		// popup IDs are negative
-		Popup_PasteFolderStruct = -550,
-		Popup_PasteDeep,
+		Popup_PasteDeep = -550,
+		Popup_PasteFolderStruct,
 		Popup_MoreGoodies,
 	};
 
@@ -72,6 +74,7 @@ private:
 	IContextMenu* m_pContextMenu;
 	CFileModel m_fileModel;									// files selected in Explorer
 	std::auto_ptr<CDropFilesModel> m_pDropFilesModel;		// files cached (copied or cut) to clipboard (CF_HDROP)
+	std::auto_ptr<CSystemTray> m_pSystemTray;
 
 	static const CMenuCmdInfo s_commands[];
 	static const CMenuCmdInfo s_moreCommands[];

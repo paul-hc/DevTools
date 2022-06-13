@@ -42,7 +42,7 @@ CToolStrip& CCommandItem::GetCmdTypeStrip( void )
 	static CToolStrip s_strip;
 	if ( !s_strip.IsValid() )
 	{
-		s_strip.AddButton( UINT_MAX, ID_EDIT_DETAILS );			// unknown command image
+		s_strip.AddButton( UINT_MAX, IDI_UNKNOWN );			// unknown command image
 
 		s_strip.AddButton( cmd::RenameFile, ID_RENAME_ITEM );
 		s_strip.AddButton( cmd::TouchFile, ID_TOUCH_FILES );
@@ -54,6 +54,8 @@ CToolStrip& CCommandItem::GetCmdTypeStrip( void )
 		s_strip.AddButton( cmd::PasteMoveFiles, ID_PASTE_DEEP_POPUP );
 		s_strip.AddButton( cmd::PasteCreateFolders, ID_CREATE_FOLDERS );
 		s_strip.AddButton( cmd::PasteCreateDeepFolders, ID_CREATE_DEEP_FOLDER_STRUCT );
+		s_strip.AddButton( cmd::CopyPasteFilesAsBackup, ID_PASTE_AS_BACKUP );
+		s_strip.AddButton( cmd::CutPasteFilesAsBackup, ID_PASTE_AS_BACKUP );
 		s_strip.AddButton( cmd::ChangeDestPaths, ID_CMD_CHANGE_DEST_PATHS );
 		s_strip.AddButton( cmd::ChangeDestFileStates, ID_CMD_CHANGE_DEST_FILE_STATES );
 		s_strip.AddButton( cmd::ResetDestinations, ID_CMD_RESET_DESTINATIONS );

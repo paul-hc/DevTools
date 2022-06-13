@@ -6,6 +6,7 @@
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
+#include "utl/FileContent.h"
 #include "utl/FileSystem.h"
 #include "utl/Logger.h"
 #include "utl/RuntimeException.h"
@@ -31,6 +32,7 @@ namespace cmd
 		, m_filePaths( filePaths )
 		, m_timestamp( timestamp )
 		, m_pParentOwner( app::GetMainWnd() )
+		, m_fileAccessMode( fs::Exist )
 		, m_opFlags( FOF_ALLOWUNDO )
 	{
 	}
@@ -122,6 +124,13 @@ namespace cmd
 		}
 		LogExecution( message );
 
+		DWORD infoFlag = workingSet.m_succeeded ? NIIF_INFO : NIIF_ERROR;
+		if ( workingSet.m_succeeded && SomeExist == workingSet.m_existStatus )
+			infoFlag = NIIF_WARNING;
+		UINT timeoutSecs = workingSet.m_succeeded && AllExist == workingSet.m_existStatus ? 10 : 30;
+
+		ui::sys_tray::ShowBalloonTip( message.c_str(), _T("Shell Goodies"), infoFlag, timeoutSecs );
+
 		if ( !workingSet.m_succeeded )
 			return false;
 
@@ -132,11 +141,12 @@ namespace cmd
 
 	// CBaseFileGroupCmd::CWorkingSet implementation
 
-	CBaseFileGroupCmd::CWorkingSet::CWorkingSet( const CBaseFileGroupCmd& cmd, fs::AccessMode accessMode /*= fs::Read*/ )
+	CBaseFileGroupCmd::CWorkingSet::CWorkingSet( const CBaseFileGroupCmd* pCmd, fs::AccessMode accessMode /*= fs::Read*/ )
 		: m_existStatus( AllExist )
 		, m_succeeded( false )
 	{
-		const std::vector< fs::CPath >& filePaths = cmd.GetFilePaths();
+		ASSERT_PTR( pCmd );
+		const std::vector< fs::CPath >& filePaths = pCmd->GetFilePaths();
 
 		ASSERT( !filePaths.empty() );
 
@@ -152,6 +162,33 @@ namespace cmd
 			m_existStatus = !m_currFilePaths.empty() ? SomeExist : NoneExist;
 	}
 
+	CBaseFileGroupCmd::CWorkingSet::CWorkingSet( const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths,
+												 fs::AccessMode accessMode /*= fs::Read*/ )
+		: m_existStatus( AllExist )
+		, m_succeeded( false )
+	{
+		REQUIRE( !srcFilePaths.empty() && srcFilePaths.size() == destFilePaths.size() );
+
+		m_currFilePaths.reserve( srcFilePaths.size() );
+		m_currDestFilePaths.reserve( destFilePaths.size() );
+
+		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
+		{
+			const fs::CPath& srcFilePath = srcFilePaths[ i ];
+
+			if ( srcFilePath.FileExist( accessMode ) )
+			{
+				m_currFilePaths.push_back( srcFilePath );
+				m_currDestFilePaths.push_back( destFilePaths[ i ] );
+			}
+			else
+				m_badFilePaths.push_back( srcFilePath );
+		}
+
+		if ( m_currFilePaths.size() != srcFilePaths.size() )
+			m_existStatus = !m_currFilePaths.empty() ? SomeExist : NoneExist;
+	}
+
 	bool CBaseFileGroupCmd::CWorkingSet::IsBadFilePath( const fs::CPath& filePath ) const
 	{
 		return !utl::Contains( m_badFilePaths, filePath );
@@ -160,15 +197,15 @@ namespace cmd
 
 	// CBaseDeepTransferFilesCmd implementation
 
-	CBaseDeepTransferFilesCmd::CBaseDeepTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath )
+	CBaseDeepTransferFilesCmd::CBaseDeepTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath )
 		: cmd::CBaseFileGroupCmd( cmdType, srcFilePaths )
-		, m_srcCommonDirPath( path::ExtractCommonParentPath( srcFilePaths ) )
 		, m_destDirPath( destDirPath )
+		, m_srcCommonDirPath( path::ExtractCommonParentPath( srcFilePaths ) )
 		, m_topDestDirPath( m_destDirPath )
 	{
 	}
 
-	void CBaseDeepTransferFilesCmd::SetDeepRelDirPath( const fs::CPath& deepRelSubfolderPath )
+	void CBaseDeepTransferFilesCmd::SetDeepRelDirPath( const fs::TDirPath& deepRelSubfolderPath )
 	{
 		REQUIRE( path::IsRelative( deepRelSubfolderPath.GetPtr() ) );
 
@@ -176,10 +213,19 @@ namespace cmd
 		m_destDirPath /= deepRelSubfolderPath;		// move dest folder deeper
 	}
 
+	bool CBaseDeepTransferFilesCmd::QueryDestFilePaths( std::vector< fs::CPath >& rDestFilePaths ) const
+	{
+		CWorkingSet workingSet( this, m_fileAccessMode );
+
+		MakeDestFilePaths( rDestFilePaths, workingSet.m_currFilePaths );
+		return workingSet.IsValid();
+	}
+
 	void CBaseDeepTransferFilesCmd::Serialize( CArchive& archive ) override
 	{
 		__super::Serialize( archive );
 
+		// keep the order for backwards compatibility
 		archive & m_srcCommonDirPath;
 		archive & m_destDirPath;
 		archive & m_topDestDirPath;
@@ -209,11 +255,66 @@ namespace cmd
 
 	fs::CPath CBaseDeepTransferFilesCmd::MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const
 	{
-		fs::CPath srcParentDirPath = srcFilePath.GetParentPath();
-		std::tstring destRelPath = path::StripCommonPrefix( srcParentDirPath.GetPtr(), m_srcCommonDirPath.GetPtr() );
+		fs::TDirPath srcParentDirPath = srcFilePath.GetParentPath();
+		fs::TDirPath destRelPath = path::StripCommonPrefix( srcParentDirPath.GetPtr(), m_srcCommonDirPath.GetPtr() );
 
 		fs::CPath targetFullPath = m_destDirPath / destRelPath / srcFilePath.GetFilename();
 		return targetFullPath;
+	}
+
+
+	// CBaseShallowTransferFilesCmd implementation
+
+	CBaseShallowTransferFilesCmd::CBaseShallowTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath,
+																const std::vector< fs::CPath >* pDestFilePaths /*= NULL*/ )
+		: cmd::CBaseFileGroupCmd( cmdType, srcFilePaths )
+		, m_destDirPath( destDirPath )
+	{
+		if ( pDestFilePaths != NULL )
+			m_destFilePaths = *pDestFilePaths;		// explicit DEST only for unexecuting
+	}
+
+	bool CBaseShallowTransferFilesCmd::QueryDestFilePaths( std::vector< fs::CPath >& rDestFilePaths ) const
+	{
+		CWorkingSet workingSet( this, m_fileAccessMode );
+
+		MakeDestFilePaths( rDestFilePaths, workingSet.m_currFilePaths );
+		return workingSet.IsValid();
+	}
+
+	void CBaseShallowTransferFilesCmd::Serialize( CArchive& archive ) override
+	{
+		__super::Serialize( archive );
+
+		archive & m_destDirPath;
+		serial::SerializeValues( archive, m_destFilePaths );
+	}
+
+	void CBaseShallowTransferFilesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const override
+	{
+		QueryFilePairLines( rLines, GetSrcFilePaths(), m_destFilePaths );
+	}
+
+	std::tstring CBaseShallowTransferFilesCmd::GetDestHeaderInfo( void ) const override
+	{
+		return str::Format( _T("-> %s"), m_destDirPath.GetPtr() );
+	}
+
+	void CBaseShallowTransferFilesCmd::MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const
+	{
+		rDestFilePaths.clear();
+		rDestFilePaths.reserve( srcFilePaths.size() );
+
+		for ( std::vector< fs::CPath >::const_iterator itSrcPath = srcFilePaths.begin(); itSrcPath != srcFilePaths.end(); ++itSrcPath )
+			rDestFilePaths.push_back( DoMakeDestFilePath( *itSrcPath ) );
+	}
+
+	fs::CPath CBaseShallowTransferFilesCmd::MakeBackupDestFilePath( const fs::CPath& srcFilePath ) const
+	{
+		// flat destination dir path
+		fs::CFileBackup backup( srcFilePath, m_destDirPath, fs::FileSizeAndCrc32 );
+
+		return backup.MakeBackupFilePath();
 	}
 }
 
@@ -225,6 +326,7 @@ IMPLEMENT_SERIAL( CDeleteFilesCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
 CDeleteFilesCmd::CDeleteFilesCmd( const std::vector< fs::CPath >& filePaths )
 	: cmd::CBaseFileGroupCmd( cmd::DeleteFiles, filePaths )
 {
+	m_fileAccessMode = fs::Write;
 }
 
 CDeleteFilesCmd::~CDeleteFilesCmd()
@@ -233,7 +335,7 @@ CDeleteFilesCmd::~CDeleteFilesCmd()
 
 bool CDeleteFilesCmd::Execute( void ) override
 {
-	CWorkingSet workingSet( *this, fs::Write );
+	CWorkingSet workingSet( this, m_fileAccessMode );
 
 	if ( workingSet.IsValid() )
 		if ( shell::DeleteFiles( workingSet.m_currFilePaths, GetParentOwner(), m_opFlags ) )		// delete to RecycleBin
@@ -266,7 +368,7 @@ bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void ) override
 	std::vector< fs::CPath > errorFilePaths;
 	size_t restoredCount = shell::UndeleteFiles( GetFilePaths(), GetParentOwner(), &errorFilePaths );
 
-	CWorkingSet workingSet( *this );
+	CWorkingSet workingSet( this );
 	workingSet.m_badFilePaths.swap( errorFilePaths );
 	workingSet.m_succeeded = restoredCount != 0;
 
@@ -278,20 +380,24 @@ bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void ) override
 
 IMPLEMENT_SERIAL( CCopyFilesCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
 
-CCopyFilesCmd::CCopyFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, bool isPaste /*= false*/ )
+CCopyFilesCmd::CCopyFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath )
 	: cmd::CBaseDeepTransferFilesCmd( cmd::CopyFiles, srcFilePaths, destDirPath )
 {
-	if ( isPaste )
-		SetTypeID( cmd::PasteCopyFiles );
+	m_fileAccessMode = fs::ReadWrite;
 }
 
 CCopyFilesCmd::~CCopyFilesCmd()
 {
 }
 
+CCopyFilesCmd* CCopyFilesCmd::MakePasteCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath )
+{
+	return SetCommandType( new CCopyFilesCmd( srcFilePaths, destDirPath ), cmd::PasteCopyFiles );
+}
+
 bool CCopyFilesCmd::Execute( void ) override
 {
-	CWorkingSet workingSet( *this, fs::ReadWrite );
+	CWorkingSet workingSet( this, m_fileAccessMode );
 
 	std::vector< fs::CPath > destFilePaths;
 	MakeDestFilePaths( destFilePaths, workingSet.m_currFilePaths );
@@ -310,7 +416,7 @@ bool CCopyFilesCmd::Unexecute( void ) override
 	std::vector< fs::CPath > destFilePaths;
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
 
-	std::vector< fs::CPath > destFolderPaths;
+	std::vector< fs::TDirPath > destFolderPaths;
 	fs::QueryFolderPaths( destFolderPaths, destFilePaths, true );		// store all dest folders for post-delete cleanup
 
 	CDeleteFilesCmd undoCmd( destFilePaths );		// delete destination files
@@ -337,20 +443,24 @@ bool CCopyFilesCmd::Unexecute( void ) override
 
 IMPLEMENT_SERIAL( CMoveFilesCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
 
-CMoveFilesCmd::CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, bool isPaste /*= false*/ )
+CMoveFilesCmd::CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath )
 	: cmd::CBaseDeepTransferFilesCmd( cmd::MoveFiles, srcFilePaths, destDirPath )
 {
-	if ( isPaste )
-		SetTypeID( cmd::PasteMoveFiles );
+	m_fileAccessMode = fs::ReadWrite;
 }
 
 CMoveFilesCmd::~CMoveFilesCmd()
 {
 }
 
+CMoveFilesCmd* CMoveFilesCmd::MakePasteCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath )
+{
+	return SetCommandType( new CMoveFilesCmd( srcFilePaths, destDirPath ), cmd::PasteMoveFiles );
+}
+
 bool CMoveFilesCmd::Execute( void ) override
 {
-	CWorkingSet workingSet( *this, fs::ReadWrite );
+	CWorkingSet workingSet( this, m_fileAccessMode );
 
 	std::vector< fs::CPath > destFilePaths;
 	MakeDestFilePaths( destFilePaths, workingSet.m_currFilePaths );
@@ -372,7 +482,8 @@ bool CMoveFilesCmd::Unexecute( void ) override
 	std::vector< fs::CPath > destFolderPaths;
 	fs::QueryFolderPaths( destFolderPaths, destFilePaths, true );		// store all dest folders for post-delete cleanup
 
-	CMoveFilesCmd undoCmd( destFilePaths, GetSrcCommonDirPath(), cmd::PasteMoveFiles == GetTypeID() );			// move back destination files to source common directory
+	CMoveFilesCmd undoCmd( destFilePaths, GetSrcCommonDirPath() );		// move back destination files to source common directory
+	undoCmd.SetTypeID( GetCmdType() );
 	undoCmd.CopyTimestampOf( *this );
 
 	if ( undoCmd.Execute() )
@@ -403,6 +514,8 @@ CCreateFoldersCmd::CCreateFoldersCmd( const std::vector< fs::CPath >& srcFilePat
 		case PasteDirs:			SetTypeID( cmd::PasteCreateFolders ); break;
 		case PasteDeepStruct:	SetTypeID( cmd::PasteCreateDeepFolders ); break;
 	}
+
+	m_fileAccessMode = fs::Exist;
 }
 
 CCreateFoldersCmd::~CCreateFoldersCmd()
@@ -411,7 +524,7 @@ CCreateFoldersCmd::~CCreateFoldersCmd()
 
 bool CCreateFoldersCmd::Execute( void ) override
 {
-	CWorkingSet workingSet( *this, fs::Exist );
+	CWorkingSet workingSet( this, m_fileAccessMode );
 
 	std::vector< fs::CPath > destFolderPaths;
 	MakeDestFilePaths( destFolderPaths, workingSet.m_currFilePaths );
@@ -466,4 +579,96 @@ bool CCreateFoldersCmd::Unexecute( void ) override
 	}
 
 	return false;
+}
+
+
+// CCopyPasteFilesAsBackupCmd implementation
+
+IMPLEMENT_SERIAL( CCopyPasteFilesAsBackupCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+
+CCopyPasteFilesAsBackupCmd::CCopyPasteFilesAsBackupCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath )
+	: cmd::CBaseShallowTransferFilesCmd( cmd::CopyPasteFilesAsBackup, srcFilePaths, destDirPath )
+{
+	m_fileAccessMode = fs::ReadWrite;
+	SetFlag( m_opFlags, FOF_NOCONFIRMATION );		// no need to bother the user on backup - the intent is to override files
+
+	// object fully constructed (can call virtual methods): initialize DEST paths
+	MakeDestFilePaths( m_destFilePaths, srcFilePaths );
+}
+
+CCopyPasteFilesAsBackupCmd::~CCopyPasteFilesAsBackupCmd()
+{
+}
+
+bool CCopyPasteFilesAsBackupCmd::Execute( void ) override
+{
+	CWorkingSet workingSet( GetSrcFilePaths(), m_destFilePaths, m_fileAccessMode );
+
+	if ( workingSet.IsValid() )
+		if ( shell::CopyFiles( workingSet.m_currFilePaths, workingSet.m_currDestFilePaths, GetParentOwner(), m_opFlags ) )		// undoable copy files, no override prompt
+			workingSet.m_succeeded = true;
+		else if ( shell::AnyOperationAborted() )
+			throw CUserAbortedException();			// go silent if cancelled by user
+
+	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+}
+
+bool CCopyPasteFilesAsBackupCmd::Unexecute( void ) override
+{
+	CDeleteFilesCmd undoCmd( m_destFilePaths );		// delete destination files
+
+	undoCmd.CopyTimestampOf( *this );
+	ClearFlag( undoCmd.m_opFlags, FOF_ALLOWUNDO );
+
+	return undoCmd.Execute();
+}
+
+
+// CCutPasteFilesAsBackupCmd implementation
+
+IMPLEMENT_SERIAL( CCutPasteFilesAsBackupCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+
+CCutPasteFilesAsBackupCmd::CCutPasteFilesAsBackupCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath )
+	: cmd::CBaseShallowTransferFilesCmd( cmd::CutPasteFilesAsBackup, srcFilePaths, destDirPath )
+{
+	m_fileAccessMode = fs::ReadWrite;
+	SetFlag( m_opFlags, FOF_NOCONFIRMATION );		// no need to bother the user on backup - the intent is to override files
+
+	// object fully constructed (can call virtual methods): initialize DEST paths
+	MakeDestFilePaths( m_destFilePaths, srcFilePaths );
+}
+
+CCutPasteFilesAsBackupCmd::CCutPasteFilesAsBackupCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath, const std::vector< fs::CPath >& destFilePaths )
+	: cmd::CBaseShallowTransferFilesCmd( cmd::CutPasteFilesAsBackup, srcFilePaths, destDirPath, &destFilePaths )
+{	// only for unexecution
+	m_fileAccessMode = fs::ReadWrite;
+}
+
+CCutPasteFilesAsBackupCmd::~CCutPasteFilesAsBackupCmd()
+{
+}
+
+bool CCutPasteFilesAsBackupCmd::Execute( void ) override
+{
+	CWorkingSet workingSet( GetSrcFilePaths(), m_destFilePaths, m_fileAccessMode );
+
+	if ( workingSet.IsValid() )
+		if ( shell::MoveFiles( workingSet.m_currFilePaths, workingSet.m_currDestFilePaths, GetParentOwner(), m_opFlags ) )		// undoable move files
+			workingSet.m_succeeded = true;
+		else if ( shell::AnyOperationAborted() )
+			throw CUserAbortedException();			// go silent if cancelled by user
+
+	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+}
+
+bool CCutPasteFilesAsBackupCmd::Unexecute( void ) override
+{
+	const std::vector< fs::CPath >& srcFilePaths = GetSrcFilePaths();
+	fs::TDirPath srcCommonDirPath( path::ExtractCommonParentPath( srcFilePaths ) );
+
+	CCutPasteFilesAsBackupCmd undoCmd( m_destFilePaths, srcCommonDirPath, srcFilePaths );		// move back destination files to source common directory
+
+	undoCmd.CopyTimestampOf( *this );
+
+	return undoCmd.Execute();
 }

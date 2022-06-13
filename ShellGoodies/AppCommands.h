@@ -13,8 +13,12 @@ namespace cmd
 {
 	enum CommandType
 	{
+		// persistent commands - don't modify their values, so that it won't break serialization
 		RenameFile = 100, TouchFile, FindDuplicates,
 		DeleteFiles, CopyFiles, PasteCopyFiles, MoveFiles, PasteMoveFiles, CreateFolders, PasteCreateFolders, PasteCreateDeepFolders,
+		CopyPasteFilesAsBackup, CutPasteFilesAsBackup,
+
+		// transient commands (not persistent)
 		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
 		EditOptions,
 		SortRenameItems, OnRenameListSelChanged,
@@ -91,7 +95,7 @@ namespace cmd
 
 
 	abstract class CBaseSerialCmd : public CObject
-								  , public CCommand
+		, public CCommand
 	{
 		DECLARE_DYNAMIC( CBaseSerialCmd )
 
@@ -99,6 +103,8 @@ namespace cmd
 	protected:
 		CBaseSerialCmd( CommandType cmdType = CommandType() );
 	public:
+		cmd::CommandType GetCmdType( void ) const { return static_cast<cmd::CommandType>( GetTypeID() ); }
+
 		// base overrides
 		virtual void Serialize( CArchive& archive );
 	protected:

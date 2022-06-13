@@ -182,9 +182,14 @@ void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX ) override
 		SwitchMode( m_mode );
 
 		// add the hidden shell tray icon (for balloon notifications)
-		m_pSystemTray.reset( new CSystemTrayWndHook() );
-		m_pSystemTray->SetOwnerCallback( this );
-		m_pSystemTray->CreateTrayIcon( GetDlgIcon( DlgSmallIcon )->GetSafeHandle(), ShellIconId, ui::GetWindowText( this ).c_str(), true );
+		if ( NULL == CSystemTray::Instance() )
+		{
+			m_pSystemTray.reset( new CSystemTrayWndHook() );
+			m_pSystemTray->SetOwnerCallback( this );
+		}
+
+		if ( CSystemTray* pSystemTray = CSystemTray::Instance() )
+			pSystemTray->CreateTrayIcon( GetDlgIcon( DlgSmallIcon )->GetSafeHandle(), ShellIconId, ui::GetWindowText( this ).c_str(), true );
 	}
 
 	__super::DoDataExchange( pDX );

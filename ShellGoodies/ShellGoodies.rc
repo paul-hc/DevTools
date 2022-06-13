@@ -508,6 +508,7 @@ BEGIN
     BUTTON      ID_TOUCH_FILES
     BUTTON      ID_FIND_DUPLICATE_FILES
     SEPARATOR
+    BUTTON      ID_PASTE_AS_BACKUP
     BUTTON      ID_PASTE_DEEP_POPUP
     BUTTON      ID_PASTE_FOLDER_STRUCT_POPUP
     BUTTON      ID_CREATE_FOLDERS
@@ -701,6 +702,7 @@ BEGIN
     ID_SELECT_TO_TOP        "Select all actions up to the top, starting with the current action"
     ID_EDIT_SEARCH_PATHS_LIST "Edit search paths\nEdit Search Paths"
     ID_EDIT_INGORE_PATHS_LIST "Edit paths to ignore\nEdit Ignore Paths"
+    ID_PASTE_AS_BACKUP      "Paste copied/cut files as a versioned backup file(s) in target folder"
 END
 
 STRINGTABLE 

@@ -217,7 +217,7 @@ void CCmdDashboardDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CTo
 	{
 		case IDC_UNDO_BUTTON:
 		case IDC_REDO_BUTTON:
-			rText = str::Format( _T("View %s action history"), svc::GetTags_StackType().FormatUi( m_stackType ).c_str() );
+			rText = str::Format( _T("View %s action history"), svc::GetTags_StackType().FormatUi( IDC_UNDO_BUTTON == cmdId ? svc::Undo : svc::Redo ).c_str() );
 			return;
 	}
 	__super::QueryTooltipText( rText, cmdId, pTooltip );
