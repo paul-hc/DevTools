@@ -354,8 +354,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,4,0,1
- PRODUCTVERSION 9,4,0,1
+ FILEVERSION 9,5,0,1
+ PRODUCTVERSION 9,5,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -370,17 +370,17 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "11-06-2022 02:06:44"
-            VALUE "Comments", "Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill"
+            VALUE "BuildTimestamp", "14-06-2022 00:20:38"
+            VALUE "Comments", "Paste as Backup|Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
-            VALUE "FileVersion", "9, 4, 0, 1"
+            VALUE "FileVersion", "9, 5, 0, 1"
             VALUE "InternalName", "Shell Goodies"
             VALUE "LegalCopyright", "Copyfright © 2001-2022"
             VALUE "OriginalFilename", "ShellGoodies64.dll"
             VALUE "ProductName", "ShellGoodies Shell Extension DLL"
-            VALUE "ProductVersion", "9, 4, 0, 1"
+            VALUE "ProductVersion", "9, 5, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
