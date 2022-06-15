@@ -619,6 +619,7 @@ bool CCopyPasteFilesAsBackupCmd::Unexecute( void ) override
 
 	undoCmd.CopyTimestampOf( *this );
 	ClearFlag( undoCmd.m_opFlags, FOF_ALLOWUNDO );
+	SetFlag( undoCmd.m_opFlags, FOF_NOCONFIRMATION );
 
 	return undoCmd.Execute();
 }
