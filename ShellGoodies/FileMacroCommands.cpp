@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileMacroCommands.h"
+#include "utl/AppTools.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
@@ -160,7 +161,7 @@ namespace cmd
 		{
 			Execute();
 
-			LogMessage( Format( utl::Detailed ) );
+			LogMessage( Format( utl::Detailed ), app::Info );
 		}
 		catch ( CException* pExc )
 		{
@@ -191,7 +192,7 @@ namespace cmd
 			case IDIGNORE:	feedback = Ignore; break;
 		}
 
-		LogMessage( str::Format( s_fmtError, Format( utl::Detailed ).c_str() ) + errMsg );
+		LogMessage( str::Format( s_fmtError, Format( utl::Detailed ).c_str() ) + errMsg, app::Error );
 		return feedback;
 	}
 

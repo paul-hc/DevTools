@@ -122,14 +122,12 @@ namespace cmd
 			stream::Tag( message, str::Format( _T(" WARNING: Cannot access %d files:"), workingSet.m_badFilePaths.size() ), s_lineEnd );
 			stream::Tag( message, str::Join( workingSet.m_badFilePaths, s_lineEnd ), s_lineEnd );
 		}
-		LogExecution( message );
 
-		DWORD infoFlag = workingSet.m_succeeded ? NIIF_INFO : NIIF_ERROR;
+		app::MsgType msgType = workingSet.m_succeeded ? app::Info : app::Error;
 		if ( workingSet.m_succeeded && SomeExist == workingSet.m_existStatus )
-			infoFlag = NIIF_WARNING;
-		UINT timeoutSecs = workingSet.m_succeeded && AllExist == workingSet.m_existStatus ? 10 : 30;
+			msgType = app::Warning;
 
-		ui::sys_tray::ShowBalloonTip( message.c_str(), _T("Shell Goodies"), infoFlag, timeoutSecs );
+		LogExecution( message, msgType );
 
 		if ( !workingSet.m_succeeded )
 			return false;
@@ -429,7 +427,7 @@ bool CCopyFilesCmd::Unexecute( void ) override
 		{
 			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
 
-			LogMessage( message );
+			LogMessage( message, app::Info );
 			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
 		}
 		return true;
@@ -492,7 +490,7 @@ bool CMoveFilesCmd::Unexecute( void ) override
 		{
 			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
 
-			LogMessage( message );
+			LogMessage( message, app::Info );
 			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
 		}
 		return true;
@@ -572,7 +570,7 @@ bool CCreateFoldersCmd::Unexecute( void ) override
 		{
 			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
 
-			LogMessage( message );
+			LogMessage( message, app::Info );
 			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
 		}
 		return true;

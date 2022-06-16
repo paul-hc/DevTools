@@ -7,6 +7,7 @@
 
 class CEnumTags;
 namespace fs { class CPath; }
+namespace app { enum MsgType; }
 
 
 namespace cmd
@@ -108,8 +109,8 @@ namespace cmd
 		// base overrides
 		virtual void Serialize( CArchive& archive );
 	protected:
-		static bool LogMessage( const std::tstring& message );
-		static void LogExecution( const std::tstring& message );
+		static bool LogMessage( const std::tstring& message, app::MsgType msgType );
+		static void LogExecution( const std::tstring& message, app::MsgType msgType );
 	private:
 		static CLogger* s_pLogger;
 	public:

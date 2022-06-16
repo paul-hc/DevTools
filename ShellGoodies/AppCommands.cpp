@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "utl/EnumTags.h"
 #include "utl/TimeUtils.h"
+#include "utl/UI/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -116,19 +117,31 @@ namespace cmd
 		CCommand::Serialize( archive );		// dis-ambiguate from CObject::Serialize()
 	}
 
-	bool CBaseSerialCmd::LogMessage( const std::tstring& message )
+	bool CBaseSerialCmd::LogMessage( const std::tstring& message, app::MsgType msgType )
 	{
+		DWORD infoFlag = NIIF_NONE;
+		UINT timeoutSecs = 10;
+
+		switch ( msgType )
+		{
+			case app::Error:	infoFlag = NIIF_ERROR; timeoutSecs = 30; break;
+			case app::Warning:	infoFlag = NIIF_WARNING; timeoutSecs = 20; break;
+			case app::Info:		infoFlag = NIIF_INFO; break;
+		}
+
+		ui::sys_tray::ShowBalloonTip( message, _T("Shell Goodies"), infoFlag, timeoutSecs );
+
 		if ( s_pLogger != NULL )
 			s_pLogger->LogString( message );
 
 		return s_pLogger != NULL;
 	}
 
-	void CBaseSerialCmd::LogExecution( const std::tstring& message )
+	void CBaseSerialCmd::LogExecution( const std::tstring& message, app::MsgType msgType )
 	{
 		std::tstring execMessage = utl::GetTags_ExecMode().FormatUi( CCommandModel::GetExecMode() );
 		stream::Tag( execMessage, message, _T(": ") );
 
-		LogMessage( execMessage );
+		LogMessage( execMessage, msgType );
 	}
 }
