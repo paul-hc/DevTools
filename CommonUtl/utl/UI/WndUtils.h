@@ -316,7 +316,7 @@ namespace ui
 		bool HasSystemTray( void );
 
 		// system tray baloon tips
-		bool ShowBalloonTip( const TCHAR text[], const TCHAR* pTitle = NULL, DWORD infoFlag = NIIF_INFO, UINT timeoutSecs = 10 );
+		bool ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle = NULL, DWORD infoFlag = NIIF_INFO, UINT timeoutSecs = 10 );
 		bool HideBalloonTip( void );
 	}
 }

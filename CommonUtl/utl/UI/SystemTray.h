@@ -11,6 +11,7 @@
 #include "Timer.h"
 
 
+struct CBaloonData;
 class CTrayIconAnimation;
 namespace ui { interface ISystemTrayCallback; }
 
@@ -49,8 +50,8 @@ public:
 	bool SetTooltipText( const TCHAR* pIconTipText );
 
 	bool IsBalloonTipVisible( void ) const { return m_baloonVisible; }
-	bool ShowBalloonTip( const TCHAR text[], const TCHAR* pTitle = NULL, DWORD infoFlag = NIIF_NONE, UINT timeoutSecs = 10 );	// Win 2K+
-	bool HideBalloonTip( void ) { return ShowBalloonTip( NULL ); }
+	bool ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle = NULL, DWORD infoFlag = NIIF_NONE, UINT timeoutSecs = 10 );	// Win 2K+
+	bool HideBalloonTip( void ) { return ShowBalloonTip( str::GetEmpty() ); }
 
 	// icon displayed
 	UINT GetTrayIconId( void ) const { return m_niData.uID; }
@@ -87,6 +88,10 @@ protected:
 
 	ui::ISystemTrayCallback* GetOwnerCallback( void ) const { return m_pOwnerCallback; }
 	NOTIFYICONDATA& RefIconData( void ) { return m_niData; }
+
+	enum PrivateNotify { NIN_BalloonPendingShow = NIN_BALLOONUSERCLICK + 33 };
+private:
+	bool DoShowBalloonTip( const std::tstring& text, const TCHAR* pTitle, DWORD infoFlag, UINT timeoutSecs );
 private:
 	ui::ISystemTrayCallback* m_pOwnerCallback;		// receives tray icon notifications, and handles special events, e.g. NIN_SELECT, NINF_KEY, NIN_KEYSELECT, NIN_BALLOONSHOW, etc
 	NOTIFYICONDATA m_niData;
@@ -101,6 +106,8 @@ private:
 	// main icon: the first one created via CreateTrayIcon(); an application can have additional tray icons
 	UINT m_mainTrayIconId;
 	UINT m_mainFlags;
+
+	std::auto_ptr<CBaloonData> m_pBaloonPending;		// used in the delayed transaction to replace a displayed ballon to another with different content (sys-tray notifications have an async sequence)
 
 	// icon animation
 	CImageList m_animImageList;

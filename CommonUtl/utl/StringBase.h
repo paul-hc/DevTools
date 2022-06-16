@@ -189,6 +189,16 @@ namespace str
 namespace str
 {
 	template< typename CharT >
+	std::basic_string<CharT> Clamp( const std::basic_string<CharT>& text, size_t maxLength, const TCHAR* pMoreSuffix = NULL )
+	{	// clamps string to a maxLength, eventually adding a suffix
+		std::basic_string<CharT> outText( text, 0, std::min( maxLength, text.length() ) );
+		if ( text.length() > maxLength && pMoreSuffix != NULL )
+			outText += pMoreSuffix;
+		return outText;
+	}
+
+
+	template< typename CharT >
 	inline std::basic_string<CharT>& PopBack( std::basic_string<CharT>& rText )
 	{	// placeholder for basic_string::pop_back() that's missing in earlier versions of STD C++
 		ASSERT( !rText.empty() );

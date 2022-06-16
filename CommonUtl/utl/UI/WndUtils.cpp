@@ -775,11 +775,11 @@ namespace ui
 		}
 
 
-		bool ShowBalloonTip( const TCHAR text[], const TCHAR* pTitle /*= NULL*/, DWORD infoFlag /*= NIIF_INFO*/, UINT timeoutSecs /*= 10*/ )
+		bool ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle /*= NULL*/, DWORD infoFlag /*= NIIF_INFO*/, UINT timeoutSecs /*= 10*/ )
 		{
 			CSystemTray* pSystemTray = CSystemTray::Instance();
 
-			if ( NULL == pSystemTray && !str::IsEmpty( text ) )
+			if ( NULL == pSystemTray && !text.empty() )
 				pSystemTray = new CSystemTraySingleton( AfxGetMainWnd() );		// self-destroying singleton
 
 			return pSystemTray != NULL && pSystemTray->ShowBalloonTip( text, pTitle, infoFlag, timeoutSecs );

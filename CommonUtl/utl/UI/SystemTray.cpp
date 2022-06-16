@@ -248,31 +248,69 @@ bool CSystemTray::SetTooltipText( const TCHAR* pIconTipText )
 	return NotifyTrayIcon( NIM_MODIFY );
 }
 
-bool CSystemTray::ShowBalloonTip( const TCHAR text[], const TCHAR* pTitle /*= NULL*/, DWORD infoFlag /*= NIIF_NONE*/, UINT timeoutSecs /*= 10*/ )
+
+struct CBaloonData
 {
+	CBaloonData( const std::tstring& text, const TCHAR* pTitle, DWORD infoFlag, UINT timeoutSecs )
+		: m_text( text ), m_infoFlag( infoFlag ), m_timeoutSecs( timeoutSecs )
+	{
+		if ( pTitle != NULL )
+			m_title = pTitle;
+	}
+
+	bool ShowBalloon( CSystemTray* pSystemTray ) { ASSERT_PTR( pSystemTray ); return pSystemTray->ShowBalloonTip( m_text, m_title.c_str(), m_infoFlag, m_timeoutSecs ); }
+public:
+	std::tstring m_text;
+	std::tstring m_title;
+	DWORD m_infoFlag;
+	UINT m_timeoutSecs;
+};
+
+bool CSystemTray::ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle /*= NULL*/, DWORD infoFlag /*= NIIF_NONE*/, UINT timeoutSecs /*= 10*/ )
+{
+	//TRACE( _T("CSystemTray::ShowBalloonTip( %s ) {...\n"), str::Clamp( text, 24 ).c_str() );
+
 	ASSERT( hlp::IsValidBaloonInfoFlags( infoFlag ) );		// info icon must be valid
 	ASSERT( hlp::IsValidBaloonTimeout( timeoutSecs ) );		// timeout must be between 10 and 30 seconds
 	ASSERT( HasIcon() );
 
-	bool autoShowIcon = !str::IsEmpty( text ) && !IsIconVisible();		// showing baloon on hidden icon?
+	bool visible = IsIconVisible();
+	bool hasText = !text.empty();
+	bool autoShowIcon = hasText && !visible;		// showing baloon on hidden icon?
+
+	if ( NULL == m_pBaloonPending.get() )
+		if ( HasFlag( m_autoHideFlags, NIF_INFO ) )
+			if ( IsIconVisible() && !text.empty() )
+			{
+				m_pBaloonPending.reset( new CBaloonData( text, pTitle, infoFlag, timeoutSecs ) );		// delayed transaction: wait for the NIN_BALLOONHIDE notification
+				DoShowBalloonTip( str::GetEmpty(), NULL, NIIF_NONE, 10 );
+				return true;
+			}
 
 	if ( autoShowIcon )
 		SetIconVisible();						// auto-show icon to display baloon
 
+	bool success = DoShowBalloonTip( text, pTitle, infoFlag, timeoutSecs );
+
+	if ( success && autoShowIcon )
+		SetFlag( m_autoHideFlags, NIF_INFO );	// store the balloon flag to auto-hide icon
+
+	//TRACE( _T("CSystemTray::ShowBalloonTip( %s ) success=%d ... }\n"), str::Clamp( text, 24 ).c_str(), success );
+	return success;
+}
+
+bool CSystemTray::DoShowBalloonTip( const std::tstring& text, const TCHAR* pTitle, DWORD infoFlag, UINT timeoutSecs )
+{
 	SetFlag( m_niData.uFlags, NIF_INFO );
 	m_niData.dwInfoFlags = infoFlag;
 	m_niData.uTimeout = timeoutSecs * 1000;		// convert time to ms
 
-	hlp::CopyTextToBuffer( m_niData.szInfo, text, BalloonTextMaxLength );
+	hlp::CopyTextToBuffer( m_niData.szInfo, text.c_str(), BalloonTextMaxLength );
 	hlp::CopyTextToBuffer( m_niData.szInfoTitle, pTitle, BalloonTitleMaxLength );
 
 	bool success = NotifyTrayIcon( NIM_MODIFY );
 
 	m_niData.szInfo[ 0 ] = _T('\0');			// zero-out the balloon text string so that later operations won't redisplay the balloon
-
-	if ( success && autoShowIcon )
-		SetFlag( m_autoHideFlags, NIF_INFO );		// store the balloon flag to auto-hide icon
-
 	return success;
 }
 
@@ -439,7 +477,7 @@ bool CSystemTray::HandleTrayIconNotify( WPARAM wParam, LPARAM lParam )
 	UINT iconId = HIWORD( lParam );
 	CPoint screenPos( GET_X_LPARAM( wParam ), GET_Y_LPARAM( wParam ) );
 
-	//dbg::TraceTrayNotifyCode( msgNotifyCode );
+	dbg::TraceTrayNotifyCode( msgNotifyCode );
 
 	if ( m_pOwnerCallback != NULL )
 		if ( m_pOwnerCallback->OnTrayIconNotify( msgNotifyCode, iconId, screenPos ) )
@@ -503,12 +541,26 @@ bool CSystemTray::HandleTrayIconNotify( WPARAM wParam, LPARAM lParam )
 			m_baloonVisible = true;
 			break;
 		case NIN_BALLOONHIDE:
+			if ( m_pBaloonPending.get() != NULL )
+			{
+				GetPopupWnd()->PostMessage( CSystemTray::WM_TRAYICONNOTIFY, wParam, MAKELPARAM( NIN_BalloonPendingShow, iconId ) );
+				return true;
+			}
+			// fall-through
 		case NIN_BALLOONTIMEOUT:
-			if ( HasFlag( m_autoHideFlags, NIF_INFO ) )		// must auto-hide icon?
-				SetIconVisible( false );
+			if ( m_pBaloonPending.get() != NULL )
+			{
+				if ( HasFlag( m_autoHideFlags, NIF_INFO ) )		// must auto-hide icon?
+					SetIconVisible( false );
 
-			m_baloonVisible = false;
+				m_baloonVisible = false;
+			}
 			break;
+		case NIN_BalloonPendingShow:
+			ASSERT_PTR( m_pBaloonPending.get() );
+			m_pBaloonPending->ShowBalloon( this );
+			m_pBaloonPending.reset();
+			return true;
 	}
 
 	return false;		// event not handled
