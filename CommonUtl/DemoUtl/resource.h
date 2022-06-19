@@ -5,6 +5,7 @@
 #define IDD_DEMO_FORM                   101
 #define IDD_DEMO_DIALOG                 102
 #define IDR_LOW_COLOR_STRIP             103
+#define IDR_MSG_TRAY                    127
 #define IDR_MAINFRAME                   128
 #define IDR_TEST_DOC_TYPE               129
 #define IDR_FORMAT_PICKER_MENU          130
@@ -29,6 +30,7 @@
 #define IDD_FILE_CHECKSUMS_DIALOG       151
 #define IDI_MY_TOOL_STRIP_ALPHA_ICON    151
 #define IDD_BUDDY_CONTROLS_DIALOG       152
+#define IDB_SEARCH_FILES_ANIM_STRIP     152
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_MODELESS_PROPERTIES_BUTTON  1002
@@ -162,13 +164,20 @@
 #define ID_STUDY_MISC_DIALOG            32794
 #define ID_STUDY_FILE_CHECKSUM          32795
 #define ID_STUDY_BUDDY_CONTROLS         32796
+#define ID_MSG_TRAY_SHOW_NEXT_BALLOON   32798
+#define ID_MSG_TRAY_HIDE_BALLOON        32799
+#define ID_MSG_TRAY_ANIMATE             32800
+#define ID_APP_TRAY_SHOW_BALLOON        32801
+#define ID_APP_TRAY_TOGGLE_TRAY_ICON    32802
+#define ID_APP_TRAY_FOCUS_TRAY_ICON     32803
+#define ID_APP_TRAY_ANIMATE             32804
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        152
-#define _APS_NEXT_COMMAND_VALUE         32798
+#define _APS_NEXT_RESOURCE_VALUE        153
+#define _APS_NEXT_COMMAND_VALUE         32813
 #define _APS_NEXT_CONTROL_VALUE         1105
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif

@@ -23,7 +23,7 @@ namespace gdi { enum Effect; }
 
 
 class CImageDialog : public CLayoutDialog
-				   , public ISampleCallback
+	, public ISampleCallback
 {
 	friend class CModePage;
 public:

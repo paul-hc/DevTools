@@ -63,6 +63,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
+IDR_MSG_TRAY            ICON                    "res\\AppMsgTray.ico"
 IDR_MAINFRAME           ICON                    "res\\DemoUtl.ico"
 IDR_TEST_DOC_TYPE       ICON                    "res\\TestDoc.ico"
 IDI_MY_TOOL_STRIP_ICON  ICON                    "res\\MyToolStrip.ico"
@@ -76,6 +77,7 @@ IDI_MY_TOOL_STRIP_ALPHA_ICON ICON                    "res\\MyToolStrip_alpha.ico
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 IDR_LOW_COLOR_STRIP     BITMAP                  "res\\LowColorStrip.bmp"
 IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+IDB_SEARCH_FILES_ANIM_STRIP BITMAP                  "res\\SearchFilesAnimStrip.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -146,6 +148,25 @@ BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
+    POPUP "System &Tray"
+    BEGIN
+        POPUP "&Message Icon (on-demand)"
+        BEGIN
+            MENUITEM "Show Next &Balloon\tF5",      ID_MSG_TRAY_SHOW_NEXT_BALLOON
+            MENUITEM "&Hide Balloon\tCtrl+H",       ID_MSG_TRAY_HIDE_BALLOON
+            MENUITEM SEPARATOR
+            MENUITEM "A&nimate\tCtrl+F5",           ID_MSG_TRAY_ANIMATE
+        END
+        POPUP "&Application Icon"
+        BEGIN
+            MENUITEM "Show &Balloon\tF8",           ID_APP_TRAY_SHOW_BALLOON
+            MENUITEM SEPARATOR
+            MENUITEM "Toggle Tray &Icon\tShift+F8", ID_APP_TRAY_TOGGLE_TRAY_ICON
+            MENUITEM "&Focus Icon\tCtrl+F",         ID_APP_TRAY_FOCUS_TRAY_ICON
+            MENUITEM SEPARATOR
+            MENUITEM "A&nimate\tCtrl+F8",           ID_APP_TRAY_ANIMATE
+        END
+    END
     POPUP "&Help"
     BEGIN
         MENUITEM "&About DemoUtl...",           ID_APP_ABOUT
@@ -178,6 +199,25 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "System &Tray"
+    BEGIN
+        POPUP "&Message Icon (on-demand)"
+        BEGIN
+            MENUITEM "Show Next &Balloon\tF5",      ID_MSG_TRAY_SHOW_NEXT_BALLOON
+            MENUITEM "&Hide Balloon\tCtrl+H",       ID_MSG_TRAY_HIDE_BALLOON
+            MENUITEM SEPARATOR
+            MENUITEM "A&nimate\tCtrl+F5",           ID_MSG_TRAY_ANIMATE
+        END
+        POPUP "&Application Icon"
+        BEGIN
+            MENUITEM "Show &Balloon\tF8",           ID_APP_TRAY_SHOW_BALLOON
+            MENUITEM SEPARATOR
+            MENUITEM "Toggle Tray &Icon\tShift+F8", ID_APP_TRAY_TOGGLE_TRAY_ICON
+            MENUITEM "&Focus Icon\tCtrl+F",         ID_APP_TRAY_FOCUS_TRAY_ICON
+            MENUITEM SEPARATOR
+            MENUITEM "A&nimate\tCtrl+F8",           ID_APP_TRAY_ANIMATE
+        END
     END
     POPUP "&Window"
     BEGIN
@@ -267,6 +307,10 @@ END
 
 IDR_MAINFRAME ACCELERATORS 
 BEGIN
+    VK_F1,          ID_APP_ABOUT,           VIRTKEY, NOINVERT
+    VK_F8,          ID_APP_TRAY_ANIMATE,    VIRTKEY, CONTROL, NOINVERT
+    VK_F8,          ID_APP_TRAY_SHOW_BALLOON, VIRTKEY, NOINVERT
+    VK_F8,          ID_APP_TRAY_TOGGLE_TRAY_ICON, VIRTKEY, SHIFT, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
@@ -278,9 +322,11 @@ BEGIN
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F5,          ID_MSG_TRAY_ANIMATE,    VIRTKEY, CONTROL, NOINVERT
+    "H",            ID_MSG_TRAY_HIDE_BALLOON, VIRTKEY, CONTROL, NOINVERT
+    VK_F5,          ID_MSG_TRAY_SHOW_NEXT_BALLOON, VIRTKEY, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
-    VK_F1,          ID_APP_ABOUT,           VIRTKEY, NOINVERT
 END
 
 IDD_IMAGE_DIALOG ACCELERATORS 
@@ -618,8 +664,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,0,0,1
- PRODUCTVERSION 3,0,0,1
+ FILEVERSION 4,0,0,1
+ PRODUCTVERSION 4,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -634,17 +680,17 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "BuildTimestamp", "28-10-2021 06:33:53"
-            VALUE "Comments", "Split UTL_BASE/UTL_UI projects"
+            VALUE "BuildTimestamp", "19-06-2022 15:47:43"
+            VALUE "Comments", "CTrayIcon|NewSysTray|Split UTL_BASE/UTL_UI projects"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Test application for UTL mini-framework"
-            VALUE "FileVersion", "3, 0, 0, 1"
+            VALUE "FileVersion", "4, 0, 0, 1"
             VALUE "InternalName", "DemoUtl"
-            VALUE "LegalCopyright", "Copyleft ® 2015-2019"
+            VALUE "LegalCopyright", "Copyleft ® 2015-2022"
             VALUE "OriginalFilename", "DemoUtl.exe"
             VALUE "ProductName", "Test application for UTL mini-framework"
-            VALUE "ProductVersion", "3, 0, 0, 1"
+            VALUE "ProductVersion", "4, 0, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -995,6 +1041,10 @@ BEGIN
     ID_SET_AUTO_TRANSP_COLOR "Set image auto-transparent color"
     ID_RESET_TRANSP_COLOR   "Reset image transparent color"
     ID_STUDY_FILE_CHECKSUM  "Evaluate the performance of CRC32 file checksum calculation by comparing UTL_BASE vs Boost algorithms"
+    ID_MSG_TRAY_SHOW_NEXT_BALLOON 
+                            "Show next balloon tip from message sequence\nShow Next Balloon (F5)"
+    ID_MSG_TRAY_HIDE_BALLOON 
+                            "Hide message balloon that is displayed\nHide Message Balloon (Ctrl+H)"
 END
 
 STRINGTABLE 
@@ -1002,6 +1052,23 @@ BEGIN
     IDC_FILE_STATE_LIST     "File name=150|DEST File name=150|Attributes|DEST Attributes|Created Date=125|DEST Created Date=125|Notes=-1/150"
     IDC_FILE_STATE_EX_LIST  "File Path=-1|Size|Attributes|CRC32|Modified Date=125|Elapsed CRC32"
     IDC_FILE_CHECKSUMS_LIST "File name=150|Directory=-1/150|File Size|UTL: CRC32=100>|UTL: Elapsed=100>|UTL-ifs: CRC32=100>|UTL-ifs: Elapsed=100>|BoostCFile: CRC32=100>|BoostCFile: Elapsed=100>|Boost-ifs: CRC32=100>|Boost-ifs: Elapsed=100>"
+END
+
+STRINGTABLE 
+BEGIN
+    IDR_MSG_TRAY            "Demo Messages"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_MSG_TRAY_ANIMATE     "Animate message icon\nAnimate (Ctrl+F5)"
+    ID_APP_TRAY_SHOW_BALLOON 
+                            "Show next system tray icon balloon\nShow Tray Balloon (F8)"
+    ID_APP_TRAY_TOGGLE_TRAY_ICON 
+                            "Toggle system tray icon\nToggle Tray Icon (Shift+F8)"
+    ID_APP_TRAY_FOCUS_TRAY_ICON 
+                            "Focus on system tray icon\nFocus Icon (Ctrl+F)"
+    ID_APP_TRAY_ANIMATE     "Animate system tray icon\nAnimate Icon (Ctrl+F8)"
 END
 
 #endif    // English (U.S.) resources

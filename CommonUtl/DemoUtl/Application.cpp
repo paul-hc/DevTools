@@ -23,6 +23,7 @@
 #endif
 
 #include "utl/UI/BaseApp.hxx"
+#include "utl/UI/BaseFrameWnd.hxx"
 
 
 namespace reg
@@ -91,37 +92,9 @@ BOOL CApplication::InitInstance( void )
 	CLayoutEngine::m_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
 	CVisualTheme::SetEnabled( !GetProfileInt( reg::section, reg::entry_disableThemes, FALSE ) );
 
-	hlp::CheckScalarTypes();
-
-	std::tstring imagePath;
-	if ( app::HasCommandLineOption( _T("image"), &imagePath ) )		// "-image=<img_path>"
-	{
-		CImageDialog dlg( NULL );
-		m_pMainWnd = &dlg;
-		if ( !imagePath.empty() )
-			dlg.SetImagePath( imagePath );
-		dlg.DoModal();
+	//hlp::CheckScalarTypes();
+	if ( HasCommandLineOptions() )
 		return FALSE;					// no app loop
-	}
-	else if ( app::HasCommandLineOption( _T("diffs") ) )			// "-diffs"
-	{
-		CFileListDialog dlg( NULL );
-		m_pMainWnd = &dlg;
-		dlg.DoModal();
-		return FALSE;					// no app loop
-	}
-	else if ( app::HasCommandLineOption( _T("td") ) )			// "-td"
-	{
-		CTestTaskDialog dlg( NULL );
-		m_pMainWnd = &dlg;
-		dlg.DoModal();
-		return FALSE;					// no app loop
-	}
-	else if ( app::HasCommandLineOption( _T("ut") ) )				// "-ut"
-	{
-		OnRunUnitTests();
-		return FALSE;					// no app msg loop
-	}
 
 	LoadStdProfileSettings( 4 );  // Load standard INI file options (including MRU)
 	// Register the application's document templates.  Document templates
@@ -132,9 +105,10 @@ BOOL CApplication::InitInstance( void )
 		RUNTIME_CLASS( CTestFormView ) )
 	);
 
-	m_nCmdShow = SW_SHOWMAXIMIZED;
+//	m_nCmdShow = SW_SHOWMAXIMIZED;
 	// create main MDI Frame window
-	m_pMainWnd = new CMainFrame();
+	CMainFrame* pMainFrame = new CMainFrame();
+	m_pMainWnd = pMainFrame;
 	if ( !static_cast<CMainFrame*>( m_pMainWnd )->LoadFrame( IDR_MAINFRAME ) )
 	{
 		delete m_pMainWnd;
@@ -152,12 +126,11 @@ BOOL CApplication::InitInstance( void )
 	CCommandLineInfo cmdInfo;
 	ParseCommandLine( cmdInfo );
 
-
 	// dispatch commands specified on the command line; will return FALSE if app was launched with /RegServer, /Register, /Unregserver or /Unregister.
 	if ( !ProcessShellCommand( cmdInfo ) )
 		return FALSE;
 
-	m_pMainWnd->ShowWindow( m_nCmdShow );
+	pMainFrame->ShowAppWindow( m_nCmdShow );
 	m_pMainWnd->UpdateWindow();
 	return TRUE;
 }
@@ -169,6 +142,42 @@ int CApplication::ExitInstance( void )
 
 	return CBaseApp<CWinApp>::ExitInstance();
 }
+
+bool CApplication::HasCommandLineOptions( void )
+{
+	std::tstring imagePath;
+	if ( app::HasCommandLineOption( _T("image"), &imagePath ) )		// "-image=<img_path>"
+	{
+		CImageDialog dlg( NULL );
+		m_pMainWnd = &dlg;
+		if ( !imagePath.empty() )
+			dlg.SetImagePath( imagePath );
+		dlg.DoModal();
+		return true;
+	}
+	else if ( app::HasCommandLineOption( _T("diffs") ) )			// "-diffs"
+	{
+		CFileListDialog dlg( NULL );
+		m_pMainWnd = &dlg;
+		dlg.DoModal();
+		return true;
+	}
+	else if ( app::HasCommandLineOption( _T("td") ) )			// "-td"
+	{
+		CTestTaskDialog dlg( NULL );
+		m_pMainWnd = &dlg;
+		dlg.DoModal();
+		return true;
+	}
+	else if ( app::HasCommandLineOption( _T("ut") ) )				// "-ut"
+	{
+		OnRunUnitTests();
+		return true;
+	}
+
+	return false;
+}
+
 
 BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 	ON_COMMAND( ID_FILE_NEW, &CBaseApp<CWinApp>::OnFileNew )

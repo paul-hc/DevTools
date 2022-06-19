@@ -12,7 +12,11 @@ public:
 	CApplication( void );
 	virtual ~CApplication();
 private:
+	bool HasCommandLineOptions( void );
+private:
 	std::auto_ptr<CScopedGdiPlusInit> m_pGdiPlusInit;
+
+	// generated stuff
 public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
