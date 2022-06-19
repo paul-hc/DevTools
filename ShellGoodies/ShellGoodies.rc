@@ -354,8 +354,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,5,0,1
- PRODUCTVERSION 9,5,0,1
+ FILEVERSION 9,5,0,2
+ PRODUCTVERSION 9,5,0,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -371,16 +371,16 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "BuildTimestamp", "14-06-2022 00:20:38"
-            VALUE "Comments", "Paste as Backup|Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary"
+            VALUE "Comments", "CTrayIcon|Paste as Backup|Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
-            VALUE "FileVersion", "9, 5, 0, 1"
+            VALUE "FileVersion", "9, 5, 0, 2"
             VALUE "InternalName", "Shell Goodies"
             VALUE "LegalCopyright", "Copyfright © 2001-2022"
             VALUE "OriginalFilename", "ShellGoodies64.dll"
             VALUE "ProductName", "ShellGoodies Shell Extension DLL"
-            VALUE "ProductVersion", "9, 5, 0, 1"
+            VALUE "ProductVersion", "9, 5, 0, 2"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -396,7 +396,7 @@ END
 // REGISTRY
 //
 
-IDR_SHELL_GOODIES_REG   REGISTRY                "res\\ShellGoodies.rgs"
+IDR_SHELL_GOODIES_APP   REGISTRY                "res\\ShellGoodies.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -405,7 +405,8 @@ IDR_SHELL_GOODIES_REG   REGISTRY                "res\\ShellGoodies.rgs"
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDD_RENAME_FILES_DIALOG ICON                    "res\\Application.ico"
+IDR_SHELL_GOODIES_APP   ICON                    "res\\ShellGoodies.ico"
+IDR_MESSAGE_TRAY_ICON   ICON                    "res\\MessageTray.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -738,6 +739,11 @@ STRINGTABLE
 BEGIN
     IDC_SHOW_EXTENSION_CHECK 
                             "Toggle file extension in the file list.  Note: the template format string should be consistent with extension visibility!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDR_MESSAGE_TRAY_ICON   "Shell Goodies"
 END
 
 #endif    // English (U.S.) resources

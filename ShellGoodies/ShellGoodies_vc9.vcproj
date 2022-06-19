@@ -422,10 +422,6 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath="res\Application.ico"
-				>
-			</File>
-			<File
 				RelativePath=".\res\ImageStrip.bmp"
 				>
 			</File>
@@ -434,7 +430,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\MessageTray.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ShellGoodies.ico"
 				>
 			</File>
 			<File

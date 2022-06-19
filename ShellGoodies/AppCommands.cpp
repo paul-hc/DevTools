@@ -4,7 +4,7 @@
 #include "Application.h"
 #include "utl/EnumTags.h"
 #include "utl/TimeUtils.h"
-#include "utl/UI/WndUtils.h"
+#include "utl/UI/SystemTray_fwd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -84,8 +84,10 @@ namespace cmd
 	{
 		ASSERT_PTR( pCmd );
 		std::tstring text = pCmd->Format( verbosity );
+
 		if ( utl::DetailFields == verbosity )
 			str::Replace( text, GetSeparator( utl::DetailFields ), GetSeparator( utl::Detailed ) );
+
 		return text;
 	}
 
@@ -119,17 +121,7 @@ namespace cmd
 
 	bool CBaseSerialCmd::LogMessage( const std::tstring& message, app::MsgType msgType )
 	{
-		DWORD infoFlag = NIIF_NONE;
-		UINT timeoutSecs = 10;
-
-		switch ( msgType )
-		{
-			case app::Error:	infoFlag = NIIF_ERROR; timeoutSecs = 30; break;
-			case app::Warning:	infoFlag = NIIF_WARNING; timeoutSecs = 20; break;
-			case app::Info:		infoFlag = NIIF_INFO; break;
-		}
-
-		ui::sys_tray::ShowBalloonTip( message, _T("Shell Goodies"), infoFlag, timeoutSecs );
+		sys_tray::ShowBalloonMessage( message, NULL, msgType );
 
 		if ( s_pLogger != NULL )
 			s_pLogger->LogString( message );

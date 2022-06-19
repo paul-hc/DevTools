@@ -14,7 +14,7 @@ class CFlagTags;
 interface IFileEditor;
 
 
-class CShellMenuController
+class CShellMenuController		// instantiated while tracking the shell context menu
 {
 	enum MenuCommand;
 public:
@@ -67,17 +67,17 @@ private:
 	bool HandlePasteDeepCmd( MenuCommand menuCmd, CWnd* pParentOwner );
 
 	CBitmap* MakeCmdInfo( std::tstring& rItemText, const CMenuCmdInfo& cmdInfo, const std::tstring& tabbedText = str::GetEmpty() );
-	void AddCmd( CBaseMenuBuilder* pMenuBuilder, MenuCommand cmd, const std::tstring& tabbedText = str::GetEmpty() );
+	bool AddCmd( CBaseMenuBuilder* pMenuBuilder, MenuCommand cmd, const std::tstring& tabbedText = str::GetEmpty() );
 	static const CMenuCmdInfo* FindCmd( MenuCommand cmd );
 	static const CMenuCmdInfo* FindCmd( MenuCommand cmd, const CMenuCmdInfo cmds[], size_t count );
 private:
 	IContextMenu* m_pContextMenu;
-	CFileModel m_fileModel;									// files selected in Explorer
-	std::auto_ptr<CDropFilesModel> m_pDropFilesModel;		// files cached (copied or cut) to clipboard (CF_HDROP)
-	std::auto_ptr<CSystemTray> m_pSystemTray;
+	CFileModel m_fileModel;								// files selected in Explorer
+	std::auto_ptr<CDropFilesModel> m_pDropFilesModel;	// files cached (copied or cut) to clipboard (CF_HDROP)
+	std::auto_ptr<CSystemTray> m_pSystemTray;			// system-tray shared popup window: hidden by default, used to display balloon notifications
 
-	static const CMenuCmdInfo s_commands[];
-	static const CMenuCmdInfo s_moreCommands[];
+	static const CMenuCmdInfo s_rootCommands[];			// commands to add directly to the context menu (not in a sub-menu)
+	static const CMenuCmdInfo s_moreCommands[];			// commands to add in sub-menus, or depending on current context
 };
 
 

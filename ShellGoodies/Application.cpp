@@ -85,12 +85,15 @@ void CApplication::OnInitAppResources( void )
 {
 	__super::OnInitAppResources();
 
-	app::GetLogger()->m_logFileMaxSize = -1;					// unlimited log size
-	CAboutBox::s_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
+	app::GetLogger()->m_logFileMaxSize = 1 * MegaByte;	// was -1: unlimited log size
+	CAboutBox::s_appIconId = IDR_SHELL_GOODIES_APP;		// will use HugeIcon_48
 
-	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );	// register stock images
-	GetSharedImageStore()->RegisterToolbarImages( IDR_TOOL_STRIP );		// register additional tool images
-	GetSharedImageStore()->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );
+	CImageStore* pSharedStore = GetSharedImageStore();
+
+	pSharedStore->RegisterToolbarImages( IDR_IMAGE_STRIP );	// register stock images
+	pSharedStore->RegisterToolbarImages( IDR_TOOL_STRIP );		// register additional tool images
+	pSharedStore->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );
+	pSharedStore->RegisterAlias( IDD_RENAME_FILES_DIALOG, ID_RENAME_ITEM );
 
 	ut::RegisterAppUnitTests();
 

@@ -47,7 +47,7 @@ namespace cmd
 	};
 
 
-	// abstract base for file leaf commands embedded in a CFileMacroCmd, that operates on a single file
+	// abstract base for file LEAF commands embedded in a CFileMacroCmd, that operates on a single file
 	//
 	abstract class CBaseFileCmd : public CBaseSerialCmd
 	{

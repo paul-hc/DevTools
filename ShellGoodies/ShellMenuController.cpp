@@ -25,19 +25,17 @@
 #endif
 
 
-const CShellMenuController::CMenuCmdInfo CShellMenuController::s_commands[] =
+const CShellMenuController::CMenuCmdInfo CShellMenuController::s_rootCommands[] =
 {
 	{ Cmd_Separator },
 	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP },
 	{ Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM },
 	{ Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES },
 	{ Cmd_FindDuplicates, _T("Find &Duplicates..."), _T("Find duplicate files in selected folders or files, and allow the deletion of duplicates"), ID_FIND_DUPLICATE_FILES },
-	{ Cmd_Undo, _T("&Undo \"%s\" ..."), _T("Undo last operation on files"), ID_EDIT_UNDO },
-	{ Cmd_Redo, _T("&Redo \"%s\" ..."), _T("Redo last undo operation on files"), ID_EDIT_REDO },
 	{ Cmd_PasteAsBackup, _T("Paste as Bac&kup"), _T("Paste copied/cut files as a versioned backup file(s) in target folder"), ID_PASTE_AS_BACKUP },
 	{ Popup_PasteDeep, _T("Paste D&eep"), _T("Paste copied/cut files creating a deep folder"), ID_PASTE_DEEP_POPUP },
 	{ Popup_PasteFolderStruct, _T("Paste &Folder Structure"), _T("Open menu for creating folder structure based on files copied on clipboard"), ID_PASTE_FOLDER_STRUCT_POPUP },
-	{ Popup_MoreGoodies, _T("More &Goodies"), _T("Open more options"), 0 },
+	{ Popup_MoreGoodies, _T("More &Goodies"), _T("Open more options"), IDR_SHELL_GOODIES_APP },
 #ifdef _DEBUG
 	{ Cmd_Separator },
 	{ Cmd_RunUnitTests, _T("# Run Unit Tests (ShellGoodies)"), _T("Run the unit tests (debug build only)"), ID_RUN_TESTS },
@@ -49,6 +47,8 @@ const CShellMenuController::CMenuCmdInfo CShellMenuController::s_moreCommands[] 
 {
 	{ Cmd_CreateFolders, _T("Create &Folders"), _T("Create folders in destination to replicate copied folders"), ID_CREATE_FOLDERS },
 	{ Cmd_CreateDeepFolderStruct, _T("Create Deep Folder Structure"), _T("Create folders in destination to replicate copied folders and their sub-folders"), ID_CREATE_DEEP_FOLDER_STRUCT },
+	{ Cmd_Undo, _T("&Undo \"%s\" ..."), _T("Undo last operation on files"), ID_EDIT_UNDO },
+	{ Cmd_Redo, _T("&Redo \"%s\" ..."), _T("Redo last undo operation on files"), ID_EDIT_REDO },
 	{ Cmd_Dashboard, _T("Dashboard.."), _T("Open the undo/redo actions dashboard"), ID_OPEN_CMD_DASHBOARD },
 	{ Cmd_Options, _T("&Properties..."), _T("Open the properties dialog"), ID_OPTIONS }
 };
@@ -85,9 +85,9 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 {
 	CShellContextMenuBuilder menuBuilder( hMenu, indexMenu, idBaseCmd );
 
-	for ( int i = 0; i != COUNT_OF( s_commands ); ++i )
+	for ( int i = 0; i != COUNT_OF( s_rootCommands ); ++i )
 	{
-		const CMenuCmdInfo& cmdInfo = s_commands[ i ];
+		const CMenuCmdInfo& cmdInfo = s_rootCommands[ i ];
 
 		if ( Cmd_Separator == cmdInfo.m_cmd )
 			menuBuilder.AddSeparator();
@@ -176,6 +176,15 @@ HMENU CShellMenuController::BuildMoreGoodiesSubmenu( CBaseMenuBuilder* pParentBu
 
 	AddCmd( &subMenuBuilder, Cmd_Dashboard );
 	subMenuBuilder.AddSeparator();
+
+	UINT undoRedoCount = 0;
+
+	undoRedoCount += AddCmd( &subMenuBuilder, Cmd_Undo );
+	undoRedoCount += AddCmd( &subMenuBuilder, Cmd_Redo );
+
+	if ( undoRedoCount != 0 )
+		subMenuBuilder.AddSeparator();
+
 	AddCmd( &subMenuBuilder, Cmd_Options );
 
 	return subMenuBuilder.GetPopupMenu()->Detach();
@@ -232,7 +241,7 @@ bool CShellMenuController::FindStatusBarInfo( std::tstring& rInfoText, UINT_PTR 
 	return false;
 }
 
-void CShellMenuController::AddCmd( CBaseMenuBuilder* pMenuBuilder, MenuCommand cmd, const std::tstring& tabbedText /*= str::GetEmpty()*/ )
+bool CShellMenuController::AddCmd( CBaseMenuBuilder* pMenuBuilder, MenuCommand cmd, const std::tstring& tabbedText /*= str::GetEmpty()*/ )
 {
 	ASSERT_PTR( pMenuBuilder );
 
@@ -242,7 +251,11 @@ void CShellMenuController::AddCmd( CBaseMenuBuilder* pMenuBuilder, MenuCommand c
 	std::tstring itemText;
 	CBitmap* pItemBitmap = MakeCmdInfo( itemText, *pCmdInfo, tabbedText );
 
+	if ( itemText.empty() )
+		return false;			// command rejected in current state
+
 	pMenuBuilder->AddCmdItem( cmd, itemText, pItemBitmap );
+	return true;
 }
 
 bool CShellMenuController::ExecuteCommand( UINT cmdId, HWND hWnd )
@@ -256,10 +269,9 @@ bool CShellMenuController::ExecuteCommand( UINT cmdId, HWND hWnd )
 	CWnd* pParentOwnerWnd = scopedMainWnd.GetParentOwnerWnd();
 
 	if ( NULL == m_pSystemTray.get() )
-	{	// create once the sys-tray shared popup window
-		enum { DefaultIconId = 5 };
-		m_pSystemTray.reset( new CSystemTrayWnd() );
-		m_pSystemTray->CreateTrayIcon( IDD_RENAME_FILES_DIALOG, _T("Shell Goodies"), true );
+	{	// create once the system-tray message icon
+		m_pSystemTray.reset( new CSystemTrayWnd() );				// hidden popup tray icon host
+		m_pSystemTray->CreateTrayIcon( IDR_MESSAGE_TRAY_ICON, false );	// auto-hide message tray icon
 	}
 
 	return HandleCommand( menuCmd, pParentOwnerWnd );
@@ -375,7 +387,7 @@ bool CShellMenuController::HandlePasteDeepCmd( MenuCommand menuCmd, CWnd* pParen
 
 const CShellMenuController::CMenuCmdInfo* CShellMenuController::FindCmd( MenuCommand cmd )
 {
-	if ( const CMenuCmdInfo* pFoundCmd = FindCmd( cmd, ARRAY_PAIR( s_commands ) ) )
+	if ( const CMenuCmdInfo* pFoundCmd = FindCmd( cmd, ARRAY_PAIR( s_rootCommands ) ) )
 		return pFoundCmd;
 
 	return FindCmd( cmd, ARRAY_PAIR( s_moreCommands ) );

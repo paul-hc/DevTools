@@ -2,20 +2,20 @@
 // Microsoft Visual C++ generated include file.
 // Used by ShellGoodies.rc
 //
-#define IDR_SHELL_GOODIES_REG           100
-#define IDD_RENAME_FILES_DIALOG         101
-#define IDD_REPLACE_DIALOG              102
-#define IDR_IMAGE_STRIP                 104
-#define IDD_TOUCH_FILES_DIALOG          104
-#define IDR_CONTEXT_MENU                105
-#define IDD_OPTIONS_CAPITALIZE_PAGE     105
-#define IDI_DETAILS                     109
-#define IDD_OPTIONS_GENERAL_PAGE        110
-#define IDD_REN_LIST_PAGE               111
-#define IDD_REN_EDIT_PAGE               112
-#define IDD_FIND_DUPLICATES_DIALOG      113
-#define IDD_CMD_DASHBOARD_DIALOG        114
-#define IDR_TOOL_STRIP                  115
+#define IDR_SHELL_GOODIES_APP           100
+#define IDR_CONTEXT_MENU                101
+#define IDR_IMAGE_STRIP                 102
+#define IDR_TOOL_STRIP                  103
+#define IDI_DETAILS                     104
+#define IDD_RENAME_FILES_DIALOG         110
+#define IDD_REPLACE_DIALOG              111
+#define IDD_TOUCH_FILES_DIALOG          112
+#define IDD_OPTIONS_CAPITALIZE_PAGE     113
+#define IDD_OPTIONS_GENERAL_PAGE        114
+#define IDD_REN_LIST_PAGE               115
+#define IDD_REN_EDIT_PAGE               116
+#define IDD_FIND_DUPLICATES_DIALOG      117
+#define IDD_CMD_DASHBOARD_DIALOG        118
 #define IDC_FILE_RENAME_LIST            1000
 #define IDC_FORMAT_COMBO                1001
 #define IDC_SEQ_COUNT_EDIT              1002
@@ -196,7 +196,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        118
+#define _APS_NEXT_RESOURCE_VALUE        119
 #define _APS_NEXT_COMMAND_VALUE         32852
 #define _APS_NEXT_CONTROL_VALUE         1095
 #define _APS_NEXT_SYMED_VALUE           5004
