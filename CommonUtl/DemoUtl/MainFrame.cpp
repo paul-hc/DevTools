@@ -52,7 +52,7 @@ void CMainFrame::InitSystemTray( void )
 	m_pSystemTray.reset( new CSystemTrayWndHook() );
 	m_pSystemTray->SetOwnerCallback( this );
 
-	CTrayIcon* pTrayIcon = m_pSystemTray->CreateTrayIcon( IDR_MSG_TRAY, false );
+	CTrayIcon* pTrayIcon = m_pSystemTray->CreateTrayIcon( IDR_MESSAGE_TRAY_ICON, false );
 	res::LoadImageListDIB( pTrayIcon->RefAnimImageList(), IDB_SEARCH_FILES_ANIM_STRIP, color::ToolStripPink );
 
 	pTrayIcon = m_pSystemTray->CreateTrayIcon( IDR_MAINFRAME );

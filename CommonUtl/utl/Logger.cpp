@@ -25,7 +25,7 @@ CLogger::~CLogger()
 void CLogger::Clear( void )
 {
 	if ( FILE* pLogFile = _tfopen( GetLogFilePath().GetPtr(), _T("wt") ) )
-		fclose( pLogFile );
+		::fclose( pLogFile );
 }
 
 void CLogger::SetOverwrite( void )

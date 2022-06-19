@@ -18,7 +18,7 @@ CDemoSysTray::CDemoSysTray( CWnd* pOwner )
 	: CCmdTarget()
 	, m_pOwner( pOwner )
 	, m_pSysTray( CSystemTray::Instance() )
-	, m_pMsgIcon( m_pSysTray->FindIcon( IDR_MSG_TRAY ) )
+	, m_pMsgIcon( m_pSysTray->FindIcon( IDR_MESSAGE_TRAY_ICON ) )
 	, m_pAppIcon( m_pSysTray->FindIcon( IDR_MAINFRAME ) )
 {
 	ASSERT_PTR( m_pSysTray );

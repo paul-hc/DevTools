@@ -3,7 +3,7 @@
 // Used by utl_ui.rc
 //
 #define UTL_MIN_RESOURCE_VALUE          28000
-#define IDR_APPLICATION                 28001
+#define IDR_MESSAGE_TRAY_ICON           28001
 #define IDR_APP_SHARED_ACCEL            28002
 #define IDD_ABOUT_BOX                   28003
 #define IDR_LIST_STRIP                  28004

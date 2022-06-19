@@ -5,7 +5,6 @@
 #define IDD_DEMO_FORM                   101
 #define IDD_DEMO_DIALOG                 102
 #define IDR_LOW_COLOR_STRIP             103
-#define IDR_MSG_TRAY                    127
 #define IDR_MAINFRAME                   128
 #define IDR_TEST_DOC_TYPE               129
 #define IDR_FORMAT_PICKER_MENU          130

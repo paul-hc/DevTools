@@ -97,7 +97,7 @@ CTrayIcon& CSystemTray::LookupIcon( UINT trayIconId ) const
 
 CTrayIcon* CSystemTray::FindMessageIcon( void ) const
 {
-	CTrayIcon* pTrayIcon = FindIcon( IDR_APPLICATION );		// usually the auto-hide application icon
+	CTrayIcon* pTrayIcon = FindIcon( IDR_MESSAGE_TRAY_ICON );	// usually the auto-hide application icon
 
 	if ( NULL == pTrayIcon )
 		pTrayIcon = FindMainIcon();							// pick the main icon
