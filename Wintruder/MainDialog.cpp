@@ -68,9 +68,8 @@ CMainDialog::CMainDialog( void )
 	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_PAIR( layout::dualLayoutStyles ) );
 	m_regSection = reg::section;
 	m_initCollapsed = true;
-	m_pSysTrayInfo.reset( new CSysTrayInfo() );
-	ui::LoadPopupMenu( m_pSysTrayInfo->m_popupMenu, IDR_CONTEXT_MENU, app::SysTrayPopup );
-	m_pSysTrayInfo->m_popupMenu.SetDefaultItem( ID_APP_MINIMIZE );
+	ui::LoadPopupMenu( m_trayPopupMenu, IDR_CONTEXT_MENU, app::SysTrayPopup );
+	m_trayPopupMenu.SetDefaultItem( ID_APP_MINIMIZE );
 
 	app::GetSvc().AddObserver( this );
 
@@ -238,7 +237,7 @@ std::tstring CMainDialog::MakeDirtyString( void ) const
 	std::tstring laundryList; laundryList.reserve( 128 );
 
 	for ( int i = 0, count = m_detailsSheet.GetPageCount(); i != count; ++i )
-		if ( IWndDetailObserver* pDetail = m_detailsSheet.GetPageAs< IWndDetailObserver >( i ) )
+		if ( IWndDetailObserver* pDetail = m_detailsSheet.GetPageAs<IWndDetailObserver>( i ) )
 			if ( pDetail->CanNotify() && pDetail->IsDirty() )
 				stream::Tag( laundryList, pageTags.GetUiTags()[ i ], _T(", ") );
 

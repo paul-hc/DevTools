@@ -13,6 +13,7 @@
 #include "utl/UI/AccelTable.h"
 #include "utl/UI/Icon.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/SystemTray_fwd.h"
 #include "utl/UI/WndUtilsEx.h"
 
 #ifdef _DEBUG
@@ -317,6 +318,8 @@ void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM row
 
 void CTreeWndPage::RefreshTreeContents( void )
 {
+	CScopedTrayIconBalloon scopedBalloon( NULL, _T("Refreshing all windows, please wait."), NULL, app::Info, 30 );
+
 	CScopedInternalChange scopedChange( &m_treeCtrl );
 	CScopedLockRedraw freeze( &m_treeCtrl, new CScopedWindowBorder( &m_treeCtrl, color::Salmon ) );
 
@@ -362,6 +365,7 @@ void CTreeWndPage::RefreshTreeBranch( HTREEITEM hItem )
 	HWND hWndTarget = m_treeCtrl.GetItemDataAs<HWND>( hItem );
 
 	{
+		CScopedTrayIconBalloon scopedBalloon( NULL, _T("Refreshing missing windows."), NULL, app::Warning, 20 );
 		CScopedInternalChange scopedChange( &m_treeCtrl );
 		CScopedLockRedraw freeze( &m_treeCtrl, new CScopedWindowBorder( &m_treeCtrl, color::Salmon ) );
 		CWaitCursor wait;

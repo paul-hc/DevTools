@@ -73,6 +73,7 @@ BOOL CApplication::InitInstance( void )
 
 	CMainDialog mainDialog;
 	m_pMainWnd = &mainDialog;
+
 	mainDialog.DoModal();
 	m_pMainWnd = NULL;
 
