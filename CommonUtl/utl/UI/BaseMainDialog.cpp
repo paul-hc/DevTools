@@ -50,13 +50,13 @@ void CBaseMainDialog::ShowAll( bool show )
 	}
 }
 
-void CBaseMainDialog::PostRestorePlacement( int showCmd )
+void CBaseMainDialog::PostRestorePlacement( int showCmd, bool restoreToMaximized ) override
 {
 	if ( UseSysTrayMinimize() )
 		if ( SW_SHOWMINIMIZED == showCmd )
 		{
 			// IMP: for some reason in Windows 10 WM_SYSCOMMAND message doesn't post properly, but CBasePostCall::WM_DELAYED_CALL posts fine
-			ui::PostCall( this, &CBaseMainDialog::_Minimize );
+			ui::PostCall( this, &CBaseMainDialog::_Minimize, restoreToMaximized );
 			//PostMessage( WM_SYSCOMMAND, SC_MINIMIZE );
 		}
 		else if ( -1 == showCmd )			// use command line show option
@@ -78,18 +78,19 @@ CWnd* CBaseMainDialog::GetOwnerWnd( void ) override
 
 CMenu* CBaseMainDialog::GetTrayIconContextMenu( void ) override
 {
-	return m_pSysTrayInfo.get() != NULL ? &m_pSysTrayInfo->m_popupMenu : NULL;
+	return UseSysTrayMinimize() ? &m_trayPopupMenu : NULL;
 }
 
-bool CBaseMainDialog::OnTrayIconNotify( UINT msgNotifyCode, UINT iconId, const CPoint& screenPos ) override
+bool CBaseMainDialog::OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override
 {
-	msgNotifyCode, iconId, screenPos;
+	msgNotifyCode, trayIconId, screenPos;
 	return false;
 }
 
-void CBaseMainDialog::_Minimize( void )
+void CBaseMainDialog::_Minimize( bool restoreToMaximized )
 {
-	CSystemTray::MinimizeToTray( this );
+	ASSERT_PTR( m_pSystemTray.get() );
+	m_pSystemTray->MinimizeOwnerWnd( restoreToMaximized );
 }
 
 
@@ -99,7 +100,6 @@ BEGIN_MESSAGE_MAP( CBaseMainDialog, CLayoutDialog )
 	ON_WM_CONTEXTMENU()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_WM_SYSCOMMAND()
 	ON_COMMAND( ID_APP_RESTORE, OnAppRestore )
 	ON_UPDATE_COMMAND_UI( ID_APP_RESTORE, OnUpdateAppRestore )
 	ON_COMMAND( ID_APP_MINIMIZE, OnAppMinimize )
@@ -124,8 +124,6 @@ BOOL CBaseMainDialog::OnInitDialog( void ) override
 		m_pSystemTray->SetOwnerCallback( this );
 		m_pSystemTray->CreateTrayIcon( GetDlgIcon( DlgSmallIcon )->GetSafeHandle(), ShellIconId, ui::GetWindowText( this ).c_str() );
 	}
-	else
-		ui::sys_tray::StoreAppInfo( GetDlgIconId(), ui::GetWindowText( this ) );
 
 	return __super::OnInitDialog();
 }
@@ -168,22 +166,6 @@ HCURSOR CBaseMainDialog::OnQueryDragIcon( void )
 	if ( const CIcon* pSmallIcon = GetDlgIcon( DlgSmallIcon ) )
 		return pSmallIcon->GetHandle();
 	return NULL;
-}
-
-void CBaseMainDialog::OnSysCommand( UINT cmdId, LPARAM lParam )
-{
-	if ( UseSysTrayMinimize() )
-		switch ( GET_SC_WPARAM( cmdId ) )
-		{
-			case SC_RESTORE:
-				m_pSystemTray->RestorePopupWnd();
-				return;
-			case SC_MINIMIZE:
-				m_pSystemTray->MinimizePopupWnd();
-				return;
-		}
-
-	__super::OnSysCommand( cmdId, lParam );
 }
 
 void CBaseMainDialog::OnAppRestore( void )

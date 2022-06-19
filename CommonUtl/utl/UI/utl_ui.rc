@@ -357,8 +357,8 @@ BEGIN
     END
     POPUP "<app-SysTray>"
     BEGIN
-        MENUITEM "&Restore",                    ID_APP_RESTORE
-        MENUITEM "Mi&nimize",                   ID_APP_MINIMIZE
+        MENUITEM "&Restore ",                   ID_APP_RESTORE
+        MENUITEM "Mi&nimize ",                  ID_APP_MINIMIZE
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
         MENUITEM SEPARATOR

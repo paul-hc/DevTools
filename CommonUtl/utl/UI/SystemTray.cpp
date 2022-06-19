@@ -1,113 +1,57 @@
 
 #include "stdafx.h"
 #include "SystemTray.h"
+#include "TrayIcon.h"
 #include "ISystemTrayCallback.h"
+#include "PopupDlgBase.h"
 #include "WndUtils.h"
-#include "MenuUtilities.h"
 #include "WindowDebug.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
-#include <shellapi.h>		// Shell_NotifyIcon()
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-namespace hlp
+namespace sys_tray
 {
-	void CopyTextToBuffer( TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize )
+	bool HasSystemTray( void )
 	{
-		if ( pText != NULL )
-			_tcsncpy( pDestBuffer, pText, bufferSize - 1 );
-		else
-			pDestBuffer[ 0 ] = _T('\0');
+		return CSystemTray::Instance() != NULL;
 	}
 
-	UINT GetTooltipMaxLength( void ) { NOTIFYICONDATA niData; niData; return COUNT_OF( niData.szTip ); }
-	bool IsValidBaloonTimeout( UINT timeoutSecs ) { return timeoutSecs >= 10 && timeoutSecs <= 30; }		// must be between 10 and 30 seconds
-	bool IsValidBaloonInfoFlags( DWORD infoFlags ) { return NIIF_NONE == infoFlags || NIIF_INFO == infoFlags || NIIF_WARNING == infoFlags || NIIF_ERROR == infoFlags; }
+	bool ShowBalloonMessage( const std::tstring& text, const TCHAR* pTitle /*= NULL*/, app::MsgType msgType /*= app::Info*/, UINT timeoutSecs /*= 0*/ )
+	{
+		if ( CSystemTray* pSystemTray = CSystemTray::Instance() )
+			if ( CTrayIcon* pMsgTrayIcon = pSystemTray->FindMessageIcon() )
+				return pMsgTrayIcon->ShowBalloonTip( text, pTitle != NULL ? pTitle : pMsgTrayIcon->GetTooltipText().c_str(), msgType, timeoutSecs );
+
+		return false;
+	}
+
+	bool HideBalloonMessage( void )
+	{
+		if ( CSystemTray* pSystemTray = CSystemTray::Instance() )
+			if ( CTrayIcon* pMsgTrayIcon = pSystemTray->FindMessageIcon() )
+				return pMsgTrayIcon->HideBalloonTip();
+
+		return false;
+	}
 }
-
-
-// CTrayIconAnimation class
-
-class CTrayIconAnimation
-{
-public:
-	CTrayIconAnimation( CSystemTray* pSystemTray, double durationSecs, UINT stepDelayMiliSecs )
-		: m_pSystemTray( pSystemTray )
-		, m_pWnd( m_pSystemTray->GetPopupWnd() )
-		, m_hIconOrig( m_pSystemTray->GetIcon() )
-		, m_durationSecs( durationSecs )
-		, m_eventId( m_pWnd->SetTimer( AnimationEventId, stepDelayMiliSecs, NULL ) )
-		, m_imageCount( m_pSystemTray->GetAnimImageList().GetImageCount() )
-		, m_imagePos( 0 )
-	{
-		ASSERT( m_eventId != 0 );
-	}
-
-	~CTrayIconAnimation()
-	{
-		ASSERT_PTR( m_pWnd->GetSafeHwnd() );
-		if ( m_eventId != 0 )
-			m_pWnd->KillTimer( m_eventId );
-
-		if ( m_hIconOrig != NULL )
-			m_pSystemTray->SetIcon( m_hIconOrig );
-	}
-
-	bool HandleTimerEvent( UINT_PTR eventId )
-	{
-		if ( eventId != m_eventId )
-			return false;
-
-		ASSERT( m_imagePos < m_imageCount );
-
-		HICON hIcon = m_pSystemTray->GetAnimImageList().ExtractIcon( static_cast<int>( m_imagePos ) );
-
-		m_pSystemTray->SetIcon( hIcon );
-		::DestroyIcon( hIcon );
-		++m_imagePos %= m_imageCount;
-		return true;
-	}
-
-	bool IsTimeout( void ) const { return m_timer.ElapsedSeconds() > m_durationSecs; }
-private:
-	enum { AnimationEventId = 4567 };
-
-	CSystemTray* m_pSystemTray;
-	CWnd* m_pWnd;
-	const HICON m_hIconOrig;
-	const double m_durationSecs;
-	const UINT_PTR m_eventId;
-	const size_t m_imageCount;
-	size_t m_imagePos;
-	CTimer m_timer;
-};
 
 
 // CSystemTray implementation
 
 CSystemTray* CSystemTray::s_pInstance = NULL;
-const UINT CSystemTray::s_tooltipMaxLength = hlp::GetTooltipMaxLength();
 const UINT CSystemTray::WM_TASKBARCREATED = ::RegisterWindowMessage( _T("TaskbarCreated") );
 const UINT CSystemTray::WM_TRAYICONNOTIFY = ::RegisterWindowMessageA( "utl:WM_TRAYICONNOTIFY" );
 
 CSystemTray::CSystemTray( void )
 	: m_pOwnerCallback( NULL )
-	, m_iconAdded( false )
-	, m_iconHidden( false )
-	, m_showIconPending( false )
-	, m_tooltipVisible( false )
-	, m_baloonVisible( false )
-	, m_ignoreNextLDblClc( false )
-	, m_autoHideFlags( 0 )
 	, m_mainTrayIconId( 0 )
-	, m_mainFlags( 0 )
+	, m_restoreShowCmd( SW_SHOWNORMAL )
 {
-	utl::ZeroWinStruct( &m_niData );
-
 	if ( NULL == s_pInstance )
 		s_pInstance = this;
 }
@@ -117,343 +61,190 @@ CSystemTray::~CSystemTray()
 	if ( this == s_pInstance )
 		s_pInstance = NULL;
 
-	ASSERT( !m_iconAdded );		// should've been removed in OnDestroy()
-	ASSERT( !IsAnimating() );
+	ASSERT( m_icons.empty() );		// should've been deleted in OnDestroy()
 }
 
-bool CSystemTray::CreateTrayIcon( HICON hIcon, UINT trayIconId, const TCHAR* pIconTipText, bool iconHidden /*= false*/ )
+CWnd* CSystemTray::GetOwnerWnd( void ) const
 {
+	return m_pOwnerCallback != NULL ? m_pOwnerCallback->GetOwnerWnd() : NULL;
+}
+
+size_t CSystemTray::FindIconPos( UINT trayIconId ) const
+{
+	for ( size_t pos = 0; pos != m_icons.size(); ++pos )
+		if ( trayIconId == m_icons[ pos ]->GetID() )
+			return pos;
+
+	return utl::npos;
+}
+
+CTrayIcon* CSystemTray::FindIcon( UINT trayIconId ) const
+{
+	size_t foundPos = FindIconPos( trayIconId );
+
+	if ( utl::npos == foundPos )
+		return NULL;
+
+	return m_icons[ foundPos ];
+}
+
+CTrayIcon& CSystemTray::LookupIcon( UINT trayIconId ) const
+{
+	size_t foundPos = FindIconPos( trayIconId );
+	ENSURE( foundPos != utl::npos );
+	return *m_icons[ foundPos ];
+}
+
+CTrayIcon* CSystemTray::FindMessageIcon( void ) const
+{
+	CTrayIcon* pTrayIcon = FindIcon( IDR_APPLICATION );		// usually the auto-hide application icon
+
+	if ( NULL == pTrayIcon )
+		pTrayIcon = FindMainIcon();							// pick the main icon
+
+	if ( NULL == pTrayIcon && !m_icons.empty() )
+		pTrayIcon = m_icons.front();						// pick the first available tray icon
+
+	return pTrayIcon;
+}
+
+CTrayIcon* CSystemTray::CreateTrayIcon( HICON hIcon, UINT trayIconId, const TCHAR* pIconTipText, bool visible /*= true*/ )
+{
+	ASSERT_NULL( FindIcon( trayIconId ) );
+
 	CWnd* pPopupWnd = EnsurePopupWnd();
 	ASSERT_PTR( pPopupWnd->GetSafeHwnd() );
 
-	// setup the NOTIFYICONDATA structure
-	m_niData.hWnd = pPopupWnd->GetSafeHwnd();										// this window will receieve tray notifications
-	m_niData.uID = trayIconId;
-	m_niData.hIcon = hIcon;
-	m_niData.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_SHOWTIP;				// NIF_SHOWTIP required with NOTIFYICON_VERSION_4 to display the standard tooltip
-	m_niData.uCallbackMessage = WM_TRAYICONNOTIFY;
-	hlp::CopyTextToBuffer( m_niData.szTip, pIconTipText, s_tooltipMaxLength );		// tray only supports tooltip text of maximum s_tooltipMaxLength
+	bool isMainIcon = visible && !utl::Any( m_icons, std::mem_fun( &CTrayIcon::IsMainIcon ) );
+	CTrayIcon* pTrayIcon = new CTrayIcon( this, trayIconId, isMainIcon );
 
-	m_iconHidden = iconHidden;
+	if ( !pTrayIcon->Add( pPopupWnd, hIcon, pIconTipText, visible ) )
+		TRACE( " ? CSystemTray::CreateTrayIcon( %d ) did not succeed (taskbar missing), will be installed delayed...\n", trayIconId );
 
-	if ( m_iconHidden )
-	{
-		SetFlag( m_niData.uFlags, NIF_STATE );
-		m_niData.dwState = NIS_HIDDEN;
-		m_niData.dwStateMask = NIS_HIDDEN;
-	}
+	m_icons.push_back( pTrayIcon );
 
-	if ( 0 == m_mainTrayIconId )
-	{	// store main icon data in case we need to recreate in OnExplorerRestart
+	if ( isMainIcon )
 		m_mainTrayIconId = trayIconId;
-		m_mainFlags = m_niData.uFlags;
-	}
 
-	bool success = Notify_AddIcon();
-	m_showIconPending = !success;
-	return success;
+	return pTrayIcon;
 }
 
-bool CSystemTray::CreateTrayIcon( UINT trayIconResId, const TCHAR* pIconTipText, bool iconHidden /*= false*/ )
+bool CSystemTray::DeleteTrayIcon( UINT trayIconId )
 {
-	HICON hIcon = AfxGetApp()->LoadIcon( trayIconResId );
+	size_t foundPos = FindIconPos( trayIconId );
 
-	if ( NULL == hIcon )
-		hIcon = ::LoadIcon( NULL, IDI_ERROR );
-
-	bool result = CreateTrayIcon( hIcon, trayIconResId, pIconTipText, iconHidden );
-	::DestroyIcon( hIcon );
-	return result;
-}
-
-bool CSystemTray::NotifyTrayIcon( int notifyCode )
-{
-	return ::Shell_NotifyIcon( notifyCode, &m_niData ) != FALSE;
-}
-
-bool CSystemTray::Notify_AddIcon( void )
-{
-	if ( !NotifyTrayIcon( NIM_ADD ) )
+	if ( utl::npos == foundPos )
+	{
+		ASSERT( false );
 		return false;
-
-	m_iconAdded = true;
-
-	// each time we add an icon, we need to modify to shell version 4 (Vista+) behaviour for WM_TRAYICONNOTIFY notifications
-	m_niData.uVersion = NOTIFYICON_VERSION_4;		// note: add NIF_SHOWTIP to indicate the standard tooltip should still be shown
-	NotifyTrayIcon( NIM_SETVERSION );
-	return true;
-}
-
-bool CSystemTray::Notify_DeleteIcon( void )
-{
-	if ( !NotifyTrayIcon( NIM_DELETE ) )
-		return false;
-
-	m_iconAdded = m_iconHidden = false;
-	return true;
-}
-
-bool CSystemTray::Notify_ModifyState( DWORD stateFlag, bool on )
-{
-	::SetFlag( m_niData.uFlags, NIF_STATE );		// preserve the other existing flags so that we don't loose the tooltip, etc
-	m_niData.dwState = 0;
-	m_niData.dwStateMask = stateFlag;
-
-	::SetFlag( m_niData.dwState, stateFlag, on );
-
-	return NotifyTrayIcon( NIM_MODIFY );
-}
-
-bool CSystemTray::IsMinimizedToTray( CWnd* pPopupWnd )
-{
-	ASSERT_PTR( pPopupWnd->GetSafeHwnd() );
-	return !ui::IsVisible( pPopupWnd->GetSafeHwnd() );
-}
-
-void CSystemTray::MinimizeToTray( CWnd* pPopupWnd )
-{
-	ASSERT_PTR( pPopupWnd->GetSafeHwnd() );
-	pPopupWnd->ShowWindow( SW_HIDE );				// IMP: hide window post-minimize so that it vanishes from the taskbar into the system tray
-}
-
-void CSystemTray::RestoreFromTray( CWnd* pPopupWnd )
-{
-	ASSERT_PTR( pPopupWnd->GetSafeHwnd() );
-	pPopupWnd->ShowWindow( SW_NORMAL );		// activate and display the window
-}
-
-void CSystemTray::MinimizePopupWnd( void )
-{
-	ASSERT_PTR( m_pOwnerCallback );
-	CSystemTray::MinimizeToTray( GetPopupWnd() );
-
-	if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
-		pContextMenu->SetDefaultItem( (UINT)-1 );		// prevent Restore on double-click, since we restore on single L-click
-}
-
-void CSystemTray::RestorePopupWnd( void )
-{
-	ASSERT_PTR( m_pOwnerCallback );
-	CSystemTray::RestoreFromTray( GetPopupWnd() );
-
-	if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
-		pContextMenu->SetDefaultItem( ID_APP_MINIMIZE );
-}
-
-bool CSystemTray::SetTooltipText( const TCHAR* pIconTipText )
-{
-	SetFlag( m_niData.uFlags, NIF_TIP );
-	hlp::CopyTextToBuffer( m_niData.szTip, pIconTipText, s_tooltipMaxLength );
-
-	return NotifyTrayIcon( NIM_MODIFY );
-}
-
-
-struct CBaloonData
-{
-	CBaloonData( const std::tstring& text, const TCHAR* pTitle, DWORD infoFlag, UINT timeoutSecs )
-		: m_text( text ), m_infoFlag( infoFlag ), m_timeoutSecs( timeoutSecs )
-	{
-		if ( pTitle != NULL )
-			m_title = pTitle;
 	}
 
-	bool ShowBalloon( CSystemTray* pSystemTray ) { ASSERT_PTR( pSystemTray ); return pSystemTray->ShowBalloonTip( m_text, m_title.c_str(), m_infoFlag, m_timeoutSecs ); }
-public:
-	std::tstring m_text;
-	std::tstring m_title;
-	DWORD m_infoFlag;
-	UINT m_timeoutSecs;
-};
-
-bool CSystemTray::ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle /*= NULL*/, DWORD infoFlag /*= NIIF_NONE*/, UINT timeoutSecs /*= 10*/ )
-{
-	//TRACE( _T("CSystemTray::ShowBalloonTip( %s ) {...\n"), str::Clamp( text, 24 ).c_str() );
-
-	ASSERT( hlp::IsValidBaloonInfoFlags( infoFlag ) );		// info icon must be valid
-	ASSERT( hlp::IsValidBaloonTimeout( timeoutSecs ) );		// timeout must be between 10 and 30 seconds
-	ASSERT( HasIcon() );
-
-	bool visible = IsIconVisible();
-	bool hasText = !text.empty();
-	bool autoShowIcon = hasText && !visible;		// showing baloon on hidden icon?
-
-	if ( NULL == m_pBaloonPending.get() )
-		if ( HasFlag( m_autoHideFlags, NIF_INFO ) )
-			if ( IsIconVisible() && !text.empty() )
-			{
-				m_pBaloonPending.reset( new CBaloonData( text, pTitle, infoFlag, timeoutSecs ) );		// delayed transaction: wait for the NIN_BALLOONHIDE notification
-				DoShowBalloonTip( str::GetEmpty(), NULL, NIIF_NONE, 10 );
-				return true;
-			}
-
-	if ( autoShowIcon )
-		SetIconVisible();						// auto-show icon to display baloon
-
-	bool success = DoShowBalloonTip( text, pTitle, infoFlag, timeoutSecs );
-
-	if ( success && autoShowIcon )
-		SetFlag( m_autoHideFlags, NIF_INFO );	// store the balloon flag to auto-hide icon
-
-	//TRACE( _T("CSystemTray::ShowBalloonTip( %s ) success=%d ... }\n"), str::Clamp( text, 24 ).c_str(), success );
-	return success;
+	return m_icons[ foundPos ]->Delete();
 }
 
-bool CSystemTray::DoShowBalloonTip( const std::tstring& text, const TCHAR* pTitle, DWORD infoFlag, UINT timeoutSecs )
+bool CSystemTray::IsMinimizedToTray( const CWnd* pOwnerWnd )
 {
-	SetFlag( m_niData.uFlags, NIF_INFO );
-	m_niData.dwInfoFlags = infoFlag;
-	m_niData.uTimeout = timeoutSecs * 1000;		// convert time to ms
+	ASSERT_PTR( pOwnerWnd );
 
-	hlp::CopyTextToBuffer( m_niData.szInfo, text.c_str(), BalloonTextMaxLength );
-	hlp::CopyTextToBuffer( m_niData.szInfoTitle, pTitle, BalloonTitleMaxLength );
+	bool isOwnerWnd = CSystemTray::Instance() != NULL && CSystemTray::Instance()->GetOwnerWnd() == pOwnerWnd;
+	bool isMinimized = isOwnerWnd && HasFlag( pOwnerWnd->m_nFlags, WF_EX_MinimizedToTray );
 
-	bool success = NotifyTrayIcon( NIM_MODIFY );
+	// consistent with visibility state?
+	// note: dialogs/property-sheets are hidden when processing WM_DESTROY, so we avoid checking for visibility consistency
+	ENSURE( !isOwnerWnd || is_a<CPopupDlgBase>( pOwnerWnd ) || isMinimized == !ui::IsVisible( pOwnerWnd->GetSafeHwnd() ) );
 
-	m_niData.szInfo[ 0 ] = _T('\0');			// zero-out the balloon text string so that later operations won't redisplay the balloon
-	return success;
+	return isMinimized;
 }
 
-
-// icon manipulation
-
-bool CSystemTray::SetIcon( HICON hIcon )
+bool CSystemTray::IsRestoreToMaximized( const CWnd* pOwnerWnd )
 {
-	SetFlag( m_niData.uFlags, NIF_ICON );
-	m_niData.hIcon = hIcon;				// the shell tray will own a copy of the icon, unless NIS_SHAREDICON state is used
+	bool isOwnerWnd = CSystemTray::Instance() != NULL && CSystemTray::Instance()->GetOwnerWnd() == pOwnerWnd;
+	bool restoreToMaximized = isOwnerWnd && HasFlag( pOwnerWnd->m_nFlags, WF_EX_RestoreToMaximized );
 
-	return NotifyTrayIcon( NIM_MODIFY );
+	ENSURE( !isOwnerWnd || restoreToMaximized == (SW_SHOWMAXIMIZED == CSystemTray::Instance()->m_restoreShowCmd) );		// consistent with tray show cmd?
+
+	return restoreToMaximized;
 }
 
-bool CSystemTray::LoadResIcon( UINT iconResId )
+void CSystemTray::MinimizeOwnerWnd( bool restoreToMaximized /*= false*/ )
 {
-	if ( HICON hIcon = (HICON)::LoadImage( AfxGetResourceHandle(), MAKEINTRESOURCE( iconResId ), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR ) )
-	{
-		bool success = SetIcon( hIcon );
-		::DestroyIcon( hIcon );
+	CWnd* pOwnerWnd = GetOwnerWnd();
+	ASSERT_PTR( pOwnerWnd->GetSafeHwnd() );
 
-		return success;
-	}
+	bool wasMaximized = restoreToMaximized || pOwnerWnd->IsZoomed() != FALSE;
 
-	return false;
+	m_restoreShowCmd = wasMaximized ? SW_SHOWMAXIMIZED : SW_SHOWNORMAL;		// store show state to be restored to
+
+	SetFlag( pOwnerWnd->m_nFlags, WF_EX_MinimizedToTray );
+	SetFlag( pOwnerWnd->m_nFlags, WF_EX_RestoreToMaximized, wasMaximized );
+
+	pOwnerWnd->ShowWindow( SW_HIDE );					// IMP: hide window post-minimize so that it vanishes from the taskbar into the system tray
+
+	OnOwnerWndStatusChanged();
 }
 
-bool CSystemTray::AddIcon( void )
+void CSystemTray::RestoreOwnerWnd( void )
 {
-	if ( m_iconAdded )
-		RemoveIcon();
+	CWnd* pOwnerWnd = GetOwnerWnd();
+	ASSERT_PTR( pOwnerWnd->GetSafeHwnd() );
 
-	SetFlag( m_niData.uFlags, NIF_ICON );
+	pOwnerWnd->ShowWindow( m_restoreShowCmd );			// activate and display the window: restore or maximize depending of its show state when minimized
 
-	if ( Notify_AddIcon() )
-		m_iconHidden = m_showIconPending = false;
-	else
-		m_showIconPending = true;
+	SetFlag( pOwnerWnd->m_nFlags, WF_EX_MinimizedToTray, false );
+	SetFlag( pOwnerWnd->m_nFlags, WF_EX_RestoreToMaximized, false );
+	m_restoreShowCmd = SW_SHOWNORMAL;
 
-	return m_iconAdded;
+	OnOwnerWndStatusChanged();
 }
 
-bool CSystemTray::RemoveIcon( void )
+void CSystemTray::OnOwnerWndStatusChanged( void )
 {
-	m_showIconPending = false;
+	bool isMinimized = IsMinimizedToTray( GetOwnerWnd() );
 
-	if ( m_iconAdded )
-	{
-		SetFlag( m_niData.uFlags, NIF_ICON, false );
-		return Notify_DeleteIcon();
-	}
+	if ( m_pOwnerCallback != NULL )
+		if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
+			pContextMenu->SetDefaultItem( isMinimized
+				? static_cast<UINT>( -1 )					// prevent Restore on double-click, since we restore on single L-click
+				: ID_APP_MINIMIZE
+			);
 
-	return false;
+	if ( isMinimized && m_mainTrayIconId != 0 )
+		LookupIcon( m_mainTrayIconId ).SetTrayFocus();		// focus the tray icon when minimized
 }
 
-bool CSystemTray::SetIconVisible( bool visible /*= true*/ )
-{
-	ASSERT( m_iconAdded );
-
-	if ( IsIconVisible() == visible )
-		return false;		// no change
-
-	if ( visible )
-	{
-		if ( !m_iconAdded )
-			return AddIcon();
-
-		if ( m_iconHidden )
-			if ( Notify_ModifyState( NIS_HIDDEN, false ) )
-			{
-				m_iconHidden = false;
-				return true;
-			}
-	}
-	else
-	{
-		if ( !m_iconHidden )
-			if ( Notify_ModifyState( NIS_HIDDEN, true ) )
-			{
-				m_iconHidden = true;
-				return true;
-			}
-	}
-
-	return false;
-}
-
-void CSystemTray::SetTrayFocus( void )
-{
-	// added by Michael Dunn [Nov 1999]
-	// Sets the focus to the tray icon.
-	// Microsoft's Win 2K UI guidelines say you should do this after the user dismisses the icon's context menu.
-	NotifyTrayIcon( NIM_SETFOCUS );
-}
-
-void CSystemTray::InstallIconPending( void )
-{
-	// is the icon display pending, and it's not been set as "hidden"?
-	if ( m_showIconPending && !m_iconHidden )
-	{
-		m_niData.uFlags = m_mainFlags;		// reset the flags to what was used at creation
-
-		if ( Notify_AddIcon() )					// try and recreate the icon
-			m_showIconPending = false;
-
-		// if it's STILL hidden, then have another go next time...
-	}
-}
-
-
-void CSystemTray::Animate( UINT stepDelayMiliSecs, double durationSecs )
-{
-	ASSERT_PTR( m_animImageList.GetSafeHandle() );
-	m_pAnimation.reset( new CTrayIconAnimation( this, durationSecs, stepDelayMiliSecs ) );
-}
-
-bool CSystemTray::StopAnimation( void )
-{
-	if ( !IsAnimating() )
-		return false;
-
-	m_pAnimation.reset();
-	return true;
-}
 
 // message handlers
 
 void CSystemTray::HandleDestroy( void )
 {
-	StopAnimation();
-	RemoveIcon();
+	utl::for_each( m_icons, std::mem_fun( &CTrayIcon::Delete ) );
+	m_icons.clear();
+}
+
+bool CSystemTray::HandleSysCommand( UINT sysCmdId )
+{
+	if ( m_pOwnerCallback != NULL )
+		switch ( sysCmdId )
+		{
+			case SC_MAXIMIZE:
+				m_restoreShowCmd = SW_SHOWMAXIMIZED;
+				// fall-through
+			case SC_RESTORE:
+				RestoreOwnerWnd();
+				return true;
+			case SC_MINIMIZE:
+				MinimizeOwnerWnd();
+				return true;
+		}
+
+	return false;
 }
 
 bool CSystemTray::HandleTimer( UINT_PTR eventId )
 {
-	if ( IsAnimating() )
-		if ( m_pAnimation->HandleTimerEvent( eventId ) )
-		{
-			if ( m_pAnimation->IsTimeout() )
-				StopAnimation();
-
+	for ( std::vector< CTrayIcon* >::const_iterator itIcon = m_icons.begin(); itIcon != m_icons.end(); ++itIcon )
+		if ( (*itIcon)->HandleTimer( eventId ) )
 			return true;
-		}
 
 	return false;
 }
@@ -461,109 +252,27 @@ bool CSystemTray::HandleTimer( UINT_PTR eventId )
 void CSystemTray::HandleSettingChange( UINT flags )
 {
 	if ( SPI_SETWORKAREA == flags )
-		if ( IsIconVisible() )
-			InstallIconPending( true );
+		utl::for_each( m_icons, std::mem_fun( &CTrayIcon::InstallPending ) );
 }
 
 void CSystemTray::HandleExplorerRestart( void )
-{
-	// called whenever the taskbar is created (eg after explorer crashes and restarts).
-	InstallIconPending( true );
+{	// called whenever the taskbar is created (eg after explorer crashes and restarts).
+	utl::for_each( m_icons, std::mem_fun( &CTrayIcon::InstallPending ) );
 }
 
 bool CSystemTray::HandleTrayIconNotify( WPARAM wParam, LPARAM lParam )
 {
 	UINT msgNotifyCode = LOWORD( lParam );		// e.g. WM_CONTEXTMENU, WM_LBUTTONDBLCLK, NIN_SELECT, NIN_BALLOONSHOW, NIN_POPUPOPEN, etc
-	UINT iconId = HIWORD( lParam );
+	UINT trayIconId = HIWORD( lParam );
 	CPoint screenPos( GET_X_LPARAM( wParam ), GET_Y_LPARAM( wParam ) );
 
 	dbg::TraceTrayNotifyCode( msgNotifyCode );
 
 	if ( m_pOwnerCallback != NULL )
-		if ( m_pOwnerCallback->OnTrayIconNotify( msgNotifyCode, iconId, screenPos ) )
+		if ( m_pOwnerCallback->OnTrayIconNotify( msgNotifyCode, trayIconId, screenPos ) )
 			return true;			// event handled by the owner (skip default handling)
 
-	// event not handled by the owner: fallback to default implementation
-	switch ( msgNotifyCode )
-	{
-		case WM_CONTEXTMENU:
-			if ( m_mainTrayIconId == iconId && m_pOwnerCallback != NULL )
-				if ( CWnd* pOwnerWnd = m_pOwnerCallback->GetOwnerWnd() )
-					if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
-					{
-						pOwnerWnd->SetForegroundWindow();
-						ui::TrackPopupMenu( *pContextMenu, pOwnerWnd, screenPos, TPM_RIGHTBUTTON );
-						return true;
-					}
-					else
-						pOwnerWnd->SendMessage( WM_CONTEXTMENU, (WPARAM)GetPopupWnd()->GetSafeHwnd(), MAKELPARAM( screenPos.x, screenPos.y ) );
-
-			break;
-		case WM_LBUTTONDBLCLK:
-			if ( m_ignoreNextLDblClc )
-				m_ignoreNextLDblClc = false;
-			else if ( m_mainTrayIconId == iconId && m_pOwnerCallback != NULL )
-				if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
-					if ( CWnd* pOwnerWnd = m_pOwnerCallback->GetOwnerWnd() )
-					{
-						UINT cmdId = pContextMenu->GetDefaultItem( GMDI_GOINTOPOPUPS );
-						if ( cmdId != -1 )
-						{
-							pOwnerWnd->SetForegroundWindow();
-							ui::SendCommand( pOwnerWnd->GetSafeHwnd(), cmdId, BN_CLICKED, GetPopupWnd()->GetSafeHwnd() );
-							return true;
-						}
-					}
-
-			break;
-		case NIN_SELECT:
-			if ( m_mainTrayIconId == iconId && m_pOwnerCallback != NULL )
-				if ( CWnd* pOwnerWnd = m_pOwnerCallback->GetOwnerWnd() )
-					if ( IsMinimizedToTray( pOwnerWnd ) )
-					{	// Restore on L-Click
-						pOwnerWnd->SetForegroundWindow();
-						RestorePopupWnd();
-						m_ignoreNextLDblClc = true;		// prevent minimizing again if WM_LBUTTONDBLCLK gets received next
-						return true;
-					}
-
-			break;
-		case NIN_POPUPOPEN:
-			m_tooltipVisible = true;
-			break;
-		case NIN_POPUPCLOSE:
-			if ( HasFlag( m_autoHideFlags, NIF_TIP ) )		// must auto-hide icon?
-				SetIconVisible( false );
-
-			m_tooltipVisible = false;
-			break;
-		case NIN_BALLOONSHOW:
-			m_baloonVisible = true;
-			break;
-		case NIN_BALLOONHIDE:
-			if ( m_pBaloonPending.get() != NULL )
-			{
-				GetPopupWnd()->PostMessage( CSystemTray::WM_TRAYICONNOTIFY, wParam, MAKELPARAM( NIN_BalloonPendingShow, iconId ) );
-				return true;
-			}
-			// fall-through
-		case NIN_BALLOONTIMEOUT:
-			if ( m_pBaloonPending.get() != NULL )
-			{
-				if ( HasFlag( m_autoHideFlags, NIF_INFO ) )		// must auto-hide icon?
-					SetIconVisible( false );
-
-				m_baloonVisible = false;
-			}
-			break;
-		case NIN_BalloonPendingShow:
-			ASSERT_PTR( m_pBaloonPending.get() );
-			m_pBaloonPending->ShowBalloon( this );
-			m_pBaloonPending.reset();
-			return true;
-	}
-
-	return false;		// event not handled
+	return LookupIcon( trayIconId ).HandleTrayIconNotify( msgNotifyCode, screenPos );
 }
 
 
@@ -585,20 +294,10 @@ CWnd* CSystemTrayWnd::EnsurePopupWnd( void )
 {
 	// create once an invisible top-level popup window
 	if ( NULL == m_hWnd )
-		if ( !CreateEx( 0, AfxRegisterWndClass( 0 ), _T("<TrayIconPopup>"), WS_POPUP, 0, 0, 0, 0, NULL, 0 ) )
+		if ( !CreateEx( 0, AfxRegisterWndClass( 0 ), _T("<HiddenTrayIconPopup>"), WS_POPUP, 0, 0, 0, 0, NULL, 0 ) )
 			ASSERT( false );
 
 	return this;
-}
-
-bool CSystemTrayWnd::SetNotifyWnd( CWnd* pNotifyWnd )
-{
-	ASSERT( ::IsWindow( pNotifyWnd->GetSafeHwnd() ) );
-
-	RefIconData().hWnd = pNotifyWnd->GetSafeHwnd();
-	//RefIconData().uFlags = 0;
-
-	return NotifyTrayIcon( NIM_MODIFY );
 }
 
 
@@ -632,7 +331,7 @@ void CSystemTrayWnd::OnSettingChange( UINT flags, LPCTSTR pSection )
 
 LRESULT CSystemTrayWnd::OnExplorerRestart( WPARAM wParam, LPARAM lParam )
 {
-	// This is called whenever the taskbar is created (eg after explorer crashes and restarts).
+	// This is called whenever the taskbar is created (e.g. after explorer crashes and restarts).
 	// WM_TASKBARCREATED message is only passed to TOP LEVEL windows.
 	wParam, lParam;
 	HandleExplorerRestart();
@@ -680,9 +379,13 @@ LRESULT CSystemTrayWndHook::WindowProc( UINT message, WPARAM wParam, LPARAM lPar
 		case WM_DESTROY:
 			HandleDestroy();
 			break;
+		case WM_SYSCOMMAND:
+			if ( HandleSysCommand( GET_SC_WPARAM( wParam ) ) )		// sysCmdId
+				return 0L;
+			break;
 		case WM_TIMER:
 			if ( HandleTimer( static_cast<UINT>( wParam ) ) )
-				return 0;
+				return 0L;
 			break;
 		case WM_SETTINGCHANGE:
 			HandleSettingChange( static_cast<UINT>( wParam ) );
@@ -696,39 +399,4 @@ LRESULT CSystemTrayWndHook::WindowProc( UINT message, WPARAM wParam, LPARAM lPar
 	}
 
 	return __super::WindowProc( message, wParam, lParam );
-}
-
-
-// CSystemTraySingleton implementation
-
-UINT CSystemTraySingleton::s_appIconId = 1;
-std::tstring CSystemTraySingleton::s_appTipText;
-
-CSystemTraySingleton::CSystemTraySingleton( CWnd* pMainWnd, UINT appIconId /*= s_appIconId*/, const TCHAR* pAppTipText /*= s_appTipText.c_str()*/ )
-	: CSystemTrayWndHook( true )
-	, m_pMainWnd( pMainWnd )
-{
-	Construct( appIconId, pAppTipText );
-}
-
-void CSystemTraySingleton::Construct( UINT appIconId, const TCHAR* pAppTipText )
-{
-	ASSERT( Instance() == this );
-	ASSERT_PTR( m_pMainWnd->GetSafeHwnd() );			// must be created to use
-
-	SetOwnerCallback( this );
-	HookWindow( m_pMainWnd->GetSafeHwnd() );
-	CreateTrayIcon( appIconId, pAppTipText, true );		// create a hidden tray app icon
-}
-
-void CSystemTraySingleton::StoreAppInfo( UINT appIconId, const std::tstring& appTipText )
-{
-	s_appIconId = appIconId;
-	s_appTipText = appTipText;
-}
-
-bool CSystemTraySingleton::OnTrayIconNotify( UINT msgNotifyCode, UINT iconId, const CPoint& screenPos )
-{
-	msgNotifyCode, iconId, screenPos;
-	return false;
 }

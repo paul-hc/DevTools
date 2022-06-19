@@ -14,7 +14,7 @@ namespace ui
 		virtual CMenu* GetTrayIconContextMenu( void ) = 0;
 
 		// receives tray notifications, returns true if was event handled by the owner
-		virtual bool OnTrayIconNotify( UINT msgNotifyCode, UINT iconId, const CPoint& screenPos ) = 0;
+		virtual bool OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) = 0;
 	};
 }
 

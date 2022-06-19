@@ -26,6 +26,11 @@ namespace ui
 	}
 
 
+	inline CSize GetRectSize( const RECT& rect )
+	{
+		return CSize( rect.right - rect.left, rect.bottom - rect.top );
+	}
+
 	inline CRect& SetRectSize( CRect& rRect, const SIZE& size )
 	{
 		rRect.BottomRight() = rRect.TopLeft() + size;

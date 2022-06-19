@@ -308,20 +308,6 @@ namespace ui
 } //namespace ui
 
 
-namespace ui
-{
-	namespace sys_tray
-	{
-		void StoreAppInfo( UINT appIconId, const std::tstring& appTipText );
-		bool HasSystemTray( void );
-
-		// system tray baloon tips
-		bool ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle = NULL, DWORD infoFlag = NIIF_INFO, UINT timeoutSecs = 10 );
-		bool HideBalloonTip( void );
-	}
-}
-
-
 #include <vector>
 
 

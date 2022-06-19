@@ -4,6 +4,7 @@
 #include "LayoutEngine.h"
 #include "CmdInfoStore.h"
 #include "CmdUpdate.h"
+#include "WindowPlacement.h"
 #include "WndUtils.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
@@ -17,6 +18,7 @@ namespace reg
 	static const TCHAR entry_initialSize[] = _T("DlgInitialSize");
 	static const TCHAR entry_dialogPos[] = _T("DlgPosition");
 	static const TCHAR entry_dialogSize[] = _T("DlgSize");
+	static const TCHAR entry_restoreToMax[] = _T("DlgRestoreToMax");
 	static const TCHAR entry_showCmd[] = _T("DlgShowCmd");
 	static const TCHAR entry_collapsed[] = _T("DlgCollapsed");
 
@@ -112,10 +114,11 @@ void CLayoutDialog::SaveToRegistry( void )
 	placement.m_initialSize = m_pLayoutEngine->GetMinClientSize( false );		// save original size to ignore saved layout for changed template (development changes)
 	placement.m_collapsed = m_pLayoutEngine->IsCollapsed();
 
-	WINDOWPLACEMENT wp = { sizeof( WINDOWPLACEMENT ) };
-	if ( placement.m_useWindowPlacement && GetWindowPlacement( &wp ) )
+	CWindowPlacement wp;
+	if ( placement.m_useWindowPlacement && wp.ReadWnd( this ) )
 	{
 		CRect windowRect = wp.rcNormalPosition;					// workspace coordinates
+		placement.m_restoreToMaximized = wp.IsRestoreToMaximized();
 		placement.m_showCmd = wp.showCmd;
 		placement.m_pos = windowRect.TopLeft();
 		placement.m_size = windowRect.Size();
@@ -143,7 +146,10 @@ void CLayoutDialog::SaveToRegistry( void )
 	pApp->WriteProfileString( m_regSection.c_str(), reg::entry_dialogSize, spec.c_str() );
 
 	if ( placement.m_useWindowPlacement )
+	{
 		pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_showCmd, placement.m_showCmd );
+		pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_restoreToMax, placement.m_restoreToMaximized );
+	}
 
 	if ( m_pLayoutEngine->IsCollapsible() )
 		pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_collapsed, placement.m_collapsed );
@@ -178,6 +184,8 @@ void CLayoutDialog::LoadFromRegistry( void )
 	if ( pPlacement->m_useWindowPlacement )
 	{
 		pPlacement->m_showCmd = pApp->GetProfileInt( m_regSection.c_str(), reg::entry_showCmd, pPlacement->m_showCmd );
+		pPlacement->m_restoreToMaximized = pApp->GetProfileInt( m_regSection.c_str(), reg::entry_restoreToMax, pPlacement->m_restoreToMaximized ) != FALSE;
+
 		if ( AfxGetMainWnd() == this )
 			if ( pApp->m_nCmdShow != SW_SHOWNORMAL )
 				pPlacement->m_showCmd = pApp->m_nCmdShow;		// override with the command line option
@@ -205,14 +213,10 @@ void CLayoutDialog::RestorePlacement( void )
 		if ( m_pPlacement->m_useWindowPlacement )
 		{
 			CRect windowRect( m_pPlacement->m_pos, m_pPlacement->m_size );
-			ui::EnsureVisibleDesktopRect( windowRect );
+			CWindowPlacement wp;
 
-			WINDOWPLACEMENT wp = { sizeof( WINDOWPLACEMENT ), 0, m_pPlacement->m_showCmd };
-			wp.ptMinPosition = CPoint( 0, 0 );
-			wp.ptMaxPosition = CPoint( -1, -1 );
-			wp.rcNormalPosition = windowRect;
-
-			SetWindowPlacement( &wp );
+			wp.Setup( this, windowRect, m_pPlacement->m_showCmd );
+			wp.CommitWnd( this );
 		}
 		else
 		{
@@ -233,15 +237,15 @@ void CLayoutDialog::RestorePlacement( void )
 	}
 
 	if ( UseWindowPlacement() )
-		PostRestorePlacement( m_pPlacement.get() != NULL ? m_pPlacement->m_showCmd : -1 );
+		PostRestorePlacement( m_pPlacement.get() != NULL ? m_pPlacement->m_showCmd : -1, m_pPlacement.get() != NULL && m_pPlacement->m_restoreToMaximized );
 	else if ( m_initCentered || NULL == m_pPlacement.get() )
 		CenterWindow( GetOwner() );
 }
 
 // main dialog may override if it minimizes to system tray icon
-void CLayoutDialog::PostRestorePlacement( int showCmd )
+void CLayoutDialog::PostRestorePlacement( int showCmd, bool restoreToMaximized )
 {
-	showCmd;
+	showCmd, restoreToMaximized;
 }
 
 void CLayoutDialog::ModifySystemMenu( void )

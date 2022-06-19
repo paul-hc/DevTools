@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 #include "WindowDebug.h"
+#include "SystemTray.h"
+#include "TrayIcon.h"
 
 #ifdef _DEBUG
 #include "WndUtils.h"
@@ -106,5 +108,34 @@ namespace dbg
 	#else
 		msgNotifyCode;
 	#endif //_DEBUG
+	}
+
+
+	// CScopedTrayIconDiagnostics implementation
+
+	CScopedTrayIconDiagnostics::CScopedTrayIconDiagnostics( const CTrayIcon* pTrayIcon, UINT msgNotifyCode )
+		: m_pTrayIcon( pTrayIcon )
+	{
+	#ifdef _DEBUG
+		if ( msgNotifyCode != WM_MOUSEMOVE )
+		{
+			m_preMsg = m_pTrayIcon->FormatState();
+			TRACE( _T("  Pre {%s}\n"), m_preMsg.c_str() );
+		}
+	#else
+		msgNotifyCode;
+	#endif
+	}
+
+	CScopedTrayIconDiagnostics::~CScopedTrayIconDiagnostics()
+	{
+	#ifdef _DEBUG
+		if ( !m_preMsg.empty() )
+		{
+			std::tstring postMsg = m_pTrayIcon->FormatState();
+			if ( postMsg != m_preMsg )
+				TRACE( _T("  Post {%s}\n"), postMsg.c_str() );
+		}
+	#endif
 	}
 }

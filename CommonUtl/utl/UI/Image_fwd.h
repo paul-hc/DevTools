@@ -157,6 +157,8 @@ namespace gdi
 	{
 		CreateImageList( rOutImageList, imageSize, -growBy, flags );
 	}
+
+	inline HICON ExtractIcon( const CImageList& imageList, size_t imagePos ) { return const_cast<CImageList&>( imageList ).ExtractIcon( static_cast<int>( imagePos ) ); }
 }
 
 

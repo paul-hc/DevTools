@@ -54,7 +54,7 @@ public:
 	virtual void LayoutDialog( void );
 protected:
 	virtual bool UseWindowPlacement( void ) const;
-	virtual void PostRestorePlacement( int showCmd );
+	virtual void PostRestorePlacement( int showCmd, bool restoreToMaximized );
 	virtual void OnIdleUpdateControls( void );			// override to update specific controls
 private:
 	void RestorePlacement( void );

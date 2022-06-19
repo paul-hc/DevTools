@@ -7,6 +7,13 @@ template< typename ValueType >
 class CScopedValue
 {
 public:
+	CScopedValue( ValueType* pValue )
+		: m_pValue( pValue )
+	{
+		ASSERT_PTR( m_pValue );
+		m_oldValue = *m_pValue;
+	}
+
 	CScopedValue( ValueType* pValue, const ValueType& newValue )
 		: m_pValue( pValue )
 	{

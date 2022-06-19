@@ -543,6 +543,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BaseFrameWnd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BaseFrameWnd.hxx"
+				>
+			</File>
+			<File
 				RelativePath=".\BaseZoomView.cpp"
 				>
 			</File>
@@ -720,14 +728,6 @@
 			</File>
 			<File
 				RelativePath=".\SyncScrolling.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SystemTray.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SystemTray.h"
 				>
 			</File>
 			<File
@@ -1167,6 +1167,26 @@
 				</File>
 				<File
 					RelativePath=".\ShellUtilities.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SystemTray.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SystemTray.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SystemTray_fwd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TrayIcon.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TrayIcon.h"
 					>
 				</File>
 				<File

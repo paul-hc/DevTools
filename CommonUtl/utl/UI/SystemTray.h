@@ -1,132 +1,79 @@
-/////////////////////////////////////////////////////////////////////////////
-//
-// Written by Chris Maunder (https://www.codeproject.com/Articles/74/Adding-Icons-to-the-System-Tray)
+// Originally written by Chris Maunder (https://www.codeproject.com/Articles/74/Adding-Icons-to-the-System-Tray)
 // Copyright (c) 1998.
 //
 #ifndef SystemTray_h
 #define SystemTray_h
 #pragma once
 
-#include <vector>
-#include "Timer.h"
-
-
-struct CBaloonData;
-class CTrayIconAnimation;
-namespace ui { interface ISystemTrayCallback; }
+#include "SystemTray_fwd.h"
 
 
 abstract class CSystemTray		// wrapper class for interfacing with the shell system tray icons
 {
+	friend class CTrayIcon;
 protected:
 	CSystemTray( void );
 
 	virtual CWnd* EnsurePopupWnd( void ) = 0;		// creates or hooks the popup window
+
+	ui::ISystemTrayCallback* GetOwnerCallback( void ) const { return m_pOwnerCallback; }
 public:
 	virtual ~CSystemTray();
 
-	virtual CWnd* GetPopupWnd( void ) = 0;
+	virtual CWnd* GetPopupWnd( void ) = 0;			// could be the owner top-level window of the hidden popup, depending on the concrete class
+	CWnd* GetOwnerWnd( void ) const;				// optional: the top-level owner window, that implements ui::ISystemTrayCallback
 
 	void SetOwnerCallback( ui::ISystemTrayCallback* pOwnerCallback ) { m_pOwnerCallback = pOwnerCallback; }
 
+	bool IsEmpty( void ) const { return m_icons.empty(); }
+	const std::vector< CTrayIcon* >& GetIcons( void ) const { return m_icons; }
+
+	CTrayIcon* FindIcon( UINT trayIconId ) const;
+	CTrayIcon& LookupIcon( UINT trayIconId ) const;
+
+	CTrayIcon* FindMainIcon( void ) const { return m_mainTrayIconId != 0 ? FindIcon( m_mainTrayIconId ) : NULL; }
+	CTrayIcon* FindMessageIcon( void ) const;
+
 	// create the tray icon
-	bool CreateTrayIcon( HICON hIcon, UINT trayIconId, const TCHAR* pIconTipText, bool iconHidden = false );
-	bool CreateTrayIcon( UINT trayIconResId, const TCHAR* pIconTipText, bool iconHidden = false );		// load tray icon resource
+	CTrayIcon* CreateTrayIcon( UINT trayIconResId, bool visible = true ) { return CreateTrayIcon( NULL, trayIconResId, NULL, visible ); }		// load tray icon resource + tooltip resource
+	CTrayIcon* CreateTrayIcon( HICON hIcon, UINT trayIconId, const TCHAR* pIconTipText, bool visible = true );
+	bool DeleteTrayIcon( UINT trayIconId );
+
+	// minimize/restore top-level owner window
+	void MinimizeOwnerWnd( bool restoreToMaximized = false );
+	void RestoreOwnerWnd( void );
+	void OnOwnerWndStatusChanged( void );
 
 	static CSystemTray* Instance( void ) { return s_pInstance; }
 
-	static bool IsMinimizedToTray( CWnd* pPopupWnd );
-	static void MinimizeToTray( CWnd* pPopupWnd );
-	static void RestoreFromTray( CWnd* pPopupWnd );
-
-	void MinimizePopupWnd( void );
-	void RestorePopupWnd( void );
-
-	CWnd* GetNotifyWnd( void ) const { return CWnd::FromHandle( m_niData.hWnd ); }
-
-	// tray icon tooltip
-	bool IsTooltipVisible( void ) const { return m_tooltipVisible; }
-	std::tstring GetTooltipText( void ) const { return m_niData.szTip; }
-	bool SetTooltipText( const TCHAR* pIconTipText );
-
-	bool IsBalloonTipVisible( void ) const { return m_baloonVisible; }
-	bool ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle = NULL, DWORD infoFlag = NIIF_NONE, UINT timeoutSecs = 10 );	// Win 2K+
-	bool HideBalloonTip( void ) { return ShowBalloonTip( str::GetEmpty() ); }
-
-	// icon displayed
-	UINT GetTrayIconId( void ) const { return m_niData.uID; }
-
-	bool HasIcon( void ) const { return m_iconAdded; }
-	HICON GetIcon( void ) const { return m_niData.hIcon; }
-	bool SetIcon( HICON hIcon );
-
-	bool LoadResIcon( UINT iconResId );
-	bool SetStandardIcon( UINT iconResId ) { SetIcon( ::LoadIcon( NULL, MAKEINTRESOURCE( iconResId ) ) ); }
-
-	bool AddIcon( void );
-	bool RemoveIcon( void );
-
-	bool IsIconVisible( void ) const { return HasIcon() && !m_iconHidden; }
-	bool SetIconVisible( bool visible = true );
-
-	void SetTrayFocus( void );
-
-	// icon animation
-	CImageList& GetAnimImageList( void ) const { return const_cast<CImageList&>( m_animImageList ); }
-	bool CanAnimate( void ) const { return m_animImageList.GetSafeHandle() != NULL && m_animImageList.GetImageCount() != 0 && IsIconVisible(); }
-	bool IsAnimating( void ) const { return m_pAnimation.get() != NULL; }
-	void Animate( UINT stepDelayMiliSecs, double durationSecs );
-	bool StopAnimation( void );
-protected:
-	bool NotifyTrayIcon( int notifyCode );
-	bool Notify_AddIcon( void );
-	bool Notify_DeleteIcon( void );
-	bool Notify_ModifyState( DWORD stateFlag, bool on );
-
-	void InstallIconPending( void );
-	void InstallIconPending( bool showIconPending ) { m_showIconPending = showIconPending; InstallIconPending(); }
-
-	ui::ISystemTrayCallback* GetOwnerCallback( void ) const { return m_pOwnerCallback; }
-	NOTIFYICONDATA& RefIconData( void ) { return m_niData; }
-
-	enum PrivateNotify { NIN_BalloonPendingShow = NIN_BALLOONUSERCLICK + 33 };
+	static bool IsMinimizedToTray( const CWnd* pOwnerWnd );
+	static bool IsRestoreToMaximized( const CWnd* pOwnerWnd );
 private:
-	bool DoShowBalloonTip( const std::tstring& text, const TCHAR* pTitle, DWORD infoFlag, UINT timeoutSecs );
+	size_t FindIconPos( UINT trayIconId ) const;
 private:
 	ui::ISystemTrayCallback* m_pOwnerCallback;		// receives tray icon notifications, and handles special events, e.g. NIN_SELECT, NINF_KEY, NIN_KEYSELECT, NIN_BALLOONSHOW, etc
-	NOTIFYICONDATA m_niData;
-	bool m_iconAdded;			// has the icon been added?
-	bool m_iconHidden;
-	bool m_showIconPending;		// show the icon once the taskbar has been created
-	bool m_tooltipVisible;		// is icon tooltip currently displayed?
-	bool m_baloonVisible;		// is icon balloon tip currently displayed?
-	bool m_ignoreNextLDblClc;
-	UINT m_autoHideFlags;		// auto-hides the tray icon when tip/balloon hides, if tooltips or balloons are displayed if icon was not visible previously
-
-	// main icon: the first one created via CreateTrayIcon(); an application can have additional tray icons
+	std::vector< CTrayIcon* > m_icons;				// with ownership
 	UINT m_mainTrayIconId;
-	UINT m_mainFlags;
+    UINT m_restoreShowCmd;
 
-	std::auto_ptr<CBaloonData> m_pBaloonPending;		// used in the delayed transaction to replace a displayed ballon to another with different content (sys-tray notifications have an async sequence)
-
-	// icon animation
-	CImageList m_animImageList;
-	std::auto_ptr<CTrayIconAnimation> m_pAnimation;
+	enum CWndFlagsEx
+	{	// private flags that extend CWnd::m_nFlags, to be used for the owner window (top-level)
+		WF_EX_MinimizedToTray		= 0x01000000,	// owner window is minimized to system tray, and hidden
+		WF_EX_RestoreToMaximized	= 0x02000000	// owner window is minimized to system tray, and should be restored to maximized
+	};
 private:
-	enum { BalloonTextMaxLength = 256, BalloonTitleMaxLength = 64 };
-
 	static CSystemTray* s_pInstance;			// shared singleton instance for global baloons
-	static const UINT s_tooltipMaxLength;
 public:
 	static const UINT WM_TASKBARCREATED;		// send by explorer.exe when process is restarted
 	static const UINT WM_TRAYICONNOTIFY;		// icon notify message sent to parent
 protected:
 	// message handlers
 	void HandleDestroy( void );
+	bool HandleSysCommand( UINT sysCmdId );
 	bool HandleTimer( UINT_PTR eventId );
 	void HandleSettingChange( UINT flags );
 	void HandleExplorerRestart( void );
-	bool HandleTrayIconNotify( WPARAM wParam, LPARAM lParam );			// handler for tray notifications
+	bool HandleTrayIconNotify( WPARAM wParam, LPARAM lParam );		// handler for tray notifications
 };
 
 
@@ -140,8 +87,6 @@ public:
 	virtual ~CSystemTrayWnd();
 
 	virtual CWnd* GetPopupWnd( void ) override { return this; }
-
-	bool SetNotifyWnd( CWnd* pNotifyWnd );				// window that will receieve tray notifications; normally should not be used
 protected:
 	virtual CWnd* EnsurePopupWnd( void ) override;		// creates the popup window
 
@@ -175,32 +120,6 @@ protected:
 
 	// base overrides
 	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
-};
-
-
-#include "ISystemTrayCallback.h"
-
-
-// singleton instance for displaying on-demand application global baloons for the main window (lazy created, for occasional tray notifications)
-//
-class CSystemTraySingleton : public CSystemTrayWndHook
-	, public ui::ISystemTrayCallback
-{
-public:
-	CSystemTraySingleton( CWnd* pMainWnd, UINT appIconId = s_appIconId, const TCHAR* pAppTipText = s_appTipText.c_str() );
-
-	static void StoreAppInfo( UINT appIconId, const std::tstring& appTipText );
-private:
-	void Construct( UINT appIconId, const TCHAR* pAppTipText );
-
-	virtual CWnd* GetOwnerWnd( void ) override { return m_pMainWnd; }
-	virtual CMenu* GetTrayIconContextMenu( void ) override { return NULL; }
-	virtual bool OnTrayIconNotify( UINT msgNotifyCode, UINT iconId, const CPoint& screenPos ) override;
-private:
-	CWnd* m_pMainWnd;
-
-	static UINT s_appIconId;
-	static std::tstring s_appTipText;
 };
 
 

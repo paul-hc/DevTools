@@ -8,14 +8,24 @@ class CWindowPlacement : public tagWINDOWPLACEMENT
 public:
 	CWindowPlacement( void );
 
-	void Reset( void );
-
 	bool IsEmpty( void ) const;
+
+	void Reset( void );
+	void Setup( const CWnd* pWnd, const CRect& normalRect, UINT showCmd, UINT flags = 0 );
+	void QueryCreateStruct( CREATESTRUCT* rCreateStruct ) const;
 
 	bool ReadWnd( const CWnd* pWnd );
 	bool CommitWnd( CWnd* pWnd, bool restoreToMax = false, bool setMinPos = false );
 
+	bool IsRestoreToMaximized( void ) const { return HasFlag( this->flags, WPF_RESTORETOMAXIMIZED ); }
 	int ChangeMaximizedShowCmd( UINT showCmd );
+
+	void RegSave( const TCHAR regSection[] ) const;
+	bool RegLoad( const TCHAR regSection[], const CWnd* pWnd );
+
+	const CRect& GetNormalPosition( void ) const { return (const CRect&)this->rcNormalPosition; }
+	CRect& RefNormalPosition( void ) { return (CRect&)this->rcNormalPosition; }
+	bool EnsureVisibleNormalPosition( const CWnd* pWnd );
 
 	// serialization
 	void Stream( CArchive& archive );

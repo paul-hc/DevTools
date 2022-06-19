@@ -30,6 +30,7 @@ struct CLayoutPlacement
 		, m_size( -1, -1 )
 		, m_showCmd( -1 )
 		, m_collapsed( false )
+		, m_restoreToMaximized( false )
 	{
 	}
 public:
@@ -39,6 +40,7 @@ public:
 	CSize m_size;
 	int m_showCmd;
 	bool m_collapsed;
+	bool m_restoreToMaximized;
 };
 
 
