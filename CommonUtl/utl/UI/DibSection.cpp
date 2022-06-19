@@ -318,7 +318,7 @@ void CDibSection::CreateEmptyImageList( CImageList& rDestImageList, const CSize&
 	REQUIRE( IsValid() );
 
 	if ( HasAlpha() )
-		rDestImageList.Create( imageSize.cx, imageSize.cy, ILC_COLOR32, imageCount, 0 );			// use alpha channel (no ILC_MASK required)
+		rDestImageList.Create( imageSize.cx, imageSize.cy, ILC_COLOR32, imageCount, 0 );			// use alpha channel, no ILC_MASK required
 	else
 	{
 		UINT ilFlags = 0;
@@ -327,7 +327,7 @@ void CDibSection::CreateEmptyImageList( CImageList& rDestImageList, const CSize&
 			default:	ASSERT( false );
 			case 1:		ilFlags |= ILC_MASK; break;
 			case 4:		ilFlags |= ILC_COLOR4; break;
-			case 8:		ilFlags |= ILC_COLOR8; break;
+			case 8:		ilFlags |= ILC_COLOR24 /*ILC_COLOR8*/; break;	// issues with image-list transparency not working [PHC 2022-06-18]
 			case 16:	ilFlags |= ILC_COLOR16; break;
 			case 24:	ilFlags |= ILC_COLOR24; break;
 			case 32:	ilFlags |= ILC_COLOR32; break;
