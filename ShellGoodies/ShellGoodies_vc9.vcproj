@@ -863,14 +863,6 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\test\CommandModelSerializerTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\CommandModelSerializerTests.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\RenameFilesTests.cpp"
 				>
 			</File>

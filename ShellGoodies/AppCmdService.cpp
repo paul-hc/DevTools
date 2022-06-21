@@ -29,7 +29,7 @@ bool CAppCmdService::SaveCommandModel( void )
 	m_pCommandModel->RemoveExpiredCommands( MaxCommands );
 	RemoveCommandsThat( pred::IsZombieCmd() );		// zombie command: it has no effect on files (in most cases empty macros due to non-existing files)
 
-	if ( !CCommandModelPersist::SaveUndoLog( *m_pCommandModel, CGeneralOptions::Instance().m_undoLogFormat ) )
+	if ( !CCommandModelPersist::SaveUndoLog( m_pCommandModel.get() ) )
 		return false;
 
 	SetDirty( false );

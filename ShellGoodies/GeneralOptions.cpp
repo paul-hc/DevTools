@@ -20,8 +20,8 @@ namespace reg
 	static const TCHAR entry_useListThumbs[] = _T("UseListThumbs");
 	static const TCHAR entry_useListDoubleBuffer[] = _T("UseListDoubleBuffer");
 	static const TCHAR entry_highlightTextDiffsFrame[] = _T("HighlightTextDiffsFrame");
+	//static const TCHAR entry_undoLogFormat[] = _T("UndoLogFormat");
 	static const TCHAR entry_undoLogPersist[] = _T("UndoLogPersist");
-	static const TCHAR entry_undoLogFormat[] = _T("UndoLogFormat");
 	static const TCHAR entry_undoEditingCmds[] = _T("UndoEditingCmds");
 	static const TCHAR entry_trimFname[] = _T("TrimFname");
 	static const TCHAR entry_normalizeWhitespace[] = _T("NormalizeWhitespace");
@@ -34,8 +34,8 @@ CGeneralOptions::CGeneralOptions( void )
 	, m_useListThumbs( true )
 	, m_useListDoubleBuffer( true )
 	, m_highlightTextDiffsFrame( true )
-	, m_undoLogPersist( true )
 	, m_undoLogFormat( cmd::BinaryFormat )
+	, m_undoLogPersist( true )
 	, m_undoEditingCmds( true )
 	, m_trimFname( true )
 	, m_normalizeWhitespace( true )
@@ -67,8 +67,8 @@ void CGeneralOptions::LoadFromRegistry( void )
 	m_useListThumbs = pApp->GetProfileInt( reg::section, reg::entry_useListThumbs, m_useListThumbs ) != FALSE;
 	m_useListDoubleBuffer = pApp->GetProfileInt( reg::section, reg::entry_useListDoubleBuffer, m_useListDoubleBuffer ) != FALSE;
 	m_highlightTextDiffsFrame = pApp->GetProfileInt( reg::section, reg::entry_highlightTextDiffsFrame, m_highlightTextDiffsFrame ) != FALSE;
+	//m_undoLogFormat = static_cast<cmd::FileFormat>( pApp->GetProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat ) );
 	m_undoLogPersist = pApp->GetProfileInt( reg::section, reg::entry_undoLogPersist, m_undoLogPersist ) != FALSE;
-	m_undoLogFormat = static_cast<cmd::FileFormat>( pApp->GetProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat ) );
 	m_undoEditingCmds = pApp->GetProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds ) != FALSE;
 	m_trimFname = pApp->GetProfileInt( reg::section, reg::entry_trimFname, m_trimFname ) != FALSE;
 	m_normalizeWhitespace = pApp->GetProfileInt( reg::section, reg::entry_normalizeWhitespace, m_normalizeWhitespace ) != FALSE;
@@ -83,8 +83,8 @@ void CGeneralOptions::SaveToRegistry( void ) const
 	pApp->WriteProfileInt( reg::section, reg::entry_useListThumbs, m_useListThumbs );
 	pApp->WriteProfileInt( reg::section, reg::entry_useListDoubleBuffer, m_useListDoubleBuffer );
 	pApp->WriteProfileInt( reg::section, reg::entry_highlightTextDiffsFrame, m_highlightTextDiffsFrame );
+	//pApp->WriteProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat );
 	pApp->WriteProfileInt( reg::section, reg::entry_undoLogPersist, m_undoLogPersist );
-	pApp->WriteProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat );
 	pApp->WriteProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds );
 	pApp->WriteProfileInt( reg::section, reg::entry_trimFname, m_trimFname );
 	pApp->WriteProfileInt( reg::section, reg::entry_normalizeWhitespace, m_normalizeWhitespace );
@@ -108,8 +108,8 @@ bool CGeneralOptions::operator==( const CGeneralOptions& right ) const
 		m_useListThumbs == right.m_useListThumbs &&
 		m_useListDoubleBuffer == right.m_useListDoubleBuffer &&
 		m_highlightTextDiffsFrame == right.m_highlightTextDiffsFrame &&
-		m_undoLogPersist == right.m_undoLogPersist &&
 		m_undoLogFormat == right.m_undoLogFormat &&
+		m_undoLogPersist == right.m_undoLogPersist &&
 		m_undoEditingCmds == right.m_undoEditingCmds &&
 		m_trimFname == right.m_trimFname &&
 		m_normalizeWhitespace == right.m_normalizeWhitespace;

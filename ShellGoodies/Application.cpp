@@ -5,7 +5,6 @@
 #include "GeneralOptions.h"
 #include "test/TextAlgorithmsTests.h"
 #include "test/RenameFilesTests.h"
-#include "test/CommandModelSerializerTests.h"
 #include "utl/EnumTags.h"
 #include "utl/UI/SystemTray.h"
 #include "resource.h"
@@ -24,7 +23,6 @@ namespace ut
 	#ifdef USE_UT
 		CTextAlgorithmsTests::Instance();
 		CRenameFilesTests::Instance();
-		CCommandModelSerializerTests::Instance();
 	#endif
 	}
 }

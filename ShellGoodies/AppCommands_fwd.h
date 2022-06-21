@@ -29,7 +29,7 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void );
 
 
-	enum FileFormat { TextFormat, BinaryFormat };
+	enum FileFormat { BinaryFormat };
 
 
 	interface IFileDetailsCmd

@@ -73,8 +73,8 @@ CGeneralOptionsPage::~CGeneralOptionsPage()
 
 const CEnumTags& CGeneralOptionsPage::GetTags_IconDim( void )
 {
-	static const CEnumTags tags( _T("16 x 16|24 x 24|32 x 32|48 x 48|96 x 96|128 x 128|256 x 256"), NULL, -1, SmallIcon );		// matches IconStdSize starting from SmallIcon
-	return tags;
+	static const CEnumTags s_tags( _T("16 x 16|24 x 24|32 x 32|48 x 48|96 x 96|128 x 128|256 x 256"), NULL, -1, SmallIcon );		// matches IconStdSize starting from SmallIcon
+	return s_tags;
 }
 
 void CGeneralOptionsPage::UpdateStatus( void )
@@ -114,17 +114,21 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 		ui::ShowControl( m_hWnd, ID_OPEN_CMD_DASHBOARD, enableProperties );
 	}
 
-	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
+	switch ( pDX->m_bSaveAndValidate )
 	{
-		m_options.m_smallIconDim = ui::GetIconDimension( smallStdSize );
-		m_options.m_largeIconDim = ui::GetIconDimension( largeStdSize );
+		case DialogOutput:
+			CheckDlgButton( IDC_UNDO_LOG_BINARY_FMT_RADIO, cmd::BinaryFormat == m_options.m_undoLogFormat );
+			break;
+		case DialogSaveChanges:
+			m_options.m_smallIconDim = ui::GetIconDimension( smallStdSize );
+			m_options.m_largeIconDim = ui::GetIconDimension( largeStdSize );
 	}
 
 	ui::DDX_Bool( pDX, IDC_USE_LIST_THUMBS_CHECK, m_options.m_useListThumbs );
 	ui::DDX_Bool( pDX, IDC_USE_LIST_DOUBLE_BUFFER_CHECK, m_options.m_useListDoubleBuffer );
 	ui::DDX_Bool( pDX, IDC_HIGHLIGHT_TEXT_DIFFS_FRAME_CHECK, m_options.m_highlightTextDiffsFrame );
 	ui::DDX_Bool( pDX, IDC_UNDO_LOG_PERSIST_CHECK, m_options.m_undoLogPersist );
-	ui::DDX_RadioEnum( pDX, IDC_UNDO_LOG_TEXT_FMT_RADIO, m_options.m_undoLogFormat );
+	//ui::DDX_RadioEnum( pDX, IDC_UNDO_LOG_TEXT_FMT_RADIO, m_options.m_undoLogFormat );
 	ui::DDX_Bool( pDX, IDC_UNDO_EDITING_CMDS_CHECK, m_options.m_undoEditingCmds );
 	ui::DDX_Bool( pDX, IDC_TRIM_FNAME_CHECK, m_options.m_trimFname );
 	ui::DDX_Bool( pDX, IDC_NORMALIZE_WHITESPACE_CHECK, m_options.m_normalizeWhitespace );

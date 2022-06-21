@@ -29,19 +29,19 @@ struct CGeneralOptions : public TSubject
 	void ApplyToListCtrl( CReportListControl* pListCtrl ) const;
 public:
 	// file lists
-	int m_smallIconDim, m_largeIconDim;
-	bool m_useListThumbs;
-	bool m_useListDoubleBuffer;
-	bool m_highlightTextDiffsFrame;
+	persist int m_smallIconDim, m_largeIconDim;
+	persist bool m_useListThumbs;
+	persist bool m_useListDoubleBuffer;
+	persist bool m_highlightTextDiffsFrame;
 
 	// Undo/Redo
-	bool m_undoLogPersist;
-	cmd::FileFormat m_undoLogFormat;
-	bool m_undoEditingCmds;
+	cmd::FileFormat m_undoLogFormat;			// disabled persistence since removed cmd::TextFormat
+	persist bool m_undoLogPersist;
+	persist bool m_undoEditingCmds;
 
 	// Filename text processing
-	bool m_trimFname;
-	bool m_normalizeWhitespace;			// ensure single whitespaces
+	persist bool m_trimFname;
+	persist bool m_normalizeWhitespace;			// ensure single whitespaces
 };
 
 
