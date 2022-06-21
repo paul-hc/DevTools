@@ -268,11 +268,7 @@ bool CShellMenuController::ExecuteCommand( UINT cmdId, HWND hWnd )
 
 	CWnd* pParentOwnerWnd = scopedMainWnd.GetParentOwnerWnd();
 
-	if ( NULL == m_pSystemTray.get() )
-	{	// create once the system-tray message icon
-		m_pSystemTray.reset( new CSystemTrayWnd() );				// hidden popup tray icon host
-		m_pSystemTray->CreateTrayIcon( IDR_MESSAGE_TRAY_ICON, false );	// auto-hide message tray icon
-	}
+	app::GetApp().GetMessageTrayIcon();			// ensure shared message tray icon is initialized
 
 	return HandleCommand( menuCmd, pParentOwnerWnd );
 }

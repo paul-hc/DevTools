@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AppCommands.h"
+#include "utl/AppTools.h"
 #include "utl/Path.h"
 
 
@@ -21,7 +22,7 @@ namespace cmd
 		CBaseFileGroupCmd( CommandType cmdType = CommandType(), const std::vector< fs::CPath >& filePaths = std::vector< fs::CPath >(), const CTime& timestamp = CTime::GetCurrentTime() );
 	public:
 		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
-		void CopyTimestampOf( const CBaseFileGroupCmd& srcCmd ) { m_timestamp = srcCmd.GetTimestamp(); }
+		void SetOriginCmd( CBaseFileGroupCmd* pOriginCmd );
 
 		CWnd* GetParentOwner( void ) const { return m_pParentOwner; }
 		void SetParentOwner( CWnd* pParentOwner ) { m_pParentOwner = pParentOwner; }
@@ -42,26 +43,39 @@ namespace cmd
 	protected:
 		virtual std::tstring GetDestHeaderInfo( void ) const;
 
-		static void QueryFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths );
-
-		enum MultiFileStatus { AllExist, SomeExist, NoneExist };
+		bool AddActualCmdDetail( std::vector< std::tstring >& rLines ) const;
 
 		struct CWorkingSet
 		{
 			CWorkingSet( const CBaseFileGroupCmd* pCmd, fs::AccessMode accessMode = fs::Read );
 			CWorkingSet( const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, fs::AccessMode accessMode = fs::Read );
 
-			bool IsValid( void ) const { return m_existStatus != NoneExist; }
+			bool IsValid( void ) const { return m_existStatus != app::Error; }
 			bool IsBadFilePath( const fs::CPath& filePath ) const;
+
+			// post-execution
+			void QueryGroupDetails( std::tstring& rDetails, const CBaseFileGroupCmd* pCmd ) const;
+			app::MsgType GetOutcomeMsgType( void ) const { return m_succeeded ? m_existStatus : app::Error; }
 		public:
 			std::vector< fs::CPath > m_currFilePaths;
 			std::vector< fs::CPath > m_badFilePaths;
 			std::vector< fs::CPath > m_currDestFilePaths;		// for commands that manage explicit destinations
-			MultiFileStatus m_existStatus;
+			app::MsgType m_existStatus;
 			bool m_succeeded;
+
+			static const TCHAR s_lineEnd[];
 		};
 
-		bool HandleExecuteResult( const CWorkingSet& workingSet, const std::tstring& groupDetails );
+		struct HasValidPathPred
+		{
+			HasValidPathPred( const CWorkingSet* pWorkingSet ) : m_pWorkingSet( pWorkingSet ) { ASSERT_PTR( m_pWorkingSet ); }
+
+			bool operator()( const std::tstring& detailLine ) const;		// detail line does not contain any bad path?
+		private:
+			const CWorkingSet* m_pWorkingSet;
+		};
+
+		bool HandleExecuteResult( const CWorkingSet& workingSet );
 	private:
 		persist CTime m_timestamp;
 		persist std::vector< fs::CPath > m_filePaths;
@@ -72,8 +86,6 @@ namespace cmd
 		fs::AccessMode m_fileAccessMode;
 	public:
 		FILEOP_FLAGS m_opFlags;
-
-		static const TCHAR s_lineEnd[];
 	};
 
 
@@ -110,6 +122,7 @@ namespace cmd
 		virtual std::tstring GetDestHeaderInfo( void ) const override;
 
 		void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const;
+		static void AppendFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths );
 	private:
 		fs::CPath MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const;
 	private:
@@ -149,6 +162,7 @@ namespace cmd
 
 		fs::CPath MakeShallowDestFilePath( const fs::CPath& srcFilePath ) const;		// straight shallow SRC/DEST
 		fs::CPath MakeBackupDestFilePath( const fs::CPath& srcFilePath ) const;			// backup SRC/DEST
+		static void AppendFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths );
 	protected:
 		persist fs::TDirPath m_destDirPath;
 		persist std::vector< fs::CPath > m_destFilePaths;

@@ -96,6 +96,8 @@ namespace str
 
 namespace str
 {
+	TCHAR* CopyTextToBuffer( TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] = g_ellipsis );
+
 	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] = g_ellipsis, bool atEnd = true );
 	std::tstring& SingleLine( std::tstring& rText, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph );
 
@@ -422,6 +424,24 @@ namespace str
 			text += pLineEnd;								// add a final line-end terminator to have a set of complete lines
 		return text;
 	}
+}
+
+
+namespace func
+{
+	struct AppendLine
+	{
+		AppendLine( std::tstring* pOutput, const TCHAR* pLineSep = _T("\n") ) : m_pOutput( pOutput ), m_pLineSep( pLineSep ) { ASSERT_PTR( m_pOutput ); }
+
+		template< typename StringyT >
+		void operator()( const StringyT& value )
+		{
+			stream::Tag( *m_pOutput, func::StringOf( value ), m_pLineSep );
+		}
+	public:
+		std::tstring* m_pOutput;
+		const TCHAR* m_pLineSep;
+	};
 }
 
 

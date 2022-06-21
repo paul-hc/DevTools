@@ -14,7 +14,7 @@ namespace app
 {
 	const CEnumTags& GetTags_MsgType( void )
 	{
-		static const CEnumTags s_tags( _T("* Error|! Warning|- Info") );
+		static const CEnumTags s_tags( _T("* Error|! Warning|- Info"), _T("* ERROR|! WARNING|") );
 		return s_tags;
 	}
 

@@ -28,6 +28,7 @@ public:
 	void Clear( void );
 
 	static utl::ExecMode GetExecMode( void ) { return s_execMode; }
+	static std::tstring PrefixExecMessage( const std::tstring& message );		// prefixes the message with the current ExecMode (do/undo/redo)
 
 	// utl::ICommandExecutor interface
 	virtual bool Execute( utl::ICommand* pCmd );

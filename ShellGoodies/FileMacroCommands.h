@@ -3,13 +3,16 @@
 #pragma once
 
 #include "AppCommands.h"
+#include "utl/AppTools.h"
 #include "utl/Path.h"
 #include "utl/RuntimeException.h"
 
 
 namespace cmd
 {
+	class CBaseFileCmd;
 	class CUserFeedbackException;
+	typedef std::pair<std::tstring, app::MsgType> TMessagePair;
 
 	enum UserFeedback { Abort, Retry, Ignore };
 
@@ -39,9 +42,25 @@ namespace cmd
 
 		virtual void Serialize( CArchive& archive ) override;
 	private:
-		enum Mode { ExecuteMode, UnexecuteMode };
+		enum CmdMode { ExecuteMode, UnexecuteMode };
 
-		void ExecuteMacro( Mode mode );
+		void ExecuteMacro( CmdMode cmdMode );
+
+		struct CExecMessage		// executes the leaf command (ExecuteMode) or reverse command (UnexecuteMode), and stores the aggregate balloon message
+		{
+			CExecMessage( void ) : m_msgType( app::Info ), m_pLeafCmd( NULL ), m_cmdPos( 0 ) { m_message.reserve( 512 ); }
+
+			CBaseFileCmd* StoreLeafCmd( CBaseFileCmd* pLeafCmd, CmdMode cmdMode );		// returns the target command
+			void AppendLeafMessage( void );
+		public:
+			// aggregate balloon message and type
+			std::tstring m_message;
+			app::MsgType m_msgType;
+		private:
+			CBaseFileCmd* m_pLeafCmd;
+			std::auto_ptr<CBaseFileCmd> m_pReverseLeafCmd;
+			size_t m_cmdPos;
+		};
 	private:
 		persist CTime m_timestamp;
 	};
@@ -56,14 +75,22 @@ namespace cmd
 	public:
 		void ExecuteHandle( void ) throws_( CUserFeedbackException );
 
+		const TMessagePair& GetExecMessage( void ) const { return m_execMessage; }
+		void SetExecMessage( const TMessagePair& execMessage ) { m_execMessage = execMessage; }
+
 		// base overrides
 		virtual bool Unexecute( void ) override;
-		virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const = 0;
+		virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) = 0;
+	protected:
+		virtual void RecordMessage( const std::tstring& coreMessage, app::MsgType msgType ) override;
 	private:
-		UserFeedback HandleFileError( CException* pExc, const fs::CPath& srcPath ) const;
+		UserFeedback HandleFileError( CException* pExc, const fs::CPath& srcPath );
 		static std::tstring ExtractMessage( CException* pExc, const fs::CPath& srcPath );
 	public:
-		abstract persist fs::CPath m_srcPath;		// persistent for some commands
+		abstract persist fs::CPath m_srcPath;	// persistent for some commands
+	private:
+		// transient
+		TMessagePair m_execMessage;				// stored for aggregate message in the macro
 	private:
 		static const TCHAR s_fmtError[];
 	};
@@ -83,7 +110,7 @@ public:
 	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
 	virtual bool Execute( void ) override;
 	virtual bool IsUndoable( void ) const override;
-	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const override;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override;
 
 	// base overrides
 	virtual void Serialize( CArchive& archive ) override;
@@ -108,7 +135,7 @@ public:
 	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
 	virtual bool Execute( void ) override;
 	virtual bool IsUndoable( void ) const override;
-	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const override;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override;
 
 	// base overrides
 	virtual void Serialize( CArchive& archive ) override;

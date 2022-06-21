@@ -6,6 +6,7 @@
 #include "RenameItem.h"
 #include "FileService.h"
 #include "TextAlgorithms.h"
+#include "AppCommands.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/Logger.h"
 #include "utl/PathGenerator.h"
@@ -35,6 +36,16 @@ namespace ut
 			(*itItem)->RefDestPath() = destParts.MakePath();
 		}
 	}
+
+
+	class CScopedCmdLogger
+	{
+	public:
+		CScopedCmdLogger( CLogger* pLogger ) : m_pOldLogger( cmd::CBaseSerialCmd::s_pLogger ) { cmd::CBaseSerialCmd::s_pLogger = pLogger; }
+		~CScopedCmdLogger() { cmd::CBaseSerialCmd::s_pLogger = m_pOldLogger; }
+	private:
+		CLogger* m_pOldLogger;
+	};
 }
 
 
@@ -126,7 +137,7 @@ void CRenameFilesTests::Run( void )
 {
 	__super::Run();
 
-	cmd::CScopedLogger scopeTestLogger( &ut::GetTestLogger() );
+	ut::CScopedCmdLogger scopeTestLogger( &ut::GetTestLogger() );
 
 	TestRenameSimple();
 	TestRenameCollisionExisting();

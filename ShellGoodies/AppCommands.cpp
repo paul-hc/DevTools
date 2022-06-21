@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "AppCommands.h"
 #include "Application.h"
+#include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/SystemTray_fwd.h"
@@ -100,6 +101,33 @@ namespace cmd
 
 namespace cmd
 {
+	void PrefixMsgTypeLine( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType )
+	{
+		ASSERT_PTR( pOutput );
+		stream::Tag( *pOutput, app::GetTags_MsgType().FormatKey( msgType ), NULL );
+		stream::Tag( *pOutput, coreMessage, _T("\n") );
+	}
+
+	void SuffixMsgType( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType )
+	{
+		ASSERT_PTR( pOutput );
+		stream::Tag( *pOutput, coreMessage, _T(" ") );
+		stream::Tag( *pOutput, app::GetTags_MsgType().FormatKey( msgType ), _T(" ") );
+	}
+
+	void FormatLogMessage( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType )
+	{
+		ASSERT_PTR( pOutput );
+
+		static const CEnumTags s_fmtMsgTags( _T("* %s\n  ERROR|! %s  WARNING|%s") );
+
+		*pOutput = str::Format( s_fmtMsgTags.FormatUi( msgType ).c_str(), coreMessage.c_str() );
+	}
+}
+
+
+namespace cmd
+{
 	// CBaseSerialCmd implementation
 
 	IMPLEMENT_DYNAMIC( CBaseSerialCmd, CObject )
@@ -119,21 +147,35 @@ namespace cmd
 		CCommand::Serialize( archive );		// dis-ambiguate from CObject::Serialize()
 	}
 
-	bool CBaseSerialCmd::LogMessage( const std::tstring& message, app::MsgType msgType )
+	std::tstring CBaseSerialCmd::FormatLogMessage( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle /*= NULL*/ ) const
 	{
-		sys_tray::ShowBalloonMessage( message, NULL, msgType );
+		std::tstring message = pTitle != NULL ? pTitle : FormatExecTitle().c_str();
 
-		if ( s_pLogger != NULL )
-			s_pLogger->LogString( message );
+		if ( utl::Contains( coreMessage, _T('\n') ) )		// multi-line?
+			cmd::PrefixMsgTypeLine( &message, coreMessage, msgType );
+		else
+			cmd::SuffixMsgType( &message, coreMessage, msgType );
 
-		return s_pLogger != NULL;
+		return message;
 	}
 
-	void CBaseSerialCmd::LogExecution( const std::tstring& message, app::MsgType msgType )
+	void CBaseSerialCmd::RecordMessage( const std::tstring& coreMessage, app::MsgType msgType )
 	{
-		std::tstring execMessage = utl::GetTags_ExecMode().FormatUi( CCommandModel::GetExecMode() );
-		stream::Tag( execMessage, message, _T(": ") );
+		std::tstring title = FormatExecTitle();
 
-		LogMessage( execMessage, msgType );
+		ShowBalloon( coreMessage, msgType, title.c_str() );
+		LogOutput( FormatLogMessage( coreMessage, msgType, title.c_str() ) );
+	}
+
+
+	bool CBaseSerialCmd::ShowBalloon( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle /*= NULL*/ ) const
+	{
+		return sys_tray::ShowBalloonMessage( coreMessage, pTitle != NULL ? pTitle : FormatExecTitle().c_str(), msgType );
+	}
+
+	void CBaseSerialCmd::LogOutput( const std::tstring& message )
+	{
+		if ( s_pLogger != NULL )
+			s_pLogger->LogString( message );
 	}
 }

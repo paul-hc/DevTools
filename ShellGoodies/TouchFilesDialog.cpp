@@ -7,6 +7,7 @@
 #include "EditingCommands.h"
 #include "GeneralOptions.h"
 #include "Application.h"
+#include "AppCommands.h"
 #include "resource.h"
 #include "utl/Command.h"
 #include "utl/EnumTags.h"

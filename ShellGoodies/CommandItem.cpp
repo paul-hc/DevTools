@@ -67,11 +67,29 @@ CToolStrip& CCommandItem::GetCmdTypeStrip( void )
 int CCommandItem::LookupImageIndex( utl::ICommand* pCmd )
 {
 	const CToolStrip& strip = GetCmdTypeStrip();
-	size_t imagePos = strip.FindButtonPos( pCmd != NULL ? pCmd->GetTypeID() : UINT_MAX );
+	size_t imagePos = strip.FindButtonPos( ExtractCmdID( pCmd ) );
 
 	if ( utl::npos == imagePos )
 		imagePos = strip.FindButtonPos( UINT_MAX );
 
 	ENSURE( imagePos < strip.GetButtonIds().size() );
 	return static_cast<int>( imagePos );
+}
+
+UINT CCommandItem::ExtractCmdID( utl::ICommand* pCmd )
+{
+	if ( NULL == pCmd )
+		return UINT_MAX;
+
+	if ( CMacroCommand::MacroCmdId == pCmd->GetTypeID() )		// macro ID with undefined image?
+	{
+		const CMacroCommand* pMacroCmd = checked_static_cast<const CMacroCommand*>( pCmd );
+
+		if ( pMacroCmd->GetMainCmd() != NULL )
+			pCmd = pMacroCmd->GetMainCmd();						// use the main command's image
+		else if ( !pMacroCmd->IsEmpty() )
+			pCmd = pMacroCmd->GetSubCommands().front();			// use the first command's image
+	}
+
+	return pCmd->GetTypeID();
 }

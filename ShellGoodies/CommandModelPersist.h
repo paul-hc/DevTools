@@ -5,7 +5,7 @@
 #include <deque>
 #include <iosfwd>
 #include "utl/ICommand.h"
-#include "AppCommands.h"
+#include "AppCommands_fwd.h"
 
 
 class CCommandModel;

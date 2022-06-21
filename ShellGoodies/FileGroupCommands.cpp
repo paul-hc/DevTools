@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "utl/AppTools.h"
 #include "utl/Algorithms.h"
+#include "utl/CommandModel.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/FileContent.h"
@@ -11,6 +12,7 @@
 #include "utl/Logger.h"
 #include "utl/RuntimeException.h"
 #include "utl/SerializeStdTypes.h"
+#include "utl/StringUtilities.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/WndUtils.h"
@@ -23,8 +25,6 @@
 namespace cmd
 {
 	// CBaseFileGroupCmd implementation
-
-	const TCHAR CBaseFileGroupCmd::s_lineEnd[] = _T("\n");
 
 	CBaseFileGroupCmd::CBaseFileGroupCmd( CommandType cmdType /*= CommandType()*/, const std::vector< fs::CPath >& filePaths /*= std::vector< fs::CPath >()*/,
 										  const CTime& timestamp /*= CTime::GetCurrentTime()*/ )
@@ -54,24 +54,47 @@ namespace cmd
 
 	void CBaseFileGroupCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const override
 	{
-		utl::Assign( rLines, m_filePaths, func::tor::StringOf() );
+		AddActualCmdDetail( rLines );
+		utl::Append( rLines, m_filePaths, func::tor::StringOf() );
+	}
+
+	void CBaseFileGroupCmd::SetOriginCmd( CBaseFileGroupCmd* pOriginCmd )
+	{
+		__super::SetOriginCmd( pOriginCmd );
+
+		if ( pOriginCmd != NULL )
+			m_timestamp = pOriginCmd->GetTimestamp();		// copy the origin's timestamp
 	}
 
 	std::tstring CBaseFileGroupCmd::Format( utl::Verbosity verbosity ) const override
 	{
-		std::tstring text = FormatCmdTag( this, verbosity );
-		const TCHAR* pSep = GetSeparator( verbosity );
+		CBaseFileGroupCmd* pCmd = GetReportingCmdAs<CBaseFileGroupCmd>();
+		std::tstring text = cmd::FormatCmdTag( pCmd, verbosity );
+		const TCHAR* pSep = cmd::GetSeparator( verbosity );
 
 		if ( verbosity != utl::Brief )
-			stream::Tag( text, str::Format( _T("[%d]"), m_filePaths.size() ), pSep );
+			stream::Tag( text, str::Format( _T("(%d)"), m_filePaths.size() ), pSep );
 
 		if ( utl::DetailFields == verbosity )
-			stream::Tag( text, GetDestHeaderInfo(), pSep );
+			stream::Tag( text, pCmd->GetDestHeaderInfo(), pSep );
 
-		if ( m_timestamp.GetTime() != 0 )
-			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ), pSep );
+		if ( pCmd->GetTimestamp().GetTime() != 0 )
+			stream::Tag( text,
+				str::Format( _T("[%s]"), time_utl::FormatTimestamp( pCmd->GetTimestamp(), verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ).c_str() ),
+				pSep
+			);
 
 		return text;
+	}
+
+	bool CBaseFileGroupCmd::AddActualCmdDetail( std::vector< std::tstring >& rLines ) const
+	{
+		if ( !HasOriginCmd() || GetOriginCmd()->GetTypeID() == GetTypeID() )		// no origin command or origin of the same type?
+			return false;			// no detail decoration line necessary
+
+		// add a detail line with the actual action: e.g. "DELETE_FILES:" for CopyPasteFilesAsBackup
+		rLines.push_back( cmd::FormatCmdTag( this, utl::Brief ) + _T(":") );		// e.g. "DELETE_FILES:" - tag only, no timestamp, etc
+		return true;
 	}
 
 	void CBaseFileGroupCmd::Serialize( CArchive& archive ) override
@@ -92,44 +115,19 @@ namespace cmd
 		return std::tstring();
 	}
 
-	void CBaseFileGroupCmd::QueryFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths )
-	{
-		ASSERT( srcFilePaths.size() == destFilePaths.size() );
-
-		rLines.clear();
-		rLines.reserve( srcFilePaths.size() );
-
-		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
-			rLines.push_back( fmt::FormatRenameEntry( srcFilePaths[ i ], destFilePaths[ i ] ) );
-	}
-
-	bool CBaseFileGroupCmd::HandleExecuteResult( const CWorkingSet& workingSet, const std::tstring& groupDetails )
+	bool CBaseFileGroupCmd::HandleExecuteResult( const CWorkingSet& workingSet )
 	{
 		if ( s_pErrorObserver != NULL )
 			for ( std::vector< fs::CPath >::const_iterator itBadFilePath = workingSet.m_badFilePaths.begin(); itBadFilePath != workingSet.m_badFilePaths.end(); ++itBadFilePath )
 				s_pErrorObserver->OnFileError( *itBadFilePath, str::Format( _T("Cannot access file: %s"), itBadFilePath->GetPtr() ) );
 
-		std::tstring message = Format( utl::Detailed );
+		app::MsgType msgType = workingSet.GetOutcomeMsgType();
+		std::tstring coreMessage;
 
-		if ( !workingSet.m_succeeded )
-			stream::Tag( message, _T(" * ERROR"), s_lineEnd );
-		stream::Tag( message, groupDetails, s_lineEnd );
+		workingSet.QueryGroupDetails( coreMessage, this );
+		RecordMessage( coreMessage, msgType );
 
-		if ( !workingSet.m_succeeded )
-			message += _T("\n ERROR");
-		else if ( !workingSet.m_badFilePaths.empty() )
-		{
-			stream::Tag( message, str::Format( _T(" WARNING: Cannot access %d files:"), workingSet.m_badFilePaths.size() ), s_lineEnd );
-			stream::Tag( message, str::Join( workingSet.m_badFilePaths, s_lineEnd ), s_lineEnd );
-		}
-
-		app::MsgType msgType = workingSet.m_succeeded ? app::Info : app::Error;
-		if ( workingSet.m_succeeded && SomeExist == workingSet.m_existStatus )
-			msgType = app::Warning;
-
-		LogExecution( message, msgType );
-
-		if ( !workingSet.m_succeeded )
+		if ( app::Error == msgType )
 			return false;
 
 		NotifyObservers();
@@ -139,8 +137,10 @@ namespace cmd
 
 	// CBaseFileGroupCmd::CWorkingSet implementation
 
+	const TCHAR CBaseFileGroupCmd::CWorkingSet::s_lineEnd[] = _T("\n");
+
 	CBaseFileGroupCmd::CWorkingSet::CWorkingSet( const CBaseFileGroupCmd* pCmd, fs::AccessMode accessMode /*= fs::Read*/ )
-		: m_existStatus( AllExist )
+		: m_existStatus( app::Info )
 		, m_succeeded( false )
 	{
 		ASSERT_PTR( pCmd );
@@ -157,12 +157,12 @@ namespace cmd
 				m_badFilePaths.push_back( *itFilePath );
 
 		if ( m_currFilePaths.size() != filePaths.size() )
-			m_existStatus = !m_currFilePaths.empty() ? SomeExist : NoneExist;
+			m_existStatus = !m_currFilePaths.empty() ? app::Warning : app::Error;
 	}
 
 	CBaseFileGroupCmd::CWorkingSet::CWorkingSet( const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths,
 												 fs::AccessMode accessMode /*= fs::Read*/ )
-		: m_existStatus( AllExist )
+		: m_existStatus( app::Info )
 		, m_succeeded( false )
 	{
 		REQUIRE( !srcFilePaths.empty() && srcFilePaths.size() == destFilePaths.size() );
@@ -184,12 +184,45 @@ namespace cmd
 		}
 
 		if ( m_currFilePaths.size() != srcFilePaths.size() )
-			m_existStatus = !m_currFilePaths.empty() ? SomeExist : NoneExist;
+			m_existStatus = !m_currFilePaths.empty() ? app::Warning : app::Error;
 	}
 
 	bool CBaseFileGroupCmd::CWorkingSet::IsBadFilePath( const fs::CPath& filePath ) const
 	{
 		return !utl::Contains( m_badFilePaths, filePath );
+	}
+
+	void CBaseFileGroupCmd::CWorkingSet::QueryGroupDetails( std::tstring& rDetails, const CBaseFileGroupCmd* pCmd ) const
+	{
+		ASSERT_PTR( pCmd );
+
+		std::vector< std::tstring > detailLines;
+		pCmd->QueryDetailLines( detailLines );			// decorated pairs for certain commands
+
+		std::vector< std::tstring >::iterator itBadPaths = detailLines.end();
+
+		if ( !m_badFilePaths.empty() )
+			itBadPaths = std::stable_partition( detailLines.begin(), detailLines.end(), HasValidPathPred( this ) );		// partition in 2 parts: valid path lines + bad path lines
+
+		std::for_each( detailLines.begin(), itBadPaths, func::AppendLine( &rDetails, s_lineEnd ) );
+
+		if ( itBadPaths != detailLines.end() )
+		{
+			stream::Tag( rDetails, _T(" WARNING: Cannot access files:"), s_lineEnd );
+			std::for_each( itBadPaths, detailLines.end(), func::AppendLine( &rDetails, s_lineEnd ) );
+		}
+	}
+
+
+	// CBaseFileGroupCmd::HasValidPathPred implementation
+
+	bool CBaseFileGroupCmd::HasValidPathPred::operator()( const std::tstring& detailLine ) const
+	{
+		for ( std::vector< fs::CPath >::const_iterator itBadFilePath = m_pWorkingSet->m_badFilePaths.begin(); itBadFilePath != m_pWorkingSet->m_badFilePaths.end(); ++itBadFilePath )
+			if ( !str::IsEmpty( path::Find( detailLine.c_str(), itBadFilePath->GetPtr() ) ) )		// detail line contains a bad path?
+				return false;
+
+		return true;
 	}
 
 
@@ -234,7 +267,8 @@ namespace cmd
 		std::vector< fs::CPath > destFilePaths;
 		MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
 
-		QueryFilePairLines( rLines, GetSrcFilePaths(), destFilePaths );
+		AddActualCmdDetail( rLines );
+		AppendFilePairLines( rLines, GetSrcFilePaths(), destFilePaths );
 	}
 
 	std::tstring CBaseDeepTransferFilesCmd::GetDestHeaderInfo( void ) const override
@@ -258,6 +292,16 @@ namespace cmd
 
 		fs::CPath targetFullPath = m_destDirPath / destRelPath / srcFilePath.GetFilename();
 		return targetFullPath;
+	}
+
+	void CBaseDeepTransferFilesCmd::AppendFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths )
+	{
+		ASSERT( srcFilePaths.size() == destFilePaths.size() );
+
+		rLines.reserve( rLines.size() + srcFilePaths.size() );
+
+		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
+			rLines.push_back( fmt::FormatRenameEntry( srcFilePaths[ i ], destFilePaths[ i ] ) );
 	}
 
 
@@ -290,7 +334,8 @@ namespace cmd
 
 	void CBaseShallowTransferFilesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const override
 	{
-		QueryFilePairLines( rLines, GetSrcFilePaths(), m_destFilePaths );
+		AddActualCmdDetail( rLines );
+		AppendFilePairLines( rLines, GetSrcFilePaths(), m_destFilePaths );
 	}
 
 	std::tstring CBaseShallowTransferFilesCmd::GetDestHeaderInfo( void ) const override
@@ -313,6 +358,16 @@ namespace cmd
 		fs::CFileBackup backup( srcFilePath, m_destDirPath, fs::FileSizeAndCrc32 );
 
 		return backup.MakeBackupFilePath();
+	}
+
+	void CBaseShallowTransferFilesCmd::AppendFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths )
+	{
+		ASSERT( srcFilePaths.size() == destFilePaths.size() );
+
+		rLines.reserve( rLines.size() + srcFilePaths.size() );
+
+		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
+			rLines.push_back( fmt::FormatRenameEntryRelativeDest( srcFilePaths[ i ], destFilePaths[ i ] ) );
 	}
 }
 
@@ -341,13 +396,13 @@ bool CDeleteFilesCmd::Execute( void ) override
 		else if ( shell::AnyOperationAborted() )
 			throw CUserAbortedException();			// go silent if cancelled by user
 
-	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+	return HandleExecuteResult( workingSet );
 }
 
 bool CDeleteFilesCmd::Unexecute( void ) override
 {
 	CUndeleteFilesCmd undoCmd( GetFilePaths() );
-	undoCmd.CopyTimestampOf( *this );
+	undoCmd.SetOriginCmd( this );
 
 	if ( undoCmd.Execute() )
 	{
@@ -370,7 +425,7 @@ bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void ) override
 	workingSet.m_badFilePaths.swap( errorFilePaths );
 	workingSet.m_succeeded = restoredCount != 0;
 
-	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+	return HandleExecuteResult( workingSet );
 }
 
 
@@ -406,7 +461,7 @@ bool CCopyFilesCmd::Execute( void ) override
 		else if ( shell::AnyOperationAborted() )
 			throw CUserAbortedException();			// go silent if cancelled by user
 
-	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+	return HandleExecuteResult( workingSet );
 }
 
 bool CCopyFilesCmd::Unexecute( void ) override
@@ -418,7 +473,7 @@ bool CCopyFilesCmd::Unexecute( void ) override
 	fs::QueryFolderPaths( destFolderPaths, destFilePaths, true );		// store all dest folders for post-delete cleanup
 
 	CDeleteFilesCmd undoCmd( destFilePaths );		// delete destination files
-	undoCmd.CopyTimestampOf( *this );
+	undoCmd.SetOriginCmd( this );
 	ClearFlag( undoCmd.m_opFlags, FOF_ALLOWUNDO );
 
 	if ( undoCmd.Execute() )
@@ -427,7 +482,7 @@ bool CCopyFilesCmd::Unexecute( void ) override
 		{
 			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
 
-			LogMessage( message, app::Info );
+			LogOutput( message );
 			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
 		}
 		return true;
@@ -469,7 +524,7 @@ bool CMoveFilesCmd::Execute( void ) override
 		else if ( shell::AnyOperationAborted() )
 			throw CUserAbortedException();			// go silent if cancelled by user
 
-	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+	return HandleExecuteResult( workingSet );
 }
 
 bool CMoveFilesCmd::Unexecute( void ) override
@@ -481,8 +536,9 @@ bool CMoveFilesCmd::Unexecute( void ) override
 	fs::QueryFolderPaths( destFolderPaths, destFilePaths, true );		// store all dest folders for post-delete cleanup
 
 	CMoveFilesCmd undoCmd( destFilePaths, GetSrcCommonDirPath() );		// move back destination files to source common directory
+
+	undoCmd.SetOriginCmd( this );
 	undoCmd.SetTypeID( GetCmdType() );
-	undoCmd.CopyTimestampOf( *this );
 
 	if ( undoCmd.Execute() )
 	{
@@ -490,7 +546,7 @@ bool CMoveFilesCmd::Unexecute( void ) override
 		{
 			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
 
-			LogMessage( message, app::Info );
+			LogOutput( message );
 			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
 		}
 		return true;
@@ -551,7 +607,7 @@ bool CCreateFoldersCmd::Execute( void ) override
 		if ( createdCount != GetSrcFolderPaths().size() )	// created fewer directories?
 			app::ReportError( str::Format( _T("Created %d new folders out of %d total folders on clipboard."), createdCount, GetSrcFolderPaths().size() ), app::Info );
 
-	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+	return HandleExecuteResult( workingSet );
 }
 
 bool CCreateFoldersCmd::Unexecute( void ) override
@@ -561,7 +617,8 @@ bool CCreateFoldersCmd::Unexecute( void ) override
 	fs::SortByPathDepth( destFolderPaths, false );		// for deletion order: sub-folder -> folder
 
 	CDeleteFilesCmd undoCmd( destFolderPaths );			// delete destination files
-	undoCmd.CopyTimestampOf( *this );
+
+	undoCmd.SetOriginCmd( this );
 	ClearFlag( undoCmd.m_opFlags, FOF_ALLOWUNDO );
 
 	if ( undoCmd.Execute() )
@@ -570,7 +627,7 @@ bool CCreateFoldersCmd::Unexecute( void ) override
 		{
 			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
 
-			LogMessage( message, app::Info );
+			LogOutput( message );
 			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
 		}
 		return true;
@@ -608,14 +665,14 @@ bool CCopyPasteFilesAsBackupCmd::Execute( void ) override
 		else if ( shell::AnyOperationAborted() )
 			throw CUserAbortedException();			// go silent if cancelled by user
 
-	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+	return HandleExecuteResult( workingSet );
 }
 
 bool CCopyPasteFilesAsBackupCmd::Unexecute( void ) override
 {
 	CDeleteFilesCmd undoCmd( m_destFilePaths );		// delete destination files
 
-	undoCmd.CopyTimestampOf( *this );
+	undoCmd.SetOriginCmd( this );
 	ClearFlag( undoCmd.m_opFlags, FOF_ALLOWUNDO );
 	SetFlag( undoCmd.m_opFlags, FOF_NOCONFIRMATION );
 
@@ -657,7 +714,7 @@ bool CCutPasteFilesAsBackupCmd::Execute( void ) override
 		else if ( shell::AnyOperationAborted() )
 			throw CUserAbortedException();			// go silent if cancelled by user
 
-	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+	return HandleExecuteResult( workingSet );
 }
 
 bool CCutPasteFilesAsBackupCmd::Unexecute( void ) override
@@ -667,7 +724,7 @@ bool CCutPasteFilesAsBackupCmd::Unexecute( void ) override
 
 	CCutPasteFilesAsBackupCmd undoCmd( m_destFilePaths, srcCommonDirPath, srcFilePaths );		// move back destination files to source common directory
 
-	undoCmd.CopyTimestampOf( *this );
+	undoCmd.SetOriginCmd( this );
 
 	return undoCmd.Execute();
 }

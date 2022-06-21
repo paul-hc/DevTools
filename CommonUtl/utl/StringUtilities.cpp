@@ -18,13 +18,34 @@ namespace str
 	template<> const char* StdDelimiters< char >( void ) { return " \t"; }
 	template<> const wchar_t* StdDelimiters< wchar_t >( void ) { return L" \t"; }
 
+	TCHAR* CopyTextToBuffer( TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] /*= g_ellipsis*/ )
+	{
+		if ( pText != NULL )
+		{
+			size_t maxLen = bufferSize - 1;
+			size_t textLen = str::GetLength( pText );
+			size_t suffixLen = str::GetLength( suffix );
+
+			if ( textLen > maxLen && suffixLen != 0 )
+			{
+				_tcsncpy( pDestBuffer, pText, maxLen - suffixLen );
+				_tcscat( pDestBuffer, suffix );
+			}
+			else
+				_tcsncpy( pDestBuffer, pText, maxLen );
+		}
+		else
+			pDestBuffer[ 0 ] = _T('\0');
+
+		return pDestBuffer;
+	}
 
 	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/, bool atEnd /*= true*/ )
 	{
 		size_t suffixLen = str::GetLength( suffix );
 		ASSERT( suffixLen <= maxLen );
 
-		if ( rText.length() + suffixLen > maxLen )
+		if ( rText.length() > maxLen )
 			if ( atEnd )
 			{
 				rText.resize( maxLen - suffixLen );			// "something..."

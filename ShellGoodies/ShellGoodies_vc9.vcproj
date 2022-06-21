@@ -702,6 +702,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\AppCommands_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\CommandModelPersist.cpp"
 					>
 				</File>

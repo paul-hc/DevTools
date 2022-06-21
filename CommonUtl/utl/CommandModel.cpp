@@ -173,3 +173,10 @@ bool CCommandModel::CanRedo( void ) const
 {
 	return !m_redoStack.empty();
 }
+
+std::tstring CCommandModel::PrefixExecMessage( const std::tstring& message )
+{
+	std::tstring execMessage = utl::GetTags_ExecMode().FormatUi( CCommandModel::GetExecMode() );
+	stream::Tag( execMessage, message, _T(": ") );
+	return execMessage;
+}

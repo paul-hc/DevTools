@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/Subject.h"
-#include "AppCommands.h"
+#include "AppCommands_fwd.h"
 
 
 class CReportListControl;

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Command.h"
+#include "CommandModel.h"
 #include "Algorithms.h"
 #include "EnumTags.h"
 #include "Serialization.h"
@@ -18,12 +19,21 @@
 CBaseCommand::CBaseCommand( int typeId, utl::ISubject* pSubject )
 	: m_typeId( typeId )
 	, m_pSubject( pSubject )
+	, m_pOriginCmd( NULL )
 {
 }
 
 int CBaseCommand::GetTypeID( void ) const override
 {
 	return m_typeId;
+}
+
+std::tstring CBaseCommand::FormatExecTitle( utl::Verbosity verbosity /*= utl::Detailed*/ ) const
+{
+	if ( HasOriginCmd() )		// this is a temporary command used to unexecute the origin command execute action?
+		return m_pOriginCmd->FormatExecTitle( verbosity );
+
+	return CCommandModel::PrefixExecMessage( Format( verbosity ) );
 }
 
 void CBaseCommand::NotifyObservers( void )
@@ -52,6 +62,9 @@ CCommand::~CCommand()
 
 std::tstring CCommand::Format( utl::Verbosity verbosity ) const override
 {
+	if ( HasOriginCmd() )
+		return GetOriginCmd()->Format( verbosity );
+
 	ASSERT_PTR( m_pCmdTags );
 	return m_pCmdTags->Format( GetTypeID(), verbosity != utl::Brief ? CEnumTags::UiTag : CEnumTags::KeyTag );
 }
@@ -92,6 +105,9 @@ void CMacroCommand::AddCmd( utl::ICommand* pSubCmd )
 
 std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const override
 {
+	if ( HasOriginCmd() )
+		return GetOriginCmd()->Format( verbosity );
+
 	if ( m_pMainCmd != NULL )
 		return m_pMainCmd->Format( verbosity );			// main commmand provides all the info
 

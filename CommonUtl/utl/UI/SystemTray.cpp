@@ -204,7 +204,7 @@ void CSystemTray::OnOwnerWndStatusChanged( void )
 	if ( m_pOwnerCallback != NULL )
 		if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
 			pContextMenu->SetDefaultItem( isMinimized
-				? static_cast<UINT>( -1 )					// prevent Restore on double-click, since we restore on single L-click
+				? UINT_MAX									// prevent Restore on double-click, since we restore on single L-click
 				: ID_APP_MINIMIZE
 			);
 

@@ -618,6 +618,12 @@ void CStringTests::TestStringConversion( void )
 	ASSERT_EQUAL_STR( _T("pre"), io );
 
 	ASSERT_EQUAL_STR( _T("proposition"), str::FormatTruncate( _T("proposition"), 256 ) );
+
+	ASSERT_EQUAL( 11, str::GetLength( _T("proposition") ) );
+	ASSERT_EQUAL_STR( _T("proposition"), str::FormatTruncate( _T("proposition"), 11 ) );
+	ASSERT_EQUAL_STR( _T("proposit..."), str::FormatTruncate( _T("propositionX"), 11 ) );
+	ASSERT_EQUAL_STR( _T("proposit..."), str::FormatTruncate( _T("propositionXY"), 11 ) );
+
 	ASSERT_EQUAL_STR( _T("prop..."), str::FormatTruncate( _T("proposition"), 7 ) );
 	ASSERT_EQUAL_STR( _T("...tion"), str::FormatTruncate( _T("proposition"), 7, _T("..."), false ) );
 	ASSERT_EQUAL_STR( _T("propETC"), str::FormatTruncate( _T("proposition"), 7, _T("ETC") ) );

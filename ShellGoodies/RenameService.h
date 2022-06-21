@@ -4,7 +4,7 @@
 
 #include "utl/Path.h"
 #include "utl/PathRenamePairs.h"
-#include "AppCommands.h"
+#include "AppCommands_fwd.h"
 
 
 class CRenameItem;

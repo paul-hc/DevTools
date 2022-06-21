@@ -125,7 +125,8 @@ namespace ui
 	// takes advantage of safe saving through a CMirrorFile provided by CDocument; redirects to m_pObject->Serialize()
 
 	CAdapterDocument::CAdapterDocument( serial::IStreamable* pStreamable, const fs::CPath& docPath )
-		: m_pStreamable( pStreamable )
+		: CDocument()
+		, m_pStreamable( pStreamable )
 		, m_pObject( NULL )
 	{
 		ASSERT_PTR( m_pStreamable );
@@ -134,7 +135,8 @@ namespace ui
 	}
 
 	CAdapterDocument::CAdapterDocument( CObject* pObject, const fs::CPath& docPath )
-		: m_pStreamable( NULL )
+		: CDocument()
+		, m_pStreamable( NULL )
 		, m_pObject( pObject )
 	{
 		ASSERT_PTR( m_pObject );

@@ -3,13 +3,11 @@
 #pragma once
 
 #include "Application_fwd.h"
-#include "AppCommands.h"
 #include "FileModel.h"
 
 
 class CDropFilesModel;
 class CBaseMenuBuilder;
-class CSystemTray;
 class CFlagTags;
 interface IFileEditor;
 
@@ -74,7 +72,6 @@ private:
 	IContextMenu* m_pContextMenu;
 	CFileModel m_fileModel;								// files selected in Explorer
 	std::auto_ptr<CDropFilesModel> m_pDropFilesModel;	// files cached (copied or cut) to clipboard (CF_HDROP)
-	std::auto_ptr<CSystemTray> m_pSystemTray;			// system-tray shared popup window: hidden by default, used to display balloon notifications
 
 	static const CMenuCmdInfo s_rootCommands[];			// commands to add directly to the context menu (not in a sub-menu)
 	static const CMenuCmdInfo s_moreCommands[];			// commands to add in sub-menus, or depending on current context

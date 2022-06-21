@@ -37,6 +37,7 @@ public:
 private:
 	static CToolStrip& GetCmdTypeStrip( void );
 	static int LookupImageIndex( utl::ICommand* pCmd );
+	static UINT ExtractCmdID( utl::ICommand* pCmd );
 private:
 	utl::ICommand* m_pCmd;
 	int m_imageIndex;

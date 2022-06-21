@@ -2,7 +2,7 @@
 #define EditingCommands_h
 #pragma once
 
-#include "AppCommands.h"
+#include "AppCommands_fwd.h"
 
 
 class CFileModel;

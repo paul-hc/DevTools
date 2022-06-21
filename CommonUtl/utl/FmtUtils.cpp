@@ -144,6 +144,12 @@ namespace fmt
 		return srcPath.Get() + s_pairSep + destPath.GetFilenamePtr();
 	}
 
+	std::tstring FormatRenameEntryRelativeDest( const fs::CPath& srcPath, const fs::CPath& destPath )
+	{
+		std::tstring relativeDestPath = path::StripCommonPrefix( destPath.GetPtr(), srcPath.GetParentPath().GetPtr() );
+		return srcPath.Get() + s_pairSep + relativeDestPath;
+	}
+
 	bool ParseRenameEntry( fs::CPath& rSrcPath, fs::CPath& rDestPath, const str::TStringRange& textRange )
 	{
 		Range<size_t> sepPos;

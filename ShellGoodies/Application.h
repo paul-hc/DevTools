@@ -2,13 +2,16 @@
 #define Application_h
 #pragma once
 
-#include "utl/CommandModel.h"
 #include "utl/Logger.h"
 #include "utl/UI/BaseApp.h"
 #include "Application_fwd.h"
 
 
 class CAppCmdService;
+class CCommandModel;
+class CSystemTray;
+class CTrayIcon;
+namespace svc { interface ICommandService; }
 
 
 class CApplication : public CBaseApp<CWinApp>
@@ -19,8 +22,10 @@ public:
 public:
 	svc::ICommandService* GetCommandService( void ) const;
 	const CCommandModel* GetCommandModel( void ) const;
+	CTrayIcon* GetMessageTrayIcon( void );				// lazy initialization
 private:
 	std::auto_ptr<CAppCmdService> m_pCmdSvc;
+	std::auto_ptr<CSystemTray> m_pSystemTray;			// system-tray shared popup window: hidden by default, used to display balloon notifications
 
 	// generated stuff
 public:

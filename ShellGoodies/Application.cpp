@@ -7,12 +7,14 @@
 #include "test/RenameFilesTests.h"
 #include "test/CommandModelSerializerTests.h"
 #include "utl/EnumTags.h"
-#include "utl/UI/BaseApp.hxx"
+#include "utl/UI/SystemTray.h"
 #include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/UI/BaseApp.hxx"
 
 
 namespace ut
@@ -74,6 +76,8 @@ int CApplication::ExitInstance( void )
 			m_pCmdSvc->SaveCommandModel();
 
 		m_pCmdSvc.reset();
+		m_pSystemTray.reset();
+
 		CGeneralOptions::Instance().SaveToRegistry();
 	}
 
@@ -113,6 +117,16 @@ const CCommandModel* CApplication::GetCommandModel( void ) const
 {
 	ASSERT_PTR( m_pCmdSvc.get() );
 	return m_pCmdSvc->GetCommandModel();
+}
+
+CTrayIcon* CApplication::GetMessageTrayIcon( void )
+{
+	if ( NULL == m_pSystemTray.get() )
+	{	// create once the system-tray message icon
+		m_pSystemTray.reset( new CSystemTrayWnd() );							// hidden popup tray icon host
+		return m_pSystemTray->CreateTrayIcon( IDR_MESSAGE_TRAY_ICON, false );	// auto-hide message tray icon
+	}
+	return m_pSystemTray->FindIcon( IDR_MESSAGE_TRAY_ICON );
 }
 
 BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )

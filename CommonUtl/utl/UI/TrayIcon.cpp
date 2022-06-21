@@ -8,6 +8,7 @@
 #include "WndUtils.h"
 #include "WindowDebug.h"
 #include "utl/Algorithms.h"
+#include "utl/StringUtilities.h"
 #include <shellapi.h>		// Shell_NotifyIcon()
 
 #ifdef _DEBUG
@@ -17,14 +18,6 @@
 
 namespace hlp
 {
-	void CopyTextToBuffer( TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize )
-	{
-		if ( pText != NULL )
-			_tcsncpy( pDestBuffer, pText, bufferSize - 1 );
-		else
-			pDestBuffer[ 0 ] = _T('\0');
-	}
-
 	UINT GetTooltipMaxLength( void ) { NOTIFYICONDATA niData; niData; return COUNT_OF( niData.szTip ); }
 	bool IsValidBaloonTimeout( UINT timeoutSecs ) { return timeoutSecs >= 10 && timeoutSecs <= 30; }		// must be between 10 and 30 seconds
 	bool IsValidBaloonInfoFlags( DWORD infoFlags ) { return NIIF_NONE == infoFlags || NIIF_INFO == infoFlags || NIIF_WARNING == infoFlags || NIIF_ERROR == infoFlags; }
@@ -74,7 +67,7 @@ bool CTrayIcon::Add( CWnd* pPopupWnd, HICON hIcon, const TCHAR* pIconTipText, bo
 	m_niData.hIcon = hIcon;
 	m_niData.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_SHOWTIP;				// NIF_SHOWTIP required with NOTIFYICON_VERSION_4 to display the standard tooltip
 	m_niData.uCallbackMessage = CSystemTray::WM_TRAYICONNOTIFY;
-	hlp::CopyTextToBuffer( m_niData.szTip, iconTipText.c_str(), s_tooltipMaxLength );	// tray only supports tooltip text of maximum s_tooltipMaxLength
+	str::CopyTextToBuffer( m_niData.szTip, iconTipText.c_str(), s_tooltipMaxLength );	// tray only supports tooltip text of maximum s_tooltipMaxLength
 
 	m_visible = visible;
 	if ( !m_visible )
@@ -202,7 +195,7 @@ void CTrayIcon::SetTrayFocus( void )
 bool CTrayIcon::SetTooltipText( const TCHAR* pIconTipText )
 {
 	SetFlag( m_niData.uFlags, NIF_TIP );
-	hlp::CopyTextToBuffer( m_niData.szTip, pIconTipText, s_tooltipMaxLength );
+	str::CopyTextToBuffer( m_niData.szTip, pIconTipText, s_tooltipMaxLength );
 
 	return NotifyTrayIcon( NIM_MODIFY );
 }
@@ -211,7 +204,7 @@ bool CTrayIcon::ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle /*
 {
 	//TRACE( _T("CTrayIcon::ShowBalloonTip( %s ) {...\n"), str::Clamp( text, 24 ).c_str() );
 
-	bool hasText = !text.empty();
+	bool hasText = !text.empty() || !str::IsEmpty( pTitle );
 
 	if ( m_baloonVisible && hasText )			// overlapping balloon?
 		if ( NULL == m_pBaloonPending.get() )
@@ -240,8 +233,8 @@ bool CTrayIcon::DoShowBalloonTip( const std::tstring& text, const TCHAR* pTitle,
 	m_niData.dwInfoFlags = infoFlag;
 	m_niData.uTimeout = timeoutSecs * 1000;		// convert time to ms
 
-	hlp::CopyTextToBuffer( m_niData.szInfo, text.c_str(), BalloonTextMaxLength );
-	hlp::CopyTextToBuffer( m_niData.szInfoTitle, pTitle, BalloonTitleMaxLength );
+	str::CopyTextToBuffer( m_niData.szInfo, text.c_str(), BalloonTextMaxLength );
+	str::CopyTextToBuffer( m_niData.szInfoTitle, pTitle, BalloonTitleMaxLength );
 
 	bool success = NotifyTrayIcon( NIM_MODIFY );
 

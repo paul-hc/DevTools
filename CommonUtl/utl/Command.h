@@ -16,17 +16,31 @@ protected:
 
 	void Serialize( CArchive& archive );				// CObject-like serialization: called from the serializable derived class
 public:
+	// utl::IMessage interface (partial)
+	virtual int GetTypeID( void ) const override;
+
+	std::tstring FormatExecTitle( utl::Verbosity verbosity = utl::Detailed ) const;
+
 	utl::ISubject* GetSubject( void ) const { return m_pSubject; }
 	void SetSubject( utl::ISubject* pSubject ) { m_pSubject = pSubject; }		// for serializable commands
 
 	template< typename SubjectType >
 	SubjectType* GetSubjectAs( void ) const { return dynamic_cast<SubjectType*>( m_pSubject ); }
 
-	// utl::IMessage interface (partial)
-	virtual int GetTypeID( void ) const override;
+	bool HasOriginCmd( void ) const { return m_pOriginCmd != NULL; }
+	CBaseCommand* GetOriginCmd( void ) const { return m_pOriginCmd; }
+	void SetOriginCmd( CBaseCommand* pOriginCmd ) { m_pOriginCmd = pOriginCmd; }
+
+	template< typename OriginCmdType >
+	OriginCmdType* GetOriginCmdAs( void ) const { return checked_static_cast<OriginCmdType*>( m_pOriginCmd ); }
+
+	// origin or this, whichever comes first
+	template< typename CmdType >
+	CmdType* GetReportingCmdAs( void ) const { return checked_static_cast<CmdType*>( m_pOriginCmd != NULL ? m_pOriginCmd : const_cast<CBaseCommand*>( this ) ); }
 private:
 	persist int m_typeId;
 	utl::ISubject* m_pSubject;		// no ownership
+	CBaseCommand* m_pOriginCmd;		// command that implements Unexecute via 'this' temporary command - some formatting is redirected to the origin command
 };
 
 
@@ -53,16 +67,18 @@ private:
 
 class CMacroCommand : public CBaseCommand
 {
-	enum { MacroCmdId = 0xFFFF };
 public:
 	CMacroCommand( const std::tstring& userInfo = std::tstring(), int typeId = MacroCmdId );
 	virtual ~CMacroCommand();
+
+	enum { MacroCmdId = 0xFFFF };
 
 	using CBaseCommand::SetTypeID;
 	void SetUserInfo( const std::tstring& userInfo ) { m_userInfo = userInfo; }
 
 	// composite command
 	bool IsEmpty( void ) const { return m_subCommands.empty(); }
+	utl::ICommand* GetMainCmd( void ) const { return m_pMainCmd; }
 	const std::vector< utl::ICommand* >& GetSubCommands( void ) const { return m_subCommands; }
 
 	void AddCmd( utl::ICommand* pSubCmd );

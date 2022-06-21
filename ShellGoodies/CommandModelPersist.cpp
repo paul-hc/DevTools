@@ -169,10 +169,12 @@ namespace cmd
 		for ( size_t i = 0; i != cmdStack.size(); ++i )
 			if ( cmd::IsPersistentCmd( cmdStack[ i ] ) )
 			{
+				utl::ICommand* pCmd = cmdStack[ i ];
+
 				if ( i != 0 )
 					os << std::endl;		// inner batch extra line-end separator
 
-				if ( const CMacroCommand* pMacroCmd = dynamic_cast<const CMacroCommand*>( cmdStack[ i ] ) )
+				if ( const CMacroCommand* pMacroCmd = dynamic_cast<const CMacroCommand*>( pCmd ) )
 				{
 					if ( !pMacroCmd->IsEmpty() )
 					{

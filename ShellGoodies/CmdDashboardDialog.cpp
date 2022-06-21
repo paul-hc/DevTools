@@ -367,7 +367,9 @@ void CCmdDashboardDialog::OnUpdateStackType( CCmdUI* pCmdUI )
 void CCmdDashboardDialog::OnOptions( void )
 {
 	COptionsSheet sheet( m_pFileModel, this );
-	sheet.DoModal();
+
+	if ( IDOK == sheet.DoModal() )
+		UpdateData( DialogOutput );		// update with the Options command
 }
 
 void CCmdDashboardDialog::OnUpdateOptions( CCmdUI* pCmdUI )

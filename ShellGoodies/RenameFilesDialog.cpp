@@ -12,6 +12,7 @@
 #include "ReplaceDialog.h"
 #include "OptionsSheet.h"
 #include "Application.h"
+#include "AppCommands.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"

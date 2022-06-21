@@ -2,105 +2,30 @@
 #define AppCommands_h
 #pragma once
 
-#include "utl/Command.h"
-
-
-class CEnumTags;
-namespace fs { class CPath; }
-namespace app { enum MsgType; }
-
-
-namespace cmd
-{
-	enum CommandType
-	{
-		// persistent commands - don't modify their values, so that it won't break serialization
-		RenameFile = 100, TouchFile, FindDuplicates,
-		DeleteFiles, CopyFiles, PasteCopyFiles, MoveFiles, PasteMoveFiles, CreateFolders, PasteCreateFolders, PasteCreateDeepFolders,
-		CopyPasteFilesAsBackup, CutPasteFilesAsBackup,
-
-		// transient commands (not persistent)
-		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
-		EditOptions,
-		SortRenameItems, OnRenameListSelChanged,
-
-		Priv_UndeleteFiles
-	};
-
-	const CEnumTags& GetTags_CommandType( void );
-
-
-	interface IFileDetailsCmd
-	{
-		virtual size_t GetFileCount( void ) const = 0;
-		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const = 0;
-	};
-
-	interface IPersistentCmd : public IFileDetailsCmd
-	{
-		virtual bool IsValid( void ) const = 0;
-		virtual const CTime& GetTimestamp( void ) const = 0;
-	};
-
-	interface IErrorObserver
-	{
-		virtual void ClearFileErrors( void ) = 0;
-		virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) = 0;
-	};
-
-
-	enum FileFormat { TextFormat, BinaryFormat };
-
-
-	bool IsPersistentCmd( const utl::ICommand* pCmd );		// some persistent commands are also editor-specific file action commands
-	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
-
-
-	// command formatting
-	const std::tstring& FormatCmdTag( const utl::ICommand* pCmd, utl::Verbosity verbosity );
-	const TCHAR* GetSeparator( utl::Verbosity verbosity );
-
-	std::tstring FormatCmdLine( const utl::ICommand* pCmd, utl::Verbosity verbosity );
-	void QueryCmdFields( std::vector< std::tstring >& rFields, const utl::ICommand* pCmd );
-}
-
-
-namespace pred
-{
-	struct IsPersistentCmd
-	{
-		typedef utl::ICommand* argument_type;		// required by std::not1()
-
-		bool operator()( const utl::ICommand* pCmd ) const
-		{
-			return cmd::IsPersistentCmd( pCmd );
-		}
-	};
-
-	struct IsZombieCmd
-	{
-		bool operator()( const utl::ICommand* pCmd ) const
-		{
-			return cmd::IsZombieCmd( pCmd );
-		}
-	};
-}
+#include "AppCommands_fwd.h"
 
 
 class CLogger;
+namespace app { enum MsgType; }
+namespace ut { class CScopedCmdLogger; }
 
 
 namespace cmd
 {
-	class CScopedLogger;
+	void PrefixMsgTypeLine( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType );
+	void SuffixMsgType( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType );
+	void FormatLogMessage( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType );		// for single-line core message
+}
 
 
+namespace cmd
+{
 	abstract class CBaseSerialCmd : public CObject
 		, public CCommand
 	{
 		DECLARE_DYNAMIC( CBaseSerialCmd )
 
-		friend class CScopedLogger;
+		friend class ut::CScopedCmdLogger;
 	protected:
 		CBaseSerialCmd( CommandType cmdType = CommandType() );
 	public:
@@ -108,24 +33,20 @@ namespace cmd
 
 		// base overrides
 		virtual void Serialize( CArchive& archive );
+
+		static void LogOutput( const std::tstring& message );
 	protected:
-		static bool LogMessage( const std::tstring& message, app::MsgType msgType );
-		static void LogExecution( const std::tstring& message, app::MsgType msgType );
+		std::tstring FormatLogMessage( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle = NULL ) const;
+
+		virtual void RecordMessage( const std::tstring& coreMessage, app::MsgType msgType );
+
+		bool ShowBalloon( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle = NULL ) const;
 	private:
 		static CLogger* s_pLogger;
 	public:
 		static IErrorObserver* s_pErrorObserver;
 	};
 
-
-	class CScopedLogger
-	{
-	public:
-		CScopedLogger( CLogger* pLogger ) : m_pOldLogger( CBaseSerialCmd::s_pLogger ) { CBaseSerialCmd::s_pLogger = pLogger; }
-		~CScopedLogger() { CBaseSerialCmd::s_pLogger = m_pOldLogger; }
-	private:
-		CLogger* m_pOldLogger;
-	};
 
 	class CScopedErrorObserver
 	{
