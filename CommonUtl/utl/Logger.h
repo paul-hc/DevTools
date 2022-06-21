@@ -16,6 +16,9 @@ public:
 
 	const fs::CPath& GetLogFilePath( void ) const;
 
+	size_t GetIndentLinesBy( void ) const { return m_indentLineEnd.size() - 1; }		// exluding the '\n'
+	void SetIndentLinesBy( size_t indentLinesBy );
+
 	// pass '\n' for line ends, since the log file is open in text mode
 	void Log( const TCHAR format[], ... );
 	void LogV( const TCHAR format[], va_list argList );
@@ -29,9 +32,13 @@ public:
 	void SetOverwrite( void );
 protected:
 	fs::CPath MakeBackupLogFilePath( void ) const;
+	const TCHAR* FormatMultiLineText( const TCHAR text[] );
 	bool CheckTruncate( void );
+	bool CheckNeedSessionNewLine( void ) const;
 private:
 	const TCHAR* m_pFmtFname;
+	std::tstring m_indentLineEnd;	// by default 2 spaces - for multi-line logging: indentation size of sub-lines
+	std::tstring m_multiLineText;	// temporary buffer for indenting multiple lines
 public:
 	bool m_enabled;
 	bool m_prependTimestamp;

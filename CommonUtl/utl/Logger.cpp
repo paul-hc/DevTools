@@ -4,6 +4,8 @@
 #include "FileSystem.h"
 #include "RuntimeException.h"
 #include "AppTools.h"
+#include "Algorithms.h"
+#include "TimeUtils.h"
 #include <fstream>
 
 
@@ -16,6 +18,7 @@ CLogger::CLogger( const TCHAR* pFmtFname /*= NULL*/ )
 	, m_logCount( 0 )
 	, m_addSessionNewLine( true )
 {
+	SetIndentLinesBy( 2 );
 }
 
 CLogger::~CLogger()
@@ -96,7 +99,6 @@ void CLogger::LogV( const TCHAR format[], va_list argList )
 
 void CLogger::LogLine( const TCHAR text[], bool useTimestamp /*= true*/ )
 {
-	ASSERT_PTR( text );
 	if ( !m_enabled )
 		return;
 
@@ -111,7 +113,7 @@ void CLogger::LogLine( const TCHAR text[], bool useTimestamp /*= true*/ )
 	{
 		if ( m_addSessionNewLine )
 		{
-			if ( !str::IsEmpty( text ) )
+			if ( CheckNeedSessionNewLine() )
 				output << std::endl;
 
 			m_addSessionNewLine = false;
@@ -120,11 +122,33 @@ void CLogger::LogLine( const TCHAR text[], bool useTimestamp /*= true*/ )
 		if ( m_prependTimestamp && useTimestamp )
 			output << CTime::GetCurrentTime().Format( _T("[%d-%b-%Y %H:%M:%S]> ") ).GetString();
 
-		output << text << std::endl;
+		output << FormatMultiLineText( text ) << std::endl;
 		output.close();
 	}
 	else
 		ASSERT( false );
+}
+
+void CLogger::SetIndentLinesBy( size_t indentLinesBy )
+{
+	m_indentLineEnd.assign( indentLinesBy + 1, _T(' ') );
+	m_indentLineEnd[ 0 ] = _T('\n');
+}
+
+const TCHAR* CLogger::FormatMultiLineText( const TCHAR text[] )
+{
+	ASSERT_PTR( text );
+	ASSERT_PTR( !m_indentLineEnd.empty() );		// at least should contain the "\n"
+
+	if ( 1 == m_indentLineEnd.size() || NULL == _tcschr( text, _T('\n') ) )
+	{
+		m_multiLineText.clear();
+		return text;			// single line, no buffered indentation
+	}
+
+	m_multiLineText = text;
+	str::Replace( m_multiLineText, _T("\n"), m_indentLineEnd.c_str() );
+	return m_multiLineText.c_str();
 }
 
 bool CLogger::CheckTruncate( void )
@@ -166,5 +190,38 @@ bool CLogger::CheckTruncate( void )
 
 	::DeleteFile( GetLogFilePath().GetPtr() );
 	::MoveFile( newLogFilePath.GetPtr(), GetLogFilePath().GetPtr() );
+	return true;
+}
+
+bool CLogger::CheckNeedSessionNewLine( void ) const
+{
+	const fs::CPath& logFilePath = GetLogFilePath();
+	const CTime lastModifyTime = fs::ReadLastModifyTime( logFilePath );
+
+	if ( !time_utl::IsValid( lastModifyTime ) )
+		return false;			// no existing log file
+
+	CTimeSpan expireBy( 0, 0, 10, 0 );		// ten minutes
+	CTime referenceTime = CTime::GetCurrentTime() - expireBy;
+
+	if ( CTime::GetCurrentTime() - lastModifyTime < expireBy )		// less than 10 minutes session timeout?
+		return false;			// don't bother checking: not long-enough time has passed since last file modification
+
+	std::ifstream input( logFilePath.GetPtr(), std::ios_base::in );
+	if ( !input.is_open() )
+		return false;			// can't read the file
+
+	if ( !input.seekg( -2, std::ios_base::end ) )
+		return false;			// file is no large-enough for double empty lines check
+
+	std::pair<TCHAR, TCHAR> lastChars;
+
+	if ( !input >> lastChars.first >> lastChars.second )
+		return false;			// realing last 2 chars failed
+
+	if ( _T('\n') == lastChars.first && _T('\n') == lastChars.second )		 // log file contains already 2 last empty lines?
+		return false;			// avoid triple-ing the last empty lines
+
+	TRACE( _T(" (!) CLogger::CheckNeedSessionNewLine(): adding a new session line in the log file: '%s'\n"), logFilePath.GetPtr() );
 	return true;
 }
