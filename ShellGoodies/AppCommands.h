@@ -15,6 +15,16 @@ namespace cmd
 	void PrefixMsgTypeLine( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType );
 	void SuffixMsgType( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType );
 	void FormatLogMessage( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType );		// for single-line core message
+
+	// command formatting
+	const std::tstring& FormatCmdTag( const utl::ICommand* pCmd, utl::Verbosity verbosity );
+	const TCHAR* GetSeparator( utl::Verbosity verbosity );
+
+	void AppendDetailCount( std::tstring* pOutput, utl::Verbosity verbosity, size_t count );
+	bool AppendTimestamp( std::tstring* pOutput, utl::Verbosity verbosity, const CTime& timestamp );
+
+	std::tstring FormatCmdLine( const utl::ICommand* pCmd, utl::Verbosity verbosity );
+	void QueryCmdFields( std::vector< std::tstring >& rFields, const utl::ICommand* pCmd );
 }
 
 

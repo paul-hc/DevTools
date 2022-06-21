@@ -89,14 +89,11 @@ namespace cmd
 		REQUIRE( !HasOriginCmd() );
 
 		std::tstring text = FormatCmdTag( this, verbosity );
-		const TCHAR* pSep = GetSeparator( verbosity );
 
 		if ( verbosity != utl::Brief )
-			stream::Tag( text, str::Format( _T("[%d]"), GetSubCommands().size() ), pSep );
+			cmd::AppendDetailCount( &text, verbosity, GetSubCommands().size() );
 
-		if ( m_timestamp.GetTime() != 0 )
-			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ), pSep );
-
+		cmd::AppendTimestamp( &text, verbosity, m_timestamp );
 		return text;
 	}
 
@@ -287,11 +284,9 @@ CRenameFileCmd::~CRenameFileCmd()
 
 std::tstring CRenameFileCmd::Format( utl::Verbosity verbosity ) const override
 {
-	if ( HasOriginCmd() )
-		return GetOriginCmd()->Format( verbosity );
-
 	std::tstring text;
-	if ( verbosity != utl::Brief )
+
+	if ( utl::DetailFields == verbosity )
 		text = __super::Format( utl::Brief );		// prepend "RENAME" tag
 
 	stream::Tag( text, fmt::FormatRenameEntry( m_srcPath, m_destPath ), _T(" ") );
@@ -345,11 +340,9 @@ CTouchFileCmd::~CTouchFileCmd()
 
 std::tstring CTouchFileCmd::Format( utl::Verbosity verbosity ) const override
 {
-	if ( HasOriginCmd() )
-		return GetOriginCmd()->Format( verbosity );
-
 	std::tstring text;
-	if ( verbosity != utl::Brief )
+
+	if ( utl::DetailFields == verbosity )
 		text = __super::Format( utl::Brief );		// prepend "TOUCH" tag
 
 	stream::Tag( text, fmt::FormatTouchEntry( m_srcState, m_destState ), _T(" ") );

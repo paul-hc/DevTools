@@ -5,7 +5,7 @@
 #include "GeneralOptions.h"
 #include "OptionsSheet.h"
 #include "Application_fwd.h"
-#include "AppCommands_fwd.h"
+#include "AppCommands.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"

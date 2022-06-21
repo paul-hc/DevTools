@@ -81,6 +81,24 @@ namespace cmd
 		return utl::DetailFields == verbosity ? s_field : s_space;
 	}
 
+	void AppendDetailCount( std::tstring* pOutput, utl::Verbosity verbosity, size_t count )
+	{
+		ASSERT_PTR( pOutput );
+		stream::Tag( *pOutput, str::Format( _T("(%d)"), count ), cmd::GetSeparator( verbosity ) );
+	}
+
+	bool AppendTimestamp( std::tstring* pOutput, utl::Verbosity verbosity, const CTime& timestamp )
+	{
+		ASSERT_PTR( pOutput );
+
+		return
+			time_utl::IsValid( timestamp ) &&
+			stream::Tag( *pOutput,
+				str::Format( _T("[%s]"), time_utl::FormatTimestamp( timestamp, verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ).c_str() ),
+				cmd::GetSeparator( verbosity ) );
+	}
+
+
 	std::tstring FormatCmdLine( const utl::ICommand* pCmd, utl::Verbosity verbosity )
 	{
 		ASSERT_PTR( pCmd );

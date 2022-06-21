@@ -73,17 +73,12 @@ namespace cmd
 		const TCHAR* pSep = cmd::GetSeparator( verbosity );
 
 		if ( verbosity != utl::Brief )
-			stream::Tag( text, str::Format( _T("(%d)"), m_filePaths.size() ), pSep );
+			cmd::AppendDetailCount( &text, verbosity, m_filePaths.size() );
 
 		if ( utl::DetailFields == verbosity )
 			stream::Tag( text, pCmd->GetDestHeaderInfo(), pSep );
 
-		if ( pCmd->GetTimestamp().GetTime() != 0 )
-			stream::Tag( text,
-				str::Format( _T("[%s]"), time_utl::FormatTimestamp( pCmd->GetTimestamp(), verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ).c_str() ),
-				pSep
-			);
-
+		cmd::AppendTimestamp( &text, verbosity, pCmd->GetTimestamp() );
 		return text;
 	}
 
