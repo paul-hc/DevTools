@@ -15,20 +15,20 @@ CApplication theApp;		// the one and only CApplication object
 
 
 CApplication::CApplication( void )
-	: CBaseApp< CWinApp >()
+	: CBaseApp<CWinApp>()
 {
 	// TODO: add construction code here, place all significant initialization in InitInstance
 }
 
 BOOL CApplication::InitInstance( void )
 {
-	if ( !CBaseApp< CWinApp >::InitInstance() )
+	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
 
 	CAboutBox::s_appIconId = IDD_MAIN_DIALOG;
 
 	// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
-	std::auto_ptr<CShellManager> pShellManager( new CShellManager() );
+//	std::auto_ptr<CShellManager> pShellManager( new CShellManager() );
 
 	CMainDialog dialog;
 	m_pMainWnd = &dialog;
@@ -39,5 +39,5 @@ BOOL CApplication::InitInstance( void )
 
 // command handlers
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 END_MESSAGE_MAP()

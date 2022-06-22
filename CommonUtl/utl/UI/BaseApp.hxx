@@ -153,7 +153,7 @@ inline utl::CResourcePool& CBaseApp<BaseClass>::GetSharedResources( void )
 }
 
 template< typename BaseClass >
-CImageStore* CBaseApp< BaseClass >::GetSharedImageStore( void )
+CImageStore* CBaseApp<BaseClass>::GetSharedImageStore( void )
 {
 	if ( NULL == m_pSharedImageStore.get() )
 	{	// lazy creation of the shared image store

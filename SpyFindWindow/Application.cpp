@@ -75,7 +75,7 @@ CApplication::CApplication( void )
 
 BOOL CApplication::InitInstance( void )
 {
-	if ( !CBaseApp< CWinApp >::InitInstance() )
+	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
 
 	CAboutBox::s_appIconId = IDD_MAIN_DIALOG;
@@ -87,5 +87,5 @@ BOOL CApplication::InitInstance( void )
 	return FALSE;			// skip the application's message pump
 }
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 END_MESSAGE_MAP()

@@ -23,7 +23,7 @@ public:
 };
 
 
-class CApplication : public CBaseApp< CWinApp >
+class CApplication : public CBaseApp<CWinApp>
 {
 public:
 	CApplication( void );
