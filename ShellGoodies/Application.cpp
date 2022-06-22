@@ -92,7 +92,7 @@ void CApplication::OnInitAppResources( void )
 
 	CImageStore* pSharedStore = GetSharedImageStore();
 
-	pSharedStore->RegisterToolbarImages( IDR_IMAGE_STRIP );	// register stock images
+	pSharedStore->RegisterToolbarImages( IDR_IMAGE_STRIP );		// register stock images
 	pSharedStore->RegisterToolbarImages( IDR_TOOL_STRIP );		// register additional tool images
 	pSharedStore->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );
 	pSharedStore->RegisterAlias( IDD_RENAME_FILES_DIALOG, ID_RENAME_ITEM );
@@ -119,12 +119,13 @@ const CCommandModel* CApplication::GetCommandModel( void ) const
 
 CTrayIcon* CApplication::GetMessageTrayIcon( void )
 {
-	if ( NULL == m_pSystemTray.get() )
+	if ( NULL == CSystemTray::Instance() && NULL == m_pSystemTray.get() )		// no system tray created by another UI component and no shared application message tray icon?
 	{	// create once the system-tray message icon
 		m_pSystemTray.reset( new CSystemTrayWnd() );							// hidden popup tray icon host
 		return m_pSystemTray->CreateTrayIcon( IDR_MESSAGE_TRAY_ICON, false );	// auto-hide message tray icon
 	}
-	return m_pSystemTray->FindIcon( IDR_MESSAGE_TRAY_ICON );
+
+	return CSystemTray::Instance() != NULL ? CSystemTray::Instance()->FindIcon( IDR_MESSAGE_TRAY_ICON ) : NULL;
 }
 
 BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )

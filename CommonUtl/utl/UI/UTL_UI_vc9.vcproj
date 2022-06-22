@@ -551,6 +551,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BaseTrackMenuWnd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BaseTrackMenuWnd.hxx"
+				>
+			</File>
+			<File
 				RelativePath=".\BaseZoomView.cpp"
 				>
 			</File>
@@ -1311,14 +1319,6 @@
 				</File>
 				<File
 					RelativePath=".\BaseStockContentCtrl.hxx"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseTrackMenuWnd.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseTrackMenuWnd.hxx"
 					>
 				</File>
 				<File
