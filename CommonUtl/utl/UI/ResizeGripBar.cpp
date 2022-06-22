@@ -368,7 +368,8 @@ CResizeGripBar::CDrawAreas CResizeGripBar::GetDrawAreas( void ) const
 
 	areas.m_gripRect = areas.m_clientRect;
 
-    int arrowExtent = GetArrowExtent(), arrowSpacing = arrowExtent;
+    int arrowExtent = GetArrowExtent();
+    int arrowSpacing = arrowExtent;
 
 	if ( resize::NoToggle == m_toggleStyle )
 		areas.m_arrowRect1 = areas.m_arrowRect2 = CRect( 0, 0, 0, 0 );
@@ -560,7 +561,8 @@ void CResizeGripBar::OnMouseMove( UINT flags, CPoint point )
 {
 	__super::OnMouseMove( flags, point );
 
-	SetHitOn( GetHitTest( GetDrawAreas(), point ) );
+	CDrawAreas drawAreas = GetDrawAreas();			// PHC: use temporary object, because otherwise it crashes unexpectedly on 64-bit Release build (?!)
+	SetHitOn( GetHitTest( drawAreas, point ) );
 
 	if ( m_pTrackingInfo != NULL )
 	{
