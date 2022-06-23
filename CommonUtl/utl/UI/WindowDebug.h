@@ -22,6 +22,8 @@ namespace dbg
 		const CTrayIcon* m_pTrayIcon;
 		std::tstring m_preMsg;
 	};
+
+	std::tstring FormatWndInfo( HWND hWnd, const TCHAR tag[] );
 }
 
 

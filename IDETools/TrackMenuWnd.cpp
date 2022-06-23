@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "TrackMenuWnd.h"
 #include "IdeUtilities.h"
-#include "Application.h"
+//#include "Application.h"
 #include "utl/Algorithms.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
@@ -14,9 +14,11 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/BaseTrackMenuWnd.hxx"
+
 
 CTrackMenuWnd::CTrackMenuWnd( CCmdTarget* pCmdTarget /*= NULL*/ )
-	: CStatic()
+	: CWnd()
 	, m_pCmdTarget( pCmdTarget )
 	, m_rightClickRepeat( false )
 	, m_hilightId( 0 )
@@ -28,10 +30,13 @@ CTrackMenuWnd::~CTrackMenuWnd()
 {
 }
 
-bool CTrackMenuWnd::Create( CWnd* pParentWnd )
+bool CTrackMenuWnd::Create( void )
 {
-	return CStatic::Create( _T("<TRACKING-STATIC>"), WS_CHILD | WS_VISIBLE | SS_LEFT, CRect( 0, 0, 0, 0 ), pParentWnd ) != FALSE;
+	return CreateEx( 0, AfxRegisterWndClass( 0 ), _T("<TrackMenuHiddenPopup>"), WS_POPUP | WS_VISIBLE/* | WS_BORDER*/, 100, 100, 50, 50, NULL, 0 ) != FALSE;
 }
+
+#include "utl/Logger.h"
+#include "utl/UI/WindowDebug.h"
 
 UINT CTrackMenuWnd::TrackContextMenu( CMenu* pPopupMenu, CPoint screenPos /*= ui::GetCursorPos()*/, UINT flags /*= TPM_RIGHTBUTTON*/ )
 {
@@ -45,25 +50,34 @@ UINT CTrackMenuWnd::TrackContextMenu( CMenu* pPopupMenu, CPoint screenPos /*= ui
 	}
 	ClearFlag( flags, TPM_NONOTIFY );			// we do need to receive and handle all menu messages
 
+CWnd* pFocus = GetFocus();
+LOG_TRACE( dbg::FormatWndInfo( pFocus->GetSafeHwnd(), _T("CTrackMenuWnd::TrackContextMenu() - Pre - focus:") ).c_str() );
+
+	SetForegroundWindow();						// MSDN documentation of CMenu::TrackPopupMenu requires SetForegroundWindow(), but we use a child window (static control)
 	SetFocus();									// MSDN documentation of CMenu::TrackPopupMenu requires SetForegroundWindow(), but we use a child window (static control)
+
+pFocus = GetFocus();
+LOG_TRACE( dbg::FormatWndInfo( pFocus->GetSafeHwnd(), _T("CTrackMenuWnd::TrackContextMenu() - SetForeground - focus:") ).c_str() );
+
 	m_selCmdId = 0;
 	m_subMenus.clear();
 
-	if ( proc::InDifferentThread( GetParent()->GetSafeHwnd() ) )
+	if ( true /*proc::InDifferentThread( GetParent()->GetSafeHwnd() )*/ )
 	{	// simulate a window click to "unlock" the keyboard for menu selection - workaround CMenu::TrackPopupMenu multi-threading issues when cancelling the menu (clicking outside of it).
-		SendMessage( WM_LBUTTONDOWN, MK_LBUTTON );
-		PostMessage( WM_LBUTTONUP, MK_LBUTTON );
+		SendMessage( WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM( 1, 1 ) );
+		PostMessage( WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM( 1, 1 ) );
 	}
 
 	BOOL selected = ui::TrackPopupMenu( *pPopupMenu, this, screenPos, flags ); selected;
 
-	PostMessage( WM_NULL );						// TrackPopupMenu on MSDN: Force a task switch to the application that called TrackPopupMenu, by posting a benign message to the window or thread
+	PostMessage( WM_NULL );						// TrackPopupMenu on MSDN: force a task switch to the application that called TrackPopupMenu, by posting a benign message to the window or thread
 	ui::PumpPendingMessages( m_hWnd );			// wait for the WM_COMMAND message to be dispatched
 
+LOG_TRACE( _T("CTrackMenuWnd::TrackContextMenu() - m_selCmdId=%d"), m_selCmdId );
 	return m_selCmdId;
 }
 
-bool CTrackMenuWnd::HighlightMenuItem( HMENU hHoverPopup )
+bool CTrackMenuWnd::_HighlightMenuItem( HMENU hHoverPopup )
 {
 	return
 		ui::HoverOnMenuItem( m_hWnd, hHoverPopup, m_hilightId ) ||
@@ -92,7 +106,7 @@ std::pair<HMENU, UINT> CTrackMenuWnd::FindMenuItemFromPoint( const CPoint& scree
 	return std::pair<HMENU, UINT>( NULL, 0 );
 }
 
-BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
 {
 	BOOL handled = m_pCmdTarget != NULL && m_pCmdTarget->OnCmdMsg( id, code, pExtra, pHandlerInfo );
 
@@ -108,7 +122,7 @@ BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINF
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CTrackMenuWnd, CStatic )
+BEGIN_MESSAGE_MAP( CTrackMenuWnd, CWnd )
 	ON_WM_INITMENUPOPUP()
 	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
@@ -124,7 +138,7 @@ void CTrackMenuWnd::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMe
 	if ( !isSysMenu )
 	{
 		if ( m_hilightId != 0 )
-			ui::PostCall( this, &CTrackMenuWnd::HighlightMenuItem, pPopupMenu->GetSafeHmenu() );		// wait for the manu to become visible to allow hover item highlighting
+			ui::PostCall( this, &CTrackMenuWnd::_HighlightMenuItem, pPopupMenu->GetSafeHmenu() );		// wait for the menu to become visible to allow hover item highlighting
 
 		utl::AddUnique( m_subMenus, pPopupMenu->GetSafeHmenu() );
 	}
@@ -138,7 +152,7 @@ void CTrackMenuWnd::OnRButtonUp( UINT vkFlags, CPoint point )
 		std::pair<HMENU, UINT> clickedItem = FindMenuItemFromPoint( point );
 		if ( clickedItem.second != 0 )
 		{
-			DEBUG_LOG( _T("Right-clicked command %d"), clickedItem.second );
+			LOG_TRACE( _T("Right-clicked command %d"), clickedItem.second );
 
 			if ( m_pCmdTarget != NULL && ui::HandleCommand( m_pCmdTarget, clickedItem.second ) )
 			{

@@ -71,11 +71,4 @@ namespace reg
 }
 
 
-#ifdef _DEBUG
-	#define DEBUG_LOG app::GetLogger()->LogTrace
-#else
-	#define DEBUG_LOG __noop
-#endif
-
-
 #endif // Application_h

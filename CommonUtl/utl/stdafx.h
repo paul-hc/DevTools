@@ -12,6 +12,8 @@
 
 #include "utl/CommonDefs.h"
 
+#define BUILD_UTL_BASE
+
 
 #ifdef _DEBUG
 	#define USE_UT		// no UT code in release builds

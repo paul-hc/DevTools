@@ -3,15 +3,16 @@
 #pragma once
 
 #include "utl/UI/ui_fwd.h"
+#include "utl/UI/BaseTrackMenuWnd.h"
 
 
-class CTrackMenuWnd : public CStatic
+class CTrackMenuWnd : public CWnd //CBaseTrackMenuWnd<CWnd>
 {
 public:
 	CTrackMenuWnd( CCmdTarget* pCmdTarget = NULL );
 	virtual ~CTrackMenuWnd();
 
-	bool Create( CWnd* pParentWnd );
+	bool Create( void );
 
 	void SetRightClickRepeat( bool rightClickRepeat = true ) { m_rightClickRepeat = rightClickRepeat; }
 	void SetHilightId( UINT hilightId ) { m_hilightId = hilightId; }
@@ -20,7 +21,7 @@ public:
 
 	UINT GetSelCmdId( void ) const { return m_selCmdId; }
 private:
-	bool HighlightMenuItem( HMENU hHoverPopup );
+	bool _HighlightMenuItem( HMENU hHoverPopup );
 	std::pair<HMENU, UINT> FindMenuItemFromPoint( const CPoint& screenPos ) const;
 private:
 	CCmdTarget* m_pCmdTarget;
@@ -32,7 +33,7 @@ private:
 
 	// generated stuff
 public:
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
 protected:
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 	afx_msg void OnRButtonUp( UINT vkFlags, CPoint point );

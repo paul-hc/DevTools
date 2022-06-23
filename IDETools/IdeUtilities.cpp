@@ -24,7 +24,7 @@ namespace ide
 		, m_hasDifferentThread( m_pFocusWnd != NULL && proc::InDifferentThread( m_pFocusWnd->GetSafeHwnd() ) )	// VC 7.1+: this COM object runs in a different thread than the text window
 		, m_ideType( ide::FindIdeType( m_pMainWnd ) )
 	{
-		DEBUG_LOG( _T("IDE: %s"), FormatInfo().c_str() );
+		LOG_TRACE( _T("IDE: %s"), FormatInfo().c_str() );
 	}
 
 	CScopedWindow::~CScopedWindow()
@@ -64,7 +64,7 @@ namespace ide
 
 		// VC 7.1 and up: this COM object runs in a different thread than the text window, therefore we need to create a tracking window in THIS thread.
 		CTrackMenuWnd trackingWnd;
-		VERIFY( trackingWnd.Create( m_pFocusWnd ) );
+		VERIFY( trackingWnd.Create() );
 
 		UINT command = trackingWnd.TrackContextMenu( &rMenu, screenPos, flags );
 		trackingWnd.DestroyWindow();
@@ -179,12 +179,12 @@ namespace ide
 
 				pFocusWindow->GetWindowRect( &windowRect );
 				mouseScreenPos = windowRect.TopLeft();
-				DEBUG_LOG( _T("NO_CARET!") );
+				LOG_TRACE( _T("NO_CARET!") );
 			}
 			else if ( pFocusWindow->GetStyle() & WS_CHILD )
 				pFocusWindow->ClientToScreen( &mouseScreenPos );
 
-			DEBUG_LOG( _T("Mouse pos (%d,%d)"), mouseScreenPos.x, mouseScreenPos.y );
+			LOG_TRACE( _T("Mouse pos (%d,%d)"), mouseScreenPos.x, mouseScreenPos.y );
 		}
 		else
 			::GetCursorPos( &mouseScreenPos );
@@ -225,7 +225,7 @@ namespace ide
 		if ( regKey.Open( HKEY_CURRENT_USER, s_regKeyPathVC6, KEY_READ ) )
 		{
 			path = regKey.ReadStringValue( entry );
-			DEBUG_LOG( _T("VC6 %s: %s"), entry, path.c_str() );
+			LOG_TRACE( _T("VC6 %s: %s"), entry, path.c_str() );
 		}
 		else
 			TRACE( _T("# Error accessing the registry: %s\n"), s_regKeyPathVC6.GetPtr() );
@@ -248,7 +248,7 @@ namespace ide
 			if ( !vc71InstallDir.empty() )
 				str::Replace( path, _T("$(VCInstallDir)"), vc71InstallDir.c_str() );
 
-			DEBUG_LOG( _T("VC71 %s: %s"), entry, path.c_str() );
+			LOG_TRACE( _T("VC71 %s: %s"), entry, path.c_str() );
 		}
 		else
 			TRACE( _T("# Error accessing the registry: %s\n"), s_regKeyPathVC71.GetPtr() );

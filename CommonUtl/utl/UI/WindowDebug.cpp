@@ -38,6 +38,11 @@ namespace dbg
 
 	void TraceWindow( HWND hWnd, const TCHAR tag[] )
 	{
+		TRACE( FormatWndInfo( hWnd, tag ).c_str() );
+	}
+
+	std::tstring FormatWndInfo( HWND hWnd, const TCHAR tag[] )
+	{
 	#ifdef _DEBUG
 		static const TCHAR s_indent[] = _T("  ");
 
@@ -48,6 +53,9 @@ namespace dbg
 
 		if ( ::IsWindow( hWnd ) )
 		{
+			if ( CWnd* pWnd = CWnd::FromHandlePermanent( hWnd ) )
+				os << s_indent << _T("Type: ") << str::GetTypeName( typeid( *pWnd ) ) << std::endl;
+
 			os << s_indent << _T("WndClassName=[") << ui::GetClassName( hWnd ) << _T(']') << std::endl;
 			os << s_indent << _T("Text=\"") << ui::GetWindowText( hWnd ) << _T('"') << std::endl;
 
@@ -55,7 +63,7 @@ namespace dbg
 			os << s_indent << str::Format( _T("ID=%d (0x%X)"), ctrlId, ctrlId ) << std::endl;
 
 			DWORD style = ui::GetStyle( hWnd );
-			os << s_indent << str::Format( _T("Style=0x08%X  "), style ) << GetStyleTags().FormatUi( style ) << std::endl;
+			os << s_indent << str::Format( _T("Style=0x%08X  "), style ) << GetStyleTags().FormatUi( style ) << std::endl;
 
 			DWORD wndThreadId = ::GetWindowThreadProcessId( hWnd, NULL ), currThreadId = ::GetCurrentThreadId();
 			os << s_indent << str::Format( _T("WndThreadId=0x%X  CurrentThreadId=0x%X  "), wndThreadId, currThreadId ) << ( wndThreadId == currThreadId ? _T("(in current thread)") : _T("(in different thread)") ) << std::endl;
@@ -64,12 +72,16 @@ namespace dbg
 			::GetWindowRect( hWnd, &wndRect );
 			os << s_indent << str::Format( _T("WndRect=(L=%d, T=%d) (R=%d, B=%d)  W=%d, H=%d"), wndRect.left, wndRect.top, wndRect.right, wndRect.bottom, wndRect.Width(), wndRect.Height() ) << std::endl;
 		}
+		else
+			os << s_indent << _T("<not a valid window>") << std::endl;
 
-		TRACE( os.str().c_str() );
+		return os.str();
 	#else
 		hWnd, tag;
+		return str::GetEmpty();
 	#endif //_DEBUG
 	}
+
 
 	void TraceTrayNotifyCode( UINT msgNotifyCode )
 	{

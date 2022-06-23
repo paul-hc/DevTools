@@ -26,7 +26,7 @@ public:
 
 	void LogString( const std::tstring& text ) { LogLine( text.c_str() ); }
 
-	void LogTrace( const TCHAR format[], ... );
+	void LogTrace( const TCHAR format[], ... );			// output to log file and TRACE to output window in VC++
 
 	void Clear( void );
 	void SetOverwrite( void );
@@ -51,6 +51,18 @@ private:
 	CCriticalSection m_cs;
 	mutable fs::CPath m_logFilePath;
 };
+
+
+#if !defined( BUILD_UTL_BASE ) && !defined( BUILD_UTL_UI )		// compiling application code?
+	#include "utl/AppTools.h"		// for app::GetLogger()
+#endif
+
+
+#ifdef _DEBUG
+	#define LOG_TRACE app::GetLogger()->LogTrace
+#else
+	#define LOG_TRACE __noop
+#endif
 
 
 #endif // Logger_h

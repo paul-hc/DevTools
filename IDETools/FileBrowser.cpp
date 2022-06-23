@@ -5,6 +5,7 @@
 #include "TrackMenuWnd.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/AppTools.h"
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/FileEnumerator.h"
@@ -272,11 +273,11 @@ void CFolderOptions::SetSubSection( const TCHAR* pSubSection )
 		LoadAll();
 }
 
-void CFolderOptions::LoadAll( void )
+void CFolderOptions::LoadAll( void ) override
 {
 	std::tstring origSortOrderText = m_fileSortOrder.GetOrderText();
 
-	CRegistryOptions::LoadAll();
+	__super::LoadAll();
 
 	if ( m_fileSortOrder.GetOrderText() != origSortOrderText )		// changed indirect value?
 		m_fileSortOrder.ParseOrderText();
@@ -348,9 +349,9 @@ BEGIN_MESSAGE_MAP( CFolderOptions, CRegistryOptions )
 	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdateResetSortOrder )
 END_MESSAGE_MAP()
 
-void CFolderOptions::OnUpdateOption( CCmdUI* pCmdUI )
+void CFolderOptions::OnUpdateOption( CCmdUI* pCmdUI ) override
 {
-	CRegistryOptions::OnUpdateOption( pCmdUI );
+	__super::OnUpdateOption( pCmdUI );
 
 	switch ( pCmdUI->m_nID )
 	{
@@ -696,13 +697,19 @@ bool CFileBrowser::PickFile( CPoint screenPos )
 
 	SortItems();
 
+	CLogger* pLog = app::GetLogger();
+
 	ide::CScopedWindow scopedIDE;
 	if ( !scopedIDE.IsValid() )
+	{
+		pLog->LogLine( _T(" ! CFileBrowser::PickFile() - cannot find the current foreground window!") );
 		return false;
+	}
+	LOG_TRACE( _T(" CFileBrowser::PickFile() - scoped IDE window: %s"), scopedIDE.FormatInfo().c_str() );
 
 	CTrackMenuWnd trackingWnd( this );
 
-	VERIFY( trackingWnd.Create( scopedIDE.GetFocusWnd() ) );
+	VERIFY( trackingWnd.Create() );
 	trackingWnd.SetRightClickRepeat();		// keep popup menu open when right clicking on a command
 
 	for ( ;; )
@@ -712,7 +719,7 @@ bool CFileBrowser::PickFile( CPoint screenPos )
 		trackingWnd.SetHilightId( GetMenuBuilder()->MarkCurrFileItemId( m_currFilePath ) );
 
 		if ( trackingWnd.TrackContextMenu( pPopupMenu, screenPos ) != 0 )
-			DEBUG_LOG( _T("Picked cmdId=%d, filePath: %s"), trackingWnd.GetSelCmdId(), GetCurrFilePath().GetPtr() );
+			LOG_TRACE( _T("Picked cmdId=%d, filePath: %s"), trackingWnd.GetSelCmdId(), GetCurrFilePath().GetPtr() );
 
 		if ( !m_pTrackInfo->m_keepTracking )
 			break;
@@ -722,7 +729,10 @@ bool CFileBrowser::PickFile( CPoint screenPos )
 
 	trackingWnd.DestroyWindow();
 
-	return IsFileCmd( trackingWnd.GetSelCmdId() ) && !m_currFilePath.IsEmpty();
+	UINT selCmdId = trackingWnd.GetSelCmdId();
+	LOG_TRACE( _T(" CFileBrowser::PickFile() - selected command %d (0x%04X)"), selCmdId, selCmdId );
+
+	return IsFileCmd( selCmdId ) && !m_currFilePath.IsEmpty();
 }
 
 bool CFileBrowser::IsFileCmd( UINT cmdId )
@@ -730,7 +740,7 @@ bool CFileBrowser::IsFileCmd( UINT cmdId )
 	return cmdId >= CM_FILEBROWSER_FILEITEM && cmdId <= CM_FILEBROWSER_FILEITEM_LAST;
 }
 
-BOOL CFileBrowser::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+BOOL CFileBrowser::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
 {
 	if ( m_options.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 	{

@@ -20,6 +20,9 @@
 #include "CommonWinDefs.h"	// min/max
 
 
+#define BUILD_UTL_UI
+
+
 #ifdef _DEBUG
 	#define USE_UT		// no UT code in release builds
 #endif // _DEBUG

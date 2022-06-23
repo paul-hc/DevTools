@@ -103,7 +103,7 @@ struct CFolderOptions : public CRegistryOptions
 	void SetSubSection( const TCHAR* pSubSection );
 
 	// base overrides
-	virtual void LoadAll( void );
+	virtual void LoadAll( void ) override;
 
 	DWORD GetFlags( void ) const;
 	void SetFlags( DWORD flags );
@@ -127,7 +127,7 @@ public:
 
 	// generated overrides
 protected:
-	virtual void OnUpdateOption( CCmdUI* pCmdUI );
+	virtual void OnUpdateOption( CCmdUI* pCmdUI ) override;
 protected:
 	afx_msg void OnToggle_SortBy( UINT cmdId );
 	afx_msg void OnUpdate_SortBy( CCmdUI* pCmdUI );
@@ -258,9 +258,9 @@ private:
 
 	std::auto_ptr<CTrackInfo> m_pTrackInfo;
 
-	// generated overrides
+	// generated stuff
 public:
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
 protected:
 	afx_msg void OnCommand_FileItem( UINT cmdId );
 	afx_msg void OnUpdate_FileItem( CCmdUI* pCmdUI );
