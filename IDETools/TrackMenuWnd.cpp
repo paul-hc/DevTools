@@ -32,7 +32,7 @@ CTrackMenuWnd::~CTrackMenuWnd()
 
 bool CTrackMenuWnd::Create( void )
 {
-	return CreateEx( 0, AfxRegisterWndClass( 0 ), _T("<TrackMenuHiddenPopup>"), WS_POPUP | WS_VISIBLE/* | WS_BORDER*/, 100, 100, 50, 50, NULL, 0 ) != FALSE;
+	return CreateEx( 0, AfxRegisterWndClass( 0 ), _T("<TrackMenuHiddenPopup>"), WS_POPUP | WS_VISIBLE | WS_BORDER, 100, 100, 50, 50, NULL, 0 ) != FALSE;
 }
 
 #include "utl/Logger.h"
@@ -64,8 +64,9 @@ LOG_TRACE( dbg::FormatWndInfo( pFocus->GetSafeHwnd(), _T("CTrackMenuWnd::TrackCo
 
 	if ( true /*proc::InDifferentThread( GetParent()->GetSafeHwnd() )*/ )
 	{	// simulate a window click to "unlock" the keyboard for menu selection - workaround CMenu::TrackPopupMenu multi-threading issues when cancelling the menu (clicking outside of it).
-		SendMessage( WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM( 1, 1 ) );
-		PostMessage( WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM( 1, 1 ) );
+		SendMessage( WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM( 1, 1 ) );		// client coordinates
+//		SendMessage( WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM( 2, 2 ) );
+		PostMessage( WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM( 2, 2 ) );
 	}
 
 	BOOL selected = ui::TrackPopupMenu( *pPopupMenu, this, screenPos, flags ); selected;
