@@ -38,6 +38,7 @@ namespace dbg
 
 	void TraceWindow( HWND hWnd, const TCHAR tag[] )
 	{
+		hWnd, tag;
 		TRACE( FormatWndInfo( hWnd, tag ).c_str() );
 	}
 
