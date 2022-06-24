@@ -705,9 +705,9 @@ bool CFileBrowser::PickFile( CPoint screenPos )
 	}
 	LOG_TRACE( _T(" CFileBrowser::PickFile() - scoped IDE window: %s"), scopedIDE.FormatInfo().c_str() );
 
-	CTrackMenuWnd trackingWnd( /*scopedIDE.GetMainWnd(),*/ this );
+	CTrackMenuWnd trackingWnd( this );
 
-	VERIFY( trackingWnd.Create( scopedIDE.GetMainWnd() ) );
+	VERIFY( trackingWnd.Create( scopedIDE.GetFocusWnd() ) );
 	trackingWnd.SetRightClickRepeat();		// keep popup menu open when right clicking on a command
 
 	for ( ;; )
@@ -716,7 +716,6 @@ bool CFileBrowser::PickFile( CPoint screenPos )
 
 		trackingWnd.SetHilightId( GetMenuBuilder()->MarkCurrFileItemId( m_currFilePath ) );
 
-//		if ( trackingWnd.ExecuteContextMenu( pPopupMenu, screenPos ) != 0 )
 		if ( trackingWnd.TrackContextMenu( pPopupMenu, screenPos ) != 0 )
 			LOG_TRACE( _T("Picked cmdId=%d, filePath: %s"), trackingWnd.GetSelCmdId(), GetCurrFilePath().GetPtr() );
 
@@ -729,8 +728,6 @@ bool CFileBrowser::PickFile( CPoint screenPos )
 	trackingWnd.DestroyWindow();
 
 	UINT selCmdId = trackingWnd.GetSelCmdId();
-	LOG_TRACE( _T(" CFileBrowser::PickFile() - selected command %d (0x%04X)"), selCmdId, selCmdId );
-
 	return IsFileCmd( selCmdId ) && !m_currFilePath.IsEmpty();
 }
 

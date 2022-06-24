@@ -2,8 +2,8 @@
 #include "stdafx.h"
 #include "IdeUtilities.h"
 #include "TrackMenuWnd.h"
-#include "Application.h"
 #include "utl/EnumTags.h"
+#include "utl/Logger.h"
 #include "utl/Path.h"
 #include "utl/UI/ProcessUtils.h"
 #include "utl/Registry.h"
@@ -64,7 +64,7 @@ namespace ide
 
 		// VC 7.1 and up: this COM object runs in a different thread than the text window, therefore we need to create a tracking window in THIS thread.
 		CTrackMenuWnd trackingWnd;
-		VERIFY( trackingWnd.Create( m_pMainWnd ) );
+		VERIFY( trackingWnd.Create( m_pFocusWnd ) );
 
 		UINT command = trackingWnd.TrackContextMenu( &rMenu, screenPos, flags );
 		trackingWnd.DestroyWindow();

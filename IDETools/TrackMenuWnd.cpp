@@ -3,31 +3,20 @@
 #include "TrackMenuWnd.h"
 #include "IdeUtilities.h"
 #include "utl/Algorithms.h"
+#include "utl/Logger.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/PostCall.h"
 #include "utl/UI/ProcessUtils.h"
 #include "utl/UI/WndUtils.h"
-#include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/UI/BaseTrackMenuWnd.hxx"
-
 
 CTrackMenuWnd::CTrackMenuWnd( CCmdTarget* pCmdTarget /*= NULL*/ )
-	: CLayoutDialog()
-	, m_pCmdTarget( pCmdTarget )
-	, m_rightClickRepeat( false )
-	, m_hilightId( 0 )
-	, m_selCmdId( 0 )
-{
-}
-
-CTrackMenuWnd::CTrackMenuWnd( CWnd* pParentWnd, CCmdTarget* pCmdTarget )
-	: CLayoutDialog( IDD_INPUT_TYPE_QUALIFIER_DIALOG, pParentWnd )
+	: CStatic()
 	, m_pCmdTarget( pCmdTarget )
 	, m_rightClickRepeat( false )
 	, m_hilightId( 0 )
@@ -41,58 +30,10 @@ CTrackMenuWnd::~CTrackMenuWnd()
 
 bool CTrackMenuWnd::Create( CWnd* pParentWnd )
 {
-	bool result = CreateModeless( IDD_INPUT_TYPE_QUALIFIER_DIALOG, pParentWnd, SW_SHOWNORMAL );
-	m_autoDelete = false;
-	return result;
-
-//	return CreateEx( WS_EX_TOOLWINDOW, AfxRegisterWndClass( 0 ), _T("<TrackMenuHiddenPopup>"), WS_POPUP | WS_CAPTION | WS_BORDER, 100, 100, 50, 50, pParentWnd->GetSafeHwnd(), NULL ) != FALSE;
+	return CStatic::Create( _T("<TrackMenuSTATIC>"), WS_CHILD | WS_VISIBLE | SS_LEFT, CRect( 0, 0, 0, 0 ), pParentWnd ) != FALSE;
 }
-
-#include "utl/Logger.h"
-#include "utl/UI/WindowDebug.h"
 
 UINT CTrackMenuWnd::TrackContextMenu( CMenu* pPopupMenu, CPoint screenPos /*= ui::GetCursorPos()*/, UINT flags /*= TPM_RIGHTBUTTON*/ )
-{
-//CScopedAttachThreadInput scopedThreadInput( ide::GetFocusWindow()->GetSafeHwnd() );
-
-CWnd* pFocus = GetFocus();
-LOG_TRACE( dbg::FormatWndInfo( pFocus->GetSafeHwnd(), _T("CTrackMenuWnd::TrackContextMenu() - Pre - focus:") ).c_str() );
-
-	ShowWindow( SW_SHOWNORMAL );
-	SetForegroundWindow();						// MSDN documentation of CMenu::TrackPopupMenu requires SetForegroundWindow(), but we use a child window (static control)
-//	SetFocus();									// MSDN documentation of CMenu::TrackPopupMenu requires SetForegroundWindow(), but we use a child window (static control)
-
-pFocus = GetFocus();
-LOG_TRACE( dbg::FormatWndInfo( pFocus->GetSafeHwnd(), _T("CTrackMenuWnd::TrackContextMenu() - SetForeground - focus:") ).c_str() );
-
-	if ( true /*proc::InDifferentThread( GetParent()->GetSafeHwnd() )*/ )
-	{	// simulate a window click to "unlock" the keyboard for menu selection - workaround CMenu::TrackPopupMenu multi-threading issues when cancelling the menu (clicking outside of it).
-		SendMessage( WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM( 1, 1 ) );		// client coordinates
-//		SendMessage( WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM( 2, 2 ) );
-		PostMessage( WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM( 2, 2 ) );
-	}
-ui::PumpPendingMessages( m_hWnd );			// wait for the WM_COMMAND message to be dispatched
-SetForegroundWindow();						// MSDN documentation of CMenu::TrackPopupMenu requires SetForegroundWindow(), but we use a child window (static control)
-
-	DoTrackPopupMenu( pPopupMenu, screenPos, flags );
-
-	PostMessage( WM_NULL );						// TrackPopupMenu on MSDN: force a task switch to the application that called TrackPopupMenu, by posting a benign message to the window or thread
-	ui::PumpPendingMessages( m_hWnd );			// wait for the WM_COMMAND message to be dispatched
-
-	return m_selCmdId;
-}
-
-UINT CTrackMenuWnd::ExecuteContextMenu( CMenu* pPopupMenu, const CPoint& screenPos /*= ui::GetCursorPos()*/, UINT flags /*= TPM_RIGHTBUTTON*/ )
-{
-	m_pMenuInfo.reset( new CMenuInfo( pPopupMenu, screenPos, flags ) );
-
-	if ( IDCANCEL == DoModal() )
-		return 0;
-
-	return m_selCmdId;
-}
-
-UINT CTrackMenuWnd::DoTrackPopupMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT flags )
 {
 	if ( m_rightClickRepeat )
 		ClearFlag( flags, TPM_RIGHTBUTTON );	// avoid eating right clicks as valid commands
@@ -104,16 +45,22 @@ UINT CTrackMenuWnd::DoTrackPopupMenu( CMenu* pPopupMenu, const CPoint& screenPos
 	}
 	ClearFlag( flags, TPM_NONOTIFY );			// we do need to receive and handle all menu messages
 
+	SetFocus();									// MSDN documentation of CMenu::TrackPopupMenu requires SetForegroundWindow(), but we use a child window (static control)
 	m_selCmdId = 0;
 	m_subMenus.clear();
 
+	if ( proc::InDifferentThread( GetParent()->GetSafeHwnd() ) )
+	{	// simulate a window click to "unlock" the keyboard for menu selection - workaround CMenu::TrackPopupMenu multi-threading issues when cancelling the menu (clicking outside of it).
+		SendMessage( WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM( 0, 0 ) );		// client coordinates
+		PostMessage( WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM( 0, 0 ) );
+	}
+
 	BOOL selected = ui::TrackPopupMenu( *pPopupMenu, this, screenPos, flags ); selected;
 
-LOG_TRACE( _T("CTrackMenuWnd::TrackContextMenu() - m_selCmdId=%d"), m_selCmdId );
+	PostMessage( WM_NULL );						// TrackPopupMenu on MSDN: Force a task switch to the application that called TrackPopupMenu, by posting a benign message to the window or thread
+	ui::PumpPendingMessages( m_hWnd );			// wait for the WM_COMMAND message to be dispatched
 
-	if ( !m_modeless )
-		EndDialog( IDOK );
-
+	LOG_TRACE( _T("CTrackMenuWnd::TrackContextMenu() - m_selCmdId=%d"), m_selCmdId );
 	return m_selCmdId;
 }
 
@@ -150,12 +97,11 @@ BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINF
 {
 	BOOL handled = m_pCmdTarget != NULL && m_pCmdTarget->OnCmdMsg( id, code, pExtra, pHandlerInfo );
 
-	if ( CN_COMMAND == code )
-		if ( NULL == pHandlerInfo )
-			m_selCmdId = id;
-
 	if ( !handled )
 		handled = __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+
+	if ( CN_COMMAND == code && NULL == pHandlerInfo )
+		m_selCmdId = id;
 
 	return handled;
 }
@@ -163,30 +109,16 @@ BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINF
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CTrackMenuWnd, CLayoutDialog )
+BEGIN_MESSAGE_MAP( CTrackMenuWnd, CStatic )
 	ON_WM_INITMENUPOPUP()
 	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
 
-BOOL CTrackMenuWnd::OnInitDialog( void ) override
-{
-	BOOL result = __super::OnInitDialog();
-
-	if ( m_pMenuInfo.get() != NULL )
-	{
-		ShowWindow( SW_SHOWNORMAL );
-		ui::PostCall( this, &CTrackMenuWnd::DoTrackPopupMenu, m_pMenuInfo->m_pPopupMenu, m_pMenuInfo->m_screenPos, m_pMenuInfo->m_flags );
-//		DoTrackPopupMenu( m_pMenuInfo->m_pPopupMenu, m_pMenuInfo->m_screenPos, m_pMenuInfo->m_flags );
-	}
-
-	return result;
-}
-
 void CTrackMenuWnd::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
-//	AfxCancelModes( m_hWnd );		// cancel any combobox popups that could be in toolbars or dialog bars
-//	if ( !isSysMenu )
-//		ui::UpdateMenuUI( this, pPopupMenu );
+	AfxCancelModes( m_hWnd );		// cancel any combobox popups that could be in toolbars or dialog bars
+	if ( !isSysMenu )
+		ui::UpdateMenuUI( this, pPopupMenu );
 
 	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 
