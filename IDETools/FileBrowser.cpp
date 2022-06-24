@@ -697,19 +697,17 @@ bool CFileBrowser::PickFile( CPoint screenPos )
 
 	SortItems();
 
-	CLogger* pLog = app::GetLogger();
-
 	ide::CScopedWindow scopedIDE;
 	if ( !scopedIDE.IsValid() )
 	{
-		pLog->LogLine( _T(" ! CFileBrowser::PickFile() - cannot find the current foreground window!") );
+		app::GetLogger()->LogLine( _T(" ! CFileBrowser::PickFile() - cannot find the current foreground window!") );
 		return false;
 	}
 	LOG_TRACE( _T(" CFileBrowser::PickFile() - scoped IDE window: %s"), scopedIDE.FormatInfo().c_str() );
 
-	CTrackMenuWnd trackingWnd( this );
+	CTrackMenuWnd trackingWnd( /*scopedIDE.GetMainWnd(),*/ this );
 
-	VERIFY( trackingWnd.Create() );
+	VERIFY( trackingWnd.Create( scopedIDE.GetMainWnd() ) );
 	trackingWnd.SetRightClickRepeat();		// keep popup menu open when right clicking on a command
 
 	for ( ;; )
@@ -718,6 +716,7 @@ bool CFileBrowser::PickFile( CPoint screenPos )
 
 		trackingWnd.SetHilightId( GetMenuBuilder()->MarkCurrFileItemId( m_currFilePath ) );
 
+//		if ( trackingWnd.ExecuteContextMenu( pPopupMenu, screenPos ) != 0 )
 		if ( trackingWnd.TrackContextMenu( pPopupMenu, screenPos ) != 0 )
 			LOG_TRACE( _T("Picked cmdId=%d, filePath: %s"), trackingWnd.GetSelCmdId(), GetCurrFilePath().GetPtr() );
 

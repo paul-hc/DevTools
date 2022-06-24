@@ -64,7 +64,7 @@ namespace ide
 
 		// VC 7.1 and up: this COM object runs in a different thread than the text window, therefore we need to create a tracking window in THIS thread.
 		CTrackMenuWnd trackingWnd;
-		VERIFY( trackingWnd.Create() );
+		VERIFY( trackingWnd.Create( m_pMainWnd ) );
 
 		UINT command = trackingWnd.TrackContextMenu( &rMenu, screenPos, flags );
 		trackingWnd.DestroyWindow();
