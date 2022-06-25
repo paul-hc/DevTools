@@ -82,7 +82,7 @@ void CPromptDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
-		ui::GetDlgItemAs< CStatic >( this, IDC_QUESTION_ICON )->SetIcon( ::LoadIcon( NULL, IDI_QUESTION ) );
+		ui::GetDlgItemAs<CStatic>( this, IDC_QUESTION_ICON )->SetIcon( ::LoadIcon( NULL, IDI_QUESTION ) );
 
 		ui::SetDlgItemText( this, IDC_PROMPT_STATIC, wnd::FormatBriefWndInfo( m_hWndTarget ) );
 		ui::SetDlgItemText( this, IDC_CHANGED_FIELDS_STATIC, m_changedFields );

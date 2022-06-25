@@ -31,14 +31,13 @@ private:
 	SplitState m_splitState;
 protected:
 	enum { DefaultBorderSpacing = 1, FocusSpacing = 2 };
-protected:
-	// generated overrides
-	public:
+
+	// generated stuff
+public:
 	virtual void PreSubclassWindow( void );
-	protected:
+protected:
 	virtual void DrawItem( DRAWITEMSTRUCT* pDrawItem );
 protected:
-	// message map functions
 	afx_msg void OnMouseMove( UINT flags, CPoint point );
 	afx_msg LRESULT OnMouseLeave( WPARAM wParam, LPARAM lParam );
 	afx_msg void OnPaint( void );

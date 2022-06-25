@@ -658,7 +658,7 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_Patterns( void )
 
 void CAlbumSettingsDialog::On_AddSearchPattern( void )
 {
-	CSearchPattern* pCaretPattern = m_patternsListCtrl.GetCaretAs< CSearchPattern >();
+	CSearchPattern* pCaretPattern = m_patternsListCtrl.GetCaretAs<CSearchPattern>();
 	CSearchPatternDialog dlg( pCaretPattern, this );
 	if ( dlg.DoModal() != IDOK )
 		return;

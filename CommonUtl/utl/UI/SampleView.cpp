@@ -165,8 +165,8 @@ bool CSampleView::TrackingScroll( const CPoint& mouseAnchor, const CPoint& scrol
 
 	scrollPos = scrollAnchor + delta;
 
-	GetScrollRangeAs< long >( SB_HORZ ).Constrain( scrollPos.x );
-	GetScrollRangeAs< long >( SB_VERT ).Constrain( scrollPos.y );
+	GetScrollRangeAs<long>( SB_HORZ ).Constrain( scrollPos.x );
+	GetScrollRangeAs<long>( SB_VERT ).Constrain( scrollPos.y );
 
 	if ( scrollPos == GetScrollPosition() )
 		return false;

@@ -66,7 +66,7 @@ private:
 	TTreeItemPair AddTreeItem( HTREEITEM hParent, CIncludeNode* pItemInfo, int& rOrderIndex, bool& rOriginalItem );
 	std::tstring BuildItemText( const CIncludeNode* pItemInfo, ViewMode viewMode = vmDefaultMode ) const;
 	void RefreshItemsText( HTREEITEM hItem = TVI_ROOT );
-	CIncludeNode* GetItemInfo( HTREEITEM hItem ) const { return m_treeCtrl.GetItemDataAs< CIncludeNode* >( hItem ); }
+	CIncludeNode* GetItemInfo( HTREEITEM hItem ) const { return m_treeCtrl.GetItemDataAs<CIncludeNode*>( hItem ); }
 
 	void ForEach( TIterFunc pIterFunc, HTREEITEM hItem = TVI_ROOT, void* pArgs = NULL, int nestingLevel = -1 );
 

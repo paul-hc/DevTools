@@ -293,7 +293,7 @@ bool CFileTreeDialog::SetViewMode( ViewMode viewMode )
 void _RefreshItemText( CTreeControl* pTreeCtrl, HTREEITEM hItem, CFileTreeDialog* pDialog, int nestingLevel )
 {
 	nestingLevel;
-	pTreeCtrl->SetItemText( hItem, pDialog->BuildItemText( pTreeCtrl->GetItemDataAs< CIncludeNode* >( hItem ) ).c_str() );
+	pTreeCtrl->SetItemText( hItem, pDialog->BuildItemText( pTreeCtrl->GetItemDataAs<CIncludeNode*>( hItem ) ).c_str() );
 }
 
 void CFileTreeDialog::RefreshItemsText( HTREEITEM hItem /*= TVI_ROOT*/ )
@@ -343,7 +343,7 @@ void _AddMatchingPath( const CTreeControl* pTreeCtrl, HTREEITEM hItem, CMatching
 {
 	nestingLevel;
 	ASSERT_PTR( pResult );
-	CIncludeNode* pItemInfo = pTreeCtrl->GetItemDataAs< CIncludeNode* >( hItem );
+	CIncludeNode* pItemInfo = pTreeCtrl->GetItemDataAs<CIncludeNode*>( hItem );
 
 	if ( pResult->IsPathMatch( pItemInfo ) )
 		pResult->AddMatch( hItem, pItemInfo );

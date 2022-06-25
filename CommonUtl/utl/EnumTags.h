@@ -32,7 +32,7 @@ public:
 	const std::tstring& Format( int value, TagType tagType ) const { return _Format( value, UiTag == tagType ? m_uiTags : m_keyTags ); }
 
 	template< typename EnumType >
-	bool ParseAs( EnumType& rValue, const std::tstring& text, TagType tagType ) const { return UiTag == tagType ? ParseUiAs< EnumType >( rValue, text ) : ParseKeyAs< EnumType >( rValue, text ); }
+	bool ParseAs( EnumType& rValue, const std::tstring& text, TagType tagType ) const { return UiTag == tagType ? ParseUiAs<EnumType>( rValue, text ) : ParseKeyAs<EnumType>( rValue, text ); }
 
 	const std::tstring& LookupTag( TagType tag, int flag ) const;
 

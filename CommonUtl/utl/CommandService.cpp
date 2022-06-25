@@ -47,7 +47,7 @@ utl::ICommand* CCommandService::PeekCmd( svc::StackType stackType ) const
 
 bool CCommandService::CanUndoRedo( svc::StackType stackType, int cmdTypeId /*= 0*/ ) const
 {
-	if ( utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( stackType ) )
+	if ( utl::ICommand* pTopCmd = PeekCmdAs<utl::ICommand>( stackType ) )
 		if ( 0 == cmdTypeId || cmdTypeId == pTopCmd->GetTypeID() )
 			return svc::Undo == stackType
 				? m_pCommandModel->CanUndo()

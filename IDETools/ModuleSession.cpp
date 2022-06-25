@@ -167,7 +167,7 @@ bool CModuleSession::EditOptions( void )
 	ide::CScopedWindow scopedIDE;
 	COptionsSheet sheet( scopedIDE.GetMainWnd() );
 
-	CGeneralOptionsPage* pGeneralPage = sheet.GetPageAs< CGeneralOptionsPage >( COptionsSheet::GeneralPage );
+	CGeneralOptionsPage* pGeneralPage = sheet.GetPageAs<CGeneralOptionsPage>( COptionsSheet::GeneralPage );
 
 	pGeneralPage->m_developerName = m_developerName;
 	pGeneralPage->m_codeTemplatePath = m_codeTemplatePath;
@@ -183,11 +183,11 @@ bool CModuleSession::EditOptions( void )
 	pGeneralPage->m_structPrefix = m_structPrefix.c_str();
 	pGeneralPage->m_enumPrefix = m_enumPrefix.c_str();
 
-	CCodingStandardPage* pCodingStandardPage = sheet.GetPageAs< CCodingStandardPage >( COptionsSheet::CodingStandardPage );
+	CCodingStandardPage* pCodingStandardPage = sheet.GetPageAs<CCodingStandardPage>( COptionsSheet::CodingStandardPage );
 
 	pCodingStandardPage->m_splitMaxColumn = m_splitMaxColumn;
 
-	CBscPathPage* pBscPathPage = sheet.GetPageAs< CBscPathPage >( COptionsSheet::BscPathPage );
+	CBscPathPage* pBscPathPage = sheet.GetPageAs<CBscPathPage>( COptionsSheet::BscPathPage );
 	pBscPathPage->m_browseInfoPath = m_browseInfoPath;
 
 	if ( sheet.DoModal() != IDOK )
@@ -216,7 +216,7 @@ bool CModuleSession::EditOptions( void )
 	formattingOptions.SetOperatorRules( pCodingStandardPage->m_operatorRules );
 	m_splitMaxColumn = pCodingStandardPage->m_splitMaxColumn;
 
-	CCppImplFormattingPage* pCppFormattingPage = sheet.GetPageAs< CCppImplFormattingPage >( COptionsSheet::CppFormattingPage );
+	CCppImplFormattingPage* pCppFormattingPage = sheet.GetPageAs<CCppImplFormattingPage>( COptionsSheet::CppFormattingPage );
 	formattingOptions.m_returnTypeOnSeparateLine = pCppFormattingPage->m_returnTypeOnSeparateLine;
 	formattingOptions.m_commentOutDefaultParams = pCppFormattingPage->m_commentOutDefaultParams;
 	formattingOptions.m_linesBetweenFunctionImpls = pCppFormattingPage->m_linesBetweenFunctionImpls;

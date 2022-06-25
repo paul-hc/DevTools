@@ -13,19 +13,19 @@
 
 // maxEnumValue is used to display fewer enumerations than defined in the enum formatter
 
-CEnumComboBox::CEnumComboBox( const CEnumTags* pEnumTags )
+CEnumComboBox::CEnumComboBox( const CEnumTags* pEnumTags /*= NULL*/ )
 	: CBaseStockContentCtrl<CComboBox>()
 	, m_pEnumTags( pEnumTags )
 {
-	ASSERT_PTR( m_pEnumTags );
 }
 
 CEnumComboBox::~CEnumComboBox()
 {
 }
 
-void CEnumComboBox::InitStockContent( void )
+void CEnumComboBox::InitStockContent( void ) override
 {
+	ASSERT_PTR( m_pEnumTags );
 	ASSERT( !HasFlag( GetStyle(), CBS_SORT ) );			// auto-sorting combos don't work with enumerations
 
 	ui::WriteComboItems( *this, m_pEnumTags->GetUiTags() );
@@ -50,4 +50,10 @@ bool CEnumComboBox::SetValue( int value )
 
 	VERIFY( SetCurSel( m_pEnumTags->GetTagIndex( value ) ) != CB_ERR );
 	return true;
+}
+
+void CEnumComboBox::PreSubclassWindow( void )
+{
+	ASSERT_PTR( m_pEnumTags );
+	__super::PreSubclassWindow();
 }

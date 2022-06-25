@@ -303,7 +303,7 @@ namespace ui
 	}
 
 	template< typename WndType >
-	inline WndType* LookupAncestorAs( const CWnd* pWnd ) { return safe_ptr( FindAncestorAs< WndType >( pWnd ) ); }
+	inline WndType* LookupAncestorAs( const CWnd* pWnd ) { return safe_ptr( FindAncestorAs<WndType>( pWnd ) ); }
 
 } //namespace ui
 
@@ -432,7 +432,7 @@ namespace ui
 	template< typename IntType >
 	void DDX_EditSel( CDataExchange* pDX, int ctrlId, Range<IntType>& rValue )
 	{
-		CEdit* pEdit = GetDlgItemAs< CEdit >( pDX->m_pDlgWnd, ctrlId );
+		CEdit* pEdit = GetDlgItemAs<CEdit>( pDX->m_pDlgWnd, ctrlId );
 		ASSERT_PTR( pEdit );
 		if ( DialogOutput == pDX->m_bSaveAndValidate )
 			pEdit->SetSel( rValue.m_start, rValue.m_end );

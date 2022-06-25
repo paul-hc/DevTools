@@ -209,8 +209,8 @@ void CEditFlagsBasePage::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		m_pGeneralList = m_listSheet.GetPageAs< CFlagsListPage >( GeneralPage )->GetFlagsCtrl();
-		m_pSpecificList = m_listSheet.GetPageAs< CFlagsListPage >( SpecificPage )->GetFlagsCtrl();
+		m_pGeneralList = m_listSheet.GetPageAs<CFlagsListPage>( GeneralPage )->GetFlagsCtrl();
+		m_pSpecificList = m_listSheet.GetPageAs<CFlagsListPage>( SpecificPage )->GetFlagsCtrl();
 
 		OutputTargetWnd();
 	}

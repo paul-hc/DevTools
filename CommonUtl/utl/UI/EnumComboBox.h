@@ -13,7 +13,7 @@ class CEnumTags;
 class CEnumComboBox : public CBaseStockContentCtrl<CComboBox>
 {
 public:
-	CEnumComboBox( const CEnumTags* pEnumTags );
+	CEnumComboBox( const CEnumTags* pEnumTags = NULL );
 	virtual ~CEnumComboBox();
 
 	template< typename EnumType >
@@ -30,15 +30,20 @@ public:
 	bool GetEnum<bool>( void ) const { return GetValue() != 0; }
 
 	const CEnumTags* GetTags( void ) const { return m_pEnumTags; }
+	void SetTags( const CEnumTags* pEnumTags ) { m_pEnumTags = pEnumTags; }
 protected:
 	// hidden methods (use specialized getters & setters)
 	using CComboBox::GetCurSel;
 	using CComboBox::SetCurSel;
 protected:
 	// base overrides
-	virtual void InitStockContent( void );
+	virtual void InitStockContent( void ) override;
 private:
 	const CEnumTags* m_pEnumTags;
+
+	// generated stuff
+public:
+	virtual void PreSubclassWindow( void );
 };
 
 

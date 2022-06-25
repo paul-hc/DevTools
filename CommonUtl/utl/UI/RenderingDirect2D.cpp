@@ -453,7 +453,7 @@ namespace d2d
 				return true;
 			case OutlineFrame:
 				m_pRenderFrame.reset( new COutlineFrame( m_frameSize ) );
-				GetRenderFrameAs< COutlineFrame >()->CreateSolidBrush( pRenderTarget, m_colors.front() );		// solid brush
+				GetRenderFrameAs<COutlineFrame>()->CreateSolidBrush( pRenderTarget, m_colors.front() );		// solid brush
 				return m_pRenderFrame->IsValid();
 			case OutlineGradientFrame:
 				m_pRenderFrame.reset( new COutlineFrame( m_frameSize ) );
