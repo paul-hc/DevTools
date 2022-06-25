@@ -19,19 +19,21 @@ class CApplication : public CBaseApp<CWinApp>
 public:
 	CApplication( void );
 	virtual ~CApplication();
-public:
+
 	svc::ICommandService* GetCommandService( void ) const;
 	const CCommandModel* GetCommandModel( void ) const;
 	CTrayIcon* GetMessageTrayIcon( void );				// lazy initialization
+
+	using CBaseApp<CWinApp>::IsInitAppResources;		// make it public for debugging
 private:
 	std::auto_ptr<CAppCmdService> m_pCmdSvc;
 	std::auto_ptr<CSystemTray> m_pSystemTray;			// system-tray shared popup window: hidden by default, used to display balloon notifications
 
 	// generated stuff
 public:
-    virtual BOOL InitInstance( void );
-    virtual int ExitInstance( void );
-	virtual void OnInitAppResources( void );
+    virtual BOOL InitInstance( void ) override;
+    virtual int ExitInstance( void ) override;
+	virtual void OnInitAppResources( void ) override;
 protected:
 	DECLARE_MESSAGE_MAP()
 };

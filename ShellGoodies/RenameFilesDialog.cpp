@@ -23,6 +23,7 @@
 #include "utl/UI/BalloonMessageTip.h"
 #include "utl/UI/CmdInfoStore.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/TaskDialog.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/VisualTheme.h"
 #include "utl/UI/resource.h"
@@ -94,7 +95,6 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_prevGenSeqCount( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCount, 1 ) )
 	, m_pDisplayFilenameAdapter( new CDisplayFilenameAdapter( m_ignoreExtension ) )
 	, m_formatCombo( ui::EditShinkHost_MateOnRight )
-	, m_sortOrderCombo( &ren::ui::GetTags_UiSortBy() )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
 	, m_delimiterSetCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_delimStatic( CThemeItem( L"EXPLORERBAR", vt::EBP_IEBARMENU, vt::EBM_NORMAL ) )
@@ -134,6 +134,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 		.AddSeparator()
 		.AddButton( ID_SEQ_COUNT_AUTO_ADVANCE );
 
+	m_sortOrderCombo.SetTags( &ren::ui::GetTags_UiSortBy() );
 	m_showExtButton.SetFrameMargins( -2, -2 );		// draw the frame outside of the button, in the dialog area
 }
 
@@ -247,8 +248,10 @@ void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMess
 
 			if ( CSortRenameItemsCmd* pSortCmd = dynamic_cast<CSortRenameItemsCmd*>( pMessage ) )
 			{
-				if ( pSortCmd->m_pPage != NULL )					// triggered by a list-ctrl, not internally
-					m_sortOrderCombo.SetValue( ren::ui::FromSortingPair( pSortCmd->m_sorting ) );
+				//if ( pSortCmd->m_pPage != NULL )					// triggered by a list-ctrl, not internally?
+				//	m_sortOrderCombo.SetValue( ren::ui::FromSortingPair( pSortCmd->m_sorting ) );
+
+				UpdateSortOrderCombo( pSortCmd->m_sorting );
 
 				if ( CommitFilesMode == m_mode && HasDestPaths() )
 					ChangeSeqCount( m_prevGenSeqCount );			// allow user to re-generate the dest sequence, by switching to EditMode
@@ -322,15 +325,54 @@ void CRenameFilesDialog::UpdateFormatLabel( void )
 	ui::SetDlgItemText( this, IDC_FORMAT_LABEL, str::Format( _T("&Template \"%s\":"), m_ignoreExtension ? _T("name") : _T("name.ext") ) );
 }
 
+void CRenameFilesDialog::UpdateSortOrderCombo( const ren::TSortingPair& sorting )
+{
+	ren::ui::UiSortBy sortBy = ren::ui::FromSortingPair( sorting );
+
+	if ( sortBy != m_sortOrderCombo.CComboBox::GetCurSel() )
+		m_sortOrderCombo.SetValue( sortBy );
+
+	m_sortOrderCombo.SetFrameColor( ren::ui::Default == sortBy ? CLR_NONE : app::ColorWarningText );
+	GetDlgItem( IDC_SORT_ORDER_STATIC )->Invalidate();
+}
+
+bool CRenameFilesDialog::PromptRenameCustomSortOrder( void ) const
+{
+	if ( m_sortOrderCombo.GetEnum<ren::ui::UiSortBy>() != ren::ui::Default )		// non-default sorting order?
+	{
+		static bool s_promptUser = true;
+		if ( s_promptUser )
+		{
+			CTaskDialog dlg( _T("Rename Files"),										// title
+				_T("The files to be renamed are sorted\n using a custom sort order."),	// main instruction
+				_T("Are you sure you want to proceed with renaming the files?"),		// content
+				TDCBF_YES_BUTTON | TDCBF_NO_BUTTON );
+
+			dlg.SetMainIcon( TD_WARNING_ICON );
+			dlg.SetFooterText( _T("Renaming files using a sort order other than default (by file path) could lead to potentially accidental results.") );
+			dlg.SetFooterIcon( TD_INFORMATION_ICON );
+			dlg.SetVerificationText( _T("Always prompt when renaming files") );
+			dlg.SetVerificationChecked( s_promptUser );
+
+			if ( IDYES == dlg.DoModal( (CWnd*)this ) )
+				s_promptUser = dlg.IsVerificationChecked() != FALSE;		// store user's choice about further prompts
+			else
+				return false;		// user rejected renaming the files (perhaps it was unintended?)
+		}
+	}
+
+	return true;
+}
+
+
 void CRenameFilesDialog::CommitLocalEdits( void )
 {
-	m_filesSheet.GetPageAs< CRenameEditPage >( EditPage )->CommitLocalEdits();			// allow detail page edit input
+	m_filesSheet.GetPageAs<CRenameEditPage>( EditPage )->CommitLocalEdits();			// allow detail page edit input
 }
 
 CRenameItem* CRenameFilesDialog::FindItemWithKey( const fs::CPath& srcPath ) const
 {
-	std::vector< CRenameItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rRenameItems, srcPath, CPathItemBase::ToFilePath() );
-	return itFoundItem != m_rRenameItems.end() ? *itFoundItem : NULL;
+	return func::FindItemWithPath( m_rRenameItems, srcPath );
 }
 
 void CRenameFilesDialog::MarkInvalidSrcItems( void )
@@ -470,7 +512,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 
 		m_seqCountEdit.SetNumericValue( m_prevGenSeqCount );
 		m_showExtButton.SetCheck( !m_ignoreExtension );			// checkbox has inverted logic
-		m_sortOrderCombo.SetValue( ren::ui::FromSortingPair( m_pFileModel->GetRenameSorting() ) );
+		UpdateSortOrderCombo( m_pFileModel->GetRenameSorting() );
 		UpdateFormatLabel();
 
 		m_isInitialized = true;
@@ -570,17 +612,18 @@ void CRenameFilesDialog::OnOK( void ) override
 			break;
 		}
 		case CommitFilesMode:
-			if ( RenameFiles() )
-			{
-				m_formatCombo.SaveHistory( m_regSection.c_str(), reg::entry_formatHistory );
-				m_delimiterSetCombo.SaveHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory );
-				AfxGetApp()->WriteProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, ui::GetWindowText( &m_newDelimiterEdit ).c_str() );
-				AfxGetApp()->WriteProfileInt( m_regSection.c_str(), reg::entry_seqCount, m_seqCountEdit.GetNumericValue() );
+			if ( PromptRenameCustomSortOrder() )
+				if ( RenameFiles() )
+				{
+					m_formatCombo.SaveHistory( m_regSection.c_str(), reg::entry_formatHistory );
+					m_delimiterSetCombo.SaveHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory );
+					AfxGetApp()->WriteProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, ui::GetWindowText( &m_newDelimiterEdit ).c_str() );
+					AfxGetApp()->WriteProfileInt( m_regSection.c_str(), reg::entry_seqCount, m_seqCountEdit.GetNumericValue() );
 
-				__super::OnOK();
-			}
-			else
-				SwitchMode( EditMode );
+					__super::OnOK();
+				}
+				else
+					SwitchMode( EditMode );
 			break;
 		case RollBackMode:
 		case RollForwardMode:
@@ -616,6 +659,10 @@ HBRUSH CRenameFilesDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColorType )
 		{
 			case IDC_FORMAT_LABEL:
 				if ( !IsFormatExtConsistent() )
+					pDC->SetTextColor( app::ColorWarningText );
+				break;
+			case IDC_SORT_ORDER_STATIC:
+				if ( m_sortOrderCombo.GetEnum<ren::ui::UiSortBy>() != ren::ui::Default )
 					pDC->SetTextColor( app::ColorWarningText );
 				break;
 		}

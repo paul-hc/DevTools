@@ -109,7 +109,7 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		bool enableProperties = NULL == ui::FindAncestorAs< CCmdDashboardDialog >( this );		// prevent recursion
+		bool enableProperties = NULL == ui::FindAncestorAs<CCmdDashboardDialog>( this );		// prevent recursion
 		ui::EnableControl( m_hWnd, ID_OPEN_CMD_DASHBOARD, enableProperties );
 		ui::ShowControl( m_hWnd, ID_OPEN_CMD_DASHBOARD, enableProperties );
 	}

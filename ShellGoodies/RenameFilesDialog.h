@@ -55,6 +55,9 @@ protected:
 	virtual void SwitchMode( Mode mode ) override;
 private:
 	void UpdateFormatLabel( void );
+	void UpdateSortOrderCombo( const ren::TSortingPair& sorting );
+	bool PromptRenameCustomSortOrder( void ) const;
+
 	void CommitLocalEdits( void );
 
 	void AutoGenerateFiles( void );
@@ -93,7 +96,7 @@ private:
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
 	CFrameHostCtrl<CButton> m_showExtButton;
-	CEnumComboBox m_sortOrderCombo;
+	CFrameHostCtrl<CEnumComboBox> m_sortOrderCombo;
 	CSplitPushButton m_capitalizeButton;
 	persist CEnumSplitButton m_changeCaseButton;
 	persist CHistoryComboBox m_delimiterSetCombo;

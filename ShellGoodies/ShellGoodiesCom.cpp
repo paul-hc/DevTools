@@ -5,16 +5,30 @@
 #include "ShellMenuController.h"
 #include "Application.h"
 #include "utl/FlagTags.h"
-#include "utl/UI/BaseApp.hxx"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
 #endif
 
+#include "utl/UI/BaseApp.hxx"
+
 
 CShellGoodiesCom::CShellGoodiesCom( void )
 {
-	app::GetApp().LazyInitAppResources();		// initialize once application resources since this is not a regsvr32.exe invocation
+	// NOTE: sometimes, the ShellGoodies shell extension doesn't initialize properly.
+	//	Symptom 1): right click on "Rename Files" dialog, and we see "About [InternalName]...\tF1" - for some unknown reason, the "InternalName" key is not found in CVersionInfo::GetValue().
+	//	Perhaps CVersionInfo loading from resource fails for this module.
+	//	Symptom 2): when changing the sort order in CFileModel, it's not sticky (doesn't get persisted properly) in the RegKey=RenameDialog\FilesSheet: entry_sortBy=...
+	//
+	// Add some Release build diagnostics to ensure that OnInitAppResources() succeeds at this stage:
+	//
+	bool wasAppInit = app::GetApp().IsInitAppResources();
+
+	bool isAppInit = app::GetApp().LazyInitAppResources();		// initialize once application resources since this is not a regsvr32.exe invocation
+
+	if ( wasAppInit || !isAppInit )
+		app::GetLogger()->LogTrace( _T("\n *** CShellGoodiesCom::CShellGoodiesCom() - detected issues on LazyInitAppResources(): wasAppInit=%d, isAppInit=%d  TODO: dig a little deeper into why...\n"),
+			wasAppInit, isAppInit );
 }
 
 CShellGoodiesCom::~CShellGoodiesCom( void )

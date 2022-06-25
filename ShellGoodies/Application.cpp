@@ -56,7 +56,7 @@ CApplication::~CApplication()
 {
 }
 
-BOOL CApplication::InitInstance( void )
+BOOL CApplication::InitInstance( void ) override
 {
 	// called once when the user right-clicks on selected files in Explorer for the first time.
 
@@ -66,7 +66,7 @@ BOOL CApplication::InitInstance( void )
 	return __super::InitInstance();
 }
 
-int CApplication::ExitInstance( void )
+int CApplication::ExitInstance( void ) override
 {
 	if ( IsInitAppResources() )
 	{
@@ -83,12 +83,12 @@ int CApplication::ExitInstance( void )
 	return __super::ExitInstance();
 }
 
-void CApplication::OnInitAppResources( void )
+void CApplication::OnInitAppResources( void ) override
 {
 	__super::OnInitAppResources();
 
-	app::GetLogger()->m_logFileMaxSize = 1 * MegaByte;	// was -1: unlimited log size
-	CAboutBox::s_appIconId = IDR_SHELL_GOODIES_APP;		// will use HugeIcon_48
+	app::GetLogger()->m_logFileMaxSize = 1 * MegaByte;			// was -1: unlimited log size
+	CAboutBox::s_appIconId = IDR_SHELL_GOODIES_APP;				// will use HugeIcon_48
 
 	CImageStore* pSharedStore = GetSharedImageStore();
 

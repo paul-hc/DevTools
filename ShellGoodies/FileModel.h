@@ -30,7 +30,7 @@ namespace func
 }
 
 
-class CFileModel : public CCmdTarget
+class CFileModel : public CCmdTarget		// owned by CShellMenuController
 	, public TSubject
 	, public CInternalChange
 	, private utl::noncopyable
@@ -74,7 +74,7 @@ public:
 	bool PromptExtensionChanges( const std::vector< fs::CPath >& destPaths ) const;
 
 	const ren::TSortingPair& GetRenameSorting( void ) const { return m_renameSorting; }
-	void SetRenameSorting( const ren::TSortingPair& renameSorting ) { m_renameSorting = renameSorting; SortRenameItems(); }
+	void SetRenameSorting( const ren::TSortingPair& renameSorting );
 	void SwapRenameSequence( std::vector< CRenameItem* >& rListSequence, const ren::TSortingPair& renameSorting );
 
 	// TOUCH
@@ -84,6 +84,7 @@ private:
 	static std::tstring FormatPath( const fs::CPath& filePath, fmt::PathFormat format, const CDisplayFilenameAdapter* pDisplayAdapter );
 
 	void SortRenameItems( void );
+	void RegSave( void );
 
 	template< typename ContainerT >
 	void StoreSourcePaths( const ContainerT& sourcePaths );

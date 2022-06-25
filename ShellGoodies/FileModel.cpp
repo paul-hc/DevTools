@@ -52,9 +52,7 @@ CFileModel::CFileModel( svc::ICommandService* pCmdSvc )
 
 CFileModel::~CFileModel()
 {
-	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortBy, m_renameSorting.first );
-	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortAscending, m_renameSorting.second );
-
+	RegSave();
 	Clear();
 }
 
@@ -65,6 +63,12 @@ void CFileModel::Clear( void )
 
 	utl::ClearOwningContainer( m_renameItems );
 	utl::ClearOwningContainer( m_touchItems );
+}
+
+void CFileModel::RegSave( void )
+{
+	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortBy, m_renameSorting.first );
+	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortAscending, m_renameSorting.second );
 }
 
 size_t CFileModel::SetupFromDropInfo( HDROP hDropInfo )
@@ -274,6 +278,14 @@ bool CFileModel::PromptExtensionChanges( const std::vector< fs::CPath >& destPat
 	}
 
 	return true;
+}
+
+void CFileModel::SetRenameSorting( const ren::TSortingPair& renameSorting )
+{
+	m_renameSorting = renameSorting;
+	RegSave();
+
+	SortRenameItems();
 }
 
 void CFileModel::SortRenameItems( void )

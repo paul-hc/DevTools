@@ -127,10 +127,10 @@ void CCmdDashboardDialog::SetupCommandList( void )
 
 		m_commandsList.InsertObjectItem( index, pCmdItem, pCmdItem->GetImageIndex() );		// Source
 
-		if ( const cmd::IFileDetailsCmd* pDetailsCmd = pCmdItem->GetCmdAs< cmd::IFileDetailsCmd >() )
+		if ( const cmd::IFileDetailsCmd* pDetailsCmd = pCmdItem->GetCmdAs<cmd::IFileDetailsCmd>() )
 			m_commandsList.SetSubItemText( index, FileCount, num::FormatNumber( pDetailsCmd->GetFileCount() ) );
 
-		if ( const cmd::IPersistentCmd* pPersistCmd = pCmdItem->GetCmdAs< cmd::IPersistentCmd >() )
+		if ( const cmd::IPersistentCmd* pPersistCmd = pCmdItem->GetCmdAs<cmd::IPersistentCmd>() )
 			m_commandsList.SetSubItemText( index, Timestamp, time_utl::FormatTimestamp( pPersistCmd->GetTimestamp() ) );
 	}
 
@@ -228,7 +228,7 @@ void CCmdDashboardDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPA
 	subItem, pCtrl;
 
 	static const ui::CTextEffect s_editorCmd( ui::Regular, color::Grey40, CLR_NONE );
-	const cmd::IPersistentCmd* pPersistCmd = CReportListControl::AsPtr<CCommandItem>( rowKey )->GetCmdAs< cmd::IPersistentCmd >();
+	const cmd::IPersistentCmd* pPersistCmd = CReportListControl::AsPtr<CCommandItem>( rowKey )->GetCmdAs<cmd::IPersistentCmd>();
 
 	if ( NULL == pPersistCmd )
 		rTextEffect.Combine( s_editorCmd );
@@ -256,7 +256,7 @@ void CCmdDashboardDialog::DoDataExchange( CDataExchange* pDX )
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
 		if ( firstInit )
-			m_enableProperties = NULL == ui::FindAncestorAs< COptionsSheet >( this );		// prevent recursion
+			m_enableProperties = NULL == ui::FindAncestorAs<COptionsSheet>( this );		// prevent recursion
 
 		SetupCommandList();
 		SelectCommandList( 0 );
