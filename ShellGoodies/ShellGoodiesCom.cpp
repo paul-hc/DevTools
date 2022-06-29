@@ -22,13 +22,10 @@ CShellGoodiesCom::CShellGoodiesCom( void )
 	//
 	// Add some Release build diagnostics to ensure that OnInitAppResources() succeeds at this stage:
 	//
-	bool wasAppInit = app::GetApp().IsInitAppResources();
+	app::GetApp().LazyInitAppResources();		// initialize once application resources since this is not a regsvr32.exe invocation
 
-	bool isAppInit = app::GetApp().LazyInitAppResources();		// initialize once application resources since this is not a regsvr32.exe invocation
-
-	if ( wasAppInit || !isAppInit )
-		app::GetLogger()->LogTrace( _T("\n *** CShellGoodiesCom::CShellGoodiesCom() - detected issues on LazyInitAppResources(): wasAppInit=%d, isAppInit=%d  TODO: dig a little deeper into why...\n"),
-			wasAppInit, isAppInit );
+	if ( !app::GetApp().IsInitAppResources() )
+		app::GetLogger()->LogTrace( _T("\n *** CShellGoodiesCom::CShellGoodiesCom() - detected issues on LazyInitAppResources(): isAppInit=false  TODO: dig a little deeper into why...") );
 }
 
 CShellGoodiesCom::~CShellGoodiesCom( void )
