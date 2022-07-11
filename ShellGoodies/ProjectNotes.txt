@@ -14,10 +14,10 @@ DEBUG the shell extension (ShellGoodies64.dll/ShellGoodies32.dll)
 - it doesn't lock the dll, you can set breakpoints in the code for Debug or Release builds.
 	Solution > ShellGoodies > Properties > Debugging:
 		For 32-bit:
-			command: C:\my\Tools\mine\ExplorerBrowser32.exe
+			command: $(MY_TOOLS_MINE)\ExplorerBrowser32.exe
 			working directory: C:\my\download\
 		For 64-bit:
-			command: C:\my\Tools\mine\ExplorerBrowser64.exe
+			command: $(MY_TOOLS_MINE)\ExplorerBrowser64.exe
 			working directory: C:\my\download\
 
 2) Using Windows Explorer - not so good, there are many issues with breaking the program in the debugger, after which the Explorer window becomes inaccessible.

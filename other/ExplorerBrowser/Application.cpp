@@ -57,7 +57,7 @@ BOOL CApplication::InitInstance( void )
 		RUNTIME_CLASS( CBrowserView ) ) );
 
 	// create main MDI Frame window
-	CMainFrame* pMainFrame = new CMainFrame;
+	CMainFrame* pMainFrame = new CMainFrame();
 	if ( NULL == pMainFrame || !pMainFrame->LoadFrame( IDR_MAINFRAME ) )
 	{
 		delete pMainFrame;
