@@ -126,6 +126,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_pFrameEditor( NULL )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_painting( false )
+	, m_applyingCheckStateToSelectedItems( false )
 	, m_stateIconSize( 0, 0 )
 	, m_deleteSrc_DiffEffect( ui::Bold, s_deleteSrcTextColor )
 	, m_mismatchDest_DiffEffect( ui::Bold, s_mismatchDestTextColor )
@@ -1510,21 +1511,23 @@ size_t CReportListControl::ApplyCheckStateToSelectedItems( int toggledIndex, int
 {
 	size_t changedCount = 0;
 
-	if ( IsSelected( toggledIndex ) && IsMultiSelectionList() )		// toggledIndex is part of multiple selection?
-		if ( ui::IsCheckBoxState( checkState, m_pCheckStatePolicy ) )
-		{
-			CScopedInternalChange change( this );
-
-			for ( POSITION pos = GetFirstSelectedItemPosition(); pos != NULL; )
+	if ( !m_applyingCheckStateToSelectedItems )
+		if ( IsSelected( toggledIndex ) && IsMultiSelectionList() )		// toggledIndex is part of multiple selection?
+			if ( ui::IsCheckBoxState( checkState, m_pCheckStatePolicy ) )
 			{
-				int index = GetNextSelectedItem( pos );
+				CScopedInternalChange change( this );
+				CScopedValue<bool> scopedApplyingToSel( &m_applyingCheckStateToSelectedItems, true );
 
-				if ( index != toggledIndex )						// exclude the toggled item
-					if ( ui::IsCheckBoxState( GetCheckState( index ), m_pCheckStatePolicy ) )
-						if ( ModifyCheckState( index, checkState ) )
-							++changedCount;
+				for ( POSITION pos = GetFirstSelectedItemPosition(); pos != NULL; )
+				{
+					int index = GetNextSelectedItem( pos );
+
+					if ( index != toggledIndex )						// exclude the toggled item
+						if ( ui::IsCheckBoxState( GetCheckState( index ), m_pCheckStatePolicy ) )
+							if ( ModifyCheckState( index, checkState ) )
+								++changedCount;
+				}
 			}
-		}
 
 	return changedCount;
 }

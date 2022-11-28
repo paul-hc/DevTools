@@ -661,6 +661,7 @@ private:
 	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop
 private:
 	bool m_painting;										// true during OnPaint() - supresses item text callback for diff columns to prevent default list sub-item draw (diffs are custom drawn)
+	bool m_applyingCheckStateToSelectedItems;				// true during ApplyCheckStateToSelectedItems()
 	mutable CSize m_stateIconSize;							// self-encapsulated, call GetStateIconSize(): cached size of an icon in the StateImageList
 	std::auto_ptr<lv::CNmCheckStatesChanged> m_pNmToggling;	// set during OnLvnItemChanging_Reflect() - user toggling check-state with extended states
 public:
