@@ -173,6 +173,7 @@ namespace fs
 	enum AccessMode { Exist = 0, Write = 2, Read = 4, ReadWrite = 6 };
 
 	bool FileExist( const TCHAR* pFilePath, AccessMode accessMode = Exist );
+	bool IsValidDirectory( const TCHAR* pDirPath );
 
 
 	struct CPathParts
@@ -412,6 +413,20 @@ namespace func
 		}
 	private:
 		const fs::TDirPath& m_dirPath;
+	};
+
+
+	struct AppendToDirPath		// e.g. used to append the same wildcard spec to some dir paths
+	{
+		AppendToDirPath( const fs::CPath& subPath ) : m_subPath( subPath ) {}
+
+		void operator()( fs::CPath& rPath ) const
+		{
+			if ( fs::IsValidDirectory( rPath.GetPtr() ) )
+				rPath /= m_subPath;
+		}
+	private:
+		const fs::CPath& m_subPath;
 	};
 
 

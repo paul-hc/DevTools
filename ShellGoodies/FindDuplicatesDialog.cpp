@@ -318,7 +318,7 @@ bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 		enumer.RefOptions().m_ignorePathMatches.Reset( cvt::CQueryPaths( m_ignorePathItems ).m_paths );
 
 		cvt::CQueryPaths searchPaths( m_searchPathItems );
-		utl::for_each( searchPaths.m_paths, func::AppendPath( m_fileSpecEdit.GetText() ) );
+		utl::for_each( searchPaths.m_paths, func::AppendToDirPath( m_fileSpecEdit.GetText() ) );
 
 		enumer.SearchDuplicates( searchPaths.m_paths );
 		m_duplicateGroups.swap( enumer.m_dupGroupItems );		// exchange ownership
