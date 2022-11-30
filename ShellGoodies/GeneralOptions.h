@@ -27,6 +27,8 @@ struct CGeneralOptions : public TSubject
 	bool operator!=( const CGeneralOptions& right ) const { return !operator==( right ); }
 
 	void ApplyToListCtrl( CReportListControl* pListCtrl ) const;
+private:
+	void InitThumbnailStoreDimensions( void ) const;
 public:
 	// file lists
 	persist int m_smallIconDim, m_largeIconDim;

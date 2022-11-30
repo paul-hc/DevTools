@@ -48,8 +48,8 @@ CGeneralOptions::~CGeneralOptions()
 
 CGeneralOptions& CGeneralOptions::Instance( void )
 {
-	static CGeneralOptions generalOptions;
-	return generalOptions;
+	static CGeneralOptions s_generalOptions;
+	return s_generalOptions;
 }
 
 const std::tstring& CGeneralOptions::GetCode( void ) const
@@ -72,6 +72,8 @@ void CGeneralOptions::LoadFromRegistry( void )
 	m_undoEditingCmds = pApp->GetProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds ) != FALSE;
 	m_trimFname = pApp->GetProfileInt( reg::section, reg::entry_trimFname, m_trimFname ) != FALSE;
 	m_normalizeWhitespace = pApp->GetProfileInt( reg::section, reg::entry_normalizeWhitespace, m_normalizeWhitespace ) != FALSE;
+
+	InitThumbnailStoreDimensions();
 }
 
 void CGeneralOptions::SaveToRegistry( void ) const
@@ -92,11 +94,7 @@ void CGeneralOptions::SaveToRegistry( void ) const
 
 void CGeneralOptions::PostApply( void ) const
 {
-	CFileItemsThumbnailStore& rThumbnailStore = CFileItemsThumbnailStore::Instance();
-	rThumbnailStore.SetGlyphDimension( ui::SmallGlyph, m_smallIconDim );
-	rThumbnailStore.SetGlyphDimension( ui::LargeGlyph, m_largeIconDim );
-	rThumbnailStore.UpdateControls();
-
+	InitThumbnailStoreDimensions();
 	SaveToRegistry();
 }
 
@@ -113,6 +111,15 @@ bool CGeneralOptions::operator==( const CGeneralOptions& right ) const
 		m_undoEditingCmds == right.m_undoEditingCmds &&
 		m_trimFname == right.m_trimFname &&
 		m_normalizeWhitespace == right.m_normalizeWhitespace;
+}
+
+void CGeneralOptions::InitThumbnailStoreDimensions( void ) const
+{
+	CFileItemsThumbnailStore& rThumbnailStore = CFileItemsThumbnailStore::Instance();
+
+	rThumbnailStore.SetGlyphDimension( ui::SmallGlyph, m_smallIconDim );
+	rThumbnailStore.SetGlyphDimension( ui::LargeGlyph, m_largeIconDim );
+	rThumbnailStore.UpdateControls();
 }
 
 void CGeneralOptions::ApplyToListCtrl( CReportListControl* pListCtrl ) const
