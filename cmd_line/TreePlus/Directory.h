@@ -12,6 +12,7 @@ class CTextCell;
 
 class CDirectory : private utl::noncopyable
 {
+private:
 	CDirectory( const CDirectory* pParent, const fs::CPath& subDirPath );
 	CDirectory( const CDirectory* pParent, const CTextCell* pTableFolder );
 

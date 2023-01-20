@@ -63,6 +63,12 @@ World\tFranz Zăicescu\tCântice\n\
 ";
 
 
+	struct CTestCmdLineOptions : CCmdLineOptions		// initialize GraphGuides by default
+	{
+		CTestCmdLineOptions( GuidesProfileType guidesProfileType = GraphGuides ) : CCmdLineOptions() { m_guidesProfileType = guidesProfileType; }
+	};
+
+
 	void ParseResultStream( std::vector< std::wstring >& rLines, std::wistream& is )
 	{
 		rLines.clear();
@@ -110,7 +116,7 @@ void CTreePlusTests::TestOnlyDirectories( void )
 	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	std::wstring result;
-	CCmdLineOptions options;
+	ut::CTestCmdLineOptions options;
 
 	options.m_dirPath = poolDirPath / _T("L1 DirA");
 	result = ut::RunTree( options );
@@ -156,7 +162,7 @@ void CTreePlusTests::TestFilesAndDirectories( void )
 
 	std::wstring result;
 
-	CCmdLineOptions options;
+	ut::CTestCmdLineOptions options;
 	options.m_optionFlags |= app::DisplayFiles;
 
 	options.m_dirPath = poolDirPath / _T("L1 DirA");
@@ -315,7 +321,7 @@ void CTreePlusTests::TestTableInput( void )
 
 	std::tstring arg0 = app::GetModulePath().Get(), arg1 = str::Format( _T("in=%s"), inTextPath.GetPtr() ), arg2 = str::Format( _T("out=%s"), outTextPath.GetPtr() );
 	const TCHAR* cmdLine[] = { arg0.c_str(), arg1.c_str(), arg2.c_str() };
-	CCmdLineOptions options;
+	ut::CTestCmdLineOptions options( TabGuides );
 
 	options.ParseCommandLine( COUNT_OF( cmdLine ), cmdLine );
 	ASSERT_PTR( options.GetTable() );
