@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "utl/targetver.h"
-#include "utl/StdStl.h"				// Standard C++ Library
+#include "utl/utl_base.h"
 
 #include <afxwin.h>					// MFC core and standard components
 #include <afxext.h>					// MFC extensions
@@ -16,6 +15,4 @@
 #include <afxdialogex.h>
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
-#include "utl/CommonDefs.h"
-#include "utl/UI/CommonWinDefs.h"		// min/max
-#include "utl/UI/StdManifest.h"		// include manifest for common controls
+#include "utl/UI/utl_ui.h"

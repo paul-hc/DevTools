@@ -59,6 +59,14 @@
 	#define HR_AUDIT( expr ) utl::Audit( (expr), (#expr) )
 	#define HR_OK( expr ) utl::Check( (expr), (#expr) )
 
+	namespace str
+	{
+		// forward declarations
+		std::string AsNarrow( const std::tstring& text );
+		std::tstring GetTypeName( const type_info& info );
+		std::tstring Format( const TCHAR* pFormat, ... );
+	}
+
 	namespace dbg
 	{
 		inline int GetRefCount( IUnknown* pInterface )
@@ -313,7 +321,6 @@ namespace utl
 
 
 #include "Compare_fwd.h"
-#include "StringBase.h"
 
 
 #endif // CommonDefs_h

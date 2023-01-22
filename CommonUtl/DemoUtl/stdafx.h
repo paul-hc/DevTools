@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "utl/targetver.h"
-#include "utl/StdStl.h"				// Standard C++ Library
+#include "utl/utl_base.h"
 
 #include <afxwin.h>					// MFC core and standard components
 #include <afxext.h>         		// MFC extensions
@@ -13,9 +12,7 @@
 #include <afxdtctl.h>				// MFC support for Internet Explorer 4 Common Controls
 #include <afxcmn.h>					// MFC support for Windows Common Controls
 
-#include "utl/CommonDefs.h"
-#include "utl/UI/CommonWinDefs.h"
-#include "utl/UI/StdManifest.h"		// include manifest for common controls
+#include "utl/UI/utl_ui.h"
 
 
 #ifdef _DEBUG

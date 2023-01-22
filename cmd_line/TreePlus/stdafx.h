@@ -4,10 +4,7 @@
 //
 #pragma once
 
-#include "utl/targetver.h"
-#include "utl/StdStl.h"
-
-#include "utl/CommonDefs.h"
+#include "utl/utl_base.h"
 
 
 #ifdef _DEBUG
