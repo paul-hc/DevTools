@@ -10,6 +10,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Path.hxx"		// ?? needed for VC12
+
 
 namespace fs
 {

@@ -1,15 +1,12 @@
 #pragma once
 
-#include "utl/utl_base.h"
+#include "utl/utl_base.h"			// UTL_BASE library classes
+#include "utl/UI/utl_ui.h"			// UTL_UI library classes
 
-#include <afxwin.h>					// MFC core and standard components
-#include <afxext.h>					// MFC extensions
-#include <afxdisp.h>				// MFC Automation classes
-#include <afxdtctl.h>           	// MFC support for Internet Explorer 4 Common Controls
-#include <afxcmn.h>             	// MFC support for Windows Common Controls
-#include <afxcontrolbars.h>     	// MFC support for ribbons and control bars
-
-#include "utl/UI/utl_ui.h"
+// MFC stuff not actually used in this project:
+//#include <afxdisp.h>				// MFC Automation classes
+//#include <afxdtctl.h>           	// MFC support for Internet Explorer 4 Common Controls
+//#include <afxcontrolbars.h>     	// MFC support for ribbons and control bars
 
 
 #ifdef _DEBUG

@@ -409,6 +409,21 @@
     <ClInclude Include="test\UnitTest.h">
       <Filter>Testing</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithms.hxx">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringBase.hxx">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringBase_fwd.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Path.hxx">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="UnitTest_fwd.h">
+      <Filter>Testing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EnumTags.cpp">
@@ -642,8 +657,11 @@
     <ClCompile Include="test\UnitTest.cpp">
       <Filter>Testing</Filter>
     </ClCompile>
+    <ClCompile Include="StdHashValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="UTL Library.txt" />
+    <Text Include="UTL Libraries.txt" />
   </ItemGroup>
 </Project>
