@@ -21,10 +21,13 @@
 
 namespace ut
 {
+	// Pick test dates outside summer Daylight Savings - there are incompatibility issues starting with Visual C++ 2022,
+	// due to CTime( const FILETIME& fileTime, int nDST = -1 ) constructor implementation!
+	static const CTime s_ct = time_utl::ParseTimestamp( _T("29-11-2017 14:10:00") );
+	static const CTime s_mt = time_utl::ParseTimestamp( _T("29-11-2017 14:20:00") );
+	static const CTime s_at = time_utl::ParseTimestamp( _T("29-11-2017 14:30:00") );
+
 	static const fs::TEnumFlags s_recurse( fs::EF_Recurse );
-	static const CTime s_ct( 2017, 7, 1, 14, 10, 0 );
-	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
-	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
 
 	void testBackupFileFlat( fs::FileContentMatch matchBy );
 	void testBackupFileSubDir( fs::FileContentMatch matchBy );
