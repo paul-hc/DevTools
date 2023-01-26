@@ -65,7 +65,7 @@ namespace mfc
 	class CAutoException : public BaseClass
 	{
 	public:
-		CAutoException( void ) { m_bAutoDelete = false; }
+		CAutoException( void ) { BaseClass::m_bAutoDelete = false; }
 	};
 }
 

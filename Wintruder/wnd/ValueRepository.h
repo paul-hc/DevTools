@@ -2,7 +2,7 @@
 #define ValueRepository_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 
 
 struct CValueStore;
@@ -40,7 +40,7 @@ public:
 	const CValueInfo* FindValue( int value ) const;
 public:
 	std::vector< CValueStore* > m_stores;
-	mutable stdext::hash_map< int, const CValueInfo* > m_idToValuesMap;
+	mutable std::unordered_map< int, const CValueInfo* > m_idToValuesMap;
 };
 
 

@@ -7,7 +7,7 @@
 #include "Range.h"
 #include "ui_fwd.h"
 #include "GdiCoords.h"
-#include <hash_map>
+#include <unordered_map>
 
 
 namespace ui
@@ -571,7 +571,7 @@ namespace ui
 		CFont* Lookup( TFontEffect fontEffect );
 	private:
 		CFont m_sourceFont;
-		stdext::hash_map< TFontEffect, CFont* > m_effectFonts;
+		std::unordered_map< TFontEffect, CFont* > m_effectFonts;
 	};
 
 	inline COLORREF GetInverseColor( COLORREF color ) { return RGB( 255 - GetRValue( color ), 255 - GetGValue( color ), 255 - GetBValue( color ) ); }

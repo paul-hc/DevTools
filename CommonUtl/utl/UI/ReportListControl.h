@@ -17,7 +17,7 @@
 #include <vector>
 #include <list>
 #include <map>
-#include <hash_map>
+#include <unordered_map>
 #include <afxcmn.h>
 
 
@@ -174,7 +174,7 @@ protected:
 	public:
 		TColumn m_srcColumn;
 		TColumn m_destColumn;
-		stdext::hash_map< TRowKey, str::TMatchSequence > m_rowSequences;		// TRowKey is invariant to sorting
+		std::unordered_map< TRowKey, str::TMatchSequence > m_rowSequences;		// TRowKey is invariant to sorting
 	};
 };
 
@@ -650,7 +650,8 @@ private:
 	const ui::ICheckStatePolicy* m_pCheckStatePolicy;		// for extended check states
 
 	typedef std::pair<TRowKey, TColumn> TCellPair;			// invariant to sorting: favour LPARAMs instead of indexes
-	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
+	typedef std::unordered_map< TCellPair, ui::CTextEffect, utl::CPairHasher > TCellTextEffectMap;
+	TCellTextEffectMap m_markedCells;
 
 	std::list< CDiffColumnPair > m_diffColumnPairs;
 

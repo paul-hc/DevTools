@@ -199,7 +199,7 @@ void CTreeControl::MarkItem( HTREEITEM hItem, const ui::CTextEffect& textEfect )
 
 void CTreeControl::UnmarkItem( HTREEITEM hItem )
 {
-	stdext::hash_map< HTREEITEM, ui::CTextEffect >::iterator itFound = m_markedItems.find( hItem );
+	std::unordered_map< HTREEITEM, ui::CTextEffect >::iterator itFound = m_markedItems.find( hItem );
 	if ( itFound != m_markedItems.end() )
 		m_markedItems.erase( itFound );
 }

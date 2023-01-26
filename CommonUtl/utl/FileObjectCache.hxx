@@ -12,7 +12,7 @@ namespace fs
 	inline void CFileObjectCache< PathType, ObjectType >::Clear( void )
 	{
 		mt::CAutoLock lock( &m_cs );
-		for ( typename stdext::hash_map< PathType, TCachedEntry >::iterator it = m_cachedEntries.begin(); it != m_cachedEntries.end(); ++it )
+		for ( typename std::unordered_map< PathType, TCachedEntry >::iterator it = m_cachedEntries.begin(); it != m_cachedEntries.end(); ++it )
 			DeleteObject( it->second );
 		m_cachedEntries.clear();
 		m_expireQueue.clear();
@@ -39,7 +39,7 @@ namespace fs
 	typename const CFileObjectCache< PathType, ObjectType >::TCachedEntry*
 	CFileObjectCache< PathType, ObjectType >::_FindEntry( const PathType& pathKey, bool checkValid ) const
 	{
-		stdext::hash_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
+		std::unordered_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound != m_cachedEntries.end() )
 			if ( !checkValid || fs::FileNotExpired == CheckExpireStatus( pathKey, itFound->second ) )
 				return &itFound->second;
@@ -57,7 +57,7 @@ namespace fs
 
 		// bug fix [2020-03-31] - sometimes _Add collides with an existing thumb
 		//ASSERT( m_cachedEntries.find( pathKey ) == m_cachedEntries.end() );		// must be new entry (before the fix above)
-		stdext::hash_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
+		std::unordered_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound != m_cachedEntries.end() )
 			if ( itFound->second.first == pObject )
 			{
@@ -82,7 +82,7 @@ namespace fs
 	{
 		REQUIRE( m_cachedEntries.size() == m_expireQueue.size() );			// consistent
 
-		stdext::hash_map< PathType, TCachedEntry >::iterator itFound = m_cachedEntries.find( pathKey );
+		std::unordered_map< PathType, TCachedEntry >::iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound == m_cachedEntries.end() )
 			return false;
 

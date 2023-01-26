@@ -2,9 +2,11 @@
 #define FileObjectCache_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include <deque>
 #include <afxmt.h>
+#include "FileSystem_fwd.h"
+#include "MultiThreading.h"
 #include "StdHashValue.h"
 
 
@@ -13,9 +15,6 @@ class CFlagTags;
 
 namespace fs
 {
-	enum FileExpireStatus;
-
-
 	namespace cache
 	{
 		enum StatusFlags
@@ -98,7 +97,7 @@ namespace fs
 		static void DeleteObject( TCachedEntry& entry ) { delete entry.first; }
 	private:
 		size_t m_maxSize;
-		stdext::hash_map< PathType, TCachedEntry > m_cachedEntries;
+		std::unordered_map< PathType, TCachedEntry > m_cachedEntries;
 		std::deque< PathType > m_expireQueue;		// at front the oldest, at back the latest
 	protected:
 		mutable CCriticalSection m_cs;				// serialize cache access for thread safety

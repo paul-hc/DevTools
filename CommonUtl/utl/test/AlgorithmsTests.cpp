@@ -13,6 +13,7 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Algorithms.hxx"
 #include "Resequence.hxx"
 
 

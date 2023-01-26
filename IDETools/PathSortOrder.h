@@ -4,7 +4,7 @@
 
 #include "PublicEnums.h"
 #include "utl/Path.h"
-#include <hash_map>
+#include <unordered_map>
 
 
 namespace fs
@@ -30,7 +30,7 @@ namespace fs
 		void RegisterCustomOrder( const TCHAR extOrderList[] = s_defaultExtOrder, const TCHAR sep[] = _T("|") );		// list of extensions
 		UINT LookupExtOrder( const std::tstring& ext ) const;
 	private:
-		stdext::hash_map< CPath, UINT > m_extToOrderMap;		// use fs::CPath for natural compare
+		std::unordered_map< CPath, UINT > m_extToOrderMap;		// use fs::CPath for natural compare
 		static const TCHAR s_defaultExtOrder[];
 	};
 }

@@ -110,7 +110,7 @@ void CReportListControl::SetupDiffColumnPair( TColumn srcColumn, TColumn destCol
 {
 	m_diffColumnPairs.push_back( CDiffColumnPair( srcColumn, destColumn ) );
 
-	stdext::hash_map< TRowKey, str::TMatchSequence >& rRowSequences = m_diffColumnPairs.back().m_rowSequences;
+	std::unordered_map< TRowKey, str::TMatchSequence >& rRowSequences = m_diffColumnPairs.back().m_rowSequences;
 
 	for ( int index = 0, itemCount = GetItemCount(); index != itemCount; ++index )
 	{

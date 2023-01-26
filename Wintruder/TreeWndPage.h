@@ -2,7 +2,7 @@
 #define TreeWndPage_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include "utl/UI/LayoutPropertyPage.h"
 #include "utl/UI/TreeControl.h"
 #include "utl/UI/TextEffect.h"
@@ -125,7 +125,7 @@ namespace wt
 		CTreeControl* m_pTreeCtrl;
 		CLogger* m_pLogger;
 		ui::CTextEffect m_insertedEffect;
-		stdext::hash_map< HWND, TTreeItemIndent > m_wndToItemMap;		// HWND -> [item, indent]
+		std::unordered_map< HWND, TTreeItemIndent > m_wndToItemMap;		// HWND -> [item, indent]
 	};
 }
 

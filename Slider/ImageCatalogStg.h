@@ -7,7 +7,6 @@
 #include "utl/StructuredStorage.h"
 #include "ICatalogStorage.h"
 #include <set>
-#include <hash_map>
 
 
 namespace wic { enum ImageFormat; }

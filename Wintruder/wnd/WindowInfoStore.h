@@ -2,7 +2,7 @@
 #define WindowInfoStore_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 
 
 // workaround for Windows 10 UIPI: cache window caption and icons for slow windows; windows belonging to processes with different elevation respond slowly to WM_GETTEXT, WM_GETICON, etc
@@ -37,7 +37,7 @@ private:
 	static HICON QueryWndIcon( HWND hWnd );
 	static HICON GetIcon( HWND hWnd );
 private:
-	stdext::hash_map<HWND, CWindowInfo> m_slowCache;			// caches icons for windows that react slowly to WM_GETICON, e.g. some elevated processes running in Windows 10
+	std::unordered_map<HWND, CWindowInfo> m_slowCache;			// caches icons for windows that react slowly to WM_GETICON, e.g. some elevated processes running in Windows 10
 
 	static double s_timeoutSecs;			// threshold for slow windows (0.5 seconds)
 };

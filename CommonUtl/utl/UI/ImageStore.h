@@ -2,7 +2,7 @@
 #define ImageStore_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include "utl/StdHashValue.h"
 #include "Icon.h"
 
@@ -42,21 +42,23 @@ private:
 private:
 	UINT FindAliasIconId( UINT cmdId ) const
 	{
-		stdext::hash_map< UINT, UINT >::const_iterator itFound = m_cmdAliasMap.find( cmdId );
+		std::unordered_map< UINT, UINT >::const_iterator itFound = m_cmdAliasMap.find( cmdId );
 		if ( itFound != m_cmdAliasMap.end() )
 			return itFound->second;					// found icon alias for the command
 		return cmdId;
 	}
 private:
-	stdext::hash_map< UINT, UINT > m_cmdAliasMap;		// cmdId -> iconId: multiple commands sharing the same icon
+	std::unordered_map< UINT, UINT > m_cmdAliasMap;		// cmdId -> iconId: multiple commands sharing the same icon
 
 	typedef std::pair<UINT, IconStdSize> TIconKey;		// <iconId, IconStdSize> - synonym with CIconId with hash value convenience
-	stdext::hash_map< TIconKey, CIcon* > m_iconMap;
+	typedef std::unordered_map< TIconKey, CIcon*, utl::CPairHasher > TIconMap;
+	TIconMap m_iconMap;
 
 	typedef std::pair<UINT, COLORREF> TBitmapKey;		// <iconId, transpColor>
-	stdext::hash_map< TBitmapKey, CBitmap* > m_bitmapMap;	// regular bitmaps look better than menu bitmaps because they retain the alpha channel
+	typedef std::unordered_map< TBitmapKey, CBitmap*, utl::CPairHasher > TBitmapMap;
+	TBitmapMap m_bitmapMap;				// regular bitmaps look better than menu bitmaps because they retain the alpha channel
 
-	stdext::hash_map< UINT, TBitmapPair > m_menuBitmapMap;		// <iconId, <unchecked, checked> >
+	std::unordered_map< UINT, TBitmapPair > m_menuBitmapMap;	// <iconId, <unchecked, checked> >
 
 	std::auto_ptr<CThemeItem> m_pMenuItemBkTheme;
 	std::auto_ptr<CThemeItem> m_pCheckedMenuItemBkTheme;

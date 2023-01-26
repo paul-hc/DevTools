@@ -9,6 +9,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Algorithms.hxx"
+
 
 namespace path
 {
@@ -32,7 +34,7 @@ namespace path
 			fs::CPathParts parts( shortFullPath.Get() );
 
 			const size_t prefixLen = maxFilenameLen - str::GetLength( _T("_ABCDEFAB") ) - parts.m_ext.length();
-			const UINT hashKey = static_cast<UINT>( path::GetHashValue( pFullPath ) );		// hash key is unique for the whole path
+			const UINT hashKey = static_cast<UINT>( path::GetHashValuePtr( pFullPath ) );		// hash key is unique for the whole path
 
 			parts.m_fname = str::Format( _T("%s_%08X"), parts.m_fname.substr( 0, prefixLen ).c_str(), hashKey );	// "prefix_hexHashKey"
 			shortFullPath.Set( parts.MakePath().Get() );

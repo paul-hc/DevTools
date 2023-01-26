@@ -2,16 +2,16 @@
 #define RandomUtilities_h
 #pragma once
 
-#include <xhash>
 #include "Range.h"
 #include "StringBase.h"
+#include "StdHashValue.h"
 
 
 namespace utl
 {
 	inline void SetRandomSeed( size_t seed = ::GetTickCount() )
 	{
-		::srand( stdext::hash_value( seed ) % RAND_MAX );
+		::srand( utl::GetHashValue( seed ) % RAND_MAX );
 	}
 
 	template< typename ValueType >

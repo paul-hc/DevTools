@@ -5,7 +5,6 @@
 #include "utl/PathMap.h"
 #include "ImagePathKey.h"
 #include "WicBitmap.h"
-#include <hash_map>
 
 
 // defines a WIC bitmap frame from a multi-frame image file or embedded file
@@ -88,7 +87,7 @@ private:
 	void SetSharedDecoder( CMultiFrameDecoder* pSharedDecoder );
 	bool LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::TImagePathKey& imageKey );
 private:
-	fs::TImagePathKey m_key;								// path and frame pos
+	fs::TImagePathKey m_key;							// path and frame pos
 	UINT m_frameCount;									// count of frames in a multiple image format
 	const WICPixelFormatGUID* m_pCvtPixelFormat;		// format to which the loaded frame bitmap is converted to (NULL for auto)
 	CMultiFrameDecoder* m_pSharedDecoder;				// only for multi-frame images, otherwise NULL

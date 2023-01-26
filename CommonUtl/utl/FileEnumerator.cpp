@@ -5,7 +5,6 @@
 #include "RuntimeException.h"
 #include "Algorithms.h"
 #include "StringUtilities.h"
-#include <hash_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -185,7 +184,7 @@ namespace fs
 
 		fs::CPathParts parts( filePath.Get() );
 
-		const UINT hashKey = static_cast<UINT>( path::GetHashValue( filePath.GetPtr() ) );		// hash key is unique for the whole path
+		const UINT hashKey = static_cast<UINT>( path::GetHashValue( filePath.Get() ) );		// hash key is unique for the whole path
 		parts.m_fname += str::Format( fmtHashSuffix, hashKey );		// e.g. "fname_hexHashKey"
 		fs::CPath uniqueFilePath = parts.MakePath();
 

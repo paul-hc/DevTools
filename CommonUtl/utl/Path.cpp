@@ -8,8 +8,7 @@
 #include "StringUtilities.h"
 #include "StringIntuitiveCompare.h"
 #include <io.h>
-#include <xhash>
-#include <hash_map>
+#include <unordered_map>
 #include <shlwapi.h>				// for PathCombine
 
 
@@ -166,18 +165,21 @@ namespace path
 		return s_fmtNumSuffix;
 	}
 
-	size_t GetHashValue( const TCHAR* pPath )
+	size_t GetHashValuePtr( const TCHAR* pPath, size_t count /*= utl::npos*/ )
 	{
 		// compute hash value based on lower-case and normalized backslashes
 
-		// inspired from template function in <xhash> for hash of range of elements:
-		//	template< class InIt >
-		//	size_t stdext::_Hash_value( InIt _Begin, InIt _End )
+		// inspired from template class instantiation 'template<> class hash<std::wstring>' from <functional> - hashing mechanism for std::unordered_map, std::unordered_set, etc.
+		size_t hashValue = 2166136261u;
+		size_t pos = 0;
+		size_t lastPos = count != utl::npos ? count : str::GetLength( pPath );
+		size_t stridePos = 1 + lastPos / 10;
 
-		size_t hashValue = 2166136261U;
+		if ( stridePos < lastPos )
+			lastPos -= stridePos;
 
-		for ( const TCHAR* pCh = pPath; *pCh != _T('\0'); ++pCh )
-			hashValue = 16777619U * hashValue ^ static_cast<size_t>( ToEquivalentChar( *pCh ) );
+		for ( ; pos < lastPos; pos += stridePos )
+			hashValue = 16777619u * hashValue ^ static_cast<size_t>( ToEquivalentChar( pPath[ pos ] ) );
 
 		return hashValue;
 	}
@@ -1114,7 +1116,7 @@ namespace pred
 {
 	struct ComparPathDepth
 	{
-		ComparPathDepth( const stdext::hash_map< fs::CPath, size_t >& rFilePathsToDepth ) : m_rFilePathsToDepth( rFilePathsToDepth ) {}
+		ComparPathDepth( const std::unordered_map< fs::CPath, size_t >& rFilePathsToDepth ) : m_rFilePathsToDepth( rFilePathsToDepth ) {}
 
 		CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
 		{
@@ -1127,7 +1129,7 @@ namespace pred
 			return result;
 		}
 	private:
-		const stdext::hash_map< fs::CPath, size_t >& m_rFilePathsToDepth;
+		const std::unordered_map< fs::CPath, size_t >& m_rFilePathsToDepth;
 		pred::CompareNaturalPath m_comparePath;
 	};
 
@@ -1143,7 +1145,7 @@ namespace fs
 {
 	void SortByPathDepth( std::vector< fs::CPath >& rFilePaths, bool ascending /*= true*/ )
 	{
-		stdext::hash_map< fs::CPath, size_t > filePathsToDepth;
+		std::unordered_map< fs::CPath, size_t > filePathsToDepth;
 
 		for ( std::vector< fs::CPath >::const_iterator itFilePath = rFilePaths.begin(); itFilePath != rFilePaths.end(); ++itFilePath )
 			filePathsToDepth[ *itFilePath ] = itFilePath->GetDepth();

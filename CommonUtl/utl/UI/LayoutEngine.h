@@ -2,7 +2,7 @@
 #define LayoutEngine_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include "CtrlInterfaces.h"
 #include "Dialog_fwd.h"
 #include "LayoutMetrics.h"
@@ -96,8 +96,8 @@ private:
 
 	int m_flags;
 	bool m_layoutEnabled;
-	stdext::hash_map< UINT, layout::CControlState > m_controlStates;
-	stdext::hash_map< UINT, ui::ILayoutFrame* > m_buddyCallbacks;		// called back when buddy windows are moved or resized
+	std::unordered_map< UINT, layout::CControlState > m_controlStates;
+	std::unordered_map< UINT, ui::ILayoutFrame* > m_buddyCallbacks;		// called back when buddy windows are moved or resized
 
 	CWnd* m_pDialog;
 	CSize m_minClientSize;

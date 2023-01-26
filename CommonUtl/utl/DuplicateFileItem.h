@@ -4,7 +4,7 @@
 
 #include "FileContent.h"
 #include "FileStateItem.h"
-#include <hash_map>
+#include <unordered_map>
 
 
 namespace utl { interface IProgressService; }
@@ -84,7 +84,7 @@ public:
 	// extract groups with more than 1 item
 	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException );
 private:
-	stdext::hash_map< fs::CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
+	std::unordered_map< fs::CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
 	std::vector< CDuplicateFilesGroup* > m_groups;				// with ownership, in the order they were registered
 };
 

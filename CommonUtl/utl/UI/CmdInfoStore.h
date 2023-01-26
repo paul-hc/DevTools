@@ -2,7 +2,7 @@
 #define CmdInfoStore_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 
 
 namespace ui
@@ -38,7 +38,7 @@ namespace ui
 		bool HandleGetMessageString( std::tstring& rMessage, UINT cmdId );		// status bar info for
 		bool HandleTooltipNeedText( NMHDR* pNmHdr, LRESULT* pResult, const ui::ICustomCmdInfo* pCustomInfo = NULL );	// tooltip notifications (TTN_NEEDTEXTA, TTN_NEEDTEXTW)
 	private:
-		stdext::hash_map< UINT, CCmdInfo > m_cmdInfos;
+		std::unordered_map< UINT, CCmdInfo > m_cmdInfos;
 	public:
 		static const std::tstring m_nilText;		// use to preventing tooltips loaded by default
 		static int m_autoPopDuration;

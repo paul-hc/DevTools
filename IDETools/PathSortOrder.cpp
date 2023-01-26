@@ -57,7 +57,7 @@ namespace fs
 	UINT CExtCustomOrder::LookupExtOrder( const std::tstring& ext ) const
 	{
 		// straight cast to fs::CPath since it's are binary compatible (avoid creating temporary variables)
-		stdext::hash_map< CPath, UINT >::const_iterator itFound = m_extToOrderMap.find( (const fs::CPath&)ext );
+		std::unordered_map< CPath, UINT >::const_iterator itFound = m_extToOrderMap.find( (const fs::CPath&)ext );
 		if ( itFound != m_extToOrderMap.end() )
 			return itFound->second;
 

@@ -49,6 +49,13 @@ private:
 };
 
 
+namespace utl
+{
+	template< typename PtrContainer, typename ClearFunctor >
+	void ClearOwningContainer( PtrContainer& rContainer, ClearFunctor clearFunctor );
+}
+
+
 class CPathItem : public CPathItemBase
 {
 public:
@@ -88,7 +95,7 @@ namespace func
 	template< typename ContainerT >
 	typename ContainerT::value_type FindItemWithPath( const ContainerT& items, const fs::CPath& filePath )
 	{
-		for ( ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 			if ( ( *itItem )->GetFilePath() == filePath )
 				return *itItem;
 

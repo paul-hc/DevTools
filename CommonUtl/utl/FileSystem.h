@@ -99,8 +99,6 @@ namespace fs
 	CTime ReadFileTime( const fs::CPath& filePath, TimeField timeField );
 	inline CTime ReadLastModifyTime( const fs::CPath& filePath ) { return ReadFileTime( filePath, ModifiedDate ); }
 
-	enum FileExpireStatus { FileNotExpired, ExpiredFileModified, ExpiredFileDeleted };
-	const CEnumTags& GetTags_FileExpireStatus( void );
 
 	FileExpireStatus CheckExpireStatus( const fs::CPath& filePath, const CTime& lastModifyTime );
 
@@ -130,16 +128,6 @@ namespace fs
 
 namespace fs
 {
-	template< typename PathType >		// PathType could be any of: const char*, const TCHAR*, std::tstring, fs::CPath
-	void __declspec(noreturn) ThrowFileException( const std::tstring& description, const PathType& filePath,
-												  fs::ExcPolicy policy = fs::RuntimeExc )
-		throws_( CRuntimeException, CFileException* )
-	{
-		fs::RuntimeExc == policy
-			? impl::ThrowFileException( description, str::ValueToString< std::tstring >( filePath ).c_str() )
-			: impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( str::traits::GetCharPtr( filePath ), ERROR_INVALID_ACCESS ) );
-	}
-
 	namespace impl
 	{
 		CFileException* NewLastErrorException( const TCHAR* pFilePath, LONG lastError = ::GetLastError() );
@@ -147,6 +135,17 @@ namespace fs
 
 		void __declspec(noreturn) ThrowMfcErrorAs( ExcPolicy policy, CFileException* pExc ) throws_( CRuntimeException, CFileException* );
 		void __declspec(noreturn) ThrowFileException( const std::tstring& description, const TCHAR* pFilePath, const TCHAR sep[] = _T(": ") ) throws_( CRuntimeException );
+	}
+
+
+	template< typename PathType >		// PathType could be any of: const char*, const TCHAR*, std::tstring, fs::CPath
+	void __declspec(noreturn) ThrowFileException( const std::tstring& description, const PathType& filePath,
+		fs::ExcPolicy policy = fs::RuntimeExc )
+		throws_( CRuntimeException, CFileException* )
+	{
+		fs::RuntimeExc == policy
+			? impl::ThrowFileException( description, str::ValueToString<std::tstring>( filePath ).c_str() )
+			: impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( str::traits::GetCharPtr( filePath ), ERROR_INVALID_ACCESS ) );
 	}
 }
 

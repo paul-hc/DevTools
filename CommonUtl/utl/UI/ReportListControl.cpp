@@ -1872,7 +1872,7 @@ void CReportListControl::MarkCellAt( int index, TColumn subItem, const ui::CText
 
 void CReportListControl::UnmarkCellAt( int index, TColumn subItem )
 {
-	stdext::hash_map< TCellPair, ui::CTextEffect >::iterator itFound = m_markedCells.find( TCellPair( MakeRowKeyAt( index ), subItem ) );
+	TCellTextEffectMap::iterator itFound = m_markedCells.find( TCellPair( MakeRowKeyAt( index ), subItem ) );
 	if ( itFound != m_markedCells.end() )
 		m_markedCells.erase( itFound );
 }

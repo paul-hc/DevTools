@@ -44,7 +44,9 @@ namespace path
 	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight );
 
 	const TCHAR* StdFormatNumSuffix( void );		// "_[%d]"
-	size_t GetHashValue( const TCHAR* pPath );
+
+	size_t GetHashValuePtr( const TCHAR* pPath, size_t count = utl::npos );
+	inline size_t GetHashValue( const std::tstring& filePath ) { return GetHashValuePtr( filePath.c_str(), filePath.length() ); }
 
 
 	struct ToNormal
@@ -278,7 +280,7 @@ namespace fs
 		bool LocateFile( CFileFind& rFindFile ) const;
 		CPath ExtractExistingFilePath( void ) const;
 
-		inline size_t GetHashValue( void ) const { return path::GetHashValue( m_filePath.c_str() ); }
+		inline size_t GetHashValue( void ) const { return path::GetHashValue( m_filePath ); }
 	private:
 		std::tstring m_filePath;
 	};
@@ -292,6 +294,22 @@ namespace fs
 	enum PatternResult { ValidFile, ValidDirectory, InvalidPattern };
 
 	PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::TPatternPath& patternPath );	// a valid file or valid directory path with a wildcards?
+}
+
+
+namespace func
+{
+	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
+	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }					// for uniform path algorithms
+}
+
+
+namespace utl
+{
+	// FWD:
+
+	template< typename ContainerT, typename IteratorT >
+	size_t JoinUnique( ContainerT& rDest, IteratorT itStart, IteratorT itEnd );
 }
 
 
@@ -322,11 +340,7 @@ namespace path
 
 
 	template< typename ContainerT >
-	inline size_t UniquifyPaths( ContainerT& rPaths )
-	{
-		stdext::hash_set< typename ContainerT::value_type > uniquePathIndex;
-		return UniquifyPaths( rPaths, uniquePathIndex );
-	}
+	size_t UniquifyPaths( ContainerT& rPaths );		// vc17: defined in Path.hxx (with <unordered_set> header dependency)
 
 
 	template< typename ContainerT, typename SrcContainerT >
@@ -361,10 +375,14 @@ namespace fs
 }
 
 
-namespace stdext
+template<>
+struct std::hash<fs::CPath>
 {
-	inline size_t hash_value( const fs::CPath& path ) { return path.GetHashValue(); }
-}
+	inline std::size_t operator()( const fs::CPath& filePath ) const /*noexcept*/
+    {
+        return filePath.GetHashValue();
+    }
+};
 
 
 namespace str
@@ -379,10 +397,6 @@ namespace str
 
 namespace func
 {
-	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
-	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }					// for uniform path algorithms
-
-
 	struct ToNameExt
 	{
 		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetFilenamePtr(); }
@@ -634,7 +648,6 @@ namespace pred
 
 #include <map>
 #include <set>
-#include <xhash>
 
 
 namespace fs

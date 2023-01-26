@@ -14,6 +14,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "StringBase.hxx"
+
 
 namespace func
 {
@@ -156,32 +158,32 @@ void CStringTests::TestCharTraits( void )
 void CStringTests::TestValueToString( void )
 {
 	{	// to NARROW
-		ASSERT_EQUAL( "", str::ValueToString< std::string >( "" ) );
-		ASSERT_EQUAL( "", str::ValueToString< std::string >( _T("") ) );
+		ASSERT_EQUAL( "", str::ValueToString<std::string>( "" ) );
+		ASSERT_EQUAL( "", str::ValueToString<std::string>( _T("") ) );
 
-		ASSERT_EQUAL( "x", str::ValueToString< std::string >( 'x' ) );
-		ASSERT_EQUAL( "x", str::ValueToString< std::string >( _T('x') ) );
+		ASSERT_EQUAL( "x", str::ValueToString<std::string>( 'x' ) );
+		ASSERT_EQUAL( "x", str::ValueToString<std::string>( _T('x') ) );
 
-		ASSERT_EQUAL( "abc", str::ValueToString< std::string >( "abc" ) );
-		ASSERT_EQUAL( "abc", str::ValueToString< std::string >( _T("abc") ) );
+		ASSERT_EQUAL( "abc", str::ValueToString<std::string>( "abc" ) );
+		ASSERT_EQUAL( "abc", str::ValueToString<std::string>( _T("abc") ) );
 
-		ASSERT_EQUAL( "name.ext", str::ValueToString< std::string >( fs::CPath( _T("name.ext") ) ) );
-		ASSERT_EQUAL( "37", str::ValueToString< std::string >( 37 ) );
+		ASSERT_EQUAL( "name.ext", str::ValueToString<std::string>( fs::CPath( _T("name.ext") ) ) );
+		ASSERT_EQUAL( "37", str::ValueToString<std::string>( 37 ) );
 	}
 
 	{	// to WIDE
-		ASSERT_EQUAL( L"", str::ValueToString< std::wstring >( "" ) );
-		ASSERT_EQUAL( L"", str::ValueToString< std::wstring >( _T("") ) );
+		ASSERT_EQUAL( L"", str::ValueToString<std::wstring>( "" ) );
+		ASSERT_EQUAL( L"", str::ValueToString<std::wstring>( _T("") ) );
 
-		ASSERT_EQUAL( L"x", str::ValueToString< std::wstring >( 'x' ) );
-		ASSERT_EQUAL( L"x", str::ValueToString< std::wstring >( _T('x') ) );
+		ASSERT_EQUAL( L"x", str::ValueToString<std::wstring>( 'x' ) );
+		ASSERT_EQUAL( L"x", str::ValueToString<std::wstring>( _T('x') ) );
 
-		ASSERT_EQUAL( L"abc", str::ValueToString< std::wstring >( "abc" ) );
-		ASSERT_EQUAL( L"abc", str::ValueToString< std::wstring >( _T("abc") ) );
+		ASSERT_EQUAL( L"abc", str::ValueToString<std::wstring>( "abc" ) );
+		ASSERT_EQUAL( L"abc", str::ValueToString<std::wstring>( _T("abc") ) );
 
-		ASSERT_EQUAL( L"name.ext", str::ValueToString< std::wstring >( fs::CPath( _T("name.ext") ) ) );
+		ASSERT_EQUAL( L"name.ext", str::ValueToString<std::wstring>( fs::CPath( _T("name.ext") ) ) );
 
-		ASSERT_EQUAL( L"37", str::ValueToString< std::wstring >( fs::CPath( _T("37") ) ) );
+		ASSERT_EQUAL( L"37", str::ValueToString<std::wstring>( fs::CPath( _T("37") ) ) );
 	}
 }
 

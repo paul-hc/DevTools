@@ -2,7 +2,7 @@
 #define VisualThemeFallback_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include "StdHashValue.h"
 
 
@@ -47,8 +47,11 @@ private:
 	static bool CustomDrawBk_MenuItem( int stateId, HDC hdc, const RECT& rect );
 	static bool CustomDrawBk_MenuChecked( int stateId, HDC hdc, const RECT& rect );
 private:
-	stdext::hash_map< TClassKey, CCtrlStates > m_classToStateMap;
-	stdext::hash_map< TClassKey, TCustomDrawBkFunc > m_classToCustomBkMap;
+	typedef std::unordered_map< TClassKey, CCtrlStates, utl::CPairHasher > TClassToStateMap;
+	typedef std::unordered_map< TClassKey, TCustomDrawBkFunc, utl::CPairHasher > TClassToCustomBkMap;
+
+	TClassToStateMap m_classToStateMap;
+	TClassToCustomBkMap m_classToCustomBkMap;
 };
 
 

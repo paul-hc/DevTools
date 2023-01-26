@@ -7,31 +7,6 @@
 
 namespace utl
 {
-	// owns a number of shared resources, and controls their destruction; a composite itself
-	// used in app::ExitInstance to release resources automatically
-
-	class CResourcePool : public utl::IMemoryManaged
-	{
-	public:
-		CResourcePool( void ) {}
-		virtual ~CResourcePool();
-
-		template< typename Type >
-		void AddPointer( Type* pointer ) { m_pResources.push_back( new std::auto_ptr<Type>( pointer ) ); }
-
-		template< typename Type >
-		void AddAutoPtr( std::auto_ptr<Type>* pPtr ) { m_pResources.push_back( new CAutoPtrResource<Type>( pPtr ) ); }
-
-		template< typename ComPtrType >
-		void AddComPtr( ComPtrType& rComPtr ) { m_pResources.push_back( new CComPtrResource<ComPtrType>( rComPtr ) ); }
-
-		template< typename ObjectType >
-		void AddAutoClear( ObjectType* pClearable ) { m_pResources.push_back( new CAutoClearResource<ObjectType>( pClearable ) ); }
-	private:
-		std::vector< utl::IMemoryManaged* > m_pResources;
-	};
-
-
 	template< typename Type >
 	class CAutoPtrResource : public utl::IMemoryManaged
 	{
@@ -62,6 +37,31 @@ namespace utl
 		virtual ~CAutoClearResource() { m_pClearable->Clear(); }
 	private:
 		ObjectType* m_pClearable;
+	};
+
+
+	// owns a number of shared resources, and controls their destruction; a composite itself
+	// used in app::ExitInstance to release resources automatically
+
+	class CResourcePool : public utl::IMemoryManaged
+	{
+	public:
+		CResourcePool( void ) {}
+		virtual ~CResourcePool();
+
+		template< typename Type >
+		void AddPointer( Type* pointer ) { m_pResources.push_back( new std::auto_ptr<Type>( pointer ) ); }
+
+		template< typename Type >
+		void AddAutoPtr( std::auto_ptr<Type>* pPtr ) { m_pResources.push_back( new CAutoPtrResource<Type>( pPtr ) ); }
+
+		template< typename ComPtrType >
+		void AddComPtr( ComPtrType& rComPtr ) { m_pResources.push_back( new CComPtrResource<ComPtrType>( rComPtr ) ); }
+
+		template< typename ObjectType >
+		void AddAutoClear( ObjectType* pClearable ) { m_pResources.push_back( new CAutoClearResource<ObjectType>( pClearable ) ); }
+	private:
+		std::vector< utl::IMemoryManaged* > m_pResources;
 	};
 }
 

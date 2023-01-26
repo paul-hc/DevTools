@@ -12,13 +12,15 @@
 #include "RuntimeException.h"
 #include "StringUtilities.h"
 #include <math.h>
-#include <hash_set>
+#include <unordered_set>
 #include <fstream>
 #include <iomanip>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "Path.hxx"
 
 
 namespace numeric

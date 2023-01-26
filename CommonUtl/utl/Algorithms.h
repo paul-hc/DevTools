@@ -82,13 +82,13 @@ namespace utl
 	// container bounds: works with std::list (not random iterator)
 
 	template< typename ContainerT >
-	inline typename const ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
+	inline const typename ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
 
 	template< typename ContainerT >
 	inline typename ContainerT::value_type& Front( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
 
 	template< typename ContainerT >
-	inline typename const ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
+	inline const typename ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
 
 	template< typename ContainerT >
 	inline typename ContainerT::value_type& Back( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
@@ -237,15 +237,7 @@ namespace utl
 	// binary search for ordered containers
 
 	template< typename IteratorT, typename KeyT, typename ToKeyFunc >
-	IteratorT BinaryFind( IteratorT itStart, IteratorT itEnd, const KeyT& key, ToKeyFunc toKeyFunc )
-	{
-		IteratorT itFound = std::lower_bound( itStart, itEnd, key, pred::MakeLessKey( toKeyFunc ) );
-		if ( itFound != itEnd )						// loose match?
-			if ( toKeyFunc( *itFound ) == key )		// exact match?
-				return itFound;
-
-		return itEnd;
-	}
+	IteratorT BinaryFind( IteratorT itStart, IteratorT itEnd, const KeyT& key, ToKeyFunc toKeyFunc );		// vc17: defined in .hxx
 
 	template< typename ContainerT, typename KeyT, typename ToKeyFunc >
 	inline typename ContainerT::const_iterator BinaryFind( const ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
@@ -260,14 +252,14 @@ namespace utl
 	}
 
 	template< typename ContainerT, typename KeyT, typename ToKeyFunc >
-	inline typename size_t BinaryFindPos( const ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
+	inline size_t BinaryFindPos( const ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
 	{
 		typename ContainerT::const_iterator itFound = BinaryFind( container.begin(), container.end(), key, toKeyFunc );
 		return itFound != container.end() ? std::distance( container.begin(), itFound ) : std::tstring::npos;
 	}
 
 	template< typename ContainerT, typename KeyT, typename ToKeyFunc >
-	inline typename bool BinaryContains( const ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
+	inline bool BinaryContains( const ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
 	{
 		return BinaryFind( container.begin(), container.end(), key, toKeyFunc ) != container.end();
 	}
@@ -476,31 +468,7 @@ namespace utl
 
 
 	template< typename PredT, typename ContainerT >
-	size_t Uniquify( ContainerT& rItems, ContainerT* pRemovedDups = static_cast<ContainerT*>( NULL ) )
-	{
-		REQUIRE( PredT::IsBoolPred() );
-
-		typedef typename ContainerT::value_type TValue;
-
-		std::set<TValue, PredT> uniqueIndex;
-		ContainerT tempItems;
-		size_t duplicateCount = 0;
-
-		tempItems.reserve( rItems.size() );
-		for ( typename ContainerT::const_iterator itItem = rItems.begin(), itEnd = rItems.end(); itItem != itEnd; ++itItem )
-			if ( uniqueIndex.insert( *itItem ).second )		// item is unique?
-				tempItems.push_back( *itItem );
-			else
-			{
-				++duplicateCount;
-
-				if ( pRemovedDups != NULL )
-					pRemovedDups->insert( pRemovedDups->end(), *itItem );	// for owning container of pointers: allow client to delete the removed duplicates
-			}
-
-		rItems.swap( tempItems );
-		return duplicateCount;
-	}
+	size_t Uniquify( ContainerT& rItems, ContainerT* pRemovedDups = static_cast<ContainerT*>( NULL ) );
 
 
 	template< typename ContainerT >

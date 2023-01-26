@@ -14,7 +14,7 @@
 #include "utl/UI/SpinEdit.h"
 #include "utl/UI/ThemeStatic.h"
 #include "utl/UI/ThumbPreviewCtrl.h"
-#include <hash_set>
+#include <unordered_set>
 
 
 class CImageView;
@@ -65,7 +65,7 @@ private:
 	const CFileAttr* m_pCaretFileAttr;
 	bool m_isDirty;
 
-	stdext::hash_set< fs::CPath > m_origFilePaths;	// both patterns + found images (for highlighting new patterns/found images)
+	std::unordered_set< fs::CPath > m_origFilePaths;	// both patterns + found images (for highlighting new patterns/found images)
 private:
 	// enum { IDD = IDD_ALBUM_SETTINGS_DIALOG };
 

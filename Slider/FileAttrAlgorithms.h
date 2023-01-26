@@ -4,7 +4,7 @@
 
 #include "utl/ComparePredicates.h"
 #include "FileAttr.h"
-#include <hash_map>
+#include <unordered_map>
 
 
 namespace fattr
@@ -46,7 +46,7 @@ namespace fattr
 		void RestoreOriginalOrder( std::vector< CFileAttr* >* pNewSequence );
 	private:
 		// original order
-		stdext::hash_map< fs::CFlexPath, size_t > m_pathToOrigPosMap;
+		std::unordered_map< fs::CFlexPath, size_t > m_pathToOrigPosMap;
 	};
 }
 

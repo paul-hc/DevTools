@@ -12,6 +12,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/StringBase.hxx"
+
 
 const TCHAR CTransferFuncTests::s_srcFiles[] =
 	_T("SRC\\B\\b1.flac|")

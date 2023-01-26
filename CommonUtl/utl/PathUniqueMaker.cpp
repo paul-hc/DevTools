@@ -61,7 +61,7 @@ UINT CPathUniqueMaker::QueryExistingSequenceCount( const fs::CPath& filePath ) c
 	std::tstring fnameBase = filePath.GetFname();
 	std::tstring filenamePattern = fnameBase + m_fnSuffixPattern + filePath.GetExt();
 
-	for ( stdext::hash_set< fs::CPath >::const_iterator itUniquePath = m_uniquePathsIndex.begin(); itUniquePath != m_uniquePathsIndex.end(); ++itUniquePath )
+	for ( std::unordered_set< fs::CPath >::const_iterator itUniquePath = m_uniquePathsIndex.begin(); itUniquePath != m_uniquePathsIndex.end(); ++itUniquePath )
 		if ( filePath == *itUniquePath )							// direct collision?
 			seqCount = std::max( 1u, seqCount );
 		else if ( parentPath == itUniquePath->GetParentPath() )		// same parent path?

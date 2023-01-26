@@ -184,7 +184,20 @@ private:
 };
 
 
-#include <hash_map>
+#include <unordered_map>
+
+
+typedef std::pair<HMENU, fs::CPath> TMenuPathKey;
+
+
+template<>
+struct std::hash<TMenuPathKey>
+{
+	inline std::size_t operator()( const TMenuPathKey& key ) const
+    {
+        return utl::GetPairHashValue( key );
+    }
+};
 
 
 class CFileMenuBuilder
@@ -207,10 +220,9 @@ private:
 	bool UseSubMenu( const CFolderItem* pFolderItem ) const;
 	UINT GetNextFileItemId( void ) { return m_fileItemId++; }
 private:
-	typedef stdext::hash_map< UINT, const CFileItem* > TMapIdToItem;
+	typedef std::unordered_map< UINT, const CFileItem* > TMapIdToItem;
 
-	typedef std::pair<HMENU, fs::CPath> TMenuPathKey;
-	typedef stdext::hash_map< TMenuPathKey, const CFileItem* > TMapMenuPathToItem;
+	typedef std::unordered_map< TMenuPathKey, const CFileItem* > TMapMenuPathToItem;
 private:
 	const CFolderOptions* m_pOptions;
 	UINT m_fileItemId;							// self-encapsulated

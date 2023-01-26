@@ -32,7 +32,7 @@ bool CVisualThemeFallback::DrawBackground( const wchar_t* pClass, int partId, in
 	TClassKey key( pClass, partId );
 	str::ToUpper( key.first );
 
-	stdext::hash_map< TClassKey, CCtrlStates >::const_iterator itFound = m_classToStateMap.find( key );
+	TClassToStateMap::const_iterator itFound = m_classToStateMap.find( key );
 	if ( itFound != m_classToStateMap.end() )
 	{
 		const TStateSet& stateSet = itFound->second.m_stateSet;
@@ -46,7 +46,7 @@ bool CVisualThemeFallback::DrawBackground( const wchar_t* pClass, int partId, in
 		}
 	}
 
-	stdext::hash_map< TClassKey, TCustomDrawBkFunc >::const_iterator itCustom = m_classToCustomBkMap.find( key );
+	TClassToCustomBkMap::const_iterator itCustom = m_classToCustomBkMap.find( key );
 	if ( itCustom != m_classToCustomBkMap.end() )
 		return itCustom->second( stateId, hdc, rect );
 

@@ -165,7 +165,7 @@ namespace wt
 
 	const TTreeItemIndent* CWndTreeBuilder::FindWndItem( HWND hWnd ) const
 	{
-		stdext::hash_map< HWND, TTreeItemIndent >::const_iterator itFound = m_wndToItemMap.find( hWnd );
+		std::unordered_map< HWND, TTreeItemIndent >::const_iterator itFound = m_wndToItemMap.find( hWnd );
 		return itFound != m_wndToItemMap.end() ? &itFound->second : NULL;
 	}
 

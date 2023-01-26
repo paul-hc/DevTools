@@ -86,6 +86,11 @@ class CEnumTags;
 
 namespace fs
 {
+	enum FileExpireStatus { FileNotExpired, ExpiredFileModified, ExpiredFileDeleted };
+
+	const CEnumTags& GetTags_FileExpireStatus( void );
+
+
 	enum TimeField { CreatedDate, ModifiedDate, AccessedDate, _TimeFieldCount };
 
 	const CEnumTags& GetTags_TimeField( void );

@@ -3,7 +3,8 @@
 #pragma once
 
 #include <limits>
-#include <hash_map>
+#include <unordered_map>
+#include "FileSystem_fwd.h"
 
 
 namespace utl
@@ -91,9 +92,6 @@ namespace crc32
 
 namespace fs
 {
-	enum FileExpireStatus;
-
-
 	class CCrc32FileCache
 	{
 		CCrc32FileCache( void ) {}
@@ -117,7 +115,7 @@ namespace fs
 		};
 
 	private:
-		stdext::hash_map< fs::CPath, CStamp > m_cachedChecksums;
+		std::unordered_map< fs::CPath, CStamp > m_cachedChecksums;
 	};
 }
 

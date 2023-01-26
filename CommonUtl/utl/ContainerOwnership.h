@@ -108,7 +108,7 @@ namespace utl
 		typedef typename std::tr1::remove_pointer<typename PtrContainerT::value_type>::type TItem;
 
 		rItemPtrs.reserve( srcItemPtrs.size() );
-		for ( PtrContainerT::const_iterator itSrcItem = srcItemPtrs.begin(); itSrcItem != srcItemPtrs.end(); ++itSrcItem )
+		for ( typename PtrContainerT::const_iterator itSrcItem = srcItemPtrs.begin(); itSrcItem != srcItemPtrs.end(); ++itSrcItem )
 			rItemPtrs.push_back( new TItem( **itSrcItem ) );
 	}
 
@@ -161,7 +161,7 @@ namespace utl
 		COwningContainer( void ) : ContainerT() {}
 		~COwningContainer() { clear(); }
 
-		void clear( void ) { std::for_each( begin(), end(), DeleteFunc() ); Release(); }
+		void clear( void ) { std::for_each( ContainerT::begin(), ContainerT::end(), DeleteFunc() ); Release(); }
 		void Release( void ) { ContainerT::clear(); }
 	};
 }

@@ -7,7 +7,6 @@
 #include "PathMap.h"
 #include "ErrorHandler.h"
 #include "RuntimeException.h"
-#include <hash_map>
 #include <afxole.h>
 
 

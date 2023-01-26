@@ -35,7 +35,7 @@ CWindowInfoStore& CWindowInfoStore::Instance( void )
 const CWindowInfoStore::CWindowInfo* CWindowInfoStore::FindInfo( HWND hWnd ) const
 {
 	ASSERT_PTR( hWnd );
-	stdext::hash_map<HWND, CWindowInfo>::const_iterator itCached = m_slowCache.find( hWnd );
+	std::unordered_map<HWND, CWindowInfo>::const_iterator itCached = m_slowCache.find( hWnd );
 	return itCached != m_slowCache.end() ? &itCached->second : NULL;
 }
 

@@ -5,7 +5,7 @@
 #include "ListLikeCtrlBase.h"
 #include "BaseTrackMenuWnd.h"
 #include "ui_fwd.h"				// ui::CNmHdr
-#include <hash_map>
+#include <unordered_map>
 
 
 class CTreeControlCustomDraw;
@@ -126,7 +126,7 @@ protected:
 	CMenu m_contextMenu;
 private:
 	CImageList* m_pImageList;			// for TVSIL_NORMAL type
-	stdext::hash_map< HTREEITEM, ui::CTextEffect > m_markedItems;
+	std::unordered_map< HTREEITEM, ui::CTextEffect > m_markedItems;
 
 	UINT m_indentNoImages, m_indentWithImages;
 	mutable CSize m_imageSize;			// self-encapsulated

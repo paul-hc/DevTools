@@ -7,12 +7,15 @@
 #include "RuntimeException.h"
 #include "Algorithms.h"
 #include "TimeUtils.h"
+#include <sys/stat.h>
 #include <stdexcept>
 #include <shlwapi.h>				// for PathRelativePathTo
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "StringBase.hxx"
 
 
 namespace fs
@@ -395,7 +398,7 @@ namespace fs
 	{
 		ASSERT( !path::IsComplex( pFilePath ) );
 
-		_stat64 fileStatus;
+		struct _stat64 fileStatus;
 		if ( 0 == _tstat64( pFilePath, &fileStatus ) )
 			return static_cast<UINT64>( fileStatus.st_size );
 
@@ -404,7 +407,7 @@ namespace fs
 
 	CTime ReadFileTime( const fs::CPath& filePath, TimeField timeField )
 	{
-		_stat64i32 fileStatus;
+		struct _stat64i32 fileStatus;
 		if ( 0 == _tstat( path::ExtractPhysical( filePath.Get() ).c_str(), &fileStatus ) )			// translate to physical path
 			switch ( timeField )
 			{
@@ -475,7 +478,7 @@ namespace fs
 		CTime ReadFileTime( const fs::CPath& filePath, TimeField timeField,
 							fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
 		{
-			_stat64i32 fileStatus;
+			struct _stat64i32 fileStatus;
 			int result = _tstat( path::ExtractPhysical( filePath.Get() ).c_str(), &fileStatus );			// translate to physical path
 			if ( 0 == result )
 				switch ( timeField )

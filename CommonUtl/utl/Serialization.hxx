@@ -13,7 +13,7 @@ namespace serial
 	template< typename PtrContainerT >
 	void Save_CObjects_Dynamic( CArchive& archive, const PtrContainerT& objects )
 	{
-		archive.WriteCount( static_cast<DWORD_PTR>( rObjects.size() ) );			// WriteCount() for backwards compatibility
+		archive.WriteCount( static_cast<DWORD_PTR>( objects.size() ) );			// WriteCount() for backwards compatibility
 
 		for ( typename PtrContainerT::iterator itPtr = objects.begin(); itPtr != objects.end(); ++itPtr )
 			archive << *itPtr;

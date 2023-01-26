@@ -4,7 +4,7 @@
 
 #include "Path.h"
 #include "ShellDialogs_fwd.h"
-#include <hash_map>
+#include <unordered_map>
 
 
 namespace fs
@@ -21,7 +21,7 @@ namespace fs
 
 		// specs
 		bool IsEmpty( void ) const { return m_knownExts.empty(); }
-		const stdext::hash_map< CPath, size_t >& GetMap( void ) const { return m_knownExts; }
+		const std::unordered_map< CPath, size_t >& GetMap( void ) const { return m_knownExts; }
 		const std::tstring& GetAllSpecs( void ) const { return m_allSpecs; }
 		const std::tstring& GetDefaultExt( void ) const { return m_defaultExt; }
 
@@ -35,7 +35,7 @@ namespace fs
 		void Register( const std::tstring& item, size_t filterPos );			// either ext ".bmp" or spec "*.bmp"
 		void RegisterSpecs( const std::tstring& specs, size_t filterPos );		// either ".bmp;.dib" or "*.bmp;*.dib"
 	private:
-		stdext::hash_map< CPath, size_t > m_knownExts;				// known extensions to a filter entry pos (CFilterStore::m_filters)
+		std::unordered_map< CPath, size_t > m_knownExts;			// known extensions to a filter entry pos (CFilterStore::m_filters)
 		std::tstring m_allSpecs;
 		std::tstring m_defaultExt;
 	};
@@ -115,7 +115,7 @@ namespace fs
 		const std::tstring& GetKey( void ) const;
 
 		static std::tstring FormatHashKey( const std::tstring& key );
-		static UINT HashKey( const std::tstring& key ) { return static_cast<UINT>( stdext::hash_value( key.c_str() ) ); }
+		static UINT HashKey( const std::tstring& key );
 	private:
 		std::vector< std::tstring > m_classTags;		// for filters
 		mutable std::tstring m_key;						// self-encapsulated concatenation of class tags
@@ -136,7 +136,7 @@ namespace fs
 	private:
 		typedef std::pair<CFilterStore*, CFilterStore*> TOpenSavePair;			// <filter_open, filter_save>
 
-		stdext::hash_map< std::tstring, TOpenSavePair > m_stores;				// <class_tag, TOpenSavePair>
+		std::unordered_map< std::tstring, TOpenSavePair > m_stores;				// <class_tag, TOpenSavePair>
 	};
 
 } //namespace fs

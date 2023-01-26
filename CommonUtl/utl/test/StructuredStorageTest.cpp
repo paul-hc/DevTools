@@ -9,7 +9,7 @@
 #include "FileEnumerator.h"
 #include "StringUtilities.h"
 #include "StructuredStorage.h"
-#include <hash_set>
+#include <unordered_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,7 +29,7 @@ namespace ut
 		const fs::TDirPath& srcDirPath = src.GetRelativeDirPath();
 
 		fs::CStructuredStorage::CScopedCurrentDir scopedCurrDir( pDocStorage, fs::CStructuredStorage::s_rootFolderName, STGM_READWRITE );
-		stdext::hash_set< fs::TEmbeddedPath > createdFolderPaths;
+		std::unordered_set< fs::TEmbeddedPath > createdFolderPaths;
 
 		for ( std::vector< fs::CPath >::const_iterator itFilePath = src.m_filePaths.begin(); itFilePath != src.m_filePaths.end(); ++itFilePath )
 		{
@@ -111,9 +111,9 @@ void CStructuredStorageTest::TestLongFilenames( void )
 	ASSERT_EQUAL( _T("Not a long filename ABCDEFG.txt"), fs::CStructuredStorage::MakeShortFilename( _T("Not a long filename ABCDEFG.txt") ) );		// 31 chars
 
 	// fs::CStructuredStorage::MaxFilenameLen overflow
-	ASSERT_EQUAL( _T("This is a long fil_A7A42533.txt"), fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCD.txt") ) );		// 32 chars
-	ASSERT_EQUAL( _T("ThisIsASuperLongFi_3B36D197.jpg"), fs::CStructuredStorage::MakeShortFilename( _T("ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.jpg") ) );	// 62 chars
-	ASSERT_EQUAL( _T("thisisasuperlongfi_3B36D197.JPG"), fs::CStructuredStorage::MakeShortFilename( _T("thisisasuperlongfilenameofanunknownimagefilethatkeepsgoing.JPG") ) );	// 62 chars
+	ASSERT_EQUAL( _T("This is a long fil_502A1267.txt"), fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCD.txt") ) );		// 32 chars
+	ASSERT_EQUAL( _T("ThisIsASuperLongFi_A58DA54A.jpg"), fs::CStructuredStorage::MakeShortFilename( _T("ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.jpg") ) );	// 62 chars
+	ASSERT_EQUAL( _T("thisisasuperlongfi_A58DA54A.JPG"), fs::CStructuredStorage::MakeShortFilename( _T("thisisasuperlongfilenameofanunknownimagefilethatkeepsgoing.JPG") ) );	// 62 chars
 
 	// sub-paths
 	ASSERT( fs::CStructuredStorage::MakeShortFilename( _T("my|docs|This is a long filename ABCDxy.txt") ) != fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCDxy.txt") ) );	// 34 chars
@@ -199,7 +199,7 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 	{
 		fs::CPathEnumerator foundEnum;
 		pDocStorage->EnumElements( &foundEnum, Deep );
-		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
+		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( foundEnum ) );
 	}
 
 	// enumerate a sub-storage
@@ -208,23 +208,23 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 		pDocStorage->ChangeCurrentDir( _T("B1") );
 
 		pDocStorage->EnumElements( &foundEnum, Deep );
-		ASSERT_EQUAL( _T("B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
+		ASSERT_EQUAL( _T("B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( foundEnum ) );
 
 		{
 			fs::CRelativePathEnumerator relEnum( pDocStorage->GetCurrentDirPath() );		// relative to "B1"
 			pDocStorage->EnumElements( &relEnum, Deep );
-			ASSERT_EQUAL( _T("b1.txt|b2.txt|SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( relEnum ) );
+			ASSERT_EQUAL( _T("b1.txt|b2.txt|SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( relEnum ) );
 		}
 
 		pDocStorage->ChangeCurrentDir( _T("SD") );		// go deeper to "SD"
 		foundEnum.Clear();
 		pDocStorage->EnumElements( &foundEnum, Deep );
-		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
+		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( foundEnum ) );
 
 		{
 			fs::CRelativePathEnumerator relEnum( pDocStorage->GetCurrentDirPath() );		// relative to "B1\\SD"
 			pDocStorage->EnumElements( &relEnum, Deep );
-			ASSERT_EQUAL( _T("ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( relEnum ) );
+			ASSERT_EQUAL( _T("ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( relEnum ) );
 		}
 	}
 
@@ -235,7 +235,7 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 
 		fs::CPathEnumerator foundEnum;
 		pDocStorage->EnumElements( &foundEnum, Deep );
-		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
+		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( foundEnum ) );
 	}
 }
 

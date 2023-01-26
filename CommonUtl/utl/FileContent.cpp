@@ -7,22 +7,10 @@
 #include "Crc32.h"
 #include "TimeUtils.h"
 #include "StringUtilities.h"
-#include "StdHashValue.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-namespace stdext
-{
-	size_t hash_value( const fs::CFileContentKey& key )
-	{
-		size_t value = stdext::hash_value( key.m_fileSize );
-		utl::hash_combine( value, key.m_crc32 );
-		return value;
-	}
-}
 
 
 namespace fs

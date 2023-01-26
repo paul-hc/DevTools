@@ -5,6 +5,7 @@
 #include "ShellUtilities.h"
 #include "ShellFileDialog.h"
 #include "StringUtilities.h"
+#include "StdHashValue.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,7 +19,7 @@ namespace fs
 	size_t CKnownExtensions::FindExtFilterPos( const TCHAR* pFilePath ) const
 	{
 		CPath ext( path::FindExt( pFilePath ) );
-		stdext::hash_map< fs::CPath, size_t >::const_iterator itFound = m_knownExts.find( ext );
+		std::unordered_map< fs::CPath, size_t >::const_iterator itFound = m_knownExts.find( ext );
 		return itFound != m_knownExts.end() ? itFound->second : utl::npos;
 	}
 
@@ -182,6 +183,11 @@ namespace fs
 		return m_key;
 	}
 
+	UINT CFilterJoiner::HashKey( const std::tstring& key )
+	{
+		return static_cast<UINT>( utl::GetHashValue( key ) );
+	}
+
 	std::tstring CFilterJoiner::FormatHashKey( const std::tstring& key )
 	{
 		return str::Format( _T("filter_%08x"), HashKey( key ) );
@@ -210,7 +216,7 @@ namespace fs
 
 	CFilterStore* CFilterRepository::Lookup( const std::tstring& classTag, shell::BrowseMode browseMode ) const
 	{
-		stdext::hash_map< std::tstring, TOpenSavePair >::const_iterator itFound = m_stores.find( classTag );
+		std::unordered_map< std::tstring, TOpenSavePair >::const_iterator itFound = m_stores.find( classTag );
 		ASSERT( itFound != m_stores.end() );
 
 		if ( shell::FileSaveAs == browseMode && itFound->second.second != NULL )
@@ -247,7 +253,7 @@ namespace fs
 
 	void CFilterRepository::Unregister( CFilterStore* pFilterStore, BrowseFlags browseFlags )
 	{
-		stdext::hash_map< std::tstring, TOpenSavePair >::iterator itFound = m_stores.find( pFilterStore->GetClassTag() );
+		std::unordered_map< std::tstring, TOpenSavePair >::iterator itFound = m_stores.find( pFilterStore->GetClassTag() );
 		ASSERT( itFound != m_stores.end() );
 		TOpenSavePair& rStorePair = itFound->second;
 		switch ( browseFlags )

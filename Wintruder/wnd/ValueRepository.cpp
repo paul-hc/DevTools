@@ -680,6 +680,6 @@ const CValueInfo* CIdentRepository::FindValue( int value ) const
 				  itValueInfo != ( *itStore )->GetValues().end(); ++itValueInfo )
 				m_idToValuesMap[ ( *itValueInfo )->m_value ] = *itValueInfo;
 
-	stdext::hash_map< int, const CValueInfo* >::const_iterator itFound = m_idToValuesMap.find( value );
+	std::unordered_map< int, const CValueInfo* >::const_iterator itFound = m_idToValuesMap.find( value );
 	return itFound != m_idToValuesMap.end() ? itFound->second : NULL;
 }

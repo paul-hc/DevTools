@@ -6,7 +6,7 @@
 #include "utl/FlexPath.h"
 #include "utl/StructuredStorage.h"
 #include "ModelSchema.h"
-#include <hash_set>
+#include <unordered_set>
 
 
 class CCatalogStorageService;
@@ -95,7 +95,7 @@ public:
 
 	bool IsPasswordVerified( const fs::TStgDocPath& docStgPath ) const;
 private:
-	stdext::hash_set< std::tstring > m_verifiedPasswords;
+	std::unordered_set< std::tstring > m_verifiedPasswords;
 };
 
 

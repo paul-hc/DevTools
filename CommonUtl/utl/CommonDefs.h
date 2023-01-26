@@ -44,6 +44,7 @@
 #define persist				// persistent data-member
 #define throws_( ... )
 
+
 #define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
 
 // iterator-like access for STL algorithms

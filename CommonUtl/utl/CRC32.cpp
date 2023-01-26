@@ -78,7 +78,7 @@ namespace fs
 
 	UINT CCrc32FileCache::AcquireCrc32( const fs::CPath& filePath )
 	{
-		stdext::hash_map< fs::CPath, CStamp >::iterator itFound = m_cachedChecksums.find( filePath );
+		std::unordered_map< fs::CPath, CStamp >::iterator itFound = m_cachedChecksums.find( filePath );
 		if ( itFound != m_cachedChecksums.end() )		// found cached?
 		{
 			fs::FileExpireStatus status = CheckExpireStatus( filePath, itFound->second.m_fileSize, itFound->second.m_modifyTime );

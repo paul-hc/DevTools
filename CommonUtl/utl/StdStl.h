@@ -3,6 +3,11 @@
 #pragma once
 
 
+#if _MSC_VER >= 1900		// MSVC++ 14.0+ (Visual Studio 2015)
+	#define _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING		// suppress warning - error C4996: 'std::tr1': warning STL4002: The non-Standard std::tr1 namespace and TR1-only machinery are deprecated and will be REMOVED.
+#endif	//_MSC_VER
+
+
 #define OEMRESOURCE			// load OCR_NORMAL cursor values from winuser.h
 #include <afx.h>			// must include first to prevent: uafxcw.lib(afxmem.obj) : error LNK2005: "void * __cdecl operator new[](unsigned int)" (??_U@YAPAXI@Z) already defined in libcpmt.lib(newaop.obj)
 
@@ -33,8 +38,9 @@
 #pragma warning( disable: 4512 )	// assignment operator could not be generated
 #pragma warning( disable: 4663 )	// C++ language change: to explicitly specialize class template use the following syntax
 
+
 #include <yvals.h>
-#include <typeinfo.h>
+#include <typeinfo>
 #include <utility>
 #include <vector>
 #include <functional>

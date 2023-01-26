@@ -76,7 +76,7 @@ WndImage CWndImageRepository::LookupImage( HWND hWnd ) const
 	std::tstring wndClass = wc::GetClassName( hWnd );
 	str::ToUpper( wndClass );
 
-	stdext::hash_map< std::tstring, WndImage >::const_iterator itFound = m_classToImageMap.find( wndClass );
+	std::unordered_map< std::tstring, WndImage >::const_iterator itFound = m_classToImageMap.find( wndClass );
 	if ( itFound != m_classToImageMap.end() )
 	{
 		switch ( itFound->second )

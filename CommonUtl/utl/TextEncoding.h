@@ -13,8 +13,8 @@ namespace str
 }
 
 
-std::ostream& operator<<( std::ostream& os, const str::char32_t* pText32 );
-std::wostream& operator<<( std::wostream& os, const str::char32_t* pText32 );
+std::ostream& operator<<( std::ostream& os, const char32_t* pText32 );
+std::wostream& operator<<( std::wostream& os, const char32_t* pText32 );
 
 inline std::ostream& operator<<( std::ostream& os, const str::wstring4& text32 ) { return os << text32.c_str(); }
 inline std::wostream& operator<<( std::wostream& os, const str::wstring4& text32 ) { return os << text32.c_str(); }

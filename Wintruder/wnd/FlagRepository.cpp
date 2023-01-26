@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "FlagRepository.h"
 #include "utl/ContainerOwnership.h"
-#include <hash_map>
+#include <unordered_map>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -687,13 +687,13 @@ void CStyleRepository::AddFlagStore( const TCHAR* pWndClassAliases, CFlagInfo pF
 
 const CFlagStore* CStyleRepository::FindSpecificStore( const std::tstring& wndClass ) const
 {
-	static stdext::hash_map< std::tstring, CFlagStore* > classToStoreMap;
+	static std::unordered_map< std::tstring, CFlagStore* > classToStoreMap;
 	if ( classToStoreMap.empty() )		// init map once
 		for ( std::vector< CFlagStore* >::const_iterator itStore = m_specificStores.begin(); itStore != m_specificStores.end(); ++itStore )
 			for ( std::vector< std::tstring >::const_iterator itWndClass = ( *itStore )->m_wndClasses.begin(); itWndClass != ( *itStore )->m_wndClasses.end(); ++itWndClass )
 				classToStoreMap[ str::MakeUpper( *itWndClass ) ] = *itStore;		// class name key in upper case
 
-	stdext::hash_map< std::tstring, CFlagStore* >::const_iterator itFound = classToStoreMap.find( str::MakeUpper( wndClass ) );
+	std::unordered_map< std::tstring, CFlagStore* >::const_iterator itFound = classToStoreMap.find( str::MakeUpper( wndClass ) );
 
 	return itFound != classToStoreMap.end() ? itFound->second : NULL;
 }
@@ -745,13 +745,13 @@ CStyleExRepository& CStyleExRepository::Instance( void )
 
 const CFlagStore* CStyleExRepository::FindStore( const std::tstring& wndClass /*= std::tstring()*/ ) const
 {
-	static stdext::hash_map< std::tstring, CFlagStore* > classToStoreMap;
+	static std::unordered_map< std::tstring, CFlagStore* > classToStoreMap;
 	if ( classToStoreMap.empty() )		// init map once
 		for ( std::vector< CFlagStore* >::const_iterator itStore = m_stores.begin(); itStore != m_stores.end(); ++itStore )
 			for ( std::vector< std::tstring >::const_iterator itWndClass = ( *itStore )->m_wndClasses.begin(); itWndClass != ( *itStore )->m_wndClasses.end(); ++itWndClass )
 				classToStoreMap[ str::MakeUpper( *itWndClass ) ] = *itStore;		// class name key in upper case
 
-	stdext::hash_map< std::tstring, CFlagStore* >::const_iterator itFound = classToStoreMap.find( str::MakeUpper( wndClass ) );
+	std::unordered_map< std::tstring, CFlagStore* >::const_iterator itFound = classToStoreMap.find( str::MakeUpper( wndClass ) );
 
 	return itFound != classToStoreMap.end() ? itFound->second : NULL;
 }

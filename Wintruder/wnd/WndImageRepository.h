@@ -2,7 +2,7 @@
 #define WndImageRepository_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 
 
 enum WndImage
@@ -34,7 +34,7 @@ public:
 
 	WndImage LookupImage( HWND hWnd ) const;
 private:
-	stdext::hash_map< std::tstring, WndImage > m_classToImageMap;
+	std::unordered_map< std::tstring, WndImage > m_classToImageMap;
 	CImageList m_imageList;
 };
 

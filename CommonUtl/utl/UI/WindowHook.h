@@ -2,7 +2,7 @@
 #define WindowHook_h
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 
 
 // Provides a convenient way of hooking windows (sub-classing the window procedure).
@@ -38,7 +38,7 @@ private:
 	void UnregisterHook( void );
 	static void UnregisterAllHooksForWindow( HWND hWndHooked );
 private:
-	typedef stdext::hash_map< HWND, CWindowHook* > THookMap;
+	typedef std::unordered_map< HWND, CWindowHook* > THookMap;
 
 	static CWindowHook* FindHook( HWND hWndHooked );
 	static THookMap& GetHookMap( void );

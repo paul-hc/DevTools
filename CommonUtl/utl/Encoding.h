@@ -26,13 +26,17 @@ namespace fs
 }
 
 
-namespace str
-{
-	// introducing char32_t just for illustration - no support yet implemented in STL or Windows
+#if _MSC_VER <= 1700		// vc11 (VS-2012)
 
+	// introducing char32_t just for illustration - no support yet implemented in STL or Windows
 	typedef unsigned long char32_t;				// UTF32, e.g. U'a'
 
-	typedef std::basic_string< char32_t > wstring4;
+#endif
+
+
+namespace str
+{
+	typedef std::basic_string<char32_t> wstring4;
 }
 
 
@@ -65,7 +69,7 @@ namespace func
 	template<>
 	struct CharEncoder< fs::UTF32_be_bom >
 	{
-		str::char32_t operator()( str::char32_t chr ) const
+		char32_t operator()( char32_t chr ) const
 		{
 			return endian::GetBytesSwapped<endian::Little, endian::Big>()( chr );
 		}
@@ -94,7 +98,7 @@ namespace func
 	template<>
 	struct CharDecoder< fs::UTF32_be_bom >
 	{
-		str::char32_t operator()( str::char32_t beChr ) const
+		char32_t operator()( char32_t beChr ) const
 		{
 			return endian::GetBytesSwapped<endian::Big, endian::Little>()( beChr );
 		}

@@ -4,7 +4,7 @@
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/TextFileIo.h"
-#include <hash_set>
+#include <unordered_set>
 #include <deque>
 
 #ifdef _DEBUG
@@ -122,7 +122,7 @@ void CTable::ParseRows( std::vector< std::tstring >& rRows, bool sortRows )
 	if ( sortRows )
 		std::sort( rRows.begin(), rRows.end(), pred::TLess_StringyIntuitive() );
 
-	stdext::hash_set< std::tstring > uniqueRows;
+	std::unordered_set< std::tstring > uniqueRows;
 
 	for ( std::vector< std::tstring >::const_iterator itRow = rRows.begin(); itRow != rRows.end(); ++itRow )
 		if ( uniqueRows.insert( *itRow ).second )		// is row unique? - filter duplicate rows

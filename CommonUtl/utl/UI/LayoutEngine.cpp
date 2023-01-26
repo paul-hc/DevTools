@@ -91,7 +91,7 @@ void CLayoutEngine::Reset( void )
 	m_nonClientSize.cx = m_nonClientSize.cy = 0;
 	m_previousSize.cx = m_previousSize.cy = 0;
 
-	for ( stdext::hash_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+	for ( std::unordered_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 		itCtrlState->second.ResetCtrl();
 
 	m_hiddenGroups.clear();
@@ -114,7 +114,7 @@ void CLayoutEngine::SetupControlStates( void )
 	ASSERT( m_controlStates.empty() || !m_controlStates.begin()->second.IsCtrlInit() );		// initialize once
 
 	bool anyRepaintCtrl = false;
-	for ( stdext::hash_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+	for ( std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 	{
 		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::DoRepaint ) )
 			anyRepaintCtrl = true;
@@ -138,7 +138,7 @@ void CLayoutEngine::SetupControlStates( void )
 	for ( ; hCtrl != NULL; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 		if ( UINT ctrlId = ::GetDlgCtrlID( hCtrl ) )								// ignore child dialogs in a property sheet
 		{
-			stdext::hash_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.find( ctrlId );
+			std::unordered_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.find( ctrlId );
 			layout::CControlState* pControlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : NULL;
 
 			if ( ui::IsGroupBox( hCtrl ) )
@@ -191,7 +191,7 @@ void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* p
 
 bool CLayoutEngine::AnyRepaintCtrl( void ) const
 {
-	for ( stdext::hash_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+	for ( std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::DoRepaint ) )
 			return true;
 
@@ -206,7 +206,7 @@ void CLayoutEngine::SetLayoutEnabled( bool layoutEnabled /*= true*/ )
 		LayoutControls();
 	else
 	{
-		for ( stdext::hash_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+		for ( std::unordered_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 			itCtrlState->second.ResetCtrl();
 	}
 }
@@ -316,7 +316,7 @@ bool CLayoutEngine::LayoutSmoothly( const CSize& delta )
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != NULL; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
-		stdext::hash_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.find( ctrlId );
+		std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.find( ctrlId );
 
 		if ( const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : NULL )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
@@ -349,7 +349,7 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != NULL; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
-		stdext::hash_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.find( ctrlId );
+		std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.find( ctrlId );
 		const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : NULL;
 		if ( pCtrlState != NULL )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
@@ -381,7 +381,7 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 
 layout::TStyle CLayoutEngine::FindLayoutStyle( UINT ctrlId ) const
 {
-	stdext::hash_map< UINT, layout::CControlState >::const_iterator itFound = m_controlStates.find( ctrlId );
+	std::unordered_map< UINT, layout::CControlState >::const_iterator itFound = m_controlStates.find( ctrlId );
 	return itFound != m_controlStates.end() ? itFound->second.GetLayoutStyle( false ) : layout::None;
 }
 
@@ -429,7 +429,7 @@ ui::ILayoutFrame* CLayoutEngine::FindControlLayoutFrame( HWND hCtrl ) const
 	if ( ui::ILayoutFrame* pControlLayoutFrame = dynamic_cast<ui::ILayoutFrame*>( CWnd::FromHandlePermanent( hCtrl ) ) )
 		return pControlLayoutFrame;
 
-	stdext::hash_map< UINT, ui::ILayoutFrame* >::const_iterator itFound = m_buddyCallbacks.find( ::GetDlgCtrlID( hCtrl ) );
+	std::unordered_map< UINT, ui::ILayoutFrame* >::const_iterator itFound = m_buddyCallbacks.find( ::GetDlgCtrlID( hCtrl ) );
 	if ( itFound != m_buddyCallbacks.end() )
 		return itFound->second;
 

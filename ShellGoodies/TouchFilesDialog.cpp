@@ -29,6 +29,7 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/Algorithms.hxx"
 #include "utl/UI/ReportListControl.hxx"
 
 

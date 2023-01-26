@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Path.h"
-#include <hash_map>
+#include <unordered_map>
 
 
 class CPathRenamePairs
@@ -58,7 +58,7 @@ private:
 	bool IsConsistent( void ) const { return m_pairs.size() == m_pathToIndexMap.size(); }
 private:
 	TPairVector m_pairs;										// maintains the order for sequence generation
-	stdext::hash_map< fs::CPath, size_t > m_pathToIndexMap;		// map src -> m_pairs.index
+	std::unordered_map< fs::CPath, size_t > m_pathToIndexMap;	// map src -> m_pairs.index
 };
 
 

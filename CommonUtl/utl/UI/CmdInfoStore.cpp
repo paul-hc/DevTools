@@ -54,7 +54,7 @@ namespace ui
 
 	const CCmdInfo* CCmdInfoStore::FindInfo( UINT cmdId ) const
 	{
-		stdext::hash_map< UINT, CCmdInfo >::const_iterator itFound = m_cmdInfos.find( cmdId );
+		std::unordered_map< UINT, CCmdInfo >::const_iterator itFound = m_cmdInfos.find( cmdId );
 		return itFound != m_cmdInfos.end() ? &itFound->second : NULL;
 	}
 

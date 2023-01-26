@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Path.h"
-#include <hash_set>
+#include <unordered_set>
 
 
 // Generates unique paths by suffixing with a sequence count on filename collisions, while maintaining an index of existing paths.
@@ -54,7 +54,7 @@ private:
 	const TCHAR* m_pFmtNumSuffix;
 	std::tstring m_fnSuffixPattern;		// e.g. "_[*]" for "_[%d]"
 
-	stdext::hash_set< fs::CPath > m_uniquePathsIndex;
+	std::unordered_set< fs::CPath > m_uniquePathsIndex;
 };
 
 

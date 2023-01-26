@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ComparePredicates.h"
-#include "StdHashValue.h"			// for stdext::hash_value
+#include "StdHashValue.h"
 #include "FlexPath.h"
 #include <thumbcache.h>				// IThumbnailCache, CLSID_ThumbnailCache
 
@@ -52,13 +52,14 @@ struct CThumbKey : public WTS_THUMBNAILID
 };
 
 
-namespace stdext
+template<>
+struct std::hash<WTS_THUMBNAILID>
 {
-	inline size_t hash_value( const WTS_THUMBNAILID& id )
-	{
-		return hash_value( CThumbKey::ToPair( id ) );
-	}
-}
+	inline std::size_t operator()( const WTS_THUMBNAILID& id ) const /*noexcept*/
+    {
+        return utl::GetPairHashValue( CThumbKey::ToPair( id ) );
+    }
+};
 
 
 #endif // Thumbnailer_fwd_h

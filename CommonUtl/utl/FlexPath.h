@@ -88,10 +88,14 @@ namespace path
 }
 
 
-namespace stdext
+template<>
+struct std::hash<fs::CFlexPath>
 {
-	inline size_t hash_value( const fs::CFlexPath& path ) { return path.GetHashValue(); }
-}
+	inline std::size_t operator()( const fs::CFlexPath& filePath ) const /*noexcept*/
+    {
+        return filePath.GetHashValue();
+    }
+};
 
 
 namespace pred

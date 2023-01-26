@@ -209,7 +209,7 @@ namespace str
 	template< typename CharT >
 	inline bool PopBackDelim( std::basic_string<CharT>& rText, CharT delim )
 	{
-		std::basic_string<CharT>::iterator itLast = rText.end();
+		typename std::basic_string<CharT>::iterator itLast = rText.end();
 
 		if ( rText.empty() || *--itLast != delim )
 			return false;
@@ -289,15 +289,67 @@ namespace str
 }
 
 
+namespace func
+{
+	inline const std::tstring& StringOf( const std::tstring& filePath ) { return filePath; }		// for uniform string algorithms
+
+
+	namespace tor
+	{
+		struct StringOf
+		{
+			template< typename StringyT >
+			const std::tstring& operator()( const StringyT& value ) const { return func::StringOf( value ); }
+		};
+	}
+
+
+	template< typename CharT >
+	inline CharT toupper( CharT ch, const std::locale& loc = str::GetUserLocale() )
+	{
+		return std::toupper( ch, loc );
+	}
+
+	template< typename CharT >
+	inline CharT tolower( CharT ch, const std::locale& loc = str::GetUserLocale() )
+	{
+		return std::tolower( ch, loc );
+	}
+
+
+	struct ToUpper
+	{
+		ToUpper( const std::locale& loc = str::GetUserLocale() ) : m_locale( loc ) {}
+
+		template< typename CharT >
+		CharT operator()( CharT ch ) const
+		{
+			return std::toupper( ch, m_locale );
+		}
+	private:
+		const std::locale& m_locale;
+	};
+
+
+	struct ToLower
+	{
+		ToLower( const std::locale& loc = str::GetUserLocale() ) : m_locale( loc ) {}
+
+		template< typename CharT >
+		CharT operator()( CharT ch ) const
+		{
+			return std::tolower( ch, m_locale );
+		}
+	private:
+		const std::locale& m_locale;
+	};
+}
+
+
 namespace str
 {
 	template< typename StringT, typename ValueT >
-	StringT ValueToString( const ValueT& value )
-	{
-		std::basic_ostringstream< typename StringT::value_type > oss;
-		oss << value;
-		return oss.str();
-	}
+	StringT ValueToString( const ValueT& value );
 
 
 	template< typename StringT >
@@ -372,63 +424,6 @@ namespace str
 		rPartsPair.second = MakePart( spec.c_str() + sepPos + 1 );
 		return true;
 	}
-}
-
-
-namespace func
-{
-	inline const std::tstring& StringOf( const std::tstring& filePath ) { return filePath; }		// for uniform string algorithms
-
-
-	namespace tor
-	{
-		struct StringOf
-		{
-			template< typename StringyT >
-			const std::tstring& operator()( const StringyT& value ) const { return func::StringOf( value ); }
-		};
-	}
-
-
-	template< typename CharT >
-	inline CharT toupper( CharT ch, const std::locale& loc = str::GetUserLocale() )
-	{
-		return std::toupper( ch, loc );
-	}
-
-	template< typename CharT >
-	inline CharT tolower( CharT ch, const std::locale& loc = str::GetUserLocale() )
-	{
-		return std::tolower( ch, loc );
-	}
-
-
-	struct ToUpper
-	{
-		ToUpper( const std::locale& loc = str::GetUserLocale() ) : m_locale( loc ) {}
-
-		template< typename CharT >
-		CharT operator()( CharT ch ) const
-		{
-			return std::toupper( ch, m_locale );
-		}
-	private:
-		const std::locale& m_locale;
-	};
-
-
-	struct ToLower
-	{
-		ToLower( const std::locale& loc = str::GetUserLocale() ) : m_locale( loc ) {}
-
-		template< typename CharT >
-		CharT operator()( CharT ch ) const
-		{
-			return std::tolower( ch, m_locale );
-		}
-	private:
-		const std::locale& m_locale;
-	};
 }
 
 
@@ -564,7 +559,7 @@ namespace str
 	{
 		// build a vector copy of source characters replacing all sepCh with '\0'
 		rItems.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// copy the EOS char
-		for ( std::vector<CharT>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+		for ( typename std::vector<CharT>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
 			if ( sepCh == *itItem )
 				*itItem = 0;
 	}
@@ -575,7 +570,7 @@ namespace str
 		const CharT* pSepEnd = str::end( pSepTokens );
 		// build a vector copy of source characters replacing any chars in pSepTokens with '\0'
 		rItems.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// copy the EOS char
-		for ( std::vector<CharT>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+		for ( typename std::vector<CharT>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
 			if ( std::find( pSepTokens, pSepEnd, *itItem ) != pSepEnd )				// any sep token
 				*itItem = 0;
 	}

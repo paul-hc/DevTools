@@ -6,7 +6,7 @@
 #include "ICounter.h"
 #include "Range.h"
 #include <set>
-#include <hash_set>
+#include <unordered_set>
 
 
 namespace fs
@@ -122,7 +122,7 @@ namespace fs
 
 		utl::CCounter m_depthCounter;				// counts recursion depth
 	private:
-		mutable stdext::hash_set< fs::CPath > m_uniquePaths;	// files + sub-directories found
+		mutable std::unordered_set< fs::CPath > m_uniquePaths;	// files + sub-directories found
 		mutable std::set< fs::CPath > m_ignoredPaths;			// files + sub-dirs ignored or filtered-out
 	public:
 		std::vector< fs::TDirPath > m_subDirPaths;	// found sub-directories

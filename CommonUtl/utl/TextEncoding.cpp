@@ -11,14 +11,14 @@
 #endif
 
 
-std::ostream& operator<<( std::ostream& os, const str::char32_t* pText32 )
+std::ostream& operator<<( std::ostream& os, const char32_t* pText32 )
 {
 	if ( NULL == pText32 )
 		return os << "<NULL>";
 	return os << str::ToWide( pText32 );
 }
 
-std::wostream& operator<<( std::wostream& os, const str::char32_t* pText32 )
+std::wostream& operator<<( std::wostream& os, const char32_t* pText32 )
 {
 	if ( NULL == pText32 )
 		return os << "<NULL>";
@@ -34,7 +34,7 @@ namespace fs
 		{
 			sizeof( char ), sizeof( char ),						// ANSI_UTF8, UTF8_bom
 			sizeof( wchar_t ), sizeof( wchar_t ),				// UTF16_LE_bom, UTF16_be_bom
-			sizeof( str::char32_t ), sizeof( str::char32_t )	// UTF32_LE_bom, UTF32_be_bom
+			sizeof( char32_t ), sizeof( char32_t )	// UTF32_LE_bom, UTF32_be_bom
 		};
 
 		ASSERT( encoding < _Encoding_Count );

@@ -94,10 +94,17 @@ namespace fs
 }
 
 
-namespace stdext
+#include "StdHashValue.h"
+
+
+template<>
+struct std::hash<fs::CFileContentKey>
 {
-	size_t hash_value( const fs::CFileContentKey& key );
-}
+	inline std::size_t operator()( const fs::CFileContentKey& key ) const /*noexcept*/
+    {
+        return utl::GetHashCombine( key.m_fileSize, key.m_crc32 );
+    }
+};
 
 
 #endif // FileContent_h

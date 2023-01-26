@@ -341,6 +341,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StdHashValue.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\StdHashValue.h"
 				>
 			</File>
@@ -362,6 +366,10 @@
 			>
 			<File
 				RelativePath=".\Algorithms.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Algorithms.hxx"
 				>
 			</File>
 			<File
@@ -549,6 +557,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StringBase.hxx"
+				>
+			</File>
+			<File
 				RelativePath=".\StringCompare.cpp"
 				>
 			</File>
@@ -701,6 +713,10 @@
 				</File>
 				<File
 					RelativePath=".\Path.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Path.hxx"
 					>
 				</File>
 				<File

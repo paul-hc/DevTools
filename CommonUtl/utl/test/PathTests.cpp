@@ -8,6 +8,7 @@
 #include "FlexPath.h"
 #include "ContainerOwnership.h"
 #include "StringUtilities.h"
+#include "StdHashValue.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -902,22 +903,20 @@ void CPathTests::TestFlexPath( void )
 
 void CPathTests::TestPathHashValue( void )
 {
-	static const TCHAR s_pathChars[] = _T("C:\\Images/fruit.stg>Europe/apple.jpg");
-	static const size_t hashChars = stdext::hash_value( s_pathChars );
+	static const fs::CPath s_path = _T("C:\\Images/fruit.stg>Europe/apple.jpg");
+	static const size_t strHashValue = std::hash<std::tstring>()( s_path.Get() );
 
-	std::tstring pathString = s_pathChars;
-	ASSERT_EQUAL( hashChars, stdext::hash_value( pathString ) );
+	const size_t pathHashValue = path::GetHashValue( s_path.Get() );
+	ASSERT( pathHashValue != strHashValue );		// strHashValue is sensitive to capitalization
 
-	const size_t hashPathChars = path::GetHashValue( s_pathChars );
-	ASSERT( hashPathChars != hashChars );
+	ASSERT_EQUAL( pathHashValue, s_path.GetHashValue() );
 
-	fs::CPath path( pathString );
-	ASSERT_EQUAL( hashPathChars, stdext::hash_value( path ) );
+	ASSERT_EQUAL( pathHashValue, std::hash<fs::CPath>()( s_path ) );
 
-	fs::CFlexPath flexPath( pathString );
-	ASSERT_EQUAL( hashPathChars, stdext::hash_value( flexPath ) );
+	fs::CFlexPath flexPath( s_path.Get() );
+	ASSERT_EQUAL( pathHashValue, utl::GetHashValue( flexPath ) );		// aka std::hash<fs::CPath>()( flexPath )
 
-	ASSERT_EQUAL( stdext::hash_value( fs::CPath( _T("C:\\Images/fruit.stg\\Europe/apple.jpg") ) ), stdext::hash_value( fs::CPath( _T("C:/IMAGES/FRUIT.STG/EUROPE/APPLE.JPG") ) ) );
+	ASSERT_EQUAL( std::hash<fs::CPath>()( fs::CPath( _T("C:\\Images/fruit.stg\\Europe/apple.jpg") ) ), std::hash<fs::CPath>()( fs::CPath( _T("C:/IMAGES/FRUIT.STG/EUROPE/APPLE.JPG") ) ) );
 }
 
 
