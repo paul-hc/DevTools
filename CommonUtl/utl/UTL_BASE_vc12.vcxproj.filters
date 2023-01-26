@@ -29,6 +29,9 @@
     <Filter Include="utl\Input/Output">
       <UniqueIdentifier>{c0953c49-6210-4af2-a4c8-e2ad2f4eb967}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Testing">
+      <UniqueIdentifier>{fd286301-84ff-42ec-9601-092632a6422b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonDefs.h">
@@ -253,9 +256,6 @@
     <ClInclude Include="test\LcsTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
-    <ClInclude Include="test\MockObject.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
     <ClInclude Include="test\NumericTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
@@ -280,13 +280,7 @@
     <ClInclude Include="test\StructuredStorageTest.h">
       <Filter>Tests</Filter>
     </ClInclude>
-    <ClInclude Include="test\Test.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
     <ClInclude Include="test\ThreadingTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\UnitTest.h">
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="test\UtlConsoleTests.h">
@@ -405,6 +399,15 @@
     </ClInclude>
     <ClInclude Include="utl_base.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MockObject.h">
+      <Filter>Testing</Filter>
+    </ClInclude>
+    <ClInclude Include="test\Test.h">
+      <Filter>Testing</Filter>
+    </ClInclude>
+    <ClInclude Include="test\UnitTest.h">
+      <Filter>Testing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -543,9 +546,6 @@
     <ClCompile Include="test\LcsTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
-    <ClCompile Include="test\MockObject.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
     <ClCompile Include="test\NumericTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
@@ -570,13 +570,7 @@
     <ClCompile Include="test\StructuredStorageTest.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
-    <ClCompile Include="test\Test.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
     <ClCompile Include="test\ThreadingTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="test\UnitTest.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="test\UtlConsoleTests.cpp">
@@ -638,6 +632,15 @@
     </ClCompile>
     <ClCompile Include="TextClipboard.cpp">
       <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="test\MockObject.cpp">
+      <Filter>Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="test\Test.cpp">
+      <Filter>Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="test\UnitTest.cpp">
+      <Filter>Testing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
