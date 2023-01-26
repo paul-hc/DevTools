@@ -352,6 +352,10 @@
 				RelativePath=".\targetver.h"
 				>
 			</File>
+			<File
+				RelativePath=".\utl_base.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="utl"

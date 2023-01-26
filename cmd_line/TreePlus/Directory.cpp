@@ -78,7 +78,7 @@ fs::CPath CDirectory::s_nullPath;
 CDirectory::CDirectory( const CCmdLineOptions& options )
 	: m_options( options )
 	, m_dirPath( m_options.m_dirPath )
-	, m_pTableFolder( m_options.GetTable()->GetRoot() )
+	, m_pTableFolder( m_options.GetTable() != NULL ? m_options.GetTable()->GetRoot() : NULL )
 	, m_depth( 0 )
 {
 	s_totalElapsedEnum = 0.0;

@@ -5,22 +5,16 @@
 
 #pragma once
 
-#include "utl/targetver.h"
-#include "utl/StdStl.h"		// standard C++ Library
+#include "utl/utl_base.h"
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #include <afxdisp.h>        // MFC OLE automation classes
 
-
-// TODO: reference additional headers your program requires here
-
-#include "utl/CommonDefs.h"
-#include "CommonWinDefs.h"	// min/max
-
-
 #define BUILD_UTL_UI
+
+#include "CommonWinDefs.h"	// min/max
 
 
 #ifdef _DEBUG

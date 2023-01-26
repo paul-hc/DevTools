@@ -9,6 +9,7 @@
 #include "utl/Guards.h"
 #include "utl/StdOutput.h"
 #include "utl/StringUtilities.h"
+#include "utl/TextClipboard.h"
 #include "utl/TextEncoding.h"
 #include "utl/TextFileIo.h"
 #include <iostream>
@@ -40,29 +41,37 @@ namespace ut
 
 static const char s_helpMessage[] =
 //	 |                       80 chars limit on the right mark                      |
-	"Graphically displays the folder structure of a drive or path.\n"
+	"Graphically displays the folder structure of a drive or path,\n"
+	"or converts tab-delimited text to tabbed tree-like hierarchy.\n"
 	"Similar with the tree.com command with added flexibility.\n"
 	"\n"
-	"Written by Paul Cocoveanu, 2021-2022 (built on 1 May 2022).\n"
+	"  Written by Paul Cocoveanu, 2021-2022 (built on 1 May 2022).\n"
 	"\n"
-	"TreePlus [dir_path] [-f] [-h] [-ns] [-gs=G|A|B|T[-]] [-l=N] [-max=FN] [-no] [-p]\n"
-	"         [-e=ANSI|UTF8|UTF16] [-t]\n"
+	"TreePlus [dir_path] [-f] [-h] [-ns] [-gs=G|A|B|T[-]] [-l=N] [-max=FN] [-p]\n"
+	"         [-e=ANSI|UTF8|UTF16] [-no] [-t]\n"
+	"\n"
+	"  - or with tab-delimited text:\n"
+	"TreePlus in=<table_input_file> [out=<output_file>] [-ns]\n"
+	"TreePlus in_clip out_clip [-ns]\n"
 	"\n"
 	"  dir_path\n"
 	"      [drive:][path] - directory path to display.\n"
 	"  in=<table_input_file>\n"
 	"      Read tab-delimited text from the input file.\n"
 	"      No dir_path, use tab guides by default (option '-gs=T-').\n"
-	"  -paste\n"
-	"      Paste tab-delimited text from clipboard (similar with 'in=path' switch).\n"
 	"  out=<output_file>\n"
 	"      Write output to text file using UTF8 encoding with BOM.\n"
+	"  in_clip\n"
+	"      Paste input tab-delimited text from clipboard\n"
+	"      (similar with 'in=path' switch).\n"
+	"  out_clip\n"
+	"      Copy output to clipboard (similar with 'out=path' switch).\n"
 	"  -f\n"
 	"      Display the names of the files in each folder.\n"
 	"  -h\n"
 	"      Include hidden files.\n"
 	"  -ns\n"
-	"      No sorting of the directory and file names.\n"
+	"      No sorting of the directory and file names, or tab-delimited text.\n"
 	"  -gs=G|A|B|T\n"
 	"      Sub-directory guides style, which could be one of:\n"
 	"         G - Display graphical guides (default).\n"
@@ -108,7 +117,13 @@ namespace app
 		topDirectory.ListContents( os, guideParts );
 		os.flush();			// just in case is using '\n' instead of std::endl
 
-		if ( !options.m_outputFilePath.IsEmpty() )
+		if ( options.HasOptionFlag( app::ClipboardOutputMode ) )
+		{
+			CTextClipboard::CMessageWnd msgWnd;		// use a temporary message-only window for clipboard copy
+			if ( !CTextClipboard::CopyText( os.str(), msgWnd.GetWnd() ) )
+				throw CRuntimeException( _T("Cannot copy the output to clipboard") );
+		}
+		else if ( !options.m_outputFilePath.IsEmpty() )
 			io::WriteStringToFile( options.m_outputFilePath, os.str(), options.m_fileEncoding );
 	}
 
@@ -149,7 +164,9 @@ int _tmain( int argc, TCHAR* argv[] )
 
 			std::wstring outcome = os.str();
 
-			if ( !options.m_outputFilePath.IsEmpty() )
+			if ( options.HasOptionFlag( app::ClipboardOutputMode ) )
+				outcome = str::Format( _T("Output copied to clipboard.\n") );
+			else if ( options.HasOptionFlag( app::ClipboardOutputMode ) )
 				outcome = str::Format( _T("Output written to text file: %s\n"), options.m_outputFilePath.GetPtr() );
 
 			io::CStdOutput& rStdOutput = application.GetStdOutput();

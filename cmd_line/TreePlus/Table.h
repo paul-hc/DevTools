@@ -48,9 +48,9 @@ public:
 
 	const CTextCell* GetRoot( void ) const { return &m_root; }
 
-	fs::Encoding ParseTextFile( const fs::CPath& textFilePath ) throws_( CRuntimeException );
+	fs::Encoding ParseTextFile( const fs::CPath& textFilePath, bool sortRows ) throws_( CRuntimeException );
 
-	void ParseRows( const std::vector< std::tstring >& rows );
+	void ParseRows( std::vector< std::tstring >& rRows, bool sortRows );
 	void ParseColumns( const std::tstring& row );
 private:
 	CTextCell m_root;		// table root

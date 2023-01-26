@@ -10,9 +10,10 @@
 
 #include <afx.h>
 
-#include "utl/CommonDefs.h"
-
 #define BUILD_UTL_BASE
+
+#include "utl/CommonDefs.h"
+#include "utl/StringBase.h"
 
 
 #ifdef _DEBUG

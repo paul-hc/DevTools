@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "utl/targetver.h"
-#include "utl/StdStl.h"				// standard C++ Library
+#include "utl/utl_base.h"
 
 #include <afxwin.h>					// MFC core and standard components
 #include <afxext.h>         		// MFC extensions
@@ -17,10 +16,7 @@
 #include <comdef.h>
 #include <atlbase.h>				// For CComPtr<> and stuff
 
-
-#include "utl/CommonDefs.h"
-#include "utl/UI/CommonWinDefs.h"
-#include "utl/UI/StdManifest.h"		// include manifest for common controls
+#include "utl/UI/utl_ui.h"
 
 
 #ifdef _DEBUG

@@ -23,6 +23,8 @@ struct CCmdLineOptions
 
 	const CTable* GetTable( void ) const { return m_pTable.get(); }
 private:
+	void ParseOptionSwitches( int argc, const TCHAR* const argv[] ) throws_( CRuntimeException );
+	void ParseParameters( int argc, const TCHAR* const argv[] ) throws_( CRuntimeException );
 	void PostProcessArguments( void ) throws_( CRuntimeException );
 	void SetTableInputMode( void );
 

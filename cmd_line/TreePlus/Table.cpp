@@ -108,20 +108,23 @@ CTable::~CTable()
 {
 }
 
-fs::Encoding CTable::ParseTextFile( const fs::CPath& textFilePath ) throws_( CRuntimeException )
+fs::Encoding CTable::ParseTextFile( const fs::CPath& textFilePath, bool sortRows ) throws_( CRuntimeException )
 {
 	std::vector< std::tstring > rows;
 	fs::Encoding encoding = io::ReadLinesFromFile( rows, textFilePath );
 
-	ParseRows( rows );
+	ParseRows( rows, sortRows );
 	return encoding;
 }
 
-void CTable::ParseRows( const std::vector< std::tstring >& rows )
+void CTable::ParseRows( std::vector< std::tstring >& rRows, bool sortRows )
 {
+	if ( sortRows )
+		std::sort( rRows.begin(), rRows.end(), pred::TLess_StringyIntuitive() );
+
 	stdext::hash_set< std::tstring > uniqueRows;
 
-	for ( std::vector< std::tstring >::const_iterator itRow = rows.begin(); itRow != rows.end(); ++itRow )
+	for ( std::vector< std::tstring >::const_iterator itRow = rRows.begin(); itRow != rRows.end(); ++itRow )
 		if ( uniqueRows.insert( *itRow ).second )		// is row unique? - filter duplicate rows
 			ParseColumns( *itRow );
 }
