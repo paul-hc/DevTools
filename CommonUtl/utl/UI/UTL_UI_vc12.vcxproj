@@ -187,6 +187,8 @@
     <ClInclude Include="BalloonMessageTip.h" />
     <ClInclude Include="BaseApp.h" />
     <ClInclude Include="BaseApp.hxx" />
+    <ClInclude Include="BaseFrameWnd.h" />
+    <ClInclude Include="BaseFrameWnd.hxx" />
     <ClInclude Include="BaseItemTooltipsCtrl.h" />
     <ClInclude Include="BaseItemTooltipsCtrl.hxx" />
     <ClInclude Include="BaseMainDialog.h" />
@@ -323,6 +325,7 @@
     <ClInclude Include="StockValuesComboBox.hxx" />
     <ClInclude Include="SyncScrolling.h" />
     <ClInclude Include="SystemTray.h" />
+    <ClInclude Include="SystemTray_fwd.h" />
     <ClInclude Include="TandemControls.h" />
     <ClInclude Include="TandemControls.hxx" />
     <ClInclude Include="TaskDialog.h" />
@@ -346,6 +349,7 @@
     <ClInclude Include="ToolStrip.h" />
     <ClInclude Include="TooltipsHook.h" />
     <ClInclude Include="TrackStatic.h" />
+    <ClInclude Include="TrayIcon.h" />
     <ClInclude Include="TreeControl.h" />
     <ClInclude Include="TreeControlCustomDraw.h" />
     <ClInclude Include="ui_fwd.h" />
@@ -502,6 +506,7 @@
     <ClCompile Include="ToolStrip.cpp" />
     <ClCompile Include="TooltipsHook.cpp" />
     <ClCompile Include="TrackStatic.cpp" />
+    <ClCompile Include="TrayIcon.cpp" />
     <ClCompile Include="TreeControl.cpp" />
     <ClCompile Include="TreeControlCustomDraw.cpp" />
     <ClCompile Include="UserReport.cpp" />

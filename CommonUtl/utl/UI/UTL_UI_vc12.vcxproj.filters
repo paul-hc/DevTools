@@ -602,6 +602,18 @@
     <ClInclude Include="ToolImageList.h">
       <Filter>UI\Imaging</Filter>
     </ClInclude>
+    <ClInclude Include="BaseFrameWnd.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFrameWnd.hxx">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemTray_fwd.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="TrayIcon.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutBox.cpp">
@@ -1038,6 +1050,9 @@
     </ClCompile>
     <ClCompile Include="ToolImageList.cpp">
       <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="TrayIcon.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
