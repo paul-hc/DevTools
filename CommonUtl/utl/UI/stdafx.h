@@ -5,16 +5,15 @@
 
 #pragma once
 
-#include "utl/utl_base.h"
+#include "utl/utl_base.h"			// UTL_BASE library classes
 
-#include <afxwin.h>         // MFC core and standard components
-#include <afxext.h>         // MFC extensions
-#include <afxcmn.h>			// MFC support for Windows Common Controls
-#include <afxdisp.h>        // MFC OLE automation classes
+#include <afxwin.h>					// MFC core and standard components
+#include <afxext.h>					// MFC extensions
+#include <afxcmn.h>					// MFC support for Windows Common Controls
 
 #define BUILD_UTL_UI
 
-#include "CommonWinDefs.h"	// min/max
+#include "CommonWinDefs.h"			// min/max
 
 
 #ifdef _DEBUG

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Range.h"
-#include "atlcomtime.h"		// for COleDateTime
+#include <atlcomtime.h>		// for COleDateTime
 
 
 namespace time_utl

@@ -2,6 +2,8 @@
 #define ShellDialogs_fwd_h
 #pragma once
 
+#include <afxdlgs.h>
+
 
 namespace shell
 {

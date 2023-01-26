@@ -403,6 +403,9 @@
     <ClInclude Include="TextClipboard.h">
       <Filter>utl</Filter>
     </ClInclude>
+    <ClInclude Include="utl_base.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EnumTags.cpp">

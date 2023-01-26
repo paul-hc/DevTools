@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ShellTypes.h"
 #include "utl/StdHashValue.h"
+#include <atlcomtime.h>		// for COleDateTime
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

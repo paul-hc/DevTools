@@ -5,19 +5,13 @@
 
 #pragma once
 
-#include "utl/targetver.h"
-#include "utl/StdStl.h"				// Standard C++ Library
+#include "utl/utl_base.h"			// UTL_BASE library classes
+#include "utl/UI/utl_ui.h"			// UTL_UI library classes
 
-#include <afxext.h>					// MFC extensions
-#include <afxdisp.h>				// MFC Automation classes
-#include <afxdtctl.h>           	// MFC support for Internet Explorer 4 Common Controls
-#include <afxcmn.h>             	// MFC support for Windows Common Controls
-#include <afxcontrolbars.h>     	// MFC support for ribbons and control bars
-
-
-#include "utl/CommonDefs.h"
-#include "utl/UI/CommonWinDefs.h"		// min/max
-#include "utl/UI/StdManifest.h"		// include manifest for common controls
+// MFC stuff not actually used in this project:
+//#include <afxdisp.h>				// MFC Automation classes
+//#include <afxdtctl.h>           	// MFC support for Internet Explorer 4 Common Controls
+//#include <afxcontrolbars.h>     	// MFC support for ribbons and control bars
 
 
 #ifdef _DEBUG

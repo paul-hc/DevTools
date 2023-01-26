@@ -304,6 +304,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimeUtils.h" />
     <ClInclude Include="TokenIterator.h" />
+    <ClInclude Include="utl_base.h" />
     <ClInclude Include="vector_map.h" />
   </ItemGroup>
   <ItemGroup>
