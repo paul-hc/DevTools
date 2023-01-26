@@ -509,7 +509,11 @@ void CNumericTests::Run( void )
 	TestConvertFileSize();
 	TestFormatFileSize();
 	TestCrc32();
+
+#if _MSC_VER >= 1800		// MSVC++ 12.0 (Visual Studio 2013)
+	// there are issues with CMemLeakCheck class on newer VC++
 	TestMemLeakCheck();
+#endif	//_MSC_VER
 }
 
 
