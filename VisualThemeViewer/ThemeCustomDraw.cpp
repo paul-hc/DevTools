@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ThemeCustomDraw.h"
 #include "ThemeStore.h"
 #include "Options.h"

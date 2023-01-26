@@ -675,6 +675,7 @@ void CPathTests::TestHasMultipleDirPaths( void )
 		ASSERT( path::HasMultipleDirPaths( paths ) );
 	}
 
+#ifndef _HAS_CXX17
 	{
 		#pragma warning( disable: 4709 )	// comma operator within array index expression
 
@@ -689,6 +690,7 @@ void CPathTests::TestHasMultipleDirPaths( void )
 
 		utl::ClearOwningMapKeys( pathMap );
 	}
+#endif //_HAS_CXX17
 }
 
 void CPathTests::TestCommonSubpath( void )
@@ -903,7 +905,7 @@ void CPathTests::TestFlexPath( void )
 
 void CPathTests::TestPathHashValue( void )
 {
-	static const fs::CPath s_path = _T("C:\\Images/fruit.stg>Europe/apple.jpg");
+	static const fs::CPath s_path( _T("C:\\Images/fruit.stg>Europe/apple.jpg") );
 	static const size_t strHashValue = std::hash<std::tstring>()( s_path.Get() );
 
 	const size_t pathHashValue = path::GetHashValue( s_path.Get() );

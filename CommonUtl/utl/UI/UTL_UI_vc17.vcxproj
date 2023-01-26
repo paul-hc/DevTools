@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugU|Win32">
+      <Configuration>DebugU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|Win32">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugU|x64">
+      <Configuration>DebugU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|x64">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{ced87d7e-e07c-4158-bcdb-d3dcf1acf42c}</ProjectGuid>
+    <RootNamespace>UTLUIvc17</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>UTL_UI</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <OutDir>$(ProjectDir)..\bin_vc17\</OutDir>
+    <IntDir>..\bin_vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_ud</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <OutDir>$(ProjectDir)..\bin_vc17\</OutDir>
+    <IntDir>..\bin_vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_u</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <OutDir>$(ProjectDir)..\bin_vc17\</OutDir>
+    <IntDir>..\bin_vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_ud64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <OutDir>$(ProjectDir)..\bin_vc17\</OutDir>
+    <IntDir>..\bin_vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_u64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="AboutBox.h" />
+    <ClInclude Include="AccelTable.h" />
+    <ClInclude Include="AnimatedFrameComposer.h" />
+    <ClInclude Include="BalloonMessageTip.h" />
+    <ClInclude Include="BaseApp.h" />
+    <ClInclude Include="BaseApp.hxx" />
+    <ClInclude Include="BaseFrameWnd.h" />
+    <ClInclude Include="BaseFrameWnd.hxx" />
+    <ClInclude Include="BaseItemTooltipsCtrl.h" />
+    <ClInclude Include="BaseItemTooltipsCtrl.hxx" />
+    <ClInclude Include="BaseMainDialog.h" />
+    <ClInclude Include="BaseSplitButton.h" />
+    <ClInclude Include="BaseStockContentCtrl.h" />
+    <ClInclude Include="BaseStockContentCtrl.hxx" />
+    <ClInclude Include="BaseTrackMenuWnd.h" />
+    <ClInclude Include="BaseTrackMenuWnd.hxx" />
+    <ClInclude Include="BaseZoomView.h" />
+    <ClInclude Include="BufferedStatic.h" />
+    <ClInclude Include="CheckStatePolicies.h" />
+    <ClInclude Include="Clipboard.h" />
+    <ClInclude Include="ClockStatic.h" />
+    <ClInclude Include="CmdIdStore.h" />
+    <ClInclude Include="CmdInfoStore.h" />
+    <ClInclude Include="CmdUpdate.h" />
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="CommonWinDefs.h" />
+    <ClInclude Include="ContentFitBase.h" />
+    <ClInclude Include="Control_fwd.h" />
+    <ClInclude Include="CtrlInterfaces.h" />
+    <ClInclude Include="CtrlUiState.h" />
+    <ClInclude Include="CustomDrawImager.h" />
+    <ClInclude Include="CustomDrawImager_fwd.h" />
+    <ClInclude Include="DateTimeControl.h" />
+    <ClInclude Include="DesktopDC.h" />
+    <ClInclude Include="DetailIconButton.h" />
+    <ClInclude Include="DetailMateCtrl.h" />
+    <ClInclude Include="DetailMateCtrl.hxx" />
+    <ClInclude Include="DialogToolBar.h" />
+    <ClInclude Include="Dialog_fwd.h" />
+    <ClInclude Include="DibDraw.h" />
+    <ClInclude Include="DibDraw_fwd.h" />
+    <ClInclude Include="DibPixels.h" />
+    <ClInclude Include="DibSection.h" />
+    <ClInclude Include="Direct2D.h" />
+    <ClInclude Include="DirectWrite.h" />
+    <ClInclude Include="DragListCtrl.h" />
+    <ClInclude Include="DragListCtrl.hxx" />
+    <ClInclude Include="EnumComboBox.h" />
+    <ClInclude Include="EnumSplitButton.h" />
+    <ClInclude Include="FilterStore.h" />
+    <ClInclude Include="FrameHostCtrl.h" />
+    <ClInclude Include="FrameHostCtrl.hxx" />
+    <ClInclude Include="GdiCoords.h" />
+    <ClInclude Include="GdiPlus_fwd.h" />
+    <ClInclude Include="GpUtilities.h" />
+    <ClInclude Include="GroupIcon.h" />
+    <ClInclude Include="HistoryComboBox.h" />
+    <ClInclude Include="Icon.h" />
+    <ClInclude Include="IconButton.h" />
+    <ClInclude Include="IImageZoomView.h" />
+    <ClInclude Include="ImageEdit.h" />
+    <ClInclude Include="ImageInfoGadget.h" />
+    <ClInclude Include="ImagePathKey.h" />
+    <ClInclude Include="ImageProxy.h" />
+    <ClInclude Include="ImageStore.h" />
+    <ClInclude Include="ImageZoomViewD2D.h" />
+    <ClInclude Include="Image_fwd.h" />
+    <ClInclude Include="Imaging.h" />
+    <ClInclude Include="ImagingDirect2D.h" />
+    <ClInclude Include="ImagingGdiPlus.h" />
+    <ClInclude Include="ImagingWic.h" />
+    <ClInclude Include="ImagingWic_fwd.h" />
+    <ClInclude Include="InternalChange.h" />
+    <ClInclude Include="ISystemTrayCallback.h" />
+    <ClInclude Include="ItemContent.h" />
+    <ClInclude Include="ItemContentEdit.h" />
+    <ClInclude Include="ItemContentHistoryCombo.h" />
+    <ClInclude Include="ItemListDialog.h" />
+    <ClInclude Include="IZoomBar.h" />
+    <ClInclude Include="LayoutBasePropertySheet.h" />
+    <ClInclude Include="LayoutChildPropertySheet.h" />
+    <ClInclude Include="LayoutDialog.h" />
+    <ClInclude Include="LayoutEngine.h" />
+    <ClInclude Include="LayoutFormView.h" />
+    <ClInclude Include="LayoutMetrics.h" />
+    <ClInclude Include="LayoutPropertyPage.h" />
+    <ClInclude Include="LayoutPropertySheet.h" />
+    <ClInclude Include="ListCtrlEditorFrame.h" />
+    <ClInclude Include="ListLikeCtrlBase.h" />
+    <ClInclude Include="LogPalette.h" />
+    <ClInclude Include="MemoryDC.h" />
+    <ClInclude Include="MenuUtilities.h" />
+    <ClInclude Include="MfcUtilities.h" />
+    <ClInclude Include="MultiZone.h" />
+    <ClInclude Include="NumericEdit.h" />
+    <ClInclude Include="ObjectCtrlBase.h" />
+    <ClInclude Include="OleDataSource.h" />
+    <ClInclude Include="OleDragDrop_fwd.h" />
+    <ClInclude Include="OleDropSource.h" />
+    <ClInclude Include="OleDropTarget.h" />
+    <ClInclude Include="OleUtils.h" />
+    <ClInclude Include="PasswordDialog.h" />
+    <ClInclude Include="PathItemListCtrl.h" />
+    <ClInclude Include="Pixel.h" />
+    <ClInclude Include="PopupDlgBase.h" />
+    <ClInclude Include="PopupSplitButton.h" />
+    <ClInclude Include="PostCall.h" />
+    <ClInclude Include="ProcessUtils.h" />
+    <ClInclude Include="ProgressDialog.h" />
+    <ClInclude Include="ProgressService.h" />
+    <ClInclude Include="Recycler.h" />
+    <ClInclude Include="RegistryOptions.h" />
+    <ClInclude Include="RegistrySection.h" />
+    <ClInclude Include="RenderingDirect2D.h" />
+    <ClInclude Include="ReportListControl.h" />
+    <ClInclude Include="ReportListControl.hxx" />
+    <ClInclude Include="ReportListCustomDraw.h" />
+    <ClInclude Include="ResizeFrameStatic.h" />
+    <ClInclude Include="ResizeGripBar.h" />
+    <ClInclude Include="ResourceData.h" />
+    <ClInclude Include="SampleView.h" />
+    <ClInclude Include="ScopedBitmapMemDC.h" />
+    <ClInclude Include="ScopedGdi.h" />
+    <ClInclude Include="ShellContextMenuBuilder.h" />
+    <ClInclude Include="ShellContextMenuHost.h" />
+    <ClInclude Include="ShellDialogs.h" />
+    <ClInclude Include="ShellDialogs_fwd.h" />
+    <ClInclude Include="ShellDragImager.h" />
+    <ClInclude Include="ShellDropTip.h" />
+    <ClInclude Include="ShellFileDialog.h" />
+    <ClInclude Include="ShellRegistryAssoc.h" />
+    <ClInclude Include="ShellTypes.h" />
+    <ClInclude Include="ShellUtilities.h" />
+    <ClInclude Include="SpinEdit.h" />
+    <ClInclude Include="SpinTargetButton.h" />
+    <ClInclude Include="SplitPushButton.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="StdColors.h" />
+    <ClInclude Include="StdManifest.h" />
+    <ClInclude Include="StockValuesComboBox.h" />
+    <ClInclude Include="StockValuesComboBox.hxx" />
+    <ClInclude Include="SyncScrolling.h" />
+    <ClInclude Include="SystemTray.h" />
+    <ClInclude Include="SystemTray_fwd.h" />
+    <ClInclude Include="TandemControls.h" />
+    <ClInclude Include="TandemControls.hxx" />
+    <ClInclude Include="TaskDialog.h" />
+    <ClInclude Include="test\BaseImageTestCase.h" />
+    <ClInclude Include="test\ColorTests.h" />
+    <ClInclude Include="test\SerializationTests.h" />
+    <ClInclude Include="test\ShellFileSystemTests.h" />
+    <ClInclude Include="test\TestToolWnd.h" />
+    <ClInclude Include="test\UtlUserInterfaceTests.h" />
+    <ClInclude Include="test\WicImageTests.h" />
+    <ClInclude Include="TextEdit.h" />
+    <ClInclude Include="TextEditor.h" />
+    <ClInclude Include="TextEffect.h" />
+    <ClInclude Include="ThemeItem.h" />
+    <ClInclude Include="ThemeStatic.h" />
+    <ClInclude Include="Thumbnailer.h" />
+    <ClInclude Include="Thumbnailer_fwd.h" />
+    <ClInclude Include="ThumbPreviewCtrl.h" />
+    <ClInclude Include="ToolbarStrip.h" />
+    <ClInclude Include="ToolImageList.h" />
+    <ClInclude Include="ToolStrip.h" />
+    <ClInclude Include="TooltipsHook.h" />
+    <ClInclude Include="TrackStatic.h" />
+    <ClInclude Include="TrayIcon.h" />
+    <ClInclude Include="TreeControl.h" />
+    <ClInclude Include="TreeControlCustomDraw.h" />
+    <ClInclude Include="ui_fwd.h" />
+    <ClInclude Include="UserReport.h" />
+    <ClInclude Include="utl_ui.h" />
+    <ClInclude Include="VersionInfo.h" />
+    <ClInclude Include="VisualTheme.h" />
+    <ClInclude Include="VisualThemeFallback.h" />
+    <ClInclude Include="vsstyle.h" />
+    <ClInclude Include="WicAnimatedImage.h" />
+    <ClInclude Include="WicBitmap.h" />
+    <ClInclude Include="WicDibSection.h" />
+    <ClInclude Include="WicImage.h" />
+    <ClInclude Include="WicImageCache.h" />
+    <ClInclude Include="WindowDebug.h" />
+    <ClInclude Include="WindowHook.h" />
+    <ClInclude Include="WindowPlacement.h" />
+    <ClInclude Include="WindowTimer.h" />
+    <ClInclude Include="WinExplorer.h" />
+    <ClInclude Include="WndUtils.h" />
+    <ClInclude Include="WndUtilsEx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AboutBox.cpp" />
+    <ClCompile Include="AccelTable.cpp" />
+    <ClCompile Include="AnimatedFrameComposer.cpp" />
+    <ClCompile Include="BalloonMessageTip.cpp" />
+    <ClCompile Include="BaseApp.cpp" />
+    <ClCompile Include="BaseMainDialog.cpp" />
+    <ClCompile Include="BaseSplitButton.cpp" />
+    <ClCompile Include="BaseZoomView.cpp" />
+    <ClCompile Include="BufferedStatic.cpp" />
+    <ClCompile Include="CheckStatePolicies.cpp" />
+    <ClCompile Include="Clipboard.cpp" />
+    <ClCompile Include="ClockStatic.cpp" />
+    <ClCompile Include="CmdIdStore.cpp" />
+    <ClCompile Include="CmdInfoStore.cpp" />
+    <ClCompile Include="CmdUpdate.cpp" />
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="ContentFitBase.cpp" />
+    <ClCompile Include="Control_fwd.cpp" />
+    <ClCompile Include="CtrlUiState.cpp" />
+    <ClCompile Include="CustomDrawImager.cpp" />
+    <ClCompile Include="DateTimeControl.cpp" />
+    <ClCompile Include="DesktopDC.cpp" />
+    <ClCompile Include="DetailIconButton.cpp" />
+    <ClCompile Include="DialogToolBar.cpp" />
+    <ClCompile Include="DibDraw.cpp" />
+    <ClCompile Include="DibPixels.cpp" />
+    <ClCompile Include="DibSection.cpp" />
+    <ClCompile Include="Direct2D.cpp" />
+    <ClCompile Include="DirectWrite.cpp" />
+    <ClCompile Include="DragListCtrl.cpp" />
+    <ClCompile Include="EnumComboBox.cpp" />
+    <ClCompile Include="EnumSplitButton.cpp" />
+    <ClCompile Include="FilterStore.cpp" />
+    <ClCompile Include="GdiCoords.cpp" />
+    <ClCompile Include="GroupIcon.cpp" />
+    <ClCompile Include="HistoryComboBox.cpp" />
+    <ClCompile Include="Icon.cpp" />
+    <ClCompile Include="IconButton.cpp" />
+    <ClCompile Include="ImageEdit.cpp" />
+    <ClCompile Include="ImageInfoGadget.cpp" />
+    <ClCompile Include="ImageProxy.cpp" />
+    <ClCompile Include="ImageStore.cpp" />
+    <ClCompile Include="ImageZoomViewD2D.cpp" />
+    <ClCompile Include="Image_fwd.cpp" />
+    <ClCompile Include="Imaging.cpp" />
+    <ClCompile Include="ImagingDirect2D.cpp" />
+    <ClCompile Include="ImagingGdiPlus.cpp" />
+    <ClCompile Include="ImagingWic.cpp" />
+    <ClCompile Include="ItemContent.cpp" />
+    <ClCompile Include="ItemContentEdit.cpp" />
+    <ClCompile Include="ItemContentHistoryCombo.cpp" />
+    <ClCompile Include="ItemListDialog.cpp" />
+    <ClCompile Include="IZoomBar.cpp" />
+    <ClCompile Include="LayoutBasePropertySheet.cpp" />
+    <ClCompile Include="LayoutChildPropertySheet.cpp" />
+    <ClCompile Include="LayoutDialog.cpp" />
+    <ClCompile Include="LayoutEngine.cpp" />
+    <ClCompile Include="LayoutFormView.cpp" />
+    <ClCompile Include="LayoutMetrics.cpp" />
+    <ClCompile Include="LayoutPropertyPage.cpp" />
+    <ClCompile Include="LayoutPropertySheet.cpp" />
+    <ClCompile Include="ListCtrlEditorFrame.cpp" />
+    <ClCompile Include="ListLikeCtrlBase.cpp" />
+    <ClCompile Include="LogPalette.cpp" />
+    <ClCompile Include="MemoryDC.cpp" />
+    <ClCompile Include="MenuUtilities.cpp" />
+    <ClCompile Include="MfcUtilities.cpp" />
+    <ClCompile Include="MultiZone.cpp" />
+    <ClCompile Include="ObjectCtrlBase.cpp" />
+    <ClCompile Include="OleDataSource.cpp" />
+    <ClCompile Include="OleDragDrop_fwd.cpp" />
+    <ClCompile Include="OleDropSource.cpp" />
+    <ClCompile Include="OleDropTarget.cpp" />
+    <ClCompile Include="OleUtils.cpp" />
+    <ClCompile Include="PasswordDialog.cpp" />
+    <ClCompile Include="PathItemListCtrl.cpp" />
+    <ClCompile Include="PopupDlgBase.cpp" />
+    <ClCompile Include="PopupSplitButton.cpp" />
+    <ClCompile Include="PostCall.cpp" />
+    <ClCompile Include="ProcessUtils.cpp" />
+    <ClCompile Include="ProgressDialog.cpp" />
+    <ClCompile Include="ProgressService.cpp" />
+    <ClCompile Include="Recycler.cpp" />
+    <ClCompile Include="RegistryOptions.cpp" />
+    <ClCompile Include="RegistrySection.cpp" />
+    <ClCompile Include="RenderingDirect2D.cpp" />
+    <ClCompile Include="ReportListControl.cpp" />
+    <ClCompile Include="ReportListCustomDraw.cpp" />
+    <ClCompile Include="ResizeFrameStatic.cpp" />
+    <ClCompile Include="ResizeGripBar.cpp" />
+    <ClCompile Include="ResourceData.cpp" />
+    <ClCompile Include="SampleView.cpp" />
+    <ClCompile Include="ShellContextMenuBuilder.cpp" />
+    <ClCompile Include="ShellContextMenuHost.cpp" />
+    <ClCompile Include="ShellDialogs.cpp" />
+    <ClCompile Include="ShellDragImager.cpp" />
+    <ClCompile Include="ShellDropTip.cpp" />
+    <ClCompile Include="ShellFileDialog.cpp" />
+    <ClCompile Include="ShellRegistryAssoc.cpp" />
+    <ClCompile Include="ShellTypes.cpp" />
+    <ClCompile Include="ShellUtilities.cpp" />
+    <ClCompile Include="SpinEdit.cpp" />
+    <ClCompile Include="SpinTargetButton.cpp" />
+    <ClCompile Include="SplitPushButton.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="StockValuesComboBox.cpp" />
+    <ClCompile Include="SyncScrolling.cpp" />
+    <ClCompile Include="SystemTray.cpp" />
+    <ClCompile Include="TaskDialog.cpp" />
+    <ClCompile Include="test\BaseImageTestCase.cpp" />
+    <ClCompile Include="test\ColorTests.cpp" />
+    <ClCompile Include="test\SerializationTests.cpp" />
+    <ClCompile Include="test\ShellFileSystemTests.cpp" />
+    <ClCompile Include="test\TestToolWnd.cpp" />
+    <ClCompile Include="test\UtlUserInterfaceTests.cpp" />
+    <ClCompile Include="test\WicImageTests.cpp" />
+    <ClCompile Include="TextEdit.cpp" />
+    <ClCompile Include="TextEditor.cpp" />
+    <ClCompile Include="TextEffect.cpp" />
+    <ClCompile Include="ThemeItem.cpp" />
+    <ClCompile Include="ThemeStatic.cpp" />
+    <ClCompile Include="Thumbnailer.cpp" />
+    <ClCompile Include="ThumbPreviewCtrl.cpp" />
+    <ClCompile Include="ToolbarStrip.cpp" />
+    <ClCompile Include="ToolImageList.cpp" />
+    <ClCompile Include="ToolStrip.cpp" />
+    <ClCompile Include="TooltipsHook.cpp" />
+    <ClCompile Include="TrackStatic.cpp" />
+    <ClCompile Include="TrayIcon.cpp" />
+    <ClCompile Include="TreeControl.cpp" />
+    <ClCompile Include="TreeControlCustomDraw.cpp" />
+    <ClCompile Include="UserReport.cpp" />
+    <ClCompile Include="VersionInfo.cpp" />
+    <ClCompile Include="VisualTheme.cpp" />
+    <ClCompile Include="VisualThemeFallback.cpp" />
+    <ClCompile Include="WicAnimatedImage.cpp" />
+    <ClCompile Include="WicDibSection.cpp" />
+    <ClCompile Include="WicImage.cpp" />
+    <ClCompile Include="WicImageCache.cpp" />
+    <ClCompile Include="WindowDebug.cpp" />
+    <ClCompile Include="WindowHook.cpp" />
+    <ClCompile Include="WindowPlacement.cpp" />
+    <ClCompile Include="WindowTimer.cpp" />
+    <ClCompile Include="WinExplorer.cpp" />
+    <ClCompile Include="WndUtils.cpp" />
+    <ClCompile Include="WndUtilsEx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="utl_ui.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\ArrowsDownUpStrip.bmp" />
+    <Image Include="res\ArrowsRightLeftStrip.bmp" />
+    <Image Include="res\ListStrip.bmp" />
+    <Image Include="res\ListStrip.png" />
+    <Image Include="res\StdStrip.bmp" />
+    <Image Include="res\StdStrip.png" />
+    <Image Include="res\Transparent.ico" />
+    <Image Include="res\Unknown.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\DragDrop-Copy.cur" />
+    <None Include="res\DragDrop-Move.cur" />
+    <None Include="res\DragDrop-None.cur" />
+    <None Include="res\ResizeSplitter-NS.cur" />
+    <None Include="res\ResizeSplitter-WE.cur" />
+    <None Include="res\Scrollable.cur" />
+    <None Include="res\ScrollDrag.cur" />
+    <None Include="res\TrackScroll.cur" />
+    <None Include="res\TrackZoom.cur" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

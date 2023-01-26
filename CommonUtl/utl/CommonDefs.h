@@ -45,6 +45,11 @@
 #define throws_( ... )
 
 
+#ifndef _HAS_CXX17
+	#define nullptr 0
+#endif //_HAS_CXX17
+
+
 #define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
 
 // iterator-like access for STL algorithms

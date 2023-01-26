@@ -125,8 +125,8 @@ namespace fs
 
 		InterfaceT* Find( const PathT& pathKey ) const
 		{
-			typename std::unordered_map< PathT, TValue >::const_iterator itFound = m_pathMap.find( pathKey );
-			if ( itFound == m_pathMap.end() )
+			typename std::unordered_map< PathT, TValue >::const_iterator itFound = this->m_pathMap.find( pathKey );
+			if ( itFound == this->m_pathMap.end() )
 				return NULL;
 
 			return itFound->second.m_T.p;
@@ -134,19 +134,19 @@ namespace fs
 
 		TComPtr& Lookup( const PathT& pathKey )
 		{
-			typename std::unordered_map< PathT, TValue >::iterator itFound = m_pathMap.find( pathKey );
-			ASSERT( itFound != m_pathMap.end() );
+			typename std::unordered_map< PathT, TValue >::iterator itFound = this->m_pathMap.find( pathKey );
+			ASSERT( itFound != this->m_pathMap.end() );
 			return itFound->second.m_T;
 		}
 
 		void ReleaseAll( void )
 		{
-			for ( std::unordered_map< PathT, ValueT >::iterator itEntry = m_pathMap.begin(); itEntry != m_pathMap.end(); ++itEntry )
+			for ( typename std::unordered_map< PathT, TValue >::iterator itEntry = this->m_pathMap.begin(); itEntry != this->m_pathMap.end(); ++itEntry )
 				itEntry->second = NULL;
 		}
 
-		const_iterator Begin( void ) const { return m_pathMap.begin(); }
-		const_iterator End( void ) const { return m_pathMap.end(); }
+		const_iterator Begin( void ) const { return this->m_pathMap.begin(); }
+		const_iterator End( void ) const { return this->m_pathMap.end(); }
 	};
 }
 

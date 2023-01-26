@@ -119,10 +119,10 @@ void CNumericTests::TestFormatNumber( void )
 {
 	{
 		ASSERT_EQUAL( _T("32"), num::FormatNumber( (signed char)32 ) );
-		ASSERT_EQUAL( _T("-16"), num::FormatNumber( (signed char)-16 ) );		// i.e. 240
+		ASSERT_EQUAL( _T("-16"), num::FormatNumber( (signed char)-16 ) );			// i.e. 240
 
 		ASSERT_EQUAL( _T("32"), num::FormatNumber( (BYTE)32 ) );
-		ASSERT_EQUAL( _T("240"), num::FormatNumber( (BYTE)240 ) );				// i.e. 0xF0
+		ASSERT_EQUAL( _T("240"), num::FormatNumber( (BYTE)240 ) );					// i.e. 0xF0
 	}
 	{
 		ASSERT_EQUAL( _T("32"), num::FormatNumber( (short)32 ) );
@@ -133,27 +133,27 @@ void CNumericTests::TestFormatNumber( void )
 	}
 	{
 		ASSERT_EQUAL( _T("32"), num::FormatNumber( (int)32 ) );
-		ASSERT_EQUAL( _T("-268435456"), num::FormatNumber( (int)-268435456 ) );				// i.e. 0xF0000000
-		ASSERT_EQUAL( _T("-268435456"), num::FormatNumber( (int)4026531840 ) );				// i.e. -268435456
+		ASSERT_EQUAL( _T("-268435456"), num::FormatNumber( static_cast<int>( -268435456 ) ) );			// i.e. 0xF0000000
+		ASSERT_EQUAL( _T("-268435456"), num::FormatNumber( static_cast<int>( 4026531840 ) ) );			// i.e. -268435456
 
 		ASSERT_EQUAL( _T("32"), num::FormatNumber( (unsigned int)32 ) );
-		ASSERT_EQUAL( _T("4026531840"), num::FormatNumber( (unsigned int)4026531840 ) );	// i.e. 0xF0000000
+		ASSERT_EQUAL( _T("4026531840"), num::FormatNumber( (unsigned int)4026531840 ) );				// i.e. 0xF0000000
 	}
 	{
 		ASSERT_EQUAL( _T("32"), num::FormatNumber( (long)32 ) );
-		ASSERT_EQUAL( _T("-268435456"), num::FormatNumber( (long)-268435456 ) );			// i.e. 0xF0000000
-		ASSERT_EQUAL( _T("-268435456"), num::FormatNumber( (long)4026531840 ) );			// i.e. -268435456
+		ASSERT_EQUAL( _T("-268435456"), num::FormatNumber( static_cast<long>( -268435456 ) ) );			// i.e. 0xF0000000
+		ASSERT_EQUAL( _T("-268435456"), num::FormatNumber( static_cast<long>( 4026531840 ) ) );			// i.e. -268435456
 
-		ASSERT_EQUAL( _T("32"), num::FormatNumber( (unsigned long)32 ) );
-		ASSERT_EQUAL( _T("4026531840"), num::FormatNumber( (unsigned long)4026531840 ) );	// i.e. 0xF0000000
+		ASSERT_EQUAL( _T("32"), num::FormatNumber( static_cast<unsigned long>( 32 ) ) );
+		ASSERT_EQUAL( _T("4026531840"), num::FormatNumber( static_cast<unsigned long>( 4026531840 ) ) );	// i.e. 0xF0000000
 	}
 	{
 		ASSERT_EQUAL( _T("32"), num::FormatNumber( (__int64)32 ) );
-		ASSERT_EQUAL( _T("-1152921504606846976"), num::FormatNumber( (__int64)-1152921504606846976 ) );				// i.e. 0xF000000000000000
-		ASSERT_EQUAL( _T("-1152921504606846976"), num::FormatNumber( (__int64)17293822569102704640 ) );				// i.e. -1152921504606846976
+		ASSERT_EQUAL( _T("-1152921504606846976"), num::FormatNumber( static_cast<__int64>( -1152921504606846976 ) ) );		// i.e. 0xF000000000000000
+		ASSERT_EQUAL( _T("-1152921504606846976"), num::FormatNumber( static_cast<__int64>( 17293822569102704640 ) ) );		// i.e. -1152921504606846976
 
-		ASSERT_EQUAL( _T("32"), num::FormatNumber( (unsigned __int64)32 ) );
-		ASSERT_EQUAL( _T("17293822569102704640"), num::FormatNumber( (unsigned __int64)17293822569102704640 ) );	// i.e. 0xF000000000000000
+		ASSERT_EQUAL( _T("32"), num::FormatNumber( static_cast<unsigned __int64>( 32 ) ) );
+		ASSERT_EQUAL( _T("17293822569102704640"), num::FormatNumber( static_cast<unsigned __int64>( 17293822569102704640 ) ) );	// i.e. 0xF000000000000000
 	}
 
 	{
@@ -192,8 +192,8 @@ void CNumericTests::TestFormatNumberUserLocale( void )
 	const std::locale& userLoc = str::GetUserLocale();
 
 	ASSERT_EQUAL( _T("4,096"), num::FormatNumber( (short)4096, userLoc ) );
-	ASSERT_EQUAL( _T("-4,096"), num::FormatNumber( (short)-4096, userLoc ) );				// i.e. 0xF000
-	ASSERT_EQUAL( _T("61,440"), num::FormatNumber( (unsigned short)61440, userLoc ) );		// i.e. 0xF000
+	ASSERT_EQUAL( _T("-4,096"), num::FormatNumber( (short)-4096, userLoc ) );						// i.e. 0xF000
+	ASSERT_EQUAL( _T("61,440"), num::FormatNumber( (unsigned short)61440, userLoc ) );				// i.e. 0xF000
 
 	ASSERT_EQUAL( _T("-268,435,456"), num::FormatNumber( (int)-268435456, userLoc ) );				// i.e. 0xF0000000
 	ASSERT_EQUAL( _T("4,026,531,840"), num::FormatNumber( (unsigned int)4026531840, userLoc ) );	// i.e. 0xF0000000
@@ -201,7 +201,7 @@ void CNumericTests::TestFormatNumberUserLocale( void )
 	ASSERT_EQUAL( _T("-268,435,456"), num::FormatNumber( (long)-268435456, userLoc ) );				// i.e. 0xF0000000
 
 	ASSERT_EQUAL( _T("-1,152,921,504,606,846,976"), num::FormatNumber( (__int64)-1152921504606846976, userLoc ) );				// i.e. 0xF000000000000000
-	ASSERT_EQUAL( _T("17,293,822,569,102,704,640"), num::FormatNumber( (unsigned __int64)17293822569102704640, userLoc ) );	// i.e. 0xF000000000000000
+	ASSERT_EQUAL( _T("17,293,822,569,102,704,640"), num::FormatNumber( (unsigned __int64)17293822569102704640, userLoc ) );		// i.e. 0xF000000000000000
 
 	ASSERT_EQUAL( _T("1,234,000.56789"), num::FormatNumber( 1234000.56789, userLoc ) );
 	ASSERT_EQUAL( _T("-1,234,000.56789"), num::FormatNumber( -1234000.56789, userLoc ) );
@@ -509,7 +509,11 @@ void CNumericTests::Run( void )
 	TestConvertFileSize();
 	TestFormatFileSize();
 	TestCrc32();
+
+#if _MSC_VER < 1800		// MSVC++ 12.0 (Visual Studio 2013)
+	// there are issues with CMemLeakCheck class on newer VC++
 	TestMemLeakCheck();
+#endif	//_MSC_VER
 }
 
 

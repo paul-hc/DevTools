@@ -46,6 +46,7 @@ namespace io
 	{
 		typedef std::basic_filebuf<CharT> TBaseFileBuf;
 		typedef typename TBaseFileBuf::traits_type TTraits;
+		typedef typename TBaseFileBuf::off_type off_type;
 
 		enum { BinaryBufferSize = 512 };
 
@@ -61,7 +62,7 @@ namespace io
 
 		virtual ~CEncodedFileBuffer()
 		{
-			if ( is_open() )
+			if ( this->is_open() )
 				close();			// necessary since m_buffer goes out of scope if closed by base destructor
 		}
 
@@ -86,7 +87,7 @@ namespace io
 			if ( IsBinary() )
 			{	// prevent UTF8 char in/out conversion: to store wchar_t strings in the buffer
 				m_buffer.resize( BinaryBufferSize );
-				setbuf( &m_buffer[0], m_buffer.size() );
+				this->setbuf( &m_buffer[0], m_buffer.size() );
 			}
 			if ( IsInput() )
 				Rewind();								// seek reading position just after the BOM
@@ -111,10 +112,10 @@ namespace io
 
 		TCharSize SeekInput( TCharSize charOffset ) throws_( CRuntimeException )
 		{
-			REQUIRE( is_open() && IsInput() );
+			REQUIRE( this->is_open() && IsInput() );
 
-			off_type byteOffset = (off_type)pubseekpos( charOffset * sizeof(CharT), std::ios_base::in );		// NOTE: pubseekpos() takes a BYTE offset!
-			if ( std::_BADOFF == byteOffset )
+			off_type byteOffset = (off_type)this->pubseekpos( charOffset * sizeof(CharT), std::ios_base::in );		// NOTE: pubseekpos() takes a BYTE offset!
+			if ( -1 == byteOffset )		// formerly std::_BADOFF
 				throw CRuntimeException( str::Format( _T("Error seeking read position to byte offset %d in text file %s"), byteOffset, m_filePath.GetPtr() ) );
 
 			ENSURE( (size_t)byteOffset == charOffset * sizeof(CharT) );
@@ -228,7 +229,7 @@ namespace io
 	{
 	public:
 		explicit CEncodedStreamFileBuffer( std::basic_istream<CharT>& is, fs::Encoding encoding )
-			: CEncodedFileBuffer( encoding )
+			: CEncodedFileBuffer<CharT>( encoding )
 			, m_pInStream( &is )
 			, m_pOutStream( NULL )
 			, m_pOldStreamBuff( m_pInStream->rdbuf( this ) )
@@ -236,7 +237,7 @@ namespace io
 		}
 
 		explicit CEncodedStreamFileBuffer( std::ostream& os, fs::Encoding encoding )
-			: CEncodedFileBuffer( encoding )
+			: CEncodedFileBuffer<CharT>( encoding )
 			, m_pInStream( NULL )
 			, m_pOutStream( &os )
 			, m_pOldStreamBuff( m_pOutStream->rdbuf( this ) )
@@ -244,7 +245,7 @@ namespace io
 		}
 
 		explicit CEncodedStreamFileBuffer( std::basic_iostream<CharT>& ios, fs::Encoding encoding )
-			: CEncodedFileBuffer( encoding )
+			: CEncodedFileBuffer<CharT>( encoding )
 			, m_pInStream( &ios )
 			, m_pOutStream( NULL )
 			, m_pOldStreamBuff( m_pInStream->rdbuf( this ) )
@@ -253,8 +254,8 @@ namespace io
 
 		virtual ~CEncodedStreamFileBuffer()
 		{
-			if ( is_open() )
-				close();			// necessary since base m_buffer goes out of scope if closed by base destructor
+			if ( this->is_open() )
+				this->close();			// necessary since base m_buffer goes out of scope if closed by base destructor
 
 			m_pInStream != NULL && m_pInStream->rdbuf( m_pOldStreamBuff );
 			m_pOutStream != NULL && m_pOutStream->rdbuf( m_pOldStreamBuff );
@@ -262,7 +263,7 @@ namespace io
 
 		virtual void Rewind( void ) throws_( CRuntimeException )
 		{
-			ASSERT( m_pInStream != NULL && is_open() );		// works only with input streams
+			ASSERT( m_pInStream != NULL && this->is_open() );		// works only with input streams
 			m_pInStream->clear();			// clear the EOF state
 			__super::Rewind();
 		}

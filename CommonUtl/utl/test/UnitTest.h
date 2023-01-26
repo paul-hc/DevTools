@@ -2,9 +2,9 @@
 #define UnitTest_h
 #pragma once
 
+#include "UnitTest_fwd.h"
 #include "Test.h"
 #include "utl/FileSystem_fwd.h"
-#include <iosfwd>
 
 
 #ifdef USE_UT		// no UT code in release builds
@@ -35,7 +35,7 @@ namespace ut
 	}
 
 	template<>
-	inline bool Equals< double >( const double& x, const double& y )
+	inline bool Equals<double>( const double& x, const double& y )
 	{
 		return numeric::DoublesEqual( x, y );
 	}
@@ -68,7 +68,7 @@ namespace ut
 	template< typename ExpectedType, typename ActualType >
 	bool AssertEqualsIgnoreCase( const ExpectedType& expected, const ActualType& actual, std::tstring& rMsg )
 	{
-		if ( str::EqualString< str::IgnoreCase >( static_cast<ActualType>( expected ), actual ) )
+		if ( str::EqualString<str::IgnoreCase>( static_cast<ActualType>( expected ), actual ) )
 			return true;
 
 		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualType>( expected ) ), ToString( actual ) );
@@ -91,6 +91,15 @@ namespace ut
 
 
 #define UT_REPEAT_BLOCK( count )  for ( unsigned int i = count; i-- != 0; )
+
+
+namespace str
+{
+	// FWD:
+
+	template< typename CharT, typename ValueT >
+	bool ParseValue( ValueT& rValue, const std::basic_string<CharT>& text );
+}
 
 
 namespace ut
@@ -141,7 +150,7 @@ namespace ut
 	}
 
 	template< typename CharType, typename StringT, typename LessPred >
-	std::basic_string< CharType > ShuffleSortJoin( std::vector< StringT >& rItems, const CharType* pSep, LessPred lessPred )
+	std::basic_string<CharType> ShuffleSortJoin( std::vector< StringT >& rItems, const CharType* pSep, LessPred lessPred )
 	{
 		std::random_shuffle( rItems.begin(), rItems.end() );
 		std::sort( rItems.begin(), rItems.end(), lessPred );

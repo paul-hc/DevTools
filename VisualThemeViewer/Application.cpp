@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Application.h"
 #include "Options.h"
 #include "ThemeStore.h"
@@ -30,10 +30,10 @@ BOOL CApplication::InitInstance( void )
 {
 	m_pGdiPlusInit.reset( new CScopedGdiPlusInit() );
 
-	if ( !CBaseApp< CWinApp >::InitInstance() )
+	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
 
-	std::auto_ptr< CShellManager > pShellManager( new CShellManager() );						// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
+	std::auto_ptr<CShellManager> pShellManager( new CShellManager() );						// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
 
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );		// activate "Windows Native" visual manager for enabling themes in MFC controls
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );		// register stock images
@@ -46,7 +46,13 @@ BOOL CApplication::InitInstance( void )
 	m_pMainWnd = &dlg;
 	dlg.DoModal();
 
-	return FALSE;
+	pShellManager.reset();
+
+#if !defined(_AFXDLL) && !defined(_AFX_NO_MFC_CONTROLS_IN_DIALOGS)
+	ControlBarCleanUp();
+#endif
+
+	return FALSE;		// we exit the application, rather than start the application's message pump
 }
 
 int CApplication::ExitInstance( void )

@@ -4,6 +4,7 @@
 
 #include <locale>
 #include <sstream>
+#include "StringBase_fwd.h"
 
 
 namespace str
@@ -47,7 +48,23 @@ namespace str
 }
 
 
-namespace fs { class CPath; }
+#include <iosfwd>
+
+
+std::ostream& operator<<( std::ostream& os, const wchar_t* pWide );
+std::wostream& operator<<( std::wostream& os, const char* pUtf8 );
+
+std::ostream& operator<<( std::ostream& os, wchar_t chWide );
+std::wostream& operator<<( std::wostream& os, char chUtf8 );
+
+inline std::ostream& operator<<( std::ostream& os, const std::wstring& wide ) { return os << wide.c_str(); }
+inline std::wostream& operator<<( std::wostream& os, const std::string& utf8 ) { return os << utf8.c_str(); }
+
+#ifdef _MFC_VER
+	inline std::ostream& operator<<( std::ostream& os, const CString& mfcString ) { return os << mfcString.GetString(); }
+	inline std::wostream& operator<<( std::wostream& os, const CString& mfcString ) { return os << mfcString.GetString(); }
+#endif //_MFC_VER
+
 
 namespace str
 {
@@ -292,7 +309,7 @@ namespace str
 namespace func
 {
 	inline const std::tstring& StringOf( const std::tstring& filePath ) { return filePath; }		// for uniform string algorithms
-
+	const std::tstring& StringOf( const fs::CPath& filePath );		// FWD
 
 	namespace tor
 	{
@@ -528,11 +545,11 @@ namespace str
 		if ( !str::IsEmpty( pSource ) )
 		{
 			const size_t sepLen = str::GetLength( pSep );
-			typedef const CharT* const_iterator;
+			typedef const CharT* Const_iterator;
 
-			for ( const_iterator itItemStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
+			for ( Const_iterator itItemStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
 			{
-				const_iterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
+				Const_iterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
 				if ( itItemEnd != itEnd )
 				{
 					rItems.push_back( std::basic_string<CharT>( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
@@ -689,24 +706,6 @@ namespace stream
 
 	bool InputLine( std::istream& is, std::tstring& rLine );
 }
-
-
-#include <iosfwd>
-
-
-std::ostream& operator<<( std::ostream& os, const wchar_t* pWide );
-std::wostream& operator<<( std::wostream& os, const char* pUtf8 );
-
-std::ostream& operator<<( std::ostream& os, wchar_t chWide );
-std::wostream& operator<<( std::wostream& os, char chUtf8 );
-
-inline std::ostream& operator<<( std::ostream& os, const std::wstring& wide ) { return os << wide.c_str(); }
-inline std::wostream& operator<<( std::wostream& os, const std::string& utf8 ) { return os << utf8.c_str(); }
-
-#ifdef _MFC_VER
-	inline std::ostream& operator<<( std::ostream& os, const CString& mfcString ) { return os << mfcString.GetString(); }
-	inline std::wostream& operator<<( std::wostream& os, const CString& mfcString ) { return os << mfcString.GetString(); }
-#endif //_MFC_VER
 
 
 #endif // StringBase_h

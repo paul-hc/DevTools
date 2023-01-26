@@ -43,8 +43,8 @@ private:
 	CThemeClass* m_pSelClass;			// list selection
 	IThemeNode* m_pSelNode;				// tree selection
 
-	std::auto_ptr< CThemeCustomDraw > m_pListCustomDraw;
-	std::auto_ptr< CThemeCustomDraw > m_pTreeCustomDraw;
+	std::auto_ptr<CThemeCustomDraw> m_pListCustomDraw;
+	std::auto_ptr<CThemeCustomDraw> m_pTreeCustomDraw;
 private:
 	// enum { IDD = IDD_MAIN_DIALOG };
 	enum ClassColumn { ClassName, RelevanceTag };
@@ -60,9 +60,9 @@ private:
 	CThemeSampleStatic m_samples[ SampleCount ];
 
 	// generated overrides
-	public:
+public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnDestroy( void );

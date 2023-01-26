@@ -51,7 +51,7 @@ void CIniFile::Save( const fs::CPath& filePath ) const throws_( std::exception )
 {
 	std::ofstream output( filePath.GetPtr() );
 	if ( !output.is_open() )
-		throw CRuntimeException( str::Format( _T("Unable to open properties file %s."), filePath ) );
+		throw CRuntimeException( str::Format( _T("Unable to open properties file %s."), filePath.GetPtr() ) );
 
 	Save( output );
 	output.close();
@@ -61,7 +61,7 @@ void CIniFile::Load( const fs::CPath& filePath ) throws_( std::exception )
 {
 	std::ifstream input( filePath.GetPtr() );
 	if ( !input.is_open() )
-		throw CRuntimeException( str::Format( _T("Unable to open properties file %s."), filePath ) );
+		throw CRuntimeException( str::Format( _T("Unable to open properties file %s."), filePath.GetPtr() ) );
 
 	Load( input );
 	input.close();
@@ -166,7 +166,7 @@ std::tstring CIniFile::ParseFromUtf8( const std::string& text )
 					output << *itCh;
 					break;
 				default:
-					throw CRuntimeException( str::Format( _T("Unrecognized escape sequence %s on line %d."), str::FromUtf8( text.c_str() ), s_parseLineNo ) );
+					throw CRuntimeException( str::Format( _T("Unrecognized escape sequence %s on line %d."), str::FromUtf8( text.c_str() ).c_str(), s_parseLineNo));
 			}
 		else
 			output << *itCh;

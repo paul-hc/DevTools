@@ -66,7 +66,7 @@ void CFmtUtilsTests::TestFileState( void )
 	ASSERT_EQUAL( refState, fmt::ParseClipFileState( newState, text ) );
 
 	// tagged format: filename.ext
-	static const fs::CPath s_keyPath = _T("C:\\download\\file.txt");
+	static const fs::CPath s_keyPath( _T("C:\\download\\file.txt") );
 	text = fmt::FormatClipFileState( refState, fmt::FilenameExt );
 	ASSERT_EQUAL( _T("file.txt\t{RH|C=01-07-2017 14:10:00|M=01-07-2017 14:20:00|A=01-07-2017 14:30:00}"), text );
 	ASSERT_EQUAL( refState, fmt::ParseClipFileState( newState, text, &s_keyPath ) );		// use key path's directory to qualify "file.txt"

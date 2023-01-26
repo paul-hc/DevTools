@@ -2,6 +2,8 @@
 #define Encoding_h
 #pragma once
 
+#include "StringBase_fwd.h"
+
 
 class CEnumTags;
 
@@ -23,20 +25,6 @@ namespace fs
 	const CEnumTags& GetTags_Encoding( void );
 
 	size_t GetCharByteCount( Encoding encoding );		// byte count per charater in encoding
-}
-
-
-#if _MSC_VER <= 1700		// vc11 (VS-2012)
-
-	// introducing char32_t just for illustration - no support yet implemented in STL or Windows
-	typedef unsigned long char32_t;				// UTF32, e.g. U'a'
-
-#endif
-
-
-namespace str
-{
-	typedef std::basic_string<char32_t> wstring4;
 }
 
 

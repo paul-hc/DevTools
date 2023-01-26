@@ -4,6 +4,7 @@
 
 #include <process.h>
 #include "Path.h"
+#include "StringUtilities.h"
 
 
 namespace utl

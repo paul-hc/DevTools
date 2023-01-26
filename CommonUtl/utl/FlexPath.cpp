@@ -114,7 +114,7 @@ namespace path
 	bool QueryStorageDocPaths( OUT std::vector< fs::CPath >& rDocStgPaths, const std::vector< fs::CFlexPath >& flexPaths )
 	{
 		for ( std::vector< fs::CFlexPath >::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
-			utl::AddUnique( rDocStgPaths, itFlexPath->IsComplexPath() ? itFlexPath->GetPhysicalPath() : *itFlexPath );
+			utl::AddUnique( rDocStgPaths, itFlexPath->IsComplexPath() ? itFlexPath->GetPhysicalPath() : itFlexPath->Get() );
 
 		return !rDocStgPaths.empty();
 	}

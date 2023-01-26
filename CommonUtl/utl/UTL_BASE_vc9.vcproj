@@ -561,6 +561,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StringBase_fwd.h"
+				>
+			</File>
+			<File
 				RelativePath=".\StringCompare.cpp"
 				>
 			</File>
@@ -1069,14 +1073,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\MockObject.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\MockObject.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\NumericTests.cpp"
 				>
 			</File>
@@ -1149,14 +1145,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\Test.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\Test.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\TextFileIoTests.cpp"
 				>
 			</File>
@@ -1173,19 +1161,39 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\UnitTest.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\UnitTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\UtlConsoleTests.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\test\UtlConsoleTests.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Testing"
+			>
+			<File
+				RelativePath=".\test\MockObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MockObject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\Test.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\Test.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\UnitTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\UnitTest.h"
 				>
 			</File>
 		</Filter>

@@ -1,37 +1,51 @@
 ==================================================================================================================
-    STATIC LIBRARY : utl_ui Project Overview
+    STATIC LIBRARY: UTL_BASE Project Overview
+		Links with MFC for some basic classes: CTime, COleDateTime, MFC exceptions, etc
 
-    The use of UTL as a static library is motivated by:
-		Independence from MFC dlls;
-		No need for binary redistributables (DLL hell).
+    STATIC LIBRARY: UTL_UI Project Overview
+		The use of UTL as a static library is motivated by:
+			Independence from MFC dlls;
+			No need for binary redistributables (DLL hell).
 
-    For example, when a program using MFC (same or other version) is debugged, the Wintruder app gets
-    locked (frozen) while the program hits a breakpoint.
+		For example, when a program using MFC (same or other version) is debugged, the Wintruder app gets
+		locked (frozen) while the program hits a breakpoint.
 
 ==================================================================================================================
 
-Linking to UTL library:
-----------------------
+Linking to UTL libraries:
+------------------------
 
-* For Visual Studio 2008 solutions:
-	- Add the utl/utl_ui_vc9.vcproj project to the solution and set a dependency to it.
+*) For Visual Studio 2008 (VC9) solutions:
+	- Add the projects to the solution and set a dependency to it (this will take care of linking to .lib files):
+		utl/UTL_BASE_vc9.vcproj
+		utl/UI/UTL_UI_vc9.vcproj
 
-* For Visual Studio 2013++ solutions:
-	NEW:
-	- There is VC12 project utl\utl_ui_vc12.vcxproj for UTL library.
-	- Include utl_ui_vc12.vcxproj in your solution, and set dependency to it.
-	- To link with utl_ui_u*.lib select project, click Properties, go to Common Properties > References and a reference to utl_ui.
-		OBSOLETE:
-		- There is no UTL solution for Visual Studio 2013.
-		- Build utl/utl_vc9.sln in Visual Studio 2008 for all configurations and platforms.
-		- In Solution Explorer right click the client project and add Linker > Additional Library Directories: ../CommonUtl/utl/bin
-		- In the client project include "utl/utl.h" in stdafx.h. This will link to the right library, which is binary compatible with Visual Studio 2013.
+*) For Visual Studio 2013 (VC12) solutions:
+	- Add the projects to your application solution and set a dependency to it (note: this WILL NOT take care of linking to .lib files):
+		utl/UTL_BASE_vc12.vcxproj
+		utl/UI/UTL_UI_vc12.vcxproj
+	- To include precompiled UTL library headers, open stdafx.h in your application project (e.g. TesterUtlBase), and include the headers:
+		#include "utl/utl_base.h"			// UTL_BASE library classes
+		#include "utl/UI/utl_ui.h"			// UTL_UI library classes
+	- To link with utl_*.lib files, select project (e.g. TesterUtlBase), right-click Properties, go to Common Properties > References and a reference to UTL_BASE, UTL_UI.
+
+*) For Visual Studio 2022 (VC17) solutions:
+	- Add the projects to your application solution and set a dependency to it (note: this WILL NOT take care of linking to .lib files):
+		utl/UTL_BASE_vc17.vcxproj
+		utl/UI/UTL_UI_vc17.vcxproj
+	- To include precompiled UTL library headers, open pch.h in your application project (e.g. TesterUtlBase), and include the headers:
+		#include "utl/utl_base.h"			// UTL_BASE library classes
+		#include "utl/UI/utl_ui.h"			// UTL_UI library classes
+	- To link with utl_*.lib files, select References under project (e.g. TesterUtlBase), right-click "Add Reference":
+		[X] UTL_BASE
+		[X] UTL_UI
 
 
 UTL Environment Variables:
 ==========================
 Example on on T440p:
 UTL_INCLUDE=C:\dev\Toolkit\boost\boost_1_63_0
+UTL_INCLUDE_VC17=C:\dev\Toolkit\boost\boost_1_81_0
 UTL_TESTDATA_PATH=C:\dev\DevTools\TestDataUtl
 UTL_THUMB_SRC_IMAGE_PATH=E:\Capture\Photos\2014\2014-07 Barcelona
 
@@ -41,9 +55,8 @@ BOOST (headers only):
 * To add Boost support in Utl and Utl-based projects:
 	Define environment variable:
 		For example on T440p MyThinkPad:
-			UTL_INCLUDE=C:\dev\Toolkit\boost\boost_1_63_0
-		T470:
-			UTL_INCLUDE=todo...
+			UTL_INCLUDE=C:\dev\Toolkit\boost\boost_1_63_0			[VC9, VC12]
+			UTL_INCLUDE_VC17=C:\dev\Toolkit\boost\boost_1_81_0		[VC17]
 
 * Add UTL_INCLUDE references for INCLUDE and LIBARY for all projects:
 	Solution Explorer > MyProject > Properties
@@ -52,12 +65,14 @@ BOOST (headers only):
 				Additional Include Directories=.;../CommonUtl;$(UTL_INCLUDE)
 		Linker > General (executables only):
 			[All Configurations, Win32]
-				Additional Library Directories=$(UTL_INCLUDE)\lib\32
+				Additional Library Directories=$(UTL_INCLUDE)\lib\32					[VC9, VC12]
+				Additional Library Directories=$(UTL_INCLUDE_VC17)\lib64-msvc-14.3		[VC17 - actually couldn't find the 32-bit Boost libraries]
 			[All Configurations, x64]
 				Additional Library Directories=$(UTL_INCLUDE)\lib\64
+				Additional Library Directories=$(UTL_INCLUDE_VC17)\lib64-msvc-14.3		[VC17 - I have only the 64-bit Boost libraries]
 
 * (!) Do not use legacy "Tools > Options > Project and Solutions > Visual C++ Directories" directory settings in Visual Studio 2008 (VC9),
-  because project specific settings a better solution since are are portable across different Git local repositories.
+  because project specific settings are a better solution since are are portable across different Git local repositories.
 
 
 DirectX development:

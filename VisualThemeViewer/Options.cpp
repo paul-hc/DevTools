@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Options.h"
 #include "utl/UI/Color.h"
 #include "utl/UI/HistoryComboBox.h"

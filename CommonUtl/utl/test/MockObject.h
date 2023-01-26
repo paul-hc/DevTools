@@ -8,6 +8,15 @@
 #include "UnitTest.h"
 
 
+namespace str
+{
+	// FWD:
+
+	template< typename CharT, typename ValueT >
+	std::basic_string<CharT> FormatValue( const ValueT& value );
+}
+
+
 namespace ut
 {
 	abstract class CMockObject		// polymorphic base
@@ -40,20 +49,20 @@ namespace ut
 		void SetValue( ValueT value ) { m_value = value; }
 
 		// base overrides
-		virtual std::string Format( void ) const { return str::FormatValue< char >( m_value ); }
+		virtual std::string Format( void ) const { return str::FormatValue<char>( m_value ); }
 	private:
 		ValueT m_value;
 	};
 
 
-	typedef CMockValue< int > TMockInt;
+	typedef CMockValue<int> TMockInt;
 }
 
 
 inline std::ostream& operator<<( std::ostream& os, const ut::CMockObject& item ) { return os << item.Format(); }
 
 template< typename ValueT >
-inline std::ostream& operator<<( std::ostream& os, const ut::CMockValue< ValueT >& item ) { return os << item.GetValue(); }
+inline std::ostream& operator<<( std::ostream& os, const ut::CMockValue<ValueT>& item ) { return os << item.GetValue(); }
 
 
 #include "ComparePredicates.h"
@@ -64,7 +73,7 @@ namespace pred
 	struct CompareMockItem
 	{
 		template< typename ValueT >
-		CompareResult operator()( const ut::CMockValue< ValueT >& left, const ut::CMockValue< ValueT >& right ) const
+		CompareResult operator()( const ut::CMockValue<ValueT>& left, const ut::CMockValue<ValueT>& right ) const
 		{
 			return Compare_Scalar( left, right );
 		}
@@ -79,10 +88,10 @@ namespace func
 	struct MockToString
 	{
 		template< typename ValueT >
-		std::string operator()( const ut::CMockValue< ValueT >& item ) const { return item.Format(); }
+		std::string operator()( const ut::CMockValue<ValueT>& item ) const { return item.Format(); }
 
 		template< typename ValueT >
-		std::string operator()( const ut::CMockValue< ValueT >* pItem ) const { return pItem->Format(); }
+		std::string operator()( const ut::CMockValue<ValueT>* pItem ) const { return pItem->Format(); }
 	};
 
 

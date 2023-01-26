@@ -346,7 +346,7 @@ namespace path
 		if ( str::IsEmpty( pPrefixOrSpec ) )
 			return Match_Any;		// no common prefix/spec filter
 
-		fs::CPath filePath = pFilePath, spec = pPrefixOrSpec;
+		fs::CPath filePath( pFilePath ), spec( pPrefixOrSpec );
 		filePath.Normalize();
 		spec.Normalize();
 

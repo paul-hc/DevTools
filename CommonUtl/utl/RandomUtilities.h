@@ -64,19 +64,19 @@ namespace utl
 	}
 
 	template< typename CharType >
-	void GenerateRandomStrings( std::vector< std::basic_string< CharType > >& rItems, size_t count, size_t maxLen, const Range<CharType>& charRange = GetRangeLowerLetters() )
+	void GenerateRandomStrings( std::vector< std::basic_string<CharType> >& rItems, size_t count, size_t maxLen, const Range<CharType>& charRange = GetRangeLowerLetters() )
 	{
 		rItems.resize( count );
 
-		for ( std::vector< std::basic_string< CharType > >::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
-			*itItem = utl::MakeRandomString( utl::GetRandomValue< size_t >( maxLen ), charRange );		// random string of random length
+		for ( typename std::vector< std::basic_string<CharType> >::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+			*itItem = utl::MakeRandomString( utl::GetRandomValue<size_t>( maxLen ), charRange );		// random string of random length
 	}
 
 	template< typename CharType >
-	void InsertFragmentRandomly( std::vector< std::basic_string< CharType > >& rItems, const CharType fragment[] )
+	void InsertFragmentRandomly( std::vector< std::basic_string<CharType> >& rItems, const CharType fragment[] )
 	{
-		for ( std::vector< std::basic_string< CharType > >::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
-			itItem->insert( utl::GetRandomValue< size_t >( itItem->length() ), fragment );
+		for ( typename std::vector< std::basic_string<CharType> >::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+			itItem->insert( utl::GetRandomValue<size_t>( itItem->length() ), fragment );
 	}
 }
 

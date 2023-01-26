@@ -131,7 +131,13 @@ namespace reg
 	{
 		CKeyInfo( void ) { Clear(); }
 		CKeyInfo( HKEY hKey ) { Build( hKey ); }
-		CKeyInfo( const CKey& key ) { key.IsOpen() ? Build( key.Get() ) : Clear(); }
+		CKeyInfo( const CKey& key )
+		{
+			if ( key.IsOpen() )
+				Build( key.Get() );
+			else
+				Clear();
+		}
 
 		void Clear( void );
 		bool Build( HKEY hKey );
@@ -144,6 +150,10 @@ namespace reg
 		CTime m_lastWriteTime;
 	};
 }
+
+
+#include "Algorithms.h"
+#include "StringUtilities.h"
 
 
 namespace reg

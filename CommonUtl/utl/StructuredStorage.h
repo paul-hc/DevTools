@@ -153,7 +153,7 @@ namespace fs
 			void Push( IStorage* pSubStorage );				// go to sub-storage
 			CComPtr<IStorage> Pop( void );				// go to parent storage
 
-			IStorage* GetCurrent( void ) const { return !IsEmpty() ? m_openSubStorages.back() : GetRoot(); }
+			IStorage* GetCurrent( void ) const { return !IsEmpty() ? m_openSubStorages.back().p : GetRoot(); }
 			const fs::TEmbeddedPath& GetCurrentPath( void ) const { return m_trailPath; }
 
 			size_t GetDepth( void ) const { return m_openSubStorages.size(); }

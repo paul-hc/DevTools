@@ -1,6 +1,10 @@
 ﻿
 #include "stdafx.h"
 
+// FWD stream inserters (for C++ 11 and up):
+std::wostream& operator<<( std::wostream& os, const std::vector< char >& buffer );
+template< typename StringT > std::wostream& operator<<( std::wostream& os, const std::vector< StringT >& strings );
+
 #ifdef USE_UT		// no UT code in release builds
 #include "test/TextFileIoTests.h"
 #include "Path.h"
@@ -378,9 +382,9 @@ void CTextFileIoTests::TestWriteRead_Contents( void )
 			ASSERT_EQUAL( contentLines, outLines );
 
 			{	// cross-read lines NARROW
-				std::vector< std::string > outLines;
-				ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
-				ASSERT_EQUAL( contentLines, ut::FromUtf8Lines( outLines ) );
+				std::vector< std::string > outLinesA;
+				ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLinesA, textPath ) );
+				ASSERT_EQUAL( contentLines, ut::FromUtf8Lines( outLinesA ) );
 			}
 		}
 	}

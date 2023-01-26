@@ -195,7 +195,7 @@ namespace str
 			{
 				ASSERT( InBounds() );
 
-				typedef typename const CharT* iterator;
+				typedef const CharT* iterator;
 
 				iterator itBegin = m_text.c_str() + m_pos.m_start, itEnd = m_text.c_str() + m_pos.m_end;
 				iterator itFound = std::search( itBegin, itEnd, part.m_pString, part.m_pString + part.m_count, pred::CharEqual< caseType >() );

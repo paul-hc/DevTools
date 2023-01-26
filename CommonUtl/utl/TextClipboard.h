@@ -3,6 +3,17 @@
 #pragma once
 
 
+namespace str
+{
+	// FWD utils (for C++ 11 and up):
+	template< typename CharT, typename StringT >
+	void SplitLines( std::vector< StringT >& rItems, const CharT* pSource, const CharT* pLineEnd );
+
+	template< typename CharT, typename ContainerT >
+	std::basic_string<CharT> JoinLines( const ContainerT& items, const CharT* pLineEnd );
+}
+
+
 class CTextClipboard
 {
 protected:

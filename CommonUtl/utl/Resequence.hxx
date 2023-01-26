@@ -8,6 +8,18 @@
 
 namespace seq
 {
+	// FWD
+
+	template< typename Type >
+	class CSequenceAdapter;
+
+	template< Direction direction >
+	struct ModifyBy;
+}
+
+
+namespace seq
+{
 	inline bool CanMoveIndex( size_t itemCount, size_t index, MoveTo moveTo )
 	{
 		REQUIRE( index < itemCount );
@@ -67,28 +79,6 @@ namespace seq
 
 namespace seq
 {
-	// Drag & Drop resequence
-
-	template< typename IndexT >
-	bool ChangesDropSequenceAt( size_t itemCount, IndexT dropIndex, const std::vector< IndexT >& dragSelIndexes )
-	{
-		REQUIRE( utl::IsOrdered( dragSelIndexes ) );	// must be pre-sorted
-
-		if ( dragSelIndexes.empty() ||
-			 dragSelIndexes.size() >= itemCount ||
-			 (size_t)dropIndex > itemCount )
-			return false;				// invalid selection or drop index
-
-		// generate fake sequence with consecutive indexes - we just need to detect if the sequence changes for drop move
-		std::vector< IndexT > baselineSeq( itemCount );				// contains indexes in the range [0, size-1]
-		std::generate( baselineSeq.begin(), baselineSeq.end(), func::GenNumSeq< IndexT >( 0 ) );
-
-		std::vector< IndexT > newSequence;
-		MakeDropSequence( newSequence, baselineSeq, dropIndex, dragSelIndexes );
-		return newSequence != baselineSeq;
-	}
-
-
 	// Drop semantics: returns the new (adjusted) dropIndex
 	//
 	template< typename Type, typename IndexT >
@@ -132,6 +122,28 @@ namespace seq
 		ENSURE( utl::SameContents( rNewSequence, baselineSeq ) );
 
 		return static_cast<IndexT>( dropPos );			// new (adjusted) dropIndex
+	}
+
+
+	// Drag & Drop resequence
+
+	template< typename IndexT >
+	bool ChangesDropSequenceAt( size_t itemCount, IndexT dropIndex, const std::vector< IndexT >& dragSelIndexes )
+	{
+		REQUIRE( utl::IsOrdered( dragSelIndexes ) );	// must be pre-sorted
+
+		if ( dragSelIndexes.empty() ||
+			dragSelIndexes.size() >= itemCount ||
+			(size_t)dropIndex > itemCount )
+			return false;				// invalid selection or drop index
+
+		// generate fake sequence with consecutive indexes - we just need to detect if the sequence changes for drop move
+		std::vector< IndexT > baselineSeq( itemCount );				// contains indexes in the range [0, size-1]
+		std::generate( baselineSeq.begin(), baselineSeq.end(), func::GenNumSeq< IndexT >( 0 ) );
+
+		std::vector< IndexT > newSequence;
+		MakeDropSequence( newSequence, baselineSeq, dropIndex, dragSelIndexes );
+		return newSequence != baselineSeq;
 	}
 
 
