@@ -14,7 +14,7 @@
 // To be used for defining promptable (F4 - Next Error) compile-time user warnings like:
 //	#pragma message( __WARN__ "User: some warning message!" )
 //
-#define __WARN__ __FILE_LINE__ "warning C8989:\n  * "
+#define __WARN__ __FILE_LINE__ "warning C9999:\n  * "
 
 
 // debug support
