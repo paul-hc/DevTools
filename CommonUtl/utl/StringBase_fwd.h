@@ -5,7 +5,7 @@
 #include <iosfwd>
 
 
-// forward declarations for stream extractors of common UTL types - required for C++ 11 compilation, which is stricter!
+// forward declarations for stream extractors of common UTL types - required for C++ 14+ compilation, which is stricter!
 
 #if _MSC_VER <= 1700		// vc11 (VS-2012)
 	// introducing char32_t just for illustration - no support yet implemented in STL or Windows

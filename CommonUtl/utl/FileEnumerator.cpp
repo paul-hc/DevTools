@@ -10,8 +10,6 @@
 #define new DEBUG_NEW
 #endif
 
-#include "Path.hxx"		// ?? needed for VC12
-
 
 namespace fs
 {
@@ -26,8 +24,7 @@ namespace fs
 	{
 		const TCHAR* pFilename = filePath.GetFilenamePtr();
 
-		return
-			'.' == pFilename[0] && ( 0 == pFilename[1] || ( '.' == pFilename[1] && 0 == pFilename[2] ) );
+		return '.' == pFilename[0] && ( 0 == pFilename[1] || ( '.' == pFilename[1] && 0 == pFilename[2] ) );
 	}
 }
 

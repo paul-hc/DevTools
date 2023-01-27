@@ -5,6 +5,7 @@
 #include "Path_fwd.h"
 #include "ComparePredicates.h"
 #include "StringCompare.h"
+#include <unordered_set>
 
 
 namespace func
@@ -340,7 +341,11 @@ namespace path
 
 
 	template< typename ContainerT >
-	size_t UniquifyPaths( ContainerT& rPaths );		// vc17: defined in Path.hxx (with <unordered_set> header dependency)
+	size_t UniquifyPaths( ContainerT& rPaths )
+	{
+		std::unordered_set< typename ContainerT::value_type > uniquePathIndex;
+		return UniquifyPaths( rPaths, uniquePathIndex );
+	}
 
 
 	template< typename ContainerT, typename SrcContainerT >

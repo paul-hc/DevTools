@@ -369,7 +369,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Algorithms.hxx"
+				RelativePath=".\Algorithms_fwd.h"
 				>
 			</File>
 			<File
@@ -557,10 +557,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StringBase.hxx"
-				>
-			</File>
-			<File
 				RelativePath=".\StringBase_fwd.h"
 				>
 			</File>
@@ -717,10 +713,6 @@
 				</File>
 				<File
 					RelativePath=".\Path.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Path.hxx"
 					>
 				</File>
 				<File
@@ -1196,9 +1188,13 @@
 				RelativePath=".\test\UnitTest.h"
 				>
 			</File>
+			<File
+				RelativePath=".\UnitTest_fwd.h"
+				>
+			</File>
 		</Filter>
 		<File
-			RelativePath=".\UTL Library.txt"
+			RelativePath=".\UTL Libraries.txt"
 			>
 		</File>
 	</Files>

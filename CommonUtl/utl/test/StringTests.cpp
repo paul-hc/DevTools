@@ -14,8 +14,6 @@
 #define new DEBUG_NEW
 #endif
 
-#include "StringBase.hxx"
-
 
 namespace func
 {

@@ -366,7 +366,12 @@ namespace func
 namespace str
 {
 	template< typename StringT, typename ValueT >
-	StringT ValueToString( const ValueT& value );
+	StringT ValueToString( const ValueT& value )
+	{
+		std::basic_ostringstream< typename StringT::value_type > oss;
+		oss << value;
+		return oss.str();
+	}
 
 
 	template< typename StringT >
