@@ -182,7 +182,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
-    <ClInclude Include="Algorithms.hxx" />
+    <ClInclude Include="Algorithms_fwd.h" />
     <ClInclude Include="AppTools.h" />
     <ClInclude Include="CacheLoader.h" />
     <ClInclude Include="CacheLoader.hxx" />
@@ -237,7 +237,6 @@
     <ClInclude Include="MultiThreading.h" />
     <ClInclude Include="NumericProcessor.h" />
     <ClInclude Include="Path.h" />
-    <ClInclude Include="Path.hxx" />
     <ClInclude Include="PathFormatter.h" />
     <ClInclude Include="PathGenerator.h" />
     <ClInclude Include="PathGroup.h" />
@@ -268,7 +267,6 @@
     <ClInclude Include="StdStl.h" />
     <ClInclude Include="StreamStdTypes.h" />
     <ClInclude Include="StringBase.h" />
-    <ClInclude Include="StringBase.hxx" />
     <ClInclude Include="StringBase_fwd.h" />
     <ClInclude Include="StringCompare.h" />
     <ClInclude Include="StringCvt.h" />

@@ -409,20 +409,14 @@
     <ClInclude Include="test\UnitTest.h">
       <Filter>Testing</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms.hxx">
-      <Filter>utl</Filter>
-    </ClInclude>
-    <ClInclude Include="StringBase.hxx">
-      <Filter>utl</Filter>
-    </ClInclude>
     <ClInclude Include="StringBase_fwd.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="Path.hxx">
-      <Filter>utl\File System</Filter>
-    </ClInclude>
     <ClInclude Include="UnitTest_fwd.h">
       <Filter>Testing</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms_fwd.h">
+      <Filter>utl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
