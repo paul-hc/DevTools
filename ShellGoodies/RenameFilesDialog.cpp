@@ -343,7 +343,7 @@ bool CRenameFilesDialog::PromptRenameCustomSortOrder( void ) const
 		static bool s_promptUser = true;
 		if ( s_promptUser )
 		{
-			CTaskDialog dlg( _T("Rename Files"),										// title
+			ui::CTaskDialog dlg( _T("Rename Files"),									// title
 				_T("The files to be renamed are sorted\n using a custom sort order."),	// main instruction
 				_T("Are you sure you want to proceed with renaming the files?"),		// content
 				TDCBF_YES_BUTTON | TDCBF_NO_BUTTON );

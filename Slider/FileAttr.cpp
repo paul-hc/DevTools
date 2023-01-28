@@ -270,7 +270,7 @@ bool CFileAttr::PromptedSpeedUpSaving( CTimer& rSavingTimer )
 		CTimer promptTimer;
 
 		{
-			CTaskDialog dlg(
+			ui::CTaskDialog dlg(
 				_T("Album Save Mode"),					// title
 				_T("Saving Album Optimization!"),		// instruction (blue)
 				s_contentText,							// content

@@ -11,7 +11,6 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/Algorithms.hxx"
 #include "utl/TextFileIo.hxx"
 
 

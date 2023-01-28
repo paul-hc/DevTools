@@ -8,19 +8,14 @@
 #define _ATL_NO_UUIDOF
 
 #include "utl/utl_base.h"
+#include "utl/UI/utl_ui.h"
 
-#include <afxwin.h>					// MFC core and standard components
-#include <afxdisp.h>
-#include <afxmt.h>
+#include <afxdisp.h>			// OLE Automation
 
-#include <comdef.h>
-#include <comutil.h>
-
+#include <comutil.h>			// _bstr_t, _variant_t
+#include <comdef.h>				// _com_error
 #include <atlbase.h>
 #include <atlcom.h>
-#include <afxcmn.h>
-
-#include "utl/UI/utl_ui.h"
 
 
 #ifdef _DEBUG

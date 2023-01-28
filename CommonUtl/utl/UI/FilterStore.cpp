@@ -41,12 +41,17 @@ namespace fs
 			Register( *itExtension, filterPos );
 	}
 
-	void CKnownExtensions::Register( const std::tstring& item, size_t filterPos )
+	bool CKnownExtensions::Register( const std::tstring& item, size_t filterPos )
 	{
 		ASSERT( !item.empty() );
 
 		CPath ext( path::FindExt( item.c_str() ) );
-		ASSERT( m_knownExts.find( ext ) == m_knownExts.end() );		// unique extension
+
+		if ( m_knownExts.find( ext ) != m_knownExts.end() )		// extension already registered?
+		{
+			TRACE( _T(" Warning: ignoring extension '%s' that is already registered!\n"), ext.GetPtr() );
+			return false;
+		}
 
 		m_knownExts[ ext ] = filterPos;
 
@@ -57,6 +62,8 @@ namespace fs
 			stream::Tag( m_allSpecs, item, CFilterStore::s_specSep );
 		else
 			stream::Tag( m_allSpecs, std::tstring( _T("*") ) + item, CFilterStore::s_specSep );
+
+		return true;		// registered
 	}
 
 	void CKnownExtensions::RegisterSpecs( const std::tstring& specs, size_t filterPos )

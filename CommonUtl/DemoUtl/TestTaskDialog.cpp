@@ -32,7 +32,6 @@ CTestTaskDialog::CTestTaskDialog( CWnd* pParent )
 {
 	m_regSection = reg::section_dialog;
 	m_usageButton.SetUseTextSpacing();
-	int f = 0;
 }
 
 CTestTaskDialog::~CTestTaskDialog()

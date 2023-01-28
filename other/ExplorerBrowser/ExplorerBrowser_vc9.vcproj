@@ -20,9 +20,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			Name="DebugU_DLL|Win32"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -103,9 +103,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			Name="DebugU_DLL|x64"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -186,9 +186,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			Name="ReleaseU_DLL|Win32"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -270,9 +270,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|x64"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			Name="ReleaseU_DLL|x64"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -354,9 +354,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug_Static|Win32"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			Name="DebugU_Static|Win32"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -437,9 +437,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug_Static|x64"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			Name="DebugU_Static|x64"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			UseOfATL="1"
@@ -520,9 +520,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_Static|Win32"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			Name="ReleaseU_Static|Win32"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -604,9 +604,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_Static|x64"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			Name="ReleaseU_Static|x64"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			UseOfATL="1"
@@ -740,7 +740,7 @@
 				RelativePath=".\ExplorerBrowser.idl"
 				>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="DebugU_DLL|Win32"
 					>
 					<Tool
 						Name="VCMIDLTool"
@@ -754,7 +754,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="DebugU_DLL|x64"
 					>
 					<Tool
 						Name="VCMIDLTool"
@@ -768,7 +768,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="ReleaseU_DLL|Win32"
 					>
 					<Tool
 						Name="VCMIDLTool"
@@ -782,7 +782,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|x64"
+					Name="ReleaseU_DLL|x64"
 					>
 					<Tool
 						Name="VCMIDLTool"
@@ -796,7 +796,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Static|Win32"
+					Name="DebugU_Static|Win32"
 					>
 					<Tool
 						Name="VCMIDLTool"
@@ -810,7 +810,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Static|x64"
+					Name="DebugU_Static|x64"
 					>
 					<Tool
 						Name="VCMIDLTool"
@@ -824,7 +824,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Static|Win32"
+					Name="ReleaseU_Static|Win32"
 					>
 					<Tool
 						Name="VCMIDLTool"
@@ -838,7 +838,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Static|x64"
+					Name="ReleaseU_Static|x64"
 					>
 					<Tool
 						Name="VCMIDLTool"
@@ -872,7 +872,7 @@
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="DebugU_DLL|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -880,7 +880,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="DebugU_DLL|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -888,7 +888,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="ReleaseU_DLL|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -896,7 +896,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|x64"
+					Name="ReleaseU_DLL|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -904,7 +904,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Static|Win32"
+					Name="DebugU_Static|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -912,7 +912,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Static|x64"
+					Name="DebugU_Static|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -920,7 +920,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Static|Win32"
+					Name="ReleaseU_Static|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -928,7 +928,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Static|x64"
+					Name="ReleaseU_Static|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"

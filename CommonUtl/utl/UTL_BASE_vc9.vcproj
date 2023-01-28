@@ -22,7 +22,7 @@
 		<Configuration
 			Name="DebugU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9"
-			IntermediateDirectory="bin\vc9\base\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\BASE\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -89,7 +89,7 @@
 		<Configuration
 			Name="DebugU|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9"
-			IntermediateDirectory="bin\vc9\base\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\BASE\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -157,7 +157,7 @@
 		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9"
-			IntermediateDirectory="bin\vc9\base\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\BASE\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -225,7 +225,7 @@
 		<Configuration
 			Name="ReleaseU|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9"
-			IntermediateDirectory="bin\vc9\base\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\BASE\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="1"
 			CharacterSet="1"

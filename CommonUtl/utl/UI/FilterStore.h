@@ -32,7 +32,7 @@ namespace fs
 		void QueryAllExts( std::vector< std::tstring >& rAllExts ) const;
 
 		void Register( const std::vector< std::tstring >& exts, size_t filterPos );
-		void Register( const std::tstring& item, size_t filterPos );			// either ext ".bmp" or spec "*.bmp"
+		bool Register( const std::tstring& item, size_t filterPos );			// either ext ".bmp" or spec "*.bmp"
 		void RegisterSpecs( const std::tstring& specs, size_t filterPos );		// either ".bmp;.dib" or "*.bmp;*.dib"
 	private:
 		std::unordered_map< CPath, size_t > m_knownExts;			// known extensions to a filter entry pos (CFilterStore::m_filters)

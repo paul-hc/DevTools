@@ -110,15 +110,21 @@ namespace win
 
 	OsVersion GetOsVersion( void )
 	{
-		static const OsVersion osVersion = GetOsVersionImpl();
-		return osVersion;
+		static const OsVersion s_osVersion = GetOsVersionImpl();
+		return s_osVersion;
 	}
 
 	OsVersion GetOsVersionImpl( void )
 	{
+		/* MSDN Note:
+			Applications not manifested for Windows 8.1 or Windows 10 will return the Windows 8 OS version value (6.2).
+			Once an application is manifested for a given operating system version, GetVersionEx will always return the
+			version that the application is manifested for in future releases.
+		*/
 		OSVERSIONINFO osvi;
 		ZeroMemory( &osvi, sizeof( OSVERSIONINFO ) );
 		osvi.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
+
 		if ( !::GetVersionEx( &osvi ) )
 			return NotAvailable;
 

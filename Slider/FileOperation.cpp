@@ -111,8 +111,8 @@ namespace svc
 			if ( str::IsEmpty( pTitle ) )
 				pTitle = _T("Confirm Save As");
 
-			CTaskDialog dlg( pTitle, _T("Override existing files?"), str::ToNonBreakingSpace( str::Join( existingPaths, _T("\n") ) ),
-							 TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, TDF_SIZE_TO_CONTENT );
+			ui::CTaskDialog dlg( pTitle, _T("Override existing files?"), str::ToNonBreakingSpace( str::Join( existingPaths, _T("\n") ) ),
+								 TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, TDF_SIZE_TO_CONTENT );
 
 			dlg.SetMainIcon( TD_WARNING_ICON );
 			if ( dlg.DoModal( NULL ) != IDYES )
