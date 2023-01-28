@@ -614,6 +614,9 @@
     <ClInclude Include="TrayIcon.h">
       <Filter>UI\Shell %28Explorer API%29</Filter>
     </ClInclude>
+    <ClInclude Include="Image_fwd.hxx">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutBox.cpp">

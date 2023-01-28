@@ -78,23 +78,23 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
-    <OutDir>$(ProjectDir)..\bin_vc12\</OutDir>
-    <IntDir>..\bin_vc12\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\vc12\</OutDir>
+    <IntDir>..\bin\vc12\UI\$(PlatformName)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_ud</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
-    <OutDir>$(ProjectDir)..\bin_vc12\</OutDir>
-    <IntDir>..\bin_vc12\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\vc12\</OutDir>
+    <IntDir>..\bin\vc12\UI\$(PlatformName)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_u</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
-    <OutDir>$(ProjectDir)..\bin_vc12\</OutDir>
-    <IntDir>..\bin_vc12\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\vc12\</OutDir>
+    <IntDir>..\bin\vc12\UI\$(PlatformName)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_ud64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
-    <OutDir>$(ProjectDir)..\bin_vc12\</OutDir>
-    <IntDir>..\bin_vc12\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\vc12\</OutDir>
+    <IntDir>..\bin\vc12\UI\$(PlatformName)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_u64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
@@ -248,6 +248,7 @@
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="ImageProxy.h" />
     <ClInclude Include="ImageStore.h" />
+    <ClInclude Include="Image_fwd.hxx" />
     <ClInclude Include="Imaging.h" />
     <ClInclude Include="ImagingDirect2D.h" />
     <ClInclude Include="ImagingGdiPlus.h" />
