@@ -147,11 +147,11 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMa
 
 		if ( !effect.m_frameFillTraits.IsNull() )
 		{
-			CRect textRect( itemRect.TopLeft(), textSize );
-			ui::CenterRect( textRect, itemRect, false, true );
-			textRect.InflateRect( 0, 2 );
+			CRect textRect2( itemRect.TopLeft(), textSize );
+			ui::CenterRect( textRect2, itemRect, false, true );
+			textRect2.InflateRect( 0, 2 );
 
-			DrawTextFrame( textRect, effect.m_frameFillTraits );
+			DrawTextFrame( textRect2, effect.m_frameFillTraits );
 		}
 
 		m_pDC->DrawText( pText, matchLen, &itemRect, TextStyle );

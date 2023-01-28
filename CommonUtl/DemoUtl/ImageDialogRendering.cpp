@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageDialog.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/ScopedValue.h"
@@ -13,6 +13,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/Image_fwd.hxx"
+
 
 void CImageDialog::CreateEffectDibs( void )
 {
@@ -23,7 +25,7 @@ void CImageDialog::CreateEffectDibs( void )
 
 	CWaitCursor wait;
 	CModeData* pModeData = m_modeData[ m_sampleMode ];
-	CScopedFlag< int > scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
+	CScopedFlag<int> scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
 	WORD bitsPerPixel = m_pDibSection->GetBitsPerPixel();
 	COLORREF bkColor = GetBkColor();
 	std::auto_ptr<CDibSection> pNewDib;
@@ -33,7 +35,7 @@ void CImageDialog::CreateEffectDibs( void )
 	{
 		case ConvertImage:				// enum EffectDib {  };
 		{
-			CScopedFlag< int > scopedCopyPixels( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtCopyPixels );
+			CScopedFlag<int> scopedCopyPixels( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtCopyPixels );
 			static const WORD bpp[] = { 1, 4, 8, 16, 24, 32 };
 			ASSERT( COUNT_OF( bpp ) == pModeData->GetZoneCount() - 1 );
 			for ( unsigned int i = 0; i != COUNT_OF( bpp ); ++i )
@@ -146,7 +148,7 @@ void CImageDialog::Render_AllImages( CDC* pDC, CMultiZoneIterator* pMultiZone )
 	BlendDib( m_pDibSection.get(), pDC, pMultiZone->GetNextZone() );
 
 	const CModeData* pModeData = m_modeData[ m_sampleMode ];
-	for ( std::vector< CDibSection* >::const_iterator itDib = pModeData->m_dibs.begin(); itDib != pModeData->m_dibs.end(); ++itDib )
+	for ( std::vector<CDibSection*>::const_iterator itDib = pModeData->m_dibs.begin(); itDib != pModeData->m_dibs.end(); ++itDib )
 		BlendDib( *itDib, pDC, pMultiZone->GetNextZone() );
 }
 
@@ -226,7 +228,7 @@ bool CImageDialog::Render_RectsAlphaBlend( CDC* pDC, const CRect& clientRect )
 	// set all pixels to blue and set source alpha to zero
 
 	typedef CPixelBGRA* iterator;
-	for ( iterator pPixel = dibPixels.Begin< CPixelBGRA >(), pPixelEnd = dibPixels.End< CPixelBGRA >(); pPixel != pPixelEnd; ++pPixel )
+	for ( iterator pPixel = dibPixels.Begin<CPixelBGRA>(), pPixelEnd = dibPixels.End<CPixelBGRA>(); pPixel != pPixelEnd; ++pPixel )
 	{
 		pPixel->m_alpha = 0;
 		pPixel->m_red = 0;
@@ -237,7 +239,7 @@ bool CImageDialog::Render_RectsAlphaBlend( CDC* pDC, const CRect& clientRect )
 	// highlight a magenta 10x5 square in the origin corner
 	for ( int y = 0; y != ( bitmapSize.cy / 5 ); ++y )
 		for ( int x = 0; x != ( bitmapSize.cx / 10 ); ++x )
-			dibPixels.GetPixel< CPixelBGRA >( x, y ).m_red = 0xFF;
+			dibPixels.GetPixel<CPixelBGRA>( x, y ).m_red = 0xFF;
 
 	BLENDFUNCTION blendFunc;				// structure for alpha blending
 	blendFunc.BlendOp = AC_SRC_OVER;
@@ -254,7 +256,7 @@ bool CImageDialog::Render_RectsAlphaBlend( CDC* pDC, const CRect& clientRect )
 	for ( int y = 0; y != bitmapSize.cy; ++y )
 		for ( int x = 0; x != bitmapSize.cx; ++x )
 		{
-			CPixelBGRA& rPixel = dibPixels.GetPixel< CPixelBGRA >( x, y );
+			CPixelBGRA& rPixel = dibPixels.GetPixel<CPixelBGRA>( x, y );
 
 			if ( ( x > (int)( bitmapSize.cx / 5 ) ) && ( x < ( bitmapSize.cx - bitmapSize.cx / 5 ) ) &&
 				 ( y > (int)( bitmapSize.cy / 5 ) ) && ( y < ( bitmapSize.cy - bitmapSize.cy / 5 ) ) )
@@ -291,7 +293,7 @@ bool CImageDialog::Render_RectsAlphaBlend( CDC* pDC, const CRect& clientRect )
 			float alphaFactor = (float)alpha / (float)0xFF;		// calculate the factor by which we multiply each component (for premultiply)
 
 			// multiply each pixel by alphaFactor, so each component is less than or equal to the alpha value
-			CPixelBGRA& rPixel = dibPixels.GetPixel< CPixelBGRA >( x, y );
+			CPixelBGRA& rPixel = dibPixels.GetPixel<CPixelBGRA>( x, y );
 			rPixel = CPixelBGRA( (BYTE)( red * alphaFactor ), (BYTE)( green * alphaFactor ), (BYTE)( blue * alphaFactor ), alpha );
 		}
 
@@ -348,7 +350,7 @@ bool CImageDialog::BlendDib( CDibSection* pDib, CDC* pDC, const CRect& rect, BYT
 			if ( 255 == srcAlpha )
 				m_sampleView.DrawDiagonalCross( pDC, rect, color::AzureBlue, m_statusAlpha );						// blitted with no transparency
 			else
-				m_sampleView.DrawDiagonalCross( pDC, rect, color::Red, std::max< BYTE >( m_statusAlpha, 192 ) );	// custom alpha-blend failed
+				m_sampleView.DrawDiagonalCross( pDC, rect, color::Red, std::max<BYTE>( m_statusAlpha, 192 ) );	// custom alpha-blend failed
 			break;
 	}
 	return true;

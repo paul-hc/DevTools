@@ -9,6 +9,13 @@ template< typename BaseCtrl >
 class CFrameHostCtrl : public BaseCtrl
 {
 public:
+	// required for C++ 14+ compilation
+	using BaseCtrl::m_hWnd;
+	using BaseCtrl::GetParent;
+	using BaseCtrl::Invalidate;
+	using BaseCtrl::GetClientRect;
+	using BaseCtrl::MapWindowPoints;
+public:
 	CFrameHostCtrl( COLORREF frameColor = CLR_NONE, bool showFocus = false )
 		: BaseCtrl()
 		, m_frameColor( frameColor )
@@ -18,7 +25,7 @@ public:
 	{
 	}
 
-	COLORREF GetFrameColor( void ) const { return frameColor; }
+	COLORREF GetFrameColor( void ) const { return m_frameColor; }
 	bool SetFrameColor( COLORREF frameColor );
 
 	bool GetShowFocus( void ) const { return m_showFocus; }

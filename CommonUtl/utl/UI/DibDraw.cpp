@@ -9,6 +9,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Image_fwd.hxx"
+
 
 namespace gdi
 {

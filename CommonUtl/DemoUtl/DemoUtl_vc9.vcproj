@@ -21,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="DebugU|Win32"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -55,7 +55,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
@@ -105,8 +105,8 @@
 		</Configuration>
 		<Configuration
 			Name="DebugU|x64"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -139,7 +139,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -190,8 +190,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseU|Win32"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -225,7 +225,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -277,8 +277,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseU|x64"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -312,7 +312,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -469,7 +469,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\stdafx.cpp"
+				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
 					Name="DebugU|Win32"
@@ -505,7 +505,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\stdafx.h"
+				RelativePath=".\pch.h"
 				>
 			</File>
 			<File

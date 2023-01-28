@@ -39,10 +39,10 @@ bool CWindowPlacement::IsEmpty( void ) const
 		0 == rcNormalPosition.left && 0 == rcNormalPosition.top && 0 == rcNormalPosition.right && 0 == rcNormalPosition.bottom;
 }
 
-void CWindowPlacement::Setup( const CWnd* pWnd, const CRect& normalRect, UINT showCmd, UINT flags /*= 0*/ )
+void CWindowPlacement::Setup( const CWnd* pWnd, const CRect& normalRect, UINT _showCmd, UINT _flags /*= 0*/ )
 {
-	this->flags = flags;
-	this->showCmd = showCmd;
+	this->flags = _flags;
+	this->showCmd = _showCmd;
 	this->ptMinPosition = CPoint( 0, 0 );
 	this->ptMaxPosition = CPoint( -1, -1 );
 	this->rcNormalPosition = normalRect;
@@ -97,11 +97,11 @@ void CWindowPlacement::QueryCreateStruct( CREATESTRUCT* pCreateStruct ) const
 	pCreateStruct->y = rcNormalPosition.top;
 }
 
-int CWindowPlacement::ChangeMaximizedShowCmd( UINT showCmd )
+int CWindowPlacement::ChangeMaximizedShowCmd( UINT _showCmd )
 {
 	if ( SW_SHOWMAXIMIZED == this->showCmd )
 	{	// actually hide now and further show as maximized
-		this->showCmd = showCmd;
+		this->showCmd = _showCmd;
 		return SW_SHOWMAXIMIZED;				// delayed show command (2nd step)
 	}
 	return this->showCmd;

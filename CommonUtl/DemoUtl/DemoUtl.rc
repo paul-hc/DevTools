@@ -63,11 +63,11 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MESSAGE_TRAY_ICON   ICON                    "res\\AppMsgTray.ico"
 IDR_MAINFRAME           ICON                    "res\\DemoUtl.ico"
+IDR_MESSAGE_TRAY_ICON   ICON                    "res\\AppMsgTray.ico"
 IDR_TEST_DOC_TYPE       ICON                    "res\\TestDoc.ico"
 IDI_MY_TOOL_STRIP_ICON  ICON                    "res\\MyToolStrip.ico"
-IDI_MY_TOOL_STRIP_ALPHA_ICON ICON               "res\\MyToolStrip_alpha.ico"
+IDI_MY_TOOL_STRIP_ALPHA_ICON ICON                    "res\\MyToolStrip_alpha.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -77,7 +77,7 @@ IDI_MY_TOOL_STRIP_ALPHA_ICON ICON               "res\\MyToolStrip_alpha.ico"
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 IDR_LOW_COLOR_STRIP     BITMAP                  "res\\LowColorStrip.bmp"
 IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
-IDB_SEARCH_FILES_ANIM_STRIP BITMAP              "res\\SearchFilesAnimStrip.bmp"
+IDB_SEARCH_FILES_ANIM_STRIP BITMAP                  "res\\SearchFilesAnimStrip.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -664,8 +664,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,0,0,1
- PRODUCTVERSION 4,0,0,1
+ FILEVERSION 4,1,0,1
+ PRODUCTVERSION 4,1,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -680,17 +680,17 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "BuildTimestamp", "19-06-2022 15:47:43"
-            VALUE "Comments", "CTrayIcon|NewSysTray|Split UTL_BASE/UTL_UI projects"
+            VALUE "BuildTimestamp", "28-01-2023 11:52:31"
+            VALUE "Comments", "VC++ 2022|CTrayIcon|NewSysTray|Split UTL_BASE/UTL_UI projects"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Test application for UTL mini-framework"
-            VALUE "FileVersion", "4, 0, 0, 1"
+            VALUE "FileVersion", "4, 1, 0, 1"
             VALUE "InternalName", "DemoUtl"
-            VALUE "LegalCopyright", "Copyleft ® 2015-2022"
+            VALUE "LegalCopyright", "Copyleft ® 2015-2023"
             VALUE "OriginalFilename", "DemoUtl.exe"
             VALUE "ProductName", "Test application for UTL mini-framework"
-            VALUE "ProductVersion", "4, 0, 0, 1"
+            VALUE "ProductVersion", "4, 1, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END

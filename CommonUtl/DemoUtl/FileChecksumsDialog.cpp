@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileChecksumsDialog.h"
 #include "utl/Algorithms.h"
 #include "utl/IoBin.h"

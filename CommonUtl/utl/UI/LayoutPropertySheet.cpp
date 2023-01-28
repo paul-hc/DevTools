@@ -24,14 +24,17 @@ namespace reg
 }
 
 
-static CLayoutStyle layoutStyles[] =
+namespace layout
 {
-	{ AFX_IDC_TAB_CONTROL, layout::Size },
-	{ IDOK, layout::Move },
-	{ IDCANCEL, layout::Move },
-	{ ID_APPLY_NOW, layout::Move },
-	{ IDHELP, layout::Move }
-};
+	static CLayoutStyle s_styles[] =
+	{
+		{ AFX_IDC_TAB_CONTROL, layout::Size },
+		{ IDOK, layout::Move },
+		{ IDCANCEL, layout::Move },
+		{ ID_APPLY_NOW, layout::Move },
+		{ IDHELP, layout::Move }
+	};
+}
 
 CLayoutPropertySheet::CLayoutPropertySheet( const std::tstring& title, CWnd* pParent, UINT selPageIndex /*= 0*/ )
 	: CLayoutBasePropertySheet( title.c_str(), pParent, selPageIndex )
@@ -43,7 +46,7 @@ CLayoutPropertySheet::CLayoutPropertySheet( const std::tstring& title, CWnd* pPa
 	, m_alwaysModified( false )
 {
 	m_psh.dwFlags &= ~PSH_HASHELP;				// don't show the help button by default
-	m_pLayoutEngine->RegisterCtrlLayout( layoutStyles, COUNT_OF( layoutStyles ) );
+	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_PAIR( layout::s_styles ) );
 	m_resizable = false;						// auto: will be flipped to true if any page is resizable
 	m_initCentered = false;
 }

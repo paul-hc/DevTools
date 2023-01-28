@@ -6,6 +6,14 @@
 #include "WindowHook.h"
 
 
+namespace num
+{
+	// forward declarations - required for C++ 14+ compilation
+	template< typename ValueT >
+	bool ParseHexNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength /*= NULL*/ );
+}
+
+
 namespace ui
 {
 	void DrawBorder( CDC* pDC, const CRect& rect, COLORREF borderColor, int borderWidth = 1 );
@@ -246,12 +254,12 @@ namespace ui
 					rValue = *pNullValue;
 				else
 				{
-					pDX->m_idLastControl = IDC_HANDLE_EDIT;
+					pDX->m_idLastControl = ctrlId;
 					pDX->Fail();
 				}
-			else if ( !num::ParseHexNumber< Value >( rValue, text ) )
+			else if ( !num::ParseHexNumber<Value>( rValue, text ) )
 			{
-				pDX->m_idLastControl = IDC_HANDLE_EDIT;
+				pDX->m_idLastControl = ctrlId;
 				pDX->Fail();
 			}
 		}

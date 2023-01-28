@@ -26,7 +26,7 @@ namespace utl
 
 
 	// Algorithms and lookup table for computing Crc32 - Cyclic Redundancy Checksum
-	// Nore: in release build it's actually faster than boost::crc_32_type::process_bytes() defined in <boost/crc.hpp>
+	// Note: in release build it's actually faster than boost::crc_32_type::process_bytes() defined in <boost/crc.hpp>
 	//
 	class CCrc32
 	{
@@ -124,7 +124,8 @@ namespace fs
 
 #pragma warning( push, 3 )			// switch to warning level 3
 #pragma warning( disable: 4245 )	// identifier was truncated to 'number' characters in the debug information
-#include <boost/crc.hpp>	// for boost::crc_32_type
+#pragma warning( disable: 4701 )	// Boost 1.81 - warning C4701: potentially uninitialized local variable 'result' used
+#include <boost/crc.hpp>			// for boost::crc_32_type
 #pragma warning( pop )				// restore to the initial warning level
 
 

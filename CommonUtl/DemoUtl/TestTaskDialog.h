@@ -4,7 +4,7 @@
 #include "utl/UI/EnumSplitButton.h"
 
 
-class CTaskDialog;
+namespace ui { class CTaskDialog; }
 class CEnumTags;
 
 
@@ -21,13 +21,13 @@ private:
 	void DisplayOutcome( void );
 	void ClearOutcome( void );
 
-	CTaskDialog* MakeTaskDialog_Basic( void ) const;
-	CTaskDialog* MakeTaskDialog_CommandLinks( void ) const;
-	CTaskDialog* MakeTaskDialog_MessageBox( void ) const;
-	CTaskDialog* MakeTaskDialog_ProgressBar( void ) const;
-	CTaskDialog* MakeTaskDialog_MarqueeProgressBar( void ) const;
-	CTaskDialog* MakeTaskDialog_Navigation( void ) const;
-	CTaskDialog* MakeTaskDialog_Complete( void ) const;
+	ui::CTaskDialog* MakeTaskDialog_Basic( void ) const;
+	ui::CTaskDialog* MakeTaskDialog_CommandLinks( void ) const;
+	ui::CTaskDialog* MakeTaskDialog_MessageBox( void ) const;
+	ui::CTaskDialog* MakeTaskDialog_ProgressBar( void ) const;
+	ui::CTaskDialog* MakeTaskDialog_MarqueeProgressBar( void ) const;
+	ui::CTaskDialog* MakeTaskDialog_Navigation( void ) const;
+	ui::CTaskDialog* MakeTaskDialog_Complete( void ) const;
 private:
 	INT_PTR m_outcome;
 	int m_radioButtonId;

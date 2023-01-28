@@ -3,6 +3,7 @@
 #pragma once
 
 #include "StringCompare.h"
+#include "LongestCommonSubsequence.h"
 
 
 namespace str
@@ -50,13 +51,13 @@ namespace str
 		//if ( MatchEqual == m_match || m_textPair.second.empty() )
 		//	return;
 
-		std::vector< lcs::CResult< CharType > > lcsSequence;
+		std::vector< lcs::CResult<CharType> > lcsSequence;
 		lcs::CompareStringPair( lcsSequence, m_textPair, getMatchFunc );
 
 		m_matchSeqPair.first.reserve( m_textPair.first.size() );
 		m_matchSeqPair.second.reserve( m_textPair.second.size() );
 
-		for ( std::vector< lcs::CResult< CharType > >::const_iterator itResult = lcsSequence.begin(); itResult != lcsSequence.end(); ++itResult )
+		for ( typename std::vector< lcs::CResult<CharType> >::const_iterator itResult = lcsSequence.begin(); itResult != lcsSequence.end(); ++itResult )
 			switch ( itResult->m_matchType )
 			{
 				case lcs::Equal:

@@ -330,7 +330,7 @@ namespace fs
 		ULONG elemCount = 0;
 		for ( CComPtr<IUnknown> pElement; S_OK == pEnum->Next( 1, &pElement, &elemCount ); pElement = NULL )
 		{
-			CComQIPtr<IWICBitmapCodecInfo> pDecoderInfo = pElement;	// IWICBitmapCodecInfo is common base of IWICBitmapDecoderInfo, IWICBitmapEncoderInfo
+			CComQIPtr<IWICBitmapCodecInfo> pDecoderInfo( pElement );	// IWICBitmapCodecInfo is common base of IWICBitmapDecoderInfo, IWICBitmapEncoderInfo
 			std::tstring name, specs;
 			{
 				UINT nameLen = 0, extsLen = 0;

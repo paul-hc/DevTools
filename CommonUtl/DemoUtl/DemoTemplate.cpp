@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DemoTemplate.h"
 #include "Application.h"
 #include "ITestMarkup.h"
@@ -89,9 +89,9 @@ CDemoTemplate::~CDemoTemplate()
 {
 }
 
-const std::vector< std::tstring >& CDemoTemplate::GetTextItems( void )
+const std::vector<std::tstring>& CDemoTemplate::GetTextItems( void )
 {
-	static std::vector< std::tstring > items;
+	static std::vector<std::tstring> items;
 	if ( items.empty() )
 	{
 		items.push_back( _T("Zoot Allures|1976|55 MB (57 767 672 bytes)") );
@@ -114,14 +114,14 @@ void CDemoTemplate::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipC
 	{
 		case IDC_OPEN_DIALOG_BUTTON:
 		{
-			static const std::vector< std::tstring > tooltips = str::LoadStrings( IDC_OPEN_DIALOG_BUTTON );
-			rText = tooltips.at( m_dialogButton.GetSelEnum< ResizeStyle >() );
+			static const std::vector<std::tstring> tooltips = str::LoadStrings( IDC_OPEN_DIALOG_BUTTON );
+			rText = tooltips.at( m_dialogButton.GetSelEnum<ResizeStyle>() );
 			break;
 		}
 		case ID_CHANGE_CASE:
 		{
-			static const std::vector< std::tstring > tooltips = str::LoadStrings( ID_CHANGE_CASE );
-			rText = tooltips.at( m_changeCaseButton.GetSelEnum< ChangeCase >() );
+			static const std::vector<std::tstring> tooltips = str::LoadStrings( ID_CHANGE_CASE );
+			rText = tooltips.at( m_changeCaseButton.GetSelEnum<ChangeCase>() );
 			break;
 		}
 		case IDC_CAPITALIZE_BUTTON:
@@ -216,7 +216,7 @@ void CDemoTemplate::OnBnClicked_OpenDialog( void )
 {
 	CTestDialog dialog( m_pOwner );
 
-	switch ( m_dialogResizeStyle = m_dialogButton.GetSelEnum< ResizeStyle >() )
+	switch ( m_dialogResizeStyle = m_dialogButton.GetSelEnum<ResizeStyle>() )
 	{
 		case ResizeHV:			break;
 		case ResizeH:			dialog.GetLayoutEngine().DisableResizeVertically(); break;
@@ -284,12 +284,12 @@ void CDemoTemplate::OnUpdateDropAlignCheckedPicker( CCmdUI* pCmdUI )
 void CDemoTemplate::OnClipboardCopy( void )
 {
 	fs::CPath execDirPath = app::GetModulePath().GetParentPath().GetParentPath();
-	const std::vector< std::tstring >& srcItems = GetTextItems();
-	std::vector< fs::CPath > filePaths;
+	const std::vector<std::tstring>& srcItems = GetTextItems();
+	std::vector<fs::CPath> filePaths;
 
-	for ( std::vector< std::tstring >::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc )
+	for ( std::vector<std::tstring>::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc )
 	{
-		std::vector< std::tstring > subItems;
+		std::vector<std::tstring> subItems;
 		str::Split( subItems, itSrc->c_str(), _T("|") );
 
 		filePaths.push_back( execDirPath / subItems.front() );
@@ -308,7 +308,7 @@ void CDemoTemplate::OnUpdateClipboardCopy( CCmdUI* pCmdUI )
 
 void CDemoTemplate::OnClipboardPaste( void )
 {
-	std::vector< fs::CPath > filePaths;
+	std::vector<fs::CPath> filePaths;
 	if ( CTextClipboard::PasteFromLines( filePaths, m_pOwner->GetSafeHwnd() ) )
 		ui::MessageBox( str::Format( _T("Pasted %d file paths from clipboard:\n\n%s"), filePaths.size(), str::JoinLines( filePaths, _T("\n") ).c_str() ) );
 	else
@@ -357,16 +357,16 @@ void CListPage::DoDataExchange( CDataExchange* pDX )
 		CScopedLockRedraw freeze( &m_fileListView );
 		CScopedInternalChange internalChange( &m_fileListView );
 
-		const std::vector< std::tstring >& srcItems = CDemoTemplate::GetTextItems();
+		const std::vector<std::tstring>& srcItems = CDemoTemplate::GetTextItems();
 
 		int pos = 0;
-		for ( std::vector< std::tstring >::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc, ++pos )
+		for ( std::vector<std::tstring>::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc, ++pos )
 		{
-			std::vector< std::tstring > subItems;
+			std::vector<std::tstring> subItems;
 			str::Split( subItems, itSrc->c_str(), _T("|") );
 			ASSERT( !subItems.empty() );
 
-			std::vector< std::tstring >::const_iterator itSubItem = subItems.begin();
+			std::vector<std::tstring>::const_iterator itSubItem = subItems.begin();
 
 			m_fileListView.InsertItem( LVIF_TEXT | LVIF_PARAM, pos, (LPTSTR)itSubItem->c_str(), 0, 0, 0, (LPARAM)itSrc->c_str() );
 			if ( ++itSubItem != subItems.end() )
@@ -485,8 +485,8 @@ void CEditPage::DoDataExchange( CDataExchange* pDX )
 		static const TCHAR lineEnd[] = _T("\r\n");
 		std::tostringstream src, dest;
 
-		const std::vector< std::tstring >& srcItems = CDemoTemplate::GetTextItems();
-		for ( std::vector< std::tstring >::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc )
+		const std::vector<std::tstring>& srcItems = CDemoTemplate::GetTextItems();
+		for ( std::vector<std::tstring>::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc )
 		{
 			if ( itSrc != srcItems.begin() )
 			{
@@ -494,11 +494,11 @@ void CEditPage::DoDataExchange( CDataExchange* pDX )
 				dest << lineEnd;
 			}
 
-			std::vector< std::tstring > subItems;
+			std::vector<std::tstring> subItems;
 			str::Split( subItems, itSrc->c_str(), _T("|") );
 			ASSERT( !subItems.empty() );
 
-			std::vector< std::tstring >::const_iterator itSubItem = subItems.begin();
+			std::vector<std::tstring>::const_iterator itSubItem = subItems.begin();
 			src << *itSubItem;
 			m_sourceCombo.AddString( itSubItem->c_str() );
 

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TestMiscDialog.h"
 #include "utl/AppTools.h"
 #include "utl/UI/ImageStore.h"

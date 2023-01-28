@@ -11,14 +11,14 @@ public:
 	bool IsEmpty( void ) const;
 
 	void Reset( void );
-	void Setup( const CWnd* pWnd, const CRect& normalRect, UINT showCmd, UINT flags = 0 );
+	void Setup( const CWnd* pWnd, const CRect& normalRect, UINT _showCmd, UINT _flags = 0 );
 	void QueryCreateStruct( CREATESTRUCT* rCreateStruct ) const;
 
 	bool ReadWnd( const CWnd* pWnd );
 	bool CommitWnd( CWnd* pWnd, bool restoreToMax = false, bool setMinPos = false );
 
 	bool IsRestoreToMaximized( void ) const { return HasFlag( this->flags, WPF_RESTORETOMAXIMIZED ); }
-	int ChangeMaximizedShowCmd( UINT showCmd );
+	int ChangeMaximizedShowCmd( UINT _showCmd );
 
 	void RegSave( const TCHAR regSection[] ) const;
 	bool RegLoad( const TCHAR regSection[], const CWnd* pWnd );

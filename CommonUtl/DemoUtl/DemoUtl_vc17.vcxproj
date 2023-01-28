@@ -20,11 +20,11 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
-    <ProjectGuid>{A6F2BC00-A7CC-4454-9995-FFE315953AA2}</ProjectGuid>
+    <ProjectGuid>{B4F88CF2-47FC-4255-9E3A-6E3A55EA84EB}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
-    <RootNamespace>VisualThemeViewer</RootNamespace>
+    <RootNamespace>DemoUtl_vc17</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>VisualThemeViewer</ProjectName>
+    <ProjectName>DemoUtl</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'" Label="Configuration">
@@ -104,9 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalBMIDirectories>
-      </AdditionalBMIDirectories>
-      <AdditionalIncludeDirectories>.;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,7 +118,7 @@
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
@@ -130,9 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalBMIDirectories>
-      </AdditionalBMIDirectories>
-      <AdditionalIncludeDirectories>.;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,7 +142,7 @@
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
@@ -158,9 +154,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalBMIDirectories>
-      </AdditionalBMIDirectories>
-      <AdditionalIncludeDirectories>.;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -176,7 +170,7 @@
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PreBuildEvent>
       <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc</Command>
@@ -194,9 +188,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalBMIDirectories>
-      </AdditionalBMIDirectories>
-      <AdditionalIncludeDirectories>.;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -212,7 +204,7 @@
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PreBuildEvent>
       <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc</Command>
@@ -222,51 +214,85 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BrowseThemesDialog.h" />
-    <ClInclude Include="MainDialog.h" />
-    <ClInclude Include="Options.h" />
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="BuddyControlsDialog.h" />
+    <ClInclude Include="ChildFrame.h" />
+    <ClInclude Include="CustomTaskDialogs.h" />
+    <ClInclude Include="DemoSysTray.h" />
+    <ClInclude Include="DemoTemplate.h" />
+    <ClInclude Include="FileChecksumsDialog.h" />
+    <ClInclude Include="FileListDialog.h" />
+    <ClInclude Include="FlagStrip.h" />
+    <ClInclude Include="ImageDialog.h" />
+    <ClInclude Include="ImageDialogUtils.h" />
+    <ClInclude Include="ITestMarkup.h" />
+    <ClInclude Include="MainFrame.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="Application.h" />
-    <ClInclude Include="ThemeContext.h" />
-    <ClInclude Include="ThemeCustomDraw.h" />
-    <ClInclude Include="ThemeSampleStatic.h" />
-    <ClInclude Include="ThemeStore.h" />
-    <ClInclude Include="ThemeStore_fwd.h" />
+    <ClInclude Include="TestDialog.h" />
+    <ClInclude Include="TestDoc.h" />
+    <ClInclude Include="TestFormView.h" />
+    <ClInclude Include="TestMiscDialog.h" />
+    <ClInclude Include="TestPropertySheet.h" />
+    <ClInclude Include="TestTaskDialog.h" />
+    <ClInclude Include="test\ImageTests.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BrowseThemesDialog.cpp" />
-    <ClCompile Include="MainDialog.cpp" />
-    <ClCompile Include="Options.cpp" />
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="BuddyControlsDialog.cpp" />
+    <ClCompile Include="ChildFrame.cpp" />
+    <ClCompile Include="DemoSysTray.cpp" />
+    <ClCompile Include="DemoTemplate.cpp" />
+    <ClCompile Include="FileChecksumsDialog.cpp" />
+    <ClCompile Include="FileListDialog.cpp" />
+    <ClCompile Include="ImageDialog.cpp" />
+    <ClCompile Include="ImageDialogRendering.cpp" />
+    <ClCompile Include="ImageDialogUtils.cpp" />
+    <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="ThemeContext.cpp" />
-    <ClCompile Include="ThemeCustomDraw.cpp" />
-    <ClCompile Include="ThemeSampleStatic.cpp" />
-    <ClCompile Include="ThemeStore.cpp" />
+    <ClCompile Include="TestDialog.cpp" />
+    <ClCompile Include="TestDoc.cpp" />
+    <ClCompile Include="TestFormView.cpp" />
+    <ClCompile Include="TestMiscDialog.cpp" />
+    <ClCompile Include="TestPropertySheet.cpp" />
+    <ClCompile Include="TestTaskDialog.cpp" />
+    <ClCompile Include="test\ImageTests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="VisualThemeViewer.rc" />
+    <ResourceCompile Include="DemoUtl.rc">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">$(IntDir);..;../utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">$(IntDir);..;../utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">$(IntDir);..;../utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">$(IntDir);..;../utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\VisualThemeViewer.rc2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\BrowseThemes.ico" />
+    <Image Include="res\AppMsgTray.ico" />
+    <Image Include="res\DemoUtl.ico" />
+    <Image Include="res\FlagStrip.png" />
     <Image Include="res\ImageStrip.bmp" />
     <Image Include="res\ImageStrip.png" />
-    <Image Include="res\VisualThemeViewer.ico" />
+    <Image Include="res\LowColorStrip.bmp" />
+    <Image Include="res\MyToolStrip.ico" />
+    <Image Include="res\MyToolStrip_alpha.ico" />
+    <Image Include="res\SearchFilesAnimStrip.bmp" />
+    <Image Include="res\TestDoc.ico" />
+    <Image Include="res\Toolbar.bmp" />
+    <Image Include="res\Toolbar.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommonUtl\utl\UI\UTL_UI_vc17.vcxproj">
+    <None Include="res\DemoUtl.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\utl\UI\UTL_UI_vc17.vcxproj">
       <Project>{ced87d7e-e07c-4158-bcdb-d3dcf1acf42c}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\CommonUtl\utl\UTL_BASE_vc17.vcxproj">
+    <ProjectReference Include="..\utl\UTL_BASE_vc17.vcxproj">
       <Project>{bd40f5cd-069f-428f-8e05-ba1b85940a9c}</Project>
     </ProjectReference>
   </ItemGroup>

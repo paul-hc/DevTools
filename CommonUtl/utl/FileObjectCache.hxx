@@ -2,14 +2,13 @@
 #define FileObjectCache_hxx
 
 #include "Algorithms.h"
-#include "MfcUtilities.h"
 #include "StructuredStorage.h"
 
 
 namespace fs
 {
 	template< typename PathType, typename ObjectType >
-	inline void CFileObjectCache< PathType, ObjectType >::Clear( void )
+	inline void CFileObjectCache<PathType, ObjectType>::Clear( void )
 	{
 		mt::CAutoLock lock( &m_cs );
 		for ( typename std::unordered_map< PathType, TCachedEntry >::iterator it = m_cachedEntries.begin(); it != m_cachedEntries.end(); ++it )
@@ -19,7 +18,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	inline size_t CFileObjectCache< PathType, ObjectType >::GetCount( void ) const
+	inline size_t CFileObjectCache<PathType, ObjectType>::GetCount( void ) const
 	{
 		mt::CAutoLock lock( &m_cs );
 		ASSERT( m_cachedEntries.size() == m_expireQueue.size() );
@@ -27,7 +26,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	inline ObjectType* CFileObjectCache< PathType, ObjectType >::Find( const PathType& pathKey, bool checkValid /*= false*/ ) const
+	inline ObjectType* CFileObjectCache<PathType, ObjectType>::Find( const PathType& pathKey, bool checkValid /*= false*/ ) const
 	{
 		mt::CAutoLock lock( &m_cs );		// nested lock works fine (no deadlock) within the same calling thread
 
@@ -36,10 +35,10 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	typename const CFileObjectCache< PathType, ObjectType >::TCachedEntry*
-	CFileObjectCache< PathType, ObjectType >::_FindEntry( const PathType& pathKey, bool checkValid ) const
+	typename const CFileObjectCache<PathType, ObjectType>::TCachedEntry*
+	CFileObjectCache<PathType, ObjectType>::_FindEntry( const PathType& pathKey, bool checkValid ) const
 	{
-		std::unordered_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
+		typename std::unordered_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound != m_cachedEntries.end() )
 			if ( !checkValid || fs::FileNotExpired == CheckExpireStatus( pathKey, itFound->second ) )
 				return &itFound->second;
@@ -48,7 +47,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	bool CFileObjectCache< PathType, ObjectType >::_Add( const PathType& pathKey, ObjectType* pObject )
+	bool CFileObjectCache<PathType, ObjectType>::_Add( const PathType& pathKey, ObjectType* pObject )
 	{
 		mt::CAutoLock lock( &m_cs );
 
@@ -57,7 +56,7 @@ namespace fs
 
 		// bug fix [2020-03-31] - sometimes _Add collides with an existing thumb
 		//ASSERT( m_cachedEntries.find( pathKey ) == m_cachedEntries.end() );		// must be new entry (before the fix above)
-		std::unordered_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
+		typename std::unordered_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound != m_cachedEntries.end() )
 			if ( itFound->second.first == pObject )
 			{
@@ -78,11 +77,11 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	bool CFileObjectCache< PathType, ObjectType >::_Remove( const PathType& pathKey, cache::TStatusFlags cacheFlag /*= cache::RemoveExpired*/ )
+	bool CFileObjectCache<PathType, ObjectType>::_Remove( const PathType& pathKey, cache::TStatusFlags cacheFlag /*= cache::RemoveExpired*/ )
 	{
 		REQUIRE( m_cachedEntries.size() == m_expireQueue.size() );			// consistent
 
-		std::unordered_map< PathType, TCachedEntry >::iterator itFound = m_cachedEntries.find( pathKey );
+		typename std::unordered_map< PathType, TCachedEntry >::iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound == m_cachedEntries.end() )
 			return false;
 
@@ -95,7 +94,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	void CFileObjectCache< PathType, ObjectType >::_RemoveExpired( void )
+	void CFileObjectCache<PathType, ObjectType>::_RemoveExpired( void )
 	{
 		size_t removeChunkSize = std::max( m_maxSize / 10, (size_t)2 );
 
@@ -108,7 +107,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	inline FileExpireStatus CFileObjectCache< PathType, ObjectType >::CheckExpireStatus( const PathType& pathKey, const TCachedEntry& entry ) const
+	inline FileExpireStatus CFileObjectCache<PathType, ObjectType>::CheckExpireStatus( const PathType& pathKey, const TCachedEntry& entry ) const
 	{
 		mt::CAutoLock lock( &m_cs );
 
@@ -116,7 +115,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	inline void CFileObjectCache< PathType, ObjectType >::SetMaxSize( size_t maxSize )
+	inline void CFileObjectCache<PathType, ObjectType>::SetMaxSize( size_t maxSize )
 	{
 		mt::CAutoLock lock( &m_cs );
 		m_maxSize = maxSize;

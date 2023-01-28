@@ -18,7 +18,6 @@
 
 const TCHAR CDateTimeControl::s_dateTimeFormat[] = _T("d'-'MM'-'yyy  H':'mm':'ss");
 const TCHAR CDateTimeControl::s_nullFormat[] = _T(" ");
-static CAccelTable s_accel;
 
 
 CDateTimeControl::CDateTimeControl( const TCHAR* pValidFormat /*= s_dateTimeFormat*/, const TCHAR* pNullFormat /*= s_nullFormat*/ )

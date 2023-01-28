@@ -223,12 +223,12 @@ const ui::CTextEffect* CTreeControl::FindTextEffect( HTREEITEM hItem ) const
 bool CTreeControl::IsRealItem( HTREEITEM hItem ) const
 {
 	ASSERT_PTR( hItem );
-	switch ( reinterpret_cast<size_t>( hItem ) )
+	switch ( (size_t)hItem )
 	{
-		case TVI_ROOT:
-		case TVI_FIRST:
-		case TVI_LAST:
-		case TVI_SORT:
+		case (size_t)TVI_ROOT:
+		case (size_t)TVI_FIRST:
+		case (size_t)TVI_LAST:
+		case (size_t)TVI_SORT:
 			return false;
 	}
 	return true;

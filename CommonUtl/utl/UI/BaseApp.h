@@ -47,7 +47,7 @@ public:
 
 	void StoreCmdShow( int cmdShow )
 	{
-		m_nCmdShow = cmdShow;
+		this->m_nCmdShow = cmdShow;
 	}
 
 	void SetInteractive( bool isInteractive = true )

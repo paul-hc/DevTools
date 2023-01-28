@@ -31,7 +31,7 @@ namespace io
 			if ( file.Open( srcFilePath.GetPtr(), CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite, &exc ) )
 			{
 				char buffer[ io::FileBlockSize ];
-				
+
 				for ( UINT readCount; ( readCount = file.Read( buffer, io::FileBlockSize ) ) != 0; )
 					blockFunc( buffer, readCount );
 
@@ -54,7 +54,7 @@ namespace io
 				char buffer[ io::FileBlockSize ];
 
 				while ( ifs.read( buffer, COUNT_OF( buffer ) ) )
-					blockFunc( buffer, ifs.gcount() );
+					blockFunc( buffer, static_cast<size_t>( ifs.gcount() ) );
 			}
 			else
 				TRACE( _T(" * Cannot open file for reading: %s\n"), srcFilePath.GetPtr() );
@@ -75,7 +75,7 @@ namespace io
 			{
 				CFile file( srcFilePath.GetPtr(), CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite );
 				char buffer[ io::FileBlockSize ];
-				
+
 				for ( UINT readCount; ( readCount = file.Read( buffer, io::FileBlockSize ) ) != 0; )
 					blockFunc( buffer, readCount );
 

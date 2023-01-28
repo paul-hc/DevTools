@@ -78,12 +78,12 @@ void CToolImageList::ResetImageList( CImageList* pImageList )
 
 int CToolImageList::GetImageCount( void ) const
 {
-	return static_cast<int>( m_buttonIds.size() - std::count( m_buttonIds.begin(), m_buttonIds.end(), ID_SEPARATOR ) );		// image count: buttons minus separators
+	return static_cast<int>( m_buttonIds.size() - std::count( m_buttonIds.begin(), m_buttonIds.end(), (UINT)ID_SEPARATOR ) );		// image count: buttons minus separators
 }
 
 int CToolImageList::EvalButtonCount( const UINT buttonIds[], size_t count )
 {
-	return static_cast<int>( count - std::count( buttonIds, buttonIds + count, ID_SEPARATOR ) );		// image count: buttons minus separators
+	return static_cast<int>( count - std::count( buttonIds, buttonIds + count, (UINT)ID_SEPARATOR ) );		// image count: buttons minus separators
 }
 
 size_t CToolImageList::FindButtonPos( UINT buttonId ) const

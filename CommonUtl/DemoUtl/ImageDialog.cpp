@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageDialog.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
@@ -259,7 +259,7 @@ void CImageDialog::LoadSampleImage( void )
 				if ( forceBpp != m_pDibSection->GetBitsPerPixel() ||
 					 HasFlag( m_convertFlags, CDibSection::ForceCvtEqualBpp ) )
 				{
-					CScopedFlag< int > scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
+					CScopedFlag<int> scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
 					std::auto_ptr<CDibSection> pCvtDib( new CDibSection() );
 					pCvtDib->Convert( *m_pDibSection, forceBpp );
 					m_pDibSection.reset( pCvtDib.release() );
@@ -269,7 +269,7 @@ void CImageDialog::LoadSampleImage( void )
 		m_pDibSection.reset();
 
 	m_framePosEdit.SetValidRange( Range<int>( 1, m_frameCount ) );
-	m_framePosEdit.SetNumber< UINT >( m_framePos );
+	m_framePosEdit.SetNumber<UINT>( m_framePos );
 	UpdateImage();
 }
 
@@ -373,7 +373,7 @@ CSize CImageDialog::ComputeContentSize( void )
 	else if ( m_pDibSection.get() != NULL )
 	{
 		m_multiZone.Init( ui::ScaleSize( m_pDibSection->GetSize(), GetZoomPct(), 100 ) + GetModeExtraSpacing(), pModeData->GetZoneCount() );
-		m_multiZone.SetStacking( m_stackingCombo.GetEnum< CMultiZone::Stacking >() );
+		m_multiZone.SetStacking( m_stackingCombo.GetEnum<CMultiZone::Stacking>() );
 
 		if ( !StretchImage() )
 			return m_multiZone.GetTotalSize();
@@ -634,9 +634,9 @@ void CImageDialog::OnChange_ImageFile( void )
 
 void CImageDialog::OnChange_FramePos( void )
 {
-	if ( m_framePosEdit.GetNumber< UINT >() != m_framePos )
+	if ( m_framePosEdit.GetNumber<UINT>() != m_framePos )
 	{
-		m_framePos = m_framePosEdit.GetNumber< UINT >();
+		m_framePos = m_framePosEdit.GetNumber<UINT>();
 		m_framePosEdit.UpdateWindow();		// instant feedback
 		LoadSampleImage();
 	}
@@ -666,14 +666,14 @@ void CImageDialog::OnChange_SampleMode( void )
 
 void CImageDialog::OnChange_ImagingApi( void )
 {
-	m_imagingApi = m_imagingApiCombo.GetEnum< ui::ImagingApi >();
+	m_imagingApi = m_imagingApiCombo.GetEnum<ui::ImagingApi>();
 	m_transpColorCache.Unregister( m_imagePath );			// reset transparent color
 	LoadSampleImage();
 }
 
 void CImageDialog::OnChange_ForceResolution( void )
 {
-	m_forceResolution = m_forceResolutionCombo.GetEnum< Resolution >();
+	m_forceResolution = m_forceResolutionCombo.GetEnum<Resolution>();
 	LoadSampleImage();
 	GetDlgItem( IDC_FORCE_RESOLUTION_LABEL )->Invalidate();
 }
@@ -692,7 +692,7 @@ void CImageDialog::OnToggle_SkipCopyImage( void )
 
 void CImageDialog::OnChange_Zoom( void )
 {
-	m_zoom = m_zoomCombo.GetEnum< Zoom >();
+	m_zoom = m_zoomCombo.GetEnum<Zoom>();
 	RedrawSample();
 }
 
@@ -704,7 +704,7 @@ void CImageDialog::OnToggle_Zoom( void )
 
 void CImageDialog::OnChange_Stacking( void )
 {
-	m_multiZone.SetStacking( m_stackingCombo.GetEnum< CMultiZone::Stacking >() );
+	m_multiZone.SetStacking( m_stackingCombo.GetEnum<CMultiZone::Stacking>() );
 	RedrawSample();
 }
 
@@ -732,7 +732,7 @@ void CImageDialog::OnChange_Spacing( void )
 
 void CImageDialog::OnChange_ColorTableMode( void )
 {
-	m_colorTable.m_mode = m_colorTableModeCombo.GetEnum< CColorTable::Mode >();
+	m_colorTable.m_mode = m_colorTableModeCombo.GetEnum<CColorTable::Mode>();
 	BuildColorTable();
 }
 
@@ -828,7 +828,7 @@ bool CModePage::SyncEditValues( const CColorChannelEdit* pRefEdit )
 
 	ASSERT_PTR( pRefEdit );
 
-	for ( std::vector< CColorChannelEdit* >::const_iterator itEdit = m_keepEqualEdits.begin(); itEdit != m_keepEqualEdits.end(); ++itEdit )
+	for ( std::vector<CColorChannelEdit*>::const_iterator itEdit = m_keepEqualEdits.begin(); itEdit != m_keepEqualEdits.end(); ++itEdit )
 		if ( *itEdit != pRefEdit )
 			( *itEdit )->SyncValueWith( pRefEdit );
 
@@ -837,7 +837,7 @@ bool CModePage::SyncEditValues( const CColorChannelEdit* pRefEdit )
 
 void CModePage::DoDataExchange( CDataExchange* pDX )
 {
-	for ( std::vector< CColorChannelEdit* >::const_iterator itChannelEdit = m_channelEdits.begin(); itChannelEdit != m_channelEdits.end(); ++itChannelEdit )
+	for ( std::vector<CColorChannelEdit*>::const_iterator itChannelEdit = m_channelEdits.begin(); itChannelEdit != m_channelEdits.end(); ++itChannelEdit )
 		( *itChannelEdit )->DDX_Channel( pDX );
 
 	CLayoutPropertyPage::DoDataExchange( pDX );

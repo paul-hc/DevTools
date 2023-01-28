@@ -170,7 +170,7 @@ CComPtr<IWICBitmapSource> CShellThumbCache::ScaleToThumbBitmap( IWICBitmapSource
 		return pSrcBitmap;									// optimization: image smaller than the thumb size -> avoid scaling, since the thumb looks "smeared"
 
 	// convert to WIC bitmap and scale to m_boundsSize
-	CComPtr<IWICBitmapSource> pScaledThumbBitmap = wic::ScaleBitmapToBounds( pSrcBitmap, m_boundsSize, WICBitmapInterpolationModeFant );		// or WICBitmapInterpolationModeHighQualityCubic
+	CComPtr<IWICBitmapSource> pScaledThumbBitmap( wic::ScaleBitmapToBounds( pSrcBitmap, m_boundsSize, WICBitmapInterpolationModeFant ) );		// or WICBitmapInterpolationModeHighQualityCubic
 	return pScaledThumbBitmap;
 }
 

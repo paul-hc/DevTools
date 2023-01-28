@@ -1283,18 +1283,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Vista MFC"
-				>
-				<File
-					RelativePath=".\TaskDialog.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TaskDialog.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="Controls"
 				>
 				<File
@@ -1803,6 +1791,14 @@
 				</File>
 				<File
 					RelativePath=".\ProgressDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TaskDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TaskDialog.h"
 					>
 				</File>
 			</Filter>

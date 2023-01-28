@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileListDialog.h"
 #include "FlagStrip.h"
 #include "TestDialog.h"
@@ -86,7 +86,7 @@ namespace hlp
 
 	const std::tstring& GetNotesAt( size_t pos )
 	{
-		static std::vector< std::tstring > s_noteItems;
+		static std::vector<std::tstring> s_noteItems;
 		if ( s_noteItems.empty() )
 		{
 			s_noteItems.push_back( _T("Empire (2003)") );
@@ -250,7 +250,7 @@ void CFileListDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM 
 		rTextEffect |= isSrc ? s_modSrc : s_modDest;
 }
 
-void CFileListDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const
+void CFileListDialog::ModifyDiffTextEffectAt( std::vector<ui::CTextEffect>& rMatchEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const
 {
 	rowKey, pCtrl;
 	switch ( subItem )

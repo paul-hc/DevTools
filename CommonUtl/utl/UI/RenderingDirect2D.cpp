@@ -531,7 +531,7 @@ namespace d2d
 
 	void COutlineFrame::Draw( ID2D1RenderTarget* pRenderTarget, const RECT& boundsRect )
 	{
-		if ( CComQIPtr<ID2D1LinearGradientBrush> pLinearGradientBrush = m_pFrameBrush )
+		if ( CComQIPtr<ID2D1LinearGradientBrush> pLinearGradientBrush = m_pFrameBrush.p )
 			SetGradientBrushDirection( pLinearGradientBrush, boundsRect, m_gradientDirection );
 
 		DrawOutlineFrame( pRenderTarget, m_pFrameBrush, boundsRect, m_frameSize );

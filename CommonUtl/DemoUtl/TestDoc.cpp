@@ -1,7 +1,7 @@
 // TestDoc.cpp : implementation of the CTestDoc class
 //
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TestDoc.h"
 
 #ifdef _DEBUG

@@ -10,7 +10,7 @@
 class CDisplayObject;
 class CLogger;
 
-namespace fs { typedef std::map< fs::CFileState, fs::CFileState > TFileStatePairMap; }
+namespace fs { typedef std::map<fs::CFileState, fs::CFileState> TFileStatePairMap; }
 typedef std::pair<const fs::CFileState, fs::CFileState> TFileStatePair;
 
 
@@ -28,13 +28,13 @@ private:
 
 	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
-	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const;
+	virtual void ModifyDiffTextEffectAt( std::vector<ui::CTextEffect>& rMatchEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const;
 private:
 	bool m_useDiffsMode;
 	bool m_useAlternateRows;
 	bool m_useTextEffects;
 	bool m_useDoubleBuffer;
-	std::vector< CDisplayObject* > m_displayItems;
+	std::vector<CDisplayObject*> m_displayItems;
 private:
 	// enum { IDD = IDD_FILE_LIST_DIALOG };
 	enum Column { SrcFileName, DestFileName, SrcAttributes, DestAttributes, SrcCreationDate, DestCreationDate, Notes };

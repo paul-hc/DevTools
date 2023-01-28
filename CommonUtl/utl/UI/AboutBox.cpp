@@ -28,10 +28,10 @@ namespace hlp
 
 	const CCompilerInfo& FindCompilerInfo( DWORD mscVer = _MSC_VER )
 	{
-		static const CCompilerInfo compilers[] =
+		static const CCompilerInfo s_compilers[] =
 		{
-			{ 1100, _T("Visual Studio 5"), _T("VC++ 5") },
-			{ 1200, _T("Visual Studio 6"), _T("VC++ 6") },
+			{ 1100, _T("Visual Studio 5"),    _T("VC++ 5") },
+			{ 1200, _T("Visual Studio 6"),    _T("VC++ 6") },
 			{ 1300, _T("Visual Studio 2002"), _T("VC++ 7") },
 			{ 1310, _T("Visual Studio 2003"), _T("VC++ 7.1") },
 			{ 1400, _T("Visual Studio 2005"), _T("VC++ 8") },
@@ -40,14 +40,37 @@ namespace hlp
 			{ 1700, _T("Visual Studio 2012"), _T("VC++ 11") },
 			{ 1800, _T("Visual Studio 2013"), _T("VC++ 12") },
 			{ 1900, _T("Visual Studio 2015"), _T("VC++ 14") },
-			{ 1910, _T("Visual Studio 2017"), _T("VC++ 14.1") }
+			{ 1910, _T("Visual Studio 2017"), _T("VC++ 15") },
+			{ 1911, _T("Visual Studio 2017"), _T("VC++ 15.3") },
+			{ 1912, _T("Visual Studio 2017"), _T("VC++ 15.5") },
+			{ 1913, _T("Visual Studio 2017"), _T("VC++ 15.6") },
+			{ 1914, _T("Visual Studio 2017"), _T("VC++ 15.7") },
+			{ 1915, _T("Visual Studio 2017"), _T("VC++ 15.8") },
+			{ 1916, _T("Visual Studio 2017"), _T("VC++ 15.9") },
+			{ 1920, _T("Visual Studio 2019"), _T("VC++ 16.0") },
+			{ 1921, _T("Visual Studio 2019"), _T("VC++ 16.1") },
+			{ 1922, _T("Visual Studio 2019"), _T("VC++ 16.2") },
+			{ 1923, _T("Visual Studio 2019"), _T("VC++ 16.3") },
+			{ 1924, _T("Visual Studio 2019"), _T("VC++ 16.4") },
+			{ 1925, _T("Visual Studio 2019"), _T("VC++ 16.5") },
+			{ 1926, _T("Visual Studio 2019"), _T("VC++ 16.6") },
+			{ 1927, _T("Visual Studio 2019"), _T("VC++ 16.7") },
+			{ 1928, _T("Visual Studio 2019"), _T("VC++ 16.9") },
+			{ 1929, _T("Visual Studio 2019"), _T("VC++ 16.11") },
+			{ 1930, _T("Visual Studio 2022"), _T("VC++ 17.0") },
+			{ 1931, _T("Visual Studio 2022"), _T("VC++ 17.1") },
+			{ 1932, _T("Visual Studio 2022"), _T("VC++ 17.2") },
+			{ 1933, _T("Visual Studio 2022"), _T("VC++ 17.3") },
+			{ 1934, _T("Visual Studio 2022"), _T("VC++ 17.4") },
+
+			{ 9999, _T("Visual Studio ?? TODO..."), _T("VC++ ??") }
 		};
 
-		for ( unsigned int i = 0, last = COUNT_OF( compilers ) - 1; i != last; ++i )
-			if ( mscVer >= compilers[ i ].m_baseCompilerVer && mscVer < compilers[ i + 1 ].m_baseCompilerVer )
-				return compilers[ i ];
+		for ( unsigned int i = 0, last = COUNT_OF( s_compilers ) - 1; i != last; ++i )
+			if ( mscVer >= s_compilers[ i ].m_baseCompilerVer && mscVer < s_compilers[ i + 1 ].m_baseCompilerVer )
+				return s_compilers[ i ];
 
-		return compilers[ COUNT_OF( compilers ) - 1 ];
+		return s_compilers[ COUNT_OF( s_compilers ) - 1 ];
 	}
 
 
@@ -137,7 +160,7 @@ const fs::CPath* CAboutBox::GetSelPath( void ) const
 	if ( -1 == caretIndex )
 		return NULL;
 
-	return m_pBuildInfoList->GetPtrAt< fs::CPath >( caretIndex );
+	return m_pBuildInfoList->GetPtrAt<fs::CPath>( caretIndex );
 }
 
 void CAboutBox::SetupBuildInfoList( void )

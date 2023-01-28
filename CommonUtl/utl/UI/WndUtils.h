@@ -10,6 +10,17 @@
 #include <unordered_map>
 
 
+namespace num
+{
+	// forward declarations - required for C++ 14+ compilation
+	const std::locale& GetEmptyLocale( void );
+	std::tstring FormatNumber( double value, const std::locale& loc /*= GetEmptyLocale()*/ );
+
+	template< typename ValueT >
+	bool ParseNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength /*= NULL*/, const std::locale& loc /*= GetEmptyLocale()*/ );
+}
+
+
 namespace ui
 {
 	int GetDrawTextAlignment( UINT dtFlags );
@@ -309,6 +320,7 @@ namespace ui
 
 
 #include <vector>
+#include "utl/SubjectPredicates.h"
 
 
 class CPathItemBase;
@@ -332,151 +344,6 @@ namespace ui
 	bool& RefAsyncApiEnabled( void );
 
 
-	namespace ddx
-	{
-		void FailInput( CDataExchange* pDX, UINT ctrlId, const std::tstring& validationError );
-
-		// combo-friendly control IO
-		std::tstring GetItemText( CDataExchange* pDX, UINT ctrlId );
-		bool SetItemText( CDataExchange* pDX, UINT ctrlId, const std::tstring& text );
-	}
-
-
-	// DDX: dialog data exchange
-
-	void DDX_Text( CDataExchange* pDX, int ctrlId, std::tstring& rValue, bool trim = false );		// Edit, Static, Combo, etc
-	void DDX_Path( CDataExchange* pDX, int ctrlId, fs::CPath& rValue );
-	void DDX_PathItem( CDataExchange* pDX, int ctrlId, CPathItemBase* pPathItem );
-
-	void DDX_Int( CDataExchange* pDX, int ctrlId, int& rValue, const int nullValue = INT_MAX );		// empty text for nullValue
-	void DDX_Bool( CDataExchange* pDX, int ctrlId, bool& rValue );
-	void DDX_BoolRadio( CDataExchange* pDX, int radioFirstId, bool& rValue, bool firstRadioIsTrue );
-	void DDX_Flag( CDataExchange* pDX, int ctrlId, int& rValue, int flag );
-	inline void DDX_Flag( CDataExchange* pDX, int ctrlId, UINT& rValue, UINT flag ) { DDX_Flag( pDX, ctrlId, (int&)rValue, flag ); }
-
-	void DDX_ButtonIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId = CIconId( 0 ), bool useText = true, bool useTextSpacing = true );
-	void DDX_StaticIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId = CIconId( 0 ) );
-
-	template< typename EnumType >
-	inline void DDX_RadioEnum( CDataExchange* pDX, int radioFirstId, EnumType& rValue, int baseValue = 0 )		// works for bool when radioFirstId = false
-	{
-		// offset by enum base value
-		if ( DialogOutput == pDX->m_bSaveAndValidate )
-		{
-			int selIndex = rValue - baseValue;
-			::DDX_Radio( pDX, radioFirstId, selIndex );
-		}
-		else
-		{
-			int selIndex;
-			::DDX_Radio( pDX, radioFirstId, selIndex );
-			rValue = static_cast<EnumType>( selIndex + baseValue );
-		}
-	}
-
-	template< typename NumericType >
-	void DDX_Number( CDataExchange* pDX, int ctrlId, NumericType& rValue, const std::locale& loc = num::GetEmptyLocale() )
-	{
-		if ( DialogOutput == pDX->m_bSaveAndValidate )
-			ddx::SetItemText( pDX, ctrlId, num::FormatNumber( rValue, loc ) );
-		else
-			num::ParseNumber( rValue, ddx::GetItemText( pDX, ctrlId ), NULL, loc );
-	}
-
-	inline void DDX_ComboSelPos( CDataExchange* pDX, int comboId, size_t& rSelPos )
-	{
-		if ( DialogOutput == pDX->m_bSaveAndValidate )
-		{
-			int selIndex = static_cast<int>( rSelPos );
-			DDX_CBIndex( pDX, comboId, selIndex );
-		}
-		else
-		{
-			int selIndex;
-			DDX_CBIndex( pDX, comboId, selIndex );
-			rSelPos = static_cast<size_t>( selIndex );
-		}
-	}
-
-	template< typename EnumType >
-	inline void DDX_EnumSelValue( CDataExchange* pDX, int comboId, EnumType& rValue )
-	{
-		DDX_CBIndex( pDX, comboId, (int&)rValue );
-	}
-
-	template< typename EnumType >
-	inline void DDX_EnumCombo( CDataExchange* pDX, int comboId, CComboBox& rCombo, EnumType& rValue, const CEnumTags& enumTags )
-	{
-		bool firstInit = NULL == rCombo.m_hWnd;
-		::DDX_Control( pDX, comboId, rCombo );
-		if ( firstInit )
-		{
-			ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
-			ui::WriteComboItems( rCombo, enumTags.GetUiTags() );
-		}
-
-		// offset by enum base value
-		if ( DialogOutput == pDX->m_bSaveAndValidate )
-		{
-			int selIndex = enumTags.GetTagIndex( rValue );
-			DDX_CBIndex( pDX, comboId, selIndex );
-		}
-		else
-		{
-			int selIndex;
-			DDX_CBIndex( pDX, comboId, selIndex );
-			rValue = enumTags.GetSelValue< EnumType >( selIndex );
-		}
-	}
-
-	template< typename IntType >
-	void DDX_EditSel( CDataExchange* pDX, int ctrlId, Range<IntType>& rValue )
-	{
-		CEdit* pEdit = GetDlgItemAs<CEdit>( pDX->m_pDlgWnd, ctrlId );
-		ASSERT_PTR( pEdit );
-		if ( DialogOutput == pDX->m_bSaveAndValidate )
-			pEdit->SetSel( rValue.m_start, rValue.m_end );
-		else
-		{
-			int start, end;
-			pEdit->GetSel( start, end );
-			rValue.SetRange( start, end );
-		}
-	}
-
-
-	// DDV: dialog data validation
-
-	template< typename NumericType >
-	void DDV_NumberRange( CDataExchange* pDX, int ctrlId, NumericType& rValue, const Range<NumericType>& validRange )
-	{
-		if ( DialogOutput == pDX->m_bSaveAndValidate )
-			return;
-		if ( !validRange.Constrain( rValue ) )
-			return;									// valid number, OK
-
-		if ( CWnd* pCtrl = pDX->m_pDlgWnd->GetDlgItem( ctrlId ) )
-		{
-			checked_static_cast<CDialog*>( pDX->m_pDlgWnd )->GotoDlgCtrl( pCtrl );
-			pDX->m_idLastControl = 0;
-		}
-		else
-			pDX->m_idLastControl = ctrlId;
-
-		ui::CInteractiveMode::Instance().MessageBox(
-			str::Format( _T("Enter a valid number between %s and %s"), num::FormatNumber( validRange.m_start ).c_str(), num::FormatNumber( validRange.m_end ).c_str() ),
-			MB_OK | MB_ICONWARNING );
-
-		pDX->Fail();
-	}
-
-	template< typename NumericType, typename MinMaxType >
-	inline void DDV_NumberMinMax( CDataExchange* pDX, int ctrlId, NumericType& rValue, MinMaxType minValue, MinMaxType maxValue )		// MinMaxType is enum friendly
-	{
-		DDV_NumberRange( pDX, ctrlId, rValue, Range<NumericType>( minValue, maxValue ) );
-	}
-
-
 	void SetSpinRange( CWnd* pDlg, int ctrlId, int minValue, int maxValue );
 
 
@@ -486,7 +353,7 @@ namespace ui
 	template< typename Compare >
 	bool SortCompareTreeChildren( Compare compare, CTreeCtrl& rTreeCtrl, HTREEITEM hParent = TVI_ROOT, RecursionDepth depth = Shallow )
 	{
-		pred::Comparator< Compare > comparator( compare );
+		pred::Comparator<Compare> comparator( compare );
 		return SortTreeChildren( &comparator, rTreeCtrl, hParent, depth );
 	}
 
@@ -580,6 +447,158 @@ namespace ui
 
 	bool PumpPendingMessages( HWND hWnd = NULL );
 	bool EatPendingMessages( HWND hWnd = NULL, UINT minMessage = WM_TIMER, UINT maxMessage = WM_TIMER );
+}
+
+
+#include "utl/EnumTags.h"
+#include "UserReport.h"
+
+
+namespace ui
+{
+	namespace ddx
+	{
+		void FailInput( CDataExchange* pDX, UINT ctrlId, const std::tstring& validationError );
+
+		// combo-friendly control IO
+		std::tstring GetItemText( CDataExchange* pDX, UINT ctrlId );
+		bool SetItemText( CDataExchange* pDX, UINT ctrlId, const std::tstring& text );
+	}
+
+
+	// DDX: dialog data exchange
+
+	void DDX_Text( CDataExchange* pDX, int ctrlId, std::tstring& rValue, bool trim = false );		// Edit, Static, Combo, etc
+	void DDX_Path( CDataExchange* pDX, int ctrlId, fs::CPath& rValue );
+	void DDX_PathItem( CDataExchange* pDX, int ctrlId, CPathItemBase* pPathItem );
+
+	void DDX_Int( CDataExchange* pDX, int ctrlId, int& rValue, const int nullValue = INT_MAX );		// empty text for nullValue
+	void DDX_Bool( CDataExchange* pDX, int ctrlId, bool& rValue );
+	void DDX_BoolRadio( CDataExchange* pDX, int radioFirstId, bool& rValue, bool firstRadioIsTrue );
+	void DDX_Flag( CDataExchange* pDX, int ctrlId, int& rValue, int flag );
+	inline void DDX_Flag( CDataExchange* pDX, int ctrlId, UINT& rValue, UINT flag ) { DDX_Flag( pDX, ctrlId, (int&)rValue, flag ); }
+
+	void DDX_ButtonIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId = CIconId( 0 ), bool useText = true, bool useTextSpacing = true );
+	void DDX_StaticIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId = CIconId( 0 ) );
+
+	template< typename EnumType >
+	inline void DDX_RadioEnum( CDataExchange* pDX, int radioFirstId, EnumType& rValue, int baseValue = 0 )		// works for bool when radioFirstId = false
+	{
+		// offset by enum base value
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+		{
+			int selIndex = rValue - baseValue;
+			::DDX_Radio( pDX, radioFirstId, selIndex );
+		}
+		else
+		{
+			int selIndex;
+			::DDX_Radio( pDX, radioFirstId, selIndex );
+			rValue = static_cast<EnumType>( selIndex + baseValue );
+		}
+	}
+
+	template< typename NumericType >
+	void DDX_Number( CDataExchange* pDX, int ctrlId, NumericType& rValue, const std::locale& loc = num::GetEmptyLocale() )
+	{
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+			ddx::SetItemText( pDX, ctrlId, num::FormatNumber( rValue, loc ) );
+		else
+			num::ParseNumber( rValue, ddx::GetItemText( pDX, ctrlId ), NULL, loc );
+	}
+
+	inline void DDX_ComboSelPos( CDataExchange* pDX, int comboId, size_t& rSelPos )
+	{
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+		{
+			int selIndex = static_cast<int>( rSelPos );
+			DDX_CBIndex( pDX, comboId, selIndex );
+		}
+		else
+		{
+			int selIndex;
+			DDX_CBIndex( pDX, comboId, selIndex );
+			rSelPos = static_cast<size_t>( selIndex );
+		}
+	}
+
+	template< typename EnumType >
+	inline void DDX_EnumSelValue( CDataExchange* pDX, int comboId, EnumType& rValue )
+	{
+		DDX_CBIndex( pDX, comboId, (int&)rValue );
+	}
+
+	template< typename EnumType >
+	void DDX_EnumCombo( CDataExchange* pDX, int comboId, CComboBox& rCombo, EnumType& rValue, const CEnumTags& enumTags )
+	{
+		bool firstInit = NULL == rCombo.m_hWnd;
+		::DDX_Control( pDX, comboId, rCombo );
+		if ( firstInit )
+		{
+			ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
+			ui::WriteComboItems( rCombo, enumTags.GetUiTags() );
+		}
+
+		// offset by enum base value
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+		{
+			int selIndex = enumTags.GetTagIndex( rValue );
+			DDX_CBIndex( pDX, comboId, selIndex );
+		}
+		else
+		{
+			int selIndex;
+			DDX_CBIndex( pDX, comboId, selIndex );
+			rValue = enumTags.GetSelValue< EnumType >( selIndex );
+		}
+	}
+
+	template< typename IntType >
+	void DDX_EditSel( CDataExchange* pDX, int ctrlId, Range<IntType>& rValue )
+	{
+		CEdit* pEdit = GetDlgItemAs<CEdit>( pDX->m_pDlgWnd, ctrlId );
+		ASSERT_PTR( pEdit );
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+			pEdit->SetSel( rValue.m_start, rValue.m_end );
+		else
+		{
+			int start, end;
+			pEdit->GetSel( start, end );
+			rValue.SetRange( start, end );
+		}
+	}
+
+
+	// DDV: dialog data validation
+
+	template< typename NumericType >
+	void DDV_NumberRange( CDataExchange* pDX, int ctrlId, NumericType& rValue, const Range<NumericType>& validRange )
+	{
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+			return;
+		if ( !validRange.Constrain( rValue ) )
+			return;									// valid number, OK
+
+		if ( CWnd* pCtrl = pDX->m_pDlgWnd->GetDlgItem( ctrlId ) )
+		{
+			checked_static_cast<CDialog*>( pDX->m_pDlgWnd )->GotoDlgCtrl( pCtrl );
+			pDX->m_idLastControl = 0;
+		}
+		else
+			pDX->m_idLastControl = ctrlId;
+
+		ui::CInteractiveMode::Instance().MessageBox(
+			str::Format( _T("Enter a valid number between %s and %s"), num::FormatNumber( validRange.m_start ).c_str(), num::FormatNumber( validRange.m_end ).c_str() ),
+			MB_OK | MB_ICONWARNING );
+
+		pDX->Fail();
+	}
+
+	template< typename NumericType, typename MinMaxType >
+	inline void DDV_NumberMinMax( CDataExchange* pDX, int ctrlId, NumericType& rValue, MinMaxType minValue, MinMaxType maxValue )		// MinMaxType is enum friendly
+	{
+		DDV_NumberRange( pDX, ctrlId, rValue, Range<NumericType>( minValue, maxValue ) );
+	}
 }
 
 

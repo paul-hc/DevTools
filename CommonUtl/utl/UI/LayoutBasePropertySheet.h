@@ -116,7 +116,7 @@ protected:
 template< typename PageType >
 PageType* CLayoutBasePropertySheet::GetCreatedPageAs( int pageIndex ) const
 {
-	CLayoutPropertyPage* pPage = GetPage( pageIndex );
+	CPropertyPage* pPage = CPropertySheet::GetPage( pageIndex );
 	return pPage->GetSafeHwnd() != NULL ? dynamic_cast<PageType*>( pPage ) : NULL;
 }
 

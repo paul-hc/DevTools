@@ -3,7 +3,7 @@
 #pragma once
 
 
-// forward declarations - required for C++ 14+ compilation, which is stricter!
+// forward declarations - required for C++ 14+ compilation (which is stricter)
 
 namespace pred
 {

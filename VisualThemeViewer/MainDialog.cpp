@@ -37,7 +37,7 @@ namespace layout
 {
 	enum { TopPct = 30, BottomPct = 100 - TopPct, SizeSamplesPct = 25, MoveSamplesPct = SizeSamplesPct * 15 / 10 /* x1.5 */ };
 
-	static CLayoutStyle styles[] =
+	static CLayoutStyle s_styles[] =
 	{
 		{ IDC_THEME_CLASS_LIST, pctSizeY( TopPct ) },
 
@@ -75,7 +75,7 @@ CMainDialog::CMainDialog( COptions* pOptions, const CThemeStore* pThemeStore )
 	, m_classList( IDC_THEME_CLASS_LIST )
 {
 	m_regSection = _T("MainDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::s_styles ) );
 
 	m_pOptions->SetCallback( this );
 

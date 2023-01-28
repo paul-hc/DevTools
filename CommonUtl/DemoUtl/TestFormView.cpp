@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TestDoc.h"
 #include "TestFormView.h"
 #include "TestTaskDialog.h"

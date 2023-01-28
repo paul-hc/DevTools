@@ -97,7 +97,7 @@ private:
 	std::auto_ptr<CImageList> m_pImageList;
 
 	CMultiZone m_multiZone;
-	std::vector< CModeData* > m_modeData;
+	std::vector<CModeData*> m_modeData;
 	CMenu m_contextMenu;
 
 	//enum { IDD = IDD_IMAGE_DIALOG };
@@ -197,8 +197,8 @@ protected:
 	CImageDialog* m_pDialog;
 	CImageDialog::SampleMode m_mode;
 
-	std::vector< CColorChannelEdit* > m_channelEdits;
-	std::vector< CColorChannelEdit* > m_keepEqualEdits;		// chanel edits with synced values
+	std::vector<CColorChannelEdit*> m_channelEdits;
+	std::vector<CColorChannelEdit*> m_keepEqualEdits;		// chanel edits with synced values
 protected:
 	virtual bool IsPixelCtrl( UINT ctrlId ) const;			// must regenerate effect DIBs
 	bool SyncEditValues( const CColorChannelEdit* pRefEdit );

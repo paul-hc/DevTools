@@ -83,7 +83,7 @@ public:
 	template< typename DestPixelType, typename SrcPixelType >
 	void CopyRect( const CDibPixels& srcPixels, const CRect& rect, const CPoint& srcPos );
 
-	void SetAlpha( BYTE alpha ) { ForEach< CPixelBGRA >( func::SetAlpha( alpha ) ); }
+	void SetAlpha( BYTE alpha ) { ForEach<CPixelBGRA>( func::SetAlpha( alpha ) ); }
 	void SetOpaque( void ) { SetAlpha( 255 ); }
 	void Fill( COLORREF color, BYTE alpha = 255 ) { ForEach( func::SetColor( color, alpha ) ); }
 
@@ -214,8 +214,8 @@ bool CDibPixels::ForEach( PixelFunc func )
 {
 	switch ( m_bitsPerPixel )
 	{
-		case 32: ForEach< CPixelBGRA >( func ); return true;
-		case 24: ForEach< CPixelBGR >( func ); return true;
+		case 32: ForEach<CPixelBGRA>( func ); return true;
+		case 24: ForEach<CPixelBGR>( func ); return true;
 	}
 
 	CScopedBitmapMemDC scopedPixelAccess( this );

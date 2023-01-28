@@ -844,7 +844,7 @@ namespace ui
 	{
 		TCHAR className[ 128 ];
 		::GetClassName( hWnd, className, COUNT_OF( className ) );
-		return _T('#') == className[ 0 ] && (ATOM)WC_DIALOG == ::GlobalFindAtom( className );
+		return _T('#') == className[ 0 ] && WC_DIALOG == (LPCTSTR)::GlobalFindAtom( className );
 	}
 
 	bool IsMenuWnd( HWND hWnd )
@@ -933,7 +933,7 @@ namespace ui
 		if ( CEdit* pEdit = dynamic_cast<CEdit*>( pCtrl ) )
 			pEdit->ShowBalloonTip( s_title,  message.c_str(), ttiIcon );
 		else
-			ui::ShowBalloonTip( pCtrl, s_title,  message.c_str(), (HICON)ttiIcon );
+			ui::ShowBalloonTip( pCtrl, s_title,  message.c_str(), (HICON)(intptr_t)ttiIcon );
 
 		TakeFocus( pCtrl->m_hWnd );
 		SelectAllText( pCtrl );

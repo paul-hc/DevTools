@@ -612,7 +612,7 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPe
 		}
 
 		if ( rgbTable.empty() )
-			CSysColorTable::MakeRgbTable( rgbTable, 1 << bitsPerPixel );
+			CSysColorTable::MakeRgbTable( rgbTable, static_cast<size_t>( 1 ) << bitsPerPixel );
 	}
 
 	m_buffer.resize( sizeof( BITMAPINFOHEADER ) + rgbTable.size() * sizeof( RGBQUAD ) );

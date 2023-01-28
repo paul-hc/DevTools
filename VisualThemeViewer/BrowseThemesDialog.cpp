@@ -24,7 +24,7 @@ namespace hlp
 
 namespace layout
 {
-	static CLayoutStyle styles[] =
+	static CLayoutStyle s_styles[] =
 	{
 		{ IDC_PARTS_FILTER_STATIC, MoveX },
 		{ IDC_PARTS_FILTER_COMBO, MoveX },
@@ -44,7 +44,7 @@ CBrowseThemesDialog::CBrowseThemesDialog( const COptions* pOptions, const CTheme
 	, m_pSelNode( NULL )
 {
 	m_regSection = _T("BrowseThemesDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::s_styles ) );
 
 	m_themesTree.SetTextEffectCallback( this );
 	m_themesTree.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : NULL );

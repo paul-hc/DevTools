@@ -76,23 +76,23 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
-    <OutDir>$(ProjectDir)..\bin_vc17\</OutDir>
-    <IntDir>..\bin_vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\vc17\</OutDir>
+    <IntDir>..\bin\vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_ud</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
-    <OutDir>$(ProjectDir)..\bin_vc17\</OutDir>
-    <IntDir>..\bin_vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\vc17\</OutDir>
+    <IntDir>..\bin\vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_u</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
-    <OutDir>$(ProjectDir)..\bin_vc17\</OutDir>
-    <IntDir>..\bin_vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\vc17\</OutDir>
+    <IntDir>..\bin\vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_ud64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
-    <OutDir>$(ProjectDir)..\bin_vc17\</OutDir>
-    <IntDir>..\bin_vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\bin\vc17\</OutDir>
+    <IntDir>..\bin\vc17\UI\$(PlatformName)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_u64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
@@ -103,7 +103,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -122,7 +122,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -141,7 +141,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -160,7 +160,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;..\..;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -239,6 +239,7 @@
     <ClInclude Include="ImageStore.h" />
     <ClInclude Include="ImageZoomViewD2D.h" />
     <ClInclude Include="Image_fwd.h" />
+    <ClInclude Include="Image_fwd.hxx" />
     <ClInclude Include="Imaging.h" />
     <ClInclude Include="ImagingDirect2D.h" />
     <ClInclude Include="ImagingGdiPlus.h" />

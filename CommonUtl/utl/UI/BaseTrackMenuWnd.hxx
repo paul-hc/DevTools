@@ -13,7 +13,7 @@ END_MESSAGE_MAP()
 template< typename BaseWndT >
 void CBaseTrackMenuWnd<BaseWndT>::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
-	AfxCancelModes( m_hWnd );		// cancel any combobox popups that could be in toolbars or dialog bars
+	AfxCancelModes( this->m_hWnd );		// cancel any combobox popups that could be in toolbars or dialog bars
 	if ( !isSysMenu )
 		ui::UpdateMenuUI( this, pPopupMenu );
 

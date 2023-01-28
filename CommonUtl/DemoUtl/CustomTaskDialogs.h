@@ -7,11 +7,11 @@
 
 namespace my
 {
-	class CProgressBarTaskDialog : public CTaskDialog
+	class CProgressBarTaskDialog : public ui::CTaskDialog
 	{
 	public:
 		CProgressBarTaskDialog( void )
-			: CTaskDialog(
+			: ui::CTaskDialog(
 				_T("Progress Bar"),
 				_T("Important!\nPlease read!"),
 				_T("This is an important message to the user."),
@@ -44,11 +44,11 @@ namespace my
 		}
 	};
 
-	class CSecondNavigationDialog : public CTaskDialog
+	class CSecondNavigationDialog : public ui::CTaskDialog
 	{
 	public:
 		CSecondNavigationDialog( void )
-			: CTaskDialog(
+			: ui::CTaskDialog(
 				_T("Navigation Usage"),
 				_T("Step 2"),
 				_T("This is the second navigation dialog."),
@@ -60,7 +60,7 @@ namespace my
 			AddButton( 103, _T("Choice 2") );
 		}
 
-		void SetPreviousDialog( CTaskDialog* pPrevDlg ) { m_pPrevDlg = pPrevDlg; }
+		void SetPreviousDialog( ui::CTaskDialog* pPrevDlg ) { m_pPrevDlg = pPrevDlg; }
 	protected:
 		// event overrides
 		virtual HRESULT OnButtonClick( int buttonId )
@@ -73,14 +73,14 @@ namespace my
 			return S_OK;
 		}
 	private:
-		CTaskDialog* m_pPrevDlg;
+		ui::CTaskDialog* m_pPrevDlg;
 	};
 
-	class CFirstNavigationDialog : public CTaskDialog
+	class CFirstNavigationDialog : public ui::CTaskDialog
 	{
 	public:
 		CFirstNavigationDialog( void )
-			: CTaskDialog(
+			: ui::CTaskDialog(
 				_T("Navigation Usage"),
 				_T("Step 1"),
 				_T("This is the first navigation dialog."),

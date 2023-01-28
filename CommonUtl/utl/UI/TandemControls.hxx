@@ -31,7 +31,7 @@ CBaseHostToolbarCtrl<BaseCtrlT>::~CBaseHostToolbarCtrl()
 template< typename BaseCtrlT >
 void CBaseHostToolbarCtrl<BaseCtrlT>::DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget /*= NULL*/ )
 {
-	if ( NULL == m_hWnd )
+	if ( NULL == this->m_hWnd )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
@@ -100,7 +100,7 @@ template< typename BaseCtrlT >
 void CBaseHostToolbarCtrl<BaseCtrlT>::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
-	m_pParentWnd = GetParent();
+	m_pParentWnd = this->GetParent();
 
 	m_ignoreResize = true;
 
@@ -146,7 +146,7 @@ template< typename BaseCtrlT >
 CHostToolbarCtrl<BaseCtrlT>::CHostToolbarCtrl( ui::TTandemAlign tandemAlign /*= ui::EditShinkHost_MateOnRight*/ )
 	: CBaseHostToolbarCtrl<BaseCtrlT>()
 {
-	RefTandemLayout().SetTandemAlign( tandemAlign );
+	this->RefTandemLayout().SetTandemAlign( tandemAlign );
 }
 
 template< typename BaseCtrlT >
@@ -162,8 +162,8 @@ BOOL CHostToolbarCtrl<BaseCtrlT>::OnCmdMsg( UINT id, int code, void* pExtra, AFX
 	if ( __super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 		return true;
 
-	if ( ContainsMateCommand( id ) )		// unhandled buddy command?
-		if ( m_pParentWnd->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+	if ( this->ContainsMateCommand( id ) )		// unhandled buddy command?
+		if ( this->m_pParentWnd->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 			return TRUE;					// command handled by parent
 
 	return FALSE;
@@ -176,7 +176,7 @@ template< typename BaseCtrlT >
 bool CBaseItemContentCtrl<BaseCtrlT>::OnBuddyCommand( UINT cmdId )
 {
 	cmdId;
-	ui::SendCommandToParent( m_hWnd, CN_EDITDETAILS );		// let the parent handle editing details
+	ui::SendCommandToParent( this->m_hWnd, CN_EDITDETAILS );		// let the parent handle editing details
 	return true;		// handled
 }
 
@@ -185,8 +185,8 @@ void CBaseItemContentCtrl<BaseCtrlT>::SetContentType( ui::ContentType type )
 {
 	m_content.m_type = type;
 
-	if ( CDialogToolBar* pMateToolbar = GetMateToolbar() )
-		if ( GetMateCommands().empty() )
+	if ( CDialogToolBar* pMateToolbar = this->GetMateToolbar() )
+		if ( this->GetMateCommands().empty() )
 			switch ( m_content.m_type )
 			{
 				default: ASSERT( false );
@@ -219,11 +219,11 @@ void CBaseItemContentCtrl<BaseCtrlT>::SetFileFilter( const TCHAR* pFileFilter )
 template< typename BaseCtrlT >
 void CBaseItemContentCtrl<BaseCtrlT>::SetStringContent( bool allowEmptyItem /*= true*/, bool noMateButton /*= true*/ )
 {
-	REQUIRE( NULL == m_hWnd );			// call before creation
+	REQUIRE( NULL == this->m_hWnd );			// call before creation
 	SetFlag( m_content.m_itemsFlags, ui::CItemContent::RemoveEmpty, !allowEmptyItem );
 
 	if ( noMateButton )
-		ResetMateToolbar();
+		this->ResetMateToolbar();
 }
 
 template< typename BaseCtrlT >
@@ -231,7 +231,7 @@ void CBaseItemContentCtrl<BaseCtrlT>::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
 
-	DragAcceptFiles( m_content.IsPathContent() );
+	this->DragAcceptFiles( m_content.IsPathContent() );
 }
 
 

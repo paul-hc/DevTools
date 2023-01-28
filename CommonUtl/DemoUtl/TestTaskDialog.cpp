@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TestTaskDialog.h"
 #include "CustomTaskDialogs.h"
 #include "utl/EnumTags.h"
@@ -32,6 +32,7 @@ CTestTaskDialog::CTestTaskDialog( CWnd* pParent )
 {
 	m_regSection = reg::section_dialog;
 	m_usageButton.SetUseTextSpacing();
+	int f = 0;
 }
 
 CTestTaskDialog::~CTestTaskDialog()
@@ -56,9 +57,9 @@ void CTestTaskDialog::ClearOutcome( void )
 	ui::SetDlgItemText( m_hWnd, IDC_OUTCOME_STATIC, std::tstring() );
 }
 
-CTaskDialog* CTestTaskDialog::MakeTaskDialog_Basic( void ) const
+ui::CTaskDialog* CTestTaskDialog::MakeTaskDialog_Basic( void ) const
 {
-	return new CTaskDialog(
+	return new ui::CTaskDialog(
 		GetTags_TaskDialogUsage().FormatUi( TD_Basic ),			// title
 		s_mainInstruction,
 		_T("This is an important message to the user."),		// content
@@ -66,9 +67,9 @@ CTaskDialog* CTestTaskDialog::MakeTaskDialog_Basic( void ) const
 		TDF_ENABLE_HYPERLINKS | TDF_ALLOW_DIALOG_CANCELLATION );
 }
 
-CTaskDialog* CTestTaskDialog::MakeTaskDialog_CommandLinks( void ) const
+ui::CTaskDialog* CTestTaskDialog::MakeTaskDialog_CommandLinks( void ) const
 {
-	CTaskDialog* pDlg = new CTaskDialog(
+	ui::CTaskDialog* pDlg = new ui::CTaskDialog(
 		GetTags_TaskDialogUsage().FormatUi( TD_CommandLinks ),	// title
 		s_mainInstruction,
 		_T("This is an important message to the user."),		// content
@@ -78,9 +79,9 @@ CTaskDialog* CTestTaskDialog::MakeTaskDialog_CommandLinks( void ) const
 	return pDlg;
 }
 
-CTaskDialog* CTestTaskDialog::MakeTaskDialog_MessageBox( void ) const
+ui::CTaskDialog* CTestTaskDialog::MakeTaskDialog_MessageBox( void ) const
 {
-	return new CTaskDialog(
+	return new ui::CTaskDialog(
 		GetTags_TaskDialogUsage().FormatUi( TD_MessageBox ),	// title
 		std::tstring(),											// main instruction
 		_T("Do you like the MFCTaskDialog sample?"),			// content
@@ -89,14 +90,14 @@ CTaskDialog* CTestTaskDialog::MakeTaskDialog_MessageBox( void ) const
 		TDCBF_YES_BUTTON | TDCBF_NO_BUTTON );
 }
 
-CTaskDialog* CTestTaskDialog::MakeTaskDialog_ProgressBar( void ) const
+ui::CTaskDialog* CTestTaskDialog::MakeTaskDialog_ProgressBar( void ) const
 {
 	return new my::CProgressBarTaskDialog();
 }
 
-CTaskDialog* CTestTaskDialog::MakeTaskDialog_MarqueeProgressBar( void ) const
+ui::CTaskDialog* CTestTaskDialog::MakeTaskDialog_MarqueeProgressBar( void ) const
 {
-	CTaskDialog* pDlg = new CTaskDialog(
+	ui::CTaskDialog* pDlg = new ui::CTaskDialog(
 		GetTags_TaskDialogUsage().FormatUi( TD_MarqueeProgressBar ),	// title
 		s_mainInstruction,
 		_T("This is an important message to the user."),
@@ -107,14 +108,14 @@ CTaskDialog* CTestTaskDialog::MakeTaskDialog_MarqueeProgressBar( void ) const
 	return pDlg;
 }
 
-CTaskDialog* CTestTaskDialog::MakeTaskDialog_Navigation( void ) const
+ui::CTaskDialog* CTestTaskDialog::MakeTaskDialog_Navigation( void ) const
 {
 	return new my::CFirstNavigationDialog();
 }
 
-CTaskDialog* CTestTaskDialog::MakeTaskDialog_Complete( void ) const
+ui::CTaskDialog* CTestTaskDialog::MakeTaskDialog_Complete( void ) const
 {
-	CTaskDialog* pDlg = new CTaskDialog(
+	ui::CTaskDialog* pDlg = new ui::CTaskDialog(
 		GetTags_TaskDialogUsage().FormatUi( TD_Complete ),		// title
 		s_mainInstruction,
 		_T("I've got news for you:  <a href=\"https://www.theguardian.com\">The Guardian</a>"),		// Content
@@ -158,7 +159,7 @@ void CTestTaskDialog::DoDataExchange( CDataExchange* pDX )
 	if ( firstInit )
 	{
 		m_usageButton.SetSelValue( static_cast<TaskDialogUsage>( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_dialogUsage, TD_Basic ) ) );
-		ui::EnableWindow( m_usageButton, CTaskDialog::IsSupported() );
+		ui::EnableWindow( m_usageButton, ui::CTaskDialog::IsSupported() );
 	}
 
 	CLayoutDialog::DoDataExchange( pDX );
@@ -178,9 +179,9 @@ void CTestTaskDialog::OnDestroy( void )
 
 void CTestTaskDialog::OnBnClicked_TaskUsage( void )
 {
-	std::auto_ptr<CTaskDialog> pDlg;
+	std::auto_ptr<ui::CTaskDialog> pDlg;
 
-	switch ( m_usageButton.GetSelEnum< TaskDialogUsage >() )
+	switch ( m_usageButton.GetSelEnum<TaskDialogUsage>() )
 	{
 		case TD_Basic:				pDlg.reset( MakeTaskDialog_Basic() ); break;
 		case TD_CommandLinks:		pDlg.reset( MakeTaskDialog_CommandLinks() ); break;

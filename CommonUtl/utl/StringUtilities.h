@@ -321,10 +321,10 @@ namespace num
 	}
 
 	template<>
-	bool ParseNumber< BYTE >( BYTE& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
+	bool ParseNumber<BYTE>( BYTE& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
 
 	template<>
-	bool ParseNumber< signed char >( signed char& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
+	bool ParseNumber<signed char>( signed char& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
 
 
 	template< typename ValueT >

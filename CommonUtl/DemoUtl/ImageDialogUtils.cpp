@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageDialogUtils.h"
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
@@ -59,15 +59,15 @@ namespace utl
 			{
 				bool isTranspColor = false;
 				if ( 24 == bitsPerPixel && rPixels.GetDib()->HasTranspColor() )
-					isTranspColor = rPixels.GetPixel< CPixelBGR >( x, y ).GetColor() == rPixels.GetDib()->GetTranspColor();
+					isTranspColor = rPixels.GetPixel<CPixelBGR>( x, y ).GetColor() == rPixels.GetDib()->GetTranspColor();
 
 				BYTE alpha = isTranspColor ? 0 : static_cast<BYTE>( (double)x / bitmapSize.cx * 255 );	// simple horizontal gradient
 
 				func::AlphaBlend ma( alpha, bkColor );
 				if ( 32 == bitsPerPixel )
-					ma( rPixels.GetPixel< CPixelBGRA >( x, y ) );
+					ma( rPixels.GetPixel<CPixelBGRA>( x, y ) );
 				else
-					ma( rPixels.GetPixel< CPixelBGR >( x, y ) );
+					ma( rPixels.GetPixel<CPixelBGR>( x, y ) );
 			}
 	}
 }
@@ -136,10 +136,10 @@ void CColorTable::Build( CDibSection* pDib )
 			{
 				CDibSectionInfo info( pDib->GetHandle() );
 				CScopedBitmapMemDC scopedBitmap( pDib );
-				const std::vector< RGBQUAD >& colorTable = info.GetColorTable( pDib->GetBitmapMemDC() );
+				const std::vector<RGBQUAD>& colorTable = info.GetColorTable( pDib->GetBitmapMemDC() );
 
 				m_colors.reserve( m_totalColors = colorTable.size() );
-				for ( std::vector< RGBQUAD >::const_iterator itRgb = colorTable.begin(); itRgb != colorTable.end(); ++itRgb )
+				for ( std::vector<RGBQUAD>::const_iterator itRgb = colorTable.begin(); itRgb != colorTable.end(); ++itRgb )
 				{
 					COLORREF color = CPixelBGR( *itRgb ).GetColor();
 					if ( m_uniqueColors )
@@ -160,7 +160,7 @@ void CColorTable::Build( CDibSection* pDib )
 			break;
 	}
 
-	std::set< COLORREF > uniqueColors;
+	std::set<COLORREF> uniqueColors;
 	for ( size_t i = 0; i != m_colors.size(); ++i )
 		if ( !uniqueColors.insert( m_colors[ i ] ).second )
 			m_dupColorsPos.push_back( i );
@@ -212,8 +212,8 @@ CSize CColorTableRenderer::ComputeCoreSize( void )
 		coreSize.cy -= coreSize.cy / 5;
 
 		enum { MaxCellWidth = 200, MaxCellHeight = 100 };
-		coreSize.cx = std::min< long >( MaxCellWidth * 2, coreSize.cx );
-		coreSize.cy = std::min< long >( MaxCellHeight, coreSize.cy );
+		coreSize.cx = std::min<long>( MaxCellWidth * 2, coreSize.cx );
+		coreSize.cy = std::min<long>( MaxCellHeight, coreSize.cy );
 	}
 	return coreSize;
 }
@@ -349,10 +349,10 @@ const TCHAR CImageTranspColors::s_entry[] = _T("TranspColors");
 
 void CImageTranspColors::Load( const TCHAR* pSection )
 {
-	std::vector< std::tstring > items;
+	std::vector<std::tstring> items;
 	str::Split( items, (LPCTSTR)AfxGetApp()->GetProfileString( pSection, s_entry ), _T(";") );
 
-	for ( std::vector< std::tstring >::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+	for ( std::vector<std::tstring>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 	{
 		size_t sepPos = itItem->find( _T('|') );
 		if ( sepPos != std::tstring::npos )
@@ -368,9 +368,9 @@ void CImageTranspColors::Load( const TCHAR* pSection )
 
 void CImageTranspColors::Save( const TCHAR* pSection ) const
 {
-	std::vector< std::tstring > items; items.reserve( m_transpColorMap.size() );
+	std::vector<std::tstring> items; items.reserve( m_transpColorMap.size() );
 
-	for ( std::map< fs::CPath, COLORREF >::const_iterator itImage = m_transpColorMap.begin(); itImage != m_transpColorMap.end(); ++itImage )
+	for ( std::map<fs::CPath, COLORREF>::const_iterator itImage = m_transpColorMap.begin(); itImage != m_transpColorMap.end(); ++itImage )
 		if ( itImage->first.FileExist() && itImage->second != CLR_NONE )
 			items.push_back( str::Format( _T("%s|%s"), itImage->first.GetPtr(), ui::FormatHtml( itImage->second ).c_str() ) );
 
@@ -379,7 +379,7 @@ void CImageTranspColors::Save( const TCHAR* pSection ) const
 
 COLORREF CImageTranspColors::Lookup( const fs::CPath& imagePath ) const
 {
-	std::map< fs::CPath, COLORREF >::const_iterator itFound = m_transpColorMap.find( imagePath );
+	std::map<fs::CPath, COLORREF>::const_iterator itFound = m_transpColorMap.find( imagePath );
 	return itFound != m_transpColorMap.end() ? itFound->second : CLR_NONE;
 }
 
@@ -401,7 +401,7 @@ CModeData::CModeData( const TCHAR* pLabels )
 {
 	str::Split( m_labels, pLabels, _T("|") );
 	static const std::tstring space = _T(" ");
-	for ( std::vector< std::tstring >::iterator itLabel = m_labels.begin(); itLabel != m_labels.end(); ++itLabel )
+	for ( std::vector<std::tstring>::iterator itLabel = m_labels.begin(); itLabel != m_labels.end(); ++itLabel )
 		*itLabel = space + *itLabel + space;			// pad with spaces for better looking labels
 
 	m_dibs.resize( m_labels.size(), NULL );				// fill with null placeholders

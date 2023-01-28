@@ -117,11 +117,11 @@ void CAccelTable::Augment( UINT accelId )
 		Load( accelId );
 	else
 	{
-		std::vector< ACCEL > keys;
-		QueryKeys( keys );
-		CAccelTable( accelId ).QueryKeys( keys );
+		std::vector<ACCEL> allKeys;
+		QueryKeys( allKeys );
+		CAccelTable( accelId ).QueryKeys( allKeys );
 
-		Create( ARRAY_PAIR_V( keys ) );
+		Create( ARRAY_PAIR_V( allKeys ) );
 	}
 }
 
@@ -131,11 +131,11 @@ void CAccelTable::Augment( ACCEL keys[], int count )
 		Create( keys, count );
 	else
 	{
-		std::vector< ACCEL > keys;
-		QueryKeys( keys );
-		keys.insert( keys.end(), &keys[ 0 ], &keys[ count ] );
+		std::vector<ACCEL> allKeys;
+		QueryKeys( allKeys );
+		allKeys.insert( allKeys.end(), &keys[ 0 ], &keys[ count ] );
 
-		Create( ARRAY_PAIR_V( keys ) );
+		Create( ARRAY_PAIR_V( allKeys ) );
 	}
 }
 

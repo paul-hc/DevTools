@@ -58,9 +58,6 @@ private:
 };
 
 
-enum IconColors;
-
-
 struct CIconInfo : private utl::noncopyable
 {
 	CIconInfo( HICON hIcon, bool isCursor = false );

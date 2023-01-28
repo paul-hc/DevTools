@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TestPropertySheet.h"
 #include "DemoTemplate.h"
 #include "resource.h"

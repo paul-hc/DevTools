@@ -26,9 +26,12 @@ namespace fs
 
 
 	template< typename PathType, typename ObjectType >
-	class CCacheLoader : public CFileObjectCache< PathType, ObjectType >
+	class CCacheLoader : public CFileObjectCache<PathType, ObjectType>
 	{
+		typedef CFileObjectCache<PathType, ObjectType> TFileObjectCache;
 	public:
+		using TFileObjectCache::TCachedEntry;
+
 		typedef std::function< ObjectType*( const PathType& ) > TLoadFunc;
 		typedef std::function< void( const std::pair<ObjectType*, cache::TStatusFlags>&, const PathType& ) > TTraceFunc;
 

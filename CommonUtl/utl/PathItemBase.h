@@ -51,8 +51,9 @@ private:
 
 namespace utl
 {
-	template< typename PtrContainer, typename ClearFunctor >
-	void ClearOwningContainer( PtrContainer& rContainer, ClearFunctor clearFunctor );
+	// forward declarations - required for C++ 14+ compilation
+	template< typename PtrContainerT >
+	void ClearOwningContainer( PtrContainerT& rContainer );
 }
 
 

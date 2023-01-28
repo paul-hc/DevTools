@@ -1,6 +1,6 @@
 // ChildFrame.cpp : implementation of the CChildFrame class
 //
-#include "stdafx.h"
+#include "pch.h"
 #include "ChildFrame.h"
 
 #ifdef _DEBUG

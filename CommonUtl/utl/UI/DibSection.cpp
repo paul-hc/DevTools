@@ -12,6 +12,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Image_fwd.hxx"
+
 
 CBitmap* CDibSection::s_pNullMask = NULL;
 int CDibSection::m_testFlags = 0;
@@ -229,7 +231,7 @@ COLORREF CDibSection::FindAutoTranspColor( void ) const
 	};
 	const COLORREF* itColorEnd = END_OF( cornerColors );
 
-	size_t counts[] =
+	ptrdiff_t counts[] =
 	{
 		std::count( cornerColors, itColorEnd, cornerColors[ 0 ] ),
 		std::count( cornerColors, itColorEnd, cornerColors[ 1 ] ),

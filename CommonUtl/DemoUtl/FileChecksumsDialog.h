@@ -23,7 +23,7 @@ private:
 private:
 	fs::CPath m_searchPath;
 
-	std::vector< CFileChecksumItem* > m_fileItems;
+	std::vector<CFileChecksumItem*> m_fileItems;
 private:
 	// enum { IDD = IDD_FILE_CHECKSUMS_DIALOG };
 	enum Column { FileName, DirPath, FileSize, UTL_CRC32, UTL_Elapsed, UTL_ifs_CRC32, UTL_ifs_Elapsed, BoostCFile_CRC32, BoostCFile_Elapsed, Boost_ifs_CRC32, Boost_ifs_Elapsed };

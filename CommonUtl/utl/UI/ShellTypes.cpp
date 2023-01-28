@@ -38,7 +38,7 @@ namespace shell
 		if ( !HR_OK( com.CreateInstance( CLSID_ShellLink, NULL, IID_IShellLink, (LPVOID*)&pShellLink ) ) || pShellLink == NULL )
 			return false;
 
-		if ( CComQIPtr<IPersistFile> pPersistFile = pShellLink )
+		if ( CComQIPtr<IPersistFile> pPersistFile = pShellLink.p )
 			if ( HR_OK( pPersistFile->Load( pShortcutLnkPath, STGM_READ ) ) )
 				if ( HR_OK( pShellLink->Resolve( pWnd->GetSafeHwnd(), SLR_ANY_MATCH ) ) )		// resolve the link; this may post UI to find the link
 				{

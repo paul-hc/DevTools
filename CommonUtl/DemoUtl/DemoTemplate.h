@@ -29,7 +29,7 @@ public:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 
-	static const std::vector< std::tstring >& GetTextItems( void );
+	static const std::vector<std::tstring>& GetTextItems( void );
 private:
 	enum { MaxDemoDepth = 3 };
 	static ResizeStyle m_dialogResizeStyle;

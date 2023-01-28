@@ -40,7 +40,7 @@ protected:
 	// base overrides
 	virtual void SetupControl( void );
 private:
-	bool UseExternalDropFiles( void ) const { return GetAcceptDropFiles(); }		// drop external files from Explorer?
+	bool UseExternalDropFiles( void ) const { return this->GetAcceptDropFiles(); }		// drop external files from Explorer?
 
 	bool IsDragging( void ) const { return m_pSrcDragging != NULL; }
 	void EndDragging( void );

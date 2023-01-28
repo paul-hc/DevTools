@@ -42,9 +42,6 @@
     <Filter Include="UI\Shell Explorer API">
       <UniqueIdentifier>{f59e82d0-cc1e-4a4f-a3b9-03a8695e745a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="UI\Vista MFC">
-      <UniqueIdentifier>{5d846405-fe5d-4037-8c84-2f720980d1bb}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -611,11 +608,14 @@
     <ClInclude Include="WinExplorer.h">
       <Filter>UI\Shell Explorer API</Filter>
     </ClInclude>
-    <ClInclude Include="TaskDialog.h">
-      <Filter>UI\Vista MFC</Filter>
-    </ClInclude>
     <ClInclude Include="ToolStrip.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Image_fwd.hxx">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskDialog.h">
+      <Filter>UI\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1051,11 +1051,11 @@
     <ClCompile Include="WinExplorer.cpp">
       <Filter>UI\Shell Explorer API</Filter>
     </ClCompile>
-    <ClCompile Include="TaskDialog.cpp">
-      <Filter>UI\Vista MFC</Filter>
-    </ClCompile>
     <ClCompile Include="ToolStrip.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskDialog.cpp">
+      <Filter>UI\Dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DemoSysTray.h"
 #include "Application.h"
 #include "utl/StringUtilities.h"

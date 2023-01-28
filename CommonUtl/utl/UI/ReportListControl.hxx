@@ -80,7 +80,7 @@ template< typename ObjectT >
 void CReportListControl::SelectObjects( const std::vector< ObjectT* >& objects )
 {
 	std::vector< int > selIndexes;
-	for ( std::vector< ObjectT* >::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
+	for ( typename std::vector< ObjectT* >::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
 	{
 		int foundIndex = FindItemIndex( *itObject );
 		if ( foundIndex != -1 )

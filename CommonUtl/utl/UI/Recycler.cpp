@@ -83,7 +83,7 @@ namespace shell
 
 		if ( CComPtr<IEnumShellItems> pEnumItems = GetEnumItems() )
 			for ( CComPtr<IShellItem> pItem; S_OK == pEnumItems->Next( 1, &pItem, NULL ); pItem = NULL )
-				if ( CComQIPtr<IShellItem2> pItem2 = pItem )
+				if ( CComQIPtr<IShellItem2> pItem2 = pItem.p )
 				{
 					path::SpecMatch foundMatch = OriginalPathMatchesPrefix( pItem2, pOrigPrefixOrSpec );
 					if ( foundMatch >= minMatch )
@@ -111,7 +111,7 @@ namespace shell
 
 		if ( CComPtr<IEnumShellItems> pEnumItems = GetEnumItems() )
 			for ( CComPtr<IShellItem> pItem; S_OK == pEnumItems->Next( 1, &pItem, NULL ); pItem = NULL )
-				if ( CComQIPtr<IShellItem2> pRecycledItem = pItem )
+				if ( CComQIPtr<IShellItem2> pRecycledItem = pItem.p )
 				{
 					fs::CPath origFilePath = GetOriginalFilePath( pRecycledItem );
 					size_t fileEntryPos = utl::FindPos( delFilePaths, origFilePath );

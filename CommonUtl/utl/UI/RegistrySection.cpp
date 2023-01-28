@@ -40,16 +40,16 @@ bool CAppRegistrySection::SaveParameter( const TCHAR entryName[], const std::tst
 
 struct CRegistryEntry
 {
-	CRegistryEntry::CRegistryEntry( void ) : m_type( REG_NONE ) {}
+	CRegistryEntry( void ) : m_type( REG_NONE ) {}
 
-	explicit CRegistryEntry::CRegistryEntry( DWORD value )
+	explicit CRegistryEntry( DWORD value )
 		: m_type( REG_DWORD )
 		, m_valueBuffer( sizeof( DWORD ) )
 	{
 		ValueAsDWORD() = value;
 	}
 
-	explicit CRegistryEntry::CRegistryEntry( const std::tstring& value )
+	explicit CRegistryEntry( const std::tstring& value )
 		: m_type( REG_SZ )
 	{
 		typedef const BYTE* TIterator;
@@ -58,7 +58,7 @@ struct CRegistryEntry
 		m_valueBuffer.assign( itStart, itEnd );
 	}
 
-	CRegistryEntry::CRegistryEntry( const BYTE* pValue, size_t size )
+	CRegistryEntry( const BYTE* pValue, size_t size )
 		: m_type( REG_BINARY )
 		, m_valueBuffer( pValue, pValue + size )
 	{

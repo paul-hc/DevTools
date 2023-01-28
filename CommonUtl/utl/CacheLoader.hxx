@@ -11,8 +11,8 @@ namespace fs
 	using std::placeholders::_1;
 
 	template< typename PathType, typename ObjectType >
-	inline CCacheLoader< PathType, ObjectType >::CCacheLoader( size_t maxSize, ICacheOwner< PathType, ObjectType >* pCacheOwner )
-		: CFileObjectCache< PathType, ObjectType >( maxSize )
+	inline CCacheLoader<PathType, ObjectType>::CCacheLoader( size_t maxSize, ICacheOwner< PathType, ObjectType >* pCacheOwner )
+		: CFileObjectCache<PathType, ObjectType>( maxSize )
 		, m_pCacheOwner( pCacheOwner )
 		, m_pendingQueue( std::bind( &CCacheLoader::_Acquire, this, _1 ) )
 	{
@@ -20,21 +20,21 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	CCacheLoader< PathType, ObjectType >::~CCacheLoader()
+	CCacheLoader<PathType, ObjectType>::~CCacheLoader()
 	{
 	}
 
 	template< typename PathType, typename ObjectType >
-	std::pair<ObjectType*, cache::TStatusFlags> CCacheLoader< PathType, ObjectType >::Acquire( const PathType& pathKey )
+	std::pair<ObjectType*, cache::TStatusFlags> CCacheLoader<PathType, ObjectType>::Acquire( const PathType& pathKey )
 	{
-		mt::CAutoLock lock( &m_cs );
+		mt::CAutoLock lock( &this->m_cs );
 
 		ObjectType* pObject = NULL;
 		cache::TStatusFlags cacheStatus = 0;
 
-		if ( const TCachedEntry* pCachedEntry = FindEntry( pathKey ) )
+		if ( const TCachedEntry* pCachedEntry = this->FindEntry( pathKey ) )
 		{
-			fs::FileExpireStatus expireStatus = CheckExpireStatus( pathKey, *pCachedEntry );
+			fs::FileExpireStatus expireStatus = this->CheckExpireStatus( pathKey, *pCachedEntry );
 			if ( fs::FileNotExpired == expireStatus )
 			{
 				SetFlag( cacheStatus, cache::CacheHit );
@@ -42,7 +42,7 @@ namespace fs
 			}
 			else
 			{	// fs::ExpiredFileModified, fs::ExpiredFileDeleted
-				_Remove( pathKey, 0 );				// delete expired entry, no tracing
+				this->_Remove( pathKey, 0 );			// delete expired entry, no tracing
 				SetFlag( cacheStatus, cache::RemoveExpired );
 			}
 		}
@@ -54,7 +54,7 @@ namespace fs
 		}
 
 		if ( pObject != NULL && !HasFlag( cacheStatus, cache::CacheHit ) )
-			_Add( pathKey, pObject );
+			this->_Add( pathKey, pObject );
 
 		std::pair<ObjectType*, cache::TStatusFlags> objectPair( pObject, cacheStatus );
 
@@ -63,15 +63,15 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	inline void CCacheLoader< PathType, ObjectType >::_Acquire( const PathType& pathKey )
+	inline void CCacheLoader<PathType, ObjectType>::_Acquire( const PathType& pathKey )
 	{
 		Acquire( pathKey );
 	}
 
 	template< typename PathType, typename ObjectType >
-	cache::EnqueueResult CCacheLoader< PathType, ObjectType >::Enqueue( const PathType& pathKey )
+	cache::EnqueueResult CCacheLoader<PathType, ObjectType>::Enqueue( const PathType& pathKey )
 	{
-		if ( Contains( pathKey, true ) )
+		if ( this->Contains( pathKey, true ) )
 			return cache::Found;
 
 		m_pendingQueue.Enqueue( pathKey );
@@ -79,9 +79,9 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	void CCacheLoader< PathType, ObjectType >::Enqueue( const std::vector< PathType >& pathKeys )
+	void CCacheLoader<PathType, ObjectType>::Enqueue( const std::vector< PathType >& pathKeys )
 	{
-		for ( std::vector< PathType >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
+		for ( typename std::vector< PathType >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
 			Enqueue( *itPathKey );
 	}
 
@@ -89,7 +89,7 @@ namespace fs
 	// CCacheLoader template code
 
 	template< typename PathType >
-	CQueueListener< PathType >::CQueueListener( TAcquireFunc acquireFunc )
+	CQueueListener<PathType>::CQueueListener( TAcquireFunc acquireFunc )
 		: m_acquireFunc( acquireFunc )
 		, m_wantExit( false )
 		, m_thread( std::bind( &CQueueListener::ListenLoop, this ) )
@@ -97,7 +97,7 @@ namespace fs
 	}
 
 	template< typename PathType >
-	CQueueListener< PathType >::~CQueueListener()
+	CQueueListener<PathType>::~CQueueListener()
 	{
 		{
 			boost::lock_guard< boost::mutex > lock( m_mutex );
@@ -108,7 +108,7 @@ namespace fs
 	}
 
 	template< typename PathType >
-	void CQueueListener< PathType >::Enqueue( const PathType& pathKey )
+	void CQueueListener<PathType>::Enqueue( const PathType& pathKey )
 	{
 		boost::lock_guard< boost::mutex > lock( m_mutex );
 		m_queue.push_front( pathKey );
@@ -116,7 +116,7 @@ namespace fs
 	}
 
 	template< typename PathType >
-	void CQueueListener< PathType >::WaitCompletePending( void )
+	void CQueueListener<PathType>::WaitCompletePending( void )
 	{
 		while ( !m_queue.empty() && !m_wantExit )
 		{
@@ -126,7 +126,7 @@ namespace fs
 	}
 
 	template< typename PathType >
-	void CQueueListener< PathType >::ListenLoop( void )
+	void CQueueListener<PathType>::ListenLoop( void )
 	{
 		mt::CScopedInitializeCom scopedCom;
 		PathType pathKey;

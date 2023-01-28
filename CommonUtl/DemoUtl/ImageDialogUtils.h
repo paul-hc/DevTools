@@ -58,10 +58,10 @@ struct CColorTable : public CColorTableOptions
 
 	void Draw( CDC* pDC, const CRect& clientRect ) const;
 public:
-	std::vector< COLORREF > m_colors;
+	std::vector<COLORREF> m_colors;
 	size_t m_totalColors;
 	size_t m_selPos;
-	std::vector< size_t > m_dupColorsPos;
+	std::vector<size_t> m_dupColorsPos;
 };
 
 
@@ -105,7 +105,7 @@ public:
 	bool Register( const fs::CPath& imagePath, COLORREF transpColor );
 	bool Unregister( const fs::CPath& imagePath ) { return 1 == m_transpColorMap.erase( imagePath ); }
 private:
-	std::map< fs::CPath, COLORREF > m_transpColorMap;
+	std::map<fs::CPath, COLORREF> m_transpColorMap;
 	static const TCHAR s_entry[];
 };
 
@@ -119,8 +119,8 @@ struct CModeData
 	void Clear( void );
 	void PushDib( std::auto_ptr<CDibSection>& rpDib ) { m_dibs.push_back( rpDib.release() ); ENSURE( m_dibs.size() < m_labels.size() ); }
 public:
-	std::vector< std::tstring > m_labels;
-	std::vector< CDibSection* > m_dibs;
+	std::vector<std::tstring> m_labels;
+	std::vector<CDibSection*> m_dibs;
 };
 
 
@@ -144,7 +144,7 @@ public:
 	}
 protected:
 	// base overrides
-	virtual void OnValueChanged( void ) { *m_pChannel = GetNumber< BYTE >(); }
+	virtual void OnValueChanged( void ) { *m_pChannel = GetNumber<BYTE>(); }
 private:
 	UINT m_editId;
 	BYTE* m_pChannel;

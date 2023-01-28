@@ -7,6 +7,13 @@
 #include "StdHashValue.h"
 
 
+namespace path
+{
+	// forward declarations - required for C++ 14+ compilation
+	bool HasPrefix( const TCHAR* pPath, const TCHAR* pPrefix );
+}
+
+
 namespace fs
 {
 	template< typename PathT >

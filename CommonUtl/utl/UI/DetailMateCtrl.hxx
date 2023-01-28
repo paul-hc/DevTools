@@ -32,7 +32,7 @@ END_MESSAGE_MAP()
 template< typename BaseCtrl >
 BOOL CDetailMateCtrl<BaseCtrl>::OnReflect_Command( void )
 {
-	return m_pHostCmdHandler->OnBuddyCommand( GetDlgCtrlID() );		// skip parent handling if handled
+	return m_pHostCmdHandler->OnBuddyCommand( this->GetDlgCtrlID() );		// skip parent handling if handled
 }
 
 

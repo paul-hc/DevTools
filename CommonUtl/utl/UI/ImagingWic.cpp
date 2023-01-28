@@ -207,7 +207,7 @@ namespace wic
 			pChecker->Handle( pPixelFormatInfo->GetBitsPerPixel( &m_bitsPerPixel ), &allGood );
 			pChecker->Handle( pPixelFormatInfo->GetChannelCount( &m_channelCount ), &allGood );
 
-			if ( CComQIPtr<IWICPixelFormatInfo2> pPixelFormatInfo2 = pPixelFormatInfo )
+			if ( CComQIPtr<IWICPixelFormatInfo2> pPixelFormatInfo2 = pPixelFormatInfo.p )
 			{
 				BOOL supportsTransparency = FALSE;
 				if ( pChecker->Handle( pPixelFormatInfo2->SupportsTransparency( &supportsTransparency ) ) )
@@ -276,7 +276,7 @@ namespace wic
 
 	bool CBitmapOrigin::IsSourceTrueBitmap( void ) const
 	{
-		CComQIPtr<IWICBitmap> pFullBitmap = m_pSrcBitmap;
+		CComQIPtr<IWICBitmap> pFullBitmap( m_pSrcBitmap );
 		return pFullBitmap != NULL;
 	}
 

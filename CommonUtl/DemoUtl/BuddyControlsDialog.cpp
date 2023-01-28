@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BuddyControlsDialog.h"
 //#include "utl/ContainerUtilities.h"
 #include "utl/FileStateEnumerator.h"
