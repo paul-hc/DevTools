@@ -32,13 +32,13 @@ namespace app
 {
 	svc::ICommandService* GetCmdSvc( void )
 	{
-		return g_app.GetCommandService();
+		return g_mfcApp.GetCommandService();
 	}
 }
 
 
 CComModule g_comModule;
-CApplication g_app;
+CApplication g_mfcApp;
 
 
 CApplication::CApplication( void )

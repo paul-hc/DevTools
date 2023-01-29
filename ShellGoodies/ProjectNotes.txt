@@ -39,6 +39,10 @@ Normal dll debug:
 	Command=C:\my\Tools\mine\ExplorerBrowser64.exe
 	Command Arguments=
 
+Note:
+	On Windows 10, you need to run Visual Studio as Administrator for the regsvr32.exe to succeed!
+
+
 HISTORY
 =======
 1) 4 November 2018: According to Michael Dunn's article:		https://www.codeproject.com/Articles/441/The-Complete-Idiot-s-Guide-to-Writing-Shell-Extens
@@ -63,7 +67,8 @@ In ShellGoodies.cpp:
 	AddAsApprovedShellExtension();
 	RemoveAsApprovedShellExtension();
 
-BUGS
+
+BUGS:
 ====
 1) Deadlock on loading ShellGoodies*.dll (64/32 bit, RELEASE/DEBUG):
 When ShellGoodies64.dll (or 32) is registered and enabled (ShellExView), sometimes when right clicking on a FOLDER *first time* in Explorer.exe (or ExplorerBrowser64.exe), a deadlock occurs.

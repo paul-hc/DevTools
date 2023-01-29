@@ -9,8 +9,8 @@ class CShellMenuController;
 
 
 class ATL_NO_VTABLE CShellGoodiesCom
-	: public CComObjectRootEx< CComSingleThreadModel >
-	, public CComCoClass< CShellGoodiesCom, &CLSID_ShellGoodiesCom >
+	: public CComObjectRootEx<CComSingleThreadModel>
+	, public CComCoClass<CShellGoodiesCom, &CLSID_ShellGoodiesCom>
 	, public ISupportErrorInfo
 	, public IShellExtInit
 	, public IContextMenu

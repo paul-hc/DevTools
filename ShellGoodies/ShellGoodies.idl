@@ -6,16 +6,17 @@
 
 import "oaidl.idl";
 import "ocidl.idl";
-	[
-		object,
-		uuid(1D4EA502-89A1-11D5-A57D-0050BA0E2E4A),
-		dual,
-		helpstring("IShellGoodiesCom Interface"),
-		pointer_default(unique)
-	]
-	interface IShellGoodiesCom : IDispatch
-	{
-	};
+
+[
+	object,
+	uuid(1D4EA502-89A1-11D5-A57D-0050BA0E2E4A),
+	dual,
+	helpstring("IShellGoodiesCom Interface"),
+	pointer_default(unique)
+]
+interface IShellGoodiesCom : IDispatch
+{
+};
 
 [
 	uuid(1D4EA4F3-89A1-11D5-A57D-0050BA0E2E4A),
