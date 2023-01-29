@@ -50,7 +50,8 @@ namespace shell
 // Hosts and tracks a shell contextmenu of files, folders, shell-items. Calling clients can augment the popup menu with additional commands.
 // Use shell::Make*ContextMenu() utility functions to make IContextMenu* for various datasets.
 //
-class CShellContextMenuHost : public CCmdTarget, private utl::noncopyable
+class CShellContextMenuHost : public CCmdTarget
+							, private utl::noncopyable
 {
 public:
 	CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu = NULL );

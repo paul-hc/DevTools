@@ -327,11 +327,11 @@ LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc2( HWND hWnd, UINT me
 		case WM_MEASUREITEM:		// return value: if an application processes this message, it should return TRUE
 			if ( 0 == wParam )		// menu-related message?
 				if ( SUCCEEDED( m_pContextMenu2->HandleMenuMsg( message, wParam, lParam ) ) )
-					return TRUE;		// message was handled
+					return TRUE;	// message was handled
 			break;
 		case WM_INITMENUPOPUP:		// return value: if an application processes this message, it should return 0
 			if ( SUCCEEDED( m_pContextMenu2->HandleMenuMsg( message, wParam, lParam ) ) )
-				return FALSE;			// message was handled
+				return FALSE;		// message was handled
 			break;
 	}
 
@@ -348,11 +348,11 @@ LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc3( HWND hWnd, UINT me
 	{
 		case WM_MENUCHAR:			// handled only by IContextMenu3
 			if ( SUCCEEDED( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
-				return lResult;					// return value is important!
+				return lResult;		// return value is important!
 			break;
 		case WM_DRAWITEM:			// return value: if an application processes this message, it should return TRUE
 		case WM_MEASUREITEM:
-			if ( 0 == wParam )					// menu-related message?
+			if ( 0 == wParam )		// menu-related message?
 				if ( SUCCEEDED( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
 					if ( TRUE == lResult )		// message was handled?
 						return lResult;
