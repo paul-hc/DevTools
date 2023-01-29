@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TitleCapitalizer.h"
 #include "utl/EnumTags.h"
 #include "utl/TokenIterator.h"

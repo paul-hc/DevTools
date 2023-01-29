@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ReplaceDialog.h"
 #include "IFileEditor.h"
 #include "RenameService.h"

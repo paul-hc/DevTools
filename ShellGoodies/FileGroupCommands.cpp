@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileGroupCommands.h"
 #include "Application.h"
 #include "utl/AppTools.h"

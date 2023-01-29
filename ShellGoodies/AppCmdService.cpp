@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AppCmdService.h"
 #include "CommandModelPersist.h"
 #include "GeneralOptions.h"

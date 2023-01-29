@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileModel.h"
 #include "FileMacroCommands.h"
 #include "EditingCommands.h"

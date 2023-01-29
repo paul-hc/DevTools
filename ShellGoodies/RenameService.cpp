@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "RenameService.h"
 #include "RenameItem.h"
 #include "TextAlgorithms.h"

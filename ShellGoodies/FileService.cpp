@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileService.h"
 #include "FileMacroCommands.h"
 #include "RenameItem.h"

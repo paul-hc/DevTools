@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TouchFilesDialog.h"
 #include "TouchItem.h"
 #include "FileModel.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CommandItem.h"
 #include "AppCommands.h"
 #include "utl/EnumTags.h"

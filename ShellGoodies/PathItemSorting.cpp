@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PathItemSorting.h"
 #include "RenameItem.h"
 #include "utl/ContainerOwnership.h"

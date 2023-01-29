@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellMenuController.h"
 #include "IFileEditor.h"
 #include "DropFilesModel.h"

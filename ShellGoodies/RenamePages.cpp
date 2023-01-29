@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "RenamePages.h"
 #include "RenameItem.h"
 #include "RenameFilesDialog.h"

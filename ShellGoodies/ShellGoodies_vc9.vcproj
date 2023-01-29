@@ -59,7 +59,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="StdAfx.h"
+				PrecompiledHeaderThrough="pch.h"
 				AssemblerListingLocation=".\DebugU/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -155,7 +155,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="StdAfx.h"
+				PrecompiledHeaderThrough="pch.h"
 				AssemblerListingLocation=""
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -254,7 +254,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="StdAfx.h"
+				PrecompiledHeaderThrough="pch.h"
 				AssemblerListingLocation=".\ReleaseU/"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -356,7 +356,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="StdAfx.h"
+				PrecompiledHeaderThrough="pch.h"
 				AssemblerListingLocation=""
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -511,6 +511,50 @@
 				>
 			</File>
 			<File
+				RelativePath=".\pch.cpp"
+				>
+				<FileConfiguration
+					Name="DebugU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugU|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseU|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\pch.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ShellGoodies.cpp"
 				>
 			</File>
@@ -576,50 +620,6 @@
 			</File>
 			<File
 				RelativePath=".\ShellGoodiesCom.h"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.cpp"
-				>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseU|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\stdafx.h"
 				>
 			</File>
 			<Filter

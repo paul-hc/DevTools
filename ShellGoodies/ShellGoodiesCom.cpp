@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellGoodiesCom.h"
 #include "ShellMenuController.h"
 #include "Application.h"

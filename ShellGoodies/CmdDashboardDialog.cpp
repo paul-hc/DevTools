@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CmdDashboardDialog.h"
 #include "FileModel.h"
 #include "CommandItem.h"

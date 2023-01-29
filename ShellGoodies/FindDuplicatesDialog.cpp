@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FindDuplicatesDialog.h"
 #include "FileModel.h"
 #include "FileGroupCommands.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileEditorBaseDialog.h"
 #include "FileModel.h"
 #include "GeneralOptions.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TextAlgorithms.h"
 #include "GeneralOptions.h"
 #include "utl/EnumTags.h"

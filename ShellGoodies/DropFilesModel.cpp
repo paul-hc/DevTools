@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DropFilesModel.h"
 #include "FileGroupCommands.h"
 #include "AppCmdService.h"
