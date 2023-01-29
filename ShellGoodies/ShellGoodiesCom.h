@@ -2,6 +2,7 @@
 #define ShellGoodiesCom_h
 #pragma once
 
+#include "gen/ShellGoodies_i.h"
 #include "resource.h"
 
 

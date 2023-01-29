@@ -10,7 +10,7 @@
 *.tlog/
 
 # DevTools Ignore:
-ShellGoodies/ShellGoodies.h
+[Gg]en/
 TestDataUtl/images/thumbnails/myThumbs.stg
 TestDataUtl/temp_ut/
 

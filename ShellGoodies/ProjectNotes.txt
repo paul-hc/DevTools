@@ -43,6 +43,35 @@ Note:
 	On Windows 10, you need to run Visual Studio as Administrator for the regsvr32.exe to succeed!
 
 
+Customize for dual VC9/VC17 projects:
+====================================
+1) ShellGoodies > Properties > Configuration Properties > General:
+	Intermediate Directory=$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)
+		Note:
+			I prefixed with "$(ProjectDir)", so that $(IntDir) is no longer a relative path.
+			That's required so that when I customize MIDL settings on ShellGoodies.idl and set Output Directory=gen\vc9,
+			it doesn't generate the .tlb deep under gen\vc9\bin\vc9\Win32_DebugU\ShellGoodies.tlb
+
+2) ShellGoodies.idl > Properties > MIDL > Output:
+	Output directory=gen
+
+3) Create project filters "Source Files/gen" and "Source Files/gen/excluded", and add the following files:
+	Source Files/gen
+		ShellGoodies_i.c
+		ShellGoodies_i.h
+		ShellGoodies_p.c
+	Source Files/gen/excluded
+		dlldata.c
+
+Select the 4 files, right-click Properties > Configuration Properties > General:
+	Exclude From Build=Yes
+
+4) Build the project
+- Update the source files with #include "ShellGoodies_i.*" => prefix with subdirectory "gen/ShellGoodies_i.*".
+- Delete the old generated files in project directory "ShellGoodies_i.*".
+- Build the project and ensure is successful.
+
+
 HISTORY
 =======
 1) 4 November 2018: According to Michael Dunn's article:		https://www.codeproject.com/Articles/441/The-Complete-Idiot-s-Guide-to-Writing-Shell-Extens

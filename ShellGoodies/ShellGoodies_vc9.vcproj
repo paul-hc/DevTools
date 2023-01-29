@@ -22,7 +22,7 @@
 		<Configuration
 			Name="DebugU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="1"
@@ -117,7 +117,7 @@
 		<Configuration
 			Name="DebugU|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="1"
@@ -213,7 +213,7 @@
 		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="1"
@@ -314,7 +314,7 @@
 		<Configuration
 			Name="ReleaseU|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="1"
@@ -528,7 +528,8 @@
 						Name="VCMIDLTool"
 						GenerateStublessProxies="true"
 						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-						HeaderFileName="ShellGoodies.h"
+						OutputDirectory="gen"
+						HeaderFileName="ShellGoodies_i.h"
 						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
@@ -539,7 +540,8 @@
 						Name="VCMIDLTool"
 						GenerateStublessProxies="true"
 						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-						HeaderFileName="ShellGoodies.h"
+						OutputDirectory="gen"
+						HeaderFileName="ShellGoodies_i.h"
 						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
@@ -550,7 +552,8 @@
 						Name="VCMIDLTool"
 						GenerateStublessProxies="true"
 						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-						HeaderFileName="ShellGoodies.h"
+						OutputDirectory="gen"
+						HeaderFileName="ShellGoodies_i.h"
 						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
@@ -561,7 +564,8 @@
 						Name="VCMIDLTool"
 						GenerateStublessProxies="true"
 						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-						HeaderFileName="ShellGoodies.h"
+						OutputDirectory="gen"
+						HeaderFileName="ShellGoodies_i.h"
 						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
@@ -619,10 +623,46 @@
 				>
 			</File>
 			<Filter
-				Name="generated"
+				Name="gen"
 				>
 				<File
-					RelativePath=".\ShellGoodies.h"
+					RelativePath=".\gen\ShellGoodies_i.c"
+					>
+					<FileConfiguration
+						Name="DebugU|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugU|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseU|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseU|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\gen\ShellGoodies_i.h"
 					>
 					<FileConfiguration
 						Name="DebugU|Win32"
@@ -658,7 +698,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\ShellGoodies_i.c"
+					RelativePath=".\gen\ShellGoodies_p.c"
 					>
 					<FileConfiguration
 						Name="DebugU|Win32"
@@ -666,8 +706,6 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderThrough=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -676,8 +714,6 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderThrough=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -686,8 +722,6 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderThrough=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -696,52 +730,6 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderThrough=""
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\ShellGoodies_p.c"
-					>
-					<FileConfiguration
-						Name="DebugU|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderThrough=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugU|x64"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderThrough=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseU|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderThrough=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseU|x64"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							PrecompiledHeaderThrough=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -749,7 +737,7 @@
 					Name="excluded"
 					>
 					<File
-						RelativePath=".\dlldata.c"
+						RelativePath=".\gen\dlldata.c"
 						>
 						<FileConfiguration
 							Name="DebugU|Win32"
@@ -757,8 +745,6 @@
 							>
 							<Tool
 								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="0"
-								PrecompiledHeaderThrough=""
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -767,8 +753,6 @@
 							>
 							<Tool
 								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="0"
-								PrecompiledHeaderThrough=""
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -777,8 +761,6 @@
 							>
 							<Tool
 								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="0"
-								PrecompiledHeaderThrough=""
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -787,8 +769,6 @@
 							>
 							<Tool
 								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="0"
-								PrecompiledHeaderThrough=""
 							/>
 						</FileConfiguration>
 					</File>

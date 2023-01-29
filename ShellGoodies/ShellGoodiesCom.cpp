@@ -1,6 +1,5 @@
 
 #include "stdafx.h"
-#include "ShellGoodies.h"
 #include "ShellGoodiesCom.h"
 #include "ShellMenuController.h"
 #include "Application.h"

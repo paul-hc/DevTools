@@ -23,12 +23,11 @@
 //	  run nmake -f ShellGoodiesps.mk in the project directory.
 
 #include "stdafx.h"
-#include "ShellGoodies.h"
 #include "Application.h"
 #include "utl/Registry.h"
-#include <initguid.h>
 
-#include "ShellGoodies_i.c"
+#include "gen/ShellGoodies_i.h"
+#include "gen/ShellGoodies_i.c"
 #include "ShellGoodiesCom.h"
 
 
