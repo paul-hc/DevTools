@@ -77,7 +77,7 @@ HISTORY
 1) 4 November 2018: According to Michael Dunn's article:		https://www.codeproject.com/Articles/441/The-Complete-Idiot-s-Guide-to-Writing-Shell-Extens
 - This may have an impact on preventing context menu deadlocks in Explorer on Windows 10 (to verify).
 
-Remove OLE Automation features that we don't need (wizard-generated code) from res\ShellGoodies.rgs.
+Remove OLE Automation features that we don't need (wizard-generated code) from ShellGoodies.rgs.
  - The original wizard-generated is backed up at res\ShellGoodies-old (wizard-generated).rgs.
 Remove the type library from ShellGoodies.rc resources: Resource Includes > Compile-time directives, remove the line:
 	1 TYPELIB "ShellGoodies.tlb"
@@ -95,6 +95,26 @@ The code to do this goes in our DllRegisterServer() and DllUnregisterServer() fu
 In ShellGoodies.cpp:
 	AddAsApprovedShellExtension();
 	RemoveAsApprovedShellExtension();
+
+2) [30-Jan-2023]
+	There seems to be a redundant entry in the ShellGoodies.rgs file (a remnant of the past...).
+	Remove the value under CurrentVersion\:
+		HKLM
+		{
+			SOFTWARE
+			{
+				Microsoft
+				{
+					Windows
+					{
+						CurrentVersion
+						{
+							val {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'Rename Files'
+							...
+
+	Remove in ShellGoodies.cpp the functions (redundant, since the ShellGoodies.rgs file seems to take care of that):
+		AddAsApprovedShellExtension();
+		RemoveAsApprovedShellExtension();
 
 
 BUGS:

@@ -42,9 +42,6 @@ namespace app
 	{
 		g_comModule.Init( s_objectMap, hInstance, &LIBID_SHELL_GOODIES_Lib );
 	}
-
-	bool AddAsApprovedShellExtension( void );
-	bool RemoveAsApprovedShellExtension( void );
 }
 
 
@@ -71,9 +68,6 @@ STDAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 
 STDAPI DllRegisterServer( void )
 {
-	if ( !app::AddAsApprovedShellExtension() )			// add ourselves to the list of approved shell extensions
-		return E_ACCESSDENIED;
-
 	// OBSOLETE: the type library is not necessary for a shell extension DLL
 	//return g_comModule.RegisterServer( TRUE );		// registers object, typelib and all interfaces in typelib
 
@@ -85,46 +79,8 @@ STDAPI DllRegisterServer( void )
 
 STDAPI DllUnregisterServer( void )
 {
-	app::RemoveAsApprovedShellExtension();				// remove ourselves from the list of approved shell extensions; don't bail out on error since we do the normal ATL unregistration stuff too
-
 	// OBSOLETE: the type library is not necessary for a shell extension DLL
 	//return g_comModule.UnregisterServer( TRUE );
 
 	return g_comModule.UnregisterServer( FALSE );		// NO TYPELIB (read ProjectNotes.txt)
-}
-
-
-namespace app
-{
-	// Michael Dunn's article:	https://www.codeproject.com/Articles/441/The-Complete-Idiot-s-Guide-to-Writing-Shell-Extens
-
-	static const TCHAR s_shellExtClassIdName[] = _T("{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}");
-	static const TCHAR regKey_ShellExtensions_Approved[] = _T("Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved");
-
-	bool AddAsApprovedShellExtension( void )
-	{
-		// NT+: add ourselves to the list of approved shell extensions.
-
-		// Note that you should *NEVER* use the overload of CRegKey::SetValue with 4 parameters.
-		// It lets you set a value in one call, without having to call CRegKey::Open() first.
-		// However, that version of SetValue() has a bug in that it requests KEY_ALL_ACCESS to the key. That will fail if the user is not an administrator.
-		// (The code should request KEY_WRITE, which is all that's necessary.)
-
-		reg::CKey key;
-		if ( key.Open( HKEY_LOCAL_MACHINE, regKey_ShellExtensions_Approved, KEY_SET_VALUE ) )
-			return key.WriteStringValue( _T("SimpleShlExt extension"), s_shellExtClassIdName );
-
-		return false;
-	}
-
-	bool RemoveAsApprovedShellExtension( void )
-	{
-		// NT+: remove ourselves from the list of approved shell extensions.
-
-		reg::CKey key;
-		if ( key.Open( HKEY_LOCAL_MACHINE, regKey_ShellExtensions_Approved, KEY_SET_VALUE ) )
-			return key.DeleteValue( s_shellExtClassIdName );
-
-		return false;
-	}
 }

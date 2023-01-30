@@ -48,12 +48,11 @@ HKLM
 			{
 				CurrentVersion
 				{
-					val {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'Rename Files'
 					'Shell Extensions'
 					{
 						NoRemove Approved
 						{
-							val {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'Rename Files'
+							val {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s '* ShellGoodies extension'
 						}
 					}
 				}

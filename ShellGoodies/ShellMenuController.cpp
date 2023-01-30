@@ -268,7 +268,7 @@ bool CShellMenuController::ExecuteCommand( UINT cmdId, HWND hWnd )
 
 	CWnd* pParentOwnerWnd = scopedMainWnd.GetParentOwnerWnd();
 
-	app::GetApp().GetMessageTrayIcon();			// ensure shared message tray icon is initialized
+	app::GetApp()->GetMessageTrayIcon();			// ensure shared message tray icon is initialized
 
 	return HandleCommand( menuCmd, pParentOwnerWnd );
 }
@@ -281,7 +281,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 			m_fileModel.CopyClipSourcePaths( ui::IsKeyPressed( VK_SHIFT ) ? fmt::FilenameExt : fmt::FullPath, pParentOwner );
 			return true;
 		case Cmd_RunUnitTests:
-			app::GetApp().RunUnitTests();
+			app::GetApp()->RunUnitTests();
 			return true;
 	}
 

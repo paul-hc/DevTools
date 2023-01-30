@@ -88,7 +88,7 @@ CCmdDashboardDialog::~CCmdDashboardDialog()
 
 CCommandModel* CCmdDashboardDialog::GetCommandModel( void )
 {
-	return const_cast<CCommandModel*>( app::GetApp().GetCommandModel() );
+	return const_cast<CCommandModel*>( app::GetApp()->GetCommandModel() );
 }
 
 const std::deque< utl::ICommand* >& CCmdDashboardDialog::GetStack( void ) const

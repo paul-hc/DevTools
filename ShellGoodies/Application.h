@@ -56,12 +56,11 @@ private:
 
 
 extern CComModule g_comModule;
-extern CApplication g_mfcApp;
 
 
 namespace app
 {
-	inline CApplication& GetApp( void ) { return g_mfcApp; }
+	CApplication* GetApp( void );
 	inline CWnd* GetMainWnd( void ) { return CScopedMainWnd::GetParentOwnerWnd(); }
 
 	void InitModule( HINSTANCE hInstance );

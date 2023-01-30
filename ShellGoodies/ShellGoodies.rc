@@ -369,7 +369,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "28-01-2023 17:52:52"
+            VALUE "BuildTimestamp", "30-01-2023 12:25:16"
             VALUE "Comments", "VC17 fixes|NewCmds+BinLog|CTrayIcon|Paste as Backup|Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
@@ -395,7 +395,7 @@ END
 // REGISTRY
 //
 
-IDR_SHELL_GOODIES_APP   REGISTRY                "res\\ShellGoodies.rgs"
+IDR_SHELL_GOODIES_APP   REGISTRY                "ShellGoodies.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //

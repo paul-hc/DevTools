@@ -7,6 +7,7 @@
 # My Ignore
 [Bb]in_vc*/
 *.res
+*.dll
 *.tlog/
 
 # DevTools Ignore:

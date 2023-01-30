@@ -16,6 +16,10 @@
 #include "utl/UI/BaseApp.hxx"
 
 
+CComModule g_comModule;
+CApplication g_mfcApp;
+
+
 namespace ut
 {
 	void RegisterAppUnitTests( void )
@@ -30,6 +34,11 @@ namespace ut
 
 namespace app
 {
+	CApplication* GetApp( void )
+	{
+		return &g_mfcApp;
+	}
+
 	svc::ICommandService* GetCmdSvc( void )
 	{
 		return g_mfcApp.GetCommandService();
@@ -37,9 +46,7 @@ namespace app
 }
 
 
-CComModule g_comModule;
-CApplication g_mfcApp;
-
+// CApplication implementation
 
 CApplication::CApplication( void )
 	: CBaseApp<CWinApp>()

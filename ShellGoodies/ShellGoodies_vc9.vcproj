@@ -482,7 +482,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\res\ShellGoodies.rgs"
+				RelativePath=".\ShellGoodies.rgs"
 				>
 			</File>
 			<File
@@ -773,6 +773,50 @@
 						</FileConfiguration>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="Merge Proxy/Stub"
+				>
+				<File
+					RelativePath=".\xdlldata.c"
+					>
+					<FileConfiguration
+						Name="DebugU|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugU|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseU|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseU|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\xdlldata.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

@@ -21,9 +21,9 @@ CShellGoodiesCom::CShellGoodiesCom( void )
 	//
 	// Add some Release build diagnostics to ensure that OnInitAppResources() succeeds at this stage:
 	//
-	app::GetApp().LazyInitAppResources();		// initialize once application resources since this is not a regsvr32.exe invocation
+	app::GetApp()->LazyInitAppResources();		// initialize once application resources since this is not a regsvr32.exe invocation
 
-	if ( !app::GetApp().IsInitAppResources() )
+	if ( !app::GetApp()->IsInitAppResources() )
 		app::GetLogger()->LogTrace( _T("\n *** CShellGoodiesCom::CShellGoodiesCom() - detected issues on LazyInitAppResources(): isAppInit=false  TODO: dig a little deeper into why...") );
 }
 
