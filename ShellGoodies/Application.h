@@ -63,7 +63,7 @@ namespace app
 	CApplication* GetApp( void );
 	inline CWnd* GetMainWnd( void ) { return CScopedMainWnd::GetParentOwnerWnd(); }
 
-	bool InitModule( HINSTANCE hInstance );
+	HRESULT InitModule( HINSTANCE hInstance );
 }
 
 

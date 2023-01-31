@@ -97,24 +97,38 @@ In ShellGoodies.cpp:
 	RemoveAsApprovedShellExtension();
 
 2) [30-Jan-2023]
-	There seems to be a redundant entry in the ShellGoodies.rgs file (a remnant of the past...).
-	Remove the value under CurrentVersion\:
-		HKLM
+There seems to be a redundant entry in the ShellGoodies.rgs file (a remnant of the past...).
+Remove the value under CurrentVersion\:
+	HKLM
+	{
+		SOFTWARE
 		{
-			SOFTWARE
+			Microsoft
 			{
-				Microsoft
+				Windows
 				{
-					Windows
+					CurrentVersion
 					{
-						CurrentVersion
-						{
-							val {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'Rename Files'
-							...
+						val {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'Rename Files'
+						...
 
-	Remove in ShellGoodies.cpp the functions (redundant, since the ShellGoodies.rgs file takes care of that):
-		AddAsApprovedShellExtension();
-		RemoveAsApprovedShellExtension();
+Remove in ShellGoodies.cpp the functions (redundant, since the ShellGoodies.rgs file takes care of that):
+	AddAsApprovedShellExtension();
+	RemoveAsApprovedShellExtension();
+
+3) [31-Jan-2023]
+Generated ShellGoodies_vc17.sln with ATL AppWizard in VC++ 2022, with the options:
+	Template: ATL Project
+	Project Name: ShellGoodies
+	Location: C:\download
+	[X] Place solution and project in the same directory
+
+  Press Create:
+	Application Type: Dynamic Link Library (.dll)
+	[ ] Allow merging of proxy/stub code
+	[X] Support MFC
+
+Migrated ShellGoodies_vc17.sln in DevTools\ShellGoodies.
 
 
 BUGS:
