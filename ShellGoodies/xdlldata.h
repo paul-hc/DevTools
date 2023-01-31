@@ -1,4 +1,4 @@
-// Borrowed from Visual C++ 2022 ATL App Wizard.
+// Borrowed from ATL App Wizard (Visual C++ 2022).
 #pragma once
 
 #ifdef _MERGE_PROXYSTUB

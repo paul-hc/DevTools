@@ -1,5 +1,5 @@
 // wrapper for dlldata.c
-//	Borrowed from Visual C++ 2022 ATL App Wizard.
+//	Borrowed from ATL App Wizard (Visual C++ 2022).
 
 #ifdef _MERGE_PROXYSTUB			// merge proxy stub DLL (optional)
 	#define REGISTER_PROXY_DLL			// DllRegisterServer, etc.

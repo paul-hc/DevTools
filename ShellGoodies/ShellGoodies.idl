@@ -7,6 +7,7 @@
 import "oaidl.idl";
 import "ocidl.idl";
 
+
 [
 	object,
 	uuid(1D4EA502-89A1-11D5-A57D-0050BA0E2E4A),
@@ -18,12 +19,13 @@ interface IShellGoodiesCom : IDispatch
 {
 };
 
+
 [
 	uuid(1D4EA4F3-89A1-11D5-A57D-0050BA0E2E4A),
 	version(1.0),
 	helpstring("ShellGoodies 1.0 Type Library")
 ]
-library SHELL_GOODIES_Lib
+library ShellGoodiesLib
 {
 	importlib("stdole32.tlb");
 	importlib("stdole2.tlb");

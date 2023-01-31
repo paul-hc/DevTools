@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "Application.h"
+#include "xdlldata.h"			// proxy/stub code, conditional on _MERGE_PROXYSTUB
 #include "AppCmdService.h"
 #include "GeneralOptions.h"
 #include "test/TextAlgorithmsTests.h"
@@ -16,8 +17,8 @@
 #include "utl/UI/BaseApp.hxx"
 
 
-CComModule g_comModule;
-CApplication g_mfcApp;
+CComModule g_comModule;			// the global singleton COM DLL module
+CApplication g_mfcApp;			// the global singleton MFC CWinApp
 
 
 namespace ut
@@ -67,7 +68,15 @@ BOOL CApplication::InitInstance( void ) override
 {
 	// called once when the user right-clicks on selected files in Explorer for the first time.
 
-	app::InitModule( m_hInstance );
+	// borrowed from ATL App Wizard (Visual C++ 2022)
+#ifdef _MERGE_PROXYSTUB
+	if (!PrxDllMain(m_hInstance, DLL_PROCESS_ATTACH, nullptr))
+		return FALSE;
+#endif
+
+	if ( !app::InitModule( m_hInstance ) )
+		return FALSE;
+
 	AfxSetResourceHandle( m_hInstance );
 
 	return __super::InitInstance();

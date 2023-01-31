@@ -24,7 +24,6 @@
 
 #include "pch.h"
 #include "Application.h"
-#include "utl/Registry.h"
 
 #include "gen/ShellGoodies_i.h"
 #include "gen/ShellGoodies_i.c"
@@ -38,9 +37,9 @@ END_OBJECT_MAP()
 
 namespace app
 {
-	void InitModule( HINSTANCE hInstance )
+	bool InitModule( HINSTANCE hInstance )
 	{
-		g_comModule.Init( s_objectMap, hInstance, &LIBID_SHELL_GOODIES_Lib );
+		return HR_OK( g_comModule.Init( s_objectMap, hInstance, &LIBID_ShellGoodiesLib ) );
 	}
 }
 
@@ -50,6 +49,12 @@ namespace app
 
 STDAPI DllCanUnloadNow( void )
 {
+#ifdef _MERGE_PROXYSTUB
+	HRESULT hResult = PrxDllCanUnloadNow();
+	if (hResult != S_OK)
+		return hResult;
+#endif
+
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
 	return ( S_OK == AfxDllCanUnloadNow() && 0 == g_comModule.GetLockCount() ) ? S_OK : S_FALSE;
 }
@@ -60,6 +65,12 @@ STDAPI DllCanUnloadNow( void )
 
 STDAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 {
+#ifdef _MERGE_PROXYSTUB
+	HRESULT hResult = PrxDllGetClassObject(rclsid, riid, ppv);
+	if (hResult != CLASS_E_CLASSNOTAVAILABLE)
+		return hResult;
+#endif
+
 	return g_comModule.GetClassObject(rclsid, riid, ppv);
 }
 
@@ -69,9 +80,15 @@ STDAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 STDAPI DllRegisterServer( void )
 {
 	// OBSOLETE: the type library is not necessary for a shell extension DLL
-	//return g_comModule.RegisterServer( TRUE );		// registers object, typelib and all interfaces in typelib
+	//HRESULT hResult = g_comModule.RegisterServer( TRUE );		// registers object, typelib and all interfaces in typelib
 
-	return g_comModule.RegisterServer( FALSE );			// registers object, NO TYPELIB (read ProjectNotes.txt)
+	HRESULT hResult = HR_AUDIT( g_comModule.RegisterServer( FALSE ) );		// registers object, NO TYPELIB (read ProjectNotes.txt)
+
+#ifdef _MERGE_PROXYSTUB
+	if ( SUCCEEDED( hResult ) )
+		hResult = PrxDllRegisterServer();
+#endif
+	return hResult;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -80,7 +97,16 @@ STDAPI DllRegisterServer( void )
 STDAPI DllUnregisterServer( void )
 {
 	// OBSOLETE: the type library is not necessary for a shell extension DLL
-	//return g_comModule.UnregisterServer( TRUE );
+	//HRESULT hResult = g_comModule.UnregisterServer( TRUE );
 
-	return g_comModule.UnregisterServer( FALSE );		// NO TYPELIB (read ProjectNotes.txt)
+	HRESULT hResult = g_comModule.UnregisterServer( FALSE );		// NO TYPELIB (read ProjectNotes.txt)
+
+#ifdef _MERGE_PROXYSTUB
+	if ( SUCCEEDED( hResult ) )
+		hResult = PrxDllRegisterServer();
+	if ( SUCCEEDED( hResult ) )
+		hResult = PrxDllUnregisterServer();
+#endif
+	return hResult;
+
 }
