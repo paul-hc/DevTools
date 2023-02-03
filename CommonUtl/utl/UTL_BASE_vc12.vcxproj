@@ -104,7 +104,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(UTL_BOOST_INC)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
@@ -124,7 +124,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(UTL_BOOST_INC)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -144,7 +144,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(UTL_BOOST_INC)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -167,7 +167,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(UTL_BOOST_INC)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -281,6 +281,7 @@
     <ClInclude Include="test\AlgorithmsTests.h" />
     <ClInclude Include="test\DuplicateFilesTests.h" />
     <ClInclude Include="test\EndiannessTests.h" />
+    <ClInclude Include="test\EnvironmentTests.h" />
     <ClInclude Include="test\FileSystemTests.h" />
     <ClInclude Include="test\FmtUtilsTests.h" />
     <ClInclude Include="test\LcsTests.h" />
@@ -296,7 +297,12 @@
     <ClInclude Include="test\TempFilePairPool.h" />
     <ClInclude Include="test\Test.h" />
     <ClInclude Include="test\TextFileIoTests.h" />
-    <ClInclude Include="test\ThreadingTests.h" />
+    <ClInclude Include="test\ThreadingTests.hxx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="test\UnitTest.h" />
     <ClInclude Include="test\UtlConsoleTests.h" />
     <ClInclude Include="TextClipboard.h" />
@@ -371,6 +377,7 @@
     <ClCompile Include="test\AlgorithmsTests.cpp" />
     <ClCompile Include="test\DuplicateFilesTests.cpp" />
     <ClCompile Include="test\EndiannessTests.cpp" />
+    <ClCompile Include="test\EnvironmentTests.cpp" />
     <ClCompile Include="test\FileSystemTests.cpp" />
     <ClCompile Include="test\FmtUtilsTests.cpp" />
     <ClCompile Include="test\LcsTests.cpp" />
@@ -386,7 +393,6 @@
     <ClCompile Include="test\TempFilePairPool.cpp" />
     <ClCompile Include="test\Test.cpp" />
     <ClCompile Include="test\TextFileIoTests.cpp" />
-    <ClCompile Include="test\ThreadingTests.cpp" />
     <ClCompile Include="test\UnitTest.cpp" />
     <ClCompile Include="test\UtlConsoleTests.cpp" />
     <ClCompile Include="TextClipboard.cpp" />
