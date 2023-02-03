@@ -1041,6 +1041,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\EnvironmentTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\EnvironmentTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\FileSystemTests.cpp"
 				>
 			</File>

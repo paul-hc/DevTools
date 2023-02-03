@@ -5,6 +5,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd;cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Tests UTL_BASE">
+      <UniqueIdentifier>{96a60b8f-b8a0-47c9-9bc1-7d8a47400d3a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp">
@@ -23,6 +26,9 @@
     </ClInclude>
     <ClInclude Include="Options.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utl\test\ThreadingTests.hxx">
+      <Filter>Tests UTL_BASE</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

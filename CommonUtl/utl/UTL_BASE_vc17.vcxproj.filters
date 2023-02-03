@@ -29,7 +29,7 @@
     <Filter Include="utl\Serialize">
       <UniqueIdentifier>{5ed84f16-b675-457e-a6b3-2c65bc50b45f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Testing">
+    <Filter Include="Unit Testing">
       <UniqueIdentifier>{7624983e-d585-4204-bcf7-b12921fd3e46}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -83,9 +83,6 @@
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="test\TextFileIoTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\ThreadingTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="test\UtlConsoleTests.h">
@@ -404,19 +401,22 @@
       <Filter>utl</Filter>
     </ClInclude>
     <ClInclude Include="test\MockObject.h">
-      <Filter>Testing</Filter>
+      <Filter>Unit Testing</Filter>
     </ClInclude>
     <ClInclude Include="test\Test.h">
-      <Filter>Testing</Filter>
+      <Filter>Unit Testing</Filter>
     </ClInclude>
     <ClInclude Include="test\UnitTest.h">
-      <Filter>Testing</Filter>
+      <Filter>Unit Testing</Filter>
     </ClInclude>
     <ClInclude Include="UnitTest_fwd.h">
-      <Filter>Testing</Filter>
+      <Filter>Unit Testing</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms_fwd.h">
       <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="test\EnvironmentTests.h">
+      <Filter>Tests</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -469,9 +469,6 @@
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="test\TextFileIoTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="test\ThreadingTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="test\UtlConsoleTests.cpp">
@@ -646,13 +643,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="test\MockObject.cpp">
-      <Filter>Testing</Filter>
+      <Filter>Unit Testing</Filter>
     </ClCompile>
     <ClCompile Include="test\Test.cpp">
-      <Filter>Testing</Filter>
+      <Filter>Unit Testing</Filter>
     </ClCompile>
     <ClCompile Include="test\UnitTest.cpp">
-      <Filter>Testing</Filter>
+      <Filter>Unit Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="test\EnvironmentTests.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -19,7 +19,7 @@
 
 static const char s_helpMessage[] =
 	"Executes the unit tests in UTL_BASE library.\n"
-	"    Written by Paul Cocoveanu, 2023. Built on 23-Jan-2023.\n"
+	"    Written by Paul Cocoveanu, 2023. Built on 3-Feb-2023.\n"
 	"\n"
 	"  /ut (default)\n"
 	"    Run unit tests.\n"
