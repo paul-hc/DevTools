@@ -13,13 +13,24 @@ namespace inc
 {
 	const CEnumTags& GetTags_Location( void )
 	{
-		static const CEnumTags tags( _T("Include Path|Local Path|Additional Path|Absolute Path|Source Path|Library Path|Binary Path") );
-		ASSERT( tags.GetUiTags().size() == ( BinaryPath + 1 ) );
-		return tags;
+		static const CEnumTags s_tags( _T("Include Path|Local Path|Additional Path|Absolute Path|Source Path|Library Path|Binary Path") );
+		ASSERT( s_tags.GetUiTags().size() == ( BinaryPath + 1 ) );
+		return s_tags;
 	}
 
 
 	// CDirPathGroup implementation
+
+	CDirPathGroup::CDirPathGroup( inc::Location location )
+		: m_location( location )
+	{
+	}
+
+	CDirPathGroup::CDirPathGroup( const TCHAR envVarName[], inc::Location location )
+		: m_location( location )
+	{
+		AddExpanded( envVarName );
+	}
 
 	std::tstring CDirPathGroup::Format( void ) const
 	{

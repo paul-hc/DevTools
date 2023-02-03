@@ -3,6 +3,8 @@
 #include "StringUtilities.h"
 #include "TokenIterator.h"
 #include "EnumTags.h"
+#include "Path.h"
+#include "Algorithms.h"
 #include <iomanip>
 
 #ifdef _DEBUG
@@ -78,31 +80,104 @@ namespace str
 		return ReplaceDelimiters( rText, _T(" \t"), _T(" ") );
 	}
 
+} //namespace str
 
-	std::tstring ExpandEnvironmentStrings( const TCHAR* pSource )
+
+namespace env
+{
+	bool HasAnyVariable( const std::tstring& source )
+	{
+		return
+			code::FindEnclosedIdentifier( NULL, source, _T("%"), _T("%") ) != utl::npos ||
+			code::FindEnclosedIdentifier( NULL, source, _T("$("), _T(")") ) != utl::npos;
+	}
+
+	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue /*= NULL*/ )
+	{
+		REQUIRE( !str::IsEmpty( varName ) );
+		std::vector<TCHAR> valueBuff( ::GetEnvironmentVariable( varName, NULL, 0 ) + 1 );				// allocate buffer
+
+		::GetEnvironmentVariable( varName, &valueBuff.front(), static_cast<DWORD>( valueBuff.size() ) );
+
+		std::tstring value( &valueBuff.front() );
+
+		if ( value.empty() && pDefaultValue != NULL )
+			value = value;
+
+		return value;
+	}
+
+	bool SetVariableValue( const TCHAR varName[], const TCHAR* pValue )
+	{
+		return ::SetEnvironmentVariable( varName, pValue ) != FALSE;
+	}
+
+
+	std::tstring ExpandStrings( const TCHAR* pSource )
+	{
+		REQUIRE( !str::IsEmpty( pSource ) );
+		std::vector<TCHAR> expandedBuff( ::ExpandEnvironmentStrings( pSource, NULL, 0 ) + 1 );						// allocate buffer
+
+		::ExpandEnvironmentStrings( pSource, &expandedBuff.front(), static_cast<DWORD>( expandedBuff.size() ) );	// expand vars
+		return &expandedBuff.front();
+	}
+
+
+	std::tstring ExpandPaths( const TCHAR* pSource )
+	{
+		std::tstring windowsEnvSource( pSource );
+		ReplaceEnvVar_VcMacroToWindows( windowsEnvSource );		// "%MY_STUFF%;$(MY_TOOLS)" => "%MY_STUFF%;%MY_TOOLS%"
+
+		return ExpandStrings( windowsEnvSource.c_str() );
+	}
+
+	size_t AddExpandedPaths( std::vector<fs::CPath>& rEvalPaths, const TCHAR* pSource, const TCHAR delim[] /*= _T(";")*/ )
+	{
+		std::tstring expandedPaths = env::ExpandPaths( pSource );
+
+		std::vector<fs::CPath> evalPaths;
+		str::Split( evalPaths, expandedPaths.c_str(), delim );
+
+		return utl::JoinUnique( rEvalPaths, evalPaths.begin(), evalPaths.end() );
+	}
+
+	namespace impl
+	{
+		void QueryEnvVariableNames( std::vector<std::tstring>& rVarNameSpecs, const TCHAR* pSource, bool keepSeps = true )
+		{
+			str::QueryEnclosedItems( rVarNameSpecs, pSource, _T("%"), _T("%"), keepSeps );		// Windows env-variables: e.g. "%VAR_NAME%"
+			str::QueryEnclosedItems( rVarNameSpecs, pSource, _T("$("), _T(")"), keepSeps );		// VC Macro env-variables: e.g. "$(VAR_NAME)"
+		}
+
+		void QueryEnvVariableValues( std::vector<std::tstring>& rValues, const std::vector<std::tstring>& sources )
+		{
+			rValues.clear();
+			rValues.reserve( sources.size() );
+
+			for ( std::vector< std::tstring >::const_iterator itVariable = sources.begin(); itVariable != sources.end(); ++itVariable )
+				rValues.push_back( env::ExpandPaths( itVariable->c_str() ) );
+		}
+	}
+
+	std::tstring UnExpandPaths( const std::tstring& expanded, const TCHAR* pSource )
 	{
 		ASSERT_PTR( pSource );
-		std::vector< TCHAR > expanded( ::ExpandEnvironmentStrings( pSource, NULL, 0 ) + 1 );						// allocate dest
-		::ExpandEnvironmentStrings( pSource, &expanded.front(), static_cast<DWORD>( expanded.size() ) );			// expand vars
-		return &expanded.front();
+
+		std::vector<std::tstring> varNameSpecs;
+		impl::QueryEnvVariableNames( varNameSpecs, pSource );
+
+		std::vector<std::tstring> values;
+		impl::QueryEnvVariableValues( values, varNameSpecs );
+		ENSURE( varNameSpecs.size() == values.size() );
+
+		std::tstring encoded = expanded;
+
+		for ( unsigned int i = 0; i != varNameSpecs.size(); ++i )
+			str::Replace( encoded, values[ i ].c_str(), varNameSpecs[ i ].c_str() );
+
+		return encoded;
 	}
-
-	void QueryEnvironmentVariables( std::vector< std::tstring >& rVariables, const TCHAR* pSource )
-	{
-		static const TCHAR sep[] = _T("%");
-		QueryEnclosedItems( rVariables, pSource, sep, sep );
-	}
-
-	void ExpandEnvironmentVariables( std::vector< std::tstring >& rValues, const std::vector< std::tstring >& rVariables )
-	{
-		rValues.clear();
-		rValues.reserve( rVariables.size() );
-
-		for ( std::vector< std::tstring >::const_iterator itVariable = rVariables.begin(); itVariable != rVariables.end(); ++itVariable )
-			rValues.push_back( str::ExpandEnvironmentStrings( itVariable->c_str() ) );
-	}
-
-} //namespace str
+}
 
 
 namespace num

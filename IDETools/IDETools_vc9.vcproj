@@ -55,7 +55,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -76,7 +76,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -86,7 +86,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile=".\IDETools.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
@@ -159,7 +159,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
@@ -181,7 +181,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -191,7 +191,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile=".\IDETools.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"

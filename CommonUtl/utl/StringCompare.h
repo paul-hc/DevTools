@@ -136,7 +136,7 @@ namespace str
 	template< typename CharT >
 	inline bool EqualsPart( const CharT* pLeft, const CPart<CharT>& rightPart, str::CaseType caseType = str::Case )
 	{
-		return EqualsN_ByCase( caseType, pLeft, rightPart.m_pString, rightPart.m_count );
+		return EqualsN_ByCase( caseType, pLeft, rightPart.m_pStr, rightPart.m_count );
 	}
 
 
@@ -341,7 +341,7 @@ namespace str
 		ASSERT( !part.IsEmpty() );
 
 		const CharT* pEnd = str::end( pText );
-		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pString, part.m_pString + part.m_count );
+		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pStr, part.m_pStr + part.m_count );
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 
@@ -352,7 +352,7 @@ namespace str
 		ASSERT( !part.IsEmpty() );
 
 		const CharT* pEnd = str::end( pText );
-		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pString, part.m_pString + part.m_count, pred::IsEqual< Compare >( compareStr ) );
+		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pStr, part.m_pStr + part.m_count, pred::IsEqual< Compare >( compareStr ) );
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 

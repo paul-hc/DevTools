@@ -369,7 +369,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "31-01-2023 08:26:23"
+            VALUE "BuildTimestamp", "03-02-2023 00:40:32"
             VALUE "Comments", "VC17 fixes|NewCmds+BinLog|CTrayIcon|Paste as Backup|Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"

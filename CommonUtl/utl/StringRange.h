@@ -152,7 +152,7 @@ namespace str
 				ASSERT( InBounds() );
 				return
 					0 == prefix.m_count ||			// empty is always a match
-					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_start ], prefix.m_pString, prefix.m_count );
+					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_start ], prefix.m_pStr, prefix.m_count );
 			}
 
 			bool _HasSuffix( const CPart<CharT>& suffix ) const
@@ -163,7 +163,7 @@ namespace str
 
 				return
 					m_pos.m_end >= suffix.m_count &&
-					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_end - suffix.m_count ], suffix.m_pString, suffix.m_count );
+					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_end - suffix.m_count ], suffix.m_pStr, suffix.m_count );
 			}
 
 			bool _StripPrefix( const CPart<CharT>& prefix )
@@ -198,7 +198,7 @@ namespace str
 				typedef const CharT* iterator;
 
 				iterator itBegin = m_text.c_str() + m_pos.m_start, itEnd = m_text.c_str() + m_pos.m_end;
-				iterator itFound = std::search( itBegin, itEnd, part.m_pString, part.m_pString + part.m_count, pred::CharEqual< caseType >() );
+				iterator itFound = std::search( itBegin, itEnd, part.m_pStr, part.m_pStr + part.m_count, pred::CharEqual< caseType >() );
 				if ( itFound == itEnd )
 					return false;
 

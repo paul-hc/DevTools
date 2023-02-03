@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories=".;..;..\utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="0"
@@ -68,7 +68,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories="$(UTL_BOOST_INC)\lib\32"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -123,7 +123,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories=".;..;..\utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="0"
@@ -146,7 +146,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName)64.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
+				AdditionalLibraryDirectories="$(UTL_BOOST_INC)\lib\64"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="17"
@@ -201,7 +201,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories=".;..;..\utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
@@ -223,7 +223,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -281,7 +281,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories=".;..;..\utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
@@ -304,7 +304,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName)64.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -392,6 +392,14 @@
 			</File>
 			<File
 				RelativePath=".\pch.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Tests UTL_BASE"
+			>
+			<File
+				RelativePath="..\utl\test\ThreadingTests.hxx"
 				>
 			</File>
 		</Filter>

@@ -80,7 +80,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "28-01-2023 16:54:16"
+            VALUE "BuildTimestamp", "03-02-2023 00:30:24"
             VALUE "Comments", "VC++ 2022|LazyInitAppResources|TableToTreeAction|Natural sort macro|Split UTL_BASE/UTL_UI|V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page. Redesigned include options and paths. Removed .dsp additional include path."
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"

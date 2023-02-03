@@ -451,29 +451,4 @@ namespace str
 		return replacementCount;
 	}
 
-	CString findEnvironmentVariable( const CString& source, int startPos, int& varStartPos, int& varLength )
-	{
-		do
-		{
-			varStartPos = source.Find( _T('%'), startPos );
-			if ( varStartPos != -1 )
-			{
-				int varEndPos = source.Find( _T('%'), varStartPos + 1 );
-
-				if ( varEndPos != -1 )
-					if ( varEndPos - varStartPos > 1 )
-					{	// Found second % and is not a %% sequence -> compute the total length and extract variable core name:
-						varLength = varEndPos - varStartPos + 1;
-						return source.Mid( varStartPos + 1, varLength - 2 );	// Return variable name (excluding %%)
-					}
-					else
-						startPos = varEndPos + 1;		// Try to find the next occurrence
-				else
-					break;
-			}
-		} while ( varStartPos != -1 );
-
-		return CString();
-	}
-
 } // namespace str

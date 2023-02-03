@@ -30,8 +30,8 @@ namespace inc
 	class CDirPathGroup : public fs::CPathGroup
 	{
 	public:
-		CDirPathGroup( inc::Location location ) : m_location( location ) {}
-		CDirPathGroup( const TCHAR environVar[], inc::Location location ) : fs::CPathGroup( environVar ), m_location( location ) {}
+		CDirPathGroup( inc::Location location );
+		CDirPathGroup( const TCHAR envVarName[], inc::Location location );
 
 		inc::Location GetLocation( void ) const { return m_location; }
 

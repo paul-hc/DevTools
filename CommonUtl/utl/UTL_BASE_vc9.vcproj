@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;..;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;..;$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_ATL_DEBUG_INTERFACES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -113,7 +113,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;..;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;..;$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -182,7 +182,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories=".;..;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;..;$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -251,7 +251,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories=".;..;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;..;$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -1145,11 +1145,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\ThreadingTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\ThreadingTests.h"
+				RelativePath=".\test\ThreadingTests.hxx"
 				>
 			</File>
 			<File
@@ -1162,7 +1158,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Testing"
+			Name="Unit Testing"
 			>
 			<File
 				RelativePath=".\test\MockObject.cpp"

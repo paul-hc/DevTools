@@ -139,12 +139,23 @@ namespace ut
 
 	std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue )
 	{
-		return str::Format( _T("* Equality Assertion Failed *\r\n\r\n  expect:\t'%s'\r\n  actual:\t'%s'\r\n"), expectedValue.c_str(), actualValue.c_str() );
+		std::tostringstream os;
+
+		os
+			<< L"* Equality Assertion Failed *" << std::endl << std::endl
+			<< L"    expected:\t'" << expectedValue << L"'" << std::endl
+			<< L"    actual:\t\t'" << actualValue << L"'" << std::endl;
+
+		std::tstring text = os.str();
+
+		// prevent assertions on '%' characters: convert the message string so that it can be output with TRACE/CRT_DEBUG functions as printf format
+		str::Replace( text, _T("%"), _T("%%") );
+		return text;
 	}
 
 	const fs::TDirPath& GetTestDataDirPath( void ) throws_( CRuntimeException )
 	{
-		static const fs::TDirPath s_dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );
+		static const fs::TDirPath s_dirPath = env::ExpandStrings( _T("%UTL_TESTDATA_PATH%") );
 		if ( !s_dirPath.IsEmpty() && !fs::IsValidDirectory( s_dirPath.GetPtr() ) )
 			throw CRuntimeException( str::Format( _T("Cannot find the local test directory path: %s\n\nTODO: define envirnoment variable UTL_TESTDATA_PATH"), s_dirPath.GetPtr() ) );
 
@@ -153,7 +164,7 @@ namespace ut
 
 	const fs::TDirPath& GetImageSourceDirPath( void )
 	{
-		static fs::TDirPath s_imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
+		static fs::TDirPath s_imagesDirPath = env::ExpandStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
 		if ( !s_imagesDirPath.IsEmpty() && !fs::IsValidDirectory( s_imagesDirPath.GetPtr() ) )
 		{
 			TRACE( _T("\n # Cannot find unit test images dir path: %s #\nNo environment variable UTL_THUMB_SRC_IMAGE_PATH"), s_imagesDirPath.GetPtr() );

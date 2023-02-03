@@ -167,8 +167,59 @@ namespace str
 
 	inline char* Copy( char* pBuffer, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
 	inline wchar_t* Copy( wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
+}
 
 
+namespace str
+{
+	// sub-sequence of a string: to be searched for
+	//
+	template< typename CharT >
+	struct CSequence
+	{
+		CSequence( const CharT* pStr = NULL, size_t length = utl::npos )
+			: m_pStr( pStr )
+			, m_length( length != utl::npos ? length : str::GetLength( pStr ) )
+		{
+			ASSERT( nullptr == m_pStr || m_length <= str::GetLength( m_pStr ) );
+		}
+
+		explicit CSequence( const std::basic_string<CharT>& text ) : m_pStr( text.c_str() ), m_length( text.length() ) {}		// the whole string
+
+		bool IsEmpty( void ) const { return NULL == m_pStr || 0 == m_length; }
+		const CharT* Begin( void ) const { ASSERT( !IsEmpty() ); return m_pStr; }
+		const CharT* End( void ) const { ASSERT( !IsEmpty() ); return m_pStr + m_length; }
+	public:
+		const CharT* m_pStr;
+		size_t m_length;
+	};
+
+
+	// part of a string: to be extracted as sub-string - constructor has different default values than CSequence
+	//
+	template< typename CharT >
+	struct CPart
+	{
+		CPart( const CharT* pStr = NULL, size_t count = 0 ) : m_pStr( pStr ), m_count( count ) {}
+		explicit CPart( const std::basic_string<CharT>& text ) : m_pStr( text.c_str() ), m_count( text.length() ) {}		// the whole string
+
+		bool IsEmpty( void ) const { return NULL == m_pStr || 0 == m_count; }
+		std::basic_string<CharT> ToString( void ) const { return !IsEmpty() ? std::basic_string<CharT>( m_pStr, m_count ) : std::basic_string<CharT>(); }
+	public:
+		const CharT* m_pStr;
+		size_t m_count;
+	};
+
+	template< typename CharT >
+	inline CPart<CharT> MakePart( const CharT* pStr, size_t count = std::basic_string<CharT>::npos )
+	{
+		return CPart<CharT>( pStr, SettleLength( count, pStr ) );
+	}
+}
+
+
+namespace str
+{
 	template< typename CharT >
 	bool ContainsAnyOf( const CharT* pCharSet, CharT ch )
 	{
@@ -200,11 +251,8 @@ namespace str
 
 		return pText;
 	}
-}
 
 
-namespace str
-{
 	template< typename CharT >
 	std::basic_string<CharT> Clamp( const std::basic_string<CharT>& text, size_t maxLength, const TCHAR* pMoreSuffix = NULL )
 	{	// clamps string to a maxLength, eventually adding a suffix
@@ -319,8 +367,11 @@ namespace func
 			const std::tstring& operator()( const StringyT& value ) const { return func::StringOf( value ); }
 		};
 	}
+}
 
 
+namespace func
+{
 	template< typename CharT >
 	inline CharT toupper( CharT ch, const std::locale& loc = str::GetUserLocale() )
 	{
@@ -403,32 +454,11 @@ namespace str
 		StringT lowerText = rText;
 		return ToLower( lowerText, loc );
 	}
-
-
 }
 
 
 namespace str
 {
-	template< typename CharT >
-	struct CPart
-	{
-		CPart( const CharT* pString = NULL, size_t count = 0 ) : m_pString( pString ), m_count( count ) {}
-		explicit CPart( const std::basic_string<CharT>& text ) : m_pString( text.c_str() ), m_count( text.length() ) {}		// the whole string
-
-		bool IsEmpty( void ) const { return NULL == m_pString || 0 == m_count; }
-		std::basic_string<CharT> ToString( void ) const { return !IsEmpty() ? std::basic_string<CharT>( m_pString, m_count ) : std::basic_string<CharT>(); }
-	public:
-		const CharT* m_pString;
-		size_t m_count;
-	};
-
-	template< typename CharT >
-	inline CPart<CharT> MakePart( const CharT* pString, size_t count = std::basic_string<CharT>::npos )
-	{
-		return CPart<CharT>( pString, SettleLength( count, pString ) );
-	}
-
 	template< typename CharT >
 	std::basic_string<CharT> FormatNameValueSpec( const std::basic_string<CharT>& tag, const std::basic_string<CharT>& value, CharT sep = '=' )
 	{

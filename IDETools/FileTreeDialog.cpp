@@ -190,10 +190,10 @@ TTreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pIt
 {
 	ASSERT_PTR( pItemInfo );
 	ASSERT( pItemInfo->IsValidFile() );
-	static const TTreeItemPair nullPair( NULL, NULL );
+	static const TTreeItemPair s_nullPair( NULL, NULL );
 
 	if ( IsFileExcluded( pItemInfo->m_path ) )
-		return nullPair;
+		return s_nullPair;
 
 	std::tstring uniqueFilePath = path::MakeCanonical( pItemInfo->m_path.GetPtr() );
 
@@ -201,7 +201,7 @@ TTreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pIt
 	rOriginalItem = itFound == m_originalItems.end();
 
 	if ( m_rOpt.m_noDuplicates && !rOriginalItem )
-		return nullPair;
+		return s_nullPair;
 
 	m_treeItems.push_back( pItemInfo );				// give ownership to the tree control
 

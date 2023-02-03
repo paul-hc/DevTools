@@ -17,6 +17,7 @@
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/LayoutEngine.h"
 #include "utl/UI/VisualTheme.h"
+#include "utl/test/ThreadingTests.hxx"		// include only in this test project to avoid the link dependency on Boost libraries in regular projects
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -141,6 +142,16 @@ int CApplication::ExitInstance( void )
 	WriteProfileInt( reg::section, reg::entry_disableThemes, CVisualTheme::IsDisabled() );
 
 	return CBaseApp<CWinApp>::ExitInstance();
+}
+
+void CApplication::OnInitAppResources( void )
+{
+	__super::OnInitAppResources();
+
+#ifdef USE_UT
+	// special case: in this demo project we include the threading tests, with their dependency on Boos Threads library
+	CThreadingTests::Instance();
+#endif
 }
 
 bool CApplication::HasCommandLineOptions( void )

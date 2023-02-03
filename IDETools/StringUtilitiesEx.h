@@ -181,9 +181,6 @@ namespace str
 	}
 
 
-	CString findEnvironmentVariable( const CString& source, int startPos, int& varStartPos, int& varLength );
-
-
 	// binary predicates
 
 	struct StringLess

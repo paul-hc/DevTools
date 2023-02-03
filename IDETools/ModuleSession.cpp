@@ -43,6 +43,7 @@ IMPLEMENT_DYNCREATE( CModuleSession, CCmdTarget )
 
 CModuleSession::CModuleSession( void )
 	: CCmdTarget()
+	, m_developerName( env::GetVariableValue( _T("USERNAME"), _T("<YourName>") ) )
 	, m_codeTemplatePath( GetDefaultCodeTemplatePath() )
 	, m_splitMaxColumn( 140 )
 	, m_menuVertSplitCount( 40 )
@@ -57,12 +58,6 @@ CModuleSession::CModuleSession( void )
 	, m_vsUseStandardWindowsMenu( false )
 	, m_moreAdditionalIncludePath( inc::AdditionalPath )
 {
-	TCHAR developerName[ 128 ];
-	::GetEnvironmentVariable( _T("UserName"), developerName, COUNT_OF( developerName ) );
-	m_developerName = developerName;
-	if ( m_developerName.empty() )
-		m_developerName = _T("<YourName>");
-
 	fs::CPath mfcSrcFolderPath = ide::vs6::GetVC98DirPath();
 	if ( !mfcSrcFolderPath.IsEmpty() )
 		m_browseInfoPath = mfcSrcFolderPath / fs::CPath( _T("MFC\\SRC\\*.bsc|MFC") );

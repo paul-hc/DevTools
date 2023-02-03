@@ -15,24 +15,6 @@
 #endif
 
 
-namespace func
-{
-	struct KeyToValue
-	{
-		std::tstring operator()( const std::tstring& key ) const
-		{
-			if ( key == _T("NAME") )
-				return _T("UTL");
-			else if ( key == _T("MAJOR") )
-				return _T("3");
-			else if ( key == _T("MINOR") )
-				return _T("12");
-			return str::Format( _T("?%s?"), key.c_str() );
-		}
-	};
-}
-
-
 CStringTests::CStringTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
@@ -893,21 +875,6 @@ void CStringTests::TestFlagTags( void )
 	}
 }
 
-void CStringTests::TestExpandKeysToValues( void )
-{
-	ASSERT_EQUAL( _T(""),
-		str::ExpandKeysToValues( _T(""), _T("["), _T("]"), func::KeyToValue() ) );
-	ASSERT_EQUAL( _T("About"),
-		str::ExpandKeysToValues( _T("About"), _T("["), _T("]"), func::KeyToValue() ) );
-	ASSERT_EQUAL( _T("??"),
-		str::ExpandKeysToValues( _T("[]"), _T("["), _T("]"), func::KeyToValue() ) );
-	ASSERT_EQUAL( _T("?[X]?"),
-		str::ExpandKeysToValues( _T("[X]"), _T("["), _T("]"), func::KeyToValue(), true ) );
-
-	ASSERT_EQUAL( _T("About UTL vesion 3.12 release ?FOO?."),
-		str::ExpandKeysToValues( _T("About [NAME] vesion [MAJOR].[MINOR] release [FOO]."), _T("["), _T("]"), func::KeyToValue() ) );
-}
-
 void CStringTests::TestWordSelection( void )
 {
 	static const std::tstring text = _T("some  'STUFF'?! ");
@@ -1042,12 +1009,11 @@ void CStringTests::Run( void )
 	TestArgUtilities();
 	TestEnumTags();
 	TestFlagTags();
-	TestExpandKeysToValues();
 	TestWordSelection();
 	TestEnsureUniformNumPadding();
 	TestTimeFormatting();
 
-//	TestFunctional();
+	TestFunctional();
 }
 
 

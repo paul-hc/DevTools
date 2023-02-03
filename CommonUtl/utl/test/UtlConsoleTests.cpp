@@ -8,6 +8,7 @@
 #include "StringRangeTests.h"
 #include "NumericTests.h"
 #include "EndiannessTests.h"
+#include "EnvironmentTests.h"
 #include "LcsTests.h"
 #include "RegistryTests.h"
 #include "ResequenceTests.h"
@@ -18,7 +19,7 @@
 #include "TextFileIoTests.h"
 #include "StructuredStorageTest.h"
 #include "DuplicateFilesTests.h"
-#include "ThreadingTests.h"
+//#include "ThreadingTests.hxx"		// include only in test projects to avoid the link dependency on Boost libraries in regular projects
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,6 +36,7 @@ namespace ut
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();
 		CEndiannessTests::Instance();
+		CEnvironmentTests::Instance();
 		CLcsTests::Instance();
 		CRegistryTests::Instance();
 		CResequenceTests::Instance();
@@ -46,7 +48,10 @@ namespace ut
 		CTextFileIoTests::Instance();
 		CStructuredStorageTest::Instance();
 		CDuplicateFilesTests::Instance();
-		CThreadingTests::Instance();
+
+		// Threading tests are explicitly included only in the test projects DemoUtl and TesterUtlBase.
+		// This is to avoid the link dependency on Boost libraries in regular projects.
+		//CThreadingTests::Instance();
 	}
 }
 

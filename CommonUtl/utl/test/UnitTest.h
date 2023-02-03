@@ -60,6 +60,7 @@ namespace ut
 			return true;
 
 		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualType>( expected ) ), ToString( actual ) );
+
 		TRACE( _T("%s\n"), rMsg.c_str() );
 		return false;
 	}
@@ -88,6 +89,11 @@ namespace ut
 
 #define ASSERT_EQUAL_IGNORECASE( expected, actual )\
 	do { std::tstring msg; _ASSERT_EXPR( ( ut::AssertEqualsIgnoreCase( (expected), (actual), msg ) ), msg.c_str() ); } while( false )
+
+
+	// prevents assertions on '%' characters
+#define ASSERT_TRUE( expr )\
+	do { std::tstring msg = _CRT_WIDE(#expr); str::Replace( msg, _T("%"), _T("%%") ); _ASSERT_EXPR( (expr), msg.c_str() ); } while( false )
 
 
 #define UT_REPEAT_BLOCK( count )  for ( unsigned int i = count; i-- != 0; )

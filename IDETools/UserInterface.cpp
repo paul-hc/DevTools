@@ -247,10 +247,8 @@ BOOL UserInterface::EnsureNumberValue( LPCTSTR pKeyFullPath, LPCTSTR pValueName,
 
 BSTR UserInterface::GetEnvironmentVariable( LPCTSTR varName )
 {
-	CString strResult;
+	CString strResult = env::GetVariableValue( varName ).c_str();
 
-	::GetEnvironmentVariable( varName, strResult.GetBuffer( 1024 ), 1024 );
-	strResult.ReleaseBuffer();
 	return strResult.AllocSysString();
 }
 
@@ -261,31 +259,7 @@ BOOL UserInterface::SetEnvironmentVariable( LPCTSTR varName, LPCTSTR varValue )
 
 BSTR UserInterface::ExpandEnvironmentVariables( LPCTSTR sourceString )
 {
-	CString expandedString = sourceString;
-
-	for ( int varStartPos = 0, varLength; ; )
-	{
-		CString varName = str::findEnvironmentVariable( expandedString, varStartPos, varStartPos, varLength );
-
-		if ( !varName.IsEmpty() )
-		{
-			CString varValue;
-			int charCount =::GetEnvironmentVariable( varName, varValue.GetBuffer( 1024 ), 1024 );
-
-			varValue.ReleaseBuffer();
-			if ( charCount > 0 )
-			{	// Environment variable successfully substituted by it's value:
-				expandedString.Delete( varStartPos, varLength );
-				expandedString.Insert( varStartPos, varValue );
-				varStartPos += str::Length( varValue );
-			}
-			else
-				// Environment variable not found -> skip it!
-				varStartPos += varLength;
-		}
-		else
-			break;
-	}
+	CString expandedString = env::ExpandPaths( sourceString ).c_str();
 
 	return expandedString.AllocSysString();
 }

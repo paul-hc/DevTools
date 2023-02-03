@@ -53,7 +53,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -73,7 +73,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -83,7 +83,7 @@
 				OutputFile="$(OutDir)\$(ProjectName)32.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile=".\ShellGoodies.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -149,7 +149,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
 				PreprocessorDefinitions="_WINDOWS;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -169,7 +169,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -179,7 +179,7 @@
 				OutputFile="$(OutDir)\$(ProjectName)64.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile=".\ShellGoodies.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -248,7 +248,7 @@
 				Optimization="1"
 				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -268,7 +268,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -278,7 +278,7 @@
 				OutputFile="$(OutDir)\$(ProjectName)32.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile=".\ShellGoodies.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -350,7 +350,7 @@
 				Optimization="1"
 				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
 				PreprocessorDefinitions="_WINDOWS;NDEBUG;_WINDOWS;_USRDLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -370,7 +370,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -380,7 +380,7 @@
 				OutputFile="$(OutDir)\$(ProjectName)64.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile=".\ShellGoodies.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"

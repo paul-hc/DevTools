@@ -48,7 +48,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;../../CommonUtl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -71,7 +71,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../../CommonUtl"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -81,7 +81,7 @@
 				OutputFile="$(OutDir)\xFer.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -146,7 +146,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../../CommonUtl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -169,7 +169,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../../CommonUtl"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -179,7 +179,7 @@
 				OutputFile="$(OutDir)\xFer.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"

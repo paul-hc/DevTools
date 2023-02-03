@@ -48,7 +48,7 @@ namespace ui
 	{
 		REQUIRE( IsPathContent() );
 
-		fs::CPath path = str::ExpandEnvironmentStrings( pathItem.c_str() );
+		fs::CPath path = env::ExpandPaths( pathItem.c_str() );
 		fs::CPath actualPath = path::StripWildcards( path );
 
 		switch ( m_type )
@@ -90,7 +90,7 @@ namespace ui
 		if ( ui::String == m_type )
 			return str::GetEmpty();
 
-		fs::CPath newItem( str::ExpandEnvironmentStrings( pItem ) );
+		fs::CPath newItem( env::ExpandPaths( pItem ) );
 		bool picked = false;
 
 		switch ( m_type )
@@ -111,17 +111,7 @@ namespace ui
 			return str::GetEmpty();
 
 		if ( IsPathContent() )
-		{
-			std::vector< std::tstring > variables;
-			str::QueryEnvironmentVariables( variables, pItem );
-
-			std::vector< std::tstring > values;
-			str::ExpandEnvironmentVariables( values, variables );
-			ENSURE( variables.size() == values.size() );
-
-			for ( unsigned int i = 0; i != variables.size(); ++i )
-				str::Replace( newItem.Ref(), values[ i ].c_str(), variables[ i ].c_str() );
-		}
+			newItem = env::UnExpandPaths( newItem.Get(), pItem );
 
 		if ( HasFlag( m_itemsFlags, Trim ) )
 			str::Trim( newItem.Ref() );

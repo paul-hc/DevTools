@@ -18,7 +18,6 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/StringBase.hxx"
 #include "utl/TextFileIo.hxx"
 
 

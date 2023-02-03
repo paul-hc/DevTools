@@ -355,7 +355,7 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 	{	// backup the OUTER selection lvState
 		CListViewState indexesState( StoreByIndex );
 		std::vector< int >& selIndexes = indexesState.m_pIndexImpl->m_selItems;
-		size_t nextSelIndex = 0;
+		int nextSelIndex = 0;
 
 		GetListViewState( indexesState );
 
@@ -423,7 +423,7 @@ bool CAlbumThumbListView::SelectionOverlapsWith( const std::vector< int >& displ
 
 bool CAlbumThumbListView::IsValidFileAt( size_t displayIndex ) const
 {
-	if ( const CFileAttr* pFileAttr = GetItemObjectAt<CFileAttr>( displayIndex ) )
+	if ( const CFileAttr* pFileAttr = GetItemObjectAt<CFileAttr>( static_cast<int>( displayIndex ) ) )
 		return pFileAttr->GetPath().FileExist();
 
 	return false;

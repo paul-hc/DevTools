@@ -3,8 +3,9 @@
 #include "pch.h"
 #include "Options.h"
 #include "utl/ConsoleApplication.h"
-#include "utl/MultiThreading.h"			// for CScopedInitializeOle
+#include "utl/MultiThreading.h"				// for CScopedInitializeOle
 #include "utl/test/Test.h"
+#include "utl/test/ThreadingTests.hxx"		// include only in this test project to avoid the link dependency on Boost libraries in regular projects
 #include <iostream>
 
 #ifdef _DEBUG
@@ -46,11 +47,11 @@ int _tmain( int argc, TCHAR* argv[] )
 			st::CScopedInitializeOle scopedOle;		// some unit tests require OLE ()
 
 			ut::RegisterUtlConsoleTests();
+			CThreadingTests::Instance();			// special case: in this demo project we include the threading tests, with their dependency on Boos Threads library
 			ut::RunAllTests();
 		#else //USE_UT
-			std::clog << "Do what in Release build?" << std::endl;
+			std::clog << "Heya! Do what in Release build?" << std::endl;
 		#endif //USE_UT
-			return 0;
 		}
 		return 0;
 	}

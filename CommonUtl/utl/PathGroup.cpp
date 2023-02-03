@@ -13,15 +13,6 @@ namespace fs
 {
 	const TCHAR CPathGroup::s_sep[] = _T(";");
 
-	CPathGroup::CPathGroup( const TCHAR environVar[] )
-	{
-		enum { BufferSize = 8192 };
-		std::vector< TCHAR > value( BufferSize );
-
-		if ( ::GetEnvironmentVariable( environVar, &value.front(), BufferSize ) != 0 )
-			Split( &value.front() );
-	}
-
 	void CPathGroup::Clear( void )
 	{
 		m_specs.clear();
@@ -71,12 +62,18 @@ namespace fs
 		Split( str::Join( m_specs.begin(), m_specs.end(), s_sep ).c_str(), s_sep );
 	}
 
+	void CPathGroup::AddExpanded( const TCHAR envVarName[] )
+	{
+		std::tstring value = env::GetVariableValue( envVarName );
+		Split( value.c_str() );
+	}
+
 	void CPathGroup::ExpandPaths( void )
 	{
 		m_paths.clear();
 		m_paths.reserve( m_specs.size() );
 
 		for ( std::vector< std::tstring >::const_iterator itSpec = m_specs.begin(); itSpec != m_specs.end(); ++itSpec )
-			m_paths.push_back( str::ExpandEnvironmentStrings( itSpec->c_str() ) );
+			env::AddExpandedPaths( m_paths, itSpec->c_str(), _T(";") );		// add unique to m_paths
 	}
 }

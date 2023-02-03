@@ -22,7 +22,7 @@
 		<Configuration
 			Name="DebugU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -46,7 +46,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_ATL_DEBUG_INTERFACES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -70,7 +70,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories="$(UTL_BOOST_INC)\lib\32"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -100,7 +100,7 @@
 		<Configuration
 			Name="DebugU|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -124,7 +124,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_ATL_DEBUG_INTERFACES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -140,7 +140,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -148,7 +148,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
+				AdditionalLibraryDirectories="$(UTL_BOOST_INC)\lib\64"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="17"
@@ -178,7 +178,7 @@
 		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -203,7 +203,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -217,7 +217,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -225,7 +225,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				AdditionalLibraryDirectories="$(UTL_BOOST_INC)\lib\32"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -258,7 +258,7 @@
 		<Configuration
 			Name="ReleaseU|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -284,7 +284,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -298,7 +298,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
+				AdditionalIncludeDirectories="$(IntDir);$(UTL_ADDITIONAL_RES_INC)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -306,7 +306,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
+				AdditionalLibraryDirectories="$(UTL_BOOST_INC)\lib\64"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"

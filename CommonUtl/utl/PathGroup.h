@@ -11,13 +11,12 @@ namespace fs
 	{
 	public:
 		CPathGroup( void ) {}
-		CPathGroup( const TCHAR environVar[] );
 
 		void Clear( void );
 
 		bool IsEmpty( void ) const { return GetSpecs().empty(); }
-		const std::vector< std::tstring >& GetSpecs( void ) const { ASSERT( m_specs.size() == m_paths.size() ); return m_specs; }
-		const std::vector< fs::CPath >& GetPaths( void ) const { ASSERT( m_specs.size() == m_paths.size() ); return m_paths; }
+		const std::vector< std::tstring >& GetSpecs( void ) const { return m_specs; }
+		const std::vector< fs::CPath >& GetPaths( void ) const { return m_paths; }
 
 		bool Contains( const fs::CPath& path ) const;
 		bool AnyIsPartOf( const fs::CPath& path ) const;		// any of m_paths is sub-path of path?
@@ -29,11 +28,13 @@ namespace fs
 		void Append( const CPathGroup& right );
 		CPathGroup& operator+=( const CPathGroup& right ) { Append( right ); return *this; }
 		CPathGroup operator+( const CPathGroup& right ) const { CPathGroup pathGroup = *this; return pathGroup += right; }
+
+		void AddExpanded( const TCHAR envVarName[] );
 	private:
 		void ExpandPaths( void );
 	private:
 		std::vector< std::tstring > m_specs;			// path specifiers could contain environment variables
-		std::vector< fs::CPath > m_paths;				// expanded environment variables
+		std::vector< fs::CPath > m_paths;				// expanded environment variables - we could potentially have more m_paths then m_specs, for multi-path environment variables
 	public:
 		static const TCHAR s_sep[];
 	};

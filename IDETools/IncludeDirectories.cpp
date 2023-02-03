@@ -31,8 +31,8 @@ CIncludeDirectories::CIncludeDirectories( void )
 
 CIncludeDirectories& CIncludeDirectories::Instance( void )
 {
-	static CIncludeDirectories dirs;
-	return dirs;
+	static CIncludeDirectories s_dirs;
+	return s_dirs;
 }
 
 void CIncludeDirectories::Clear( void )

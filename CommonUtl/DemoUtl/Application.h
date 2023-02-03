@@ -15,6 +15,9 @@ private:
 	bool HasCommandLineOptions( void );
 private:
 	std::auto_ptr<CScopedGdiPlusInit> m_pGdiPlusInit;
+protected:
+	// base overrides
+	virtual void OnInitAppResources( void );
 
 	// generated stuff
 public:
