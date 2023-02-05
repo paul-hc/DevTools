@@ -171,7 +171,7 @@ namespace serial
 	template< typename PtrContainerT >
 	void LoadOwningPtrs( CArchive& archive, PtrContainerT& rItemPtrs );
 
-	// serialize ContainerT< Type* > - owning container of pointers to objects with:
+	// serialize ContainerT<Type*> - owning container of pointers to objects with:
 	//	- default constructor Type::Type()
 	//	- method: void Type::Stream( CArchive& archive )
 	// note: it has identical binary footprint as StreamItems()

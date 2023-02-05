@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FmtUtils.h"
 #include "FileState.h"
 #include "EnumTags.h"
@@ -227,7 +227,7 @@ namespace fmt
 			if ( tagged )
 				return FormatFileState_Tagged( fileState, pathFormat );
 
-			std::vector< std::tstring > parts;
+			std::vector<std::tstring> parts;
 			if ( !fileState.IsEmpty() )
 			{
 				if ( pathFormat != NoPath )
@@ -243,7 +243,7 @@ namespace fmt
 
 		bool ParseFileState( fs::CFileState& rFileState, const std::tstring& text, PathFormat pathFormat )
 		{
-			std::vector< std::tstring > parts;
+			std::vector<std::tstring> parts;
 			str::Split( parts, text.c_str(), s_fieldSep );
 
 			const size_t fieldCount = NoPath == pathFormat ? 4 : 5;
@@ -292,7 +292,7 @@ namespace fmt
 		//
 		std::tstring FormatFileState_Tagged( const fs::CFileState& fileState, PathFormat pathFormat )
 		{
-			std::vector< std::tstring > parts;
+			std::vector<std::tstring> parts;
 			if ( !fileState.IsEmpty() )
 			{
 				if ( pathFormat != NoPath )
@@ -312,10 +312,10 @@ namespace fmt
 
 		bool ParseFileState_Tagged( fs::CFileState& rFileState, const std::tstring& text, PathFormat pathFormat )
 		{
-			std::vector< std::tstring > parts;
+			std::vector<std::tstring> parts;
 			str::Split( parts, text.c_str(), s_fieldSep );
 
-			std::vector< std::tstring >::iterator itPart = parts.begin();
+			std::vector<std::tstring>::iterator itPart = parts.begin();
 
 			if ( itPart == parts.end() )
 				return false;

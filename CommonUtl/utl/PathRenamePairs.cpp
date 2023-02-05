@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PathRenamePairs.h"
 #include "Algorithms.h"
 
@@ -68,7 +68,7 @@ void CPathRenamePairs::CopySrcToDestPaths( void )
 		itPair->second = itPair->first;
 }
 
-void CPathRenamePairs::CopyDestPaths( const std::vector< fs::CPath >& destPaths )		// assume destPaths is in same order as m_pairs
+void CPathRenamePairs::CopyDestPaths( const std::vector<fs::CPath>& destPaths )		// assume destPaths is in same order as m_pairs
 {
 	REQUIRE( IsConsistent() );
 

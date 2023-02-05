@@ -90,7 +90,7 @@ namespace utl
 
 
 	template< typename IteratorT, typename GetTextFuncT >
-	void QueryTextItems( std::vector< std::tstring >& rTextItems, IteratorT itFirst, IteratorT itLast, GetTextFuncT getTextFunc )
+	void QueryTextItems( std::vector<std::tstring>& rTextItems, IteratorT itFirst, IteratorT itLast, GetTextFuncT getTextFunc )
 	{
 		rTextItems.reserve( rTextItems.size() + std::distance( itFirst, itLast ) );
 
@@ -102,7 +102,7 @@ namespace utl
 	template< typename IteratorT, typename GetTextFuncT >
 	void MakeTextItemsList( std::tstring& rText, IteratorT itFirst, IteratorT itLast, GetTextFuncT getTextFunc, const TCHAR sep[] )
 	{
-		std::vector< std::tstring > textItems;
+		std::vector<std::tstring> textItems;
 		QueryTextItems( textItems, itFirst, itLast, getTextFunc );
 
 		rText = str::Join( textItems, sep );

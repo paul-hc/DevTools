@@ -283,7 +283,7 @@
     <ClInclude Include="test\UtlConsoleTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="pch.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="StdHashValue.h">
@@ -438,9 +438,6 @@
     <ClCompile Include="StringUtilities.cpp">
       <Filter>utl</Filter>
     </ClCompile>
-    <ClCompile Include="TokenIterator.cpp">
-      <Filter>utl</Filter>
-    </ClCompile>
     <ClCompile Include="FileSystem.cpp">
       <Filter>utl\File System</Filter>
     </ClCompile>
@@ -585,7 +582,7 @@
     <ClCompile Include="test\UtlConsoleTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Serialization.cpp">

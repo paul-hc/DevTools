@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/FileSystemTests.h"
@@ -169,7 +169,7 @@ void CFileSystemTests::TestFileEnumFilter( void )
 
 	// ignore path matches
 	{
-		std::vector< fs::CPath > ignorePaths;
+		std::vector<fs::CPath> ignorePaths;
 		ignorePaths.push_back( poolDirPath / _T("D1\\D2") );
 		ignorePaths.push_back( fs::CPath( _T("*.doc;*.jpg;*.png") ) );
 

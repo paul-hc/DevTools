@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "StructuredStorage.h"
 #include "FlexPath.h"
 #include "StringUtilities.h"
@@ -16,7 +16,7 @@ namespace fs
 {
 	// CStructuredStorage implementation
 
-	mfc::CAutoException< CFileException > CStructuredStorage::s_fileError;
+	mfc::CAutoException<CFileException> CStructuredStorage::s_fileError;
 	const TCHAR CStructuredStorage::s_rootFolderName[] = _T("");
 
 	CStructuredStorage::CStructuredStorage( void )
@@ -125,10 +125,10 @@ namespace fs
 		CStorageTrail origTrail = m_cwdTrail;
 		CScopedErrorHandling scopedIgnore( this, utl::CheckMode );
 
-		std::vector< std::tstring > subDirs;
+		std::vector<std::tstring> subDirs;
 		str::Tokenize( subDirs, pDirSubPath, path::DirDelims() );
 
-		for ( std::vector< std::tstring >::const_iterator itSubDir = subDirs.begin(); itSubDir != subDirs.end(); ++itSubDir )
+		for ( std::vector<std::tstring>::const_iterator itSubDir = subDirs.begin(); itSubDir != subDirs.end(); ++itSubDir )
 		{
 			ASSERT( !itSubDir->empty() );
 
@@ -149,13 +149,13 @@ namespace fs
 		CStorageTrail origTrail = m_cwdTrail;
 		CScopedErrorHandling scopedIgnore( this, utl::CheckMode );
 
-		std::vector< std::tstring > subDirs;
+		std::vector<std::tstring> subDirs;
 		str::Tokenize( subDirs, pDirSubPath, path::DirDelims() );
 
 		DWORD openExistingMode = ::MakeFlag( mode, STGM_CREATE, false );
 		bool succeeded = true;
 
-		for ( std::vector< std::tstring >::const_iterator itSubDir = subDirs.begin(); itSubDir != subDirs.end(); ++itSubDir )
+		for ( std::vector<std::tstring>::const_iterator itSubDir = subDirs.begin(); itSubDir != subDirs.end(); ++itSubDir )
 		{
 			ASSERT( !itSubDir->empty() );
 
@@ -537,7 +537,7 @@ namespace fs
 			return HandleError( hResult, embeddedPath.GetPtr() );
 
 		STATSTG stat;
-		std::vector< fs::TStgSubDirPath > subStgNames;
+		std::vector<fs::TStgSubDirPath> subStgNames;
 
 		for ( ;; )
 		{
@@ -566,7 +566,7 @@ namespace fs
 
 		bool succeeded = true;
 
-		for ( std::vector< fs::TStgSubDirPath >::const_iterator itSubStgName = subStgNames.begin(); itSubStgName != subStgNames.end(); ++itSubStgName )
+		for ( std::vector<fs::TStgSubDirPath>::const_iterator itSubStgName = subStgNames.begin(); itSubStgName != subStgNames.end(); ++itSubStgName )
 		{
 			fs::TEmbeddedPath subDirPath = embeddedPath / *itSubStgName;
 			if ( pEnumerator->AddFoundSubDir( subDirPath ) )		// sub-storage is not ignored?
@@ -596,7 +596,7 @@ namespace fs
 			return HandleError( hResult, embeddedPath.GetPtr() );
 
 		STATSTG stat;
-		std::vector< fs::TStgSubDirPath > subStgNames;
+		std::vector<fs::TStgSubDirPath> subStgNames;
 		bool found = false;
 
 		do
@@ -626,7 +626,7 @@ namespace fs
 		{
 			fs::SortPaths( subStgNames );		// natural path order
 
-			for ( std::vector< fs::TStgSubDirPath >::const_iterator itSubStgName = subStgNames.begin(); !found && itSubStgName != subStgNames.end(); ++itSubStgName )
+			for ( std::vector<fs::TStgSubDirPath>::const_iterator itSubStgName = subStgNames.begin(); !found && itSubStgName != subStgNames.end(); ++itSubStgName )
 			{
 				m_cwdTrail.Push( OpenDir( itSubStgName->GetPtr() ) );
 				found = FindFirstElementThat( rFoundElementPath, pElementPred, Deep );		// recurse in sub-storage

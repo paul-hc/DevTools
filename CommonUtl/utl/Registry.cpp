@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Registry.h"
 
 #ifdef _DEBUG
@@ -64,7 +64,7 @@ namespace reg
 		rhHive = NULL;
 		rSubPath.Clear();
 
-		size_t sepPos = str::Find< str::Case >( pKeyFullPath, _T('\\') );
+		size_t sepPos = str::Find<str::Case>( pKeyFullPath, _T('\\') );
 		if ( sepPos != utl::npos )
 		{
 			rSubPath = TKeyPath( pKeyFullPath + sepPos + 1 );
@@ -100,7 +100,7 @@ namespace reg
 		return subKey.Open( Get(), pSubKeyName, KEY_READ );
 	}
 
-	void CKey::QuerySubKeyNames( std::vector< std::tstring >& rSubKeyNames ) const
+	void CKey::QuerySubKeyNames( std::vector<std::tstring>& rSubKeyNames ) const
 	{
 		ASSERT( IsOpen() );
 		CKeyInfo info( Get() );
@@ -108,7 +108,7 @@ namespace reg
 		rSubKeyNames.clear();
 		rSubKeyNames.reserve( info.m_subKeyCount );
 
-		std::vector< TCHAR > buffer( info.m_subKeyNameMaxLen + 1 );
+		std::vector<TCHAR> buffer( info.m_subKeyNameMaxLen + 1 );
 
 		for ( DWORD i = 0; i != info.m_subKeyCount; ++i )
 		{
@@ -122,14 +122,14 @@ namespace reg
 	void CKey::DeleteAllSubKeys( void )
 	{
 		ASSERT( IsOpen() );
-		std::vector< std::tstring > subKeyNames;
+		std::vector<std::tstring> subKeyNames;
 		QueryValueNames( subKeyNames );
 
-		for ( std::vector< std::tstring >::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
+		for ( std::vector<std::tstring>::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
 			DeleteSubKey( itSubKeyName->c_str(), Deep );
 	}
 
-	void CKey::QueryValueNames( std::vector< std::tstring >& rValueNames ) const
+	void CKey::QueryValueNames( std::vector<std::tstring>& rValueNames ) const
 	{
 		ASSERT( IsOpen() );
 		CKeyInfo info( Get() );
@@ -137,7 +137,7 @@ namespace reg
 		rValueNames.clear();
 		rValueNames.reserve( info.m_valueCount );
 
-		std::vector< TCHAR > buffer( info.m_valueNameMaxLen + 1 );
+		std::vector<TCHAR> buffer( info.m_valueNameMaxLen + 1 );
 
 		for ( DWORD i = 0; i != info.m_valueCount; ++i )
 		{
@@ -151,10 +151,10 @@ namespace reg
 	void CKey::DeleteAllValues( void )
 	{
 		ASSERT( IsOpen() );
-		std::vector< std::tstring > valueNames;
+		std::vector<std::tstring> valueNames;
 		QueryValueNames( valueNames );
 
-		for ( std::vector< std::tstring >::const_iterator itValueName = valueNames.begin(); itValueName != valueNames.end(); ++itValueName )
+		for ( std::vector<std::tstring>::const_iterator itValueName = valueNames.begin(); itValueName != valueNames.end(); ++itValueName )
 			DeleteValue( itValueName->c_str() );
 	}
 
@@ -177,7 +177,7 @@ namespace reg
 	{
 		ASSERT( IsOpen() );
 
-		std::vector< TCHAR > buffer( GetValueBufferSize( pValueName ) );
+		std::vector<TCHAR> buffer( GetValueBufferSize( pValueName ) );
 		if ( buffer.empty() )
 			return false;
 

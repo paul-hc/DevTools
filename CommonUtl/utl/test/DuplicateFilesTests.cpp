@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "DuplicateFilesTests.h"
@@ -14,7 +14,7 @@ namespace ut
 {
 	std::tstring JoinRelativeDupPaths( const CDuplicateFilesGroup* pDupGroup, const fs::TDirPath& rootDir )
 	{
-		std::vector< fs::CPath > dupPaths;
+		std::vector<fs::CPath> dupPaths;
 
 		func::QueryItemsPaths( dupPaths, pDupGroup->GetItems() );
 		path::StripDirPrefixes( dupPaths, rootDir.GetPtr() );
@@ -50,7 +50,7 @@ void CDuplicateFilesTests::TestDuplicateFiles( void )
 	ASSERT_EQUAL( 9, outcome.m_foundFileCount );
 	ASSERT_EQUAL( 1, outcome.m_ignoredCount );			// D1/IGNORE
 
-	const std::vector< CDuplicateFilesGroup* >& dupGroups = enumer.m_dupGroupItems;
+	const std::vector<CDuplicateFilesGroup*>& dupGroups = enumer.m_dupGroupItems;
 
 	ASSERT_EQUAL( 2, dupGroups.size() );
 	ASSERT_EQUAL( _T("a.txt|D1\\a.txt|D1\\D2\\a.txt"), ut::JoinRelativeDupPaths( dupGroups[0], poolDirPath ) );

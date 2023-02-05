@@ -31,7 +31,7 @@ namespace fs
 		void SetEncoding( Encoding encoding );
 
 		bool IsEmpty( void ) const { return m_bom.empty(); }
-		const std::vector< char >& Get( void ) const { return m_bom; }
+		const std::vector<char>& Get( void ) const { return m_bom; }
 
 		size_t GetCharCount( void ) const { return m_bom.size() / fs::GetCharByteCount( m_encoding ); }		// count of BOM in encoding_chars (not BYTES for wide encodings)
 
@@ -46,13 +46,13 @@ namespace fs
 		template< typename istream_T >
 		istream_T& SeekAfterBom( istream_T& is ) const;
 
-		Encoding ParseBuffer( const std::vector< char >& filePrefix );
+		Encoding ParseBuffer( const std::vector<char>& filePrefix );
 	private:
-		static bool BomMatches( const std::vector< char >& filePrefix, const BYTE bom[], size_t bomCount );
-		static bool BomEquals( const std::vector< char >& filePrefix, const BYTE bom[], size_t bomCount );
+		static bool BomMatches( const std::vector<char>& filePrefix, const BYTE bom[], size_t bomCount );
+		static bool BomEquals( const std::vector<char>& filePrefix, const BYTE bom[], size_t bomCount );
 	private:
 		Encoding m_encoding;
-		std::vector< char > m_bom;
+		std::vector<char> m_bom;
 	private:
 		static const BYTE s_bom_UTF8[ 3 ];		// { 0xEF, 0xBB, 0xBF };
 		static const BYTE s_bom_UTF16_LE[ 2 ];	// { 0xFF, 0xFE }; aka UCS2 LE

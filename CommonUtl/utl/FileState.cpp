@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileState.h"
 #include "FileSystem.h"
 #include "Crc32.h"

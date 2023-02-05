@@ -63,7 +63,7 @@ public:
 	CPathItem( const fs::CPath& filePath ) : CPathItemBase( filePath ) {}
 
 	template< typename PathContainerT >
-	static void MakePathItems( std::vector< CPathItem* >& rPathItems, const PathContainerT& filePaths )
+	static void MakePathItems( std::vector<CPathItem*>& rPathItems, const PathContainerT& filePaths )
 	{
 		utl::ClearOwningContainer( rPathItems );
 		rPathItems.reserve( filePaths.size() );
@@ -141,7 +141,7 @@ namespace cvt
 			func::QueryItemsPaths( m_paths, srcPathItems );
 		}
 	public:
-		std::vector< fs::CPath > m_paths;
+		std::vector<fs::CPath> m_paths;
 	};
 }
 

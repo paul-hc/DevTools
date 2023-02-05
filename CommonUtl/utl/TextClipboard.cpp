@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TextClipboard.h"
 
 #ifdef _DEBUG

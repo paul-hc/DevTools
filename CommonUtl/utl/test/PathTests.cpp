@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/PathTests.h"
@@ -292,7 +292,7 @@ void CPathTests::TestPathUtilities( void )
 
 void CPathTests::TestPathSort( void )
 {
-	std::vector< std::tstring > srcPaths;
+	std::vector<std::tstring> srcPaths;
 	srcPaths.push_back( _T("C:\\dir/fn.txt") );
 	srcPaths.push_back( _T("C:\\dir2/subDir/fn.txt") );
 	srcPaths.push_back( _T("X:\\dir/file.ext") );
@@ -302,10 +302,10 @@ void CPathTests::TestPathSort( void )
 	srcPaths.push_back( _T("C:\\dir00001/fn.txt") );
 
 	{
-		std::vector< std::tstring > stringPaths = srcPaths;
+		std::vector<std::tstring> stringPaths = srcPaths;
 
 		fs::SortPaths( stringPaths );
-		std::vector< std::tstring >::const_iterator itPath = stringPaths.begin();
+		std::vector<std::tstring>::const_iterator itPath = stringPaths.begin();
 		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir/fn.txt"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir000/fn.txt"), *itPath++ );
@@ -328,10 +328,10 @@ void CPathTests::TestPathSort( void )
 	}
 
 	{
-		std::vector< fs::CPath > paths( srcPaths.begin(), srcPaths.end() );
+		std::vector<fs::CPath> paths( srcPaths.begin(), srcPaths.end() );
 
 		fs::SortPaths( paths );
-		std::vector< fs::CPath >::const_iterator itPath = paths.begin();
+		std::vector<fs::CPath>::const_iterator itPath = paths.begin();
 		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir/fn.txt"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir000/fn.txt"), *itPath++ );
@@ -354,7 +354,7 @@ void CPathTests::TestPathSort( void )
 	}
 
 	{
-		std::vector< fs::CPath > paths;
+		std::vector<fs::CPath> paths;
 		paths.push_back( fs::CPath( _T("C:\\dir\\X\\Y\\Z\\file.txt") ) );
 		paths.push_back( fs::CPath( _T("C:\\dir\\X\\Y\\file.txt") ) );
 		paths.push_back( fs::CPath( _T("") ) );
@@ -368,7 +368,7 @@ void CPathTests::TestPathSort( void )
 
 		fs::SortByPathDepth( paths );
 
-		std::vector< fs::CPath >::const_iterator itPath = paths.begin();
+		std::vector<fs::CPath>::const_iterator itPath = paths.begin();
 		ASSERT_EQUAL( _T(""), *itPath++ );
 		ASSERT_EQUAL( _T("A:"), *itPath++ );
 		ASSERT_EQUAL( _T("C:"), *itPath++ );
@@ -388,7 +388,7 @@ void CPathTests::TestPathSortExisting( void )
 	ut::CTempFilePairPool pool( _T("a|a.doc|a.txt|d3/some|d1\\b|d1\\b3.doc|d1\\b002.doc|d1\\b.txt|d1\\d2\\c|d1/d2/c.doc|d1\\d2\\c.txt") );
 	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
-	std::vector< fs::CPath > mixedPaths;	// files + directories
+	std::vector<fs::CPath> mixedPaths;	// files + directories
 	path::QueryParentPaths( mixedPaths, pool.GetFilePaths() );
 	mixedPaths.insert( mixedPaths.begin(), pool.GetFilePaths().begin(), pool.GetFilePaths().end() );
 
@@ -396,8 +396,8 @@ void CPathTests::TestPathSortExisting( void )
 
 	// fs::CPath sort ascending
 	{
-		std::vector< fs::CPath > paths = mixedPaths;
-		std::vector< fs::CPath >::const_iterator itPath;
+		std::vector<fs::CPath> paths = mixedPaths;
+		std::vector<fs::CPath>::const_iterator itPath;
 
 		fs::SortPathsDirsFirst( paths );
 		path::StripDirPrefixes( paths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
@@ -424,8 +424,8 @@ void CPathTests::TestPathSortExisting( void )
 
 	// fs::CPath sort descending
 	{
-		std::vector< fs::CPath > paths = mixedPaths;
-		std::vector< fs::CPath >::const_iterator itPath;
+		std::vector<fs::CPath> paths = mixedPaths;
+		std::vector<fs::CPath>::const_iterator itPath;
 
 		fs::SortPathsDirsFirst( paths, false );					// sort descending
 		path::StripDirPrefixes( paths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
@@ -452,11 +452,11 @@ void CPathTests::TestPathSortExisting( void )
 
 	// std::tstring sort ascending
 	{
-		std::vector< std::tstring > stringPaths;
-		for ( std::vector< fs::CPath >::const_iterator itMixedPath = mixedPaths.begin(); itMixedPath != mixedPaths.end(); ++itMixedPath )
+		std::vector<std::tstring> stringPaths;
+		for ( std::vector<fs::CPath>::const_iterator itMixedPath = mixedPaths.begin(); itMixedPath != mixedPaths.end(); ++itMixedPath )
 			stringPaths.push_back( itMixedPath->Get() );
 
-		std::vector< std::tstring >::const_iterator itPath;
+		std::vector<std::tstring>::const_iterator itPath;
 
 		fs::SortPathsDirsFirst( stringPaths );
 		path::StripDirPrefixes( stringPaths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
@@ -495,7 +495,7 @@ void CPathTests::TestPathNaturalSort( void )
 		_T("Ardeal\\1254 Biertan_noDUP.txt|")
 		_T("Ardeal/1254 Biertan.txt");
 
-	std::vector< fs::CPath > filePaths;
+	std::vector<fs::CPath> filePaths;
 	str::Split( filePaths, s_srcFiles, _T("|") );
 
 	std::random_shuffle( filePaths.begin(), filePaths.end() );
@@ -662,7 +662,7 @@ namespace func
 void CPathTests::TestHasMultipleDirPaths( void )
 {
 	{
-		std::vector< fs::CPath > paths;
+		std::vector<fs::CPath> paths;
 		ASSERT( !path::HasMultipleDirPaths( paths ) );
 
 		paths.push_back( fs::CPath( _T("C:\\Images\\Fruit\\apple.jpg") ) );
@@ -679,7 +679,7 @@ void CPathTests::TestHasMultipleDirPaths( void )
 	{
 		#pragma warning( disable: 4709 )	// comma operator within array index expression
 
-		std::map< ut::CPathItem*, std::string > pathMap;
+		std::map<ut::CPathItem*, std::string> pathMap;
 
 		pathMap[ new ut::CPathItem( _T("C:\\Images/Fruit/apple.jpg"), 10 ) ] = "A";
 		pathMap[ new ut::CPathItem( _T("C:\\Images\\Fruit\\orange.jpg"), 20 ) ] = "B";
@@ -696,7 +696,7 @@ void CPathTests::TestHasMultipleDirPaths( void )
 void CPathTests::TestCommonSubpath( void )
 {
 	{
-		std::vector< fs::CPath > paths;
+		std::vector<fs::CPath> paths;
 		ASSERT_EQUAL( _T(""), path::ExtractCommonParentPath( paths ) );
 
 		paths.push_back( fs::CPath( _T("C:\\Images\\Fruit\\apple.jpg") ) );
@@ -716,14 +716,14 @@ void CPathTests::TestCommonSubpath( void )
 	}
 
 	{
-		std::vector< fs::CPath > paths;
+		std::vector<fs::CPath> paths;
 		paths.push_back( fs::CPath( _T("C:\\Images\\Fruit\\apple.jpg") ) );
 		paths.push_back( fs::CPath( _T("C:\\Images/Fruit/orange.jpg") ) );
 		paths.push_back( fs::CPath( _T("C:\\Images\\Drink\\coffee.jpg") ) );
 
 		fs::TDirPath commonDirPath = path::ExtractCommonParentPath( paths );
 
-		for ( std::vector< fs::CPath >::iterator itPath = paths.begin(); itPath != paths.end(); ++itPath )
+		for ( std::vector<fs::CPath>::iterator itPath = paths.begin(); itPath != paths.end(); ++itPath )
 		{
 			std::tstring relPath = itPath->Get();
 			path::StripPrefix( relPath, commonDirPath.GetPtr() );
@@ -738,7 +738,7 @@ void CPathTests::TestCommonSubpath( void )
 	{
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg>Europe"), path::FindCommonPrefix( _T("C:\\Images\\fruit.stg>Europe\\apple.jpg"), _T("C:/Images/fruit.stg>Europe/Citrus/orange.jpg") ) );
 
-		std::vector< fs::CPath > paths;
+		std::vector<fs::CPath> paths;
 		paths.push_back( fs::CPath( _T("C:\\Images\\fruit.stg>Europe\\apple.jpg") ) );
 		paths.push_back( fs::CPath( _T("C:\\Images\\fruit.stg>Europe\\Citrus\\orange.jpg") ) );
 
@@ -867,7 +867,7 @@ void CPathTests::TestFlexPath( void )
 	// ordered path set
 	static const TCHAR comma[] = _T(",");
 	{
-		std::set< fs::CFlexPath > pathSet;
+		std::set<fs::CFlexPath> pathSet;
 		pathSet.insert( fs::CFlexPath( _T("File 10") ) );
 		pathSet.insert( fs::CFlexPath( _T("file 1") ) );
 		pathSet.insert( fs::CFlexPath( _T("File 7") ) );

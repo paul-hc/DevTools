@@ -24,10 +24,10 @@ namespace utl
 		HANDLE Spawn( int mode = _P_NOWAIT ) { return reinterpret_cast<HANDLE>( ExecuteProcess( mode ) ); }
 	private:
 		intptr_t ExecuteProcess( int mode );
-		const TCHAR* const* MakeArgList( std::vector< const TCHAR* >& rArgList ) const;
+		const TCHAR* const* MakeArgList( std::vector<const TCHAR*>& rArgList ) const;
 	private:
 		fs::CPath m_exePath;
-		std::vector< std::tstring > m_params;
+		std::vector<std::tstring> m_params;
 	};
 }
 

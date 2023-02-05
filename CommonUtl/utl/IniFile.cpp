@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "pch.h"
 #include "IniFile.h"
 #include "Algorithms.h"
 #include "Path.h"
@@ -25,7 +25,7 @@ unsigned int CIniFile::s_parseLineNo = 1;
 
 const CIniFile::TSectionMap* CIniFile::FindSection( const std::tstring& sectionKey ) const
 {
-	std::map< std::tstring, TSectionMap >::const_iterator itFound = m_sectionMap.find( sectionKey );
+	std::map<std::tstring, TSectionMap>::const_iterator itFound = m_sectionMap.find( sectionKey );
 	return itFound != m_sectionMap.end() ? &itFound->second : NULL;
 }
 
@@ -71,7 +71,7 @@ void CIniFile::Save( std::ostream& rOutStream ) const throws_( std::exception )
 {
 	// save sections according to order stored in m_orderedSections
 
-	for ( std::vector< std::tstring >::const_iterator itSectionKey = m_orderedSections.begin();
+	for ( std::vector<std::tstring>::const_iterator itSectionKey = m_orderedSections.begin();
 		  itSectionKey != m_orderedSections.end(); ++itSectionKey )
 	{
 		const TSectionMap* pSection = FindSection( *itSectionKey );

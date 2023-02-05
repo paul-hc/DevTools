@@ -39,7 +39,7 @@ namespace func
 
 		CharType operator()( void ) const
 		{
-			return utl::GetRandomValue< CharType >( m_charRange.m_start, m_charRange.m_end + 1 );		// add 1 to include maxChar
+			return utl::GetRandomValue<CharType>( m_charRange.m_start, m_charRange.m_end + 1 );		// add 1 to include maxChar
 		}
 	private:
 		Range<CharType> m_charRange;
@@ -53,13 +53,13 @@ namespace utl
 	inline Range<CharType> GetRangeLowerLetters( void ) { return Range<CharType>( 'a', 'z' ); }
 
 	template< typename CharType >
-	std::basic_string< CharType > MakeRandomString( size_t length, const Range<CharType>& charRange = GetRangeLowerLetters() )
+	std::basic_string<CharType> MakeRandomString( size_t length, const Range<CharType>& charRange = GetRangeLowerLetters() )
 	{
 		#pragma warning( disable: 4996 )	// warning C4996: 'std::generate_n': Function call with parameters that may be unsafe
 
-		std::vector< CharType > buffer( length + 1, '\0' );
+		std::vector<CharType> buffer( length + 1, '\0' );
 
-		std::generate_n( &buffer.front(), length, func::RandomChar< CharType >( charRange ) );
+		std::generate_n( &buffer.front(), length, func::RandomChar<CharType>( charRange ) );
 		return &buffer.front();
 	}
 

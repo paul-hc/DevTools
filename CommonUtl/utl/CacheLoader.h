@@ -35,13 +35,13 @@ namespace fs
 		typedef std::function< ObjectType*( const PathType& ) > TLoadFunc;
 		typedef std::function< void( const std::pair<ObjectType*, cache::TStatusFlags>&, const PathType& ) > TTraceFunc;
 
-		CCacheLoader( size_t maxSize, ICacheOwner< PathType, ObjectType >* pCacheOwner );
+		CCacheLoader( size_t maxSize, ICacheOwner<PathType, ObjectType>* pCacheOwner );
 		~CCacheLoader();
 
 		std::pair<ObjectType*, cache::TStatusFlags> Acquire( const PathType& pathKey );		// object, cacheStatusFlags
 
 		cache::EnqueueResult Enqueue( const PathType& pathKey );
-		void Enqueue( const std::vector< PathType >& pathKeys );
+		void Enqueue( const std::vector<PathType>& pathKeys );
 		void WaitPendingQueue( void ) { m_pendingQueue.WaitCompletePending(); }
 	protected:
 		// base overrides
@@ -52,8 +52,8 @@ namespace fs
 	private:
 		void _Acquire( const PathType& pathKey );
 	private:
-		ICacheOwner< PathType, ObjectType >* m_pCacheOwner;
-		CQueueListener< PathType > m_pendingQueue;
+		ICacheOwner<PathType, ObjectType>* m_pCacheOwner;
+		CQueueListener<PathType> m_pendingQueue;
 	};
 
 
@@ -79,7 +79,7 @@ namespace fs
 		boost::thread m_thread;
 		boost::mutex m_mutex;
 		boost::condition_variable m_queuePending;
-		std::deque< PathType > m_queue;
+		std::deque<PathType> m_queue;
 	};
 }
 

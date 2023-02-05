@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "StdOutput.h"
 #include "TextEncoding.h"
 #include "Endianness.h"

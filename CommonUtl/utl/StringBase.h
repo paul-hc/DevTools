@@ -31,7 +31,7 @@ namespace str
 	std::tstring Format( UINT formatId, ... );
 
 	std::tstring Load( UINT strId, bool* pLoaded = NULL );
-	std::vector< std::tstring > LoadStrings( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = NULL );
+	std::vector<std::tstring> LoadStrings( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = NULL );
 	std::pair<std::tstring, std::tstring> LoadPair( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = NULL );
 
 
@@ -143,14 +143,14 @@ namespace str
 
 	template< str::CaseType caseType, typename CharT > bool Equals( const CharT* pLeft, const CharT* pRight );
 
-	template<> inline bool Equals< Case, char >( const char* pLeft, const char* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
-	template<> inline bool Equals< Case, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
+	template<> inline bool Equals<Case, char>( const char* pLeft, const char* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
+	template<> inline bool Equals<Case, wchar_t>( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
 
-	template<> inline bool Equals< IgnoreCase, char >( const char* pLeft, const char* pRight ) { return pred::Equal == CharTraits::CompareI( pLeft, pRight ); }
-	template<> inline bool Equals< IgnoreCase, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == CharTraits::CompareI( pLeft, pRight ); }
+	template<> inline bool Equals<IgnoreCase, char>( const char* pLeft, const char* pRight ) { return pred::Equal == CharTraits::CompareI( pLeft, pRight ); }
+	template<> inline bool Equals<IgnoreCase, wchar_t>( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == CharTraits::CompareI( pLeft, pRight ); }
 
 	template< str::CaseType caseType, typename StringT >
-	bool EqualString( const StringT& left, const StringT& right ) { return Equals< caseType >( left.c_str(), right.c_str() ); }
+	bool EqualString( const StringT& left, const StringT& right ) { return Equals<caseType>( left.c_str(), right.c_str() ); }
 
 	template<typename StringT>
 	bool EqualString( str::CaseType caseType, const StringT& left, const StringT& right ) { return str::Case == caseType ? Equals<str::Case>( left.c_str(), right.c_str() ) : Equals<str::IgnoreCase>( left.c_str(), right.c_str() ); }
@@ -419,7 +419,7 @@ namespace str
 	template< typename StringT, typename ValueT >
 	StringT ValueToString( const ValueT& value )
 	{
-		std::basic_ostringstream< typename StringT::value_type > oss;
+		std::basic_ostringstream<typename StringT::value_type> oss;
 		oss << value;
 		return oss.str();
 	}
@@ -573,7 +573,7 @@ namespace str
 
 
 	template< typename CharT, typename StringT >
-	void SplitAdd( std::vector< StringT >& rItems, const CharT* pSource, const CharT* pSep )
+	void SplitAdd( std::vector<StringT>& rItems, const CharT* pSource, const CharT* pSep )
 	{
 		ASSERT( !str::IsEmpty( pSep ) );
 
@@ -600,7 +600,7 @@ namespace str
 	}
 
 	template< typename CharT, typename StringT >
-	inline void Split( std::vector< StringT >& rItems, const CharT* pSource, const CharT* pSep )
+	inline void Split( std::vector<StringT>& rItems, const CharT* pSource, const CharT* pSep )
 	{
 		rItems.clear();
 		SplitAdd( rItems, pSource, pSep );
@@ -679,8 +679,8 @@ namespace pred
 		bool operator()( const StringT& itemText ) const
 		{
 			return str::IgnoreCase == m_caseType
-				? str::Equals< str::IgnoreCase >( m_text.c_str(), itemText.c_str() )
-				: str::Equals< str::Case >( m_text.c_str(), itemText.c_str() );
+				? str::Equals<str::IgnoreCase>( m_text.c_str(), itemText.c_str() )
+				: str::Equals<str::Case>( m_text.c_str(), itemText.c_str() );
 		}
 	private:
 		const StringT& m_text;

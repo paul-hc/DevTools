@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/EndiannessTests.h"
@@ -126,9 +126,9 @@ void CEndiannessTests::TestSwapBytesContainer( void )
 	using namespace endian;
 
 	const WORD wordsArray[] = { 0xAABB, 0xCCDD, 0xEEFF };
-	const std::vector< WORD > words( wordsArray, wordsArray + COUNT_OF( wordsArray ) );
+	const std::vector<WORD> words( wordsArray, wordsArray + COUNT_OF( wordsArray ) );
 
-	std::vector< WORD > swappedWords = words;
+	std::vector<WORD> swappedWords = words;
 	std::for_each( swappedWords.begin(), swappedWords.end(), func::SwapBytes<Little, Big>() );
 	ASSERT_EQUAL( 0xBBAA, swappedWords[ 0 ] );
 	ASSERT_EQUAL( 0xDDCC, swappedWords[ 1 ] );

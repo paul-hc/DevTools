@@ -36,9 +36,9 @@ namespace num
 	str::TStringRange FindNextNumber( const str::TStringRange& textRange );
 	inline str::TStringRange FindNextNumber( const std::tstring& text ) { return FindNextNumber( str::TStringRange( text ) ); }
 
-	CSequenceNumber< unsigned int > ExtractNumber( const std::tstring& text ) throws_( CRuntimeException );
+	CSequenceNumber<unsigned int> ExtractNumber( const std::tstring& text ) throws_( CRuntimeException );
 
-	size_t GenerateNumbersInSequence( std::vector< std::tstring >& rItems, unsigned int startingNumber = UINT_MAX ) throws_( CRuntimeException );
+	size_t GenerateNumbersInSequence( std::vector<std::tstring>& rItems, unsigned int startingNumber = UINT_MAX ) throws_( CRuntimeException );
 }
 
 

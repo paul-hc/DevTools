@@ -14,7 +14,7 @@ namespace lcs
 	}
 
 	template<>
-	inline bool IsEmpty< std::tstring >( const std::tstring* pString )
+	inline bool IsEmpty<std::tstring>( const std::tstring* pString )
 	{
 		return NULL == pString || 0 == pString->length();
 	}
@@ -32,7 +32,7 @@ namespace lcs
 		basic data provider template class for integral types
 		example:
 			const TCHAR* str = "a string to compare";
-			lcs::CBlock< TCHAR > compare_data1( str, strlen( str ) );
+			lcs::CBlock<TCHAR> compare_data1( str, strlen( str ) );
 	*/
 	template< typename T >
 	class CBlock
@@ -102,7 +102,7 @@ namespace lcs
 		template< typename StringT >
 		explicit Comparator( const StringT& src, const StringT& dest ) : m_src( src.c_str(), src.length() ), m_dest( dest.c_str(), dest.length() ) {}
 
-		void Process( std::vector< CResult< T > >& rOutSeq );
+		void Process( std::vector< CResult<T> >& rOutSeq );
 		size_t GetLcsLength( void ) const { return static_cast<size_t>( GetLcsAt( 0, 0 ) ); }
 	private:
 		size_t GetLcsIndex( size_t col, size_t row ) const;
@@ -110,7 +110,7 @@ namespace lcs
 		LCS_T GetLcsAt( size_t col, size_t row ) const { return m_lcsArray[ GetLcsIndex( col, row ) ]; }
 		void SetLcsAt( size_t col, size_t row, LCS_T lcsValue ) { m_lcsArray[ GetLcsIndex( col, row ) ] = lcsValue; }
 
-		void QueryResults( std::vector< CResult< T > >& rOutSeq ) const;
+		void QueryResults( std::vector< CResult<T> >& rOutSeq ) const;
 
 		template< typename T >
 		str::Match GetValueMatch( const T* pLeft, const T* pRight ) const
@@ -124,15 +124,15 @@ namespace lcs
 			return str::MatchNotEqual;
 		}
 	private:
-		CBlock< T > m_src;
-		CBlock< T > m_dest;
+		CBlock<T> m_src;
+		CBlock<T> m_dest;
 		MatchFunc m_getMatchFunc;
-		std::vector< LCS_T > m_lcsArray;		// LCS working array
+		std::vector<LCS_T> m_lcsArray;		// LCS working array
 	};
 
 
 	template< typename StringT, typename MatchFunc >
-	void CompareStrings( std::vector< CResult< typename StringT::value_type > >& rLcsSequence, const StringT& srcText, const StringT& destText, MatchFunc getMatchFunc )
+	void CompareStrings( std::vector< CResult<typename StringT::value_type> >& rLcsSequence, const StringT& srcText, const StringT& destText, MatchFunc getMatchFunc )
 	{
 		typedef typename StringT::value_type TChar;
 
@@ -141,7 +141,7 @@ namespace lcs
 	}
 
 	template< typename StringT, typename MatchFunc >
-	inline void CompareStringPair( std::vector< CResult< typename StringT::value_type > >& rLcsSequence, const std::pair<StringT, StringT>& textPair, MatchFunc getMatchFunc )
+	inline void CompareStringPair( std::vector< CResult<typename StringT::value_type> >& rLcsSequence, const std::pair<StringT, StringT>& textPair, MatchFunc getMatchFunc )
 	{
 		CompareStrings( rLcsSequence, textPair.first, textPair.second, getMatchFunc );
 	}
@@ -150,10 +150,10 @@ namespace lcs
 
 namespace lcs
 {
-	// Comparator< T, MatchFunc > template code
+	// Comparator<T, MatchFunc> template code
 
 	template< typename T, typename MatchFunc >
-	inline size_t Comparator< T, MatchFunc >::GetLcsIndex( size_t col, size_t row ) const
+	inline size_t Comparator<T, MatchFunc>::GetLcsIndex( size_t col, size_t row ) const
 	{
 		size_t index = ( row * m_src.GetSize() ) + col;
 		ASSERT( index < m_lcsArray.size() );
@@ -162,13 +162,13 @@ namespace lcs
 
 	// we calculate the LCS array and return the LCS length
 	template< typename T, typename MatchFunc >
-	void Comparator< T, MatchFunc >::Process( std::vector< CResult< T > >& rOutSeq )
+	void Comparator<T, MatchFunc>::Process( std::vector< CResult<T> >& rOutSeq )
 	{
 		if ( m_src == m_dest )
 		{
 			rOutSeq.resize( m_dest.GetSize() );
 			for ( size_t i = 0; i != rOutSeq.size(); ++i )
-				rOutSeq[ i ] = CResult< T >( i, Equal, *m_dest.GetAt( i ) );
+				rOutSeq[ i ] = CResult<T>( i, Equal, *m_dest.GetAt( i ) );
 
 			return;
 		}
@@ -209,7 +209,7 @@ namespace lcs
 
 
 	template< typename T, typename MatchFunc >
-	void Comparator< T, MatchFunc >::QueryResults( std::vector< CResult< T > >& rOutSeq ) const
+	void Comparator<T, MatchFunc>::QueryResults( std::vector< CResult<T> >& rOutSeq ) const
 	{
 		for ( size_t col = 0, row = 0; col < m_src.GetSize() || row < m_dest.GetSize(); )
 		{
@@ -221,7 +221,7 @@ namespace lcs
 			if ( str::MatchEqual == match || str::MatchEqualDiffCase == match )
 			{
 				// if the data is equal, then mark the record to be kept
-				rOutSeq.push_back( CResult< T >( ++col, str::MatchEqual == match ? lcs::Equal : lcs::EqualDiffCase, *pSrcData, *pDestData ) );
+				rOutSeq.push_back( CResult<T>( ++col, str::MatchEqual == match ? lcs::Equal : lcs::EqualDiffCase, *pSrcData, *pDestData ) );
 				++row;
 			}
 			else if ( !lcs::IsEmpty( pSrcData ) && ( lcs::IsEmpty( pDestData ) || GetLcsAt( col + 1, row ) >= GetLcsAt( col, row + 1 ) ) )
@@ -229,7 +229,7 @@ namespace lcs
 				// if the value to the right is greater than or equal to the
 				// value below, and the data is not null, then mark the first
 				// data to be deleted
-				rOutSeq.push_back( CResult< T >( ++col, lcs::Remove, *pSrcData ) );
+				rOutSeq.push_back( CResult<T>( ++col, lcs::Remove, *pSrcData ) );
 			}
 			else
 			{
@@ -237,7 +237,7 @@ namespace lcs
 				// then mark the first data to be deleted the data should not null
 				ASSERT( !lcs::IsEmpty( pDestData ) );
 
-				rOutSeq.push_back( CResult< T >( ++row, lcs::Insert, *pDestData ) );
+				rOutSeq.push_back( CResult<T>( ++row, lcs::Insert, *pDestData ) );
 			}
 		}
 	}

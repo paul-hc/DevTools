@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PathGroup.h"
 #include "Algorithms.h"
 #include "StringUtilities.h"
@@ -27,7 +27,7 @@ namespace fs
 	bool CPathGroup::AnyIsPartOf( const fs::CPath& path ) const
 	{
 		if ( !path.IsEmpty() )
-			for ( std::vector< fs::CPath >::const_iterator itSubPath = m_paths.begin(); itSubPath != m_paths.end(); ++itSubPath )
+			for ( std::vector<fs::CPath>::const_iterator itSubPath = m_paths.begin(); itSubPath != m_paths.end(); ++itSubPath )
 				if ( path::Contains( path.GetPtr(), itSubPath->GetPtr() ) )
 					return true;
 				else if ( path::ContainsWildcards( itSubPath->GetPtr() ) )
@@ -54,7 +54,7 @@ namespace fs
 
 	void CPathGroup::Append( const CPathGroup& right )
 	{
-		std::vector< std::tstring > allSpecs;
+		std::vector<std::tstring> allSpecs;
 		allSpecs.reserve( m_specs.size() + right.m_specs.size() );
 		allSpecs = m_specs;
 		allSpecs.insert( allSpecs.end(), right.m_specs.begin(), right.m_specs.end() );
@@ -73,7 +73,7 @@ namespace fs
 		m_paths.clear();
 		m_paths.reserve( m_specs.size() );
 
-		for ( std::vector< std::tstring >::const_iterator itSpec = m_specs.begin(); itSpec != m_specs.end(); ++itSpec )
+		for ( std::vector<std::tstring>::const_iterator itSpec = m_specs.begin(); itSpec != m_specs.end(); ++itSpec )
 			env::AddExpandedPaths( m_paths, itSpec->c_str(), _T(";") );		// add unique to m_paths
 	}
 }

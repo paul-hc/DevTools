@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CommandService.h"
 #include "CommandModel.h"
 #include "Algorithms.h"
@@ -32,7 +32,7 @@ CCommandService::~CCommandService()
 
 size_t CCommandService::FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const
 {
-	const std::deque< utl::ICommand* >& rStack = svc::Undo == stackType ? m_pCommandModel->GetUndoStack() : m_pCommandModel->GetRedoStack();
+	const std::deque<utl::ICommand*>& rStack = svc::Undo == stackType ? m_pCommandModel->GetUndoStack() : m_pCommandModel->GetRedoStack();
 	size_t topPos = utl::FindPos( rStack, pCmd );
 	if ( topPos != utl::npos )
 		topPos = rStack.size() - topPos - 1;		// position from the top

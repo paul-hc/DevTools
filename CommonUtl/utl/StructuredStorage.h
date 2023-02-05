@@ -132,7 +132,7 @@ namespace fs
 
 		typedef int TStorageFlags;
 	private:
-		typedef fs::CPathObjectMap< fs::TStgDocPath, CStructuredStorage > TStorageMap;		// document path to open root storage
+		typedef fs::CPathObjectMap<fs::TStgDocPath, CStructuredStorage> TStorageMap;		// document path to open root storage
 
 		static TStorageMap& GetOpenedDocStgs( void );			// singleton: opened document storages - only root storages!
 
@@ -186,11 +186,11 @@ namespace fs
 		DWORD m_openMode;
 		fs::TStgDocPath m_docFilePath;				// full path of the document storage file
 
-		typedef fs::CPathMap< fs::TEmbeddedPath, fs::CStreamState > TStreamStates;		// keys are embedded encoded paths, whereas CFileState::m_fullPath is the storage name
+		typedef fs::CPathMap<fs::TEmbeddedPath, fs::CStreamState> TStreamStates;		// keys are embedded encoded paths, whereas CFileState::m_fullPath is the storage name
 
 		TStreamStates m_openedStreamStates;		// stream states of streams opened for reading (immutable, clonable)
 	protected:
-		static mfc::CAutoException< CFileException > s_fileError;
+		static mfc::CAutoException<CFileException> s_fileError;
 	public:
 		static const TCHAR s_rootFolderName[];	// ""
 	};

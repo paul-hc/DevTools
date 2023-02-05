@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileContent.h"
 #include "FileState.h"
 #include "FileEnumerator.h"
@@ -151,7 +151,7 @@ namespace fs
 		const CFileBackup& m_backup;
 		CFileCompareContent m_srcContent;
 	public:
-		std::vector< fs::CPath > m_dupFilePaths;
+		std::vector<fs::CPath> m_dupFilePaths;
 	};
 
 

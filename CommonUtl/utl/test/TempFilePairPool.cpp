@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/TempFilePairPool.h"
@@ -16,7 +16,7 @@ namespace ut
 	CPathPairPool::CPathPairPool( const TCHAR* pSourceFilenames, bool fullDestPaths /*= false*/ )
 		: m_fullDestPaths( fullDestPaths )
 	{
-		std::vector< std::tstring > srcFilenames;
+		std::vector<std::tstring> srcFilenames;
 		str::Split( srcFilenames, pSourceFilenames, ut::CTempFilePool::m_sep );
 
 		m_pathPairs.StoreSrcFromPaths( srcFilenames );
@@ -26,7 +26,7 @@ namespace ut
 
 	std::tstring CPathPairPool::JoinDest( void )
 	{
-		std::vector< std::tstring > destFilenames; destFilenames.reserve( m_pathPairs.GetPairs().size() );
+		std::vector<std::tstring> destFilenames; destFilenames.reserve( m_pathPairs.GetPairs().size() );
 
 		for ( CPathRenamePairs::const_iterator itPair = m_pathPairs.Begin(); itPair != m_pathPairs.End(); ++itPair )
 			destFilenames.push_back( m_fullDestPaths ? itPair->second.Get() : fs::CPathParts( itPair->second.Get() ).GetFilename() );

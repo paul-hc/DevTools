@@ -24,7 +24,7 @@ Linking to UTL libraries:
 	- Add the projects to your application solution and set a dependency to it (note: this WILL NOT take care of linking to .lib files):
 		utl/UTL_BASE_vc12.vcxproj
 		utl/UI/UTL_UI_vc12.vcxproj
-	- To include precompiled UTL library headers, open stdafx.h in your application project (e.g. TesterUtlBase), and include the headers:
+	- To include precompiled UTL library headers, open pch.h in your application project (e.g. TesterUtlBase), and include the headers:
 		#include "utl/utl_base.h"			// UTL_BASE library classes
 		#include "utl/UI/utl_ui.h"			// UTL_UI library classes
 	- To link with utl_*.lib files, select project (e.g. TesterUtlBase), right-click Properties, go to Common Properties > References and a reference to UTL_BASE, UTL_UI.

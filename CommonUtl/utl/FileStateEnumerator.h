@@ -25,7 +25,7 @@ namespace fs
 		virtual void OnAddFileInfo( const fs::CFileState& fileState );
 		virtual void AddFoundFile( const fs::CPath& filePath ) { __super::AddFoundFile( filePath ); }		// base method is pure & implemented
 	public:
-		std::vector< fs::CFileState > m_fileStates;
+		std::vector<fs::CFileState> m_fileStates;
 	};
 }
 
@@ -78,7 +78,7 @@ namespace fs
 		using CFileStateEnumerator::m_fileStates;
 		using CFileStateEnumerator::SortFileStates;
 	public:
-		std::vector< FileStateItemT* > m_fileItems;
+		std::vector<FileStateItemT*> m_fileItems;
 	};
 }
 

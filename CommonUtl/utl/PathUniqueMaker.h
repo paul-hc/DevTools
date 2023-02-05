@@ -54,7 +54,7 @@ private:
 	const TCHAR* m_pFmtNumSuffix;
 	std::tstring m_fnSuffixPattern;		// e.g. "_[*]" for "_[%d]"
 
-	std::unordered_set< fs::CPath > m_uniquePathsIndex;
+	std::unordered_set<fs::CPath> m_uniquePathsIndex;
 };
 
 

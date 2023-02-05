@@ -31,8 +31,8 @@ namespace io
 		class CRedirectStream : public utl::IMemoryManaged
 		{
 			typedef typename ProxyStreamT::char_type TProxyChar;
-			typedef std::basic_streambuf< TProxyChar > TOStreamBuf;
-			typedef std::basic_ostringstream< TProxyChar > TOStringStream;
+			typedef std::basic_streambuf<TProxyChar> TOStreamBuf;
+			typedef std::basic_ostringstream<TProxyChar> TOStringStream;
 		public:
 			CRedirectStream( ProxyStreamT& rProxyOStream, DestStreamT& rDestOStream )		// i.e. std::cout|std::cerr, std::wcout|std::wcerr
 				: m_rProxyOStream( rProxyOStream )

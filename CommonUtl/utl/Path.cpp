@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Path.h"
 #include "FileState.h"
 #include "FileSystem.h"
@@ -150,7 +150,7 @@ namespace path
 
 	bool EqualsPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
-		return str::Equals< str::IgnoreCase >( pLeftPath, pRightPath );
+		return str::Equals<str::IgnoreCase>( pLeftPath, pRightPath );
 	}
 
 	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight )
@@ -221,7 +221,7 @@ namespace path
 			if ( !HasSameRoot( pPath, pSegment ) )
 				return false;
 
-		utl::AssignPtr( pMatchLength, Range<const TCHAR*>( pPath, SkipRoot( pPath ) ).GetSpan< size_t >() );
+		utl::AssignPtr( pMatchLength, Range<const TCHAR*>( pPath, SkipRoot( pPath ) ).GetSpan<size_t>() );
 		return true;
 	}
 
@@ -295,7 +295,7 @@ namespace path
 	{
 		if ( IsMultipleWildcard( pWildSpec, pMultiSpecDelims ) )
 		{
-			std::vector< TCHAR > wildcards;
+			std::vector<TCHAR> wildcards;
 			str::QuickTokenize( wildcards, pWildSpec, pMultiSpecDelims );		// multiple zero-terminated items
 
 			for ( str::const_iterator pWild = &wildcards.front(), pEnd = &wildcards.back() + 1; pWild != pEnd; ++pWild )
@@ -743,7 +743,7 @@ namespace path
 			}
 		}
 
-		return commonRange.GetSpan< size_t >();
+		return commonRange.GetSpan<size_t>();
 	}
 
 	std::tstring FindCommonPrefix( const TCHAR* pLeftPath, const TCHAR* pRightPath )
@@ -1116,7 +1116,7 @@ namespace pred
 {
 	struct ComparPathDepth
 	{
-		ComparPathDepth( const std::unordered_map< fs::CPath, size_t >& rFilePathsToDepth ) : m_rFilePathsToDepth( rFilePathsToDepth ) {}
+		ComparPathDepth( const std::unordered_map<fs::CPath, size_t>& rFilePathsToDepth ) : m_rFilePathsToDepth( rFilePathsToDepth ) {}
 
 		CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
 		{
@@ -1129,7 +1129,7 @@ namespace pred
 			return result;
 		}
 	private:
-		const std::unordered_map< fs::CPath, size_t >& m_rFilePathsToDepth;
+		const std::unordered_map<fs::CPath, size_t>& m_rFilePathsToDepth;
 		pred::CompareNaturalPath m_comparePath;
 	};
 
@@ -1143,11 +1143,11 @@ namespace pred
 
 namespace fs
 {
-	void SortByPathDepth( std::vector< fs::CPath >& rFilePaths, bool ascending /*= true*/ )
+	void SortByPathDepth( std::vector<fs::CPath>& rFilePaths, bool ascending /*= true*/ )
 	{
-		std::unordered_map< fs::CPath, size_t > filePathsToDepth;
+		std::unordered_map<fs::CPath, size_t> filePathsToDepth;
 
-		for ( std::vector< fs::CPath >::const_iterator itFilePath = rFilePaths.begin(); itFilePath != rFilePaths.end(); ++itFilePath )
+		for ( std::vector<fs::CPath>::const_iterator itFilePath = rFilePaths.begin(); itFilePath != rFilePaths.end(); ++itFilePath )
 			filePathsToDepth[ *itFilePath ] = itFilePath->GetDepth();
 
 		std::sort( rFilePaths.begin(), rFilePaths.end(), pred::MakeOrderByValue( pred::ComparPathDepth( filePathsToDepth ), ascending ) );
@@ -1157,9 +1157,9 @@ namespace fs
 
 namespace path
 {
-	void QueryParentPaths( std::vector< fs::CPath >& rParentPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly /*= true*/ )
+	void QueryParentPaths( std::vector<fs::CPath>& rParentPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly /*= true*/ )
 	{
-		for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+		for ( std::vector<fs::CPath>::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 		{
 			fs::CPath parentPath = itFilePath->GetParentPath();
 			if ( !parentPath.IsEmpty() )

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FlexPath.h"
 #include "StructuredStorage.h"
 #include "Algorithms.h"
@@ -100,26 +100,26 @@ namespace fs
 
 namespace path
 {
-	bool QueryPhysicalPaths( OUT std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths )
+	bool QueryPhysicalPaths( OUT std::vector<fs::CPath>& rPhysicalPaths, const std::vector<fs::CFlexPath>& flexPaths )
 	{
-		for ( std::vector< fs::CFlexPath >::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
+		for ( std::vector<fs::CFlexPath>::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
 			if ( itFlexPath->IsPhysicalPath() )
 				rPhysicalPaths.push_back( *itFlexPath );
 
 		return !rPhysicalPaths.empty();
 	}
 
-	bool QueryStorageDocPaths( OUT std::vector< fs::CPath >& rDocStgPaths, const std::vector< fs::CFlexPath >& flexPaths )
+	bool QueryStorageDocPaths( OUT std::vector<fs::CPath>& rDocStgPaths, const std::vector<fs::CFlexPath>& flexPaths )
 	{
-		for ( std::vector< fs::CFlexPath >::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
+		for ( std::vector<fs::CFlexPath>::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
 			utl::AddUnique( rDocStgPaths, itFlexPath->IsComplexPath() ? itFlexPath->GetPhysicalPath() : itFlexPath->Get() );
 
 		return !rDocStgPaths.empty();
 	}
 
-	void ConvertToPhysicalPaths( std::vector< fs::CFlexPath >& rFlexPaths )
+	void ConvertToPhysicalPaths( std::vector<fs::CFlexPath>& rFlexPaths )
 	{
-		for ( std::vector< fs::CFlexPath >::iterator itFlexPath = rFlexPaths.begin(); itFlexPath != rFlexPaths.end(); ++itFlexPath )
+		for ( std::vector<fs::CFlexPath>::iterator itFlexPath = rFlexPaths.begin(); itFlexPath != rFlexPaths.end(); ++itFlexPath )
 			if ( itFlexPath->IsComplexPath() )
 				itFlexPath->Set( itFlexPath->GetPhysicalPath().Get() );
 

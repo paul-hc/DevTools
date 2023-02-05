@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/LcsTests.h"
@@ -15,22 +15,22 @@
 
 namespace ut
 {
-	inline std::vector< std::string > Split( const char* pSource, const char sep[] = "|" )
+	inline std::vector<std::string> Split( const char* pSource, const char sep[] = "|" )
 	{
-		std::vector< std::string > items;
+		std::vector<std::string> items;
 		str::Split( items, pSource, sep );
 		return items;
 	}
 
-	inline std::vector< std::wstring > Split( const wchar_t* pSource, const wchar_t sep[] = _T("|") )
+	inline std::vector<std::wstring> Split( const wchar_t* pSource, const wchar_t sep[] = _T("|") )
 	{
-		std::vector< std::wstring > items;
+		std::vector<std::wstring> items;
 		str::Split( items, pSource, sep );
 		return items;
 	}
 
 	template< typename CharType >
-	void MakeRandomItems( std::vector< std::basic_string< CharType > >& rItems, const CharType fragment[], size_t minItems, size_t maxItems, size_t maxLen, const Range<CharType>& charRange )
+	void MakeRandomItems( std::vector< std::basic_string<CharType> >& rItems, const CharType fragment[], size_t minItems, size_t maxItems, size_t maxLen, const Range<CharType>& charRange )
 	{
 		utl::GenerateRandomStrings( rItems, utl::GetRandomValue( minItems, maxItems ), maxLen - str::GetLength( fragment ), charRange );
 		utl::InsertFragmentRandomly( rItems, fragment );
@@ -57,7 +57,7 @@ namespace ut
 
 
 	template<>
-	std::tstring ToString< MatchTriplet >( const MatchTriplet& triplet )
+	std::tstring ToString<MatchTriplet>( const MatchTriplet& triplet )
 	{
 		std::tostringstream oss;
 		switch ( triplet.m_match )
@@ -91,7 +91,7 @@ namespace ut
 		}
 	}
 
-	void PushTriplet( std::vector< ut::MatchTriplet >& rTriplets, const lcs::CResult< char >& lcsResult )
+	void PushTriplet( std::vector<ut::MatchTriplet>& rTriplets, const lcs::CResult<char>& lcsResult )
 	{
 		if ( rTriplets.empty() || rTriplets.back().m_match != ToStringMatch( lcsResult.m_matchType ) )
 			rTriplets.push_back( MatchTriplet( ToStringMatch( lcsResult.m_matchType ) ) );
@@ -140,8 +140,8 @@ CLcsTests& CLcsTests::Instance( void )
 
 void CLcsTests::TestSuffixTreeGutsAnsi( void )
 {
-	lcs::CSuffixTree< char, pred::TCompareCase > suffixTree( "of the people, by the people, for the people," );
-	std::vector< const char* >::const_iterator itSuffix = suffixTree.m_suffixes.begin();
+	lcs::CSuffixTree<char, pred::TCompareCase> suffixTree( "of the people, by the people, for the people," );
+	std::vector<const char*>::const_iterator itSuffix = suffixTree.m_suffixes.begin();
 
 	ASSERT_EQUAL( _T(" by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
 	ASSERT_EQUAL( _T(" for the people,"), str::FromAnsi( *itSuffix++ ) );
@@ -192,8 +192,8 @@ void CLcsTests::TestSuffixTreeGutsAnsi( void )
 
 void CLcsTests::TestSuffixTreeGutsWide( void )
 {
-	lcs::CSuffixTree< TCHAR, pred::TCompareCase > suffixTree( _T("of the people, by the people, for the people,") );
-	std::vector< const TCHAR* >::const_iterator itSuffix = suffixTree.m_suffixes.begin();
+	lcs::CSuffixTree<TCHAR, pred::TCompareCase> suffixTree( _T("of the people, by the people, for the people,") );
+	std::vector<const TCHAR*>::const_iterator itSuffix = suffixTree.m_suffixes.begin();
 
 	ASSERT_EQUAL_STR( _T(" by the people, for the people,"), *itSuffix++ );
 	ASSERT_EQUAL_STR( _T(" for the people,"), *itSuffix++ );
@@ -259,7 +259,7 @@ void CLcsTests::TestFindLongestDuplicatedString( void )
 void CLcsTests::TestFindLongestCommonSubstring( void )
 {
 	{
-		std::vector< std::wstring > items;
+		std::vector<std::wstring> items;
 		ASSERT_EQUAL( L"", str::FindLongestCommonSubstring( items ) );
 
 		items.push_back( std::wstring() );
@@ -273,13 +273,13 @@ void CLcsTests::TestFindLongestCommonSubstring( void )
 		ASSERT_EQUAL( "", str::FindLongestCommonSubstring( ut::Split( "bcd|abcdabcd|" ) ) );
 		ASSERT_EQUAL( "", str::FindLongestCommonSubstring( ut::Split( "bcd|abcdabcd|xy" ) ) );
 		ASSERT_EQUAL( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|ycd" ) ) );
-		ASSERT( str::Equals< str::IgnoreCase >( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|yCD" ), pred::TCompareNoCase() ).c_str() ) );
+		ASSERT( str::Equals<str::IgnoreCase>( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|yCD" ), pred::TCompareNoCase() ).c_str() ) );
 
 		ASSERT_EQUAL_IGNORECASE( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|yCD" ), pred::TCompareNoCase() ) );
 	}
 
 	{
-		std::vector< std::wstring > items;
+		std::vector<std::wstring> items;
 		ASSERT_EQUAL( L"", str::FindLongestCommonSubstring( items, pred::TCompareCase() ) );
 
 		items.push_back( L"of the people from Italy" );
@@ -293,12 +293,12 @@ void CLcsTests::TestFindLongestCommonSubstring( void )
 
 void CLcsTests::TestRandomLongestCommonSubstring( void )
 {
-	const Range<wchar_t> charRange = utl::GetRangeLowerLetters< wchar_t >();
+	const Range<wchar_t> charRange = utl::GetRangeLowerLetters<wchar_t>();
 	static const wchar_t fragment[] = L" XYZ ";
 
 	for ( size_t i = 0; i != 5; ++i )
 	{
-		std::vector< std::wstring > items;
+		std::vector<std::wstring> items;
 		ut::MakeRandomItems( items, fragment, 2, 16, 32, charRange );
 
 		ASSERT( str::ContainsPart( str::FindLongestCommonSubstring( items ).c_str(), str::MakePart( fragment ) ) );
@@ -312,12 +312,12 @@ void CLcsTests::TestMatchingSequenceSimple( void )
 
 	lcs::Comparator<char, str::TGetMatch> comparator( src, dest );
 
-	std::vector< lcs::CResult< char > > results;
+	std::vector< lcs::CResult<char> > results;
 	comparator.Process( results );
 
-	std::vector< ut::MatchTriplet > triplets;
+	std::vector<ut::MatchTriplet> triplets;
 
-	for ( std::vector< lcs::CResult< char > >::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult )
+	for ( std::vector< lcs::CResult<char> >::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult )
 		ut::PushTriplet( triplets, *itResult );
 
 	ASSERT_EQUAL( 3, triplets.size() );
@@ -332,12 +332,12 @@ void CLcsTests::TestMatchingSequenceDiffCase( void )
 
 	lcs::Comparator<char, str::TGetMatch> comparator( src, dest );
 
-	std::vector< lcs::CResult< char > > results;
+	std::vector< lcs::CResult<char> > results;
 	comparator.Process( results );
 
 	std::vector< ut::MatchTriplet > triplets;
 
-	for ( std::vector< lcs::CResult< char > >::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult )
+	for ( std::vector<lcs::CResult< char >>::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult )
 		ut::PushTriplet( triplets, *itResult );
 
 	ASSERT_EQUAL( 3, triplets.size() );
@@ -352,12 +352,12 @@ void CLcsTests::TestMatchingSequenceMidCommon( void )
 
 	lcs::Comparator<char, str::TGetMatch> comparator( src, dest );
 
-	std::vector< lcs::CResult< char > > results;
+	std::vector< lcs::CResult<char> > results;
 	comparator.Process( results );
 
-	std::vector< ut::MatchTriplet > triplets;
+	std::vector<ut::MatchTriplet> triplets;
 
-	for ( std::vector< lcs::CResult< char > >::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult )
+	for ( std::vector< lcs::CResult<char> >::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult )
 		ut::PushTriplet( triplets, *itResult );
 
 	ASSERT_EQUAL( 5, triplets.size() );

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DuplicateFilesEnumerator.h"
 #include "ContainerOwnership.h"
 #include "Guards.h"
@@ -29,7 +29,7 @@ void CDuplicateFilesEnumerator::Clear( void )
 	__super::Clear();
 }
 
-void CDuplicateFilesEnumerator::SearchDuplicates( const std::vector< fs::TPatternPath >& searchPaths )
+void CDuplicateFilesEnumerator::SearchDuplicates( const std::vector<fs::TPatternPath>& searchPaths )
 {
 	Clear();
 
@@ -39,7 +39,7 @@ void CDuplicateFilesEnumerator::SearchDuplicates( const std::vector< fs::TPatter
 	{
 		utl::CSectionGuard section( _T("# SearchDuplicates") );
 
-		for ( std::vector< fs::TPatternPath >::const_iterator itSearchPath = searchPaths.begin(); itSearchPath != searchPaths.end(); ++itSearchPath )
+		for ( std::vector<fs::TPatternPath>::const_iterator itSearchPath = searchPaths.begin(); itSearchPath != searchPaths.end(); ++itSearchPath )
 			fs::SearchEnumFiles( this, *itSearchPath );
 	}
 
@@ -76,7 +76,7 @@ void CDuplicateFilesEnumerator::GroupByCrc32( void )
 
 	utl::CSectionGuard section( _T("# ExtractDuplicateGroups (CRC32)") );
 
-	utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > newDuplicateGroups;
+	utl::COwningContainer< std::vector<CDuplicateFilesGroup*> > newDuplicateGroups;
 	m_pGroupStore->ExtractDuplicateGroups( newDuplicateGroups, m_outcome.m_ignoredCount, m_pProgressSvc );
 
 	m_dupGroupItems.swap( newDuplicateGroups );		// swap items and ownership

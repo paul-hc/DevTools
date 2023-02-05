@@ -343,7 +343,7 @@ namespace path
 	template< typename ContainerT >
 	size_t UniquifyPaths( ContainerT& rPaths )
 	{
-		std::unordered_set< typename ContainerT::value_type > uniquePathIndex;
+		std::unordered_set<typename ContainerT::value_type> uniquePathIndex;
 		return UniquifyPaths( rPaths, uniquePathIndex );
 	}
 
@@ -554,7 +554,7 @@ namespace pred
 	};
 
 
-	struct IsEquivalentPathChar : public std::unary_function< bool, TCHAR >
+	struct IsEquivalentPathChar : public std::unary_function<bool, TCHAR>
 	{
 		bool operator()( TCHAR left, TCHAR right ) const
 		{
@@ -563,7 +563,7 @@ namespace pred
 	};
 
 
-	struct IsEquivalentPathString : public std::unary_function< bool, std::tstring >
+	struct IsEquivalentPathString : public std::unary_function<bool, std::tstring>
 	{
 		IsEquivalentPathString( const std::tstring& path ) : m_path( path ) {}
 
@@ -576,7 +576,7 @@ namespace pred
 	};
 
 
-	struct IsEquivalentPath : public std::unary_function< bool, fs::CPath >
+	struct IsEquivalentPath : public std::unary_function<bool, fs::CPath>
 	{
 		IsEquivalentPath( const fs::CPath& path ) : m_path( path ) {}
 
@@ -589,7 +589,7 @@ namespace pred
 	};
 
 
-	struct IsPathEquivalent : public std::binary_function< bool, fs::CPath, fs::CPath >
+	struct IsPathEquivalent : public std::binary_function<bool, fs::CPath, fs::CPath>
 	{
 		bool operator()( const fs::CPath& left, const fs::CPath& right ) const
 		{
@@ -665,8 +665,8 @@ namespace fs
 
 
 	// orders path keys using path equivalence (rather than CPath::operator< intuitive ordering)
-	typedef std::map< fs::CPath, fs::CPath, pred::TLess_NaturalPath > TPathPairMap;
-	typedef std::set< fs::CPath, pred::TLess_NaturalPath > TPathSet;
+	typedef std::map<fs::CPath, fs::CPath, pred::TLess_NaturalPath> TPathPairMap;
+	typedef std::set<fs::CPath, pred::TLess_NaturalPath> TPathSet;
 
 
 	// path sort for std::tstring, fs::CPath, fs::CFlexPath
@@ -683,13 +683,13 @@ namespace fs
 		SortPaths( rStrPaths.begin(), rStrPaths.end(), ascending );
 	}
 
-	void SortByPathDepth( std::vector< fs::CPath >& rFilePaths, bool ascending = true );
+	void SortByPathDepth( std::vector<fs::CPath>& rFilePaths, bool ascending = true );
 }
 
 
 namespace path
 {
-	void QueryParentPaths( std::vector< fs::CPath >& rParentPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly = true );
+	void QueryParentPaths( std::vector<fs::CPath>& rParentPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly = true );
 
 
 	template< typename ContainerT >

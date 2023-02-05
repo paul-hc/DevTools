@@ -87,7 +87,7 @@ namespace fs
 		bool IsValid( void ) const { return !m_securityDescriptor.empty(); }
 		PSECURITY_DESCRIPTOR GetDescriptor( void ) const { return IsValid() ? (PSECURITY_DESCRIPTOR)&m_securityDescriptor.front() : NULL; }
 	private:
-		std::vector< BYTE > m_securityDescriptor;
+		std::vector<BYTE> m_securityDescriptor;
 	};
 }
 

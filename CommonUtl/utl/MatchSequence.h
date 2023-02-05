@@ -11,7 +11,7 @@ namespace str
 	template< typename CharType >
 	struct CMatchSequence
 	{
-		typedef std::basic_string< CharType > TString;
+		typedef std::basic_string<CharType> TString;
 
 		CMatchSequence( void ) : m_match( MatchEqual ) {}
 		CMatchSequence( const TString& srcText, const TString& destText ) : m_textPair( srcText, destText ), m_match( MatchNotEqual ) {}
@@ -34,14 +34,14 @@ namespace str
 	};
 
 
-	typedef CMatchSequence< TCHAR > TMatchSequence;
+	typedef CMatchSequence<TCHAR> TMatchSequence;
 
 
 	// CMatchSequence template code
 
 	template< typename CharType >
 	template< typename MatchFunc >
-	void CMatchSequence< CharType >::ComputeMatchSeq( MatchFunc getMatchFunc )
+	void CMatchSequence<CharType>::ComputeMatchSeq( MatchFunc getMatchFunc )
 	{
 		m_match = getMatchFunc( m_textPair.first.c_str(), m_textPair.second.c_str() );
 		m_matchSeqPair.first.clear();
@@ -51,7 +51,7 @@ namespace str
 		//if ( MatchEqual == m_match || m_textPair.second.empty() )
 		//	return;
 
-		std::vector< lcs::CResult<CharType> > lcsSequence;
+		std::vector<lcs::CResult<CharType>> lcsSequence;
 		lcs::CompareStringPair( lcsSequence, m_textPair, getMatchFunc );
 
 		m_matchSeqPair.first.reserve( m_textPair.first.size() );

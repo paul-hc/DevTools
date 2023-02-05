@@ -79,7 +79,7 @@ public:
 	// composite command
 	bool IsEmpty( void ) const { return m_subCommands.empty(); }
 	utl::ICommand* GetMainCmd( void ) const { return m_pMainCmd; }
-	const std::vector< utl::ICommand* >& GetSubCommands( void ) const { return m_subCommands; }
+	const std::vector<utl::ICommand*>& GetSubCommands( void ) const { return m_subCommands; }
 
 	void AddCmd( utl::ICommand* pSubCmd );
 	void AddMainCmd( utl::ICommand* pMainCmd ) { m_pMainCmd = pMainCmd; AddCmd( pMainCmd ); }
@@ -95,7 +95,7 @@ protected:
 	void Serialize( CArchive& archive );				// CObject-like serialization: called from the serializable derived class
 protected:
 	persist std::tstring m_userInfo;
-	persist std::vector< utl::ICommand* > m_subCommands;		// with ownership
+	persist std::vector<utl::ICommand*> m_subCommands;		// with ownership
 	persist utl::ICommand* m_pMainCmd;
 };
 

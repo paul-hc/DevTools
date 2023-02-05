@@ -18,7 +18,7 @@ namespace fs
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
 	bool IsProtectedFile( const TCHAR* pFilePath );
 
-	void QueryFolderPaths( std::vector< fs::TDirPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly = true );
+	void QueryFolderPaths( std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly = true );
 
 	fs::TDirPath GetCurrentDirectory( void );				// current working directory
 	fs::CPath GetModuleFilePath( HINSTANCE hInstance );		// pass AfxGetApp()->m_hInstance in GUI apps, or NULL for the .exe

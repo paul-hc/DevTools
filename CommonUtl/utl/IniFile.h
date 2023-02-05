@@ -13,7 +13,7 @@ namespace fs { class CPath; }
 class CIniFile
 {
 public:
-	typedef std::map< std::tstring, std::tstring > TSectionMap;
+	typedef std::map<std::tstring, std::tstring> TSectionMap;
 
 	CIniFile( void ) {}
 
@@ -37,8 +37,8 @@ private:
 	static bool ParseSection( std::tstring& rSectionKey, const std::string& line );
 	static bool ParseProperty( std::tstring& rPropKey, std::tstring& rPropValue, const std::string& line );
 private:
-	std::map< std::tstring, TSectionMap > m_sectionMap;		// section name to property bag
-	std::vector< std::tstring > m_orderedSections;			// order in which sections get saved
+	std::map<std::tstring, TSectionMap> m_sectionMap;		// section name to property bag
+	std::vector<std::tstring> m_orderedSections;			// order in which sections get saved
 
 	static unsigned int s_parseLineNo;
 };

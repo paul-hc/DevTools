@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/RegistryTests.h"
@@ -95,7 +95,7 @@ void CRegistryTests::TestKey( void )
 		reg::CKey rootKey;
 		ASSERT( rootKey.Open( HKEY_CURRENT_USER, s_rootPath ) );
 
-		std::vector< std::tstring > subKeyNames;
+		std::vector<std::tstring> subKeyNames;
 		rootKey.QuerySubKeyNames( subKeyNames );
 		ASSERT( utl::FindPos( subKeyNames, s_test.Get() ) != utl::npos );
 
@@ -129,7 +129,7 @@ void CRegistryTests::Test_StringValue( reg::CKey& rKey )
 
 void CRegistryTests::Test_MultiStringValue( reg::CKey& rKey )
 {
-	std::vector< fs::CPath > paths;
+	std::vector<fs::CPath> paths;
 	ASSERT( !rKey.HasValue( _T("MultiPaths") ) );
 	ASSERT( !rKey.QueryMultiString( _T("MultiPaths"), paths ) );
 	ASSERT( paths.empty() );
@@ -192,13 +192,13 @@ void CRegistryTests::Test_BinaryValue( reg::CKey& rKey )
 
 void CRegistryTests::Test_BinaryBuffer( reg::CKey& rKey )
 {
-	std::vector< double > numbers;
+	std::vector<double> numbers;
 	numbers.push_back( 123.4567 );
 	numbers.push_back( 357.98 );
 
 	ASSERT( rKey.WriteBinaryBuffer( _T("Doubles"), numbers ) );
 
-	std::vector< double > persistNumbers;
+	std::vector<double> persistNumbers;
 	ASSERT( rKey.QueryBinaryBuffer( _T("Doubles"), persistNumbers ) );
 	ASSERT( numbers == persistNumbers );
 	ASSERT_EQUAL( REG_BINARY, rKey.GetValueType( _T("Doubles") ) );
@@ -225,11 +225,11 @@ void CRegistryTests::Test_KeyInfo( const reg::CKey& rKey )
 	ASSERT_EQUAL( 8, keyInfo.m_valueCount );
 	ASSERT( CTime::GetCurrentTime() == keyInfo.m_lastWriteTime );
 
-	std::vector< std::tstring > subKeyNames;
+	std::vector<std::tstring> subKeyNames;
 	rKey.QuerySubKeyNames( subKeyNames );
 	ASSERT_EQUAL( _T("Details"), str::Join( subKeyNames, _T("|") ) );
 
-	std::vector< std::tstring > valueNames;
+	std::vector<std::tstring> valueNames;
 	rKey.QueryValueNames( valueNames );
 	ASSERT_EQUAL( _T("StrName|MultiPaths|Int16|Int32|UInt64|InterfaceID|Rect|Doubles"), str::Join( valueNames, _T("|") ) );
 }

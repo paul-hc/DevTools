@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ConsoleApplication.h"
 #include "EnumTags.h"
 #include "FileSystem.h"

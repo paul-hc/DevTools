@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "NumericProcessor.h"
 #include "RuntimeException.h"
 
@@ -90,7 +90,7 @@ namespace num
 		return numberRange.MakeTrail( numberRange.GetPos().m_end );		// empty range (at end)
 	}
 
-	CSequenceNumber< unsigned int > ExtractNumber( const std::tstring& text ) throws_( CRuntimeException )
+	CSequenceNumber<unsigned int> ExtractNumber( const std::tstring& text ) throws_( CRuntimeException )
 	{
 		str::TStringRange numberRange = FindNextNumber( text );
 		if ( numberRange.IsEmpty() )
@@ -104,7 +104,7 @@ namespace num
 		if ( NoNumber == radix )
 			throw CRuntimeException( str::Format( _T("No number found in item '%s'"), numberRange.GetStartPtr() ) );
 
-		CSequenceNumber< unsigned int > parsedNumber( value, _T("%u") );
+		CSequenceNumber<unsigned int> parsedNumber( value, _T("%u") );
 
 		switch ( radix )
 		{
@@ -120,18 +120,18 @@ namespace num
 		return parsedNumber;
 	}
 
-	size_t GenerateNumbersInSequence( std::vector< std::tstring >& rItems, unsigned int startingNumber /*= UINT_MAX*/ ) throws_( CRuntimeException )
+	size_t GenerateNumbersInSequence( std::vector<std::tstring>& rItems, unsigned int startingNumber /*= UINT_MAX*/ ) throws_( CRuntimeException )
 	{
 		size_t changedCount = 0;
 
 		if ( rItems.size() > 1 )		// multiple items?
 		{	// generate a new sequence
-			CSequenceNumber< unsigned int > seqNumber( startingNumber, _T("%u") );
+			CSequenceNumber<unsigned int> seqNumber( startingNumber, _T("%u") );
 
 			if ( UINT_MAX == startingNumber )
 				seqNumber = ExtractNumber( rItems.front() );
 
-			for ( std::vector< std::tstring >::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+			for ( std::vector<std::tstring>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
 				if ( !itItem->empty() )
 				{
 					str::TStringRange numberRange = FindNextNumber( str::TStringRange( *itItem ) );

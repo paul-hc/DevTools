@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CommandModel.h"
 #include "ContainerOwnership.h"
 #include "EnumTags.h"
@@ -162,7 +162,7 @@ bool CCommandModel::Redo( size_t stepCount /*= 1*/ )
 
 bool CCommandModel::CanUndo( void ) const
 {
-	for ( std::deque< utl::ICommand* >::const_reverse_iterator itCmd = m_undoStack.rbegin(); itCmd != m_undoStack.rend(); ++itCmd )
+	for ( std::deque<utl::ICommand*>::const_reverse_iterator itCmd = m_undoStack.rbegin(); itCmd != m_undoStack.rend(); ++itCmd )
 		if ( ( *itCmd )->IsUndoable() )
 			return true;
 

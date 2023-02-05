@@ -1,14 +1,14 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
-#include "test/StructuredStorageTest.h"
-#include "test/TempFilePairPool.h"
 #include "FlexPath.h"
 #include "FileState.h"
 #include "FileEnumerator.h"
 #include "StringUtilities.h"
 #include "StructuredStorage.h"
+#include "test/StructuredStorageTest.h"
+#include "test/TempFilePairPool.h"
 #include <unordered_set>
 
 #ifdef _DEBUG
@@ -23,15 +23,15 @@ namespace ut
 		ASSERT_PTR( pDocStorage );
 		ASSERT( pDocStorage->IsOpen() );
 
-		for ( std::vector< fs::TDirPath >::const_iterator itSubDirPath = src.m_subDirPaths.begin(); itSubDirPath != src.m_subDirPaths.end(); ++itSubDirPath )
+		for ( std::vector<fs::TDirPath>::const_iterator itSubDirPath = src.m_subDirPaths.begin(); itSubDirPath != src.m_subDirPaths.end(); ++itSubDirPath )
 			ASSERT( pDocStorage->MakeDirPath( itSubDirPath->GetPtr(), false ) );
 
 		const fs::TDirPath& srcDirPath = src.GetRelativeDirPath();
 
 		fs::CStructuredStorage::CScopedCurrentDir scopedCurrDir( pDocStorage, fs::CStructuredStorage::s_rootFolderName, STGM_READWRITE );
-		std::unordered_set< fs::TEmbeddedPath > createdFolderPaths;
+		std::unordered_set<fs::TEmbeddedPath> createdFolderPaths;
 
-		for ( std::vector< fs::CPath >::const_iterator itFilePath = src.m_filePaths.begin(); itFilePath != src.m_filePaths.end(); ++itFilePath )
+		for ( std::vector<fs::CPath>::const_iterator itFilePath = src.m_filePaths.begin(); itFilePath != src.m_filePaths.end(); ++itFilePath )
 		{
 			std::auto_ptr<CFile> pSrcFile = fs::OpenFile( srcDirPath / *itFilePath, false );
 			ASSERT_PTR( pSrcFile.get() );
@@ -59,7 +59,7 @@ namespace ut
 		ASSERT( fs::stg::GetElementFullState( streamState, pStream ) );
 
 		size_t textLength = static_cast<size_t>( streamState.m_fileSize );
-		std::vector< char > textBuffer;
+		std::vector<char> textBuffer;
 
 		textBuffer.reserve( textLength + 1 );		// including EOS
 		textBuffer.resize( textLength );

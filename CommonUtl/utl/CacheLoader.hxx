@@ -11,7 +11,7 @@ namespace fs
 	using std::placeholders::_1;
 
 	template< typename PathType, typename ObjectType >
-	inline CCacheLoader<PathType, ObjectType>::CCacheLoader( size_t maxSize, ICacheOwner< PathType, ObjectType >* pCacheOwner )
+	inline CCacheLoader<PathType, ObjectType>::CCacheLoader( size_t maxSize, ICacheOwner<PathType, ObjectType>* pCacheOwner )
 		: CFileObjectCache<PathType, ObjectType>( maxSize )
 		, m_pCacheOwner( pCacheOwner )
 		, m_pendingQueue( std::bind( &CCacheLoader::_Acquire, this, _1 ) )
@@ -79,9 +79,9 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	void CCacheLoader<PathType, ObjectType>::Enqueue( const std::vector< PathType >& pathKeys )
+	void CCacheLoader<PathType, ObjectType>::Enqueue( const std::vector<PathType>& pathKeys )
 	{
-		for ( typename std::vector< PathType >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
+		for ( typename std::vector<PathType>::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
 			Enqueue( *itPathKey );
 	}
 
@@ -100,7 +100,7 @@ namespace fs
 	CQueueListener<PathType>::~CQueueListener()
 	{
 		{
-			boost::lock_guard< boost::mutex > lock( m_mutex );
+			boost::lock_guard<boost::mutex> lock( m_mutex );
 			m_wantExit = true;
 			m_queuePending.notify_one();
 		}
@@ -110,7 +110,7 @@ namespace fs
 	template< typename PathType >
 	void CQueueListener<PathType>::Enqueue( const PathType& pathKey )
 	{
-		boost::lock_guard< boost::mutex > lock( m_mutex );
+		boost::lock_guard<boost::mutex> lock( m_mutex );
 		m_queue.push_front( pathKey );
 		m_queuePending.notify_one();
 	}
@@ -120,7 +120,7 @@ namespace fs
 	{
 		while ( !m_queue.empty() && !m_wantExit )
 		{
-			boost::lock_guard< boost::mutex > lock( m_mutex );
+			boost::lock_guard<boost::mutex> lock( m_mutex );
 			m_queuePending.notify_one();
 		}
 	}
@@ -134,7 +134,7 @@ namespace fs
 		for ( ;; m_queue.pop_back() )
 		{
 			{
-				boost::unique_lock< boost::mutex > lock( m_mutex );
+				boost::unique_lock<boost::mutex> lock( m_mutex );
 				m_queuePending.wait( lock, std::bind( &CQueueListener::WaitPred, this ) );
 
 				if ( m_wantExit )

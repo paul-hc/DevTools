@@ -13,8 +13,8 @@ namespace io
 	{
 		// buffer I/O for binary files
 
-		void WriteAllToFile( const fs::CPath& targetFilePath, const std::vector< char >& buffer ) throws_( CRuntimeException );
-		void ReadAllFromFile( std::vector< char >& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+		void WriteAllToFile( const fs::CPath& targetFilePath, const std::vector<char>& buffer ) throws_( CRuntimeException );
+		void ReadAllFromFile( std::vector<char>& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 	}
 
 

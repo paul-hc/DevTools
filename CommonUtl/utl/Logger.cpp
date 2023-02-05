@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Logger.h"
 #include "FileSystem.h"
 #include "RuntimeException.h"

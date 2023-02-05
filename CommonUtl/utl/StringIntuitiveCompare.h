@@ -108,7 +108,7 @@ namespace pred
 
 
 	template< typename TranslateFunc >
-	inline IntuitiveComparator< TranslateFunc > MakeIntuitiveComparator( TranslateFunc translateFunc ) { return IntuitiveComparator< TranslateFunc >( translateFunc ); }
+	inline IntuitiveComparator<TranslateFunc> MakeIntuitiveComparator( TranslateFunc translateFunc ) { return IntuitiveComparator<TranslateFunc>( translateFunc ); }
 }
 
 

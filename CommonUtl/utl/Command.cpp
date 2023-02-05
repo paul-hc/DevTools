@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Command.h"
 #include "CommandModel.h"
 #include "Algorithms.h"
@@ -119,10 +119,10 @@ std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const override
 	if ( !IsEmpty() )
 	{
 		enum { MaxSubCmds = 5 };
-		std::vector< std::tstring > cmdInfos; cmdInfos.reserve( m_subCommands.size() );
+		std::vector<std::tstring> cmdInfos; cmdInfos.reserve( m_subCommands.size() );
 
 		size_t count = 0;
-		for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd, ++count )
+		for ( std::vector<utl::ICommand*>::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd, ++count )
 			if ( utl::Detailed == verbosity || count != MaxSubCmds )
 				cmdInfos.push_back( ( *itSubCmd )->Format( verbosity ) );
 			else
@@ -143,7 +143,7 @@ bool CMacroCommand::Execute( void ) override
 {
 	bool succeded = !m_subCommands.empty();
 
-	for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
+	for ( std::vector<utl::ICommand*>::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
 		if ( !( *itSubCmd )->Execute() )
 			succeded = false;
 
@@ -154,7 +154,7 @@ bool CMacroCommand::Unexecute( void ) override
 {
 	bool succeded = !m_subCommands.empty();
 
-	for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
+	for ( std::vector<utl::ICommand*>::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
 		if ( !( *itSubCmd )->Unexecute() )
 			succeded = false;
 
@@ -163,7 +163,7 @@ bool CMacroCommand::Unexecute( void ) override
 
 bool CMacroCommand::IsUndoable( void ) const override
 {
-	for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
+	for ( std::vector<utl::ICommand*>::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
 		if ( ( *itSubCmd )->IsUndoable() )
 			return true;
 

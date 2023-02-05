@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "StdHashValue.h"
 
 #ifdef _DEBUG

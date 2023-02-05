@@ -51,33 +51,33 @@ namespace fs
 
 	// convenience reference downcasts
 	inline const CFlexPath& CastFlexPath( const CPath& path ) { return reinterpret_cast<const CFlexPath&>( path ); }
-	inline const std::vector< CFlexPath >& CastFlexPaths( const std::vector< CPath >& paths ) { return reinterpret_cast<const std::vector< CFlexPath >&>( paths ); }
+	inline const std::vector<CFlexPath>& CastFlexPaths( const std::vector<CPath>& paths ) { return reinterpret_cast< const std::vector<CFlexPath>& >( paths ); }
 }
 
 
 namespace path
 {
-	bool QueryPhysicalPaths( OUT std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths );
-	bool QueryStorageDocPaths( OUT std::vector< fs::CPath >& rDocStgPaths, const std::vector< fs::CFlexPath >& flexPaths );
-	void ConvertToPhysicalPaths( IN OUT std::vector< fs::CFlexPath >& rFlexPaths );			// strip-out complex paths to physical paths (retaining existing physical paths)
+	bool QueryPhysicalPaths( OUT std::vector<fs::CPath>& rPhysicalPaths, const std::vector<fs::CFlexPath>& flexPaths );
+	bool QueryStorageDocPaths( OUT std::vector<fs::CPath>& rDocStgPaths, const std::vector<fs::CFlexPath>& flexPaths );
+	void ConvertToPhysicalPaths( IN OUT std::vector<fs::CFlexPath>& rFlexPaths );			// strip-out complex paths to physical paths (retaining existing physical paths)
 
 
 	template< typename PathT >
-	inline size_t FindComplexPathCount( const std::vector< PathT >& flexPaths )
+	inline size_t FindComplexPathCount( const std::vector<PathT>& flexPaths )
 	{
 		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fun_ref( &fs::CPath::IsComplexPath ) );
 	}
 
 	template< typename PathT >
-	inline size_t FindPhysicalPathCount( const std::vector< PathT >& flexPaths )
+	inline size_t FindPhysicalPathCount( const std::vector<PathT>& flexPaths )
 	{
 		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fun_ref( &fs::CPath::IsPhysicalPath ) );
 	}
 
 	template< typename PathT >
-	bool ExtractPhysicalPaths( OUT std::vector< fs::CPath >& rPhysicalPaths, IN OUT std::vector< PathT >& rFlexPaths )
+	bool ExtractPhysicalPaths( OUT std::vector<fs::CPath>& rPhysicalPaths, IN OUT std::vector<PathT>& rFlexPaths )
 	{
-		typename std::vector< PathT >::iterator itRemove = std::remove_if( rFlexPaths.begin(), rFlexPaths.end(), std::mem_fun_ref( &fs::CPath::IsPhysicalPath ) );	// just move physical paths at the end
+		typename std::vector<PathT>::iterator itRemove = std::remove_if( rFlexPaths.begin(), rFlexPaths.end(), std::mem_fun_ref( &fs::CPath::IsPhysicalPath ) );	// just move physical paths at the end
 
 		if ( (void*)&rPhysicalPaths != (void*)&rFlexPaths )
 			rPhysicalPaths.assign( itRemove, rFlexPaths.end() );

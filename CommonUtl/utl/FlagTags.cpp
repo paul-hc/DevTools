@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "pch.h"
 #include "FlagTags.h"
 #include "StringUtilities.h"
 
@@ -26,7 +26,7 @@ CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::t
 {
 	ASSERT( count < MaxBits );
 
-	std::vector< std::tstring > srcUiTags;
+	std::vector<std::tstring> srcUiTags;
 	str::Split( srcUiTags, uiTags.c_str(), m_listSep );
 	ASSERT( srcUiTags.empty() || srcUiTags.size() == count );
 
@@ -39,7 +39,7 @@ CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::t
 		int pos = FindBitPos( flagDefs[ i ].m_flag );
 		m_keyTags[ pos ] = flagDefs[ i ].m_pKeyTag;
 		m_uiTags[ pos ] = !srcUiTags.empty() ? srcUiTags[ i ] : m_keyTags[ pos ];
-		maxPos = std::max< int >( pos, maxPos );
+		maxPos = std::max<int>( pos, maxPos );
 	}
 
 	// remove undefined bit flags
@@ -66,11 +66,11 @@ int CFlagTags::GetFlagsMask( void ) const
 	return static_cast<int>( mask );
 }
 
-std::tstring CFlagTags::Format( int flags, const std::vector< std::tstring >& tags, const TCHAR* pSep )
+std::tstring CFlagTags::Format( int flags, const std::vector<std::tstring>& tags, const TCHAR* pSep )
 {
 	ASSERT( !tags.empty() );
 
-	std::vector< std::tstring > flagsOn; flagsOn.reserve( tags.size() );
+	std::vector<std::tstring> flagsOn; flagsOn.reserve( tags.size() );
 
 	for ( size_t pos = 0; pos != tags.size(); ++pos )
 		if ( !tags[ pos ].empty() )					// flag is defined
@@ -80,12 +80,12 @@ std::tstring CFlagTags::Format( int flags, const std::vector< std::tstring >& ta
 	return str::Join( flagsOn, pSep );
 }
 
-void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector< std::tstring >& tags, const TCHAR* pSep, str::CaseType caseType )
+void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector<std::tstring>& tags, const TCHAR* pSep, str::CaseType caseType )
 {
 	ASSERT( !tags.empty() );
 	ASSERT_PTR( pFlags );
 
-	std::vector< std::tstring > flagsOn;
+	std::vector<std::tstring> flagsOn;
 	if ( !str::IsEmpty( pSep ) )
 		str::Split( flagsOn, text.c_str(), pSep );
 	else
@@ -103,9 +103,9 @@ void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector<
 			SetBitFlag( *pFlags, static_cast<int>( pos ), Contains( flagsOn, tags[ pos ], caseType ) );
 }
 
-bool CFlagTags::Contains( const std::vector< std::tstring >& strings, const std::tstring& value, str::CaseType caseType )
+bool CFlagTags::Contains( const std::vector<std::tstring>& strings, const std::tstring& value, str::CaseType caseType )
 {
-	for ( std::vector< std::tstring >::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
+	for ( std::vector<std::tstring>::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
 		if ( str::EqualsN_ByCase( caseType, itString->c_str(), value.c_str(), utl::npos ) )
 			return true;
 
@@ -129,10 +129,10 @@ const std::tstring& CFlagTags::LookupTag( TagType tag, int flag ) const
 
 int CFlagTags::FindFlag( TagType tag, const std::tstring& flagOn ) const
 {
-	const std::vector< std::tstring >& tags = KeyTag == tag ? m_keyTags : m_uiTags;
+	const std::vector<std::tstring>& tags = KeyTag == tag ? m_keyTags : m_uiTags;
 
 	for ( size_t i = 0; i != tags.size(); ++i )
-		if ( str::EqualString< str::IgnoreCase >( tags[ i ], flagOn ) )
+		if ( str::EqualString<str::IgnoreCase>( tags[ i ], flagOn ) )
 			return ToBitFlag( static_cast<int>( i ) );
 
 	return -1;

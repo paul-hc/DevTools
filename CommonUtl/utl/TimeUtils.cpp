@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TimeUtils.h"
 
 #ifdef _DEBUG
@@ -97,7 +97,7 @@ namespace time_utl
 	std::tstring FormatDuration( CTimeSpan duration )
 	{
 		std::tstring sign;
-		std::vector< std::tstring > components;
+		std::vector<std::tstring> components;
 
 		if ( duration.GetTimeSpan() < 0 )
 		{

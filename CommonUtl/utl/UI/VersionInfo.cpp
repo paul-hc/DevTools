@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "VersionInfo.h"
-#include "StringUtilities.h"
+#include "StringParsing.h"
 #include "TimeUtils.h"
 #include <sstream>
 

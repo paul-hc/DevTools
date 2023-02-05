@@ -46,7 +46,7 @@ namespace func
 	};
 
 	template<>
-	struct CharEncoder< fs::UTF16_be_bom >
+	struct CharEncoder<fs::UTF16_be_bom>
 	{
 		wchar_t operator()( wchar_t chr ) const
 		{
@@ -55,7 +55,7 @@ namespace func
 	};
 
 	template<>
-	struct CharEncoder< fs::UTF32_be_bom >
+	struct CharEncoder<fs::UTF32_be_bom>
 	{
 		char32_t operator()( char32_t chr ) const
 		{
@@ -75,7 +75,7 @@ namespace func
 	};
 
 	template<>
-	struct CharDecoder< fs::UTF16_be_bom >
+	struct CharDecoder<fs::UTF16_be_bom>
 	{
 		wchar_t operator()( wchar_t beChr ) const
 		{
@@ -84,7 +84,7 @@ namespace func
 	};
 
 	template<>
-	struct CharDecoder< fs::UTF32_be_bom >
+	struct CharDecoder<fs::UTF32_be_bom>
 	{
 		char32_t operator()( char32_t beChr ) const
 		{

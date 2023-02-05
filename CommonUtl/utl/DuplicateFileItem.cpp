@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DuplicateFileItem.h"
 #include "Algorithms.h"
 #include "ContainerOwnership.h"
@@ -66,7 +66,7 @@ void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pDupItem )
 bool CDuplicateFilesGroup::MakeOriginalItem( CDuplicateFileItem* pItem )
 {
 	ASSERT_PTR( pItem );
-	std::vector< CDuplicateFileItem* >::iterator itFountItem = std::find( m_items.begin(), m_items.end(), pItem );
+	std::vector<CDuplicateFileItem*>::iterator itFountItem = std::find( m_items.begin(), m_items.end(), pItem );
 	ASSERT( itFountItem != m_items.end() );
 
 	if ( pItem->IsOriginalItem() )
@@ -81,7 +81,7 @@ bool CDuplicateFilesGroup::MakeOriginalItem( CDuplicateFileItem* pItem )
 bool CDuplicateFilesGroup::MakeDuplicateItem( CDuplicateFileItem* pItem )
 {
 	ASSERT_PTR( pItem );
-	std::vector< CDuplicateFileItem* >::iterator itFountItem = std::find( m_items.begin(), m_items.end(), pItem );
+	std::vector<CDuplicateFileItem*>::iterator itFountItem = std::find( m_items.begin(), m_items.end(), pItem );
 	ASSERT( itFountItem != m_items.end() );
 
 	if ( !pItem->IsOriginalItem() )
@@ -93,7 +93,7 @@ bool CDuplicateFilesGroup::MakeDuplicateItem( CDuplicateFileItem* pItem )
 	return true;
 }
 
-void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException )
+void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector<CDuplicateFilesGroup*>& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException )
 {
 	REQUIRE( HasDuplicates() );
 	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
@@ -105,7 +105,7 @@ void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector< CDuplicateFil
 	TKeyItemContainer scopedKeyItems;
 	scopedKeyItems.reserve( m_items.size() );
 
-	for ( std::vector< CDuplicateFileItem* >::iterator itItem = m_items.begin(); itItem != m_items.end(); ++itItem )
+	for ( std::vector<CDuplicateFileItem*>::iterator itItem = m_items.begin(); itItem != m_items.end(); ++itItem )
 	{
 		pProgressSvc->AdvanceItem( ( *itItem )->GetFilePath().Get() );
 
@@ -128,16 +128,16 @@ void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector< CDuplicateFil
 
 	m_items.clear();					// ownership was passed to scopedKeyItems
 
-	typedef pred::CompareFirstSecond< pred::CompareValue, pred::TComparePathItem > TCompareKeyItemPair;
+	typedef pred::CompareFirstSecond<pred::CompareValue, pred::TComparePathItem> TCompareKeyItemPair;
 
 	func::SortPathItems<TCompareKeyItemPair>( scopedKeyItems );
 
 	typedef std::pair<TKeyItemContainer::iterator, TKeyItemContainer::iterator> TIteratorPair;
-	typedef pred::CompareFirst< pred::CompareValue > TCompareKeyPair;
+	typedef pred::CompareFirst<pred::CompareValue> TCompareKeyPair;
 
 	for ( TKeyItemContainer::iterator itKeyItem = scopedKeyItems.begin(), itEnd = scopedKeyItems.end(); itKeyItem != itEnd; )
 	{
-		TIteratorPair itPair = std::equal_range( itKeyItem, itEnd, *itKeyItem, pred::LessValue< TCompareKeyPair >() );		// range of items with same content key -> make new group if more than 1 item
+		TIteratorPair itPair = std::equal_range( itKeyItem, itEnd, *itKeyItem, pred::LessValue<TCompareKeyPair>() );		// range of items with same content key -> make new group if more than 1 item
 		ASSERT( itPair.first == itKeyItem );
 		size_t itemCount = std::distance( itPair.first, itPair.second );
 
@@ -164,11 +164,11 @@ CDuplicateGroupStore::~CDuplicateGroupStore( void )
 	utl::ClearOwningContainer( m_groups );
 }
 
-size_t CDuplicateGroupStore::GetDuplicateItemCount( const std::vector< CDuplicateFilesGroup* >& groups )
+size_t CDuplicateGroupStore::GetDuplicateItemCount( const std::vector<CDuplicateFilesGroup*>& groups )
 {
 	size_t dupItemCount = 0;
 
-	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = groups.begin(); itGroup != groups.end(); ++itGroup )
+	for ( std::vector<CDuplicateFilesGroup*>::const_iterator itGroup = groups.begin(); itGroup != groups.end(); ++itGroup )
 		if ( ( *itGroup )->HasDuplicates() )
 			dupItemCount += ( *itGroup )->GetItems().size();
 
@@ -192,11 +192,11 @@ CDuplicateFilesGroup* CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pD
 	return rpGroup;
 }
 
-void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException )
+void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector<CDuplicateFilesGroup*>& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException )
 {
 	ASSERT_PTR( pProgressSvc );
 
-	utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > scopedGroups;
+	utl::COwningContainer< std::vector<CDuplicateFilesGroup*> > scopedGroups;
 	scopedGroups.swap( m_groups );			// take scoped ownership for exception safety
 
 	for ( size_t i = 0; i != scopedGroups.size(); ++i )
@@ -214,7 +214,7 @@ void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesG
 			}
 			else
 			{
-				std::vector< CDuplicateFilesGroup* > subGroups;		// grouped by file-size *and* CRC32
+				std::vector<CDuplicateFilesGroup*> subGroups;		// grouped by file-size *and* CRC32
 
 				pGroup->ExtractChecksumDuplicates( subGroups, rIgnoredCount, pProgressSvc );
 				rDuplicateGroups.insert( rDuplicateGroups.end(), subGroups.begin(), subGroups.end() );

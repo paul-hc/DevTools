@@ -209,13 +209,13 @@ namespace str
 	namespace ignore_case
 	{
 		template< typename CharT >
-		inline bool operator==( const std::basic_string<CharT>& left, const std::basic_string<CharT>& right ) { return str::Equals< IgnoreCase >( left.c_str(), right.c_str() ); }
+		inline bool operator==( const std::basic_string<CharT>& left, const std::basic_string<CharT>& right ) { return str::Equals<IgnoreCase>( left.c_str(), right.c_str() ); }
 
 		template< typename CharT >
-		inline bool operator==( const CharT* pLeft, const std::basic_string<CharT>& right ) { return str::Equals< IgnoreCase >( pLeft, right.c_str() ); }
+		inline bool operator==( const CharT* pLeft, const std::basic_string<CharT>& right ) { return str::Equals<IgnoreCase>( pLeft, right.c_str() ); }
 
 		template< typename CharT >
-		inline bool operator==( const std::basic_string<CharT>& left, const CharT* pRight ) { return str::Equals< IgnoreCase >( left.c_str(), pRight ); }
+		inline bool operator==( const std::basic_string<CharT>& left, const CharT* pRight ) { return str::Equals<IgnoreCase>( left.c_str(), pRight ); }
 
 
 		template< typename CharT >
@@ -324,7 +324,7 @@ namespace pred
 		template< typename CharT >
 		bool operator()( const CharT* pLeft, const CharT* pRight ) const
 		{
-			return str::Equals< caseType >( pLeft, pRight );
+			return str::Equals<caseType>( pLeft, pRight );
 		}
 	};
 }
@@ -352,7 +352,7 @@ namespace str
 		ASSERT( !part.IsEmpty() );
 
 		const CharT* pEnd = str::end( pText );
-		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pStr, part.m_pStr + part.m_count, pred::IsEqual< Compare >( compareStr ) );
+		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pStr, part.m_pStr + part.m_count, pred::IsEqual<Compare>( compareStr ) );
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 
@@ -415,7 +415,7 @@ namespace str
 	template< str::CaseType caseType, typename CharT >
 	const CharT* SkipPrefix( const CharT* pText, const CharT* pPrefix )
 	{
-		pred::CharEqual< caseType > eqChar;
+		pred::CharEqual<caseType> eqChar;
 
 		for ( const CharT* pSkip = pText; ; )
 			if ( _T('\0') == *pPrefix )
@@ -432,7 +432,7 @@ namespace str
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 
 		const CharT* itEnd = end( pText );
-		const CharT* itFound = std::find_if( begin( pText ) + offset, itEnd, pred::CharMatch< CharT, caseType >( chr ) );
+		const CharT* itFound = std::find_if( begin( pText ) + offset, itEnd, pred::CharMatch<CharT, caseType>( chr ) );
 		return itFound != itEnd ? std::distance( begin( pText ), itFound ) : std::tstring::npos;
 	}
 
@@ -443,7 +443,7 @@ namespace str
 		ASSERT( !str::IsEmpty( pPart ) );
 
 		const CharT* itEnd = end( pText );
-		const CharT* itFound = std::search( begin( pText ) + offset, itEnd, begin( pPart ), end( pPart ), pred::CharEqual< caseType >() );
+		const CharT* itFound = std::search( begin( pText ) + offset, itEnd, begin( pPart ), end( pPart ), pred::CharEqual<caseType>() );
 		return itFound != itEnd ? std::distance( begin( pText ), itFound ) : std::tstring::npos;
 	}
 
@@ -453,7 +453,7 @@ namespace str
 		size_t count = 0, matchLen = str::GetLength( pPart );
 
 		if ( !str::IsEmpty( pPart ) )
-			for ( size_t offset = str::Find< caseType >( pText, pPart ); offset != std::string::npos; offset = str::Find< caseType >( pText, pPart, offset + matchLen ) )
+			for ( size_t offset = str::Find<caseType>( pText, pPart ); offset != std::string::npos; offset = str::Find<caseType>( pText, pPart, offset + matchLen ) )
 				++count;
 
 		return count;
@@ -464,12 +464,12 @@ namespace str
 	{
 		if ( matchWhole )
 			return matchCase
-				? str::Equals< str::Case >( pText, pPart )
-				: str::Equals< str::IgnoreCase >( pText, pPart );
+				? str::Equals<str::Case>( pText, pPart )
+				: str::Equals<str::IgnoreCase>( pText, pPart );
 
 		return matchCase
-			? ( str::Find< str::Case >( pText, pPart ) != std::tstring::npos )
-			: ( str::Find< str::IgnoreCase >( pText, pPart ) != std::tstring::npos );
+			? ( str::Find<str::Case>( pText, pPart ) != std::tstring::npos )
+			: ( str::Find<str::IgnoreCase>( pText, pPart ) != std::tstring::npos );
 	}
 
 

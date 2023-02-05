@@ -217,7 +217,7 @@ namespace pred
 	}
 
 
-	// adapts Compare defined for an object to a new object via Adapter functor; example CompareAdapter< CompareRequestDate, func::ToWorkOrder >
+	// adapts Compare defined for an object to a new object via Adapter functor; example CompareAdapter<CompareRequestDate, func::ToWorkOrder>
 
 	template< typename CmpValuesT, typename Adapter >
 	struct CompareAdapter : public BaseComparator
@@ -268,7 +268,7 @@ namespace pred
 	};
 
 
-	// creates a descending criteria by flipping Less and Greater of the comparator; example Descending< CompareEndTime >
+	// creates a descending criteria by flipping Less and Greater of the comparator; example Descending<CompareEndTime>
 
 	template< typename CmpValuesT >
 	struct Descending : public BaseComparator

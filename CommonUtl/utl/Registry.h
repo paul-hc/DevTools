@@ -68,13 +68,13 @@ namespace reg
 
 		// SUB-KEYS
 		bool HasSubKey( const TCHAR* pSubKeyName ) const;
-		void QuerySubKeyNames( std::vector< std::tstring >& rSubKeyNames ) const;
+		void QuerySubKeyNames( std::vector<std::tstring>& rSubKeyNames ) const;
 		bool DeleteSubKey( const TCHAR* pSubKey, RecursionDepth depth = Shallow ) { return ERROR_SUCCESS == ( Shallow == depth ? m_key.DeleteSubKey( pSubKey ) : m_key.RecurseDeleteKey( pSubKey ) ); }
 		void DeleteAllSubKeys( void );
 
 		// VALUES
 		bool HasValue( const TCHAR* pValueName ) const { return GetValueType( pValueName ) != REG_NONE; }
-		void QueryValueNames( std::vector< std::tstring >& rValueNames ) const;
+		void QueryValueNames( std::vector<std::tstring>& rValueNames ) const;
 
 		bool DeleteValue( const TCHAR* pValueName ) { return ERROR_SUCCESS == m_key.DeleteValue( pValueName ); }
 		void DeleteAllValues( void );
@@ -90,10 +90,10 @@ namespace reg
 
 		// multi-string
 		template< typename StringyT >
-		bool WriteMultiString( const TCHAR* pValueName, const std::vector< StringyT >& values );
+		bool WriteMultiString( const TCHAR* pValueName, const std::vector<StringyT>& values );
 
 		template< typename StringyT >
-		bool QueryMultiString( const TCHAR* pValueName, std::vector< StringyT >& rValues ) const;
+		bool QueryMultiString( const TCHAR* pValueName, std::vector<StringyT>& rValues ) const;
 
 		// number
 		template< typename NumericT >
@@ -118,10 +118,10 @@ namespace reg
 
 		// binary buffer
 		template< typename ValueT >
-		bool WriteBinaryBuffer( const TCHAR* pValueName, const std::vector< ValueT >& bufferValue );
+		bool WriteBinaryBuffer( const TCHAR* pValueName, const std::vector<ValueT>& bufferValue );
 
 		template< typename ValueT >
-		bool QueryBinaryBuffer( const TCHAR* pValueName, std::vector< ValueT >& rBufferValue ) const;
+		bool QueryBinaryBuffer( const TCHAR* pValueName, std::vector<ValueT>& rBufferValue ) const;
 	private:
 		mutable CRegKey m_key;			// friendly for Query... methods (declared non-const in CRegKey class)
 	};
@@ -161,21 +161,21 @@ namespace reg
 	// CKey template code
 
 	template< typename StringyT >
-	bool CKey::WriteMultiString( const TCHAR* pValueName, const std::vector< StringyT >& values )
+	bool CKey::WriteMultiString( const TCHAR* pValueName, const std::vector<StringyT>& values )
 	{
 		ASSERT( IsOpen() );
 
-		std::vector< TCHAR > msData;		// multi-string data: an array of zero-terminated strings, terminated by 2 zero characters
+		std::vector<TCHAR> msData;		// multi-string data: an array of zero-terminated strings, terminated by 2 zero characters
 		str::QuickTokenize( msData, str::JoinLines( values, _T("|") ).c_str(), _T("|") );
 		return ERROR_SUCCESS == m_key.SetMultiStringValue( pValueName, &msData.front() );
 	}
 
 	template< typename StringyT >
-	bool CKey::QueryMultiString( const TCHAR* pValueName, std::vector< StringyT >& rValues ) const
+	bool CKey::QueryMultiString( const TCHAR* pValueName, std::vector<StringyT>& rValues ) const
 	{
 		ASSERT( IsOpen() );
 
-		std::vector< TCHAR > buffer( GetValueBufferSize( pValueName ) );
+		std::vector<TCHAR> buffer( GetValueBufferSize( pValueName ) );
 		if ( buffer.empty() )
 			return false;
 
@@ -249,13 +249,13 @@ namespace reg
 
 
 	template< typename ValueT >
-	bool CKey::WriteBinaryBuffer( const TCHAR* pValueName, const std::vector< ValueT >& bufferValue )
+	bool CKey::WriteBinaryBuffer( const TCHAR* pValueName, const std::vector<ValueT>& bufferValue )
 	{
 		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &bufferValue.front(), static_cast<ULONG>( utl::ByteSize( bufferValue ) ) );
 	}
 
 	template< typename ValueT >
-	bool CKey::QueryBinaryBuffer( const TCHAR* pValueName, std::vector< ValueT >& rBufferValue ) const
+	bool CKey::QueryBinaryBuffer( const TCHAR* pValueName, std::vector<ValueT>& rBufferValue ) const
 	{
 		size_t byteSize = GetValueBufferSize( pValueName );
 		if ( 0 == byteSize )

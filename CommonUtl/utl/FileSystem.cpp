@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileSystem.h"
 #include "FileEnumerator.h"
 #include "EnumTags.h"
@@ -59,9 +59,9 @@ namespace fs
 	}
 
 
-	void QueryFolderPaths( std::vector< fs::TDirPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly /*= true*/ )
+	void QueryFolderPaths( std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly /*= true*/ )
 	{
-		for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+		for ( std::vector<fs::CPath>::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 		{
 			fs::TDirPath folderPath;
 
@@ -215,13 +215,13 @@ namespace fs
 		fs::CPathEnumerator found;
 		fs::EnumFiles( &found, fs::TDirPath( pDirPath ), _T("*") );
 
-		for ( std::vector< fs::TDirPath >::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )
+		for ( std::vector<fs::TDirPath>::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )
 			if ( fs::DeleteDir( itSubDirPath->GetPtr() ) )
 				itSubDirPath = found.m_subDirPaths.erase( itSubDirPath );
 			else
 				++itSubDirPath;
 
-		for ( std::vector< fs::CPath >::iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); )
+		for ( std::vector<fs::CPath>::iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); )
 			if ( fs::DeleteFile( itFilePath->GetPtr() ) )
 				itFilePath = found.m_filePaths.erase( itFilePath );
 			else
@@ -318,7 +318,7 @@ namespace fs
 	{
 		ASSERT( !filePath.IsComplexPath() );
 
-		static mfc::CAutoException< CFileException > s_fileError;
+		static mfc::CAutoException<CFileException> s_fileError;
 		s_fileError.m_strFileName = filePath.GetPtr();
 
 		std::auto_ptr<CFile> pFile( new CFile() );
@@ -334,7 +334,7 @@ namespace fs
 	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize /*= 4 * KiloByte*/ )
 	{
 		UINT64 fileSize = srcFile.GetLength();
-		std::vector< BYTE > buffer;
+		std::vector<BYTE> buffer;
 		buffer.resize( (std::min)( chunkSize, static_cast<size_t>( fileSize ) ) );		// grow the size of the copy buffer as needed
 
 		for ( UINT64 bytesLeft = fileSize; bytesLeft != 0; )
@@ -497,7 +497,7 @@ namespace fs
 			ASSERT( time_utl::IsValid( time ) );
 
 			FILETIME fileTime;
-			std::vector< const FILETIME* > triplet( _TimeFieldCount );		// all reset to NULL
+			std::vector<const FILETIME*> triplet( _TimeFieldCount );		// all reset to NULL
 
 			triplet[ timeField ] = MakeFileTime( fileTime, time, pFilePath, policy );
 			if ( triplet[ timeField ] != NULL )

@@ -20,7 +20,7 @@ namespace endian
 		};
 
 		template<>
-		struct ToBytesSwapped< 1 >
+		struct ToBytesSwapped<1>
 		{
 			template< typename NumericT >
 			NumericT operator()( NumericT value ) const
@@ -30,7 +30,7 @@ namespace endian
 		};
 
 		template<>
-		struct ToBytesSwapped< 2 >
+		struct ToBytesSwapped<2>
 		{
 			template< typename NumericT >
 			NumericT operator()( NumericT value ) const
@@ -42,7 +42,7 @@ namespace endian
 		};
 
 		template<>
-		struct ToBytesSwapped< 4 >
+		struct ToBytesSwapped<4>
 		{
 			template< typename NumericT >
 			NumericT operator()( NumericT value ) const
@@ -104,21 +104,21 @@ namespace endian
 		template< class NumericT >
 		NumericT operator()( NumericT value ) const
 		{
-			return impl::ToBytesSwapped< sizeof( NumericT ) >()( value );
+			return impl::ToBytesSwapped<sizeof( NumericT )>()( value );
 		}
 	};
 
 	// specialisations when attempting to swap to the same endianess
 
 	template<>
-	struct GetBytesSwapped< Little, Little >
+	struct GetBytesSwapped<Little, Little>
 	{
 		template< class NumericT >
 		NumericT operator()( NumericT value ) const { return value; }
 	};
 
 	template<>
-	struct GetBytesSwapped< Big, Big >
+	struct GetBytesSwapped<Big, Big>
 	{
 		template< class NumericT >
 		NumericT operator()( NumericT value ) const { return value; }
@@ -135,7 +135,7 @@ namespace func
 		template< typename NumericT >
 		void operator()( NumericT& rNumber ) const
 		{
-			rNumber = ::endian::GetBytesSwapped< from, to >()( rNumber );
+			rNumber = ::endian::GetBytesSwapped<from, to>()( rNumber );
 		}
 	};
 }
@@ -144,7 +144,7 @@ namespace func
 namespace endian
 {
 	template< endian::Endianness from, endian::Endianness to, typename CharT >
-	void SwapBytes( std::basic_string< CharT >& rText )
+	void SwapBytes( std::basic_string<CharT>& rText )
 	{
 		std::for_each( rText.begin(), rText.end(), func::SwapBytes<from, to>() );
 	}

@@ -35,7 +35,7 @@ public:
 	{
 		ASSERT_PTR( pObserver );
 
-		std::vector< utl::IObserver* >::iterator itFound = std::find( m_observers.begin(), m_observers.end(), pObserver );
+		std::vector<utl::IObserver*>::iterator itFound = std::find( m_observers.begin(), m_observers.end(), pObserver );
 		if ( itFound != m_observers.end() )
 			m_observers.erase( itFound );
 		else
@@ -44,11 +44,11 @@ public:
 
 	virtual void UpdateAllObservers( utl::IMessage* pMessage )
 	{
-		for ( std::vector< utl::IObserver* >::const_iterator itObserver = m_observers.begin(); itObserver != m_observers.end(); ++itObserver )
+		for ( std::vector<utl::IObserver*>::const_iterator itObserver = m_observers.begin(); itObserver != m_observers.end(); ++itObserver )
 			(*itObserver)->OnUpdate( this, pMessage );
 	}
 private:
-	std::vector< utl::IObserver* > m_observers;
+	std::vector<utl::IObserver*> m_observers;
 };
 
 

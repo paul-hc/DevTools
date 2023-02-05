@@ -1,9 +1,9 @@
 ﻿
-#include "stdafx.h"
+#include "pch.h"
 
 // FWD stream inserters (for C++ 11 and up):
-std::wostream& operator<<( std::wostream& os, const std::vector< char >& buffer );
-template< typename StringT > std::wostream& operator<<( std::wostream& os, const std::vector< StringT >& strings );
+std::wostream& operator<<( std::wostream& os, const std::vector<char>& buffer );
+template< typename StringT > std::wostream& operator<<( std::wostream& os, const std::vector<StringT>& strings );
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/TextFileIoTests.h"
@@ -22,7 +22,7 @@ template< typename StringT > std::wostream& operator<<( std::wostream& os, const
 #include "TextFileIo.hxx"
 
 
-std::wostream& operator<<( std::wostream& os, const std::vector< char >& buffer )
+std::wostream& operator<<( std::wostream& os, const std::vector<char>& buffer )
 {
 	os << L"hex: ";		// separator
 	for ( size_t pos = 0; pos != buffer.size(); ++pos )
@@ -36,11 +36,11 @@ std::wostream& operator<<( std::wostream& os, const std::vector< char >& buffer 
 }
 
 template< typename StringT >
-std::wostream& operator<<( std::wostream& os, const std::vector< StringT >& strings )
+std::wostream& operator<<( std::wostream& os, const std::vector<StringT>& strings )
 {
 	os << L"{";
 	size_t linePos = 0;
-	for ( typename std::vector< StringT >::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
+	for ( typename std::vector<StringT>::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
 	{
 		if ( linePos++ != 0 )
 			os << L' ';
@@ -57,7 +57,7 @@ std::wostream& operator<<( std::wostream& os, const std::vector< StringT >& stri
 namespace ut
 {
 	template< typename CharType >
-	std::vector< CharType >& AssignText( std::vector< CharType >& rBuffer, const CharType* pText, size_t textSize = std::string::npos )
+	std::vector<CharType>& AssignText( std::vector<CharType>& rBuffer, const CharType* pText, size_t textSize = std::string::npos )
 	{
 		if ( pText != NULL )
 		{
@@ -77,23 +77,23 @@ namespace ut
 		return str::Format( fmt, fs::GetTags_Encoding().FormatKey( encoding ).c_str() );
 	}
 
-	const std::vector< std::string >& ToUtf8Lines( const std::vector< std::wstring >& lines )
+	const std::vector<std::string>& ToUtf8Lines( const std::vector<std::wstring>& lines )
 	{
-		static std::vector< std::string > s_linesUtf8;
+		static std::vector<std::string> s_linesUtf8;
 
 		s_linesUtf8.clear();
-		for ( std::vector< std::wstring >::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
+		for ( std::vector<std::wstring>::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
 			s_linesUtf8.push_back( str::ToUtf8( itLine->c_str() ) );
 
 		return s_linesUtf8;
 	}
 
-	const std::vector< std::wstring >& FromUtf8Lines( const std::vector< std::string >& lines )
+	const std::vector<std::wstring>& FromUtf8Lines( const std::vector<std::string>& lines )
 	{
-		static std::vector< std::wstring > s_linesWide;
+		static std::vector<std::wstring> s_linesWide;
 
 		s_linesWide.clear();
-		for ( std::vector< std::string >::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
+		for ( std::vector<std::string>::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
 			s_linesWide.push_back( str::FromUtf8( itLine->c_str() ) );
 
 		return s_linesWide;
@@ -269,13 +269,13 @@ void CTextFileIoTests::TestWriteRead_BinBuffer( void )
 
 	void ut::test_WriteRead_BinBuffer( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize /*= std::string::npos*/ )
 	{
-		std::vector< char > expectedBuffer;
+		std::vector<char> expectedBuffer;
 		AssignText( expectedBuffer, pExpected, expectedSize );
 
 		io::WriteStringToFile( textPath, content, encoding );
 
 		// test input binary buffer
-		std::vector< char > inBuffer;
+		std::vector<char> inBuffer;
 		io::bin::ReadAllFromFile( inBuffer, textPath );
 		ASSERT_EQUAL( expectedBuffer, inBuffer );
 
@@ -353,36 +353,36 @@ void CTextFileIoTests::TestWriteRead_Contents( void )
 	{
 		{	// NARROW
 			std::string content( str::ToUtf8( pContent ) );
-			std::vector< std::string > contentLines;
+			std::vector<std::string> contentLines;
 			str::Split( contentLines, str::ToUtf8( pContent ).c_str(), "\n" );
 
 			io::WriteLinesToFile( textPath, contentLines, encoding );
 
 			{
-				std::vector< std::string > outLines;
+				std::vector<std::string> outLines;
 				ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 				ASSERT_EQUAL( contentLines, outLines );
 			}
 
 			{	// cross-read lines WIDE
-				std::vector< std::wstring > outLines;
+				std::vector<std::wstring> outLines;
 				ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 				ASSERT_EQUAL( contentLines, ut::ToUtf8Lines( outLines ) );
 			}
 		}
 		{	// WIDE
 			std::wstring content( pContent );
-			std::vector< std::wstring > contentLines;
+			std::vector<std::wstring> contentLines;
 			str::Split( contentLines, pContent, L"\n" );
 
 			io::WriteLinesToFile( textPath, contentLines, encoding );
 
-			std::vector< std::wstring > outLines;
+			std::vector<std::wstring> outLines;
 			ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 			ASSERT_EQUAL( contentLines, outLines );
 
 			{	// cross-read lines NARROW
-				std::vector< std::string > outLinesA;
+				std::vector<std::string> outLinesA;
 				ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLinesA, textPath ) );
 				ASSERT_EQUAL( contentLines, ut::FromUtf8Lines( outLinesA ) );
 			}
@@ -414,7 +414,7 @@ void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
 	void ut::test_WriteReadLines_StreamImpl( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent )
 	{
 		std::string content( str::ToUtf8( pContent ) );
-		std::vector< std::string > contentLines;
+		std::vector<std::string> contentLines;
 		str::Split( contentLines, str::ToUtf8( pContent ).c_str(), "\n" );
 
 		io::WriteLinesToFile( textPath, contentLines, encoding );
@@ -425,7 +425,7 @@ void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
 			io::CEncodedStreamFileBuffer<char> fileBuffer( is, encoding );
 			fileBuffer.Open( textPath, std::ios_base::in );
 			{
-				std::vector< std::string > outLines;
+				std::vector<std::string> outLines;
 
 				for ( std::string line; io::GetLine( is, line ); )
 					outLines.push_back( line );
@@ -435,7 +435,7 @@ void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
 
 			{	// cross-read lines WIDE
 				fileBuffer.Rewind();
-				std::vector< std::wstring > outLines;
+				std::vector<std::wstring> outLines;
 
 				for ( std::wstring line; io::GetLine( is, line ); )
 					outLines.push_back( line );
@@ -449,7 +449,7 @@ void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
 			io::CEncodedStreamFileBuffer<wchar_t> fileBuffer( is, encoding );
 			fileBuffer.Open( textPath, std::ios_base::in );
 			{
-				std::vector< std::wstring > outLines;
+				std::vector<std::wstring> outLines;
 
 				for ( std::wstring line; io::GetLine( is, line ); )
 					outLines.push_back( line );
@@ -459,7 +459,7 @@ void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
 
 			{	// cross-read lines NARROW
 				fileBuffer.Rewind();
-				std::vector< std::string > outLines;
+				std::vector<std::string> outLines;
 
 				for ( std::string line; io::GetLine( is, line ); )
 					outLines.push_back( line );
@@ -553,8 +553,8 @@ void CTextFileIoTests::TestWriteParseLines( void )
 		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
 
-		io::CTextFileParser< std::string > narrowParser;
-		const std::vector< std::string >& parsedLines = narrowParser.GetParsedLines();
+		io::CTextFileParser<std::string> narrowParser;
+		const std::vector<std::string>& parsedLines = narrowParser.GetParsedLines();
 
 		// check empty file
 		io::WriteStringToFile( textPath, std::string(), encoding );
@@ -590,8 +590,8 @@ void CTextFileIoTests::TestWriteParseLines( void )
 		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
 
-		io::CTextFileParser< std::wstring > wideParser;
-		const std::vector< std::wstring >& parsedLines = wideParser.GetParsedLines();
+		io::CTextFileParser<std::wstring> wideParser;
+		const std::vector<std::wstring>& parsedLines = wideParser.GetParsedLines();
 
 		// check empty file
 		io::WriteStringToFile( textPath, std::wstring(), encoding );
@@ -664,7 +664,7 @@ void CTextFileIoTests::TestParseSaveVerbatimContent( void )
 		io::WriteStringToFile( textPath, content, encoding );
 
 		{	// do the round-trip: parse & save
-			io::CTextFileParser< StringT > parser;
+			io::CTextFileParser<StringT> parser;
 
 			parser.ParseFile( textPath );
 			io::WriteLinesToFile( textPath, parser.GetParsedLines(), parser.GetEncoding() );		// save all lines

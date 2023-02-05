@@ -178,7 +178,7 @@ namespace io
 		template< typename CharT, typename LinesT >
 		void DoReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath, fs::Encoding encoding ) throws_( CRuntimeException )
 		{
-			CEncodedFileBuffer< CharT > inFile( encoding );
+			CEncodedFileBuffer<CharT> inFile( encoding );
 			inFile.Open( srcFilePath, std::ios_base::in );
 
 			typedef typename LinesT::value_type TString;
@@ -304,7 +304,7 @@ namespace io
 	// CTextFileParser template code
 
 	template< typename StringT >
-	fs::Encoding CTextFileParser< StringT >::ParseFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+	fs::Encoding CTextFileParser<StringT>::ParseFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
 		Clear();
 
@@ -323,7 +323,7 @@ namespace io
 
 	template< typename StringT >
 	template< typename EncCharT >
-	void CTextFileParser< StringT >::ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+	void CTextFileParser<StringT>::ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
 		CEncodedFileBuffer<EncCharT> inFile( m_encoding );
 		inFile.Open( srcFilePath, std::ios_base::in );
@@ -343,7 +343,7 @@ namespace io
 	}
 
 	template< typename StringT >
-	bool CTextFileParser< StringT >::PushLine( const StringT& line, size_t lineNo )
+	bool CTextFileParser<StringT>::PushLine( const StringT& line, size_t lineNo )
 	{
 		if ( NULL == m_pLineParserCallback )
 			m_parsedLines.push_back( line );

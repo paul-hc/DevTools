@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PathGenerator.h"
 #include "FileEnumerator.h"
 
@@ -47,7 +47,7 @@ bool CPathGenerator::GeneratePairs( void )
 {
 	ASSERT( m_mutablePairs );
 
-	std::vector< fs::CPath > destPaths;
+	std::vector<fs::CPath> destPaths;
 	if ( !Generate( destPaths ) )
 	{
 		m_pRenamePairs->ResetDestPaths();
@@ -58,7 +58,7 @@ bool CPathGenerator::GeneratePairs( void )
 	return true;
 }
 
-bool CPathGenerator::Generate( std::vector< fs::CPath >& rDestPaths )
+bool CPathGenerator::Generate( std::vector<fs::CPath>& rDestPaths )
 {
 	m_destSet.clear();
 	rDestPaths.clear();
@@ -66,7 +66,7 @@ bool CPathGenerator::Generate( std::vector< fs::CPath >& rDestPaths )
 	if ( !m_formatter.IsValidFormat() )
 		return false;
 
-	std::vector< fs::CPath > destPaths;
+	std::vector<fs::CPath> destPaths;
 	destPaths.reserve( m_pRenamePairs->GetPairs().size() );
 
 	for ( CPathRenamePairs::const_iterator it = m_pRenamePairs->Begin(); it != m_pRenamePairs->End(); ++it )
@@ -91,10 +91,10 @@ UINT CPathGenerator::FindNextAvailSeqCount( void ) const
 		// sweep existing files (source + outside) that match current format for the lowest seq count that is not used
 		fs::CPath dirPath = m_pRenamePairs->Begin()->first.GetParentPath();			// use first source file dir path
 
-		std::vector< fs::CPath > existingFilePaths;
+		std::vector<fs::CPath> existingFilePaths;
 		fs::EnumFilePaths( existingFilePaths, dirPath );
 
-		for ( std::vector< fs::CPath >::const_iterator itFilePath = existingFilePaths.begin(); itFilePath != existingFilePaths.end(); ++itFilePath )
+		for ( std::vector<fs::CPath>::const_iterator itFilePath = existingFilePaths.begin(); itFilePath != existingFilePaths.end(); ++itFilePath )
 		{
 			UINT seqCount;
 			if ( m_formatter.ParseSeqCount( seqCount, *itFilePath ) )

@@ -67,19 +67,19 @@ namespace io
 
 		bool UseCallback( void ) const { return m_pLineParserCallback != NULL; }
 
-		const std::vector< StringT >& GetParsedLines( void ) const { ASSERT( !UseCallback() ); return m_parsedLines; }
-		void SwapParsedLines( std::vector< StringT >& rParsedLines ) { ASSERT( !UseCallback() ); rParsedLines.swap( m_parsedLines ); }
+		const std::vector<StringT>& GetParsedLines( void ) const { ASSERT( !UseCallback() ); return m_parsedLines; }
+		void SwapParsedLines( std::vector<StringT>& rParsedLines ) { ASSERT( !UseCallback() ); rParsedLines.swap( m_parsedLines ); }
 	protected:
 		template< typename EncCharT >
 		void ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
 		bool PushLine( const StringT& line, size_t lineNo );
 	private:
-		ILineParserCallback< StringT >* m_pLineParserCallback;
+		ILineParserCallback<StringT>* m_pLineParserCallback;
 		unsigned int m_maxLineCount;
 
 		fs::Encoding m_encoding;
-		std::vector< StringT > m_parsedLines;
+		std::vector<StringT> m_parsedLines;
 	};
 }
 

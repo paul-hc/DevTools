@@ -94,7 +94,7 @@ namespace std
 }
 
 
-// include this in stdafx.h just before first Windows header: #include <afxwin.h>
+// include this in pch.h just before first Windows header: #include <afxwin.h>
 
 namespace utl
 {
@@ -106,15 +106,15 @@ namespace utl
 
 
 	template< typename ValueT >
-	inline std::pair< ValueT, ValueT > make_pair_single( const ValueT& value )		// return pair composed from single value
+	inline std::pair<ValueT, ValueT> make_pair_single( const ValueT& value )		// return pair composed from single value
 	{
-		return std::pair< ValueT, ValueT >( value, value );
+		return std::pair<ValueT, ValueT>( value, value );
 	}
 }
 
 
 #ifdef NOMINMAX
-	// required by some Windows headers: return by value to make it compatible with uses such as: max< int, unsigned long >( a, b )
+	// required by some Windows headers: return by value to make it compatible with uses such as: max<int, unsigned long>( a, b )
 	using utl::max;
 	using utl::min;
 #endif //NOMINMAX

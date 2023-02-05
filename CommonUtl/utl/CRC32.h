@@ -36,14 +36,14 @@ namespace utl
 
 		static const CCrc32& Instance( void );
 
-		const std::vector< UINT >& GetLookupTable( void ) const { return m_lookupTable; }
+		const std::vector<UINT>& GetLookupTable( void ) const { return m_lookupTable; }
 
 		// CRC32 incremental checksum (usually starting with UINT_MAX)
 		void AddBytes( TUnderlying& rChecksum, const void* pBuffer, size_t count ) const;
 	private:
 		void AddByte( TUnderlying& rCrc32, const BYTE byteValue ) const { rCrc32 = ( rCrc32 >> 8 ) ^ m_lookupTable[ byteValue ^ ( rCrc32 & 0x000000FF )]; }
 	private:
-		std::vector< UINT > m_lookupTable;		// the lookup table with constants generated based on s_polynomial, with entry for each byte value from 0 to 255
+		std::vector<UINT> m_lookupTable;		// the lookup table with constants generated based on s_polynomial, with entry for each byte value from 0 to 255
 		static const UINT s_polynomial;
 	};
 
@@ -115,7 +115,7 @@ namespace fs
 		};
 
 	private:
-		std::unordered_map< fs::CPath, CStamp > m_cachedChecksums;
+		std::unordered_map<fs::CPath, CStamp> m_cachedChecksums;
 	};
 }
 

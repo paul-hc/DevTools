@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/Test.h"
@@ -63,14 +63,14 @@ namespace ut
 
 	CTestSuite& CTestSuite::Instance( void )
 	{
-		static CTestSuite singleton;
-		return singleton;
+		static CTestSuite s_singleton;
+		return s_singleton;
 	}
 
 	void CTestSuite::RunTests( void )
 	{
 		ASSERT( !IsEmpty() );
-		for ( std::vector< ITestCase* >::const_iterator itTestCase = m_testCases.begin(); itTestCase != m_testCases.end(); ++itTestCase )
+		for ( std::vector<ITestCase*>::const_iterator itTestCase = m_testCases.begin(); itTestCase != m_testCases.end(); ++itTestCase )
 			( *itTestCase )->Run();
 	}
 
@@ -81,11 +81,11 @@ namespace ut
 		return true;
 	}
 
-	void CTestSuite::QueryTestNames( std::vector< std::tstring >& rTestNames ) const
+	void CTestSuite::QueryTestNames( std::vector<std::tstring>& rTestNames ) const
 	{
 		rTestNames.reserve( rTestNames.size() + m_testCases.size() );
 
-		for ( std::vector< ITestCase* >::const_iterator itTestCase = m_testCases.begin(); itTestCase != m_testCases.end(); ++itTestCase )
+		for ( std::vector<ITestCase*>::const_iterator itTestCase = m_testCases.begin(); itTestCase != m_testCases.end(); ++itTestCase )
 			rTestNames.push_back( str::GetTypeName( typeid( **itTestCase ) ) );
 	}
 

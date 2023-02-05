@@ -61,7 +61,7 @@ namespace utl
 		template< typename ObjectType >
 		void AddAutoClear( ObjectType* pClearable ) { m_pResources.push_back( new CAutoClearResource<ObjectType>( pClearable ) ); }
 	private:
-		std::vector< utl::IMemoryManaged* > m_pResources;
+		std::vector<utl::IMemoryManaged*> m_pResources;
 	};
 }
 

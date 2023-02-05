@@ -31,7 +31,7 @@ private:
 private:
 	std::tstring m_section;
 	std::string m_sectionAnsi;
-	std::map< std::string, std::tstring > m_entries;		// <name, value>	(ANSI -> WIDE)
+	std::map<std::string, std::tstring> m_entries;		// <name, value>	(ANSI -> WIDE)
 };
 
 

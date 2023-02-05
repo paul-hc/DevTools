@@ -47,7 +47,7 @@ namespace fs
 		void Clear( void );
 
 		size_t GetCount( void ) const;
-		const std::deque< PathType >& GetPathKeys( void ) const { return m_expireQueue; }
+		const std::deque<PathType>& GetPathKeys( void ) const { return m_expireQueue; }
 
 		bool Contains( const PathType& pathKey, bool checkValid = false ) const { return Find( pathKey, checkValid ) != NULL; }
 		ObjectType* Find( const PathType& pathKey, bool checkValid = false ) const;
@@ -97,8 +97,8 @@ namespace fs
 		static void DeleteObject( TCachedEntry& entry ) { delete entry.first; }
 	private:
 		size_t m_maxSize;
-		std::unordered_map< PathType, TCachedEntry > m_cachedEntries;
-		std::deque< PathType > m_expireQueue;		// at front the oldest, at back the latest
+		std::unordered_map<PathType, TCachedEntry> m_cachedEntries;
+		std::deque<PathType> m_expireQueue;		// at front the oldest, at back the latest
 	protected:
 		mutable CCriticalSection m_cs;				// serialize cache access for thread safety
 	};

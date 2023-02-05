@@ -34,7 +34,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="pch.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="test\AlgorithmsTests.h">
@@ -423,7 +423,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="test\AlgorithmsTests.cpp">
@@ -535,9 +535,6 @@
       <Filter>utl</Filter>
     </ClCompile>
     <ClCompile Include="TimeUtils.cpp">
-      <Filter>utl</Filter>
-    </ClCompile>
-    <ClCompile Include="TokenIterator.cpp">
       <Filter>utl</Filter>
     </ClCompile>
     <ClCompile Include="CRC32.cpp">

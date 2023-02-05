@@ -7,7 +7,7 @@ namespace str
 {
 	// FWD utils (for C++ 11 and up):
 	template< typename CharT, typename StringT >
-	void SplitLines( std::vector< StringT >& rItems, const CharT* pSource, const CharT* pLineEnd );
+	void SplitLines( std::vector<StringT>& rItems, const CharT* pSource, const CharT* pLineEnd );
 
 	template< typename CharT, typename ContainerT >
 	std::basic_string<CharT> JoinLines( const ContainerT& items, const CharT* pLineEnd );
@@ -54,7 +54,7 @@ public:
 	static bool CopyToLines( const ContainerT& textItems, HWND hWnd, const TCHAR* pLineEnd = s_lineEnd, bool clear = true );
 
 	template< typename StringT >
-	static bool PasteFromLines( std::vector< StringT >& rTextItems, HWND hWnd, const TCHAR* pLineEnd = s_lineEnd );
+	static bool PasteFromLines( std::vector<StringT>& rTextItems, HWND hWnd, const TCHAR* pLineEnd = s_lineEnd );
 public:
 	class CMessageWnd : private utl::noncopyable		// lightweight message window wrapper for clipboard IO in console applications
 	{
@@ -107,7 +107,7 @@ inline bool CTextClipboard::CopyToLines( const ContainerT& textItems, HWND hWnd,
 }
 
 template< typename StringT >
-bool CTextClipboard::PasteFromLines( std::vector< StringT >& rTextItems, HWND hWnd, const TCHAR* pLineEnd /*= s_lineEnd*/ )
+bool CTextClipboard::PasteFromLines( std::vector<StringT>& rTextItems, HWND hWnd, const TCHAR* pLineEnd /*= s_lineEnd*/ )
 {
 	std::tstring text;
 	if ( !PasteText( text, hWnd ) )

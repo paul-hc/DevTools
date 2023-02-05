@@ -10,7 +10,7 @@ namespace func
 {
 	/*
 		usage:
-			std::vector< Element* > elements;
+			std::vector<Element*> elements;
 			std::for_each( elements.begin(), elements.end(), func::Delete() );
 		or
 			utl::for_each( elements, func::Delete() );

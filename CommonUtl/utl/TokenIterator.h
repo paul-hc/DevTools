@@ -11,7 +11,7 @@ namespace str
 	template< typename CompareT = pred::TCompareCase, typename CharType = TCHAR >
 	struct CTokenIterator
 	{
-		typedef std::basic_string< CharType > TString;
+		typedef std::basic_string<CharType> TString;
 
 		explicit CTokenIterator( const TString& text, size_t pos = 0, CompareT compare = CompareT() )
 			: m_text( text )
@@ -21,7 +21,7 @@ namespace str
 			, m_compare( compare )
 			, m_equals( compare )
 		{
-			SetWhiteSpace( str::StdWhitespace< CharType >() );
+			SetWhiteSpace( str::StdWhitespace<CharType>() );
 			SetPos( pos );
 		}
 
@@ -237,14 +237,14 @@ namespace str
 		static Range<size_t> s_posRange;		// default parameter for extract methods
 	public:
 		CompareT m_compare;
-		pred::IsEqual< CompareT > m_equals;
+		pred::IsEqual<CompareT> m_equals;
 	};
 
 
 	// CTokenIterator template code
 
 	template< typename CompareT, typename CharType >
-	Range<size_t> CTokenIterator< CompareT, CharType >::s_posRange( 0 );		// static s_posRange object definition
+	Range<size_t> CTokenIterator<CompareT, CharType>::s_posRange( 0 );		// static s_posRange object definition
 }
 
 

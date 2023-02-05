@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PathFormatter.h"
 #include "StringUtilities.h"
 
@@ -218,7 +218,7 @@ bool CPathFormatter::ParseSeqCount( UINT& rSeqCount, const fs::CPath& srcPath ) 
 
 std::tstring CPathFormatter::FormatPart( const std::tstring& part, const std::tstring& format, UINT seqCount, bool* pSyntaxOk /*= NULL*/ )
 {
-	std::vector< TCHAR > output;
+	std::vector<TCHAR> output;
 	output.reserve( MAX_PATH );
 
 	bool syntaxOk = true, doneSeq = false;

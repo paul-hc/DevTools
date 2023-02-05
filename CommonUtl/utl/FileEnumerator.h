@@ -16,8 +16,8 @@ namespace fs
 	void EnumFiles( IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*") );
 	fs::PatternResult SearchEnumFiles( IEnumerator* pEnumerator, const fs::TPatternPath& searchPath );
 
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
-	size_t EnumSubDirPaths( std::vector< fs::TDirPath >& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	size_t EnumFilePaths( std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	size_t EnumSubDirPaths( std::vector<fs::TDirPath>& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
 
 	fs::CPath FindFirstFile( const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
 
@@ -39,10 +39,10 @@ namespace fs
 	{
 	public:
 		CPathMatchLookup( void ) {}
-		CPathMatchLookup( const std::vector< fs::CPath >& paths ) { Reset( paths ); }
+		CPathMatchLookup( const std::vector<fs::CPath>& paths ) { Reset( paths ); }
 
 		void Clear( void );
-		void Reset( const std::vector< fs::CPath >& paths );
+		void Reset( const std::vector<fs::CPath>& paths );
 		void AddPath( const fs::CPath& path );
 
 		bool IsEmpty( void ) const { return m_dirPaths.empty() && m_filePaths.empty() && m_wildSpecs.empty(); }
@@ -52,9 +52,9 @@ namespace fs
 	private:
 		bool IsWildcardMatch( const fs::CPath& anyPath ) const;
 	private:
-		std::vector< fs::TDirPath > m_dirPaths;			// deep matching (including subdirectories)
-		std::vector< fs::CPath > m_filePaths;
-		std::vector< std::tstring > m_wildSpecs;
+		std::vector<fs::TDirPath> m_dirPaths;			// deep matching (including subdirectories)
+		std::vector<fs::CPath> m_filePaths;
+		std::vector<std::tstring> m_wildSpecs;
 	};
 
 
@@ -112,9 +112,9 @@ namespace fs
 		const fs::TDirPath& GetRelativeDirPath( void ) const { return m_relativeDirPath; }
 		void SetRelativeDirPath( const fs::TDirPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
 
-		void SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths );
+		void SetIgnorePathMatches( const std::vector<fs::CPath>& ignorePaths );
 
-		const std::set< fs::CPath >& GetIgnoredPaths( void ) const { return m_ignoredPaths; }
+		const std::set<fs::CPath>& GetIgnoredPaths( void ) const { return m_ignoredPaths; }
 	protected:
 		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
 		CEnumOptions m_options;
@@ -122,10 +122,10 @@ namespace fs
 
 		utl::CCounter m_depthCounter;				// counts recursion depth
 	private:
-		mutable std::unordered_set< fs::CPath > m_uniquePaths;	// files + sub-directories found
-		mutable std::set< fs::CPath > m_ignoredPaths;			// files + sub-dirs ignored or filtered-out
+		mutable std::unordered_set<fs::CPath> m_uniquePaths;	// files + sub-directories found
+		mutable std::set<fs::CPath> m_ignoredPaths;			// files + sub-dirs ignored or filtered-out
 	public:
-		std::vector< fs::TDirPath > m_subDirPaths;	// found sub-directories
+		std::vector<fs::TDirPath> m_subDirPaths;	// found sub-directories
 	};
 }
 
@@ -145,7 +145,7 @@ namespace fs
 		// IEnumerator interface
 		virtual void AddFoundFile( const fs::CPath& filePath ) override;
 	public:
-		std::vector< fs::CPath > m_filePaths;
+		std::vector<fs::CPath> m_filePaths;
 	};
 
 

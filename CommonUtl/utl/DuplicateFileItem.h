@@ -43,7 +43,7 @@ public:
 	bool HasDuplicates( void ) const { return m_items.size() > 1; }
 	bool HasCrc32( void ) const { return m_contentKey.HasCrc32(); }
 
-	const std::vector< CDuplicateFileItem* >& GetItems( void ) const { return m_items; }
+	const std::vector<CDuplicateFileItem*>& GetItems( void ) const { return m_items; }
 	size_t GetDuplicatesCount( void ) const { ASSERT( !m_items.empty() ); return m_items.size() - 1; }		// excluding the original item
 
 	CDuplicateFileItem* GetOriginalItem( void ) const { return !m_items.empty() ? m_items.front() : NULL; }
@@ -54,7 +54,7 @@ public:
 	void SortDuplicates( void );		//  keep original first, sort duplicate items by path
 
 	// lazy CRC32 evaluation and regrouping
-	void ExtractChecksumDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException );
+	void ExtractChecksumDuplicates( std::vector<CDuplicateFilesGroup*>& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException );
 
 	bool MakeOriginalItem( CDuplicateFileItem* pItem );
 	bool MakeDuplicateItem( CDuplicateFileItem* pItem );
@@ -66,7 +66,7 @@ public:
 	}
 private:
 	fs::CFileContentKey m_contentKey;
-	std::vector< CDuplicateFileItem* > m_items;
+	std::vector<CDuplicateFileItem*> m_items;
 };
 
 
@@ -77,15 +77,15 @@ public:
 	~CDuplicateGroupStore( void );
 
 	size_t GetDuplicateItemCount( void ) const { return GetDuplicateItemCount( m_groups ); }
-	static size_t GetDuplicateItemCount( const std::vector< CDuplicateFilesGroup* >& groups );
+	static size_t GetDuplicateItemCount( const std::vector<CDuplicateFilesGroup*>& groups );
 
 	CDuplicateFilesGroup* RegisterItem( CDuplicateFileItem* pDupItem );
 
 	// extract groups with more than 1 item
-	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException );
+	void ExtractDuplicateGroups( std::vector<CDuplicateFilesGroup*>& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException );
 private:
-	std::unordered_map< fs::CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
-	std::vector< CDuplicateFilesGroup* > m_groups;				// with ownership, in the order they were registered
+	std::unordered_map<fs::CFileContentKey, CDuplicateFilesGroup*> m_groupsMap;
+	std::vector<CDuplicateFilesGroup*> m_groups;				// with ownership, in the order they were registered
 };
 
 
@@ -146,7 +146,7 @@ namespace func
 	};
 
 
-	inline void SortDuplicateGroupItems( std::vector< CDuplicateFilesGroup* >& rDupGroupItems, bool ascending = true )
+	inline void SortDuplicateGroupItems( std::vector<CDuplicateFilesGroup*>& rDupGroupItems, bool ascending = true )
 	{
 		func::SortPathItems<pred::TCompareOriginalItemPath>( rDupGroupItems, ascending );		// sort groups by original item path
 	}

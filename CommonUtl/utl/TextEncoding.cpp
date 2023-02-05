@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TextEncoding.h"
 #include "Path.h"
 #include "RuntimeException.h"
@@ -109,7 +109,7 @@ namespace fs
 		if ( !ifs.is_open() )
 			io::ThrowOpenForReading( srcFilePath );
 
-		std::vector< char > filePrefix( BomMaxSize );
+		std::vector<char> filePrefix( BomMaxSize );
 
 		ifs.read( &filePrefix.front(), BomMaxSize );
 		filePrefix.resize( static_cast<size_t>( ifs.gcount() ) );
@@ -131,7 +131,7 @@ namespace fs
 			ofs.write( &m_bom.front(), m_bom.size() );
 	}
 
-	Encoding CByteOrderMark::ParseBuffer( const std::vector< char >& filePrefix )
+	Encoding CByteOrderMark::ParseBuffer( const std::vector<char>& filePrefix )
 	{
 		// match in descending order of BOM size
 		if ( filePrefix.size() >= BomMinSize )
@@ -149,7 +149,7 @@ namespace fs
 		return ANSI_UTF8;
 	}
 
-	bool CByteOrderMark::BomMatches( const std::vector< char >& filePrefix, const BYTE bom[], size_t bomCount )
+	bool CByteOrderMark::BomMatches( const std::vector<char>& filePrefix, const BYTE bom[], size_t bomCount )
 	{
 		// since filePrefix usually reads more characters than required, we have a match if the bom matches the leading part of the prefix
 		return
@@ -158,7 +158,7 @@ namespace fs
 			pred::Equal == std::memcmp( &filePrefix.front(), bom, std::min( bomCount, filePrefix.size() ) );
 	}
 
-	bool CByteOrderMark::BomEquals( const std::vector< char >& filePrefix, const BYTE bom[], size_t bomCount )
+	bool CByteOrderMark::BomEquals( const std::vector<char>& filePrefix, const BYTE bom[], size_t bomCount )
 	{
 		return
 			filePrefix.size() == bomCount &&
@@ -215,7 +215,7 @@ namespace io
 			return __super::WriteEncoded( &m_buffer.front(), charCount ) * sizeof( wchar_t );
 		}
 	private:
-		std::vector< wchar_t > m_buffer;		// excluding the EOS
+		std::vector<wchar_t> m_buffer;		// excluding the EOS
 	};
 
 

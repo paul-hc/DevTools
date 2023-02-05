@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/PathGeneratorTests.h"
@@ -59,7 +59,7 @@ void CPathGeneratorTests::TestPathUniqueMaker( void )
 	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>a_[11].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>a.txt") ) ) );
 
 	// batch uniquify
-	std::vector< fs::CPath > paths;
+	std::vector<fs::CPath> paths;
 	str::Split( paths, _T("x|y|z|z|x|y_[15]|y|x|y"), _T("|") );
 
 	ASSERT_EQUAL( 5, uniquePathMaker.UniquifyPaths( paths ) );			// number of duplicates uniquified

@@ -25,8 +25,8 @@ public:
 	CDuplicateFilesEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = NULL, utl::IProgressService* pProgressSvc = svc::CNoProgressService::Instance() );
 	~CDuplicateFilesEnumerator() { Clear(); }
 
-	void SearchDuplicates( const std::vector< fs::TPatternPath >& searchPaths );
-	void SearchDuplicates( const fs::TPatternPath& searchPath ) { SearchDuplicates( std::vector< fs::TPatternPath >( 1, searchPath ) ); }
+	void SearchDuplicates( const std::vector<fs::TPatternPath>& searchPaths );
+	void SearchDuplicates( const fs::TPatternPath& searchPath ) { SearchDuplicates( std::vector<fs::TPatternPath>( 1, searchPath ) ); }
 
 	const CDupsOutcome& GetOutcome( void ) const { return m_outcome; }
 
@@ -48,7 +48,7 @@ private:
 	// transient during search
 	CDuplicateGroupStore* m_pGroupStore;
 public:
-	std::vector< CDuplicateFilesGroup* > m_dupGroupItems;		// results: groups sorted by path, each group's duplicate items sorted by path
+	std::vector<CDuplicateFilesGroup*> m_dupGroupItems;		// results: groups sorted by path, each group's duplicate items sorted by path
 };
 
 

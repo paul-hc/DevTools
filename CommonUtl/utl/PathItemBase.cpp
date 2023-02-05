@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PathItemBase.h"
 #include "SerializeStdTypes.h"
 

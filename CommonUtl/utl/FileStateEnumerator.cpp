@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileStateEnumerator.h"
 
 #ifdef _DEBUG

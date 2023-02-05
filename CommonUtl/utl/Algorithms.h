@@ -72,7 +72,7 @@ namespace utl
 
 
 	template< typename ContainerT, typename UnaryPred >
-	void QueryThat( std::vector< typename ContainerT::value_type >& rSubset, const ContainerT& objects, UnaryPred pred )
+	void QueryThat( std::vector<typename ContainerT::value_type>& rSubset, const ContainerT& objects, UnaryPred pred )
 	{
 		// additive
 		for ( typename ContainerT::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
@@ -100,7 +100,7 @@ namespace utl
 namespace func
 {
 	template< typename NumericT >
-	struct GenNumSeq : public std::unary_function< void, NumericT >
+	struct GenNumSeq : public std::unary_function<void, NumericT>
 	{
 		GenNumSeq( NumericT initialValue = NumericT(), NumericT step = 1 ) : m_value( initialValue ), m_step( step ) {}
 
@@ -390,19 +390,19 @@ namespace utl
 
 
 	template< typename Type, typename ItemT >
-	inline void AddSorted( std::vector< Type >& rDest, ItemT item )
+	inline void AddSorted( std::vector<Type>& rDest, ItemT item )
 	{
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item ), item );
 	}
 
 	template< typename Type, typename ItemT, typename OrderBinaryPred >
-	inline void AddSorted( std::vector< Type >& rDest, ItemT item, OrderBinaryPred orderPred )		// predicate version
+	inline void AddSorted( std::vector<Type>& rDest, ItemT item, OrderBinaryPred orderPred )		// predicate version
 	{
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item, orderPred ), item );
 	}
 
 	template< typename Type, typename IteratorT, typename OrderBinaryPred >
-	void AddSorted( std::vector< Type >& rDest, IteratorT itFirst, IteratorT itEnd, OrderBinaryPred orderPred )		// sequence with predicate version
+	void AddSorted( std::vector<Type>& rDest, IteratorT itFirst, IteratorT itEnd, OrderBinaryPred orderPred )		// sequence with predicate version
 	{
 		for ( ; itFirst != itEnd; ++itFirst )
 			AddSorted( rDest, *itFirst, orderPred );
@@ -532,41 +532,41 @@ namespace utl
 	// specific type
 
 	template< typename DesiredT, typename SourceT >
-	void QueryWithType( std::vector< DesiredT* >& rOutObjects, const std::vector< SourceT* >& rSource )
+	void QueryWithType( std::vector<DesiredT*>& rOutObjects, const std::vector<SourceT*>& rSource )
 	{
 		rOutObjects.reserve( rOutObjects.size() + rSource.size() );
 
-		for ( typename std::vector< SourceT* >::const_iterator itSource = rSource.begin(); itSource != rSource.end(); ++itSource )
+		for ( typename std::vector<SourceT*>::const_iterator itSource = rSource.begin(); itSource != rSource.end(); ++itSource )
 			if ( DesiredT* pDesired = dynamic_cast<DesiredT*>( *itSource ) )
 				rOutObjects.push_back( pDesired );
 	}
 
 	template< typename TargetT, typename DestT, typename SourceT >
-	void AddWithType( std::vector< DestT* >& rDestObjects, const std::vector< SourceT* >& rSourceObjects )
+	void AddWithType( std::vector<DestT*>& rDestObjects, const std::vector<SourceT*>& rSourceObjects )
 	{
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
-		for ( typename std::vector< SourceT* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
+		for ( typename std::vector<SourceT*>::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
 			if ( is_a<TargetT>( *itObject ) )
 				rDestObjects.push_back( checked_static_cast<DestT*>( *itObject ) );
 	}
 
 	template< typename TargetT, typename DestT, typename SourceT >
-	void AddWithoutType( std::vector< DestT* >& rDestObjects, const std::vector< SourceT* >& rSourceObjects )
+	void AddWithoutType( std::vector<DestT*>& rDestObjects, const std::vector<SourceT*>& rSourceObjects )
 	{
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
-		for ( typename std::vector< SourceT* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
+		for ( typename std::vector<SourceT*>::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
 			if ( !is_a<TargetT>( *itObject ) )
 				rDestObjects.push_back( checked_static_cast<DestT*>( *itObject ) );
 	}
 
 	template< typename ToRemoveT, typename ObjectT >
-	size_t RemoveWithType( std::vector< ObjectT* >& rObjects )
+	size_t RemoveWithType( std::vector<ObjectT*>& rObjects )
 	{
 		size_t removedCount = 0;
 
-		for ( typename std::vector< ObjectT* >::iterator it = rObjects.begin(); it != rObjects.end(); )
+		for ( typename std::vector<ObjectT*>::iterator it = rObjects.begin(); it != rObjects.end(); )
 			if ( is_a<ToRemoveT>( *it ) )
 			{
 				it = rObjects.erase( it );
@@ -579,11 +579,11 @@ namespace utl
 	}
 
 	template< typename PreserveT, typename ObjectT >
-	size_t RemoveWithoutType( std::vector< ObjectT* >& rObjects )
+	size_t RemoveWithoutType( std::vector<ObjectT*>& rObjects )
 	{
 		size_t removedCount = 0;
 
-		for ( typename std::vector< ObjectT* >::iterator it = rObjects.begin(); it != rObjects.end(); )
+		for ( typename std::vector<ObjectT*>::iterator it = rObjects.begin(); it != rObjects.end(); )
 			if ( is_a<PreserveT>( *it ) )
 				++it;
 			else
@@ -625,7 +625,7 @@ namespace utl
 
 	// returns true if containers have the same items, eventually in different order (predicate version)
 	template< typename Type, typename BinaryPred >
-	bool SameContents( const std::vector< Type >& left, const std::vector< Type >& right, BinaryPred equalPred )
+	bool SameContents( const std::vector<Type>& left, const std::vector<Type>& right, BinaryPred equalPred )
 	{
 		if ( left.size() != right.size() )
 			return false;
@@ -640,19 +640,19 @@ namespace utl
 
 
 	template< typename IndexT, typename Type >
-	void QuerySubSequenceFromIndexes( std::vector< Type >& rSubSequence, const std::vector< Type >& source, const std::vector< IndexT >& selIndexes )
+	void QuerySubSequenceFromIndexes( std::vector<Type>& rSubSequence, const std::vector<Type>& source, const std::vector<IndexT>& selIndexes )
 	{
 		REQUIRE( selIndexes.size() <= source.size() );
 
 		rSubSequence.clear();
 		rSubSequence.reserve( selIndexes.size() );
 
-		for ( typename std::vector< IndexT >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
+		for ( typename std::vector<IndexT>::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
 			rSubSequence.push_back( source[ *itSelIndex ] );
 	}
 
 	template< typename IndexT, typename ContainerT >
-	void QuerySubSequenceIndexes( std::vector< IndexT >& rIndexes, const ContainerT& source, const ContainerT& subSequence )
+	void QuerySubSequenceIndexes( std::vector<IndexT>& rIndexes, const ContainerT& source, const ContainerT& subSequence )
 	{	// note: N-squared complexity
 		rIndexes.clear();
 		rIndexes.reserve( subSequence.size() );

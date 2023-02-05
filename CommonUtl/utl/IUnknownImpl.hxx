@@ -5,7 +5,7 @@
 namespace utl
 {
 	template< typename InterfaceT >
-	ULONG STDMETHODCALLTYPE IUnknownImpl< InterfaceT >::Release( void )
+	ULONG STDMETHODCALLTYPE IUnknownImpl<InterfaceT>::Release( void )
 	{
 		ULONG refCount = ::InterlockedDecrement( &m_refCount );
 		if ( 0 == m_refCount )

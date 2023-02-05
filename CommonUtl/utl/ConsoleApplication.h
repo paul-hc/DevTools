@@ -94,14 +94,14 @@ namespace io
 
 		bool IsDenied( const fs::CPath& directoryPath ) const;
 	private:
-		std::vector< fs::CPath > m_deniedDirPaths;		// directories denied by the user or with creation error: cached to skip further prompts
+		std::vector<fs::CPath> m_deniedDirPaths;		// directories denied by the user or with creation error: cached to skip further prompts
 	};
 }
 
 
 namespace func
 {
-	struct PtrStreamInserter : std::unary_function< void*, void >
+	struct PtrStreamInserter : std::unary_function<void*, void>
 	{
 		PtrStreamInserter( std::tostream& os, const TCHAR* pSuffix = _T("") ) : m_os( os ), m_pSuffix( pSuffix ) {}
 

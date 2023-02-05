@@ -9,7 +9,7 @@
 class CPathRenamePairs
 {
 public:
-	typedef std::vector< fs::TPathPair > TPairVector;
+	typedef std::vector<fs::TPathPair> TPairVector;
 	typedef TPairVector::const_iterator const_iterator;
 public:
 	CPathRenamePairs( void ) {}
@@ -36,7 +36,7 @@ public:
 	// DEST assignment
 	void ResetDestPaths( void );
 	void CopySrcToDestPaths( void );
-	void CopyDestPaths( const std::vector< fs::CPath >& destPaths );		// assume destPaths is in same order as m_pairs
+	void CopyDestPaths( const std::vector<fs::CPath>& destPaths );		// assume destPaths is in same order as m_pairs
 
 	// SRC setup
 	template< typename PairContainer >
@@ -58,7 +58,7 @@ private:
 	bool IsConsistent( void ) const { return m_pairs.size() == m_pathToIndexMap.size(); }
 private:
 	TPairVector m_pairs;										// maintains the order for sequence generation
-	std::unordered_map< fs::CPath, size_t > m_pathToIndexMap;	// map src -> m_pairs.index
+	std::unordered_map<fs::CPath, size_t> m_pathToIndexMap;	// map src -> m_pairs.index
 };
 
 

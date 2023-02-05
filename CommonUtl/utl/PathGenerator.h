@@ -22,7 +22,7 @@ public:
 	UINT GetSeqCount( void ) const { return m_seqCount; }
 
 	bool GeneratePairs( void );										// generates to m_rRenamePairs
-	bool Generate( std::vector< fs::CPath >& rDestPaths );			// generates to rDestPaths
+	bool Generate( std::vector<fs::CPath>& rDestPaths );			// generates to rDestPaths
 
 	UINT FindNextAvailSeqCount( void ) const;
 

@@ -38,7 +38,7 @@ namespace serial
 	template< typename PtrContainerT >
 	void Save_CObjects_Mixed( CArchive& archive, const PtrContainerT& objects )
 	{
-		size_t mfcSerialCount = std::count_if( objects.begin(), objects.end(), pred::IsA< CObject >() );
+		size_t mfcSerialCount = std::count_if( objects.begin(), objects.end(), pred::IsA<CObject>() );
 		archive.WriteCount( static_cast<DWORD_PTR>( mfcSerialCount ) );			// WriteCount() for backwards compatibility
 
 		for ( typename PtrContainerT::const_iterator itPtr = objects.begin(); itPtr != objects.end(); ++itPtr )

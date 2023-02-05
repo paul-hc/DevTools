@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "pch.h"
 #include "IniFileRegistrySection.h"
 #include "PropertyLineReader.h"
 #include "FileSystem.h"
@@ -89,7 +89,7 @@ const std::tstring& CIniFileRegistrySection::GetSectionName( void ) const
 
 int CIniFileRegistrySection::GetIntParameter( const TCHAR entryName[], int defaultValue ) const
 {
-	std::map< std::string, std::tstring >::const_iterator itEntry = m_entries.find( str::ToAnsi( entryName ) );
+	std::map<std::string, std::tstring>::const_iterator itEntry = m_entries.find( str::ToAnsi( entryName ) );
 	if ( itEntry != m_entries.end() )
 	{
 		int value = defaultValue;
@@ -101,7 +101,7 @@ int CIniFileRegistrySection::GetIntParameter( const TCHAR entryName[], int defau
 
 std::tstring CIniFileRegistrySection::GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue/* = NULL*/ ) const
 {
-	std::map< std::string, std::tstring >::const_iterator itEntry = m_entries.find( str::ToAnsi( entryName ) );
+	std::map<std::string, std::tstring>::const_iterator itEntry = m_entries.find( str::ToAnsi( entryName ) );
 	if ( itEntry != m_entries.end() )
 		return itEntry->second;
 

@@ -28,7 +28,7 @@ namespace str
 		inline std::basic_string<CharT> Extract( const Range<size_t>& pos, const std::basic_string<CharT>& text )
 		{
 			ASSERT( range::InBounds( pos, text ) );
-			return text.substr( pos.m_start, pos.GetSpan< size_t >() );
+			return text.substr( pos.m_start, pos.GetSpan<size_t>() );
 		}
 
 
@@ -42,7 +42,7 @@ namespace str
 
 			bool InBounds( void ) const { return range::InBounds( m_pos, m_text ); }
 			bool IsEmpty( void ) const { return 0 == GetLength(); }
-			size_t GetLength( void ) const { ASSERT( InBounds() ); return m_pos.GetSpan< size_t >(); }
+			size_t GetLength( void ) const { ASSERT( InBounds() ); return m_pos.GetSpan<size_t>(); }
 
 			const Range<size_t>& GetPos( void ) const { return m_pos; }
 			Range<size_t>& RefPos( void ) { return m_pos; }
@@ -96,15 +96,15 @@ namespace str
 			bool Find( Range<size_t>& rFoundPos, const CharT part[], str::CaseType caseType = str::Case ) const
 			{
 				return str::Case == caseType
-					? _Find< str::Case >( rFoundPos, MakePart( part ) )
-					: _Find< str::IgnoreCase >( rFoundPos, MakePart( part ) );
+					? _Find<str::Case>( rFoundPos, MakePart( part ) )
+					: _Find<str::IgnoreCase>( rFoundPos, MakePart( part ) );
 			}
 
 			bool Find( Range<size_t>& rFoundPos, CharT ch, str::CaseType caseType = str::Case ) const
 			{
 				return str::Case == caseType
-					? _Find< str::Case >( rFoundPos, CPart<CharT>( &ch, ch != 0 ? 1 : 0 ) )
-					: _Find< str::IgnoreCase >( rFoundPos, CPart<CharT>( &ch, ch != 0 ? 1 : 0 ) );
+					? _Find<str::Case>( rFoundPos, CPart<CharT>( &ch, ch != 0 ? 1 : 0 ) )
+					: _Find<str::IgnoreCase>( rFoundPos, CPart<CharT>( &ch, ch != 0 ? 1 : 0 ) );
 			}
 
 			bool Equals( const CharT part[], str::CaseType caseType = str::Case )
@@ -198,7 +198,7 @@ namespace str
 				typedef const CharT* iterator;
 
 				iterator itBegin = m_text.c_str() + m_pos.m_start, itEnd = m_text.c_str() + m_pos.m_end;
-				iterator itFound = std::search( itBegin, itEnd, part.m_pStr, part.m_pStr + part.m_count, pred::CharEqual< caseType >() );
+				iterator itFound = std::search( itBegin, itEnd, part.m_pStr, part.m_pStr + part.m_count, pred::CharEqual<caseType>() );
 				if ( itFound == itEnd )
 					return false;
 

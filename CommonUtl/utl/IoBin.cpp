@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "IoBin.h"
 #include "Path.h"
 #include <fstream>
@@ -15,7 +15,7 @@ namespace io
 	{
 		// buffer I/O for binary files
 
-		void WriteAllToFile( const fs::CPath& targetFilePath, const std::vector< char >& buffer ) throws_( CRuntimeException )
+		void WriteAllToFile( const fs::CPath& targetFilePath, const std::vector<char>& buffer ) throws_( CRuntimeException )
 		{
 			std::ofstream ofs( targetFilePath.GetPtr(), std::ios_base::out | std::ios_base::binary );
 			if ( !ofs.is_open() )
@@ -25,7 +25,7 @@ namespace io
 				ofs.write( &buffer.front(), buffer.size() );												// verbatim buffer of chars
 		}
 
-		void ReadAllFromFile( std::vector< char >& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+		void ReadAllFromFile( std::vector<char>& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 		{
 			std::ifstream ifs( srcFilePath.GetPtr(), std::ios_base::in | std::ios_base::binary );
 			if ( !ifs.is_open() )

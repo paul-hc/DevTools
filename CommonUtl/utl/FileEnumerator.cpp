@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileEnumerator.h"
 #include "FileState.h"
 #include "RuntimeException.h"
@@ -46,7 +46,7 @@ namespace fs
 			if ( !fs::IsValidFile( dirPathFilter.GetPtr() ) )		// not a single file search path?
 				dirPathFilter = dirPath / _T("*");					// need to relax filter to all so that it covers sub-directories
 
-		std::vector< fs::CPath > subDirPaths;
+		std::vector<fs::CPath> subDirPaths;
 
 		CFileFind finder;
 		for ( BOOL found = finder.FindFile( dirPathFilter.GetPtr() ); found && !pEnumerator->MustStop(); )
@@ -84,7 +84,7 @@ namespace fs
 		const bool canRecurse = pEnumerator->CanRecurse();
 
 		// progress reporting: ensure the sub-directory (stage) is always displayed first, then the files (items) under it
-		for ( std::vector< fs::TDirPath >::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )
+		for ( std::vector<fs::TDirPath>::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )
 			if ( pEnumerator->AddFoundSubDir( *itSubDirPath ) )		// sub-directory is not ignored?
 				if ( canRecurse && !pEnumerator->MustStop() )
 					EnumFiles( pEnumerator, *itSubDirPath, pWildSpec );
@@ -118,7 +118,7 @@ namespace fs
 	}
 
 
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
+	size_t EnumFilePaths( std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CPathEnumerator found( flags );
 		EnumFiles( &found, dirPath, pWildSpec );
@@ -126,7 +126,7 @@ namespace fs
 		return path::JoinUniquePaths( rFilePaths, found.m_filePaths );		// added count
 	}
 
-	size_t EnumSubDirPaths( std::vector< fs::TDirPath >& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
+	size_t EnumSubDirPaths( std::vector<fs::TDirPath>& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CPathEnumerator found( flags );
 		EnumFiles( &found, dirPath, pWildSpec );
@@ -205,11 +205,11 @@ namespace fs
 		m_wildSpecs.clear();
 	}
 
-	void CPathMatchLookup::Reset( const std::vector< fs::CPath >& paths )
+	void CPathMatchLookup::Reset( const std::vector<fs::CPath>& paths )
 	{
 		Clear();
 
-		for ( std::vector< fs::CPath >::const_iterator itPath = paths.begin(); itPath != paths.end(); ++itPath )
+		for ( std::vector<fs::CPath>::const_iterator itPath = paths.begin(); itPath != paths.end(); ++itPath )
 			AddPath( *itPath );
 	}
 
@@ -226,7 +226,7 @@ namespace fs
 	bool CPathMatchLookup::IsDirMatch( const fs::TDirPath& dirPath ) const
 	{
 		if ( !m_dirPaths.empty() )		// speed things up if empty - skip iterators creation
-			for ( std::vector< fs::TDirPath >::const_iterator itDirPath = m_dirPaths.begin(); itDirPath != m_dirPaths.end(); ++itDirPath )
+			for ( std::vector<fs::TDirPath>::const_iterator itDirPath = m_dirPaths.begin(); itDirPath != m_dirPaths.end(); ++itDirPath )
 				if ( path::HasPrefix( dirPath.GetPtr(), itDirPath->GetPtr() ) )
 					return true;
 
@@ -236,7 +236,7 @@ namespace fs
 	bool CPathMatchLookup::IsFileMatch( const fs::CPath& filePath ) const
 	{
 		if ( !m_filePaths.empty() )		// speed things up if empty - skip iterators creation
-			for ( std::vector< fs::CPath >::const_iterator itFilePath = m_filePaths.begin(); itFilePath != m_filePaths.end(); ++itFilePath )
+			for ( std::vector<fs::CPath>::const_iterator itFilePath = m_filePaths.begin(); itFilePath != m_filePaths.end(); ++itFilePath )
 				if ( filePath == *itFilePath )
 					return true;
 
@@ -246,7 +246,7 @@ namespace fs
 	bool CPathMatchLookup::IsWildcardMatch( const fs::CPath& anyPath ) const
 	{
 		if ( !m_wildSpecs.empty() )		// speed things up if empty - skip iterators creation
-			for ( std::vector< std::tstring >::const_iterator itWildSpec = m_wildSpecs.begin(); itWildSpec != m_wildSpecs.end(); ++itWildSpec )
+			for ( std::vector<std::tstring>::const_iterator itWildSpec = m_wildSpecs.begin(); itWildSpec != m_wildSpecs.end(); ++itWildSpec )
 				if ( path::MatchWildcard( anyPath.GetPtr(), itWildSpec->c_str() ) )
 					return true;
 
@@ -301,7 +301,7 @@ namespace fs
 	{
 	}
 
-	void CBaseEnumerator::SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths )
+	void CBaseEnumerator::SetIgnorePathMatches( const std::vector<fs::CPath>& ignorePaths )
 	{
 		m_options.m_ignorePathMatches.Reset( ignorePaths );
 	}
@@ -442,7 +442,7 @@ namespace fs
 			const fs::CPath filePath = filePathParts.MakePath();
 			const fs::CPath parentDirPath = filePathParts.GetDirPath();
 
-			std::vector< fs::CPath > existingPaths;
+			std::vector<fs::CPath> existingPaths;
 			UINT seqCount = 0;
 
 			if ( fs::IsValidDirectory( parentDirPath.GetPtr() ) )
@@ -459,7 +459,7 @@ namespace fs
 
 			const size_t prefixLen = filePathParts.m_fname.length();
 
-			for ( std::vector< fs::CPath >::const_iterator itExistingPath = existingPaths.begin(); itExistingPath != existingPaths.end(); ++itExistingPath )
+			for ( std::vector<fs::CPath>::const_iterator itExistingPath = existingPaths.begin(); itExistingPath != existingPaths.end(); ++itExistingPath )
 			{
 				fs::CPathParts parts( itExistingPath->GetFilename() );
 				ASSERT( str::HasPrefixI( parts.m_fname.c_str(), filePathParts.m_fname.c_str() ) );

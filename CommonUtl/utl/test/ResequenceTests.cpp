@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/ResequenceTests.h"
@@ -14,28 +14,28 @@
 
 namespace ut
 {
-	std::string MoveBy( const char srcText[], const std::vector< int >& selIndexes, seq::Direction direction )
+	std::string MoveBy( const char srcText[], const std::vector<int>& selIndexes, seq::Direction direction )
 	{
 		std::string chars = srcText;
-		seq::CSequenceAdapter< char > sequence( &chars[ 0 ], chars.size() );
+		seq::CSequenceAdapter<char> sequence( &chars[ 0 ], chars.size() );
 
 		seq::MoveBy( sequence, selIndexes, direction );
 		return chars;
 	}
 
-	std::string Resequence( const char srcText[], const std::vector< int >& selIndexes, seq::MoveTo moveTo )
+	std::string Resequence( const char srcText[], const std::vector<int>& selIndexes, seq::MoveTo moveTo )
 	{
 		std::string chars = srcText;
-		seq::CSequenceAdapter< char > sequence( &chars[ 0 ], chars.size() );
+		seq::CSequenceAdapter<char> sequence( &chars[ 0 ], chars.size() );
 
 		seq::Resequence( sequence, selIndexes, moveTo );
 		return chars;
 	}
 
-	std::string MakeDropSequence( const char srcText[], int dropIndex, const std::vector< int >& selIndexes )
+	std::string MakeDropSequence( const char srcText[], int dropIndex, const std::vector<int>& selIndexes )
 	{
-		std::vector< char > baselineSeq( srcText, str::end( srcText ) );
-		std::vector< char > newSequence;
+		std::vector<char> baselineSeq( srcText, str::end( srcText ) );
+		std::vector<char> newSequence;
 
 		seq::MakeDropSequence( newSequence, baselineSeq, dropIndex, selIndexes );
 		return std::string( &newSequence.front(), newSequence.size() );
@@ -73,7 +73,7 @@ void CResequenceTests::TestCanMove( void )
 
 void CResequenceTests::TestResequence( void )
 {
-	std::vector< int > sel_CE;
+	std::vector<int> sel_CE;
 	sel_CE.push_back( 2 );		// 'C'
 	sel_CE.push_back( 4 );		// 'E'
 
@@ -90,7 +90,7 @@ void CResequenceTests::TestResequence( void )
 void CResequenceTests::TestDropMove( void )
 {
 	{	// single selection
-		std::vector< int > sel_C;
+		std::vector<int> sel_C;
 		sel_C.push_back( 2 );		// 'C'
 
 		ASSERT( seq::ChangesDropSequenceAt( 7, 0, sel_C ) );
@@ -111,7 +111,7 @@ void CResequenceTests::TestDropMove( void )
 	}
 
 	{	// multiple selection
-		std::vector< int > sel_CEF;
+		std::vector<int> sel_CEF;
 		sel_CEF.push_back( 2 );		// 'C'
 		sel_CEF.push_back( 4 );		// 'E'
 		sel_CEF.push_back( 5 );		// 'F'

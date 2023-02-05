@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "StringBase.h"
 #include <comdef.h>			// _com_error
 
@@ -177,7 +177,7 @@ namespace str
 			if ( !str::IsEmpty( pUtf8 ) )
 			{
 				size_t size = strlen( pUtf8 ) + 1;
-				std::vector< wchar_t > wideBuff( size );
+				std::vector<wchar_t> wideBuff( size );
 				size_t convertedChars = 0;
 				mbstowcs_s( &convertedChars, &wideBuff.front(), size, pUtf8, _TRUNCATE );		// UTF8 -> WIDE
 				wide = &wideBuff.front();
@@ -257,9 +257,9 @@ namespace str
 		return text.GetString();
 	}
 
-	std::vector< std::tstring > LoadStrings( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= NULL*/ )
+	std::vector<std::tstring> LoadStrings( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= NULL*/ )
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		Split( items, Load( strId, pLoaded ).c_str(), pSep );
 		return items;
 	}

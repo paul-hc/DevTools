@@ -29,7 +29,7 @@ namespace fs
 
 		bool Register( const PathT& pathKey ) { return m_paths.insert( pathKey ).second; }
 	private:
-		std::unordered_set< PathT > m_paths;
+		std::unordered_set<PathT> m_paths;
 	};
 
 
@@ -51,7 +51,7 @@ namespace fs
 
 		ValueT* Find( const PathT& pathKey )
 		{
-			typename std::unordered_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
+			typename std::unordered_map<PathT, ValueT>::iterator itFound = m_pathMap.find( pathKey );
 			return itFound != m_pathMap.end() ? &itFound->second : NULL;
 		}
 
@@ -70,12 +70,12 @@ namespace fs
 
 		bool Register( const PathT& pathKey, const ValueT& value )
 		{
-			return m_pathMap.insert( std::unordered_map< PathT, ValueT >::value_type( pathKey, value ) ).second;
+			return m_pathMap.insert( std::unordered_map<PathT, ValueT>::value_type( pathKey, value ) ).second;
 		}
 
 		bool Remove( const PathT& pathKey )
 		{
-			typename std::unordered_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
+			typename std::unordered_map<PathT, ValueT>::iterator itFound = m_pathMap.find( pathKey );
 			if ( itFound == m_pathMap.end() )
 				return false;
 
@@ -94,7 +94,7 @@ namespace fs
 		{
 			size_t oldCount = m_pathMap.size();
 
-			for ( typename std::unordered_map< PathT, ValueT >::iterator itPath = m_pathMap.begin(); itPath != m_pathMap.end(); )
+			for ( typename std::unordered_map<PathT, ValueT>::iterator itPath = m_pathMap.begin(); itPath != m_pathMap.end(); )
 				if ( path::HasPrefix( str::traits::GetCharPtr( itPath->first ), pDirPrefix ) )
 					itPath = m_pathMap.erase( itPath );
 				else
@@ -103,7 +103,7 @@ namespace fs
 			return oldCount - m_pathMap.size();
 		}
 	protected:
-		std::unordered_map< PathT, ValueT > m_pathMap;
+		std::unordered_map<PathT, ValueT> m_pathMap;
 	};
 }
 
@@ -123,7 +123,7 @@ namespace fs
 		typedef CAdapt<TComPtr> TValue;
 		typedef CPathMap<PathT, TValue> TBaseClass;
 
-		typedef typename std::unordered_map< PathT, TValue >::const_iterator const_iterator;
+		typedef typename std::unordered_map<PathT, TValue>::const_iterator const_iterator;
 	private:
 		using TBaseClass::Find;
 		using TBaseClass::Lookup;
@@ -132,7 +132,7 @@ namespace fs
 
 		InterfaceT* Find( const PathT& pathKey ) const
 		{
-			typename std::unordered_map< PathT, TValue >::const_iterator itFound = this->m_pathMap.find( pathKey );
+			typename std::unordered_map<PathT, TValue>::const_iterator itFound = this->m_pathMap.find( pathKey );
 			if ( itFound == this->m_pathMap.end() )
 				return NULL;
 
@@ -141,14 +141,14 @@ namespace fs
 
 		TComPtr& Lookup( const PathT& pathKey )
 		{
-			typename std::unordered_map< PathT, TValue >::iterator itFound = this->m_pathMap.find( pathKey );
+			typename std::unordered_map<PathT, TValue>::iterator itFound = this->m_pathMap.find( pathKey );
 			ASSERT( itFound != this->m_pathMap.end() );
 			return itFound->second.m_T;
 		}
 
 		void ReleaseAll( void )
 		{
-			for ( typename std::unordered_map< PathT, TValue >::iterator itEntry = this->m_pathMap.begin(); itEntry != this->m_pathMap.end(); ++itEntry )
+			for ( typename std::unordered_map<PathT, TValue>::iterator itEntry = this->m_pathMap.begin(); itEntry != this->m_pathMap.end(); ++itEntry )
 				itEntry->second = NULL;
 		}
 
@@ -280,7 +280,7 @@ namespace fs
 		// un-synchronized methods
 		const TEntry* _FindEntry( const PathT& pathKey ) const
 		{
-			typename std::unordered_map< PathT, TEntry >::const_iterator itFound = m_pathMap.find( pathKey );
+			typename std::unordered_map<PathT, TEntry>::const_iterator itFound = m_pathMap.find( pathKey );
 			if ( itFound != m_pathMap.end() )
 				return &itFound->second;
 
@@ -295,7 +295,7 @@ namespace fs
 
 		bool _RemoveEntry( const PathT& pathKey )
 		{
-			typename std::unordered_map< PathT, TEntry >::iterator itFound = m_pathMap.find( pathKey );
+			typename std::unordered_map<PathT, TEntry>::iterator itFound = m_pathMap.find( pathKey );
 			if ( itFound == m_pathMap.end() )
 				return false;
 
@@ -306,7 +306,7 @@ namespace fs
 	private:
 		void DeleteEntry( TEntry& entry ) { m_deleteFunc( entry ); }
 	private:
-		std::unordered_map< PathT, TEntry > m_pathMap;
+		std::unordered_map<PathT, TEntry> m_pathMap;
 		DeleteEntryFunc m_deleteFunc;
 	protected:
 		mutable CCriticalSection m_cs;				// serialize cache access for thread safety

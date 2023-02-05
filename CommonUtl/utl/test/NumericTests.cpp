@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/NumericTests.h"
@@ -19,7 +19,7 @@ namespace ut
 	std::tstring GenerateNumbersInSequence( const TCHAR srcItems[], unsigned int startingNumber = UINT_MAX ) throws_( CRuntimeException )
 	{
 		static const TCHAR s_sep[] = _T("|");
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, srcItems, s_sep );
 
 		num::GenerateNumbersInSequence( items, startingNumber );
@@ -39,7 +39,7 @@ CNumericTests& CNumericTests::Instance( void )
 	return s_testCase;
 }
 
-const std::vector< UINT >& CNumericTests::GetReferenceCrc32Table( void )
+const std::vector<UINT>& CNumericTests::GetReferenceCrc32Table( void )
 {
 	static const UINT table[] =
 	{
@@ -111,7 +111,7 @@ const std::vector< UINT >& CNumericTests::GetReferenceCrc32Table( void )
 		0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94,
 		0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D,
 	};
-	static const std::vector< UINT > s_crc32Table( table, table + COUNT_OF( table ) );
+	static const std::vector<UINT> s_crc32Table( table, table + COUNT_OF( table ) );
 	return s_crc32Table;
 }
 
@@ -221,51 +221,51 @@ namespace ut
 void CNumericTests::TestParseNumber( void )
 {
 	{
-		ASSERT_EQUAL( std::make_pair( true, (signed char)32 ), ut::ParseNumber< signed char >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (signed char)-16 ), ut::ParseNumber< signed char >( _T("-16") ) );
+		ASSERT_EQUAL( std::make_pair( true, (signed char)32 ), ut::ParseNumber<signed char>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (signed char)-16 ), ut::ParseNumber<signed char>( _T("-16") ) );
 
-		ASSERT_EQUAL( std::make_pair( true, (BYTE)32 ), ut::ParseNumber< BYTE >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (BYTE)240 ), ut::ParseNumber< BYTE >( _T("240") ) );
+		ASSERT_EQUAL( std::make_pair( true, (BYTE)32 ), ut::ParseNumber<BYTE>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (BYTE)240 ), ut::ParseNumber<BYTE>( _T("240") ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (short)32 ), ut::ParseNumber< short >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (short)-4096 ), ut::ParseNumber< short >( _T("-4096") ) );
+		ASSERT_EQUAL( std::make_pair( true, (short)32 ), ut::ParseNumber<short>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (short)-4096 ), ut::ParseNumber<short>( _T("-4096") ) );
 
-		ASSERT_EQUAL( std::make_pair( true, (unsigned short)32 ), ut::ParseNumber< unsigned short >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned short)61440 ), ut::ParseNumber< unsigned short >( _T("61440") ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned short)32 ), ut::ParseNumber<unsigned short>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned short)61440 ), ut::ParseNumber<unsigned short>( _T("61440") ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (int)32 ), ut::ParseNumber< int >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (int)-268435456 ), ut::ParseNumber< int >( _T("-268435456") ) );
+		ASSERT_EQUAL( std::make_pair( true, (int)32 ), ut::ParseNumber<int>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (int)-268435456 ), ut::ParseNumber<int>( _T("-268435456") ) );
 
-		ASSERT_EQUAL( std::make_pair( true, (unsigned int)32 ), ut::ParseNumber< unsigned int >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned int)4026531840 ), ut::ParseNumber< unsigned int >( _T("4026531840") ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned int)32 ), ut::ParseNumber<unsigned int>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned int)4026531840 ), ut::ParseNumber<unsigned int>( _T("4026531840") ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (long)32 ), ut::ParseNumber< long >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (long)-268435456 ), ut::ParseNumber< long >( _T("-268435456") ) );
+		ASSERT_EQUAL( std::make_pair( true, (long)32 ), ut::ParseNumber<long>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (long)-268435456 ), ut::ParseNumber<long>( _T("-268435456") ) );
 
-		ASSERT_EQUAL( std::make_pair( true, (unsigned long)32 ), ut::ParseNumber< unsigned long >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned long)4026531840 ), ut::ParseNumber< unsigned long >( _T("4026531840") ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned long)32 ), ut::ParseNumber<unsigned long>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned long)4026531840 ), ut::ParseNumber<unsigned long>( _T("4026531840") ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (__int64)32 ), ut::ParseNumber< __int64 >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (__int64)-1152921504606846976 ), ut::ParseNumber< __int64 >( _T("-1152921504606846976") ) );
+		ASSERT_EQUAL( std::make_pair( true, (__int64)32 ), ut::ParseNumber<__int64>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (__int64)-1152921504606846976 ), ut::ParseNumber<__int64>( _T("-1152921504606846976") ) );
 
-		ASSERT_EQUAL( std::make_pair( true, (unsigned __int64)32 ), ut::ParseNumber< unsigned __int64 >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned __int64)17293822569102704640 ), ut::ParseNumber< unsigned __int64 >( _T("17293822569102704640") ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned __int64)32 ), ut::ParseNumber<unsigned __int64>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned __int64)17293822569102704640 ), ut::ParseNumber<unsigned __int64>( _T("17293822569102704640") ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, 32.0 ), ut::ParseNumber< double >( _T("32") ) );
-		ASSERT_EQUAL( std::make_pair( true, 1234.56789 ), ut::ParseNumber< double >( _T("1234.56789") ) );
-		ASSERT_EQUAL( std::make_pair( true, -1234.56789 ), ut::ParseNumber< double >( _T("-1234.56789") ) );
+		ASSERT_EQUAL( std::make_pair( true, 32.0 ), ut::ParseNumber<double>( _T("32") ) );
+		ASSERT_EQUAL( std::make_pair( true, 1234.56789 ), ut::ParseNumber<double>( _T("1234.56789") ) );
+		ASSERT_EQUAL( std::make_pair( true, -1234.56789 ), ut::ParseNumber<double>( _T("-1234.56789") ) );
 	}
 
 	// with skip length
 	{
 		static const std::tstring numText = _T(" -375some");
 		size_t skipLength;
-		ASSERT_EQUAL( std::make_pair( true, (int)-375 ), ut::ParseNumber< int >( numText, &skipLength ) );
+		ASSERT_EQUAL( std::make_pair( true, (int)-375 ), ut::ParseNumber<int>( numText, &skipLength ) );
 		ASSERT_EQUAL( 5, skipLength );
 		ASSERT_EQUAL( _T("some"), numText.substr( skipLength ) );
 	}
@@ -275,26 +275,26 @@ void CNumericTests::TestParseNumberUserLocale( void )
 {
 	const std::locale& userLoc = str::GetUserLocale();
 	{
-		ASSERT_EQUAL( std::make_pair( true, (short)-4096 ), ut::ParseNumber< short >( _T("-4,096"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned short)61440 ), ut::ParseNumber< unsigned short >( _T("61,440"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (short)-4096 ), ut::ParseNumber<short>( _T("-4,096"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned short)61440 ), ut::ParseNumber<unsigned short>( _T("61,440"), NULL, userLoc ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (int)32 ), ut::ParseNumber< int >( _T("32"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (int)-268435456 ), ut::ParseNumber< int >( _T("-268,435,456"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned int)4026531840 ), ut::ParseNumber< unsigned int >( _T("4,026,531,840"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (int)32 ), ut::ParseNumber<int>( _T("32"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (int)-268435456 ), ut::ParseNumber<int>( _T("-268,435,456"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned int)4026531840 ), ut::ParseNumber<unsigned int>( _T("4,026,531,840"), NULL, userLoc ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (long)-268435456 ), ut::ParseNumber< long >( _T("-268,435,456"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned long)4026531840 ), ut::ParseNumber< unsigned long >( _T("4,026,531,840"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (long)-268435456 ), ut::ParseNumber<long>( _T("-268,435,456"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned long)4026531840 ), ut::ParseNumber<unsigned long>( _T("4,026,531,840"), NULL, userLoc ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (__int64)-1152921504606846976 ), ut::ParseNumber< __int64 >( _T("-1,152,921,504,606,846,976"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned __int64)17293822569102704640 ), ut::ParseNumber< unsigned __int64 >( _T("17,293,822,569,102,704,640"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (__int64)-1152921504606846976 ), ut::ParseNumber<__int64>( _T("-1,152,921,504,606,846,976"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned __int64)17293822569102704640 ), ut::ParseNumber<unsigned __int64>( _T("17,293,822,569,102,704,640"), NULL, userLoc ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, 32.0 ), ut::ParseNumber< double >( _T("32"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, 1234000.56789 ), ut::ParseNumber< double >( _T("1,234,000.56789"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, -1234000.56789 ), ut::ParseNumber< double >( _T("-1,234,000.56789"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, 32.0 ), ut::ParseNumber<double>( _T("32"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, 1234000.56789 ), ut::ParseNumber<double>( _T("1,234,000.56789"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, -1234000.56789 ), ut::ParseNumber<double>( _T("-1,234,000.56789"), NULL, userLoc ) );
 	}
 }
 

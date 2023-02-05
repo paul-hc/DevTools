@@ -101,13 +101,13 @@ namespace io
 			m_filePath.Clear();
 			m_openMode = 0;
 			m_lastCh = 0;
-			m_itChar = std::istreambuf_iterator< CharT >();
+			m_itChar = std::istreambuf_iterator<CharT>();
 		}
 
 		virtual void Rewind( void ) throws_( CRuntimeException )
 		{
 			SeekInput( m_bom.GetScaledSize<CharT>() );					// skip the BOM - equivalent to std::advance( m_itChar, m_bom.GetScaledSize<CharT>() )
-			m_itChar = std::istreambuf_iterator< CharT >( this );		// use iterator only for reading
+			m_itChar = std::istreambuf_iterator<CharT>( this );		// use iterator only for reading
 		}
 
 		TCharSize SeekInput( TCharSize charOffset ) throws_( CRuntimeException )
@@ -145,7 +145,7 @@ namespace io
 				Put( *pText++ );
 		}
 
-		void AppendString( const std::basic_string< CharT >& text ) { Append( text.c_str(), text.length() ); }
+		void AppendString( const std::basic_string<CharT>& text ) { Append( text.c_str(), text.length() ); }
 
 
 		// reading - strictly file buffer based, not on an istream
@@ -213,9 +213,9 @@ namespace io
 				throw CRuntimeException( str::Format( _T("Error writing character '%c' to text file %s"), chr, m_filePath.GetPtr() ) );
 		}
 	private:
-		std::vector< CharT > m_buffer;							// set to override the locale-specific conversion in the base
+		std::vector<CharT> m_buffer;							// set to override the locale-specific conversion in the base
 
-		std::istreambuf_iterator< CharT > m_itChar, m_itEnd;	// read-mode iterators
+		std::istreambuf_iterator<CharT> m_itChar, m_itEnd;	// read-mode iterators
 		CharT m_lastCh;
 	};
 
