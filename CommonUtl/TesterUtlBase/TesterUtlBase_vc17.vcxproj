@@ -99,12 +99,13 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;..;..\utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC_VC17)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(UTL_INCLUDE_VC17)\lib64-msvc-14.3</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
@@ -117,14 +118,15 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;..;..\utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC_VC17)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(UTL_INCLUDE_VC17)\lib64-msvc-14.3</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
@@ -136,12 +138,12 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;..;..\utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC_VC17)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(UTL_INCLUDE_VC17)\lib64-msvc-14.3</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(UTL_BOOST_INC_VC17)\lib64-msvc-14.3</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
@@ -154,14 +156,14 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.;..;..\utl;$(UTL_INCLUDE_VC17)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC_VC17)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(UTL_INCLUDE_VC17)\lib64-msvc-14.3</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(UTL_BOOST_INC_VC17)\lib64-msvc-14.3</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>

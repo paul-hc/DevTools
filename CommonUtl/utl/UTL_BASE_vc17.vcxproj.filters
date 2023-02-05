@@ -418,6 +418,9 @@
     <ClInclude Include="test\EnvironmentTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="StringParsing.h">
+      <Filter>utl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
