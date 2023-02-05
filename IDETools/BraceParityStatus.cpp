@@ -12,20 +12,34 @@
 
 namespace code
 {
+	bool IsValidBrace( wchar_t brace )
+	{
+		static const std::wstring s_allBraces = L"()[]{}<>";
+		return s_allBraces.find( brace ) != std::wstring::npos;
+	}
+
+	bool IsValidOpenBrace( wchar_t brace )
+	{
+		static const std::wstring s_openBraces = L"([{<";
+		return s_openBraces.find( brace ) != std::wstring::npos;
+	}
+
+	bool IsValidCloseBrace( wchar_t brace )
+	{
+		static const std::wstring s_closeBraces = L")]}>";
+		return s_closeBraces.find( brace ) != std::wstring::npos;
+	}
+}
+
+
+namespace code
+{
 	// BraceParityStatus implementation
-
-	BraceParityStatus::BraceParityStatus( void )
-	{
-	}
-
-	BraceParityStatus::~BraceParityStatus()
-	{
-	}
 
 	void BraceParityStatus::clear( void )
 	{
-		braceCounters.clear();
-		errorMessages.clear();
+		m_braceCounters.clear();
+		m_errorMessages.clear();
 	}
 
 	int BraceParityStatus::findMatchingBracePos( const TCHAR* pStr, int openBracePos, DocLanguage docLanguage )
@@ -39,59 +53,59 @@ namespace code
 
 		code::LanguageSearchEngine languageEngine( docLanguage );
 		TCHAR matchingCloseBrace = getMatchingBrace( pStr[ openBracePos ] );
-		const TCHAR* cursor = pStr + openBracePos + 1;
+		const TCHAR* pCursor = pStr + openBracePos + 1;
 
-		while ( *cursor != _T('\0') )
+		while ( *pCursor != _T('\0') )
 		{
 			int commentEnd;
 
-			if ( isBraceChar( *cursor ) )
+			if ( isBraceChar( *pCursor ) )
 			{
-				BraceCounter* braceCounter = storeBrace( *cursor );
+				BraceCounter* braceCounter = storeBrace( *pCursor );
 
-				if ( braceCounter != NULL && braceCounter->m_parityCounter == -1 )
-					errorMessages.push_back( str::formatString( _T("Closing brace '%c' encountered before the opening brace; at pos %d: [%s]"),
-																braceCounter->m_closeBrace, int( cursor - pStr ), cursor ) );
+				if ( braceCounter != NULL && -1 == braceCounter->m_parityCounter )
+					m_errorMessages.push_back( str::formatString( _T("Closing brace '%c' encountered before the opening brace; at pos %d: [%s]"),
+																braceCounter->m_closeBrace, int( pCursor - pStr ), pCursor ) );
 
-				if ( *cursor == matchingCloseBrace )
-					if ( isBraceEven( *cursor ) )
+				if ( *pCursor == matchingCloseBrace )
+					if ( isBraceEven( *pCursor ) )
 						break;
 			}
-			else if ( isQuoteChar( *cursor ) )
+			else if ( isQuoteChar( *pCursor ) )
 			{
-				int matchingQuotePos = code::findMatchingQuotePos( pStr, int( cursor - pStr ) );
+				int matchingQuotePos = code::findMatchingQuotePos( pStr, int( pCursor - pStr ) );
 
 				if ( matchingQuotePos != -1 )
-					cursor = pStr + matchingQuotePos;
+					pCursor = pStr + matchingQuotePos;
 				else
 				{
-					errorMessages.push_back( str::formatString( _T("Quoted string not closed at pos %d: [%s]"),
-																int( cursor - pStr ), cursor ) );
-					cursor += _tcslen( cursor ); // fatal error -> go to end
+					m_errorMessages.push_back( str::formatString( _T("Quoted string not closed at pos %d: [%s]"),
+																int( pCursor - pStr ), pCursor ) );
+					pCursor += _tcslen( pCursor ); // fatal error -> go to end
 				}
 			}
-			else if ( languageEngine.isCommentStatement( commentEnd, pStr, int( cursor - pStr ) ) )
+			else if ( languageEngine.isCommentStatement( commentEnd, pStr, int( pCursor - pStr ) ) )
 			{
-				cursor = pStr + str::safePos( commentEnd, pStr );
+				pCursor = pStr + str::safePos( commentEnd, pStr );
 				continue; // skip incrementing
 			}
 
-			++cursor;
+			++pCursor;
 		}
 
 		checkParityErrors();
 
-		if ( *cursor == _T('\0') )
+		if ( *pCursor == _T('\0') )
 		{
-			errorMessages.push_back( str::formatString( _T("Closing brace not found for opening brace '%c' at pos %d"),
+			m_errorMessages.push_back( str::formatString( _T("Closing brace not found for opening brace '%c' at pos %d"),
 														pStr[ openBracePos ], openBracePos ) );
 			return -1;						// reached end of string, closing brace not found
 		}
 
-		return int( cursor - pStr );		// found the matching brace -> return the position
+		return int( pCursor - pStr );		// found the matching brace -> return the position
 	}
 
-	struct BraceReverser : public std::unary_function< void, TCHAR >
+	struct BraceReverser : public std::unary_function<void, TCHAR>
 	{
 		void operator()( TCHAR& chr )
 		{
@@ -142,7 +156,7 @@ namespace code
 
 	/**
 		Analyzes the syntax for parity of the braces/quotes, returning true if syntax is correct.
-		Errors (if any) are stored in 'errorMessages' data member.
+		Errors (if any) are stored in 'm_errorMessages' data member.
 	*/
 	bool BraceParityStatus::analyzeBraceParity( const TCHAR* pStr, DocLanguage docLanguage )
 	{
@@ -187,8 +201,8 @@ namespace code
 		}
 		else
 		{
-			braceCounters.push_back( BraceCounter( brace ) ); // ctor auto-counts the brace
-			return &braceCounters.back();
+			m_braceCounters.push_back( BraceCounter( brace ) ); // ctor auto-counts the brace
+			return &m_braceCounters.back();
 		}
 	}
 
@@ -196,11 +210,11 @@ namespace code
 	{
 		bool succeeded = true;
 
-		for ( std::vector< BraceCounter >::const_iterator itBraceCounter = braceCounters.begin();
-			  itBraceCounter != braceCounters.end(); ++itBraceCounter )
+		for ( std::vector<BraceCounter>::const_iterator itBraceCounter = m_braceCounters.begin();
+			  itBraceCounter != m_braceCounters.end(); ++itBraceCounter )
 			if ( !itBraceCounter->IsEven() )
 			{
-				errorMessages.push_back( str::formatString( _T("Un-even brace pair '%c%c'; missing %d '%c' braces"),
+				m_errorMessages.push_back( str::formatString( _T("Un-even brace pair '%c%c'; missing %d '%c' braces"),
 															itBraceCounter->m_openBrace, itBraceCounter->m_closeBrace,
 															abs( itBraceCounter->m_parityCounter ),
 															itBraceCounter->m_parityCounter > 0 ? itBraceCounter->m_closeBrace : itBraceCounter->m_openBrace ) );
@@ -212,8 +226,8 @@ namespace code
 
 	bool BraceParityStatus::isEntirelyEven( void ) const
 	{
-		for ( std::vector< BraceCounter >::const_iterator itBraceCounter = braceCounters.begin();
-			  itBraceCounter != braceCounters.end(); ++itBraceCounter )
+		for ( std::vector<BraceCounter>::const_iterator itBraceCounter = m_braceCounters.begin();
+			  itBraceCounter != m_braceCounters.end(); ++itBraceCounter )
 			if ( !itBraceCounter->IsEven() )
 				return false;
 
@@ -231,8 +245,8 @@ namespace code
 	{
 		CString oddOpenBraces;
 
-		for ( std::vector< BraceCounter >::const_iterator itBraceCounter = braceCounters.begin();
-			  itBraceCounter != braceCounters.end(); ++itBraceCounter )
+		for ( std::vector<BraceCounter>::const_iterator itBraceCounter = m_braceCounters.begin();
+			  itBraceCounter != m_braceCounters.end(); ++itBraceCounter )
 			if ( !itBraceCounter->IsEven() )
 				oddOpenBraces += itBraceCounter->m_openBrace;
 
@@ -241,7 +255,7 @@ namespace code
 
 	CString BraceParityStatus::getErrorMessage( const TCHAR* separator /*= _T("\r\n")*/ ) const
 	{
-		return str::unsplit( errorMessages, separator );
+		return str::unsplit( m_errorMessages, separator );
 	}
 
 	//------------------------------------------------------------------------------

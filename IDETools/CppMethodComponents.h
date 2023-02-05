@@ -16,6 +16,7 @@ namespace code
 
 		void splitMethod( const TCHAR* validArgListOpenBraces );
 
+		std::tstring FormatInfo( void ) const;
 		void showMessageBox( void ) const;
 	public:
 		LanguageSearchEngine m_languageEngine;

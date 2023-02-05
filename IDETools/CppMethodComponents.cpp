@@ -68,7 +68,13 @@ namespace code
 		for ( ;; )
 		{
 			while ( m_methodName.m_start > 0 && !_istspace( m_methodPrototype[ m_methodName.m_start - 1 ] ) )
-				--m_methodName.m_start;
+				if ( '>' == m_methodPrototype[ m_methodName.m_start ] )		// closing class template instance brace?
+				{	// bug fix: capture entire template instance => skip backwards to the matching '<' opening brace
+					if ( !code::SkipBraceBackwards( &m_methodName.m_start, m_methodPrototype, m_methodName.m_start ) )
+						--m_methodName.m_start;		// fishy syntax in m_methodPrototype, just ignore
+				}
+				else
+					--m_methodName.m_start;
 
 			if ( isValidBraceChar( m_methodPrototype[ m_methodName.m_start ], validArgListOpenBraces ) )
 			{
@@ -130,24 +136,29 @@ namespace code
 			while ( _istspace( m_methodPrototype[ m_returnType.m_start ] ) )
 				++m_returnType.m_start;
 		}
+
+		TRACE( _T("%s"), FormatInfo().c_str() );
+	}
+
+	std::tstring CppMethodComponents::FormatInfo( void ) const
+	{
+		return str::Format(
+			_T("#CppMethodComponents - Prototype components for:\n%s\ntemplateDecl='%s'\ninlineModifier='%s'\nreturnType='%s'\n")
+			_T("m_methodName='%s'\ntypeQualifier='%s'\nargList='%s'\npostArgListSuffix='%s'\n"),
+			m_methodPrototype,
+			(LPCTSTR)m_templateDecl.getString( m_methodPrototype ),
+			(LPCTSTR)m_inlineModifier.getString( m_methodPrototype ),
+			(LPCTSTR)m_returnType.getString( m_methodPrototype ),
+			(LPCTSTR)m_methodName.getString( m_methodPrototype ),
+			(LPCTSTR)m_typeQualifier.getString( m_methodPrototype ),
+			(LPCTSTR)m_argList.getString( m_methodPrototype ),
+			(LPCTSTR)m_postArgListSuffix.getString( m_methodPrototype )
+		);
 	}
 
 	void CppMethodComponents::showMessageBox( void ) const
 	{
-		CString message;
-
-		message.Format( _T("Prototype components for:\n%s\n\n\ntemplateDecl='%s'\ninlineModifier='%s'\nreturnType='%s'\n")
-						_T("m_methodName='%s'\ntypeQualifier='%s'\nargList='%s'\npostArgListSuffix='%s'\n"),
-						m_methodPrototype,
-						(LPCTSTR)m_templateDecl.getString( m_methodPrototype ),
-						(LPCTSTR)m_inlineModifier.getString( m_methodPrototype ),
-						(LPCTSTR)m_returnType.getString( m_methodPrototype ),
-						(LPCTSTR)m_methodName.getString( m_methodPrototype ),
-						(LPCTSTR)m_typeQualifier.getString( m_methodPrototype ),
-						(LPCTSTR)m_argList.getString( m_methodPrototype ),
-						(LPCTSTR)m_postArgListSuffix.getString( m_methodPrototype ) );
-
-		AfxMessageBox( message );
+		AfxMessageBox( FormatInfo().c_str() );
 	}
 
 } // namespace code

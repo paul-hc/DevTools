@@ -12,8 +12,7 @@ namespace code
 	class BraceParityStatus
 	{
 	public:
-		BraceParityStatus( void );
-		~BraceParityStatus();
+		BraceParityStatus( void ) {}
 
 		// high-level
 		int findMatchingBracePos( const TCHAR* pStr, int openBracePos, DocLanguage docLanguage );
@@ -30,7 +29,7 @@ namespace code
 		// brace status
 		bool isEntirelyEven( void ) const;
 
-		bool hasBrace( TCHAR brace ) const;
+		bool hasBrace( TCHAR brace ) const { return findBrace( brace ) != NULL; }
 		bool isBraceEven( TCHAR brace ) const;
 
 		CString getOddBracesAsString( void ) const;
@@ -39,7 +38,12 @@ namespace code
 	private:
 		struct BraceCounter;
 
-		BraceCounter* findBrace( TCHAR brace ) const;
+		BraceCounter* findBrace( TCHAR brace ) const
+		{
+			std::vector<BraceCounter>::const_iterator itFound = std::find_if( m_braceCounters.begin(), m_braceCounters.end(), MatchesBrace( brace ) );
+
+			return itFound != m_braceCounters.end() ? const_cast<BraceCounter*>( &*itFound ) : NULL;
+		}
 
 		BraceCounter* storeBrace( TCHAR brace );
 		bool checkParityErrors( void );
@@ -49,7 +53,7 @@ namespace code
 			BraceCounter( void );
 			BraceCounter( TCHAR brace );
 
-			bool IsEven( void ) const;
+			bool IsEven( void ) const { return 0 == m_parityCounter; }
 			void countBrace( TCHAR brace );
 		public:
 			TCHAR m_openBrace;
@@ -57,7 +61,7 @@ namespace code
 			int m_parityCounter;
 		};
 
-		struct MatchesOpenBrace : public std::unary_function< const BraceCounter&, bool >
+		struct MatchesOpenBrace : public std::unary_function<const BraceCounter&, bool>
 		{
 			MatchesOpenBrace( TCHAR openBrace ) : m_openBrace( openBrace ) {}
 
@@ -69,7 +73,7 @@ namespace code
 			TCHAR m_openBrace;
 		};
 
-		struct MatchesCloseBrace : public std::unary_function< const BraceCounter&, bool >
+		struct MatchesCloseBrace : public std::unary_function<const BraceCounter&, bool>
 		{
 			MatchesCloseBrace( TCHAR closeBrace ) : m_closeBrace( closeBrace ) {}
 
@@ -81,7 +85,7 @@ namespace code
 			TCHAR m_closeBrace;
 		};
 
-		struct MatchesBrace : public std::unary_function< const BraceCounter&, bool >
+		struct MatchesBrace : public std::unary_function<const BraceCounter&, bool>
 		{
 			MatchesBrace( TCHAR brace ) : m_brace( brace ) {}
 
@@ -93,37 +97,61 @@ namespace code
 			TCHAR m_brace;
 		};
 	private:
-		std::vector< BraceCounter > braceCounters;
-		std::vector< CString > errorMessages;
+		std::vector<BraceCounter> m_braceCounters;
+		std::vector<CString> m_errorMessages;
 	};
 
 } // namespace code
 
 
-// inline code
+namespace str
+{
+	template< typename CharT, typename PosT >
+	inline bool IsValidPos( PosT pos, const CharT* pText ) { return pos >= 0 && pos < static_cast<PosT>( str::GetLength( pText ) ); }
+}
+
+
 namespace code
 {
-	inline BraceParityStatus::BraceCounter* BraceParityStatus::findBrace( TCHAR brace ) const
-	{
-		std::vector< BraceCounter >::const_iterator itFound = std::find_if( braceCounters.begin(), braceCounters.end(),
-																			MatchesBrace( brace ) );
+	bool IsValidBrace( wchar_t brace );
+	bool IsValidOpenBrace( wchar_t brace );
+	bool IsValidCloseBrace( wchar_t brace );
 
-		return itFound != braceCounters.end() ? const_cast<BraceCounter*>( &*itFound ) : NULL;
+
+	// brace lookup helpers
+
+	template< typename PosT >
+	bool SkipBrace( PosT* pOutCloseBracePos, const TCHAR* pCode, PosT openBracePos, DocLanguage docLanguage = DocLang_Cpp )
+	{
+		ASSERT( pOutCloseBracePos != nullptr && pCode != nullptr );
+		REQUIRE( str::IsValidPos( openBracePos, pCode ) && IsValidOpenBrace( pCode[ openBracePos ] ) );
+
+		int closeBracePos = BraceParityStatus().findMatchingBracePos( pCode, static_cast<int>( openBracePos ), docLanguage );
+		if ( -1 == closeBracePos )
+			return false;		// matching brace not found (bad syntax)
+
+		ENSURE( closeBracePos > openBracePos && str::IsValidPos( closeBracePos, pCode ) && IsValidCloseBrace( pCode[ closeBracePos ] ) );
+
+		*pOutCloseBracePos = static_cast<PosT>( closeBracePos );
+		return true;			// found matching brace
 	}
 
-	inline bool BraceParityStatus::hasBrace( TCHAR brace ) const
+	template< typename PosT >
+	bool SkipBraceBackwards( PosT* pOutOpenBracePos, const TCHAR* pCode, PosT closeBracePos, DocLanguage docLanguage = DocLang_Cpp )
 	{
-		return findBrace( brace ) != NULL;
+		ASSERT( pOutOpenBracePos != nullptr && pCode != nullptr );
+		REQUIRE( closeBracePos < static_cast<PosT>( str::GetLength( pCode ) ) && IsValidCloseBrace( pCode[ closeBracePos ] ) );
+
+		int openBracePos = BraceParityStatus().reverseFindMatchingBracePos( pCode, static_cast<int>( closeBracePos ), docLanguage );
+		if ( -1 == openBracePos )
+			return false;		// matching brace not found (bad syntax)
+
+		ENSURE( openBracePos < closeBracePos && str::IsValidPos( openBracePos, pCode ) && IsValidOpenBrace( pCode[ openBracePos ] ) );
+
+		*pOutOpenBracePos = static_cast<PosT>( openBracePos );
+		return true;			// found matching brace
 	}
-
-	// BraceParityStatus::BraceCounter inline code
-
-	inline bool BraceParityStatus::BraceCounter::IsEven( void ) const
-	{
-		return m_parityCounter == 0;
-	}
-
-} // namespace code
+}
 
 
 #endif // BraceParityStatus_h
