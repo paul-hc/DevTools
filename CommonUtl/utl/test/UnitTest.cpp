@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/UnitTest.h"
@@ -14,6 +14,7 @@
 #include <math.h>
 #include <unordered_set>
 #include <fstream>
+#include <iostream>
 #include <iomanip>
 
 #ifdef _DEBUG
@@ -71,7 +72,7 @@ namespace ut
 
 	void StoreFileTextSize( const fs::CPath& filePath, size_t fileSize )
 	{
-		std::vector< char > buffer( fileSize, '#' );
+		std::vector<char> buffer( fileSize, '#' );
 		io::bin::WriteAllToFile( filePath, buffer );
 	}
 
@@ -86,7 +87,7 @@ namespace ut
 		static const char s_blankCh = ' ';
 		static const char s_columnSep[] = "  ";
 
-		std::vector< char > inputRowBuff( rowByteCount );
+		std::vector<char> inputRowBuff( rowByteCount );
 		std::string charRow;
 
 		for ( size_t i; !is.eof(); )
@@ -132,8 +133,8 @@ namespace ut
 {
 	CLogger& GetTestLogger( void )
 	{
-		static CLogger testLogger( _T("%s_tests") );
-		return testLogger;
+		static CLogger s_testLogger( _T("%s_tests") );
+		return s_testLogger;
 	}
 
 
@@ -144,14 +145,37 @@ namespace ut
 		os
 			<< L"* Equality Assertion Failed *" << std::endl << std::endl
 			<< L"    expected:\t'" << expectedValue << L"'" << std::endl
-			<< L"    actual:\t\t'" << actualValue << L"'" << std::endl;
+			<< L"    actual:  \t'" << actualValue << L"'";
 
-		std::tstring text = os.str();
-
-		// prevent assertions on '%' characters: convert the message string so that it can be output with TRACE/CRT_DEBUG functions as printf format
-		str::Replace( text, _T("%"), _T("%%") );
-		return text;
+		return os.str();
 	}
+
+	bool ReportMessage( bool succeeded, const TCHAR* pMsg, const char* pFilePath, int lineNumber )
+	{
+		if ( succeeded )
+			return true;
+
+		TRACE( _T("%s\n"), pMsg );
+
+		std::cerr << pFilePath << '(' << lineNumber << ") : " << pMsg << std::endl;
+		return false;
+	}
+
+	bool AssertTrue( bool succeeded, const wchar_t* pExpression, std::tstring& rMsg )
+	{
+		if ( succeeded )
+			return true;
+
+		std::tostringstream os;
+
+		os
+			<< L"* Assertion Failed *" << std::endl
+			<< L"  expression:\t" << pExpression;
+
+		rMsg = os.str();
+		return false;
+	}
+
 
 	const fs::TDirPath& GetTestDataDirPath( void ) throws_( CRuntimeException )
 	{
@@ -267,10 +291,10 @@ namespace ut
 
 		m_hasFileErrors = false;
 
-		std::vector< fs::CPath > filePaths;
+		std::vector<fs::CPath> filePaths;
 		str::Split( filePaths, pFlatPaths, m_sep );
 
-		for ( std::vector< fs::CPath >::iterator itSrcPath = filePaths.begin(); itSrcPath != filePaths.end(); ++itSrcPath )
+		for ( std::vector<fs::CPath>::iterator itSrcPath = filePaths.begin(); itSrcPath != filePaths.end(); ++itSrcPath )
 		{
 			*itSrcPath = m_poolDirPath / *itSrcPath;		// convert to absolute path
 			if ( !ut::SetFileText( *itSrcPath ) )
@@ -286,11 +310,11 @@ namespace ut
 		return true;
 	}
 
-	size_t CTempFilePool::SplitQualifyPaths( std::vector< fs::CPath >& rFullPaths, const TCHAR relFilePaths[] ) const
+	size_t CTempFilePool::SplitQualifyPaths( std::vector<fs::CPath>& rFullPaths, const TCHAR relFilePaths[] ) const
 	{
 		str::Split( rFullPaths, relFilePaths, m_sep );
 
-		for ( std::vector< fs::CPath >::iterator itFilePath = rFullPaths.begin(); itFilePath != rFullPaths.end(); ++itFilePath )
+		for ( std::vector<fs::CPath>::iterator itFilePath = rFullPaths.begin(); itFilePath != rFullPaths.end(); ++itFilePath )
 			*itFilePath = m_poolDirPath / *itFilePath;
 
 		return rFullPaths.size();
@@ -312,7 +336,7 @@ namespace ut
 
 	// enumeration with relative paths
 
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/,
+	size_t EnumFilePaths( std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/,
 						  const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		fs::CRelativePathEnumerator found( dirPath, flags );
@@ -326,7 +350,7 @@ namespace ut
 		return addedCount;
 	}
 
-	size_t EnumSubDirPaths( std::vector< fs::TDirPath >& rSubDirPaths, const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/,
+	size_t EnumSubDirPaths( std::vector<fs::TDirPath>& rSubDirPaths, const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/,
 							fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		fs::CRelativePathEnumerator found( dirPath, flags );
@@ -344,7 +368,7 @@ namespace ut
 	std::tstring EnumJoinFiles( const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/, const TCHAR* pWildSpec /*= _T("*")*/,
 								fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
-		std::vector< fs::CPath > filePaths;
+		std::vector<fs::CPath> filePaths;
 		EnumFilePaths( filePaths, dirPath, sortType, pWildSpec, flags );
 
 		return str::Join( filePaths, CTempFilePool::m_sep );
@@ -352,7 +376,7 @@ namespace ut
 
 	std::tstring EnumJoinSubDirs( const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
-		std::vector< fs::TDirPath > subDirPaths;
+		std::vector<fs::TDirPath> subDirPaths;
 		EnumSubDirPaths( subDirPaths, dirPath, sortType, flags );
 
 		return str::Join( subDirPaths, CTempFilePool::m_sep );

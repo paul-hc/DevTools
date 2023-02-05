@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/StringTests.h"
@@ -8,6 +8,7 @@
 #include "FlagTags.h"
 #include "FlexPath.h"
 #include "StringUtilities.h"
+#include "StringParsing.h"
 #include "TimeUtils.h"
 
 #ifdef _DEBUG
@@ -171,29 +172,29 @@ void CStringTests::TestStringSorting( void )
 {
 	static const char s_src[] = "a,ab,abc,abcd,A-,AB-,ABC-,ABCD-";		// add trailing '-' to avoid arbitrary order on case-insensitive comparison
 
-	std::vector< std::string > items;
+	std::vector<std::string> items;
 	str::Split( items, s_src, "," );
 	ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( items, ",", pred::TLess_StringyCase() ) );
 	ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( items, ",", pred::TLess_StringyNoCase() ) );
 
-	std::vector< std::wstring > wItems;
+	std::vector<std::wstring> wItems;
 	str::Split( wItems, str::FromAnsi( s_src ).c_str(), L"," );
 	ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wItems, L",", pred::TLess_StringyCase() ) );
 	ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wItems, L",", pred::TLess_StringyNoCase() ) );
 
-	std::vector< fs::CPath > paths;
+	std::vector<fs::CPath> paths;
 	str::Split( paths, str::FromAnsi( s_src ).c_str(), L"," );
 	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::ShuffleSortJoin( paths, _T(","), pred::TLess_StringyCase() ) );
 	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::ShuffleSortJoin( paths, _T(","), pred::TLess_StringyNoCase() ) );
 
-	std::vector< fs::CFlexPath > flexPaths;
+	std::vector<fs::CFlexPath> flexPaths;
 	str::Split( flexPaths, str::FromAnsi( s_src ).c_str(), L"," );
 	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::ShuffleSortJoin( flexPaths, _T(","), pred::TLess_StringyCase() ) );
 	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::ShuffleSortJoin( flexPaths, _T(","), pred::TLess_StringyNoCase() ) );
 
 	// vector of pointers
 	{
-		std::vector< const char* > ptrItems;
+		std::vector<const char*> ptrItems;
 		utl::Assign( ptrItems, items, func::ToCharPtr() );
 
 		ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr<pred::TCompareCase>() ) );
@@ -201,7 +202,7 @@ void CStringTests::TestStringSorting( void )
 	}
 
 	{
-		std::vector< const wchar_t* > wPtrItems;
+		std::vector<const wchar_t*> wPtrItems;
 		utl::Assign( wPtrItems, wItems, func::ToCharPtr() );
 
 		ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr<pred::TCompareCase>() ) );
@@ -214,14 +215,14 @@ void CStringTests::TestIntuitiveSort( void )
 	const char s_srcItems[] = "st3Ring,2string,st2ring,STRING20,string2,3String,20STRING,st20RING,String3";
 
 	{	// NARROW
-		std::vector< std::string > items;
+		std::vector<std::string> items;
 		str::Split( items, s_srcItems, "," );
 		std::random_shuffle( items.begin(), items.end() );
 
 		// sort intuitive via pred::CompareValue that uses pred::Compare_Scalar() specialization
 		ASSERT_EQUAL(
 			"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
-			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::CompareValue >() ) );
+			ut::ShuffleSortJoin( items, ",", pred::LessValue<pred::CompareValue>() ) );
 
 		// sort intuitive via pred::TLess_StringyIntuitive (equivalent with pred::CompareValue)
 		ASSERT_EQUAL(
@@ -240,19 +241,19 @@ void CStringTests::TestIntuitiveSort( void )
 	}
 
 	{	// WIDE
-		std::vector< std::wstring > items;
+		std::vector<std::wstring> items;
 		str::Split( items, str::FromAnsi( s_srcItems ).c_str(), L"," );
 		std::random_shuffle( items.begin(), items.end() );
 
 		// sort intuitive via pred::CompareValue that uses pred::Compare_Scalar() specialization
 		ASSERT_EQUAL(
 			L"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
-			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::CompareValue >() ) );
+			ut::ShuffleSortJoin( items, L",", pred::LessValue<pred::CompareValue>() ) );
 
 		// sort intuitive via pred::TStringyCompareIntuitive (equivalent with pred::CompareValue)
 		ASSERT_EQUAL(
 			L"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
-			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::TStringyCompareIntuitive >() ) );
+			ut::ShuffleSortJoin( items, L",", pred::LessValue<pred::TStringyCompareIntuitive>() ) );
 
 		// sort case-insensitive
 		ASSERT_EQUAL(
@@ -281,7 +282,7 @@ void CStringTests::TestIntuitiveSortPunctuation( void )
 
 	// intuitive: case-insensitive, numbers by value, default punctuation order
 	{
-		std::vector< std::string > items;
+		std::vector<std::string> items;
 		str::Split( items, s_srcItems, "|" );
 
 		ASSERT_EQUAL(
@@ -294,11 +295,11 @@ void CStringTests::TestIntuitiveSortPunctuation( void )
 			"1254 Biertan_noDUP.jpg|"
 			"1254 Biertan{DUP}.jpg|"
 			"1254 Biertan~DUP.jpg"
-			, ut::ShuffleSortJoin( items, "|", pred::LessValue< pred::CompareValue >() ) );
+			, ut::ShuffleSortJoin( items, "|", pred::LessValue<pred::CompareValue>() ) );
 	}
 
 	{
-		std::vector< std::wstring > items;
+		std::vector<std::wstring> items;
 		str::Split( items, str::FromUtf8( s_srcItems ).c_str(), L"|" );
 
 		ASSERT_EQUAL(
@@ -311,7 +312,7 @@ void CStringTests::TestIntuitiveSortPunctuation( void )
 			L"1254 Biertan_noDUP.jpg|"
 			L"1254 Biertan{DUP}.jpg|"
 			L"1254 Biertan~DUP.jpg"
-			, ut::ShuffleSortJoin( items, L"|", pred::LessValue< pred::CompareValue >() ) );
+			, ut::ShuffleSortJoin( items, L"|", pred::LessValue<pred::CompareValue>() ) );
 	}
 }
 
@@ -460,7 +461,7 @@ void CStringTests::TestEnquote( void )
 void CStringTests::TestStringSplit( void )
 {
 	{	// WIDE strings
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, _T(""), _T(",;") );
 		ASSERT_EQUAL( 0, items.size() );
 
@@ -495,7 +496,7 @@ void CStringTests::TestStringSplit( void )
 	}
 
 	{	// ANSI strings
-		std::vector< std::string > items;
+		std::vector<std::string> items;
 		str::Split( items, "", ",;" );
 		ASSERT_EQUAL( 0, items.size() );
 
@@ -520,10 +521,10 @@ void CStringTests::TestStringSplit( void )
 void CStringTests::TestStringTokenize( void )
 {
 	static const TCHAR seps[] = _T(";,\n \t");
-	std::vector< std::tstring > tokens;
+	std::vector<std::tstring> tokens;
 	ASSERT_EQUAL( 0, str::Tokenize( tokens, _T(""), seps ) );
 	ASSERT_EQUAL( 6, str::Tokenize( tokens, _T("\n\t,apple,grape;plum pear\tkiwi\nbanana \n\t"), seps ) );
-	ASSERT_EQUAL_STR( _T("apple|grape|plum|pear|kiwi|banana"), str::Join( tokens, _T("|") ) );
+	ASSERT_EQUAL( _T("apple|grape|plum|pear|kiwi|banana"), str::Join( tokens, _T("|") ) );
 }
 
 void CStringTests::TestStringPrefixSuffix( void )
@@ -592,38 +593,38 @@ void CStringTests::TestStringConversion( void )
 	io = _T("preFix");
 	ASSERT( !str::StripPrefix( io, _T("PRE") ) );
 	ASSERT( str::StripPrefix( io, _T("pre") ) );
-	ASSERT_EQUAL_STR( _T("Fix"), io );
+	ASSERT_EQUAL( _T("Fix"), io );
 
 	io = _T("preFix");
 	ASSERT( !str::StripSuffix( io, _T("fix") ) );
 	ASSERT( str::StripSuffix( io, _T("Fix") ) );
-	ASSERT_EQUAL_STR( _T("pre"), io );
+	ASSERT_EQUAL( _T("pre"), io );
 
-	ASSERT_EQUAL_STR( _T("proposition"), str::FormatTruncate( _T("proposition"), 256 ) );
+	ASSERT_EQUAL( _T("proposition"), str::FormatTruncate( _T("proposition"), 256 ) );
 
 	ASSERT_EQUAL( 11, str::GetLength( _T("proposition") ) );
-	ASSERT_EQUAL_STR( _T("proposition"), str::FormatTruncate( _T("proposition"), 11 ) );
-	ASSERT_EQUAL_STR( _T("proposit..."), str::FormatTruncate( _T("propositionX"), 11 ) );
-	ASSERT_EQUAL_STR( _T("proposit..."), str::FormatTruncate( _T("propositionXY"), 11 ) );
+	ASSERT_EQUAL( _T("proposition"), str::FormatTruncate( _T("proposition"), 11 ) );
+	ASSERT_EQUAL( _T("proposit..."), str::FormatTruncate( _T("propositionX"), 11 ) );
+	ASSERT_EQUAL( _T("proposit..."), str::FormatTruncate( _T("propositionXY"), 11 ) );
 
-	ASSERT_EQUAL_STR( _T("prop..."), str::FormatTruncate( _T("proposition"), 7 ) );
-	ASSERT_EQUAL_STR( _T("...tion"), str::FormatTruncate( _T("proposition"), 7, _T("..."), false ) );
-	ASSERT_EQUAL_STR( _T("propETC"), str::FormatTruncate( _T("proposition"), 7, _T("ETC") ) );
-	ASSERT_EQUAL_STR( _T("ETCtion"), str::FormatTruncate( _T("proposition"), 7, _T("ETC"), false ) );
+	ASSERT_EQUAL( _T("prop..."), str::FormatTruncate( _T("proposition"), 7 ) );
+	ASSERT_EQUAL( _T("...tion"), str::FormatTruncate( _T("proposition"), 7, _T("..."), false ) );
+	ASSERT_EQUAL( _T("propETC"), str::FormatTruncate( _T("proposition"), 7, _T("ETC") ) );
+	ASSERT_EQUAL( _T("ETCtion"), str::FormatTruncate( _T("proposition"), 7, _T("ETC"), false ) );
 
-	ASSERT_EQUAL_STR( _T("i1\xB6i2\xB6i3\xB6"), str::FormatSingleLine( _T("i1\ni2\r\ni3\n") ) );
-	ASSERT_EQUAL_STR( _T("i1|i2|i3|"), str::FormatSingleLine( _T("i1\ni2\r\ni3\n"), utl::npos, _T("|") ) );
-	ASSERT_EQUAL_STR( _T("i1..."), str::FormatSingleLine( _T("i1\ni2\r\ni3\n"), 5, _T("|") ) );
+	ASSERT_EQUAL( _T("i1\xB6i2\xB6i3\xB6"), str::FormatSingleLine( _T("i1\ni2\r\ni3\n") ) );
+	ASSERT_EQUAL( _T("i1|i2|i3|"), str::FormatSingleLine( _T("i1\ni2\r\ni3\n"), utl::npos, _T("|") ) );
+	ASSERT_EQUAL( _T("i1..."), str::FormatSingleLine( _T("i1\ni2\r\ni3\n"), 5, _T("|") ) );
 
 	io = _T("a1b1c1d1");
 	ASSERT_EQUAL( 0, str::Replace( io, _T(""), _T(",") ) );
-	ASSERT_EQUAL_STR( io, _T("a1b1c1d1") );
+	ASSERT_EQUAL( _T("a1b1c1d1"), io );
 
 	ASSERT_EQUAL( 4, str::Replace( io, _T("1"), _T("3,") ) );
-	ASSERT_EQUAL_STR( io, _T("a3,b3,c3,d3,") );
+	ASSERT_EQUAL( _T("a3,b3,c3,d3,"), io );
 
 	ASSERT_EQUAL( 4, str::Replace( io, _T("3,"), _T("") ) );
-	ASSERT_EQUAL_STR( io, _T("abcd") );
+	ASSERT_EQUAL( _T("abcd"), io );
 }
 
 void CStringTests::TestStringSearch( void )
@@ -635,11 +636,11 @@ void CStringTests::TestStringSearch( void )
 
 void CStringTests::TestStringMatch( void )
 {
-	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix< str::Case >( _T("abcText"), _T("abc") ) );
-	ASSERT_EQUAL_STR( _T("ABcText"), str::SkipPrefix< str::Case >( _T("ABcText"), _T("aBC") ) );
+	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix<str::Case>( _T("abcText"), _T("abc") ) );
+	ASSERT_EQUAL_STR( _T("ABcText"), str::SkipPrefix<str::Case>( _T("ABcText"), _T("aBC") ) );
 
-	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix< str::IgnoreCase >( _T("abcText"), _T("abc") ) );
-	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix< str::IgnoreCase >( _T("ABcText"), _T("aBC") ) );
+	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix<str::IgnoreCase>( _T("abcText"), _T("abc") ) );
+	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix<str::IgnoreCase>( _T("ABcText"), _T("aBC") ) );
 
 	str::TGetMatch getMatchFunc;
 	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T(""), _T("") ) );
@@ -650,57 +651,57 @@ void CStringTests::TestStringMatch( void )
 
 void CStringTests::TestStringPart( void )
 {
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "", str::CPart< char >( "a text", 1 ) ) );
-	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart< wchar_t >( L"liquid", 2 ) ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( L"a line", str::CPart< wchar_t >( L"liquid", 3 ) ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "", str::CPart<char>( "a text", 1 ) ) );
+	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart<wchar_t>( L"liquid", 2 ) ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( L"a line", str::CPart<wchar_t>( L"liquid", 3 ) ) );
 
-	ASSERT_EQUAL( 2, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ), pred::TCompareNoCase() ) );
-	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart< wchar_t >( L"LIQUID", 2 ), pred::TCompareNoCase() ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ), pred::TCompareCase() ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ) ) );
+	ASSERT_EQUAL( 2, str::FindPart( "a line", str::CPart<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart<wchar_t>( L"LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart<char>( "LIQUID", 2 ), pred::TCompareCase() ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart<char>( "LIQUID", 2 ) ) );
 
-	std::vector< std::string > items;
-	ASSERT( !AllContain( items, str::CPart< char >( "liquid", 2 ) ) );
+	std::vector<std::string> items;
+	ASSERT( !AllContain( items, str::CPart<char>( "liquid", 2 ) ) );
 
 	items.push_back( "a line" );
-	ASSERT( AllContain( items, str::CPart< char >( "liquid", 2 ) ) );
-	ASSERT( !AllContain( items, str::CPart< char >( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CPart<char>( "liquid", 2 ) ) );
+	ASSERT( !AllContain( items, str::CPart<char>( "LIQUID", 2 ) ) );
+	ASSERT( AllContain( items, str::CPart<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 
 	items.push_back( "OS linux" );
-	ASSERT( AllContain( items, str::CPart< char >( "liquid", 2 ) ) );
-	ASSERT( !AllContain( items, str::CPart< char >( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CPart<char>( "liquid", 2 ) ) );
+	ASSERT( !AllContain( items, str::CPart<char>( "LIQUID", 2 ) ) );
+	ASSERT( AllContain( items, str::CPart<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 
 	items.push_back( "Red Hat Linux" );
-	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CPart<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 }
 
 void CStringTests::TestStringOccurenceCount( void )
 {
-	ASSERT_EQUAL( 0, str::GetCountOf< str::Case >( "abcde", "" ) );
-	ASSERT_EQUAL( 0, str::GetCountOf< str::Case >( "abcde", " " ) );
-	ASSERT_EQUAL( 1, str::GetCountOf< str::Case >( "abcde", "a" ) );
-	ASSERT_EQUAL( 1, str::GetCountOf< str::Case >( "abcdeABC", "a" ) );
-	ASSERT_EQUAL( 2, str::GetCountOf< str::IgnoreCase >( "abcdeABC", "a" ) );
-	ASSERT_EQUAL( 2, str::GetCountOf< str::IgnoreCase >( _T("abcdeABC"), _T("a") ) );
+	ASSERT_EQUAL( 0, str::GetCountOf<str::Case>( "abcde", "" ) );
+	ASSERT_EQUAL( 0, str::GetCountOf<str::Case>( "abcde", " " ) );
+	ASSERT_EQUAL( 1, str::GetCountOf<str::Case>( "abcde", "a" ) );
+	ASSERT_EQUAL( 1, str::GetCountOf<str::Case>( "abcdeABC", "a" ) );
+	ASSERT_EQUAL( 2, str::GetCountOf<str::IgnoreCase>( "abcdeABC", "a" ) );
+	ASSERT_EQUAL( 2, str::GetCountOf<str::IgnoreCase>( _T("abcdeABC"), _T("a") ) );
 
 	ASSERT_EQUAL( 0, str::GetPartCount( "abc", str::MakePart( "" ) ) );
 	ASSERT_EQUAL( 1, str::GetPartCount( _T("abc"), str::MakePart( _T("b") ) ) );
 	ASSERT_EQUAL( 1, str::GetPartCount( _T("abcA"), str::MakePart( _T("a") ) ) );
 
 	static const TCHAR* sepArray[] = { _T(";"), _T("|"), _T("\r\n"), _T("\n") };
-	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("ABC") ) ) );
-	ASSERT_EQUAL_STR( _T("\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("A\nB\nC") ) ) );
-	ASSERT_EQUAL_STR( _T("\r\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("A\r\nB\r\nC") ) ) );
-	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("A|B;C|D;E;F") ) ) );
+	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount<TCHAR>( _T("ABC") ) ) );
+	ASSERT_EQUAL_STR( _T("\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount<TCHAR>( _T("A\nB\nC") ) ) );
+	ASSERT_EQUAL_STR( _T("\r\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount<TCHAR>( _T("A\r\nB\r\nC") ) ) );
+	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount<TCHAR>( _T("A|B;C|D;E;F") ) ) );
 }
 
 void CStringTests::TestStringLines( void )
 {
 	static const char s_lineEnd[] = "\n";
 
-	std::vector< std::string > lines, outLines;
+	std::vector<std::string> lines, outLines;
 
 	str::Split( lines, "", s_lineEnd );
 	ASSERT_EQUAL( "", str::JoinLines( lines, s_lineEnd ) );
@@ -722,6 +723,74 @@ void CStringTests::TestStringLines( void )
 	str::SplitLines( outLines, str::JoinLines( lines, s_lineEnd ).c_str(), s_lineEnd );
 	ASSERT( lines == outLines );
 }
+
+
+void CStringTests::TestSearchEnclosedItems( void )
+{
+	str::CEnclosedParser<char> parser( "$(|%", ")|%" );
+	std::string text = "lead_%MY_STUFF%_mid_$(MY_TOOLS)__%VAR.1%_trail";
+
+	ASSERT( parser.IsValid() );
+
+	{
+		str::CEnclosedParser<char>::TSepMatchPos sepMatchPos;
+		str::CEnclosedParser<char>::TIdentSpecPair specBounds;
+
+		specBounds = parser.FindItem( &sepMatchPos, text );
+		ASSERT( specBounds.first != std::string::npos );
+		ASSERT_EQUAL( "%", parser.GetStartSep( sepMatchPos ) );
+		ASSERT_EQUAL( "%", parser.GetEndSep( sepMatchPos ) );
+		ASSERT_EQUAL( "%MY_STUFF%", parser.MakeSpec( specBounds, text ) );
+		ASSERT_EQUAL( "MY_STUFF", parser.MakeIdentifier( sepMatchPos, specBounds, text ) );
+
+		specBounds = parser.FindItem( &sepMatchPos, text, specBounds.second );
+		ASSERT( specBounds.first != std::string::npos );
+		ASSERT_EQUAL( "$(MY_TOOLS)", parser.MakeSpec( specBounds, text ) );
+		ASSERT_EQUAL( "MY_TOOLS", parser.MakeIdentifier( sepMatchPos, specBounds, text ) );
+
+		// test last spec, which is free-form, i.e. not an identifier
+		str::CEnclosedParser<char>::TIdentSpecPair nonIdentSpecBounds;
+		nonIdentSpecBounds = parser.FindItem( &sepMatchPos, text, specBounds.second );
+		ASSERT( std::string::npos == nonIdentSpecBounds.first );		// "%VAR.1%" not found when matching identifiers
+	}
+
+	{
+		std::vector<std::string> items;
+
+		parser.QueryItems( items, text, true );
+		ASSERT_EQUAL( "%MY_STUFF%,$(MY_TOOLS)", str::Join( items, "," ) );
+
+		parser.QueryItems( items, text, false );
+		ASSERT_EQUAL( "MY_STUFF,MY_TOOLS", str::Join( items, "," ) );
+	}
+	{	// including non-identifiers:
+		str::CEnclosedParser<char> parserAny( "$(|%", ")|%", false );
+		std::vector<std::string> items;
+
+		parserAny.QueryItems( items, text, true );
+		ASSERT_EQUAL( "%MY_STUFF%,$(MY_TOOLS),%VAR.1%", str::Join( items, "," ) );
+
+		parserAny.QueryItems( items, text, false );
+		ASSERT_EQUAL( "MY_STUFF,MY_TOOLS,VAR.1", str::Join( items, "," ) );
+	}
+}
+
+void CStringTests::TestReplaceEnclosedItems( void )
+{
+	{
+		std::string text = "%MY_STUFF%$(MY_TOOLS)%VAR.1%";
+		str::CEnclosedParser<char> parser( "$(|%", ")|%" );
+		ASSERT_EQUAL( 2, parser.ReplaceSeparators( text, "#{<", ">}" ) );
+		ASSERT_EQUAL( "#{<MY_STUFF>}#{<MY_TOOLS>}%VAR.1%", text );
+	}
+	{
+		std::string text = "%MY_STUFF%$(MY_TOOLS)%VAR.1%";
+		str::CEnclosedParser<char> parserAny( "$(|%", ")|%", false );
+		ASSERT_EQUAL( 3, parserAny.ReplaceSeparators( text, "#{<", ">}" ) );
+		ASSERT_EQUAL( "#{<MY_STUFF>}#{<MY_TOOLS>}#{<VAR.1>}", text );
+	}
+}
+
 
 void CStringTests::TestArgUtilities( void )
 {
@@ -923,37 +992,37 @@ void CStringTests::TestEnsureUniformNumPadding( void )
 {
 	static const TCHAR comma[] = _T(",");
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, _T("a,b"), comma );
 		ASSERT_EQUAL( 0, num::EnsureUniformZeroPadding( items ) );
 		ASSERT_EQUAL( _T("a,b"), str::Join( items, comma ) );
 	}
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, _T("a1,b"), comma );
 		ASSERT_EQUAL( 1, num::EnsureUniformZeroPadding( items ) );
 		ASSERT_EQUAL( _T("a1,b"), str::Join( items, comma ) );
 	}
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, _T("a1x,bcd23"), comma );
 		ASSERT_EQUAL( 1, num::EnsureUniformZeroPadding( items ) );
 		ASSERT_EQUAL( _T("a01x,bcd23"), str::Join( items, comma ) );
 	}
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, _T(" 1 19 ,   23 "), comma );
 		ASSERT_EQUAL( 2, num::EnsureUniformZeroPadding( items ) );
 		ASSERT_EQUAL( _T(" 01 19 ,   23 "), str::Join( items, comma ) );
 	}
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, _T("1 19,23 7-00"), comma );
 		ASSERT_EQUAL( 3, num::EnsureUniformZeroPadding( items ) );
 		ASSERT_EQUAL( _T("01 19,23 07-0"), str::Join( items, comma ) );
 	}
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, _T("1 19 3, 23 000007 1289 ,0-0-0-0"), comma );
 		ASSERT_EQUAL( 4, num::EnsureUniformZeroPadding( items ) );
 		ASSERT_EQUAL( _T("01 19 0003, 23 07 1289 ,00-00-0000-0"), str::Join( items, comma ) );
@@ -1006,6 +1075,9 @@ void CStringTests::Run( void )
 	TestStringPart();
 	TestStringOccurenceCount();
 	TestStringLines();
+
+	TestSearchEnclosedItems();
+	TestReplaceEnclosedItems();
 	TestArgUtilities();
 	TestEnumTags();
 	TestFlagTags();

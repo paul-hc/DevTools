@@ -2,6 +2,20 @@
 #define CommonDefs_h
 #pragma once
 
+#include <crtdbg.h>
+
+#ifdef _DEBUG
+	#undef _ASSERT_EXPR
+
+	// We output the message as string, not as a format.
+	// This way we avoid assertion firing when printing '%' characters, mistaken for invalid printf format sequence.
+	//
+	#define _ASSERT_EXPR(expr, msg) \
+			(void) ((!!(expr)) || \
+					(1 != _CrtDbgReportW(_CRT_ASSERT, _CRT_WIDE(__FILE__), __LINE__, NULL, L"%s", msg)) || \
+					(_CrtDbgBreak(), 0))
+#endif //_DEBUG
+
 
 #pragma warning( disable: 4355 )	// 'this' : used in base member initializer list
 

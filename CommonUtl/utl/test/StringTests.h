@@ -27,7 +27,6 @@ private:
 	void TestEnquote( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
-
 	void TestStringPrefixSuffix( void );
 	void TestStringConversion( void );
 	void TestStringSearch( void );
@@ -35,6 +34,9 @@ private:
 	void TestStringPart( void );
 	void TestStringOccurenceCount( void );
 	void TestStringLines( void );
+
+	void TestSearchEnclosedItems( void );
+	void TestReplaceEnclosedItems( void );
 	void TestArgUtilities( void );
 	void TestEnumTags( void );
 	void TestFlagTags( void );

@@ -1,10 +1,9 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/EnvironmentTests.h"
-//#include "Algorithms.h"
-#include "StringUtilities.h"
+#include "StringParsing.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -40,65 +39,55 @@ CEnvironmentTests& CEnvironmentTests::Instance( void )
 	return s_testCase;
 }
 
-void CEnvironmentTests::TestFindEnclosedIdentifier( void )
+void CEnvironmentTests::TestQueryEnclosedIdentifiers( void )
 {
-	const str::CSequence<char> openSep( "$(" );
-	const str::CSequence<char> closeSep( ")@" );
-	size_t identLen;
-
-	ASSERT_EQUAL( utl::npos, code::FindEnclosedIdentifier( &identLen, std::string(), openSep, closeSep ) );
-	ASSERT_EQUAL( 0, identLen );
-
-	ASSERT_EQUAL( utl::npos, code::FindEnclosedIdentifier( &identLen, std::string("mid"), openSep, closeSep ) );
-	ASSERT_EQUAL( 0, identLen );
-
-	ASSERT_EQUAL( 5, code::FindEnclosedIdentifier( &identLen, std::string("lead_$(ident)@_trail"), openSep, closeSep ) );
-	ASSERT_EQUAL( str::GetLength( "ident" ), identLen );
-
-	ASSERT_EQUAL( 5, code::FindEnclosedIdentifier( &identLen, std::string("lead_$(ident1)@_mid_$(ident2)@_trail"), openSep, closeSep ) );
-	ASSERT_EQUAL( str::GetLength( "ident1" ), identLen );
-
-	ASSERT_EQUAL( 20, code::FindEnclosedIdentifier( &identLen, std::string("lead_$(ident1)@_mid_$(ident2)@_trail"), openSep, closeSep, 7 ) );	// skip "ident.1" since we're searching past it
-	ASSERT_EQUAL( str::GetLength( "ident2" ), identLen );
-
-	ASSERT_EQUAL( 21, code::FindEnclosedIdentifier( &identLen, std::string("lead_$(ident.1)@_mid_$(ident2)@_trail"), openSep, closeSep ) );		// skip "ident.1" since it's not an identifier
-	ASSERT_EQUAL( str::GetLength( "ident2" ), identLen );
-
-	ASSERT_EQUAL( 19, code::FindEnclosedIdentifier( &identLen, std::string("lead_$(ident1?_mid_$(ident2)@_trail"), openSep, closeSep ) );		// skip "ident1" since it's not ended
-	ASSERT_EQUAL( str::GetLength( "ident2" ), identLen );
-}
-
-void CEnvironmentTests::TestQueryEnclosedItems( void )
-{
+	// namespace str => any enclosed item, regardless of syntax
 	{
 		std::vector<std::string> items;
-		str::QueryEnclosedItems( items, "lead_%MY_STUFF%_mid_%MY_TOOLS%_trail", "%", "%", false );
+		str::QueryEnclosedItems( items, std::string("lead_%MY_STUFF%_mid_%MY_TOOLS%_trail"), "%", "%", false );
 		ASSERT_EQUAL( "MY_STUFF,MY_TOOLS", str::Join( items, "," ) );
 	}
 	{
 		std::vector<std::string> items;
-		str::QueryEnclosedItems( items, "lead_%MY_STUFF%_mid_%MY_TOOLS%_trail", "%", "%", true );
-		ASSERT_EQUAL( "%MY_STUFF%,%MY_TOOLS%", str::Join( items, "," ) );
+		str::QueryEnclosedItems( items, std::string("lead_%MY_STUFF%_mid_%MY_T.OOLS%_trail"), "%", "%", true, false );
+		ASSERT_EQUAL( "%MY_STUFF%,%MY_T.OOLS%", str::Join( items, "," ) );
+	}
+
+	// namespace code => only enclosed identifiers (A..Z|a..z|0..9|_)
+	{
+		std::vector<std::string> idents;
+		code::QueryEnclosedIdentifiers( idents, std::string("lead_%MY_STUFF%_mid_%MY_TOOLS%_trail"), "%", "%", false );
+		ASSERT_EQUAL( "MY_STUFF,MY_TOOLS", str::Join( idents, "," ) );
+	}
+	{
+		std::vector<std::string> idents;
+		code::QueryEnclosedIdentifiers( idents, std::string("lead_%MY_STUFF%_mid_%MY_T.OOLS%_trail"), "%", "%", true );
+		ASSERT_EQUAL( "%MY_STUFF%", str::Join( idents, "," ) );		// exclude "MY_T.OOLS" - not an identifier
+	}
+	{
+		std::vector<std::string> idents;
+		code::QueryEnclosedIdentifiers( idents, std::string("lead_%MY_STUFF%_mid_%MY_TOOLS%_trail"), "%", "%", true );
+		ASSERT_EQUAL( "%MY_STUFF%,%MY_TOOLS%", str::Join( idents, "," ) );
 	}
 }
 
 void CEnvironmentTests::TestEnvironVariables( void )
 {
-	ASSERT_TRUE( !env::HasAnyVariable( _T("") ) );
-	ASSERT_TRUE( !env::HasAnyVariable( _T("%%") ) );		// empty identifier
-	ASSERT_TRUE( !env::HasAnyVariable( _T("$()") ) );		// empty identifier
+	ASSERT( !env::HasAnyVariable( _T("") ) );
+	ASSERT( !env::HasAnyVariable( _T("%%") ) );			// empty identifier
+	ASSERT( !env::HasAnyVariable( _T("$()") ) );		// empty identifier
 
-	ASSERT_TRUE( env::HasAnyVariable( _T("%MY_TOOLS%") ) );
-	ASSERT_TRUE( env::HasAnyVariable( _T("lead_%MY_TOOLS%_trail") ) );
-	ASSERT_TRUE( env::HasAnyVariable( _T("lead_$(MY_TOOLS)_trail") ) );
+	ASSERT( env::HasAnyVariable( _T("%MY_TOOLS%") ) );
+	ASSERT( env::HasAnyVariable( _T("lead_%MY_TOOLS%_trail") ) );
+	ASSERT( env::HasAnyVariable( _T("lead_$(MY_TOOLS)_trail") ) );
 
 	// not enclosed:
-	ASSERT_TRUE( !env::HasAnyVariable( _T("%MY_TOOLS") ) );
-	ASSERT_TRUE( !env::HasAnyVariable( _T("MY_TOOLS%") ) );
-	ASSERT_TRUE( !env::HasAnyVariable( _T("&(MY_TOOLS") ) );
-	ASSERT_TRUE( !env::HasAnyVariable( _T("MY_TOOLS)") ) );
+	ASSERT( !env::HasAnyVariable( _T("%MY_TOOLS") ) );
+	ASSERT( !env::HasAnyVariable( _T("MY_TOOLS%") ) );
+	ASSERT( !env::HasAnyVariable( _T("&(MY_TOOLS") ) );
+	ASSERT( !env::HasAnyVariable( _T("MY_TOOLS)") ) );
 
-	ASSERT_TRUE( !env::HasAnyVariable( _T("%MY_TOO.LS%") ) );	// invalid identifier
+	ASSERT( !env::HasAnyVariable( _T("%MY_TOO.LS%") ) );	// invalid identifier
 
 	{
 		// set 2 environment variables in this process
@@ -177,8 +166,7 @@ void CEnvironmentTests::Run( void )
 {
 	__super::Run();
 
-	TestFindEnclosedIdentifier();
-	TestQueryEnclosedItems();
+	TestQueryEnclosedIdentifiers();
 	TestEnvironVariables();
 	TestReplaceEnvVar_VcMacroToWindows();
 	TestExpandEnvironment();

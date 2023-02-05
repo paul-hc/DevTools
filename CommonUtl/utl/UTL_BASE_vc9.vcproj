@@ -577,6 +577,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StringParsing.h"
+				>
+			</File>
+			<File
 				RelativePath=".\StringRange.h"
 				>
 			</File>

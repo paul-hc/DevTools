@@ -51,6 +51,10 @@ namespace ut
 
 
 	std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue );
+	bool ReportMessage( bool succeeded, const TCHAR* pMsg, const char* pFilePath, int lineNumber );
+
+
+	bool AssertTrue( bool succeeded, const wchar_t* pExpression, std::tstring& rMsg );
 
 
 	template< typename ExpectedType, typename ActualType >
@@ -60,8 +64,6 @@ namespace ut
 			return true;
 
 		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualType>( expected ) ), ToString( actual ) );
-
-		TRACE( _T("%s\n"), rMsg.c_str() );
 		return false;
 	}
 
@@ -76,24 +78,37 @@ namespace ut
 		TRACE( _T("%s\n"), rMsg.c_str() );
 		return false;
 	}
+
+
+	// just for ASSERT_EQUAL_STR
+	inline std::string PtrAsString( const char* pStr ) { return pStr != nullptr ? pStr : ""; }
+	inline std::wstring PtrAsString( const wchar_t* pStr ) { return pStr != nullptr ? pStr : L""; }
 }
 
 
+// Unit Test assertions: assertion failures are traced in the output window, and printed to std::cerr.
+
+#undef ASSERT
+#define ASSERT( expr )\
+	do { std::tstring msg; bool succeeded = ut::AssertTrue( !!(expr), _CRT_WIDE(#expr), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	_ASSERT_EXPR( succeeded, _CRT_WIDE(#expr) ); } while( false )
+	//
+	// Note: include the "test/Header.h" last in .cpp file, if getting compilation errors due to conflicts with some MFC macros (e.g. AFX_ISOLATIONAWARE_PROC)
+
+
 #define ASSERT_EQUAL( expected, actual )\
-	do { std::tstring msg; _ASSERT_EXPR( ( ut::AssertEquals( (expected), (actual), msg ) ), msg.c_str() ); } while( false )
+	do { std::tstring msg; bool succeeded = ut::AssertEquals( (expected), (actual), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 
 #define ASSERT_EQUAL_STR( pExpected, pActual )\
-	do { std::tstring msg; _ASSERT_EXPR( ( ut::AssertEquals( (pExpected), std::tstring( (pActual) ), msg ) ), msg.c_str() ); } while( false )
+	do { std::tstring msg; bool succeeded = ut::AssertEquals( (pExpected), ut::PtrAsString( (pActual) ), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 
 #define ASSERT_EQUAL_IGNORECASE( expected, actual )\
-	do { std::tstring msg; _ASSERT_EXPR( ( ut::AssertEqualsIgnoreCase( (expected), (actual), msg ) ), msg.c_str() ); } while( false )
-
-
-	// prevents assertions on '%' characters
-#define ASSERT_TRUE( expr )\
-	do { std::tstring msg = _CRT_WIDE(#expr); str::Replace( msg, _T("%"), _T("%%") ); _ASSERT_EXPR( (expr), msg.c_str() ); } while( false )
+	do { std::tstring msg; bool succeeded = ut::AssertEqualsIgnoreCase( (expected), (actual), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 
 #define UT_REPEAT_BLOCK( count )  for ( unsigned int i = count; i-- != 0; )
@@ -156,7 +171,7 @@ namespace ut
 	}
 
 	template< typename CharType, typename StringT, typename LessPred >
-	std::basic_string<CharType> ShuffleSortJoin( std::vector< StringT >& rItems, const CharType* pSep, LessPred lessPred )
+	std::basic_string<CharType> ShuffleSortJoin( std::vector<StringT>& rItems, const CharType* pSep, LessPred lessPred )
 	{
 		std::random_shuffle( rItems.begin(), rItems.end() );
 		std::sort( rItems.begin(), rItems.end(), lessPred );
@@ -182,7 +197,7 @@ namespace ut
 				const_iterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
 				if ( itItemEnd != itEnd )
 				{
-					if ( str::ParseValue( value, std::basic_string< CharType >( itItemStart, std::distance( itItemStart, itItemEnd ) ) ) )
+					if ( str::ParseValue( value, std::basic_string<CharType>( itItemStart, std::distance( itItemStart, itItemEnd ) ) ) )
 						rItems.push_back( value );
 					else
 						ASSERT( false );
@@ -191,7 +206,7 @@ namespace ut
 				}
 				else
 				{
-					if ( str::ParseValue( value, std::basic_string< CharType >( itItemStart ) ) )
+					if ( str::ParseValue( value, std::basic_string<CharType>( itItemStart ) ) )
 						rItems.push_back( value );
 					else
 						ASSERT( false );
@@ -259,10 +274,10 @@ namespace ut
 		bool IsValidPool( void ) const { return IsValidDir() && !m_filePaths.empty() && !m_hasFileErrors; }
 		const fs::TDirPath& GetPoolDirPath( void ) const { return m_poolDirPath; }
 
-		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
+		const std::vector<fs::CPath>& GetFilePaths( void ) const { return m_filePaths; }
 		fs::CPath QualifyPath( const TCHAR* pRelativePath ) const { return m_poolDirPath / fs::CPath( pRelativePath ); }
 
-		size_t SplitQualifyPaths( std::vector< fs::CPath >& rFullPaths, const TCHAR relFilePaths[] ) const;
+		size_t SplitQualifyPaths( std::vector<fs::CPath>& rFullPaths, const TCHAR relFilePaths[] ) const;
 
 		bool DeleteAllFiles( void );
 		bool CreateFiles( const TCHAR* pFlatPaths = NULL );		// can contain subdirectories
@@ -270,7 +285,7 @@ namespace ut
 		static fs::TDirPath MakePoolDirPath( bool createDir = false );
 	private:
 		fs::TDirPath m_poolDirPath;								// temorary directory
-		std::vector< fs::CPath > m_filePaths;
+		std::vector<fs::CPath> m_filePaths;
 		bool m_hasFileErrors;									// file creation errors
 	public:
 		static const TCHAR m_sep[];
@@ -281,8 +296,8 @@ namespace ut
 	std::tstring JoinSubDirs( const fs::CPathEnumerator& enumerator );
 
 	// enumeration with relative paths
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::TDirPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
-	size_t EnumSubDirPaths( std::vector< fs::TDirPath >& rSubDirPaths, const fs::TDirPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );
+	size_t EnumFilePaths( std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
+	size_t EnumSubDirPaths( std::vector<fs::TDirPath>& rSubDirPaths, const fs::TDirPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );
 
 	std::tstring EnumJoinFiles( const fs::TDirPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
 	std::tstring EnumJoinSubDirs( const fs::TDirPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );

@@ -91,7 +91,7 @@ namespace str
 }
 
 
-#define NBSP '\xA0'		// non-breaking space
+#define NBSP '\xA0'		// non-breaking space: ' ' (special space character)
 
 
 namespace str
@@ -120,92 +120,6 @@ namespace str
 }
 
 
-namespace str
-{
-	// ex: query quoted sub-strings, or environment variables "abc%VAR1%ijk%VAR2%xyz"
-
-	template< typename CharT >
-	void QueryEnclosedItems( std::vector< std::basic_string<CharT> >& rItems, const CharT* pSource,
-							 const CharT* pSepStart, const CharT* pSepEnd, bool keepSeps = true )
-	{
-		ASSERT_PTR( pSource );
-		ASSERT_PTR( !str::IsEmpty( pSepStart ) );
-
-		const str::CSequence<CharT> sepStart( pSepStart );
-		const str::CSequence<CharT> sepEnd( str::IsEmpty( pSepEnd ) ? pSepStart : pSepEnd );
-
-		typedef const CharT* Tconst_iterator;
-
-		for ( Tconst_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
-		{
-			Tconst_iterator itItemStart = std::search( itStart, itEnd, sepStart.Begin(), sepStart.End() );
-			if ( itItemStart == itEnd )
-				break;					// no more substrings
-			Tconst_iterator itItemEnd = std::search( itItemStart + sepStart.m_length, itEnd, sepEnd.Begin(), sepEnd.End() );
-			if ( itItemEnd == itEnd )
-				break;					// substring not enclosed
-
-			itStart = itItemEnd + sepEnd.m_length;
-
-			if ( keepSeps )
-				itItemEnd += sepEnd.m_length;
-			else
-				itItemStart += sepStart.m_length;
-
-			rItems.push_back( std::basic_string<CharT>( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
-		}
-	}
-
-
-	// expand enclosed tags using KeyToValueFunc
-
-	template< typename CharT, typename KeyToValueFunc >
-	std::basic_string<CharT> ExpandKeysToValues( const CharT* pSource, const CharT* pSepStart, const CharT* pSepEnd,
-												 KeyToValueFunc func, bool keepSeps = false )
-	{
-		ASSERT_PTR( pSource );
-		ASSERT_PTR( !str::IsEmpty( pSepStart ) );
-
-		const str::CSequence<CharT> sepStart( pSepStart );
-		const str::CSequence<CharT> sepEnd( str::IsEmpty( pSepEnd ) ? pSepStart : pSepEnd );
-
-		std::basic_string<CharT> output; output.reserve( str::GetLength( pSource ) * 2 );
-
-		for ( str::const_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
-		{
-			str::const_iterator itKeyStart = std::search( itStart, itEnd, sepStart.Begin(), sepStart.End() ), itKeyEnd = itEnd;
-			if ( itKeyStart != itEnd )
-				itKeyEnd = std::search( itKeyStart + sepStart.m_length, itEnd, sepEnd.Begin(), sepEnd.End() );
-
-			if ( itKeyStart != itEnd && itKeyEnd != itEnd )
-			{
-				output += std::basic_string<CharT>( itStart, std::distance( itStart, itKeyStart ) );		// add leading text
-				output += func( keepSeps
-					? std::basic_string<CharT>( itKeyStart, itKeyEnd + sepEnd.m_length )
-					: std::basic_string<CharT>( itKeyStart + sepStart.m_length, itKeyEnd ) );
-			}
-			else
-				output += std::basic_string<CharT>( itStart, std::distance( itStart, itKeyEnd ) );
-
-			itStart = itKeyEnd + sepEnd.m_length;
-			if ( itStart >= itEnd )
-				break;
-		}
-		return output;
-	}
-}
-
-
-namespace code
-{
-	// FWD:
-	template< typename CharT >
-	size_t FindEnclosedIdentifier( size_t* pOutIdentLen, const std::basic_string<CharT>& text,
-								   const str::CSequence<CharT>& openSep, const str::CSequence<CharT>& closeSep,
-								   size_t offset /*= 0*/ );
-}
-
-
 namespace env
 {
 	// environment variables
@@ -216,48 +130,10 @@ namespace env
 	bool SetVariableValue( const TCHAR varName[], const TCHAR* pValue );
 
 	std::tstring ExpandStrings( const TCHAR* pSource );			// expand "%WIN_VAR%" Windows environment variables
-	std::tstring ExpandPaths( const TCHAR* pSource );	// expand "%WIN_VAR%" and "$(VC_MACRO_VAR)" - Windows and Visual Studio style environment variables
+	std::tstring ExpandPaths( const TCHAR* pSource );			// expand "%WIN_VAR%" and "$(VC_MACRO_VAR)" - Windows and Visual Studio style environment variables
 	size_t AddExpandedPaths( std::vector<fs::CPath>& rEvalPaths, const TCHAR* pSource, const TCHAR delim[] = _T(";") );		// add unique to rPaths
 
-	std::tstring UnExpandPaths( const std::tstring& expanded, const TCHAR* pSource );
-
-
-	template< typename StringT >
-	size_t ReplaceEnvVar_VcMacroToWindows( StringT& rText, size_t varMaxCount = StringT::npos )
-	{
-		// replaces multiple occurences of e.g. "$(UTL_INCLUDE)" to "%UTL_INCLUDE%" - only for literals that resemble a C/C++ identifier
-		typedef typename StringT::value_type TChar;
-
-		const TChar _openSep[] = { '$', '(', '\0' };		// "$("
-		const TChar _closeSep[] = { ')', '\0' };			// ")"
-		const str::CSequence<TChar> openSep( _openSep );
-		const str::CSequence<TChar> closeSep( _closeSep );
-
-		const TChar winVarSep[] = { '%', '\0' };			// "%"
-
-		size_t varCount = 0, identLen;
-
-		for ( size_t pos = 0;
-			  varCount != varMaxCount && ( pos = code::FindEnclosedIdentifier( &identLen, rText, openSep, closeSep, pos ) ) != StringT::npos;
-			  ++varCount )
-		{
-			StringT winEnvVar;
-			winEnvVar = winVarSep + rText.substr( pos + openSep.m_length, identLen ) + winVarSep;
-
-			rText.replace( pos, openSep.m_length + identLen + closeSep.m_length, winEnvVar );
-			pos += winEnvVar.length();
-		}
-
-		return varCount;
-	}
-
-	template< typename CharT >
-	std::basic_string<CharT> GetReplaceEnvVar_VcMacroToWindows( const CharT* pSource, size_t varMaxCount = utl::npos )
-	{
-		std::basic_string<CharT> text( pSource );
-		ReplaceEnvVar_VcMacroToWindows( text, varMaxCount );
-		return text;
-	}
+	std::tstring UnExpandPaths( const std::tstring& expanded, const std::tstring& text );
 }
 
 
@@ -325,24 +201,24 @@ namespace num
 
 
 	template< typename ValueT >
-	inline ValueT MinValue( void ) { return (std::numeric_limits< ValueT >::min)(); }
+	inline ValueT MinValue( void ) { return (std::numeric_limits<ValueT>::min)(); }
 
 	// for double doesn't work (DBL_MIN is minimal positive value); in C++ 11 use lowest()
 	template<>
-	inline double MinValue< double >( void ) { return -(std::numeric_limits< double >::max)(); }	// min doesn't work (DBL_MIN is minimal positive value)
+	inline double MinValue<double>( void ) { return -(std::numeric_limits<double>::max)(); }	// min doesn't work (DBL_MIN is minimal positive value)
 
 	template< typename ValueT >
-	inline ValueT MaxValue( void ) { return (std::numeric_limits< ValueT >::max)(); }
+	inline ValueT MaxValue( void ) { return (std::numeric_limits<ValueT>::max)(); }
 
 
 	template< typename ValueT >		// [0, MAX]
-	inline Range<ValueT> PositiveRange( void ) { return Range<ValueT>( 0, MaxValue< ValueT >() ); }
+	inline Range<ValueT> PositiveRange( void ) { return Range<ValueT>( 0, MaxValue<ValueT>() ); }
 
 	template< typename ValueT >		// [MIN, 0]
-	inline Range<ValueT> NegativeRange( void ) { return Range<ValueT>( MinValue< ValueT >(), 0 ); }
+	inline Range<ValueT> NegativeRange( void ) { return Range<ValueT>( MinValue<ValueT>(), 0 ); }
 
 	template< typename ValueT >		// [MIN, MAX]
-	inline Range<ValueT> FullRange( void ) { return Range<ValueT>( MinValue< ValueT >(), MaxValue< ValueT >() ); }
+	inline Range<ValueT> FullRange( void ) { return Range<ValueT>( MinValue<ValueT>(), MaxValue<ValueT>() ); }
 
 
 	template< typename ValueT >
@@ -451,7 +327,7 @@ namespace num
 
 
 	Range<size_t> FindNumericSequence( const std::tstring& text, size_t pos = 0 );
-	size_t EnsureUniformZeroPadding( std::vector< std::tstring >& rItems );			// returns max count of numbers found for all items
+	size_t EnsureUniformZeroPadding( std::vector<std::tstring>& rItems );			// returns max count of numbers found for all items
 }
 
 
@@ -465,7 +341,7 @@ namespace str
 
 
 	template< typename CharT, typename StringT >
-	inline void SplitLines( std::vector< StringT >& rItems, const CharT* pSource, const CharT* pLineEnd )
+	inline void SplitLines( std::vector<StringT>& rItems, const CharT* pSource, const CharT* pLineEnd )
 	{
 		Split( rItems, pSource, pLineEnd );
 
@@ -514,52 +390,26 @@ namespace code
 		return '_' == chr || std::isalnum( chr, loc );
 	}
 
-
 	template< typename CharT >
-	size_t FindEnclosedIdentifier( size_t* pOutIdentLen, const std::basic_string<CharT>& text,
-								   const str::CSequence<CharT>& openSep, const str::CSequence<CharT>& closeSep,
-								   size_t offset = 0 )
-	{	// look for "<openSep>identifier<closeSep>" beginnng at offset
-		ASSERT( !openSep.IsEmpty() );
-		ASSERT( !closeSep.IsEmpty() );
-
-		size_t identLen = 0;
-		size_t sepPos = text.find( openSep.m_pStr, offset, openSep.m_length );
-
-		if ( sepPos != utl::npos )
-		{
-			size_t identPos = sepPos + openSep.m_length, endPos = identPos;
-
-			// skip identifier
-			while ( endPos != text.length() && code::IsIdentifierChar( text[ endPos ] ) )
-				++endPos;
-
-			if ( endPos == text.length() )			// not ended in closeSep?
-				sepPos = utl::npos;
-			else if ( pred::Equal == text.compare( endPos, closeSep.m_length, closeSep.m_pStr ) )
-			{
-				identLen = endPos - identPos;
-				endPos += closeSep.m_length;		// skip past closeSep
-			}
-			else
-				return FindEnclosedIdentifier( pOutIdentLen, text, openSep, closeSep, identPos );		// continue searching past openSep for an enclosed identifier
-		}
-
-		utl::AssignPtr( pOutIdentLen, identLen );
-		if ( 0 == identLen )		// empty identifier?
-			return utl::npos;
-		return sepPos;
+	inline bool IsIdentifierFirstChar( CharT chr, const std::locale& loc = str::GetUserLocale() )		// e.g. C/C++ identifier, or Windows environment variable identifier, etc
+	{
+		return '_' == chr || std::isalpha( chr, loc );
 	}
 
-	template< typename CharT >
-	size_t FindEnclosedIdentifier( size_t* pOutIdentLen, const std::basic_string<CharT>& text,
-								   const CharT* pOpenSep, const CharT* pCloseSep,
-								   size_t offset = 0 )
-	{	// look for "<openSep>identifier<closeSep>" beginnng at offset
-		const str::CSequence<CharT> openSep( pOpenSep );
-		const str::CSequence<CharT> closeSep( pCloseSep );
+	template< typename StringT >
+	size_t FindIdentifierEnd( const StringT& text, size_t identPos )
+	{	// identifier should not start with a digit
+		size_t endPos = identPos;
 
-		return FindEnclosedIdentifier( pOutIdentLen, text, openSep, closeSep, offset );
+		if ( endPos != text.length() && code::IsIdentifierFirstChar( text[ endPos ] ) )		// not starting with a digit?
+		{	// skip first char, check the inner identifier criteria
+			++endPos;
+
+			while ( endPos != text.length() && code::IsIdentifierChar( text[ endPos ] ) )
+				++endPos;
+		}
+
+		return endPos;
 	}
 }
 

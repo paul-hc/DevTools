@@ -1,6 +1,7 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "StringUtilities.h"
+#include "StringParsing.h"
 #include "TokenIterator.h"
 #include "EnumTags.h"
 #include "Path.h"
@@ -17,8 +18,8 @@ namespace str
 	const TCHAR g_ellipsis[] = _T("...");
 	const TCHAR g_paragraph[] = _T("\xB6");
 
-	template<> const char* StdDelimiters< char >( void ) { return " \t"; }
-	template<> const wchar_t* StdDelimiters< wchar_t >( void ) { return L" \t"; }
+	template<> const char* StdDelimiters<char>( void ) { return " \t"; }
+	template<> const wchar_t* StdDelimiters<wchar_t>( void ) { return L" \t"; }
 
 	TCHAR* CopyTextToBuffer( TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] /*= g_ellipsis*/ )
 	{
@@ -69,7 +70,7 @@ namespace str
 
 	size_t ReplaceDelimiters( std::tstring& rText, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter )
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		Tokenize( items, rText.c_str(), pDelimiters );
 		rText = Join( items, pNewDelimiter );
 		return items.size();
@@ -87,9 +88,12 @@ namespace env
 {
 	bool HasAnyVariable( const std::tstring& source )
 	{
-		return
-			code::FindEnclosedIdentifier( NULL, source, _T("%"), _T("%") ) != utl::npos ||
-			code::FindEnclosedIdentifier( NULL, source, _T("$("), _T(")") ) != utl::npos;
+		static const str::CEnclosedParser<TCHAR> s_envParser( _T("%|$("), _T("%|)") );
+
+		str::CEnclosedParser<TCHAR>::TSepMatchPos sepMatchPos;
+		str::CEnclosedParser<TCHAR>::TIdentSpecPair specBounds = s_envParser.FindItem( &sepMatchPos, source );
+
+		return specBounds.first != utl::npos && s_envParser.GetIdentLength( sepMatchPos, specBounds ) != 0;
 	}
 
 	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue /*= NULL*/ )
@@ -143,10 +147,10 @@ namespace env
 
 	namespace impl
 	{
-		void QueryEnvVariableNames( std::vector<std::tstring>& rVarNameSpecs, const TCHAR* pSource, bool keepSeps = true )
-		{
-			str::QueryEnclosedItems( rVarNameSpecs, pSource, _T("%"), _T("%"), keepSeps );		// Windows env-variables: e.g. "%VAR_NAME%"
-			str::QueryEnclosedItems( rVarNameSpecs, pSource, _T("$("), _T(")"), keepSeps );		// VC Macro env-variables: e.g. "$(VAR_NAME)"
+		void QueryEnvVariableNames( std::vector<std::tstring>& rVarNameSpecs, const std::tstring& text, bool keepSeps = true )
+		{	// both environment variables Windows  ("%VAR_NAME%") and VC Macro ("$(VAR_NAME)")
+			str::CEnclosedParser<TCHAR> parser( _T("%|$("), _T("%|)") );
+			parser.QueryItems( rVarNameSpecs, text, keepSeps );
 		}
 
 		void QueryEnvVariableValues( std::vector<std::tstring>& rValues, const std::vector<std::tstring>& sources )
@@ -154,17 +158,15 @@ namespace env
 			rValues.clear();
 			rValues.reserve( sources.size() );
 
-			for ( std::vector< std::tstring >::const_iterator itVariable = sources.begin(); itVariable != sources.end(); ++itVariable )
+			for ( std::vector<std::tstring>::const_iterator itVariable = sources.begin(); itVariable != sources.end(); ++itVariable )
 				rValues.push_back( env::ExpandPaths( itVariable->c_str() ) );
 		}
 	}
 
-	std::tstring UnExpandPaths( const std::tstring& expanded, const TCHAR* pSource )
+	std::tstring UnExpandPaths( const std::tstring& expanded, const std::tstring& text )
 	{
-		ASSERT_PTR( pSource );
-
 		std::vector<std::tstring> varNameSpecs;
-		impl::QueryEnvVariableNames( varNameSpecs, pSource );
+		impl::QueryEnvVariableNames( varNameSpecs, text );
 
 		std::vector<std::tstring> values;
 		impl::QueryEnvVariableValues( values, varNameSpecs );
@@ -190,7 +192,7 @@ namespace num
 
 	bool StripFractionalZeros( std::tstring& rText, const std::locale& loc /*= str::GetUserLocale()*/ )
 	{
-		const TCHAR decimalPoint = std::use_facet< std::numpunct< TCHAR > >( loc ).decimal_point();
+		const TCHAR decimalPoint = std::use_facet< std::numpunct<TCHAR> >( loc ).decimal_point();
 		std::tstring::reverse_iterator itStart = rText.rbegin();
 		std::tstring::reverse_iterator itPoint = std::find( itStart, rText.rend(), decimalPoint );
 		if ( itPoint != rText.rend() )
@@ -256,15 +258,15 @@ namespace num
 			return Range<size_t>( std::tstring::npos );
 	}
 
-	size_t EnsureUniformZeroPadding( std::vector< std::tstring >& rItems )
+	size_t EnsureUniformZeroPadding( std::vector<std::tstring>& rItems )
 	{
-		std::vector< size_t > digitWidths;
+		std::vector<size_t> digitWidths;
 
 		// 1: detect maximum padding for all numeric sequences in each item
-		for ( std::vector< std::tstring >::const_iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+		for ( std::vector<std::tstring>::const_iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
 		{
 			const TCHAR* pItem = itItem->c_str();
-			std::vector< size_t > widths;			// per item
+			std::vector<size_t> widths;			// per item
 
 			for ( size_t pos = 0; pos != itItem->length(); )
 			{
@@ -280,7 +282,7 @@ namespace num
 						str::CharTraits::IsDigit( pItem[ numRange.m_start + 1 ] ) )
 					++numRange.m_start;
 
-				widths.push_back( numRange.GetSpan< size_t >() );
+				widths.push_back( numRange.GetSpan<size_t>() );
 				pos = numRange.m_end;
 			}
 
@@ -293,22 +295,22 @@ namespace num
 
 		// 2: reformat numbers in all items using uniform zero padding
 		if ( !digitWidths.empty() )
-			for ( std::vector< std::tstring >::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+			for ( std::vector<std::tstring>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
 			{
 				size_t pos = 0;
-				for ( std::vector< size_t >::const_iterator itWidth = digitWidths.begin(); itWidth != digitWidths.end() && pos != itItem->length(); ++itWidth )
+				for ( std::vector<size_t>::const_iterator itWidth = digitWidths.begin(); itWidth != digitWidths.end() && pos != itItem->length(); ++itWidth )
 				{
 					Range<size_t> numRange = FindNumericSequence( *itItem, pos );
 					if ( std::tstring::npos == numRange.m_start )
 						break;
 
-					std::tstring numberText = itItem->substr( numRange.m_start, numRange.GetSpan< size_t >() );
+					std::tstring numberText = itItem->substr( numRange.m_start, numRange.GetSpan<size_t>() );
 					UINT number = 0;
 					if ( num::ParseNumber( number, numberText ) )
 					{
 						std::tstring newNumberText = str::Format( _T("%0*u"), *itWidth, number );		// reformat with 0 padding
 						if ( numberText != newNumberText )
-							itItem->replace( numRange.m_start, numRange.GetSpan< size_t >(), newNumberText );
+							itItem->replace( numRange.m_start, numRange.GetSpan<size_t>(), newNumberText );
 						pos = numRange.m_start + newNumberText.length();
 					}
 					else
