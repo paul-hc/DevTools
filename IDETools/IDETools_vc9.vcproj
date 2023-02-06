@@ -964,6 +964,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CodeParsingBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CodeParsingBase.h"
+					>
+				</File>
+				<File
 					RelativePath="CodeUtilities.cpp"
 					>
 					<FileConfiguration
@@ -1516,6 +1524,18 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Tests"
+			>
+			<File
+				RelativePath=".\test\CodeParserTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CodeParserTests.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="ReadMe.txt"

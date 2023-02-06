@@ -59,12 +59,18 @@ namespace ut
 
 	CTestSuite::~CTestSuite()
 	{
+		ClearTests();
 	}
 
 	CTestSuite& CTestSuite::Instance( void )
 	{
 		static CTestSuite s_singleton;
 		return s_singleton;
+	}
+
+	void CTestSuite::ClearTests( void )
+	{
+		m_testCases.clear();
 	}
 
 	void CTestSuite::RunTests( void )

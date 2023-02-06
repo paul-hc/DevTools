@@ -12,28 +12,6 @@
 
 namespace code
 {
-	bool IsValidBrace( wchar_t brace )
-	{
-		static const std::wstring s_allBraces = L"()[]{}<>";
-		return s_allBraces.find( brace ) != std::wstring::npos;
-	}
-
-	bool IsValidOpenBrace( wchar_t brace )
-	{
-		static const std::wstring s_openBraces = L"([{<";
-		return s_openBraces.find( brace ) != std::wstring::npos;
-	}
-
-	bool IsValidCloseBrace( wchar_t brace )
-	{
-		static const std::wstring s_closeBraces = L")]}>";
-		return s_closeBraces.find( brace ) != std::wstring::npos;
-	}
-}
-
-
-namespace code
-{
 	// BraceParityStatus implementation
 
 	void BraceParityStatus::clear( void )
@@ -42,18 +20,18 @@ namespace code
 		m_errorMessages.clear();
 	}
 
-	int BraceParityStatus::findMatchingBracePos( const TCHAR* pStr, int openBracePos, DocLanguage docLanguage )
+	int BraceParityStatus::findMatchingBracePos( const TCHAR* pCode, int openBracePos, DocLanguage docLanguage )
 	{
 		clear();
 
-		ASSERT( pStr != NULL && openBracePos >= 0 && openBracePos <= str::Length( pStr ) );
-		ASSERT( isOpenBraceChar( pStr[ openBracePos ] ) );
+		ASSERT( pCode != NULL && openBracePos >= 0 && openBracePos <= str::Length( pCode ) );
+		ASSERT( isOpenBraceChar( pCode[ openBracePos ] ) );
 
-		storeBrace( pStr[ openBracePos ] );
+		storeBrace( pCode[ openBracePos ] );
 
 		code::LanguageSearchEngine languageEngine( docLanguage );
-		TCHAR matchingCloseBrace = getMatchingBrace( pStr[ openBracePos ] );
-		const TCHAR* pCursor = pStr + openBracePos + 1;
+		TCHAR matchingCloseBrace = getMatchingBrace( pCode[ openBracePos ] );
+		const TCHAR* pCursor = pCode + openBracePos + 1;
 
 		while ( *pCursor != _T('\0') )
 		{
@@ -65,7 +43,7 @@ namespace code
 
 				if ( braceCounter != NULL && -1 == braceCounter->m_parityCounter )
 					m_errorMessages.push_back( str::formatString( _T("Closing brace '%c' encountered before the opening brace; at pos %d: [%s]"),
-																braceCounter->m_closeBrace, int( pCursor - pStr ), pCursor ) );
+																braceCounter->m_closeBrace, int( pCursor - pCode ), pCursor ) );
 
 				if ( *pCursor == matchingCloseBrace )
 					if ( isBraceEven( *pCursor ) )
@@ -73,20 +51,20 @@ namespace code
 			}
 			else if ( isQuoteChar( *pCursor ) )
 			{
-				int matchingQuotePos = code::findMatchingQuotePos( pStr, int( pCursor - pStr ) );
+				int matchingQuotePos = code::findMatchingQuotePos( pCode, int( pCursor - pCode ) );
 
 				if ( matchingQuotePos != -1 )
-					pCursor = pStr + matchingQuotePos;
+					pCursor = pCode + matchingQuotePos;
 				else
 				{
 					m_errorMessages.push_back( str::formatString( _T("Quoted string not closed at pos %d: [%s]"),
-																int( pCursor - pStr ), pCursor ) );
-					pCursor += _tcslen( pCursor ); // fatal error -> go to end
+																int( pCursor - pCode ), pCursor ) );
+					pCursor += str::Length( pCursor ); // fatal error -> go to end
 				}
 			}
-			else if ( languageEngine.isCommentStatement( commentEnd, pStr, int( pCursor - pStr ) ) )
+			else if ( languageEngine.isCommentStatement( commentEnd, pCode, int( pCursor - pCode ) ) )
 			{
-				pCursor = pStr + str::safePos( commentEnd, pStr );
+				pCursor = pCode + str::safePos( commentEnd, pCode );
 				continue; // skip incrementing
 			}
 
@@ -98,11 +76,11 @@ namespace code
 		if ( *pCursor == _T('\0') )
 		{
 			m_errorMessages.push_back( str::formatString( _T("Closing brace not found for opening brace '%c' at pos %d"),
-														pStr[ openBracePos ], openBracePos ) );
+														pCode[ openBracePos ], openBracePos ) );
 			return -1;						// reached end of string, closing brace not found
 		}
 
-		return int( pCursor - pStr );		// found the matching brace -> return the position
+		return int( pCursor - pCode );		// found the matching brace -> return the position
 	}
 
 	struct BraceReverser : public std::unary_function<void, TCHAR>
@@ -114,62 +92,58 @@ namespace code
 		}
 	};
 
-	int BraceParityStatus::reverseFindMatchingBracePos( const TCHAR* pStr, int openBracePos, DocLanguage docLanguage )
+	int BraceParityStatus::reverseFindMatchingBracePos( const TCHAR* pCode, int openBracePos, DocLanguage docLanguage )
 	{
 		// build just the leading  part of the original string, but reversed
-		int length = openBracePos + 1;
-		TCHAR* revString = _tcsncpy( new TCHAR[ length + 1 ], pStr, length );
+		std::tstring revCode( pCode, openBracePos + 1 );
 
-		revString[ length ] = _T('\0');
+		std::reverse( revCode.begin(), revCode.end() );
+		std::for_each( revCode.begin(), revCode.end(), BraceReverser() );
 
-		_tcsrev( revString );
-		std::for_each( revString, revString + length, BraceReverser() );
+		int revMatchingBracePos = findMatchingBracePos( revCode.c_str(), 0, docLanguage );
 
-		int revMatchingBracePos = findMatchingBracePos( revString, 0, docLanguage );
-
-		delete revString;
-		return revMatchingBracePos != -1 ? ( openBracePos - revMatchingBracePos - 1 ) : -1;
+		return revMatchingBracePos != -1 ? ( openBracePos - revMatchingBracePos /*- 1*/ ) : -1;
 	}
 
-	TokenRange BraceParityStatus::findArgList( const TCHAR* codeText, int pos, const TCHAR* argListOpenBraces,
+	TokenRange BraceParityStatus::findArgList( const TCHAR* pCode, int pos, const TCHAR* argListOpenBraces,
 											   DocLanguage docLanguage, bool allowUnclosedArgList /*= false*/ )
 	{
-		ASSERT( codeText != NULL && pos >= 0 && pos <= str::Length( codeText ) );
+		ASSERT( pCode != NULL && pos >= 0 && pos <= str::Length( pCode ) );
 		ASSERT( argListOpenBraces != NULL && argListOpenBraces[ 0 ] != _T('\0') );
 
 		code::LanguageSearchEngine languageEngine( docLanguage );
-		int openBracePos = languageEngine.findOneOf( codeText, argListOpenBraces, pos );
+		int openBracePos = languageEngine.findOneOf( pCode, argListOpenBraces, pos );
 
 		ASSERT( openBracePos != -1 );
-		if ( codeText[ openBracePos ] != _T('\0') )
+		if ( pCode[ openBracePos ] != _T('\0') )
 		{
-			int closeBracePos = findMatchingBracePos( codeText, openBracePos, docLanguage );
+			int closeBracePos = findMatchingBracePos( pCode, openBracePos, docLanguage );
 
 			if ( closeBracePos != -1 )
 				return TokenRange( openBracePos, closeBracePos + 1 );
 			else if ( allowUnclosedArgList )
-				return TokenRange( openBracePos, str::Length( codeText ) );
+				return TokenRange( openBracePos, str::Length( pCode ) );
 		}
 
-		return TokenRange::endOfString( codeText );
+		return TokenRange::endOfString( pCode );
 	}
 
 	/**
 		Analyzes the syntax for parity of the braces/quotes, returning true if syntax is correct.
 		Errors (if any) are stored in 'm_errorMessages' data member.
 	*/
-	bool BraceParityStatus::analyzeBraceParity( const TCHAR* pStr, DocLanguage docLanguage )
+	bool BraceParityStatus::analyzeBraceParity( const TCHAR* pCode, DocLanguage docLanguage )
 	{
-		ASSERT( pStr != NULL );
+		ASSERT_PTR( pCode );
 
 		code::LanguageSearchEngine languageEngine( docLanguage );
 
-		int firstOpenBracePos = languageEngine.findOneOf( pStr, code::openBraces, 0 );
+		int firstOpenBracePos = languageEngine.findOneOf( pCode, code::openBraces, 0 );
 
 		ASSERT( firstOpenBracePos != -1 );
 
-		return pStr[ firstOpenBracePos ] != _T('\0') &&
-			   -1 != findMatchingBracePos( pStr, firstOpenBracePos, docLanguage );
+		return pCode[ firstOpenBracePos ] != _T('\0') &&
+			   -1 != findMatchingBracePos( pCode, firstOpenBracePos, docLanguage );
 	}
 
 	bool BraceParityStatus::filterOutOddBraces( CString& inOutOpenBraces ) const

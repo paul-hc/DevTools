@@ -35,6 +35,7 @@ namespace ut
 		static CTestSuite& Instance( void );
 
 		void RunTests( void );
+		void ClearTests( void );
 
 		bool IsEmpty( void ) const { return m_testCases.empty(); }
 		bool RegisterTestCase( ut::ITestCase* pTestCase );

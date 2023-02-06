@@ -12,17 +12,17 @@ namespace code
 {
 	struct CppMethodComponents
 	{
-		CppMethodComponents( const TCHAR* methodPrototype );
+		CppMethodComponents( const TCHAR* pMethodPrototype );
 
-		void splitMethod( const TCHAR* validArgListOpenBraces );
+		void splitMethod( const TCHAR validArgListOpenBraces[] = _T("(") );
 
 		std::tstring FormatInfo( void ) const;
 		void showMessageBox( void ) const;
-	public:
+	private:
 		LanguageSearchEngine m_languageEngine;
-
-		const TCHAR* m_methodPrototype;
+		const TCHAR* m_pMethodPrototype;
 		int m_methodLength;
+	public:
 		TokenRange m_templateDecl;
 		TokenRange m_inlineModifier;
 		TokenRange m_returnType;

@@ -27,11 +27,14 @@ private:
 	std::auto_ptr<CModuleSession> m_pModuleSession;
 	bool m_isVisualStudio6;
 
+	// base overrides
+protected:
+	virtual void OnInitAppResources( void );
+
 	// generated stuff
 public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
-	virtual void OnInitAppResources( void );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 private:
 	DECLARE_MESSAGE_MAP()

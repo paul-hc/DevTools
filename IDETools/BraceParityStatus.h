@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "DocLanguage.h"
 #include "TokenRange.h"
+#include "CodeParsingBase.h"
 
 
 namespace code
@@ -15,12 +16,12 @@ namespace code
 		BraceParityStatus( void ) {}
 
 		// high-level
-		int findMatchingBracePos( const TCHAR* pStr, int openBracePos, DocLanguage docLanguage );
-		int reverseFindMatchingBracePos( const TCHAR* pStr, int openBracePos, DocLanguage docLanguage );
-		TokenRange findArgList( const TCHAR* codeText, int pos, const TCHAR* argListOpenBraces,
+		int findMatchingBracePos( const TCHAR* pCode, int openBracePos, DocLanguage docLanguage );
+		int reverseFindMatchingBracePos( const TCHAR* pCode, int openBracePos, DocLanguage docLanguage );
+		TokenRange findArgList( const TCHAR* pCode, int pos, const TCHAR* argListOpenBraces,
 								DocLanguage docLanguage, bool allowUnclosedArgList = false );
 
-		bool analyzeBraceParity( const TCHAR* pStr, DocLanguage docLanguage );
+		bool analyzeBraceParity( const TCHAR* pCode, DocLanguage docLanguage );
 
 		bool filterOutOddBraces( CString& inOutOpenBraces ) const;
 
@@ -104,18 +105,27 @@ namespace code
 } // namespace code
 
 
-namespace str
-{
-	template< typename CharT, typename PosT >
-	inline bool IsValidPos( PosT pos, const CharT* pText ) { return pos >= 0 && pos < static_cast<PosT>( str::GetLength( pText ) ); }
-}
-
-
 namespace code
 {
-	bool IsValidBrace( wchar_t brace );
-	bool IsValidOpenBrace( wchar_t brace );
-	bool IsValidCloseBrace( wchar_t brace );
+	template< typename PosT >
+	void SkipSpace( PosT* pPos, const TCHAR* pCode )
+	{
+		ASSERT( pPos != nullptr && pCode != nullptr );
+		REQUIRE( str::IsValidPos( *pPos, pCode ) );
+
+		while ( pCode[ *pPos ] != 0 && _istspace( pCode[ *pPos ] ) )
+			++*pPos;
+	}
+
+	template< typename PosT >
+	void SkipSpaceBackwards( PosT* pPos, const TCHAR* pCode )
+	{
+		ASSERT( pPos != nullptr && pCode != nullptr );
+		REQUIRE( str::IsValidPos( *pPos, pCode ) );
+
+		while ( *pPos > 0 && _istspace( pCode[ *pPos - 1 ] ) )
+			--*pPos;
+	}
 
 
 	// brace lookup helpers
@@ -124,13 +134,13 @@ namespace code
 	bool SkipBrace( PosT* pOutCloseBracePos, const TCHAR* pCode, PosT openBracePos, DocLanguage docLanguage = DocLang_Cpp )
 	{
 		ASSERT( pOutCloseBracePos != nullptr && pCode != nullptr );
-		REQUIRE( str::IsValidPos( openBracePos, pCode ) && IsValidOpenBrace( pCode[ openBracePos ] ) );
+		REQUIRE( str::IsValidPos( openBracePos, pCode ) && IsOpenBrace( pCode[ openBracePos ] ) );
 
 		int closeBracePos = BraceParityStatus().findMatchingBracePos( pCode, static_cast<int>( openBracePos ), docLanguage );
 		if ( -1 == closeBracePos )
 			return false;		// matching brace not found (bad syntax)
 
-		ENSURE( closeBracePos > openBracePos && str::IsValidPos( closeBracePos, pCode ) && IsValidCloseBrace( pCode[ closeBracePos ] ) );
+		ENSURE( closeBracePos > openBracePos && str::IsValidPos( closeBracePos, pCode ) && IsCloseBrace( pCode[ closeBracePos ] ) );
 
 		*pOutCloseBracePos = static_cast<PosT>( closeBracePos );
 		return true;			// found matching brace
@@ -140,13 +150,13 @@ namespace code
 	bool SkipBraceBackwards( PosT* pOutOpenBracePos, const TCHAR* pCode, PosT closeBracePos, DocLanguage docLanguage = DocLang_Cpp )
 	{
 		ASSERT( pOutOpenBracePos != nullptr && pCode != nullptr );
-		REQUIRE( closeBracePos < static_cast<PosT>( str::GetLength( pCode ) ) && IsValidCloseBrace( pCode[ closeBracePos ] ) );
+		REQUIRE( str::IsValidPos( closeBracePos, pCode ) && IsCloseBrace( pCode[ closeBracePos ] ) );
 
 		int openBracePos = BraceParityStatus().reverseFindMatchingBracePos( pCode, static_cast<int>( closeBracePos ), docLanguage );
 		if ( -1 == openBracePos )
 			return false;		// matching brace not found (bad syntax)
 
-		ENSURE( openBracePos < closeBracePos && str::IsValidPos( openBracePos, pCode ) && IsValidOpenBrace( pCode[ openBracePos ] ) );
+		ENSURE( openBracePos < closeBracePos && str::IsValidPos( openBracePos, pCode ) && IsOpenBrace( pCode[ openBracePos ] ) );
 
 		*pOutOpenBracePos = static_cast<PosT>( openBracePos );
 		return true;			// found matching brace

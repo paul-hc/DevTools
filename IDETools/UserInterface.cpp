@@ -76,6 +76,7 @@ BEGIN_DISPATCH_MAP(UserInterface, CCmdTarget)
 	DISP_FUNCTION(UserInterface, "SetEnvironmentVariable", SetEnvironmentVariable, VT_BOOL, VTS_BSTR VTS_BSTR)
 	DISP_FUNCTION(UserInterface, "ExpandEnvironmentVariables", ExpandEnvironmentVariables, VT_BSTR, VTS_BSTR)
 	DISP_FUNCTION(UserInterface, "LocateFile", LocateFile, VT_BSTR, VTS_BSTR)
+	DISP_FUNCTION(UserInterface, "RunUnitTests", LocateFile, VT_EMPTY, VTS_NONE)
 	//}}AFX_DISPATCH_MAP
 END_DISPATCH_MAP()
 
@@ -276,4 +277,8 @@ BSTR UserInterface::LocateFile( LPCTSTR localDirPath )
 		includeFilePath = dlg.m_selectedFilePath;
 
 	return str::AllocSysString( includeFilePath );
+}
+
+void UserInterface::RunUnitTests( void )
+{
 }

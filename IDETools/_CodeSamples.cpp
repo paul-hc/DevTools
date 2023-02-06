@@ -11,6 +11,19 @@
 #define new DEBUG_NEW
 #endif
 
+
+template< typename PathType, typename ObjectType >
+inline void CCacheLoader<PathType, ObjectType>::Blah2( const std::string& filePath )
+{
+}
+
+  void Blah1( const std::vector<PathType>& pathKeys );
+  void Blah2( const std::string& filePath );
+	template< typename PathType, typename ObjectType >
+	std::pair<ObjectType*, cache::TStatusFlags> CCacheLoader<PathType, ObjectType>::Acquire( const PathType& pathKey )
+	{
+	}
+
 	ASSERT(uTimeout>=10&&uTimeout<=     30    );		// timeout must be between 10 and 30 seconds
 
 

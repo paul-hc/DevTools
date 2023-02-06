@@ -30,16 +30,17 @@ namespace str
 		CEnclosedParser( const CharT* pStartSepList, const CharT* pEndSepList, bool matchIdentifier = true, const CharT listDelim[] = nullptr /* "|" */ )
 			: m_matchIdentifier( matchIdentifier )
 		{
-			const CharT defaultDelim[] = { '|', '\0' };		// "|"
-			if ( nullptr == listDelim )
-				listDelim = defaultDelim;
+			InitSeparators( pStartSepList, pEndSepList, listDelim );
+		}
 
-			str::Split( m_sepsPair.first, pStartSepList, listDelim );
-			str::Split( m_sepsPair.second, pEndSepList, listDelim );
-			StoreLeadingChars();
+		CEnclosedParser( bool matchIdentifier, const char* pStartSepList, const char* pEndSepList, const char listDelim[] = "|" )		// narrow seps constructor
+			: m_matchIdentifier( matchIdentifier )
+		{
+			std::basic_ostringstream<CharT> ossStartSeps, ossEndSeps;
+			ossStartSeps << pStartSepList;
+			ossEndSeps << pEndSepList;
 
-			ENSURE( !m_sepsPair.first.empty() && m_sepsPair.first.size() == m_sepsPair.second.size() );
-			ENSURE( !m_leadingChars.empty() );
+			InitSeparators( ossStartSeps.str().c_str(), ossEndSeps.str().c_str(), listDelim );
 		}
 
 		bool IsValid( void ) const { return !m_sepsPair.first.empty(); }
@@ -106,7 +107,7 @@ namespace str
 			return std::make_pair( startSepPos, endPos );
 		}
 
-		void QueryItems( std::vector<TString>& rItems, const TString& text, bool keepSeps = true )
+		void QueryItems( std::vector<TString>& rItems, const TString& text, bool keepSeps = true ) const
 		{
 			rItems.clear();
 
@@ -118,7 +119,7 @@ namespace str
 				rItems.push_back( Make( sepMatchPos, specBounds, text, keepSeps ) );
 		}
 
-		size_t ReplaceSeparators( TString& rText, const CharT* pStartSep, const CharT* pEndSep, size_t maxCount = TString::npos )
+		size_t ReplaceSeparators( TString& rText, const CharT* pStartSep, const CharT* pEndSep, size_t maxCount = TString::npos ) const
 		{
 			REQUIRE( pStartSep != nullptr && pEndSep != nullptr );
 
@@ -185,6 +186,20 @@ namespace str
 				if ( TString::npos == m_leadingChars.find( leadingCh ) )		// is it unique?
 					m_leadingChars.push_back( leadingCh );
 			}
+		}
+
+		void InitSeparators( const CharT* pStartSepList, const CharT* pEndSepList, const CharT listDelim[] )
+		{
+			const CharT defaultDelim[] = { '|', '\0' };		// "|"
+			if ( nullptr == listDelim )
+				listDelim = defaultDelim;
+
+			str::Split( m_sepsPair.first, pStartSepList, listDelim );
+			str::Split( m_sepsPair.second, pEndSepList, listDelim );
+			StoreLeadingChars();
+
+			ENSURE( !m_sepsPair.first.empty() && m_sepsPair.first.size() == m_sepsPair.second.size() );
+			ENSURE( !m_leadingChars.empty() );
 		}
 	private:
 		std::pair<TSepVector, TSepVector> m_sepsPair;	// <START seps, END seps>

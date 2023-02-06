@@ -240,6 +240,7 @@ library IDETools
 			[id(16)] boolean SetEnvironmentVariable(BSTR varName, BSTR varValue);
 			[id(17)] BSTR ExpandEnvironmentVariables(BSTR sourceString);
 			[id(18)] BSTR LocateFile(BSTR localDirPath);
+			[id(19)] void RunUnitTests();
 			//}}AFX_ODL_METHOD
 
 	};

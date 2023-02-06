@@ -13,11 +13,24 @@
 #include "utl/UI/VersionInfo.h"
 #include "utl/UI/resource.h"
 
+#include "test/CodeParserTests.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 #include "utl/UI/BaseApp.hxx"
+
+
+namespace ut
+{
+	void RegisterAppUnitTests( void )
+	{
+	#ifdef USE_UT
+		CCodeParserTests::Instance();
+	#endif
+	}
+}
 
 
 /* CApplication implementation note:
@@ -94,6 +107,11 @@ void CApplication::OnInitAppResources( void )
 
 	m_pModuleSession.reset( new CModuleSession() );
 	m_pModuleSession->LoadFromRegistry();
+
+#ifdef USE_UT
+	ut::CTestSuite::Instance().ClearTests();		// clear UTL tests, since we want to focus narrowly on this applications' tests
+	ut::RegisterAppUnitTests();
+#endif
 }
 
 BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )

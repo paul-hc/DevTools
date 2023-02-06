@@ -11,10 +11,10 @@
 
 namespace code
 {
-	CppMethodComponents::CppMethodComponents( const TCHAR* methodPrototype )
+	CppMethodComponents::CppMethodComponents( const TCHAR* pMethodPrototype )
 		: m_languageEngine( DocLang_Cpp )
-		, m_methodPrototype( methodPrototype )
-		, m_methodLength( str::Length( m_methodPrototype ) )
+		, m_pMethodPrototype( pMethodPrototype )
+		, m_methodLength( str::Length( m_pMethodPrototype ) )
 		, m_templateDecl( m_methodLength )
 		, m_inlineModifier( m_methodLength )
 		, m_returnType( m_methodLength )
@@ -23,7 +23,7 @@ namespace code
 		, m_argList( m_methodLength )
 		, m_postArgListSuffix( m_methodLength )
 	{
-		ASSERT_PTR( m_methodPrototype );
+		ASSERT_PTR( m_pMethodPrototype );
 	}
 
 	/**
@@ -31,15 +31,15 @@ namespace code
 		[m_templateDecl][m_inlineModifier] m_returnType m_methodName [m_typeQualifier] m_argList [m_postArgListSuffix]
 
 	*/
-	void CppMethodComponents::splitMethod( const TCHAR* validArgListOpenBraces )
+	void CppMethodComponents::splitMethod( const TCHAR validArgListOpenBraces[] /*= _T("(")*/ )
 	{
 		BraceParityStatus braceStatus;
-		m_argList = braceStatus.findArgList( m_methodPrototype, 0, _T("("), DocLang_Cpp, true );
+		m_argList = braceStatus.findArgList( m_pMethodPrototype, 0, _T("("), DocLang_Cpp, true );
 
 		//* m_argList *//
-		if ( m_argList.getLength() == 2 )
+		if ( 2 == m_argList.getLength() )
 		{	// handle the case: "bool operator()( const string& str )"
-			TokenRange nextArgList = braceStatus.findArgList( m_methodPrototype, m_argList.m_end, _T("("), DocLang_Cpp );
+			TokenRange nextArgList = braceStatus.findArgList( m_pMethodPrototype, m_argList.m_end, _T("("), DocLang_Cpp );
 
 			if ( !nextArgList.IsEmpty() )
 				m_argList = nextArgList;
@@ -47,38 +47,40 @@ namespace code
 
 		//* m_postArgListSuffix *//
 		m_postArgListSuffix.m_start = m_argList.m_end;
-		m_postArgListSuffix.m_end = m_languageEngine.findString( m_methodPrototype, code::lineEnd, m_postArgListSuffix.m_start ).m_start;
+		m_postArgListSuffix.m_end = m_languageEngine.findString( m_pMethodPrototype, code::lineEnd, m_postArgListSuffix.m_start ).m_start;
 
 		//* m_methodName *//
 		m_methodName.m_end = m_argList.m_start;
-		while ( m_methodName.m_end > 0 && _istspace( m_methodPrototype[ m_methodName.m_end - 1 ] ) )
+		while ( m_methodName.m_end > 0 && _istspace( m_pMethodPrototype[ m_methodName.m_end - 1 ] ) )
 			--m_methodName.m_end;
 
 		m_methodName.m_start = m_methodName.m_end;
 
-		TokenRange operatorRange = m_languageEngine.findString( m_methodPrototype, _T("operator") );
+		TokenRange operatorRange = m_languageEngine.findString( m_pMethodPrototype, _T("operator") );
 
 		if ( !operatorRange.IsEmpty() &&
 			 operatorRange.m_end < m_argList.m_start &&
-			 !_istalnum( m_methodPrototype[ operatorRange.m_end ] ) )
+			 !_istalnum( m_pMethodPrototype[ operatorRange.m_end ] ) )
 		{
 			m_methodName.m_start = operatorRange.m_start;
 		}
 
 		for ( ;; )
 		{
-			while ( m_methodName.m_start > 0 && !_istspace( m_methodPrototype[ m_methodName.m_start - 1 ] ) )
-				if ( '>' == m_methodPrototype[ m_methodName.m_start ] )		// closing class template instance brace?
+			while ( m_methodName.m_start > 0 && !_istspace( m_pMethodPrototype[ m_methodName.m_start - 1 ] ) )
+				if ( '>' == m_pMethodPrototype[ m_methodName.m_start ] )		// closing class template instance brace?
 				{	// bug fix: capture entire template instance => skip backwards to the matching '<' opening brace
-					if ( !code::SkipBraceBackwards( &m_methodName.m_start, m_methodPrototype, m_methodName.m_start ) )
-						--m_methodName.m_start;		// fishy syntax in m_methodPrototype, just ignore
+					if ( code::SkipBraceBackwards( &m_methodName.m_start, m_pMethodPrototype, m_methodName.m_start ) )
+						code::SkipSpaceBackwards( &m_methodName.m_start, m_pMethodPrototype );
+					else
+						--m_methodName.m_start;		// fishy syntax in m_pMethodPrototype, just ignore
 				}
 				else
 					--m_methodName.m_start;
 
-			if ( isValidBraceChar( m_methodPrototype[ m_methodName.m_start ], validArgListOpenBraces ) )
+			if ( isValidBraceChar( m_pMethodPrototype[ m_methodName.m_start ], validArgListOpenBraces ) )
 			{
-				int openBracePos = BraceParityStatus().reverseFindMatchingBracePos( m_methodPrototype, m_methodName.m_start, DocLang_Cpp );
+				int openBracePos = BraceParityStatus().reverseFindMatchingBracePos( m_pMethodPrototype, m_methodName.m_start, DocLang_Cpp );
 
 				if ( openBracePos != -1 )
 					m_methodName.m_start = openBracePos;
@@ -90,10 +92,10 @@ namespace code
 		//* m_returnType *//
 		m_returnType.assign( 0, m_methodName.m_start );
 		// skip trailing whitespaces
-		while ( m_returnType.m_end > 0 && _istspace( m_methodPrototype[ m_returnType.m_end - 1 ] ) )
+		while ( m_returnType.m_end > 0 && _istspace( m_pMethodPrototype[ m_returnType.m_end - 1 ] ) )
 			--m_returnType.m_end;
 		// skip leading whitespaces
-		while ( _istspace( m_methodPrototype[ m_returnType.m_start ] ) )
+		while ( _istspace( m_pMethodPrototype[ m_returnType.m_start ] ) )
 			++m_returnType.m_start;
 
 		//* m_typeQualifier *//
@@ -102,38 +104,38 @@ namespace code
 
 		m_typeQualifier.setEmpty( m_methodName.m_start );
 
-		const TCHAR* lastScopeAccess = std::find_end( m_methodPrototype + m_methodName.m_start,
-													  m_methodPrototype + m_methodName.m_end,
+		const TCHAR* lastScopeAccess = std::find_end( m_pMethodPrototype + m_methodName.m_start,
+													  m_pMethodPrototype + m_methodName.m_end,
 													  scopeAccessOperator,
 													  scopeAccessOperator + scopeAccessOpLength );
 
-		if ( lastScopeAccess != m_methodPrototype + m_methodName.m_end )
+		if ( lastScopeAccess != m_pMethodPrototype + m_methodName.m_end )
 			// Found the last "::" -> extract the type qualifier
-			m_typeQualifier.m_end = int( lastScopeAccess - m_methodPrototype ) + scopeAccessOpLength;
+			m_typeQualifier.m_end = int( lastScopeAccess - m_pMethodPrototype ) + scopeAccessOpLength;
 
 		//* m_templateDecl *//
 		m_templateDecl.setEmpty( m_returnType.m_start );
-		if ( str::isTokenMatch( m_methodPrototype, _T("template"), m_templateDecl.m_start ) )
+		if ( str::isTokenMatch( m_pMethodPrototype, _T("template"), m_templateDecl.m_start ) )
 		{
-			TokenRange templTypeList = BraceParityStatus().findArgList( m_methodPrototype, m_templateDecl.m_start, _T("<"),
+			TokenRange templTypeList = BraceParityStatus().findArgList( m_pMethodPrototype, m_templateDecl.m_start, _T("<"),
 																		DocLang_Cpp );
 
 			if ( !templTypeList.IsEmpty() && templTypeList.m_end <= m_returnType.m_end )
 			{
 				m_templateDecl.m_end = templTypeList.m_end;
 				m_returnType.m_start = m_templateDecl.m_end;
-				while ( _istspace( m_methodPrototype[ m_returnType.m_start ] ) )
+				while ( _istspace( m_pMethodPrototype[ m_returnType.m_start ] ) )
 					++m_returnType.m_start;
 			}
 		}
 
 		//* m_inlineModifier *//
 		m_inlineModifier.setEmpty( m_returnType.m_start );
-		if ( str::isTokenMatch( m_methodPrototype, _T("inline"), m_inlineModifier.m_start ) )
+		if ( str::isTokenMatch( m_pMethodPrototype, _T("inline"), m_inlineModifier.m_start ) )
 		{
 			m_inlineModifier.setLength( str::Length( _T("inline") ) );
 			m_returnType.m_start = m_inlineModifier.m_end;
-			while ( _istspace( m_methodPrototype[ m_returnType.m_start ] ) )
+			while ( _istspace( m_pMethodPrototype[ m_returnType.m_start ] ) )
 				++m_returnType.m_start;
 		}
 
@@ -145,14 +147,14 @@ namespace code
 		return str::Format(
 			_T("#CppMethodComponents - Prototype components for:\n%s\ntemplateDecl='%s'\ninlineModifier='%s'\nreturnType='%s'\n")
 			_T("m_methodName='%s'\ntypeQualifier='%s'\nargList='%s'\npostArgListSuffix='%s'\n"),
-			m_methodPrototype,
-			(LPCTSTR)m_templateDecl.getString( m_methodPrototype ),
-			(LPCTSTR)m_inlineModifier.getString( m_methodPrototype ),
-			(LPCTSTR)m_returnType.getString( m_methodPrototype ),
-			(LPCTSTR)m_methodName.getString( m_methodPrototype ),
-			(LPCTSTR)m_typeQualifier.getString( m_methodPrototype ),
-			(LPCTSTR)m_argList.getString( m_methodPrototype ),
-			(LPCTSTR)m_postArgListSuffix.getString( m_methodPrototype )
+			m_pMethodPrototype,
+			(LPCTSTR)m_templateDecl.getString( m_pMethodPrototype ),
+			(LPCTSTR)m_inlineModifier.getString( m_pMethodPrototype ),
+			(LPCTSTR)m_returnType.getString( m_pMethodPrototype ),
+			(LPCTSTR)m_methodName.getString( m_pMethodPrototype ),
+			(LPCTSTR)m_typeQualifier.getString( m_pMethodPrototype ),
+			(LPCTSTR)m_argList.getString( m_pMethodPrototype ),
+			(LPCTSTR)m_postArgListSuffix.getString( m_pMethodPrototype )
 		);
 	}
 

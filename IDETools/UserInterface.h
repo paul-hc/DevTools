@@ -59,6 +59,7 @@ protected:
 	afx_msg BOOL SetEnvironmentVariable(LPCTSTR varName, LPCTSTR varValue);
 	afx_msg BSTR ExpandEnvironmentVariables(LPCTSTR sourceString);
 	afx_msg BSTR LocateFile(LPCTSTR localDirPath);
+	afx_msg void RunUnitTests();
 	//}}AFX_DISPATCH
 
 	DECLARE_DISPATCH_MAP()
