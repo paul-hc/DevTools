@@ -26,7 +26,7 @@ struct CScopedAttachThreadInput
 		, m_differentThread( m_currThreadId != m_wndThreadId )
 		, m_attached( m_differentThread && ::AttachThreadInput( m_currThreadId, m_wndThreadId, TRUE ) != FALSE )
 	{
-		ASSERT_PTR( ::IsWindow( hWnd ) );
+		ASSERT( ::IsWindow( hWnd ) );
 	}
 
 	~CScopedAttachThreadInput()

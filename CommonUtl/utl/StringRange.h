@@ -78,39 +78,39 @@ namespace str
 					CStringRange( m_text, utl::MakeRange( sepPos.m_end, m_pos.m_end ) ) );
 			}
 
-			bool HasPrefix( const CharT prefix[] ) const { return _HasPrefix( MakePart( prefix ) ); }
-			bool HasPrefix( CharT prefixCh ) const { return _HasPrefix( CPart<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ) ); }
+			bool HasPrefix( const CharT* pPrefix ) const { return _HasPrefix( MakeSequence( pPrefix ) ); }
+			bool HasPrefix( CharT prefixCh ) const { return _HasPrefix( CSequence<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ) ); }
 
-			bool HasSuffix( const CharT suffix[] ) const { return _HasSuffix( MakePart( suffix ) ); }
-			bool HasSuffix( CharT suffixCh ) const { return _HasSuffix( CPart<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
+			bool HasSuffix( const CharT* pSuffix ) const { return _HasSuffix( MakeSequence( pSuffix ) ); }
+			bool HasSuffix( CharT suffixCh ) const { return _HasSuffix( CSequence<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
 
-			bool StripPrefix( const CharT prefix[] ) { return _StripPrefix( MakePart( prefix ) ); }
-			bool StripPrefix( CharT prefixCh ) { return _StripPrefix( CPart<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ) ); }
+			bool StripPrefix( const CharT* pPrefix ) { return _StripPrefix( MakeSequence( pPrefix ) ); }
+			bool StripPrefix( CharT prefixCh ) { return _StripPrefix( CSequence<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ) ); }
 
-			bool StripSuffix( const CharT suffix[] ) { return _StripSuffix( MakePart( suffix ) ); }
-			bool StripSuffix( CharT suffixCh ) { return _StripSuffix( CPart<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
+			bool StripSuffix( const CharT* pSuffix ) { return _StripSuffix( MakeSequence( pSuffix ) ); }
+			bool StripSuffix( CharT suffixCh ) { return _StripSuffix( CSequence<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
 
-			bool Strip( const CharT prefix[], const CharT suffix[] ) { return _Strip( MakePart( prefix ), MakePart( suffix ) ); }
-			bool Strip( CharT prefixCh, CharT suffixCh ) { return _Strip( CPart<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ), CPart<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
+			bool Strip( const CharT* pPrefix, const CharT* pSuffix ) { return _Strip( MakeSequence( pPrefix ), MakeSequence( pSuffix ) ); }
+			bool Strip( CharT prefixCh, CharT suffixCh ) { return _Strip( CSequence<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ), CSequence<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
 
-			bool Find( Range<size_t>& rFoundPos, const CharT part[], str::CaseType caseType = str::Case ) const
+			bool Find( Range<size_t>& rFoundPos, const CharT* pSeq, str::CaseType caseType = str::Case ) const
 			{
 				return str::Case == caseType
-					? _Find<str::Case>( rFoundPos, MakePart( part ) )
-					: _Find<str::IgnoreCase>( rFoundPos, MakePart( part ) );
+					? _Find<str::Case>( rFoundPos, MakeSequence( pSeq ) )
+					: _Find<str::IgnoreCase>( rFoundPos, MakeSequence( pSeq ) );
 			}
 
 			bool Find( Range<size_t>& rFoundPos, CharT ch, str::CaseType caseType = str::Case ) const
 			{
 				return str::Case == caseType
-					? _Find<str::Case>( rFoundPos, CPart<CharT>( &ch, ch != 0 ? 1 : 0 ) )
-					: _Find<str::IgnoreCase>( rFoundPos, CPart<CharT>( &ch, ch != 0 ? 1 : 0 ) );
+					? _Find<str::Case>( rFoundPos, CSequence<CharT>( &ch, ch != 0 ? 1 : 0 ) )
+					: _Find<str::IgnoreCase>( rFoundPos, CSequence<CharT>( &ch, ch != 0 ? 1 : 0 ) );
 			}
 
-			bool Equals( const CharT part[], str::CaseType caseType = str::Case )
+			bool Equals( const CharT* pSeq, str::CaseType caseType = str::Case )
 			{
 				ASSERT( InBounds() );
-				return str::EqualsN_ByCase( caseType, m_text.c_str() + m_pos.m_start, part, GetLength() );
+				return str::EqualsN_ByCase( caseType, m_text.c_str() + m_pos.m_start, pSeq, GetLength() );
 			}
 
 			bool TrimLeft( const CharT* pWhiteSpace = StdWhitespace<CharT>() )
@@ -147,63 +147,63 @@ namespace str
 				return m_pos != oldPos;
 			}
 		private:
-			bool _HasPrefix( const CPart<CharT>& prefix ) const
+			bool _HasPrefix( const CSequence<CharT>& prefix ) const
 			{
 				ASSERT( InBounds() );
 				return
-					0 == prefix.m_count ||			// empty is always a match
-					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_start ], prefix.m_pStr, prefix.m_count );
+					0 == prefix.m_length ||			// empty is always a match
+					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_start ], prefix.m_pSeq, prefix.m_length );
 			}
 
-			bool _HasSuffix( const CPart<CharT>& suffix ) const
+			bool _HasSuffix( const CSequence<CharT>& suffix ) const
 			{
 				ASSERT( InBounds() );
-				if ( 0 == suffix.m_count )
+				if ( 0 == suffix.m_length )
 					return true;					// empty is always a match
 
 				return
-					m_pos.m_end >= suffix.m_count &&
-					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_end - suffix.m_count ], suffix.m_pStr, suffix.m_count );
+					m_pos.m_end >= suffix.m_length &&
+					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_end - suffix.m_length ], suffix.m_pSeq, suffix.m_length );
 			}
 
-			bool _StripPrefix( const CPart<CharT>& prefix )
+			bool _StripPrefix( const CSequence<CharT>& prefix )
 			{
 				if ( !_HasPrefix( prefix ) )
 					return false;
 
-				m_pos.m_start += prefix.m_count;
+				m_pos.m_start += prefix.m_length;
 				return true;		// changed
 			}
 
-			bool _StripSuffix( const CPart<CharT>& suffix )
+			bool _StripSuffix( const CSequence<CharT>& suffix )
 			{
 				if ( !_HasSuffix( suffix ) )
 					return false;
 
-				m_pos.m_end -= suffix.m_count;
+				m_pos.m_end -= suffix.m_length;
 				return true;		// changed
 			}
 
-			bool _Strip( const CPart<CharT>& prefix, const CPart<CharT>& suffix )
+			bool _Strip( const CSequence<CharT>& prefix, const CSequence<CharT>& suffix )
 			{
 				bool hasPrefix = _StripPrefix( prefix ), hasSuffix = _StripSuffix( suffix );
 				return hasPrefix && hasSuffix;
 			}
 
 			template< str::CaseType caseType >
-			bool _Find( Range<size_t>& rFoundPos, const CPart<CharT>& part ) const
+			bool _Find( Range<size_t>& rFoundPos, const CSequence<CharT>& seq ) const
 			{
 				ASSERT( InBounds() );
 
 				typedef const CharT* iterator;
 
 				iterator itBegin = m_text.c_str() + m_pos.m_start, itEnd = m_text.c_str() + m_pos.m_end;
-				iterator itFound = std::search( itBegin, itEnd, part.m_pStr, part.m_pStr + part.m_count, pred::CharEqual<caseType>() );
+				iterator itFound = std::search( itBegin, itEnd, seq.Begin(), seq.End(), pred::CharEqual<caseType>());
 				if ( itFound == itEnd )
 					return false;
 
 				rFoundPos.m_start = std::distance( m_text.c_str(), itFound );
-				rFoundPos.m_end = rFoundPos.m_start + part.m_count;
+				rFoundPos.m_end = rFoundPos.m_start + seq.m_length;
 				return true;
 			}
 		private:

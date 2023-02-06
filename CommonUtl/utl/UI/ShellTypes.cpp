@@ -254,7 +254,7 @@ namespace shell
 		PIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
 		{
 			ASSERT_PTR( pFolder );
-			ASSERT_PTR( !str::IsEmpty( itemFilename ) );
+			ASSERT( !str::IsEmpty( itemFilename ) );
 
 			TCHAR displayName[ MAX_PATH * 2 ];
 			_tcscpy( displayName, itemFilename );

@@ -15,7 +15,7 @@ namespace code
 
 namespace str
 {
-	// A set of START and END separators to search for enclosed identifiers.
+	// A set of START and END separators to search for enclosed identifiers, in forward direction, by position.
 	// Provides parsing a string for enclosed items delimited by any of the multiple START/END separator pairs (e.g. environment variables).
 	//
 	template< typename CharT >
@@ -36,11 +36,7 @@ namespace str
 		CEnclosedParser( bool matchIdentifier, const char* pStartSepList, const char* pEndSepList, const char listDelim[] = "|" )		// narrow seps constructor
 			: m_matchIdentifier( matchIdentifier )
 		{
-			std::basic_ostringstream<CharT> ossStartSeps, ossEndSeps;
-			ossStartSeps << pStartSepList;
-			ossEndSeps << pEndSepList;
-
-			InitSeparators( ossStartSeps.str().c_str(), ossEndSeps.str().c_str(), listDelim );
+			InitSeparators( str::ValueToString<TString>( pStartSepList ).c_str(), str::ValueToString<TString>( pEndSepList ).c_str(), listDelim );
 		}
 
 		bool IsValid( void ) const { return !m_sepsPair.first.empty(); }
@@ -98,7 +94,7 @@ namespace str
 
 				if ( TString::npos == endPos || endPos == text.length() )		// not ended in endSep?
 					startSepPos = utl::npos;
-				else if ( pred::Equal == text.compare( endPos, endSep.length(), endSep ) )
+				else if ( str::EqualsAt( text, endPos, endSep ) )
 					endPos += endSep.length();			// skip past endSep
 				else
 					return FindItem( pOutSepMatchPos, text, identPos );			// continue searching past startSep for next enclosed identifier
@@ -134,10 +130,10 @@ namespace str
 				const TString& startSep = GetStartSep( sepMatchPos );
 				const TString& endSep = GetEndSep( sepMatchPos );
 
-				rText.replace( specBounds.first, startSep.length(), startSeq.m_pStr, startSeq.m_length );
+				rText.replace( specBounds.first, startSep.length(), startSeq.m_pSeq, startSeq.m_length );
 				specBounds.second -= startSep.length() - startSeq.m_length;
 
-				rText.replace( specBounds.second - endSep.length(), endSep.length(), endSeq.m_pStr, endSeq.m_length );
+				rText.replace( specBounds.second - endSep.length(), endSep.length(), endSeq.m_pSeq, endSeq.m_length );
 				specBounds.second -= endSep.length() - endSeq.m_length;
 			}
 
@@ -168,7 +164,7 @@ namespace str
 			{
 				const TString& startSep = m_sepsPair.first[ i ];
 
-				if ( pred::Equal == text.compare( offset, startSep.length(), startSep ) )
+				if ( str::EqualsAt( text, offset, startSep ) )
 					return i;		// found matching separator position
 			}
 
@@ -211,7 +207,7 @@ namespace str
 
 namespace str
 {
-	// ex: query quoted sub-strings, or environment variables "abc%VAR1%ijk%VAR2%xyz" => { "VAR1", "VAR2" }
+	// ex: query quoted sub-strings, or environment variables "lead_%VAR1%_mid_%VAR2%_trail" => { "VAR1", "VAR2" }
 
 	template< typename CharT >
 	void QueryEnclosedItems( std::vector< std::basic_string<CharT> >& rItems, const std::basic_string<CharT>& text,
@@ -229,7 +225,7 @@ namespace str
 												 KeyToValueFunc func, bool keepSeps = false )
 	{
 		ASSERT_PTR( pSource );
-		ASSERT_PTR( !str::IsEmpty( pStartSep ) );
+		ASSERT( !str::IsEmpty( pStartSep ) );
 
 		const str::CSequence<CharT> sepStart( pStartSep );
 		const str::CSequence<CharT> sepEnd( str::IsEmpty( pEndSep ) ? pStartSep : pEndSep );

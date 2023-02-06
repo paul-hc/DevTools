@@ -61,7 +61,7 @@ namespace lcs
 			BuildSuffixTree();
 
 			// find longest common prefix
-			str::CPart<CharType> lcPrefix( empty );				// start empty
+			str::CSequence<CharType> lcPrefix( empty );				// start empty
 
 			if ( !m_suffixes.empty() )
 				for ( size_t i = 0; i != m_suffixes.size() - 1; ++i )
@@ -70,9 +70,9 @@ namespace lcs
 					const CharType* pNextPrefix = m_suffixes[ i + 1 ];
 
 					if ( size_t commonLen = GetCommonLength( pPrefix, pNextPrefix ) )
-						if ( commonLen > lcPrefix.m_count )
+						if ( commonLen > lcPrefix.m_length )
 						{
-							str::CPart<CharType> prefix( pPrefix, commonLen );
+							str::CSequence<CharType> prefix( pPrefix, commonLen );
 							if ( str::AllContain( items, prefix, m_compareStr ) )
 								lcPrefix = prefix;
 						}

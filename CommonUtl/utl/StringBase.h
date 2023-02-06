@@ -127,7 +127,7 @@ namespace str
 
 
 	template< typename CharT >
-	size_t& SettleLength( size_t& rCount, const CharT* pText )
+	inline size_t& SettleLength( size_t& rCount, const CharT* pText )
 	{
 		if ( std::basic_string<CharT>::npos == rCount )
 			rCount = str::GetLength( pText );
@@ -135,6 +135,19 @@ namespace str
 			REQUIRE( rCount <= str::GetLength( pText ) );
 
 		return rCount;
+	}
+
+
+	template< typename StringT >
+	inline bool EqualsAt( const StringT& text, size_t offset, size_t seqCount, const typename StringT::value_type* pSequence )
+	{
+		return pred::Equal == text.compare( offset, seqCount, pSequence, seqCount );
+	}
+
+	template< typename StringT >
+	inline bool EqualsAt( const StringT& text, size_t offset, const StringT& sequence )
+	{
+		return EqualsAt( text, offset, sequence.length(), sequence.c_str() );
 	}
 
 
@@ -152,7 +165,7 @@ namespace str
 	template< str::CaseType caseType, typename StringT >
 	bool EqualString( const StringT& left, const StringT& right ) { return Equals<caseType>( left.c_str(), right.c_str() ); }
 
-	template<typename StringT>
+	template< typename StringT >
 	bool EqualString( str::CaseType caseType, const StringT& left, const StringT& right ) { return str::Case == caseType ? Equals<str::Case>( left.c_str(), right.c_str() ) : Equals<str::IgnoreCase>( left.c_str(), right.c_str() ); }
 
 
@@ -167,6 +180,15 @@ namespace str
 
 	inline char* Copy( char* pBuffer, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
 	inline wchar_t* Copy( wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
+
+
+	template< typename StringT, typename ValueT >
+	StringT ValueToString( const ValueT& value )
+	{
+		std::basic_ostringstream<typename StringT::value_type> oss;
+		oss << value;
+		return oss.str();
+	}
 }
 
 
@@ -177,43 +199,37 @@ namespace str
 	template< typename CharT >
 	struct CSequence
 	{
-		CSequence( const CharT* pStr = NULL, size_t length = utl::npos )
-			: m_pStr( pStr )
-			, m_length( length != utl::npos ? length : str::GetLength( pStr ) )
+		typedef std::basic_string<CharT> TString;
+
+		CSequence( const CharT* pSeq = nullptr, size_t length = utl::npos )
+			: m_pSeq( pSeq )
+			, m_length( length != utl::npos ? length : str::GetLength( pSeq ) )
 		{
-			ASSERT( nullptr == m_pStr || m_length <= str::GetLength( m_pStr ) );
+			ASSERT( nullptr == m_pSeq || m_length <= str::GetLength( m_pSeq ) );
 		}
 
-		explicit CSequence( const std::basic_string<CharT>& text ) : m_pStr( text.c_str() ), m_length( text.length() ) {}		// the whole string
+		explicit CSequence( const std::basic_string<CharT>& text ) : m_pSeq( text.c_str() ), m_length( text.length() ) {}		// the whole string
 
-		bool IsEmpty( void ) const { return NULL == m_pStr || 0 == m_length; }
-		const CharT* Begin( void ) const { ASSERT( !IsEmpty() ); return m_pStr; }
-		const CharT* End( void ) const { ASSERT( !IsEmpty() ); return m_pStr + m_length; }
+		bool IsEmpty( void ) const { return nullptr == m_pSeq || 0 == m_length; }
+		const CharT* Begin( void ) const { ASSERT( !IsEmpty() ); return m_pSeq; }
+		const CharT* End( void ) const { ASSERT( !IsEmpty() ); return m_pSeq + m_length; }
+
+		TString ToString( void ) const { return IsEmpty() ? TString() : TString( m_pSeq, m_length ); }
 	public:
-		const CharT* m_pStr;
+		const CharT* m_pSeq;
 		size_t m_length;
 	};
 
-
-	// part of a string: to be extracted as sub-string - constructor has different default values than CSequence
-	//
 	template< typename CharT >
-	struct CPart
+	inline CSequence<CharT> MakeSequence( const CharT* pSeq, size_t length = std::basic_string<CharT>::npos )
 	{
-		CPart( const CharT* pStr = NULL, size_t count = 0 ) : m_pStr( pStr ), m_count( count ) {}
-		explicit CPart( const std::basic_string<CharT>& text ) : m_pStr( text.c_str() ), m_count( text.length() ) {}		// the whole string
-
-		bool IsEmpty( void ) const { return NULL == m_pStr || 0 == m_count; }
-		std::basic_string<CharT> ToString( void ) const { return !IsEmpty() ? std::basic_string<CharT>( m_pStr, m_count ) : std::basic_string<CharT>(); }
-	public:
-		const CharT* m_pStr;
-		size_t m_count;
-	};
+		return CSequence<CharT>( pSeq, length );
+	}
 
 	template< typename CharT >
-	inline CPart<CharT> MakePart( const CharT* pStr, size_t count = std::basic_string<CharT>::npos )
+	inline bool EqualsAt( const std::basic_string<CharT>& text, size_t offset, const CSequence<CharT>& sequence )
 	{
-		return CPart<CharT>( pStr, SettleLength( count, pStr ) );
+		return EqualsAt( text, offset, sequence.m_length, sequence.m_pSeq );
 	}
 }
 
@@ -416,15 +432,6 @@ namespace func
 
 namespace str
 {
-	template< typename StringT, typename ValueT >
-	StringT ValueToString( const ValueT& value )
-	{
-		std::basic_ostringstream<typename StringT::value_type> oss;
-		oss << value;
-		return oss.str();
-	}
-
-
 	template< typename StringT >
 	inline StringT& ToUpper( StringT& rText, const std::locale& loc = str::GetUserLocale() )
 	{
@@ -466,14 +473,14 @@ namespace str
 	}
 
 	template< typename CharT >
-	bool ParseNameValuePair( std::pair< CPart<CharT>, CPart<CharT> >& rPartsPair, const std::basic_string<CharT>& spec, CharT sep = '=' )
+	bool ParseNameValuePair( std::pair< CSequence<CharT>, CSequence<CharT> >& rSeqPair, const std::basic_string<CharT>& spec, CharT sep = '=' )
 	{
 		size_t sepPos = spec.find( sep );
 		if ( std::basic_string<CharT>::npos == sepPos )
 			return false;
 
-		rPartsPair.first = MakePart( spec.c_str(), sepPos );
-		rPartsPair.second = MakePart( spec.c_str() + sepPos + 1 );
+		rSeqPair.first = MakeSequence( spec.c_str(), sepPos );
+		rSeqPair.second = MakeSequence( spec.c_str() + sepPos + 1 );
 		return true;
 	}
 }

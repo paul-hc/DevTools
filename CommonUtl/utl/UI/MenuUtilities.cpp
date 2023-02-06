@@ -242,7 +242,7 @@ namespace ui
 	bool MENUITEMINFO_BUFF::GetMenuItemInfo( HMENU hMenu, UINT item, bool byPos /*= true*/,
 											 UINT mask /*= MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP*/ )
 	{
-		ASSERT_PTR( ::IsMenu( hMenu ) );
+		ASSERT( ::IsMenu( hMenu ) );
 
 		ClearTextBuffer();
 		utl::ZeroWinStruct( static_cast<MENUITEMINFO*>( this ) );
@@ -329,7 +329,7 @@ namespace ui
 
 	HMENU CloneMenu( HMENU hSrcMenu )
 	{
-		ASSERT_PTR( ::IsMenu( hSrcMenu ) );
+		ASSERT( ::IsMenu( hSrcMenu ) );
 
 		CMenu destMenu;
 		destMenu.CreatePopupMenu();
@@ -536,7 +536,7 @@ namespace ui
 	{
 		ASSERT( hiliteId != 0 );
 		ASSERT_PTR( hTrackWnd );
-		ASSERT_PTR( ::IsMenu( hMenu ) );
+		ASSERT( ::IsMenu( hMenu ) );
 
 		// post arrow down for non-separator items until reaching the hiliteId item; scrolls the menu if necessary
 		if ( ::GetMenuState( hMenu, hiliteId, MF_BYCOMMAND ) != UINT_MAX )		// item exists in popup?
@@ -556,7 +556,7 @@ namespace ui
 	{	// don't call this directly: works when called delayed, e.g. through a ui::PostCall when handling WM_INITMENUPOPUP
 		ASSERT( hiliteId != 0 );
 		ASSERT_PTR( hTrackWnd );
-		ASSERT_PTR( ::IsMenu( hMenu ) );
+		ASSERT( ::IsMenu( hMenu ) );
 
 		int itemPos = ui::FindMenuItemIndex( hMenu, hiliteId );
 		if ( itemPos != -1 )
@@ -635,7 +635,7 @@ namespace dbg
 	void TraceMenu( HMENU hMenu, unsigned int indentLevel /*= 0*/ )
 	{
 	#ifdef _DEBUG
-		ASSERT_PTR( ::IsMenu( hMenu ) );
+		ASSERT( ::IsMenu( hMenu ) );
 
 		for ( int i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
 		{

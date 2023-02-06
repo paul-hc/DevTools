@@ -649,32 +649,32 @@ void CStringTests::TestStringMatch( void )
 	ASSERT_EQUAL( str::MatchNotEqual, getMatchFunc( _T("Some"), _T("Text") ) );
 }
 
-void CStringTests::TestStringPart( void )
+void CStringTests::TestStringSequence( void )
 {
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "", str::CPart<char>( "a text", 1 ) ) );
-	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart<wchar_t>( L"liquid", 2 ) ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( L"a line", str::CPart<wchar_t>( L"liquid", 3 ) ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "", str::CSequence<char>( "a text", 1 ) ) );
+	ASSERT_EQUAL( 2, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"liquid", 2 ) ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"liquid", 3 ) ) );
 
-	ASSERT_EQUAL( 2, str::FindPart( "a line", str::CPart<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
-	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart<wchar_t>( L"LIQUID", 2 ), pred::TCompareNoCase() ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart<char>( "LIQUID", 2 ), pred::TCompareCase() ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart<char>( "LIQUID", 2 ) ) );
+	ASSERT_EQUAL( 2, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT_EQUAL( 2, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ), pred::TCompareCase() ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ) ) );
 
 	std::vector<std::string> items;
-	ASSERT( !AllContain( items, str::CPart<char>( "liquid", 2 ) ) );
+	ASSERT( !AllContain( items, str::CSequence<char>( "liquid", 2 ) ) );
 
 	items.push_back( "a line" );
-	ASSERT( AllContain( items, str::CPart<char>( "liquid", 2 ) ) );
-	ASSERT( !AllContain( items, str::CPart<char>( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CPart<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CSequence<char>( "liquid", 2 ) ) );
+	ASSERT( !AllContain( items, str::CSequence<char>( "LIQUID", 2 ) ) );
+	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 
 	items.push_back( "OS linux" );
-	ASSERT( AllContain( items, str::CPart<char>( "liquid", 2 ) ) );
-	ASSERT( !AllContain( items, str::CPart<char>( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CPart<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CSequence<char>( "liquid", 2 ) ) );
+	ASSERT( !AllContain( items, str::CSequence<char>( "LIQUID", 2 ) ) );
+	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 
 	items.push_back( "Red Hat Linux" );
-	ASSERT( AllContain( items, str::CPart<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 }
 
 void CStringTests::TestStringOccurenceCount( void )
@@ -686,15 +686,15 @@ void CStringTests::TestStringOccurenceCount( void )
 	ASSERT_EQUAL( 2, str::GetCountOf<str::IgnoreCase>( "abcdeABC", "a" ) );
 	ASSERT_EQUAL( 2, str::GetCountOf<str::IgnoreCase>( _T("abcdeABC"), _T("a") ) );
 
-	ASSERT_EQUAL( 0, str::GetPartCount( "abc", str::MakePart( "" ) ) );
-	ASSERT_EQUAL( 1, str::GetPartCount( _T("abc"), str::MakePart( _T("b") ) ) );
-	ASSERT_EQUAL( 1, str::GetPartCount( _T("abcA"), str::MakePart( _T("a") ) ) );
+	ASSERT_EQUAL( 0, str::GetSequenceCount( "abc", str::MakeSequence( "" ) ) );
+	ASSERT_EQUAL( 1, str::GetSequenceCount( _T("abc"), str::MakeSequence( _T("b") ) ) );
+	ASSERT_EQUAL( 1, str::GetSequenceCount( _T("abcA"), str::MakeSequence( _T("a") ) ) );
 
 	static const TCHAR* sepArray[] = { _T(";"), _T("|"), _T("\r\n"), _T("\n") };
-	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount<TCHAR>( _T("ABC") ) ) );
-	ASSERT_EQUAL_STR( _T("\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount<TCHAR>( _T("A\nB\nC") ) ) );
-	ASSERT_EQUAL_STR( _T("\r\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount<TCHAR>( _T("A\r\nB\r\nC") ) ) );
-	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount<TCHAR>( _T("A|B;C|D;E;F") ) ) );
+	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessSequenceCount<TCHAR>( _T("ABC") ) ) );
+	ASSERT_EQUAL_STR( _T("\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessSequenceCount<TCHAR>( _T("A\nB\nC") ) ) );
+	ASSERT_EQUAL_STR( _T("\r\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessSequenceCount<TCHAR>( _T("A\r\nB\r\nC") ) ) );
+	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessSequenceCount<TCHAR>( _T("A|B;C|D;E;F") ) ) );
 }
 
 void CStringTests::TestStringLines( void )
@@ -1072,7 +1072,7 @@ void CStringTests::Run( void )
 	TestStringConversion();
 	TestStringSearch();
 	TestStringMatch();
-	TestStringPart();
+	TestStringSequence();
 	TestStringOccurenceCount();
 	TestStringLines();
 

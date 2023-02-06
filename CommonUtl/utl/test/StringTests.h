@@ -31,7 +31,7 @@ private:
 	void TestStringConversion( void );
 	void TestStringSearch( void );
 	void TestStringMatch( void );
-	void TestStringPart( void );
+	void TestStringSequence( void );
 	void TestStringOccurenceCount( void );
 	void TestStringLines( void );
 

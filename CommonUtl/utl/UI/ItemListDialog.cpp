@@ -284,8 +284,9 @@ void CItemListDialog::OnUpdateCopyItems( CCmdUI* pCmdUI )
 
 const TCHAR* CItemListDialog::FindSeparatorMostUsed( const std::tstring& text )
 {
-	static const TCHAR* sepArray[] = { _T(";"), _T("|"), _T("\r\n"), _T("\n") };
-	return *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( text.c_str() ) );
+	static const TCHAR* s_sepArray[] = { _T(";"), _T("|"), _T("\r\n"), _T("\n") };
+
+	return *std::max_element( s_sepArray, END_OF( s_sepArray ), pred::LessSequenceCount<TCHAR>(text.c_str()));
 }
 
 void CItemListDialog::OnPasteItems( void )

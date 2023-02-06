@@ -134,9 +134,9 @@ namespace str
 	}
 
 	template< typename CharT >
-	inline bool EqualsPart( const CharT* pLeft, const CPart<CharT>& rightPart, str::CaseType caseType = str::Case )
+	inline bool EqualsSequence( const CharT* pLeft, const CSequence<CharT>& rightSequence, str::CaseType caseType = str::Case )
 	{
-		return EqualsN_ByCase( caseType, pLeft, rightPart.m_pStr, rightPart.m_count );
+		return EqualsN_ByCase( caseType, pLeft, rightSequence.m_pStr, rightSequence.m_count );
 	}
 
 
@@ -332,64 +332,66 @@ namespace pred
 
 namespace str
 {
-	// part (sub-string) search
+	// sequence (sub-string) search
 
 	template< typename CharT >
-	size_t FindPart( const CharT* pText, const CPart<CharT>& part, size_t offset = 0 )
+	size_t FindSequence( const CharT* pText, const CSequence<CharT>& seq, size_t offset = 0 )
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
-		ASSERT( !part.IsEmpty() );
+		ASSERT( !seq.IsEmpty() );
 
 		const CharT* pEnd = str::end( pText );
-		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pStr, part.m_pStr + part.m_count );
+		const CharT* pFound = std::search( pText + offset, pEnd, seq.Begin(), seq.End() );
+
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 
 	template< typename CharT, typename Compare >
-	size_t FindPart( const CharT* pText, const CPart<CharT>& part, Compare compareStr, size_t offset = 0 )				// e.g. pred::TCompareNoCase
+	size_t FindSequence( const CharT* pText, const CSequence<CharT>& seq, Compare compareStr, size_t offset = 0 )				// e.g. pred::TCompareNoCase
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
-		ASSERT( !part.IsEmpty() );
+		ASSERT( !seq.IsEmpty() );
 
 		const CharT* pEnd = str::end( pText );
-		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pStr, part.m_pStr + part.m_count, pred::IsEqual<Compare>( compareStr ) );
+		const CharT* pFound = std::search( pText + offset, pEnd, seq.Begin(), seq.End(), pred::IsEqual<Compare>( compareStr ) );
+
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 
 	template< typename CharT >
-	inline bool ContainsPart( const CharT* pText, const CPart<CharT>& part ) { return FindPart( pText, part ) != std::tstring::npos; }
+	inline bool ContainsSequence( const CharT* pText, const CSequence<CharT>& seq ) { return FindSequence( pText, seq ) != std::tstring::npos; }
 
 	template< typename CharT, typename Compare >
-	inline bool ContainsPart( const CharT* pText, const CPart<CharT>& part, Compare compareStr ) { return FindPart( pText, part, compareStr ) != std::tstring::npos; }
+	inline bool ContainsSequence( const CharT* pText, const CSequence<CharT>& seq, Compare compareStr ) { return FindSequence( pText, seq, compareStr ) != std::tstring::npos; }
 
 
 	template< typename CharT, typename ContainerT >
-	bool AllContain( const ContainerT& items, const str::CPart<CharT>& part )
+	bool AllContain( const ContainerT& items, const str::CSequence<CharT>& seq )
 	{
 		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
-			if ( std::tstring::npos == FindPart( itItem->c_str(), part ) )
+			if ( std::tstring::npos == FindSequence( itItem->c_str(), seq ) )
 				return false;			// not a match for this item
 
 		return !items.empty();
 	}
 
 	template< typename CharT, typename ContainerT, typename Compare >
-	bool AllContain( const ContainerT& items, const str::CPart<CharT>& part, Compare compareStr )		// e.g. pred::TCompareNoCase
+	bool AllContain( const ContainerT& items, const str::CSequence<CharT>& seq, Compare compareStr )		// e.g. pred::TCompareNoCase
 	{
 		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
-			if ( std::tstring::npos == FindPart( itItem->c_str(), part, compareStr ) )
+			if ( std::tstring::npos == FindSequence( itItem->c_str(), seq, compareStr ) )
 				return false;			// not a match for this item
 
 		return !items.empty();
 	}
 
 	template< typename CharT >
-	size_t GetPartCount( const CharT* pText, const CPart<CharT>& part )
+	size_t GetSequenceCount( const CharT* pText, const CSequence<CharT>& seq )
 	{
 		size_t count = 0;
 
-		if ( !part.IsEmpty() )
-			for ( size_t offset = str::FindPart( pText, part ); offset != std::string::npos; offset = str::FindPart( pText, part, offset + part.m_count ) )
+		if ( !seq.IsEmpty() )
+			for ( size_t offset = str::FindSequence( pText, seq ); offset != std::string::npos; offset = str::FindSequence( pText, seq, offset + seq.m_length ) )
 				++count;
 
 		return count;
@@ -437,39 +439,39 @@ namespace str
 	}
 
 	template< str::CaseType caseType, typename CharT >
-	size_t Find( const CharT* pText, const CharT* pPart, size_t offset = 0 )
+	size_t Find( const CharT* pText, const CharT* pSequence, size_t offset = 0 )
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
-		ASSERT( !str::IsEmpty( pPart ) );
+		ASSERT( !str::IsEmpty( pSequence ) );
 
 		const CharT* itEnd = end( pText );
-		const CharT* itFound = std::search( begin( pText ) + offset, itEnd, begin( pPart ), end( pPart ), pred::CharEqual<caseType>() );
+		const CharT* itFound = std::search( begin( pText ) + offset, itEnd, begin( pSequence ), end( pSequence ), pred::CharEqual<caseType>() );
 		return itFound != itEnd ? std::distance( begin( pText ), itFound ) : std::tstring::npos;
 	}
 
 	template< str::CaseType caseType, typename CharT >
-	size_t GetCountOf( const CharT* pText, const CharT* pPart )
+	size_t GetCountOf( const CharT* pText, const CharT* pSequence )
 	{
-		size_t count = 0, matchLen = str::GetLength( pPart );
+		size_t count = 0, matchLen = str::GetLength( pSequence );
 
-		if ( !str::IsEmpty( pPart ) )
-			for ( size_t offset = str::Find<caseType>( pText, pPart ); offset != std::string::npos; offset = str::Find<caseType>( pText, pPart, offset + matchLen ) )
+		if ( !str::IsEmpty( pSequence ) )
+			for ( size_t offset = str::Find<caseType>( pText, pSequence ); offset != std::string::npos; offset = str::Find<caseType>( pText, pSequence, offset + matchLen ) )
 				++count;
 
 		return count;
 	}
 
 	template< typename CharT >
-	bool Matches( const CharT* pText, const CharT* pPart, bool matchCase, bool matchWhole )
+	bool Matches( const CharT* pText, const CharT* pSequence, bool matchCase, bool matchWhole )
 	{
 		if ( matchWhole )
 			return matchCase
-				? str::Equals<str::Case>( pText, pPart )
-				: str::Equals<str::IgnoreCase>( pText, pPart );
+				? str::Equals<str::Case>( pText, pSequence )
+				: str::Equals<str::IgnoreCase>( pText, pSequence );
 
 		return matchCase
-			? ( str::Find<str::Case>( pText, pPart ) != std::tstring::npos )
-			: ( str::Find<str::IgnoreCase>( pText, pPart ) != std::tstring::npos );
+			? ( str::Find<str::Case>( pText, pSequence ) != std::tstring::npos )
+			: ( str::Find<str::IgnoreCase>( pText, pSequence ) != std::tstring::npos );
 	}
 
 
@@ -509,20 +511,20 @@ namespace str
 
 namespace pred
 {
-	// to find most occurences in a string from an array of a parts
+	// to find most occurences in a string from an array of a sequences
 	template< typename CharT >
-	struct LessPartCount
+	struct LessSequenceCount
 	{
-		LessPartCount( const CharT* pText ) : m_pText( pText ) { ASSERT_PTR( m_pText ); }
+		LessSequenceCount( const CharT* pText ) : m_pText( pText ) { ASSERT_PTR( m_pText ); }
 
-		bool operator()( const str::CPart<CharT>& left, const str::CPart<CharT>& right ) const
+		bool operator()( const str::CSequence<CharT>& left, const str::CSequence<CharT>& right ) const
 		{
-			return Less == Compare_Scalar( str::GetPartCount( m_pText, left ), str::GetPartCount( m_pText, right ) );
+			return Less == Compare_Scalar( str::GetSequenceCount( m_pText, left ), str::GetSequenceCount( m_pText, right ) );
 		}
 
-		bool operator()( const CharT* pLeftPart, const CharT* pRightPart ) const
+		bool operator()( const CharT* pLeftSeq, const CharT* pRightSeq ) const
 		{
-			return operator()( str::MakePart( pLeftPart ), str::MakePart( pRightPart ) );
+			return operator()( str::MakeSequence( pLeftSeq ), str::MakeSequence( pRightSeq ) );
 		}
 	private:
 		const CharT* m_pText;

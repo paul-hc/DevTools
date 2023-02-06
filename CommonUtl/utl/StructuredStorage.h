@@ -57,11 +57,11 @@ namespace fs
 
 		CStorageTrail* RefCwd( void ) { return &m_cwdTrail; }
 
-		IStorage* GetCurrentDir( void ) const { ASSERT_PTR( IsOpen() ); return m_cwdTrail.GetCurrent(); }
+		IStorage* GetCurrentDir( void ) const { ASSERT( IsOpen() ); return m_cwdTrail.GetCurrent(); }
 		const fs::TEmbeddedPath& GetCurrentDirPath( void ) const { return m_cwdTrail.GetCurrentPath(); }
 		bool IsRootCurrentDir( void ) const { return m_pRootStorage == GetCurrentDir(); }
 
-		CStructuredStorage& ResetToRootCurrentDir( void ) { ASSERT_PTR( IsOpen() ); m_cwdTrail.Reset(); return *this; }
+		CStructuredStorage& ResetToRootCurrentDir( void ) { ASSERT( IsOpen() ); m_cwdTrail.Reset(); return *this; }
 		bool ChangeCurrentDir( const TCHAR* pDirSubPath, DWORD mode = STGM_READ );		// use STGM_READWRITE for writing (STGM_WRITE seems to be failing)
 		bool MakeDirPath( const TCHAR* pDirSubPath, bool enterCurrent, DWORD mode = STGM_CREATE | STGM_READWRITE );
 

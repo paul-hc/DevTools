@@ -28,7 +28,7 @@ namespace ui
 
 	void CCmdIdStore::RegisterCommands( HMENU hMenu, RecursionDepth depth /*= Deep*/ )
 	{
-		ASSERT_PTR( ::IsMenu( hMenu ) );
+		ASSERT( ::IsMenu( hMenu ) );
 
 		for ( int i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
 		{

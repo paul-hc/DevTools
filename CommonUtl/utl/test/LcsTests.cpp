@@ -301,7 +301,7 @@ void CLcsTests::TestRandomLongestCommonSubstring( void )
 		std::vector<std::wstring> items;
 		ut::MakeRandomItems( items, fragment, 2, 16, 32, charRange );
 
-		ASSERT( str::ContainsPart( str::FindLongestCommonSubstring( items ).c_str(), str::MakePart( fragment ) ) );
+		ASSERT( str::ContainsSequence( str::FindLongestCommonSubstring( items ).c_str(), str::MakeSequence( fragment ) ) );
 	}
 }
 

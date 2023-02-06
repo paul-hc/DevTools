@@ -138,9 +138,9 @@ void CLogger::SetIndentLinesBy( size_t indentLinesBy )
 const TCHAR* CLogger::FormatMultiLineText( const TCHAR text[] )
 {
 	ASSERT_PTR( text );
-	ASSERT_PTR( !m_indentLineEnd.empty() );		// at least should contain the "\n"
+	ASSERT( !m_indentLineEnd.empty() );		// at least should contain the "\n"
 
-	if ( 1 == m_indentLineEnd.size() || NULL == _tcschr( text, _T('\n') ) )
+	if ( 1 == m_indentLineEnd.size() || nullptr == _tcschr( text, _T('\n') ) )
 	{
 		m_multiLineText.clear();
 		return text;			// single line, no buffered indentation

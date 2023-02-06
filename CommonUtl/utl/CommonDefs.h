@@ -2,26 +2,11 @@
 #define CommonDefs_h
 #pragma once
 
-#include <crtdbg.h>
-
-#ifdef _DEBUG
-	#undef _ASSERT_EXPR
-
-	// We output the message as string, not as a format.
-	// This way we avoid assertion firing when printing '%' characters, mistaken for invalid printf format sequence.
-	//
-	#define _ASSERT_EXPR(expr, msg) \
-			(void) ((!!(expr)) || \
-					(1 != _CrtDbgReportW(_CRT_ASSERT, _CRT_WIDE(__FILE__), __LINE__, NULL, L"%s", msg)) || \
-					(_CrtDbgBreak(), 0))
-#endif //_DEBUG
-
 
 #pragma warning( disable: 4355 )	// 'this' : used in base member initializer list
 
 
-#define _INDIRECT_LINE_NAME_( t ) #t
-#define _LINE_NAME_( t ) _INDIRECT_LINE_NAME_( t )
+#define _LINE_NAME_( t ) #t
 #define __LINE__STR__ _LINE_NAME_( __LINE__ )
 #define __FILE_LINE__ __FILE__ "(" __LINE__STR__ "): "
 
@@ -29,6 +14,26 @@
 //	#pragma message( __WARN__ "User: some warning message!" )
 //
 #define __WARN__ __FILE_LINE__ "warning C9999:\n  * "
+
+
+#ifndef _HAS_CXX17
+#define nullptr 0
+#endif //_HAS_CXX17
+
+
+#include <crtdbg.h>
+
+#ifdef _DEBUG
+#undef _ASSERT_EXPR
+
+// We output the message as string, not as a format.
+// This way we avoid assertion firing when printing '%' characters, mistaken for invalid printf format sequence.
+//
+#define _ASSERT_EXPR(expr, msg) \
+			(void) ((!!(expr)) || \
+					(1 != _CrtDbgReportW(_CRT_ASSERT, _CRT_WIDE(__FILE__), __LINE__, nullptr, L"%s", msg)) || \
+					(_CrtDbgBreak(), 0))
+#endif //_DEBUG
 
 
 // debug support
@@ -45,8 +50,8 @@
 #define ENSURE ASSERT
 #define INVARIANT ASSERT
 
-#define ASSERT_PTR( x ) ASSERT( ( x ) != NULL )
-#define ASSERT_NULL( x ) ASSERT( ( x ) == NULL )
+#define ASSERT_PTR( x ) ASSERT( ( x ) != nullptr )
+#define ASSERT_NULL( x ) ASSERT( ( x ) == nullptr )
 
 #define DEBUG_BREAK ASSERT( false )
 #define DEBUG_BREAK_IF( cond ) ASSERT( !cond )
@@ -57,11 +62,6 @@
 #define final				// don't override a method/don't subclass a class
 #define persist				// persistent data-member
 #define throws_( ... )
-
-
-#ifndef _HAS_CXX17
-	#define nullptr 0
-#endif //_HAS_CXX17
 
 
 #define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
@@ -91,7 +91,7 @@
 	{
 		inline int GetRefCount( IUnknown* pInterface )
 		{
-			if ( NULL == pInterface )
+			if ( nullptr == pInterface )
 				return 0;
 
 			pInterface->AddRef();
@@ -114,8 +114,8 @@
 
 #else
 
-	#define HR_AUDIT( expr ) utl::Audit( (expr), NULL )
-	#define HR_OK( expr ) utl::Check( (expr), NULL )
+	#define HR_AUDIT( expr ) utl::Audit( (expr), nullptr )
+	#define HR_OK( expr ) utl::Check( (expr), nullptr )
 
 	#define TRACE_COM_ITF( pInterface, pSuffix ) __noop
 	#define TRACE_COM_PTR( ptr, pSuffix ) __noop
@@ -162,7 +162,7 @@ inline const Type* safe_ptr( const Type* ptr )
 template< typename Type, typename BaseType >
 inline bool is_a( const BaseType* pObject )
 {
-	return dynamic_cast<const Type*>( pObject ) != NULL;
+	return dynamic_cast<const Type*>( pObject ) != nullptr;
 }
 
 template< typename ToPtrType, typename FromPtrType >
@@ -298,7 +298,7 @@ namespace utl
 	template< typename ValueType >
 	inline void AssignPtr( ValueType* pField, const ValueType& value )
 	{
-		if ( pField != NULL )
+		if ( pField != nullptr )
 			*pField = value;
 	}
 

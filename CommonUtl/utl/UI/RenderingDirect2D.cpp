@@ -51,7 +51,7 @@ namespace d2d
 	CComPtr<ID2D1GradientStopCollection> CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F colors[], size_t count )
 	{
 		ASSERT_PTR( pRenderTarget );
-		ASSERT_PTR( count > 1 );
+		ASSERT( count > 1 );
 
 		std::vector< D2D1_GRADIENT_STOP > gradientStops( count );
 		gradientStops[ 0 ].position = 0.0f;
@@ -145,7 +145,7 @@ namespace d2d
 	CComPtr<ID2D1PathGeometry> CreatePolygonGeometry( const POINT points[], size_t count, bool filled /*= true*/ )
 	{
 		ASSERT_PTR( points );
-		ASSERT_PTR( count > 1 );
+		ASSERT( count > 1 );
 
 		ID2D1Factory* pFactory = CFactory::Factory();
 
@@ -182,7 +182,7 @@ namespace d2d
 	CComPtr<ID2D1PathGeometry> CreateCombinedGeometries( ID2D1Geometry* geometries[], size_t count, D2D1_COMBINE_MODE combineMode )
 	{
 		ASSERT_PTR( geometries );
-		ASSERT_PTR( count > 1 );
+		ASSERT( count > 1 );
 
 		CComPtr<ID2D1PathGeometry> pNewGeometry;
 		if ( HR_OK( CFactory::Factory()->CreatePathGeometry( &pNewGeometry ) ) )

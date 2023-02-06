@@ -185,12 +185,13 @@ namespace str
 	template< typename CharT, typename ValueT >
 	bool ParseNameValue( std::basic_string<CharT>& rName, ValueT& rValue, const std::basic_string<CharT>& spec, CharT sep = '=' )
 	{
-		std::pair<CPart<CharT>, CPart<CharT>> partsPair;
-		if ( !ParseNameValuePair<CharT>( partsPair, spec, sep ) )
+		std::pair< CSequence<CharT>, CSequence<CharT> > seqPair;
+
+		if ( !ParseNameValuePair<CharT>( seqPair, spec, sep ) )
 			return false;
 
-		rName = partsPair.first.ToString();
-		return ParseValue<CharT>( rValue, partsPair.second.ToString() );
+		rName = seqPair.first.ToString();
+		return ParseValue<CharT>( rValue, seqPair.second.ToString() );
 	}
 }
 

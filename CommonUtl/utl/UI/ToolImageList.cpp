@@ -93,7 +93,7 @@ size_t CToolImageList::FindButtonPos( UINT buttonId ) const
 
 bool CToolImageList::LoadToolbar( UINT toolBarId, COLORREF transpColor /*= color::Auto*/ )
 {
-	ASSERT_PTR( toolBarId );
+	ASSERT( toolBarId != 0 );
 
 	CResourceData toolbarData( MAKEINTRESOURCE( toolBarId ), RT_TOOLBAR );
 	if ( !toolbarData.IsValid() )
