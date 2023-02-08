@@ -299,7 +299,9 @@ namespace str
 	{
 		ASSERT( startPos >= 0 && startPos <= str::Length( pString ) );
 
-		str::const_iterator itEnd = end( pString ), itFound;
+		typedef const TCHAR* TConstIterator;
+
+		TConstIterator itEnd = end( pString ), itFound;
 
 		if ( caseType == str::Case )
 			itFound = std::find_if( begin( pString ) + startPos, itEnd, CharMatchCase( chr ) );
@@ -314,7 +316,7 @@ namespace str
 	{
 		ASSERT( startPos >= 0 && startPos <= str::Length( pString ) );
 
-		str::const_iterator itFound;
+		TConstIterator itFound;
 
 		if ( caseType == str::Case )
 			itFound = std::search( begin( pString ) + startPos, end( pString ), begin( subString ), end( subString ) );
@@ -367,7 +369,8 @@ namespace str
 	{
 		ASSERT( startPos >= 0 && startPos <= str::Length( pString ) );
 
-		str::const_iterator itFound;
+		typedef const TCHAR* TConstIterator;
+		TConstIterator itFound;
 
 		if ( caseType == str::Case )
 			itFound = std::find_first_of( begin( pString ) + startPos, end( pString ), begin( charSet ), end( charSet ) );

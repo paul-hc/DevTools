@@ -11,6 +11,21 @@
 #endif
 
 
+namespace hlp
+{
+	template< typename IteratorT >
+	size_t GetMatchingLength( IteratorT itStart, IteratorT itEnd )
+	{
+		if ( itStart != itEnd )
+			for ( IteratorT itMismatch = itStart + 1; ; ++itMismatch )
+				if ( itMismatch == itEnd || *itMismatch != *itStart )
+					return std::distance( itStart, itMismatch );
+
+		return 0;
+	}
+}
+
+
 CReportListCustomDraw::CReportListCustomDraw( NMLVCUSTOMDRAW* pDraw, CReportListControl* pList )
 	: CListLikeCustomDrawBase( &pDraw->nmcd )
 	, m_pDraw( pDraw )
@@ -138,7 +153,7 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMa
 
 	for ( size_t pos = 0; pos != matchSeq.size() && itemRect.left < itemRect.right; )
 	{
-		unsigned int matchLen = static_cast<unsigned int>( utl::GetMatchingLength( matchSeq.begin() + pos, matchSeq.end() ) );
+		unsigned int matchLen = static_cast<unsigned int>( hlp::GetMatchingLength( matchSeq.begin() + pos, matchSeq.end() ) );
 		const ui::CTextEffect& effect = matchEffects[ matchSeq[ pos ] ];
 
 		SelectTextEffect( effect );

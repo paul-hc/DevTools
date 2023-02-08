@@ -298,7 +298,9 @@ namespace path
 			std::vector<TCHAR> wildcards;
 			str::QuickTokenize( wildcards, pWildSpec, pMultiSpecDelims );		// multiple zero-terminated items
 
-			for ( str::const_iterator pWild = &wildcards.front(), pEnd = &wildcards.back() + 1; pWild != pEnd; ++pWild )
+			typedef const TCHAR* TConstIterator;
+
+			for ( TConstIterator pWild = &wildcards.front(), pEnd = &wildcards.back() + 1; pWild != pEnd; ++pWild )
 				if ( _T('\0') == *pWild )
 					++pWild;						// skip empty specs, e.g. in ";x;;y"
 				else if ( DoMatchFilenameWildcard( pFilename, pWild, pMultiSpecDelims ) )			// recursive call spec by spec
@@ -717,8 +719,9 @@ namespace path
 		std::tstring path = MakeNormal( pPath );
 		std::tstring prefix = MakeNormal( pPrefix );
 
-		str::const_iterator itPath = path.c_str();
-		str::const_iterator itPrefix = prefix.c_str();
+		typedef const TCHAR* TConstIterator;
+		TConstIterator itPath = path.c_str();
+		TConstIterator itPrefix = prefix.c_str();
 
 		Range<const TCHAR*> commonRange( itPath );
 

@@ -70,10 +70,11 @@ namespace code
 			while ( m_methodName.m_start > 0 && !_istspace( m_pMethodPrototype[ m_methodName.m_start - 1 ] ) )
 				if ( '>' == m_pMethodPrototype[ m_methodName.m_start ] )		// closing class template instance brace?
 				{	// bug fix: capture entire template instance => skip backwards to the matching '<' opening brace
-					if ( code::SkipBraceBackwards( &m_methodName.m_start, m_pMethodPrototype, m_methodName.m_start ) )
-						code::SkipSpaceBackwards( &m_methodName.m_start, m_pMethodPrototype );
-					else
-						--m_methodName.m_start;		// fishy syntax in m_pMethodPrototype, just ignore
+					if ( !code::ide_tools::SkipBraceBackwards( &m_methodName.m_start, m_pMethodPrototype, m_methodName.m_start ) )
+						TRACE( _T(" ? CppMethodComponents::splitMethod() - Bad syntax in source code: no reverse matching brace at pos=%d in:\n  code='%s'\n"),
+							   m_methodName.m_start, m_pMethodPrototype );
+
+					--m_methodName.m_start;		// fishy syntax in m_pMethodPrototype, just ignore
 				}
 				else
 					--m_methodName.m_start;

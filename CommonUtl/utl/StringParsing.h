@@ -3,6 +3,7 @@
 #pragma once
 
 #include "StringUtilities.h"
+#include "Algorithms_fwd.h"
 
 
 namespace code
@@ -15,6 +16,9 @@ namespace code
 
 namespace str
 {
+	enum IterationDir { ForwardIter, ReverseIter };		// iteration direction
+
+
 	// A set of START and END separators to search for enclosed sequences.
 	//
 	template< typename CharT >
@@ -36,7 +40,7 @@ namespace str
 			StoreLeadingChars();
 
 			ENSURE( !m_sepsPair.first.empty() && m_sepsPair.first.size() == m_sepsPair.second.size() );
-			ENSURE( !m_leadingChars.empty() );
+			ENSURE( !m_leadStartChars.empty() );
 		}
 
 		bool IsValid( void ) const { return !m_sepsPair.first.empty(); }
@@ -44,11 +48,14 @@ namespace str
 
 		bool IsValidMatchPos( TSepMatchPos sepMatchPos ) const { return sepMatchPos < m_sepsPair.first.size(); }
 
+
+		// FORWARD direction:
+
 		size_t FindAnyStartSep( TSepMatchPos* pOutSepMatchPos, const TString& text, size_t offset = 0 ) const
 		{
 			ASSERT_PTR( pOutSepMatchPos );
 
-			for ( size_t startSepPos = offset; ( startSepPos = text.find_first_of( m_leadingChars, startSepPos ) ) != TString::npos; ++startSepPos )
+			for ( size_t startSepPos = offset; ( startSepPos = text.find_first_of( m_leadStartChars, startSepPos ) ) != TString::npos; ++startSepPos )
 			{
 				TSepMatchPos sepMatchPos = FindSepMatchPos( text, startSepPos, m_sepsPair.first );
 
@@ -66,7 +73,7 @@ namespace str
 		{
 			REQUIRE( offset != text.length() );
 
-			if ( m_leadingChars.find( text[ offset ] ) != TString::npos )		// quick match of any separator leading character?
+			if ( m_leadStartChars.find( text[ offset ] ) != TString::npos )		// quick match of any separator leading character?
 			{
 				TSepMatchPos sepMatchPos = FindSepMatchPos( text, offset, m_sepsPair.first );
 
@@ -79,9 +86,56 @@ namespace str
 
 			return false;
 		}
+
+
+		// FORWARD/REVERSE direction using iterators:
+
+		const TSepVector& GetOpenSeparators( IterationDir iterDir ) const { return ForwardIter == iterDir ? m_sepsPair.first : m_sepsPair.second; }
+		const TSepVector& GetCloseSeparators( IterationDir iterDir ) const { return ForwardIter == iterDir ? m_sepsPair.second : m_sepsPair.first; }
+
+		const TString& GetMatchingOpenSep( TSepMatchPos sepMatchPos, IterationDir iterDir ) const { REQUIRE( IsValidMatchPos( sepMatchPos ) ); return GetOpenSeparators( iterDir )[ sepMatchPos ]; }
+		const TString& GetMatchingCloseSep( TSepMatchPos sepMatchPos, IterationDir iterDir ) const { REQUIRE( IsValidMatchPos( sepMatchPos ) ); return GetCloseSeparators( iterDir )[ sepMatchPos ]; }
+
+		template< typename IteratorT >
+		bool MatchesAnyOpenSepAt( TSepMatchPos* pOutSepMatchPos, IteratorT itText, IteratorT itLast, IterationDir iterDir ) const
+		{
+			return MatchesAnySepAt( pOutSepMatchPos, itText, itLast, GetOpenSeparators( iterDir ), iterDir );
+		}
+
+		template< typename IteratorT >
+		bool MatchesAnyCloseSepAt( TSepMatchPos sepMatchPos, IteratorT itText, IteratorT itLast, IterationDir iterDir ) const
+		{
+			REQUIRE( IsValidMatchPos( sepMatchPos ) );
+
+			const TString& sep = GetMatchingCloseSep( sepMatchPos, iterDir );
+			return Equals( itText, itLast, sep, iterDir );
+		}
+
+
+		// parsing methods:
+
+		template< typename IteratorT >
+		bool SkipMatchingSpec( IteratorT& rItText /*in-out*/, IteratorT itLast, TSepMatchPos sepMatchPos, str::IterationDir iterDir ) const
+		{
+			// skip the code sequence "<openSep>content<closeSep>"
+			const TString& openSep = GetMatchingOpenSep( sepMatchPos, iterDir );
+
+			REQUIRE( rItText != itLast );
+			REQUIRE( MatchesSepAt( openSep, rItText, itLast, iterDir ) );			// expected to be on the OPEN separator
+
+			for ( IteratorT it = rItText + GetMatchingOpenSep( sepMatchPos, iterDir ).length();		// skip the open sep
+				  it != itLast; ++it )
+				if ( MatchesAnyCloseSepAt( sepMatchPos, it, itLast, iterDir ) )
+				{
+					rItText = it + GetMatchingCloseSep( sepMatchPos, iterDir ).length();
+					return true;			// we have a spec match
+				}
+
+			return false;
+		}
 	private:
 		static TSepMatchPos FindSepMatchPos( const TString& text, size_t offset, const TSepVector& separators )
-		{
+		{	// by position
 			for ( TSepMatchPos i = 0; i != separators.size(); ++i )
 			{
 				const TString& startSep = separators[ i ];
@@ -92,22 +146,67 @@ namespace str
 
 			return utl::npos;
 		}
-	private:
+
+		template< typename IteratorT >
+		static TSepMatchPos FindSepMatchPos( IteratorT itText, IteratorT itLast, const TSepVector& separators, IterationDir iterDir )
+		{
+			for ( TSepMatchPos i = 0; i != separators.size(); ++i )
+			{
+				const TString& sep = separators[ i ];
+
+				if ( Equals( itText, itLast, sep, iterDir ) )
+					return i;		// found matching separator position
+			}
+
+			return utl::npos;
+		}
+
+		template< typename IteratorT >
+		bool MatchesAnySepAt( TSepMatchPos* pOutSepMatchPos, IteratorT itText, IteratorT itLast, const TSepVector& separators, IterationDir iterDir = ForwardIter ) const
+		{
+			REQUIRE( itText != itLast );
+
+			TSepMatchPos sepMatchPos = FindSepMatchPos( itText, itLast, separators, iterDir );
+
+			if ( sepMatchPos != utl::npos )
+			{
+				utl::AssignPtr( pOutSepMatchPos, sepMatchPos );
+				return true;
+			}
+
+			return false;
+		}
+
+		template< typename IteratorT >
+		static inline bool MatchesSepAt( const TString& sep, IteratorT itText, IteratorT itLast, IterationDir iterDir = ForwardIter )
+		{
+			return Equals( itText, itLast, sep, iterDir );
+		}
+
+		template< typename IteratorT >
+		static inline bool Equals( IteratorT itText, IteratorT itLast, const TString& sequence, IterationDir iterDir )
+		{
+			if ( ReverseIter == iterDir )
+				return utl::Equals( itText, itLast, sequence.rbegin(), sequence.rend() );		// comparison starting backwards
+
+			return utl::Equals( itText, itLast, sequence.begin(), sequence.end() );
+		}
+
 		void StoreLeadingChars( void )
 		{
 			for ( size_t i = 0; i != m_sepsPair.first.size(); ++i )
 			{
 				REQUIRE( !m_sepsPair.first[i].empty() && !m_sepsPair.second[i].empty() );		// START and END separators must be valid
 
-				CharT leadingCh = m_sepsPair.first[ i ][ 0 ];
+				CharT leadingStart = utl::Front( m_sepsPair.first[ i ] );
 
-				if ( TString::npos == m_leadingChars.find( leadingCh ) )		// is it unique?
-					m_leadingChars.push_back( leadingCh );
+				if ( TString::npos == m_leadStartChars.find( leadingStart ) )	// unique?
+					m_leadStartChars.push_back( leadingStart );
 			}
 		}
 	private:
 		std::pair<TSepVector, TSepVector> m_sepsPair;	// <START seps, END seps>
-		TString m_leadingChars;							// for quick matching of the first letter when searching for START separators
+		TString m_leadStartChars;						// for quick matching of the first letter when searching for START separators (by position only)
 	};
 
 
@@ -121,7 +220,7 @@ namespace str
 		typedef std::basic_string<CharT> TString;
 		typedef CSeparatorsPair<CharT> TSeparatorsPair;
 		typedef typename TSeparatorsPair::TSepMatchPos TSepMatchPos;	// position in TSepVector of the matching START and END separators
-		typedef std::pair<size_t, size_t> TIdentSpecPair;	// START and END positions of a full identifier spec "<startSep>identifier<endSep>"
+		typedef std::pair<size_t, size_t> TIdentSpecPair;				// START and END positions of a full identifier spec "<startSep>identifier<endSep>"
 
 		CEnclosedParser( const CharT* pStartSepList, const CharT* pEndSepList, bool matchIdentifier = true, const CharT listDelim[] = nullptr /* "|" */ )
 			: m_matchIdentifier( matchIdentifier )
@@ -129,9 +228,9 @@ namespace str
 		{
 		}
 
-		CEnclosedParser( bool matchIdentifier, const char* pStartSepList, const char* pEndSepList, const char listDelim[] = "|" )
+		CEnclosedParser( bool matchIdentifier, const char* pStartSepList, const char* pEndSepList )
 			: m_matchIdentifier( matchIdentifier )
-			, m_seps( str::ValueToString<TString>( pStartSepList ).c_str(), str::ValueToString<TString>( pEndSepList ).c_str(), listDelim )
+			, m_seps( str::ValueToString<TString>( pStartSepList ).c_str(), str::ValueToString<TString>( pEndSepList ).c_str() )
 		{	// narrow seps constructor, works for both char/wchar_t parsers
 		}
 
@@ -184,7 +283,7 @@ namespace str
 				const TString& endSep = GetEndSep( *pOutSepMatchPos );
 
 				if ( m_matchIdentifier )
-					endPos = code::FindIdentifierEnd( text, identPos );		// skip identifier (should not start with a digit)
+					endPos = code::FindIdentifierEnd( text, identPos );			// skip identifier (should not start with a digit)
 				else
 					endPos = text.find( endSep, identPos );						// find END separator
 
@@ -268,10 +367,11 @@ namespace str
 		const str::CSequence<CharT> sepEnd( str::IsEmpty( pEndSep ) ? pStartSep : pEndSep );
 
 		std::basic_string<CharT> output; output.reserve( str::GetLength( pSource ) * 2 );
+		typedef const CharT* TConstIterator;
 
-		for ( str::const_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
+		for ( TConstIterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
 		{
-			str::const_iterator itKeyStart = std::search( itStart, itEnd, sepStart.Begin(), sepStart.End() ), itKeyEnd = itEnd;
+			TConstIterator itKeyStart = std::search( itStart, itEnd, sepStart.Begin(), sepStart.End() ), itKeyEnd = itEnd;
 			if ( itKeyStart != itEnd )
 				itKeyEnd = std::search( itKeyStart + sepStart.m_length, itEnd, sepEnd.Begin(), sepEnd.End() );
 

@@ -42,6 +42,26 @@ CAlgorithmsTests& CAlgorithmsTests::Instance( void )
 	return s_testCase;
 }
 
+void CAlgorithmsTests::TestBasicUtils( void )
+{
+	{	// REVERSE iteration
+		const std::string text = "name=[value...[";
+
+		ASSERT_HAS_PREFIX( "name=", &*utl::RevIterAtFwdFront( text ) );
+		ASSERT_HAS_PREFIX( "[", &*utl::RevIterAtFwdBack( text ) );
+
+		std::string::const_reverse_iterator itEnd = text.rend();
+		std::string::const_reverse_iterator it = utl::RevIterAtFwdPos( text, text.find( '[' ) );
+		ASSERT_HAS_PREFIX( "[val", &*it );
+
+		++it;
+		ASSERT_HAS_PREFIX( "=[", &*it );
+
+		size_t fwdPos = utl::FwdPosOfRevIter( text, it );
+		ASSERT_EQUAL( text.find( '=' ), fwdPos );
+		ASSERT_HAS_PREFIX( "=[", &text[fwdPos] );
+	}
+}
 
 void CAlgorithmsTests::TestBuffer( void )
 {
@@ -465,6 +485,7 @@ void CAlgorithmsTests::Run( void )
 {
 	__super::Run();
 
+	TestBasicUtils();
 	TestBuffer();
 	TestLookup();
 	TestBinaryLookup();

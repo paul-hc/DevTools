@@ -159,7 +159,9 @@ namespace str
 
 	// string to STL iterators conversions
 
-	inline const_iterator end( const TCHAR* pString, int endPos )
+	typedef const TCHAR* TConstIterator;
+
+	inline TConstIterator end( const TCHAR* pString, int endPos )
 	{
 		if ( -1 == endPos )
 			endPos = Length( pString );
@@ -168,7 +170,7 @@ namespace str
 		return pString + endPos;
 	}
 
-    typedef std::reverse_iterator< const_iterator > const_reverse_iterator;
+    typedef std::reverse_iterator<TConstIterator> const_reverse_iterator;
 
 	inline const_reverse_iterator rbegin( const TCHAR* pString, int startPos = -1 )
 	{
@@ -286,7 +288,7 @@ namespace str
 	{
 		ASSERT( characterSet != NULL );
 
-		const_iterator itEnd = end( characterSet );
+		TConstIterator itEnd = end( characterSet );
 
 		if ( caseType == str::Case )
 			return std::find( begin( characterSet ), itEnd, chr ) != itEnd;

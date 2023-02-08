@@ -50,6 +50,13 @@ namespace ut
 	}
 
 
+	template< typename CharT >
+	std::basic_string<CharT> MakeString( const CharT* pText ) { return pText != nullptr ? std::basic_string<CharT>( pText ) : std::basic_string<CharT>(); }
+
+	template< typename CharT >
+	std::basic_string<CharT> MakePrefix( const CharT* pText, size_t prefixLen ) { return pText != nullptr ? std::basic_string<CharT>( pText, prefixLen ) : std::basic_string<CharT>(); }
+
+
 	std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue );
 	bool ReportMessage( bool succeeded, const TCHAR* pMsg, const char* pFilePath, int lineNumber );
 
@@ -57,32 +64,32 @@ namespace ut
 	bool AssertTrue( bool succeeded, const wchar_t* pExpression, std::tstring& rMsg );
 
 
-	template< typename ExpectedType, typename ActualType >
-	bool AssertEquals( const ExpectedType& expected, const ActualType& actual, std::tstring& rMsg )
+	template< typename ExpectedT, typename ActualT >
+	bool AssertEquals( const ExpectedT& expected, const ActualT& actual, std::tstring& rMsg )
 	{
-		if ( Equals( static_cast<ActualType>( expected ), actual ) )
+		if ( Equals( static_cast<ActualT>( expected ), actual ) )
 			return true;
 
-		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualType>( expected ) ), ToString( actual ) );
+		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualT>( expected ) ), ToString( actual ) );
 		return false;
 	}
 
-
-	template< typename ExpectedType, typename ActualType >
-	bool AssertEqualsIgnoreCase( const ExpectedType& expected, const ActualType& actual, std::tstring& rMsg )
+	template< typename ExpectedT, typename ActualT >
+	bool AssertEqualsIgnoreCase( const ExpectedT& expected, const ActualT& actual, std::tstring& rMsg )
 	{
-		if ( str::EqualString<str::IgnoreCase>( static_cast<ActualType>( expected ), actual ) )
+		if ( str::EqualString<str::IgnoreCase>( static_cast<ActualT>( expected ), actual ) )
 			return true;
 
-		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualType>( expected ) ), ToString( actual ) );
+		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualT>( expected ) ), ToString( actual ) );
 		TRACE( _T("%s\n"), rMsg.c_str() );
 		return false;
 	}
 
-
-	// just for ASSERT_EQUAL_STR
-	inline std::string PtrAsString( const char* pStr ) { return pStr != nullptr ? pStr : ""; }
-	inline std::wstring PtrAsString( const wchar_t* pStr ) { return pStr != nullptr ? pStr : L""; }
+	template< typename ExpectedCharT, typename ActualCharT >
+	bool AssertHasPrefix( const ExpectedCharT* pExpectedPrefix, const ActualCharT* pActual, std::tstring& rMsg )
+	{
+		return AssertEquals( pExpectedPrefix, MakePrefix( pActual, str::GetLength( pExpectedPrefix ) ), rMsg );
+	}
 }
 
 
@@ -102,12 +109,17 @@ namespace ut
 
 
 #define ASSERT_EQUAL_STR( pExpected, pActual )\
-	do { std::tstring msg; bool succeeded = ut::AssertEquals( (pExpected), ut::PtrAsString( (pActual) ), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	do { std::tstring msg; bool succeeded = ut::AssertEquals( (pExpected), ut::MakeString( (pActual) ), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
 	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 
 #define ASSERT_EQUAL_IGNORECASE( expected, actual )\
 	do { std::tstring msg; bool succeeded = ut::AssertEqualsIgnoreCase( (expected), (actual), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
+
+
+#define ASSERT_HAS_PREFIX( pExpectedPrefix, pActual )\
+	do { std::tstring msg; bool succeeded = ut::AssertHasPrefix( (pExpectedPrefix), (pActual), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
 	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 

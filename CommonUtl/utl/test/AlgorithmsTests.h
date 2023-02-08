@@ -17,6 +17,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestBasicUtils( void );
 	void TestBuffer( void );
 	void TestLookup( void );
 	void TestBinaryLookup( void );

@@ -37,6 +37,7 @@ private:
 
 	void TestSearchEnclosedItems( void );
 	void TestReplaceEnclosedItems( void );
+
 	void TestArgUtilities( void );
 	void TestEnumTags( void );
 	void TestFlagTags( void );

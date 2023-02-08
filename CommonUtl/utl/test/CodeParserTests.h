@@ -17,8 +17,10 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestBraceParityStatus( void );
-	void TestMethodComponents( void );
+	void TestCustomLanguage( void );
+	void TestBraceParity( void );
+	void TestBraceMismatch( void );
+	void TestCodeDetails( void );
 };
 
 

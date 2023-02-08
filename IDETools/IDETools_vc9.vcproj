@@ -658,7 +658,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Code"
+			Name="Main Code"
 			>
 			<File
 				RelativePath="CompoundTextParser.cpp"
@@ -961,14 +961,6 @@
 				</File>
 				<File
 					RelativePath="BraceParityStatus.h"
-					>
-				</File>
-				<File
-					RelativePath=".\CodeParsingBase.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\CodeParsingBase.h"
 					>
 				</File>
 				<File
@@ -1529,11 +1521,11 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\test\CodeParserTests.cpp"
+				RelativePath=".\test\CodeParserExTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\test\CodeParserTests.h"
+				RelativePath=".\test\CodeParserExTests.h"
 				>
 			</File>
 		</Filter>

@@ -1,6 +1,6 @@
 
-#include "stdafx.h"
-#include "CodeParsingBase.h"
+#include "pch.h"
+#include "CodeParsing.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -40,5 +40,20 @@ namespace code
 			return L'\0';
 
 		return s_matching[ bracePos ];
+	}
+
+
+	template<>
+	const CLanguage<char>& GetCppLanguage<char>( void )
+	{
+		static const CLanguage<char> s_cppLang( "'|\"|/*|//", "'|\"|*/|\n" );			// quote | double-quote | comment | single-line-comment
+		return s_cppLang;
+	}
+
+	template<>
+	const CLanguage<wchar_t>& GetCppLanguage<wchar_t>( void )
+	{
+		static const CLanguage<wchar_t> s_cppLang( "'|\"|/*|//", "'|\"|*/|\n" );
+		return s_cppLang;
 	}
 }

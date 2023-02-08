@@ -56,47 +56,6 @@ namespace utl
 }
 
 
-namespace utl
-{
-	template< typename ContainerT, typename FuncT >
-	inline FuncT for_each( ContainerT& rObjects, FuncT func )
-	{
-		return std::for_each( rObjects.begin(), rObjects.end(), func );
-	}
-
-	template< typename ContainerT, typename FuncT >
-	inline FuncT for_each( const ContainerT& objects, FuncT func )
-	{
-		return std::for_each( objects.begin(), objects.end(), func );
-	}
-
-
-	template< typename ContainerT, typename UnaryPred >
-	void QueryThat( std::vector<typename ContainerT::value_type>& rSubset, const ContainerT& objects, UnaryPred pred )
-	{
-		// additive
-		for ( typename ContainerT::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
-			if ( pred( *itObject ) )
-				rSubset.push_back( *itObject );
-	}
-
-
-	// container bounds: works with std::list (not random iterator)
-
-	template< typename ContainerT >
-	inline const typename ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
-
-	template< typename ContainerT >
-	inline typename ContainerT::value_type& Front( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
-
-	template< typename ContainerT >
-	inline const typename ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
-
-	template< typename ContainerT >
-	inline typename ContainerT::value_type& Back( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
-}
-
-
 namespace func
 {
 	template< typename NumericT >
@@ -194,17 +153,6 @@ namespace utl
 	inline size_t LookupPos( const ContainerT& container, const ValueT& value )
 	{
 		return LookupPos( container.begin(), container.end(), value );
-	}
-
-	template< typename IteratorT >
-	size_t GetMatchingLength( IteratorT itStart, IteratorT itEnd )
-	{
-		if ( itStart != itEnd )
-			for ( IteratorT itMismatch = itStart + 1; ; ++itMismatch )
-				if ( itMismatch == itEnd || *itMismatch != *itStart )
-					return std::distance( itStart, itMismatch );
-
-		return 0;
 	}
 
 

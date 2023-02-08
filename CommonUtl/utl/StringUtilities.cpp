@@ -645,7 +645,9 @@ namespace arg
 
 	bool EqualsAnyOf( const TCHAR* pArg, const TCHAR* pMatchList, const TCHAR* pListDelims /*= _T("|")*/ )
 	{
-		for ( str::const_iterator pItem = pMatchList, pMatchListEnd = str::end( pMatchList ); pItem != pMatchListEnd; )
+		typedef const TCHAR* TConstIterator;
+
+		for ( TConstIterator pItem = pMatchList, pMatchListEnd = str::end( pMatchList ); pItem != pMatchListEnd; )
 		{
 			const TCHAR* pItemEnd = str::FindTokenEnd( pItem, pListDelims );
 
@@ -667,7 +669,9 @@ namespace arg
 
 	bool StartsWithAnyOf( const TCHAR* pArg, const TCHAR* pPrefixList, const TCHAR* pListDelims )
 	{
-		for ( str::const_iterator pPrefix = pPrefixList, pPrefixListEnd = str::end( pPrefixList ); pPrefix != pPrefixListEnd; )
+		typedef const TCHAR* TConstIterator;
+
+		for ( TConstIterator pPrefix = pPrefixList, pPrefixListEnd = str::end( pPrefixList ); pPrefix != pPrefixListEnd; )
 		{
 			const TCHAR* pPrefixEnd = str::FindTokenEnd( pPrefix, pListDelims );
 			if ( StartsWith( pArg, pPrefix, std::distance( pPrefix, pPrefixEnd ) ) )

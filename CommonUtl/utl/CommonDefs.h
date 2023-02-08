@@ -6,7 +6,8 @@
 #pragma warning( disable: 4355 )	// 'this' : used in base member initializer list
 
 
-#define _LINE_NAME_( t ) #t
+#define _INDIRECT_LINE_NAME_( t ) #t
+#define _LINE_NAME_( t ) _INDIRECT_LINE_NAME_( t )
 #define __LINE__STR__ _LINE_NAME_( __LINE__ )
 #define __FILE_LINE__ __FILE__ "(" __LINE__STR__ "): "
 
@@ -17,7 +18,7 @@
 
 
 #ifndef _HAS_CXX17
-#define nullptr 0
+	#define nullptr NULL
 #endif //_HAS_CXX17
 
 
@@ -30,9 +31,10 @@
 // This way we avoid assertion firing when printing '%' characters, mistaken for invalid printf format sequence.
 //
 #define _ASSERT_EXPR(expr, msg) \
-			(void) ((!!(expr)) || \
-					(1 != _CrtDbgReportW(_CRT_ASSERT, _CRT_WIDE(__FILE__), __LINE__, nullptr, L"%s", msg)) || \
-					(_CrtDbgBreak(), 0))
+	(void) ((!!(expr)) || \
+			(1 != _CrtDbgReportW(_CRT_ASSERT, _CRT_WIDE(__FILE__), __LINE__, nullptr, L"%s", msg)) || \
+			(_CrtDbgBreak(), 0))
+
 #endif //_DEBUG
 
 

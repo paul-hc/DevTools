@@ -385,6 +385,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CodeParsing.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CodeParsing.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CommonDefs.h"
 				>
 			</File>
@@ -1026,6 +1034,14 @@
 			</File>
 			<File
 				RelativePath=".\test\AlgorithmsTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CodeParserTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CodeParserTests.h"
 				>
 			</File>
 			<File

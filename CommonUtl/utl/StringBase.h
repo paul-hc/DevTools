@@ -170,13 +170,19 @@ namespace str
 
 
 	// string to STL iterators conversions
-	typedef const TCHAR* const_iterator;
 
-	inline const char* begin( const char* pText ) { return pText; }
-	inline const wchar_t* begin( const wchar_t* pText ) { return pText; }
+	template< typename CharT >
+	inline const CharT* begin( const CharT* pText ) { return pText; }
 
-	inline const char* end( const char* pText ) { return pText + GetLength( pText ); }
-	inline const wchar_t* end( const wchar_t* pText ) { return pText + GetLength( pText ); }
+	template< typename CharT >
+	inline const CharT* end( const CharT* pText ) { return pText + GetLength( pText ); }
+
+	template< typename CharT >
+	inline const CharT* s_begin( const std::basic_string<CharT>& text ) { return text.c_str(); }
+
+	template< typename CharT >
+	inline const CharT* s_end( const std::basic_string<CharT>& text ) { return text.c_str() + text.length(); }
+
 
 	inline char* Copy( char* pBuffer, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
 	inline wchar_t* Copy( wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }

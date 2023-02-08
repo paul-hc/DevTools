@@ -13,7 +13,9 @@
 #include "utl/UI/VersionInfo.h"
 #include "utl/UI/resource.h"
 
-#include "test/CodeParserTests.h"
+#include "utl/test/CodeParserTests.h"
+#include "utl/test/StringTests.h"
+#include "test/CodeParserExTests.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,6 +30,8 @@ namespace ut
 	{
 	#ifdef USE_UT
 		CCodeParserTests::Instance();
+		CStringTests::Instance();
+		CCodeParserExTests::Instance();
 	#endif
 	}
 }
