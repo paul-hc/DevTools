@@ -32,6 +32,13 @@ namespace utl
 	}
 
 
+	template< typename DiffT, typename IteratorT >
+	inline DiffT Distance( IteratorT itFirst, IteratorT itLast )
+	{
+		return static_cast<DiffT>( std::distance( itFirst, itLast ) );
+	}
+
+
 	// container bounds: works with std::list (not random iterator)
 
 	template< typename ContainerT >
@@ -72,7 +79,7 @@ namespace utl
 	// FORWARD position corresponding to reverse iterator
 
 	template< typename ContainerT >
-	inline size_t FwdPosOfRevIter( const ContainerT& items, typename ContainerT::const_reverse_iterator itRev )
+	inline size_t FwdPosOfRevIter( typename ContainerT::const_reverse_iterator itRev, const ContainerT& items )
 	{
 		size_t fwdPos = std::distance( itRev, items.rend() ) - 1;
 		ENSURE( fwdPos < items.size() );
@@ -88,10 +95,13 @@ namespace utl
 	{
 		// Use this for sub-sequence matching (typically the sub-sequence is on the right-hand-side).
 		// The left/right sequences can be of different length, checking is done on the common shortest length.
-		// Note:
+		//	Note:
 		//	In <algorithm>, none of the safe std::equal() has the same effect as this (not equal if different sequence lengths),
 		//	except the unsafe std::equal(itLeft, itLeftLast, itRight)!
 		//
+		if ( itLeft == itLeftLast || itRight == itRightLast )
+			return false;		// one of the ranges empty
+
 		for ( ; itLeft != itLeftLast && itRight != itRightLast; ++itLeft, ++itRight )
 			if ( !( *itLeft == *itRight ) )
 				return false;

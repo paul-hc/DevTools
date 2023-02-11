@@ -15,13 +15,13 @@ namespace code
 		return s_allBraces.find( brace ) != std::wstring::npos;
 	}
 
-	bool IsOpenBrace( wchar_t brace )
+	bool IsStartBrace( wchar_t brace )
 	{
 		static const std::wstring s_openBraces = L"([{<";
 		return s_openBraces.find( brace ) != std::wstring::npos;
 	}
 
-	bool IsCloseBrace( wchar_t brace )
+	bool IsEndBrace( wchar_t brace )
 	{
 		static const std::wstring s_closeBraces = L")]}>";
 		return s_closeBraces.find( brace ) != std::wstring::npos;

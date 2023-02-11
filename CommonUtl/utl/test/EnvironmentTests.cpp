@@ -4,6 +4,7 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "test/EnvironmentTests.h"
 #include "StringParsing.h"
+#include "StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -106,12 +107,6 @@ void CEnvironmentTests::TestEnvironVariables( void )
 
 void CEnvironmentTests::TestReplaceEnvVar_VcMacroToWindows( void )
 {
-	ASSERT( code::IsIdentifierChar( 'a' ) );
-	ASSERT( code::IsIdentifierChar( 'Z' ) );
-	ASSERT( code::IsIdentifierChar( '0' ) );
-	ASSERT( code::IsIdentifierChar( '9' ) );
-	ASSERT( code::IsIdentifierChar( '_' ) );
-
 	ASSERT_EQUAL( "", env::GetReplaceEnvVar_VcMacroToWindows( "" ) );
 	ASSERT_EQUAL( "mid", env::GetReplaceEnvVar_VcMacroToWindows( "mid" ) );
 	ASSERT_EQUAL( "lead_%MY_STUFF%_mid_%MY_TOOLS%_trail", env::GetReplaceEnvVar_VcMacroToWindows( "lead_%MY_STUFF%_mid_%MY_TOOLS%_trail" ) );

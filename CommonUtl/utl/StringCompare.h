@@ -7,6 +7,115 @@
 #include <locale>
 
 
+namespace pred
+{
+	struct BaseIsCharPred : public std::unary_function<wchar_t, bool>
+	{
+	};
+
+	struct BaseIsCharPred_Loc : public BaseIsCharPred		// character type based on classic C locale
+	{
+		BaseIsCharPred_Loc( const std::locale& loc = std::locale::classic() ) : m_loc( loc ) {}
+	public:
+		const std::locale& m_loc;
+	};
+
+
+	struct IsSpace : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::isspace( chr, m_loc ); }
+	};
+
+	struct IsPunct : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::ispunct( chr, m_loc ); }
+	};
+
+	struct IsControl : public BaseIsCharPred_Loc		// \t, \n, \r, etc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::iscntrl( chr, m_loc ); }
+	};
+
+
+	struct IsAlpha : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::isalpha( chr, m_loc ); }
+	};
+
+	struct IsAlphaNum : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::isalnum( chr, m_loc ); }
+	};
+
+	struct IsDigit : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::isdigit( chr, m_loc ); }
+	};
+
+	struct IsHexDigit : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::isxdigit( chr, m_loc ); }
+	};
+
+
+	struct IsIdentifier : public BaseIsCharPred_Loc			// e.g. C/C++ identifier, or Windows environment variable identifier, etc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return '_' == chr || std::isalnum( chr, m_loc ); }
+	};
+
+	struct IsIdentifierLead : public BaseIsCharPred_Loc		// first character in a C/C++ identifier (non-digit)
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return '_' == chr || std::isalpha( chr, m_loc ); }
+	};
+
+
+	struct IsLower : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::islower( chr, m_loc ); }
+	};
+
+	struct IsUpper : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::isupper( chr, m_loc ); }
+	};
+
+
+	struct ToLower : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		CharT operator()( CharT chr ) const { return std::tolower( chr, m_loc ); }
+	};
+
+	struct ToUpper : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		CharT operator()( CharT chr ) const { return std::toupper( chr, m_loc ); }
+	};
+
+
+	struct IsChar : public BaseIsCharPred_Loc
+	{
+		IsChar( wchar_t chr ) : m_chr( chr ) {}
+
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return m_chr == chr; }
+	private:
+		wchar_t m_chr;		// wchar_t is also compatible with char
+	};
+}
+
+
 namespace str
 {
 	pred::CompareResult IntuitiveCompare( const char* pLeft, const char* pRight );

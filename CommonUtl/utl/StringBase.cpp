@@ -95,8 +95,8 @@ namespace str
 
 	const std::locale& GetUserLocale( void )
 	{
-		static const std::locale userLocale( "" );		// user-specific locale
-		return userLocale;
+		static const std::locale s_userLocale( "" );		// user-specific locale
+		return s_userLocale;
 	}
 
 	const std::tstring& GetEmpty( void )

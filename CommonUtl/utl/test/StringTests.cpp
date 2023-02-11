@@ -29,8 +29,8 @@ CStringTests& CStringTests::Instance( void )
 
 void CStringTests::TestCharTraits( void )
 {
-	static const char* s_nullA = NULL;
-	static const wchar_t* s_nullW = NULL;
+	static const char* s_nullA = nullptr;
+	static const wchar_t* s_nullW = nullptr;
 
 	{	// NARROW
 		ASSERT_EQUAL( 0, str::CharTraits::GetLength( s_nullA ) );
@@ -134,6 +134,24 @@ void CStringTests::TestCharTraits( void )
 
 	ASSERT_EQUAL( 0, str::GetLength( "" ) );
 	ASSERT_EQUAL( 0, str::GetLength( L"" ) );
+}
+
+void CStringTests::TestIsCharType( void )
+{
+	ASSERT( utl::All( std::string( " \t\r\n" ), pred::IsSpace() ) );
+	ASSERT( utl::All( std::string( "\a\b\r\n\v\f" ), pred::IsControl() ) );
+	ASSERT( utl::All( std::string( ".,;" ), pred::IsPunct() ) );
+
+	ASSERT( utl::All( std::string( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsAlpha() ) );
+	ASSERT( utl::All( std::string( "01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsAlphaNum() ) );
+	ASSERT( utl::All( std::string( "01234567890" ), pred::IsDigit() ) );
+	ASSERT( utl::All( std::string( "01234567890abcdefABCDEF" ), pred::IsHexDigit() ) );
+
+	ASSERT( utl::All( std::string( "_01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsIdentifier() ) );
+	ASSERT( utl::All( std::string( "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsIdentifierLead() ) );
+
+	ASSERT( utl::All( std::string( "abcdefghijklmnopqrstuvwxyz" ), pred::IsLower() ) );
+	ASSERT( utl::All( std::string( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsUpper() ) );
 }
 
 void CStringTests::TestValueToString( void )
@@ -1059,6 +1077,7 @@ void CStringTests::Run( void )
 	__super::Run();
 
 	TestCharTraits();
+	TestIsCharType();
 	TestValueToString();
 	TestStringSorting();
 	TestIntuitiveSort();

@@ -385,28 +385,17 @@ namespace code
 	std::tstring ParseEscapeSeqs( const std::tstring& displayText, bool uiSeq = false );
 
 
-	template< typename CharT >
-	inline bool IsIdentifierChar( CharT chr, const std::locale& loc = str::GetUserLocale() )		// e.g. C/C++ identifier, or Windows environment variable identifier, etc
-	{
-		return '_' == chr || std::isalnum( chr, loc );
-	}
-
-	template< typename CharT >
-	inline bool IsIdentifierFirstChar( CharT chr, const std::locale& loc = str::GetUserLocale() )		// e.g. C/C++ identifier, or Windows environment variable identifier, etc
-	{
-		return '_' == chr || std::isalpha( chr, loc );
-	}
-
 	template< typename StringT >
 	size_t FindIdentifierEnd( const StringT& text, size_t identPos )
 	{	// identifier should not start with a digit
 		size_t endPos = identPos;
+		pred::IsIdentifier isIdentPred;
 
-		if ( endPos != text.length() && code::IsIdentifierFirstChar( text[ endPos ] ) )		// not starting with a digit?
+		if ( endPos != text.length() && pred::IsIdentifierLead()( text[ endPos ] ) )	// not starting with a digit?
 		{	// skip first char, check the inner identifier criteria
 			++endPos;
 
-			while ( endPos != text.length() && code::IsIdentifierChar( text[ endPos ] ) )
+			while ( endPos != text.length() && isIdentPred( text[ endPos ] ) )
 				++endPos;
 		}
 

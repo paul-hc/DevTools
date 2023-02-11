@@ -18,6 +18,7 @@ public:
 	virtual void Run( void );
 private:
 	void TestCharTraits( void );
+	void TestIsCharType( void );
 	void TestValueToString( void );
 	void TestStringSorting( void );
 	void TestIntuitiveSort( void );

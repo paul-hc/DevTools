@@ -28,6 +28,9 @@ public:
 
 	bool IsNormalized( void ) const { return m_start <= m_end; }
 
+	template< typename U >
+	Range<U> AsRange( void ) const { return Range<U>( static_cast<U>( m_start ), static_cast<U>( m_end ) ); }
+
 	Range<ValueT> GetNormalized( void ) const
 	{
 		if ( !IsNormalized() )

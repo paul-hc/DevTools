@@ -121,12 +121,6 @@ namespace utl
 		return itFound != itEnd;
 	}
 
-	template< typename DiffT, typename IteratorT >
-	inline DiffT Distance( IteratorT itFirst, IteratorT itLast )
-	{
-		return static_cast<DiffT>( std::distance( itFirst, itLast ) );
-	}
-
 	template< typename IteratorT, typename ValueT >
 	inline size_t FindPos( IteratorT itStart, IteratorT itEnd, const ValueT& value )
 	{

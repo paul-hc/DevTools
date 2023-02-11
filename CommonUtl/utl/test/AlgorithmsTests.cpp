@@ -45,21 +45,37 @@ CAlgorithmsTests& CAlgorithmsTests::Instance( void )
 void CAlgorithmsTests::TestBasicUtils( void )
 {
 	{	// REVERSE iteration
-		const std::string text = "name=[value...[";
+		{
+			const std::string text = "0123456789";
+			ASSERT_EQUAL( '9', *text.rbegin() );
+			ASSERT_EQUAL( '0', *( text.rend() - 1 ) );
 
-		ASSERT_HAS_PREFIX( "name=", &*utl::RevIterAtFwdFront( text ) );
-		ASSERT_HAS_PREFIX( "[", &*utl::RevIterAtFwdBack( text ) );
+			size_t fwdPos = 3;
+			ASSERT_EQUAL( '3', text[ fwdPos ] );
 
-		std::string::const_reverse_iterator itEnd = text.rend();
-		std::string::const_reverse_iterator it = utl::RevIterAtFwdPos( text, text.find( '[' ) );
-		ASSERT_HAS_PREFIX( "[val", &*it );
+			std::string::const_reverse_iterator itRev = utl::RevIterAtFwdPos( text, fwdPos );
+			ASSERT_EQUAL( '3', *itRev );
 
-		++it;
-		ASSERT_HAS_PREFIX( "=[", &*it );
+			ASSERT_EQUAL( fwdPos, utl::FwdPosOfRevIter( itRev, text ) );
+		}
 
-		size_t fwdPos = utl::FwdPosOfRevIter( text, it );
-		ASSERT_EQUAL( text.find( '=' ), fwdPos );
-		ASSERT_HAS_PREFIX( "=[", &text[fwdPos] );
+		{
+			const std::string text = "name=[value...[";
+
+			ASSERT_HAS_PREFIX( "name=", &*utl::RevIterAtFwdFront( text ) );
+			ASSERT_HAS_PREFIX( "[", &*utl::RevIterAtFwdBack( text ) );
+
+			std::string::const_reverse_iterator itEnd = text.rend();
+			std::string::const_reverse_iterator it = utl::RevIterAtFwdPos( text, text.find( '[' ) );
+			ASSERT_HAS_PREFIX( "[val", &*it );
+
+			++it;
+			ASSERT_HAS_PREFIX( "=[", &*it );
+
+			size_t fwdPos = utl::FwdPosOfRevIter( it, text );
+			ASSERT_EQUAL( text.find( '=' ), fwdPos );
+			ASSERT_HAS_PREFIX( "=[", &text[fwdPos] );
+		}
 	}
 }
 

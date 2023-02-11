@@ -2,7 +2,7 @@
 #define StringParsing_h
 #pragma once
 
-#include "StringUtilities.h"
+#include "StringCompare.h"
 #include "Algorithms_fwd.h"
 
 
@@ -16,9 +16,32 @@ namespace code
 
 namespace str
 {
+	template< typename IteratorT >
+	inline bool IsReverseIter( const IteratorT& /*it*/ ) { return false; }
+
+	template<> inline bool IsReverseIter( const std::string::const_reverse_iterator& /*it*/ ) { return true; }
+	template<> inline bool IsReverseIter( const std::wstring::const_reverse_iterator& /*it*/ ) { return true; }
+
+
 	enum IterationDir { ForwardIter, ReverseIter };		// iteration direction
 
+	template< typename IteratorT >
+	inline IterationDir GetIterationDir( const IteratorT& it ) { return IsReverseIter( it ) ? ReverseIter : ForwardIter; }
 
+
+	template< typename IteratorT, typename StringT >
+	static inline bool EqualsSeq( IteratorT itText, IteratorT itLast, const StringT& sequence )
+	{
+		if ( ReverseIter == GetIterationDir( itText ) )
+			return utl::Equals( itText, itLast, sequence.rbegin(), sequence.rend() );		// comparison in reverse, starting backwards
+
+		return utl::Equals( itText, itLast, sequence.begin(), sequence.end() );
+	}
+}
+
+
+namespace str
+{
 	// A set of START and END separators to search for enclosed sequences.
 	//
 	template< typename CharT >
@@ -97,41 +120,50 @@ namespace str
 		const TString& GetMatchingCloseSep( TSepMatchPos sepMatchPos, IterationDir iterDir ) const { REQUIRE( IsValidMatchPos( sepMatchPos ) ); return GetCloseSeparators( iterDir )[ sepMatchPos ]; }
 
 		template< typename IteratorT >
-		bool MatchesAnyOpenSepAt( TSepMatchPos* pOutSepMatchPos, IteratorT itText, IteratorT itLast, IterationDir iterDir ) const
+		bool MatchesAnyOpenSepAt( TSepMatchPos* pOutSepMatchPos, IteratorT itText, IteratorT itLast ) const
 		{
-			return MatchesAnySepAt( pOutSepMatchPos, itText, itLast, GetOpenSeparators( iterDir ), iterDir );
+			return MatchesAnySepAt( pOutSepMatchPos, itText, itLast, GetOpenSeparators( GetIterationDir( itText ) ) );
 		}
 
 		template< typename IteratorT >
-		bool MatchesAnyCloseSepAt( TSepMatchPos sepMatchPos, IteratorT itText, IteratorT itLast, IterationDir iterDir ) const
+		bool MatchesAnyCloseSepAt( TSepMatchPos sepMatchPos, IteratorT itText, IteratorT itLast ) const
 		{
 			REQUIRE( IsValidMatchPos( sepMatchPos ) );
 
-			const TString& sep = GetMatchingCloseSep( sepMatchPos, iterDir );
-			return Equals( itText, itLast, sep, iterDir );
+			const TString& sep = GetMatchingCloseSep( sepMatchPos, GetIterationDir( itText ) );
+
+			return str::EqualsSeq( itText, itLast, sep );
 		}
 
 
 		// parsing methods:
 
 		template< typename IteratorT >
-		bool SkipMatchingSpec( IteratorT& rItText /*in-out*/, IteratorT itLast, TSepMatchPos sepMatchPos, str::IterationDir iterDir ) const
+		bool SkipMatchingSpec( IteratorT* pItText /*in-out*/, IteratorT itLast, TSepMatchPos sepMatchPos ) const
 		{
 			// skip the code sequence "<openSep>content<closeSep>"
+			ASSERT_PTR( pItText );
+			IterationDir iterDir = GetIterationDir( *pItText );
 			const TString& openSep = GetMatchingOpenSep( sepMatchPos, iterDir );
 
-			REQUIRE( rItText != itLast );
-			REQUIRE( MatchesSepAt( openSep, rItText, itLast, iterDir ) );			// expected to be on the OPEN separator
+			REQUIRE( *pItText != itLast );
+			REQUIRE( MatchesSequenceAt( *pItText, itLast, openSep ) );			// expected to be on the OPEN separator
 
-			for ( IteratorT it = rItText + GetMatchingOpenSep( sepMatchPos, iterDir ).length();		// skip the open sep
+			for ( IteratorT it = *pItText + GetMatchingOpenSep( sepMatchPos, iterDir ).length();		// skip the open sep
 				  it != itLast; ++it )
-				if ( MatchesAnyCloseSepAt( sepMatchPos, it, itLast, iterDir ) )
+				if ( MatchesAnyCloseSepAt( sepMatchPos, it, itLast ) )
 				{
-					rItText = it + GetMatchingCloseSep( sepMatchPos, iterDir ).length();
+					*pItText = it + GetMatchingCloseSep( sepMatchPos, iterDir ).length();
 					return true;			// we have a spec match
 				}
 
 			return false;
+		}
+
+		template< typename IteratorT >
+		static inline bool MatchesSequenceAt( IteratorT itText, IteratorT itLast, const TString& sequence )
+		{
+			return str::EqualsSeq( itText, itLast, sequence );
 		}
 	private:
 		static TSepMatchPos FindSepMatchPos( const TString& text, size_t offset, const TSepVector& separators )
@@ -148,13 +180,13 @@ namespace str
 		}
 
 		template< typename IteratorT >
-		static TSepMatchPos FindSepMatchPos( IteratorT itText, IteratorT itLast, const TSepVector& separators, IterationDir iterDir )
+		static TSepMatchPos FindSepMatchPos( IteratorT itText, IteratorT itLast, const TSepVector& separators )
 		{
 			for ( TSepMatchPos i = 0; i != separators.size(); ++i )
 			{
 				const TString& sep = separators[ i ];
 
-				if ( Equals( itText, itLast, sep, iterDir ) )
+				if ( str::EqualsSeq( itText, itLast, sep ) )
 					return i;		// found matching separator position
 			}
 
@@ -162,11 +194,11 @@ namespace str
 		}
 
 		template< typename IteratorT >
-		bool MatchesAnySepAt( TSepMatchPos* pOutSepMatchPos, IteratorT itText, IteratorT itLast, const TSepVector& separators, IterationDir iterDir = ForwardIter ) const
+		bool MatchesAnySepAt( TSepMatchPos* pOutSepMatchPos, IteratorT itText, IteratorT itLast, const TSepVector& separators ) const
 		{
 			REQUIRE( itText != itLast );
 
-			TSepMatchPos sepMatchPos = FindSepMatchPos( itText, itLast, separators, iterDir );
+			TSepMatchPos sepMatchPos = FindSepMatchPos( itText, itLast, separators );
 
 			if ( sepMatchPos != utl::npos )
 			{
@@ -175,21 +207,6 @@ namespace str
 			}
 
 			return false;
-		}
-
-		template< typename IteratorT >
-		static inline bool MatchesSepAt( const TString& sep, IteratorT itText, IteratorT itLast, IterationDir iterDir = ForwardIter )
-		{
-			return Equals( itText, itLast, sep, iterDir );
-		}
-
-		template< typename IteratorT >
-		static inline bool Equals( IteratorT itText, IteratorT itLast, const TString& sequence, IterationDir iterDir )
-		{
-			if ( ReverseIter == iterDir )
-				return utl::Equals( itText, itLast, sequence.rbegin(), sequence.rend() );		// comparison starting backwards
-
-			return utl::Equals( itText, itLast, sequence.begin(), sequence.end() );
 		}
 
 		void StoreLeadingChars( void )
