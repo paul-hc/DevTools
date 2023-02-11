@@ -158,13 +158,13 @@ namespace code
 		bool SkipBraceBackwards( PosT* pOutOpenBracePos, const TCHAR* pCode, PosT closeBracePos, DocLanguage docLanguage = DocLang_Cpp )
 		{
 			ASSERT( pOutOpenBracePos != nullptr && pCode != nullptr );
-			REQUIRE( str::IsValidPos( closeBracePos, pCode ) && IsCloseBrace( pCode[ closeBracePos ] ) );
+			REQUIRE( str::IsValidPos( closeBracePos, pCode ) && IsEndBrace( pCode[ closeBracePos ] ) );
 
 			int openBracePos = BraceParityStatus().reverseFindMatchingBracePos( pCode, static_cast<int>( closeBracePos ), docLanguage );
 			if ( -1 == openBracePos )
 				return false;		// matching brace not found (bad syntax)
 
-			ENSURE( openBracePos < closeBracePos && str::IsValidPos( openBracePos, pCode ) && IsOpenBrace( pCode[ openBracePos ] ) );
+			ENSURE( openBracePos < closeBracePos && str::IsValidPos( openBracePos, pCode ) && IsStartBrace( pCode[ openBracePos ] ) );
 
 			*pOutOpenBracePos = static_cast<PosT>( openBracePos );
 			return true;			// found matching brace

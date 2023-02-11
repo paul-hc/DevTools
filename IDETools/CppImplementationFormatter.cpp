@@ -7,7 +7,7 @@
 #include "LanguageSearchEngine.h"
 #include "BraceParityStatus.h"
 #include "FormatterOptions.h"
-#include "CppMethodComponents.h"
+#include "MethodPrototype.h"
 #include "InputTypeQualifierDialog.h"
 #include "TokenizeTextDialog.h"
 #include "TextContent.h"
@@ -159,9 +159,9 @@ namespace code
 		CString typeQualifier;
 
 		{
-			CppMethodComponents ranges( functionImplLine );
+			CMethodPrototype ranges;
 
-			ranges.splitMethod( m_validArgListOpenBraces );
+			ranges.SplitMethod( functionImplLine );		//m_validArgListOpenBraces
 			if ( !ranges.m_templateDecl.IsEmpty() )
 				templateDecl = ranges.m_templateDecl.getString( functionImplLine );
 			if ( !ranges.m_typeQualifier.IsEmpty() )
@@ -175,9 +175,9 @@ namespace code
 			if ( userTypeDescriptor == m_cancelTag )
 				return userTypeDescriptor; // canceled by user
 
-			CppMethodComponents ranges( userTypeDescriptor );
+			CMethodPrototype ranges;
 
-			ranges.splitMethod( m_validArgListOpenBraces );
+			ranges.SplitMethod( userTypeDescriptor.GetString() );		//m_validArgListOpenBraces
 			if ( !ranges.m_templateDecl.IsEmpty() )
 				templateDecl = ranges.m_templateDecl.getString( userTypeDescriptor );
 
@@ -205,9 +205,9 @@ namespace code
 
 		if ( !sourcePrototype.IsEmpty() )
 		{
-			CppMethodComponents method( sourcePrototype );
+			CMethodPrototype method;
 
-			method.splitMethod( m_validArgListOpenBraces );
+			method.SplitMethod( sourcePrototype.GetString() );		//m_validArgListOpenBraces
 
 			CString returnType;
 			bool hasNoReturnType = true;
@@ -231,7 +231,7 @@ namespace code
 			if ( typeQualifier != NULL )
 				implementedMethod += typeQualifier;
 
-			implementedMethod += TokenRange( method.m_methodName.m_start, method.m_postArgListSuffix.m_end ).getString( sourcePrototype );
+			implementedMethod += TokenRange( method.m_methodQualifiedName.m_start, method.m_postArgListSuffix.m_end ).getString( sourcePrototype );
 			implementedMethod += code::lineEnd;
 			implementedMethod = splitArgumentList( implementedMethod );
 
@@ -243,7 +243,7 @@ namespace code
 
 			if ( !m_commentDecorationTemplate.IsEmpty() )
 			{
-				CString decorationCore = typeQualifier + TokenRange( method.m_methodName.m_start, method.m_methodName.m_end ).getString( sourcePrototype );
+				CString decorationCore = typeQualifier + TokenRange( method.m_methodQualifiedName.m_start, method.m_methodQualifiedName.m_end ).getString( sourcePrototype );
 				CString commentDecoration = makeCommentDecoration( decorationCore );
 
 				if ( !commentDecoration.IsEmpty() )

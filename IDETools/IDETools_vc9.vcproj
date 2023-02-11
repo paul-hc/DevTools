@@ -964,6 +964,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CodeParser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CodeParser.h"
+					>
+				</File>
+				<File
 					RelativePath="CodeUtilities.cpp"
 					>
 					<FileConfiguration
@@ -1033,30 +1041,6 @@
 				</File>
 				<File
 					RelativePath="CppImplementationFormatter.h"
-					>
-				</File>
-				<File
-					RelativePath="CppMethodComponents.cpp"
-					>
-					<FileConfiguration
-						Name="ReleaseU|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugU|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="CppMethodComponents.h"
 					>
 				</File>
 				<File
@@ -1161,6 +1145,30 @@
 				</File>
 				<File
 					RelativePath=".\LineSet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\MethodPrototype.cpp"
+					>
+					<FileConfiguration
+						Name="ReleaseU|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugU|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\MethodPrototype.h"
 					>
 				</File>
 				<File
@@ -1521,11 +1529,11 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\test\CodeParserExTests.cpp"
+				RelativePath=".\test\MethodPrototypeTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\test\CodeParserExTests.h"
+				RelativePath=".\test\MethodPrototypeTests.h"
 				>
 			</File>
 		</Filter>

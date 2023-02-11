@@ -2,6 +2,8 @@
 #define TokenRange_h
 #pragma once
 
+#include "utl/Range.h"
+
 
 struct TokenRange
 {
@@ -9,6 +11,9 @@ public:
 	TokenRange( int startAndEnd = 0 ) : m_start( startAndEnd ), m_end( startAndEnd ) {}
 	TokenRange( int start, int end ) : m_start( start ), m_end( end ) {}
 	TokenRange( const TCHAR* pText, int start = 0 ) { setString( pText, start ); }
+
+	template< typename PosT >
+	explicit TokenRange( const Range<PosT>& range ) : m_start( static_cast<int>( range.m_start ) ), m_end( static_cast<int>( range.m_end ) ) {}
 
 	bool operator==( const TokenRange& right ) const
 	{
@@ -50,6 +55,7 @@ public:
 
 	// string operations
 	std::tstring GetToken( const TCHAR* pText ) const { ASSERT( InStringBounds( pText ) ); return std::tstring( pText + m_start, getLength() ); }
+	std::tstring MakeToken( const std::tstring& text ) const { ASSERT( InStringBounds( text.c_str() ) ); return text.substr( m_start, m_end - m_start ); }
 
 	CString getString( const TCHAR* pText ) const;
 	CString getPrefixString( const TCHAR* pText ) const;

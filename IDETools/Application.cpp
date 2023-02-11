@@ -15,7 +15,7 @@
 
 #include "utl/test/CodeParserTests.h"
 #include "utl/test/StringTests.h"
-#include "test/CodeParserExTests.h"
+#include "test/MethodPrototypeTests.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,9 +29,11 @@ namespace ut
 	void RegisterAppUnitTests( void )
 	{
 	#ifdef USE_UT
-		CCodeParserTests::Instance();
-		CStringTests::Instance();
-		CCodeParserExTests::Instance();
+		// just a few UTL_BASE tests:
+		ut::CTestSuite::Instance().ClearTests();		// clear UTL tests, since we want to focus narrowly on this applications' tests
+		ut::CTestSuite::Instance().RegisterTestCase( &CCodeParserTests::Instance() );
+
+		CMethodPrototypeTests::Instance();
 	#endif
 	}
 }
@@ -113,7 +115,6 @@ void CApplication::OnInitAppResources( void )
 	m_pModuleSession->LoadFromRegistry();
 
 #ifdef USE_UT
-	ut::CTestSuite::Instance().ClearTests();		// clear UTL tests, since we want to focus narrowly on this applications' tests
 	ut::RegisterAppUnitTests();
 #endif
 }

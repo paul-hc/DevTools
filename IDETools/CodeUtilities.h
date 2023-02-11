@@ -4,9 +4,10 @@
 #define CodeUtilities_h
 #pragma once
 
-#include "DocLanguage.h"
 #include "TokenRange.h"
+#include "DocLanguage.h"
 #include "StringUtilitiesEx.h"
+
 
 namespace code
 {

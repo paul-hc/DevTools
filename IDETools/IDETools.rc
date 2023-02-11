@@ -64,8 +64,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,3,1,0
- PRODUCTVERSION 7,3,1,0
+ FILEVERSION 7,3,1,1
+ PRODUCTVERSION 7,3,1,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -80,17 +80,17 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "06-02-2023 02:12:42"
-            VALUE "Comments", "bugFix:TemplInst|VC++ 2022|LazyInitAppResources|TableToTreeAction|Natural sort macro|Split UTL_BASE/UTL_UI|V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page. Redesigned include options and paths. Removed .dsp additional"
+            VALUE "BuildTimestamp", "11-02-2023 13:06:12"
+            VALUE "Comments", "MethodUT|bugFix:TemplInst|VC++ 2022|LazyInitAppResources|TableToTreeAction|Natural sort macro|Split UTL_BASE/UTL_UI|V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page. Redesigned include options and paths."
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "IDETools DLL"
-            VALUE "FileVersion", "7, 3, 1, 0"
+            VALUE "FileVersion", "7, 3, 1, 1"
             VALUE "InternalName", "IDETools"
             VALUE "LegalCopyright", "Copyright © 1998-2023"
             VALUE "OriginalFilename", "IDETools.dll"
             VALUE "ProductName", "IDETools Automation DLL"
-            VALUE "ProductVersion", "7, 3, 1, 0"
+            VALUE "ProductVersion", "7, 3, 1, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END

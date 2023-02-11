@@ -144,10 +144,9 @@ namespace str
 			// skip the code sequence "<openSep>content<closeSep>"
 			ASSERT_PTR( pItText );
 			IterationDir iterDir = GetIterationDir( *pItText );
-			const TString& openSep = GetMatchingOpenSep( sepMatchPos, iterDir );
 
 			REQUIRE( *pItText != itLast );
-			REQUIRE( MatchesSequenceAt( *pItText, itLast, openSep ) );			// expected to be on the OPEN separator
+			REQUIRE( MatchesSequenceAt( *pItText, itLast, GetMatchingOpenSep( sepMatchPos, iterDir ) ) );		// expected to be on the OPEN separator
 
 			for ( IteratorT it = *pItText + GetMatchingOpenSep( sepMatchPos, iterDir ).length();		// skip the open sep
 				  it != itLast; ++it )

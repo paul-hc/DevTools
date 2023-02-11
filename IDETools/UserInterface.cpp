@@ -6,6 +6,7 @@
 #include "FileLocatorDialog.h"
 #include "StringUtilitiesEx.h"
 #include "ModuleSession.h"
+#include "Application.h"
 #include "resource.h"
 #include "utl/Registry.h"
 #include "utl/TextClipboard.h"
@@ -76,7 +77,7 @@ BEGIN_DISPATCH_MAP(UserInterface, CCmdTarget)
 	DISP_FUNCTION(UserInterface, "SetEnvironmentVariable", SetEnvironmentVariable, VT_BOOL, VTS_BSTR VTS_BSTR)
 	DISP_FUNCTION(UserInterface, "ExpandEnvironmentVariables", ExpandEnvironmentVariables, VT_BSTR, VTS_BSTR)
 	DISP_FUNCTION(UserInterface, "LocateFile", LocateFile, VT_BSTR, VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "RunUnitTests", LocateFile, VT_EMPTY, VTS_NONE)
+	DISP_FUNCTION(UserInterface, "RunUnitTests", RunUnitTests, VT_EMPTY, VTS_NONE)
 	//}}AFX_DISPATCH_MAP
 END_DISPATCH_MAP()
 
@@ -281,4 +282,5 @@ BSTR UserInterface::LocateFile( LPCTSTR localDirPath )
 
 void UserInterface::RunUnitTests( void )
 {
+	CApplication::GetApp()->OnRunUnitTests();
 }

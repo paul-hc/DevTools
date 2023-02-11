@@ -14,6 +14,8 @@ class CModuleSession;
 class CApplication : public CBaseApp<CWinApp>
 {
 public:
+	using CBaseApp<CWinApp>::OnRunUnitTests;
+
 	CApplication( void );
 	virtual ~CApplication();
 
