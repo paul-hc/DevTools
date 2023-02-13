@@ -150,7 +150,7 @@ public:
 	void InitAsSubMenu( const std::tstring& subMenuCaption );
 
 	bool IsNull( void ) const { return NULL == m_menu.GetSafeHmenu() ; }
-	bool IsEmpty( void ) const { return IsNull() || m_menu.GetMenuItemCount() == m_initialCount; }
+	bool IsEmpty( void ) const { return IsNull() || m_menu.GetMenuItemCount() == (int)m_initialCount; }
 	bool IsSubMenu( void ) const { return !m_subMenuCaption.empty(); }
 
 	void Commit( CMenu* pParentMenu );

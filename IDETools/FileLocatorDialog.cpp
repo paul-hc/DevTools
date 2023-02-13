@@ -264,7 +264,7 @@ int CFileLocatorDialog::SearchForTag( const std::tstring& includeTag )
 
 		for ( int i = 0; i < (int)m_foundFiles.size(); ++i )
 		{
-			fs::CPathParts parts( m_foundFiles[ i ].first.Get() );
+			parts.SplitPath( m_foundFiles[ i ].first.Get() );
 
 			m_foundFilesListCtrl.InsertItem( i, parts.GetFilename().c_str(), ft::FindTypeOfExtension( parts.m_ext.c_str() ) );
 			m_foundFilesListCtrl.SetSubItemText( i, Directory, parts.GetDirPath().GetPtr() );

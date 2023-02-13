@@ -46,7 +46,7 @@ STDAPI DllRegisterServer(void)
 	if ( !COleObjectFactory::UpdateRegistryAll( TRUE ) )
 		return E_FAIL;
 
-	// register automation objects in component categories in order to make them safe for scripting
+	// register all automation objects as safe for scripting (in component categories)
 	ole::CSafeForScripting::UpdateRegistryAll( ole::Register );
 	return S_OK;
 }
@@ -59,7 +59,7 @@ STDAPI DllUnregisterServer( void )
 	// the call below is just for convenience, MFC doesn't actually implement COM server unregistration
 	COleObjectFactory::UpdateRegistryAll( FALSE );
 
-	// we have to do it explicitly
+	// unregister all automation objects as safe for scripting (in component categories)
 	ole::CSafeForScripting::UpdateRegistryAll( ole::Unregister );
 	return S_OK;
 }

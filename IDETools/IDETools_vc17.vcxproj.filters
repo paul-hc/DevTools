@@ -1,0 +1,439 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd;cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{b08b4862-662b-46ed-9a5e-8168514f41f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="automation server">
+      <UniqueIdentifier>{da3bc35c-c349-410a-b21c-11e98e77cf58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code">
+      <UniqueIdentifier>{2f94e38a-1763-4ded-a50c-ec08e329e4c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\include">
+      <UniqueIdentifier>{ec3e72cc-84d4-4dfa-87ce-450d501fc692}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\path">
+      <UniqueIdentifier>{74f8600e-0bfd-4fa0-86c4-53bb9862a527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\string &amp; code">
+      <UniqueIdentifier>{6b273340-d3fb-40ca-93eb-5ba010e9e2ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\UI">
+      <UniqueIdentifier>{f09da8a3-a5b3-438c-beb8-2d58129dbbdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{eeabc432-7635-4ddb-8f77-63ba28103beb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gen\IDETools_i.c">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UserInterface.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeProcessor.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="DspProject.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="FileAccess.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLocator.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSearch.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="IncludeFileTree.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuFilePicker.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleOptions.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="TextContent.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkspaceProfile.cpp">
+      <Filter>automation server</Filter>
+    </ClCompile>
+    <ClCompile Include="CompoundTextParser.cpp">
+      <Filter>Main Code</Filter>
+    </ClCompile>
+    <ClCompile Include="DspParser.cpp">
+      <Filter>Main Code</Filter>
+    </ClCompile>
+    <ClCompile Include="IdeUtilities.cpp">
+      <Filter>Main Code</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleSession.cpp">
+      <Filter>Main Code</Filter>
+    </ClCompile>
+    <ClCompile Include="OutputActivator.cpp">
+      <Filter>Main Code</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectContext.cpp">
+      <Filter>Main Code</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtilitiesEx.cpp">
+      <Filter>Main Code</Filter>
+    </ClCompile>
+    <ClCompile Include="DirPathGroup.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="FileAssoc.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="FileType.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="IncludeDirectories.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="IncludeOptions.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="IncludePaths.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="IncludeTag.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="SearchPathEngine.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceFileParser.cpp">
+      <Filter>Main Code\include</Filter>
+    </ClCompile>
+    <ClCompile Include="PathInfo.cpp">
+      <Filter>Main Code\path</Filter>
+    </ClCompile>
+    <ClCompile Include="PathSortOrder.cpp">
+      <Filter>Main Code\path</Filter>
+    </ClCompile>
+    <ClCompile Include="BraceParityStatus.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeParser.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeUtilities.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="ContainerComponents.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="CppImplementationFormatter.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="DocLanguage.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="Formatter.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="FormatterOptions.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageSearchEngine.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="LineSet.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodPrototype.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenRange.cpp">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeMessageBox.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="FileBrowser.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLocatorDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="FileTreeDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="IncludeOptionsDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="InputBoxDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="InputTypeQualifierDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsSheet.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenizeTextDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackMenuWnd.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="WkspLoadDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="WkspSaveDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="test\MethodPrototypeTests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="IDETools.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="res\IDETools.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Application.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\IDETools_i.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInterface.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeProcessor.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="DspProject.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAccess.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="FileLocator.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSearch.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeFileTree.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuFilePicker.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleOptions.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="TextContent.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkspaceProfile.h">
+      <Filter>automation server</Filter>
+    </ClInclude>
+    <ClInclude Include="CompoundTextParser.h">
+      <Filter>Main Code</Filter>
+    </ClInclude>
+    <ClInclude Include="DspParser.h">
+      <Filter>Main Code</Filter>
+    </ClInclude>
+    <ClInclude Include="IdeUtilities.h">
+      <Filter>Main Code</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleSession.h">
+      <Filter>Main Code</Filter>
+    </ClInclude>
+    <ClInclude Include="OutputActivator.h">
+      <Filter>Main Code</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectContext.h">
+      <Filter>Main Code</Filter>
+    </ClInclude>
+    <ClInclude Include="PublicEnums.h">
+      <Filter>Main Code</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtilitiesEx.h">
+      <Filter>Main Code</Filter>
+    </ClInclude>
+    <ClInclude Include="DirPathGroup.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAssoc.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="FileType.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeDirectories.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeNode.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeOptions.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludePaths.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeTag.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchPathEngine.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceFileParser.h">
+      <Filter>Main Code\include</Filter>
+    </ClInclude>
+    <ClInclude Include="PathInfo.h">
+      <Filter>Main Code\path</Filter>
+    </ClInclude>
+    <ClInclude Include="PathSortOrder.h">
+      <Filter>Main Code\path</Filter>
+    </ClInclude>
+    <ClInclude Include="BraceParityStatus.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeParser.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeUtilities.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="ContainerComponents.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="CppImplementationFormatter.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="DocLanguage.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="Formatter.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="FormatterOptions.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="LanguageSearchEngine.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="LineSet.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodPrototype.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenRange.h">
+      <Filter>Main Code\string &amp; code</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeMessageBox.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="FileBrowser.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="FileLocatorDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="FileTreeDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeOptionsDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="InputBoxDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTypeQualifierDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionsSheet.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenizeTextDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackMenuWnd.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="WkspLoadDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="WkspSaveDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MethodPrototypeTests.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Application_fwd.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="IDETools.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="IDETools.idl">
+      <Filter>Source Files</Filter>
+    </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\BscPathStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\BscPathStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\FileTypeStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\IDETools.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ImageStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ImageStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\IncBrowser.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

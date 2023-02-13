@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugU|Win32">
+      <Configuration>DebugU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|Win32">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugU|x64">
+      <Configuration>DebugU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|x64">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{D2C7B1B4-6864-42AA-AF4D-C44B5D6CAD31}</ProjectGuid>
+    <Keyword>MFCDLLProj</Keyword>
+    <RootNamespace>IDETools</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>IDETools</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>$(IntDir)$(ProjectName).tlb</TypeLibraryName>
+      <OutputDirectory>gen</OutputDirectory>
+      <HeaderFileName>%(Filename)_i.h</HeaderFileName>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <ProjectReference />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>$(IntDir)$(ProjectName).tlb</TypeLibraryName>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <OutputDirectory>gen</OutputDirectory>
+      <HeaderFileName>%(Filename)_i.h</HeaderFileName>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <ProjectReference />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>$(IntDir)$(ProjectName).tlb</TypeLibraryName>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <OutputDirectory>gen</OutputDirectory>
+      <HeaderFileName>%(Filename)_i.h</HeaderFileName>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <ProjectReference />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>$(IntDir)$(ProjectName).tlb</TypeLibraryName>
+      <OutputDirectory>gen</OutputDirectory>
+      <HeaderFileName>%(Filename)_i.h</HeaderFileName>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <ProjectReference />
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="BraceParityStatus.cpp" />
+    <ClCompile Include="CodeMessageBox.cpp" />
+    <ClCompile Include="CodeParser.cpp" />
+    <ClCompile Include="CodeProcessor.cpp" />
+    <ClCompile Include="CodeUtilities.cpp" />
+    <ClCompile Include="CompoundTextParser.cpp" />
+    <ClCompile Include="ContainerComponents.cpp" />
+    <ClCompile Include="CppImplementationFormatter.cpp" />
+    <ClCompile Include="DirPathGroup.cpp" />
+    <ClCompile Include="DocLanguage.cpp" />
+    <ClCompile Include="DspParser.cpp" />
+    <ClCompile Include="DspProject.cpp" />
+    <ClCompile Include="FileAccess.cpp" />
+    <ClCompile Include="FileAssoc.cpp" />
+    <ClCompile Include="FileBrowser.cpp" />
+    <ClCompile Include="FileLocator.cpp" />
+    <ClCompile Include="FileLocatorDialog.cpp" />
+    <ClCompile Include="FileSearch.cpp" />
+    <ClCompile Include="FileTreeDialog.cpp" />
+    <ClCompile Include="FileType.cpp" />
+    <ClCompile Include="Formatter.cpp" />
+    <ClCompile Include="FormatterOptions.cpp" />
+    <ClCompile Include="gen\IDETools_i.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="IdeUtilities.cpp" />
+    <ClCompile Include="IncludeDirectories.cpp" />
+    <ClCompile Include="IncludeFileTree.cpp" />
+    <ClCompile Include="IncludeOptions.cpp" />
+    <ClCompile Include="IncludeOptionsDialog.cpp" />
+    <ClCompile Include="IncludePaths.cpp" />
+    <ClCompile Include="IncludeTag.cpp" />
+    <ClCompile Include="InputBoxDialog.cpp" />
+    <ClCompile Include="InputTypeQualifierDialog.cpp" />
+    <ClCompile Include="LanguageSearchEngine.cpp" />
+    <ClCompile Include="LineSet.cpp" />
+    <ClCompile Include="MenuFilePicker.cpp" />
+    <ClCompile Include="MethodPrototype.cpp" />
+    <ClCompile Include="ModuleOptions.cpp" />
+    <ClCompile Include="ModuleSession.cpp" />
+    <ClCompile Include="OptionsSheet.cpp" />
+    <ClCompile Include="OutputActivator.cpp" />
+    <ClCompile Include="PathInfo.cpp" />
+    <ClCompile Include="PathSortOrder.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ProjectContext.cpp" />
+    <ClCompile Include="SearchPathEngine.cpp" />
+    <ClCompile Include="SourceFileParser.cpp" />
+    <ClCompile Include="StringUtilitiesEx.cpp" />
+    <ClCompile Include="test\MethodPrototypeTests.cpp" />
+    <ClCompile Include="TextContent.cpp" />
+    <ClCompile Include="TokenizeTextDialog.cpp" />
+    <ClCompile Include="TokenRange.cpp" />
+    <ClCompile Include="TrackMenuWnd.cpp" />
+    <ClCompile Include="UserInterface.cpp" />
+    <ClCompile Include="WkspLoadDialog.cpp" />
+    <ClCompile Include="WkspSaveDialog.cpp" />
+    <ClCompile Include="WorkspaceProfile.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="IDETools.def" />
+    <None Include="res\IDETools.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="Application_fwd.h" />
+    <ClInclude Include="BraceParityStatus.h" />
+    <ClInclude Include="CodeMessageBox.h" />
+    <ClInclude Include="CodeParser.h" />
+    <ClInclude Include="CodeProcessor.h" />
+    <ClInclude Include="CodeUtilities.h" />
+    <ClInclude Include="CompoundTextParser.h" />
+    <ClInclude Include="ContainerComponents.h" />
+    <ClInclude Include="CppImplementationFormatter.h" />
+    <ClInclude Include="DirPathGroup.h" />
+    <ClInclude Include="DocLanguage.h" />
+    <ClInclude Include="DspParser.h" />
+    <ClInclude Include="DspProject.h" />
+    <ClInclude Include="FileAccess.h" />
+    <ClInclude Include="FileAssoc.h" />
+    <ClInclude Include="FileBrowser.h" />
+    <ClInclude Include="FileLocator.h" />
+    <ClInclude Include="FileLocatorDialog.h" />
+    <ClInclude Include="FileSearch.h" />
+    <ClInclude Include="FileTreeDialog.h" />
+    <ClInclude Include="FileType.h" />
+    <ClInclude Include="Formatter.h" />
+    <ClInclude Include="FormatterOptions.h" />
+    <ClInclude Include="gen\IDETools_i.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="IdeUtilities.h" />
+    <ClInclude Include="IncludeDirectories.h" />
+    <ClInclude Include="IncludeFileTree.h" />
+    <ClInclude Include="IncludeNode.h" />
+    <ClInclude Include="IncludeOptions.h" />
+    <ClInclude Include="IncludeOptionsDialog.h" />
+    <ClInclude Include="IncludePaths.h" />
+    <ClInclude Include="IncludeTag.h" />
+    <ClInclude Include="InputBoxDialog.h" />
+    <ClInclude Include="InputTypeQualifierDialog.h" />
+    <ClInclude Include="LanguageSearchEngine.h" />
+    <ClInclude Include="LineSet.h" />
+    <ClInclude Include="MenuFilePicker.h" />
+    <ClInclude Include="MethodPrototype.h" />
+    <ClInclude Include="ModuleOptions.h" />
+    <ClInclude Include="ModuleSession.h" />
+    <ClInclude Include="OptionsSheet.h" />
+    <ClInclude Include="OutputActivator.h" />
+    <ClInclude Include="PathInfo.h" />
+    <ClInclude Include="PathSortOrder.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="ProjectContext.h" />
+    <ClInclude Include="PublicEnums.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SearchPathEngine.h" />
+    <ClInclude Include="SourceFileParser.h" />
+    <ClInclude Include="StringUtilitiesEx.h" />
+    <ClInclude Include="test\MethodPrototypeTests.h" />
+    <ClInclude Include="TextContent.h" />
+    <ClInclude Include="TokenizeTextDialog.h" />
+    <ClInclude Include="TokenRange.h" />
+    <ClInclude Include="TrackMenuWnd.h" />
+    <ClInclude Include="UserInterface.h" />
+    <ClInclude Include="WkspLoadDialog.h" />
+    <ClInclude Include="WkspSaveDialog.h" />
+    <ClInclude Include="WorkspaceProfile.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="IDETools.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="IDETools.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtl\utl\UI\UTL_UI_vc17.vcxproj">
+      <Project>{ced87d7e-e07c-4158-bcdb-d3dcf1acf42c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonUtl\utl\UTL_BASE_vc17.vcxproj">
+      <Project>{bd40f5cd-069f-428f-8e05-ba1b85940a9c}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\BscPathStrip.bmp" />
+    <Image Include="res\BscPathStrip.png" />
+    <Image Include="res\FileTypeStrip.bmp" />
+    <Image Include="res\IDETools.ico" />
+    <Image Include="res\ImageStrip.bmp" />
+    <Image Include="res\ImageStrip.png" />
+    <Image Include="res\IncBrowser.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

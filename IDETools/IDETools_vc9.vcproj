@@ -217,6 +217,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Application_fwd.h"
+				>
+			</File>
+			<File
 				RelativePath=".\IDETools.def"
 				>
 			</File>
