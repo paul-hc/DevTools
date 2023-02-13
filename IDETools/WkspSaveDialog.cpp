@@ -39,14 +39,14 @@ CWkspSaveDialog::CWkspSaveDialog( WorkspaceProfile& rWkspProfile, const CString&
 	, m_folderItem( _T("") )
 	, m_fullPathEdit( ui::FilePath )
 {
-	m_regSection = ::sectionWorkspaceDialogs;
+	m_regSection = WorkspaceProfile::s_sectionWorkspaceDialogs;
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	LoadDlgIcon( IDD_WORKSPACE_SAVE_DIALOG );
 
 	if ( m_section.IsEmpty() )
-		m_section = ::defaulWkspSection;
+		m_section = WorkspaceProfile::s_defaulWkspSection;
 	if ( m_currProjectName.IsEmpty() )
-		m_currProjectName = ::defaulProjectName;
+		m_currProjectName = WorkspaceProfile::s_defaulProjectName;
 
 	ui::LoadPopupMenu( m_sortOrderPopup, IDR_CONTEXT_MENU, app::FileSortOrderPopup );
 

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 
 
 // UserInterface command target
 
 class UserInterface : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE(UserInterface)
 protected:
@@ -24,27 +24,6 @@ protected:
 	DECLARE_INTERFACE_MAP()
 
 	// generated OLE dispatch map functions
-	BSTR GetIDEToolsRegistryKey();
-	void SetIDEToolsRegistryKey(LPCTSTR lpszNewValue);
-	void RunUnitTests(void);
-	BSTR InputBox(LPCTSTR title, LPCTSTR prompt, LPCTSTR initialValue);
-	BSTR GetClipboardText();
-	void SetClipboardText(LPCTSTR text);
-	BOOL IsClipFormatAvailable(long clipFormat);
-	BOOL IsClipFormatNameAvailable(LPCTSTR formatName);
-	BOOL IsKeyPath(LPCTSTR pKeyFullPath);
-	BOOL CreateKeyPath(LPCTSTR pKeyFullPath);
-	BSTR RegReadString(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString);
-	long RegReadNumber(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber);
-	BOOL RegWriteString(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pStrValue);
-	BOOL RegWriteNumber(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long numValue);
-	BOOL EnsureStringValue(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString);
-	BOOL EnsureNumberValue(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber);
-	BSTR GetEnvironmentVariable(LPCTSTR varName);
-	BOOL SetEnvironmentVariable(LPCTSTR varName, LPCTSTR varValue);
-	BSTR ExpandEnvironmentVariables(LPCTSTR sourceString);
-	BSTR LocateFile(LPCTSTR localDirPath);
-
 	enum 
 	{
 		dispidIDEToolsRegistryKey = 1,
@@ -67,4 +46,25 @@ protected:
 		dispidExpandEnvironmentVariables = 18,
 		dispidLocateFile = 19
 	};
+
+	BSTR GetIDEToolsRegistryKey();
+	void SetIDEToolsRegistryKey(LPCTSTR lpszNewValue);
+	void RunUnitTests(void);
+	BSTR InputBox(LPCTSTR title, LPCTSTR prompt, LPCTSTR initialValue);
+	BSTR GetClipboardText();
+	void SetClipboardText(LPCTSTR text);
+	BOOL IsClipFormatAvailable(long clipFormat);
+	BOOL IsClipFormatNameAvailable(LPCTSTR formatName);
+	BOOL IsKeyPath(LPCTSTR pKeyFullPath);
+	BOOL CreateKeyPath(LPCTSTR pKeyFullPath);
+	BSTR RegReadString(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString);
+	long RegReadNumber(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber);
+	BOOL RegWriteString(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pStrValue);
+	BOOL RegWriteNumber(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long numValue);
+	BOOL EnsureStringValue(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString);
+	BOOL EnsureNumberValue(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber);
+	BSTR GetEnvironmentVariable(LPCTSTR varName);
+	BOOL SetEnvironmentVariable(LPCTSTR varName, LPCTSTR varValue);
+	BSTR ExpandEnvironmentVariables(LPCTSTR sourceString);
+	BSTR LocateFile(LPCTSTR localDirPath);
 };

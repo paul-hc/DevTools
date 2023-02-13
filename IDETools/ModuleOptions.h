@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 
 
 // This automation object gets created in the VC++ macro initialization via the SetupMacroParameters() function, which is called on script startup.
@@ -9,7 +9,7 @@
 //	Visual Studio 2008	C:\Users\Paul\Documents\Visual Studio 2008\Projects\VSMacros80\CppMacros\CppMacros.vsmacros
 
 class ModuleOptions : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE( ModuleOptions )
 protected:
@@ -27,6 +27,37 @@ protected:
 	DECLARE_INTERFACE_MAP()
 
 	// generated OLE dispatch map functions
+	enum
+	{
+		// properties:
+		// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
+		dispiddeveloperName = 1,
+		dispidcodeTemplateFile = 2,
+		dispidsplitMaxColumn = 3,
+		dispidmenuVertSplitCount = 4,
+		dispidsingleLineCommentToken = 5,
+		dispidclassPrefix = 6,
+		dispidstructPrefix = 7,
+		dispidenumPrefix = 8,
+		dispidautoCodeGeneration = 9,
+		dispiddisplayErrorMessages = 10,
+		dispiduseCommentDecoration = 11,
+		dispidduplicateLineMoveDown = 12,
+		dispidbrowseInfoPath = 13,
+		dispidadditionalIncludePath = 14,
+		dispidadditionalAssocFolders = 15,
+		dispidlinesBetweenFunctionImpls = 16,
+		dispidreturnTypeOnSeparateLine = 17,
+
+		// methods:
+		dispidGetVStudioCommonDirPath = 18,
+		dispidGetVStudioMacrosDirPath = 19,
+		dispidGetVStudioVC98DirPath = 20,
+		dispidEditOptions = 21,
+		dispidLoadOptions = 22,
+		dispidSaveOptions = 23
+	};
+
 	afx_msg BSTR GetDeveloperName();
 	afx_msg void SetDeveloperName(LPCTSTR lpszNewValue);
 	afx_msg BSTR GetCodeTemplateFile();
@@ -65,35 +96,4 @@ protected:
 	afx_msg BOOL EditOptions();
 	afx_msg void LoadOptions();
 	afx_msg void SaveOptions();
-
-	enum
-	{
-		// properties:
-		// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
-		dispiddeveloperName = 1,
-		dispidcodeTemplateFile = 2,
-		dispidsplitMaxColumn = 3,
-		dispidmenuVertSplitCount = 4,
-		dispidsingleLineCommentToken = 5,
-		dispidclassPrefix = 6,
-		dispidstructPrefix = 7,
-		dispidenumPrefix = 8,
-		dispidautoCodeGeneration = 9,
-		dispiddisplayErrorMessages = 10,
-		dispiduseCommentDecoration = 11,
-		dispidduplicateLineMoveDown = 12,
-		dispidbrowseInfoPath = 13,
-		dispidadditionalIncludePath = 14,
-		dispidadditionalAssocFolders = 15,
-		dispidlinesBetweenFunctionImpls = 16,
-		dispidreturnTypeOnSeparateLine = 17,
-
-		// methods:
-		dispidGetVStudioCommonDirPath = 18,
-		dispidGetVStudioMacrosDirPath = 19,
-		dispidGetVStudioVC98DirPath = 20,
-		dispidEditOptions = 21,
-		dispidLoadOptions = 22,
-		dispidSaveOptions = 23
-	};
 };

@@ -98,14 +98,14 @@ namespace ut
 	Please see MFC Technical Notes 33 and 58 for additional details.
 */
 
-CApplication theApp;
+CApplication g_theApp;
 
 CApplication::CApplication( void )
 	: CBaseApp<CWinApp>()
 	, m_isVisualStudio6( false )
 {
 	// Extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe.
-	// Will initialize application resources later, when any automation object based on CAutomationBase gets instantiated.
+	// Will initialize application resources later, when any automation object based on app::CLazyInitAppResources gets instantiated.
 	SetLazyInitAppResources();
 }
 

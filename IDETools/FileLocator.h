@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 #include "DirPathGroup.h"
 #include "ProjectContext.h"
 
 
 class FileLocator : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE(FileLocator)
 protected:
@@ -27,6 +27,19 @@ protected:
 	DECLARE_INTERFACE_MAP()
 
 	// generated OLE dispatch map functions
+	enum
+	{
+		dispidLocalDirPath = 1,
+		dispidLocalCurrentFile = 2,
+		dispidAssociatedProjectFile = 3,
+		dispidProjectActiveConfiguration = 4,
+		dispidProjectAdditionalIncludePath = 5,
+		dispidSelectedFiles = 6,
+		dispidSelectedCount = 7,
+		dispidGetSelectedFile = 8,
+		dispidLocateFile = 9
+	};
+
 	afx_msg BSTR GetLocalDirPath();
 	afx_msg void SetLocalDirPath(LPCTSTR lpszNewValue);
 	afx_msg BSTR GetLocalCurrentFile();
@@ -41,17 +54,4 @@ protected:
 	afx_msg long GetSelectedCount();
 	afx_msg BSTR GetSelectedFile(long index);
 	afx_msg BOOL LocateFile();
-
-	enum
-	{
-		dispidLocalDirPath = 1,
-		dispidLocalCurrentFile = 2,
-		dispidAssociatedProjectFile = 3,
-		dispidProjectActiveConfiguration = 4,
-		dispidProjectAdditionalIncludePath = 5,
-		dispidSelectedFiles = 6,
-		dispidSelectedCount = 7,
-		dispidGetSelectedFile = 8,
-		dispidLocateFile = 9
-	};
 };

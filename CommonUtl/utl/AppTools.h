@@ -30,6 +30,7 @@ namespace app
 		virtual CLogger& GetLogger( void ) = 0;
 		virtual utl::CResourcePool& GetSharedResources( void ) = 0;
 		virtual CImageStore* GetSharedImageStore( void ) = 0;
+		virtual bool LazyInitAppResources( void ) = 0;
 
 		virtual bool BeepSignal( app::MsgType msgType = app::Info ) = 0;									// returns false for convenience
 		virtual bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error ) = 0;		// returns false for convenience
@@ -71,6 +72,16 @@ namespace app
 	inline bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error ) { return CAppTools::Instance()->ReportError( message, msgType ); }
 	inline int ReportException( const std::exception& exc ) { return CAppTools::Instance()->ReportException( exc ); }
 	inline int ReportException( const CException* pExc ) { return CAppTools::Instance()->ReportException( pExc ); }
+}
+
+
+namespace app
+{
+	class CLazyInitAppResources		// use as a base class or data-member for object relying on lazy resource initialization (e.g. automation server classes, etc)
+	{
+	public:
+		CLazyInitAppResources( void ) { CAppTools::Instance()->LazyInitAppResources(); }
+	};
 }
 
 

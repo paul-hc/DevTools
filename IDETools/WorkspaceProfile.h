@@ -1,15 +1,10 @@
 #pragma once
 
-#include "AutomationBase.h"
-
-
-extern LPCTSTR defaulWkspSection;
-extern LPCTSTR defaulProjectName;
-extern LPCTSTR sectionWorkspaceDialogs;
+#include "utl/AppTools.h"
 
 
 class WorkspaceProfile : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE( WorkspaceProfile )
 public:
@@ -25,6 +20,10 @@ public:
 	std::vector< CString > projectNameArray;
 	std::vector< CString > fileArray;
 
+	static const TCHAR s_defaulWkspSection[];
+	static const TCHAR s_defaulProjectName[];
+	static const TCHAR s_sectionWorkspaceDialogs[];
+
 	// generated stuff
 public:
 	virtual void OnFinalRelease();
@@ -36,15 +35,6 @@ protected:
 	DECLARE_INTERFACE_MAP()
 public:
 	// generated OLE dispatch map functions
-	BOOL m_mustCloseAll;
-	afx_msg void OnMustCloseAllChanged();
-	afx_msg BOOL AddFile( LPCTSTR fileFullPath );
-	afx_msg BOOL AddProjectName( LPCTSTR projectName );
-	afx_msg long GetFileCount();
-	afx_msg BSTR GetFileName( long index );
-	afx_msg BOOL Save( LPCTSTR section, LPCTSTR currProjectName );
-	afx_msg BOOL Load( LPCTSTR section, LPCTSTR currProjectName );
-
 	enum
 	{
 		// properties:
@@ -57,4 +47,13 @@ public:
 		dispidSave = 6,
 		dispidLoad = 7
 	};
+
+	BOOL m_mustCloseAll;
+	afx_msg void OnMustCloseAllChanged();
+	afx_msg BOOL AddFile( LPCTSTR fileFullPath );
+	afx_msg BOOL AddProjectName( LPCTSTR projectName );
+	afx_msg long GetFileCount();
+	afx_msg BSTR GetFileName( long index );
+	afx_msg BOOL Save( LPCTSTR section, LPCTSTR currProjectName );
+	afx_msg BOOL Load( LPCTSTR section, LPCTSTR currProjectName );
 };

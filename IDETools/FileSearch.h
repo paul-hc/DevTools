@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 
 
 // FileSearch command target
 
 class FileSearch : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE(FileSearch)
 
@@ -39,38 +39,6 @@ protected:
 	DECLARE_INTERFACE_MAP()
 
 	// generated OLE dispatch map functions
-	afx_msg long GetFileAttrFilterStrict();
-	afx_msg void SetFileAttrFilterStrict(long nNewValue);
-	afx_msg long GetFileAttrFilterStrictNot();
-	afx_msg void SetFileAttrFilterStrictNot(long nNewValue);
-	afx_msg long GetFileAttrFilterOr();
-	afx_msg void SetFileAttrFilterOr(long nNewValue);
-	afx_msg BOOL GetExcludeDirDots();
-	afx_msg void SetExcludeDirDots(BOOL bNewValue);
-	afx_msg long GetFileAttributes();
-	afx_msg BSTR GetFileName();
-	afx_msg BSTR GetFilePath();
-	afx_msg BSTR GetFileTitle();
-	afx_msg BSTR GetFileURL();
-	afx_msg BSTR GetRoot();
-	afx_msg long GetLength();
-	afx_msg BOOL GetIsDots();
-	afx_msg BOOL GetIsReadOnly();
-	afx_msg BOOL GetIsDirectory();
-	afx_msg BOOL GetIsCompressed();
-	afx_msg BOOL GetIsSystem();
-	afx_msg BOOL GetIsHidden();
-	afx_msg BOOL GetIsTemporary();
-	afx_msg BOOL GetIsNormal();
-	afx_msg BOOL GetIsArchived();
-	afx_msg BOOL FindFile(LPCTSTR filePattern);
-	afx_msg BOOL FindNextFile();
-	afx_msg BSTR FindAllFiles(LPCTSTR filePattern, LPCTSTR separator, long FAR* outFileCount, BOOL recurseSubDirs);
-	afx_msg void Close();
-	afx_msg BOOL MatchesMask(long mask);
-	afx_msg BSTR BuildSubDirFilePattern(LPCTSTR filePattern);
-	afx_msg BSTR SetupForSubDirSearch(LPCTSTR parentFilePattern);
-
 	enum
 	{
 		// properties:
@@ -104,4 +72,36 @@ protected:
 		dispidBuildSubDirFilePattern = 26,
 		dispidSetupForSubDirSearch = 27,
 	};
+
+	afx_msg long GetFileAttrFilterStrict();
+	afx_msg void SetFileAttrFilterStrict(long nNewValue);
+	afx_msg long GetFileAttrFilterStrictNot();
+	afx_msg void SetFileAttrFilterStrictNot(long nNewValue);
+	afx_msg long GetFileAttrFilterOr();
+	afx_msg void SetFileAttrFilterOr(long nNewValue);
+	afx_msg BOOL GetExcludeDirDots();
+	afx_msg void SetExcludeDirDots(BOOL bNewValue);
+	afx_msg long GetFileAttributes();
+	afx_msg BSTR GetFileName();
+	afx_msg BSTR GetFilePath();
+	afx_msg BSTR GetFileTitle();
+	afx_msg BSTR GetFileURL();
+	afx_msg BSTR GetRoot();
+	afx_msg long GetLength();
+	afx_msg BOOL GetIsDots();
+	afx_msg BOOL GetIsReadOnly();
+	afx_msg BOOL GetIsDirectory();
+	afx_msg BOOL GetIsCompressed();
+	afx_msg BOOL GetIsSystem();
+	afx_msg BOOL GetIsHidden();
+	afx_msg BOOL GetIsTemporary();
+	afx_msg BOOL GetIsNormal();
+	afx_msg BOOL GetIsArchived();
+	afx_msg BOOL FindFile(LPCTSTR filePattern);
+	afx_msg BOOL FindNextFile();
+	afx_msg BSTR FindAllFiles(LPCTSTR filePattern, LPCTSTR separator, long FAR* outFileCount, BOOL recurseSubDirs);
+	afx_msg void Close();
+	afx_msg BOOL MatchesMask(long mask);
+	afx_msg BSTR BuildSubDirFilePattern(LPCTSTR filePattern);
+	afx_msg BSTR SetupForSubDirSearch(LPCTSTR parentFilePattern);
 };

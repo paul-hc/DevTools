@@ -10,13 +10,11 @@
 #endif
 
 
-LPCTSTR defaulWkspSection = _T("WorkspaceProfiles");
-LPCTSTR defaulProjectName = _T("<Default>");
-LPCTSTR sectionWorkspaceDialogs = _T("WorkspaceDialogs");
-
+const TCHAR WorkspaceProfile::s_defaulWkspSection[] = _T("WorkspaceProfiles");
+const TCHAR WorkspaceProfile::s_defaulProjectName[] = _T("<Default>");
+const TCHAR WorkspaceProfile::s_sectionWorkspaceDialogs[] = _T("WorkspaceDialogs");
 
 IMPLEMENT_DYNCREATE( WorkspaceProfile, CCmdTarget )
-
 
 WorkspaceProfile::WorkspaceProfile()
 	: CCmdTarget()

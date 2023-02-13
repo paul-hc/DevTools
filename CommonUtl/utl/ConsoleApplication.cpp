@@ -88,6 +88,11 @@ utl::CResourcePool& CConsoleApplication::GetSharedResources( void )
 	return m_resourcePool;
 }
 
+bool CConsoleApplication::LazyInitAppResources( void )
+{
+	return false;		// no standard shared resources to delay initialization
+}
+
 bool CConsoleApplication::BeepSignal( app::MsgType msgType /*= app::Info*/ )
 {
 	switch ( msgType )

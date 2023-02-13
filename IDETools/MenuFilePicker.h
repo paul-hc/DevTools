@@ -1,11 +1,11 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 #include "FileBrowser.h"
 
 
 class MenuFilePicker : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE( MenuFilePicker )
 protected:
@@ -25,25 +25,6 @@ protected:
 	DECLARE_INTERFACE_MAP()
 
 	// generated OLE dispatch map functions
-	long m_trackPosX;
-	afx_msg void OnTrackPosXChanged();
-	long m_trackPosY;
-	afx_msg void OnTrackPosYChanged();
-	afx_msg long GetOptionFlags();
-	afx_msg void SetOptionFlags( long nNewValue );
-	afx_msg long GetFolderLayout();
-	afx_msg void SetFolderLayout( long nNewValue );
-	afx_msg BSTR GetCurrentFilePath();
-	afx_msg void SetCurrentFilePath( LPCTSTR pCurrFilePath );
-	afx_msg BSTR SetProfileSection( LPCTSTR pSubSection );
-	afx_msg BOOL AddFolder( LPCTSTR pFolderPathFilter, LPCTSTR pFolderAlias );
-	afx_msg BOOL AddFolderArray( LPCTSTR pFolderItemFlatArray );
-	afx_msg BOOL AddRootFile( LPCTSTR pFilePath, LPCTSTR pLabel );
-	afx_msg void AddSortOrder( long pathField, BOOL exclusive );
-	afx_msg void ClearSortOrder();
-	afx_msg void StoreTrackPos();
-	afx_msg BOOL ChooseFile();
-
 	enum
 	{
 		// properties:
@@ -63,4 +44,23 @@ protected:
 		dispidStoreTrackPos = 12,
 		dispidChooseFile = 13
 	};
+
+	long m_trackPosX;
+	afx_msg void OnTrackPosXChanged();
+	long m_trackPosY;
+	afx_msg void OnTrackPosYChanged();
+	afx_msg long GetOptionFlags();
+	afx_msg void SetOptionFlags( long nNewValue );
+	afx_msg long GetFolderLayout();
+	afx_msg void SetFolderLayout( long nNewValue );
+	afx_msg BSTR GetCurrentFilePath();
+	afx_msg void SetCurrentFilePath( LPCTSTR pCurrFilePath );
+	afx_msg BSTR SetProfileSection( LPCTSTR pSubSection );
+	afx_msg BOOL AddFolder( LPCTSTR pFolderPathFilter, LPCTSTR pFolderAlias );
+	afx_msg BOOL AddFolderArray( LPCTSTR pFolderItemFlatArray );
+	afx_msg BOOL AddRootFile( LPCTSTR pFilePath, LPCTSTR pLabel );
+	afx_msg void AddSortOrder( long pathField, BOOL exclusive );
+	afx_msg void ClearSortOrder();
+	afx_msg void StoreTrackPos();
+	afx_msg BOOL ChooseFile();
 };

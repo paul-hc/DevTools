@@ -40,6 +40,7 @@ public:
 	virtual CLogger& GetLogger( void );
 	virtual utl::CResourcePool& GetSharedResources( void );
 	virtual CImageStore* GetSharedImageStore( void );
+	virtual bool LazyInitAppResources( void );
 	virtual bool BeepSignal( app::MsgType msgType = app::Info );
 	virtual bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error );
 	virtual int ReportException( const std::exception& exc );
@@ -55,7 +56,6 @@ public:
 		m_isInteractive = isInteractive;
 	}
 
-	bool LazyInitAppResources( void );
 	void RunUnitTests( void ) { OnRunUnitTests(); }
 protected:
 	static const TCHAR* AssignStringCopy( const TCHAR*& rpAppString, const std::tstring& value )

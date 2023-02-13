@@ -29,6 +29,7 @@ public:
 	virtual CLogger& GetLogger( void );
 	virtual utl::CResourcePool& GetSharedResources( void );
 	virtual CImageStore* GetSharedImageStore( void ) override { return NULL; }
+	virtual bool LazyInitAppResources( void );
 	virtual bool BeepSignal( app::MsgType msgType = app::Info );
 	virtual bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error );
 	virtual int ReportException( const std::exception& exc );

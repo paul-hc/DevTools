@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 
 
 // CodeProcessor command target
 
 class CodeProcessor : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE(CodeProcessor)
 protected:
@@ -28,21 +28,6 @@ protected:
 	DECLARE_INTERFACE_MAP()
 
 	// generated OLE dispatch map functions
-	afx_msg void SetDocLanguage(LPCTSTR lpszNewValue);
-	afx_msg void SetTabSize(long nNewValue);
-	afx_msg void SetUseTabs(BOOL bNewValue);
-	afx_msg BSTR GetCancelTag();
-	afx_msg BSTR AutoFormatCode(LPCTSTR codeText);
-	afx_msg BSTR SplitArgumentList(LPCTSTR codeText, long splitAtColumn, long targetBracketLevel);
-	afx_msg BSTR ExtractTypeDescriptor(LPCTSTR functionImplLine, LPCTSTR docFileExt);
-	afx_msg BSTR ImplementMethods(LPCTSTR methodPrototypes, LPCTSTR typeDescriptor, BOOL isInline);
-	afx_msg BSTR ToggleComment(LPCTSTR codeText);
-	afx_msg BSTR FormatWhitespaces(LPCTSTR codeText);
-	afx_msg BSTR GenerateConsecutiveNumbers(LPCTSTR codeText);
-	afx_msg BSTR SortLines(LPCTSTR codeText, BOOL ascending);
-	afx_msg BSTR AutoMakeCode(LPCTSTR codeText);
-	afx_msg BSTR TokenizeText(LPCTSTR codeText);
-
 	enum 
 	{
 		dispidDocLanguage = 1,
@@ -60,4 +45,19 @@ protected:
 		dispidAutoMakeCode = 13,
 		dispidTokenizeText = 14
 	};
+
+	afx_msg void SetDocLanguage(LPCTSTR lpszNewValue);
+	afx_msg void SetTabSize(long nNewValue);
+	afx_msg void SetUseTabs(BOOL bNewValue);
+	afx_msg BSTR GetCancelTag();
+	afx_msg BSTR AutoFormatCode(LPCTSTR codeText);
+	afx_msg BSTR SplitArgumentList(LPCTSTR codeText, long splitAtColumn, long targetBracketLevel);
+	afx_msg BSTR ExtractTypeDescriptor(LPCTSTR functionImplLine, LPCTSTR docFileExt);
+	afx_msg BSTR ImplementMethods(LPCTSTR methodPrototypes, LPCTSTR typeDescriptor, BOOL isInline);
+	afx_msg BSTR ToggleComment(LPCTSTR codeText);
+	afx_msg BSTR FormatWhitespaces(LPCTSTR codeText);
+	afx_msg BSTR GenerateConsecutiveNumbers(LPCTSTR codeText);
+	afx_msg BSTR SortLines(LPCTSTR codeText, BOOL ascending);
+	afx_msg BSTR AutoMakeCode(LPCTSTR codeText);
+	afx_msg BSTR TokenizeText(LPCTSTR codeText);
 };

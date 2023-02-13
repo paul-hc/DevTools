@@ -1,10 +1,10 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 
 
 class IncludeFileTree : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE(IncludeFileTree)
 
@@ -22,12 +22,6 @@ protected:
 	DECLARE_INTERFACE_MAP()
 
 	// generated OLE dispatch map functions
-	CString m_pickedIncludeFile;
-	long m_promptLineNo;
-	afx_msg void OnPickedIncludeFileChanged();
-	afx_msg void OnPromptLineNoChanged();
-	afx_msg BOOL BrowseIncludeFiles(LPCTSTR targetFileName);
-
 	enum
 	{
 		// properties:
@@ -37,4 +31,10 @@ protected:
 		// methods:
 		dispidBrowseIncludeFiles = 3
 	};
+
+	CString m_pickedIncludeFile;
+	long m_promptLineNo;
+	afx_msg void OnPickedIncludeFileChanged();
+	afx_msg void OnPromptLineNoChanged();
+	afx_msg BOOL BrowseIncludeFiles(LPCTSTR targetFileName);
 };

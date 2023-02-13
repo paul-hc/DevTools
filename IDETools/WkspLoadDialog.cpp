@@ -38,7 +38,7 @@ CWkspLoadDialog::CWkspLoadDialog( WorkspaceProfile& rWkspProfile, const CString&
 	, m_folderItem( _T("") )
 	, m_fullPathEdit( ui::FilePath )
 {
-	m_regSection = ::sectionWorkspaceDialogs;
+	m_regSection = WorkspaceProfile::s_sectionWorkspaceDialogs;
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	LoadDlgIcon( IDD_WORKSPACE_LOAD_DIALOG );
 	m_accelPool.AddAccelTable( new CAccelTable( IDR_WKSPLOAD_ACCEL ) );
@@ -50,7 +50,7 @@ CWkspLoadDialog::CWkspLoadDialog( WorkspaceProfile& rWkspProfile, const CString&
 	m_options.m_fileSortOrder.Clear();
 
 	if ( m_section.IsEmpty() )
-		m_section = ::defaulWkspSection;
+		m_section = WorkspaceProfile::s_defaulWkspSection;
 
 	m_rWkspProfile.m_mustCloseAll = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( mustCloseAll ), m_rWkspProfile.m_mustCloseAll );
 }

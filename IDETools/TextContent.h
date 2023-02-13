@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 #include <vector>
 #include <map>
 
@@ -8,7 +8,7 @@
 // Automation object for text file IO, replacements, etc
 
 class TextContent : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE( TextContent )
 public:
@@ -32,24 +32,6 @@ protected:
 	DECLARE_INTERFACE_MAP()
 public:
 	// generated OLE dispatch map functions
-	BOOL m_showErrors;
-	afx_msg void OnShowErrorsChanged();
-	afx_msg BSTR GetText();
-	afx_msg void SetText( LPCTSTR lpszNewValue );
-	afx_msg long GetTextLen();
-	afx_msg BOOL LoadFile( LPCTSTR textFilePath );
-	afx_msg BOOL LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName );
-	afx_msg long LoadCompoundFileSections( LPCTSTR compoundFilePath, LPCTSTR sectionFilter, BOOL caseSensitive );
-	afx_msg long FindText( LPCTSTR match, long startPos, BOOL caseSensitive );
-	afx_msg long ReplaceText( LPCTSTR match, LPCTSTR replacement, BOOL caseSensitive );
-	afx_msg BOOL AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedContent, BOOL caseSensitive );
-	afx_msg BSTR Tokenize( LPCTSTR separatorCharSet );
-	afx_msg BSTR GetNextToken();
-	afx_msg long MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTrimTrailingSpaces );
-	afx_msg void AddFieldReplacement( LPCTSTR fieldText, LPCTSTR replaceWith );
-	afx_msg void ClearFieldReplacements();
-	afx_msg BSTR FormatTimestamp( DATE timestamp, LPCTSTR strftimeFormat );
-
 	enum
 	{
 		// properties:
@@ -71,4 +53,22 @@ public:
 		dispidClearFieldReplacements = 14,
 		dispidFormatTimestamp = 15
 	};
+
+	BOOL m_showErrors;
+	afx_msg void OnShowErrorsChanged();
+	afx_msg BSTR GetText();
+	afx_msg void SetText( LPCTSTR lpszNewValue );
+	afx_msg long GetTextLen();
+	afx_msg BOOL LoadFile( LPCTSTR textFilePath );
+	afx_msg BOOL LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName );
+	afx_msg long LoadCompoundFileSections( LPCTSTR compoundFilePath, LPCTSTR sectionFilter, BOOL caseSensitive );
+	afx_msg long FindText( LPCTSTR match, long startPos, BOOL caseSensitive );
+	afx_msg long ReplaceText( LPCTSTR match, LPCTSTR replacement, BOOL caseSensitive );
+	afx_msg BOOL AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedContent, BOOL caseSensitive );
+	afx_msg BSTR Tokenize( LPCTSTR separatorCharSet );
+	afx_msg BSTR GetNextToken();
+	afx_msg long MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTrimTrailingSpaces );
+	afx_msg void AddFieldReplacement( LPCTSTR fieldText, LPCTSTR replaceWith );
+	afx_msg void ClearFieldReplacements();
+	afx_msg BSTR FormatTimestamp( DATE timestamp, LPCTSTR strftimeFormat );
 };

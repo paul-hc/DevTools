@@ -299,14 +299,6 @@
 			Name="automation server"
 			>
 			<File
-				RelativePath=".\AutomationBase.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\AutomationBase.h"
-				>
-			</File>
-			<File
 				RelativePath=".\CodeProcessor.cpp"
 				>
 			</File>

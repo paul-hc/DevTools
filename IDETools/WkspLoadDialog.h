@@ -7,11 +7,8 @@
 #include "FileBrowser.h"
 
 
-extern LPCTSTR defaulWkspSection;
-extern LPCTSTR defaulProjectName;
-
-
 class WorkspaceProfile;
+
 
 class CWkspLoadDialog : public CLayoutDialog
 {

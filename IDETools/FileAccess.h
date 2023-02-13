@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AutomationBase.h"
+#include "utl/AppTools.h"
 
 
 // FileAccess command target
 
 class FileAccess : public CCmdTarget
-	, private CAutomationBase
+	, private app::CLazyInitAppResources
 {
 	DECLARE_DYNCREATE(FileAccess)
 public:
@@ -23,22 +23,6 @@ protected:
 	DECLARE_INTERFACE_MAP()
 
 	// generated OLE dispatch map functions
-	afx_msg BOOL FileExist(LPCTSTR fullPath);
-	afx_msg long GetFileAttributes(LPCTSTR fullPath);
-	afx_msg BOOL IsDirectoryFile(LPCTSTR fullPath);
-	afx_msg BOOL IsCompressedFile(LPCTSTR fullPath);
-	afx_msg BOOL IsReadOnlyFile(LPCTSTR fullPath);
-	afx_msg BOOL SetReadOnlyFile(LPCTSTR fullPath, BOOL readOnly);
-	afx_msg BOOL Execute(LPCTSTR fullPath);
-	afx_msg BOOL ShellOpen(LPCTSTR docFullPath);
-	afx_msg BOOL ExploreAndSelectFile(LPCTSTR fileFullPath);
-	afx_msg BSTR GetNextAssocDoc(LPCTSTR docFullPath, BOOL forward);
-	afx_msg BSTR GetNextVariationDoc(LPCTSTR docFullPath, BOOL forward);
-	afx_msg BSTR GetComplementaryDoc(LPCTSTR docFullPath);
-	afx_msg BOOL OutputWndActivateTab(LPCTSTR tabCaption);
-	afx_msg BSTR GetIDECurrentBrowseFile();
-	afx_msg BOOL UpdateIDECurrentBrowseFile(BOOL doItNow);
-
 	enum
 	{
 		dispidFileExist = 1,
@@ -57,4 +41,20 @@ protected:
 		dispidGetIDECurrentBrowseFile = 14,
 		dispidUpdateIDECurrentBrowseFile = 15
 	};
+
+	afx_msg BOOL FileExist(LPCTSTR fullPath);
+	afx_msg long GetFileAttributes(LPCTSTR fullPath);
+	afx_msg BOOL IsDirectoryFile(LPCTSTR fullPath);
+	afx_msg BOOL IsCompressedFile(LPCTSTR fullPath);
+	afx_msg BOOL IsReadOnlyFile(LPCTSTR fullPath);
+	afx_msg BOOL SetReadOnlyFile(LPCTSTR fullPath, BOOL readOnly);
+	afx_msg BOOL Execute(LPCTSTR fullPath);
+	afx_msg BOOL ShellOpen(LPCTSTR docFullPath);
+	afx_msg BOOL ExploreAndSelectFile(LPCTSTR fileFullPath);
+	afx_msg BSTR GetNextAssocDoc(LPCTSTR docFullPath, BOOL forward);
+	afx_msg BSTR GetNextVariationDoc(LPCTSTR docFullPath, BOOL forward);
+	afx_msg BSTR GetComplementaryDoc(LPCTSTR docFullPath);
+	afx_msg BOOL OutputWndActivateTab(LPCTSTR tabCaption);
+	afx_msg BSTR GetIDECurrentBrowseFile();
+	afx_msg BOOL UpdateIDECurrentBrowseFile(BOOL doItNow);
 };
