@@ -188,6 +188,12 @@
       <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <ProjectReference />
+    <PreBuildEvent>
+      <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Stamping build time in resource file...</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
     <ClCompile>
@@ -220,6 +226,12 @@
       <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <ProjectReference />
+    <PreBuildEvent>
+      <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Stamping build time in resource file...</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />

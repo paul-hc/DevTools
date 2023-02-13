@@ -67,11 +67,32 @@ CModuleSession::~CModuleSession()
 {
 }
 
+const fs::CPath& CModuleSession::GetDefaultConfigDirPath( void )
+{
+	static fs::CPath s_configDirPath;
+	if ( s_configDirPath.IsEmpty() )
+	{
+		fs::CPath exeDirPath = app::GetModulePath().GetParentPath();
+
+		s_configDirPath = exeDirPath / _T("mine\\config");
+
+		if ( !fs::IsValidDirectory( s_configDirPath.GetPtr() ) )
+			s_configDirPath = ide::vs6::GetMacrosDirPath();
+
+		if ( !fs::IsValidDirectory( s_configDirPath.GetPtr() ) )
+			s_configDirPath = exeDirPath;
+
+		ENSURE( fs::IsValidDirectory( s_configDirPath.GetPtr() ) );
+	}
+
+	return s_configDirPath;
+}
+
 fs::CPath CModuleSession::GetDefaultCodeTemplatePath( void )
 {
 	static const std::tstring nameExt = _T("StdCodeTemplates.ctf");
 
-	fs::CPath codeTemplatePath = app::GetDefaultConfigDirPath() / nameExt;
+	fs::CPath codeTemplatePath = GetDefaultConfigDirPath() / nameExt;
 
 	if ( !codeTemplatePath.FileExist() )
 		codeTemplatePath = ide::vs6::GetMacrosDirPath() / nameExt;

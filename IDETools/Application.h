@@ -52,10 +52,6 @@ namespace app
 	UINT GetMenuVertSplitCount( void );
 
 	const CIncludePaths* GetIncludePaths( void );
-
-	const fs::CPath& GetDefaultConfigDirPath( void );
-
-	void TraceMenu( HMENU hMenu, size_t indentLevel = 0 );
 }
 
 

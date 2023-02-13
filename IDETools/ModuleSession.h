@@ -32,6 +32,8 @@ public:
 	// accessors
 	const std::tstring& GetAdditionalAssocFolders( void ) const { return m_additionalAssocFolders; }
 	void SetAdditionalAssocFolders( const std::tstring& additionalAssocFolders ) { m_additionalAssocFolders = additionalAssocFolders; }
+
+	static const fs::CPath& GetDefaultConfigDirPath( void );
 private:
 	static fs::CPath GetDefaultCodeTemplatePath( void );
 public:
