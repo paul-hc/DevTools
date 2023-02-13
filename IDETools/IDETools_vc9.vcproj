@@ -29,9 +29,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Performing Automation Server DLL registration..."
-				CommandLine="regsvr32 /s /c &quot;$(TargetPath)&quot; &amp;&amp; echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;&#x0D;&#x0A;"
-				Outputs="$(OutDir)\regsvr32.trg"
+				Description=""
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -121,9 +121,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Performing Automation Server DLL registration..."
-				CommandLine="regsvr32 /s /c &quot;$(TargetPath)&quot; &amp;&amp; echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;&#x0D;&#x0A;"
-				Outputs="$(OutDir)\regsvr32.trg"
+				Description=""
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
