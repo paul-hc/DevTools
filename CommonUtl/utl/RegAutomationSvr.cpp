@@ -10,7 +10,7 @@
 #endif
 
 
-// FWD <afximpl.h>
+// FWD from <afximpl.h>
 #define CRIT_OBJECTFACTORYLIST  0
 #define CRIT_DYNLINKLIST        0
 void AFXAPI AfxLockGlobals( int lockType );
@@ -45,8 +45,8 @@ namespace ole
 		return ( (const hlp::CFriendlyObjectFactory*)pFactory )->m_lpszProgID;
 	}
 
-	//const CLSID& pFactory->GetClassID() const;
 
+	// CSafeForScripting class
 
 	const TCHAR* CSafeForScripting::s_categoryIds[] =
 	{

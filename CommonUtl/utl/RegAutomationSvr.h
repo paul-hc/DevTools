@@ -15,7 +15,7 @@ namespace ole
 	class CSafeForScripting
 	{
 	public:
-		// register automation objects in component categories in order to make them safe for scripting
+		// register automation objects in component categories in order to make them safe for scripting for all object factories
 		static size_t UpdateRegistryAll( RegAction action = ole::Register );
 	private:
 		static bool UpdateRegistry( const CLSID& coClassId, RegAction action );
