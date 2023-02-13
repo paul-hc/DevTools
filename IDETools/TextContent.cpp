@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TextContent.h"
 #include "StringUtilitiesEx.h"
 #include "CompoundTextParser.h"
@@ -14,7 +14,7 @@ IMPLEMENT_DYNCREATE(TextContent, CCmdTarget)
 
 
 TextContent::TextContent( void )
-	: CAutomationBase()
+	: CCmdTarget()
 	, m_TextContent()
 	, m_showErrors( TRUE )
 {
@@ -44,34 +44,30 @@ void TextContent::OnFinalRelease( void )
 // message handlers
 
 BEGIN_MESSAGE_MAP(TextContent, CCmdTarget)
-	//{{AFX_MSG_MAP(TextContent)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
 BEGIN_DISPATCH_MAP(TextContent, CCmdTarget)
-	//{{AFX_DISPATCH_MAP(TextContent)
-	DISP_PROPERTY_NOTIFY(TextContent, "ShowErrors", m_showErrors, OnShowErrorsChanged, VT_BOOL)
-	DISP_PROPERTY_EX(TextContent, "Text", GetText, SetText, VT_BSTR)
-	DISP_PROPERTY_EX(TextContent, "TextLen", GetTextLen, SetNotSupported, VT_I4)
-	DISP_FUNCTION(TextContent, "LoadFile", LoadFile, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(TextContent, "LoadFileSection", LoadFileSection, VT_BOOL, VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION(TextContent, "LoadCompoundFileSections", LoadCompoundFileSections, VT_I4, VTS_BSTR VTS_BSTR VTS_BOOL)
-	DISP_FUNCTION(TextContent, "FindText", FindText, VT_I4, VTS_BSTR VTS_I4 VTS_BOOL)
-	DISP_FUNCTION(TextContent, "ReplaceText", ReplaceText, VT_I4, VTS_BSTR VTS_BSTR VTS_BOOL)
-	DISP_FUNCTION(TextContent, "AddEmbeddedContent", AddEmbeddedContent, VT_BOOL, VTS_BSTR VTS_BSTR VTS_BOOL)
-	DISP_FUNCTION(TextContent, "Tokenize", Tokenize, VT_BSTR, VTS_BSTR)
-	DISP_FUNCTION(TextContent, "GetNextToken", GetNextToken, VT_BSTR, VTS_NONE)
-	DISP_FUNCTION(TextContent, "MultiLinesToSingleParagraph", MultiLinesToSingleParagraph, VT_I4, VTS_BSTR VTS_BOOL)
-	DISP_FUNCTION(TextContent, "AddFieldReplacement", AddFieldReplacement, VT_EMPTY, VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION(TextContent, "ClearFieldReplacements", ClearFieldReplacements, VT_EMPTY, VTS_NONE)
-	DISP_FUNCTION(TextContent, "FormatTimestamp", FormatTimestamp, VT_BSTR, VTS_DATE VTS_BSTR)
-	//}}AFX_DISPATCH_MAP
+	DISP_PROPERTY_NOTIFY_ID(TextContent, "ShowErrors", dispidShowErrors, m_showErrors, OnShowErrorsChanged, VT_BOOL)
+	DISP_PROPERTY_EX_ID(TextContent, "Text", dispidText, GetText, SetText, VT_BSTR)
+	DISP_PROPERTY_EX_ID(TextContent, "TextLen", dispidTextLen, GetTextLen, SetNotSupported, VT_I4)
+	DISP_FUNCTION_ID(TextContent, "LoadFile", dispidLoadFile, LoadFile, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(TextContent, "LoadFileSection", dispidLoadFileSection, LoadFileSection, VT_BOOL, VTS_BSTR VTS_BSTR)
+	DISP_FUNCTION_ID(TextContent, "LoadCompoundFileSections", dispidLoadCompoundFileSections, LoadCompoundFileSections, VT_I4, VTS_BSTR VTS_BSTR VTS_BOOL)
+	DISP_FUNCTION_ID(TextContent, "FindText", dispidFindText, FindText, VT_I4, VTS_BSTR VTS_I4 VTS_BOOL)
+	DISP_FUNCTION_ID(TextContent, "ReplaceText", dispidReplaceText, ReplaceText, VT_I4, VTS_BSTR VTS_BSTR VTS_BOOL)
+	DISP_FUNCTION_ID(TextContent, "AddEmbeddedContent", dispidAddEmbeddedContent, AddEmbeddedContent, VT_BOOL, VTS_BSTR VTS_BSTR VTS_BOOL)
+	DISP_FUNCTION_ID(TextContent, "Tokenize", dispidTokenize, Tokenize, VT_BSTR, VTS_BSTR)
+	DISP_FUNCTION_ID(TextContent, "GetNextToken", dispidGetNextToken, GetNextToken, VT_BSTR, VTS_NONE)
+	DISP_FUNCTION_ID(TextContent, "MultiLinesToSingleParagraph", dispidMultiLinesToSingleParagraph, MultiLinesToSingleParagraph, VT_I4, VTS_BSTR VTS_BOOL)
+	DISP_FUNCTION_ID(TextContent, "AddFieldReplacement", dispidAddFieldReplacement, AddFieldReplacement, VT_EMPTY, VTS_BSTR VTS_BSTR)
+	DISP_FUNCTION_ID(TextContent, "ClearFieldReplacements", dispidClearFieldReplacements, ClearFieldReplacements, VT_EMPTY, VTS_NONE)
+	DISP_FUNCTION_ID(TextContent, "FormatTimestamp", dispidFormatTimestamp, FormatTimestamp, VT_BSTR, VTS_DATE VTS_BSTR)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_ITextContent to support typesafe binding
 //  from VBA.  This IID must match the GUID that is attached to the
-//  dispinterface in the .ODL file.
+//  dispinterface in the .IDL file.
 
 // {E37FE176-CBB7-11D4-B57C-00D0B74ECB52}
 static const IID IID_ITextContent =
@@ -85,7 +81,7 @@ END_INTERFACE_MAP()
 IMPLEMENT_OLECREATE(TextContent, "IDETools.TextContent", 0xe37fe177, 0xcbb7, 0x11d4, 0xb5, 0x7c, 0x0, 0xd0, 0xb7, 0x4e, 0xcb, 0x52)
 
 
-// message handlers
+// interface methods
 
 BSTR TextContent::GetText( void )
 {

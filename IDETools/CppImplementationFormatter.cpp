@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "IdeUtilities.h"
 #include "CppImplementationFormatter.h"
 #include "ContainerComponents.h"
@@ -159,7 +159,7 @@ namespace code
 		CString typeQualifier;
 
 		{
-			CMethodPrototype ranges;
+			CMethodPrototypeOld ranges;
 
 			ranges.SplitMethod( functionImplLine );		//m_validArgListOpenBraces
 			if ( !ranges.m_templateDecl.IsEmpty() )
@@ -175,7 +175,7 @@ namespace code
 			if ( userTypeDescriptor == m_cancelTag )
 				return userTypeDescriptor; // canceled by user
 
-			CMethodPrototype ranges;
+			CMethodPrototypeOld ranges;
 
 			ranges.SplitMethod( userTypeDescriptor.GetString() );		//m_validArgListOpenBraces
 			if ( !ranges.m_templateDecl.IsEmpty() )
@@ -205,7 +205,7 @@ namespace code
 
 		if ( !sourcePrototype.IsEmpty() )
 		{
-			CMethodPrototype method;
+			CMethodPrototypeOld method;
 
 			method.SplitMethod( sourcePrototype.GetString() );		//m_validArgListOpenBraces
 

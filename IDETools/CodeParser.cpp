@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CodeParser.h"
 
 #ifdef _DEBUG
@@ -7,26 +7,31 @@
 #endif
 
 
-bool CCodeParser::FindArgumentList( Range<TIterator>* pOutArgList, TIterator itCode, TIterator itLast ) const
+bool CCodeParser::FindArgumentList( TokenRange* pOutArgList, const std::tstring& proto, size_t offset /*= 0*/ ) const
 {
 	ASSERT_PTR( pOutArgList );
 
-	static const std::tstring s_oper = _T("operator");
-	std::tstring::const_iterator it = std::search( itCode, itLast, s_oper.begin(), s_oper.end() );
+	std::tstring::const_iterator itProto = proto.begin() + offset, itEnd = proto.end();
 
-	if ( it != itLast )
+	static const std::tstring s_oper = _T("operator");
+	std::tstring::const_iterator it = std::search( itProto, itEnd, s_oper.begin(), s_oper.end() );
+
+	if ( it != itEnd )
 		// skip "operator()"
-		if ( it = m_lang.FindNextCharThat( it + s_oper.length(), itLast, pred::IsChar( '(' ) ), it != itLast )
-			if ( m_lang.SkipPastMatchingBrace( &it, itLast ) )
-				if ( FindArgumentList( pOutArgList, it, itLast ) )
+		if ( it = m_lang.FindNextCharThat( it + s_oper.length(), itEnd, pred::IsChar( '(' ) ), it != itEnd )
+			if ( m_lang.SkipPastMatchingBrace( &it, itEnd ) )
+				if ( FindArgumentList( pOutArgList, proto, std::distance( itProto, it ) ) )
 					return true;
 
-	if ( it = m_lang.FindNextCharThat( itCode, itLast, pred::IsChar( '(' ) ), it != itLast )
+	if ( it = m_lang.FindNextCharThat( itProto, itEnd, pred::IsChar( '(' ) ), it != itEnd )
 	{
-		pOutArgList->SetEmptyRange( it );
+		pOutArgList->SetEmptyRange( pvt::Distance( proto.begin(), it ) );
 
-		if ( m_lang.SkipPastMatchingBrace( &pOutArgList->m_end, itLast ), it != itLast )
+		if ( m_lang.SkipPastMatchingBrace( &it, itEnd ), it != itEnd )
+		{
+			pOutArgList->m_end = pvt::Distance( proto.begin(), it );
 			return true;
+		}
 	}
 
 	return false;

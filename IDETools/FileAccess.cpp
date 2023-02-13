@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileAccess.h"
 #include "FileAssoc.h"
 #include "IdeUtilities.h"
@@ -9,11 +9,12 @@
 #include "utl/FileSystem.h"
 #include "utl/UI/ShellUtilities.h"
 
-#define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+#define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 
 
 IMPLEMENT_DYNCREATE(FileAccess, CCmdTarget)
@@ -45,33 +46,29 @@ void FileAccess::OnFinalRelease()
 }
 
 BEGIN_MESSAGE_MAP(FileAccess, CCmdTarget)
-	//{{AFX_MSG_MAP(FileAccess)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 BEGIN_DISPATCH_MAP(FileAccess, CCmdTarget)
-	//{{AFX_DISPATCH_MAP(FileAccess)
-	DISP_FUNCTION(FileAccess, "FileExist", FileExist, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "GetFileAttributes", GetFileAttributes, VT_I4, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "IsDirectoryFile", IsDirectoryFile, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "IsCompressedFile", IsCompressedFile, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "IsReadOnlyFile", IsReadOnlyFile, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "SetReadOnlyFile", SetReadOnlyFile, VT_BOOL, VTS_BSTR VTS_BOOL)
-	DISP_FUNCTION(FileAccess, "Execute", Execute, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "ShellOpen", ShellOpen, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "ExploreAndSelectFile", ExploreAndSelectFile, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "GetNextAssocDoc", GetNextAssocDoc, VT_BSTR, VTS_BSTR VTS_BOOL)
-	DISP_FUNCTION(FileAccess, "GetNextVariationDoc", GetNextVariationDoc, VT_BSTR, VTS_BSTR VTS_BOOL)
-	DISP_FUNCTION(FileAccess, "GetComplementaryDoc", GetComplementaryDoc, VT_BSTR, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "OutputWndActivateTab", OutputWndActivateTab, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileAccess, "GetIDECurrentBrowseFile", GetIDECurrentBrowseFile, VT_BSTR, VTS_NONE)
-	DISP_FUNCTION(FileAccess, "UpdateIDECurrentBrowseFile", UpdateIDECurrentBrowseFile, VT_BOOL, VTS_BOOL)
-	//}}AFX_DISPATCH_MAP
+	DISP_FUNCTION_ID(FileAccess, "FileExist", dispidFileExist, FileExist, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "GetFileAttributes", dispidGetFileAttributes, GetFileAttributes, VT_I4, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "IsDirectoryFile", dispidIsDirectoryFile, IsDirectoryFile, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "IsCompressedFile", dispidIsCompressedFile, IsCompressedFile, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "IsReadOnlyFile", dispidIsReadOnlyFile, IsReadOnlyFile, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "SetReadOnlyFile", dispidSetReadOnlyFile, SetReadOnlyFile, VT_BOOL, VTS_BSTR VTS_BOOL)
+	DISP_FUNCTION_ID(FileAccess, "Execute", dispidExecute, Execute, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "ShellOpen", dispidShellOpen, ShellOpen, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "ExploreAndSelectFile", dispidExploreAndSelectFile, ExploreAndSelectFile, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "GetNextAssocDoc", dispidGetNextAssocDoc, GetNextAssocDoc, VT_BSTR, VTS_BSTR VTS_BOOL)
+	DISP_FUNCTION_ID(FileAccess, "GetNextVariationDoc", dispidGetNextVariationDoc, GetNextVariationDoc, VT_BSTR, VTS_BSTR VTS_BOOL)
+	DISP_FUNCTION_ID(FileAccess, "GetComplementaryDoc", dispidGetComplementaryDoc, GetComplementaryDoc, VT_BSTR, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "OutputWndActivateTab", dispidOutputWndActivateTab, OutputWndActivateTab, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileAccess, "GetIDECurrentBrowseFile", dispidGetIDECurrentBrowseFile, GetIDECurrentBrowseFile, VT_BSTR, VTS_NONE)
+	DISP_FUNCTION_ID(FileAccess, "UpdateIDECurrentBrowseFile", dispidUpdateIDECurrentBrowseFile, UpdateIDECurrentBrowseFile, VT_BOOL, VTS_BOOL)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_IFileAccess to support typesafe binding
 //  from VBA.  This IID must match the GUID that is attached to the
-//  dispinterface in the .ODL file.
+//  dispinterface in the .IDL file.
 
 // {1556FB24-22DB-11D2-A278-006097B8DD84}
 static const IID IID_IFileAccess =

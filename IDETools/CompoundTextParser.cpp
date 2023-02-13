@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CompoundTextParser.h"
 #include "IdeUtilities.h"
 #include "StringUtilitiesEx.h"

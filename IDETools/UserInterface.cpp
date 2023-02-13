@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "UserInterface.h"
 #include "IdeUtilities.h"
 #include "InputBoxDialog.h"
@@ -52,38 +52,34 @@ void UserInterface::OnFinalRelease()
 // message handlers
 
 BEGIN_MESSAGE_MAP(UserInterface, CCmdTarget)
-	//{{AFX_MSG_MAP(UserInterface)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
 BEGIN_DISPATCH_MAP(UserInterface, CCmdTarget)
-	//{{AFX_DISPATCH_MAP(UserInterface)
-	DISP_PROPERTY_EX(UserInterface, "IDEToolsRegistryKey", GetIDEToolsRegistryKey, SetIDEToolsRegistryKey, VT_BSTR)
-	DISP_FUNCTION(UserInterface, "InputBox", InputBox, VT_BSTR, VTS_BSTR VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "GetClipboardText", GetClipboardText, VT_BSTR, VTS_NONE)
-	DISP_FUNCTION(UserInterface, "SetClipboardText", SetClipboardText, VT_EMPTY, VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "IsClipFormatAvailable", IsClipFormatAvailable, VT_BOOL, VTS_I4)
-	DISP_FUNCTION(UserInterface, "IsClipFormatNameAvailable", IsClipFormatNameAvailable, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "IsKeyPath", IsKeyPath, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "CreateKeyPath", CreateKeyPath, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "RegReadString", RegReadString, VT_BSTR, VTS_BSTR VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "RegReadNumber", RegReadNumber, VT_I4, VTS_BSTR VTS_BSTR VTS_I4)
-	DISP_FUNCTION(UserInterface, "RegWriteString", RegWriteString, VT_BOOL, VTS_BSTR VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "RegWriteNumber", RegWriteNumber, VT_BOOL, VTS_BSTR VTS_BSTR VTS_I4)
-	DISP_FUNCTION(UserInterface, "EnsureStringValue", EnsureStringValue, VT_BOOL, VTS_BSTR VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "EnsureNumberValue", EnsureNumberValue, VT_BOOL, VTS_BSTR VTS_BSTR VTS_I4)
-	DISP_FUNCTION(UserInterface, "GetEnvironmentVariable", GetEnvironmentVariable, VT_BSTR, VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "SetEnvironmentVariable", SetEnvironmentVariable, VT_BOOL, VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "ExpandEnvironmentVariables", ExpandEnvironmentVariables, VT_BSTR, VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "LocateFile", LocateFile, VT_BSTR, VTS_BSTR)
-	DISP_FUNCTION(UserInterface, "RunUnitTests", RunUnitTests, VT_EMPTY, VTS_NONE)
-	//}}AFX_DISPATCH_MAP
+	DISP_PROPERTY_EX_ID(UserInterface, "IDEToolsRegistryKey", dispidIDEToolsRegistryKey, GetIDEToolsRegistryKey, SetIDEToolsRegistryKey, VT_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "RunUnitTests", dispidRunUnitTests, RunUnitTests, VT_EMPTY, VTS_NONE)
+	DISP_FUNCTION_ID(UserInterface, "InputBox", dispidInputBox, InputBox, VT_BSTR, VTS_BSTR VTS_BSTR VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "GetClipboardText", dispidGetClipboardText, GetClipboardText, VT_BSTR, VTS_NONE)
+	DISP_FUNCTION_ID(UserInterface, "SetClipboardText", dispidSetClipboardText, SetClipboardText, VT_EMPTY, VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "IsClipFormatAvailable", dispidIsClipFormatAvailable, IsClipFormatAvailable, VT_BOOL, VTS_I4)
+	DISP_FUNCTION_ID(UserInterface, "IsClipFormatNameAvailable", dispidIsClipFormatNameAvailable, IsClipFormatNameAvailable, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "IsKeyPath", dispidIsKeyPath, IsKeyPath, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "CreateKeyPath", dispidCreateKeyPath, CreateKeyPath, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "RegReadString", dispidRegReadString, RegReadString, VT_BSTR, VTS_BSTR VTS_BSTR VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "RegReadNumber", dispidRegReadNumber, RegReadNumber, VT_I4, VTS_BSTR VTS_BSTR VTS_I4)
+	DISP_FUNCTION_ID(UserInterface, "RegWriteString", dispidRegWriteString, RegWriteString, VT_BOOL, VTS_BSTR VTS_BSTR VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "RegWriteNumber", dispidRegWriteNumber, RegWriteNumber, VT_BOOL, VTS_BSTR VTS_BSTR VTS_I4)
+	DISP_FUNCTION_ID(UserInterface, "EnsureStringValue", dispidEnsureStringValue, EnsureStringValue, VT_BOOL, VTS_BSTR VTS_BSTR VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "EnsureNumberValue", dispidEnsureNumberValue, EnsureNumberValue, VT_BOOL, VTS_BSTR VTS_BSTR VTS_I4)
+	DISP_FUNCTION_ID(UserInterface, "GetEnvironmentVariable", dispidGetEnvironmentVariable, GetEnvironmentVariable, VT_BSTR, VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "SetEnvironmentVariable", dispidSetEnvironmentVariable, SetEnvironmentVariable, VT_BOOL, VTS_BSTR VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "ExpandEnvironmentVariables", dispidExpandEnvironmentVariables, ExpandEnvironmentVariables, VT_BSTR, VTS_BSTR)
+	DISP_FUNCTION_ID(UserInterface, "LocateFile", dispidLocateFile, LocateFile, VT_BSTR, VTS_BSTR)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_IUserInterface to support typesafe binding
 //  from VBA.  This IID must match the GUID that is attached to the
-//  dispinterface in the .ODL file.
+//  dispinterface in the .IDL file.
 
 // {216EF194-4C10-11D3-A3C8-006097B8DD84}
 static const IID IID_IUserInterface =
@@ -116,6 +112,11 @@ void UserInterface::SetIDEToolsRegistryKey( LPCTSTR lpszNewValue )
 
 	msg.Format( IDS_ERR_READONLY_PROPERTY, _T("UserInterface.IDEToolsRegistryKey") );
 	AfxMessageBox( msg );
+}
+
+void UserInterface::RunUnitTests( void )
+{
+	CApplication::GetApp()->OnRunUnitTests();
 }
 
 BSTR UserInterface::InputBox( LPCTSTR title, LPCTSTR prompt, LPCTSTR initialValue )
@@ -278,9 +279,4 @@ BSTR UserInterface::LocateFile( LPCTSTR localDirPath )
 		includeFilePath = dlg.m_selectedFilePath;
 
 	return str::AllocSysString( includeFilePath );
-}
-
-void UserInterface::RunUnitTests( void )
-{
-	CApplication::GetApp()->OnRunUnitTests();
 }

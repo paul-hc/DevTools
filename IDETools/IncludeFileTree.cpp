@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "IncludeFileTree.h"
 #include "IdeUtilities.h"
 #include "FileTreeDialog.h"
@@ -15,7 +15,7 @@ IMPLEMENT_DYNCREATE(IncludeFileTree, CCmdTarget)
 
 
 IncludeFileTree::IncludeFileTree( void )
-	: CAutomationBase()
+	: CCmdTarget()
 {
 	EnableAutomation();
 	// To keep the application running as long as an OLE automation
@@ -43,21 +43,17 @@ void IncludeFileTree::OnFinalRelease( void )
 // message handlers
 
 BEGIN_MESSAGE_MAP(IncludeFileTree, CCmdTarget)
-	//{{AFX_MSG_MAP(IncludeFileTree)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 BEGIN_DISPATCH_MAP(IncludeFileTree, CCmdTarget)
-	//{{AFX_DISPATCH_MAP(IncludeFileTree)
-	DISP_PROPERTY_NOTIFY(IncludeFileTree, "PickedIncludeFile", m_pickedIncludeFile, OnPickedIncludeFileChanged, VT_BSTR)
-	DISP_PROPERTY_NOTIFY(IncludeFileTree, "PromptLineNo", m_promptLineNo, OnPromptLineNoChanged, VT_I4)
-	DISP_FUNCTION(IncludeFileTree, "BrowseIncludeFiles", BrowseIncludeFiles, VT_BOOL, VTS_BSTR)
-	//}}AFX_DISPATCH_MAP
+	DISP_PROPERTY_NOTIFY_ID(IncludeFileTree, "PickedIncludeFile", dispidPickedIncludeFile, m_pickedIncludeFile, OnPickedIncludeFileChanged, VT_BSTR)
+	DISP_PROPERTY_NOTIFY_ID(IncludeFileTree, "PromptLineNo", dispidPromptLineNo, m_promptLineNo, OnPromptLineNoChanged, VT_I4)
+	DISP_FUNCTION_ID(IncludeFileTree, "BrowseIncludeFiles", dispidBrowseIncludeFiles, BrowseIncludeFiles, VT_BOOL, VTS_BSTR)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_IIncludeFileTree to support typesafe binding
 //  from VBA.  This IID must match the GUID that is attached to the
-//  dispinterface in the .ODL file.
+//  dispinterface in the .IDL file.
 
 // {1006E3E6-1F6F-11D2-A275-006097B8DD84}
 static const IID IID_IIncludeFileTree =

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "OptionsSheet.h"
 #include "IncludeDirectories.h"
 #include "ModuleSession.h"

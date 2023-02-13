@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WkspLoadDialog.h"
 #include "WorkspaceProfile.h"
 #include "Application_fwd.h"

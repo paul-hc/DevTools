@@ -1,6 +1,6 @@
 // Copyleft 2004 Paul Cocoveanu
 //
-#include "stdafx.h"
+#include "pch.h"
 #include "TokenRange.h"
 #include "StringUtilitiesEx.h"
 

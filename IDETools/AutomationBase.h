@@ -5,7 +5,7 @@
 
 // base for all automation objects in this module, ensures lazy initialization of GUI application resources
 
-abstract class CAutomationBase : public CCmdTarget
+abstract class CAutomationBase
 {
 protected:
 	CAutomationBase( void );

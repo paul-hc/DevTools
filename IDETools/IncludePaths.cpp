@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "IncludePaths.h"
 #include "IdeUtilities.h"
 #include "Application.h"

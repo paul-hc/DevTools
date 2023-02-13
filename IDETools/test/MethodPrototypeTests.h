@@ -8,6 +8,12 @@
 #include "utl/test/UnitTest.h"
 
 
+namespace code
+{
+	struct CMethodPrototype;
+}
+
+
 class CMethodPrototypeTests : public ut::CConsoleTestCase
 {
 	CMethodPrototypeTests( void );
@@ -17,9 +23,9 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestParse_GlobalFunction( void );
-	void TestParse_ClassMethodImpl( void );
-	void TestParse_TemplateMethodImpl( void );
+	void TestParse_GlobalFunction( code::CMethodPrototype& proto );
+	void TestParse_ClassMethodImpl( code::CMethodPrototype& proto );
+	void TestParse_TemplateMethodImpl( code::CMethodPrototype& proto );
 };
 
 

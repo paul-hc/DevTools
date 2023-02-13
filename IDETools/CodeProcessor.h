@@ -1,38 +1,33 @@
-#if !defined(AFX_CODEFORMATTING_H__C841D2DA_1177_4AF1_A68C_3EA45D9166BC__INCLUDED_)
-#define AFX_CODEFORMATTING_H__C841D2DA_1177_4AF1_A68C_3EA45D9166BC__INCLUDED_
 #pragma once
 
 #include "AutomationBase.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// CCodeProcessor command target
 
-class CCodeProcessor : public CAutomationBase
+// CodeProcessor command target
+
+class CodeProcessor : public CCmdTarget
+	, private CAutomationBase
 {
-	DECLARE_DYNCREATE(CCodeProcessor)
+	DECLARE_DYNCREATE(CodeProcessor)
 protected:
-	CCodeProcessor( void );
-	virtual ~CCodeProcessor();
+	CodeProcessor( void );
+	virtual ~CodeProcessor();
 private:
 	CString m_docLanguage;
 	int m_tabSize;
 	bool m_useTabs;
 public:
-	// generated overrides
-	//{{AFX_VIRTUAL(CCodeProcessor)
-	public:
-	virtual void OnFinalRelease();
-	//}}AFX_VIRTUAL
+	// generated stuff
+public:
+	virtual void OnFinalRelease( void );
 protected:
-	// generated message map
-	//{{AFX_MSG(CCodeProcessor)
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
-	DECLARE_OLECREATE(CCodeProcessor)
+	DECLARE_OLECREATE(CodeProcessor)
 
-	// Generated OLE dispatch map functions
-	//{{AFX_DISPATCH(CCodeProcessor)
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
+
+	// generated OLE dispatch map functions
 	afx_msg void SetDocLanguage(LPCTSTR lpszNewValue);
 	afx_msg void SetTabSize(long nNewValue);
 	afx_msg void SetUseTabs(BOOL bNewValue);
@@ -47,14 +42,22 @@ protected:
 	afx_msg BSTR SortLines(LPCTSTR codeText, BOOL ascending);
 	afx_msg BSTR AutoMakeCode(LPCTSTR codeText);
 	afx_msg BSTR TokenizeText(LPCTSTR codeText);
-	//}}AFX_DISPATCH
-	DECLARE_DISPATCH_MAP()
-	DECLARE_INTERFACE_MAP()
+
+	enum 
+	{
+		dispidDocLanguage = 1,
+		dispidTabSize = 2,
+		dispidUseTabs = 3,
+		dispidCancelTag = 4,
+		dispidAutoFormatCode = 5,
+		dispidSplitArgumentList = 6,
+		dispidExtractTypeDescriptor = 7,
+		dispidImplementMethods = 8,
+		dispidToggleComment = 9,
+		dispidFormatWhitespaces = 10,
+		dispidGenerateConsecutiveNumbers = 11,
+		dispidSortLines = 12,
+		dispidAutoMakeCode = 13,
+		dispidTokenizeText = 14
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_CODEFORMATTING_H__C841D2DA_1177_4AF1_A68C_3EA45D9166BC__INCLUDED_)

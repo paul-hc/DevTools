@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileSearch.h"
 
 #ifdef _DEBUG
@@ -143,45 +143,41 @@ CString FileSearch::doFindAllFiles( LPCTSTR filePattern, LPCTSTR separator, long
 // message handlers
 
 BEGIN_MESSAGE_MAP(FileSearch, CCmdTarget)
-	//{{AFX_MSG_MAP(FileSearch)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 BEGIN_DISPATCH_MAP(FileSearch, CCmdTarget)
-	//{{AFX_DISPATCH_MAP(FileSearch)
-	DISP_PROPERTY_EX(FileSearch, "FileAttrFilterStrict", GetFileAttrFilterStrict, SetFileAttrFilterStrict, VT_I4)
-	DISP_PROPERTY_EX(FileSearch, "FileAttrFilterStrictNot", GetFileAttrFilterStrictNot, SetFileAttrFilterStrictNot, VT_I4)
-	DISP_PROPERTY_EX(FileSearch, "FileAttrFilterOr", GetFileAttrFilterOr, SetFileAttrFilterOr, VT_I4)
-	DISP_PROPERTY_EX(FileSearch, "ExcludeDirDots", GetExcludeDirDots, SetExcludeDirDots, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "FileAttributes", GetFileAttributes, SetNotSupported, VT_I4)
-	DISP_PROPERTY_EX(FileSearch, "FileName", GetFileName, SetNotSupported, VT_BSTR)
-	DISP_PROPERTY_EX(FileSearch, "FilePath", GetFilePath, SetNotSupported, VT_BSTR)
-	DISP_PROPERTY_EX(FileSearch, "FileTitle", GetFileTitle, SetNotSupported, VT_BSTR)
-	DISP_PROPERTY_EX(FileSearch, "FileURL", GetFileURL, SetNotSupported, VT_BSTR)
-	DISP_PROPERTY_EX(FileSearch, "Root", GetRoot, SetNotSupported, VT_BSTR)
-	DISP_PROPERTY_EX(FileSearch, "Length", GetLength, SetNotSupported, VT_I4)
-	DISP_PROPERTY_EX(FileSearch, "IsDots", GetIsDots, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "IsReadOnly", GetIsReadOnly, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "IsDirectory", GetIsDirectory, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "IsCompressed", GetIsCompressed, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "IsSystem", GetIsSystem, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "IsHidden", GetIsHidden, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "IsTemporary", GetIsTemporary, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "IsNormal", GetIsNormal, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX(FileSearch, "IsArchived", GetIsArchived, SetNotSupported, VT_BOOL)
-	DISP_FUNCTION(FileSearch, "FindFile", FindFile, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(FileSearch, "FindNextFile", FindNextFile, VT_BOOL, VTS_NONE)
-	DISP_FUNCTION(FileSearch, "FindAllFiles", FindAllFiles, VT_BSTR, VTS_BSTR VTS_BSTR VTS_PI4 VTS_BOOL)
-	DISP_FUNCTION(FileSearch, "Close", Close, VT_EMPTY, VTS_NONE)
-	DISP_FUNCTION(FileSearch, "MatchesMask", MatchesMask, VT_BOOL, VTS_I4)
-	DISP_FUNCTION(FileSearch, "BuildSubDirFilePattern", BuildSubDirFilePattern, VT_BSTR, VTS_BSTR)
-	DISP_FUNCTION(FileSearch, "SetupForSubDirSearch", SetupForSubDirSearch, VT_BSTR, VTS_BSTR)
-	//}}AFX_DISPATCH_MAP
+	DISP_PROPERTY_EX_ID(FileSearch, "FileAttrFilterStrict", dispidFileAttrFilterStrict, GetFileAttrFilterStrict, SetFileAttrFilterStrict, VT_I4)
+	DISP_PROPERTY_EX_ID(FileSearch, "FileAttrFilterStrictNot", dispidFileAttrFilterStrictNot, GetFileAttrFilterStrictNot, SetFileAttrFilterStrictNot, VT_I4)
+	DISP_PROPERTY_EX_ID(FileSearch, "FileAttrFilterOr", dispidFileAttrFilterOr, GetFileAttrFilterOr, SetFileAttrFilterOr, VT_I4)
+	DISP_PROPERTY_EX_ID(FileSearch, "ExcludeDirDots", dispidExcludeDirDots, GetExcludeDirDots, SetExcludeDirDots, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "FileAttributes", dispidFileAttributes, GetFileAttributes, SetNotSupported, VT_I4)
+	DISP_PROPERTY_EX_ID(FileSearch, "FileName", dispidFileName, GetFileName, SetNotSupported, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileSearch, "FilePath", dispidFilePath, GetFilePath, SetNotSupported, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileSearch, "FileTitle", dispidFileTitle, GetFileTitle, SetNotSupported, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileSearch, "FileURL", dispidFileURL, GetFileURL, SetNotSupported, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileSearch, "Root", dispidRoot, GetRoot, SetNotSupported, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileSearch, "Length", dispidLength, GetLength, SetNotSupported, VT_I4)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsDots", dispidIsDots, GetIsDots, SetNotSupported, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsReadOnly", dispidIsReadOnly, GetIsReadOnly, SetNotSupported, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsDirectory", dispidIsDirectory, GetIsDirectory, SetNotSupported, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsCompressed", dispidIsCompressed, GetIsCompressed, SetNotSupported, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsSystem", dispidIsSystem, GetIsSystem, SetNotSupported, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsHidden", dispidIsHidden, GetIsHidden, SetNotSupported, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsTemporary", dispidIsTemporary, GetIsTemporary, SetNotSupported, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsNormal", dispidIsNormal, GetIsNormal, SetNotSupported, VT_BOOL)
+	DISP_PROPERTY_EX_ID(FileSearch, "IsArchived", dispidIsArchived, GetIsArchived, SetNotSupported, VT_BOOL)
+	DISP_FUNCTION_ID(FileSearch, "FindFile", dispidFindFile, FindFile, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(FileSearch, "FindNextFile", dispidFindNextFile, FindNextFile, VT_BOOL, VTS_NONE)
+	DISP_FUNCTION_ID(FileSearch, "FindAllFiles", dispidFindAllFiles, FindAllFiles, VT_BSTR, VTS_BSTR VTS_BSTR VTS_PI4 VTS_BOOL)
+	DISP_FUNCTION_ID(FileSearch, "Close", dispidClose, Close, VT_EMPTY, VTS_NONE)
+	DISP_FUNCTION_ID(FileSearch, "MatchesMask", dispidMatchesMask, MatchesMask, VT_BOOL, VTS_I4)
+	DISP_FUNCTION_ID(FileSearch, "BuildSubDirFilePattern", dispidBuildSubDirFilePattern, BuildSubDirFilePattern, VT_BSTR, VTS_BSTR)
+	DISP_FUNCTION_ID(FileSearch, "SetupForSubDirSearch", dispidSetupForSubDirSearch, SetupForSubDirSearch, VT_BSTR, VTS_BSTR)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_IFileSearch to support typesafe binding
 //  from VBA.  This IID must match the GUID that is attached to the
-//  dispinterface in the .ODL file.
+//  dispinterface in the .IDL file.
 
 // {C722D0B5-1E2D-11D5-B59B-00D0B74ECB52}
 static const IID IID_IFileSearch =
@@ -194,8 +190,8 @@ END_INTERFACE_MAP()
 // {C722D0B6-1E2D-11D5-B59B-00D0B74ECB52}
 IMPLEMENT_OLECREATE(FileSearch, "IDETools.FileSearch", 0xc722d0b6, 0x1e2d, 0x11d5, 0xb5, 0x9b, 0x0, 0xd0, 0xb7, 0x4e, 0xcb, 0x52)
 
-/////////////////////////////////////////////////////////////////////////////
-// FileSearch message handlers
+
+// dispatch methods
 
 long FileSearch::GetFileAttrFilterStrict()
 {

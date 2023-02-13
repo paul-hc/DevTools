@@ -1,14 +1,14 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Application.h"
 #include "IdeUtilities.h"
 #include "IncludeDirectories.h"
 #include "ModuleSession.h"
 #include "PathSortOrder.h"
-#include "SafeForScripting.h"
 #include "resource.h"
 #include "utl/AppTools.h"
 #include "utl/FileSystem.h"
+#include "utl/RegAutomationSvr.h"
 #include "utl/UI/ShellDialogs_fwd.h"
 #include "utl/UI/VersionInfo.h"
 #include "utl/UI/resource.h"
@@ -22,6 +22,47 @@
 #endif
 
 #include "utl/UI/BaseApp.hxx"
+
+
+// special entry points required for inproc servers
+
+STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return AfxDllGetClassObject(rclsid, riid, ppv);
+}
+
+STDAPI DllCanUnloadNow(void)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return AfxDllCanUnloadNow();
+}
+
+// by exporting DllRegisterServer, you can use regsvr.exe to register COM server
+STDAPI DllRegisterServer(void)
+{
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
+
+	if ( !COleObjectFactory::UpdateRegistryAll( TRUE ) )
+		return E_FAIL;
+
+	// register automation objects in component categories in order to make them safe for scripting
+	ole::CSafeForScripting::UpdateRegistryAll( ole::Register );
+	return S_OK;
+}
+
+// by exporting DllUnregisterServer, you can use regsvr.exe to unregister COM server
+STDAPI DllUnregisterServer( void )
+{
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
+
+	// the call below is just for convenience, MFC doesn't actually implement COM server unregistration
+	COleObjectFactory::UpdateRegistryAll( FALSE );
+
+	// we have to do it explicitly
+	ole::CSafeForScripting::UpdateRegistryAll( ole::Unregister );
+	return S_OK;
+}
 
 
 namespace ut
@@ -74,7 +115,7 @@ CApplication::~CApplication()
 }
 
 BOOL CApplication::InitInstance( void )
-{
+{	// called by DllMain()
 	// modify profile name from "IDETools" to "IDETools_v7"
 	StoreProfileSuffix( str::Format( _T("_v%d"), HIWORD( CVersionInfo().GetFileInfo().dwProductVersionMS ) ) );
 
@@ -216,44 +257,3 @@ namespace app
 	}
 
 } //namespace app
-
-
-// special entry points required for inproc servers
-
-STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return AfxDllGetClassObject(rclsid, riid, ppv);
-}
-
-STDAPI DllCanUnloadNow(void)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return AfxDllCanUnloadNow();
-}
-
-// by exporting DllRegisterServer, you can use regsvr.exe to register COM server
-STDAPI DllRegisterServer(void)
-{
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
-
-	if ( !COleObjectFactory::UpdateRegistryAll( TRUE ) )
-		return E_FAIL;
-
-	// register automation objects in component categories in order to make them safe for scripting
-	scripting::registerAllScriptObjects( scripting::Register );
-	return S_OK;
-}
-
-// by exporting DllUnregisterServer, you can use regsvr.exe to unregister COM server
-STDAPI DllUnregisterServer( void )
-{
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
-
-	// the call below is just for convenience, MFC doesn't actually implement COM server unregistration
-	COleObjectFactory::UpdateRegistryAll( FALSE );
-
-	// we have to do it explicitly
-	scripting::registerAllScriptObjects( scripting::Unregister );
-	return S_OK;
-}

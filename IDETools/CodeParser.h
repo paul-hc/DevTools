@@ -31,12 +31,10 @@ namespace pvt
 
 class CCodeParser
 {
-	typedef std::tstring::const_iterator TIterator;
-	typedef std::tstring::const_reverse_iterator TRevIterator;
 public:
 	CCodeParser( const code::CLanguage<TCHAR>& lang ) : m_lang( lang ) {}
 
-	bool FindArgumentList( Range<TIterator>* pOutArgList, TIterator itCode, TIterator itLast ) const;
+	bool FindArgumentList( TokenRange* pOutArgList, const std::tstring& proto, size_t offset = 0 ) const;
 private:
 	const code::CLanguage<TCHAR>& m_lang;
 };

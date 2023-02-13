@@ -10,9 +10,6 @@
 
 namespace code
 {
-	struct CMethodPrototype;
-
-
 	class CppImplementationFormatter : public CFormatter
 	{
 	public:

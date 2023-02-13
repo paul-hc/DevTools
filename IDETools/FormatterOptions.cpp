@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FormatterOptions.h"
 #include "CodeUtilities.h"
 #include "ModuleSession.h"

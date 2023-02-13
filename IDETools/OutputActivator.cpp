@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "OutputActivator.h"
 
 #ifdef _DEBUG

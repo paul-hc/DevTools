@@ -1,6 +1,6 @@
 // Copyleft 2004 Paul Cocoveanu
 //
-#include "stdafx.h"
+#include "pch.h"
 #include "LanguageSearchEngine.h"
 #include "BraceParityStatus.h"
 #include "ModuleSession.h"

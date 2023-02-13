@@ -1,6 +1,6 @@
 // Copyleft 2004 Paul Cocoveanu
 //
-#include "stdafx.h"
+#include "pch.h"
 #include "Application.h"
 #include "Formatter.h"
 #include "StringUtilitiesEx.h"
@@ -55,7 +55,7 @@ namespace code
 			{ _T("HTML - IE 3.0"), DocLang_HtmlXml },
 			{ _T("HTML 2.0 (RFC 1866)"), DocLang_HtmlXml },
 			{ _T("HTML Server-Side Script"), DocLang_HtmlXml },
-			{ _T("ODL/IDL"), DocLang_IDL }
+			{ _T("IDL/ODL"), DocLang_IDL }
 		};
 
 		m_docLanguage = DocLang_None;

@@ -430,6 +430,9 @@
     <ClInclude Include="CodeParsing.h">
       <Filter>utl\code</Filter>
     </ClInclude>
+    <ClInclude Include="RegAutomationSvr.h">
+      <Filter>utl\Registry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -668,6 +671,9 @@
     </ClCompile>
     <ClCompile Include="CodeParsing.cpp">
       <Filter>utl\code</Filter>
+    </ClCompile>
+    <ClCompile Include="RegAutomationSvr.cpp">
+      <Filter>utl\Registry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

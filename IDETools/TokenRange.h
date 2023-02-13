@@ -5,15 +5,16 @@
 #include "utl/Range.h"
 
 
-struct TokenRange
+struct TokenRange : public Range<int>
 {
+	typedef Range<int> TRange;
 public:
-	TokenRange( int startAndEnd = 0 ) : m_start( startAndEnd ), m_end( startAndEnd ) {}
-	TokenRange( int start, int end ) : m_start( start ), m_end( end ) {}
+	TokenRange( int startAndEnd = 0 ) : TRange( startAndEnd ) {}
+	TokenRange( int start, int end ) : TRange( start, end ) {}
 	TokenRange( const TCHAR* pText, int start = 0 ) { setString( pText, start ); }
 
 	template< typename PosT >
-	explicit TokenRange( const Range<PosT>& range ) : m_start( static_cast<int>( range.m_start ) ), m_end( static_cast<int>( range.m_end ) ) {}
+	explicit TokenRange( const Range<PosT>& range ) : TRange( range ) {}
 
 	bool operator==( const TokenRange& right ) const
 	{
@@ -27,23 +28,21 @@ public:
 	bool operator<( const TokenRange& right ) const { return &right != this && m_start < right.m_start; }
 
 	bool IsValid( void ) const { return m_start >= 0 && m_end >= 0; }
-	bool IsEmpty( void ) const { return m_start == m_end; }
-	bool IsNormalized( void ) const { return m_start <= m_end; }
 	bool InStringBounds( const TCHAR* pText ) const;
 
 	int getLength( void ) const { ASSERT( IsValid() ); return m_end - m_start; }
-	void setLength( int length );
+	void setLength( int length ) { ASSERT( m_start >= 0 ); m_end = m_start + length; }
 
 	void assign( int start, int end ) { m_start = start; m_end = end; }
 	void setString( const TCHAR* pText, int start = 0 );
 	void setEmpty( int startAndEnd ) { m_start = m_end = startAndEnd; }
-	void setWithLength( int start, int length );
+	void setWithLength( int start, int length ) { m_start = start; setLength( length ); }
 
 	static TokenRange endOfString( const TCHAR* pText ) { return TokenRange( (int)str::GetLength( pText ) ); }
 
 	void gotoEnd( const TCHAR* pText ) { ASSERT_PTR( pText ); setEmpty( (int)str::GetLength( pText ) ); }
 
-	void extendToEnd( const TCHAR* pText );
+	void extendToEnd( const TCHAR* pText ) { ASSERT( pText != NULL && m_start >= 0 ); m_end = (int)str::GetLength( pText ); }
 
 	void incrementBy( int increment );
 
@@ -65,31 +64,19 @@ public:
 
 	TokenRange& replaceWithToken( CString& targetString, const TCHAR* pToken );
 	TokenRange& smartReplaceWithToken( CString& targetString, const TCHAR* pToken );
-public:
-	int m_start;
-	int m_end;
 };
 
 
+namespace str
+{
+	inline std::tstring ExtractString( const TokenRange& tokenRange, const std::tstring& text )
+	{
+		return text.substr( tokenRange.m_start, tokenRange.m_end - tokenRange.m_start );
+	}
+}
+
+
 // inline code
-
-inline void TokenRange::setLength( int length )
-{
-	ASSERT( m_start >= 0 );
-	m_end = m_start + length;
-}
-
-inline void TokenRange::setWithLength( int start, int length )
-{
-	m_start = start;
-	setLength( length );
-}
-
-inline void TokenRange::extendToEnd( const TCHAR* pText )
-{
-	ASSERT( pText != NULL && m_start >= 0 );
-	m_end = (int)str::GetLength( pText );
-}
 
 inline void TokenRange::inflateBy( int delta )
 {

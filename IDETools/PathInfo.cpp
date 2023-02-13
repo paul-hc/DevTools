@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PathInfo.h"
 #include "PathSortOrder.h"
 #include "StringUtilitiesEx.h"

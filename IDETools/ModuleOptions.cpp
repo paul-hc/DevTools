@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ModuleSession.h"
 #include "ModuleOptions.h"
 #include "IdeUtilities.h"
@@ -37,41 +37,37 @@ void ModuleOptions::OnFinalRelease( void )
 }
 
 BEGIN_MESSAGE_MAP(ModuleOptions, CCmdTarget)
-	//{{AFX_MSG_MAP(ModuleOptions)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 BEGIN_DISPATCH_MAP(ModuleOptions, CCmdTarget)
-	//{{AFX_DISPATCH_MAP(ModuleOptions)
-	DISP_PROPERTY_EX(ModuleOptions, "developerName", GetDeveloperName, SetDeveloperName, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "codeTemplateFile", GetCodeTemplateFile, SetCodeTemplateFile, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "splitMaxColumn", GetSplitMaxColumn, SetSplitMaxColumn, VT_I4)
-	DISP_PROPERTY_EX(ModuleOptions, "menuVertSplitCount", GetMenuVertSplitCount, SetMenuVertSplitCount, VT_I4)
-	DISP_PROPERTY_EX(ModuleOptions, "singleLineCommentToken", GetSingleLineCommentToken, SetSingleLineCommentToken, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "classPrefix", GetClassPrefix, SetClassPrefix, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "structPrefix", GetStructPrefix, SetStructPrefix, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "enumPrefix", GetEnumPrefix, SetEnumPrefix, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "autoCodeGeneration", GetAutoCodeGeneration, SetAutoCodeGeneration, VT_BOOL)
-	DISP_PROPERTY_EX(ModuleOptions, "displayErrorMessages", GetDisplayErrorMessages, SetDisplayErrorMessages, VT_BOOL)
-	DISP_PROPERTY_EX(ModuleOptions, "useCommentDecoration", GetUseCommentDecoration, SetUseCommentDecoration, VT_BOOL)
-	DISP_PROPERTY_EX(ModuleOptions, "duplicateLineMoveDown", GetDuplicateLineMoveDown, SetDuplicateLineMoveDown, VT_BOOL)
-	DISP_PROPERTY_EX(ModuleOptions, "browseInfoPath", GetBrowseInfoPath, SetBrowseInfoPath, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "additionalIncludePath", GetAdditionalIncludePath, SetAdditionalIncludePath, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "additionalAssocFolders", GetAdditionalAssocFolders, SetAdditionalAssocFolders, VT_BSTR)
-	DISP_PROPERTY_EX(ModuleOptions, "linesBetweenFunctionImpls", GetLinesBetweenFunctionImpls, SetNotSupported, VT_I4)
-	DISP_PROPERTY_EX(ModuleOptions, "returnTypeOnSeparateLine", GetReturnTypeOnSeparateLine, SetNotSupported, VT_BOOL)
-	DISP_FUNCTION(ModuleOptions, "GetVStudioCommonDirPath", GetVStudioCommonDirPath, VT_BSTR, VTS_BOOL)
-	DISP_FUNCTION(ModuleOptions, "GetVStudioMacrosDirPath", GetVStudioMacrosDirPath, VT_BSTR, VTS_BOOL)
-	DISP_FUNCTION(ModuleOptions, "GetVStudioVC98DirPath", GetVStudioVC98DirPath, VT_BSTR, VTS_BOOL)
-	DISP_FUNCTION(ModuleOptions, "EditOptions", EditOptions, VT_BOOL, VTS_NONE)
-	DISP_FUNCTION(ModuleOptions, "LoadOptions", LoadOptions, VT_EMPTY, VTS_NONE)
-	DISP_FUNCTION(ModuleOptions, "SaveOptions", SaveOptions, VT_EMPTY, VTS_NONE)
-	//}}AFX_DISPATCH_MAP
+	DISP_PROPERTY_EX_ID(ModuleOptions, "developerName", dispiddeveloperName, GetDeveloperName, SetDeveloperName, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "codeTemplateFile", dispidcodeTemplateFile, GetCodeTemplateFile, SetCodeTemplateFile, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "splitMaxColumn", dispidsplitMaxColumn, GetSplitMaxColumn, SetSplitMaxColumn, VT_I4)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "menuVertSplitCount", dispidmenuVertSplitCount, GetMenuVertSplitCount, SetMenuVertSplitCount, VT_I4)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "singleLineCommentToken", dispidsingleLineCommentToken, GetSingleLineCommentToken, SetSingleLineCommentToken, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "classPrefix", dispidclassPrefix, GetClassPrefix, SetClassPrefix, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "structPrefix", dispidstructPrefix, GetStructPrefix, SetStructPrefix, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "enumPrefix", dispidenumPrefix, GetEnumPrefix, SetEnumPrefix, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "autoCodeGeneration", dispidautoCodeGeneration, GetAutoCodeGeneration, SetAutoCodeGeneration, VT_BOOL)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "displayErrorMessages", dispiddisplayErrorMessages, GetDisplayErrorMessages, SetDisplayErrorMessages, VT_BOOL)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "useCommentDecoration", dispiduseCommentDecoration, GetUseCommentDecoration, SetUseCommentDecoration, VT_BOOL)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "duplicateLineMoveDown", dispidduplicateLineMoveDown, GetDuplicateLineMoveDown, SetDuplicateLineMoveDown, VT_BOOL)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "browseInfoPath", dispidbrowseInfoPath, GetBrowseInfoPath, SetBrowseInfoPath, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "additionalIncludePath", dispidadditionalIncludePath, GetAdditionalIncludePath, SetAdditionalIncludePath, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "additionalAssocFolders", dispidadditionalAssocFolders, GetAdditionalAssocFolders, SetAdditionalAssocFolders, VT_BSTR)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "linesBetweenFunctionImpls", dispidlinesBetweenFunctionImpls, GetLinesBetweenFunctionImpls, SetNotSupported, VT_I4)
+	DISP_PROPERTY_EX_ID(ModuleOptions, "returnTypeOnSeparateLine", dispidreturnTypeOnSeparateLine, GetReturnTypeOnSeparateLine, SetNotSupported, VT_BOOL)
+	DISP_FUNCTION_ID(ModuleOptions, "GetVStudioCommonDirPath", dispidGetVStudioCommonDirPath, GetVStudioCommonDirPath, VT_BSTR, VTS_BOOL)
+	DISP_FUNCTION_ID(ModuleOptions, "GetVStudioMacrosDirPath", dispidGetVStudioMacrosDirPath, GetVStudioMacrosDirPath, VT_BSTR, VTS_BOOL)
+	DISP_FUNCTION_ID(ModuleOptions, "GetVStudioVC98DirPath", dispidGetVStudioVC98DirPath, GetVStudioVC98DirPath, VT_BSTR, VTS_BOOL)
+	DISP_FUNCTION_ID(ModuleOptions, "EditOptions", dispidEditOptions, EditOptions, VT_BOOL, VTS_NONE)
+	DISP_FUNCTION_ID(ModuleOptions, "LoadOptions", dispidLoadOptions, LoadOptions, VT_EMPTY, VTS_NONE)
+	DISP_FUNCTION_ID(ModuleOptions, "SaveOptions", dispidSaveOptions, SaveOptions, VT_EMPTY, VTS_NONE)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_IModuleOptions to support typesafe binding
 //	from VBA.  This IID must match the GUID that is attached to the
-//	dispinterface in the .ODL file.
+//	dispinterface in the .IDL file.
 
 // {4804CCBD-E60C-45C9-A6C0-3E1E96DA3725}
 static const IID IID_IModuleOptions =
@@ -84,9 +80,8 @@ END_INTERFACE_MAP()
 // {4064259A-55DC-4CD5-8A17-DD1CC7B59673}
 IMPLEMENT_OLECREATE(ModuleOptions, "IDETools.ModuleOptions", 0x4064259a, 0x55dc, 0x4cd5, 0x8a, 0x17, 0xdd, 0x1c, 0xc7, 0xb5, 0x96, 0x73)
 
-////////////////////////////////////////////////////////////////////////////////
-// CModuleOptions message handlers
-////////////////////////////////////////////////////////////////////////////////
+
+// automation methods
 
 BSTR ModuleOptions::GetDeveloperName( void )
 {

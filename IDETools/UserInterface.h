@@ -1,74 +1,70 @@
-#if !defined(AFX_USERINTERFACE_H__216EF196_4C10_11D3_A3C8_006097B8DD84__INCLUDED_)
-#define AFX_USERINTERFACE_H__216EF196_4C10_11D3_A3C8_006097B8DD84__INCLUDED_
 #pragma once
 
 #include "AutomationBase.h"
 
 
-/////////////////////////////////////////////////////////////////////////////
 // UserInterface command target
 
-class UserInterface : public CAutomationBase
+class UserInterface : public CCmdTarget
+	, private CAutomationBase
 {
 	DECLARE_DYNCREATE(UserInterface)
-
-	UserInterface();           // protected constructor used by dynamic creation
-
-// Attributes
-public:
-
-// Operations
-public:
-// Overrides
-	// generated overrides
-	//{{AFX_VIRTUAL(UserInterface)
-	public:
-	virtual void OnFinalRelease();
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
+	UserInterface();
 	virtual ~UserInterface();
 
-	// generated message map
-	//{{AFX_MSG(UserInterface)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
+	// generated stuff
+public:
+	virtual void OnFinalRelease( void );
+protected:
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE(UserInterface)
 
-	// Generated OLE dispatch map functions
-	//{{AFX_DISPATCH(UserInterface)
-	afx_msg BSTR GetIDEToolsRegistryKey();
-	afx_msg void SetIDEToolsRegistryKey(LPCTSTR lpszNewValue);
-	afx_msg BSTR InputBox(LPCTSTR title, LPCTSTR prompt, LPCTSTR initialValue);
-	afx_msg BSTR GetClipboardText();
-	afx_msg void SetClipboardText(LPCTSTR text);
-	afx_msg BOOL IsClipFormatAvailable(long clipFormat);
-	afx_msg BOOL IsClipFormatNameAvailable(LPCTSTR formatName);
-	afx_msg BOOL IsKeyPath(LPCTSTR pKeyFullPath);
-	afx_msg BOOL CreateKeyPath(LPCTSTR pKeyFullPath);
-	afx_msg BSTR RegReadString( LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString );
-	afx_msg long RegReadNumber(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber);
-	afx_msg BOOL RegWriteString(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pStrValue);
-	afx_msg BOOL RegWriteNumber(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long numValue);
-	afx_msg BOOL EnsureStringValue(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString);
-	afx_msg BOOL EnsureNumberValue(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber);
-	afx_msg BSTR GetEnvironmentVariable(LPCTSTR varName);
-	afx_msg BOOL SetEnvironmentVariable(LPCTSTR varName, LPCTSTR varValue);
-	afx_msg BSTR ExpandEnvironmentVariables(LPCTSTR sourceString);
-	afx_msg BSTR LocateFile(LPCTSTR localDirPath);
-	afx_msg void RunUnitTests();
-	//}}AFX_DISPATCH
-
 	DECLARE_DISPATCH_MAP()
 	DECLARE_INTERFACE_MAP()
+
+	// generated OLE dispatch map functions
+	BSTR GetIDEToolsRegistryKey();
+	void SetIDEToolsRegistryKey(LPCTSTR lpszNewValue);
+	void RunUnitTests(void);
+	BSTR InputBox(LPCTSTR title, LPCTSTR prompt, LPCTSTR initialValue);
+	BSTR GetClipboardText();
+	void SetClipboardText(LPCTSTR text);
+	BOOL IsClipFormatAvailable(long clipFormat);
+	BOOL IsClipFormatNameAvailable(LPCTSTR formatName);
+	BOOL IsKeyPath(LPCTSTR pKeyFullPath);
+	BOOL CreateKeyPath(LPCTSTR pKeyFullPath);
+	BSTR RegReadString(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString);
+	long RegReadNumber(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber);
+	BOOL RegWriteString(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pStrValue);
+	BOOL RegWriteNumber(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long numValue);
+	BOOL EnsureStringValue(LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString);
+	BOOL EnsureNumberValue(LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber);
+	BSTR GetEnvironmentVariable(LPCTSTR varName);
+	BOOL SetEnvironmentVariable(LPCTSTR varName, LPCTSTR varValue);
+	BSTR ExpandEnvironmentVariables(LPCTSTR sourceString);
+	BSTR LocateFile(LPCTSTR localDirPath);
+
+	enum 
+	{
+		dispidIDEToolsRegistryKey = 1,
+		dispidRunUnitTests = 2,
+		dispidInputBox = 3,
+		dispidGetClipboardText = 4,
+		dispidSetClipboardText = 5,
+		dispidIsClipFormatAvailable = 6,
+		dispidIsClipFormatNameAvailable = 7,
+		dispidIsKeyPath = 8,
+		dispidCreateKeyPath = 9,
+		dispidRegReadString = 10,
+		dispidRegReadNumber = 11,
+		dispidRegWriteString = 12,
+		dispidRegWriteNumber = 13,
+		dispidEnsureStringValue = 14,
+		dispidEnsureNumberValue = 15,
+		dispidGetEnvironmentVariable = 16,
+		dispidSetEnvironmentVariable = 17,
+		dispidExpandEnvironmentVariables = 18,
+		dispidLocateFile = 19
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_USERINTERFACE_H__216EF196_4C10_11D3_A3C8_006097B8DD84__INCLUDED_)

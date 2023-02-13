@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileType.h"
 #include "resource.h"
 #include "utl/UI/Image_fwd.h"

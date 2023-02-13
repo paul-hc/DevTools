@@ -1,5 +1,3 @@
-#if !defined(AFX_WORKSPACEPROFILE_H__0E44AB08_90E1_11D2_A2C9_006097B8DD84__INCLUDED_)
-#define AFX_WORKSPACEPROFILE_H__0E44AB08_90E1_11D2_A2C9_006097B8DD84__INCLUDED_
 #pragma once
 
 #include "AutomationBase.h"
@@ -10,7 +8,8 @@ extern LPCTSTR defaulProjectName;
 extern LPCTSTR sectionWorkspaceDialogs;
 
 
-class WorkspaceProfile : public CAutomationBase
+class WorkspaceProfile : public CCmdTarget
+	, private CAutomationBase
 {
 	DECLARE_DYNCREATE( WorkspaceProfile )
 public:
@@ -25,19 +24,18 @@ public:
 	CFolderOptions m_options;
 	std::vector< CString > projectNameArray;
 	std::vector< CString > fileArray;
-public:
-	//{{AFX_VIRTUAL(WorkspaceProfile)
-	public:
-	virtual void OnFinalRelease();
-	//}}AFX_VIRTUAL
-protected:
-	//{{AFX_MSG(WorkspaceProfile)
-	//}}AFX_MSG
 
+	// generated stuff
+public:
+	virtual void OnFinalRelease();
+protected:
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE( WorkspaceProfile )
+
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
 public:
-	//{{AFX_DISPATCH(WorkspaceProfile)
+	// generated OLE dispatch map functions
 	BOOL m_mustCloseAll;
 	afx_msg void OnMustCloseAllChanged();
 	afx_msg BOOL AddFile( LPCTSTR fileFullPath );
@@ -46,15 +44,17 @@ public:
 	afx_msg BSTR GetFileName( long index );
 	afx_msg BOOL Save( LPCTSTR section, LPCTSTR currProjectName );
 	afx_msg BOOL Load( LPCTSTR section, LPCTSTR currProjectName );
-	//}}AFX_DISPATCH
 
-	DECLARE_DISPATCH_MAP()
-	DECLARE_INTERFACE_MAP()
+	enum
+	{
+		// properties:
+		dispidMustCloseAll = 1,
+		// methods:
+		dispidAddFile = 2,
+		dispidAddProjectName = 3,
+		dispidGetFileCount = 4,
+		dispidGetFileName = 5,
+		dispidSave = 6,
+		dispidLoad = 7
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_WORKSPACEPROFILE_H__0E44AB08_90E1_11D2_A2C9_006097B8DD84__INCLUDED_)

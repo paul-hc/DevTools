@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "InputTypeQualifierDialog.h"
 #include "resource.h"
 

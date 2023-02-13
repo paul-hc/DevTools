@@ -1,44 +1,28 @@
-#if !defined(AFX_FILEACCESS_H__1556FB26_22DB_11D2_A278_006097B8DD84__INCLUDED_)
-#define AFX_FILEACCESS_H__1556FB26_22DB_11D2_A278_006097B8DD84__INCLUDED_
 #pragma once
 
 #include "AutomationBase.h"
 
 
-/////////////////////////////////////////////////////////////////////////////
 // FileAccess command target
 
-class FileAccess : public CAutomationBase
+class FileAccess : public CCmdTarget
+	, private CAutomationBase
 {
 	DECLARE_DYNCREATE(FileAccess)
 public:
 	FileAccess( void );
 	virtual ~FileAccess();
-// Attributes
-public:
 
-// Operations
+	// generated stuff
 public:
-
-// Overrides
-	// generated overrides
-	//{{AFX_VIRTUAL(FileAccess)
-	public:
 	virtual void OnFinalRelease();
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
-	// generated message map
-	//{{AFX_MSG(FileAccess)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE(FileAccess)
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
 
-	// Generated OLE dispatch map functions
-	//{{AFX_DISPATCH(FileAccess)
+	// generated OLE dispatch map functions
 	afx_msg BOOL FileExist(LPCTSTR fullPath);
 	afx_msg long GetFileAttributes(LPCTSTR fullPath);
 	afx_msg BOOL IsDirectoryFile(LPCTSTR fullPath);
@@ -54,14 +38,23 @@ protected:
 	afx_msg BOOL OutputWndActivateTab(LPCTSTR tabCaption);
 	afx_msg BSTR GetIDECurrentBrowseFile();
 	afx_msg BOOL UpdateIDECurrentBrowseFile(BOOL doItNow);
-	//}}AFX_DISPATCH
-	DECLARE_DISPATCH_MAP()
-	DECLARE_INTERFACE_MAP()
+
+	enum
+	{
+		dispidFileExist = 1,
+		dispidGetFileAttributes = 2,
+		dispidIsDirectoryFile = 3,
+		dispidIsCompressedFile = 4,
+		dispidIsReadOnlyFile = 5,
+		dispidSetReadOnlyFile = 7,
+		dispidExecute = 8,
+		dispidShellOpen = 6,
+		dispidExploreAndSelectFile = 9,
+		dispidGetNextAssocDoc = 10,
+		dispidGetComplementaryDoc = 11,
+		dispidOutputWndActivateTab = 12,
+		dispidGetNextVariationDoc = 13,
+		dispidGetIDECurrentBrowseFile = 14,
+		dispidUpdateIDECurrentBrowseFile = 15
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_FILEACCESS_H__1556FB26_22DB_11D2_A278_006097B8DD84__INCLUDED_)

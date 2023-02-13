@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DspProject.h"
 #include "DspParser.h"
 #include "Application.h"
@@ -10,7 +10,6 @@
 #define new DEBUG_NEW
 #endif
 
-// DspProject implementation
 
 IMPLEMENT_DYNCREATE(DspProject, CCmdTarget)
 
@@ -127,31 +126,27 @@ bool DspProject::isSourceFileMatch( const PathInfoEx& filePath ) const
 }
 
 BEGIN_MESSAGE_MAP(DspProject, CCmdTarget)
-	//{{AFX_MSG_MAP(DspProject)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 BEGIN_DISPATCH_MAP(DspProject, CCmdTarget)
-	//{{AFX_DISPATCH_MAP(DspProject)
-	DISP_PROPERTY_EX(DspProject, "DspProjectFilePath", GetDspProjectFilePath, SetDspProjectFilePath, VT_BSTR)
-	DISP_FUNCTION(DspProject, "GetFileFilterCount", GetFileFilterCount, VT_I4, VTS_NONE)
-	DISP_FUNCTION(DspProject, "GetFileFilterAt", GetFileFilterAt, VT_BSTR, VTS_I4)
-	DISP_FUNCTION(DspProject, "AddFileFilter", AddFileFilter, VT_EMPTY, VTS_BSTR)
-	DISP_FUNCTION(DspProject, "ClearAllFileFilters", ClearAllFileFilters, VT_EMPTY, VTS_NONE)
-	DISP_FUNCTION(DspProject, "GetProjectFileCount", GetProjectFileCount, VT_I4, VTS_NONE)
-	DISP_FUNCTION(DspProject, "GetProjectFileAt", GetProjectFileAt, VT_BSTR, VTS_I4)
-	DISP_FUNCTION(DspProject, "ContainsSourceFile", ContainsSourceFile, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(DspProject, "GetFilesToAddCount", GetFilesToAddCount, VT_I4, VTS_NONE)
-	DISP_FUNCTION(DspProject, "GetFileToAddAt", GetFileToAddAt, VT_BSTR, VTS_I4)
-	DISP_FUNCTION(DspProject, "GetFilesToRemoveCount", GetFilesToRemoveCount, VT_I4, VTS_NONE)
-	DISP_FUNCTION(DspProject, "GetFileToRemoveAt", GetFileToRemoveAt, VT_BSTR, VTS_I4)
-	DISP_FUNCTION(DspProject, "GetAdditionalIncludePath", GetAdditionalIncludePath, VT_BSTR, VTS_BSTR)
-	//}}AFX_DISPATCH_MAP
+	DISP_PROPERTY_EX_ID(DspProject, "DspProjectFilePath", dispidDspProjectFilePath, GetDspProjectFilePath, SetDspProjectFilePath, VT_BSTR)
+	DISP_FUNCTION_ID(DspProject, "GetFileFilterCount", dispidGetFileFilterCount, GetFileFilterCount, VT_I4, VTS_NONE)
+	DISP_FUNCTION_ID(DspProject, "GetFileFilterAt", dispidGetFileFilterAt, GetFileFilterAt, VT_BSTR, VTS_I4)
+	DISP_FUNCTION_ID(DspProject, "AddFileFilter", dispidAddFileFilter, AddFileFilter, VT_EMPTY, VTS_BSTR)
+	DISP_FUNCTION_ID(DspProject, "ClearAllFileFilters", dispidClearAllFileFilters, ClearAllFileFilters, VT_EMPTY, VTS_NONE)
+	DISP_FUNCTION_ID(DspProject, "GetProjectFileCount", dispidGetProjectFileCount, GetProjectFileCount, VT_I4, VTS_NONE)
+	DISP_FUNCTION_ID(DspProject, "GetProjectFileAt", dispidGetProjectFileAt, GetProjectFileAt, VT_BSTR, VTS_I4)
+	DISP_FUNCTION_ID(DspProject, "ContainsSourceFile", dispidContainsSourceFile, ContainsSourceFile, VT_BOOL, VTS_BSTR)
+	DISP_FUNCTION_ID(DspProject, "GetFilesToAddCount", dispidGetFilesToAddCount, GetFilesToAddCount, VT_I4, VTS_NONE)
+	DISP_FUNCTION_ID(DspProject, "GetFileToAddAt", dispidGetFileToAddAt, GetFileToAddAt, VT_BSTR, VTS_I4)
+	DISP_FUNCTION_ID(DspProject, "GetFilesToRemoveCount", dispidGetFilesToRemoveCount, GetFilesToRemoveCount, VT_I4, VTS_NONE)
+	DISP_FUNCTION_ID(DspProject, "GetFileToRemoveAt", dispidGetFileToRemoveAt, GetFileToRemoveAt, VT_BSTR, VTS_I4)
+	DISP_FUNCTION_ID(DspProject, "GetAdditionalIncludePath", dispidGetAdditionalIncludePath, GetAdditionalIncludePath, VT_BSTR, VTS_BSTR)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_IDspProject to support typesafe binding
 //  from VBA.  This IID must match the GUID that is attached to the
-//  dispinterface in the .ODL file.
+//  dispinterface in the .IDL file.
 
 // {9C88D6AC-E3AE-43D6-AE96-500CB8B5E1A9}
 static const IID IID_IDspProject =
@@ -164,9 +159,8 @@ END_INTERFACE_MAP()
 // {C60E380C-3DE3-4D69-9120-D76A23ECDC8D}
 IMPLEMENT_OLECREATE(DspProject, "IDETools.DspProject", 0xc60e380c, 0x3de3, 0x4d69, 0x91, 0x20, 0xd7, 0x6a, 0x23, 0xec, 0xdc, 0x8d)
 
-/////////////////////////////////////////////////////////////////////////////
-// DspProject message handlers
-/////////////////////////////////////////////////////////////////////////////
+
+// message handlers
 
 BSTR DspProject::GetDspProjectFilePath( void )
 {

@@ -1,5 +1,3 @@
-#if !defined(AFX_TEXTCONTENT_H__E37FE178_CBB7_11D4_B57C_00D0B74ECB52__INCLUDED_)
-#define AFX_TEXTCONTENT_H__E37FE178_CBB7_11D4_B57C_00D0B74ECB52__INCLUDED_
 #pragma once
 
 #include "AutomationBase.h"
@@ -8,7 +6,9 @@
 
 
 // Automation object for text file IO, replacements, etc
-class TextContent : public CAutomationBase
+
+class TextContent : public CCmdTarget
+	, private CAutomationBase
 {
 	DECLARE_DYNCREATE( TextContent )
 public:
@@ -20,22 +20,18 @@ private:
 private:
 	CString tokenizedBuffer, tokenizedSeps;
 	CString currToken;
+
+	// generated stuff
 public:
-	// generated overrides
-	//{{AFX_VIRTUAL(TextContent)
-	public:
 	virtual void OnFinalRelease();
-	//}}AFX_VIRTUAL
 protected:
-	// generated message map
-	//{{AFX_MSG(TextContent)
-	//}}AFX_MSG
-public:
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE( TextContent )
 
-	// Generated OLE dispatch map functions
-	//{{AFX_DISPATCH(TextContent)
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
+public:
+	// generated OLE dispatch map functions
 	BOOL m_showErrors;
 	afx_msg void OnShowErrorsChanged();
 	afx_msg BSTR GetText();
@@ -53,15 +49,26 @@ public:
 	afx_msg void AddFieldReplacement( LPCTSTR fieldText, LPCTSTR replaceWith );
 	afx_msg void ClearFieldReplacements();
 	afx_msg BSTR FormatTimestamp( DATE timestamp, LPCTSTR strftimeFormat );
-	//}}AFX_DISPATCH
 
-	DECLARE_DISPATCH_MAP()
-	DECLARE_INTERFACE_MAP()
+	enum
+	{
+		// properties:
+		// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
+		dispidShowErrors = 1,
+		dispidText = 2,
+		dispidTextLen = 3,
+		// methods:
+		dispidLoadFile = 4,
+		dispidLoadFileSection = 5,
+		dispidLoadCompoundFileSections = 6,
+		dispidFindText = 7,
+		dispidReplaceText = 8,
+		dispidAddEmbeddedContent = 9,
+		dispidTokenize = 10,
+		dispidGetNextToken = 11,
+		dispidMultiLinesToSingleParagraph = 12,
+		dispidAddFieldReplacement = 13,
+		dispidClearFieldReplacements = 14,
+		dispidFormatTimestamp = 15
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_TEXTCONTENT_H__E37FE178_CBB7_11D4_B57C_00D0B74ECB52__INCLUDED_)

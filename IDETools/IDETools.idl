@@ -1,37 +1,31 @@
-// IDETools.odl : type library source for IDETools.dll
-
+// IDETools.idl : type library source for IDETools.dll
 // This file will be processed by the MIDL compiler to produce the
 // type library (IDETools.tlb).
+
+#include "olectl.h"
+
 
 [ uuid(690D31A0-1AC3-11D2-A26A-006097B8DD84), version(1.0) ]
 library IDETools
 {
 	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
 
 	//  Primary dispatch interface for IncludeFileTree
-
 	[ uuid(1006E3E6-1F6F-11D2-A275-006097B8DD84) ]
 	dispinterface IIncludeFileTree
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(IncludeFileTree)
+			// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
 			[id(1)] BSTR PickedIncludeFile;
 			[id(2)] long PromptLineNo;
-			//}}AFX_ODL_PROP
 
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(IncludeFileTree)
 			[id(3)] boolean BrowseIncludeFiles(BSTR targetFileName);
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for IncludeFileTree
-
+		//  Class information for IncludeFileTree
 	[ uuid(1006E3E7-1F6F-11D2-A275-006097B8DD84) ]
 	coclass IncludeFileTree
 	{
@@ -39,22 +33,13 @@ library IDETools
 	};
 
 
-
 	//  Primary dispatch interface for FileAccess
-
 	[ uuid(1556FB24-22DB-11D2-A278-006097B8DD84) ]
 	dispinterface IFileAccess
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(FileAccess)
-			//}}AFX_ODL_PROP
 
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(FileAccess)
 			[id(1)] boolean FileExist(BSTR fullPath);
 			[id(2)] long GetFileAttributes(BSTR fullPath);
 			[id(3)] boolean IsDirectoryFile(BSTR fullPath);
@@ -70,17 +55,15 @@ library IDETools
 			[id(13)] BSTR GetNextVariationDoc(BSTR docFullPath, boolean forward);
 			[id(14)] BSTR GetIDECurrentBrowseFile();
 			[id(15)] boolean UpdateIDECurrentBrowseFile(boolean doItNow);
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for FileAccess
-
+		//  Class information for FileAccess
 	[ uuid(1556FB25-22DB-11D2-A278-006097B8DD84) ]
 	coclass FileAccess
 	{
 		[default] dispinterface IFileAccess;
 	};
+
 
 	//  *** MenuFilePicker stuff ***
 	//
@@ -132,25 +115,18 @@ library IDETools
 
 
 	//  Primary dispatch interface for MenuFilePicker
-
 	[ uuid(4DFA7BE1-8484-11D2-A2C3-006097B8DD84) ]
 	dispinterface IMenuFilePicker
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(MenuFilePicker)
+			// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
 			[id(1)] long TrackPosX;
 			[id(2)] long TrackPosY;
 			[id(3)] long OptionFlags;
 			[id(4)] long FolderLayout;
 			[id(5)] BSTR CurrentFilePath;
-			//}}AFX_ODL_PROP
 
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(MenuFilePicker)
 			[id(6)] BSTR SetProfileSection(BSTR subSection);
 			[id(7)] boolean AddFolder(BSTR folderPathSpec, BSTR folderAlias, BSTR fileFilter);
 			[id(8)] boolean AddFolderArray(BSTR folderItemFlatArray);
@@ -159,12 +135,9 @@ library IDETools
 			[id(11)] void ClearSortOrder();
 			[id(12)] void StoreTrackPos();
 			[id(13)] boolean ChooseFile();
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for MenuFilePicker
-
+		//  Class information for MenuFilePicker
 	[ uuid(4DFA7BE2-8484-11D2-A2C3-006097B8DD84) ]
 	coclass MenuFilePicker
 	{
@@ -178,28 +151,18 @@ library IDETools
 	dispinterface IWorkspaceProfile
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(WorkspaceProfile)
+			// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
 			[id(1)] boolean MustCloseAll;
-			//}}AFX_ODL_PROP
-
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(WorkspaceProfile)
 			[id(2)] boolean AddFile(BSTR fileFullPath);
 			[id(3)] boolean AddProjectName(BSTR projectName);
 			[id(4)] long GetFileCount();
 			[id(5)] BSTR GetFileName(long index);
 			[id(6)] boolean Save(BSTR section, BSTR currProjectName);
 			[id(7)] boolean Load(BSTR section, BSTR currProjectName);
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for WorkspaceProfile
-
+		//  Class information for WorkspaceProfile
 	[ uuid(0E44AB07-90E1-11D2-A2C9-006097B8DD84) ]
 	coclass WorkspaceProfile
 	{
@@ -208,45 +171,33 @@ library IDETools
 
 
 	//  Primary dispatch interface for UserInterface
-
 	[ uuid(216EF194-4C10-11D3-A3C8-006097B8DD84) ]
 	dispinterface IUserInterface
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(UserInterface)
-			[id(1)] BSTR IDEToolsRegistryKey;
-			//}}AFX_ODL_PROP
-
+			[id(1), helpstring("property IDEToolsRegistryKey")] BSTR IDEToolsRegistryKey;
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(UserInterface)
-			[id(2)] BSTR InputBox(BSTR title, BSTR prompt, BSTR initialValue);
-			[id(3)] BSTR GetClipboardText();
-			[id(4)] void SetClipboardText(BSTR text);
-			[id(5)] boolean IsClipFormatAvailable(long clipFormat);
-			[id(6)] boolean IsClipFormatNameAvailable(BSTR formatName);
-			[id(7)] boolean IsKeyPath(BSTR keyFullPath);
-			[id(8)] boolean CreateKeyPath(BSTR keyFullPath);
-			[id(9)] BSTR RegReadString(BSTR keyFullPath, BSTR valueName, BSTR defaultString);
-			[id(10)] long RegReadNumber(BSTR keyFullPath, BSTR valueName, long defaultNumber);
-			[id(11)] boolean RegWriteString(BSTR keyFullPath, BSTR valueName, BSTR strValue);
-			[id(12)] boolean RegWriteNumber(BSTR keyFullPath, BSTR valueName, long numValue);
-			[id(13)] boolean EnsureStringValue(BSTR keyFullPath, BSTR valueName, BSTR defaultString);
-			[id(14)] boolean EnsureNumberValue(BSTR keyFullPath, BSTR valueName, long defaultNumber);
-			[id(15)] BSTR GetEnvironmentVariable(BSTR varName);
-			[id(16)] boolean SetEnvironmentVariable(BSTR varName, BSTR varValue);
-			[id(17)] BSTR ExpandEnvironmentVariables(BSTR sourceString);
-			[id(18)] BSTR LocateFile(BSTR localDirPath);
-			[id(19)] void RunUnitTests();
-			//}}AFX_ODL_METHOD
-
+			[id(2), helpstring("method RunUnitTests: run the tests")] void RunUnitTests(void);
+			[id(3)] BSTR InputBox(BSTR title, BSTR prompt, BSTR initialValue);
+			[id(4)] BSTR GetClipboardText();
+			[id(5)] void SetClipboardText(BSTR text);
+			[id(6)] boolean IsClipFormatAvailable(long clipFormat);
+			[id(7)] boolean IsClipFormatNameAvailable(BSTR formatName);
+			[id(8)] boolean IsKeyPath(BSTR keyFullPath);
+			[id(9)] boolean CreateKeyPath(BSTR keyFullPath);
+			[id(10)] BSTR RegReadString(BSTR keyFullPath, BSTR valueName, BSTR defaultString);
+			[id(11)] long RegReadNumber(BSTR keyFullPath, BSTR valueName, long defaultNumber);
+			[id(12)] boolean RegWriteString(BSTR keyFullPath, BSTR valueName, BSTR strValue);
+			[id(13)] boolean RegWriteNumber(BSTR keyFullPath, BSTR valueName, long numValue);
+			[id(14)] boolean EnsureStringValue(BSTR keyFullPath, BSTR valueName, BSTR defaultString);
+			[id(15)] boolean EnsureNumberValue(BSTR keyFullPath, BSTR valueName, long defaultNumber);
+			[id(16)] BSTR GetEnvironmentVariable(BSTR varName);
+			[id(17)] boolean SetEnvironmentVariable(BSTR varName, BSTR varValue);
+			[id(18)] BSTR ExpandEnvironmentVariables(BSTR sourceString);
+			[id(19)] BSTR LocateFile(BSTR localDirPath);
 	};
 
-	//  Class information for UserInterface
-
+		//  Class information for UserInterface
 	[ uuid(216EF195-4C10-11D3-A3C8-006097B8DD84) ]
 	coclass UserInterface
 	{
@@ -255,23 +206,15 @@ library IDETools
 
 
 	//  Primary dispatch interface for TextContent
-
 	[ uuid(E37FE176-CBB7-11D4-B57C-00D0B74ECB52) ]
 	dispinterface ITextContent
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(TextContent)
+			// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
 			[id(1)] boolean ShowErrors;
 			[id(2)] BSTR Text;
 			[id(3)] long TextLen;
-			//}}AFX_ODL_PROP
-
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(TextContent)
 			[id(4)] boolean LoadFile(BSTR textFilePath);
 			[id(5)] boolean LoadFileSection(BSTR compoundFilePath, BSTR sectionName);
 			[id(6)] long LoadCompoundFileSections(BSTR compoundFilePath, BSTR sectionFilter, boolean caseSensitive);
@@ -284,12 +227,9 @@ library IDETools
 			[id(13)] void AddFieldReplacement(BSTR fieldText, BSTR replaceWith);
 			[id(14)] void ClearFieldReplacements();
 			[id(15)] BSTR FormatTimestamp(DATE timestamp, BSTR strftimeFormat);
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for TextContent
-
+		//  Class information for TextContent
 	[ uuid(E37FE177-CBB7-11D4-B57C-00D0B74ECB52) ]
 	coclass TextContent
 	{
@@ -298,14 +238,11 @@ library IDETools
 
 
 	//  Primary dispatch interface for FileSearch
-
 	[ uuid(C722D0B5-1E2D-11D5-B59B-00D0B74ECB52) ]
 	dispinterface IFileSearch
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(FileSearch)
+			// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
 			[id(1)] long FileAttrFilterStrict;
 			[id(2)] long FileAttrFilterStrictNot;
 			[id(3)] long FileAttrFilterOr;
@@ -326,12 +263,8 @@ library IDETools
 			[id(18)] boolean IsTemporary;
 			[id(19)] boolean IsNormal;
 			[id(20)] boolean IsArchived;
-			//}}AFX_ODL_PROP
 
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(FileSearch)
 			[id(21)] boolean FindFile(BSTR filePattern);
 			[id(22)] boolean FindNextFile();
 			[id(23)] BSTR FindAllFiles(BSTR filePattern, BSTR separator, long* outFileCount, boolean recurseSubDirs);
@@ -339,12 +272,10 @@ library IDETools
 			[id(25)] boolean MatchesMask(long mask);
 			[id(26)] BSTR BuildSubDirFilePattern(BSTR filePattern);
 			[id(27)] BSTR SetupForSubDirSearch(BSTR parentFilePattern);
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for FileSearch
 
+	//  Class information for FileSearch
 	[ uuid(C722D0B6-1E2D-11D5-B59B-00D0B74ECB52) ]
 	coclass FileSearch
 	{
@@ -352,15 +283,11 @@ library IDETools
 	};
 
 
-	//  Primary dispatch interface for FileLocator
-
+		//  Primary dispatch interface for FileLocator
 	[ uuid(A0580B95-3350-11D5-B5A4-00D0B74ECB52) ]
 	dispinterface IFileLocator
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(FileLocator)
 			[id(1)] BSTR LocalDirPath;
 			[id(2)] BSTR LocalCurrentFile;
 			[id(3)] BSTR AssociatedProjectFile;
@@ -368,20 +295,13 @@ library IDETools
 			[id(5)] BSTR ProjectAdditionalIncludePath;		// OBSOLETE
 			[id(6)] BSTR SelectedFiles;
 			[id(7)] long SelectedCount;
-			//}}AFX_ODL_PROP
 
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(FileLocator)
 			[id(8)] BSTR GetSelectedFile(long index);
 			[id(9)] boolean LocateFile();
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for FileLocator
-
+		//  Class information for FileLocator
 	[ uuid(A0580B96-3350-11D5-B5A4-00D0B74ECB52) ]
 	coclass FileLocator
 	{
@@ -390,14 +310,11 @@ library IDETools
 
 
 	//  Primary dispatch interface for ModuleOptions
-
 	[ uuid(4804CCBD-E60C-45C9-A6C0-3E1E96DA3725) ]
 	dispinterface IModuleOptions
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(ModuleOptions)
+			// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
 			[id(1)] BSTR developerName;
 			[id(2)] BSTR codeTemplateFile;
 			[id(3)] long splitMaxColumn;
@@ -415,24 +332,17 @@ library IDETools
 			[id(15)] BSTR additionalAssocFolders;
 			[id(16)] long linesBetweenFunctionImpls;
 			[id(17)] boolean returnTypeOnSeparateLine;
-			//}}AFX_ODL_PROP
 
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(ModuleOptions)
 			[id(18)] BSTR GetVStudioCommonDirPath(boolean addTrailingSlash);
 			[id(19)] BSTR GetVStudioMacrosDirPath(boolean addTrailingSlash);
 			[id(20)] BSTR GetVStudioVC98DirPath(boolean addTrailingSlash);
 			[id(21)] boolean EditOptions();
 			[id(22)] void LoadOptions();
 			[id(23)] void SaveOptions();
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for ModuleOptions
-
+		//  Class information for ModuleOptions
 	[ uuid(4064259A-55DC-4CD5-8A17-DD1CC7B59673) ]
 	coclass ModuleOptions
 	{
@@ -441,21 +351,12 @@ library IDETools
 
 
 	//  Primary dispatch interface for DspProject
-
 	[ uuid(9C88D6AC-E3AE-43D6-AE96-500CB8B5E1A9) ]
 	dispinterface IDspProject
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(DspProject)
 			[id(1)] BSTR DspProjectFilePath;
-			//}}AFX_ODL_PROP
-
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(DspProject)
 			[id(2)] long GetFileFilterCount();
 			[id(3)] BSTR GetFileFilterAt(long index);
 			[id(4)] void AddFileFilter(BSTR sourceFileFilter);
@@ -468,12 +369,9 @@ library IDETools
 			[id(11)] long GetFilesToRemoveCount();
 			[id(12)] BSTR GetFileToRemoveAt(long index);
 			[id(13)] BSTR GetAdditionalIncludePath( [defaultvalue("")] BSTR configurationName);
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for DspProject
-
+		//  Class information for DspProject
 	[ uuid(C60E380C-3DE3-4D69-9120-D76A23ECDC8D) ]
 	coclass DspProject
 	{
@@ -481,25 +379,16 @@ library IDETools
 	};
 
 
-	//  Primary dispatch interface for CCodeProcessor
-
+	//  Primary dispatch interface for CodeProcessor
 	[ uuid(397B64A6-EF38-4E9E-8343-D1A9102284D6) ]
 	dispinterface ICodeProcessor
 	{
 		properties:
-			// NOTE - ClassWizard will maintain property information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_PROP(CCodeProcessor)
-			[id(1)] BSTR docLanguage;
-			[id(2)] long tabSize;
-			[id(3)] boolean useTabs;
-			[id(4)] BSTR cancelTag;
-			//}}AFX_ODL_PROP
-
+			[id(1)] BSTR DocLanguage;
+			[id(2)] long TabSize;
+			[id(3)] boolean UseTabs;
+			[id(4)] BSTR CancelTag;
 		methods:
-			// NOTE - ClassWizard will maintain method information here.
-			//    Use extreme caution when editing this section.
-			//{{AFX_ODL_METHOD(CCodeProcessor)
 			[id(5)] BSTR AutoFormatCode(BSTR codeText);
 			[id(6)] BSTR SplitArgumentList(BSTR codeText, long splitAtColumn, long targetBracketLevel);
 			[id(7)] BSTR ExtractTypeDescriptor(BSTR functionImplLine, BSTR docFileExt);
@@ -510,18 +399,12 @@ library IDETools
 			[id(12)] BSTR SortLines(BSTR codeText, boolean ascending);
 			[id(13)] BSTR AutoMakeCode(BSTR codeText);
 			[id(14)] BSTR TokenizeText(BSTR codeText);
-			//}}AFX_ODL_METHOD
-
 	};
 
-	//  Class information for CCodeProcessor
-
+		//  Class information for CCodeProcessor
 	[ uuid(F70182C0-AE07-4DEB-AFEB-31BCC6BB244C) ]
 	coclass CodeProcessor
 	{
 		[default] dispinterface ICodeProcessor;
 	};
-
-	//{{AFX_APPEND_ODL}}
-	//}}AFX_APPEND_ODL}}
 };

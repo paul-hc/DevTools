@@ -42,6 +42,7 @@ public:
 	{
 		if ( m_start <= m_end )
 			return false;
+
 		SwapBounds();
 		return true;
 	}

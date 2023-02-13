@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "StringUtilitiesEx.h"
 #include "utl/RuntimeException.h"
 #include <atlconv.h>

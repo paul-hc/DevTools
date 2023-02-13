@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AutomationBase.h"
 #include "Application.h"
 

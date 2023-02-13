@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "IdeUtilities.h"
 #include "FileLocatorDialog.h"
 #include "FileLocator.h"
@@ -41,28 +41,24 @@ void FileLocator::OnFinalRelease( void )
 // message handlers
 
 BEGIN_MESSAGE_MAP(FileLocator, CCmdTarget)
-	//{{AFX_MSG_MAP(FileLocator)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
 BEGIN_DISPATCH_MAP(FileLocator, CCmdTarget)
-	//{{AFX_DISPATCH_MAP(FileLocator)
-	DISP_PROPERTY_EX(FileLocator, "LocalDirPath", GetLocalDirPath, SetLocalDirPath, VT_BSTR)
-	DISP_PROPERTY_EX(FileLocator, "LocalCurrentFile", GetLocalCurrentFile, SetLocalCurrentFile, VT_BSTR)
-	DISP_PROPERTY_EX(FileLocator, "AssociatedProjectFile", GetAssociatedProjectFile, SetAssociatedProjectFile, VT_BSTR)
-	DISP_PROPERTY_EX(FileLocator, "ProjectActiveConfiguration", GetProjectActiveConfiguration, SetProjectActiveConfiguration, VT_BSTR)
-	DISP_PROPERTY_EX(FileLocator, "ProjectAdditionalIncludePath", GetProjectAdditionalIncludePath, SetProjectAdditionalIncludePath, VT_BSTR)
-	DISP_PROPERTY_EX(FileLocator, "SelectedFiles", GetSelectedFiles, SetNotSupported, VT_BSTR)
-	DISP_PROPERTY_EX(FileLocator, "SelectedCount", GetSelectedCount, SetNotSupported, VT_I4)
-	DISP_FUNCTION(FileLocator, "GetSelectedFile", GetSelectedFile, VT_BSTR, VTS_I4)
-	DISP_FUNCTION(FileLocator, "LocateFile", LocateFile, VT_BOOL, VTS_NONE)
-	//}}AFX_DISPATCH_MAP
+	DISP_PROPERTY_EX_ID(FileLocator, "LocalDirPath", dispidLocalDirPath, GetLocalDirPath, SetLocalDirPath, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileLocator, "LocalCurrentFile", dispidLocalCurrentFile, GetLocalCurrentFile, SetLocalCurrentFile, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileLocator, "AssociatedProjectFile", dispidAssociatedProjectFile, GetAssociatedProjectFile, SetAssociatedProjectFile, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileLocator, "ProjectActiveConfiguration", dispidProjectActiveConfiguration, GetProjectActiveConfiguration, SetProjectActiveConfiguration, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileLocator, "ProjectAdditionalIncludePath", dispidProjectAdditionalIncludePath, GetProjectAdditionalIncludePath, SetProjectAdditionalIncludePath, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileLocator, "SelectedFiles", dispidSelectedFiles, GetSelectedFiles, SetNotSupported, VT_BSTR)
+	DISP_PROPERTY_EX_ID(FileLocator, "SelectedCount", dispidSelectedCount, GetSelectedCount, SetNotSupported, VT_I4)
+	DISP_FUNCTION_ID(FileLocator, "GetSelectedFile", dispidGetSelectedFile, GetSelectedFile, VT_BSTR, VTS_I4)
+	DISP_FUNCTION_ID(FileLocator, "LocateFile", dispidLocateFile, LocateFile, VT_BOOL, VTS_NONE)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_IFileLocator to support typesafe binding
 //  from VBA.  This IID must match the GUID that is attached to the
-//  dispinterface in the .ODL file.
+//  dispinterface in the .IDL file.
 
 // {A0580B95-3350-11D5-B5A4-00D0B74ECB52}
 static const IID IID_IFileLocator =
@@ -76,7 +72,7 @@ END_INTERFACE_MAP()
 IMPLEMENT_OLECREATE( FileLocator, "IDETools.FileLocator", 0xa0580b96, 0x3350, 0x11d5, 0xb5, 0xa4, 0x0, 0xd0, 0xb7, 0x4e, 0xcb, 0x52 )
 
 
-// message handlers
+// dispatch methods
 
 BSTR FileLocator::GetLocalDirPath( void )
 {

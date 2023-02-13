@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BraceParityStatus.h"
 #include "StringUtilitiesEx.h"
 #include "CodeUtilities.h"

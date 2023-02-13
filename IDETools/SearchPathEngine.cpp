@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SearchPathEngine.h"
 #include "IncludeDirectories.h"
 #include "IncludeNode.h"

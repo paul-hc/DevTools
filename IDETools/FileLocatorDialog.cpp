@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileLocatorDialog.h"
 #include "IncludeNode.h"
 #include "IncludeOptions.h"

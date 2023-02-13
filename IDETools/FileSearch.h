@@ -1,60 +1,44 @@
-#if !defined(AFX_FILEFIND_H__C722D0B7_1E2D_11D5_B59B_00D0B74ECB52__INCLUDED_)
-#define AFX_FILEFIND_H__C722D0B7_1E2D_11D5_B59B_00D0B74ECB52__INCLUDED_
 #pragma once
 
 #include "AutomationBase.h"
 
 
-/////////////////////////////////////////////////////////////////////////////
 // FileSearch command target
 
-class FileSearch : public CAutomationBase
+class FileSearch : public CCmdTarget
+	, private CAutomationBase
 {
 	DECLARE_DYNCREATE(FileSearch)
 
 	FileSearch();           // protected constructor used by dynamic creation
-
-// Attributes
-private:
-			bool			isFiltered( void ) const;
-			bool			isTargetFile( void ) const;
-			bool			findNextTargetFile( void );
-			CString			doFindAllFiles( LPCTSTR filePattern, LPCTSTR separator, long& outFileCount,
-											BOOL recurseSubDirs = FALSE );
-private:
-			CFileFind		m_fileFind;
-			BOOL			nextFound;
-			DWORD			fileAttrFilterStrict;		// File must have all the attributes specified here (if any)
-			DWORD			fileAttrFilterStrictNot;	// File must have no one of the attributes specified here (if any)
-			DWORD			fileAttrFilterOr;			// File must have at least one of the attributes specified (if any)
-			bool			excludeDirDots;				// true by default, excludes . and .. directories from the results
-private:
-			WIN32_FIND_DATA* getFindData( void ) const;
-			WIN32_FIND_DATA* getNextData( void ) const;
-// Operations
-public:
-
-// Overrides
-	// generated overrides
-	//{{AFX_VIRTUAL(FileSearch)
-	public:
-	virtual void OnFinalRelease();
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
 	virtual ~FileSearch();
+private:
+	bool isFiltered( void ) const;
+	bool isTargetFile( void ) const;
+	bool findNextTargetFile( void );
+	CString doFindAllFiles( LPCTSTR filePattern, LPCTSTR separator, long& outFileCount, BOOL recurseSubDirs = FALSE );
+private:
+	CFileFind m_fileFind;
+	BOOL nextFound;
+	DWORD fileAttrFilterStrict;		// File must have all the attributes specified here (if any)
+	DWORD fileAttrFilterStrictNot;	// File must have no one of the attributes specified here (if any)
+	DWORD fileAttrFilterOr;			// File must have at least one of the attributes specified (if any)
+	bool excludeDirDots;			// true by default, excludes . and .. directories from the results
+private:
+	WIN32_FIND_DATA* getFindData( void ) const;
+	WIN32_FIND_DATA* getNextData( void ) const;
 
-	// generated message map
-	//{{AFX_MSG(FileSearch)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
+	// generated stuff
+public:
+	virtual void OnFinalRelease();
+protected:
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE(FileSearch)
 
-	// Generated OLE dispatch map functions
-	//{{AFX_DISPATCH(FileSearch)
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
+
+	// generated OLE dispatch map functions
 	afx_msg long GetFileAttrFilterStrict();
 	afx_msg void SetFileAttrFilterStrict(long nNewValue);
 	afx_msg long GetFileAttrFilterStrictNot();
@@ -86,14 +70,38 @@ protected:
 	afx_msg BOOL MatchesMask(long mask);
 	afx_msg BSTR BuildSubDirFilePattern(LPCTSTR filePattern);
 	afx_msg BSTR SetupForSubDirSearch(LPCTSTR parentFilePattern);
-	//}}AFX_DISPATCH
-	DECLARE_DISPATCH_MAP()
-	DECLARE_INTERFACE_MAP()
+
+	enum
+	{
+		// properties:
+		dispidFileAttrFilterStrict = 1,
+		dispidFileAttrFilterStrictNot = 2,
+		dispidFileAttrFilterOr = 3,
+		dispidExcludeDirDots = 4,
+		dispidFileAttributes = 5,
+		dispidFileName = 6,
+		dispidFilePath = 7,
+		dispidFileTitle = 8,
+		dispidFileURL = 9,
+		dispidRoot = 10,
+		dispidLength = 11,
+		dispidIsDots = 12,
+		dispidIsReadOnly = 13,
+		dispidIsDirectory = 14,
+		dispidIsCompressed = 15,
+		dispidIsSystem = 16,
+		dispidIsHidden = 17,
+		dispidIsTemporary = 18,
+		dispidIsNormal = 19,
+		dispidIsArchived = 20,
+
+		// methods:
+		dispidFindFile = 21,
+		dispidFindNextFile = 22,
+		dispidFindAllFiles = 23,
+		dispidClose = 24,
+		dispidMatchesMask = 25,
+		dispidBuildSubDirFilePattern = 26,
+		dispidSetupForSubDirSearch = 27,
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_FILEFIND_H__C722D0B7_1E2D_11D5_B59B_00D0B74ECB52__INCLUDED_)

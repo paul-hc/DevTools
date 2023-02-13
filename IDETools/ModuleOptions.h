@@ -1,5 +1,3 @@
-#if !defined(AFX_MODULEOPTIONS_H__9F8BBF8E_5AB9_400F_8C52_3CE4487806A7__INCLUDED_)
-#define AFX_MODULEOPTIONS_H__9F8BBF8E_5AB9_400F_8C52_3CE4487806A7__INCLUDED_
 #pragma once
 
 #include "AutomationBase.h"
@@ -10,35 +8,25 @@
 //	Visual Studio 6		C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Macros\C++ Macros.dsm
 //	Visual Studio 2008	C:\Users\Paul\Documents\Visual Studio 2008\Projects\VSMacros80\CppMacros\CppMacros.vsmacros
 
-
-class ModuleOptions : public CAutomationBase
+class ModuleOptions : public CCmdTarget
+	, private CAutomationBase
 {
 	DECLARE_DYNCREATE( ModuleOptions )
 protected:
 	ModuleOptions();		   // protected constructor used by dynamic creation
 	virtual ~ModuleOptions();
 
-// Attributes
+	// generated stuff
 public:
-
-public:
-// Overrides
-	// generated overrides
-	//{{AFX_VIRTUAL(ModuleOptions)
-	public:
 	virtual void OnFinalRelease();
-	//}}AFX_VIRTUAL
-
 protected:
-	// generated message map
-	//{{AFX_MSG(ModuleOptions)
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE(ModuleOptions)
 
-	// Generated OLE dispatch map functions
-	//{{AFX_DISPATCH(ModuleOptions)
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
+
+	// generated OLE dispatch map functions
 	afx_msg BSTR GetDeveloperName();
 	afx_msg void SetDeveloperName(LPCTSTR lpszNewValue);
 	afx_msg BSTR GetCodeTemplateFile();
@@ -77,14 +65,35 @@ protected:
 	afx_msg BOOL EditOptions();
 	afx_msg void LoadOptions();
 	afx_msg void SaveOptions();
-	//}}AFX_DISPATCH
-	DECLARE_DISPATCH_MAP()
-	DECLARE_INTERFACE_MAP()
+
+	enum
+	{
+		// properties:
+		// NOTE - ClassWizard will maintain property information here. Use extreme caution when editing this section.
+		dispiddeveloperName = 1,
+		dispidcodeTemplateFile = 2,
+		dispidsplitMaxColumn = 3,
+		dispidmenuVertSplitCount = 4,
+		dispidsingleLineCommentToken = 5,
+		dispidclassPrefix = 6,
+		dispidstructPrefix = 7,
+		dispidenumPrefix = 8,
+		dispidautoCodeGeneration = 9,
+		dispiddisplayErrorMessages = 10,
+		dispiduseCommentDecoration = 11,
+		dispidduplicateLineMoveDown = 12,
+		dispidbrowseInfoPath = 13,
+		dispidadditionalIncludePath = 14,
+		dispidadditionalAssocFolders = 15,
+		dispidlinesBetweenFunctionImpls = 16,
+		dispidreturnTypeOnSeparateLine = 17,
+
+		// methods:
+		dispidGetVStudioCommonDirPath = 18,
+		dispidGetVStudioMacrosDirPath = 19,
+		dispidGetVStudioVC98DirPath = 20,
+		dispidEditOptions = 21,
+		dispidLoadOptions = 22,
+		dispidSaveOptions = 23
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_MODULEOPTIONS_H__9F8BBF8E_5AB9_400F_8C52_3CE4487806A7__INCLUDED_)

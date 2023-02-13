@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "IdeUtilities.h"
 #include "TrackMenuWnd.h"
 #include "utl/EnumTags.h"

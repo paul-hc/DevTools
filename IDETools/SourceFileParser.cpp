@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SourceFileParser.h"
 #include "IncludeNode.h"
 #include "SearchPathEngine.h"

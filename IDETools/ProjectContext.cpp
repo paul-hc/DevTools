@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ProjectContext.h"
 #include "DspParser.h"
 #include "PathInfo.h"

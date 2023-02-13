@@ -1,12 +1,11 @@
-#if !defined(AFX_MENUFILEPICKER_H__4DFA7BE3_8484_11D2_A2C3_006097B8DD84__INCLUDED_)
-#define AFX_MENUFILEPICKER_H__4DFA7BE3_8484_11D2_A2C3_006097B8DD84__INCLUDED_
 #pragma once
 
 #include "AutomationBase.h"
 #include "FileBrowser.h"
 
 
-class MenuFilePicker : public CAutomationBase
+class MenuFilePicker : public CCmdTarget
+	, private CAutomationBase
 {
 	DECLARE_DYNCREATE( MenuFilePicker )
 protected:
@@ -14,20 +13,18 @@ protected:
 	virtual ~MenuFilePicker();
 public:
 	CFileBrowser m_browser;
-public:
-	//{{AFX_VIRTUAL(MenuFilePicker)
-	public:
-	virtual void OnFinalRelease( void );
-	//}}AFX_VIRTUAL
-protected:
-	//{{AFX_MSG(MenuFilePicker)
-	//}}AFX_MSG
 
+	// generated stuff
+public:
+	virtual void OnFinalRelease( void );
+protected:
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE( MenuFilePicker )
 
-	// Generated OLE dispatch map functions
-	//{{AFX_DISPATCH(MenuFilePicker)
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
+
+	// generated OLE dispatch map functions
 	long m_trackPosX;
 	afx_msg void OnTrackPosXChanged();
 	long m_trackPosY;
@@ -46,15 +43,24 @@ protected:
 	afx_msg void ClearSortOrder();
 	afx_msg void StoreTrackPos();
 	afx_msg BOOL ChooseFile();
-	//}}AFX_DISPATCH
 
-	DECLARE_DISPATCH_MAP()
-	DECLARE_INTERFACE_MAP()
+	enum
+	{
+		// properties:
+		dispidTrackPosX = 1,
+		dispidTrackPosY = 2,
+		dispidOptionFlags = 3,
+		dispidFolderLayout = 4,
+		dispidCurrentFilePath = 5,
+
+		// methods:
+		dispidSetProfileSection = 6,
+		dispidAddFolder = 7,
+		dispidAddFolderArray = 8,
+		dispidAddRootFile = 9,
+		dispidAddSortOrder = 10,
+		dispidClearSortOrder = 11,
+		dispidStoreTrackPos = 12,
+		dispidChooseFile = 13
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_MENUFILEPICKER_H__4DFA7BE3_8484_11D2_A2C3_006097B8DD84__INCLUDED_)

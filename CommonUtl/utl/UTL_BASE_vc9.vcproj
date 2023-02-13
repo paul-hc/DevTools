@@ -884,6 +884,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\RegAutomationSvr.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RegAutomationSvr.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Registry.cpp"
 					>
 				</File>

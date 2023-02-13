@@ -1,5 +1,3 @@
-#if !defined(AFX_DSPPROJECT_H__8902DD00_9974_43AF_B8BC_B301EF9F89FE__INCLUDED_)
-#define AFX_DSPPROJECT_H__8902DD00_9974_43AF_B8BC_B301EF9F89FE__INCLUDED_
 #pragma once
 
 #include <vector>
@@ -10,7 +8,8 @@
 class DspParser;
 
 
-class DspProject : public CAutomationBase
+class DspProject : public CCmdTarget
+	, private CAutomationBase
 {
 	DECLARE_DYNCREATE(DspProject)
 protected:
@@ -31,22 +30,17 @@ private:
 	std::vector< PathInfoEx > m_filesToAdd;
 	std::vector< PathInfoEx > m_filesToRemove;
 public:
-// Overrides
-	// generated overrides
-	//{{AFX_VIRTUAL(DspProject)
-	public:
-	virtual void OnFinalRelease();
-	//}}AFX_VIRTUAL
-protected:
-	// generated message map
-	//{{AFX_MSG(DspProject)
-	//}}AFX_MSG
 
+	// generated stuff
+public:
+	virtual void OnFinalRelease();
+protected:
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE(DspProject)
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
 
-	// Generated OLE dispatch map functions
-	//{{AFX_DISPATCH(DspProject)
+	// generated OLE dispatch map functions
 	afx_msg BSTR GetDspProjectFilePath();
 	afx_msg void SetDspProjectFilePath(LPCTSTR lpszNewValue);
 	afx_msg long GetFileFilterCount();
@@ -61,15 +55,21 @@ protected:
 	afx_msg long GetFilesToRemoveCount();
 	afx_msg BSTR GetFileToRemoveAt(long index);
 	afx_msg BSTR GetAdditionalIncludePath(LPCTSTR configurationName);
-	//}}AFX_DISPATCH
 
-	DECLARE_DISPATCH_MAP()
-	DECLARE_INTERFACE_MAP()
+	enum 
+	{
+		dispidDspProjectFilePath = 1,
+		dispidGetFileFilterCount = 2,
+		dispidGetFileFilterAt = 3,
+		dispidAddFileFilter = 4,
+		dispidClearAllFileFilters = 5,
+		dispidGetProjectFileCount = 6,
+		dispidGetProjectFileAt = 7,
+		dispidContainsSourceFile = 8,
+		dispidGetFilesToAddCount = 9,
+		dispidGetFileToAddAt = 10,
+		dispidGetFilesToRemoveCount = 11,
+		dispidGetFileToRemoveAt = 12,
+		dispidGetAdditionalIncludePath = 13
+	};
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_DSPPROJECT_H__8902DD00_9974_43AF_B8BC_B301EF9F89FE__INCLUDED_)

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CodeMessageBox.h"
 #include "CodeUtilities.h"
 #include "resource.h"

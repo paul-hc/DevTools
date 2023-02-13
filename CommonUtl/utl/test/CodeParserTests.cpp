@@ -6,7 +6,6 @@
 #include "utl/StringParsing.h"
 #include "utl/CodeParsing.h"
 #include "test/CodeParserTests.h"
-	#include "_MethodPrototype.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -319,8 +318,6 @@ void CCodeParserTests::TestCodeDetails( void )
 		}
 	}
 }
-
-
 
 
 void CCodeParserTests::Run( void )
