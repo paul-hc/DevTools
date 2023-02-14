@@ -35,9 +35,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Performing registration"
-				CommandLine="if &quot;%OS%&quot;==&quot;&quot; goto NOTNT&#x0D;&#x0A;if not &quot;%OS%&quot;==&quot;Windows_NT&quot; goto NOTNT&#x0D;&#x0A;regsvr32 /s /c &quot;$(TargetPath)&quot;&#x0D;&#x0A;echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;&#x0D;&#x0A;goto end&#x0D;&#x0A;:NOTNT&#x0D;&#x0A;echo Warning : Cannot register Unicode DLL on Windows 95&#x0D;&#x0A;:end&#x0D;&#x0A;"
-				Outputs="$(OutDir)\regsvr32.trg"
+				Description=""
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -80,6 +80,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				RegisterOutput="true"
 				OutputFile="$(OutDir)\$(ProjectName)32.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -130,9 +131,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Performing registration"
-				CommandLine="if &quot;%OS%&quot;==&quot;&quot; goto NOTNT&#x0D;&#x0A;if not &quot;%OS%&quot;==&quot;Windows_NT&quot; goto NOTNT&#x0D;&#x0A;regsvr32 /s /c &quot;$(TargetPath)&quot;&#x0D;&#x0A;echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;&#x0D;&#x0A;goto end&#x0D;&#x0A;:NOTNT&#x0D;&#x0A;echo Warning : Cannot register Unicode DLL on Windows 95&#x0D;&#x0A;:end&#x0D;&#x0A;"
-				Outputs="$(OutDir)\regsvr32.trg"
+				Description=""
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -176,6 +177,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				RegisterOutput="true"
 				OutputFile="$(OutDir)\$(ProjectName)64.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -228,9 +230,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Performing registration"
-				CommandLine="if &quot;%OS%&quot;==&quot;&quot; goto NOTNT&#x0D;&#x0A;if not &quot;%OS%&quot;==&quot;Windows_NT&quot; goto NOTNT&#x0D;&#x0A;regsvr32 /s /c &quot;$(TargetPath)&quot;&#x0D;&#x0A;echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;&#x0D;&#x0A;goto end&#x0D;&#x0A;:NOTNT&#x0D;&#x0A;echo Warning : Cannot register Unicode DLL on Windows 95&#x0D;&#x0A;:end&#x0D;&#x0A;"
-				Outputs="$(OutDir)\regsvr32.trg"
+				Description=""
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -275,6 +277,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				RegisterOutput="true"
 				OutputFile="$(OutDir)\$(ProjectName)32.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -329,9 +332,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Performing registration"
-				CommandLine="if &quot;%OS%&quot;==&quot;&quot; goto NOTNT&#x0D;&#x0A;if not &quot;%OS%&quot;==&quot;Windows_NT&quot; goto NOTNT&#x0D;&#x0A;regsvr32 /s /c &quot;$(TargetPath)&quot;&#x0D;&#x0A;echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;&#x0D;&#x0A;goto end&#x0D;&#x0A;:NOTNT&#x0D;&#x0A;echo Warning : Cannot register Unicode DLL on Windows 95&#x0D;&#x0A;:end&#x0D;&#x0A;"
-				Outputs="$(OutDir)\regsvr32.trg"
+				Description=""
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -377,6 +380,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				RegisterOutput="true"
 				OutputFile="$(OutDir)\$(ProjectName)64.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
