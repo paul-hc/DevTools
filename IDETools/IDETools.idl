@@ -2,10 +2,12 @@
 // This file will be processed by the MIDL compiler to produce the
 // type library (IDETools.tlb).
 
-#include "olectl.h"
 
-
-[ uuid(690D31A0-1AC3-11D2-A26A-006097B8DD84), version(1.0) ]
+[
+	uuid(690D31A0-1AC3-11D2-A26A-006097B8DD84),
+	version(1.0),
+	helpstring("IDETools - Visual Studio macro companion")
+]
 library IDETools
 {
 	importlib("stdole32.tlb");
@@ -198,7 +200,10 @@ library IDETools
 	};
 
 		//  Class information for UserInterface
-	[ uuid(216EF195-4C10-11D3-A3C8-006097B8DD84) ]
+	[
+		uuid(216EF195-4C10-11D3-A3C8-006097B8DD84),
+		helpstring("UserInterface Class")				// no effect in OleView.exe, still shows <no name> for the coclass
+	]
 	coclass UserInterface
 	{
 		[default] dispinterface IUserInterface;

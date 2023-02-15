@@ -266,6 +266,6 @@ namespace code
 				++m_returnType.m_start;
 		}
 
-		TRACE( _T("%s"), FormatInfo().c_str() );
+		TRACE( _T("%s\n"), FormatInfo().c_str() );
 	}
 }

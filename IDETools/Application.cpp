@@ -24,6 +24,14 @@
 #include "utl/UI/BaseApp.hxx"
 
 
+// From IDETools.idl:
+//	[ uuid(690D31A0-1AC3-11D2-A26A-006097B8DD84), version(1.0) ]
+//	library IDETools
+const GUID CDECL g_tlid = {0x690D31A0, 0x1AC3, 0x11D2, {0xA2, 0x6A, 0x00, 0x60, 0x97, 0xB8, 0xDD, 0x84 } };
+const WORD g_wVerMajor = 1;
+const WORD g_wVerMinor = 0;
+
+
 // special entry points required for inproc servers
 
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
@@ -43,6 +51,9 @@ STDAPI DllRegisterServer(void)
 {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
 
+	if ( !AfxOleRegisterTypeLib( AfxGetInstanceHandle(), g_tlid ) )
+		return SELFREG_E_TYPELIB;
+
 	if ( !COleObjectFactory::UpdateRegistryAll( TRUE ) )
 		return E_FAIL;
 
@@ -55,6 +66,9 @@ STDAPI DllRegisterServer(void)
 STDAPI DllUnregisterServer( void )
 {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
+
+	if ( !AfxOleUnregisterTypeLib( g_tlid, g_wVerMajor, g_wVerMinor ) )
+		return SELFREG_E_TYPELIB;
 
 	// the call below is just for convenience, MFC doesn't actually implement COM server unregistration
 	COleObjectFactory::UpdateRegistryAll( FALSE );
