@@ -22,6 +22,8 @@
 #endif //_HAS_CXX17
 
 
+// debug support
+
 #include <crtdbg.h>
 
 #ifdef _DEBUG
@@ -38,7 +40,9 @@
 #endif //_DEBUG
 
 
-// debug support
+#define MFC_ASSERT(expr)	DEBUG_ONLY( (void) ((expr) || !::AfxAssertFailedLine(THIS_FILE, __LINE__) || (AfxDebugBreak(), 0)) )		// verbatim from <afx.h>
+
+
 #ifdef ASSERT
 	#undef ASSERT
 #endif

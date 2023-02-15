@@ -155,7 +155,8 @@ namespace ut
 		if ( succeeded )
 			return true;
 
-		TRACE( _T("%s\n"), pMsg );
+		// note: _ASSERT_EXPR() will do the tracing (avoid double tracing)
+		//TRACE( _T("%s\n"), pMsg );
 
 		std::cerr << pFilePath << '(' << lineNumber << ") : " << pMsg << std::endl;
 		return false;
