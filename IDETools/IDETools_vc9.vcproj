@@ -815,6 +815,10 @@
 			RelativePath=".\ReadMe.txt"
 			>
 		</File>
+		<File
+			RelativePath=".\RunUnitTests.vbs"
+			>
+		</File>
 	</Files>
 	<Globals>
 		<Global

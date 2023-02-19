@@ -87,8 +87,11 @@ namespace code
 				lang.SkipIdentifier( &it, itEnd );	// "Acquire" or "func"
 			}
 
-			m_methodQualifiedName = pvt::MakeFwdTokenRange( Range<const_reverse_iterator>( it, itArgList ), m_proto );
-			m_typeQualifier = pvt::MakeFwdTokenRange( Range<const_reverse_iterator>( it, itAnchor ), m_proto );
+			m_methodQualifiedName = pvt::MakeFwdTokenRange( Range<const_reverse_iterator>( itArgList + 1, it ), m_proto );
+			m_typeQualifier = pvt::MakeFwdTokenRange( Range<const_reverse_iterator>( itAnchor, it ), m_proto );
+
+			if ( m_functionName.IsEmpty() )					// no "::" scope separator?
+				m_functionName = m_methodQualifiedName;
 
 			itAnchor = ++it;		// rev-start of returnType
 
@@ -97,7 +100,7 @@ namespace code
 					lang.SkipPastMatchingBrace( &it, itEnd );			// skip template instance "<...>" list
 
 			it = lang.FindNextCharThat( it, itEnd, pred::IsSpace() );	// rev-end of returnType
-			m_returnType = pvt::MakeFwdTokenRange( Range<const_reverse_iterator>( it, itAnchor ), m_proto );
+			m_returnType = pvt::MakeFwdTokenRange( Range<const_reverse_iterator>( itAnchor, it ), m_proto );
 
 			//m_returnType
 		}

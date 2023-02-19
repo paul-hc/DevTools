@@ -307,6 +307,7 @@
   <ItemGroup>
     <None Include="IDETools.def" />
     <None Include="res\IDETools.rc2" />
+    <None Include="RunUnitTests.vbs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
