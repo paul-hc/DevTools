@@ -45,6 +45,7 @@ namespace app
 
 // CAppTools implementation
 
+int CAppTools::s_mainResultCode = 0;
 CAppTools* CAppTools::s_pAppTools = NULL;
 
 CAppTools::CAppTools( void )

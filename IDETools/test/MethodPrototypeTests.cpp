@@ -124,22 +124,21 @@ inline std::pair<ObjectT*, cache::TStatusFlags> CCacheLoader<PathT, ObjectT>::Ac
 
 void CMethodPrototypeTests::Run( void )
 {
-	__super::Run();
-
+if(1)
 	{
 		code::CMethodPrototypeOld protoOld;
 
-		TestParse_GlobalFunction( protoOld );
-		TestParse_ClassMethodImpl( protoOld );
-		TestParse_TemplateMethodImpl( protoOld );
+		RUN_TEST1( TestParse_GlobalFunction, protoOld );
+		RUN_TEST1( TestParse_ClassMethodImpl, protoOld );
+		RUN_TEST1( TestParse_TemplateMethodImpl, protoOld );
 	}
-if(0)
+else
 	{
 		code::CMethodPrototype proto;
 
-		TestParse_GlobalFunction( proto );
-		TestParse_ClassMethodImpl( proto );
-		TestParse_TemplateMethodImpl( proto );
+		RUN_TEST1( TestParse_GlobalFunction, proto );
+		RUN_TEST1( TestParse_ClassMethodImpl, proto );
+		RUN_TEST1( TestParse_TemplateMethodImpl, proto );
 	}
 }
 

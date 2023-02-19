@@ -1072,39 +1072,38 @@ void CStringTests::TestFunctional( void )
 	ASSERT_EQUAL_STR( _T("orange.png"), getNameExtMethod() );
 }
 
+
 void CStringTests::Run( void )
 {
-	__super::Run();
+	RUN_TEST( TestCharTraits );
+	RUN_TEST( TestIsCharType );
+	RUN_TEST( TestValueToString );
+	RUN_TEST( TestStringSorting );
+	RUN_TEST( TestIntuitiveSort );
+	RUN_TEST( TestIntuitiveSortPunctuation );
+	RUN_TEST( TestIgnoreCase );
+	RUN_TEST( TestTrim );
+	RUN_TEST( TestEnquote );
+	RUN_TEST( TestStringSplit );
+	RUN_TEST( TestStringTokenize );
+	RUN_TEST( TestStringPrefixSuffix );
+	RUN_TEST( TestStringConversion );
+	RUN_TEST( TestStringSearch );
+	RUN_TEST( TestStringMatch );
+	RUN_TEST( TestStringSequence );
+	RUN_TEST( TestStringOccurenceCount );
+	RUN_TEST( TestStringLines );
 
-	TestCharTraits();
-	TestIsCharType();
-	TestValueToString();
-	TestStringSorting();
-	TestIntuitiveSort();
-	TestIntuitiveSortPunctuation();
-	TestIgnoreCase();
-	TestTrim();
-	TestEnquote();
-	TestStringSplit();
-	TestStringTokenize();
-	TestStringPrefixSuffix();
-	TestStringConversion();
-	TestStringSearch();
-	TestStringMatch();
-	TestStringSequence();
-	TestStringOccurenceCount();
-	TestStringLines();
+	RUN_TEST( TestSearchEnclosedItems );
+	RUN_TEST( TestReplaceEnclosedItems );
+	RUN_TEST( TestArgUtilities );
+	RUN_TEST( TestEnumTags );
+	RUN_TEST( TestFlagTags );
+	RUN_TEST( TestWordSelection );
+	RUN_TEST( TestEnsureUniformNumPadding );
+	RUN_TEST( TestTimeFormatting );
 
-	TestSearchEnclosedItems();
-	TestReplaceEnclosedItems();
-	TestArgUtilities();
-	TestEnumTags();
-	TestFlagTags();
-	TestWordSelection();
-	TestEnsureUniformNumPadding();
-	TestTimeFormatting();
-
-	TestFunctional();
+	RUN_TEST( TestFunctional );
 }
 
 

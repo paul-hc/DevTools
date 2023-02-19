@@ -213,10 +213,8 @@ void ut::testRcFile_RefTimestamp( const std::string& newText )
 
 void CResourceFileTests::Run( void )
 {
-	__super::Run();
-
-	TestStampRcFile();
-	FuncTest_StampRcFile();
+	RUN_TEST( TestStampRcFile );
+	RUN_TEST( FuncTest_StampRcFile );
 }
 
 

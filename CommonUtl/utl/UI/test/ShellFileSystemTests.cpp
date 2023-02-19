@@ -253,14 +253,12 @@ void CShellFileSystemTests::TestMultiFileContextMenu( void )
 
 void CShellFileSystemTests::Run( void )
 {
-	__super::Run();
-
-	TestShellPidl();
-	TestShellRelativePidl();
-	TestPathShellApi();
-	TestPathExplorerSort();
-	TestRecycler();
-	TestMultiFileContextMenu();
+	RUN_TEST( TestShellPidl );
+	RUN_TEST( TestShellRelativePidl );
+	RUN_TEST( TestPathShellApi );
+	RUN_TEST( TestPathExplorerSort );
+	RUN_TEST( TestRecycler );
+	RUN_TEST( TestMultiFileContextMenu );
 }
 
 

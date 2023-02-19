@@ -180,13 +180,11 @@ void CStringRangeTests::TestSplit( void )
 
 void CStringRangeTests::Run( void )
 {
-	__super::Run();
-
-	TestInit();
-	TestFind();
-	TestTrim();
-	TestStrip();
-	TestSplit();
+	RUN_TEST( TestInit );
+	RUN_TEST( TestFind );
+	RUN_TEST( TestTrim );
+	RUN_TEST( TestStrip );
+	RUN_TEST( TestSplit );
 }
 
 

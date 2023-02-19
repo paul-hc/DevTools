@@ -42,6 +42,31 @@ CAlgorithmsTests& CAlgorithmsTests::Instance( void )
 	return s_testCase;
 }
 
+
+void CAlgorithmsTests::TestAssertions( void )
+{
+	if ( 0 )			// deliberate assertion failures to test reporting interactively (enable on demand)
+	{
+		ASSERT(! path::IsWellFormed( _T("C:\\Images\\Europe/apple.jpg") ) );
+
+		ASSERT_EQUAL(1+ 2, str::GetCountOf<str::IgnoreCase>( "abcdeABC", "a" ) );
+		ASSERT_EQUAL( "!name.ext", std::string( "name.ext" ) );
+		ASSERT_EQUAL( _T("!name.ext"), fs::CPath( _T("name.ext") ).Get() );
+
+		ASSERT_EQUAL_STR( "!Text", str::SkipPrefix<str::Case>( "abcText", "abc" ) );
+		ASSERT_EQUAL_STR( L"!Text", str::SkipPrefix<str::Case>( L"abcText", L"abc" ) );
+
+		ASSERT_EQUAL_IGNORECASE( "!abc", str::MakeUpper( std::string( "abc" ) ) );
+		ASSERT_EQUAL_IGNORECASE( L"!abc", str::MakeUpper( std::wstring( L"abc" ) ) );
+
+		ASSERT_HAS_PREFIX( "!name=", &*utl::RevIterAtFwdFront( std::string( "name=[value...[" ) ) );
+		ASSERT_HAS_PREFIX( L"!name=", &*utl::RevIterAtFwdFront( std::wstring( L"name=[value...[" ) ) );
+	}
+	else
+		UT_TRACE( "(skipped)  " );
+}
+
+
 void CAlgorithmsTests::TestBasicUtils( void )
 {
 	{	// REVERSE iteration
@@ -81,14 +106,17 @@ void CAlgorithmsTests::TestBasicUtils( void )
 
 void CAlgorithmsTests::TestBuffer( void )
 {
+	UT_TRACE( "(TODO: implement...)  " );
 }
 
 void CAlgorithmsTests::TestLookup( void )
 {
+	UT_TRACE( "(TODO: implement...)  " );
 }
 
 void CAlgorithmsTests::TestBinaryLookup( void )
 {
+	UT_TRACE( "(TODO: implement...)  " );
 }
 
 void CAlgorithmsTests::TestIsOrdered( void )
@@ -465,10 +493,12 @@ void CAlgorithmsTests::TestCompareContents( void )
 
 void CAlgorithmsTests::TestAdvancePos( void )
 {
+	UT_TRACE( "(TODO: implement...)  " );
 }
 
 void CAlgorithmsTests::TestOwningContainer( void )
 {
+	UT_TRACE( "(TODO: implement...)  " );
 }
 
 void CAlgorithmsTests::Test_vector_map( void )
@@ -499,22 +529,22 @@ void CAlgorithmsTests::Test_vector_map( void )
 
 void CAlgorithmsTests::Run( void )
 {
-	__super::Run();
+	RUN_TEST( TestAssertions );
 
-	TestBasicUtils();
-	TestBuffer();
-	TestLookup();
-	TestBinaryLookup();
-	TestIsOrdered();
-	TestQuery();
-	TestAssignment();
-	TestInsert();
-	TestRemove();
-	TestMixedTypes();
-	TestCompareContents();
-	TestAdvancePos();
-	TestOwningContainer();
-	Test_vector_map();
+	RUN_TEST( TestBasicUtils );
+	RUN_TEST( TestBuffer );
+	RUN_TEST( TestLookup );
+	RUN_TEST( TestBinaryLookup );
+	RUN_TEST( TestIsOrdered );
+	RUN_TEST( TestQuery );
+	RUN_TEST( TestAssignment );
+	RUN_TEST( TestInsert );
+	RUN_TEST( TestRemove );
+	RUN_TEST( TestMixedTypes );
+	RUN_TEST( TestCompareContents );
+	RUN_TEST( TestAdvancePos );
+	RUN_TEST( TestOwningContainer );
+	RUN_TEST( Test_vector_map );
 }
 
 

@@ -498,19 +498,17 @@ namespace ut
 
 void CFileSystemTests::Run( void )
 {
-	__super::Run();
-
-	TestFileSystem();
-	TestFileEnum();
-	TestFileEnumFilter();
-	TestFileEnumHidden();
-	TestNumericFilename();
-	TestTempFilePool();
-	TestFileAndDirectoryState();
-	TestTouchFile();
-	TestFileTransferMatch();
-	TestBackupFileFlat();
-	TestBackupFileSubDir();
+	RUN_TEST( TestFileSystem );
+	RUN_TEST( TestFileEnum );
+	RUN_TEST( TestFileEnumFilter );
+	RUN_TEST( TestFileEnumHidden );
+	RUN_TEST( TestNumericFilename );
+	RUN_TEST( TestTempFilePool );
+	RUN_TEST( TestFileAndDirectoryState );
+	RUN_TEST( TestTouchFile );
+	RUN_TEST( TestFileTransferMatch );
+	RUN_TEST( TestBackupFileFlat );
+	RUN_TEST( TestBackupFileSubDir );
 }
 
 

@@ -6,6 +6,16 @@
 #ifdef USE_UT		// no UT code in release builds
 
 
+#define RUN_TEST( testMethod )\
+	do { ut::CScopedTestMethod test( this, #testMethod ); (testMethod)(); } while ( false )
+
+#define RUN_TEST1( testMethod, arg1 )\
+	do { ut::CScopedTestMethod test( this, #testMethod ); (testMethod)( (arg1) ); } while ( false )
+
+#define RUN_TEST2( testMethod, arg1, arg2 )\
+	do { ut::CScopedTestMethod test( this, #testMethod ); (testMethod)( (arg1), (arg2) ); } while ( false )
+
+
 namespace ut
 {
 	interface ITestCase
@@ -15,21 +25,16 @@ namespace ut
 
 	abstract class CConsoleTestCase : public ITestCase
 	{
-	public:
-		// base overrides
-		virtual void Run( void ) = 0;		// pure with implementation; must be called for tracing execution
 	};
 
 	abstract class CGraphicTestCase : public ITestCase
 	{
-	public:
-		// base overrides
-		virtual void Run( void ) = 0;		// pure with implementation; must be called for tracing execution
 	};
 
 
 	class CTestSuite
 	{
+		CTestSuite( void );
 		~CTestSuite();
 	public:
 		static CTestSuite& Instance( void );
@@ -46,6 +51,26 @@ namespace ut
 	};
 
 	void RunAllTests( void );				// main entry point for running all unit tests
+}
+
+
+namespace ut
+{
+	class CScopedTestMethod
+	{
+	public:
+		CScopedTestMethod( const ITestCase* pTestCase, const char* pTestMethod );
+		~CScopedTestMethod();
+
+		static size_t GetTestCount( void ) { return s_testCount; }
+		static size_t GetFailedTestCount( void ) { return s_failedTestCount; }
+		static size_t GetPassedTestCount( void ) { return s_testCount - s_failedTestCount; }
+	private:
+		int m_oldErrorCount;
+
+		static size_t s_testCount;			// total test methods executed
+		static size_t s_failedTestCount;	// failed test methods
+	};
 }
 
 

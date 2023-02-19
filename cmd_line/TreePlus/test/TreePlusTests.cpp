@@ -444,11 +444,9 @@ void CTreePlusTests::testTable( const CTextCell* pTableRoot )
 
 void CTreePlusTests::Run( void )
 {
-	__super::Run();
-
-	TestOnlyDirectories();
-	TestFilesAndDirectories();
-	TestTableInput();
+	RUN_TEST( TestOnlyDirectories );
+	RUN_TEST( TestFilesAndDirectories );
+	RUN_TEST( TestTableInput );
 }
 
 

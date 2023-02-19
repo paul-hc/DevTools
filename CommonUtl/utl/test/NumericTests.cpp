@@ -497,22 +497,20 @@ void CNumericTests::TestMemLeakCheck( void )
 
 void CNumericTests::Run( void )
 {
-	__super::Run();
+	RUN_TEST( TestFormatNumber );
+	RUN_TEST( TestFormatNumberUserLocale );
+	RUN_TEST( TestParseNumber );
+	RUN_TEST( TestParseNumberUserLocale );
+	RUN_TEST( TestFindNumber );
+	RUN_TEST( TestGenerateNumericSequence );
 
-	TestFormatNumber();
-	TestFormatNumberUserLocale();
-	TestParseNumber();
-	TestParseNumberUserLocale();
-	TestFindNumber();
-	TestGenerateNumericSequence();
-
-	TestConvertFileSize();
-	TestFormatFileSize();
-	TestCrc32();
+	RUN_TEST( TestConvertFileSize );
+	RUN_TEST( TestFormatFileSize );
+	RUN_TEST( TestCrc32 );
 
 #if _MSC_VER < 1800		// MSVC++ 12.0 (Visual Studio 2013)
 	// there are issues with CMemLeakCheck class on newer VC++
-	TestMemLeakCheck();
+	RUN_TEST( TestMemLeakCheck );
 #endif	//_MSC_VER
 }
 

@@ -45,12 +45,10 @@ void CColorTests::TestFormatParseColor( void )
 
 void CColorTests::Run( void )
 {
-	__super::Run();
-
-	TestColor();
-	TestColorChannels();
-	TestColorTransform();
-	TestFormatParseColor();
+	RUN_TEST( TestColor );
+	RUN_TEST( TestColorChannels );
+	RUN_TEST( TestColorTransform );
+	RUN_TEST( TestFormatParseColor );
 }
 
 

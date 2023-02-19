@@ -182,12 +182,12 @@ int _tmain( int argc, TCHAR* argv[] )
 
 		if ( options.HasOptionFlag( app::PauseAtEnd ) )
 			io::PressAnyKey();
-
-		return 0;
 	}
 	catch ( const std::exception& exc )
 	{
+		CAppTools::AddMainResultError();
 		app::ReportException( exc );
-		return 1;
 	}
+
+	return CAppTools::GetMainResultCode();			// count of tests that failed
 }

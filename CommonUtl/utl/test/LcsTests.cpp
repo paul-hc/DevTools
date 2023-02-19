@@ -370,17 +370,15 @@ void CLcsTests::TestMatchingSequenceMidCommon( void )
 
 void CLcsTests::Run( void )
 {
-	__super::Run();
+	RUN_TEST( TestSuffixTreeGutsAnsi );
+	RUN_TEST( TestSuffixTreeGutsWide );
+	RUN_TEST( TestFindLongestDuplicatedString );
+	RUN_TEST( TestFindLongestCommonSubstring );
+	RUN_TEST( TestRandomLongestCommonSubstring );
 
-	TestSuffixTreeGutsAnsi();
-	TestSuffixTreeGutsWide();
-	TestFindLongestDuplicatedString();
-	TestFindLongestCommonSubstring();
-	TestRandomLongestCommonSubstring();
-
-	TestMatchingSequenceSimple();
-	TestMatchingSequenceDiffCase();
-	TestMatchingSequenceMidCommon();
+	RUN_TEST( TestMatchingSequenceSimple );
+	RUN_TEST( TestMatchingSequenceDiffCase );
+	RUN_TEST( TestMatchingSequenceMidCommon );
 }
 
 

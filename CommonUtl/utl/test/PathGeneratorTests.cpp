@@ -307,16 +307,14 @@ void CPathGeneratorTests::TestWildcardFileGeneration( void )
 
 void CPathGeneratorTests::Run( void )
 {
-	__super::Run();
-
-	TestPathUniqueMaker();
-	TestPathMaker();
-	TestPathFormatter();
-	TestNumSeqGeneration();
-	TestNumSeqFileGeneration();
-	TestFindNextAvailSeqCount();
-	TestWildcardGeneration();
-	TestWildcardFileGeneration();
+	RUN_TEST( TestPathUniqueMaker );
+	RUN_TEST( TestPathMaker );
+	RUN_TEST( TestPathFormatter );
+	RUN_TEST( TestNumSeqGeneration );
+	RUN_TEST( TestNumSeqFileGeneration );
+	RUN_TEST( TestFindNextAvailSeqCount );
+	RUN_TEST( TestWildcardGeneration );
+	RUN_TEST( TestWildcardFileGeneration );
 }
 
 

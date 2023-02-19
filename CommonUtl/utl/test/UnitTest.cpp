@@ -10,8 +10,9 @@
 #include "Logger.h"
 #include "Path.h"
 #include "RuntimeException.h"
+#include "AppTools.h"
 #include "StringUtilities.h"
-#include <math.h>
+#include <math.h>			// fabs()
 #include <unordered_set>
 #include <fstream>
 #include <iostream>
@@ -27,6 +28,73 @@ namespace numeric
 	bool DoublesEqual( double left, double right )
 	{
 		return fabs( left - right ) < dEpsilon;
+	}
+}
+
+
+namespace ut
+{
+	// UT assertions:
+
+	namespace impl
+	{
+		std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue, const wchar_t* pExpression )
+		{
+			std::tostringstream os;
+
+			os
+				<< L"** Equality Assertion Failed:" << std::endl
+				<< L"  " << pExpression << std::endl
+				<< std::endl
+				<< L"    expected:\t'" << expectedValue << L"'" << std::endl
+				<< L"    actual:  \t'" << actualValue << L"'";
+
+			return os.str();
+		}
+
+		bool ReportMessage( bool succeeded, const std::tstring& msg, const char* pFilePath, int lineNumber )
+		{
+			if ( succeeded )
+				return true;
+
+			// note: avoid double tracing => _ASSERT_EXPR() will do the tracing
+			//TRACE( _T("%s\n"), pMsg );
+
+			std::cerr << pFilePath << '(' << lineNumber << ") : " << msg << std::endl;
+			CAppTools::AddMainResultError();		// increment error count for console unit tests
+			return false;
+		}
+
+
+		template<>
+		void TraceMessage<char>( const char* pMessage )
+		{
+			OutputDebugStringA( pMessage );		// avoids TRACE overhead due to ATL_TRACE
+			std::clog << pMessage;
+		}
+
+		template<>
+		void TraceMessage<wchar_t>( const wchar_t* pMessage )
+		{
+			OutputDebugStringW( pMessage );		// avoids TRACE overhead due to ATL_TRACE
+			std::wclog << pMessage;
+		}
+	}
+
+
+	bool AssertTrue( bool succeeded, const wchar_t* pExpression, std::tstring& rMsg )
+	{
+		if ( succeeded )
+			return true;
+
+		std::tostringstream os;
+
+		os
+			<< L"** Assertion Failed:" << std::endl
+			<< L"  Expression:\t" << pExpression;
+
+		rMsg = os.str();
+		return false;
 	}
 }
 
@@ -137,45 +205,6 @@ namespace ut
 		return s_testLogger;
 	}
 
-
-	std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue )
-	{
-		std::tostringstream os;
-
-		os
-			<< L"* Equality Assertion Failed *" << std::endl << std::endl
-			<< L"    expected:\t'" << expectedValue << L"'" << std::endl
-			<< L"    actual:  \t'" << actualValue << L"'";
-
-		return os.str();
-	}
-
-	bool ReportMessage( bool succeeded, const TCHAR* pMsg, const char* pFilePath, int lineNumber )
-	{
-		if ( succeeded )
-			return true;
-
-		// note: _ASSERT_EXPR() will do the tracing (avoid double tracing)
-		//TRACE( _T("%s\n"), pMsg );
-
-		std::cerr << pFilePath << '(' << lineNumber << ") : " << pMsg << std::endl;
-		return false;
-	}
-
-	bool AssertTrue( bool succeeded, const wchar_t* pExpression, std::tstring& rMsg )
-	{
-		if ( succeeded )
-			return true;
-
-		std::tostringstream os;
-
-		os
-			<< L"* Assertion Failed *" << std::endl
-			<< L"  expression:\t" << pExpression;
-
-		rMsg = os.str();
-		return false;
-	}
 
 
 	const fs::TDirPath& GetTestDataDirPath( void ) throws_( CRuntimeException )

@@ -53,10 +53,15 @@ public:
 	static CAppTools* Instance( void ) { ASSERT_PTR( s_pAppTools ); return s_pAppTools; }
 
 	const fs::CPath& GetModulePath( void ) const { return m_modulePath; }
+
+	// main() result code:
+	static int GetMainResultCode( void ) { return s_mainResultCode; }
+	static void AddMainResultError( void ) { ++s_mainResultCode; }
 protected:
 	fs::CPath m_modulePath;
 private:
 	static CAppTools* s_pAppTools;
+	static int s_mainResultCode;		// can be used as a return result of main()
 };
 
 

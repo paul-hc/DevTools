@@ -105,14 +105,12 @@ void CImagingD2DTests::TestImageAnimation( ut::CTestDevice* pTestDev, d2d::CDCRe
 
 void CImagingD2DTests::Run( void )
 {
-	__super::Run();
-
 	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ), ut::TileDown );
 	d2d::CDCRenderTarget renderTarget( testDev.GetDC() );
 
-	TestImage( &testDev, &renderTarget );
-	TestImageEffects( &testDev, &renderTarget );
-	TestImageAnimation( &testDev, &renderTarget );
+	RUN_TEST2( TestImage, &testDev, &renderTarget );
+	RUN_TEST2( TestImageEffects, &testDev, &renderTarget );
+	RUN_TEST2( TestImageAnimation, &testDev, &renderTarget );
 
 	ut::CTestToolWnd::DisableEraseBk();
 }

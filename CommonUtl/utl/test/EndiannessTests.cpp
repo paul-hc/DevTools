@@ -169,12 +169,10 @@ void CEndiannessTests::TestSwapBytesSameEndianness( void )
 
 void CEndiannessTests::Run( void )
 {
-	__super::Run();
-
-	TestSwapBytesValues();
-	TestSwapBytesString();
-	TestSwapBytesContainer();
-	TestSwapBytesSameEndianness();
+	RUN_TEST( TestSwapBytesValues );
+	RUN_TEST( TestSwapBytesString );
+	RUN_TEST( TestSwapBytesContainer );
+	RUN_TEST( TestSwapBytesSameEndianness );
 }
 
 

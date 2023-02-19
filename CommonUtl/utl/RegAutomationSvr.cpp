@@ -50,9 +50,9 @@ namespace ole
 
 	const TCHAR* CSafeForScripting::s_categoryIds[] =
 	{
-		_T("{40FC6ED5-2438-11CF-A3DB-080036F12502}"),		// i.e. "Automation Objects"
-		_T("{7DD95801-9882-11CF-9FA9-00AA006C42C4}"),
-		_T("{7DD95802-9882-11CF-9FA9-00AA006C42C4}")
+		_T("{40FC6ED5-2438-11CF-A3DB-080036F12502}"),		// "Automation Objects"
+		_T("{7DD95801-9882-11CF-9FA9-00AA006C42C4}"),		// CATID_SafeForScripting    - defined in <objsafe.h>; OleView.exe: "Controls safely initializable from persistent data"
+		_T("{7DD95802-9882-11CF-9FA9-00AA006C42C4}")		// CATID_SafeForInitializing - defined in <objsafe.h>; OleView.exe: "Controls that are safely scriptable"
 	};
 
 	size_t CSafeForScripting::UpdateRegistryAll( RegAction action /*= ole::Register*/ )

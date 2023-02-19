@@ -3,6 +3,7 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/Test.h"
+#include "AppTools.h"
 #include "Algorithms.h"
 #include "FileSystem.h"
 #include "Logger.h"
@@ -10,8 +11,10 @@
 #include "RuntimeException.h"
 #include "RandomUtilities.h"
 #include "StringUtilities.h"
+#include "Timer.h"
 #include <math.h>
 #include <fstream>
+#include <iostream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,42 +23,30 @@
 
 namespace ut
 {
-	const std::string& GetTestCaseName( const ITestCase* pTestCase )
+	class CTestRunnerReport
 	{
-		ASSERT_PTR( pTestCase );
-
-		static std::string testName;
-		testName = typeid( *pTestCase ).name();		// name of the derived concrete class (dereferenced pointer)
-		str::StripPrefix( testName, "class " );
-		return testName;
-	}
-
-	void CConsoleTestCase::Run( void )
-	{
-		TRACE( "-- %s console test case --\n", GetTestCaseName( this ).c_str() );
-	}
-
-	void CGraphicTestCase::Run( void )
-	{
-		TRACE( "-- %s graphic test case --\n", GetTestCaseName( this ).c_str() );
-	}
-}
+	public:
+		CTestRunnerReport( void );
+		~CTestRunnerReport();
+	private:
+		CTimer m_timer;
+	};
 
 
-namespace ut
-{
 	void RunAllTests( void )				// main entry point for running all unit tests
 	{
-		TRACE( "\nRUNNING UNIT TESTS:\n" );
+		CTestRunnerReport report;			// scoped output
 
 		utl::SetRandomSeed();				// ensure randomness on std::random_shuffle calls
 		CTestSuite::Instance().RunTests();
-
-		TRACE( "\nEND UNIT TESTS\n" );
 	}
 
 
 	// CTestSuite implementation
+
+	CTestSuite::CTestSuite( void )
+	{
+	}
 
 	CTestSuite::~CTestSuite()
 	{
@@ -96,6 +87,89 @@ namespace ut
 	}
 
 } //namespace ut
+
+
+namespace ut
+{
+	// CTestRunnerReport implementation
+
+	CTestRunnerReport::CTestRunnerReport()
+	{
+		std::ostringstream os;
+		os << "RUNNING UNIT TESTS:   " << CAppTools::Instance()->GetModulePath().GetFilenamePtr() << std::endl;
+
+		std::string text = os.str();
+
+		std::clog << text;
+		OutputDebugStringA( text.c_str() );
+	}
+
+	CTestRunnerReport::~CTestRunnerReport()
+	{
+		std::ostringstream os;
+
+		if ( 0 == CScopedTestMethod::GetFailedTestCount() )
+			os << "OK (" << CScopedTestMethod::GetTestCount() << ')';
+		else
+			os << "FAILED (" << CScopedTestMethod::GetFailedTestCount() << "),   PASSED (" << CScopedTestMethod::GetPassedTestCount() << ')';
+
+		os << _T("   Elapsed: ") << m_timer.FormatElapsedSeconds() << std::endl;
+
+		std::string text = os.str();
+
+		std::clog << text;
+		OutputDebugStringA( text.c_str() );
+	}
+
+
+	// CScopedTestMethod implementation
+
+	size_t CScopedTestMethod::s_testCount = 0;
+	size_t CScopedTestMethod::s_failedTestCount = 0;
+
+	CScopedTestMethod::CScopedTestMethod( const ITestCase* pTestCase, const char* pTestMethod )
+		: m_oldErrorCount( CAppTools::GetMainResultCode() )
+	{
+		ASSERT_PTR( pTestCase );
+
+		const char* pTestCaseName = typeid( *pTestCase ).name();
+		if ( const char* pCoreName = strchr( pTestCaseName, ' ' ) )
+			pTestCaseName = pCoreName + 1;
+
+		std::ostringstream os;
+		os << pTestCaseName << "::" << pTestMethod << " : ";
+
+		if ( is_a<CGraphicTestCase>( pTestCase ) )
+			os << " (graphic test case)";
+
+		std::string text = os.str();
+
+		OutputDebugStringA( text.c_str() );		// don't use TRACE to avoid the ATL overhead
+		std::clog << text;
+
+		++s_testCount;
+	}
+
+	CScopedTestMethod::~CScopedTestMethod()
+	{
+		std::string text = "OK\n";
+
+		if ( int failedCount = CAppTools::GetMainResultCode() - m_oldErrorCount )
+		{
+			std::ostringstream os;
+			os << failedCount << ( 1 == failedCount ? " ERROR!" : " ERRORS!" ) << std::endl;
+			text = os.str();
+
+			std::cerr << text;
+
+			++s_failedTestCount;
+		}
+		else
+			std::clog << text;
+
+		OutputDebugStringA( text.c_str() );
+	}
+}
 
 
 #endif //USE_UT

@@ -108,18 +108,18 @@ int _tmain( int argc, TCHAR* argv[] )
 		}
 		else
 			app::RunMain( options );
-
-		return 0;
 	}
 	catch ( const std::exception& exc )
 	{
+		CAppTools::AddMainResultError();
 		app::ReportException( exc );
-		return 1;
 	}
 	catch ( CException* pExc )
 	{
+		CAppTools::AddMainResultError();
 		app::ReportException( pExc );
 		pExc->Delete();
-		return 1;
 	}
+
+	return CAppTools::GetMainResultCode();			// count of tests that failed
 }

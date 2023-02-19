@@ -237,10 +237,8 @@ void CRegistryTests::Test_KeyInfo( const reg::CKey& rKey )
 
 void CRegistryTests::Run( void )
 {
-	__super::Run();
-
-	TestParseKeyFullPath();
-	TestKey();
+	RUN_TEST( TestParseKeyFullPath );
+	RUN_TEST( TestKey );
 }
 
 

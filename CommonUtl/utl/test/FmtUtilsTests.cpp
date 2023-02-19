@@ -92,10 +92,8 @@ void CFmtUtilsTests::TestTouchEntry( void )
 
 void CFmtUtilsTests::Run( void )
 {
-	__super::Run();
-
-	TestFileState();
-	TestTouchEntry();
+	RUN_TEST( TestFileState );
+	RUN_TEST( TestTouchEntry );
 }
 
 

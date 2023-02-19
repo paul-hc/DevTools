@@ -128,7 +128,7 @@ int _tmain( int argc, TCHAR* argv[] )
 
 		ut::RegisterAppUnitTests( value == _T("debug") );
 		ut::RunAllTests();
-		return 0;
+		return CAppTools::GetMainResultCode();			// count of tests that failed
 	}
 #endif
 
@@ -145,11 +145,13 @@ int _tmain( int argc, TCHAR* argv[] )
 			transfer.Run();
 			transfer.PrintStatistics( std::cout );
 		}
-		return 0;
 	}
 	catch ( const std::exception& exc )
 	{
+		CAppTools::AddMainResultError();
+
 		app::ReportException( exc );
-		return 1;
 	}
+
+	return CAppTools::GetMainResultCode();			// count of tests that failed
 }

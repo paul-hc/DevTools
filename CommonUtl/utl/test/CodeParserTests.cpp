@@ -322,12 +322,10 @@ void CCodeParserTests::TestCodeDetails( void )
 
 void CCodeParserTests::Run( void )
 {
-	__super::Run();
-
-	TestCustomLanguage();
-	TestBraceParity();
-	TestBraceMismatch();
-	TestCodeDetails();
+	RUN_TEST( TestCustomLanguage );
+	RUN_TEST( TestBraceParity );
+	RUN_TEST( TestBraceMismatch );
+	RUN_TEST( TestCodeDetails );
 }
 
 

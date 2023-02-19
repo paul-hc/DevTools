@@ -142,8 +142,7 @@ void CImageTests::TestImageList( void )
 	CDibSection dupDib;
 	dupDib.Copy( imageInfo.hbmImage );
 
-	CRect rect;
-	rect = CRect( testDev.GetDrawPos(), dupDib.GetSize() );
+	CRect rect( testDev.GetDrawPos(), dupDib.GetSize() );
 	dupDib.Draw( testDev.GetDC(), rect );
 	testDev.StoreTileRect( rect );
 	testDev.DrawTileFrame( color::AzureBlue );
@@ -185,13 +184,12 @@ void CImageTests::TestImageList( void )
 	testDev.Await();
 }
 
+
 void CImageTests::Run( void )
 {
-	__super::Run();
-
-	TestGroupIcon();
-	TestIcon();
-	TestImageList();
+	RUN_TEST( TestGroupIcon );
+	RUN_TEST( TestIcon );
+	RUN_TEST( TestImageList );
 }
 
 

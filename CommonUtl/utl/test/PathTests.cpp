@@ -877,7 +877,7 @@ void CPathTests::TestFlexPath( void )
 		pathSet.insert( fs::CFlexPath( _T("fILE 7") ) );
 		pathSet.insert( fs::CFlexPath( _T("FILE 1") ) );
 		pathSet.insert( fs::CFlexPath( _T("FILE 3") ) );
-		
+
 		ASSERT_EQUAL( _T("file 1,file 3,File 7,File 10"), str::Join( pathSet.begin(), pathSet.end(), comma ) );
 	}
 
@@ -924,21 +924,19 @@ void CPathTests::TestPathHashValue( void )
 
 void CPathTests::Run( void )
 {
-	__super::Run();
-
-	TestPathBasics();
-	TestPathIs();
-	TestPathUtilities();
-	TestPathSort();
-	TestPathSortExisting();
-	TestPathNaturalSort();
-	TestPathCompareFind();
-	TestPathWildcardMatch();
-	TestHasMultipleDirPaths();
-	TestCommonSubpath();
-	TestComplexPath();
-	TestFlexPath();
-	TestPathHashValue();
+	RUN_TEST( TestPathBasics );
+	RUN_TEST( TestPathIs );
+	RUN_TEST( TestPathUtilities );
+	RUN_TEST( TestPathSort );
+	RUN_TEST( TestPathSortExisting );
+	RUN_TEST( TestPathNaturalSort );
+	RUN_TEST( TestPathCompareFind );
+	RUN_TEST( TestPathWildcardMatch );
+	RUN_TEST( TestHasMultipleDirPaths );
+	RUN_TEST( TestCommonSubpath );
+	RUN_TEST( TestComplexPath );
+	RUN_TEST( TestFlexPath );
+	RUN_TEST( TestPathHashValue );
 }
 
 

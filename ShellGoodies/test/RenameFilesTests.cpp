@@ -135,13 +135,11 @@ void CRenameFilesTests::TestRenameChangeCase( void )
 
 void CRenameFilesTests::Run( void )
 {
-	__super::Run();
-
 	ut::CScopedCmdLogger scopeTestLogger( &ut::GetTestLogger() );
 
-	TestRenameSimple();
-	TestRenameCollisionExisting();
-	TestRenameChangeCase();
+	RUN_TEST( TestRenameSimple );
+	RUN_TEST( TestRenameCollisionExisting );
+	RUN_TEST( TestRenameChangeCase );
 }
 
 

@@ -42,9 +42,7 @@ int _tmain( int argc, TCHAR* argv[] )
 		else
 		{
 		#ifdef USE_UT
-			std::clog << "Executing UTL_BASE unit tests:" << std::endl;
-
-			st::CScopedInitializeOle scopedOle;		// some unit tests require OLE ()
+			st::CScopedInitializeOle scopedOle;		// some unit tests require OLE
 
 			ut::RegisterUtlConsoleTests();
 			CThreadingTests::Instance();			// special case: in this demo project we include the threading tests, with their dependency on Boos Threads library
@@ -53,11 +51,12 @@ int _tmain( int argc, TCHAR* argv[] )
 			std::clog << "Heya! Do what in Release build?" << std::endl;
 		#endif //USE_UT
 		}
-		return 0;
 	}
 	catch ( const std::exception& exc )
 	{
+		CAppTools::AddMainResultError();
 		app::ReportException( exc );
-		return 1;
 	}
+
+	return CAppTools::GetMainResultCode();			// count of tests that failed
 }

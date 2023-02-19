@@ -135,11 +135,9 @@ void CResequenceTests::TestDropMove( void )
 
 void CResequenceTests::Run( void )
 {
-	__super::Run();
-
-	TestCanMove();
-	TestResequence();
-	TestDropMove();
+	RUN_TEST( TestCanMove );
+	RUN_TEST( TestResequence );
+	RUN_TEST( TestDropMove );
 }
 
 

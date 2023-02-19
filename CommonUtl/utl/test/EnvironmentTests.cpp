@@ -159,13 +159,11 @@ void CEnvironmentTests::TestExpandKeysToValues( void )
 
 void CEnvironmentTests::Run( void )
 {
-	__super::Run();
-
-	TestQueryEnclosedIdentifiers();
-	TestEnvironVariables();
-	TestReplaceEnvVar_VcMacroToWindows();
-	TestExpandEnvironment();
-	TestExpandKeysToValues();
+	RUN_TEST( TestQueryEnclosedIdentifiers );
+	RUN_TEST( TestEnvironVariables );
+	RUN_TEST( TestReplaceEnvVar_VcMacroToWindows );
+	RUN_TEST( TestExpandEnvironment );
+	RUN_TEST( TestExpandKeysToValues );
 }
 
 

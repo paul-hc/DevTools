@@ -50,45 +50,49 @@ namespace ut
 	}
 
 
-	template< typename CharT >
-	std::basic_string<CharT> MakeString( const CharT* pText ) { return pText != nullptr ? std::basic_string<CharT>( pText ) : std::basic_string<CharT>(); }
+	namespace impl
+	{
+		template< typename CharT >
+		std::basic_string<CharT> MakeString( const CharT* pText ) { return pText != nullptr ? std::basic_string<CharT>( pText ) : std::basic_string<CharT>(); }
 
-	template< typename CharT >
-	std::basic_string<CharT> MakePrefix( const CharT* pText, size_t prefixLen ) { return pText != nullptr ? std::basic_string<CharT>( pText, prefixLen ) : std::basic_string<CharT>(); }
+		template< typename CharT >
+		std::basic_string<CharT> MakePrefix( const CharT* pText, size_t prefixLen ) { return pText != nullptr ? std::basic_string<CharT>( pText, prefixLen ) : std::basic_string<CharT>(); }
 
 
-	std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue );
-	bool ReportMessage( bool succeeded, const TCHAR* pMsg, const char* pFilePath, int lineNumber );
+		std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue, const wchar_t* pExpression );
+		bool ReportMessage( bool succeeded, const std::tstring& msg, const char* pFilePath, int lineNumber );
+
+		template< typename CharT >
+		void TraceMessage( const CharT* pMessage );		// traces to debug output and std::clog (for console apps) - no '\n' written!
+	}
 
 
 	bool AssertTrue( bool succeeded, const wchar_t* pExpression, std::tstring& rMsg );
 
-
 	template< typename ExpectedT, typename ActualT >
-	bool AssertEquals( const ExpectedT& expected, const ActualT& actual, std::tstring& rMsg )
+	bool AssertEquals( const ExpectedT& expected, const ActualT& actual, const wchar_t* pExpression, std::tstring& rMsg )
 	{
 		if ( Equals( static_cast<ActualT>( expected ), actual ) )
 			return true;
 
-		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualT>( expected ) ), ToString( actual ) );
+		rMsg = impl::MakeNotEqualMessage( ToString( static_cast<ActualT>( expected ) ), ToString( actual ), pExpression );
 		return false;
 	}
 
 	template< typename ExpectedT, typename ActualT >
-	bool AssertEqualsIgnoreCase( const ExpectedT& expected, const ActualT& actual, std::tstring& rMsg )
+	bool AssertEqualsIgnoreCase( const ExpectedT& expected, const ActualT& actual, const wchar_t* pExpression, std::tstring& rMsg )
 	{
 		if ( str::EqualString<str::IgnoreCase>( static_cast<ActualT>( expected ), actual ) )
 			return true;
 
-		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualT>( expected ) ), ToString( actual ) );
-		TRACE( _T("%s\n"), rMsg.c_str() );
+		rMsg = impl::MakeNotEqualMessage( ToString( static_cast<ActualT>( expected ) ), ToString( actual ), pExpression );
 		return false;
 	}
 
 	template< typename ExpectedCharT, typename ActualCharT >
-	bool AssertHasPrefix( const ExpectedCharT* pExpectedPrefix, const ActualCharT* pActual, std::tstring& rMsg )
+	bool AssertHasPrefix( const ExpectedCharT* pExpectedPrefix, const ActualCharT* pActual, const wchar_t* pExpression, std::tstring& rMsg )
 	{
-		return AssertEquals( pExpectedPrefix, MakePrefix( pActual, str::GetLength( pExpectedPrefix ) ), rMsg );
+		return AssertEquals( pExpectedPrefix, impl::MakePrefix( pActual, str::GetLength( pExpectedPrefix ) ), pExpression, rMsg );
 	}
 }
 
@@ -97,31 +101,33 @@ namespace ut
 
 #undef ASSERT
 #define ASSERT( expr )\
-	do { std::tstring msg; bool succeeded = ut::AssertTrue( !!(expr), _CRT_WIDE(#expr), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	do { std::tstring msg; bool succeeded = ut::AssertTrue( !!(expr), _CRT_WIDE(#expr), msg ); ut::impl::ReportMessage( succeeded, msg, __FILE__, __LINE__ );\
 	_ASSERT_EXPR( succeeded, _CRT_WIDE(#expr) ); } while( false )
 	//
-	// Note: include the "test/Header.h" last in .cpp file, if getting compilation errors due to conflicts with some MFC macros (e.g. AFX_ISOLATIONAWARE_PROC)
+	// Note: include the "test/*header.h" last in .cpp file, if getting compilation errors due to conflicts with some MFC macros (e.g. AFX_ISOLATIONAWARE_PROC)
 
 
 #define ASSERT_EQUAL( expected, actual )\
-	do { std::tstring msg; bool succeeded = ut::AssertEquals( (expected), (actual), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	do { std::tstring msg; bool succeeded = ut::AssertEquals( (expected), (actual), _CRT_WIDE(#actual), msg ); ut::impl::ReportMessage( succeeded, msg, __FILE__, __LINE__ );\
 	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 
 #define ASSERT_EQUAL_STR( pExpected, pActual )\
-	do { std::tstring msg; bool succeeded = ut::AssertEquals( (pExpected), ut::MakeString( (pActual) ), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	do { std::tstring msg; bool succeeded = ut::AssertEquals( (pExpected), ut::impl::MakeString( (pActual) ), _CRT_WIDE(#pActual), msg ); ut::impl::ReportMessage( succeeded, msg, __FILE__, __LINE__ );\
 	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 
 #define ASSERT_EQUAL_IGNORECASE( expected, actual )\
-	do { std::tstring msg; bool succeeded = ut::AssertEqualsIgnoreCase( (expected), (actual), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	do { std::tstring msg; bool succeeded = ut::AssertEqualsIgnoreCase( (expected), (actual), _CRT_WIDE(#actual), msg ); ut::impl::ReportMessage( succeeded, msg, __FILE__, __LINE__ );\
 	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 
 #define ASSERT_HAS_PREFIX( pExpectedPrefix, pActual )\
-	do { std::tstring msg; bool succeeded = ut::AssertHasPrefix( (pExpectedPrefix), (pActual), msg ); ut::ReportMessage( succeeded, msg.c_str(), __FILE__, __LINE__ );\
+	do { std::tstring msg; bool succeeded = ut::AssertHasPrefix( (pExpectedPrefix), (pActual), _CRT_WIDE(#pActual), msg ); ut::impl::ReportMessage( succeeded, msg, __FILE__, __LINE__ );\
 	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
+
+#define UT_TRACE( pMessage )  ut::impl::TraceMessage( (pMessage) )
 
 #define UT_REPEAT_BLOCK( count )  for ( unsigned int i = count; i-- != 0; )
 

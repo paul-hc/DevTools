@@ -202,13 +202,11 @@ void CThumbnailTests::TestThumbnailCache( ut::CTestDevice* pTestDev )
 
 void CThumbnailTests::Run( void )
 {
-	__super::Run();
-
 	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd() );
 
-	TestThumbConversion();
-	TestImageThumbs( &testDev );
-	TestThumbnailCache( &testDev );
+	RUN_TEST( TestThumbConversion );
+	RUN_TEST1( TestImageThumbs, &testDev );
+	RUN_TEST1( TestThumbnailCache, &testDev );
 }
 
 

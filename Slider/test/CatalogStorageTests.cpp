@@ -158,10 +158,8 @@ void CCatalogStorageTests::_TestAlbumFileAttr( ICatalogStorage* pCatalogStorage,
 
 void CCatalogStorageTests::Run( void )
 {
-	__super::Run();
-
-	TestBuildImageArchive();
-	TestAlbumSaveAs();
+	RUN_TEST( TestBuildImageArchive );
+	RUN_TEST( TestAlbumSaveAs );
 }
 
 

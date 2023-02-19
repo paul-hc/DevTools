@@ -303,12 +303,10 @@ void CTransferFuncTests::TestPullLossy( void )
 
 void CTransferFuncTests::Run( void )
 {
-	__super::Run();
-
-	TestCopy();
-	TestMove();
-	TestBackup();
-	TestPullLossy();
+	RUN_TEST( TestCopy );
+	RUN_TEST( TestMove );
+	RUN_TEST( TestBackup );
+	RUN_TEST( TestPullLossy );
 }
 
 

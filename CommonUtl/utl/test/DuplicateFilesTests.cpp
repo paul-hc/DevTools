@@ -60,9 +60,7 @@ void CDuplicateFilesTests::TestDuplicateFiles( void )
 
 void CDuplicateFilesTests::Run( void )
 {
-	__super::Run();
-
-	TestDuplicateFiles();
+	RUN_TEST( TestDuplicateFiles );
 }
 
 

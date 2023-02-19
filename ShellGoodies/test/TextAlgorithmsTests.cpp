@@ -77,17 +77,15 @@ void CTextAlgorithmsTests::TestWhitespace( void )
 
 void CTextAlgorithmsTests::Run( void )
 {
-	__super::Run();
-
 	// temporary store the filename adjustments defaults
 	CGeneralOptions* pOptions = &CGeneralOptions::Instance();
 	CScopedValue< bool > scopedTrimFname( &pOptions->m_trimFname, true );
 	CScopedValue< bool > scopedNormalizeWhitespace( &pOptions->m_normalizeWhitespace, true );
 
-	TestMakeCase();
-	TestCapitalizeWords();
-	TestReplaceText();
-	TestWhitespace();
+	RUN_TEST( TestMakeCase );
+	RUN_TEST( TestCapitalizeWords );
+	RUN_TEST( TestReplaceText );
+	RUN_TEST( TestWhitespace );
 }
 
 

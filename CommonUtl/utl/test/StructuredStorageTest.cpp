@@ -318,10 +318,8 @@ void CStructuredStorageTest::_TestOpenSharedStreams( fs::CStructuredStorage* pDo
 
 void CStructuredStorageTest::Run( void )
 {
-	__super::Run();
-
-	TestLongFilenames();
-	TestStructuredStorage();
+	RUN_TEST( TestLongFilenames );
+	RUN_TEST( TestStructuredStorage );
 }
 
 

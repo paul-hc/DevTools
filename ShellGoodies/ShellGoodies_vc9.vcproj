@@ -648,7 +648,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Code"
+			Name="Main Code"
 			>
 			<Filter
 				Name="UI"

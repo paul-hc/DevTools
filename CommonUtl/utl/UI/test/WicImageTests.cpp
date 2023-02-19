@@ -111,12 +111,10 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 
 void CWicImageTests::Run( void )
 {
-	__super::Run();
-
 	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
 
-	TestImage( &testDev );
-	TestImageCache( &testDev );
+	RUN_TEST1( TestImage, &testDev );
+	RUN_TEST1( TestImageCache, &testDev );
 }
 
 

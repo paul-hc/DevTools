@@ -366,7 +366,7 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 		}
 		else
 		{	// search for a valid file next to selection
-			for ( nextSelIndex = selIndexes.back() + 1; !hasSel && nextSelIndex < m_pAlbumModel->GetFileAttrCount(); ++nextSelIndex )
+			for ( nextSelIndex = selIndexes.back() + 1; !hasSel && (size_t)nextSelIndex < m_pAlbumModel->GetFileAttrCount(); ++nextSelIndex )
 				if ( GetItemObjectAt<CFileAttr>( nextSelIndex )->IsValid() )
 					m_selectionBackup.m_pStringImpl->m_selItems.push_back( GetItemObjectAt<CFileAttr>( nextSelIndex )->GetPath().Get() ), hasSel = true;
 

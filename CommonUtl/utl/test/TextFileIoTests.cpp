@@ -678,15 +678,13 @@ void CTextFileIoTests::TestParseSaveVerbatimContent( void )
 
 void CTextFileIoTests::Run( void )
 {
-	__super::Run();
-
-	TestByteOrderMark();
-	TestWriteRead_BinBuffer();
-	TestWriteRead_Contents();
-	TestWriteReadLines_StreamGetLine();
-	TestWriteReadLines_Rewind();
-	TestWriteParseLines();
-	TestParseSaveVerbatimContent();
+	RUN_TEST( TestByteOrderMark );
+	RUN_TEST( TestWriteRead_BinBuffer );
+	RUN_TEST( TestWriteRead_Contents );
+	RUN_TEST( TestWriteReadLines_StreamGetLine );
+	RUN_TEST( TestWriteReadLines_Rewind );
+	RUN_TEST( TestWriteParseLines );
+	RUN_TEST( TestParseSaveVerbatimContent );
 }
 
 

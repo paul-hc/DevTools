@@ -35,9 +35,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void )
 	{
-		__super::Run();
-
-		TestNestedLocking();
+		RUN_TEST( TestNestedLocking );
 	}
 private:
 	void TestNestedLocking( void )			// OS sync objects

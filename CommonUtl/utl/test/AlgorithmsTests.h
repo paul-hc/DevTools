@@ -17,6 +17,8 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestAssertions( void );		// deliberate assertion failures to test reporting interactively (enable on demand)
+
 	void TestBasicUtils( void );
 	void TestBuffer( void );
 	void TestLookup( void );
