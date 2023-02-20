@@ -164,8 +164,8 @@ namespace code
 			ranges.SplitMethod( functionImplLine );		//m_validArgListOpenBraces
 			if ( !ranges.m_templateDecl.IsEmpty() )
 				templateDecl = ranges.m_templateDecl.getString( functionImplLine );
-			if ( !ranges.m_typeQualifier.IsEmpty() )
-				typeQualifier = ranges.m_typeQualifier.getString( functionImplLine );
+			if ( !ranges.m_classQualifier.IsEmpty() )
+				typeQualifier = ranges.m_classQualifier.getString( functionImplLine );
 		}
 
 		if ( typeQualifier.IsEmpty() )
@@ -181,8 +181,8 @@ namespace code
 			if ( !ranges.m_templateDecl.IsEmpty() )
 				templateDecl = ranges.m_templateDecl.getString( userTypeDescriptor );
 
-			if ( !ranges.m_typeQualifier.IsEmpty() )
-				typeQualifier = ranges.m_typeQualifier.getString( userTypeDescriptor );
+			if ( !ranges.m_classQualifier.IsEmpty() )
+				typeQualifier = ranges.m_classQualifier.getString( userTypeDescriptor );
 		}
 
 		CString typeDescriptor;
@@ -231,7 +231,7 @@ namespace code
 			if ( typeQualifier != NULL )
 				implementedMethod += typeQualifier;
 
-			implementedMethod += TokenRange( method.m_methodQualifiedName.m_start, method.m_postArgListSuffix.m_end ).getString( sourcePrototype );
+			implementedMethod += TokenRange( method.m_qualifiedMethod.m_start, method.m_postArgListSuffix.m_end ).getString( sourcePrototype );
 			implementedMethod += code::lineEnd;
 			implementedMethod = splitArgumentList( implementedMethod );
 
@@ -243,7 +243,7 @@ namespace code
 
 			if ( !m_commentDecorationTemplate.IsEmpty() )
 			{
-				CString decorationCore = typeQualifier + TokenRange( method.m_methodQualifiedName.m_start, method.m_methodQualifiedName.m_end ).getString( sourcePrototype );
+				CString decorationCore = typeQualifier + TokenRange( method.m_qualifiedMethod.m_start, method.m_qualifiedMethod.m_end ).getString( sourcePrototype );
 				CString commentDecoration = makeCommentDecoration( decorationCore );
 
 				if ( !commentDecoration.IsEmpty() )

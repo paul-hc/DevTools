@@ -134,7 +134,7 @@
     <ClCompile Include="BraceParityStatus.cpp">
       <Filter>Main Code\string &amp; code</Filter>
     </ClCompile>
-    <ClCompile Include="CodeParser.cpp">
+    <ClCompile Include="CppCodeParser.cpp">
       <Filter>Main Code\string &amp; code</Filter>
     </ClCompile>
     <ClCompile Include="CodeUtilities.cpp">
@@ -325,7 +325,7 @@
     <ClInclude Include="BraceParityStatus.h">
       <Filter>Main Code\string &amp; code</Filter>
     </ClInclude>
-    <ClInclude Include="CodeParser.h">
+    <ClInclude Include="CppCodeParser.h">
       <Filter>Main Code\string &amp; code</Filter>
     </ClInclude>
     <ClInclude Include="CodeUtilities.h">

@@ -610,14 +610,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\CodeParser.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\CodeParser.h"
-					>
-				</File>
-				<File
 					RelativePath=".\CodeUtilities.cpp"
 					>
 				</File>
@@ -631,6 +623,14 @@
 				</File>
 				<File
 					RelativePath=".\ContainerComponents.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CppCodeParser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CppCodeParser.h"
 					>
 				</File>
 				<File

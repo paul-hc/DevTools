@@ -134,7 +134,7 @@ namespace code
 				if ( sepsPair.MatchesSequenceAt( itCode, itLast, sequence ) )
 				{
 					if ( str::ReverseIter == iterDir )
-						itCode += sequence.length() - 1;	// advance to beginning of the match
+						itCode += sequence.length() - 1;	// advance to r-beginning of the match
 
 					return itCode;				// found the next brace
 				}
@@ -184,11 +184,24 @@ namespace code
 			ASSERT_PTR( pItCode );
 
 			IteratorT itFound = FindNextCharThatNot( *pItCode, itLast, isCharPred );
-			if ( itFound == itLast )
-				return false;
+			if ( itFound == *pItCode )
+				return false;				// no advance
 
 			*pItCode = itFound;
 			return true;					// true if found non-isCharPred
+		}
+
+		template< typename IteratorT, typename IsCharPred >
+		bool SkipUntil( IteratorT* pItCode /*in-out*/, IteratorT itLast, IsCharPred isCharPred ) const
+		{	// skips to the next position that satisfies the predicate
+			ASSERT_PTR( pItCode );
+
+			IteratorT itFound = FindNextCharThat( *pItCode, itLast, isCharPred );
+			if ( itFound == *pItCode )
+				return false;				// no advance
+
+			*pItCode = itFound;
+			return true;					// true if found isCharPred
 		}
 
 
