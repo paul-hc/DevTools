@@ -800,8 +800,16 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="tests"
+			Name="Tests"
 			>
+			<File
+				RelativePath=".\test\CppCodeTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CppCodeTests.h"
+				>
+			</File>
 			<File
 				RelativePath=".\test\MethodPrototypeTests.cpp"
 				>

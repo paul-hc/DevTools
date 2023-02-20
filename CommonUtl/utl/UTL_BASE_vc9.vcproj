@@ -1141,6 +1141,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\StringCompareTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\StringCompareTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\StringRangeTests.cpp"
 				>
 			</File>

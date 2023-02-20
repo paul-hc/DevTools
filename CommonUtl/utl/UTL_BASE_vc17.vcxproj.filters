@@ -433,6 +433,9 @@
     <ClInclude Include="RegAutomationSvr.h">
       <Filter>utl\Registry</Filter>
     </ClInclude>
+    <ClInclude Include="test\StringCompareTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -674,6 +677,9 @@
     </ClCompile>
     <ClCompile Include="RegAutomationSvr.cpp">
       <Filter>utl\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="test\StringCompareTests.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -20,10 +20,6 @@ private:
 	void TestCharTraits( void );
 	void TestIsCharType( void );
 	void TestValueToString( void );
-	void TestStringSorting( void );
-	void TestIntuitiveSort( void );
-	void TestIntuitiveSortPunctuation( void );
-	void TestIgnoreCase( void );
 	void TestTrim( void );
 	void TestEnquote( void );
 	void TestStringSplit( void );

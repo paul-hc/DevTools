@@ -48,6 +48,7 @@ public:
 
 	CCppCodeParser( void );
 
+	// split code into slices
 	bool ParseCode( const std::tstring& codeText );						// split into m_codeSlices; returns true if no syntax error
 
 	const TokenRange& LookupSliceRange( SliceType sliceType ) const;	// lookup slices in the split codeText

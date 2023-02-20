@@ -68,6 +68,7 @@ namespace app
 		ui::RequestCloseAllBalloons();						// just in case running tests in quick succession
 
 		ut::RunAllTests();
+
 		ReportTestResults();
 	}
 
@@ -75,10 +76,10 @@ namespace app
 	{
 		CWnd* pForegroundWnd = CWnd::GetForegroundWindow();
 
-		if ( NULL == pForegroundWnd )
+		if ( nullptr == pForegroundWnd )
 			pForegroundWnd = AfxGetMainWnd();
 
-		if ( pForegroundWnd != NULL && proc::InCurrentThread( pForegroundWnd->GetSafeHwnd() ) )
+		if ( pForegroundWnd != nullptr && proc::InCurrentThread( pForegroundWnd->GetSafeHwnd() ) )
 		{
 			static HICON s_hToolIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_RUN_TESTS )->GetHandle();
 			std::vector< std::tstring > testNames;

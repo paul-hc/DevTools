@@ -290,6 +290,7 @@
     <ClInclude Include="test\PathTests.h" />
     <ClInclude Include="test\RegistryTests.h" />
     <ClInclude Include="test\ResequenceTests.h" />
+    <ClInclude Include="test\StringCompareTests.h" />
     <ClInclude Include="test\StringRangeTests.h" />
     <ClInclude Include="test\StringTests.h" />
     <ClInclude Include="test\StructuredStorageTest.h" />
@@ -383,6 +384,7 @@
     <ClCompile Include="test\PathTests.cpp" />
     <ClCompile Include="test\RegistryTests.cpp" />
     <ClCompile Include="test\ResequenceTests.cpp" />
+    <ClCompile Include="test\StringCompareTests.cpp" />
     <ClCompile Include="test\StringRangeTests.cpp" />
     <ClCompile Include="test\StringTests.cpp" />
     <ClCompile Include="test\StructuredStorageTest.cpp" />

@@ -294,6 +294,7 @@
     <ClCompile Include="SearchPathEngine.cpp" />
     <ClCompile Include="SourceFileParser.cpp" />
     <ClCompile Include="StringUtilitiesEx.cpp" />
+    <ClCompile Include="test\CppCodeTests.cpp" />
     <ClCompile Include="test\MethodPrototypeTests.cpp" />
     <ClCompile Include="TextContent.cpp" />
     <ClCompile Include="TokenizeTextDialog.cpp" />
@@ -367,6 +368,7 @@
     <ClInclude Include="SearchPathEngine.h" />
     <ClInclude Include="SourceFileParser.h" />
     <ClInclude Include="StringUtilitiesEx.h" />
+    <ClInclude Include="test\CppCodeTests.h" />
     <ClInclude Include="test\MethodPrototypeTests.h" />
     <ClInclude Include="TextContent.h" />
     <ClInclude Include="TokenizeTextDialog.h" />

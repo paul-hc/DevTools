@@ -5,6 +5,7 @@
 #include "AlgorithmsTests.h"
 #include "UtlConsoleTests.h"
 #include "StringTests.h"
+#include "StringCompareTests.h"
 #include "StringRangeTests.h"
 #include "NumericTests.h"
 #include "CodeParserTests.h"
@@ -34,6 +35,7 @@ namespace ut
 		// register UTL tests
 		CAlgorithmsTests::Instance();
 		CStringTests::Instance();
+		CStringCompareTests::Instance();
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();
 		CCodeParserTests::Instance();

@@ -206,6 +206,9 @@
     <ClCompile Include="test\MethodPrototypeTests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="test\CppCodeTests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="IDETools.def">
@@ -399,6 +402,9 @@
     </ClInclude>
     <ClInclude Include="Application_fwd.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\CppCodeTests.h">
+      <Filter>tests</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

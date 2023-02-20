@@ -15,6 +15,7 @@
 
 #include "utl/test/CodeParserTests.h"
 #include "utl/test/StringTests.h"
+#include "test/CppCodeTests.h"
 #include "test/MethodPrototypeTests.h"
 
 #ifdef _DEBUG
@@ -22,6 +23,24 @@
 #endif
 
 #include "utl/UI/BaseApp.hxx"
+
+
+namespace ut
+{
+	void RegisterAppUnitTests( void )
+	{
+	#ifdef USE_UT
+		// just a few UTL_BASE tests:
+		ut::CTestSuite::Instance().ClearTests();		// clear UTL tests, since we want to focus narrowly on this applications' tests
+
+		ut::CTestSuite::Instance().RegisterTestCase( &CStringTests::Instance() );
+		ut::CTestSuite::Instance().RegisterTestCase( &CCodeParserTests::Instance() );
+
+		CCppCodeTests::Instance();
+		CMethodPrototypeTests::Instance();
+	#endif
+	}
+}
 
 
 // From IDETools.idl:
@@ -76,21 +95,6 @@ STDAPI DllUnregisterServer( void )
 	// unregister all automation objects as safe for scripting (in component categories)
 	ole::CSafeForScripting::UpdateRegistryAll( ole::Unregister );
 	return S_OK;
-}
-
-
-namespace ut
-{
-	void RegisterAppUnitTests( void )
-	{
-	#ifdef USE_UT
-		// just a few UTL_BASE tests:
-		ut::CTestSuite::Instance().ClearTests();		// clear UTL tests, since we want to focus narrowly on this applications' tests
-		ut::CTestSuite::Instance().RegisterTestCase( &CCodeParserTests::Instance() );
-
-		CMethodPrototypeTests::Instance();
-	#endif
-	}
 }
 
 
