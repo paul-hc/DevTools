@@ -3,7 +3,6 @@
 #pragma once
 
 #include "TokenRange.h"
-	#include "LanguageSearchEngine.h"
 
 
 namespace code
@@ -28,16 +27,6 @@ namespace code
 		TokenRange m_classQualifier;		// e.g. "CCacheLoader<PathType, ObjectType>::"
 		TokenRange m_argList;				// e.g. "( const PathType& pathKey )"
 		TokenRange m_postArgListSuffix;		// e.g. " const" - excluding the terminating line-end
-	};
-
-
-	struct CMethodPrototypeOld : public CMethodPrototype
-	{
-		CMethodPrototypeOld( void ) : m_languageEngine( DocLang_Cpp ) {}
-
-		virtual void SplitMethod( const std::tstring& proto );
-	private:
-		LanguageSearchEngine m_languageEngine;
 	};
 }
 

@@ -159,7 +159,7 @@ namespace code
 		CString typeQualifier;
 
 		{
-			CMethodPrototypeOld ranges;
+			CMethodPrototype ranges;
 
 			ranges.SplitMethod( functionImplLine );		//m_validArgListOpenBraces
 			if ( !ranges.m_templateDecl.IsEmpty() )
@@ -175,7 +175,7 @@ namespace code
 			if ( userTypeDescriptor == m_cancelTag )
 				return userTypeDescriptor; // canceled by user
 
-			CMethodPrototypeOld ranges;
+			CMethodPrototype ranges;
 
 			ranges.SplitMethod( userTypeDescriptor.GetString() );		//m_validArgListOpenBraces
 			if ( !ranges.m_templateDecl.IsEmpty() )
@@ -205,7 +205,7 @@ namespace code
 
 		if ( !sourcePrototype.IsEmpty() )
 		{
-			CMethodPrototypeOld method;
+			CMethodPrototype method;
 
 			method.SplitMethod( sourcePrototype.GetString() );		//m_validArgListOpenBraces
 

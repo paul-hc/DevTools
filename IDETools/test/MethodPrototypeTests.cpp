@@ -65,6 +65,34 @@ void CMethodPrototypeTests::TestParse_GlobalFunction( code::CMethodPrototype& pr
 		ASSERT_EQUAL( _T("( void )"), str::ExtractString( proto.m_argList, method ) );
 		ASSERT_EQUAL( _T(" const"), str::ExtractString( proto.m_postArgListSuffix, method ) );
 	}
+
+	// cast operator method (type conversion)
+	{
+		method = _T("operator PCXSTR() const throw()");
+
+		proto.SplitMethod( method );
+		ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_templateDecl, method ) );
+		ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_inlineModifier, method ) );
+		ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_returnType, method ) );
+		ASSERT_EQUAL( _T("operator PCXSTR"), str::ExtractString( proto.m_functionName, method ) );
+		ASSERT_EQUAL( _T("operator PCXSTR"), str::ExtractString( proto.m_qualifiedMethod, method ) );
+		ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_classQualifier, method ) );
+		ASSERT_EQUAL( _T("()"), str::ExtractString( proto.m_argList, method ) );
+		ASSERT_EQUAL( _T(" const throw()"), str::ExtractString( proto.m_postArgListSuffix, method ) );
+	}
+	{
+		method = _T("operator const char*() const throw()");
+
+		proto.SplitMethod( method );
+		ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_templateDecl, method ) );
+		ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_inlineModifier, method ) );
+		ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_returnType, method ) );
+		ASSERT_EQUAL( _T("operator const char*"), str::ExtractString( proto.m_functionName, method ) );
+		ASSERT_EQUAL( _T("operator const char*"), str::ExtractString( proto.m_qualifiedMethod, method ) );
+		ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_classQualifier, method ) );
+		ASSERT_EQUAL( _T("()"), str::ExtractString( proto.m_argList, method ) );
+		ASSERT_EQUAL( _T(" const throw()"), str::ExtractString( proto.m_postArgListSuffix, method ) );
+	}
 }
 
 void CMethodPrototypeTests::TestParse_ClassMethodImpl( code::CMethodPrototype& proto )
@@ -97,37 +125,6 @@ void CMethodPrototypeTests::TestParse_ClassMethodImpl( code::CMethodPrototype& p
 		ASSERT_EQUAL( _T("CComparator::"), str::ExtractString( proto.m_classQualifier, method ) );
 		ASSERT_EQUAL( _T("( const CFileItem* pLeft, const CFileItem* pRight )"), str::ExtractString( proto.m_argList, method ) );
 		ASSERT_EQUAL( _T(" const"), str::ExtractString( proto.m_postArgListSuffix, method ) );
-	}
-
-	if ( !is_a<code::CMethodPrototypeOld>( &proto ) )
-	{
-		{	// type conversion operator method
-			method = _T("operator PCXSTR() const throw()");
-
-			proto.SplitMethod( method );
-			ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_templateDecl, method ) );
-			ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_inlineModifier, method ) );
-			ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_returnType, method ) );
-			ASSERT_EQUAL( _T("operator PCXSTR"), str::ExtractString( proto.m_functionName, method ) );
-			ASSERT_EQUAL( _T("operator PCXSTR"), str::ExtractString( proto.m_qualifiedMethod, method ) );
-			ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_classQualifier, method ) );
-			ASSERT_EQUAL( _T("()"), str::ExtractString( proto.m_argList, method ) );
-			ASSERT_EQUAL( _T(" const throw()"), str::ExtractString( proto.m_postArgListSuffix, method ) );
-		}
-
-		{	// type conversion operator method
-			method = _T("operator const char*() const throw()");
-
-			proto.SplitMethod( method );
-			ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_templateDecl, method ) );
-			ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_inlineModifier, method ) );
-			ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_returnType, method ) );
-			ASSERT_EQUAL( _T("operator const char*"), str::ExtractString( proto.m_functionName, method ) );
-			ASSERT_EQUAL( _T("operator const char*"), str::ExtractString( proto.m_qualifiedMethod, method ) );
-			ASSERT_EQUAL( _T(""), str::ExtractString( proto.m_classQualifier, method ) );
-			ASSERT_EQUAL( _T("()"), str::ExtractString( proto.m_argList, method ) );
-			ASSERT_EQUAL( _T(" const throw()"), str::ExtractString( proto.m_postArgListSuffix, method ) );
-		}
 	}
 }
 
@@ -171,20 +168,11 @@ inline std::pair<ObjectT*, cache::TStatusFlags> CCacheLoader<PathT, ObjectT>::")
 
 void CMethodPrototypeTests::Run( void )
 {
-	{
-		code::CMethodPrototypeOld protoOld;
+	code::CMethodPrototype proto;
 
-		RUN_TEST1( TestParse_GlobalFunction, protoOld );
-		RUN_TEST1( TestParse_ClassMethodImpl, protoOld );
-		RUN_TEST1( TestParse_TemplateMethodImpl, protoOld );
-	}
-	{
-		code::CMethodPrototype proto;
-
-		RUN_TEST1( TestParse_GlobalFunction, proto );
-		RUN_TEST1( TestParse_ClassMethodImpl, proto );
-		RUN_TEST1( TestParse_TemplateMethodImpl, proto );
-	}
+	RUN_TEST1( TestParse_GlobalFunction, proto );
+	RUN_TEST1( TestParse_ClassMethodImpl, proto );
+	RUN_TEST1( TestParse_TemplateMethodImpl, proto );
 }
 
 
