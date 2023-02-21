@@ -15,7 +15,7 @@ namespace code
 		m_proto = proto;
 
 		// set all ranges empty at end
-		m_templateDecl.setEmpty( m_proto.length() );
+		m_templateDecl.SetEmptyRange( static_cast<int>( m_proto.length() ) );
 		m_argList = m_inlineModifier = m_returnType = m_qualifiedMethod = m_functionName = m_classQualifier = m_postArgListSuffix =
 			m_templateDecl;
 	}

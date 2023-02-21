@@ -618,11 +618,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ContainerComponents.cpp"
+					RelativePath=".\IterationSlices.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ContainerComponents.h"
+					RelativePath=".\IterationSlices.h"
 					>
 				</File>
 				<File

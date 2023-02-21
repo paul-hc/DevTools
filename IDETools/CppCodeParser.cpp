@@ -15,7 +15,7 @@ const std::tstring CCppCodeParser::s_scopeOp = _T("::");
 const std::tstring CCppCodeParser::s_callOp = _T("()");
 
 CCppCodeParser::CCppCodeParser( void )
-	: m_lang( code::GetCppLanguage<TCHAR>() )
+	: m_lang( code::GetCppLang<TCHAR>() )
 {
 }
 
@@ -44,7 +44,7 @@ bool CCppCodeParser::ParseCode( const std::tstring& codeText )
 			if ( it == itEnd || *it != '<' )
 				return false;					// syntax error: template argument list missing
 
-			m_lang.SkipPastMatchingBrace( &it, itEnd );
+			m_lang.SkipPastMatchingBracket( &it, itEnd );
 			m_codeSlices[ TemplateDecl ] = pvt::MakeTokenRange( TIteratorRange( itSlice, it ), itCode );
 		}
 		else if ( !HasSlice( InlineModifier ) && str::EqualsSeq( it, itEnd, s_inline ) )
@@ -125,12 +125,12 @@ bool CCppCodeParser::FindSliceEnd( TConstIterator* pItSlice, const TConstIterato
 	TConstIterator it = *pItSlice;
 
 	if ( '(' == *it )			// beginning of an args-list?
-		m_lang.SkipPastMatchingBrace( &it, itEnd );		// argument list is a slice in itself
+		m_lang.SkipPastMatchingBracket( &it, itEnd );		// argument list is a slice in itself
 	else
 		while ( it != itEnd && !pred::IsSpace()( *it ) && *it != '(' )
 		{
 			if ( '<' == *it )
-				m_lang.SkipPastMatchingBrace( &it, itEnd );
+				m_lang.SkipPastMatchingBracket( &it, itEnd );
 			else if ( str::EqualsSeq( it, itEnd, s_scopeOp ) )
 				it += s_scopeOp.length();
 			else if ( str::EqualsSeq( it, itEnd, s_operator ) )

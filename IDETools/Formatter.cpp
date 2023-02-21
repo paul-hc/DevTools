@@ -261,7 +261,7 @@ namespace code
 
 				ASSERT( numberRange.IsValid() && !numberRange.IsEmpty() );
 
-				numberRange.replaceWithToken( *itLine, number.formatString() );
+				numberRange.replaceWithToken( &*itLine, number.formatString() );
 			}
 		}
 
@@ -447,7 +447,7 @@ namespace code
 		{	// preserve multiple whitespaces, e.g. avoid replacing "    " with " "
 		}
 		else
-			whitespaces.smartReplaceWithToken( targetString, newWhitespace );
+			whitespaces.smartReplaceWithToken( &targetString, newWhitespace );
 
 		return whitespaces.m_end;
 	}
@@ -509,7 +509,7 @@ namespace code
 				TCHAR emptyBraces[] = { chrBrace, closeBrace, _T('\0') };
 				TokenRange emptyBraceRange( pos, nextNonWhitespacePos + 1 );
 
-				return emptyBraceRange.smartReplaceWithToken( targetString, emptyBraces ).m_end;
+				return emptyBraceRange.smartReplaceWithToken( &targetString, emptyBraces ).m_end;
 			}
 
 			if ( chrBrace == _T('(') )
@@ -525,7 +525,7 @@ namespace code
 
 					--m_disableBracketSpacingCounter;
 
-					statementRange.smartReplaceWithToken( targetString, formattedCastStatement );
+					statementRange.smartReplaceWithToken( &targetString, formattedCastStatement );
 					return statementRange.m_end;
 				}
 			}
@@ -730,8 +730,7 @@ namespace code
 	/**
 		Replaces terminal single-line comments into multi-line comments if available in the language, otherwise removes them.
 	*/
-	CString CFormatter::transformTrailingSingleLineComment( const TCHAR* lineOfCode,
-														   HandleSingleLineComments handleComments /*= ToMultiLineComment*/ )
+	CString CFormatter::transformTrailingSingleLineComment( const TCHAR* lineOfCode, HandleSingleLineComments handleComments /*= ToMultiLineComment*/ )
 	{
 		TokenRange lastCommentRange( 0 );
 		CString outCode = lineOfCode;
@@ -754,7 +753,7 @@ namespace code
 				{
 					while ( lastCommentRange.m_start > 0 && code::isWhitespaceChar( str::charAt( outCode, lastCommentRange.m_start - 1 ) ) )
 						--lastCommentRange.m_start;
-					lastCommentRange.replaceWithToken( outCode, _T("") );
+					lastCommentRange.replaceWithToken( &outCode, _T("") );
 				}
 				else if ( handleComments == ToMultiLineComment )
 				{
@@ -1028,13 +1027,13 @@ namespace code
 
 			if ( foundToken.IsValid() )
 				if ( !_istalnum( str::charAt( targetString, foundToken.m_start ) ) || !_istalnum( str::charAt( targetString, foundToken.m_end ) ) )
-					foundToken.replaceWithToken( targetString, _T("") );
+					foundToken.replaceWithToken( &targetString, _T("") );
 		}
 
 		// remove leading whitespaces
 		TokenRange leadingWhiteSpaceRange = getWhiteSpaceRange( targetString );
 
-		leadingWhiteSpaceRange.replaceWithToken( targetString, _T("") );
+		leadingWhiteSpaceRange.replaceWithToken( &targetString, _T("") );
 	}
 
 	CString CFormatter::comment( const TCHAR* pCodeText, bool isEntireLine, CommentState commentState ) const
@@ -1052,7 +1051,7 @@ namespace code
 			if ( str::isTokenMatch( commentedCodeText, leading4Spaces ) )
 				leadingSpaceRange.m_end += str::Length( openComment );
 
-		leadingSpaceRange.replaceWithToken( commentedCodeText, openComment );
+		leadingSpaceRange.replaceWithToken( &commentedCodeText, openComment );
 
 		if ( commentState == MultiLineComment )
 			commentedCodeText += langCommentTokens.m_closeComment;

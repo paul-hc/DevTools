@@ -17,28 +17,28 @@ namespace code
 		~CppImplementationFormatter();
 
 		// operations
-		CString extractTypeDescriptor( const TCHAR* functionImplLine, const TCHAR* pDocFilename );
-		CString implementMethodBlock( const TCHAR* methodPrototypes, const TCHAR* typeDescriptor, bool isInline ) throws_( mfc::CRuntimeException );
+		CString extractTypeDescriptor( const TCHAR* pFunctionImplLine, const TCHAR* pDocFilename );
+		CString implementMethodBlock( const TCHAR* pMethodPrototypes, const TCHAR* pTypeDescriptor, bool isInline ) throws_( mfc::CRuntimeException );
 
-		CString autoMakeCode( const TCHAR* codeText );
-		CString tokenizeText( const TCHAR* codeText );
+		CString autoMakeCode( const TCHAR* pCodeText );
+		CString tokenizeText( const TCHAR* pCodeText );
 
 		static bool isCppTypeQualifier( std::tstring typeQualifier );
 	protected:
 		bool loadCodeTemplates( void );
-		CString makeCommentDecoration( const TCHAR* decorationCore ) const;
+		CString makeCommentDecoration( const TCHAR* pDecorationCore ) const;
 
-		CString buildTemplateInstanceTypeList( const TokenRange& templateDecl, const TCHAR* methodPrototype ) const;
+		CString buildTemplateInstanceTypeList( const TokenRange& templateDecl, const TCHAR* pMethodPrototype ) const;
 
-		void prototypeResolveDefaultParameters( CString& targetString ) const;
+		void prototypeResolveDefaultParameters( CString& rTargetString ) const;
 
-		CString implementMethod( const TCHAR* methodPrototype, const TCHAR* templateDecl,
-								 const TCHAR* typeQualifier, bool isInline );
+		CString implementMethod( const TCHAR* pMethodPrototype, const TCHAR* pTemplateDecl,
+								 const TCHAR* pTypeQualifier, bool isInline );
 		CString inputDocTypeDescriptor( const TCHAR* pDocFilename ) const;
-		void splitTypeDescriptor( CString& templateDecl, CString& typeQualifier, const TCHAR* typeDescriptor ) const throws_( mfc::CRuntimeException );
+		void splitTypeDescriptor( CString& rTemplateDecl, CString& rTypeQualifier, const TCHAR* pTypeDescriptor ) const throws_( mfc::CRuntimeException );
 
-		CString makeIteratorLoop( const TCHAR* codeText, bool isConstIterator ) throws_( mfc::CRuntimeException );
-		CString makeIndexLoop( const TCHAR* codeText ) throws_( mfc::CRuntimeException );
+		CString makeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( mfc::CRuntimeException );
+		CString makeIndexLoop( const TCHAR* pCodeText ) throws_( mfc::CRuntimeException );
 	protected:
 		// code templates
 		CString m_voidFunctionBody;

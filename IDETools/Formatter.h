@@ -22,8 +22,6 @@ namespace code
 		CFormatter( const CFormatterOptions& _options );
 		~CFormatter();
 
-		void setSpacingOpenBraces( const CString& _spacingOpenBraces );
-
 		DocLanguage getDocLanguage( void ) const { return m_docLanguage; }
 		void setDocLanguage( const TCHAR* tagDocLanguage );
 		void setDocLanguage( DocLanguage docLanguage );

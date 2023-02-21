@@ -49,6 +49,20 @@ void TokenRange::normalize( const TCHAR* pText )
 
 // the token string
 
+void TokenRange::Trim( const std::tstring& text )
+{
+	ASSERT( IsNormalized() );
+	ASSERT( str::IsValidPos( m_start, text ) && str::IsValidPos( m_end, text ) );
+
+	pred::IsSpace isSpace;
+
+	while ( m_start != m_end && isSpace( text[ m_start ] ) )
+		++m_start;
+
+	while ( m_end != m_start && isSpace( text[ m_end - 1 ] ) )
+		--m_end;
+}
+
 CString TokenRange::getString( const TCHAR* pText ) const
 {
 	ASSERT( IsValid() && IsNormalized() );
@@ -102,22 +116,24 @@ bool TokenRange::isTokenMatch( const TCHAR* pText, const TCHAR* pToken, str::Cas
 
 // replace the pointed token with the new one in targetString, and updates m_end.
 
-TokenRange& TokenRange::replaceWithToken( CString& targetString, const TCHAR* pToken )
+TokenRange& TokenRange::replaceWithToken( CString* pTargetString, const TCHAR* pToken )
 {
+	ASSERT_PTR( pTargetString );
 	ASSERT( IsValid() && IsNormalized() );
-	ASSERT( InStringBounds( targetString ) && pToken != NULL );
+	ASSERT( InStringBounds( *pTargetString ) && pToken != NULL );
 
-	targetString.Delete( m_start, getLength() );
-	targetString.Insert( m_start, pToken );
+	pTargetString->Delete( m_start, getLength() );
+	pTargetString->Insert( m_start, pToken );
 	m_end = m_start + (int)str::GetLength( pToken );
 
 	return *this;
 }
 
-TokenRange& TokenRange::smartReplaceWithToken( CString& targetString, const TCHAR* pToken )
+TokenRange& TokenRange::smartReplaceWithToken( CString* pTargetString, const TCHAR* pToken )
 {
-	if ( !isTokenMatch( targetString, pToken ) )
-		replaceWithToken( targetString, pToken );
+	ASSERT_PTR( pTargetString );
+	if ( !isTokenMatch( pTargetString->GetString(), pToken) )
+		replaceWithToken( pTargetString, pToken );
 
 	return *this;
 }

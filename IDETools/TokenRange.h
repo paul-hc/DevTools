@@ -5,6 +5,13 @@
 #include "utl/Range.h"
 
 
+namespace str
+{
+	template< typename PosT, typename StringT >
+	inline bool IsValidPos( PosT pos, const StringT& codeText ) { return static_cast<size_t>( pos ) < codeText.length(); }
+}
+
+
 struct TokenRange : public Range<int>
 {
 	typedef Range<int> TRange;
@@ -56,14 +63,16 @@ public:
 	std::tstring GetToken( const TCHAR* pText ) const { ASSERT( InStringBounds( pText ) ); return std::tstring( pText + m_start, getLength() ); }
 	std::tstring MakeToken( const std::tstring& text ) const { ASSERT( InStringBounds( text.c_str() ) ); return text.substr( m_start, m_end - m_start ); }
 
+	void Trim( const std::tstring& text );
+
 	CString getString( const TCHAR* pText ) const;
 	CString getPrefixString( const TCHAR* pText ) const;
 	CString getSuffixString( const TCHAR* pText ) const;
 
 	bool isTokenMatch( const TCHAR* pText, const TCHAR* pToken, str::CaseType caseType = str::Case ) const;
 
-	TokenRange& replaceWithToken( CString& targetString, const TCHAR* pToken );
-	TokenRange& smartReplaceWithToken( CString& targetString, const TCHAR* pToken );
+	TokenRange& replaceWithToken( CString* pTargetString, const TCHAR* pToken );
+	TokenRange& smartReplaceWithToken( CString* pTargetString, const TCHAR* pToken );
 };
 
 

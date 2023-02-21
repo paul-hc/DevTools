@@ -1,12 +1,42 @@
 
 #include "pch.h"
 #include "CodeUtilities.h"
-#include "StringUtilitiesEx.h"
-#include "BraceParityStatus.h"
+#include "CppCodeParser.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace code
+{
+	int FindPosMatchingBracket( int bracketPos, const std::tstring& codeText )
+	{
+		ASSERT( str::IsValidPos( bracketPos, codeText ) );
+		std::tstring::const_iterator itCloseBracket = GetCppLang<TCHAR>().FindMatchingBracket( codeText.begin() + bracketPos, codeText.end() );
+
+		if ( itCloseBracket == codeText.end() )
+			return -1;
+
+		return pvt::Distance( codeText.begin(), itCloseBracket );
+	}
+
+	bool SkipPosPastMatchingBracket( int* pBracketPos /*in-out*/, const std::tstring& codeText )
+	{
+		ASSERT_PTR( pBracketPos );
+		ASSERT( str::IsValidPos( *pBracketPos, codeText ) );
+
+		std::tstring::const_iterator it = codeText.begin() + *pBracketPos;
+
+		if ( !GetCppLang<TCHAR>().SkipPastMatchingBracket( &it, codeText.end() ) )
+			return false;
+
+		*pBracketPos = pvt::Distance( codeText.begin(), it );
+		return true;
+	}
+
+	//bool FindArgList( TokenRange* pArgList, const TCHAR* pCode, int pos, const TCHAR* argListOpenBraces );
+}
 
 
 namespace code
@@ -212,50 +242,6 @@ namespace code
 			++cursorNonWS;
 
 		return int( cursorNonWS - str );
-	}
-
-	CString getMirrorStatement( const TCHAR* statement )
-	{
-		CString reverse = statement;
-
-		reverse.MakeReverse();
-
-		// mirror the parentheses so they look normal
-		for ( int i = 0; i != reverse.GetLength(); ++i )
-			if ( isBraceChar( reverse[ i ] ) )
-				reverse.SetAt( i, getMatchingBrace( reverse[ i ] ) );
-
-		return reverse;
-	}
-
-	bool skipArgList( int& rPos, const TCHAR* str )
-	{
-		ASSERT( str != NULL );
-		ASSERT( rPos >= 0 && rPos <= (int)_tcslen( str ) );
-
-		if ( !isBraceChar( str[ rPos ] ) )
-			return false;
-
-		BraceParityStatus braceStatus;
-		int braceEndPos = braceStatus.findMatchingBracePos( str, rPos, DocLang_Cpp );
-
-		if ( braceEndPos == -1 )
-		{
-			TRACE( _T(" * Cannot find matching parenthesis in statement '%s'\n"), str );
-			return false;
-		}
-
-		rPos = braceEndPos + 1;
-		return true;
-	}
-
-	void skipCppKeyword( int& rPos, const TCHAR* str )
-	{
-		ASSERT( str != NULL );
-		ASSERT( rPos >= 0 && rPos <= (int)_tcslen( str ) );
-
-		while ( str[ rPos ] != _T('\0') && _istalnum( str[ rPos ] ) )
-			++rPos;
 	}
 
 	namespace cpp

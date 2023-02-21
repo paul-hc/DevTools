@@ -23,7 +23,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void Test( void );
+	void TestIterationSlices( void );
 };
 
 

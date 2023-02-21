@@ -1,5 +1,5 @@
-#ifndef CodeParser_h
-#define CodeParser_h
+#ifndef CppCodeParser_h
+#define CppCodeParser_h
 #pragma once
 
 #include "utl/CodeParsing.h"
@@ -73,4 +73,4 @@ private:
 };
 
 
-#endif // CodeParser_h
+#endif // CppCodeParser_h

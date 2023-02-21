@@ -18,8 +18,8 @@ public:
 	virtual void Run( void );
 private:
 	void TestCustomLanguage( void );
-	void TestBraceParity( void );
-	void TestBraceMismatch( void );
+	void TestBracketParity( void );
+	void TestBracketMismatch( void );
 	void TestCodeDetails( void );
 };
 

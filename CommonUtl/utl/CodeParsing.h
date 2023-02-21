@@ -9,49 +9,49 @@
 
 namespace code
 {
-	bool IsBrace( wchar_t brace );				// works for both char/wchar_t
-	bool IsStartBrace( wchar_t brace );
-	bool IsEndBrace( wchar_t brace );
+	bool IsBracket( wchar_t bracket );				// works for both char/wchar_t
+	bool IsStartBracket( wchar_t bracket );
+	bool IsEndBracket( wchar_t bracket );
 
-	wchar_t _GetMatchingBrace( wchar_t brace );
+	wchar_t _GetMatchingBracket( wchar_t bracket );
 
 	template< typename CharT >
-	inline CharT ToMatchingBrace( CharT brace ) { return static_cast<CharT>( _GetMatchingBrace( brace ) ); }
+	inline CharT ToMatchingBracket( CharT bracket ) { return static_cast<CharT>( _GetMatchingBracket( bracket ) ); }
 
 
 	template< typename CharT >
 	class CLanguage;
 
 	template< typename CharT >
-	const CLanguage<CharT>& GetCppLanguage( void );
+	const CLanguage<CharT>& GetCppLang( void );
 }
 
 
 namespace pred
 {
-	struct IsBrace : public BaseIsCharPred
+	struct IsBracket : public BaseIsCharPred
 	{
 		template< typename CharT >
-		bool operator()( CharT chr ) const { return code::IsBrace( chr ); }
+		bool operator()( CharT chr ) const { return code::IsBracket( chr ); }
 	};
 
-	struct IsStartBrace : public BaseIsCharPred
+	struct IsStartBracket : public BaseIsCharPred
 	{
 		template< typename CharT >
-		bool operator()( CharT chr ) const { return code::IsStartBrace( chr ); }
+		bool operator()( CharT chr ) const { return code::IsStartBracket( chr ); }
 	};
 
-	struct IsEndBrace : public BaseIsCharPred
+	struct IsEndBracket : public BaseIsCharPred
 	{
 		template< typename CharT >
-		bool operator()( CharT chr ) const { return code::IsEndBrace( chr ); }
+		bool operator()( CharT chr ) const { return code::IsEndBracket( chr ); }
 	};
 
 
-	struct ToMatchingBrace : public BaseIsCharPred
+	struct ToMatchingBracket : public BaseIsCharPred
 	{
 		template< typename CharT >
-		CharT operator()( CharT chr ) const { return code::ToMatchingBrace( chr ); }
+		CharT operator()( CharT chr ) const { return code::ToMatchingBracket( chr ); }
 	};
 }
 
@@ -136,7 +136,7 @@ namespace code
 					if ( str::ReverseIter == iterDir )
 						itCode += sequence.length() - 1;	// advance to r-beginning of the match
 
-					return itCode;				// found the next brace
+					return itCode;				// found the next bracket
 				}
 				else if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, itCode, itLast ) )	// matches a quoted string, comment, etc?
 				{
@@ -212,38 +212,38 @@ namespace code
 		inline bool SkipIdentifier( IteratorT* pItCode /*in-out*/, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsIdentifier() ); }
 
 
-		// brace lookup
+		// bracket lookup
 
 		template< typename IteratorT >
-		IteratorT FindMatchingBrace( IteratorT itBrace, IteratorT itLast, IteratorT* pItBraceMismatch = nullptr ) const
-		{	// find the closing brace matching the current brace;  skip language-specific comments, quoted strings, etc
-			REQUIRE( itBrace != itLast && IsBrace( *itBrace ) );
+		IteratorT FindMatchingBracket( IteratorT itBracket, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr ) const
+		{	// find the closing bracket matching the current bracket;  skip language-specific comments, quoted strings, etc
+			REQUIRE( itBracket != itLast && IsBracket( *itBracket ) );
 
-			utl::AssignPtr( pItBraceMismatch, itLast );				// i.e. no mismatch syntax error
+			utl::AssignPtr( pItBracketMismatch, itLast );				// i.e. no mismatch syntax error
 
-			std::vector< std::pair<CharT, IteratorT> > braceStack;	// <original_brace, origin_iter>
+			std::vector< std::pair<CharT, IteratorT> > bracketStack;	// <original_bracket, origin_iter>
 
-			braceStack.push_back( std::make_pair( *itBrace, itBrace ) );
-			IteratorT it = itBrace + 1;		// skip the opening brace
+			bracketStack.push_back( std::make_pair( *itBracket, itBracket ) );
+			IteratorT it = itBracket + 1;		// skip the opening bracket
 
-			CharT topMatchingBrace = ToMatchingBrace( braceStack.back().first );
+			CharT topMatchingBracket = ToMatchingBracket( bracketStack.back().first );
 			const TSeparatorsPair& sepsPair = m_parser.GetSeparators();
 
 			for ( TSepMatchPos sepMatchPos = TString::npos; it != itLast; )
 			{
-				if ( IsBrace( *it ) )
+				if ( IsBracket( *it ) )
 				{
-					if ( topMatchingBrace == *it )
+					if ( topMatchingBracket == *it )
 					{
-						braceStack.pop_back();			// exit one brace nesting level
+						bracketStack.pop_back();			// exit one bracket nesting level
 
-						if ( braceStack.empty() )
-							return it;					// on the matching brace of the originating brace
+						if ( bracketStack.empty() )
+							return it;					// on the matching bracket of the originating bracket
 					}
 					else
-						braceStack.push_back( std::make_pair( *it, it ) );				// go deeper with the nested brace
+						bracketStack.push_back( std::make_pair( *it, it ) );				// go deeper with the nested bracket
 
-					topMatchingBrace = ToMatchingBrace( braceStack.back().first );
+					topMatchingBracket = ToMatchingBracket( bracketStack.back().first );
 				}
 				else if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, it, itLast ) )	// matches a quoted string, comment, etc?
 				{
@@ -254,31 +254,31 @@ namespace code
 				++it;
 			}
 
-			// matching brace not found
-			ENSURE( !braceStack.empty() );
-			TRACE( " (?) CLanguage::FindMatchingBrace() - syntax error in code: no matching brace found for the origin brace at:\n\tcode: '%s'\n",
-				   str::ValueToString<std::string>( &*braceStack.front().second ).c_str() );
+			// matching bracket not found
+			ENSURE( !bracketStack.empty() );
+			TRACE( " (?) CLanguage::FindMatchingBracket() - syntax error in code: no matching bracket found for the origin bracket at:\n\tcode: '%s'\n",
+				   str::ValueToString<std::string>( &*bracketStack.front().second ).c_str() );
 
-			utl::AssignPtr( pItBraceMismatch, braceStack.front().second );		// point to the originating brace mismatch (the cause of syntax error)
+			utl::AssignPtr( pItBracketMismatch, bracketStack.front().second );		// point to the originating bracket mismatch (the cause of syntax error)
 			return itLast;
 		}
 
 		template< typename IteratorT >
-		bool SkipPastMatchingBrace( IteratorT* pItBrace /*in-out*/, IteratorT itLast, IteratorT* pItBraceMismatch = nullptr ) const
-		{	// find past the closing brace matching the current brace - compatible with found range bounds
-			ASSERT_PTR( pItBrace );
-			*pItBrace = FindMatchingBrace( *pItBrace, itLast, pItBraceMismatch );
-			if ( *pItBrace == itLast )
+		bool SkipPastMatchingBracket( IteratorT* pItBracket /*in-out*/, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr ) const
+		{	// find past the closing bracket matching the current bracket - compatible with found range bounds
+			ASSERT_PTR( pItBracket );
+			*pItBracket = FindMatchingBracket( *pItBracket, itLast, pItBracketMismatch );
+			if ( *pItBracket == itLast )
 				return false;
 
-			++*pItBrace;		// advance past the found matching brace (for range computation)
+			++*pItBracket;		// advance past the found matching bracket (for range computation)
 			return true;
 		}
 
 		template< typename IteratorT >
-		IteratorT FindNextBrace( IteratorT itCode, IteratorT itLast ) const
+		IteratorT FindNextBracket( IteratorT itCode, IteratorT itLast ) const
 		{
-			return FindNextCharThat( itCode, itLast, &code::IsBrace );
+			return FindNextCharThat( itCode, itLast, &code::IsBracket );
 		}
 	private:
 		const str::CEnclosedParser<CharT> m_parser;		// contains pairs of START/END separators of specific language constructs (for skipping)

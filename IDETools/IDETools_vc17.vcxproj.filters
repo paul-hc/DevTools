@@ -140,7 +140,7 @@
     <ClCompile Include="CodeUtilities.cpp">
       <Filter>Main Code\string &amp; code</Filter>
     </ClCompile>
-    <ClCompile Include="ContainerComponents.cpp">
+    <ClCompile Include="IterationSlices.cpp">
       <Filter>Main Code\string &amp; code</Filter>
     </ClCompile>
     <ClCompile Include="CppImplementationFormatter.cpp">
@@ -334,7 +334,7 @@
     <ClInclude Include="CodeUtilities.h">
       <Filter>Main Code\string &amp; code</Filter>
     </ClInclude>
-    <ClInclude Include="ContainerComponents.h">
+    <ClInclude Include="IterationSlices.h">
       <Filter>Main Code\string &amp; code</Filter>
     </ClInclude>
     <ClInclude Include="CppImplementationFormatter.h">

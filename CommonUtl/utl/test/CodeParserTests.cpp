@@ -35,32 +35,32 @@ void CCodeParserTests::TestCustomLanguage( void )
 			std::string::const_iterator itBegin = text.begin(), itEnd = text.end();
 			{
 				{	// Find API
-					std::string::const_iterator itOpenBrace = myLang.FindNextBrace( itBegin, itEnd );
-					ASSERT_HAS_PREFIX( "( int depth", &*itOpenBrace );
+					std::string::const_iterator itOpenBracket = myLang.FindNextBracket( itBegin, itEnd );
+					ASSERT_HAS_PREFIX( "( int depth", &*itOpenBracket );
 
-					std::string::const_iterator itCloseBrace = myLang.FindMatchingBrace( itOpenBrace, itEnd );
-					ASSERT_HAS_PREFIX( ") { // SL-", &*itCloseBrace );
+					std::string::const_iterator itCloseBracket = myLang.FindMatchingBracket( itOpenBracket, itEnd );
+					ASSERT_HAS_PREFIX( ") { // SL-", &*itCloseBracket );
 
-					itOpenBrace = myLang.FindNextBrace( itCloseBrace + 1, itEnd );
-					ASSERT_HAS_PREFIX( "{ // SL-", &*itOpenBrace );
+					itOpenBracket = myLang.FindNextBracket( itCloseBracket + 1, itEnd );
+					ASSERT_HAS_PREFIX( "{ // SL-", &*itOpenBracket );
 
-					itCloseBrace = myLang.FindMatchingBrace( itOpenBrace, itEnd );		// also skip 2nd comment + single-line comment
-					ASSERT_HAS_PREFIX( "} end", &*itCloseBrace );
+					itCloseBracket = myLang.FindMatchingBracket( itOpenBracket, itEnd );		// also skip 2nd comment + single-line comment
+					ASSERT_HAS_PREFIX( "} end", &*itCloseBracket );
 				}
 
 				{	// Skip API with iterator ranges
-					Range<std::string::const_iterator> it( myLang.FindNextBrace( itBegin, itEnd ) );
+					Range<std::string::const_iterator> it( myLang.FindNextBracket( itBegin, itEnd ) );
 					ASSERT_HAS_PREFIX( "( int depth", &*it.m_start );
 					ENSURE( it.IsEmpty() );
 
-					ASSERT( myLang.SkipPastMatchingBrace( &it.m_end, itEnd ) );
+					ASSERT( myLang.SkipPastMatchingBracket( &it.m_end, itEnd ) );
 					ASSERT_HAS_PREFIX( " { // SL-", &*it.m_end );
 					ASSERT_EQUAL( "( int depth = 5 )", str::ExtractString( it ) );
 
-					it.SetEmptyRange( myLang.FindNextBrace( it.m_end, itEnd ) );
+					it.SetEmptyRange( myLang.FindNextBracket( it.m_end, itEnd ) );
 					ASSERT_HAS_PREFIX( "{ // SL-", &*it.m_start );
 
-					ASSERT( myLang.SkipPastMatchingBrace( &it.m_end, itEnd ) );		// also skip 2nd comment + single-line comment
+					ASSERT( myLang.SkipPastMatchingBracket( &it.m_end, itEnd ) );		// also skip 2nd comment + single-line comment
 					ASSERT_HAS_PREFIX( " end", &*it.m_end );
 					ASSERT_EQUAL( "{ // SL-comment\n int t[17]; /*BEGIN skip],{,= END*/ }", str::ExtractString( it ) );
 				}
@@ -91,35 +91,35 @@ void CCodeParserTests::TestCustomLanguage( void )
 		std::string::const_reverse_iterator itBegin = text.rbegin(), itEnd = text.rend();
 		{
 			{
-				std::string::const_reverse_iterator itOpenBrace = myLang.FindNextBrace( itBegin, itEnd );
-				ASSERT_HAS_PREFIX( "} end", &*itOpenBrace );
+				std::string::const_reverse_iterator itOpenBracket = myLang.FindNextBracket( itBegin, itEnd );
+				ASSERT_HAS_PREFIX( "} end", &*itOpenBracket );
 
-				std::string::const_reverse_iterator itCloseBrace = myLang.FindMatchingBrace( itOpenBrace, itEnd );
-				ASSERT_HAS_PREFIX( "{ // SL", &*itCloseBrace );
+				std::string::const_reverse_iterator itCloseBracket = myLang.FindMatchingBracket( itOpenBracket, itEnd );
+				ASSERT_HAS_PREFIX( "{ // SL", &*itCloseBracket );
 
-				itOpenBrace = myLang.FindNextBrace( itCloseBrace + 1, itEnd );
-				ASSERT_HAS_PREFIX( ") { //", &*itOpenBrace );
+				itOpenBracket = myLang.FindNextBracket( itCloseBracket + 1, itEnd );
+				ASSERT_HAS_PREFIX( ") { //", &*itOpenBracket );
 
-				itCloseBrace = myLang.FindMatchingBrace( itOpenBrace, itEnd );
-				ASSERT_HAS_PREFIX( "( int depth", &*itCloseBrace );
+				itCloseBracket = myLang.FindMatchingBracket( itOpenBracket, itEnd );
+				ASSERT_HAS_PREFIX( "( int depth", &*itCloseBracket );
 
-				itCloseBrace = myLang.FindNextBrace( itCloseBrace + 1, itEnd );
-				ASSERT( itCloseBrace == itEnd );
+				itCloseBracket = myLang.FindNextBracket( itCloseBracket + 1, itEnd );
+				ASSERT( itCloseBracket == itEnd );
 			}
 
 			{	// Skip API with reverse iterator ranges
-				Range<std::string::const_reverse_iterator> it( myLang.FindNextBrace( itBegin, itEnd ) );
+				Range<std::string::const_reverse_iterator> it( myLang.FindNextBracket( itBegin, itEnd ) );
 				ASSERT_HAS_PREFIX( "} end", &*it.m_start );
 				ENSURE( it.IsEmpty() );
 
-				ASSERT( myLang.SkipPastMatchingBrace( &it.m_end, itEnd ) );
+				ASSERT( myLang.SkipPastMatchingBracket( &it.m_end, itEnd ) );
 				ASSERT_HAS_PREFIX( " { // SL-", &*it.m_end );
 				ASSERT_EQUAL( "{ // SL-comment\n int t[17]; /*BEGIN skip],{,= END*/ }", str::ExtractString( it ) );
 
-				it.SetEmptyRange( myLang.FindNextBrace( it.m_end, itEnd ) );
+				it.SetEmptyRange( myLang.FindNextBracket( it.m_end, itEnd ) );
 				ASSERT_HAS_PREFIX( ") { // SL-", &*it.m_start );
 
-				ASSERT( myLang.SkipPastMatchingBrace( &it.m_end, itEnd ) );		// also skip 2nd comment + single-line comment
+				ASSERT( myLang.SkipPastMatchingBracket( &it.m_end, itEnd ) );		// also skip 2nd comment + single-line comment
 				ASSERT_HAS_PREFIX( "h( int depth", &*it.m_end );
 				ASSERT_EQUAL( "( int depth = 5 )", str::ExtractString( it ) );
 			}
@@ -146,9 +146,9 @@ void CCodeParserTests::TestCustomLanguage( void )
 	}
 }
 
-void CCodeParserTests::TestBraceParity( void )
+void CCodeParserTests::TestBracketParity( void )
 {
-	const code::CLanguage<char>& cppLang = code::GetCppLanguage<char>();
+	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
 
 	const std::string text = "std::pair<ObjectT*, cache::TStatusFlags> CLoader< std::pair<PathT, size_t>, ObjectT >::Acquire( const PathT& pathKey )";
 
@@ -156,18 +156,18 @@ void CCodeParserTests::TestBraceParity( void )
 		{	// by iterator
 			std::string::const_iterator itEnd = text.end();
 			{
-				std::string::const_iterator itOpenBrace = cppLang.FindNextBrace( text.begin(), itEnd );
-				ASSERT_HAS_PREFIX( "<ObjectT*,", &*itOpenBrace );
+				std::string::const_iterator itOpenBracket = cppLang.FindNextBracket( text.begin(), itEnd );
+				ASSERT_HAS_PREFIX( "<ObjectT*,", &*itOpenBracket );
 
-				std::string::const_iterator itCloseBrace = cppLang.FindMatchingBrace( itOpenBrace, itEnd );
-				ASSERT_HAS_PREFIX( "> CLoader", &*itCloseBrace );
+				std::string::const_iterator itCloseBracket = cppLang.FindMatchingBracket( itOpenBracket, itEnd );
+				ASSERT_HAS_PREFIX( "> CLoader", &*itCloseBracket );
 			}
 
 			{	// ranges
-				Range<std::string::const_iterator> itRange( cppLang.FindNextBrace( text.begin(), itEnd ) );
+				Range<std::string::const_iterator> itRange( cppLang.FindNextBracket( text.begin(), itEnd ) );
 				ASSERT_HAS_PREFIX( "<ObjectT*,", &*itRange.m_start );
 
-				ASSERT( cppLang.SkipPastMatchingBrace( &itRange.m_end, itEnd ) );
+				ASSERT( cppLang.SkipPastMatchingBracket( &itRange.m_end, itEnd ) );
 				ASSERT_EQUAL( "<ObjectT*, cache::TStatusFlags>", str::ExtractString( itRange ) );
 
 				Range<size_t> posRange = str::MakePosRange( itRange, text.begin() );
@@ -176,30 +176,30 @@ void CCodeParserTests::TestBraceParity( void )
 		}
 		{	// by pointer
 			const char* pEnd = str::s_end( text );
-			const char* pOpenBrace = cppLang.FindNextBrace( str::s_begin( text ), pEnd );
-			ASSERT_HAS_PREFIX( "<ObjectT*,", pOpenBrace );
+			const char* pOpenBracket = cppLang.FindNextBracket( str::s_begin( text ), pEnd );
+			ASSERT_HAS_PREFIX( "<ObjectT*,", pOpenBracket );
 
-			ASSERT_HAS_PREFIX( "> CLoader", cppLang.FindMatchingBrace( pOpenBrace, pEnd ) );
+			ASSERT_HAS_PREFIX( "> CLoader", cppLang.FindMatchingBracket( pOpenBracket, pEnd ) );
 		}
 	}
 
 	{	// REVERSE iteration
 		std::string::const_reverse_iterator itEnd = text.rend();
 		{
-			std::string::const_reverse_iterator itOpenBrace = utl::RevIterAtFwdPos( text, text.rfind( ">" ) );
-			ASSERT_HAS_PREFIX( ">::Acquire(", &*itOpenBrace );
+			std::string::const_reverse_iterator itOpenBracket = utl::RevIterAtFwdPos( text, text.rfind( ">" ) );
+			ASSERT_HAS_PREFIX( ">::Acquire(", &*itOpenBracket );
 
-			std::string::const_reverse_iterator itCloseBrace = cppLang.FindMatchingBrace( itOpenBrace, itEnd );
-			ASSERT_HAS_PREFIX( "< std::pair<PathT, size_t>", &*itCloseBrace );
+			std::string::const_reverse_iterator itCloseBracket = cppLang.FindMatchingBracket( itOpenBracket, itEnd );
+			ASSERT_HAS_PREFIX( "< std::pair<PathT, size_t>", &*itCloseBracket );
 		}
 
 		{	// ranges
-			Range<std::string::const_reverse_iterator> itRange( cppLang.FindNextBrace( text.rbegin(), itEnd ) );
+			Range<std::string::const_reverse_iterator> itRange( cppLang.FindNextBracket( text.rbegin(), itEnd ) );
 			ASSERT_HAS_PREFIX( ")", &*itRange.m_start );
 
-			ASSERT( cppLang.SkipPastMatchingBrace( &itRange.m_end, itEnd ) );
+			ASSERT( cppLang.SkipPastMatchingBracket( &itRange.m_end, itEnd ) );
 			ASSERT_EQUAL( "( const PathT& pathKey )", str::ExtractString( itRange ) );
-			  ASSERT_HAS_PREFIX( "e( const PathT&", &*itRange.m_end );		// points 1 position beyond the matching brace, just as for forward skipping
+			  ASSERT_HAS_PREFIX( "e( const PathT&", &*itRange.m_end );		// points 1 position beyond the matching bracket, just as for forward skipping
 
 			Range<size_t> posRange = str::MakeFwdPosRange( itRange, text );
 			ASSERT_EQUAL( "( const PathT& pathKey )", str::ExtractString( posRange, text ) );
@@ -207,43 +207,43 @@ void CCodeParserTests::TestBraceParity( void )
 	}
 }
 
-void CCodeParserTests::TestBraceMismatch( void )
+void CCodeParserTests::TestBracketMismatch( void )
 {
-	const code::CLanguage<char>& cppLang = code::GetCppLanguage<char>();
+	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
 
 	const std::string text = "void CLoader< std::pair<PathT, size_t>, (ObjectT[] >::Acquire( const PathT& pathKey )";
 
-	{	// FORWARD iteration - brace mismatch: code syntax error
+	{	// FORWARD iteration - bracket mismatch: code syntax error
 		{	// by iterator
 			std::string::const_iterator itEnd = text.end();
-			std::string::const_iterator itOpenBrace = cppLang.FindNextBrace( text.begin(), itEnd );
-			ASSERT_HAS_PREFIX( "< std::pair", &*itOpenBrace );
+			std::string::const_iterator itOpenBracket = cppLang.FindNextBracket( text.begin(), itEnd );
+			ASSERT_HAS_PREFIX( "< std::pair", &*itOpenBracket );
 
-			std::string::const_iterator itBraceMismatch = itEnd;
-			std::string::const_iterator itCloseBrace = cppLang.FindMatchingBrace( itOpenBrace, itEnd, &itBraceMismatch );
+			std::string::const_iterator itBracketMismatch = itEnd;
+			std::string::const_iterator itCloseBracket = cppLang.FindMatchingBracket( itOpenBracket, itEnd, &itBracketMismatch );
 
-			// matching brace not found
-			ASSERT( itCloseBrace == itEnd );
-			ASSERT_HAS_PREFIX( "< std::pair", &*itBraceMismatch );		// first (originating) mismatching brace
+			// matching bracket not found
+			ASSERT( itCloseBracket == itEnd );
+			ASSERT_HAS_PREFIX( "< std::pair", &*itBracketMismatch );		// first (originating) mismatching bracket
 		}
 		{	// by pointer
 			const char* pEnd = str::s_end( text );
-			const char* pOpenBrace = cppLang.FindNextBrace( str::s_begin( text ), pEnd );
-			ASSERT_HAS_PREFIX( "< std::pair", pOpenBrace );
+			const char* pOpenBracket = cppLang.FindNextBracket( str::s_begin( text ), pEnd );
+			ASSERT_HAS_PREFIX( "< std::pair", pOpenBracket );
 
-			const char* pBraceMismatch = pEnd;
-			const char* pCloseBrace = cppLang.FindMatchingBrace( pOpenBrace, pEnd, &pBraceMismatch );
+			const char* pBracketMismatch = pEnd;
+			const char* pCloseBracket = cppLang.FindMatchingBracket( pOpenBracket, pEnd, &pBracketMismatch );
 
-			// matching brace not found
-			ASSERT( pCloseBrace == pEnd );
-			ASSERT_HAS_PREFIX( "< std::pair", pBraceMismatch );		// first (originating) mismatching brace
+			// matching bracket not found
+			ASSERT( pCloseBracket == pEnd );
+			ASSERT_HAS_PREFIX( "< std::pair", pBracketMismatch );		// first (originating) mismatching bracket
 		}
 	}
 }
 
 void CCodeParserTests::TestCodeDetails( void )
 {
-	const code::CLanguage<char>& cppLang = code::GetCppLanguage<char>();
+	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
 
 	const std::string text =
 		"size_t  \t\r\n /* skip(,'(' */ DisplayFilePaths( std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath /*= StdDir() )*/, "
@@ -253,17 +253,17 @@ void CCodeParserTests::TestCodeDetails( void )
 		{	// by iterator
 			std::string::const_iterator itEnd = text.end();
 			{
-				std::string::const_iterator itOpenBrace = cppLang.FindNextBrace( text.begin(), itEnd );
-				ASSERT_HAS_PREFIX( "( std::vector<", &*itOpenBrace );
+				std::string::const_iterator itOpenBracket = cppLang.FindNextBracket( text.begin(), itEnd );
+				ASSERT_HAS_PREFIX( "( std::vector<", &*itOpenBracket );
 
-				std::string::const_iterator itCloseBrace = cppLang.FindMatchingBrace( itOpenBrace, itEnd );
-				ASSERT_HAS_PREFIX( ") { int t = 10;", &*itCloseBrace );
+				std::string::const_iterator itCloseBracket = cppLang.FindMatchingBracket( itOpenBracket, itEnd );
+				ASSERT_HAS_PREFIX( ") { int t = 10;", &*itCloseBracket );
 
-				itOpenBrace = cppLang.FindNextBrace( itCloseBrace + 1, itEnd );
-				ASSERT_HAS_PREFIX( "{ int t", &*itOpenBrace );
+				itOpenBracket = cppLang.FindNextBracket( itCloseBracket + 1, itEnd );
+				ASSERT_HAS_PREFIX( "{ int t", &*itOpenBracket );
 
-				itCloseBrace = cppLang.FindMatchingBrace( itOpenBrace, itEnd );		// skips the single-line comment!
-				ASSERT_HAS_PREFIX( "}", &*itCloseBrace );
+				itCloseBracket = cppLang.FindMatchingBracket( itOpenBracket, itEnd );		// skips the single-line comment!
+				ASSERT_HAS_PREFIX( "}", &*itCloseBracket );
 			}
 			{
 				std::string::const_iterator it = text.begin();
@@ -276,34 +276,34 @@ void CCodeParserTests::TestCodeDetails( void )
 		}
 		{	// by pointer
 			const char* pEnd = str::s_end( text );
-			const char* pOpenBrace = cppLang.FindNextBrace( str::s_begin( text ), pEnd );
-			ASSERT_HAS_PREFIX( "( std::vector<", pOpenBrace );
+			const char* pOpenBracket = cppLang.FindNextBracket( str::s_begin( text ), pEnd );
+			ASSERT_HAS_PREFIX( "( std::vector<", pOpenBracket );
 
-			const char* pCloseBrace = cppLang.FindMatchingBrace( pOpenBrace, pEnd );
-			ASSERT_HAS_PREFIX( ") { int t = 10;", pCloseBrace );
+			const char* pCloseBracket = cppLang.FindMatchingBracket( pOpenBracket, pEnd );
+			ASSERT_HAS_PREFIX( ") { int t = 10;", pCloseBracket );
 
-			pOpenBrace = cppLang.FindNextBrace( pCloseBrace + 1, pEnd );
-			ASSERT_HAS_PREFIX( "{ int t", pOpenBrace );
+			pOpenBracket = cppLang.FindNextBracket( pCloseBracket + 1, pEnd );
+			ASSERT_HAS_PREFIX( "{ int t", pOpenBracket );
 
-			pCloseBrace = cppLang.FindMatchingBrace( pOpenBrace, pEnd );		// skips the single-line comment
-			ASSERT_HAS_PREFIX( "}", pCloseBrace );
+			pCloseBracket = cppLang.FindMatchingBracket( pOpenBracket, pEnd );		// skips the single-line comment
+			ASSERT_HAS_PREFIX( "}", pCloseBracket );
 		}
 	}
 
 	{	// REVERSE iteration
 		std::string::const_reverse_iterator itEnd = text.rend();
 		{
-			std::string::const_reverse_iterator itOpenBrace = cppLang.FindNextBrace( text.rbegin(), itEnd );
-			ASSERT_HAS_PREFIX( "}", &*itOpenBrace );
+			std::string::const_reverse_iterator itOpenBracket = cppLang.FindNextBracket( text.rbegin(), itEnd );
+			ASSERT_HAS_PREFIX( "}", &*itOpenBracket );
 
-			std::string::const_reverse_iterator itCloseBrace = cppLang.FindMatchingBrace( itOpenBrace, itEnd );
-			ASSERT_HAS_PREFIX( "{ int t = 10;", &*itCloseBrace );
+			std::string::const_reverse_iterator itCloseBracket = cppLang.FindMatchingBracket( itOpenBracket, itEnd );
+			ASSERT_HAS_PREFIX( "{ int t = 10;", &*itCloseBracket );
 
-			itOpenBrace = cppLang.FindNextBrace( itCloseBrace + 1, itEnd );
-			ASSERT_HAS_PREFIX( ") { int t", &*itOpenBrace );
+			itOpenBracket = cppLang.FindNextBracket( itCloseBracket + 1, itEnd );
+			ASSERT_HAS_PREFIX( ") { int t", &*itOpenBracket );
 
-			itCloseBrace = cppLang.FindMatchingBrace( itOpenBrace, itEnd );		// skips the single-line comment
-			ASSERT_HAS_PREFIX( "( std::vector<fs::CPath>&", &*itCloseBrace );
+			itCloseBracket = cppLang.FindMatchingBracket( itOpenBracket, itEnd );		// skips the single-line comment
+			ASSERT_HAS_PREFIX( "( std::vector<fs::CPath>&", &*itCloseBracket );
 		}
 		{
 			std::string::const_reverse_iterator it = text.rbegin() + 1;
@@ -323,8 +323,8 @@ void CCodeParserTests::TestCodeDetails( void )
 void CCodeParserTests::Run( void )
 {
 	RUN_TEST( TestCustomLanguage );
-	RUN_TEST( TestBraceParity );
-	RUN_TEST( TestBraceMismatch );
+	RUN_TEST( TestBracketParity );
+	RUN_TEST( TestBracketMismatch );
 	RUN_TEST( TestCodeDetails );
 }
 

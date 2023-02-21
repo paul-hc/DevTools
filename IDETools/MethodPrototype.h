@@ -14,9 +14,9 @@ namespace code
 		virtual void SplitMethod( const std::tstring& proto );
 
 		std::tstring FormatInfo( void ) const;
-	protected:
+	private:
 		void Reset( const std::tstring& proto );
-	protected:
+	private:
 		std::tstring m_proto;
 	public:
 		TokenRange m_templateDecl;			// e.g. "template< typename PathType, typename ObjectType >"

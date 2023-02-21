@@ -5,6 +5,15 @@
 #pragma once
 
 #include "TokenRange.h"
+
+
+namespace code
+{
+	int FindPosMatchingBracket( int bracketPos, const std::tstring& codeText );
+	bool SkipPosPastMatchingBracket( int* pBracketPos /*in-out*/, const std::tstring& codeText );
+}
+
+
 #include "DocLanguage.h"
 #include "StringUtilitiesEx.h"
 
@@ -86,14 +95,6 @@ namespace code
 	// Code parsing (low level)
 	int findNextWhitespacePos( const TCHAR* str, int startPos = 0 );
 	int findNextNonWhitespace( const TCHAR* str, int startPos = 0 );
-
-	// reverse but with parentheses mirrored, so they look normal
-	CString getMirrorStatement( const TCHAR* statement );
-
-
-	bool skipArgList( int& rPos, const TCHAR* str );
-	void skipCppKeyword( int& rPos, const TCHAR* str );
-
 
 } // namespace code
 
