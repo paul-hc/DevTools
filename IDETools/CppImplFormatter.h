@@ -1,7 +1,7 @@
 // Copyleft 2004 Paul Cocoveanu
 //
-#ifndef CppImplementationFormatter_h
-#define CppImplementationFormatter_h
+#ifndef CppImplFormatter_h
+#define CppImplFormatter_h
 #pragma once
 
 #include "Formatter.h"
@@ -13,11 +13,11 @@ namespace code
 	struct CTypeDescriptor;
 
 
-	class CppImplementationFormatter : public CFormatter
+	class CCppImplFormatter : public CFormatter
 	{
 	public:
-		CppImplementationFormatter( const CFormatterOptions& options );
-		~CppImplementationFormatter();
+		CCppImplFormatter( const CFormatterOptions& options );
+		~CCppImplFormatter();
 
 		// operations
 		std::tstring ExtractTypeDescriptor( const std::tstring& functionImplLine, const fs::CPath& docPath );
@@ -64,4 +64,4 @@ namespace code
 }
 
 
-#endif // CppImplementationFormatter_h
+#endif // CppImplFormatter_h

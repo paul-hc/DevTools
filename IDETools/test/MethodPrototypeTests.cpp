@@ -4,7 +4,7 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "utl/StringUtilities.h"
 #include "MethodPrototype.h"
-#include "CppImplementationFormatter.h"
+#include "CppImplFormatter.h"
 #include "FormatterOptions.h"
 //#include "Application_fwd.h"
 #include "test/MethodPrototypeTests.h"
@@ -172,7 +172,7 @@ inline std::pair<ObjectT*, cache::TStatusFlags> CCacheLoader<PathT, ObjectT>::")
 void CMethodPrototypeTests::TestImplementMethodBlock( void )
 {
 	code::CFormatterOptions options;		// test with default options, not customized by user
-	code::CppImplementationFormatter formatter( options );
+	code::CCppImplFormatter formatter( options );
 
 	std::tstring methods = _T("\
 \tstd::pair<int, int> Func( const CFileItem* pLeft = _T(\"END\"), int depth = 5 ) const;\r\n\

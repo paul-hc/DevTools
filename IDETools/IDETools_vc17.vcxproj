@@ -244,7 +244,7 @@
     <ClCompile Include="CodeUtilities.cpp" />
     <ClCompile Include="CompoundTextParser.cpp" />
     <ClCompile Include="IterationSlices.cpp" />
-    <ClCompile Include="CppImplementationFormatter.cpp" />
+    <ClCompile Include="CppImplFormatter.cpp" />
     <ClCompile Include="DirPathGroup.cpp" />
     <ClCompile Include="DocLanguage.cpp" />
     <ClCompile Include="DspParser.cpp" />
@@ -320,7 +320,7 @@
     <ClInclude Include="CodeUtilities.h" />
     <ClInclude Include="CompoundTextParser.h" />
     <ClInclude Include="IterationSlices.h" />
-    <ClInclude Include="CppImplementationFormatter.h" />
+    <ClInclude Include="CppImplFormatter.h" />
     <ClInclude Include="DirPathGroup.h" />
     <ClInclude Include="DocLanguage.h" />
     <ClInclude Include="DspParser.h" />

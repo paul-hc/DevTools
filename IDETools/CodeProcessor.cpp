@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "CodeProcessor.h"
 #include "Formatter.h"
-#include "CppImplementationFormatter.h"
+#include "CppImplFormatter.h"
 #include "ModuleSession.h"
 #include "Application.h"
 #include <sstream>
@@ -187,7 +187,7 @@ BSTR CodeProcessor::SplitArgumentList( LPCTSTR codeText, long splitAtColumn, lon
 
 BSTR CodeProcessor::ExtractTypeDescriptor( LPCTSTR functionImplLine, LPCTSTR docFileExt )
 {
-	code::CppImplementationFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
+	code::CCppImplFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
 	std::tstring typeDescriptor;
 
 	PROCESS_CODE( typeDescriptor, code::CFormatter::s_cancelTag, cppCodeFormatter.ExtractTypeDescriptor( functionImplLine, fs::CPath( docFileExt ) ) )
@@ -197,7 +197,7 @@ BSTR CodeProcessor::ExtractTypeDescriptor( LPCTSTR functionImplLine, LPCTSTR doc
 
 BSTR CodeProcessor::ImplementMethods( LPCTSTR methodPrototypes, LPCTSTR typeDescriptor, BOOL isInline )
 {
-	code::CppImplementationFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
+	code::CCppImplFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
 
 	cppCodeFormatter.setDocLanguage( m_docLanguage );
 	cppCodeFormatter.setTabSize( m_tabSize );
@@ -270,7 +270,7 @@ BSTR CodeProcessor::SortLines( LPCTSTR codeText, BOOL ascending )
 
 BSTR CodeProcessor::AutoMakeCode( LPCTSTR codeText )
 {
-	code::CppImplementationFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
+	code::CCppImplFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
 
 	cppCodeFormatter.setDocLanguage( m_docLanguage );
 	cppCodeFormatter.setTabSize( m_tabSize );
@@ -284,7 +284,7 @@ BSTR CodeProcessor::AutoMakeCode( LPCTSTR codeText )
 
 BSTR CodeProcessor::TokenizeText( LPCTSTR codeText )
 {
-	code::CppImplementationFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
+	code::CCppImplFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
 
 	cppCodeFormatter.setDocLanguage( m_docLanguage );
 	cppCodeFormatter.setTabSize( m_tabSize );

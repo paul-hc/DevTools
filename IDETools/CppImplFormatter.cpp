@@ -1,7 +1,7 @@
 
 #include "pch.h"
 #include "IdeUtilities.h"
-#include "CppImplementationFormatter.h"
+#include "CppImplFormatter.h"
 #include "IterationSlices.h"
 	#include "CodeUtilities.h"
 	#include "LanguageSearchEngine.h"
@@ -42,25 +42,25 @@ namespace ui
 
 namespace code
 {
-	// CppImplementationFormatter implementation
+	// CCppImplFormatter implementation
 
-	CppImplementationFormatter::CppImplementationFormatter( const CFormatterOptions& options )
+	CCppImplFormatter::CCppImplFormatter( const CFormatterOptions& options )
 		: CFormatter( options )
 	{
 		setDocLanguage( DocLang_Cpp );
 	}
 
-	CppImplementationFormatter::~CppImplementationFormatter()
+	CCppImplFormatter::~CCppImplFormatter()
 	{
 	}
 
-	bool CppImplementationFormatter::isCppTypeQualifier( std::tstring typeQualifier )
+	bool CCppImplFormatter::isCppTypeQualifier( std::tstring typeQualifier )
 	{
 		str::Replace( typeQualifier, _T("::"), _T("") );
 		return word::IsAlphaNumericWord( typeQualifier );
 	}
 
-	std::tstring CppImplementationFormatter::ImplementMethodBlock( const TCHAR* pMethodPrototypes, const TCHAR* pTypeDescriptor, bool isInline ) throws_( CRuntimeException )
+	std::tstring CCppImplFormatter::ImplementMethodBlock( const TCHAR* pMethodPrototypes, const TCHAR* pTypeDescriptor, bool isInline ) throws_( CRuntimeException )
 	{
 		resetInternalState();
 		LoadCodeTemplates();
@@ -113,7 +113,7 @@ namespace code
 		return implementedMethods;
 	}
 
-	bool CppImplementationFormatter::LoadCodeTemplates( void )
+	bool CCppImplFormatter::LoadCodeTemplates( void )
 	{
 		m_voidFunctionBody = _T("{\r\n}\r\n");
 		m_returnFunctionBody = _T("{\r\n\treturn ;\r\n}\r\n");
@@ -138,7 +138,7 @@ namespace code
 		return !m_commentDecorationTemplate.empty();
 	}
 
-	std::tstring CppImplementationFormatter::MakeCommentDecoration( const std::tstring& decorationCore ) const
+	std::tstring CCppImplFormatter::MakeCommentDecoration( const std::tstring& decorationCore ) const
 	{
 		std::tstring commentDecoration = m_commentDecorationTemplate;
 
@@ -160,7 +160,7 @@ namespace code
 			"MyClass::"
 			"MyClass::NestedClass::"
 	*/
-	std::tstring CppImplementationFormatter::ExtractTypeDescriptor( const std::tstring& functionImplLine, const fs::CPath& docPath )
+	std::tstring CCppImplFormatter::ExtractTypeDescriptor( const std::tstring& functionImplLine, const fs::CPath& docPath )
 	{
 		resetInternalState();
 
@@ -193,7 +193,7 @@ namespace code
 		return typeDescriptor;
 	}
 
-	std::tstring CppImplementationFormatter::ImplementMethod( const std::tstring& methodProto, const std::tstring& templateDecl, const std::tstring& typeQualifier, bool isInline )
+	std::tstring CCppImplFormatter::ImplementMethod( const std::tstring& methodProto, const std::tstring& templateDecl, const std::tstring& typeQualifier, bool isInline )
 	{
 		std::tstring srcPrototype = makeNormalizedFormattedPrototype( methodProto.c_str(), true );
 		std::tstring implementedMethod;
@@ -255,7 +255,7 @@ namespace code
 		return implementedMethod;
 	}
 
-	void CppImplementationFormatter::ResolveDefaultParameters( std::tstring* pProto ) const
+	void CCppImplFormatter::ResolveDefaultParameters( std::tstring* pProto ) const
 	{
 		ASSERT_PTR( pProto );
 	#pragma message( __WARN__ "TODO: simplify this mess, pretty please!" )
@@ -332,7 +332,7 @@ namespace code
 		}
 	}
 
-	std::tstring CppImplementationFormatter::InputDocTypeDescriptor( const fs::CPath& docPath ) const
+	std::tstring CCppImplFormatter::InputDocTypeDescriptor( const fs::CPath& docPath ) const
 	{
 		ASSERT( DocLang_Cpp == m_docLanguage );
 
@@ -417,7 +417,7 @@ namespace code
 	}
 
 
-	CString CppImplementationFormatter::autoMakeCode( const TCHAR* pCodeText )
+	CString CCppImplFormatter::autoMakeCode( const TCHAR* pCodeText )
 	{
 		resetInternalState();
 
@@ -440,7 +440,7 @@ namespace code
 		return outcome;
 	}
 
-	CString CppImplementationFormatter::makeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException )
+	CString CCppImplFormatter::makeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException )
 	{
 		CIterationSlices slices;
 		slices.ParseCode( pCodeText );
@@ -463,7 +463,7 @@ namespace code
 		return outcome;
 	}
 
-	CString CppImplementationFormatter::makeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException )
+	CString CCppImplFormatter::makeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException )
 	{
 		CIterationSlices slices;
 		slices.ParseCode( pCodeText );
@@ -488,7 +488,7 @@ namespace code
 		return outcome;
 	}
 
-	CString CppImplementationFormatter::tokenizeText( const TCHAR* pCodeText )
+	CString CCppImplFormatter::tokenizeText( const TCHAR* pCodeText )
 	{
 		ide::CScopedWindow scopedIDE;
 		CTokenizeTextDialog dialog( scopedIDE.GetMainWnd() );
