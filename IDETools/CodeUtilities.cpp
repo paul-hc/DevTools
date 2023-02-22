@@ -1,42 +1,11 @@
 
 #include "pch.h"
 #include "CodeUtilities.h"
-#include "CppCodeParser.h"
+#include "CppParser.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-namespace code
-{
-	int FindPosMatchingBracket( int bracketPos, const std::tstring& codeText )
-	{
-		ASSERT( str::IsValidPos( bracketPos, codeText ) );
-		std::tstring::const_iterator itCloseBracket = GetCppLang<TCHAR>().FindMatchingBracket( codeText.begin() + bracketPos, codeText.end() );
-
-		if ( itCloseBracket == codeText.end() )
-			return -1;
-
-		return pvt::Distance( codeText.begin(), itCloseBracket );
-	}
-
-	bool SkipPosPastMatchingBracket( int* pBracketPos /*in-out*/, const std::tstring& codeText )
-	{
-		ASSERT_PTR( pBracketPos );
-		ASSERT( str::IsValidPos( *pBracketPos, codeText ) );
-
-		std::tstring::const_iterator it = codeText.begin() + *pBracketPos;
-
-		if ( !GetCppLang<TCHAR>().SkipPastMatchingBracket( &it, codeText.end() ) )
-			return false;
-
-		*pBracketPos = pvt::Distance( codeText.begin(), it );
-		return true;
-	}
-
-	//bool FindArgList( TokenRange* pArgList, const TCHAR* pCode, int pos, const TCHAR* argListOpenBraces );
-}
 
 
 namespace code

@@ -335,10 +335,27 @@ namespace num
 namespace str
 {
 	// line utilities
-	std::string& ToWindowsLineEnds( std::string& rText );
-	std::wstring& ToWindowsLineEnds( std::wstring& rText );
-	std::string& ToUnixLineEnds( std::string& rText );
-	std::wstring& ToUnixLineEnds( std::wstring& rText );
+
+	template< typename StringT >
+	StringT& ToWindowsLineEnds( StringT* pText )
+	{
+		ASSERT_PTR( pText );
+		const StringT::value_type winLineEnd[] = { '\r', '\n', 0 }, unixLineEnd[] = { '\n', 0 };
+
+		str::Replace( *pText, winLineEnd, unixLineEnd );
+		str::Replace( *pText, unixLineEnd, winLineEnd );
+		return *pText;
+	}
+
+	template< typename StringT >
+	StringT& ToUnixLineEnds( StringT* pText )
+	{
+		ASSERT_PTR( pText );
+		const StringT::value_type winLineEnd[] = {'\r', '\n', 0 }, unixLineEnd[] = { '\n', 0 };
+
+		str::Replace( *pText, winLineEnd, unixLineEnd );
+		return *pText;
+	}
 
 
 	template< typename CharT, typename StringT >

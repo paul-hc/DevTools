@@ -19,7 +19,7 @@ namespace code
 	class CFormatter
 	{
 	public:
-		CFormatter( const CFormatterOptions& _options );
+		CFormatter( const CFormatterOptions& options );
 		~CFormatter();
 
 		DocLanguage getDocLanguage( void ) const { return m_docLanguage; }
@@ -48,6 +48,8 @@ namespace code
 
 		CString generateConsecutiveNumbers( const TCHAR* pCodeText, unsigned int startingNumber = UINT_MAX ) throws_( CRuntimeException );
 		CString sortLines( const TCHAR* pCodeText, bool ascending ) throws_( CRuntimeException );
+
+		TokenSpacing MustSpaceBrace( TCHAR chrBrace ) const;
 	protected:
 		void resetInternalState( void );
 	protected:
@@ -61,7 +63,6 @@ namespace code
 		CString doFormatLineOfCode( const TCHAR lineOfCode[] );
 		CString doAdjustWhitespaceLineOfCode( const TCHAR lineOfCode[] );
 		bool IsBraceCharAt( const TCHAR code[], size_t pos ) const;
-		TokenSpacing MustSpaceBrace( TCHAR chrBrace ) const;
 
 		int replaceMultipleWhiteSpace( CString& targetString, int pos, const TCHAR* newWhitespace = _T(" ") );
 		int resolveSpaceAfterToken( CString& targetString, const TokenRange& tokenRange, bool mustSpaceIt );
@@ -73,7 +74,7 @@ namespace code
 		// line splitter
 		enum HandleSingleLineComments { RemoveComment, ToMultiLineComment };
 
-		CString makeNormalizedFormattedPrototype( const TCHAR* methodPrototype, bool forImplementation = false );
+		CString makeNormalizedFormattedPrototype( const TCHAR* pMethodProto, bool forImplementation = false );
 		CString transformTrailingSingleLineComment( const TCHAR* lineOfCode, HandleSingleLineComments handleComments = ToMultiLineComment );
 		int doSplitArgumentList( std::vector< CString >& brokenLines, const TokenRange& openBraceRange, int maxEditorColIndex );
 
@@ -89,7 +90,7 @@ namespace code
 		CString comment( const TCHAR* pCodeText, bool isEntireLine, CommentState commentState ) const;
 		CString uncomment( const TCHAR* pCodeText, bool isEntireLine ) const;
 	protected:
-		LineBreakTokenMatch findLineBreakToken( TokenRange& outToken, const TCHAR* string, int startPos = 0 ) const;
+		LineBreakTokenMatch findLineBreakToken( TokenRange* pOutToken, const TCHAR* pCodeText, int startPos = 0 ) const;
 		TokenRange getWhiteSpaceRange( const TCHAR* pCodeText, int pos = 0, bool includingComments = true ) const;
 	protected:
 		// format/split parameters
@@ -107,7 +108,7 @@ namespace code
 		// Internal state
 		int m_disableBracketSpacingCounter;
 	public:
-		static const CString m_cancelTag;
+		static const std::tstring s_cancelTag;
 	};
 
 } // namespace code

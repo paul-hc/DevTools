@@ -19,6 +19,7 @@ public:
 	TokenRange( int startAndEnd = 0 ) : TRange( startAndEnd ) {}
 	TokenRange( int start, int end ) : TRange( start, end ) {}
 	TokenRange( const TCHAR* pText, int start = 0 ) { setString( pText, start ); }
+	explicit TokenRange( const std::tstring& text ) : TRange( 0, static_cast<int>( text.length() ) ) {}
 
 	template< typename PosT >
 	explicit TokenRange( const Range<PosT>& range ) : TRange( range ) {}
@@ -61,9 +62,11 @@ public:
 
 	// string operations
 	std::tstring GetToken( const TCHAR* pText ) const { ASSERT( InStringBounds( pText ) ); return std::tstring( pText + m_start, getLength() ); }
-	std::tstring MakeToken( const std::tstring& text ) const { ASSERT( InStringBounds( text.c_str() ) ); return text.substr( m_start, m_end - m_start ); }
+	std::tstring MakeToken( const std::tstring& text ) const { ASSERT( InStringBounds( text.c_str() ) ); return std::tstring( text.begin() + m_start, text.begin() + m_end ); }
+		// safe for empty ranges, even at end
 
 	void Trim( const std::tstring& text );
+	void ReplaceWithToken( std::tstring* pTargetText, const std::tstring& token );		// returns true if changed
 
 	CString getString( const TCHAR* pText ) const;
 	CString getPrefixString( const TCHAR* pText ) const;
@@ -74,15 +77,6 @@ public:
 	TokenRange& replaceWithToken( CString* pTargetString, const TCHAR* pToken );
 	TokenRange& smartReplaceWithToken( CString* pTargetString, const TCHAR* pToken );
 };
-
-
-namespace str
-{
-	inline std::tstring ExtractString( const TokenRange& tokenRange, const std::tstring& text )
-	{
-		return text.substr( tokenRange.m_start, tokenRange.m_end - tokenRange.m_start );
-	}
-}
 
 
 // inline code

@@ -5,15 +5,6 @@
 #pragma once
 
 #include "TokenRange.h"
-
-
-namespace code
-{
-	int FindPosMatchingBracket( int bracketPos, const std::tstring& codeText );
-	bool SkipPosPastMatchingBracket( int* pBracketPos /*in-out*/, const std::tstring& codeText );
-}
-
-
 #include "DocLanguage.h"
 #include "StringUtilitiesEx.h"
 

@@ -11,9 +11,10 @@
 
 namespace reg
 {
-	TCHAR section_formatting[ 64 ];
-	TCHAR section_braces[ 64 ];
-	TCHAR section_operators[ 64 ];
+	const fs::CPath _section_settings = _T("Settings");
+	const fs::CPath section_formatting = _section_settings / _T("Formatting");
+	const fs::CPath section_braces = _section_settings / _T("Braces");
+	const fs::CPath section_operators = _section_settings / _T("Operators");
 
 	const TCHAR entry_breakSeparators[] = _T("Break separators");
 	const TCHAR entry_preserveMultipleWhiteSpace[] = _T("Preserve multiple whitespace");
@@ -46,13 +47,6 @@ namespace code
 		, m_returnTypeOnSeparateLine( false )
 		, m_commentOutDefaultParams( true )
 	{
-		if ( str::IsEmpty( reg::section_formatting ) )
-		{
-			str::Copy( reg::section_formatting, std::tstring( reg::section_settings ) + _T("\\Formatting") );
-			str::Copy( reg::section_braces, std::tstring( reg::section_formatting ) + _T("\\Braces") );
-			str::Copy( reg::section_operators, std::tstring( reg::section_formatting ) + _T("\\Operators") );
-		}
-
 		m_breakSeparators.reserve( 5 );
 		m_breakSeparators.push_back( _T(",") );
 		m_breakSeparators.push_back( _T(";") );
@@ -62,7 +56,7 @@ namespace code
 		// brace rules
 		m_braceRules.reserve( 4 );
 		m_braceRules.push_back( CBraceRule( _T('('), _T(')'), InsertOneSpace, true ) );
-		m_braceRules.push_back( CBraceRule( _T('<'), _T('>'), InsertOneSpace, true ) );
+		m_braceRules.push_back( CBraceRule( _T('<'), _T('>'), PreserveSpace, true ) );
 		m_braceRules.push_back( CBraceRule( _T('['), _T(']'), InsertOneSpace ) );
 		m_braceRules.push_back( CBraceRule( _T('{'), _T('}'), InsertOneSpace ) );
 
@@ -99,44 +93,44 @@ namespace code
 	{
 	}
 
-	static const TCHAR slashSep[] = _T("/");
+	static const TCHAR s_slashSep[] = _T("/");
 
 	void CFormatterOptions::LoadFromRegistry( void )
 	{
-		m_preserveMultipleWhiteSpace = AfxGetApp()->GetProfileInt( reg::section_formatting, reg::entry_preserveMultipleWhiteSpace, m_preserveMultipleWhiteSpace ) != FALSE;
-		m_deleteTrailingWhiteSpace = AfxGetApp()->GetProfileInt( reg::section_formatting, reg::entry_deleteTrailingWhiteSpace, m_deleteTrailingWhiteSpace ) != FALSE;
-		m_linesBetweenFunctionImpls = AfxGetApp()->GetProfileInt( reg::section_formatting, reg::entry_linesBetweenFunctionImpls, m_linesBetweenFunctionImpls );
-		m_returnTypeOnSeparateLine = AfxGetApp()->GetProfileInt( reg::section_formatting, reg::entry_returnTypeOnSeparateLine, m_returnTypeOnSeparateLine ) != FALSE;
-		m_commentOutDefaultParams = AfxGetApp()->GetProfileInt( reg::section_formatting, reg::entry_commentOutDefaultParams, m_commentOutDefaultParams ) != FALSE;
+		m_preserveMultipleWhiteSpace = AfxGetApp()->GetProfileInt( reg::section_formatting.GetPtr(), reg::entry_preserveMultipleWhiteSpace, m_preserveMultipleWhiteSpace ) != FALSE;
+		m_deleteTrailingWhiteSpace = AfxGetApp()->GetProfileInt( reg::section_formatting.GetPtr(), reg::entry_deleteTrailingWhiteSpace, m_deleteTrailingWhiteSpace ) != FALSE;
+		m_linesBetweenFunctionImpls = AfxGetApp()->GetProfileInt( reg::section_formatting.GetPtr(), reg::entry_linesBetweenFunctionImpls, m_linesBetweenFunctionImpls );
+		m_returnTypeOnSeparateLine = AfxGetApp()->GetProfileInt( reg::section_formatting.GetPtr(), reg::entry_returnTypeOnSeparateLine, m_returnTypeOnSeparateLine ) != FALSE;
+		m_commentOutDefaultParams = AfxGetApp()->GetProfileInt( reg::section_formatting.GetPtr(), reg::entry_commentOutDefaultParams, m_commentOutDefaultParams ) != FALSE;
 
-		str::Split( m_breakSeparators, (LPCTSTR)AfxGetApp()->GetProfileString( reg::section_formatting, reg::entry_breakSeparators, str::Join( m_breakSeparators, slashSep ).c_str() ), slashSep );
+		str::Split( m_breakSeparators, (LPCTSTR)AfxGetApp()->GetProfileString( reg::section_formatting.GetPtr(), reg::entry_breakSeparators, str::Join( m_breakSeparators, s_slashSep ).c_str() ), s_slashSep );
 
-		for ( std::vector< CBraceRule >::iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
+		for ( std::vector<CBraceRule>::iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
 			( *itBrace ).LoadFromRegistry();
 
-		for ( std::vector< COperatorRule >::iterator itOpRule = m_operatorRules.begin(); itOpRule != m_operatorRules.end(); ++itOpRule )
+		for ( std::vector<COperatorRule>::iterator itOpRule = m_operatorRules.begin(); itOpRule != m_operatorRules.end(); ++itOpRule )
 			( *itOpRule ).LoadFromRegistry();
 	}
 
 	void CFormatterOptions::SaveToRegistry( void ) const
 	{
-		AfxGetApp()->WriteProfileString( reg::section_formatting, reg::entry_breakSeparators, str::Join( m_breakSeparators, slashSep ).c_str() );
-		AfxGetApp()->WriteProfileInt( reg::section_formatting, reg::entry_preserveMultipleWhiteSpace, m_preserveMultipleWhiteSpace );
-		AfxGetApp()->WriteProfileInt( reg::section_formatting, reg::entry_deleteTrailingWhiteSpace, m_deleteTrailingWhiteSpace );
-		AfxGetApp()->WriteProfileInt( reg::section_formatting, reg::entry_linesBetweenFunctionImpls, m_linesBetweenFunctionImpls );
-		AfxGetApp()->WriteProfileInt( reg::section_formatting, reg::entry_returnTypeOnSeparateLine, m_returnTypeOnSeparateLine );
-		AfxGetApp()->WriteProfileInt( reg::section_formatting, reg::entry_commentOutDefaultParams, m_commentOutDefaultParams );
+		AfxGetApp()->WriteProfileString( reg::section_formatting.GetPtr(), reg::entry_breakSeparators, str::Join( m_breakSeparators, s_slashSep ).c_str() );
+		AfxGetApp()->WriteProfileInt( reg::section_formatting.GetPtr(), reg::entry_preserveMultipleWhiteSpace, m_preserveMultipleWhiteSpace );
+		AfxGetApp()->WriteProfileInt( reg::section_formatting.GetPtr(), reg::entry_deleteTrailingWhiteSpace, m_deleteTrailingWhiteSpace );
+		AfxGetApp()->WriteProfileInt( reg::section_formatting.GetPtr(), reg::entry_linesBetweenFunctionImpls, m_linesBetweenFunctionImpls );
+		AfxGetApp()->WriteProfileInt( reg::section_formatting.GetPtr(), reg::entry_returnTypeOnSeparateLine, m_returnTypeOnSeparateLine );
+		AfxGetApp()->WriteProfileInt( reg::section_formatting.GetPtr(), reg::entry_commentOutDefaultParams, m_commentOutDefaultParams );
 
-		for ( std::vector< CBraceRule >::const_iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
+		for ( std::vector<CBraceRule>::const_iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
 			( *itBrace ).SaveToRegistry();
 
-		for ( std::vector< COperatorRule >::const_iterator itOpRule = m_operatorRules.begin(); itOpRule != m_operatorRules.end(); ++itOpRule )
+		for ( std::vector<COperatorRule>::const_iterator itOpRule = m_operatorRules.begin(); itOpRule != m_operatorRules.end(); ++itOpRule )
 			( *itOpRule ).SaveToRegistry();
 	}
 
 	CFormatterOptions::CBraceRule* CFormatterOptions::FindBraceRule( TCHAR chr ) const
 	{
-		for ( std::vector< CBraceRule >::const_iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
+		for ( std::vector<CBraceRule>::const_iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
 			if ( chr == itBrace->m_braceOpen || chr == itBrace->m_braceClose )
 				return const_cast<CBraceRule*>( &*itBrace );
 
@@ -159,8 +153,8 @@ namespace code
 	CFormatterOptions::COperatorRule* CFormatterOptions::FindOperatorRule( const TCHAR* pOpStart ) const
 	{
 		// lookup a match in descending order of operator length
-		for ( std::vector< COperatorRule >::const_iterator itOpRule = m_sortedOperatorRules.begin(); itOpRule != m_sortedOperatorRules.end(); ++itOpRule )
-			if ( 0 == _tcsncmp( itOpRule->m_pOperator, pOpStart, str::GetLength( itOpRule->m_pOperator ) ) )
+		for ( std::vector<COperatorRule>::const_iterator itOpRule = m_sortedOperatorRules.begin(); itOpRule != m_sortedOperatorRules.end(); ++itOpRule )
+			if ( pred::Equal == _tcsncmp( itOpRule->m_pOperator, pOpStart, str::GetLength( itOpRule->m_pOperator ) ) )
 				return const_cast<COperatorRule*>( &*itOpRule );
 
 		return NULL;
@@ -168,8 +162,8 @@ namespace code
 
 	const std::tstring* CFormatterOptions::FindBreakSeparator( const TCHAR* pBreakSepStart ) const
 	{
-		for ( std::vector< std::tstring >::const_iterator itBreakSep = m_breakSeparators.begin(); itBreakSep != m_breakSeparators.end(); ++itBreakSep )
-			if ( 0 == _tcsnicmp( itBreakSep->c_str(), pBreakSepStart, itBreakSep->length() ) )
+		for ( std::vector<std::tstring>::const_iterator itBreakSep = m_breakSeparators.begin(); itBreakSep != m_breakSeparators.end(); ++itBreakSep )
+			if ( pred::Equal == _tcsnicmp( itBreakSep->c_str(), pBreakSepStart, itBreakSep->length() ) )
 				return &*itBreakSep;
 
 		return NULL;
@@ -179,7 +173,7 @@ namespace code
 	{
 		std::tstring argListBraces;
 		argListBraces.reserve( m_braceRules.size() );
-		for ( std::vector< CBraceRule >::const_iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
+		for ( std::vector<CBraceRule>::const_iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
 			if ( itBrace->m_isArgList )
 				argListBraces += itBrace->m_braceOpen;
 
@@ -221,7 +215,7 @@ namespace code
 
 	void CFormatterOptions::CBraceRule::LoadFromRegistry( void )
 	{
-		std::tstring value = (LPCTSTR)AfxGetApp()->GetProfileString( reg::section_braces, m_regEntry.c_str() );
+		std::tstring value = (LPCTSTR)AfxGetApp()->GetProfileString( reg::section_braces.GetPtr(), m_regEntry.c_str() );
 		if ( 2 == value.length() )
 		{
 			m_spacing = CFormatterOptions::SpacingFromChar( value[ 0 ] );
@@ -232,7 +226,7 @@ namespace code
 	void CFormatterOptions::CBraceRule::SaveToRegistry( void ) const
 	{
 		TCHAR value[ 3 ] = { CFormatterOptions::SpacingToChar( m_spacing ), m_isArgList ? _T('1') : _T('0'), _T('\0') };
-		AfxGetApp()->WriteProfileString( reg::section_braces, m_regEntry.c_str(), value );
+		AfxGetApp()->WriteProfileString( reg::section_braces.GetPtr(), m_regEntry.c_str(), value );
 	}
 
 
@@ -240,7 +234,7 @@ namespace code
 
 	void CFormatterOptions::COperatorRule::LoadFromRegistry( void )
 	{
-		std::tstring value = (LPCTSTR)AfxGetApp()->GetProfileString( reg::section_operators, m_regEntry.c_str() );
+		std::tstring value = (LPCTSTR)AfxGetApp()->GetProfileString( reg::section_operators.GetPtr(), m_regEntry.c_str() );
 		if ( 2 == value.length() )
 		{
 			m_spaceBefore = CFormatterOptions::SpacingFromChar( value[ 0 ] );
@@ -251,7 +245,7 @@ namespace code
 	void CFormatterOptions::COperatorRule::SaveToRegistry( void ) const
 	{
 		TCHAR value[ 3 ] = { CFormatterOptions::SpacingToChar( m_spaceBefore ), CFormatterOptions::SpacingToChar( m_spaceAfter ), _T('\0') };
-		AfxGetApp()->WriteProfileString( reg::section_operators, m_regEntry.c_str(), value );
+		AfxGetApp()->WriteProfileString( reg::section_operators.GetPtr(), m_regEntry.c_str(), value );
 	}
 
 } //namespace code

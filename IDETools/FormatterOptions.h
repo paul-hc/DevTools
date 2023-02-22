@@ -76,20 +76,20 @@ namespace code
 			std::tstring m_regEntry;
 		};
 	public:
-		const std::vector< COperatorRule >& GetOperatorRules( void ) const { return m_operatorRules; }
-		void SetOperatorRules( const std::vector< COperatorRule >& operatorRules ) { m_operatorRules = operatorRules; }
+		const std::vector<COperatorRule>& GetOperatorRules( void ) const { return m_operatorRules; }
+		void SetOperatorRules( const std::vector<COperatorRule>& operatorRules ) { m_operatorRules = operatorRules; }
 	public:
-		std::vector< std::tstring > m_breakSeparators;
+		std::vector<std::tstring> m_breakSeparators;
 		bool m_preserveMultipleWhiteSpace;
 		bool m_deleteTrailingWhiteSpace;
 		int m_linesBetweenFunctionImpls;
 		bool m_returnTypeOnSeparateLine;
 		bool m_commentOutDefaultParams;
 
-		std::vector< CBraceRule > m_braceRules;
+		std::vector<CBraceRule> m_braceRules;
 	private:
-		std::vector< COperatorRule > m_operatorRules;
-		std::vector< COperatorRule > m_sortedOperatorRules;		// rules ordered descending by length: longest-first - for looking up matches
+		std::vector<COperatorRule> m_operatorRules;
+		std::vector<COperatorRule> m_sortedOperatorRules;		// rules ordered descending by length: longest-first - for looking up matches
 	};
 
 } // namespace code

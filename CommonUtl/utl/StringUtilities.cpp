@@ -430,36 +430,6 @@ namespace num
 }
 
 
-namespace str
-{
-	std::string& ToWindowsLineEnds( std::string& rText )
-	{
-		str::Replace( rText, "\r\n", "\n" );
-		str::Replace( rText, "\n", "\r\n" );
-		return rText;
-	}
-
-	std::wstring& ToWindowsLineEnds( std::wstring& rText )
-	{
-		str::Replace( rText, L"\r\n", L"\n" );
-		str::Replace( rText, L"\n", L"\r\n" );
-		return rText;
-	}
-
-	std::string& ToUnixLineEnds( std::string& rText )
-	{
-		str::Replace( rText, "\r\n", "\n" );
-		return rText;
-	}
-
-	std::wstring& ToUnixLineEnds( std::wstring& rText )
-	{
-		str::Replace( rText, L"\r\n", L"\n" );
-		return rText;
-	}
-}
-
-
 namespace code
 {
 	std::tstring FormatEscapeSeq( const std::tstring& text, bool uiSeq /*= false*/ )

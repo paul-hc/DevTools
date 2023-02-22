@@ -1,6 +1,6 @@
 
 #include "pch.h"
-#include "CppCodeParser.h"
+#include "CppParser.h"
 #include "utl/Algorithms.h"
 
 #ifdef _DEBUG
@@ -8,31 +8,183 @@
 #endif
 
 
-const std::tstring CCppCodeParser::s_template = _T("template");
-const std::tstring CCppCodeParser::s_inline = _T("inline");
-const std::tstring CCppCodeParser::s_operator = _T("operator");
-const std::tstring CCppCodeParser::s_scopeOp = _T("::");
-const std::tstring CCppCodeParser::s_callOp = _T("()");
+// CCppParser implementation
 
-CCppCodeParser::CCppCodeParser( void )
+CCppParser::CCppParser( void )
 	: m_lang( code::GetCppLang<TCHAR>() )
 {
 }
 
-bool CCppCodeParser::ParseCode( const std::tstring& codeText )
+
+// CCppCodeParser implementation
+
+CCppCodeParser::CCppCodeParser( const std::tstring* pCodeText )
+	: CCppParser()
+	, m_codeText( *safe_ptr( pCodeText ) )
+	, m_length( static_cast<TPos>( m_codeText.length() ) )
+	, m_itBegin( m_codeText.begin() )
+	, m_itEnd( m_codeText.end() )
+{
+}
+
+CCppCodeParser::TPos CCppCodeParser::FindPosNextSequence( TPos pos, const std::tstring& sequence ) const
+{
+	ASSERT( IsValidPos( pos ) );
+	ASSERT( !sequence.empty() );
+
+	TConstIterator itFound = m_lang.FindNextSequence( m_itBegin + pos, m_itEnd, sequence );
+
+	if ( m_itEnd == itFound )
+		return -1;
+
+	TPos foundPos = pvt::Distance( m_itBegin, itFound );
+	ENSURE( IsValidPos( foundPos ) );
+	return foundPos;
+}
+
+bool CCppCodeParser::FindNextSequence( TokenRange* pSeqRange, TPos pos, const std::tstring& sequence ) const
+{
+	ASSERT_PTR( pSeqRange );
+	ASSERT( IsValidPos( pos ) );
+
+	pSeqRange->SetEmptyRange( FindPosNextSequence( pos, sequence ) );
+	if ( pSeqRange->m_start == m_length )
+		return false;
+
+	pSeqRange->m_end += static_cast<TPos>( sequence.length() );
+	return true;
+}
+
+CCppCodeParser::TPos CCppCodeParser::FindPosMatchingBracket( TPos bracketPos ) const
+{
+	ASSERT( IsValidPos( bracketPos ) );
+	TConstIterator itCloseBracket = m_lang.FindMatchingBracket( m_itBegin + bracketPos, m_itEnd );
+
+	if ( m_itEnd == itCloseBracket )
+		return -1;
+
+	return pvt::Distance( m_itBegin, itCloseBracket );
+}
+
+bool CCppCodeParser::SkipPosPastMatchingBracket( TPos* pBracketPos /*in-out*/ ) const
+{
+	ASSERT_PTR( pBracketPos );
+	ASSERT( IsValidPos( *pBracketPos ) );
+
+	TConstIterator it = m_itBegin + *pBracketPos;
+
+	if ( !m_lang.SkipPastMatchingBracket( &it, m_itEnd ) )
+		return false;
+
+	*pBracketPos = pvt::Distance( m_itBegin, it );
+	return true;
+}
+
+bool CCppCodeParser::FindArgList( TokenRange* pArgList, TPos pos, TCHAR openBracket /*= s_anyBracket*/ ) const
+{
+	ASSERT_PTR( pArgList );
+	ASSERT( IsValidPos( pos ) );
+
+	TConstIterator itOpenBracket = s_anyBracket == openBracket
+		? m_lang.FindNextCharThat( m_itBegin + pos, m_itEnd, pred::IsBracket() )
+		: m_lang.FindNextCharThat( m_itBegin + pos, m_itEnd, pred::IsChar( openBracket ) );
+
+	if ( itOpenBracket == m_itEnd )
+		return false;				// no opening bracket found
+
+	TConstIterator it = itOpenBracket;
+
+	if ( !m_lang.SkipPastMatchingBracket( &it, m_itEnd ) )
+		return false;				// no matching closing bracket found
+
+	*pArgList = pvt::MakeTokenRange( Range<TConstIterator>( itOpenBracket, it ), m_itBegin );
+	return true;
+}
+
+bool CCppCodeParser::SkipWhitespace( TPos* pPos /*in-out*/ ) const
+{
+	ASSERT_PTR( pPos );
+	ASSERT( IsValidPos( *pPos ) );
+
+	TConstIterator it = m_itBegin + *pPos;
+	if ( !m_lang.SkipWhitespace( &it, m_itEnd ) )
+		return false;
+
+	*pPos = pvt::Distance( m_itBegin, it );
+	return true;
+}
+
+bool CCppCodeParser::SkipMatchingToken( TPos* pPos /*in-out*/, const std::tstring& token )
+{
+	ASSERT_PTR( pPos );
+	ASSERT( IsValidPos( *pPos ) );
+
+	if ( !str::EqualsSeq( m_itBegin + *pPos, m_itEnd, token ) )
+		return false;
+
+	*pPos += token.length();
+	SkipWhitespace( pPos );
+	return true;
+}
+
+bool CCppCodeParser::SkipAnyOf( TPos* pPos, const TCHAR charSet[] )
+{
+	ASSERT_PTR( pPos );
+	ASSERT( IsValidPos( *pPos ) );
+
+	TPos oldPos = *pPos;
+	while ( *pPos != m_length && str::IsAnyOf( m_codeText[ *pPos ], charSet ) )
+		++*pPos;
+
+	return *pPos != oldPos;
+}
+
+bool CCppCodeParser::SkipAnyNotOf( TPos* pPos, const TCHAR charSet[] )
+{
+	ASSERT_PTR( pPos );
+	ASSERT( IsValidPos( *pPos ) );
+
+	TPos oldPos = *pPos;
+	while ( *pPos != m_length && !str::IsAnyOf( m_codeText[ *pPos ], charSet ) )
+		++*pPos;
+
+	return *pPos != oldPos;
+}
+
+
+// CCppMethodParser implementation
+
+const std::tstring CCppMethodParser::s_template = _T("template");
+const std::tstring CCppMethodParser::s_inline = _T("inline");
+const std::tstring CCppMethodParser::s_operator = _T("operator");
+const std::tstring CCppMethodParser::s_scopeOp = _T("::");
+const std::tstring CCppMethodParser::s_callOp = _T("()");
+
+CCppMethodParser::CCppMethodParser( void )
+	: CCppParser()
+{
+}
+
+bool CCppMethodParser::ParseCode( const std::tstring& codeText )
 {
 	m_codeSlices.clear();
 	m_emptyRange.SetEmptyRange( codeText.length() );
 
 	TConstIterator itCode = codeText.begin(), itEnd = codeText.end(), it = itCode;
-	const code::CLanguage<TCHAR>::TSeparatorsPair& sepsPair = m_lang.GetParser().GetSeparators();
+	const TLanguage::TSeparatorsPair& sepsPair = m_lang.GetParser().GetSeparators();
 	typedef Range<TConstIterator> TIteratorRange;
 
-	for ( code::CLanguage<TCHAR>::TSepMatchPos sepMatchPos = std::tstring::npos; it != itEnd; )
+	for ( ; it != itEnd; )
 	{
 		m_lang.SkipWhitespace( &it, itEnd );
+		if ( it == itEnd )
+			break;							// ending in whitespace
+
+		if ( !HasSlice( IndentPrefix ) && it != itCode )	// found leading whitespace?
+			m_codeSlices[ IndentPrefix ] = pvt::MakeTokenRange( TIteratorRange( itCode, it ), itCode );
 
 		TConstIterator itSlice = it;		// beginning of a potential slice
+		TLanguage::TSepMatchPos sepMatchPos;
 
 		if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, it, itEnd ) )	// matches a quoted string, comment, etc?
 			sepsPair.SkipMatchingSpec( &it, itEnd, sepMatchPos );		// skip quoted strings, comments, etc
@@ -85,7 +237,7 @@ bool CCppCodeParser::ParseCode( const std::tstring& codeText )
 	return true;
 }
 
-void CCppCodeParser::ParseQualifiedMethod( const std::tstring& codeText )
+void CCppMethodParser::ParseQualifiedMethod( const std::tstring& codeText )
 {	// extract FunctionName, ClassQualifier, adjust ReturnType from QualifiedMethod
 	REQUIRE( !HasSlice( FunctionName ) && !HasSlice( ClassQualifier ) );
 
@@ -118,7 +270,7 @@ void CCppCodeParser::ParseQualifiedMethod( const std::tstring& codeText )
 	}
 }
 
-bool CCppCodeParser::FindSliceEnd( TConstIterator* pItSlice, const TConstIterator& itEnd ) const
+bool CCppMethodParser::FindSliceEnd( TConstIterator* pItSlice, const TConstIterator& itEnd ) const
 {
 	ASSERT_PTR( pItSlice );
 
@@ -156,7 +308,7 @@ bool CCppCodeParser::FindSliceEnd( TConstIterator* pItSlice, const TConstIterato
 	return true;
 }
 
-const TokenRange& CCppCodeParser::LookupSliceRange( SliceType sliceType ) const
+const TokenRange& CCppMethodParser::LookupSliceRange( SliceType sliceType ) const
 {
 	if ( const TokenRange* pFoundRange = FindSliceRange( sliceType ) )
 		return *pFoundRange;
@@ -164,7 +316,7 @@ const TokenRange& CCppCodeParser::LookupSliceRange( SliceType sliceType ) const
 	return m_emptyRange;		// code slice not found
 }
 
-const TokenRange* CCppCodeParser::FindSliceRange( SliceType sliceType ) const
+const TokenRange* CCppMethodParser::FindSliceRange( SliceType sliceType ) const
 {
 	return utl::FindValuePtr( m_codeSlices, sliceType );
 }

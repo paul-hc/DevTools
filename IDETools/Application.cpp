@@ -210,14 +210,24 @@ END_MESSAGE_MAP()
 
 namespace app
 {
-	UINT GetMenuVertSplitCount( void )
+	CModuleSession& GetModuleSession( void )
 	{
-		return GetModuleSession().m_menuVertSplitCount;
+		return CApplication::GetApp()->GetModuleSession();
+	}
+
+	const code::CFormatterOptions& GetCodeFormatterOptions( void )
+	{
+		return GetModuleSession().GetCodeFormatterOptions();
 	}
 
 	const CIncludePaths* GetIncludePaths( void )
 	{
 		return CIncludeDirectories::Instance().GetCurrentPaths();
+	}
+
+	UINT GetMenuVertSplitCount( void )
+	{
+		return GetModuleSession().m_menuVertSplitCount;
 	}
 
 } //namespace app

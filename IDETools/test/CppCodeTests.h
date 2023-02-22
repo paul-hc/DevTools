@@ -8,12 +8,6 @@
 #include "utl/test/UnitTest.h"
 
 
-namespace code
-{
-	struct CMethodPrototype;
-}
-
-
 class CCppCodeTests : public ut::CConsoleTestCase
 {
 	CCppCodeTests( void );

@@ -11,7 +11,7 @@ namespace code
 	{
 		CMethodPrototype( void ) {}
 
-		virtual void SplitMethod( const std::tstring& proto );
+		virtual void ParseCode( const std::tstring& proto );
 
 		std::tstring FormatInfo( void ) const;
 	private:
@@ -19,6 +19,7 @@ namespace code
 	private:
 		std::tstring m_proto;
 	public:
+		TokenRange m_indentPrefix;			// e.g. "\t\t" before m_templateDecl
 		TokenRange m_templateDecl;			// e.g. "template< typename PathType, typename ObjectType >"
 		TokenRange m_inlineModifier;		// e.g. "inline"
 		TokenRange m_returnType;			// e.g. "std::pair<ObjectType*, cache::TStatusFlags>"

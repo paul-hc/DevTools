@@ -243,7 +243,7 @@ namespace str
 namespace str
 {
 	template< typename CharT >
-	bool ContainsAnyOf( const CharT* pCharSet, CharT ch )
+	bool IsAnyOf( CharT ch, const CharT* pCharSet )
 	{
 		ASSERT_PTR( pCharSet );
 		for ( ; *pCharSet != 0; ++pCharSet )

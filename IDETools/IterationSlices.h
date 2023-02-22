@@ -15,7 +15,7 @@ namespace code
 
 		CIterationSlices( void );
 
-		void ParseStatement( const std::tstring& codeText ) throws_( mfc::CRuntimeException );
+		void ParseCode( const std::tstring& codeText ) throws_( CRuntimeException );
 	private:
 		void Reset( const std::tstring& codeText );
 		void ExtractIteratorName( void );

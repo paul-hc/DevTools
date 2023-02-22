@@ -24,11 +24,11 @@
 	{\
 		newCodeText = ( processedCodeText );\
 	}\
-	catch ( CException* exc )\
+	catch ( CException* pExc )\
 	{\
 		newCodeText = ( codeText );\
-		exc->ReportError();\
-		exc->Delete();\
+		pExc->ReportError();\
+		pExc->Delete();\
 	}\
 	catch ( const std::exception& exc )\
 	{\
@@ -152,7 +152,9 @@ void CodeProcessor::SetUseTabs( BOOL bNewValue )
 
 BSTR CodeProcessor::GetCancelTag( void )
 {
-	return code::CFormatter::m_cancelTag.AllocSysString();
+	CString cancelTag = code::CFormatter::s_cancelTag.c_str();
+
+	return cancelTag.AllocSysString();
 }
 
 BSTR CodeProcessor::AutoFormatCode( LPCTSTR codeText )
@@ -186,10 +188,11 @@ BSTR CodeProcessor::SplitArgumentList( LPCTSTR codeText, long splitAtColumn, lon
 BSTR CodeProcessor::ExtractTypeDescriptor( LPCTSTR functionImplLine, LPCTSTR docFileExt )
 {
 	code::CppImplementationFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
-	CString typeDescriptor;
+	std::tstring typeDescriptor;
 
-	PROCESS_CODE( typeDescriptor, _T("<cancel>"), cppCodeFormatter.extractTypeDescriptor( functionImplLine, docFileExt ) )
-	return typeDescriptor.AllocSysString();
+	PROCESS_CODE( typeDescriptor, code::CFormatter::s_cancelTag, cppCodeFormatter.ExtractTypeDescriptor( functionImplLine, fs::CPath( docFileExt ) ) )
+
+	return CString( typeDescriptor.c_str() ).AllocSysString();
 }
 
 BSTR CodeProcessor::ImplementMethods( LPCTSTR methodPrototypes, LPCTSTR typeDescriptor, BOOL isInline )
@@ -200,11 +203,12 @@ BSTR CodeProcessor::ImplementMethods( LPCTSTR methodPrototypes, LPCTSTR typeDesc
 	cppCodeFormatter.setTabSize( m_tabSize );
 	cppCodeFormatter.setUseTabs( m_useTabs != FALSE );
 
-	CString newCodeText;
+	std::tstring newCodeText;
 
 	PROCESS_CODE( newCodeText, methodPrototypes,
-				  cppCodeFormatter.implementMethodBlock( methodPrototypes, typeDescriptor, isInline != FALSE ) )
-	return newCodeText.AllocSysString();
+				  cppCodeFormatter.ImplementMethodBlock( methodPrototypes, typeDescriptor, isInline != FALSE ) )
+
+	return CString( newCodeText.c_str() ).AllocSysString();
 }
 
 BSTR CodeProcessor::ToggleComment( LPCTSTR codeText )

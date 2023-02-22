@@ -626,11 +626,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\CppCodeParser.cpp"
+					RelativePath=".\CppParser.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\CppCodeParser.h"
+					RelativePath=".\CppParser.h"
 					>
 				</File>
 				<File

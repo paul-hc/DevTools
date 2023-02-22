@@ -91,28 +91,6 @@ namespace str
 
 
 	template< typename IntegralType >
-	void skipCharSet( IntegralType& rPos, const TCHAR* str, const TCHAR* characterSet )
-	{
-		ASSERT( str != NULL );
-		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
-
-		while ( str[ rPos ] != _T('\0') && str::isCharOneOf( str[ rPos ], characterSet ) )
-			++rPos;
-	}
-
-
-	template< typename IntegralType >
-	void skipNotCharSet( IntegralType& rPos, const TCHAR* str, const TCHAR* characterSet )
-	{
-		ASSERT( str != NULL );
-		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
-
-		while ( str[ rPos ] != _T('\0') && !str::isCharOneOf( str[ rPos ], characterSet ) )
-			++rPos;
-	}
-
-
-	template< typename IntegralType >
 	bool skipToken( IntegralType& rPos, const TCHAR* str, const TCHAR* token, str::CaseType caseType = str::Case )
 	{
 		ASSERT( str != NULL && token != NULL );

@@ -12,6 +12,10 @@
 #endif
 
 
+  std::pair<int, int> Func( const CFileItem* pLeft, int depth = 5 ) const;
+CCmd::
+
+
 template< typename PathType, typename ObjectType >
 inline void CCacheLoader<PathType, ObjectType>::Blah2( const std::string& filePath )
 {
@@ -19,6 +23,7 @@ inline void CCacheLoader<PathType, ObjectType>::Blah2( const std::string& filePa
 
   void Blah1( const std::vector<PathType>& pathKeys );
   void Blah2( const std::string& filePath );
+  std::pair<int, int> Func( const CFileItem* pLeft, int depth = 5 ) const;
 	template< typename PathType, typename ObjectType >
 	std::pair<ObjectType*, cache::TStatusFlags> CCacheLoader<PathType, ObjectType>::Acquire( const PathType& pathKey )
 	{

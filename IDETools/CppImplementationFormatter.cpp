@@ -3,11 +3,12 @@
 #include "IdeUtilities.h"
 #include "CppImplementationFormatter.h"
 #include "IterationSlices.h"
-#include "CodeUtilities.h"
-#include "LanguageSearchEngine.h"
-#include "BraceParityStatus.h"
+	#include "CodeUtilities.h"
+	#include "LanguageSearchEngine.h"
+	#include "BraceParityStatus.h"
 #include "FormatterOptions.h"
 #include "MethodPrototype.h"
+#include "CppParser.h"
 #include "InputTypeQualifierDialog.h"
 #include "TokenizeTextDialog.h"
 #include "TextContent.h"
@@ -23,12 +24,28 @@
 #endif
 
 
+namespace ui
+{
+	UINT TrackMakeCodeTemplate( void )
+	{
+		CPoint screenPos;
+		GetCursorPos( &screenPos );
+
+		CMenu contextMenu;
+		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AutoMakeCodePopup );
+
+		ide::CScopedWindow scopedIDE;
+		return scopedIDE.TrackPopupMenu( contextMenu, screenPos );
+	}
+}
+
+
 namespace code
 {
 	// CppImplementationFormatter implementation
 
-	CppImplementationFormatter::CppImplementationFormatter( const CFormatterOptions& _options )
-		: CFormatter( _options )
+	CppImplementationFormatter::CppImplementationFormatter( const CFormatterOptions& options )
+		: CFormatter( options )
 	{
 		setDocLanguage( DocLang_Cpp );
 	}
@@ -43,67 +60,65 @@ namespace code
 		return word::IsAlphaNumericWord( typeQualifier );
 	}
 
-	CString CppImplementationFormatter::implementMethodBlock( const TCHAR* pMethodPrototypes, const TCHAR* pTypeDescriptor, bool isInline ) throws_( mfc::CRuntimeException )
+	std::tstring CppImplementationFormatter::ImplementMethodBlock( const TCHAR* pMethodPrototypes, const TCHAR* pTypeDescriptor, bool isInline ) throws_( CRuntimeException )
 	{
 		resetInternalState();
-		loadCodeTemplates();
+		LoadCodeTemplates();
 
-		CString templateDecl;
-		CString typeQualifier;
+		CTypeDescriptor tdInfo( this );
 
-		splitTypeDescriptor( templateDecl, typeQualifier, pTypeDescriptor );
+		tdInfo.Parse( pTypeDescriptor );
 
-		CString separatedPrototypes = pMethodPrototypes;
+		std::tstring prototypeBlock = pMethodPrototypes;
+		str::ToWindowsLineEnds( &prototypeBlock );
 
-		code::convertToWindowsLineEnds( separatedPrototypes );
-
+		CCppCodeParser protoParser( &prototypeBlock );
 		static const std::tstring s_protoSep = _T("\r\r");
-		BraceParityStatus braceStatus;
 
-		for ( TokenRange range( 0 ); str::charAt( separatedPrototypes, range.m_end ) != _T('\0'); )
+		for ( int pos = 0; pos != protoParser.m_length; )
 		{
-			range = braceStatus.findArgList( separatedPrototypes, range.m_end, _T("("), m_docLanguage );
+			// for each prototype line: skip arg-list(s) to locate the line-end:
+			TokenRange argList;
+			if ( !protoParser.FindArgList( &argList, pos, '(' ) )
+				break;
 
-			if ( range.IsValid() && 2 == range.getLength() )
-				if ( '(' == str::charAt( separatedPrototypes, range.m_end ) )
-					range = braceStatus.findArgList( separatedPrototypes, range.m_end, _T("("), m_docLanguage );
-
-			if ( !range.IsEmpty() )
+			if ( 2 == argList.getLength() )		// "()" empty arg-list, i.e. from "operator()( ... )"?
 			{
-				TokenRange endOfLinePos = m_languageEngine.findString( separatedPrototypes, code::lineEnd, range.m_end );
-
-				ASSERT( endOfLinePos.IsValid() );
-
-				if ( !endOfLinePos.IsEmpty() )
-					endOfLinePos.replaceWithToken( &separatedPrototypes, s_protoSep.c_str() );
-
-				range.m_end = endOfLinePos.m_end;
+				TokenRange nextArgList;
+				if ( protoParser.FindArgList( &nextArgList, argList.m_end, '(' ) )
+					argList = nextArgList;		// skip to the following
 			}
+
+			TokenRange endOfLine;
+			if ( !protoParser.FindNextSequence( &endOfLine, argList.m_end, code::lineEnd ) )
+				break;					// we're done with last line
+
+			endOfLine.ReplaceWithToken( &prototypeBlock, s_protoSep.c_str() );
+			pos = endOfLine.m_end;		// skip to next line
 		}
 
-		std::vector< CString > sourcePrototypes;
+		std::vector<std::tstring> prototypes;
+		str::Split( prototypes, prototypeBlock.c_str(), s_protoSep.c_str());
 
-		str::split( sourcePrototypes, separatedPrototypes, s_protoSep.c_str() );
+		std::tstring implementedMethods;
 
-		CString implementedMethods;
-
-		for ( std::vector< CString >::const_iterator itPrototype = sourcePrototypes.begin(); itPrototype != sourcePrototypes.end(); ++itPrototype )
+		for ( std::vector<std::tstring>::const_iterator itProto = prototypes.begin(); itProto != prototypes.end(); ++itProto )
 		{
-			CString implementation = implementMethod( *itPrototype, templateDecl, typeQualifier, isInline );
+			std::tstring implementation = ImplementMethod( *itProto, tdInfo.m_templateDecl, tdInfo.m_typeQualifier, isInline );
 
-			if ( !implementation.IsEmpty() )
+			if ( !implementation.empty() )
 				implementedMethods += implementation;
 		}
 
 		return implementedMethods;
 	}
 
-	bool CppImplementationFormatter::loadCodeTemplates( void )
+	bool CppImplementationFormatter::LoadCodeTemplates( void )
 	{
 		m_voidFunctionBody = _T("{\r\n}\r\n");
 		m_returnFunctionBody = _T("{\r\n\treturn ;\r\n}\r\n");
 
-		m_commentDecorationTemplate.Empty();
+		m_commentDecorationTemplate.clear();
 
 		TextContent codeTemplateFile;
 		std::tstring codeTemplateFilePath = app::GetModuleSession().m_codeTemplatePath.Get();
@@ -120,20 +135,15 @@ namespace code
 		if ( codeTemplateFile.LoadFileSection( codeTemplateFilePath.c_str(), _T("return Function Body") ) )
 			m_returnFunctionBody = codeTemplateFile.GetText();
 
-		return !m_commentDecorationTemplate.IsEmpty();
+		return !m_commentDecorationTemplate.empty();
 	}
 
-	CString CppImplementationFormatter::makeCommentDecoration( const TCHAR* pDecorationCore ) const
+	std::tstring CppImplementationFormatter::MakeCommentDecoration( const std::tstring& decorationCore ) const
 	{
-		ASSERT_PTR( pDecorationCore );
+		std::tstring commentDecoration = m_commentDecorationTemplate;
 
-		CString commentDecoration;
-
-		if ( !m_commentDecorationTemplate.IsEmpty() )
-		{
-			commentDecoration = m_commentDecorationTemplate;
-			commentDecoration.Replace( _T("%TypeName%"), pDecorationCore );
-		}
+		if ( !commentDecoration.empty() )
+			str::Replace( commentDecoration, _T("%TypeName%"), decorationCore.c_str() );
 
 		return commentDecoration;
 	}
@@ -150,65 +160,53 @@ namespace code
 			"MyClass::"
 			"MyClass::NestedClass::"
 	*/
-	CString CppImplementationFormatter::extractTypeDescriptor( const TCHAR* pFunctionImplLine, const TCHAR* pDocFilename )
+	std::tstring CppImplementationFormatter::ExtractTypeDescriptor( const std::tstring& functionImplLine, const fs::CPath& docPath )
 	{
 		resetInternalState();
 
-		CString templateDecl;
-		CString typeQualifier;
+		CMethodPrototype proto;
 
+		proto.ParseCode( functionImplLine );		//m_validArgListOpenBraces
+
+		std::tstring templateDecl = proto.m_templateDecl.MakeToken( functionImplLine );
+		std::tstring typeQualifier = proto.m_classQualifier.MakeToken( functionImplLine );
+
+		if ( typeQualifier.empty() )
 		{
-			CMethodPrototype ranges;
+			std::tstring userTypeDescriptor = InputDocTypeDescriptor( docPath );
 
-			ranges.SplitMethod( pFunctionImplLine );		//m_validArgListOpenBraces
-			if ( !ranges.m_templateDecl.IsEmpty() )
-				templateDecl = ranges.m_templateDecl.getString( pFunctionImplLine );
-			if ( !ranges.m_classQualifier.IsEmpty() )
-				typeQualifier = ranges.m_classQualifier.getString( pFunctionImplLine );
+			if ( userTypeDescriptor == s_cancelTag )
+				return userTypeDescriptor;			// canceled by user
+
+			proto.ParseCode( userTypeDescriptor );		//m_validArgListOpenBraces
+
+			templateDecl = proto.m_templateDecl.MakeToken( userTypeDescriptor );
+			typeQualifier = proto.m_classQualifier.MakeToken( userTypeDescriptor );
 		}
 
-		if ( typeQualifier.IsEmpty() )
-		{
-			CString userTypeDescriptor = inputDocTypeDescriptor( pDocFilename );
+		std::tstring typeDescriptor;
 
-			if ( userTypeDescriptor == m_cancelTag )
-				return userTypeDescriptor; // canceled by user
-
-			CMethodPrototype ranges;
-
-			ranges.SplitMethod( userTypeDescriptor.GetString() );		//m_validArgListOpenBraces
-			if ( !ranges.m_templateDecl.IsEmpty() )
-				templateDecl = ranges.m_templateDecl.getString( userTypeDescriptor );
-
-			if ( !ranges.m_classQualifier.IsEmpty() )
-				typeQualifier = ranges.m_classQualifier.getString( userTypeDescriptor );
-		}
-
-		CString typeDescriptor;
-
-		if ( !templateDecl.IsEmpty() )
+		if ( !templateDecl.empty() )
 			typeDescriptor = templateDecl + code::lineEnd;
 
 		typeDescriptor += typeQualifier;
 		return typeDescriptor;
 	}
 
-	CString CppImplementationFormatter::implementMethod( const TCHAR* pMethodPrototype, const TCHAR* pTemplateDecl,
-														 const TCHAR* pTypeQualifier, bool isInline )
+	std::tstring CppImplementationFormatter::ImplementMethod( const std::tstring& methodProto, const std::tstring& templateDecl, const std::tstring& typeQualifier, bool isInline )
 	{
-		CString sourcePrototype = makeNormalizedFormattedPrototype( pMethodPrototype, true );
+		std::tstring srcPrototype = makeNormalizedFormattedPrototype( methodProto.c_str(), true );
+		std::tstring implementedMethod;
 
-		prototypeResolveDefaultParameters( sourcePrototype );
-
-		CString implementedMethod;
-
-		if ( !sourcePrototype.IsEmpty() )
+		if ( !srcPrototype.empty() )
 		{
+			ResolveDefaultParameters( &srcPrototype );
+
 			CMethodPrototype method;
 
-			method.SplitMethod( sourcePrototype.GetString() );		//m_validArgListOpenBraces
+			method.ParseCode( srcPrototype );		//m_validArgListOpenBraces
 
-			CString returnType;
+			std::tstring returnType;
 			bool hasNoReturnType = true;
 
 			if ( isInline )
@@ -216,36 +214,35 @@ namespace code
 
 			if ( !method.m_returnType.IsEmpty() )
 			{
-				CString theReturnType = method.m_returnType.getString( sourcePrototype );
+				std::tstring theReturnType = method.m_returnType.MakeToken( srcPrototype );
 
-				hasNoReturnType = theReturnType == _T("void");
+				hasNoReturnType = ( theReturnType == _T("void") );
 
 				returnType += theReturnType;
 				returnType += m_options.m_returnTypeOnSeparateLine ? code::lineEnd : _T(" ");
 			}
 
-			if ( !m_options.m_returnTypeOnSeparateLine && !returnType.IsEmpty() )
+			if ( !m_options.m_returnTypeOnSeparateLine && !returnType.empty() )
 				implementedMethod = returnType;
 
-			if ( pTypeQualifier != NULL )
-				implementedMethod += pTypeQualifier;
+			implementedMethod += typeQualifier;
 
-			implementedMethod += TokenRange( method.m_qualifiedMethod.m_start, method.m_postArgListSuffix.m_end ).getString( sourcePrototype );
+			implementedMethod += TokenRange( method.m_qualifiedMethod.m_start, method.m_postArgListSuffix.m_end ).MakeToken( srcPrototype );
 			implementedMethod += code::lineEnd;
-			implementedMethod = splitArgumentList( implementedMethod );
+			implementedMethod = splitArgumentList( implementedMethod.c_str() );
 
-			if ( m_options.m_returnTypeOnSeparateLine && !returnType.IsEmpty() )
+			if ( m_options.m_returnTypeOnSeparateLine && !returnType.empty() )
 				implementedMethod = returnType + implementedMethod;
 
-			if ( pTemplateDecl != NULL && pTemplateDecl[ 0 ] != _T('\0') )
-				implementedMethod = CString( pTemplateDecl ) + code::lineEnd + implementedMethod;
+			if ( !templateDecl.empty() )
+				implementedMethod = templateDecl + code::lineEnd + implementedMethod;
 
-			if ( !m_commentDecorationTemplate.IsEmpty() )
+			if ( !m_commentDecorationTemplate.empty() )
 			{
-				CString decorationCore = pTypeQualifier + TokenRange( method.m_qualifiedMethod.m_start, method.m_qualifiedMethod.m_end ).getString( sourcePrototype );
-				CString commentDecoration = makeCommentDecoration( decorationCore );
+				std::tstring decorationCore = typeQualifier + TokenRange( method.m_qualifiedMethod.m_start, method.m_qualifiedMethod.m_end ).MakeToken( srcPrototype );
+				std::tstring commentDecoration = MakeCommentDecoration( decorationCore );
 
-				if ( !commentDecoration.IsEmpty() )
+				if ( !commentDecoration.empty() )
 					implementedMethod = commentDecoration + code::lineEnd + implementedMethod;
 			}
 
@@ -258,86 +255,35 @@ namespace code
 		return implementedMethod;
 	}
 
-	// example: converts "template< typename Type, class MyClass, struct MyStruct >" to "< Type, MyClass, MyStruct >"
-
-	CString CppImplementationFormatter::buildTemplateInstanceTypeList( const TokenRange& templateDecl, const TCHAR* pMethodPrototype ) const
+	void CppImplementationFormatter::ResolveDefaultParameters( std::tstring* pProto ) const
 	{
-		CString outTemplateInstanceList;
-		BraceParityStatus braceStatus;
-		TokenRange templTypeList = braceStatus.findArgList( pMethodPrototype, templateDecl.m_start, _T("<"), m_docLanguage );
+		ASSERT_PTR( pProto );
+	#pragma message( __WARN__ "TODO: simplify this mess, pretty please!" )
 
-		if ( templTypeList.m_start >= templateDecl.m_start && templTypeList.m_end <= templateDecl.m_end )
-		{
-			templTypeList.deflateBy( 1 );
-			if ( !templTypeList.IsEmpty() )
-			{
-				std::vector< CString > typeArgs;
-
-				str::split( typeArgs, templTypeList.getString( pMethodPrototype ), _T(",") );
-
-				for ( unsigned int i = 0; i != typeArgs.size(); ++i )
-				{
-					const TCHAR* typeArg = typeArgs[ i ];
-					TokenRange argRange = TokenRange::endOfString( typeArg );
-
-					while ( argRange.m_end > 0 && code::isWhitespaceChar( typeArg[ argRange.m_end - 1 ] ) )
-						--argRange.m_end;
-
-					argRange.m_start = argRange.m_end;
-
-					while ( argRange.m_start > 0 && !code::isWhitespaceChar( typeArg[ argRange.m_start - 1 ] ) )
-						--argRange.m_start;
-
-					if ( !argRange.IsEmpty() )
-					{
-						if ( !outTemplateInstanceList.IsEmpty() )
-							outTemplateInstanceList += _T(", ");
-
-						outTemplateInstanceList += argRange.getString( typeArg );
-					}
-					else
-						TRACE( _T(" * SYNTAX ERROR: cannot extract type argument at index %d from the template '%s'\n"),
-							   (LPCTSTR)templateDecl.getString( pMethodPrototype ) );
-				}
-			}
-		}
-
-		if ( !outTemplateInstanceList.IsEmpty() )
-		{
-			CString tiList;
-			const TCHAR* pSpacer = MustSpaceBrace( _T('<') ) == InsertOneSpace ? _T(" ") : _T("");
-
-			tiList.Format( _T("<%s%s%s>"), pSpacer, (LPCTSTR)outTemplateInstanceList, pSpacer );
-			outTemplateInstanceList = tiList;
-		}
-
-		return outTemplateInstanceList;
-	}
-
-	void CppImplementationFormatter::prototypeResolveDefaultParameters( CString& rTargetString ) const
-	{
-		TCHAR openBrace = _T('\0');
+		const TCHAR* pProtoText = pProto->c_str();
+		int length = static_cast<int>( pProto->length() );
+		TCHAR openBrace = '\0';
 		bool inArgList = false;
 
-		for ( TokenRange breakToken( 0 ), prevBreakToken( -1 ); str::charAt( rTargetString, breakToken.m_end ) != _T('\0'); )
+		for ( TokenRange breakToken( 0 ), prevBreakToken( -1 ); breakToken.m_end != length; )
 		{
-			LineBreakTokenMatch match = findLineBreakToken( breakToken, rTargetString, breakToken.m_end );
+			LineBreakTokenMatch match = findLineBreakToken( &breakToken, pProtoText, breakToken.m_end );
 
 			switch ( match )
 			{
 				case LBT_OpenBrace:
 					if ( !inArgList )
 					{
-						openBrace = rTargetString[ breakToken.m_start ];
-						if ( str::charAt( rTargetString, breakToken.m_end ) != code::getMatchingBrace( openBrace ) )
+						openBrace = pProtoText[ breakToken.m_start ];
+						if ( pProtoText[ breakToken.m_end ] != code::getMatchingBrace( openBrace ) )
 						{
-							inArgList = true; // non-empty argument list -> enter arg-list mode
+							inArgList = true;				// non-empty argument list -> enter arg-list mode
 							prevBreakToken = breakToken;
 						}
 					}
 					else
 					{
-						int nestedBraceEnd = BraceParityStatus().findMatchingBracePos( rTargetString, breakToken.m_start, DocLang_Cpp );
+						int nestedBraceEnd = BraceParityStatus().findMatchingBracePos( pProtoText, breakToken.m_start, DocLang_Cpp );
 
 						if ( nestedBraceEnd != -1 )
 							breakToken.m_end = nestedBraceEnd + 1;
@@ -349,30 +295,33 @@ namespace code
 				case LBT_BreakSeparator:
 					if ( inArgList )
 					{
-						int defaultParamPos = m_languageEngine.findString( rTargetString, _T("="), prevBreakToken.m_end != -1 ? prevBreakToken.m_end : 0 ).m_start;
+						int defaultParamPos = m_languageEngine.findString( pProtoText, _T("="), prevBreakToken.m_end != -1 ? prevBreakToken.m_end : 0 ).m_start;
 
 						if ( defaultParamPos > prevBreakToken.m_end && defaultParamPos < breakToken.m_start )
 						{
-							if ( match == LBT_CloseBrace )
-								--breakToken.m_start; // skip the leading space form " )"
+							if ( LBT_CloseBrace == match )
+								--breakToken.m_start;		// skip the leading space from " )"
 
 							TokenRange defaultParamRange( defaultParamPos, breakToken.m_start );
-							CString newDefaultParam;
+							std::tstring newDefaultParam;
+							pred::IsSpace isSpacePred;
 
 							if ( m_options.m_commentOutDefaultParams )
-								newDefaultParam.Format( _T("/*%s*/"), (LPCTSTR)defaultParamRange.getString( rTargetString ) );
+								newDefaultParam = str::Format( _T("/*%s*/"), defaultParamRange.MakeToken( *pProto ).c_str() );
 							else
-								while ( defaultParamRange.m_start > 0 && code::isWhitespaceChar( rTargetString[ defaultParamRange.m_start - 1 ] ) )
+								while ( defaultParamRange.m_start > 0 && isSpacePred( pProtoText[ defaultParamRange.m_start - 1 ] ) )
 									--defaultParamRange.m_start;
 
-							defaultParamRange.replaceWithToken( &rTargetString, newDefaultParam );
-							if ( match == LBT_CloseBrace )
+							defaultParamRange.ReplaceWithToken( pProto, newDefaultParam );
+
+							if ( LBT_CloseBrace == match )
 								++defaultParamRange.m_end; // skip the space
+
 							breakToken.assign( defaultParamRange.m_end, defaultParamRange.m_end + 1 );
 						}
 
 						if ( match == LBT_CloseBrace )
-							inArgList = false; // exit current arg-list mode
+							inArgList = false;			// exit current arg-list mode
 
 						prevBreakToken = breakToken;
 					}
@@ -383,19 +332,17 @@ namespace code
 		}
 	}
 
-	CString CppImplementationFormatter::inputDocTypeDescriptor( const TCHAR* pDocFilename ) const
+	std::tstring CppImplementationFormatter::InputDocTypeDescriptor( const fs::CPath& docPath ) const
 	{
 		ASSERT( DocLang_Cpp == m_docLanguage );
 
 		ide::CScopedWindow scopedIDE;
 
 		std::tstring docTypeQualifier;
-		if ( !str::IsEmpty( pDocFilename ) )
-		{
-			std::tstring fname = fs::CPath( pDocFilename ).GetFname();
-			if ( !fname.empty() )
-				docTypeQualifier = str::Format( _T("%s%s::"), app::GetModuleSession().m_classPrefix.c_str(), fname.c_str() );
-		}
+		std::tstring fname = docPath.GetFname();
+
+		if ( !fname.empty() )
+			docTypeQualifier = str::Format( _T("%s%s::"), app::GetModuleSession().m_classPrefix.c_str(), fname.c_str() );
 
 		std::tstring clipTypeQualifier;
 		if ( CTextClipboard::CanPasteText() )
@@ -451,95 +398,31 @@ namespace code
 		switch ( command )
 		{
 			case cmdUseDocQualifier:
-				return docTypeQualifier.c_str();
+				return docTypeQualifier;
 			case cmdUseClipboardQualifier:
-				return clipTypeQualifier.c_str();
+				return clipTypeQualifier;
 			case cmdUseEmptyQualifier:
 				break;
 			case cmdUseCustomQualifier:
 			{
 				CInputTypeQualifierDialog dlg( docTypeQualifier.c_str(), scopedIDE.GetMainWnd() );
 				if ( dlg.DoModal() != IDCANCEL )
-					return dlg.m_typeQualifier;
+					return dlg.m_typeQualifier.GetString();
 			}
 			case cmdCancel:
-				return m_cancelTag;
+				return s_cancelTag;
 		}
 
-		return CString();
+		return str::GetEmpty();
 	}
 
-
-	//	Type descriptor syntax:
-	//		"[[templateDecl]\r\n][typeQualifier]"
-	//
-	void CppImplementationFormatter::splitTypeDescriptor( CString& rTemplateDecl, CString& rTypeQualifier, const TCHAR* pTypeDescriptor ) const throws_( mfc::CRuntimeException )
-	{
-		std::vector<CString> typeDescriptorComponents;
-
-		switch ( str::split( typeDescriptorComponents, pTypeDescriptor, code::lineEnd ) )
-		{
-			case 0:
-				break;
-			case 2:
-				rTemplateDecl = typeDescriptorComponents.front();
-			case 1:
-				rTypeQualifier = typeDescriptorComponents.back();
-				break;
-			default:
-				throw new mfc::CRuntimeException( str::Format( _T("Bad type descriptor/qualifier: '%s'"), pTypeDescriptor ) );
-		}
-
-		if ( !rTypeQualifier.IsEmpty() )
-			if ( rTypeQualifier.GetLength() < 2 || rTypeQualifier.Right( 2 ) != _T("::") )
-				rTypeQualifier += _T("::");
-
-		if ( !rTemplateDecl.IsEmpty() && !rTypeQualifier.IsEmpty() )
-		{
-			// This has a template declaration, therefore outer class (as in "OuterClass::EmbeddedClass::")
-			// should have the concrete template type arguments.
-			//
-			// Example:
-			//	for descriptor: "template< typename T, class C >\r\nOuterClass::Embedded::"
-			//	rTypeQualifier should be: "OuterClass< T, C >::Embedded::"
-
-			TokenRange endOfOuterClassRange = m_languageEngine.findString( rTypeQualifier, _T("::") );
-
-			if ( !endOfOuterClassRange.IsEmpty() )
-			{
-				TokenRange outerClass( 0, endOfOuterClassRange.m_end );
-				BraceParityStatus braceStatus;
-				TokenRange templateInstanceArgsRange = braceStatus.findArgList( rTypeQualifier, outerClass.m_start, _T("<"), m_docLanguage );
-
-				if ( templateInstanceArgsRange.IsEmpty() || templateInstanceArgsRange.m_start > outerClass.m_end )
-				{
-					CString templateInstanceArgs = buildTemplateInstanceTypeList( TokenRange( rTemplateDecl ), rTemplateDecl );
-
-					endOfOuterClassRange.m_end = endOfOuterClassRange.m_start;
-					endOfOuterClassRange.replaceWithToken( &rTypeQualifier, templateInstanceArgs );
-				}
-			}
-		}
-	}
-
-	UINT TrackMakeCodeTemplate( void )
-	{
-		CPoint screenPos;
-		GetCursorPos( &screenPos );
-
-		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AutoMakeCodePopup );
-
-		ide::CScopedWindow scopedIDE;
-		return scopedIDE.TrackPopupMenu( contextMenu, screenPos );
-	}
 
 	CString CppImplementationFormatter::autoMakeCode( const TCHAR* pCodeText )
 	{
 		resetInternalState();
 
 		CString outcome;
-		UINT commandId = TrackMakeCodeTemplate();
+		UINT commandId = ui::TrackMakeCodeTemplate();
 
 		switch ( commandId )
 		{
@@ -557,10 +440,10 @@ namespace code
 		return outcome;
 	}
 
-	CString CppImplementationFormatter::makeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( mfc::CRuntimeException )
+	CString CppImplementationFormatter::makeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException )
 	{
 		CIterationSlices slices;
-		slices.ParseStatement( pCodeText );
+		slices.ParseCode( pCodeText );
 
 		TextContent codeTemplateFile;
 		CString outcome;
@@ -580,10 +463,10 @@ namespace code
 		return outcome;
 	}
 
-	CString CppImplementationFormatter::makeIndexLoop( const TCHAR* pCodeText ) throws_( mfc::CRuntimeException )
+	CString CppImplementationFormatter::makeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException )
 	{
 		CIterationSlices slices;
-		slices.ParseStatement( pCodeText );
+		slices.ParseCode( pCodeText );
 
 		TextContent codeTemplateFile;
 		CString outcome;
@@ -618,3 +501,131 @@ namespace code
 	}
 
 } // namespace code
+
+
+namespace code
+{
+	// CTypeDescriptor implementation
+
+	void CTypeDescriptor::Parse( const TCHAR* pTypeDescriptor ) throws_( CRuntimeException )
+	{
+		Split( pTypeDescriptor );
+
+		if ( !m_typeQualifier.empty() )
+			if ( !str::HasSuffix( m_typeQualifier.c_str(), _T("::") ) )
+				m_typeQualifier += _T("::");
+
+		if ( !m_templateDecl.empty() && !m_typeQualifier.empty() )
+		{
+			// This has a template declaration, therefore outer class (as in "OuterClass::EmbeddedClass::")
+			// should have the concrete template type arguments.
+			//
+			// Example:
+			//	for descriptor: "template< typename T, class C >\r\nOuterClass::Embedded::"
+			//	rTypeQualifier should be: "OuterClass< T, C >::Embedded::"
+
+			CCppCodeParser tqParser( &m_typeQualifier );
+			TokenRange endOfOuterClassRange;
+
+			if ( tqParser.FindNextSequence( &endOfOuterClassRange, 0, _T("::") ) )
+			{
+				TokenRange outerClass( 0, endOfOuterClassRange.m_end );
+				TokenRange templateInstanceArgsRange;
+
+				if ( !tqParser.FindArgList( &templateInstanceArgsRange, outerClass.m_start, '<' ) || templateInstanceArgsRange.m_start > outerClass.m_end )
+				{
+					std::tstring templateInstanceArgs = buildTemplateInstanceTypeList( TokenRange( m_templateDecl ), m_templateDecl.c_str() );
+
+					endOfOuterClassRange.m_end = endOfOuterClassRange.m_start;
+					endOfOuterClassRange.ReplaceWithToken( &m_typeQualifier, templateInstanceArgs );
+				}
+			}
+		}
+	}
+
+	//	Type descriptor syntax:
+	//		"[[templateDecl]\r\n][typeQualifier]"
+	//
+	void CTypeDescriptor::Split( const TCHAR* pTypeDescriptor ) throws_( CRuntimeException )
+	{
+		ASSERT_PTR( pTypeDescriptor );
+
+		const TCHAR* pLead = pTypeDescriptor;
+		pTypeDescriptor = str::SkipWhitespace( pTypeDescriptor, _T(" \t") );	// skip leading indent prefix (if any)
+
+		if ( pTypeDescriptor != pLead )
+			m_indentPrefix.assign( pLead, pTypeDescriptor );
+
+		std::vector<std::tstring> items;
+
+		str::Split( items, pTypeDescriptor, code::lineEnd );
+		switch ( items.size() )
+		{
+			case 0:
+				break;
+			case 2:
+				m_templateDecl = items.front();
+				// fall-through
+			case 1:
+				m_typeQualifier = items.back();
+				break;
+			default:
+				throw CRuntimeException( str::Format( _T("Bad type descriptor/qualifier: '%s'"), pTypeDescriptor ) );
+		}
+	}
+
+	CString CTypeDescriptor::buildTemplateInstanceTypeList( const TokenRange& templateDecl, const TCHAR* pMethodPrototype ) const
+	{
+		// example: converts "template< typename Type, class MyClass, struct MyStruct >" to "< Type, MyClass, MyStruct >"
+		CString outTemplateInstanceList;
+		BraceParityStatus braceStatus;
+		TokenRange templTypeList = braceStatus.findArgList( pMethodPrototype, templateDecl.m_start, _T("<"), m_pFmt->getDocLanguage() );
+
+		if ( templTypeList.m_start >= templateDecl.m_start && templTypeList.m_end <= templateDecl.m_end )
+		{
+			templTypeList.deflateBy( 1 );
+			if ( !templTypeList.IsEmpty() )
+			{
+				std::vector< CString > typeArgs;
+
+				str::split( typeArgs, templTypeList.getString( pMethodPrototype ), _T(",") );
+
+				for ( unsigned int i = 0; i != typeArgs.size(); ++i )
+				{
+					const TCHAR* typeArg = typeArgs[ i ];
+					TokenRange argRange = TokenRange::endOfString( typeArg );
+
+					while ( argRange.m_end > 0 && code::isWhitespaceChar( typeArg[ argRange.m_end - 1 ] ) )
+						--argRange.m_end;
+
+					argRange.m_start = argRange.m_end;
+
+					while ( argRange.m_start > 0 && !code::isWhitespaceChar( typeArg[ argRange.m_start - 1 ] ) )
+						--argRange.m_start;
+
+					if ( !argRange.IsEmpty() )
+					{
+						if ( !outTemplateInstanceList.IsEmpty() )
+							outTemplateInstanceList += _T(", ");
+
+						outTemplateInstanceList += argRange.getString( typeArg );
+					}
+					else
+						TRACE( _T(" * SYNTAX ERROR: cannot extract type argument at index %d from the template '%s'\n"),
+							   (LPCTSTR)templateDecl.getString( pMethodPrototype ) );
+				}
+			}
+		}
+
+		if ( !outTemplateInstanceList.IsEmpty() )
+		{
+			CString tiList;
+			const TCHAR* pSpacer = InsertOneSpace == m_pFmt->MustSpaceBrace( _T('<') ) ? _T(" ") : _T("");
+
+			tiList.Format( _T("<%s%s%s>"), pSpacer, (LPCTSTR)outTemplateInstanceList, pSpacer );
+			outTemplateInstanceList = tiList;
+		}
+
+		return outTemplateInstanceList;
+	}
+}

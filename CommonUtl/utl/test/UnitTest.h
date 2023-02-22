@@ -111,6 +111,8 @@ namespace ut
 	do { std::tstring msg; bool succeeded = ut::AssertEquals( (expected), (actual), _CRT_WIDE(#actual), msg ); ut::impl::ReportMessage( succeeded, msg, __FILE__, __LINE__ );\
 	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
+#define ASSERT_EQUAL_SWAP( actual, expected ) ASSERT_EQUAL( expected, actual )
+
 
 #define ASSERT_EQUAL_STR( pExpected, pActual )\
 	do { std::tstring msg; bool succeeded = ut::AssertEquals( (pExpected), ut::impl::MakeString( (pActual) ), _CRT_WIDE(#pActual), msg ); ut::impl::ReportMessage( succeeded, msg, __FILE__, __LINE__ );\

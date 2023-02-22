@@ -146,8 +146,8 @@ std::tstring CTokenizeTextDialog::GenerateOutputText( void )
 		{
 			std::tstring inputSep = code::ParseEscapeSeqs( m_separators[ m_action ].m_input.c_str() );
 			std::tstring outputSep = code::ParseEscapeSeqs( m_separators[ m_action ].m_output.c_str() );
-			str::ToWindowsLineEnds( inputSep );
-			str::ToWindowsLineEnds( outputSep );
+			str::ToWindowsLineEnds( &inputSep );
+			str::ToWindowsLineEnds( &outputSep );
 
 			std::vector< std::tstring > parts;
 

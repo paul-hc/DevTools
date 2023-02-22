@@ -26,6 +26,7 @@ private:
 	void TestParse_GlobalFunction( code::CMethodPrototype& proto );
 	void TestParse_ClassMethodImpl( code::CMethodPrototype& proto );
 	void TestParse_TemplateMethodImpl( code::CMethodPrototype& proto );
+	void TestImplementMethodBlock( void );
 };
 
 

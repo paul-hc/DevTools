@@ -1,5 +1,5 @@
-#ifndef CppCodeParser_h
-#define CppCodeParser_h
+#ifndef CppParser_h
+#define CppParser_h
 #pragma once
 
 #include "utl/CodeParsing.h"
@@ -30,11 +30,58 @@ namespace pvt
 }
 
 
-class CCppCodeParser
+class CCppParser
+{
+public:
+	typedef code::CLanguage<TCHAR> TLanguage;
+
+	CCppParser( void );
+public:
+	const TLanguage& m_lang;
+};
+
+
+class CCppCodeParser : public CCppParser		// parsing methods on a given code string (by reference)
+{
+public:
+	typedef int TPos;
+
+	CCppCodeParser( const std::tstring* pCodeText );	// use pointer to force by-reference semantics
+
+	bool IsValidPos( TPos pos ) const { return static_cast<size_t>( pos ) < m_codeText.length(); }
+	bool AtEnd( TPos pos ) const { return pos == m_length; }
+
+	TPos FindPosNextSequence( TPos pos, const std::tstring& sequence ) const;		// -1 if not found
+	bool FindNextSequence( TokenRange* pSeqRange, TPos pos, const std::tstring& sequence ) const;
+
+	TPos FindPosMatchingBracket( TPos bracketPos ) const;							// -1 if not found
+	bool SkipPosPastMatchingBracket( TPos* pBracketPos /*in-out*/ ) const;
+	bool FindArgList( TokenRange* pArgList, TPos pos, TCHAR openBracket = s_anyBracket ) const;
+
+	bool SkipWhitespace( TPos* pPos /*in-out*/ ) const;
+	bool SkipAnyOf( TPos* pPos /*in-out*/, const TCHAR charSet[] );
+	bool SkipAnyNotOf( TPos* pPos /*in-out*/, const TCHAR charSet[] );
+
+	bool SkipMatchingToken( TPos* pPos /*in-out*/, const std::tstring& token );
+private:
+	const std::tstring& m_codeText;
+public:
+	typedef std::tstring::const_iterator TConstIterator;
+
+	const TPos m_length;
+	TConstIterator m_itBegin;
+	TConstIterator m_itEnd;
+
+	static const TCHAR s_anyBracket = '\0';
+};
+
+
+class CCppMethodParser : public CCppParser
 {
 public:
 	enum SliceType
 	{
+		IndentPrefix,			// whitespace before TemplateDecl
 		TemplateDecl,			// "template< typename PathT, typename ObjectT >"
 		InlineModifier,			// "inline"
 		ReturnType,				// "std::pair<ObjectT*, cache::TStatusFlags>"
@@ -42,11 +89,10 @@ public:
 		FunctionName,			// "Acquire"
 		ClassQualifier,			// "CCacheLoader<PathT, ObjectT>::"
 		ArgList,				// "( const PathT& pathKey )"
-		PostArgListSuffix,		// " const throws(std::exception, std::runtime_error)"
-			_Unknown
+		PostArgListSuffix		// " const throws(std::exception, std::runtime_error)"
 	};
 
-	CCppCodeParser( void );
+	CCppMethodParser( void );
 
 	// split code into slices
 	bool ParseCode( const std::tstring& codeText );						// split into m_codeSlices; returns true if no syntax error
@@ -61,7 +107,6 @@ private:
 	bool FindSliceEnd( TConstIterator* pItSlice /*in-out*/, const TConstIterator& itEnd ) const;
 	void ParseQualifiedMethod( const std::tstring& codeText );
 private:
-	const code::CLanguage<TCHAR>& m_lang;
 	std::map<SliceType, TokenRange> m_codeSlices;
 	TokenRange m_emptyRange;					// at the end of codeText
 
@@ -73,4 +118,4 @@ private:
 };
 
 
-#endif // CppCodeParser_h
+#endif // CppParser_h

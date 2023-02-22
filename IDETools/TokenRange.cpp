@@ -12,7 +12,7 @@
 bool TokenRange::InStringBounds( const TCHAR* pText ) const
 {
 	ASSERT_PTR( pText );
-	return IsValid() && IsNormalized() && m_end <= (int)str::GetLength( pText );
+	return IsValid() && IsNormalized() && m_end <= str::Length( pText );
 }
 
 void TokenRange::setString( const TCHAR* pText, int startPos /*= 0*/ )
@@ -63,6 +63,16 @@ void TokenRange::Trim( const std::tstring& text )
 		--m_end;
 }
 
+void TokenRange::ReplaceWithToken( std::tstring* pTargetText, const std::tstring& token )
+{
+	ASSERT_PTR( pTargetText );
+	ASSERT( IsValid() && IsNormalized() );
+	ASSERT( InStringBounds( pTargetText->c_str() ) );
+
+	pTargetText->replace( m_start, getLength(), token );
+	m_end = m_start + static_cast<int>( token.length() );
+}
+
 CString TokenRange::getString( const TCHAR* pText ) const
 {
 	ASSERT( IsValid() && IsNormalized() );
@@ -98,7 +108,7 @@ CString TokenRange::getSuffixString( const TCHAR* pText ) const
 
 bool TokenRange::isTokenMatch( const TCHAR* pText, const TCHAR* pToken, str::CaseType caseType /*= str::Case*/ ) const
 {
-	ASSERT( pToken != NULL );
+	ASSERT_PTR( pToken );
 
 	if ( IsValid() && IsNormalized() )
 	{
@@ -106,9 +116,9 @@ bool TokenRange::isTokenMatch( const TCHAR* pText, const TCHAR* pToken, str::Cas
 
 		if ( getLength() == tokenLength )
 			if ( caseType == str::Case )
-				return 0 == _tcsncmp( pText + m_start, pToken, tokenLength );
+				return pred::Equal == _tcsncmp( pText + m_start, pToken, tokenLength );
 			else
-				return 0 == _tcsnicmp( pText + m_start, pToken, tokenLength );
+				return pred::Equal == _tcsnicmp( pText + m_start, pToken, tokenLength );
 	}
 
 	return false;
@@ -132,7 +142,7 @@ TokenRange& TokenRange::replaceWithToken( CString* pTargetString, const TCHAR* p
 TokenRange& TokenRange::smartReplaceWithToken( CString* pTargetString, const TCHAR* pToken )
 {
 	ASSERT_PTR( pTargetString );
-	if ( !isTokenMatch( pTargetString->GetString(), pToken) )
+	if ( !isTokenMatch( pTargetString->GetString(), pToken ) )
 		replaceWithToken( pTargetString, pToken );
 
 	return *this;

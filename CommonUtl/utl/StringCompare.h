@@ -113,6 +113,17 @@ namespace pred
 	private:
 		wchar_t m_chr;		// wchar_t is also compatible with char
 	};
+
+
+	template< typename CharT >
+	struct IsCharAnyOf : public BaseIsCharPred_Loc
+	{
+		IsCharAnyOf( const CharT charSet[] ) : m_charSet( charSet ) {}
+
+		bool operator()( CharT chr ) const { return str::IsAnyOf( chr, m_charSet ); }
+	private:
+		const CharT m_charSet[];
+	};
 }
 
 
@@ -347,7 +358,7 @@ namespace str
 	const CharT* SkipWhitespace( const CharT* pText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		ASSERT_PTR( pText );
-		while ( ContainsAnyOf( pWhiteSpace, *pText ) )
+		while ( IsAnyOf( *pText, pWhiteSpace ) )
 			++pText;
 
 		return pText;

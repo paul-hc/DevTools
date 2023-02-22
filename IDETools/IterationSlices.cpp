@@ -1,7 +1,7 @@
 
 #include "pch.h"
 #include "IterationSlices.h"
-#include "CodeUtilities.h"
+#include "CppParser.h"
 #include "utl/CodeParsing.h"
 
 #ifdef _DEBUG
@@ -31,26 +31,29 @@ namespace code
 		m_libraryType = STL;
 	}
 
-	void CIterationSlices::ParseStatement( const std::tstring& codeText ) throws_( mfc::CRuntimeException )
+	void CIterationSlices::ParseCode( const std::tstring& codeText ) throws_( CRuntimeException )
 	{
 		Reset( codeText );
 
+		static const std::tstring s_const = _T("const");
+		CCppCodeParser codeParser( &m_codeText );
+
 		int pos = 0;
 
-		str::skipWhiteSpace( pos, m_pCodeText );
+		codeParser.SkipWhitespace( &pos );
 		m_leadingWhiteSpace.m_start = 0;
 		m_leadingWhiteSpace.m_end = pos;
-		m_isConst = str::skipToken( pos, m_pCodeText, _T("const") );
+		m_isConst = codeParser.SkipMatchingToken( &pos, s_const );
 
 		m_containerType.m_start = m_containerType.m_end = pos;
 
 		while ( m_pCodeText[ pos ] != _T('\0') )
 			if ( '<' == m_pCodeText[ pos ] )
 			{
-				int bracketEndPos = code::FindPosMatchingBracket( pos, codeText );
+				int bracketEndPos = codeParser.FindPosMatchingBracket( pos );
 
 				if ( -1 == bracketEndPos )
-					throw new mfc::CRuntimeException( str::Format( _T("Syntax error: cannot find ending template brace for statement '%s'"), m_pCodeText ) );
+					throw CRuntimeException( str::Format( _T("Syntax error: cannot find ending template brace for statement '%s'"), m_pCodeText ) );
 
 				m_valueType.SetRange( ++pos, bracketEndPos );
 				m_valueType.Trim( codeText );
@@ -58,7 +61,7 @@ namespace code
 				m_containerType.m_end = pos = bracketEndPos + 1;
 				break;
 			}
-			else if ( str::isCharOneOf( m_pCodeText[ pos ], _T("*& \t\r\n") ) )
+			else if ( str::IsAnyOf( m_pCodeText[ pos ], _T("*& \t\r\n") ) )
 			{
 				m_containerType.m_end = pos;
 				break;
@@ -67,32 +70,32 @@ namespace code
 				++pos;
 
 		if ( m_containerType.IsEmpty() )
-			throw new mfc::CRuntimeException( str::Format( _T("Syntax error: cannot find container type in statement '%s'"), m_pCodeText ) );
+			throw CRuntimeException( str::Format( _T("Syntax error: cannot find container type in statement '%s'"), m_pCodeText ) );
 
-		str::skipWhiteSpace( pos, m_pCodeText );
+		codeParser.SkipWhitespace( &pos );
 
-		if ( m_pCodeText[ pos ] == _T('*') )
-			m_pObjSelOp = _T("->");	// use pointer selector
+		if ( '*' == m_pCodeText[ pos ] )
+			m_pObjSelOp = _T("->");				// use pointer selector
 
-		str::skipCharSet( pos, m_pCodeText, _T("*&") );
-		str::skipWhiteSpace( pos, m_pCodeText );
-		m_isConst |= str::skipToken( pos, m_pCodeText, _T("const") );
+		codeParser.SkipAnyOf( &pos, _T("*&") );
+		codeParser.SkipWhitespace( &pos );
+		m_isConst |= codeParser.SkipMatchingToken( &pos, s_const );
 
 		m_containerName.m_start = m_containerName.m_end = pos;
-		str::skipNotCharSet( m_containerName.m_end, m_pCodeText, _T(",; \t\r\n") );
+		codeParser.SkipAnyNotOf( &m_containerName.m_end, _T(",; \t\r\n") );
 
 		if ( m_containerName.IsEmpty() )
-			throw new mfc::CRuntimeException( str::Format( _T("Syntax error: cannot find container variable in statement '%s'"), m_pCodeText ) );
+			throw CRuntimeException( str::Format( _T("Syntax error: cannot find container variable in statement '%s'"), m_pCodeText ) );
 
 		ExtractIteratorName();
 
-		CString containerType = m_containerType.getString( m_pCodeText );
+		std::tstring containerType = m_containerType.getString( m_pCodeText );
 
-		m_isMfcList = containerType.Find( _T("List") ) != -1;
+		m_isMfcList = containerType.find( _T("List") ) != std::tstring::npos;
 
-		if ( containerType.Find( _T("Array") ) != -1 ||
-			 containerType.Find( _T("List") ) != -1 ||
-			 containerType.Find( _T("Map") ) != -1 )
+		if ( containerType.find( _T("Array") ) != std::tstring::npos ||
+			 containerType.find( _T("List") ) != std::tstring::npos ||
+			 containerType.find( _T("Map") ) != std::tstring::npos )
 			m_libraryType = MFC;
 		else
 			m_libraryType = STL;
@@ -129,17 +132,22 @@ namespace code
 
 		if ( core.length() > 1 )
 		{
+			CCppCodeParser parser( &core );
 			TokenRange coreRange( 0, core.length() );
 			const TCHAR* pCore = core.c_str();
 
-			if ( 'p' == pCore[ coreRange.m_start ] || 'r' == pCore[ coreRange.m_start ] )
-				if ( pred::IsUpper()( pCore[ coreRange.m_start + 1 ] ) )
+			if ( 'p' == core[ coreRange.m_start ] || 'r' == core[ coreRange.m_start ] )
+				if ( core.length() > 1 && pred::IsUpper()( core[ coreRange.m_start + 1 ] ) )
 					++coreRange.m_start;
 
-			str::skipToken( coreRange.m_start, pCore, _T("Ref"), str::IgnoreCase );
-			str::skipToken( coreRange.m_start, pCore, _T("Get"), str::IgnoreCase );
+			{
+				using namespace str::ignore_case;
 
-			if ( pCore[ coreRange.m_end - 1 ] == _T('s') )
+				parser.SkipMatchingToken( &coreRange.m_start, _T("Get") );
+				parser.SkipMatchingToken( &coreRange.m_start, _T("Ref") );
+			}
+
+			if ( 's' == core[ coreRange.m_end - 1 ] )
 				--coreRange.m_end;
 
 			if ( coreRange.IsNonEmpty() )

@@ -8,9 +8,6 @@
 #include "Application_fwd.h"
 
 
-class CModuleSession;
-
-
 class CApplication : public CBaseApp<CWinApp>
 {
 public:
@@ -41,18 +38,6 @@ public:
 private:
 	DECLARE_MESSAGE_MAP()
 };
-
-
-struct CIncludePaths;
-
-
-namespace app
-{
-	inline CModuleSession& GetModuleSession( void ) { return CApplication::GetApp()->GetModuleSession(); }
-	UINT GetMenuVertSplitCount( void );
-
-	const CIncludePaths* GetIncludePaths( void );
-}
 
 
 #include "utl/PathGroup.h"

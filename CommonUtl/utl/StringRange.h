@@ -119,7 +119,7 @@ namespace str
 				// trim re-entrantly
 				size_t oldStart = m_pos.m_start;
 
-				while ( m_pos.m_start < m_pos.m_end && ContainsAnyOf( pWhiteSpace, m_text[ m_pos.m_start ] ) )
+				while ( m_pos.m_start < m_pos.m_end && IsAnyOf( m_text[ m_pos.m_start ], pWhiteSpace ) )
 					++m_pos.m_start;
 
 				ENSURE( m_pos.IsNormalized() );
@@ -132,7 +132,7 @@ namespace str
 				// trim re-entrantly
 				size_t oldEnd = m_pos.m_end;
 
-				while ( m_pos.m_start < m_pos.m_end && ContainsAnyOf( pWhiteSpace, m_text[ m_pos.m_end - 1 ] ) )
+				while ( m_pos.m_start < m_pos.m_end && IsAnyOf( m_text[ m_pos.m_end - 1 ], pWhiteSpace ) )
 					--m_pos.m_end;
 
 				ENSURE( m_pos.IsNormalized() );

@@ -18,11 +18,11 @@
 
 namespace code
 {
-	const CString CFormatter::m_cancelTag( _T("<cancel>") );
+	const std::tstring CFormatter::s_cancelTag = _T("<cancel>");
 
 
-	CFormatter::CFormatter( const CFormatterOptions& _options )
-		: m_options( _options )
+	CFormatter::CFormatter( const CFormatterOptions& options )
+		: m_options( options )
 		, m_multiWhitespacePolicy( UseOptionsPolicy ) // allows overriding for splitting/C++ implementation
 		, m_docLanguage( DocLang_None )
 		, m_tabSize( 4 )
@@ -142,7 +142,7 @@ namespace code
 		brokenLines.push_back( makeNormalizedFormattedPrototype( pCodeText ) );
 
 		for ( TokenRange breakToken( 0 ); str::charAt( brokenLines.back(), breakToken.m_end ) != _T('\0'); )
-			if ( findLineBreakToken( breakToken, brokenLines.back(), breakToken.m_end ) == LBT_OpenBrace )
+			if ( findLineBreakToken( &breakToken, brokenLines.back(), breakToken.m_end ) == LBT_OpenBrace )
 				breakToken.m_end = doSplitArgumentList( brokenLines, breakToken, maxEditorColIndex );
 
 		if ( m_useTabs )
@@ -675,11 +675,11 @@ namespace code
 		- Formats the single line using current formatting rules, but without preserving multiple whitespaces
 		  inside the argument list.
 		- Untabifies the leading whitespaces so index is equal to editor visual index
-		- The output contains the single line prototype, that is pre formatted and has the original leading whitespaces.
+		- The output contains the single line prototype, that is pre-formatted and has the original leading whitespaces.
 	*/
-	CString CFormatter::makeNormalizedFormattedPrototype( const TCHAR* methodPrototype, bool forImplementation /*= false*/ )
+	CString CFormatter::makeNormalizedFormattedPrototype( const TCHAR* pMethodProto, bool forImplementation /*= false*/ )
 	{
-		CString normalizedCode = methodPrototype;
+		CString normalizedCode = pMethodProto;
 
 		code::convertToWindowsLineEnds( normalizedCode );
 
@@ -836,7 +836,7 @@ namespace code
 		for ( TokenRange prevBreakSepRange( -1 ); ; )
 		{
 			CString& currentLine = brokenLines.back();
-			LineBreakTokenMatch match = findLineBreakToken( breakToken, currentLine, breakToken.m_end );
+			LineBreakTokenMatch match = findLineBreakToken( &breakToken, currentLine, breakToken.m_end );
 
 			switch ( match )
 			{
@@ -887,56 +887,58 @@ namespace code
 		}
 	}
 
-	LineBreakTokenMatch CFormatter::findLineBreakToken( TokenRange& outToken, const TCHAR* string, int startPos /*= 0*/ ) const
+	LineBreakTokenMatch CFormatter::findLineBreakToken( TokenRange* pOutToken, const TCHAR* pCodeText, int startPos /*= 0*/ ) const
 	{
-		ASSERT( string != NULL && startPos >= 0 && startPos <= str::Length( string ) );
+		ASSERT_PTR( pOutToken );
+		ASSERT_PTR( pCodeText );
+		ASSERT( (size_t)startPos <= str::GetLength( pCodeText ) );
 
-		const TCHAR* cursor = string + startPos;
+		const TCHAR* pCursor = pCodeText + startPos;
 
-		while ( *cursor != _T('\0') )
+		while ( *pCursor != _T('\0') )
 		{
 			int statementEnd;
 			const std::tstring* pBreakSeparatorFound = NULL;
 
-			if ( code::isQuoteChar( *cursor ) )
+			if ( code::isQuoteChar( *pCursor ) )
 			{
-				int matchingQuotePos = code::findMatchingQuotePos( string, int( cursor - string ) );
+				int matchingQuotePos = code::findMatchingQuotePos( pCodeText, int( pCursor - pCodeText ) );
 
 				if ( matchingQuotePos == -1 )
 					break; // fatal syntax error -> abort searching
-				cursor = string + matchingQuotePos + 1; // go past closing quote
+				pCursor = pCodeText + matchingQuotePos + 1; // go past closing quote
 			}
 			else if
 			(
-				m_languageEngine.isCommentStatement( statementEnd, string, int( cursor - string ) ) ||
+				m_languageEngine.isCommentStatement( statementEnd, pCodeText, int( pCursor - pCodeText ) ) ||
 				(
-					m_docLanguage == DocLang_Cpp && ( m_languageEngine.isCCastStatement( statementEnd, string, int( cursor - string ) ) ||
-													m_languageEngine.isUnicodePortableStringConstant( statementEnd, string, int( cursor - string ) ) )
+					m_docLanguage == DocLang_Cpp && ( m_languageEngine.isCCastStatement( statementEnd, pCodeText, int( pCursor - pCodeText ) ) ||
+													m_languageEngine.isUnicodePortableStringConstant( statementEnd, pCodeText, int( pCursor - pCodeText ) ) )
 				)
 			)
 			{
-				cursor = string + str::safePos( statementEnd, string );
+				pCursor = pCodeText + str::safePos( statementEnd, pCodeText );
 			}
-			else if ( ( pBreakSeparatorFound = m_options.FindBreakSeparator( cursor ) ) != NULL )
+			else if ( ( pBreakSeparatorFound = m_options.FindBreakSeparator( pCursor ) ) != NULL )
 			{
-				outToken.setWithLength( int( cursor - string ), pBreakSeparatorFound->length() );
+				pOutToken->setWithLength( int( pCursor - pCodeText ), pBreakSeparatorFound->length() );
 				return LBT_BreakSeparator;
 			}
-			else if ( code::isOpenBraceChar( *cursor ) && m_validArgListOpenBraces.Find( *cursor ) != -1 )
+			else if ( code::isOpenBraceChar( *pCursor ) && m_validArgListOpenBraces.Find( *pCursor ) != -1 )
 			{
-				outToken.setWithLength( int( cursor - string ), 1 );
+				pOutToken->setWithLength( int( pCursor - pCodeText ), 1 );
 				return LBT_OpenBrace;
 			}
-			else if ( code::isCloseBraceChar( *cursor ) && m_validArgListOpenBraces.Find( code::getMatchingBrace( *cursor ) ) != -1 )
+			else if ( code::isCloseBraceChar( *pCursor ) && m_validArgListOpenBraces.Find( code::getMatchingBrace( *pCursor ) ) != -1 )
 			{
-				outToken.setWithLength( int( cursor - string ), 1 );
+				pOutToken->setWithLength( int( pCursor - pCodeText ), 1 );
 				return LBT_CloseBrace;
 			}
 			else
-				++cursor;
+				++pCursor;
 		}
 
-		outToken.gotoEnd( string );
+		pOutToken->gotoEnd( pCodeText );
 		return LBT_NoMatch;
 	}
 
