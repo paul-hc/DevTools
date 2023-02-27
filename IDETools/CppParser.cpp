@@ -42,7 +42,7 @@ CCppCodeParser::TPos CCppCodeParser::FindPosNextSequence( TPos pos, const std::t
 	return foundPos;
 }
 
-bool CCppCodeParser::FindNextSequence( TokenRange* pSeqRange, TPos pos, const std::tstring& sequence ) const
+bool CCppCodeParser::FindNextSequence( TokenRange* pSeqRange _out_, TPos pos, const std::tstring& sequence ) const
 {
 	ASSERT_PTR( pSeqRange );
 	ASSERT( IsValidPos( pos ) );
@@ -66,7 +66,7 @@ CCppCodeParser::TPos CCppCodeParser::FindPosMatchingBracket( TPos bracketPos ) c
 	return pvt::Distance( m_itBegin, itCloseBracket );
 }
 
-bool CCppCodeParser::SkipPosPastMatchingBracket( TPos* pBracketPos /*in-out*/ ) const
+bool CCppCodeParser::SkipPosPastMatchingBracket( TPos* pBracketPos _in_out_ ) const
 {
 	ASSERT_PTR( pBracketPos );
 	ASSERT( IsValidPos( *pBracketPos ) );
@@ -80,7 +80,7 @@ bool CCppCodeParser::SkipPosPastMatchingBracket( TPos* pBracketPos /*in-out*/ ) 
 	return true;
 }
 
-bool CCppCodeParser::FindArgList( TokenRange* pArgList, TPos pos, TCHAR openBracket /*= s_anyBracket*/ ) const
+bool CCppCodeParser::FindArgList( TokenRange* pArgList _out_, TPos pos, TCHAR openBracket /*= s_anyBracket*/ ) const
 {
 	ASSERT_PTR( pArgList );
 	ASSERT( IsValidPos( pos ) );
@@ -101,7 +101,7 @@ bool CCppCodeParser::FindArgList( TokenRange* pArgList, TPos pos, TCHAR openBrac
 	return true;
 }
 
-bool CCppCodeParser::SkipWhitespace( TPos* pPos /*in-out*/ ) const
+bool CCppCodeParser::SkipWhitespace( TPos* pPos _in_out_ ) const
 {
 	ASSERT_PTR( pPos );
 	ASSERT( IsValidPos( *pPos ) );
@@ -114,7 +114,7 @@ bool CCppCodeParser::SkipWhitespace( TPos* pPos /*in-out*/ ) const
 	return true;
 }
 
-bool CCppCodeParser::SkipMatchingToken( TPos* pPos /*in-out*/, const std::tstring& token )
+bool CCppCodeParser::SkipMatchingToken( TPos* pPos _in_out_, const std::tstring& token )
 {
 	ASSERT_PTR( pPos );
 	ASSERT( IsValidPos( *pPos ) );
@@ -127,7 +127,7 @@ bool CCppCodeParser::SkipMatchingToken( TPos* pPos /*in-out*/, const std::tstrin
 	return true;
 }
 
-bool CCppCodeParser::SkipAnyOf( TPos* pPos, const TCHAR charSet[] )
+bool CCppCodeParser::SkipAnyOf( TPos* pPos _in_out_, const TCHAR charSet[] )
 {
 	ASSERT_PTR( pPos );
 	ASSERT( IsValidPos( *pPos ) );
@@ -139,7 +139,7 @@ bool CCppCodeParser::SkipAnyOf( TPos* pPos, const TCHAR charSet[] )
 	return *pPos != oldPos;
 }
 
-bool CCppCodeParser::SkipAnyNotOf( TPos* pPos, const TCHAR charSet[] )
+bool CCppCodeParser::SkipAnyNotOf( TPos* pPos _in_out_, const TCHAR charSet[] )
 {
 	ASSERT_PTR( pPos );
 	ASSERT( IsValidPos( *pPos ) );
@@ -270,7 +270,7 @@ void CCppMethodParser::ParseQualifiedMethod( const std::tstring& codeText )
 	}
 }
 
-bool CCppMethodParser::FindSliceEnd( TConstIterator* pItSlice, const TConstIterator& itEnd ) const
+bool CCppMethodParser::FindSliceEnd( TConstIterator* pItSlice _in_out_, const TConstIterator& itEnd ) const
 {
 	ASSERT_PTR( pItSlice );
 
@@ -295,8 +295,8 @@ bool CCppMethodParser::FindSliceEnd( TConstIterator* pItSlice, const TConstItera
 
 				m_lang.SkipUntil( &it, itEnd, pred::IsChar( '(' ) );	// skip to operator end (arg-list)
 			}
-			else if ( pred::IsIdentifier()( *it ) )
-				m_lang.SkipIdentifier( &it, itEnd );
+			else if ( pred::IsLiteral()( *it ) )
+				m_lang.SkipLiteral( &it, itEnd );
 			else
 				++it;			// skip *, &
 		}

@@ -11,7 +11,7 @@
 struct CIncludeNode;
 
 
-struct CSourceFileParser : private io::ILineParserCallback< std::tstring >
+struct CSourceFileParser : private io::ILineParserCallback<std::tstring>
 {
 	CSourceFileParser( const fs::CPath& rootFilePath );
 	~CSourceFileParser();

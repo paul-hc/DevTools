@@ -222,7 +222,7 @@ library IDETools
 		methods:
 			[id(4)] boolean LoadFile(BSTR textFilePath);
 			[id(5)] boolean LoadFileSection(BSTR compoundFilePath, BSTR sectionName);
-			[id(6)] long LoadCompoundFileSections(BSTR compoundFilePath, BSTR sectionFilter, boolean caseSensitive);
+			[id(6)] long LoadCompoundFileSections(BSTR compoundFilePath, BSTR sectionFilter);
 			[id(7)] long FindText(BSTR match, long startPos, boolean caseSensitive);
 			[id(8)] long ReplaceText(BSTR match, BSTR replacement, boolean caseSensitive);
 			[id(9)] boolean AddEmbeddedContent(BSTR matchCoreID, BSTR embeddedContent, boolean caseSensitive);

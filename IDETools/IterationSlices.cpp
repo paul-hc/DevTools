@@ -126,8 +126,8 @@ namespace code
 		Range<std::tstring::const_reverse_iterator> itRange( it );
 		std::tstring core;
 
-		if ( pred::IsIdentifier()( *itRange.m_start ) )
-			if ( lang.SkipIdentifier( &itRange.m_end, itEnd ) )
+		if ( pred::IsLiteral()( *itRange.m_start ) )
+			if ( lang.SkipLiteral( &itRange.m_end, itEnd ) )
 				core = str::ExtractString( itRange );		// "GetTags"
 
 		if ( core.length() > 1 )

@@ -4,36 +4,36 @@
 
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/TextEdit.h"
+#include "IdeUtilities.h"		// convenient for using ide::CScopedWindow
 
 
 class CCodeMessageBox : public CLayoutDialog
 {
 public:
-	CCodeMessageBox( const CString& message, const CString& codeText,
-					 UINT mbType = MB_ICONQUESTION,
-					 const CString& caption = AfxGetApp()->m_pszProfileName,
-					 CWnd* pParent = NULL );
+	CCodeMessageBox( const std::tstring& message, const std::tstring& codeText, UINT mbType = MB_ICONQUESTION, CWnd* pParent = NULL );
 	virtual ~CCodeMessageBox();
+public:
+	std::tstring m_caption;
 private:
-	CString m_caption;
-	CString m_message;
-	CString m_codeText;
+	std::tstring m_message;
+	std::tstring m_codeText;
 	UINT m_mbType;
 
 	CFont messageFont;
 private:
 	// enum { IDD = IDD_CODE_MESSAGE_BOX_DIALOG };
+
 	CStatic m_iconStatic;
 	CStatic m_messageStatic;
 	CTextEdit m_codeEdit;
 public:
-	// generated overrides
-	protected:
+	// generated stuff
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	// generated m_message map
-	virtual BOOL OnInitDialog();
+	virtual BOOL OnInitDialog( void );
 	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColorType );
+
 	DECLARE_MESSAGE_MAP()
 };
 

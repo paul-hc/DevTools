@@ -24,14 +24,14 @@
     <Filter Include="Main Code\path">
       <UniqueIdentifier>{74f8600e-0bfd-4fa0-86c4-53bb9862a527}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Main Code\string &amp; code">
-      <UniqueIdentifier>{6b273340-d3fb-40ca-93eb-5ba010e9e2ff}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Main Code\UI">
       <UniqueIdentifier>{f09da8a3-a5b3-438c-beb8-2d58129dbbdf}</UniqueIdentifier>
     </Filter>
     <Filter Include="tests">
       <UniqueIdentifier>{eeabc432-7635-4ddb-8f77-63ba28103beb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\code &amp; text">
+      <UniqueIdentifier>{6b273340-d3fb-40ca-93eb-5ba010e9e2ff}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -76,9 +76,6 @@
     </ClCompile>
     <ClCompile Include="WorkspaceProfile.cpp">
       <Filter>automation server</Filter>
-    </ClCompile>
-    <ClCompile Include="CompoundTextParser.cpp">
-      <Filter>Main Code</Filter>
     </ClCompile>
     <ClCompile Include="DspParser.cpp">
       <Filter>Main Code</Filter>
@@ -132,40 +129,40 @@
       <Filter>Main Code\path</Filter>
     </ClCompile>
     <ClCompile Include="BraceParityStatus.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="CppParser.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="CodeUtilities.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="IterationSlices.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="CppImplFormatter.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="DocLanguage.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="Formatter.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="FormatterOptions.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="LanguageSearchEngine.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="LineSet.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="MethodPrototype.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="TokenRange.cpp">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
     <ClCompile Include="CodeMessageBox.cpp">
       <Filter>Main Code\UI</Filter>
@@ -208,6 +205,9 @@
     </ClCompile>
     <ClCompile Include="test\CppCodeTests.cpp">
       <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="CompoundTextParser.cpp">
+      <Filter>Main Code\code &amp; text</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -264,9 +264,6 @@
     </ClInclude>
     <ClInclude Include="WorkspaceProfile.h">
       <Filter>automation server</Filter>
-    </ClInclude>
-    <ClInclude Include="CompoundTextParser.h">
-      <Filter>Main Code</Filter>
     </ClInclude>
     <ClInclude Include="DspParser.h">
       <Filter>Main Code</Filter>
@@ -326,40 +323,40 @@
       <Filter>Main Code\path</Filter>
     </ClInclude>
     <ClInclude Include="BraceParityStatus.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="CppParser.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="CodeUtilities.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="IterationSlices.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="CppImplFormatter.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="DocLanguage.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="Formatter.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="FormatterOptions.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="LanguageSearchEngine.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="LineSet.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="MethodPrototype.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="TokenRange.h">
-      <Filter>Main Code\string &amp; code</Filter>
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
     <ClInclude Include="CodeMessageBox.h">
       <Filter>Main Code\UI</Filter>
@@ -405,6 +402,9 @@
     </ClInclude>
     <ClInclude Include="test\CppCodeTests.h">
       <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="CompoundTextParser.h">
+      <Filter>Main Code\code &amp; text</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,7 +1,7 @@
 
 #include "pch.h"
 #include "CodeMessageBox.h"
-#include "CodeUtilities.h"
+#include "utl/CodeAlgorithms.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -27,10 +27,9 @@ namespace layout
 }
 
 
-CCodeMessageBox::CCodeMessageBox( const CString& message, const CString& codeText, UINT mbType /*= MB_ICONQUESTION*/,
-								  const CString& caption /*= AfxGetApp()->m_pszProfileName*/, CWnd* pParent /*= NULL*/ )
+CCodeMessageBox::CCodeMessageBox( const std::tstring& message, const std::tstring& codeText, UINT mbType /*= MB_ICONQUESTION*/, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_CODE_MESSAGE_BOX_DIALOG, pParent )
-	, m_caption( caption )
+	, m_caption( AfxGetApp()->m_pszProfileName )
 	, m_message( message )
 	, m_codeText( codeText )
 	, m_mbType( mbType )
@@ -39,7 +38,7 @@ CCodeMessageBox::CCodeMessageBox( const CString& message, const CString& codeTex
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
-	m_codeText = code::convertTabsToSpaces( m_codeText );
+	m_codeText = code::Untabify( m_codeText );
 }
 
 CCodeMessageBox::~CCodeMessageBox()
@@ -85,12 +84,12 @@ BOOL CCodeMessageBox::OnInitDialog( void )
 		if ( messageFont.CreateFontIndirect( &boldLogFont ) )
 			m_messageStatic.SetFont( &messageFont );
 	}
-	m_messageStatic.SetWindowText( m_message );
+	ui::SetWindowText( m_messageStatic, m_message );
 
-	m_codeEdit.SetWindowText( m_codeText );
+	ui::SetWindowText( m_codeEdit, m_codeText );
 	m_codeEdit.SetSel( 0, 0 );
 
-	SetWindowText( m_caption );
+	ui::SetWindowText( m_hWnd, m_caption );
 	return TRUE;
 }
 

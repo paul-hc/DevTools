@@ -79,14 +79,4 @@ public:
 };
 
 
-// inline code
-
-inline void TokenRange::inflateBy( int delta )
-{
-	ASSERT( IsValid() && IsNormalized() );
-	m_start -= delta;
-	m_end += delta;
-}
-
-
 #endif // TokenRange_h

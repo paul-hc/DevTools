@@ -15,6 +15,7 @@
 
 #include "utl/test/CodeParserTests.h"
 #include "utl/test/StringTests.h"
+#include "utl/test/StringCompareTests.h"
 #include "test/CppCodeTests.h"
 #include "test/MethodPrototypeTests.h"
 
@@ -34,6 +35,7 @@ namespace ut
 		ut::CTestSuite::Instance().ClearTests();		// clear UTL tests, since we want to focus narrowly on this applications' tests
 
 		ut::CTestSuite::Instance().RegisterTestCase( &CStringTests::Instance() );
+		ut::CTestSuite::Instance().RegisterTestCase( &CStringCompareTests::Instance() );
 		ut::CTestSuite::Instance().RegisterTestCase( &CCodeParserTests::Instance() );
 
 		CCppCodeTests::Instance();

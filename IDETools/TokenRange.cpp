@@ -2,7 +2,8 @@
 //
 #include "pch.h"
 #include "TokenRange.h"
-#include "StringUtilitiesEx.h"
+#include "utl/StringCompare.h"
+//#include "StringUtilitiesEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -12,14 +13,14 @@
 bool TokenRange::InStringBounds( const TCHAR* pText ) const
 {
 	ASSERT_PTR( pText );
-	return IsValid() && IsNormalized() && m_end <= str::Length( pText );
+	return IsValid() && IsNormalized() && (size_t)m_end <= str::GetLength( pText );
 }
 
 void TokenRange::setString( const TCHAR* pText, int startPos /*= 0*/ )
 {
 	if ( pText != NULL )
 	{
-		ASSERT( startPos >= 0 && startPos <= (int)str::GetLength( pText ) );
+		ASSERT( (size_t)startPos <= str::GetLength( pText ) );
 		assign( startPos, (int)str::GetLength( pText ) );
 	}
 	else
@@ -33,6 +34,13 @@ void TokenRange::incrementBy( int increment )
 	m_end += increment;
 }
 
+void TokenRange::inflateBy( int delta )
+{
+	ASSERT( IsValid() && IsNormalized() );
+	m_start -= delta;
+	m_end += delta;
+}
+
 void TokenRange::normalize( void )
 {
 	if ( IsValid() && !IsNormalized() )
@@ -41,7 +49,7 @@ void TokenRange::normalize( void )
 
 void TokenRange::normalize( const TCHAR* pText )
 {
-	if ( m_start >= 0 && m_end == -1 )
+	if ( m_start >= 0 && -1 == m_end )
 		m_end = (int)str::GetLength( pText );
 	else
 		normalize();

@@ -34,54 +34,6 @@ namespace code
 		return targetCodeText;
 	}
 
-	CString convertTabsToSpaces( const CString& codeText, int tabSize /*= 4*/ )
-	{
-		int eolLen = str::Length( lineEnd );
-		CString spaces( _T(' '), tabSize );
-		CString outcome;
-		int destSize = codeText.GetLength() * 2 + 100;
-		TCHAR* dest = outcome.GetBuffer( destSize );
-
-	#ifdef	_DEBUG
-		for ( int i = 0; i != destSize; ++i )
-			dest[ i ] = _T('\0');
-	#else	// _DEBUG
-		*dest = _T('\0');
-	#endif	// _DEBUG
-
-		for ( LPCTSTR srcStart = codeText, srcEnd; *srcStart != _T('\0'); srcStart = srcEnd + eolLen )
-		{
-			srcEnd = _tcsstr( srcStart, lineEnd );
-			// If it's the last line -> move end to the terminating zero
-			if ( srcEnd == NULL )
-				srcEnd = srcStart + _tcslen( srcStart );
-
-			const TCHAR*	destLineStart = dest;
-
-			// Iterate the line and covert each tab into spaces
-			for ( const TCHAR* src = srcStart; src != srcEnd; ++src )
-				if ( *src != _T('\t') )
-					*dest++ = *src;
-				else
-				{	// Fill with spaces, depending on the current tab position
-					int			tabSpaceCount = tabSize - ( int( dest - destLineStart ) % tabSize );
-
-					dest = _tcsncpy( dest, spaces, tabSpaceCount ) + tabSpaceCount;
-				}
-
-			if ( *srcEnd != _T('\0') )
-				dest = _tcscpy( dest, lineEnd ) + eolLen;
-			else
-			{	// Copy the zero terminator and exit loop
-				*dest++ = *srcEnd;
-				break;
-			}
-		}
-
-		outcome.ReleaseBuffer();
-		return outcome;
-	}
-
 	bool isLineBreakEscapeChar( TCHAR chr, DocLanguage docLanguage )
 	{
 		switch ( docLanguage )

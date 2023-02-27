@@ -1,9 +1,11 @@
 
 #include "pch.h"
 #include "TextContent.h"
-#include "StringUtilitiesEx.h"
 #include "CompoundTextParser.h"
-#include <memory>
+#include "StringUtilitiesEx.h"
+#include "utl/AppTools.h"
+#include "utl/RuntimeException.h"
+#include <fstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,7 +17,6 @@ IMPLEMENT_DYNCREATE(TextContent, CCmdTarget)
 
 TextContent::TextContent( void )
 	: CCmdTarget()
-	, m_TextContent()
 	, m_showErrors( TRUE )
 {
 	EnableAutomation();
@@ -53,7 +54,7 @@ BEGIN_DISPATCH_MAP(TextContent, CCmdTarget)
 	DISP_PROPERTY_EX_ID(TextContent, "TextLen", dispidTextLen, GetTextLen, SetNotSupported, VT_I4)
 	DISP_FUNCTION_ID(TextContent, "LoadFile", dispidLoadFile, LoadFile, VT_BOOL, VTS_BSTR)
 	DISP_FUNCTION_ID(TextContent, "LoadFileSection", dispidLoadFileSection, LoadFileSection, VT_BOOL, VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION_ID(TextContent, "LoadCompoundFileSections", dispidLoadCompoundFileSections, LoadCompoundFileSections, VT_I4, VTS_BSTR VTS_BSTR VTS_BOOL)
+	DISP_FUNCTION_ID(TextContent, "LoadCompoundFileSections", dispidLoadCompoundFileSections, LoadCompoundFileSections, VT_I4, VTS_BSTR VTS_BSTR)
 	DISP_FUNCTION_ID(TextContent, "FindText", dispidFindText, FindText, VT_I4, VTS_BSTR VTS_I4 VTS_BOOL)
 	DISP_FUNCTION_ID(TextContent, "ReplaceText", dispidReplaceText, ReplaceText, VT_I4, VTS_BSTR VTS_BSTR VTS_BOOL)
 	DISP_FUNCTION_ID(TextContent, "AddEmbeddedContent", dispidAddEmbeddedContent, AddEmbeddedContent, VT_BOOL, VTS_BSTR VTS_BSTR VTS_BOOL)
@@ -85,9 +86,10 @@ IMPLEMENT_OLECREATE(TextContent, "IDETools.TextContent", 0xe37fe177, 0xcbb7, 0x1
 
 BSTR TextContent::GetText( void )
 {
-	// Make a full copy of m_TextContent before returning it. This is because conversion to BSTR (AllocSysString())
-	// may set the length of the BSTR incorrectly!!!
-	return CString( (LPCTSTR)m_TextContent ).AllocSysString();
+		// Make a full copy of m_TextContent before returning it. This is because conversion to BSTR (AllocSysString())
+		// may set the length of the BSTR incorrectly!!!
+		//return CString( m_TextContent.GetString() ).AllocSysString();
+	return m_TextContent.AllocSysString();
 }
 
 void TextContent::SetText( LPCTSTR lpszNewValue )
@@ -97,7 +99,7 @@ void TextContent::SetText( LPCTSTR lpszNewValue )
 
 long TextContent::GetTextLen()
 {
-	return 0;
+	return m_TextContent.GetLength();
 }
 
 void TextContent::OnShowErrorsChanged( void )
@@ -110,65 +112,66 @@ BOOL TextContent::LoadFile( LPCTSTR textFilePath )
 
 	try
 	{
-		CStdioFile file( textFilePath, CFile::modeRead | CFile::typeBinary );
-		TCHAR lineBuffer[ 2048 ];
+		std::ifstream input( textFilePath, std::ios_base::in | std::ios_base::binary );		// read line ends as "\r\n"
+		if ( !input.is_open() )
+			throw CRuntimeException( str::Format( _T("Unable to open text file %s."), textFilePath ) );
 
-		// Read each line and append it to text content member:
-		while ( file.ReadString( lineBuffer, COUNT_OF( lineBuffer ) ) != NULL )
-			m_TextContent += lineBuffer;
+		std::ostringstream oss;
+		oss << input.rdbuf();
+		m_TextContent = str::FromUtf8( oss.str().c_str() ).c_str();
+
+		return TRUE;
 	}
-	catch ( CException* exc )
+	catch ( const std::exception& exc )
 	{
-		if ( m_showErrors )
-			exc->ReportError();
-		exc->Delete();
+		m_showErrors ? app::ReportException( exc ) : app::TraceException( exc );
 		return FALSE;
 	}
-	return TRUE;
 }
 
 BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName )
 {
-	CompoundTextParser textParser( compoundFilePath, m_fieldReplacements );
-
 	m_TextContent.Empty();
-	if ( textParser.parseFile() )
+
+	try
 	{
-		textParser.makeFieldReplacements();
-		m_TextContent = textParser.getSectionContent( sectionName );
+		CCompoundTextParser textParser;
+
+		textParser.StoreFieldMappings( m_fieldReplacements );
+		textParser.ParseFile( fs::CPath( compoundFilePath ) );
+
+		m_TextContent = textParser.ExpandSectionContent( sectionName ).c_str();
+
+		return !m_TextContent.IsEmpty();
 	}
-	return !m_TextContent.IsEmpty();
+	catch ( const std::exception& exc )
+	{
+		m_showErrors ? app::ReportException( exc ) : app::TraceException( exc );
+		return FALSE;
+	}
 }
 
 // Loads all the existing sections in the specified compound text file.
 // Sections are lines into the text content that can be tokenized by "\r\n".
-long TextContent::LoadCompoundFileSections( LPCTSTR compoundFilePath, LPCTSTR sectionFilter,
-											BOOL caseSensitive )
+//
+long TextContent::LoadCompoundFileSections( LPCTSTR compoundFilePath, LPCTSTR sectionFilter )
 {
-	int				sectionCount = 0;
-
 	m_TextContent.Empty();
+
 	try
 	{
-		CStdioFile		file( compoundFilePath, CFile::modeRead | CFile::typeBinary );
-		SectionParser	sectionParser( NULL, _T("[["), _T("]]"), _T("EOS") );
-		TCHAR			lineBuffer[ 4096 ];
+		CSectionParser parser;		// _T("[["), _T("]]"), _T("EOS")
 
-		// Read each line in order to find all the section names in the file:
-		while ( file.ReadString( lineBuffer, COUNT_OF( lineBuffer ) ) )
-			sectionParser.extractSection( lineBuffer, sectionFilter,
-										  caseSensitive ? str::Case : str::IgnoreCase, _T("\r\n") );
-		m_TextContent = sectionParser.textContent;
+		if ( parser.LoadFileSection( fs::CPath( compoundFilePath ), sectionFilter ) )
+			SetText( parser.GetTextContent().c_str() );
+
+		return parser.GetSectionCount();
 	}
-	catch ( CException* exc )
+	catch ( const std::exception& exc )
 	{
-		if ( m_showErrors )
-			exc->ReportError();
-		exc->Delete();
-		return FALSE;
+		m_showErrors ? app::ReportException( exc ) : app::TraceException( exc );
+		return 0;
 	}
-
-	return sectionCount;
 }
 
 long TextContent::FindText( LPCTSTR match, long startPos, BOOL caseSensitive )
@@ -187,6 +190,7 @@ BOOL TextContent::AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedConte
 {
 	if ( str::stringReplace( m_TextContent, matchCoreID, embeddedContent, caseSensitive ? str::Case : str::IgnoreCase ) > 0 )
 		return TRUE;
+
 	m_TextContent += embeddedContent;
 	return FALSE;
 }
@@ -196,19 +200,25 @@ BOOL TextContent::AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedConte
 BSTR TextContent::Tokenize( LPCTSTR separatorCharSet )
 {
 	// Avoid refcount on copy since we'll modify the string buffer -> force a true copy
-	tokenizedBuffer = LPCTSTR( m_TextContent );
-	tokenizedSeps = separatorCharSet;
-	currToken = _tcstok( (LPTSTR)(LPCTSTR)tokenizedBuffer, tokenizedSeps );
-	return currToken.AllocSysString();
+	const TCHAR* pText = m_TextContent.GetString();
+	const TCHAR* pTextEnd = pText + m_TextContent.GetLength() + 1;		// include terminating zero
+
+	m_tokenizedBuffer.assign( pText, pTextEnd );
+	m_tokenizedSeps = separatorCharSet;
+
+	m_currToken = _tcstok( &m_tokenizedBuffer.front(), m_tokenizedSeps.c_str() );
+
+	return m_currToken.AllocSysString();
 }
 
 // Returns the next token (if any), otherwise an empty string.
 // Semantics: return strtok( NULL, sep );
 BSTR TextContent::GetNextToken( void )
 {
-	if ( !currToken.IsEmpty() )
-		currToken = _tcstok( NULL, tokenizedSeps );
-	return currToken.AllocSysString();
+	if ( !m_currToken.IsEmpty() )
+		m_currToken = _tcstok( NULL, m_tokenizedSeps.c_str() );
+
+	return m_currToken.AllocSysString();
 }
 
 long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTrimTrailingSpaces )
@@ -247,7 +257,7 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 					m_TextContent += line;
 				}
 				else
-					TRACE( _T("Ignoring empty line!\n") );
+					TRACE( _T("Ignoring empty m_line!\n") );
 
 				lineToken = _tcstok( NULL, seps );
 			}

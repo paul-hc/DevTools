@@ -124,7 +124,7 @@ void MenuFilePicker::SetCurrentFilePath( LPCTSTR pCurrFilePath )
 
 /**
 	Set the profile section where browsing options will be persisted.
-	Section layout is: "FolderOptions[\\SubSection]"
+	CSection layout is: "FolderOptions[\\SubSection]"
 */
 BSTR MenuFilePicker::SetProfileSection( LPCTSTR pSubSection )
 {

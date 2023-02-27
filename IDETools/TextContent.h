@@ -16,10 +16,11 @@ public:
 	virtual ~TextContent();
 private:
 	CString m_TextContent;
-	std::map< CString, CString > m_fieldReplacements;
+	std::map<std::tstring, std::tstring> m_fieldReplacements;
 private:
-	CString tokenizedBuffer, tokenizedSeps;
-	CString currToken;
+	std::vector<TCHAR> m_tokenizedBuffer;
+	std::tstring m_tokenizedSeps;
+	CString m_currToken;
 
 	// generated stuff
 public:
@@ -61,7 +62,7 @@ public:
 	afx_msg long GetTextLen();
 	afx_msg BOOL LoadFile( LPCTSTR textFilePath );
 	afx_msg BOOL LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName );
-	afx_msg long LoadCompoundFileSections( LPCTSTR compoundFilePath, LPCTSTR sectionFilter, BOOL caseSensitive );
+	afx_msg long LoadCompoundFileSections( LPCTSTR compoundFilePath, LPCTSTR sectionFilter );
 	afx_msg long FindText( LPCTSTR match, long startPos, BOOL caseSensitive );
 	afx_msg long ReplaceText( LPCTSTR match, LPCTSTR replacement, BOOL caseSensitive );
 	afx_msg BOOL AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedContent, BOOL caseSensitive );

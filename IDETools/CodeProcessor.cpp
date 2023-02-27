@@ -192,7 +192,7 @@ BSTR CodeProcessor::ExtractTypeDescriptor( LPCTSTR functionImplLine, LPCTSTR doc
 
 	PROCESS_CODE( typeDescriptor, code::CFormatter::s_cancelTag, cppCodeFormatter.ExtractTypeDescriptor( functionImplLine, fs::CPath( docFileExt ) ) )
 
-	return CString( typeDescriptor.c_str() ).AllocSysString();
+	return str::AllocSysString( typeDescriptor );
 }
 
 BSTR CodeProcessor::ImplementMethods( LPCTSTR methodPrototypes, LPCTSTR typeDescriptor, BOOL isInline )
@@ -208,7 +208,7 @@ BSTR CodeProcessor::ImplementMethods( LPCTSTR methodPrototypes, LPCTSTR typeDesc
 	PROCESS_CODE( newCodeText, methodPrototypes,
 				  cppCodeFormatter.ImplementMethodBlock( methodPrototypes, typeDescriptor, isInline != FALSE ) )
 
-	return CString( newCodeText.c_str() ).AllocSysString();
+	return str::AllocSysString( newCodeText );
 }
 
 BSTR CodeProcessor::ToggleComment( LPCTSTR codeText )

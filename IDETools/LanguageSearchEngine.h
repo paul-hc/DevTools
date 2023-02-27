@@ -102,9 +102,8 @@ namespace code
 
 		bool findNextMatch( const TCHAR* pString, int startPos, IsMatchAtCursor& isMatchAtCursor ) const;
 	public:
-		/**
-			Generic predicate search; it works with stuff like _istspace(), _istdigit(), etc
-		*/
+		// generic predicate search; it works with stuff like _istspace(), _istdigit(), etc
+		//
 		template< typename UnaryPredType >
 		struct IsPredMatch : public LanguageSearchEngine::IsMatchAtCursor
 		{
@@ -159,9 +158,7 @@ namespace code
 	};
 
 
-	/**
-		LanguageSearchEngine inline code
-	*/
+	// LanguageSearchEngine inline code
 
 	inline int LanguageSearchEngine::findNextWhitespace( const TCHAR* pString, int startPos /*= 0*/ ) const
 	{

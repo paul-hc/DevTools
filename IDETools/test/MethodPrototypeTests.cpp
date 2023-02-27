@@ -181,19 +181,34 @@ void CMethodPrototypeTests::TestImplementMethodBlock( void )
 
 	std::tstring typeDescriptor;
 	{	// global functions
-		//typeDescriptor = _T("\t");
-
 		ASSERT_EQUAL_SWAP( formatter.ImplementMethodBlock( methods.c_str(), typeDescriptor.c_str(), false ),
 						   _T("\
 std::pair<int, int> Func( const CFileItem* pLeft /*= _T(\"END\")*/, int depth /*= 5*/ ) const\r\n\
 {\r\n\
-	return ;\r\n\
+	return ?;\r\n\
 }\r\n\
 \r\n\
 const TCHAR* operator()( int left, int right ) const\r\n\
 {\r\n\
-	return ;\r\n\
+	return ?;\r\n\
 }\r\n\
+\r\n\
+")
+);
+
+		typeDescriptor = _T("\t");		// indented output
+
+		ASSERT_EQUAL_SWAP( formatter.ImplementMethodBlock( methods.c_str(), typeDescriptor.c_str(), false ),
+						   _T("\
+\tstd::pair<int, int> Func( const CFileItem* pLeft /*= _T(\"END\")*/, int depth /*= 5*/ ) const\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
+\r\n\
+\tconst TCHAR* operator()( int left, int right ) const\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
 \r\n\
 ")
 );
@@ -206,12 +221,12 @@ const TCHAR* operator()( int left, int right ) const\r\n\
 						   _T("\
 std::pair<int, int> CCmd::Func( const CFileItem* pLeft /*= _T(\"END\")*/, int depth /*= 5*/ ) const\r\n\
 {\r\n\
-	return ;\r\n\
+	return ?;\r\n\
 }\r\n\
 \r\n\
 const TCHAR* CCmd::operator()( int left, int right ) const\r\n\
 {\r\n\
-	return ;\r\n\
+	return ?;\r\n\
 }\r\n\
 \r\n\
 ")
@@ -228,13 +243,13 @@ CCache<T, V>::");
 template< typename T, typename V >\r\n\
 std::pair<int, int> CCache<T, V>::Func( const CFileItem* pLeft /*= _T(\"END\")*/, int depth /*= 5*/ ) const\r\n\
 {\r\n\
-	return ;\r\n\
+	return ?;\r\n\
 }\r\n\
 \r\n\
 template< typename T, typename V >\r\n\
 const TCHAR* CCache<T, V>::operator()( int left, int right ) const\r\n\
 {\r\n\
-	return ;\r\n\
+	return ?;\r\n\
 }\r\n\
 \r\n\
 ")
@@ -246,14 +261,36 @@ const TCHAR* CCache<T, V>::operator()( int left, int right ) const\r\n\
 template< typename T, typename V >\r\n\
 inline std::pair<int, int> CCache<T, V>::Func( const CFileItem* pLeft /*= _T(\"END\")*/, int depth /*= 5*/ ) const\r\n\
 {\r\n\
-	return ;\r\n\
+	return ?;\r\n\
 }\r\n\
 \r\n\
 template< typename T, typename V >\r\n\
 inline const TCHAR* CCache<T, V>::operator()( int left, int right ) const\r\n\
 {\r\n\
-	return ;\r\n\
+	return ?;\r\n\
 }\r\n\
+\r\n\
+")
+);
+
+		// inline indented
+		typeDescriptor = _T("\
+\ttemplate< typename T, typename V >\r\n\
+CCache<T, V>::");
+
+		ASSERT_EQUAL_SWAP( formatter.ImplementMethodBlock( methods.c_str(), typeDescriptor.c_str(), true ),
+						   _T("\
+\ttemplate< typename T, typename V >\r\n\
+\tinline std::pair<int, int> CCache<T, V>::Func( const CFileItem* pLeft /*= _T(\"END\")*/, int depth /*= 5*/ ) const\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
+\r\n\
+\ttemplate< typename T, typename V >\r\n\
+\tinline const TCHAR* CCache<T, V>::operator()( int left, int right ) const\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
 \r\n\
 ")
 );

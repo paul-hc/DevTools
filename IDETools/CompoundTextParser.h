@@ -2,100 +2,89 @@
 #define CompoundTextParser_h
 #pragma once
 
+#include "utl/StringParsing.h"
 #include <map>
 
 
-class SectionParser
+class CCompoundTextParser
 {
 public:
-	SectionParser( LPCTSTR _sectionName, LPCTSTR _tagOpen = _T("[["), LPCTSTR _tagClose = _T("]]"),
-				   LPCTSTR _tagCoreEOS = _T("EOS") );
-	virtual ~SectionParser();
+	CCompoundTextParser( void );
+	~CCompoundTextParser();
 
-	bool isBefore( void ) const { return zone == Before; }
-	bool isInside( void ) const { return zone == Inside; }
-	bool isAfter( void ) const { return zone == After; }
+	void StoreFieldMappings( const std::map<std::tstring, std::tstring>& fieldMappings );
 
-	void reset( void );
-	bool processLine( LPCTSTR line );
-	bool extractSection( LPCTSTR line, LPCTSTR sectionFilter = NULL, str::CaseType caseType = str::IgnoreCase, LPCTSTR sep = _T("\r\n") );
-protected:
-	CString extractTag( LPCTSTR line, int& rTagStartPos, int& rLength ) const;
-public:
-	enum SectionZone { Before, Inside, After };
-protected:
-	LPCTSTR sectionName;		// The name of the target section.
-	LPCTSTR tagOpen, tagClose, tagCoreEOS;
-	int tagOpenLen, tagCloseLen;
+	void ParseFile( const fs::CPath& filePath ) throws_( std::exception );
 
-	SectionZone zone;			// The current zone of parsing relative to the desired section.
-public:
-	CString textContent;		// The resulting text content of the section.
+	std::tstring ExpandSectionContent( const std::tstring& sectionName ) throws_( CRuntimeException );
+private:
+	enum SepMatch
+	{
+		SectionSep,				// "[[...]]" TSepMatchPos of 0 in m_sectionParser
+		LineCommentSep			// ";;..." TSepMatchPos of 1 in m_sectionParser
+	};
+
+	struct CParsingContext
+	{
+		CParsingContext( const fs::CPath& filePath ) : m_filePath( filePath ), m_lineNo( 1 ), m_pSectionContent( nullptr ) {}
+	public:
+		const fs::CPath& m_filePath;
+		size_t m_lineNo;
+		std::tstring* m_pSectionContent;		// content of the current section being parsed
+	};
+
+	void ParseLine( const std::tstring& line ) throws_( CRuntimeException );
+	bool InSection( void ) const { ASSERT_PTR( m_pCtx.get() ); return m_pCtx->m_pSectionContent != nullptr; }
+	void EnterSection( const std::tstring& sectionName, const std::tstring& lineSuffix ) throws_( CRuntimeException );
+	void AddTextContent( const std::tstring& text );
+
+	size_t ExpandFieldMappings( std::tstring* pSectionContent _out_ );
+	std::tstring* ExpandSectionRefs( const std::tstring& sectionName ) throws_( CRuntimeException );
+	bool PromptConditionalSectionRef( std::tstring* pRefSectionName _in_out_ ) const;
+
+	static bool CheckEatLineEnd( size_t* pLastPos _in_out_, const TCHAR* pContent );		// if '$' suffix => skip the following "\r\n" (or just "\n")
+private:
+	typedef str::CEnclosedParser<TCHAR> TParser;
+	typedef std::map<std::tstring, std::tstring> TSectionMap;
+
+	const TParser m_sectionParser;			// for "[[section]]" tags
+	const TParser m_crossRefParser;			// for "<<section>>" tags (section cross-references)
+	std::vector< std::pair<std::tstring, std::tstring> > m_fieldMappings;	// e.g. "%FileName%" -> "StripBar"
+	std::auto_ptr<CParsingContext> m_pCtx;
+
+	TSectionMap m_sectionMap;				// sections: name -> content
+
+	static const std::tstring s_endOfSection;				// "EOS" => "[[EOS]]" tags in the compound text file
+	static const TCHAR s_conditionalPrompt = _T('?');		// e.g. "<<?Section>>"
+	static const TCHAR s_eatLineEnd = _T('$');				// e.g. "<<Section>>$\r\n" => eat next "\r\n"
 };
 
 
-class CompoundTextParser
+class CSectionParser		// rough cut with little functionality (no embedded sections) => better use CCompoundTextParser!
 {
 public:
-	enum TokenSemantic
-	{
-		tok_Comment,
-		tok_Section,
-		tok_EndOfSection,
-		tok_ContentLine,
-		tok_SectionReference
-	};
+	CSectionParser( const TCHAR* pOpenDelim = _T("[["), const TCHAR* pCloseDelim = _T("]]"), const TCHAR* pTagEOS = _T("EOS") );
+	virtual ~CSectionParser();
 
-	enum Exception { EndOfFile, SyntaxError };
+	bool LoadFileSection( const fs::CPath& compoundFilePath, const std::tstring& sectionName ) throws_( std::exception );
 
-	typedef std::map< CString, CString > TMapSectionToContent;
-	typedef std::pair<const TCHAR*, const TCHAR*> TokenDescr;
-public:
-	CompoundTextParser( const TCHAR* _textFilePath,
-						const std::map< CString, CString >& _fieldReplacements );
-	~CompoundTextParser();
+	const std::tstring& GetTextContent( void ) const { return m_textContent; }
+	size_t GetSectionCount( void ) const { return m_sectionCount; }
+private:
+	void Reset( void );
+	bool ParseLine( const std::tstring& line, const std::tstring& sectionName );
+	void AddTextContent( const std::tstring& text );
+private:
+	enum SectionStage { Before, InSection, Done };
+	typedef str::CEnclosedParser<TCHAR> TParser;
 
-	bool parseFile( void );
-	void makeFieldReplacements( void );
-	CString getSectionContent( const CString& sectionName );
-protected:
-	TokenSemantic getNextLine( void ) throws_( Exception );
+	const TParser m_parser;
+	std::tstring m_tagEOS;			// "EOS": end of section
 
-	static bool isCharOneOf( TCHAR chr, const TCHAR* stringSet );
-public:
-	CString textFilePath;
-	const std::map< CString, CString >& fieldReplacements;
-protected:
-	CStdioFile textFile;
-	CString line;
-	int m_lineNo;
-	CString tokenCore;
-	TMapSectionToContent mapSections;
-public:
-	class Section
-	{
-	public:
-		Section( CompoundTextParser& _parser, TMapSectionToContent::const_iterator itSection );
-		~Section();
+	SectionStage m_sectionStage;	// the current zone of parsing relative to the desired section.
+	size_t m_sectionCount;
 
-		CString extractContent( const TCHAR* insertorReplacer = NULL ) const;
-		int bindAllReferences( void ) throws_( CString );
-	private:
-		CompoundTextParser&	parser;
-	protected:
-		CString name;
-		CString content;
-	};
-	friend class Section;
-public:
-	static const TCHAR chConditionalPrompt;
-	static const TCHAR chNoEndOfLineIfEmpty;
-	static const TCHAR whitespaces[];
-	static const TCHAR singleLineComment[];
-	static const TCHAR endOfSection[];
-	static const TCHAR embeddedInsertPoint[];
-	static const TokenDescr tokenSection;
-	static const TokenDescr tokenSectionRef;
+	std::tstring m_textContent;		// resulting text content of the section
 };
 
 

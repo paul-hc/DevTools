@@ -33,7 +33,7 @@ namespace code
 
 		void ResolveDefaultParameters( std::tstring* pProto ) const;
 
-		std::tstring ImplementMethod( const std::tstring& methodProto, const std::tstring& templateDecl, const std::tstring& typeQualifier, bool isInline );
+		std::tstring ImplementMethod( const std::tstring& methodProto, const CTypeDescriptor& tdInfo );
 		std::tstring InputDocTypeDescriptor( const fs::CPath& docPath ) const;
 
 		CString makeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException );
@@ -48,18 +48,21 @@ namespace code
 
 	struct CTypeDescriptor
 	{
-		CTypeDescriptor( const CFormatter* pFmt ) : m_pFmt( pFmt ) { ASSERT_PTR( pFmt ); }
+		CTypeDescriptor( const CFormatter* pFmt, bool isInline );
 
 		void Parse( const TCHAR* pTypeDescriptor ) throws_( CRuntimeException );
+
+		void IndentCode( std::tstring* pCodeText ) const;
 	private:
 		void Split( const TCHAR* pTypeDescriptor ) throws_( CRuntimeException );
 		CString buildTemplateInstanceTypeList( const TokenRange& templateDecl, const TCHAR* pMethodPrototype ) const;
 	private:
 		const CFormatter* m_pFmt;
 	public:
-		std::tstring m_indentPrefix;
 		std::tstring m_templateDecl;
 		std::tstring m_typeQualifier;
+		std::tstring m_indentPrefix;
+		std::tstring m_inlinePrefix;
 	};
 }
 

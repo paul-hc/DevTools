@@ -72,7 +72,6 @@ namespace code
 	// Code helpers
 	CString& convertToWindowsLineEnds( CString& targetCodeText );
 	CString& convertToUnixLineEnds( CString& targetCodeText );
-	CString convertTabsToSpaces( const CString& codeText, int tabSize = 4 );
 
 	namespace cpp
 	{

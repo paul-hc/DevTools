@@ -157,11 +157,8 @@
 #define IDC_BINARY_PATH_EDIT            1217
 #define IDS_OPTIONS_PROPERTY_SHEET_CAPTION 5000
 #define IDS_EMPTY_CURR_PROJECT_MESSAGE  5002
-#define IDS_CODE_GENERATOR_CAPTION      5003
-#define IDS_PROMPTINCLUDESECTION        5004
 #define IDS_PROMPT_DEBUG_BREAK          5005
 #define IDS_ERR_READONLY_PROPERTY       5006
-#define IDS_ERR_SECTIONNOTCLOSED        5008
 #define CM_FILEBROWSER_SETUP            29000
 #define CM_FILEBROWSER_FoldersAsPopups  29010
 #define CM_FILEBROWSER_FoldersAsRootPopups 29011
@@ -209,7 +206,7 @@
 #define CM_MAKE_LOOP_index              32820
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        126

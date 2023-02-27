@@ -95,7 +95,7 @@ namespace code
 	CString CFormatter::formatLineOfCode( const TCHAR* lineOfCode, bool protectLeadingWhiteSpace /*= true*/,
 										 bool justAdjustWhiteSpace /*= false*/ )
 	{
-		ASSERT( lineOfCode != NULL );
+		ASSERT_PTR( lineOfCode );
 
 		TokenRange formatTargetRange( lineOfCode );
 
@@ -118,7 +118,7 @@ namespace code
 
 	CString CFormatter::tabifyLineOfCode( const TCHAR* lineOfCode, bool doTabify /*= true*/ )
 	{
-		ASSERT( lineOfCode != NULL );
+		ASSERT_PTR( lineOfCode );
 
 		TokenRange leadingWhiteSpaceRange = getWhiteSpaceRange( lineOfCode, 0, false );
 
@@ -129,7 +129,7 @@ namespace code
 	}
 
 	CString CFormatter::splitArgumentList( const TCHAR* pCodeText, TEditorColumn maxColumn /*= UINT_MAX*/,
-										  int targetBracketLevel /*= -1*/ )
+										   int targetBracketLevel /*= -1*/ )
 	{
 		UNUSED_ALWAYS( targetBracketLevel );
 
@@ -175,7 +175,7 @@ namespace code
 
 		splitMultipleLines( linesOfCode, lineEnds, newCodeText );
 		if ( !linesOfCode.empty() )
-			if ( linesOfCode.size() == 1 )
+			if ( 1 == linesOfCode.size() )
 			{	// Selection has no line-ends -> toggle multi-line comment on/off
 				if ( !langCommentTokens.hasMultiLineComment() )
 					return newCodeText;
@@ -185,7 +185,7 @@ namespace code
 				else
 					return uncomment( newCodeText, false );
 			}
-			if ( linesOfCode.size() == 2 )
+			if ( 2 == linesOfCode.size() )
 			{	// Single-line selection -> toggle single-line comment on/off
 				if ( commentState == NoComment )
 					linesOfCode.front() = comment( linesOfCode.front(), true, SingleLineComment );
@@ -683,7 +683,7 @@ namespace code
 
 		code::convertToWindowsLineEnds( normalizedCode );
 
-		if ( m_docLanguage == DocLang_Basic )
+		if ( DocLang_Basic == m_docLanguage )
 			normalizedCode.Replace( code::basicMidLineEnd, code::lineEnd );
 
 		std::vector< CString > linesOfCode, __lineEnds;
@@ -1015,7 +1015,7 @@ namespace code
 			_T("friend"),
 			_T("explicit"),
 			_T("mutable"),
-//			_T("override"),
+			//_T("override"),
 			_T("final"),
 			_T("afx_msg"),
 			_T("public:"),
@@ -1023,12 +1023,14 @@ namespace code
 			_T("private:")
 		};
 
+		pred::IsAlphaNum isAlphaNum;
+
 		for ( int i = 0; i != COUNT_OF( s_declarativeTokens ); ++i )
 		{
 			TokenRange foundToken = m_languageEngine.findString( targetString, s_declarativeTokens[ i ] );
 
-			if ( foundToken.IsValid() )
-				if ( !_istalnum( str::charAt( targetString, foundToken.m_start ) ) || !_istalnum( str::charAt( targetString, foundToken.m_end ) ) )
+			if ( foundToken.IsNonEmpty() )
+				if ( !isAlphaNum( str::charAt( targetString, foundToken.m_start ) ) || !isAlphaNum( str::charAt( targetString, foundToken.m_end ) ) )
 					foundToken.replaceWithToken( &targetString, _T("") );
 		}
 

@@ -1,426 +1,327 @@
 
 #include "pch.h"
 #include "CompoundTextParser.h"
-#include "IdeUtilities.h"
-#include "StringUtilitiesEx.h"
+#include "CodeUtilities.h"
+#include "Algorithms.h"
 #include "CodeMessageBox.h"
-#include "resource.h"
+#include "utl/Path.h"
+#include "utl/RuntimeException.h"
+#include <fstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-// SectionParser implementation
 
-SectionParser::SectionParser( LPCTSTR _sectionName, LPCTSTR _tagOpen /*= _T("[[")*/,
-							  LPCTSTR _tagClose /*= _T("]]")*/, LPCTSTR _tagCoreEOS /*= _T("EOS")*/ )
-	: sectionName( _sectionName )
-	, tagOpen( _tagOpen )
-	, tagClose( _tagClose )
-	, tagCoreEOS( _tagCoreEOS )
-	, tagOpenLen( str::GetLength( tagOpen ) )
-	, tagCloseLen( str::GetLength( tagClose ) )
+// CCompoundTextParser implementation
 
-	, zone( Before )
-	, textContent()
+/* Valid section constructs:
+[[Copyright]]
+[[EOS]]
+
+[[Copyright]][[EOS]]
+
+[[Copyright]]content[[EOS]]
+
+[[Copyright]]
+content[[EOS]]
+
+[[Copyright]]line1
+...
+lineN[[EOS]]
+
+[[Copyright]]
+line1
+...
+lineN
+[[EOS]]
+*/
+
+const std::tstring CCompoundTextParser::s_endOfSection = _T("EOS");
+
+CCompoundTextParser::CCompoundTextParser( void )
+	: m_sectionParser( _T("[[|;;"), _T("]]|\n"), false )
+	, m_crossRefParser( _T("<<"), _T(">>"), false )
+{
+	m_sectionParser.GetSeparators().EnableLineComments();
+}
+
+CCompoundTextParser::~CCompoundTextParser()
 {
 }
 
-SectionParser::~SectionParser()
+void CCompoundTextParser::StoreFieldMappings( const std::map<std::tstring, std::tstring>& fieldMappings )
 {
+	m_fieldMappings.assign( fieldMappings.begin(), fieldMappings.end() );
 }
 
-void SectionParser::reset( void )
+void CCompoundTextParser::ParseFile( const fs::CPath& filePath ) throws_( std::exception )
 {
-	zone = Before;
-	textContent.Empty();
+	m_sectionMap.clear();
+	m_pCtx.reset( new CParsingContext( filePath ) );
+
+	std::ifstream input( filePath.GetPtr(), std::ios_base::in );	// | std::ios_base::binary
+	if ( !input.is_open() )
+		throw CRuntimeException( str::Format( _T("Unable to open text file %s"), filePath.GetPtr() ) );
+
+	for ( std::string line; std::getline( input, line ); ++m_pCtx->m_lineNo )
+		ParseLine( str::FromUtf8( line.c_str() ) );
 }
 
-// Process the line by switching to Inside zone if desired section is detected,
-// and appending the line to content if zone is Inside.
-// Returns false if After state is reached, otherwise true.
-// NOTE: section content starts on the line next to section begin tag, and
-// EOS tag (end of section) may be on the same line with a section content line.
-// If EOS tag is not present, a section ends on the next section start tag.
-bool SectionParser::processLine( LPCTSTR line )
+void CCompoundTextParser::ParseLine( const std::tstring& line )
 {
-	if ( !isAfter() )
-	{	// Parsing not finished, process the line:
-		int				tagStartPos = -1, tagLength = 0;
-		CString			tagCore = extractTag( line, tagStartPos, tagLength );
+	TParser::TSepMatchPos sepMatchPos;
+	TParser::TSpecPair specBounds = m_sectionParser.FindItemSpec( &sepMatchPos, line );
 
-		if ( isBefore() )
+//	for ( TParser::TSpecPair specBounds( 0, 0 );
+//		  ( specBounds = m_sectionParser.FindItemSpec( &sepMatchPos, line, specBounds.first ) ).first != utl::npos;		// a known spec?
+//		  specBounds.first = specBounds.second; )
+
+	if ( specBounds.first != utl::npos )			// a known spec?
+	{
+		Range<size_t> itemRange = m_sectionParser.GetItemRange( sepMatchPos, specBounds );
+		std::tstring lineSuffix = line.substr( specBounds.second );
+
+		if ( !InSection() )
 		{
-			if ( !tagCore.IsEmpty() && tagCore.CompareNoCase( sectionName ) == 0 )
-				zone = Inside;
+			if ( SectionSep == sepMatchPos )		// "[[tag]]"?
+				EnterSection( m_sectionParser.MakeItem( itemRange, line ), lineSuffix );
 		}
 		else
 		{
-			ASSERT( isInside() );
-			if ( tagCore.CompareNoCase( tagCoreEOS ) == 0 || !tagCore.IsEmpty() )
-				zone = After;
-			if ( zone == After )
-				textContent += CString( line, tagStartPos );	// Append the line until the tag start.
-			else
-				textContent += line;							// Append the entire line.
-		}
-	}
-
-	return !isAfter();
-}
-
-// Parse the line, search for section names, and if found it appends it as a line to
-// the current content and returns True, otherwise does nothing and returns false.
-// NOTE: EOS sections are not added!
-bool SectionParser::extractSection( LPCTSTR line, LPCTSTR sectionFilter /*= NULL*/,
-									str::CaseType caseType /*= str::IgnoreCase*/, LPCTSTR sep /*= _T("\r\n")*/ )
-{
-	int tagStartPos = -1, tagLength = 0;
-	CString sectionCore = extractTag( line, tagStartPos, tagLength );
-
-	if ( sectionCore.IsEmpty() || sectionCore.CompareNoCase( tagCoreEOS ) == 0 )
-		return false;
-
-	// if section name filter is specified -> check for filter match:
-	if ( sectionFilter != NULL && *sectionFilter != 0 )
-		if ( !str::findStringPos( sectionCore, sectionFilter, caseType ).IsValid() )
-			return false;
-
-	if ( !textContent.IsEmpty() )
-		textContent += ( CString( sep ) + sectionCore );
-	return true;
-}
-
-// extract and localize the tag into string (if any), and returns the tag core string + start and end pos.
-
-CString SectionParser::extractTag( LPCTSTR line, int& rTagStartPos, int& rTagLength ) const
-{
-	rTagStartPos = str::findStringPos( line, tagOpen ).m_start;
-	if ( rTagStartPos != -1 )
-	{
-		int endPos = str::findStringPos( line, tagClose, rTagStartPos + tagOpenLen ).m_start;
-		if ( endPos != -1 )
-		{
-			rTagLength = endPos + tagCloseLen - rTagStartPos;
-			return CString( line + rTagStartPos + tagOpenLen, rTagLength - tagOpenLen - tagCloseLen );
-		}
-	}
-	return CString();
-}
-
-
-// CompoundTextParser implementation
-
-const TCHAR CompoundTextParser::chConditionalPrompt = _T('?');
-const TCHAR CompoundTextParser::chNoEndOfLineIfEmpty = _T('$');
-const TCHAR CompoundTextParser::whitespaces[] = _T(" \t\r\n");
-const TCHAR CompoundTextParser::singleLineComment[] = _T(";");
-const TCHAR CompoundTextParser::endOfSection[] = _T("EOS");
-const TCHAR CompoundTextParser::embeddedInsertPoint[] = _T("%CORE%");
-const CompoundTextParser::TokenDescr CompoundTextParser::tokenSection = CompoundTextParser::TokenDescr( _T("[["), _T("]]") );
-const CompoundTextParser::TokenDescr CompoundTextParser::tokenSectionRef = CompoundTextParser::TokenDescr( _T("<<"), _T(">>") );
-
-CompoundTextParser::CompoundTextParser( const TCHAR* _textFilePath,
-										const std::map< CString, CString >& _fieldReplacements )
-	: textFilePath( _textFilePath )
-	, fieldReplacements( _fieldReplacements )
-	, textFile()
-	, line()
-	, m_lineNo( 0 )
-	, tokenCore()
-	, mapSections()
-{
-}
-
-CompoundTextParser::~CompoundTextParser()
-{
-}
-
-bool CompoundTextParser::parseFile( void )
-{
-	mapSections.clear();
-	m_lineNo = 0;
-	if ( !textFile.Open( textFilePath, CFile::modeRead | CFile::typeText ) )
-		return false;
-
-	CString			errMessage;
-	CString			currSection, currContent;
-
-	try
-	{
-		for ( ;; )
-			switch ( getNextLine() )
+			if ( SectionSep == sepMatchPos )		// "[[tag]]"?
 			{
-				case tok_Comment:
-					break;
-				case tok_Section:
-					if ( !currSection.IsEmpty() || tokenCore.IsEmpty() )
-						throw SyntaxError;
-					currSection = tokenCore;
-					break;
-				case tok_EndOfSection:
-					if ( currSection.IsEmpty() )
-						throw SyntaxError;
-					// Special care for sections with inline content: add the prefix of the line containing the EndOfSection tag
-					currContent += line;
-					mapSections[ currSection ] = currContent;
-					currSection.Empty();
-					currContent.Empty();
-					break;
-				case tok_ContentLine:
-					if ( !currSection.IsEmpty() )
-						currContent += line + _T("\r\n");
-					break;
-				default:
-					throw SyntaxError;
-			}
-	}
-	catch ( Exception exc )
-	{
-		if ( exc == SyntaxError )
-		{
-			TRACE( _T("CompoundTextParser::parseFile(): syntax error at line: %d \"%s\"\n"), m_lineNo, (LPCTSTR)line );
-			return false;
-		}
-	}
-
-	if ( !currSection.IsEmpty() )
-	{
-		AfxFormatString1( errMessage, IDS_ERR_SECTIONNOTCLOSED, (LPCTSTR)currSection );
-		AfxMessageBox( errMessage );
-		return false;
-	}
-	return true;
-}
-
-void CompoundTextParser::makeFieldReplacements( void )
-{
-	for ( TMapSectionToContent::iterator sectionIt = mapSections.begin(); sectionIt != mapSections.end(); ++sectionIt )
-		for ( std::map< CString, CString >::const_iterator fieldIt = fieldReplacements.begin();
-			  fieldIt != fieldReplacements.end(); ++fieldIt )
-			( *sectionIt ).second.Replace( ( *fieldIt ).first, ( *fieldIt ).second );
-}
-
-CString CompoundTextParser::getSectionContent( const CString& sectionName )
-{
-	CString textContent;
-	TMapSectionToContent::const_iterator itSection = mapSections.find( sectionName );
-
-	if ( itSection != mapSections.end() )
-	{
-		Section section( *this, itSection );
-
-		try
-		{
-			section.bindAllReferences();
-			textContent = section.extractContent();
-		}
-		catch ( const CString& exc )
-		{
-			AfxMessageBox( exc );
-		}
-	}
-	return textContent;
-}
-
-CompoundTextParser::TokenSemantic CompoundTextParser::getNextLine( void ) throws_( Exception )
-{
-	line.Empty();
-	tokenCore.Empty();
-	++m_lineNo;
-	try
-	{	// read a new line string from the file
-		if ( textFile.ReadString( line ) )
-		{
-			static std::pair<int, int> tokenSectionLen( str::GetLength( tokenSection.first ), str::GetLength( tokenSection.second ) );
-			int tokenStart = 0, tokenEnd = 0;
-
-			if ( !line.IsEmpty() )
-				if ( _tcsncmp( line, singleLineComment, _tcslen( singleLineComment ) ) == 0 )
-					return tok_Comment;
-				else if ( ( tokenStart = line.Find( tokenSection.first, tokenEnd ) ) != -1 )
-					if ( ( tokenEnd = line.Find( tokenSection.second, tokenStart += tokenSectionLen.first ) ) != -1 )
-					{
-						tokenCore = line.Mid( tokenStart, tokenEnd - tokenStart );
-						// truncate the line at section begin position in order to separate inline content from the tag
-						line.SetAt( tokenStart - tokenSectionLen.first, _T('\0') );
-						if ( tokenCore == endOfSection )
-							return tok_EndOfSection;
-						else
-							return tok_Section;
-					}
-					else
-						throw SyntaxError;
-			return tok_ContentLine;
-		}
-	}
-	catch ( CException* exc )
-	{
-		exc->Delete();
-	}
-	throw EndOfFile;
-}
-
-bool CompoundTextParser::isCharOneOf( TCHAR chr, const TCHAR* stringSet )
-{
-	if ( chr == _T('\0') )
-		return false;
-
-	const TCHAR*	found = _tcschr( stringSet, chr );
-
-	return found != NULL && *found != _T('\0');
-}
-
-
-// CompoundTextParser::Section implementation
-
-CompoundTextParser::Section::Section( CompoundTextParser& _parser, CompoundTextParser::TMapSectionToContent::const_iterator itSection )
-	: parser( _parser )
-	, name( ( *itSection ).first )
-	, content( ( *itSection ).second )
-{
-}
-
-CompoundTextParser::Section::~Section()
-{
-}
-
-CString CompoundTextParser::Section::extractContent( const TCHAR* insertorReplacer /*= NULL*/ ) const
-{
-	bool isEmptyReplacer = insertorReplacer == NULL || *insertorReplacer == _T('\0');
-	CString outcomeContent = content;
-	int insertorStart = outcomeContent.Find( embeddedInsertPoint );
-
-	if ( insertorStart != -1 )
-	{
-		// Replace embedded insertion point with referredContent
-		const TCHAR* contentPtr = outcomeContent;
-		int insertorEnd = insertorStart + static_cast<int>( str::GetLength( embeddedInsertPoint ) );
-
-		// If post token tag line remover exists, extend the token after the next "\r\n"
-		if ( contentPtr[ insertorEnd ] == chNoEndOfLineIfEmpty )
-		{
-			++insertorEnd;
-			// Cut trailing "\r\n" if the replacer is empty
-			if ( isEmptyReplacer )
-				while ( contentPtr[ insertorEnd ] == _T('\r') || contentPtr[ insertorEnd ] == _T('\n') )
-					++insertorEnd;
-		}
-		outcomeContent.Delete( insertorStart, insertorEnd - insertorStart );
-		if ( !isEmptyReplacer )
-			outcomeContent.Insert( insertorStart, insertorReplacer );
-	}
-
-	return outcomeContent;
-}
-
-int CompoundTextParser::Section::bindAllReferences( void ) throws_( CString )
-{
-	static std::pair<int, int> tokenPairLen( str::GetLength( CompoundTextParser::tokenSectionRef.first ),
-											 str::GetLength( CompoundTextParser::tokenSectionRef.second ) );
-	int tokenStart = 0, tokenEnd = 0, boundCount = 0;
-	CString errMessage;
-
-	do
-		if ( ( tokenStart = content.Find( CompoundTextParser::tokenSectionRef.first, tokenStart ) ) != -1 )
-			if ( ( tokenEnd = content.Find( CompoundTextParser::tokenSectionRef.second, tokenStart + tokenPairLen.first ) ) != -1 )
-			{
-				tokenEnd += tokenPairLen.second;
-
-				CString refSectionName = content.Mid( tokenStart + tokenPairLen.first,
-													  tokenEnd - tokenStart - tokenPairLen.first - tokenPairLen.second );
-				CString referredContent;
-
-				if ( !refSectionName.IsEmpty() )
-				{	// First bind the referred section
-					bool isConditional = refSectionName[ 0 ] == CompoundTextParser::chConditionalPrompt;
-
-					if ( isConditional )
-						refSectionName = refSectionName.Mid( 1 );
-
-					TMapSectionToContent::const_iterator itRefSection = parser.mapSections.find( refSectionName );
-
-					if ( itRefSection != parser.mapSections.end() )
-					{	// Bind the referred section as well (if not already)
-						Section refSection( parser, itRefSection );
-
-						refSection.bindAllReferences();
-						referredContent = refSection.content;
-						if ( isConditional )
-						{	// Prompt token found -> query for conditional reference inclusion
-							CString promptMessage;
-
-							promptMessage.Format( IDS_PROMPTINCLUDESECTION, (LPCTSTR)refSectionName );
-
-							ide::CScopedWindow scopedIDE;
-							if ( CCodeMessageBox( promptMessage, referredContent, MB_OKCANCEL | MB_ICONQUESTION,
-												  MAKEINTRESOURCE( IDS_CODE_GENERATOR_CAPTION ), scopedIDE.GetMainWnd() ).DoModal() != IDOK )
-								referredContent.Empty();
-						}
-					}
-					else
-					{
-						errMessage.Format( _T("Invalid reference in section \"%s\": section named \"%s\" couldn't be found !"),
-										   (LPCTSTR)name, (LPCTSTR)refSectionName );
-						throw errMessage;
-					}
-				}
-
-				// if trailing chNoEndOfLineIfEmpty $ exist, extend the section reference tag to include the trailing "\r\n"
-				// In this case:
-				//	<<Section1>><<Section2>>[[EOS]]
-				// is equivalent with:
-				//	<<Section1>>$
-				//	<<Section2>>$
-				//	[[EOS]]
-				//
-				LPCTSTR contentPtr = content;
-
-				if ( contentPtr[ tokenEnd ] == chNoEndOfLineIfEmpty )
-				{	// Include trailing CR+LF in the section reference tag
-					do
-						++tokenEnd;
-					while ( contentPtr[ tokenEnd ] == _T('\r') || contentPtr[ tokenEnd ] == _T('\n') );
-				}
-
-				// delete section reference tag
-				content.Delete( tokenStart, tokenEnd - tokenStart );
-
-				int insertorStart = content.Find( embeddedInsertPoint );
-
-				if ( insertorStart != -1 )
+				if ( str::EqualsSeqAt( line, itemRange.m_start, s_endOfSection ) )	// EOS or new_section tag?
 				{
-					// replace embedded insertion point with referredContent
-					int insertorEnd = insertorStart + str::GetLength( embeddedInsertPoint );
-
-					contentPtr = content;
-					// If post token tag line remover exists, extend the token after the next "\r\n"
-					if ( contentPtr[ insertorEnd ] == chNoEndOfLineIfEmpty )
-					{
-						++insertorEnd;
-						// Cut trailing "\r\n" if referred content is empty
-						if ( referredContent.IsEmpty() )
-							while ( contentPtr[ insertorEnd ] == _T('\r') || contentPtr[ insertorEnd ] == _T('\n') )
-								++insertorEnd;
-					}
-					content.Delete( insertorStart, insertorEnd - insertorStart );
-					content.Insert( insertorStart, referredContent );
+					AddTextContent( line.substr( 0, specBounds.first ) );			// append the leading text before the tag
+					m_pCtx->m_pSectionContent = nullptr;							// exit section content parsing mode
 				}
 				else
-					// Append the content: replace the tag (section reference) with it's content
-					content.Insert( tokenStart, referredContent );
-				++boundCount;
+					EnterSection( m_sectionParser.MakeItem( itemRange, line ), lineSuffix );
 			}
 			else
+				ASSERT( LineCommentSep == sepMatchPos );		// just ignore comment
+		}
+	}
+	else if ( InSection() )
+		AddTextContent( line );		// append the entire line
+	else
+	{	// ignore stray line
+	}
+}
+
+void CCompoundTextParser::EnterSection( const std::tstring& sectionName, const std::tstring& lineSuffix ) throws_( CRuntimeException )
+{
+	m_pCtx->m_pSectionContent = &m_sectionMap[ sectionName ];		// enter section content parsing mode
+
+	if ( !m_pCtx->m_pSectionContent->empty() )						// not a new entry? => section collision
+		throw CRuntimeException( str::Format( _T("Syntax error: duplicate section '%s' found in compound text file '%s'"),
+											  sectionName.c_str(), m_pCtx->m_filePath.GetPtr() ) );
+
+	if ( !lineSuffix.empty() )
+		ParseLine( lineSuffix );		// allow inline text after the "[[section]]" tag
+}
+
+void CCompoundTextParser::AddTextContent( const std::tstring& text )
+{
+	ASSERT( InSection() );
+
+	if ( !m_pCtx->m_pSectionContent->empty() )
+		*m_pCtx->m_pSectionContent += code::lineEnd;
+
+	*m_pCtx->m_pSectionContent += text;
+}
+
+
+// expand embedded sections:
+
+std::tstring CCompoundTextParser::ExpandSectionContent( const std::tstring& sectionName ) throws_( CRuntimeException )
+{
+	if ( std::tstring* pTextContent = ExpandSectionRefs( sectionName ) )
+	{
+		ExpandFieldMappings( pTextContent );
+		return *pTextContent;
+	}
+
+	return str::GetEmpty();
+}
+
+size_t CCompoundTextParser::ExpandFieldMappings( std::tstring* pSectionContent _out_ )
+{
+	ASSERT_PTR( pSectionContent );
+
+	size_t count = 0;
+
+	for ( std::vector< std::pair<std::tstring, std::tstring> >::const_iterator itField = m_fieldMappings.begin(); itField != m_fieldMappings.end(); ++itField )
+		count += str::Replace( *pSectionContent, itField->first.c_str(), itField->second.c_str() );
+
+	return count;
+}
+
+std::tstring* CCompoundTextParser::ExpandSectionRefs( const std::tstring& sectionName ) throws_( CRuntimeException )
+{	// expand embedded sections such as "<<Section X>>", returns the expanded section content
+	std::tstring* pTextContent = utl::FindValuePtr( m_sectionMap, sectionName );
+
+	if ( nullptr == pTextContent )
+		return nullptr;
+
+	TParser::TSepMatchPos sepMatchPos;
+
+	for ( TParser::TSpecPair specBounds( 0, 0 );
+		  ( specBounds = m_crossRefParser.FindItemSpec( &sepMatchPos, *pTextContent, specBounds.second ) ).first != std::tstring::npos;
+		  specBounds.first = specBounds.second )
+	{	// found an embedded "<<Section>>" spec
+		std::tstring refSectionName = m_crossRefParser.ExtractItem( sepMatchPos, specBounds, *pTextContent );
+
+		const std::tstring* pRefContent = PromptConditionalSectionRef( &refSectionName )		// it strips the '?' prefix if present (conditional sections)
+			? ExpandSectionRefs( refSectionName )
+			: &str::GetEmpty();
+
+		if ( nullptr == pRefContent )
+			throw CRuntimeException( str::Format( _T("Cross-referenced section '%s' in section '%s' not found in compound text file '%s'"),
+												  refSectionName.c_str(), sectionName.c_str(), m_pCtx->m_filePath.GetPtr() ) );
+
+		CheckEatLineEnd( &specBounds.second, pTextContent->c_str() );		// do we have a '$' suffix, such as "<<Section>>$"?
+
+		// replace the entire spec "<<RefSection>>" with the embedded section content
+		pTextContent->replace( specBounds.first, specBounds.second - specBounds.first, *pRefContent );
+
+		specBounds.second = specBounds.first + pRefContent->length();		// adjust span to the new expanded content
+	}
+	return pTextContent;
+}
+
+bool CCompoundTextParser::CheckEatLineEnd( size_t* pLastPos _in_out_, const TCHAR* pContent )
+{	// if there is an '$' suffix (such as "<<Section>>$") => eat the following "\r\n" (or just "\n")
+	ASSERT_PTR( pContent );
+	ASSERT( *pLastPos <= str::GetLength( pContent ) );
+
+	if ( pContent[ *pLastPos ] != s_eatLineEnd )
+		return false;		// no '$' suffix
+
+	++*pLastPos;			// skip the '$' suffix, such as "<<Section>>$"?
+
+	// skip ONE following line-end:
+	if ( '\r' == pContent[ *pLastPos ] )
+		++*pLastPos;
+
+	if ( '\n' == pContent[ *pLastPos ] )
+		++*pLastPos;
+
+	return true;
+}
+
+bool CCompoundTextParser::PromptConditionalSectionRef( std::tstring* pRefSectionName _in_out_ ) const
+{
+	ASSERT_PTR( pRefSectionName );
+
+	if ( s_conditionalPrompt == str::CharAt( *pRefSectionName, 0 ) )
+	{
+		pRefSectionName->erase( pRefSectionName->begin() );		// strip the '?'
+
+		std::tstring message = str::Format( _T("Do you want to include section '%s'?"), pRefSectionName->c_str() );
+		std::tstring refContent = utl::FindValue( m_sectionMap, *pRefSectionName );
+
+		ide::CScopedWindow scopedIDE;
+		CCodeMessageBox dlg( message, refContent, MB_OKCANCEL | MB_ICONQUESTION, scopedIDE.GetMainWnd() );
+
+		if ( dlg.DoModal() != IDOK )
+			return false;
+	}
+
+	return true;
+}
+
+
+// CSectionParser implementation
+
+CSectionParser::CSectionParser( const TCHAR* pOpenDelim /*= _T("[[")*/, const TCHAR* pCloseDelim /*= _T("]]")*/, const TCHAR* pTagEOS /*= _T("EOS")*/ )
+	: m_parser( pOpenDelim, pCloseDelim, false )
+	, m_tagEOS( pTagEOS )
+{
+	Reset();
+}
+
+CSectionParser::~CSectionParser()
+{
+}
+
+void CSectionParser::Reset( void )
+{
+	m_sectionStage = Before;
+	m_sectionCount = 0;
+	m_textContent.clear();
+}
+
+bool CSectionParser::LoadFileSection( const fs::CPath& compoundFilePath, const std::tstring& sectionName ) throws_( std::exception )
+{
+	Reset();
+
+	std::ifstream input( compoundFilePath.GetPtr(), std::ios_base::in );	// | std::ios_base::binary
+	if ( !input.is_open() )
+		throw CRuntimeException( str::Format( _T("Unable to open text file %s"), compoundFilePath.GetPtr() ) );
+
+	for ( std::string line; std::getline( input, line ); )
+		if ( !ParseLine( str::FromUtf8( line.c_str() ), sectionName ) )
+			break;
+
+	return m_sectionCount != 0;
+}
+
+/*
+Process the line by switching to InSection stage if desired section is detected,
+and appending the line to content if zone is InSection.
+
+Note:
+- section content starts on the next line;
+- EOS tag (end of section) may be on the same line with a section content line.
+- if EOS tag is not present, a section ends on the next section start tag.
+*/
+bool CSectionParser::ParseLine( const std::tstring& line, const std::tstring& sectionName )
+{
+	ASSERT( m_sectionStage != Done );
+
+	TParser::TSepMatchPos sepMatchPos;
+	TParser::TSpecPair specBounds = m_parser.FindItemSpec( &sepMatchPos, line );
+
+	if ( specBounds.first != utl::npos )
+	{
+		Range<size_t> tagRange = m_parser.GetItemRange( sepMatchPos, specBounds );
+
+		if ( Before == m_sectionStage )
+		{
+			if ( sectionName.empty() || str::EqualsSeqAt( line, tagRange.m_start, sectionName ) )
 			{
-				errMessage.Format( _T("Syntax error in section \"%s\": section tag not closed !"), (LPCTSTR)name );
-				throw errMessage;
+				++m_sectionCount;
+				m_sectionStage = InSection;		// enter text content parsing mode
 			}
-	while ( tokenStart != -1 );
+		}
+		else
+		{
+			ASSERT( InSection == m_sectionStage );
 
-	// if any substitution done, update parser's section map
-	if ( boundCount > 0 )
-		parser.mapSections[ name ] = content;
+			if ( !tagRange.IsEmpty() )			// new-section tag or EOS?
+			{
+				if ( !sectionName.empty() )
+					m_sectionStage = Done;
+				else
+					m_sectionStage = Before;	// no section filter: keep loading all sections
 
-	return boundCount;
+				if ( str::EqualsSeqAt( line, tagRange.m_start, m_tagEOS ) )
+					AddTextContent( line.substr( 0, specBounds.first ) );		// append the leading text before the tag
+			}
+		}
+	}
+	else
+		AddTextContent( line );		// append the entire line
+
+	return m_sectionStage != Done;
+}
+
+void CSectionParser::AddTextContent( const std::tstring& text )
+{
+	if ( !m_textContent.empty() )
+		m_textContent += code::lineEnd;
+
+	m_textContent += text;
 }

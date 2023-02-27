@@ -31,12 +31,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "#ifndef APSTUDIO_INVOKED\r\n"
@@ -46,7 +46,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\IDETools.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -442,7 +442,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_FILE_TREE_DIALOG, DIALOG
     BEGIN
@@ -574,7 +574,7 @@ IDI_INCBROWSER_ICON     ICON                    "res\\IncBrowser.ico"
 // Accelerator
 //
 
-IDR_FILETREE_ACCEL ACCELERATORS 
+IDR_FILETREE_ACCEL ACCELERATORS
 BEGIN
     "E",            CM_EXPLORE_FILE,        VIRTKEY, CONTROL, NOINVERT
     "O",            IDC_BROWSE_FILE,        VIRTKEY, CONTROL, NOINVERT
@@ -594,7 +594,7 @@ BEGIN
     VK_SUBTRACT,    CM_COLAPSE_BRANCH,      VIRTKEY, CONTROL, NOINVERT
 END
 
-IDR_WKSPLOAD_ACCEL ACCELERATORS 
+IDR_WKSPLOAD_ACCEL ACCELERATORS
 BEGIN
     VK_ADD,         CM_MULTISEL_SELECT_ALL, VIRTKEY, NOINVERT
     VK_DIVIDE,      CM_MULTISEL_TOGGLE_SEL, VIRTKEY, NOINVERT
@@ -602,21 +602,21 @@ BEGIN
     VK_SUBTRACT,    CM_MULTISEL_CLEAR_ALL,  VIRTKEY, NOINVERT
 END
 
-IDR_FILETREEFOCUS_ACCEL ACCELERATORS 
+IDR_FILETREEFOCUS_ACCEL ACCELERATORS
 BEGIN
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_MULTIPLY,    CM_EXPAND_BRANCH,       VIRTKEY, NOINVERT
 END
 
-IDR_LOCATE_FILE_ACCEL ACCELERATORS 
+IDR_LOCATE_FILE_ACCEL ACCELERATORS
 BEGIN
     "E",            CM_EXPLORE_FILE,        VIRTKEY, CONTROL, NOINVERT
     "T",            CM_TEXT_VIEW_FILE,      VIRTKEY, CONTROL, NOINVERT
     "T",            CM_VIEW_FILE,           VIRTKEY, SHIFT, CONTROL, NOINVERT
 END
 
-IDR_LOCATE_FILE_LISTFOCUS_ACCEL ACCELERATORS 
+IDR_LOCATE_FILE_LISTFOCUS_ACCEL ACCELERATORS
 BEGIN
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
 END
@@ -627,7 +627,7 @@ END
 // Menu
 //
 
-IDR_CONTEXT_MENU MENU 
+IDR_CONTEXT_MENU MENU
 BEGIN
     POPUP "<IncludeTree>"
     BEGIN
@@ -783,73 +783,65 @@ IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_OPTIONS_PROPERTY_SHEET_CAPTION "IDETools Options"
     IDS_EMPTY_CURR_PROJECT_MESSAGE "No project name is specified!"
-    IDS_CODE_GENERATOR_CAPTION "IDETools - Code Generator"
-    IDS_PROMPTINCLUDESECTION "Do you want to include the section ""%s""?"
     IDS_PROMPT_DEBUG_BREAK  "Do you want to debug IDETools.dll ?"
     IDS_ERR_READONLY_PROPERTY "Attempt to set the read only property '%s'."
 END
 
-STRINGTABLE 
-BEGIN
-    IDS_ERR_SECTIONNOTCLOSED 
-                            "Syntax error:\n\nSection '%1' is not properly closed."
-END
-
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_DELETE_PROJECT_ENTRY "Project '%s' entry will be deleted."
     IDC_DELETE_ALL_PROJECTS "All project entries will be deleted!"
     IDC_REMOVE_SELECTED_FILE "Remove selected file?\n\n%s"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     CM_OPEN_COMPLEMENTARY   "Open Complementary\nOpen Complementary"
     CM_OPEN_INCLUDE_LINE    "Open Reference\nOpen Reference"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_FOUND_FILES_LISTCTRL "File Name=140|Directory=-1|Location=90"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     CM_ADD_BSC_DIR_PATH     "Add a new browse files folder entry\nNew Browse Folder"
     CM_REMOVE_BSC_DIR_PATH  "Delete the selected browse files folder entry\nDelete Browse Folder"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     CM_EDIT_BSC_DIR_PATH    "Modify the selected browse files folder\nModify Browse Folder"
     CM_MOVE_UP_BSC_DIR_PATH "Moves the selected folder up one position\nMove Folder Up"
-    CM_MOVE_DOWN_BSC_DIR_PATH 
+    CM_MOVE_DOWN_BSC_DIR_PATH
                             "Moves the selected folder down one position\nMove Folder Down"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_INPUT_TOKENS_DEFAULT "Set default input tokens"
     IDC_OUTPUT_SEPARATOR_DEFAULT "Set default output separators"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_COPY_OUTPUT_TO_SOURCE "Copy output text to source text"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_DEPTH_LEVEL_COMBO   "No limit|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15"
     IDC_VIEW_MODE_COMBO     "File name|Relative path file name|#include directive|File full path"
     IDC_ORDER_COMBO         "Parsing Order|Descending|Ascending|File name ascending"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "Clear\nClear selected text (Del)"
     ID_EDIT_CLEAR_ALL       "Clear All\nClear all text"

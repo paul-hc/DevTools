@@ -52,17 +52,17 @@ public:
 	bool AtEnd( TPos pos ) const { return pos == m_length; }
 
 	TPos FindPosNextSequence( TPos pos, const std::tstring& sequence ) const;		// -1 if not found
-	bool FindNextSequence( TokenRange* pSeqRange, TPos pos, const std::tstring& sequence ) const;
+	bool FindNextSequence( TokenRange* pSeqRange _in_out_, TPos pos, const std::tstring& sequence ) const;
 
 	TPos FindPosMatchingBracket( TPos bracketPos ) const;							// -1 if not found
-	bool SkipPosPastMatchingBracket( TPos* pBracketPos /*in-out*/ ) const;
-	bool FindArgList( TokenRange* pArgList, TPos pos, TCHAR openBracket = s_anyBracket ) const;
+	bool SkipPosPastMatchingBracket( TPos* pBracketPos _in_out_ ) const;
+	bool FindArgList( TokenRange* pArgList _out_, TPos pos, TCHAR openBracket = s_anyBracket ) const;
 
-	bool SkipWhitespace( TPos* pPos /*in-out*/ ) const;
-	bool SkipAnyOf( TPos* pPos /*in-out*/, const TCHAR charSet[] );
-	bool SkipAnyNotOf( TPos* pPos /*in-out*/, const TCHAR charSet[] );
+	bool SkipWhitespace( TPos* pPos _in_out_ ) const;
+	bool SkipAnyOf( TPos* pPos _in_out_, const TCHAR charSet[] );
+	bool SkipAnyNotOf( TPos* pPos _in_out_, const TCHAR charSet[] );
 
-	bool SkipMatchingToken( TPos* pPos /*in-out*/, const std::tstring& token );
+	bool SkipMatchingToken( TPos* pPos _in_out_, const std::tstring& token );
 private:
 	const std::tstring& m_codeText;
 public:
@@ -104,7 +104,7 @@ private:
 
 	typedef std::tstring::const_iterator TConstIterator;
 
-	bool FindSliceEnd( TConstIterator* pItSlice /*in-out*/, const TConstIterator& itEnd ) const;
+	bool FindSliceEnd( TConstIterator* pItSlice _in_out_, const TConstIterator& itEnd ) const;
 	void ParseQualifiedMethod( const std::tstring& codeText );
 private:
 	std::map<SliceType, TokenRange> m_codeSlices;

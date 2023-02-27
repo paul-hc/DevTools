@@ -439,14 +439,6 @@
 			Name="Main Code"
 			>
 			<File
-				RelativePath=".\CompoundTextParser.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CompoundTextParser.h"
-				>
-			</File>
-			<File
 				RelativePath=".\DspParser.cpp"
 				>
 			</File>
@@ -599,7 +591,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="string &amp; code"
+				Name="code &amp; text"
 				>
 				<File
 					RelativePath=".\BraceParityStatus.cpp"
@@ -618,11 +610,19 @@
 					>
 				</File>
 				<File
-					RelativePath=".\IterationSlices.cpp"
+					RelativePath=".\CompoundTextParser.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\IterationSlices.h"
+					RelativePath=".\CompoundTextParser.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CppImplFormatter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CppImplFormatter.h"
 					>
 				</File>
 				<File
@@ -631,14 +631,6 @@
 				</File>
 				<File
 					RelativePath=".\CppParser.h"
-					>
-				</File>
-				<File
-					RelativePath=".\CppImplementationFormatter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\CppImplementationFormatter.h"
 					>
 				</File>
 				<File
@@ -663,6 +655,14 @@
 				</File>
 				<File
 					RelativePath=".\FormatterOptions.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IterationSlices.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IterationSlices.h"
 					>
 				</File>
 				<File

@@ -65,7 +65,7 @@ namespace code
 		resetInternalState();
 		LoadCodeTemplates();
 
-		CTypeDescriptor tdInfo( this );
+		CTypeDescriptor tdInfo( this, isInline );
 
 		tdInfo.Parse( pTypeDescriptor );
 
@@ -104,19 +104,25 @@ namespace code
 
 		for ( std::vector<std::tstring>::const_iterator itProto = prototypes.begin(); itProto != prototypes.end(); ++itProto )
 		{
-			std::tstring implementation = ImplementMethod( *itProto, tdInfo.m_templateDecl, tdInfo.m_typeQualifier, isInline );
+			std::tstring implementation = ImplementMethod( *itProto, tdInfo );
 
 			if ( !implementation.empty() )
 				implementedMethods += implementation;
 		}
 
+		tdInfo.IndentCode( &implementedMethods );
 		return implementedMethods;
 	}
 
 	bool CCppImplFormatter::LoadCodeTemplates( void )
 	{
-		m_voidFunctionBody = _T("{\r\n}\r\n");
-		m_returnFunctionBody = _T("{\r\n\treturn ;\r\n}\r\n");
+		m_voidFunctionBody = _T("\
+{\r\n\
+}\r\n");
+		m_returnFunctionBody = _T("\
+{\r\n\
+\treturn ?;\r\n\
+}\r\n");
 
 		m_commentDecorationTemplate.clear();
 
@@ -193,66 +199,65 @@ namespace code
 		return typeDescriptor;
 	}
 
-	std::tstring CCppImplFormatter::ImplementMethod( const std::tstring& methodProto, const std::tstring& templateDecl, const std::tstring& typeQualifier, bool isInline )
+	std::tstring CCppImplFormatter::ImplementMethod( const std::tstring& methodProto, const CTypeDescriptor& tdInfo )
 	{
 		std::tstring srcPrototype = makeNormalizedFormattedPrototype( methodProto.c_str(), true );
-		std::tstring implementedMethod;
 
-		if ( !srcPrototype.empty() )
+		if ( srcPrototype.empty() )
+			return srcPrototype;
+
+		ResolveDefaultParameters( &srcPrototype );
+
+		CMethodPrototype method;
+
+		method.ParseCode( srcPrototype );		//m_validArgListOpenBraces
+
+		std::tstring returnType = tdInfo.m_inlinePrefix;
+		bool hasNoReturnType = true;
+
+		if ( !method.m_returnType.IsEmpty() )
 		{
-			ResolveDefaultParameters( &srcPrototype );
+			std::tstring theReturnType = method.m_returnType.MakeToken( srcPrototype );
 
-			CMethodPrototype method;
+			hasNoReturnType = ( theReturnType == _T("void") );
 
-			method.ParseCode( srcPrototype );		//m_validArgListOpenBraces
+			returnType += theReturnType;
 
-			std::tstring returnType;
-			bool hasNoReturnType = true;
-
-			if ( isInline )
-				returnType += _T("inline ");
-
-			if ( !method.m_returnType.IsEmpty() )
-			{
-				std::tstring theReturnType = method.m_returnType.MakeToken( srcPrototype );
-
-				hasNoReturnType = ( theReturnType == _T("void") );
-
-				returnType += theReturnType;
-				returnType += m_options.m_returnTypeOnSeparateLine ? code::lineEnd : _T(" ");
-			}
-
-			if ( !m_options.m_returnTypeOnSeparateLine && !returnType.empty() )
-				implementedMethod = returnType;
-
-			implementedMethod += typeQualifier;
-
-			implementedMethod += TokenRange( method.m_qualifiedMethod.m_start, method.m_postArgListSuffix.m_end ).MakeToken( srcPrototype );
-			implementedMethod += code::lineEnd;
-			implementedMethod = splitArgumentList( implementedMethod.c_str() );
-
-			if ( m_options.m_returnTypeOnSeparateLine && !returnType.empty() )
-				implementedMethod = returnType + implementedMethod;
-
-			if ( !templateDecl.empty() )
-				implementedMethod = templateDecl + code::lineEnd + implementedMethod;
-
-			if ( !m_commentDecorationTemplate.empty() )
-			{
-				std::tstring decorationCore = typeQualifier + TokenRange( method.m_qualifiedMethod.m_start, method.m_qualifiedMethod.m_end ).MakeToken( srcPrototype );
-				std::tstring commentDecoration = MakeCommentDecoration( decorationCore );
-
-				if ( !commentDecoration.empty() )
-					implementedMethod = commentDecoration + code::lineEnd + implementedMethod;
-			}
-
-			implementedMethod += hasNoReturnType ? m_voidFunctionBody : m_returnFunctionBody;
-
-			for ( int i = 0; i != m_options.m_linesBetweenFunctionImpls; ++i )
-				implementedMethod += code::lineEnd;
+			returnType += m_options.m_returnTypeOnSeparateLine ? code::lineEnd : _T(" ");
 		}
 
-		return implementedMethod;
+		std::tstring implMethod;
+
+		if ( !m_options.m_returnTypeOnSeparateLine && !returnType.empty() )
+			implMethod = returnType;
+
+		implMethod += tdInfo.m_typeQualifier;
+
+		implMethod += TokenRange( method.m_qualifiedMethod.m_start, method.m_postArgListSuffix.m_end ).MakeToken( srcPrototype );
+		implMethod += code::lineEnd;
+		implMethod = splitArgumentList( implMethod.c_str() );
+
+		if ( m_options.m_returnTypeOnSeparateLine && !returnType.empty() )
+			implMethod = returnType + implMethod;
+
+		if ( !tdInfo.m_templateDecl.empty() )
+			implMethod = tdInfo.m_templateDecl + code::lineEnd + implMethod;
+
+		if ( !m_commentDecorationTemplate.empty() )
+		{
+			std::tstring decorationCore = tdInfo.m_typeQualifier + TokenRange( method.m_qualifiedMethod.m_start, method.m_qualifiedMethod.m_end ).MakeToken( srcPrototype );
+			std::tstring commentDecoration = MakeCommentDecoration( decorationCore );
+
+			if ( !commentDecoration.empty() )
+				implMethod = commentDecoration + code::lineEnd + implMethod;
+		}
+
+		implMethod += hasNoReturnType ? m_voidFunctionBody : m_returnFunctionBody;
+
+		for ( int i = 0; i != m_options.m_linesBetweenFunctionImpls; ++i )
+			implMethod += code::lineEnd;
+
+		return implMethod;
 	}
 
 	void CCppImplFormatter::ResolveDefaultParameters( std::tstring* pProto ) const
@@ -507,6 +512,15 @@ namespace code
 {
 	// CTypeDescriptor implementation
 
+	CTypeDescriptor::CTypeDescriptor( const CFormatter* pFmt, bool isInline )
+		: m_pFmt( pFmt )
+	{
+		ASSERT_PTR( pFmt );
+
+		if ( isInline )
+			m_inlinePrefix = _T("inline ");
+	}
+
 	void CTypeDescriptor::Parse( const TCHAR* pTypeDescriptor ) throws_( CRuntimeException )
 	{
 		Split( pTypeDescriptor );
@@ -627,5 +641,22 @@ namespace code
 		}
 
 		return outTemplateInstanceList;
+	}
+
+	void CTypeDescriptor::IndentCode( std::tstring* pCodeText ) const
+	{
+		ASSERT_PTR( pCodeText );
+
+		if ( m_indentPrefix.empty() )
+			return;			// nothing to change
+
+		std::vector<std::tstring> lines;
+		str::Split( lines, pCodeText->c_str(), code::lineEnd );
+
+		for ( std::vector<std::tstring>::iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
+			if ( !itLine->empty() )
+				itLine->insert( 0, m_indentPrefix );		// indent only non-empty lines
+
+		*pCodeText = str::Join( lines, code::lineEnd );
 	}
 }
