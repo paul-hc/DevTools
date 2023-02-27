@@ -64,7 +64,7 @@ public:
 	// DSP Operations
 	bool findConfiguration( const TCHAR* configurationName );
 	bool findFile( const TCHAR* fileFullPath );
-	CString GetAdditionalIncludePath( const TCHAR* activeConfiguration = NULL, bool useAnyConfig = true );
+	CString GetAdditionalIncludePath( const TCHAR* activeConfiguration = nullptr, bool useAnyConfig = true );
 	size_t querySourceFiles( std::vector< PathInfoEx >& rOutSourceFiles );
 	size_t querySourceFiles( std::vector< CString >& rOutSourceFiles );
 
@@ -109,7 +109,7 @@ public:
 inline bool DspParser::isTokenCharMatch( const TCHAR* pStr, TCHAR tokenChar, str::CaseType caseType /*= str::Case*/ )
 {
 	return
-		pStr != NULL &&
+		pStr != nullptr &&
 		( caseType == str::Case ? ( pStr[ 0 ] == tokenChar )
 								: ( _totlower( pStr[ 0 ] ) == _totlower( tokenChar ) ) ) &&
 		_T('\0') == pStr[ 1 ];

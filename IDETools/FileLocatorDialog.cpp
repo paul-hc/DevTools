@@ -92,7 +92,7 @@ CFileLocatorDialog::CFileLocatorDialog( CWnd* pParent )
 	m_foundFilesListCtrl.SetSection( reg::section_list );
 	m_foundFilesListCtrl.SetUseAlternateRowColoring();
 	m_foundFilesListCtrl.StoreImageLists( &ft::GetFileTypeImageList() );
-	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );
+	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, nullptr );
 }
 
 CFileLocatorDialog::~CFileLocatorDialog()
@@ -344,7 +344,7 @@ int CFileLocatorDialog::getSelectedFoundFiles( std::vector< int >& selFiles )
 	int selIndex = -1;
 	std::vector< inc::TPathLocPair >::const_iterator itFoundBase = m_foundFiles.begin();
 
-	while ( pos != NULL )
+	while ( pos != nullptr )
 	{
 		selIndex = m_foundFilesListCtrl.GetNextSelectedItem( pos );
 		selFiles.push_back( selIndex );
@@ -384,14 +384,14 @@ void CFileLocatorDialog::OnLocalDirPathChanged( void )
 {
 	CProjectContext::OnLocalDirPathChanged();
 
-	if ( 0 == m_intrinsic && m_hWnd != NULL )
+	if ( 0 == m_intrinsic && m_hWnd != nullptr )
 		ui::SetWindowText( m_localDirPathEdit, m_localDirPath );
 }
 
 void CFileLocatorDialog::OnAssociatedProjectFileChanged( void )
 {
 	CProjectContext::OnAssociatedProjectFileChanged();
-	if ( 0 == m_intrinsic && m_hWnd != NULL )
+	if ( 0 == m_intrinsic && m_hWnd != nullptr )
 		ui::SetWindowText( m_projectFileEdit, m_associatedProjectFile );
 }
 
@@ -526,7 +526,7 @@ HBRUSH CFileLocatorDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT nCtlColor )
 {
 	HBRUSH hBrush = CLayoutDialog::OnCtlColor( pDC, pWnd, nCtlColor );
 
-	if ( nCtlColor == CTLCOLOR_STATIC && pWnd != NULL )
+	if ( nCtlColor == CTLCOLOR_STATIC && pWnd != nullptr )
 		switch ( pWnd->GetDlgCtrlID() )
 		{
 			case IDC_LOCAL_DIR_EDIT:
@@ -622,9 +622,9 @@ void CFileLocatorDialog::CmViewFile( UINT cmdId )
 			UpdateHistory( fileFullPath );
 
 		// Use text key (.txt) for text view, or the default for run
-		LPCTSTR useExtType = cmdId == CM_TEXT_VIEW_FILE ? _T(".txt") : NULL;
+		LPCTSTR useExtType = cmdId == CM_TEXT_VIEW_FILE ? _T(".txt") : nullptr;
 
-		shell::Execute( this, fileFullPath.c_str(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, useExtType );
+		shell::Execute( this, fileFullPath.c_str(), nullptr, SEE_MASK_FLAG_DDEWAIT, nullptr, nullptr, useExtType );
 	}
 }
 

@@ -19,8 +19,8 @@ namespace layout
 }
 
 
-CInputBoxDialog::CInputBoxDialog( const TCHAR* pTitle /*= NULL*/, const TCHAR* pPrompt /*= NULL*/,
-								const TCHAR* pInputText /*= NULL*/, CWnd* parent /*= NULL*/ )
+CInputBoxDialog::CInputBoxDialog( const TCHAR* pTitle /*= nullptr*/, const TCHAR* pPrompt /*= nullptr*/,
+								const TCHAR* pInputText /*= nullptr*/, CWnd* parent /*= nullptr*/ )
 	: CLayoutDialog( IDD_INPUT_BOX_DIALOG, parent )
 	, m_pTitle( pTitle )
 	, m_pPrompt( pPrompt )
@@ -36,7 +36,7 @@ CInputBoxDialog::~CInputBoxDialog()
 
 void CInputBoxDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == inputEdit.m_hWnd;
+	bool firstInit = nullptr == inputEdit.m_hWnd;
 
 	DDX_Control( pDX, IDC_INPUT_EDIT, inputEdit );
 	DDX_Text( pDX, IDC_INPUT_EDIT, m_inputText );

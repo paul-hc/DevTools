@@ -88,12 +88,12 @@ namespace code
 
 	bool isValidBraceChar( TCHAR chr, const TCHAR* validOpenBraces )
 	{
-		ASSERT( validOpenBraces != NULL );
+		ASSERT( validOpenBraces != nullptr );
 
 		if ( code::isOpenBraceChar( chr ) )
-			return _tcschr( validOpenBraces, chr ) != NULL;
+			return _tcschr( validOpenBraces, chr ) != nullptr;
 		else if ( code::isCloseBraceChar( chr ) )
-			return _tcschr( validOpenBraces, code::getMatchingBrace( chr ) ) != NULL;
+			return _tcschr( validOpenBraces, code::getMatchingBrace( chr ) ) != nullptr;
 		else
 			return false;
 	}
@@ -102,7 +102,7 @@ namespace code
 	{
 		TCHAR matchingQuote = str[ openQuotePos ];
 
-		ASSERT( str != NULL && openQuotePos >= 0 && openQuotePos < str::Length( str ) );
+		ASSERT( str != nullptr && openQuotePos >= 0 && openQuotePos < str::Length( str ) );
 		ASSERT( isQuoteChar( matchingQuote ) );
 
 		const TCHAR* cursor = str + openQuotePos + 1;
@@ -114,7 +114,7 @@ namespace code
 			{
 				++cursor;
 
-				if ( _tcschr( cppEscapedChars, *cursor ) != NULL )
+				if ( _tcschr( cppEscapedChars, *cursor ) != nullptr )
 					++cursor;						// known C++ escape sequence, skip it
 				else if ( *cursor == _T('x') )
 				{
@@ -140,7 +140,7 @@ namespace code
 	*/
 	int findNextWhitespacePos( const TCHAR* str, int startPos /*= 0*/ )
 	{
-		ASSERT( str != NULL && startPos <= (int)_tcslen( str ) );
+		ASSERT( str != nullptr && startPos <= (int)_tcslen( str ) );
 
 		const TCHAR* cursorNonWS = str + startPos;
 
@@ -155,7 +155,7 @@ namespace code
 	*/
 	int findNextNonWhitespace( const TCHAR* str, int startPos /*= 0*/ )
 	{
-		ASSERT( str != NULL && startPos <= (int)_tcslen( str ) );
+		ASSERT( str != nullptr && startPos <= (int)_tcslen( str ) );
 
 		const TCHAR* cursorNonWS = str + startPos;
 
@@ -169,7 +169,7 @@ namespace code
 	{
 		CString formatEscapeSequence( const TCHAR* pCodeText )
 		{
-			ASSERT( pCodeText != NULL );
+			ASSERT( pCodeText != nullptr );
 
 			CString displayText;
 			TCHAR* pOut = displayText.GetBuffer( 2 * str::Length( pCodeText ) );
@@ -201,7 +201,7 @@ namespace code
 
 		CString parseEscapeSequences( const TCHAR* pDisplayText )
 		{
-			ASSERT( pDisplayText != NULL );
+			ASSERT( pDisplayText != nullptr );
 
 			CString codeText;
 			TCHAR* pOut = codeText.GetBuffer( 2 * str::Length( pDisplayText ) );

@@ -50,7 +50,7 @@ public:
 
 	void gotoEnd( const TCHAR* pText ) { ASSERT_PTR( pText ); setEmpty( (int)str::GetLength( pText ) ); }
 
-	void extendToEnd( const TCHAR* pText ) { ASSERT( pText != NULL && m_start >= 0 ); m_end = (int)str::GetLength( pText ); }
+	void extendToEnd( const TCHAR* pText ) { ASSERT( pText != nullptr && m_start >= 0 ); m_end = (int)str::GetLength( pText ); }
 
 	void incrementBy( int increment );
 

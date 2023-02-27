@@ -34,8 +34,8 @@ const TCHAR* DspParser::getTokenString( TokenSemantic tokenSemantic )
 {
 	static const TCHAR* knownTokens[] =
 	{
-		NULL,					// tok_Invalid
-		NULL,					// tok_Generic
+		nullptr,				// tok_Invalid
+		nullptr,				// tok_Generic
 		_T("IF"),				// tok_ppIF
 		_T("ELSEIF"),			// tok_ppELSEIF
 		_T("ENDIF"),			// tok_ppENDIF
@@ -51,7 +51,7 @@ const TCHAR* DspParser::getTokenString( TokenSemantic tokenSemantic )
 		_T("SOURCE=")			// tok_SOURCE
 	};
 
-	return tokenSemantic >= tok_Invalid && tokenSemantic < tok_MaxCount ? knownTokens[ tokenSemantic ] : NULL;
+	return tokenSemantic >= tok_Invalid && tokenSemantic < tok_MaxCount ? knownTokens[ tokenSemantic ] : nullptr;
 }
 
 bool DspParser::registerToken( const CString& token, TokenSemantic tokenSemantic /*= tok_Generic*/ )
@@ -196,10 +196,10 @@ bool DspParser::isTokenSequence( const TCHAR* const* tokenSeq, int seqCount /*= 
 {
 	int i = 0;
 
-	for ( ; i < seqCount && tokenSeq[ i ] != NULL; ++i )
+	for ( ; i < seqCount && tokenSeq[ i ] != nullptr; ++i )
 		if ( !str::isTokenMatch( getNextToken(), tokenSeq[ i ] ) )
 			return false;
-	return i == seqCount || tokenSeq[ i ] == NULL;
+	return i == seqCount || tokenSeq[ i ] == nullptr;
 }
 
 bool DspParser::findConfiguration( const TCHAR* configurationName )
@@ -251,14 +251,14 @@ bool DspParser::findConfiguration( const TCHAR* configurationName )
 	return false;
 }
 
-CString DspParser::GetAdditionalIncludePath( const TCHAR* activeConfiguration /*= NULL*/, bool useAnyConfig /*= true*/ )
+CString DspParser::GetAdditionalIncludePath( const TCHAR* activeConfiguration /*= nullptr*/, bool useAnyConfig /*= true*/ )
 {
 	CString			additionalIncludePath;
 	bool			foundFirstConfig = false, foundEntry = false;
 
 	try
 	{	// Search for the active configuration if it's specified
-		if ( activeConfiguration != NULL && *activeConfiguration != _T('\0') )
+		if ( activeConfiguration != nullptr && *activeConfiguration != _T('\0') )
 			if ( findConfiguration( activeConfiguration ) )
 				foundFirstConfig = true;
 			else if ( useAnyConfig )

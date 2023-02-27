@@ -123,18 +123,18 @@ namespace str
 	// doesn't clear rOutDestTokens, it appends tokens to it
 	size_t split( std::vector< CString >& rOutDestTokens, const TCHAR* flatString, const TCHAR* separator )
 	{
-		ASSERT( separator != NULL && *separator != _T('\0') );
+		ASSERT( separator != nullptr && *separator != _T('\0') );
 
 		int separatorLength = str::Length( separator );
 		int startPos = 0;
 
-		if ( flatString != NULL && flatString[ 0 ] != _T('\0') )
+		if ( flatString != nullptr && flatString[ 0 ] != _T('\0') )
 			for ( ; ; )
 			{
 				const TCHAR* foundSep = _tcsstr( flatString + startPos, separator );
-				TokenRange tokenRange( startPos, foundSep != NULL ? int( foundSep - flatString ) : -1 );
+				TokenRange tokenRange( startPos, foundSep != nullptr ? int( foundSep - flatString ) : -1 );
 
-				if ( foundSep != NULL )
+				if ( foundSep != nullptr )
 				{
 					rOutDestTokens.push_back( tokenRange.getString( flatString ) );
 					startPos = tokenRange.m_end + separatorLength;
@@ -156,7 +156,7 @@ namespace str
 		CString flatCopy = flatString;
 
 		if ( !flatCopy.IsEmpty() )
-			for ( TCHAR* pToken = _tcstok( (TCHAR*)(const TCHAR*)flatCopy, separators ); pToken != NULL; pToken = _tcstok( NULL, separators ) )
+			for ( TCHAR* pToken = _tcstok( (TCHAR*)(const TCHAR*)flatCopy, separators ); pToken != nullptr; pToken = _tcstok( nullptr, separators ) )
 			{
 				CString item( pToken );
 
@@ -203,7 +203,7 @@ namespace str
 
 	bool parseInteger( int& rOutNumber, const TCHAR* pString )
 	{
-		ASSERT( pString != NULL );
+		ASSERT( pString != nullptr );
 
 		const TCHAR* ptr = pString;
 
@@ -422,8 +422,8 @@ namespace str
 	*/
 	bool isTokenMatch( const TCHAR* pString, const TCHAR* token, int startPos /*= 0*/, str::CaseType caseType /*= str::Case*/ )
 	{
-		ASSERT( token != NULL );
-		ASSERT( pString != NULL && startPos >= 0 && startPos <= str::Length( pString ) );
+		ASSERT( token != nullptr );
+		ASSERT( pString != nullptr && startPos >= 0 && startPos <= str::Length( pString ) );
 
 		int tokenLength = str::Length( token );
 

@@ -152,7 +152,7 @@ int CApplication::ExitInstance( void )
 	if ( CIncludeDirectories::Created() )			// was it loaded?
 		CIncludeDirectories::Instance().Save();
 
-	if ( m_pModuleSession.get() != NULL )
+	if ( m_pModuleSession.get() != nullptr )
 	{
 		m_pModuleSession->SaveToRegistry();
 		m_pModuleSession.reset();
@@ -182,7 +182,7 @@ void CApplication::OnInitAppResources( void )
 
 BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
-	if ( m_pModuleSession.get() != NULL && m_pModuleSession->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+	if ( m_pModuleSession.get() != nullptr && m_pModuleSession->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 		return TRUE;
 
 	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
@@ -191,7 +191,7 @@ BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO
 void CApplication::StoreVisualStudioVersion( void )
 {
 	static const fs::CPath s_filenameVS6( _T("MSDEV.EXE") );
-	fs::CPath exePath = fs::GetModuleFilePath( NULL );
+	fs::CPath exePath = fs::GetModuleFilePath( nullptr );
 
 	m_isVisualStudio6 = s_filenameVS6 == exePath.GetFilename();
 

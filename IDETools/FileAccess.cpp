@@ -142,7 +142,7 @@ BOOL FileAccess::Execute( LPCTSTR fullPath )
 
 BOOL FileAccess::ShellOpen( LPCTSTR docFullPath )
 {
-	HINSTANCE hInstExec = shell::Execute( NULL, docFullPath );
+	HINSTANCE hInstExec = shell::Execute( nullptr, docFullPath );
 
 	return (UINT_PTR)hInstExec >= HINSTANCE_ERROR;
 }
@@ -184,14 +184,14 @@ BSTR FileAccess::GetComplementaryDoc( LPCTSTR docFullPath )
 
 BOOL FileAccess::OutputWndActivateTab( LPCTSTR tabCaption )
 {
-	HWND hWndOutput =::GetFocus(), hWndTab = NULL;
+	HWND hWndOutput =::GetFocus(), hWndTab = nullptr;
 
-	if ( hWndOutput == NULL )
+	if ( hWndOutput == nullptr )
 		return FALSE;
 	hWndTab = ::GetWindow( hWndOutput, GW_HWNDFIRST );
-	if ( hWndTab != NULL )
+	if ( hWndTab != nullptr )
 		hWndTab = ::GetWindow( hWndTab, GW_HWNDNEXT );
-	if ( hWndTab == NULL )
+	if ( hWndTab == nullptr )
 		return FALSE;
 
 	return ( new OutputActivator( hWndOutput, hWndTab, tabCaption ) )->CreateThread();
@@ -206,15 +206,15 @@ BSTR FileAccess::GetIDECurrentBrowseFile( void )
 {
 	std::pair<HMENU, int> foundPopup = ide::FindPopupMenuWithCommand( ide::GetMainWindow()->GetSafeHwnd(), CM_IDE_CLOSEBROWSEFILE );
 
-	if ( foundPopup.first == NULL )
-		return NULL;
+	if ( foundPopup.first == nullptr )
+		return nullptr;
 
 	// Found CM_IDE_CLOSEBROWSEFILE popup item:
 	UINT itemState = GetMenuState( foundPopup.first, CM_IDE_CLOSEBROWSEFILE, MF_BYCOMMAND );
 
 	ASSERT( itemState != UINT( -1 ) );
 	if ( itemState & ( MF_DISABLED | MF_GRAYED ) )
-		return NULL;		// Menu item is disabled !
+		return nullptr;		// Menu item is disabled !
 
 	CString itemText, currBrowseFN;
 
@@ -224,7 +224,7 @@ BSTR FileAccess::GetIDECurrentBrowseFile( void )
 	itemText.ReleaseBuffer();
 
 	if ( itemText.IsEmpty() || itemText.Find( IDE_CLOSEBROWSEFILE_PREFIX ) == -1 )
-		return NULL;
+		return nullptr;
 
 	// found "Close Source Browser &File file.ext" popup item -> extract filename
 	int start = (int)_tcslen( IDE_CLOSEBROWSEFILE_PREFIX );
@@ -241,7 +241,7 @@ BOOL FileAccess::UpdateIDECurrentBrowseFile( BOOL doItNow )
 		HWND hWndIde = ide::GetMainWindow()->GetSafeHwnd();
 		std::pair<HMENU, int> foundPopup = ide::FindPopupMenuWithCommand( hWndIde, CM_IDE_CLOSEBROWSEFILE );
 
-		if ( foundPopup.first != NULL )
+		if ( foundPopup.first != nullptr )
 		{
 			if ( doItNow )
 				::SendMessage( hWndIde, WM_INITMENUPOPUP, (WPARAM)foundPopup.first, MAKELPARAM( foundPopup.second, FALSE ) );

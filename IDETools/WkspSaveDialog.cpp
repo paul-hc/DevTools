@@ -112,7 +112,7 @@ void CWkspSaveDialog::updateFileContents( void )
 
 	m_folderItem.Clear();
 	for ( unsigned int i = 0; i != m_rWkspProfile.fileArray.size(); ++i )
-		m_folderItem.AddFileItem( NULL, fs::CPath( m_rWkspProfile.fileArray[ i ].GetString() ) );
+		m_folderItem.AddFileItem( nullptr, fs::CPath( m_rWkspProfile.fileArray[ i ].GetString() ) );
 
 	m_fileList.SetRedraw( FALSE );
 	m_fileList.ResetContent();
@@ -292,7 +292,7 @@ void CWkspSaveDialog::OnOK( void )
 
 void CWkspSaveDialog::OnDropFiles( HDROP hDropInfo )
 {
-	UINT fileCount =::DragQueryFile( hDropInfo, UINT( -1 ), NULL, 0 );
+	UINT fileCount =::DragQueryFile( hDropInfo, UINT( -1 ), nullptr, 0 );
 	TCHAR fullPath[ MAX_PATH ];
 
 	for ( UINT index = 0; index < fileCount; ++index )

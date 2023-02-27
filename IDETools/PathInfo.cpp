@@ -12,7 +12,7 @@
 
 int revFindCharsPos( const TCHAR* string, const TCHAR* chars, int pos /*= -1*/ )
 {
-	if ( string == NULL || string[ 0 ] == _T('\0') || chars == NULL || chars[ 0 ] == _T('\0') )
+	if ( string == nullptr || string[ 0 ] == _T('\0') || chars == nullptr || chars[ 0 ] == _T('\0') )
 		return -1;
 
 	int len = str::Length( string );
@@ -21,7 +21,7 @@ int revFindCharsPos( const TCHAR* string, const TCHAR* chars, int pos /*= -1*/ )
 		pos = len;
 	ASSERT( pos >= 0 && pos <= len );
 
-	while ( --pos >= 0 && _tcschr( chars, string[ pos ] ) == NULL )
+	while ( --pos >= 0 && _tcschr( chars, string[ pos ] ) == nullptr )
 		UNUSED_ALWAYS( 0 );
 
 	return pos;
@@ -122,7 +122,7 @@ const std::vector< PathField >& PathInfo::GetDefaultOrder( void )
 	return CPathSortOrder::GetDefaultOrder();
 }
 
-CString PathInfo::getField( PathField field, const TCHAR* defaultField /*= NULL*/ ) const
+CString PathInfo::getField( PathField field, const TCHAR* defaultField /*= nullptr*/ ) const
 {
 	switch ( field )
 	{
@@ -177,7 +177,7 @@ bool PathInfo::operator==( const PathInfo& right ) const
 
 pred::CompareResult PathInfo::Compare( const PathInfo& right,
 									   const std::vector< PathField >& orderFields /*= GetDefaultOrder()*/,
-									   const TCHAR* pDefaultDirName /*= NULL*/ ) const
+									   const TCHAR* pDefaultDirName /*= nullptr*/ ) const
 {
 	// make field comparisions as specified by orderFields while most signifiant fileds are equal
 	pred::CompareResult result = pred::Equal;
@@ -186,7 +186,7 @@ pred::CompareResult PathInfo::Compare( const PathInfo& right,
 	return result;
 }
 
-pred::CompareResult PathInfo::CompareField( const PathInfo& right, PathField field, const TCHAR* pDefaultDirName /*= NULL*/ ) const
+pred::CompareResult PathInfo::CompareField( const PathInfo& right, PathField field, const TCHAR* pDefaultDirName /*= nullptr*/ ) const
 {
 	pred::CompareResult result = path::CompareNPtr( getField( field, pDefaultDirName ), right.getField( field, pDefaultDirName ) );
 
@@ -245,7 +245,7 @@ bool PathInfo::isNetworkPath( void ) const
 
 bool PathInfo::hasWildcards( void ) const
 {
-	return _tcspbrk( name, _T("*?") ) != NULL || _tcspbrk( ext, _T("*?") ) != NULL;
+	return _tcspbrk( name, _T("*?") ) != nullptr || _tcspbrk( ext, _T("*?") ) != nullptr;
 }
 
 bool PathInfo::exist( const TCHAR* pFilePath, bool allowDevices /*= false*/ )
@@ -267,11 +267,11 @@ CString PathInfo::getDirPath( bool withTrailSlash /*= true*/ ) const
 		return drive + dir.Left( dir.GetLength() - 1 );
 }
 
-CString PathInfo::getDirName( const TCHAR* pDefaultDirName /*= NULL*/ ) const
+CString PathInfo::getDirName( const TCHAR* pDefaultDirName /*= nullptr*/ ) const
 {
 	// ex: for "E:\WINNT\system32\BROWSER.DLL" -> returns "system32"
 	// if pDefaultDirName="system32" -> returns "" !
-	if ( pDefaultDirName != NULL && path::EquivalentPtr( dirName, pDefaultDirName ) )
+	if ( pDefaultDirName != nullptr && path::EquivalentPtr( dirName, pDefaultDirName ) )
 		return CString();
 	return dirName;
 }
@@ -305,8 +305,8 @@ void PathInfo::assignDirPath( CString dirPath, bool doStdConvert /*= false*/ )
 	_tsplitpath( dirPath,
 				 drive.GetBuffer( _MAX_DRIVE ),
 				 dir.GetBuffer( _MAX_DIR ),
-				 NULL,
-				 NULL );
+				 nullptr,
+				 nullptr );
 	drive.ReleaseBuffer();
 	dir.ReleaseBuffer();
 
@@ -318,8 +318,8 @@ void PathInfo::assignNameExt( const CString& nameExt, bool doStdConvert /*= fals
 // Assigns 'name' and 'ext' members and preserves 'drive' and 'dir' members
 {
 	_tsplitpath( doStdConvert ? path::MakeNormal( nameExt ).c_str() : (LPCTSTR)nameExt,
-				 NULL,
-				 NULL,
+				 nullptr,
+				 nullptr,
 				 name.GetBuffer( _MAX_FNAME ),
 				 ext.GetBuffer( _MAX_EXT ) );
 	name.ReleaseBuffer();
@@ -339,7 +339,7 @@ void PathInfo::updateFullPath( void )
 {
 }
 
-CString PathInfo::getDirNameExt( const TCHAR* pDefaultDirName /*= NULL*/ ) const
+CString PathInfo::getDirNameExt( const TCHAR* pDefaultDirName /*= nullptr*/ ) const
 {
 	CString dirNameFriendly = getDirName( pDefaultDirName );
 
@@ -357,7 +357,7 @@ void PathInfo::makeAbsolute( void )
 CString PathInfo::makeAbsolute( const TCHAR* pathToConvert )
 {
 	CString absolutePath;
-	bool success = _tfullpath( absolutePath.GetBuffer( _MAX_PATH ), pathToConvert, _MAX_PATH ) != NULL;
+	bool success = _tfullpath( absolutePath.GetBuffer( _MAX_PATH ), pathToConvert, _MAX_PATH ) != nullptr;
 
 	absolutePath.ReleaseBuffer();
 	if ( !success )
@@ -382,17 +382,17 @@ TCHAR* PathInfo::findSubString( const TCHAR* pathString, const TCHAR* subString 
 			return cmp;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int PathInfo::find( const TCHAR* pathString, const TCHAR* subString, int startPos /*= 0*/ )
 {
-	ASSERT( pathString != NULL && subString != NULL && startPos >= startPos );
+	ASSERT( pathString != nullptr && subString != nullptr && startPos >= startPos );
 	ASSERT( startPos <= str::Length( pathString ) );
 
 	TCHAR* pMatch = findSubString( pathString + startPos, subString );
 
-	return pMatch != NULL ? ( int( pMatch - pathString ) + startPos ) : ( -1 );
+	return pMatch != nullptr ? ( int( pMatch - pathString ) + startPos ) : ( -1 );
 }
 
 
@@ -455,20 +455,20 @@ bool PathInfoEx::isConsistent( void ) const
 
 // FileFindEx implementation
 
-bool FileFindEx::findDir( const TCHAR* dirPathFilter /*= NULL*/ )
+bool FileFindEx::findDir( const TCHAR* dirPathFilter /*= nullptr*/ )
 {
 #ifdef _WIN32_WINNT
 	Close();
 
 	m_pNextInfo = new WIN32_FIND_DATA;
 
-	if ( dirPathFilter == NULL )
+	if ( dirPathFilter == nullptr )
 		dirPathFilter = _T("*.*");
 	lstrcpy( ( (WIN32_FIND_DATA*)m_pNextInfo )->cFileName, dirPathFilter );
 
 	m_hContext = ::FindFirstFileEx( dirPathFilter, FindExInfoStandard,
 									(WIN32_FIND_DATA*)m_pNextInfo,
-									FindExSearchLimitToDirectories, NULL, 0 );
+									FindExSearchLimitToDirectories, nullptr, 0 );
 
 	if ( m_hContext == INVALID_HANDLE_VALUE )
 	{
@@ -483,8 +483,8 @@ bool FileFindEx::findDir( const TCHAR* dirPathFilter /*= NULL*/ )
 	const TCHAR* pstr = _tfullpath( pstrRoot, dirPathFilter, _MAX_PATH );
 
 	// Passed name isn't a valid path but was found by the API
-	ASSERT( pstr != NULL );
-	if ( pstr == NULL )
+	ASSERT( pstr != nullptr );
+	if ( pstr == nullptr )
 	{
 		m_strRoot.ReleaseBuffer();
 		Close();
@@ -497,11 +497,11 @@ bool FileFindEx::findDir( const TCHAR* dirPathFilter /*= NULL*/ )
 		TCHAR* pstrBack = _tcsrchr( pstrRoot, _T('\\') );
 		TCHAR* pstrFront = _tcsrchr( pstrRoot, _T('/') );
 
-		if ( pstrFront != NULL || pstrBack != NULL )
+		if ( pstrFront != nullptr || pstrBack != nullptr )
 		{
-			if ( pstrFront == NULL )
+			if ( pstrFront == nullptr )
 				pstrFront = pstrRoot;
-			if ( pstrBack == NULL )
+			if ( pstrBack == nullptr )
 				pstrBack = pstrRoot;
 			// From the start to the last whack is the root
 			if ( pstrFront >= pstrBack )

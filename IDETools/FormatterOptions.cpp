@@ -134,20 +134,20 @@ namespace code
 			if ( chr == itBrace->m_braceOpen || chr == itBrace->m_braceClose )
 				return const_cast<CBraceRule*>( &*itBrace );
 
-		return NULL;
+		return nullptr;
 	}
 
 	TokenSpacing CFormatterOptions::MustSpaceBrace( TCHAR chr ) const
 	{
 		CBraceRule* brace = FindBraceRule( chr );
 
-		return brace != NULL ? brace->m_spacing : PreserveSpace;
+		return brace != nullptr ? brace->m_spacing : PreserveSpace;
 	}
 
 	bool CFormatterOptions::IsArgListBrace( TCHAR chr ) const
 	{
 		const CBraceRule* pBrace = FindBraceRule( chr );
-		return pBrace != NULL && pBrace->m_isArgList;
+		return pBrace != nullptr && pBrace->m_isArgList;
 	}
 
 	CFormatterOptions::COperatorRule* CFormatterOptions::FindOperatorRule( const TCHAR* pOpStart ) const
@@ -157,7 +157,7 @@ namespace code
 			if ( pred::Equal == _tcsncmp( itOpRule->m_pOperator, pOpStart, str::GetLength( itOpRule->m_pOperator ) ) )
 				return const_cast<COperatorRule*>( &*itOpRule );
 
-		return NULL;
+		return nullptr;
 	}
 
 	const std::tstring* CFormatterOptions::FindBreakSeparator( const TCHAR* pBreakSepStart ) const
@@ -166,7 +166,7 @@ namespace code
 			if ( pred::Equal == _tcsnicmp( itBreakSep->c_str(), pBreakSepStart, itBreakSep->length() ) )
 				return &*itBreakSep;
 
-		return NULL;
+		return nullptr;
 	}
 
 	std::tstring CFormatterOptions::GetArgListOpenBraces( void ) const

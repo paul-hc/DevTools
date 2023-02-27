@@ -587,7 +587,7 @@ namespace code
 
 	int CFormatter::splitMultipleLines( std::vector< CString >& outLinesOfCode, std::vector< CString >& outLineEnds, const TCHAR* pCodeText )
 	{
-		if ( pCodeText != NULL && pCodeText[ 0 ] != _T('\0') )
+		if ( pCodeText != nullptr && pCodeText[ 0 ] != _T('\0') )
 			for ( int pos = 0; ; )
 			{
 				TokenRange endOfLinePos = str::findStringPos( pCodeText, code::lineEnd, pos );
@@ -898,7 +898,7 @@ namespace code
 		while ( *pCursor != _T('\0') )
 		{
 			int statementEnd;
-			const std::tstring* pBreakSeparatorFound = NULL;
+			const std::tstring* pBreakSeparatorFound = nullptr;
 
 			if ( code::isQuoteChar( *pCursor ) )
 			{
@@ -919,7 +919,7 @@ namespace code
 			{
 				pCursor = pCodeText + str::safePos( statementEnd, pCodeText );
 			}
-			else if ( ( pBreakSeparatorFound = m_options.FindBreakSeparator( pCursor ) ) != NULL )
+			else if ( ( pBreakSeparatorFound = m_options.FindBreakSeparator( pCursor ) ) != nullptr )
 			{
 				pOutToken->setWithLength( int( pCursor - pCodeText ), pBreakSeparatorFound->length() );
 				return LBT_BreakSeparator;
@@ -1069,12 +1069,12 @@ namespace code
 
 		TokenRange coreRange( pCodeText );
 
-		if ( langCommentTokens.m_singleLineComment != NULL &&
+		if ( langCommentTokens.m_singleLineComment != nullptr &&
 			 str::isTokenMatch( pCodeText, langCommentTokens.m_singleLineComment, 0, getLanguageCase( m_docLanguage ) ) )
 		{
 			coreRange.m_start += str::Length( langCommentTokens.m_singleLineComment );
 		}
-		else if ( langCommentTokens.m_openComment != NULL && langCommentTokens.m_closeComment != NULL )
+		else if ( langCommentTokens.m_openComment != nullptr && langCommentTokens.m_closeComment != nullptr )
 		{
 			if ( str::isTokenMatch( pCodeText, langCommentTokens.m_openComment, 0, getLanguageCase( m_docLanguage ) ) )
 				coreRange.m_start += str::Length( langCommentTokens.m_openComment );

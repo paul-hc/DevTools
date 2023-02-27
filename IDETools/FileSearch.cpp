@@ -66,7 +66,7 @@ bool FileSearch::isTargetFile( void ) const
 {
 	WIN32_FIND_DATA* findData = getFindData();
 
-	VERIFY( findData != NULL );
+	VERIFY( findData != nullptr );
 
 	DWORD			attr = findData->dwFileAttributes;
 
@@ -112,7 +112,7 @@ CString FileSearch::doFindAllFiles( LPCTSTR filePattern, LPCTSTR separator, long
 	CString			foundPaths;
 	BOOL			found = FindFile( filePattern );
 
-	ASSERT( separator != NULL && *separator != _T('\0') );
+	ASSERT( separator != nullptr && *separator != _T('\0') );
 	for ( ; found; ++outFileCount )
 	{
 		if ( !foundPaths.IsEmpty() )
@@ -237,7 +237,7 @@ long FileSearch::GetFileAttributes()
 {
 	WIN32_FIND_DATA* findData = getFindData();
 
-	return findData != NULL ? findData->dwFileAttributes : 0;
+	return findData != nullptr ? findData->dwFileAttributes : 0;
 }
 
 BSTR FileSearch::GetFileName()
@@ -337,11 +337,11 @@ BSTR FileSearch::FindAllFiles( LPCTSTR filePattern, LPCTSTR separator, long FAR*
 	CString foundPaths;
 	long fileCount = 0;
 
-	if ( separator == NULL || *separator == _T('\0') )
+	if ( separator == nullptr || *separator == _T('\0') )
 		separator = _T(";");
 	foundPaths = doFindAllFiles( filePattern, separator, fileCount, recurseSubDirs );
 
-	if ( outFileCount != NULL )
+	if ( outFileCount != nullptr )
 		*outFileCount = fileCount;
 
 	return foundPaths.AllocSysString();
@@ -370,16 +370,16 @@ BSTR FileSearch::BuildSubDirFilePattern( LPCTSTR filePattern )
 		int len = subDirPath.GetLength();
 		TCHAR drive[ _MAX_DRIVE ], dir[ _MAX_DIR ], fname[ _MAX_FNAME ], ext[ _MAX_EXT ];
 
-		if ( filePattern == NULL || *filePattern == _T('\0') )
+		if ( filePattern == nullptr || *filePattern == _T('\0') )
 			filePattern = _T("*.*");
 		// Append a trailing backslash if not already
 		if ( len > 3 )
 			if ( subDirPath[ len - 1 ] != _T('\\') && subDirPath[ len - 1 ] != _T('/') )
 				subDirPath += _T("\\");
 		// Get the subdir full path
-		_tsplitpath( subDirPath, drive, dir, NULL, NULL );
+		_tsplitpath( subDirPath, drive, dir, nullptr, nullptr );
 		// Get the pattern filename and extension
-		_tsplitpath( filePattern, NULL, NULL, fname, ext );
+		_tsplitpath( filePattern, nullptr, nullptr, fname, ext );
 		// Mix together the subdir path and filter filename and extension into the resulting subdir pattern
 		_tmakepath( subDirFilePattern.GetBuffer( _MAX_PATH ), drive, dir, fname, ext );
 		subDirFilePattern.ReleaseBuffer();
@@ -399,7 +399,7 @@ BSTR FileSearch::SetupForSubDirSearch( LPCTSTR parentFilePattern )
 
 	TCHAR drive[ _MAX_DRIVE ], dir[ _MAX_DIR ];
 
-	_tsplitpath( parentFilePattern, drive, dir, NULL, NULL );
+	_tsplitpath( parentFilePattern, drive, dir, nullptr, nullptr );
 	_tmakepath( subDirFilePattern.GetBuffer( _MAX_PATH ), drive, dir, _T("*"), _T(".*") );
 	subDirFilePattern.ReleaseBuffer();
 

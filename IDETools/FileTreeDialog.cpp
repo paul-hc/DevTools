@@ -84,7 +84,7 @@ CFileTreeDialog::~CFileTreeDialog()
 
 void CFileTreeDialog::SetRootPath( const fs::CPath& rootPath )
 {
-	bool restoreTreeUi = m_hWnd != NULL && m_rOpt.m_selRecover && m_rootPath.Equivalent( rootPath.Get() );
+	bool restoreTreeUi = m_hWnd != nullptr && m_rOpt.m_selRecover && m_rootPath.Equivalent( rootPath.Get() );
 	CTreeCtrlUiState treeState;
 
 	if ( restoreTreeUi )
@@ -127,7 +127,7 @@ void CFileTreeDialog::BuildIncludeTree( void )
 		int orderIndex = 0;							// keep root items unsorted
 		bool originalItem;
 		TTreeItemPair itemPair = AddTreeItem( TVI_ROOT, *itItem, orderIndex, originalItem );
-		if ( itemPair.first != NULL )
+		if ( itemPair.first != nullptr )
 		{
 			if ( originalItem )
 				AddIncludedChildren( itemPair, !m_rOpt.m_lazyParsing );		// insert children
@@ -171,7 +171,7 @@ bool CFileTreeDialog::AddIncludedChildren( TTreeItemPair& rParentPair, bool doRe
 	{
 		bool originalItem;
 		TTreeItemPair itemPair = AddTreeItem( rParentPair.first, *itItem, orderIndex, originalItem );
-		if ( itemPair.first != NULL )
+		if ( itemPair.first != nullptr )
 		{
 			++addedCount;
 			if ( doRecurse && originalItem )
@@ -190,7 +190,7 @@ TTreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pIt
 {
 	ASSERT_PTR( pItemInfo );
 	ASSERT( pItemInfo->IsValidFile() );
-	static const TTreeItemPair s_nullPair( NULL, NULL );
+	static const TTreeItemPair s_nullPair( nullptr, nullptr );
 
 	if ( IsFileExcluded( pItemInfo->m_path ) )
 		return s_nullPair;
@@ -239,7 +239,7 @@ TTreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pIt
 
 bool CFileTreeDialog::IsCircularDependency( const TTreeItemPair& currItem ) const
 {
-	for ( HTREEITEM hParent = currItem.first; ( hParent = m_treeCtrl.GetParentItem( hParent ) ) != NULL; )
+	for ( HTREEITEM hParent = currItem.first; ( hParent = m_treeCtrl.GetParentItem( hParent ) ) != nullptr; )
 		if ( const CIncludeNode* pParentItem = GetItemInfo( hParent) )
 			if ( pParentItem->m_path == currItem.second->m_path )
 				return true;		// found circular dependency
@@ -266,7 +266,7 @@ bool CFileTreeDialog::UpdateCurrentSelection( void )
 {
 	fs::CPath fullPath;
 	HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem();
-	if ( hSelItem != NULL )
+	if ( hSelItem != nullptr )
 		if ( const CIncludeNode* pItemInfo = GetItemInfo( hSelItem ) )
 			fullPath = pItemInfo->m_path;
 
@@ -277,7 +277,7 @@ bool CFileTreeDialog::UpdateCurrentSelection( void )
 
 	if ( m_complemFilePath.IsEmpty() )
 		m_complemFilePath = fullPath;		// set to current file if no associations
-	return hSelItem != NULL;
+	return hSelItem != nullptr;
 }
 
 bool CFileTreeDialog::SetViewMode( ViewMode viewMode )
@@ -322,14 +322,14 @@ std::tstring CFileTreeDialog::BuildItemText( const CIncludeNode* pItemInfo, View
 	return _T("???");
 }
 
-void CFileTreeDialog::ForEach( TIterFunc pIterFunc, HTREEITEM hItem /*= TVI_ROOT*/, void* pArgs /*= NULL*/, int nestingLevel /*= -1*/ )
+void CFileTreeDialog::ForEach( TIterFunc pIterFunc, HTREEITEM hItem /*= TVI_ROOT*/, void* pArgs /*= nullptr*/, int nestingLevel /*= -1*/ )
 {
 	ASSERT_PTR( pIterFunc );
 
 	if ( hItem != TVI_ROOT )
 		pIterFunc( &m_treeCtrl, hItem, pArgs, nestingLevel );
 
-	for ( HTREEITEM hChild = m_treeCtrl.GetChildItem( hItem ); hChild != NULL; hChild = m_treeCtrl.GetNextSiblingItem( hChild ) )
+	for ( HTREEITEM hChild = m_treeCtrl.GetChildItem( hItem ); hChild != nullptr; hChild = m_treeCtrl.GetNextSiblingItem( hChild ) )
 		ForEach( pIterFunc, hChild, pArgs, nestingLevel + 1 );
 }
 
@@ -351,8 +351,8 @@ void _AddMatchingPath( const CTreeControl* pTreeCtrl, HTREEITEM hItem, CMatching
 
 HTREEITEM CFileTreeDialog::FindNextItem( HTREEITEM hStartItem, bool forward /*= true*/ )
 {
-	if ( NULL == hStartItem )
-		return NULL;
+	if ( nullptr == hStartItem )
+		return nullptr;
 
 	ASSERT( m_treeCtrl.IsRealItem( hStartItem ) );
 
@@ -371,15 +371,15 @@ HTREEITEM CFileTreeDialog::FindNextItem( HTREEITEM hStartItem, bool forward /*= 
 
 HTREEITEM CFileTreeDialog::FindOriginalItem( HTREEITEM hStartItem )
 {
-	if ( NULL == hStartItem )
-		return NULL;
+	if ( nullptr == hStartItem )
+		return nullptr;
 
 	const CIncludeNode* pStartInfo = GetItemInfo( hStartItem );
 	std::tstring fullPath = path::MakeCanonical( pStartInfo->m_path.GetPtr() );
 
 	TPathToItemMap::const_iterator itFound = m_originalItems.find( fullPath );
 	if ( itFound == m_originalItems.end() )
-		return NULL;
+		return nullptr;
 	return itFound->second;
 }
 
@@ -397,7 +397,7 @@ bool CFileTreeDialog::SetOrder( Ordering ordering )
 
 int CALLBACK SortCallback( const CIncludeNode* pLeft, const CIncludeNode* pRight, CFileTreeDialog* pDialog )
 {
-	ASSERT( pLeft != NULL && pRight != NULL );
+	ASSERT( pLeft != nullptr && pRight != nullptr );
 	switch ( pDialog->m_rOpt.m_ordering )
 	{
 		case ordNormal:
@@ -418,7 +418,7 @@ bool CFileTreeDialog::ReorderChildren( HTREEITEM hParent /*= TVI_ROOT*/ )
 {
 	if ( TVI_ROOT == hParent )
 	{	// special case for root items -> sort only their children but not themselves
-		for ( HTREEITEM hItemRoot = m_treeCtrl.GetRootItem(); hItemRoot != NULL; hItemRoot = m_treeCtrl.GetNextSiblingItem( hItemRoot ) )
+		for ( HTREEITEM hItemRoot = m_treeCtrl.GetRootItem(); hItemRoot != nullptr; hItemRoot = m_treeCtrl.GetNextSiblingItem( hItemRoot ) )
 			ReorderChildren( hItemRoot );
 		return true;
 	}
@@ -456,8 +456,8 @@ bool CFileTreeDialog::HasValidComplementary( void ) const		// true if the select
 
 TTreeItemPair CFileTreeDialog::GetSelectedItem( void ) const
 {
-	TTreeItemPair itemPair( m_treeCtrl.GetSelectedItem(), NULL );
-	if ( itemPair.first != NULL )
+	TTreeItemPair itemPair( m_treeCtrl.GetSelectedItem(), nullptr );
+	if ( itemPair.first != nullptr )
 		itemPair.second = GetItemInfo( itemPair.first );
 	return itemPair;
 }
@@ -474,7 +474,7 @@ void CFileTreeDialog::UpdateOptionCtrl( void )
 
 void CFileTreeDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_depthLevelCombo.m_hWnd;
+	bool firstInit = nullptr == m_depthLevelCombo.m_hWnd;
 
 	DDX_Control( pDX, IDC_DEPTH_LEVEL_COMBO, m_depthLevelCombo );
 	DDX_Control( pDX, IDC_FILE_TREE, m_treeCtrl );
@@ -693,7 +693,7 @@ void CFileTreeDialog::TVnGetInfoTip_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMTVGETINFOTIP* pNmInfoTip = (NMTVGETINFOTIP*)pNmHdr;
 
-	if ( pNmInfoTip != NULL )
+	if ( pNmInfoTip != nullptr )
 	{
 		static std::tstring tooltipTextBuffer;
 		CIncludeNode* pTreeItem = GetItemInfo( pNmInfoTip->hItem );
@@ -725,7 +725,7 @@ void CFileTreeDialog::TVnRclick_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 	clientPoint = mouse;
 	m_treeCtrl.ScreenToClient( &clientPoint );
 	hItem = m_treeCtrl.HitTest( clientPoint, &hit );
-	if ( hItem != NULL )
+	if ( hItem != nullptr )
 		m_treeCtrl.SelectItem( hItem );
 	*pResult = 0; // WM_CONTEXTMENU will be further received
 }
@@ -741,7 +741,7 @@ void CFileTreeDialog::TVnDblclk_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 	m_treeCtrl.ScreenToClient( &mouse );
 	hItem = m_treeCtrl.HitTest( mouse, &hit );
 	*pResult = 0;
-	if ( hItem != NULL && hit == TVHT_ONITEMLABEL )
+	if ( hItem != nullptr && hit == TVHT_ONITEMLABEL )
 	{
 		*pResult = 1;
 		PostMessage( WM_COMMAND, IDOK );
@@ -859,14 +859,14 @@ void CFileTreeDialog::UUI_FindDupOccurences( CCmdUI* pCmdUI )
 		{	// we may have dups
 			if ( HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem() )
 			{
-				HTREEITEM hItemFound = NULL;
+				HTREEITEM hItemFound = nullptr;
 				switch ( pCmdUI->m_nID )
 				{
 					case CM_FIND_NEXT:		hItemFound = FindNextItem( hSelItem, true ); break;
 					case CM_FIND_PREV:		hItemFound = FindNextItem( hSelItem, false ); break;
 					case CM_FIND_ORIGIN:	hItemFound = FindOriginalItem( hSelItem ); break;
 				}
-				doEnable = hItemFound != NULL && hItemFound != hSelItem;
+				doEnable = hItemFound != nullptr && hItemFound != hSelItem;
 			}
 		}
 
@@ -900,7 +900,7 @@ void CFileTreeDialog::CmRefresh( void )
 
 void CFileTreeDialog::OnOK( void )
 {
-	if ( m_treeCtrl.GetEditControl() != NULL )
+	if ( m_treeCtrl.GetEditControl() != nullptr )
 		m_treeCtrl.SetFocus();				// first cancel label edit modal state
 	else
 	{
@@ -912,7 +912,7 @@ void CFileTreeDialog::OnOK( void )
 
 void CFileTreeDialog::OnCancel( void )
 {
-	if ( m_treeCtrl.GetEditControl() != NULL )
+	if ( m_treeCtrl.GetEditControl() != nullptr )
 		m_treeCtrl.SetFocus();				// first cancel label edit modal state
 	else
 		CLayoutDialog::OnCancel();
@@ -944,23 +944,23 @@ void CFileTreeDialog::CmOpenIncludeLine( void )
 void CFileTreeDialog::CmExploreFile( void )
 {
 	TTreeItemPair itemPair = GetSelectedItem();
-	if ( itemPair.first != NULL && itemPair.second->m_path.FileExist() )
+	if ( itemPair.first != nullptr && itemPair.second->m_path.FileExist() )
 		shell::ExploreAndSelectFile( itemPair.second->m_path.GetPtr() );
 }
 
 void CFileTreeDialog::CmViewFile( UINT cmdId )
 {
 	TTreeItemPair itemPair = GetSelectedItem();
-	if ( itemPair.first != NULL && itemPair.second->m_path.FileExist() )
+	if ( itemPair.first != nullptr && itemPair.second->m_path.FileExist() )
 	{	// use text key (.txt) for text view, or the default for run
-		shell::Execute( this, itemPair.second->m_path.GetPtr(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, cmdId == CM_TEXT_VIEW_FILE ? _T(".txt") : NULL );
+		shell::Execute( this, itemPair.second->m_path.GetPtr(), nullptr, SEE_MASK_FLAG_DDEWAIT, nullptr, nullptr, cmdId == CM_TEXT_VIEW_FILE ? _T(".txt") : nullptr );
 	}
 }
 
 void CFileTreeDialog::CmCopyFullPath( void )
 {
 	TTreeItemPair itemPair = GetSelectedItem();
-	if ( itemPair.first != NULL && itemPair.second->m_path.FileExist() )
+	if ( itemPair.first != nullptr && itemPair.second->m_path.FileExist() )
 		CTextClipboard::CopyText( itemPair.second->m_path.Get(), m_hWnd );
 }
 
@@ -994,7 +994,7 @@ void CFileTreeDialog::CmBrowseFile( void )
 void CFileTreeDialog::UUI_AnySelected( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( AnySelected() );
-	if ( pCmdUI->m_nID == IDOK && pCmdUI->m_pMenu != NULL )
+	if ( pCmdUI->m_nID == IDOK && pCmdUI->m_pMenu != nullptr )
 		pCmdUI->m_pMenu->SetDefaultItem( IDOK );
 }
 
@@ -1008,7 +1008,7 @@ void CFileTreeDialog::UUI_OpenComplementary( CCmdUI* pCmdUI )
 	bool hasComplementary = HasValidComplementary();
 
 	pCmdUI->Enable( hasComplementary );
-	if ( pCmdUI->m_pMenu != NULL )
+	if ( pCmdUI->m_pMenu != nullptr )
 	{
 		CString itemFormat;
 		if ( pCmdUI->m_pMenu->GetMenuString( pCmdUI->m_nID, itemFormat, MF_BYCOMMAND ) > 0 )
@@ -1031,7 +1031,7 @@ void CFileTreeDialog::CmEditLabel( void )
 
 void CFileTreeDialog::UUI_EditLabel( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( ::GetFocus() == m_treeCtrl.m_hWnd && m_treeCtrl.GetSelectedItem() != NULL );
+	pCmdUI->Enable( ::GetFocus() == m_treeCtrl.m_hWnd && m_treeCtrl.GetSelectedItem() != nullptr );
 }
 
 void _appendItemTextLine( CTreeControl* pTreeCtrl, HTREEITEM hItem, std::tstring* pDestString, int nestingLevel )

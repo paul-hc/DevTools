@@ -26,7 +26,7 @@
 CFolderItem::CFolderItem( const std::tstring& alias )
 	: CPathItemBase( fs::CPath() )
 	, m_alias( alias )
-	, m_pParentFolder( NULL )
+	, m_pParentFolder( nullptr )
 	, m_deepLeafCount( 0 )
 {
 }
@@ -93,7 +93,7 @@ void CFolderItem::SearchForFiles( RecursionDepth depth, CPathIndex* pPathIndex )
 	fs::SortPaths( found.m_filePaths );				// natural path order
 
 	for ( std::vector< fs::CPath >::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
-		if ( NULL == pPathIndex || pPathIndex->RegisterUnique( *itFilePath ) )
+		if ( nullptr == pPathIndex || pPathIndex->RegisterUnique( *itFilePath ) )
 			m_files.push_back( new CFileItem( this, *itFilePath ) );
 
 	AddLeafCount( m_files.size() );
@@ -103,7 +103,7 @@ void CFolderItem::SearchForFiles( RecursionDepth depth, CPathIndex* pPathIndex )
 		fs::SortPaths( found.m_subDirPaths );		// natural path order
 
 		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); ++itSubDirPath )
-			if ( NULL == pPathIndex || pPathIndex->RegisterUnique( *itSubDirPath ) )
+			if ( nullptr == pPathIndex || pPathIndex->RegisterUnique( *itSubDirPath ) )
 			{
 				std::auto_ptr<CFolderItem> pNewFolder( new CFolderItem( this, *itSubDirPath ) );
 
@@ -118,16 +118,16 @@ void CFolderItem::AddLeafCount( size_t leafCount )
 {
 	m_deepLeafCount += leafCount;
 
-	for ( CFolderItem* pFolderItem = m_pParentFolder; pFolderItem != NULL; pFolderItem = pFolderItem->GetParentFolder() )
+	for ( CFolderItem* pFolderItem = m_pParentFolder; pFolderItem != nullptr; pFolderItem = pFolderItem->GetParentFolder() )
 		pFolderItem->AddLeafCount( leafCount );
 }
 
 bool CFolderItem::AddFileItem( CPathIndex* pPathIndex, const fs::CPath& filePath, const std::tstring& fileLabel /*= std::tstring()*/ )
 {
-	if ( pPathIndex != NULL && !pPathIndex->RegisterUnique( filePath ) )
+	if ( pPathIndex != nullptr && !pPathIndex->RegisterUnique( filePath ) )
 		return false;		// avoid global duplicates
 
-	if ( FindFilePath( filePath ) != NULL )
+	if ( FindFilePath( filePath ) != nullptr )
 		return false;		// avoid file duplicates in same folder
 
 	m_files.push_back( new CFileItem( this, filePath, fileLabel ) );
@@ -150,7 +150,7 @@ CFileItem* CFolderItem::FindFilePath( const fs::CPath& filePath ) const
 		if ( ( *itFile )->GetFilePath() == filePath )
 			return *itFile;
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -259,8 +259,8 @@ CFolderOptions::~CFolderOptions()
 
 void CFolderOptions::SetSubSection( const TCHAR* pSubSection )
 {
-	if ( NULL == pSubSection )
-		SetSection( NULL );
+	if ( nullptr == pSubSection )
+		SetSection( nullptr );
 	else
 	{
 		std::tstring section = reg::section_folderOptions;
@@ -406,7 +406,7 @@ void CFolderOptions::OnUpdateResetSortOrder( CCmdUI* pCmdUI )
 
 void CTargetMenu::InitInplace( CMenu* pParentMenu )
 {
-	REQUIRE( NULL == m_menu.GetSafeHmenu() );
+	REQUIRE( nullptr == m_menu.GetSafeHmenu() );
 
 	ASSERT_PTR( pParentMenu->GetSafeHmenu() );
 	m_menu.Attach( pParentMenu->GetSafeHmenu() );
@@ -415,7 +415,7 @@ void CTargetMenu::InitInplace( CMenu* pParentMenu )
 
 void CTargetMenu::InitAsSubMenu( const std::tstring& subMenuCaption )
 {
-	REQUIRE( NULL == m_menu.GetSafeHmenu() );
+	REQUIRE( nullptr == m_menu.GetSafeHmenu() );
 
 	m_menu.CreatePopupMenu();
 	m_initialCount = 0;
@@ -464,7 +464,7 @@ bool CTargetMenu::AppendContextSubMenu( CMenu* pMenu, app::ContextPopup popupInd
 	return AppendSubMenu( pMenu, subMenu.Detach(), subMenuCaption );
 }
 
-bool CTargetMenu::DoAppendItem( CMenu* pMenu, UINT flags, UINT_PTR itemId /*= 0*/, const TCHAR* pItemText /*= NULL*/ )
+bool CTargetMenu::DoAppendItem( CMenu* pMenu, UINT flags, UINT_PTR itemId /*= 0*/, const TCHAR* pItemText /*= nullptr*/ )
 {
 	ASSERT_PTR( pMenu->GetSafeHmenu() );
 
@@ -499,7 +499,7 @@ CFileMenuBuilder::CFileMenuBuilder( const CFolderOptions* pOptions )
 const CFileItem* CFileMenuBuilder::FindFileItemWithId( UINT cmdId ) const
 {
 	TMapIdToItem::const_iterator itFound = m_idToItemMap.find( cmdId );
-	return itFound != m_idToItemMap.end() ? itFound->second : NULL;
+	return itFound != m_idToItemMap.end() ? itFound->second : nullptr;
 }
 
 UINT CFileMenuBuilder::MarkCurrFileItemId( const fs::CPath& currFilePath )
@@ -588,7 +588,7 @@ bool CFileMenuBuilder::RegisterMenuUniqueItem( const CMenu* pPopupMenu, const CF
 	ASSERT_PTR( pFileItem );
 
 	const CFileItem*& rpItem = m_menuPathToItemMap[ TMenuPathKey( pPopupMenu->GetSafeHmenu(), pFileItem->GetFilePath() ) ];
-	if ( rpItem != NULL )
+	if ( rpItem != nullptr )
 		return false;				// reject duplicate path menu items in the same popup menu
 
 	rpItem = pFileItem;
@@ -617,7 +617,7 @@ bool CFileBrowser::AddFolder( const fs::CPath& folderPathFilter, const std::tstr
 	if ( !fs::IsValidDirectory( folderPath.GetPtr() ) )
 		return false;
 
-	if ( m_pPathIndex.get() != NULL && !m_pPathIndex->RegisterUnique( folderPathFilter ) )
+	if ( m_pPathIndex.get() != nullptr && !m_pPathIndex->RegisterUnique( folderPathFilter ) )
 		return false;
 
 	std::auto_ptr<CFolderItem> pNewFolder( new CFolderItem( m_pRootFolderItem.get(), folderPath, folderPathFilter.GetFilename(), folderAlias ) );
@@ -740,7 +740,7 @@ BOOL CFileBrowser::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO
 {
 	if ( m_options.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 	{
-		if ( CN_COMMAND == code && NULL == pHandlerInfo && m_pTrackInfo.get() != NULL )
+		if ( CN_COMMAND == code && nullptr == pHandlerInfo && m_pTrackInfo.get() != nullptr )
 			m_pTrackInfo->m_keepTracking = true;		// keep tracking the context menu while options are changed
 
 		return TRUE;

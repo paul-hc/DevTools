@@ -8,7 +8,7 @@
 class CInputBoxDialog : public CLayoutDialog
 {
 public:
-	CInputBoxDialog( const TCHAR* pTitle = NULL, const TCHAR* pPrompt = NULL, const TCHAR* pInputText = NULL, CWnd* parent = NULL );
+	CInputBoxDialog( const TCHAR* pTitle = nullptr, const TCHAR* pPrompt = nullptr, const TCHAR* pInputText = nullptr, CWnd* parent = nullptr );
 	virtual ~CInputBoxDialog();
 public:
 	const TCHAR* m_pTitle;

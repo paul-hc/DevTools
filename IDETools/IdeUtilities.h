@@ -27,7 +27,7 @@ namespace ide
 		CWnd* GetFocusWnd( void ) const { return m_pFocusWnd; }
 		CWnd* GetMainWnd( void ) const { return m_pMainWnd; }
 
-		bool IsValid( void ) const { return m_pFocusWnd != NULL; }
+		bool IsValid( void ) const { return m_pFocusWnd != nullptr; }
 		bool HasDifferentThread( void ) const { return m_hasDifferentThread; }
 		IdeType GetType( void ) const { return m_ideType; }
 		std::tstring FormatInfo( void ) const;

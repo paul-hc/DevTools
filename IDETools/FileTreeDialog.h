@@ -56,7 +56,7 @@ public:
 	bool SetViewMode( ViewMode viewMode );
 	bool SetOrder( Ordering ordering );
 
-	bool AnySelected( void ) const { return m_treeCtrl.GetSelectedItem() != NULL; }
+	bool AnySelected( void ) const { return m_treeCtrl.GetSelectedItem() != nullptr; }
 private:
 	void Clear( void );
 	void BuildIncludeTree( void );
@@ -68,7 +68,7 @@ private:
 	void RefreshItemsText( HTREEITEM hItem = TVI_ROOT );
 	CIncludeNode* GetItemInfo( HTREEITEM hItem ) const { return m_treeCtrl.GetItemDataAs<CIncludeNode*>( hItem ); }
 
-	void ForEach( TIterFunc pIterFunc, HTREEITEM hItem = TVI_ROOT, void* pArgs = NULL, int nestingLevel = -1 );
+	void ForEach( TIterFunc pIterFunc, HTREEITEM hItem = TVI_ROOT, void* pArgs = nullptr, int nestingLevel = -1 );
 
 	bool ReorderChildren( HTREEITEM hParent = TVI_ROOT );
 	HTREEITEM FindNextItem( HTREEITEM hStartItem, bool forward = true );
@@ -83,7 +83,7 @@ private:
 	bool SafeBindItem( HTREEITEM hItem, CIncludeNode* pTreeItem );
 	void BindAllItems( void ) { ForEach( (TIterFunc)_SafeBindItem, TVI_ROOT, this ); }
 
-	bool IsRootItem( HTREEITEM hItem ) const { return hItem != NULL && NULL == m_treeCtrl.GetParentItem( hItem ); }
+	bool IsRootItem( HTREEITEM hItem ) const { return hItem != nullptr && nullptr == m_treeCtrl.GetParentItem( hItem ); }
 	bool IsOriginalItem( HTREEITEM hItem ) const;
 	bool IsFileExcluded( const fs::CPath& path ) const;
 	bool HasValidComplementary( void ) const;

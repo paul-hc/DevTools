@@ -131,7 +131,7 @@ namespace code
 		template< typename UnaryPredType >
 		int findIf( const TCHAR* pString, int startPos, UnaryPredType predicate ) const
 		{
-			ASSERT( pString != NULL );
+			ASSERT( pString != nullptr );
 
 			IsPredMatch< UnaryPredType > predIsPredMatch( pString, predicate );
 
@@ -144,7 +144,7 @@ namespace code
 		template< typename UnaryPredType >
 		int findIfNot( const TCHAR* pString, int startPos, UnaryPredType predicate ) const
 		{
-			ASSERT( pString != NULL );
+			ASSERT( pString != nullptr );
 
 			IsPredMatch< UnaryPredType > predIsPredMatch( pString, predicate, true /*negate the predicate*/ );
 

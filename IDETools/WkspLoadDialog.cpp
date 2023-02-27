@@ -34,7 +34,7 @@ CWkspLoadDialog::CWkspLoadDialog( WorkspaceProfile& rWkspProfile, const CString&
 	, m_section( section )
 	, m_currProjectName( currProjectName )
 	, m_rWkspProfile( rWkspProfile )
-	, m_options( NULL )
+	, m_options( nullptr )
 	, m_folderItem( _T("") )
 	, m_fullPathEdit( ui::FilePath )
 {
@@ -116,7 +116,7 @@ void CWkspLoadDialog::updateFileContents( void )
 				projectKey.QueryValueNames( valueNames );
 
 				for ( std::vector< std::tstring >::const_iterator itValueName = valueNames.begin(); itValueName != valueNames.end(); ++itValueName )
-					m_folderItem.AddFileItem( NULL, projectKey.ReadStringValue( itValueName->c_str() ) );		// was m_rWkspProfile.getFileEntryName( i )
+					m_folderItem.AddFileItem( nullptr, projectKey.ReadStringValue( itValueName->c_str() ) );		// was m_rWkspProfile.getFileEntryName( i )
 			}
 		}
 	}

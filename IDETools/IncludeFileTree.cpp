@@ -82,7 +82,7 @@ BOOL IncludeFileTree::BrowseIncludeFiles( LPCTSTR targetFileName )
 	m_pickedIncludeFile.Empty();
 	m_promptLineNo = 0;
 
-	if ( NULL == targetFileName )
+	if ( nullptr == targetFileName )
 		return FALSE;
 
 	if ( _T('\0') == *targetFileName || !fs::FileExist( targetFileName, fs::Read ) )

@@ -69,7 +69,7 @@ const CTokenizeTextDialog::ActionSeparator CTokenizeTextDialog::m_defaultSeparat
 static const TCHAR defaultTrimChars[] = _T(" \t");
 
 
-CTokenizeTextDialog::CTokenizeTextDialog( CWnd* pParent /*=NULL*/ )
+CTokenizeTextDialog::CTokenizeTextDialog( CWnd* pParent /*= nullptr*/ )
 	: CLayoutDialog( IDD_TOKENIZE_TEXT_DIALOG, pParent )
 	, m_action( SplitAction )
 	, m_tokenCount( 0 )
@@ -300,7 +300,7 @@ std::tstring CTokenizeTextDialog::FormatResultsLabel( void ) const
 
 void CTokenizeTextDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_sourceEdit.m_hWnd;
+	bool firstInit = nullptr == m_sourceEdit.m_hWnd;
 
 	DDX_Control( pDX, IDC_SOURCE_TEXT_EDIT, m_sourceEdit );
 	DDX_Control( pDX, IDC_OUTPUT_TEXT_EDIT, m_outputEdit );
@@ -400,7 +400,7 @@ HBRUSH CTokenizeTextDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor )
 
 	HBRUSH hBrushBk = CLayoutDialog::OnCtlColor( pDC, pWnd, ctlColor );
 
-	if ( pWnd != NULL )
+	if ( pWnd != nullptr )
 		switch ( pWnd->GetDlgCtrlID() )
 		{
 			case IDC_INPUT_TOKENS_EDIT:

@@ -14,7 +14,7 @@ int revFindCharsPos( const TCHAR* string, const TCHAR* chars, int pos = -1 );
 inline const TCHAR* revFindChars( const TCHAR* string, const TCHAR* chars )
 {
 	int pos = revFindCharsPos( string, chars );
-	return pos == -1 ? NULL : ( string + pos );
+	return pos == -1 ? nullptr : ( string + pos );
 }
 
 
@@ -49,7 +49,7 @@ public:
 	bool operator!=( const PathInfo& right ) const { return !operator==( right ); }
 	bool operator<( const PathInfo& right ) const { return path::CompareNPtr( GetFullPath(), right.GetFullPath() ) < 0; }
 	pred::CompareResult Compare( const PathInfo& right, const std::vector< PathField >& orderFields = GetDefaultOrder(),
-								 const TCHAR* pDefaultDirName = NULL ) const;
+								 const TCHAR* pDefaultDirName = nullptr ) const;
 	bool smartNameExtEQ( const PathInfo& right ) const;
 
 	// path conversion
@@ -57,8 +57,8 @@ public:
 	void SetupFileType( void ) { m_fileType = ft::FindTypeOfExtension( ext ); }
 
 	CString getDirPath( bool withTrailSlash = true ) const;				// "C:\WINNT\system32\" or "C:\WINNT\system32"
-	CString getDirName( const TCHAR* pDefaultDirName = NULL ) const;	// "system32"
-	CString getDirNameExt( const TCHAR* pDefaultDirName = NULL ) const;	// "system32\BROWSER.DLL"
+	CString getDirName( const TCHAR* pDefaultDirName = nullptr ) const;	// "system32"
+	CString getDirNameExt( const TCHAR* pDefaultDirName = nullptr ) const;	// "system32\BROWSER.DLL"
 	CString getNameExt( void ) const { return name + ext; }				// "BROWSER.DLL"
 
 	const TCHAR* getCoreExt( void ) const { return (const TCHAR*)ext + !ext.IsEmpty(); }	// "DLL"
@@ -96,8 +96,8 @@ public:
 protected:
 	void setupDirName( void );
 
-	CString getField( PathField field, const TCHAR* defaultField = NULL ) const;
-	pred::CompareResult CompareField( const PathInfo& right, PathField field, const TCHAR* pDefaultDirName = NULL ) const;
+	CString getField( PathField field, const TCHAR* defaultField = nullptr ) const;
+	pred::CompareResult CompareField( const PathInfo& right, PathField field, const TCHAR* pDefaultDirName = nullptr ) const;
 public:									// "C:\WINNT\system32\BROWSER.DLL":
 	CString drive;					// "C:"
 	CString dir;					// "\WINNT\system32\"
@@ -164,7 +164,7 @@ class FileFindEx : public CFileFind
 public:
 	FileFindEx( void ) {}
 
-	bool findDir( const TCHAR* dirPathFilter = NULL );
+	bool findDir( const TCHAR* dirPathFilter = nullptr );
 };
 
 

@@ -112,8 +112,8 @@ bool CSourceFileParser::ParseIncludeStatement( CIncludeTag* pIncludeTag, const s
 	else if ( !IsIDLFile() )
 		return false;									// not a preprocessor directive in a C++ source file
 
-	const TCHAR* pDirective = NULL;
-	const TCHAR* pToken = NULL;
+	const TCHAR* pDirective = nullptr;
+	const TCHAR* pToken = nullptr;
 	if ( !isCppPreprocessor && IsIDLFile() )			// special case for IDLs: test for importlib or import directives
 		if ( it.Matches( pToken = _T("importlib") ) )
 		{
@@ -124,7 +124,7 @@ bool CSourceFileParser::ParseIncludeStatement( CIncludeTag* pIncludeTag, const s
 				return false;
 		}
 
-	if ( NULL == pDirective && !it.AtEnd() )			// check for import directive (used both in C++ and IDL syntax)
+	if ( nullptr == pDirective && !it.AtEnd() )			// check for import directive (used both in C++ and IDL syntax)
 		if ( it.Matches( pToken = _T("import") ) )
 		{
 			pDirective = pToken;
@@ -132,7 +132,7 @@ bool CSourceFileParser::ParseIncludeStatement( CIncludeTag* pIncludeTag, const s
 				return false;
 		}
 
-	if ( NULL == pDirective && !it.AtEnd() )			// check for include directive (used both in C++ and IDL syntax)
+	if ( nullptr == pDirective && !it.AtEnd() )			// check for include directive (used both in C++ and IDL syntax)
 		if ( it.Matches( pToken = _T("include") ) )
 		{
 			pDirective = pToken;
@@ -140,7 +140,7 @@ bool CSourceFileParser::ParseIncludeStatement( CIncludeTag* pIncludeTag, const s
 				return false;
 		}
 
-	if ( NULL == pDirective )
+	if ( nullptr == pDirective )
 		return false;
 
 	pIncludeTag->Setup( it.CurrentPtr() );
@@ -166,7 +166,7 @@ CIncludeNode* CSourceFileParser::AddIncludeFile( const CIncludeTag& includeTag, 
 	if ( foundFile.first.IsEmpty() )
 	{
 		//TRACE( _T(" - include file not found in the specified path: %s\n"), includeTag.GetSafeFileName().c_str() );
-		return NULL;
+		return nullptr;
 	}
 	CIncludeNode* pItem = new CIncludeNode( includeTag, fs::CPath( foundFile.first ), foundFile.second, lineNo );
 	m_includeNodes.push_back( pItem );

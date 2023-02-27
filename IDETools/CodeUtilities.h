@@ -47,8 +47,8 @@ namespace code
 
 	inline bool isQuoteChar( TCHAR chr, const TCHAR* quoteSet )
 	{
-		ASSERT( quoteSet != NULL );
-		return _tcschr( quoteSet, chr ) != NULL;
+		ASSERT( quoteSet != nullptr );
+		return _tcschr( quoteSet, chr ) != nullptr;
 	}
 
 	inline bool isOpenBraceChar( TCHAR chr )

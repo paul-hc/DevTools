@@ -27,7 +27,7 @@ namespace layout
 }
 
 
-CCodeMessageBox::CCodeMessageBox( const std::tstring& message, const std::tstring& codeText, UINT mbType /*= MB_ICONQUESTION*/, CWnd* pParent /*= NULL*/ )
+CCodeMessageBox::CCodeMessageBox( const std::tstring& message, const std::tstring& codeText, UINT mbType /*= MB_ICONQUESTION*/, CWnd* pParent /*= nullptr*/ )
 	: CLayoutDialog( IDD_CODE_MESSAGE_BOX_DIALOG, pParent )
 	, m_caption( AfxGetApp()->m_pszProfileName )
 	, m_message( message )
@@ -64,16 +64,16 @@ BOOL CCodeMessageBox::OnInitDialog( void )
 {
 	CLayoutDialog::OnInitDialog();
 
-	HICON hIcon = NULL;
+	HICON hIcon = nullptr;
 
 	switch ( m_mbType & 0x00F0 )
 	{
-		case MB_ICONHAND:			hIcon = ::LoadIcon( NULL, IDI_HAND ); break;
-		case MB_ICONQUESTION:		hIcon = ::LoadIcon( NULL, IDI_QUESTION ); break;
-		case MB_ICONEXCLAMATION:	hIcon = ::LoadIcon( NULL, IDI_EXCLAMATION ); break;
-		case MB_ICONASTERISK:		hIcon = ::LoadIcon( NULL, IDI_INFORMATION ); break;
+		case MB_ICONHAND:			hIcon = ::LoadIcon( nullptr, IDI_HAND ); break;
+		case MB_ICONQUESTION:		hIcon = ::LoadIcon( nullptr, IDI_QUESTION ); break;
+		case MB_ICONEXCLAMATION:	hIcon = ::LoadIcon( nullptr, IDI_EXCLAMATION ); break;
+		case MB_ICONASTERISK:		hIcon = ::LoadIcon( nullptr, IDI_INFORMATION ); break;
 	}
-	if ( hIcon != NULL )
+	if ( hIcon != nullptr )
 		m_iconStatic.SetIcon( hIcon );
 
 	if ( CFont* pSrcFont = GetFont() )

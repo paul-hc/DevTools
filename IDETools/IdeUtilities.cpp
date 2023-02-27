@@ -21,7 +21,7 @@ namespace ide
 	CScopedWindow::CScopedWindow( void )
 		: m_pFocusWnd( ide::GetFocusWindow() )
 		, m_pMainWnd( ide::GetMainWindow( m_pFocusWnd ) )
-		, m_hasDifferentThread( m_pFocusWnd != NULL && proc::InDifferentThread( m_pFocusWnd->GetSafeHwnd() ) )	// VC 7.1+: this COM object runs in a different thread than the text window
+		, m_hasDifferentThread( m_pFocusWnd != nullptr && proc::InDifferentThread( m_pFocusWnd->GetSafeHwnd() ) )	// VC 7.1+: this COM object runs in a different thread than the text window
 		, m_ideType( ide::FindIdeType( m_pMainWnd ) )
 	{
 		LOG_TRACE( _T("IDE: %s"), FormatInfo().c_str() );
@@ -83,10 +83,10 @@ namespace ide
 			FormatWndInfo( m_pFocusWnd->GetSafeHwnd() ).c_str(),
 			FormatWndInfo( m_pMainWnd->GetSafeHwnd() ).c_str() );
 	}
-	
+
 	std::tstring CScopedWindow::FormatWndInfo( HWND hWnd )
 	{
-		if ( NULL == hWnd )
+		if ( nullptr == hWnd )
 			return _T("<null-wnd>");
 
 		DWORD style = ::GetWindowLong( hWnd, GWL_STYLE );
@@ -116,7 +116,7 @@ namespace ide
 {
 	IdeType FindIdeType( CWnd* pMainWnd /*= GetMainWindow()*/ )
 	{
-		if ( pMainWnd->GetSafeHwnd() != NULL )
+		if ( pMainWnd->GetSafeHwnd() != nullptr )
 		{
 			std::tstring className = ui::GetClassName( pMainWnd->GetSafeHwnd() );
 
@@ -137,19 +137,19 @@ namespace ide
 			GUI_CARETBLINKING | GUI_INMENUMODE | GUI_INMOVESIZE | GUI_POPUPMENUMODE | GUI_SYSTEMMENUMODE
 		};
 
-		if ( ::GetGUIThreadInfo( ::GetWindowThreadProcessId( ::GetForegroundWindow(), NULL ), &threadInfo ) )
+		if ( ::GetGUIThreadInfo( ::GetWindowThreadProcessId( ::GetForegroundWindow(), nullptr ), &threadInfo ) )
 		{
 			HWND s_hFocusWnds[] = { threadInfo.hwndCaret, threadInfo.hwndFocus, threadInfo.hwndCapture, threadInfo.hwndActive };
 
 			for ( unsigned int i = 0; i != COUNT_OF( s_hFocusWnds ); ++i )
-				if ( s_hFocusWnds[ i ] != NULL )
+				if ( s_hFocusWnds[ i ] != nullptr )
 					return CWnd::FromHandle( s_hFocusWnds[ i ] );
 		}
 
 		HWND hWnds[] = { ::GetFocus(), ::GetActiveWindow() };
 
 		for ( unsigned int i = 0; i != COUNT_OF( hWnds ); ++i )
-			if ( hWnds[ i ] != NULL )
+			if ( hWnds[ i ] != nullptr )
 				return CWnd::FromHandle( hWnds[ i ] );
 
 		return CWnd::GetForegroundWindow();
@@ -157,10 +157,10 @@ namespace ide
 
 	CWnd* GetMainWindow( CWnd* pStartingWnd /*= GetFocusWindow()*/ )
 	{
-		if ( NULL == pStartingWnd )
+		if ( nullptr == pStartingWnd )
 			pStartingWnd = CWnd::GetForegroundWindow();
 
-		if ( pStartingWnd != NULL )
+		if ( pStartingWnd != nullptr )
 			pStartingWnd = ui::GetTopLevelParent( pStartingWnd );
 
 		return pStartingWnd;
@@ -207,7 +207,7 @@ namespace ide
 				}
 			}
 
-		return std::make_pair( (HMENU)NULL, -1 );
+		return std::make_pair( (HMENU)nullptr, -1 );
 	}
 }
 

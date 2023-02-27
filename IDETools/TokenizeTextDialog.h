@@ -13,7 +13,7 @@
 class CTokenizeTextDialog : public CLayoutDialog
 {
 public:
-	CTokenizeTextDialog( CWnd* pParent = NULL );
+	CTokenizeTextDialog( CWnd* pParent = nullptr );
 	virtual ~CTokenizeTextDialog();
 private:
 	void RegistryLoad( void );

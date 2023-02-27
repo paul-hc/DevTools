@@ -15,7 +15,7 @@
 #endif
 
 
-CTrackMenuWnd::CTrackMenuWnd( CCmdTarget* pCmdTarget /*= NULL*/ )
+CTrackMenuWnd::CTrackMenuWnd( CCmdTarget* pCmdTarget /*= nullptr*/ )
 	: CStatic()
 	, m_pCmdTarget( pCmdTarget )
 	, m_rightClickRepeat( false )
@@ -90,17 +90,17 @@ std::pair<HMENU, UINT> CTrackMenuWnd::FindMenuItemFromPoint( const CPoint& scree
 				}
 		}
 
-	return std::pair<HMENU, UINT>( NULL, 0 );
+	return std::pair<HMENU, UINT>( nullptr, 0 );
 }
 
 BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
 {
-	BOOL handled = m_pCmdTarget != NULL && m_pCmdTarget->OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	BOOL handled = m_pCmdTarget != nullptr && m_pCmdTarget->OnCmdMsg( id, code, pExtra, pHandlerInfo );
 
 	if ( !handled )
 		handled = __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 
-	if ( CN_COMMAND == code && NULL == pHandlerInfo )
+	if ( CN_COMMAND == code && nullptr == pHandlerInfo )
 		m_selCmdId = id;
 
 	return handled;
@@ -141,7 +141,7 @@ void CTrackMenuWnd::OnRButtonUp( UINT vkFlags, CPoint point )
 		{
 			LOG_TRACE( _T("Right-clicked command %d"), clickedItem.second );
 
-			if ( m_pCmdTarget != NULL && ui::HandleCommand( m_pCmdTarget, clickedItem.second ) )
+			if ( m_pCmdTarget != nullptr && ui::HandleCommand( m_pCmdTarget, clickedItem.second ) )
 			{
 				ui::UpdateMenuUI( this, CMenu::FromHandle( clickedItem.first ) );
 				ui::InvalidateMenuWindow();

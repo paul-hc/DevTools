@@ -15,7 +15,7 @@ namespace ft
 	{
 		ASSERT( !str::IsEmpty( pFilePath ) );
 		TCHAR ext[ _MAX_EXT ];
-		_tsplitpath( pFilePath, NULL, NULL, NULL, ext );
+		_tsplitpath( pFilePath, nullptr, nullptr, nullptr, ext );
 		return FindTypeOfExtension( ext );
 	}
 
@@ -79,7 +79,7 @@ namespace ft
 	CImageList& GetFileTypeImageList( void )
 	{
 		static CImageList s_imageListType;
-		if ( NULL == s_imageListType.GetSafeHandle() )
+		if ( nullptr == s_imageListType.GetSafeHandle() )
 		{
 			VERIFY( ft::_ImageCount == res::LoadImageListDIB( s_imageListType, IDB_FILE_TYPE_STRIP, color::ToolStripPink ) );
 			ASSERT( CIconSize::GetSizeOf( SmallIcon ) == gdi::GetImageIconSize( s_imageListType ) );

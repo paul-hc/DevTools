@@ -33,7 +33,7 @@ std::tstring CLineSet::FormatText( const TCHAR* pLineEnd /*= s_winLineEnd*/ ) co
 	return outputText;
 }
 
-void CLineSet::TrimLines( const TCHAR* pWhiteSpace /*= NULL*/ )
+void CLineSet::TrimLines( const TCHAR* pWhiteSpace /*= nullptr*/ )
 {
 	for ( std::vector< std::tstring >::iterator itLine = m_lines.begin(); itLine != m_lines.end(); ++itLine )
 		str::Trim( *itLine, pWhiteSpace );

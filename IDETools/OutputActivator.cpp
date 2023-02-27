@@ -56,7 +56,7 @@ void OutputActivator::waitForCaptionChange( const TCHAR* origCaption )
 
 	while( !seenOurMessage )
 	{
-		while( PeekMessage( &m, NULL, 0, 0, PM_REMOVE ) )
+		while( PeekMessage( &m, nullptr, 0, 0, PM_REMOVE ) )
 		{
 			TranslateMessage( &m );
 			DispatchMessage( &m );

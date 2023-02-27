@@ -212,11 +212,11 @@ BSTR TextContent::Tokenize( LPCTSTR separatorCharSet )
 }
 
 // Returns the next token (if any), otherwise an empty string.
-// Semantics: return strtok( NULL, sep );
+// Semantics: return strtok( nullptr, sep );
 BSTR TextContent::GetNextToken( void )
 {
 	if ( !m_currToken.IsEmpty() )
-		m_currToken = _tcstok( NULL, m_tokenizedSeps.c_str() );
+		m_currToken = _tcstok( nullptr, m_tokenizedSeps.c_str() );
 
 	return m_currToken.AllocSysString();
 }
@@ -227,11 +227,11 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 
 	m_TextContent.Empty();
 
-	if ( multiLinesText != NULL && multiLinesText[ 0 ] != _T('\0') )
+	if ( multiLinesText != nullptr && multiLinesText[ 0 ] != _T('\0') )
 	{
 		std::auto_ptr<TCHAR> textBuffer( new TCHAR[ _tcslen( multiLinesText ) + 1 ] );
 
-		if ( textBuffer.get() != NULL )
+		if ( textBuffer.get() != nullptr )
 		{
 			_tcscpy( textBuffer.get(), multiLinesText );
 
@@ -240,7 +240,7 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 			TCHAR* lineToken = _tcstok( textBuffer.get(), seps );
 			CString line;
 
-			while ( lineToken != NULL )
+			while ( lineToken != nullptr )
 			{
 				++lineCount;
 				line = lineToken;
@@ -259,7 +259,7 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 				else
 					TRACE( _T("Ignoring empty m_line!\n") );
 
-				lineToken = _tcstok( NULL, seps );
+				lineToken = _tcstok( nullptr, seps );
 			}
 		}
 		else
@@ -283,7 +283,7 @@ void TextContent::ClearFieldReplacements( void )
 
 BSTR TextContent::FormatTimestamp( DATE timestamp, LPCTSTR strftimeFormat )
 {
-	const TCHAR* format = strftimeFormat != NULL && strftimeFormat[ 0 ] != _T('\0') ? strftimeFormat : _T("%d-%b-%Y");
+	const TCHAR* format = strftimeFormat != nullptr && strftimeFormat[ 0 ] != _T('\0') ? strftimeFormat : _T("%d-%b-%Y");
 	CString timestampAsString = COleDateTime( timestamp ).Format( format );
 
 	return timestampAsString.AllocSysString();

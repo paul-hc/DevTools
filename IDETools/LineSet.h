@@ -16,7 +16,7 @@ struct CLineSet
 	bool HasLastEmptyLine( void ) const { return m_lastEmptyLine; }
 	void RemoveLastEmptyLine( void ) { m_lastEmptyLine = false; }
 
-	void TrimLines( const TCHAR* pWhiteSpace = NULL );
+	void TrimLines( const TCHAR* pWhiteSpace = nullptr );
 	void RemoveEmptyLines( void ) { str::RemoveEmptyItems( m_lines ); }
 	void RemoveDuplicateLines( str::CaseType caseType );
 

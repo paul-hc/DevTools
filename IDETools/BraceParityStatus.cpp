@@ -24,7 +24,7 @@ namespace code
 	{
 		clear();
 
-		ASSERT( pCode != NULL && openBracePos >= 0 && openBracePos <= str::Length( pCode ) );
+		ASSERT( pCode != nullptr && openBracePos >= 0 && openBracePos <= str::Length( pCode ) );
 		ASSERT( isOpenBraceChar( pCode[ openBracePos ] ) );
 
 		storeBrace( pCode[ openBracePos ] );
@@ -41,7 +41,7 @@ namespace code
 			{
 				BraceCounter* braceCounter = storeBrace( *pCursor );
 
-				if ( braceCounter != NULL && -1 == braceCounter->m_parityCounter )
+				if ( braceCounter != nullptr && -1 == braceCounter->m_parityCounter )
 					m_errorMessages.push_back( str::formatString( _T("Closing brace '%c' encountered before the opening brace; at pos %d: [%s]"),
 																braceCounter->m_closeBrace, int( pCursor - pCode ), pCursor ) );
 
@@ -108,8 +108,8 @@ namespace code
 	TokenRange BraceParityStatus::findArgList( const TCHAR* pCode, int pos, const TCHAR* argListOpenBraces,
 											   DocLanguage docLanguage, bool allowUnclosedArgList /*= false*/ )
 	{
-		ASSERT( pCode != NULL && pos >= 0 && pos <= str::Length( pCode ) );
-		ASSERT( argListOpenBraces != NULL && argListOpenBraces[ 0 ] != _T('\0') );
+		ASSERT( pCode != nullptr && pos >= 0 && pos <= str::Length( pCode ) );
+		ASSERT( argListOpenBraces != nullptr && argListOpenBraces[ 0 ] != _T('\0') );
 
 		code::LanguageSearchEngine languageEngine( docLanguage );
 		int openBracePos = languageEngine.findOneOf( pCode, argListOpenBraces, pos );
@@ -168,10 +168,10 @@ namespace code
 	{
 		BraceCounter* foundBraceCounter = findBrace( brace );
 
-		if ( foundBraceCounter != NULL )
+		if ( foundBraceCounter != nullptr )
 		{
 			foundBraceCounter->countBrace( brace );
-			return NULL;
+			return nullptr;
 		}
 		else
 		{
@@ -212,7 +212,7 @@ namespace code
 	{
 		BraceCounter* foundBraceCounter = findBrace( brace );
 
-		return foundBraceCounter != NULL && foundBraceCounter->IsEven();
+		return foundBraceCounter != nullptr && foundBraceCounter->IsEven();
 	}
 
 	CString BraceParityStatus::getOddBracesAsString( void ) const

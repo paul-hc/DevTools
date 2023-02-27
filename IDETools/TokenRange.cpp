@@ -18,7 +18,7 @@ bool TokenRange::InStringBounds( const TCHAR* pText ) const
 
 void TokenRange::setString( const TCHAR* pText, int startPos /*= 0*/ )
 {
-	if ( pText != NULL )
+	if ( pText != nullptr )
 	{
 		ASSERT( (size_t)startPos <= str::GetLength( pText ) );
 		assign( startPos, (int)str::GetLength( pText ) );
@@ -138,7 +138,7 @@ TokenRange& TokenRange::replaceWithToken( CString* pTargetString, const TCHAR* p
 {
 	ASSERT_PTR( pTargetString );
 	ASSERT( IsValid() && IsNormalized() );
-	ASSERT( InStringBounds( *pTargetString ) && pToken != NULL );
+	ASSERT( InStringBounds( *pTargetString ) && pToken != nullptr );
 
 	pTargetString->Delete( m_start, getLength() );
 	pTargetString->Insert( m_start, pToken );

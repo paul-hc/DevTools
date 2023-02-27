@@ -32,7 +32,7 @@ public:
 	CFileItem* FindFilePath( const fs::CPath& filePath ) const;
 
 	CFolderItem* GetParentFolder( void ) const { return m_pParentFolder; }
-	bool IsRootFolder( void ) const { return NULL == m_pParentFolder; }
+	bool IsRootFolder( void ) const { return nullptr == m_pParentFolder; }
 	bool IsTopFolder( void ) const { return IsRootFolder() || m_pParentFolder->IsRootFolder(); }
 
 	const std::tstring& GetAlias( void ) const { return m_alias; }
@@ -149,7 +149,7 @@ public:
 	void InitInplace( CMenu* pParentMenu );
 	void InitAsSubMenu( const std::tstring& subMenuCaption );
 
-	bool IsNull( void ) const { return NULL == m_menu.GetSafeHmenu() ; }
+	bool IsNull( void ) const { return nullptr == m_menu.GetSafeHmenu() ; }
 	bool IsEmpty( void ) const { return IsNull() || m_menu.GetMenuItemCount() == (int)m_initialCount; }
 	bool IsSubMenu( void ) const { return !m_subMenuCaption.empty(); }
 
@@ -164,7 +164,7 @@ public:
 	static bool AppendSubMenu( CMenu* pMenu, HMENU hSubMenu, const std::tstring& subMenuCaption ) { return DoAppendItem( pMenu, MF_POPUP | MF_STRING, (UINT_PTR)hSubMenu, subMenuCaption.c_str() ); }
 	static bool AppendContextSubMenu( CMenu* pMenu, app::ContextPopup popupIndex );
 
-	static bool DoAppendItem( CMenu* pMenu, UINT flags, UINT_PTR itemId = 0, const TCHAR* pItemText = NULL );
+	static bool DoAppendItem( CMenu* pMenu, UINT flags, UINT_PTR itemId = 0, const TCHAR* pItemText = nullptr );
 private:
 	CMenu m_menu;
 	UINT m_initialCount;
@@ -259,7 +259,7 @@ private:
 
 	void SortItems( void );
 	CMenu* BuildMenu( void );
-	CFileMenuBuilder* GetMenuBuilder( void ) { return m_pTrackInfo.get() != NULL ? &m_pTrackInfo->m_menuBuilder : NULL; }
+	CFileMenuBuilder* GetMenuBuilder( void ) { return m_pTrackInfo.get() != nullptr ? &m_pTrackInfo->m_menuBuilder : nullptr; }
 	static bool IsFileCmd( UINT cmdId );
 public:
 	CFolderOptions m_options;
@@ -296,7 +296,7 @@ namespace pred
 
 	struct CompareFileItem
 	{
-		CompareFileItem( const CPathSortOrder* pSortOrder ) : m_pSortOrder( pSortOrder ) { ASSERT( m_pSortOrder != NULL && !m_pSortOrder->IsEmpty() ); }
+		CompareFileItem( const CPathSortOrder* pSortOrder ) : m_pSortOrder( pSortOrder ) { ASSERT( m_pSortOrder != nullptr && !m_pSortOrder->IsEmpty() ); }
 
 		CompareResult operator()( const CFileItem* pLeft, const CFileItem* pRight ) const;
 	private:

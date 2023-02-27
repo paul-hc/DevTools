@@ -8,7 +8,7 @@
 class CTrackMenuWnd : public CStatic
 {
 public:
-	CTrackMenuWnd( CCmdTarget* pCmdTarget = NULL );
+	CTrackMenuWnd( CCmdTarget* pCmdTarget = nullptr );
 	virtual ~CTrackMenuWnd();
 
 	bool Create( CWnd* pParentWnd );

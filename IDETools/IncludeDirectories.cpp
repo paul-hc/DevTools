@@ -189,7 +189,7 @@ void CIncludeDirectories::Save( void ) const
 	key.QuerySubKeyNames( subKeyNames );
 
 	for ( std::vector< std::tstring >::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
-		if ( NULL == utl::FindValue( m_includePaths, *itSubKeyName ) )
+		if ( nullptr == utl::FindValue( m_includePaths, *itSubKeyName ) )
 			key.DeleteSubKey( itSubKeyName->c_str() );
 
 	for ( utl::vector_map< std::tstring, CIncludePaths* >::const_iterator itIncludePath = m_includePaths.begin(); itIncludePath != m_includePaths.end(); ++itIncludePath )

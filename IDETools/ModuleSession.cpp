@@ -155,7 +155,7 @@ void CModuleSession::SaveToRegistry( void ) const
 	pApp->WriteProfileInt( reg::section_settings, reg::entry_duplicateLineMoveDown, m_duplicateLineMoveDown );
 
 	// save it only when modified (options dialog)
-//	if ( m_pCodeFormatterOptions.get() != NULL )
+//	if ( m_pCodeFormatterOptions.get() != nullptr )
 //		m_pCodeFormatterOptions->SaveToRegistry();
 
 	pApp->WriteProfileString( reg::section_settings, reg::entry_browseInfoPath, m_browseInfoPath.GetPtr() );
@@ -169,7 +169,7 @@ void CModuleSession::SaveToRegistry( void ) const
 
 code::CFormatterOptions& CModuleSession::GetCodeFormatterOptions( void )
 {
-	if ( NULL == m_pCodeFormatterOptions.get() )
+	if ( nullptr == m_pCodeFormatterOptions.get() )
 	{	// lazy creation/registry loading
 		m_pCodeFormatterOptions.reset( new code::CFormatterOptions() );
 		m_pCodeFormatterOptions->LoadFromRegistry();

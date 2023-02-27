@@ -37,7 +37,7 @@ namespace code
 		// brace status
 		bool isEntirelyEven( void ) const;
 
-		bool hasBrace( TCHAR brace ) const { return findBrace( brace ) != NULL; }
+		bool hasBrace( TCHAR brace ) const { return findBrace( brace ) != nullptr; }
 		bool isBraceEven( TCHAR brace ) const;
 
 		CString getOddBracesAsString( void ) const;
@@ -50,7 +50,7 @@ namespace code
 		{
 			std::vector<BraceCounter>::const_iterator itFound = std::find_if( m_braceCounters.begin(), m_braceCounters.end(), MatchesBrace( brace ) );
 
-			return itFound != m_braceCounters.end() ? const_cast<BraceCounter*>( &*itFound ) : NULL;
+			return itFound != m_braceCounters.end() ? const_cast<BraceCounter*>( &*itFound ) : nullptr;
 		}
 
 		BraceCounter* storeBrace( TCHAR brace );

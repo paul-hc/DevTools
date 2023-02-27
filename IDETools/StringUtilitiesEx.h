@@ -54,7 +54,7 @@ namespace str
 	template< typename IntegralType >
 	void skipWhiteSpace( IntegralType& rPos, const TCHAR* str )
 	{
-		ASSERT( str != NULL );
+		ASSERT( str != nullptr );
 		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 
 		while ( str[ rPos ] != _T('\0') && _istspace( str[ rPos ] ) )
@@ -65,7 +65,7 @@ namespace str
 	template< typename IntegralType >
 	void skipNonWhiteSpace( IntegralType& rPos, const TCHAR* str )
 	{
-		ASSERT( str != NULL );
+		ASSERT( str != nullptr );
 		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 
 		while ( str[ rPos ] != _T('\0') && !_istspace( str[ rPos ] ) )
@@ -76,7 +76,7 @@ namespace str
 	template< typename IntegralType >
 	void skipDigit( IntegralType& rPos, const TCHAR* str )
 	{
-		ASSERT( str != NULL );
+		ASSERT( str != nullptr );
 		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 		ASSERT( isNumberChar( str[ rPos ] ) );
 
@@ -93,7 +93,7 @@ namespace str
 	template< typename IntegralType >
 	bool skipToken( IntegralType& rPos, const TCHAR* str, const TCHAR* token, str::CaseType caseType = str::Case )
 	{
-		ASSERT( str != NULL && token != NULL );
+		ASSERT( str != nullptr && token != nullptr );
 
 		if ( !str::isTokenMatch( str, token, rPos, caseType ) )
 			return false;
@@ -264,7 +264,7 @@ namespace str
 
 	inline bool isCharOneOf( TCHAR chr, const TCHAR* characterSet, str::CaseType caseType /*= str::Case*/ )
 	{
-		ASSERT( characterSet != NULL );
+		ASSERT_PTR( characterSet );
 
 		TConstIterator itEnd = end( characterSet );
 
@@ -278,33 +278,33 @@ namespace str
 	{
 		size_t foundPos = findStringPos( pString, subString, 0, caseType ).m_start;
 
-		return foundPos != -1 ? const_cast<TCHAR*>( pString + foundPos ) : NULL;
+		return foundPos != -1 ? const_cast<TCHAR*>( pString + foundPos ) : nullptr;
 	}
 
 	inline TCHAR* reverseFindString( const TCHAR* pString, const TCHAR* subString, str::CaseType caseType /*= str::Case*/ )
 	{
 		size_t foundPos = reverseFindStringPos( pString, subString, -1, caseType ).m_start;
 
-		return foundPos != -1 ? const_cast<TCHAR*>( pString + foundPos ) : NULL;
+		return foundPos != -1 ? const_cast<TCHAR*>( pString + foundPos ) : nullptr;
 	}
 
 	inline const TCHAR* ptrAt( const TCHAR* pString, int pos )
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= Length( pString ) );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= Length( pString ) );
 
 		return pString + pos;
 	}
 
 	inline TCHAR charAt( const TCHAR* pString, int pos )
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= Length( pString ) );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= Length( pString ) );
 
 		return pString[ pos ];
 	}
 
 	inline int safePos( int pos, const TCHAR* pString )
 	{
-		ASSERT( pString != NULL && ( pos == -1 || pos <= Length( pString ) ) );
+		ASSERT( pString != nullptr && ( pos == -1 || pos <= Length( pString ) ) );
 
 		if ( pos == -1 )
 			pos = Length( pString );

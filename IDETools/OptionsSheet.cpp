@@ -67,7 +67,7 @@ CGeneralOptionsPage::~CGeneralOptionsPage()
 
 void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_menuVertSplitCountSpin.m_hWnd;
+	bool firstInit = nullptr == m_menuVertSplitCountSpin.m_hWnd;
 
 	DDX_Control( pDX, IDC_TEXT_TEMPLATE_FILE_EDIT, m_templateFileEdit );
 	ui::DDX_Text( pDX, IDC_USER_NAME_EDIT, m_developerName );
@@ -130,7 +130,7 @@ CCodingStandardPage::~CCodingStandardPage()
 
 void CCodingStandardPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_splitMaxColumnEdit.m_hWnd;
+	bool firstInit = nullptr == m_splitMaxColumnEdit.m_hWnd;
 
 	ui::DDX_Bool( pDX, IDC_PRESERVE_MULTIPLE_WHITESPACES_CHECK, m_preserveMultipleWhiteSpace );
 	ui::DDX_Bool( pDX, IDC_DELETE_TRAILING_WHITESPACES_CHECK, m_deleteTrailingWhiteSpace );
@@ -243,7 +243,7 @@ CCppImplFormattingPage::~CCppImplFormattingPage()
 
 void CCppImplFormattingPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_linesBetweenFunctionImplsSpin.m_hWnd;
+	bool firstInit = nullptr == m_linesBetweenFunctionImplsSpin.m_hWnd;
 
 	ui::DDX_Bool( pDX, IDC_RETURN_TYPE_ON_SEPARATE_LINE_CHECK, m_returnTypeOnSeparateLine );
 	ui::DDX_Bool( pDX, IDC_COMMENT_OUT_DEFAULT_PARAMS_CHECK, m_commentOutDefaultParams );
@@ -734,7 +734,7 @@ void CDirectoriesPage::OnCopyPaths( void )
 
 void CDirectoriesPage::OnUpdateCopyPaths( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_pDirSets->GetCurrentPaths() != NULL );
+	pCmdUI->Enable( m_pDirSets->GetCurrentPaths() != nullptr );
 }
 
 void CDirectoriesPage::OnPastePaths( void )
@@ -752,5 +752,5 @@ void CDirectoriesPage::OnPastePaths( void )
 
 void CDirectoriesPage::OnUpdatePastePaths( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( CTextClipboard::CanPasteText() && m_pDirSets->GetCurrentPaths() != NULL );
+	pCmdUI->Enable( CTextClipboard::CanPasteText() && m_pDirSets->GetCurrentPaths() != nullptr );
 }

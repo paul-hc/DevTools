@@ -10,7 +10,7 @@
 class CCodeMessageBox : public CLayoutDialog
 {
 public:
-	CCodeMessageBox( const std::tstring& message, const std::tstring& codeText, UINT mbType = MB_ICONQUESTION, CWnd* pParent = NULL );
+	CCodeMessageBox( const std::tstring& message, const std::tstring& codeText, UINT mbType = MB_ICONQUESTION, CWnd* pParent = nullptr );
 	virtual ~CCodeMessageBox();
 public:
 	std::tstring m_caption;

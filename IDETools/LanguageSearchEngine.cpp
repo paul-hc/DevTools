@@ -23,28 +23,28 @@ namespace code
 		else if ( commentState == MultiLineComment )
 			return m_openComment;
 
-		return NULL;
+		return nullptr;
 	}
 
 	bool CommentTokens::hasSingleLineComment( void ) const
 	{
-		return m_singleLineComment != NULL;
+		return m_singleLineComment != nullptr;
 	}
 
 	bool CommentTokens::hasMultiLineComment( void ) const
 	{
-		return m_openComment != NULL && m_closeComment != NULL;
+		return m_openComment != nullptr && m_closeComment != nullptr;
 	}
 
 	const CommentTokens& CommentTokens::getLanguageSpecific( DocLanguage m_docLanguage )
 	{
 		static CommentTokens commentTokens[] =
 		{
-			{ _T("#"), NULL, NULL },			// DocLang_None
+			{ _T("#"), nullptr, nullptr },		// DocLang_None
 			{ _T("//"), _T("/*"), _T("*/") },	// DocLang_Cpp
-			{ _T("'"), NULL, NULL },			// DocLang_Basic
+			{ _T("'"), nullptr, nullptr },		// DocLang_Basic
 			{ _T("--"), _T("/*"), _T("*/") },	// DocLang_SQL
-			{ NULL, _T("<!--"), _T("-->") },	// DocLang_HtmlXml
+			{ nullptr, _T("<!--"), _T("-->") },	// DocLang_HtmlXml
 			{ _T("//"), _T("/*"), _T("*/") }	// DocLang_IDL
 		};
 
@@ -74,8 +74,8 @@ namespace code
 	bool LanguageSearchEngine::isTokenMatch( const TCHAR* pString, int pos, const TCHAR* token,
 											 bool skipFwdWhiteSpace /*= true*/ ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
-		ASSERT( token != NULL );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= str::Length( pString ) );
+		ASSERT_PTR( token );
 
 		if ( skipFwdWhiteSpace )
 			while ( code::isWhitespaceChar( pString[ pos ] ) )
@@ -87,8 +87,8 @@ namespace code
 	bool LanguageSearchEngine::isTokenMatchBefore( const TCHAR* pString, int pos, const TCHAR* token,
 												   bool skipBkwdWhiteSpace /*= true*/ ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
-		ASSERT( token != NULL );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= str::Length( pString ) );
+		ASSERT_PTR( token );
 
 		if ( skipBkwdWhiteSpace )
 			while ( pos > 0 && code::isWhitespaceChar( pString[ pos - 1 ] ) )
@@ -108,7 +108,7 @@ namespace code
 	*/
 	bool LanguageSearchEngine::isCommentStatement( int& outStatementEndPos, const TCHAR* pString, int pos ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= str::Length( pString ) );
 
 		outStatementEndPos = -1;
 
@@ -182,7 +182,7 @@ namespace code
 
 	bool LanguageSearchEngine::isSingleLineCommentStatement( const TCHAR* pString, int pos ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= str::Length( pString ) );
 
 		switch ( m_docLanguage )
 		{
@@ -214,7 +214,7 @@ namespace code
 	bool LanguageSearchEngine::isCCastStatement( int& outStatementEndPos, const TCHAR* pString, int pos ) const
 	{
 		ASSERT( m_docLanguage == DocLang_Cpp );
-		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= str::Length( pString ) );
 
 		outStatementEndPos = -1;
 
@@ -266,7 +266,7 @@ namespace code
 	bool LanguageSearchEngine::isUnicodePortableStringConstant( int& outStatementEndPos, const TCHAR* pString, int pos ) const
 	{
 		ASSERT( m_docLanguage == DocLang_Cpp );
-		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= str::Length( pString ) );
 
 		outStatementEndPos = -1;
 
@@ -302,7 +302,7 @@ namespace code
 	*/
 	bool LanguageSearchEngine::isProtectedLineTermination( int& outStatementEndPos, const TCHAR* pString, int pos ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
+		ASSERT( pString != nullptr && pos >= 0 && pos <= str::Length( pString ) );
 
 		outStatementEndPos = -1;
 
@@ -331,7 +331,7 @@ namespace code
 													   const TCHAR* quoteSet /*= code::quoteChars*/ ) const
 	{
 		caseType;
-		ASSERT( pString != NULL && startPos >= 0 && startPos <= str::Length( pString ) );
+		ASSERT( pString != nullptr && startPos >= 0 && startPos <= str::Length( pString ) );
 
 		const TCHAR* pCursor = pString + startPos;
 
@@ -364,7 +364,7 @@ namespace code
 												  str::CaseType caseType /*= str::Case*/ ) const
 	{
 		caseType;
-		ASSERT( pString != NULL && startPos >= 0 && startPos <= str::Length( pString ) );
+		ASSERT( pString != nullptr && startPos >= 0 && startPos <= str::Length( pString ) );
 
 		const TCHAR* pCursor = pString + startPos;
 
@@ -395,7 +395,7 @@ namespace code
 
 	TokenRange LanguageSearchEngine::findNextNumber( const TCHAR* text, int startPos /*= 0*/ )
 	{
-		ASSERT( text != NULL && startPos >= 0 && startPos <= str::Length( text ) );
+		ASSERT( text != nullptr && startPos >= 0 && startPos <= str::Length( text ) );
 
 		int pos = startPos;
 
@@ -491,7 +491,7 @@ namespace code
 	TokenRange LanguageSearchEngine::findString( const TCHAR* pString, const TCHAR* pSubString, int startPos /*= 0*/,
 												 str::CaseType caseType /*= str::Case*/ ) const
 	{
-		ASSERT( pSubString != NULL );
+		ASSERT_PTR( pSubString );
 
 		IsSubString predIsSubString( pString, pSubString, caseType );
 
@@ -528,7 +528,7 @@ namespace code
 	int LanguageSearchEngine::findOneOf( const TCHAR* pString, const TCHAR* pCharSet, int startPos,
 										 str::CaseType caseType /*= str::Case*/ ) const
 	{
-		ASSERT( pString != NULL && pCharSet != NULL );
+		ASSERT( pString != nullptr && pCharSet != nullptr );
 
 		IsOneOfCharSet predIsOneOfCharSet( pString, pCharSet, caseType );
 
@@ -544,7 +544,7 @@ namespace code
 	*/
 	bool LanguageSearchEngine::findNextMatch( const TCHAR* pString, int startPos, IsMatchAtCursor& isMatchAtCursor ) const
 	{
-		ASSERT( pString != NULL && startPos >= 0 && startPos <= str::Length( pString ) );
+		ASSERT( pString != nullptr && startPos >= 0 && startPos <= str::Length( pString ) );
 
 		const TCHAR* pCursor = pString + startPos;
 

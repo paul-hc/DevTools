@@ -166,7 +166,7 @@ BSTR DspProject::GetDspProjectFilePath( void )
 {
 	CString dspProjectFilePath;
 
-	if ( m_parserPtr.get() != NULL )
+	if ( m_parserPtr.get() != nullptr )
 		dspProjectFilePath = m_parserPtr->m_dspFilePath;
 
 	return dspProjectFilePath.AllocSysString();
@@ -240,7 +240,7 @@ BSTR DspProject::GetAdditionalIncludePath( LPCTSTR configurationName /*= _T("")*
 {
 	CString additionalIncludePath;
 
-	if ( m_parserPtr.get() != NULL )
+	if ( m_parserPtr.get() != nullptr )
 		additionalIncludePath = m_parserPtr->GetAdditionalIncludePath( configurationName );
 	return additionalIncludePath.AllocSysString();
 }
