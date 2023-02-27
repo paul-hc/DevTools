@@ -5,6 +5,7 @@
 #include "utl/StringUtilities.h"
 #include "utl/StringParsing.h"
 #include "utl/CodeParsing.h"
+#include "utl/CodeAlgorithms.h"
 #include "test/CodeParserTests.h"
 
 #ifdef _DEBUG
@@ -23,7 +24,7 @@ CCodeParserTests& CCodeParserTests::Instance( void )
 	return s_testCase;
 }
 
-void CCodeParserTests::TestCustomLanguage( void )
+void CCodeParserTests::TestMyLanguage( void )
 {
 	const code::CLanguage<char> myLang( "'|\"|/*BEGIN|//", "'|\"|END*/|\n" );		// exotic asymetric comments syntax, to ensure reverse iteration is matching properly
 
@@ -142,6 +143,173 @@ void CCodeParserTests::TestCustomLanguage( void )
 
 			ASSERT( itEnd == myLang.FindNextSequence( itBegin, itEnd, "skip(" ) );			// inside comment
 			ASSERT( itEnd == myLang.FindNextSequence( itBegin, itEnd, "SL-comment" ) );		// inside single-line comment
+		}
+	}
+}
+
+void CCodeParserTests::TestMyLanguageSingleLine( void )
+{
+	const code::CLanguage<char> myLang( "'|\"|/*BEGIN|//", "'|\"|END*/|\n" );		// exotic asymetric comments syntax, to ensure reverse iteration is matching properly
+
+	// single-line code: no ending "\n" for "//" comment
+	std::string lineText =
+		"size_t /*BEGIN skip(,'(',= END*/ ListDir( char pathSep = '/', const char prefix[] = \"/scratch\" ) { int t[17]; /*BEGIN skip],{,= END*/ } end // SL-comment";
+
+	{	// CEnclosedParser code features, forward iteration by position
+		typedef str::CEnclosedParser<char> TParser;
+
+		const TParser& myParser = myLang.GetParser();
+		enum MatchPos { SingleQuote, DoubleQuote, Comment, LineComment };		// as defined in myLang
+
+		TParser::TSepMatchPos sepMatchPos;
+		TParser::TSpecPair specBounds = myParser.FindItemSpec( &sepMatchPos, lineText );
+
+		ASSERT( Comment == sepMatchPos && specBounds.first != utl::npos );
+		ASSERT_EQUAL( "/*BEGIN skip(,'(',= END*/", myParser.MakeSpec( specBounds, lineText ) );
+		ASSERT_EQUAL( " skip(,'(',= ", myParser.ExtractItem( sepMatchPos, specBounds, lineText ) );
+
+		specBounds = myParser.FindItemSpec( &sepMatchPos, lineText, specBounds.second );
+		ASSERT( SingleQuote == sepMatchPos && specBounds.first != utl::npos );
+		ASSERT_EQUAL( "'/'", myParser.MakeSpec( specBounds, lineText ) );
+		ASSERT_EQUAL( "/", myParser.ExtractItem( sepMatchPos, specBounds, lineText ) );
+
+		specBounds = myParser.FindItemSpec( &sepMatchPos, lineText, specBounds.second );
+		ASSERT( DoubleQuote == sepMatchPos && specBounds.first != utl::npos );
+		ASSERT_EQUAL( "\"/scratch\"", myParser.MakeSpec( specBounds, lineText ) );
+		ASSERT_EQUAL( "/scratch", myParser.ExtractItem( sepMatchPos, specBounds, lineText ) );
+
+		specBounds = myParser.FindItemSpec( &sepMatchPos, lineText, specBounds.second );
+		ASSERT( Comment == sepMatchPos && specBounds.first != utl::npos );
+		ASSERT_EQUAL( "/*BEGIN skip],{,= END*/", myParser.MakeSpec( specBounds, lineText ) );
+		ASSERT_EQUAL( " skip],{,= ", myParser.ExtractItem( sepMatchPos, specBounds, lineText ) );
+
+		specBounds = myParser.FindItemSpec( &sepMatchPos, lineText, specBounds.second );
+		ASSERT( LineComment == sepMatchPos && specBounds.first != utl::npos );
+		ASSERT_EQUAL( "// SL-comment", myParser.MakeSpec( specBounds, lineText ) );
+		ASSERT_EQUAL( " SL-comment", myParser.ExtractItem( sepMatchPos, specBounds, lineText ) );
+
+		specBounds = myParser.FindItemSpec( &sepMatchPos, lineText, specBounds.second );
+		ASSERT( utl::npos == sepMatchPos && utl::npos == specBounds.first );		// no more matches past end
+	}
+
+
+	lineText =
+		"size_t /*BEGIN skip(,'(',= END*/ PushPath( int depth = 5 ) { int t[17]; /*BEGIN skip],{,= END*/ } end // SL-comment";
+
+	{	// FORWARD iteration
+		{	// by iterator
+			std::string::const_iterator itBegin = lineText.begin(), itEnd = lineText.end();
+			{
+				{	// Find API
+					std::string::const_iterator itOpenBracket = myLang.FindNextBracket( itBegin, itEnd );
+					ASSERT_HAS_PREFIX( "( int depth", &*itOpenBracket );
+
+					std::string::const_iterator itCloseBracket = myLang.FindMatchingBracket( itOpenBracket, itEnd );
+					ASSERT_HAS_PREFIX( ") { int t[17]", &*itCloseBracket );
+
+					itOpenBracket = myLang.FindNextBracket( itCloseBracket + 1, itEnd );
+					ASSERT_HAS_PREFIX( "{ int t[17]", &*itOpenBracket );
+
+					itCloseBracket = myLang.FindMatchingBracket( itOpenBracket, itEnd );		// also skip 2nd comment + single-line comment
+					ASSERT_HAS_PREFIX( "} end", &*itCloseBracket );
+				}
+
+				{	// Skip API with iterator ranges
+					Range<std::string::const_iterator> it( myLang.FindNextBracket( itBegin, itEnd ) );
+					ASSERT_HAS_PREFIX( "( int depth", &*it.m_start );
+					ENSURE( it.IsEmpty() );
+
+					ASSERT( myLang.SkipPastMatchingBracket( &it.m_end, itEnd ) );
+					ASSERT_HAS_PREFIX( " { int t[17]", &*it.m_end );
+					ASSERT_EQUAL( "( int depth = 5 )", str::ExtractString( it ) );
+
+					it.SetEmptyRange( myLang.FindNextBracket( it.m_end, itEnd ) );
+					ASSERT_HAS_PREFIX( "{ int t[17]", &*it.m_start );
+
+					ASSERT( myLang.SkipPastMatchingBracket( &it.m_end, itEnd ) );		// also skip 2nd comment + single-line comment
+					ASSERT_HAS_PREFIX( " end", &*it.m_end );
+					ASSERT_EQUAL( "{ int t[17]; /*BEGIN skip],{,= END*/ }", str::ExtractString( it ) );
+				}
+			}
+
+			{	// find token character
+				std::string::const_iterator itChar = myLang.FindNextCharThat( itBegin, itEnd, pred::IsChar( '=' ) );
+				ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
+
+				itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar( '=' ) );
+				ASSERT( itChar == itEnd );
+			}
+
+			{	// find sequence
+				std::string::const_iterator itChar = myLang.FindNextSequence( itBegin, itEnd, "= 5" );
+				ASSERT_HAS_PREFIX( "= 5", &*itChar );
+
+				itChar = myLang.FindNextSequence( itChar + 1, itEnd, "int t" );
+				ASSERT_HAS_PREFIX( "int t[17]", &*itChar );
+
+				ASSERT( itEnd == myLang.FindNextSequence( itBegin, itEnd, "skip(" ) );			// inside comment
+				ASSERT( itEnd == myLang.FindNextSequence( itBegin, itEnd, "SL-comment" ) );		// inside single-line comment
+			}
+		}
+	}
+
+	{	// REVERSE iteration
+		std::string::const_reverse_iterator itBegin = lineText.rbegin(), itEnd = lineText.rend();
+		{
+			{
+				std::string::const_reverse_iterator itOpenBracket = myLang.FindNextBracket( itBegin, itEnd );
+				ASSERT_HAS_PREFIX( "} end", &*itOpenBracket );
+
+				std::string::const_reverse_iterator itCloseBracket = myLang.FindMatchingBracket( itOpenBracket, itEnd );
+				ASSERT_HAS_PREFIX( "{ int t[17]", &*itCloseBracket );
+
+				itOpenBracket = myLang.FindNextBracket( itCloseBracket + 1, itEnd );
+				ASSERT_HAS_PREFIX( ") { int t[17]", &*itOpenBracket );
+
+				itCloseBracket = myLang.FindMatchingBracket( itOpenBracket, itEnd );
+				ASSERT_HAS_PREFIX( "( int depth", &*itCloseBracket );
+
+				itCloseBracket = myLang.FindNextBracket( itCloseBracket + 1, itEnd );
+				ASSERT( itCloseBracket == itEnd );
+			}
+
+			{	// Skip API with reverse iterator ranges
+				Range<std::string::const_reverse_iterator> it( myLang.FindNextBracket( itBegin, itEnd ) );
+				ASSERT_HAS_PREFIX( "} end", &*it.m_start );
+				ENSURE( it.IsEmpty() );
+
+				ASSERT( myLang.SkipPastMatchingBracket( &it.m_end, itEnd ) );
+				ASSERT_HAS_PREFIX( " { int t[17]", &*it.m_end );
+				ASSERT_EQUAL( "{ int t[17]; /*BEGIN skip],{,= END*/ }", str::ExtractString( it ) );
+
+				it.SetEmptyRange( myLang.FindNextBracket( it.m_end, itEnd ) );
+				ASSERT_HAS_PREFIX( ") { int t[17]", &*it.m_start );
+
+				ASSERT( myLang.SkipPastMatchingBracket( &it.m_end, itEnd ) );		// also skip 2nd comment + single-line comment
+				ASSERT_HAS_PREFIX( "h( int depth", &*it.m_end );
+				ASSERT_EQUAL( "( int depth = 5 )", str::ExtractString( it ) );
+			}
+		}
+
+		{	// find token character
+			std::string::const_reverse_iterator itChar = myLang.FindNextCharThat( itBegin, itEnd, pred::IsChar( '=' ) );
+			ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
+
+			itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar( '=' ) );
+			ASSERT( itChar == itEnd );
+		}
+
+		{	// find sequence
+			std::string::const_reverse_iterator itChar = myLang.FindNextSequence( itBegin, itEnd, "int t" );
+			ASSERT_HAS_PREFIX( "int t[17]", &*itChar );
+
+			itChar = myLang.FindNextSequence( itChar + 1, itEnd, "= 5" );
+			ASSERT_HAS_PREFIX( "= 5", &*itChar );
+
+			ASSERT( itEnd == myLang.FindNextSequence( itBegin, itEnd, "skip(" ) );			// inside comment
+
+			// REVERSE iteration: not possible to detect single-line comments for code without the ending "\n"
+			//ASSERT( itEnd == myLang.FindNextSequence( itBegin, itEnd, "SL-comment" ) );	// inside single-line comment
 		}
 	}
 }
@@ -267,7 +435,7 @@ void CCodeParserTests::TestCodeDetails( void )
 			}
 			{
 				std::string::const_iterator it = text.begin();
-				ASSERT( cppLang.SkipIdentifier( &it, itEnd ) );
+				ASSERT( cppLang.SkipLiteral( &it, itEnd ) );
 				ASSERT_HAS_PREFIX( "  \t", &*it );
 
 				ASSERT( cppLang.SkipWhitespace( &it, itEnd ) );
@@ -319,13 +487,43 @@ void CCodeParserTests::TestCodeDetails( void )
 	}
 }
 
+void CCodeParserTests::TestUntabify( void )
+{
+	const std::string textTabs = "\
+class CFlag\n\
+{\n\
+public:\n\
+\tCFlag( void );\t// constructor\n\
+\tvirtual ~CFlag();\n\
+private:\n\
+\tint m_flag;\t\t// 1 bit\n\
+};\n\
+";
+
+	ASSERT_EQUAL_SWAP( code::Untabify( textTabs ),
+					   "\
+class CFlag\n\
+{\n\
+public:\n\
+    CFlag( void );  // constructor\n\
+    virtual ~CFlag();\n\
+private:\n\
+    int m_flag;     // 1 bit\n\
+};\n\
+"
+	);
+}
+
 
 void CCodeParserTests::Run( void )
 {
-	RUN_TEST( TestCustomLanguage );
+	RUN_TEST( TestMyLanguage );
+	RUN_TEST( TestMyLanguageSingleLine );
 	RUN_TEST( TestBracketParity );
 	RUN_TEST( TestBracketMismatch );
 	RUN_TEST( TestCodeDetails );
+
+	RUN_TEST( TestUntabify );
 }
 
 

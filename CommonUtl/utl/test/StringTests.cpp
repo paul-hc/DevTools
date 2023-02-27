@@ -146,8 +146,8 @@ void CStringTests::TestIsCharType( void )
 	ASSERT( utl::All( std::string( "01234567890" ), pred::IsDigit() ) );
 	ASSERT( utl::All( std::string( "01234567890abcdefABCDEF" ), pred::IsHexDigit() ) );
 
-	ASSERT( utl::All( std::string( "_01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsIdentifier() ) );
-	ASSERT( utl::All( std::string( "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsIdentifierLead() ) );
+	ASSERT( utl::All( std::string( "_01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsLiteral() ) );
+	ASSERT( utl::All( std::string( "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsLiteralLead() ) );
 
 	ASSERT( utl::All( std::string( "abcdefghijklmnopqrstuvwxyz" ), pred::IsLower() ) );
 	ASSERT( utl::All( std::string( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsUpper() ) );
@@ -580,24 +580,24 @@ void CStringTests::TestSearchEnclosedItems( void )
 
 	{
 		str::CEnclosedParser<char>::TSepMatchPos sepMatchPos;
-		str::CEnclosedParser<char>::TIdentSpecPair specBounds;
+		str::CEnclosedParser<char>::TSpecPair specBounds;
 
-		specBounds = parser.FindItem( &sepMatchPos, text );
+		specBounds = parser.FindItemSpec( &sepMatchPos, text );
 		ASSERT( specBounds.first != std::string::npos );
 		ASSERT_EQUAL( "%", parser.GetStartSep( sepMatchPos ) );
 		ASSERT_EQUAL( "%", parser.GetEndSep( sepMatchPos ) );
 		ASSERT_EQUAL( "%MY_STUFF%", parser.MakeSpec( specBounds, text ) );
-		ASSERT_EQUAL( "MY_STUFF", parser.MakeIdentifier( sepMatchPos, specBounds, text ) );
+		ASSERT_EQUAL( "MY_STUFF", parser.ExtractItem( sepMatchPos, specBounds, text ) );
 
-		specBounds = parser.FindItem( &sepMatchPos, text, specBounds.second );
+		specBounds = parser.FindItemSpec( &sepMatchPos, text, specBounds.second );
 		ASSERT( specBounds.first != std::string::npos );
 		ASSERT_EQUAL( "$(MY_TOOLS)", parser.MakeSpec( specBounds, text ) );
-		ASSERT_EQUAL( "MY_TOOLS", parser.MakeIdentifier( sepMatchPos, specBounds, text ) );
+		ASSERT_EQUAL( "MY_TOOLS", parser.ExtractItem( sepMatchPos, specBounds, text ) );
 
-		// test last spec, which is free-form, i.e. not an identifier
-		str::CEnclosedParser<char>::TIdentSpecPair nonIdentSpecBounds;
-		nonIdentSpecBounds = parser.FindItem( &sepMatchPos, text, specBounds.second );
-		ASSERT( std::string::npos == nonIdentSpecBounds.first );		// "%VAR.1%" not found when matching identifiers
+		// test last spec, which is free-form, i.e. not an literal
+		str::CEnclosedParser<char>::TSpecPair nonLiteralSpecBounds;
+		nonLiteralSpecBounds = parser.FindItemSpec( &sepMatchPos, text, specBounds.second );
+		ASSERT( std::string::npos == nonLiteralSpecBounds.first );		// "%VAR.1%" not found when matching literals
 	}
 
 	{
@@ -609,7 +609,7 @@ void CStringTests::TestSearchEnclosedItems( void )
 		parser.QueryItems( items, text, false );
 		ASSERT_EQUAL( "MY_STUFF,MY_TOOLS", str::Join( items, "," ) );
 	}
-	{	// including non-identifiers:
+	{	// including non-literals:
 		str::CEnclosedParser<char> parserAny( "$(|%", ")|%", false );
 		std::vector<std::string> items;
 

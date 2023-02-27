@@ -21,9 +21,9 @@ namespace str
 	template<> const char* StdDelimiters<char>( void ) { return " \t"; }
 	template<> const wchar_t* StdDelimiters<wchar_t>( void ) { return L" \t"; }
 
-	TCHAR* CopyTextToBuffer( TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] /*= g_ellipsis*/ )
+	TCHAR* CopyTextToBuffer( TCHAR* pDestBuffer _out_, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] /*= g_ellipsis*/ )
 	{
-		if ( pText != NULL )
+		if ( pText != nullptr )
 		{
 			size_t maxLen = bufferSize - 1;
 			size_t textLen = str::GetLength( pText );
@@ -43,7 +43,7 @@ namespace str
 		return pDestBuffer;
 	}
 
-	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/, bool atEnd /*= true*/ )
+	std::tstring& Truncate( std::tstring& rText _in_out_, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/, bool atEnd /*= true*/ )
 	{
 		size_t suffixLen = str::GetLength( suffix );
 		ASSERT( suffixLen <= maxLen );
@@ -60,7 +60,7 @@ namespace str
 		return rText;
 	}
 
-	std::tstring& SingleLine( std::tstring& rText, size_t maxLen /*= utl::npos*/, const TCHAR sepLineEnd[] /*= g_paragraph*/ )
+	std::tstring& SingleLine( std::tstring& rText _in_out_, size_t maxLen /*= utl::npos*/, const TCHAR sepLineEnd[] /*= g_paragraph*/ )
 	{
 		str::Replace( rText, _T("\r\n"), sepLineEnd );
 		str::Replace( rText, _T("\n"), sepLineEnd );
@@ -68,7 +68,7 @@ namespace str
 	}
 
 
-	size_t ReplaceDelimiters( std::tstring& rText, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter )
+	size_t ReplaceDelimiters( std::tstring& rText _in_out_, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter )
 	{
 		std::vector<std::tstring> items;
 		Tokenize( items, rText.c_str(), pDelimiters );
@@ -76,7 +76,7 @@ namespace str
 		return items.size();
 	}
 
-	size_t EnsureSingleSpace( std::tstring& rText )
+	size_t EnsureSingleSpace( std::tstring& rText _in_out_ )
 	{
 		return ReplaceDelimiters( rText, _T(" \t"), _T(" ") );
 	}
@@ -91,21 +91,21 @@ namespace env
 		static const str::CEnclosedParser<TCHAR> s_envParser( _T("%|$("), _T("%|)") );
 
 		str::CEnclosedParser<TCHAR>::TSepMatchPos sepMatchPos;
-		str::CEnclosedParser<TCHAR>::TIdentSpecPair specBounds = s_envParser.FindItem( &sepMatchPos, source );
+		str::CEnclosedParser<TCHAR>::TSpecPair specBounds = s_envParser.FindItemSpec( &sepMatchPos, source );
 
-		return specBounds.first != utl::npos && s_envParser.GetIdentLength( sepMatchPos, specBounds ) != 0;
+		return specBounds.first != utl::npos && !s_envParser.GetItemRange( sepMatchPos, specBounds ).IsEmpty();
 	}
 
-	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue /*= NULL*/ )
+	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue /*= nullptr*/ )
 	{
 		REQUIRE( !str::IsEmpty( varName ) );
-		std::vector<TCHAR> valueBuff( ::GetEnvironmentVariable( varName, NULL, 0 ) + 1 );				// allocate buffer
+		std::vector<TCHAR> valueBuff( ::GetEnvironmentVariable( varName, nullptr, 0 ) + 1 );				// allocate buffer
 
 		::GetEnvironmentVariable( varName, &valueBuff.front(), static_cast<DWORD>( valueBuff.size() ) );
 
 		std::tstring value( &valueBuff.front() );
 
-		if ( value.empty() && pDefaultValue != NULL )
+		if ( value.empty() && pDefaultValue != nullptr )
 			value = value;
 
 		return value;
@@ -120,7 +120,7 @@ namespace env
 	std::tstring ExpandStrings( const TCHAR* pSource )
 	{
 		REQUIRE( !str::IsEmpty( pSource ) );
-		std::vector<TCHAR> expandedBuff( ::ExpandEnvironmentStrings( pSource, NULL, 0 ) + 1 );						// allocate buffer
+		std::vector<TCHAR> expandedBuff( ::ExpandEnvironmentStrings( pSource, nullptr, 0 ) + 1 );						// allocate buffer
 
 		::ExpandEnvironmentStrings( pSource, &expandedBuff.front(), static_cast<DWORD>( expandedBuff.size() ) );	// expand vars
 		return &expandedBuff.front();
@@ -135,7 +135,7 @@ namespace env
 		return ExpandStrings( windowsEnvSource.c_str() );
 	}
 
-	size_t AddExpandedPaths( std::vector<fs::CPath>& rEvalPaths, const TCHAR* pSource, const TCHAR delim[] /*= _T(";")*/ )
+	size_t AddExpandedPaths( std::vector<fs::CPath>& rEvalPaths _in_out_, const TCHAR* pSource, const TCHAR delim[] /*= _T(";")*/ )
 	{
 		std::tstring expandedPaths = env::ExpandPaths( pSource );
 
@@ -147,7 +147,7 @@ namespace env
 
 	namespace impl
 	{
-		void QueryEnvVariableNames( std::vector<std::tstring>& rVarNameSpecs, const std::tstring& text, bool keepSeps = true )
+		void QueryEnvVariableNames( std::vector<std::tstring>& rVarNameSpecs _out_, const std::tstring& text, bool keepSeps = true )
 		{	// both environment variables Windows  ("%VAR_NAME%") and VC Macro ("$(VAR_NAME)")
 			str::CEnclosedParser<TCHAR> parser( _T("%|$("), _T("%|)") );
 			parser.QueryItems( rVarNameSpecs, text, keepSeps );
@@ -190,7 +190,7 @@ namespace num
 		return emptyLocale;
 	}
 
-	bool StripFractionalZeros( std::tstring& rText, const std::locale& loc /*= str::GetUserLocale()*/ )
+	bool StripFractionalZeros( std::tstring& rText _out_, const std::locale& loc /*= str::GetUserLocale()*/ )
 	{
 		const TCHAR decimalPoint = std::use_facet< std::numpunct<TCHAR> >( loc ).decimal_point();
 		std::tstring::reverse_iterator itStart = rText.rbegin();
@@ -222,7 +222,7 @@ namespace num
 	}
 
 	template<>
-	bool ParseNumber<BYTE>( BYTE& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
+	bool ParseNumber<BYTE>( BYTE& rNumber _out_, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
 	{
 		unsigned int number;
 		if ( !ParseNumber( number, text, pSkipLength, loc ) || number > 255 )
@@ -232,7 +232,7 @@ namespace num
 	}
 
 	template<>
-	bool ParseNumber<signed char>( signed char& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
+	bool ParseNumber<signed char>( signed char& rNumber _out_, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
 	{
 		int number;
 		if ( !ParseNumber( number, text, pSkipLength, loc ) || number > 255 )
@@ -258,7 +258,7 @@ namespace num
 			return Range<size_t>( std::tstring::npos );
 	}
 
-	size_t EnsureUniformZeroPadding( std::vector<std::tstring>& rItems )
+	size_t EnsureUniformZeroPadding( std::vector<std::tstring>& rItems _in_out_ )
 	{
 		std::vector<size_t> digitWidths;
 
@@ -574,7 +574,7 @@ namespace word
 
 namespace app
 {
-	bool HasCommandLineOption( const TCHAR* pOption, std::tstring* pValue /*= NULL*/ )
+	bool HasCommandLineOption( const TCHAR* pOption, std::tstring* pValue /*= nullptr*/ )
 	{
 		std::tstring value;
 
@@ -587,7 +587,7 @@ namespace app
 					return true;
 		}
 
-		if ( pValue != NULL )
+		if ( pValue != nullptr )
 			pValue->clear();
 		return false;
 	}
@@ -605,7 +605,7 @@ namespace arg
 
 	const TCHAR* GetSwitch( const TCHAR* pArg )
 	{
-		return IsSwitch( pArg ) ? ( pArg + 1 ) : NULL;
+		return IsSwitch( pArg ) ? ( pArg + 1 ) : nullptr;
 	}
 
 	bool Equals( const TCHAR* pArg, const TCHAR* pMatch )
@@ -654,7 +654,7 @@ namespace arg
 		return false;
 	}
 
-	bool ParseValuePair( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
+	bool ParseValuePair( std::tstring& rValue _out_, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
 	{
 		// argument syntax: name=value - allows name partial prefix matches
 		const TCHAR* pValueSep = std::find( pArg, str::end( pArg ), valueSep );
@@ -669,7 +669,7 @@ namespace arg
 		return false;
 	}
 
-	bool ParseOptionalValuePair( std::tstring* pValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
+	bool ParseOptionalValuePair( std::tstring* pValue _out_, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
 	{
 		// argument syntax: name[=value], where "name" can be a case insensitive match of any item in pNameList
 
@@ -683,13 +683,13 @@ namespace arg
 
 		if ( EqualsAnyOf( name.c_str(), pNameList, pListDelims ) )
 		{
-			if ( pValue != NULL )
+			if ( pValue != nullptr )
 				*pValue = pValueSep;
 
 			return true;
 		}
 
-		if ( pValue != NULL )
+		if ( pValue != nullptr )
 			pValue->clear();
 		return false;
 	}

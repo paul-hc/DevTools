@@ -17,7 +17,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestQueryEnclosedIdentifiers( void );
+	void TestQueryEnclosedLiterals( void );
 	void TestReplaceEnvVar_VcMacroToWindows( void );
 	void TestEnvironVariables( void );
 	void TestExpandEnvironment( void );

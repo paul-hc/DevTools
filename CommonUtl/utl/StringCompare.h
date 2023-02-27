@@ -65,13 +65,13 @@ namespace pred
 	};
 
 
-	struct IsIdentifier : public BaseIsCharPred_Loc			// e.g. C/C++ identifier, or Windows environment variable identifier, etc
+	struct IsLiteral : public BaseIsCharPred_Loc			// e.g. C/C++ identifier, or Windows environment variable literal, etc
 	{
 		template< typename CharT >
 		bool operator()( CharT chr ) const { return '_' == chr || std::isalnum( chr, m_loc ); }
 	};
 
-	struct IsIdentifierLead : public BaseIsCharPred_Loc		// first character in a C/C++ identifier (non-digit)
+	struct IsLiteralLead : public BaseIsCharPred_Loc		// first character in a C/C++ identifier (non-digit)
 	{
 		template< typename CharT >
 		bool operator()( CharT chr ) const { return '_' == chr || std::isalpha( chr, m_loc ); }
@@ -123,6 +123,13 @@ namespace pred
 		bool operator()( CharT chr ) const { return str::IsAnyOf( chr, m_charSet ); }
 	private:
 		const CharT m_charSet[];
+	};
+
+
+	struct IsLineEnd : public BaseIsCharPred_Loc		// \t, \n, \r, etc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return '\r' == chr || '\n' == chr; }
 	};
 }
 
@@ -454,6 +461,12 @@ namespace str
 {
 	// sequence (sub-string) search
 
+	template< typename IteratorT, typename StringT >
+	inline IteratorT Search( IteratorT itFirst, IteratorT itLast, const StringT& seq )		// like strstr() - returns itLast if not found
+	{
+		return std::search( itFirst, itLast, seq.begin(), seq.end() );
+	}
+
 	template< typename CharT >
 	size_t FindSequence( const CharT* pText, const CSequence<CharT>& seq, size_t offset = 0 )
 	{
@@ -540,7 +553,7 @@ namespace str
 		pred::CharEqual<caseType> eqChar;
 
 		for ( const CharT* pSkip = pText; ; )
-			if ( _T('\0') == *pPrefix )
+			if ( '\0' == *pPrefix )
 				return pSkip;
 			else if ( !eqChar( *pSkip++, *pPrefix++ ) )
 				break;

@@ -17,10 +17,13 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestCustomLanguage( void );
+	void TestMyLanguage( void );
+	void TestMyLanguageSingleLine( void );
 	void TestBracketParity( void );
 	void TestBracketMismatch( void );
 	void TestCodeDetails( void );
+
+	void TestUntabify( void );
 };
 
 

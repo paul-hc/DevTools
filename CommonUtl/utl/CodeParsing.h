@@ -104,6 +104,9 @@ namespace str
 
 namespace code
 {
+	// A language syntax is defined by pairs of separators that define quoted strings, comments, etc.
+	//	note: brackets are excluded since they need special parsing rules (must be avoided inside quoted strings, comments).
+	//
 	template< typename CharT >
 	class CLanguage : private utl::noncopyable
 	{
@@ -116,9 +119,11 @@ namespace code
 		CLanguage( const char* pStartSepList, const char* pEndSepList )		// constructor using only narrow strings for language constructs
 			: m_parser( false, pStartSepList, pEndSepList )
 		{
+			GetSeparatorsPair().EnableLineComments();		// by default assume the last separator pair refers to single-line comments
 		}
 
 		const str::CEnclosedParser<CharT>& GetParser( void ) const { return m_parser; }
+		const TSeparatorsPair& GetSeparatorsPair( void ) const { return m_parser.GetSeparators(); }
 
 
 		// iterator search
@@ -131,7 +136,7 @@ namespace code
 
 			for ( TSepMatchPos sepMatchPos = TString::npos; itCode != itLast; )
 			{
-				if ( sepsPair.MatchesSequenceAt( itCode, itLast, sequence ) )
+				if ( str::EqualsSeq( itCode, itLast, sequence ) )
 				{
 					if ( str::ReverseIter == iterDir )
 						itCode += sequence.length() - 1;	// advance to r-beginning of the match
@@ -140,7 +145,7 @@ namespace code
 				}
 				else if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, itCode, itLast ) )	// matches a quoted string, comment, etc?
 				{
-					sepsPair.SkipMatchingSpec( &itCode /*in-out*/, itLast, sepMatchPos );	// skip the entire spec
+					sepsPair.SkipMatchingSpec( &itCode, itLast, sepMatchPos );	// skip the entire spec
 					continue;
 				}
 
@@ -158,7 +163,7 @@ namespace code
 			{
 				if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, itCode, itLast ) )			// matches a quoted string, comment, etc?
 				{
-					sepsPair.SkipMatchingSpec( &itCode /*in-out*/, itLast, sepMatchPos );	// skip the entire spec
+					sepsPair.SkipMatchingSpec( &itCode, itLast, sepMatchPos );	// skip the entire spec
 					continue;
 				}
 				else if ( isCharPred( *itCode ) )
@@ -179,7 +184,7 @@ namespace code
 		// skipping methods
 
 		template< typename IteratorT, typename IsCharPred >
-		bool SkipWhile( IteratorT* pItCode /*in-out*/, IteratorT itLast, IsCharPred isCharPred ) const
+		bool SkipWhile( IteratorT* pItCode _in_out_, IteratorT itLast, IsCharPred isCharPred ) const
 		{	// skips to the next position that does not satisfy the predicate
 			ASSERT_PTR( pItCode );
 
@@ -192,7 +197,7 @@ namespace code
 		}
 
 		template< typename IteratorT, typename IsCharPred >
-		bool SkipUntil( IteratorT* pItCode /*in-out*/, IteratorT itLast, IsCharPred isCharPred ) const
+		bool SkipUntil( IteratorT* pItCode _in_out_, IteratorT itLast, IsCharPred isCharPred ) const
 		{	// skips to the next position that satisfies the predicate
 			ASSERT_PTR( pItCode );
 
@@ -206,16 +211,16 @@ namespace code
 
 
 		template< typename IteratorT >
-		inline bool SkipWhitespace( IteratorT* pItCode /*in-out*/, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsSpace() ); }
+		inline bool SkipWhitespace( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsSpace() ); }
 
 		template< typename IteratorT >
-		inline bool SkipIdentifier( IteratorT* pItCode /*in-out*/, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsIdentifier() ); }
+		inline bool SkipLiteral( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsLiteral() ); }
 
 
 		// bracket lookup
 
 		template< typename IteratorT >
-		IteratorT FindMatchingBracket( IteratorT itBracket, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr ) const
+		IteratorT FindMatchingBracket( IteratorT itBracket, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr _out_ ) const
 		{	// find the closing bracket matching the current bracket;  skip language-specific comments, quoted strings, etc
 			REQUIRE( itBracket != itLast && IsBracket( *itBracket ) );
 
@@ -235,19 +240,19 @@ namespace code
 				{
 					if ( topMatchingBracket == *it )
 					{
-						bracketStack.pop_back();			// exit one bracket nesting level
+						bracketStack.pop_back();		// exit one bracket nesting level
 
 						if ( bracketStack.empty() )
 							return it;					// on the matching bracket of the originating bracket
 					}
 					else
-						bracketStack.push_back( std::make_pair( *it, it ) );				// go deeper with the nested bracket
+						bracketStack.push_back( std::make_pair( *it, it ) );			// go deeper with the nested bracket
 
 					topMatchingBracket = ToMatchingBracket( bracketStack.back().first );
 				}
 				else if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, it, itLast ) )	// matches a quoted string, comment, etc?
 				{
-					sepsPair.SkipMatchingSpec( &it /*in-out*/, itLast, sepMatchPos );	// skip the entire spec
+					sepsPair.SkipMatchingSpec( &it, itLast, sepMatchPos );	// skip the entire spec
 					continue;
 				}
 
@@ -264,7 +269,7 @@ namespace code
 		}
 
 		template< typename IteratorT >
-		bool SkipPastMatchingBracket( IteratorT* pItBracket /*in-out*/, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr ) const
+		bool SkipPastMatchingBracket( IteratorT* pItBracket _in_out_, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr _out_ ) const
 		{	// find past the closing bracket matching the current bracket - compatible with found range bounds
 			ASSERT_PTR( pItBracket );
 			*pItBracket = FindMatchingBracket( *pItBracket, itLast, pItBracketMismatch );
