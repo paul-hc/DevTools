@@ -182,7 +182,7 @@
     <ClInclude Include="CacheLoader.h" />
     <ClInclude Include="CacheLoader.hxx" />
     <ClInclude Include="CodeAlgorithms.h" />
-    <ClInclude Include="CodeParsing.h" />
+    <ClInclude Include="Language.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandModel.h" />
     <ClInclude Include="CommandService.h" />
@@ -278,7 +278,7 @@
     <ClInclude Include="SubjectPredicates.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="test\AlgorithmsTests.h" />
-    <ClInclude Include="test\CodeParserTests.h" />
+    <ClInclude Include="test\LanguageTests.h" />
     <ClInclude Include="test\DuplicateFilesTests.h" />
     <ClInclude Include="test\EndiannessTests.h" />
     <ClInclude Include="test\EnvironmentTests.h" />
@@ -314,7 +314,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppTools.cpp" />
-    <ClCompile Include="CodeParsing.cpp" />
+    <ClCompile Include="Language.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandModel.cpp" />
     <ClCompile Include="CommandService.cpp" />
@@ -373,7 +373,7 @@
     <ClCompile Include="StructuredStorage.cpp" />
     <ClCompile Include="Subject.cpp" />
     <ClCompile Include="test\AlgorithmsTests.cpp" />
-    <ClCompile Include="test\CodeParserTests.cpp" />
+    <ClCompile Include="test\LanguageTests.cpp" />
     <ClCompile Include="test\DuplicateFilesTests.cpp" />
     <ClCompile Include="test\EndiannessTests.cpp" />
     <ClCompile Include="test\EnvironmentTests.cpp" />

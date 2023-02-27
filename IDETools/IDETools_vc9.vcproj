@@ -591,7 +591,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="code &amp; text"
+				Name="code + text"
 				>
 				<File
 					RelativePath=".\BraceParityStatus.cpp"

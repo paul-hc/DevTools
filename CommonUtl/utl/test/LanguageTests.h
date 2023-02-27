@@ -1,5 +1,5 @@
-#ifndef CodeParserTests_h
-#define CodeParserTests_h
+#ifndef LanguageTests_h
+#define LanguageTests_h
 #pragma once
 
 
@@ -8,11 +8,11 @@
 #include "utl/test/UnitTest.h"
 
 
-class CCodeParserTests : public ut::CConsoleTestCase
+class CLanguageTests : public ut::CConsoleTestCase
 {
-	CCodeParserTests( void );
+	CLanguageTests( void );
 public:
-	static CCodeParserTests& Instance( void );
+	static CLanguageTests& Instance( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );
@@ -30,4 +30,4 @@ private:
 #endif //USE_UT
 
 
-#endif // CodeParserTests_h
+#endif // LanguageTests_h

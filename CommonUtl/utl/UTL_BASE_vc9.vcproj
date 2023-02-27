@@ -1036,11 +1036,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\CodeParsing.cpp"
+					RelativePath=".\Language.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\CodeParsing.h"
+					RelativePath=".\Language.h"
 					>
 				</File>
 			</Filter>
@@ -1054,14 +1054,6 @@
 			</File>
 			<File
 				RelativePath=".\test\AlgorithmsTests.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\CodeParserTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\CodeParserTests.h"
 				>
 			</File>
 			<File
@@ -1102,6 +1094,14 @@
 			</File>
 			<File
 				RelativePath=".\test\FmtUtilsTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LanguageTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LanguageTests.h"
 				>
 			</File>
 			<File

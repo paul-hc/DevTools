@@ -13,7 +13,7 @@
 #include "utl/UI/VersionInfo.h"
 #include "utl/UI/resource.h"
 
-#include "utl/test/CodeParserTests.h"
+#include "utl/test/LanguageTests.h"
 #include "utl/test/StringTests.h"
 #include "utl/test/StringCompareTests.h"
 #include "test/CppCodeTests.h"
@@ -36,7 +36,7 @@ namespace ut
 
 		ut::CTestSuite::Instance().RegisterTestCase( &CStringTests::Instance() );
 		ut::CTestSuite::Instance().RegisterTestCase( &CStringCompareTests::Instance() );
-		ut::CTestSuite::Instance().RegisterTestCase( &CCodeParserTests::Instance() );
+		ut::CTestSuite::Instance().RegisterTestCase( &CLanguageTests::Instance() );
 
 		CCppCodeTests::Instance();
 		CMethodPrototypeTests::Instance();

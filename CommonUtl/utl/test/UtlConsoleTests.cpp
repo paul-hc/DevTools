@@ -8,7 +8,7 @@
 #include "StringCompareTests.h"
 #include "StringRangeTests.h"
 #include "NumericTests.h"
-#include "CodeParserTests.h"
+#include "LanguageTests.h"
 #include "EndiannessTests.h"
 #include "EnvironmentTests.h"
 #include "LcsTests.h"
@@ -38,7 +38,7 @@ namespace ut
 		CStringCompareTests::Instance();
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();
-		CCodeParserTests::Instance();
+		CLanguageTests::Instance();
 		CEndiannessTests::Instance();
 		CEnvironmentTests::Instance();
 		CLcsTests::Instance();

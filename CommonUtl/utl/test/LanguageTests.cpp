@@ -4,27 +4,27 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "utl/StringUtilities.h"
 #include "utl/StringParsing.h"
-#include "utl/CodeParsing.h"
+#include "utl/Language.h"
 #include "utl/CodeAlgorithms.h"
-#include "test/CodeParserTests.h"
+#include "test/LanguageTests.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-CCodeParserTests::CCodeParserTests( void )
+CLanguageTests::CLanguageTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
 
-CCodeParserTests& CCodeParserTests::Instance( void )
+CLanguageTests& CLanguageTests::Instance( void )
 {
-	static CCodeParserTests s_testCase;
+	static CLanguageTests s_testCase;
 	return s_testCase;
 }
 
-void CCodeParserTests::TestMyLanguage( void )
+void CLanguageTests::TestMyLanguage( void )
 {
 	const code::CLanguage<char> myLang( "'|\"|/*BEGIN|//", "'|\"|END*/|\n" );		// exotic asymetric comments syntax, to ensure reverse iteration is matching properly
 
@@ -147,7 +147,7 @@ void CCodeParserTests::TestMyLanguage( void )
 	}
 }
 
-void CCodeParserTests::TestMyLanguageSingleLine( void )
+void CLanguageTests::TestMyLanguageSingleLine( void )
 {
 	const code::CLanguage<char> myLang( "'|\"|/*BEGIN|//", "'|\"|END*/|\n" );		// exotic asymetric comments syntax, to ensure reverse iteration is matching properly
 
@@ -314,7 +314,7 @@ void CCodeParserTests::TestMyLanguageSingleLine( void )
 	}
 }
 
-void CCodeParserTests::TestBracketParity( void )
+void CLanguageTests::TestBracketParity( void )
 {
 	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
 
@@ -375,7 +375,7 @@ void CCodeParserTests::TestBracketParity( void )
 	}
 }
 
-void CCodeParserTests::TestBracketMismatch( void )
+void CLanguageTests::TestBracketMismatch( void )
 {
 	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
 
@@ -409,7 +409,7 @@ void CCodeParserTests::TestBracketMismatch( void )
 	}
 }
 
-void CCodeParserTests::TestCodeDetails( void )
+void CLanguageTests::TestCodeDetails( void )
 {
 	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
 
@@ -487,7 +487,7 @@ void CCodeParserTests::TestCodeDetails( void )
 	}
 }
 
-void CCodeParserTests::TestUntabify( void )
+void CLanguageTests::TestUntabify( void )
 {
 	const std::string textTabs = "\
 class CFlag\n\
@@ -515,7 +515,7 @@ private:\n\
 }
 
 
-void CCodeParserTests::Run( void )
+void CLanguageTests::Run( void )
 {
 	RUN_TEST( TestMyLanguage );
 	RUN_TEST( TestMyLanguageSingleLine );

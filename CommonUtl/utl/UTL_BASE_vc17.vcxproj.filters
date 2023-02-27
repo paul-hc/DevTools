@@ -424,10 +424,10 @@
     <ClInclude Include="StringParsing.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="test\CodeParserTests.h">
+    <ClInclude Include="test\LanguageTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
-    <ClInclude Include="CodeParsing.h">
+    <ClInclude Include="Language.h">
       <Filter>utl\code</Filter>
     </ClInclude>
     <ClInclude Include="RegAutomationSvr.h">
@@ -675,10 +675,10 @@
     <ClCompile Include="test\EnvironmentTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
-    <ClCompile Include="test\CodeParserTests.cpp">
+    <ClCompile Include="test\LanguageTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
-    <ClCompile Include="CodeParsing.cpp">
+    <ClCompile Include="Language.cpp">
       <Filter>utl\code</Filter>
     </ClCompile>
     <ClCompile Include="RegAutomationSvr.cpp">

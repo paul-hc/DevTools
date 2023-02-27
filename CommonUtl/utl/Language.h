@@ -1,5 +1,5 @@
-#ifndef CodeParsing_h
-#define CodeParsing_h
+#ifndef Language_h
+#define Language_h
 #pragma once
 
 #include "StringParsing.h"
@@ -291,4 +291,4 @@ namespace code
 }
 
 
-#endif // CodeParsing_h
+#endif // Language_h
