@@ -14,15 +14,15 @@ namespace bmp
 	{
 		friend class CMemDC;
 	protected:
-		CSharedAccess( void ) : m_pMemDC( NULL ) {}
+		CSharedAccess( void ) : m_pMemDC( nullptr ) {}
 
 		virtual CSharedAccess* GetTarget( void ) const { return const_cast<CSharedAccess*>( this ); }		// overridden for proxy access redirection
 	public:
 		virtual HBITMAP GetHandle( void ) const = 0;
 
 		CDC* GetBitmapMemDC( void ) const { return (CDC*)GetTarget()->m_pMemDC; }
-		bool HasBitmapMemDC( void ) const { return GetBitmapMemDC() != NULL; }
-		bool HasValidBitmapMemDC( void ) const { return GetBitmapMemDC()->GetSafeHdc() != NULL; }
+		bool HasBitmapMemDC( void ) const { return GetBitmapMemDC() != nullptr; }
+		bool HasValidBitmapMemDC( void ) const { return GetBitmapMemDC()->GetSafeHdc() != nullptr; }
 	private:
 		mutable CMemDC* m_pMemDC;			// allow mem DC for const source
 	};
@@ -33,15 +33,15 @@ namespace bmp
 	class CMemDC : public CDC
 	{
 	public:
-		CMemDC( const CSharedAccess* pAccess, CDC* pTemplateDC = NULL )
+		CMemDC( const CSharedAccess* pAccess, CDC* pTemplateDC = nullptr )
 			: m_pTarget( pAccess->GetTarget() )
-			, m_hOldBitmap( NULL )
+			, m_hOldBitmap( nullptr )
 		{
 			ASSERT_PTR( m_pTarget );
 			ASSERT_PTR( m_pTarget->GetHandle() );
 			ASSERT_NULL( m_pTarget->m_pMemDC );
 
-			if ( CreateCompatibleDC( pTemplateDC ) )			// compatible with screen DC if pTemplateDC is NULL 
+			if ( CreateCompatibleDC( pTemplateDC ) )			// compatible with screen DC if pTemplateDC is NULL
 			{
 				m_pTarget->m_pMemDC = this;
 				m_hOldBitmap = SelectObject( m_pTarget->GetHandle() );
@@ -51,10 +51,10 @@ namespace bmp
 		~CMemDC()
 		{
 			ASSERT_PTR( m_pTarget );
-			if ( GetSafeHdc() != NULL )
+			if ( GetSafeHdc() != nullptr )
 			{
-				m_pTarget->m_pMemDC = NULL;
-				if ( m_hOldBitmap != NULL )
+				m_pTarget->m_pMemDC = nullptr;
+				if ( m_hOldBitmap != nullptr )
 					SelectObject( m_hOldBitmap );
 			}
 		}
@@ -71,7 +71,7 @@ namespace bmp
 class CScopedBitmapMemDC
 {
 public:
-	CScopedBitmapMemDC( const bmp::CSharedAccess* pAccess, CDC* pTemplateDC = NULL, bool condition = true )
+	CScopedBitmapMemDC( const bmp::CSharedAccess* pAccess, CDC* pTemplateDC = nullptr, bool condition = true )
 	{
 		ASSERT_PTR( pAccess  );
 		if ( !pAccess->HasBitmapMemDC() && condition )

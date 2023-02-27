@@ -48,7 +48,7 @@ namespace wic
 		IWICBitmapDecoder* GetDecoder( void ) const { return m_pDecoder; }
 
 		bool CreateFromFile( const fs::CFlexPath& imagePath );
-		bool CreateFromStream( IStream* pStream, const IID* pVendorId = NULL );
+		bool CreateFromStream( IStream* pStream, const IID* pVendorId = nullptr );
 
 		bool HasContainerFormat( const GUID& containerFormatId ) const;
 		CComPtr<IWICBitmapFrameDecode> GetFrameAt( UINT framePos ) const;
@@ -77,7 +77,7 @@ namespace wic
 
 	struct CBitmapFormat
 	{
-		CBitmapFormat( IWICBitmapSource* pBitmap = NULL ) { Construct( pBitmap ); }
+		CBitmapFormat( IWICBitmapSource* pBitmap = nullptr ) { Construct( pBitmap ); }
 
 		bool Construct( IWICBitmapSource* pBitmap );
 
@@ -110,12 +110,12 @@ namespace wic
 		// converts IWICBitmapSource to a IWICBitmap, releasing any bitmap source dependencies (IStream, HFILE, etc)
 		bool DetachSourceToBitmap( WICBitmapCreateCacheOption detachOption = WICBitmapCacheOnLoad );
 
-		void ReleaseSource( void ) { m_pSrcBitmap = NULL; }
+		void ReleaseSource( void ) { m_pSrcBitmap = nullptr; }
 
-		bool SaveBitmapToFile( const TCHAR* pDestFilePath, const GUID* pContainerFormatId = NULL );		// e.g. GUID_ContainerFormatJpeg
+		bool SaveBitmapToFile( const TCHAR* pDestFilePath, const GUID* pContainerFormatId = nullptr );		// e.g. GUID_ContainerFormatJpeg
 		bool SaveBitmapToStream( IStream* pDestStream, const GUID& containerFormatId );
 
-		bool IsValid( void ) const { return m_pSrcBitmap != NULL && m_bmpFmt.IsValid(); }
+		bool IsValid( void ) const { return m_pSrcBitmap != nullptr && m_bmpFmt.IsValid(); }
 
 		IWICBitmapSource* GetSourceBitmap( void ) const { return m_pSrcBitmap; }
 		const CBitmapFormat& GetBmpFmt( void ) const { return m_bmpFmt; }

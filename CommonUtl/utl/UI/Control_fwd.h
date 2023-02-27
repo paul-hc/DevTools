@@ -49,13 +49,13 @@ namespace ui
 		CSize& RefSpacing( void ) { return m_spacing; }
 
 		// operations
-		void AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize = NULL ) const;		// align rects of both host and mate controls
+		void AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize = nullptr ) const;		// align rects of both host and mate controls
 		void AlignMate( CRect& rMateRect, const RECT& hostRect, bool inTandem ) const;							// align mate rect relative to the host rect
 
 		void ShrinkHostRect( CRect& rHostRect, const CSize& mateSize ) const;
 
 		CRect LayoutMate( CWnd* pMateCtrl, const CWnd* pHostCtrl ) const;										// move mate control relative to host anchor rect (host was repositioned)
-		void LayoutTandem( CWnd* pHostCtrl, CWnd* pMateCtrl, const CSize* pMateCustomSize = NULL ) const;
+		void LayoutTandem( CWnd* pHostCtrl, CWnd* pMateCtrl, const CSize* pMateCustomSize = nullptr ) const;
 	private:
 		TTandemAlign m_tandemAlign;
 		CSize m_spacing;

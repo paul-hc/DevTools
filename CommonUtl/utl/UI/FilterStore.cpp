@@ -176,8 +176,8 @@ namespace fs
 	}
 
 	bool CFilterJoiner::BrowseFile( fs::CPath& rFilePath, shell::BrowseMode browseMode,
-									DWORD flags /*= 0*/, const TCHAR* pDefaultExt /*= NULL*/,
-									CWnd* pParentWnd /*= NULL*/, const TCHAR* pTitle /*= NULL*/ ) const
+									DWORD flags /*= 0*/, const TCHAR* pDefaultExt /*= nullptr*/,
+									CWnd* pParentWnd /*= nullptr*/, const TCHAR* pTitle /*= nullptr*/ ) const
 	{
 		CShellFileDialog dlg( browseMode, rFilePath.GetPtr(), this, flags, pDefaultExt, pParentWnd, pTitle );
 		return dlg.RunModal( &rFilePath );
@@ -226,7 +226,7 @@ namespace fs
 		std::unordered_map< std::tstring, TOpenSavePair >::const_iterator itFound = m_stores.find( classTag );
 		ASSERT( itFound != m_stores.end() );
 
-		if ( shell::FileSaveAs == browseMode && itFound->second.second != NULL )
+		if ( shell::FileSaveAs == browseMode && itFound->second.second != nullptr )
 			return itFound->second.second;
 		return itFound->second.first;
 	}
@@ -265,12 +265,12 @@ namespace fs
 		TOpenSavePair& rStorePair = itFound->second;
 		switch ( browseFlags )
 		{
-			case BrowseOpen:	rStorePair.first = NULL; break;
-			case BrowseSave:	rStorePair.second = NULL; break;
-			case BrowseBoth:	rStorePair.first = rStorePair.second = NULL; break;
+			case BrowseOpen:	rStorePair.first = nullptr; break;
+			case BrowseSave:	rStorePair.second = nullptr; break;
+			case BrowseBoth:	rStorePair.first = rStorePair.second = nullptr; break;
 		}
 
-		static const TOpenSavePair nullPair( NULL, NULL );
+		static const TOpenSavePair nullPair( nullptr, nullptr );
 		if ( nullPair == itFound->second )
 			m_stores.erase( itFound );
 	}

@@ -6,7 +6,7 @@
 class CAccelTable
 {
 public:
-	CAccelTable( void ) : m_hAccel( NULL ) {}
+	CAccelTable( void ) : m_hAccel( nullptr ) {}
 	CAccelTable( HACCEL hAccel ) : m_hAccel( hAccel ) { ASSERT_PTR( m_hAccel ); }
 	CAccelTable( UINT accelId );
 	CAccelTable( ACCEL keys[], int count );
@@ -23,7 +23,7 @@ public:
 	void Augment( UINT accelId );
 	void Augment( ACCEL keys[], int count );
 
-	bool Translate( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus = NULL ) const;
+	bool Translate( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus = nullptr ) const;
 	bool TranslateIfOwnsFocus( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus ) const;
 
 	static bool IsKeyMessage( const MSG* pMsg ) { ASSERT_PTR( pMsg ); return pMsg->message >= WM_KEYFIRST && pMsg->message <= WM_KEYLAST; }

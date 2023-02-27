@@ -40,7 +40,7 @@ namespace ut
 	CFont& CTestDC::GetCtrlFont( void )
 	{
 		static CFont font;
-		if ( NULL == font.GetSafeHandle() )
+		if ( nullptr == font.GetSafeHandle() )
 			ui::MakeStandardControlFont( font, ui::CFontInfo() );
 		return font;
 	}
@@ -78,7 +78,7 @@ namespace ut
 
 	// CTestToolWnd implementation
 
-	CTestToolWnd* CTestToolWnd::s_pWndTool = NULL;
+	CTestToolWnd* CTestToolWnd::s_pWndTool = nullptr;
 
 	CTestToolWnd::CTestToolWnd( UINT elapseSelfDestroy )
 		: CFrameWnd()
@@ -93,22 +93,22 @@ namespace ut
 	CTestToolWnd::~CTestToolWnd()
 	{
 		ASSERT( s_pWndTool == this );
-		s_pWndTool = NULL;
+		s_pWndTool = nullptr;
 	}
 
 	CTestToolWnd* CTestToolWnd::AcquireWnd( UINT selfDestroySecs /*= 5*/ )
 	{
 		selfDestroySecs *= 1000;
 		CTestToolWnd* pWndTool = s_pWndTool;
-		if ( NULL == pWndTool )			// create first?
+		if ( nullptr == pWndTool )			// create first?
 		{
 			pWndTool = new CTestToolWnd( selfDestroySecs );
 			CRect wndRect = MakeWindowRect();
-			if ( !pWndTool->Create( GetClassName(), s_titleBase, WS_POPUPWINDOW | WS_THICKFRAME | WS_CAPTION | WS_VISIBLE, wndRect, AfxGetMainWnd(), NULL, WS_EX_TOOLWINDOW ) )
+			if ( !pWndTool->Create( GetClassName(), s_titleBase, WS_POPUPWINDOW | WS_THICKFRAME | WS_CAPTION | WS_VISIBLE, wndRect, AfxGetMainWnd(), nullptr, WS_EX_TOOLWINDOW ) )
 			{
 				ASSERT( false );
 				delete pWndTool;
-				return NULL;
+				return nullptr;
 			}
 			ui::SetTopMost( pWndTool->m_hWnd );
 		}
@@ -129,7 +129,7 @@ namespace ut
 		// Hack: set to true to prevent erasing the background when a d2d::CDCRenderTarget goes out of scope - e.g. in CImagingD2DTests::Run(), and sends a WM_DWMNCRENDERINGCHANGED message.
 		//	This was difficult to debug and required extra code for debugging and capturing the cause of the window erase.
 
-		if ( s_pWndTool != NULL )
+		if ( s_pWndTool != nullptr )
 			s_pWndTool->m_disableEraseBk = true;
 	}
 
@@ -145,7 +145,7 @@ namespace ut
 	const TCHAR* CTestToolWnd::GetClassName( void )
 	{
 		static const CBrush fillBrush( color::html::LavenderBlush );
-		static const TCHAR* pClassName = ::AfxRegisterWndClass( CS_SAVEBITS | CS_DBLCLKS, ::LoadCursor( NULL, IDC_ARROW ), fillBrush );
+		static const TCHAR* pClassName = ::AfxRegisterWndClass( CS_SAVEBITS | CS_DBLCLKS, ::LoadCursor( nullptr, IDC_ARROW ), fillBrush );
 		return pClassName;
 	}
 
@@ -197,7 +197,7 @@ namespace ut
 		: m_tileAlign( tileAlign )
 		, m_stripRect( 0, 0, 0, 0 )
 	{
-		Construct( selfDestroySecs != 0 ? CTestToolWnd::AcquireWnd( selfDestroySecs ) : NULL );
+		Construct( selfDestroySecs != 0 ? CTestToolWnd::AcquireWnd( selfDestroySecs ) : nullptr );
 	}
 
 	CTestDevice::~CTestDevice()
@@ -208,7 +208,7 @@ namespace ut
 	void CTestDevice::Construct( CTestToolWnd* pToolWnd )
 	{
 		m_pToolWnd = pToolWnd;
-		if ( m_pToolWnd != NULL )
+		if ( m_pToolWnd != nullptr )
 		{
 			m_pTestDC.reset( new CTestDC( m_pToolWnd ) );
 			m_pToolWnd->GetClientRect( &m_workAreaRect );
@@ -342,14 +342,14 @@ namespace ut
 		DrawBitmap( hBitmap, CBitmapInfo( hBitmap ).GetBitmapSize() );
 	}
 
-	void CTestDevice::DrawBitmap( HBITMAP hBitmap, const CSize& boundsSize, CDC* pSrcDC /*= NULL*/ )
+	void CTestDevice::DrawBitmap( HBITMAP hBitmap, const CSize& boundsSize, CDC* pSrcDC /*= nullptr*/ )
 	{
 		if ( !IsEnabled() )
 			return;
 
 		CDC* pDC = GetDC();
 		CDC memDC;
-		if ( NULL == pSrcDC && memDC.CreateCompatibleDC( pDC ) )
+		if ( nullptr == pSrcDC && memDC.CreateCompatibleDC( pDC ) )
 			pSrcDC = &memDC;
 
 		CSize bmpSize = CBitmapInfo( hBitmap ).GetBitmapSize();
@@ -362,7 +362,7 @@ namespace ut
 
 		int oldStretchMode = pDC->SetStretchBltMode( COLORONCOLOR );
 
-		if ( pSrcDC != NULL )
+		if ( pSrcDC != nullptr )
 		{
 			CScopedGdiObj scopedBitmap( pSrcDC, hBitmap );
 			ut::DrawBitmap( pDC, imageRect, pSrcDC, CRect( 0, 0, bmpSize.cx, bmpSize.cy ) );
@@ -408,7 +408,7 @@ namespace ut
 
 		CRect iconRect = CRect( m_pToolWnd->m_drawPos, boundsSize );
 
-		if ( !::DrawIconEx( GetDC()->GetSafeHdc(), iconRect.left, iconRect.top, hIcon, iconRect.Width(), iconRect.Height(), 0, NULL, flags ) )
+		if ( !::DrawIconEx( GetDC()->GetSafeHdc(), iconRect.left, iconRect.top, hIcon, iconRect.Width(), iconRect.Height(), 0, nullptr, flags ) )
 			ASSERT( false );
 
 		DrawTileFrame( iconRect );

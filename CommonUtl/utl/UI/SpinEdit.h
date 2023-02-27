@@ -26,7 +26,7 @@ public:
 	CSpinEdit( bool useSpin = true, const std::locale& loc = num::GetEmptyLocale() );
 	virtual ~CSpinEdit();
 
-	bool UseSpin( void ) const { return GetSpinButton() != NULL; }
+	bool UseSpin( void ) const { return GetSpinButton() != nullptr; }
 	void SetUseSpin( bool useSpin = true );
 
 	void SetLocale( const std::locale& loc ) { m_locale = loc; }
@@ -44,11 +44,11 @@ public:
 
 	template< typename NumericT > void SetFullRange( void ) { m_validRange = num::FullRange<NumericT>(); }
 
-	int GetNumericValue( bool* pValid = NULL ) const;
+	int GetNumericValue( bool* pValid = nullptr ) const;
 	void SetNumericValue( int value );
 
 	template< typename NumericT >
-	NumericT GetNumber( bool* pValid = NULL ) const { return static_cast<NumericT>( GetNumericValue( pValid ) ); }
+	NumericT GetNumber( bool* pValid = nullptr ) const { return static_cast<NumericT>( GetNumericValue( pValid ) ); }
 
 	template< typename NumericT >
 	bool ParseNumber( NumericT* pNumber ) const;

@@ -12,7 +12,7 @@ namespace fs { class CPath; }
 class CPasswordDialog : public CLayoutDialog
 {
 public:
-	CPasswordDialog( CWnd* pParentWnd, const fs::CPath* pDocPath = NULL );
+	CPasswordDialog( CWnd* pParentWnd, const fs::CPath* pDocPath = nullptr );
 
 	const std::tstring& GetPassword( void ) const { ASSERT( EditMode == m_mode ); return m_password; }
 	void SetPassword( const std::tstring& password ) { ASSERT( EditMode == m_mode ); m_password = password; }

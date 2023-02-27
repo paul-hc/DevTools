@@ -20,7 +20,7 @@ CProgressService::CProgressService( CWnd* pParentWnd, const std::tstring& operat
 	{
 		m_pDlg.reset( new CProgressDialog( operationLabel, CProgressDialog::StageLabelCount ) );
 
-		if ( m_pDlg->Create( s_dialogTitle, pParentWnd != NULL ? pParentWnd : AfxGetMainWnd() ) )
+		if ( m_pDlg->Create( s_dialogTitle, pParentWnd != nullptr ? pParentWnd : AfxGetMainWnd() ) )
 		{
 			GetHeader()->SetStageLabel( s_stageLabel );
 			GetHeader()->SetItemLabel( s_itemLabel );
@@ -41,7 +41,7 @@ CProgressService::~CProgressService()
 
 void CProgressService::DestroyDialog( void )
 {
-	if ( m_pDlg.get() != NULL )
+	if ( m_pDlg.get() != nullptr )
 		m_pDlg->DestroyWindow();
 }
 

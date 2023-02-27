@@ -15,7 +15,7 @@
 #endif
 
 
-CBaseMainDialog::CBaseMainDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
+CBaseMainDialog::CBaseMainDialog( UINT templateId, CWnd* pParent /*= nullptr*/ )
 	: CLayoutDialog( templateId, pParent )
 {
 	m_initCentered = false;			// so that it uses WINDOWPLACEMENT
@@ -26,7 +26,7 @@ CBaseMainDialog::CBaseMainDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
 CBaseMainDialog::~CBaseMainDialog()
 {
 	if ( this == AfxGetMainWnd() )
-		AfxGetApp()->m_pMainWnd = NULL;
+		AfxGetApp()->m_pMainWnd = nullptr;
 }
 
 void CBaseMainDialog::ParseCommandLine( int argc, TCHAR* argv[] )
@@ -78,7 +78,7 @@ CWnd* CBaseMainDialog::GetOwnerWnd( void ) override
 
 CMenu* CBaseMainDialog::GetTrayIconContextMenu( void ) override
 {
-	return UseSysTrayMinimize() ? &m_trayPopupMenu : NULL;
+	return UseSysTrayMinimize() ? &m_trayPopupMenu : nullptr;
 }
 
 bool CBaseMainDialog::OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override
@@ -112,7 +112,7 @@ BOOL CBaseMainDialog::OnInitDialog( void ) override
 	if ( !appNameSuffix.empty() )
 		ui::SetWindowText( m_hWnd, ui::GetWindowText( m_hWnd ) + appNameSuffix );
 
-	if ( NULL == AfxGetMainWnd() )
+	if ( nullptr == AfxGetMainWnd() )
 		AfxGetApp()->m_pMainWnd = this;
 
 	if ( HasFlag( GetExStyle(), WS_EX_TOOLWINDOW ) )
@@ -165,7 +165,7 @@ HCURSOR CBaseMainDialog::OnQueryDragIcon( void )
 {	// the system calls this function to obtain the cursor to display while the user drags the minimized window
 	if ( const CIcon* pSmallIcon = GetDlgIcon( DlgSmallIcon ) )
 		return pSmallIcon->GetHandle();
-	return NULL;
+	return nullptr;
 }
 
 void CBaseMainDialog::OnAppRestore( void )

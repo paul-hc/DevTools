@@ -5,7 +5,7 @@
 
 namespace proc
 {
-	inline bool InCurrentThread( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::GetWindowThreadProcessId( hWnd, NULL ) == ::GetCurrentThreadId(); }
+	inline bool InCurrentThread( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::GetWindowThreadProcessId( hWnd, nullptr ) == ::GetCurrentThreadId(); }
 	inline bool InDifferentThread( HWND hWnd ) { return !InCurrentThread( hWnd ); }
 
 	bool IsProcessElevated( HANDLE hProcess = ::GetCurrentProcess() );
@@ -22,7 +22,7 @@ struct CScopedAttachThreadInput
 {
 	CScopedAttachThreadInput( HWND hWnd )
 		: m_currThreadId( ::GetCurrentThreadId() )
-		, m_wndThreadId( ::GetWindowThreadProcessId( hWnd, NULL ) )
+		, m_wndThreadId( ::GetWindowThreadProcessId( hWnd, nullptr ) )
 		, m_differentThread( m_currThreadId != m_wndThreadId )
 		, m_attached( m_differentThread && ::AttachThreadInput( m_currThreadId, m_wndThreadId, TRUE ) != FALSE )
 	{

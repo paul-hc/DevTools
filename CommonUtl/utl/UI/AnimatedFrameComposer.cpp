@@ -34,16 +34,16 @@ namespace d2d
 		m_framePos = 0;
 		m_frameMetadata.Reset();
 
-		m_pFrameComposeRT = NULL;
-		m_pRawFrame = NULL;
-		m_pSavedFrame = NULL;
-		m_pFrameToRender = NULL;
+		m_pFrameComposeRT = nullptr;
+		m_pRawFrame = nullptr;
+		m_pSavedFrame = nullptr;
+		m_pFrameToRender = nullptr;
 	}
 
 	bool CAnimatedFrameComposer::Create( void )
 	{
 		// create a bitmap render target used to compose frames; bitmap render targets cannot be resized, so we always recreate it.
-		m_pFrameComposeRT = NULL;
+		m_pFrameComposeRT = nullptr;
 		if ( !HR_OK( GetWndRenderTarget()->CreateCompatibleRenderTarget( d2d::ToSizeF( m_pAnimImage->GetGifSize() ), &m_pFrameComposeRT ) ) )
 			return false;
 
@@ -58,13 +58,13 @@ namespace d2d
 
 	bool CAnimatedFrameComposer::StoreRawFrame( void )
 	{
-		m_pRawFrame = NULL;
-		m_pFrameToRender = NULL;
+		m_pRawFrame = nullptr;
+		m_pFrameToRender = nullptr;
 		m_frameMetadata.Reset();
 
 		// create a D2DBitmap from IWICBitmapSource
 		if ( CComPtr<IWICBitmapSource> pWicFrame = m_pAnimImage->GetDecoder().ConvertFrameAt( m_framePos ) )			// raw WIC frame
-			if ( HR_OK( GetWndRenderTarget()->CreateBitmapFromWicBitmap( pWicFrame, NULL, &m_pRawFrame ) ) )			// raw D2D bitmap
+			if ( HR_OK( GetWndRenderTarget()->CreateBitmapFromWicBitmap( pWicFrame, nullptr, &m_pRawFrame ) ) )			// raw D2D bitmap
 			{
 				if ( CComPtr<IWICMetadataQueryReader> pMetadataReader = m_pAnimImage->GetDecoder().GetFrameMetadataAt( m_framePos ) )
 					m_frameMetadata.Store( pMetadataReader );		// store the Metadata for the current frame
@@ -79,7 +79,7 @@ namespace d2d
 	{
 		m_pRenderHostWnd->StopAnimation();	// delay is no longer valid
 
-		if ( NULL == m_pFrameComposeRT )
+		if ( nullptr == m_pFrameComposeRT )
 			return false;
 
 		bool succeeded = StepFrame();		// compose one frame
@@ -154,7 +154,7 @@ namespace d2d
 		if ( HR_OK( m_pFrameComposeRT->GetBitmap( &pComposedFrame ) ) )
 		{
 			// create the temporary bitmap if it hasn't been created yet
-			if ( NULL == m_pSavedFrame )
+			if ( nullptr == m_pSavedFrame )
 			{
 				D2D1_SIZE_U bitmapSize = pComposedFrame->GetPixelSize();
 				D2D1_BITMAP_PROPERTIES bitmapProps;
@@ -166,15 +166,15 @@ namespace d2d
 			}
 		}
 
-		return HR_OK( m_pSavedFrame->CopyFromBitmap( NULL, pComposedFrame, NULL ) );			// copy the whole bitmap
+		return HR_OK( m_pSavedFrame->CopyFromBitmap( nullptr, pComposedFrame, nullptr ) );			// copy the whole bitmap
 	}
 
 	bool CAnimatedFrameComposer::RestoreSavedFrame( void )
 	{
 		CComPtr<ID2D1Bitmap> pFrameToCopyTo;
-		if ( m_pSavedFrame != NULL )
+		if ( m_pSavedFrame != nullptr )
 			if ( HR_OK( m_pFrameComposeRT->GetBitmap( &pFrameToCopyTo ) ) )
-				if ( HR_OK( pFrameToCopyTo->CopyFromBitmap( NULL, m_pSavedFrame, NULL ) ) )		// copy the whole bitmap
+				if ( HR_OK( pFrameToCopyTo->CopyFromBitmap( nullptr, m_pSavedFrame, nullptr ) ) )		// copy the whole bitmap
 					return true;
 
 		return false;
@@ -195,7 +195,7 @@ namespace d2d
 
 	RenderResult CAnimatedFrameComposer::DrawBitmap( const CViewCoords& coords, const CBitmapCoords& bmpCoords )
 	{
-		if ( NULL == m_pFrameComposeRT )
+		if ( nullptr == m_pFrameComposeRT )
 			return RenderError;
 
 		bmpCoords.m_dbmTraits.Draw( GetWndRenderTarget(), m_pFrameToRender, coords.m_contentRect, bmpCoords.m_pSrcBmpRect );

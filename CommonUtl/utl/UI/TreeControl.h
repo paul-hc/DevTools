@@ -67,7 +67,7 @@ public:
 
 	// item interface
 	virtual HTREEITEM InsertObjectItem( HTREEITEM hParent, const utl::ISubject* pObject, int imageIndex = ui::No_Image, UINT state = TVIS_EXPANDED,
-										HTREEITEM hInsertAfter = TVI_LAST, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
+										HTREEITEM hInsertAfter = TVI_LAST, const TCHAR* pText = nullptr );		// pText could be LPSTR_TEXTCALLBACK
 
 	bool DeleteAllItems( void );
 	bool DeleteItem( HTREEITEM hItem );
@@ -189,7 +189,7 @@ template< typename ObjectT >
 ObjectT* CTreeControl::GetSelected( void ) const
 {
 	HTREEITEM hSelItem = GetSelectedItem();
-	return hSelItem != NULL ? GetItemObject<ObjectT>( hSelItem ) : NULL;
+	return hSelItem != nullptr ? GetItemObject<ObjectT>( hSelItem ) : nullptr;
 }
 
 template< typename Func >
@@ -198,7 +198,7 @@ void CTreeControl::ForEach( Func func, HTREEITEM hStart /*= TVI_ROOT*/ )
 	if ( hStart != TVI_ROOT )			// could be TVI_ROOT to iterate multiple root items
 		func( this, hStart );
 
-	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != NULL; hChild = GetNextSiblingItem( hChild ) )
+	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != nullptr; hChild = GetNextSiblingItem( hChild ) )
 		ForEach( func, hChild );
 }
 
@@ -209,18 +209,18 @@ HTREEITEM CTreeControl::FirstThat( Pred pred, HTREEITEM hStart /*= TVI_ROOT*/ ) 
 		if ( pred( this, hStart ) )
 			return hStart;
 
-	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != NULL; hChild = GetNextSiblingItem( hChild ) )
+	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != nullptr; hChild = GetNextSiblingItem( hChild ) )
 		if ( HTREEITEM hFound = FirstThat( pred, hChild ) )
 			return hFound;
 
-	return NULL;
+	return nullptr;
 }
 
 template< typename Type >
 inline HTREEITEM CTreeControl::FindItemWithData( Type data, HTREEITEM hStart /*= TVI_ROOT*/, RecursionDepth depth /*= Deep*/ ) const
 {
-	if ( NULL == hStart )
-		return NULL;
+	if ( nullptr == hStart )
+		return nullptr;
 
 	pred::HasItemData hasDataPred( data );
 
@@ -228,11 +228,11 @@ inline HTREEITEM CTreeControl::FindItemWithData( Type data, HTREEITEM hStart /*=
 		return FirstThat( hasDataPred, hStart );
 
 	// children shallow search
-	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != NULL; hChild = GetNextSiblingItem( hChild ) )
+	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != nullptr; hChild = GetNextSiblingItem( hChild ) )
 		if ( hasDataPred( this, hChild ) )
 			return hChild;
 
-	return NULL;
+	return nullptr;
 }
 
 

@@ -31,7 +31,7 @@ namespace reg
 CLayoutBasePropertySheet::CLayoutBasePropertySheet( const TCHAR* pTitle, CWnd* pParent, UINT selPageIndex )
 	: CPropertySheet( pTitle, pParent, selPageIndex )
 	, m_initialPageIndex( UINT_MAX )
-	, m_pCommandExecutor( NULL )
+	, m_pCommandExecutor( nullptr )
 	, m_manageOkButtonState( false )
 {
 }
@@ -48,7 +48,7 @@ CLayoutPropertyPage* CLayoutBasePropertySheet::GetPage( int pageIndex ) const
 CLayoutPropertyPage* CLayoutBasePropertySheet::GetActivePage( void ) const
 {
 	if ( 0 == GetPageCount() )
-		return NULL;
+		return nullptr;
 
 	return checked_static_cast<CLayoutPropertyPage*>( __super::GetActivePage() );
 }
@@ -128,7 +128,7 @@ void CLayoutBasePropertySheet::DeleteAllPages( void )
 
 void CLayoutBasePropertySheet::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
-	if ( pTooltip != NULL && m_pTooltipCtrl.get() == pTooltip )
+	if ( pTooltip != nullptr && m_pTooltipCtrl.get() == pTooltip )
 	{
 		UINT pageIndex = cmdId - TabItem_BaseToolId;				// tool id: subtract TabItem_BaseToolId
 
@@ -149,7 +149,7 @@ void CLayoutBasePropertySheet::QueryTooltipText( std::tstring& rText, UINT cmdId
 
 void CLayoutBasePropertySheet::RegisterTabTooltips( void )
 {
-	if ( NULL == GetSheetTooltip() )
+	if ( nullptr == GetSheetTooltip() )
 		return;
 
 	CTabCtrl* pTabCtrl = GetTabControl();
@@ -203,7 +203,7 @@ void CLayoutBasePropertySheet::LayoutPages( const CRect& rPageRect )
 	{
 		CLayoutPropertyPage* pPage = GetPage( i );
 
-		if ( pPage->m_hWnd != NULL )
+		if ( pPage->m_hWnd != nullptr )
 		{
 			pPage->MoveWindow( rPageRect );
 			pPage->LayoutPage();
@@ -223,17 +223,17 @@ void CLayoutBasePropertySheet::BuildPropPageArray( void ) override
 
 bool CLayoutBasePropertySheet::IsSheetModified( void ) const
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return false;				// window not yet created
 
 	ui::TriggerInput( m_hWnd );		// trigger input if a modified edit is focused, i.e. uncommited
 
 	// either ID_APPLY_NOW or IDOK button indicates the sheet is modified
 	CWnd* pModifiedButton = GetSheetButton( ID_APPLY_NOW );
-	if ( NULL == pModifiedButton )
+	if ( nullptr == pModifiedButton )
 		pModifiedButton = GetSheetButton( IDOK );
 
-	if ( pModifiedButton != NULL )
+	if ( pModifiedButton != nullptr )
 		return !HasFlag( pModifiedButton->GetStyle(), WS_DISABLED );
 
 	return true;		// assume modified since we cannot make a guess
@@ -283,7 +283,7 @@ void CLayoutBasePropertySheet::SetPagesUseLazyUpdateData( bool useLazyUpdateData
 bool CLayoutBasePropertySheet::OutputPage( int pageIndex )
 {
 	CLayoutPropertyPage* pPage = GetPage( pageIndex );
-	return pPage->GetSafeHwnd() != NULL && pPage->UpdateData( DialogOutput ) != FALSE;
+	return pPage->GetSafeHwnd() != nullptr && pPage->UpdateData( DialogOutput ) != FALSE;
 }
 
 void CLayoutBasePropertySheet::OutputPages( void )
@@ -304,7 +304,7 @@ bool CLayoutBasePropertySheet::ApplyChanges( void )
 	{
 		CLayoutPropertyPage* pPage = GetPage( i );
 
-		if ( pPage->GetSafeHwnd() != NULL )
+		if ( pPage->GetSafeHwnd() != nullptr )
 		{
 			if ( !pPage->UpdateData( DialogSaveChanges ) )
 				return false;
@@ -330,8 +330,8 @@ bool CLayoutBasePropertySheet::ApplyChanges( void )
 		}
 	}
 
-	if ( m_pCommandExecutor != NULL )
-		if ( m_pApplyMacroCmd.get() != NULL && !m_pApplyMacroCmd->IsEmpty() )
+	if ( m_pCommandExecutor != nullptr )
+		if ( m_pApplyMacroCmd.get() != nullptr && !m_pApplyMacroCmd->IsEmpty() )
 			m_pCommandExecutor->Execute( m_pApplyMacroCmd.release() );
 
 	OnChangesApplied();
@@ -344,7 +344,7 @@ void CLayoutBasePropertySheet::OnChangesApplied( void )
 
 BOOL CLayoutBasePropertySheet::PreTranslateMessage( MSG* pMsg ) override
 {
-	if ( GetSheetTooltip() != NULL )
+	if ( GetSheetTooltip() != nullptr )
 		m_pTooltipCtrl->RelayEvent( pMsg );
 
 	return __super::PreTranslateMessage( pMsg );
@@ -377,7 +377,7 @@ BOOL CLayoutBasePropertySheet::OnInitDialog( void ) override
 	RegisterTabTooltips();
 	m_pTooltipCtrl->Activate( TRUE );
 
-	if ( m_tabImageList.GetSafeHandle() != NULL )
+	if ( m_tabImageList.GetSafeHandle() != nullptr )
 	{
 		ASSERT( m_tabImageList.GetImageCount() >= GetPageCount() );
 		pTabCtrl->SetImageList( &m_tabImageList );
@@ -397,7 +397,7 @@ BOOL CLayoutBasePropertySheet::OnInitDialog( void ) override
 void CLayoutBasePropertySheet::OnDestroy( void )
 {
 	if ( CTabCtrl* pTabCtrl = GetTabControl() )
-		pTabCtrl->SetImageList( NULL );				// release image list ownership
+		pTabCtrl->SetImageList( nullptr );				// release image list ownership
 
 	SaveToRegistry();
 	__super::OnDestroy();

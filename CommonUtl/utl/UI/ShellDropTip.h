@@ -32,7 +32,7 @@ namespace shell
 		bool CopyMessage( DROPDESCRIPTION* pDestDropTip, const wchar_t* pMessage ) const;
 
 		static bool IsValidType( DROPIMAGETYPE type ) { return type >= DROPIMAGE_NONE && type <= MaxDropImage; }
-		static bool HasInsertFmt( const DROPDESCRIPTION* pDropTip ) { return pDropTip != NULL && !str::IsEmpty( pDropTip->szInsert ); }
+		static bool HasInsertFmt( const DROPDESCRIPTION* pDropTip ) { return pDropTip != nullptr && !str::IsEmpty( pDropTip->szInsert ); }
 		static bool Clear( DROPDESCRIPTION* pDropTip );
 	private:
 		enum Field { Message, InsertFmt };

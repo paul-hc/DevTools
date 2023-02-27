@@ -110,16 +110,16 @@ class CGroupIcon		// RT_GROUP_ICON resource info
 public:
 	CGroupIcon( UINT iconId );
 
-	bool IsValid( void ) const { return m_pGroupIconDir != NULL; }
+	bool IsValid( void ) const { return m_pGroupIconDir != nullptr; }
 	const res::CGroupIconDir* GetDir( void ) const { return m_pGroupIconDir; }
 
 	enum { AnyBpp = 0 };
 
 	const res::CGroupIconEntry* FindMatch( TBitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const;
 
-	bool Contains( TBitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const { return FindMatch( bitsPerPixel, iconStdSize ) != NULL; }
-	bool ContainsSize( IconStdSize iconStdSize, TBitsPerPixel* pBitsPerPixel = NULL ) const;
-	bool ContainsBpp( TBitsPerPixel bitsPerPixel, IconStdSize* pIconStdSize = NULL ) const;
+	bool Contains( TBitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const { return FindMatch( bitsPerPixel, iconStdSize ) != nullptr; }
+	bool ContainsSize( IconStdSize iconStdSize, TBitsPerPixel* pBitsPerPixel = nullptr ) const;
+	bool ContainsBpp( TBitsPerPixel bitsPerPixel, IconStdSize* pIconStdSize = nullptr ) const;
 
 	std::pair<TBitsPerPixel, IconStdSize> Front( void ) const { return IsValid() ? ToBppSize( m_pGroupIconDir->Begin() ) : m_nullBppStdSize; }
 	std::pair<TBitsPerPixel, IconStdSize> Back( void ) const { return IsValid() ? ToBppSize( m_pGroupIconDir->Last() ) : m_nullBppStdSize; }

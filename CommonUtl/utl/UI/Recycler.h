@@ -27,13 +27,13 @@ namespace shell
 		IShellItem2* FindRecycledItem( const fs::CPath& delFilePath ) const;
 
 		bool UndeleteFile( const fs::CPath& delFilePath, CWnd* pWndOwner );
-		size_t UndeleteMultiFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = NULL );		// all at once
-		size_t UndeleteMultiFiles2( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = NULL );		// one-by-one
+		size_t UndeleteMultiFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = nullptr );		// all at once
+		size_t UndeleteMultiFiles2( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = nullptr );		// one-by-one
 
 		static bool Undelete( IContextMenu* pContextMenu, CWnd* pWndOwner );
 		static bool UndeleteItem( IShellItem2* pRecycledItem, CWnd* pWndOwner );
 
-		static bool EmptyRecycleBin( HWND hWndOwner, const TCHAR* pRootPath = NULL, DWORD flags = 0 ) { return HR_OK( ::SHEmptyRecycleBin( hWndOwner, pRootPath, flags ) ); }
+		static bool EmptyRecycleBin( HWND hWndOwner, const TCHAR* pRootPath = nullptr, DWORD flags = 0 ) { return HR_OK( ::SHEmptyRecycleBin( hWndOwner, pRootPath, flags ) ); }
 	public:
 		static fs::CPath GetOriginalFilePath( IShellItem* pRecycledItem ) { ASSERT_PTR( pRecycledItem ); return shell::GetDisplayName( pRecycledItem, SIGDN_NORMALDISPLAY ); }
 		static CTime GetDateDeleted( IShellItem2* pRecycledItem ) { ASSERT_PTR( pRecycledItem ); return shell::GetDateTimeProperty( pRecycledItem, PK_DateDeleted ); }
@@ -44,7 +44,7 @@ namespace shell
 		static void QueryDrivesWithRecycledItems( std::vector< std::tstring >& rDriveRootPaths );		// drive root paths that have deleted files in Recycle Bin
 
 		// pRootPath could be any directory path
-		static bool QueryRecycleBin( const TCHAR* pRootPath, size_t& rItemCount, ULONGLONG* pTotalSize = NULL );
+		static bool QueryRecycleBin( const TCHAR* pRootPath, size_t& rItemCount, ULONGLONG* pTotalSize = nullptr );
 		static size_t FindRecycledItemCount( const TCHAR* pRootPath );
 	private:
 		CComPtr<IShellItem2> m_pRecyclerItem;

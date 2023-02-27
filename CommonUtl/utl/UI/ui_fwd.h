@@ -135,7 +135,7 @@ namespace ui
 	inline int ToCmdId( UINT uCmdId ) { return (short)(unsigned short)( uCmdId ); }
 
 
-	CPoint GetCursorPos( HWND hWnd = NULL );			// return screen coordinates if NULL
+	CPoint GetCursorPos( HWND hWnd = nullptr );			// return screen coordinates if NULL
 	const CPoint& GetNullPos( void );
 
 	// works for VK_CONTROL, VK_SHIFT, VK_MENU (alt), VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, etc

@@ -26,21 +26,21 @@ const CIcon* CSplitPushButton::GetRhsIcon( void ) const
 	if ( m_rhsIconId.IsValid() )
 		return ui::GetImageStoresSvc()->RetrieveIcon( m_rhsIconId );
 
-	return NULL;
+	return nullptr;
 }
 
 void CSplitPushButton::SetRhsIconId( const CIconId& rhsIconId )
 {
 	m_rhsIconId = rhsIconId;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		Invalidate();
 }
 
 void CSplitPushButton::SetRhsText( const std::tstring& rhsText )
 {
 	m_rhsText = rhsText;
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		Invalidate();
 }
 
@@ -52,12 +52,12 @@ void CSplitPushButton::SetActiveSide( ButtonSide activeSide )
 	Invalidate();
 }
 
-CRect CSplitPushButton::GetRhsPartRect( const CRect* pClientRect /*= NULL*/ ) const
+CRect CSplitPushButton::GetRhsPartRect( const CRect* pClientRect /*= nullptr*/ ) const
 {
 	CRect rhsRect( 0, 0, 0, 0 );
 	if ( HasRhsPart() )
 	{
-		if ( pClientRect != NULL )
+		if ( pClientRect != nullptr )
 			rhsRect = *pClientRect;
 		else
 			GetClientRect( &rhsRect );

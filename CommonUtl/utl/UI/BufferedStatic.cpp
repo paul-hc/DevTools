@@ -59,7 +59,7 @@ void CBufferedStatic::DrawBackground( CDC* pDC, const CRect& clientRect )
 CFont* CBufferedStatic::GetMarlettFont( void )
 {
 	static CFont marlettFont;
-	if ( NULL == marlettFont.GetSafeHandle() )
+	if ( nullptr == marlettFont.GetSafeHandle() )
 		ui::MakeStandardControlFont( marlettFont, ui::CFontInfo( _T("Marlett"), ui::Regular, 120 ) );
 	return &marlettFont;
 }

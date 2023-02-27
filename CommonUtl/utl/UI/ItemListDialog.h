@@ -25,7 +25,7 @@ namespace detail
 class CItemListDialog : public CLayoutDialog
 {
 public:
-	CItemListDialog( CWnd* pParent, const ui::CItemContent& content, const TCHAR* pTitle = NULL );
+	CItemListDialog( CWnd* pParent, const ui::CItemContent& content, const TCHAR* pTitle = nullptr );
 
 	const ui::CItemContent& GetContent( void ) const { return m_content; }
 

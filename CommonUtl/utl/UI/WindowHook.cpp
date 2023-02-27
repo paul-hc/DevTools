@@ -9,20 +9,20 @@
 
 CWindowHook::CWindowHook( bool autoDelete /*= false*/ )
 	: m_autoDelete( autoDelete )
-	, m_hWnd( NULL )
-	, m_pOrgWndProc( NULL )
-	, m_pNextHook( NULL )
+	, m_hWnd( nullptr )
+	, m_pOrgWndProc( nullptr )
+	, m_pNextHook( nullptr )
 {
 }
 
 CWindowHook::~CWindowHook()
 {
-	ASSERT( NULL == m_hWnd && NULL == m_pOrgWndProc );			// can't destroy while still hooked
+	ASSERT( nullptr == m_hWnd && nullptr == m_pOrgWndProc );			// can't destroy while still hooked
 }
 
 void CWindowHook::HookWindow( HWND hWndToHook )
 {
-	ASSERT( hWndToHook != NULL && ::IsWindow( hWndToHook ) );
+	ASSERT( hWndToHook != nullptr && ::IsWindow( hWndToHook ) );
 
 	if ( IsHooked() )
 	{	// unhook previous hooked window
@@ -41,9 +41,9 @@ bool CWindowHook::UnhookWindow( void )
 		return false;
 
 	UnregisterHook();
-	m_hWnd = NULL;
-	m_pOrgWndProc = NULL;
-	m_pNextHook = NULL;
+	m_hWnd = nullptr;
+	m_pOrgWndProc = nullptr;
+	m_pNextHook = nullptr;
 
 	if ( m_autoDelete )
 		delete this;
@@ -58,7 +58,7 @@ LRESULT CWindowHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
 {
 	ASSERT_PTR( m_pOrgWndProc );
 
-	return m_pNextHook != NULL
+	return m_pNextHook != nullptr
 		? m_pNextHook->WindowProc( message, wParam, lParam )
 		: ::CallWindowProc( m_pOrgWndProc, m_hWnd, message, wParam, lParam );
 }
@@ -120,7 +120,7 @@ CWindowHook::THookMap& CWindowHook::GetHookMap( void )
 CWindowHook* CWindowHook::FindHook( HWND hWndHooked )
 {
 	THookMap::const_iterator itHook = GetHookMap().find( hWndHooked );
-	return itHook != GetHookMap().end() ? itHook->second : NULL;
+	return itHook != GetHookMap().end() ? itHook->second : nullptr;
 }
 
 void CWindowHook::RegisterHook( HWND hWndToHook )
@@ -130,7 +130,7 @@ void CWindowHook::RegisterHook( HWND hWndToHook )
 	m_pNextHook = FindHook( hWndToHook );
 
 	GetHookMap()[ hWndToHook ] = this;
-	if ( NULL == m_pNextHook )
+	if ( nullptr == m_pNextHook )
 		// this is the first hook added -> subclass the window
 		m_pOrgWndProc = (WNDPROC)::SetWindowLongPtr( hWndToHook, GWLP_WNDPROC, (LONG_PTR)&CWindowHook::HookedWindowsProc );
 	else
@@ -144,10 +144,10 @@ void CWindowHook::UnregisterHook( void )
 {
 	CWindowHook* pTheHook = FindHook( m_hWnd );
 
-	ASSERT( m_hWnd != NULL && ::IsWindow( m_hWnd ) );
-	ASSERT( pTheHook != NULL );
+	ASSERT( m_hWnd != nullptr && ::IsWindow( m_hWnd ) );
+	ASSERT( pTheHook != nullptr );
 	if ( pTheHook == this )
-		if ( pTheHook->m_pNextHook != NULL )
+		if ( pTheHook->m_pNextHook != nullptr )
 			GetHookMap()[ m_hWnd ] = pTheHook->m_pNextHook;
 		else
 		{	// the last hook for this window, restore original window-proc
@@ -159,7 +159,7 @@ void CWindowHook::UnregisterHook( void )
 		while ( pTheHook->m_pNextHook != this )
 			pTheHook = pTheHook->m_pNextHook;
 
-		ASSERT( pTheHook != NULL && pTheHook->m_pNextHook == this );
+		ASSERT( pTheHook != nullptr && pTheHook->m_pNextHook == this );
 		pTheHook->m_pNextHook = m_pNextHook;
 	}
 }

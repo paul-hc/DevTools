@@ -15,7 +15,7 @@
 template< typename BaseCtrlT >
 CBaseHostToolbarCtrl<BaseCtrlT>::CBaseHostToolbarCtrl( void )
 	: TBaseClass()
-	, m_pParentWnd( NULL )
+	, m_pParentWnd( nullptr )
 	, m_pMateToolbar( new CDialogToolBar() )
 	, m_tandemLayout( ui::EditShinkHost_MateOnRight, Spacing )
 	, m_ignoreResize( false )
@@ -29,15 +29,15 @@ CBaseHostToolbarCtrl<BaseCtrlT>::~CBaseHostToolbarCtrl()
 }
 
 template< typename BaseCtrlT >
-void CBaseHostToolbarCtrl<BaseCtrlT>::DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget /*= NULL*/ )
+void CBaseHostToolbarCtrl<BaseCtrlT>::DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget /*= nullptr*/ )
 {
-	if ( NULL == this->m_hWnd )
+	if ( nullptr == this->m_hWnd )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
 		::DDX_Control( pDX, ctrlId, *this );
 
-		if ( pWndTarget != NULL )
+		if ( pWndTarget != nullptr )
 			GetMateToolbar()->SetOwner( pWndTarget );		// host control handles WM_COMMAND for editing, and redirects WM_NOTIFY to parent dialog (for tooltips)
 	}
 }
@@ -58,7 +58,7 @@ inline const std::vector< UINT >& CBaseHostToolbarCtrl<BaseCtrlT>::GetMateComman
 template< typename BaseCtrlT >
 inline bool CBaseHostToolbarCtrl<BaseCtrlT>::ContainsMateCommand( UINT cmdId ) const
 {
-	return m_pMateToolbar.get() != NULL && m_pMateToolbar->GetStrip().ContainsButton( cmdId );
+	return m_pMateToolbar.get() != nullptr && m_pMateToolbar->GetStrip().ContainsButton( cmdId );
 }
 
 template< typename BaseCtrlT >
@@ -104,7 +104,7 @@ void CBaseHostToolbarCtrl<BaseCtrlT>::PreSubclassWindow( void )
 
 	m_ignoreResize = true;
 
-	if ( m_pMateToolbar.get() != NULL )
+	if ( m_pMateToolbar.get() != nullptr )
 	{
 		m_pMateToolbar->CreateTandem( this, m_tandemLayout );
 		m_pMateToolbar->SetOwner( this );		// host control handles WM_COMMAND for editing, and redirects WM_NOTIFY to parent dialog (for tooltips)
@@ -212,14 +212,14 @@ void CBaseItemContentCtrl<BaseCtrlT>::SetFileFilter( const TCHAR* pFileFilter )
 {
 	m_content.m_pFileFilter = pFileFilter;
 
-	if ( m_content.m_pFileFilter != NULL )
+	if ( m_content.m_pFileFilter != nullptr )
 		SetContentType( ui::FilePath );
 }
 
 template< typename BaseCtrlT >
 void CBaseItemContentCtrl<BaseCtrlT>::SetStringContent( bool allowEmptyItem /*= true*/, bool noMateButton /*= true*/ )
 {
-	REQUIRE( NULL == this->m_hWnd );			// call before creation
+	REQUIRE( nullptr == this->m_hWnd );			// call before creation
 	SetFlag( m_content.m_itemsFlags, ui::CItemContent::RemoveEmpty, !allowEmptyItem );
 
 	if ( noMateButton )

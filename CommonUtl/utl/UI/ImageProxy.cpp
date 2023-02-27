@@ -14,11 +14,11 @@
 
 // CImageProxy implementation
 
-CImageProxy::CImageProxy( CImageList* pImageList /*= NULL*/, int index /*= NoImage*/, int overlayMask /*= NoOverlayMask*/ )
+CImageProxy::CImageProxy( CImageList* pImageList /*= nullptr*/, int index /*= NoImage*/, int overlayMask /*= NoOverlayMask*/ )
 	: m_pImageList( pImageList )
 	, m_index( index )
 	, m_overlayMask( NoOverlayMask )
-	, m_pExternalOverlay( NULL )
+	, m_pExternalOverlay( nullptr )
 	, m_size( 0, 0 )
 {
 	SetOverlayMask( overlayMask ); // do some validation
@@ -26,7 +26,7 @@ CImageProxy::CImageProxy( CImageList* pImageList /*= NULL*/, int index /*= NoIma
 
 bool CImageProxy::IsEmpty( void ) const
 {
-	return NULL == m_pImageList || m_index < 0;
+	return nullptr == m_pImageList || m_index < 0;
 }
 
 const CSize& CImageProxy::GetSize( void ) const
@@ -100,7 +100,7 @@ void CImageProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT style 
 
 	bool hasAlphaChannel = false;		// we can use AlphaBlend if the alpha channel is defined for 32bpp icons
 	BYTE* pPixels;
-	if ( HBITMAP hDib = ::CreateDIBSection( memDC, &bmpInfo, DIB_RGB_COLORS, (void**)&pPixels, NULL, 0 ) )
+	if ( HBITMAP hDib = ::CreateDIBSection( memDC, &bmpInfo, DIB_RGB_COLORS, (void**)&pPixels, nullptr, 0 ) )
 	{
 		CScopedGdiObj scopedBitmap( &memDC, hDib );
 
@@ -139,7 +139,7 @@ void CImageProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT style 
 		// white: destintation (transparent)
 
 		CBitmap monochromeBitmap;
-		monochromeBitmap.CreateBitmap( m_size.cx, m_size.cy, 1, 1, NULL );		// for color: monochromeBitmap.CreateCompatibleBitmap( pDC, cx, cy );
+		monochromeBitmap.CreateBitmap( m_size.cx, m_size.cy, 1, 1, nullptr );		// for color: monochromeBitmap.CreateCompatibleBitmap( pDC, cx, cy );
 
 		CScopedGdi< CBitmap > scopedBitmap( &memDC, &monochromeBitmap );
 		CPoint posMem( 0, 0 );
@@ -176,12 +176,12 @@ CBitmapProxy::CBitmapProxy( HBITMAP hBitmapList, int bitmapIndex, const CSize& s
 	, m_index( bitmapIndex )
 	, m_size( size )
 {
-	ASSERT( hBitmapList != NULL && bitmapIndex >= 0 && size.cx != 0 && size.cy != 0 );
+	ASSERT( hBitmapList != nullptr && bitmapIndex >= 0 && size.cx != 0 && size.cy != 0 );
 }
 
 bool CBitmapProxy::IsEmpty( void ) const
 {
-	return NULL == m_hBitmapList != NULL || m_index < 0;
+	return nullptr == m_hBitmapList || m_index < 0;
 }
 
 const CSize& CBitmapProxy::GetSize( void ) const
@@ -216,7 +216,7 @@ void CBitmapProxy::DrawDisabled( CDC* pDC, const CPoint& pos, UINT /*style = ILD
 		CBitmap maskBitmap;
 
 		if ( monoDC.CreateCompatibleDC( &memDC ) &&
-			 maskBitmap.CreateBitmap( m_size.cx, m_size.cy, 1, 1, NULL ) )
+			 maskBitmap.CreateBitmap( m_size.cx, m_size.cy, 1, 1, nullptr ) )
 		{
 			CScopedGdi< CBitmap > scopedMonoBitmap( &monoDC, &maskBitmap );
 

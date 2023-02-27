@@ -13,7 +13,7 @@ class CEnumTags;
 class CEnumComboBox : public CBaseStockContentCtrl<CComboBox>
 {
 public:
-	CEnumComboBox( const CEnumTags* pEnumTags = NULL );
+	CEnumComboBox( const CEnumTags* pEnumTags = nullptr );
 	virtual ~CEnumComboBox();
 
 	template< typename EnumType >

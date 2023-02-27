@@ -24,7 +24,7 @@ CDateTimeControl::CDateTimeControl( const TCHAR* pValidFormat /*= s_dateTimeForm
 	: CBaseTrackMenuWnd<CDateTimeCtrl>()
 	, m_pValidFormat( pValidFormat )
 	, m_pNullFormat( pNullFormat )
-	, m_pLastFormat( NULL )
+	, m_pLastFormat( nullptr )
 {
 }
 
@@ -47,7 +47,7 @@ void CDateTimeControl::SetValidFormat( const TCHAR* pValidFormat )
 {
 	m_pValidFormat = pValidFormat;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		SetDateTime( GetDateTime() );
 }
 
@@ -56,7 +56,7 @@ void CDateTimeControl::SetNullFormat( const TCHAR* pNullFormat )
 	bool isNull = IsNullDateTime();
 	m_pNullFormat = pNullFormat;
 
-	if ( m_hWnd != NULL && isNull )
+	if ( m_hWnd != nullptr && isNull )
 		SetNullDateTime();
 }
 
@@ -67,7 +67,7 @@ CTime CDateTimeControl::GetDateTime( void ) const
 	// Issue: when the user picks a date from the month calendar drop-down, DTN_CLOSEUP is received after DTN_DATETIMECHANGE (sent twice) by the common control.
 	// Since we flip to a normal format only later on receiving DTN_CLOSEUP, we need to return the actual current time while month calendar is visible, regardless of current format.
 
-	if ( m_pLastFormat != m_pNullFormat || GetMonthCalCtrl() != NULL )
+	if ( m_pLastFormat != m_pNullFormat || GetMonthCalCtrl() != nullptr )
 		if ( GetTime( dateTime ) != GDT_VALID )
 			dateTime = CTime();
 
@@ -90,7 +90,7 @@ bool CDateTimeControl::IsNullDateTime( void ) const
 	if ( m_pNullFormat == m_pLastFormat )
 		return true;
 
-	if ( m_hWnd != NULL && IsNullDateTime( GetDateTime() ) )
+	if ( m_hWnd != nullptr && IsNullDateTime( GetDateTime() ) )
 		return true;
 
 	return false;

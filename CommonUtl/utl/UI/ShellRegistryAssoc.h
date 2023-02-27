@@ -16,7 +16,7 @@ namespace shell
 	std::tstring MakeParam( unsigned int paramNo = 1 );
 
 	bool RegisterShellVerb( const reg::TKeyPath& verbPath, const reg::TKeyPath& modulePath,
-							const TCHAR* pVerbTag = NULL, const TCHAR* pDdeCmd = NULL, const std::tstring extraParams = str::GetEmpty() );
+							const TCHAR* pVerbTag = nullptr, const TCHAR* pDdeCmd = nullptr, const std::tstring extraParams = str::GetEmpty() );
 	bool UnregisterShellVerb( const reg::TKeyPath& verbPath );
 
 	bool RegisterAdditionalDocumentExt( const reg::TKeyPath& docExt, const std::tstring& docTypeId );

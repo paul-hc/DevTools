@@ -36,7 +36,7 @@ namespace ui
 		void DisableInfo( UINT cmdId ) { RegisterCustom( cmdId, std::tstring() ); }
 
 		bool HandleGetMessageString( std::tstring& rMessage, UINT cmdId );		// status bar info for
-		bool HandleTooltipNeedText( NMHDR* pNmHdr, LRESULT* pResult, const ui::ICustomCmdInfo* pCustomInfo = NULL );	// tooltip notifications (TTN_NEEDTEXTA, TTN_NEEDTEXTW)
+		bool HandleTooltipNeedText( NMHDR* pNmHdr, LRESULT* pResult, const ui::ICustomCmdInfo* pCustomInfo = nullptr );	// tooltip notifications (TTN_NEEDTEXTA, TTN_NEEDTEXTW)
 	private:
 		std::unordered_map< UINT, CCmdInfo > m_cmdInfos;
 	public:

@@ -82,7 +82,7 @@ namespace lv
 		: m_nmHdr( pListCtrl, lv::LVN_ToggleCheckState )
 		, m_pListView( pListView )
 		, m_oldCheckState( ui::CheckStateFromRaw( m_pListView->uOldState ) )
-		, m_newCheckState( pCheckStatePolicy != NULL ? pCheckStatePolicy->Toggle( m_oldCheckState ) : m_oldCheckState )		// toggle check-state by default
+		, m_newCheckState( pCheckStatePolicy != nullptr ? pCheckStatePolicy->Toggle( m_oldCheckState ) : m_oldCheckState )		// toggle check-state by default
 	{
 	}
 
@@ -116,14 +116,14 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_listStyleEx( listStyleEx )
 	, m_optionFlags( SortInternally | PersistSorting | HighlightTextDiffsFrame )
 	, m_subjectBased( false )
-	, m_pTabularSep( NULL )
+	, m_pTabularSep( nullptr )
 	, m_sortByColumn( -1 )			// no sorting by default
 	, m_sortAscending( true )
-	, m_pComparePtrFunc( NULL )		// use text compare by default
-	, m_pImageList( NULL )
-	, m_pLargeImageList( NULL )
-	, m_pCheckStatePolicy( NULL )
-	, m_pFrameEditor( NULL )
+	, m_pComparePtrFunc( nullptr )		// use text compare by default
+	, m_pImageList( nullptr )
+	, m_pLargeImageList( nullptr )
+	, m_pCheckStatePolicy( nullptr )
+	, m_pFrameEditor( nullptr )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_painting( false )
 	, m_applyingCheckStateToSelectedItems( false )
@@ -156,14 +156,14 @@ bool CReportListControl::SetOptionFlag( ListOption flag, bool on )
 		return false;
 
 	SetFlag( m_optionFlags, flag, on );
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		Invalidate();
 	return true;
 }
 
 bool CReportListControl::ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT swpFlags /*= 0*/ )
 {
-	DWORD listStyleEx = m_hWnd != NULL ? GetExtendedStyle() : m_listStyleEx;
+	DWORD listStyleEx = m_hWnd != nullptr ? GetExtendedStyle() : m_listStyleEx;
 	DWORD newListStyleEx = ( listStyleEx & ~dwRemove ) | dwAdd;
 
 	if ( listStyleEx == newListStyleEx )
@@ -171,12 +171,12 @@ bool CReportListControl::ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT sw
 
 	m_listStyleEx = newListStyleEx;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		SetExtendedStyle( m_listStyleEx );
 
 		if ( swpFlags != 0 )
-			SetWindowPos( NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | swpFlags );
+			SetWindowPos( nullptr, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | swpFlags );
 	}
 
 	return true;
@@ -207,12 +207,12 @@ void CReportListControl::ClearData( void )
 	m_diffColumnPairs.clear();
 }
 
-void CReportListControl::StoreImageLists( CImageList* pImageList, CImageList* pLargeImageList /*= NULL*/ )
+void CReportListControl::StoreImageLists( CImageList* pImageList, CImageList* pLargeImageList /*= nullptr*/ )
 {
 	m_pImageList = pImageList;
 	m_pLargeImageList = pLargeImageList;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		SetImageList( m_pImageList, LVSIL_SMALL );
 		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
@@ -223,7 +223,7 @@ void CReportListControl::StoreImageLists( CImageList* pImageList, CImageList* pL
 
 bool CReportListControl::UpdateCustomImagerBoundsSize( void )
 {
-	if ( m_pCustomImager.get() != NULL )
+	if ( m_pCustomImager.get() != nullptr )
 		return m_pCustomImager->SetCurrGlyphGauge( GetViewModeGlyphGauge() );
 
 	return false;			// no change
@@ -240,13 +240,13 @@ void CReportListControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
 	}
 	else
 	{
-		StoreImageLists( NULL, NULL );
+		StoreImageLists( nullptr, nullptr );
 		ModifyListStyleEx( 0, LVS_EX_DOUBLEBUFFER );
 	}
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
-		if ( NULL == m_pCustomImager.get() )
+		if ( nullptr == m_pCustomImager.get() )
 		{	// hack: force the list to remove icon area for all items
 			ModifyStyle( LVS_TYPEMASK, LVS_ICON );
 			ChangeListViewMode( LV_VIEW_DETAILS );			// switch to report mode since other modes don't make sense without icons
@@ -258,7 +258,7 @@ void CReportListControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
 
 void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize /*= CSize( 0, 0 )*/, const CSize& largeImageSize /*= CSize( 0, 0 )*/ )
 {
-	if ( pCustomImageDraw != NULL )
+	if ( pCustomImageDraw != nullptr )
 	{
 		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, smallImageSize, largeImageSize ) );
 		StoreImageLists( m_pCustomImager->GetImageList( ui::SmallGlyph ), m_pCustomImager->GetImageList( ui::LargeGlyph ) );
@@ -267,13 +267,13 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 	else
 	{
 		m_pCustomImager.reset();
-		StoreImageLists( NULL, NULL );
+		StoreImageLists( nullptr, nullptr );
 		ModifyListStyleEx( 0, LVS_EX_DOUBLEBUFFER );
 	}
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
-		if ( NULL == m_pCustomImager.get() )
+		if ( nullptr == m_pCustomImager.get() )
 		{	// hack: force the list to remove icon area for all items
 			ModifyStyle( LVS_TYPEMASK, LVS_ICON );
 			ChangeListViewMode( LV_VIEW_DETAILS );			// switch to report mode since other modes don't make sense without icons
@@ -293,7 +293,7 @@ CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
 	static CMenu s_stdPopupMenu[ _ListPopupCount ];
 	CMenu& rMenu = s_stdPopupMenu[ popupType ];
 
-	if ( NULL == rMenu.GetSafeHmenu() )
+	if ( nullptr == rMenu.GetSafeHmenu() )
 	{
 		switch ( popupType )
 		{
@@ -329,15 +329,15 @@ void CReportListControl::SetupControl( void )
 
 	CListLikeCtrlBase::SetupControl();
 
-	if ( m_pImageList != NULL )
+	if ( m_pImageList != nullptr )
 		SetImageList( m_pImageList, LVSIL_SMALL );
-	if ( m_pLargeImageList != NULL )
+	if ( m_pLargeImageList != nullptr )
 		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
 
-	if ( m_pCheckStatePolicy != NULL )
+	if ( m_pCheckStatePolicy != nullptr )
 	{
 		CImageList* pStateImageList = GetStateImageList();
-		ASSERT( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) && pStateImageList != NULL );
+		ASSERT( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) && pStateImageList != nullptr );
 		ASSERT( 2 == pStateImageList->GetImageCount() );				// standard check-box
 
 		if ( const std::vector< CThemeItem >* pThemeItems = m_pCheckStatePolicy->GetThemeItems() )
@@ -351,7 +351,7 @@ void CReportListControl::SetupControl( void )
 	if ( !m_regSection.empty() )
 		LoadFromRegistry();
 	else
-		SetupColumnLayout( NULL );
+		SetupColumnLayout( nullptr );
 
 	UpdateCustomImagerBoundsSize();
 	UpdateColumnSortHeader();		// update current sorting order
@@ -401,9 +401,9 @@ ui::GlyphGauge CReportListControl::GetViewModeGlyphGauge( DWORD listViewMode )
 bool CReportListControl::SetCompactIconSpacing( int iconEdgeWidth /*= IconViewEdgeX*/ )
 {
 	CSize spacing( iconEdgeWidth * 2, 0 );
-	if ( m_pLargeImageList != NULL )
+	if ( m_pLargeImageList != nullptr )
 		spacing.cx += gdi::GetImageIconSize( *m_pLargeImageList ).cx;
-	else if ( m_pImageList != NULL )
+	else if ( m_pImageList != nullptr )
 		spacing.cx += gdi::GetImageIconSize( *m_pImageList ).cx;
 	else
 		return false;
@@ -465,9 +465,9 @@ OR:
 */
 }
 
-int CReportListControl::HitTest( CPoint point, UINT* pFlags /*= NULL*/, TGroupId* pGroupId /*= NULL*/ ) const
+int CReportListControl::HitTest( CPoint point, UINT* pFlags /*= nullptr*/, TGroupId* pGroupId /*= nullptr*/ ) const
 {
-	REQUIRE( NULL == pGroupId || pFlags != NULL );
+	REQUIRE( nullptr == pGroupId || pFlags != nullptr );
 	UINT hitFlags;
 	int itemIndex = __super::HitTest( point, &hitFlags );
 
@@ -494,7 +494,7 @@ int CReportListControl::HitTest( CPoint point, UINT* pFlags /*= NULL*/, TGroupId
 		else
 			SetFlag( hitFlags, LVHT_MY_PASTEND );
 
-		if ( pGroupId != NULL )
+		if ( pGroupId != nullptr )
 		{
 			*pGroupId = GroupHitTest( point );
 
@@ -503,7 +503,7 @@ int CReportListControl::HitTest( CPoint point, UINT* pFlags /*= NULL*/, TGroupId
 		}
 	}
 
-	if ( pFlags != NULL )
+	if ( pFlags != nullptr )
 		*pFlags = hitFlags;
 
 	return itemIndex;
@@ -580,7 +580,7 @@ void CReportListControl::SetSortByColumn( TColumn sortByColumn, bool sortAscendi
 	m_sortByColumn = sortByColumn;
 	m_sortAscending = sortAscending;
 
-	if ( m_hWnd != NULL && IsSortingEnabled() )
+	if ( m_hWnd != nullptr && IsSortingEnabled() )
 		SortList();
 }
 
@@ -589,7 +589,7 @@ void CReportListControl::StoreSortByColumn( TColumn sortByColumn, bool sortAscen
 	m_sortByColumn = sortByColumn;
 	m_sortAscending = sortAscending;
 
-	if ( m_hWnd != NULL && IsSortingEnabled() )
+	if ( m_hWnd != nullptr && IsSortingEnabled() )
 		UpdateColumnSortHeader();
 }
 
@@ -630,7 +630,7 @@ void CReportListControl::SortList( void )
 				SortGroups( (PFNLVGROUPCOMPARE)&InitialGroupOrderCompareProc, this );
 		}
 		else if ( GetSortInternally() )											// otherwise was sorted externally, just update sort header
-			if ( m_pComparePtrFunc != NULL )
+			if ( m_pComparePtrFunc != nullptr )
 				SortItems( m_pComparePtrFunc, (LPARAM)this );					// passes item LPARAMs as left/right
 			else
 				SortItemsEx( (PFNLVCOMPARE)&TextCompareProc, (LPARAM)this );	// passes item indexes as left/right LPARAMs
@@ -665,7 +665,7 @@ void CReportListControl::AddColumnCompare( TColumn column, const pred::IComparat
 	// note: pComparator could be NULL for custom sorting
 	ASSERT( column >= 0 || EntireRecord == column );
 
-	if ( NULL == m_pComparePtrFunc )
+	if ( nullptr == m_pComparePtrFunc )
 		SetCompareFunc( (PFNLVCOMPARE)&ObjectCompareProc );
 
 	m_comparators.push_back( CColumnComparator( column, defaultAscending, pComparator ) );
@@ -677,7 +677,7 @@ const pred::IComparator* CReportListControl::FindCompare( TColumn column ) const
 		if ( column == itColComparator->m_column )
 			return itColComparator->m_pComparator;
 
-	return NULL;
+	return nullptr;
 }
 
 bool CReportListControl::IsDefaultAscending( TColumn column ) const
@@ -846,12 +846,12 @@ void CReportListControl::SetLayoutInfo( UINT columnLayoutId )
 
 void CReportListControl::SetLayoutInfo( const std::vector< std::tstring >& columnSpecs )
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		DeleteAllColumns();
 
 	ParseColumnLayout( m_columnInfos, columnSpecs );
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		InsertAllColumns();
 }
 
@@ -910,7 +910,7 @@ void CReportListControl::ParseColumnLayout( std::vector< CColumnInfo >& rColumnI
 unsigned int CReportListControl::GetColumnCount( void ) const
 {
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
-	return pHeaderCtrl != NULL ? pHeaderCtrl->GetItemCount() : 0;
+	return pHeaderCtrl != nullptr ? pHeaderCtrl->GetItemCount() : 0;
 }
 
 void CReportListControl::ResetColumnLayout( void )
@@ -920,7 +920,7 @@ void CReportListControl::ResetColumnLayout( void )
 	std::vector< std::tstring > columnSpecs = str::LoadStrings( m_columnLayoutId );
 	ParseColumnLayout( m_columnInfos, columnSpecs );
 
-	SetupColumnLayout( NULL );
+	SetupColumnLayout( nullptr );
 }
 
 void CReportListControl::DeleteAllColumns( void )
@@ -970,7 +970,7 @@ void CReportListControl::SetupColumnLayout( const std::vector< std::tstring >* p
 		return;
 
 	bool insertMode = 0 == GetColumnCount();
-	bool ignoreSavedLayout = !insertMode || NULL == pRegColumnLayoutItems || pRegColumnLayoutItems->size() != m_columnInfos.size();
+	bool ignoreSavedLayout = !insertMode || nullptr == pRegColumnLayoutItems || pRegColumnLayoutItems->size() != m_columnInfos.size();
 
 	LVCOLUMN columnInfo;
 	ZeroMemory( &columnInfo, sizeof( columnInfo ) );
@@ -1033,7 +1033,7 @@ CReportListControl& CReportListControl::AddTileColumn( UINT tileColumn )
 
 bool CReportListControl::ResizeFlexColumns( void )
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return false;
 	if ( 0 == GetColumnCount() )
 		return false;			// columns not initialized yet
@@ -1187,7 +1187,7 @@ utl::ISubject* CReportListControl::GetSubjectAt( int index ) const
 {
 	if ( utl::ISubject* pObject = ToSubject( GetItemData( index ) ) )
 		if ( !m_subjectBased )
-			return NULL;
+			return nullptr;
 		else
 		{
 			pObject = dynamic_cast<utl::ISubject*>( pObject );
@@ -1195,15 +1195,15 @@ utl::ISubject* CReportListControl::GetSubjectAt( int index ) const
 			return pObject;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
-int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex /*= ui::No_Image*/, const TCHAR* pText /*= NULL*/ )
+int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex /*= ui::No_Image*/, const TCHAR* pText /*= nullptr*/ )
 {
 	std::tstring displayCode;
-	if ( pObject != NULL )
+	if ( pObject != nullptr )
 	{
-		if ( NULL == pText )
+		if ( nullptr == pText )
 		{
 			displayCode = FormatCode( pObject );
 			pText = displayCode.c_str();
@@ -1214,7 +1214,7 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 	}
 
 	if ( ui::Transparent_Image == imageIndex )
-		imageIndex = m_pCustomImager.get() != NULL ? m_pCustomImager->GetTranspImageIndex() : 0;
+		imageIndex = m_pCustomImager.get() != nullptr ? m_pCustomImager->GetTranspImageIndex() : 0;
 
 	int insertIndex = InsertItem( LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM, index, pText, 0, 0, imageIndex, reinterpret_cast<LPARAM>( pObject ) );
 	ASSERT( insertIndex != -1 );
@@ -1230,7 +1230,7 @@ void CReportListControl::SetSubItemTextPtr( int index, int subItem, const TCHAR*
 	ASSERT( subItem > 0 );
 
 	if ( ui::Transparent_Image == imageIndex )
-		imageIndex = m_pCustomImager.get() != NULL ? m_pCustomImager->GetTranspImageIndex() : 0;
+		imageIndex = m_pCustomImager.get() != nullptr ? m_pCustomImager->GetTranspImageIndex() : 0;
 	else if ( str::IsEmpty( pText ) )
 		imageIndex = ui::No_Image;			// clear the image for empty text
 
@@ -1239,7 +1239,7 @@ void CReportListControl::SetSubItemTextPtr( int index, int subItem, const TCHAR*
 
 void CReportListControl::SetSubItemImage( int index, int subItem, int imageIndex )
 {
-	VERIFY( SetItem( index, subItem, LVIF_IMAGE, NULL, imageIndex, 0, 0, 0 ) );
+	VERIFY( SetItem( index, subItem, LVIF_IMAGE, nullptr, imageIndex, 0, 0, 0 ) );
 }
 
 bool CReportListControl::SetItemTileInfo( int index )
@@ -1251,7 +1251,7 @@ bool CReportListControl::SetItemTileInfo( int index )
 	tileInfo.iItem = index;
 	tileInfo.cColumns = static_cast<UINT>( m_tileColumns.size() );
 	tileInfo.puColumns = &m_tileColumns.front();
-	tileInfo.piColFmt = NULL;
+	tileInfo.piColFmt = nullptr;
 
 	return SetTileInfo( &tileInfo ) != FALSE;
 }
@@ -1324,12 +1324,12 @@ const CReportListControl::CLabelEdit* CReportListControl::EditLabelModal( int in
 	HWND hEdit = EditLabel( index )->GetSafeHwnd();
 	MSG msg;
 
-	while ( ui::IsValidWindow( hEdit ) && m_pLabelEdit.get() != NULL && !m_pLabelEdit->m_done )
-		if ( ::PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
+	while ( ui::IsValidWindow( hEdit ) && m_pLabelEdit.get() != nullptr && !m_pLabelEdit->m_done )
+		if ( ::PeekMessage( &msg, nullptr, 0, 0, PM_NOREMOVE ) )
 			if ( !AfxGetThread()->PumpMessage() )
 			{
 				::PostQuitMessage( 0 );
-				return NULL;
+				return nullptr;
 			}
 
 	return m_pLabelEdit.get();
@@ -1416,7 +1416,7 @@ bool CReportListControl::SetCheckState( int index, int checkState )
 	if ( !SetRawCheckState( index, ui::CheckStateToRaw( checkState ) ) )
 		return false;
 
-	if ( m_pNmToggling.get() != NULL )
+	if ( m_pNmToggling.get() != nullptr )
 		m_pNmToggling->AddIndex( index );		// accumulate items that have changed state during a toggle
 
 	return true;
@@ -1445,7 +1445,7 @@ bool CReportListControl::ModifyObjectCheckState( const utl::ISubject* pObject, i
 
 bool CReportListControl::IsChecked( int index ) const
 {
-	if ( m_pCheckStatePolicy != NULL )
+	if ( m_pCheckStatePolicy != nullptr )
 		return GetCheckStatePolicy()->IsCheckedState( GetCheckState( index ) );
 
 	return GetCheck( index ) != FALSE;
@@ -1518,7 +1518,7 @@ size_t CReportListControl::ApplyCheckStateToSelectedItems( int toggledIndex, int
 				CScopedInternalChange change( this );
 				CScopedValue<bool> scopedApplyingToSel( &m_applyingCheckStateToSelectedItems, true );
 
-				for ( POSITION pos = GetFirstSelectedItemPosition(); pos != NULL; )
+				for ( POSITION pos = GetFirstSelectedItemPosition(); pos != nullptr; )
 				{
 					int index = GetNextSelectedItem( pos );
 
@@ -1545,7 +1545,7 @@ bool CReportListControl::SetCaretIndex( int index, bool doSet /*= true*/ )
 bool CReportListControl::SingleSelected( void ) const
 {
 	int selCount = 0;
-	for ( POSITION pos = GetFirstSelectedItemPosition(); pos != NULL && selCount < 2; ++selCount )
+	for ( POSITION pos = GetFirstSelectedItemPosition(); pos != nullptr && selCount < 2; ++selCount )
 		GetNextSelectedItem( pos );
 
 	return 1 == selCount;
@@ -1603,17 +1603,17 @@ int CReportListControl::GetSelCaretIndex( void ) const
 	return -1;
 }
 
-bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCaretIndex /*= NULL*/, int* pTopIndex /*= NULL*/ ) const
+bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCaretIndex /*= nullptr*/, int* pTopIndex /*= nullptr*/ ) const
 {
 	rSelIndexes.reserve( rSelIndexes.size() + GetSelectedCount() );
 
-	for ( POSITION pos = GetFirstSelectedItemPosition(); pos != NULL; )
+	for ( POSITION pos = GetFirstSelectedItemPosition(); pos != nullptr; )
 		rSelIndexes.push_back( GetNextSelectedItem( pos ) );
 
-	if ( pCaretIndex != NULL )
+	if ( pCaretIndex != nullptr )
 		*pCaretIndex = FindItemWithState( LVNI_FOCUSED );
 
-	if ( pTopIndex != NULL )
+	if ( pTopIndex != nullptr )
 		*pTopIndex = GetTopIndex();
 
 	std::sort( rSelIndexes.begin(), rSelIndexes.end() );		// sort indexes ascending
@@ -1657,7 +1657,7 @@ bool CReportListControl::Select( const void* pObject )
 		else
 			ClearSelection();
 
-		return ( -1 == indexFound ) == ( NULL == pObject );
+		return ( -1 == indexFound ) == ( nullptr == pObject );
 	}
 	else
 		return SetCurSel( indexFound );
@@ -1787,14 +1787,14 @@ std::tstring CReportListControl::FormatItemLine( int index ) const
 			if ( col != 0 )
 				lineText += m_pTabularSep;
 
-			if ( Code == col && pObject != NULL )
+			if ( Code == col && pObject != nullptr )
 				lineText += pObject->GetCode();
 			else
 				lineText += GetItemText( index, col ).GetString();
 		}
 	}
 	else
-		if ( pObject != NULL )
+		if ( pObject != nullptr )
 			lineText = pObject->GetCode();		// assume GetCode() represents a full path, and GetDisplayCode() represents a fname.ext
 		else
 			lineText = GetItemText( index, Code ).GetString();
@@ -1815,13 +1815,13 @@ bool CReportListControl::Copy( int sourceFlags /*= ListSourcesMask*/ )
 	return false;
 }
 
-std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin /*= NULL*/ )
+std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin /*= nullptr*/ )
 {
 	std::auto_ptr<CImageList> pDragImage;			// imagelist with the merged drag images
 	if ( !indexes.empty() )
 	{
 		SHDRAGIMAGE shDragImage;
-		if ( shell::GetDragImage( shDragImage, m_hWnd ) != NULL )
+		if ( shell::GetDragImage( shDragImage, m_hWnd ) != nullptr )
 		{
 			pDragImage.reset( new CImageList() );
 			pDragImage->Create( shDragImage.sizeDragImage.cx, shDragImage.sizeDragImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1 );		// 1 image with all items
@@ -1833,14 +1833,14 @@ std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::v
 			AfxImageList_AddMasked( pDragImage->GetSafeHandle(), shDragImage.hbmpDragImage, shDragImage.crColorKey );
 		#endif
 
-			if ( pFrameOrigin != NULL )
+			if ( pFrameOrigin != nullptr )
 				*pFrameOrigin = GetFrameBounds( indexes ).TopLeft();	// offset of the current mouse cursor to the imagelist we can use in BeginDrag()
 		}
 	}
 	return pDragImage;
 }
 
-std::auto_ptr<CImageList> CReportListControl::CreateDragImageSelection( CPoint* pFrameOrigin /*= NULL*/ )
+std::auto_ptr<CImageList> CReportListControl::CreateDragImageSelection( CPoint* pFrameOrigin /*= nullptr*/ )
 {
 	std::vector< int > selIndexes;
 	GetSelection( selIndexes );
@@ -1894,7 +1894,7 @@ const CReportListControl::CDiffColumnPair* CReportListControl::FindDiffColumnPai
 		if ( itDiffPair->HasColumn( column ) )
 			return &*itDiffPair;
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -2085,7 +2085,7 @@ BOOL CReportListControl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDL
 			- It works the other way around, list routes to parent dialog.
 		 */
 
-		if ( m_pFrameEditor != NULL )
+		if ( m_pFrameEditor != nullptr )
 		{
 			if ( m_pFrameEditor->HandleCtrlCmdMsg( id, code, pExtra, pHandlerInfo ) )
 				return TRUE;			// handled by frame editor, which take precedence over internal handler
@@ -2178,11 +2178,11 @@ void CReportListControl::OnKeyDown( UINT chr, UINT repCnt, UINT vkFlags )
 {
 	std::auto_ptr<CSelFlowSequence> pSelFlow = CSelFlowSequence::MakeFlow( this );
 
-	if ( NULL == pSelFlow.get() || pSelFlow->HandleKeyDown( chr ) )
+	if ( nullptr == pSelFlow.get() || pSelFlow->HandleKeyDown( chr ) )
 	{
 		__super::OnKeyDown( chr, repCnt, vkFlags );
 
-		if ( pSelFlow.get() != NULL )
+		if ( pSelFlow.get() != nullptr )
 			pSelFlow->PostKeyDown( chr );
 	}
 }
@@ -2231,7 +2231,7 @@ BOOL CReportListControl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 	if ( !IsInternalChange() )									// a user change?
 		if ( IsCheckStateChangeNotify( pListView ) )			// item check-state is about to change?
 		{
-			if ( m_pCheckStatePolicy != NULL )
+			if ( m_pCheckStatePolicy != nullptr )
 			{
 				lv::CNmToggleCheckState toggleInfo( this, pListView, m_pCheckStatePolicy );		// toggle check-state by default
 
@@ -2253,7 +2253,7 @@ BOOL CReportListControl::OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 	*pResult = 0L;
 
 	if ( GetToggleCheckSelItems() )											// apply toggle to multi-selection?
-		if ( !IsInternalChange() || m_pNmToggling.get() != NULL )			// user has toggled the check-state (directly or indirectly)?
+		if ( !IsInternalChange() || m_pNmToggling.get() != nullptr )			// user has toggled the check-state (directly or indirectly)?
 			if ( IsCheckStateChangeNotify( pListView ) )					// user has toggled the check-state?
 				ApplyCheckStateToSelectedItems( pListView->iItem, ui::CheckStateFromRaw( pListView->uNewState ) );		// apply check-state to selected items if toggled an item that is part of the multi-selection
 
@@ -2335,8 +2335,8 @@ BOOL CReportListControl::OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 	NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNmHdr;
 	*pResult = 0;
 
-	if ( m_pLabelEdit.get() != NULL )
-		if ( pDispInfo->item.pszText != NULL )
+	if ( m_pLabelEdit.get() != nullptr )
+		if ( pDispInfo->item.pszText != nullptr )
 		{
 			m_pLabelEdit->m_done = true;
 			m_pLabelEdit->m_newLabel = pDispInfo->item.pszText;
@@ -2390,7 +2390,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 		case CDDS_ITEMPREPAINT:
 			*pResult = CDRF_NEWFONT | CDRF_NOTIFYSUBITEMDRAW;
 
-			if ( m_pCustomImager.get() != NULL )
+			if ( m_pCustomImager.get() != nullptr )
 				*pResult |= CDRF_NOTIFYPOSTPAINT;				// will superimpose the thumbnail on top of transparent image (on CDDS_ITEMPOSTPAINT drawing stage)
 
 			break;
@@ -2406,7 +2406,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 			if ( !draw.m_isReportMode )
 				draw.DrawCellTextDiffs();						// draw text diffs since there is no CDDS_SUBITEM notification
 
-			if ( m_pCustomImager.get() != NULL )
+			if ( m_pCustomImager.get() != nullptr )
 				if ( IsItemVisible( draw.m_index ) )
 				{
 					CRect itemImageRect;
@@ -2436,7 +2436,7 @@ void CReportListControl::OnListViewMode( UINT cmdId )
 void CReportListControl::OnUpdateListViewMode( CCmdUI* pCmdUI )
 {
 	DWORD viewMode = lv::CmdIdToListViewMode( pCmdUI->m_nID );
-	bool modeHasImages = ( LV_VIEW_ICON == viewMode ? m_pLargeImageList : m_pImageList ) != NULL;
+	bool modeHasImages = ( LV_VIEW_ICON == viewMode ? m_pLargeImageList : m_pImageList ) != nullptr;
 
 	pCmdUI->Enable( modeHasImages );
 	ui::SetRadio( pCmdUI, viewMode == GetView() );
@@ -2580,7 +2580,7 @@ namespace lv
 	template<>
 	void TScopedStatus_ByIndex::Restore( void )
 	{
-		if ( m_pListCtrl != NULL && m_pListCtrl->GetItemCount() != 0 )
+		if ( m_pListCtrl != nullptr && m_pListCtrl->GetItemCount() != 0 )
 		{
 			//CScopedInternalChange internalChange( m_pListCtrl );
 			m_pListCtrl->SetSelection( m_selItems, m_caretItem );
@@ -2589,7 +2589,7 @@ namespace lv
 				m_pListCtrl->EnsureVisible( m_topVisibleItem, FALSE );
 		}
 
-		m_pListCtrl = NULL;
+		m_pListCtrl = nullptr;
 	}
 
 
@@ -2598,8 +2598,8 @@ namespace lv
 	template<>
 	TScopedStatus_ByObject::CScopedStatus( CReportListControl* pListCtrl, bool useTopItem /*= false*/ )
 		: m_pListCtrl( pListCtrl )
-		, m_topVisibleItem( NULL )
-		, m_caretItem( NULL )
+		, m_topVisibleItem( nullptr )
+		, m_caretItem( nullptr )
 	{
 		ASSERT_PTR( m_pListCtrl->GetSafeHwnd() );
 
@@ -2622,7 +2622,7 @@ namespace lv
 	template<>
 	void TScopedStatus_ByObject::Restore( void )
 	{
-		if ( m_pListCtrl != NULL && m_pListCtrl->GetItemCount() != 0 )
+		if ( m_pListCtrl != nullptr && m_pListCtrl->GetItemCount() != 0 )
 		{
 			//CScopedInternalChange internalChange( m_pListCtrl );
 
@@ -2631,18 +2631,18 @@ namespace lv
 			else if ( 1 == m_selItems.size() )
 				m_pListCtrl->Select( m_selItems.front() );
 
-			if ( m_caretItem != NULL && m_caretItem != m_pListCtrl->GetCaretAs<utl::ISubject>() )
+			if ( m_caretItem != nullptr && m_caretItem != m_pListCtrl->GetCaretAs<utl::ISubject>() )
 			{
 				int caretIndex = m_pListCtrl->FindItemIndex( m_caretItem );
 				if ( caretIndex != -1 )
 					m_pListCtrl->SetCaretIndex( caretIndex );
 			}
 
-			if ( m_topVisibleItem != NULL )
+			if ( m_topVisibleItem != nullptr )
 				m_pListCtrl->EnsureVisibleObject( m_topVisibleItem );
 		}
 
-		m_pListCtrl = NULL;
+		m_pListCtrl = nullptr;
 	}
 
 
@@ -2677,7 +2677,7 @@ namespace lv
 	template<>
 	void TScopedStatus_ByText::Restore( void )
 	{
-		if ( m_pListCtrl != NULL && m_pListCtrl->GetItemCount() != 0 )
+		if ( m_pListCtrl != nullptr && m_pListCtrl->GetItemCount() != 0 )
 		{
 			//CScopedInternalChange internalChange( m_pListCtrl );
 
@@ -2702,7 +2702,7 @@ namespace lv
 			}
 		}
 
-		m_pListCtrl = NULL;
+		m_pListCtrl = nullptr;
 	}
 
 } //namespace lv
@@ -2843,7 +2843,7 @@ bool CSelFlowSequence::NavigateCaret( int newCaretIndex )
 
 // CListSelectionData implementation
 
-CListSelectionData::CListSelectionData( CWnd* pSrcWnd /*= NULL*/ )
+CListSelectionData::CListSelectionData( CWnd* pSrcWnd /*= nullptr*/ )
 	: ole::CTransferBlob( GetClipFormat() )
 	, m_pSrcWnd( pSrcWnd )
 {

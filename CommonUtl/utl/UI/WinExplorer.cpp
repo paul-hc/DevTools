@@ -13,7 +13,7 @@
 
 	IUnknown
 		IExplorerBrowser
-			{ ::SHCoCreateInstance( NULL, &CLSID_ExplorerBrowser, NULL, IID_PPV_ARGS( &m_pExplorerBrowser ) ) }
+			{ ::SHCoCreateInstance( nullptr, &CLSID_ExplorerBrowser, nullptr, IID_PPV_ARGS( &m_pExplorerBrowser ) ) }
 
 		IShellFolder
 			IShellFolder2
@@ -57,7 +57,7 @@ namespace shell
 		TCHAR displayName[ MAX_PATH * 2 ];
 		_tcscpy( displayName, pFnameExt );
 
-		return Handle( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, pPidl, NULL ) );
+		return Handle( pFolder->ParseDisplayName( nullptr, nullptr, displayName, nullptr, pPidl, nullptr ) );
 	}
 
 	CComPtr<IShellFolder> CWinExplorer::FindShellFolder( const TCHAR* pDirPath ) const
@@ -68,7 +68,7 @@ namespace shell
 			{
 				CComHeapPtr<ITEMIDLIST> workDirPidl;
 				if ( ParsePidl( &workDirPidl, pDesktopFolder, pDirPath ) )
-					Handle( pDesktopFolder->BindToObject( workDirPidl, NULL, IID_PPV_ARGS( &pDirFolder ) ) );
+					Handle( pDesktopFolder->BindToObject( workDirPidl, nullptr, IID_PPV_ARGS( &pDirFolder ) ) );
 			}
 
 		return pDirFolder;
@@ -78,7 +78,7 @@ namespace shell
 	CComPtr<IShellItem> CWinExplorer::FindShellItem( const fs::CPath& fullPath ) const
 	{
 		CComPtr<IShellItem> pShellItem;
-		Handle( ::SHCreateItemFromParsingName( fullPath.GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) );
+		Handle( ::SHCreateItemFromParsingName( fullPath.GetPtr(), nullptr, IID_PPV_ARGS( &pShellItem ) ) );
 		return pShellItem;
 	}
 
@@ -97,10 +97,10 @@ namespace shell
 	HBITMAP CWinExplorer::ExtractThumbnail( const fs::CPath& filePath, const CSize& boundsSize, DWORD flags /*= 0*/ ) const
 	{
 		CComPtr<IShellFolder> pDirFolder = FindShellFolder( filePath.GetParentPath().GetPtr() );
-		if ( pDirFolder != NULL )
+		if ( pDirFolder != nullptr )
 		{
 			CComPtr<IExtractImage> pExtractImage = BindFileTo< IExtractImage >( pDirFolder, filePath.GetFilenamePtr() );
-			if ( pExtractImage != NULL )
+			if ( pExtractImage != nullptr )
 			{
 				// define thumbnail properties
 				DWORD priority = IEIT_PRIORITY_NORMAL;
@@ -108,20 +108,20 @@ namespace shell
 				if ( Handle( pExtractImage->GetLocation( pathBuffer, MAX_PATH, &priority, &boundsSize, 16, &flags ) ) )
 				{
 					// generate thumbnail
-					HBITMAP hThumbBitmap = NULL;
+					HBITMAP hThumbBitmap = nullptr;
 					if ( Handle( pExtractImage->Extract( &hThumbBitmap ) ) )
 						return hThumbBitmap;
 				}
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	HBITMAP CWinExplorer::ExtractThumbnail( IShellItem* pShellItem, const CSize& boundsSize, SIIGBF flags /*= SIIGBF_RESIZETOFIT*/ ) const
 	{
-		HBITMAP hBitmap = NULL;
+		HBITMAP hBitmap = nullptr;
 		CComQIPtr<IShellItemImageFactory> pImageFactory( pShellItem );
-		if ( pImageFactory != NULL )
+		if ( pImageFactory != nullptr )
 			Handle( pImageFactory->GetImage( boundsSize, flags, &hBitmap ) );
 
 		return hBitmap;

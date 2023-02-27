@@ -25,7 +25,7 @@ void CBaseMenuBuilder::AddCmdItem( UINT cmdOffset, const std::tstring& itemText,
 
 	VERIFY( m_pPopupMenu->InsertMenu( m_indexMenu, MF_STRING | MF_BYPOSITION, cmdId, itemText.c_str() ) );
 
-	if ( pItemBitmap != NULL )
+	if ( pItemBitmap != nullptr )
 		VERIFY( m_pPopupMenu->SetMenuItemBitmaps( m_indexMenu, MF_BYPOSITION, pItemBitmap, pItemBitmap ) );
 
 	++m_indexMenu;
@@ -38,7 +38,7 @@ void CBaseMenuBuilder::AddPopupItem( HMENU hSubMenu, const std::tstring& itemTex
 
 	VERIFY( m_pPopupMenu->InsertMenu( m_indexMenu, MF_POPUP | MF_BYPOSITION, (UINT_PTR)hSubMenu, itemText.c_str() ) );
 
-	if ( pItemBitmap != NULL )
+	if ( pItemBitmap != nullptr )
 		VERIFY( m_pPopupMenu->SetMenuItemBitmaps( m_indexMenu, MF_BYPOSITION, pItemBitmap, pItemBitmap ) );
 
 	++m_indexMenu;
@@ -89,7 +89,7 @@ CShellContextMenuBuilder::CShellContextMenuBuilder( HMENU hShellMenu, UINT index
 
 CBaseMenuBuilder* CShellContextMenuBuilder::GetParentBuilder( void ) const
 {
-	return NULL;
+	return nullptr;
 }
 
 void CShellContextMenuBuilder::OnAddCmd( UINT cmdId )

@@ -32,9 +32,9 @@ namespace ui
 		return ui::IsValidAlignment( m_tandemAlign );			// no standard alignment conflicts?
 	}
 
-	void CTandemLayout::AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize /*= NULL*/ ) const
+	void CTandemLayout::AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize /*= nullptr*/ ) const
 	{
-		if ( pMateCustomSize != NULL )
+		if ( pMateCustomSize != nullptr )
 			ui::SetRectSize( rMateRect, *pMateCustomSize );		// resize mate to ideal size
 
 		AlignMate( rMateRect, rHostRect, true );
@@ -100,7 +100,7 @@ namespace ui
 		return mateRect;
 	}
 
-	void CTandemLayout::LayoutTandem( CWnd* pHostCtrl, CWnd* pMateCtrl, const CSize* pMateCustomSize /*= NULL*/ ) const
+	void CTandemLayout::LayoutTandem( CWnd* pHostCtrl, CWnd* pMateCtrl, const CSize* pMateCustomSize /*= nullptr*/ ) const
 	{
 		CRect hostRect = ui::GetControlRect( pHostCtrl->GetSafeHwnd() );
 		CRect mateRect = ui::GetControlRect( pMateCtrl->GetSafeHwnd() );

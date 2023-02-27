@@ -9,7 +9,7 @@
 template< typename BaseCtrl >
 void CFrameHostCtrl<BaseCtrl>::Refresh( void )
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		InvalidateFrame( SolidFrame );
 

@@ -13,12 +13,12 @@
 
 namespace ui
 {
-	void LoadPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages /*= NormalMenuImages*/, std::tstring* pPopupText /*= NULL*/ )
+	void LoadPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages /*= NormalMenuImages*/, std::tstring* pPopupText /*= nullptr*/ )
 	{
 		CMenu menuBar;
 		VERIFY( menuBar.LoadMenu( menuResId ) );
 
-		if ( pPopupText != NULL )
+		if ( pPopupText != nullptr )
 		{
 			CString popupText;
 			menuBar.GetMenuString( popupIndex, popupText, MF_BYPOSITION );
@@ -59,11 +59,11 @@ namespace ui
 	}
 
 
-	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= NULL*/ )
+	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= nullptr*/ )
 	{
-		if ( NULL == pImageStore )
+		if ( nullptr == pImageStore )
 			pImageStore = ui::GetImageStoresSvc();
-		if ( NULL == pImageStore )
+		if ( nullptr == pImageStore )
 			return false;
 
 		for ( unsigned int i = 0, count = rMenu.GetMenuItemCount(); i != count; ++i )
@@ -78,20 +78,20 @@ namespace ui
 				ASSERT( itemId != 0 && itemId != UINT_MAX );
 
 				std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( itemId, useCheckedBitmaps );
-				if ( bitmaps.first != NULL || bitmaps.second != NULL )
+				if ( bitmaps.first != nullptr || bitmaps.second != nullptr )
 					rMenu.SetMenuItemBitmaps( i, MF_BYPOSITION, bitmaps.first, bitmaps.second );
 			}
 		}
 		return true;
 	}
 
-	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId /*= 0*/, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= NULL*/ )
+	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId /*= 0*/, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= nullptr*/ )
 	{
-		if ( NULL == pImageStore )
+		if ( nullptr == pImageStore )
 			pImageStore = ui::GetImageStoresSvc();
 
 		std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( 0 == iconId ? itemRef.GetCmdId() : iconId, useCheckedBitmaps );
-		if ( bitmaps.first != NULL || bitmaps.second != NULL )
+		if ( bitmaps.first != nullptr || bitmaps.second != nullptr )
 		{
 			rMenu.SetMenuItemBitmaps( itemRef.m_itemRef, itemRef.m_refFlags, bitmaps.first, bitmaps.second );
 			return true;
@@ -100,17 +100,17 @@ namespace ui
 		return false;
 	}
 
-	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags /*= TPM_RIGHTBUTTON*/, const RECT* pExcludeRect /*= NULL*/ )
+	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags /*= TPM_RIGHTBUTTON*/, const RECT* pExcludeRect /*= nullptr*/ )
 	{
 		AdjustMenuTrackPos( screenPos );
 
 		TPMPARAMS excludeParams;
 		utl::ZeroWinStruct( &excludeParams );
 
-		if ( pExcludeRect != NULL )			// pExcludeRect is ignored by TrackPopupMenu()
+		if ( pExcludeRect != nullptr )			// pExcludeRect is ignored by TrackPopupMenu()
 			excludeParams.rcExclude = *pExcludeRect;
 
-		return ui::ToCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != NULL ? &excludeParams : NULL ) );
+		return ui::ToCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != nullptr ? &excludeParams : nullptr ) );
 	}
 
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign /*= DropDown*/,
@@ -126,14 +126,14 @@ namespace ui
 	{
 		CWnd* pCmdTargetWnd = pTargetWnd;
 
-		if ( pTargetWnd != NULL && HasFlag( pTargetWnd->GetStyle(), WS_CHILD ) )
+		if ( pTargetWnd != nullptr && HasFlag( pTargetWnd->GetStyle(), WS_CHILD ) )
 		{	// pTargetWnd is not a dialog
 			pCmdTargetWnd = pTargetWnd->GetParentFrame();
 
-			if ( NULL == pCmdTargetWnd )
+			if ( nullptr == pCmdTargetWnd )
 				pCmdTargetWnd = pTargetWnd->GetParent();
 
-			if ( NULL == pCmdTargetWnd || !pCmdTargetWnd->IsChild( pTargetWnd ) )
+			if ( nullptr == pCmdTargetWnd || !pCmdTargetWnd->IsChild( pTargetWnd ) )
 				pCmdTargetWnd = pTargetWnd;
 		}
 
@@ -232,10 +232,10 @@ namespace ui
 
 	void MENUITEMINFO_BUFF::ClearTextBuffer( void )
 	{
-		if ( dwTypeData != NULL && HasText() )		// text buffer allocated internally?
+		if ( dwTypeData != nullptr && HasText() )		// text buffer allocated internally?
 			delete[] dwTypeData;
 
-		dwTypeData = NULL;
+		dwTypeData = nullptr;
 		cch = 0;
 	}
 
@@ -339,7 +339,7 @@ namespace ui
 			MENUITEMINFO_BUFF itemInfo;
 			if ( itemInfo.GetMenuItemInfo( hSrcMenu, i ) )
 			{
-				if ( itemInfo.hSubMenu != NULL )
+				if ( itemInfo.hSubMenu != nullptr )
 					itemInfo.hSubMenu = ui::CloneMenu( itemInfo.hSubMenu );		// clone the sub-menu inplace
 
 				VERIFY( destMenu.InsertMenuItem( i, &itemInfo, TRUE ) );
@@ -354,7 +354,7 @@ namespace ui
 		return destMenu.Detach();
 	}
 
-	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds /*= NULL*/ )
+	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds /*= nullptr*/ )
 	{
 		size_t copiedCount = 0;
 
@@ -362,7 +362,7 @@ namespace ui
 		{
 			UINT srcId = srcMenu.GetMenuItemID( i );
 
-			if ( NULL == pSrcIds || ( 0 == srcId || std::find( pSrcIds->begin(), pSrcIds->end(), srcId ) != pSrcIds->end() ) )
+			if ( nullptr == pSrcIds || ( 0 == srcId || std::find( pSrcIds->begin(), pSrcIds->end(), srcId ) != pSrcIds->end() ) )
 			{
 				MENUITEMINFO_BUFF itemInfo;
 				if ( itemInfo.GetMenuItemInfo( srcMenu, i ) )
@@ -510,7 +510,7 @@ namespace ui
 			if ( ui::IsMenuWnd( hWnd ) )
 				return hWnd;
 
-		return NULL;
+		return nullptr;
 	}
 
 	bool IsHiliteMenuItem( HMENU hMenu, int itemPos )
@@ -528,7 +528,7 @@ namespace ui
 	void InvalidateMenuWindow( void )
 	{
 		if ( HWND hMenuWnd = FindMenuWindowFromPoint() )
-			::InvalidateRect( hMenuWnd, NULL, TRUE );
+			::InvalidateRect( hMenuWnd, nullptr, TRUE );
 	}
 
 
@@ -646,7 +646,7 @@ namespace dbg
 			else
 				ASSERT( false );
 
-			if ( itemInfo.hSubMenu != NULL )
+			if ( itemInfo.hSubMenu != nullptr )
 				TraceMenu( itemInfo.hSubMenu, indentLevel + 1 );		// trace the sub-menu
 		}
 	#else

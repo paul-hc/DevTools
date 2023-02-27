@@ -30,8 +30,8 @@ class CShellFileDialog : private fs::impl::CFilterData
 {
 public:
 	CShellFileDialog( shell::BrowseMode browseMode, const TCHAR* pFilePath, const fs::CFilterJoiner* pFilterJoiner = &GetDefaultJoiner(),
-					  DWORD flags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, const TCHAR* pDefaultExt = NULL,
-					  CWnd* pParentWnd = NULL, const TCHAR* pTitle = NULL );
+					  DWORD flags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, const TCHAR* pDefaultExt = nullptr,
+					  CWnd* pParentWnd = nullptr, const TCHAR* pTitle = nullptr );
 	virtual ~CShellFileDialog();
 
 	bool RunModal( fs::CPath* pFilePath );
@@ -51,7 +51,7 @@ private:
 	CComPtr<IFileDialog> GetFileDialog( void );
 	bool ReplaceExt( std::tstring& rFilePath, const COMDLG_FILTERSPEC& filterSpec ) const;
 
-	static bool IsValidFilterSpec( const COMDLG_FILTERSPEC& filterSpec ) { return filterSpec.pszName != NULL && filterSpec.pszSpec != NULL; }
+	static bool IsValidFilterSpec( const COMDLG_FILTERSPEC& filterSpec ) { return filterSpec.pszName != nullptr && filterSpec.pszSpec != nullptr; }
 private:
 	enum Flags
 	{

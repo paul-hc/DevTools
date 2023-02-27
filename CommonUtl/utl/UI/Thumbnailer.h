@@ -38,10 +38,10 @@ public:
 	void SetOptimizeExtractIcons( bool optimizeExtractIcons = true ) { SetThumbExtractFlags( optimizeExtractIcons ? SIIGBF_ICONONLY : SIIGBF_BIGGERSIZEOK ); }
 
 	// called to chain thumbnail production externally
-	bool IsExternallyProduced( const fs::CFlexPath& filePath ) const { return m_pThumbProducer != NULL && m_pThumbProducer->ProducesThumbFor( filePath ); }
+	bool IsExternallyProduced( const fs::CFlexPath& filePath ) const { return m_pThumbProducer != nullptr && m_pThumbProducer->ProducesThumbFor( filePath ); }
 	void SetExternalProducer( fs::IThumbProducer* pThumbProducer ) { m_pThumbProducer = pThumbProducer; }
 
-	bool IsValidShellCache( void ) const { return m_pShellThumbCache != NULL; }
+	bool IsValidShellCache( void ) const { return m_pShellThumbCache != nullptr; }
 	void ReleaseShellCache( void );
 
 	CComPtr<IShellItem> FindShellItem( const fs::CFlexPath& filePath ) const;
@@ -52,7 +52,7 @@ public:
 	fs::FileExpireStatus CheckThumbExpired( const CCachedThumbBitmap* pThumb ) const;
 
 	// create new thumbnail scale to m_boundsSize
-	CCachedThumbBitmap* NewScaledThumb( IWICBitmapSource* pUnscaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey = NULL ) const;
+	CCachedThumbBitmap* NewScaledThumb( IWICBitmapSource* pUnscaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey = nullptr ) const;
 	CComPtr<IWICBitmapSource> ScaleToThumbBitmap( IWICBitmapSource* pSrcBitmap ) const;
 private:
 	CSize m_boundsSize;
@@ -80,7 +80,7 @@ public:
 
 	size_t GetCachedCount( void ) const;
 
-	CCachedThumbBitmap* AcquireThumbnail( const fs::CFlexPath& srcImagePath, int* pCacheStatusFlags = NULL );
+	CCachedThumbBitmap* AcquireThumbnail( const fs::CFlexPath& srcImagePath, int* pCacheStatusFlags = nullptr );
 	CCachedThumbBitmap* AcquireThumbnailNoThrow( const fs::CFlexPath& srcImagePath ) throws_();
 
 	bool DiscardThumbnail( const fs::CFlexPath& srcImagePath );			// force discard a cached thumbnail, should't really be used
@@ -138,7 +138,7 @@ class CCachedThumbBitmap : public CWicDibSection
 {
 	friend class CShellThumbCache;
 
-	CCachedThumbBitmap( IWICBitmapSource* pUnscaledBitmap, IWICBitmapSource* pScaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey = NULL );
+	CCachedThumbBitmap( IWICBitmapSource* pUnscaledBitmap, IWICBitmapSource* pScaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey = nullptr );
 public:
 	const CThumbKey& GetKey( void ) const { return m_key; }
 	const fs::CFlexPath& GetSrcImagePath( void ) const { return m_srcImagePath; }

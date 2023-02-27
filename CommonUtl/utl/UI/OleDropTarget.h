@@ -51,10 +51,10 @@ namespace ole
 		void SetScrollMode( int autoScrollFlags ) { m_autoScrollFlags = autoScrollFlags; }
 
 		// target specific drop-tips
-		bool SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText = NULL );
+		bool SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText = nullptr );
 		bool SetDropTipInsertText( const wchar_t* pInsertText );
 		bool SetDropTip( DROPIMAGETYPE imageType, const wchar_t* pText, bool create );
-		bool ClearDropTip( void ) { return SetDropTip( DROPIMAGE_INVALID, NULL, false ); }
+		bool ClearDropTip( void ) { return SetDropTip( DROPIMAGE_INVALID, nullptr, false ); }
 	private:
 		bool SetDropTip( DROPEFFECT effect );
 	public:

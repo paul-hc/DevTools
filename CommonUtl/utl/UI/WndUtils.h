@@ -17,7 +17,7 @@ namespace num
 	std::tstring FormatNumber( double value, const std::locale& loc /*= GetEmptyLocale()*/ );
 
 	template< typename ValueT >
-	bool ParseNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength /*= NULL*/, const std::locale& loc /*= GetEmptyLocale()*/ );
+	bool ParseNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength /*= nullptr*/, const std::locale& loc /*= GetEmptyLocale()*/ );
 }
 
 
@@ -113,7 +113,7 @@ namespace ui
 	void MoveControlOver( HWND hDlg, UINT sourceCtrlId, UINT destCtrlId, bool hideDestCtrl = true );
 
 	CWnd* AlignToPlaceholder( CWnd* pCtrl, int placeholderId,
-							  const CSize* pCustomSize = NULL, TAlignment alignment = NoAlign, CSize addBottomRight = CSize( 0, 0 ) );
+							  const CSize* pCustomSize = nullptr, TAlignment alignment = NoAlign, CSize addBottomRight = CSize( 0, 0 ) );
 
 	inline bool SetTabOrder( CWnd* pCtrl, const CWnd* pPreviousCtrl )
 	{	// move in tab order after previous control
@@ -125,7 +125,7 @@ namespace ui
 
 	struct CCtrlPlace
 	{
-		CCtrlPlace( HWND hCtrl = NULL );
+		CCtrlPlace( HWND hCtrl = nullptr );
 		CCtrlPlace( HWND hCtrl, const CRect& rect ) : m_hCtrl( hCtrl ), m_rect( rect ) {}
 
 		UINT GetCtrlId( void ) const { ASSERT_PTR( m_hCtrl ); return ::GetDlgCtrlID( m_hCtrl ); }
@@ -147,7 +147,7 @@ namespace ui
 
 namespace ui
 {
-	inline bool IsValidWindow( HWND hWnd ) { return hWnd != NULL && ::IsWindow( hWnd ) != FALSE; }
+	inline bool IsValidWindow( HWND hWnd ) { return hWnd != nullptr && ::IsWindow( hWnd ) != FALSE; }
 	inline bool IsValidWindow( const CWnd* pWnd ) { return ui::IsValidWindow( pWnd->GetSafeHwnd() ); }
 
 	DWORD GetWindowProcessId( HWND hWnd );
@@ -162,7 +162,7 @@ namespace ui
 	inline bool IsTopLevel( HWND hWnd ) { return !IsChild( hWnd ); }
 	inline bool HasStyleTopLevelCaption( DWORD style ) { return !HasFlag( style, WS_CHILD ) && EqFlag( style, WS_CAPTION ); }	// WS_CAPTION=WS_BORDER|WS_DLGFRAME
 	inline bool IsTopLevelCaption( HWND hWnd ) { return HasStyleTopLevelCaption( GetStyle( hWnd ) ); }
-	inline bool IsPermanentWnd( HWND hWnd ) { return hWnd != NULL && CWnd::FromHandlePermanent( hWnd ) != NULL; }		// permanent: a window subclassed in this module
+	inline bool IsPermanentWnd( HWND hWnd ) { return hWnd != nullptr && CWnd::FromHandlePermanent( hWnd ) != nullptr; }		// permanent: a window subclassed in this module
 
 
 	HWND GetTopLevelParent( HWND hWnd );				// find first top-level parent (non-child)
@@ -180,7 +180,7 @@ namespace ui
 	inline bool SetDlgItemText( HWND hDlg, UINT ctrlId, const std::tstring& text ) { return ui::SetWindowText( ::GetDlgItem( hDlg, ctrlId ), text ); }
 	inline bool SetDlgItemText( CWnd* pDlg, UINT ctrlId, const std::tstring& text ) { return SetDlgItemText( pDlg->GetSafeHwnd(), ctrlId, text ); }
 
-	int GetDlgItemInt( HWND hDlg, UINT ctrlId, bool* pValid = NULL );
+	int GetDlgItemInt( HWND hDlg, UINT ctrlId, bool* pValid = nullptr );
 	bool SetDlgItemInt( HWND hDlg, UINT ctrlId, int value );
 
 	template< typename CtrlType >
@@ -208,10 +208,10 @@ namespace ui
 
 	inline bool RedrawDialog( HWND hDlg, UINT moreFlags = RDW_UPDATENOW )
 	{
-		return ::RedrawWindow( hDlg, NULL, NULL, RDW_ALLCHILDREN | RDW_ERASE | RDW_INVALIDATE | moreFlags ) != FALSE;
+		return ::RedrawWindow( hDlg, nullptr, nullptr, RDW_ALLCHILDREN | RDW_ERASE | RDW_INVALIDATE | moreFlags ) != FALSE;
 	}
 
-	inline void RedrawDesktop( void ) { ::InvalidateRect( NULL, NULL, TRUE ); }		// invalidate desktop & all windows; redraws top level windows - slow, but works
+	inline void RedrawDesktop( void ) { ::InvalidateRect( nullptr, nullptr, TRUE ); }		// invalidate desktop & all windows; redraws top level windows - slow, but works
 
 
 	// Z-order
@@ -244,7 +244,7 @@ namespace ui
 	bool IsCommandEnabled( CCmdTarget* pCmdTarget, UINT cmdId );	// check via CN_UPDATE_COMMAND_UI handler
 	bool HandleCommand( CCmdTarget* pCmdTarget, UINT cmdId );		// menu or accelerator
 
-	inline LRESULT SendCommand( HWND hTargetWnd, UINT cmdId, int notifCode = BN_CLICKED, HWND hCtrl = NULL )
+	inline LRESULT SendCommand( HWND hTargetWnd, UINT cmdId, int notifCode = BN_CLICKED, HWND hCtrl = nullptr )
 	{
 		ASSERT_PTR( hTargetWnd );
 		return ::SendMessage( hTargetWnd, WM_COMMAND, MAKEWPARAM( cmdId, notifCode ), (LPARAM)hCtrl );
@@ -252,7 +252,7 @@ namespace ui
 
 	inline void SendCommandToParent( HWND hCtrl, int notifCode = BN_CLICKED )
 	{
-		ASSERT( hCtrl != NULL && ::GetParent( hCtrl ) != NULL );
+		ASSERT( hCtrl != nullptr && ::GetParent( hCtrl ) != nullptr );
 		::SendMessage( ::GetParent( hCtrl ),
 					   WM_COMMAND, MAKEWPARAM( ::GetDlgCtrlID( hCtrl ), notifCode ),
 					   (LPARAM)hCtrl );
@@ -260,7 +260,7 @@ namespace ui
 
 	inline void PostCommandToParent( HWND hCtrl, int notifCode = BN_CLICKED )
 	{
-		ASSERT( hCtrl != NULL && ::GetParent( hCtrl ) != NULL );
+		ASSERT( hCtrl != nullptr && ::GetParent( hCtrl ) != nullptr );
 		::PostMessage( ::GetParent( hCtrl ),
 					   WM_COMMAND, MAKEWPARAM( ::GetDlgCtrlID( hCtrl ), notifCode ),
 					   (LPARAM)hCtrl );
@@ -268,7 +268,7 @@ namespace ui
 
 	inline LRESULT SendNotifyToParent( HWND hCtrl, int notifCode, NMHDR* pNmHdr )
 	{
-		ASSERT( hCtrl != NULL && ::GetParent( hCtrl ) != NULL );
+		ASSERT( hCtrl != nullptr && ::GetParent( hCtrl ) != nullptr );
 		ASSERT_PTR( pNmHdr );
 		pNmHdr->code = notifCode;
 		pNmHdr->idFrom = ::GetDlgCtrlID( hCtrl );
@@ -283,7 +283,7 @@ namespace ui
 
 	inline bool ContainsMessageHandler( const CCmdTarget* pCmdTarget, UINT message, UINT notifyCode, UINT id )
 	{
-		return FindMessageHandler( pCmdTarget, message, notifyCode, id ) != NULL;
+		return FindMessageHandler( pCmdTarget, message, notifyCode, id ) != nullptr;
 	}
 
 	inline bool ParentContainsMessageHandler( const CWnd* pChild, UINT message, UINT notifyCode )
@@ -306,11 +306,11 @@ namespace ui
 	{
 		ASSERT_PTR( pWnd );
 
-		for ( CWnd* pParent = const_cast<CWnd*>( pWnd ); ( pParent = pParent->GetParent() ) != NULL; )
+		for ( CWnd* pParent = const_cast<CWnd*>( pWnd ); ( pParent = pParent->GetParent() ) != nullptr; )
 			if ( WndType* pParentAsType = dynamic_cast<WndType*>( pParent ) )
 				return pParentAsType;
 
-		return NULL;
+		return nullptr;
 	}
 
 	template< typename WndType >
@@ -415,7 +415,7 @@ namespace ui
 	struct CFontInfo
 	{
 		CFontInfo( TFontEffect effect = Regular, int heightPct = 100 )
-			: m_pFaceName( NULL ), m_effect( effect ), m_heightPct( heightPct ) {}
+			: m_pFaceName( nullptr ), m_effect( effect ), m_heightPct( heightPct ) {}
 
 		CFontInfo( const TCHAR* pFaceName, TFontEffect effect = Regular, int heightPct = 100 )
 			: m_pFaceName( pFaceName ), m_effect( effect ), m_heightPct( heightPct ) {}
@@ -445,8 +445,8 @@ namespace ui
 	void AddSysColors( std::vector< COLORREF >& rColors, const int sysIndexes[], size_t count );
 
 
-	bool PumpPendingMessages( HWND hWnd = NULL );
-	bool EatPendingMessages( HWND hWnd = NULL, UINT minMessage = WM_TIMER, UINT maxMessage = WM_TIMER );
+	bool PumpPendingMessages( HWND hWnd = nullptr );
+	bool EatPendingMessages( HWND hWnd = nullptr, UINT minMessage = WM_TIMER, UINT maxMessage = WM_TIMER );
 }
 
 
@@ -504,7 +504,7 @@ namespace ui
 		if ( DialogOutput == pDX->m_bSaveAndValidate )
 			ddx::SetItemText( pDX, ctrlId, num::FormatNumber( rValue, loc ) );
 		else
-			num::ParseNumber( rValue, ddx::GetItemText( pDX, ctrlId ), NULL, loc );
+			num::ParseNumber( rValue, ddx::GetItemText( pDX, ctrlId ), nullptr, loc );
 	}
 
 	inline void DDX_ComboSelPos( CDataExchange* pDX, int comboId, size_t& rSelPos )
@@ -531,7 +531,7 @@ namespace ui
 	template< typename EnumType >
 	void DDX_EnumCombo( CDataExchange* pDX, int comboId, CComboBox& rCombo, EnumType& rValue, const CEnumTags& enumTags )
 	{
-		bool firstInit = NULL == rCombo.m_hWnd;
+		bool firstInit = nullptr == rCombo.m_hWnd;
 		::DDX_Control( pDX, comboId, rCombo );
 		if ( firstInit )
 		{

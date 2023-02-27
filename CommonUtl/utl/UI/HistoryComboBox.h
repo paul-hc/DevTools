@@ -33,7 +33,7 @@ public:
 	void SetCaseType( str::CaseType caseType = str::Case ) { m_caseType = caseType; }
 
 	void SaveHistory( const TCHAR* pSection, const TCHAR* pEntry );
-	void LoadHistory( const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText = NULL );
+	void LoadHistory( const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText = nullptr );
 
 	std::tstring GetCurrentText( void ) const;
 	std::pair<bool, ui::ComboField> SetEditText( const std::tstring& currText );

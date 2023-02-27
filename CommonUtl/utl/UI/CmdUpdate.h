@@ -12,10 +12,10 @@ namespace ui
 
 	void UpdateMenuUI( CWnd* pWnd, CMenu* pPopupMenu, bool autoMenuEnable = true );
 
-	void UpdateDlgControlsUI( HWND hDlg, CCmdTarget* pTarget = NULL, bool disableIfNoHandler = false );
-	void UpdateDlgControlsUI( HWND hDlg, const UINT ctrlIds[], size_t count, CCmdTarget* pTarget = NULL, bool disableIfNoHandler = false );
+	void UpdateDlgControlsUI( HWND hDlg, CCmdTarget* pTarget = nullptr, bool disableIfNoHandler = false );
+	void UpdateDlgControlsUI( HWND hDlg, const UINT ctrlIds[], size_t count, CCmdTarget* pTarget = nullptr, bool disableIfNoHandler = false );
 
-	bool UpdateControlUI( HWND hCtrl, CCmdTarget* pTarget = NULL, bool disableIfNoHandler = false );
+	bool UpdateControlUI( HWND hCtrl, CCmdTarget* pTarget = nullptr, bool disableIfNoHandler = false );
 	inline bool UpdateDlgItemUI( CWnd* pDlg, UINT ctrlId ) { return UpdateControlUI( ::GetDlgItem( pDlg->GetSafeHwnd(), ctrlId ), pDlg ); }
 }
 

@@ -9,11 +9,11 @@
 #endif
 
 
-CTooltipsHook::CTooltipsHook( HWND hWndToHook /*= NULL*/ )
+CTooltipsHook::CTooltipsHook( HWND hWndToHook /*= nullptr*/ )
 	: CWindowHook()
-	, m_pCustomCmdInfo( NULL )
+	, m_pCustomCmdInfo( nullptr )
 {
-	if ( hWndToHook != NULL )
+	if ( hWndToHook != nullptr )
 		HookWindow( hWndToHook );
 }
 
@@ -29,7 +29,7 @@ LRESULT CTooltipsHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
 	{
 		NMHDR* pNmHdr = (NMHDR*)lParam;
 
-		if ( pNmHdr->hwndFrom != NULL && ( pNmHdr->code == TTN_NEEDTEXTW || pNmHdr->code == TTN_NEEDTEXTA ) )
+		if ( pNmHdr->hwndFrom != nullptr && ( pNmHdr->code == TTN_NEEDTEXTW || pNmHdr->code == TTN_NEEDTEXTA ) )
 			if ( OnTtnNeedText( pNmHdr ) )
 				return TRUE;
 	}
@@ -39,7 +39,7 @@ LRESULT CTooltipsHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
 
 bool CTooltipsHook::OnTtnNeedText( NMHDR* pNmHdr )
 {
-	if ( ui::CCmdInfoStore::Instance().HandleTooltipNeedText( pNmHdr, NULL, m_pCustomCmdInfo ) )
+	if ( ui::CCmdInfoStore::Instance().HandleTooltipNeedText( pNmHdr, nullptr, m_pCustomCmdInfo ) )
 		return true;		// message handled
 
 	return false;

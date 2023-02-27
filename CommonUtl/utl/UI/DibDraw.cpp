@@ -101,7 +101,7 @@ namespace gdi
 		int oldStretchBltMode = pDC->SetStretchBltMode( COLORONCOLOR );
 
 		CBitmap maskBitmap;
-		maskBitmap.CreateBitmap( imageSize.cx, imageSize.cy, 1, 1, NULL );		// for color: maskBitmap.CreateCompatibleBitmap( pDC, cx, cy );
+		maskBitmap.CreateBitmap( imageSize.cx, imageSize.cy, 1, 1, nullptr );		// for color: maskBitmap.CreateCompatibleBitmap( pDC, cx, cy );
 
 		CScopedGdi< CBitmap > scopedBitmap( &memDC, &maskBitmap );
 
@@ -188,8 +188,8 @@ namespace gdi
 		rDestImageList.DeleteImageList();
 		dib.CreateEmptyImageList( rDestImageList, info.m_imageSize, info.m_imageCount );		// compatible with source DIB
 		if ( dib.HasAlpha() )
-			rDestImageList.Add( &dib, (CBitmap*)NULL );					// use alpha channel (no mask required)
-		else if ( info.hbmMask != NULL )
+			rDestImageList.Add( &dib, (CBitmap*)nullptr );					// use alpha channel (no mask required)
+		else if ( info.hbmMask != nullptr )
 			rDestImageList.Add( &dib, CBitmap::FromHandle( info.hbmMask ) );
 		else
 			rDestImageList.Add( &dib, srcImageList.GetBkColor() );
@@ -219,7 +219,7 @@ namespace gdi
 	{
 		VERIFY( m_pImageList->GetImageInfo( index, this ) );
 		m_imageSize = ( (const CRect&)rcImage ).Size();
-		m_srcDibSize = gdi::GetBitmapSize( hbmImage != NULL ? hbmImage : hbmMask );
+		m_srcDibSize = gdi::GetBitmapSize( hbmImage != nullptr ? hbmImage : hbmMask );
 	}
 
 	CRect CImageInfo::MapSrcDibRect( int index )

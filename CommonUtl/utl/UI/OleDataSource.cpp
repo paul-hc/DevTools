@@ -25,7 +25,7 @@ namespace ole
 	const CLIPFORMAT CDataSource::s_cfDropDescription = ole_utl::RegisterFormat( CFSTR_DROPDESCRIPTION );
 	CRect CDataSource::m_nullRect( 0, 0, 0, 0 );
 
-	CDataSource::CDataSource( ole::IRenderDataWnd* pRenderDataWnd /*= NULL*/, CWnd* pSrcWnd /*= NULL*/ )
+	CDataSource::CDataSource( ole::IRenderDataWnd* pRenderDataWnd /*= nullptr*/, CWnd* pSrcWnd /*= nullptr*/ )
 		: COleDataSource()
 		, m_pRenderDataWnd( pRenderDataWnd )
 		, m_pSrcWnd( pSrcWnd )
@@ -33,11 +33,11 @@ namespace ole
 		, m_dragResult( 0 )
 		, m_hasDropTipText( false )
 	{
-		if ( NULL == m_pSrcWnd && m_pRenderDataWnd != NULL )
+		if ( nullptr == m_pSrcWnd && m_pRenderDataWnd != nullptr )
 			m_pSrcWnd = m_pRenderDataWnd->GetSrcWnd();
 
 		// enable drop-tips by default: this will create a global DWORD data object of format "DragSourceHelperFlags"
-		if ( m_dragImager.GetHelper2() != NULL )
+		if ( m_dragImager.GetHelper2() != nullptr )
 			m_dragImager.GetHelper2()->SetFlags( DSH_ALLOWDROPDESCRIPTIONTEXT );
 	}
 
@@ -45,11 +45,11 @@ namespace ole
 	{
 	}
 
-	DROPEFFECT CDataSource::DragAndDrop( DROPEFFECT dropEffect, const RECT* pStartDragRect /*= NULL*/ )
+	DROPEFFECT CDataSource::DragAndDrop( DROPEFFECT dropEffect, const RECT* pStartDragRect /*= nullptr*/ )
 	{
 		// for drop-tips: we must use a ole::CDropSource object that handles drop descriptions within GiveFeedback()
 
-		bool useDropTips = ::IsAppThemed() && m_dragImager.GetHelper2() != NULL;		// use old cursors when visual styles are disabled
+		bool useDropTips = ::IsAppThemed() && m_dragImager.GetHelper2() != nullptr;		// use old cursors when visual styles are disabled
 
 		if ( useDropTips && m_hasDropTipText )
 		{
@@ -81,20 +81,20 @@ namespace ole
 
 	bool CDataSource::DisableDropTipText( void )
 	{
-		return m_dragImager.GetHelper2() != NULL && HR_OK( m_dragImager.GetHelper2()->SetFlags( 0 ) );		// clear DSH_ALLOWDROPDESCRIPTIONTEXT flag
+		return m_dragImager.GetHelper2() != nullptr && HR_OK( m_dragImager.GetHelper2()->SetFlags( 0 ) );		// clear DSH_ALLOWDROPDESCRIPTIONTEXT flag
 	}
 
-	bool CDataSource::SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText /*= NULL*/ )
+	bool CDataSource::SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText /*= nullptr*/ )
 	{
 		// PHC: not sure this has any effect; most likely the CDropTarget::SetDropTipText() is the one that works.
 		// If any text args is NULL, the Explorer default text is used.
 		// Because the %1 placeholder is used to insert the szInsert text, a single percent character inside the strings must be esacped by another one.
 
 		bool changed = false;
-		if ( m_dragImager.GetHelper2() != NULL )
+		if ( m_dragImager.GetHelper2() != nullptr )
 		{
 			changed = m_dropTip.StoreTypeField( dropImageType, pMessage, pInsertFmt );
-			if ( changed && pInsertText != NULL )
+			if ( changed && pInsertText != nullptr )
 				m_dropTip.SetInsert( pInsertText );
 
 			m_hasDropTipText |= changed;
@@ -116,7 +116,7 @@ namespace ole
 	BOOL CDataSource::OnRenderData( FORMATETC* pFormatEtc, STGMEDIUM* pStgMedium )
 	{
 		if ( !COleDataSource::OnRenderData( pFormatEtc, pStgMedium ) )
-			if ( m_pRenderDataWnd != NULL )
+			if ( m_pRenderDataWnd != nullptr )
 				return m_pRenderDataWnd->HandleRenderData( pFormatEtc, pStgMedium );		// let the source window render the data (delayed)
 
 		return false;

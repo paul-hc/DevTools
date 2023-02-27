@@ -8,7 +8,7 @@
 class CVisualTheme
 {
 public:
-	CVisualTheme( const wchar_t* pClass, HWND hWnd = NULL );
+	CVisualTheme( const wchar_t* pClass, HWND hWnd = nullptr );
 	~CVisualTheme();
 
 	static bool IsThemed( void ) { return IsEnabled() && ::IsAppThemed() != FALSE; }
@@ -20,35 +20,35 @@ public:
 	static bool IsFallbackEnabled( void ) { return s_fallbackEnabled; }
 	static void SetFallbackEnabled( bool fallbackEnabled ) { s_fallbackEnabled = fallbackEnabled; }
 
-	bool IsValid( void ) const { return m_hTheme != NULL; }
+	bool IsValid( void ) const { return m_hTheme != nullptr; }
 	HTHEME GetTheme( void ) const { return m_hTheme; }
 
 	void Close( void );
 
-	static bool SetWindowTheme( HWND hWnd, const wchar_t* pSubAppName, const wchar_t* pSubIdList = NULL ) { return IsThemed() && HR_OK( ::SetWindowTheme( hWnd, pSubAppName, pSubIdList ) ); }
+	static bool SetWindowTheme( HWND hWnd, const wchar_t* pSubAppName, const wchar_t* pSubIdList = nullptr ) { return IsThemed() && HR_OK( ::SetWindowTheme( hWnd, pSubAppName, pSubIdList ) ); }
 
 	bool IsThemePartDefined( int partId, int stateId ) const { return IsValid() && ::IsThemePartDefined( m_hTheme, partId, stateId ) != FALSE; }
 	bool IsThemeBackgroundPartiallyTransparent( int partId, int stateId ) const { return IsValid() && ::IsThemeBackgroundPartiallyTransparent( m_hTheme, partId, stateId ) != FALSE; }
 
 	COLORREF GetThemeColor( int partId, int stateId, int propId ) const;
-	bool GetThemePartSize( OUT CSize* pPartSize, HDC hdc, int partId, int stateId, THEMESIZE themeSize = TS_DRAW, const RECT* pRect = NULL ) const;
+	bool GetThemePartSize( OUT CSize* pPartSize, HDC hdc, int partId, int stateId, THEMESIZE themeSize = TS_DRAW, const RECT* pRect = nullptr ) const;
 	bool GetThemeTextExtent( OUT RECT* pExtentRect, HDC hdc, int partId, int stateId, const wchar_t* pText, DWORD textFlags,
-							 const RECT* pBoundingRect = NULL ) const;
+							 const RECT* pBoundingRect = nullptr ) const;
 	bool GetThemePosition( OUT POINT* pPoint, int partId, int stateId, int propId ) const;
 	bool GetThemeRect( OUT RECT* pRect, int partId, int stateId, int propId ) const;
 	bool GetThemeBackgroundContentRect( OUT RECT* pContentRect, HDC hdc, int partId, int stateId,  const RECT* pBoundingRect );
 	bool GetThemeBackgroundExtent( OUT RECT* pExtentRect, HDC hdc, int partId, int stateId, const RECT* pContentRect );
 
-	bool DrawThemeEdge( HDC hdc, int partId, int stateId, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect = NULL );
-	bool DrawThemeBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect = NULL );
+	bool DrawThemeEdge( HDC hdc, int partId, int stateId, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect = nullptr );
+	bool DrawThemeBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect = nullptr );
 	bool DrawThemeText( HDC hdc, int partId, int stateId, const RECT& rect, const wchar_t* pText, DWORD textFlags );
 	bool DrawThemeIcon( HDC hdc, int partId, int stateId, const RECT& rect, const CImageList& imageList, int imagePos );
 
 	static bool DrawThemeParentBackground( HWND hWnd, HDC hdc, const RECT& rect ) { return IsThemed() && HR_OK( ::DrawThemeParentBackground( hWnd, hdc, &rect ) ); }
 
 	// complex drawing
-	bool DrawBackground( HWND hWnd, HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect = NULL );
-	bool DrawEntireBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect = NULL );
+	bool DrawBackground( HWND hWnd, HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect = nullptr );
+	bool DrawEntireBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect = nullptr );
 
 	// theme testing
 	static bool* GetEnabledPtr( void ) { return &s_enabled; }

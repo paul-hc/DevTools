@@ -15,7 +15,7 @@ CBaseFrameWnd<BaseWnd>::~CBaseFrameWnd()
 template< typename BaseWnd >
 CMenu* CBaseFrameWnd<BaseWnd>::GetTrayIconContextMenu( void ) override
 {
-	return UseSysTrayMinimize() ? &m_trayPopupMenu : NULL;
+	return UseSysTrayMinimize() ? &m_trayPopupMenu : nullptr;
 }
 
 template< typename BaseWnd >

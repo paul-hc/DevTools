@@ -8,13 +8,13 @@
 
 
 CShellFileDialog::CShellFileDialog( shell::BrowseMode browseMode, const TCHAR* pFilePath, const fs::CFilterJoiner* pFilterJoiner /*= GetDefaultJoiner()*/,
-									DWORD flags /*= OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT*/, const TCHAR* pDefaultExt /*= NULL*/,
-									CWnd* pParentWnd /*= NULL*/, const TCHAR* pTitle /*= NULL*/ )
+									DWORD flags /*= OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT*/, const TCHAR* pDefaultExt /*= nullptr*/,
+									CWnd* pParentWnd /*= nullptr*/, const TCHAR* pTitle /*= nullptr*/ )
 	: fs::impl::CFilterData( pFilterJoiner, browseMode )
 	, CFileDialog( browseMode, pDefaultExt, pFilePath, GetFlags( browseMode, flags ), m_filters.c_str(), pParentWnd, 0, shell::s_useVistaStyle )
 	, m_flags( 0 )
 {
-	if ( pTitle != NULL )
+	if ( pTitle != nullptr )
 		m_ofn.lpstrTitle = pTitle;
 
 	m_ofn.nFilterIndex = FindMatchingFilterIndex( m_pFilterJoiner->RetrieveSelFilterSpec(), pFilePath );
@@ -39,7 +39,7 @@ bool CShellFileDialog::RunModal( std::vector< fs::CPath >& rFilePaths )
 	if ( DoModal() != IDOK )
 		return false;
 
-	for ( POSITION pos = GetStartPosition(); pos != NULL; )
+	for ( POSITION pos = GetStartPosition(); pos != nullptr; )
 		rFilePaths.push_back( fs::CPath( GetNextPathName( pos ).GetString() ) );
 
 	return true;
@@ -115,7 +115,7 @@ DWORD CShellFileDialog::FindMatchingFilterIndex( const std::tstring& spec, const
 
 COMDLG_FILTERSPEC CShellFileDialog::LookupFilter( DWORD filterIndex ) const
 {
-	COMDLG_FILTERSPEC filterSpec = { NULL, NULL };
+	COMDLG_FILTERSPEC filterSpec = { nullptr, nullptr };
 
 	for ( const TCHAR* pFilter = m_ofn.lpstrFilter; pFilter[ 0 ] != _T('\0'); --filterIndex )
 		if ( 1 == filterIndex )			// found: last 1-based index
@@ -155,7 +155,7 @@ CComPtr<IFileDialog> CShellFileDialog::GetFileDialog( void )
 	CComPtr<IFileDialog> pFileDialog;
 	pFileDialog.Attach( GetIFileOpenDialog() );			// no additional AddRef on ptr ctor
 
-	if ( NULL == pFileDialog )
+	if ( nullptr == pFileDialog )
 		pFileDialog.Attach( GetIFileSaveDialog() );
 	return pFileDialog;
 }

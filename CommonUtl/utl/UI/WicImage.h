@@ -102,7 +102,7 @@ namespace ui
 	{
 		CImageFileDetails( void ) { Reset(); }
 
-		void Reset( const CWicImage* pImage = NULL );
+		void Reset( const CWicImage* pImage = nullptr );
 
 		bool IsValid( void ) const { return !m_filePath.IsEmpty(); }
 		bool IsMultiFrameImage( void ) const { return !m_isAnimated && m_frameCount > 1; }
@@ -148,7 +148,7 @@ namespace fs
 
 namespace shell
 {
-	bool BrowseImageFile( fs::CPath& rFilePath, BrowseMode browseMode = FileOpen, DWORD flags = 0, CWnd* pParentWnd = NULL );
+	bool BrowseImageFile( fs::CPath& rFilePath, BrowseMode browseMode = FileOpen, DWORD flags = 0, CWnd* pParentWnd = nullptr );
 }
 
 

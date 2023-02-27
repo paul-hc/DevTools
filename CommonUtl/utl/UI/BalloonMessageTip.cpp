@@ -47,7 +47,7 @@ namespace ui
 
 	CPoint GetTipScreenPos( const CWnd* pCtrl )
 	{
-		if ( pCtrl->GetSafeHwnd() != NULL )
+		if ( pCtrl->GetSafeHwnd() != nullptr )
 		{
 			CRect windowRect;
 			pCtrl->GetWindowRect( &windowRect );
@@ -58,7 +58,7 @@ namespace ui
 				pCtrl->GetClientRect( &clientRect );
 				ui::ClientToScreen( pCtrl->GetSafeHwnd(), clientRect );
 
-				if ( pCtrl->GetMenu() != NULL )
+				if ( pCtrl->GetMenu() != nullptr )
 				{
 					MENUBARINFO menuBarInfo;
 					utl::ZeroWinStruct( &menuBarInfo );
@@ -92,10 +92,10 @@ namespace ui
 		ASSERT( !HasFlag( mbStyle, MB_ABORTRETRYIGNORE | MB_OKCANCEL | MB_RETRYCANCEL | MB_YESNO | MB_YESNOCANCEL ) );
 		ASSERT( ( mbStyle & (MB_ICONINFORMATION | MB_ICONEXCLAMATION | MB_ICONSTOP | MB_ICONQUESTION) ) != MB_ICONQUESTION );
 
-		if ( NULL == pCtrl )
+		if ( nullptr == pCtrl )
 			pCtrl = CWnd::GetSafeOwner();
 
-		if ( BalloonsEnabled() && pCtrl != NULL )			// user hasn't disabled tooltip display in Explorer?
+		if ( BalloonsEnabled() && pCtrl != nullptr )			// user hasn't disabled tooltip display in Explorer?
 		{
 			HICON hToolIcon = TTI_NONE;
 
@@ -110,7 +110,7 @@ namespace ui
 		}
 
 		ui::MessageBox( message, mbStyle );				// default handling when user has disabled balloons
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -171,7 +171,7 @@ CBalloonHostWnd::CBalloonHostWnd( void )
 
 CBalloonHostWnd::~CBalloonHostWnd()
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		DestroyWindow();
 }
 
@@ -193,7 +193,7 @@ CBalloonHostWnd* CBalloonHostWnd::Display( const TCHAR* pTitle, const std::tstri
 bool CBalloonHostWnd::Create( CWnd* pParentWnd )
 {
 	static const CBrush s_debugBk( color::Red );				// to help visualize the host window
-	static const std::tstring s_wndClass = ::AfxRegisterWndClass( 0, NULL, NULL /*s_debugBk*/ );		// register class with all defaults
+	static const std::tstring s_wndClass = ::AfxRegisterWndClass( 0, nullptr, nullptr /*s_debugBk*/ );		// register class with all defaults
 	CRect mouseRect( m_screenPos != ui::GetNullPos() ? m_screenPos : ui::GetCursorPos(), CSize( 0, 0 ) );
 
 	mouseRect.InflateRect( s_toolBorder, s_toolBorder );
@@ -206,7 +206,7 @@ bool CBalloonHostWnd::Create( CWnd* pParentWnd )
 					 mouseRect.left, mouseRect.top,
 					 mouseRect.Width(), mouseRect.Height(),
 					 pParentWnd->GetSafeHwnd(),
-					 NULL ) != FALSE;
+					 nullptr ) != FALSE;
 }
 
 bool CBalloonHostWnd::CreateToolTip( void )
@@ -255,7 +255,7 @@ bool CBalloonHostWnd::CheckMainThreadChanges( void )
 {
 	ASSERT( m_mainThreadId != ::GetCurrentThreadId() );		// this should run in the baloon UI thread, different than the main calling thread
 
-	if ( NULL == m_pThreadInfo.get() )
+	if ( nullptr == m_pThreadInfo.get() )
 		m_pThreadInfo.reset( new CGuiThreadInfo( m_mainThreadId ) );
 	else
 	{

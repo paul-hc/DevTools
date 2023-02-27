@@ -32,7 +32,7 @@ HBITMAP CWicDibSection::CloneBitmap( void ) const
 	return (HBITMAP)::CopyImage( GetSafeHandle(), IMAGE_BITMAP, GetBmpFmt().m_size.cx, GetBmpFmt().m_size.cy, LR_CREATEDIBSECTION );
 }
 
-CRect CWicDibSection::Draw( CDC* pDC, const CRect& boundsRect, ui::StretchMode stretchMode /*= ui::OriginalSize*/, CDC* pSrcDC /*= NULL*/, DWORD rop /*= SRCCOPY*/ )
+CRect CWicDibSection::Draw( CDC* pDC, const CRect& boundsRect, ui::StretchMode stretchMode /*= ui::OriginalSize*/, CDC* pSrcDC /*= nullptr*/, DWORD rop /*= SRCCOPY*/ )
 {
 	if ( !IsValid() )
 		return boundsRect;
@@ -45,7 +45,7 @@ CRect CWicDibSection::Draw( CDC* pDC, const CRect& boundsRect, ui::StretchMode s
 	return imageRect;
 }
 
-CRect CWicDibSection::DrawAtPos( CDC* pDC, const CPoint& pos, CDC* pSrcDC /*= NULL*/ )
+CRect CWicDibSection::DrawAtPos( CDC* pDC, const CPoint& pos, CDC* pSrcDC /*= nullptr*/ )
 {
 	const CRect bmpRect( CPoint( 0, 0 ), GetBmpFmt().m_size );
 	CRect imageRect( pos, bmpRect.Size() );
@@ -54,16 +54,16 @@ CRect CWicDibSection::DrawAtPos( CDC* pDC, const CPoint& pos, CDC* pSrcDC /*= NU
 	return imageRect;
 }
 
-bool CWicDibSection::BlitNatural( CDC* pDC, const CRect& destRect, const CRect& srcRect, CDC* pSrcDC /*= NULL*/, DWORD rop /*= SRCCOPY*/ ) const
+bool CWicDibSection::BlitNatural( CDC* pDC, const CRect& destRect, const CRect& srcRect, CDC* pSrcDC /*= nullptr*/, DWORD rop /*= SRCCOPY*/ ) const
 {
 	if ( !IsValid() )
 		return false;
 
 	CDC memDC;
-	if ( NULL == pSrcDC && memDC.CreateCompatibleDC( pDC ) )
+	if ( nullptr == pSrcDC && memDC.CreateCompatibleDC( pDC ) )
 		pSrcDC = &memDC;
 
-	if ( NULL == pSrcDC )
+	if ( nullptr == pSrcDC )
 		return false;
 
 	CScopedGdiObj scopedBitmap( pSrcDC, GetSafeHandle() );

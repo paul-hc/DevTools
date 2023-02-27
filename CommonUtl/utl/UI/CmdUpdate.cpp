@@ -16,9 +16,9 @@ namespace ui
 	{
 		ASSERT_PTR( pCmdUI );
 
-		if ( pCmdUI->m_pMenu != NULL )
+		if ( pCmdUI->m_pMenu != nullptr )
 			return ui::GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID, MF_BYCOMMAND );
-		else if ( pCmdUI->m_pOther != NULL )
+		else if ( pCmdUI->m_pOther != nullptr )
 			return ui::GetWindowText( pCmdUI->m_pOther );
 
 		return std::tstring();
@@ -28,7 +28,7 @@ namespace ui
 	void SetRadio( CCmdUI* pCmdUI, BOOL checked )
 	{
 		ASSERT_PTR( pCmdUI );
-		if ( NULL == pCmdUI->m_pMenu )
+		if ( nullptr == pCmdUI->m_pMenu )
 		{
 			pCmdUI->SetRadio( checked );		// normal processing for toolbar buttons, etc
 			return;
@@ -40,7 +40,7 @@ namespace ui
 			pCmdUI->SetCheck( checked );
 		else
 		{
-			if ( pCmdUI->m_pSubMenu != NULL )
+			if ( pCmdUI->m_pSubMenu != nullptr )
 				return;							// don't change popup submenus indirectly
 
 			UINT pos = pCmdUI->m_nIndex;
@@ -51,7 +51,7 @@ namespace ui
 	bool ExpandVersionInfoTags( CCmdUI* pCmdUI )
 	{
 		ASSERT_PTR( pCmdUI );
-		if ( pCmdUI->m_pMenu != NULL && NULL == pCmdUI->m_pSubMenu )		// a menu but not sub-menu (don't change submenus indirectly, wait for their expansion)
+		if ( pCmdUI->m_pMenu != nullptr && nullptr == pCmdUI->m_pSubMenu )		// a menu but not sub-menu (don't change submenus indirectly, wait for their expansion)
 		{
 			static CVersionInfo s_versionInfo;
 			std::tstring menuItemText = GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID );
@@ -71,20 +71,20 @@ namespace ui
 		CCmdUI itemState;
 
 		itemState.m_pMenu = pPopupMenu;
-		ASSERT( itemState.m_pOther == NULL );
-		ASSERT( itemState.m_pParentMenu == NULL );
+		ASSERT( itemState.m_pOther == nullptr );
+		ASSERT( itemState.m_pParentMenu == nullptr );
 
 		// determine if menu is popup in top-level menu and set m_pOther to
-		//  it if so (m_pParentMenu == NULL indicates that it is secondary popup)
+		//  it if so (m_pParentMenu == nullptr indicates that it is secondary popup)
 		HMENU hParentMenu;
 		if ( AfxGetThreadState()->m_hTrackingMenu == pPopupMenu->m_hMenu )
 			itemState.m_pParentMenu = pPopupMenu;					// parent == child for tracking popup
-		else if ( ( hParentMenu = ::GetMenu( pWnd->m_hWnd ) ) != NULL )
+		else if ( ( hParentMenu = ::GetMenu( pWnd->m_hWnd ) ) != nullptr )
 		{
 			CWnd* pParent = pWnd->GetTopLevelParent();		// child windows don't have menus - need to go to the top
 
-			if ( pParent != NULL &&
-				( hParentMenu = ::GetMenu( pParent->m_hWnd ) ) != NULL )
+			if ( pParent != nullptr &&
+				( hParentMenu = ::GetMenu( pParent->m_hWnd ) ) != nullptr )
 			{
 				int nIndexMax = ::GetMenuItemCount( hParentMenu );
 				for ( int nIndex = 0; nIndex < nIndexMax; nIndex++ )
@@ -110,7 +110,7 @@ namespace ui
 			{
 				// possibly a popup menu, route to first item of that popup
 				itemState.m_pSubMenu = pPopupMenu->GetSubMenu( itemState.m_nIndex );
-				if ( itemState.m_pSubMenu == NULL ||
+				if ( itemState.m_pSubMenu == nullptr ||
 					( itemState.m_nID = itemState.m_pSubMenu->GetMenuItemID( 0 ) ) == 0 || itemState.m_nID == (UINT)-1 )
 					continue;	   // first item of popup can't be routed to
 
@@ -121,7 +121,7 @@ namespace ui
 				// normal menu item
 				// auto enable/disable according to autoMenuEnable
 				//	set and command is _not_ a system command.
-				itemState.m_pSubMenu = NULL;
+				itemState.m_pSubMenu = nullptr;
 				itemState.DoUpdate( pWnd, !autoMenuEnable && itemState.m_nID < 0xF000 );
 			}
 
@@ -141,7 +141,7 @@ namespace ui
 	CCmdTarget* ResolveDlgTarget( CCmdTarget*& rpTarget, HWND hDlg )
 	{
 		REQUIRE( ::IsWindow( hDlg ) );
-		if ( NULL == rpTarget )
+		if ( nullptr == rpTarget )
 			rpTarget = CWnd::FromHandlePermanent( hDlg );
 
 		ASSERT_PTR( rpTarget );
@@ -151,7 +151,7 @@ namespace ui
 	CCmdTarget* ResolveCtrlTarget( CCmdTarget*& rpTarget, HWND hCtrl )
 	{
 		REQUIRE( ::IsWindow( hCtrl ) );
-		if ( NULL == rpTarget )
+		if ( nullptr == rpTarget )
 			rpTarget = CWnd::FromHandlePermanent( ::GetParent( hCtrl ) );
 
 		ASSERT_PTR( rpTarget );
@@ -159,15 +159,15 @@ namespace ui
 	}
 
 
-	void UpdateDlgControlsUI( HWND hDlg, CCmdTarget* pTarget /*= NULL*/, bool disableIfNoHandler /*= false*/ )
+	void UpdateDlgControlsUI( HWND hDlg, CCmdTarget* pTarget /*= nullptr*/, bool disableIfNoHandler /*= false*/ )
 	{
 		ui::ResolveDlgTarget( pTarget, hDlg );
 
-		for ( HWND hCtrl = ::GetTopWindow( hDlg ); hCtrl != NULL; hCtrl = ::GetNextWindow( hCtrl, GW_HWNDNEXT ) )
+		for ( HWND hCtrl = ::GetTopWindow( hDlg ); hCtrl != nullptr; hCtrl = ::GetNextWindow( hCtrl, GW_HWNDNEXT ) )
 			UpdateControlUI( hCtrl, pTarget, disableIfNoHandler );
 	}
 
-	void UpdateDlgControlsUI( HWND hDlg, const UINT ctrlIds[], size_t count, CCmdTarget* pTarget /*= NULL*/, bool disableIfNoHandler /*= false*/ )
+	void UpdateDlgControlsUI( HWND hDlg, const UINT ctrlIds[], size_t count, CCmdTarget* pTarget /*= nullptr*/, bool disableIfNoHandler /*= false*/ )
 	{
 		ui::ResolveDlgTarget( pTarget, hDlg );
 
@@ -176,7 +176,7 @@ namespace ui
 				UpdateControlUI( hCtrl, pTarget, disableIfNoHandler );
 	}
 
-	bool UpdateControlUI( HWND hCtrl, CCmdTarget* pTarget /*= NULL*/, bool disableIfNoHandler /*= false*/ )
+	bool UpdateControlUI( HWND hCtrl, CCmdTarget* pTarget /*= nullptr*/, bool disableIfNoHandler /*= false*/ )
 	{	// inspired from CWnd::UpdateDialogControls() MFC implementation
 		ui::ResolveCtrlTarget( pTarget, hCtrl );
 
@@ -190,15 +190,15 @@ namespace ui
 
 		// check for reflect handlers in the child window
 		CWnd* pWnd = CWnd::FromHandlePermanent( hCtrl );
-		if ( pWnd != NULL )
+		if ( pWnd != nullptr )
 		{
 			// call it directly to disable any routing
-			if ( pWnd->CWnd::OnCmdMsg( 0, MAKELONG( 0xFFFF, WM_COMMAND + WM_REFLECT_BASE ), &ctrlState, NULL ) )
+			if ( pWnd->CWnd::OnCmdMsg( 0, MAKELONG( 0xFFFF, WM_COMMAND + WM_REFLECT_BASE ), &ctrlState, nullptr ) )
 				return true;		// handled
 		}
 
 		if ( CWnd* pParentWnd = CWnd::FromHandlePermanent( hCtrl ) )	// check for handlers in the parent window
-			if ( pParentWnd->CWnd::OnCmdMsg( ctrlState.m_nID, CN_UPDATE_COMMAND_UI, &ctrlState, NULL ) )
+			if ( pParentWnd->CWnd::OnCmdMsg( ctrlState.m_nID, CN_UPDATE_COMMAND_UI, &ctrlState, nullptr ) )
 				return true;		// handled
 
 		// determine whether to disable when no handler exists
@@ -218,13 +218,13 @@ namespace ui
 
 		bool handled = ctrlState.DoUpdate( pTarget, disableCtrl ) != FALSE;		// check for handlers in the target (owner)
 
-		tempWnd.m_hWnd = NULL;		// quick and dirty detach
+		tempWnd.m_hWnd = nullptr;		// quick and dirty detach
 		return handled;
 	}
 
-	bool UpdateControlUI_utlOld( CWnd* pCtrl, CWnd* pTargetWnd /*= NULL*/ )
+	bool UpdateControlUI_utlOld( CWnd* pCtrl, CWnd* pTargetWnd /*= nullptr*/ )
 	{
-		if ( NULL == pTargetWnd )
+		if ( nullptr == pTargetWnd )
 			pTargetWnd = pCtrl->GetParent();
 
 		ASSERT_PTR( pCtrl->GetSafeHwnd() );

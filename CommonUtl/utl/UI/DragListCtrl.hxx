@@ -16,7 +16,7 @@ template< typename BaseListCtrl >
 CDragListCtrl<BaseListCtrl>::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: BaseListCtrl( columnLayoutId, listStyleEx )
 	, m_draggingMode( NoDragging )
-	, m_pSrcDragging( NULL )
+	, m_pSrcDragging( nullptr )
 	, m_dropIndex( -1 )
 {
 	SetDraggingMode( InternalDragging );
@@ -32,36 +32,36 @@ void CDragListCtrl<BaseListCtrl>::SetupControl( void )
 {
 	BaseListCtrl::SetupControl();
 
-	if ( m_pDropTarget.get() != NULL )
+	if ( m_pDropTarget.get() != nullptr )
 		m_pDropTarget->Register( this );			// register this list as drop target
 }
 
 template< typename BaseListCtrl >
 void CDragListCtrl<BaseListCtrl>::SetDraggingMode( DraggingMode draggingMode )
 {
-	if ( m_pDropTarget.get() != NULL )
+	if ( m_pDropTarget.get() != nullptr )
 		m_pDropTarget->Revoke();					// unregister as drop target
 
 	m_draggingMode = draggingMode;
-	m_pDropTarget.reset( m_draggingMode != NoDragging ? new ole::CDropTarget : NULL );
+	m_pDropTarget.reset( m_draggingMode != NoDragging ? new ole::CDropTarget : nullptr );
 
-	if ( m_pDropTarget.get() != NULL )
+	if ( m_pDropTarget.get() != nullptr )
 	{
 		m_pDropTarget->SetScrollMode( auto_scroll::Bars /*| auto_scroll::UseDefault*/ );
 		m_pDropTarget->SetDropTipText( DROPIMAGE_MOVE, _T("Reorder"), _T("Move to %1") );
 	}
 
-	if ( m_hWnd != NULL && m_pDropTarget.get() != NULL )
+	if ( m_hWnd != nullptr && m_pDropTarget.get() != nullptr )
 		m_pDropTarget->Register( this );			// register this list as drop target
 }
 
 template< typename BaseListCtrl >
-bool CDragListCtrl<BaseListCtrl>::DragSelection( CPoint dragPos, ole::CDataSource* pDataSource /*= NULL*/, int sourceFlags /*= ListSourcesMask*/,
+bool CDragListCtrl<BaseListCtrl>::DragSelection( CPoint dragPos, ole::CDataSource* pDataSource /*= nullptr*/, int sourceFlags /*= ListSourcesMask*/,
 												 DROPEFFECT dropEffect /*= DROPEFFECT_COPY | DROPEFFECT_MOVE | DROPEFFECT_LINK*/ )
 {
 	CListSelectionData selData( this );									// this will query the selected indexes
 	std::auto_ptr<ole::CDataSource> pNewDataSource;
-	if ( NULL == pDataSource )
+	if ( nullptr == pDataSource )
 	{
 		pNewDataSource.reset( GetDataSourceFactory()->NewDataSource() );
 		pDataSource = pNewDataSource.get();								// use local data source
@@ -79,7 +79,7 @@ bool CDragListCtrl<BaseListCtrl>::DragSelection( CPoint dragPos, ole::CDataSourc
 
 	dropEffect = pDataSource->DragAndDrop( dropEffect );				// drag drop the selected valid files
 	EndDragging();
-	m_pSrcDragging = NULL;
+	m_pSrcDragging = nullptr;
 	return dropEffect != DROPEFFECT_NONE;
 }
 
@@ -178,7 +178,7 @@ void CDragListCtrl<BaseListCtrl>::RedrawItem( int index )
 template< typename BaseListCtrl >
 bool CDragListCtrl<BaseListCtrl>::IsValidDropIndex( void ) const
 {
-	if ( m_pSrcDragging != NULL )
+	if ( m_pSrcDragging != nullptr )
 		return seq::ChangesDropSequenceAt( GetItemCount(), m_dropIndex, m_pSrcDragging->m_selIndexes );
 
 	return m_dropIndex >= 0 && m_dropIndex <= GetItemCount();		// TODO: redirect to parent's callback interface

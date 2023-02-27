@@ -33,7 +33,7 @@ namespace shell
 		ASSERT_PTR( pParentFolder );
 
 		CComPtr<IContextMenu> pCtxMenu;
-		HR_AUDIT( pParentFolder->GetUIObjectOf( hWndOwner, 1, &pidlItem, __uuidof( IContextMenu ), NULL, (void**)&pCtxMenu ) );
+		HR_AUDIT( pParentFolder->GetUIObjectOf( hWndOwner, 1, &pidlItem, __uuidof( IContextMenu ), nullptr, (void**)&pCtxMenu ) );
 		return pCtxMenu;
 	}
 
@@ -45,7 +45,7 @@ namespace shell
 		if ( CComPtr<IShellFolder2> pParentFolder = GetParentFolderAndPidl( &childPidl, pItem ) )
 			return MakeFolderItemContextMenu( pParentFolder, childPidl, hWndOwner );
 
-		return NULL;
+		return nullptr;
 	}
 
 	CComPtr<IContextMenu> MakeFolderItemsContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD_ARRAY pidlItemsArray, size_t itemCount, HWND hWndOwner )
@@ -53,7 +53,7 @@ namespace shell
 		ASSERT_PTR( pParentFolder );
 
 		CComPtr<IContextMenu> pCtxMenu;
-		HR_AUDIT( pParentFolder->GetUIObjectOf( hWndOwner, static_cast<unsigned int>( itemCount ), pidlItemsArray, __uuidof( IContextMenu ), NULL, (void**)&pCtxMenu ) );
+		HR_AUDIT( pParentFolder->GetUIObjectOf( hWndOwner, static_cast<unsigned int>( itemCount ), pidlItemsArray, __uuidof( IContextMenu ), nullptr, (void**)&pCtxMenu ) );
 		return pCtxMenu;
 	}
 
@@ -101,7 +101,7 @@ namespace shell
 
 // CShellContextMenuHost implementation
 
-CShellContextMenuHost::CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu /*= NULL*/ )
+CShellContextMenuHost::CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu /*= nullptr*/ )
 	: m_pWndOwner( pWndOwner )
 	, m_menuOwnership( InternalMenu )
 {
@@ -117,7 +117,7 @@ CShellContextMenuHost::~CShellContextMenuHost()
 		m_popupMenu.Detach();			// avoid destroying externally owned menu
 }
 
-void CShellContextMenuHost::Reset( IContextMenu* pContextMenu /*= NULL*/ )
+void CShellContextMenuHost::Reset( IContextMenu* pContextMenu /*= nullptr*/ )
 {
 	m_pContextMenu = pContextMenu;
 }
@@ -126,7 +126,7 @@ void CShellContextMenuHost::SetPopupMenu( HMENU hMenu, MenuOwnership ownership /
 {
 	DeletePopupMenu();
 
-	if ( hMenu != NULL )
+	if ( hMenu != nullptr )
 	{
 		m_popupMenu.Attach( hMenu );
 		m_menuOwnership = ownership;
@@ -151,7 +151,7 @@ bool CShellContextMenuHost::MakePopupMenu( CMenu& rPopupMenu, int atIndex /*= At
 	if ( !IsValid() )
 		return false;
 
-	if ( NULL == rPopupMenu.GetSafeHmenu() )
+	if ( nullptr == rPopupMenu.GetSafeHmenu() )
 		rPopupMenu.CreatePopupMenu();
 
 	SetFlag( queryFlags, CMF_EXTENDEDVERBS, ui::IsKeyPressed( VK_SHIFT ) );
@@ -214,7 +214,7 @@ CMenu* CShellContextMenuHost::EnsurePopupShellCmds( UINT queryFlags )
 	// inplace query using a temporary popup menu
 	CMenu* pPopupMenu = CMenu::FromHandle( ::CreatePopupMenu() );
 
-	return MakePopupMenu( *pPopupMenu, AtEnd, queryFlags ) ? pPopupMenu : NULL;
+	return MakePopupMenu( *pPopupMenu, AtEnd, queryFlags ) ? pPopupMenu : nullptr;
 }
 
 
@@ -224,7 +224,7 @@ std::tstring CShellContextMenuHost::GetItemVerb( int cmdId ) const
 
 	TCHAR verb[ MAX_PATH ];
 	if ( cmdId > 0 )
-		if ( SUCCEEDED( m_pContextMenu->GetCommandString( ToVerbIndex( cmdId ), GCS_VERBW, NULL, (char*)verb, _countof( verb ) ) ) )
+		if ( SUCCEEDED( m_pContextMenu->GetCommandString( ToVerbIndex( cmdId ), GCS_VERBW, nullptr, (char*)verb, _countof( verb ) ) ) )
 			return verb;
 
 	return std::tstring();
@@ -242,7 +242,7 @@ bool CShellContextMenuHost::InvokeVerb( const char* pVerb )
 	cmd.hwnd = m_pWndOwner->GetSafeHwnd();
 	cmd.nShow = SW_SHOWNORMAL;
 
-	if ( NULL == cmd.hwnd )
+	if ( nullptr == cmd.hwnd )
 		SetFlag( cmd.fMask, CMIC_MASK_FLAG_NO_UI );		// doesn't seem to have any effect
 
 	return HR_OK( m_pContextMenu->InvokeCommand( &cmd ) );
@@ -289,19 +289,19 @@ void CShellContextMenuHost::OnShellCommand( UINT cmdId )
 
 // CShellContextMenuHost::CTrackingHook implementation
 
-CShellContextMenuHost::CTrackingHook* CShellContextMenuHost::CTrackingHook::s_pInstance = NULL;
+CShellContextMenuHost::CTrackingHook* CShellContextMenuHost::CTrackingHook::s_pInstance = nullptr;
 
 CShellContextMenuHost::CTrackingHook::CTrackingHook( HWND hWndOwner, IContextMenu* pContextMenu )
 	: m_hWndOwner( hWndOwner )
-	, m_pOldWndProc( NULL )
+	, m_pOldWndProc( nullptr )
 	, m_pContextMenu2( pContextMenu )
 	, m_pContextMenu3( pContextMenu )
 {
 	// only subclass if its version 2 or 3 of context menu - subclass window to handle menu messages in here
-	if ( m_hWndOwner != NULL )
-		if ( m_pContextMenu3 != NULL )
+	if ( m_hWndOwner != nullptr )
+		if ( m_pContextMenu3 != nullptr )
 			m_pOldWndProc = (WNDPROC)::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)HookWndProc3 );
-		else if ( m_pContextMenu2 != NULL )
+		else if ( m_pContextMenu2 != nullptr )
 			m_pOldWndProc = (WNDPROC)::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)HookWndProc2 );
 
 	ASSERT_NULL( s_pInstance );
@@ -310,16 +310,16 @@ CShellContextMenuHost::CTrackingHook::CTrackingHook( HWND hWndOwner, IContextMen
 
 CShellContextMenuHost::CTrackingHook::~CTrackingHook()
 {
-	if ( m_pOldWndProc != NULL )
+	if ( m_pOldWndProc != nullptr )
 		::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)m_pOldWndProc );		// unsubclass
 
 	ASSERT( this == s_pInstance );
-	s_pInstance = NULL;
+	s_pInstance = nullptr;
 }
 
 LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc2( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
-	REQUIRE( m_pContextMenu2 != NULL && m_pContextMenu3 == NULL );
+	REQUIRE( m_pContextMenu2 != nullptr && m_pContextMenu3 == nullptr );
 
 	switch ( message )
 	{
@@ -340,7 +340,7 @@ LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc2( HWND hWnd, UINT me
 
 LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc3( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
-	REQUIRE( m_pContextMenu3 != NULL );
+	REQUIRE( m_pContextMenu3 != nullptr );
 
 	LRESULT lResult = 0;
 
@@ -426,7 +426,7 @@ int CShellLazyContextMenuHost::TrackMenu( CMenu* pPopupMenu, const CPoint& scree
 {
 	if ( !IsLazyUninit() )
 		return __super::TrackMenu( pPopupMenu, screenPos, trackFlags );		// track directly for subsequent calls
-	else if ( NULL == m_pExplorerSubMenuHook.get() )
+	else if ( nullptr == m_pExplorerSubMenuHook.get() )
 		m_pExplorerSubMenuHook.reset( new CExplorerSubMenuHook( this, m_pWndOwner ) );
 
 	int cmdId = DoTrackMenu( pPopupMenu, screenPos, trackFlags );			// no CTrackingHook yet!

@@ -67,7 +67,7 @@ namespace utl
 			}
 			::GlobalFree( hGlobal );		// free the memory on error
 		}
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -149,7 +149,7 @@ namespace serial
 		bool HasStreamingFlag( int flag ) const { return HasFlag( m_streamingFlags, flag ); }
 		void SetStreamingFlag( int flag, bool on = true ) { SetFlag( m_streamingFlags, flag, on ); }
 
-		static CStreamingGuard* GetTop( void ) { return !s_instances.empty() ? s_instances.back() : NULL; }
+		static CStreamingGuard* GetTop( void ) { return !s_instances.empty() ? s_instances.back() : nullptr; }
 	private:
 		const CArchive& m_rArchive;
 		CTimer m_timer;
@@ -192,11 +192,11 @@ namespace ui
 	{
 		ASSERT_PTR( pDoc );
 
-		for ( POSITION pos = pDoc->GetFirstViewPosition(); pos != NULL; )
+		for ( POSITION pos = pDoc->GetFirstViewPosition(); pos != nullptr; )
 			if ( ViewT* pView = dynamic_cast<ViewT*>( pDoc->GetNextView( pos ) ) )
 				return pView;
 
-		return NULL;
+		return nullptr;
 	}
 }
 

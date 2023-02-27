@@ -54,7 +54,7 @@ CIcon* CImageStore::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*
 	const TIconKey key( FindAliasIconId( cmdId ), iconStdSize );
 	TIconMap::const_iterator itFound = m_iconMap.find( key );
 	if ( itFound == m_iconMap.end() )
-		return NULL;
+		return nullptr;
 	return itFound->second;
 }
 
@@ -82,7 +82,7 @@ const CIcon* CImageStore::RetrieveIcon( const CIconId& cmdId )
 		return pIcon;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 CBitmap* CImageStore::RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor )
@@ -101,7 +101,7 @@ CBitmap* CImageStore::RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor
 		m_bitmapMap[ key ] = pBitmap;
 		return pBitmap;
 	}
-	return NULL;
+	return nullptr;
 }
 
 ui::IImageStore::TBitmapPair CImageStore::RetrieveMenuBitmaps( const CIconId& cmdId )
@@ -119,7 +119,7 @@ ui::IImageStore::TBitmapPair CImageStore::RetrieveMenuBitmaps( const CIconId& cm
 		rBitmapPair.second = RenderMenuBitmap( *pIcon, true );		// checked state
 		return rBitmapPair;
 	}
-	return TBitmapPair( NULL, NULL );
+	return TBitmapPair( nullptr, nullptr );
 }
 
 ui::IImageStore::TBitmapPair CImageStore::RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps )
@@ -130,7 +130,7 @@ ui::IImageStore::TBitmapPair CImageStore::RetrieveMenuBitmaps( const CIconId& cm
 	{
 		// straight bitmap looks better because the DIB section retains the alpha channel;
 		// no image for checked state (will use a check mark)
-		return TBitmapPair( RetrieveBitmap( cmdId, GetSysColor( COLOR_MENU ) ), NULL );
+		return TBitmapPair( RetrieveBitmap( cmdId, GetSysColor( COLOR_MENU ) ), nullptr );
 	}
 }
 
@@ -142,7 +142,7 @@ CBitmap* CImageStore::RenderMenuBitmap( const CIcon& icon, bool checked ) const
 	CSize bitmapSize = iconSize + CSize( Edge * 2, Edge * 2 );
 
 	std::auto_ptr<CBitmap> pMenuBitmap( new CBitmap );
-	CWindowDC screenDC( NULL );
+	CWindowDC screenDC( nullptr );
 	CDC memDC;
 	if ( memDC.CreateCompatibleDC( &screenDC ) )
 		if ( pMenuBitmap->CreateCompatibleBitmap( &screenDC, bitmapSize.cx, bitmapSize.cy ) )
@@ -161,7 +161,7 @@ CBitmap* CImageStore::RenderMenuBitmap( const CIcon& icon, bool checked ) const
 			return pMenuBitmap.release();
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 void CImageStore::RegisterToolbarImages( UINT toolBarId, COLORREF transpColor /*= color::Auto*/ )
@@ -178,13 +178,13 @@ void CImageStore::RegisterButtonImages( const CToolImageList& toolImageList )
 	RegisterButtonImages( *toolImageList.GetImageList(), ARRAY_PAIR_V( toolImageList.GetButtonIds() ), &toolImageList.GetImageSize() );
 }
 
-void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize /*= NULL*/ )
+void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize /*= nullptr*/ )
 {
 	ASSERT_PTR( imageList.GetSafeHandle() );
 	ASSERT( imageList.GetImageCount() <= (int)buttonCount );		// give or take the separators
 
 	const bool hasAlpha = !gdi::HasMask( imageList, 0 );			// could also use ui::HasAlphaTransparency() - assume all images are the same
-	CSize imageSize = pImageSize != NULL ? *pImageSize : gdi::GetImageIconSize( imageList );
+	CSize imageSize = pImageSize != nullptr ? *pImageSize : gdi::GetImageIconSize( imageList );
 	TIconKey iconKey( 0, ui::LookupIconStdSize( imageSize.cy ) );
 
 	ENSURE( iconKey.second != DefaultSize );
@@ -211,7 +211,7 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 void CImageStore::RegisterIcon( UINT cmdId, CIcon* pIcon )
 {
 	ASSERT( cmdId != 0 );
-	ASSERT( pIcon != NULL && pIcon->IsValid() );
+	ASSERT( pIcon != nullptr && pIcon->IsValid() );
 
 	TIconKey iconKey( cmdId, ui::LookupIconStdSize( pIcon->GetSize().cx ) );
 
@@ -254,7 +254,7 @@ CIcon* CImageStoresSvc::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallI
 		if ( CIcon* pFoundIcon = (*itStore)->FindIcon( cmdId, iconStdSize ) )
 			return pFoundIcon;
 
-	return NULL;
+	return nullptr;
 }
 
 const CIcon* CImageStoresSvc::RetrieveIcon( const CIconId& cmdId )
@@ -263,7 +263,7 @@ const CIcon* CImageStoresSvc::RetrieveIcon( const CIconId& cmdId )
 		if ( const CIcon* pFoundIcon = (*itStore)->RetrieveIcon( cmdId ) )
 			return pFoundIcon;
 
-	return NULL;
+	return nullptr;
 }
 
 CBitmap* CImageStoresSvc::RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor )
@@ -272,7 +272,7 @@ CBitmap* CImageStoresSvc::RetrieveBitmap( const CIconId& cmdId, COLORREF transpC
 		if ( CBitmap* pFoundBitmap = (*itStore)->RetrieveBitmap( cmdId, transpColor ) )
 			return pFoundBitmap;
 
-	return NULL;
+	return nullptr;
 }
 
 ui::IImageStore::TBitmapPair CImageStoresSvc::RetrieveMenuBitmaps( const CIconId& cmdId )
@@ -282,7 +282,7 @@ ui::IImageStore::TBitmapPair CImageStoresSvc::RetrieveMenuBitmaps( const CIconId
 	for ( std::vector< ui::IImageStore* >::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
 	{
 		foundPair = (*itStore)->RetrieveMenuBitmaps( cmdId );
-		if ( foundPair.first != NULL || foundPair.second != NULL )
+		if ( foundPair.first != nullptr || foundPair.second != nullptr )
 			break;
 	}
 
@@ -296,7 +296,7 @@ ui::IImageStore::TBitmapPair CImageStoresSvc::RetrieveMenuBitmaps( const CIconId
 	for ( std::vector< ui::IImageStore* >::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
 	{
 		foundPair = (*itStore)->RetrieveMenuBitmaps( cmdId, useCheckedBitmaps );
-		if ( foundPair.first != NULL || foundPair.second != NULL )
+		if ( foundPair.first != nullptr || foundPair.second != nullptr )
 			break;
 	}
 

@@ -61,7 +61,7 @@ namespace gdi
 	{
 		ASSERT_PTR( pBmpName );
 
-		HINSTANCE hResInst = NULL;
+		HINSTANCE hResInst = nullptr;
 		UINT flags = 0;
 
 		if ( IS_INTRESOURCE( pBmpName ) )
@@ -91,7 +91,7 @@ namespace gdi
 	bool MapBmpTo3dColors( HBITMAP& rhBitmap, bool useRGBQUAD /*= false*/, COLORREF clrSrc /*= CLR_NONE*/, COLORREF clrDest /*= CLR_NONE*/ )
 	{
 		BITMAP bmp;
-		if ( rhBitmap != NULL && ::GetObject( rhBitmap, sizeof( BITMAP ), &bmp ) != 0 )
+		if ( rhBitmap != nullptr && ::GetObject( rhBitmap, sizeof( BITMAP ), &bmp ) != 0 )
 			if ( bmp.bmBitsPixel > 8 )								// LR_LOADMAP3DCOLORS doesn't work for images > 8bpp, we should convert it now
 				return MapBmpTo3dColorsImpl( rhBitmap, &bmp, useRGBQUAD, clrSrc, clrDest );
 
@@ -106,15 +106,15 @@ namespace gdi
 
 		// create source memory DC and select an original bitmap
 		CDC srcMemDC;
-		srcMemDC.CreateCompatibleDC( NULL );
+		srcMemDC.CreateCompatibleDC( nullptr );
 
 		HBITMAP hOldSrcBitmap = (HBITMAP)srcMemDC.SelectObject( rhBitmap );
-		if ( NULL == hOldSrcBitmap )
+		if ( nullptr == hOldSrcBitmap )
 			return false;
 
 		// create a new bitmap compatible with the source memory DC (original bitmap should be already selected)
 		HBITMAP hNewBitmap = (HBITMAP)::CreateCompatibleBitmap( srcMemDC, pBmp->bmWidth, pBmp->bmHeight );
-		if ( NULL == hNewBitmap )
+		if ( nullptr == hNewBitmap )
 		{
 			srcMemDC.SelectObject( hOldSrcBitmap );
 			return false;
@@ -124,7 +124,7 @@ namespace gdi
 		destMemDC.CreateCompatibleDC( &srcMemDC );
 
 		HBITMAP hOldDestBitmap = (HBITMAP)destMemDC.SelectObject( hNewBitmap );
-		if ( NULL == hOldDestBitmap )
+		if ( nullptr == hOldDestBitmap )
 		{
 			srcMemDC.SelectObject( hOldSrcBitmap );
 			::DeleteObject( hNewBitmap );

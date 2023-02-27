@@ -33,7 +33,7 @@ namespace proc
 
 	bool HasSameElevation( HANDLE hProcess1, HANDLE hProcess2 )
 	{
-		return hProcess1 != NULL && hProcess2 != NULL && IsProcessElevated( hProcess1 ) == IsProcessElevated( hProcess2 );
+		return hProcess1 != nullptr && hProcess2 != nullptr && IsProcessElevated( hProcess1 ) == IsProcessElevated( hProcess2 );
 	}
 
 	bool HasCurrentElevation( HWND hWnd, DWORD access /*= SYNCHRONIZE*/ )

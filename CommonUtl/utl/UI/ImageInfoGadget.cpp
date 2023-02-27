@@ -29,13 +29,13 @@ namespace d2d
 
 	void CImageInfoGadget::DiscardDeviceResources( void )
 	{
-		m_pBkBrush = NULL;
-		m_pTextBrush = NULL;
-		m_pDimensionsBrush = NULL;
-		m_pNavigBrush = NULL;
-		m_pFrameTextBrush = NULL;
+		m_pBkBrush = nullptr;
+		m_pTextBrush = nullptr;
+		m_pDimensionsBrush = nullptr;
+		m_pNavigBrush = nullptr;
+		m_pFrameTextBrush = nullptr;
 
-		m_pInfoTextLayout = NULL;
+		m_pInfoTextLayout = nullptr;
 	}
 
 	bool CImageInfoGadget::CreateDeviceResources( void )
@@ -59,7 +59,7 @@ namespace d2d
 
 	bool CImageInfoGadget::BuildInfo( void )
 	{
-		bool dirty = m_pInfoTextLayout == NULL;
+		bool dirty = m_pInfoTextLayout == nullptr;
 
 		ui::CImageFileDetails newInfo;
 		m_pImageView->QueryImageFileDetails( newInfo );
@@ -97,7 +97,7 @@ namespace d2d
 		const D2D_SIZE_F maxSize = ToSizeF( ui::GetScreenSize() );		// start with the entire screen
 
 	    m_pInfoTextLayout = dw::CreateTextLayout( textLayout.GetFullText(), m_pInfoFont, maxSize );
-		if ( m_pInfoTextLayout != NULL )
+		if ( m_pInfoTextLayout != nullptr )
 		{	// apply text effects
 			HR_VERIFY( m_pInfoTextLayout->SetDrawingEffect( m_pDimensionsBrush, textLayout.GetFieldRangeAt( Dimensions ) ) );
 			HR_VERIFY( m_pInfoTextLayout->SetFontWeight( DWRITE_FONT_WEIGHT_NORMAL, textLayout.GetFieldRangeAt( Dimensions ) ) );
@@ -110,14 +110,14 @@ namespace d2d
 		else if ( m_info.IsMultiFrameImage() )
 			m_pFrameTextLayout = dw::CreateTextLayout( str::Format( _T("Page: %d of %d"), m_info.m_framePos + 1, m_info.m_frameCount ), m_pInfoFont, maxSize );
 		else
-			m_pFrameTextLayout = NULL;
+			m_pFrameTextLayout = nullptr;
 
-		return m_pInfoTextLayout != NULL;
+		return m_pInfoTextLayout != nullptr;
 	}
 
 	bool CImageInfoGadget::IsValid( void ) const
 	{
-		return m_info.IsValid() && m_pInfoTextLayout != NULL;
+		return m_info.IsValid() && m_pInfoTextLayout != nullptr;
 	}
 
 	void CImageInfoGadget::Draw( const CViewCoords& coords )
@@ -150,7 +150,7 @@ namespace d2d
 		D2D1_POINT_2F textOrigin = ToPointF( textRect.TopLeft() );
 		pRenderTarget->DrawTextLayout( textOrigin, m_pInfoTextLayout, m_pTextBrush );				// e.g. "Iggy Pop.tif (1920 x 945 = 1.37 MP, 8.83 MB) [ 16 / 28 ] 63%"
 
-		if ( m_pFrameTextLayout != NULL )
+		if ( m_pFrameTextLayout != nullptr )
 		{
 			textOrigin.y = backgroundRect.top - ( dw::ComputeTextSize( m_pFrameTextLayout ).height + EdgeV );
 			pRenderTarget->DrawTextLayout( textOrigin, m_pFrameTextLayout, m_pFrameTextBrush );		// e.g. "Page: 1 of 4"

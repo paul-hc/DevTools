@@ -43,7 +43,7 @@ namespace ui
 							  UINT mask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP );
 
 		bool IsSeparator( void ) const { return HasFlag( fType, MFT_SEPARATOR ); }
-		bool IsSubMenu( void ) const { return hSubMenu != NULL; }
+		bool IsSubMenu( void ) const { return hSubMenu != nullptr; }
 		bool IsCommand( void ) const { return !IsSeparator() && !IsSubMenu() && wID != 0; }
 
 		enum { BaseTypeMask = MFT_STRING | MFT_BITMAP | MFT_SEPARATOR };
@@ -58,13 +58,13 @@ namespace ui
 	enum UseMenuImages { NoMenuImages, NormalMenuImages, CheckedMenuImages };
 
 
-	void LoadPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages = NormalMenuImages, std::tstring* pPopupText = NULL );
+	void LoadPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages = NormalMenuImages, std::tstring* pPopupText = nullptr );
 	void LoadPopupSubMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex1, int popupIndex2 = -1, int popupIndex3 = -1 );
 
-	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = NULL );
-	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId = 0, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = NULL );
+	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = nullptr );
+	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId = 0, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = nullptr );
 
-	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags = TPM_RIGHTBUTTON, const RECT* pExcludeRect = NULL );
+	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags = TPM_RIGHTBUTTON, const RECT* pExcludeRect = nullptr );
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign = DropDown, UINT trackFlags = TPM_RIGHTBUTTON );
 
 
@@ -93,7 +93,7 @@ namespace ui
 
 	HMENU CloneMenu( HMENU hSrcMenu );
 
-	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds = NULL );
+	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds = nullptr );
 	void DeleteMenuItem( CMenu& rDestMenu, UINT itemId );
 	void DeleteMenuItems( CMenu& rDestMenu, const UINT* pItemIds, size_t itemCount );
 

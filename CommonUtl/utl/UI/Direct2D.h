@@ -119,7 +119,7 @@ namespace d2d
 		virtual void AddGadget( IGadgetComponent* pGadget ) = 0;
 		virtual bool IsGadgetVisible( const IGadgetComponent* pGadget ) const = 0;		// allows the host to prevent drawing of a certain gadget
 
-		bool IsValidTarget( void ) const { return GetRenderTarget() != NULL; }
+		bool IsValidTarget( void ) const { return GetRenderTarget() != nullptr; }
 	};
 
 
@@ -154,7 +154,7 @@ namespace d2d
 							   , private utl::noncopyable
 	{
 	protected:
-		CGadgetBase( void ) : m_pRenderHost( NULL ) {}
+		CGadgetBase( void ) : m_pRenderHost( nullptr ) {}
 	public:
 		// IGadgetComponent interface (partial)
 		virtual IRenderHost* GetRenderHost( void ) const;

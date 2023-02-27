@@ -18,17 +18,17 @@ CDesktopDC::CDesktopDC( bool clipTopLevelWindows /*= true*/, bool useUpdateLocki
 
 CDesktopDC::~CDesktopDC()
 {
-	if ( m_hDC != NULL )
+	if ( m_hDC != nullptr )
 		Release();
 }
 
 void CDesktopDC::Release( void )
 {
 	ASSERT_PTR( m_hDC );
-	::ReleaseDC( NULL, Detach() );
+	::ReleaseDC( nullptr, Detach() );
 
 	if ( m_updateLocked )
-		if ( !::LockWindowUpdate( NULL ) )
+		if ( !::LockWindowUpdate( nullptr ) )
 			TRACE( _T(" ** CDesktopDC: LockWindowUpdate() UNLOCK failed! **\n") );
 }
 
@@ -47,17 +47,17 @@ HDC CDesktopDC::InitUpdateLocking( bool clipTopLevelWindows )
 
 	if ( m_updateLocked )
 		flags |= DCX_LOCKWINDOWUPDATE;
-	if ( topLevelRegion.GetSafeHandle() != NULL )
+	if ( topLevelRegion.GetSafeHandle() != nullptr )
 		flags |= DCX_EXCLUDERGN;
 
-	return ::GetDCEx( NULL, (HRGN)topLevelRegion.Detach(), flags );		// the system takes ownership of the region
+	return ::GetDCEx( nullptr, (HRGN)topLevelRegion.Detach(), flags );		// the system takes ownership of the region
 }
 
 HDC CDesktopDC::InitNormal( bool clipTopLevelWindows )
 {
-	HDC hDC = ::GetDC( NULL );						// entire desktop DC (spanning all monitors)
+	HDC hDC = ::GetDC( nullptr );						// entire desktop DC (spanning all monitors)
 
-	if ( clipTopLevelWindows && hDC != NULL )
+	if ( clipTopLevelWindows && hDC != nullptr )
 	{
 		std::vector< HWND > topLevelWindows;		// visible ones
 		ui::QueryTopLevelWindows( topLevelWindows, WS_VISIBLE );
@@ -82,7 +82,7 @@ void CDesktopDC::MakeTopLevelRegion( CRgn& rRegion ) const
 		CRect windowRect;
 		::GetWindowRect( *itWnd, &windowRect );
 
-		if ( NULL == (HRGN)rRegion )
+		if ( nullptr == (HRGN)rRegion )
 			rRegion.CreateRectRgnIndirect( &windowRect );
 		else
 		{

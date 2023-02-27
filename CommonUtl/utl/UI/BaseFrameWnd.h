@@ -18,7 +18,7 @@ protected:
 public:
 	virtual ~CBaseFrameWnd();
 
-	bool UseSysTrayMinimize( void ) const { return m_trayPopupMenu.GetSafeHmenu() != NULL; }
+	bool UseSysTrayMinimize( void ) const { return m_trayPopupMenu.GetSafeHmenu() != nullptr; }
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 
 	bool ShowAppWindow( int cmdShow );

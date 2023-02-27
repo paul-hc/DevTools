@@ -22,14 +22,14 @@ class CBaseApp
 	, public CAppTools
 {
 protected:
-	CBaseApp( const TCHAR* pAppName = NULL );
+	CBaseApp( const TCHAR* pAppName = nullptr );
 	virtual ~CBaseApp();
 
 	// call just before InitInstance:
 	void StoreAppNameSuffix( const std::tstring& appNameSuffix ) { m_appNameSuffix = appNameSuffix; }
 	void StoreProfileSuffix( const std::tstring& profileSuffix ) { m_profileSuffix = profileSuffix; }
 
-	bool IsInitAppResources( void ) const { return m_pSharedResources.get() != NULL; }
+	bool IsInitAppResources( void ) const { return m_pSharedResources.get() != nullptr; }
 	void SetLazyInitAppResources( void ) { m_lazyInitAppResources = true; }			// for extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe
 public:
 	const std::tstring& GetAppNameSuffix( void ) const { return m_appNameSuffix; }

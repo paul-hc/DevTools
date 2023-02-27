@@ -19,16 +19,16 @@ namespace ole
 	class CDataSource : public COleDataSource
 	{
 	public:
-		CDataSource( ole::IRenderDataWnd* pRenderDataWnd = NULL, CWnd* pSrcWnd = NULL );
+		CDataSource( ole::IRenderDataWnd* pRenderDataWnd = nullptr, CWnd* pSrcWnd = nullptr );
 		virtual ~CDataSource();
 
-		DROPEFFECT DragAndDrop( DROPEFFECT dropEffect, const RECT* pStartDragRect = NULL );		// pass m_nullRect to disable the start drag delay
+		DROPEFFECT DragAndDrop( DROPEFFECT dropEffect, const RECT* pStartDragRect = nullptr );		// pass m_nullRect to disable the start drag delay
 
 		int GetDragResult( void ) const { return m_dragResult; }
 
 		// drop-tip text
 		bool DisableDropTipText( void );
-		bool SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText = NULL );
+		bool SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText = nullptr );
 
 		// data caching overridables
 		virtual void CacheShellFilePaths( const std::vector< fs::CPath >& filePaths );			// formats: shell::cfHDROP, shell::cfFileGroupDescriptor

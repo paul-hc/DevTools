@@ -28,7 +28,7 @@ namespace ole_utl
 	void CacheGlobalData( COleDataSource* pDataSource, CLIPFORMAT clipFormat, HGLOBAL hGlobal )
 	{
 		ASSERT( pDataSource );
-		if ( hGlobal != NULL )
+		if ( hGlobal != nullptr )
 			pDataSource->CacheGlobalData( clipFormat, hGlobal );
 	}
 
@@ -42,7 +42,7 @@ namespace ole_utl
 
 		bool succeeded = false;
 		pOutFormatEtc->cfFormat = ole_utl::RegisterFormat( pFormat );
-		pOutFormatEtc->ptd = NULL;
+		pOutFormatEtc->ptd = nullptr;
 		pOutFormatEtc->dwAspect = DVASPECT_CONTENT;
 		pOutFormatEtc->lindex = -1;
 		pOutFormatEtc->tymed = TYMED_HGLOBAL;
@@ -101,7 +101,7 @@ namespace ole_utl
 				*pValue = value;
 				::GlobalUnlock( stgMedium.hGlobal );
 				stgMedium.tymed = TYMED_HGLOBAL;
-				stgMedium.pUnkForRelease = NULL;
+				stgMedium.pUnkForRelease = nullptr;
 				succeeded = HR_OK( pDataObject->SetData( &formatEtc, &stgMedium, TRUE ) );
 				if ( !succeeded )
 					::GlobalFree( stgMedium.hGlobal );
@@ -184,7 +184,7 @@ namespace ole
 		{	pExc;
 			TRACE( _T("* CTransferBlob::CacheTo() exception: %s"), mfc::CRuntimeException::MessageOf( *pExc ).c_str() );
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	bool CTransferBlob::ReadFromGlobalData( HGLOBAL hGlobal ) throws_()
@@ -240,13 +240,13 @@ namespace ole
 	bool CTransferBlob::Paste( const CClipboard* pClipboard )
 	{
 		HGLOBAL hGlobal = safe_ptr( pClipboard )->GetData( m_clipFormat );
-		return hGlobal != NULL && ReadFromGlobalData( hGlobal );
+		return hGlobal != nullptr && ReadFromGlobalData( hGlobal );
 	}
 
 	bool CTransferBlob::Copy( CClipboard* pClipboard )
 	{
 		HGLOBAL hGlobal = MakeGlobalData();
-		return hGlobal != NULL && safe_ptr( pClipboard )->SetData( m_clipFormat, hGlobal );
+		return hGlobal != nullptr && safe_ptr( pClipboard )->SetData( m_clipFormat, hGlobal );
 	}
 
 } //namespace ole

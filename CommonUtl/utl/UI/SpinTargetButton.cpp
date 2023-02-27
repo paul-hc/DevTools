@@ -48,7 +48,7 @@ bool CSpinTargetButton::Create( DWORD alignment /*= UDS_ALIGNRIGHT*/ )
 
 void CSpinTargetButton::UpdateState( void )
 {
-	ASSERT( GetSafeHwnd() != NULL && m_pBuddyCtrl->GetSafeHwnd() != NULL );
+	ASSERT( GetSafeHwnd() != nullptr && m_pBuddyCtrl->GetSafeHwnd() != nullptr );
 
 	ui::EnableWindow( *this, IsBuddyEditable() );
 	Invalidate();
@@ -57,7 +57,7 @@ void CSpinTargetButton::UpdateState( void )
 
 void CSpinTargetButton::Layout( void )
 {
-	ASSERT( GetSafeHwnd() != NULL && m_pBuddyCtrl->GetSafeHwnd() != NULL );
+	ASSERT( GetSafeHwnd() != nullptr && m_pBuddyCtrl->GetSafeHwnd() != nullptr );
 
 	CRect spinRect = ui::GetControlRect( *this );
 	CRect editRect = ui::GetControlRect( *m_pBuddyCtrl );
@@ -81,9 +81,9 @@ BOOL CSpinTargetButton::OnUdnDeltaPos( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMUPDOWN* pUpDown = (NMUPDOWN*)pNmHdr;
 
-	if ( m_pSpinTarget != NULL )
+	if ( m_pSpinTarget != nullptr )
 		*pResult = !IsBuddyEditable() || m_pSpinTarget->SpinBy( pUpDown->iDelta );	// skip default processing if spinned
 	else
 		*pResult = FALSE;		// do default incrementing
-	return FALSE;				// pass notification to parent 
+	return FALSE;				// pass notification to parent
 }

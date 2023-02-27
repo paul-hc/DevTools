@@ -16,7 +16,7 @@
 CDetailIconButton::CDetailIconButton( ui::IBuddyCommandHandler* pHostCmdHandler, UINT iconId /*= 0*/ )
 	: CDetailMateCtrl<CIconButton>( pHostCmdHandler )
 {
-	SetIconId( iconId != NULL ? iconId : ID_EDIT_DETAILS );
+	SetIconId( iconId != 0 ? iconId : ID_EDIT_DETAILS );
 	SetUseText( false );
 }
 

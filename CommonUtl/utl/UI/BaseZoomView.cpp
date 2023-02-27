@@ -16,7 +16,7 @@ CBaseZoomView::CBaseZoomView( ui::ImageScalingMode scalingMode, UINT zoomPct )
 	: CScrollView()
 	, m_scalingMode( scalingMode )
 	, m_zoomPct( zoomPct )
-	, m_pZoomBar( NULL )
+	, m_pZoomBar( nullptr )
 	, m_viewStatusFlags( 0 )
 	, m_minContentSize( 0, 0 )
 {
@@ -98,7 +98,7 @@ void CBaseZoomView::SetScaleZoom( ui::ImageScalingMode scalingMode, UINT zoomPct
 
 bool CBaseZoomView::ZoomRelative( ZoomBy zoomBy )
 {
-	if ( NULL == m_pZoomBar )
+	if ( nullptr == m_pZoomBar )
 		return false;
 
 	UINT zoomPct = m_pZoomBar->InputZoomPct( ui::ByEdit );		// input zoom just in case combo is not updated (editing)
@@ -135,7 +135,7 @@ void CBaseZoomView::OnViewStatusChanged( ui::TViewStatusFlag flag )
 
 void CBaseZoomView::SetupContentMetrics( bool doRedraw /*= true*/ )
 {
-	if ( NULL == m_hWnd || IsInternalChange() )
+	if ( nullptr == m_hWnd || IsInternalChange() )
 		return;
 
 	GetClientRect( &m_clientRect );
@@ -222,7 +222,7 @@ void CBaseZoomView::ResizeParentToFit( BOOL shrinkOnly /*= true*/ )
 	CSize oldTotalDev = m_totalDev;
 
 	m_totalDev = ui::MaxSize( m_totalDev, m_minContentSize );		// impose a minimum size limit temporarily
-	
+
 	__super::ResizeParentToFit( shrinkOnly );
 
 	m_totalDev = oldTotalDev;			// restore original value
@@ -249,9 +249,9 @@ bool CBaseZoomView::ClampScrollPos( CPoint& rScrollPos )
 	return !( rScrollPos == oldScrollPos );								// changed?
 }
 
-CSize CBaseZoomView::GetContentPointedPct( const CPoint* pClientPoint /*= NULL*/ ) const
+CSize CBaseZoomView::GetContentPointedPct( const CPoint* pClientPoint /*= nullptr*/ ) const
 {
-	CPoint point = pClientPoint != NULL ? *pClientPoint : ui::GetCursorPos( m_hWnd );
+	CPoint point = pClientPoint != nullptr ? *pClientPoint : ui::GetCursorPos( m_hWnd );
 
 	point += GetScrollPosition() - m_contentRect.TopLeft();
 	CSize pointedPct(
@@ -319,7 +319,7 @@ BOOL CBaseZoomView::OnEraseBkgnd( CDC* pDC )
 
 // CScopedScaleZoom implementation
 
-CScopedScaleZoom::CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint /*= NULL*/ )
+CScopedScaleZoom::CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint /*= nullptr*/ )
 	: m_pZoomView( pZoomView )
 	, m_oldScalingMode( m_pZoomView->GetScalingMode() )
 	, m_oldZoomPct( m_pZoomView->GetZoomPct() )
@@ -352,13 +352,13 @@ CScopedScaleZoom::~CScopedScaleZoom()
 
 CZoomViewMouseTracker::CZoomViewMouseTracker( CBaseZoomView* pZoomView, CPoint point, TrackOperation trackOp )
 	: m_pZoomView( pZoomView )
-	, m_pZoomNormal( OpZoomNormal == trackOp ? new CScopedScaleZoom( pZoomView, ui::ActualSize, 100, &point ) : NULL )
+	, m_pZoomNormal( OpZoomNormal == trackOp ? new CScopedScaleZoom( pZoomView, ui::ActualSize, 100, &point ) : nullptr )
 	, m_trackOp( trackOp )
 	, m_origPoint( point )
 	, m_origScrollPos( m_pZoomView->GetScrollPosition() )
 	, m_origScalingMode( m_pZoomView->GetScalingMode() )
 	, m_origZoomPct( m_pZoomView->GetZoomPct() )
-	, m_hOrigCursor( NULL )
+	, m_hOrigCursor( nullptr )
 {
 	switch ( trackOp )
 	{
@@ -369,7 +369,7 @@ CZoomViewMouseTracker::CZoomViewMouseTracker( CBaseZoomView* pZoomView, CPoint p
 			m_hOrigCursor = ::SetCursor( AfxGetApp()->LoadCursor( IDR_TRACK_SCROLL_CURSOR ) );
 			break;
 		case OpZoomNormal:
-			m_hOrigCursor = ::SetCursor( NULL );
+			m_hOrigCursor = ::SetCursor( nullptr );
 			break;
 	}
 }
@@ -379,7 +379,7 @@ CZoomViewMouseTracker::~CZoomViewMouseTracker()
 	m_pZoomNormal.reset();
 	m_pZoomView->UpdateWindow();
 
-	if ( m_hOrigCursor != NULL )
+	if ( m_hOrigCursor != nullptr )
 		::SetCursor( m_hOrigCursor );
 }
 
@@ -407,7 +407,7 @@ bool CZoomViewMouseTracker::RunLoop( void )
 {
 	m_pZoomView->SetCapture();
 
-	MSG msg = { NULL };
+	MSG msg = { nullptr };
 
 	for ( CPoint point; ::GetCapture() == m_pZoomView->m_hWnd; )
 		if ( ::PeekMessage( &msg, m_pZoomView->m_hWnd, 0, 0, PM_REMOVE ) )

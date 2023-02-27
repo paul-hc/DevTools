@@ -53,10 +53,10 @@ bool CTrayIcon::Add( CWnd* pPopupWnd, HICON hIcon, const TCHAR* pIconTipText, bo
 {
 	std::tstring iconTipText;
 
-	if ( NULL == hIcon )
+	if ( nullptr == hIcon )
 		hIcon = CImageStoresSvc::Instance()->RetrieveIcon( CIconId( m_trayIconId ) )->GetSafeHandle();
 
-	if ( pIconTipText != NULL )
+	if ( pIconTipText != nullptr )
 		iconTipText = pIconTipText;
 	else
 		iconTipText = str::Load( m_trayIconId );
@@ -134,7 +134,7 @@ bool CTrayIcon::Notify_DeleteIcon( void )
 	if ( !NotifyTrayIcon( NIM_DELETE ) )
 		return false;
 
-	m_niData.hIcon = NULL;
+	m_niData.hIcon = nullptr;
 	ClearFlag( m_niData.uFlags, NIF_ICON );
 	return true;
 }
@@ -172,7 +172,7 @@ bool CTrayIcon::SetIcon( const CIconId& iconResId )
 {
 	const CIcon* pIcon = CImageStoresSvc::Instance()->RetrieveIcon( iconResId );
 
-	return pIcon != NULL && SetIcon( pIcon->GetHandle() );
+	return pIcon != nullptr && SetIcon( pIcon->GetHandle() );
 }
 
 bool CTrayIcon::SetVisible( bool visible /*= true*/ )
@@ -200,14 +200,14 @@ bool CTrayIcon::SetTooltipText( const TCHAR* pIconTipText )
 	return NotifyTrayIcon( NIM_MODIFY );
 }
 
-bool CTrayIcon::ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle /*= NULL*/, app::MsgType msgType /*= app::Info*/, UINT timeoutSecs /*= 0*/ )
+bool CTrayIcon::ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle /*= nullptr*/, app::MsgType msgType /*= app::Info*/, UINT timeoutSecs /*= 0*/ )
 {
 	//TRACE( _T("CTrayIcon::ShowBalloonTip( %s ) {...\n"), str::Clamp( text, 24 ).c_str() );
 
 	bool hasText = !text.empty() || !str::IsEmpty( pTitle );
 
 	if ( m_baloonVisible && hasText )			// overlapping balloon?
-		if ( NULL == m_pBaloonPending.get() )
+		if ( nullptr == m_pBaloonPending.get() )
 		{	// delayed transaction: wait for the NIN_BALLOONHIDE notification
 			m_pBaloonPending.reset( new CBaloonData( text, pTitle, msgType, timeoutSecs ) );
 			DoHideBalloonTip();
@@ -245,7 +245,7 @@ bool CTrayIcon::DoShowBalloonTip( const std::tstring& text, const TCHAR* pTitle,
 	return success;
 }
 
-DWORD CTrayIcon::ToInfoFlag( app::MsgType msgType, UINT* pOutTimeoutSecs /*= NULL*/ )
+DWORD CTrayIcon::ToInfoFlag( app::MsgType msgType, UINT* pOutTimeoutSecs /*= nullptr*/ )
 {
 	DWORD infoFlag = NIIF_NONE;
 	UINT timeoutSecs = 10;
@@ -266,7 +266,7 @@ DWORD CTrayIcon::ToInfoFlag( app::MsgType msgType, UINT* pOutTimeoutSecs /*= NUL
 			break;
 	}
 
-	if ( pOutTimeoutSecs != NULL && 0 == *pOutTimeoutSecs )
+	if ( pOutTimeoutSecs != nullptr && 0 == *pOutTimeoutSecs )
 		*pOutTimeoutSecs = timeoutSecs;
 
 	return infoFlag;
@@ -366,7 +366,7 @@ bool CTrayIcon::HandleTrayIconNotify( UINT msgNotifyCode, const CPoint& screenPo
 	switch ( msgNotifyCode )
 	{
 		case WM_CONTEXTMENU:
-			if ( m_isMainIcon && m_pOwnerCallback != NULL )
+			if ( m_isMainIcon && m_pOwnerCallback != nullptr )
 				if ( CWnd* pOwnerWnd = m_pOwnerCallback->GetOwnerWnd() )
 					if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
 					{
@@ -381,7 +381,7 @@ bool CTrayIcon::HandleTrayIconNotify( UINT msgNotifyCode, const CPoint& screenPo
 		case WM_LBUTTONDBLCLK:
 			if ( m_ignoreNextLDblClc )
 				m_ignoreNextLDblClc = false;
-			else if ( m_isMainIcon && m_pOwnerCallback != NULL )
+			else if ( m_isMainIcon && m_pOwnerCallback != nullptr )
 				if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
 					if ( CWnd* pOwnerWnd = m_pOwnerCallback->GetOwnerWnd() )
 					{
@@ -396,7 +396,7 @@ bool CTrayIcon::HandleTrayIconNotify( UINT msgNotifyCode, const CPoint& screenPo
 
 			break;
 		case NIN_SELECT:
-			if ( m_isMainIcon && m_pOwnerCallback != NULL )
+			if ( m_isMainIcon && m_pOwnerCallback != nullptr )
 				if ( CWnd* pOwnerWnd = m_pOwnerCallback->GetOwnerWnd() )
 					if ( CSystemTray::IsMinimizedToTray( pOwnerWnd ) )
 					{	// Restore on L-Click
@@ -420,7 +420,7 @@ bool CTrayIcon::HandleTrayIconNotify( UINT msgNotifyCode, const CPoint& screenPo
 			m_baloonVisible = true;
 			break;
 		case NIN_BALLOONHIDE:
-			if ( m_pBaloonPending.get() != NULL )
+			if ( m_pBaloonPending.get() != nullptr )
 			{
 				PostNotify( _NIN_BalloonPendingShow, screenPos );
 				return true;
@@ -428,11 +428,11 @@ bool CTrayIcon::HandleTrayIconNotify( UINT msgNotifyCode, const CPoint& screenPo
 			// fall-through
 		case NIN_BALLOONTIMEOUT:
 		case NIN_BALLOONUSERCLICK:
-			if ( NULL == m_pBaloonPending.get() )
+			if ( nullptr == m_pBaloonPending.get() )
 				AutoHideIcon();
 			break;
 		case _NIN_BalloonPendingShow:
-			if ( m_pBaloonPending.get() != NULL )
+			if ( m_pBaloonPending.get() != nullptr )
 			{
 				m_pBaloonPending->ShowBalloon( this );
 				m_pBaloonPending.reset();
@@ -453,7 +453,7 @@ CTrayIcon::CAnimation::CAnimation( CTrayIcon* pTrayIcon, double durationSecs, UI
 	, m_pWnd( m_pTrayIcon->GetTray()->GetPopupWnd() )
 	, m_hIconOrig( m_pTrayIcon->GetIcon() )
 	, m_durationSecs( durationSecs )
-	, m_eventId( m_pWnd->SetTimer( AnimationEventId, stepDelayMiliSecs, NULL ) )
+	, m_eventId( m_pWnd->SetTimer( AnimationEventId, stepDelayMiliSecs, nullptr ) )
 	, m_imageCount( m_pTrayIcon->GetAnimImageList().GetImageCount() )
 	, m_imagePos( 0 )
 {
@@ -467,7 +467,7 @@ CTrayIcon::CAnimation::~CAnimation()
 	if ( m_eventId != 0 )
 		m_pWnd->KillTimer( m_eventId );
 
-	if ( m_hIconOrig != NULL )
+	if ( m_hIconOrig != nullptr )
 		m_pTrayIcon->SetIcon( m_hIconOrig );
 }
 
@@ -488,16 +488,16 @@ bool CTrayIcon::CAnimation::HandleTimerEvent( UINT_PTR eventId )
 
 // CScopedTrayIconBalloon implementation
 
-CScopedTrayIconBalloon::CScopedTrayIconBalloon( CTrayIcon* pTrayIcon /*= NULL*/, const std::tstring& text, const TCHAR* pTitle /*= NULL*/,
+CScopedTrayIconBalloon::CScopedTrayIconBalloon( CTrayIcon* pTrayIcon /*= nullptr*/, const std::tstring& text, const TCHAR* pTitle /*= nullptr*/,
 												app::MsgType msgType /*= app::Info*/, UINT timeoutSecs /*= 30*/ )
-	: m_pTrayIcon( pTrayIcon != NULL ? pTrayIcon : CSystemTray::Instance()->FindMainIcon() )
+	: m_pTrayIcon( pTrayIcon != nullptr ? pTrayIcon : CSystemTray::Instance()->FindMainIcon() )
 {
-	if ( m_pTrayIcon != NULL )
-		m_pTrayIcon->ShowBalloonTip( text, pTitle != NULL ? pTitle : m_pTrayIcon->GetTooltipText().c_str(), msgType, timeoutSecs );
+	if ( m_pTrayIcon != nullptr )
+		m_pTrayIcon->ShowBalloonTip( text, pTitle != nullptr ? pTitle : m_pTrayIcon->GetTooltipText().c_str(), msgType, timeoutSecs );
 }
 
 CScopedTrayIconBalloon::~CScopedTrayIconBalloon()
 {
-	if ( m_pTrayIcon != NULL && m_pTrayIcon->IsBalloonTipVisible() )
+	if ( m_pTrayIcon != nullptr && m_pTrayIcon->IsBalloonTipVisible() )
 		m_pTrayIcon->HideBalloonTip();
 }

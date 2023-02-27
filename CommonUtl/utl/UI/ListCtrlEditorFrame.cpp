@@ -27,7 +27,7 @@ CListCtrlEditorFrame::CListCtrlEditorFrame( CReportListControl* pListCtrl, CTool
 	//	- this allows proper command routing for multiple list frames in the same dialog.
 	m_pListCtrl->SetFrameEditor( this );
 
-	if ( m_pToolbar != NULL )
+	if ( m_pToolbar != nullptr )
 	{
 		m_pToolbar->SetOwner( m_pListCtrl );		// important: route commands directly to the list (for the case of multiple frames in parent dialog)
 		HookWindow( m_pListCtrl->GetSafeHwnd() );	// needed for displaying tooltips in the toolbar
@@ -40,7 +40,7 @@ CListCtrlEditorFrame::~CListCtrlEditorFrame()
 
 bool CListCtrlEditorFrame::InInlineEditingMode( void ) const
 {
-	return m_pListCtrl->IsInternalChange() || m_pListCtrl->GetEditControl() != NULL;
+	return m_pListCtrl->IsInternalChange() || m_pListCtrl->GetEditControl() != nullptr;
 }
 
 

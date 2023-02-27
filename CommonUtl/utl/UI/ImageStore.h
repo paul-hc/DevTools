@@ -29,7 +29,7 @@ public:
 public:
 	void RegisterToolbarImages( UINT toolBarId, COLORREF transpColor = color::Auto );
 	void RegisterButtonImages( const CToolImageList& toolImageList );
-	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize = NULL );
+	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize = nullptr );
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );		// takes ownership of pIcon
 	void RegisterIcon( UINT cmdId, HICON hIcon ) { return RegisterIcon( cmdId, CIcon::NewIcon( hIcon ) ); }
 

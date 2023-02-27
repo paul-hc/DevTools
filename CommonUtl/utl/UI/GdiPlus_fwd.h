@@ -20,7 +20,7 @@ public:
 	CScopedGdiPlusInit( void )
 	{
 		Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-		Gdiplus::GdiplusStartup( &m_gpToken, &gdiplusStartupInput, NULL );		// initialize GDI+
+		Gdiplus::GdiplusStartup( &m_gpToken, &gdiplusStartupInput, nullptr );		// initialize GDI+
 	}
 
 	~CScopedGdiPlusInit( void )

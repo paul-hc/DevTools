@@ -23,7 +23,7 @@ namespace ui
 	{
 		m_contentFitFlags = contentFitFlags;
 
-		if ( m_pCtrl->m_hWnd != NULL && m_contentFitFlags != 0 )
+		if ( m_pCtrl->m_hWnd != nullptr && m_contentFitFlags != 0 )
 			ResizeToFit( m_contentFitFlags );
 	}
 

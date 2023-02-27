@@ -26,7 +26,7 @@ public:
 	void CreateTandem( CWnd* pHostCtrl, const ui::CTandemLayout& tandemLayout = ui::CTandemLayout::s_mateOnRight, UINT toolbarResId = 0 );
 
 	// creates a toolbar with id AFX_IDW_TOOLBAR
-	void CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect = NULL,
+	void CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect = nullptr,
 						TAlignment alignment = H_AlignRight | V_AlignCenter, UINT toolbarResId = 0 );
 private:
 	void CreateToolbar( CWnd* pParent, UINT toolbarResId );

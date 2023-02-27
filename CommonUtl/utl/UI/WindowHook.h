@@ -20,8 +20,8 @@ public:
 	operator HWND() const { return m_hWnd; }
 	HWND GetHwnd() const { return m_hWnd; }
 
-	bool IsWindow( void ) const { return m_hWnd != NULL && ::IsWindow( m_hWnd ); }
-	bool IsHooked( void ) const { ASSERT( NULL == m_hWnd || ::IsWindow( m_hWnd ) ); return m_hWnd != NULL; }
+	bool IsWindow( void ) const { return m_hWnd != nullptr && ::IsWindow( m_hWnd ); }
+	bool IsHooked( void ) const { ASSERT( nullptr == m_hWnd || ::IsWindow( m_hWnd ) ); return m_hWnd != nullptr; }
 
 	virtual void HookWindow( HWND hWndToHook );
 	virtual bool UnhookWindow( void );

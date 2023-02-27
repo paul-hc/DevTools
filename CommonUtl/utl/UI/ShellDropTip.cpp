@@ -38,22 +38,22 @@ namespace shell
 
 		m_messages[ type ] = m_insertFmts[ type ] = s_nullStr;
 
-		if ( pMessage != NULL )
+		if ( pMessage != nullptr )
 			m_messages[ type ] = pMessage;
-		if ( pInsertFmt != NULL )
+		if ( pInsertFmt != nullptr )
 			m_insertFmts[ type ] = pInsertFmt;
 
-		return pMessage != NULL || pInsertFmt != NULL;
+		return pMessage != nullptr || pInsertFmt != nullptr;
 	}
 
 	const wchar_t* CDropTip::GetTypeField( DROPIMAGETYPE type, Field field ) const
 	{
 		if ( !IsValidType( type ) )
-			return NULL;
+			return nullptr;
 
 		if ( InsertFmt == field && !IsNull( m_insertFmts[ type ] ) )
 			return m_insertFmts[ type ].c_str();
-		return !IsNull( m_insertFmts[ type ] ) ? m_messages[ type ].c_str() : NULL;
+		return !IsNull( m_insertFmts[ type ] ) ? m_messages[ type ].c_str() : nullptr;
 	}
 
 	bool CDropTip::MakeDescription( DROPDESCRIPTION* pDestDropTip, const wchar_t* pMessage ) const
@@ -108,7 +108,7 @@ namespace shell
 		if ( 0 == wcscmp( pDest, pSrc ) )
 			return false;						// string not changed
 
-		wcsncpy_s( pDest, destSize, pSrc != NULL ? pSrc : L"", _TRUNCATE );
+		wcsncpy_s( pDest, destSize, pSrc != nullptr ? pSrc : L"", _TRUNCATE );
 		return true;
 	}
 

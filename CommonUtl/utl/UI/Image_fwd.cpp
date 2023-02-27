@@ -169,7 +169,7 @@ namespace res
 			imageCount = imageSize.cx / imageSize.cy;
 			imageSize.cx /= imageCount;
 
-			if ( NULL == pOutImageList->GetSafeHandle() )
+			if ( nullptr == pOutImageList->GetSafeHandle() )
 				pOutImageList->Create( imageSize.cx, imageSize.cy, ilFlags, imageCount, 0 );		// note: if icon has alpha channel, then no ILC_MASK required (in practice it makes little difference)
 
 			VERIFY( pOutImageList->Add( &info.m_bitmapColor, &info.m_bitmapMask ) != -1 );			// add the strip bitmaps, which will amount to imageCount images
@@ -185,7 +185,7 @@ namespace res
 	{
 		ASSERT_PTR( iconIds );
 
-		if ( NULL == rOutImageList.GetSafeHandle() )
+		if ( nullptr == rOutImageList.GetSafeHandle() )
 		{
 			const CSize iconSize = CIconSize::GetSizeOf( iconStdSize );
 			VERIFY( rOutImageList.Create( iconSize.cx, iconSize.cy, ilFlags, 0, (int)iconCount ) );
@@ -219,15 +219,15 @@ namespace ui
 			if ( const CIcon* pIcon = RetrieveIcon( CIconId( cmdId, maxIconStdSize ) ) )
 				return pIcon;
 
-		return NULL;
+		return nullptr;
 	}
 
 	int IImageStore::BuildImageList( CImageList* pDestImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize )
 	{
 		ASSERT_PTR( pDestImageList );
-		ASSERT( buttonIds != NULL && buttonCount != 0 );
+		ASSERT( buttonIds != nullptr && buttonCount != 0 );
 
-		if ( NULL == pDestImageList->GetSafeHandle() )
+		if ( nullptr == pDestImageList->GetSafeHandle() )
 			gdi::CreateImageList( *pDestImageList, imageSize, CToolImageList::EvalButtonCount( buttonIds, buttonCount ) );
 
 		IconStdSize iconStdSize = CIconSize::FindStdSize( imageSize );
@@ -238,7 +238,7 @@ namespace ui
 			{
 				const CIcon* pIcon = RetrieveIcon( CIconId( buttonIds[ i ], iconStdSize ) );
 
-				if ( NULL == pIcon )
+				if ( nullptr == pIcon )
 					pIcon = &CIcon::GetUnknownIcon();
 
 				pDestImageList->Add( pIcon->GetHandle() );
@@ -286,14 +286,14 @@ namespace gdi
 		return CSize( cx, cy );
 	}
 
-	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection /*= NULL*/ )
+	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection /*= nullptr*/ )
 	{
 		ASSERT_PTR( hBitmap );
 		DIBSECTION dibSection;
 		int size = ::GetObject( hBitmap, sizeof( DIBSECTION ), &dibSection );
 		ASSERT( size != 0 );									// valid DIB or DDB bitmap
 
-		if ( pIsDibSection != NULL )
+		if ( pIsDibSection != nullptr )
 			*pIsDibSection = sizeof( DIBSECTION ) == size;		// bitmap is a DIB section?
 
 		return dibSection.dsBm.bmBitsPixel;
@@ -330,7 +330,7 @@ namespace gdi
 	{
 		IMAGEINFO info;
 		if ( imageList.GetImageInfo( imagePos, &info ) )
-			return info.hbmMask != NULL;
+			return info.hbmMask != nullptr;
 		return false;
 	}
 
@@ -339,12 +339,12 @@ namespace gdi
 		rMaskBitmap.DeleteObject();
 
 		CDC memDC, maskDC;
-		if ( !memDC.CreateCompatibleDC( NULL ) || !maskDC.CreateCompatibleDC( NULL ) )
+		if ( !memDC.CreateCompatibleDC( nullptr ) || !maskDC.CreateCompatibleDC( nullptr ) )
 			return false;
 
 		CSize bitmapSize = GetBitmapSize( hSrcBitmap );
 
-		rMaskBitmap.CreateBitmap( bitmapSize.cx, bitmapSize.cy, 1, 1, NULL );		// create monochrome (1 bit) mask bitmap
+		rMaskBitmap.CreateBitmap( bitmapSize.cx, bitmapSize.cy, 1, 1, nullptr );		// create monochrome (1 bit) mask bitmap
 
 		CScopedGdiObj scopedBitmap( &memDC, hSrcBitmap );
 		CScopedGdi< CBitmap > scopedMaskBitmap( &maskDC, &rMaskBitmap );
@@ -375,7 +375,7 @@ namespace gdi
 	{
 		CBitmap maskBitmap;
 		if ( !CreateBitmapMask( maskBitmap, hImageBitmap, transpColor ) )
-			return NULL;
+			return nullptr;
 
 		return gdi::CreateIcon( hImageBitmap, maskBitmap );
 	}
@@ -569,7 +569,7 @@ CPalette* CDibSectionInfo::MakeColorPalette( const CDC* pDC )
 {
 	ASSERT( !GetColorTable( pDC ).empty() );
 
-	if ( NULL == m_pPalette.get() )
+	if ( nullptr == m_pPalette.get() )
 	{
 		m_pPalette.reset( new CPalette() );
 		if ( m_colorTable.size() > 256 )
@@ -596,12 +596,12 @@ CPalette* CDibSectionInfo::MakeColorPalette( const CDC* pDC )
 
 // CBitmapInfoBuffer implementation
 
-BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPerPixel, const bmp::CSharedAccess* pSrcDib /*= NULL*/ )
+BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPerPixel, const bmp::CSharedAccess* pSrcDib /*= nullptr*/ )
 {
 	std::vector< RGBQUAD > rgbTable;
 	if ( bitsPerPixel <= 8 )			// got to build a color table
 	{
-		if ( pSrcDib != NULL && pSrcDib->GetHandle() != NULL )
+		if ( pSrcDib != nullptr && pSrcDib->GetHandle() != nullptr )
 		{
 			CDibSectionInfo srcInfo( pSrcDib->GetHandle() );
 			if ( srcInfo.GetBitsPerPixel() == bitsPerPixel )							// same color table size
@@ -649,7 +649,7 @@ const std::vector< RGBQUAD >& CSysColorTable::GetSysRgbTable( void )
 	{
 		std::auto_ptr<CPalette> pPalette( new CPalette() );
 		{
-			CWindowDC screenDC( NULL );
+			CWindowDC screenDC( nullptr );
 			pPalette->CreateHalftonePalette( &screenDC );
 		}
 

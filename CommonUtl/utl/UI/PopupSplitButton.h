@@ -22,8 +22,8 @@ public:
 	virtual void DropDown( void );
 
 	// base overrides
-	virtual bool HasRhsPart( void ) const { return m_popupMenu.GetSafeHmenu() != NULL; }
-	virtual CRect GetRhsPartRect( const CRect* pClientRect = NULL ) const;
+	virtual bool HasRhsPart( void ) const { return m_popupMenu.GetSafeHmenu() != nullptr; }
+	virtual CRect GetRhsPartRect( const CRect* pClientRect = nullptr ) const;
 protected:
 	virtual void DrawRhsPart( CDC* pDC, const CRect& clientRect );
 protected:

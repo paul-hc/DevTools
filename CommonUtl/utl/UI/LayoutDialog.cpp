@@ -34,18 +34,18 @@ CLayoutDialog::CLayoutDialog( void )
 	m_modeless = m_autoDelete = true;		// default constructor is for modeless dialog
 }
 
-CLayoutDialog::CLayoutDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
+CLayoutDialog::CLayoutDialog( UINT templateId, CWnd* pParent /*= nullptr*/ )
 	: TMfcBaseDialog( templateId, pParent )
 {
 	Construct();
-	m_initCentered = pParent != NULL;		// keep absolute position if main dialog
+	m_initCentered = pParent != nullptr;		// keep absolute position if main dialog
 }
 
-CLayoutDialog::CLayoutDialog( const TCHAR* pTemplateName, CWnd* pParent /*= NULL*/ )
+CLayoutDialog::CLayoutDialog( const TCHAR* pTemplateName, CWnd* pParent /*= nullptr*/ )
 	: TMfcBaseDialog( pTemplateName, pParent )
 {
 	Construct();
-	m_initCentered = pParent != NULL;		// keep absolute position if main dialog
+	m_initCentered = pParent != nullptr;		// keep absolute position if main dialog
 }
 
 CLayoutDialog::~CLayoutDialog()
@@ -58,7 +58,7 @@ void CLayoutDialog::Construct( void )
 	m_pLayoutEngine.reset( new CLayoutEngine() );
 }
 
-bool CLayoutDialog::CreateModeless( UINT templateId /*= 0*/, CWnd* pParentWnd /*= NULL*/, int cmdShow /*= SW_SHOW*/ )
+bool CLayoutDialog::CreateModeless( UINT templateId /*= 0*/, CWnd* pParentWnd /*= nullptr*/, int cmdShow /*= SW_SHOW*/ )
 {
 	// works with both modal and modeless constructors:
 	//	pass templateId and pParentWnd if not initialized via modal constructor
@@ -66,7 +66,7 @@ bool CLayoutDialog::CreateModeless( UINT templateId /*= 0*/, CWnd* pParentWnd /*
 	//
 	m_modeless = m_autoDelete = true;
 
-	if ( !__super::Create( templateId != 0 ? MAKEINTRESOURCE( templateId ) : m_lpszTemplateName, pParentWnd != NULL ? pParentWnd : m_pParentWnd ) )
+	if ( !__super::Create( templateId != 0 ? MAKEINTRESOURCE( templateId ) : m_lpszTemplateName, pParentWnd != nullptr ? pParentWnd : m_pParentWnd ) )
 		return false;
 
 	if ( cmdShow != SW_HIDE )
@@ -204,7 +204,7 @@ void CLayoutDialog::LoadFromRegistry( void )
 
 void CLayoutDialog::RestorePlacement( void )
 {
-	if ( NULL == m_pPlacement.get() )
+	if ( nullptr == m_pPlacement.get() )
 		m_pLayoutEngine->SetCollapsed( m_initCollapsed );
 	else
 	{
@@ -237,8 +237,8 @@ void CLayoutDialog::RestorePlacement( void )
 	}
 
 	if ( UseWindowPlacement() )
-		PostRestorePlacement( m_pPlacement.get() != NULL ? m_pPlacement->m_showCmd : -1, m_pPlacement.get() != NULL && m_pPlacement->m_restoreToMaximized );
-	else if ( m_initCentered || NULL == m_pPlacement.get() )
+		PostRestorePlacement( m_pPlacement.get() != nullptr ? m_pPlacement->m_showCmd : -1, m_pPlacement.get() != nullptr && m_pPlacement->m_restoreToMaximized );
+	else if ( m_initCentered || nullptr == m_pPlacement.get() )
 		CenterWindow( GetOwner() );
 }
 
@@ -281,8 +281,8 @@ void CLayoutDialog::ModifySystemMenu( void )
 		if ( !HasFlag( GetStyle(), WS_CHILD ) && HasFlag( GetStyle(), WS_SYSMENU ) )
 		{
 			ModifyStyleEx( 0, WS_EX_DLGMODALFRAME );
-			if ( NULL == GetIcon( ICON_SMALL ) )
-				SetIcon( NULL, ICON_SMALL );			// remove default icon; this will not prevent adding an icon using SetIcon()
+			if ( nullptr == GetIcon( ICON_SMALL ) )
+				SetIcon( nullptr, ICON_SMALL );			// remove default icon; this will not prevent adding an icon using SetIcon()
 		}
 
 	SetupDlgIcons();
@@ -342,7 +342,7 @@ void CLayoutDialog::DoDataExchange( CDataExchange* pDX ) override
 BOOL CLayoutDialog::DestroyWindow( void ) override
 {
 	// fix for app losing activation when destroying the modeless dialog: https://stackoverflow.com/questions/3144004/wpf-app-loses-completely-focus-on-window-close
-	if ( IsModeless() && m_hWnd != NULL )
+	if ( IsModeless() && m_hWnd != nullptr )
 		if ( CWnd* pOwner = GetOwner() )
 			pOwner->SetActiveWindow();
 

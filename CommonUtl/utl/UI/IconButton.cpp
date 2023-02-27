@@ -29,29 +29,29 @@ const CIcon* CIconButton::GetIconPtr( void ) const
 	if ( m_iconId.m_id != 0 )
 		return ui::GetImageStoresSvc()->RetrieveIcon( m_iconId );
 
-	return NULL;
+	return nullptr;
 }
 
 void CIconButton::SetIconId( const CIconId& iconId )
 {
 	m_iconId = iconId;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		const CIcon* pIcon = GetIconPtr();
-		if ( pIcon != NULL )
+		if ( pIcon != nullptr )
 			if ( !m_useText )
 				ModifyStyle( 0, BS_ICON );
 
-		SetIcon( pIcon != NULL ? pIcon->GetHandle() : NULL );
-		UpdateCaption( this, m_useText, m_useTextSpacing && pIcon != NULL );
+		SetIcon( pIcon != nullptr ? pIcon->GetHandle() : nullptr );
+		UpdateCaption( this, m_useText, m_useTextSpacing && pIcon != nullptr );
 	}
 }
 
 void CIconButton::SetUseTextSpacing( bool useTextSpacing /*= true*/ )
 {
 	m_useTextSpacing = useTextSpacing;
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		UpdateCaption( this, m_useText, m_useTextSpacing );
 }
 
@@ -69,7 +69,7 @@ void CIconButton::SetButtonIcon( CButton* pButton, const CIconId& iconId, bool u
 {
 	ASSERT_PTR( pButton->GetSafeHwnd() );
 
-	HICON hOldIcon = pButton->GetIcon(), hNewIcon = NULL;
+	HICON hOldIcon = pButton->GetIcon(), hNewIcon = nullptr;
 
 	if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( iconId ) )
 		hNewIcon = pIcon->GetHandle();
@@ -112,7 +112,7 @@ bool CIconButton::UpdateIcon( void )
 	// We need to set the current icon again.
 	ASSERT_PTR( m_hWnd );
 
-	if ( 0 == m_iconId.m_id || GetIcon() != NULL )
+	if ( 0 == m_iconId.m_id || GetIcon() != nullptr )
 		return false;
 
 	SetIconId( m_iconId );
@@ -122,7 +122,7 @@ bool CIconButton::UpdateIcon( void )
 bool CIconButton::UpdateCaption( CButton* pButton, bool useText, bool useTextSpacing )
 {
 	ASSERT_PTR( pButton->GetSafeHwnd() );
-	if ( pButton->GetIcon() != NULL )
+	if ( pButton->GetIcon() != nullptr )
 		if ( useText )
 			return ui::SetWindowText( pButton->GetSafeHwnd(), CaptionToText( ui::GetWindowText( pButton->GetSafeHwnd() ), useText, useTextSpacing ) );
 		else
@@ -138,6 +138,6 @@ void CIconButton::PreSubclassWindow( void )
 	if ( 0 == m_iconId.m_id )
 		m_iconId.m_id = GetDlgCtrlID();
 
-	if ( NULL == GetIcon() )
+	if ( nullptr == GetIcon() )
 		UpdateIcon();
 }

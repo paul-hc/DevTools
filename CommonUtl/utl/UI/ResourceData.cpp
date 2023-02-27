@@ -10,9 +10,9 @@
 
 CResourceData::CResourceData( const TCHAR* pResId, const TCHAR* pResType )
 	: m_hInst( CScopedResInst::Find( pResId, pResType ) )				// determine location of the resource
-	, m_hResource( m_hInst != NULL ? ::FindResource( m_hInst, pResId, pResType ) : NULL )
-	, m_hGlobal( m_hResource != NULL ? ::LoadResource( m_hInst, m_hResource ) : NULL )
-	, m_pResource( m_hGlobal != NULL ? ::LockResource( m_hGlobal ) : NULL )
+	, m_hResource( m_hInst != nullptr ? ::FindResource( m_hInst, pResId, pResType ) : nullptr )
+	, m_hGlobal( m_hResource != nullptr ? ::LoadResource( m_hInst, m_hResource ) : nullptr )
+	, m_pResource( m_hGlobal != nullptr ? ::LockResource( m_hGlobal ) : nullptr )
 {
 }
 

@@ -37,7 +37,7 @@ namespace ole
 				return hMoveCursor;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -180,7 +180,7 @@ namespace ole
 		// hit-test against inset region
 		UINT timerID = MAKEWORD(-1, -1);
 		innerClientRect.InflateRect(-nScrollInset, -nScrollInset);
-		CSplitterWnd* pSplitter = NULL;
+		CSplitterWnd* pSplitter = nullptr;
 
 		if ( !rectClient.PtInRect( point ) )
 		{
@@ -218,7 +218,7 @@ namespace ole
 			// check for valid scroll first
 			pSplitter = CView::GetParentSplitter(pView, FALSE);
 			BOOL bEnableScroll = FALSE;
-			if (pSplitter != NULL)
+			if (pSplitter != nullptr)
 				bEnableScroll = pSplitter->DoScroll(pView, timerID, FALSE);
 			else
 				bEnableScroll = pView->OnScroll(timerID, 0, FALSE);
@@ -253,7 +253,7 @@ namespace ole
 		// scroll if necessary
 		if (tickCount - m_dwLastTick > m_nScrollDelay)
 		{
-			if (pSplitter != NULL)
+			if (pSplitter != nullptr)
 				pSplitter->DoScroll(pView, timerID, TRUE);
 			else
 				pView->OnScroll(timerID, 0, TRUE);

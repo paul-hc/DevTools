@@ -54,7 +54,7 @@ namespace shell
 		if ( ParsePidl( &pidlFile, pFolder, pFnameExt ) )
 		{
 			LPITEMIDLIST p_pidlFile = pidlFile;			// (!) pointer to pointer
-			Handle( pFolder->GetUIObjectOf( NULL, 1, (PCUITEMID_CHILD_ARRAY)&p_pidlFile, __uuidof( Interface ), NULL, (void**)&pInterface ) );
+			Handle( pFolder->GetUIObjectOf( nullptr, 1, (PCUITEMID_CHILD_ARRAY)&p_pidlFile, __uuidof( Interface ), nullptr, (void**)&pInterface ) );
 		}
 		return pInterface;
 	}

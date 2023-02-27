@@ -15,7 +15,7 @@ public:
 	// cell text effects
 	bool ApplyCellTextEffect( void );
 	COLORREF GetRealizedBkColor( void ) const;
-	COLORREF GetRealizedTextColor( DiffSide diffSide, const str::TMatchSequence* pCellSeq = NULL ) const;
+	COLORREF GetRealizedTextColor( DiffSide diffSide, const str::TMatchSequence* pCellSeq = nullptr ) const;
 
 	// text diffs
 	bool DrawCellTextDiffs( void );

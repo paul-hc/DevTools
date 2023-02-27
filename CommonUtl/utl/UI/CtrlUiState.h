@@ -45,7 +45,7 @@ public:
 
 	bool RestoreTreeSelection( CTreeCtrl& rTreeCtrl ) const;
 
-	HTREEITEM FindSelectedItem( CTreeCtrl& rTreeCtrl, bool* pIsFullMatch = NULL ) const;
+	HTREEITEM FindSelectedItem( CTreeCtrl& rTreeCtrl, bool* pIsFullMatch = nullptr ) const;
 
 	void SaveTopVisibleItem( const CTreeCtrl& treeCtrl );
 	bool RestoreTopVisibleItem( CTreeCtrl& rTreeCtrl ) const;
@@ -75,7 +75,7 @@ public:
 		~CTreeItemPath();
 
 		int BuildPath( const CTreeCtrl& treeCtrl, HTREEITEM hItem );
-		HTREEITEM FindItem( const CTreeCtrl& treeCtrl, bool* pDestIsFullMatch = NULL ) const;
+		HTREEITEM FindItem( const CTreeCtrl& treeCtrl, bool* pDestIsFullMatch = nullptr ) const;
 	public:
 		std::vector< CTreeItem > m_elements;
 	};

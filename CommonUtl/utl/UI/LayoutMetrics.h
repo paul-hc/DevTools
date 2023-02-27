@@ -171,9 +171,9 @@ namespace layout
 		void SetLayoutStyle( int layoutStyle, bool collapsed );
 		void ModifyLayoutStyle( int clearStyle, int setStyle );
 
-		bool IsCtrlInit( void ) const { return m_hControl != NULL; };
+		bool IsCtrlInit( void ) const { return m_hControl != nullptr; };
 		void InitCtrl( HWND hControl );
-		void ResetCtrl( void ) { InitCtrl( NULL ); }
+		void ResetCtrl( void ) { InitCtrl( nullptr ); }
 
 		bool ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const CSize& delta, bool collapsed ) const;
 		bool RepositionCtrl( const CSize& delta, bool collapsed ) const;

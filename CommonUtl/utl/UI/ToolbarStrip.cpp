@@ -83,7 +83,7 @@ void CToolbarStrip::SetCustomDisabledImageList( void )
 
 void CToolbarStrip::UpdateCmdUI( void )
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		SendMessage( WM_IDLEUPDATECMDUI, (WPARAM)!m_enableUnhandledCmds );
 }
 

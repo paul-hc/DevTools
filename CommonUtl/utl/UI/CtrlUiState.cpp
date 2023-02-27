@@ -58,7 +58,7 @@ void CTreeCtrlUiState::SaveExpandingState( const CTreeCtrl& treeCtrl )
 {
 	ClearExpandedState();
 
-	for ( HTREEITEM hRootItem = treeCtrl.GetChildItem( TVGN_ROOT ); hRootItem != NULL;
+	for ( HTREEITEM hRootItem = treeCtrl.GetChildItem( TVGN_ROOT ); hRootItem != nullptr;
 		  hRootItem = treeCtrl.GetNextSiblingItem( hRootItem ) )
 		if ( IsItemExpanded( hRootItem, treeCtrl ) )
 		{
@@ -152,10 +152,10 @@ bool CTreeCtrlUiState::IsItemExpanded( HTREEITEM hItem, const CTreeCtrl& treeCtr
 }
 
 
-HTREEITEM CTreeCtrlUiState::FindSelectedItem( CTreeCtrl& rTreeCtrl, bool* pIsFullMatch /*= NULL*/ ) const
+HTREEITEM CTreeCtrlUiState::FindSelectedItem( CTreeCtrl& rTreeCtrl, bool* pIsFullMatch /*= nullptr*/ ) const
 {
 	if ( m_selectedItems.m_paths.empty() )
-		return NULL;
+		return nullptr;
 	return m_selectedItems.m_paths.back()->FindItem( rTreeCtrl, pIsFullMatch );
 }
 
@@ -194,7 +194,7 @@ CTreeCtrlUiState::CTreeItem::CTreeItem( const CTreeCtrl& treeCtrl, HTREEITEM hIt
 {
 	HTREEITEM hSiblingItem = hItem;
 
-	while ( ( hSiblingItem = treeCtrl.GetPrevSiblingItem( hSiblingItem ) ) != NULL &&
+	while ( ( hSiblingItem = treeCtrl.GetPrevSiblingItem( hSiblingItem ) ) != nullptr &&
 			treeCtrl.GetItemText( hSiblingItem ) == m_text )
 		++m_sameSiblingIndex;
 }
@@ -205,10 +205,10 @@ CTreeCtrlUiState::CTreeItem::~CTreeItem()
 
 HTREEITEM CTreeCtrlUiState::CTreeItem::FindInParent( const CTreeCtrl& treeCtrl, HTREEITEM hParentItem ) const
 {
-	HTREEITEM hLastMatchItem = NULL;
+	HTREEITEM hLastMatchItem = nullptr;
 	int sameSiblingIndex = 0;
 
-	for ( HTREEITEM hItem = treeCtrl.GetChildItem( hParentItem ); hItem != NULL;
+	for ( HTREEITEM hItem = treeCtrl.GetChildItem( hParentItem ); hItem != nullptr;
 		  hItem = treeCtrl.GetNextSiblingItem( hItem ) )
 		if ( treeCtrl.GetItemText( hItem ) == m_text )
 			if ( sameSiblingIndex++ == m_sameSiblingIndex )
@@ -237,17 +237,17 @@ int CTreeCtrlUiState::CTreeItemPath::BuildPath( const CTreeCtrl& treeCtrl, HTREE
 	m_elements.clear();
 
 	// save the selected item path (if any)
-	for ( HTREEITEM hPathItem = hItem; hPathItem != NULL; hPathItem = treeCtrl.GetParentItem( hPathItem ) )
+	for ( HTREEITEM hPathItem = hItem; hPathItem != nullptr; hPathItem = treeCtrl.GetParentItem( hPathItem ) )
 		m_elements.insert( m_elements.begin(), CTreeItem( treeCtrl, hPathItem ) );
 
 	return (int)m_elements.size();
 }
 
-HTREEITEM CTreeCtrlUiState::CTreeItemPath::FindItem( const CTreeCtrl& treeCtrl, bool* pDestIsFullMatch /*= NULL*/ ) const
+HTREEITEM CTreeCtrlUiState::CTreeItemPath::FindItem( const CTreeCtrl& treeCtrl, bool* pDestIsFullMatch /*= nullptr*/ ) const
 {
 	HTREEITEM hPathItem = TVGN_ROOT;
 
-	if ( pDestIsFullMatch != NULL )
+	if ( pDestIsFullMatch != nullptr )
 		*pDestIsFullMatch = true;
 
 	for ( std::vector< CTreeItem >::const_iterator itElement = m_elements.begin();
@@ -256,7 +256,7 @@ HTREEITEM CTreeCtrlUiState::CTreeItemPath::FindItem( const CTreeCtrl& treeCtrl, 
 			hPathItem = hChildItem; // recover as much as possible from original selected item path
 		else
 		{
-			if ( pDestIsFullMatch != NULL )
+			if ( pDestIsFullMatch != nullptr )
 				*pDestIsFullMatch = false;
 			break;
 		}
@@ -298,7 +298,7 @@ void CTreeCtrlUiState::CTreeNode::Clear( void )
 
 void CTreeCtrlUiState::CTreeNode::AddExpandedChildNodes( const CTreeCtrl& treeCtrl, HTREEITEM hParentItem )
 {
-	for ( HTREEITEM hChildItem = treeCtrl.GetChildItem( hParentItem ); hChildItem != NULL;
+	for ( HTREEITEM hChildItem = treeCtrl.GetChildItem( hParentItem ); hChildItem != nullptr;
 		  hChildItem = treeCtrl.GetNextSiblingItem( hChildItem ) )
 		if ( IsItemExpanded( hChildItem, treeCtrl ) )
 		{
@@ -319,7 +319,7 @@ void CTreeCtrlUiState::CTreeNode::ExpandTreeItem( CTreeCtrl& rTreeCtrl, HTREEITE
 	{
 		HTREEITEM hMatchingChildItem = ( *itExpandedChild )->m_item.FindInParent( rTreeCtrl, hTargetItem );
 
-		if ( hMatchingChildItem != NULL )
+		if ( hMatchingChildItem != nullptr )
 			( *itExpandedChild )->ExpandTreeItem( rTreeCtrl, hMatchingChildItem );
 		else
 			TRACE( _T(" * Couldn't restore expanded state for child node: '%s':%d\n"),
@@ -331,7 +331,7 @@ void CTreeCtrlUiState::CTreeNode::ExpandTreeItem( CTreeCtrl& rTreeCtrl, HTREEITE
 void CTreeCtrlUiState::CTreeNode::TraceNode( int nestingLevel /*= 0*/ )
 {
 #ifdef _DEBUG
-	if ( this == NULL )
+	if ( this == nullptr )
 		return; // must be safe for NULL (root ptr)
 
 	std::tstring leadingSpaces( size_t( nestingLevel * 2 ), _T(' ') );

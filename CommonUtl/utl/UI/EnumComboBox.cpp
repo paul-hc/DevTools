@@ -13,7 +13,7 @@
 
 // maxEnumValue is used to display fewer enumerations than defined in the enum formatter
 
-CEnumComboBox::CEnumComboBox( const CEnumTags* pEnumTags /*= NULL*/ )
+CEnumComboBox::CEnumComboBox( const CEnumTags* pEnumTags /*= nullptr*/ )
 	: CBaseStockContentCtrl<CComboBox>()
 	, m_pEnumTags( pEnumTags )
 {

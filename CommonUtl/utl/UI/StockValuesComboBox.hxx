@@ -31,7 +31,7 @@ namespace ui
 template< typename ValueT >
 CStockValuesComboBox<ValueT>::CStockValuesComboBox( const ui::IValueSetAdapter<ValueT>* pStockAdapter, ui::TValueSetFlags flags /*= 0*/ )
 	: CBaseStockContentCtrl<CComboBox>()
-	, m_pStockAdapter( NULL )
+	, m_pStockAdapter( nullptr )
 	, m_flags( flags )
 {
 	SetAdapter( pStockAdapter );
@@ -50,7 +50,7 @@ inline void CStockValuesComboBox<ValueT>::SetAdapter( const ui::IValueSetAdapter
 		m_validRange.m_end = *std::max_element( stockValues.begin(), stockValues.end() );
 	}
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		InitStockContent();
 }
 

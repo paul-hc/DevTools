@@ -13,13 +13,13 @@ abstract class CBaseMainDialog : public CLayoutDialog
 	, protected ui::ISystemTrayCallback
 {
 protected:
-	CBaseMainDialog( UINT templateId, CWnd* pParent = NULL );
+	CBaseMainDialog( UINT templateId, CWnd* pParent = nullptr );
 public:
 	virtual ~CBaseMainDialog();
 
 	static void ParseCommandLine( int argc, TCHAR* argv[] );
 
-	bool UseSysTrayMinimize( void ) const { return m_trayPopupMenu.GetSafeHmenu() != NULL; }
+	bool UseSysTrayMinimize( void ) const { return m_trayPopupMenu.GetSafeHmenu() != nullptr; }
 
 	void ShowAll( bool show );
 protected:

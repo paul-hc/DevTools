@@ -18,7 +18,7 @@ void CDialogToolBar::DDX_Placeholder( CDataExchange* pDX, int placeholderId,
 									  TAlignment alignToPlaceholder /*= H_AlignLeft | V_AlignBottom*/,
 									  UINT toolbarResId /*= 0*/ )
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
@@ -29,7 +29,7 @@ void CDialogToolBar::DDX_Placeholder( CDataExchange* pDX, int placeholderId,
 void CDialogToolBar::DDX_Tandem( CDataExchange* pDX, CWnd* pHostCtrl, int toolbarId, const ui::CTandemLayout& tandemLayout /*= ui::CTandemLayout::s_mateOnRight*/,
 								 UINT toolbarResId /*= 0*/ )
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate ); pDX;
 
@@ -72,7 +72,7 @@ void CDialogToolBar::CreateTandem( CWnd* pHostCtrl, const ui::CTandemLayout& tan
 	ui::SetTabOrder( this, pHostCtrl );
 }
 
-void CDialogToolBar::CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect /*= NULL*/,
+void CDialogToolBar::CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect /*= nullptr*/,
 									TAlignment alignment /*= H_AlignRight | V_AlignCenter*/, UINT toolbarResId /*= 0*/ )
 {
 	ASSERT_NULL( m_hWnd );
@@ -85,7 +85,7 @@ void CDialogToolBar::CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect
 
 	CRect barRect( CPoint( 0, 0 ), idealBarSize ), alignRect;
 
-	if ( pAlignScreenRect != NULL )
+	if ( pAlignScreenRect != nullptr )
 		alignRect = *pAlignScreenRect;
 	else
 		pParent->GetWindowRect( &alignRect );
@@ -97,7 +97,7 @@ void CDialogToolBar::CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect
 
 void CDialogToolBar::CreateToolbar( CWnd* pParent, UINT toolbarResId )
 {
-	ASSERT( NULL == m_hWnd && pParent->GetSafeHwnd() != NULL );
+	ASSERT( nullptr == m_hWnd && pParent->GetSafeHwnd() != nullptr );
 
 	bool useButtonText = false;
 	DWORD tbStyle = TBSTYLE_CUSTOMERASE | TBSTYLE_AUTOSIZE | ( useButtonText ? TBSTYLE_LIST : TBSTYLE_FLAT );	// TBSTYLE_TRANSPARENT has problems with WS_CLIPCHILDREN (smooth groups)

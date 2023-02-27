@@ -31,7 +31,7 @@ namespace layout
 }
 
 
-CPasswordDialog::CPasswordDialog( CWnd* pParentWnd, const fs::CPath* pDocPath /*= NULL*/ )
+CPasswordDialog::CPasswordDialog( CWnd* pParentWnd, const fs::CPath* pDocPath /*= nullptr*/ )
 	: CLayoutDialog( IDD_PASSWORD_DIALOG, pParentWnd )
 	, m_mode( EditMode )
 {
@@ -40,7 +40,7 @@ CPasswordDialog::CPasswordDialog( CWnd* pParentWnd, const fs::CPath* pDocPath /*
 	GetLayoutEngine().DisableResizeVertically();
 	LoadDlgIcon( IDD_PASSWORD_DIALOG );
 
-	if ( pDocPath != NULL )
+	if ( pDocPath != nullptr )
 		m_documentLabel = str::Format( _T("Document: %s"), pDocPath->GetFilenamePtr() );
 }
 
@@ -63,7 +63,7 @@ void CPasswordDialog::RecreateEditCtrls( void )
 
 void CPasswordDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_passwordEdit.m_hWnd;
+	bool firstInit = nullptr == m_passwordEdit.m_hWnd;
 
 	m_passwordEdit.DDX_Text( pDX, m_password, IDC_PASSWORD_EDIT );
 	DDX_Control( pDX, IDC_CONFIRM_PASSWORD_EDIT, m_confirmPasswordEdit );

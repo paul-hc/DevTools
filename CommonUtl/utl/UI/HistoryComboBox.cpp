@@ -75,8 +75,8 @@ CHistoryComboBox::CHistoryComboBox( unsigned int maxCount /*= ui::HistoryMaxSize
 	, m_accel( ARRAY_PAIR( s_keys ) )
 	, m_dropDownAccel( ARRAY_PAIR( s_dropDownKeys ) )
 	, m_dropSelIndex( CB_ERR )
-	, m_pSection( NULL )
-	, m_pEntry( NULL )
+	, m_pSection( nullptr )
+	, m_pEntry( nullptr )
 {
 	SetFocusMargins( 2, 2 );
 	SetShowFocus();
@@ -91,7 +91,7 @@ void CHistoryComboBox::SaveHistory( const TCHAR* pSection, const TCHAR* pEntry )
 	ui::SaveHistoryCombo( *this, pSection, pEntry, m_pItemSep, m_maxCount, m_caseType );
 }
 
-void CHistoryComboBox::LoadHistory( const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText /*= NULL*/ )
+void CHistoryComboBox::LoadHistory( const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText /*= nullptr*/ )
 {
 	// store registry info for inplace saving
 	m_pSection = pSection;
@@ -152,15 +152,15 @@ void CHistoryComboBox::PreSubclassWindow( void )
 	COMBOBOXINFO cbInfo = { sizeof( COMBOBOXINFO ) };
 	if ( GetComboBoxInfo( &cbInfo ) )
 	{
-		if ( cbInfo.hwndItem != NULL )
+		if ( cbInfo.hwndItem != nullptr )
 		{
-			if ( NULL == m_pEdit.get() )
+			if ( nullptr == m_pEdit.get() )
 				m_pEdit.reset( new CTextEditor() );
 
 			m_pEdit->SubclassWindow( cbInfo.hwndItem );
 		}
 
-		if ( cbInfo.hwndList != NULL && NULL == m_pDropList.get() )
+		if ( cbInfo.hwndList != nullptr && nullptr == m_pDropList.get() )
 		{
 			m_pDropList.reset( new CComboDropList( this ) );
 			m_pDropList->SubclassWindow( cbInfo.hwndList );
@@ -214,7 +214,7 @@ void CHistoryComboBox::OnContextMenu( CWnd* pWnd, CPoint point )
 	else if ( pWnd == this )
 		ui::LoadPopupMenu( contextMenu, IDR_STD_CONTEXT_MENU, ui::HistoryComboPopup );
 
-	if ( contextMenu.GetSafeHmenu() != NULL )
+	if ( contextMenu.GetSafeHmenu() != nullptr )
 	{
 		m_dropSelIndex = GetCurSel();
 		ui::TrackPopupMenu( contextMenu, this, point, TPM_RIGHTBUTTON );

@@ -44,8 +44,8 @@ namespace shell
 	}
 
 
-	bool BrowseForFolder( fs::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= NULL*/,
-						  BrowseFlags flags /*= BF_FileSystem*/, const TCHAR* pTitle /*= NULL*/, bool useNetwork /*= false*/ )
+	bool BrowseForFolder( fs::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= nullptr*/,
+						  BrowseFlags flags /*= BF_FileSystem*/, const TCHAR* pTitle /*= nullptr*/, bool useNetwork /*= false*/ )
 	{
 		bool isOk = false;
 
@@ -76,7 +76,7 @@ namespace shell
 
 		CPidl pidlFolder( ::SHBrowseForFolder( &bi ) );
 
-		if ( pDisplayedName != NULL )
+		if ( pDisplayedName != nullptr )
 			*pDisplayedName = displayName;
 
 		if ( !pidlFolder.IsEmpty() )
@@ -98,7 +98,7 @@ namespace shell
 
 
 	bool BrowseForFile( fs::CPath& rFilePath, CWnd* pParentWnd, BrowseMode browseMode /*= FileOpen*/,
-						const TCHAR* pFileFilter /*= NULL*/, DWORD flags /*= 0*/, const TCHAR* pTitle /*= NULL*/ )
+						const TCHAR* pFileFilter /*= nullptr*/, DWORD flags /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
 		impl::CScopedFileDialog scopedDlg( pFileFilter );
 
@@ -107,9 +107,9 @@ namespace shell
 	}
 
 	bool PickFolder( fs::TDirPath& rFilePath, CWnd* pParentWnd,
-					 FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= NULL*/ )
+					 FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
-		impl::CScopedFileDialog scopedDlg( NULL );
+		impl::CScopedFileDialog scopedDlg( nullptr );
 
 		scopedDlg.StoreDialog( impl::MakeFileDialog( rFilePath, pParentWnd, FileOpen, std::tstring(), 0, pTitle ) );		// no filter for picking folders
 
@@ -123,7 +123,7 @@ namespace shell
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
 
-	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= NULL*/ )
+	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= nullptr*/ )
 	{
 		fs::CPath path;
 		std::tstring wildSpec;
@@ -140,7 +140,7 @@ namespace shell
 		// File Dialog
 
 		CFileDialog* MakeFileDialog( const fs::CPath& filePath, CWnd* pParentWnd, BrowseMode browseMode, const std::tstring& fileFilter,
-									 DWORD flags /*= 0*/, const TCHAR* pTitle /*= NULL*/ )
+									 DWORD flags /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 		{
 			SetFlag( flags, OFN_NOTESTFILECREATE | OFN_PATHMUSTEXIST | OFN_ENABLESIZING );
 
@@ -156,21 +156,21 @@ namespace shell
 						SetFlag( flags, OFN_PATHMUSTEXIST );
 						SetFlag( flags, OFN_NOVALIDATE );			// allow wildcards in return string
 
-						if ( NULL == pTitle )
+						if ( nullptr == pTitle )
 							pTitle = _T("Select Folder Search Pattern");
 					}
 					else
 						SetFlag( flags, OFN_FILEMUSTEXIST );
 					break;
 				case FileBrowse:
-					if ( NULL == pTitle )
+					if ( nullptr == pTitle )
 						pTitle = _T("Browse File");
 					break;
 			}
 
-			CFileDialog* pDlg = new CFileDialog( browseMode != FileSaveAs, NULL, filePath.GetPtr(), flags, fileFilter.c_str(), pParentWnd, 0, s_useVistaStyle );
+			CFileDialog* pDlg = new CFileDialog( browseMode != FileSaveAs, nullptr, filePath.GetPtr(), flags, fileFilter.c_str(), pParentWnd, 0, s_useVistaStyle );
 
-			if ( pTitle != NULL )
+			if ( pTitle != nullptr )
 				pDlg->m_ofn.lpstrTitle = pTitle;
 
 			return pDlg;
@@ -193,7 +193,7 @@ namespace shell
 		std::unordered_map< std::tstring, int > CScopedFileDialog::s_selFilterMap;
 
 		CScopedFileDialog::CScopedFileDialog( const TCHAR* pFileFilter )
-			: m_fileFilter( pFileFilter != NULL ? pFileFilter : s_allFilesFilter )
+			: m_fileFilter( pFileFilter != nullptr ? pFileFilter : s_allFilesFilter )
 		{
 		}
 
@@ -209,7 +209,7 @@ namespace shell
 
 		CScopedFileDialog::~CScopedFileDialog()
 		{
-			if ( m_pFileDlg.get() != NULL )
+			if ( m_pFileDlg.get() != nullptr )
 				s_selFilterMap[ m_fileFilter ] = m_pFileDlg->m_pOFN->nFilterIndex;		// save selected file filter
 		}
 
@@ -234,9 +234,9 @@ namespace shell
 
 		CTreeControl* FindBrowseFolderTree( HWND hDlg )
 		{
-			HWND hCtrl = NULL;
+			HWND hCtrl = nullptr;
 			::EnumChildWindows( hDlg, (WNDENUMPROC)&FindChildTreeCtrlProc, reinterpret_cast<LPARAM>( &hCtrl ) );
-			return hCtrl != NULL ? (CTreeControl*)CWnd::FromHandle( hCtrl ) : NULL;
+			return hCtrl != nullptr ? (CTreeControl*)CWnd::FromHandle( hCtrl ) : nullptr;
 		}
 
 		int CALLBACK BrowseFolderCallback( HWND hDlg, UINT msg, LPARAM lParam, LPARAM data )

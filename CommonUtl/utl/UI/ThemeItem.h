@@ -13,16 +13,16 @@ struct CThemeItem
 	CThemeItem( void );
 	CThemeItem( const wchar_t* pThemeClass, int partId, int stateId = 0 );
 
-	bool IsValid( void ) const { return m_pThemeClass != NULL; }
+	bool IsValid( void ) const { return m_pThemeClass != nullptr; }
 	bool IsThemed( void ) const;
 
-	bool DrawBackground( HDC hdc, const RECT& rect, const RECT* pClipRect = NULL ) const;
-	bool DrawBackgroundErase( HWND hWnd, HDC hdc, const RECT& rect, const RECT* pClipRect = NULL ) const;		// also erase for transparent stateId
-	bool DrawEdge( HDC hdc, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect = NULL ) const;
+	bool DrawBackground( HDC hdc, const RECT& rect, const RECT* pClipRect = nullptr ) const;
+	bool DrawBackgroundErase( HWND hWnd, HDC hdc, const RECT& rect, const RECT* pClipRect = nullptr ) const;		// also erase for transparent stateId
+	bool DrawEdge( HDC hdc, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect = nullptr ) const;
 	bool DrawText( HDC hdc, const RECT& rect, const wchar_t* pText, DWORD textFlags ) const;
 	bool DrawIcon( HDC hdc, const RECT& rect, const CImageList& imageList, int imagePos ) const;
 
-	bool GetPartSize( CSize* pPartSize, HDC hdc, THEMESIZE themeSize = TS_TRUE, const RECT* pRect = NULL ) const;
+	bool GetPartSize( CSize* pPartSize, HDC hdc, THEMESIZE themeSize = TS_TRUE, const RECT* pRect = nullptr ) const;
 
 	// status dependent drawing
 	enum Status { Normal, Hot, Pressed, Disabled, _StatusCount };
@@ -30,9 +30,9 @@ struct CThemeItem
 	int GetStateId( Status status = Normal ) const { return m_stateId[ status ]; }
 	CThemeItem& SetStateId( Status status, int stateId = -1 );
 
-	bool DrawStatusBackground( Status status, HDC hdc, const RECT& rect, const RECT* pClipRect = NULL ) const;
-	bool DrawStatusBackgroundErase( Status status, HWND hWnd, HDC hdc, const RECT& rect, const RECT* pClipRect = NULL ) const;
-	bool DrawStatusEdge( Status status, HDC hdc, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect = NULL ) const;
+	bool DrawStatusBackground( Status status, HDC hdc, const RECT& rect, const RECT* pClipRect = nullptr ) const;
+	bool DrawStatusBackgroundErase( Status status, HWND hWnd, HDC hdc, const RECT& rect, const RECT* pClipRect = nullptr ) const;
+	bool DrawStatusEdge( Status status, HDC hdc, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect = nullptr ) const;
 	bool DrawStatusText( Status status, HDC hdc, const RECT& rect, const wchar_t* pText, DWORD textFlags ) const;
 
 	// conversion to image
@@ -49,17 +49,17 @@ public:
 
 // inline code
 
-inline bool CThemeItem::DrawBackground( HDC hdc, const RECT& rect, const RECT* pClipRect /*= NULL*/ ) const
+inline bool CThemeItem::DrawBackground( HDC hdc, const RECT& rect, const RECT* pClipRect /*= nullptr*/ ) const
 {
 	return DrawStatusBackground( Normal, hdc, rect, pClipRect );
 }
 
-inline bool CThemeItem::DrawBackgroundErase( HWND hWnd, HDC hdc, const RECT& rect, const RECT* pClipRect /*= NULL*/ ) const
+inline bool CThemeItem::DrawBackgroundErase( HWND hWnd, HDC hdc, const RECT& rect, const RECT* pClipRect /*= nullptr*/ ) const
 {
 	return DrawStatusBackgroundErase( Normal, hWnd, hdc, rect, pClipRect );
 }
 
-inline bool CThemeItem::DrawEdge( HDC hdc, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect /*= NULL*/ ) const
+inline bool CThemeItem::DrawEdge( HDC hdc, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect /*= nullptr*/ ) const
 {
 	return DrawStatusEdge( Normal, hdc, rect, edge, flags, pContentRect );
 }

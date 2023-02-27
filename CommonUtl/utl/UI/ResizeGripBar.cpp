@@ -13,7 +13,7 @@
 #endif
 
 
-HCURSOR CResizeGripBar::s_hCursors[ 2 ] = { NULL, NULL };
+HCURSOR CResizeGripBar::s_hCursors[ 2 ] = { nullptr, nullptr };
 
 
 CResizeGripBar::CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Orientation orientation, resize::ToggleStyle toggleStyle /*= resize::ToggleSecond*/ )
@@ -22,15 +22,15 @@ CResizeGripBar::CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Ori
 	, m_toggleStyle( toggleStyle )
 	, m_panelCtrls( pFirstCtrl, pSecondCtrl )
 
-	, m_pResizeFrame( NULL )
+	, m_pResizeFrame( nullptr )
 	, m_windowDepth( 0 )
 	, m_arrowSize( 0, 0 )
 	, m_hitOn( Nowhere )
-	, m_pTrackingInfo( NULL )
+	, m_pTrackingInfo( nullptr )
 {
-	REQUIRE( m_panelCtrls.first != NULL && m_panelCtrls.second != NULL );
+	REQUIRE( m_panelCtrls.first != nullptr && m_panelCtrls.second != nullptr );
 
-	if ( NULL == s_hCursors[ resize::NorthSouth ] )
+	if ( nullptr == s_hCursors[ resize::NorthSouth ] )
 	{
 		s_hCursors[ resize::NorthSouth ] = AfxGetApp()->LoadCursor( IDC_RESIZE_SPLITTER_NS_CURSOR );
 		s_hCursors[ resize::WestEast ] = AfxGetApp()->LoadCursor( IDC_RESIZE_SPLITTER_WE_CURSOR );
@@ -145,7 +145,7 @@ CResizeGripBar& CResizeGripBar::SetFirstExtentPercentage( TPercent firstExtentPe
 {
 	REQUIRE( ui::IsPercentage_0_100( firstExtentPercentage ) );
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		CFrameLayoutInfo info;
 		ReadLayoutInfo( info );
@@ -169,7 +169,7 @@ CResizeGripBar& CResizeGripBar::SetCollapsed( bool collapsed )
 
 	m_layout.m_isCollapsed = collapsed;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		LayoutProportionally();
 
 	return *this;
@@ -279,7 +279,7 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 
 	rGripperRect = rFirstRect = rSecondRect = info.m_frameRect;		// start with all rects to frame
 
-	CWnd* pHiddenWnd = NULL;
+	CWnd* pHiddenWnd = nullptr;
 
 	if ( m_layout.m_isCollapsed )
 		pHiddenWnd = m_toggleStyle == resize::ToggleFirst ? m_panelCtrls.first : m_panelCtrls.second;
@@ -527,7 +527,7 @@ void CResizeGripBar::OnLButtonUp( UINT flags, CPoint point )
 {
 	enum Event { None, EndResize, Toggle } event = None;
 
-	if ( m_pTrackingInfo != NULL )
+	if ( m_pTrackingInfo != nullptr )
 	{
 		if ( ::GetCapture() == m_hWnd )
 			ReleaseCapture();
@@ -538,7 +538,7 @@ void CResizeGripBar::OnLButtonUp( UINT flags, CPoint point )
 			event = Toggle;
 
 		delete m_pTrackingInfo;
-		m_pTrackingInfo = NULL;
+		m_pTrackingInfo = nullptr;
 	}
 	else if ( ToggleArrow == m_hitOn )
 		event = Toggle;
@@ -564,7 +564,7 @@ void CResizeGripBar::OnMouseMove( UINT flags, CPoint point )
 	CDrawAreas drawAreas = GetDrawAreas();			// PHC: use temporary object, because otherwise it crashes unexpectedly on 64-bit Release build (?!)
 	SetHitOn( GetHitTest( drawAreas, point ) );
 
-	if ( m_pTrackingInfo != NULL )
+	if ( m_pTrackingInfo != nullptr )
 	{
 		CPoint screenTrackPos = point;
 

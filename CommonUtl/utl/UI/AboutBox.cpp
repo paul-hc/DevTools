@@ -136,7 +136,7 @@ UINT CAboutBox::s_appIconId = 0;
 CAboutBox::CAboutBox( CWnd* pParent )
 	: CLayoutDialog( IDD_ABOUT_BOX, pParent )
 	, m_modulePath( app::GetModulePath() )
-	, m_exePath( fs::GetModuleFilePath( NULL ) )
+	, m_exePath( fs::GetModuleFilePath( nullptr ) )
 	, m_pEmailStatic( new CLinkStatic( _T("mailto:") ) )
 	, m_pBuildInfoList( new CReportListControl() )
 {
@@ -158,7 +158,7 @@ const fs::CPath* CAboutBox::GetSelPath( void ) const
 {
 	int caretIndex = m_pBuildInfoList->GetCaretIndex();
 	if ( -1 == caretIndex )
-		return NULL;
+		return nullptr;
 
 	return m_pBuildInfoList->GetPtrAt<fs::CPath>( caretIndex );
 }
@@ -281,16 +281,16 @@ void CAboutBox::OnLvnItemChanged_ListItems( NMHDR* pNmHdr, LRESULT* pResult )
 void CAboutBox::OnExploreModule( void )
 {
 	const fs::CPath* pItemPath = GetSelPath();
-	if ( NULL == pItemPath )
+	if ( nullptr == pItemPath )
 		pItemPath = &m_modulePath;
 
 	std::tstring parameters = _T("/select,") + pItemPath->Get();
-	::ShellExecute( m_hWnd, NULL, _T("explorer.exe"), parameters.c_str(), NULL, SW_SHOWNORMAL );
+	::ShellExecute( m_hWnd, nullptr, _T("explorer.exe"), parameters.c_str(), nullptr, SW_SHOWNORMAL );
 }
 
 void CAboutBox::OnUpdateExploreModule( CCmdUI* pCmdUI )
 {
 	const fs::CPath* pItemPath = GetSelPath();
 
-	pCmdUI->Enable( NULL == pItemPath || pItemPath->FileExist() );
+	pCmdUI->Enable( nullptr == pItemPath || pItemPath->FileExist() );
 }

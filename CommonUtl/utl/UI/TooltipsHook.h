@@ -11,7 +11,7 @@ namespace ui { interface ICustomCmdInfo; }
 class CTooltipsHook : public CWindowHook
 {
 public:
-	CTooltipsHook( HWND hWndToHook = NULL );
+	CTooltipsHook( HWND hWndToHook = nullptr );
 
 	void HookControl( CWnd* pCtrlToHook );
 protected:

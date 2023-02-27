@@ -92,7 +92,7 @@ protected:
 class CPageValidationException : public CRuntimeException
 {
 public:
-	explicit CPageValidationException( const std::tstring& message, CWnd* pErrorCtrl = NULL );
+	explicit CPageValidationException( const std::tstring& message, CWnd* pErrorCtrl = nullptr );
 	virtual ~CPageValidationException() throw();
 
 	CWnd* GetErrorCtrl( void ) const { return m_pErrorCtrl; }

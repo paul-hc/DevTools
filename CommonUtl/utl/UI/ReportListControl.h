@@ -195,7 +195,7 @@ public:
 	void SaveToRegistry( void );
 	bool LoadFromRegistry( void );
 
-	void StoreImageLists( CImageList* pImageList, CImageList* pLargeImageList = NULL );
+	void StoreImageLists( CImageList* pImageList, CImageList* pLargeImageList = nullptr );
 
 	void ChangeListViewMode( DWORD viewMode );
 
@@ -212,7 +212,7 @@ public:
 
 	bool IsCommandFrame( void ) const { return HasFlag( m_optionFlags, CommandFrame ); }
 	void SetCommandFrame( bool isCommandFrame = true ) { SetTrackMenuTarget( this ); SetOptionFlag( CommandFrame, isCommandFrame ); }
-	void SetFrameEditor( ui::ICommandFrame* pFrameEditor ) { m_pFrameEditor = pFrameEditor; SetCommandFrame( m_pFrameEditor != NULL ); }
+	void SetFrameEditor( ui::ICommandFrame* pFrameEditor ) { m_pFrameEditor = pFrameEditor; SetCommandFrame( m_pFrameEditor != nullptr ); }
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
@@ -257,7 +257,7 @@ public:
 
 	enum MyHitTest { LVHT_MY_PASTEND = 0x00080000 };
 
-	int HitTest( CPoint point, UINT* pFlags = NULL, TGroupId* pGroupId = NULL ) const;
+	int HitTest( CPoint point, UINT* pFlags = nullptr, TGroupId* pGroupId = nullptr ) const;
 	TGroupId GroupHitTest( const CPoint& point, int groupType = LVGGR_HEADER ) const;
 
 	int GetDropIndexAtPoint( const CPoint& point ) const;
@@ -314,7 +314,7 @@ private:
 
 	struct CColumnComparator 							// compare sub-item values per columns using object accessors
 	{
-		CColumnComparator( void ) {}
+		CColumnComparator( void ) : m_column( -1 ), m_defaultAscending( false ), m_pComparator( nullptr ) {}
 		CColumnComparator( TColumn column, bool defaultAscending, const pred::IComparator* pComparator ) : m_column( column ), m_defaultAscending( defaultAscending ), m_pComparator( pComparator ) {}
 	public:
 		TColumn m_column;
@@ -398,7 +398,7 @@ public:
 	bool DeleteAllItems( void );
 	void RemoveAllGroups( void );
 
-	virtual int InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex = ui::No_Image, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
+	virtual int InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex = ui::No_Image, const TCHAR* pText = nullptr );		// pText could be LPSTR_TEXTCALLBACK
 
 	void SetSubItemTextPtr( int index, int subItem, const TCHAR* pText = LPSTR_TEXTCALLBACK, int imageIndex = ui::No_Image );
 	void SetSubItemText( int index, int subItem, const std::tstring& text, int imageIndex = ui::No_Image ) { SetSubItemTextPtr( index, subItem, text.c_str(), imageIndex ); }
@@ -447,7 +447,7 @@ public:
 	template< typename ObjectT >
 	void SetCheckedObjects( const std::vector< ObjectT* >& objects, bool check = true, bool uncheckOthers = true ) { SetObjectsCheckedState( &objects, check ? BST_CHECKED : BST_UNCHECKED, uncheckOthers ); }
 
-	void SetCheckedAll( bool check = true ) { SetObjectsCheckedState( (const std::vector< utl::ISubject* >*)NULL, check ? BST_CHECKED : BST_UNCHECKED, false ); }
+	void SetCheckedAll( bool check = true ) { SetObjectsCheckedState( (const std::vector< utl::ISubject* >*)nullptr, check ? BST_CHECKED : BST_UNCHECKED, false ); }
 
 	// Extended check-state (may include radio check-states).
 	//	Internally, the list-ctrl toggles through the sequence of states. That behaviour is replaced with custom togging when using a m_pCheckStatePolicy.
@@ -503,7 +503,7 @@ public:
 	bool SetSelected( int index, bool doSelect = true ) { return SetItemState( index, doSelect ? LVIS_SELECTED : 0, LVIS_SELECTED ) != FALSE; }
 
 	// multiple selection
-	bool GetSelection( std::vector< int >& rSelIndexes, int* pCaretIndex = NULL, int* pTopIndex = NULL ) const;
+	bool GetSelection( std::vector< int >& rSelIndexes, int* pCaretIndex = nullptr, int* pTopIndex = nullptr ) const;
 	void SetSelection( const std::vector< int >& selIndexes, int caretIndex = -1 );
 	void ClearSelection( void );
 	void SelectAll( void );
@@ -532,8 +532,8 @@ public:
 	bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags = ListSourcesMask ) const;		// for drag-drop or clipboard transfers
 	bool Copy( int sourceFlags = ListSourcesMask );						// creates a new COleDataSource object owned by the cliboard
 
-	std::auto_ptr<CImageList> CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin = NULL );
-	std::auto_ptr<CImageList> CreateDragImageSelection( CPoint* pFrameOrigin = NULL );
+	std::auto_ptr<CImageList> CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin = nullptr );
+	std::auto_ptr<CImageList> CreateDragImageSelection( CPoint* pFrameOrigin = nullptr );
 
 	CRect GetFrameBounds( const std::vector< int >& indexes ) const;
 public:
@@ -550,7 +550,7 @@ public:
 	void SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::TGetMatch()
 protected:
 	const CDiffColumnPair* FindDiffColumnPair( TColumn column ) const;
-	bool IsDiffColumn( TColumn column ) const { return FindDiffColumnPair( column ) != NULL; }
+	bool IsDiffColumn( TColumn column ) const { return FindDiffColumnPair( column ) != nullptr; }
 public:
 	enum SortOrder { NotSorted, Ascending, Descending };				// column sort image index
 
@@ -794,10 +794,10 @@ private:
 class CListSelectionData : public ole::CTransferBlob
 {
 public:
-	CListSelectionData( CWnd* pSrcWnd = NULL );
+	CListSelectionData( CWnd* pSrcWnd = nullptr );
 	CListSelectionData( CReportListControl* pSrcListCtrl );
 
-	bool IsValid( void ) const { return m_pSrcWnd != NULL && !m_selIndexes.empty(); }
+	bool IsValid( void ) const { return m_pSrcWnd != nullptr && !m_selIndexes.empty(); }
 	static CLIPFORMAT GetClipFormat( void );
 
 	// serial::IStreamable interface

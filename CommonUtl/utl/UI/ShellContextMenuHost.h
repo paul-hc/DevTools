@@ -54,13 +54,13 @@ class CShellContextMenuHost : public CCmdTarget
 							, private utl::noncopyable
 {
 public:
-	CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu = NULL );
+	CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu = nullptr );
 	virtual ~CShellContextMenuHost();
 
-	bool IsValid( void ) const { return m_pContextMenu != NULL || IsLazyUninit(); }
+	bool IsValid( void ) const { return m_pContextMenu != nullptr || IsLazyUninit(); }
 	IContextMenu* Get( void ) const { return m_pContextMenu; }
 
-	void Reset( IContextMenu* pContextMenu = NULL );
+	void Reset( IContextMenu* pContextMenu = nullptr );
 
 	// context popup menu
 	enum MenuOwnership { InternalMenu, ExternalMenu };

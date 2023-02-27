@@ -236,16 +236,16 @@ void CShellFileSystemTests::TestMultiFileContextMenu( void )
 	for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 	{
 		shellItems.push_back( shell::FindShellItem( *itFilePath ) );
-		ASSERT( shellItems.back() != NULL );
+		ASSERT( shellItems.back() != nullptr );
 	}
 
 	CComPtr<IContextMenu> pContextMenu;
 	if ( true )
-		pContextMenu = shell::MakeItemsContextMenu( shellItems, NULL );
+		pContextMenu = shell::MakeItemsContextMenu( shellItems, nullptr );
 	else	//	for files in same folder - fails for DIR\\file3.txt
 	{
 		CComPtr<IShellItemArray> pShellItemArray = shell::MakeShellItemArray( shellItems );
-		ASSERT( HR_OK( pShellItemArray->BindToHandler( NULL, BHID_SFUIObject, IID_PPV_ARGS( &pContextMenu ) ) ) );
+		ASSERT( HR_OK( pShellItemArray->BindToHandler( nullptr, BHID_SFUIObject, IID_PPV_ARGS( &pContextMenu ) ) ) );
 	}
 	ASSERT_PTR( pContextMenu );
 }

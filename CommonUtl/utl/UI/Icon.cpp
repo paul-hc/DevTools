@@ -11,9 +11,9 @@
 
 
 CIcon::CIcon( void )
-	: m_hIcon( NULL )
+	: m_hIcon( nullptr )
 	, m_hasAlpha( false )
-	, m_pShared( NULL )
+	, m_pShared( nullptr )
 	, m_size( 0, 0 )
 {
 }
@@ -21,7 +21,7 @@ CIcon::CIcon( void )
 CIcon::CIcon( HICON hIcon, const CSize& iconSize /*= CSize( 0, 0 )*/ )
 	: m_hIcon( hIcon )
 	, m_hasAlpha( false )
-	, m_pShared( NULL )
+	, m_pShared( nullptr )
 	, m_size( iconSize )
 {
 }
@@ -58,7 +58,7 @@ CIcon* CIcon::NewIcon( const CIconId& iconId )
 
 	if ( HICON hIcon = res::LoadIcon( iconId ) )
 		return SetHasAlpha( new CIcon( hIcon, iconId.GetStdSize() ), hasAlpha );
-	return NULL;
+	return nullptr;
 }
 
 // loads only if the icon contains the exact size
@@ -70,16 +70,16 @@ CIcon* CIcon::NewExactIcon( const CIconId& iconId )
 		if ( HICON hIcon = res::LoadIcon( iconId ) )
 			return SetHasAlpha( new CIcon( hIcon, iconId.GetStdSize() ), 32 == bitsPerPixel );
 
-	return NULL;
+	return nullptr;
 }
 
 HICON CIcon::Detach( void )
 {
 	HICON hIcon = m_hIcon;
 
-	m_hIcon = NULL;
+	m_hIcon = nullptr;
 	m_hasAlpha = false;
-	m_pShared = NULL;
+	m_pShared = nullptr;
 	m_size = CSize( 0, 0 );
 	return hIcon;
 }
@@ -103,7 +103,7 @@ CIcon& CIcon::SetHandle( HICON hIcon, bool hasAlpha /*= true*/ )
 
 CIcon* CIcon::SetHasAlpha( CIcon* pIcon, bool hasAlpha )
 {
-	if ( pIcon != NULL )					// safe if NULL pIcon
+	if ( pIcon != nullptr )					// safe if NULL pIcon
 		pIcon->SetHasAlpha( hasAlpha );
 
 	return pIcon;
@@ -142,7 +142,7 @@ void CIcon::Draw( HDC hDC, const CPoint& pos, bool enabled /*= true*/ ) const
 	ASSERT_PTR( hDC );
 
 	if ( enabled )
-		::DrawIconEx( hDC, pos.x, pos.y, m_hIcon, GetSize().cx, GetSize().cy, 0, NULL, DI_NORMAL | DI_COMPAT );
+		::DrawIconEx( hDC, pos.x, pos.y, m_hIcon, GetSize().cx, GetSize().cy, 0, nullptr, DI_NORMAL | DI_COMPAT );
 	else
 		DrawDisabled( hDC, pos );
 }
@@ -152,7 +152,7 @@ void CIcon::DrawDisabled( HDC hDC, const CPoint& pos ) const
 	ASSERT_PTR( m_hIcon );
 	ASSERT_PTR( hDC );
 
-	::DrawState( hDC, GetSysColorBrush( COLOR_3DSHADOW ), NULL, (LPARAM)m_hIcon, 0,
+	::DrawState( hDC, GetSysColorBrush( COLOR_3DSHADOW ), nullptr, (LPARAM)m_hIcon, 0,
 		pos.x, pos.y, GetSize().cx, GetSize().cy, DST_ICON | DSS_UNION );				// DSS_DISABLED looks uglier
 }
 
@@ -176,7 +176,7 @@ bool CIcon::MakeBitmap( CBitmap& rBitmap, COLORREF transpColor ) const
 		else
 		{
 			const CSize& iconSize = GetSize();
-			CWindowDC screenDC( NULL );
+			CWindowDC screenDC( nullptr );
 			CDC memDC;
 			if ( memDC.CreateCompatibleDC( &screenDC ) )
 				if ( rBitmap.CreateCompatibleBitmap( &screenDC, iconSize.cx, iconSize.cy ) )
@@ -195,7 +195,7 @@ bool CIcon::MakeBitmap( CBitmap& rBitmap, COLORREF transpColor ) const
 				}
 		}
 
-	return rBitmap.GetSafeHandle() != NULL;
+	return rBitmap.GetSafeHandle() != nullptr;
 }
 
 void CIcon::CreateFromBitmap( HBITMAP hImageBitmap, HBITMAP hMaskBitmap )
@@ -231,12 +231,12 @@ void CIconInfo::Init( HICON hIcon, bool isCursor )
 	ZeroMemory( &m_info, sizeof( m_info ) );
 	m_info.fIcon = !isCursor;
 
-	if ( hIcon != NULL )
+	if ( hIcon != nullptr )
 	{
 		VERIFY( ::GetIconInfo( hIcon, &m_info ) );
 
 		BITMAP bmp;
-		VERIFY( ::GetObject( m_info.hbmColor != NULL ? m_info.hbmColor : m_info.hbmMask, sizeof( bmp ), &bmp ) != 0 );
+		VERIFY( ::GetObject( m_info.hbmColor != nullptr ? m_info.hbmColor : m_info.hbmMask, sizeof( bmp ), &bmp ) != 0 );
 		m_size.cx = bmp.bmWidth;
 		m_size.cy = bmp.bmHeight;
 
@@ -256,10 +256,10 @@ bool CIconInfo::MakeDibSection( CBitmap& rDibSection ) const
 	//	If it does not have an alpha channel (32 bpp) it dulls the colours and has slight pixel errors.
 	//	Use this if m_hasAlpha, otherwise better use MakeBitmap with transparent colour.
 
-	if ( m_info.hbmColor != NULL )
+	if ( m_info.hbmColor != nullptr )
 		rDibSection.Attach( (HBITMAP)::CopyImage( m_info.hbmColor, IMAGE_BITMAP, m_size.cx, m_size.cy, LR_CREATEDIBSECTION ) );		// copy colour bitmap as DIB
-	else if ( m_info.hbmMask != NULL )				// monochrome icons have only the mask bitmap
+	else if ( m_info.hbmMask != nullptr )				// monochrome icons have only the mask bitmap
 		rDibSection.Attach( (HBITMAP)::CopyImage( m_info.hbmMask, IMAGE_BITMAP, m_size.cx, m_size.cy, LR_MONOCHROME ) );			// copy monochrome bitmap
 
-	return rDibSection.GetSafeHandle() != NULL;
+	return rDibSection.GetSafeHandle() != nullptr;
 }

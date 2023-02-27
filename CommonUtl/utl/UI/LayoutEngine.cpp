@@ -18,7 +18,7 @@ int CLayoutEngine::m_defaultFlags = Smooth;
 CLayoutEngine::CLayoutEngine( int flags /*= m_defaultFlags*/ )
 	: m_flags( flags )
 	, m_layoutEnabled( true )
-	, m_pDialog( NULL )
+	, m_pDialog( nullptr )
 	, m_minClientSize( 0, 0 )
 	, m_maxClientSize( INT_MAX, INT_MAX )
 	, m_nonClientSize( 0, 0 )
@@ -85,7 +85,7 @@ void CLayoutEngine::Initialize( CWnd* pDialog )
 
 void CLayoutEngine::Reset( void )
 {
-	m_pDialog = NULL;
+	m_pDialog = nullptr;
 	m_minClientSize.cx = m_minClientSize.cy = 0;
 	m_maxClientSize.cx = m_maxClientSize.cy = INT_MAX;
 	m_nonClientSize.cx = m_nonClientSize.cy = 0;
@@ -105,7 +105,7 @@ void CLayoutEngine::CreateResizeGripper( const CSize& offset /*= CSize( 1, 0 )*/
 
 layout::CResizeGripper* CLayoutEngine::GetResizeGripper( void ) const
 {
-	return IsInitialized() && !m_pDialog->IsZoomed() ? m_pGripper.get() : NULL;
+	return IsInitialized() && !m_pDialog->IsZoomed() ? m_pGripper.get() : nullptr;
 }
 
 void CLayoutEngine::SetupControlStates( void )
@@ -135,11 +135,11 @@ void CLayoutEngine::SetupControlStates( void )
 	HWND hCtrl = ::GetWindow( m_pDialog->GetSafeHwnd(), GW_CHILD );
 	ASSERT_PTR( hCtrl );		// controls created from dialog template?
 
-	for ( ; hCtrl != NULL; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
+	for ( ; hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 		if ( UINT ctrlId = ::GetDlgCtrlID( hCtrl ) )								// ignore child dialogs in a property sheet
 		{
 			std::unordered_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.find( ctrlId );
-			layout::CControlState* pControlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : NULL;
+			layout::CControlState* pControlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr;
 
 			if ( ui::IsGroupBox( hCtrl ) )
 				SetupGroupBoxState( hCtrl, pControlState );
@@ -175,7 +175,7 @@ void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* p
 	}
 	else
 	{
-		if ( HasFlag( m_flags, GroupsRepaint ) && pControlState != NULL )
+		if ( HasFlag( m_flags, GroupsRepaint ) && pControlState != nullptr )
 			pControlState->ModifyLayoutStyle( 0, layout::DoRepaint );		// force groups repaint
 
 		if ( HasFlag( m_flags, GroupsTransparent ) )
@@ -295,7 +295,7 @@ bool CLayoutEngine::LayoutControls( const CSize& clientSize )
 	if ( m_previousSize == clientSize )
 		return false;							// skip when same size and already layed-out
 
-	if ( GetResizeGripper() != NULL )
+	if ( GetResizeGripper() != nullptr )
 		m_pGripper->Layout();
 
 	CSize delta = clientSize - GetMinClientSize();
@@ -313,12 +313,12 @@ bool CLayoutEngine::LayoutSmoothly( const CSize& delta )
 		m_pDialog->SetRedraw( FALSE );
 
 	int changedCount = 0;
-	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != NULL; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
+	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
 		std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.find( ctrlId );
 
-		if ( const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : NULL )
+		if ( const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
 			{
 				if ( ui::ILayoutFrame* pControlFrame = FindControlLayoutFrame( hCtrl ) )
@@ -332,7 +332,7 @@ bool CLayoutEngine::LayoutSmoothly( const CSize& delta )
 
 	if ( 0 == changedCount )
 		return false;
-	m_pDialog->RedrawWindow( NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN );
+	m_pDialog->RedrawWindow( nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN );
 	return changedCount != 0;
 }
 
@@ -346,17 +346,17 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 
 	std::vector< HWND > changedCtrls; changedCtrls.reserve( m_controlStates.size() );
 
-	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != NULL; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
+	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
 		std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.find( ctrlId );
-		const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : NULL;
-		if ( pCtrlState != NULL )
+		const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr;
+		if ( pCtrlState != nullptr )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
 				changedCtrls.push_back( hCtrl );
 
 		// clip control out of background erase region (except the ones to be repainted)
-		if ( NULL == pCtrlState || !HasFlag( pCtrlState->GetLayoutStyle( false ), layout::DoRepaint ) )
+		if ( nullptr == pCtrlState || !HasFlag( pCtrlState->GetLayoutStyle( false ), layout::DoRepaint ) )
 			if ( ui::IsVisible( hCtrl ) )
 			{
 				CRect ctrlRect;
@@ -392,7 +392,7 @@ layout::CControlState* CLayoutEngine::LookupControlState( UINT ctrlId )
 
 bool CLayoutEngine::RefreshControlHandle( UINT ctrlId )
 {
-	if ( m_pDialog != NULL )
+	if ( m_pDialog != nullptr )
 		if ( layout::CControlState* pControlState = LookupControlState( ctrlId ) )
 		{
 			if ( HWND hControlNew = ::GetDlgItem( m_pDialog->m_hWnd, ctrlId ) )
@@ -433,7 +433,7 @@ ui::ILayoutFrame* CLayoutEngine::FindControlLayoutFrame( HWND hCtrl ) const
 	if ( itFound != m_buddyCallbacks.end() )
 		return itFound->second;
 
-	return NULL;
+	return nullptr;
 }
 
 void CLayoutEngine::HandleGetMinMaxInfo( MINMAXINFO* pMinMaxInfo ) const
@@ -453,7 +453,7 @@ void CLayoutEngine::HandleGetMinMaxInfo( MINMAXINFO* pMinMaxInfo ) const
 LRESULT CLayoutEngine::HandleHitTest( LRESULT hitTest, const CPoint& screenPoint ) const
 {
 	if ( HTCLIENT == hitTest )
-		if ( GetResizeGripper() != NULL )
+		if ( GetResizeGripper() != nullptr )
 		{
 			CPoint point = screenPoint; m_pDialog->ScreenToClient( &point );
 			if ( m_pGripper->GetRect().PtInRect( point ) )
@@ -528,7 +528,7 @@ void CLayoutEngine::DrawBackground( CDC* pDC, const CRect& clientRect )
 
 		// clip other controls from the background erase region
 		if ( !is_a<CFormView>( m_pDialog ) )					// prevent background erase issues with checkboxes, etc
-			for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != NULL; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
+			for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 				if ( CanClip( hCtrl ) )
 				{
 					CRect ctrlRect;

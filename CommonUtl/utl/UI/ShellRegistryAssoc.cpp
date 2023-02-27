@@ -22,7 +22,7 @@ namespace shell
 	{
 		reg::CKey key;
 		if ( key.Open( HKEY_CLASSES_ROOT, ext, KEY_READ ) )			// extension already registered?
-			if ( key.QueryStringValue( NULL, rHandlerName ) )		// query for default key value (shell handler name)
+			if ( key.QueryStringValue( nullptr, rHandlerName ) )		// query for default key value (shell handler name)
 				return !rHandlerName.empty();
 
 		return false;
@@ -46,7 +46,7 @@ namespace shell
 	//	pDdeCmd="[open(\"%1\")]" (optional DDE command)
 	//
 	bool RegisterShellVerb( const reg::TKeyPath& verbPath, const reg::TKeyPath& modulePath,
-							const TCHAR* pVerbTag /*= NULL*/, const TCHAR* pDdeCmd /*= NULL*/,
+							const TCHAR* pVerbTag /*= nullptr*/, const TCHAR* pDdeCmd /*= nullptr*/,
 							const std::tstring extraParams /*= str::GetEmpty()*/ )
 	{
 		REQUIRE( !verbPath.IsEmpty() );
@@ -55,7 +55,7 @@ namespace shell
 		{
 			reg::CKey key;
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath ) ||
-				 !key.WriteStringValue( NULL, pVerbTag ) )					// default value of the key
+				 !key.WriteStringValue( nullptr, pVerbTag ) )					// default value of the key
 				return false;
 		}
 
@@ -76,7 +76,7 @@ namespace shell
 
 			reg::CKey key;
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath / _T("command") ) ||
-				 !key.WriteStringValue( NULL, cmdLine ) )					// default value of the key
+				 !key.WriteStringValue( nullptr, cmdLine ) )					// default value of the key
 				return false;
 		}
 
@@ -84,7 +84,7 @@ namespace shell
 		{
 			reg::CKey key;
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath / _T("ddeexec") ) ||
-				 !key.WriteStringValue( NULL, pDdeCmd ) )					// default value of the key
+				 !key.WriteStringValue( nullptr, pDdeCmd ) )					// default value of the key
 				return false;
 		}
 
@@ -106,7 +106,7 @@ namespace shell
 		shell::QueryHandlerName( handlerName, docExt.GetPtr() );
 
 		if ( handlerName != docTypeId )										// bad handler?
-			if ( !reg::WriteStringValue( HKEY_CLASSES_ROOT, docExt, NULL, docTypeId ) )			// default value of the key
+			if ( !reg::WriteStringValue( HKEY_CLASSES_ROOT, docExt, nullptr, docTypeId ) )			// default value of the key
 				return false;
 
 		return reg::WriteStringValue( HKEY_CLASSES_ROOT, docExt / _T("ShellNew"), _T("NullFile"), std::tstring() );

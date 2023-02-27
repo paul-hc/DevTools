@@ -30,7 +30,7 @@ namespace ui
 				All = Trim | RemoveEmpty | EnsureUnique
 		};
 
-		CItemContent( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL, int itemsFlags = All )
+		CItemContent( ui::ContentType type = ui::String, const TCHAR* pFileFilter = nullptr, int itemsFlags = All )
 			: m_type( type ), m_pFileFilter( pFileFilter ), m_itemsFlags( itemsFlags ) {}
 
 		bool IsValidItem( const std::tstring& item ) const;

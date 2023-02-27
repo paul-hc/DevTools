@@ -24,12 +24,12 @@ namespace shell
 		{
 			ASSERT( 0 == size.u.HighPart );				// shouldn't be huge
 
-			if ( HR_OK( ::CreateStreamOnHGlobal( NULL, autoDelete, &pDestStream ) ) )
+			if ( HR_OK( ::CreateStreamOnHGlobal( nullptr, autoDelete, &pDestStream ) ) )
 				if ( HR_OK( ::IStream_Copy( pSrcStream, pDestStream, size.u.LowPart ) ) )
 					return pDestStream;
 		}
 
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -53,19 +53,19 @@ namespace shell
 
 		std::vector< TCHAR > srcBuffer, destBuffer;
 		shell::BuildFileListBuffer( srcBuffer, srcPaths );
-		if ( pDestPaths != NULL )
+		if ( pDestPaths != nullptr )
 			shell::BuildFileListBuffer( destBuffer, *pDestPaths );
 
 		SHFILEOPSTRUCT fileOp;
 		fileOp.hwnd = pWnd->GetSafeHwnd();
 		fileOp.wFunc = shellOp;
 		fileOp.pFrom = &srcBuffer.front();
-		fileOp.pTo = !destBuffer.empty() ? &destBuffer.front() : NULL;
+		fileOp.pTo = !destBuffer.empty() ? &destBuffer.front() : nullptr;
 		fileOp.fFlags = flags;
 		fileOp.lpszProgressTitle = pShellOpTags[ shellOp ];
 
 		if ( shellOp != FO_DELETE )
-			if ( srcPaths.size() > 1 && pDestPaths != NULL && pDestPaths->size() == srcPaths.size() )
+			if ( srcPaths.size() > 1 && pDestPaths != nullptr && pDestPaths->size() == srcPaths.size() )
 				SetFlag( fileOp.fFlags, FOF_MULTIDESTFILES );							// each SRC file has a DEST file
 
 		s_anyOperationAborted = false;
@@ -103,7 +103,7 @@ namespace shell
 
 	bool DeleteFiles( const std::vector< fs::CPath >& srcPaths, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
-		return DoFileOperation( FO_DELETE, srcPaths, NULL, pWnd, flags );
+		return DoFileOperation( FO_DELETE, srcPaths, nullptr, pWnd, flags );
 	}
 
 	bool DeleteFile( const fs::CPath& filePath, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
@@ -118,14 +118,14 @@ namespace shell
 		return recycleBin.UndeleteFile( delFilePath, pWnd );
 	}
 
-	size_t UndeleteFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWnd /*= AfxGetMainWnd()*/, std::vector< fs::CPath >* pErrorFilePaths /*= NULL*/ )
+	size_t UndeleteFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWnd /*= AfxGetMainWnd()*/, std::vector< fs::CPath >* pErrorFilePaths /*= nullptr*/ )
 	{
 		shell::CRecycler recycleBin;
 		return recycleBin.UndeleteMultiFiles( delFilePaths, pWnd, pErrorFilePaths );
 	}
 
 
-	size_t DeleteEmptySubdirs( const fs::CPath& topDirPath, const fs::CPath& subFolderPath, std::vector< fs::CPath >* pDelFolderPaths /*= NULL*/ )
+	size_t DeleteEmptySubdirs( const fs::CPath& topDirPath, const fs::CPath& subFolderPath, std::vector< fs::CPath >* pDelFolderPaths /*= nullptr*/ )
 	{
 		REQUIRE( path::HasPrefix( subFolderPath.GetPtr(), topDirPath.GetPtr() ) );
 
@@ -139,7 +139,7 @@ namespace shell
 				{
 					++delSubdirCount;
 
-					if ( pDelFolderPaths != NULL )
+					if ( pDelFolderPaths != nullptr )
 						pDelFolderPaths->push_back( parentPath );
 				}
 
@@ -149,7 +149,7 @@ namespace shell
 		return delSubdirCount;
 	}
 
-	size_t DeleteEmptyMultiSubdirs( const fs::CPath& topDirPath, std::vector< fs::CPath > subFolderPaths, std::vector< fs::CPath >* pDelFolderPaths /*= NULL*/ )
+	size_t DeleteEmptyMultiSubdirs( const fs::CPath& topDirPath, std::vector< fs::CPath > subFolderPaths, std::vector< fs::CPath >* pDelFolderPaths /*= nullptr*/ )
 	{
 		ASSERT( !path::HasTrailingSlash( topDirPath.GetPtr() ) );
 
@@ -167,8 +167,8 @@ namespace shell
 	// if SEE_MASK_FLAG_DDEWAIT mask is specified, the call will be modal for DDE conversations;
 	// otherwise (the default), the function returns before the DDE conversation is finished.
 
-	HINSTANCE Execute( CWnd* pParentWnd, const TCHAR* pFilePath, const TCHAR* pParams /*= NULL*/, DWORD mask /*= 0*/, const TCHAR* pVerb /*= NULL*/,
-					   const TCHAR* pUseClassName /*= NULL*/, const TCHAR* pUseExtType /*= NULL*/, int cmdShow /*= SW_SHOWNORMAL*/ )
+	HINSTANCE Execute( CWnd* pParentWnd, const TCHAR* pFilePath, const TCHAR* pParams /*= nullptr*/, DWORD mask /*= 0*/, const TCHAR* pVerb /*= nullptr*/,
+					   const TCHAR* pUseClassName /*= nullptr*/, const TCHAR* pUseExtType /*= nullptr*/, int cmdShow /*= SW_SHOWNORMAL*/ )
 	{
 		SHELLEXECUTEINFO shellInfo;
 
@@ -179,14 +179,14 @@ namespace shell
 		shellInfo.lpVerb = pVerb;			// Like "[Open(\"%1\")]"
 		shellInfo.lpFile = pFilePath;
 		shellInfo.lpParameters = pParams;
-		shellInfo.lpDirectory = NULL;
+		shellInfo.lpDirectory = nullptr;
 		shellInfo.nShow = cmdShow;
 
 		std::tstring className;
 
-		if ( pUseClassName != NULL  )
+		if ( pUseClassName != nullptr  )
 			className = pUseClassName;
-		else if ( pUseExtType != NULL )
+		else if ( pUseExtType != nullptr )
 			className = GetClassAssociatedWith( pUseExtType );
 
 		if ( !className.empty() )
@@ -206,7 +206,7 @@ namespace shell
 		std::tstring className;
 		reg::CKey key;
 		if ( key.Open( HKEY_CLASSES_ROOT, pExt, KEY_READ ) )
-			className = key.ReadStringValue( NULL );			// default value for the key
+			className = key.ReadStringValue( nullptr );			// default value for the key
 
 		return className;
 	}
@@ -227,7 +227,7 @@ namespace shell
 			case SE_ERR_DDEBUSY:		return _T("DDE operation busy");
 			case SE_ERR_NOASSOC:		return _T("File association not available");
 			default:
-				return (DWORD_PTR)hInstExec < HINSTANCE_ERROR ? _T("Unknown error") : NULL;
+				return (DWORD_PTR)hInstExec < HINSTANCE_ERROR ? _T("Unknown error") : nullptr;
 		}
 	}
 
@@ -271,7 +271,7 @@ namespace shell
 		HGLOBAL BuildHDrop( const std::vector< fs::CPath >& srcFiles )
 		{
 			if ( srcFiles.empty() )
-				return NULL;
+				return nullptr;
 
 			std::vector< TCHAR > srcBuffer;
 			shell::BuildFileListBuffer( srcBuffer, srcFiles );
@@ -281,7 +281,7 @@ namespace shell
 			// allocate space for DROPFILE structure plus the number of file and one extra byte for final NULL terminator
 			HGLOBAL hGlobal = ::GlobalAlloc( GHND | GMEM_SHARE, ( sizeof( DROPFILES ) + byteSize ) );
 
-			if ( hGlobal != NULL )
+			if ( hGlobal != nullptr )
 				if ( DROPFILES* pDropFiles = (DROPFILES*)::GlobalLock( hGlobal ) )
 				{
 					pDropFiles->pFiles = sizeof( DROPFILES );					// set the offset where the starting point of the file start
@@ -300,12 +300,12 @@ namespace shell
 		HGLOBAL BuildFileGroupDescriptor( const std::vector< fs::CPath >& srcFiles )
 		{
 			size_t fileCount = srcFiles.size();
-			HGLOBAL hGlobal = NULL;
+			HGLOBAL hGlobal = nullptr;
 
 			if ( fileCount != 0 )
 			{
 				hGlobal = ::GlobalAlloc( GMEM_FIXED, sizeof( FILEGROUPDESCRIPTOR ) + ( fileCount - 1 ) * sizeof( FILEDESCRIPTOR ) );
-				if ( hGlobal != NULL )
+				if ( hGlobal != nullptr )
 				{
 					if ( FILEGROUPDESCRIPTOR* pFileGroupDescr = (FILEGROUPDESCRIPTOR*)::GlobalLock( hGlobal ) )
 					{

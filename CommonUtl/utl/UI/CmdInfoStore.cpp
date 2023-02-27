@@ -55,7 +55,7 @@ namespace ui
 	const CCmdInfo* CCmdInfoStore::FindInfo( UINT cmdId ) const
 	{
 		std::unordered_map< UINT, CCmdInfo >::const_iterator itFound = m_cmdInfos.find( cmdId );
-		return itFound != m_cmdInfos.end() ? &itFound->second : NULL;
+		return itFound != m_cmdInfos.end() ? &itFound->second : nullptr;
 	}
 
 	const CCmdInfo* CCmdInfoStore::RetrieveInfo( UINT cmdId )
@@ -71,7 +71,7 @@ namespace ui
 			return pCmdInfo;
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	void CCmdInfoStore::RegisterCustom( UINT cmdId, const std::tstring& info )
@@ -88,7 +88,7 @@ namespace ui
 		return !rMessage.empty();
 	}
 
-	bool CCmdInfoStore::HandleTooltipNeedText( NMHDR* pNmHdr, LRESULT* pResult, const ui::ICustomCmdInfo* pCustomInfo /*= NULL*/ )
+	bool CCmdInfoStore::HandleTooltipNeedText( NMHDR* pNmHdr, LRESULT* pResult, const ui::ICustomCmdInfo* pCustomInfo /*= nullptr*/ )
 	{	// code inspired by CFrameWnd::OnToolTipText()
 		ASSERT_PTR( pNmHdr );
 
@@ -96,16 +96,16 @@ namespace ui
 		if ( !message.IsValidNotification() )
 			return false;				// ignore stray notifications
 
-		if ( message.m_pTooltip != NULL )
+		if ( message.m_pTooltip != nullptr )
 			if ( m_autoPopDuration != 0 && m_autoPopDuration != message.m_pTooltip->GetDelayTime( TTDT_AUTOPOP ) )
 				message.m_pTooltip->SetDelayTime( TTDT_AUTOPOP, m_autoPopDuration );
 
 		std::tstring text;
 
-		if ( text.empty() && pCustomInfo != NULL )
+		if ( text.empty() && pCustomInfo != nullptr )
 			pCustomInfo->QueryTooltipText( text, message.m_cmdId, message.m_pTooltip );
 
-		if ( text.empty() && message.m_hCtrl != NULL )
+		if ( text.empty() && message.m_hCtrl != nullptr )
 			if ( const ui::ICustomCmdInfo* pCtrlCustomInfo = dynamic_cast<const ui::ICustomCmdInfo*>( CWnd::FromHandlePermanent( message.m_hCtrl ) ) )
 				pCtrlCustomInfo->QueryTooltipText( text, message.m_cmdId, message.m_pTooltip );		// redirect to the control object
 
@@ -131,15 +131,15 @@ namespace ui
 
 	CTooltipTextMessage::CTooltipTextMessage( NMHDR* pNmHdr )
 		: m_pTooltip( static_cast<CToolTipCtrl*>( CWnd::FromHandlePermanent( pNmHdr->hwndFrom ) ) )
-		, m_pTttA( TTN_NEEDTEXTA == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTA*>( pNmHdr ) : NULL )
-		, m_pTttW( TTN_NEEDTEXTW == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTW*>( pNmHdr ) : NULL )
+		, m_pTttA( TTN_NEEDTEXTA == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTA*>( pNmHdr ) : nullptr )
+		, m_pTttW( TTN_NEEDTEXTW == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTW*>( pNmHdr ) : nullptr )
 		, m_cmdId( static_cast<UINT>( pNmHdr->idFrom ) )
-		, m_hCtrl( NULL )
+		, m_hCtrl( nullptr )
 	{
-		ASSERT( m_pTttA != NULL || m_pTttW != NULL );
+		ASSERT( m_pTttA != nullptr || m_pTttW != nullptr );
 
-		if ( ( m_pTttA != NULL && HasFlag( m_pTttA->uFlags, TTF_IDISHWND ) ) ||
-			 ( m_pTttW != NULL && HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) ) )
+		if ( ( m_pTttA != nullptr && HasFlag( m_pTttA->uFlags, TTF_IDISHWND ) ) ||
+			 ( m_pTttW != nullptr && HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) ) )
 		{
 			m_hCtrl = (HWND)pNmHdr->idFrom;						// idFrom is actually the HWND of the tool
 			m_cmdId = ui::ToCmdId( ::GetDlgCtrlID( m_hCtrl ) );
@@ -156,13 +156,13 @@ namespace ui
 		if ( text.empty() || CCmdInfoStore::m_nilText == text )
 			return false;
 
-		if ( m_pTttA != NULL )
+		if ( m_pTttA != nullptr )
 		{
 			static std::string s_narrowText;			// static buffer (can be longer than 80 characters default limit)
 			s_narrowText = str::AsNarrow( text );
 			m_pTttA->lpszText = const_cast<char*>( s_narrowText.c_str() );
 		}
-		else if ( m_pTttW != NULL )
+		else if ( m_pTttW != nullptr )
 		{
 			static std::wstring s_wideText;				// static buffer (can be longer than 80 characters default limit)
 			s_wideText = str::AsWide( text );
@@ -172,7 +172,7 @@ namespace ui
 			ASSERT( false );
 
 		// bring the tooltip window above other popup windows
-		if ( m_pTooltip != NULL )
+		if ( m_pTooltip != nullptr )
 			ui::BringWndToTop( *m_pTooltip );			// move window to the top/bottom of Z-order (above other popup windows)
 
 		return true;			// valid tooltip text
@@ -180,7 +180,7 @@ namespace ui
 
 	bool CTooltipTextMessage::IgnoreResourceString( void ) const
 	{
-		return m_hCtrl != NULL && IgnoreResourceString( m_hCtrl );
+		return m_hCtrl != nullptr && IgnoreResourceString( m_hCtrl );
 	}
 
 	bool CTooltipTextMessage::IgnoreResourceString( HWND hCtrl )

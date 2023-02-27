@@ -47,7 +47,7 @@ public:
 	Range<Type> GetScrollRange( int bar ) const { int lower, upper; CScrollView::GetScrollRange( bar, &lower, &upper ); return Range<Type>( lower, upper ); }
 
 	// coords translation
-	CSize GetContentPointedPct( const CPoint* pClientPoint = NULL ) const;			// use mouse cursor if NULL
+	CSize GetContentPointedPct( const CPoint* pClientPoint = nullptr ) const;		// use mouse cursor if NULL
 	CPoint TranslatePointedPct( const CSize& pointedPct ) const;					// equivalent point after rescaling
 
 	// zoom editor
@@ -62,12 +62,12 @@ public:
 	static COLORREF MakeAccentedBkColor( COLORREF bkColor );	// background highlighting (used in full screen)
 protected:
 	bool AssignScalingMode( ui::ImageScalingMode scalingMode ) { return utl::ModifyValue( m_scalingMode, scalingMode ) && OutputScalingMode(); }
-	bool OutputScalingMode( void ) { return m_pZoomBar != NULL && m_pZoomBar->OutputScalingMode( m_scalingMode ); }
-	void InputScalingMode( void ) { if ( m_pZoomBar != NULL ) ModifyScalingMode( m_pZoomBar->InputScalingMode() ); }
+	bool OutputScalingMode( void ) { return m_pZoomBar != nullptr && m_pZoomBar->OutputScalingMode( m_scalingMode ); }
+	void InputScalingMode( void ) { if ( m_pZoomBar != nullptr ) ModifyScalingMode( m_pZoomBar->InputScalingMode() ); }
 
 	bool AssignZoomPct( UINT zoomPct ) { return utl::ModifyValue( m_zoomPct, zoomPct ) && OutputZoomPct(); }
-	bool OutputZoomPct( void ) { return m_pZoomBar != NULL && m_pZoomBar->OutputZoomPct( m_zoomPct ); }
-	bool InputZoomPct( ui::ComboField byField ) { return m_pZoomBar != NULL && ModifyZoomPct( m_pZoomBar->InputZoomPct( byField ) ); }
+	bool OutputZoomPct( void ) { return m_pZoomBar != nullptr && m_pZoomBar->OutputZoomPct( m_zoomPct ); }
+	bool InputZoomPct( ui::ComboField byField ) { return m_pZoomBar != nullptr && ModifyZoomPct( m_pZoomBar->InputZoomPct( byField ) ); }
 
 	enum ZoomBy { ZoomIn = 1, ZoomOut = -1 };
 	bool ZoomRelative( ZoomBy zoomBy );
@@ -137,7 +137,7 @@ private:
 class CScopedScaleZoom
 {
 public:
-	CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint = NULL );
+	CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint = nullptr );
 	~CScopedScaleZoom();
 private:
 	CBaseZoomView* m_pZoomView;

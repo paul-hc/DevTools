@@ -52,7 +52,7 @@ void CWindowPlacement::Setup( const CWnd* pWnd, const CRect& normalRect, UINT _s
 
 bool CWindowPlacement::EnsureVisibleNormalPosition( const CWnd* pWnd )
 {
-	if ( NULL == pWnd->GetSafeHwnd() || ui::IsTopLevel( pWnd->m_hWnd ) )					// if pWnd is NULL assume top-level window
+	if ( nullptr == pWnd->GetSafeHwnd() || ui::IsTopLevel( pWnd->m_hWnd ) )					// if pWnd is NULL assume top-level window
 		return ui::EnsureVisibleDesktopRect( RefNormalPosition() );							// clamp to visible monitor work-area
 	else
 		return ui::EnsureVisibleWindowRect( RefNormalPosition(), pWnd->GetSafeHwnd() );		// clamp to parent's rect
@@ -146,7 +146,7 @@ bool CWindowPlacement::RegLoad( const TCHAR regSection[], const CWnd* pWnd )
 	Setup( pWnd, normalRect, pApp->GetProfileInt( regSection, reg::entry_showCmd, SW_SHOWNORMAL ) );
 	SetFlag( this->flags, WPF_RESTORETOMAXIMIZED, pApp->GetProfileInt( regSection, reg::entry_restoreToMax, FALSE ) != FALSE );
 
-	if ( pWnd != NULL && AfxGetMainWnd() == pWnd )
+	if ( pWnd != nullptr && AfxGetMainWnd() == pWnd )
 		if ( pApp->m_nCmdShow != SW_SHOWNORMAL )
 			this->showCmd = pApp->m_nCmdShow;				// override with the command line option
 		else

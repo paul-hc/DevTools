@@ -16,10 +16,10 @@ namespace ui
 		virtual bool IsEnabledState( int checkState ) const { checkState; return true; }
 
 		virtual int Toggle( int checkState ) const = 0;
-		virtual const std::vector< CThemeItem >* GetThemeItems( void ) const { return NULL; }
+		virtual const std::vector< CThemeItem >* GetThemeItems( void ) const { return nullptr; }
 	};
 
-	bool IsCheckBoxState( int checkState, const ui::ICheckStatePolicy* pCheckStatePolicy = NULL );
+	bool IsCheckBoxState( int checkState, const ui::ICheckStatePolicy* pCheckStatePolicy = nullptr );
 	void AppendToStateImageList( CImageList* pStateImageList, const std::vector< CThemeItem >& themeItems, COLORREF transpBkColor );
 }
 

@@ -64,7 +64,7 @@ namespace dw
 			m_fullText.reserve( 256 );
 		}
 
-		void AddField( const std::tstring& fieldText, const TCHAR* pFieldSep = NULL );
+		void AddField( const std::tstring& fieldText, const TCHAR* pFieldSep = nullptr );
 
 		const std::tstring& GetFullText( void ) const { return m_fullText; }
 

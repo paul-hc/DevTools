@@ -35,7 +35,7 @@ CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	, m_hookThumbTrack( true )
 	, m_visibleWhiteSpace( false )
 	, m_accel( ARRAY_PAIR( s_editKeys ) )
-	, m_pSyncScrolling( NULL )
+	, m_pSyncScrolling( nullptr )
 	, m_lastSelRange( 0, 0 )
 {
 }
@@ -101,7 +101,7 @@ bool CTextEdit::SetText( const std::tstring& text )
 
 void CTextEdit::DDX_Text( CDataExchange* pDX, std::tstring& rValue, int ctrlId /*= 0*/ )
 {
-	if ( NULL == m_hWnd && ctrlId != 0 )
+	if ( nullptr == m_hWnd && ctrlId != 0 )
 		::DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -112,7 +112,7 @@ void CTextEdit::DDX_Text( CDataExchange* pDX, std::tstring& rValue, int ctrlId /
 
 void CTextEdit::DDX_UiEscapeSeqs( CDataExchange* pDX, std::tstring& rValue, int ctrlId /*= 0*/ )
 {
-	if ( NULL == m_hWnd && ctrlId != 0 )
+	if ( nullptr == m_hWnd && ctrlId != 0 )
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -127,12 +127,12 @@ bool CTextEdit::SetVisibleWhiteSpace( bool visibleWhiteSpace /*= true*/ )
 		return false;
 
 	std::tstring text;
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		text = GetText();
 
 	m_visibleWhiteSpace = visibleWhiteSpace;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		SetText( text );
 
 	return true;
@@ -173,7 +173,7 @@ std::tstring CTextEdit::GetLineText( TLine linePos ) const
 CFont* CTextEdit::GetFixedFont( FontSize fontSize /*= Normal*/ )
 {
 	static CFont s_fixedFont[ 2 ];
-	if ( NULL == s_fixedFont[ fontSize ].GetSafeHandle() )
+	if ( nullptr == s_fixedFont[ fontSize ].GetSafeHandle() )
 		ui::MakeStandardControlFont( s_fixedFont[ fontSize ], ui::CFontInfo( _T("Consolas"), ui::Regular, Normal == fontSize ? 100 : 120 ) );		// "Courier New"
 	return &s_fixedFont[ fontSize ];
 }
@@ -342,7 +342,7 @@ BOOL CTextEdit::OnEnKillFocus_Reflect( void )
 
 BOOL CTextEdit::OnEnHScroll_Reflect( void )
 {
-	if ( m_pSyncScrolling != NULL && m_pSyncScrolling->SyncHorizontal() )
+	if ( m_pSyncScrolling != nullptr && m_pSyncScrolling->SyncHorizontal() )
 		m_pSyncScrolling->Synchronize( this );
 
 	return FALSE;					// continue routing
@@ -350,7 +350,7 @@ BOOL CTextEdit::OnEnHScroll_Reflect( void )
 
 BOOL CTextEdit::OnEnVScroll_Reflect( void )
 {
-	if ( m_pSyncScrolling != NULL && m_pSyncScrolling->SyncVertical() )
+	if ( m_pSyncScrolling != nullptr && m_pSyncScrolling->SyncVertical() )
 		m_pSyncScrolling->Synchronize( this );
 
 	return FALSE;					// continue routing

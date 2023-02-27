@@ -10,7 +10,7 @@ namespace sys_tray
 	bool HasSystemTray( void );
 
 	// baloon tips on the message tray icon (usually auto-hide)
-	bool ShowBalloonMessage( const std::tstring& text, const TCHAR* pTitle = NULL, app::MsgType msgType = app::Info, UINT timeoutSecs = 0 );
+	bool ShowBalloonMessage( const std::tstring& text, const TCHAR* pTitle = nullptr, app::MsgType msgType = app::Info, UINT timeoutSecs = 0 );
 	bool HideBalloonMessage( void );
 }
 
@@ -22,7 +22,7 @@ namespace ui { interface ISystemTrayCallback; }
 class CScopedTrayIconBalloon
 {
 public:
-	CScopedTrayIconBalloon( CTrayIcon* pTrayIcon /*= NULL*/, const std::tstring& text, const TCHAR* pTitle = NULL, app::MsgType msgType = app::Info, UINT timeoutSecs = 30 );
+	CScopedTrayIconBalloon( CTrayIcon* pTrayIcon /*= nullptr*/, const std::tstring& text, const TCHAR* pTitle = nullptr, app::MsgType msgType = app::Info, UINT timeoutSecs = 30 );
 	~CScopedTrayIconBalloon();
 private:
 	CTrayIcon* m_pTrayIcon;

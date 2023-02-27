@@ -22,14 +22,14 @@ protected:
 public:
 	virtual ~CBaseHostToolbarCtrl();
 
-	void DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget = NULL );
+	void DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget = nullptr );
 
 	enum Metrics { Spacing = 2 };
 
 	const ui::CTandemLayout& GetTandemLayout( void ) const { return m_tandemLayout; }
 	ui::CTandemLayout& RefTandemLayout( void ) { return m_tandemLayout; }
 
-	bool HasMateToolbar( void ) const { return m_pMateToolbar.get() != NULL; }
+	bool HasMateToolbar( void ) const { return m_pMateToolbar.get() != nullptr; }
 	CDialogToolBar* GetMateToolbar( void ) const { return m_pMateToolbar.get(); }
 	void ResetMateToolbar( void );
 
@@ -89,7 +89,7 @@ abstract class CBaseItemContentCtrl : public CBaseHostToolbarCtrl<BaseCtrlT>
 {
 	typedef CBaseHostToolbarCtrl<BaseCtrlT> TBaseClass;
 protected:
-	CBaseItemContentCtrl( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL ) : m_content( type, pFileFilter ) {}
+	CBaseItemContentCtrl( ui::ContentType type = ui::String, const TCHAR* pFileFilter = nullptr ) : m_content( type, pFileFilter ) {}
 
 	// interface IBuddyCommandHandler (may be overridden)
 	virtual bool OnBuddyCommand( UINT cmdId );

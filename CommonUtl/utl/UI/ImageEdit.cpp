@@ -9,7 +9,7 @@
 
 CImageEdit::CImageEdit( void )
 	: CTextEdit( false )			// no fixed font
-	, m_pImageList( NULL )
+	, m_pImageList( nullptr )
 	, m_imageIndex( -1 )
 	, m_imageSize( 0, 0 )
 	, m_imageNcRect( 0, 0, 0, 0 )
@@ -23,7 +23,7 @@ CImageEdit::~CImageEdit()
 void CImageEdit::SetImageList( CImageList* pImageList )
 {
 	m_pImageList = pImageList;
-	if ( m_pImageList != NULL )
+	if ( m_pImageList != nullptr )
 		m_imageSize = gdi::GetImageIconSize( *m_pImageList );
 }
 
@@ -33,7 +33,7 @@ bool CImageEdit::SetImageIndex( int imageIndex )
 		return false;
 
 	m_imageIndex = imageIndex;
-	if ( ( NULL == m_pImageList ) == !m_imageNcRect.IsRectEmpty() )
+	if ( ( nullptr == m_pImageList ) == !m_imageNcRect.IsRectEmpty() )
 		ResizeNonClient();
 	else
 		ui::RedrawControl( m_hWnd );
@@ -42,7 +42,7 @@ bool CImageEdit::SetImageIndex( int imageIndex )
 
 void CImageEdit::ResizeNonClient( void )
 {
-	SetWindowPos( NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER );
+	SetWindowPos( nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER );
 }
 
 void CImageEdit::DrawImage( CDC* pDC, const CRect& imageRect )
@@ -55,7 +55,7 @@ void CImageEdit::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
 
-	if ( m_pImageList != NULL )
+	if ( m_pImageList != nullptr )
 		ResizeNonClient();
 }
 

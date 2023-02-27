@@ -29,7 +29,7 @@ void CWindowTimer::Start( void )
 	ASSERT( IsWindow( m_pWnd->GetSafeHwnd() ) );
 
 	Stop();
-	m_eventId = m_pWnd->SetTimer( m_timerId, m_elapsedMs, NULL );
+	m_eventId = m_pWnd->SetTimer( m_timerId, m_elapsedMs, nullptr );
 
 	ENSURE( IsStarted() );
 }
@@ -67,10 +67,10 @@ const UINT CTimerSequenceHook::WM_ENDTIMERSEQ = RegisterWindowMessageA( "utl:WM_
 CTimerSequenceHook::CTimerSequenceHook( HWND hWnd, ISequenceTimerCallback* pCallback, int eventId, unsigned int seqCount, int elapse )
 	: CWindowHook( true )
 	, m_pCallback( pCallback )
-	, m_eventId( ::SetTimer( hWnd, eventId, elapse, NULL ) )
+	, m_eventId( ::SetTimer( hWnd, eventId, elapse, nullptr ) )
 	, m_seqCount( seqCount )
 {
-	ASSERT( m_pCallback != NULL && m_seqCount != 0 );
+	ASSERT( m_pCallback != nullptr && m_seqCount != 0 );
 	HookWindow( hWnd );
 }
 

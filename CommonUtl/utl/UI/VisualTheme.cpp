@@ -16,9 +16,9 @@
 bool CVisualTheme::s_enabled = true;
 bool CVisualTheme::s_fallbackEnabled = true;
 
-CVisualTheme::CVisualTheme( const wchar_t* pClass, HWND hWnd /*= NULL*/ )
+CVisualTheme::CVisualTheme( const wchar_t* pClass, HWND hWnd /*= nullptr*/ )
 	: m_pClass( pClass )
-	, m_hTheme( NULL )
+	, m_hTheme( nullptr )
 {
 	if ( IsThemed() )
 		m_hTheme = ::OpenThemeData( hWnd, m_pClass );
@@ -31,10 +31,10 @@ CVisualTheme::~CVisualTheme()
 
 void CVisualTheme::Close( void )
 {
-	if ( m_hTheme != NULL )
+	if ( m_hTheme != nullptr )
 	{
 		::CloseThemeData( m_hTheme );
-		m_hTheme = NULL;
+		m_hTheme = nullptr;
 	}
 }
 
@@ -46,14 +46,14 @@ COLORREF CVisualTheme::GetThemeColor( int partId, int stateId, int propId ) cons
 	return CLR_NONE;
 }
 
-bool CVisualTheme::GetThemePartSize( OUT CSize* pPartSize, HDC hdc, int partId, int stateId, THEMESIZE themeSize /*= TS_DRAW*/, const RECT* pRect /*= NULL*/ ) const
+bool CVisualTheme::GetThemePartSize( OUT CSize* pPartSize, HDC hdc, int partId, int stateId, THEMESIZE themeSize /*= TS_DRAW*/, const RECT* pRect /*= nullptr*/ ) const
 {
 	ASSERT_PTR( pPartSize );
 	pPartSize->cx = pPartSize->cy = 0;
 	return IsValid() && HR_OK( ::GetThemePartSize( m_hTheme, hdc, partId, stateId, pRect, themeSize, pPartSize ) );
 }
 
-bool CVisualTheme::GetThemeTextExtent( OUT RECT* pExtentRect, HDC hdc, int partId, int stateId, const wchar_t* pText, DWORD textFlags, const RECT* pBoundingRect /*= NULL*/ ) const
+bool CVisualTheme::GetThemeTextExtent( OUT RECT* pExtentRect, HDC hdc, int partId, int stateId, const wchar_t* pText, DWORD textFlags, const RECT* pBoundingRect /*= nullptr*/ ) const
 {
 	ASSERT_PTR( pExtentRect );
 	return IsValid() && HR_OK( ::GetThemeTextExtent( m_hTheme, hdc, partId, stateId, pText, -1, textFlags, pBoundingRect, pExtentRect ) );
@@ -84,7 +84,7 @@ bool CVisualTheme::GetThemeBackgroundExtent( OUT RECT* pExtentRect, HDC hdc, int
 }
 
 
-bool CVisualTheme::DrawThemeEdge( HDC hdc, int partId, int stateId, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect /*= NULL*/ )
+bool CVisualTheme::DrawThemeEdge( HDC hdc, int partId, int stateId, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect /*= nullptr*/ )
 {
 	if ( !IsValid() && s_fallbackEnabled )
 		return CVisualThemeFallback::Instance().DrawEdge( hdc, rect, edge, flags );
@@ -92,7 +92,7 @@ bool CVisualTheme::DrawThemeEdge( HDC hdc, int partId, int stateId, const RECT& 
 	return HR_OK( ::DrawThemeEdge( m_hTheme, hdc, partId, stateId, &rect, edge, flags, pContentRect ) );
 }
 
-bool CVisualTheme::DrawThemeBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect /*= NULL*/ )
+bool CVisualTheme::DrawThemeBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect /*= nullptr*/ )
 {
 	if ( !IsValid() && s_fallbackEnabled )
 		return CVisualThemeFallback::Instance().DrawBackground( m_pClass, partId, stateId, hdc, rect );
@@ -110,7 +110,7 @@ bool CVisualTheme::DrawThemeIcon( HDC hdc, int partId, int stateId, const RECT& 
 	return IsValid() && HR_OK( ::DrawThemeIcon( m_hTheme, hdc, partId, stateId, &rect, imageList.GetSafeHandle(), imagePos ) );
 }
 
-bool CVisualTheme::DrawBackground( HWND hWnd, HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect /*= NULL*/ )
+bool CVisualTheme::DrawBackground( HWND hWnd, HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect /*= nullptr*/ )
 {
 	if ( IsThemeBackgroundPartiallyTransparent( partId, stateId ) )
 		DrawThemeParentBackground( hWnd, hdc, rect );
@@ -119,12 +119,12 @@ bool CVisualTheme::DrawBackground( HWND hWnd, HDC hdc, int partId, int stateId, 
 }
 
 
-bool CVisualTheme::DrawEntireBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect /*= NULL*/ )
+bool CVisualTheme::DrawEntireBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect /*= nullptr*/ )
 {
 	CRect boundsRect = rect;
 
 	// some classes draw inside the bounds, so require some stretching to cover entirely
-	if ( m_pClass != NULL )
+	if ( m_pClass != nullptr )
 		if ( 0 == _wcsicmp( L"BUTTON", m_pClass ) )
 			boundsRect.InflateRect( 1, 1 );		// stretch both
 		else if ( 0 == _wcsicmp( L"TOOLBAR", m_pClass ) )

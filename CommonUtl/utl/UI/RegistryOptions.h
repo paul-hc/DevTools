@@ -37,7 +37,7 @@ public:
 	CRegistryOptions( const CRegistryOptions& right ) { right; }
 	CRegistryOptions& operator=( const CRegistryOptions& right ) { right; return *this; }
 
-	bool IsPersistent( void ) const { return m_pRegSection.get() != NULL; }
+	bool IsPersistent( void ) const { return m_pRegSection.get() != nullptr; }
 
 	IRegistrySection* GetSection( void ) const { return m_pRegSection.get(); }
 	void SetSection( IRegistrySection* pRegSection ) { m_pRegSection.reset( pRegSection ); }
@@ -72,7 +72,7 @@ public:
 
 	void UpdateControls( CWnd* pTargetWnd );			// update check-box buttons
 protected:
-	bool IsHandledInternallyID( UINT ctrlId ) const { return FindOptionByID( ctrlId ) != NULL; }
+	bool IsHandledInternallyID( UINT ctrlId ) const { return FindOptionByID( ctrlId ) != nullptr; }
 	bool RestoreOptionDefaultValue( reg::CBaseOption* pOption );
 
 	// overrideables
@@ -166,7 +166,7 @@ namespace reg
 		typedef COption<int> TBaseClass;
 	public:
 		template< typename EnumType >
-		CEnumOption( EnumType* pValue, const TCHAR* pEntry ) : COption< int >( (int*)pValue, pEntry ), m_pTags( NULL ), m_radioIds( 0 ) {}
+		CEnumOption( EnumType* pValue, const TCHAR* pEntry ) : COption< int >( (int*)pValue, pEntry ), m_pTags( nullptr ), m_radioIds( 0 ) {}
 
 		void SetEnumTags( const CEnumTags* pTags ) { m_pTags = pTags; }
 		void SetRadioIds( UINT firstRadioId, UINT lastRadioId ) { m_radioIds.SetRange( firstRadioId, lastRadioId ); }

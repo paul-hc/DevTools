@@ -133,13 +133,13 @@ public:
 	CScopedResInst( HINSTANCE hResInst ) : m_hOldResInst( AfxGetResourceHandle() ) { AfxSetResourceHandle( hResInst ); }	// resource located in an existing module
 	~CScopedResInst() { AfxSetResourceHandle( m_hOldResInst ); }
 
-	static HINSTANCE Get( void ) { return IsSysResource() ? NULL : AfxGetResourceHandle(); }
+	static HINSTANCE Get( void ) { return IsSysResource() ? nullptr : AfxGetResourceHandle(); }
 
 	static HINSTANCE Find( UINT resId, const TCHAR* pResType ) { return Find( MAKEINTRESOURCE( resId ), pResType ); }
 	static HINSTANCE Find( const TCHAR* pResName, const TCHAR* pResType )
 	{
 		pResName, pResType;			// prevent compiler warnings
-		return IsSysResource() ? NULL : AfxFindResourceHandle( pResName, pResType );
+		return IsSysResource() ? nullptr : AfxFindResourceHandle( pResName, pResType );
 	}
 
 	static bool IsSysResource( void ) { return AfxGetResourceHandle() == (HINSTANCE)WinResource; }
@@ -223,7 +223,7 @@ namespace gdi
 	CSize GetBitmapSize( HBITMAP hBitmap );
 	CSize GetImageIconSize( const CImageList& imageList );
 
-	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection = NULL );
+	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection = nullptr );
 	bool Is32BitBitmap( HBITMAP hBitmap );					// DIB/DDB
 
 	// stride: number of bytes per scan line (aka pitch)
@@ -268,10 +268,10 @@ namespace gdi
 
 struct CDibMeta		// contains information that must be passed from creation
 {
-	CDibMeta( HBITMAP hDib = NULL )
+	CDibMeta( HBITMAP hDib = nullptr )
 		: m_hDib( hDib ), m_orientation( gdi::BottomUp ), m_bitsPerPixel( 0 ), m_channelCount( 0 ) {}
 
-	bool IsValid( void ) const { return m_hDib != NULL; }
+	bool IsValid( void ) const { return m_hDib != nullptr; }
 	bool HasAlpha( void ) const { return 32 == m_bitsPerPixel && 4 == m_channelCount; }
 
 	bool StorePixelFormat( void );
@@ -367,7 +367,7 @@ public:
 	bool IsValid( void ) const { return !m_buffer.empty(); }
 	const BITMAPINFO* GetBitmapInfo( void ) const { ASSERT( IsValid() ); return reinterpret_cast<const BITMAPINFO*>( &m_buffer.front() ); }
 
-	BITMAPINFO* CreateDibInfo( int width, int height, UINT bitsPerPixel, const bmp::CSharedAccess* pSrcDib = NULL );
+	BITMAPINFO* CreateDibInfo( int width, int height, UINT bitsPerPixel, const bmp::CSharedAccess* pSrcDib = nullptr );
 	BITMAPINFO* CreateDibInfo( UINT bitsPerPixel, const bmp::CSharedAccess& sourceDib );
 private:
 	std::vector< BYTE > m_buffer;

@@ -47,11 +47,11 @@ CProgressDialog::CProgressDialog( const std::tstring& operationLabel, int option
 
 CProgressDialog::~CProgressDialog()
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		DestroyWindow();
 }
 
-bool CProgressDialog::Create( const std::tstring& title, CWnd* pParentWnd /*= NULL*/ )
+bool CProgressDialog::Create( const std::tstring& title, CWnd* pParentWnd /*= nullptr*/ )
 {
 	ASSERT( !IsRunning() );
 
@@ -279,7 +279,7 @@ void CProgressDialog::AdvanceItemToEnd( void ) throws_( CUserAbortedException )
 
 void CProgressDialog::ProcessInput( void ) const throws_( CUserAbortedException )
 {
-	if ( m_pMsgPump.get() != NULL )
+	if ( m_pMsgPump.get() != nullptr )
 		m_pMsgPump->CheckPump();		// pump any messages in the queue
 
 	CheckRunning();						// throws if dialog got destroyed in the meantime
@@ -396,7 +396,7 @@ bool CProgressDialog::ResizeLabelsContentsToFit( void )
 
 void CProgressDialog::DoDataExchange( CDataExchange* pDX )
 {
-	const bool firstInit = NULL == m_operationStatic.m_hWnd;
+	const bool firstInit = nullptr == m_operationStatic.m_hWnd;
 
 	DDX_Control( pDX, IDC_OPERATION_LABEL, m_operationStatic );
 	DDX_Control( pDX, IDC_STAGE_LABEL, m_stageLabelStatic );

@@ -101,7 +101,7 @@ void CThumbPreviewCtrl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	fs::CPath filePath = m_imageFilePath.GetPhysicalPath();
 
 	if ( filePath.FileExist() )
-		if ( CMenu* pContextPopup = MakeContextMenuHost( NULL, filePath ) )
+		if ( CMenu* pContextPopup = MakeContextMenuHost( nullptr, filePath ) )
 			DoTrackContextMenu( pContextPopup, screenPos );
 }
 
@@ -113,7 +113,7 @@ BOOL CThumbPreviewCtrl::OnEraseBkgnd( CDC* pDC )
 
 void CThumbPreviewCtrl::OnPaint( void )
 {
-	CWicDibSection* pThumb = NULL;
+	CWicDibSection* pThumb = nullptr;
 	if ( !m_imageFilePath.IsEmpty() )
 		pThumb = m_pThumbnailer->AcquireThumbnail( m_imageFilePath );
 
@@ -122,6 +122,6 @@ void CThumbPreviewCtrl::OnPaint( void )
 	GetClientRect( &clientRect );
 	::FillRect( dc, clientRect, GetSysColorBrush( COLOR_BTNFACE ) );
 
-	if ( pThumb != NULL )
+	if ( pThumb != nullptr )
 		DrawThumbnail( &dc, clientRect, pThumb );
 }

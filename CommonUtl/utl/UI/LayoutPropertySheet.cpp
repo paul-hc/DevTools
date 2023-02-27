@@ -55,7 +55,7 @@ CLayoutPropertySheet::~CLayoutPropertySheet()
 {
 }
 
-bool CLayoutPropertySheet::CreateModeless( CWnd* pParent /*= NULL*/, DWORD style /*= UINT_MAX*/, DWORD styleEx /*= 0*/ )
+bool CLayoutPropertySheet::CreateModeless( CWnd* pParent /*= nullptr*/, DWORD style /*= UINT_MAX*/, DWORD styleEx /*= 0*/ )
 {
 	if ( UINT_MAX == style )
 	{
@@ -215,7 +215,7 @@ void CLayoutPropertySheet::AdjustModelessSheet( void )
 
 	sheetRect.bottom = okButtonRect.bottom + ButtonSpacingV + sheetEdgeV;
 
-	SetWindowPos( NULL, sheetRect.left, sheetRect.top, sheetRect.Width(), sheetRect.Height(), SWP_NOZORDER | SWP_NOACTIVATE );
+	SetWindowPos( nullptr, sheetRect.left, sheetRect.top, sheetRect.Width(), sheetRect.Height(), SWP_NOZORDER | SWP_NOACTIVATE );
 }
 
 void CLayoutPropertySheet::ModifySystemMenu( void )
@@ -246,8 +246,8 @@ void CLayoutPropertySheet::ModifySystemMenu( void )
 		if ( m_hideSysMenuIcon && HasFlag( GetStyle(), WS_SYSMENU ) )
 		{
 			ModifyStyleEx( 0, WS_EX_DLGMODALFRAME );
-			if ( NULL == GetIcon( FALSE ) )
-				SetIcon( NULL, FALSE );						// remove default icon; this will not prevent adding an icon using SetIcon()
+			if ( nullptr == GetIcon( FALSE ) )
+				SetIcon( nullptr, FALSE );						// remove default icon; this will not prevent adding an icon using SetIcon()
 		}
 
 	SetupDlgIcons();
@@ -255,7 +255,7 @@ void CLayoutPropertySheet::ModifySystemMenu( void )
 
 void CLayoutPropertySheet::RestoreSheetPlacement( void )
 {
-	if ( m_pSheetPlacement.get() != NULL )
+	if ( m_pSheetPlacement.get() != nullptr )
 		if ( m_pSheetPlacement->m_initialSize == m_pLayoutEngine->GetMinClientSize() )		// hasn't changed during development?
 		{
 			CRect orgSheetRect;
@@ -301,7 +301,7 @@ void CLayoutPropertySheet::OnIdleUpdateControls( void )
 
 bool CLayoutPropertySheet::IsSheetModified( void ) const override
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return false;				// window not yet created
 
 	return m_alwaysModified || __super::IsSheetModified();

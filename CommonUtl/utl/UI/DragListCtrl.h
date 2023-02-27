@@ -28,7 +28,7 @@ public:
 
 	ole::CDropTarget* GetDropTarget( void ) const { return safe_ptr( m_pDropTarget.get() ); }
 
-	bool DragSelection( CPoint dragPos, ole::CDataSource* pDataSource = NULL, int sourceFlags = ListSourcesMask,
+	bool DragSelection( CPoint dragPos, ole::CDataSource* pDataSource = nullptr, int sourceFlags = ListSourcesMask,
 						DROPEFFECT dropEffect = DROPEFFECT_COPY | DROPEFFECT_MOVE | DROPEFFECT_LINK );
 protected:
 	// ole::IDropTargetEventsStub interface
@@ -42,7 +42,7 @@ protected:
 private:
 	bool UseExternalDropFiles( void ) const { return this->GetAcceptDropFiles(); }		// drop external files from Explorer?
 
-	bool IsDragging( void ) const { return m_pSrcDragging != NULL; }
+	bool IsDragging( void ) const { return m_pSrcDragging != nullptr; }
 	void EndDragging( void );
 	bool DropSelection( void );							// for InternalDragging mode
 

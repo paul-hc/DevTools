@@ -19,7 +19,7 @@ CLayoutPropertyPage::CLayoutPropertyPage( UINT templateId, UINT titleId /*= 0*/ 
 	, m_templateId( templateId )
 	, m_pLayoutEngine( new CLayoutEngine() )
 	, m_useLazyUpdateData( false )				// don't output on each page activation - contrary to CPropertyPage default behaviour
-	, m_hCtrlFocus( NULL )
+	, m_hCtrlFocus( nullptr )
 	, m_idleUpdateDeep( false )
 {
 	m_psp.dwFlags &= ~PSP_HASHELP;				// don't show the help button by default
@@ -69,7 +69,7 @@ CMacroCommand* CLayoutPropertyPage::GetApplyMacroCmd( void ) const
 
 void CLayoutPropertyPage::SetTitle( const std::tstring& pageTitle )
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		ui::SetWindowText( m_hWnd, pageTitle );
 	else
 	{
@@ -96,17 +96,17 @@ void CLayoutPropertyPage::SetModified( bool changed )
 bool CLayoutPropertyPage::StoreFocusControl( void )
 {
 	HWND hCtrlFocus = ::GetFocus();
-	if ( hCtrlFocus != NULL && ::IsChild( m_hWnd, hCtrlFocus ) )
+	if ( hCtrlFocus != nullptr && ::IsChild( m_hWnd, hCtrlFocus ) )
 		m_hCtrlFocus = hCtrlFocus;
 	else
-		m_hCtrlFocus = NULL;
+		m_hCtrlFocus = nullptr;
 
-	return m_hCtrlFocus != NULL;
+	return m_hCtrlFocus != nullptr;
 }
 
 bool CLayoutPropertyPage::RestoreFocusControl( void )
 {
-	if ( NULL == m_hCtrlFocus || !::IsWindow( m_hCtrlFocus ) )
+	if ( nullptr == m_hCtrlFocus || !::IsWindow( m_hCtrlFocus ) )
 		return false;
 
 	::SetFocus( m_hCtrlFocus );
@@ -262,7 +262,7 @@ void CLayoutPropertyPage::OnFieldModified( UINT ctrlId )
 
 // CPageValidationException implementation
 
-CPageValidationException::CPageValidationException( const std::tstring& message, CWnd* pErrorCtrl /*= NULL*/ )
+CPageValidationException::CPageValidationException( const std::tstring& message, CWnd* pErrorCtrl /*= nullptr*/ )
 	: CRuntimeException( message )
 	, m_pErrorCtrl( pErrorCtrl )
 {

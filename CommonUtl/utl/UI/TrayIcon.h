@@ -36,7 +36,7 @@ public:
 	HICON GetIcon( void ) const { return m_niData.hIcon; }
 	bool SetIcon( HICON hIcon );
 	bool SetIcon( const CIconId& iconResId );
-	bool LoadStandardIcon( UINT iconResId ) { SetIcon( ::LoadIcon( NULL, MAKEINTRESOURCE( iconResId ) ) ); }
+	bool LoadStandardIcon( UINT iconResId ) { SetIcon( ::LoadIcon( nullptr, MAKEINTRESOURCE( iconResId ) ) ); }
 
 	void SetTrayFocus( void );
 
@@ -47,15 +47,15 @@ public:
 
 	// tray balloon tip
 	bool IsBalloonTipVisible( void ) const { return m_baloonVisible; }
-	bool ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle = NULL, app::MsgType msgType = app::Info, UINT timeoutSecs = 0 );
+	bool ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle = nullptr, app::MsgType msgType = app::Info, UINT timeoutSecs = 0 );
 	bool HideBalloonTip( void ) { return ShowBalloonTip( str::GetEmpty() ); }
-	static DWORD ToInfoFlag( app::MsgType msgType, UINT* pOutTimeoutSecs = NULL );
+	static DWORD ToInfoFlag( app::MsgType msgType, UINT* pOutTimeoutSecs = nullptr );
 
 	// icon animation
 	const CImageList& GetAnimImageList( void ) const { return m_animImageList; }
 	CImageList& RefAnimImageList( void ) { return m_animImageList; }
-	bool CanAnimate( void ) const { return m_animImageList.GetSafeHandle() != NULL && m_animImageList.GetImageCount() != 0; }
-	bool IsAnimating( void ) const { return m_pAnimation.get() != NULL; }
+	bool CanAnimate( void ) const { return m_animImageList.GetSafeHandle() != nullptr && m_animImageList.GetImageCount() != 0; }
+	bool IsAnimating( void ) const { return m_pAnimation.get() != nullptr; }
 	void Animate( double durationSecs, UINT stepDelayMiliSecs = 100 );
 	bool StopAnimation( void );
 
@@ -72,7 +72,7 @@ protected:
 	bool HandleTrayIconNotify( UINT msgNotifyCode, const CPoint& screenPos );
 
 	bool DoShowBalloonTip( const std::tstring& text, const TCHAR* pTitle, DWORD infoFlag, UINT timeoutSecs );
-	bool DoHideBalloonTip( void ) { return DoShowBalloonTip( str::GetEmpty(), NULL, NIIF_NONE, 10 ); }
+	bool DoHideBalloonTip( void ) { return DoShowBalloonTip( str::GetEmpty(), nullptr, NIIF_NONE, 10 ); }
 private:
 	struct CBaloonData;
 	class CAnimation;
@@ -112,7 +112,7 @@ private:
 		CBaloonData( const std::tstring& text, const TCHAR* pTitle, app::MsgType msgType, UINT timeoutSecs )
 			: m_text( text ), m_msgType( msgType ), m_timeoutSecs( timeoutSecs )
 		{
-			if ( pTitle != NULL )
+			if ( pTitle != nullptr )
 				m_title = pTitle;
 		}
 

@@ -104,8 +104,8 @@ namespace fs
 		std::tstring MakeSpecs( shell::BrowseMode browseMode ) const;			// joined specs for all known extensions
 
 		bool BrowseFile( fs::CPath& rFilePath, shell::BrowseMode browseMode,
-						 DWORD flags = 0, const TCHAR* pDefaultExt = NULL,
-						 CWnd* pParentWnd = NULL, const TCHAR* pTitle = NULL ) const;
+						 DWORD flags = 0, const TCHAR* pDefaultExt = nullptr,
+						 CWnd* pParentWnd = nullptr, const TCHAR* pTitle = nullptr ) const;
 
 		// selected filter persistence (1-based)
 		std::tstring RetrieveSelFilterSpec( void ) const;

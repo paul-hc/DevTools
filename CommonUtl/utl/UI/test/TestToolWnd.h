@@ -64,7 +64,7 @@ namespace ut
 		CTestDevice( UINT selfDestroySecs, TileAlign tileAlign = ut::TileRight );
 		~CTestDevice();
 
-		bool IsEnabled( void ) const { return m_pToolWnd != NULL; }
+		bool IsEnabled( void ) const { return m_pToolWnd != nullptr; }
 		CDC* GetDC( void ) const { ASSERT_PTR( m_pTestDC.get() ); return m_pTestDC.get(); }
 
 		void SetSubTitle( const TCHAR* pSubTitle );		// augment test window title with the sub-title
@@ -85,7 +85,7 @@ namespace ut
 		void DrawTileFrame( const CRect& tileRect, COLORREF frameColor = color::LightGrey, int outerEdge = 1 );
 
 		void DrawBitmap( HBITMAP hBitmap );
-		void DrawBitmap( HBITMAP hBitmap, const CSize& boundsSize, CDC* pSrcDC = NULL );
+		void DrawBitmap( HBITMAP hBitmap, const CSize& boundsSize, CDC* pSrcDC = nullptr );
 		void DrawBitmap( IWICBitmapSource* pWicBitmap, const CSize& boundsSize );
 		void DrawBitmap( d2d::CRenderTarget* pBitmapRT, const d2d::CDrawBitmapTraits& traits, const CSize& boundsSize );
 		void DrawIcon( HICON hIcon, const CSize& boundsSize, UINT flags = DI_NORMAL );

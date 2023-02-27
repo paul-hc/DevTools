@@ -41,7 +41,7 @@ const CSize& CWicAnimatedImage::GetBmpSize( void ) const
 bool CWicAnimatedImage::StoreGlobalMetadata( void )
 {
 	CComPtr<IWICMetadataQueryReader> pDecoderMetadata = m_decoder.GetDecoderMetadata();
-	if ( NULL == pDecoderMetadata )
+	if ( nullptr == pDecoderMetadata )
 		return false;
 
 	com::CPropVariant value;

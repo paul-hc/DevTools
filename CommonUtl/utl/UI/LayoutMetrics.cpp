@@ -56,8 +56,8 @@ namespace layout
 	CControlState::CControlState( const Metrics& metrics /*= Metrics( 0 )*/ )
 		: m_metrics( metrics )
 		, m_collapsedMetrics( UINT_MAX )
-		, m_hControl( NULL )
-		, m_hParent( NULL )
+		, m_hControl( nullptr )
+		, m_hParent( nullptr )
 	{
 	}
 
@@ -83,7 +83,7 @@ namespace layout
 
 	void CControlState::InitCtrl( HWND hControl )
 	{
-		if ( hControl != NULL )
+		if ( hControl != nullptr )
 		{
 			m_hControl = hControl;
 			m_hParent = ::GetParent( m_hControl );
@@ -98,7 +98,7 @@ namespace layout
 		}
 		else
 		{
-			m_hControl = m_hParent = NULL;
+			m_hControl = m_hParent = nullptr;
 			m_initialOrigin = CPoint( 0, 0 );
 			m_initialSize = CSize( 0, 0 );
 		}
@@ -154,7 +154,7 @@ namespace layout
 		if ( !ComputeLayout( ctrlRect, swpFlags, delta, collapsed ) )
 			return false;		// hasn't moved or resized
 
-		::SetWindowPos( m_hControl, NULL, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), swpFlags );		// reposition changed control
+		::SetWindowPos( m_hControl, nullptr, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), swpFlags );		// reposition changed control
 		return true;
 	}
 
@@ -203,7 +203,7 @@ namespace layout
 	void SetControlPos( HWND hCtrl, const CRect& ctrlRect, UINT swpFlags )
 	{
 		ASSERT_PTR( hCtrl );
-		::SetWindowPos( hCtrl, NULL, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), swpFlags );		// reposition changed control
+		::SetWindowPos( hCtrl, nullptr, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), swpFlags );		// reposition changed control
 
 		if ( ui::ILayoutFrame* pCtrlFrame = dynamic_cast<ui::ILayoutFrame*>( CWnd::FromHandlePermanent( hCtrl ) ) )		// control is a frame?
 			pCtrlFrame->OnControlResized( ::GetDlgCtrlID( hCtrl ) );		// notify controls having dependent layout

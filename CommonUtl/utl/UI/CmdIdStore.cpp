@@ -42,7 +42,7 @@ namespace ui
 			else
 				ASSERT( false );
 
-			if ( Deep == depth && itemInfo.hSubMenu != NULL )
+			if ( Deep == depth && itemInfo.hSubMenu != nullptr )
 				RegisterCommands( itemInfo.hSubMenu, Deep );		// trace the sub-menu
 		}
 	}

@@ -31,11 +31,11 @@ public:
 	CTrayIcon* FindIcon( UINT trayIconId ) const;
 	CTrayIcon& LookupIcon( UINT trayIconId ) const;
 
-	CTrayIcon* FindMainIcon( void ) const { return m_mainTrayIconId != 0 ? FindIcon( m_mainTrayIconId ) : NULL; }
+	CTrayIcon* FindMainIcon( void ) const { return m_mainTrayIconId != 0 ? FindIcon( m_mainTrayIconId ) : nullptr; }
 	CTrayIcon* FindMessageIcon( void ) const;
 
 	// create the tray icon
-	CTrayIcon* CreateTrayIcon( UINT trayIconResId, bool visible = true ) { return CreateTrayIcon( NULL, trayIconResId, NULL, visible ); }		// load tray icon resource + tooltip resource
+	CTrayIcon* CreateTrayIcon( UINT trayIconResId, bool visible = true ) { return CreateTrayIcon( nullptr, trayIconResId, nullptr, visible ); }		// load tray icon resource + tooltip resource
 	CTrayIcon* CreateTrayIcon( HICON hIcon, UINT trayIconId, const TCHAR* pIconTipText, bool visible = true );
 	bool DeleteTrayIcon( UINT trayIconId );
 

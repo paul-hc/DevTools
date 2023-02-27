@@ -20,7 +20,7 @@ int CAppRegistrySection::GetIntParameter( const TCHAR entryName[], int defaultVa
 	return m_pApp->GetProfileInt( m_section.c_str(), entryName, defaultValue );
 }
 
-std::tstring CAppRegistrySection::GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue /*= NULL*/ ) const
+std::tstring CAppRegistrySection::GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue /*= nullptr*/ ) const
 {
 	return m_pApp->GetProfileString( m_section.c_str(), entryName, pDefaultValue ).GetString();
 }
@@ -113,7 +113,7 @@ int CRegistrySection::GetIntParameter( const TCHAR entryName[], int defaultValue
 }
 
 
-std::tstring CRegistrySection::GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue/* = NULL*/ ) const
+std::tstring CRegistrySection::GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue/* = nullptr*/ ) const
 {
 	CRegistryEntry entry;
 	if ( GetParameter( entryName, entry ) )
@@ -125,7 +125,7 @@ std::tstring CRegistrySection::GetStringParameter( const TCHAR entryName[], cons
 			return entry.ValueAsString();
 		}
 
-	return pDefaultValue != NULL ? pDefaultValue : std::tstring();
+	return pDefaultValue != nullptr ? pDefaultValue : std::tstring();
 }
 
 bool CRegistrySection::GetParameter( const TCHAR entryName[], CRegistryEntry& rEntry ) const
@@ -176,7 +176,7 @@ bool CRegistrySection::SaveParameter( const TCHAR entryName[], const std::tstrin
 bool CRegistrySection::SaveParameter( const TCHAR entryName[], const CRegistryEntry& entry ) const
 {
 	HKEY hSubKey;
-	if ( ::RegCreateKeyEx( m_hKey, m_section.c_str(), 0, 0, REG_OPTION_NON_VOLATILE, KEY_WRITE, 0, &hSubKey, NULL ) != ERROR_SUCCESS )
+	if ( ::RegCreateKeyEx( m_hKey, m_section.c_str(), 0, 0, REG_OPTION_NON_VOLATILE, KEY_WRITE, 0, &hSubKey, nullptr ) != ERROR_SUCCESS )
 		return false;
 
 	LONG result = ::RegSetValueEx( hSubKey, entryName, 0, entry.m_type, &entry.m_valueBuffer.front(), entry.GetSize() );

@@ -40,18 +40,18 @@ const CSize CShellThumbCache::s_defaultBoundsSize( thumb::DefaultBoundsSize, thu
 
 CShellThumbCache::CShellThumbCache( void )
 	: m_boundsSize( s_defaultBoundsSize )
-	, m_pThumbProducer( NULL )
+	, m_pThumbProducer( nullptr )
 	, m_thumbExtractFlags( SIIGBF_BIGGERSIZEOK )		// if an image has no thumbnail cached by Explorer
 {
 	// (*) COM must be initialized by now
-	m_pShellThumbCache.CoCreateInstance( CLSID_LocalThumbnailCache, NULL, CLSCTX_INPROC );
+	m_pShellThumbCache.CoCreateInstance( CLSID_LocalThumbnailCache, nullptr, CLSCTX_INPROC );
 
 	ASSERT_PTR( m_pShellThumbCache );
 }
 
 void CShellThumbCache::ReleaseShellCache( void )
 {
-	m_pShellThumbCache = NULL;
+	m_pShellThumbCache = nullptr;
 }
 
 bool CShellThumbCache::SetBoundsSize( const CSize& boundsSize )
@@ -68,15 +68,15 @@ CComPtr<IShellItem> CShellThumbCache::FindShellItem( const fs::CFlexPath& filePa
 {
 	if ( !filePath.IsComplexPath() )
 		return m_shellExplorer.FindShellItem( filePath );
-	return NULL;
+	return nullptr;
 }
 
 CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const TShellItemPair& imagePair )
 {
-	if ( m_pThumbProducer != NULL && m_pThumbProducer->ProducesThumbFor( imagePair.first ) )
+	if ( m_pThumbProducer != nullptr && m_pThumbProducer->ProducesThumbFor( imagePair.first ) )
 		return m_pThumbProducer->ExtractThumb( imagePair.first );			// chain to external thumb producer
 
-	if ( IsValidShellCache() && imagePair.second != NULL )		// valid physical shell item?
+	if ( IsValidShellCache() && imagePair.second != nullptr )		// valid physical shell item?
 		switch ( ui::FindImageFileFormat( imagePair.first.GetPtr() ) )
 		{
 			case ui::IconFormat:				// better generate the icon for best fitting image (minimize icon scaling)
@@ -94,7 +94,7 @@ CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const TShellItemPair& imageP
 			        WTS_ALPHATYPE alphaType = WTSAT_UNKNOWN;
 			        HR_AUDIT( pSharedThumb->GetFormat( &alphaType ) );
 
-					HBITMAP hSharedBitmap = NULL;				// note: shared bitmap cannot be selected into a DC - must either Detach() or copy to a WIC bitmap
+					HBITMAP hSharedBitmap = nullptr;				// note: shared bitmap cannot be selected into a DC - must either Detach() or copy to a WIC bitmap
 					if ( HR_OK( pSharedThumb->GetSharedBitmap( &hSharedBitmap ) ) )
 						return NewScaledThumb( wic::cvt::ToWicBitmap( hSharedBitmap ), imagePair.first, &thumbKey );
 				}
@@ -103,36 +103,36 @@ CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const TShellItemPair& imageP
 			}
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const TShellItemPair& imagePair )
 {
-	if ( m_pThumbProducer != NULL && m_pThumbProducer->ProducesThumbFor( imagePair.first ) )
+	if ( m_pThumbProducer != nullptr && m_pThumbProducer->ProducesThumbFor( imagePair.first ) )
 		return m_pThumbProducer->GenerateThumb( imagePair.first );			// chain to external thumb producer
 
-	if ( imagePair.second != NULL )		// valid physical shell item?
+	if ( imagePair.second != nullptr )		// valid physical shell item?
 	{
 		// use IShellItemImageFactory to produce a usually larger thumb bitmap, which will be scaled
 		if ( HBITMAP hThumbBitmap = m_shellExplorer.ExtractThumbnail( imagePair.second, m_boundsSize, m_thumbExtractFlags ) )
 			if ( CComPtr<IWICBitmapSource> pUnscaledBitmap = wic::cvt::ToWicBitmap( hThumbBitmap ) )
-				return NewScaledThumb( pUnscaledBitmap, imagePair.first, NULL );
+				return NewScaledThumb( pUnscaledBitmap, imagePair.first, nullptr );
 
 		// Note: even with SIIGBF_THUMBNAILONLY flag set in m_thumbExtractFlags, it doesn't force Explorer to generate the thumb!
 		// This may be caused to UAC user elevation issues.
 		TRACE( _T(" (!) Thumbnail not yet cached by Explorer for: %s"), imagePair.first.GetPtr() );
 	}
 
-	return NULL;
+	return nullptr;
 }
 
-CCachedThumbBitmap* CShellThumbCache::NewScaledThumb( IWICBitmapSource* pUnscaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey /*= NULL*/ ) const
+CCachedThumbBitmap* CShellThumbCache::NewScaledThumb( IWICBitmapSource* pUnscaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey /*= nullptr*/ ) const
 {
-	if ( pUnscaledBitmap != NULL )
+	if ( pUnscaledBitmap != nullptr )
 		if ( CComPtr<IWICBitmapSource> pScaledBitmap = ScaleToThumbBitmap( pUnscaledBitmap ) )			// scale to m_boundsSize
 			return new CCachedThumbBitmap( pUnscaledBitmap, pScaledBitmap, srcImagePath, pCachedKey );
 
-	return NULL;
+	return nullptr;
 }
 
 fs::FileExpireStatus CShellThumbCache::CheckThumbExpired( const CCachedThumbBitmap* pThumb ) const
@@ -236,48 +236,48 @@ bool CThumbnailer::SetBoundsSize( const CSize& boundsSize )
 	return true;
 }
 
-CCachedThumbBitmap* CThumbnailer::AcquireThumbnail( const fs::CFlexPath& srcImagePath, int* pCacheStatusFlags /*= NULL*/ )
+CCachedThumbBitmap* CThumbnailer::AcquireThumbnail( const fs::CFlexPath& srcImagePath, int* pCacheStatusFlags /*= nullptr*/ )
 {
 	int cacheStatus = 0;
 
 	CCachedThumbBitmap* pThumb = m_thumbsCache.Find( srcImagePath );
-	if ( pThumb != NULL )
+	if ( pThumb != nullptr )
 		if ( fs::FileNotExpired == CheckThumbExpired( pThumb ) )
 			SetFlag( cacheStatus, CacheHit );
 		else
 		{
 			m_thumbsCache.Remove( srcImagePath );				// delete expired entry
-			pThumb = NULL;
+			pThumb = nullptr;
 			SetFlag( cacheStatus, CacheRemoveExpired );
 		}
 
-	TShellItemPair imagePair( srcImagePath, NULL );
+	TShellItemPair imagePair( srcImagePath, nullptr );
 
-	if ( NULL == pThumb )
+	if ( nullptr == pThumb )
 	{
 		imagePair.second = FindShellItem( srcImagePath );		// bind to the actual shell item
 		pThumb = ExtractThumb( imagePair );
 
-		if ( pThumb != NULL && NULL == imagePair.second )		// externally produced?
+		if ( pThumb != nullptr && nullptr == imagePair.second )		// externally produced?
 			if ( HasFlag( m_flags, AutoRegenSmallStgThumbs ) )
 				if ( pThumb->IsTooSmall( GetBoundsSize() ) )
 				{	// archived thumb is too small -> force generation; this will slow down thumb access, but thumbs will look better.
 					TRACE_THUMBS( _T("<%d> Regenerating cached thumb for image: %s - Reason: resolution is too small\n"), thumb::s_traceCount++, pThumb->GetSrcImagePath().GetPtr() );
 
 					delete pThumb;
-					pThumb = NULL;
+					pThumb = nullptr;
 				}
 
-		SetFlag( cacheStatus, CacheExtract, pThumb != NULL );
+		SetFlag( cacheStatus, CacheExtract, pThumb != nullptr );
 	}
 
-	if ( NULL == pThumb )
+	if ( nullptr == pThumb )
 	{
 		pThumb = GenerateThumb( imagePair );
-		SetFlag( cacheStatus, Generate, pThumb != NULL );
+		SetFlag( cacheStatus, Generate, pThumb != nullptr );
 	}
 
-	if ( pThumb != NULL && !HasFlag( cacheStatus, CacheHit ) )
+	if ( pThumb != nullptr && !HasFlag( cacheStatus, CacheHit ) )
 		m_thumbsCache.Add( pThumb->GetSrcImagePath(), pThumb );
 
 #ifdef _DEBUG
@@ -286,10 +286,10 @@ CCachedThumbBitmap* CThumbnailer::AcquireThumbnail( const fs::CFlexPath& srcImag
 		TRACE_THUMBS( _T("<%d> Thumb '%s' for %s: %s\n"), thumb::s_traceCount++,
 			flagsText.c_str(),
 			srcImagePath.IsComplexPath() ? _T("EMBEDDED image") : _T("image"),
-			pThumb != NULL ? pThumb->FormatDbg().c_str() : _T("NULL") );
+			pThumb != nullptr ? pThumb->FormatDbg().c_str() : _T("NULL") );
 #endif
 
-	if ( pCacheStatusFlags != NULL )
+	if ( pCacheStatusFlags != nullptr )
 		*pCacheStatusFlags = cacheStatus;
 	return pThumb;
 }
@@ -303,7 +303,7 @@ CCachedThumbBitmap* CThumbnailer::AcquireThumbnailNoThrow( const fs::CFlexPath& 
 	catch ( CException* pExc )
 	{
 		pExc->Delete();
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -325,7 +325,7 @@ bool CThumbnailer::SetItemImageSize( const CSize& imageBoundsSize )
 bool CThumbnailer::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect )
 {
 	ASSERT_PTR( pDC );
-	if ( pSubject != NULL )
+	if ( pSubject != nullptr )
 	{
 		fs::CFlexPath srcImagePath = path::StripWildcards( pSubject->GetCode() ).Get();
 		if ( srcImagePath.FileExist() )
@@ -371,12 +371,12 @@ bool CGlyphThumbnailer::SetItemImageSize( const CSize& imageBoundsSize )
 
 const CThumbKey CCachedThumbBitmap::m_nullKey( true );
 
-CCachedThumbBitmap::CCachedThumbBitmap( IWICBitmapSource* pUnscaledBitmap, IWICBitmapSource* pScaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey /*= NULL*/ )
+CCachedThumbBitmap::CCachedThumbBitmap( IWICBitmapSource* pUnscaledBitmap, IWICBitmapSource* pScaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey /*= nullptr*/ )
 	: CWicDibSection( pScaledBitmap )
 	, m_srcImagePath( srcImagePath )
-	, m_key( pCachedKey != NULL ? *pCachedKey : m_nullKey )
+	, m_key( pCachedKey != nullptr ? *pCachedKey : m_nullKey )
 	, m_lastModifTime( fs::ReadLastModifyTime( m_srcImagePath ) )
-	, m_unscaledBmpSize( pUnscaledBitmap != NULL ? wic::GetBitmapSize( pUnscaledBitmap ) : GetBmpFmt().m_size )
+	, m_unscaledBmpSize( pUnscaledBitmap != nullptr ? wic::GetBitmapSize( pUnscaledBitmap ) : GetBmpFmt().m_size )
 {
 }
 

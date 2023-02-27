@@ -55,10 +55,10 @@ namespace ole
 		: COleDropTarget()
 		, m_useDropTip( false )
 		, m_autoScrollFlags( 0 )
-		, m_pTargetEvents( NULL )
+		, m_pTargetEvents( nullptr )
 	{
-		m_pDropTargetHelper.CoCreateInstance( CLSID_DragDropHelper, NULL, CLSCTX_INPROC_SERVER );		// IDropTargetHelper, different than IDragSourceHelper in shell::CDragImager
-		m_canShowDropTips = m_pDropTargetHelper != NULL && ::IsAppThemed() != 0;		// Vista+
+		m_pDropTargetHelper.CoCreateInstance( CLSID_DragDropHelper, nullptr, CLSCTX_INPROC_SERVER );		// IDropTargetHelper, different than IDragSourceHelper in shell::CDragImager
+		m_canShowDropTips = m_pDropTargetHelper != nullptr && ::IsAppThemed() != 0;		// Vista+
 
 		ClearStateFlags();
 	}
@@ -82,14 +82,14 @@ namespace ole
 		return COleDropTarget::Register( pWnd );
 	}
 
-	bool CDropTarget::SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText /*= NULL*/ )
+	bool CDropTarget::SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText /*= nullptr*/ )
 	{
 		// if any of the text args is NULL, the default text is used (Explorer)
 		bool changed = false;
 		if ( m_canShowDropTips )
 		{
 			changed = m_dropTip.StoreTypeField( dropImageType, pMessage, pInsertFmt );
-			if ( changed && pInsertText != NULL )
+			if ( changed && pInsertText != nullptr )
 				m_dropTip.SetInsert( pInsertText );
 			m_useDropTip |= changed;					// drop description text is available
 		}
@@ -113,7 +113,7 @@ namespace ole
 		bool hasDescription = false;
 
 		// source provides a drag image, Vista or later with enabled themes, and actually dragging (m_lpDataObject is NULL when not dragging)
-		if ( m_cachedDragImage && m_canShowDropTips && m_lpDataObject != NULL )
+		if ( m_cachedDragImage && m_canShowDropTips && m_lpDataObject != nullptr )
 		{
 			STGMEDIUM stgMedium;
 			FORMATETC formatEtc;
@@ -128,7 +128,7 @@ namespace ole
 				else if ( m_cachedDropTipText )			// no need to update the description text when the source hasn't enabled text
 				{
 					// if no text has been passed, use the stored text for the image type if present
-					if ( NULL == pText )
+					if ( nullptr == pText )
 						pText = m_dropTip.GetTypeField( imageType );
 					update = m_dropTip.MakeDescription( pDropTip, pText );
 				}
@@ -158,14 +158,14 @@ namespace ole
 			{
 				stgMedium.tymed = TYMED_HGLOBAL;
 				stgMedium.hGlobal = ::GlobalAlloc( GMEM_MOVEABLE | GMEM_ZEROINIT, sizeof( DROPDESCRIPTION ) );
-				stgMedium.pUnkForRelease = NULL;
-				if ( stgMedium.hGlobal != NULL )
+				stgMedium.pUnkForRelease = nullptr;
+				if ( stgMedium.hGlobal != nullptr )
 				{
 					DROPDESCRIPTION* pDropTip = (DROPDESCRIPTION*)::GlobalLock( stgMedium.hGlobal );
 					pDropTip->type = imageType;
 					if ( m_cachedDropTipText )
 					{
-						if ( NULL == pText )
+						if ( nullptr == pText )
 							pText = m_dropTip.GetTypeField( imageType );		// use the stored text for the image type
 						m_dropTip.MakeDescription( pDropTip, pText );
 					}
@@ -203,14 +203,14 @@ namespace ole
 
 		DROPEFFECT effect = DROPEFFECT_NONE;
 
-		m_cachedDragImage = ole_utl::GetValueDWord( m_lpDataObject, _T("DragWindow") ) != NULL;				// source provides a drag image?
+		m_cachedDragImage = ole_utl::GetValueDWord( m_lpDataObject, _T("DragWindow") ) != 0;				// source provides a drag image?
 
 		// drag source has display of drop tips text enabled? If disabled, no need to change the description text here
 		if ( m_cachedDragImage && m_canShowDropTips )
 			m_cachedDropTipText = HasFlag( ole_utl::GetValueDWord( m_lpDataObject, _T("DragSourceHelperFlags") ), DSH_ALLOWDROPDESCRIPTIONTEXT );
 
 		m_cachedPreferredEffect = ole_utl::GetValueDWord( m_lpDataObject, CFSTR_PREFERREDDROPEFFECT );		// cache preferred drop effect
-		if ( m_pTargetEvents != NULL )
+		if ( m_pTargetEvents != nullptr )
 			effect = m_pTargetEvents->Event_OnDragEnter( pDataObject, keyState, point );
 		else
 			effect = COleDropTarget::OnDragEnter( pWnd, pDataObject, keyState, point );						// default handling (CView support)
@@ -218,7 +218,7 @@ namespace ole
 		effect = FilterDropEffect( effect );			// we need the correct effect here for the drop tip
 		if ( m_useDropTip && !m_dropTipUpdated )		// set drop-tip text if available and not been already set by the control
 			SetDropTip( effect );
-		if ( m_pDropTargetHelper != NULL )
+		if ( m_pDropTargetHelper != nullptr )
 			m_pDropTargetHelper->DragEnter( pWnd->GetSafeHwnd(), m_lpDataObject, &point, effect );			// show drag image
 
 		m_entered = true;								// entered the target window - used by OnDragScroll()
@@ -228,7 +228,7 @@ namespace ole
 	void CDropTarget::OnDragLeave( CWnd* pWnd )
 	{
 		// it may be necessary to perform a similar clean up at the end of OnDrop/OnDropEx
-		if ( m_pTargetEvents != NULL )
+		if ( m_pTargetEvents != nullptr )
 			m_pTargetEvents->Event_OnDragLeave();
 		else
 			COleDropTarget::OnDragLeave( pWnd );
@@ -237,7 +237,7 @@ namespace ole
 		// This helps the drop source to detect changes of the description.
 		ClearDropTip();
 
-		if ( m_pDropTargetHelper != NULL )
+		if ( m_pDropTargetHelper != nullptr )
 			m_pDropTargetHelper->DragLeave();
 
 		ClearStateFlags();								// next drag event may be from another source
@@ -248,7 +248,7 @@ namespace ole
 		// the main purpose of this is to change the cursor according to the key state
 		DROPEFFECT effect = DROPEFFECT_NONE;			// default return value if not handled
 		m_dropTipUpdated = false;						// set when description updated by target window
-		if ( m_pTargetEvents != NULL )
+		if ( m_pTargetEvents != nullptr )
 			effect = m_pTargetEvents->Event_OnDragOver( pDataObject, keyState, point );
 		else
 			effect = COleDropTarget::OnDragOver( pWnd, pDataObject, keyState, point );		// default handling (CView support)
@@ -256,7 +256,7 @@ namespace ole
 		effect = FilterDropEffect( effect );
 		if ( m_useDropTip && !m_dropTipUpdated )
 			SetDropTip( effect );
-		if ( m_pDropTargetHelper != NULL )
+		if ( m_pDropTargetHelper != nullptr )
 			m_pDropTargetHelper->DragOver( &point, effect );								// show drag image
 		return effect;
 	}
@@ -264,7 +264,7 @@ namespace ole
 	DROPEFFECT CDropTarget::OnDropEx( CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropDefault, DROPEFFECT dropList, CPoint point )
 	{
 		DROPEFFECT effect = DROPEFFECT_NOT_IMPL;
-		if ( m_pTargetEvents != NULL )
+		if ( m_pTargetEvents != nullptr )
 			effect = m_pTargetEvents->Event_OnDropEx( pDataObject, dropDefault, dropList, point );
 		else
 			effect = COleDropTarget::OnDropEx( pWnd, pDataObject, dropDefault, dropList, point );		// default handling
@@ -280,7 +280,7 @@ namespace ole
 	BOOL CDropTarget::OnDrop( CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point )
 	{
 		BOOL dropped = FALSE;
-		if ( m_pTargetEvents != NULL )
+		if ( m_pTargetEvents != nullptr )
 			dropped = m_pTargetEvents->Event_OnDrop( pDataObject, dropEffect, point );
 		else
 			dropped = COleDropTarget::OnDrop( pWnd, pDataObject, dropEffect, point );
@@ -297,7 +297,7 @@ namespace ole
 		if ( m_cachedPreferredEffect != DROPEFFECT_NONE && !pDataObject->IsDataAvailable( cfPerformedDropEffect ) )
 			ole_utl::SetValueDWord( m_lpDataObject, dropEffect, CFSTR_PERFORMEDDROPEFFECT );		// set the performed drop effect if not done by the control
 
-		if ( m_pDropTargetHelper != NULL )				// release drag image
+		if ( m_pDropTargetHelper != nullptr )				// release drag image
 			m_pDropTargetHelper->Drop( m_lpDataObject, &point, dropEffect );
 		ClearStateFlags();
 	}
@@ -319,7 +319,7 @@ namespace ole
 		}
 		else
 		{
-			if ( m_pTargetEvents != NULL )
+			if ( m_pTargetEvents != nullptr )
 				effect = m_pTargetEvents->Event_OnDragScroll( keyState, point );
 
 			// PHC: fix for InfoList as drop target! - if COleDropTarget::OnDragScroll() doesn't get called InfoList does NOT behave as a valid drop target
@@ -330,7 +330,7 @@ namespace ole
 				effect = DefaultAutoScroll( pWnd, keyState, point );					// call the default handler when DROPEFFECT_SCROLL is returned
 		}
 
-		if ( HasFlag( effect, DROPEFFECT_SCROLL ) && m_pDropTargetHelper != NULL )
+		if ( HasFlag( effect, DROPEFFECT_SCROLL ) && m_pDropTargetHelper != nullptr )
 		{
 			// adjust drop effect to show correct drop description cursor (ole::CDropSource class handles these correctly)
 			effect = FilterDropEffect( effect & ~DROPEFFECT_SCROLL );
@@ -451,7 +451,7 @@ namespace ole
 		}
 		if ( dwTick - m_dwLastTick > m_nScrollDelay )		// scroll if delay time expired
 		{
-			if ( m_pTargetEvents != NULL )
+			if ( m_pTargetEvents != nullptr )
 				m_pTargetEvents->Event_DoScroll( horizDir, vertDir );
 			else
 			{

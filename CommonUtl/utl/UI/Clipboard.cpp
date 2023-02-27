@@ -23,7 +23,7 @@ CClipboard::CClipboard( CWnd* pWnd )
 CClipboard* CClipboard::Open( CWnd* pWnd /*= AfxGetMainWnd()*/ )
 {
 	ASSERT_PTR( pWnd->GetSafeHwnd() );
-	return pWnd->OpenClipboard() ? new CClipboard( pWnd ) : NULL;
+	return pWnd->OpenClipboard() ? new CClipboard( pWnd ) : nullptr;
 }
 
 
@@ -39,7 +39,7 @@ DROPEFFECT CClipboard::QueryDropFilePaths( std::vector< fs::CPath >& rSrcPaths )
 	if ( ::IsClipboardFormatAvailable( CF_HDROP ) )
 		if ( SUCCEEDED( ::OleGetClipboard( &pDataObject ) ) )
 		{
-			FORMATETC format = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+			FORMATETC format = { CF_HDROP, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 			STGMEDIUM stgMedium = { 0 };	// defend against buggy data object
 
 			if ( SUCCEEDED( pDataObject->GetData( &format, &stgMedium ) ) )		// transfer the data

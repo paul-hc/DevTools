@@ -69,7 +69,7 @@ void CToolImageList::ResetImageList( CImageList* pImageList )
 {
 	m_pImageList.reset( pImageList );
 
-	if ( pImageList != NULL )
+	if ( pImageList != nullptr )
 	{
 		ENSURE( GetImageCount() == pImageList->GetImageCount() );
 		m_imageSize.Reset( gdi::GetImageIconSize( *pImageList ) );

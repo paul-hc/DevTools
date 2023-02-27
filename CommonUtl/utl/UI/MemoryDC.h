@@ -13,7 +13,7 @@ public:
 	CMemoryDC( CDC& dc, const CRect& rect, bool useMemDC = true );
 	virtual ~CMemoryDC();
 
-	bool IsMemDC( void ) const { return m_memDC.GetSafeHdc() != NULL; }
+	bool IsMemDC( void ) const { return m_memDC.GetSafeHdc() != nullptr; }
 	CDC& GetDC( void ) { return IsMemDC() ? m_memDC : m_rDC; }
 private:
 	void Construct( void );

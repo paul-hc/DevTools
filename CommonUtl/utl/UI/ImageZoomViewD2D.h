@@ -37,7 +37,7 @@ namespace d2d
 		bool DrawImage( const CViewCoords& coords, const CBitmapCoords& bmpCoords );
 
 		// animation timer
-		bool IsAnimEvent( UINT_PTR eventId ) const { return m_pAnimComposer.get() != NULL && m_animTimer.IsHit( eventId ); }
+		bool IsAnimEvent( UINT_PTR eventId ) const { return m_pAnimComposer.get() != nullptr && m_animTimer.IsHit( eventId ); }
 		void HandleAnimEvent( void );
 	private:
 		CFrameGadget* MakeAccentFrameGadget( void ) const;
@@ -76,7 +76,7 @@ protected:
 	virtual ui::IZoomView* GetZoomView( void );
 	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
-	bool IsValidRenderTarget( void ) const { return m_pImageRT.get() != NULL && m_pImageRT->IsValidTarget(); }
+	bool IsValidRenderTarget( void ) const { return m_pImageRT.get() != nullptr && m_pImageRT->IsValidTarget(); }
 	void PrintImageGdi( CDC* pPrintDC, CWicImage* pImage );
 private:
 	std::auto_ptr<d2d::CImageRenderTarget> m_pImageRT;

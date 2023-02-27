@@ -12,7 +12,7 @@
 
 // CItemContentHistoryCombo implementation
 
-CItemContentHistoryCombo::CItemContentHistoryCombo( ui::ContentType type /*= ui::String*/, const TCHAR* pFileFilter /*= NULL*/ )
+CItemContentHistoryCombo::CItemContentHistoryCombo( ui::ContentType type /*= ui::String*/, const TCHAR* pFileFilter /*= nullptr*/ )
 	: CBaseItemContentCtrl<CHistoryComboBox>( type, pFileFilter )
 {
 	SetContentType( type );					// also switch the icon
@@ -55,7 +55,7 @@ bool CItemContentHistoryCombo::OnBuddyCommand( UINT cmdId )
 
 // CSearchPathHistoryCombo implementation
 
-CSearchPathHistoryCombo::CSearchPathHistoryCombo( ui::ContentType type /*= ui::MixedPath*/, const TCHAR* pFileFilter /*= NULL*/ )
+CSearchPathHistoryCombo::CSearchPathHistoryCombo( ui::ContentType type /*= ui::MixedPath*/, const TCHAR* pFileFilter /*= nullptr*/ )
 	: CItemContentHistoryCombo( type, pFileFilter )
 	, m_recurse( true )
 {

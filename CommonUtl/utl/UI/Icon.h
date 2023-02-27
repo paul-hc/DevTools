@@ -18,9 +18,9 @@ public:
 	static CIcon* NewIcon( const CIconId& iconId );
 	static CIcon* NewExactIcon( const CIconId& iconId );					// loads only if size exists (no scaling)
 
-	bool IsValid( void ) const { return m_hIcon != NULL; }
+	bool IsValid( void ) const { return m_hIcon != nullptr; }
 
-	HICON GetSafeHandle( void ) const { return this != NULL ? m_hIcon : NULL; }
+	HICON GetSafeHandle( void ) const { return this != nullptr ? m_hIcon : nullptr; }
 
 	HICON GetHandle( void ) const { return m_hIcon; }
 	CIcon& SetHandle( HICON hIcon, bool hasAlpha );
@@ -29,7 +29,7 @@ public:
 	void SetHasAlpha( bool hasAlpha ) { m_hasAlpha = hasAlpha; }
 	static CIcon* SetHasAlpha( CIcon* pIcon, bool hasAlpha );				// safe if NULL pIcon
 
-	bool IsShared( void ) const { return m_pShared != NULL; }
+	bool IsShared( void ) const { return m_pShared != nullptr; }
 	CIcon* Clone( void ) const { return new CIcon( *this ); }
 	void SetShared( const CIcon& shared );
 
@@ -63,9 +63,9 @@ struct CIconInfo : private utl::noncopyable
 	CIconInfo( HICON hIcon, bool isCursor = false );
 	~CIconInfo();
 
-	bool IsValid( void ) const { return m_info.hbmColor != NULL || m_info.hbmMask != NULL; }	// if monochrome it has only mask
+	bool IsValid( void ) const { return m_info.hbmColor != nullptr || m_info.hbmMask != nullptr; }	// if monochrome it has only mask
 	bool IsCursor( void ) const { return !m_info.fIcon; }
-	bool HasAlpha( void ) const { return IsValid() && NULL == m_info.hbmMask; }
+	bool HasAlpha( void ) const { return IsValid() && nullptr == m_info.hbmMask; }
 
 	CPoint GetHotSpot( void ) const { return CPoint( m_info.xHotspot, m_info.yHotspot ); }
 	bool MakeDibSection( CBitmap& rDibSection ) const;			// uses hbmColor (ignores hbmMask)

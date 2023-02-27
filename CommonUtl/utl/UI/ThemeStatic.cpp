@@ -91,12 +91,12 @@ void CThemeStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeIte
 }
 
 void CThemeStatic::DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::Status drawStatus, CDC* pDC, CRect& rRect,
-									 const std::tstring& text, UINT dtFlags, CFont* pFallbackFont /*= NULL*/ ) const
+									 const std::tstring& text, UINT dtFlags, CFont* pFallbackFont /*= nullptr*/ ) const
 {
 	CRect anchorRect = rRect;
-	if ( NULL == pTextTheme || !pTextTheme->DrawStatusText( drawStatus, *pDC, rRect, text.c_str(), dtFlags ) )
+	if ( nullptr == pTextTheme || !pTextTheme->DrawStatusText( drawStatus, *pDC, rRect, text.c_str(), dtFlags ) )
 	{
-		CScopedDrawText scopedDrawText( pDC, this, pFallbackFont != NULL ? pFallbackFont : GetFont() );
+		CScopedDrawText scopedDrawText( pDC, this, pFallbackFont != nullptr ? pFallbackFont : GetFont() );
 		pDC->DrawText( text.c_str(), (int)text.length(), &rRect, dtFlags );
 	}
 
@@ -128,7 +128,7 @@ CThemeItem* CThemeStatic::GetTextThemeItem( void )
 		else
 			return &m_bkgndItem;
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -368,7 +368,7 @@ CDetailsButton::~CDetailsButton()
 
 // CLinkStatic implementation
 
-CLinkStatic::CLinkStatic( const TCHAR* pLinkPrefix /*= NULL*/ )
+CLinkStatic::CLinkStatic( const TCHAR* pLinkPrefix /*= nullptr*/ )
 	: CThemeStatic( CThemeItem( L"CONTROLPANEL", vt::CPANEL_CONTENTLINK, vt::CPCL_NORMAL ) )
 	, m_linkPrefix( pLinkPrefix )
 {
@@ -412,7 +412,7 @@ LRESULT CLinkStatic::OnNcHitTest( CPoint point )
 BOOL CLinkStatic::OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message )
 {
 	static HCURSOR hLinkCursor = AfxGetApp()->LoadStandardCursor( IDC_HAND );
-	if ( hLinkCursor != NULL )
+	if ( hLinkCursor != nullptr )
 	{
 		::SetCursor( hLinkCursor );
 		return TRUE;

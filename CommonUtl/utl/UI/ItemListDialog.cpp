@@ -33,7 +33,7 @@ namespace layout
 	};
 }
 
-CItemListDialog::CItemListDialog( CWnd* pParent, const ui::CItemContent& content, const TCHAR* pTitle /*= NULL*/ )
+CItemListDialog::CItemListDialog( CWnd* pParent, const ui::CItemContent& content, const TCHAR* pTitle /*= nullptr*/ )
 	: CLayoutDialog( IDD_ITEM_LIST_DIALOG, pParent )
 	, m_readOnly( false )
 	, m_content( content )
@@ -125,13 +125,13 @@ bool CItemListDialog::InputAllItems( const std::vector< std::tstring >& items )
 
 void CItemListDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_toolbar.m_hWnd;
+	bool firstInit = nullptr == m_toolbar.m_hWnd;
 
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignLeft | V_AlignCenter );
 
 	if ( firstInit )
 	{
-		if ( m_pTitle != NULL )
+		if ( m_pTitle != nullptr )
 			SetWindowText( m_pTitle );
 		else
 			ui::SetWindowText( m_hWnd, str::Format( _T("Edit %s Items"), ui::GetTags_ContentType().FormatUi( m_content.m_type ).c_str() ) );
@@ -337,7 +337,7 @@ CItemsListPage::~CItemsListPage()
 
 bool CItemsListPage::InEditMode( void ) const
 {
-	return m_listCtrl.GetEditControl() != NULL;
+	return m_listCtrl.GetEditControl() != nullptr;
 }
 
 bool CItemsListPage::EditSelItem( void )
@@ -416,7 +416,7 @@ void CItemsListPage::OutputList( void )
 
 void CItemsListPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_listCtrl.m_hWnd;
+	bool firstInit = nullptr == m_listCtrl.m_hWnd;
 
 	DDX_Control( pDX, IDC_ITEMS_LIST, m_listCtrl );
 
@@ -471,7 +471,7 @@ void CItemsListPage::OnLvnEndLabelEdit_Items( NMHDR* pNmHdr, LRESULT* pResult )
 	NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNmHdr;
 	*pResult = 0;					// rollback input
 
-	if ( pDispInfo->item.pszText != NULL )
+	if ( pDispInfo->item.pszText != nullptr )
 		if ( m_pDialog->InputItem( pDispInfo->item.iItem, pDispInfo->item.pszText ) )
 			*pResult = TRUE;		// signal valid input so it will commit the changes
 }
@@ -580,7 +580,7 @@ void CItemsEditPage::OnSelectedLinesChanged( void )
 
 void CItemsEditPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_mlEdit.m_hWnd;
+	bool firstInit = nullptr == m_mlEdit.m_hWnd;
 
 	DDX_Control( pDX, IDC_ITEMS_EDIT, m_mlEdit );
 	if ( firstInit )

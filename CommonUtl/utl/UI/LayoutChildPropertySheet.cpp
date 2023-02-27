@@ -18,7 +18,7 @@ static ACCEL s_sheetKeys[] =
 
 
 CLayoutChildPropertySheet::CLayoutChildPropertySheet( UINT selPageIndex /*= 0*/ )
-	: CLayoutBasePropertySheet( _T("<detail sheet>"), NULL, selPageIndex )
+	: CLayoutBasePropertySheet( _T("<detail sheet>"), nullptr, selPageIndex )
 	, m_autoDeletePages( true )
 	, m_tabMargins( 0, 0, 2, 2 )
 	, m_accel( s_sheetKeys, COUNT_OF( s_sheetKeys ) )
@@ -34,7 +34,7 @@ CLayoutChildPropertySheet::~CLayoutChildPropertySheet()
 void CLayoutChildPropertySheet::DDX_DetailSheet( CDataExchange* pDX, UINT frameStaticId, bool singleLineTab /*= false*/ )
 {
 	// frameStaticId: static control sibling after which the child sheet is positioned
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 	{
 		CreateChildSheet( pDX->m_pDlgWnd );
 		if ( singleLineTab )

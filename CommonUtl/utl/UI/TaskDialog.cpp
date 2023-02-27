@@ -162,7 +162,7 @@ namespace ui
 							  int optionFlags /*= TDF_ENABLE_HYPERLINKS | TDF_USE_COMMAND_LINKS*/,
 							  const std::tstring& footerText /*= s_empty*/ )
 		: CObject()
-		, m_hWnd( NULL )
+		, m_hWnd( nullptr )
 		, m_title( title )
 		, m_mainInstructionText( mainInstructionText )
 		, m_contentText( contentText )
@@ -181,8 +181,8 @@ namespace ui
 		, m_radioId( 0 )
 		, m_buttonId( 0 )
 	{
-		m_mainIcon.pszIcon = NULL;
-		m_footerIcon.pszIcon = NULL;
+		m_mainIcon.pszIcon = nullptr;
+		m_footerIcon.pszIcon = nullptr;
 	}
 
 	CTaskDialog::CTaskDialog( const std::tstring& title, const std::tstring& mainInstructionText, const std::tstring& contentText,
@@ -191,7 +191,7 @@ namespace ui
 							  int optionFlags /*= TDF_ENABLE_HYPERLINKS | TDF_USE_COMMAND_LINKS*/,
 							  const std::tstring& footerText /*= s_empty*/ )
 		: CObject()
-		, m_hWnd( NULL )
+		, m_hWnd( nullptr )
 		, m_title( title )
 		, m_mainInstructionText( mainInstructionText )
 		, m_contentText( contentText )
@@ -210,8 +210,8 @@ namespace ui
 		, m_radioId( 0 )
 		, m_buttonId( 0 )
 	{
-		m_mainIcon.pszIcon = NULL;
-		m_footerIcon.pszIcon = NULL;
+		m_mainIcon.pszIcon = nullptr;
+		m_footerIcon.pszIcon = nullptr;
 
 		LoadButtons( firstButtonId, lastButtonId );
 	}
@@ -270,7 +270,7 @@ namespace ui
 	void CTaskDialog::SetTitle( const std::tstring& title )
 	{
 		m_title = title;
-		if ( m_hWnd != NULL )
+		if ( m_hWnd != nullptr )
 			ui::SetWindowText( m_hWnd, m_title );
 	}
 
@@ -288,10 +288,10 @@ namespace ui
 
 	void CTaskDialog::SetMainIcon(HICON hMainIcon)
 	{
-		ASSERT(hMainIcon != NULL);
+		ASSERT(hMainIcon != nullptr);
 
 		// If the icon was initially set by HICON, allow only HICON setter method after the window has been created.
-		ASSERT(NULL == m_hWnd || m_optionFlags & TDF_USE_HICON_MAIN);
+		ASSERT(nullptr == m_hWnd || m_optionFlags & TDF_USE_HICON_MAIN);
 
 		m_mainIcon.hIcon = hMainIcon;
 		m_optionFlags |= TDF_USE_HICON_MAIN;
@@ -301,10 +301,10 @@ namespace ui
 
 	void CTaskDialog::SetMainIcon(LPCWSTR lpszMainIcon)
 	{
-		ASSERT(lpszMainIcon != NULL);
+		ASSERT(lpszMainIcon != nullptr);
 
 		// If the icon was initially set by LPWSTR, allow only LPWSTR setter method after the window has been created.
-		ASSERT(NULL == m_hWnd || !(m_optionFlags & TDF_USE_HICON_MAIN));
+		ASSERT(nullptr == m_hWnd || !(m_optionFlags & TDF_USE_HICON_MAIN));
 
 		m_mainIcon.pszIcon = lpszMainIcon;
 		m_optionFlags &= ~TDF_USE_HICON_MAIN;
@@ -314,10 +314,10 @@ namespace ui
 
 	void CTaskDialog::SetFooterIcon(HICON hFooterIcon)
 	{
-		ASSERT(hFooterIcon != NULL);
+		ASSERT(hFooterIcon != nullptr);
 
 		// If the icon was initially set by HICON, allow only HICON setter method after the window has been created.
-		ASSERT(NULL == m_hWnd || m_optionFlags & TDF_USE_HICON_FOOTER);
+		ASSERT(nullptr == m_hWnd || m_optionFlags & TDF_USE_HICON_FOOTER);
 
 		m_footerIcon.hIcon = hFooterIcon;
 		m_optionFlags |= TDF_USE_HICON_FOOTER;
@@ -327,10 +327,10 @@ namespace ui
 
 	void CTaskDialog::SetFooterIcon( LPCWSTR lpszFooterIcon )
 	{
-		ASSERT(lpszFooterIcon != NULL);
+		ASSERT(lpszFooterIcon != nullptr);
 
 		// If the icon was initially set by LPWSTR, allow only LPWSTR setter method after the window has been created.
-		ASSERT(NULL == m_hWnd || !(m_optionFlags & TDF_USE_HICON_FOOTER));
+		ASSERT(nullptr == m_hWnd || !(m_optionFlags & TDF_USE_HICON_FOOTER));
 
 		m_footerIcon.pszIcon = lpszFooterIcon;
 		m_optionFlags &= ~TDF_USE_HICON_FOOTER;
@@ -430,7 +430,7 @@ namespace ui
 
 	void CTaskDialog::SetProgressBarRange( int rangeMin, int rangeMax )
 	{
-		ASSERT( NULL == m_hWnd || ( !HasFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) && HasFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR ) ) );	// before dialog creation
+		ASSERT( nullptr == m_hWnd || ( !HasFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) && HasFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR ) ) );	// before dialog creation
 		ASSERT( rangeMin < rangeMax );
 
 		m_progressRange.m_start = rangeMin;
@@ -444,7 +444,7 @@ namespace ui
 
 	void CTaskDialog::SetProgressBarPosition( int progressPos )
 	{
-		ASSERT( NULL == m_hWnd || ( !HasFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) && HasFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR ) ) );	// before dialog creation
+		ASSERT( nullptr == m_hWnd || ( !HasFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) && HasFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR ) ) );	// before dialog creation
 		ASSERT( m_progressRange.m_start <= progressPos && progressPos <= m_progressRange.m_end );
 
 		m_progressPos = progressPos;
@@ -456,7 +456,7 @@ namespace ui
 
 	void CTaskDialog::SetProgressBarState( int state /*= PBST_NORMAL*/ )
 	{
-		ASSERT( NULL == m_hWnd || ( !HasFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) && HasFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR ) ) );	// before dialog creation
+		ASSERT( nullptr == m_hWnd || ( !HasFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) && HasFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR ) ) );	// before dialog creation
 
 		m_progressState = state;
 		SetFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR );
@@ -468,7 +468,7 @@ namespace ui
 	void CTaskDialog::SetProgressBarMarquee( bool enabled /*= true*/, int marqueeSpeed /*= 0*/ )
 	{
 		// Marquee cannot be defined after the window has been created.
-		ASSERT( NULL == m_hWnd || ( HasFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) && HasFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR ) ) );
+		ASSERT( nullptr == m_hWnd || ( HasFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) && HasFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR ) ) );
 		ASSERT( marqueeSpeed >= 0 );
 
 		m_progressState = enabled;
@@ -614,7 +614,7 @@ namespace ui
 			ClearFlag( rConfig.dwFlags, TDF_USE_COMMAND_LINKS | TDF_USE_COMMAND_LINKS_NO_ICON );
 
 		// ensure that there is footer field and we can set the footer icon.
-		if ( m_footerText.empty() && m_footerIcon.pszIcon != NULL )
+		if ( m_footerText.empty() && m_footerIcon.pszIcon != nullptr )
 			m_footerText = _T(" ");
 
 		rConfig.cxWidth = m_width;
@@ -654,7 +654,7 @@ namespace ui
 		else
 		{
 			rConfig.dwFlags &= ~TDF_VERIFICATION_FLAG_CHECKED;
-			rConfig.pszVerificationText = NULL;
+			rConfig.pszVerificationText = nullptr;
 		}
 
 		if ( !m_radioButtons.empty() )
@@ -676,16 +676,16 @@ namespace ui
 
 	void CTaskDialog::FreeStruct( TASKDIALOGCONFIG& rConfig )
 	{
-		if ( rConfig.pButtons != NULL )
+		if ( rConfig.pButtons != nullptr )
 		{
 			delete[] rConfig.pButtons;
-			rConfig.pButtons = NULL;
+			rConfig.pButtons = nullptr;
 		}
 
-		if ( rConfig.pRadioButtons != NULL )
+		if ( rConfig.pRadioButtons != nullptr )
 		{
 			delete [] rConfig.pRadioButtons;
-			rConfig.pRadioButtons = NULL;
+			rConfig.pRadioButtons = nullptr;
 		}
 	}
 
@@ -762,7 +762,7 @@ namespace ui
 
 	void CTaskDialog::Notify( UINT uMsg, WPARAM wParam, LPARAM lParam ) const
 	{
-		if ( m_hWnd != NULL )
+		if ( m_hWnd != nullptr )
 			SendMessage( m_hWnd, uMsg, wParam, lParam );
 	}
 
@@ -819,7 +819,7 @@ namespace ui
 
 	HRESULT CTaskDialog::OnHyperlinkClick( const std::tstring& href )
 	{
-		ShellExecute( m_hWnd, NULL, href.c_str(), NULL, NULL, SW_SHOW );
+		ShellExecute( m_hWnd, nullptr, href.c_str(), nullptr, nullptr, SW_SHOW );
 		return S_OK;
 	}
 

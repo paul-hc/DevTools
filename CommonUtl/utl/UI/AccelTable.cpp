@@ -68,15 +68,15 @@ CAccelTable::CAccelTable( ACCEL keys[], int count )
 
 CAccelTable::~CAccelTable()
 {
-	if ( m_hAccel != NULL )
+	if ( m_hAccel != nullptr )
 		::DestroyAcceleratorTable( m_hAccel );
 }
 
 void CAccelTable::QueryKeys( std::vector< ACCEL >& rKeys ) const
 {
-	if ( m_hAccel != NULL )
+	if ( m_hAccel != nullptr )
 	{
-		int count = ::CopyAcceleratorTable( m_hAccel, NULL, 0 );
+		int count = ::CopyAcceleratorTable( m_hAccel, nullptr, 0 );
 		int oldCount = static_cast<int>( rKeys.size() );
 
 		rKeys.resize( rKeys.size() + count );			// allocate stoarge keys
@@ -86,7 +86,7 @@ void CAccelTable::QueryKeys( std::vector< ACCEL >& rKeys ) const
 
 void CAccelTable::Load( UINT accelId )
 {
-	if ( m_hAccel != NULL )
+	if ( m_hAccel != nullptr )
 		::DestroyAcceleratorTable( m_hAccel );
 
 	m_hAccel = ::LoadAccelerators( CScopedResInst::Get(), MAKEINTRESOURCE( accelId ) );
@@ -95,7 +95,7 @@ void CAccelTable::Load( UINT accelId )
 
 bool CAccelTable::LoadOnce( UINT accelId )
 {
-	if ( m_hAccel != NULL )
+	if ( m_hAccel != nullptr )
 		return false;				// already loaded
 
 	Load( accelId );
@@ -104,7 +104,7 @@ bool CAccelTable::LoadOnce( UINT accelId )
 
 void CAccelTable::Create( ACCEL keys[], int count )
 {
-	if ( m_hAccel != NULL )
+	if ( m_hAccel != nullptr )
 		::DestroyAcceleratorTable( m_hAccel );
 
 	m_hAccel = ::CreateAcceleratorTable( const_cast<ACCEL*>( keys ), count );
@@ -113,7 +113,7 @@ void CAccelTable::Create( ACCEL keys[], int count )
 
 void CAccelTable::Augment( UINT accelId )
 {
-	if ( NULL == m_hAccel )
+	if ( nullptr == m_hAccel )
 		Load( accelId );
 	else
 	{
@@ -127,7 +127,7 @@ void CAccelTable::Augment( UINT accelId )
 
 void CAccelTable::Augment( ACCEL keys[], int count )
 {
-	if ( NULL == m_hAccel )
+	if ( nullptr == m_hAccel )
 		Create( keys, count );
 	else
 	{
@@ -139,10 +139,10 @@ void CAccelTable::Augment( ACCEL keys[], int count )
 	}
 }
 
-bool CAccelTable::Translate( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus /*= NULL*/ ) const
+bool CAccelTable::Translate( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus /*= nullptr*/ ) const
 {
-	if ( m_hAccel != NULL && IsKeyMessage( pMsg ) )
-		if ( NULL == hCondFocus || GetFocus() == hCondFocus )
+	if ( m_hAccel != nullptr && IsKeyMessage( pMsg ) )
+		if ( nullptr == hCondFocus || GetFocus() == hCondFocus )
 			if ( ::TranslateAccelerator( hTargetWnd, m_hAccel, pMsg ) )
 				return true;
 
@@ -151,8 +151,8 @@ bool CAccelTable::Translate( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus /*= NUL
 
 bool CAccelTable::TranslateIfOwnsFocus( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus ) const
 {
-	if ( m_hAccel != NULL && IsKeyMessage( pMsg ) )
-		if ( NULL == hCondFocus || ui::OwnsFocus( hCondFocus ) )
+	if ( m_hAccel != nullptr && IsKeyMessage( pMsg ) )
+		if ( nullptr == hCondFocus || ui::OwnsFocus( hCondFocus ) )
 			if ( ::TranslateAccelerator( hTargetWnd, m_hAccel, pMsg ) )
 				return true;
 

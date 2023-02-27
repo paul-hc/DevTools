@@ -12,7 +12,7 @@ class CItemContentHistoryCombo : public CBaseItemContentCtrl<CHistoryComboBox>
 {
 	typedef CFrameHostCtrl<CComboBox> TBaseClass;
 public:
-	CItemContentHistoryCombo( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL );
+	CItemContentHistoryCombo( ui::ContentType type = ui::String, const TCHAR* pFileFilter = nullptr );
 	virtual ~CItemContentHistoryCombo();
 
 	void SelectAll( void ) { SetEditSel( 0, -1 ); }
@@ -30,7 +30,7 @@ protected:
 class CSearchPathHistoryCombo : public CItemContentHistoryCombo
 {
 public:
-	CSearchPathHistoryCombo( ui::ContentType type = ui::MixedPath, const TCHAR* pFileFilter = NULL );
+	CSearchPathHistoryCombo( ui::ContentType type = ui::MixedPath, const TCHAR* pFileFilter = nullptr );
 private:
 	bool m_recurse;
 };

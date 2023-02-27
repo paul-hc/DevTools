@@ -25,7 +25,7 @@ interface IImageProxy : public utl::IMemoryManaged
 
 struct CImageProxy : public IImageProxy
 {
-	CImageProxy( CImageList* pImageList = NULL, int index = NoImage, int overlayMask = NoOverlayMask );
+	CImageProxy( CImageList* pImageList = nullptr, int index = NoImage, int overlayMask = NoOverlayMask );
 
 	void Set( CImageList* pImageList, int index );
 
@@ -33,7 +33,7 @@ struct CImageProxy : public IImageProxy
 	bool HasOverlayMask( void ) const { return m_overlayMask > NoOverlayMask; }
 	void SetOverlayMask( int overlayMask ) { ASSERT( overlayMask >= NoOverlayMask && overlayMask <= 4 ); m_overlayMask = overlayMask; }
 
-	bool HasExternalOverlay( void ) const { ASSERT( NULL == m_pExternalOverlay || !m_pExternalOverlay->IsEmpty() ); return m_pExternalOverlay != NULL; }
+	bool HasExternalOverlay( void ) const { ASSERT( nullptr == m_pExternalOverlay || !m_pExternalOverlay->IsEmpty() ); return m_pExternalOverlay != nullptr; }
 	const CImageProxy* GetExternalOverlay( void ) const;
 	void SetExternalOverlay( const CImageProxy* pExternalOverlay ) { m_pExternalOverlay = pExternalOverlay; }
 

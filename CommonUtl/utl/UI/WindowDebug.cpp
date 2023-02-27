@@ -66,7 +66,7 @@ namespace dbg
 			DWORD style = ui::GetStyle( hWnd );
 			os << s_indent << str::Format( _T("Style=0x%08X  "), style ) << GetStyleTags().FormatUi( style ) << std::endl;
 
-			DWORD wndThreadId = ::GetWindowThreadProcessId( hWnd, NULL ), currThreadId = ::GetCurrentThreadId();
+			DWORD wndThreadId = ::GetWindowThreadProcessId( hWnd, nullptr ), currThreadId = ::GetCurrentThreadId();
 			os << s_indent << str::Format( _T("WndThreadId=0x%X  CurrentThreadId=0x%X  "), wndThreadId, currThreadId ) << ( wndThreadId == currThreadId ? _T("(in current thread)") : _T("(in different thread)") ) << std::endl;
 
 			CRect wndRect;
@@ -87,7 +87,7 @@ namespace dbg
 	void TraceTrayNotifyCode( UINT msgNotifyCode )
 	{
 	#ifdef _DEBUG
-		const TCHAR* pNotifyCode = NULL;
+		const TCHAR* pNotifyCode = nullptr;
 
 		switch ( msgNotifyCode )
 		{

@@ -19,7 +19,7 @@ protected:
 public:
 	// overridables
 	virtual bool HasRhsPart( void ) const = 0;
-	virtual CRect GetRhsPartRect( const CRect* pClientRect = NULL ) const = 0;
+	virtual CRect GetRhsPartRect( const CRect* pClientRect = nullptr ) const = 0;
 protected:
 	virtual void DrawRhsPart( CDC* pDC, const CRect& clientRect );
 	virtual void DrawFocus( CDC* pDC, const CRect& clientRect );

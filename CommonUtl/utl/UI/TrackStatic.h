@@ -25,7 +25,7 @@ public:
 	void SetTrackIconId( const CIconId& trackIconId ) { ASSERT_NULL( m_hWnd ); m_trackIconId = trackIconId; }
 	void SetToolIconId( const CIconId& toolIconId ) { ASSERT_NULL( m_hWnd ); m_toolIconId = toolIconId; }
 
-	bool IsTracking( void ) const { return m_pTrackData.get() != NULL; }
+	bool IsTracking( void ) const { return m_pTrackData.get() != nullptr; }
 	CPoint GetCursorPos( void ) const { ASSERT( IsTracking() ); return m_pTrackData->m_cursorPos; }
 	CSize GetDelta( void ) const { ASSERT( IsTracking() ); return m_pTrackData->m_delta; }
 	CPoint GetStartPos( void ) const { ASSERT( IsTracking() ); return m_pTrackData->m_startPos; }
@@ -53,7 +53,7 @@ private:
 	struct CTrackData
 	{
 		CTrackData( const CPoint& startPos )
-			: m_startPos( startPos ), m_cursorPos( startPos ), m_delta( 0, 0 ), m_restoreStartPos( false ), m_hOldIcon( NULL ), m_hOldCursor( NULL ), m_hOldFocus( NULL ) {}
+			: m_startPos( startPos ), m_cursorPos( startPos ), m_delta( 0, 0 ), m_restoreStartPos( false ), m_hOldIcon( nullptr ), m_hOldCursor( nullptr ), m_hOldFocus( nullptr ) {}
 	public:
 		CPoint m_startPos;			// original track start pos
 		CPoint m_cursorPos;

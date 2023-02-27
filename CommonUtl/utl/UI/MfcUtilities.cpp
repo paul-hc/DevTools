@@ -14,9 +14,9 @@ namespace utl
 {
 	CGlobalMemFile::CGlobalMemFile( HGLOBAL hSrcBuffer ) throws_( CException )
 		: CMemFile( 0 )				// no growth when reading
-		, m_hLockedSrcBuffer( NULL )
+		, m_hLockedSrcBuffer( nullptr )
 	{
-		if ( hSrcBuffer != NULL )
+		if ( hSrcBuffer != nullptr )
 			if ( size_t bufferSize = ::GlobalSize( hSrcBuffer ) )
 				if ( BYTE* pSrcBuffer = (BYTE*)::GlobalLock( hSrcBuffer ) )
 				{
@@ -24,30 +24,30 @@ namespace utl
 					Attach( pSrcBuffer, static_cast<UINT>( bufferSize ) );
 				}
 
-		if ( NULL == m_hLockedSrcBuffer )
+		if ( nullptr == m_hLockedSrcBuffer )
 			AfxThrowOleException( E_POINTER );			// source bufer not accessible
 	}
 
 	CGlobalMemFile::CGlobalMemFile( size_t growBytes /*= KiloByte*/ )
 		: CMemFile( static_cast<UINT>( growBytes ) )
-		, m_hLockedSrcBuffer( NULL )
+		, m_hLockedSrcBuffer( nullptr )
 	{
 	}
 
 	CGlobalMemFile::~CGlobalMemFile()
 	{
-		if ( m_hLockedSrcBuffer != NULL )
+		if ( m_hLockedSrcBuffer != nullptr )
 			::GlobalUnlock( m_hLockedSrcBuffer );
 	}
 
 	HGLOBAL CGlobalMemFile::MakeGlobalData( UINT flags /*= GMEM_MOVEABLE*/ )
 	{
-		HGLOBAL hGlobal = NULL;
+		HGLOBAL hGlobal = nullptr;
 		if ( size_t bufferSize = static_cast<size_t>( GetLength() ) )
 		{
 			ASSERT_PTR( m_lpBuffer );
 			hGlobal = ::GlobalAlloc( flags, bufferSize );
-			if ( hGlobal != NULL )
+			if ( hGlobal != nullptr )
 				if ( void* pDestBuffer = ::GlobalLock( hGlobal ) )
 				{
 					::CopyMemory( pDestBuffer, m_lpBuffer, bufferSize );
@@ -70,7 +70,7 @@ namespace serial
 	// CScopedLoadingArchive implementation
 
 	int CScopedLoadingArchive::s_latestModelSchema = UnitializedVersion;
-	const CArchive* CScopedLoadingArchive::s_pLoadingArchive = NULL;
+	const CArchive* CScopedLoadingArchive::s_pLoadingArchive = nullptr;
 	int CScopedLoadingArchive::s_docLoadingModelSchema = UnitializedVersion;
 
 	CScopedLoadingArchive::CScopedLoadingArchive( const CArchive& rArchiveLoading, int docLoadingModelSchema )
@@ -85,7 +85,7 @@ namespace serial
 
 	CScopedLoadingArchive::~CScopedLoadingArchive()
 	{
-		s_pLoadingArchive = NULL;
+		s_pLoadingArchive = nullptr;
 		s_docLoadingModelSchema = -1;
 	}
 
@@ -95,7 +95,7 @@ namespace serial
 			return false;
 
 		if ( IsFileBasedArchive( rArchive ) )
-			return s_pLoadingArchive != NULL;			// must have been created in the scope of loading a FILE with backwards compatibility
+			return s_pLoadingArchive != nullptr;			// must have been created in the scope of loading a FILE with backwards compatibility
 
 		return true;
 	}
@@ -127,7 +127,7 @@ namespace ui
 	CAdapterDocument::CAdapterDocument( serial::IStreamable* pStreamable, const fs::CPath& docPath )
 		: CDocument()
 		, m_pStreamable( pStreamable )
-		, m_pObject( NULL )
+		, m_pObject( nullptr )
 	{
 		ASSERT_PTR( m_pStreamable );
 		SetPathName( docPath.GetPtr(), FALSE );		// no MRU for this
@@ -136,7 +136,7 @@ namespace ui
 
 	CAdapterDocument::CAdapterDocument( CObject* pObject, const fs::CPath& docPath )
 		: CDocument()
-		, m_pStreamable( NULL )
+		, m_pStreamable( nullptr )
 		, m_pObject( pObject )
 	{
 		ASSERT_PTR( m_pObject );
@@ -146,14 +146,14 @@ namespace ui
 
 	void CAdapterDocument::Serialize( CArchive& archive )
 	{
-		if ( m_pStreamable != NULL )
+		if ( m_pStreamable != nullptr )
 		{
 			if ( archive.IsLoading() )
 				m_pStreamable->Load( archive );
 			else
 				m_pStreamable->Save( archive );
 		}
-		else if ( m_pObject != NULL )
+		else if ( m_pObject != nullptr )
 			m_pObject->Serialize( archive );
 	}
 

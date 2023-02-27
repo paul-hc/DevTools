@@ -30,7 +30,7 @@ public:
 	void Clear( void );
 
 	bool HasButtons( void ) const { return !m_buttonIds.empty(); }
-	bool HasImages( void ) const { return m_pImageList.get() != NULL; }
+	bool HasImages( void ) const { return m_pImageList.get() != nullptr; }
 	bool IsValid( void ) const { return HasButtons() && HasImages(); }
 
 	IconStdSize GetIconStdSize( void ) const { return m_imageSize.GetStdSize(); }

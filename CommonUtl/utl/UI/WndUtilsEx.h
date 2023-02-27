@@ -10,7 +10,7 @@ namespace num
 {
 	// forward declarations - required for C++ 14+ compilation
 	template< typename ValueT >
-	bool ParseHexNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength /*= NULL*/ );
+	bool ParseHexNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength /*= nullptr*/ );
 }
 
 
@@ -30,17 +30,17 @@ interface INonClientRender
 class CNonClientDraw : public CWindowHook
 {
 public:
-	CNonClientDraw( CWnd* pWnd, INonClientRender* pCallback = NULL );
+	CNonClientDraw( CWnd* pWnd, INonClientRender* pCallback = nullptr );
 	~CNonClientDraw();
 
 	void RedrawNonClient( void )
 	{
-		m_pWnd->RedrawWindow( NULL, NULL, RDW_INVALIDATE | RDW_FRAME );
+		m_pWnd->RedrawWindow( nullptr, nullptr, RDW_INVALIDATE | RDW_FRAME );
 	}
 
 	void ResizeNonClient( void )
 	{
-		m_pWnd->SetWindowPos( NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER );
+		m_pWnd->SetWindowPos( nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER );
 	}
 protected:
 	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
@@ -55,7 +55,7 @@ class CScopedWindowBorder;
 
 struct CScopedLockRedraw
 {
-	CScopedLockRedraw( CWnd* pWnd, CScopedWindowBorder* pBorder = NULL, bool doRedraw = true );
+	CScopedLockRedraw( CWnd* pWnd, CScopedWindowBorder* pBorder = nullptr, bool doRedraw = true );
 	~CScopedLockRedraw();
 private:
 	CWnd* m_pWnd;
@@ -146,13 +146,13 @@ namespace ui
 class CScopedPumpMessage
 {
 public:
-	CScopedPumpMessage( size_t pumpFreq, CWnd* pDisableWnd = NULL )
+	CScopedPumpMessage( size_t pumpFreq, CWnd* pDisableWnd = nullptr )
 		: m_pumpFreq( pumpFreq )
 		, m_count( 0 )
 		, m_pDisableWnd( pDisableWnd )
 		, m_oldEnabled( true )
 	{
-		if ( m_pDisableWnd != NULL )
+		if ( m_pDisableWnd != nullptr )
 		{
 			m_oldEnabled = !ui::IsDisabled( m_pDisableWnd->GetSafeHwnd() );
 			ui::EnableWindow( m_pDisableWnd->GetSafeHwnd(), false );					// disable input, but allow tastbar activation, paint, etc
@@ -161,7 +161,7 @@ public:
 
 	~CScopedPumpMessage()
 	{
-		if ( m_pDisableWnd != NULL && ::IsWindow( m_pDisableWnd->GetSafeHwnd() ) )
+		if ( m_pDisableWnd != nullptr && ::IsWindow( m_pDisableWnd->GetSafeHwnd() ) )
 			ui::EnableWindow( m_pDisableWnd->GetSafeHwnd(), m_oldEnabled );				// restore original enabling state
 	}
 
@@ -181,14 +181,14 @@ private:
 struct CScopedDisableDropTarget
 {
 	CScopedDisableDropTarget( CWnd* pWnd )
-		: m_pWnd( HasFlag( ui::GetStyleEx( pWnd->GetSafeHwnd() ), WS_EX_ACCEPTFILES ) ? pWnd : NULL )
+		: m_pWnd( HasFlag( ui::GetStyleEx( pWnd->GetSafeHwnd() ), WS_EX_ACCEPTFILES ) ? pWnd : nullptr )
 	{
-		if ( m_pWnd != NULL )
+		if ( m_pWnd != nullptr )
 			m_pWnd->DragAcceptFiles( FALSE );
 	}
 	~CScopedDisableDropTarget()
 	{
-		if ( m_pWnd != NULL )
+		if ( m_pWnd != nullptr )
 			m_pWnd->DragAcceptFiles( TRUE );
 	}
 private:
@@ -209,7 +209,7 @@ struct CScopedDrawText
 {
 	CScopedDrawText( CDC* pDC, const CWnd* pCtrl, CFont* pFont, COLORREF textColor = color::Auto, COLORREF bkColor = CLR_NONE )
 		: m_pDC( pDC )
-		, m_pOldFont( m_pDC->SelectObject( pFont != NULL ? pFont : pCtrl->GetFont() ) )
+		, m_pOldFont( m_pDC->SelectObject( pFont != nullptr ? pFont : pCtrl->GetFont() ) )
 		, m_oldTextColor( m_pDC->SetTextColor( textColor != color::Auto ? textColor : GetSysColor( pCtrl->IsWindowEnabled() ? COLOR_BTNTEXT : COLOR_GRAYTEXT ) ) )
 		, m_oldBkColor( bkColor != CLR_NONE ? m_pDC->SetBkColor( bkColor ) : bkColor )
 		, m_oldBkMode( m_pDC->SetBkMode( CLR_NONE == bkColor ? TRANSPARENT : OPAQUE ) )
@@ -236,11 +236,11 @@ private:
 namespace ui
 {
 	template< typename Value >
-	void DDX_HexValue( CDataExchange* pDX, int ctrlId, Value& rValue, const TCHAR* pFormat = _T("0x%08X"), const Value* pNullValue = NULL )
+	void DDX_HexValue( CDataExchange* pDX, int ctrlId, Value& rValue, const TCHAR* pFormat = _T("0x%08X"), const Value* pNullValue = nullptr )
 	{
 		if ( !pDX->m_bSaveAndValidate )
 		{
-			if ( NULL == pNullValue || rValue != *pNullValue )
+			if ( nullptr == pNullValue || rValue != *pNullValue )
 				ddx::SetItemText( pDX, ctrlId, str::Format( pFormat, rValue ) );
 			else
 				ddx::SetItemText( pDX, ctrlId, std::tstring() );
@@ -250,7 +250,7 @@ namespace ui
 			std::tstring text = ddx::GetItemText( pDX, ctrlId );
 
 			if ( text.empty() )
-				if ( pNullValue != NULL )
+				if ( pNullValue != nullptr )
 					rValue = *pNullValue;
 				else
 				{
@@ -266,7 +266,7 @@ namespace ui
 	}
 
 	template< typename Handle >
-	inline void DDX_Handle( CDataExchange* pDX, int ctrlId, Handle& rHandle, const Handle* pNullHandle = NULL )
+	inline void DDX_Handle( CDataExchange* pDX, int ctrlId, Handle& rHandle, const Handle* pNullHandle = nullptr )
 	{
 		typedef DWORD_PTR THandleValue;
 		DDX_HexValue< THandleValue >( pDX, ctrlId, (THandleValue&)rHandle, _T("%08X"), (const THandleValue*)pNullHandle );
@@ -279,7 +279,7 @@ namespace app
 	template< typename Type >
 	bool GetProfileVector( std::vector< Type >& rOutVector, const TCHAR* pSection, const TCHAR* pEntry )
 	{
-		BYTE* pData = NULL;
+		BYTE* pData = nullptr;
 		UINT byteCount;
 		if ( !AfxGetApp()->GetProfileBinary( pSection, pEntry, &pData, &byteCount ) )
 			return false;
@@ -298,7 +298,7 @@ namespace app
 	template< typename Type >
 	bool WriteProfileVector( const std::vector< Type >& rVector, const TCHAR* pSection, const TCHAR* pEntry )
 	{
-		BYTE* pData = !rVector.empty() ? (BYTE*)( &rVector.front() ) : NULL;
+		BYTE* pData = !rVector.empty() ? (BYTE*)( &rVector.front() ) : nullptr;
 		UINT byteCount = static_cast<UINT>( rVector.size() * sizeof( Type ) );
 		return AfxGetApp()->WriteProfileBinary( pSection, pEntry, pData, byteCount ) != FALSE;
 	}

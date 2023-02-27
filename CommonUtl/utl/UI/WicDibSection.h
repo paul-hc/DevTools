@@ -22,10 +22,10 @@ public:
 	HBITMAP CloneBitmap( void ) const;
 
 	// GDI drawing (draws transparently if bitmap has alpha channel and rop is SRCCOPY)
-	CRect Draw( CDC* pDC, const CRect& boundsRect, ui::StretchMode stretchMode = ui::OriginalSize, CDC* pSrcDC = NULL, DWORD rop = SRCCOPY );		// returns the image rect
-	CRect DrawAtPos( CDC* pDC, const CPoint& pos, CDC* pSrcDC = NULL );
+	CRect Draw( CDC* pDC, const CRect& boundsRect, ui::StretchMode stretchMode = ui::OriginalSize, CDC* pSrcDC = nullptr, DWORD rop = SRCCOPY );		// returns the image rect
+	CRect DrawAtPos( CDC* pDC, const CPoint& pos, CDC* pSrcDC = nullptr );
 protected:
-	bool BlitNatural( CDC* pDC, const CRect& destRect, const CRect& srcRect, CDC* pSrcDC = NULL, DWORD rop = SRCCOPY ) const;		// alpha blends (transparently) if alpha channel present, otherwise it blits.
+	bool BlitNatural( CDC* pDC, const CRect& destRect, const CRect& srcRect, CDC* pSrcDC = nullptr, DWORD rop = SRCCOPY ) const;		// alpha blends (transparently) if alpha channel present, otherwise it blits.
 };
 
 

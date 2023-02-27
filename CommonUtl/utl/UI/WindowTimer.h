@@ -15,7 +15,7 @@ public:
 	UINT GetElapsed( void ) const { return m_elapsedMs; }
 	void SetElapsed( UINT elapsedMs );
 
-	bool IsStarted( void ) const { return m_eventId != 0 && m_pWnd->GetSafeHwnd() != NULL; }
+	bool IsStarted( void ) const { return m_eventId != 0 && m_pWnd->GetSafeHwnd() != nullptr; }
 	bool IsHit( UINT_PTR eventId ) const { return eventId == m_eventId && IsStarted(); }
 
 	void Start( void );

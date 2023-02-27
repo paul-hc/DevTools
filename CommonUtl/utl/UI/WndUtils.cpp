@@ -129,11 +129,11 @@ namespace ui
 
 namespace ui
 {
-	CPoint GetCursorPos( HWND hWnd /*= NULL*/ )
+	CPoint GetCursorPos( HWND hWnd /*= nullptr*/ )
 	{
 		CPoint mousePos;
 		::GetCursorPos( &mousePos );
-		if ( hWnd != NULL )
+		if ( hWnd != nullptr )
 			::ScreenToClient( hWnd, &mousePos );			// convert to client coords
 		return mousePos;
 	}
@@ -242,7 +242,7 @@ namespace ui
 	void MoveControlOver( HWND hDlg, UINT sourceCtrlId, UINT destCtrlId, bool hideDestCtrl /*= true*/ )
 	{
 		HWND hDestCtrl = ::GetDlgItem( hDlg, destCtrlId ), hSourceCtrl = ::GetDlgItem( hDlg, sourceCtrlId );
-		ASSERT( hDestCtrl != NULL && hSourceCtrl != NULL );
+		ASSERT( hDestCtrl != nullptr && hSourceCtrl != nullptr );
 
 		CRect destRect, sourceRect;
 		::GetWindowRect( hDlg, &destRect );
@@ -258,7 +258,7 @@ namespace ui
 	}
 
 	CWnd* AlignToPlaceholder( CWnd* pCtrl, int placeholderId,
-							  const CSize* pCustomSize /*= NULL*/, TAlignment alignment /*= NoAlign*/, CSize addBottomRight /*= CSize( 0, 0 )*/ )
+							  const CSize* pCustomSize /*= nullptr*/, TAlignment alignment /*= NoAlign*/, CSize addBottomRight /*= CSize( 0, 0 )*/ )
 	{
 		ASSERT_PTR( pCtrl->GetSafeHwnd() );
 
@@ -270,7 +270,7 @@ namespace ui
 		pParentWnd->ScreenToClient( &placeholderRect );
 
 		CRect ctrlRect = placeholderRect;
-		if ( pCustomSize != NULL )
+		if ( pCustomSize != nullptr )
 			ctrlRect.BottomRight() = ctrlRect.TopLeft() + *pCustomSize;
 
 		ctrlRect.BottomRight() += addBottomRight;
@@ -292,17 +292,17 @@ namespace ui
 
 		enum { Flags = SWP_NOMOVE | SWP_NOREDRAW | SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER };
 
-		::SetWindowPos( hWnd, NULL, 0, 0, windowRect.Width() - 1, windowRect.Height() - 1, Flags | SWP_NOSENDCHANGING );		// shrink it by 1 pixel
-		::SetWindowPos( hWnd, NULL, 0, 0, windowRect.Width(), windowRect.Height(), Flags );				// restore original size
+		::SetWindowPos( hWnd, nullptr, 0, 0, windowRect.Width() - 1, windowRect.Height() - 1, Flags | SWP_NOSENDCHANGING );		// shrink it by 1 pixel
+		::SetWindowPos( hWnd, nullptr, 0, 0, windowRect.Width(), windowRect.Height(), Flags );				// restore original size
 
-		::InvalidateRect( hWnd, NULL, TRUE );
+		::InvalidateRect( hWnd, nullptr, TRUE );
 	}
 
 
-	CCtrlPlace::CCtrlPlace( HWND hCtrl /*= NULL*/ )
+	CCtrlPlace::CCtrlPlace( HWND hCtrl /*= nullptr*/ )
 		: m_hCtrl( hCtrl )
 	{
-		if ( m_hCtrl != NULL )
+		if ( m_hCtrl != nullptr )
 			m_rect = ui::GetControlRect( m_hCtrl );
 	}
 
@@ -311,17 +311,17 @@ namespace ui
 		HDWP hdwp = ::BeginDeferWindowPos( static_cast<int>( ctrlPlaces.size() ) );
 		std::vector< CCtrlPlace >::const_iterator itCtrl, itEnd = ctrlPlaces.end();
 
-		for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd && hdwp != NULL; ++itCtrl )
-			hdwp = ::DeferWindowPos( hdwp, itCtrl->m_hCtrl, NULL,
+		for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd && hdwp != nullptr; ++itCtrl )
+			hdwp = ::DeferWindowPos( hdwp, itCtrl->m_hCtrl, nullptr,
 				itCtrl->m_rect.left, itCtrl->m_rect.top, itCtrl->m_rect.Width(), itCtrl->m_rect.Height(),
 				SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | swpFlags );
 
-		if ( NULL == hdwp || !::EndDeferWindowPos( hdwp ) )
+		if ( nullptr == hdwp || !::EndDeferWindowPos( hdwp ) )
 			return false;
 
 		if ( invalidate )
 			for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd; ++itCtrl )
-				::InvalidateRect( itCtrl->m_hCtrl, NULL, TRUE );
+				::InvalidateRect( itCtrl->m_hCtrl, nullptr, TRUE );
 
 		return true;
 	}
@@ -334,13 +334,13 @@ namespace ui
 	{
 		CToolTipCtrl* pOldTooltipCtrl = ui::GetThreadTooltipCtrl();
 
-		if ( pTooltipCtrl != pOldTooltipCtrl && pOldTooltipCtrl != NULL )
+		if ( pTooltipCtrl != pOldTooltipCtrl && pOldTooltipCtrl != nullptr )
 		{
 			pOldTooltipCtrl->DestroyWindow();
 			delete pOldTooltipCtrl;
 		}
 
-		if ( pTooltipCtrl->GetSafeHwnd() != NULL )
+		if ( pTooltipCtrl->GetSafeHwnd() != nullptr )
 			pTooltipCtrl->SendMessage( TTM_ACTIVATE, false );
 
 		AfxGetModuleThreadState()->m_pToolTip = pTooltipCtrl;
@@ -352,7 +352,7 @@ namespace ui
 {
 	HWND GetTopLevelParent( HWND hWnd )
 	{
-		while ( hWnd != NULL )
+		while ( hWnd != nullptr )
 			if ( ui::IsChild( hWnd ) )
 				hWnd = ::GetParent( hWnd );
 			else
@@ -365,7 +365,7 @@ namespace ui
 	{	// useful in shell extension DLLd to distinguish from windows created by the owner application
 		ASSERT_PTR( hWnd );
 
-		for ( CWnd* pParentPerm = CWnd::FromHandlePermanent( hWnd ); pParentPerm != NULL; )
+		for ( CWnd* pParentPerm = CWnd::FromHandlePermanent( hWnd ); pParentPerm != nullptr; )
 			if ( ui::IsTopLevel( pParentPerm->GetSafeHwnd() ) )
 				return pParentPerm;					// found top-level parent (non-child)
 			else
@@ -374,7 +374,7 @@ namespace ui
 				else
 					return pParentPerm;				// found top child window that's permanent
 
-		return NULL;
+		return nullptr;
 	}
 
 	DWORD GetWindowProcessId( HWND hWnd )
@@ -437,11 +437,11 @@ namespace ui
 		return false;
 	}
 
-	int GetDlgItemInt( HWND hDlg, UINT ctrlId, bool* pValid /*= NULL*/ )
+	int GetDlgItemInt( HWND hDlg, UINT ctrlId, bool* pValid /*= nullptr*/ )
 	{
 		BOOL valid;
 		int result = static_cast<int>( ::GetDlgItemInt( hDlg, ctrlId, &valid, TRUE ) );
-		if ( pValid != NULL )
+		if ( pValid != nullptr )
 			*pValid = valid != FALSE;
 		return result;
 	}
@@ -495,7 +495,7 @@ namespace ui
 			return false;
 
 		if ( IsTopLevel( hWnd ) )
-			::SetWindowPos( hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE | SWP_NOZORDER );
+			::SetWindowPos( hWnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE | SWP_NOZORDER );
 
 		RedrawControl( hWnd );
 		return true;
@@ -506,8 +506,8 @@ namespace ui
 		if ( !ui::IsVisible( hCtrl ) )
 			return false;
 
-		::RedrawWindow( hCtrl, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME );
-		::RedrawWindow( hCtrl, NULL, NULL, RDW_INVALIDATE );
+		::RedrawWindow( hCtrl, nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME );
+		::RedrawWindow( hCtrl, nullptr, nullptr, RDW_INVALIDATE );
 		return true;
 	}
 
@@ -515,7 +515,7 @@ namespace ui
 	bool BringWndUp( HWND hWnd )
 	{
 		if ( HWND hPrevious = ::GetWindow( hWnd, GW_HWNDPREV ) )
-			if ( ( hPrevious = ::GetWindow( hPrevious, GW_HWNDPREV ) ) != NULL )
+			if ( ( hPrevious = ::GetWindow( hPrevious, GW_HWNDPREV ) ) != nullptr )
 				return ::SetWindowPos( hWnd, hPrevious, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
 
 		return ui::BringWndToTop( hWnd );
@@ -575,7 +575,7 @@ namespace ui
 	bool OwnsFocus( HWND hWnd )
 	{
 		if ( HWND hFocusWnd = ::GetFocus() )
-			if ( hWnd != NULL )
+			if ( hWnd != nullptr )
 				if ( hFocusWnd == hWnd || ::IsChild( hWnd, hFocusWnd ) )
 					return true;
 
@@ -606,13 +606,13 @@ namespace ui
 
 	bool TriggerInput( HWND hParent )
 	{
-		if ( hParent != NULL && ui::OwnsFocus( hParent ) )
+		if ( hParent != nullptr && ui::OwnsFocus( hParent ) )
 			if ( CWnd* pFocusCtrl = CWnd::GetFocus() )
 				if ( ( (CEdit*)pFocusCtrl )->GetModify() )
 					if ( is_a<CEdit>( pFocusCtrl ) ||
 						 IsEditLikeCtrl( pFocusCtrl->m_hWnd ) )
 					{
-						::SetFocus( NULL );			// this will eventually trigger input on EN_KILLFOCUS
+						::SetFocus( nullptr );			// this will eventually trigger input on EN_KILLFOCUS
 
 						if ( IsWindow( pFocusCtrl->GetSafeHwnd() ) )
 							TakeFocus( *pFocusCtrl );
@@ -666,7 +666,7 @@ namespace ui
 			return false;
 
 		pCtrl->SetFont( pCtrlFont );		// note: it doesn't work for CEdit with ES_PASSWORD
-		pCtrl->SetWindowPos( pPrevCtrl != NULL ? pPrevCtrl : &CWnd::wndBottom, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE );		// move in tab order after the previous control
+		pCtrl->SetWindowPos( pPrevCtrl != nullptr ? pPrevCtrl : &CWnd::wndBottom, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE );		// move in tab order after the previous control
 
 		if ( ui::ILayoutEngine* pParentLayout = dynamic_cast<ui::ILayoutEngine*>( pParentDlg ) )		// a layout dialog?
 			pParentLayout->GetLayoutEngine().RefreshControlHandle( ctrlId );						// we have a new m_hControl
@@ -703,7 +703,7 @@ namespace ui
 		// make sure command has not become disabled before routing
 		CTestCmdUI state( cmdId );
 
-		if ( !pCmdTarget->OnCmdMsg( cmdId, CN_UPDATE_COMMAND_UI, &state, NULL ) )
+		if ( !pCmdTarget->OnCmdMsg( cmdId, CN_UPDATE_COMMAND_UI, &state, nullptr ) )
 			return false;			// not handled by this target
 
 		if ( state.m_enabled )
@@ -723,7 +723,7 @@ namespace ui
 		if ( !IsCommandEnabled( pCmdTarget, cmdId ) )
 			return true;		// handled: command disabled
 
-		return pCmdTarget->OnCmdMsg( cmdId, CN_COMMAND, NULL, NULL ) != FALSE;
+		return pCmdTarget->OnCmdMsg( cmdId, CN_COMMAND, nullptr, nullptr ) != FALSE;
 	}
 
 
@@ -775,11 +775,11 @@ namespace ui
 	{
 		notifyCode = LOWORD( notifyCode );			// translate to WORD for proper identification in AfxFindMessageEntry
 
-		for ( const AFX_MSGMAP* pMessageMap = FriendlyCmdTarget::_GetMessageMap( pCmdTarget ); pMessageMap->pfnGetBaseMap != NULL; pMessageMap = (*pMessageMap->pfnGetBaseMap)() )
+		for ( const AFX_MSGMAP* pMessageMap = FriendlyCmdTarget::_GetMessageMap( pCmdTarget ); pMessageMap->pfnGetBaseMap != nullptr; pMessageMap = (*pMessageMap->pfnGetBaseMap)() )
 			if ( const AFX_MSGMAP_ENTRY* pEntry = AfxFindMessageEntry( pMessageMap->lpEntries, message, notifyCode, id ) )
 				return pEntry;		// found it
 
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -950,11 +950,11 @@ namespace ui
 
 			CWnd* pCtrl = pDX->m_pDlgWnd->GetDlgItem( ctrlId );
 
-			if ( pCtrl != NULL )
+			if ( pCtrl != nullptr )
 				IsEditLikeCtrl( pCtrl->m_hWnd ) ? pDX->PrepareEditCtrl( ctrlId ) : pDX->PrepareCtrl( ctrlId );
 
 			if ( !validationError.empty() )
-				ShowInputError( pCtrl != NULL ? pCtrl : pDX->m_pDlgWnd, validationError );		// will also focus and select all text
+				ShowInputError( pCtrl != nullptr ? pCtrl : pDX->m_pDlgWnd, validationError );		// will also focus and select all text
 
 			pDX->Fail();	// will throw a CUserException, handled by CWnd::UpdateData()
 		}
@@ -1100,7 +1100,7 @@ namespace ui
 		if ( DialogOutput == pDX->m_bSaveAndValidate )
 			if ( CStatic* pStatic = (CStatic*)pDX->m_pDlgWnd->GetDlgItem( ctrlId ) )
 			{
-				if ( NULL == pStatic->GetIcon() )
+				if ( nullptr == pStatic->GetIcon() )
 					if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( CIconId( iconId.m_id != 0 ? iconId.m_id : ctrlId, iconId.m_stdSize ) ) )
 						pStatic->SetIcon( pIcon->GetHandle() );
 			}
@@ -1119,13 +1119,13 @@ namespace ui
 
 	HTREEITEM FindTreeItem( const CTreeCtrl& treeCtrl, const std::tstring& itemText, HTREEITEM hParent /*= TVI_ROOT*/ )
 	{
-		for ( HTREEITEM hChild = treeCtrl.GetChildItem( hParent ); hChild != NULL; hChild = treeCtrl.GetNextSiblingItem( hChild ) )
+		for ( HTREEITEM hChild = treeCtrl.GetChildItem( hParent ); hChild != nullptr; hChild = treeCtrl.GetNextSiblingItem( hChild ) )
 			if ( itemText == treeCtrl.GetItemText( hChild ).GetString() )
 				return hChild;
 			else if ( HTREEITEM hFoundItem = FindTreeItem( treeCtrl, itemText, hChild ) )
 				return hFoundItem;
 
-		return NULL;
+		return nullptr;
 	}
 
 	static pred::CompareResult CALLBACK CompareSubjectProc( LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort )
@@ -1142,11 +1142,11 @@ namespace ui
 	bool SortTreeChildren( const pred::IComparator* pComparator, CTreeCtrl& rTreeCtrl, HTREEITEM hParent /*= TVI_ROOT*/, RecursionDepth depth /*= Shallow*/ )
 	{
 		static const pred::Comparator<pred::TCompareCode> s_compareCodeAsc;
-		if ( NULL == pComparator )
+		if ( nullptr == pComparator )
 			pComparator = &s_compareCodeAsc;
 
 		if ( Deep == depth )
-			for ( HTREEITEM hChild = rTreeCtrl.GetChildItem( hParent ); hChild != NULL; hChild = rTreeCtrl.GetNextSiblingItem( hChild ) )
+			for ( HTREEITEM hChild = rTreeCtrl.GetChildItem( hParent ); hChild != nullptr; hChild = rTreeCtrl.GetNextSiblingItem( hChild ) )
 				SortTreeChildren( pComparator, rTreeCtrl, hChild, depth );
 
 		TVSORTCB sortInfo;
@@ -1213,20 +1213,20 @@ namespace ui
 	{
 		COMBOBOXINFO comboInfo = { sizeof( COMBOBOXINFO ) };
 		if ( rCombo.GetComboBoxInfo( &comboInfo ) )
-			if ( comboInfo.hwndItem != NULL )
+			if ( comboInfo.hwndItem != nullptr )
 				return (CEdit*)CWnd::FromHandle( comboInfo.hwndItem );
 
-		return NULL;
+		return nullptr;
 	}
 
 	CWnd* GetComboDropList( const CComboBox& rCombo )
 	{
 		COMBOBOXINFO comboInfo = { sizeof( COMBOBOXINFO ) };
 		if ( rCombo.GetComboBoxInfo( &comboInfo ) )
-			if ( comboInfo.hwndList != NULL )
+			if ( comboInfo.hwndList != nullptr )
 				return (CEdit*)CWnd::FromHandle( comboInfo.hwndList );
 
-		return NULL;
+		return nullptr;
 	}
 
 	std::tstring GetComboSelText( const CComboBox& rCombo, ComboField byField /*= BySel*/ )
@@ -1365,7 +1365,7 @@ namespace ui
 
 	void MakeStandardControlFont( CFont& rOutFont, const ui::CFontInfo& fontInfo /*= ui::CFontInfo()*/, int stockFontType /*= DEFAULT_GUI_FONT*/ )
 	{
-		if ( NULL == rOutFont.m_hObject )			// create font once (friendly with static font data members)
+		if ( nullptr == rOutFont.m_hObject )			// create font once (friendly with static font data members)
 		{
 			CFont* pStockFont = CFont::FromHandle( (HFONT)::GetStockObject( stockFontType ) );
 			ASSERT_PTR( pStockFont );
@@ -1374,7 +1374,7 @@ namespace ui
 			memset( &logFont, 0, sizeof( LOGFONT ) );
 			pStockFont->GetLogFont( &logFont );
 
-			if ( fontInfo.m_pFaceName != NULL )
+			if ( fontInfo.m_pFaceName != nullptr )
 			{
 				logFont.lfCharSet = DEFAULT_CHARSET;
 				_tcscpy( logFont.lfFaceName, fontInfo.m_pFaceName );
@@ -1395,10 +1395,10 @@ namespace ui
 
 	void MakeEffectControlFont( CFont& rOutFont, CFont* pSourceFont, TFontEffect fontEffect /*= ui::Regular*/, int heightPct /*= 100*/ )
 	{
-		if ( rOutFont.m_hObject != NULL )
+		if ( rOutFont.m_hObject != nullptr )
 			return;				// create once
 
-		if ( NULL == pSourceFont )
+		if ( nullptr == pSourceFont )
 			pSourceFont = CFont::FromHandle( (HFONT)::GetStockObject( DEFAULT_GUI_FONT ) );
 		ASSERT_PTR( pSourceFont->GetSafeHandle() );
 
@@ -1440,7 +1440,7 @@ namespace ui
 			return &m_sourceFont;
 
 		CFont*& rpFount = m_effectFonts[ fontEffect ];
-		if ( NULL == rpFount )
+		if ( nullptr == rpFount )
 		{
 			rpFount = new CFont();
 			MakeEffectControlFont( *rpFount, &m_sourceFont, fontEffect );
@@ -1458,7 +1458,7 @@ namespace ui
 	}
 
 
-	bool PumpPendingMessages( HWND hWnd /*= NULL*/ )
+	bool PumpPendingMessages( HWND hWnd /*= nullptr*/ )
 	{
 		// eat all messages in queue, no OnIdle() though
 		MSG msg;
@@ -1472,7 +1472,7 @@ namespace ui
 		return true;
 	}
 
-	bool EatPendingMessages( HWND hWnd /*= NULL*/, UINT minMessage /*= WM_TIMER*/, UINT maxMessage /*= WM_TIMER*/ )
+	bool EatPendingMessages( HWND hWnd /*= nullptr*/, UINT minMessage /*= WM_TIMER*/, UINT maxMessage /*= WM_TIMER*/ )
 	{
 		int msgCount = 0;
 		MSG msg;

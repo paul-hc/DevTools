@@ -31,7 +31,7 @@ namespace ui
 
 // CScopedLockRedraw implementation
 
-CScopedLockRedraw::CScopedLockRedraw( CWnd* pWnd, CScopedWindowBorder* pBorder /*= NULL*/, bool doRedraw /*= true*/ )
+CScopedLockRedraw::CScopedLockRedraw( CWnd* pWnd, CScopedWindowBorder* pBorder /*= nullptr*/, bool doRedraw /*= true*/ )
 	: m_pWnd( pWnd )
 	, m_doRedraw( doRedraw )
 	, m_pBorder( pBorder )
@@ -47,7 +47,7 @@ CScopedLockRedraw::~CScopedLockRedraw()
 
 	if ( m_doRedraw )
 	{
-		m_pWnd->RedrawWindow( NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME );		// redraw scrollbars
+		m_pWnd->RedrawWindow( nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME );		// redraw scrollbars
 		m_pWnd->Invalidate();
 	}
 }
@@ -55,9 +55,9 @@ CScopedLockRedraw::~CScopedLockRedraw()
 
 // CNonClientDraw implementation
 
-CNonClientDraw::CNonClientDraw( CWnd* pWnd, INonClientRender* pCallback /*= NULL*/ )
+CNonClientDraw::CNonClientDraw( CWnd* pWnd, INonClientRender* pCallback /*= nullptr*/ )
 	: m_pWnd( pWnd )
-	, m_pCallback( pCallback != NULL ? pCallback : dynamic_cast<INonClientRender*>( m_pWnd ) )
+	, m_pCallback( pCallback != nullptr ? pCallback : dynamic_cast<INonClientRender*>( m_pWnd ) )
 {
 	ASSERT_PTR( m_pWnd->GetSafeHwnd() );
 	HookWindow( *m_pWnd );
@@ -72,7 +72,7 @@ CNonClientDraw::~CNonClientDraw()
 LRESULT CNonClientDraw::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
 {
 	LRESULT result = CWindowHook::WindowProc( message, wParam, lParam );
-	if ( WM_NCPAINT == message && m_pCallback != NULL )
+	if ( WM_NCPAINT == message && m_pCallback != nullptr )
 	{
 		CWindowDC dc( m_pWnd );
 		m_pCallback->DrawNonClient( &dc, ui::GetControlRect( *m_pWnd ) );		// in parent's coords
@@ -118,7 +118,7 @@ void CScopedWindowBorder::RedrawBorder( void )
 
 	// according to documentation should use RDW_INVALIDATE, but that interferes with client region, which is undesirable for tree control;
 	// seems to work fine with just RDW_FRAME
-	m_pWnd->RedrawWindow( NULL, &borderRegion, RDW_FRAME );		// redraw non-client border
+	m_pWnd->RedrawWindow( nullptr, &borderRegion, RDW_FRAME );		// redraw non-client border
 }
 
 

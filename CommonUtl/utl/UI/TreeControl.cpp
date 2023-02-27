@@ -33,7 +33,7 @@ namespace tv
 CTreeControl::CTreeControl( void )
 	: CBaseTrackMenuWnd<CTreeCtrl>()
 	, CListLikeCtrlBase( this )
-	, m_pImageList( NULL )
+	, m_pImageList( nullptr )
 	, m_indentNoImages( 0 )
 	, m_indentWithImages( 0 )
 	, m_imageSize( 0, 0 )
@@ -53,7 +53,7 @@ bool CTreeControl::Copy( void )
 {
 	HTREEITEM hSelItem = GetSelectedItem();
 	return
-		hSelItem != NULL &&
+		hSelItem != nullptr &&
 		CTextClipboard::CopyText( FormatCode( GetItemObject< utl::ISubject >( hSelItem ) ), m_hWnd );
 }
 
@@ -61,11 +61,11 @@ void CTreeControl::StoreImageList( CImageList* pImageList )
 {
 	m_pImageList = pImageList;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		SetImageList( m_pImageList, TVSIL_NORMAL );
 
-		if ( UINT indent = m_pImageList != NULL ? m_indentWithImages : m_indentNoImages )
+		if ( UINT indent = m_pImageList != nullptr ? m_indentWithImages : m_indentNoImages )
 			SetIndent( indent );
 
 		UpdateCustomImagerBoundsSize();
@@ -77,7 +77,7 @@ CImageList* CTreeControl::SetImageList( CImageList* pImageList, int imageType )
 {
 	CImageList* pOldImageList = __super::SetImageList( pImageList, imageType );
 
-	if ( pImageList != NULL && TVSIL_NORMAL == imageType )
+	if ( pImageList != nullptr && TVSIL_NORMAL == imageType )
 		if ( 0 == m_indentWithImages )
 			m_indentWithImages = GetIndent();
 
@@ -91,12 +91,12 @@ void CTreeControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
 	if ( showGlyphs )
 		StoreImageList( m_pCustomImager->GetImageList( ui::SmallGlyph ) );
 	else
-		StoreImageList( NULL );
+		StoreImageList( nullptr );
 }
 
 void CTreeControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize /*= CSize( 0, 0 )*/ )
 {
-	if ( pCustomImageDraw != NULL )
+	if ( pCustomImageDraw != nullptr )
 	{
 		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, imageSize, imageSize ) );
 		StoreImageList( m_pCustomImager->GetImageList( ui::SmallGlyph ) );
@@ -104,23 +104,23 @@ void CTreeControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, c
 	else
 	{
 		m_pCustomImager.reset();
-		StoreImageList( NULL );
+		StoreImageList( nullptr );
 	}
 }
 
 HTREEITEM CTreeControl::InsertObjectItem( HTREEITEM hParent, const utl::ISubject* pObject, int imageIndex /*= ui::No_Image*/, UINT state /*= TVIS_EXPANDED*/,
-										  HTREEITEM hInsertAfter /*= TVI_LAST*/, const TCHAR* pText /*= NULL*/ )
+										  HTREEITEM hInsertAfter /*= TVI_LAST*/, const TCHAR* pText /*= nullptr*/ )
 {
 	std::tstring displayCode;
-	if ( pObject != NULL )
-		if ( NULL == pText )
+	if ( pObject != nullptr )
+		if ( nullptr == pText )
 		{
 			displayCode = FormatCode( pObject );
 			pText = displayCode.c_str();
 		}
 
 	if ( ui::Transparent_Image == imageIndex )
-		imageIndex = m_pCustomImager.get() != NULL ? m_pCustomImager->GetTranspImageIndex() : 0;
+		imageIndex = m_pCustomImager.get() != nullptr ? m_pCustomImager->GetTranspImageIndex() : 0;
 
 	UINT mask = TVIF_TEXT | TVIF_PARAM | TVIF_STATE;
 	if ( imageIndex != ui::No_Image )
@@ -144,7 +144,7 @@ bool CTreeControl::DeleteItem( HTREEITEM hItem )
 
 void CTreeControl::DeleteChildren( HTREEITEM hItem )
 {
-	for ( HTREEITEM hChildItem = GetChildItem( hItem ); hChildItem != NULL; )
+	for ( HTREEITEM hChildItem = GetChildItem( hItem ); hChildItem != nullptr; )
 	{
 		HTREEITEM hNextItem = GetNextSiblingItem( hChildItem );
 
@@ -188,7 +188,7 @@ bool CTreeControl::CustomDrawItemIcon( const NMTVCUSTOMDRAW* pDraw, HICON hIcon,
 	if ( !GetIconItemRect( &itemImageRect, hItem ) )
 		return false;
 
-	::DrawIconEx( pDraw->nmcd.hdc, itemImageRect.left, itemImageRect.top, hIcon, itemImageRect.Width(), itemImageRect.Height(), 0, NULL, diFlags );
+	::DrawIconEx( pDraw->nmcd.hdc, itemImageRect.left, itemImageRect.top, hIcon, itemImageRect.Width(), itemImageRect.Height(), 0, nullptr, diFlags );
 	return true;
 }
 
@@ -252,7 +252,7 @@ int CTreeControl::GetItemIndentLevel( HTREEITEM hItem ) const
 
 	int indentLevel = 0;
 
-	while ( ( hItem = GetParentItem( hItem ) ) != NULL )
+	while ( ( hItem = GetParentItem( hItem ) ) != nullptr )
 		++indentLevel;
 
 	return indentLevel;
@@ -284,7 +284,7 @@ bool CTreeControl::SelectItem( HTREEITEM hItem )
 	if ( !__super::SelectItem( hItem ) )
 		return false;
 
-	if ( hItem != NULL )
+	if ( hItem != nullptr )
 		EnsureVisible( hItem );
 	return true;
 }
@@ -301,7 +301,7 @@ bool CTreeControl::RefreshItem( HTREEITEM hItem )
 bool CTreeControl::SetSelected( const utl::ISubject* pObject )
 {
 	HTREEITEM hItem = FindItemWithObject( pObject );
-	return hItem != NULL && SelectItem( hItem );
+	return hItem != nullptr && SelectItem( hItem );
 }
 
 void CTreeControl::ExpandBranch( HTREEITEM hItem, bool expand /*= true*/ )
@@ -315,7 +315,7 @@ void CTreeControl::ExpandBranch( HTREEITEM hItem, bool expand /*= true*/ )
 
 bool CTreeControl::UpdateCustomImagerBoundsSize( void )
 {
-	if ( m_pCustomImager.get() != NULL )
+	if ( m_pCustomImager.get() != nullptr )
 		return m_pCustomImager->SetCurrGlyphGauge( ui::SmallGlyph );
 
 	return false;			// no change
@@ -326,7 +326,7 @@ void CTreeControl::SetupControl( void )
 	CListLikeCtrlBase::SetupControl();
 
 	m_indentNoImages = GetIndent();
-	if ( m_pImageList != NULL )
+	if ( m_pImageList != nullptr )
 		SetImageList( m_pImageList, TVSIL_NORMAL );
 
 	UpdateCustomImagerBoundsSize();
@@ -379,7 +379,7 @@ void CTreeControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	HTREEITEM hitIndex = HitTest( ui::ScreenToClient( m_hWnd, screenPos ), &flags );
 	hitIndex, pWnd;
 
-	if ( m_contextMenu.GetSafeHmenu() != NULL )
+	if ( m_contextMenu.GetSafeHmenu() != nullptr )
 	{
 		ui::TrackPopupMenu( m_contextMenu, m_pTrackMenuTarget, screenPos );
 		return;						// supress rising WM_CONTEXTMENU to the parent
@@ -410,7 +410,7 @@ BOOL CTreeControl::OnTvnRClick_Reflect( NMHDR* /*pNmHdr*/, LRESULT* pResult )
 BOOL CTreeControl::OnTvnDblClk_Reflect( NMHDR* /*pNmHdr*/, LRESULT* pResult )
 {
 	if ( HTREEITEM hSelItem = GetSelectedItem() )
-		if ( m_contextMenu.GetSafeHmenu() != NULL )
+		if ( m_contextMenu.GetSafeHmenu() != nullptr )
 			if ( UINT defCmdId = ::GetMenuDefaultItem( m_contextMenu, FALSE, 0 ) )
 				ui::SendCommand( ::GetParent( m_hWnd ), defCmdId );
 
@@ -441,13 +441,13 @@ BOOL CTreeControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 			if ( draw.ApplyItemTextEffect() )
 				*pResult |= CDRF_NEWFONT;
 
-			if ( m_pCustomImager.get() != NULL )
+			if ( m_pCustomImager.get() != nullptr )
 				*pResult |= CDRF_NOTIFYPOSTPAINT;				// will superimpose the thumbnail on top of transparent image (on CDDS_ITEMPOSTPAINT drawing stage)
 
 			break;
 
 		case CDDS_ITEMPOSTPAINT:
-			if ( m_pCustomImager.get() != NULL )
+			if ( m_pCustomImager.get() != nullptr )
 			{
 				CRect itemImageRect;
 				if ( GetIconItemRect( &itemImageRect, draw.m_hItem ) )		// visible item?
@@ -471,5 +471,5 @@ void CTreeControl::OnEditCopy( void )
 
 void CTreeControl::OnUpdateEditCopy( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( GetSelectedItem() != NULL );
+	pCmdUI->Enable( GetSelectedItem() != nullptr );
 }

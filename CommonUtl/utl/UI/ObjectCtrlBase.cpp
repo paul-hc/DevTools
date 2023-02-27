@@ -45,7 +45,7 @@ namespace ui
 
 
 CObjectCtrlBase::CObjectCtrlBase( CWnd* pCtrl, UINT ctrlAccelId /*= 0*/ )
-	: m_pSubjectAdapter( NULL )
+	: m_pSubjectAdapter( nullptr )
 	, m_pCtrl( pCtrl )
 	, m_pTrackMenuTarget( m_pCtrl )
 	, m_shCtxStyle( ExplorerSubMenu )
@@ -70,7 +70,7 @@ void CObjectCtrlBase::SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter )
 
 bool CObjectCtrlBase::IsInternalCmdId( int cmdId ) const
 {
-	if ( m_pShellMenuHost.get() != NULL )
+	if ( m_pShellMenuHost.get() != nullptr )
 		if ( m_pShellMenuHost->HasShellCmd( cmdId ) )
 			return true;
 
@@ -79,7 +79,7 @@ bool CObjectCtrlBase::IsInternalCmdId( int cmdId ) const
 
 bool CObjectCtrlBase::HandleCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
-	if ( m_pShellMenuHost.get() != NULL )
+	if ( m_pShellMenuHost.get() != nullptr )
 		if ( m_pShellMenuHost->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 			return true;
 
@@ -89,7 +89,7 @@ bool CObjectCtrlBase::HandleCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHAND
 bool CObjectCtrlBase::TranslateMessage( MSG* pMsg )
 {
 	return
-		m_ctrlAccel.GetAccel() != NULL &&
+		m_ctrlAccel.GetAccel() != nullptr &&
 		m_ctrlAccel.Translate( pMsg, m_pTrackMenuTarget->m_hWnd, m_pCtrl->m_hWnd );
 }
 
@@ -109,14 +109,14 @@ CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::ve
 	REQUIRE( !filePaths.empty() );
 	ASSERT_NULL( m_pShellMenuHost.get() );
 
-	if ( ExplorerSubMenu == m_shCtxStyle && NULL == pSrcPopupMenu )
+	if ( ExplorerSubMenu == m_shCtxStyle && nullptr == pSrcPopupMenu )
 		m_shCtxStyle = ShellMenuLast;
 
 	CComPtr<IContextMenu> pContextMenu = shell::MakeFilePathsContextMenu( filePaths, m_pCtrl->m_hWnd );
-	if ( pContextMenu == NULL )
-		return NULL;
+	if ( pContextMenu == nullptr )
+		return nullptr;
 
-	CMenu* pContextPopup = CMenu::FromHandle( ui::CloneMenu( pSrcPopupMenu != NULL ? pSrcPopupMenu->GetSafeHmenu() : ::CreatePopupMenu() ) );
+	CMenu* pContextPopup = CMenu::FromHandle( ui::CloneMenu( pSrcPopupMenu != nullptr ? pSrcPopupMenu->GetSafeHmenu() : ::CreatePopupMenu() ) );
 
 	if ( ExplorerSubMenu == m_shCtxStyle )
 	{
@@ -146,7 +146,7 @@ CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::ve
 		return pContextPopup;
 
 	m_pShellMenuHost.reset();
-	return NULL;
+	return nullptr;
 }
 
 bool CObjectCtrlBase::DoTrackContextMenu( CMenu* pPopupMenu, const CPoint& screenPos )
@@ -155,7 +155,7 @@ bool CObjectCtrlBase::DoTrackContextMenu( CMenu* pPopupMenu, const CPoint& scree
 
 	int cmdId = 0;
 
-	if ( m_pShellMenuHost.get() != NULL )
+	if ( m_pShellMenuHost.get() != nullptr )
 		cmdId = m_pShellMenuHost->TrackMenu( pPopupMenu, screenPos, TPM_RIGHTBUTTON );
 	else
 		cmdId = ui::TrackPopupMenu( *pPopupMenu, m_pTrackMenuTarget, screenPos );

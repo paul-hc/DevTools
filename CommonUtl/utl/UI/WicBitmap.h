@@ -35,7 +35,7 @@ public:
 		return m_pBitmapOrigin->IsValid();
 	}
 
-	bool IsValid( void ) const { return m_pBitmapOrigin.get() != NULL && GetBmpFmt().IsValid(); }
+	bool IsValid( void ) const { return m_pBitmapOrigin.get() != nullptr && GetBmpFmt().IsValid(); }
 	wic::CBitmapOrigin& GetOrigin( void ) const { return *m_pBitmapOrigin; }
 	const wic::CBitmapFormat& GetBmpFmt( void ) const { return GetOrigin().GetBmpFmt(); }
 private:

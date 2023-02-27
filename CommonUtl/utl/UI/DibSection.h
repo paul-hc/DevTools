@@ -24,7 +24,7 @@ class CDibSection : public CBitmap
 			_CopyMask = F_IsPng | F_HasAlpha | F_AutoTranspColor
 	};
 public:
-	CDibSection( HBITMAP hDib = NULL, bool ownsDib = false );
+	CDibSection( HBITMAP hDib = nullptr, bool ownsDib = false );
 	virtual ~CDibSection();
 
 	// base overrides
@@ -40,7 +40,7 @@ public:
 	bool Convert( const CDibSection& srcDib, UINT destBitsPerPixel );
 	bool CopyPixels( const CDibSection& srcDib, bool keepOrientation = false );							// via CDibPixels; pretty unreliable
 
-	bool IsValid( void ) const { return GetSafeHandle() != NULL; }
+	bool IsValid( void ) const { return GetSafeHandle() != nullptr; }
 	bool IsDibSection( void ) const;
 	bool IsIndexed( void ) const { ASSERT( IsDibSection() ); return m_bitsPerPixel <= 8; }
 	const CDibMeta& GetSrcMeta( void ) const { return m_srcDibMeta; }		// source image information preserved

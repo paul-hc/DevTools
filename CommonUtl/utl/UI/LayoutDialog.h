@@ -30,11 +30,11 @@ class CLayoutDialog : public TMfcBaseDialog
 protected:
 	CLayoutDialog( void );			// for modeless dialog
 public:
-	CLayoutDialog( UINT templateId, CWnd* pParent = NULL );
-	CLayoutDialog( const TCHAR* pTemplateName, CWnd* pParent = NULL );
+	CLayoutDialog( UINT templateId, CWnd* pParent = nullptr );
+	CLayoutDialog( const TCHAR* pTemplateName, CWnd* pParent = nullptr );
 	virtual ~CLayoutDialog();
 
-	bool CreateModeless( UINT templateId = 0, CWnd* pParentWnd = NULL, int cmdShow = SW_SHOW );		// works with both modal and modeless constructors
+	bool CreateModeless( UINT templateId = 0, CWnd* pParentWnd = nullptr, int cmdShow = SW_SHOW );		// works with both modal and modeless constructors
 	bool IsModeless( void ) const { return m_modeless; }
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }

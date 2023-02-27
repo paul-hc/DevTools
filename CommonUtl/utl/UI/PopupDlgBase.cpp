@@ -42,18 +42,18 @@ const CIcon* CPopupDlgBase::GetDlgIcon( DlgIcon dlgIcon /*= DlgSmallIcon*/ ) con
 {
 	if ( m_dlgIconId != 0 )
 		return ui::GetImageStoresSvc()->RetrieveIcon( CIconId( m_dlgIconId, DlgSmallIcon == dlgIcon ? SmallIcon : LargeIcon ) );
-	return NULL;
+	return nullptr;
 }
 
 void CPopupDlgBase::LoadDlgIcon( UINT dlgIconId )
 {
 	// normally called prior to creation
 	ui::IImageStore* pStoreSvc = ui::GetImageStoresSvc();
-	if ( pStoreSvc->RetrieveIcon( CIconId( dlgIconId, SmallIcon ) ) != NULL )
+	if ( pStoreSvc->RetrieveIcon( CIconId( dlgIconId, SmallIcon ) ) != nullptr )
 		m_dlgIconId = dlgIconId;
 
 	// main dialogs need to manage both small and large icons at once
-	if ( pStoreSvc->RetrieveIcon( CIconId( dlgIconId, LargeIcon ) ) != NULL )
+	if ( pStoreSvc->RetrieveIcon( CIconId( dlgIconId, LargeIcon ) ) != nullptr )
 		m_dlgIconId = dlgIconId;
 
 	if ( m_dlgIconId != 0 )
@@ -145,7 +145,7 @@ bool CPopupWndPool::AddWindow( CWnd* pPopupTopWnd )
 {
 	ASSERT_PTR( pPopupTopWnd );
 	ASSERT( !utl::Contains( m_popupWnds, pPopupTopWnd ) );
-	ASSERT( NULL == pPopupTopWnd->GetSafeHwnd() || ui::IsTopLevel( pPopupTopWnd->GetSafeHwnd() ) );		// a top-level window?
+	ASSERT( nullptr == pPopupTopWnd->GetSafeHwnd() || ui::IsTopLevel( pPopupTopWnd->GetSafeHwnd() ) );		// a top-level window?
 
 	if ( pPopupTopWnd == AfxGetMainWnd() )
 		return false;			// we keep track of all top-level popups except the main application window
@@ -171,7 +171,7 @@ bool CPopupWndPool::SendIdleUpdates( CWnd* pPopupWnd )
 {
 	ASSERT_PTR( pPopupWnd );
 
-	if ( pPopupWnd->GetSafeHwnd() != NULL )
+	if ( pPopupWnd->GetSafeHwnd() != nullptr )
 		if ( pPopupWnd->IsWindowVisible() )
 		{
 			// send WM_IDLEUPDATECMDUI to the main window

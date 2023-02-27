@@ -9,23 +9,23 @@
 #endif
 
 
-CDibPixels::CDibPixels( const CDibSection* pDibSection /*= NULL*/ )
-	: m_pDibSection( NULL )
+CDibPixels::CDibPixels( const CDibSection* pDibSection /*= nullptr*/ )
+	: m_pDibSection( nullptr )
 	, m_ownsDib( false )
-	, m_pPixels( NULL )
+	, m_pPixels( nullptr )
 {
-	if ( pDibSection != NULL && pDibSection->IsValid() )
+	if ( pDibSection != nullptr && pDibSection->IsValid() )
 		Init( *pDibSection );
 }
 
 CDibPixels::CDibPixels( HBITMAP hDib, gdi::Orientation orientation /*= gdi::BottomUp*/ )
 	: m_pDibSection( MakeLocalDibSection( hDib ) )			// create a local owned object that doesn't own the handle
 	, m_ownsDib( true )
-	, m_pPixels( NULL )
+	, m_pPixels( nullptr )
 	, m_orientation( orientation )							// a top-down DIB if height is negative
 {
 	CDibSectionInfo dibInfo( hDib );
-	if ( m_pDibSection != NULL && dibInfo.IsValid() )
+	if ( m_pDibSection != nullptr && dibInfo.IsValid() )
 	{
 		REQUIRE( dibInfo.GetHeight() > 0 );					// GetObject should always returns positive
 
@@ -50,8 +50,9 @@ CDibPixels::~CDibPixels()
 CDibSection* CDibPixels::MakeLocalDibSection( HBITMAP hDib )
 {
 	ASSERT_PTR( hDib );
-	if ( is_a<CDibSection>( CGdiObject::FromHandle( hDib ) ) != NULL )
-		return NULL;				// should've called the overloaded constructor
+	if ( is_a<CDibSection>( CGdiObject::FromHandle( hDib ) ) )
+		return nullptr;				// should've called the overloaded constructor
+
 	return new CDibSection( hDib );
 }
 
@@ -80,16 +81,16 @@ void CDibPixels::Reset( void )
 	if ( !IsValid() )
 		return;
 
-	if ( m_ownsDib && m_pDibSection != NULL )
+	if ( m_ownsDib && m_pDibSection != nullptr )
 	{
 		m_pDibSection->Detach();			// no ownership on the DIB handle
 		delete m_pDibSection;
 	}
 
-	m_pDibSection = NULL;
+	m_pDibSection = nullptr;
 	m_ownsDib = false;
 
-	m_pPixels = NULL;
+	m_pPixels = nullptr;
 	m_bufferSize = 0;
 	m_orientation = gdi::BottomUp;
 	m_width = m_height = 0;
@@ -99,7 +100,7 @@ void CDibPixels::Reset( void )
 
 HBITMAP CDibPixels::GetHandle( void ) const
 {
-	return m_pDibSection != NULL ? m_pDibSection->GetHandle() : NULL;
+	return m_pDibSection != nullptr ? m_pDibSection->GetHandle() : nullptr;
 }
 
 bmp::CSharedAccess* CDibPixels::GetTarget( void ) const
@@ -119,7 +120,7 @@ bool CDibPixels::FlipBottomUp( void )
 
 COLORREF* CDibPixels::GetTranspColorPtr( void )
 {
-	return m_pDibSection->HasTranspColor() ? &m_pDibSection->RefTranspColor() : NULL;
+	return m_pDibSection->HasTranspColor() ? &m_pDibSection->RefTranspColor() : nullptr;
 }
 
 bool CDibPixels::ContainsAlpha( void ) const

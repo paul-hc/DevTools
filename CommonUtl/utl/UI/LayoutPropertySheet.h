@@ -20,7 +20,7 @@ protected:
 public:
 	virtual ~CLayoutPropertySheet();
 
-	bool CreateModeless( CWnd* pParent = NULL, DWORD style = UINT_MAX, DWORD styleEx = 0 );
+	bool CreateModeless( CWnd* pParent = nullptr, DWORD style = UINT_MAX, DWORD styleEx = 0 );
 
 	enum SingleTransactionButtons { ShowOkCancel, ShowOnlyClose };
 

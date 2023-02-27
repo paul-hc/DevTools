@@ -37,7 +37,7 @@ CRegistryOptions::~CRegistryOptions()
 const std::tstring& CRegistryOptions::GetSectionName( void ) const
 {
 	IRegistrySection* pSection = GetSection();
-	return pSection != NULL ? pSection->GetSectionName() : str::GetEmpty();
+	return pSection != nullptr ? pSection->GetSectionName() : str::GetEmpty();
 }
 
 void CRegistryOptions::SetSectionName( const std::tstring& sectionName )
@@ -122,7 +122,7 @@ reg::CBaseOption* CRegistryOptions::FindOptionByID( UINT ctrlId ) const
 		if ( (*itOption)->HasCtrlId( ctrlId ) )
 			return *itOption;
 
-	return NULL;
+	return nullptr;
 }
 
 void CRegistryOptions::UpdateControls( CWnd* pTargetWnd )
@@ -204,7 +204,7 @@ namespace reg
 
 	CBaseOption::CBaseOption( const TCHAR* pEntry )
 		: m_entry( SkipDataMemberPrefix( pEntry ) )
-		, m_pParent( NULL )
+		, m_pParent( nullptr )
 		, m_ctrlId( 0 )
 	{
 		ASSERT( !m_entry.empty() );
@@ -257,7 +257,7 @@ namespace reg
 
 	void CEnumOption::Load( void )
 	{
-		if ( m_pTags != NULL )
+		if ( m_pTags != nullptr )
 		{
 			std::tstring keyTag = GetSection()->GetStringParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
 			int newValue;
@@ -272,7 +272,7 @@ namespace reg
 
 	void CEnumOption::Save( void ) const
 	{
-		if ( m_pTags != NULL )
+		if ( m_pTags != nullptr )
 			GetSection()->SaveParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
 		else
 			TBaseClass::Save();

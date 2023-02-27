@@ -25,7 +25,7 @@ namespace ui
 
 	bool CTextEffect::AssignPtr( const CTextEffect* pRight )
 	{
-		if ( NULL == pRight )
+		if ( nullptr == pRight )
 			return false;
 
 		if ( pRight != this )
@@ -52,7 +52,7 @@ namespace ui
 
 	bool CTextEffect::CombinePtr( const CTextEffect* pRight )
 	{
-		if ( NULL == pRight )
+		if ( nullptr == pRight )
 			return false;
 
 		Combine( *pRight );

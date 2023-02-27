@@ -29,7 +29,7 @@ public:
 public:
 	// base overrides
 	virtual bool HasRhsPart( void ) const { return m_rhsIconId.IsValid() || !m_rhsText.empty(); }
-	virtual CRect GetRhsPartRect( const CRect* pClientRect = NULL ) const;
+	virtual CRect GetRhsPartRect( const CRect* pClientRect = nullptr ) const;
 protected:
 	virtual void DrawRhsPart( CDC* pDC, const CRect& clientRect );
 	virtual void DrawFocus( CDC* pDC, const CRect& clientRect );

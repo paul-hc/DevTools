@@ -13,7 +13,7 @@ class CDibSection;
 class CDibPixels : protected bmp::CSharedAccess
 {
 public:
-	CDibPixels( const CDibSection* pDibSection = NULL );
+	CDibPixels( const CDibSection* pDibSection = nullptr );
 	CDibPixels( HBITMAP hDib, gdi::Orientation orientation = gdi::BottomUp );
 	~CDibPixels();
 
@@ -22,7 +22,7 @@ public:
 	const CDibSection* GetDib( void ) const { return m_pDibSection; }
 	virtual HBITMAP GetHandle( void ) const;
 
-	bool IsValid( void ) const { ASSERT( ( m_pDibSection == NULL ) == ( m_pPixels == NULL ) ); return m_pPixels != NULL; }
+	bool IsValid( void ) const { ASSERT( ( m_pDibSection == nullptr ) == ( m_pPixels == nullptr ) ); return m_pPixels != nullptr; }
 	bool IsIndexed( void ) const { ASSERT( IsValid() ); return m_bitsPerPixel <= 8; }
 	gdi::Orientation GetOrientation( void ) const { ASSERT( IsValid() ); return m_orientation; }
 	bool HasAlpha( void ) const { return 32 == m_bitsPerPixel; }

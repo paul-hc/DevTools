@@ -21,7 +21,7 @@ protected:
 	// composite overridables
 	virtual CBaseMenuBuilder* GetParentBuilder( void ) const = 0;
 
-	bool IsShellMenu( void ) const { return NULL == GetParentBuilder(); }
+	bool IsShellMenu( void ) const { return nullptr == GetParentBuilder(); }
 	bool IsSubMenuMenu( void ) const { return !IsShellMenu(); }
 private:
 	CShellContextMenuBuilder* m_pShellBuilder;

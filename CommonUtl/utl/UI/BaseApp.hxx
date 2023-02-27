@@ -21,7 +21,7 @@
 // CBaseApp template code
 
 template< typename BaseClass >
-CBaseApp<BaseClass>::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
+CBaseApp<BaseClass>::CBaseApp( const TCHAR* pAppName /*= nullptr*/ )
 	: BaseClass( pAppName )
 	, CAppTools()
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
@@ -131,7 +131,7 @@ bool CBaseApp<BaseClass>::LazyInitAppResources( void )
 template< typename BaseClass >
 inline bool CBaseApp<BaseClass>::IsConsoleApp( void ) const
 {
-	return NULL == m_pMainWnd;
+	return nullptr == m_pMainWnd;
 }
 
 template< typename BaseClass >
@@ -155,7 +155,7 @@ inline utl::CResourcePool& CBaseApp<BaseClass>::GetSharedResources( void )
 template< typename BaseClass >
 CImageStore* CBaseApp<BaseClass>::GetSharedImageStore( void )
 {
-	if ( NULL == m_pSharedImageStore.get() )
+	if ( nullptr == m_pSharedImageStore.get() )
 	{	// lazy creation of the shared image store
 		m_pSharedImageStore.reset( new CImageStore() );
 		m_pSharedResources->AddAutoPtr( &m_pSharedImageStore );
@@ -232,7 +232,7 @@ template< typename BaseClass >
 void CBaseApp<BaseClass>::OnUpdateAppAbout( CCmdUI* pCmdUI )
 {
 	CWnd* pForegroundWnd = CWnd::GetForegroundWindow();
-	pCmdUI->Enable( pForegroundWnd != NULL && !is_a<CAboutBox>( pForegroundWnd ) );
+	pCmdUI->Enable( pForegroundWnd != nullptr && !is_a<CAboutBox>( pForegroundWnd ) );
 	ui::ExpandVersionInfoTags( pCmdUI );		// expand "[InternalName]"
 }
 

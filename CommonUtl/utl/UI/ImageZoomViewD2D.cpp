@@ -64,18 +64,18 @@ namespace d2d
 
 	void CImageRenderTarget::HandleAnimEvent( void )
 	{
-		if ( m_pAnimComposer.get() != NULL && m_pAnimComposer->UsesImage( GetImage() ) )
+		if ( m_pAnimComposer.get() != nullptr && m_pAnimComposer->UsesImage( GetImage() ) )
 			m_pAnimComposer->HandleAnimEvent();
 	}
 
 	void CImageRenderTarget::SetupCurrentImage( void )
 	{
 		CWicImage* pImage = GetImage();
-		SetWicBitmap( pImage != NULL ? pImage->GetWicBitmap() : NULL );
+		SetWicBitmap( pImage != nullptr ? pImage->GetWicBitmap() : nullptr );
 
-		if ( pImage != NULL && pImage->IsAnimated() )
+		if ( pImage != nullptr && pImage->IsAnimated() )
 		{
-			if ( NULL == m_pAnimComposer.get() || !m_pAnimComposer->UsesImage( pImage ) )
+			if ( nullptr == m_pAnimComposer.get() || !m_pAnimComposer->UsesImage( pImage ) )
 			{
 				m_pAnimComposer.reset( new CAnimatedFrameComposer( this, checked_static_cast<CWicAnimatedImage*>( pImage ) ) );
 				m_pAnimComposer->Create();
@@ -95,7 +95,7 @@ namespace d2d
 	{
 		__super::DiscardDeviceResources();
 
-		if ( m_pAnimComposer.get() != NULL )
+		if ( m_pAnimComposer.get() != nullptr )
 			m_pAnimComposer->Reset();
 	}
 
@@ -104,7 +104,7 @@ namespace d2d
 		if ( !__super::CreateDeviceResources() )
 			return false;
 
-		return NULL == m_pAnimComposer.get() || m_pAnimComposer->Create();
+		return nullptr == m_pAnimComposer.get() || m_pAnimComposer->Create();
 	}
 
 	void CImageRenderTarget::StartAnimation( UINT frameDelay )
@@ -121,7 +121,7 @@ namespace d2d
 	{
 		const ui::IZoomView* pZoomView = m_pImageView->GetZoomView();
 
-		if ( NULL == GetImage() || pZoomView->HasViewStatusFlag( ui::ZoomMouseTracking ) )			// don't show any gadget in zoom tracking mode
+		if ( nullptr == GetImage() || pZoomView->HasViewStatusFlag( ui::ZoomMouseTracking ) )			// don't show any gadget in zoom tracking mode
 			return false;
 
 		if ( pGadget == m_pAccentFrameGadget.get() )
@@ -135,7 +135,7 @@ namespace d2d
 
 	void CImageRenderTarget::DrawBitmap( const CViewCoords& coords, const CBitmapCoords& bmpCoords )
 	{
-		if ( m_pAnimComposer.get() != NULL )
+		if ( m_pAnimComposer.get() != nullptr )
 			m_pAnimComposer->DrawBitmap( coords, bmpCoords );			// draw current animated frame
 		else
 			__super::DrawBitmap( coords, bmpCoords );					// draw static image
@@ -148,7 +148,7 @@ namespace d2d
 		COLORREF bkColor = pZoomView->GetBkColor();
 
 		if ( pZoomView->IsAccented() )
-			if ( pZoomView->HasViewStatusFlag( ui::FullScreen | ui::ZoomMouseTracking ) || NULL == GetImage() )
+			if ( pZoomView->HasViewStatusFlag( ui::FullScreen | ui::ZoomMouseTracking ) || nullptr == GetImage() )
 				bkColor = CBaseZoomView::MakeAccentedBkColor( bkColor );					// use accented background highlight
 
 		ClearBackground( bkColor );
@@ -184,7 +184,7 @@ CImageZoomViewD2D::~CImageZoomViewD2D()
 CSize CImageZoomViewD2D::GetSourceSize( void ) const
 {
 	CWicImage* pImage = GetImage();
-	return pImage != NULL ? pImage->GetBmpSize() : CSize( 0, 0 );
+	return pImage != nullptr ? pImage->GetBmpSize() : CSize( 0, 0 );
 }
 
 ui::IZoomView* CImageZoomViewD2D::GetZoomView( void )
@@ -205,7 +205,7 @@ void CImageZoomViewD2D::PrintImageGdi( CDC* pPrintDC, CWicImage* pImage )
 	REQUIRE( pPrintDC->IsPrinting() );
 	ASSERT_PTR( pImage );
 
-	::SetBrushOrgEx( pPrintDC->m_hDC, 0, 0, NULL );
+	::SetBrushOrgEx( pPrintDC->m_hDC, 0, 0, nullptr );
 
 	CRect prnPageRect( 0, 0, pPrintDC->GetDeviceCaps( HORZRES ), pPrintDC->GetDeviceCaps( VERTRES ) );		// printer page rect in pixels
 	CSize prnDpi( pPrintDC->GetDeviceCaps( LOGPIXELSX ), pPrintDC->GetDeviceCaps( LOGPIXELSY ) );			// printer resolution in pixels per inch
@@ -230,10 +230,10 @@ void CImageZoomViewD2D::OnDraw( CDC* pDC )
 
 	if ( pDC->IsPrinting() )
 	{
-		if ( pImage != NULL )
+		if ( pImage != nullptr )
 			PrintImageGdi( pDC, pImage );
 	}
-	else if ( m_pImageRT.get() != NULL )
+	else if ( m_pImageRT.get() != nullptr )
 	{
 		m_pImageRT->EnsureDeviceResources();
 
@@ -281,7 +281,7 @@ void CImageZoomViewD2D::OnSize( UINT sizeType, int cx, int cy )
 
 void CImageZoomViewD2D::OnTimer( UINT_PTR eventId )
 {
-	if ( m_pImageRT.get() != NULL && m_pImageRT->IsAnimEvent( eventId ) )
+	if ( m_pImageRT.get() != nullptr && m_pImageRT->IsAnimEvent( eventId ) )
 		m_pImageRT->HandleAnimEvent();
 	else
 		__super::OnTimer( eventId );

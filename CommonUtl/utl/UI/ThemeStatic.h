@@ -33,7 +33,7 @@ protected:
 	virtual void DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus );
 
 	void DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::Status drawStatus, CDC* pDC, CRect& rRect, const std::tstring& text, UINT dtFlags,
-						   CFont* pFallbackFont = NULL ) const;
+						   CFont* pFallbackFont = nullptr ) const;
 public:
 	CThemeItem m_bkgndItem;
 	CThemeItem m_contentItem;
@@ -131,7 +131,7 @@ class CLinkStatic : public CThemeStatic
 public:
 	enum { ColorVirginLink = RGB( 0, 0, 255 ), ColorVisitedLink = RGB( 128, 0, 128 ) };
 
-	CLinkStatic( const TCHAR* pLinkPrefix = NULL );
+	CLinkStatic( const TCHAR* pLinkPrefix = nullptr );
 	virtual ~CLinkStatic();
 
 	std::tstring GetLinkText( void ) const;

@@ -42,7 +42,7 @@ template< typename ObjectT >
 void CReportListControl::SetObjectsCheckedState( const std::vector< ObjectT* >* pObjects, int checkState /*= BST_CHECKED*/, bool uncheckOthers /*= true*/ )
 {
 	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
-		if ( NULL == pObjects || utl::Contains( *pObjects, GetPtrAt<ObjectT>( i ) ) )
+		if ( nullptr == pObjects || utl::Contains( *pObjects, GetPtrAt<ObjectT>( i ) ) )
 			ModifyCheckState( i, checkState );
 		else if ( uncheckOthers )
 			ModifyCheckState( i, BST_UNCHECKED );
@@ -53,14 +53,14 @@ template< typename ObjectT >
 ObjectT* CReportListControl::GetCaretAs( void ) const
 {
 	int caretIndex = GetCaretIndex();
-	return caretIndex != -1 ? GetPtrAt<ObjectT>( caretIndex ) : NULL;
+	return caretIndex != -1 ? GetPtrAt<ObjectT>( caretIndex ) : nullptr;
 }
 
 template< typename ObjectT >
 ObjectT* CReportListControl::GetSelected( void ) const
 {
 	int selIndex = GetCurSel();
-	return selIndex != -1 ? GetPtrAt<ObjectT>( selIndex ) : NULL;
+	return selIndex != -1 ? GetPtrAt<ObjectT>( selIndex ) : nullptr;
 }
 
 template< typename ObjectT >

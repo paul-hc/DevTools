@@ -18,14 +18,14 @@ namespace sys_tray
 {
 	bool HasSystemTray( void )
 	{
-		return CSystemTray::Instance() != NULL;
+		return CSystemTray::Instance() != nullptr;
 	}
 
-	bool ShowBalloonMessage( const std::tstring& text, const TCHAR* pTitle /*= NULL*/, app::MsgType msgType /*= app::Info*/, UINT timeoutSecs /*= 0*/ )
+	bool ShowBalloonMessage( const std::tstring& text, const TCHAR* pTitle /*= nullptr*/, app::MsgType msgType /*= app::Info*/, UINT timeoutSecs /*= 0*/ )
 	{
 		if ( CSystemTray* pSystemTray = CSystemTray::Instance() )
 			if ( CTrayIcon* pMsgTrayIcon = pSystemTray->FindMessageIcon() )
-				return pMsgTrayIcon->ShowBalloonTip( text, pTitle != NULL ? pTitle : pMsgTrayIcon->GetTooltipText().c_str(), msgType, timeoutSecs );
+				return pMsgTrayIcon->ShowBalloonTip( text, pTitle != nullptr ? pTitle : pMsgTrayIcon->GetTooltipText().c_str(), msgType, timeoutSecs );
 
 		return false;
 	}
@@ -43,30 +43,30 @@ namespace sys_tray
 
 // CSystemTray implementation
 
-CSystemTray* CSystemTray::s_pInstance = NULL;
+CSystemTray* CSystemTray::s_pInstance = nullptr;
 const UINT CSystemTray::WM_TASKBARCREATED = ::RegisterWindowMessage( _T("TaskbarCreated") );
 const UINT CSystemTray::WM_TRAYICONNOTIFY = ::RegisterWindowMessageA( "utl:WM_TRAYICONNOTIFY" );
 
 CSystemTray::CSystemTray( void )
-	: m_pOwnerCallback( NULL )
+	: m_pOwnerCallback( nullptr )
 	, m_mainTrayIconId( 0 )
 	, m_restoreShowCmd( SW_SHOWNORMAL )
 {
-	if ( NULL == s_pInstance )
+	if ( nullptr == s_pInstance )
 		s_pInstance = this;
 }
 
 CSystemTray::~CSystemTray()
 {
 	if ( this == s_pInstance )
-		s_pInstance = NULL;
+		s_pInstance = nullptr;
 
 	ASSERT( m_icons.empty() );		// should've been deleted in OnDestroy()
 }
 
 CWnd* CSystemTray::GetOwnerWnd( void ) const
 {
-	return m_pOwnerCallback != NULL ? m_pOwnerCallback->GetOwnerWnd() : NULL;
+	return m_pOwnerCallback != nullptr ? m_pOwnerCallback->GetOwnerWnd() : nullptr;
 }
 
 size_t CSystemTray::FindIconPos( UINT trayIconId ) const
@@ -83,7 +83,7 @@ CTrayIcon* CSystemTray::FindIcon( UINT trayIconId ) const
 	size_t foundPos = FindIconPos( trayIconId );
 
 	if ( utl::npos == foundPos )
-		return NULL;
+		return nullptr;
 
 	return m_icons[ foundPos ];
 }
@@ -99,10 +99,10 @@ CTrayIcon* CSystemTray::FindMessageIcon( void ) const
 {
 	CTrayIcon* pTrayIcon = FindIcon( IDR_MESSAGE_TRAY_ICON );	// usually the auto-hide application icon
 
-	if ( NULL == pTrayIcon )
+	if ( nullptr == pTrayIcon )
 		pTrayIcon = FindMainIcon();							// pick the main icon
 
-	if ( NULL == pTrayIcon && !m_icons.empty() )
+	if ( nullptr == pTrayIcon && !m_icons.empty() )
 		pTrayIcon = m_icons.front();						// pick the first available tray icon
 
 	return pTrayIcon;
@@ -146,7 +146,7 @@ bool CSystemTray::IsMinimizedToTray( const CWnd* pOwnerWnd )
 {
 	ASSERT_PTR( pOwnerWnd );
 
-	bool isOwnerWnd = CSystemTray::Instance() != NULL && CSystemTray::Instance()->GetOwnerWnd() == pOwnerWnd;
+	bool isOwnerWnd = CSystemTray::Instance() != nullptr && CSystemTray::Instance()->GetOwnerWnd() == pOwnerWnd;
 	bool isMinimized = isOwnerWnd && HasFlag( pOwnerWnd->m_nFlags, WF_EX_MinimizedToTray );
 
 	// consistent with visibility state?
@@ -158,7 +158,7 @@ bool CSystemTray::IsMinimizedToTray( const CWnd* pOwnerWnd )
 
 bool CSystemTray::IsRestoreToMaximized( const CWnd* pOwnerWnd )
 {
-	bool isOwnerWnd = CSystemTray::Instance() != NULL && CSystemTray::Instance()->GetOwnerWnd() == pOwnerWnd;
+	bool isOwnerWnd = CSystemTray::Instance() != nullptr && CSystemTray::Instance()->GetOwnerWnd() == pOwnerWnd;
 	bool restoreToMaximized = isOwnerWnd && HasFlag( pOwnerWnd->m_nFlags, WF_EX_RestoreToMaximized );
 
 	ENSURE( !isOwnerWnd || restoreToMaximized == (SW_SHOWMAXIMIZED == CSystemTray::Instance()->m_restoreShowCmd) );		// consistent with tray show cmd?
@@ -201,7 +201,7 @@ void CSystemTray::OnOwnerWndStatusChanged( void )
 {
 	bool isMinimized = IsMinimizedToTray( GetOwnerWnd() );
 
-	if ( m_pOwnerCallback != NULL )
+	if ( m_pOwnerCallback != nullptr )
 		if ( CMenu* pContextMenu = m_pOwnerCallback->GetTrayIconContextMenu() )
 			pContextMenu->SetDefaultItem( isMinimized
 				? UINT_MAX									// prevent Restore on double-click, since we restore on single L-click
@@ -223,7 +223,7 @@ void CSystemTray::HandleDestroy( void )
 
 bool CSystemTray::HandleSysCommand( UINT sysCmdId )
 {
-	if ( m_pOwnerCallback != NULL )
+	if ( m_pOwnerCallback != nullptr )
 		switch ( sysCmdId )
 		{
 			case SC_MAXIMIZE:
@@ -268,7 +268,7 @@ bool CSystemTray::HandleTrayIconNotify( WPARAM wParam, LPARAM lParam )
 
 	dbg::TraceTrayNotifyCode( msgNotifyCode );
 
-	if ( m_pOwnerCallback != NULL )
+	if ( m_pOwnerCallback != nullptr )
 		if ( m_pOwnerCallback->OnTrayIconNotify( msgNotifyCode, trayIconId, screenPos ) )
 			return true;			// event handled by the owner (skip default handling)
 
@@ -286,15 +286,15 @@ CSystemTrayWnd::CSystemTrayWnd( void )
 
 CSystemTrayWnd::~CSystemTrayWnd()
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		DestroyWindow();
 }
 
 CWnd* CSystemTrayWnd::EnsurePopupWnd( void )
 {
 	// create once an invisible top-level popup window
-	if ( NULL == m_hWnd )
-		if ( !CreateEx( 0, AfxRegisterWndClass( 0 ), _T("<HiddenTrayIconPopup>"), WS_POPUP, 0, 0, 0, 0, NULL, 0 ) )
+	if ( nullptr == m_hWnd )
+		if ( !CreateEx( 0, AfxRegisterWndClass( 0 ), _T("<HiddenTrayIconPopup>"), WS_POPUP, 0, 0, 0, 0, nullptr, 0 ) )
 			ASSERT( false );
 
 	return this;

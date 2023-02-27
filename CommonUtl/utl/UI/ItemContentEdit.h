@@ -11,7 +11,7 @@
 class CItemContentEdit : public CBaseItemContentCtrl<CTextEdit>
 {
 public:
-	CItemContentEdit( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL );
+	CItemContentEdit( ui::ContentType type = ui::String, const TCHAR* pFileFilter = nullptr );
 	virtual ~CItemContentEdit();
 protected:
 	// base overrides

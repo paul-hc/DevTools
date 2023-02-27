@@ -16,7 +16,7 @@ CToolStrip::~CToolStrip()
 
 CToolStrip& CToolStrip::AddButton( UINT buttonId, UINT iconId /*= (UINT)UseButtonId*/ )
 {
-	HICON hIcon = NULL;
+	HICON hIcon = nullptr;
 
 	if ( buttonId != ID_SEPARATOR )
 	{
@@ -32,7 +32,7 @@ CToolStrip& CToolStrip::AddButton( UINT buttonId, UINT iconId /*= (UINT)UseButto
 			default:
 			{
 				hIcon = ui::GetImageStoresSvc()->RetrieveIcon( CIconId( iconId, GetIconStdSize() ) )->GetSafeHandle();
-				if ( NULL == hIcon )
+				if ( nullptr == hIcon )
 				{
 					ASSERT( false );		// missing icon resource: fallback to loading the button icon
 					hIcon = ui::GetImageStoresSvc()->RetrieveIcon( btnIconId )->GetSafeHandle();
@@ -40,7 +40,7 @@ CToolStrip& CToolStrip::AddButton( UINT buttonId, UINT iconId /*= (UINT)UseButto
 			}
 		}
 
-		if ( NULL == hIcon )
+		if ( nullptr == hIcon )
 		{	// missing store icon: use a placeholder
 			TRACE( "(!) Missing image for toolstrip button: buttonId=%d,  iconId=%d\n", buttonId, iconId );
 			hIcon = CIcon::GetUnknownIcon().GetHandle();
@@ -52,9 +52,9 @@ CToolStrip& CToolStrip::AddButton( UINT buttonId, UINT iconId /*= (UINT)UseButto
 
 CToolStrip& CToolStrip::AddButton( UINT buttonId, HICON hIcon )
 {
-	if ( hIcon != NULL )
+	if ( hIcon != nullptr )
 	{
-		if ( NULL == m_pImageList.get() )
+		if ( nullptr == m_pImageList.get() )
 			CreateImageList();
 
 		ENSURE( GetImageSize() == CIconInfo( hIcon ).m_size );		// ensure equivalent size to prevent scaling distorsions
@@ -75,7 +75,7 @@ CToolStrip& CToolStrip::AddButton( UINT buttonId, HICON hIcon )
 
 CToolStrip& CToolStrip::AddButtons( const UINT buttonIds[], size_t buttonCount, IconStdSize iconStdSize /*= SmallIcon*/ )
 {
-	ASSERT( buttonIds != NULL && buttonCount != 0 );
+	ASSERT( buttonIds != nullptr && buttonCount != 0 );
 
 	SetImageSize( iconStdSize );
 

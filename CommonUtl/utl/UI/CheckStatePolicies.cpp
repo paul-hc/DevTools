@@ -13,13 +13,13 @@
 
 namespace ui
 {
-	bool IsCheckBoxState( int checkState, const ui::ICheckStatePolicy* pCheckStatePolicy /*= NULL*/ )
+	bool IsCheckBoxState( int checkState, const ui::ICheckStatePolicy* pCheckStatePolicy /*= nullptr*/ )
 	{
 		switch ( checkState )
 		{
 			case BST_UNCHECKED:
 			case BST_CHECKED:
-				return NULL == pCheckStatePolicy || pCheckStatePolicy->IsEnabledState( checkState );
+				return nullptr == pCheckStatePolicy || pCheckStatePolicy->IsEnabledState( checkState );
 		}
 		return false;
 	}

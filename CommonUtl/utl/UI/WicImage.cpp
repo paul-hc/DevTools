@@ -19,13 +19,13 @@ CWicImage::CWicImage( const WICPixelFormatGUID* pCvtPixelFormat /*= &GUID_WICPix
 	, m_key( s_nullKey )
 	, m_frameCount( 0 )
 	, m_pCvtPixelFormat( pCvtPixelFormat )
-	, m_pSharedDecoder( NULL )
+	, m_pSharedDecoder( nullptr )
 {
 }
 
 CWicImage::~CWicImage()
 {
-	if ( m_pSharedDecoder != NULL )
+	if ( m_pSharedDecoder != nullptr )
 		if ( !m_pSharedDecoder->UnloadFrame( this ) )						// no frames loaded anymore?
 			VERIFY( SharedMultiFrameDecoders().Remove( m_key.first ) );		// removed the registered shared decoder
 }
@@ -55,7 +55,7 @@ std::auto_ptr<CWicImage> CWicImage::CreateFromFile( const fs::TImagePathKey& ima
 			}
 		}
 	}
-	if ( NULL == pNewImage.get() )
+	if ( nullptr == pNewImage.get() )
 		pNewImage.reset( new CWicImage() );
 
 	if ( !pNewImage->LoadDecoderFrame( decoder, imageKey ) )
@@ -247,7 +247,7 @@ bool CWicImage::CMultiFrameDecoder::UnloadFrame( CWicImage* pFrameImage )
 	size_t foundPos = FindPosLoaded( pFrameImage->GetFramePos() );
 	if ( foundPos != utl::npos )
 	{
-		pFrameImage->SetSharedDecoder( NULL );
+		pFrameImage->SetSharedDecoder( nullptr );
 		m_loadedFrames.erase( m_loadedFrames.begin() + foundPos );
 	}
 	else
@@ -261,14 +261,14 @@ namespace ui
 {
 	// CImageFileDetails implementation
 
-	void CImageFileDetails::Reset( const CWicImage* pImage /*= NULL*/ )
+	void CImageFileDetails::Reset( const CWicImage* pImage /*= nullptr*/ )
 	{
 		m_filePath.Clear();
 		m_isAnimated = false;
 		m_fileSize = m_framePos = m_frameCount = m_navigPos = m_navigCount = 0;
 		m_dimensions = CSize( 0, 0 );
 
-		if ( pImage != NULL )
+		if ( pImage != nullptr )
 		{
 			m_filePath = pImage->GetImagePath();
 			m_isAnimated = pImage->IsAnimated();
@@ -328,14 +328,14 @@ namespace fs
 			return;
 
 		ULONG elemCount = 0;
-		for ( CComPtr<IUnknown> pElement; S_OK == pEnum->Next( 1, &pElement, &elemCount ); pElement = NULL )
+		for ( CComPtr<IUnknown> pElement; S_OK == pEnum->Next( 1, &pElement, &elemCount ); pElement = nullptr )
 		{
 			CComQIPtr<IWICBitmapCodecInfo> pDecoderInfo( pElement );	// IWICBitmapCodecInfo is common base of IWICBitmapDecoderInfo, IWICBitmapEncoderInfo
 			std::tstring name, specs;
 			{
 				UINT nameLen = 0, extsLen = 0;
-				pDecoderInfo->GetFriendlyName( 0, NULL, &nameLen );		// get necessary buffer sizes
-				pDecoderInfo->GetFileExtensions( 0, NULL, &extsLen );
+				pDecoderInfo->GetFriendlyName( 0, nullptr, &nameLen );		// get necessary buffer sizes
+				pDecoderInfo->GetFileExtensions( 0, nullptr, &extsLen );
 
 				std::vector< wchar_t > nameBuffer( nameLen ), extsBuffer( extsLen );
 				pDecoderInfo->GetFriendlyName( nameLen, &nameBuffer.front(), &nameLen );
@@ -357,9 +357,9 @@ namespace fs
 
 namespace shell
 {
-	bool BrowseImageFile( fs::CPath& rFilePath, BrowseMode browseMode /*= FileOpen*/, DWORD flags /*= 0*/, CWnd* pParentWnd /*= NULL*/ )
+	bool BrowseImageFile( fs::CPath& rFilePath, BrowseMode browseMode /*= FileOpen*/, DWORD flags /*= 0*/, CWnd* pParentWnd /*= nullptr*/ )
 	{
 		fs::CFilterJoiner filterJoiner( fs::CImageFilterStore::Instance( browseMode ) );
-		return filterJoiner.BrowseFile( rFilePath, browseMode, flags, NULL, pParentWnd );
+		return filterJoiner.BrowseFile( rFilePath, browseMode, flags, nullptr, pParentWnd );
 	}
 }

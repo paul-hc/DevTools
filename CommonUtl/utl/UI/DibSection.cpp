@@ -15,17 +15,17 @@
 #include "Image_fwd.hxx"
 
 
-CBitmap* CDibSection::s_pNullMask = NULL;
+CBitmap* CDibSection::s_pNullMask = nullptr;
 int CDibSection::m_testFlags = 0;
 
-CDibSection::CDibSection( HBITMAP hDib /*= NULL*/, bool ownsDib /*= false*/ )
+CDibSection::CDibSection( HBITMAP hDib /*= nullptr*/, bool ownsDib /*= false*/ )
 	: CBitmap()
 	, m_flags( 0 )
 	, m_bitsPerPixel( 0 )
 	, m_bitmapSize( 0, 0 )
 	, m_transpColor( CLR_NONE )
 {
-	if ( hDib != NULL )
+	if ( hDib != nullptr )
 	{
 		CDibMeta dibMeta( hDib );
 		dibMeta.StorePixelFormat();
@@ -64,7 +64,7 @@ bool CDibSection::AttachDib( const CDibMeta& dibMeta )
 	SetFlag( m_flags, F_HasAlpha, dibMeta.HasAlpha() );
 
 	DIBSECTION dibSection;
-	if ( dibMeta.m_hDib != NULL )
+	if ( dibMeta.m_hDib != nullptr )
 		if ( sizeof( DIBSECTION ) == ::GetObject( dibMeta.m_hDib, sizeof( DIBSECTION ), &dibSection ) )
 		{
 			m_bitsPerPixel = dibSection.dsBm.bmBitsPixel;
@@ -160,7 +160,7 @@ bool CDibSection::Convert( const CDibSection& srcDib, UINT destBitsPerPixel )
 	}
 	else
 	{
-		CScopedBitmapMemDC scopedDestBitmap( this, NULL, m_bitsPerPixel < 24 );		// we need a mem DC only for 1/4/8/16 bpp
+		CScopedBitmapMemDC scopedDestBitmap( this, nullptr, m_bitsPerPixel < 24 );		// we need a mem DC only for 1/4/8/16 bpp
 
 		CDibPixels srcPixels( &srcDib );
 		destPixels.CopyPixels( srcPixels );
@@ -198,7 +198,7 @@ bool CDibSection::CopyPixels( const CDibSection& srcDib, bool keepOrientation /*
 	if ( !CreateDIBSection( pixels, *bitmapInfo.GetBitmapInfo() ) )
 		return false;
 
-	CScopedBitmapMemDC scopedDestBitmap( this, NULL, m_bitsPerPixel < 24 );		// we need a mem DC only for 1/4/8/16 bpp
+	CScopedBitmapMemDC scopedDestBitmap( this, nullptr, m_bitsPerPixel < 24 );		// we need a mem DC only for 1/4/8/16 bpp
 
 	CDibPixels srcPixels( &srcDib );
 	pixels.CopyPixels( srcPixels );
@@ -345,7 +345,7 @@ bool CDibSection::CreateDIBSection( CDibPixels& rPixels, const BITMAPINFO& dibIn
 
 	// if pSrcDC not null and has the source bitmap selected, it will copy the source colour table
 	void* pPixels;
-	if ( HBITMAP hDib = ::CreateDIBSection( NULL, &dibInfo, DIB_RGB_COLORS, &pPixels, NULL, 0 ) )
+	if ( HBITMAP hDib = ::CreateDIBSection( nullptr, &dibInfo, DIB_RGB_COLORS, &pPixels, nullptr, 0 ) )
 	{
 		CDibMeta dibMeta( hDib );
 		dibMeta.StorePixelFormat( dibInfo );
@@ -357,7 +357,7 @@ bool CDibSection::CreateDIBSection( CDibPixels& rPixels, const BITMAPINFO& dibIn
 		return true;
 	}
 
-	return GetSafeHandle() != NULL;
+	return GetSafeHandle() != nullptr;
 }
 
 bool CDibSection::CreateDIBSection( CDibPixels& rPixels, int width, int height, UINT bitsPerPixel )

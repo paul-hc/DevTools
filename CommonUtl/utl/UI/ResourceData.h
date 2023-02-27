@@ -11,8 +11,8 @@ public:
 	CResourceData( const TCHAR* pResId, const TCHAR* pResType );
 	~CResourceData();
 
-	bool IsValid( void ) const { return m_pResource != NULL; }
-	DWORD GetSize( void ) const { return m_pResource != NULL ? ::SizeofResource( m_hInst, m_hResource ) : 0; }
+	bool IsValid( void ) const { return m_pResource != nullptr; }
+	DWORD GetSize( void ) const { return m_pResource != nullptr ? ::SizeofResource( m_hInst, m_hResource ) : 0; }
 
 	template< typename ResourceType >
 	const ResourceType* GetResource( void ) const { return static_cast<const ResourceType*>( m_pResource ); }

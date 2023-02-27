@@ -16,7 +16,7 @@
 CListLikeCtrlBase::CListLikeCtrlBase( CWnd* pCtrl, UINT ctrlAccelId /*= 0*/ )
 	: CObjectCtrlBase( pCtrl, ctrlAccelId )
 	, m_useExplorerTheme( true )
-	, m_pTextEffectCallback( NULL )
+	, m_pTextEffectCallback( nullptr )
 {
 	CFileItemsThumbnailStore::Instance().RegisterControl( this );
 }
@@ -30,8 +30,8 @@ void CListLikeCtrlBase::SetUseExplorerTheme( bool useExplorerTheme /*= true*/ )
 {
 	m_useExplorerTheme = useExplorerTheme;
 
-	if ( m_pCtrl->m_hWnd != NULL )
-		CVisualTheme::SetWindowTheme( m_pCtrl->m_hWnd, GetUseExplorerTheme() ? L"Explorer" : L"", NULL );		// enable Explorer vs classic theme
+	if ( m_pCtrl->m_hWnd != nullptr )
+		CVisualTheme::SetWindowTheme( m_pCtrl->m_hWnd, GetUseExplorerTheme() ? L"Explorer" : L"", nullptr );		// enable Explorer vs classic theme
 }
 
 CBaseCustomDrawImager* CListLikeCtrlBase::GetCustomDrawImager( void ) const
@@ -41,18 +41,18 @@ CBaseCustomDrawImager* CListLikeCtrlBase::GetCustomDrawImager( void ) const
 
 void CListLikeCtrlBase::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
 {
-	m_pCustomImager.reset( showGlyphs ? new CFileGlyphCustomDrawImager( ui::SmallGlyph ) : NULL );
+	m_pCustomImager.reset( showGlyphs ? new CFileGlyphCustomDrawImager( ui::SmallGlyph ) : nullptr );
 }
 
 void CListLikeCtrlBase::SetupControl( void )
 {
 	if ( GetUseExplorerTheme() )
-		CVisualTheme::SetWindowTheme( m_pCtrl->m_hWnd, L"Explorer", NULL );		// enable Explorer theme
+		CVisualTheme::SetWindowTheme( m_pCtrl->m_hWnd, L"Explorer", nullptr );		// enable Explorer theme
 }
 
 ui::CFontEffectCache* CListLikeCtrlBase::GetFontEffectCache( void )
 {
-	if ( NULL == m_pFontCache.get() )
+	if ( nullptr == m_pFontCache.get() )
 		m_pFontCache.reset( new ui::CFontEffectCache( m_pCtrl->GetFont() ) );
 	return m_pFontCache.get();
 }
@@ -60,20 +60,20 @@ ui::CFontEffectCache* CListLikeCtrlBase::GetFontEffectCache( void )
 void CListLikeCtrlBase::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
 	ASSERT( this == pCtrl );
-	if ( m_pTextEffectCallback != NULL )
+	if ( m_pTextEffectCallback != nullptr )
 		m_pTextEffectCallback->CombineTextEffectAt( rTextEffect, rowKey, subItem, pCtrl );
 }
 
 void CListLikeCtrlBase::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const
 {
 	//ASSERT( this == pCtrl );		// for this check: don't bother to #include "ReportListControl.h"
-	if ( m_pTextEffectCallback != NULL )
+	if ( m_pTextEffectCallback != nullptr )
 		m_pTextEffectCallback->ModifyDiffTextEffectAt( rEffects, rowKey, subItem, pCtrl );
 }
 
 bool CListLikeCtrlBase::ParentHandles( UINT cmdMessage, UINT notifyCode )
 {
-	if ( NULL == m_pParentHandlesCache.get() )
+	if ( nullptr == m_pParentHandlesCache.get() )
 		m_pParentHandlesCache.reset( new ui::CHandledNotificationsCache( m_pCtrl->GetParent() ) );		// lazy instantiation so that list parent is available
 
 	return m_pParentHandlesCache->HandlesMessage( m_pCtrl->GetDlgCtrlID(), cmdMessage, notifyCode );
@@ -112,7 +112,7 @@ namespace dbg
 	const TCHAR* FormatDrawStage( DWORD dwDrawStage )
 	{
 	#ifdef _DEBUG
-		static const CEnumTags enumTags( _T("CDDS_PREPAINT|CDDS_POSTPAINT|CDDS_PREERASE|CDDS_POSTERASE"), NULL, -1, CDDS_PREPAINT );		// mask 0x0000000F
+		static const CEnumTags enumTags( _T("CDDS_PREPAINT|CDDS_POSTPAINT|CDDS_PREERASE|CDDS_POSTERASE"), nullptr, -1, CDDS_PREPAINT );		// mask 0x0000000F
 		static const CFlagTags::FlagDef flagDefs[] =
 		{
 			{ CDDS_ITEM, _T("CDDS_ITEM") },

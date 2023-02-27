@@ -24,7 +24,7 @@ CSpinEdit::~CSpinEdit()
 
 void CSpinEdit::SetUseSpin( bool useSpin /*= true*/ )
 {
-	m_pSpinButton.reset( useSpin ? new CSpinTargetButton( this, this ) : NULL );
+	m_pSpinButton.reset( useSpin ? new CSpinTargetButton( this, this ) : nullptr );
 }
 
 bool CSpinEdit::SpinBy( int delta )
@@ -46,17 +46,17 @@ bool CSpinEdit::HasInvalidText( void ) const
 	return !valid || CTextEdit::HasInvalidText();
 }
 
-int CSpinEdit::GetNumericValue( bool* pValid /*= NULL*/ ) const
+int CSpinEdit::GetNumericValue( bool* pValid /*= nullptr*/ ) const
 {
 	int value;
-	bool valid = num::ParseNumber( value, GetText(), NULL, m_locale );
+	bool valid = num::ParseNumber( value, GetText(), nullptr, m_locale );
 	if ( valid && !CheckValidNumber( value ) )
 	{
 		valid = false;
 		ui::BeepSignal( MB_OK );
 	}
 
-	if ( pValid != NULL )
+	if ( pValid != nullptr )
 		*pValid = valid;
 
 	if ( !valid )
@@ -113,7 +113,7 @@ void CSpinEdit::PreSubclassWindow( void )
 //	if ( HasFlag( GetStyle(), ES_NUMBER ) )
 //		ModifyStyle( ES_NUMBER, 0 );		// shouldn't use number style due to custom formatting
 
-	if ( m_pSpinButton.get() != NULL )
+	if ( m_pSpinButton.get() != nullptr )
 		m_pSpinButton->Create( UDS_ALIGNRIGHT );
 }
 
@@ -131,20 +131,20 @@ void CSpinEdit::OnWindowPosChanged( WINDOWPOS* pWndPos )
 	bool mustLayout = !HasFlag( pWndPos->flags, SWP_NOMOVE ) || !HasFlag( pWndPos->flags, SWP_NOSIZE );
 	CTextEdit::OnWindowPosChanged( pWndPos );
 
-	if ( mustLayout && m_pSpinButton.get() != NULL )
+	if ( mustLayout && m_pSpinButton.get() != nullptr )
 		m_pSpinButton->Layout();
 }
 
 void CSpinEdit::OnEnable( BOOL enable )
 {
 	CTextEdit::OnEnable( enable );
-	if ( m_pSpinButton.get() != NULL )
+	if ( m_pSpinButton.get() != nullptr )
 		m_pSpinButton->UpdateState();
 }
 
 void CSpinEdit::OnStyleChanged( int styleType, STYLESTRUCT* pStyleStruct )
 {
 	CTextEdit::OnStyleChanged( styleType, pStyleStruct );
-	if ( m_pSpinButton.get() != NULL )
+	if ( m_pSpinButton.get() != nullptr )
 		m_pSpinButton->UpdateState();
 }

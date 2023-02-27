@@ -16,17 +16,17 @@ namespace ole
 		: COleDropSource()
 		, m_setCursor( true )
 		, m_dragResult( 0 )
-		, m_pDataObject( NULL )
-		, m_pDropTip( NULL )
+		, m_pDataObject( nullptr )
+		, m_pDropTip( nullptr )
 	{
 	}
 
 	void CDropSource::SetDataSource( COleDataSource* pDataSource )
 	{
-		if ( pDataSource != NULL )
+		if ( pDataSource != nullptr )
 			m_pDataObject = static_cast<IDataObject*>( pDataSource->GetInterface( &IID_IDataObject ) );
 		else
-			m_pDataObject = NULL;
+			m_pDataObject = nullptr;
 	}
 
 	bool CDropSource::SetDragImageCursor( DROPEFFECT dwEffect )
@@ -35,7 +35,7 @@ namespace ole
 		// note: when a drop description object is present and has valid drop image type (not DROPIMAGE_INVALID), it's used regardless of the WPARAM value.
 
 		HWND hWnd = (HWND)ULongToHandle( ole_utl::GetValueDWord( m_pDataObject, _T("DragWindow") ) );		// always a DWORD (also in 64-bit apps)
-		if ( NULL == hWnd )
+		if ( nullptr == hWnd )
 			return false;
 
 		enum CursorType { FromDropTip, NoDrop, MoveDrop, CopyDrop, LinkDrop };
@@ -85,11 +85,11 @@ namespace ole
 
 		SCODE result = COleDropSource::GiveFeedback( dropEffect );
 
-		if ( m_bDragStarted && m_pDataObject != NULL )
+		if ( m_bDragStarted && m_pDataObject != nullptr )
 		{
 			bool oldStyle = FALSE == ole_utl::GetValueDWord( m_pDataObject, _T("IsShowingLayered") );		// "IsShowingLayered": true when the target window shows the drag image (through IDropTargetHelper)
 
-			if ( oldStyle ? ( !m_setCursor ) : ( m_pDropTip != NULL ) )
+			if ( oldStyle ? ( !m_setCursor ) : ( m_pDropTip != nullptr ) )
 			{
 				FORMATETC formatEtc;
 				STGMEDIUM stgMedium;
@@ -147,7 +147,7 @@ namespace ole
 	HCURSOR CDropSource::GetNormalCursor( void )
 	{
 		// for OCR_NORMAL: add '#define OEMRESOURCE' on top of stdafx.h
-		static HCURSOR hCursor = (HCURSOR)::LoadImage( NULL, MAKEINTRESOURCE( OCR_NORMAL ), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED );
+		static HCURSOR hCursor = (HCURSOR)::LoadImage( nullptr, MAKEINTRESOURCE( OCR_NORMAL ), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED );
 		return hCursor;
 	}
 

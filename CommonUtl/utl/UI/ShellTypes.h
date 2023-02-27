@@ -10,7 +10,7 @@
 
 namespace shell
 {
-	bool ResolveShortcut( fs::CPath& rDestPath, const TCHAR* pShortcutLnkPath, CWnd* pWnd = NULL );
+	bool ResolveShortcut( fs::CPath& rDestPath, const TCHAR* pShortcutLnkPath, CWnd* pWnd = nullptr );
 }
 
 
@@ -31,7 +31,7 @@ namespace shell
 {
 	// shell properties
 
-	std::tstring GetString( STRRET* pStrRet, PCUITEMID_CHILD pidl = NULL );
+	std::tstring GetString( STRRET* pStrRet, PCUITEMID_CHILD pidl = nullptr );
 
 
 	// IShellFolder properties
@@ -111,7 +111,7 @@ namespace shell
 		fs::CPath GetAbsolutePath( PIDLIST_ABSOLUTE pidlAbsolute, GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT );
 		std::tstring GetName( LPCITEMIDLIST pidl, SIGDN nameType = SIGDN_NORMALDISPLAY );
 
-		inline bool IsNull( LPCITEMIDLIST pidl ) { return NULL == pidl; }
+		inline bool IsNull( LPCITEMIDLIST pidl ) { return nullptr == pidl; }
 		inline bool IsEmpty( LPCITEMIDLIST pidl ) { return IsNull( pidl ) || 0 == pidl->mkid.cb; }
 		size_t GetCount( LPCITEMIDLIST pidl );
 		size_t GetByteSize( LPCITEMIDLIST pidl );
@@ -145,13 +145,13 @@ namespace shell
 	class CPidl
 	{
 	public:
-		CPidl( void ) : m_pidl( NULL ) {}
+		CPidl( void ) : m_pidl( nullptr ) {}
 		CPidl( CPidl& rRight ) : m_pidl( rRight.Release() ) {}													// copy-move constructor
 		explicit CPidl( LPITEMIDLIST pidl ) : m_pidl( pidl ) {}													// takes ownership of pidl
-		explicit CPidl( LPCITEMIDLIST rootPidl, LPCITEMIDLIST dirPathPidl, LPCITEMIDLIST childPidl = NULL );	// creates a copy with concatenation
+		explicit CPidl( LPCITEMIDLIST rootPidl, LPCITEMIDLIST dirPathPidl, LPCITEMIDLIST childPidl = nullptr );	// creates a copy with concatenation
 		~CPidl() { Delete(); }
 
-		bool IsNull( void ) const { return NULL == m_pidl; }
+		bool IsNull( void ) const { return nullptr == m_pidl; }
 		bool IsEmpty( void ) const { return pidl::IsEmpty( m_pidl ); }						// note: desktop PIDL is empty (but not null)
 		size_t GetCount( void ) const { return pidl::GetCount( m_pidl ); }
 		size_t GetByteSize( void ) const { return pidl::GetByteSize( m_pidl ); }
@@ -165,7 +165,7 @@ namespace shell
 			return &m_pidl;
 		}
 
-		void Reset( LPITEMIDLIST pidl = NULL )
+		void Reset( LPITEMIDLIST pidl = nullptr )
 		{
 			Delete();
 			m_pidl = pidl;
@@ -174,13 +174,13 @@ namespace shell
 		LPITEMIDLIST Release( void )
 		{
 			LPITEMIDLIST pidl = m_pidl;
-			m_pidl = NULL;
+			m_pidl = nullptr;
 			return pidl;
 		}
 
 		void Delete( void )
 		{
-			if ( m_pidl != NULL )
+			if ( m_pidl != nullptr )
 				pidl::Delete( Release() );
 		}
 
@@ -207,7 +207,7 @@ namespace shell
 		bool CreateFrom( IUnknown* pUnknown );										// ABSOLUTE pidl - most general, works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
 		bool CreateFromFolder( IShellFolder* pShellFolder );						// ABSOLUTE pidl - superseeded by CreateFrom()
 
-		CComPtr<IShellItem> FindItem( IShellFolder* pParentFolder = NULL ) const;			// pass pParentFolder if PIDL is relative/child
+		CComPtr<IShellItem> FindItem( IShellFolder* pParentFolder = nullptr ) const;			// pass pParentFolder if PIDL is relative/child
 		CComPtr<IShellFolder> FindFolder( IShellFolder* pParentFolder = GetDesktopFolder() ) const;
 
 		fs::CPath GetAbsolutePath( GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT ) const { return pidl::GetAbsolutePath( m_pidl, optFlags ); }
@@ -266,7 +266,7 @@ namespace shell
 		if ( !commonDirPath.IsEmpty() )
 		{
 			pCommonFolder = FindShellFolder( commonDirPath.GetPtr() );
-			if ( pCommonFolder != NULL )
+			if ( pCommonFolder != nullptr )
 				for ( typename PathContainerT::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 				{
 					std::tstring relativePath = func::StringOf( *itFilePath );

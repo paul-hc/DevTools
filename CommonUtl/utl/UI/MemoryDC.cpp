@@ -9,7 +9,7 @@
 
 CMemoryDC::CMemoryDC( CDC& dc, bool useMemDC /*= true*/ )
 	: m_rDC( dc )
-	, m_pOldBitmap( NULL )
+	, m_pOldBitmap( nullptr )
 {
 	m_rDC.GetClipBox( &m_sourceRect );
 	if ( useMemDC )
@@ -19,7 +19,7 @@ CMemoryDC::CMemoryDC( CDC& dc, bool useMemDC /*= true*/ )
 CMemoryDC::CMemoryDC( CDC& dc, const CRect& rect, bool useMemDC /*= true*/ )
 	: m_rDC( dc )
 	, m_sourceRect( rect )
-	, m_pOldBitmap( NULL )
+	, m_pOldBitmap( nullptr )
 {
 	if ( useMemDC )
 		Construct();
@@ -48,7 +48,7 @@ void CMemoryDC::Construct( void )
 			}
 		}
 
-	if ( m_bitmap.GetSafeHandle() != NULL )
+	if ( m_bitmap.GetSafeHandle() != nullptr )
 	{
 		m_memDC.m_bPrinting = m_rDC.m_bPrinting;
 		m_memDC.m_hAttribDC = m_rDC.m_hAttribDC;

@@ -16,7 +16,7 @@ namespace shell
 
 	HBITMAP GetDragImage( SHDRAGIMAGE& rOutDragImage, HWND hCtrl )
 	{
-		rOutDragImage.hbmpDragImage = NULL;
+		rOutDragImage.hbmpDragImage = nullptr;
 		::SendMessage( hCtrl, shell::WM_DI_GETDRAGIMAGE, 0, (LPARAM)&rOutDragImage );
 		return rOutDragImage.hbmpDragImage;
 	}
@@ -25,29 +25,29 @@ namespace shell
 	// CDragImager implementation
 
 	CDragImager::CDragImager( COleDataSource* pDataSource )
-		: m_pDataObject( NULL )
+		: m_pDataObject( nullptr )
 	{
 		// create drag source helper to show drag images
-		if ( HR_OK( m_pDragSourceHelper.CoCreateInstance( CLSID_DragDropHelper, NULL, CLSCTX_INPROC_SERVER ) ) )
+		if ( HR_OK( m_pDragSourceHelper.CoCreateInstance( CLSID_DragDropHelper, nullptr, CLSCTX_INPROC_SERVER ) ) )
 			m_pDragSourceHelper.QueryInterface( &m_pDragSourceHelper2 );
 
-		if ( pDataSource != NULL )
+		if ( pDataSource != nullptr )
 			m_pDataObject = static_cast<IDataObject*>( pDataSource->GetInterface( &IID_IDataObject ) );
 	}
 
 	/*
 		Window must handle the registered DI_GETDRAGIMAGE message and fill the passed SHDRAGIMAGE structure (built-in with CListCtrl, CTreeViewCtrl).
-		
-		If hWnd is NULL, an empty bitmap is created by the shell. Ditto if the control does not handle the DI_GETDRAGIMAGE message.
+
+		If hWnd is nullptr, an empty bitmap is created by the shell. Ditto if the control does not handle the DI_GETDRAGIMAGE message.
 		In this case the boolean data object "UsingDefaultDragImage" is created and set to true.
-		
+
 		IMP: when m_pDataObject contains a cached "Shell IDList Array", this is used to determine the drag image selection (like dragging files from Explorer).
 	*/
-	bool CDragImager::SetFromWindow( HWND hWnd, const POINT* pOrigin /*= NULL*/ )
+	bool CDragImager::SetFromWindow( HWND hWnd, const POINT* pOrigin /*= nullptr*/ )
 	{
-		if ( m_pDragSourceHelper != NULL )
+		if ( m_pDragSourceHelper != nullptr )
 		{
-			CPoint origin = pOrigin != NULL ? *pOrigin : ui::GetCursorPos( hWnd );
+			CPoint origin = pOrigin != nullptr ? *pOrigin : ui::GetCursorPos( hWnd );
 
 			if ( HR_OK( m_pDragSourceHelper->InitializeFromWindow( hWnd, &origin, m_pDataObject ) ) )
 				return true;
@@ -57,13 +57,13 @@ namespace shell
 		return false;
 	}
 
-	bool CDragImager::SetFromBitmap( HBITMAP hBitmap, COLORREF transpColor, const POINT* pOrigin /*= NULL*/ )
+	bool CDragImager::SetFromBitmap( HBITMAP hBitmap, COLORREF transpColor, const POINT* pOrigin /*= nullptr*/ )
 	{
 		ASSERT_PTR( hBitmap );
 
-		if ( hBitmap != NULL )
+		if ( hBitmap != nullptr )
 		{
-			if ( m_pDragSourceHelper != NULL )
+			if ( m_pDragSourceHelper != nullptr )
 			{
 				BITMAP bm;
 				VERIFY( ::GetObject( hBitmap, sizeof( bm ), &bm ) );
@@ -72,7 +72,7 @@ namespace shell
 				SHDRAGIMAGE shDragImage;
 				shDragImage.sizeDragImage = bmpRect.Size();
 
-				if ( pOrigin != NULL )
+				if ( pOrigin != nullptr )
 				{
 					ASSERT( pOrigin->x >= 0 && pOrigin->y >= 0 );		// must be positive
 					shDragImage.ptOffset = *pOrigin;
@@ -92,7 +92,7 @@ namespace shell
 		return false;
 	}
 
-	bool CDragImager::SetFromBitmap( CBitmap& rBitmap, COLORREF transpColor, const POINT* pOrigin /*= NULL*/ )
+	bool CDragImager::SetFromBitmap( CBitmap& rBitmap, COLORREF transpColor, const POINT* pOrigin /*= nullptr*/ )
 	{
 		return SetFromBitmap( static_cast<HBITMAP>( rBitmap.Detach() ), transpColor, pOrigin );		// detach the HBITMAP handle
 	}

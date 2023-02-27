@@ -25,9 +25,9 @@ CSampleView::~CSampleView()
 
 void CSampleView::DDX_Placeholder( CDataExchange* pDX, int placeholderId )
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 	{
-		VERIFY( Create( NULL, NULL, WS_CHILD | WS_VISIBLE, CRect( 0, 0, 0, 0 ), pDX->m_pDlgWnd, (WORD)-1 ) );
+		VERIFY( Create( nullptr, nullptr, WS_CHILD | WS_VISIBLE, CRect( 0, 0, 0, 0 ), pDX->m_pDlgWnd, (WORD)-1 ) );
 		ModifyStyleEx( 0, WS_EX_STATICEDGE );
 
 		ui::AlignToPlaceholder( this, placeholderId )->DestroyWindow();
@@ -56,7 +56,7 @@ CRect CSampleView::MakeDisplayRect( const CRect& clientRect, const CSize& displa
 
 void CSampleView::SafeRedraw( void )
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		Invalidate();
 		UpdateWindow();
@@ -115,7 +115,7 @@ void CSampleView::RunTrackScroll( CPoint point )
 {
 	ClientToScreen( &point );
 
-	MSG msg = { NULL };
+	MSG msg = { nullptr };
 	CPoint mouseAnchor = point, scrollAnchor = GetScrollPosition();
 
 	SetCapture();
@@ -202,13 +202,13 @@ void CSampleView::OnDraw( CDC* pDC )
 	CRect clientRect;
 	GetClientRect( &clientRect );
 
-	if ( NULL == m_pSampleCallback || !m_pSampleCallback->RenderSample( pDC, clientRect ) )
+	if ( nullptr == m_pSampleCallback || !m_pSampleCallback->RenderSample( pDC, clientRect ) )
 		DrawError( pDC, clientRect );
 }
 
 BOOL CSampleView::OnEraseBkgnd( CDC* pDC )
 {
-	if ( NULL == m_pSampleCallback )
+	if ( nullptr == m_pSampleCallback )
 		return CScrollView::OnEraseBkgnd( pDC );
 
 	CRect clientRect;
@@ -219,7 +219,7 @@ BOOL CSampleView::OnEraseBkgnd( CDC* pDC )
 
 BOOL CSampleView::OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message )
 {
-	if ( HTCLIENT == hitTest && IsScrollable() && m_hScrollableCursor != NULL )
+	if ( HTCLIENT == hitTest && IsScrollable() && m_hScrollableCursor != nullptr )
 	{
 		::SetCursor( m_hScrollableCursor );
 		return TRUE;
@@ -239,7 +239,7 @@ void CSampleView::OnMouseMove( UINT flags, CPoint point )
 {
 	CScrollView::OnMouseMove( flags, point );
 
-	if ( m_pSampleCallback != NULL )
+	if ( m_pSampleCallback != nullptr )
 	{
 		CClientDC dc( this );
 		m_pSampleCallback->ShowPixelInfo( point, dc.GetPixel( point ) );

@@ -17,16 +17,16 @@ namespace d2d
 		ASSERT_PTR( pRenderTarget );
 
 		CComPtr<ID2D1SolidColorBrush> pSolidBrush;
-		if ( HR_OK( pRenderTarget->CreateSolidColorBrush( &solidColor, NULL, &pSolidBrush ) ) )
+		if ( HR_OK( pRenderTarget->CreateSolidColorBrush( &solidColor, nullptr, &pSolidBrush ) ) )
 			return pSolidBrush;
 
-		return NULL;
+		return nullptr;
 	}
 
 	bool CreateAsSolidBrush( CComPtr<ID2D1Brush>& rpBrush, ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor )
 	{
 		ASSERT_PTR( pRenderTarget );
-		return HR_OK( pRenderTarget->CreateSolidColorBrush( &solidColor, NULL, reinterpret_cast<ID2D1SolidColorBrush**>( &rpBrush ) ) );
+		return HR_OK( pRenderTarget->CreateSolidColorBrush( &solidColor, nullptr, reinterpret_cast<ID2D1SolidColorBrush**>( &rpBrush ) ) );
 	}
 
 	CComPtr<ID2D1GradientStopCollection> CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor )
@@ -45,7 +45,7 @@ namespace d2d
 		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_PAIR( gradientStops ), D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &pGradientStopCollection ) ) )
 			return pGradientStopCollection;
 
-		return NULL;
+		return nullptr;
 	}
 
 	CComPtr<ID2D1GradientStopCollection> CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F colors[], size_t count )
@@ -68,7 +68,7 @@ namespace d2d
 		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_PAIR_V( gradientStops ), D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &pGradientStopCollection ) ) )
 			return pGradientStopCollection;
 
-		return NULL;
+		return nullptr;
 	}
 
 	CComPtr<ID2D1GradientStopCollection> CreateReverseGradientStops( ID2D1RenderTarget* pRenderTarget, const ID2D1GradientStopCollection* pSrcGradientStops )
@@ -89,7 +89,7 @@ namespace d2d
 		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_PAIR_V( gradientStops ), gamma, extendMode, &pGradientStopCollection ) ) )
 			return pGradientStopCollection;
 
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -101,10 +101,10 @@ namespace d2d
 		D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES gradBrushProperties = {};
 		CComPtr<ID2D1LinearGradientBrush> pBrush;
 
-		if ( HR_OK( pRenderTarget->CreateLinearGradientBrush( &gradBrushProperties, NULL, pGradientStops, &pBrush ) ) )
+		if ( HR_OK( pRenderTarget->CreateLinearGradientBrush( &gradBrushProperties, nullptr, pGradientStops, &pBrush ) ) )
 			return pBrush;
 
-		return NULL;
+		return nullptr;
 	}
 
 	CComPtr<ID2D1RadialGradientBrush> CreateRadialGradientBrush( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops )
@@ -115,10 +115,10 @@ namespace d2d
 		D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES radialGradientBrushProperties = {};
 		CComPtr<ID2D1RadialGradientBrush> pBrush;
 
-		if ( HR_OK( pRenderTarget->CreateRadialGradientBrush( &radialGradientBrushProperties, NULL, pGradientStops, &pBrush ) ) )
+		if ( HR_OK( pRenderTarget->CreateRadialGradientBrush( &radialGradientBrushProperties, nullptr, pGradientStops, &pBrush ) ) )
 			return pBrush;
 
-		return NULL;
+		return nullptr;
 	}
 
 	CComPtr<ID2D1LinearGradientBrush> CreateLinearGradientBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor )
@@ -126,7 +126,7 @@ namespace d2d
 		if ( CComPtr<ID2D1GradientStopCollection> pGradientStops = CreateGradientStops( pRenderTarget, fromColor, toColor ) )
 			return CreateLinearGradientBrush( pRenderTarget, pGradientStops );
 
-		return NULL;
+		return nullptr;
 	}
 
 	CComPtr<ID2D1RadialGradientBrush> CreateRadialGradientBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor )
@@ -134,7 +134,7 @@ namespace d2d
 		if ( CComPtr<ID2D1GradientStopCollection> pGradientStops = CreateGradientStops( pRenderTarget, fromColor, toColor ) )
 			return CreateRadialGradientBrush( pRenderTarget, pGradientStops );
 
-		return NULL;
+		return nullptr;
 	}
 
 } //namespace d2d
@@ -169,7 +169,7 @@ namespace d2d
 					return pPolygonGeometry;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	CComPtr<ID2D1PathGeometry> CreateTriangleGeometry( const POINT& point1, const POINT& point2, const POINT& point3 )
@@ -190,14 +190,14 @@ namespace d2d
 			CComPtr<ID2D1GeometrySink> pSink;
 			if ( HR_OK( pNewGeometry->Open( &pSink ) ) )
 			{
-				for ( size_t i = 0; i < count; ++i )
-					HR_OK( geometries[ i ]->CombineWithGeometry( geometries[ i + 1 ], combineMode, NULL, NULL, pSink ) );
+				for ( size_t i = 0; i != count; ++i )
+					HR_OK( geometries[ i ]->CombineWithGeometry( geometries[ i + 1 ], combineMode, nullptr, 0.0, pSink ) );
 
 				if ( HR_OK( pSink->Close() ) )
 					return pNewGeometry;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	CComPtr<ID2D1PathGeometry> CreateCombinedGeometries( ID2D1Geometry* pGeometry1, ID2D1Geometry* pGeometry2, D2D1_COMBINE_MODE combineMode )
@@ -222,7 +222,7 @@ namespace d2d
 			if ( HR_OK( pFactory->CreateRectangleGeometry( ToRectF( rect ), &pInnerGeometry ) ) )
 				return CreateCombinedGeometries( pOuterGeometry, pInnerGeometry, D2D1_COMBINE_MODE_EXCLUDE );
 		}
-		return NULL;
+		return nullptr;
 	}
 
 } //namespace d2d
@@ -469,10 +469,10 @@ namespace d2d
 				ASSERT( false );
 		}
 
-		if ( NULL == pGradientStops )
+		if ( nullptr == pGradientStops )
 			pGradientStops = CreateGradientStops( pRenderTarget, ARRAY_PAIR_V( m_colors ) );
 
-		if ( pGradientStops != NULL )
+		if ( pGradientStops != nullptr )
 			m_pRenderFrame->Create( pRenderTarget, pGradientStops );
 
 		return m_pRenderFrame->IsValid();
@@ -480,7 +480,7 @@ namespace d2d
 
 	bool CFrameGadget::IsValid( void ) const
 	{
-		return GetRenderFrame() != NULL && GetRenderFrame()->IsValid();
+		return GetRenderFrame() != nullptr && GetRenderFrame()->IsValid();
 	}
 
 	CRect CFrameGadget::MakeFrameRect( const CViewCoords& coords ) const
@@ -521,7 +521,7 @@ namespace d2d
 
 	bool COutlineFrame::IsValid( void ) const
 	{
-		return m_pFrameBrush != NULL;
+		return m_pFrameBrush != nullptr;
 	}
 
 	void COutlineFrame::Create( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops )
@@ -542,7 +542,7 @@ namespace d2d
 
 	bool CGradientFrame::IsValid( void ) const
 	{
-		return m_pGradientBrush != NULL;
+		return m_pGradientBrush != nullptr;
 	}
 
 	void CGradientFrame::Create( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops )
@@ -560,7 +560,7 @@ namespace d2d
 
 	bool CRadialCornersFrame::IsValid( void ) const
 	{
-		return m_pEdgeBrush != NULL && m_pCornerBrush != NULL;
+		return m_pEdgeBrush != nullptr && m_pCornerBrush != nullptr;
 	}
 
 	void CRadialCornersFrame::Create( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops )

@@ -15,7 +15,7 @@
 
 // CItemContentEdit implementation
 
-CItemContentEdit::CItemContentEdit( ui::ContentType type /*= ui::String*/, const TCHAR* pFileFilter /*= NULL*/ )
+CItemContentEdit::CItemContentEdit( ui::ContentType type /*= ui::String*/, const TCHAR* pFileFilter /*= nullptr*/ )
 	: CBaseItemContentCtrl<CTextEdit>( type, pFileFilter )
 {
 	SetUseFixedFont( false );
@@ -74,7 +74,7 @@ CItemListEdit::~CItemListEdit()
 
 void CItemListEdit::DDX_Items( CDataExchange* pDX, std::tstring& rFlatItems, int ctrlId /*= 0*/ )
 {
-	if ( NULL == m_hWnd && ctrlId != 0 )
+	if ( nullptr == m_hWnd && ctrlId != 0 )
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -89,7 +89,7 @@ void CItemListEdit::DDX_Items( CDataExchange* pDX, std::tstring& rFlatItems, int
 
 void CItemListEdit::DDX_Items( CDataExchange* pDX, std::vector< std::tstring >& rItems, int ctrlId /*= 0*/ )
 {
-	if ( NULL == m_hWnd && ctrlId != 0 )
+	if ( nullptr == m_hWnd && ctrlId != 0 )
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -100,7 +100,7 @@ void CItemListEdit::DDX_Items( CDataExchange* pDX, std::vector< std::tstring >& 
 
 void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::tstring& rFlatItems, int ctrlId /*= 0*/ )
 {
-	if ( NULL == m_hWnd && ctrlId != 0 )
+	if ( nullptr == m_hWnd && ctrlId != 0 )
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -115,7 +115,7 @@ void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::tstring& rFl
 
 void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector< std::tstring >& rItems, int ctrlId /*= 0*/ )
 {
-	if ( NULL == m_hWnd && ctrlId != 0 )
+	if ( nullptr == m_hWnd && ctrlId != 0 )
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )

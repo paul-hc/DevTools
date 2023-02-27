@@ -59,7 +59,7 @@ CGlyphThumbnailer* CFileItemsThumbnailStore::GetThumbnailer( ui::GlyphGauge glyp
 {
 	std::auto_ptr<CGlyphThumbnailer>& rpThumbnailer = m_pThumbnailer[ glyphGauge ];
 
-	if ( NULL == rpThumbnailer.get() )
+	if ( nullptr == rpThumbnailer.get() )
 	{
 		rpThumbnailer.reset( new CGlyphThumbnailer( GetDefaultGlyphDimension( glyphGauge ) ) );
 		app::GetSharedResources().AddAutoPtr( &rpThumbnailer );		// will release the shared thumbnailer in ExitInstance()
@@ -120,7 +120,7 @@ void CBaseCustomDrawImager::InitImageLists( const CSize& smallImageSize, const C
 bool CBaseCustomDrawImager::DrawItemGlyph( const NMCUSTOMDRAW* pDraw, const CRect& itemImageRect )
 {
 	ui::ICustomImageDraw* pRenderer = GetRenderer();
-	return pRenderer != NULL && pRenderer->CustomDrawItemImage( pDraw, itemImageRect );
+	return pRenderer != nullptr && pRenderer->CustomDrawItemImage( pDraw, itemImageRect );
 }
 
 

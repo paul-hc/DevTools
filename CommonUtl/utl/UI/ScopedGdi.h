@@ -56,11 +56,11 @@ public:
 
 	void Restore( void )
 	{
-		if ( m_pDC != NULL )
+		if ( m_pDC != nullptr )
 		{
 			m_pDC->SelectObject( m_pOldGdiObject );
-			m_pDC = NULL;
-			m_pOldGdiObject = NULL;
+			m_pDC = nullptr;
+			m_pOldGdiObject = nullptr;
 		}
 	}
 
@@ -88,22 +88,18 @@ class CScopedPalette : private utl::noncopyable
 {
 public:
 	CScopedPalette( CDC* pDC, CPalette* pPalette, bool realize = true, bool forceBackground = false )
-		: m_pDC( pPalette != NULL && HasFlag( pDC->GetDeviceCaps( RASTERCAPS ), RC_PALETTE ) ? pDC : NULL )
-		, m_pOldPalette( m_pDC != NULL ? m_pDC->SelectPalette( pPalette, forceBackground ) : NULL )
+		: m_pDC( pPalette != nullptr && HasFlag( pDC->GetDeviceCaps( RASTERCAPS ), RC_PALETTE ) ? pDC : nullptr )
+		, m_pOldPalette( m_pDC != nullptr ? m_pDC->SelectPalette( pPalette, forceBackground ) : nullptr )
 		, m_forceBackground( forceBackground )
 	{
-		if ( realize && m_pDC != NULL )
+		if ( realize && m_pDC != nullptr )
 			m_pDC->RealizePalette();
 	}
 
 	~CScopedPalette()
 	{
-		if ( m_pDC != NULL )
-		{
+		if ( m_pDC != nullptr )
 			m_pDC->SelectPalette( m_pOldPalette, m_forceBackground );
-			m_pDC = NULL;
-			m_forceBackground = NULL;
-		}
 	}
 private:
 	CDC* m_pDC;

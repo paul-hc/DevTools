@@ -20,7 +20,7 @@ namespace d2d
 
 		void SetScrollPos( const POINT& scrollPos );
 
-		void Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect = NULL ) const;
+		void Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect = nullptr ) const;
 	private:
 		utl::Ternary m_smoothingMode;			// bitmap drawing strategy for enlarging (scaling up) - could override CSharedTraits::m_pixelSmoothEnlarge
 	public:
@@ -33,7 +33,7 @@ namespace d2d
 
 	struct CBitmapCoords : private utl::noncopyable
 	{
-		CBitmapCoords( const CDrawBitmapTraits& dbmTraits, const CRect* pSrcBmpRect = NULL )
+		CBitmapCoords( const CDrawBitmapTraits& dbmTraits, const CRect* pSrcBmpRect = nullptr )
 			: m_dbmTraits( dbmTraits )
 			, m_pSrcBmpRect( pSrcBmpRect )
 		{
@@ -86,7 +86,7 @@ namespace d2d
 				CreateDeviceResources();			// lazy resource aquisition
 		}
 	protected:
-		void ReleaseBitmap( void ) { m_pBitmap = NULL; }
+		void ReleaseBitmap( void ) { m_pBitmap = nullptr; }
 
 		// CInternalChange overrides
 		virtual void OnFirstAddInternalChange( void );				// calls BeginDraw()

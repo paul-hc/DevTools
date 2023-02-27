@@ -49,7 +49,7 @@ void CWicImageCache::TraceObject( const fs::TImagePathKey& imageKey, CWicImage* 
 		TRACE_CACHE( _T("[%d] '%s' %s: %s\n"), s_traceCount++,
 			flagsText.c_str(),
 			imageKey.first.IsComplexPath() ? _T("EMBEDDED image") : _T("image"),
-			pImage != NULL ? pImage->FormatDbg().c_str() : imageKey.first.GetPtr() );
+			pImage != nullptr ? pImage->FormatDbg().c_str() : imageKey.first.GetPtr() );
 #else
 	imageKey, pImage, cacheFlags;
 #endif

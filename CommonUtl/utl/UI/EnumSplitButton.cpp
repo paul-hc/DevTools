@@ -11,7 +11,7 @@
 
 CEnumSplitButton::CEnumSplitButton( const CEnumTags* pEnumTags )
 	: CPopupSplitButton()
-	, m_pEnumTags( NULL )
+	, m_pEnumTags( nullptr )
 	, m_selValue( 0 )
 {
 	SetEnumTags( pEnumTags );
@@ -24,7 +24,7 @@ CEnumSplitButton::~CEnumSplitButton()
 void CEnumSplitButton::SetEnumTags( const CEnumTags* pEnumTags )
 {
 	m_pEnumTags = pEnumTags;
-	if ( NULL == m_pEnumTags )
+	if ( nullptr == m_pEnumTags )
 		return;
 
 	SetTargetWnd( this );
@@ -41,14 +41,14 @@ void CEnumSplitButton::SetEnumTags( const CEnumTags* pEnumTags )
 
 void CEnumSplitButton::SetSelValue( int selValue )
 {
-	ASSERT( m_pEnumTags != NULL && !m_pEnumTags->GetUiTags().empty() );
+	ASSERT( m_pEnumTags != nullptr && !m_pEnumTags->GetUiTags().empty() );
 	unsigned int count = static_cast<UINT>( m_pEnumTags->GetUiTags().size() );
 
 	ASSERT( selValue >= 0 && selValue < static_cast<int>( count ) );
 	m_selValue = selValue;
 	m_popupMenu.CheckMenuRadioItem( 0, count - 1, m_selValue, MF_BYPOSITION );
 
-	if ( m_hWnd != NULL && m_pEnumTags != NULL )
+	if ( m_hWnd != nullptr && m_pEnumTags != nullptr )
 		SetButtonCaption( m_pEnumTags->FormatUi( m_selValue ) );
 }
 
@@ -56,7 +56,7 @@ void CEnumSplitButton::PreSubclassWindow( void )
 {
 	CPopupSplitButton::PreSubclassWindow();
 
-	if ( m_pEnumTags != NULL && m_selValue >= 0 )
+	if ( m_pEnumTags != nullptr && m_selValue >= 0 )
 		SetButtonCaption( m_pEnumTags->FormatUi( m_selValue ) );
 }
 

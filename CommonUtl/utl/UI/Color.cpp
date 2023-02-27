@@ -66,7 +66,7 @@ namespace ui
 	{
 		// quick and less safe parsing
 		// HTML color format: #RRGGBB - "#FF0000" for bright red
-		ASSERT( pHtmlLiteral != NULL && '#' == pHtmlLiteral[ 0 ] && 7 == strlen( pHtmlLiteral ) );
+		ASSERT( pHtmlLiteral != nullptr && '#' == pHtmlLiteral[ 0 ] && 7 == strlen( pHtmlLiteral ) );
 
 		const char digits[] =
 		{

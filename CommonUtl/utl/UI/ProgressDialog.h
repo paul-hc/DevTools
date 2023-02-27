@@ -38,10 +38,10 @@ public:
 	CProgressDialog( const std::tstring& operationLabel, int optionFlags = MarqueeProgress );
 	virtual ~CProgressDialog();
 
-	bool IsRunning( void ) const { return m_hWnd != NULL; }
+	bool IsRunning( void ) const { return m_hWnd != nullptr; }
 	bool CheckRunning( void ) const throws_( CUserAbortedException );
 
-	bool Create( const std::tstring& title, CWnd* pParentWnd = NULL );
+	bool Create( const std::tstring& title, CWnd* pParentWnd = nullptr );
 	static void __declspec(noreturn) Abort( void ) throws_( CUserAbortedException );
 
 	CProgressCtrl& GetProgressBar( void ) { return m_progressBar; }

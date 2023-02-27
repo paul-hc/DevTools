@@ -36,7 +36,7 @@ CMenu& CPathItemListCtrl::GetStdPathListPopupMenu( ListPopup popupType )
 
 	static CMenu s_stdPopupMenu[ _ListPopupCount ];
 	CMenu& rMenu = s_stdPopupMenu[ popupType ];
-	if ( NULL == rMenu.GetSafeHmenu() )
+	if ( nullptr == rMenu.GetSafeHmenu() )
 		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, OnSelection == popupType ? lv::PathItemOnSelectionSubPopup : lv::PathItemNowhereSubPopup );
 	return rMenu;
 }
@@ -45,7 +45,7 @@ CMenu* CPathItemListCtrl::GetPopupMenu( ListPopup popupType )
 {
 	CMenu* pSrcPopupMenu = __super::GetPopupMenu( popupType );
 
-	if ( pSrcPopupMenu != NULL && OnSelection == popupType && UseShellContextMenu() )
+	if ( pSrcPopupMenu != nullptr && OnSelection == popupType && UseShellContextMenu() )
 	{
 		std::vector< fs::CPath > selFilePaths;
 		if ( QuerySelectedItemPaths( selFilePaths ) )

@@ -11,7 +11,7 @@
 
 CTrackStatic::CTrackStatic( void )
 	: CStatic()
-	, m_hTrackCursor( NULL )
+	, m_hTrackCursor( nullptr )
 	, m_trackingResult( Cancel )
 {
 }
@@ -60,7 +60,7 @@ void CTrackStatic::BeginTracking( void )
 		if ( const CIcon* pTrackIcon = ui::GetImageStoresSvc()->RetrieveIcon( m_trackIconId ) )
 			m_pTrackData->m_hOldIcon = SetIcon( pTrackIcon->GetHandle() );		// display the tracking image (with no syringe)
 
-	if ( m_hTrackCursor != NULL )
+	if ( m_hTrackCursor != nullptr )
 		m_pTrackData->m_hOldCursor = ::SetCursor( m_hTrackCursor );				// set the tracking cursor
 
 	m_pTrackData->m_hOldFocus = ::SetFocus( m_hWnd );							// for keyboard input
@@ -76,10 +76,10 @@ void CTrackStatic::EndTracking( void )
 	if ( m_pTrackData->m_restoreStartPos || CursorInTool() )
 		::SetCursorPos( m_pTrackData->m_startPos.x, m_pTrackData->m_startPos.y );		// restore the original start pos
 
-	if ( m_pTrackData->m_hOldIcon != NULL )
+	if ( m_pTrackData->m_hOldIcon != nullptr )
 		SetIcon( m_pTrackData->m_hOldIcon );		// restore the idle image
 
-	if ( m_pTrackData->m_hOldCursor != NULL )
+	if ( m_pTrackData->m_hOldCursor != nullptr )
 		::SetCursor( m_pTrackData->m_hOldCursor );	// restore the old cursor
 
 	if ( IsWindow( m_pTrackData->m_hOldFocus ) )
@@ -125,7 +125,7 @@ void CTrackStatic::CancelTracking( void )
 
 CPoint CTrackStatic::GetTrackCursorHotSpot( void ) const
 {
-	return m_hTrackCursor != NULL ? CIconInfo( m_hTrackCursor ).GetHotSpot() : CPoint( -1, -1 );
+	return m_hTrackCursor != nullptr ? CIconInfo( m_hTrackCursor ).GetHotSpot() : CPoint( -1, -1 );
 }
 
 void CTrackStatic::NotifyParent( int notifyCode )
@@ -137,7 +137,7 @@ void CTrackStatic::PreSubclassWindow( void )
 {
 	CStatic::PreSubclassWindow();
 
-	if ( NULL == GetIcon() && m_toolIconId.IsValid() )
+	if ( nullptr == GetIcon() && m_toolIconId.IsValid() )
 		if ( const CIcon* pToolIcon = ui::GetImageStoresSvc()->RetrieveIcon( m_toolIconId ) )
 		{
 			ModifyStyle( SS_TYPEMASK, SS_ICON | SS_REALSIZEIMAGE | SS_NOTIFY );

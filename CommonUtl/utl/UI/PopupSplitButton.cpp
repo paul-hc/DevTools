@@ -12,7 +12,7 @@
 
 CPopupSplitButton::CPopupSplitButton( UINT menuId /*= 0*/, int popupIndex /*= 0*/ )
 	: CBaseSplitButton()
-	, m_pTargetWnd( NULL )
+	, m_pTargetWnd( nullptr )
 	, m_dropItem( CThemeItem( L"COMBOBOX", vt::CP_DROPDOWNBUTTONRIGHT, vt::CBXSR_NORMAL ) )
 {
 	m_dropItem
@@ -36,12 +36,12 @@ void CPopupSplitButton::LoadMenu( UINT menuId, int popupIndex )
 		m_popupMenu.DestroyMenu();
 }
 
-CRect CPopupSplitButton::GetRhsPartRect( const CRect* pClientRect /*= NULL*/ ) const
+CRect CPopupSplitButton::GetRhsPartRect( const CRect* pClientRect /*= nullptr*/ ) const
 {
 	CRect rhsRect( 0, 0, 0, 0 );
 	if ( HasRhsPart() )
 	{
-		if ( pClientRect != NULL )
+		if ( pClientRect != nullptr )
 			rhsRect = *pClientRect;
 		else
 			GetClientRect( &rhsRect );
@@ -87,7 +87,7 @@ void CPopupSplitButton::DropDown( void )
 	buttonRect.DeflateRect( 1, 1 );		// exclude default frame
 
 	CPoint trackPos( buttonRect.left, buttonRect.bottom );
-	ui::TrackPopupMenu( m_popupMenu, m_pTargetWnd != NULL ? m_pTargetWnd : GetParent(), trackPos, TPM_LEFTALIGN | TPM_TOPALIGN, &buttonRect );
+	ui::TrackPopupMenu( m_popupMenu, m_pTargetWnd != nullptr ? m_pTargetWnd : GetParent(), trackPos, TPM_LEFTALIGN | TPM_TOPALIGN, &buttonRect );
 }
 
 

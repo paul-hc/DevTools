@@ -41,25 +41,25 @@ const res::CGroupIconEntry* CGroupIcon::FindMatch( TBitsPerPixel bitsPerPixel, I
 					return &*it;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
-bool CGroupIcon::ContainsSize( IconStdSize iconStdSize, TBitsPerPixel* pBitsPerPixel /*= NULL*/ ) const
+bool CGroupIcon::ContainsSize( IconStdSize iconStdSize, TBitsPerPixel* pBitsPerPixel /*= nullptr*/ ) const
 {
 	if ( const res::CGroupIconEntry* pFound = FindMatch( AnyBpp, iconStdSize ) )
 	{
-		if ( pBitsPerPixel != NULL )
+		if ( pBitsPerPixel != nullptr )
 			*pBitsPerPixel = pFound->GetBitsPerPixel();
 		return true;
 	}
 	return false;
 }
 
-bool CGroupIcon::ContainsBpp( TBitsPerPixel bitsPerPixel, IconStdSize* pIconStdSize /*= NULL*/ ) const
+bool CGroupIcon::ContainsBpp( TBitsPerPixel bitsPerPixel, IconStdSize* pIconStdSize /*= nullptr*/ ) const
 {
 	if ( const res::CGroupIconEntry* pFound = FindMatch( bitsPerPixel, static_cast< IconStdSize >( DefaultSize ) ) )
 	{
-		if ( pIconStdSize != NULL )
+		if ( pIconStdSize != nullptr )
 			*pIconStdSize = CIconSize::FindStdSize( pFound->GetSize() );
 		return true;
 	}

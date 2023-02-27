@@ -11,7 +11,7 @@ namespace ui
 	class CCmdIdStore
 	{
 	public:
-		CCmdIdStore( HMENU hMenu = NULL, RecursionDepth depth = Deep ) { if ( hMenu != NULL ) RegisterCommands( hMenu, depth ); }
+		CCmdIdStore( HMENU hMenu = nullptr, RecursionDepth depth = Deep ) { if ( hMenu != nullptr ) RegisterCommands( hMenu, depth ); }
 
 		bool IsEmpty( void ) const { return m_cmdIds.empty(); }
 

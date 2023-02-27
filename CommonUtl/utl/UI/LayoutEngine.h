@@ -38,7 +38,7 @@ public:
 	bool HasInitialSize( void ) const { return m_minClientSize.cx != 0 && m_minClientSize.cy != 0; }
 	void StoreInitialSize( CWnd* pDialog );		// called before Initialize() by form views, etc
 
-	bool IsInitialized( void ) const { return m_pDialog->GetSafeHwnd() != NULL; }
+	bool IsInitialized( void ) const { return m_pDialog->GetSafeHwnd() != nullptr; }
 	void Initialize( CWnd* pDialog );
 	void Reset( void );						// un-initialize: for form view recreation
 

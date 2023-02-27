@@ -67,14 +67,14 @@ namespace dw
 		CComPtr<IDWriteTextFormat> pTextFormat;			// new font
 		float fontSize = ConvertPointToDipExtent( height );
 
-		if ( HR_OK( CTextFactory::Factory()->CreateTextFormat( fontName, NULL, weight, style, stretch, fontSize, localeName, &pTextFormat ) ) )
+		if ( HR_OK( CTextFactory::Factory()->CreateTextFormat( fontName, nullptr, weight, style, stretch, fontSize, localeName, &pTextFormat ) ) )
 		{
 			HR_VERIFY( pTextFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING ) );
 			HR_VERIFY( pTextFormat->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_NEAR ) );
 			return pTextFormat;
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
     CComPtr<IDWriteTextLayout> CreateTextLayout( const std::tstring& text, IDWriteTextFormat* pFont, D2D_SIZE_F maxSize /*= d2d::GetScreenSize()*/ )
@@ -82,7 +82,7 @@ namespace dw
 		CComPtr<IDWriteTextLayout> pTextLayout;
 		if ( HR_OK( CTextFactory::Factory()->CreateTextLayout( text.c_str(), static_cast<UINT32>( text.length() ), pFont, maxSize.width, maxSize.height, &pTextLayout ) ) )
 			return pTextLayout;
-		return NULL;
+		return nullptr;
     }
 
 
@@ -141,11 +141,11 @@ namespace dw
 {
 	// CTextLayout implementation
 
-	void CTextLayout::AddField( const std::tstring& fieldText, const TCHAR* pFieldSep /*= NULL*/ )
+	void CTextLayout::AddField( const std::tstring& fieldText, const TCHAR* pFieldSep /*= nullptr*/ )
 	{
 		DWRITE_TEXT_RANGE range = { static_cast<UINT>( m_fullText.length() ), 0 };
 
-		if ( NULL == pFieldSep )
+		if ( nullptr == pFieldSep )
 			pFieldSep = m_pFieldSep;
 
 		if ( stream::Tag( m_fullText, fieldText, pFieldSep ) )

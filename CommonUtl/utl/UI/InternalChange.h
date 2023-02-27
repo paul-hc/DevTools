@@ -39,13 +39,13 @@ struct CScopedInternalChange
 	CScopedInternalChange( CInternalChange* pBaseCtrl )
 		: m_pBaseCtrl( pBaseCtrl )
 	{
-		if ( m_pBaseCtrl != NULL )		// allow for external conditional logic (possibly passing NULL)
+		if ( m_pBaseCtrl != nullptr )		// allow for external conditional logic (possibly passing NULL)
 			m_pBaseCtrl->AddInternalChange();
 	}
 
 	~CScopedInternalChange()
 	{
-		if ( m_pBaseCtrl != NULL )
+		if ( m_pBaseCtrl != nullptr )
 			m_pBaseCtrl->ReleaseInternalChange();
 	}
 private:

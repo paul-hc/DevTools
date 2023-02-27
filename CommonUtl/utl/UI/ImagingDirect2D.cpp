@@ -29,7 +29,7 @@ namespace d2d
 		m_transform = D2D1::Matrix3x2F::Translation( (float)-scrollPos.x, (float)-scrollPos.y );
 	}
 
-	void CDrawBitmapTraits::Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect /*= NULL*/ ) const
+	void CDrawBitmapTraits::Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect /*= nullptr*/ ) const
 	{
 		// caller should initiate BeginDraw
 		ASSERT_PTR( pRenderTarget );
@@ -44,15 +44,15 @@ namespace d2d
 				pRenderTarget->FillRectangle( &destRectF, pBrush );				// clear the image background (not the entire client rect)
 		}
 
-		if ( pBitmap != NULL )
+		if ( pBitmap != nullptr )
 		{
-			CRect bmpRect = pSrcRect != NULL ? *pSrcRect : CRect( CPoint( 0, 0 ), FromSizeU( pBitmap->GetPixelSize() ) );
+			CRect bmpRect = pSrcRect != nullptr ? *pSrcRect : CRect( CPoint( 0, 0 ), FromSizeU( pBitmap->GetPixelSize() ) );
 			D2D_RECT_F srcRect = d2d::ToRectF( bmpRect );
 			D2D1_BITMAP_INTERPOLATION_MODE interpolationMode = ui::FitsInside( destRect.Size(), bmpRect.Size() )		// enlarge scaling?
 				? CSharedTraits::ToInterpolationMode( IsSmoothingMode() )		// use current enlarge scaling mode
 				: D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;						// shrinking: always use smooting (dithering)
 
-			pRenderTarget->DrawBitmap( pBitmap, destRectF, m_opacity, interpolationMode, pSrcRect != NULL ? &srcRect : NULL );
+			pRenderTarget->DrawBitmap( pBitmap, destRectF, m_opacity, interpolationMode, pSrcRect != nullptr ? &srcRect : nullptr );
 		}
 
 		if ( m_frameColor != CLR_NONE )
@@ -108,9 +108,9 @@ namespace d2d
 
 	ID2D1Bitmap* CRenderTarget::GetBitmap( void )
 	{
-		if ( m_pWicBitmap != NULL && NULL == m_pBitmap )
+		if ( m_pWicBitmap != nullptr && nullptr == m_pBitmap )
 			if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
-				HR_AUDIT( pRenderTarget->CreateBitmapFromWicBitmap( m_pWicBitmap, NULL, &m_pBitmap ) );
+				HR_AUDIT( pRenderTarget->CreateBitmapFromWicBitmap( m_pWicBitmap, nullptr, &m_pBitmap ) );
 
 		return m_pBitmap;
 	}
@@ -203,7 +203,7 @@ namespace d2d
 	{
 		__super::DiscardDeviceResources();
 
-		m_pWndRenderTarget = NULL;
+		m_pWndRenderTarget = nullptr;
 		ReleaseBitmap();
 	}
 
@@ -237,7 +237,7 @@ namespace d2d
 
 	void CDCRenderTarget::DiscardDeviceResources( void )
 	{
-		m_pDcRenderTarget = NULL;
+		m_pDcRenderTarget = nullptr;
 		ReleaseBitmap();
 	}
 

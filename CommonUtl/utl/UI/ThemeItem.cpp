@@ -14,7 +14,7 @@ const CThemeItem CThemeItem::m_null;
 
 
 CThemeItem::CThemeItem( void )
-	: m_pThemeClass( NULL )
+	: m_pThemeClass( nullptr )
 	, m_partId( 0 )
 {
 	std::fill( m_stateId, m_stateId + COUNT_OF( m_stateId ), 0 );
@@ -38,7 +38,7 @@ CThemeItem& CThemeItem::SetStateId( Status status, int stateId /*= -1*/ )
 	return *this;
 }
 
-bool CThemeItem::DrawStatusBackground( Status status, HDC hdc, const RECT& rect, const RECT* pClipRect /*= NULL*/ ) const
+bool CThemeItem::DrawStatusBackground( Status status, HDC hdc, const RECT& rect, const RECT* pClipRect /*= nullptr*/ ) const
 {
 	if ( !IsValid() )
 		return false;
@@ -47,7 +47,7 @@ bool CThemeItem::DrawStatusBackground( Status status, HDC hdc, const RECT& rect,
 	return theme.DrawThemeBackground( hdc, m_partId, GetStateId( status ), rect, pClipRect );
 }
 
-bool CThemeItem::DrawStatusBackgroundErase( Status status, HWND hWnd, HDC hdc, const RECT& rect, const RECT* pClipRect /*= NULL*/ ) const
+bool CThemeItem::DrawStatusBackgroundErase( Status status, HWND hWnd, HDC hdc, const RECT& rect, const RECT* pClipRect /*= nullptr*/ ) const
 {
 	if ( !IsValid() )
 		return false;
@@ -56,7 +56,7 @@ bool CThemeItem::DrawStatusBackgroundErase( Status status, HWND hWnd, HDC hdc, c
 	return theme.DrawBackground( hWnd, hdc, m_partId, GetStateId( status ), rect, pClipRect );
 }
 
-bool CThemeItem::DrawStatusEdge( Status status, HDC hdc, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect /*= NULL*/ ) const
+bool CThemeItem::DrawStatusEdge( Status status, HDC hdc, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect /*= nullptr*/ ) const
 {
 	if ( !IsValid() )
 		return false;
@@ -96,7 +96,7 @@ bool CThemeItem::DrawIcon( HDC hdc, const RECT& rect, const CImageList& imageLis
 	return theme.IsValid() && theme.DrawThemeIcon( hdc, m_partId, m_stateId[ Normal ], rect, imageList, imagePos );
 }
 
-bool CThemeItem::GetPartSize( CSize* pPartSize, HDC hdc, THEMESIZE themeSize /*= TS_TRUE*/, const RECT* pRect /*= NULL*/ ) const
+bool CThemeItem::GetPartSize( CSize* pPartSize, HDC hdc, THEMESIZE themeSize /*= TS_TRUE*/, const RECT* pRect /*= nullptr*/ ) const
 {
 	if ( !IsValid() )
 		return false;
@@ -107,7 +107,7 @@ bool CThemeItem::GetPartSize( CSize* pPartSize, HDC hdc, THEMESIZE themeSize /*=
 
 bool CThemeItem::MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& imageSize, TAlignment alignment /*= NoAlign*/, Status status /*= Normal*/ ) const
 {
-	if ( rBitmap.GetSafeHandle() != NULL )
+	if ( rBitmap.GetSafeHandle() != nullptr )
 		rBitmap.DeleteObject();
 
 	if ( !IsValid() )
@@ -116,7 +116,7 @@ bool CThemeItem::MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& im
 	CVisualTheme theme( m_pThemeClass );
 
 	bool success = false;
-	CWindowDC screenDC( NULL );
+	CWindowDC screenDC( nullptr );
 	CDC memDC;
 	if ( memDC.CreateCompatibleDC( &screenDC ) )
 		if ( rBitmap.CreateCompatibleBitmap( &screenDC, imageSize.cx, imageSize.cy ) )
@@ -146,7 +146,7 @@ bool CThemeItem::MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& im
 			memDC.SelectObject( pOldBitmap );
 		}
 
-	return success && rBitmap.GetSafeHandle() != NULL;
+	return success && rBitmap.GetSafeHandle() != nullptr;
 }
 
 bool CThemeItem::MakeIcon( CIcon& rIcon, const CSize& imageSize, TAlignment alignment /*= NoAlign*/, Status status /*= Normal*/ ) const
@@ -163,5 +163,5 @@ bool CThemeItem::MakeIcon( CIcon& rIcon, const CSize& imageSize, TAlignment alig
 		return false;
 
 	rIcon.CreateFromBitmap( imageBitmap, maskBitmap );
-	return rIcon.GetHandle() != NULL;
+	return rIcon.GetHandle() != nullptr;
 }
