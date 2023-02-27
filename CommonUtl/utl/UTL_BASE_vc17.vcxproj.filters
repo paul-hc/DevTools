@@ -436,6 +436,12 @@
     <ClInclude Include="test\StringCompareTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="TextFileIo_fwd.h">
+      <Filter>utl\Input/Output</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeAlgorithms.h">
+      <Filter>utl\code</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

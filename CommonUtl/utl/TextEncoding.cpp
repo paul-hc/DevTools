@@ -13,14 +13,14 @@
 
 std::ostream& operator<<( std::ostream& os, const char32_t* pText32 )
 {
-	if ( NULL == pText32 )
+	if ( nullptr == pText32 )
 		return os << "<NULL>";
 	return os << str::ToWide( pText32 );
 }
 
 std::wostream& operator<<( std::wostream& os, const char32_t* pText32 )
 {
-	if ( NULL == pText32 )
+	if ( nullptr == pText32 )
 		return os << "<NULL>";
 	return os << str::ToWide( pText32 );
 }

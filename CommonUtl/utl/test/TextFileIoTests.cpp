@@ -59,7 +59,7 @@ namespace ut
 	template< typename CharType >
 	std::vector<CharType>& AssignText( std::vector<CharType>& rBuffer, const CharType* pText, size_t textSize = std::string::npos )
 	{
-		if ( pText != NULL )
+		if ( pText != nullptr )
 		{
 			if ( std::string::npos == textSize )
 				textSize = str::GetLength( pText );
@@ -197,7 +197,7 @@ void CTextFileIoTests::TestWriteRead_BinBuffer( void )
 
 		// check empty file
 		content = "";
-		ut::test_WriteRead_BinBuffer( encoding, textPath, content, NULL );
+		ut::test_WriteRead_BinBuffer( encoding, textPath, content, nullptr );
 
 		// single-line file
 		content = "xyz";
@@ -421,7 +421,7 @@ void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
 
 		if ( fs::GetCharByteCount( encoding ) == sizeof(char) )
 		{	// NARROW stream
-			std::istream is( NULL );
+			std::istream is( nullptr );
 			io::CEncodedStreamFileBuffer<char> fileBuffer( is, encoding );
 			fileBuffer.Open( textPath, std::ios_base::in );
 			{
@@ -445,7 +445,7 @@ void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
 		}
 		else if ( fs::GetCharByteCount( encoding ) == sizeof(wchar_t) )
 		{	// WIDE
-			std::wistream is( NULL );
+			std::wistream is( nullptr );
 			io::CEncodedStreamFileBuffer<wchar_t> fileBuffer( is, encoding );
 			fileBuffer.Open( textPath, std::ios_base::in );
 			{

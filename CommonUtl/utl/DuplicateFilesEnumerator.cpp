@@ -12,11 +12,11 @@
 
 // CDuplicateFilesEnumerator implementation
 
-CDuplicateFilesEnumerator::CDuplicateFilesEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum /*= NULL*/,
+CDuplicateFilesEnumerator::CDuplicateFilesEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum /*= nullptr*/,
 													  utl::IProgressService* pProgressSvc /*= svc::CNoProgressService::Instance()*/ )
 	: fs::CBaseEnumerator( enumFlags, pChainEnum )
 	, m_pProgressSvc( pProgressSvc )
-	, m_pGroupStore( NULL )
+	, m_pGroupStore( nullptr )
 {
 	ASSERT_PTR( m_pProgressSvc );
 }
@@ -50,7 +50,7 @@ void CDuplicateFilesEnumerator::SearchDuplicates( const std::vector<fs::TPattern
 	GroupByCrc32();
 
 	func::SortDuplicateGroupItems( m_dupGroupItems );		// sort groups by original item path
-	m_pGroupStore = NULL;
+	m_pGroupStore = nullptr;
 }
 
 void CDuplicateFilesEnumerator::OnAddFileInfo( const fs::CFileState& fileState )

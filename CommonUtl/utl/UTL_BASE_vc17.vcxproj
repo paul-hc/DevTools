@@ -181,6 +181,7 @@
     <ClInclude Include="AppTools.h" />
     <ClInclude Include="CacheLoader.h" />
     <ClInclude Include="CacheLoader.hxx" />
+    <ClInclude Include="CodeAlgorithms.h" />
     <ClInclude Include="CodeParsing.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandModel.h" />
@@ -303,6 +304,7 @@
     <ClInclude Include="TextEncoding.h" />
     <ClInclude Include="TextFileIo.h" />
     <ClInclude Include="TextFileIo.hxx" />
+    <ClInclude Include="TextFileIo_fwd.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimeUtils.h" />
     <ClInclude Include="TokenIterator.h" />

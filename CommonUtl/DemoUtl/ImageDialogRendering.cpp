@@ -321,13 +321,13 @@ CDibSection* CImageDialog::GetSafeDibAt( size_t dibPos ) const
 {
 	const CModeData* pModeData = m_modeData[ m_sampleMode ];
 	ASSERT_PTR( pModeData );
-	return dibPos < pModeData->m_dibs.size() ? pModeData->m_dibs[ dibPos ] : NULL;
+	return dibPos < pModeData->m_dibs.size() ? pModeData->m_dibs[ dibPos ] : nullptr;
 }
 
 bool CImageDialog::BlendDib( CDibSection* pDib, CDC* pDC, const CRect& rect, BYTE srcAlpha /*= 255*/ )
 {
 	CDibSection::DrawResult result = CDibSection::Error;
-	if ( pDib != NULL && pDib->IsValid() )
+	if ( pDib != nullptr && pDib->IsValid() )
 	{
 		result = pDib->DrawTransparent( pDC, rect, srcAlpha );
 		if ( CDibSection::Error == result )

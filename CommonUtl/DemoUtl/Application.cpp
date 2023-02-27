@@ -159,7 +159,7 @@ bool CApplication::HasCommandLineOptions( void )
 	std::tstring imagePath;
 	if ( app::HasCommandLineOption( _T("image"), &imagePath ) )		// "-image=<img_path>"
 	{
-		CImageDialog dlg( NULL );
+		CImageDialog dlg( nullptr );
 		m_pMainWnd = &dlg;
 		if ( !imagePath.empty() )
 			dlg.SetImagePath( imagePath );
@@ -168,14 +168,14 @@ bool CApplication::HasCommandLineOptions( void )
 	}
 	else if ( app::HasCommandLineOption( _T("diffs") ) )			// "-diffs"
 	{
-		CFileListDialog dlg( NULL );
+		CFileListDialog dlg( nullptr );
 		m_pMainWnd = &dlg;
 		dlg.DoModal();
 		return true;
 	}
 	else if ( app::HasCommandLineOption( _T("td") ) )			// "-td"
 	{
-		CTestTaskDialog dlg( NULL );
+		CTestTaskDialog dlg( nullptr );
 		m_pMainWnd = &dlg;
 		dlg.DoModal();
 		return true;

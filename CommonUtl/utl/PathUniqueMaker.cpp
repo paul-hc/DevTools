@@ -20,7 +20,7 @@ void CPathUniqueMaker::SetupSuffixPattern( void )
 	static const TCHAR s_numericFieldChars[] = _T("diouxX");
 
 	const TCHAR* pNumStart = _tcschr( m_pFmtNumSuffix, _T('%') );
-	const TCHAR* pNumEnd = pNumStart != NULL ? pNumEnd = str::FindTokenEnd( pNumStart, s_numericFieldChars ) : NULL;
+	const TCHAR* pNumEnd = pNumStart != nullptr ? pNumEnd = str::FindTokenEnd( pNumStart, s_numericFieldChars ) : nullptr;
 
 	if ( !str::IsEmpty( pNumEnd ) )
 	{

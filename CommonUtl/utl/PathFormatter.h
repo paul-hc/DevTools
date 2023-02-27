@@ -25,7 +25,7 @@ public:
 	fs::CPath FormatPath( const fs::CPath& srcPath, UINT seqCount, UINT dupCount = 0 ) const;
 	bool ParseSeqCount( UINT& rSeqCount, const fs::CPath& srcPath ) const;
 private:
-	static std::tstring FormatPart( const std::tstring& part, const std::tstring& format, UINT seqCount, bool* pSyntaxOk = NULL );
+	static std::tstring FormatPart( const std::tstring& part, const std::tstring& format, UINT seqCount, bool* pSyntaxOk = nullptr );
 	static bool ParsePart( UINT& rSeqCount, const std::tstring& format, const std::tstring& src );
 
 	static bool IsNumericFormat( const std::tstring& format );

@@ -73,7 +73,7 @@ bool CCommandService::Execute( utl::ICommand* pCmd )
 
 bool CCommandService::SafeExecuteCmd( utl::ICommand* pCmd, bool execInline /*= false*/ )
 {
-	if ( NULL == pCmd )
+	if ( nullptr == pCmd )
 		return false;
 
 	if ( execInline )

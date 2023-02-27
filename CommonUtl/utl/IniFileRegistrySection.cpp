@@ -99,13 +99,13 @@ int CIniFileRegistrySection::GetIntParameter( const TCHAR entryName[], int defau
 	return defaultValue;
 }
 
-std::tstring CIniFileRegistrySection::GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue/* = NULL*/ ) const
+std::tstring CIniFileRegistrySection::GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue/* = nullptr*/ ) const
 {
 	std::map<std::string, std::tstring>::const_iterator itEntry = m_entries.find( str::ToAnsi( entryName ) );
 	if ( itEntry != m_entries.end() )
 		return itEntry->second;
 
-	return pDefaultValue != NULL ? pDefaultValue : std::tstring();
+	return pDefaultValue != nullptr ? pDefaultValue : std::tstring();
 }
 
 bool CIniFileRegistrySection::SaveParameter( const TCHAR entryName[], int value ) const
@@ -198,7 +198,7 @@ bool CIniFileRegistrySection::LocateSection( CPropertyLineReader& rLineReader ) 
 
 bool CIniFileRegistrySection::ExtractSectionName( std::string& rOutSectionName, const char* pLineBuffer, int lineSize ) const
 {
-	ASSERT( pLineBuffer != NULL );
+	ASSERT( pLineBuffer != nullptr );
 
 	bool isSection = false;
 	std::string newSection;

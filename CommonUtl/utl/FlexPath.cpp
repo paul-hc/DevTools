@@ -88,7 +88,7 @@ namespace fs
 		if ( CStructuredStorage* pDocStorage = CStructuredStorage::FindOpenedStorage( docStgPath ) )
 		{
 			CScopedErrorHandling scopedIgnore( pDocStorage, utl::IgnoreMode );		// testing: failure not an error
-			return pDocStorage->LocateReadStream( GetEmbeddedPath() ).get() != NULL;
+			return pDocStorage->LocateReadStream( GetEmbeddedPath() ).get() != nullptr;
 		}
 
 		return false;

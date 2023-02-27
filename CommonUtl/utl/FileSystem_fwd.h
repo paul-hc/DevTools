@@ -67,7 +67,7 @@ namespace fs
 		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const;
 		virtual bool CanRecurse( void ) const { return m_enumFlags.Has( fs::EF_Recurse ); }
 		virtual bool MustStop( void ) const { return false; }
-		virtual utl::ICounter* GetDepthCounter( void ) { return NULL; }
+		virtual utl::ICounter* GetDepthCounter( void ) { return nullptr; }
 	private:
 		fs::TEnumFlags m_enumFlags;
 	};

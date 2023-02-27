@@ -132,7 +132,7 @@ void CColorTable::Build( CDibSection* pDib )
 	switch ( m_mode )
 	{
 		case ImageColorTable:
-			if ( pDib != NULL && pDib->IsIndexed() )
+			if ( pDib != nullptr && pDib->IsIndexed() )
 			{
 				CDibSectionInfo info( pDib->GetHandle() );
 				CScopedBitmapMemDC scopedBitmap( pDib );
@@ -404,13 +404,13 @@ CModeData::CModeData( const TCHAR* pLabels )
 	for ( std::vector<std::tstring>::iterator itLabel = m_labels.begin(); itLabel != m_labels.end(); ++itLabel )
 		*itLabel = space + *itLabel + space;			// pad with spaces for better looking labels
 
-	m_dibs.resize( m_labels.size(), NULL );				// fill with null placeholders
+	m_dibs.resize( m_labels.size(), nullptr );			// fill with null placeholders
 }
 
 void CModeData::Clear( void )
 {
 	std::for_each( m_dibs.begin(), m_dibs.end(), func::Delete() );
-	std::fill( m_dibs.begin(), m_dibs.end(), (CDibSection*)NULL );
+	std::fill( m_dibs.begin(), m_dibs.end(), (CDibSection*)nullptr );
 }
 
 
@@ -435,6 +435,6 @@ bool CColorSample::RenderSample( CDC* pDC, const CRect& clientRect )
 
 void CColorSample::ShowPixelInfo( const CPoint& pos, COLORREF color )
 {
-	if ( m_pRoutePixelInfo != NULL )
+	if ( m_pRoutePixelInfo != nullptr )
 		m_pRoutePixelInfo->ShowPixelInfo( pos, color );
 }

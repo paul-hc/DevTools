@@ -85,7 +85,7 @@ namespace fs
 		TCHAR buffer[ MAX_PATH * 2 ];
 		TDirPath cwd;
 
-		if ( _tgetcwd( buffer, COUNT_OF( buffer ) ) != NULL )
+		if ( _tgetcwd( buffer, COUNT_OF( buffer ) ) != nullptr )
 			cwd.Set( buffer );
 
 		return cwd;
@@ -116,7 +116,7 @@ namespace fs
 	{
 		std::tstring relativePath = path::MakeNormal( pRelativePath );
 		TCHAR absolutePath[ MAX_PATH ];
-		if ( NULL == ::_tfullpath( absolutePath, relativePath.c_str(), COUNT_OF( absolutePath ) ) )
+		if ( nullptr == ::_tfullpath( absolutePath, relativePath.c_str(), COUNT_OF( absolutePath ) ) )
 			return std::tstring();			// failed
 
 		return fs::CPath( absolutePath );
@@ -164,7 +164,7 @@ namespace fs
 	{
 		return
 			fs::IsValidDirectory( pDirPath ) ||
-			::CreateDirectory( pDirPath, NULL ) != FALSE;
+			::CreateDirectory( pDirPath, nullptr ) != FALSE;
 	}
 
 	bool CreateDirPath( const TCHAR* pDirPath )
@@ -241,11 +241,11 @@ namespace fs
 
 			DWORD fileAttr = ::GetFileAttributes( pFilePath );
 			if ( INVALID_FILE_ATTRIBUTES == fileAttr )
-				ThrowFileOpLastError( ::GetLastError(), s_opTag, pFilePath, NULL );
+				ThrowFileOpLastError( ::GetLastError(), s_opTag, pFilePath, nullptr );
 
 			if ( HasFlag( fileAttr, FILE_ATTRIBUTE_READONLY ) )
 				if ( !::SetFileAttributes( pFilePath, fileAttr & ~FILE_ATTRIBUTE_READONLY ) )
-					ThrowFileOpLastError( ::GetLastError(), s_opTag, pFilePath, NULL );
+					ThrowFileOpLastError( ::GetLastError(), s_opTag, pFilePath, nullptr );
 		}
 
 		void CopyFile( const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath, bool failIfExists ) throws_( CRuntimeException )
@@ -270,7 +270,7 @@ namespace fs
 			MakeFileWritable( pFilePath );
 
 			if ( !::DeleteFile( pFilePath ) )
-				ThrowFileOpLastError( ::GetLastError(), _T("Delete file"), pFilePath, NULL );
+				ThrowFileOpLastError( ::GetLastError(), _T("Delete file"), pFilePath, nullptr );
 		}
 
 
@@ -285,14 +285,14 @@ namespace fs
 		{
 			std::tstring description = operationTag;
 			std::tstring whatTag = _T("failed to copy to destination file: ");
-			const TCHAR* pFilePath = pDestFilePath != NULL ? pDestFilePath : pSrcFilePath;
+			const TCHAR* pFilePath = pDestFilePath != nullptr ? pDestFilePath : pSrcFilePath;
 
 			switch ( lastError )
 			{
 				case ERROR_FILE_NOT_FOUND:
 				case ERROR_PATH_NOT_FOUND:
 					whatTag = _T("file not found");
-					pFilePath = pSrcFilePath != NULL ? pSrcFilePath : pDestFilePath;
+					pFilePath = pSrcFilePath != nullptr ? pSrcFilePath : pDestFilePath;
 					break;
 				case ERROR_ACCESS_DENIED:
 					whatTag = _T("destination file already exists");
@@ -466,7 +466,7 @@ namespace fs
 					return &rOutFileTime;
 		}
 
-		return NULL;
+		return nullptr;
 
 	}
 
@@ -500,14 +500,14 @@ namespace fs
 			std::vector<const FILETIME*> triplet( _TimeFieldCount );		// all reset to NULL
 
 			triplet[ timeField ] = MakeFileTime( fileTime, time, pFilePath, policy );
-			if ( triplet[ timeField ] != NULL )
+			if ( triplet[ timeField ] != nullptr )
 			{
 				fs::CScopedWriteableFile scopedWriteable( pFilePath );
 
 				fs::CHandle file( ::CreateFile( pFilePath, GENERIC_READ | GENERIC_WRITE,
-					FILE_SHARE_READ, NULL, OPEN_EXISTING,
+					FILE_SHARE_READ, nullptr, OPEN_EXISTING,
 					IsValidDirectory( pFilePath ) ? FILE_FLAG_BACKUP_SEMANTICS : FILE_ATTRIBUTE_NORMAL,		// IMPORTANT: for access to directory vs file
-					NULL ) );
+					nullptr ) );
 
 				if ( file.IsValid() )
 					if ( ::SetFileTime( file.Get(), triplet[ CreatedDate ], triplet[ AccessedDate ], triplet[ ModifiedDate ] ) != FALSE )
@@ -523,7 +523,7 @@ namespace fs
 		{
 			FILETIME* pResult = fs::MakeFileTime( rOutFileTime, time );		// call the no-throw function
 
-			if ( NULL == pResult && time_utl::IsValid( time ) )
+			if ( nullptr == pResult && time_utl::IsValid( time ) )
 				impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( pFilePath ) );
 
 			return pResult;
@@ -552,19 +552,19 @@ namespace fs
 		{
 			return lastError != 0
 				? new CFileException( CFileException::OsErrorToException( lastError ), lastError, pFilePath )
-				: NULL;
+				: nullptr;
 		}
 
 		CFileException* NewErrnoException( const TCHAR* pFilePath, unsigned long errNo )	// = _doserrno
 		{
 			return errNo != 0
 				? new CFileException( CFileException::ErrnoToException( errNo != -1 ? errNo : (int)_doserrno ), _doserrno, pFilePath )
-				: NULL;
+				: nullptr;
 		}
 
 		void __declspec(noreturn) ThrowMfcErrorAs( ExcPolicy policy, CFileException* pExc ) throws_( CRuntimeException, CFileException* )
 		{
-			if ( pExc != NULL )
+			if ( pExc != nullptr )
 				switch ( policy )
 				{
 					case RuntimeExc:

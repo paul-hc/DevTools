@@ -26,7 +26,7 @@ unsigned int CIniFile::s_parseLineNo = 1;
 const CIniFile::TSectionMap* CIniFile::FindSection( const std::tstring& sectionKey ) const
 {
 	std::map<std::tstring, TSectionMap>::const_iterator itFound = m_sectionMap.find( sectionKey );
-	return itFound != m_sectionMap.end() ? &itFound->second : NULL;
+	return itFound != m_sectionMap.end() ? &itFound->second : nullptr;
 }
 
 CIniFile::TSectionMap& CIniFile::RetrieveSection( const std::tstring& sectionKey )
@@ -92,7 +92,7 @@ void CIniFile::Save( std::ostream& rOutStream ) const throws_( std::exception )
 
 void CIniFile::Load( std::istream& rInStream ) throws_( std::exception )
 {
-	TSectionMap* pCurrentSection = NULL;
+	TSectionMap* pCurrentSection = nullptr;
 
 	s_parseLineNo = 1;
 	for ( std::string line; std::getline( rInStream, line ); ++s_parseLineNo )
@@ -105,7 +105,7 @@ void CIniFile::Load( std::istream& rInStream ) throws_( std::exception )
 			std::tstring propKey, propValue;
 			if ( ParseProperty( propKey, propValue, line ) )
 			{
-				if ( NULL == pCurrentSection )
+				if ( nullptr == pCurrentSection )
 					pCurrentSection = &RetrieveSection( std::tstring() );	// root section is implicit
 
 				(*pCurrentSection)[ propKey ] = propValue;					// store the property

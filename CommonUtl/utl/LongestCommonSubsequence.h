@@ -10,13 +10,13 @@ namespace lcs
 	template< typename T >
 	inline bool IsEmpty( const T* pObject )
 	{
-		return NULL == pObject || T() == *pObject;
+		return nullptr == pObject || T() == *pObject;
 	}
 
 	template<>
 	inline bool IsEmpty<std::tstring>( const std::tstring* pString )
 	{
-		return NULL == pString || 0 == pString->length();
+		return nullptr == pString || 0 == pString->length();
 	}
 
 	template< typename T >
@@ -24,7 +24,7 @@ namespace lcs
 	{
 		return
 			pLeft == pRight ||
-			( pLeft != NULL && pRight != NULL && *pLeft == *pRight );
+			( pLeft != nullptr && pRight != nullptr && *pLeft == *pRight );
 	}
 
 
@@ -38,7 +38,7 @@ namespace lcs
 	class CBlock
 	{
 	public:
-		CBlock( const T* pData, size_t size ) : m_pData( pData ), m_size( size ) { ASSERT( m_pData != NULL || 0 == m_size ); }
+		CBlock( const T* pData, size_t size ) : m_pData( pData ), m_size( size ) { ASSERT( m_pData != nullptr || 0 == m_size ); }
 
 		const T* Get( void ) const { return m_pData; }
 		size_t GetSize( void ) const { return m_size; }
@@ -46,7 +46,7 @@ namespace lcs
 		const T* GetAt( size_t pos ) const
 		{
 			ASSERT( pos <= m_size );		// may get past end one position -> return NULL
-			return pos < m_size ? &m_pData[ pos ] : NULL;
+			return pos < m_size ? &m_pData[ pos ] : nullptr;
 		}
 
 		bool operator==( const CBlock& rRight ) const
@@ -118,7 +118,7 @@ namespace lcs
 			if ( pLeft == pRight )
 				return str::MatchEqual;							// works for NULL pointers
 
-			if ( pLeft != NULL && pRight != NULL )
+			if ( pLeft != nullptr && pRight != nullptr )
 				return m_getMatchFunc( *pLeft, *pRight );		// first character matching
 
 			return str::MatchNotEqual;

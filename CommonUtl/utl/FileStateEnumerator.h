@@ -12,7 +12,7 @@ namespace fs
 	//
 	struct CFileStateEnumerator : public CBaseEnumerator
 	{
-		CFileStateEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( enumFlags, pChainEnum ) {}
+		CFileStateEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = nullptr ) : CBaseEnumerator( enumFlags, pChainEnum ) {}
 
 		// base overrides
 		virtual void Clear( void ) { m_fileStates.clear(); __super::Clear(); }
@@ -55,7 +55,7 @@ namespace fs
 	class CFileStateItemEnumerator : public CFileStateEnumerator
 	{
 	public:
-		CFileStateItemEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL, CreateFuncT createFunc = CreateFuncT() )
+		CFileStateItemEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = nullptr, CreateFuncT createFunc = CreateFuncT() )
 			: CFileStateEnumerator( enumFlags, pChainEnum )
 			, m_createFunc( createFunc )
 		{

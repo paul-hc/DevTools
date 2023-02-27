@@ -20,7 +20,7 @@ namespace pred
 namespace utl
 {
 	template< typename ContainerT, typename FuncT >
-	inline FuncT for_each( ContainerT& rObjects, FuncT func )
+	inline FuncT for_each( ContainerT& rObjects _in_out_, FuncT func )
 	{
 		return std::for_each( rObjects.begin(), rObjects.end(), func );
 	}

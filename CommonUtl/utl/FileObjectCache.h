@@ -49,7 +49,7 @@ namespace fs
 		size_t GetCount( void ) const;
 		const std::deque<PathType>& GetPathKeys( void ) const { return m_expireQueue; }
 
-		bool Contains( const PathType& pathKey, bool checkValid = false ) const { return Find( pathKey, checkValid ) != NULL; }
+		bool Contains( const PathType& pathKey, bool checkValid = false ) const { return Find( pathKey, checkValid ) != nullptr; }
 		ObjectType* Find( const PathType& pathKey, bool checkValid = false ) const;
 
 		bool Add( const PathType& pathKey, ObjectType* pObject )

@@ -64,7 +64,7 @@ void CRegistryTests::TestParseKeyFullPath( void )
 
 	// negative check
 	ASSERT( !reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_BLAH\\Directory\\shell\\cmd\\command") ) );
-	ASSERT( NULL == hHive );
+	ASSERT( nullptr == hHive );
 	ASSERT_EQUAL( _T(""), subPath );
 }
 

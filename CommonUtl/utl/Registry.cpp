@@ -61,7 +61,7 @@ namespace reg
 	bool CKey::ParseFullPath( HKEY& rhHive, TKeyPath& rSubPath, const TCHAR* pKeyFullPath )
 	{
 		ASSERT( !str::IsEmpty( pKeyFullPath ) );
-		rhHive = NULL;
+		rhHive = nullptr;
 		rSubPath.Clear();
 
 		size_t sepPos = str::Find<str::Case>( pKeyFullPath, _T('\\') );
@@ -143,7 +143,7 @@ namespace reg
 		{
 			DWORD nameLen = static_cast<DWORD>( buffer.size() );
 
-			if ( ERROR_SUCCESS == ::RegEnumValue( Get(), i, &buffer.front(), &nameLen, NULL, NULL, NULL, NULL ) )
+			if ( ERROR_SUCCESS == ::RegEnumValue( Get(), i, &buffer.front(), &nameLen, nullptr, nullptr, nullptr, nullptr ) )
 				rValueNames.push_back( &buffer.front() );
 		}
 	}
@@ -161,7 +161,7 @@ namespace reg
 	std::pair<DWORD, size_t> CKey::GetValueInfo( const TCHAR* pValueName ) const
 	{
 		DWORD type, bufferSize;
-		if ( ERROR_SUCCESS == ::RegQueryValueEx( Get(), pValueName, NULL, &type, NULL, &bufferSize ) )
+		if ( ERROR_SUCCESS == ::RegQueryValueEx( Get(), pValueName, nullptr, &type, nullptr, &bufferSize ) )
 			return std::pair<DWORD, size_t>( type, static_cast<size_t>( bufferSize ) );
 
 		return std::pair<DWORD, size_t>( REG_NONE, 0 );
@@ -206,8 +206,8 @@ namespace reg
 		ASSERT_PTR( hKey );
 
 		FILETIME lastWriteTime;
-		if ( ERROR_SUCCESS == ::RegQueryInfoKey( hKey, NULL, NULL, NULL, &m_subKeyCount, &m_subKeyNameMaxLen, NULL,
-												 &m_valueCount, &m_valueNameMaxLen, &m_valueBufferMaxLen, NULL, &lastWriteTime ) )
+		if ( ERROR_SUCCESS == ::RegQueryInfoKey( hKey, nullptr, nullptr, nullptr, &m_subKeyCount, &m_subKeyNameMaxLen, nullptr,
+												 &m_valueCount, &m_valueNameMaxLen, &m_valueBufferMaxLen, nullptr, &lastWriteTime ) )
 		{
 			m_lastWriteTime = CTime( lastWriteTime );
 			return true;

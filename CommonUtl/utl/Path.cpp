@@ -57,7 +57,7 @@ namespace path
 		CNormalPath( const TCHAR rawPath[] )
 			: m_pRawPath( rawPath )
 		{
-			if ( m_pRawPath != NULL && !IsNormal( m_pRawPath ) )
+			if ( m_pRawPath != nullptr && !IsNormal( m_pRawPath ) )
 				EnsureBuffer();
 		}
 
@@ -92,13 +92,13 @@ namespace path
 		static bool IsNormal( const TCHAR* pPath )
 		{
 			ASSERT_PTR( pPath );
-			return NULL == _tcschr( pPath, _T('/') );
+			return nullptr == _tcschr( pPath, _T('/') );
 		}
 
 		static bool IsComplex( const TCHAR* pPath )
 		{
 			ASSERT_PTR( pPath );
-			return NULL == _tcschr( pPath, s_complexPathSep );
+			return nullptr == _tcschr( pPath, s_complexPathSep );
 		}
 	private:
 		size_t FindPos( TCHAR ch ) const
@@ -106,7 +106,7 @@ namespace path
 			const TCHAR* pPath = Get();
 			const TCHAR* pFound = _tcschr( pPath, ch );
 
-			return pFound != NULL ? std::distance( pPath, pFound ) : std::tstring::npos;
+			return pFound != nullptr ? std::distance( pPath, pFound ) : std::tstring::npos;
 		}
 	private:
 		const TCHAR* m_pRawPath;
@@ -129,7 +129,7 @@ namespace path
 
 	bool EquivalentPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
-		ASSERT( pLeftPath != NULL && pRightPath != NULL );
+		ASSERT( pLeftPath != nullptr && pRightPath != nullptr );
 		if ( pLeftPath == pRightPath )
 			return true;
 
@@ -190,7 +190,7 @@ namespace path
 		ASSERT_PTR( pPath );
 
 		if ( _T('\0') == *pPath )
-			return NULL;
+			return nullptr;
 
 		while ( !IsBreakChar( *pPath ) )
 			++pPath;
@@ -200,10 +200,10 @@ namespace path
 
 	const TCHAR* SkipBreak( const TCHAR* pPathBreak )
 	{
-		ASSERT( pPathBreak != NULL && IsBreakChar( *pPathBreak ) );
+		ASSERT( pPathBreak != nullptr && IsBreakChar( *pPathBreak ) );
 
 		if ( _T('\0') == *pPathBreak )
-			return NULL;
+			return nullptr;
 
 		while ( *pPathBreak != _T('\0') && IsBreakChar( *pPathBreak ) )
 			++pPathBreak;
@@ -211,7 +211,7 @@ namespace path
 		return pPathBreak;
 	}
 
-	bool MatchRootSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength = NULL )
+	bool MatchRootSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength = nullptr )
 	{
 		// workaround for: PathIsSameRoot fails for comparing dots (".", "..")
 		ASSERT_PTR( pPath );
@@ -225,10 +225,10 @@ namespace path
 		return true;
 	}
 
-	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength /*= NULL*/ )
+	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength /*= nullptr*/ )
 	{
-		ASSERT( pPath != NULL && !IsBreakChar( *pPath ) );
-		ASSERT( pSegment != NULL && !IsBreakChar( *pSegment ) );
+		ASSERT( pPath != nullptr && !IsBreakChar( *pPath ) );
+		ASSERT( pSegment != nullptr && !IsBreakChar( *pSegment ) );
 
 		size_t matchLength = 0;
 
@@ -405,7 +405,7 @@ namespace path
 
 	bool HasDirectory( const TCHAR* pPath )
 	{
-		return _tcspbrk( pPath, DirDelims() ) != NULL;
+		return _tcspbrk( pPath, DirDelims() ) != nullptr;
 	}
 
 
@@ -618,7 +618,7 @@ namespace path
 		std::tstring dirPath = MakeNormal( pDirPath ), rightPath = MakeNormal( pRightPath );		// PathCombine works only with backslashes
 
 		TCHAR fullPath[ MAX_PATH ];
-		if ( NULL == ::PathCombine( fullPath, dirPath.c_str(), rightPath.c_str() ) )
+		if ( nullptr == ::PathCombine( fullPath, dirPath.c_str(), rightPath.c_str() ) )
 			return _T("<bad PathCombine>");
 		return fullPath;
 	}
@@ -1080,7 +1080,7 @@ namespace fs
 
 	fs::PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::TPatternPath& patternPath )
 	{
-		REQUIRE( pPath != NULL && pWildSpec != NULL );
+		REQUIRE( pPath != nullptr && pWildSpec != nullptr );
 
 		if ( path::ContainsWildcards( patternPath.GetFilenamePtr() ) )
 		{

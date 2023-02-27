@@ -10,7 +10,7 @@
 
 
 CTestPropertySheet::CTestPropertySheet( void )
-	: CLayoutPropertySheet( _T("Properties - MODELESS"), NULL )
+	: CLayoutPropertySheet( _T("Properties - MODELESS"), nullptr )
 {
 	Construct();
 	m_styleMinMax = WS_MINIMIZEBOX | WS_MAXIMIZEBOX;

@@ -30,7 +30,7 @@ fs::CPath& CPathRenamePairs::operator[]( const fs::CPath& srcPath )
 {
 	fs::CPath* pDestPath = FindDestPath( srcPath );
 
-	if ( NULL == pDestPath )
+	if ( nullptr == pDestPath )
 	{
 		AddSrc( srcPath );
 		pDestPath = &m_pairs.back().second;
@@ -49,7 +49,7 @@ fs::CPath* CPathRenamePairs::FindDestPath( const fs::CPath& srcPath )
 		ASSERT( *pIndex < m_pairs.size() );
 		return &m_pairs[ *pIndex ].second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 void CPathRenamePairs::ResetDestPaths( void )

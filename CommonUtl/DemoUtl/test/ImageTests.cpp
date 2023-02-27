@@ -177,7 +177,7 @@ void CImageTests::TestImageList( void )
 	imageList.DeleteImageList();
 	imageList.Create( imageSize.cx, imageSize.cy, ILC_COLOR32 | ILC_MASK, 0, 2 );
 	imageList.Add( pTranspIcon->GetHandle() );				// one white pixel at right-bottom
-	imageList.Add( NULL, CLR_NONE );						// another was to add an empty icon
+	imageList.Add( nullptr, CLR_NONE );						// another was to add an empty icon
 	testDev.DrawImageList( &imageList, true );
 	testDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
 

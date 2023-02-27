@@ -21,7 +21,7 @@ public:
 	// IRegistrySection interface
 	virtual const std::tstring& GetSectionName( void ) const;
 	virtual int GetIntParameter( const TCHAR entryName[], int defaultValue ) const;
-	virtual std::tstring GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue = NULL ) const;
+	virtual std::tstring GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue = nullptr ) const;
 	virtual bool SaveParameter( const TCHAR entryName[], int value ) const;
 	virtual bool SaveParameter( const TCHAR entryName[], const std::tstring& value ) const;
 private:

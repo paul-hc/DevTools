@@ -22,14 +22,14 @@ namespace utl
 
 std::ostream& operator<<( std::ostream& os, const wchar_t* pWide )
 {
-	if ( NULL == pWide )
+	if ( nullptr == pWide )
 		return os << "<NULL>";
 	return os << str::ToUtf8( pWide );
 }
 
 std::wostream& operator<<( std::wostream& os, const char* pUtf8 )
 {
-	if ( NULL == pUtf8 )
+	if ( nullptr == pUtf8 )
 		return os << L"<NULL>";
 	return os << str::FromUtf8( pUtf8 );
 }
@@ -49,17 +49,17 @@ std::wostream& operator<<( std::wostream& os, char chUtf8 )
 
 namespace hlp
 {
-	std::string& ToNarrow( std::string& rNarrow, UINT codePage, const wchar_t* pWide, size_t charCount )
+	std::string& ToNarrow( std::string& rNarrow _out_, UINT codePage, const wchar_t* pWide, size_t charCount )
 	{	// codePage: CP_UTF8/CP_ACP
 		str::SettleLength( charCount, pWide );
 
 		if ( !str::IsEmpty( pWide ) )
 		{
 			int wideCount = static_cast<int>( charCount );
-			int requiredSize = ::WideCharToMultiByte( codePage, 0, pWide, wideCount, NULL, 0, NULL, NULL );
+			int requiredSize = ::WideCharToMultiByte( codePage, 0, pWide, wideCount, nullptr, 0, nullptr, nullptr );
 
 			rNarrow.resize( requiredSize, '\0' );
-			::WideCharToMultiByte( codePage, 0, pWide, wideCount, &rNarrow[ 0 ], requiredSize, NULL, NULL );
+			::WideCharToMultiByte( codePage, 0, pWide, wideCount, &rNarrow[ 0 ], requiredSize, nullptr, nullptr );
 		}
 		else
 			rNarrow.clear();
@@ -67,14 +67,14 @@ namespace hlp
 		return rNarrow;
 	}
 
-	std::wstring& ToWide( std::wstring& rWide, UINT codePage, const char* pNarrow, size_t charCount )
+	std::wstring& ToWide( std::wstring& rWide _out_, UINT codePage, const char* pNarrow, size_t charCount )
 	{	// codePage: CP_UTF8/CP_ACP
 		str::SettleLength( charCount, pNarrow );
 
 		if ( !str::IsEmpty( pNarrow ) )
 		{
 			int narrowCount = static_cast<int>( charCount );
-			int requiredSize = ::MultiByteToWideChar( codePage, 0, pNarrow, narrowCount, NULL, 0 );
+			int requiredSize = ::MultiByteToWideChar( codePage, 0, pNarrow, narrowCount, nullptr, 0 );
 
 			rWide.resize( requiredSize, L'\0' );
 			::MultiByteToWideChar( codePage, 0, pNarrow, narrowCount, &rWide[ 0 ], requiredSize );
@@ -89,8 +89,8 @@ namespace hlp
 
 namespace str
 {
-	template<> const char* StdWhitespace< char >( void ) { return " \t\r\n"; }
-	template<> const wchar_t* StdWhitespace< wchar_t >( void ) { return L" \t\r\n"; }
+	template<> const char* StdWhitespace<char>( void ) { return " \t\r\n"; }
+	template<> const wchar_t* StdWhitespace<wchar_t>( void ) { return L" \t\r\n"; }
 
 
 	const std::locale& GetUserLocale( void )
@@ -135,7 +135,7 @@ namespace str
 		std::string ToAnsi( const wchar_t* pWide )
 		{
 			std::string text;
-			if ( pWide != NULL )
+			if ( pWide != nullptr )
 			{
 				USES_CONVERSION;
 				text = W2A( pWide );
@@ -146,7 +146,7 @@ namespace str
 		std::wstring FromAnsi( const char* pAnsi )
 		{
 			std::wstring text;
-			if ( pAnsi != NULL )
+			if ( pAnsi != nullptr )
 			{
 				USES_CONVERSION;
 				text = A2W( pAnsi );
@@ -248,23 +248,23 @@ namespace str
 		return message.GetString();
 	}
 
-	std::tstring Load( UINT strId, bool* pLoaded /*= NULL*/ )
+	std::tstring Load( UINT strId, bool* pLoaded /*= nullptr*/ )
 	{
 		CString text;
 		bool loaded = text.LoadString( AfxGetResourceHandle(), strId ) != FALSE;
-		if ( pLoaded != NULL )
+		if ( pLoaded != nullptr )
 			*pLoaded = loaded;
 		return text.GetString();
 	}
 
-	std::vector<std::tstring> LoadStrings( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= NULL*/ )
+	std::vector<std::tstring> LoadStrings( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= nullptr*/ )
 	{
 		std::vector<std::tstring> items;
 		Split( items, Load( strId, pLoaded ).c_str(), pSep );
 		return items;
 	}
 
-	std::pair<std::tstring, std::tstring> LoadPair( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= NULL*/ )
+	std::pair<std::tstring, std::tstring> LoadPair( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= nullptr*/ )
 	{
 		std::tstring text = Load( strId, pLoaded );
 		size_t sepPos = text.find( pSep );
@@ -289,7 +289,7 @@ namespace str
 
 		CString GetTypeName( const CObject* pObject )
 		{
-			if ( pObject != NULL )
+			if ( pObject != nullptr )
 				if ( CRuntimeClass* pRuntimeClass = pObject->GetRuntimeClass() )
 					return CString( pRuntimeClass->m_lpszClassName );
 
@@ -314,7 +314,7 @@ namespace str
 
 namespace stream
 {
-	bool Tag( std::tstring& rOutput, const std::tstring& tag, const TCHAR* pPrefixSep )
+	bool Tag( std::tstring& rOutput _in_out_, const std::tstring& tag, const TCHAR* pPrefixSep )
 	{
 		if ( tag.empty() )
 			return false;
@@ -326,7 +326,7 @@ namespace stream
 		return true;
 	}
 
-	bool InputLine( std::istream& is, std::tstring& rLine )
+	bool InputLine( std::istream& is, std::tstring& rLine _out_ )
 	{
 		std::string line;
 		bool eof = !std::getline( is, line );

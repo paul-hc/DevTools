@@ -80,7 +80,7 @@ namespace fs
 	abstract class CBaseEnumerator : public IEnumerator, private utl::noncopyable
 	{
 	protected:
-		CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = NULL );
+		CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = nullptr );
 	public:
 		// IEnumerator interface (partial)
 		virtual const TEnumFlags& GetEnumFlags( void ) const override { return m_options.m_enumFlags; }
@@ -136,7 +136,7 @@ namespace fs
 	//
 	struct CPathEnumerator : public CBaseEnumerator
 	{
-		CPathEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( enumFlags, pChainEnum ) {}
+		CPathEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = nullptr ) : CBaseEnumerator( enumFlags, pChainEnum ) {}
 
 		// base overrides
 		virtual size_t GetFileCount( void ) const override { return m_filePaths.size(); }
@@ -151,7 +151,7 @@ namespace fs
 
 	struct CRelativePathEnumerator : public CPathEnumerator
 	{
-		CRelativePathEnumerator( const fs::TDirPath& relativeDirPath, fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL )
+		CRelativePathEnumerator( const fs::TDirPath& relativeDirPath, fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = nullptr )
 			: CPathEnumerator( enumFlags, pChainEnum )
 		{
 			SetRelativeDirPath( relativeDirPath );

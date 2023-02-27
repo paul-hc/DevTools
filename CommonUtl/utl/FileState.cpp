@@ -119,16 +119,16 @@ namespace fs
 		std::vector< std::pair<FILETIME, const FILETIME*> > times( _TimeFieldCount );		// pair.second: ptr not NULL when time is defined (!= 0)
 
 		times[ ModifiedDate ].second = fs::thr::MakeFileTime( times[ ModifiedDate ].first, newStatus.m_mtime, newStatus.m_szFullName, fs::MfcExc );			// last modification time
-		if ( times[ ModifiedDate ].second != NULL )
+		if ( times[ ModifiedDate ].second != nullptr )
 		{
 			times[ AccessedDate ].second = fs::thr::MakeFileTime( times[ AccessedDate ].first, newStatus.m_atime, newStatus.m_szFullName, fs::MfcExc );		// last access time
 			times[ CreatedDate ].second = fs::thr::MakeFileTime( times[ CreatedDate ].first, newStatus.m_ctime, newStatus.m_szFullName, fs::MfcExc );		// create time
 
 			fs::CScopedWriteableFile scopedWriteable( m_fullPath.GetPtr() );
 			fs::CHandle file( ::CreateFile( m_fullPath.GetPtr(), GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ, NULL, OPEN_EXISTING,
+				FILE_SHARE_READ, nullptr, OPEN_EXISTING,
 				isDirectory ? FILE_FLAG_BACKUP_SEMANTICS : FILE_ATTRIBUTE_NORMAL,								// IMPORTANT: for access to directory vs file
-				NULL ) );
+				nullptr ) );
 
 			if ( !file.IsValid() ||
 				 !::SetFileTime( file.Get(), times[ CreatedDate ].second, times[ AccessedDate ].second, times[ ModifiedDate ].second ) ||
@@ -229,7 +229,7 @@ namespace fs
 	{
 		DWORD dwLength = 0;
 
-		if ( ::GetFileSecurity( filePath.GetPtr(), DACL_SECURITY_INFORMATION, NULL, dwLength, &dwLength ) )
+		if ( ::GetFileSecurity( filePath.GetPtr(), DACL_SECURITY_INFORMATION, nullptr, dwLength, &dwLength ) )
 		{
 			m_securityDescriptor.resize( dwLength );
 
@@ -240,7 +240,7 @@ namespace fs
 		}
 
 		m_securityDescriptor.clear();
-		return NULL;
+		return nullptr;
 	}
 
 	bool CSecurityDescriptor::WriteToFile( const fs::CPath& destFilePath ) const

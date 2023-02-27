@@ -29,7 +29,7 @@ namespace fs
 	{
 		mt::CAutoLock lock( &this->m_cs );
 
-		ObjectType* pObject = NULL;
+		ObjectType* pObject = nullptr;
 		cache::TStatusFlags cacheStatus = 0;
 
 		if ( const TCachedEntry* pCachedEntry = this->FindEntry( pathKey ) )
@@ -47,13 +47,13 @@ namespace fs
 			}
 		}
 
-		if ( NULL == pObject )
+		if ( nullptr == pObject )
 		{
 			pObject = m_pCacheOwner->LoadObject( pathKey );
-			SetFlag( cacheStatus, pObject != NULL ? cache::Load : cache::LoadingError );
+			SetFlag( cacheStatus, pObject != nullptr ? cache::Load : cache::LoadingError );
 		}
 
-		if ( pObject != NULL && !HasFlag( cacheStatus, cache::CacheHit ) )
+		if ( pObject != nullptr && !HasFlag( cacheStatus, cache::CacheHit ) )
 			this->_Add( pathKey, pObject );
 
 		std::pair<ObjectType*, cache::TStatusFlags> objectPair( pObject, cacheStatus );

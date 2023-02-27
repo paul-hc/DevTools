@@ -74,7 +74,7 @@ namespace path
 
 	const TCHAR* FindBreak( const TCHAR* pPath );
 	const TCHAR* SkipBreak( const TCHAR* pPathBreak );
-	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength = NULL );
+	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength = nullptr );
 
 
 	const TCHAR* Wildcards( void );
@@ -117,7 +117,7 @@ namespace path
 
 
 	// complex path
-	inline bool IsComplex( const TCHAR* pPath ) { return pPath != NULL && _tcschr( pPath, s_complexPathSep ) != NULL; }
+	inline bool IsComplex( const TCHAR* pPath ) { return pPath != nullptr && _tcschr( pPath, s_complexPathSep ) != nullptr; }
 	bool IsWellFormed( const TCHAR* pFilePath );
 	size_t FindComplexSepPos( const TCHAR* pPath );
 	std::tstring ExtractPhysical( const std::tstring& filePath );	// "C:\Images\fruit.stg" <- "C:\Images\fruit.stg>apple.jpg";  "C:\Images\orange.png" <- "C:\Images\orange.png"

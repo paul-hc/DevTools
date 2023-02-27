@@ -22,15 +22,15 @@ CTextClipboard::~CTextClipboard()
 
 CTextClipboard* CTextClipboard::Open( HWND hWnd )
 {
-	return ::OpenClipboard( hWnd ) ? new CTextClipboard( hWnd ) : NULL;
+	return ::OpenClipboard( hWnd ) ? new CTextClipboard( hWnd ) : nullptr;
 }
 
 void CTextClipboard::Close( void )
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		::CloseClipboard();
-		m_hWnd = NULL;
+		m_hWnd = nullptr;
 	}
 }
 
@@ -48,7 +48,7 @@ bool CTextClipboard::WriteData( UINT clipFormat, const void* pBuffer, size_t byt
 				::CopyMemory( pClipData, pBuffer, byteCount );
 				::GlobalUnlock( hBuffer );
 
-				if ( ::SetClipboardData( clipFormat, hBuffer ) != NULL )
+				if ( ::SetClipboardData( clipFormat, hBuffer ) != nullptr )
 					return true;
 			}
 			catch ( ... )
@@ -103,7 +103,7 @@ bool CTextClipboard::CopyText( const std::tstring& text, HWND hWnd, bool clear /
 	std::string utf8Text = str::ToUtf8( text.c_str() );
 
 	std::auto_ptr<CTextClipboard> pClipboard( Open( hWnd ) );
-	if ( NULL == pClipboard.get() )
+	if ( nullptr == pClipboard.get() )
 		return false;
 
 	if ( clear )
@@ -122,22 +122,22 @@ bool CTextClipboard::CanPasteText( void )
 bool CTextClipboard::PasteText( std::tstring& rText, HWND hWnd )
 {
 	std::auto_ptr<CTextClipboard> pClipboard( Open( hWnd ) );
-	return pClipboard.get() != NULL && pClipboard->ReadString( rText );
+	return pClipboard.get() != nullptr && pClipboard->ReadString( rText );
 }
 
 
 // CTextClipboard::CMessageWnd implementation
 
 CTextClipboard::CMessageWnd::CMessageWnd( void )
-	: m_hWnd( ::CreateWindowEx( 0, L"Message", _T("<my_msgs>"), WS_POPUP, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, 0L ) )
+	: m_hWnd( ::CreateWindowEx( 0, L"Message", _T("<my_msgs>"), WS_POPUP, 0, 0, 0, 0, HWND_MESSAGE, nullptr, nullptr, 0L ) )
 {
 }
 
 void CTextClipboard::CMessageWnd::Destroy( void )
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		::DestroyWindow( m_hWnd );
-		m_hWnd = NULL;
+		m_hWnd = nullptr;
 	}
 }

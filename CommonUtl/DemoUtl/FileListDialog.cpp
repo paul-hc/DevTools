@@ -219,7 +219,7 @@ void CFileListDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM 
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, ColorErrorBk );
 
 	const CDisplayObject* pObject = CReportListControl::AsPtr<CDisplayObject>( rowKey );
-	const ui::CTextEffect* pTextEffect = NULL;
+	const ui::CTextEffect* pTextEffect = nullptr;
 	bool isModified = false, isSrc = false;
 
 	switch ( subItem )
@@ -244,7 +244,7 @@ void CFileListDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM 
 	if ( pObject->GetDisplayCode() == _T("Focus - Hocus Pocus.gp") )
 		rTextEffect |= s_errorBk;
 
-	if ( pTextEffect != NULL )
+	if ( pTextEffect != nullptr )
 		rTextEffect |= *pTextEffect;
 	else if ( isModified )
 		rTextEffect |= isSrc ? s_modSrc : s_modDest;
@@ -271,7 +271,7 @@ BOOL CFileListDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERI
 
 void CFileListDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_fileListCtrl.m_hWnd;
+	bool firstInit = nullptr == m_fileListCtrl.m_hWnd;
 	DDX_Control( pDX, IDC_FILE_STATE_LIST, m_fileListCtrl );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )

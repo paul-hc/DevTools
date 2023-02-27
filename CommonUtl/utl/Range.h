@@ -8,7 +8,7 @@ struct Range
 {
 	typedef ValueT TValue;
 public:
-	Range( void ) {}
+	Range( void ) : m_start(), m_end() {}		// reset to [0, 0]
 	Range( ValueT start, ValueT end ) : m_start( start ), m_end( end ) {}
 	explicit Range( ValueT startAndEnd ) : m_start( startAndEnd ), m_end( startAndEnd ) {}		// empty range constructor
 

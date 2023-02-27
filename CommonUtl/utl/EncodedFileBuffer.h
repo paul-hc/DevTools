@@ -78,7 +78,7 @@ namespace io
 			if ( fs::GetCharByteCount( GetEncoding() ) != sizeof( char ) )	// wide encoded file? (not fs::ANSI_UTF8 nor fs::UTF8_bom)
 				openMode |= std::ios_base::binary;		// force binary mode for wide encodings
 
-			if ( NULL == open( filePath.GetPtr(), openMode ) )
+			if ( nullptr == open( filePath.GetPtr(), openMode ) )
 				isOutput ? ThrowOpenForWriting( filePath ) : ThrowOpenForReading( filePath );
 
 			m_filePath = filePath;
@@ -231,14 +231,14 @@ namespace io
 		explicit CEncodedStreamFileBuffer( std::basic_istream<CharT>& is, fs::Encoding encoding )
 			: CEncodedFileBuffer<CharT>( encoding )
 			, m_pInStream( &is )
-			, m_pOutStream( NULL )
+			, m_pOutStream( nullptr )
 			, m_pOldStreamBuff( m_pInStream->rdbuf( this ) )
 		{
 		}
 
 		explicit CEncodedStreamFileBuffer( std::ostream& os, fs::Encoding encoding )
 			: CEncodedFileBuffer<CharT>( encoding )
-			, m_pInStream( NULL )
+			, m_pInStream( nullptr )
 			, m_pOutStream( &os )
 			, m_pOldStreamBuff( m_pOutStream->rdbuf( this ) )
 		{
@@ -247,7 +247,7 @@ namespace io
 		explicit CEncodedStreamFileBuffer( std::basic_iostream<CharT>& ios, fs::Encoding encoding )
 			: CEncodedFileBuffer<CharT>( encoding )
 			, m_pInStream( &ios )
-			, m_pOutStream( NULL )
+			, m_pOutStream( nullptr )
 			, m_pOldStreamBuff( m_pInStream->rdbuf( this ) )
 		{
 		}
@@ -257,13 +257,13 @@ namespace io
 			if ( this->is_open() )
 				this->close();			// necessary since base m_buffer goes out of scope if closed by base destructor
 
-			m_pInStream != NULL && m_pInStream->rdbuf( m_pOldStreamBuff );
-			m_pOutStream != NULL && m_pOutStream->rdbuf( m_pOldStreamBuff );
+			m_pInStream != nullptr && m_pInStream->rdbuf( m_pOldStreamBuff );
+			m_pOutStream != nullptr && m_pOutStream->rdbuf( m_pOldStreamBuff );
 		}
 
 		virtual void Rewind( void ) throws_( CRuntimeException )
 		{
-			ASSERT( m_pInStream != NULL && this->is_open() );		// works only with input streams
+			ASSERT( m_pInStream != nullptr && this->is_open() );		// works only with input streams
 			m_pInStream->clear();			// clear the EOF state
 			__super::Rewind();
 		}

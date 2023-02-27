@@ -216,7 +216,7 @@ bool CPathFormatter::ParseSeqCount( UINT& rSeqCount, const fs::CPath& srcPath ) 
 	//	numeric:	"#", "##", "%d", "%02d", "%02X"
 	//	wildcards:	"*.*", "?"
 
-std::tstring CPathFormatter::FormatPart( const std::tstring& part, const std::tstring& format, UINT seqCount, bool* pSyntaxOk /*= NULL*/ )
+std::tstring CPathFormatter::FormatPart( const std::tstring& part, const std::tstring& format, UINT seqCount, bool* pSyntaxOk /*= nullptr*/ )
 {
 	std::vector<TCHAR> output;
 	output.reserve( MAX_PATH );
@@ -281,7 +281,7 @@ std::tstring CPathFormatter::FormatPart( const std::tstring& part, const std::ts
 	if ( output.empty() && !format.empty() )
 		syntaxOk = false;					// not empty (exclude EOS)
 
-	if ( pSyntaxOk != NULL )
+	if ( pSyntaxOk != nullptr )
 		*pSyntaxOk = syntaxOk;
 
 	output.push_back( _T('\0') );			// end the string

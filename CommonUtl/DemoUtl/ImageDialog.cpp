@@ -275,7 +275,7 @@ void CImageDialog::LoadSampleImage( void )
 
 void CImageDialog::UpdateImage( void )
 {
-	if ( m_pDibSection.get() != NULL )
+	if ( m_pDibSection.get() != nullptr )
 	{
 		m_transpColorCache.Register( m_imagePath, m_pDibSection->GetTranspColor() );
 
@@ -357,7 +357,7 @@ void CImageDialog::RedrawColorTable( void )
 
 bool CImageDialog::IsValidImageMode( void ) const
 {
-	return m_pDibSection.get() != NULL && m_sampleMode != RectsAlphaBlend;
+	return m_pDibSection.get() != nullptr && m_sampleMode != RectsAlphaBlend;
 }
 
 CSize CImageDialog::ComputeContentSize( void )
@@ -370,7 +370,7 @@ CSize CImageDialog::ComputeContentSize( void )
 		m_multiZone.Init( CSize( 10, 10 ), pModeData->GetZoneCount() );
 		m_multiZone.SetStacking( CMultiZone::VertStacked );
 	}
-	else if ( m_pDibSection.get() != NULL )
+	else if ( m_pDibSection.get() != nullptr )
 	{
 		m_multiZone.Init( ui::ScaleSize( m_pDibSection->GetSize(), GetZoomPct(), 100 ) + GetModeExtraSpacing(), pModeData->GetZoneCount() );
 		m_multiZone.SetStacking( m_stackingCombo.GetEnum<CMultiZone::Stacking>() );
@@ -393,7 +393,7 @@ bool CImageDialog::RenderSample( CDC* pDC, const CRect& clientRect )
 	if ( RectsAlphaBlend == m_sampleMode )
 		return Render_RectsAlphaBlend( pDC, clientRect );
 
-	if ( NULL == m_pDibSection.get() && m_sampleMode != RectsAlphaBlend )
+	if ( nullptr == m_pDibSection.get() && m_sampleMode != RectsAlphaBlend )
 		return false;
 
 	CRect contentRect = MakeContentRect( clientRect );
@@ -455,7 +455,7 @@ CRect CImageDialog::MakeContentRect( const CRect& clientRect ) const
 void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color )
 {
 	std::tstring text;
-	if ( m_pDibSection.get() != NULL || RectsAlphaBlend == m_sampleMode )
+	if ( m_pDibSection.get() != nullptr || RectsAlphaBlend == m_sampleMode )
 	{
 		m_pPixelInfoSample->SetPixelInfo( color, pos );
 
@@ -477,7 +477,7 @@ void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color )
 
 void CImageDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_imagePathCombo.m_hWnd;
+	bool firstInit = nullptr == m_imagePathCombo.m_hWnd;
 
 	m_transpColorSample.DDX_Placeholder( pDX, IDC_TRANSP_COLOR_SAMPLE );
 	m_sampleView.DDX_Placeholder( pDX, IDC_IMAGE_SAMPLE );
@@ -605,7 +605,7 @@ void CImageDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 HBRUSH CImageDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColorType )
 {
 	HBRUSH hBrushFill = __super::OnCtlColor( pDC, pWnd, ctlColorType );
-	if ( ctlColorType == CTLCOLOR_STATIC && pWnd != NULL )
+	if ( ctlColorType == CTLCOLOR_STATIC && pWnd != nullptr )
 		switch ( pWnd->GetDlgCtrlID() )
 		{
 			case IDC_IMAGE_INFO_STATIC:
@@ -769,12 +769,12 @@ void CImageDialog::OnResetTranspColor( void )
 void CImageDialog::OnUpdateTranspColor( CCmdUI* pCmdUI )
 {
 	enum CurrTransp { TranspColor, AutoTranspColor, NoTranspColor } transp = NoTranspColor;
-	if ( m_pDibSection.get() != NULL && m_pDibSection->HasTranspColor() )
+	if ( m_pDibSection.get() != nullptr && m_pDibSection->HasTranspColor() )
 		transp = m_pDibSection->HasAutoTranspColor() ? AutoTranspColor : TranspColor;
 	CurrTransp btnTransp = (CurrTransp)( pCmdUI->m_nID - ID_SET_TRANSP_COLOR );
 
 	ui::SetRadio( pCmdUI, transp == btnTransp );
-	pCmdUI->Enable( m_pDibSection.get() != NULL && !m_pDibSection->HasAlpha() );
+	pCmdUI->Enable( m_pDibSection.get() != nullptr && !m_pDibSection->HasAlpha() );
 }
 
 void CImageDialog::OnRedrawSample( void )
@@ -821,7 +821,7 @@ bool CModePage::IsPixelCtrl( UINT ctrlId ) const
 
 bool CModePage::SyncEditValues( const CColorChannelEdit* pRefEdit )
 {
-	if ( NULL == pRefEdit )
+	if ( nullptr == pRefEdit )
 		pRefEdit = m_keepEqualEdits.front();
 	else if ( !utl::Contains( m_keepEqualEdits, pRefEdit ) )
 		return false;
@@ -895,7 +895,7 @@ void CShowImagePage::DoDataExchange( CDataExchange* pDX )
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
 		std::tstring info;
-		if ( m_pDialog->GetImage() != NULL )
+		if ( m_pDialog->GetImage() != nullptr )
 		{
 			COLORREF transpColor = m_pDialog->GetImage()->GetTranspColor();
 			m_transpColorSample.SetColor( transpColor );

@@ -100,7 +100,7 @@ namespace func
 			if ( ( *itItem )->GetFilePath() == filePath )
 				return *itItem;
 
-		return ContainerT::value_type( NULL );
+		return ContainerT::value_type( nullptr );
 	}
 
 

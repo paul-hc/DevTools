@@ -29,7 +29,7 @@ namespace app
 	void TraceException( const std::exception& exc )
 	{
 		exc;
-		TRACE( _T("* STL exception: %s\n"), CRuntimeException::MessageOf( exc ).c_str() );
+		TRACE( _T("* STL exception (%s): %s\n"), str::GetTypeName( typeid( exc ) ).c_str(), CRuntimeException::MessageOf(exc).c_str());
 	}
 
 	void TraceException( const CException* pExc )
@@ -38,7 +38,7 @@ namespace app
 		ASSERT_PTR( pExc );
 
 		if ( !CAppTools::Instance()->IsConsoleApp() )		// avoid console applications, since usually they don't include MFC resource strings required to format the exception message
-			TRACE( _T("* MFC exception: %s\n"), mfc::CRuntimeException::MessageOf( *pExc ).c_str() );
+			TRACE( _T("* MFC exception (%s): %s\n"), str::GetTypeName( typeid( *pExc ) ).c_str(), mfc::CRuntimeException::MessageOf( *pExc ).c_str() );
 	}
 }
 
@@ -46,7 +46,7 @@ namespace app
 // CAppTools implementation
 
 int CAppTools::s_mainResultCode = 0;
-CAppTools* CAppTools::s_pAppTools = NULL;
+CAppTools* CAppTools::s_pAppTools = nullptr;
 
 CAppTools::CAppTools( void )
 {
@@ -57,5 +57,5 @@ CAppTools::CAppTools( void )
 CAppTools::~CAppTools()
 {
 	ASSERT( this == s_pAppTools );
-	s_pAppTools = NULL;
+	s_pAppTools = nullptr;
 }

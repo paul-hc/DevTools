@@ -18,7 +18,7 @@
 
 CDuplicateFileItem::CDuplicateFileItem( const fs::CFileState& fileState )
 	: CFileStateItem( fileState )
-	, m_pParentGroup( NULL )
+	, m_pParentGroup( nullptr )
 {
 }
 
@@ -182,7 +182,7 @@ CDuplicateFilesGroup* CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pD
 	fs::CFileContentKey contentKey = pDupItem->GetContentKey();
 	CDuplicateFilesGroup*& rpGroup = m_groupsMap[ contentKey ];
 
-	if ( NULL == rpGroup )
+	if ( nullptr == rpGroup )
 	{
 		rpGroup = new CDuplicateFilesGroup( contentKey );
 		m_groups.push_back( rpGroup );
@@ -210,7 +210,7 @@ void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector<CDuplicateFilesGr
 				pProgressSvc->AdvanceStage( pGroup->GetContentKey().Format() );
 
 				rDuplicateGroups.push_back( pGroup );
-				scopedGroups[ i ] = NULL;							// mark detached group as NULL to prevent being deleted when unwiding the stack
+				scopedGroups[ i ] = nullptr;						// mark detached group as NULL to prevent being deleted when unwiding the stack
 			}
 			else
 			{

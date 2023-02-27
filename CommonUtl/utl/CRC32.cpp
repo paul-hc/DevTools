@@ -44,7 +44,7 @@ namespace utl
 
 	void CCrc32::AddBytes( TUnderlying& rChecksum, const void* pBuffer, size_t count ) const
 	{
-		ASSERT( 0 == count || pBuffer != NULL );
+		ASSERT( 0 == count || pBuffer != nullptr );
 
 		for ( const BYTE* pByte = reinterpret_cast<const BYTE*>( pBuffer ); count-- != 0; ++pByte )
 			AddByte( rChecksum, *pByte );

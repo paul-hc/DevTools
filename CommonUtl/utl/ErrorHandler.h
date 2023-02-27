@@ -21,7 +21,7 @@ public:
 	CErrorHandler( utl::ErrorHandling handlingMode ) : m_handlingMode( handlingMode ) {}
 	CErrorHandler( const CErrorHandler& src ) : m_handlingMode( src.m_handlingMode ) {}
 
-	bool Handle( HRESULT hResult, bool* pAllGood = NULL ) const throws_( COleException* );
+	bool Handle( HRESULT hResult, bool* pAllGood = nullptr ) const throws_( COleException* );
 
 	utl::ErrorHandling GetHandlingMode( void ) const { return m_handlingMode; }
 	void SetHandlingMode( utl::ErrorHandling handlingMode ) { m_handlingMode = handlingMode; }

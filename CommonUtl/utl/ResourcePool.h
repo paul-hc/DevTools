@@ -23,7 +23,7 @@ namespace utl
 	{
 	public:
 		CComPtrResource( ComPtrType& rComPtr ) : m_rComPtr( rComPtr ) {}
-		virtual ~CComPtrResource() { m_rComPtr = NULL; }
+		virtual ~CComPtrResource() { m_rComPtr = nullptr; }
 	private:
 		ComPtrType& m_rComPtr;
 	};

@@ -23,7 +23,7 @@ namespace reg
 	class CKey : private utl::noncopyable
 	{
 	public:
-		explicit CKey( HKEY hKey = NULL ) : m_key( hKey ) {}
+		explicit CKey( HKEY hKey = nullptr ) : m_key( hKey ) {}
 		CKey( CKey& rSrcMove ) : m_key( rSrcMove.m_key ) {}								// move constructor
 		~CKey() { Close(); }
 
@@ -40,13 +40,13 @@ namespace reg
 		}
 
 		bool Create( HKEY hParentKey, const TCHAR* pSubKeyPath, LPTSTR pClass = REG_NONE,
-					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = NULL, DWORD* pDisposition = NULL ) throw()
+					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = nullptr, DWORD* pDisposition = nullptr ) throw()
 		{
 			return ERROR_SUCCESS == m_key.Create( hParentKey, pSubKeyPath, pClass, dwOptions, samDesired, pSecAttr, pDisposition );
 		}
 
 		bool Create( HKEY hParentKey, const TKeyPath& subKeyPath, LPTSTR pClass = REG_NONE,
-					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = NULL, DWORD* pDisposition = NULL ) throw()
+					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = nullptr, DWORD* pDisposition = nullptr ) throw()
 		{
 			return ERROR_SUCCESS == m_key.Create( hParentKey, subKeyPath.GetPtr(), pClass, dwOptions, samDesired, pSecAttr, pDisposition );
 		}
@@ -54,10 +54,10 @@ namespace reg
 		HKEY Get( void ) const { return m_key.m_hKey; }
 		CRegKey& GetKey( void ) { return m_key; }
 
-		bool IsOpen( void ) const { return Get() != NULL; }
+		bool IsOpen( void ) const { return Get() != nullptr; }
 
 		bool Close( void ) { return ERROR_SUCCESS == m_key.Close(); }
-		void Reset( HKEY hKey = NULL ) { Close(); m_key.Attach( hKey ); }
+		void Reset( HKEY hKey = nullptr ) { Close(); m_key.Attach( hKey ); }
 		HKEY Detach( void ) { return m_key.Detach(); }
 
 		bool Flush( void ) { return ERROR_SUCCESS == m_key.Flush(); }		// flush the key's data to disk

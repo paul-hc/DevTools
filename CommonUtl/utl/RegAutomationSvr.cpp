@@ -62,7 +62,7 @@ namespace ole
 
 		size_t coClassCount = 0;
 
-		for ( COleObjectFactory* pFactory = pModuleState->m_factoryList; pFactory != NULL; pFactory = pFactory->m_pNextFactory )
+		for ( COleObjectFactory* pFactory = pModuleState->m_factoryList; pFactory != nullptr; pFactory = pFactory->m_pNextFactory )
 			if ( UpdateRegistry( pFactory->GetClassID(), action ) )
 				++coClassCount;
 
@@ -71,8 +71,8 @@ namespace ole
 	#ifdef _AFXDLL
 		::AfxLockGlobals( CRIT_DYNLINKLIST );
 		// register extension DLL factories
-		for ( CDynLinkLibrary* pDLL = pModuleState->m_libraryList; pDLL != NULL; pDLL = pDLL->m_pNextDLL )
-			for ( COleObjectFactory* pDLLFactory = pDLL->m_factoryList; pDLLFactory != NULL; pDLLFactory = pDLLFactory->m_pNextFactory )
+		for ( CDynLinkLibrary* pDLL = pModuleState->m_libraryList; pDLL != nullptr; pDLL = pDLL->m_pNextDLL )
+			for ( COleObjectFactory* pDLLFactory = pDLL->m_factoryList; pDLLFactory != nullptr; pDLLFactory = pDLLFactory->m_pNextFactory )
 				if ( UpdateRegistry( pDLLFactory->GetClassID(), action ) )
 					++coClassCount;
 

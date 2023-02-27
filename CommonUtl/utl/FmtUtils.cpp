@@ -64,7 +64,7 @@ namespace fmt
 		switch ( format )
 		{
 			default: ASSERT( false );
-			case NoPath:		return NULL;
+			case NoPath:		return nullptr;
 			case FullPath:		return fullPath.GetPtr();
 			case FilenameExt:	return fullPath.GetFilenamePtr();
 		}
@@ -111,7 +111,7 @@ namespace fmt
 		return std::tstring( FormatPath( fileState.m_fullPath, pathFormat ) ) + s_clipSep + FormatFileStateCore( fileState, tagged );
 	}
 
-	fs::CFileState& ParseClipFileState( fs::CFileState& rFileState, const std::tstring& text, const fs::CPath* pKeyPath /*= NULL*/ ) throws_( CRuntimeException )
+	fs::CFileState& ParseClipFileState( fs::CFileState& rFileState, const std::tstring& text, const fs::CPath* pKeyPath /*= nullptr*/ ) throws_( CRuntimeException )
 	{
 		str::TStringRange textRange( text );
 
@@ -120,7 +120,7 @@ namespace fmt
 		{
 			rFileState.m_fullPath = textRange.ExtractLead( sepPos.m_start );
 
-			if ( pKeyPath != NULL )
+			if ( pKeyPath != nullptr )
 			{
 				if ( !rFileState.m_fullPath.HasParentPath() )
 					rFileState.m_fullPath.SetDirPath( pKeyPath->GetParentPath().Get() );		// qualify with SRC dir path

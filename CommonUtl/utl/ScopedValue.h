@@ -64,7 +64,7 @@ public:
 	CScopedIncrement( ValueType* pValue )
 		: m_pValue( pValue )
 	{
-		ASSERT( m_pValue != NULL && *m_pValue >= 0 );
+		ASSERT( m_pValue != nullptr && *m_pValue >= 0 );
 		++*m_pValue;
 	}
 

@@ -62,10 +62,10 @@ namespace func
 namespace utl
 {
 	template< typename Type, typename SmartPtrType >
-	inline bool ResetPtr( SmartPtrType& rPtr, Type* pObject ) { rPtr.reset( pObject ); return pObject != NULL; }
+	inline bool ResetPtr( SmartPtrType& rPtr, Type* pObject ) { rPtr.reset( pObject ); return pObject != nullptr; }
 
 	template< typename SmartPtrType >
-	inline bool ResetPtr( SmartPtrType& rPtr ) { rPtr.reset( NULL ); return false; }
+	inline bool ResetPtr( SmartPtrType& rPtr ) { rPtr.reset( nullptr ); return false; }
 
 
 	/**
@@ -76,7 +76,7 @@ namespace utl
 	inline PtrType* ReleaseOwnership( PtrType*& rPtr )		// release item ownership in owning containers of pointers
 	{
 		PtrType* ptr = rPtr;
-		rPtr = NULL;				// mark detached item as NULL to prevent being deleted
+		rPtr = nullptr;				// mark detached item as NULL to prevent being deleted
 		return ptr;
 	}
 

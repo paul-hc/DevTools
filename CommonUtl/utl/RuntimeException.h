@@ -42,7 +42,7 @@ namespace mfc
 		CRuntimeException( const std::tstring& message );		// w. auto-delete
 		virtual ~CRuntimeException();
 
-		virtual BOOL GetErrorMessage( TCHAR* pMessage, UINT count, UINT* pHelpContext = NULL ) const;
+		virtual BOOL GetErrorMessage( TCHAR* pMessage, UINT count, UINT* pHelpContext = nullptr ) const;
 
 		static std::tstring MessageOf( const CException& exc ) throw();
 	protected:

@@ -40,23 +40,16 @@ namespace io
 }
 
 
+#include "TextFileIo_fwd.h"		// ILineParserCallback
+
+
 namespace io
 {
-	template< typename StringT >
-	interface ILineParserCallback
-	{
-		virtual bool OnParseLine( const StringT& line, unsigned int lineNo ) = 0;		// return false to stop parsing
-
-		virtual void OnBeginParsing( void ) {}
-		virtual void OnEndParsing( void ) {}
-	};
-
-
 	template< typename StringT >
 	class CTextFileParser
 	{
 	public:
-		CTextFileParser( ILineParserCallback<StringT>* pLineParserCallback = NULL ) : m_pLineParserCallback( pLineParserCallback ), m_maxLineCount( UINT_MAX ), m_encoding( fs::ANSI_UTF8 ) {}
+		CTextFileParser( ILineParserCallback<StringT>* pLineParserCallback = nullptr ) : m_pLineParserCallback( pLineParserCallback ), m_maxLineCount( UINT_MAX ), m_encoding( fs::ANSI_UTF8 ) {}
 
 		void Clear( void ) { m_parsedLines.clear(); }
 		void SetMaxLineCount( unsigned int maxLineCount ) { m_maxLineCount = maxLineCount; }
@@ -65,7 +58,7 @@ namespace io
 
 		fs::Encoding ParseFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
-		bool UseCallback( void ) const { return m_pLineParserCallback != NULL; }
+		bool UseCallback( void ) const { return m_pLineParserCallback != nullptr; }
 
 		const std::vector<StringT>& GetParsedLines( void ) const { ASSERT( !UseCallback() ); return m_parsedLines; }
 		void SwapParsedLines( std::vector<StringT>& rParsedLines ) { ASSERT( !UseCallback() ); rParsedLines.swap( m_parsedLines ); }

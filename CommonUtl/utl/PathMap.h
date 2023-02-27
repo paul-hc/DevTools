@@ -45,14 +45,14 @@ namespace fs
 		void Clear( void ) { m_pathMap.clear(); }
 
 		size_t GetCount( void ) const { return m_pathMap.size(); }
-		bool Contains( const PathT& pathKey ) const { return Find( pathKey ) != NULL; }
+		bool Contains( const PathT& pathKey ) const { return Find( pathKey ) != nullptr; }
 
 		const ValueT* Find( const PathT& pathKey ) const { return const_cast<CPathMap*>( this )->Find( pathKey ); }
 
 		ValueT* Find( const PathT& pathKey )
 		{
 			typename std::unordered_map<PathT, ValueT>::iterator itFound = m_pathMap.find( pathKey );
-			return itFound != m_pathMap.end() ? &itFound->second : NULL;
+			return itFound != m_pathMap.end() ? &itFound->second : nullptr;
 		}
 
 		ValueT& Lookup( const PathT& pathKey )
@@ -134,7 +134,7 @@ namespace fs
 		{
 			typename std::unordered_map<PathT, TValue>::const_iterator itFound = this->m_pathMap.find( pathKey );
 			if ( itFound == this->m_pathMap.end() )
-				return NULL;
+				return nullptr;
 
 			return itFound->second.m_T.p;
 		}
@@ -149,7 +149,7 @@ namespace fs
 		void ReleaseAll( void )
 		{
 			for ( typename std::unordered_map<PathT, TValue>::iterator itEntry = this->m_pathMap.begin(); itEntry != this->m_pathMap.end(); ++itEntry )
-				itEntry->second = NULL;
+				itEntry->second = nullptr;
 		}
 
 		const_iterator Begin( void ) const { return this->m_pathMap.begin(); }
@@ -224,12 +224,12 @@ namespace fs
 			return m_pathMap.size();
 		}
 
-		bool Contains( const PathT& pathKey ) const { return FindEntry( pathKey ) != NULL; }
+		bool Contains( const PathT& pathKey ) const { return FindEntry( pathKey ) != nullptr; }
 
 		ObjectT* Find( const PathT& pathKey ) const
 		{
 			const TEntry* pFoundEntry = FindEntry( pathKey );
-			return pFoundEntry != NULL ? pFoundEntry->first : NULL;
+			return pFoundEntry != nullptr ? pFoundEntry->first : nullptr;
 		}
 
 		const TEntry* FindEntry( const PathT& pathKey ) const
@@ -270,7 +270,7 @@ namespace fs
 		{
 			mt::CAutoLock lock( &m_cs );		// nested locks works fine (no deadlock) within the same calling thread
 			TEntry* pFoundEntry = const_cast<TEntry*>( _FindEntry( pathKey ) );
-			if ( NULL == pFoundEntry )
+			if ( nullptr == pFoundEntry )
 				return false;
 
 			pFoundEntry->second = param;
@@ -284,7 +284,7 @@ namespace fs
 			if ( itFound != m_pathMap.end() )
 				return &itFound->second;
 
-			return NULL;
+			return nullptr;
 		}
 
 		void _AddEntry( const PathT& pathKey, const TEntry& entry )

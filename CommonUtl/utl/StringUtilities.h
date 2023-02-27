@@ -15,9 +15,9 @@ namespace str
 
 
 	template< typename CharT, typename ContainerT >
-	size_t Tokenize( ContainerT& rTokens, const CharT* pSource, const CharT delims[] = StdDelimiters<CharT>() )
+	size_t Tokenize( ContainerT& rTokens _out_, const CharT* pSource, const CharT delims[] = StdDelimiters<CharT>() )
 	{
-		ASSERT( pSource != NULL && delims != NULL );
+		ASSERT( pSource != nullptr && delims != nullptr );
 		rTokens.clear();
 
 		const CharT* pDelimsEnd = str::end( delims );
@@ -51,7 +51,7 @@ namespace str
 
 
 	template< typename CharT >
-	bool StripPrefix( std::basic_string<CharT>& rText, const CharT prefix[], size_t prefixLen = std::string::npos )
+	bool StripPrefix( std::basic_string<CharT>& rText _in_out_, const CharT prefix[], size_t prefixLen = std::string::npos )
 	{
 		if ( std::string::npos == prefixLen )
 			prefixLen = GetLength( prefix );
@@ -67,7 +67,7 @@ namespace str
 	}
 
 	template< typename CharT >
-	bool StripSuffix( std::basic_string<CharT>& rText, const CharT suffix[], size_t suffixLen = std::string::npos )
+	bool StripSuffix( std::basic_string<CharT>& rText _in_out_, const CharT suffix[], size_t suffixLen = std::string::npos )
 	{
 		if ( std::string::npos == suffixLen )
 			suffixLen = GetLength( suffix );
@@ -96,10 +96,10 @@ namespace str
 
 namespace str
 {
-	TCHAR* CopyTextToBuffer( TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] = g_ellipsis );
+	TCHAR* CopyTextToBuffer( TCHAR* pDestBuffer _out_, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] = g_ellipsis );
 
-	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] = g_ellipsis, bool atEnd = true );
-	std::tstring& SingleLine( std::tstring& rText, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph );
+	std::tstring& Truncate( std::tstring& rText _in_out_, size_t maxLen, const TCHAR suffix[] = g_ellipsis, bool atEnd = true );
+	std::tstring& SingleLine( std::tstring& rText _in_out_, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph );
 
 	inline std::tstring FormatTruncate( std::tstring text, size_t maxLen, const TCHAR suffix[] = g_ellipsis, bool atEnd = true ) { return Truncate( text, maxLen, suffix, atEnd ); }
 	inline std::tstring FormatSingleLine( std::tstring text, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph ) { return SingleLine( text, maxLen, sepLineEnd ); }
@@ -115,8 +115,8 @@ namespace str
 
 	// search & replace
 
-	size_t ReplaceDelimiters( std::tstring& rText, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter );
-	size_t EnsureSingleSpace( std::tstring& rText );
+	size_t ReplaceDelimiters( std::tstring& rText _in_out_, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter );
+	size_t EnsureSingleSpace( std::tstring& rText _in_out_ );
 }
 
 
@@ -126,12 +126,12 @@ namespace env
 
 	bool HasAnyVariable( const std::tstring& source );
 
-	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue = NULL );
+	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue = nullptr );
 	bool SetVariableValue( const TCHAR varName[], const TCHAR* pValue );
 
 	std::tstring ExpandStrings( const TCHAR* pSource );			// expand "%WIN_VAR%" Windows environment variables
 	std::tstring ExpandPaths( const TCHAR* pSource );			// expand "%WIN_VAR%" and "$(VC_MACRO_VAR)" - Windows and Visual Studio style environment variables
-	size_t AddExpandedPaths( std::vector<fs::CPath>& rEvalPaths, const TCHAR* pSource, const TCHAR delim[] = _T(";") );		// add unique to rPaths
+	size_t AddExpandedPaths( std::vector<fs::CPath>& rEvalPaths _in_out_, const TCHAR* pSource, const TCHAR delim[] = _T(";") );		// add unique to rPaths
 
 	std::tstring UnExpandPaths( const std::tstring& expanded, const std::tstring& text );
 }
@@ -152,7 +152,7 @@ namespace str
 	}
 
 	template< typename CharT, typename ValueT >
-	bool ParseValue( ValueT& rValue, const std::basic_string<CharT>& text )
+	bool ParseValue( ValueT& rValue _out_, const std::basic_string<CharT>& text )
 	{
 		std::basic_istringstream<CharT> iss( text );
 		iss >> std::noskipws >> rValue;		// read the entire string, including whitespaces
@@ -169,7 +169,7 @@ namespace str
 	}
 
 	template< typename CharT >
-	inline bool ParseValue( std::basic_string<CharT>& rValue, const std::basic_string<CharT>& text )
+	inline bool ParseValue( std::basic_string<CharT>& rValue _out_, const std::basic_string<CharT>& text )
 	{
 		rValue = text;
 		return true;
@@ -183,7 +183,7 @@ namespace str
 	}
 
 	template< typename CharT, typename ValueT >
-	bool ParseNameValue( std::basic_string<CharT>& rName, ValueT& rValue, const std::basic_string<CharT>& spec, CharT sep = '=' )
+	bool ParseNameValue( std::basic_string<CharT>& rName _out_, ValueT& rValue, const std::basic_string<CharT>& spec, CharT sep = '=' )
 	{
 		std::pair< CSequence<CharT>, CSequence<CharT> > seqPair;
 
@@ -241,7 +241,7 @@ namespace num
 
 
 	template< typename ValueT >
-	bool ParseNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength = NULL, const std::locale& loc = GetEmptyLocale() )
+	bool ParseNumber( ValueT& rNumber _out_, const std::tstring& text, size_t* pSkipLength = nullptr, const std::locale& loc = GetEmptyLocale() )
 	{
 		std::tistringstream iss( text );
 		iss.imbue( loc );
@@ -249,16 +249,16 @@ namespace num
 		if ( iss.fail() )
 			return false;
 
-		if ( pSkipLength != NULL )
+		if ( pSkipLength != nullptr )
 			*pSkipLength = static_cast<size_t>( iss.tellg() );
 		return true;
 	}
 
 	template<>
-	bool ParseNumber<BYTE>( BYTE& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
+	bool ParseNumber<BYTE>( BYTE& rNumber _out_, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
 
 	template<>
-	bool ParseNumber<signed char>( signed char& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
+	bool ParseNumber<signed char>( signed char& rNumber _out_, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
 
 
 	template< typename ValueT >
@@ -268,7 +268,7 @@ namespace num
 	}
 
 	template< typename ValueT >
-	bool ParseHexNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength = NULL )
+	bool ParseHexNumber( ValueT& rNumber _out_, const std::tstring& text, size_t* pSkipLength = nullptr )
 	{
 		std::tistringstream iss( str::SkipHexPrefix( text.c_str(), str::IgnoreCase ) );
 		size_t number;
@@ -277,12 +277,12 @@ namespace num
 			return false;
 
 		rNumber = static_cast<ValueT>( number );
-		if ( pSkipLength != NULL )
+		if ( pSkipLength != nullptr )
 			*pSkipLength = static_cast<size_t>( iss.tellg() );
 		return true;
 	}
 
-	bool StripFractionalZeros( std::tstring& rText, const std::locale& loc = str::GetUserLocale() );
+	bool StripFractionalZeros( std::tstring& rText _out_, const std::locale& loc = str::GetUserLocale() );
 }
 
 
@@ -309,7 +309,7 @@ namespace num
 	// advanced numeric algorithms
 
 	template< typename IntT, typename StringT >
-	bool EnwrapNumericSequence( Range<IntT>& rRange, const StringT& text )
+	bool EnwrapNumericSequence( Range<IntT>& rRange _in_out_, const StringT& text )
 	{
 		IntT len = static_cast<IntT>( text.length() );
 		if ( text.empty() || rRange.m_start >= len || !str::CharTraits::IsDigit( text[ rRange.m_start ] ) )
@@ -328,7 +328,7 @@ namespace num
 
 
 	Range<size_t> FindNumericSequence( const std::tstring& text, size_t pos = 0 );
-	size_t EnsureUniformZeroPadding( std::vector<std::tstring>& rItems );			// returns max count of numbers found for all items
+	size_t EnsureUniformZeroPadding( std::vector<std::tstring>& rItems _in_out_ );			// returns max count of numbers found for all items
 }
 
 
@@ -337,7 +337,7 @@ namespace str
 	// line utilities
 
 	template< typename StringT >
-	StringT& ToWindowsLineEnds( StringT* pText )
+	StringT& ToWindowsLineEnds( StringT* pText _in_out_ )
 	{
 		ASSERT_PTR( pText );
 		const StringT::value_type winLineEnd[] = { '\r', '\n', 0 }, unixLineEnd[] = { '\n', 0 };
@@ -348,7 +348,7 @@ namespace str
 	}
 
 	template< typename StringT >
-	StringT& ToUnixLineEnds( StringT* pText )
+	StringT& ToUnixLineEnds( StringT* pText _in_out_ )
 	{
 		ASSERT_PTR( pText );
 		const StringT::value_type winLineEnd[] = {'\r', '\n', 0 }, unixLineEnd[] = { '\n', 0 };
@@ -359,7 +359,7 @@ namespace str
 
 
 	template< typename CharT, typename StringT >
-	inline void SplitLines( std::vector<StringT>& rItems, const CharT* pSource, const CharT* pLineEnd )
+	inline void SplitLines( std::vector<StringT>& rItems _out_, const CharT* pSource, const CharT* pLineEnd )
 	{
 		Split( rItems, pSource, pLineEnd );
 
@@ -382,7 +382,7 @@ namespace func
 {
 	struct AppendLine
 	{
-		AppendLine( std::tstring* pOutput, const TCHAR* pLineSep = _T("\n") ) : m_pOutput( pOutput ), m_pLineSep( pLineSep ) { ASSERT_PTR( m_pOutput ); }
+		AppendLine( std::tstring* pOutput _in_out_, const TCHAR* pLineSep = _T("\n") ) : m_pOutput( pOutput ), m_pLineSep( pLineSep ) { ASSERT_PTR( m_pOutput ); }
 
 		template< typename StringyT >
 		void operator()( const StringyT& value )
@@ -403,16 +403,16 @@ namespace code
 
 
 	template< typename StringT >
-	size_t FindIdentifierEnd( const StringT& text, size_t identPos )
-	{	// identifier should not start with a digit
-		size_t endPos = identPos;
-		pred::IsIdentifier isIdentPred;
+	size_t FindLiteralEnd( const StringT& text, size_t literalPos )
+	{	// literal should not start with a digit
+		size_t endPos = literalPos;
+		pred::IsLiteral isLiteralPred;
 
-		if ( endPos != text.length() && pred::IsIdentifierLead()( text[ endPos ] ) )	// not starting with a digit?
-		{	// skip first char, check the inner identifier criteria
+		if ( endPos != text.length() && pred::IsLiteralLead()( text[ endPos ] ) )	// not starting with a digit?
+		{	// skip first char, check the inner literal criteria
 			++endPos;
 
-			while ( endPos != text.length() && isIdentPred( text[ endPos ] ) )
+			while ( endPos != text.length() && isLiteralPred( text[ endPos ] ) )
 				++endPos;
 		}
 
@@ -449,7 +449,7 @@ namespace word
 
 namespace app
 {
-	bool HasCommandLineOption( const TCHAR* pOption, std::tstring* pValue = NULL );
+	bool HasCommandLineOption( const TCHAR* pOption, std::tstring* pValue = nullptr );
 }
 
 
@@ -464,8 +464,8 @@ namespace arg
 	bool StartsWith( const TCHAR* pArg, const TCHAR* pPrefix, size_t count = std::tstring::npos );
 	bool StartsWithAnyOf( const TCHAR* pArg, const TCHAR* pPrefixList, const TCHAR* pListDelims = _T("|") );
 
-	bool ParseValuePair( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep = _T('='), const TCHAR* pListDelims = _T("|") );
-	bool ParseOptionalValuePair( std::tstring* pValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep = _T('='), const TCHAR* pListDelims = _T("|") );
+	bool ParseValuePair( std::tstring& rValue _out_, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep = _T('='), const TCHAR* pListDelims = _T("|") );
+	bool ParseOptionalValuePair( std::tstring* pValue _out_, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep = _T('='), const TCHAR* pListDelims = _T("|") );
 
 
 	// command line

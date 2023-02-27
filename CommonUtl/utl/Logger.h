@@ -11,7 +11,7 @@ class CLogger
 public:
 	enum { DefaultSize = 512 * KiloByte };
 
-	CLogger( const TCHAR* pFmtFname = NULL );		// could be _T("%s-suffix") for "exe_name-suffix.log"
+	CLogger( const TCHAR* pFmtFname = nullptr );		// could be _T("%s-suffix") for "exe_name-suffix.log"
 	~CLogger();
 
 	const fs::CPath& GetLogFilePath( void ) const;

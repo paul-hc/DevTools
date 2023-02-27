@@ -132,9 +132,7 @@ namespace ut
 	{
 		ASSERT_PTR( pTestCase );
 
-		const char* pTestCaseName = typeid( *pTestCase ).name();
-		if ( const char* pCoreName = strchr( pTestCaseName, ' ' ) )
-			pTestCaseName = pCoreName + 1;
+		const char* pTestCaseName = str::GetTypeNamePtr( *pTestCase );
 
 		std::ostringstream os;
 		os << pTestCaseName << "::" << pTestMethod << " : ";

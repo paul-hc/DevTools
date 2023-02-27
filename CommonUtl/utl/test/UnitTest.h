@@ -254,8 +254,8 @@ std::wostream& operator<<( std::wostream& os, const std::pair<Type1, Type2>& rPa
 
 namespace ut
 {
-	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText = NULL );				// set a line of thext (pass NULL for using "name.ext")
-	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pAddText = NULL, bool retainModifyTime = false );	// add another line of thext (pass NULL for using "name.ext")
+	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText = nullptr );				// set a line of thext (pass NULL for using "name.ext")
+	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pAddText = nullptr, bool retainModifyTime = false );	// add another line of thext (pass NULL for using "name.ext")
 
 	void StoreFileTextSize( const fs::CPath& filePath, size_t fileSize );
 
@@ -287,7 +287,7 @@ namespace ut
 	class CTempFilePool : private utl::noncopyable
 	{
 	public:
-		CTempFilePool( const TCHAR* pFlatPaths = NULL );
+		CTempFilePool( const TCHAR* pFlatPaths = nullptr );
 		~CTempFilePool();
 
 		bool IsValidDir( void ) const { return path::IsValid( m_poolDirPath.Get() ) && fs::IsValidDirectory( m_poolDirPath.GetPtr() ); }
@@ -300,7 +300,7 @@ namespace ut
 		size_t SplitQualifyPaths( std::vector<fs::CPath>& rFullPaths, const TCHAR relFilePaths[] ) const;
 
 		bool DeleteAllFiles( void );
-		bool CreateFiles( const TCHAR* pFlatPaths = NULL );		// can contain subdirectories
+		bool CreateFiles( const TCHAR* pFlatPaths = nullptr );		// can contain subdirectories
 
 		static fs::TDirPath MakePoolDirPath( bool createDir = false );
 	private:

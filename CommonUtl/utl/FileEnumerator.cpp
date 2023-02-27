@@ -13,7 +13,7 @@
 
 namespace fs
 {
-	static TResolveShortcutProc s_resolveShortcutProc = NULL;
+	static TResolveShortcutProc s_resolveShortcutProc = nullptr;
 
 	void StoreResolveShortcutProc( TResolveShortcutProc resolveShortcutProc )
 	{
@@ -55,12 +55,12 @@ namespace fs
 			fs::CFileState nodeState( finder );
 
 			if ( pEnumerator->HasEnumFlag( fs::EF_ResolveShellLinks ) )
-				if ( s_resolveShortcutProc != NULL )				// links with UTL_UI.lib?
+				if ( s_resolveShortcutProc != nullptr )				// links with UTL_UI.lib?
 					if ( fs::IsValidShellLink( nodeState.m_fullPath.GetPtr() ) )
 					{
 						fs::CPath linkTargetPath;
 
-						if ( s_resolveShortcutProc( linkTargetPath, nodeState.m_fullPath.GetPtr(), NULL ) )
+						if ( s_resolveShortcutProc( linkTargetPath, nodeState.m_fullPath.GetPtr(), nullptr ) )
 							nodeState = fs::CFileState::ReadFromFile( linkTargetPath );		// resolve the link to taget path
 					}
 
@@ -294,7 +294,7 @@ namespace fs
 
 	// CBaseEnumerator implementation
 
-	CBaseEnumerator::CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum /*= NULL*/ )
+	CBaseEnumerator::CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum /*= nullptr*/ )
 		: m_options( enumFlags )
 		, m_pChainEnum( pChainEnum )
 		, m_depthCounter( utl::npos )
@@ -343,7 +343,7 @@ namespace fs
 	{
 		REQUIRE( !HasEnumFlag( fs::EF_IgnoreFiles ) );	// should've been filtered by now
 
-		if ( m_pChainEnum != NULL )
+		if ( m_pChainEnum != nullptr )
 			m_pChainEnum->AddFoundFile( filePath );
 	}
 
@@ -357,7 +357,7 @@ namespace fs
 		if ( !_subDirPath.IsEmpty() )
 			m_subDirPaths.push_back( _subDirPath );
 
-		if ( m_pChainEnum != NULL )
+		if ( m_pChainEnum != nullptr )
 			m_pChainEnum->AddFoundSubDir( subDirPath );
 
 		return true;

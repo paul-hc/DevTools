@@ -27,7 +27,7 @@ public:
 	template< typename SubjectType >
 	SubjectType* GetSubjectAs( void ) const { return dynamic_cast<SubjectType*>( m_pSubject ); }
 
-	bool HasOriginCmd( void ) const { return m_pOriginCmd != NULL; }
+	bool HasOriginCmd( void ) const { return m_pOriginCmd != nullptr; }
 	CBaseCommand* GetOriginCmd( void ) const { return m_pOriginCmd; }
 	void SetOriginCmd( CBaseCommand* pOriginCmd ) { m_pOriginCmd = pOriginCmd; }
 
@@ -36,7 +36,7 @@ public:
 
 	// origin or this, whichever comes first
 	template< typename CmdType >
-	CmdType* GetReportingCmdAs( void ) const { return checked_static_cast<CmdType*>( m_pOriginCmd != NULL ? m_pOriginCmd : const_cast<CBaseCommand*>( this ) ); }
+	CmdType* GetReportingCmdAs( void ) const { return checked_static_cast<CmdType*>( m_pOriginCmd != nullptr ? m_pOriginCmd : const_cast<CBaseCommand*>( this ) ); }
 private:
 	persist int m_typeId;
 	utl::ISubject* m_pSubject;		// no ownership
@@ -50,7 +50,7 @@ class CEnumTags;
 abstract class CCommand : public CBaseCommand
 {
 protected:
-	CCommand( int typeId, utl::ISubject* pSubject, const CEnumTags* pCmdTags = NULL );
+	CCommand( int typeId, utl::ISubject* pSubject, const CEnumTags* pCmdTags = nullptr );
 public:
 	virtual ~CCommand();
 
@@ -107,7 +107,7 @@ template< typename SubjectType >
 abstract class CObjectCommand : public CCommand
 {
 protected:
-	CObjectCommand( int typeId, SubjectType* pObject, const CEnumTags* pCmdTags = NULL )
+	CObjectCommand( int typeId, SubjectType* pObject, const CEnumTags* pCmdTags = nullptr )
 		: CCommand( typeId, pObject, pCmdTags )
 		, m_pObject( pObject )
 	{
@@ -148,7 +148,7 @@ template< typename SubjectType, typename PropertyType >
 class CObjectPropertyCommand : public CObjectCommand<SubjectType>
 {
 protected:
-	CObjectPropertyCommand( int typeId, SubjectType* pObject, const PropertyType& rValue, const CEnumTags* pCmdTags = NULL )
+	CObjectPropertyCommand( int typeId, SubjectType* pObject, const PropertyType& rValue, const CEnumTags* pCmdTags = nullptr )
 		: CObjectCommand<SubjectType>( typeId, pObject, pCmdTags )
 		, m_value( rValue )
 		, m_oldValue( rValue )

@@ -54,14 +54,14 @@ namespace seq
 	// container-based API (vector, deque, string, etc):
 
 	template< typename ContainerT, typename IndexT >
-	inline void MoveBy( ContainerT* pItems, const std::vector<IndexT>& selIndexes, Direction moveBy )
+	inline void MoveBy( ContainerT* pItems _in_out_, const std::vector<IndexT>& selIndexes, Direction moveBy )
 	{
 		CSequenceAdapter<typename ContainerT::value_type> sequence( pItems );
 		MoveBy( sequence, selIndexes, moveBy );
 	}
 
 	template< typename ContainerT, typename IndexT >
-	inline void MoveBy( ContainerT* pItems, IndexT selIndex, Direction moveBy )
+	inline void MoveBy( ContainerT* pItems _in_out_, IndexT selIndex, Direction moveBy )
 	{
 		CSequenceAdapter<typename ContainerT::value_type> sequence( pItems );
 		MoveBy( sequence, selIndex, moveBy );
@@ -69,7 +69,7 @@ namespace seq
 
 
 	template< typename ContainerT, typename IndexT >
-	inline void Resequence( ContainerT* pItems, const std::vector<IndexT>& selIndexes, MoveTo moveTo )
+	inline void Resequence( ContainerT* pItems _in_out_, const std::vector<IndexT>& selIndexes, MoveTo moveTo )
 	{
 		CSequenceAdapter<typename ContainerT::value_type> sequence( pItems );
 		Resequence( sequence, selIndexes, moveTo );
@@ -82,9 +82,9 @@ namespace seq
 	// Drop semantics: returns the new (adjusted) dropIndex
 	//
 	template< typename Type, typename IndexT >
-	IndexT MakeDropSequence( std::vector<Type>& rNewSequence, const std::vector<Type>& baselineSeq,
+	IndexT MakeDropSequence( std::vector<Type>& rNewSequence _out_, const std::vector<Type>& baselineSeq,
 							 IndexT dropIndex, const std::vector<IndexT>& dragSelIndexes,
-							 std::vector<IndexT>* pDroppedSelIndexes = NULL )					// optional output
+							 std::vector<IndexT>* pDroppedSelIndexes = nullptr _out_ )					// optional output
 	{
 		REQUIRE( utl::IsOrdered( dragSelIndexes ) );	// must be pre-sorted
 		REQUIRE( !dragSelIndexes.empty() );
@@ -113,7 +113,7 @@ namespace seq
 
 		rNewSequence.insert( rNewSequence.begin() + dropPos, selTemp.begin(), selTemp.end() );		// 'drop' the selected object
 
-		if ( pDroppedSelIndexes != NULL )
+		if ( pDroppedSelIndexes != nullptr )
 		{	// adjust dropped selected indexes according to the new dropped-index
 			pDroppedSelIndexes->resize( dragSelIndexes.size() );
 			std::generate( pDroppedSelIndexes->begin(), pDroppedSelIndexes->end(), func::GenNumSeq<IndexT>( static_cast<IndexT>( dropPos ) ) );
@@ -150,7 +150,7 @@ namespace seq
 	// Undo Drop semantics: uses the ORIGINAL drag selection and dropped index (after drop); returns the original (rolled-back) dropIndex.
 	//
 	template< typename Type, typename IndexT >
-	IndexT MakeUndoDropSequence( std::vector<Type>& rNewSequence, const std::vector<Type>& baselineSeq,
+	IndexT MakeUndoDropSequence( std::vector<Type>& rNewSequence _out_, const std::vector<Type>& baselineSeq,
 								 IndexT droppedIndex, const std::vector<IndexT>& origDragSelIndexes )
 	{
 		REQUIRE( utl::IsOrdered( origDragSelIndexes ) );		// must be pre-sorted
@@ -193,7 +193,7 @@ namespace seq
 	// see CSequenceAdapter below for an example of sequence adapter; could be more sophisticated, such as a list ctrl adapter, etc.
 	//
 	template< typename SequenceT, typename IndexT >
-	void MoveBy( SequenceT& rSequence, const std::vector<IndexT>& selIndexes, Direction moveBy )
+	void MoveBy( SequenceT& rSequence _in_out_, const std::vector<IndexT>& selIndexes, Direction moveBy )
 	{
 		REQUIRE( utl::IsOrdered( selIndexes ) );		// must be pre-sorted
 		REQUIRE( !selIndexes.empty() );
@@ -214,14 +214,14 @@ namespace seq
 	}
 
 	template< typename SequenceT, typename IndexT >
-	inline void MoveBy( SequenceT& rSequence, IndexT selIndex, Direction moveBy )
+	inline void MoveBy( SequenceT& rSequence _in_out_, IndexT selIndex, Direction moveBy )
 	{
 		MoveBy( rSequence, std::vector<IndexT>( 1, selIndex ), moveBy );
 	}
 
 
 	template< typename SequenceT, typename IndexT >
-	void Resequence( SequenceT& rSequence, const std::vector<IndexT>& selIndexes, MoveTo moveTo )
+	void Resequence( SequenceT& rSequence _in_out_, const std::vector<IndexT>& selIndexes, MoveTo moveTo )
 	{
 		REQUIRE( utl::IsOrdered( selIndexes ) );		// must be pre-sorted
 		REQUIRE( !selIndexes.empty() );
@@ -261,7 +261,7 @@ namespace seq
 	struct ModifyBy
 	{
 		template< typename IndexT >
-		void operator()( IndexT& rIndex ) { rIndex += static_cast<IndexT>( direction ); }
+		void operator()( IndexT& rIndex _in_out_ ) { rIndex += static_cast<IndexT>( direction ); }
 	};
 
 
@@ -274,7 +274,7 @@ namespace seq
 		typedef Type TType;
 
 		template< typename Container >
-		CSequenceAdapter( Container* pSequence ) : m_pSequence( &pSequence->front() ), m_count( pSequence->size() ) { ASSERT_PTR( m_pSequence ); }
+		CSequenceAdapter( Container* pSequence _in_out_ ) : m_pSequence( &pSequence->front() ), m_count( pSequence->size() ) { ASSERT_PTR( m_pSequence ); }
 
 		CSequenceAdapter( Type sequence[], size_t count ) : m_pSequence( sequence ), m_count( count ) { ASSERT_PTR( m_pSequence ); }
 

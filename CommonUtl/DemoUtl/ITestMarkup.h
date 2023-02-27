@@ -15,7 +15,7 @@ template< typename CountableType >
 int GetMarkupDepth( const CountableType* pWnd )
 {
 	int depth = 1;
-	for ( const CWnd* pParent = pWnd; pParent != NULL && !is_a<ITestMarkup>( pParent ); pParent = pParent->GetParent() )
+	for ( const CWnd* pParent = pWnd; pParent != nullptr && !is_a<ITestMarkup>( pParent ); pParent = pParent->GetParent() )
 		if ( is_a<CountableType>( pParent ) )
 			++depth;
 

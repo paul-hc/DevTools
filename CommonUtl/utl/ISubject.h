@@ -40,16 +40,16 @@ namespace utl
 	template< typename ObjectType >
 	inline const std::tstring& GetSafeCode( const ObjectType* pObject )
 	{
-		return pObject != NULL ? pObject->GetCode() : str::GetEmpty();
+		return pObject != nullptr ? pObject->GetCode() : str::GetEmpty();
 	}
 
 	template< typename ObjectType >
 	inline std::tstring GetSafeDisplayCode( const ObjectType* pObject )
 	{
-		return pObject != NULL ? pObject->GetDisplayCode() : str::GetEmpty();
+		return pObject != nullptr ? pObject->GetDisplayCode() : str::GetEmpty();
 	}
 
-	inline int GetSafeTypeID( const IMessage* pMessage ) { return pMessage != NULL ? pMessage->GetTypeID() : 0; }
+	inline int GetSafeTypeID( const IMessage* pMessage ) { return pMessage != nullptr ? pMessage->GetTypeID() : 0; }
 }
 
 
@@ -95,7 +95,7 @@ namespace utl
 		rTextItems.reserve( rTextItems.size() + std::distance( itFirst, itLast ) );
 
 		for ( ; itFirst != itLast; ++itFirst )
-			if ( *itFirst != NULL )
+			if ( *itFirst != nullptr )
 				rTextItems.push_back( getTextFunc( *itFirst ) );
 	}
 

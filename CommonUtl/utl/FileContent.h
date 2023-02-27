@@ -79,7 +79,7 @@ namespace fs
 		CFileBackup( const fs::CPath& srcFilePath, fs::TDirPath backupDirPath = fs::TDirPath(), FileContentMatch matchBy = FileSize, const TCHAR fmtNumSuffix[] = _T("-[%d]") );
 
 		bool FindFirstDuplicateFile( fs::CPath* pOutDupFilePath ) const;
-		fs::CPath MakeBackupFilePath( fs::AcquireResult* pOutResult = NULL ) const;							// would-be backup file path (no copying involved)
+		fs::CPath MakeBackupFilePath( fs::AcquireResult* pOutResult = nullptr ) const;							// would-be backup file path (no copying involved)
 
 		fs::AcquireResult CreateBackupFile( fs::CPath* pOutBackupFilePath ) throws_( CRuntimeException );	// create a backup copy of the original if none existing files matching "name*.ext" have identical content
 

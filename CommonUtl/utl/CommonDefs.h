@@ -69,6 +69,9 @@
 #define persist				// persistent data-member
 #define throws_( ... )
 
+#define _out_				// output function parameter
+#define _in_out_			// input and output function parameter
+
 
 #define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
 

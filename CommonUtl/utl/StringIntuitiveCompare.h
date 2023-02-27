@@ -9,7 +9,7 @@ namespace pred
 {
 	// intuitive order: case insensitive, compare numeric sequences by value
 	//
-	template< typename TranslateFunc = ToCharFunc() >
+	template< typename TranslateFunc >
 	struct IntuitiveComparator
 	{
 		IntuitiveComparator( TranslateFunc translateFunc = TranslateFunc() ) : m_translateFunc( translateFunc ) {}
@@ -23,7 +23,7 @@ namespace pred
 		template< typename CharT >
 		CompareResult Compare( const CharT* pLeft, const CharT* pRight ) const
 		{
-			REQUIRE( pLeft != NULL && pRight != NULL );
+			REQUIRE( pLeft != nullptr && pRight != nullptr );
 
 			for ( size_t posLeft = 0, posRight = 0; ; ++posLeft, ++posRight )
 			{

@@ -36,7 +36,7 @@ namespace fmt
 	bool ParseFileStateCore( fs::CFileState& rFileState, str::TStringRange& rTextRange );
 
 	std::tstring FormatClipFileState( const fs::CFileState& fileState, PathFormat pathFormat = FullPath, bool tagged = true );
-	fs::CFileState& ParseClipFileState( fs::CFileState& rFileState, const std::tstring& text, const fs::CPath* pKeyPath = NULL ) throws_( CRuntimeException );
+	fs::CFileState& ParseClipFileState( fs::CFileState& rFileState, const std::tstring& text, const fs::CPath* pKeyPath = nullptr ) throws_( CRuntimeException );
 
 	std::tstring FormatRenameEntry( const fs::CPath& srcPath, const fs::CPath& destPath );
 	std::tstring FormatRenameEntryRelativeDest( const fs::CPath& srcPath, const fs::CPath& destPath );

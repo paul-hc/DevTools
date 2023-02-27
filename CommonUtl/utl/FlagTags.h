@@ -19,7 +19,7 @@ public:
 	};
 
 	// for contiguous flags starting with 0b1
-	CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags = NULL );
+	CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags = nullptr );
 
 	// for sparse individual flags; uiTags follows the same order
 	CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags = std::tstring() );

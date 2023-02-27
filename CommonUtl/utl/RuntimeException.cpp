@@ -68,11 +68,11 @@ namespace mfc
 	{
 	}
 
-	BOOL CRuntimeException::GetErrorMessage( TCHAR* pMessage, UINT count, UINT* pHelpContext /*= NULL*/ ) const
+	BOOL CRuntimeException::GetErrorMessage( TCHAR* pMessage, UINT count, UINT* pHelpContext /*= nullptr*/ ) const
 	{
 		ASSERT_PTR( pMessage );
 
-		if ( pHelpContext != NULL )
+		if ( pHelpContext != nullptr )
 			*pHelpContext = 0;
 
 		_tcsncpy( pMessage, m_message.c_str(), count - 1 );

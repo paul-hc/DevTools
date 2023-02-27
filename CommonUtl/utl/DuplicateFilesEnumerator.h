@@ -22,7 +22,7 @@ public:
 class CDuplicateFilesEnumerator : public fs::CBaseEnumerator
 {
 public:
-	CDuplicateFilesEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = NULL, utl::IProgressService* pProgressSvc = svc::CNoProgressService::Instance() );
+	CDuplicateFilesEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = nullptr, utl::IProgressService* pProgressSvc = svc::CNoProgressService::Instance() );
 	~CDuplicateFilesEnumerator() { Clear(); }
 
 	void SearchDuplicates( const std::vector<fs::TPatternPath>& searchPaths );

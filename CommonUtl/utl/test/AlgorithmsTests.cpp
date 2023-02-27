@@ -357,6 +357,7 @@ void CAlgorithmsTests::TestRemove( void )
 		ASSERT_EQUAL( "1,2,3,4,5,6,7,8,9,10", str::Join( numbers, sep ) );
 
 		utl::RemoveIf( numbers, pred::IsEven() );
+		ASSERT_EQUAL( "1,3,5,7,9", str::Join( numbers, sep ) );
 
 		utl::RemoveExisting( numbers, 5 );
 		ASSERT_EQUAL( "1,3,7,9", str::Join( numbers, sep ) );

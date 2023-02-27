@@ -7,13 +7,13 @@
 #endif
 
 
-bool CErrorHandler::Handle( HRESULT hResult, bool* pAllGood /*= NULL*/ ) const throws_( COleException* )
+bool CErrorHandler::Handle( HRESULT hResult, bool* pAllGood /*= nullptr*/ ) const throws_( COleException* )
 {
 	if ( IsIgnoreMode() || HR_OK( hResult ) )
 		return true;				// all good
 	else
 	{
-		if ( pAllGood != NULL )
+		if ( pAllGood != nullptr )
 			*pAllGood = false;
 
 		if ( !IsThrowMode() )

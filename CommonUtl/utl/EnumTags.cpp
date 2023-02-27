@@ -17,7 +17,7 @@ CEnumTags::CEnumTags( int defaultValue /*= -1*/, int baseValue /*= 0*/ )
 {
 }
 
-CEnumTags::CEnumTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= NULL*/, int defaultValue /*= -1*/, int baseValue /*= 0*/ )
+CEnumTags::CEnumTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= nullptr*/, int defaultValue /*= -1*/, int baseValue /*= 0*/ )
 	: m_defaultValue( defaultValue )
 	, m_baseValue( baseValue )
 {
@@ -28,7 +28,7 @@ CEnumTags::~CEnumTags()
 {
 }
 
-void CEnumTags::AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag /*= NULL*/ )
+void CEnumTags::AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag /*= nullptr*/ )
 {
 	ASSERT_PTR( uiTag );
 	m_uiTags.push_back( uiTag );
@@ -41,7 +41,7 @@ void CEnumTags::AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag /*= NULL*/
 void CEnumTags::Construct( const std::tstring& uiTags, const TCHAR* pKeyTags )
 {
 	str::Split( m_uiTags, uiTags.c_str(), m_listSep );
-	if ( pKeyTags != NULL )
+	if ( pKeyTags != nullptr )
 		str::Split( m_keyTags, pKeyTags, m_listSep );
 
 	ENSURE( !m_uiTags.empty() );

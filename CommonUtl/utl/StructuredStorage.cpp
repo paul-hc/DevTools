@@ -69,7 +69,7 @@ namespace fs
 		m_cwdTrail.Reset();
 		m_openedStreamStates.Clear();
 
-		m_pRootStorage = NULL;			// release the storage
+		m_pRootStorage = nullptr;			// release the storage
 		m_openMode = 0;
 		m_docFilePath.Clear();
 	}
@@ -81,11 +81,11 @@ namespace fs
 
 		mode = ToMode( mode );
 
-		HRESULT hResult = ::StgCreateStorageEx( docFilePath.GetPtr(), mode, STGFMT_STORAGE, 0, NULL, 0, IID_PPV_ARGS( &m_pRootStorage ) );
+		HRESULT hResult = ::StgCreateStorageEx( docFilePath.GetPtr(), mode, STGFMT_STORAGE, 0, nullptr, 0, IID_PPV_ARGS( &m_pRootStorage ) );
 		//HRESULT hResult = ::StgCreateDocfile( docFilePath.GetPtr(), mode, 0, &m_pRootStorage );		// old API NT4-
 
 		if ( FAILED( hResult ) )
-			return HandleError( hResult, NULL, docFilePath.GetPtr() );
+			return HandleError( hResult, nullptr, docFilePath.GetPtr() );
 
 		m_openMode = mode;
 		m_docFilePath = fs::stg::GetElementName( &*m_pRootStorage );
@@ -100,11 +100,11 @@ namespace fs
 
 		mode = ToMode( mode );
 
-		HRESULT hResult = HR_AUDIT( ::StgOpenStorageEx( docFilePath.GetPtr(), mode, STGFMT_STORAGE, 0, NULL, 0, IID_PPV_ARGS( &m_pRootStorage ) ) );
-		//HRESULT hResult = HR_AUDIT( ::StgOpenStorage( docFilePath.GetPtr(), NULL, mode, NULL, 0, &m_pRootStorage ) );		// old API NT4-
+		HRESULT hResult = HR_AUDIT( ::StgOpenStorageEx( docFilePath.GetPtr(), mode, STGFMT_STORAGE, 0, nullptr, 0, IID_PPV_ARGS( &m_pRootStorage ) ) );
+		//HRESULT hResult = HR_AUDIT( ::StgOpenStorage( docFilePath.GetPtr(), nullptr, mode, nullptr, 0, &m_pRootStorage ) );		// old API NT4-
 
 		if ( FAILED( hResult ) )
-			return HandleError( hResult, NULL, docFilePath.GetPtr() );
+			return HandleError( hResult, nullptr, docFilePath.GetPtr() );
 
 		m_openMode = mode;
 		m_docFilePath = fs::stg::GetElementName( &*m_pRootStorage );
@@ -163,7 +163,7 @@ namespace fs
 				? OpenDir( itSubDir->c_str(), openExistingMode )	// open existing storage
 				: CreateDir( itSubDir->c_str(), mode );				// create the sub-storage
 
-			if ( pStorage != NULL )
+			if ( pStorage != nullptr )
 				m_cwdTrail.Push( pStorage );		// advance one level deeper
 			else
 			{
@@ -196,7 +196,7 @@ namespace fs
 		std::tstring storageName = MakeShortFilename( pDirName );
 
 		CComPtr<IStorage> pDirStorage;
-		HRESULT hResult = GetCurrentDir()->OpenStorage( storageName.c_str(), NULL, ToMode( mode ), NULL, 0, &pDirStorage );
+		HRESULT hResult = GetCurrentDir()->OpenStorage( storageName.c_str(), nullptr, ToMode( mode ), nullptr, 0, &pDirStorage );
 
 		if ( FAILED( hResult ) )
 			HandleError( hResult, pDirName );
@@ -223,7 +223,7 @@ namespace fs
 		CScopedErrorHandling scopedIgnore( this, utl::IgnoreMode );		// failure is not an error
 
 		CComPtr<IStorage> pStorage = OpenDir( pStorageName, STGM_READ );
-		return pStorage != NULL;
+		return pStorage != nullptr;
 	}
 
 
@@ -237,11 +237,11 @@ namespace fs
 		m_openedStreamStates.Remove( streamPath );		// remove any cached reading stream state
 
 		CComPtr<IStream> pFileStream;
-		HRESULT hResult = GetCurrentDir()->CreateStream( streamName.c_str(), ToMode( mode ), NULL, 0, &pFileStream );
+		HRESULT hResult = GetCurrentDir()->CreateStream( streamName.c_str(), ToMode( mode ), 0, 0, &pFileStream );
 
 		if ( FAILED( hResult ) )
 			HandleError( hResult, pStreamName );
-	
+
 		return pFileStream;
 	}
 
@@ -260,7 +260,7 @@ namespace fs
 			m_openedStreamStates.Remove( streamPath );
 
 		CComPtr<IStream> pFileStream;
-		HRESULT hResult = GetCurrentDir()->OpenStream( streamName.c_str(), NULL, ToMode( mode ), 0, &pFileStream );
+		HRESULT hResult = GetCurrentDir()->OpenStream( streamName.c_str(), nullptr, ToMode( mode ), 0, &pFileStream );
 
 		if ( FAILED( hResult ) )
 			HandleError( hResult, pStreamName );
@@ -315,7 +315,7 @@ namespace fs
 		CScopedErrorHandling scopedIgnore( this, utl::IgnoreMode );		// failure is not an error
 
 		CComPtr<IStream> pStream = OpenStream( pStreamName, STGM_READ );
-		return pStream != NULL;
+		return pStream != nullptr;
 	}
 
 
@@ -362,7 +362,7 @@ namespace fs
 				pStreamLocation->m_pCurrDir.reset( new CScopedCurrentDir( this, folderPath.GetPtr(), STGM_READWRITE ) );	// deep stream located in its parent storage path location
 		}
 
-		if ( pStreamLocation->m_pCurrDir.get() != NULL )		// do we have a valid location?
+		if ( pStreamLocation->m_pCurrDir.get() != nullptr )		// do we have a valid location?
 			if ( HasFlag( mode, STGM_CREATE ) )
 				pStreamLocation->m_pStream = CreateStream( streamEmbeddedPath.GetPtr(), mode );
 			else
@@ -406,7 +406,7 @@ namespace fs
 			if ( StorageExist( altDirNames[ i ] ) )
 				return std::pair<const TCHAR*, size_t>( altDirNames[ i ], i );
 
-		return std::pair<const TCHAR*, size_t>( NULL, utl::npos );			// no storage found
+		return std::pair<const TCHAR*, size_t>( nullptr, utl::npos );			// no storage found
 	}
 
 	std::pair<const TCHAR*, size_t> CStructuredStorage::FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount )
@@ -417,7 +417,7 @@ namespace fs
 			if ( StreamExist( altStreamNames[ i ] ) )
 				return std::pair<const TCHAR*, size_t>( altStreamNames[ i ], i );
 
-		return std::pair<const TCHAR*, size_t>( NULL, utl::npos );			// no stream found
+		return std::pair<const TCHAR*, size_t>( nullptr, utl::npos );			// no stream found
 	}
 
 
@@ -442,13 +442,13 @@ namespace fs
 		return UseStreamSharing();
 	}
 
-	std::auto_ptr<COleStreamFile> CStructuredStorage::MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream /*= NULL*/ ) const
+	std::auto_ptr<COleStreamFile> CStructuredStorage::MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream /*= nullptr*/ ) const
 	{
 		std::auto_ptr<COleStreamFile> pFile( new CManagedOleStreamFile( pStream, fs::CFlexPath::MakeComplexPath( GetDocFilePath(), GetCurrentDirPath() / pStreamName ) ) );
 		return pFile;
 	}
 
-	bool CStructuredStorage::HandleError( HRESULT hResult, const TCHAR* pElementName, const TCHAR* pDocFilePath /*= NULL*/ ) const
+	bool CStructuredStorage::HandleError( HRESULT hResult, const TCHAR* pElementName, const TCHAR* pDocFilePath /*= nullptr*/ ) const
 	{
 		if ( SUCCEEDED( hResult ) || IsIgnoreMode() )
 			return true;				// all good
@@ -532,7 +532,7 @@ namespace fs
 
 		CComPtr<IEnumSTATSTG> pEnumStat;
 
-		HRESULT hResult = pCurrStorage->EnumElements( 0, NULL, 0, &pEnumStat );
+		HRESULT hResult = pCurrStorage->EnumElements( 0, nullptr, 0, &pEnumStat );
 		if ( FAILED( hResult ) )
 			return HandleError( hResult, embeddedPath.GetPtr() );
 
@@ -541,7 +541,7 @@ namespace fs
 
 		for ( ;; )
 		{
-			hResult = pEnumStat->Next( 1, &stat, NULL );
+			hResult = pEnumStat->Next( 1, &stat, nullptr );
 			if ( FAILED( hResult ) )
 				return HandleError( hResult, embeddedPath.GetPtr() );
 			else if ( S_FALSE == hResult )		// done?
@@ -591,7 +591,7 @@ namespace fs
 		fs::TEmbeddedPath embeddedPath = GetCurrentDirPath();
 
 		CComPtr<IEnumSTATSTG> pEnumStat;
-		HRESULT hResult = GetCurrentDir()->EnumElements( 0, NULL, 0, &pEnumStat );
+		HRESULT hResult = GetCurrentDir()->EnumElements( 0, nullptr, 0, &pEnumStat );
 		if ( FAILED( hResult ) )
 			return HandleError( hResult, embeddedPath.GetPtr() );
 
@@ -601,7 +601,7 @@ namespace fs
 
 		do
 		{
-			hResult = pEnumStat->Next( 1, &stat, NULL );
+			hResult = pEnumStat->Next( 1, &stat, nullptr );
 			if ( FAILED( hResult ) )
 				return HandleError( hResult, embeddedPath.GetPtr() );
 			else if ( S_FALSE == hResult )		// done?
@@ -676,9 +676,9 @@ namespace fs
 
 	// CStructuredStorage::CStorageTrail implementation
 
-	void CStructuredStorage::CStorageTrail::Reset( const CStorageTrail* pTrail /*= NULL*/ )
+	void CStructuredStorage::CStorageTrail::Reset( const CStorageTrail* pTrail /*= nullptr*/ )
 	{
-		if ( pTrail != NULL )
+		if ( pTrail != nullptr )
 		{
 			ASSERT( m_pDocStorage == pTrail->m_pDocStorage );
 
@@ -736,7 +736,7 @@ namespace fs
 		if ( fromRoot )
 			m_pDocStorage->ResetToRootCurrentDir();
 
-		if ( pSubStorage != NULL )
+		if ( pSubStorage != nullptr )
 			m_pDocStorage->RefCwd()->Push( pSubStorage );
 	}
 
@@ -756,7 +756,7 @@ namespace fs
 		ASSERT_PTR( pStream );
 		LARGE_INTEGER startPos;
 		startPos.QuadPart = position;
-		return HR_OK( pStream->Seek( startPos, origin, NULL ) );
+		return HR_OK( pStream->Seek( startPos, origin, nullptr ) );
 	}
 
 
@@ -808,15 +808,15 @@ namespace fs
 		: COleStreamFile( pStreamLocation->m_pStream )
 		, m_pStreamLocation( pStreamLocation )
 	{
-		REQUIRE( m_pStreamLocation.get() != NULL && m_pStreamLocation->IsValid() );
+		REQUIRE( m_pStreamLocation.get() != nullptr && m_pStreamLocation->IsValid() );
 
 		Init( m_pStreamLocation->m_pStream, streamFullPath );
-		m_pStreamLocation->m_pStream = NULL;					// release the stream since is managed by COleStreamFile base class, but keep location alive
+		m_pStreamLocation->m_pStream = nullptr;					// release the stream since is managed by COleStreamFile base class, but keep location alive
 	}
 
 	CManagedOleStreamFile::~CManagedOleStreamFile()
 	{
-		ASSERT( m_bCloseOnDelete || NULL == GetStream() );
+		ASSERT( m_bCloseOnDelete || nullptr == GetStream() );
 		//TRACE_COM_ITF( m_lpStream, "CManagedOleStreamFile::~CManagedOleStreamFile() - before closing m_lpStream" );		// refCount=1 for straight usage
 	}
 
@@ -824,7 +824,7 @@ namespace fs
 	{
 		m_bCloseOnDelete = TRUE;			// will close on destructor
 
-		if ( pStreamOpened != NULL )
+		if ( pStreamOpened != nullptr )
 			pStreamOpened->AddRef();		// keep the stream alive when passed on contructor by e.g. OpenStream - it will be released on Close()
 
 		// store the stream path so it gets assigned in CArchive objects;
@@ -839,15 +839,15 @@ namespace fs
 		CScopedCreateDocMode::CScopedCreateDocMode( CStructuredStorage* pDocStorage, const fs::TStgDocPath* pDocFilePath, const CErrorHandler* pSrcHandler /*= CErrorHandler::Thrower()*/ )
 			: CScopedErrorHandling( pDocStorage, pSrcHandler )
 			, m_pDocStorage( pDocStorage )
-			, m_docFilePath( pDocFilePath != NULL ? *pDocFilePath : m_pDocStorage->GetDocFilePath() )
+			, m_docFilePath( pDocFilePath != nullptr ? *pDocFilePath : m_pDocStorage->GetDocFilePath() )
 		{
-			if ( pDocFilePath != NULL )
+			if ( pDocFilePath != nullptr )
 				VERIFY( m_pDocStorage->CreateDocFile( m_docFilePath ) );
 		}
 
 		CScopedCreateDocMode::~CScopedCreateDocMode()
 		{
-			if ( m_pDocStorage != NULL )			// not restored by derived class?
+			if ( m_pDocStorage != nullptr )			// not restored by derived class?
 				m_pDocStorage->CloseDocFile();
 		}
 
@@ -856,10 +856,10 @@ namespace fs
 
 		CScopedWriteDocMode::CScopedWriteDocMode( CStructuredStorage* pDocStorage, const fs::TStgDocPath* pDocFilePath, DWORD writeMode /*= STGM_READWRITE*/,
 												  const CErrorHandler* pSrcHandler /*= CErrorHandler::Thrower()*/ )
-			: CScopedCreateDocMode( pDocStorage, NULL /*avoid creation*/, pSrcHandler )
+			: CScopedCreateDocMode( pDocStorage, nullptr /*avoid creation*/, pSrcHandler )
 			, m_origReadingMode( s_closedMode )
 		{
-			__super::m_docFilePath = pDocFilePath != NULL ? *pDocFilePath : m_pDocStorage->GetDocFilePath();
+			__super::m_docFilePath = pDocFilePath != nullptr ? *pDocFilePath : m_pDocStorage->GetDocFilePath();
 
 			if ( m_pDocStorage->IsOpen() )
 			{
@@ -874,7 +874,7 @@ namespace fs
 
 		CScopedWriteDocMode::~CScopedWriteDocMode()
 		{
-			if ( m_pDocStorage != NULL )			// not restored by derived class?
+			if ( m_pDocStorage != nullptr )			// not restored by derived class?
 			{
 				m_pDocStorage->CloseDocFile();
 
@@ -886,7 +886,7 @@ namespace fs
 					m_pDocStorage->OpenDocFile( m_docFilePath, m_origReadingMode );
 				}
 
-				m_pDocStorage = NULL;				// prevent base destructor from restoring
+				m_pDocStorage = nullptr;				// prevent base destructor from restoring
 			}
 		}
 
@@ -956,14 +956,14 @@ namespace fs
 			CComPtr<IStream> pStream;
 
 			if ( !filePath.IsComplexPath() )
-				::SHCreateStreamOnFileEx( filePath.GetPtr(), mode, createAttributes, FALSE, NULL, &pStream );
+				::SHCreateStreamOnFileEx( filePath.GetPtr(), mode, createAttributes, FALSE, nullptr, &pStream );
 			else
 			{
 				if ( CStructuredStorage* pFoundDocStorage = fs::CStructuredStorage::FindOpenedStorage( filePath.GetPhysicalPath() ) )
 					pStream = pFoundDocStorage->OpenStream( filePath.GetEmbeddedPathPtr(), mode );
 			}
 
-			if ( NULL == pStream )
+			if ( nullptr == pStream )
 				TRACE( _T(" * fs::flex::OpenStreamOnFile() failed to open file %s\n"), filePath.GetPtr() );
 
 			return pStream;
@@ -984,7 +984,7 @@ namespace fs
 						return pStreamState->m_fileSize;		// cached file size
 
 					std::auto_ptr<fs::CStreamLocation> pStreamLocation = pDocStorage->LocateReadStream( streamEmbeddedPath );
-					if ( pStreamLocation.get() != NULL )
+					if ( pStreamLocation.get() != nullptr )
 						return fs::stg::GetStreamSize( &*pStreamLocation->m_pStream );
 				}
 			}
@@ -1026,10 +1026,10 @@ namespace fs
 			rState.m_fileSize = static_cast<UINT64>( stat.cbSize.QuadPart );
 
 			rState.m_attributes = 0;
-			if ( stat.pwcsName != NULL )						// name was requested?
+			if ( stat.pwcsName != nullptr )						// name was requested?
 			{
 				rState.m_fullPath.Set( stat.pwcsName );		// assign element name - the physical name of the stream (max 31 characters)
-				::CoTaskMemFree( stat.pwcsName );			// free the memory allocated by Stat() 
+				::CoTaskMemFree( stat.pwcsName );			// free the memory allocated by Stat()
 			}
 			else
 				rState.m_fullPath.Clear();

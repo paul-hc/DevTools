@@ -41,8 +41,8 @@ public:
 	bool CanUndo( void ) const;
 	bool CanRedo( void ) const;
 
-	utl::ICommand* PeekUndo( void ) const { return !m_undoStack.empty() ? m_undoStack.back() : NULL; }
-	utl::ICommand* PeekRedo( void ) const { return !m_redoStack.empty() ? m_redoStack.back() : NULL; }
+	utl::ICommand* PeekUndo( void ) const { return !m_undoStack.empty() ? m_undoStack.back() : nullptr; }
+	utl::ICommand* PeekRedo( void ) const { return !m_redoStack.empty() ? m_redoStack.back() : nullptr; }
 
 	const std::deque<utl::ICommand*>& GetUndoStack( void ) const { return m_undoStack; }
 	const std::deque<utl::ICommand*>& GetRedoStack( void ) const { return m_redoStack; }

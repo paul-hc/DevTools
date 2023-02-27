@@ -101,12 +101,12 @@ namespace ut
 
 namespace ut
 {
-	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText /*= NULL*/ )
+	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText /*= nullptr*/ )
 	{
 		if ( !fs::CreateDirPath( filePath.GetParentPath().GetPtr() ) )
 			return false;			// error creating sub dir
 
-		if ( NULL == pText )
+		if ( nullptr == pText )
 			pText = filePath.GetFilenamePtr();		// use the filename as text content
 
 		std::ofstream output( filePath.GetPtr(), std::ios::out | std::ios::trunc );
@@ -117,7 +117,7 @@ namespace ut
 		return filePath.FileExist();
 	}
 
-	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pText /*= NULL*/, bool retainModifyTime /*= false*/ )
+	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pText /*= nullptr*/, bool retainModifyTime /*= false*/ )
 	{
 		if ( !filePath.FileExist() )
 		{
@@ -125,9 +125,9 @@ namespace ut
 			return false;
 		}
 
-		std::auto_ptr<fs::CScopedFileTime> pScopedFileTime( retainModifyTime ? new fs::CScopedFileTime( filePath ) : NULL );
+		std::auto_ptr<fs::CScopedFileTime> pScopedFileTime( retainModifyTime ? new fs::CScopedFileTime( filePath ) : nullptr );
 
-		if ( NULL == pText )
+		if ( nullptr == pText )
 			pText = filePath.GetFilenamePtr();		// use the filename as text content
 
 		{
@@ -289,7 +289,7 @@ namespace ut
 
 	const TCHAR CTempFilePool::m_sep[] = _T("|");
 
-	CTempFilePool::CTempFilePool( const TCHAR* pFlatPaths /*= NULL*/ )
+	CTempFilePool::CTempFilePool( const TCHAR* pFlatPaths /*= nullptr*/ )
 		: m_poolDirPath( MakePoolDirPath( true ) )
 		, m_hasFileErrors( false )
 	{
@@ -314,7 +314,7 @@ namespace ut
 		return fs::DeleteAllFiles( m_poolDirPath.GetPtr() );
 	}
 
-	bool CTempFilePool::CreateFiles( const TCHAR* pFlatPaths /*= NULL*/ )
+	bool CTempFilePool::CreateFiles( const TCHAR* pFlatPaths /*= nullptr*/ )
 	{
 		if ( !IsValidDir() )
 			return false;

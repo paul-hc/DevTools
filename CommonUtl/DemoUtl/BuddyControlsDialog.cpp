@@ -239,7 +239,7 @@ BOOL CBuddyControlsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHAN
 
 void CBuddyControlsDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_searchPathCombo.m_hWnd;
+	bool firstInit = nullptr == m_searchPathCombo.m_hWnd;
 
 	DDX_Control( pDX, IDC_SEARCH_PATH_COMBO, m_searchPathCombo );
 	DDX_Control( pDX, IDC_FOLDER_PATH_COMBO, m_folderPathCombo );

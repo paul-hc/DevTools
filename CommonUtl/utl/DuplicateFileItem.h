@@ -46,9 +46,9 @@ public:
 	const std::vector<CDuplicateFileItem*>& GetItems( void ) const { return m_items; }
 	size_t GetDuplicatesCount( void ) const { ASSERT( !m_items.empty() ); return m_items.size() - 1; }		// excluding the original item
 
-	CDuplicateFileItem* GetOriginalItem( void ) const { return !m_items.empty() ? m_items.front() : NULL; }
+	CDuplicateFileItem* GetOriginalItem( void ) const { return !m_items.empty() ? m_items.front() : nullptr; }
 	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const { return func::FindItemWithPath( m_items, filePath ); }
-	bool ContainsItem( const fs::CPath& filePath ) const { return FindItem( filePath ) != NULL; }
+	bool ContainsItem( const fs::CPath& filePath ) const { return FindItem( filePath ) != nullptr; }
 
 	void AddItem( CDuplicateFileItem* pDupItem );
 	void SortDuplicates( void );		//  keep original first, sort duplicate items by path

@@ -12,10 +12,10 @@ const TCHAR CFlagTags::m_listSep[] = _T("|");
 const TCHAR CFlagTags::m_tagSep[] = _T("|");
 
 
-CFlagTags::CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= NULL*/ )
+CFlagTags::CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= nullptr*/ )
 {
 	str::Split( m_uiTags, uiTags.c_str(), m_listSep );
-	if ( pKeyTags != NULL )
+	if ( pKeyTags != nullptr )
 		str::Split( m_keyTags, pKeyTags, m_listSep );
 
 	ENSURE( !m_uiTags.empty() );

@@ -43,7 +43,7 @@ namespace serial
 	template< typename ObjectType >
 	void Load_CObject_Dynamic( CArchive& archive, ObjectType*& rpObject )
 	{
-		CObject* pSerialObject = NULL;
+		CObject* pSerialObject = nullptr;
 		archive >> pSerialObject;
 
 		rpObject = dynamic_cast<ObjectType*>( pSerialObject );
@@ -193,7 +193,7 @@ namespace serial
 	{
 		if ( archive.IsStoring() )
 		{
-			if ( rPtr.get() != NULL )
+			if ( rPtr.get() != nullptr )
 			{
 				archive << true;				// has ptr
 				rPtr->Stream( archive );
@@ -208,7 +208,7 @@ namespace serial
 
 			if ( hasPtr )
 			{
-				if ( NULL == rPtr.get() )
+				if ( nullptr == rPtr.get() )
 					rPtr.reset( new Type() );
 
 				rPtr->Stream( archive );
@@ -234,7 +234,7 @@ namespace serial
 	};
 
 
-	UnicodeEncoding InspectSavedStringEncoding( ::CArchive& rLoadArchive, size_t* pLength = NULL );
+	UnicodeEncoding InspectSavedStringEncoding( ::CArchive& rLoadArchive, size_t* pLength = nullptr );
 
 	const BYTE* GetLoadingCursor( const ::CArchive& rLoadArchive );
 	void UnreadBytes( ::CArchive& rLoadArchive, size_t bytes );

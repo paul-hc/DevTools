@@ -49,7 +49,7 @@ void CTestFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipC
 
 void CTestFormView::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_pDemo->m_formatCombo.m_hWnd;
+	bool firstInit = nullptr == m_pDemo->m_formatCombo.m_hWnd;
 
 	m_pDemo->DoDataExchange( pDX );
 	ui::DDX_ButtonIcon( pDX, IDC_RUN_IMAGE_TESTS, ID_RUN_TESTS );
@@ -140,7 +140,7 @@ void CTestFormView::OnStudyBuddyControls( void )
 	}
 	else
 	{
-		CBuddyControlsDialog* pDlg = new CBuddyControlsDialog( NULL );
+		CBuddyControlsDialog* pDlg = new CBuddyControlsDialog( nullptr );
 		pDlg->CreateModeless();
 	}
 }

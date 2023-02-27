@@ -138,7 +138,7 @@ void CDemoTemplate::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipC
 
 void CDemoTemplate::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_formatCombo.m_hWnd;
+	bool firstInit = nullptr == m_formatCombo.m_hWnd;
 	if ( firstInit )
 		if ( GetMarkupDepth( dynamic_cast<CDemoPage*>( m_pOwner ) ) <= MaxDemoDepth )
 			m_detailSheet.AddPage( new CDemoPage() );
@@ -208,8 +208,8 @@ void CDemoTemplate::OnToggle_DisableThemes( void )
 {
 	CVisualTheme::SetEnabled( !m_pOwner->IsDlgButtonChecked( IDC_DISABLE_THEMES_TOGGLE ) );
 
-	AfxGetMainWnd()->RedrawWindow( NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN );
-	m_pOwner->RedrawWindow( NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN );
+	AfxGetMainWnd()->RedrawWindow( nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN );
+	m_pOwner->RedrawWindow( nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN );
 }
 
 void CDemoTemplate::OnBnClicked_OpenDialog( void )
@@ -349,7 +349,7 @@ CListPage::CListPage( void )
 
 void CListPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_fileListView.m_hWnd;
+	bool firstInit = nullptr == m_fileListView.m_hWnd;
 
 	DDX_Control( pDX, IDC_FILE_RENAME_LIST, m_fileListView );
 	if ( firstInit )
@@ -474,7 +474,7 @@ void CEditPage::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl*
 
 void CEditPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_sourceEdit.m_hWnd;
+	bool firstInit = nullptr == m_sourceEdit.m_hWnd;
 	DDX_Control( pDX, IDC_SOURCE_EDIT, m_sourceEdit );
 	DDX_Control( pDX, IDC_SOURCE_COMBO, m_sourceCombo );
 	DDX_Control( pDX, IDC_DEST_EDIT, m_destEdit );
@@ -566,7 +566,7 @@ CDetailsPage::~CDetailsPage()
 
 void CDetailsPage::DoDataExchange( CDataExchange* pDX )
 {
-	if ( NULL == m_detailSheet.m_hWnd )
+	if ( nullptr == m_detailSheet.m_hWnd )
 		if ( GetMarkupDepth( this ) <= MaxDepth )
 			m_detailSheet.AddPage( new CDetailsPage() );
 

@@ -210,7 +210,7 @@ void CNumericTests::TestFormatNumberUserLocale( void )
 namespace ut
 {
 	template< typename ValueType >
-	std::pair<bool, ValueType> ParseNumber( const std::tstring& text, size_t* pSkipLength = NULL, const std::locale& loc = num::GetEmptyLocale() )
+	std::pair<bool, ValueType> ParseNumber( const std::tstring& text, size_t* pSkipLength = nullptr, const std::locale& loc = num::GetEmptyLocale() )
 	{
 		std::pair<bool, ValueType> result;
 		result.first = num::ParseNumber( result.second, text, pSkipLength, loc );
@@ -275,26 +275,26 @@ void CNumericTests::TestParseNumberUserLocale( void )
 {
 	const std::locale& userLoc = str::GetUserLocale();
 	{
-		ASSERT_EQUAL( std::make_pair( true, (short)-4096 ), ut::ParseNumber<short>( _T("-4,096"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned short)61440 ), ut::ParseNumber<unsigned short>( _T("61,440"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (short)-4096 ), ut::ParseNumber<short>( _T("-4,096"), nullptr, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned short)61440 ), ut::ParseNumber<unsigned short>( _T("61,440"), nullptr, userLoc ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (int)32 ), ut::ParseNumber<int>( _T("32"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (int)-268435456 ), ut::ParseNumber<int>( _T("-268,435,456"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned int)4026531840 ), ut::ParseNumber<unsigned int>( _T("4,026,531,840"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (int)32 ), ut::ParseNumber<int>( _T("32"), nullptr, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (int)-268435456 ), ut::ParseNumber<int>( _T("-268,435,456"), nullptr, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned int)4026531840 ), ut::ParseNumber<unsigned int>( _T("4,026,531,840"), nullptr, userLoc ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (long)-268435456 ), ut::ParseNumber<long>( _T("-268,435,456"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned long)4026531840 ), ut::ParseNumber<unsigned long>( _T("4,026,531,840"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (long)-268435456 ), ut::ParseNumber<long>( _T("-268,435,456"), nullptr, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned long)4026531840 ), ut::ParseNumber<unsigned long>( _T("4,026,531,840"), nullptr, userLoc ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, (__int64)-1152921504606846976 ), ut::ParseNumber<__int64>( _T("-1,152,921,504,606,846,976"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, (unsigned __int64)17293822569102704640 ), ut::ParseNumber<unsigned __int64>( _T("17,293,822,569,102,704,640"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (__int64)-1152921504606846976 ), ut::ParseNumber<__int64>( _T("-1,152,921,504,606,846,976"), nullptr, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, (unsigned __int64)17293822569102704640 ), ut::ParseNumber<unsigned __int64>( _T("17,293,822,569,102,704,640"), nullptr, userLoc ) );
 	}
 	{
-		ASSERT_EQUAL( std::make_pair( true, 32.0 ), ut::ParseNumber<double>( _T("32"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, 1234000.56789 ), ut::ParseNumber<double>( _T("1,234,000.56789"), NULL, userLoc ) );
-		ASSERT_EQUAL( std::make_pair( true, -1234000.56789 ), ut::ParseNumber<double>( _T("-1,234,000.56789"), NULL, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, 32.0 ), ut::ParseNumber<double>( _T("32"), nullptr, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, 1234000.56789 ), ut::ParseNumber<double>( _T("1,234,000.56789"), nullptr, userLoc ) );
+		ASSERT_EQUAL( std::make_pair( true, -1234000.56789 ), ut::ParseNumber<double>( _T("-1,234,000.56789"), nullptr, userLoc ) );
 	}
 }
 
@@ -450,7 +450,7 @@ void CNumericTests::TestCrc32( void )
 {
 	ASSERT( GetReferenceCrc32Table() == utl::CCrc32::Instance().GetLookupTable() );
 
-	ASSERT_EQUAL( 0, crc32::ComputeStringChecksum( (const char*)NULL ) );
+	ASSERT_EQUAL( 0, crc32::ComputeStringChecksum( (const char*)nullptr ) );
 	{
 		static const BYTE bytes[] = { 0 };
 		ASSERT_EQUAL( 0xD202EF8D, crc32::ComputeChecksum( bytes, COUNT_OF( bytes ) ) );

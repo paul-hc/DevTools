@@ -35,7 +35,7 @@ namespace utl
 		CScopedIncrement( ICounter* pCounter )		// optional counter
 			: m_pCounter( pCounter )
 		{
-			if ( m_pCounter != NULL )
+			if ( m_pCounter != nullptr )
 				m_pCounter->AddCount();
 		}
 
@@ -47,7 +47,7 @@ namespace utl
 
 		~CScopedIncrement()
 		{
-			if ( m_pCounter != NULL )
+			if ( m_pCounter != nullptr )
 				m_pCounter->ReleaseCount();
 		}
 	private:

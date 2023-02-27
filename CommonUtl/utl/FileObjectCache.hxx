@@ -31,7 +31,7 @@ namespace fs
 		mt::CAutoLock lock( &m_cs );		// nested lock works fine (no deadlock) within the same calling thread
 
 		const TCachedEntry* pCachedEntry = _FindEntry( pathKey, checkValid );
-		return pCachedEntry != NULL ? pCachedEntry->first : NULL;
+		return pCachedEntry != nullptr ? pCachedEntry->first : nullptr;
 	}
 
 	template< typename PathType, typename ObjectType >
@@ -43,7 +43,7 @@ namespace fs
 			if ( !checkValid || fs::FileNotExpired == CheckExpireStatus( pathKey, itFound->second ) )
 				return &itFound->second;
 
-		return NULL;
+		return nullptr;
 	}
 
 	template< typename PathType, typename ObjectType >

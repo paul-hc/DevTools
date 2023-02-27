@@ -54,7 +54,7 @@ namespace serial
 
 		for ( typename PtrContainerT::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
 		{
-			CObject* pSerialObject = NULL;
+			CObject* pSerialObject = nullptr;
 			archive >> pSerialObject;
 
 			*itPtr = dynamic_cast<typename PtrContainerT::value_type>( pSerialObject );

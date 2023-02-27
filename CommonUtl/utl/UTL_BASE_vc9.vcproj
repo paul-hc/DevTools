@@ -385,14 +385,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CodeParsing.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CodeParsing.h"
-				>
-			</File>
-			<File
 				RelativePath=".\CommonDefs.h"
 				>
 			</File>
@@ -983,6 +975,10 @@
 					RelativePath=".\TextFileIo.hxx"
 					>
 				</File>
+				<File
+					RelativePath=".\TextFileIo_fwd.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Model"
@@ -1029,6 +1025,22 @@
 				</File>
 				<File
 					RelativePath=".\PathItemBase.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="code"
+				>
+				<File
+					RelativePath=".\CodeAlgorithms.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CodeParsing.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CodeParsing.h"
 					>
 				</File>
 			</Filter>

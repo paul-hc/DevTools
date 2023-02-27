@@ -241,7 +241,7 @@ namespace io
 	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine, CharT delim )
 	{	// get characters into string, discard delimiter
 		CEncodedFileBuffer<CharT>* pInBuffer = dynamic_cast<CEncodedFileBuffer<CharT>*>( is.rdbuf() );
-		REQUIRE( pInBuffer != NULL );		// to be used only with encoded file buffers; otherwise use std::getline()
+		REQUIRE( pInBuffer != nullptr );		// to be used only with encoded file buffers; otherwise use std::getline()
 
 		typedef std::basic_istream<CharT> TIStream;
 		typedef typename TIStream::traits_type TTraits;
@@ -330,7 +330,7 @@ namespace io
 
 		Clear();
 
-		if ( m_pLineParserCallback != NULL )
+		if ( m_pLineParserCallback != nullptr )
 			m_pLineParserCallback->OnBeginParsing();
 
 		size_t lineNo = 1;
@@ -338,14 +338,14 @@ namespace io
 			if ( !PushLine( line, lineNo ) )
 				break;
 
-		if ( m_pLineParserCallback != NULL )
+		if ( m_pLineParserCallback != nullptr )
 			m_pLineParserCallback->OnEndParsing();
 	}
 
 	template< typename StringT >
 	bool CTextFileParser<StringT>::PushLine( const StringT& line, size_t lineNo )
 	{
-		if ( NULL == m_pLineParserCallback )
+		if ( nullptr == m_pLineParserCallback )
 			m_parsedLines.push_back( line );
 		else if ( !m_pLineParserCallback->OnParseLine( line, static_cast<unsigned int>( lineNo ) ) )
 			return false;

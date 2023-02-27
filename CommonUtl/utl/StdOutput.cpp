@@ -26,7 +26,7 @@ namespace io
 	size_t GetFilePointer( HANDLE hFile )
 	{
 		ASSERT_PTR( hFile );
-		DWORD currPos = ::SetFilePointer( hFile, 0, NULL, FILE_CURRENT );
+		DWORD currPos = ::SetFilePointer( hFile, 0, nullptr, FILE_CURRENT );
 		return currPos != INVALID_SET_FILE_POINTER ? currPos : 0;
 	}
 
@@ -65,7 +65,7 @@ namespace io
 
 		virtual TCharSize WriteString( const char* pText, TCharSize charCount ) throws_( CRuntimeException )
 		{
-			if ( !::WriteConsoleA( m_hConsoleOutput, (const void*)pText, static_cast<DWORD>( charCount ), &m_writtenChars, NULL ) )
+			if ( !::WriteConsoleA( m_hConsoleOutput, (const void*)pText, static_cast<DWORD>( charCount ), &m_writtenChars, nullptr ) )
 				io::ThrowWriteToConsole( charCount );
 
 			return m_writtenChars;
@@ -73,7 +73,7 @@ namespace io
 
 		virtual TCharSize WriteString( const wchar_t* pText, TCharSize charCount ) throws_( CRuntimeException )
 		{
-			if ( !::WriteConsoleW( m_hConsoleOutput, (const void*)pText, static_cast<DWORD>( charCount ), &m_writtenChars, NULL ) )
+			if ( !::WriteConsoleW( m_hConsoleOutput, (const void*)pText, static_cast<DWORD>( charCount ), &m_writtenChars, nullptr ) )
 				io::ThrowWriteToConsole( charCount );
 
 			return m_writtenChars;
@@ -102,7 +102,7 @@ namespace io
 
 		virtual TCharSize WriteString( const char* pText, TCharSize charCount ) throws_( CRuntimeException )
 		{
-			if ( !::WriteFile( m_hFile, pText, static_cast<DWORD>( charCount ), &m_writtenBytes, NULL ) )
+			if ( !::WriteFile( m_hFile, pText, static_cast<DWORD>( charCount ), &m_writtenBytes, nullptr ) )
 				io::ThrowWriteToFile( m_filePath, charCount );
 
 			return m_writtenBytes;
@@ -110,7 +110,7 @@ namespace io
 
 		virtual TCharSize WriteString( const wchar_t* pWideText, TCharSize charCount ) throws_( CRuntimeException )
 		{
-			if ( !::WriteFile( m_hFile, pWideText, static_cast<DWORD>( charCount * sizeof(wchar_t) ), &m_writtenBytes, NULL ) )
+			if ( !::WriteFile( m_hFile, pWideText, static_cast<DWORD>( charCount * sizeof(wchar_t) ), &m_writtenBytes, nullptr ) )
 				io::ThrowWriteToFile( m_filePath, charCount );
 
 			return m_writtenBytes / sizeof( wchar_t );
@@ -129,7 +129,7 @@ namespace io
 	size_t CStdOutput::s_maxBatchSize = 8 * KiloByte;		// larger than 8 KB there are diminishing returns (even 4 KB is comparable)
 
 	CStdOutput::CStdOutput( DWORD stdHandle /*= STD_OUTPUT_HANDLE*/ )
-		: m_hStdOutput( NULL )
+		: m_hStdOutput( nullptr )
 		, m_fileType( 0 )
 		, m_isConsoleOutput( false )
 		, m_outputMode( OtherOutput )

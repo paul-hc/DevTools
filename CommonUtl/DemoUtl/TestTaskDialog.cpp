@@ -151,7 +151,7 @@ ui::CTaskDialog* CTestTaskDialog::MakeTaskDialog_Complete( void ) const
 
 void CTestTaskDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_usageButton.m_hWnd;
+	bool firstInit = nullptr == m_usageButton.m_hWnd;
 
 	DDX_Control( pDX, IDC_TASK_DIALOG_USAGE, m_usageButton );
 
@@ -191,7 +191,7 @@ void CTestTaskDialog::OnBnClicked_TaskUsage( void )
 		case TD_Complete:			pDlg.reset( MakeTaskDialog_Complete() ); break;
 	}
 
-	if ( NULL == pDlg.get() )
+	if ( nullptr == pDlg.get() )
 	{
 		ASSERT( false );
 		return;

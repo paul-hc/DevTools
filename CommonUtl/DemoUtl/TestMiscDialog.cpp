@@ -75,7 +75,7 @@ void CTestMiscDialog::RegisterOwnCmds( void )
 
 void CTestMiscDialog::DoDataExchange( CDataExchange* pDX )
 {
-//	bool firstInit = NULL == m_toolbarStdEnabled.m_hWnd;
+//	bool firstInit = nullptr == m_toolbarStdEnabled.m_hWnd;
 	enum Align { BarAlign = H_AlignLeft | V_AlignCenter };
 
 	m_toolbarStdEnabled.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, BarAlign );

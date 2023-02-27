@@ -26,7 +26,7 @@ namespace utl
 			if ( !itParam->empty() )
 				rArgList.push_back( itParam->c_str() );
 
-		rArgList.push_back( NULL );					// terminating NULL
+		rArgList.push_back( nullptr );					// terminating NULL
 		return &rArgList.front();
 	}
 

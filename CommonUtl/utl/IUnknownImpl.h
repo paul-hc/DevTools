@@ -23,10 +23,10 @@ namespace utl
 	public:
 		virtual HRESULT STDMETHODCALLTYPE QueryInterface( const IID& rIID, void** ppObject )
 		{
-			if ( NULL == ppObject )
+			if ( nullptr == ppObject )
 				return E_INVALIDARG;
 
-			*ppObject = NULL;			// always set out parameter to NULL, validating it first
+			*ppObject = nullptr;			// always set out parameter to NULL, validating it first
 
 			if ( m_rIID == rIID || IID_IUnknown == rIID )
 			{

@@ -9,7 +9,7 @@
 #include <fstream>
 
 
-CLogger::CLogger( const TCHAR* pFmtFname /*= NULL*/ )
+CLogger::CLogger( const TCHAR* pFmtFname /*= nullptr*/ )
 	: m_pFmtFname( pFmtFname )
 	, m_enabled( true )
 	, m_prependTimestamp( true )
@@ -179,7 +179,7 @@ bool CLogger::CheckTruncate( void )
 			return false;
 
 		// copy the remaining contents of old log file to the new file
-		while ( logFile.ReadString( lineBuffer, 2048 ) != NULL )
+		while ( logFile.ReadString( lineBuffer, 2048 ) != nullptr )
 			newLogFile.WriteString( lineBuffer );
 	}
 	catch ( CException* pExc )

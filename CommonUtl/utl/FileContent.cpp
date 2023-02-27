@@ -190,7 +190,7 @@ namespace fs
 		return true;
 	}
 
-	fs::CPath CFileBackup::MakeBackupFilePath( fs::AcquireResult* pOutResult /*= NULL*/ ) const
+	fs::CPath CFileBackup::MakeBackupFilePath( fs::AcquireResult* pOutResult /*= nullptr*/ ) const
 	{	// would-be backup file path (no copying involved)
 		fs::CPath backupFilePath;
 

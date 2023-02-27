@@ -24,12 +24,12 @@ public:
 	static CTextClipboard* Open( HWND hWnd );
 
 	void Close( void );
-	bool IsOpen( void ) const { return m_hWnd != NULL; }
+	bool IsOpen( void ) const { return m_hWnd != nullptr; }
 
 	void Clear( void ) { ASSERT( IsOpen() ); ::EmptyClipboard(); }
 
-	HGLOBAL GetData( UINT clipFormat ) const { ASSERT( IsOpen() ); return IsFormatAvailable( clipFormat ) ? ::GetClipboardData( clipFormat ) : NULL; }
-	bool SetData( UINT clipFormat, HGLOBAL hGlobal ) { ASSERT( IsOpen() ); return ::SetClipboardData( clipFormat, hGlobal ) != NULL; }
+	HGLOBAL GetData( UINT clipFormat ) const { ASSERT( IsOpen() ); return IsFormatAvailable( clipFormat ) ? ::GetClipboardData( clipFormat ) : nullptr; }
+	bool SetData( UINT clipFormat, HGLOBAL hGlobal ) { ASSERT( IsOpen() ); return ::SetClipboardData( clipFormat, hGlobal ) != nullptr; }
 
 	bool WriteData( UINT clipFormat, const void* pBuffer, size_t byteCount );
 
@@ -63,7 +63,7 @@ public:
 		~CMessageWnd() { Destroy(); }
 
 		HWND GetWnd( void ) const { return m_hWnd; }
-		bool IsValid( void ) const { return m_hWnd != NULL; }
+		bool IsValid( void ) const { return m_hWnd != nullptr; }
 
 		void Destroy( void );
 	private:

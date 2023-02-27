@@ -16,7 +16,7 @@ namespace utl
 
 	CSectionGuard::CSectionGuard( const std::tstring& sectionName, bool logging /*= false*/ )
 		: m_timer()
-		, m_pLogger( logging ? app::GetLogger() : NULL )
+		, m_pLogger( logging ? app::GetLogger() : nullptr )
 		, m_sectionName( sectionName )
 	{
 	}
@@ -34,7 +34,7 @@ namespace utl
 		std::tstring text = str::Format( _T("* %s... takes %s"), m_sectionName.c_str(), m_timer.FormatElapsedDuration( 3 ).c_str() );
 		TRACE( _T(" %s\n"), text.c_str() );
 
-		if ( m_pLogger != NULL )
+		if ( m_pLogger != nullptr )
 			m_pLogger->Log( text.c_str() );
 	}
 

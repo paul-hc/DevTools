@@ -28,7 +28,7 @@ struct CColorTableOptions			// persistent options
 	enum Mode { ImageColorTable, System_1_bit, System_4_bit, System_8_bit };
 	static const CEnumTags& GetTags_Mode( void );
 
-	CColorTableOptions( void ) : m_uniqueColors( false ), m_mode( ImageColorTable ) {}
+	CColorTableOptions( void ) : m_uniqueColors( false ), m_mode( ImageColorTable ), m_showLabels( false ) {}
 
 	void Load( const TCHAR* pSection );
 	void Save( const TCHAR* pSection ) const;
@@ -159,7 +159,7 @@ class CColorSample : public CSampleView
 				   , public ISampleCallback
 {
 public:
-	CColorSample( ISampleCallback* pRoutePixelInfo = NULL ) : CSampleView( this ), m_color( CLR_NONE ), m_pRoutePixelInfo( pRoutePixelInfo ) {}
+	CColorSample( ISampleCallback* pRoutePixelInfo = nullptr ) : CSampleView( this ), m_color( CLR_NONE ), m_pRoutePixelInfo( pRoutePixelInfo ) {}
 
 	COLORREF GetColor( void ) const { return m_color; }
 	void SetColor( COLORREF color ) { m_color = color; SafeRedraw(); }

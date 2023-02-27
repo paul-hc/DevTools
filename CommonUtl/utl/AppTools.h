@@ -13,10 +13,6 @@ namespace utl { class CResourcePool; }
 
 namespace app
 {
-	void TraceException( const std::exception& exc );
-	void TraceException( const CException* pExc );
-
-
 	enum MsgType { Error, Warning, Info };
 
 	const CEnumTags& GetTags_MsgType( void );
@@ -77,6 +73,9 @@ namespace app
 	inline bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error ) { return CAppTools::Instance()->ReportError( message, msgType ); }
 	inline int ReportException( const std::exception& exc ) { return CAppTools::Instance()->ReportException( exc ); }
 	inline int ReportException( const CException* pExc ) { return CAppTools::Instance()->ReportException( pExc ); }
+
+	void TraceException( const std::exception& exc );
+	void TraceException( const CException* pExc );
 }
 
 

@@ -44,7 +44,7 @@ namespace fs
 		bool OpenDocFile( const fs::TStgDocPath& docFilePath, DWORD mode = STGM_READ );
 		virtual void CloseDocFile( void );			// (!) if derived classes, call this in derived destructor so that virtual delivers the goods
 
-		bool IsOpen( void ) const { return m_pRootStorage != NULL; }
+		bool IsOpen( void ) const { return m_pRootStorage != nullptr; }
 		bool IsOpenForReading( void ) const { return IsOpen() && IsReadingMode( GetOpenMode() ); }
 		bool IsOpenForWriting( void ) const { return IsOpen() && IsWritingMode( GetOpenMode() ); }
 		DWORD GetOpenMode( void ) const { return m_openMode; }
@@ -94,7 +94,7 @@ namespace fs
 		std::auto_ptr<COleStreamFile> CreateStreamFile( const TCHAR* pStreamName, DWORD mode = CFile::modeCreate | CFile::modeWrite );
 		std::auto_ptr<COleStreamFile> OpenStreamFile( const TCHAR* pStreamName, DWORD mode = CFile::modeRead );
 
-		std::auto_ptr<COleStreamFile> MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
+		std::auto_ptr<COleStreamFile> MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = nullptr ) const;
 
 		// backwards compatibility: find existing object based on possible alternates (in current storage trail)
 		std::pair<const TCHAR*, size_t> FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount );
@@ -114,7 +114,7 @@ namespace fs
 		virtual TCHAR GetFlattenPathSep( void ) const;
 		virtual bool RetainOpenedStream( const fs::TEmbeddedPath& streamPath ) const;		// if true: cache opened streams to allow later shared access (workaround sharing violations caused by STGM_SHARE_EXCLUSIVE)
 
-		bool HandleError( HRESULT hResult, const TCHAR* pElementName, const TCHAR* pDocFilePath = NULL ) const;
+		bool HandleError( HRESULT hResult, const TCHAR* pElementName, const TCHAR* pDocFilePath = nullptr ) const;
 		fs::CFlexPath MakeElementFlexPath( const TCHAR* pDocFilePath, const TCHAR* pElementName ) const;
 	private:
 		bool CacheStreamState( const fs::TEmbeddedPath& streamPath, IStream* pStreamOrigin );
@@ -149,7 +149,7 @@ namespace fs
 			bool IsEmpty( void ) const { return m_openSubStorages.empty(); }
 			IStorage* GetRoot( void ) const { return m_pDocStorage->GetRootStorage(); }
 
-			void Reset( const CStorageTrail* pTrail = NULL );
+			void Reset( const CStorageTrail* pTrail = nullptr );
 			void Push( IStorage* pSubStorage );				// go to sub-storage
 			CComPtr<IStorage> Pop( void );				// go to parent storage
 
@@ -208,7 +208,7 @@ namespace fs
 	inline bool SeekToBegin( IStream* pStream ) { return SeekToPos( pStream, 0 ); }
 	inline bool SeekToEnd( IStream* pStream ) { return SeekToPos( pStream, 0, STREAM_SEEK_END ); }
 
-	inline IStream* GetSafeStream( const COleStreamFile* pFile ) { return pFile != NULL ? pFile->m_lpStream : NULL; }
+	inline IStream* GetSafeStream( const COleStreamFile* pFile ) { return pFile != nullptr ? pFile->m_lpStream : nullptr; }
 
 
 	struct CStreamState : public fs::CFileState
@@ -217,8 +217,8 @@ namespace fs
 
 		bool Build( IStream* pStreamOrigin, bool keepStreamAlive );
 
-		bool HasStream( void ) const { return m_pStreamOrigin != NULL; }
-		void ReleaseStream( void ) { m_pStreamOrigin = NULL; }
+		bool HasStream( void ) const { return m_pStreamOrigin != nullptr; }
+		void ReleaseStream( void ) { m_pStreamOrigin = nullptr; }
 		HRESULT CloneStream( IStream** ppStreamDuplicate ) const;
 	private:
 		CComPtr<IStream> m_pStreamOrigin;			// for stream sharing: optional, keeps the original opened stream, that can be cloned for subsequent stream reading
@@ -230,7 +230,7 @@ namespace fs
 	{
 		CStreamLocation( void ) {}
 
-		bool IsValid( void ) const { return m_pStream != NULL; }
+		bool IsValid( void ) const { return m_pStream != nullptr; }
 
 		fs::CStructuredStorage::CStorageTrail* GetLocation( void ) const { return GetDocStorage()->RefCwd(); }
 		fs::CStructuredStorage* GetDocStorage( void ) const { ASSERT_PTR( m_pCurrDir.get() ); return m_pCurrDir->m_pDocStorage; }

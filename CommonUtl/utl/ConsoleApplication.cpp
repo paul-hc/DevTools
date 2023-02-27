@@ -27,7 +27,7 @@ CConsoleApplication::CConsoleApplication( io::TranslationMode translationMode )
 	// facilitate Unicode output - in a console that has a Unicode font defined!
 	::setlocale( LC_ALL, "" );		// sets the locale to the default, which is obtained from the operating system
 
-	m_modulePath = fs::GetModuleFilePath( NULL );
+	m_modulePath = fs::GetModuleFilePath( nullptr );
 	m_pLogger.reset( new CLogger() );
 }
 
@@ -186,7 +186,7 @@ namespace io
 
 	char PressAnyKey( const char* pMessage /*= "Press any key to continue..."*/ )
 	{
-		if ( pMessage != NULL )
+		if ( pMessage != nullptr )
 		{	// use std::cerr to avoid output when redirecting output to file
 			CScopedRedirectStream scopedRedirect( std::cerr );
 			std::cerr << pMessage << std::endl;

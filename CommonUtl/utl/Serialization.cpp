@@ -18,7 +18,7 @@ namespace serial
 	void CPolicy::ToUtf8String( CStringA& rUtf8Str, const std::wstring& wideStr )
 	{
 		if ( const int wideLength = static_cast<int>( wideStr.length() ) )
-			if ( int length = ::WideCharToMultiByte( CP_UTF8, 0, wideStr.c_str(), wideLength, NULL, 0, NULL, NULL ) )		// get length of the new multibyte string (excluding EOS)
+			if ( int length = ::WideCharToMultiByte( CP_UTF8, 0, wideStr.c_str(), wideLength, nullptr, 0, nullptr, nullptr ) )		// get length of the new multibyte string (excluding EOS)
 			{
 				if ( char* pBuffer = rUtf8Str.GetBuffer( length ) )
 					::WideCharToMultiByte( CP_UTF8, 0, wideStr.c_str(), wideLength, pBuffer, length, 0, 0 );				// convert to UTF8
@@ -33,7 +33,7 @@ namespace serial
 	void CPolicy::FromUtf8String( std::wstring& rWideStr, const CStringA& utf8Str )
 	{
 		if ( int narrowLength = utf8Str.GetLength() )
-			if ( int requiredSize = ::MultiByteToWideChar( CP_UTF8, 0, utf8Str.GetString(), narrowLength, NULL, 0 ) )
+			if ( int requiredSize = ::MultiByteToWideChar( CP_UTF8, 0, utf8Str.GetString(), narrowLength, nullptr, 0 ) )
 			{
 				rWideStr.resize( requiredSize, L'\0' );
 				::MultiByteToWideChar( CP_UTF8, 0, utf8Str.GetString(), narrowLength, &rWideStr[ 0 ], requiredSize );
@@ -59,7 +59,7 @@ namespace serial
 			ENSURE( m_lpBufCur >= m_lpBufStart );		// no underflow
 		}
 
-		UnicodeEncoding InspectSavedStringEncoding( size_t* pLength = NULL )
+		UnicodeEncoding InspectSavedStringEncoding( size_t* pLength = nullptr )
 		{
 			const BYTE* pOldCursor = GetCursor();
 
@@ -89,7 +89,7 @@ namespace serial
 		pArchiveGuts->Rewind( bytes );
 	}
 
-	UnicodeEncoding InspectSavedStringEncoding( ::CArchive& rLoadArchive, size_t* pLength /*= NULL*/ )
+	UnicodeEncoding InspectSavedStringEncoding( ::CArchive& rLoadArchive, size_t* pLength /*= nullptr*/ )
 	{
 		CArchiveGuts* pArchiveGuts = reinterpret_cast<CArchiveGuts*>( &rLoadArchive );
 		return pArchiveGuts->InspectSavedStringEncoding( pLength );

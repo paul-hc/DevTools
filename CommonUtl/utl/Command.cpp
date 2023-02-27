@@ -19,7 +19,7 @@
 CBaseCommand::CBaseCommand( int typeId, utl::ISubject* pSubject )
 	: m_typeId( typeId )
 	, m_pSubject( pSubject )
-	, m_pOriginCmd( NULL )
+	, m_pOriginCmd( nullptr )
 {
 }
 
@@ -38,7 +38,7 @@ std::tstring CBaseCommand::FormatExecTitle( utl::Verbosity verbosity /*= utl::De
 
 void CBaseCommand::NotifyObservers( void )
 {
-	if ( m_pSubject != NULL )
+	if ( m_pSubject != nullptr )
 		m_pSubject->UpdateAllObservers( this );
 }
 
@@ -50,7 +50,7 @@ void CBaseCommand::Serialize( CArchive& archive )
 
 // CCommand implementation
 
-CCommand::CCommand( int typeId, utl::ISubject* pSubject, const CEnumTags* pCmdTags /*= NULL*/ )
+CCommand::CCommand( int typeId, utl::ISubject* pSubject, const CEnumTags* pCmdTags /*= nullptr*/ )
 	: CBaseCommand( typeId, pSubject )
 	, m_pCmdTags( pCmdTags )
 {
@@ -84,9 +84,9 @@ bool CCommand::IsUndoable( void ) const override
 // CMacroCommand implementation
 
 CMacroCommand::CMacroCommand( const std::tstring& userInfo /*= std::tstring()*/, int typeId /*= MacroCmdId*/ )
-	: CBaseCommand( typeId, NULL )
+	: CBaseCommand( typeId, nullptr )
 	, m_userInfo( userInfo )
-	, m_pMainCmd( NULL )
+	, m_pMainCmd( nullptr )
 {
 }
 
@@ -108,7 +108,7 @@ std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const override
 	if ( HasOriginCmd() )
 		return GetOriginCmd()->Format( verbosity );
 
-	if ( m_pMainCmd != NULL )
+	if ( m_pMainCmd != nullptr )
 		return m_pMainCmd->Format( verbosity );			// main commmand provides all the info
 
 	std::tstring text;
