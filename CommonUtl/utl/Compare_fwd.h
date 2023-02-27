@@ -40,6 +40,13 @@ namespace pred
 		return Equal;
 	}
 
+	// FWD-declare explicit instantiations:
+	template<>
+	CompareResult Compare_Scalar<std::string>( const std::string& left, const std::string& right );			// by default sort std::string in natural order
+
+	template<>
+	CompareResult Compare_Scalar<std::wstring>( const std::wstring& left, const std::wstring& right );		// by default sort std::string in natural order
+
 
 	// functor version
 	struct CompareValue
