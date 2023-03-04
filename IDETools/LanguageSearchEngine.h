@@ -77,7 +77,7 @@ namespace code
 		int findNextWhitespace( const TCHAR* pString, int startPos = 0 ) const;
 		int findNextNonWhitespace( const TCHAR* pString, int startPos = 0 ) const;
 		TokenRange findQuotedString( const TCHAR* pString, int startPos = 0, str::CaseType caseType = str::Case,
-									 const TCHAR* quoteSet = code::quoteChars ) const;
+									 const TCHAR* quoteSet = code::g_pQuoteChars ) const;
 		TokenRange findComment( const TCHAR* pString, int startPos = 0, str::CaseType caseType = str::Case ) const;
 
 		TokenRange findNextNumber( const TCHAR* text, int startPos = 0 );

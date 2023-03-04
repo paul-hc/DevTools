@@ -3,6 +3,7 @@
 #include "IterationSlices.h"
 #include "CppParser.h"
 #include "utl/Language.h"
+#include <set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -89,18 +90,36 @@ namespace code
 
 		ExtractIteratorName();
 
-		std::tstring containerType = m_containerType.getString( m_pCodeText );
+		std::tstring containerType = code::ExtractIdentifier( m_containerType.GetToken( m_pCodeText ), 0 );
 
-		m_isMfcList = containerType.find( _T("List") ) != std::tstring::npos;
+		m_isMfcList = IsMfcList( containerType );
+		m_libraryType = IsMfcContainer( containerType ) ? MFC : STL;
 
-		if ( containerType.find( _T("Array") ) != std::tstring::npos ||
-			 containerType.find( _T("List") ) != std::tstring::npos ||
-			 containerType.find( _T("Map") ) != std::tstring::npos )
-			m_libraryType = MFC;
-		else
-			m_libraryType = STL;
+		//Trace();
+	}
 
-		Trace();
+	bool CIterationSlices::IsMfcList( const std::tstring& containerType )
+	{
+		static std::set<std::tstring> s_mfcListTypes;
+		if ( s_mfcListTypes.empty() )
+			str::SplitSet( s_mfcListTypes, _T("CList|CStringList|CObList|CTypedPtrList|CPtrList"), _T("|") );
+
+		return s_mfcListTypes.find( containerType ) != s_mfcListTypes.end();
+	}
+
+	bool CIterationSlices::IsMfcContainer( const std::tstring& containerType )
+	{
+		static std::set<std::tstring> s_mfcCollTypes;
+		if ( s_mfcCollTypes.empty() )
+		{
+			static const TCHAR s_types[] =
+				_T("CArray|CTypedPtrArray|CTypedPtrMap|CObArray|CByteArray|CDWordArray|CPtrArray|CStringArray|CWordArray|CUIntArray|")
+				_T("CMap|CMapPtrToWord|CMapPtrToPtr|CMapStringToOb|CMapStringToPtr|CMapStringToString|CMapWordToOb|CMapWordToPtr");
+
+			str::SplitSet( s_mfcCollTypes, s_types, _T("|") );
+		}
+
+		return IsMfcList( containerType ) || s_mfcCollTypes.find( containerType ) != s_mfcCollTypes.end();
 	}
 
 	/**
@@ -126,8 +145,8 @@ namespace code
 		Range<std::tstring::const_reverse_iterator> itRange( it );
 		std::tstring core;
 
-		if ( pred::IsLiteral()( *itRange.m_start ) )
-			if ( lang.SkipLiteral( &itRange.m_end, itEnd ) )
+		if ( pred::IsIdentifier()( *itRange.m_start ) )
+			if ( lang.SkipIdentifier( &itRange.m_end, itEnd ) )
 				core = str::ExtractString( itRange );		// "GetTags"
 
 		if ( core.length() > 1 )

@@ -21,6 +21,9 @@ namespace code
 		void ExtractIteratorName( void );
 
 		void Trace( void );
+
+		static bool IsMfcList( const std::tstring& containerType );
+		static bool IsMfcContainer( const std::tstring& containerType );
 	private:
 		std::tstring m_codeText;
 		const TCHAR* m_pCodeText;

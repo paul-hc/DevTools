@@ -99,8 +99,10 @@ namespace utl
 		//	In <algorithm>, none of the safe std::equal() has the same effect as this (not equal if different sequence lengths),
 		//	except the unsafe std::equal(itLeft, itLeftLast, itRight)!
 		//
-		if ( itLeft == itLeftLast || itRight == itRightLast )
-			return false;		// one of the ranges empty
+		if ( itLeft == itLeftLast )
+			return itRight == itRightLast;		// both ranges empty
+		else if ( itRight == itRightLast )
+			return itLeft == itLeftLast;		// both ranges empty
 
 		for ( ; itLeft != itLeftLast && itRight != itRightLast; ++itLeft, ++itRight )
 			if ( !( *itLeft == *itRight ) )

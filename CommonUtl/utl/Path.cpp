@@ -1045,7 +1045,7 @@ namespace fs
 			rFindFile.FindNextFile() != FALSE;
 	}
 
-	CPath CPath::ExtractExistingFilePath( void ) const
+	CPath CPath::LocateExistingFile( void ) const
 	{
 		ASSERT( FileExist() );
 
@@ -1053,7 +1053,7 @@ namespace fs
 		VERIFY( finder.FindFile( m_filePath.c_str() ) );
 		finder.FindNextFile();
 
-		return CPath( (const TCHAR*)finder.GetFilePath() );
+		return CPath( finder.GetFilePath().GetString() );
 	}
 
 } //namespace fs

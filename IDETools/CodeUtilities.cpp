@@ -10,27 +10,25 @@
 
 namespace code
 {
-	const TCHAR* lineEnd = _T("\r\n");
-	const TCHAR* lineEndUnix = _T("\n");
-	const TCHAR* basicMidLineEnd = _T("_\r\n");
+	const TCHAR* g_pBasicLineBreak = _T("_\r\n");
 
-	const TCHAR* cppEscapedChars = _T("rntvabf\"\'\\?");
-	const TCHAR* openBraces =  _T("(<[{");
-	const TCHAR* closeBraces = _T(")>]}");
-	const TCHAR* quoteChars = _T("\"'");
+	const TCHAR* g_pCppEscapedChars = _T("rntvabf\"\'\\?");
+	const TCHAR* g_pOpenBrackets =  _T("(<[{");
+	const TCHAR* g_pCloseBrackets = _T(")>]}");
+	const TCHAR* g_pQuoteChars = _T("\"'");
 
 
 	CString& convertToWindowsLineEnds( CString& targetCodeText )
 	{
-		targetCodeText.Replace( lineEnd, lineEndUnix );
-		targetCodeText.Replace( lineEndUnix, lineEnd );
+		targetCodeText.Replace( g_pLineEnd, g_pLineEndUnix );
+		targetCodeText.Replace( g_pLineEndUnix, g_pLineEnd );
 
 		return targetCodeText;
 	}
 
 	CString& convertToUnixLineEnds( CString& targetCodeText )
 	{
-		targetCodeText.Replace( lineEnd, lineEndUnix );
+		targetCodeText.Replace( g_pLineEnd, g_pLineEndUnix );
 		return targetCodeText;
 	}
 
@@ -114,7 +112,7 @@ namespace code
 			{
 				++cursor;
 
-				if ( _tcschr( cppEscapedChars, *cursor ) != nullptr )
+				if ( _tcschr( g_pCppEscapedChars, *cursor ) != nullptr )
 					++cursor;						// known C++ escape sequence, skip it
 				else if ( *cursor == _T('x') )
 				{

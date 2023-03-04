@@ -103,7 +103,7 @@ void CEndiannessTests::TestSwapBytesString( void )
 
 	// char32_t (UTF32)
 	{
-		const str::wstring4 value = str::FromWide( L"ABCD" );			// U"ABCD" - VC9 doesn't define char32_t and the U"..." literals
+		const str::wstring4 value = str::FromWide( L"ABCD" );	// U"ABCD" - VC9 doesn't define char32_t and the U"..." literals
 		ASSERT_EQUAL( 0x00000041, value[ 0 ] );
 		ASSERT_EQUAL( 0x00000042, value[ 1 ] );
 		ASSERT_EQUAL( 0x00000043, value[ 2 ] );

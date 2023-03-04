@@ -65,13 +65,13 @@ namespace pred
 	};
 
 
-	struct IsLiteral : public BaseIsCharPred_Loc			// e.g. C/C++ identifier, or Windows environment variable literal, etc
+	struct IsIdentifier : public BaseIsCharPred_Loc			// e.g. C/C++ identifier, or Windows environment variable identifier, etc
 	{
 		template< typename CharT >
 		bool operator()( CharT chr ) const { return '_' == chr || std::isalnum( chr, m_loc ); }
 	};
 
-	struct IsLiteralLead : public BaseIsCharPred_Loc		// first character in a C/C++ identifier (non-digit)
+	struct IsIdentifierLead : public BaseIsCharPred_Loc		// first character in a C/C++ identifier (non-digit)
 	{
 		template< typename CharT >
 		bool operator()( CharT chr ) const { return '_' == chr || std::isalpha( chr, m_loc ); }
@@ -126,7 +126,13 @@ namespace pred
 	};
 
 
-	struct IsLineEnd : public BaseIsCharPred_Loc		// \t, \n, \r, etc
+	struct IsSpaceTab : public BaseIsCharPred_Loc
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return ' ' == chr || '\t' == chr; }
+	};
+
+	struct IsLineEnd : public BaseIsCharPred_Loc
 	{
 		template< typename CharT >
 		bool operator()( CharT chr ) const { return '\r' == chr || '\n' == chr; }

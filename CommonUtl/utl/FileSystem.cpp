@@ -231,6 +231,29 @@ namespace fs
 	}
 
 
+	bool LocateExistingFile( fs::CPath* pFoundPath, const std::vector<fs::TDirPath>& searchPaths, const TCHAR* pFilenameList, const TCHAR* pSep /*= _T("|")*/ )
+	{
+		ASSERT_PTR( pFoundPath );
+
+		std::vector<fs::CPath> filenames;
+		str::Split( filenames, pFilenameList, pSep );
+
+		for ( std::vector<fs::TDirPath>::const_iterator itDirPath = searchPaths.begin(); itDirPath != searchPaths.end(); ++itDirPath )
+			for ( std::vector<fs::CPath>::const_iterator itFilename = filenames.begin(); itFilename != filenames.end(); ++itFilename )
+			{
+				fs::CPath filePath = *itDirPath / *itFilename;
+
+				if ( fs::IsValidFile( filePath.GetPtr() ) )
+				{
+					*pFoundPath = filePath.LocateExistingFile();		// return the actual file path as is on file system
+					return true;
+				}
+			}
+
+		return false;
+	}
+
+
 	namespace thr
 	{
 		void MakeFileWritable( const TCHAR* pFilePath ) throws_( CRuntimeException )

@@ -590,7 +590,7 @@ namespace code
 		if ( pCodeText != nullptr && pCodeText[ 0 ] != _T('\0') )
 			for ( int pos = 0; ; )
 			{
-				TokenRange endOfLinePos = str::findStringPos( pCodeText, code::lineEnd, pos );
+				TokenRange endOfLinePos = str::findStringPos( pCodeText, code::g_pLineEnd, pos );
 
 				if ( endOfLinePos.m_start > 1 )
 					if ( code::isLineBreakEscapeChar( pCodeText[ endOfLinePos.m_start - 1 ], m_docLanguage ) )
@@ -650,11 +650,11 @@ namespace code
 	CString CFormatter::getArgListCodeText( const std::vector< CString >& linesOfCode ) const
 	{
 		CString resultCodeText = str::unsplit( linesOfCode,
-											   m_docLanguage != DocLang_Basic ? code::lineEnd : code::basicMidLineEnd );
+											   m_docLanguage != DocLang_Basic ? code::g_pLineEnd : code::g_pBasicLineBreak );
 
 		if ( m_docLanguage == DocLang_Basic )
 		{
-			TokenRange lastBasicLineEndRange = str::reverseFindStringPos( resultCodeText, code::basicMidLineEnd );
+			TokenRange lastBasicLineEndRange = str::reverseFindStringPos( resultCodeText, code::g_pBasicLineBreak );
 
 			if ( lastBasicLineEndRange.m_end == resultCodeText.GetLength() )
 				resultCodeText.Delete( lastBasicLineEndRange.m_start, 1 ); // Remove '_' from the last '_\r\n'
@@ -684,7 +684,7 @@ namespace code
 		code::convertToWindowsLineEnds( normalizedCode );
 
 		if ( DocLang_Basic == m_docLanguage )
-			normalizedCode.Replace( code::basicMidLineEnd, code::lineEnd );
+			normalizedCode.Replace( code::g_pBasicLineBreak, code::g_pLineEnd );
 
 		std::vector< CString > linesOfCode, __lineEnds;
 
@@ -945,7 +945,7 @@ namespace code
 	TEditorColumn CFormatter::computeVisualEditorColumn( const TCHAR* pCodeText, int index ) const
 	{
 		// search for the start of line that contains 'index' position
-		int pos = str::reverseFindStringPos( pCodeText, code::lineEnd, index ).m_end;
+		int pos = str::reverseFindStringPos( pCodeText, code::g_pLineEnd, index ).m_end;
 
 		if ( pos == -1 )
 			pos = 0; // 'index' belongs to the first line -> start at the beginning

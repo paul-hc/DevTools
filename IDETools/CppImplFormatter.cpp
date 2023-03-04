@@ -90,7 +90,7 @@ namespace code
 			}
 
 			TokenRange endOfLine;
-			if ( !protoParser.FindNextSequence( &endOfLine, argList.m_end, code::lineEnd ) )
+			if ( !protoParser.FindNextSequence( &endOfLine, argList.m_end, code::g_pLineEnd ) )
 				break;					// we're done with last line
 
 			endOfLine.ReplaceWithToken( &prototypeBlock, s_protoSep.c_str() );
@@ -193,7 +193,7 @@ namespace code
 		std::tstring typeDescriptor;
 
 		if ( !templateDecl.empty() )
-			typeDescriptor = templateDecl + code::lineEnd;
+			typeDescriptor = templateDecl + code::g_pLineEnd;
 
 		typeDescriptor += typeQualifier;
 		return typeDescriptor;
@@ -223,7 +223,7 @@ namespace code
 
 			returnType += theReturnType;
 
-			returnType += m_options.m_returnTypeOnSeparateLine ? code::lineEnd : _T(" ");
+			returnType += m_options.m_returnTypeOnSeparateLine ? code::g_pLineEnd : _T(" ");
 		}
 
 		std::tstring implMethod;
@@ -234,14 +234,14 @@ namespace code
 		implMethod += tdInfo.m_typeQualifier;
 
 		implMethod += TokenRange( method.m_qualifiedMethod.m_start, method.m_postArgListSuffix.m_end ).MakeToken( srcPrototype );
-		implMethod += code::lineEnd;
+		implMethod += code::g_pLineEnd;
 		implMethod = splitArgumentList( implMethod.c_str() );
 
 		if ( m_options.m_returnTypeOnSeparateLine && !returnType.empty() )
 			implMethod = returnType + implMethod;
 
 		if ( !tdInfo.m_templateDecl.empty() )
-			implMethod = tdInfo.m_templateDecl + code::lineEnd + implMethod;
+			implMethod = tdInfo.m_templateDecl + code::g_pLineEnd + implMethod;
 
 		if ( !m_commentDecorationTemplate.empty() )
 		{
@@ -249,13 +249,13 @@ namespace code
 			std::tstring commentDecoration = MakeCommentDecoration( decorationCore );
 
 			if ( !commentDecoration.empty() )
-				implMethod = commentDecoration + code::lineEnd + implMethod;
+				implMethod = commentDecoration + code::g_pLineEnd + implMethod;
 		}
 
 		implMethod += hasNoReturnType ? m_voidFunctionBody : m_returnFunctionBody;
 
 		for ( int i = 0; i != m_options.m_linesBetweenFunctionImpls; ++i )
-			implMethod += code::lineEnd;
+			implMethod += code::g_pLineEnd;
 
 		return implMethod;
 	}
@@ -572,7 +572,7 @@ namespace code
 
 		std::vector<std::tstring> items;
 
-		str::Split( items, pTypeDescriptor, code::lineEnd );
+		str::Split( items, pTypeDescriptor, code::g_pLineEnd );
 		switch ( items.size() )
 		{
 			case 0:
@@ -651,12 +651,12 @@ namespace code
 			return;			// nothing to change
 
 		std::vector<std::tstring> lines;
-		str::Split( lines, pCodeText->c_str(), code::lineEnd );
+		str::Split( lines, pCodeText->c_str(), code::g_pLineEnd );
 
 		for ( std::vector<std::tstring>::iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
 			if ( !itLine->empty() )
 				itLine->insert( 0, m_indentPrefix );		// indent only non-empty lines
 
-		*pCodeText = str::Join( lines, code::lineEnd );
+		*pCodeText = str::Join( lines, code::g_pLineEnd );
 	}
 }

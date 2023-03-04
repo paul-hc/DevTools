@@ -209,6 +209,9 @@
     <ClCompile Include="CompoundTextParser.cpp">
       <Filter>Main Code\code + text</Filter>
     </ClCompile>
+    <ClCompile Include="CodeUtils.cpp">
+      <Filter>Main Code\code + text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="IDETools.def">
@@ -404,6 +407,9 @@
       <Filter>tests</Filter>
     </ClInclude>
     <ClInclude Include="CompoundTextParser.h">
+      <Filter>Main Code\code + text</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeUtils.h">
       <Filter>Main Code\code + text</Filter>
     </ClInclude>
   </ItemGroup>

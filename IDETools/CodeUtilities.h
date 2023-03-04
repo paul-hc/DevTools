@@ -4,6 +4,8 @@
 #define CodeUtilities_h
 #pragma once
 
+#include "utl/StringCompare.h"
+#include "CodeUtils.h"
 #include "TokenRange.h"
 #include "DocLanguage.h"
 #include "StringUtilitiesEx.h"
@@ -11,20 +13,20 @@
 
 namespace code
 {
-	// Constants
-	extern const TCHAR* lineEnd;
-	extern const TCHAR* lineEndUnix;
-	extern const TCHAR* basicMidLineEnd;
+	// constants
+	extern const TCHAR* g_pBasicLineBreak;
 
-	extern const TCHAR* cppEscapedChars;
-	extern const TCHAR* openBraces;
-	extern const TCHAR* closeBraces;
-	extern const TCHAR* quoteChars;
+	extern const TCHAR* g_pCppEscapedChars;
+	extern const TCHAR* g_pOpenBrackets;
+	extern const TCHAR* g_pCloseBrackets;
+	extern const TCHAR* g_pQuoteChars;
 
-	// Character type
+
+	// character type
+
 	inline bool isLineEndChar( TCHAR chr )
 	{
-		return chr == _T('\r') || chr == _T('\n');
+		return pred::IsLineEnd()( chr );
 	}
 
 	bool isLineBreakEscapeChar( TCHAR chr, DocLanguage docLanguage );
@@ -32,12 +34,12 @@ namespace code
 
 	inline bool isWhitespaceChar( TCHAR chr )
 	{
-		return chr == _T(' ') || chr == _T('\t');
+		return pred::IsSpaceTab()( chr );
 	}
 
 	inline bool isWhitespaceOrLineEndChar( TCHAR chr )
 	{
-		return isWhitespaceChar( chr ) || isLineEndChar( chr );
+		return pred::IsSpace()( chr );
 	}
 
 	inline bool isQuoteChar( TCHAR chr )

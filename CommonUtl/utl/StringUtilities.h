@@ -11,7 +11,8 @@ namespace str
 	extern const TCHAR g_ellipsis[];
 	extern const TCHAR g_paragraph[];
 
-	template< typename CharT > const CharT* StdDelimiters( void );	// " \t"
+	template< typename CharT >
+	const CharT* StdDelimiters( void );		// " \t"
 
 
 	template< typename CharT, typename ContainerT >
@@ -400,24 +401,6 @@ namespace code
 {
 	std::tstring FormatEscapeSeq( const std::tstring& text, bool uiSeq = false );
 	std::tstring ParseEscapeSeqs( const std::tstring& displayText, bool uiSeq = false );
-
-
-	template< typename StringT >
-	size_t FindLiteralEnd( const StringT& text, size_t literalPos )
-	{	// literal should not start with a digit
-		size_t endPos = literalPos;
-		pred::IsLiteral isLiteralPred;
-
-		if ( endPos != text.length() && pred::IsLiteralLead()( text[ endPos ] ) )	// not starting with a digit?
-		{	// skip first char, check the inner literal criteria
-			++endPos;
-
-			while ( endPos != text.length() && isLiteralPred( text[ endPos ] ) )
-				++endPos;
-		}
-
-		return endPos;
-	}
 }
 
 

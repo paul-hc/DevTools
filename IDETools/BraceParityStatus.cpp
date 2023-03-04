@@ -138,7 +138,7 @@ namespace code
 
 		code::LanguageSearchEngine languageEngine( docLanguage );
 
-		int firstOpenBracePos = languageEngine.findOneOf( pCode, code::openBraces, 0 );
+		int firstOpenBracePos = languageEngine.findOneOf( pCode, code::g_pOpenBrackets, 0 );
 
 		ASSERT( firstOpenBracePos != -1 );
 

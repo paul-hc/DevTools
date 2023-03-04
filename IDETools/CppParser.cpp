@@ -295,8 +295,8 @@ bool CCppMethodParser::FindSliceEnd( TConstIterator* pItSlice _in_out_, const TC
 
 				m_lang.SkipUntil( &it, itEnd, pred::IsChar( '(' ) );	// skip to operator end (arg-list)
 			}
-			else if ( pred::IsLiteral()( *it ) )
-				m_lang.SkipLiteral( &it, itEnd );
+			else if ( pred::IsIdentifier()( *it ) )
+				m_lang.SkipIdentifier( &it, itEnd );
 			else
 				++it;			// skip *, &
 		}

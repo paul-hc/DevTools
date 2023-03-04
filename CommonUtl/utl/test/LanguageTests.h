@@ -17,6 +17,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestBasicParsing( void );
 	void TestMyLanguage( void );
 	void TestMyLanguageSingleLine( void );
 	void TestBracketParity( void );

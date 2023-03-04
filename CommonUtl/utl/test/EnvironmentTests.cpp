@@ -40,7 +40,7 @@ CEnvironmentTests& CEnvironmentTests::Instance( void )
 	return s_testCase;
 }
 
-void CEnvironmentTests::TestQueryEnclosedLiterals( void )
+void CEnvironmentTests::TestQueryEnclosedIdentifiers( void )
 {
 	// namespace str => any enclosed item, regardless of syntax
 	{
@@ -54,29 +54,29 @@ void CEnvironmentTests::TestQueryEnclosedLiterals( void )
 		ASSERT_EQUAL( "%MY_STUFF%,%MY_T.OOLS%", str::Join( items, "," ) );
 	}
 
-	// namespace code => only enclosed literals (A..Z|a..z|0..9|_)
+	// namespace code => only enclosed identifiers (A..Z|a..z|0..9|_)
 	{
-		std::vector<std::string> literals;
-		code::QueryEnclosedLiterals( literals, std::string("lead_%MY_STUFF%_mid_%MY_TOOLS%_trail"), "%", "%", false );
-		ASSERT_EQUAL( "MY_STUFF,MY_TOOLS", str::Join( literals, "," ) );
+		std::vector<std::string> identifiers;
+		code::QueryEnclosedIdentifiers( identifiers, std::string("lead_%MY_STUFF%_mid_%MY_TOOLS%_trail"), "%", "%", false );
+		ASSERT_EQUAL( "MY_STUFF,MY_TOOLS", str::Join( identifiers, "," ) );
 	}
 	{
-		std::vector<std::string> literals;
-		code::QueryEnclosedLiterals( literals, std::string("lead_%MY_STUFF%_mid_%MY_T.OOLS%_trail"), "%", "%", true );
-		ASSERT_EQUAL( "%MY_STUFF%", str::Join( literals, "," ) );		// exclude "MY_T.OOLS" - not a literal
+		std::vector<std::string> identifiers;
+		code::QueryEnclosedIdentifiers( identifiers, std::string("lead_%MY_STUFF%_mid_%MY_T.OOLS%_trail"), "%", "%", true );
+		ASSERT_EQUAL( "%MY_STUFF%", str::Join( identifiers, "," ) );		// exclude "MY_T.OOLS" - not a identifier
 	}
 	{
-		std::vector<std::string> literals;
-		code::QueryEnclosedLiterals( literals, std::string("lead_%MY_STUFF%_mid_%MY_TOOLS%_trail"), "%", "%", true );
-		ASSERT_EQUAL( "%MY_STUFF%,%MY_TOOLS%", str::Join( literals, "," ) );
+		std::vector<std::string> identifiers;
+		code::QueryEnclosedIdentifiers( identifiers, std::string("lead_%MY_STUFF%_mid_%MY_TOOLS%_trail"), "%", "%", true );
+		ASSERT_EQUAL( "%MY_STUFF%,%MY_TOOLS%", str::Join( identifiers, "," ) );
 	}
 }
 
 void CEnvironmentTests::TestEnvironVariables( void )
 {
 	ASSERT( !env::HasAnyVariable( _T("") ) );
-	ASSERT( !env::HasAnyVariable( _T("%%") ) );			// empty literal
-	ASSERT( !env::HasAnyVariable( _T("$()") ) );		// empty literal
+	ASSERT( !env::HasAnyVariable( _T("%%") ) );			// empty identifier
+	ASSERT( !env::HasAnyVariable( _T("$()") ) );		// empty identifier
 
 	ASSERT( env::HasAnyVariable( _T("%MY_TOOLS%") ) );
 	ASSERT( env::HasAnyVariable( _T("lead_%MY_TOOLS%_trail") ) );
@@ -88,7 +88,7 @@ void CEnvironmentTests::TestEnvironVariables( void )
 	ASSERT( !env::HasAnyVariable( _T("&(MY_TOOLS") ) );
 	ASSERT( !env::HasAnyVariable( _T("MY_TOOLS)") ) );
 
-	ASSERT( !env::HasAnyVariable( _T("%MY_TOO.LS%") ) );	// invalid literal
+	ASSERT( !env::HasAnyVariable( _T("%MY_TOO.LS%") ) );	// invalid identifier
 
 	{
 		// set 2 environment variables in this process
@@ -159,7 +159,7 @@ void CEnvironmentTests::TestExpandKeysToValues( void )
 
 void CEnvironmentTests::Run( void )
 {
-	RUN_TEST( TestQueryEnclosedLiterals );
+	RUN_TEST( TestQueryEnclosedIdentifiers );
 	RUN_TEST( TestEnvironVariables );
 	RUN_TEST( TestReplaceEnvVar_VcMacroToWindows );
 	RUN_TEST( TestExpandEnvironment );

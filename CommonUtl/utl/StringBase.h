@@ -3,6 +3,7 @@
 #pragma once
 
 #include <locale>
+#include <iterator>			// std::inserter, std::back_inserter
 #include <sstream>
 #include "StringBase_fwd.h"
 
@@ -597,40 +598,74 @@ namespace str
 		return count;
 	}
 
-
-	template< typename CharT, typename StringT >
-	void SplitAdd( std::vector<StringT>& rItems _out_, const CharT* pSource, const CharT* pSep )
+	template< typename CharT >
+	size_t ReplaceDelims( std::basic_string<CharT>& rText _in_out_, const CharT* pDelims, const CharT* pReplace, size_t maxCount = utl::npos )
 	{
+		ASSERT_PTR( pDelims );
+		ASSERT_PTR( pReplace );
+		size_t count = 0;
+
+		if ( !str::IsEmpty( pDelims ) )
+		{
+			const size_t replaceLen = str::GetLength( pReplace );
+
+			for ( size_t pos = 0;
+				  count != maxCount && ( pos = rText.find_first_of( pDelims, pos ) ) != std::basic_string<CharT>::npos;
+				  ++count, pos += replaceLen )
+				rText.replace( pos, 1, pReplace );
+		}
+
+		return count;
+	}
+
+
+	template< typename CharT, typename OutIteratorT >
+	void SplitOut( OutIteratorT itOutItems _out_, const CharT* pSource, const CharT* pSep )
+	{	// uses an output iterator to insert into any container: vector, list, set, etc
 		ASSERT( !str::IsEmpty( pSep ) );
 
 		if ( !str::IsEmpty( pSource ) )
 		{
-			const size_t sepLen = str::GetLength( pSep );
-			typedef const CharT* Const_iterator;
+			typedef const CharT* TConstIterator;
+			typedef std::basic_string<CharT> TString;
 
-			for ( Const_iterator itItemStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
+			const size_t sepLen = str::GetLength( pSep );
+
+			for ( TConstIterator itItemStart = str::begin( pSource ), itEnd = str::end( pSource ); ; ++itOutItems )
 			{
-				Const_iterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
+				TConstIterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
 				if ( itItemEnd != itEnd )
 				{
-					rItems.push_back( std::basic_string<CharT>( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
+					*itOutItems = TString( itItemStart, std::distance( itItemStart, itItemEnd ) );
 					itItemStart = itItemEnd + sepLen;
 				}
 				else
 				{
-					rItems.push_back( std::basic_string<CharT>( itItemStart ) );			// last item
+					*itOutItems = TString( itItemStart );			// last item
 					break;
 				}
 			}
 		}
 	}
 
-	template< typename CharT, typename StringT >
-	inline void Split( std::vector<StringT>& rItems _out_, const CharT* pSource, const CharT* pSep )
-	{
-		rItems.clear();
-		SplitAdd( rItems, pSource, pSep );
+	template< typename CharT, typename VectLikeT >
+	void Split( VectLikeT& rItems _out_, const CharT* pSource, const CharT* pSep, bool clear = true )
+	{	// for containers with push_back() - VectLikeT is vector-like: vector, list, deque, stack
+		if ( clear )
+			rItems.clear();
+
+		SplitOut( std::back_inserter( rItems ), pSource, pSep );
 	}
+
+	template< typename CharT, typename SetLikeT >
+	void SplitSet( SetLikeT& rItems _out_, const CharT* pSource, const CharT* pSep, bool clear = true )
+	{	// SetLikeT is set-like: set, unordedred_set, list, etc
+		if ( clear )
+			rItems.clear();
+
+		SplitOut( std::inserter( rItems, rItems.begin() ), pSource, pSep );
+	}
+
 
 	template< typename CharT >
 	void QuickSplit( std::vector<CharT>& rItems _out_, const CharT* pSource, CharT sepCh )

@@ -120,7 +120,7 @@ namespace code
 
 				if ( 0 == _tcsncmp( pString + pos, singleLineCommentToken, singleLineCommentToken.GetLength() ) )
 				{	// "#"
-					outStatementEndPos = str::findStringPos( pString, code::lineEnd, pos += singleLineCommentToken.GetLength() ).m_start;
+					outStatementEndPos = str::findStringPos( pString, code::g_pLineEnd, pos += singleLineCommentToken.GetLength() ).m_start;
 					return true;
 				}
 				break;
@@ -138,7 +138,7 @@ namespace code
 					else if ( pString[ pos ] == _T('/') )
 					{	// "//..."
 						// NB: for single-line comment, the line-end is excluded from the comment
-						outStatementEndPos = str::findStringPos( pString, code::lineEnd, ++pos ).m_start;
+						outStatementEndPos = str::findStringPos( pString, code::g_pLineEnd, ++pos ).m_start;
 						return true;
 					}
 				}
@@ -146,13 +146,13 @@ namespace code
 			case DocLang_Basic:
 				if ( pString[ pos ] == _T('\'') )
 				{	// "'..."
-					outStatementEndPos = str::findStringPos( pString, code::lineEnd, ++pos ).m_start;
+					outStatementEndPos = str::findStringPos( pString, code::g_pLineEnd, ++pos ).m_start;
 					return true;
 				}
 				else if ( 0 == _tcsnicmp( pString + pos, _T("REM"), 3 ) )
 					if ( code::isWhitespaceChar( pString[ pos += 3 ] ) )
 					{	// "REM ..."
-						outStatementEndPos = str::findStringPos( pString, code::lineEnd, ++pos ).m_start;
+						outStatementEndPos = str::findStringPos( pString, code::g_pLineEnd, ++pos ).m_start;
 						return true;
 					}
 				break;
@@ -164,7 +164,7 @@ namespace code
 				}
 				else if ( 0 == _tcsncmp( pString + pos, _T("--"), 2 ) )
 				{	// "--..."
-					outStatementEndPos = str::findStringPos( pString, code::lineEnd, pos += 2 ).m_start;
+					outStatementEndPos = str::findStringPos( pString, code::g_pLineEnd, pos += 2 ).m_start;
 					return true;
 				}
 				break;
@@ -328,7 +328,7 @@ namespace code
 
 	TokenRange LanguageSearchEngine::findQuotedString( const TCHAR* pString, int startPos /*= 0*/,
 													   str::CaseType caseType /*= str::Case*/,
-													   const TCHAR* quoteSet /*= code::quoteChars*/ ) const
+													   const TCHAR* quoteSet /*= code::g_pQuoteChars*/ ) const
 	{
 		caseType;
 		ASSERT( pString != nullptr && startPos >= 0 && startPos <= str::Length( pString ) );

@@ -146,8 +146,8 @@ void CStringTests::TestIsCharType( void )
 	ASSERT( utl::All( std::string( "01234567890" ), pred::IsDigit() ) );
 	ASSERT( utl::All( std::string( "01234567890abcdefABCDEF" ), pred::IsHexDigit() ) );
 
-	ASSERT( utl::All( std::string( "_01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsLiteral() ) );
-	ASSERT( utl::All( std::string( "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsLiteralLead() ) );
+	ASSERT( utl::All( std::string( "_01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsIdentifier() ) );
+	ASSERT( utl::All( std::string( "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsIdentifierLead() ) );
 
 	ASSERT( utl::All( std::string( "abcdefghijklmnopqrstuvwxyz" ), pred::IsLower() ) );
 	ASSERT( utl::All( std::string( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ), pred::IsUpper() ) );
@@ -361,6 +361,77 @@ void CStringTests::TestStringSplit( void )
 		ASSERT_EQUAL( "", items[ 0 ] );
 		ASSERT_EQUAL( "", items[ 1 ] );
 		ASSERT_EQUAL( "", items[ 2 ] );
+	}
+
+
+	{	// std::list - ANSI strings
+		std::list<std::string> items;
+		std::list<std::string>::const_iterator it;
+
+		str::Split( items, "", ",;" );
+		ASSERT_EQUAL( 0, items.size() );
+
+		str::SplitSet( items, "", ",;" );
+		ASSERT_EQUAL( 0, items.size() );
+
+		str::Split( items, "apple", ",;" );
+		ASSERT_EQUAL( 1, items.size() );
+		ASSERT_EQUAL( "apple", items.front() );
+
+		str::SplitSet( items, "apple", ",;" );
+		ASSERT_EQUAL( 1, items.size() );
+		ASSERT_EQUAL( "apple", items.front() );
+
+		str::Split( items, "apple,;grape,;plum", ",;" );
+		ASSERT_EQUAL( 3, items.size() );
+		it = items.begin();
+		ASSERT_EQUAL( "apple", *it++ );
+		ASSERT_EQUAL( "grape", *it++ );
+		ASSERT_EQUAL( "plum", *it++ );
+
+		str::SplitSet( items, "apple,;grape,;plum", ",;" );
+		ASSERT_EQUAL( 3, items.size() );
+		it = items.begin();
+		ASSERT_EQUAL( "apple", *it++ );
+		ASSERT_EQUAL( "grape", *it++ );
+		ASSERT_EQUAL( "plum", *it++ );
+
+		str::Split( items, ",;,;", ",;" );
+		ASSERT_EQUAL( 3, items.size() );
+		it = items.begin();
+		ASSERT_EQUAL( "", *it++ );
+		ASSERT_EQUAL( "", *it++ );
+		ASSERT_EQUAL( "", *it++ );
+	}
+
+	{	// std::set - ANSI strings
+		std::set<std::string> items;
+		std::set<std::string>::const_iterator it;
+
+		str::SplitSet( items, "", ",;" );
+		ASSERT_EQUAL( 0, items.size() );
+
+		str::SplitSet( items, "apple", ",;" );
+		ASSERT_EQUAL( 1, items.size() );
+		ASSERT( items.find( "apple" ) != items.end() );
+
+		str::SplitSet( items, "apple,;grape,;plum", ",;" );
+		ASSERT_EQUAL( 3, items.size() );
+		it = items.begin();
+		ASSERT_EQUAL( "apple", *it++ );
+		ASSERT_EQUAL( "grape", *it++ );
+		ASSERT_EQUAL( "plum", *it++ );
+
+		str::SplitSet( items, "apple,;grape,;apple", ",;" );
+		ASSERT_EQUAL( 2, items.size() );
+		it = items.begin();
+		ASSERT_EQUAL( "apple", *it++ );
+		ASSERT_EQUAL( "grape", *it++ );
+
+		str::SplitSet( items, ",;,;", ",;" );
+		ASSERT_EQUAL( 1, items.size() );
+		it = items.begin();
+		ASSERT_EQUAL( "", *it++ );
 	}
 }
 
@@ -594,10 +665,10 @@ void CStringTests::TestSearchEnclosedItems( void )
 		ASSERT_EQUAL( "$(MY_TOOLS)", parser.MakeSpec( specBounds, text ) );
 		ASSERT_EQUAL( "MY_TOOLS", parser.ExtractItem( sepMatchPos, specBounds, text ) );
 
-		// test last spec, which is free-form, i.e. not an literal
-		str::CEnclosedParser<char>::TSpecPair nonLiteralSpecBounds;
-		nonLiteralSpecBounds = parser.FindItemSpec( &sepMatchPos, text, specBounds.second );
-		ASSERT( std::string::npos == nonLiteralSpecBounds.first );		// "%VAR.1%" not found when matching literals
+		// test last spec, which is free-form, i.e. not an identifier
+		str::CEnclosedParser<char>::TSpecPair nonIdentifierSpecBounds;
+		nonIdentifierSpecBounds = parser.FindItemSpec( &sepMatchPos, text, specBounds.second );
+		ASSERT( std::string::npos == nonIdentifierSpecBounds.first );		// "%VAR.1%" not found when matching identifiers
 	}
 
 	{
@@ -609,7 +680,7 @@ void CStringTests::TestSearchEnclosedItems( void )
 		parser.QueryItems( items, text, false );
 		ASSERT_EQUAL( "MY_STUFF,MY_TOOLS", str::Join( items, "," ) );
 	}
-	{	// including non-literals:
+	{	// including non-identifiers:
 		str::CEnclosedParser<char> parserAny( "$(|%", ")|%", false );
 		std::vector<std::string> items;
 

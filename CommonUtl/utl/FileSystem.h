@@ -41,6 +41,9 @@ namespace fs
 	bool DeleteAllFiles( const TCHAR* pDirPath );						// delete even if read-only sub-directories or embedded files
 
 
+	bool LocateExistingFile( fs::CPath* pFoundPath, const std::vector<fs::TDirPath>& searchPaths, const TCHAR* pFilenames, const TCHAR* pSep = _T("|") );
+
+
 	enum ExcPolicy { RuntimeExc, MfcExc };
 
 	namespace thr

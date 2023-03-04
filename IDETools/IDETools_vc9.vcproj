@@ -610,6 +610,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CodeUtils.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CodeUtils.h"
+					>
+				</File>
+				<File
 					RelativePath=".\CompoundTextParser.cpp"
 					>
 				</File>

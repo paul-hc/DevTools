@@ -24,6 +24,30 @@ CLanguageTests& CLanguageTests::Instance( void )
 	return s_testCase;
 }
 
+void CLanguageTests::TestBasicParsing( void )
+{
+	// heterogenous narrow and wide strings equality
+	std::string narrow;
+	std::wstring wide;
+
+	ASSERT( str::EqualsSeq( narrow.begin(), narrow.end(), wide ) );
+	ASSERT( str::EqualsSeqAt( narrow, 0, wide ) );
+	ASSERT( str::EqualsSeq( wide.begin(), wide.end(), narrow ) );
+	ASSERT( str::EqualsSeqAt( wide, 0, narrow ) );
+
+	narrow = "a"; wide = L"a";
+	ASSERT( str::EqualsSeq( narrow.begin(), narrow.end(), wide ) );
+	ASSERT( str::EqualsSeqAt( narrow, 0, wide ) );
+	ASSERT( str::EqualsSeq( wide.begin(), wide.end(), narrow ) );
+	ASSERT( str::EqualsSeqAt( wide, 0, narrow ) );
+
+	narrow = "abc1"; wide = L"abc1";
+	ASSERT( str::EqualsSeq( narrow.begin(), narrow.end(), wide ) );
+	ASSERT( str::EqualsSeqAt( narrow, 0, wide ) );
+	ASSERT( str::EqualsSeq( wide.begin(), wide.end(), narrow ) );
+	ASSERT( str::EqualsSeqAt( wide, 0, narrow ) );
+}
+
 void CLanguageTests::TestMyLanguage( void )
 {
 	const code::CLanguage<char> myLang( "'|\"|/*BEGIN|//", "'|\"|END*/|\n" );		// exotic asymetric comments syntax, to ensure reverse iteration is matching properly
@@ -435,7 +459,7 @@ void CLanguageTests::TestCodeDetails( void )
 			}
 			{
 				std::string::const_iterator it = text.begin();
-				ASSERT( cppLang.SkipLiteral( &it, itEnd ) );
+				ASSERT( cppLang.SkipIdentifier( &it, itEnd ) );
 				ASSERT_HAS_PREFIX( "  \t", &*it );
 
 				ASSERT( cppLang.SkipWhitespace( &it, itEnd ) );
@@ -517,6 +541,7 @@ private:\n\
 
 void CLanguageTests::Run( void )
 {
+	RUN_TEST( TestBasicParsing );
 	RUN_TEST( TestMyLanguage );
 	RUN_TEST( TestMyLanguageSingleLine );
 	RUN_TEST( TestBracketParity );

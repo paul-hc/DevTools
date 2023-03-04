@@ -279,7 +279,7 @@ namespace fs
 		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( m_filePath.c_str(), accessMode ); }
 
 		bool LocateFile( CFileFind& rFindFile ) const;
-		CPath ExtractExistingFilePath( void ) const;
+		CPath LocateExistingFile( void ) const;
 
 		inline size_t GetHashValue( void ) const { return path::GetHashValue( m_filePath ); }
 	private:

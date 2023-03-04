@@ -239,6 +239,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="BraceParityStatus.cpp" />
     <ClCompile Include="CodeMessageBox.cpp" />
+    <ClCompile Include="CodeUtils.cpp" />
     <ClCompile Include="CppParser.cpp" />
     <ClCompile Include="CodeProcessor.cpp" />
     <ClCompile Include="CodeUtilities.cpp" />
@@ -315,6 +316,7 @@
     <ClInclude Include="Application_fwd.h" />
     <ClInclude Include="BraceParityStatus.h" />
     <ClInclude Include="CodeMessageBox.h" />
+    <ClInclude Include="CodeUtils.h" />
     <ClInclude Include="CppParser.h" />
     <ClInclude Include="CodeProcessor.h" />
     <ClInclude Include="CodeUtilities.h" />

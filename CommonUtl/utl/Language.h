@@ -214,7 +214,7 @@ namespace code
 		inline bool SkipWhitespace( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsSpace() ); }
 
 		template< typename IteratorT >
-		inline bool SkipLiteral( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsLiteral() ); }
+		inline bool SkipIdentifier( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsIdentifier() ); }
 
 
 		// bracket lookup
