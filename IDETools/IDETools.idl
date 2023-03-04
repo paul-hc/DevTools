@@ -222,16 +222,15 @@ library IDETools
 		methods:
 			[id(4)] boolean LoadFile(BSTR textFilePath);
 			[id(5)] boolean LoadFileSection(BSTR compoundFilePath, BSTR sectionName);
-			[id(6)] long LoadCompoundFileSections(BSTR compoundFilePath, BSTR sectionFilter);
-			[id(7)] long FindText(BSTR match, long startPos, boolean caseSensitive);
-			[id(8)] long ReplaceText(BSTR match, BSTR replacement, boolean caseSensitive);
-			[id(9)] boolean AddEmbeddedContent(BSTR matchCoreID, BSTR embeddedContent, boolean caseSensitive);
-			[id(10)] BSTR Tokenize(BSTR separatorCharSet);
-			[id(11)] BSTR GetNextToken();
-			[id(12)] long MultiLinesToSingleParagraph(BSTR multiLinesText, boolean doTrimTrailingSpaces);
-			[id(13)] void AddFieldReplacement(BSTR fieldText, BSTR replaceWith);
-			[id(14)] void ClearFieldReplacements();
-			[id(15)] BSTR FormatTimestamp(DATE timestamp, BSTR strftimeFormat);
+			[id(6)] long FindText(BSTR match, long startPos, boolean caseSensitive);
+			[id(7)] long ReplaceText(BSTR match, BSTR replacement, boolean caseSensitive);
+			[id(8)] boolean AddEmbeddedContent(BSTR matchCoreID, BSTR embeddedContent, boolean caseSensitive);
+			[id(9)] BSTR Tokenize(BSTR separatorCharSet);
+			[id(10)] BSTR GetNextToken();
+			[id(11)] long MultiLinesToSingleParagraph(BSTR multiLinesText, boolean doTrimTrailingSpaces);
+			[id(12)] void AddFieldReplacement(BSTR fieldText, BSTR replaceWith);
+			[id(13)] void ClearFieldReplacements();
+			[id(14)] BSTR FormatTimestamp(DATE timestamp, BSTR strftimeFormat);
 	};
 
 		//  Class information for TextContent

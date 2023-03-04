@@ -43,16 +43,15 @@ public:
 		// methods:
 		dispidLoadFile = 4,
 		dispidLoadFileSection = 5,
-		dispidLoadCompoundFileSections = 6,
-		dispidFindText = 7,
-		dispidReplaceText = 8,
-		dispidAddEmbeddedContent = 9,
-		dispidTokenize = 10,
-		dispidGetNextToken = 11,
-		dispidMultiLinesToSingleParagraph = 12,
-		dispidAddFieldReplacement = 13,
-		dispidClearFieldReplacements = 14,
-		dispidFormatTimestamp = 15
+		dispidFindText = 6,
+		dispidReplaceText = 7,
+		dispidAddEmbeddedContent = 8,
+		dispidTokenize = 9,
+		dispidGetNextToken = 10,
+		dispidMultiLinesToSingleParagraph = 11,
+		dispidAddFieldReplacement = 12,
+		dispidClearFieldReplacements = 13,
+		dispidFormatTimestamp = 14
 	};
 
 	BOOL m_showErrors;
@@ -62,7 +61,6 @@ public:
 	afx_msg long GetTextLen();
 	afx_msg BOOL LoadFile( LPCTSTR textFilePath );
 	afx_msg BOOL LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName );
-	afx_msg long LoadCompoundFileSections( LPCTSTR compoundFilePath, LPCTSTR sectionFilter );
 	afx_msg long FindText( LPCTSTR match, long startPos, BOOL caseSensitive );
 	afx_msg long ReplaceText( LPCTSTR match, LPCTSTR replacement, BOOL caseSensitive );
 	afx_msg BOOL AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedContent, BOOL caseSensitive );

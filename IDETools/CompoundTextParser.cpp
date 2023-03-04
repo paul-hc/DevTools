@@ -93,51 +93,52 @@ void CCompoundTextParser::ParseStream( std::istream& is ) throws_( CRuntimeExcep
 
 void CCompoundTextParser::ParseLine( const std::tstring& line )
 {
-	if ( line.empty() && InSection() )
-		*m_pCtx->m_pSectionContent += m_outLineEnd;			// append the empty line
-	else
-		for ( size_t pos = 0, length = line.length(); pos != length; )
+	size_t pos = 0, length = line.length();
+
+	do
+	{
+		TParser::TSepMatchPos sepMatchPos;
+		TParser::TSpecPair specBounds = m_sectionParser.FindItemSpec( &sepMatchPos, line, pos );
+
+		if ( specBounds.first != utl::npos )		// a known spec?
 		{
-			TParser::TSepMatchPos sepMatchPos;
-			TParser::TSpecPair specBounds = m_sectionParser.FindItemSpec( &sepMatchPos, line, pos );
+			Range<size_t> itemRange = m_sectionParser.GetItemRange( sepMatchPos, specBounds );
 
-			if ( specBounds.first != utl::npos )			// a known spec?
+			if ( !InSection() )
 			{
-				Range<size_t> itemRange = m_sectionParser.GetItemRange( sepMatchPos, specBounds );
-
-				if ( !InSection() )
-				{
-					if ( SectionSep == sepMatchPos )		// "[[tag]]"?
-						EnterSection( m_sectionParser.MakeItem( itemRange, line ) );
-				}
-				else
-				{
-					if ( SectionSep == sepMatchPos )		// "[[tag]]"?
-					{
-						AddTextContent( line.substr( pos, specBounds.first - pos ), 0 == pos );		// keep this: append the leading text before the tag
-
-						if ( str::EqualsSeqAt( line, itemRange.m_start, s_endOfSection ) )			// EOS or new_section tag?
-							ExitCurrentSection();
-						else
-							EnterSection( m_sectionParser.MakeItem( itemRange, line ) );			// will throw "previous section not ended"
-					}
-					else
-						ASSERT( LineCommentSep == sepMatchPos );	// just ignore comment
-				}
-				pos = specBounds.second;		// continue parsing past tag suffix
-			}
-			else if ( InSection() )
-			{
-				if ( 0 == pos )
-					AddTextContent( line, true );					// append the entire line
-				else
-					AddTextContent( line.substr( pos ), false );	// append the remaining text
-
-				pos = length;
+				if ( SectionSep == sepMatchPos )	// "[[tag]]"?
+					EnterSection( m_sectionParser.MakeItem( itemRange, line ) );
 			}
 			else
-				break;		// ignore stray line
+			{
+				if ( SectionSep == sepMatchPos )	// "[[tag]]"?
+				{
+					if ( pos != specBounds.first )	// any leading text content?
+						AddTextContent( line.begin() + pos, line.begin() + specBounds.first, false );	// keep this: append the leading text before the tag, e.g. "text[[EOS]]"
+
+					if ( str::EqualsSeqAt( line, itemRange.m_start, s_endOfSection ) )			// EOS or new_section tag?
+						ExitCurrentSection();
+					else
+						EnterSection( m_sectionParser.MakeItem( itemRange, line ) );			// will throw "previous section not ended"
+				}
+				else
+					ASSERT( LineCommentSep == sepMatchPos );	// just ignore comment
+			}
+			pos = specBounds.second;		// continue parsing past tag suffix
 		}
+		else if ( InSection() )
+		{
+			if ( 0 == pos )
+				AddTextContentLine( line );									// append the entire line
+			else
+				AddTextContent( line.begin() + pos, line.end(), false );	// append the remaining text
+
+			pos = length;
+		}
+		else
+			break;		// ignore stray line
+	}
+	while ( pos != length );
 }
 
 void CCompoundTextParser::EnterSection( const std::tstring& sectionName ) throws_( CRuntimeException )
@@ -164,14 +165,14 @@ void CCompoundTextParser::ExitCurrentSection( void ) throws_( CRuntimeException 
 	m_pCtx->m_pSectionContent = nullptr;		// exit section content parsing mode
 }
 
-void CCompoundTextParser::AddTextContent( const std::tstring& text, bool newLine )
+void CCompoundTextParser::AddTextContent( TConstIterator itFirst, TConstIterator itLast, bool fullLine )
 {
 	ASSERT( InSection() );
 
-	if ( newLine && !m_pCtx->m_pSectionContent->empty() )
-		*m_pCtx->m_pSectionContent += m_outLineEnd;
+	m_pCtx->m_pSectionContent->insert( m_pCtx->m_pSectionContent->end(), itFirst, itLast );		// append text content
 
-	*m_pCtx->m_pSectionContent += text;
+	if ( fullLine )
+		*m_pCtx->m_pSectionContent += m_outLineEnd;
 }
 
 
@@ -318,98 +319,4 @@ bool CCompoundTextParser::PromptConditionalSectionRef( std::tstring* pRefSection
 	}
 
 	return true;
-}
-
-
-// CSectionParser implementation
-
-CSectionParser::CSectionParser( const TCHAR* pOpenDelim /*= _T("[[")*/, const TCHAR* pCloseDelim /*= _T("]]")*/, const TCHAR* pTagEOS /*= _T("EOS")*/ )
-	: m_parser( pOpenDelim, pCloseDelim, false )
-	, m_tagEOS( pTagEOS )
-{
-	Reset();
-}
-
-CSectionParser::~CSectionParser()
-{
-}
-
-void CSectionParser::Reset( void )
-{
-	m_sectionStage = Before;
-	m_sectionCount = 0;
-	m_textContent.clear();
-}
-
-bool CSectionParser::LoadFileSection( const fs::CPath& compoundFilePath, const std::tstring& sectionName ) throws_( std::exception )
-{
-	Reset();
-
-	std::ifstream input( compoundFilePath.GetPtr(), std::ios_base::in );	// | std::ios_base::binary
-	if ( !input.is_open() )
-		throw CRuntimeException( str::Format( _T("Unable to open text file %s"), compoundFilePath.GetPtr() ) );
-
-	for ( std::string line; std::getline( input, line ); )
-		if ( !ParseLine( str::FromUtf8( line.c_str() ), sectionName ) )
-			break;
-
-	return m_sectionCount != 0;
-}
-
-/*
-Process the line by switching to InSection stage if desired section is detected,
-and appending the line to content if zone is InSection.
-
-Note:
-- section content starts on the next line;
-- EOS tag (end of section) may be on the same line with a section content line.
-- if EOS tag is not present, a section ends on the next section start tag.
-*/
-bool CSectionParser::ParseLine( const std::tstring& line, const std::tstring& sectionName )
-{
-	ASSERT( m_sectionStage != Done );
-
-	TParser::TSepMatchPos sepMatchPos;
-	TParser::TSpecPair specBounds = m_parser.FindItemSpec( &sepMatchPos, line );
-
-	if ( specBounds.first != utl::npos )
-	{
-		Range<size_t> tagRange = m_parser.GetItemRange( sepMatchPos, specBounds );
-
-		if ( Before == m_sectionStage )
-		{
-			if ( sectionName.empty() || str::EqualsSeqAt( line, tagRange.m_start, sectionName ) )
-			{
-				++m_sectionCount;
-				m_sectionStage = InSection;		// enter text content parsing mode
-			}
-		}
-		else
-		{
-			ASSERT( InSection == m_sectionStage );
-
-			if ( !tagRange.IsEmpty() )			// new-section tag or EOS?
-			{
-				if ( !sectionName.empty() )
-					m_sectionStage = Done;
-				else
-					m_sectionStage = Before;	// no section filter: keep loading all sections
-
-				if ( str::EqualsSeqAt( line, tagRange.m_start, m_tagEOS ) )
-					AddTextContent( line.substr( 0, specBounds.first ) );		// append the leading text before the tag
-			}
-		}
-	}
-	else
-		AddTextContent( line );		// append the entire line
-
-	return m_sectionStage != Done;
-}
-
-void CSectionParser::AddTextContent( const std::tstring& text )
-{
-	if ( !m_textContent.empty() )
-		m_textContent += code::g_pLineEnd;
-
-	m_textContent += text;
 }

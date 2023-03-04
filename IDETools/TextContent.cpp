@@ -54,7 +54,6 @@ BEGIN_DISPATCH_MAP(TextContent, CCmdTarget)
 	DISP_PROPERTY_EX_ID(TextContent, "TextLen", dispidTextLen, GetTextLen, SetNotSupported, VT_I4)
 	DISP_FUNCTION_ID(TextContent, "LoadFile", dispidLoadFile, LoadFile, VT_BOOL, VTS_BSTR)
 	DISP_FUNCTION_ID(TextContent, "LoadFileSection", dispidLoadFileSection, LoadFileSection, VT_BOOL, VTS_BSTR VTS_BSTR)
-	DISP_FUNCTION_ID(TextContent, "LoadCompoundFileSections", dispidLoadCompoundFileSections, LoadCompoundFileSections, VT_I4, VTS_BSTR VTS_BSTR)
 	DISP_FUNCTION_ID(TextContent, "FindText", dispidFindText, FindText, VT_I4, VTS_BSTR VTS_I4 VTS_BOOL)
 	DISP_FUNCTION_ID(TextContent, "ReplaceText", dispidReplaceText, ReplaceText, VT_I4, VTS_BSTR VTS_BSTR VTS_BOOL)
 	DISP_FUNCTION_ID(TextContent, "AddEmbeddedContent", dispidAddEmbeddedContent, AddEmbeddedContent, VT_BOOL, VTS_BSTR VTS_BSTR VTS_BOOL)
@@ -136,9 +135,10 @@ BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName
 	try
 	{
 		CCompoundTextParser textParser;
+		fs::CPath filePath( compoundFilePath );
 
 		textParser.StoreFieldMappings( m_fieldReplacements );
-		textParser.ParseFile( fs::CPath( compoundFilePath ) );
+		textParser.ParseFile( filePath );
 
 		m_TextContent = textParser.ExpandSection( sectionName ).c_str();
 
@@ -148,29 +148,6 @@ BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName
 	{
 		m_showErrors ? app::ReportException( exc ) : app::TraceException( exc );
 		return FALSE;
-	}
-}
-
-// Loads all the existing sections in the specified compound text file.
-// Sections are lines into the text content that can be tokenized by "\r\n".
-//
-long TextContent::LoadCompoundFileSections( LPCTSTR compoundFilePath, LPCTSTR sectionFilter )
-{
-	m_TextContent.Empty();
-
-	try
-	{
-		CSectionParser parser;		// _T("[["), _T("]]"), _T("EOS")
-
-		if ( parser.LoadFileSection( fs::CPath( compoundFilePath ), sectionFilter ) )
-			SetText( parser.GetTextContent().c_str() );
-
-		return parser.GetSectionCount();
-	}
-	catch ( const std::exception& exc )
-	{
-		m_showErrors ? app::ReportException( exc ) : app::TraceException( exc );
-		return 0;
 	}
 }
 

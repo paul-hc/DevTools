@@ -21,6 +21,8 @@ public:
 
 	std::tstring ExpandSection( const std::tstring& sectionName ) throws_( CRuntimeException );
 private:
+	typedef std::tstring::const_iterator TConstIterator;
+
 	enum SepMatch
 	{
 		SectionSep,				// "[[...]]" TSepMatchPos of 0 in m_sectionParser
@@ -31,7 +33,8 @@ private:
 	bool InSection( void ) const { ASSERT_PTR( m_pCtx.get() ); return m_pCtx->m_pSectionContent != nullptr; }
 	void EnterSection( const std::tstring& sectionName ) throws_( CRuntimeException );
 	void ExitCurrentSection( void ) throws_( CRuntimeException );
-	void AddTextContent( const std::tstring& text, bool newLine );
+	void AddTextContent( TConstIterator itFirst, TConstIterator itLast, bool fullLine );
+	void AddTextContentLine( const std::tstring& line ) { AddTextContent( line.begin(), line.end(), true ); }
 
 	std::tstring* FindFieldValue( const std::tstring& fieldKey );			// e.g. "%TypeName%"
 	std::tstring& LookupFieldValue( const std::tstring& fieldKey );			// e.g. "%TypeName%"
@@ -73,34 +76,6 @@ private:
 	static const std::tstring s_year;		// "%YEAR%"  -> "2023"
 	static const std::tstring s_month;		// "%MONTH%" -> "Feb-2023"
 	static const std::tstring s_date;		// "%DATE%"  -> "27-Feb-2023"
-};
-
-
-class CSectionParser		// rough cut with little functionality (no embedded sections) => better use CCompoundTextParser!
-{
-public:
-	CSectionParser( const TCHAR* pOpenDelim = _T("[["), const TCHAR* pCloseDelim = _T("]]"), const TCHAR* pTagEOS = _T("EOS") );
-	virtual ~CSectionParser();
-
-	bool LoadFileSection( const fs::CPath& compoundFilePath, const std::tstring& sectionName ) throws_( std::exception );
-
-	const std::tstring& GetTextContent( void ) const { return m_textContent; }
-	size_t GetSectionCount( void ) const { return m_sectionCount; }
-private:
-	void Reset( void );
-	bool ParseLine( const std::tstring& line, const std::tstring& sectionName );
-	void AddTextContent( const std::tstring& text );
-private:
-	enum SectionStage { Before, InSection, Done };
-	typedef str::CEnclosedParser<TCHAR> TParser;
-
-	const TParser m_parser;
-	std::tstring m_tagEOS;			// "EOS": end of section
-
-	SectionStage m_sectionStage;	// the current zone of parsing relative to the desired section.
-	size_t m_sectionCount;
-
-	std::tstring m_textContent;		// resulting text content of the section
 };
 
 
