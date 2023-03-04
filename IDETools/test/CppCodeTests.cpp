@@ -4,11 +4,24 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "utl/StringUtilities.h"
 #include "test/CppCodeTests.h"
+#include "CompoundTextParser.h"
 #include "IterationSlices.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace ut
+{
+	void ParseString( CCompoundTextParser* pParser, const std::string& text ) throws_( CRuntimeException )
+	{
+		ASSERT_PTR( pParser );
+		std::istringstream is( text );
+
+		pParser->ParseStream( is );
+	}
+}
 
 
 CCppCodeTests::CCppCodeTests( void )
@@ -20,6 +33,143 @@ CCppCodeTests& CCppCodeTests::Instance( void )
 {
 	static CCppCodeTests s_testCase;
 	return s_testCase;
+}
+
+void CCppCodeTests::TestCompoundTextParser( void )
+{
+	CCompoundTextParser parser( _T("\n") );
+
+	{	// inline section content
+		ut::ParseString( &parser, "\
+ignore\n\
+[[S1]]This <<CS2>> some <<CS3>>.[[EOS]]\n\
+[[CS2]]IS[[EOS]]\n\
+[[CS3]]TEXT[[EOS]][[CS4]]ignore[[EOS]]"
+);
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ), _T("This IS some TEXT.") );
+	}
+
+	{	// 1 line section content
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+Line1\n\
+[[EOS]]"
+);
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+Line1\n\
+") );
+
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+Line1\n\
+Line2[[EOS]]"
+);
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+Line1\n\
+Line2\
+") );
+	}
+
+	{	// 2 lines section content
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+Line1\n\
+Line2\n\
+[[EOS]]"
+);
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+Line1\n\
+Line2\n\
+") );
+	}
+
+	{	// 3 lines section content
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+Line1\n\
+Line2\n\
+\n\
+[[EOS]]"
+);
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+Line1\n\
+Line2\n\
+\n\
+") );
+	}
+
+	{	// nested section multi-line section content
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+Line1\n\
+<<LINE2>>\n\
+[[EOS]]\n\
+\n\
+[[LINE2]]\n\
+Line2\n\
+[[EOS]]\
+");
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+Line1\n\
+Line2\n\
+\n\
+") );
+	}
+
+	{	// nested section multi-line section content using '$' suffix to eat line-end
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+Line1\n\
+<<LINE2>>$\n\
+[[EOS]]\n\
+\n\
+[[LINE2]]\n\
+Line2\n\
+[[EOS]]\
+");
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+Line1\n\
+Line2\n\
+") );	// '\n' was eaten!
+	}
+
+	{	// multi-line section content
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+Line1[[EOS]]\
+");
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+Line1\
+") );
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+Line1\n\
+[[EOS]]\
+");
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+Line1\n\
+") );
+
+		ut::ParseString( &parser, "\
+[[S1]]\n\
+\n\
+Line1\n\
+[[EOS]]\
+");
+		ASSERT_EQUAL_SWAP( parser.ExpandSection( _T("S1") ),
+						   _T("\
+\n\
+Line1\n\
+") );
+	}
 }
 
 void CCppCodeTests::TestIterationSlices( void )
@@ -40,11 +190,11 @@ void CCppCodeTests::TestIterationSlices( void )
 		ASSERT_EQUAL_STR( _T("."), slices.m_pObjSelOp );
 		ASSERT( code::CIterationSlices::MFC == slices.m_libraryType );
 	}
-	{	// CObjectList (MFC)
-		codeText = _T("\tCObjectList< CNmxObject* > myList;\n");
+	{	// CObList (MFC)
+		codeText = _T("\tCObList< CNmxObject* > myList;\n");
 
 		slices.ParseCode( codeText );
-		ASSERT_EQUAL( _T("CObjectList< CNmxObject* >"), slices.m_containerType.MakeToken( codeText ) );
+		ASSERT_EQUAL( _T("CObList< CNmxObject* >"), slices.m_containerType.MakeToken( codeText ) );
 		ASSERT_EQUAL( _T("myList"), slices.m_containerName.MakeToken( codeText ) );
 		ASSERT_EQUAL( _T("MyList"), slices.m_iteratorName );
 		ASSERT_EQUAL( _T("CNmxObject*"), slices.m_valueType.MakeToken( codeText ) );
@@ -186,6 +336,7 @@ void CCppCodeTests::TestIterationSlices( void )
 
 void CCppCodeTests::Run( void )
 {
+	RUN_TEST( TestCompoundTextParser );
 	RUN_TEST( TestIterationSlices );
 }
 

@@ -140,7 +140,7 @@ BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName
 		textParser.StoreFieldMappings( m_fieldReplacements );
 		textParser.ParseFile( fs::CPath( compoundFilePath ) );
 
-		m_TextContent = textParser.ExpandSectionContent( sectionName ).c_str();
+		m_TextContent = textParser.ExpandSection( sectionName ).c_str();
 
 		return !m_TextContent.IsEmpty();
 	}

@@ -17,6 +17,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestCompoundTextParser( void );
 	void TestIterationSlices( void );
 };
 

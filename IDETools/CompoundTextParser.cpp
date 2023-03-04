@@ -4,8 +4,11 @@
 #include "CodeUtilities.h"
 #include "Algorithms.h"
 #include "CodeMessageBox.h"
+#include "Application_fwd.h"
+#include "ModuleSession.h"
+#include "utl/FileSystem.h"
 #include "utl/Path.h"
-#include "utl/RuntimeException.h"
+#include "utl/TimeUtils.h"
 #include <fstream>
 
 #ifdef _DEBUG
@@ -38,12 +41,21 @@ lineN
 */
 
 const std::tstring CCompoundTextParser::s_endOfSection = _T("EOS");
+const std::tstring CCompoundTextParser::s_year = _T("%YEAR%");
+const std::tstring CCompoundTextParser::s_month = _T("%MONTH%");
+const std::tstring CCompoundTextParser::s_date = _T("%DATE%");
 
-CCompoundTextParser::CCompoundTextParser( void )
-	: m_sectionParser( _T("[[|;;"), _T("]]|\n"), false )
+CCompoundTextParser::CCompoundTextParser( const TCHAR* pOutLineEnd /*= code::g_pLineEnd*/ )
+	: m_outLineEnd( pOutLineEnd )
+	, m_sectionParser( _T("[[|;;"), _T("]]|\n"), false )
 	, m_crossRefParser( _T("<<"), _T(">>"), false )
 {
 	m_sectionParser.GetSeparators().EnableLineComments();
+
+	CTime now = CTime::GetCurrentTime();
+	m_fieldMappings.push_back( std::make_pair( s_year, time_utl::FormatTimestamp( now, _T("%Y") ) ) );
+	m_fieldMappings.push_back( std::make_pair( s_month, time_utl::FormatTimestamp( now, _T("%b-%Y") ) ) );
+	m_fieldMappings.push_back( std::make_pair( s_date, time_utl::FormatTimestamp( now, _T("%#d-%b-%Y") ) ) );
 }
 
 CCompoundTextParser::~CCompoundTextParser()
@@ -52,82 +64,112 @@ CCompoundTextParser::~CCompoundTextParser()
 
 void CCompoundTextParser::StoreFieldMappings( const std::map<std::tstring, std::tstring>& fieldMappings )
 {
-	m_fieldMappings.assign( fieldMappings.begin(), fieldMappings.end() );
+	m_fieldMappings.insert( m_fieldMappings.end(), fieldMappings.begin(), fieldMappings.end() );
+
+	UpdateFilePathFields();
 }
 
-void CCompoundTextParser::ParseFile( const fs::CPath& filePath ) throws_( std::exception )
+void CCompoundTextParser::ParseFile( const fs::CPath& filePath ) throws_( CRuntimeException )
 {
-	m_sectionMap.clear();
 	m_pCtx.reset( new CParsingContext( filePath ) );
 
 	std::ifstream input( filePath.GetPtr(), std::ios_base::in );	// | std::ios_base::binary
 	if ( !input.is_open() )
 		throw CRuntimeException( str::Format( _T("Unable to open text file %s"), filePath.GetPtr() ) );
 
-	for ( std::string line; std::getline( input, line ); ++m_pCtx->m_lineNo )
+	ParseStream( input );
+}
+
+void CCompoundTextParser::ParseStream( std::istream& is ) throws_( CRuntimeException )
+{
+	m_sectionMap.clear();
+
+	if ( nullptr == m_pCtx.get() )
+		m_pCtx.reset( new CParsingContext( fs::CPath() ) );
+
+	for ( std::string line; std::getline( is, line ); ++m_pCtx->m_lineNo )
 		ParseLine( str::FromUtf8( line.c_str() ) );
 }
 
 void CCompoundTextParser::ParseLine( const std::tstring& line )
 {
-	TParser::TSepMatchPos sepMatchPos;
-	TParser::TSpecPair specBounds = m_sectionParser.FindItemSpec( &sepMatchPos, line );
-
-//	for ( TParser::TSpecPair specBounds( 0, 0 );
-//		  ( specBounds = m_sectionParser.FindItemSpec( &sepMatchPos, line, specBounds.first ) ).first != utl::npos;		// a known spec?
-//		  specBounds.first = specBounds.second; )
-
-	if ( specBounds.first != utl::npos )			// a known spec?
-	{
-		Range<size_t> itemRange = m_sectionParser.GetItemRange( sepMatchPos, specBounds );
-		std::tstring lineSuffix = line.substr( specBounds.second );
-
-		if ( !InSection() )
+	if ( line.empty() && InSection() )
+		*m_pCtx->m_pSectionContent += m_outLineEnd;			// append the empty line
+	else
+		for ( size_t pos = 0, length = line.length(); pos != length; )
 		{
-			if ( SectionSep == sepMatchPos )		// "[[tag]]"?
-				EnterSection( m_sectionParser.MakeItem( itemRange, line ), lineSuffix );
-		}
-		else
-		{
-			if ( SectionSep == sepMatchPos )		// "[[tag]]"?
+			TParser::TSepMatchPos sepMatchPos;
+			TParser::TSpecPair specBounds = m_sectionParser.FindItemSpec( &sepMatchPos, line, pos );
+
+			if ( specBounds.first != utl::npos )			// a known spec?
 			{
-				if ( str::EqualsSeqAt( line, itemRange.m_start, s_endOfSection ) )	// EOS or new_section tag?
+				Range<size_t> itemRange = m_sectionParser.GetItemRange( sepMatchPos, specBounds );
+
+				if ( !InSection() )
 				{
-					AddTextContent( line.substr( 0, specBounds.first ) );			// append the leading text before the tag
-					m_pCtx->m_pSectionContent = nullptr;							// exit section content parsing mode
+					if ( SectionSep == sepMatchPos )		// "[[tag]]"?
+						EnterSection( m_sectionParser.MakeItem( itemRange, line ) );
 				}
 				else
-					EnterSection( m_sectionParser.MakeItem( itemRange, line ), lineSuffix );
+				{
+					if ( SectionSep == sepMatchPos )		// "[[tag]]"?
+					{
+						AddTextContent( line.substr( pos, specBounds.first - pos ), 0 == pos );		// keep this: append the leading text before the tag
+
+						if ( str::EqualsSeqAt( line, itemRange.m_start, s_endOfSection ) )			// EOS or new_section tag?
+							ExitCurrentSection();
+						else
+							EnterSection( m_sectionParser.MakeItem( itemRange, line ) );			// will throw "previous section not ended"
+					}
+					else
+						ASSERT( LineCommentSep == sepMatchPos );	// just ignore comment
+				}
+				pos = specBounds.second;		// continue parsing past tag suffix
+			}
+			else if ( InSection() )
+			{
+				if ( 0 == pos )
+					AddTextContent( line, true );					// append the entire line
+				else
+					AddTextContent( line.substr( pos ), false );	// append the remaining text
+
+				pos = length;
 			}
 			else
-				ASSERT( LineCommentSep == sepMatchPos );		// just ignore comment
+				break;		// ignore stray line
 		}
-	}
-	else if ( InSection() )
-		AddTextContent( line );		// append the entire line
-	else
-	{	// ignore stray line
-	}
 }
 
-void CCompoundTextParser::EnterSection( const std::tstring& sectionName, const std::tstring& lineSuffix ) throws_( CRuntimeException )
+void CCompoundTextParser::EnterSection( const std::tstring& sectionName ) throws_( CRuntimeException )
 {
+	if ( !m_pCtx->m_sectionName.empty() )						// not a new entry? => section collision
+		throw CRuntimeException( str::Format( _T("Syntax error: previous session '%s' was not ended while starting a new section '%s' in compound text file '%s' at line %d"),
+											  m_pCtx->m_sectionName.c_str(), sectionName.c_str(), m_pCtx->m_filePath.GetPtr(), m_pCtx->m_lineNo ) );
+
+	m_pCtx->m_sectionName = sectionName;
 	m_pCtx->m_pSectionContent = &m_sectionMap[ sectionName ];		// enter section content parsing mode
 
 	if ( !m_pCtx->m_pSectionContent->empty() )						// not a new entry? => section collision
-		throw CRuntimeException( str::Format( _T("Syntax error: duplicate section '%s' found in compound text file '%s'"),
-											  sectionName.c_str(), m_pCtx->m_filePath.GetPtr() ) );
-
-	if ( !lineSuffix.empty() )
-		ParseLine( lineSuffix );		// allow inline text after the "[[section]]" tag
+		throw CRuntimeException( str::Format( _T("Syntax error: duplicate section '%s' found in compound text file '%s' at line %d"),
+											  sectionName.c_str(), m_pCtx->m_filePath.GetPtr(), m_pCtx->m_lineNo ) );
 }
 
-void CCompoundTextParser::AddTextContent( const std::tstring& text )
+void CCompoundTextParser::ExitCurrentSection( void ) throws_( CRuntimeException )
+{
+	if ( m_pCtx->m_sectionName.empty() )		// stray [[EOS]]
+		throw CRuntimeException( str::Format( _T("Syntax error: ending a section that was not entered in compound text file '%s' at line %d"),
+											  m_pCtx->m_filePath.GetPtr(), m_pCtx->m_lineNo ) );
+
+	m_pCtx->m_sectionName.clear();
+	m_pCtx->m_pSectionContent = nullptr;		// exit section content parsing mode
+}
+
+void CCompoundTextParser::AddTextContent( const std::tstring& text, bool newLine )
 {
 	ASSERT( InSection() );
 
-	if ( !m_pCtx->m_pSectionContent->empty() )
-		*m_pCtx->m_pSectionContent += code::lineEnd;
+	if ( newLine && !m_pCtx->m_pSectionContent->empty() )
+		*m_pCtx->m_pSectionContent += m_outLineEnd;
 
 	*m_pCtx->m_pSectionContent += text;
 }
@@ -135,7 +177,7 @@ void CCompoundTextParser::AddTextContent( const std::tstring& text )
 
 // expand embedded sections:
 
-std::tstring CCompoundTextParser::ExpandSectionContent( const std::tstring& sectionName ) throws_( CRuntimeException )
+std::tstring CCompoundTextParser::ExpandSection( const std::tstring& sectionName ) throws_( CRuntimeException )
 {
 	if ( std::tstring* pTextContent = ExpandSectionRefs( sectionName ) )
 	{
@@ -146,9 +188,32 @@ std::tstring CCompoundTextParser::ExpandSectionContent( const std::tstring& sect
 	return str::GetEmpty();
 }
 
+std::tstring* CCompoundTextParser::FindFieldValue( const std::tstring& fieldKey )
+{
+	for ( std::vector< std::pair<std::tstring, std::tstring> >::iterator itField = m_fieldMappings.begin(); itField != m_fieldMappings.end(); ++itField )
+		if ( fieldKey == itField->first )
+			return &itField->second;
+
+	return NULL;
+}
+
+std::tstring& CCompoundTextParser::LookupFieldValue( const std::tstring& fieldKey )
+{
+	std::tstring* pFieldValue = FindFieldValue( fieldKey );
+
+	if ( nullptr == pFieldValue )
+	{
+		m_fieldMappings.push_back( std::make_pair( fieldKey, str::GetEmpty() ) );
+		pFieldValue = &m_fieldMappings.back().second;
+	}
+
+	return *pFieldValue;
+}
+
 size_t CCompoundTextParser::ExpandFieldMappings( std::tstring* pSectionContent _out_ )
 {
 	ASSERT_PTR( pSectionContent );
+	UpdateFilePathFields();
 
 	size_t count = 0;
 
@@ -156,6 +221,29 @@ size_t CCompoundTextParser::ExpandFieldMappings( std::tstring* pSectionContent _
 		count += str::Replace( *pSectionContent, itField->first.c_str(), itField->second.c_str() );
 
 	return count;
+}
+
+void CCompoundTextParser::UpdateFilePathFields( void )
+{
+	// store document path dependent fields
+	fs::CPath pchFilePath( _T("stdafx.h") );
+
+	if ( std::tstring* pFilePath = FindFieldValue( _T("%FilePath%") ) )		// was the field set by the VBA macro?
+	{
+		fs::CPath filePath( *pFilePath );
+		std::tstring typeName = code::ExtractFilenameIdentifier( filePath );
+
+		LookupFieldValue( _T("%FileName%") ) = filePath.GetFname();
+		LookupFieldValue( _T("%TypeName%") ) = app::GetModuleSession().m_classPrefix + typeName;
+
+		std::vector<fs::TDirPath> searchPaths;
+		searchPaths.push_back( filePath.GetParentPath() );				// same directory
+		searchPaths.push_back( searchPaths.back().GetParentPath() );		// parent directory (for test/TestCase.h)
+
+		fs::LocateExistingFile( &pchFilePath, searchPaths, _T("pch.h|stdafx.h") );
+	}
+
+	LookupFieldValue( _T("%PCH%") ) = pchFilePath.GetFname();
 }
 
 std::tstring* CCompoundTextParser::ExpandSectionRefs( const std::tstring& sectionName ) throws_( CRuntimeException )
@@ -321,7 +409,7 @@ bool CSectionParser::ParseLine( const std::tstring& line, const std::tstring& se
 void CSectionParser::AddTextContent( const std::tstring& text )
 {
 	if ( !m_textContent.empty() )
-		m_textContent += code::lineEnd;
+		m_textContent += code::g_pLineEnd;
 
 	m_textContent += text;
 }
