@@ -301,7 +301,8 @@ namespace fs
 namespace func
 {
 	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
-	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }					// for uniform path algorithms
+
+	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }
 }
 
 

@@ -182,6 +182,7 @@
     <ClInclude Include="CacheLoader.h" />
     <ClInclude Include="CacheLoader.hxx" />
     <ClInclude Include="CodeAlgorithms.h" />
+    <ClInclude Include="CppVer.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandModel.h" />
@@ -195,6 +196,7 @@
     <ClInclude Include="CRC32.h" />
     <ClInclude Include="DuplicateFileItem.h" />
     <ClInclude Include="DuplicateFilesEnumerator.h" />
+    <ClInclude Include="Language.hxx" />
     <ClInclude Include="RegAutomationSvr.h" />
     <ClInclude Include="StringParsing.h" />
     <ClInclude Include="EncodedFileBuffer.h" />

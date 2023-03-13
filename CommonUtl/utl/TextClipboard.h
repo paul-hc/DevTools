@@ -47,7 +47,9 @@ public:
 	static bool IsFormatAvailable( UINT clipFormat ) { return ::IsClipboardFormatAvailable( clipFormat ) != FALSE; }
 	static bool CanPasteText( void );
 
-	static bool CopyText( const std::tstring& text, HWND hWnd, bool clear = true );
+	static bool CopyText( const std::string& utf8Text, HWND hWnd, bool clear = true ) { return DoCopyText( utf8Text, str::ToWide( utf8Text.c_str() ), hWnd, clear ); }
+	static bool CopyText( const std::wstring& wideText, HWND hWnd, bool clear = true ) { return DoCopyText( str::ToUtf8( wideText.c_str() ), wideText, hWnd, clear ); }
+
 	static bool PasteText( std::tstring& rText, HWND hWnd );
 
 	template< typename ContainerT >
@@ -69,7 +71,8 @@ public:
 	private:
 		HWND m_hWnd;
 	};
-
+private:
+	static bool DoCopyText( const std::string& utf8Text, const std::wstring& wideText, HWND hWnd, bool clear );
 private:
 	HWND m_hWnd;
 public:

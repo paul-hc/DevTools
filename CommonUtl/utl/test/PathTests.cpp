@@ -654,9 +654,12 @@ namespace ut
 	};
 }
 
+
 namespace func
 {
-	inline const fs::CPath& PathOf( const std::pair<const ut::CPathItem*, std::string>& mapItem ) { return mapItem.first->m_path; }
+#ifndef IS_CPP_11
+	const fs::CPath& PathOf( const std::pair<const ut::CPathItem*, std::string>& mapItem ) { return mapItem.first->m_path; }
+#endif
 }
 
 void CPathTests::TestHasMultipleDirPaths( void )
@@ -675,7 +678,7 @@ void CPathTests::TestHasMultipleDirPaths( void )
 		ASSERT( path::HasMultipleDirPaths( paths ) );
 	}
 
-#ifndef _HAS_CXX17
+#ifndef IS_CPP_11
 	{
 		#pragma warning( disable: 4709 )	// comma operator within array index expression
 
@@ -690,7 +693,7 @@ void CPathTests::TestHasMultipleDirPaths( void )
 
 		utl::ClearOwningMapKeys( pathMap );
 	}
-#endif //_HAS_CXX17
+#endif
 }
 
 void CPathTests::TestCommonSubpath( void )

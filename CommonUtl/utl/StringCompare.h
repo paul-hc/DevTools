@@ -27,16 +27,33 @@ namespace pred
 		bool operator()( CharT chr ) const { return std::isspace( chr, m_loc ); }
 	};
 
+	struct IsBlank : public BaseIsCharPred_Loc
+	{
+	#ifdef IS_CPP_11
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::isblank( chr, m_loc ); }
+	#else
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return ' ' == chr || '\t' == chr; }
+	#endif
+	};
+
 	struct IsPunct : public BaseIsCharPred_Loc
 	{
 		template< typename CharT >
 		bool operator()( CharT chr ) const { return std::ispunct( chr, m_loc ); }
 	};
 
-	struct IsControl : public BaseIsCharPred_Loc		// \t, \n, \r, etc
+	struct IsControl : public BaseIsCharPred_Loc	// \t, \n, \r, etc
 	{
 		template< typename CharT >
 		bool operator()( CharT chr ) const { return std::iscntrl( chr, m_loc ); }
+	};
+
+	struct IsPrint : public BaseIsCharPred_Loc		// [0x20 - 0x7E]
+	{
+		template< typename CharT >
+		bool operator()( CharT chr ) const { return std::isprint( chr, m_loc ); }
 	};
 
 
@@ -115,22 +132,17 @@ namespace pred
 	};
 
 
-	template< typename CharT >
+	template< typename CharSetT >
 	struct IsCharAnyOf : public BaseIsCharPred_Loc
 	{
-		IsCharAnyOf( const CharT charSet[] ) : m_charSet( charSet ) {}
+		IsCharAnyOf( const CharSetT* pCharSet ) : m_pCharSet( pCharSet ) { ASSERT_PTR( m_pCharSet ); }
 
-		bool operator()( CharT chr ) const { return str::IsAnyOf( chr, m_charSet ); }
-	private:
-		const CharT m_charSet[];
-	};
-
-
-	struct IsSpaceTab : public BaseIsCharPred_Loc
-	{
 		template< typename CharT >
-		bool operator()( CharT chr ) const { return ' ' == chr || '\t' == chr; }
+		bool operator()( CharT chr ) const { return str::IsAnyOf( static_cast<CharSetT>( chr ), m_pCharSet ); }
+	private:
+		const CharSetT* m_pCharSet;
 	};
+
 
 	struct IsLineEnd : public BaseIsCharPred_Loc
 	{
@@ -308,7 +320,7 @@ namespace str
 	}
 
 	template< typename CharT >
-	inline bool HasPrefixI( const CharT* pText, const CharT prefix[], size_t prefixLen = std::string::npos )		// empty prefix is always a match
+	inline bool HasPrefixI( const CharT* pText, const CharT prefix[], size_t prefixLen = std::string::npos )	// empty prefix is always a match
 	{
 		return EqualsIN( pText, prefix, prefixLen != std::string::npos ? prefixLen : GetLength( prefix ) );
 	}

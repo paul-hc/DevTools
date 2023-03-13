@@ -11,7 +11,7 @@
 namespace str
 {
 	const std::locale& GetUserLocale( void );
-	const std::locale& GetUtf8CvtLocale( void );
+	//const std::locale& GetUtf8CvtLocale( void );
 
 
 	std::string ToAnsi( const wchar_t* pWide, size_t charCount = std::wstring::npos );
@@ -23,6 +23,13 @@ namespace str
 
 	std::string AsNarrow( const std::tstring& text );
 	std::wstring AsWide( const std::tstring& text );
+
+	// formatting conversions
+	inline std::string ToNarrow( const char* pNarrow ) { ASSERT( pNarrow ); return std::string( pNarrow ); }
+	inline std::string ToNarrow( const wchar_t* pWide ) { return ToUtf8( pWide ); }
+
+	inline std::wstring ToWide( const char* pNarrow ) { return FromUtf8( pNarrow ); }
+	inline std::wstring ToWide( const wchar_t* pWide ) { ASSERT( pWide ); return std::wstring( pWide ); }
 
 
 	const std::tstring& GetEmpty( void );
@@ -139,7 +146,7 @@ namespace str
 	template< typename CharT >
 	inline size_t& SettleLength( size_t& rCount _out_, const CharT* pText )
 	{
-		if ( std::basic_string<CharT>::npos == rCount )
+		if ( std::string::npos == rCount )
 			rCount = str::GetLength( pText );
 		else
 			REQUIRE( rCount <= str::GetLength( pText ) );
@@ -209,6 +216,21 @@ namespace str
 		oss << value;
 		return oss.str();
 	}
+
+
+	template< typename StringT, typename SeqCharT >
+	inline void AppendSeqPtr( StringT* pText _in_out_, const SeqCharT* pSequence )
+	{
+		ASSERT_PTR( pText );
+		pText->insert( pText->end(), pSequence, str::end( pSequence ) );
+	}
+
+	template< typename StringT, typename SeqStringT >
+	inline void AppendSeq( StringT* pText _in_out_, const SeqStringT& sequence )
+	{
+		ASSERT_PTR( pText );
+		pText->insert( pText->end(), sequence.begin(), sequence.end() );
+	}
 }
 
 
@@ -241,7 +263,7 @@ namespace str
 	};
 
 	template< typename CharT >
-	inline CSequence<CharT> MakeSequence( const CharT* pSeq, size_t length = std::basic_string<CharT>::npos )
+	inline CSequence<CharT> MakeSequence( const CharT* pSeq, size_t length = std::string::npos )
 	{
 		return CSequence<CharT>( pSeq, length );
 	}
@@ -496,7 +518,7 @@ namespace str
 	bool ParseNameValuePair( std::pair< CSequence<CharT>, CSequence<CharT> >& rSeqPair _out_, const std::basic_string<CharT>& spec, CharT sep = '=' )
 	{
 		size_t sepPos = spec.find( sep );
-		if ( std::basic_string<CharT>::npos == sepPos )
+		if ( std::string::npos == sepPos )
 			return false;
 
 		rSeqPair.first = MakeSequence( spec.c_str(), sepPos );
@@ -512,14 +534,15 @@ namespace str
 
 
 	template< typename CharT >
-	std::basic_string<CharT>& Trim( std::basic_string<CharT>& rText _in_out_, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	std::basic_string<CharT>& TrimLeft( std::basic_string<CharT>& rText _in_out_, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
-		size_t startPos = rText.find_first_not_of( pWhiteSpace ), endPos = rText.find_last_not_of( pWhiteSpace );
+		size_t startPos = rText.find_first_not_of( pWhiteSpace );
 
-		if ( std::basic_string<CharT>::npos == startPos || std::basic_string<CharT>::npos == endPos || startPos > endPos )
-			rText.clear();
+		if ( startPos != std::string::npos )
+			rText.erase( 0, startPos );
 		else
-			rText = rText.substr( startPos, endPos - startPos + 1 );
+			rText.clear();
+
 		return rText;
 	}
 
@@ -527,22 +550,20 @@ namespace str
 	std::basic_string<CharT>& TrimRight( std::basic_string<CharT>& rText _in_out_, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		size_t endPos = rText.find_last_not_of( pWhiteSpace );
-		if ( std::basic_string<CharT>::npos == endPos )
-			rText.clear();
+
+		if ( endPos != std::string::npos )
+			rText.erase( endPos + 1 );
 		else
-			rText = rText.substr( 0, endPos + 1 );
+			rText.clear();
+
 		return rText;
 	}
 
 	template< typename CharT >
-	std::basic_string<CharT>& TrimLeft( std::basic_string<CharT>& rText _in_out_, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	inline std::basic_string<CharT>& Trim( std::basic_string<CharT>& rText _in_out_, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
-		size_t startPos = rText.find_first_not_of( pWhiteSpace );
-		if ( std::basic_string<CharT>::npos == startPos )
-			rText.clear();
-		else
-			rText = rText.substr( startPos );
-		return rText;
+		TrimLeft( rText, pWhiteSpace );
+		return TrimRight( rText, pWhiteSpace );
 	}
 
 
@@ -556,17 +577,17 @@ namespace str
 	}
 
 	template< typename CharT >
-	std::basic_string<CharT> GetTrimRight( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
-	{
-		std::basic_string<CharT> trimmed = rText;
-		return TrimRight( trimmed, pWhiteSpace );
-	}
-
-	template< typename CharT >
 	std::basic_string<CharT> GetTrimLeft( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		std::basic_string<CharT> trimmed = rText;
 		return TrimLeft( trimmed, pWhiteSpace );
+	}
+
+	template< typename CharT >
+	std::basic_string<CharT> GetTrimRight( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	{
+		std::basic_string<CharT> trimmed = rText;
+		return TrimRight( trimmed, pWhiteSpace );
 	}
 
 
@@ -590,7 +611,7 @@ namespace str
 			const size_t searchLen = str::GetLength( pSearch ), replaceLen = str::GetLength( pReplace );
 
 			for ( size_t pos = 0;
-				  count != maxCount && ( pos = rText.find( pSearch, pos ) ) != std::basic_string<CharT>::npos;
+				  count != maxCount && ( pos = rText.find( pSearch, pos ) ) != std::string::npos;
 				  ++count, pos += replaceLen )
 				rText.replace( pos, searchLen, pReplace );
 		}
@@ -610,7 +631,7 @@ namespace str
 			const size_t replaceLen = str::GetLength( pReplace );
 
 			for ( size_t pos = 0;
-				  count != maxCount && ( pos = rText.find_first_of( pDelims, pos ) ) != std::basic_string<CharT>::npos;
+				  count != maxCount && ( pos = rText.find_first_of( pDelims, pos ) ) != std::string::npos;
 				  ++count, pos += replaceLen )
 				rText.replace( pos, 1, pReplace );
 		}
@@ -793,6 +814,55 @@ namespace str
 		return pAnsi;
 	#endif
 	}
+}
+
+
+namespace num
+{
+	template< typename SignedIntT >
+	inline SignedIntT StringToInteger( const char* pSrc, char** ppNumEnd, int radix )
+	{
+	#ifdef IS_CPP_11
+		return static_cast<SignedIntT>( ::strtoll( pSrc, ppNumEnd, radix ) );
+	#else
+		return static_cast<SignedIntT>( ::_strtoi64( pSrc, ppNumEnd, radix ) );
+	#endif
+	}
+
+	template< typename SignedIntT >
+	inline SignedIntT StringToInteger( const wchar_t* pSrc, wchar_t** ppNumEnd, int radix )
+	{
+	#ifdef IS_CPP_11
+		return static_cast<SignedIntT>( ::wcstoll( pSrc, ppNumEnd, radix ) );
+	#else
+		return static_cast<SignedIntT>( ::_wcstoi64( pSrc, ppNumEnd, radix ) );
+	#endif
+	}
+
+
+	template< typename UnsignedIntT >
+	inline UnsignedIntT StringToUnsignedInteger( const char* pSrc, char** ppNumEnd, int radix )
+	{
+	#ifdef IS_CPP_11
+		return static_cast<UnsignedIntT>( ::strtoull( pSrc, ppNumEnd, radix ) );
+	#else
+		return static_cast<UnsignedIntT>( ::_strtoui64( pSrc, ppNumEnd, radix ) );
+	#endif
+	}
+
+	template< typename UnsignedIntT >
+	inline UnsignedIntT StringToUnsignedInteger( const wchar_t* pSrc, wchar_t** ppNumEnd, int radix )
+	{
+	#ifdef IS_CPP_11
+		return static_cast<UnsignedIntT>( ::wcstoull( pSrc, ppNumEnd, radix ) );
+	#else
+		return static_cast<UnsignedIntT>( ::_wcstoui64( pSrc, ppNumEnd, radix ) );
+	#endif
+	}
+
+
+	inline double StringToDouble( const char* pSrc, char** ppNumEnd ) { return ::strtod( pSrc, ppNumEnd ); }
+	inline double StringToDouble( const wchar_t* pSrc, wchar_t** ppNumEnd ) { return ::wcstod( pSrc, ppNumEnd ); }
 }
 
 

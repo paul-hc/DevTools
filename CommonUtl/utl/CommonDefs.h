@@ -2,6 +2,8 @@
 #define CommonDefs_h
 #pragma once
 
+#include "CppVer.h"
+
 
 #pragma warning( disable: 4355 )	// 'this' : used in base member initializer list
 
@@ -17,9 +19,29 @@
 #define __WARN__ __FILE_LINE__ "warning C9999:\n  * "
 
 
-#ifndef _HAS_CXX17
+#ifndef IS_CPP_11
 	#define nullptr NULL
-#endif //_HAS_CXX17
+	#define final			// don't override a method/don't subclass a class
+#endif
+
+
+#define abstract			// class not instantiable
+#define override			// method suffix to indicate a base override - note: replaces the CLR override keyword
+#define persist				// persistent data-member
+#define throws_( ... )
+
+#define _out_				// output function parameter
+#define _in_out_			// input and output function parameter
+
+
+#define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
+
+// iterator-like access for STL algorithms
+#define END_OF( array ) ( array + COUNT_OF( array ) )
+
+// pass the pair of "array, arrayCount" in functions
+#define ARRAY_PAIR( array ) (array), COUNT_OF( (array) )
+#define ARRAY_PAIR_V( vect ) &(vect).front(), static_cast<unsigned int>( (vect).size() )
 
 
 // debug support
@@ -44,11 +66,11 @@
 
 
 #ifdef ASSERT
-	#undef ASSERT
+#undef ASSERT
 #endif
 
 #ifdef ENSURE
-	#undef ENSURE
+#undef ENSURE
 #endif
 
 #define ASSERT _ASSERTE
@@ -62,25 +84,6 @@
 #define DEBUG_BREAK ASSERT( false )
 #define DEBUG_BREAK_IF( cond ) ASSERT( !cond )
 
-
-#define abstract			// class not instantiable
-#define override			// method suffix to indicate a base override - note: replaces the CLR override keyword
-#define final				// don't override a method/don't subclass a class
-#define persist				// persistent data-member
-#define throws_( ... )
-
-#define _out_				// output function parameter
-#define _in_out_			// input and output function parameter
-
-
-#define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
-
-// iterator-like access for STL algorithms
-#define END_OF( array ) ( array + COUNT_OF( array ) )
-
-// pass the pair of "array, arrayCount" in functions
-#define ARRAY_PAIR( array ) (array), COUNT_OF( (array) )
-#define ARRAY_PAIR_V( vect ) &(vect).front(), static_cast<unsigned int>( (vect).size() )
 
 #include <unknwn.h>
 

@@ -442,6 +442,12 @@
     <ClInclude Include="CodeAlgorithms.h">
       <Filter>utl\code</Filter>
     </ClInclude>
+    <ClInclude Include="CppVer.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Language.hxx">
+      <Filter>utl\code</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

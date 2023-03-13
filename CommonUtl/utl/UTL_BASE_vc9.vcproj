@@ -413,6 +413,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CppVer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\EnumTags.cpp"
 				>
 			</File>
@@ -1041,6 +1045,10 @@
 				</File>
 				<File
 					RelativePath=".\Language.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Language.hxx"
 					>
 				</File>
 			</Filter>

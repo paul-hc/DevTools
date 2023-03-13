@@ -98,10 +98,8 @@ bool CTextClipboard::ReadString( std::tstring& rOutText ) const
 	return false;
 }
 
-bool CTextClipboard::CopyText( const std::tstring& text, HWND hWnd, bool clear /*= true*/ )
+bool CTextClipboard::DoCopyText( const std::string& utf8Text, const std::wstring& wideText, HWND hWnd, bool clear )
 {
-	std::string utf8Text = str::ToUtf8( text.c_str() );
-
 	std::auto_ptr<CTextClipboard> pClipboard( Open( hWnd ) );
 	if ( nullptr == pClipboard.get() )
 		return false;
@@ -111,7 +109,7 @@ bool CTextClipboard::CopyText( const std::tstring& text, HWND hWnd, bool clear /
 
 	return
 		pClipboard->WriteString( utf8Text.c_str() ) &&		// UTF8 (UNICODE)
-		pClipboard->WriteString( text );					// WIDE (UNICODE)
+		pClipboard->WriteString( wideText );				// WIDE (UNICODE)
 }
 
 bool CTextClipboard::CanPasteText( void )
