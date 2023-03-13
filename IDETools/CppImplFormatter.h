@@ -8,6 +8,9 @@
 #include "utl/RuntimeException.h"
 
 
+class CMethodPrototypeTests;
+
+
 namespace code
 {
 	struct CTypeDescriptor;
@@ -15,6 +18,7 @@ namespace code
 
 	class CCppImplFormatter : public CFormatter
 	{
+		friend class CMethodPrototypeTests;
 	public:
 		CCppImplFormatter( const CFormatterOptions& options );
 		~CCppImplFormatter();
@@ -27,11 +31,9 @@ namespace code
 		CString tokenizeText( const TCHAR* pCodeText );
 
 		static bool isCppTypeQualifier( std::tstring typeQualifier );
-	protected:
+	private:
 		bool LoadCodeTemplates( void );
 		std::tstring MakeCommentDecoration( const std::tstring& decorationCore ) const;
-
-		void ResolveDefaultParameters( std::tstring* pProto ) const;
 
 		std::tstring ImplementMethod( const std::tstring& methodProto, const CTypeDescriptor& tdInfo );
 		std::tstring InputDocTypeDescriptor( const fs::CPath& docPath ) const;

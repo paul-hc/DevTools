@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "CppParser.h"
 #include "utl/Algorithms.h"
+#include "utl/RuntimeException.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -10,8 +11,21 @@
 
 // CCppParser implementation
 
+const str::CSequenceSet<char> CCppParser::s_exprOps(
+	":: . -> & *"							// scope, member access, address, dereference
+	" += -= *= /= %= >>= <<= &= ^= |="		// compound assignment
+	" == != >= <= > <"						// comparison
+	" ++ -- + - / %"						// in/de-crement, arithmetic
+	" ! && ||"								// logical
+	" | ^ ~ << >>"							// bitwise operators
+	" ? :"									// conditional ternary
+	//" sizeof"								// redundant, captured by pred::IsIdenifier()
+	, " " );
+
+const str::CSequenceSet<char> CCppParser::s_breakWords( "_in_|_out_|_in_out_" );
+
 CCppParser::CCppParser( void )
-	: m_lang( code::GetCppLang<TCHAR>() )
+	: m_lang( code::GetLangCpp<TCHAR>() )
 {
 }
 
@@ -154,11 +168,11 @@ bool CCppCodeParser::SkipAnyNotOf( TPos* pPos _in_out_, const TCHAR charSet[] )
 
 // CCppMethodParser implementation
 
-const std::tstring CCppMethodParser::s_template = _T("template");
-const std::tstring CCppMethodParser::s_inline = _T("inline");
-const std::tstring CCppMethodParser::s_operator = _T("operator");
+const std::string CCppMethodParser::s_template = "template";
+const std::string CCppMethodParser::s_inline = "inline";
+const std::string CCppMethodParser::s_operator = "operator";
+const std::string CCppMethodParser::s_callOp = "()";
 const std::tstring CCppMethodParser::s_scopeOp = _T("::");
-const std::tstring CCppMethodParser::s_callOp = _T("()");
 
 CCppMethodParser::CCppMethodParser( void )
 	: CCppParser()

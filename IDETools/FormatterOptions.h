@@ -14,7 +14,7 @@ namespace code
 		struct CBraceRule;
 		struct COperatorRule;
 
-		CFormatterOptions( void );
+		CFormatterOptions( bool testMode = false );		// by default production mode
 		~CFormatterOptions();
 
 		void LoadFromRegistry( void );
@@ -53,7 +53,7 @@ namespace code
 			TCHAR m_braceOpen;
 			TCHAR m_braceClose;
 			TokenSpacing m_spacing;
-			bool m_isArgList;
+			bool m_isArgList;			// i.e. splitable
 		private:
 			std::tstring m_regEntry;
 		};
@@ -79,6 +79,8 @@ namespace code
 		const std::vector<COperatorRule>& GetOperatorRules( void ) const { return m_operatorRules; }
 		void SetOperatorRules( const std::vector<COperatorRule>& operatorRules ) { m_operatorRules = operatorRules; }
 	public:
+		const bool m_testMode;
+
 		std::vector<std::tstring> m_breakSeparators;
 		bool m_preserveMultipleWhiteSpace;
 		bool m_deleteTrailingWhiteSpace;

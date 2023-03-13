@@ -6,11 +6,14 @@
 #include "EnumTags.h"
 #include "Path.h"
 #include "Algorithms.h"
+#include "Language.h"
 #include <iomanip>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "Language.hxx"
 
 
 namespace str
@@ -432,27 +435,31 @@ namespace num
 
 namespace code
 {
-	std::tstring FormatEscapeSeq( const std::tstring& text, bool uiSeq /*= false*/ )
+	std::tstring FormatEscapeSeq( const std::tstring& actualCode, bool uiSeq /*= false*/ )
 	{
+	#if 1
+		return code::GetEscaperC().Encode( actualCode, false, uiSeq ? "\'\"\?" : nullptr );
+	#else
+		// legacy implementation
 		std::tostringstream display;
 
-		for ( const TCHAR* pSource = text.c_str(); *pSource != _T('\0'); ++pSource )
+		for ( const TCHAR* pSource = actualCode.c_str(); *pSource != '\0'; ++pSource )
 			switch ( *pSource )
 			{
-				case _T('\r'): display << _T('\\'); display << _T('r'); break;
-				case _T('\n'): display << _T('\\'); display << _T('n'); break;
-				case _T('\t'): display << _T('\\'); display << _T('t'); break;
-				case _T('\v'): display << _T('\\'); display << _T('v'); break;
-				case _T('\a'): display << _T('\\'); display << _T('a'); break;
-				case _T('\b'): display << _T('\\'); display << _T('b'); break;
-				case _T('\f'): display << _T('\\'); display << _T('f'); break;
-				case _T('\\'): display << _T('\\'); display << _T('\\'); break;
+				case _T('\r'): display << _T('\\') << _T('r'); break;
+				case _T('\n'): display << _T('\\') << _T('n'); break;
+				case _T('\t'): display << _T('\\') << _T('t'); break;
+				case _T('\v'): display << _T('\\') << _T('v'); break;
+				case _T('\a'): display << _T('\\') << _T('a'); break;
+				case _T('\b'): display << _T('\\') << _T('b'); break;
+				case _T('\f'): display << _T('\\') << _T('f'); break;
+				case _T('\\'): display << _T('\\') << _T('\\'); break;
 				default:
 					if ( !uiSeq )
 						switch ( *pSource )
 						{
-							case _T('\''): display << _T('\\'); display << _T('\''); continue;
-							case _T('\"'): display << _T('\\'); display << _T('\"'); continue;
+							case _T('\''): display << _T('\\') << _T('\''); continue;
+							case _T('\"'): display << _T('\\') << _T('\"'); continue;
 						}
 
 					display << *pSource;
@@ -460,39 +467,48 @@ namespace code
 			}
 
 		return display.str();
+	#endif
 	}
 
-	std::tstring ParseEscapeSeqs( const std::tstring& displayText, bool uiSeq /*= false*/ )
+	std::tstring ParseEscapeSeqs( const std::tstring& literalText, bool uiSeq /*= false*/ )
 	{
-		std::tostringstream text;
+	#if 1
+		uiSeq;
+		return code::GetEscaperC().Decode( literalText );
+	#else
+		// legacy implementation
+		std::tstring text;
+		text.reserve( literalText.length() );
 
-		for ( const TCHAR* pSource = displayText.c_str(); *pSource != _T('\0'); ++pSource )
+		for ( const TCHAR* pSource = literalText.c_str(); *pSource != _T('\0'); ++pSource )
 			if ( *pSource == _T('\\') )
 				switch ( *++pSource )
 				{
-					case _T('r'):  text << _T('\r'); break;
-					case _T('n'):  text << _T('\n'); break;
-					case _T('t'):  text << _T('\t'); break;
-					case _T('v'):  text << _T('\v'); break;
-					case _T('a'):  text << _T('\a'); break;
-					case _T('b'):  text << _T('\b'); break;
-					case _T('f'):  text << _T('\f'); break;
-					case _T('\\'): text << _T('\\'); break;
+					case _T('r'):  text += _T('\r'); break;
+					case _T('n'):  text += _T('\n'); break;
+					case _T('t'):  text += _T('\t'); break;
+					case _T('v'):  text += _T('\v'); break;
+					case _T('a'):  text += _T('\a'); break;
+					case _T('b'):  text += _T('\b'); break;
+					case _T('f'):  text += _T('\f'); break;
+					case _T('\\'): text += _T('\\'); break;
 					default:
 						if ( !uiSeq )
 							switch ( *pSource )
 							{
-								case _T('\"'): text << _T('\"'); continue;
-								case _T('\''): text << _T('\''); continue;
+								case _T('\"'): text += _T('\"'); continue;
+								case _T('\''): text += _T('\''); continue;
 							}
 
 						// bad escape -> consider it an '\'
-						text << _T('\\') << *pSource;
+						text += _T('\\');
+						text += *pSource;
 				}
 			else
-				text << *pSource;
+				text += *pSource;
 
-		return text.str();
+		return text;
+	#endif
 	}
 
 } //namespace code

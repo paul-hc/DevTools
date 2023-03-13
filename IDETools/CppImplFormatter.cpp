@@ -4,7 +4,6 @@
 #include "CppImplFormatter.h"
 #include "IterationSlices.h"
 	#include "CodeUtilities.h"
-	#include "LanguageSearchEngine.h"
 	#include "BraceParityStatus.h"
 #include "FormatterOptions.h"
 #include "MethodPrototype.h"
@@ -48,6 +47,14 @@ namespace code
 		: CFormatter( options )
 	{
 		setDocLanguage( DocLang_Cpp );
+
+		m_voidFunctionBody = _T("\
+{\r\n\
+}\r\n");
+		m_returnFunctionBody = _T("\
+{\r\n\
+\treturn ?;\r\n\
+}\r\n");
 	}
 
 	CCppImplFormatter::~CCppImplFormatter()
@@ -63,7 +70,8 @@ namespace code
 	std::tstring CCppImplFormatter::ImplementMethodBlock( const TCHAR* pMethodPrototypes, const TCHAR* pTypeDescriptor, bool isInline ) throws_( CRuntimeException )
 	{
 		resetInternalState();
-		LoadCodeTemplates();
+		if ( !m_options.m_testMode )
+			LoadCodeTemplates();
 
 		CTypeDescriptor tdInfo( this, isInline );
 
@@ -103,12 +111,13 @@ namespace code
 		std::tstring implementedMethods;
 
 		for ( std::vector<std::tstring>::const_iterator itProto = prototypes.begin(); itProto != prototypes.end(); ++itProto )
-		{
-			std::tstring implementation = ImplementMethod( *itProto, tdInfo );
+			if ( !itProto->empty() )
+			{
+				std::tstring implementation = ImplementMethod( *itProto, tdInfo );
 
-			if ( !implementation.empty() )
-				implementedMethods += implementation;
-		}
+				if ( !implementation.empty() )
+					implementedMethods += implementation;
+			}
 
 		tdInfo.IndentCode( &implementedMethods );
 		return implementedMethods;
@@ -116,16 +125,6 @@ namespace code
 
 	bool CCppImplFormatter::LoadCodeTemplates( void )
 	{
-		m_voidFunctionBody = _T("\
-{\r\n\
-}\r\n");
-		m_returnFunctionBody = _T("\
-{\r\n\
-\treturn ?;\r\n\
-}\r\n");
-
-		m_commentDecorationTemplate.clear();
-
 		TextContent codeTemplateFile;
 		std::tstring codeTemplateFilePath = app::GetModuleSession().m_codeTemplatePath.Get();
 
@@ -206,7 +205,8 @@ namespace code
 		if ( srcPrototype.empty() )
 			return srcPrototype;
 
-		ResolveDefaultParameters( &srcPrototype );
+		const CCppParser cppParser;
+		srcPrototype = cppParser.MakeRemoveDefaultParams( srcPrototype, m_options.m_commentOutDefaultParams );
 
 		CMethodPrototype method;
 
@@ -217,11 +217,11 @@ namespace code
 
 		if ( !method.m_returnType.IsEmpty() )
 		{
-			std::tstring theReturnType = method.m_returnType.MakeToken( srcPrototype );
+			std::tstring srcReturnType = method.m_returnType.MakeToken( srcPrototype );
 
-			hasNoReturnType = ( theReturnType == _T("void") );
+			hasNoReturnType = ( srcReturnType.empty() || srcReturnType == _T("void") );
 
-			returnType += theReturnType;
+			returnType += srcReturnType;
 
 			returnType += m_options.m_returnTypeOnSeparateLine ? code::g_pLineEnd : _T(" ");
 		}
@@ -235,7 +235,9 @@ namespace code
 
 		implMethod += TokenRange( method.m_qualifiedMethod.m_start, method.m_postArgListSuffix.m_end ).MakeToken( srcPrototype );
 		implMethod += code::g_pLineEnd;
-		implMethod = splitArgumentList( implMethod.c_str() );
+
+		if ( !m_options.m_testMode )		// factor-out splitting in test mode
+			implMethod = splitArgumentList( implMethod.c_str() );
 
 		if ( m_options.m_returnTypeOnSeparateLine && !returnType.empty() )
 			implMethod = returnType + implMethod;
@@ -258,83 +260,6 @@ namespace code
 			implMethod += code::g_pLineEnd;
 
 		return implMethod;
-	}
-
-	void CCppImplFormatter::ResolveDefaultParameters( std::tstring* pProto ) const
-	{
-		ASSERT_PTR( pProto );
-	#pragma message( __WARN__ "TODO: simplify this mess, pretty please!" )
-
-		const TCHAR* pProtoText = pProto->c_str();
-		int length = static_cast<int>( pProto->length() );
-		TCHAR openBrace = '\0';
-		bool inArgList = false;
-
-		for ( TokenRange breakToken( 0 ), prevBreakToken( -1 ); breakToken.m_end != length; )
-		{
-			LineBreakTokenMatch match = findLineBreakToken( &breakToken, pProtoText, breakToken.m_end );
-
-			switch ( match )
-			{
-				case LBT_OpenBrace:
-					if ( !inArgList )
-					{
-						openBrace = pProtoText[ breakToken.m_start ];
-						if ( pProtoText[ breakToken.m_end ] != code::getMatchingBrace( openBrace ) )
-						{
-							inArgList = true;				// non-empty argument list -> enter arg-list mode
-							prevBreakToken = breakToken;
-						}
-					}
-					else
-					{
-						int nestedBraceEnd = BraceParityStatus().findMatchingBracePos( pProtoText, breakToken.m_start, DocLang_Cpp );
-
-						if ( nestedBraceEnd != -1 )
-							breakToken.m_end = nestedBraceEnd + 1;
-						else
-							return;
-					}
-					break;
-				case LBT_CloseBrace:
-				case LBT_BreakSeparator:
-					if ( inArgList )
-					{
-						int defaultParamPos = m_languageEngine.findString( pProtoText, _T("="), prevBreakToken.m_end != -1 ? prevBreakToken.m_end : 0 ).m_start;
-
-						if ( defaultParamPos > prevBreakToken.m_end && defaultParamPos < breakToken.m_start )
-						{
-							if ( LBT_CloseBrace == match )
-								--breakToken.m_start;		// skip the leading space from " )"
-
-							TokenRange defaultParamRange( defaultParamPos, breakToken.m_start );
-							std::tstring newDefaultParam;
-							pred::IsSpace isSpacePred;
-
-							if ( m_options.m_commentOutDefaultParams )
-								newDefaultParam = str::Format( _T("/*%s*/"), defaultParamRange.MakeToken( *pProto ).c_str() );
-							else
-								while ( defaultParamRange.m_start > 0 && isSpacePred( pProtoText[ defaultParamRange.m_start - 1 ] ) )
-									--defaultParamRange.m_start;
-
-							defaultParamRange.ReplaceWithToken( pProto, newDefaultParam );
-
-							if ( LBT_CloseBrace == match )
-								++defaultParamRange.m_end; // skip the space
-
-							breakToken.assign( defaultParamRange.m_end, defaultParamRange.m_end + 1 );
-						}
-
-						if ( match == LBT_CloseBrace )
-							inArgList = false;			// exit current arg-list mode
-
-						prevBreakToken = breakToken;
-					}
-					break;
-				case LBT_NoMatch:
-					return;
-			}
-		}
 	}
 
 	std::tstring CCppImplFormatter::InputDocTypeDescriptor( const fs::CPath& docPath ) const

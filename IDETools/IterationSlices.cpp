@@ -131,7 +131,7 @@ namespace code
 
 		std::tstring containerName = m_containerName.MakeToken( m_codeText );
 		std::tstring::const_reverse_iterator it = containerName.rbegin(), itEnd = containerName.rend();
-		const CLanguage<TCHAR>& lang = GetCppLang<TCHAR>();
+		const CLanguage<TCHAR>& lang = GetLangCpp<TCHAR>();
 
 		if ( it != itEnd && code::IsBracket( *it ) )
 			lang.SkipPastMatchingBracket( &it, itEnd );		// skip "()"

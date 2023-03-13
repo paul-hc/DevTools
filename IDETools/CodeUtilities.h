@@ -34,7 +34,7 @@ namespace code
 
 	inline bool isWhitespaceChar( TCHAR chr )
 	{
-		return pred::IsSpaceTab()( chr );
+		return pred::IsBlank()( chr );
 	}
 
 	inline bool isWhitespaceOrLineEndChar( TCHAR chr )

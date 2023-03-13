@@ -3,10 +3,10 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "utl/StringUtilities.h"
+#include "CppParser.h"
 #include "MethodPrototype.h"
 #include "CppImplFormatter.h"
 #include "FormatterOptions.h"
-//#include "Application_fwd.h"
 #include "test/MethodPrototypeTests.h"
 
 #ifdef _DEBUG
@@ -98,8 +98,9 @@ void CMethodPrototypeTests::TestParse_GlobalFunction( code::CMethodPrototype& pr
 	}
 }
 
-void CMethodPrototypeTests::TestParse_ClassMethodImpl( code::CMethodPrototype& proto )
+void CMethodPrototypeTests::TestParse_ClassMethodImpl( void )
 {
+	code::CMethodPrototype proto;
 	std::tstring method;
 
 	{	// class method implementation
@@ -131,8 +132,9 @@ void CMethodPrototypeTests::TestParse_ClassMethodImpl( code::CMethodPrototype& p
 	}
 }
 
-void CMethodPrototypeTests::TestParse_TemplateMethodImpl( code::CMethodPrototype& proto )
+void CMethodPrototypeTests::TestParse_TemplateMethodImpl( void )
 {
+	code::CMethodPrototype proto;
 	std::tstring method;
 
 	{	// template class method implementation
@@ -168,15 +170,58 @@ inline std::pair<ObjectT*, cache::TStatusFlags> CCacheLoader<PathT, ObjectT>::")
 	}
 }
 
+void CMethodPrototypeTests::TestResolveDefaultParams( void )
+{
+	const CCppParser cppParser;
+
+	{	// simple
+		std::string proto = "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth = 2 + 3, std::wstring const& text = L\"END\", const char delim = '|' );";
+
+		ASSERT_EQUAL( "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ );",
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth, std::wstring const& text, const char delim );",
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+	}
+	{	// operator, no trailing ';'
+		std::string proto = "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair = std::make_pair( FirstT(), SecondT() ) )";
+
+		ASSERT_EQUAL( "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair /*= std::make_pair( FirstT(), SecondT() )*/ )",
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair )",
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+	}
+	{	// break protected words
+		std::string proto = "char Filter( const char** ppSrc = defPtr() _in_out_, size_t* pLength = nullptr _out_ )";
+
+		ASSERT_EQUAL( "char Filter( const char** ppSrc /*= defPtr()*/ _in_out_, size_t* pLength /*= nullptr*/ _out_ )",
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( "char Filter( const char** ppSrc _in_out_, size_t* pLength _out_ )",
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+	}
+	{	// more involved cast expressions, unicode strings
+		std::tstring proto = _T("\tstd::pair<int, bool> Func( int depth = 5, TCHAR* pAtom = (TCHAR*)(const TCHAR*)str::GetEmpty().c_str(), const fs::CPath& item = _T(\"END\") );");
+
+		ASSERT_EQUAL( _T("\tstd::pair<int, bool> Func( int depth /*= 5*/, TCHAR* pAtom /*= (TCHAR*)(const TCHAR*)str::GetEmpty().c_str()*/, const fs::CPath& item /*= _T(\"END\")*/ );"),
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( _T("\tstd::pair<int, bool> Func( int depth, TCHAR* pAtom, const fs::CPath& item );"),
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+	}
+}
+
 
 void CMethodPrototypeTests::TestImplementMethodBlock( void )
 {
-	code::CFormatterOptions options;		// test with default options, not customized by user
+	code::CFormatterOptions options( true );		// test with default options, not customized by user, no splitting
 	code::CCppImplFormatter formatter( options );
 
 	std::tstring methods = _T("\
 \tstd::pair<int, int> Func( const CFileItem* pLeft = _T(\"END\"), int depth = 5 ) const;\r\n\
 \tconst TCHAR* operator()( int left, int right ) const;\r\n\
+  std::pair<int, bool> operator<( UINT pos, size_t pos /*= utl::npos*/, int depth = 2 + 3, std::wstring const& text = L\"END\", const char delim = '|' );\r\n\
 ");
 
 	std::tstring typeDescriptor;
@@ -189,6 +234,11 @@ std::pair<int, int> Func( const CFileItem* pLeft /*= _T(\"END\")*/, int depth /*
 }\r\n\
 \r\n\
 const TCHAR* operator()( int left, int right ) const\r\n\
+{\r\n\
+	return ?;\r\n\
+}\r\n\
+\r\n\
+std::pair<int, bool> operator<( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ )\r\n\
 {\r\n\
 	return ?;\r\n\
 }\r\n\
@@ -206,6 +256,11 @@ const TCHAR* operator()( int left, int right ) const\r\n\
 \t}\r\n\
 \r\n\
 \tconst TCHAR* operator()( int left, int right ) const\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
+\r\n\
+\tstd::pair<int, bool> operator<( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ )\r\n\
 \t{\r\n\
 \t	return ?;\r\n\
 \t}\r\n\
@@ -229,8 +284,35 @@ const TCHAR* CCmd::operator()( int left, int right ) const\r\n\
 	return ?;\r\n\
 }\r\n\
 \r\n\
+std::pair<int, bool> CCmd::operator<( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ )\r\n\
+{\r\n\
+	return ?;\r\n\
+}\r\n\
+\r\n\
 ")
 		);
+
+		typeDescriptor = _T("\tCCmd::");
+
+		ASSERT_EQUAL_SWAP( formatter.ImplementMethodBlock( methods.c_str(), typeDescriptor.c_str(), false ),
+						   _T("\
+\tstd::pair<int, int> CCmd::Func( const CFileItem* pLeft /*= _T(\"END\")*/, int depth /*= 5*/ ) const\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
+\r\n\
+\tconst TCHAR* CCmd::operator()( int left, int right ) const\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
+\r\n\
+\tstd::pair<int, bool> CCmd::operator<( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ )\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
+\r\n\
+")
+);
 	}
 
 	{	// template class methods
@@ -252,6 +334,12 @@ const TCHAR* CCache<T, V>::operator()( int left, int right ) const\r\n\
 	return ?;\r\n\
 }\r\n\
 \r\n\
+template< typename T, typename V >\r\n\
+std::pair<int, bool> CCache<T, V>::operator<( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ )\r\n\
+{\r\n\
+	return ?;\r\n\
+}\r\n\
+\r\n\
 ")
 );
 
@@ -266,6 +354,12 @@ inline std::pair<int, int> CCache<T, V>::Func( const CFileItem* pLeft /*= _T(\"E
 \r\n\
 template< typename T, typename V >\r\n\
 inline const TCHAR* CCache<T, V>::operator()( int left, int right ) const\r\n\
+{\r\n\
+	return ?;\r\n\
+}\r\n\
+\r\n\
+template< typename T, typename V >\r\n\
+inline std::pair<int, bool> CCache<T, V>::operator<( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ )\r\n\
 {\r\n\
 	return ?;\r\n\
 }\r\n\
@@ -292,6 +386,12 @@ CCache<T, V>::");
 \t	return ?;\r\n\
 \t}\r\n\
 \r\n\
+\ttemplate< typename T, typename V >\r\n\
+\tinline std::pair<int, bool> CCache<T, V>::operator<( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ )\r\n\
+\t{\r\n\
+\t	return ?;\r\n\
+\t}\r\n\
+\r\n\
 ")
 );
 	}
@@ -302,11 +402,12 @@ void CMethodPrototypeTests::Run( void )
 {
 	{
 		code::CMethodPrototype proto;
-
-		RUN_TEST1( TestParse_GlobalFunction, proto );
-		RUN_TEST1( TestParse_ClassMethodImpl, proto );
-		RUN_TEST1( TestParse_TemplateMethodImpl, proto );
+		RUN_TEST1( TestParse_GlobalFunction, proto );		// just an illustration of RUN_TEST1 macro
 	}
+	RUN_TEST( TestParse_ClassMethodImpl );
+	RUN_TEST( TestParse_TemplateMethodImpl );
+
+	RUN_TEST( TestResolveDefaultParams );
 	RUN_TEST( TestImplementMethodBlock );
 }
 

@@ -12,7 +12,7 @@
 
 namespace numeric
 {
-	const double dEpsilon = 0.000000001;
+	const double dEpsilon = 0.000001;
 
 	bool DoublesEqual( double left, double right );
 }

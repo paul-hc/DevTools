@@ -23,7 +23,12 @@ namespace code
 	class CLanguage;
 
 	template< typename CharT >
-	const CLanguage<CharT>& GetCppLang( void );
+	const CLanguage<CharT>& GetLangCpp( void );
+
+
+	class CEscaper;
+
+	const CEscaper& GetEscaperC( void );
 }
 
 
@@ -116,21 +121,23 @@ namespace code
 		typedef typename str::CEnclosedParser<CharT>::TSeparatorsPair TSeparatorsPair;
 		typedef typename str::CSeparatorsPair<CharT>::TSepVector TSepVector;
 
-		CLanguage( const char* pStartSepList, const char* pEndSepList )		// constructor using only narrow strings for language constructs
+		CLanguage( const char* pStartSepList, const char* pEndSepList, const CEscaper* pEscaper = nullptr )		// constructor using only narrow strings for language constructs
 			: m_parser( false, pStartSepList, pEndSepList )
+			, m_pEscaper( pEscaper )
 		{
 			GetSeparatorsPair().EnableLineComments();		// by default assume the last separator pair refers to single-line comments
 		}
 
 		const str::CEnclosedParser<CharT>& GetParser( void ) const { return m_parser; }
 		const TSeparatorsPair& GetSeparatorsPair( void ) const { return m_parser.GetSeparators(); }
+		const CEscaper* GetEscaper( void ) const { return m_pEscaper; }
 
 
 		// iterator search
 
-		template< typename IteratorT >
-		IteratorT FindNextSequence( IteratorT itCode, IteratorT itLast, const TString& sequence ) const
-		{
+		template< typename SeqStringT, typename IteratorT >
+		IteratorT FindNextSequenceT( IteratorT itCode, IteratorT itLast, const SeqStringT& sequence ) const
+		{	// note: sequence can be of a different string type - for parsing TCHAR code with char language elements (operators, etc)
 			str::IterationDir iterDir = str::GetIterationDir( itCode );
 			const TSeparatorsPair& sepsPair = m_parser.GetSeparators();
 
@@ -152,6 +159,12 @@ namespace code
 				++itCode;
 			}
 			return itLast;
+		}
+
+		template< typename IteratorT >
+		inline IteratorT FindNextSequence( IteratorT itCode, IteratorT itLast, const TString& sequence ) const
+		{	// sequence of the same string type
+			return FindNextSequenceT<TString>( itCode, itLast, sequence );
 		}
 
 		template< typename IteratorT, typename IsCharPred >
@@ -215,6 +228,18 @@ namespace code
 
 		template< typename IteratorT >
 		inline bool SkipIdentifier( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsIdentifier() ); }
+
+		template< typename IteratorT, typename IsCharPred >
+		size_t SkipBackWhile( IteratorT* pItCode _in_out_, IteratorT itFirst, IsCharPred isCharPred ) const
+		{	// skips to the first previous position that satisfies the predicate (e.g. is space) => Note: no separators parsing, no smarties!
+			ASSERT_PTR( pItCode );
+			size_t count = 0;
+
+			for ( ; *pItCode != itFirst && isCharPred( *( *pItCode - 1 ) ); ++count )
+				--*pItCode;
+
+			return count;
+		}
 
 
 		// bracket lookup
@@ -287,7 +312,141 @@ namespace code
 		}
 	private:
 		const str::CEnclosedParser<CharT> m_parser;		// contains pairs of START/END separators of specific language constructs (for skipping)
+		const CEscaper* m_pEscaper;
 	};
+}
+
+
+namespace code
+{
+	class CEscaper
+	{
+	public:
+		CEscaper( char escSeqLead, const char* pEscaped, const char* pActual, const char* pEncNewLineContinue, const char* pEncRetain, char hexPrefix, bool parseOctalLiteral );
+
+		template< typename StringT >
+		StringT Decode( const StringT& srcLiteral ) const;													// parse to actual code
+
+		template< typename StringT >
+		StringT Encode( const StringT& actualCode, bool enquote, const char* pRetain = nullptr ) const;		// format to literal text
+
+		// pointer interface:
+		template< typename CharT >
+		typename CharT DecodeCharAdvance( const CharT** ppSrc _in_out_ ) const;
+
+		template< typename CharT >
+		typename CharT DecodeChar( const CharT* pSrc, size_t* pLength = nullptr _out_ ) const;
+
+		// iterator interface:
+		template< typename IteratorT >
+		typename IteratorT::value_type DecodeCharAdvance( IteratorT* pIt _in_out_ ) const;
+
+		template< typename IteratorT >
+		typename IteratorT::value_type DecodeChar( IteratorT it, size_t* pLength = nullptr _out_ ) const;
+
+
+		// character encoding:
+		template< typename OutIteratorT, typename CharT >
+		void AppendEncodedChar( OutIteratorT itLiteral _out_, CharT actualCh, bool enquote, const char* pRetain = nullptr ) const;
+	private:
+		std::string FormatHexCh( char chr ) const;
+		std::wstring FormatHexCh( wchar_t chr ) const;
+	private:
+		char m_escSeqLead;				// e.g. C/C++: '\'
+		std::string m_escaped;			// e.g. C/C++: abfnrtv'"\?
+		std::string m_actual;			// e.g. C/C++: '\a' '\b' '\f' '\n' '\r' '\t' '\v' '\'' '\"' '\\' '\?'
+		std::string m_encLineContinue;	// e.g. C/C++: '\' in string literals, to continue string literal on next line
+		std::string m_encRetain;		// e.g. C/C++: '\?' to avoid trigraphs - avoid encoding, since it's a marginal escape sequence
+		char m_hexPrefix;				// e.g. C/C++: 'x'
+		bool m_parseOctalLiteral;		// e.g. C/C++: true
+
+		static const char s_unknownChr = '¿';	// error placeholder character: upside-down question mark
+	};
+}
+
+
+namespace cpp
+{
+	enum SepMatch { CharQuote, StringQuote, Comment, LineComment };		// TSepMatchPos indexes in GetParser().GetSeparators()
+	enum NumLiteral { BadNumLiteral, DecimalLiteral, HexLiteral, OctalLiteral, BinaryLiteral, FloatingPointLiteral };
+
+
+	template< typename SignedIntT, typename CharT >
+	std::pair<SignedIntT, NumLiteral> ParseIntegerLiteral( const CharT* pSrc, CharT** ppNumEnd _out_ )
+	{
+		ASSERT_PTR( pSrc );
+
+		const CharT numPrefix[] = { ' ', '\t', '\r', '\n', '+', '-', '\0' };
+		const CharT* pNum = str::SkipWhitespace( pSrc, numPrefix );			// skip whitespace and sign
+
+		NumLiteral numLiteral = DecimalLiteral;
+
+		if ( '0' == *pNum )
+		{
+			CharT nextCh = pNum[ 1 ];
+
+			switch ( func::ToLower()( nextCh ) )
+			{
+				case 'b':
+					return std::make_pair( num::StringToInteger<SignedIntT>( pNum + 2, ppNumEnd, 2 ), BinaryLiteral );		// skip non-parsable "0b" prefix
+				case 'x':
+					numLiteral = HexLiteral;
+					break;
+				case '\0':
+					break;		// EOS
+				default:
+					if ( pred::IsDigit()( nextCh ) )
+						numLiteral = OctalLiteral;
+			}
+		}
+
+		SignedIntT integer = num::StringToInteger<SignedIntT>( pSrc, ppNumEnd, 0 );
+
+		if ( *ppNumEnd == pSrc )
+			numLiteral = BadNumLiteral;
+		else if ( '.' == **ppNumEnd )		// decimal point in C locale?  => will parse for double
+			numLiteral = FloatingPointLiteral;
+
+		return std::make_pair( integer, numLiteral );
+	}
+
+	template< typename SignedIntT, typename CharT >
+	std::pair<SignedIntT, NumLiteral> ParseIntegerLiteral( const CharT* pSrc, size_t* pNumLength = nullptr _out_ )
+	{
+		CharT* pNumEnd;
+		std::pair<SignedIntT, NumLiteral> integerPair = ParseIntegerLiteral<SignedIntT>( pSrc, &pNumEnd );
+
+		utl::AssignPtr( pNumLength, static_cast<size_t>( pNumEnd - pSrc ) );
+		return integerPair;
+	}
+
+	template< typename CharT >
+	std::pair<double, NumLiteral> ParseDoubleLiteral( const CharT* pSrc, size_t* pNumLength = nullptr _out_ )
+	{
+		ASSERT_PTR( pSrc );
+		CharT* pNumEnd;
+		double realNumber = num::StringToDouble( pSrc, &pNumEnd );
+
+		utl::AssignPtr( pNumLength, static_cast<size_t>( pNumEnd - pSrc ) );
+		return std::pair<double, NumLiteral>( realNumber, pNumEnd != pSrc ? FloatingPointLiteral : BadNumLiteral );
+	}
+
+
+	template< typename CharT >
+	bool IsValidNumericLiteral( const CharT* pSrc, size_t* pNumLength = nullptr _out_ )
+	{
+		CharT* pNumEnd;
+		std::pair<long long, NumLiteral> integerPair = ParseIntegerLiteral<long long>( pSrc, &pNumEnd );
+
+		if ( FloatingPointLiteral == integerPair.second )
+		{
+			double realNumber = num::StringToDouble( pSrc, &pNumEnd );
+			UNUSED_ALWAYS( realNumber );
+		}
+
+		utl::AssignPtr( pNumLength, static_cast<size_t>( pNumEnd - pSrc ) );
+		return pNumEnd != pSrc;
+	}
 }
 
 

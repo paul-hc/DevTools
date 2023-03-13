@@ -24,6 +24,8 @@ private:
 	void TestBracketMismatch( void );
 	void TestCodeDetails( void );
 
+	void TestC_EscapeSequences( void );
+	void TestCpp_ParseNumericLiteral( void );
 	void TestUntabify( void );
 };
 

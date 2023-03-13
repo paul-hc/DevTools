@@ -54,6 +54,92 @@ namespace str
 
 namespace str
 {
+	// a set of sequences to be matched when parsing a string (narrow/wide), typically defined for char
+	//
+	template< typename CharT >
+	class CSequenceSet : private utl::noncopyable
+	{
+	public:
+		typedef std::basic_string<CharT> TString;
+		typedef size_t TSeqMatchPos;						// position in m_sequences of the matching sequence
+
+		CSequenceSet( const CharT* pSeqList, const CharT listDelim[] = nullptr /* "|" */ )
+		{
+			const CharT defaultDelim[] = { '|', '\0' };		// "|"
+			if ( nullptr == listDelim )
+				listDelim = defaultDelim;
+
+			str::Split( m_sequences, pSeqList, listDelim );
+			ENSURE( !m_sequences.empty() );
+		}
+
+		const std::vector<TString>& GetSequences( void ) const { return m_sequences; }
+
+		bool IsValidMatchPos( TSeqMatchPos seqMatchPos ) const { return seqMatchPos < m_sequences.size(); }
+		size_t GetSequenceLength( TSeqMatchPos seqMatchPos ) const { REQUIRE( IsValidMatchPos( seqMatchPos ) ); return m_sequences[ seqMatchPos ].length(); }
+
+
+		template< typename IteratorT >
+		bool MatchesAnySequence( TSeqMatchPos* pOutSeqMatchPos _out_, IteratorT itText, IteratorT itLast ) const
+		{
+			REQUIRE( itText != itLast );
+			for ( TSeqMatchPos i = 0; i != m_sequences.size(); ++i )
+			{
+				const TString& seq = m_sequences[ i ];
+				if ( str::EqualsSeq( itText, itLast, seq ) )
+				{
+					utl::AssignPtr( pOutSeqMatchPos, i );
+					return true;		// found matching seqarator position
+				}
+			}
+			utl::AssignPtr( pOutSeqMatchPos, utl::npos );
+			return false;
+		}
+
+		template< typename StringT >
+		inline bool MatchesAnySequenceAt( TSeqMatchPos* pOutSeqMatchPos _out_, const StringT& text, size_t pos ) const
+		{
+			REQUIRE( pos < text.length() );
+			return MatchesAnySequence( pOutSeqMatchPos, text.begin() + pos, text.end() );
+		}
+
+
+		template< typename IteratorT >
+		bool SkipAnyMatchingSequence( IteratorT* pItText _in_out_, IteratorT itLast, TSeqMatchPos* pSeqMatchPos = nullptr _out_ ) const
+		{
+			ASSERT_PTR( pItText );
+			TSeqMatchPos seqMatchPos = utl::npos;
+
+			if ( MatchesAnySequence( &seqMatchPos, *pItText, itLast ) )
+				*pItText += m_sequences[ seqMatchPos ].length();
+
+			utl::AssignPtr( pSeqMatchPos, seqMatchPos );
+			return seqMatchPos != utl::npos;
+		}
+
+		template< typename StringT >
+		bool SkipAnyMatchingSequenceAt( size_t* pPos _in_out_, const StringT& text, TSeqMatchPos* pSeqMatchPos = nullptr _out_ ) const
+		{
+			ASSERT_PTR( pPos );
+			ASSERT( *pPos < text.length() );
+			TSeqMatchPos seqMatchPos = utl::npos;
+
+			if ( MatchesAnySequenceAt( &seqMatchPos, text, *pPos ) )
+				*pPos += GetSequenceLength( seqMatchPos );
+
+			utl::AssignPtr( pSeqMatchPos, seqMatchPos );
+
+			ENSURE( *pPos <= text.length() );
+			return seqMatchPos != utl::npos;
+		}
+	private:
+		std::vector<TString> m_sequences;
+	};
+}
+
+
+namespace str
+{
 	// A set of START and END separators to search for enclosed sequences.
 	// Note: single-line comments is defined (usually for languages), it must be the last separator in the list! That is to enable matching of line comments with no ending "\n" in the code text.
 	//

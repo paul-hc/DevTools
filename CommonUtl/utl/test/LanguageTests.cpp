@@ -6,11 +6,14 @@
 #include "utl/StringParsing.h"
 #include "utl/Language.h"
 #include "utl/CodeAlgorithms.h"
+#include "utl/TextClipboard.h"
 #include "test/LanguageTests.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/Language.hxx"
 
 
 CLanguageTests::CLanguageTests( void )
@@ -340,7 +343,7 @@ void CLanguageTests::TestMyLanguageSingleLine( void )
 
 void CLanguageTests::TestBracketParity( void )
 {
-	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
+	const code::CLanguage<char>& cppLang = code::GetLangCpp<char>();
 
 	const std::string text = "std::pair<ObjectT*, cache::TStatusFlags> CLoader< std::pair<PathT, size_t>, ObjectT >::Acquire( const PathT& pathKey )";
 
@@ -401,7 +404,7 @@ void CLanguageTests::TestBracketParity( void )
 
 void CLanguageTests::TestBracketMismatch( void )
 {
-	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
+	const code::CLanguage<char>& cppLang = code::GetLangCpp<char>();
 
 	const std::string text = "void CLoader< std::pair<PathT, size_t>, (ObjectT[] >::Acquire( const PathT& pathKey )";
 
@@ -435,7 +438,7 @@ void CLanguageTests::TestBracketMismatch( void )
 
 void CLanguageTests::TestCodeDetails( void )
 {
-	const code::CLanguage<char>& cppLang = code::GetCppLang<char>();
+	const code::CLanguage<char>& cppLang = code::GetLangCpp<char>();
 
 	const std::string text =
 		"size_t  \t\r\n /* skip(,'(' */ DisplayFilePaths( std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath /*= StdDir() )*/, "
@@ -511,6 +514,224 @@ void CLanguageTests::TestCodeDetails( void )
 	}
 }
 
+void CLanguageTests::TestC_EscapeSequences( void )
+{
+	const code::CEscaper& escaper = code::GetEscaperC();
+
+	// NARROW:
+	{
+		std::string strLiteral = "\\t\\\"L1\\\"\\r\\n\\'±=\\xB1=\\261\\'\\r\\n»=\\xBB=\273\\r\\n\\a\\b\\f\\v\\?\\\\";		// '±'='\xB1'='\261'    '»'='\xBB'='\273'
+
+		{	// decoding by pointer:
+			const char* pSrc = strLiteral.c_str();
+
+			ASSERT_EQUAL( '\t', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '"', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( 'L', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '1', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '"', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\r', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\n', escaper.DecodeCharAdvance( &pSrc ) );
+
+			ASSERT_EQUAL( '\'', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '±', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '=', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '±', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '=', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '±', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\'', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\r', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\n', escaper.DecodeCharAdvance( &pSrc ) );
+
+			ASSERT_EQUAL( '»', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '=', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '»', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '=', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '»', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\r', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\n', escaper.DecodeCharAdvance( &pSrc ) );
+
+			ASSERT_EQUAL( '\a', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\b', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\f', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '\v', escaper.DecodeCharAdvance( &pSrc ) );
+			ASSERT_EQUAL( '?', escaper.DecodeCharAdvance( &pSrc ) );
+			// no advance
+			ASSERT_EQUAL( '\\', escaper.DecodeChar( pSrc ) );
+			ASSERT_EQUAL( '\\', escaper.DecodeChar( pSrc ) );
+
+			ASSERT_EQUAL( '\\', escaper.DecodeCharAdvance( &pSrc ) );
+
+			ASSERT_EQUAL( '\0', *pSrc );	// EOS
+		}
+
+		{	// decoding by iterator:
+			std::string::const_iterator it = strLiteral.begin();
+
+			ASSERT_EQUAL( '\t', escaper.DecodeCharAdvance( &it ) );
+			ASSERT_EQUAL( '"', escaper.DecodeCharAdvance( &it ) );
+			ASSERT_EQUAL( 'L', escaper.DecodeCharAdvance( &it ) );
+			ASSERT_EQUAL( '1', escaper.DecodeCharAdvance( &it ) );
+			ASSERT_EQUAL( '"', escaper.DecodeCharAdvance( &it ) );
+			ASSERT_EQUAL( '\r', escaper.DecodeCharAdvance( &it ) );
+			ASSERT_EQUAL( '\n', escaper.DecodeCharAdvance( &it ) );
+
+			// no advance
+			ASSERT_EQUAL( '\'', escaper.DecodeChar( it ) );
+			ASSERT_EQUAL( '\'', escaper.DecodeChar( it ) );
+		}
+
+		std::string actualCode = escaper.Decode( strLiteral );
+		ASSERT_EQUAL_SWAP( actualCode, "\
+\t\"L1\"\r\n\
+'±=±=±'\r\n\
+»=»=»\r\n\
+\a\b\f\v?\\" );
+
+		ASSERT_EQUAL_SWAP( escaper.Encode( actualCode, false ), "\\t\\\"L1\\\"\\r\\n\\'\\xB1=\\xB1=\\xB1\\'\\r\\n\\xBB=\\xBB=\\xBB\\r\\n\\a\\b\\f\\v?\\\\" );
+		ASSERT_EQUAL_SWAP( escaper.Encode( actualCode, false, "\t\?" ), "	\\\"L1\\\"\\r\\n\\'\\xB1=\\xB1=\\xB1\\'\\r\\n\\xBB=\\xBB=\\xBB\\r\\n\\a\\b\\f\\v?\\\\" );	// preserve tabs (don't encode them)
+
+		std::string newLiteral = escaper.Encode( actualCode, true );
+
+		// the expected quoted encoded string is hard to read -> uncomment the line below to paste the copied text into an editor for inspection
+		//CTextClipboard::CopyText( newLiteral, CTextClipboard::CMessageWnd().GetWnd() );	// use a temporary message-only window for clipboard copy
+
+		ASSERT_EQUAL_SWAP( newLiteral, "\
+\"\\t\\\"L1\\\"\\r\\n\\\r\n\
+\\'\\xB1=\\xB1=\\xB1\\'\\r\\n\\\r\n\
+\\xBB=\\xBB=\\xBB\\r\\n\\\r\n\
+\\a\\b\\f\\v?\\\\\"" );
+	}
+
+	// WIDE:
+	{
+		std::wstring strLiteral = L"\\t\\\"L1\\\"\\r\\n\\'±=\\xB1=\\261\\'\\r\\n\\a\\b\\f\\v\\?\\\\";		// '±'='\xB1'='\261'
+
+		std::wstring actualCode = escaper.Decode( strLiteral );
+		ASSERT_EQUAL_SWAP( actualCode, L"\
+\t\"L1\"\r\n\
+'±=±=±'\r\n\
+\a\b\f\v?\\" );
+
+		// note: for wide strings, the '±' character is printable, whereas for narrow strings it's not
+		ASSERT_EQUAL_SWAP( escaper.Encode( actualCode, false ), L"\\t\\\"L1\\\"\\r\\n\\'±=±=±\\'\\r\\n\\a\\b\\f\\v?\\\\" );
+		ASSERT_EQUAL_SWAP( escaper.Encode( actualCode, false, "\t\?" ), L"	\\\"L1\\\"\\r\\n\\'±=±=±\\'\\r\\n\\a\\b\\f\\v?\\\\" );	// preserve tabs (don't encode them)
+
+		ASSERT_EQUAL_SWAP( escaper.Encode( actualCode, true ), L"\
+\"\\t\\\"L1\\\"\\r\\n\\\r\n\
+\\'±=±=±\\'\\r\\n\\\r\n\
+\\a\\b\\f\\v?\\\\\"" );
+	}
+}
+
+void CLanguageTests::TestCpp_ParseNumericLiteral( void )
+{
+	const char* pLiteral;
+
+	// CRT API tests
+	{
+		char* pEnd = NULL;
+
+		pLiteral = "\t end";		// invalid numeric literal
+		pEnd = const_cast<char*>( pLiteral );
+		ASSERT_EQUAL( 0, _strtoi64( pEnd, &pEnd, 0 ) );
+		ASSERT_EQUAL_STR( pLiteral, pEnd );
+		ASSERT_EQUAL( .0, strtod( pEnd, &pEnd ) );
+		ASSERT_EQUAL_STR( pLiteral, pEnd );
+
+		pLiteral = "\t 1234 -4321 0xABCD 0Xcdef 0765 1111 1010 end";		// valid integer literals: decimal, hex, octal, binary
+		pEnd = const_cast<char*>( pLiteral );
+		ASSERT_EQUAL( 1234, _strtoi64( pEnd, &pEnd, 0 ) );
+		ASSERT_EQUAL( -4321, _strtoi64( pEnd, &pEnd, 0 ) );
+		ASSERT_EQUAL( 0xABCD, _strtoi64( pEnd, &pEnd, 0 ) );
+		ASSERT_EQUAL( 0xCDEF, _strtoi64( pEnd, &pEnd, 0 ) );
+		ASSERT_EQUAL( 0765, _strtoi64( pEnd, &pEnd, 0 ) );
+		ASSERT_EQUAL( 0xF, _strtoi64( pEnd, &pEnd, 2 ) );
+		ASSERT_EQUAL( 0xA, _strtoi64( pEnd, &pEnd, 2 ) );
+		ASSERT_EQUAL_STR( " end", pEnd );
+
+		pLiteral = "\t 1234.5678 111.222e-3 end";
+		pEnd = const_cast<char*>( pLiteral );
+		ASSERT_EQUAL( 1234, _strtoi64( pEnd, &pEnd, 0 ) );
+		ASSERT_HAS_PREFIX( ".5678", pEnd );
+
+		pEnd = const_cast<char*>( pLiteral );
+		ASSERT_EQUAL( 1234.5678, strtod( pEnd, &pEnd ) );
+		ASSERT_EQUAL( 111.222e-3, strtod( pEnd, &pEnd ) );
+		ASSERT_EQUAL_STR( " end", pEnd );
+	}
+
+	// cpp utils tests
+	{
+		size_t numLength;
+
+		pLiteral = "";				// invalid numeric literal
+		ASSERT( !cpp::IsValidNumericLiteral( pLiteral, &numLength ) );
+		ASSERT_EQUAL( 0, numLength );
+
+		pLiteral = "\t end";		// invalid numeric literal
+		ASSERT( !cpp::IsValidNumericLiteral( pLiteral, &numLength ) );
+		ASSERT_EQUAL( 0, numLength );
+
+		pLiteral = "\t 0 1234 -4321 0xABCD 0Xcdef 0765 0b1111 0B1010 1234.5678 -111.222e-3 end";	// valid number literals: decimal, hex, octal, binary + double
+
+		// parse "0" decimal literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral ) );
+		ASSERT_EQUAL( std::make_pair( 0, cpp::DecimalLiteral ), cpp::ParseIntegerLiteral<long long>( pLiteral, &numLength ) );
+		pLiteral += numLength;
+		// parse "1234" decimal literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral ) );
+		ASSERT_EQUAL( std::make_pair( 1234, cpp::DecimalLiteral ), cpp::ParseIntegerLiteral<long long>( pLiteral, &numLength ) );
+		pLiteral += numLength;
+		// parse "-4321" negative decimal literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral ) );
+		ASSERT_EQUAL( std::make_pair( -4321, cpp::DecimalLiteral ), cpp::ParseIntegerLiteral<long long>( pLiteral, &numLength ) );
+		pLiteral += numLength;
+
+		// parse "0xABCD" hexa-decimal literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral ) );
+		ASSERT_EQUAL( std::make_pair( 0xABCD, cpp::HexLiteral ), cpp::ParseIntegerLiteral<long long>( pLiteral, &numLength ) );
+		pLiteral += numLength;
+		// parse "0Xcdef" hexa-decimal literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral ) );
+		ASSERT_EQUAL( std::make_pair( 0Xcdef, cpp::HexLiteral ), cpp::ParseIntegerLiteral<long long>( pLiteral, &numLength ) );
+		pLiteral += numLength;
+
+		// parse "0765" octal literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral ) );
+		ASSERT_EQUAL( std::make_pair( 0765, cpp::OctalLiteral ), cpp::ParseIntegerLiteral<long long>( pLiteral, &numLength ) );
+		pLiteral += numLength;
+
+		// parse "0b1111" binary literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral, &numLength ) );
+	#ifdef IS_CPP_14
+		ASSERT_EQUAL( std::make_pair( 0b1111, cpp::BinaryLiteral ), cpp::ParseIntegerLiteral<long long>( pLiteral, &numLength ) );
+	#endif
+		pLiteral += numLength;
+		// parse "0B1010" binary literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral, &numLength ) );
+	#ifdef IS_CPP_14
+		ASSERT_EQUAL( std::make_pair( 0B1010, cpp::BinaryLiteral ), cpp::ParseIntegerLiteral<long long>( pLiteral, &numLength ) );
+	#endif
+		pLiteral += numLength;
+
+		// parse "1234.5678" double literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral ) );
+		ASSERT_EQUAL( cpp::FloatingPointLiteral, cpp::ParseIntegerLiteral<long long>( pLiteral ).second );		// ignore testing irelevant value (which is 1234)
+		ASSERT_EQUAL( std::make_pair( 1234.5678, cpp::FloatingPointLiteral ), cpp::ParseDoubleLiteral( pLiteral, &numLength ) );
+		pLiteral += numLength;
+		// parse "-111.222e-3" double literal
+		ASSERT( cpp::IsValidNumericLiteral( pLiteral ) );
+		ASSERT_EQUAL( cpp::FloatingPointLiteral, cpp::ParseIntegerLiteral<long long>( pLiteral ).second );		// ignore testing irelevant value (which is 1234)
+		ASSERT_EQUAL( std::make_pair( -111.222e-3, cpp::FloatingPointLiteral ), cpp::ParseDoubleLiteral( pLiteral, &numLength ) );
+		pLiteral += numLength;
+
+		ASSERT( !cpp::IsValidNumericLiteral( pLiteral, &numLength ) );		// parse " end" invalid literal
+		ASSERT_EQUAL( 0, numLength );
+		ASSERT_EQUAL_STR( " end", pLiteral );
+	}
+}
+
 void CLanguageTests::TestUntabify( void )
 {
 	const std::string textTabs = "\
@@ -548,6 +769,8 @@ void CLanguageTests::Run( void )
 	RUN_TEST( TestBracketMismatch );
 	RUN_TEST( TestCodeDetails );
 
+	RUN_TEST( TestC_EscapeSequences );
+	RUN_TEST( TestCpp_ParseNumericLiteral );
 	RUN_TEST( TestUntabify );
 }
 

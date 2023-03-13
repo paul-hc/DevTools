@@ -399,8 +399,8 @@ namespace func
 
 namespace code
 {
-	std::tstring FormatEscapeSeq( const std::tstring& text, bool uiSeq = false );
-	std::tstring ParseEscapeSeqs( const std::tstring& displayText, bool uiSeq = false );
+	std::tstring FormatEscapeSeq( const std::tstring& actualCode, bool uiSeq = false );
+	std::tstring ParseEscapeSeqs( const std::tstring& literalText, bool uiSeq = false );
 }
 
 

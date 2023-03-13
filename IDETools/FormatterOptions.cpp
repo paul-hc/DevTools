@@ -39,8 +39,9 @@ namespace func
 
 namespace code
 {
-	CFormatterOptions::CFormatterOptions( void )
-		: m_breakSeparators()
+	CFormatterOptions::CFormatterOptions( bool testMode /*= false*/ )
+		: m_testMode( testMode )
+		, m_breakSeparators()
 		, m_preserveMultipleWhiteSpace( false )
 		, m_deleteTrailingWhiteSpace( true )
 		, m_linesBetweenFunctionImpls( 1 )

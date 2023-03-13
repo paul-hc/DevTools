@@ -11,8 +11,9 @@
 #define new DEBUG_NEW
 #endif
 
-
-  std::pair<int, int> Func( const CFileItem* pLeft, int depth = 5 ) const;
+  std::pair<int, bool> Func1( UINT pos, size_t pos /*= utl::npos*/, int depth = 2 + 3, std::wstring const& text = L\"END\", const char delim = '|' );
+  std::pair<int, int> Func2( const CFileItem* pLeft, int depth = 5 ) const;
+  std::pair<int, bool> operator<( UINT pos, size_t pos = utl::npos, int depth = 2 + 3, std::wstring const& text = L"END", const char delim = '|' );
 CCmd::
 
 
