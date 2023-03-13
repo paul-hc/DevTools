@@ -60,6 +60,7 @@ namespace code
 					m_errorMessages.push_back( str::formatString( _T("Quoted string not closed at pos %d: [%s]"),
 																int( pCursor - pCode ), pCursor ) );
 					pCursor += str::Length( pCursor ); // fatal error -> go to end
+					continue; // skip incrementing
 				}
 			}
 			else if ( languageEngine.isCommentStatement( commentEnd, pCode, int( pCursor - pCode ) ) )

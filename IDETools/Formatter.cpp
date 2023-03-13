@@ -904,15 +904,16 @@ namespace code
 			{
 				int matchingQuotePos = code::findMatchingQuotePos( pCodeText, int( pCursor - pCodeText ) );
 
-				if ( matchingQuotePos == -1 )
-					break; // fatal syntax error -> abort searching
-				pCursor = pCodeText + matchingQuotePos + 1; // go past closing quote
+				if ( -1 == matchingQuotePos )
+					break;										// fatal syntax error -> abort searching
+
+				pCursor = pCodeText + matchingQuotePos + 1;		// go past closing quote
 			}
 			else if
 			(
 				m_languageEngine.isCommentStatement( statementEnd, pCodeText, int( pCursor - pCodeText ) ) ||
 				(
-					m_docLanguage == DocLang_Cpp && ( m_languageEngine.isCCastStatement( statementEnd, pCodeText, int( pCursor - pCodeText ) ) ||
+					DocLang_Cpp == m_docLanguage && ( m_languageEngine.isCCastStatement( statementEnd, pCodeText, int( pCursor - pCodeText ) ) ||
 													m_languageEngine.isUnicodePortableStringConstant( statementEnd, pCodeText, int( pCursor - pCodeText ) ) )
 				)
 			)
