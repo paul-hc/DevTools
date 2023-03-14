@@ -2,12 +2,11 @@
 #define FormatterOptions_h
 #pragma once
 
+#include "utl/Code_fwd.h"
+
 
 namespace code
 {
-	enum TokenSpacing { RemoveSpace, InsertOneSpace, PreserveSpace };
-
-
 	class CFormatterOptions
 	{
 	public:
@@ -22,7 +21,7 @@ namespace code
 
 		CBraceRule* FindBraceRule( TCHAR chr ) const;
 
-		TokenSpacing MustSpaceBrace( TCHAR chr ) const;
+		Spacing MustSpaceBrace( TCHAR chr ) const;
 		bool IsArgListBrace( TCHAR chr ) const;
 
 		COperatorRule* FindOperatorRule( const TCHAR* pOpStart ) const;
@@ -32,13 +31,13 @@ namespace code
 		std::tstring GetArgListOpenBraces( void ) const;
 	public:
 		// Helpers
-		static TokenSpacing SpacingFromChar( TCHAR chr );
-		static TCHAR SpacingToChar( TokenSpacing spacing );
+		static Spacing SpacingFromChar( TCHAR chr );
+		static TCHAR SpacingToChar( Spacing spacing );
 	public:
 		// formatting rules for braces
 		struct CBraceRule
 		{
-			CBraceRule( TCHAR braceOpen = _T('\0'), TCHAR braceClose = _T('\0'), TokenSpacing spacing = PreserveSpace, bool isArgList = false )
+			CBraceRule( TCHAR braceOpen = '\0', TCHAR braceClose = '\0', Spacing spacing = RetainSpace, bool isArgList = false )
 				: m_braceOpen( braceOpen )
 				, m_braceClose( braceClose )
 				, m_spacing( spacing )
@@ -52,7 +51,7 @@ namespace code
 		public:
 			TCHAR m_braceOpen;
 			TCHAR m_braceClose;
-			TokenSpacing m_spacing;
+			Spacing m_spacing;
 			bool m_isArgList;			// i.e. splitable
 		private:
 			std::tstring m_regEntry;
@@ -61,7 +60,7 @@ namespace code
 		// formatting rules for special operators (commas, semi-colons, etc)
 		struct COperatorRule
 		{
-			COperatorRule( const TCHAR* pOperator = _T(""), TokenSpacing spaceBefore = PreserveSpace, TokenSpacing spaceAfter = PreserveSpace )
+			COperatorRule( const TCHAR* pOperator = _T(""), Spacing spaceBefore = RetainSpace, Spacing spaceAfter = RetainSpace )
 				: m_pOperator( pOperator ), m_spaceBefore( spaceBefore ), m_spaceAfter( spaceAfter ), m_regEntry( m_pOperator ) {}
 
 			void LoadFromRegistry( void );
@@ -70,8 +69,8 @@ namespace code
 			size_t GetOperatorLength( void ) const { return str::GetLength( m_pOperator ); }
 		public:
 			const TCHAR* m_pOperator;
-			TokenSpacing m_spaceBefore;
-			TokenSpacing m_spaceAfter;
+			Spacing m_spaceBefore;
+			Spacing m_spaceAfter;
 		private:
 			std::tstring m_regEntry;
 		};

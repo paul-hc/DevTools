@@ -85,7 +85,7 @@ BOOL IncludeFileTree::BrowseIncludeFiles( LPCTSTR targetFileName )
 	if ( nullptr == targetFileName )
 		return FALSE;
 
-	if ( _T('\0') == *targetFileName || !fs::FileExist( targetFileName, fs::Read ) )
+	if ( '\0' == *targetFileName || !fs::FileExist( targetFileName, fs::Read ) )
 		TRACE( _T("Specified filename does not exist: [%s]\n"), targetFileName );
 
 	ide::CScopedWindow scopedIDE;

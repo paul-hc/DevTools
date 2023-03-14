@@ -2,6 +2,7 @@
 #define Language_h
 #pragma once
 
+#include "Code_fwd.h"
 #include "StringParsing.h"
 #include "Range.h"
 #include <vector>
@@ -124,6 +125,7 @@ namespace code
 		CLanguage( const char* pStartSepList, const char* pEndSepList, const CEscaper* pEscaper = nullptr )		// constructor using only narrow strings for language constructs
 			: m_parser( false, pStartSepList, pEndSepList )
 			, m_pEscaper( pEscaper )
+			, m_skipArgLists( false )						// by default disabled, so the client code has to skip them if needed
 		{
 			GetSeparatorsPair().EnableLineComments();		// by default assume the last separator pair refers to single-line comments
 		}
@@ -131,6 +133,8 @@ namespace code
 		const str::CEnclosedParser<CharT>& GetParser( void ) const { return m_parser; }
 		const TSeparatorsPair& GetSeparatorsPair( void ) const { return m_parser.GetSeparators(); }
 		const CEscaper* GetEscaper( void ) const { return m_pEscaper; }
+
+		bool& RefSkipArgLists( void ) const { return m_skipArgLists; }		// mutable data-member
 
 
 		// iterator search
@@ -143,20 +147,19 @@ namespace code
 
 			for ( TSepMatchPos sepMatchPos = TString::npos; itCode != itLast; )
 			{
-				if ( str::EqualsSeq( itCode, itLast, sequence ) )
+				if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, itCode, itLast ) )	// matches a quoted string, comment, etc?
+					sepsPair.SkipMatchingSpec( &itCode, itLast, sepMatchPos );	// skip the entire spec
+				else if ( str::EqualsSeq( itCode, itLast, sequence ) )
 				{
 					if ( str::ReverseIter == iterDir )
 						itCode += sequence.length() - 1;	// advance to r-beginning of the match
 
 					return itCode;				// found the next bracket
 				}
-				else if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, itCode, itLast ) )	// matches a quoted string, comment, etc?
-				{
-					sepsPair.SkipMatchingSpec( &itCode, itLast, sepMatchPos );	// skip the entire spec
-					continue;
-				}
-
-				++itCode;
+				else if ( m_skipArgLists && IsBracket( *itCode ) )
+					SkipPastMatchingBracket( &itCode, itLast );
+				else
+					++itCode;
 			}
 			return itLast;
 		}
@@ -167,6 +170,13 @@ namespace code
 			return FindNextSequenceT<TString>( itCode, itLast, sequence );
 		}
 
+
+		template< typename IteratorT >
+		inline IteratorT FindNextChar( IteratorT itCode, IteratorT itLast, wchar_t chr ) const
+		{
+			return FindNextCharThat( itCode, itLast, pred::IsChar( chr ) );
+		}
+
 		template< typename IteratorT, typename IsCharPred >
 		IteratorT FindNextCharThat( IteratorT itCode, IteratorT itLast, IsCharPred isCharPred ) const
 		{
@@ -174,15 +184,14 @@ namespace code
 
 			for ( TSepMatchPos sepMatchPos = TString::npos; itCode != itLast; )
 			{
-				if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, itCode, itLast ) )			// matches a quoted string, comment, etc?
-				{
-					sepsPair.SkipMatchingSpec( &itCode, itLast, sepMatchPos );	// skip the entire spec
-					continue;
-				}
+				if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, itCode, itLast ) )		// matches a quoted string, comment, etc?
+					sepsPair.SkipMatchingSpec( &itCode, itLast, sepMatchPos );			// skip the entire spec
 				else if ( isCharPred( *itCode ) )
 					return itCode;				// found the next match
-
-				++itCode;
+				else if ( m_skipArgLists && IsBracket( *itCode ) )
+					SkipPastMatchingBracket( &itCode, itLast );
+				else
+					++itCode;
 			}
 			return itLast;
 		}
@@ -222,16 +231,9 @@ namespace code
 			return true;					// true if found isCharPred
 		}
 
-
-		template< typename IteratorT >
-		inline bool SkipWhitespace( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsSpace() ); }
-
-		template< typename IteratorT >
-		inline bool SkipIdentifier( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsIdentifier() ); }
-
 		template< typename IteratorT, typename IsCharPred >
 		size_t SkipBackWhile( IteratorT* pItCode _in_out_, IteratorT itFirst, IsCharPred isCharPred ) const
-		{	// skips to the first previous position that satisfies the predicate (e.g. is space) => Note: no separators parsing, no smarties!
+		{	// skips to the first previous position that satisfies the predicate (e.g. is space) => Note: no separators parsing, no smarties, so use it for skiping spaces, not semantically rich stuff!
 			ASSERT_PTR( pItCode );
 			size_t count = 0;
 
@@ -242,77 +244,52 @@ namespace code
 		}
 
 
+		template< typename IteratorT >
+		inline bool SkipWhitespace( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsSpace() ); }
+
+		template< typename IteratorT >
+		inline bool SkipBlank( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsBlank() ); }
+
+		template< typename IteratorT >
+		inline bool SkipIdentifier( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsIdentifier() ); }
+
+
 		// bracket lookup
 
 		template< typename IteratorT >
-		IteratorT FindMatchingBracket( IteratorT itBracket, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr _out_ ) const
-		{	// find the closing bracket matching the current bracket;  skip language-specific comments, quoted strings, etc
-			REQUIRE( itBracket != itLast && IsBracket( *itBracket ) );
-
-			utl::AssignPtr( pItBracketMismatch, itLast );				// i.e. no mismatch syntax error
-
-			std::vector< std::pair<CharT, IteratorT> > bracketStack;	// <original_bracket, origin_iter>
-
-			bracketStack.push_back( std::make_pair( *itBracket, itBracket ) );
-			IteratorT it = itBracket + 1;		// skip the opening bracket
-
-			CharT topMatchingBracket = ToMatchingBracket( bracketStack.back().first );
-			const TSeparatorsPair& sepsPair = m_parser.GetSeparators();
-
-			for ( TSepMatchPos sepMatchPos = TString::npos; it != itLast; )
-			{
-				if ( IsBracket( *it ) )
-				{
-					if ( topMatchingBracket == *it )
-					{
-						bracketStack.pop_back();		// exit one bracket nesting level
-
-						if ( bracketStack.empty() )
-							return it;					// on the matching bracket of the originating bracket
-					}
-					else
-						bracketStack.push_back( std::make_pair( *it, it ) );			// go deeper with the nested bracket
-
-					topMatchingBracket = ToMatchingBracket( bracketStack.back().first );
-				}
-				else if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, it, itLast ) )	// matches a quoted string, comment, etc?
-				{
-					sepsPair.SkipMatchingSpec( &it, itLast, sepMatchPos );	// skip the entire spec
-					continue;
-				}
-
-				++it;
-			}
-
-			// matching bracket not found
-			ENSURE( !bracketStack.empty() );
-			TRACE( " (?) CLanguage::FindMatchingBracket() - syntax error in code: no matching bracket found for the origin bracket at:\n\tcode: '%s'\n",
-				   str::ValueToString<std::string>( &*bracketStack.front().second ).c_str() );
-
-			utl::AssignPtr( pItBracketMismatch, bracketStack.front().second );		// point to the originating bracket mismatch (the cause of syntax error)
-			return itLast;
-		}
+		IteratorT FindMatchingBracket( IteratorT itBracket, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr _out_ ) const throws_cond( code::TSyntaxError );
 
 		template< typename IteratorT >
-		bool SkipPastMatchingBracket( IteratorT* pItBracket _in_out_, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr _out_ ) const
-		{	// find past the closing bracket matching the current bracket - compatible with found range bounds
-			ASSERT_PTR( pItBracket );
-			*pItBracket = FindMatchingBracket( *pItBracket, itLast, pItBracketMismatch );
-			if ( *pItBracket == itLast )
-				return false;
-
-			++*pItBracket;		// advance past the found matching bracket (for range computation)
-			return true;
-		}
+		bool SkipPastMatchingBracket( IteratorT* pItBracket _in_out_, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr _out_ ) const throws_cond( code::TSyntaxError );
 
 		template< typename IteratorT >
 		IteratorT FindNextBracket( IteratorT itCode, IteratorT itLast ) const
 		{
 			return FindNextCharThat( itCode, itLast, &code::IsBracket );
 		}
+	public:
+		class CScopedSkipArgLists
+		{
+		public:
+			CScopedSkipArgLists( const CLanguage* pLang, bool skipArgLists = true )
+				: m_pLang( safe_ptr( pLang ) )
+				, m_origSkipArgLists( m_pLang->RefSkipArgLists() )
+			{
+				m_pLang->RefSkipArgLists() = skipArgLists;
+			}
+
+			~CScopedSkipArgLists()
+			{
+				m_pLang->RefSkipArgLists() = m_origSkipArgLists;
+			}
+		private:
+			const CLanguage* m_pLang;
+			bool m_origSkipArgLists;					// when searching for sequences or characters, parses and skips the embedded bracket-delimited arg-lists
+		};
 	private:
 		const str::CEnclosedParser<CharT> m_parser;		// contains pairs of START/END separators of specific language constructs (for skipping)
 		const CEscaper* m_pEscaper;
+		mutable bool m_skipArgLists;					// if true: when searching for sequences or characters, parses and skips the embedded bracket-delimited arg-lists
 	};
 }
 

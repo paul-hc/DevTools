@@ -141,7 +141,7 @@ namespace code
 
 		brokenLines.push_back( makeNormalizedFormattedPrototype( pCodeText ) );
 
-		for ( TokenRange breakToken( 0 ); str::charAt( brokenLines.back(), breakToken.m_end ) != _T('\0'); )
+		for ( TokenRange breakToken( 0 ); str::charAt( brokenLines.back(), breakToken.m_end ) != '\0'; )
 			if ( findLineBreakToken( &breakToken, brokenLines.back(), breakToken.m_end ) == LBT_OpenBrace )
 				breakToken.m_end = doSplitArgumentList( brokenLines, breakToken, maxEditorColIndex );
 
@@ -240,7 +240,7 @@ namespace code
 			--lineCount;
 
 		if ( lineCount < 2 )
-			throw CRuntimeException( _T("You must select at least 2 lines of code!") );
+			throw CRuntimeException( _T("You must select at least 2 lines of code!"), UTL_FILE_LINE );
 
 		FormattedNumber< unsigned int > number( startingNumber, _T("%u") );
 
@@ -281,7 +281,7 @@ namespace code
 			--lineCount;
 
 		if ( lineCount < 2 )
-			throw CRuntimeException( _T("You must select at least 2 lines of code!") );
+			throw CRuntimeException( _T("You must select at least 2 lines of code!"), UTL_FILE_LINE );
 
 		size_t lastBlankOffset = 0;
 		{
@@ -308,7 +308,7 @@ namespace code
 	{
 		CString outCode = lineOfCode;
 
-		for ( int pos = 0; str::charAt( outCode, pos ) != _T('\0'); )
+		for ( int pos = 0; str::charAt( outCode, pos ) != '\0'; )
 		{
 			TCHAR chr = str::charAt( outCode, pos );
 			int statementEndPos;
@@ -352,7 +352,7 @@ namespace code
 	{
 		CString outCode = lineOfCode;
 
-		for ( int pos = 0; str::charAt( outCode, pos ) != _T('\0'); )
+		for ( int pos = 0; str::charAt( outCode, pos ) != '\0'; )
 		{
 			TCHAR chr = str::charAt( outCode, pos );
 			int statementEndPos;
@@ -397,13 +397,13 @@ namespace code
 		return true;
 	}
 
-	TokenSpacing CFormatter::MustSpaceBrace( TCHAR chrBrace ) const
+	Spacing CFormatter::MustSpaceBrace( TCHAR chrBrace ) const
 	{
 		ASSERT( m_disableBracketSpacingCounter >= 0 );
 
 		if ( m_disableBracketSpacingCounter > 0 )
 			if ( chrBrace == _T('(') || chrBrace == _T(')') )
-				return RemoveSpace; // don't space () in C cast statements
+				return TrimSpace;		// don't space () in C cast statements
 
 		return m_options.MustSpaceBrace( chrBrace );
 	}
@@ -491,9 +491,9 @@ namespace code
 		ASSERT( pos != -1 && code::isBraceChar( str::charAt( targetString, pos ) ) );
 
 		TCHAR chrBrace = str::charAt( targetString, pos );
-		TokenSpacing mustSpaceIt = MustSpaceBrace( chrBrace );
+		Spacing mustSpaceIt = MustSpaceBrace( chrBrace );
 
-		if ( mustSpaceIt == PreserveSpace )
+		if ( mustSpaceIt == RetainSpace )
 			return pos + 1; // skip to the next char
 
 		if ( isOpenBraceChar( chrBrace ) )
@@ -506,7 +506,7 @@ namespace code
 
 			if ( str::charAt( targetString, nextNonWhitespacePos ) == closeBrace )
 			{
-				TCHAR emptyBraces[] = { chrBrace, closeBrace, _T('\0') };
+				TCHAR emptyBraces[] = { chrBrace, closeBrace, '\0' };
 				TokenRange emptyBraceRange( pos, nextNonWhitespacePos + 1 );
 
 				return emptyBraceRange.smartReplaceWithToken( &targetString, emptyBraces ).m_end;
@@ -530,10 +530,10 @@ namespace code
 				}
 			}
 
-			return resolveSpaceAfterToken( targetString, TokenRange( pos, pos + 1 ), mustSpaceIt != RemoveSpace );
+			return resolveSpaceAfterToken( targetString, TokenRange( pos, pos + 1 ), mustSpaceIt != TrimSpace );
 		}
 		else
-			return resolveSpaceBeforeToken( targetString, TokenRange( pos, pos + 1 ), mustSpaceIt != RemoveSpace ); // after closing brace
+			return resolveSpaceBeforeToken( targetString, TokenRange( pos, pos + 1 ), mustSpaceIt != TrimSpace ); // after closing brace
 	}
 
 	int CFormatter::formatUnicodePortableStringConstant( CString& targetString, int pos )
@@ -565,16 +565,16 @@ namespace code
 					pos += operatorLength;
 				else
 				{
-					if ( pOpRule->m_spaceBefore != PreserveSpace )
+					if ( pOpRule->m_spaceBefore != RetainSpace )
 					{
 						pos = resolveSpaceBeforeToken( targetString, TokenRange( pos, pos + operatorLength ),
-													   pOpRule->m_spaceBefore != RemoveSpace );
+													   pOpRule->m_spaceBefore != TrimSpace );
 						pos -= operatorLength;
 					}
 
-					if ( pOpRule->m_spaceBefore != PreserveSpace )
+					if ( pOpRule->m_spaceBefore != RetainSpace )
 						pos = resolveSpaceAfterToken( targetString, TokenRange( pos, pos + operatorLength ),
-													  pOpRule->m_spaceAfter != RemoveSpace );
+													  pOpRule->m_spaceAfter != TrimSpace );
 					else
 						pos += operatorLength;
 				}
@@ -587,7 +587,7 @@ namespace code
 
 	int CFormatter::splitMultipleLines( std::vector< CString >& outLinesOfCode, std::vector< CString >& outLineEnds, const TCHAR* pCodeText )
 	{
-		if ( pCodeText != nullptr && pCodeText[ 0 ] != _T('\0') )
+		if ( pCodeText != nullptr && pCodeText[ 0 ] != '\0' )
 			for ( int pos = 0; ; )
 			{
 				TokenRange endOfLinePos = str::findStringPos( pCodeText, code::g_pLineEnd, pos );
@@ -735,7 +735,7 @@ namespace code
 		TokenRange lastCommentRange( 0 );
 		CString outCode = lineOfCode;
 
-		for ( int pos = 0; str::charAt( outCode, pos ) != _T('\0'); )
+		for ( int pos = 0; str::charAt( outCode, pos ) != '\0'; )
 		{
 			TokenRange commentRange = m_languageEngine.findComment( outCode, pos );
 
@@ -895,7 +895,7 @@ namespace code
 
 		const TCHAR* pCursor = pCodeText + startPos;
 
-		while ( *pCursor != _T('\0') )
+		while ( *pCursor != '\0' )
 		{
 			int statementEnd;
 			const std::tstring* pBreakSeparatorFound = nullptr;

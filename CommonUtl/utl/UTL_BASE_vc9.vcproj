@@ -1036,6 +1036,10 @@
 				Name="code"
 				>
 				<File
+					RelativePath=".\Code_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\CodeAlgorithms.h"
 					>
 				</File>

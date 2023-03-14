@@ -33,7 +33,7 @@ namespace code
 		TCHAR matchingCloseBrace = getMatchingBrace( pCode[ openBracePos ] );
 		const TCHAR* pCursor = pCode + openBracePos + 1;
 
-		while ( *pCursor != _T('\0') )
+		while ( *pCursor != '\0' )
 		{
 			int commentEnd;
 
@@ -74,7 +74,7 @@ namespace code
 
 		checkParityErrors();
 
-		if ( *pCursor == _T('\0') )
+		if ( *pCursor == '\0' )
 		{
 			m_errorMessages.push_back( str::formatString( _T("Closing brace not found for opening brace '%c' at pos %d"),
 														pCode[ openBracePos ], openBracePos ) );
@@ -110,13 +110,13 @@ namespace code
 											   DocLanguage docLanguage, bool allowUnclosedArgList /*= false*/ )
 	{
 		ASSERT( pCode != nullptr && pos >= 0 && pos <= str::Length( pCode ) );
-		ASSERT( argListOpenBraces != nullptr && argListOpenBraces[ 0 ] != _T('\0') );
+		ASSERT( argListOpenBraces != nullptr && argListOpenBraces[ 0 ] != '\0' );
 
 		code::LanguageSearchEngine languageEngine( docLanguage );
 		int openBracePos = languageEngine.findOneOf( pCode, argListOpenBraces, pos );
 
 		ASSERT( openBracePos != -1 );
-		if ( pCode[ openBracePos ] != _T('\0') )
+		if ( pCode[ openBracePos ] != '\0' )
 		{
 			int closeBracePos = findMatchingBracePos( pCode, openBracePos, docLanguage );
 
@@ -143,7 +143,7 @@ namespace code
 
 		ASSERT( firstOpenBracePos != -1 );
 
-		return pCode[ firstOpenBracePos ] != _T('\0') &&
+		return pCode[ firstOpenBracePos ] != '\0' &&
 			   -1 != findMatchingBracePos( pCode, firstOpenBracePos, docLanguage );
 	}
 

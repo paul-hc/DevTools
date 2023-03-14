@@ -218,7 +218,7 @@ namespace code
 
 		outStatementEndPos = -1;
 
-		TCHAR prevChar = _T('\0');
+		TCHAR prevChar = '\0';
 
 		if ( pos > 0 )
 		{
@@ -243,7 +243,7 @@ namespace code
 					{
 						pCursor = pString + closeBracePos + 1;
 
-						if ( *pCursor != _T('\0') )
+						if ( *pCursor != '\0' )
 							if ( code::isQuoteChar( *pCursor ) ||
 								 ( _istalnum( *pCursor ) && !_istalnum( prevChar ) ) ||
 								 0 == _tcsncmp( pCursor, _T("::"), 2 ) )
@@ -319,7 +319,7 @@ namespace code
 		while ( code::isWhitespaceChar( *pCursor ) || isAtLineEnd( pCursor, m_docLanguage ) )
 			++pCursor;
 
-		if ( *pCursor != _T('\0') )
+		if ( *pCursor != '\0' )
 			return false; // not end of string -> match was found
 
 		outStatementEndPos = int( pCursor - pString );
@@ -335,7 +335,7 @@ namespace code
 
 		const TCHAR* pCursor = pString + startPos;
 
-		while ( *pCursor != _T('\0') )
+		while ( *pCursor != '\0' )
 		{
 			int commentEnd;
 
@@ -368,7 +368,7 @@ namespace code
 
 		const TCHAR* pCursor = pString + startPos;
 
-		while ( *pCursor != _T('\0') )
+		while ( *pCursor != '\0' )
 		{
 			int commentEnd;
 
@@ -399,18 +399,18 @@ namespace code
 
 		int pos = startPos;
 
-		while ( text[ pos ] != _T('\0') && !_istdigit( text[ pos ] ) )
+		while ( text[ pos ] != '\0' && !_istdigit( text[ pos ] ) )
 			++pos;
 
-		while ( pos > 0 && text[ pos ] != _T('\0') && !_istspace( text[ pos - 1 ] ) )
+		while ( pos > 0 && text[ pos ] != '\0' && !_istspace( text[ pos - 1 ] ) )
 		{
 			str::skipDigit( pos, text );
 
-			while ( text[ pos ] != _T('\0') && !_istdigit( text[ pos ] ) )
+			while ( text[ pos ] != '\0' && !_istdigit( text[ pos ] ) )
 				++pos;
 		}
 
-		if ( _T('\0') == text[ pos ] )
+		if ( '\0' == text[ pos ] )
 			return TokenRange( -1 );
 
 		ASSERT( str::isNumberChar( text[ pos ] ) );
@@ -425,14 +425,14 @@ namespace code
 	{
 		TokenRange numberRange = findNextNumber( text, startPos );
 		if ( numberRange.IsEmpty() )
-			throw CRuntimeException( str::Format( _T("No number detected in '%s'"), text ) );
+			throw CRuntimeException( str::Format( _T("No number detected in '%s'"), text ), UTL_FILE_LINE );
 
 		ASSERT( numberRange.IsValid() );
 
 		unsigned int value;
 		str::NumType numType = str::parseUnsignedInteger( value, text + numberRange.m_start );
 		if ( str::NoNumber == numType )
-			throw CRuntimeException( str::Format( _T("invalid unsigned int number '%s'"), text + numberRange.m_start ) );
+			throw CRuntimeException( str::Format( _T("invalid unsigned int number '%s'"), text + numberRange.m_start ), UTL_FILE_LINE );
 
 		FormattedNumber< unsigned int > parsedNumber( value, _T("%u") );
 
@@ -453,7 +453,7 @@ namespace code
 					++hexDigitCount;
 
 				if ( 0 == hexDigitCount )
-					throw CRuntimeException( str::Format( _T("Invalid hex number in '%s'"), text ) );
+					throw CRuntimeException( str::Format( _T("Invalid hex number in '%s'"), text ), UTL_FILE_LINE );
 
 				parsedNumber.m_format.Format( _T("0x%%0%dX"), hexDigitCount );
 				break;
@@ -548,7 +548,7 @@ namespace code
 
 		const TCHAR* pCursor = pString + startPos;
 
-		while ( *pCursor != _T('\0') )
+		while ( *pCursor != '\0' )
 		{
 			int commentEnd;
 
@@ -572,7 +572,7 @@ namespace code
 			++pCursor;
 		}
 
-		return *pCursor != _T('\0'); // true if a match was found
+		return *pCursor != '\0'; // true if a match was found
 	}
 
 } // namespace code

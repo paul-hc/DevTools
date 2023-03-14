@@ -123,12 +123,12 @@ namespace str
 	// doesn't clear rOutDestTokens, it appends tokens to it
 	size_t split( std::vector< CString >& rOutDestTokens, const TCHAR* flatString, const TCHAR* separator )
 	{
-		ASSERT( separator != nullptr && *separator != _T('\0') );
+		ASSERT( separator != nullptr && *separator != '\0' );
 
 		int separatorLength = str::Length( separator );
 		int startPos = 0;
 
-		if ( flatString != nullptr && flatString[ 0 ] != _T('\0') )
+		if ( flatString != nullptr && flatString[ 0 ] != '\0' )
 			for ( ; ; )
 			{
 				const TCHAR* foundSep = _tcsstr( flatString + startPos, separator );
@@ -207,7 +207,7 @@ namespace str
 
 		const TCHAR* ptr = pString;
 
-		while ( *ptr != _T('\0') && _istspace( *ptr ) )
+		while ( *ptr != '\0' && _istspace( *ptr ) )
 			++ptr;
 
 		const TCHAR* format = _T("%d");
@@ -221,7 +221,7 @@ namespace str
 				case _T('x'): format = _T("%x"); ++ptr; break;
 			}
 		}
-		else if ( *ptr == _T('0') && *( ptr + 1 ) != _T('\0') )
+		else if ( *ptr == _T('0') && *( ptr + 1 ) != '\0' )
 			if ( _totlower( *++ptr ) == _T('x') )
 			{
 				format = _T("%x"); // hex
@@ -238,7 +238,7 @@ namespace str
 		int number = 0;
 
 		if ( !parseInteger( number, pString ) )
-			throw CRuntimeException( str::Format( _T("invalid integer number '%s'"), pString ) );
+			throw CRuntimeException( str::Format( _T("invalid integer number '%s'"), pString ), UTL_FILE_LINE );
 
 		return number;
 	}
@@ -249,7 +249,7 @@ namespace str
 
 		const TCHAR* ptr = pString;
 
-		while ( *ptr != _T('\0') && ::_istspace( *ptr ) )
+		while ( *ptr != '\0' && ::_istspace( *ptr ) )
 			++ptr;
 
 		NumType numType = DecimalNum;
@@ -264,7 +264,7 @@ namespace str
 				case _T('0'): numType = OctalNum; ++ptr; break;
 			}
 		}
-		else if ( _T('0') == *ptr && *( ptr + 1 ) != _T('\0') )
+		else if ( _T('0') == *ptr && *( ptr + 1 ) != '\0' )
 			if ( _T('x') == ::_totlower( *++ptr ) )
 			{
 				numType = HexNum;
@@ -284,7 +284,7 @@ namespace str
 	{
 		unsigned int number = 0;
 		if ( NoNumber == parseUnsignedInteger( number, pString ) )
-			throw CRuntimeException( str::Format( _T("invalid unsigned int number '%s'"), pString ) );
+			throw CRuntimeException( str::Format( _T("invalid unsigned int number '%s'"), pString ), UTL_FILE_LINE );
 
 		return number;
 	}

@@ -26,6 +26,8 @@ private:
 
 	void TestC_EscapeSequences( void );
 	void TestCpp_ParseNumericLiteral( void );
+	void TestSpaceCode( void );
+	void TestEncloseCode( void );
 	void TestUntabify( void );
 };
 

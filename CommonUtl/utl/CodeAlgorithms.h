@@ -2,8 +2,55 @@
 #define CodeAlgorithms_h
 #pragma once
 
+#include "Code_fwd.h"
 #include "StringParsing.h"
 #include "Range.h"
+
+
+namespace code
+{
+	template< typename StringT >
+	void SpaceCode( StringT* pOutCode, Spacing spacing, size_t extraCapacity = 0 )
+	{
+		ASSERT_PTR( pOutCode );
+
+		if ( AddSpace == spacing )
+			extraCapacity += 2;
+
+		if ( extraCapacity != 0 )
+			pOutCode->reserve( pOutCode->size() + extraCapacity );
+
+		if ( spacing != RetainSpace )
+		{
+			str::Trim( *pOutCode );		// normalize at 1 space even if AddSpace is specified
+
+			if ( AddSpace == spacing )
+			{
+				pOutCode->insert( pOutCode->begin(), ' ' );
+				pOutCode->push_back( ' ' );
+			}
+		}
+	}
+
+	template< typename StringT >
+	void EncloseCode( StringT* pOutCode, const char* pOpen, const char* pClose, Spacing spacing = code::RetainSpace )
+	{
+		ASSERT_PTR( pOutCode );
+
+		std::pair<size_t, size_t> length( str::GetLength( pOpen ), str::GetLength( pClose ) );
+
+		if ( !pOutCode->empty() )		// only space non-empty code!
+			SpaceCode( pOutCode, spacing, length.first + length.second );
+		else
+			pOutCode->reserve( pOutCode->size() + length.first + length.second );
+
+		if ( length.first != 0 )
+			pOutCode->insert( pOutCode->begin(), pOpen, pOpen + length.first );
+
+		if ( length.second != 0 )
+			pOutCode->insert( pOutCode->end(), pClose, pClose + length.second );
+	}
+}
 
 
 namespace code

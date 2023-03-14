@@ -24,19 +24,14 @@ namespace str
 	std::string AsNarrow( const std::tstring& text );
 	std::wstring AsWide( const std::tstring& text );
 
-	// formatting conversions
-	inline std::string ToNarrow( const char* pNarrow ) { ASSERT( pNarrow ); return std::string( pNarrow ); }
-	inline std::string ToNarrow( const wchar_t* pWide ) { return ToUtf8( pWide ); }
-
-	inline std::wstring ToWide( const char* pNarrow ) { return FromUtf8( pNarrow ); }
-	inline std::wstring ToWide( const wchar_t* pWide ) { ASSERT( pWide ); return std::wstring( pWide ); }
-
 
 	const std::tstring& GetEmpty( void );
+
 
 	std::string Format( const char* pFormat, ... );
 	std::tstring Format( const TCHAR* pFormat, ... );
 	std::tstring Format( UINT formatId, ... );
+
 
 	std::tstring Load( UINT strId, bool* pLoaded = nullptr );
 	std::vector<std::tstring> LoadStrings( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = nullptr );

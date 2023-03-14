@@ -8,6 +8,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/Language.hxx"
+
 
 // CCppParser implementation
 
@@ -22,7 +24,7 @@ const str::CSequenceSet<char> CCppParser::s_exprOps(
 	//" sizeof"								// redundant, captured by pred::IsIdenifier()
 	, " " );
 
-const str::CSequenceSet<char> CCppParser::s_breakWords( "_in_|_out_|_in_out_" );
+const str::CSequenceSet<char> CCppParser::s_protoBreakWords( "_in_|_out_|_in_out_" );
 
 CCppParser::CCppParser( void )
 	: m_lang( code::GetLangCpp<TCHAR>() )

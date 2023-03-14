@@ -6,10 +6,14 @@
 #include "test/CppCodeTests.h"
 #include "CompoundTextParser.h"
 #include "IterationSlices.h"
+#include "CppParser.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/Language.hxx"
+#include "CppParser.hxx"
 
 
 namespace ut
@@ -333,11 +337,84 @@ void CCppCodeTests::TestIterationSlices( void )
 	}
 }
 
+void CCppCodeTests::TestResolveDefaultParams( void )
+{
+	const CCppParser cppParser;
+
+	{	// simple
+		std::string proto = "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth = 2 + 3, std::wstring const& text = L\"END\", const char delim = '|' );";
+
+		ASSERT_EQUAL( "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ );",
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth, std::wstring const& text, const char delim );",
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+	}
+	{	// operator, no trailing ';'
+		std::string proto = "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair = std::make_pair( FirstT(), SecondT() ) )";
+
+		ASSERT_EQUAL( "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair /*= std::make_pair( FirstT(), SecondT() )*/ )",
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair )",
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+	}
+	{	// break protected words
+		std::string proto = "char Filter( const char** ppSrc = defPtr() _in_out_, size_t* pLength = nullptr _out_ )";
+
+		ASSERT_EQUAL( "char Filter( const char** ppSrc /*= defPtr()*/ _in_out_, size_t* pLength /*= nullptr*/ _out_ )",
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( "char Filter( const char** ppSrc _in_out_, size_t* pLength _out_ )",
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+	}
+	{	// more involved cast expressions, unicode strings
+		std::tstring proto = _T("\tstd::pair<int, bool> Func( int depth = 5, TCHAR* pAtom = (TCHAR*)(const TCHAR*)str::GetEmpty().c_str(), const fs::CPath& item = _T(\"END\") );");
+
+		ASSERT_EQUAL( _T("\tstd::pair<int, bool> Func( int depth /*= 5*/, TCHAR* pAtom /*= (TCHAR*)(const TCHAR*)str::GetEmpty().c_str()*/, const fs::CPath& item /*= _T(\"END\")*/ );"),
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( _T("\tstd::pair<int, bool> Func( int depth, TCHAR* pAtom, const fs::CPath& item );"),
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+	}
+}
+
+void CCppCodeTests::TestExtractTemplateInstance( void )
+{
+	const CCppParser cppParser;
+	{
+		std::string templateDecl;
+
+		templateDecl = "template< typename Type, class MyClass, struct MyStruct, enum MyEnum = utl::GetEnum(), int level = 5 >";
+		ASSERT_EQUAL( "<Type, MyClass, MyStruct, MyEnum, level>",
+					  cppParser.ExtractTemplateInstance( templateDecl, code::TrimSpace ) );
+
+		templateDecl = "template< typename Type, class MyClass, struct MyStruct, enum MyEnum = utl::GetEnum(), int level = 5 >";
+		ASSERT_EQUAL( "< Type, MyClass, MyStruct, MyEnum, level >",
+					  cppParser.ExtractTemplateInstance( templateDecl, code::AddSpace ) );
+
+		templateDecl = "template<\t  typename Type, class MyClass, struct MyStruct, enum MyEnum = utl::GetEnum(), int level = 5>";
+		ASSERT_EQUAL( "< Type, MyClass, MyStruct, MyEnum, level >",
+					  cppParser.ExtractTemplateInstance( templateDecl, code::AddSpace ) );
+
+		templateDecl = "template<\t  typename Type, class MyClass, struct MyStruct, enum MyEnum = utl::GetEnum(), int level = 5>";
+		ASSERT_EQUAL( "<\t  Type, MyClass, MyStruct, MyEnum, level>",
+					  cppParser.ExtractTemplateInstance( templateDecl, code::RetainSpace ) );
+
+		// simple with non-type parameters
+		templateDecl = "template< str::CaseType caseType, size_t size, typename CharT >";
+		ASSERT_EQUAL( "<caseType, size, CharT>",
+					  cppParser.ExtractTemplateInstance( templateDecl, code::TrimSpace ) );
+	}
+}
+
 
 void CCppCodeTests::Run( void )
 {
 	RUN_TEST( TestCompoundTextParser );
 	RUN_TEST( TestIterationSlices );
+	RUN_TEST( TestResolveDefaultParams );
+	RUN_TEST( TestExtractTemplateInstance );
 }
 
 

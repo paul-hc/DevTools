@@ -27,10 +27,10 @@ namespace code
 		std::tstring ExtractTypeDescriptor( const std::tstring& functionImplLine, const fs::CPath& docPath );
 		std::tstring ImplementMethodBlock( const TCHAR* pMethodPrototypes, const TCHAR* pTypeDescriptor, bool isInline ) throws_( CRuntimeException );
 
-		CString autoMakeCode( const TCHAR* pCodeText );
-		CString tokenizeText( const TCHAR* pCodeText );
+		std::tstring AutoMakeCode( const TCHAR* pCodeText );
+		std::tstring TokenizeText( const TCHAR* pCodeText );
 
-		static bool isCppTypeQualifier( std::tstring typeQualifier );
+		static bool IsCppTypeQualifier( std::tstring typeQualifier );
 	private:
 		bool LoadCodeTemplates( void );
 		std::tstring MakeCommentDecoration( const std::tstring& decorationCore ) const;
@@ -38,8 +38,8 @@ namespace code
 		std::tstring ImplementMethod( const std::tstring& methodProto, const CTypeDescriptor& tdInfo );
 		std::tstring InputDocTypeDescriptor( const fs::CPath& docPath ) const;
 
-		CString makeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException );
-		CString makeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException );
+		std::tstring MakeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException );
+		std::tstring MakeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException );
 	protected:
 		// code templates
 		std::tstring m_voidFunctionBody;
@@ -57,7 +57,6 @@ namespace code
 		void IndentCode( std::tstring* pCodeText ) const;
 	private:
 		void Split( const TCHAR* pTypeDescriptor ) throws_( CRuntimeException );
-		CString buildTemplateInstanceTypeList( const TokenRange& templateDecl, const TCHAR* pMethodPrototype ) const;
 	private:
 		const CFormatter* m_pFmt;
 	public:

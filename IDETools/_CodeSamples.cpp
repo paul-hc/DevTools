@@ -17,6 +17,8 @@
 CCmd::
 
 
+  std::pair<int, int> Func2( const CFileItem* pLeft, int depth = 5 ) const;
+  std::pair<int, bool> operator<( UINT pos, size_t pos = utl::npos, int depth = 2 + 3, std::wstring const& text = L"END", const char delim = '|' );
 template< typename PathType, typename ObjectType >
 inline void CCacheLoader<PathType, ObjectType>::Blah2( const std::string& filePath )
 {

@@ -12,7 +12,7 @@
 
 int revFindCharsPos( const TCHAR* string, const TCHAR* chars, int pos /*= -1*/ )
 {
-	if ( string == nullptr || string[ 0 ] == _T('\0') || chars == nullptr || chars[ 0 ] == _T('\0') )
+	if ( string == nullptr || string[ 0 ] == '\0' || chars == nullptr || chars[ 0 ] == '\0' )
 		return -1;
 
 	int len = str::Length( string );
@@ -368,7 +368,7 @@ CString PathInfo::makeAbsolute( const TCHAR* pathToConvert )
 
 TCHAR* PathInfo::findSubString( const TCHAR* pathString, const TCHAR* subString )
 {
-	if ( *subString == _T('\0') )
+	if ( *subString == '\0' )
 		return const_cast<TCHAR*>( pathString );
 
 	for ( TCHAR *cmp = const_cast<TCHAR*>( pathString ); *cmp; cmp++ )
@@ -378,7 +378,7 @@ TCHAR* PathInfo::findSubString( const TCHAR* pathString, const TCHAR* subString 
 		while ( *pStr && *subStr && !( path::ToEquivalentChar( *pStr ) - path::ToEquivalentChar( *subStr ) ) )
 			++pStr, ++subStr;
 
-		if ( *subStr == _T('\0') )
+		if ( *subStr == '\0' )
 			return cmp;
 	}
 

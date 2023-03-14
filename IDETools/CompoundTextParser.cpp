@@ -75,7 +75,7 @@ void CCompoundTextParser::ParseFile( const fs::CPath& filePath ) throws_( CRunti
 
 	std::ifstream input( filePath.GetPtr(), std::ios_base::in );	// | std::ios_base::binary
 	if ( !input.is_open() )
-		throw CRuntimeException( str::Format( _T("Unable to open text file %s"), filePath.GetPtr() ) );
+		throw CRuntimeException( str::Format( _T("Unable to open text file %s"), filePath.GetPtr() ), UTL_FILE_LINE );
 
 	ParseStream( input );
 }

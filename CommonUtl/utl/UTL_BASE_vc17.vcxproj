@@ -182,6 +182,7 @@
     <ClInclude Include="CacheLoader.h" />
     <ClInclude Include="CacheLoader.hxx" />
     <ClInclude Include="CodeAlgorithms.h" />
+    <ClInclude Include="Code_fwd.h" />
     <ClInclude Include="CppVer.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="Command.h" />

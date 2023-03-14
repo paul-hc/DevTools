@@ -3,8 +3,6 @@
 #include "IdeUtilities.h"
 #include "CppImplFormatter.h"
 #include "IterationSlices.h"
-	#include "CodeUtilities.h"
-	#include "BraceParityStatus.h"
 #include "FormatterOptions.h"
 #include "MethodPrototype.h"
 #include "CppParser.h"
@@ -21,6 +19,9 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/Language.hxx"
+#include "CppParser.hxx"
 
 
 namespace ui
@@ -61,7 +62,7 @@ namespace code
 	{
 	}
 
-	bool CCppImplFormatter::isCppTypeQualifier( std::tstring typeQualifier )
+	bool CCppImplFormatter::IsCppTypeQualifier( std::tstring typeQualifier )
 	{
 		str::Replace( typeQualifier, _T("::"), _T("") );
 		return word::IsAlphaNumericWord( typeQualifier );
@@ -125,20 +126,20 @@ namespace code
 
 	bool CCppImplFormatter::LoadCodeTemplates( void )
 	{
-		TextContent codeTemplateFile;
-		std::tstring codeTemplateFilePath = app::GetModuleSession().m_codeTemplatePath.Get();
+		TextContent codeSnippets;
+		std::tstring codeSnippetsPath = app::GetModuleSession().m_codeTemplatePath.Get();
 
 		if ( app::GetModuleSession().m_useCommentDecoration )
 		{
-			if ( codeTemplateFile.LoadFileSection( codeTemplateFilePath.c_str(), _T("Single Line Decoration") ) )
-				m_commentDecorationTemplate = codeTemplateFile.GetText();
+			if ( codeSnippets.LoadFileSection( codeSnippetsPath.c_str(), _T("Single Line Decoration") ) )
+				m_commentDecorationTemplate = codeSnippets.GetText();
 		}
 
-		if ( codeTemplateFile.LoadFileSection( codeTemplateFilePath.c_str(), _T("void Function Body") ) )
-			m_voidFunctionBody = codeTemplateFile.GetText();
+		if ( codeSnippets.LoadFileSection( codeSnippetsPath.c_str(), _T("void Function Body") ) )
+			m_voidFunctionBody = codeSnippets.GetText();
 
-		if ( codeTemplateFile.LoadFileSection( codeTemplateFilePath.c_str(), _T("return Function Body") ) )
-			m_returnFunctionBody = codeTemplateFile.GetText();
+		if ( codeSnippets.LoadFileSection( codeSnippetsPath.c_str(), _T("return Function Body") ) )
+			m_returnFunctionBody = codeSnippets.GetText();
 
 		return !m_commentDecorationTemplate.empty();
 	}
@@ -161,7 +162,7 @@ namespace code
 
 		Examples:
 			"template< typename T, class Pred, int dim >\r\nMyClass< T, Pred, i >::"
-			"template<>\r\nMyClass< CString, LessThanString, 5 >::"
+			"template<>\r\nMyClass< std::string, LessThanString, 5 >::"
 			"MyClass::"
 			"MyClass::NestedClass::"
 	*/
@@ -281,7 +282,7 @@ namespace code
 			if ( CTextClipboard::PasteText( clipText, scopedIDE.GetMainWnd()->GetSafeHwnd() ) )
 			{
 				str::Trim( clipText );
-				if ( isCppTypeQualifier( clipText ) )
+				if ( IsCppTypeQualifier( clipText ) )
 				{
 					if ( !str::IsUpperMatch( clipText.c_str(), 2 ) )		// not a type-prefixed token?
 						clipTypeQualifier = app::GetModuleSession().m_classPrefix;
@@ -347,87 +348,85 @@ namespace code
 	}
 
 
-	CString CCppImplFormatter::autoMakeCode( const TCHAR* pCodeText )
+	std::tstring CCppImplFormatter::AutoMakeCode( const TCHAR* pCodeText )
 	{
 		resetInternalState();
 
-		CString outcome;
+		std::tstring outCode;
 		UINT commandId = ui::TrackMakeCodeTemplate();
 
 		switch ( commandId )
 		{
 			case CM_MAKE_LOOP_const_iterator:
 			case CM_MAKE_LOOP_iterator:
-				outcome = makeIteratorLoop( pCodeText, CM_MAKE_LOOP_const_iterator == commandId );
+				outCode = MakeIteratorLoop( pCodeText, CM_MAKE_LOOP_const_iterator == commandId );
 				break;
 			case CM_MAKE_LOOP_index:
-				outcome = makeIndexLoop( pCodeText );
+				outCode = MakeIndexLoop( pCodeText );
 				break;
-			default:
-				return CString();
 		}
 
-		return outcome;
+		return outCode;
 	}
 
-	CString CCppImplFormatter::makeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException )
+	std::tstring CCppImplFormatter::MakeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException )
 	{
 		CIterationSlices slices;
 		slices.ParseCode( pCodeText );
 
-		TextContent codeTemplateFile;
-		CString outcome;
+		TextContent codeSnippets;
+		std::tstring outCode;
 
-		if ( codeTemplateFile.LoadFileSection( app::GetModuleSession().m_codeTemplatePath.GetPtr(), _T("ForLoopIterator") ) )
+		if ( codeSnippets.LoadFileSection( app::GetModuleSession().m_codeTemplatePath.GetPtr(), _T("ForLoopIterator") ) )
 		{
-			codeTemplateFile.ReplaceText( _T("%ContainerType%"), slices.m_containerType.getString( pCodeText ), TRUE );
-			codeTemplateFile.ReplaceText( _T("%IteratorType%"), isConstIterator ? _T("const_iterator") : _T("iterator"), TRUE );
-			codeTemplateFile.ReplaceText( _T("%IteratorName%"), slices.m_iteratorName.c_str(), TRUE);
-			codeTemplateFile.ReplaceText( _T("%Container%"), slices.m_containerName.getString( pCodeText ), TRUE );
-			codeTemplateFile.ReplaceText( _T("%Selector%"), slices.m_pObjSelOp, TRUE );
-			codeTemplateFile.ReplaceText( _T("%LeadingSpaces%"), slices.m_leadingWhiteSpace.getString( pCodeText ), TRUE );
+			codeSnippets.ReplaceText( _T("%ContainerType%"), slices.m_containerType.GetToken( pCodeText ).c_str(), TRUE);
+			codeSnippets.ReplaceText( _T("%IteratorType%"), isConstIterator ? _T("const_iterator") : _T("iterator"), TRUE );
+			codeSnippets.ReplaceText( _T("%IteratorName%"), slices.m_iteratorName.c_str(), TRUE);
+			codeSnippets.ReplaceText( _T("%Container%"), slices.m_containerName.GetToken( pCodeText ).c_str(), TRUE );
+			codeSnippets.ReplaceText( _T("%Selector%"), slices.m_pObjSelOp, TRUE );
+			codeSnippets.ReplaceText( _T("%LeadingSpaces%"), slices.m_leadingWhiteSpace.GetToken( pCodeText ).c_str(), TRUE );
 
-			outcome = codeTemplateFile.GetText();
+			outCode = codeSnippets.GetText();
 		}
 
-		return outcome;
+		return outCode;
 	}
 
-	CString CCppImplFormatter::makeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException )
+	std::tstring CCppImplFormatter::MakeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException )
 	{
 		CIterationSlices slices;
 		slices.ParseCode( pCodeText );
 
-		TextContent codeTemplateFile;
-		CString outcome;
+		TextContent codeSnippets;
+		std::tstring outCode;
 
-		if ( codeTemplateFile.LoadFileSection( app::GetModuleSession().m_codeTemplatePath.GetPtr(), slices.m_isMfcList ? _T("ForLoopPosition") : _T("ForLoopIndex") ) )
+		if ( codeSnippets.LoadFileSection( app::GetModuleSession().m_codeTemplatePath.GetPtr(), slices.m_isMfcList ? _T("ForLoopPosition") : _T("ForLoopIndex") ) )
 		{
-			codeTemplateFile.ReplaceText( _T("%IndexType%"), CIterationSlices::STL == slices.m_libraryType ? _T("size_t") : _T("int"), TRUE );
-			codeTemplateFile.ReplaceText( _T("%ObjectType%"), slices.m_valueType.getString( pCodeText ), TRUE );
-			codeTemplateFile.ReplaceText( _T("%ObjectName%"), slices.m_iteratorName.c_str(), TRUE);
-			codeTemplateFile.ReplaceText( _T("%Index%"), _T("i"), TRUE );
-			codeTemplateFile.ReplaceText( _T("%Container%"), slices.m_containerName.getString( pCodeText ), TRUE );
-			codeTemplateFile.ReplaceText( _T("%Selector%"), slices.m_pObjSelOp, TRUE );
-			codeTemplateFile.ReplaceText( _T("%GetSizeMethod%"), CIterationSlices::MFC == slices.m_libraryType ? _T("GetSize") : _T("size"), TRUE );
-			codeTemplateFile.ReplaceText( _T("%LeadingSpaces%"), slices.m_leadingWhiteSpace.getString( pCodeText ), TRUE );
+			codeSnippets.ReplaceText( _T("%IndexType%"), CIterationSlices::STL == slices.m_libraryType ? _T("size_t") : _T("int"), TRUE );
+			codeSnippets.ReplaceText( _T("%ObjectType%"), slices.m_valueType.getString( pCodeText ), TRUE );
+			codeSnippets.ReplaceText( _T("%ObjectName%"), slices.m_iteratorName.c_str(), TRUE);
+			codeSnippets.ReplaceText( _T("%Index%"), _T("i"), TRUE );
+			codeSnippets.ReplaceText( _T("%Container%"), slices.m_containerName.getString( pCodeText ), TRUE );
+			codeSnippets.ReplaceText( _T("%Selector%"), slices.m_pObjSelOp, TRUE );
+			codeSnippets.ReplaceText( _T("%GetSizeMethod%"), CIterationSlices::MFC == slices.m_libraryType ? _T("GetSize") : _T("size"), TRUE );
+			codeSnippets.ReplaceText( _T("%LeadingSpaces%"), slices.m_leadingWhiteSpace.getString( pCodeText ), TRUE );
 
-			outcome = codeTemplateFile.GetText();
+			outCode = codeSnippets.GetText();
 		}
 
-		return outcome;
+		return outCode;
 	}
 
-	CString CCppImplFormatter::tokenizeText( const TCHAR* pCodeText )
+	std::tstring CCppImplFormatter::TokenizeText( const TCHAR* pCodeText )
 	{
 		ide::CScopedWindow scopedIDE;
 		CTokenizeTextDialog dialog( scopedIDE.GetMainWnd() );
 		dialog.m_sourceText = pCodeText;
 
 		if ( IDCANCEL == dialog.DoModal() )
-			return CString();
+			return str::GetEmpty();
 
-		return dialog.m_outputText.c_str();
+		return dialog.m_outputText;
 	}
 
 } // namespace code
@@ -473,7 +472,7 @@ namespace code
 
 				if ( !tqParser.FindArgList( &templateInstanceArgsRange, outerClass.m_start, '<' ) || templateInstanceArgsRange.m_start > outerClass.m_end )
 				{
-					std::tstring templateInstanceArgs = buildTemplateInstanceTypeList( TokenRange( m_templateDecl ), m_templateDecl.c_str() );
+					std::tstring templateInstanceArgs = tqParser.ExtractTemplateInstance( m_templateDecl, m_pFmt->MustSpaceBrace( _T('<') ) );
 
 					endOfOuterClassRange.m_end = endOfOuterClassRange.m_start;
 					endOfOuterClassRange.ReplaceWithToken( &m_typeQualifier, templateInstanceArgs );
@@ -509,63 +508,8 @@ namespace code
 				m_typeQualifier = items.back();
 				break;
 			default:
-				throw CRuntimeException( str::Format( _T("Bad type descriptor/qualifier: '%s'"), pTypeDescriptor ) );
+				throw CRuntimeException( str::Format( _T("Bad type descriptor/qualifier: '%s'"), pTypeDescriptor ), UTL_FILE_LINE );
 		}
-	}
-
-	CString CTypeDescriptor::buildTemplateInstanceTypeList( const TokenRange& templateDecl, const TCHAR* pMethodPrototype ) const
-	{
-		// example: converts "template< typename Type, class MyClass, struct MyStruct >" to "< Type, MyClass, MyStruct >"
-		CString outTemplateInstanceList;
-		BraceParityStatus braceStatus;
-		TokenRange templTypeList = braceStatus.findArgList( pMethodPrototype, templateDecl.m_start, _T("<"), m_pFmt->getDocLanguage() );
-
-		if ( templTypeList.m_start >= templateDecl.m_start && templTypeList.m_end <= templateDecl.m_end )
-		{
-			templTypeList.deflateBy( 1 );
-			if ( !templTypeList.IsEmpty() )
-			{
-				std::vector< CString > typeArgs;
-
-				str::split( typeArgs, templTypeList.getString( pMethodPrototype ), _T(",") );
-
-				for ( unsigned int i = 0; i != typeArgs.size(); ++i )
-				{
-					const TCHAR* typeArg = typeArgs[ i ];
-					TokenRange argRange = TokenRange::endOfString( typeArg );
-
-					while ( argRange.m_end > 0 && code::isWhitespaceChar( typeArg[ argRange.m_end - 1 ] ) )
-						--argRange.m_end;
-
-					argRange.m_start = argRange.m_end;
-
-					while ( argRange.m_start > 0 && !code::isWhitespaceChar( typeArg[ argRange.m_start - 1 ] ) )
-						--argRange.m_start;
-
-					if ( !argRange.IsEmpty() )
-					{
-						if ( !outTemplateInstanceList.IsEmpty() )
-							outTemplateInstanceList += _T(", ");
-
-						outTemplateInstanceList += argRange.getString( typeArg );
-					}
-					else
-						TRACE( _T(" * SYNTAX ERROR: cannot extract type argument at index %d from the template '%s'\n"),
-							   (LPCTSTR)templateDecl.getString( pMethodPrototype ) );
-				}
-			}
-		}
-
-		if ( !outTemplateInstanceList.IsEmpty() )
-		{
-			CString tiList;
-			const TCHAR* pSpacer = InsertOneSpace == m_pFmt->MustSpaceBrace( _T('<') ) ? _T(" ") : _T("");
-
-			tiList.Format( _T("<%s%s%s>"), pSpacer, (LPCTSTR)outTemplateInstanceList, pSpacer );
-			outTemplateInstanceList = tiList;
-		}
-
-		return outTemplateInstanceList;
 	}
 
 	void CTypeDescriptor::IndentCode( std::tstring* pCodeText ) const

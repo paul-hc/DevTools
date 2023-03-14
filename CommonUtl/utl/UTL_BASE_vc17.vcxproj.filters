@@ -448,6 +448,9 @@
     <ClInclude Include="Language.hxx">
       <Filter>utl\code</Filter>
     </ClInclude>
+    <ClInclude Include="Code_fwd.h">
+      <Filter>utl\code</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

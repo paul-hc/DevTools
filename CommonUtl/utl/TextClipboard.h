@@ -47,7 +47,7 @@ public:
 	static bool IsFormatAvailable( UINT clipFormat ) { return ::IsClipboardFormatAvailable( clipFormat ) != FALSE; }
 	static bool CanPasteText( void );
 
-	static bool CopyText( const std::string& utf8Text, HWND hWnd, bool clear = true ) { return DoCopyText( utf8Text, str::ToWide( utf8Text.c_str() ), hWnd, clear ); }
+	static bool CopyText( const std::string& utf8Text, HWND hWnd, bool clear = true ) { return DoCopyText( utf8Text, str::FromUtf8( utf8Text.c_str() ), hWnd, clear ); }
 	static bool CopyText( const std::wstring& wideText, HWND hWnd, bool clear = true ) { return DoCopyText( str::ToUtf8( wideText.c_str() ), wideText, hWnd, clear ); }
 
 	static bool PasteText( std::tstring& rText, HWND hWnd );

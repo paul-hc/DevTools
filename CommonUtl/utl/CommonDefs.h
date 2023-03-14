@@ -29,6 +29,7 @@
 #define override			// method suffix to indicate a base override - note: replaces the CLR override keyword
 #define persist				// persistent data-member
 #define throws_( ... )
+#define throws_cond( ... )	// throws conditionally, depending on a specific parameter
 
 #define _out_				// output function parameter
 #define _in_out_			// input and output function parameter

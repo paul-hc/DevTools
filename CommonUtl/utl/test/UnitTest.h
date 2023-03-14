@@ -129,6 +129,11 @@ namespace ut
 	_ASSERT_EXPR( succeeded, msg.c_str() ); } while( false )
 
 
+#define ASSERT_THROWS( ExceptionT, statement )\
+	try { ( statement ); _ASSERT_EXPR( false, _CRT_WIDE("Expected to throw " #ExceptionT) ); }\
+	catch ( const ExceptionT& exc ) { exc; }
+
+
 #define UT_TRACE( pMessage )  ut::impl::TraceMessage( (pMessage) )
 
 #define UT_REPEAT_BLOCK( count )  for ( unsigned int i = count; i-- != 0; )

@@ -2,7 +2,77 @@
 #define Language_hxx
 #pragma once
 
-#include "Language.h"
+#include "RuntimeException.h"
+
+
+namespace code
+{
+	// CLanguage template code
+
+	template< typename CharT >
+	template< typename IteratorT >
+	IteratorT CLanguage<CharT>::FindMatchingBracket( IteratorT itBracket, IteratorT itLast, IteratorT* pItBracketMismatch /*= nullptr*/ _out_ ) const throws_cond( code::TSyntaxError )
+	{
+		// find the closing bracket matching the current bracket;  skip language-specific comments, quoted strings, etc.
+		// throws TSyntaxError if pItBracketMismatch is null.
+		REQUIRE( itBracket != itLast && IsBracket( *itBracket ) );
+
+		utl::AssignPtr( pItBracketMismatch, itLast );				// i.e. no mismatch syntax error
+
+		std::vector< std::pair<CharT, IteratorT> > bracketStack;	// <original_bracket, origin_iter>
+
+		bracketStack.push_back( std::make_pair( *itBracket, itBracket ) );
+		IteratorT it = itBracket + 1;		// skip the opening bracket
+
+		CharT topMatchingBracket = ToMatchingBracket( bracketStack.back().first );
+		const TSeparatorsPair& sepsPair = m_parser.GetSeparators();
+
+		for ( TSepMatchPos sepMatchPos = TString::npos; it != itLast; )
+			if ( IsBracket( *it ) )
+			{
+				if ( topMatchingBracket == *it )
+				{
+					bracketStack.pop_back();		// exit one bracket nesting level
+
+					if ( bracketStack.empty() )
+						return it;					// on the matching bracket of the originating bracket
+				}
+				else
+					bracketStack.push_back( std::make_pair( *it, it ) );			// go deeper with the nested bracket
+
+				topMatchingBracket = ToMatchingBracket( bracketStack.back().first );
+				++it;
+			}
+			else if ( sepsPair.MatchesAnyOpenSepAt( &sepMatchPos, it, itLast ) )	// matches a quoted string, comment, etc?
+				sepsPair.SkipMatchingSpec( &it, itLast, sepMatchPos );				// skip the entire spec
+			else
+				++it;
+
+		// matching bracket not found
+		ENSURE( !bracketStack.empty() );
+		if ( pItBracketMismatch != nullptr )
+			*pItBracketMismatch = bracketStack.front().second;		// point to the originating bracket mismatch (the cause of syntax error)
+		else
+			throw code::TSyntaxError( str::Format( "Syntax error: no matching bracket found for the origin bracket at:\n\tcode: '%s'",
+												   str::ValueToString<std::string>( &*bracketStack.front().second ).c_str() ),
+									  UTL_FILE_LINE );
+
+		return itLast;
+	}
+
+	template< typename CharT >
+	template< typename IteratorT >
+	bool CLanguage<CharT>::SkipPastMatchingBracket( IteratorT* pItBracket _in_out_, IteratorT itLast, IteratorT* pItBracketMismatch /*= nullptr*/ _out_ ) const throws_cond( code::TSyntaxError )
+	{	// find past the closing bracket matching the current bracket - compatible with found range bounds
+		ASSERT_PTR( pItBracket );
+		*pItBracket = FindMatchingBracket( *pItBracket, itLast, pItBracketMismatch );
+		if ( *pItBracket == itLast )
+			return false;
+
+		++*pItBracket;		// advance past the found matching bracket (for range computation)
+		return true;
+	}
+}
 
 
 namespace code

@@ -2,13 +2,13 @@
 #define Formatter_h
 #pragma once
 
+#include "utl/Code_fwd.h"
 #include "DocLanguage.h"
 #include "LanguageSearchEngine.h"
 
 
 namespace code
 {
-	enum TokenSpacing;
 	class CFormatterOptions;
 
 	typedef unsigned int TEditorColumn;
@@ -49,7 +49,7 @@ namespace code
 		CString generateConsecutiveNumbers( const TCHAR* pCodeText, unsigned int startingNumber = UINT_MAX ) throws_( CRuntimeException );
 		CString sortLines( const TCHAR* pCodeText, bool ascending ) throws_( CRuntimeException );
 
-		TokenSpacing MustSpaceBrace( TCHAR chrBrace ) const;
+		Spacing MustSpaceBrace( TCHAR chrBrace ) const;
 	protected:
 		void resetInternalState( void );
 	protected:

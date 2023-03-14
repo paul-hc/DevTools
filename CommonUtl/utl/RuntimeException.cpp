@@ -5,18 +5,40 @@
 #include <iostream>
 
 
+namespace hlp
+{
+	std::string MakeSrcFileMessage( const std::string& message, const char* pSrcFilePath, int lineNumber )
+	{
+		ASSERT_PTR( pSrcFilePath );
+		fs::CPath filePath( str::FromAnsi( pSrcFilePath ) );
+
+		// convert "C:\dev\DevTools\CommonUtl\utl\Command.cpp" to "utl/Command.cpp"
+		filePath = path::StripDirPrefix( filePath, filePath.GetParentPath().GetParentPath() );
+		str::Replace( filePath.Ref(), _T("\\"), _T("/") );
+
+		std::ostringstream os;
+		os << pSrcFilePath << '(' << lineNumber << ") : " << message;
+		return os.str();
+	}
+}
+
+
 CRuntimeException::CRuntimeException( void )
 {
 }
 
-CRuntimeException::CRuntimeException( const std::string& message )
+CRuntimeException::CRuntimeException( const std::string& message, const char* pSrcFilePath /*= nullptr*/, int lineNumber /*= 0*/ )
 	: m_message( message )
 {
+	if ( pSrcFilePath != nullptr )
+		m_message = hlp::MakeSrcFileMessage( m_message, pSrcFilePath, lineNumber );
 }
 
-CRuntimeException::CRuntimeException( const std::wstring& message )
+CRuntimeException::CRuntimeException( const std::wstring& message, const char* pSrcFilePath /*= nullptr*/, int lineNumber /*= 0*/ )
 	: m_message( str::ToUtf8( message.c_str() ) )
 {
+	if ( pSrcFilePath != nullptr )
+		m_message = hlp::MakeSrcFileMessage( m_message, pSrcFilePath, lineNumber );
 }
 
 CRuntimeException::~CRuntimeException() throw()

@@ -321,6 +321,7 @@
     <ClInclude Include="CodeProcessor.h" />
     <ClInclude Include="CodeUtilities.h" />
     <ClInclude Include="CompoundTextParser.h" />
+    <ClInclude Include="CppParser.hxx" />
     <ClInclude Include="IterationSlices.h" />
     <ClInclude Include="CppImplFormatter.h" />
     <ClInclude Include="DirPathGroup.h" />

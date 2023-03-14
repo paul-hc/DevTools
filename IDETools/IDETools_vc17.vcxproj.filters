@@ -412,6 +412,9 @@
     <ClInclude Include="CodeUtils.h">
       <Filter>Main Code\code + text</Filter>
     </ClInclude>
+    <ClInclude Include="CppParser.hxx">
+      <Filter>Main Code\code + text</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IDETools.rc">

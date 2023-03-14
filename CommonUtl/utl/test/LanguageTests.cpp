@@ -95,10 +95,10 @@ void CLanguageTests::TestMyLanguage( void )
 			}
 
 			{	// find token character
-				std::string::const_iterator itChar = myLang.FindNextCharThat( itBegin, itEnd, pred::IsChar( '=' ) );
+				std::string::const_iterator itChar = myLang.FindNextChar( itBegin, itEnd, '=' );
 				ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
 
-				itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar( '=' ) );
+				itChar = myLang.FindNextChar( itChar + 1, itEnd, '=' );
 				ASSERT( itChar == itEnd );
 			}
 
@@ -157,7 +157,7 @@ void CLanguageTests::TestMyLanguage( void )
 			std::string::const_reverse_iterator itChar = myLang.FindNextCharThat( itBegin, itEnd, pred::IsChar( '=' ) );
 			ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
 
-			itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar( '=' ) );
+			itChar = myLang.FindNextChar( itChar + 1, itEnd, '=' );
 			ASSERT( itChar == itEnd );
 		}
 
@@ -260,7 +260,7 @@ void CLanguageTests::TestMyLanguageSingleLine( void )
 			}
 
 			{	// find token character
-				std::string::const_iterator itChar = myLang.FindNextCharThat( itBegin, itEnd, pred::IsChar( '=' ) );
+				std::string::const_iterator itChar = myLang.FindNextChar( itBegin, itEnd, '=' );
 				ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
 
 				itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar( '=' ) );
@@ -319,7 +319,7 @@ void CLanguageTests::TestMyLanguageSingleLine( void )
 		}
 
 		{	// find token character
-			std::string::const_reverse_iterator itChar = myLang.FindNextCharThat( itBegin, itEnd, pred::IsChar( '=' ) );
+			std::string::const_reverse_iterator itChar = myLang.FindNextChar( itBegin, itEnd, '=' );
 			ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
 
 			itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar( '=' ) );
@@ -367,6 +367,17 @@ void CLanguageTests::TestBracketParity( void )
 
 				Range<size_t> posRange = str::MakePosRange( itRange, text.begin() );
 				ASSERT_EQUAL( Range<size_t>( 9, 40 ), posRange );
+			}
+			{	// find with skipping arg-lists
+				std::string::const_iterator itArgs2 = cppLang.FindNextSequence( text.begin(), itEnd, "std::pair<PathT" );
+				ASSERT_HAS_PREFIX( "std::pair<PathT", &*itArgs2 );
+
+				ASSERT_HAS_PREFIX( ", size_t", &*cppLang.FindNextChar( itArgs2, itEnd, ',' ) );				// the first ','
+				{
+					code::CLanguage<char>::CScopedSkipArgLists skipArgLists( &cppLang );
+					ASSERT_HAS_PREFIX( ", ObjectT >", &*cppLang.FindNextChar( itArgs2, itEnd, ',' ) );		// the second ',' <= skipped "<...>" arg-list
+				}
+				ASSERT_HAS_PREFIX( ", size_t", &*cppLang.FindNextChar( itArgs2, itEnd, ',' ) );				// the first ',' again
 			}
 		}
 		{	// by pointer
@@ -420,6 +431,8 @@ void CLanguageTests::TestBracketMismatch( void )
 			// matching bracket not found
 			ASSERT( itCloseBracket == itEnd );
 			ASSERT_HAS_PREFIX( "< std::pair", &*itBracketMismatch );		// first (originating) mismatching bracket
+
+			ASSERT_THROWS( code::TSyntaxError, cppLang.FindMatchingBracket( itOpenBracket, itEnd ) );	// mismatching bracket exception
 		}
 		{	// by pointer
 			const char* pEnd = str::s_end( text );
@@ -432,6 +445,8 @@ void CLanguageTests::TestBracketMismatch( void )
 			// matching bracket not found
 			ASSERT( pCloseBracket == pEnd );
 			ASSERT_HAS_PREFIX( "< std::pair", pBracketMismatch );		// first (originating) mismatching bracket
+
+			ASSERT_THROWS( code::TSyntaxError, cppLang.FindMatchingBracket( pOpenBracket, pEnd ) );		// mismatching bracket exception
 		}
 	}
 }
@@ -732,6 +747,59 @@ void CLanguageTests::TestCpp_ParseNumericLiteral( void )
 	}
 }
 
+void CLanguageTests::TestSpaceCode( void )
+{
+	std::string text;
+
+	code::SpaceCode( &text, code::RetainSpace );
+	ASSERT_EQUAL( "", text );
+
+	code::SpaceCode( &text, code::AddSpace );
+	ASSERT_EQUAL( "  ", text );
+
+	code::SpaceCode( &text, code::TrimSpace );
+	ASSERT_EQUAL( "", text );
+
+
+	text = "\t void   ";
+	code::SpaceCode( &text, code::RetainSpace );
+	ASSERT_EQUAL( "\t void   ", text );
+
+	code::SpaceCode( &text, code::AddSpace );
+	ASSERT_EQUAL( " void ", text );
+
+	code::SpaceCode( &text, code::TrimSpace );
+	ASSERT_EQUAL( "void", text );
+}
+
+void CLanguageTests::TestEncloseCode( void )
+{
+	std::string text;
+
+	code::EncloseCode( &text, "[[", "]]" );
+	ASSERT_EQUAL( "[[]]", text );
+
+	text = "index";
+	code::EncloseCode( &text, "[[", "]]" );
+	ASSERT_EQUAL( "[[index]]", text );
+	text = "index";
+	code::EncloseCode( &text, "[[", "]]", code::AddSpace );
+	ASSERT_EQUAL( "[[ index ]]", text );
+	text = "index";
+	code::EncloseCode( &text, "[[", "]]", code::TrimSpace );
+	ASSERT_EQUAL( "[[index]]", text );
+
+	text = "\t index   ";
+	code::EncloseCode( &text, "[[", "]]", code::RetainSpace );
+	ASSERT_EQUAL( "[[\t index   ]]", text );
+	text = "\t index   ";
+	code::EncloseCode( &text, "[[", "]]", code::AddSpace );
+	ASSERT_EQUAL( "[[ index ]]", text );
+	text = "\t index   ";
+	code::EncloseCode( &text, "[[", "]]", code::TrimSpace );
+	ASSERT_EQUAL( "[[index]]", text );
+}
+
 void CLanguageTests::TestUntabify( void )
 {
 	const std::string textTabs = "\
@@ -771,6 +839,8 @@ void CLanguageTests::Run( void )
 
 	RUN_TEST( TestC_EscapeSequences );
 	RUN_TEST( TestCpp_ParseNumericLiteral );
+	RUN_TEST( TestSpaceCode );
+	RUN_TEST( TestEncloseCode );
 	RUN_TEST( TestUntabify );
 }
 

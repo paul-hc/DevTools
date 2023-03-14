@@ -113,7 +113,7 @@ BOOL TextContent::LoadFile( LPCTSTR textFilePath )
 	{
 		std::ifstream input( textFilePath, std::ios_base::in | std::ios_base::binary );		// read line ends as "\r\n"
 		if ( !input.is_open() )
-			throw CRuntimeException( str::Format( _T("Unable to open text file %s."), textFilePath ) );
+			throw CRuntimeException( str::Format( _T("Unable to open text file %s."), textFilePath ), UTL_FILE_LINE );
 
 		std::ostringstream oss;
 		oss << input.rdbuf();
@@ -204,7 +204,7 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 
 	m_TextContent.Empty();
 
-	if ( multiLinesText != nullptr && multiLinesText[ 0 ] != _T('\0') )
+	if ( multiLinesText != nullptr && multiLinesText[ 0 ] != '\0' )
 	{
 		std::auto_ptr<TCHAR> textBuffer( new TCHAR[ _tcslen( multiLinesText ) + 1 ] );
 
@@ -260,7 +260,7 @@ void TextContent::ClearFieldReplacements( void )
 
 BSTR TextContent::FormatTimestamp( DATE timestamp, LPCTSTR strftimeFormat )
 {
-	const TCHAR* format = strftimeFormat != nullptr && strftimeFormat[ 0 ] != _T('\0') ? strftimeFormat : _T("%d-%b-%Y");
+	const TCHAR* format = strftimeFormat != nullptr && strftimeFormat[ 0 ] != '\0' ? strftimeFormat : _T("%d-%b-%Y");
 	CString timestampAsString = COleDateTime( timestamp ).Format( format );
 
 	return timestampAsString.AllocSysString();

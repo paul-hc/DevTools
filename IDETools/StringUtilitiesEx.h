@@ -57,7 +57,7 @@ namespace str
 		ASSERT( str != nullptr );
 		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 
-		while ( str[ rPos ] != _T('\0') && _istspace( str[ rPos ] ) )
+		while ( str[ rPos ] != '\0' && _istspace( str[ rPos ] ) )
 			++rPos;
 	}
 
@@ -68,7 +68,7 @@ namespace str
 		ASSERT( str != nullptr );
 		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 
-		while ( str[ rPos ] != _T('\0') && !_istspace( str[ rPos ] ) )
+		while ( str[ rPos ] != '\0' && !_istspace( str[ rPos ] ) )
 			++rPos;
 	}
 

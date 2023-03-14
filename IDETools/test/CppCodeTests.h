@@ -19,6 +19,8 @@ public:
 private:
 	void TestCompoundTextParser( void );
 	void TestIterationSlices( void );
+	void TestResolveDefaultParams( void );
+	void TestExtractTemplateInstance( void );
 };
 
 

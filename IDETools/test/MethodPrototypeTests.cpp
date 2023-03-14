@@ -3,7 +3,6 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "utl/StringUtilities.h"
-#include "CppParser.h"
 #include "MethodPrototype.h"
 #include "CppImplFormatter.h"
 #include "FormatterOptions.h"
@@ -167,48 +166,6 @@ inline std::pair<ObjectT*, cache::TStatusFlags> CCacheLoader<PathT, ObjectT>::")
 		ASSERT_EQUAL( _T("CCacheLoader<PathT, ObjectT>::"), proto.m_classQualifier.MakeToken( method ) );
 		ASSERT_EQUAL( _T(""), proto.m_argList.MakeToken( method ) );
 		ASSERT_EQUAL( _T(""), proto.m_postArgListSuffix.MakeToken( method ) );
-	}
-}
-
-void CMethodPrototypeTests::TestResolveDefaultParams( void )
-{
-	const CCppParser cppParser;
-
-	{	// simple
-		std::string proto = "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth = 2 + 3, std::wstring const& text = L\"END\", const char delim = '|' );";
-
-		ASSERT_EQUAL( "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth /*= 2 + 3*/, std::wstring const& text /*= L\"END\"*/, const char delim /*= '|'*/ );",
-					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
-
-		ASSERT_EQUAL( "\tstd::pair<int, bool> Func( UINT pos, size_t pos /*= utl::npos*/, int depth, std::wstring const& text, const char delim );",
-					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
-	}
-	{	// operator, no trailing ';'
-		std::string proto = "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair = std::make_pair( FirstT(), SecondT() ) )";
-
-		ASSERT_EQUAL( "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair /*= std::make_pair( FirstT(), SecondT() )*/ )",
-					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
-
-		ASSERT_EQUAL( "\tinline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair )",
-					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
-	}
-	{	// break protected words
-		std::string proto = "char Filter( const char** ppSrc = defPtr() _in_out_, size_t* pLength = nullptr _out_ )";
-
-		ASSERT_EQUAL( "char Filter( const char** ppSrc /*= defPtr()*/ _in_out_, size_t* pLength /*= nullptr*/ _out_ )",
-					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
-
-		ASSERT_EQUAL( "char Filter( const char** ppSrc _in_out_, size_t* pLength _out_ )",
-					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
-	}
-	{	// more involved cast expressions, unicode strings
-		std::tstring proto = _T("\tstd::pair<int, bool> Func( int depth = 5, TCHAR* pAtom = (TCHAR*)(const TCHAR*)str::GetEmpty().c_str(), const fs::CPath& item = _T(\"END\") );");
-
-		ASSERT_EQUAL( _T("\tstd::pair<int, bool> Func( int depth /*= 5*/, TCHAR* pAtom /*= (TCHAR*)(const TCHAR*)str::GetEmpty().c_str()*/, const fs::CPath& item /*= _T(\"END\")*/ );"),
-					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
-
-		ASSERT_EQUAL( _T("\tstd::pair<int, bool> Func( int depth, TCHAR* pAtom, const fs::CPath& item );"),
-					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
 	}
 }
 
@@ -407,7 +364,6 @@ void CMethodPrototypeTests::Run( void )
 	RUN_TEST( TestParse_ClassMethodImpl );
 	RUN_TEST( TestParse_TemplateMethodImpl );
 
-	RUN_TEST( TestResolveDefaultParams );
 	RUN_TEST( TestImplementMethodBlock );
 }
 

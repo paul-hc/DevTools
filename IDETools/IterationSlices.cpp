@@ -9,6 +9,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/Language.hxx"
+
 
 namespace code
 {
@@ -48,13 +50,13 @@ namespace code
 
 		m_containerType.m_start = m_containerType.m_end = pos;
 
-		while ( m_pCodeText[ pos ] != _T('\0') )
+		while ( m_pCodeText[ pos ] != '\0' )
 			if ( '<' == m_pCodeText[ pos ] )
 			{
 				int bracketEndPos = codeParser.FindPosMatchingBracket( pos );
 
 				if ( -1 == bracketEndPos )
-					throw CRuntimeException( str::Format( _T("Syntax error: cannot find ending template brace for statement '%s'"), m_pCodeText ) );
+					throw CRuntimeException( str::Format( _T("Syntax error: cannot find ending template brace for statement '%s'"), m_pCodeText ), UTL_FILE_LINE );
 
 				m_valueType.SetRange( ++pos, bracketEndPos );
 				m_valueType.Trim( codeText );
@@ -71,7 +73,7 @@ namespace code
 				++pos;
 
 		if ( m_containerType.IsEmpty() )
-			throw CRuntimeException( str::Format( _T("Syntax error: cannot find container type in statement '%s'"), m_pCodeText ) );
+			throw CRuntimeException( str::Format( _T("Syntax error: cannot find container type in statement '%s'"), m_pCodeText ), UTL_FILE_LINE );
 
 		codeParser.SkipWhitespace( &pos );
 
@@ -86,7 +88,7 @@ namespace code
 		codeParser.SkipAnyNotOf( &m_containerName.m_end, _T(",; \t\r\n") );
 
 		if ( m_containerName.IsEmpty() )
-			throw CRuntimeException( str::Format( _T("Syntax error: cannot find container variable in statement '%s'"), m_pCodeText ) );
+			throw CRuntimeException( str::Format( _T("Syntax error: cannot find container variable in statement '%s'"), m_pCodeText ), UTL_FILE_LINE );
 
 		ExtractIteratorName();
 

@@ -75,12 +75,6 @@ namespace code
 	CString& convertToWindowsLineEnds( CString& targetCodeText );
 	CString& convertToUnixLineEnds( CString& targetCodeText );
 
-	namespace cpp
-	{
-		CString formatEscapeSequence( const TCHAR* pCodeText );
-		CString parseEscapeSequences( const TCHAR* pDisplayText );
-	}
-
 	// Code parsing (high level)
 	int findMatchingQuotePos( const TCHAR* str, int openQuotePos );
 

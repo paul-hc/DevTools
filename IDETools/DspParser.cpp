@@ -104,7 +104,7 @@ CString DspParser::getNextToken( void ) throws_( Exception )
 
 	switch ( linePtr[ m_tokenStart ] )
 	{
-		case _T('\0'):
+		case '\0':
 		case chSingleLineComment:
 			throw EndOfLine;
 		case chPreprocessor:
@@ -146,7 +146,7 @@ bool DspParser::isNormalTokenBreak( void )
 	const TCHAR		*linePtr = m_line;
 	TCHAR			endChr = linePtr[ m_tokenEnd ];
 	int				tokenLen = m_tokenEnd - m_tokenStart;
-	bool			_isTokenBreak = endChr == _T('\0') ||						// End of line
+	bool			_isTokenBreak = endChr == '\0' ||						// End of line
 									str::isCharOneOf( endChr, whitespaces ) ||	// Whitespace
 									endChr == stringDelims[ 0 ];				// String begin
 
@@ -258,7 +258,7 @@ CString DspParser::GetAdditionalIncludePath( const TCHAR* activeConfiguration /*
 
 	try
 	{	// Search for the active configuration if it's specified
-		if ( activeConfiguration != nullptr && *activeConfiguration != _T('\0') )
+		if ( activeConfiguration != nullptr && *activeConfiguration != '\0' )
 			if ( findConfiguration( activeConfiguration ) )
 				foundFirstConfig = true;
 			else if ( useAnyConfig )

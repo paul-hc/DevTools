@@ -112,7 +112,7 @@ CString FileSearch::doFindAllFiles( LPCTSTR filePattern, LPCTSTR separator, long
 	CString			foundPaths;
 	BOOL			found = FindFile( filePattern );
 
-	ASSERT( separator != nullptr && *separator != _T('\0') );
+	ASSERT( separator != nullptr && *separator != '\0' );
 	for ( ; found; ++outFileCount )
 	{
 		if ( !foundPaths.IsEmpty() )
@@ -337,7 +337,7 @@ BSTR FileSearch::FindAllFiles( LPCTSTR filePattern, LPCTSTR separator, long FAR*
 	CString foundPaths;
 	long fileCount = 0;
 
-	if ( separator == nullptr || *separator == _T('\0') )
+	if ( separator == nullptr || *separator == '\0' )
 		separator = _T(";");
 	foundPaths = doFindAllFiles( filePattern, separator, fileCount, recurseSubDirs );
 
@@ -370,7 +370,7 @@ BSTR FileSearch::BuildSubDirFilePattern( LPCTSTR filePattern )
 		int len = subDirPath.GetLength();
 		TCHAR drive[ _MAX_DRIVE ], dir[ _MAX_DIR ], fname[ _MAX_FNAME ], ext[ _MAX_EXT ];
 
-		if ( filePattern == nullptr || *filePattern == _T('\0') )
+		if ( filePattern == nullptr || *filePattern == '\0' )
 			filePattern = _T("*.*");
 		// Append a trailing backslash if not already
 		if ( len > 3 )

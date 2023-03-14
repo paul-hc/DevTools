@@ -269,17 +269,17 @@ BSTR CodeProcessor::SortLines( LPCTSTR codeText, BOOL ascending )
 }
 
 BSTR CodeProcessor::AutoMakeCode( LPCTSTR codeText )
-{
+{	// 'DESCRIPTION: (***) Automatically generates pre-defined code constructs [Ctrl+9]
 	code::CCppImplFormatter cppCodeFormatter( app::GetModuleSession().GetCodeFormatterOptions() );
 
 	cppCodeFormatter.setDocLanguage( m_docLanguage );
 	cppCodeFormatter.setTabSize( m_tabSize );
 	cppCodeFormatter.setUseTabs( m_useTabs != FALSE );
 
-	CString newCodeText;
+	std::tstring newCodeText;
 
-	PROCESS_CODE( newCodeText, codeText, cppCodeFormatter.autoMakeCode( codeText ) )
-	return newCodeText.AllocSysString();
+	PROCESS_CODE( newCodeText, codeText, cppCodeFormatter.AutoMakeCode( codeText ) )
+	return str::AllocSysString( newCodeText );
 }
 
 BSTR CodeProcessor::TokenizeText( LPCTSTR codeText )
@@ -290,8 +290,8 @@ BSTR CodeProcessor::TokenizeText( LPCTSTR codeText )
 	cppCodeFormatter.setTabSize( m_tabSize );
 	cppCodeFormatter.setUseTabs( m_useTabs != FALSE );
 
-	CString newCodeText;
+	std::tstring newCodeText;
 
-	PROCESS_CODE( newCodeText, codeText, cppCodeFormatter.tokenizeText( codeText ) )
-	return newCodeText.AllocSysString();
+	PROCESS_CODE( newCodeText, codeText, cppCodeFormatter.TokenizeText( codeText ) )
+	return str::AllocSysString( newCodeText );
 }

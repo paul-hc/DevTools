@@ -5,12 +5,15 @@
 #include <exception>
 
 
+#define UTL_FILE_LINE  __FILE__, __LINE__
+
+
 class CRuntimeException : public std::exception
 {
 public:
 	CRuntimeException( void );
-	CRuntimeException( const std::string& message );
-	CRuntimeException( const std::wstring& message );
+	CRuntimeException( const std::string& message, const char* pSrcFilePath = nullptr, int lineNumber = 0 );
+	CRuntimeException( const std::wstring& message, const char* pSrcFilePath = nullptr, int lineNumber = 0 );
 	virtual ~CRuntimeException() throw();
 
 	virtual const char* what( void ) const throw() { return m_message.c_str(); }

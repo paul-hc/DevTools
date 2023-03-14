@@ -112,7 +112,7 @@ inline bool DspParser::isTokenCharMatch( const TCHAR* pStr, TCHAR tokenChar, str
 		pStr != nullptr &&
 		( caseType == str::Case ? ( pStr[ 0 ] == tokenChar )
 								: ( _totlower( pStr[ 0 ] ) == _totlower( tokenChar ) ) ) &&
-		_T('\0') == pStr[ 1 ];
+		'\0' == pStr[ 1 ];
 }
 
 inline bool DspParser::isStringToken( const TCHAR* token )

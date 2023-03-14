@@ -56,33 +56,33 @@ namespace code
 
 		// brace rules
 		m_braceRules.reserve( 4 );
-		m_braceRules.push_back( CBraceRule( _T('('), _T(')'), InsertOneSpace, true ) );
-		m_braceRules.push_back( CBraceRule( _T('<'), _T('>'), PreserveSpace, true ) );
-		m_braceRules.push_back( CBraceRule( _T('['), _T(']'), InsertOneSpace ) );
-		m_braceRules.push_back( CBraceRule( _T('{'), _T('}'), InsertOneSpace ) );
+		m_braceRules.push_back( CBraceRule( _T('('), _T(')'), AddSpace, true ) );
+		m_braceRules.push_back( CBraceRule( _T('<'), _T('>'), RetainSpace, true ) );
+		m_braceRules.push_back( CBraceRule( _T('['), _T(']'), AddSpace ) );
+		m_braceRules.push_back( CBraceRule( _T('{'), _T('}'), AddSpace ) );
 
 		// operator rules
 		m_operatorRules.reserve( 25 );
-		m_operatorRules.push_back( COperatorRule( _T(","), RemoveSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T(";"), RemoveSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("."), RemoveSpace, RemoveSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("->"), RemoveSpace, RemoveSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("::"), PreserveSpace, RemoveSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T(":"), PreserveSpace, PreserveSpace ) );		// order is important, must come after ::
-		m_operatorRules.push_back( COperatorRule( _T("=="), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("!="), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("="), InsertOneSpace, InsertOneSpace ) );		// order is important, must come after ==, !=
-		m_operatorRules.push_back( COperatorRule( _T("+="), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("-="), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("&&"), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("||"), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("|"), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("<="), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T(">="), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("<<"), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T(">>"), InsertOneSpace, InsertOneSpace ) );
-		m_operatorRules.push_back( COperatorRule( _T("<"), InsertOneSpace, InsertOneSpace ) );		// order is important, must come after <<
-		m_operatorRules.push_back( COperatorRule( _T(">"), InsertOneSpace, InsertOneSpace ) );		// order is important, must come after >
+		m_operatorRules.push_back( COperatorRule( _T(","), TrimSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T(";"), TrimSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("."), TrimSpace, TrimSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("->"), TrimSpace, TrimSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("::"), RetainSpace, TrimSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T(":"), RetainSpace, RetainSpace ) );	// order is important, must come after ::
+		m_operatorRules.push_back( COperatorRule( _T("=="), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("!="), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("="), AddSpace, AddSpace ) );				// order is important, must come after ==, !=
+		m_operatorRules.push_back( COperatorRule( _T("+="), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("-="), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("&&"), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("||"), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("|"), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("<="), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T(">="), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("<<"), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T(">>"), AddSpace, AddSpace ) );
+		m_operatorRules.push_back( COperatorRule( _T("<"), AddSpace, AddSpace ) );				// order is important, must come after <<
+		m_operatorRules.push_back( COperatorRule( _T(">"), AddSpace, AddSpace ) );				// order is important, must come after >
 
 		m_sortedOperatorRules = m_operatorRules;
 		typedef pred::CompareAdapter<pred::CompareValue, func::ToOpRuleLength> TCompareOpRuleLength;
@@ -138,11 +138,11 @@ namespace code
 		return nullptr;
 	}
 
-	TokenSpacing CFormatterOptions::MustSpaceBrace( TCHAR chr ) const
+	Spacing CFormatterOptions::MustSpaceBrace( TCHAR chr ) const
 	{
 		CBraceRule* brace = FindBraceRule( chr );
 
-		return brace != nullptr ? brace->m_spacing : PreserveSpace;
+		return brace != nullptr ? brace->m_spacing : RetainSpace;
 	}
 
 	bool CFormatterOptions::IsArgListBrace( TCHAR chr ) const
@@ -181,32 +181,32 @@ namespace code
 		return argListBraces;
 	}
 
-	TokenSpacing CFormatterOptions::SpacingFromChar( TCHAR chr )
+	Spacing CFormatterOptions::SpacingFromChar( TCHAR chr )
 	{
 		switch ( chr )
 		{
 			case _T('0'):
-				return RemoveSpace;
+				return TrimSpace;
 			case _T('1'):
-				return InsertOneSpace;
+				return AddSpace;
 			default:
 				ASSERT( false );
 			case _T('-'):
-				return PreserveSpace;
+				return RetainSpace;
 		}
 	}
 
-	TCHAR CFormatterOptions::SpacingToChar( TokenSpacing spacing )
+	TCHAR CFormatterOptions::SpacingToChar( Spacing spacing )
 	{
 		switch ( spacing )
 		{
-			case RemoveSpace:
+			case TrimSpace:
 				return _T('0');
-			case InsertOneSpace:
+			case AddSpace:
 				return _T('1');
 			default:
 				ASSERT( false );
-			case PreserveSpace:
+			case RetainSpace:
 				return _T('-');
 		}
 	}
@@ -226,7 +226,7 @@ namespace code
 
 	void CFormatterOptions::CBraceRule::SaveToRegistry( void ) const
 	{
-		TCHAR value[ 3 ] = { CFormatterOptions::SpacingToChar( m_spacing ), m_isArgList ? _T('1') : _T('0'), _T('\0') };
+		TCHAR value[ 3 ] = { CFormatterOptions::SpacingToChar( m_spacing ), m_isArgList ? _T('1') : _T('0'), '\0' };
 		AfxGetApp()->WriteProfileString( reg::section_braces.GetPtr(), m_regEntry.c_str(), value );
 	}
 
@@ -245,7 +245,7 @@ namespace code
 
 	void CFormatterOptions::COperatorRule::SaveToRegistry( void ) const
 	{
-		TCHAR value[ 3 ] = { CFormatterOptions::SpacingToChar( m_spaceBefore ), CFormatterOptions::SpacingToChar( m_spaceAfter ), _T('\0') };
+		TCHAR value[ 3 ] = { CFormatterOptions::SpacingToChar( m_spaceBefore ), CFormatterOptions::SpacingToChar( m_spaceAfter ), '\0' };
 		AfxGetApp()->WriteProfileString( reg::section_operators.GetPtr(), m_regEntry.c_str(), value );
 	}
 

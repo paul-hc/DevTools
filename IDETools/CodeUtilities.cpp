@@ -52,7 +52,7 @@ namespace code
 			return true;
 
 		return isLineBreakEscapeChar( *chrPtr, docLanguage ) &&
-			   ( chrPtr[ 1 ] == _T('\0') || isLineEndChar( chrPtr[ 1 ] ) );
+			   ( chrPtr[ 1 ] == '\0' || isLineEndChar( chrPtr[ 1 ] ) );
 	}
 
 	TCHAR getMatchingBrace( TCHAR chBrace )
@@ -105,7 +105,7 @@ namespace code
 
 		const TCHAR* cursor = str + openQuotePos + 1;
 
-		while ( *cursor != _T('\0') )
+		while ( *cursor != '\0' )
 			if ( *cursor == matchingQuote )
 				return int( cursor - str );		// found the matching quote -> return the position
 			else if ( *cursor == _T('\\') )
@@ -142,7 +142,7 @@ namespace code
 
 		const TCHAR* cursorNonWS = str + startPos;
 
-		while ( *cursorNonWS != _T('\0') && !_istspace( *cursorNonWS ) )
+		while ( *cursorNonWS != '\0' && !_istspace( *cursorNonWS ) )
 			++cursorNonWS;
 
 		return int( cursorNonWS - str );
@@ -157,82 +157,10 @@ namespace code
 
 		const TCHAR* cursorNonWS = str + startPos;
 
-		while ( *cursorNonWS != _T('\0') && _istspace( *cursorNonWS ) )
+		while ( *cursorNonWS != '\0' && _istspace( *cursorNonWS ) )
 			++cursorNonWS;
 
 		return int( cursorNonWS - str );
-	}
-
-	namespace cpp
-	{
-		CString formatEscapeSequence( const TCHAR* pCodeText )
-		{
-			ASSERT( pCodeText != nullptr );
-
-			CString displayText;
-			TCHAR* pOut = displayText.GetBuffer( 2 * str::Length( pCodeText ) );
-
-			for ( const TCHAR* pSource = pCodeText; *pSource != _T('\0'); ++pSource )
-				switch ( *pSource )
-				{
-					case _T('\r'): *pOut++ = _T('\\'); *pOut++ = _T('r'); break;
-					case _T('\n'): *pOut++ = _T('\\'); *pOut++ = _T('n'); break;
-					case _T('\t'): *pOut++ = _T('\\'); *pOut++ = _T('t'); break;
-					case _T('\v'): *pOut++ = _T('\\'); *pOut++ = _T('v'); break;
-					case _T('\a'): *pOut++ = _T('\\'); *pOut++ = _T('a'); break;
-					case _T('\b'): *pOut++ = _T('\\'); *pOut++ = _T('b'); break;
-					case _T('\f'): *pOut++ = _T('\\'); *pOut++ = _T('f'); break;
-					case _T('\"'): *pOut++ = _T('\\'); *pOut++ = _T('\"'); break;
-					case _T('\''): *pOut++ = _T('\\'); *pOut++ = _T('\''); break;
-					case _T('\\'): *pOut++ = _T('\\'); *pOut++ = _T('\\'); break;
-					case _T('\?'): *pOut++ = _T('\\'); *pOut++ = _T('?'); break;
-					default:
-						*pOut++ = *pSource;
-						break;
-				}
-
-			*pOut = _T('\0');
-			displayText.ReleaseBuffer();
-
-			return displayText;
-		}
-
-		CString parseEscapeSequences( const TCHAR* pDisplayText )
-		{
-			ASSERT( pDisplayText != nullptr );
-
-			CString codeText;
-			TCHAR* pOut = codeText.GetBuffer( 2 * str::Length( pDisplayText ) );
-
-			for ( const TCHAR* pSource = pDisplayText; *pSource != _T('\0'); ++pSource )
-				if ( *pSource == _T('\\') )
-					switch ( *++pSource )
-					{
-						case _T('r'):  *pOut++ = _T('\r'); break;
-						case _T('n'):  *pOut++ = _T('\n'); break;
-						case _T('t'):  *pOut++ = _T('\t'); break;
-						case _T('v'):  *pOut++ = _T('\v'); break;
-						case _T('a'):  *pOut++ = _T('\a'); break;
-						case _T('b'):  *pOut++ = _T('\b'); break;
-						case _T('f'):  *pOut++ = _T('\f'); break;
-						case _T('\"'): *pOut++ = _T('\"'); break;
-						case _T('\''): *pOut++ = _T('\''); break;
-						case _T('\\'): *pOut++ = _T('\\'); break;
-						case _T('?'):  *pOut++ = _T('\?'); break;
-						default:
-							// bad escape -> consider it an '\'
-							*pOut++ = *--pSource;
-							MessageBeep( MB_ICONERROR );
-							break;
-					}
-				else
-					*pOut++ = *pSource;
-
-			*pOut = _T('\0');
-			codeText.ReleaseBuffer();
-
-			return codeText;
-		}
 	}
 
 } // namespace code

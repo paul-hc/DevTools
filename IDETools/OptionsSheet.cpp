@@ -208,7 +208,7 @@ void CCodingStandardPage::BnClicked_BraceRulesButton( UINT cmdId )
 	code::CFormatterOptions::CBraceRule& rBraceRule = m_braceRules[ selIndex ];
 
 	rBraceRule.m_isArgList = IsDlgButtonChecked( IDC_IS_ARGUMENT_LIST_BRACKET_CHECK ) != FALSE;
-	rBraceRule.m_spacing = code::TokenSpacing( GetCheckedRadioButton( IDC_REMOVE_SPACES_RADIO, IDC_PRESERVE_SPACES_RADIO ) - IDC_REMOVE_SPACES_RADIO );
+	rBraceRule.m_spacing = code::Spacing( GetCheckedRadioButton( IDC_REMOVE_SPACES_RADIO, IDC_PRESERVE_SPACES_RADIO ) - IDC_REMOVE_SPACES_RADIO );
 }
 
 void CCodingStandardPage::BnClicked_OperatorRulesButton( UINT cmdId )
@@ -219,8 +219,8 @@ void CCodingStandardPage::BnClicked_OperatorRulesButton( UINT cmdId )
 
 	code::CFormatterOptions::COperatorRule& rOperatorRule = m_operatorRules[ selIndex ];
 
-	rOperatorRule.m_spaceBefore = code::TokenSpacing( GetCheckedRadioButton( IDC_OP_BEFORE_REMOVE_SPACES_RADIO, IDC_OP_BEFORE_PRESERVE_SPACES_RADIO ) - IDC_OP_BEFORE_REMOVE_SPACES_RADIO );
-	rOperatorRule.m_spaceAfter = code::TokenSpacing( GetCheckedRadioButton( IDC_OP_AFTER_REMOVE_SPACES_RADIO, IDC_OP_AFTER_PRESERVE_SPACES_RADIO ) - IDC_OP_AFTER_REMOVE_SPACES_RADIO );
+	rOperatorRule.m_spaceBefore = code::Spacing( GetCheckedRadioButton( IDC_OP_BEFORE_REMOVE_SPACES_RADIO, IDC_OP_BEFORE_PRESERVE_SPACES_RADIO ) - IDC_OP_BEFORE_REMOVE_SPACES_RADIO );
+	rOperatorRule.m_spaceAfter = code::Spacing( GetCheckedRadioButton( IDC_OP_AFTER_REMOVE_SPACES_RADIO, IDC_OP_AFTER_PRESERVE_SPACES_RADIO ) - IDC_OP_AFTER_REMOVE_SPACES_RADIO );
 }
 
 
