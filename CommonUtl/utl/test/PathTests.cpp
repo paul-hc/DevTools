@@ -124,6 +124,34 @@ void CPathTests::TestPathIs( void )
 		ASSERT( path::IsRelative( _T("file.txt") ) );
 }
 
+void CPathTests::TestPathConversion( void )
+{
+	fs::CPath filePath;
+
+	ASSERT_EQUAL( _T(""), filePath = filePath.MakeUnixPath() );
+	ASSERT_EQUAL( _T(""), filePath.MakeWindowsPath() );
+
+	filePath.Set( _T("\\") );
+	ASSERT_EQUAL( _T("/"), filePath = filePath.MakeUnixPath() );
+	ASSERT_EQUAL( _T("\\"), filePath.MakeWindowsPath() );
+
+	filePath.Set( _T("X:\\") );
+	ASSERT_EQUAL( _T("X:/"), filePath = filePath.MakeUnixPath() );
+	ASSERT_EQUAL( _T("X:\\"), filePath.MakeWindowsPath() );
+
+	filePath.Set( _T("\\\\server") );
+	ASSERT_EQUAL( _T("//server"), filePath = filePath.MakeUnixPath() );
+	ASSERT_EQUAL( _T("\\\\server"), filePath.MakeWindowsPath() );
+
+	filePath.Set( _T("\\\\server\\share") );
+	ASSERT_EQUAL( _T("//server/share"), filePath = filePath.MakeUnixPath() );
+	ASSERT_EQUAL( _T("\\\\server\\share"), filePath.MakeWindowsPath() );
+
+	filePath.Set( _T("X:\\Dir\\Sub\\name.ext") );
+	ASSERT_EQUAL( _T("X:/Dir/Sub/name.ext"), filePath = filePath.MakeUnixPath() );
+	ASSERT_EQUAL( _T("X:\\Dir\\Sub\\name.ext"), filePath.MakeWindowsPath() );
+}
+
 void CPathTests::TestPathUtilities( void )
 {
 	// rooth path:
@@ -136,7 +164,7 @@ void CPathTests::TestPathUtilities( void )
 	ASSERT_EQUAL( _T("X:\\A\\C"), path::MakeCanonical( _T("X:\\A\\.\\B\\..\\C") ) );
 	ASSERT_EQUAL( _T("X:\\A\\C"), path::MakeCanonical( _T("X:/A/./B/../C") ) );
 
-	ASSERT_EQUAL( _T("X:\\A\\.\\B\\..\\C"), path::MakeNormal( _T("X:\\A/./B/../C") ) );
+	ASSERT_EQUAL( _T("X:\\A\\.\\B\\..\\C"), path::MakeWindows( _T("X:\\A/./B/../C") ) );
 
 	ASSERT_EQUAL( _T("X:\\A\\B\\file.txt"), path::Combine( _T("X:\\A\\B"), _T("file.txt") ) );
 	ASSERT_EQUAL( _T("X:\\A\\B\\subdir\\file.txt"), path::Combine( _T("X:\\A\\B"), _T("subdir\\file.txt") ) );
@@ -552,14 +580,14 @@ void CPathTests::TestPathNaturalSort( void )
 void CPathTests::TestPathCompareFind( void )
 {
 	{
-		ASSERT( path::EquivalentPtr( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
-		ASSERT( !path::EqualsPtr( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
+		ASSERT( path::Equivalent( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
+		ASSERT( !path::Equals( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
 
-		ASSERT( !path::EquivalentPtr( _T("a:\\list.txt"), _T("x:/fname.ext") ) );
-		ASSERT( !path::EqualsPtr( _T("a:\\list.txt"), _T("x:/fname.ext") ) );
+		ASSERT( !path::Equivalent( _T("a:\\list.txt"), _T("x:/fname.ext") ) );
+		ASSERT( !path::Equals( _T("a:\\list.txt"), _T("x:/fname.ext") ) );
 
-		ASSERT_EQUAL( pred::Equal, path::CompareNPtr( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
-		ASSERT_EQUAL( pred::Less, path::CompareNPtr( _T("name 05.ext"), _T("name 10.ext") ) );
+		ASSERT_EQUAL( pred::Equal, path::CompareEquivalent( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
+		ASSERT_EQUAL( pred::Less, path::CompareEquivalent( _T("name 05.ext"), _T("name 10.ext") ) );
 	}
 	{
 		static const fs::CPath windowsPath( _T("X:\\DIR\\SUB\\NAME.EXT") );
@@ -929,6 +957,7 @@ void CPathTests::Run( void )
 {
 	RUN_TEST( TestPathBasics );
 	RUN_TEST( TestPathIs );
+	RUN_TEST( TestPathConversion );
 	RUN_TEST( TestPathUtilities );
 	RUN_TEST( TestPathSort );
 	RUN_TEST( TestPathSortExisting );

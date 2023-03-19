@@ -80,7 +80,7 @@ namespace str
 
 
 		template< typename IteratorT >
-		bool MatchesAnySequence( TSeqMatchPos* pOutSeqMatchPos _out_, IteratorT itText, IteratorT itLast ) const
+		bool MatchesAnySequence( OUT TSeqMatchPos* pOutSeqMatchPos, IteratorT itText, IteratorT itLast ) const
 		{
 			REQUIRE( itText != itLast );
 			for ( TSeqMatchPos i = 0; i != m_sequences.size(); ++i )
@@ -97,7 +97,7 @@ namespace str
 		}
 
 		template< typename StringT >
-		inline bool MatchesAnySequenceAt( TSeqMatchPos* pOutSeqMatchPos _out_, const StringT& text, size_t pos ) const
+		inline bool MatchesAnySequenceAt( OUT TSeqMatchPos* pOutSeqMatchPos, const StringT& text, size_t pos ) const
 		{
 			REQUIRE( pos < text.length() );
 			return MatchesAnySequence( pOutSeqMatchPos, text.begin() + pos, text.end() );
@@ -105,7 +105,7 @@ namespace str
 
 
 		template< typename IteratorT >
-		bool SkipAnyMatchingSequence( IteratorT* pItText _in_out_, IteratorT itLast, TSeqMatchPos* pSeqMatchPos = nullptr _out_ ) const
+		bool SkipAnyMatchingSequence( IN OUT IteratorT* pItText, IteratorT itLast, OUT TSeqMatchPos* pSeqMatchPos = nullptr ) const
 		{
 			ASSERT_PTR( pItText );
 			TSeqMatchPos seqMatchPos = utl::npos;
@@ -118,7 +118,7 @@ namespace str
 		}
 
 		template< typename StringT >
-		bool SkipAnyMatchingSequenceAt( size_t* pPos _in_out_, const StringT& text, TSeqMatchPos* pSeqMatchPos = nullptr _out_ ) const
+		bool SkipAnyMatchingSequenceAt( IN OUT size_t* pPos, const StringT& text, OUT TSeqMatchPos* pSeqMatchPos = nullptr ) const
 		{
 			ASSERT_PTR( pPos );
 			ASSERT( *pPos < text.length() );
@@ -177,7 +177,7 @@ namespace str
 
 		// FORWARD direction:
 
-		size_t FindAnyStartSep( TSepMatchPos* pOutSepMatchPos _out_, const TString& text, size_t offset = 0 ) const
+		size_t FindAnyStartSep( OUT TSepMatchPos* pOutSepMatchPos, const TString& text, size_t offset = 0 ) const
 		{
 			ASSERT_PTR( pOutSepMatchPos );
 
@@ -196,7 +196,7 @@ namespace str
 			return TString::npos;
 		}
 
-		bool MatchesAnyStartSepAt( TSepMatchPos* pOutSepMatchPos _out_, const TString& text, size_t offset ) const	// use this in outside loops
+		bool MatchesAnyStartSepAt( OUT TSepMatchPos* pOutSepMatchPos, const TString& text, size_t offset ) const	// use this in outside loops
 		{
 			REQUIRE( offset != text.length() );
 
@@ -224,7 +224,7 @@ namespace str
 		const TString& GetMatchingCloseSep( TSepMatchPos sepMatchPos, IterationDir iterDir ) const { REQUIRE( IsValidMatchPos( sepMatchPos ) ); return GetCloseSeparators( iterDir )[ sepMatchPos ]; }
 
 		template< typename IteratorT >
-		bool MatchesAnyOpenSepAt( TSepMatchPos* pOutSepMatchPos _out_, IteratorT itText, IteratorT itLast ) const
+		bool MatchesAnyOpenSepAt( OUT TSepMatchPos* pOutSepMatchPos, IteratorT itText, IteratorT itLast ) const
 		{
 			return MatchesAnySepAt( pOutSepMatchPos, itText, itLast, GetOpenSeparators( GetIterationDir( itText ) ) );
 		}
@@ -243,7 +243,7 @@ namespace str
 		// parsing methods:
 
 		template< typename IteratorT >
-		bool SkipMatchingSpec( IteratorT* pItText _in_out_, IteratorT itLast, TSepMatchPos sepMatchPos ) const
+		bool SkipMatchingSpec( IN OUT IteratorT* pItText, IteratorT itLast, TSepMatchPos sepMatchPos ) const
 		{
 			// skip the code sequence "<openSep>item<closeSep>"
 			ASSERT_PTR( pItText );
@@ -299,7 +299,7 @@ namespace str
 		}
 
 		template< typename IteratorT >
-		bool MatchesAnySepAt( TSepMatchPos* pOutSepMatchPos _out_, IteratorT itText, IteratorT itLast, const TSepVector& separators ) const
+		bool MatchesAnySepAt( OUT TSepMatchPos* pOutSepMatchPos, IteratorT itText, IteratorT itLast, const TSepVector& separators ) const
 		{
 			REQUIRE( itText != itLast );
 
@@ -417,7 +417,7 @@ namespace str
 			return GetItemRange( sepMatchPos, specBounds ).GetSpan<size_t>();
 		}
 
-		TSpecPair FindItemSpec( TSepMatchPos* pOutSepMatchPos _out_, const TString& text, size_t offset = 0 ) const
+		TSpecPair FindItemSpec( OUT TSepMatchPos* pOutSepMatchPos, const TString& text, size_t offset = 0 ) const
 		{	// look for "<startSep>item<endSep>" beginning at offset
 			ASSERT_PTR( pOutSepMatchPos );
 			REQUIRE( IsValid() && offset <= text.length() );
@@ -451,7 +451,7 @@ namespace str
 			return std::make_pair( startSepPos, endPos );
 		}
 
-		void QueryItems( std::vector<TString>& rItems _out_, const TString& text, bool keepSeps = true ) const
+		void QueryItems( OUT std::vector<TString>& rItems, const TString& text, bool keepSeps = true ) const
 		{
 			rItems.clear();
 
@@ -463,7 +463,7 @@ namespace str
 				rItems.push_back( Make( sepMatchPos, specBounds, text, keepSeps ) );
 		}
 
-		size_t ReplaceSeparators( TString& rText _out_, const CharT* pStartSep, const CharT* pEndSep, size_t maxCount = TString::npos ) const
+		size_t ReplaceSeparators( OUT TString& rText, const CharT* pStartSep, const CharT* pEndSep, size_t maxCount = TString::npos ) const
 		{
 			REQUIRE( pStartSep != nullptr && pEndSep != nullptr );
 
@@ -499,7 +499,7 @@ namespace str
 	// ex: query quoted sub-strings, or environment variables "lead_%VAR1%_mid_%VAR2%_trail" => { "VAR1", "VAR2" }
 
 	template< typename CharT >
-	void QueryEnclosedItems( std::vector< std::basic_string<CharT> >& rItems _out_, const std::basic_string<CharT>& text,
+	void QueryEnclosedItems( OUT std::vector< std::basic_string<CharT> >& rItems, const std::basic_string<CharT>& text,
 							 const CharT* pStartSeps, const CharT* pEndSeps, bool keepSeps = true, bool matchIdentifier = true )
 	{
 		str::CEnclosedParser<CharT> parser( pStartSeps, pEndSeps, matchIdentifier );
@@ -552,7 +552,7 @@ namespace env
 	// environment variables parsing
 
 	template< typename StringT >
-	size_t ReplaceEnvVar_VcMacroToWindows( StringT& rText _in_out_, size_t varMaxCount = StringT::npos )
+	size_t ReplaceEnvVar_VcMacroToWindows( IN OUT StringT& rText, size_t varMaxCount = StringT::npos )
 	{
 		// replaces multiple occurences of e.g. "$(UTL_INCLUDE)" to "%UTL_INCLUDE%" - only for identifiers that resemble a C/C++ identifier
 		typedef typename StringT::value_type TChar;
@@ -603,7 +603,7 @@ namespace code
 
 
 	template< typename CharT >
-	inline void QueryEnclosedIdentifiers( std::vector< std::basic_string<CharT> >& rIdentifiers _out_, const std::basic_string<CharT>& text,
+	inline void QueryEnclosedIdentifiers( OUT std::vector< std::basic_string<CharT> >& rIdentifiers, const std::basic_string<CharT>& text,
 										  const CharT* pStartSeps, const CharT* pEndSeps, bool keepSeps = true )
 	{
 		str::QueryEnclosedItems( rIdentifiers, text, pStartSeps, pEndSeps, keepSeps, true /*matchIdentifier*/ );

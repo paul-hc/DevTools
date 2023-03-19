@@ -211,7 +211,7 @@ std::tstring& CCompoundTextParser::LookupFieldValue( const std::tstring& fieldKe
 	return *pFieldValue;
 }
 
-size_t CCompoundTextParser::ExpandFieldMappings( std::tstring* pSectionContent _out_ )
+size_t CCompoundTextParser::ExpandFieldMappings( OUT std::tstring* pSectionContent )
 {
 	ASSERT_PTR( pSectionContent );
 	UpdateFilePathFields();
@@ -280,7 +280,7 @@ std::tstring* CCompoundTextParser::ExpandSectionRefs( const std::tstring& sectio
 	return pTextContent;
 }
 
-bool CCompoundTextParser::CheckEatLineEnd( size_t* pLastPos _in_out_, const TCHAR* pContent )
+bool CCompoundTextParser::CheckEatLineEnd( IN OUT size_t* pLastPos, const TCHAR* pContent )
 {	// if there is an '$' suffix (such as "<<Section>>$") => eat the following "\r\n" (or just "\n")
 	ASSERT_PTR( pContent );
 	ASSERT( *pLastPos <= str::GetLength( pContent ) );
@@ -300,7 +300,7 @@ bool CCompoundTextParser::CheckEatLineEnd( size_t* pLastPos _in_out_, const TCHA
 	return true;
 }
 
-bool CCompoundTextParser::PromptConditionalSectionRef( std::tstring* pRefSectionName _in_out_ ) const
+bool CCompoundTextParser::PromptConditionalSectionRef( IN OUT std::tstring* pRefSectionName ) const
 {
 	ASSERT_PTR( pRefSectionName );
 

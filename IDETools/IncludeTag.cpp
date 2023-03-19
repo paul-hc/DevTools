@@ -76,7 +76,7 @@ void CIncludeTag::SetIncludeDirectiveFormat( const TCHAR* pDirective, bool isCpp
 
 	m_directiveFormat += pDirective;
 
-	if ( str::Equals< str::Case >( _T("importlib"), pDirective ) )
+	if ( str::Equals<str::Case>( _T("importlib"), pDirective ) )
 		m_directiveFormat += _T("(%s)");
 	else
 		m_directiveFormat += _T(" %s");

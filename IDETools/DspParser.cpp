@@ -483,7 +483,7 @@ bool DspParser::isSourceFile( const PathInfoEx& filePath )
 	};
 
 	for ( int i = 0; i != COUNT_OF( sourceFileTypes ); ++i )
-		if ( path::EquivalentPtr( filePath.ext, sourceFileTypes[ i ] ) )
+		if ( path::Equivalent( filePath.ext, sourceFileTypes[ i ] ) )
 			return true;
 
 	return false;

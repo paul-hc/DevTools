@@ -72,7 +72,7 @@ namespace code
 	{
 		resetInternalState();
 		if ( !m_options.m_testMode )
-			LoadCodeTemplates();
+			LoadCodeSnippets();
 
 		CTypeDescriptor tdInfo( this, isInline );
 
@@ -124,21 +124,21 @@ namespace code
 		return implementedMethods;
 	}
 
-	bool CCppImplFormatter::LoadCodeTemplates( void )
+	bool CCppImplFormatter::LoadCodeSnippets( void )
 	{
 		TextContent codeSnippets;
-		std::tstring codeSnippetsPath = app::GetModuleSession().m_codeTemplatePath.Get();
+		std::tstring filePath = app::GetModuleSession().m_codeTemplatePath.Get();
 
 		if ( app::GetModuleSession().m_useCommentDecoration )
 		{
-			if ( codeSnippets.LoadFileSection( codeSnippetsPath.c_str(), _T("Single Line Decoration") ) )
+			if ( codeSnippets.LoadFileSection( filePath.c_str(), _T("Single Line Decoration") ) )
 				m_commentDecorationTemplate = codeSnippets.GetText();
 		}
 
-		if ( codeSnippets.LoadFileSection( codeSnippetsPath.c_str(), _T("void Function Body") ) )
+		if ( codeSnippets.LoadFileSection( filePath.c_str(), _T("void Function Body") ) )
 			m_voidFunctionBody = codeSnippets.GetText();
 
-		if ( codeSnippets.LoadFileSection( codeSnippetsPath.c_str(), _T("return Function Body") ) )
+		if ( codeSnippets.LoadFileSection( filePath.c_str(), _T("return Function Body") ) )
 			m_returnFunctionBody = codeSnippets.GetText();
 
 		return !m_commentDecorationTemplate.empty();

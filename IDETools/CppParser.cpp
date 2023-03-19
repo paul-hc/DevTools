@@ -24,7 +24,7 @@ const str::CSequenceSet<char> CCppParser::s_exprOps(
 	//" sizeof"								// redundant, captured by pred::IsIdenifier()
 	, " " );
 
-const str::CSequenceSet<char> CCppParser::s_protoBreakWords( "_in_|_out_|_in_out_" );
+const str::CSequenceSet<char> CCppParser::s_protoBreakWords( "IN|OUT|OPTIONAL|_in_|_out_|_in_out_" );
 
 CCppParser::CCppParser( void )
 	: m_lang( code::GetLangCpp<TCHAR>() )
@@ -58,7 +58,7 @@ CCppCodeParser::TPos CCppCodeParser::FindPosNextSequence( TPos pos, const std::t
 	return foundPos;
 }
 
-bool CCppCodeParser::FindNextSequence( TokenRange* pSeqRange _out_, TPos pos, const std::tstring& sequence ) const
+bool CCppCodeParser::FindNextSequence( OUT TokenRange* pSeqRange, TPos pos, const std::tstring& sequence ) const
 {
 	ASSERT_PTR( pSeqRange );
 	ASSERT( IsValidPos( pos ) );
@@ -82,7 +82,7 @@ CCppCodeParser::TPos CCppCodeParser::FindPosMatchingBracket( TPos bracketPos ) c
 	return pvt::Distance( m_itBegin, itCloseBracket );
 }
 
-bool CCppCodeParser::SkipPosPastMatchingBracket( TPos* pBracketPos _in_out_ ) const
+bool CCppCodeParser::SkipPosPastMatchingBracket( IN OUT TPos* pBracketPos ) const
 {
 	ASSERT_PTR( pBracketPos );
 	ASSERT( IsValidPos( *pBracketPos ) );
@@ -96,14 +96,14 @@ bool CCppCodeParser::SkipPosPastMatchingBracket( TPos* pBracketPos _in_out_ ) co
 	return true;
 }
 
-bool CCppCodeParser::FindArgList( TokenRange* pArgList _out_, TPos pos, TCHAR openBracket /*= s_anyBracket*/ ) const
+bool CCppCodeParser::FindArgList( OUT TokenRange* pArgList, TPos pos, TCHAR openBracket /*= s_anyBracket*/ ) const
 {
 	ASSERT_PTR( pArgList );
 	ASSERT( IsValidPos( pos ) );
 
 	TConstIterator itOpenBracket = s_anyBracket == openBracket
 		? m_lang.FindNextCharThat( m_itBegin + pos, m_itEnd, pred::IsBracket() )
-		: m_lang.FindNextCharThat( m_itBegin + pos, m_itEnd, pred::IsChar( openBracket ) );
+		: m_lang.FindNextCharThat( m_itBegin + pos, m_itEnd, pred::IsChar<>( openBracket ) );
 
 	if ( itOpenBracket == m_itEnd )
 		return false;				// no opening bracket found
@@ -117,7 +117,7 @@ bool CCppCodeParser::FindArgList( TokenRange* pArgList _out_, TPos pos, TCHAR op
 	return true;
 }
 
-bool CCppCodeParser::SkipWhitespace( TPos* pPos _in_out_ ) const
+bool CCppCodeParser::SkipWhitespace( IN OUT TPos* pPos ) const
 {
 	ASSERT_PTR( pPos );
 	ASSERT( IsValidPos( *pPos ) );
@@ -130,7 +130,7 @@ bool CCppCodeParser::SkipWhitespace( TPos* pPos _in_out_ ) const
 	return true;
 }
 
-bool CCppCodeParser::SkipMatchingToken( TPos* pPos _in_out_, const std::tstring& token )
+bool CCppCodeParser::SkipMatchingToken( IN OUT TPos* pPos, const std::tstring& token )
 {
 	ASSERT_PTR( pPos );
 	ASSERT( IsValidPos( *pPos ) );
@@ -143,7 +143,7 @@ bool CCppCodeParser::SkipMatchingToken( TPos* pPos _in_out_, const std::tstring&
 	return true;
 }
 
-bool CCppCodeParser::SkipAnyOf( TPos* pPos _in_out_, const TCHAR charSet[] )
+bool CCppCodeParser::SkipAnyOf( IN OUT TPos* pPos, const TCHAR charSet[] )
 {
 	ASSERT_PTR( pPos );
 	ASSERT( IsValidPos( *pPos ) );
@@ -155,7 +155,7 @@ bool CCppCodeParser::SkipAnyOf( TPos* pPos _in_out_, const TCHAR charSet[] )
 	return *pPos != oldPos;
 }
 
-bool CCppCodeParser::SkipAnyNotOf( TPos* pPos _in_out_, const TCHAR charSet[] )
+bool CCppCodeParser::SkipAnyNotOf( IN OUT TPos* pPos, const TCHAR charSet[] )
 {
 	ASSERT_PTR( pPos );
 	ASSERT( IsValidPos( *pPos ) );
@@ -286,7 +286,7 @@ void CCppMethodParser::ParseQualifiedMethod( const std::tstring& codeText )
 	}
 }
 
-bool CCppMethodParser::FindSliceEnd( TConstIterator* pItSlice _in_out_, const TConstIterator& itEnd ) const
+bool CCppMethodParser::FindSliceEnd( IN OUT TConstIterator* pItSlice, const TConstIterator& itEnd ) const
 {
 	ASSERT_PTR( pItSlice );
 
@@ -309,7 +309,7 @@ bool CCppMethodParser::FindSliceEnd( TConstIterator* pItSlice _in_out_, const TC
 				if ( str::EqualsSeq( it, itEnd, s_callOp ) )
 					it += s_callOp.length();							// skip "operator()"
 
-				m_lang.SkipUntil( &it, itEnd, pred::IsChar( '(' ) );	// skip to operator end (arg-list)
+				m_lang.SkipUntil( &it, itEnd, pred::IsChar<>( '(' ) );	// skip to operator end (arg-list)
 			}
 			else if ( pred::IsIdentifier()( *it ) )
 				m_lang.SkipIdentifier( &it, itEnd );

@@ -47,7 +47,7 @@ public:
 	// comparision
 	bool operator==( const PathInfo& right ) const;
 	bool operator!=( const PathInfo& right ) const { return !operator==( right ); }
-	bool operator<( const PathInfo& right ) const { return path::CompareNPtr( GetFullPath(), right.GetFullPath() ) < 0; }
+	bool operator<( const PathInfo& right ) const { return path::CompareEquivalent( GetFullPath(), right.GetFullPath() ) < 0; }
 	pred::CompareResult Compare( const PathInfo& right, const std::vector< PathField >& orderFields = GetDefaultOrder(),
 								 const TCHAR* pDefaultDirName = nullptr ) const;
 	bool smartNameExtEQ( const PathInfo& right ) const;
@@ -89,8 +89,8 @@ public:
 	static const TCHAR* revFindSlash( const TCHAR* path ) { return ::revFindChars( path, _T("\\/") ); }
 	static int revFindSlashPos( const TCHAR* path, int pos = -1 ) { return ::revFindCharsPos( path, _T("\\/"), pos ); }
 
-	static TCHAR* findSubString( const TCHAR* pathString, const TCHAR* subString );
-	static int find( const TCHAR* pathString, const TCHAR* subString, int startPos = 0 );
+	static inline TCHAR* findSubString( const TCHAR* pPath, const TCHAR* pSubString );
+	static int find( const TCHAR* pPath, const TCHAR* pSubString, int startPos = 0 );
 
 	static const std::vector< PathField >& GetDefaultOrder( void );
 protected:
@@ -127,9 +127,9 @@ struct PathInfoEx : public PathInfo
 	virtual void updateFullPath( void );
 
 	// comparision
-	bool operator==( const PathInfoEx& right ) const { ASSERT( isConsistent() && right.isConsistent() ); return path::EquivalentPtr( fullPath, right.fullPath ); }
+	bool operator==( const PathInfoEx& right ) const { ASSERT( isConsistent() && right.isConsistent() ); return path::Equivalent( fullPath, right.fullPath ); }
 	bool operator!=( const PathInfoEx& right ) const { return !operator==( right ); }
-	bool operator==( const CString& rightFullPath ) const { ASSERT( isConsistent() ); return path::EquivalentPtr( fullPath, rightFullPath ); }
+	bool operator==( const CString& rightFullPath ) const { ASSERT( isConsistent() ); return path::Equivalent( fullPath, rightFullPath ); }
 	bool operator!=( const CString& rightFullPath ) const { return !operator==( rightFullPath ); }
 
 	// attributes
@@ -144,7 +144,7 @@ struct LessPathPred
 	template< typename PathStringType >
 	bool operator()( const PathStringType& left, const PathStringType& right ) const
 	{
-		return pred::Less == path::CompareNPtr( left, right );
+		return pred::Less == path::CompareEquivalent( left, right );
 	}
 };
 
@@ -154,7 +154,7 @@ struct EqualPathPred
 	template< typename PathStringType >
 	bool operator()( const PathStringType& left, const PathStringType& right ) const
 	{
-		return path::EquivalentPtr( left, right );
+		return path::Equivalent( left, right );
 	}
 };
 

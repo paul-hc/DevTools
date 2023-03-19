@@ -5,7 +5,7 @@
 #include <map>
 
 
-// Automation object for text file IO, replacements, etc
+// Automation object for text file IO, string replacements, etc
 
 class TextContent : public CCmdTarget
 	, private app::CLazyInitAppResources
@@ -15,16 +15,16 @@ public:
 	TextContent( void );		// protected constructor used by dynamic creation
 	virtual ~TextContent();
 private:
-	CString m_TextContent;
+	std::tstring m_textContent;
 	std::map<std::tstring, std::tstring> m_fieldReplacements;
 private:
 	std::vector<TCHAR> m_tokenizedBuffer;
 	std::tstring m_tokenizedSeps;
-	CString m_currToken;
+	std::tstring m_currToken;
 
 	// generated stuff
 public:
-	virtual void OnFinalRelease();
+	virtual void OnFinalRelease( void );
 protected:
 	DECLARE_MESSAGE_MAP()
 	DECLARE_OLECREATE( TextContent )
@@ -61,8 +61,8 @@ public:
 	afx_msg long GetTextLen();
 	afx_msg BOOL LoadFile( LPCTSTR textFilePath );
 	afx_msg BOOL LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName );
-	afx_msg long FindText( LPCTSTR match, long startPos, BOOL caseSensitive );
-	afx_msg long ReplaceText( LPCTSTR match, LPCTSTR replacement, BOOL caseSensitive );
+	afx_msg long FindText( LPCTSTR pattern, long startPos, BOOL caseSensitive );
+	afx_msg long ReplaceText( LPCTSTR pattern, LPCTSTR replacement, BOOL caseSensitive );
 	afx_msg BOOL AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedContent, BOOL caseSensitive );
 	afx_msg BSTR Tokenize( LPCTSTR separatorCharSet );
 	afx_msg BSTR GetNextToken();

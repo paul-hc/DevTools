@@ -360,8 +360,15 @@ void CCppCodeTests::TestResolveDefaultParams( void )
 					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
 	}
 	{	// break protected words
-		std::string proto = "char Filter( const char** ppSrc = defPtr() _in_out_, size_t* pLength = nullptr _out_ )";
+		std::string proto = "char Filter( const char** ppSrc = defPtr() IN OUT, size_t* pLength = nullptr OUT )";
 
+		ASSERT_EQUAL( "char Filter( const char** ppSrc /*= defPtr()*/ IN OUT, size_t* pLength /*= nullptr*/ OUT )",
+					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
+
+		ASSERT_EQUAL( "char Filter( const char** ppSrc _in_out_, size_t* pLength _out_ )",
+					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
+
+		proto = "char Filter( const char** ppSrc = defPtr() _in_out_, size_t* pLength = nullptr _out_ )";
 		ASSERT_EQUAL( "char Filter( const char** ppSrc /*= defPtr()*/ _in_out_, size_t* pLength /*= nullptr*/ _out_ )",
 					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
 

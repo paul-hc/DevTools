@@ -19,6 +19,7 @@ public:
 private:
 	void TestPathBasics( void );
 	void TestPathIs( void );
+	void TestPathConversion( void );
 	void TestPathUtilities( void );
 	void TestPathSort( void );
 	void TestPathSortExisting( void );

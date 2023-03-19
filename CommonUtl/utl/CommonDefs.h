@@ -31,8 +31,8 @@
 #define throws_( ... )
 #define throws_cond( ... )	// throws conditionally, depending on a specific parameter
 
-#define _out_				// output function parameter
-#define _in_out_			// input and output function parameter
+//#define _out_				// output function parameter - better use OUT (defined in <minwindef.h>)
+//#define _in_out_			// input and output function parameter - better use IN OUT (defined in <minwindef.h>)
 
 
 #define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
@@ -314,6 +314,13 @@ namespace utl
 		if ( pField != nullptr )
 			*pField = value;
 	}
+
+	template< typename LeftT, typename RightT >
+	inline bool SamePtr( const LeftT* pLeft, const RightT* pRight ) { return static_cast<const void*>( pLeft ) == static_cast<const void*>( pRight ); }
+
+	template< typename LeftT, typename RightT >
+	inline bool SameRef( const LeftT& left, const RightT& right ) { return SamePtr( &left, &right ); }
+
 
 	inline unsigned int GetPlatformBits( void ) { return sizeof( void* ) * 8; }
 	inline unsigned int Is32bitPlatform( void ) { return 32 == GetPlatformBits(); }

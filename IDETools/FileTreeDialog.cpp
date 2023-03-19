@@ -27,9 +27,33 @@
 #include "utl/UI/TandemControls.hxx"
 
 
+struct CMatchingItems
+{
+	CMatchingItems( HTREEITEM hStartItem, const fs::CPath& fullPath )
+		: m_hStartItem( hStartItem ), m_fullPath( path::MakeCanonical( fullPath.GetPtr() ) ), m_startPos( std::tstring::npos ) {}
+
+	bool IsPathMatch( const CIncludeNode* pItemInfo ) const { return m_fullPath == pItemInfo->m_path.Get(); }
+
+	void AddMatch( HTREEITEM hItem, CIncludeNode* pItemInfo )
+	{
+		if ( m_hStartItem == hItem )
+			m_startPos = m_matches.size();
+
+		m_matches.push_back( std::make_pair( hItem, pItemInfo ) );
+	}
+public:
+	HTREEITEM m_hStartItem;
+	fs::CPath m_fullPath;
+	size_t m_startPos;
+	std::vector<TTreeItemPair> m_matches;
+};
+
+
+// CFileTreeDialog implementation
+
 namespace layout
 {
-	static CLayoutStyle styles[] =
+	static CLayoutStyle s_styles[] =
 	{
 		{ IDC_FILE_TREE, Size },
 		{ IDC_FULLPATH_STATIC, MoveY },
@@ -51,8 +75,7 @@ namespace layout
 	};
 }
 
-
-CFileTreeDialog::CFileTreeDialog( const std::tstring& rootPath, CWnd* pParent )
+CFileTreeDialog::CFileTreeDialog( const fs::CPath& rootPath, CWnd* pParent )
 	: CLayoutDialog( IDD_FILE_TREE_DIALOG, pParent )
 	, m_rootPath( rootPath )
 	, m_rOpt( CIncludeOptions::Instance() )
@@ -66,7 +89,7 @@ CFileTreeDialog::CFileTreeDialog( const std::tstring& rootPath, CWnd* pParent )
 	, m_accelTreeFocus( IDR_FILETREEFOCUS_ACCEL )
 {
 	m_regSection = _T("FileTreeDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::s_styles ) );
 	LoadDlgIcon( IDI_INCBROWSER_ICON );
 	m_accelPool.AddAccelTable( new CAccelTable( IDR_FILETREE_ACCEL ) );
 
@@ -195,7 +218,7 @@ TTreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pIt
 	if ( IsFileExcluded( pItemInfo->m_path ) )
 		return s_nullPair;
 
-	std::tstring uniqueFilePath = path::MakeCanonical( pItemInfo->m_path.GetPtr() );
+	fs::CPath uniqueFilePath( &pItemInfo->m_path );
 
 	TPathToItemMap::const_iterator itFound = m_originalItems.find( uniqueFilePath );
 	rOriginalItem = itFound == m_originalItems.end();
@@ -375,9 +398,8 @@ HTREEITEM CFileTreeDialog::FindOriginalItem( HTREEITEM hStartItem )
 		return nullptr;
 
 	const CIncludeNode* pStartInfo = GetItemInfo( hStartItem );
-	std::tstring fullPath = path::MakeCanonical( pStartInfo->m_path.GetPtr() );
 
-	TPathToItemMap::const_iterator itFound = m_originalItems.find( fullPath );
+	TPathToItemMap::const_iterator itFound = m_originalItems.find( pStartInfo->m_path );
 	if ( itFound == m_originalItems.end() )
 		return nullptr;
 	return itFound->second;
@@ -432,7 +454,7 @@ bool CFileTreeDialog::ReorderChildren( HTREEITEM hParent /*= TVI_ROOT*/ )
 bool CFileTreeDialog::IsOriginalItem( HTREEITEM hItem ) const
 {
 	const CIncludeNode* pTreeItem = GetItemInfo( hItem );
-	TPathToItemMap::const_iterator itFound = m_originalItems.find( pTreeItem->m_path.Get() );
+	TPathToItemMap::const_iterator itFound = m_originalItems.find( pTreeItem->m_path );
 	return itFound != m_originalItems.end() && hItem == itFound->second;
 }
 

@@ -505,25 +505,25 @@ namespace wic
 	{
 		const TCHAR* pExt = path::FindExt( pFilePath );
 
-		if ( path::EquivalentPtr( _T(".bmp"), pExt ) ||
-			 path::EquivalentPtr( _T(".dib"), pExt ) )
+		if ( path::Equivalent( _T(".bmp"), pExt ) ||
+			 path::Equivalent( _T(".dib"), pExt ) )
 			return BmpFormat;
-		else if ( path::EquivalentPtr( _T(".jpg"), pExt ) ||
-			 path::EquivalentPtr( _T(".jpeg"), pExt ) ||
-			 path::EquivalentPtr( _T(".jpe"), pExt ) ||
-			 path::EquivalentPtr( _T(".jfif"), pExt ) )
+		else if ( path::Equivalent( _T(".jpg"), pExt ) ||
+			 path::Equivalent( _T(".jpeg"), pExt ) ||
+			 path::Equivalent( _T(".jpe"), pExt ) ||
+			 path::Equivalent( _T(".jfif"), pExt ) )
 			return JpegFormat;
-		else if ( path::EquivalentPtr( _T(".tif"), pExt ) ||
-				  path::EquivalentPtr( _T(".tiff"), pExt ) )
+		else if ( path::Equivalent( _T(".tif"), pExt ) ||
+				  path::Equivalent( _T(".tiff"), pExt ) )
 			return TiffFormat;
-		else if ( path::EquivalentPtr( _T(".gif"), pExt ) )
+		else if ( path::Equivalent( _T(".gif"), pExt ) )
 			return GifFormat;
-		else if ( path::EquivalentPtr( _T(".png"), pExt ) )
+		else if ( path::Equivalent( _T(".png"), pExt ) )
 			return PngFormat;
-		else if ( path::EquivalentPtr( _T(".ico"), pExt ) ||
-				  path::EquivalentPtr( _T(".cur"), pExt ) )
+		else if ( path::Equivalent( _T(".ico"), pExt ) ||
+				  path::Equivalent( _T(".cur"), pExt ) )
 			return IcoFormat;
-		else if ( path::EquivalentPtr( _T(".wmp"), pExt ) )
+		else if ( path::Equivalent( _T(".wmp"), pExt ) )
 			return WmpFormat;
 
 		return UnknownImageFormat;

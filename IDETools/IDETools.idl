@@ -222,8 +222,8 @@ library IDETools
 		methods:
 			[id(4)] boolean LoadFile(BSTR textFilePath);
 			[id(5)] boolean LoadFileSection(BSTR compoundFilePath, BSTR sectionName);
-			[id(6)] long FindText(BSTR match, long startPos, boolean caseSensitive);
-			[id(7)] long ReplaceText(BSTR match, BSTR replacement, boolean caseSensitive);
+			[id(6)] long FindText(BSTR pattern, long startPos, boolean caseSensitive);
+			[id(7)] long ReplaceText(BSTR pattern, BSTR replacement, boolean caseSensitive);
 			[id(8)] boolean AddEmbeddedContent(BSTR matchCoreID, BSTR embeddedContent, boolean caseSensitive);
 			[id(9)] BSTR Tokenize(BSTR separatorCharSet);
 			[id(10)] BSTR GetNextToken();

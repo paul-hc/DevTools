@@ -30,7 +30,7 @@ namespace str
 		// converts a source container of paths (std::tstring, fs::CPath, fs::CFlexPath) into a container of CString
 		//
 		template< typename MfcContainerT, typename SrcContainerT >
-		MfcContainerT& MakeMfcStrings( MfcContainerT& rMfcItems _out_, const SrcContainerT& srcItems )
+		MfcContainerT& MakeMfcStrings( OUT MfcContainerT& rMfcItems, const SrcContainerT& srcItems )
 		{
 			for ( typename SrcContainerT::const_iterator itSrcItem = srcItems.begin(); itSrcItem != srcItems.end(); ++itSrcItem )
 				rMfcItems.push_back( str::traits::GetCharPtr( *itSrcItem ) );

@@ -49,7 +49,7 @@ int WorkspaceProfile::findProjectName( LPCTSTR projectName ) const
 {
 	if ( projectName != nullptr && projectName[ 0 ] != '\0' )
 		for ( unsigned int i = 0; i != projectNameArray.size(); ++i )
-			if ( path::EquivalentPtr( projectNameArray[ i ], projectName ) )
+			if ( path::Equivalent( projectNameArray[ i ], projectName ) )
 				return i;
 
 	return -1;
@@ -59,7 +59,7 @@ int WorkspaceProfile::findFile( LPCTSTR fileFullPath ) const
 {
 	if ( fileFullPath != nullptr && fileFullPath[ 0 ] != '\0' )
 		for ( unsigned int i = 0; i != fileArray.size(); ++i )
-			if ( path::EquivalentPtr( fileArray[ i ], fileFullPath ) )
+			if ( path::Equivalent( fileArray[ i ], fileFullPath ) )
 				return i;
 
 	return -1;

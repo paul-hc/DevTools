@@ -48,7 +48,7 @@ void CProjectContext::OnLocalDirPathChanged( void )
 		PathInfoEx piLocalFile( m_localCurrentFile.c_str() ), piLocalDir;
 
 		piLocalDir.assignDirPath( m_localDirPath.c_str() );
-		if ( !path::EquivalentPtr( piLocalFile.getDirPath(), piLocalDir.getDirPath() ) )
+		if ( !path::Equivalent( piLocalFile.getDirPath(), piLocalDir.getDirPath() ) )
 		{	// new local directory path is different than local file's directory path -> reset local file
 			CScopedInternalChange internalChange( this );
 			SetLocalCurrentFile( std::tstring() );
@@ -80,7 +80,7 @@ void CProjectContext::OnAssociatedProjectFileChanged( void )
 			PathInfoEx piLocalDir;
 
 			piLocalDir.assignDirPath( m_localDirPath.c_str() );
-			if ( !path::EquivalentPtr( projectFullPath.getDirPath(), piLocalDir.getDirPath() ) )
+			if ( !path::Equivalent( projectFullPath.getDirPath(), piLocalDir.getDirPath() ) )
 			{	// Correlate local dir with the dir path of the DSP file
 				CScopedInternalChange internalChange( this );
 				SetLocalDirPath( (LPCTSTR)projectFullPath.getDirPath( false ) );

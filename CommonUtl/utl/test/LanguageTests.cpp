@@ -154,7 +154,7 @@ void CLanguageTests::TestMyLanguage( void )
 		}
 
 		{	// find token character
-			std::string::const_reverse_iterator itChar = myLang.FindNextCharThat( itBegin, itEnd, pred::IsChar( '=' ) );
+			std::string::const_reverse_iterator itChar = myLang.FindNextCharThat( itBegin, itEnd, pred::IsChar<>( '=' ) );
 			ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
 
 			itChar = myLang.FindNextChar( itChar + 1, itEnd, '=' );
@@ -263,7 +263,7 @@ void CLanguageTests::TestMyLanguageSingleLine( void )
 				std::string::const_iterator itChar = myLang.FindNextChar( itBegin, itEnd, '=' );
 				ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
 
-				itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar( '=' ) );
+				itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar<>( '=' ) );
 				ASSERT( itChar == itEnd );
 			}
 
@@ -322,7 +322,7 @@ void CLanguageTests::TestMyLanguageSingleLine( void )
 			std::string::const_reverse_iterator itChar = myLang.FindNextChar( itBegin, itEnd, '=' );
 			ASSERT_HAS_PREFIX( "= 5 ) {", &*itChar );
 
-			itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar( '=' ) );
+			itChar = myLang.FindNextCharThat( itChar + 1, itEnd, pred::IsChar<>( '=' ) );
 			ASSERT( itChar == itEnd );
 		}
 

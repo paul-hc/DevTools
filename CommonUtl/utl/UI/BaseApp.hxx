@@ -240,6 +240,7 @@ template< typename BaseClass >
 void CBaseApp<BaseClass>::OnRunUnitTests( void )
 {
 #ifdef USE_UT
+	CWaitCursor wait;
 	app::RunAllTests();
 #endif
 }

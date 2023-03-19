@@ -53,7 +53,7 @@ private:
 	void AddArgListParams( StringT* pOutCode, const Range<typename StringT::const_iterator>& itArgs, bool commentOut, const str::CSequenceSet<char>* pBreakSet = nullptr ) const;
 
 	template< typename OutIteratorT, typename IteratorT >
-	void MakeTemplateInstance( OutIteratorT itOutTemplInst _out_, IteratorT itFirst, IteratorT itLast ) const;
+	void MakeTemplateInstance( OUT OutIteratorT itOutTemplInst, IteratorT itFirst, IteratorT itLast ) const;
 public:
 	const TLanguage& m_lang;
 
@@ -76,17 +76,17 @@ public:
 	bool AtEnd( TPos pos ) const { return pos == m_length; }
 
 	TPos FindPosNextSequence( TPos pos, const std::tstring& sequence ) const;		// -1 if not found
-	bool FindNextSequence( TokenRange* pSeqRange _in_out_, TPos pos, const std::tstring& sequence ) const;
+	bool FindNextSequence( IN OUT TokenRange* pSeqRange, TPos pos, const std::tstring& sequence ) const;
 
 	TPos FindPosMatchingBracket( TPos bracketPos ) const;							// -1 if not found
-	bool SkipPosPastMatchingBracket( TPos* pBracketPos _in_out_ ) const;
-	bool FindArgList( TokenRange* pArgList _out_, TPos pos, TCHAR openBracket = s_anyBracket ) const;
+	bool SkipPosPastMatchingBracket( IN OUT TPos* pBracketPos ) const;
+	bool FindArgList( OUT TokenRange* pArgList, TPos pos, TCHAR openBracket = s_anyBracket ) const;
 
-	bool SkipWhitespace( TPos* pPos _in_out_ ) const;
-	bool SkipAnyOf( TPos* pPos _in_out_, const TCHAR charSet[] );
-	bool SkipAnyNotOf( TPos* pPos _in_out_, const TCHAR charSet[] );
+	bool SkipWhitespace( IN OUT TPos* pPos ) const;
+	bool SkipAnyOf( IN OUT TPos* pPos, const TCHAR charSet[] );
+	bool SkipAnyNotOf( IN OUT TPos* pPos, const TCHAR charSet[] );
 
-	bool SkipMatchingToken( TPos* pPos _in_out_, const std::tstring& token );
+	bool SkipMatchingToken( IN OUT TPos* pPos, const std::tstring& token );
 private:
 	const std::tstring& m_codeText;
 public:
@@ -126,7 +126,7 @@ private:
 
 	typedef std::tstring::const_iterator TConstIterator;
 
-	bool FindSliceEnd( TConstIterator* pItSlice _in_out_, const TConstIterator& itEnd ) const;
+	bool FindSliceEnd( IN OUT TConstIterator* pItSlice, const TConstIterator& itEnd ) const;
 	void ParseQualifiedMethod( const std::tstring& codeText );
 private:
 	std::map<SliceType, TokenRange> m_codeSlices;

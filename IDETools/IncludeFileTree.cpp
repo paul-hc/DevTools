@@ -89,7 +89,7 @@ BOOL IncludeFileTree::BrowseIncludeFiles( LPCTSTR targetFileName )
 		TRACE( _T("Specified filename does not exist: [%s]\n"), targetFileName );
 
 	ide::CScopedWindow scopedIDE;
-	CFileTreeDialog	pickerDlg( targetFileName, scopedIDE.GetMainWnd() );
+	CFileTreeDialog	pickerDlg( fs::CPath( targetFileName ), scopedIDE.GetMainWnd() );
 	if ( IDCANCEL == pickerDlg.DoModal() )
 		return FALSE;
 

@@ -14,7 +14,23 @@
 
 namespace func
 {
-	int ToNaturalPathChar::Translate( int charCode )
+	// Translates characters to generate a natural order, useful for sorting paths and filenames.
+	// Natural order: intuitive (case insensitive, order numeric sequences by value) | punctuation first (shortest filename first in a tie).
+	// Note: This is closer to Explorer.exe sort order (which varies with Windows version), yet different than ::StrCmpLogicalW from <shlwapi.h>
+	//
+	struct ToNaturalPathCharValue
+	{
+		template< typename CharType >
+		CharType operator()( CharType ch ) const
+		{
+			return static_cast<CharType>( Translate( ch ) );
+		}
+
+		static int Translate( int charCode );
+	};
+
+
+	int ToNaturalPathCharValue::Translate( int charCode )
 	{
 		enum TranslatedCode		// natural order for punctuation characters
 		{
@@ -50,14 +66,49 @@ namespace func
 
 namespace path
 {
-	// an efficient way of referring to the original path by pointer if it was originally normal, or a buffered normalized copy
-	class CNormalPath
+	const TCHAR g_complexPathSep = '>';
+
+
+	pred::CompareResult CompareIntuitive( const TCHAR* pLeft, const TCHAR* pRight )
+	{
+		return pred::MakeIntuitiveComparator( func::ToNaturalPathCharValue() ).Compare( pLeft, pRight );
+	}
+
+
+	size_t GetHashValuePtr( const TCHAR* pPath, size_t count /*= utl::npos*/ )
+	{
+		// compute hash value based on lower-case and normalized backslashes
+
+		// inspired from template class instantiation 'template<> class hash<std::wstring>' from <functional> - hashing mechanism for std::unordered_map, std::unordered_set, etc.
+		size_t hashValue = 2166136261u;
+		size_t pos = 0;
+		size_t lastPos = count != utl::npos ? count : str::GetLength( pPath );
+		size_t stridePos = 1 + lastPos / 10;
+		const func::ToEquivalentPathChar toEquivalentPathChar;
+
+		if ( stridePos < lastPos )
+			lastPos -= stridePos;
+
+		for ( ; pos < lastPos; pos += stridePos )
+			hashValue = 16777619u * hashValue ^ static_cast<size_t>( toEquivalentPathChar( pPath[ pos ] ) );
+
+		return hashValue;
+	}
+}
+
+
+namespace path
+{
+	// an efficient way (copy-on-write) of referring to the original path by pointer if it was originally normal, or a buffered normalized copy
+	//
+	class CWindowsPath
 	{
 	public:
-		CNormalPath( const TCHAR rawPath[] )
-			: m_pRawPath( rawPath )
+		CWindowsPath( const TCHAR* pRawPath )
+			: m_pRawPath( pRawPath )
+			, m_isWindows( path::IsWindows( m_pRawPath ) )
 		{
-			if ( m_pRawPath != nullptr && !IsNormal( m_pRawPath ) )
+			if ( m_pRawPath != nullptr && !m_isWindows )
 				EnsureBuffer();
 		}
 
@@ -65,52 +116,23 @@ namespace path
 		const TCHAR* GetRaw( void ) const { return m_pRawPath; }
 		operator const TCHAR*( void ) const { return Get(); }
 
-		bool IsNormal( void ) const { return m_normalizedPath.empty() == str::IsEmpty( m_pRawPath ); }
+		bool IsWindows( void ) const { return m_isWindows; }
 
 		TCHAR* Ref( void ) { return const_cast<TCHAR*>( EnsureBuffer().c_str() ); }
 
 		std::tstring& EnsureBuffer( void )
 		{
-			if ( m_normalizedPath.empty() )
-			{
-				m_normalizedPath = m_pRawPath;
-				std::replace( m_normalizedPath.begin(), m_normalizedPath.end(), _T('/'), _T('\\') );
-			}
+			if ( m_normalizedPath.empty() && !str::IsEmpty( m_pRawPath ) )
+				str::Transform( m_pRawPath, std::back_inserter( m_normalizedPath ), func::ToWinPathChar() );
+
 			return m_normalizedPath;
 		}
 
-		bool NormalizeComplex( void )
-		{
-			size_t sepPos = FindPos( s_complexPathSep );
-			if ( std::tstring::npos == sepPos )
-				return false;
-
-			EnsureBuffer()[ sepPos ] = _T('\\');
-			return true;
-		}
-
-		static bool IsNormal( const TCHAR* pPath )
-		{
-			ASSERT_PTR( pPath );
-			return nullptr == _tcschr( pPath, _T('/') );
-		}
-
-		static bool IsComplex( const TCHAR* pPath )
-		{
-			ASSERT_PTR( pPath );
-			return nullptr == _tcschr( pPath, s_complexPathSep );
-		}
-	private:
-		size_t FindPos( TCHAR ch ) const
-		{
-			const TCHAR* pPath = Get();
-			const TCHAR* pFound = _tcschr( pPath, ch );
-
-			return pFound != nullptr ? std::distance( pPath, pFound ) : std::tstring::npos;
-		}
+		void NormalizeComplex( void ) { path::NormalizeComplexPath( EnsureBuffer() ); }
 	private:
 		const TCHAR* m_pRawPath;
 		std::tstring m_normalizedPath;
+		const bool m_isWindows;
 	};
 }
 
@@ -127,61 +149,10 @@ namespace path
 		return dirDelims;
 	}
 
-	bool EquivalentPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath )
-	{
-		ASSERT( pLeftPath != nullptr && pRightPath != nullptr );
-		if ( pLeftPath == pRightPath )
-			return true;
-
-		return
-			str::GetLength( pLeftPath ) == str::GetLength( pRightPath ) &&
-			std::equal( str::begin( pLeftPath ), str::end( pLeftPath ), str::begin( pRightPath ), pred::IsEquivalentPathChar() );
-	}
-
-	bool Equivalent( const std::tstring& leftPath, const std::tstring& rightPath )
-	{
-		if ( &leftPath == &rightPath )
-			return true;
-
-		return
-			leftPath.length() == rightPath.length() &&
-			std::equal( leftPath.begin(), leftPath.end(), rightPath.begin(), pred::IsEquivalentPathChar() );
-	}
-
-	bool EqualsPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath )
-	{
-		return str::Equals<str::IgnoreCase>( pLeftPath, pRightPath );
-	}
-
-	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight )
-	{
-		return pred::MakeIntuitiveComparator( func::ToNaturalPathChar() ).Compare( pLeft, pRight );
-	}
-
-
 	const TCHAR* StdFormatNumSuffix( void )
 	{
 		static const TCHAR s_fmtNumSuffix[] = _T("_[%d]");
 		return s_fmtNumSuffix;
-	}
-
-	size_t GetHashValuePtr( const TCHAR* pPath, size_t count /*= utl::npos*/ )
-	{
-		// compute hash value based on lower-case and normalized backslashes
-
-		// inspired from template class instantiation 'template<> class hash<std::wstring>' from <functional> - hashing mechanism for std::unordered_map, std::unordered_set, etc.
-		size_t hashValue = 2166136261u;
-		size_t pos = 0;
-		size_t lastPos = count != utl::npos ? count : str::GetLength( pPath );
-		size_t stridePos = 1 + lastPos / 10;
-
-		if ( stridePos < lastPos )
-			lastPos -= stridePos;
-
-		for ( ; pos < lastPos; pos += stridePos )
-			hashValue = 16777619u * hashValue ^ static_cast<size_t>( ToEquivalentChar( pPath[ pos ] ) );
-
-		return hashValue;
 	}
 
 
@@ -189,7 +160,7 @@ namespace path
 	{
 		ASSERT_PTR( pPath );
 
-		if ( _T('\0') == *pPath )
+		if ( '\0' == *pPath )
 			return nullptr;
 
 		while ( !IsBreakChar( *pPath ) )
@@ -202,16 +173,16 @@ namespace path
 	{
 		ASSERT( pPathBreak != nullptr && IsBreakChar( *pPathBreak ) );
 
-		if ( _T('\0') == *pPathBreak )
+		if ( '\0' == *pPathBreak )
 			return nullptr;
 
-		while ( *pPathBreak != _T('\0') && IsBreakChar( *pPathBreak ) )
+		while ( *pPathBreak != '\0' && IsBreakChar( *pPathBreak ) )
 			++pPathBreak;
 
 		return pPathBreak;
 	}
 
-	bool MatchRootSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength = nullptr )
+	bool MatchRootSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pOutMatchLength = nullptr OUT )
 	{
 		// workaround for: PathIsSameRoot fails for comparing dots (".", "..")
 		ASSERT_PTR( pPath );
@@ -221,32 +192,35 @@ namespace path
 			if ( !HasSameRoot( pPath, pSegment ) )
 				return false;
 
-		utl::AssignPtr( pMatchLength, Range<const TCHAR*>( pPath, SkipRoot( pPath ) ).GetSpan<size_t>() );
+		utl::AssignPtr( pOutMatchLength, Range<const TCHAR*>( pPath, SkipRoot( pPath ) ).GetSpan<size_t>() );
 		return true;
 	}
 
-	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength /*= nullptr*/ )
+	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, OUT size_t* pOutMatchLength /*= nullptr*/ )
 	{
 		ASSERT( pPath != nullptr && !IsBreakChar( *pPath ) );
 		ASSERT( pSegment != nullptr && !IsBreakChar( *pSegment ) );
 
+		const pred::TCharEqualEquivalentPath charEqual;
 		size_t matchLength = 0;
 
 		for ( ; !IsBreakChar( *pPath ); ++matchLength, ++pPath, ++pSegment )
-			if ( ToEquivalentChar( *pPath ) != ToEquivalentChar( *pSegment ) )
+			if ( !charEqual( *pPath, *pSegment ) )
 				break;
 
-		utl::AssignPtr( pMatchLength, matchLength );
+		utl::AssignPtr( pOutMatchLength, matchLength );
 		return IsBreakChar( *pPath ) && IsBreakChar( *pSegment );		// true if both break at end of match
 	}
 
 
 /*	str::Match GetMatch( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
-		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, &path::ToNormalChar ) )			// case sensitive
+		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, func::ToWinPathChar() ) )	// case sensitive
 			return str::MatchEqual;
-		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, &path::ToEquivalentChar ) )		// case insensitive
+
+		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, func::ToEquivalentPathChar() ) )	// case insensitive
 			return str::MatchEqualDiffCase;
+
 		return str::MatchNotEqual;
 	}*/
 
@@ -260,13 +234,13 @@ namespace path
 			m_pExtCore = ::PathFindExtension( m_fname );
 			if ( HasExt() )
 			{
-				*m_pExtCore = _T('\0');
+				*m_pExtCore = '\0';
 				++m_pExtCore;
 			}
 		}
 
-		bool HasFname( void ) const { return m_fname[ 0 ] != _T('\0'); }
-		bool HasExt( void ) const { return *m_pExtCore != _T('\0'); }
+		bool HasFname( void ) const { return m_fname[ 0 ] != '\0'; }
+		bool HasExt( void ) const { return *m_pExtCore != '\0'; }
 		bool IsEmpty( void ) const { return !HasFname() && !HasExt(); }
 
 		bool MatchWildcard( const CFnameExt& wild )
@@ -301,7 +275,7 @@ namespace path
 			typedef const TCHAR* TConstIterator;
 
 			for ( TConstIterator pWild = &wildcards.front(), pEnd = &wildcards.back() + 1; pWild != pEnd; ++pWild )
-				if ( _T('\0') == *pWild )
+				if ( '\0' == *pWild )
 					++pWild;						// skip empty specs, e.g. in ";x;;y"
 				else if ( DoMatchFilenameWildcard( pFilename, pWild, pMultiSpecDelims ) )			// recursive call spec by spec
 					return true;
@@ -388,19 +362,19 @@ namespace path
 	bool IsRelative( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		return ::PathIsRelative( CNormalPath( pPath ) ) != FALSE;
+		return ::PathIsRelative( CWindowsPath( pPath ) ) != FALSE;
 	}
 
 	bool IsDirectory( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		return ::PathIsDirectory( CNormalPath( pPath ) ) != FALSE;
+		return ::PathIsDirectory( CWindowsPath( pPath ) ) != FALSE;
 	}
 
 	bool IsFilename( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		return ::PathIsFileSpec( CNormalPath( pPath ) ) != FALSE;
+		return ::PathIsFileSpec( CWindowsPath( pPath ) ) != FALSE;
 	}
 
 	bool HasDirectory( const TCHAR* pPath )
@@ -415,7 +389,15 @@ namespace path
 
 		return std::search( str::begin( pPath ), str::end( pPath ),
 							str::begin( pSubString ), str::end( pSubString ),
-							pred::IsEquivalentPathChar() );
+							pred::TCharEqualEquivalentPath() );
+	}
+
+	size_t FindPos( const TCHAR* pPath, const TCHAR* pSubString, size_t offset /*= 0*/ )
+	{
+		REQUIRE( offset < str::GetLength( pPath ) );
+		const TCHAR* pFound = Find( pPath + offset, pSubString );
+		ASSERT_PTR( pFound );
+		return *pFound != '\0' ? std::distance( pPath, pFound ) : utl::npos;
 	}
 
 	const TCHAR* FindFilename( const TCHAR* pPath )
@@ -432,7 +414,7 @@ namespace path
 
 	const TCHAR* SkipRoot( const TCHAR* pPath )
 	{
-		CNormalPath pathCopy( pPath );
+		CWindowsPath pathCopy( pPath );
 
 		if ( const TCHAR* pRootEnd = ::PathSkipRoot( pathCopy ) )
 			return pPath + std::distance( pathCopy.Get(), pRootEnd );
@@ -462,7 +444,7 @@ namespace path
 		return pPath;
 	}
 
-	bool SetHugePrefix( std::tstring& rPath, bool useHugePrefixSyntax /*= true*/ )
+	bool SetHugePrefix( IN OUT std::tstring& rPath, bool useHugePrefixSyntax /*= true*/ )
 	{
 		if ( !useHugePrefixSyntax )
 			return str::StripPrefix( rPath, GetHugePrefix().c_str(), GetHugePrefix().length() );
@@ -477,16 +459,14 @@ namespace path
 
 	// complex path
 
-	const TCHAR s_complexPathSep = _T('>');
-
 	bool IsWellFormed( const TCHAR* pFilePath )
 	{
-		return std::count( str::begin( pFilePath ), str::end( pFilePath ), s_complexPathSep ) <= 1;		// ensure at most single complex separator
+		return std::count( str::begin( pFilePath ), str::end( pFilePath ), g_complexPathSep ) <= 1;		// ensure at most single complex separator
 	}
 
 	size_t FindComplexSepPos( const TCHAR* pPath )
 	{
-		return utl::FindPos( str::begin( pPath ), str::end( pPath ), s_complexPathSep );
+		return utl::FindPos( str::begin( pPath ), str::end( pPath ), g_complexPathSep );
 	}
 
 	std::tstring ExtractPhysical( const std::tstring& filePath )
@@ -501,15 +481,15 @@ namespace path
 	const TCHAR* GetEmbedded( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		pPath = std::find( str::begin( pPath ), str::end( pPath ), s_complexPathSep );
-		return *pPath != _T('\0') ? ( pPath + 1 ) : pPath;
+		pPath = std::find( str::begin( pPath ), str::end( pPath ), g_complexPathSep );
+		return *pPath != '\0' ? ( pPath + 1 ) : pPath;
 	}
 
 	const TCHAR* GetSubPath( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		const TCHAR* pComplexSep = std::find( str::begin( pPath ), str::end( pPath ), s_complexPathSep );
-		return *pComplexSep != _T('\0') ? ( pComplexSep + 1 ) : pPath;
+		const TCHAR* pComplexSep = std::find( str::begin( pPath ), str::end( pPath ), g_complexPathSep );
+		return *pComplexSep != '\0' ? ( pComplexSep + 1 ) : pPath;
 	}
 
 	std::tstring MakeComplex( const std::tstring& physicalPath, const TCHAR* pEmbeddedPath )
@@ -519,10 +499,10 @@ namespace path
 		ASSERT( utl::npos == FindComplexSepPos( physicalPath.c_str() ) );
 		ASSERT( utl::npos == FindComplexSepPos( pEmbeddedPath ) );
 
-		return physicalPath + s_complexPathSep + pEmbeddedPath;
+		return physicalPath + g_complexPathSep + pEmbeddedPath;
 	}
 
-	bool SplitComplex( std::tstring& rPhysicalPath, std::tstring& rEmbeddedPath, const std::tstring& filePath )
+	bool SplitComplex( OUT std::tstring& rPhysicalPath, OUT std::tstring& rEmbeddedPath, const std::tstring& filePath )
 	{
 		size_t sepPos = FindComplexSepPos( filePath.c_str() );
 		if ( std::tstring::npos == sepPos )
@@ -537,7 +517,7 @@ namespace path
 		return true;
 	}
 
-	bool NormalizeComplexPath( std::tstring& rFlexPath, TCHAR chNormalSep /*= _T('\\')*/ )
+	bool NormalizeComplexPath( IN OUT std::tstring& rFlexPath, TCHAR chNormalSep /*= '\\'*/ )
 	{	// treat storage document in rFlexPath as a directory
 		size_t sepPos = FindComplexSepPos( rFlexPath.c_str() );
 		if ( std::tstring::npos == sepPos )
@@ -548,22 +528,24 @@ namespace path
 	}
 
 
-	std::tstring& SetBackslash( std::tstring& rDirPath, TrailSlash trailSlash /*= AddSlash*/ )
+	std::tstring& SetBackslash( IN OUT std::tstring& rDirPath, TrailSlash trailSlash /*= AddSlash*/ )
 	{
-		if ( PreserveSlash == trailSlash /*|| IsComplex( rDirPath.c_str() )*/ )		// if complex path leave it alone
+		if ( PreserveSlash == trailSlash )
 			return rDirPath;
 
-		TCHAR dirPath[ MAX_PATH ];
-		str::Copy( dirPath, rDirPath );
+		std::vector<TCHAR> buffer;
+		buffer.reserve( rDirPath.length() + 1 + 1 );				// make room for extra-slash and terminating zero
+		buffer.assign( rDirPath.c_str(), rDirPath.c_str() + rDirPath.length() + 1 );
+
 		if ( !rDirPath.empty() )
-		{	// just normalize last slash to make it compatible with the API
-			TCHAR* pLastCh = dirPath + rDirPath.length() - 1;
-			*pLastCh = ToNormalChar( *pLastCh );
+		{
+			TCHAR& rTrailChar = buffer[ rDirPath.length() - 1 ];
+			rTrailChar = func::ToWinPathChar()( rTrailChar );		// just normalize last slash to make it compatible with the shell API
 		}
 
-		if ( AddSlash == trailSlash ? ::PathAddBackslash( dirPath ) : ::PathRemoveBackslash( dirPath ) )
-			if ( !Equivalent( rDirPath, dirPath ) )		// only if changed
-				rDirPath = dirPath;
+		if ( AddSlash == trailSlash ? ::PathAddBackslash( &buffer.front() ) : ::PathRemoveBackslash( &buffer.front() ) )
+			if ( !Equivalent( rDirPath.c_str(), &buffer.front() ) )		// only if changed
+				rDirPath = &buffer.front();
 
 		return rDirPath;
 	}
@@ -585,28 +567,29 @@ namespace path
 		SetBackslash( dirPath, trailSlash );
 
 		if ( RemoveSlash == trailSlash )
-			str::StripSuffix( dirPath, &path::s_complexPathSep, 1 );		// flex paths: treat trailing '>' like a slash - remove it
+			str::StripSuffix( dirPath, &path::g_complexPathSep, 1 );		// flex paths: treat trailing '>' like a slash - remove it
 
 		return dirPath;
 	}
 
 
-	bool IsNormal( const TCHAR* pPath )
+	bool IsWindows( const TCHAR* pPath )
 	{
-		return CNormalPath::IsNormal( pPath );
+		return !str::Contains( pPath, '/' );
 	}
 
-	std::tstring MakeNormal( const TCHAR* pPath )
+	std::tstring MakeWindows( const TCHAR* pPath )
 	{
-		std::tstring normalPath = pPath;
-		str::Trim( normalPath );
-		std::replace( normalPath.begin(), normalPath.end(), _T('/'), _T('\\') );
-		return normalPath;
+		std::tstring windowsPath;
+
+		str::Transform( pPath, std::back_inserter( windowsPath ), func::ToWinPathChar() );
+		str::Trim( windowsPath );
+		return windowsPath;
 	}
 
 	std::tstring MakeCanonical( const TCHAR* pPath )
 	{
-		std::tstring absolutePath = MakeNormal( pPath );		// PathCanonicalize works only with backslashes
+		std::tstring absolutePath = MakeWindows( pPath );		// PathCanonicalize works only with backslashes
 		TCHAR fullPath[ MAX_PATH ];
 		if ( ::PathCanonicalize( fullPath, absolutePath.c_str() ) )
 			absolutePath = fullPath;
@@ -615,7 +598,7 @@ namespace path
 
 	std::tstring Combine( const TCHAR* pDirPath, const TCHAR* pRightPath )
 	{
-		std::tstring dirPath = MakeNormal( pDirPath ), rightPath = MakeNormal( pRightPath );		// PathCombine works only with backslashes
+		std::tstring dirPath = MakeWindows( pDirPath ), rightPath = MakeWindows( pRightPath );		// PathCombine works only with backslashes
 
 		TCHAR fullPath[ MAX_PATH ];
 		if ( nullptr == ::PathCombine( fullPath, dirPath.c_str(), rightPath.c_str() ) )
@@ -626,7 +609,7 @@ namespace path
 
 	bool IsRoot( const TCHAR* pPath )
 	{
-		return ::PathIsRoot( CNormalPath( pPath ).Get() ) != FALSE;
+		return ::PathIsRoot( CWindowsPath( pPath ).Get() ) != FALSE;
 	}
 
 	bool IsNetwork( const TCHAR* pPath )
@@ -693,15 +676,15 @@ namespace path
 
 	bool HasSameRoot( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
-		ASSERT( IsNormal( pLeftPath ) );
-		ASSERT( IsNormal( pRightPath ) );
+		ASSERT( IsWindows( pLeftPath ) );
+		ASSERT( IsWindows( pRightPath ) );
 
 		return ::PathIsSameRoot( pLeftPath, pRightPath ) != FALSE;
 	}
 
 	std::tstring GetRootPath( const TCHAR* pPath )
 	{
-		CNormalPath rootPath( pPath );
+		CWindowsPath rootPath( pPath );
 
 		::PathStripToRoot( rootPath.Ref() );
 		return rootPath.Ref();
@@ -716,8 +699,8 @@ namespace path
 		if ( str::IsEmpty( pPrefix ) )
 			return 0;
 
-		std::tstring path = MakeNormal( pPath );
-		std::tstring prefix = MakeNormal( pPrefix );
+		std::tstring path = MakeWindows( pPath );
+		std::tstring prefix = MakeWindows( pPrefix );
 
 		typedef const TCHAR* TConstIterator;
 		TConstIterator itPath = path.c_str();
@@ -760,8 +743,8 @@ namespace path
 	std::tstring _FindCommonPrefix( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
 		size_t complSepPos = FindComplexSepPos( pLeftPath );
-		std::tstring leftPath = MakeNormal( pLeftPath );		// backslashes only
-		std::tstring rightPath = MakeNormal( pRightPath );
+		std::tstring leftPath = MakeWindows( pLeftPath );		// backslashes only
+		std::tstring rightPath = MakeWindows( pRightPath );
 
 		// ensure it works seamlessly with deep embedded paths (stoage doc treated as directory)
 		NormalizeComplexPath( leftPath );
@@ -772,7 +755,7 @@ namespace path
 
 		// restore the complex path separator if it's still part of the resulting common prefix
 		if ( complSepPos != std::tstring::npos && complSepPos < str::GetLength( commonPrefix ) )
-			commonPrefix[ complSepPos ] = s_complexPathSep;
+			commonPrefix[ complSepPos ] = g_complexPathSep;
 
 		return commonPrefix;
 	}
@@ -783,7 +766,7 @@ namespace path
 
 		if ( !str::IsEmpty( pDirPath ) )
 		{
-			size_t commonLen = str::_BaseCompare( pFullPath, pDirPath, &path::ToEquivalentChar ).second;
+			size_t commonLen = func::TCompareEquivalentPath().Compare( pFullPath, pDirPath ).second;
 			if ( commonLen != 0 )
 			{
 				if ( IsSlash( pFullPath[ commonLen ] ) )
@@ -802,11 +785,11 @@ namespace path
 			return true;					// nothing to strip, not an error
 
 		if ( size_t prefixLen = str::GetLength( pPrefix ) )
-			if ( pred::Equal == CompareNPtr( rPath.c_str(), pPrefix, prefixLen ) )
+			if ( pred::Equal == CompareEquivalent( rPath.c_str(), pPrefix, prefixLen ) )
 			{
 				TCHAR chNext = rPath.c_str()[ prefixLen ];
 
-				if ( IsSlash( chNext ) || s_complexPathSep == chNext )
+				if ( IsSlash( chNext ) || g_complexPathSep == chNext )
 					++prefixLen;			// cut leading slash or '>'
 
 				rPath.erase( 0, prefixLen );
@@ -875,13 +858,13 @@ namespace fs
 
 			std::tstring tempDir = m_dir;
 			sepPos = path::FindComplexSepPos( tempDir.c_str() );
-			tempDir[ sepPos ] = _T('/');		// temporary make it look like a real dir
+			tempDir[ sepPos ] = '/';			// temporary make it look like a real dir
 
 			_tmakepath( path, m_drive.c_str(), tempDir.c_str(), m_fname.c_str(), m_ext.c_str() );
 
 			sepPos += m_drive.length();
-			ASSERT( _T('/') == path[ sepPos ] );	// restore to original
-			path[ sepPos ] = path::s_complexPathSep;
+			ASSERT( '/' == path[ sepPos ] );	// restore to original
+			path[ sepPos ] = path::g_complexPathSep;
 		}
 
 		return fs::CPath( path );
@@ -900,7 +883,7 @@ namespace fs
 
 			std::tstring tempPath = filePath;
 			sepPos = path::FindComplexSepPos( tempPath.c_str() );
-			tempPath[ sepPos ] = _T('/');		// temporary make it part of the dir path
+			tempPath[ sepPos ] = '/';			// temporary make it part of the dir path
 
 			_tsplitpath( tempPath.c_str(), drive, dir, fname, ext );
 		}
@@ -913,8 +896,8 @@ namespace fs
 		if ( sepPos != std::tstring::npos )
 		{
 			sepPos -= m_drive.length();
-			ASSERT( _T('/') == m_dir[ sepPos ] );	// restore to original
-			m_dir[ sepPos ] = path::s_complexPathSep;
+			ASSERT( '/' == m_dir[ sepPos ] );	// restore to original
+			m_dir[ sepPos ] = path::g_complexPathSep;
 		}
 	}
 
@@ -1000,7 +983,7 @@ namespace fs
 		size_t GetDotExtCount( const fs::CPath& filePath )
 		{
 			const TCHAR* pNameExt = filePath.GetFilenamePtr();
-			return std::count( pNameExt, pNameExt + str::GetLength( pNameExt ), _T('.') );
+			return std::count( pNameExt, pNameExt + str::GetLength( pNameExt ), '.' );
 		}
 	}
 

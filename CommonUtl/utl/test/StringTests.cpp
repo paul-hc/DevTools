@@ -542,76 +542,32 @@ void CStringTests::TestStringConversion( void )
 
 	ASSERT_EQUAL( 4, str::Replace( io, _T("3,"), _T("") ) );
 	ASSERT_EQUAL( _T("abcd"), io );
-}
 
-void CStringTests::TestStringSearch( void )
-{
-	ASSERT_EQUAL_STR( _T(";mn"), str::FindTokenEnd( _T("abc;mn"), _T(",;") ) );
-	ASSERT_EQUAL_STR( _T(",xy"), str::FindTokenEnd( _T("abc;mn,xy"), _T(",") ) );
-	ASSERT_EQUAL_STR( _T(""), str::FindTokenEnd( _T("abc;mn,xy"), _T(">") ) );
-}
+	{	// StringCompare.h version
+		{
+			std::tstring text = _T("a1b1c1d1");
+			ASSERT_EQUAL( 0, str::Replace<str::Case>( &text, "X", "," ) );
+			ASSERT_EQUAL( _T("a1b1c1d1"), text );
 
-void CStringTests::TestStringMatch( void )
-{
-	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix<str::Case>( _T("abcText"), _T("abc") ) );
-	ASSERT_EQUAL_STR( _T("ABcText"), str::SkipPrefix<str::Case>( _T("ABcText"), _T("aBC") ) );
+			ASSERT_EQUAL( 4, str::Replace<str::Case>( &text, "1", "3," ) );
+			ASSERT_EQUAL( _T("a3,b3,c3,d3,"), text );
 
-	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix<str::IgnoreCase>( _T("abcText"), _T("abc") ) );
-	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix<str::IgnoreCase>( _T("ABcText"), _T("aBC") ) );
+			ASSERT_EQUAL( 2, str::Replace<str::Case>( &text, "3,", "", 2 ) );
+			ASSERT_EQUAL( _T("abc3,d3,"), text );
+		}
+		// case-insensitive
+		{
+			std::string text = "1a2a3a4a";
+			ASSERT_EQUAL( 0, str::Replace<str::IgnoreCase>( &text, L"X", L"," ) );
+			ASSERT_EQUAL( "1a2a3a4a", text );
 
-	str::TGetMatch getMatchFunc;
-	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T(""), _T("") ) );
-	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T("SomeText"), _T("SomeText") ) );
-	ASSERT_EQUAL( str::MatchEqualDiffCase, getMatchFunc( _T("SomeText"), _T("sometext") ) );
-	ASSERT_EQUAL( str::MatchNotEqual, getMatchFunc( _T("Some"), _T("Text") ) );
-}
+			ASSERT_EQUAL( 4, str::Replace<str::IgnoreCase>( &text, L"A", L"B," ) );
+			ASSERT_EQUAL( "1B,2B,3B,4B,", text );
 
-void CStringTests::TestStringSequence( void )
-{
-	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "", str::CSequence<char>( "a text", 1 ) ) );
-	ASSERT_EQUAL( 2, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"liquid", 2 ) ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"liquid", 3 ) ) );
-
-	ASSERT_EQUAL( 2, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
-	ASSERT_EQUAL( 2, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"LIQUID", 2 ), pred::TCompareNoCase() ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ), pred::TCompareCase() ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ) ) );
-
-	std::vector<std::string> items;
-	ASSERT( !AllContain( items, str::CSequence<char>( "liquid", 2 ) ) );
-
-	items.push_back( "a line" );
-	ASSERT( AllContain( items, str::CSequence<char>( "liquid", 2 ) ) );
-	ASSERT( !AllContain( items, str::CSequence<char>( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
-
-	items.push_back( "OS linux" );
-	ASSERT( AllContain( items, str::CSequence<char>( "liquid", 2 ) ) );
-	ASSERT( !AllContain( items, str::CSequence<char>( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
-
-	items.push_back( "Red Hat Linux" );
-	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
-}
-
-void CStringTests::TestStringOccurenceCount( void )
-{
-	ASSERT_EQUAL( 0, str::GetCountOf<str::Case>( "abcde", "" ) );
-	ASSERT_EQUAL( 0, str::GetCountOf<str::Case>( "abcde", " " ) );
-	ASSERT_EQUAL( 1, str::GetCountOf<str::Case>( "abcde", "a" ) );
-	ASSERT_EQUAL( 1, str::GetCountOf<str::Case>( "abcdeABC", "a" ) );
-	ASSERT_EQUAL( 2, str::GetCountOf<str::IgnoreCase>( "abcdeABC", "a" ) );
-	ASSERT_EQUAL( 2, str::GetCountOf<str::IgnoreCase>( _T("abcdeABC"), _T("a") ) );
-
-	ASSERT_EQUAL( 0, str::GetSequenceCount( "abc", str::MakeSequence( "" ) ) );
-	ASSERT_EQUAL( 1, str::GetSequenceCount( _T("abc"), str::MakeSequence( _T("b") ) ) );
-	ASSERT_EQUAL( 1, str::GetSequenceCount( _T("abcA"), str::MakeSequence( _T("a") ) ) );
-
-	static const TCHAR* sepArray[] = { _T(";"), _T("|"), _T("\r\n"), _T("\n") };
-	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessSequenceCount<TCHAR>( _T("ABC") ) ) );
-	ASSERT_EQUAL_STR( _T("\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessSequenceCount<TCHAR>( _T("A\nB\nC") ) ) );
-	ASSERT_EQUAL_STR( _T("\r\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessSequenceCount<TCHAR>( _T("A\r\nB\r\nC") ) ) );
-	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessSequenceCount<TCHAR>( _T("A|B;C|D;E;F") ) ) );
+			ASSERT_EQUAL( 2, str::Replace<str::IgnoreCase>( &text, L"B,", L"", 2 ) );
+			ASSERT_EQUAL( "123B,4B,", text );
+		}
+	}
 }
 
 void CStringTests::TestStringLines( void )
@@ -983,10 +939,6 @@ void CStringTests::Run( void )
 	RUN_TEST( TestStringTokenize );
 	RUN_TEST( TestStringPrefixSuffix );
 	RUN_TEST( TestStringConversion );
-	RUN_TEST( TestStringSearch );
-	RUN_TEST( TestStringMatch );
-	RUN_TEST( TestStringSequence );
-	RUN_TEST( TestStringOccurenceCount );
 	RUN_TEST( TestStringLines );
 
 	RUN_TEST( TestSearchEnclosedItems );

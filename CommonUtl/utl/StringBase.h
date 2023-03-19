@@ -139,7 +139,7 @@ namespace str
 
 
 	template< typename CharT >
-	inline size_t& SettleLength( size_t& rCount _out_, const CharT* pText )
+	inline size_t& SettleLength( OUT size_t& rCount, const CharT* pText )
 	{
 		if ( std::string::npos == rCount )
 			rCount = str::GetLength( pText );
@@ -154,6 +154,64 @@ namespace str
 	inline CharT CharAt( const std::basic_string<CharT>& text, size_t pos ) { REQUIRE( pos <= text.length() ); return text.c_str()[ pos ]; }
 
 
+	template< typename CharT >
+	bool Contains( const CharT* pText, wchar_t chr )
+	{
+		ASSERT( pText != nullptr && chr != '\0' );
+		if ( '\0' == *pText )
+			return false;
+
+		while ( *pText != chr )
+			if ( '\0' == *pText++ )		// reached the end?
+				return false;
+
+		return true;
+	}
+
+	template< typename CharT, typename ToCharFunc >
+	bool Contains( const CharT* pText, wchar_t chr, ToCharFunc toCharFunc )		// with character translation
+	{
+		ASSERT( pText != nullptr && chr != '\0' );
+		if ( '\0' == *pText )
+			return false;
+
+		for ( chr = toCharFunc( chr ); toCharFunc( *pText ) != chr; )
+			if ( '\0' == *pText++ )		// reached the end?
+				return false;
+
+		return true;
+	}
+
+	template< typename CharT >
+	bool ContainsI( const CharT* pText, wchar_t chr );			// case-insensitive - defined in StringCompare.h
+
+
+	template< typename CharT >
+	bool IsAnyOf( wchar_t ch, const CharT* pCharSet )
+	{
+		ASSERT_PTR( pCharSet );
+		for ( ; *pCharSet != 0; ++pCharSet )
+			if ( ch == *pCharSet )
+				return true;
+
+		return false;
+	}
+
+
+	template< typename CharT, typename OutIteratorT, typename ToCharFunc >
+	OutIteratorT Transform( const CharT* pText, OUT OutIteratorT itOut, ToCharFunc toCharFunc )
+	{	// like std::transform() with zero-terminated SRC
+		ASSERT_PTR( pText );
+		for ( ; *pText != '\0'; ++pText, ++itOut )
+			*itOut = toCharFunc( *pText );
+
+		return itOut;
+	}
+}
+
+
+namespace str
+{
 	template< typename StringT >
 	inline bool EqualsAt( const StringT& text, size_t offset, size_t seqCount, const typename StringT::value_type* pSequence )
 	{
@@ -170,7 +228,8 @@ namespace str
 	enum CaseType { Case, IgnoreCase };
 
 
-	template< str::CaseType caseType, typename CharT > bool Equals( const CharT* pLeft, const CharT* pRight );
+	template< str::CaseType caseType, typename CharT >
+	bool Equals( const CharT* pLeft, const CharT* pRight );
 
 	template<> inline bool Equals<Case, char>( const char* pLeft, const char* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
 	template<> inline bool Equals<Case, wchar_t>( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
@@ -200,8 +259,8 @@ namespace str
 	inline const CharT* s_end( const std::basic_string<CharT>& text ) { return text.c_str() + text.length(); }
 
 
-	inline char* Copy( char* pBuffer _out_, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
-	inline wchar_t* Copy( wchar_t* pBuffer _out_, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
+	inline char* Copy( OUT char* pBuffer, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
+	inline wchar_t* Copy( OUT wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
 
 
 	template< typename StringT, typename ValueT >
@@ -214,14 +273,14 @@ namespace str
 
 
 	template< typename StringT, typename SeqCharT >
-	inline void AppendSeqPtr( StringT* pText _in_out_, const SeqCharT* pSequence )
+	inline void AppendSeqPtr( IN OUT StringT* pText, const SeqCharT* pSequence )
 	{
 		ASSERT_PTR( pText );
 		pText->insert( pText->end(), pSequence, str::end( pSequence ) );
 	}
 
 	template< typename StringT, typename SeqStringT >
-	inline void AppendSeq( StringT* pText _in_out_, const SeqStringT& sequence )
+	inline void AppendSeq( IN OUT StringT* pText, const SeqStringT& sequence )
 	{
 		ASSERT_PTR( pText );
 		pText->insert( pText->end(), sequence.begin(), sequence.end() );
@@ -274,17 +333,6 @@ namespace str
 namespace str
 {
 	template< typename CharT >
-	bool IsAnyOf( CharT ch, const CharT* pCharSet )
-	{
-		ASSERT_PTR( pCharSet );
-		for ( ; *pCharSet != 0; ++pCharSet )
-			if ( ch == *pCharSet )
-				return true;
-
-		return false;
-	}
-
-	template< typename CharT >
 	inline const CharT* FindTokenEnd( const CharT* pText, const CharT delims[] )
 	{
 		const CharT* pTextEnd = str::end( pText );
@@ -317,7 +365,7 @@ namespace str
 
 
 	template< typename CharT >
-	inline std::basic_string<CharT>& PopBack( std::basic_string<CharT>& rText _out_ )
+	inline std::basic_string<CharT>& PopBack( OUT std::basic_string<CharT>& rText )
 	{	// placeholder for basic_string::pop_back() that's missing in earlier versions of STD C++
 		ASSERT( !rText.empty() );
 		rText.erase( --rText.end() );
@@ -325,7 +373,7 @@ namespace str
 	}
 
 	template< typename CharT >
-	inline bool PopBackDelim( std::basic_string<CharT>& rText _out_, CharT delim )
+	inline bool PopBackDelim( OUT std::basic_string<CharT>& rText, CharT delim )
 	{
 		typename std::basic_string<CharT>::iterator itLast = rText.end();
 
@@ -338,7 +386,7 @@ namespace str
 
 
 	template< typename CharT >
-	void EnquoteImpl( std::basic_string<CharT>& rOutText _in_out_, const CharT* pText, const CharT leading[], const CharT trailing[], bool skipIfEmpty )
+	void EnquoteImpl( IN OUT std::basic_string<CharT>& rOutText, const CharT* pText, const CharT leading[], const CharT trailing[], bool skipIfEmpty )
 	{
 		ASSERT_PTR( pText );
 		rOutText = pText;
@@ -470,7 +518,7 @@ namespace func
 namespace str
 {
 	template< typename StringT >
-	inline StringT& ToUpper( StringT& rText _in_out_, const std::locale& loc = str::GetUserLocale() )
+	inline StringT& ToUpper( IN OUT StringT& rText, const std::locale& loc = str::GetUserLocale() )
 	{
 		if ( !rText.empty() )
 			std::transform( rText.begin(), rText.end(), rText.begin(), func::ToUpper( loc ) );
@@ -478,7 +526,7 @@ namespace str
 	}
 
 	template< typename StringT >
-	inline StringT& ToLower( StringT& rText _in_out_, const std::locale& loc = str::GetUserLocale() )
+	inline StringT& ToLower( IN OUT StringT& rText, const std::locale& loc = str::GetUserLocale() )
 	{
 		if ( !rText.empty() )
 			std::transform( rText.begin(), rText.end(), rText.begin(), func::ToLower( loc ) );
@@ -510,7 +558,7 @@ namespace str
 	}
 
 	template< typename CharT >
-	bool ParseNameValuePair( std::pair< CSequence<CharT>, CSequence<CharT> >& rSeqPair _out_, const std::basic_string<CharT>& spec, CharT sep = '=' )
+	bool ParseNameValuePair( OUT std::pair< CSequence<CharT>, CSequence<CharT> >& rSeqPair, const std::basic_string<CharT>& spec, CharT sep = '=' )
 	{
 		size_t sepPos = spec.find( sep );
 		if ( std::string::npos == sepPos )
@@ -529,7 +577,7 @@ namespace str
 
 
 	template< typename CharT >
-	std::basic_string<CharT>& TrimLeft( std::basic_string<CharT>& rText _in_out_, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	std::basic_string<CharT>& TrimLeft( IN OUT std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		size_t startPos = rText.find_first_not_of( pWhiteSpace );
 
@@ -542,7 +590,7 @@ namespace str
 	}
 
 	template< typename CharT >
-	std::basic_string<CharT>& TrimRight( std::basic_string<CharT>& rText _in_out_, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	std::basic_string<CharT>& TrimRight( IN OUT std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		size_t endPos = rText.find_last_not_of( pWhiteSpace );
 
@@ -555,7 +603,7 @@ namespace str
 	}
 
 	template< typename CharT >
-	inline std::basic_string<CharT>& Trim( std::basic_string<CharT>& rText _in_out_, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	inline std::basic_string<CharT>& Trim( IN OUT std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		TrimLeft( rText, pWhiteSpace );
 		return TrimRight( rText, pWhiteSpace );
@@ -587,15 +635,15 @@ namespace str
 
 
 #ifdef _MFC_VER
-	inline CStringA& Trim( CStringA& rText _in_out_ ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
-	inline CStringW& Trim( CStringW& rText _in_out_ ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
+	inline CStringA& Trim( IN OUT CStringA& rText ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
+	inline CStringW& Trim( IN OUT CStringW& rText ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
 
 	inline BSTR AllocSysString( const std::tstring& text ) { return CString( text.c_str() ).AllocSysString(); }
 #endif //_MFC_VER
 
 
 	template< typename CharT >
-	size_t Replace( std::basic_string<CharT>& rText _in_out_, const CharT* pSearch, const CharT* pReplace, size_t maxCount = utl::npos )
+	size_t Replace( IN OUT std::basic_string<CharT>& rText, const CharT* pSearch, const CharT* pReplace, size_t maxCount = utl::npos )
 	{
 		ASSERT_PTR( pSearch );
 		ASSERT_PTR( pReplace );
@@ -614,8 +662,13 @@ namespace str
 		return count;
 	}
 
+	// defined in utl/StringCompare.h
+	//template< str::CaseType caseType, typename CharT, typename SeqCharT >
+	//size_t Replace( IN OUT std::basic_string<CharT>* pText, const SeqCharT* pSearch, const SeqCharT* pReplace, size_t maxCount = utl::npos );
+
+
 	template< typename CharT >
-	size_t ReplaceDelims( std::basic_string<CharT>& rText _in_out_, const CharT* pDelims, const CharT* pReplace, size_t maxCount = utl::npos )
+	size_t ReplaceDelims( IN OUT std::basic_string<CharT>& rText, const CharT* pDelims, const CharT* pReplace, size_t maxCount = utl::npos )
 	{
 		ASSERT_PTR( pDelims );
 		ASSERT_PTR( pReplace );
@@ -636,7 +689,7 @@ namespace str
 
 
 	template< typename CharT, typename OutIteratorT >
-	void SplitOut( OutIteratorT itOutItems _out_, const CharT* pSource, const CharT* pSep )
+	void SplitOut( OUT OutIteratorT itOutItems, const CharT* pSource, const CharT* pSep )
 	{	// uses an output iterator to insert into any container: vector, list, set, etc
 		ASSERT( !str::IsEmpty( pSep ) );
 
@@ -665,7 +718,7 @@ namespace str
 	}
 
 	template< typename CharT, typename VectLikeT >
-	void Split( VectLikeT& rItems _out_, const CharT* pSource, const CharT* pSep, bool clear = true )
+	void Split( OUT VectLikeT& rItems, const CharT* pSource, const CharT* pSep, bool clear = true )
 	{	// for containers with push_back() - VectLikeT is vector-like: vector, list, deque, stack
 		if ( clear )
 			rItems.clear();
@@ -674,7 +727,7 @@ namespace str
 	}
 
 	template< typename CharT, typename SetLikeT >
-	void SplitSet( SetLikeT& rItems _out_, const CharT* pSource, const CharT* pSep, bool clear = true )
+	void SplitSet( OUT SetLikeT& rItems, const CharT* pSource, const CharT* pSep, bool clear = true )
 	{	// SetLikeT is set-like: set, unordedred_set, list, etc
 		if ( clear )
 			rItems.clear();
@@ -684,7 +737,7 @@ namespace str
 
 
 	template< typename CharT >
-	void QuickSplit( std::vector<CharT>& rItems _out_, const CharT* pSource, CharT sepCh )
+	void QuickSplit( OUT std::vector<CharT>& rItems, const CharT* pSource, CharT sepCh )
 	{
 		// build a vector copy of source characters replacing all sepCh with '\0'
 		rItems.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// copy the EOS char
@@ -694,7 +747,7 @@ namespace str
 	}
 
 	template< typename CharT >
-	void QuickTokenize( std::vector<CharT>& rItems _out_, const CharT* pSource, const CharT* pSepTokens )
+	void QuickTokenize( OUT std::vector<CharT>& rItems, const CharT* pSource, const CharT* pSepTokens )
 	{
 		const CharT* pSepEnd = str::end( pSepTokens );
 		// build a vector copy of source characters replacing any chars in pSepTokens with '\0'
@@ -769,14 +822,14 @@ namespace pred
 namespace str
 {
 	template< typename ContainerT >
-	void RemoveEmptyItems( ContainerT& rItems _in_out_ )
+	void RemoveEmptyItems( IN OUT ContainerT& rItems )
 	{
 		rItems.erase( std::remove_if( rItems.begin(), rItems.end(), pred::IsEmpty() ), rItems.end() );
 	}
 
 
 	template< typename StrContainerT >
-	void TrimItems( StrContainerT& rItems _in_out_ )
+	void TrimItems( IN OUT StrContainerT& rItems )
 	{
 		for ( typename StrContainerT::iterator itLine = rItems.begin(); itLine != rItems.end(); ++itLine )
 			str::Trim( *itLine );
@@ -863,9 +916,9 @@ namespace num
 
 namespace stream
 {
-	bool Tag( std::tstring& rOutput _in_out_, const std::tstring& tag, const TCHAR* pPrefixSep );
+	bool Tag( IN OUT std::tstring& rOutput, const std::tstring& tag, const TCHAR* pPrefixSep );
 
-	bool InputLine( std::istream& is, std::tstring& rLine _out_ );
+	bool InputLine( std::istream& is, OUT std::tstring& rLine );
 }
 
 

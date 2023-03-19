@@ -49,7 +49,7 @@ std::wostream& operator<<( std::wostream& os, char chUtf8 )
 
 namespace hlp
 {
-	std::string& ToNarrow( std::string& rNarrow _out_, UINT codePage, const wchar_t* pWide, size_t charCount )
+	std::string& ToNarrow( OUT std::string& rNarrow, UINT codePage, const wchar_t* pWide, size_t charCount )
 	{	// codePage: CP_UTF8/CP_ACP
 		str::SettleLength( charCount, pWide );
 
@@ -67,7 +67,7 @@ namespace hlp
 		return rNarrow;
 	}
 
-	std::wstring& ToWide( std::wstring& rWide _out_, UINT codePage, const char* pNarrow, size_t charCount )
+	std::wstring& ToWide( OUT std::wstring& rWide, UINT codePage, const char* pNarrow, size_t charCount )
 	{	// codePage: CP_UTF8/CP_ACP
 		str::SettleLength( charCount, pNarrow );
 
@@ -314,7 +314,7 @@ namespace str
 
 namespace stream
 {
-	bool Tag( std::tstring& rOutput _in_out_, const std::tstring& tag, const TCHAR* pPrefixSep )
+	bool Tag( IN OUT std::tstring& rOutput, const std::tstring& tag, const TCHAR* pPrefixSep )
 	{
 		if ( tag.empty() )
 			return false;
@@ -326,7 +326,7 @@ namespace stream
 		return true;
 	}
 
-	bool InputLine( std::istream& is, std::tstring& rLine _out_ )
+	bool InputLine( std::istream& is, OUT std::tstring& rLine )
 	{
 		std::string line;
 		bool eof = !std::getline( is, line );

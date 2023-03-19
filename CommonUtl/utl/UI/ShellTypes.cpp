@@ -626,7 +626,7 @@ namespace shell
 {
 	pred::CompareResult ExplorerCompare( const wchar_t* pLeftPath, const wchar_t* pRightPath )
 	{
-		if ( path::EquivalentPtr( pLeftPath, pRightPath ) )
+		if ( path::Equivalent( pLeftPath, pRightPath ) )
 			return pred::Equal;
 
 		return pred::ToCompareResult( ::StrCmpLogicalW( pLeftPath, pRightPath ) );

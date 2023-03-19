@@ -174,7 +174,7 @@ namespace code
 		template< typename IteratorT >
 		inline IteratorT FindNextChar( IteratorT itCode, IteratorT itLast, wchar_t chr ) const
 		{
-			return FindNextCharThat( itCode, itLast, pred::IsChar( chr ) );
+			return FindNextCharThat( itCode, itLast, pred::IsChar<>( chr ) );
 		}
 
 		template< typename IteratorT, typename IsCharPred >
@@ -206,7 +206,7 @@ namespace code
 		// skipping methods
 
 		template< typename IteratorT, typename IsCharPred >
-		bool SkipWhile( IteratorT* pItCode _in_out_, IteratorT itLast, IsCharPred isCharPred ) const
+		bool SkipWhile( IN OUT IteratorT* pItCode, IteratorT itLast, IsCharPred isCharPred ) const
 		{	// skips to the next position that does not satisfy the predicate
 			ASSERT_PTR( pItCode );
 
@@ -219,7 +219,7 @@ namespace code
 		}
 
 		template< typename IteratorT, typename IsCharPred >
-		bool SkipUntil( IteratorT* pItCode _in_out_, IteratorT itLast, IsCharPred isCharPred ) const
+		bool SkipUntil( IN OUT IteratorT* pItCode, IteratorT itLast, IsCharPred isCharPred ) const
 		{	// skips to the next position that satisfies the predicate
 			ASSERT_PTR( pItCode );
 
@@ -232,7 +232,7 @@ namespace code
 		}
 
 		template< typename IteratorT, typename IsCharPred >
-		size_t SkipBackWhile( IteratorT* pItCode _in_out_, IteratorT itFirst, IsCharPred isCharPred ) const
+		size_t SkipBackWhile( IN OUT IteratorT* pItCode, IteratorT itFirst, IsCharPred isCharPred ) const
 		{	// skips to the first previous position that satisfies the predicate (e.g. is space) => Note: no separators parsing, no smarties, so use it for skiping spaces, not semantically rich stuff!
 			ASSERT_PTR( pItCode );
 			size_t count = 0;
@@ -245,22 +245,22 @@ namespace code
 
 
 		template< typename IteratorT >
-		inline bool SkipWhitespace( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsSpace() ); }
+		inline bool SkipWhitespace( IN OUT IteratorT* pItCode, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsSpace() ); }
 
 		template< typename IteratorT >
-		inline bool SkipBlank( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsBlank() ); }
+		inline bool SkipBlank( IN OUT IteratorT* pItCode, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsBlank() ); }
 
 		template< typename IteratorT >
-		inline bool SkipIdentifier( IteratorT* pItCode _in_out_, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsIdentifier() ); }
+		inline bool SkipIdentifier( IN OUT IteratorT* pItCode, IteratorT itLast ) const { return SkipWhile( pItCode, itLast, pred::IsIdentifier() ); }
 
 
 		// bracket lookup
 
 		template< typename IteratorT >
-		IteratorT FindMatchingBracket( IteratorT itBracket, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr _out_ ) const throws_cond( code::TSyntaxError );
+		IteratorT FindMatchingBracket( IteratorT itBracket, IteratorT itLast, OUT IteratorT* pItBracketMismatch = nullptr ) const throws_cond( code::TSyntaxError );
 
 		template< typename IteratorT >
-		bool SkipPastMatchingBracket( IteratorT* pItBracket _in_out_, IteratorT itLast, IteratorT* pItBracketMismatch = nullptr _out_ ) const throws_cond( code::TSyntaxError );
+		bool SkipPastMatchingBracket( IN OUT IteratorT* pItBracket, IteratorT itLast, OUT IteratorT* pItBracketMismatch = nullptr ) const throws_cond( code::TSyntaxError );
 
 		template< typename IteratorT >
 		IteratorT FindNextBracket( IteratorT itCode, IteratorT itLast ) const
@@ -309,22 +309,22 @@ namespace code
 
 		// pointer interface:
 		template< typename CharT >
-		typename CharT DecodeCharAdvance( const CharT** ppSrc _in_out_ ) const;
+		typename CharT DecodeCharAdvance( IN OUT const CharT** ppSrc ) const;
 
 		template< typename CharT >
-		typename CharT DecodeChar( const CharT* pSrc, size_t* pLength = nullptr _out_ ) const;
+		typename CharT DecodeChar( OUT const CharT* pSrc, size_t* pLength = nullptr ) const;
 
 		// iterator interface:
 		template< typename IteratorT >
-		typename IteratorT::value_type DecodeCharAdvance( IteratorT* pIt _in_out_ ) const;
+		typename IteratorT::value_type DecodeCharAdvance( IN OUT IteratorT* pIt ) const;
 
 		template< typename IteratorT >
-		typename IteratorT::value_type DecodeChar( IteratorT it, size_t* pLength = nullptr _out_ ) const;
+		typename IteratorT::value_type DecodeChar( IteratorT it, OUT size_t* pLength = nullptr ) const;
 
 
 		// character encoding:
 		template< typename OutIteratorT, typename CharT >
-		void AppendEncodedChar( OutIteratorT itLiteral _out_, CharT actualCh, bool enquote, const char* pRetain = nullptr ) const;
+		void AppendEncodedChar( OUT OutIteratorT itLiteral, CharT actualCh, bool enquote, const char* pRetain = nullptr ) const;
 	private:
 		std::string FormatHexCh( char chr ) const;
 		std::wstring FormatHexCh( wchar_t chr ) const;
@@ -349,7 +349,7 @@ namespace cpp
 
 
 	template< typename SignedIntT, typename CharT >
-	std::pair<SignedIntT, NumLiteral> ParseIntegerLiteral( const CharT* pSrc, CharT** ppNumEnd _out_ )
+	std::pair<SignedIntT, NumLiteral> ParseIntegerLiteral( const CharT* pSrc, OUT CharT** ppNumEnd )
 	{
 		ASSERT_PTR( pSrc );
 
@@ -388,7 +388,7 @@ namespace cpp
 	}
 
 	template< typename SignedIntT, typename CharT >
-	std::pair<SignedIntT, NumLiteral> ParseIntegerLiteral( const CharT* pSrc, size_t* pNumLength = nullptr _out_ )
+	std::pair<SignedIntT, NumLiteral> ParseIntegerLiteral( const CharT* pSrc, OUT size_t* pNumLength = nullptr )
 	{
 		CharT* pNumEnd;
 		std::pair<SignedIntT, NumLiteral> integerPair = ParseIntegerLiteral<SignedIntT>( pSrc, &pNumEnd );
@@ -398,7 +398,7 @@ namespace cpp
 	}
 
 	template< typename CharT >
-	std::pair<double, NumLiteral> ParseDoubleLiteral( const CharT* pSrc, size_t* pNumLength = nullptr _out_ )
+	std::pair<double, NumLiteral> ParseDoubleLiteral( const CharT* pSrc, OUT size_t* pNumLength = nullptr )
 	{
 		ASSERT_PTR( pSrc );
 		CharT* pNumEnd;
@@ -410,7 +410,7 @@ namespace cpp
 
 
 	template< typename CharT >
-	bool IsValidNumericLiteral( const CharT* pSrc, size_t* pNumLength = nullptr _out_ )
+	bool IsValidNumericLiteral( const CharT* pSrc, OUT size_t* pNumLength = nullptr )
 	{
 		CharT* pNumEnd;
 		std::pair<long long, NumLiteral> integerPair = ParseIntegerLiteral<long long>( pSrc, &pNumEnd );

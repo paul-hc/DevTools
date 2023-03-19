@@ -333,7 +333,7 @@ bool CPathFormatter::ParsePart( UINT& rSeqCount, const std::tstring& format, con
 				break;
 			default:
 				issSrc >> chSrc;
-				if ( !pred::IsEquivalentPathChar()( *itFmt, chSrc ) )
+				if ( !pred::TCharEqualEquivalentPath()( *itFmt, chSrc ) )
 					return false;					// mismatch
 				break;
 		}
@@ -372,7 +372,7 @@ bool CPathFormatter::SkipStar( std::tistringstream& issSrc, std::tstring::const_
 					++itFmt;
 					break;
 				default:
-					if ( pred::IsEquivalentPathChar()( *itFmt, chSrc ) )
+					if ( pred::TCharEqualEquivalentPath()( *itFmt, chSrc ) )
 					{
 						issSrc.unget();
 						return true;

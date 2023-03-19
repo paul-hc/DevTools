@@ -35,7 +35,7 @@ namespace path
 	void normalizePaths( std::vector< CString >& rOutFilepaths )
 	{
 		for ( std::vector< CString >::iterator itPath = rOutFilepaths.begin(); itPath != rOutFilepaths.end(); ++itPath )
-			*itPath = path::MakeNormal( *itPath ).c_str();
+			*itPath = path::MakeWindows( itPath->GetString() ).c_str();
 	}
 }
 
@@ -169,10 +169,10 @@ PathInfo& PathInfo::operator=( const PathInfo& src )
 bool PathInfo::operator==( const PathInfo& right ) const
 {
 	return
-		path::EquivalentPtr( ext, right.ext ) &&
-		path::EquivalentPtr( name, right.name ) &&
-		path::EquivalentPtr( drive, right.drive ) &&
-		path::EquivalentPtr( dir, right.dir );
+		path::Equivalent( ext, right.ext ) &&
+		path::Equivalent( name, right.name ) &&
+		path::Equivalent( drive, right.drive ) &&
+		path::Equivalent( dir, right.dir );
 }
 
 pred::CompareResult PathInfo::Compare( const PathInfo& right,
@@ -188,7 +188,7 @@ pred::CompareResult PathInfo::Compare( const PathInfo& right,
 
 pred::CompareResult PathInfo::CompareField( const PathInfo& right, PathField field, const TCHAR* pDefaultDirName /*= nullptr*/ ) const
 {
-	pred::CompareResult result = path::CompareNPtr( getField( field, pDefaultDirName ), right.getField( field, pDefaultDirName ) );
+	pred::CompareResult result = path::CompareEquivalent( getField( field, pDefaultDirName ), right.getField( field, pDefaultDirName ) );
 
 	if ( pfExt == field )
 		if ( !( pred::Equal == result || ext.IsEmpty() || right.ext.IsEmpty() ) )		// different non-empty extensions
@@ -202,14 +202,14 @@ pred::CompareResult PathInfo::CompareField( const PathInfo& right, PathField fie
 bool PathInfo::smartNameExtEQ( const PathInfo& right ) const
 {
 	// compares filename+ext and only if any, directory path
-	if ( !path::EquivalentPtr( getNameExt(), right.getNameExt() ) )
+	if ( !path::Equivalent( getNameExt(), right.getNameExt() ) )
 		return false;	// Filename+ext mismatch.
 
 	bool thisAbs = isAbsolutePath(), cmpAbs = right.isAbsolutePath();
 
 	if ( thisAbs != cmpAbs || !thisAbs )
 		return true;	// Both or one of then not absolute path -> consider it a match !
-	return path::EquivalentPtr( drive, right.drive ) && path::EquivalentPtr( dir, right.dir );
+	return path::Equivalent( drive, right.drive ) && path::Equivalent( dir, right.dir );
 }
 
 CString PathInfo::GetFullPath( void ) const
@@ -223,7 +223,7 @@ CString PathInfo::GetFullPath( void ) const
 
 void PathInfo::assign( const CString& _fullPath, bool doStdConvert /*= false*/ )
 {
-	_tsplitpath( doStdConvert ? path::MakeNormal( _fullPath ).c_str() : (LPCTSTR)_fullPath,
+	_tsplitpath( doStdConvert ? path::MakeWindows( _fullPath.GetString() ).c_str() : (LPCTSTR)_fullPath,
 				 drive.GetBuffer( _MAX_DRIVE ),
 				 dir.GetBuffer( _MAX_DIR ),
 				 name.GetBuffer( _MAX_FNAME ),
@@ -271,7 +271,7 @@ CString PathInfo::getDirName( const TCHAR* pDefaultDirName /*= nullptr*/ ) const
 {
 	// ex: for "E:\WINNT\system32\BROWSER.DLL" -> returns "system32"
 	// if pDefaultDirName="system32" -> returns "" !
-	if ( pDefaultDirName != nullptr && path::EquivalentPtr( dirName, pDefaultDirName ) )
+	if ( pDefaultDirName != nullptr && path::Equivalent( dirName, pDefaultDirName ) )
 		return CString();
 	return dirName;
 }
@@ -297,7 +297,7 @@ void PathInfo::assignDirPath( CString dirPath, bool doStdConvert /*= false*/ )
 // Assigns 'drive' and 'dir' members, alters 'dirName' and preserves 'name' and 'ext' members
 {
 	if ( doStdConvert )
-		dirPath = path::MakeNormal( dirPath ).c_str();
+		dirPath = path::MakeWindows( dirPath.GetString() ).c_str();
 	// Add trailing slash (if not already):
 	if ( !dirPath.IsEmpty() && !path::IsSlash( dirPath[ dirPath.GetLength() - 1 ] ) )
 		dirPath += _T('\\');
@@ -317,7 +317,7 @@ void PathInfo::assignDirPath( CString dirPath, bool doStdConvert /*= false*/ )
 void PathInfo::assignNameExt( const CString& nameExt, bool doStdConvert /*= false*/ )
 // Assigns 'name' and 'ext' members and preserves 'drive' and 'dir' members
 {
-	_tsplitpath( doStdConvert ? path::MakeNormal( nameExt ).c_str() : (LPCTSTR)nameExt,
+	_tsplitpath( doStdConvert ? path::MakeWindows( nameExt.GetString() ).c_str() : (LPCTSTR)nameExt,
 				 nullptr,
 				 nullptr,
 				 name.GetBuffer( _MAX_FNAME ),
@@ -366,33 +366,16 @@ CString PathInfo::makeAbsolute( const TCHAR* pathToConvert )
 	return absolutePath;
 }
 
-TCHAR* PathInfo::findSubString( const TCHAR* pathString, const TCHAR* subString )
+TCHAR* PathInfo::findSubString( const TCHAR* pPath, const TCHAR* pSubString )
 {
-	if ( *subString == '\0' )
-		return const_cast<TCHAR*>( pathString );
-
-	for ( TCHAR *cmp = const_cast<TCHAR*>( pathString ); *cmp; cmp++ )
-	{
-		TCHAR* pStr = cmp, *subStr = const_cast<TCHAR*>( subString );
-
-		while ( *pStr && *subStr && !( path::ToEquivalentChar( *pStr ) - path::ToEquivalentChar( *subStr ) ) )
-			++pStr, ++subStr;
-
-		if ( *subStr == '\0' )
-			return cmp;
-	}
-
-	return nullptr;
+	const TCHAR* pFound = path::Find( pPath, pSubString );
+	ASSERT_PTR( pFound );
+	return *pFound != '\0' ? const_cast<TCHAR*>( pFound ) : nullptr;
 }
 
-int PathInfo::find( const TCHAR* pathString, const TCHAR* subString, int startPos /*= 0*/ )
+int PathInfo::find( const TCHAR* pPath, const TCHAR* pSubString, int startPos /*= 0*/ )
 {
-	ASSERT( pathString != nullptr && subString != nullptr && startPos >= startPos );
-	ASSERT( startPos <= str::Length( pathString ) );
-
-	TCHAR* pMatch = findSubString( pathString + startPos, subString );
-
-	return pMatch != nullptr ? ( int( pMatch - pathString ) + startPos ) : ( -1 );
+	return static_cast<int>( path::FindPos( pPath, pSubString, startPos ) );
 }
 
 
@@ -430,7 +413,7 @@ CString PathInfoEx::GetFullPath( void ) const
 void PathInfoEx::assign( const CString& _fullPath, bool doStdConvert /*= false*/ )
 {
 	if ( doStdConvert )
-		fullPath = path::MakeNormal( _fullPath ).c_str();
+		fullPath = path::MakeWindows( _fullPath.GetString() ).c_str();
 	else
 		fullPath = _fullPath;
 	PathInfo::assign( fullPath, false /*already converted*/ );
@@ -449,7 +432,7 @@ void PathInfoEx::updateFullPath( void )
 
 bool PathInfoEx::isConsistent( void ) const
 {
-	return path::EquivalentPtr( fullPath, PathInfo::GetFullPath() );
+	return path::Equivalent( fullPath, PathInfo::GetFullPath() );
 }
 
 

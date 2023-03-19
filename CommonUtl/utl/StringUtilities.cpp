@@ -24,7 +24,7 @@ namespace str
 	template<> const char* StdDelimiters<char>( void ) { return " \t"; }
 	template<> const wchar_t* StdDelimiters<wchar_t>( void ) { return L" \t"; }
 
-	TCHAR* CopyTextToBuffer( TCHAR* pDestBuffer _out_, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] /*= g_ellipsis*/ )
+	TCHAR* CopyTextToBuffer( OUT TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] /*= g_ellipsis*/ )
 	{
 		if ( pText != nullptr )
 		{
@@ -46,7 +46,7 @@ namespace str
 		return pDestBuffer;
 	}
 
-	std::tstring& Truncate( std::tstring& rText _in_out_, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/, bool atEnd /*= true*/ )
+	std::tstring& Truncate( IN OUT std::tstring& rText, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/, bool atEnd /*= true*/ )
 	{
 		size_t suffixLen = str::GetLength( suffix );
 		ASSERT( suffixLen <= maxLen );
@@ -63,7 +63,7 @@ namespace str
 		return rText;
 	}
 
-	std::tstring& SingleLine( std::tstring& rText _in_out_, size_t maxLen /*= utl::npos*/, const TCHAR sepLineEnd[] /*= g_paragraph*/ )
+	std::tstring& SingleLine( IN OUT std::tstring& rText, size_t maxLen /*= utl::npos*/, const TCHAR sepLineEnd[] /*= g_paragraph*/ )
 	{
 		str::Replace( rText, _T("\r\n"), sepLineEnd );
 		str::Replace( rText, _T("\n"), sepLineEnd );
@@ -71,7 +71,7 @@ namespace str
 	}
 
 
-	size_t ReplaceDelimiters( std::tstring& rText _in_out_, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter )
+	size_t ReplaceDelimiters( IN OUT std::tstring& rText, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter )
 	{
 		std::vector<std::tstring> items;
 		Tokenize( items, rText.c_str(), pDelimiters );
@@ -79,7 +79,7 @@ namespace str
 		return items.size();
 	}
 
-	size_t EnsureSingleSpace( std::tstring& rText _in_out_ )
+	size_t EnsureSingleSpace( IN OUT std::tstring& rText )
 	{
 		return ReplaceDelimiters( rText, _T(" \t"), _T(" ") );
 	}
@@ -138,7 +138,7 @@ namespace env
 		return ExpandStrings( windowsEnvSource.c_str() );
 	}
 
-	size_t AddExpandedPaths( std::vector<fs::CPath>& rEvalPaths _in_out_, const TCHAR* pSource, const TCHAR delim[] /*= _T(";")*/ )
+	size_t AddExpandedPaths( IN OUT std::vector<fs::CPath>& rEvalPaths, const TCHAR* pSource, const TCHAR delim[] /*= _T(";")*/ )
 	{
 		std::tstring expandedPaths = env::ExpandPaths( pSource );
 
@@ -150,7 +150,7 @@ namespace env
 
 	namespace impl
 	{
-		void QueryEnvVariableNames( std::vector<std::tstring>& rVarNameSpecs _out_, const std::tstring& text, bool keepSeps = true )
+		void QueryEnvVariableNames( OUT std::vector<std::tstring>& rVarNameSpecs, const std::tstring& text, bool keepSeps = true )
 		{	// both environment variables Windows  ("%VAR_NAME%") and VC Macro ("$(VAR_NAME)")
 			str::CEnclosedParser<TCHAR> parser( _T("%|$("), _T("%|)") );
 			parser.QueryItems( rVarNameSpecs, text, keepSeps );
@@ -193,7 +193,7 @@ namespace num
 		return emptyLocale;
 	}
 
-	bool StripFractionalZeros( std::tstring& rText _out_, const std::locale& loc /*= str::GetUserLocale()*/ )
+	bool StripFractionalZeros( OUT std::tstring& rText, const std::locale& loc /*= str::GetUserLocale()*/ )
 	{
 		const TCHAR decimalPoint = std::use_facet< std::numpunct<TCHAR> >( loc ).decimal_point();
 		std::tstring::reverse_iterator itStart = rText.rbegin();
@@ -225,7 +225,7 @@ namespace num
 	}
 
 	template<>
-	bool ParseNumber<BYTE>( BYTE& rNumber _out_, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
+	bool ParseNumber<BYTE>( OUT BYTE& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
 	{
 		unsigned int number;
 		if ( !ParseNumber( number, text, pSkipLength, loc ) || number > 255 )
@@ -235,7 +235,7 @@ namespace num
 	}
 
 	template<>
-	bool ParseNumber<signed char>( signed char& rNumber _out_, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
+	bool ParseNumber<signed char>( OUT signed char& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
 	{
 		int number;
 		if ( !ParseNumber( number, text, pSkipLength, loc ) || number > 255 )
@@ -261,7 +261,7 @@ namespace num
 			return Range<size_t>( std::tstring::npos );
 	}
 
-	size_t EnsureUniformZeroPadding( std::vector<std::tstring>& rItems _in_out_ )
+	size_t EnsureUniformZeroPadding( IN OUT std::vector<std::tstring>& rItems )
 	{
 		std::vector<size_t> digitWidths;
 
@@ -670,7 +670,7 @@ namespace arg
 		return false;
 	}
 
-	bool ParseValuePair( std::tstring& rValue _out_, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
+	bool ParseValuePair( OUT std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
 	{
 		// argument syntax: name=value - allows name partial prefix matches
 		const TCHAR* pValueSep = std::find( pArg, str::end( pArg ), valueSep );
@@ -685,7 +685,7 @@ namespace arg
 		return false;
 	}
 
-	bool ParseOptionalValuePair( std::tstring* pValue _out_, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
+	bool ParseOptionalValuePair( OUT std::tstring* pValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
 	{
 		// argument syntax: name[=value], where "name" can be a case insensitive match of any item in pNameList
 

@@ -48,10 +48,10 @@ namespace auto_drop
 		bool imageWasMovedOrg = m_imageWasMoved;
 
 		if ( !m_imageWasMoved )
-			if ( path::EquivalentPtr( path::GetParentPath( m_srcFullPath.c_str() ).c_str(), destDirPath.c_str() ) )
+			if ( path::Equivalent( path::GetParentPath( m_srcFullPath.c_str() ).c_str(), destDirPath.c_str() ) )
 				m_imageWasMoved = true;			// COPY operation specified -> change to MOVE since source and dest dirs are the same
 
-		ASSERT( !path::EquivalentPtr( m_srcFullPath.c_str(), GetDestFullPath( destDirPath ).c_str() ) );
+		ASSERT( !path::Equivalent( m_srcFullPath.c_str(), GetDestFullPath( destDirPath ).c_str() ) );
 		return m_imageWasMoved == imageWasMovedOrg;		// consistent if operation didn't change
 	}
 

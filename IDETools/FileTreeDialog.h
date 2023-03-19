@@ -18,33 +18,12 @@ struct CIncludeNode;
 typedef std::pair<HTREEITEM, CIncludeNode*> TTreeItemPair;
 
 
-struct CMatchingItems
-{
-	CMatchingItems( HTREEITEM hStartItem, const std::tstring& fullPath )
-		: m_hStartItem( hStartItem ), m_fullPath( path::MakeCanonical( fullPath.c_str() ) ), m_startPos( std::tstring::npos ) {}
-
-	bool IsPathMatch( const CIncludeNode* pItemInfo ) const { return path::Equivalent( m_fullPath, pItemInfo->m_path.Get() ); }
-
-	void AddMatch( HTREEITEM hItem, CIncludeNode* pItemInfo )
-	{
-		if ( m_hStartItem == hItem )
-			m_startPos = m_matches.size();
-		m_matches.push_back( std::make_pair( hItem, pItemInfo ) );
-	}
-public:
-	HTREEITEM m_hStartItem;
-	std::tstring m_fullPath;
-	size_t m_startPos;
-	std::vector< TTreeItemPair > m_matches;
-};
-
-
 class CFileTreeDialog : public CLayoutDialog
 {
 public:
 	typedef void (*TIterFunc)( CTreeControl* pTreeCtrl, HTREEITEM hItem, void* pArgs, int nestingLevel );
 
-	CFileTreeDialog( const std::tstring& rootPath, CWnd* pParent );
+	CFileTreeDialog( const fs::CPath& rootPath, CWnd* pParent );
 	virtual ~CFileTreeDialog();
 
 	const fs::CPath& GetRootPath( void ) const { return m_rootPath; }
@@ -90,15 +69,15 @@ private:
 	TTreeItemPair GetSelectedItem( void ) const;
 
 	void UpdateOptionCtrl( void );
+
+	typedef std::map<fs::CPath, HTREEITEM> TPathToItemMap;
 private:
 	fs::CPath m_rootPath;
 	CIncludeOptions& m_rOpt;
 
-	std::vector< CIncludeNode* > m_treeItems;				// has ownership
+	std::vector<CIncludeNode*> m_treeItems;				// has ownership
 	int m_sourceLineNo;
 
-	typedef pred::LessValue< pred::CompareEquivPath > TLessPath;
-	typedef std::map< std::tstring, HTREEITEM, TLessPath > TPathToItemMap;
 	TPathToItemMap m_originalItems;
 
 	CFileAssoc m_fileAssoc;

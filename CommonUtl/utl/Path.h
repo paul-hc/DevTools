@@ -8,41 +8,71 @@
 #include <unordered_set>
 
 
+namespace path
+{
+	extern const TCHAR g_complexPathSep;			// '>' character that separates the storage file path from the stream/storage embedded sub-path
+}
+
+
 namespace func
 {
-	// Translates characters to generate a natural order, useful for sorting paths and filenames.
-	// Natural order: intuitive (case insensitive, order numeric sequences by value) | punctuation first (shortest filename first in a tie).
-	// Note: This is closer to Explorer.exe sort order (which varies with Windows version), yet different than ::StrCmpLogicalW from <shlwapi.h>
-	//
-	struct ToNaturalPathChar
+	struct ToWinPathChar			// translate slashes to Windows '\\'
 	{
-		template< typename CharType >
-		CharType operator()( CharType ch ) const
-		{
-			return static_cast<CharType>( Translate( ch ) );
-		}
-
-		static int Translate( int charCode );
+		TCHAR operator()( TCHAR ch ) const { return '/' == ch ? '\\' : ch; }
 	};
+
+	struct ToUnixPathChar				// translate slashes to Unix '/'
+	{
+		TCHAR operator()( TCHAR ch ) const { return '\\' == ch ? '/' : ch; }
+	};
+
+	struct ToEquivalentPathChar			// lower-case letters or Windows '\\'
+	{
+		TCHAR operator()( TCHAR ch ) const { return ( '/' == ch || path::g_complexPathSep == ch ) ? '\\' : m_toLower( ch ); }
+	public:
+		pred::ToLower m_toLower;
+	};
+
+
+	typedef func::StrCompareBase<ToEquivalentPathChar> TCompareEquivalentPath;
+}
+
+
+namespace pred
+{
+	typedef CharEqualBase<func::ToEquivalentPathChar> TCharEqualEquivalentPath;
+
+	typedef StrEqualsBase<func::ToEquivalentPathChar> TEquivalentPath;
+	typedef StrEquals<str::IgnoreCase> TEqualsPath;
 }
 
 
 namespace path
 {
-	extern const TCHAR s_complexPathSep;			// '>' character that separates the storage file path from the stream/storage embedded sub-path
+	inline bool Equivalent( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return pred::TEquivalentPath()( pLeftPath, pRightPath ); }
+	inline bool Equals( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return str::Equals<str::IgnoreCase>( pLeftPath, pRightPath ); }
 
-	inline bool IsSlash( TCHAR ch ) { return _T('\\') == ch || _T('/') == ch; }
-	inline TCHAR ToNormalChar( TCHAR ch ) { return _T('/') == ch ? _T('\\') : ch; }
-	inline TCHAR ToEquivalentChar( TCHAR ch ) { return _T('/') == ch || s_complexPathSep == ch ? _T('\\') : ::towlower( ch ); }
+	inline pred::CompareResult CompareEquivalent( const TCHAR* pLeftPath, const TCHAR* pRightPath, size_t count = std::tstring::npos )
+	{
+		return func::TCompareEquivalentPath()( pLeftPath, pRightPath, count );
+	}
+
+	pred::CompareResult CompareIntuitive( const TCHAR* pLeft, const TCHAR* pRight );
+
+
+	typedef str::EvalMatch<func::ToWinPathChar, func::ToEquivalentPathChar> TGetMatch;
+}
+
+
+namespace path
+{
+	// path API
+
+	inline bool IsSlash( TCHAR ch ) { return '\\' == ch || '/' == ch; }
+
 	const TCHAR* DirDelims( void );
-
-	bool EquivalentPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath );
-	bool Equivalent( const std::tstring& leftPath, const std::tstring& rightPath );
-
-	bool EqualsPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath );
-	inline bool Equals( const std::tstring& leftPath, const std::tstring& rightPath ) { return EqualsPtr( leftPath.c_str(), rightPath.c_str() ); }
-
-	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight );
+	const TCHAR* Wildcards( void );
+	const TCHAR* MultiSpecDelims( void );
 
 	const TCHAR* StdFormatNumSuffix( void );		// "_[%d]"
 
@@ -50,35 +80,13 @@ namespace path
 	inline size_t GetHashValue( const std::tstring& filePath ) { return GetHashValuePtr( filePath.c_str(), filePath.length() ); }
 
 
-	struct ToNormal
-	{
-		TCHAR operator()( TCHAR ch ) const { return ToNormalChar( ch ); }
-	};
-
-	struct ToEquivalent
-	{
-		TCHAR operator()( TCHAR ch ) const { return ToEquivalentChar( ch ); }
-	};
-
-
-	inline pred::CompareResult CompareNPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath, size_t count = std::tstring::npos )
-	{
-		return str::_CompareN( pLeftPath, pRightPath, path::ToEquivalent(), count );
-	}
-
-	typedef str::EvalMatch< ToNormal, ToEquivalent > TGetMatch;
-
-
 	// path breaks and segment matching
-	inline bool IsBreakChar( TCHAR ch ) { return IsSlash( ch ) || s_complexPathSep == ch || _T('\0') == ch; }
+	inline bool IsBreakChar( TCHAR ch ) { return IsSlash( ch ) || g_complexPathSep == ch || '\0' == ch; }
 
 	const TCHAR* FindBreak( const TCHAR* pPath );
 	const TCHAR* SkipBreak( const TCHAR* pPathBreak );
-	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength = nullptr );
+	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, OUT size_t* pOutMatchLength = nullptr );
 
-
-	const TCHAR* Wildcards( void );
-	const TCHAR* MultiSpecDelims( void );
 
 	bool MatchWildcard( const TCHAR* pPath, const TCHAR* pWildSpec, const TCHAR* pMultiSpecDelims = MultiSpecDelims() );
 	bool IsMultipleWildcard( const TCHAR* pWildSpec, const TCHAR* pMultiSpecDelims = MultiSpecDelims() );
@@ -95,29 +103,30 @@ namespace path
 	bool IsAbsolute( const TCHAR* pPath );
 	bool IsRelative( const TCHAR* pPath );
 	bool IsDirectory( const TCHAR* pPath );
-	bool IsFilename( const TCHAR* pPath );		// "basefilename[.ext]"
+	bool IsFilename( const TCHAR* pPath );				// "basefilename[.ext]"
 
 	bool HasDirectory( const TCHAR* pPath );
 
 	const TCHAR* Find( const TCHAR* pPath, const TCHAR* pSubString );
+	size_t FindPos( const TCHAR* pPath, const TCHAR* pSubString, size_t offset = 0 );
 	inline bool Contains( const TCHAR* pPath, const TCHAR* pSubString ) { return !str::IsEmpty( Find( pPath, pSubString ) ); }
 
 	const TCHAR* FindFilename( const TCHAR* pPath );
 	const TCHAR* FindExt( const TCHAR* pPath );
-	const TCHAR* SkipRoot( const TCHAR* pPath );		// ignore the drive letter or Universal Naming Convention (UNC) server/share path parts
+	const TCHAR* SkipRoot( const TCHAR* pPath );		// ignore the drive letter or UNC (Universal Naming Convention) server/share path parts
 
-	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return EquivalentPtr( FindExt( pPath ), pExt ); }		// pExt: ".txt"
+	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return path::Equivalent( FindExt( pPath ), pExt ); }		// pExt: ".txt"
 
 
 	// huge prefix syntax: path prefixed with "\\?\"
 	const std::tstring& GetHugePrefix( void );
 	bool HasHugePrefix( const TCHAR* pPath );			// uses path syntax with "\\?\" prefix?
 	const TCHAR* SkipHugePrefix( const TCHAR* pPath );
-	bool SetHugePrefix( std::tstring& rPath, bool useHugePrefixSyntax = true );		// return true if modified
+	bool SetHugePrefix( IN OUT std::tstring& rPath, bool useHugePrefixSyntax = true );		// return true if modified
 
 
 	// complex path
-	inline bool IsComplex( const TCHAR* pPath ) { return pPath != nullptr && _tcschr( pPath, s_complexPathSep ) != nullptr; }
+	inline bool IsComplex( const TCHAR* pPath ) { return pPath != nullptr && str::Contains( pPath, g_complexPathSep ); }
 	bool IsWellFormed( const TCHAR* pFilePath );
 	size_t FindComplexSepPos( const TCHAR* pPath );
 	std::tstring ExtractPhysical( const std::tstring& filePath );	// "C:\Images\fruit.stg" <- "C:\Images\fruit.stg>apple.jpg";  "C:\Images\orange.png" <- "C:\Images\orange.png"
@@ -125,23 +134,23 @@ namespace path
 	const TCHAR* GetSubPath( const TCHAR* pPath );					// IsComplex() ? GetEmbedded() : pPath
 
 	std::tstring MakeComplex( const std::tstring& physicalPath, const TCHAR* pEmbeddedPath );
-	bool SplitComplex( std::tstring& rPhysicalPath, std::tstring& rEmbeddedPath, const std::tstring& filePath );
-	bool NormalizeComplexPath( std::tstring& rFlexPath, TCHAR chNormalSep = _T('\\') );			// treat storage document as a directory: make a deep complex path look like a normal full path
+	bool SplitComplex( OUT std::tstring& rPhysicalPath, OUT std::tstring& rEmbeddedPath, const std::tstring& filePath );
+	bool NormalizeComplexPath( IN OUT std::tstring& rFlexPath, TCHAR chNormalSep = '\\' );			// treat storage document as a directory: make a deep complex path look like a normal full path
 
 
 	enum TrailSlash { PreserveSlash, AddSlash, RemoveSlash };
 
-	std::tstring& SetBackslash( std::tstring& rDirPath, TrailSlash trailSlash = AddSlash );
-	inline std::tstring& SetBackslash( std::tstring& rDirPath, bool doSet ) { return SetBackslash( rDirPath, doSet ? AddSlash : RemoveSlash ); }
+	std::tstring& SetBackslash( IN OUT std::tstring& rDirPath, TrailSlash trailSlash = AddSlash );
+	inline std::tstring& SetBackslash( IN OUT std::tstring& rDirPath, bool doSet ) { return SetBackslash( rDirPath, doSet ? AddSlash : RemoveSlash ); }
 	bool HasTrailingSlash( const TCHAR* pPath );				// true for non-root paths with a trailing slash
 
 	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
 
 
 	// normal: backslashes only
-	bool IsNormal( const TCHAR* pPath );
-	std::tstring MakeNormal( const TCHAR* pPath );
-	inline std::tstring& Normalize( IN OUT std::tstring& rPath ) { return rPath = MakeNormal( rPath.c_str() ); }
+	bool IsWindows( const TCHAR* pPath );
+	std::tstring MakeWindows( const TCHAR* pPath );
+	inline std::tstring& Normalize( IN OUT std::tstring& rPath ) { return rPath = MakeWindows( rPath.c_str() ); }
 
 	std::tstring MakeCanonical( const TCHAR* pPath );						// relative to absolute normalized: "X:/A\./B\..\C" -> "X:\A\C"
 	inline std::tstring& Canonicalize( IN OUT std::tstring& rPath ) { return rPath = MakeCanonical( rPath.c_str() ); }
@@ -167,7 +176,7 @@ namespace path
 
 	std::tstring FindCommonPrefix( const TCHAR* pLeftPath, const TCHAR* pRightPath );	// "C:\win" for "C:\win\desktop\temp.txt" and "c:\win\tray\sample.txt"
 	std::tstring StripCommonPrefix( const TCHAR* pFullPath, const TCHAR* pDirPath );	// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win\system"
-	bool StripPrefix( std::tstring& rPath, const TCHAR* pPrefix );						// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win"
+	bool StripPrefix( IN OUT std::tstring& rPath, const TCHAR* pPrefix );				// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win"
 }
 
 
@@ -195,7 +204,7 @@ namespace fs
 		fs::CPath MakePath( void ) const;
 		void SplitPath( const std::tstring& filePath );
 
-		bool MatchExt( const TCHAR* pExt ) const { return path::EquivalentPtr( m_ext.c_str(), pExt ); }		// pExt: ".txt"
+		bool MatchExt( const TCHAR* pExt ) const { return path::Equivalent( m_ext.c_str(), pExt ); }		// pExt: ".txt"
 
 		static std::tstring MakeFullPath( const TCHAR* pDrive, const TCHAR* pDir, const TCHAR* pFname, const TCHAR* pExt );
 	public:
@@ -214,6 +223,14 @@ namespace fs
 	public:
 		CPath( void ) {}
 		CPath( const std::tstring& filePath ) { Set( filePath ); }
+		CPath( const CPath* pFilePath ) : m_filePath( safe_ptr( pFilePath )->Get() ) { Canonicalize(); }		// canonic conversion ctor
+
+		template< typename ToCharFunc >
+		CPath( const std::tstring& filePath, ToCharFunc toCharFunc )
+		{
+			std::transform( filePath.begin(), filePath.end(), std::back_inserter( m_filePath ), toCharFunc );
+			str::Trim( m_filePath );
+		}
 
 		bool IsEmpty( void ) const { return m_filePath.empty(); }
 		void Clear( void ) { m_filePath.clear(); }
@@ -230,6 +247,9 @@ namespace fs
 		const TCHAR* GetPtr( void ) const { return m_filePath.c_str(); }
 		std::string GetUtf8( void ) const { return str::ToUtf8( GetPtr() ); }
 
+		CPath MakeUnixPath( void ) const { return CPath( m_filePath, func::ToUnixPathChar() ); }
+		CPath MakeWindowsPath( void ) const { return CPath( m_filePath, func::ToWinPathChar() ); }
+
 		size_t GetDepth( void ) const;		// count of path elements up to the root
 
 		bool HasParentPath( void ) const { return GetFilenamePtr() != GetPtr(); }		// has a directory path?
@@ -242,7 +262,7 @@ namespace fs
 
 		const TCHAR* GetExt( void ) const { return path::FindExt( m_filePath.c_str() ); }
 		bool HasExt( void ) const { return !str::IsEmpty( GetExt() ); }
-		bool ExtEquals( const TCHAR* pExt ) const { return path::EquivalentPtr( GetExt(), pExt ); }
+		bool ExtEquals( const TCHAR* pExt ) const { return path::Equivalent( GetExt(), pExt ); }
 		ExtensionMatch GetExtensionMatch( const fs::CPath& right ) const;
 
 		void SplitFilename( std::tstring& rFname, std::tstring& rExt ) const;
@@ -268,13 +288,13 @@ namespace fs
 		CPath& operator/=( const CPath& right );
 		CPath& operator/=( const TCHAR* pRight ) { Set( path::Combine( GetPtr(), pRight ) ); return *this; }
 
-		bool operator==( const CPath& right ) const { return path::Equivalent( m_filePath, right.m_filePath ); }
+		bool operator==( const CPath& right ) const { return Equivalent( right ); }
 		bool operator!=( const CPath& right ) const { return !operator==( right ); }
 
 		bool operator<( const CPath& right ) const;
 
-		bool Equivalent( const CPath& right ) const { return path::Equivalent( m_filePath, right.m_filePath ); }
-		bool Equals( const CPath& right ) const { return path::Equals( m_filePath, right.m_filePath ); }
+		bool Equivalent( const CPath& right ) const { return path::Equivalent( m_filePath.c_str(), right.m_filePath.c_str() ); }
+		bool Equals( const CPath& right ) const { return path::Equals( m_filePath.c_str(), right.m_filePath.c_str() ); }
 
 		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( m_filePath.c_str(), accessMode ); }
 
@@ -298,11 +318,142 @@ namespace fs
 }
 
 
+template<>
+struct std::hash<fs::CPath>
+{
+	inline std::size_t operator()( const fs::CPath& filePath ) const /*noexcept*/
+	{
+		return filePath.GetHashValue();
+	}
+};
+
+
 namespace func
 {
+	struct ToNameExt
+	{
+		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetFilenamePtr(); }
+		const TCHAR* operator()( const TCHAR* pFullPath ) const { return path::FindFilename( pFullPath ); }
+	};
+
+
 	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
 
 	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }
+}
+
+
+namespace fs { struct CFileState; }
+
+
+namespace pred
+{
+	// path binary predicates
+
+	struct CompareNaturalPath : public BaseComparator		// equivalent | natural-intuitive
+	{
+		pred::CompareResult operator()( const TCHAR* pLeftPath, const TCHAR* pRightPath ) const
+		{
+			if ( path::Equivalent( pLeftPath, pRightPath ) )
+				return pred::Equal;
+
+			return path::CompareIntuitive( pLeftPath, pRightPath );
+		}
+
+		pred::CompareResult operator()( const std::tstring& leftPath, const std::tstring& rightPath ) const
+		{
+			return operator()( leftPath.c_str(), rightPath.c_str() );
+		}
+
+		pred::CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
+		{
+			if ( leftPath == rightPath )
+				return pred::Equal;
+
+			return path::CompareIntuitive( leftPath.GetPtr(), rightPath.GetPtr() );
+		}
+
+		pred::CompareResult operator()( const fs::CFileState& leftState, const fs::CFileState& rightState ) const;
+	};
+
+
+	typedef CompareAdapter<CompareNaturalPath, func::ToNameExt> _CompareNameExt;		// filename | fullpath
+	typedef JoinCompare<_CompareNameExt, CompareNaturalPath> TCompareNameExt;
+
+	typedef LessValue<CompareNaturalPath> TLess_NaturalPath;
+	typedef LessValue<TCompareNameExt> TLess_NameExt;
+}
+
+
+namespace pred
+{
+	// path unary predicates
+
+	template<>
+	inline bool IsEmpty::operator()( const fs::CPath& object ) const
+	{
+		return object.IsEmpty();
+	}
+
+
+	struct FileExist
+	{
+		bool operator()( const TCHAR* pFilePath ) const
+		{
+			return fs::FileExist( pFilePath );
+		}
+
+		template< typename PathKey >
+		bool operator()( const PathKey& pathKey ) const
+		{
+			return func::PathOf( pathKey ).FileExist();
+		}
+	};
+
+
+	struct FileExistStr
+	{
+		bool operator()( const std::tstring& path ) const
+		{
+			return fs::FileExist( path.c_str() );
+		}
+	};
+}
+
+
+#include <map>
+#include <set>
+
+
+namespace fs
+{
+	// forward declarations
+	interface IEnumerator;
+
+
+	typedef std::pair<fs::CPath, fs::CPath> TPathPair;
+
+
+	// orders path keys using path equivalence (rather than CPath::operator< intuitive ordering)
+	typedef std::map<fs::CPath, fs::CPath, pred::TLess_NaturalPath> TPathPairMap;
+	typedef std::set<fs::CPath, pred::TLess_NaturalPath> TPathSet;
+
+
+	// path sort for std::tstring, fs::CPath, fs::CFlexPath
+
+	template< typename IteratorT >
+	inline void SortPaths( IteratorT itFirst, IteratorT itLast, bool ascending = true )
+	{
+		std::sort( itFirst, itLast, pred::OrderByValue<pred::CompareNaturalPath>( ascending ) );
+	}
+
+	template< typename ContainerT >
+	inline void SortPaths( ContainerT& rStrPaths, bool ascending = true )
+	{
+		SortPaths( rStrPaths.begin(), rStrPaths.end(), ascending );
+	}
+
+	void SortByPathDepth( std::vector<fs::CPath>& rFilePaths, bool ascending = true );
 }
 
 
@@ -381,16 +532,6 @@ namespace fs
 }
 
 
-template<>
-struct std::hash<fs::CPath>
-{
-	inline std::size_t operator()( const fs::CPath& filePath ) const /*noexcept*/
-    {
-        return filePath.GetHashValue();
-    }
-};
-
-
 namespace str
 {
 	namespace traits
@@ -403,13 +544,6 @@ namespace str
 
 namespace func
 {
-	struct ToNameExt
-	{
-		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetFilenamePtr(); }
-		const TCHAR* operator()( const TCHAR* pFullPath ) const { return path::FindFilename( pFullPath ); }
-	};
-
-
 	struct AppendPath		// e.g. used to append the same wildcard spec to some paths
 	{
 		AppendPath( const fs::CPath& subPath ) : m_subPath( subPath ) {}
@@ -517,174 +651,6 @@ namespace func
 
 		void operator()( fs::CPath& rPath ) { rPath.Set( rPath.GetFilenamePtr() ); }
 	};
-}
-
-
-namespace pred
-{
-	// path unary predicates
-
-	template<>
-	inline bool IsEmpty::operator()( const fs::CPath& object ) const
-	{
-		return object.IsEmpty();
-	}
-
-
-	struct FileExist
-	{
-		bool operator()( const TCHAR* pFilePath ) const
-		{
-			return fs::FileExist( pFilePath );
-		}
-
-		template< typename PathKey >
-		bool operator()( const PathKey& pathKey ) const
-		{
-			return func::PathOf( pathKey ).FileExist();
-		}
-	};
-
-
-	struct FileExistStr
-	{
-		bool operator()( const std::tstring& path ) const
-		{
-			return fs::FileExist( path.c_str() );
-		}
-	};
-
-
-	struct IsEquivalentPathChar : public std::unary_function<bool, TCHAR>
-	{
-		bool operator()( TCHAR left, TCHAR right ) const
-		{
-			return path::ToEquivalentChar( left ) == path::ToEquivalentChar( right );
-		}
-	};
-
-
-	struct IsEquivalentPathString : public std::unary_function<bool, std::tstring>
-	{
-		IsEquivalentPathString( const std::tstring& path ) : m_path( path ) {}
-
-		bool operator()( const std::tstring& path ) const
-		{
-			return path::Equivalent( m_path, path );
-		}
-	private:
-		const std::tstring& m_path;
-	};
-
-
-	struct IsEquivalentPath : public std::unary_function<bool, fs::CPath>
-	{
-		IsEquivalentPath( const fs::CPath& path ) : m_path( path ) {}
-
-		bool operator()( const fs::CPath& path ) const
-		{
-			return m_path.Equivalent( path );
-		}
-	private:
-		const fs::CPath& m_path;
-	};
-
-
-	struct IsPathEquivalent : public std::binary_function<bool, fs::CPath, fs::CPath>
-	{
-		bool operator()( const fs::CPath& left, const fs::CPath& right ) const
-		{
-			return left.Equivalent( right );
-		}
-	};
-}
-
-
-namespace fs { struct CFileState; }
-
-
-namespace pred
-{
-	// path binary predicates
-
-	struct CompareEquivPath : public BaseComparator			// equivalent
-	{
-		pred::CompareResult operator()( const std::tstring& leftPath, const std::tstring& rightPath ) const
-		{
-			return str::_CompareN( leftPath.c_str(), rightPath.c_str(), &path::ToEquivalentChar );
-		}
-	};
-
-
-	struct CompareNaturalPath : public BaseComparator		// equivalent | natural-intuitive
-	{
-		pred::CompareResult operator()( const TCHAR* pLeftPath, const TCHAR* pRightPath ) const
-		{
-			if ( path::EquivalentPtr( pLeftPath, pRightPath ) )
-				return pred::Equal;
-
-			return path::CompareNaturalPtr( pLeftPath, pRightPath );
-		}
-
-		pred::CompareResult operator()( const std::tstring& leftPath, const std::tstring& rightPath ) const
-		{
-			return operator()( leftPath.c_str(), rightPath.c_str() );
-		}
-
-		pred::CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
-		{
-			if ( leftPath == rightPath )
-				return pred::Equal;
-
-			return path::CompareNaturalPtr( leftPath.GetPtr(), rightPath.GetPtr() );
-		}
-
-		pred::CompareResult operator()( const fs::CFileState& leftState, const fs::CFileState& rightState ) const;
-	};
-
-
-	typedef CompareAdapter<CompareNaturalPath, func::ToNameExt> _CompareNameExt;		// filename | fullpath
-	typedef JoinCompare<_CompareNameExt, CompareNaturalPath> TCompareNameExt;
-
-	typedef LessValue<CompareEquivPath> TLess_EquivPath;
-	typedef LessValue<CompareNaturalPath> TLess_NaturalPath;
-	typedef LessValue<TCompareNameExt> TLess_NameExt;
-}
-
-
-#include <map>
-#include <set>
-
-
-namespace fs
-{
-	// forward declarations
-	interface IEnumerator;
-
-
-	typedef std::pair<fs::CPath, fs::CPath> TPathPair;
-
-
-	// orders path keys using path equivalence (rather than CPath::operator< intuitive ordering)
-	typedef std::map<fs::CPath, fs::CPath, pred::TLess_NaturalPath> TPathPairMap;
-	typedef std::set<fs::CPath, pred::TLess_NaturalPath> TPathSet;
-
-
-	// path sort for std::tstring, fs::CPath, fs::CFlexPath
-
-	template< typename IteratorT >
-	inline void SortPaths( IteratorT itFirst, IteratorT itLast, bool ascending = true )
-	{
-		std::sort( itFirst, itLast, pred::OrderByValue< pred::CompareNaturalPath >( ascending ) );
-	}
-
-	template< typename ContainerT >
-	inline void SortPaths( ContainerT& rStrPaths, bool ascending = true )
-	{
-		SortPaths( rStrPaths.begin(), rStrPaths.end(), ascending );
-	}
-
-	void SortByPathDepth( std::vector<fs::CPath>& rFilePaths, bool ascending = true );
 }
 
 

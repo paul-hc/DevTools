@@ -69,7 +69,7 @@ namespace ft
 		ASSERT_PTR( pExt );
 
 		for ( unsigned int i = 0; i != COUNT_OF( knownExts ); ++i )
-			if ( str::Equals< str::IgnoreCase >( knownExts[ i ].m_pExt, pExt ) )
+			if ( str::Equals<str::IgnoreCase>( knownExts[ i ].m_pExt, pExt ) )
 				return knownExts[ i ].m_fileType;
 
 		return Unknown;

@@ -114,7 +114,7 @@ namespace fs
 
 	fs::CPath MakeAbsoluteToCWD( const TCHAR* pRelativePath )
 	{
-		std::tstring relativePath = path::MakeNormal( pRelativePath );
+		std::tstring relativePath = path::MakeWindows( pRelativePath );
 		TCHAR absolutePath[ MAX_PATH ];
 		if ( nullptr == ::_tfullpath( absolutePath, relativePath.c_str(), COUNT_OF( absolutePath ) ) )
 			return std::tstring();			// failed
@@ -124,7 +124,7 @@ namespace fs
 
 	fs::CPath MakeRelativeTo( const TCHAR* pFromPath, const fs::TDirPath& dirPath )
 	{
-		std::tstring fromPath = path::MakeNormal( pFromPath );
+		std::tstring fromPath = path::MakeWindows( pFromPath );
 		DWORD fromAttr = IsValidDirectory( fromPath.c_str() ) ? FILE_ATTRIBUTE_DIRECTORY : 0;
 		TCHAR relativePath[ MAX_PATH ];
 
@@ -169,7 +169,7 @@ namespace fs
 
 	bool CreateDirPath( const TCHAR* pDirPath )
 	{
-		std::tstring dirPath = path::MakeNormal( pDirPath );
+		std::tstring dirPath = path::MakeWindows( pDirPath );
 		path::SetBackslash( dirPath, false );
 		if ( !path::IsValid( dirPath ) )
 			return false;

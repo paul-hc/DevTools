@@ -175,7 +175,7 @@ bool CFileItem::HasFilePath( const fs::CPath& rightFilePath ) const
 	if ( GetFilePath() == rightFilePath )
 		return true;
 
-	if ( path::EquivalentPtr( GetFilePath().GetFilenamePtr(), rightFilePath.GetFilenamePtr() ) )		// same filename?
+	if ( path::Equivalent( GetFilePath().GetFilenamePtr(), rightFilePath.GetFilenamePtr() ) )		// same filename?
 		return path::IsRelative( rightFilePath.GetPtr() );
 
 	return false;

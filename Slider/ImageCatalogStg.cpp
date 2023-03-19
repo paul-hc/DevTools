@@ -105,7 +105,7 @@ bool CImageCatalogStg::IsSpecialStreamName( const TCHAR* pStreamName )
 	}
 
 	for ( size_t i = 0; i != s_reservedStreamNames.size(); ++i )
-		if ( path::EqualsPtr( s_reservedStreamNames[ i ], pStreamName ) )
+		if ( path::Equals( s_reservedStreamNames[ i ], pStreamName ) )
 			return true;
 
 	return false;
@@ -334,7 +334,7 @@ CComPtr<IStream> CImageCatalogStg::OpenThumbnailImageStream( const TCHAR* pImage
 
 	const TCHAR* pThumbStreamName = thumbStreamName.GetPtr();
 
-	if ( !path::EquivalentPtr( pThumbStreamName, pImageEmbeddedPath ) )		// possibly an archive build with Slider_v5_2-
+	if ( !path::Equivalent( pThumbStreamName, pImageEmbeddedPath ) )		// possibly an archive build with Slider_v5_2-
 		if ( StreamExist( pImageEmbeddedPath ) )			// backwards compatibility: also try with straight SRC image path as stream name
 			pThumbStreamName = pImageEmbeddedPath;
 

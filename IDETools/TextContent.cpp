@@ -85,20 +85,17 @@ IMPLEMENT_OLECREATE(TextContent, "IDETools.TextContent", 0xe37fe177, 0xcbb7, 0x1
 
 BSTR TextContent::GetText( void )
 {
-		// Make a full copy of m_TextContent before returning it. This is because conversion to BSTR (AllocSysString())
-		// may set the length of the BSTR incorrectly!!!
-		//return CString( m_TextContent.GetString() ).AllocSysString();
-	return m_TextContent.AllocSysString();
+	return str::AllocSysString( m_textContent );
 }
 
 void TextContent::SetText( LPCTSTR lpszNewValue )
 {
-	m_TextContent = lpszNewValue;
+	m_textContent = lpszNewValue;
 }
 
 long TextContent::GetTextLen()
 {
-	return m_TextContent.GetLength();
+	return static_cast<long>( m_textContent.length() );
 }
 
 void TextContent::OnShowErrorsChanged( void )
@@ -107,7 +104,7 @@ void TextContent::OnShowErrorsChanged( void )
 
 BOOL TextContent::LoadFile( LPCTSTR textFilePath )
 {
-	m_TextContent.Empty();
+	m_textContent.clear();
 
 	try
 	{
@@ -117,7 +114,7 @@ BOOL TextContent::LoadFile( LPCTSTR textFilePath )
 
 		std::ostringstream oss;
 		oss << input.rdbuf();
-		m_TextContent = str::FromUtf8( oss.str().c_str() ).c_str();
+		m_textContent = str::FromUtf8( oss.str().c_str() );
 
 		return TRUE;
 	}
@@ -130,7 +127,7 @@ BOOL TextContent::LoadFile( LPCTSTR textFilePath )
 
 BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName )
 {
-	m_TextContent.Empty();
+	m_textContent.clear();
 
 	try
 	{
@@ -140,9 +137,9 @@ BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName
 		textParser.StoreFieldMappings( m_fieldReplacements );
 		textParser.ParseFile( filePath );
 
-		m_TextContent = textParser.ExpandSection( sectionName ).c_str();
+		m_textContent = textParser.ExpandSection( sectionName );
 
-		return !m_TextContent.IsEmpty();
+		return !m_textContent.empty();
 	}
 	catch ( const std::exception& exc )
 	{
@@ -151,24 +148,29 @@ BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName
 	}
 }
 
-long TextContent::FindText( LPCTSTR match, long startPos, BOOL caseSensitive )
+long TextContent::FindText( LPCTSTR pattern, long startPos, BOOL caseSensitive )
 {
-	return (long)str::findStringPos( m_TextContent, match, (int)startPos, caseSensitive ? str::Case : str::IgnoreCase ).m_start;
+	return caseSensitive
+		? static_cast<long>( str::Find<str::Case>( m_textContent.c_str(), pattern, startPos ) )
+		: static_cast<long>( str::Find<str::IgnoreCase>( m_textContent.c_str(), pattern, startPos ) );
 }
 
-long TextContent::ReplaceText( LPCTSTR match, LPCTSTR replacement, BOOL caseSensitive )
+long TextContent::ReplaceText( LPCTSTR pattern, LPCTSTR replacement, BOOL caseSensitive )
 {
-	return (long)str::stringReplace( m_TextContent, match, replacement, caseSensitive ? str::Case : str::IgnoreCase );
+	if ( caseSensitive )
+		return static_cast<long>( str::Replace<str::Case>( &m_textContent, pattern, replacement ) );
+	else
+		return static_cast<long>( str::Replace<str::IgnoreCase>( &m_textContent, pattern, replacement ) );
 }
 
 // Adds embedded content to already existing one by replacing the 'matchCoreID'
 // occurrence (if any), otherwise by appending the new content
 BOOL TextContent::AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedContent, BOOL caseSensitive )
 {
-	if ( str::stringReplace( m_TextContent, matchCoreID, embeddedContent, caseSensitive ? str::Case : str::IgnoreCase ) > 0 )
+	if ( ReplaceText( matchCoreID, embeddedContent, caseSensitive ) > 0 )
 		return TRUE;
 
-	m_TextContent += embeddedContent;
+	m_textContent += embeddedContent;
 	return FALSE;
 }
 
@@ -176,33 +178,29 @@ BOOL TextContent::AddEmbeddedContent( LPCTSTR matchCoreID, LPCTSTR embeddedConte
 // Semantics: return strtok( content, sep );
 BSTR TextContent::Tokenize( LPCTSTR separatorCharSet )
 {
-	// Avoid refcount on copy since we'll modify the string buffer -> force a true copy
-	const TCHAR* pText = m_TextContent.GetString();
-	const TCHAR* pTextEnd = pText + m_TextContent.GetLength() + 1;		// include terminating zero
-
-	m_tokenizedBuffer.assign( pText, pTextEnd );
+	m_tokenizedBuffer.assign( m_textContent.c_str(), m_textContent.c_str() + m_textContent.length() + 1 );	// include terminating zero
 	m_tokenizedSeps = separatorCharSet;
 
 	m_currToken = _tcstok( &m_tokenizedBuffer.front(), m_tokenizedSeps.c_str() );
 
-	return m_currToken.AllocSysString();
+	return str::AllocSysString( m_currToken );
 }
 
 // Returns the next token (if any), otherwise an empty string.
 // Semantics: return strtok( nullptr, sep );
 BSTR TextContent::GetNextToken( void )
 {
-	if ( !m_currToken.IsEmpty() )
+	if ( !m_currToken.empty() )
 		m_currToken = _tcstok( nullptr, m_tokenizedSeps.c_str() );
 
-	return m_currToken.AllocSysString();
+	return str::AllocSysString( m_currToken );
 }
 
 long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTrimTrailingSpaces )
 {
 	int lineCount = 0;
 
-	m_TextContent.Empty();
+	m_textContent.clear();
 
 	if ( multiLinesText != nullptr && multiLinesText[ 0 ] != '\0' )
 	{
@@ -229,9 +227,10 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 				}
 				if ( !line.IsEmpty() )
 				{
-					if ( doTrimTrailingSpaces && !m_TextContent.IsEmpty() )
-						m_TextContent += _T(" ");
-					m_TextContent += line;
+					if ( doTrimTrailingSpaces && !m_textContent.empty() )
+						m_textContent += _T(" ");
+
+					m_textContent += line;
 				}
 				else
 					TRACE( _T("Ignoring empty m_line!\n") );
@@ -242,8 +241,9 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 		else
 			TRACE( _T("Cannot allocate a duplicate buffer for tokenizing!\n") );
 	}
-	if ( !m_TextContent.IsEmpty() )
-		m_TextContent += _T("\r\n");
+
+	if ( !m_textContent.empty() )
+		m_textContent += _T("\r\n");
 
 	return lineCount;
 }

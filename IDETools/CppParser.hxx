@@ -82,7 +82,7 @@ StringT CCppParser::ExtractTemplateInstance( const StringT& templateDecl, code::
 }
 
 template< typename OutIteratorT, typename IteratorT >
-void CCppParser::MakeTemplateInstance( OutIteratorT itOutTemplInst _out_, IteratorT itFirst, IteratorT itLast ) const
+void CCppParser::MakeTemplateInstance( OUT OutIteratorT itOutTemplInst, IteratorT itFirst, IteratorT itLast ) const
 {
 	// for each template argument, strip the typename: "typename T" -> "T", or the non-type "int depth" -> "depth"
 	TLanguage::CScopedSkipArgLists skipArgLists( &m_lang );		// to skip template templates with nested arg-lists

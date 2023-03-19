@@ -192,7 +192,7 @@ void CAlbumDoc::PrepareToSave( const fs::CPath& docPath )
 
 	if ( GetModelSchema() != app::Slider_LatestModelSchema )
 	{
-		if ( path::EquivalentPtr( m_strPathName, docPath.GetPtr() ) )		// Save? (not Save As)
+		if ( path::Equivalent( m_strPathName, docPath.GetPtr() ) )		// Save? (not Save As)
 			if ( !PromptSaveConvertModelSchema() )
 				throw new mfc::CUserAbortedException();
 

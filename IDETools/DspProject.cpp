@@ -118,8 +118,8 @@ size_t DspProject::filterProjectFiles( void )
 bool DspProject::isSourceFileMatch( const PathInfoEx& filePath ) const
 {
 	for ( std::vector< PathInfoEx >::const_iterator filterIt = m_sourceFileFilters.begin(); filterIt != m_sourceFileFilters.end(); ++filterIt )
-		if ( path::EquivalentPtr( ( *filterIt ).name, _T("*") ) || path::EquivalentPtr( ( *filterIt ).name, filePath.name ) )
-			if ( path::EquivalentPtr( ( *filterIt ).ext, _T("*") ) || path::EquivalentPtr( ( *filterIt ).ext, filePath.ext ) )
+		if ( path::Equivalent( ( *filterIt ).name, _T("*") ) || path::Equivalent( ( *filterIt ).name, filePath.name ) )
+			if ( path::Equivalent( ( *filterIt ).ext, _T("*") ) || path::Equivalent( ( *filterIt ).ext, filePath.ext ) )
 				return true;
 
 	return false;

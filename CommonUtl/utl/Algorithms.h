@@ -11,7 +11,7 @@
 namespace utl
 {
 	template< typename StructT >
-	inline StructT* ZeroStruct( StructT* pStruct _out_ )
+	inline StructT* ZeroStruct( OUT StructT* pStruct )
 	{
 		ASSERT_PTR( pStruct );
 		::memset( pStruct, 0, sizeof( StructT ) );
@@ -19,7 +19,7 @@ namespace utl
 	}
 
 	template< typename StructT >
-	inline StructT* ZeroWinStruct( StructT* pStruct _out_ )		// for Win32 structures with 'cbSize' data-member
+	inline StructT* ZeroWinStruct( OUT StructT* pStruct )		// for Win32 structures with 'cbSize' data-member
 	{
 		ZeroStruct( pStruct );
 		pStruct->cbSize = sizeof( StructT );
@@ -31,7 +31,7 @@ namespace utl
 	inline size_t ByteSize( const ContainerT& items ) { return items.size() * sizeof( ContainerT::value_type ); }	// for vector, deque
 
 	template< typename InputIterator, class OutputIterT >
-	OutputIterT Copy( InputIterator itFirst, InputIterator itLast, OutputIterT itDest _out_ )
+	OutputIterT Copy( InputIterator itFirst, InputIterator itLast, OUT OutputIterT itDest )
 	{
 		// same as std::copy without the warning
 		for ( ; itFirst != itLast; ++itDest, ++itFirst )
@@ -41,14 +41,14 @@ namespace utl
 	}
 
 	template< typename SrcT >
-	inline void* WriteBuffer( void* pBuffer _out_, const SrcT* pSrc, size_t size = 1 )
+	inline void* WriteBuffer( OUT void* pBuffer, const SrcT* pSrc, size_t size = 1 )
 	{
 		memcpy( pBuffer, pSrc, size * sizeof( SrcT ) );
 		return reinterpret_cast<SrcT*>( pBuffer ) + size;			// pointer arithmetic: next insert position in the DEST buffer
 	}
 
 	template< typename DestT >
-	inline const void* ReadBuffer( DestT* pDest _out_, const void* pBuffer, size_t size = 1 )
+	inline const void* ReadBuffer( OUT DestT* pDest, const void* pBuffer, size_t size = 1 )
 	{
 		memcpy( pDest, pBuffer, size * sizeof( DestT ) );
 		return reinterpret_cast<const DestT*>( pBuffer ) + size;	// pointer arithmetic: next extract position in the SRC buffer
@@ -292,7 +292,7 @@ namespace utl
 	// copy items between containers using a conversion functor (unary)
 
 	template< typename ContainerT, typename UnaryFunc >
-	void GenerateN( ContainerT& rItems _out_, size_t count, UnaryFunc genFunc, size_t atPos = utl::npos )
+	void GenerateN( OUT ContainerT& rItems, size_t count, UnaryFunc genFunc, size_t atPos = utl::npos )
 	{
 		if ( utl::npos == atPos )
 			atPos = rItems.size();
@@ -302,22 +302,22 @@ namespace utl
 	}
 
 
-	template< typename InsertIteratorT, typename SrcContainerT, typename ConvertUnaryFunc >
-	inline void InsertFrom( InsertIteratorT destInserter _out_, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	template< typename OutIteratorT, typename SrcContainerT, typename ConvertUnaryFunc >
+	inline void InsertFrom( OUT OutIteratorT destInserter, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
 	{
 		std::transform( srcItems.begin(), srcItems.end(), destInserter, cvtFunc );
 	}
 
 
 	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
-	inline void Assign( DestContainerT& rDestItems _out_, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	inline void Assign( OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
 	{
 		rDestItems.resize( srcItems.size() );
 		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );
 	}
 
 	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
-	inline void Append( DestContainerT& rDestItems _in_out_, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	inline void Append( IN OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
 	{
 		size_t origDestCount = rDestItems.size();
 		rDestItems.insert( rDestItems.end(), srcItems.size(), typename DestContainerT::value_type() );		// append SRC count
@@ -325,7 +325,7 @@ namespace utl
 	}
 
 	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
-	void Prepend( DestContainerT& rDestItems _in_out_, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	void Prepend( IN OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
 	{
 		rDestItems.insert( rDestItems.begin(), srcItems.size(), typename DestContainerT::value_type() );	// prepend SRC count
 		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );
@@ -333,26 +333,26 @@ namespace utl
 
 
 	template< typename Type, typename ItemT >
-	inline void AddSorted( std::vector<Type>& rDest _in_out_, ItemT item )
+	inline void AddSorted( IN OUT std::vector<Type>& rDest, ItemT item )
 	{
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item ), item );
 	}
 
 	template< typename Type, typename ItemT, typename OrderBinaryPred >
-	inline void AddSorted( std::vector<Type>& rDest _in_out_, ItemT item, OrderBinaryPred orderPred )		// predicate version
+	inline void AddSorted( IN OUT std::vector<Type>& rDest, ItemT item, OrderBinaryPred orderPred )		// predicate version
 	{
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item, orderPred ), item );
 	}
 
 	template< typename Type, typename IteratorT, typename OrderBinaryPred >
-	void AddSorted( std::vector<Type>& rDest _in_out_, IteratorT itFirst, IteratorT itEnd, OrderBinaryPred orderPred )		// sequence with predicate version
+	void AddSorted( IN OUT std::vector<Type>& rDest, IteratorT itFirst, IteratorT itEnd, OrderBinaryPred orderPred )		// sequence with predicate version
 	{
 		for ( ; itFirst != itEnd; ++itFirst )
 			AddSorted( rDest, *itFirst, orderPred );
 	}
 
 	template< typename ContainerT, typename ItemT >
-	inline bool AddUnique( ContainerT& rDest _in_out_, ItemT item )
+	inline bool AddUnique( IN OUT ContainerT& rDest, ItemT item )
 	{
 		if ( std::find( rDest.begin(), rDest.end(), item ) != rDest.end() )
 			return false;
@@ -362,7 +362,7 @@ namespace utl
 	}
 
 	template< typename ContainerT, typename IteratorT >
-	size_t JoinUnique( ContainerT& rDest _in_out_, IteratorT itStart, IteratorT itEnd )
+	size_t JoinUnique( IN OUT ContainerT& rDest, IteratorT itStart, IteratorT itEnd )
 	{
 		size_t oldCount = rDest.size();
 
@@ -373,7 +373,7 @@ namespace utl
 	}
 
 	template< typename ContainerT, typename ItemT >
-	inline void PushUnique( ContainerT& rContainer _in_out_, ItemT item, size_t pos = std::tstring::npos )
+	inline void PushUnique( IN OUT ContainerT& rContainer, ItemT item, size_t pos = std::tstring::npos )
 	{
 		ASSERT( !Contains( rContainer, item ) );
 		rContainer.insert( std::tstring::npos == pos ? rContainer.end() : ( rContainer.begin() + pos ), item );
@@ -381,7 +381,7 @@ namespace utl
 
 
 	template< typename ContainerT, typename ValueT >
-	size_t Remove( ContainerT& rItems _in_out_, const ValueT& value )
+	size_t Remove( IN OUT ContainerT& rItems, const ValueT& value )
 	{
 		typename ContainerT::iterator itRemove = std::remove( rItems.begin(), rItems.end(), value );	// doesn't actually remove, just move items to be removed at the end
 		size_t count = std::distance( itRemove, rItems.end() );
@@ -391,7 +391,7 @@ namespace utl
 	}
 
 	template< typename ContainerT, typename UnaryPred >
-	size_t RemoveIf( ContainerT& rItems _in_out_, UnaryPred pred )
+	size_t RemoveIf( IN OUT ContainerT& rItems, UnaryPred pred )
 	{
 		typename ContainerT::iterator itRemove = std::remove_if( rItems.begin(), rItems.end(), pred );	// doesn't actually remove, just move items to be removed at the end
 		size_t count = std::distance( itRemove, rItems.end() );
@@ -401,7 +401,7 @@ namespace utl
 	}
 
 	template< typename ContainerT >
-	bool RemoveValue( ContainerT& rContainer _in_out_, const typename ContainerT::value_type& value )		// remove once
+	bool RemoveValue( IN OUT ContainerT& rContainer, const typename ContainerT::value_type& value )		// remove once
 	{
 		typename ContainerT::iterator itFound = std::find( rContainer.begin(), rContainer.end(), value );
 
@@ -413,7 +413,7 @@ namespace utl
 	}
 
 	template< typename ContainerT >
-	void RemoveExisting( ContainerT& rContainer _in_out_, const typename ContainerT::value_type& rItem )	// remove once
+	void RemoveExisting( IN OUT ContainerT& rContainer, const typename ContainerT::value_type& rItem )	// remove once
 	{
 		typename ContainerT::iterator itFound = std::find( rContainer.begin(), rContainer.end(), rItem );
 		ASSERT( itFound != rContainer.end() );
@@ -422,7 +422,7 @@ namespace utl
 
 
 	template< typename ContainerT >
-	size_t Uniquify( ContainerT& rItems _in_out_ )
+	size_t Uniquify( IN OUT ContainerT& rItems )
 	{
 		size_t removedCount = 0;
 
@@ -443,7 +443,7 @@ namespace utl
 
 
 	template< typename PredT, typename ContainerT >
-	size_t Uniquify( ContainerT& rItems _in_out_, ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) )
+	size_t Uniquify( IN OUT ContainerT& rItems, ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) )
 	{
 		REQUIRE( PredT::IsBoolPred() );
 
@@ -476,7 +476,7 @@ namespace utl
 	// specific type
 
 	template< typename DesiredT, typename SourceT >
-	void QueryWithType( std::vector<DesiredT*>& rOutObjects _in_out_, const std::vector<SourceT*>& rSource )
+	void QueryWithType( IN OUT std::vector<DesiredT*>& rOutObjects, const std::vector<SourceT*>& rSource )
 	{
 		rOutObjects.reserve( rOutObjects.size() + rSource.size() );
 
@@ -486,7 +486,7 @@ namespace utl
 	}
 
 	template< typename TargetT, typename DestT, typename SourceT >
-	void AddWithType( std::vector<DestT*>& rDestObjects _in_out_, const std::vector<SourceT*>& rSourceObjects )
+	void AddWithType( IN OUT std::vector<DestT*>& rDestObjects, const std::vector<SourceT*>& rSourceObjects )
 	{
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
@@ -496,7 +496,7 @@ namespace utl
 	}
 
 	template< typename TargetT, typename DestT, typename SourceT >
-	void AddWithoutType( std::vector<DestT*>& rDestObjects _in_out_, const std::vector<SourceT*>& rSourceObjects )
+	void AddWithoutType( IN OUT std::vector<DestT*>& rDestObjects, const std::vector<SourceT*>& rSourceObjects )
 	{
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
@@ -506,7 +506,7 @@ namespace utl
 	}
 
 	template< typename ToRemoveT, typename ObjectT >
-	size_t RemoveWithType( std::vector<ObjectT*>& rObjects _in_out_ )
+	size_t RemoveWithType( IN OUT std::vector<ObjectT*>& rObjects )
 	{
 		size_t count = 0;
 
@@ -523,7 +523,7 @@ namespace utl
 	}
 
 	template< typename KeepT, typename ObjectT >
-	size_t RemoveWithoutType( std::vector<ObjectT*>& rObjects _in_out_ )
+	size_t RemoveWithoutType( IN OUT std::vector<ObjectT*>& rObjects )
 	{
 		size_t count = 0;
 
@@ -568,6 +568,21 @@ namespace utl
 
 
 	// returns true if containers have the same items, eventually in different order (predicate version)
+	//
+	template< typename Type >
+	bool SameContents( const std::vector<Type>& left, const std::vector<Type>& right )
+	{
+		if ( left.size() != right.size() )
+			return false;
+
+		for ( size_t i = 0; i != left.size(); ++i )
+			if ( !( left[ i ] == right[ i ] ) )				// try by index
+				if ( !utl::Contains( right, left[ i ] ) )
+					return false;
+
+		return true;
+	}
+
 	template< typename Type, typename BinaryPred >
 	bool SameContents( const std::vector<Type>& left, const std::vector<Type>& right, BinaryPred equalPred )
 	{
@@ -584,7 +599,7 @@ namespace utl
 
 
 	template< typename IndexT, typename Type >
-	void QuerySubSequenceFromIndexes( std::vector<Type>& rSubSequence _out_, const std::vector<Type>& source, const std::vector<IndexT>& selIndexes )
+	void QuerySubSequenceFromIndexes( OUT std::vector<Type>& rSubSequence, const std::vector<Type>& source, const std::vector<IndexT>& selIndexes )
 	{
 		REQUIRE( selIndexes.size() <= source.size() );
 
@@ -596,7 +611,7 @@ namespace utl
 	}
 
 	template< typename IndexT, typename ContainerT >
-	void QuerySubSequenceIndexes( std::vector<IndexT>& rIndexes _out_, const ContainerT& source, const ContainerT& subSequence )
+	void QuerySubSequenceIndexes( OUT std::vector<IndexT>& rIndexes, const ContainerT& source, const ContainerT& subSequence )
 	{	// note: N-squared complexity
 		rIndexes.clear();
 		rIndexes.reserve( subSequence.size() );
@@ -618,7 +633,7 @@ namespace utl
 
 
 	template< typename LeftContainerT, typename RightContainer2T >
-	std::pair<size_t, size_t> RemoveIntersection( LeftContainerT& rLeft _in_out_, RightContainer2T& rRight _in_out_ )
+	std::pair<size_t, size_t> RemoveIntersection( IN OUT LeftContainerT& rLeft, IN OUT RightContainer2T& rRight )
 	{
 		std::pair<size_t, size_t> count( 0, 0 );
 
@@ -637,7 +652,7 @@ namespace utl
 	}
 
 	template< typename LeftContainerT, typename RightContainerT >
-	size_t RemoveLeftDuplicates( LeftContainerT& rLeft _in_out_, const RightContainerT& right )
+	size_t RemoveLeftDuplicates( IN OUT LeftContainerT& rLeft, const RightContainerT& right )
 	{
 		size_t count = 0;
 
@@ -711,7 +726,7 @@ namespace utl
 
 
 	template< typename PosT >
-	bool AdvancePos( PosT& rPos _in_out_, PosT count, bool wrap, bool next, PosT step = 1 )
+	bool AdvancePos( IN OUT PosT& rPos, PosT count, bool wrap, bool next, PosT step = 1 )
 	{
 		ASSERT( rPos < count );
 		ASSERT( count > 0 );

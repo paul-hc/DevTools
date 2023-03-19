@@ -18,6 +18,12 @@ public:
 	virtual void Run( void );
 private:
 	void TestIgnoreCase( void );
+	void TestStringCompare( void );
+	void TestStringCompare2( void );
+	void TestStringFind( void );
+	void TestStringFindSequence( void );
+	void TestStringOccurenceCount( void );
+	void TestStringMatch( void );
 	void TestStringSorting( void );
 	void TestIntuitiveSort( void );
 	void TestIntuitiveSortPunctuation( void );

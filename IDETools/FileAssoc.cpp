@@ -100,7 +100,7 @@ bool CFileAssoc::SetPath( const fs::CPath& path )
 		ft::RES == m_fileType;
 
 	for ( unsigned int i = 0; i != COUNT_OF( s_circularExt ); ++i )
-		if ( path::EqualsPtr( m_parts.m_ext.c_str(), s_circularExt[ i ] ) )
+		if ( path::Equals( m_parts.m_ext.c_str(), s_circularExt[ i ] ) )
 		{
 			m_circularIndex = static_cast<CircularIndex>( i );
 			break;
@@ -119,10 +119,10 @@ bool CFileAssoc::IsValidKnownAssoc( void ) const
 //		"XyzRes.h" or "XyzRes.rh" (with complementary "Xyz.rc")
 bool CFileAssoc::IsResourceHeaderFile( const fs::CPathParts& parts )
 {
-	if ( path::Equals( parts.GetFilename(), _T("resource.h") ) )
+	if ( path::Equals( parts.GetFilename().c_str(), _T("resource.h") ) )
 		return true;
 
-	if ( path::EqualsPtr( parts.m_ext.c_str(), _T(".h") ) || path::EqualsPtr( parts.m_ext.c_str(), _T(".rh") ) )
+	if ( path::Equals( parts.m_ext.c_str(), _T(".h") ) || path::Equals( parts.m_ext.c_str(), _T(".rh") ) )
 	{
 		static const TCHAR prefix[] = _T("Res");
 		const size_t prefixLen = str::GetLength( prefix );
@@ -168,7 +168,7 @@ void CFileAssoc::QueryComplementaryParentDirs( std::vector< fs::CPath >& rComple
 
 	// reverse iteration
 	for ( int i = (int)dirTokens.size(); --i >= 0; )
-		if ( path::Equals( dirTokens[ i ], _T("include") ) || path::Equals( dirTokens[ i ], _T("inc") ) )
+		if ( path::Equals( dirTokens[ i ].c_str(), _T("include") ) || path::Equals( dirTokens[ i ].c_str(), _T("inc") ) )
 		{
 			std::tstring orgToken = dirTokens[ i ];
 
@@ -180,7 +180,7 @@ void CFileAssoc::QueryComplementaryParentDirs( std::vector< fs::CPath >& rComple
 
 			dirTokens[ i ] = orgToken;
 		}
-		else if ( path::Equals( dirTokens[ i ], _T("source") ) || path::Equals( dirTokens[ i ], _T("src") ) )
+		else if ( path::Equals( dirTokens[ i ].c_str(), _T("source") ) || path::Equals( dirTokens[ i ].c_str(), _T("src") ) )
 		{
 			std::tstring orgToken = dirTokens[ i ];
 
@@ -365,7 +365,7 @@ void CFileAssoc::FindVariationsOf( std::vector< fs::CPath >& rVariations, int& r
 
 		std::tstring foundFileName = (LPCTSTR)findVariations.GetFileName();
 
-		if ( path::Equals( foundFileName, m_parts.GetFilename() ) )
+		if ( path::Equals( foundFileName.c_str(), m_parts.GetFilename().c_str() ) )
 		{
 			ASSERT( rThisIdx == -1 );
 			rThisIdx = (int)rVariations.size();

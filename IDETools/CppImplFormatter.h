@@ -32,7 +32,7 @@ namespace code
 
 		static bool IsCppTypeQualifier( std::tstring typeQualifier );
 	private:
-		bool LoadCodeTemplates( void );
+		bool LoadCodeSnippets( void );
 		std::tstring MakeCommentDecoration( const std::tstring& decorationCore ) const;
 
 		std::tstring ImplementMethod( const std::tstring& methodProto, const CTypeDescriptor& tdInfo );

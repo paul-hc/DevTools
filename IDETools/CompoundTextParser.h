@@ -38,13 +38,13 @@ private:
 
 	std::tstring* FindFieldValue( const std::tstring& fieldKey );			// e.g. "%TypeName%"
 	std::tstring& LookupFieldValue( const std::tstring& fieldKey );			// e.g. "%TypeName%"
-	size_t ExpandFieldMappings( std::tstring* pSectionContent _out_ );
+	size_t ExpandFieldMappings( OUT std::tstring* pSectionContent );
 	void UpdateFilePathFields( void );
 
 	std::tstring* ExpandSectionRefs( const std::tstring& sectionName ) throws_( CRuntimeException );
-	bool PromptConditionalSectionRef( std::tstring* pRefSectionName _in_out_ ) const;
+	bool PromptConditionalSectionRef( IN OUT std::tstring* pRefSectionName ) const;
 
-	static bool CheckEatLineEnd( size_t* pLastPos _in_out_, const TCHAR* pContent );		// if '$' suffix => skip the following "\r\n" (or just "\n")
+	static bool CheckEatLineEnd( IN OUT size_t* pLastPos, const TCHAR* pContent );		// if '$' suffix => skip the following "\r\n" (or just "\n")
 
 
 	struct CParsingContext

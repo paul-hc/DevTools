@@ -11,7 +11,7 @@ namespace code
 
 	template< typename CharT >
 	template< typename IteratorT >
-	IteratorT CLanguage<CharT>::FindMatchingBracket( IteratorT itBracket, IteratorT itLast, IteratorT* pItBracketMismatch /*= nullptr*/ _out_ ) const throws_cond( code::TSyntaxError )
+	IteratorT CLanguage<CharT>::FindMatchingBracket( IteratorT itBracket, IteratorT itLast, OUT IteratorT* pItBracketMismatch /*= nullptr*/ ) const throws_cond( code::TSyntaxError )
 	{
 		// find the closing bracket matching the current bracket;  skip language-specific comments, quoted strings, etc.
 		// throws TSyntaxError if pItBracketMismatch is null.
@@ -62,7 +62,7 @@ namespace code
 
 	template< typename CharT >
 	template< typename IteratorT >
-	bool CLanguage<CharT>::SkipPastMatchingBracket( IteratorT* pItBracket _in_out_, IteratorT itLast, IteratorT* pItBracketMismatch /*= nullptr*/ _out_ ) const throws_cond( code::TSyntaxError )
+	bool CLanguage<CharT>::SkipPastMatchingBracket( IN OUT IteratorT* pItBracket, IteratorT itLast, OUT IteratorT* pItBracketMismatch /*= nullptr*/ ) const throws_cond( code::TSyntaxError )
 	{	// find past the closing bracket matching the current bracket - compatible with found range bounds
 		ASSERT_PTR( pItBracket );
 		*pItBracket = FindMatchingBracket( *pItBracket, itLast, pItBracketMismatch );
@@ -115,7 +115,7 @@ namespace code
 
 
 	template< typename CharT >
-	typename CharT CEscaper::DecodeCharAdvance( const CharT** ppSrc _in_out_ ) const
+	typename CharT CEscaper::DecodeCharAdvance( IN OUT const CharT** ppSrc ) const
 	{
 		ASSERT( ppSrc != nullptr && *ppSrc != nullptr );
 		if ( '\0' == **ppSrc )
@@ -166,7 +166,7 @@ namespace code
 	}
 
 	template< typename CharT >
-	typename CharT CEscaper::DecodeChar( const CharT* pSrc, size_t* pLength /*= nullptr*/ _out_ ) const
+	typename CharT CEscaper::DecodeChar( const CharT* pSrc, OUT size_t* pLength /*= nullptr*/ ) const
 	{
 		const CharT* pNext = pSrc;
 		CharT actualChar = DecodeCharAdvance( &pNext );
@@ -176,7 +176,7 @@ namespace code
 
 
 	template< typename IteratorT >
-	inline typename IteratorT::value_type CEscaper::DecodeCharAdvance( IteratorT* pIt _in_out_ ) const
+	inline typename IteratorT::value_type CEscaper::DecodeCharAdvance( IN OUT IteratorT* pIt ) const
 	{
 		ASSERT_PTR( pIt );
 		size_t length;
@@ -187,7 +187,7 @@ namespace code
 	}
 
 	template< typename IteratorT >
-	typename IteratorT::value_type CEscaper::DecodeChar( IteratorT it, size_t* pLength /*= nullptr*/ _out_ ) const
+	typename IteratorT::value_type CEscaper::DecodeChar( IteratorT it, OUT size_t* pLength /*= nullptr*/ ) const
 	{
 		IteratorT itNext = it;
 		typename IteratorT::value_type actualChar = DecodeCharAdvance( &itNext );
@@ -197,7 +197,7 @@ namespace code
 
 
 	template< typename OutIteratorT, typename CharT >
-	void CEscaper::AppendEncodedChar( OutIteratorT itLiteral _out_, CharT actualCh, bool enquote, const char* pRetain /*= nullptr*/ ) const
+	void CEscaper::AppendEncodedChar( OUT OutIteratorT itLiteral, CharT actualCh, bool enquote, const char* pRetain /*= nullptr*/ ) const
 	{
 		if ( '\0' == m_escSeqLead )					// a no-op escaper
 			*itLiteral++ = actualCh;

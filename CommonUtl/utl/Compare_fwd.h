@@ -14,12 +14,7 @@ namespace pred
 	template< typename DiffType >
 	inline CompareResult ToCompareResult( DiffType difference )
 	{
-		if ( difference < 0 )
-			return Less;
-		else if ( difference > 0 )
-			return Greater;
-
-		return Equal;
+		return (pred::CompareResult)( ( -difference < 0 ) - ( difference < 0 ) );	// (if positive) - (if negative) generates branchless code
 	}
 
 

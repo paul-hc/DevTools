@@ -642,6 +642,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CppParser.hxx"
+					>
+				</File>
+				<File
 					RelativePath=".\DocLanguage.cpp"
 					>
 				</File>

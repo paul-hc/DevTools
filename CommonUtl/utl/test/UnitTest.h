@@ -130,7 +130,7 @@ namespace ut
 
 
 #define ASSERT_THROWS( ExceptionT, statement )\
-	try { ( statement ); _ASSERT_EXPR( false, _CRT_WIDE("Expected to throw " #ExceptionT) ); }\
+	try { ( statement ); _ASSERT_EXPR( false, L"Expected to throw " _CRT_WIDE(#ExceptionT) ); }\
 	catch ( const ExceptionT& exc ) { exc; }
 
 

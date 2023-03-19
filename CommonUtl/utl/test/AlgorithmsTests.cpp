@@ -487,8 +487,8 @@ void CAlgorithmsTests::TestCompareContents( void )
 		str::Split( strayPaths, _T("x,y,z"), s_sep );
 
 		ASSERT( path1 != path2 );
-		ASSERT( utl::SameContents( path1, path2, pred::IsPathEquivalent() ) );
-		ASSERT( !utl::SameContents( path1, strayPaths, pred::IsPathEquivalent() ) );
+		ASSERT( utl::SameContents( path1, path2 ) );
+		ASSERT( !utl::SameContents( path1, strayPaths ) );
 	}
 }
 
