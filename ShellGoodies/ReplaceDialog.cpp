@@ -68,7 +68,7 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 
 	m_initCentered = false;
 	m_regSection = reg::section;
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	GetLayoutEngine().DisableResizeVertically();
 	LoadDlgIcon( ID_EDIT_REPLACE );
 

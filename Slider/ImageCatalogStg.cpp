@@ -300,7 +300,7 @@ CCachedThumbBitmap* CImageCatalogStg::LoadThumbnail( const fs::CFlexPath& imageC
 	try
 	{
 		CComPtr<IStorage> pThumbsStorage;
-		if ( const TCHAR* pThumbsFolderName = FindAlternate_DirName( ARRAY_PAIR( s_thumbsFolderNames ) ).first )
+		if ( const TCHAR* pThumbsFolderName = FindAlternate_DirName( ARRAY_SPAN( s_thumbsFolderNames ) ).first )
 			pThumbsStorage = OpenDir( pThumbsFolderName );
 
 		if ( pThumbsStorage != NULL )
@@ -573,7 +573,7 @@ bool CImageCatalogStg::SavePasswordStream( void )
 
 	try
 	{
-		DeleteAnyOldVersionStream( ARRAY_PAIR( s_passwordStreamNames ) );		// remove existing password stream
+		DeleteAnyOldVersionStream( ARRAY_SPAN( s_passwordStreamNames ) );		// remove existing password stream
 
 		if ( m_password.empty() )
 			return true;			// no password, done
@@ -611,7 +611,7 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );			// start lookup in root (for backwards compatibility)
 
 	{
-		std::pair<const TCHAR*, size_t> streamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) );
+		std::pair<const TCHAR*, size_t> streamName = FindAlternate_StreamName( ARRAY_SPAN( s_passwordStreamNames ) );
 		pPasswordStreamName = streamName.first;
 
 		if ( streamName.first != NULL )			// password stream found in the root?

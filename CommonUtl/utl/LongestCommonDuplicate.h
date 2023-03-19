@@ -11,7 +11,7 @@ namespace lcs
 	// Use a suffix array to find the Longest Common Duplicate (LCD).
 	// The sorted suffix array is iterated as a balanced suffix tree using Compare.
 
-	template< typename CharType, typename Compare = pred::TCompareCase >
+	template< typename CharType, typename Compare = func::TStrCompareCase >
 	class CSuffixTree
 	{
 		typedef std::basic_string<CharType> TString;
@@ -73,7 +73,7 @@ namespace lcs
 						if ( commonLen > lcPrefix.m_length )
 						{
 							str::CSequence<CharType> prefix( pPrefix, commonLen );
-							if ( str::AllContain( items, prefix, m_compareStr ) )
+							if ( str::AllContain( items, prefix, pred::MakeCharEquals( m_compareStr ) ) )
 								lcPrefix = prefix;
 						}
 				}
@@ -92,7 +92,8 @@ namespace lcs
 
 		size_t GetCommonLength( const CharType* pLeft, const CharType* pRight ) const
 		{
-			return str::GetCommonLength( pLeft, pRight, m_compareStr );
+			return str::GetCommonLength( pLeft, pRight, pred::MakeCharEquals( m_compareStr ) );
+				// return m_compareStr.Compare( pLeft, pRight ).second;
 		}
 
 		struct LessRefPtr

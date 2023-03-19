@@ -42,14 +42,14 @@ namespace d2d
 	CFrameGadget* CImageRenderTarget::MakeAccentFrameGadget( void ) const
 	{
 		const D2D1_COLOR_F colors[] = { ToColor( m_accentFrameColor, 70 ), ToColor( color::White, 20 ) };
-		CFrameGadget* pAccentFrameGadget = new CFrameGadget( 3, ARRAY_PAIR( colors ) );
+		CFrameGadget* pAccentFrameGadget = new CFrameGadget( 3, ARRAY_SPAN( colors ) );
 
 		pAccentFrameGadget->SetFrameStyle( GradientFrameRadialCorners );
 
 	#if 0
 		// debugging: use high contrast colours
 		static const D2D1_COLOR_F s_debugColors[] = { ToColor( color::Red, 90 ), ToColor( color::Yellow, 80 ), ToColor( color::BrightGreen, 70 ) };
-		pAccentFrameGadget->SetColors( ARRAY_PAIR( s_debugColors ) );
+		pAccentFrameGadget->SetColors( ARRAY_SPAN( s_debugColors ) );
 		pAccentFrameGadget->SetFrameSize( 10 );
 		pAccentFrameGadget->SetFrameStyle( OutlineGradientFrame );
 	#endif

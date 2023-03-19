@@ -44,7 +44,7 @@ namespace shell
 				{
 					TCHAR destPath[ MAX_PATH ];
 
-					pShellLink->GetPath( ARRAY_PAIR( destPath ), nullptr, 0 );
+					pShellLink->GetPath( ARRAY_SPAN( destPath ), nullptr, 0 );
 					rDestPath.Set( destPath );
 					return true;
 				}

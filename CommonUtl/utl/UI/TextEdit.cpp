@@ -34,7 +34,7 @@ CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	, m_usePasteTransact( false )
 	, m_hookThumbTrack( true )
 	, m_visibleWhiteSpace( false )
-	, m_accel( ARRAY_PAIR( s_editKeys ) )
+	, m_accel( ARRAY_SPAN( s_editKeys ) )
 	, m_pSyncScrolling( nullptr )
 	, m_lastSelRange( 0, 0 )
 {
@@ -164,7 +164,7 @@ std::tstring CTextEdit::GetLineText( TLine linePos ) const
 	size_t length = GetLineRange( linePos ).GetSpan<size_t>();
 	std::vector< TCHAR > lineBuffer( length + 1 );
 
-	size_t newLength = GetLine( linePos, ARRAY_PAIR_V( lineBuffer ) );
+	size_t newLength = GetLine( linePos, ARRAY_SPAN_V( lineBuffer ) );
 	ENSURE( length == newLength ); newLength;
 	lineBuffer[ length ] = _T('\0');
 	return &lineBuffer.front();

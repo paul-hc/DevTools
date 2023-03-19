@@ -25,53 +25,24 @@ namespace func
 		{
 			return static_cast<CharType>( Translate( ch ) );
 		}
-
-		static int Translate( int charCode );
+	private:
+		static int Translate( wchar_t charCode );
 	};
-
-
-	int ToNaturalPathCharValue::Translate( int charCode )
-	{
-		enum TranslatedCode		// natural order for punctuation characters
-		{
-			Dot = 1, Colon, SemiColon, Comma, Dash, Plus, Underbar,
-			CurvedBraceB, CurvedBraceE,
-			SquareBraceB, SquareBraceE,
-			CurlyBraceB, CurlyBraceE,
-			AngularBraceB, AngularBraceE
-		};
-
-		switch ( charCode )
-		{
-			case '.':	return Dot;
-			case ':':	return Colon;
-			case ';':	return SemiColon;
-			case ',':	return Comma;
-			case '-':	return Dash;
-			case '+':	return Plus;
-			case '_':	return Underbar;
-			case '(':	return CurvedBraceB;
-			case ')':	return CurvedBraceE;
-			case '[':	return SquareBraceB;
-			case ']':	return SquareBraceE;
-			case '{':	return CurlyBraceB;
-			case '}':	return CurlyBraceE;
-			case '<':	return AngularBraceB;
-			case '>':	return AngularBraceE;
-		}
-		return charCode;
-	}
 }
 
 
 namespace path
 {
-	const TCHAR g_complexPathSep = '>';
+	const std::tstring CDelims::s_dirDelims( _T("\\/") );
+	const std::tstring CDelims::s_hugePrefix( _T("\\\\?\\") );		// "\\?\" without the C escape sequences
+	const std::tstring CDelims::s_wildcards( _T("*?") );
+	const std::tstring CDelims::s_multiSpecDelims( _T(";,") );
+	const std::tstring CDelims::s_fmtNumSuffix( _T("_[%d]") );
 
 
 	pred::CompareResult CompareIntuitive( const TCHAR* pLeft, const TCHAR* pRight )
 	{
-		return pred::MakeIntuitiveComparator( func::ToNaturalPathCharValue() ).Compare( pLeft, pRight );
+		return pred::MakeIntuitiveComparator( func::ToNaturalPathCharValue() ).Compare( GetStart( pLeft ), GetStart( pRight ) );
 	}
 
 
@@ -143,19 +114,6 @@ namespace path
 
 namespace path
 {
-	const TCHAR* DirDelims( void )
-	{
-		static const TCHAR dirDelims[] = _T("\\/");
-		return dirDelims;
-	}
-
-	const TCHAR* StdFormatNumSuffix( void )
-	{
-		static const TCHAR s_fmtNumSuffix[] = _T("_[%d]");
-		return s_fmtNumSuffix;
-	}
-
-
 	const TCHAR* FindBreak( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
@@ -213,18 +171,6 @@ namespace path
 	}
 
 
-/*	str::Match GetMatch( const TCHAR* pLeftPath, const TCHAR* pRightPath )
-	{
-		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, func::ToWinPathChar() ) )	// case sensitive
-			return str::MatchEqual;
-
-		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, func::ToEquivalentPathChar() ) )	// case insensitive
-			return str::MatchEqualDiffCase;
-
-		return str::MatchNotEqual;
-	}*/
-
-
 	struct CFnameExt
 	{
 		CFnameExt( const TCHAR* pFilename )
@@ -255,29 +201,19 @@ namespace path
 	};
 
 
-	const TCHAR* Wildcards( void )
+	bool DoMatchFilenameWildcard( const TCHAR* pFilename, const TCHAR* pWildSpec, const std::tstring& multiSpecDelims /*= CDelims::s_multiSpecDelims*/ )
 	{
-		return _T("*?");
-	}
-
-	const TCHAR* MultiSpecDelims( void )
-	{
-		return _T(";,");
-	}
-
-	bool DoMatchFilenameWildcard( const TCHAR* pFilename, const TCHAR* pWildSpec, const TCHAR* pMultiSpecDelims )
-	{
-		if ( IsMultipleWildcard( pWildSpec, pMultiSpecDelims ) )
+		if ( IsMultipleWildcard( pWildSpec, multiSpecDelims ) )
 		{
 			std::vector<TCHAR> wildcards;
-			str::QuickTokenize( wildcards, pWildSpec, pMultiSpecDelims );		// multiple zero-terminated items
+			str::QuickTokenize( wildcards, pWildSpec, multiSpecDelims.c_str() );		// multiple zero-terminated items
 
 			typedef const TCHAR* TConstIterator;
 
 			for ( TConstIterator pWild = &wildcards.front(), pEnd = &wildcards.back() + 1; pWild != pEnd; ++pWild )
 				if ( '\0' == *pWild )
 					++pWild;						// skip empty specs, e.g. in ";x;;y"
-				else if ( DoMatchFilenameWildcard( pFilename, pWild, pMultiSpecDelims ) )			// recursive call spec by spec
+				else if ( DoMatchFilenameWildcard( pFilename, pWild, multiSpecDelims ) )			// recursive call spec by spec
 					return true;
 				else
 					pWild += str::GetLength( pWild );
@@ -299,21 +235,21 @@ namespace path
 		return path.MatchWildcard( wild );
 	}
 
-	bool MatchWildcard( const TCHAR* pPath, const TCHAR* pWildSpec, const TCHAR* pMultiSpecDelims /*= MultiSpecDelims()*/ )
+	bool MatchWildcard( const TCHAR* pPath, const TCHAR* pWildSpec, const std::tstring& multiSpecDelims /*= CDelims::s_multiSpecDelims*/ )
 	{
-		return DoMatchFilenameWildcard( FindFilename( pPath ), pWildSpec, pMultiSpecDelims );
+		return DoMatchFilenameWildcard( FindFilename( pPath ), pWildSpec, multiSpecDelims );
 	}
 
-	bool IsMultipleWildcard( const TCHAR* pWildSpec, const TCHAR* pMultiSpecDelims /*= MultiSpecDelims()*/ )
+	bool IsMultipleWildcard( const TCHAR* pWildSpec, const std::tstring& multiSpecDelims /*= CDelims::s_multiSpecDelims*/ )
 	{
 		const TCHAR* pWildEnd = str::end( pWildSpec );
-		return std::find_first_of( pWildSpec, pWildEnd, pMultiSpecDelims, str::end( pMultiSpecDelims ) ) != pWildEnd;
+		return std::find_first_of( pWildSpec, pWildEnd, multiSpecDelims.begin(), multiSpecDelims.end() ) != pWildEnd;
 	}
 
-	bool ContainsWildcards( const TCHAR* pWildSpec, const TCHAR* pWildcards /*= Wildcards()*/ )
+	bool ContainsWildcards( const TCHAR* pWildSpec, const std::tstring& wildcards /*= CDelims::s_wildcards*/ )
 	{
 		const TCHAR* pWildEnd = str::end( pWildSpec );
-		return std::find_first_of( pWildSpec, pWildEnd, pWildcards, str::end( pWildcards ) ) != pWildEnd;
+		return std::find_first_of( pWildSpec, pWildEnd, wildcards.begin(), wildcards.end() ) != pWildEnd;
 	}
 
 
@@ -379,7 +315,7 @@ namespace path
 
 	bool HasDirectory( const TCHAR* pPath )
 	{
-		return _tcspbrk( pPath, DirDelims() ) != nullptr;
+		return _tcspbrk( pPath, CDelims::s_dirDelims.c_str() ) != nullptr;
 	}
 
 
@@ -425,34 +361,26 @@ namespace path
 
 	// huge prefix syntax: path prefixed with "\\?\"
 
-	const std::tstring& GetHugePrefix( void )
-	{
-		static const std::tstring s_hugePrefix( _T("\\\\?\\") );		// "\\?\" without the C escape sequences
-		return s_hugePrefix;
-	}
-
-	bool HasHugePrefix( const TCHAR* pPath )
-	{
-		return pred::Equal == str::CharTraits::CompareN( pPath, GetHugePrefix().c_str(), GetHugePrefix().length() );
-	}
-
-	const TCHAR* SkipHugePrefix( const TCHAR* pPath )
+	const TCHAR* GetStart( const TCHAR* pPath )
 	{
 		if ( HasHugePrefix( pPath ) )
-			return pPath + GetHugePrefix().length();
+			return pPath + CDelims::s_hugePrefix.length();
 
 		return pPath;
 	}
 
-	bool SetHugePrefix( IN OUT std::tstring& rPath, bool useHugePrefixSyntax /*= true*/ )
+	bool AutoHugePrefix( IN OUT std::tstring& rPath )
 	{
-		if ( !useHugePrefixSyntax )
-			return str::StripPrefix( rPath, GetHugePrefix().c_str(), GetHugePrefix().length() );
+		bool isHuge = rPath.length() >= MAX_PATH;
 
-		if ( HasHugePrefix( rPath.c_str() ) )
-			return false;
+		if ( isHuge == HasHugePrefix( rPath.c_str() ) )
+			return false;		// no change
 
-		rPath.insert( 0, GetHugePrefix() );
+		if ( isHuge )
+			rPath.insert( 0, CDelims::s_hugePrefix );
+		else
+			str::StripPrefix( rPath, STRING_SPAN( CDelims::s_hugePrefix ) );
+
 		return true;
 	}
 
@@ -461,12 +389,7 @@ namespace path
 
 	bool IsWellFormed( const TCHAR* pFilePath )
 	{
-		return std::count( str::begin( pFilePath ), str::end( pFilePath ), g_complexPathSep ) <= 1;		// ensure at most single complex separator
-	}
-
-	size_t FindComplexSepPos( const TCHAR* pPath )
-	{
-		return utl::FindPos( str::begin( pPath ), str::end( pPath ), g_complexPathSep );
+		return std::count( str::begin( pFilePath ), str::end( pFilePath ), CDelims::s_complexPathSep ) <= 1;		// ensure at most single complex separator
 	}
 
 	std::tstring ExtractPhysical( const std::tstring& filePath )
@@ -481,14 +404,14 @@ namespace path
 	const TCHAR* GetEmbedded( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		pPath = std::find( str::begin( pPath ), str::end( pPath ), g_complexPathSep );
+		pPath = std::find( str::begin( pPath ), str::end( pPath ), CDelims::s_complexPathSep );
 		return *pPath != '\0' ? ( pPath + 1 ) : pPath;
 	}
 
 	const TCHAR* GetSubPath( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		const TCHAR* pComplexSep = std::find( str::begin( pPath ), str::end( pPath ), g_complexPathSep );
+		const TCHAR* pComplexSep = std::find( str::begin( pPath ), str::end( pPath ), CDelims::s_complexPathSep );
 		return *pComplexSep != '\0' ? ( pComplexSep + 1 ) : pPath;
 	}
 
@@ -499,7 +422,7 @@ namespace path
 		ASSERT( utl::npos == FindComplexSepPos( physicalPath.c_str() ) );
 		ASSERT( utl::npos == FindComplexSepPos( pEmbeddedPath ) );
 
-		return physicalPath + g_complexPathSep + pEmbeddedPath;
+		return physicalPath + CDelims::s_complexPathSep + pEmbeddedPath;
 	}
 
 	bool SplitComplex( OUT std::tstring& rPhysicalPath, OUT std::tstring& rEmbeddedPath, const std::tstring& filePath )
@@ -567,7 +490,7 @@ namespace path
 		SetBackslash( dirPath, trailSlash );
 
 		if ( RemoveSlash == trailSlash )
-			str::StripSuffix( dirPath, &path::g_complexPathSep, 1 );		// flex paths: treat trailing '>' like a slash - remove it
+			str::StripSuffix( dirPath, &CDelims::s_complexPathSep, 1 );		// flex paths: treat trailing '>' like a slash - remove it
 
 		return dirPath;
 	}
@@ -755,7 +678,7 @@ namespace path
 
 		// restore the complex path separator if it's still part of the resulting common prefix
 		if ( complSepPos != std::tstring::npos && complSepPos < str::GetLength( commonPrefix ) )
-			commonPrefix[ complSepPos ] = g_complexPathSep;
+			commonPrefix[ complSepPos ] = CDelims::s_complexPathSep;
 
 		return commonPrefix;
 	}
@@ -789,7 +712,7 @@ namespace path
 			{
 				TCHAR chNext = rPath.c_str()[ prefixLen ];
 
-				if ( IsSlash( chNext ) || g_complexPathSep == chNext )
+				if ( IsSlash( chNext ) || CDelims::s_complexPathSep == chNext )
 					++prefixLen;			// cut leading slash or '>'
 
 				rPath.erase( 0, prefixLen );
@@ -864,7 +787,7 @@ namespace fs
 
 			sepPos += m_drive.length();
 			ASSERT( '/' == path[ sepPos ] );	// restore to original
-			path[ sepPos ] = path::g_complexPathSep;
+			path[ sepPos ] = path::CDelims::s_complexPathSep;
 		}
 
 		return fs::CPath( path );
@@ -897,7 +820,7 @@ namespace fs
 		{
 			sepPos -= m_drive.length();
 			ASSERT( '/' == m_dir[ sepPos ] );	// restore to original
-			m_dir[ sepPos ] = path::g_complexPathSep;
+			m_dir[ sepPos ] = path::CDelims::s_complexPathSep;
 		}
 	}
 
@@ -920,20 +843,21 @@ namespace fs
 	{
 		m_filePath = filePath;
 		str::Trim( m_filePath );
+		path::AutoHugePrefix( m_filePath );
 	}
 
 	size_t CPath::GetDepth( void ) const
 	{
 		size_t depth = 0;
 
-		fs::CPath parentPath = *this;
+		fs::TDirPath parentPath = *this;
 		parentPath.Normalize();
 
 		while ( !parentPath.IsEmpty() )
 		{
 			++depth;
 
-			fs::CPath newParentPath = parentPath.GetParentPath();
+			fs::TDirPath newParentPath = parentPath.GetParentPath();
 
 			if ( newParentPath != parentPath )
 				parentPath = newParentPath;
@@ -943,6 +867,7 @@ namespace fs
 
 		return depth;
 	}
+
 
 	TDirPath CPath::GetParentPath( bool trailSlash /*= false*/ ) const
 	{
@@ -1100,9 +1025,9 @@ namespace path
 
 namespace pred
 {
-	struct ComparPathDepth
+	struct ComparePathDepth
 	{
-		ComparPathDepth( const std::unordered_map<fs::CPath, size_t>& rFilePathsToDepth ) : m_rFilePathsToDepth( rFilePathsToDepth ) {}
+		ComparePathDepth( const std::unordered_map<fs::CPath, size_t>& rFilePathsToDepth ) : m_rFilePathsToDepth( rFilePathsToDepth ) {}
 
 		CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
 		{
@@ -1136,7 +1061,7 @@ namespace fs
 		for ( std::vector<fs::CPath>::const_iterator itFilePath = rFilePaths.begin(); itFilePath != rFilePaths.end(); ++itFilePath )
 			filePathsToDepth[ *itFilePath ] = itFilePath->GetDepth();
 
-		std::sort( rFilePaths.begin(), rFilePaths.end(), pred::MakeOrderByValue( pred::ComparPathDepth( filePathsToDepth ), ascending ) );
+		std::sort( rFilePaths.begin(), rFilePaths.end(), pred::MakeOrderByValue( pred::ComparePathDepth( filePathsToDepth ), ascending ) );
 	}
 }
 
@@ -1154,5 +1079,41 @@ namespace path
 				else
 					rParentPaths.push_back( parentPath );
 		}
+	}
+}
+
+
+namespace func
+{
+	int ToNaturalPathCharValue::Translate( wchar_t charCode )
+	{
+		enum TranslatedCode		// natural order for punctuation characters
+		{
+			Dot = 1, Colon, SemiColon, Comma, Dash, Plus, Underbar,
+			CurvedBraceB, CurvedBraceE,
+			SquareBraceB, SquareBraceE,
+			CurlyBraceB, CurlyBraceE,
+			AngularBraceB, AngularBraceE
+		};
+
+		switch ( charCode )
+		{
+			case '.':	return Dot;
+			case ':':	return Colon;
+			case ';':	return SemiColon;
+			case ',':	return Comma;
+			case '-':	return Dash;
+			case '+':	return Plus;
+			case '_':	return Underbar;
+			case '(':	return CurvedBraceB;
+			case ')':	return CurvedBraceE;
+			case '[':	return SquareBraceB;
+			case ']':	return SquareBraceE;
+			case '{':	return CurlyBraceB;
+			case '}':	return CurlyBraceE;
+			case '<':	return AngularBraceB;
+			case '>':	return AngularBraceE;
+		}
+		return charCode;
 	}
 }

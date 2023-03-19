@@ -41,7 +41,7 @@ CProgressDialog::CProgressDialog( const std::tstring& operationLabel, int option
 	, m_pClockStatic( new CClockStatic() )
 {
 	m_regSection = _T("utl\\ProgressDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	GetLayoutEngine().DisableResizeVertically();
 }
 

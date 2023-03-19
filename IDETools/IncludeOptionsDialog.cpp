@@ -35,7 +35,7 @@ CIncludeOptionsDialog::CIncludeOptionsDialog( CIncludeOptions* pOptions, CWnd* p
 {
 	ASSERT_PTR( m_pOptions );
 	m_regSection = _T("IncludeOptionsDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	GetLayoutEngine().DisableResizeVertically();
 	LoadDlgIcon( ID_OPTIONS );
 

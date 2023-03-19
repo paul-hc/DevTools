@@ -177,130 +177,6 @@ void CStringCompareTests::TestStringCompare( void )
 	}
 }
 
-namespace ut
-{
-	template< typename CharT >
-	inline std::pair<pred::CompareResult, size_t> BaseCompare( const CharT* pLeft, const CharT* pRight, size_t count = std::tstring::npos )
-	{
-		return str::_BaseCompare( pLeft, pRight, func::ToCharValue<>(), count );
-	}
-
-	template< typename CharT >
-	inline std::pair<pred::CompareResult, size_t> BaseCompareI( const CharT* pLeft, const CharT* pRight, size_t count = std::tstring::npos )
-	{
-		return str::_BaseCompare( pLeft, pRight, func::ToCharValue<str::IgnoreCase>(), count );
-	}
-
-	template< typename CharT >
-	inline bool BaseEquals( const CharT* pLeft, const CharT* pRight, size_t count = std::tstring::npos )
-	{
-		return pred::Equal == str::_BaseCompare( pLeft, pRight, func::ToCharValue<>(), count ).first;
-	}
-
-	template< typename CharT >
-	inline bool BaseEqualsI( const CharT* pLeft, const CharT* pRight, size_t count = std::tstring::npos )
-	{
-		return pred::Equal == str::_BaseCompare( pLeft, pRight, func::ToCharValue<str::IgnoreCase>(), count ).first;
-	}
-}
-
-void CStringCompareTests::TestStringCompare2( void )
-{
-	typedef std::pair<pred::CompareResult, size_t> TResult;
-
-	// case-sensitive compare (str::Case)
-	{
-		ASSERT( pred::Equal == ut::BaseCompare( "", "" ).first );
-		ASSERT( pred::Greater == ut::BaseCompare( "abc", "" ).first );
-		ASSERT( pred::Less == ut::BaseCompare( "", "abc" ).first );
-		ASSERT_EQUAL( TResult( pred::Equal, 0 ), ut::BaseCompare( "abc", "", 0 ) );
-		ASSERT_EQUAL( TResult( pred::Equal, 0 ), ut::BaseCompare( "", "abc", 0 ) );
-
-		ASSERT_EQUAL( TResult( pred::Equal, 1 ), ut::BaseCompare( "abc", "a", 1 ) );
-		ASSERT( pred::Greater == ut::BaseCompare( "abc", "a" ).first );
-		ASSERT( pred::Less == ut::BaseCompare( "a", "abc" ).first );
-
-		ASSERT_EQUAL( TResult( pred::Equal, 2 ), ut::BaseCompare( "abc", "ab", 2 ) );
-		ASSERT( pred::Greater == ut::BaseCompare( "abc", "ab" ).first );
-		ASSERT( pred::Less == ut::BaseCompare( "ab", "abc" ).first );
-
-		ASSERT_EQUAL( TResult( pred::Less, 1 ), ut::BaseCompare( "abc", "ax", 2 ) );
-		ASSERT( pred::Less == ut::BaseCompare( "abc", "ax" ).first );
-		ASSERT( pred::Greater == ut::BaseCompare( "ax", "abc" ).first );
-
-		// narrow-wide compare
-		ASSERT( pred::Equal == ut::BaseCompare( "abc", "abc" ).first );
-		ASSERT( pred::Equal == ut::BaseCompare( L"abc", L"abc" ).first );
-
-		// case mismatch
-		ASSERT( pred::Greater == ut::BaseCompare( "abc", "ABC" ).first );
-		ASSERT( pred::Less == ut::BaseCompare( L"ABC", L"abc" ).first );
-
-		// equals:
-		ASSERT( ut::BaseEquals( "", "" ) );
-		ASSERT( !ut::BaseEquals( "abc", "" ) );
-		ASSERT( !ut::BaseEquals( "", "abc" ) );
-
-		// equalsN:
-		ASSERT( ut::BaseEquals( "abc", "", 0 ) );
-
-		ASSERT( ut::BaseEquals( "abc", "a", 1 ) );
-		ASSERT( ut::BaseEquals( L"a", L"abc", 1 ) );
-
-		ASSERT( ut::BaseEquals( "abc", "ab", 2 ) );
-		ASSERT( ut::BaseEquals( L"ab", L"abc", 2 ) );
-
-		ASSERT( !ut::BaseEquals( "abc", "ax", 2 ) );
-		ASSERT( !ut::BaseEquals( L"ax", L"abc", 2 ) );
-	}
-
-	// case-insensitive compare
-	{
-		ASSERT( pred::Equal == ut::BaseCompareI( "", "" ).first );
-		ASSERT( pred::Greater == ut::BaseCompareI( "abc", "" ).first );
-		ASSERT( pred::Less == ut::BaseCompareI( "", "abc" ).first );
-		ASSERT_EQUAL( TResult( pred::Equal, 0 ), ut::BaseCompareI( "abc", "", 0 ) );
-		ASSERT_EQUAL( TResult( pred::Equal, 0 ), ut::BaseCompareI( "", "abc", 0 ) );
-
-		ASSERT_EQUAL( TResult( pred::Equal, 1 ), ut::BaseCompareI( "abc", "A", 1 ) );
-		ASSERT( pred::Greater == ut::BaseCompareI( "abc", "A" ).first );
-		ASSERT( pred::Less == ut::BaseCompareI( "A", "abc" ).first );
-
-		ASSERT_EQUAL( TResult( pred::Equal, 2 ), ut::BaseCompareI( "abc", "AB", 2 ) );
-		ASSERT( pred::Greater == ut::BaseCompareI( "abc", "AB" ).first );
-		ASSERT( pred::Less == ut::BaseCompareI( "AB", "abc" ).first );
-
-		ASSERT_EQUAL( TResult( pred::Less, 1 ), ut::BaseCompareI( "abc", "AX", 2 ) );
-		ASSERT( pred::Less == ut::BaseCompareI( "abc", "AX" ).first );
-		ASSERT( pred::Greater == ut::BaseCompareI( "AX", "abc" ).first );
-
-		// narrow-wide compare
-		ASSERT( pred::Equal == ut::BaseCompareI( "abc", "ABC" ).first );
-		ASSERT( pred::Equal == ut::BaseCompareI( L"abc", L"ABC" ).first );
-
-		// case mismatch
-		ASSERT( pred::Equal == ut::BaseCompareI( "abc", "ABC" ).first );
-		ASSERT( pred::Equal == ut::BaseCompareI( L"ABC", L"abc" ).first );
-
-		// equals:
-		ASSERT( ut::BaseEqualsI( "", "" ) );
-		ASSERT( !ut::BaseEqualsI( "abc", "" ) );
-		ASSERT( !ut::BaseEqualsI( "", "abc" ) );
-
-		// equalsN:
-		ASSERT( ut::BaseEqualsI( "abc", "", 0 ) );
-
-		ASSERT( ut::BaseEqualsI( "abc", "A", 1 ) );
-		ASSERT( ut::BaseEqualsI( "A", "abc", 1 ) );
-
-		ASSERT( ut::BaseEqualsI( L"abc", L"AB", 2 ) );
-		ASSERT( ut::BaseEqualsI( L"AB", L"abc", 2 ) );
-
-		ASSERT( !ut::BaseEqualsI( "abc", "AX", 2 ) );
-		ASSERT( !ut::BaseEqualsI( L"AX", L"abc", 2 ) );
-	}
-}
-
 void CStringCompareTests::TestStringFind( void )
 {
 	// str::Contains, str::ContainsI
@@ -448,9 +324,9 @@ void CStringCompareTests::TestStringFindSequence( void )
 	ASSERT_EQUAL( 2, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"liquid", 2 ) ) );
 	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"liquid", 3 ) ) );
 
-	ASSERT_EQUAL( 2, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
-	ASSERT_EQUAL( 2, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"LIQUID", 2 ), pred::TCompareNoCase() ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ), pred::TCompareCase() ) );
+	ASSERT_EQUAL( 2, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ), pred::TStrEqualsIgnoreCase() ) );
+	ASSERT_EQUAL( 2, str::FindSequence( L"a line", str::CSequence<wchar_t>( L"LIQUID", 2 ), pred::TStrEqualsIgnoreCase() ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ), pred::TStrEqualsCase() ) );
 	ASSERT_EQUAL( std::tstring::npos, str::FindSequence( "a line", str::CSequence<char>( "LIQUID", 2 ) ) );
 
 	std::vector<std::string> items;
@@ -459,15 +335,15 @@ void CStringCompareTests::TestStringFindSequence( void )
 	items.push_back( "a line" );
 	ASSERT( AllContain( items, str::CSequence<char>( "liquid", 2 ) ) );
 	ASSERT( !AllContain( items, str::CSequence<char>( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TStrEqualsIgnoreCase() ) );
 
 	items.push_back( "OS linux" );
 	ASSERT( AllContain( items, str::CSequence<char>( "liquid", 2 ) ) );
 	ASSERT( !AllContain( items, str::CSequence<char>( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TStrEqualsIgnoreCase() ) );
 
 	items.push_back( "Red Hat Linux" );
-	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TStrEqualsIgnoreCase() ) );
 }
 
 void CStringCompareTests::TestStringOccurenceCount( void )
@@ -536,16 +412,16 @@ void CStringCompareTests::TestStringSorting( void )
 		std::vector<const char*> ptrItems;
 		utl::Assign( ptrItems, items, func::ToCharPtr() );
 
-		ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr<pred::TCompareCase>() ) );
-		ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr<pred::TCompareNoCase>() ) );
+		ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr<func::TStrCompareCase>() ) );
+		ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr<func::TStrCompareIgnoreCase>() ) );
 	}
 
 	{
 		std::vector<const wchar_t*> wPtrItems;
 		utl::Assign( wPtrItems, wItems, func::ToCharPtr() );
 
-		ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr<pred::TCompareCase>() ) );
-		ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr<pred::TCompareNoCase>() ) );
+		ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr<func::TStrCompareCase>() ) );
+		ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr<func::TStrCompareIgnoreCase>() ) );
 	}
 }
 
@@ -660,7 +536,6 @@ void CStringCompareTests::Run( void )
 {
 	RUN_TEST( TestIgnoreCase );
 	RUN_TEST( TestStringCompare );
-	RUN_TEST( TestStringCompare2 );
 	RUN_TEST( TestStringFind );
 	RUN_TEST( TestStringFindSequence );
 	RUN_TEST( TestStringOccurenceCount );

@@ -100,7 +100,7 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 	}
 
 	if ( !m_wndStatusBar.Create( this ) ||
-		 !m_wndStatusBar.SetIndicators( ARRAY_PAIR( s_sbIndicators ) ) )
+		 !m_wndStatusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
 	{
 		TRACE( "Failed to create status bar\n" );
 		return -1;	  // fail to create

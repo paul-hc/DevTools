@@ -19,7 +19,6 @@ public:
 private:
 	void TestIgnoreCase( void );
 	void TestStringCompare( void );
-	void TestStringCompare2( void );
 	void TestStringFind( void );
 	void TestStringFindSequence( void );
 	void TestStringOccurenceCount( void );

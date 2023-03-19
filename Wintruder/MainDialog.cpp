@@ -65,7 +65,7 @@ CMainDialog::CMainDialog( void )
 	, m_autoUpdateTimer( this, TimerAutoUpdate, app::GetOptions()->m_autoUpdateTimeout * 1000 )
 	, m_refreshTimer( this, TimerResetRefreshButton, 150 )
 {
-	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_PAIR( layout::dualLayoutStyles ) );
+	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_SPAN( layout::dualLayoutStyles ) );
 	m_regSection = reg::section;
 	m_initCollapsed = true;
 	ui::LoadPopupMenu( m_trayPopupMenu, IDR_CONTEXT_MENU, app::SysTrayPopup );

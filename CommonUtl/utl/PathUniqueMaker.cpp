@@ -8,7 +8,7 @@
 #endif
 
 
-CPathUniqueMaker::CPathUniqueMaker( const TCHAR fmtNumSuffix[] /*= path::StdFormatNumSuffix()*/ )
+CPathUniqueMaker::CPathUniqueMaker( const TCHAR fmtNumSuffix[] /*= path::CDelims::s_fmtNumSuffix.c_str()*/ )
 	: m_pFmtNumSuffix( fmtNumSuffix )
 {
 	REQUIRE( !str::IsEmpty( m_pFmtNumSuffix ) );

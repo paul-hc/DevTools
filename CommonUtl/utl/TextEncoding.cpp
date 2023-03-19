@@ -135,15 +135,15 @@ namespace fs
 	{
 		// match in descending order of BOM size
 		if ( filePrefix.size() >= BomMinSize )
-			if ( BomMatches( filePrefix, ARRAY_PAIR( s_bom_UTF32_LE ) ) )
+			if ( BomMatches( filePrefix, ARRAY_SPAN( s_bom_UTF32_LE ) ) )
 				return UTF32_LE_bom;
-			else if ( BomMatches( filePrefix, ARRAY_PAIR( s_bom_UTF32_be ) ) )
+			else if ( BomMatches( filePrefix, ARRAY_SPAN( s_bom_UTF32_be ) ) )
 				return UTF32_be_bom;
-			else if ( BomMatches( filePrefix, ARRAY_PAIR( s_bom_UTF8 ) ) )
+			else if ( BomMatches( filePrefix, ARRAY_SPAN( s_bom_UTF8 ) ) )
 				return UTF8_bom;
-			else if ( BomMatches( filePrefix, ARRAY_PAIR( s_bom_UTF16_LE ) ) )
+			else if ( BomMatches( filePrefix, ARRAY_SPAN( s_bom_UTF16_LE ) ) )
 				return UTF16_LE_bom;
-			else if ( BomMatches( filePrefix, ARRAY_PAIR( s_bom_UTF16_be ) ) )
+			else if ( BomMatches( filePrefix, ARRAY_SPAN( s_bom_UTF16_be ) ) )
 				return UTF16_be_bom;
 
 		return ANSI_UTF8;

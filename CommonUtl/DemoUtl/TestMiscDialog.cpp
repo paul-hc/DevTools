@@ -34,18 +34,18 @@ CTestMiscDialog::CTestMiscDialog( CWnd* pParent )
 	, m_toolbarDisabledBlendColor( gdi::DisabledBlendColor )
 {
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
 	RegisterOwnCmds();
 
 	static const UINT s_stdButtons[] = { IdFileNew, IdFileOpen, IdFileSave, 0, IdEditCut, IdEditCopy, IdEditPaste, 0, IdFilePrint, 0, IdAppAbout };
-	m_toolbarStdEnabled.GetStrip().AddButtons( ARRAY_PAIR( s_stdButtons ) );
-	m_toolbarStdDisabled.GetStrip().AddButtons( ARRAY_PAIR( s_stdButtons ) );
+	m_toolbarStdEnabled.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarStdDisabled.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
 
-	m_toolbarDisabledGrayScale.GetStrip().AddButtons( ARRAY_PAIR( s_stdButtons ) );
-	m_toolbarDisabledGray.GetStrip().AddButtons( ARRAY_PAIR( s_stdButtons ) );
-	m_toolbarDisabledEffect.GetStrip().AddButtons( ARRAY_PAIR( s_stdButtons ) );
-	m_toolbarDisabledBlendColor.GetStrip().AddButtons( ARRAY_PAIR( s_stdButtons ) );
+	m_toolbarDisabledGrayScale.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarDisabledGray.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarDisabledEffect.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarDisabledBlendColor.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
 }
 
 CTestMiscDialog::~CTestMiscDialog()
@@ -69,7 +69,7 @@ void CTestMiscDialog::RegisterOwnCmds( void )
 		{ IdFilePrint, ID_FILE_PRINT },
 		{ IdAppAbout, ID_APP_ABOUT }
 	};
-	app::GetSharedImageStore()->RegisterAliases( ARRAY_PAIR( s_aliases ) );
+	app::GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_aliases ) );
 	registered = true;
 }
 

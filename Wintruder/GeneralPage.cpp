@@ -187,7 +187,7 @@ CGeneralPage::CGeneralPage( void )
 	, m_promptField( PF_None )
 	, m_pInfoEdit( new CInfoEditBox( this ) )
 {
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	app::GetSvc().AddObserver( this );
 
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_GENERAL_PAGE ) );

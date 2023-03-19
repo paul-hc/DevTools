@@ -12,17 +12,15 @@ namespace str
 	extern const TCHAR g_paragraph[];
 
 	template< typename CharT >
-	const CharT* StdDelimiters( void );		// " \t"
+	const CharT* StdBlanks( void );		// " \t"
 
 
-	template< typename CharT, typename ContainerT >
-	size_t Tokenize( OUT ContainerT& rTokens, const CharT* pSource, const CharT delims[] = StdDelimiters<CharT>() )
+	template< typename CharT, typename OutIteratorT >
+	void TokenizeOut( OUT OutIteratorT itOutTokens, const CharT* pSource, const CharT* pDelims )
 	{
-		ASSERT( pSource != nullptr && delims != nullptr );
-		rTokens.clear();
+		ASSERT( pSource != nullptr && pDelims != nullptr );
 
-		const CharT* pDelimsEnd = str::end( delims );
-		size_t tokenCount = 0;
+		const CharT* pDelimsEnd = str::end( pDelims );
 		bool inQuotes = false;
 		std::tstring token;
 
@@ -31,23 +29,25 @@ namespace str
 			if ( '\"' == *pChr )
 				inQuotes = !inQuotes;
 
-			if ( inQuotes || std::find( delims, pDelimsEnd, *pChr ) == pDelimsEnd )
+			if ( inQuotes || std::find( pDelims, pDelimsEnd, *pChr ) == pDelimsEnd )
 				token += *pChr;
 			else if ( !token.empty() )
 			{
-				rTokens.push_back( token );
-				++tokenCount;
+				*itOutTokens++ = token;
 				token.clear();
 			}
 		}
 
 		if ( !token.empty() )
-		{	// do the last token...
-			rTokens.push_back( token );
-			++tokenCount;
-		}
+			*itOutTokens = token;		// do the last token...
+	}
 
-		return tokenCount;
+	template< typename CharT, typename VectLikeT >
+	inline size_t Tokenize( OUT VectLikeT& rTokens, const CharT* pSource, const CharT* pDelims = StdBlanks<CharT>() )
+	{
+		rTokens.clear();
+		TokenizeOut( std::back_inserter( rTokens ), pSource, pDelims );
+		return rTokens.size();
 	}
 
 

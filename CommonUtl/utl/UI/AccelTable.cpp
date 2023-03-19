@@ -121,7 +121,7 @@ void CAccelTable::Augment( UINT accelId )
 		QueryKeys( allKeys );
 		CAccelTable( accelId ).QueryKeys( allKeys );
 
-		Create( ARRAY_PAIR_V( allKeys ) );
+		Create( ARRAY_SPAN_V( allKeys ) );
 	}
 }
 
@@ -135,7 +135,7 @@ void CAccelTable::Augment( ACCEL keys[], int count )
 		QueryKeys( allKeys );
 		allKeys.insert( allKeys.end(), &keys[ 0 ], &keys[ count ] );
 
-		Create( ARRAY_PAIR_V( allKeys ) );
+		Create( ARRAY_SPAN_V( allKeys ) );
 	}
 }
 

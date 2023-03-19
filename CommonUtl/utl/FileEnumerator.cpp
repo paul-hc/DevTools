@@ -146,7 +146,7 @@ namespace fs
 	namespace impl { UINT QueryExistingSequenceCount( const fs::CPathParts& filePathParts ); }
 
 
-	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] /*= path::StdFormatNumSuffix()*/ ) throws_( CRuntimeException )
+	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] /*= path::CDelims::s_fmtNumSuffix.c_str()*/ ) throws_( CRuntimeException )
 	{
 		ASSERT( !filePath.IsEmpty() );
 		if ( !filePath.FileExist() )
@@ -465,8 +465,9 @@ namespace fs
 				ASSERT( str::HasPrefixI( parts.m_fname.c_str(), filePathParts.m_fname.c_str() ) );
 
 				const TCHAR* pNumber = parts.m_fname.c_str() + prefixLen;		// skip past original fname to search for digits
+				const pred::IsDigit isDigit;
 
-				while ( *pNumber != _T('\0') && !str::CharTraits::IsDigit( *pNumber ) )
+				while ( *pNumber != _T('\0') && !isDigit( *pNumber ) )
 					++pNumber;
 
 				if ( *pNumber != _T('\0') )

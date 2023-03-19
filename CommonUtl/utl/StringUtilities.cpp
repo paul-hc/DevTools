@@ -21,8 +21,8 @@ namespace str
 	const TCHAR g_ellipsis[] = _T("...");
 	const TCHAR g_paragraph[] = _T("\xB6");
 
-	template<> const char* StdDelimiters<char>( void ) { return " \t"; }
-	template<> const wchar_t* StdDelimiters<wchar_t>( void ) { return L" \t"; }
+	template<> const char* StdBlanks<char>( void ) { return " \t"; }
+	template<> const wchar_t* StdBlanks<wchar_t>( void ) { return L" \t"; }
 
 	TCHAR* CopyTextToBuffer( OUT TCHAR* pDestBuffer, const TCHAR* pText, size_t bufferSize, const TCHAR suffix[] /*= g_ellipsis*/ )
 	{

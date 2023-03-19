@@ -36,7 +36,7 @@ CPasswordDialog::CPasswordDialog( CWnd* pParentWnd, const fs::CPath* pDocPath /*
 	, m_mode( EditMode )
 {
 	m_regSection = _T("PasswordDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	GetLayoutEngine().DisableResizeVertically();
 	LoadDlgIcon( IDD_PASSWORD_DIALOG );
 
@@ -58,7 +58,7 @@ void CPasswordDialog::RecreateEditCtrls( void )
 	ui::RecreateControl( &m_confirmPasswordEdit, m_confirmPasswordEdit.GetStyle() );		// just to keep identical looking fonts (since SetFont fails for ES_PASSWORD)
 
 	static const UINT s_ctrlIds[] = { IDC_CONFIRM_PASSWORD_STATIC, IDC_CONFIRM_PASSWORD_EDIT };
-	ui::ShowControls( m_hWnd, ARRAY_PAIR( s_ctrlIds ), !showPassword );
+	ui::ShowControls( m_hWnd, ARRAY_SPAN( s_ctrlIds ), !showPassword );
 }
 
 void CPasswordDialog::DoDataExchange( CDataExchange* pDX )
@@ -83,7 +83,7 @@ void CPasswordDialog::DoDataExchange( CDataExchange* pDX )
 		else
 		{
 			static const UINT s_hiddenCtrlIds[] = { IDC_CONFIRM_PASSWORD_STATIC, IDC_CONFIRM_PASSWORD_EDIT, IDC_SHOW_PASSWORD_CHECK };
-			ui::ShowControls( m_hWnd, ARRAY_PAIR( s_hiddenCtrlIds ), false );
+			ui::ShowControls( m_hWnd, ARRAY_SPAN( s_hiddenCtrlIds ), false );
 		}
 	}
 

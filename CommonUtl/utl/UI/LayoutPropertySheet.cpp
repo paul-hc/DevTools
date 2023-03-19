@@ -46,7 +46,7 @@ CLayoutPropertySheet::CLayoutPropertySheet( const std::tstring& title, CWnd* pPa
 	, m_alwaysModified( false )
 {
 	m_psh.dwFlags &= ~PSH_HASHELP;				// don't show the help button by default
-	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_PAIR( layout::s_styles ) );
+	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	m_resizable = false;						// auto: will be flipped to true if any page is resizable
 	m_initCentered = false;
 }

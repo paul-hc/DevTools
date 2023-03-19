@@ -108,24 +108,16 @@ namespace pred
 	};
 
 
-	struct ToLower : public BaseIsCharPred_Loc
-	{
-		template< typename CharT >
-		CharT operator()( CharT chr ) const { return std::tolower( chr, m_loc ); }
-	};
-
-	struct ToUpper : public BaseIsCharPred_Loc
-	{
-		template< typename CharT >
-		CharT operator()( CharT chr ) const { return std::toupper( chr, m_loc ); }
-	};
-
-
 	// locale-independent predicates
 
 	struct IsLineEnd : public BaseIsCharPred
 	{
 		bool operator()( wchar_t chr ) const { return '\r' == chr || '\n' == chr; }
+	};
+
+	struct IsSign : public BaseIsCharPred
+	{
+		bool operator()( wchar_t chr ) const { return '-' == chr || '+' == chr; }
 	};
 
 
@@ -167,6 +159,33 @@ namespace pred
 
 namespace func
 {
+	namespace C
+	{
+		struct BaseLocaleFunc		// character conversions based on classic C locale
+		{
+			BaseLocaleFunc( const std::locale& loc = std::locale::classic() ) : m_loc( loc ) {}
+		public:
+			const std::locale& m_loc;
+		};
+
+
+		struct ToLower : public BaseLocaleFunc
+		{
+			template< typename CharT >
+			CharT operator()( CharT chr ) const { return std::tolower( chr, m_loc ); }
+		};
+
+		struct ToUpper : public BaseLocaleFunc
+		{
+			template< typename CharT >
+			CharT operator()( CharT chr ) const { return std::toupper( chr, m_loc ); }
+		};
+	}
+}
+
+
+namespace func
+{
 	struct ToChar			// character translator
 	{
 		template< typename CharT >
@@ -182,6 +201,20 @@ namespace func
 		const char* operator()( const std::string& value ) const { return str::traits::GetCharPtr( value ); }
 		const wchar_t* operator()( const std::wstring& value ) const { return str::traits::GetCharPtr( value ); }
 		const TCHAR* operator()( const fs::CPath& value ) const { return str::traits::GetCharPtr( value ); }
+	};
+
+
+	// e.g. for combining func::ToLower with another character translation functor
+	//
+	template< typename BaseToCharFunc, typename AsCharFunc >
+	struct ToCharAs : public BaseToCharFunc
+	{
+		ToCharAs( AsCharFunc asChar = AsCharFunc() ) : m_asChar( asChar ) {}
+
+		template< typename CharT >
+		CharT operator()( CharT chr ) const { return m_asChar( BaseToCharFunc::operator()( chr ) ); }
+	public:
+		const AsCharFunc m_asChar;
 	};
 
 
@@ -206,6 +239,18 @@ namespace func
 	private:
 		const func::ToLower m_toLower;
 	};
+
+
+	// abstract base for functors/predicates that use character translation: provides access to the translation functor
+	//
+	template< typename ToCharValueFunc >
+	abstract class CharTranslateBase
+	{
+	protected:
+		CharTranslateBase( ToCharValueFunc toCharValue = ToCharValueFunc() ) : m_toCharValue( toCharValue ) {}
+	public:
+		const ToCharValueFunc m_toCharValue;
+	};
 }
 
 
@@ -214,7 +259,7 @@ namespace pred
 	template< typename ToCharFunc >
 	struct CharEqualBase : public std::binary_function<wchar_t, wchar_t, bool>
 	{
-		CharEqualBase( void ) : m_toChar() {}
+		CharEqualBase( ToCharFunc toChar = ToCharFunc() ) : m_toChar( toChar ) {}
 
 		bool operator()( wchar_t chLeft, wchar_t chRight ) const
 		{	// rely to implicit conversion to wchar_t to compare any combination of character types: char==char, wchar_t==wchar_t, char==wchar_t, wchar_t==char
@@ -232,6 +277,13 @@ namespace pred
 			return chLeft == chRight;
 		}
 	};
+
+
+	template< typename ToCharValueFunc >
+	inline CharEqualBase<ToCharValueFunc> MakeCharEquals( const func::CharTranslateBase<ToCharValueFunc>& translateFunc )
+	{	// very useful: borrows the character translation functor to generate a char-equals predicate based on a str-equals functor that inherits from CharTranslateBase
+		return CharEqualBase<ToCharValueFunc>( translateFunc.m_toCharValue );
+	}
 
 
 
@@ -254,6 +306,10 @@ namespace pred
 			return func::toupper( chLeft ) == func::toupper( chRight );
 		}
 	};
+
+
+	typedef CharEqual<str::Case> TCharEqualCase;
+	typedef CharEqual<str::IgnoreCase> TCharEqualIgnoreCase;
 }
 
 
@@ -262,9 +318,13 @@ namespace func
 	// comparator of heterogenous character strings and characters, covering both compare() and compareN() use cases
 	//
 	template< typename ToCharValueFunc >
-	struct StrCompareBase
+	struct StrCompareBase : public CharTranslateBase<ToCharValueFunc>
 	{
-		StrCompareBase( void ) : m_toCharValue() {}		// prevent warning C4269: 'strCompare': 'const' automatic data initialized with compiler generated default constructor produces unreliable results
+		typedef CharTranslateBase<ToCharValueFunc> TBaseClass;
+		using TBaseClass::m_toCharValue;
+
+		StrCompareBase( ToCharValueFunc toCharValue = ToCharValueFunc() ) : TBaseClass( toCharValue ) {}
+			// default ctor to prevent warning C4269: 'strCompare': 'const' automatic data initialized with compiler generated default constructor produces unreliable results
 
 		template< typename LeftCharT, typename RightCharT >
 		pred::CompareResult operator()( const LeftCharT* pLeft, const RightCharT* pRight, size_t count = std::tstring::npos ) const
@@ -296,8 +356,6 @@ namespace func
 
 			return std::pair<pred::CompareResult, size_t>( pred::ToCompareResult( diff ), matchLen );
 		}
-	public:
-		const ToCharValueFunc m_toCharValue;
 	};
 
 
@@ -316,6 +374,9 @@ namespace func
 		StrCompare( void ) : StrCompareBase< func::ToCharValue<caseType> >() {}
 	};
 #endif
+
+	typedef StrCompare<str::Case> TStrCompareCase;
+	typedef StrCompare<str::IgnoreCase> TStrCompareIgnoreCase;
 }
 
 
@@ -326,6 +387,12 @@ namespace pred
 	template< typename ToCharValueFunc >
 	struct StrEqualsBase
 	{
+		template< typename LeftCharT, typename RightCharT >
+		bool operator()( LeftCharT leftChr, RightCharT rightChr ) const
+		{
+			return m_compare.m_toCharValue( leftChr ) == m_compare.m_toCharValue( rightChr );
+		}
+
 		template< typename LeftCharT, typename RightCharT >
 		bool operator()( const LeftCharT* pLeft, const RightCharT* pRight, size_t count = std::tstring::npos ) const		// equals/equalsN
 		{
@@ -347,6 +414,17 @@ namespace pred
 		StrEquals( void ) : StrEqualsBase< func::ToCharValue<caseType> >() {}
 	};
 #endif
+
+
+	typedef StrEquals<str::Case> TStrEqualsCase;
+	typedef StrEquals<str::IgnoreCase> TStrEqualsIgnoreCase;
+
+	// stringy comparators for string-like objects
+	typedef CompareAdapter<func::TStrCompareCase, func::ToCharPtr> TStringyCompareCase;
+	typedef CompareAdapter<func::TStrCompareIgnoreCase, func::ToCharPtr> TStringyCompareNoCase;
+
+	typedef LessValue<TStringyCompareCase> TLess_StringyCase;
+	typedef LessValue<TStringyCompareNoCase> TLess_StringyNoCase;
 }
 
 
@@ -395,43 +473,16 @@ namespace str
 	// comparison with character translation (low-level)
 
 	template< typename CharT, typename ToCharValueFunc >
-	std::pair<pred::CompareResult, size_t> _BaseCompare( const CharT* pLeft, const CharT* pRight, ToCharValueFunc toCharValueFunc, size_t count = std::tstring::npos )
-	{
-		ASSERT_PTR( pLeft );
-		ASSERT_PTR( pRight );
-
-		int diff = 0;
-		size_t matchLen = 0;
-
-		if ( count != 0 )
-			if ( pLeft != pRight )
-			{
-				while ( count-- != 0 &&
-						0 == ( diff = toCharValueFunc( *pLeft ) - toCharValueFunc( *pRight ) ) &&
-						*pLeft != 0 && *pRight != 0 )
-				{
-					++pLeft;
-					++pRight;
-					++matchLen;
-				}
-			}
-			else
-				matchLen = str::GetLength( pLeft );
-
-		return std::pair<pred::CompareResult, size_t>( pred::ToCompareResult( diff ), matchLen );
-	}
-
-	template< typename CharT, typename ToCharValueFunc >
 	inline pred::CompareResult _CompareN( const CharT* pLeft, const CharT* pRight, ToCharValueFunc toCharValueFunc, size_t count = std::tstring::npos )
 	{
-		return _BaseCompare( pLeft, pRight, toCharValueFunc, count ).first;
+		return func::MakeStrCompareBase( toCharValueFunc )( pLeft, pRight, count );
 	}
 
 
 	// comparison interface (high-level)
 
 	template< typename CharT >
-	inline pred::CompareResult CompareIN( const CharT* pLeft, const CharT* pRight, size_t count ) { return str::_CompareN( pLeft, pRight, &::toupper, count ); }
+	inline pred::CompareResult CompareIN( const CharT* pLeft, const CharT* pRight, size_t count ) { return func::StrCompare<str::IgnoreCase>()( pLeft, pRight, count ); }
 
 
 	template< typename CharT >
@@ -575,42 +626,6 @@ namespace str
 }
 
 
-namespace pred
-{
-	// string compare policies
-
-	template< typename CharCasePolicy >
-	struct CompareCharPtr		// rename to avoid collision with CompareStringW/A (<WinNls.h>)
-	{
-		template< typename CharT >
-		CompareResult operator()( CharT left, CharT right ) const
-		{
-			return Compare_Scalar( m_casePolicy( left ), m_casePolicy( right ) );
-		}
-
-		template< typename CharT >
-		CompareResult operator()( const CharT* pLeft, const CharT* pRight, size_t count = std::string::npos ) const
-		{
-			return str::_CompareN( pLeft, pRight, m_casePolicy, count );
-		}
-	private:
-		CharCasePolicy m_casePolicy;
-	};
-
-
-	// character-ptr comparators
-	typedef CompareCharPtr<func::ToChar> TCompareCase;
-	typedef CompareCharPtr<func::ToUpper> TCompareNoCase;
-
-	// stringy comparators for string-like objects
-	typedef CompareAdapter<TCompareCase, func::ToCharPtr> TStringyCompareCase;
-	typedef CompareAdapter<TCompareNoCase, func::ToCharPtr> TStringyCompareNoCase;
-
-	typedef LessValue<TStringyCompareCase> TLess_StringyCase;
-	typedef LessValue<TStringyCompareNoCase> TLess_StringyNoCase;
-}
-
-
 namespace str
 {
 	template< typename CharT >
@@ -750,7 +765,7 @@ namespace str
 		ToEquivFunc m_toEquivFunc;			// for case-insensitive matching (with specialization for paths)
 	};
 
-	typedef EvalMatch<func::ToChar, func::ToUpper> TGetMatch;
+	typedef EvalMatch<func::ToChar, func::ToLower> TGetMatch;
 }
 
 
@@ -764,14 +779,14 @@ namespace str
 		return Find<str::Case>( pText, seq.m_pSeq, offset, seq.m_length );
 	}
 
-	template< typename CharT, typename Compare >
-	size_t FindSequence( const CharT* pText, const CSequence<CharT>& seq, Compare compareStr, size_t offset = 0 )				// e.g. pred::TCompareNoCase
+	template< typename CharT, typename CharBinPredT >
+	size_t FindSequence( const CharT* pText, const CSequence<CharT>& seq, CharBinPredT charEquals, size_t offset = 0 )		// e.g. pred::TCharEqualCase
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 		ASSERT( !seq.IsEmpty() );
 
 		const CharT* pEnd = str::end( pText );
-		const CharT* pFound = std::search( pText + offset, pEnd, seq.Begin(), seq.End(), pred::IsEqual<Compare>( compareStr ) );
+		const CharT* pFound = std::search( pText + offset, pEnd, seq.Begin(), seq.End(), charEquals );
 
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
@@ -779,8 +794,8 @@ namespace str
 	template< typename CharT >
 	inline bool ContainsSequence( const CharT* pText, const CSequence<CharT>& seq ) { return FindSequence( pText, seq ) != std::tstring::npos; }
 
-	template< typename CharT, typename Compare >
-	inline bool ContainsSequence( const CharT* pText, const CSequence<CharT>& seq, Compare compareStr ) { return FindSequence( pText, seq, compareStr ) != std::tstring::npos; }
+	template< typename CharT, typename CharBinPredT >
+	inline bool ContainsSequence( const CharT* pText, const CSequence<CharT>& seq, CharBinPredT charEquals ) { return FindSequence( pText, seq, charEquals ) != std::tstring::npos; }
 
 
 	template< typename CharT, typename ContainerT >
@@ -793,11 +808,11 @@ namespace str
 		return !items.empty();
 	}
 
-	template< typename CharT, typename ContainerT, typename Compare >
-	bool AllContain( const ContainerT& items, const str::CSequence<CharT>& seq, Compare compareStr )		// e.g. pred::TCompareNoCase
+	template< typename CharT, typename ContainerT, typename CharBinPredT >
+	bool AllContain( const ContainerT& items, const str::CSequence<CharT>& seq, CharBinPredT charEquals )		// e.g. pred::TCharEqualCase
 	{
 		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
-			if ( std::tstring::npos == FindSequence( itItem->c_str(), seq, compareStr ) )
+			if ( std::tstring::npos == FindSequence( itItem->c_str(), seq, charEquals ) )
 				return false;			// not a match for this item
 
 		return !items.empty();
@@ -820,11 +835,11 @@ namespace str
 
 namespace str
 {
-	template< typename CharT, typename CompareFunc >
-	size_t GetCommonLength( const CharT* pLeft, const CharT* pRight, CompareFunc compareStr /*= pred::TCompareCase()*/ )
+	template< typename CharT, typename CharBinPredT >
+	size_t GetCommonLength( const CharT* pLeft, const CharT* pRight, CharBinPredT charEquals )		// e.g. pred::TCharEqualCase
 	{
 		size_t len = 0;
-		while ( *pLeft != 0 && pred::Equal == compareStr( *pLeft++, *pRight++ ) )
+		while ( *pLeft != '\0' && charEquals( *pLeft++, *pRight++ ) )
 			++len;
 
 		return len;

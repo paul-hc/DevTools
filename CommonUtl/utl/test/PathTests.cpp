@@ -388,6 +388,7 @@ void CPathTests::TestPathSort( void )
 		paths.push_back( fs::CPath( _T("") ) );
 		paths.push_back( fs::CPath( _T("C:\\dir\\X\\file.txt") ) );
 		paths.push_back( fs::CPath( _T("C:\\dir/file.txt") ) );
+		paths.push_back( fs::CPath( _T("C:\\dir/file.TXT") ) );
 		paths.push_back( fs::CPath( _T("\\") ) );
 		paths.push_back( fs::CPath( _T("C:\\dir\\Image.jpg") ) );
 		paths.push_back( fs::CPath( _T("C:\\dir\\file.txt") ) );
@@ -398,9 +399,10 @@ void CPathTests::TestPathSort( void )
 
 		std::vector<fs::CPath>::const_iterator itPath = paths.begin();
 		ASSERT_EQUAL( _T(""), *itPath++ );
+		ASSERT_EQUAL( _T("\\"), *itPath++ );
 		ASSERT_EQUAL( _T("A:"), *itPath++ );
 		ASSERT_EQUAL( _T("C:"), *itPath++ );
-		ASSERT_EQUAL( _T("\\"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir/file.TXT"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir\\file.txt"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir\\Image.jpg"), *itPath++ );

@@ -33,10 +33,11 @@ namespace io
 	fs::CPath GetFilePath( HANDLE hFile )
 	{
 		fs::CPath filePath;
-		TCHAR pathBuffer[ MAX_PATH * 2 ];
+		std::vector<TCHAR> pathBuffer( ::GetFinalPathNameByHandle( hFile, nullptr, 0, FILE_NAME_OPENED ) + 1 );		// allocate buffer
 
-		if ( ::GetFinalPathNameByHandle( hFile, pathBuffer, COUNT_OF( pathBuffer ), FILE_NAME_OPENED ) != 0 )
-			filePath.Set( path::SkipHugePrefix( pathBuffer ) );
+		if ( ::GetFinalPathNameByHandle( hFile, &pathBuffer.front(), static_cast<DWORD>( pathBuffer.size() ), FILE_NAME_OPENED ) != 0 )
+			filePath.Set( &pathBuffer.front() );
+
 		return filePath;
 	}
 

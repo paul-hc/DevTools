@@ -174,7 +174,7 @@ CPickDataset::CPickDataset( std::vector< std::tstring >* pDestFnames )
 	if ( m_destFnames.size() > 1 )			// multiple files?
 	{
 		std::tstring commonPrefix = ExtractLongestCommonPrefix();
-		std::tstring commonSubstring = str::FindLongestCommonSubstring( m_destFnames, pred::TCompareNoCase() );
+		std::tstring commonSubstring = str::FindLongestCommonSubstring( m_destFnames, func::TStrCompareIgnoreCase() );
 
 		str::Trim( commonPrefix );			// remove trailing spaces
 		str::Trim( commonSubstring );

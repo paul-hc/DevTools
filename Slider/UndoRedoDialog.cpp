@@ -24,7 +24,7 @@ CUndoRedoDialog::CUndoRedoDialog( auto_drop::COpStack& rFromStack, auto_drop::CO
 	, m_isUndoOp( isUndoOp )
 {
 	m_regSection = _T("UndoRedoDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 }
 
 CUndoRedoDialog::~CUndoRedoDialog()

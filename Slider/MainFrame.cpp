@@ -317,7 +317,7 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 		return -1;	  // fail to create
 	}
 
-	if ( !m_statusBar.Create( this ) || !m_statusBar.SetIndicators( ARRAY_PAIR( s_sbIndicators ) ) )
+	if ( !m_statusBar.Create( this ) || !m_statusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
 	{
 		TRACE( "Failed to create status bar\n" );
 		return -1;	  // fail to create

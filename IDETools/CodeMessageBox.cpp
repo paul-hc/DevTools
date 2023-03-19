@@ -36,7 +36,7 @@ CCodeMessageBox::CCodeMessageBox( const std::tstring& message, const std::tstrin
 {
 	m_initCentered = true;
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
 	m_codeText = code::Untabify( m_codeText );
 }

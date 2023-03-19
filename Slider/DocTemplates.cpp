@@ -297,13 +297,13 @@ namespace app
 	std::tstring CAlbumFilterStore::MakeAlbumFilters( void ) const
 	{
 		const UINT positions[] = { SlideFilter, CatalogStgFilter };
-		return MakeFilters( ARRAY_PAIR( positions ) );
+		return MakeFilters( ARRAY_SPAN( positions ) );
 	}
 
 	std::tstring CAlbumFilterStore::MakeCatalogStgFilters( void ) const
 	{
 		const UINT positions[] = { CatalogStgFilter };
-		return MakeFilters( ARRAY_PAIR( positions ) );
+		return MakeFilters( ARRAY_SPAN( positions ) );
 	}
 
 

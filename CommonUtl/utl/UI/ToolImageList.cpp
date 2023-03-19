@@ -133,7 +133,7 @@ bool CToolImageList::LoadButtonImages( ui::IImageStore* pSrcImageStore /*= ui::G
 	REQUIRE( HasButtons() );
 
 	m_pImageList.reset( new CImageList() );
-	int imageCount = pSrcImageStore->BuildImageList( m_pImageList.get(), ARRAY_PAIR_V( m_buttonIds ), GetImageSize() );
+	int imageCount = pSrcImageStore->BuildImageList( m_pImageList.get(), ARRAY_SPAN_V( m_buttonIds ), GetImageSize() );
 
 	return imageCount == GetImageCount();		// all buttons images found?
 }

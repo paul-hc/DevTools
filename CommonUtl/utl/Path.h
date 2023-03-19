@@ -10,13 +10,34 @@
 
 namespace path
 {
-	extern const TCHAR g_complexPathSep;			// '>' character that separates the storage file path from the stream/storage embedded sub-path
+	struct CDelims
+	{
+	public:
+		static const std::tstring s_dirDelims;
+		static const std::tstring s_hugePrefix;				// huge prefix syntax: path prefixed with "\\?\"
+		static const std::tstring s_wildcards;
+		static const std::tstring s_multiSpecDelims;
+		static const std::tstring s_fmtNumSuffix;			// suffix "_[%d]"
+
+		static const TCHAR s_complexPathSep = '>';			// '>' character that separates the storage file path from the stream/storage embedded sub-path
+	};
+
+
+	// huge prefix syntax: path prefixed with "\\?\"
+	inline bool HasHugePrefix( const TCHAR* pPath ) { return str::HasPrefix( pPath, STRING_SPAN( CDelims::s_hugePrefix ) ); }
+	bool AutoHugePrefix( IN OUT std::tstring& rPath );		// return true if modified
+
+	// skips the huge prefix, if any
+	const TCHAR* GetStart( const TCHAR* pPath );
+
+	template< typename IteratorT >
+	inline IteratorT GetStart( IteratorT itFilePath, IteratorT itEnd ) { return itFilePath + ( itFilePath != itEnd && HasHugePrefix( &*itFilePath ) ? CDelims::s_hugePrefix.length() : 0 ); }
 }
 
 
 namespace func
 {
-	struct ToWinPathChar			// translate slashes to Windows '\\'
+	struct ToWinPathChar				// translate slashes to Windows '\\'
 	{
 		TCHAR operator()( TCHAR ch ) const { return '/' == ch ? '\\' : ch; }
 	};
@@ -28,9 +49,9 @@ namespace func
 
 	struct ToEquivalentPathChar			// lower-case letters or Windows '\\'
 	{
-		TCHAR operator()( TCHAR ch ) const { return ( '/' == ch || path::g_complexPathSep == ch ) ? '\\' : m_toLower( ch ); }
+		TCHAR operator()( TCHAR ch ) const { return ( '/' == ch || path::CDelims::s_complexPathSep == ch ) ? '\\' : m_toLower( ch ); }
 	public:
-		pred::ToLower m_toLower;
+		func::ToLower m_toLower;
 	};
 
 
@@ -49,12 +70,12 @@ namespace pred
 
 namespace path
 {
-	inline bool Equivalent( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return pred::TEquivalentPath()( pLeftPath, pRightPath ); }
-	inline bool Equals( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return str::Equals<str::IgnoreCase>( pLeftPath, pRightPath ); }
+	inline bool Equivalent( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return pred::TEquivalentPath()( GetStart( pLeftPath ), GetStart( pRightPath ) ); }
+	inline bool Equals( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return str::Equals<str::IgnoreCase>( GetStart( pLeftPath ), GetStart( pRightPath ) ); }
 
 	inline pred::CompareResult CompareEquivalent( const TCHAR* pLeftPath, const TCHAR* pRightPath, size_t count = std::tstring::npos )
 	{
-		return func::TCompareEquivalentPath()( pLeftPath, pRightPath, count );
+		return func::TCompareEquivalentPath()( GetStart( pLeftPath ), GetStart( pRightPath ), count );
 	}
 
 	pred::CompareResult CompareIntuitive( const TCHAR* pLeft, const TCHAR* pRight );
@@ -70,27 +91,21 @@ namespace path
 
 	inline bool IsSlash( TCHAR ch ) { return '\\' == ch || '/' == ch; }
 
-	const TCHAR* DirDelims( void );
-	const TCHAR* Wildcards( void );
-	const TCHAR* MultiSpecDelims( void );
-
-	const TCHAR* StdFormatNumSuffix( void );		// "_[%d]"
-
 	size_t GetHashValuePtr( const TCHAR* pPath, size_t count = utl::npos );
 	inline size_t GetHashValue( const std::tstring& filePath ) { return GetHashValuePtr( filePath.c_str(), filePath.length() ); }
 
 
 	// path breaks and segment matching
-	inline bool IsBreakChar( TCHAR ch ) { return IsSlash( ch ) || g_complexPathSep == ch || '\0' == ch; }
+	inline bool IsBreakChar( TCHAR ch ) { return IsSlash( ch ) || CDelims::s_complexPathSep == ch || '\0' == ch; }
 
 	const TCHAR* FindBreak( const TCHAR* pPath );
 	const TCHAR* SkipBreak( const TCHAR* pPathBreak );
 	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, OUT size_t* pOutMatchLength = nullptr );
 
 
-	bool MatchWildcard( const TCHAR* pPath, const TCHAR* pWildSpec, const TCHAR* pMultiSpecDelims = MultiSpecDelims() );
-	bool IsMultipleWildcard( const TCHAR* pWildSpec, const TCHAR* pMultiSpecDelims = MultiSpecDelims() );
-	bool ContainsWildcards( const TCHAR* pWildSpec, const TCHAR* pWildcards = Wildcards() );
+	bool MatchWildcard( const TCHAR* pPath, const TCHAR* pWildSpec, const std::tstring& multiSpecDelims = CDelims::s_multiSpecDelims );
+	bool IsMultipleWildcard( const TCHAR* pWildSpec, const std::tstring& multiSpecDelims = CDelims::s_multiSpecDelims );
+	bool ContainsWildcards( const TCHAR* pWildSpec, const std::tstring& wildcards = CDelims::s_wildcards );
 
 	enum SpecMatch { NoMatch, Match_Any, Match_Prefix, Match_Spec };
 
@@ -118,17 +133,10 @@ namespace path
 	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return path::Equivalent( FindExt( pPath ), pExt ); }		// pExt: ".txt"
 
 
-	// huge prefix syntax: path prefixed with "\\?\"
-	const std::tstring& GetHugePrefix( void );
-	bool HasHugePrefix( const TCHAR* pPath );			// uses path syntax with "\\?\" prefix?
-	const TCHAR* SkipHugePrefix( const TCHAR* pPath );
-	bool SetHugePrefix( IN OUT std::tstring& rPath, bool useHugePrefixSyntax = true );		// return true if modified
-
-
 	// complex path
-	inline bool IsComplex( const TCHAR* pPath ) { return pPath != nullptr && str::Contains( pPath, g_complexPathSep ); }
+	inline bool IsComplex( const TCHAR* pPath ) { return pPath != nullptr && str::Contains( pPath, CDelims::s_complexPathSep ); }
 	bool IsWellFormed( const TCHAR* pFilePath );
-	size_t FindComplexSepPos( const TCHAR* pPath );
+	inline size_t FindComplexSepPos( const TCHAR* pPath ) { return str::Find<str::Case>( pPath, CDelims::s_complexPathSep ); }
 	std::tstring ExtractPhysical( const std::tstring& filePath );	// "C:\Images\fruit.stg" <- "C:\Images\fruit.stg>apple.jpg";  "C:\Images\orange.png" <- "C:\Images\orange.png"
 	const TCHAR* GetEmbedded( const TCHAR* pPath );					// "Normal\apple.jpg" <- "C:\Images\fruit.stg>Normal\apple.jpg";  "" <- "C:\Images\orange.png"
 	const TCHAR* GetSubPath( const TCHAR* pPath );					// IsComplex() ? GetEmbedded() : pPath
@@ -226,10 +234,14 @@ namespace fs
 		CPath( const CPath* pFilePath ) : m_filePath( safe_ptr( pFilePath )->Get() ) { Canonicalize(); }		// canonic conversion ctor
 
 		template< typename ToCharFunc >
-		CPath( const std::tstring& filePath, ToCharFunc toCharFunc )
+		CPath( const std::tstring& filePath, ToCharFunc toCharFunc ) { Set( filePath ); Convert( toCharFunc ); }
+
+		template< typename ToCharFunc >
+		CPath& Convert( ToCharFunc toCharFunc )
 		{
-			std::transform( filePath.begin(), filePath.end(), std::back_inserter( m_filePath ), toCharFunc );
-			str::Trim( m_filePath );
+			std::tstring::iterator itStart = path::GetStart( m_filePath.begin(), m_filePath.end() );
+			std::transform( itStart, m_filePath.end(), itStart, toCharFunc );	// write to the same location
+			return *this;
 		}
 
 		bool IsEmpty( void ) const { return m_filePath.empty(); }
@@ -245,6 +257,7 @@ namespace fs
 		void Set( const std::tstring& filePath );
 
 		const TCHAR* GetPtr( void ) const { return m_filePath.c_str(); }
+		const TCHAR* GetStart( void )const { return path::GetStart( m_filePath.c_str() ); }		// skips the huge prefix, if any
 		std::string GetUtf8( void ) const { return str::ToUtf8( GetPtr() ); }
 
 		CPath MakeUnixPath( void ) const { return CPath( m_filePath, func::ToUnixPathChar() ); }
@@ -279,8 +292,7 @@ namespace fs
 		void Normalize( void ) { path::Normalize( m_filePath ); }
 		void Canonicalize( void ) { path::Canonicalize( m_filePath ); }
 
-		bool HasHugePrefix( void ) const { return path::HasHugePrefix( m_filePath.c_str() ); }
-		bool SetHugePrefix( bool useHugePrefixSyntax = true ) { return path::SetHugePrefix( m_filePath, useHugePrefixSyntax ); }
+		bool IsHuge( void ) const { return path::HasHugePrefix( m_filePath.c_str() ); }
 
 		CPath operator/( const CPath& right ) const { return CPath( path::Combine( GetPtr(), right.GetPtr() ) ); }
 		CPath operator/( const TCHAR* pRight ) const { return CPath( path::Combine( GetPtr(), pRight ) ); }

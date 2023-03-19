@@ -93,7 +93,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 {
 	// base init
 	m_regSection = _T("AlbumSettingsDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	m_initCentered = false;
 	LoadDlgIcon( ID_EDIT_ALBUM );
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_ALBUM_SETTINGS_DIALOG ) );

@@ -89,7 +89,7 @@ CFileTreeDialog::CFileTreeDialog( const fs::CPath& rootPath, CWnd* pParent )
 	, m_accelTreeFocus( IDR_FILETREEFOCUS_ACCEL )
 {
 	m_regSection = _T("FileTreeDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::s_styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	LoadDlgIcon( IDI_INCBROWSER_ICON );
 	m_accelPool.AddAccelTable( new CAccelTable( IDR_FILETREE_ACCEL ) );
 

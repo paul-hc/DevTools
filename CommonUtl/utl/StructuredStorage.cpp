@@ -126,7 +126,7 @@ namespace fs
 		CScopedErrorHandling scopedIgnore( this, utl::CheckMode );
 
 		std::vector<std::tstring> subDirs;
-		str::Tokenize( subDirs, pDirSubPath, path::DirDelims() );
+		str::Tokenize( subDirs, pDirSubPath, path::CDelims::s_dirDelims.c_str() );
 
 		for ( std::vector<std::tstring>::const_iterator itSubDir = subDirs.begin(); itSubDir != subDirs.end(); ++itSubDir )
 		{
@@ -150,7 +150,7 @@ namespace fs
 		CScopedErrorHandling scopedIgnore( this, utl::CheckMode );
 
 		std::vector<std::tstring> subDirs;
-		str::Tokenize( subDirs, pDirSubPath, path::DirDelims() );
+		str::Tokenize( subDirs, pDirSubPath, path::CDelims::s_dirDelims.c_str() );
 
 		DWORD openExistingMode = ::MakeFlag( mode, STGM_CREATE, false );
 		bool succeeded = true;

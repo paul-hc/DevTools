@@ -638,35 +638,35 @@ namespace style_ex
 // CStyleRepository implementation
 
 CStyleRepository::CStyleRepository( void )
-	: m_generalTopLevelStore( _T(""), ARRAY_PAIR( style::general::s_topLevelFlags ), &GetWindowStyle, &SetWindowStyle )
-	, m_generalChildStore( _T(""), ARRAY_PAIR( style::general::s_childFlags ), &GetWindowStyle, &SetWindowStyle )
+	: m_generalTopLevelStore( _T(""), ARRAY_SPAN( style::general::s_topLevelFlags ), &GetWindowStyle, &SetWindowStyle )
+	, m_generalChildStore( _T(""), ARRAY_SPAN( style::general::s_childFlags ), &GetWindowStyle, &SetWindowStyle )
 {
 	using namespace style;
 
-	AddFlagStore( _T("#32768"), ARRAY_PAIR( specific::s_popupMenuFlags ) );
-	AddFlagStore( _T("#32770"), ARRAY_PAIR( specific::s_dialogFlags ) );
-	AddFlagStore( _T("Static"), ARRAY_PAIR( specific::s_staticFlags ) );
-	AddFlagStore( _T("Edit"), ARRAY_PAIR( specific::s_editFlags ) );
-	AddFlagStore( _T("RichEdit|RichEdit20A|RichEdit20W"), ARRAY_PAIR( specific::s_richEditFlags ) );
-	AddFlagStore( _T("Button"), ARRAY_PAIR( specific::s_buttonFlags ) );
-	AddFlagStore( _T("ComboBox|ComboBoxEx32"), ARRAY_PAIR( specific::s_comboBoxFlags ) );
-	AddFlagStore( _T("ListBox|ComboLBox"), ARRAY_PAIR( specific::s_listBoxFlags ) );
-	AddFlagStore( _T("ScrollBar"), ARRAY_PAIR( specific::s_scrollBarFlags ) );
-	AddFlagStore( _T("msctls_UpDown32|msctls_UpDown"), ARRAY_PAIR( specific::s_spinButtonFlags ) );
-	AddFlagStore( _T("msctls_TrackBar32|msctls_TrackBar"), ARRAY_PAIR( specific::s_sliderFlags ) );
-	AddFlagStore( _T("msctls_HotKey32|msctls_HotKey"), ARRAY_PAIR( specific::s_hotKeyFlags ) );
-	AddFlagStore( _T("SysHeader32|SysHeader"), ARRAY_PAIR( specific::s_headerCtrlFlags ) );
-	AddFlagStore( _T("SysListView32|SysListView"), ARRAY_PAIR( specific::s_listCtrlFlags ) );
-	AddFlagStore( _T("SysTreeView32|SysTreeView"), ARRAY_PAIR( specific::s_treeCtrlFlags ) );
-	AddFlagStore( _T("SysTabControl32|SysTabControl"), ARRAY_PAIR( specific::s_tabCtrlFlags ) );
-	AddFlagStore( _T("SysMonthCal32"), ARRAY_PAIR( specific::s_monthCalendarFlags ) );
-	AddFlagStore( _T("SysDateTimePick32"), ARRAY_PAIR( specific::s_dateTimeCtrlFlags ) );
-	AddFlagStore( _T("msctls_progress32|msctls_progress"), ARRAY_PAIR( specific::s_progressBarFlags ) );
-	AddFlagStore( _T("SysAnimate32"), ARRAY_PAIR( specific::s_animateCtrlFlags ) );
-	AddFlagStore( _T("tooltips_class32|tooltips_class"), ARRAY_PAIR( specific::s_tooltipCtrlFlags ) );
-	AddFlagStore( _T("ToolbarWindow32|ToolbarWindow"), ARRAY_PAIR( specific::s_toolBarFlags ) );
-	AddFlagStore( _T("ReBarWindow32|ReBarWindow"), ARRAY_PAIR( specific::s_reBarFlags ) );
-	AddFlagStore( _T("msctls_statusbar32|msctls_statusbar"), ARRAY_PAIR( specific::s_statusBarFlags ) );
+	AddFlagStore( _T("#32768"), ARRAY_SPAN( specific::s_popupMenuFlags ) );
+	AddFlagStore( _T("#32770"), ARRAY_SPAN( specific::s_dialogFlags ) );
+	AddFlagStore( _T("Static"), ARRAY_SPAN( specific::s_staticFlags ) );
+	AddFlagStore( _T("Edit"), ARRAY_SPAN( specific::s_editFlags ) );
+	AddFlagStore( _T("RichEdit|RichEdit20A|RichEdit20W"), ARRAY_SPAN( specific::s_richEditFlags ) );
+	AddFlagStore( _T("Button"), ARRAY_SPAN( specific::s_buttonFlags ) );
+	AddFlagStore( _T("ComboBox|ComboBoxEx32"), ARRAY_SPAN( specific::s_comboBoxFlags ) );
+	AddFlagStore( _T("ListBox|ComboLBox"), ARRAY_SPAN( specific::s_listBoxFlags ) );
+	AddFlagStore( _T("ScrollBar"), ARRAY_SPAN( specific::s_scrollBarFlags ) );
+	AddFlagStore( _T("msctls_UpDown32|msctls_UpDown"), ARRAY_SPAN( specific::s_spinButtonFlags ) );
+	AddFlagStore( _T("msctls_TrackBar32|msctls_TrackBar"), ARRAY_SPAN( specific::s_sliderFlags ) );
+	AddFlagStore( _T("msctls_HotKey32|msctls_HotKey"), ARRAY_SPAN( specific::s_hotKeyFlags ) );
+	AddFlagStore( _T("SysHeader32|SysHeader"), ARRAY_SPAN( specific::s_headerCtrlFlags ) );
+	AddFlagStore( _T("SysListView32|SysListView"), ARRAY_SPAN( specific::s_listCtrlFlags ) );
+	AddFlagStore( _T("SysTreeView32|SysTreeView"), ARRAY_SPAN( specific::s_treeCtrlFlags ) );
+	AddFlagStore( _T("SysTabControl32|SysTabControl"), ARRAY_SPAN( specific::s_tabCtrlFlags ) );
+	AddFlagStore( _T("SysMonthCal32"), ARRAY_SPAN( specific::s_monthCalendarFlags ) );
+	AddFlagStore( _T("SysDateTimePick32"), ARRAY_SPAN( specific::s_dateTimeCtrlFlags ) );
+	AddFlagStore( _T("msctls_progress32|msctls_progress"), ARRAY_SPAN( specific::s_progressBarFlags ) );
+	AddFlagStore( _T("SysAnimate32"), ARRAY_SPAN( specific::s_animateCtrlFlags ) );
+	AddFlagStore( _T("tooltips_class32|tooltips_class"), ARRAY_SPAN( specific::s_tooltipCtrlFlags ) );
+	AddFlagStore( _T("ToolbarWindow32|ToolbarWindow"), ARRAY_SPAN( specific::s_toolBarFlags ) );
+	AddFlagStore( _T("ReBarWindow32|ReBarWindow"), ARRAY_SPAN( specific::s_reBarFlags ) );
+	AddFlagStore( _T("msctls_statusbar32|msctls_statusbar"), ARRAY_SPAN( specific::s_statusBarFlags ) );
 }
 
 CStyleRepository::~CStyleRepository()
@@ -724,12 +724,12 @@ DWORD CStyleRepository::SetWindowStyle( HWND hDest, DWORD style )
 
 CStyleExRepository::CStyleExRepository( void )
 {
-	m_stores.push_back( new CFlagStore( _T(""), ARRAY_PAIR( style_ex::s_generalExFlags ), &GetWindowStyleEx, &SetWindowStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("SysListView|SysListView32"), ARRAY_PAIR( style_ex::s_listCtrlExFlags ), &GetListViewStyleEx, &SetListViewStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("SysTreeView|SysTreeView32"), ARRAY_PAIR( style_ex::s_treeCtrlExFlags ), &GetTreeViewStyleEx, &SetTreeViewStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("SysTabControl|SysTabControl32"), ARRAY_PAIR( style_ex::s_tabCtrlExFlags ), &GetTabCtrlStyleEx, &SetTabCtrlStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("ComboBoxEx32"), ARRAY_PAIR( style_ex::s_comboBoxExFlags ), &GetComboExStyleEx, &SetComboExStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("ToolbarWindow|ToolbarWindow32"), ARRAY_PAIR( style_ex::s_toolbarExFlags ), &GetToolbarStyleEx, &SetToolbarStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T(""), ARRAY_SPAN( style_ex::s_generalExFlags ), &GetWindowStyleEx, &SetWindowStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("SysListView|SysListView32"), ARRAY_SPAN( style_ex::s_listCtrlExFlags ), &GetListViewStyleEx, &SetListViewStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("SysTreeView|SysTreeView32"), ARRAY_SPAN( style_ex::s_treeCtrlExFlags ), &GetTreeViewStyleEx, &SetTreeViewStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("SysTabControl|SysTabControl32"), ARRAY_SPAN( style_ex::s_tabCtrlExFlags ), &GetTabCtrlStyleEx, &SetTabCtrlStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("ComboBoxEx32"), ARRAY_SPAN( style_ex::s_comboBoxExFlags ), &GetComboExStyleEx, &SetComboExStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("ToolbarWindow|ToolbarWindow32"), ARRAY_SPAN( style_ex::s_toolbarExFlags ), &GetToolbarStyleEx, &SetToolbarStyleEx ) );
 }
 
 CStyleExRepository::~CStyleExRepository()

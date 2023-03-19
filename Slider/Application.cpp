@@ -420,7 +420,7 @@ void CApplication::InitGlobals( void )
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_MAINFRAME );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_APP_TOOL_STRIP );
-	GetSharedImageStore()->RegisterAliases( ARRAY_PAIR( s_cmdAliases ) );
+	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
 }
 
 bool CApplication::OpenQueuedAlbum( void )

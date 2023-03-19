@@ -63,14 +63,14 @@ namespace code
 	std::string CEscaper::FormatHexCh( char chr ) const
 	{
 		char buffer[ 16 ];
-		sprintf_s( ARRAY_PAIR( buffer ), "\\x%02X", static_cast<unsigned char>( chr ) );
+		sprintf_s( ARRAY_SPAN( buffer ), "\\x%02X", static_cast<unsigned char>( chr ) );
 		return buffer;
 	}
 
 	std::wstring CEscaper::FormatHexCh( wchar_t chr ) const
 	{
 		wchar_t buffer[ 16 ];
-		swprintf_s( ARRAY_PAIR( buffer ), L"\\x%04X", static_cast<unsigned short>( chr ) );
+		swprintf_s( ARRAY_SPAN( buffer ), L"\\x%04X", static_cast<unsigned short>( chr ) );
 		return buffer;
 	}
 }

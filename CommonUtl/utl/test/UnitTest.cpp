@@ -57,8 +57,11 @@ namespace ut
 			if ( succeeded )
 				return true;
 
+		#ifdef IS_CPP_11
 			// note: avoid double tracing => _ASSERT_EXPR() will do the tracing
-			//TRACE( _T("%s\n"), pMsg );
+		#else
+			TRACE( _T("%s\n"), msg.c_str() );
+		#endif
 
 			std::cerr << pFilePath << '(' << lineNumber << ") : " << msg << std::endl;
 			CAppTools::AddMainResultError();		// increment error count for console unit tests

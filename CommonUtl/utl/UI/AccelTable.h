@@ -18,7 +18,7 @@ public:
 	void Load( UINT accelId );
 	bool LoadOnce( UINT accelId );								// convenient for static data member initialization
 	void Create( ACCEL keys[], int count );
-	void Create( std::vector< ACCEL >& keys ) { Create( ARRAY_PAIR_V( keys ) ); }
+	void Create( std::vector< ACCEL >& keys ) { Create( ARRAY_SPAN_V( keys ) ); }
 
 	void Augment( UINT accelId );
 	void Augment( ACCEL keys[], int count );

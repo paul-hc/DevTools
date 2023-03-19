@@ -88,7 +88,7 @@ bool CSourceFileParser::ParseIncludeStatement( CIncludeTag* pIncludeTag, const s
 {
 	ASSERT_PTR( pIncludeTag );
 
-	str::CTokenIterator< pred::TCompareCase > it( line );
+	str::CTokenIterator<> it( line );
 	if ( it.SkipWhiteSpace().AtEnd() )
 		return false;
 

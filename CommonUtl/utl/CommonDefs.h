@@ -41,8 +41,9 @@
 #define END_OF( array ) ( array + COUNT_OF( array ) )
 
 // pass the pair of "array, arrayCount" in functions
-#define ARRAY_PAIR( array ) (array), COUNT_OF( (array) )
-#define ARRAY_PAIR_V( vect ) &(vect).front(), static_cast<unsigned int>( (vect).size() )
+#define ARRAY_SPAN( array ) (array), COUNT_OF( (array) )
+#define ARRAY_SPAN_V( vect ) &(vect).front(), static_cast<unsigned int>( (vect).size() )
+#define STRING_SPAN( strText ) (strText).c_str(), (strText).length()
 
 
 // debug support

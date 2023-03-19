@@ -81,7 +81,7 @@ CFileLocatorDialog::CFileLocatorDialog( CWnd* pParent )
 
 	// init base
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	LoadDlgIcon( IDD_FILE_LOCATOR_DIALOG );
 	m_accelPool.AddAccelTable( new CAccelTable( IDR_LOCATE_FILE_ACCEL ) );
 

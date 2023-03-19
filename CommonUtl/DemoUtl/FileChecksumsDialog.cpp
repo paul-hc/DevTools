@@ -176,7 +176,7 @@ CFileChecksumsDialog::CFileChecksumsDialog( CWnd* pParent )
 	, m_searchPathCombo( ui::MixedPath )
 {
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
 	m_searchPathCombo.SetEnsurePathExist();
 	//SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );

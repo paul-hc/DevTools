@@ -140,7 +140,7 @@ CLcsTests& CLcsTests::Instance( void )
 
 void CLcsTests::TestSuffixTreeGutsAnsi( void )
 {
-	lcs::CSuffixTree<char, pred::TCompareCase> suffixTree( "of the people, by the people, for the people," );
+	lcs::CSuffixTree<char, func::TStrCompareCase> suffixTree( "of the people, by the people, for the people," );
 	std::vector<const char*>::const_iterator itSuffix = suffixTree.m_suffixes.begin();
 
 	ASSERT_EQUAL( _T(" by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
@@ -192,7 +192,7 @@ void CLcsTests::TestSuffixTreeGutsAnsi( void )
 
 void CLcsTests::TestSuffixTreeGutsWide( void )
 {
-	lcs::CSuffixTree<TCHAR, pred::TCompareCase> suffixTree( _T("of the people, by the people, for the people,") );
+	lcs::CSuffixTree<TCHAR, func::TStrCompareCase> suffixTree( _T("of the people, by the people, for the people,") );
 	std::vector<const TCHAR*>::const_iterator itSuffix = suffixTree.m_suffixes.begin();
 
 	ASSERT_EQUAL_STR( _T(" by the people, for the people,"), *itSuffix++ );
@@ -244,16 +244,16 @@ void CLcsTests::TestSuffixTreeGutsWide( void )
 
 void CLcsTests::TestFindLongestDuplicatedString( void )
 {
-	ASSERT_EQUAL( "", str::FindLongestDuplicatedString( std::string(), pred::TCompareCase() ) );
-	ASSERT_EQUAL( L"", str::FindLongestDuplicatedString( std::wstring(), pred::TCompareCase() ) );
+	ASSERT_EQUAL( "", str::FindLongestDuplicatedString( std::string(), func::TStrCompareCase() ) );
+	ASSERT_EQUAL( L"", str::FindLongestDuplicatedString( std::wstring(), func::TStrCompareCase() ) );
 
-	ASSERT_EQUAL( " the people, ", str::FindLongestDuplicatedString( std::string( "of the people, by the people, for the people," ), pred::TCompareCase() ) );
-	ASSERT_EQUAL( "he people, ", str::FindLongestDuplicatedString( std::string( "of the people, by The people, for tHE people," ), pred::TCompareCase() ) );
-	ASSERT_EQUAL( " THE people, ", str::FindLongestDuplicatedString( std::string( "of THE people, by The people, for tHE people," ), pred::TCompareNoCase() ) );		// first match wins
+	ASSERT_EQUAL( " the people, ", str::FindLongestDuplicatedString( std::string( "of the people, by the people, for the people," ), func::TStrCompareCase() ) );
+	ASSERT_EQUAL( "he people, ", str::FindLongestDuplicatedString( std::string( "of the people, by The people, for tHE people," ), func::TStrCompareCase() ) );
+	ASSERT_EQUAL( " THE people, ", str::FindLongestDuplicatedString( std::string( "of THE people, by The people, for tHE people," ), func::TStrCompareIgnoreCase() ) );		// first match wins
 
 	ASSERT_EQUAL( L"abcd", str::FindLongestDuplicatedString( std::wstring( L"abcdabcdbcd" ) ) );
-	ASSERT_EQUAL( L"ABCD", str::FindLongestDuplicatedString( std::wstring( L"ABCDabcdbcd" ), pred::TCompareNoCase() ) );		// first match wins
-	ASSERT_EQUAL( L"abcd", str::FindLongestDuplicatedString( std::wstring( L"abcdABCDbcd" ), pred::TCompareNoCase() ) );		// first match wins
+	ASSERT_EQUAL( L"ABCD", str::FindLongestDuplicatedString( std::wstring( L"ABCDabcdbcd" ), func::TStrCompareIgnoreCase() ) );		// first match wins
+	ASSERT_EQUAL( L"abcd", str::FindLongestDuplicatedString( std::wstring( L"abcdABCDbcd" ), func::TStrCompareIgnoreCase() ) );		// first match wins
 }
 
 void CLcsTests::TestFindLongestCommonSubstring( void )
@@ -273,21 +273,21 @@ void CLcsTests::TestFindLongestCommonSubstring( void )
 		ASSERT_EQUAL( "", str::FindLongestCommonSubstring( ut::Split( "bcd|abcdabcd|" ) ) );
 		ASSERT_EQUAL( "", str::FindLongestCommonSubstring( ut::Split( "bcd|abcdabcd|xy" ) ) );
 		ASSERT_EQUAL( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|ycd" ) ) );
-		ASSERT( str::Equals<str::IgnoreCase>( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|yCD" ), pred::TCompareNoCase() ).c_str() ) );
+		ASSERT( str::Equals<str::IgnoreCase>( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|yCD" ), func::TStrCompareIgnoreCase() ).c_str() ) );
 
-		ASSERT_EQUAL_IGNORECASE( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|yCD" ), pred::TCompareNoCase() ) );
+		ASSERT_EQUAL_IGNORECASE( "cd", str::FindLongestCommonSubstring( ut::Split( "xcd|bcd|abcdabcd|cd|yCD" ), func::TStrCompareIgnoreCase() ) );
 	}
 
 	{
 		std::vector<std::wstring> items;
-		ASSERT_EQUAL( L"", str::FindLongestCommonSubstring( items, pred::TCompareCase() ) );
+		ASSERT_EQUAL( L"", str::FindLongestCommonSubstring( items, func::TStrCompareCase() ) );
 
 		items.push_back( L"of the people from Italy" );
-		ASSERT_EQUAL( L"of the people from Italy", str::FindLongestCommonSubstring( items, pred::TCompareCase() ) );
+		ASSERT_EQUAL( L"of the people from Italy", str::FindLongestCommonSubstring( items, func::TStrCompareCase() ) );
 
 		items.push_back( L"by the people of Italy" );
 		items.push_back( L"for the people in Italy" );
-		ASSERT_EQUAL( L" the people ", str::FindLongestCommonSubstring( items, pred::TCompareCase() ) );
+		ASSERT_EQUAL( L" the people ", str::FindLongestCommonSubstring( items, func::TStrCompareCase() ) );
 	}
 }
 

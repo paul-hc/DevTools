@@ -87,7 +87,7 @@ BOOL CApplication::InitInstance( void )
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images
-	GetSharedImageStore()->RegisterAliases( ARRAY_PAIR( s_cmdAliases ) );
+	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
 
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	CLayoutEngine::m_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;

@@ -42,7 +42,7 @@ namespace d2d
 
 		CComPtr<ID2D1GradientStopCollection> pGradientStopCollection;
 
-		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_PAIR( gradientStops ), D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &pGradientStopCollection ) ) )
+		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_SPAN( gradientStops ), D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &pGradientStopCollection ) ) )
 			return pGradientStopCollection;
 
 		return nullptr;
@@ -65,7 +65,7 @@ namespace d2d
 
 		CComPtr<ID2D1GradientStopCollection> pGradientStopCollection;
 
-		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_PAIR_V( gradientStops ), D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &pGradientStopCollection ) ) )
+		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_SPAN_V( gradientStops ), D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &pGradientStopCollection ) ) )
 			return pGradientStopCollection;
 
 		return nullptr;
@@ -78,7 +78,7 @@ namespace d2d
 
 		UINT count = pSrcGradientStops->GetGradientStopCount();
 		std::vector< D2D1_GRADIENT_STOP > gradientStops( count );
-		pSrcGradientStops->GetGradientStops( ARRAY_PAIR_V( gradientStops ) );
+		pSrcGradientStops->GetGradientStops( ARRAY_SPAN_V( gradientStops ) );
 		ReverseGradientStops( gradientStops.begin(), gradientStops.end() );			// reverse colour order
 
 		D2D1_GAMMA gamma = pSrcGradientStops->GetColorInterpolationGamma();
@@ -86,7 +86,7 @@ namespace d2d
 
 		CComPtr<ID2D1GradientStopCollection> pGradientStopCollection;
 
-		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_PAIR_V( gradientStops ), gamma, extendMode, &pGradientStopCollection ) ) )
+		if ( HR_OK( pRenderTarget->CreateGradientStopCollection( ARRAY_SPAN_V( gradientStops ), gamma, extendMode, &pGradientStopCollection ) ) )
 			return pGradientStopCollection;
 
 		return nullptr;
@@ -175,7 +175,7 @@ namespace d2d
 	CComPtr<ID2D1PathGeometry> CreateTriangleGeometry( const POINT& point1, const POINT& point2, const POINT& point3 )
 	{
 		const POINT points[] = { point1, point2, point3 };
-		return CreatePolygonGeometry( ARRAY_PAIR( points ) );
+		return CreatePolygonGeometry( ARRAY_SPAN( points ) );
 	}
 
 
@@ -203,7 +203,7 @@ namespace d2d
 	CComPtr<ID2D1PathGeometry> CreateCombinedGeometries( ID2D1Geometry* pGeometry1, ID2D1Geometry* pGeometry2, D2D1_COMBINE_MODE combineMode )
 	{
 		ID2D1Geometry* geometries[] = { pGeometry1, pGeometry2 };
-		return CreateCombinedGeometries( ARRAY_PAIR( geometries ), combineMode );
+		return CreateCombinedGeometries( ARRAY_SPAN( geometries ), combineMode );
 	}
 
 
@@ -470,7 +470,7 @@ namespace d2d
 		}
 
 		if ( nullptr == pGradientStops )
-			pGradientStops = CreateGradientStops( pRenderTarget, ARRAY_PAIR_V( m_colors ) );
+			pGradientStops = CreateGradientStops( pRenderTarget, ARRAY_SPAN_V( m_colors ) );
 
 		if ( pGradientStops != nullptr )
 			m_pRenderFrame->Create( pRenderTarget, pGradientStops );
@@ -513,10 +513,10 @@ namespace d2d
 			std::vector< D2D1_COLOR_F > mirroredColors = srcColors;
 			mirroredColors.insert( mirroredColors.end(), srcColors.rbegin() + 1, srcColors.rend() );
 
-			return CreateGradientStops( pRenderTarget, ARRAY_PAIR_V( mirroredColors ) );
+			return CreateGradientStops( pRenderTarget, ARRAY_SPAN_V( mirroredColors ) );
 		}
 
-		return CreateGradientStops( pRenderTarget, ARRAY_PAIR_V( srcColors ) );
+		return CreateGradientStops( pRenderTarget, ARRAY_SPAN_V( srcColors ) );
 	}
 
 	bool COutlineFrame::IsValid( void ) const

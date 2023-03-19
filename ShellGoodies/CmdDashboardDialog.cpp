@@ -59,7 +59,7 @@ CCmdDashboardDialog::CCmdDashboardDialog( CFileModel* pFileModel, svc::StackType
 {
 	m_initCentered = false;
 	m_regSection = reg::section;
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	LoadDlgIcon( svc::Undo == m_stackType ? ID_EDIT_UNDO : ID_EDIT_REDO );
 
 	m_commandsList.SetSection( m_regSection + _T("\\List") );
@@ -204,7 +204,7 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 	m_cmdDetailsEdit.SetText( detailsText );
 
 	static const UINT ctrlIds[] = { IDC_CMD_HEADER_STATIC, IDC_CMD_HEADER_EDIT, IDC_CMD_DETAILS_STATIC, IDC_CMD_DETAILS_EDIT };
-	ui::EnableControls( *this, ARRAY_PAIR( ctrlIds ), pSelectedCmd != NULL );
+	ui::EnableControls( *this, ARRAY_SPAN( ctrlIds ), pSelectedCmd != NULL );
 
 	std::vector< int > selIndexes;
 	m_commandsList.GetSelection( selIndexes );

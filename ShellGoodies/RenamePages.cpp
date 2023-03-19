@@ -34,7 +34,7 @@ CBaseRenameListPage::CBaseRenameListPage( CRenameFilesDialog* pParentDlg, UINT l
 	: CBaseRenamePage( IDD_REN_LIST_PAGE, pParentDlg )
 	, m_fileListCtrl( listLayoutId )
 {
-	RegisterCtrlLayout( ARRAY_PAIR( layout::stylesList ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::stylesList ) );
 
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
@@ -322,7 +322,7 @@ CRenameEditPage::CRenameEditPage( CRenameFilesDialog* pParentDlg )
 	, m_syncScrolling( SB_BOTH )
 	, m_lastCaretLinePos( -1 )
 {
-	RegisterCtrlLayout( ARRAY_PAIR( layout::stylesEdit ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::stylesEdit ) );
 //	SetUseLazyUpdateData( true );			// need data transfer on OnSetActive()/OnKillActive()
 
 	m_srcStatic.m_useText = m_destStatic.m_useText = true;

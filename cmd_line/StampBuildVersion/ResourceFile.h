@@ -13,7 +13,7 @@
 
 namespace rc
 {
-	typedef str::CTokenIterator< pred::TCompareCase, char > TTokenIterator;
+	typedef str::CTokenIterator<pred::TStrEqualsCase, char> TTokenIterator;
 
 	class CVersionInfoParser;
 }

@@ -132,7 +132,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_mismatchDest_DiffEffect( ui::Bold, s_mismatchDestTextColor )
 	, m_matchDest_DiffEffect( ui::Regular, GetSysColor( COLOR_GRAYTEXT ) )
 {
-	m_ctrlAccel.Create( ARRAY_PAIR( s_keys ) );
+	m_ctrlAccel.Create( ARRAY_SPAN( s_keys ) );
 
 	m_pPopupMenu[ Nowhere ] = &GetStdPopupMenu( Nowhere );
 	m_pPopupMenu[ OnSelection ] = &GetStdPopupMenu( OnSelection );

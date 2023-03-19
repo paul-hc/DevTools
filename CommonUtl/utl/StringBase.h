@@ -718,7 +718,7 @@ namespace str
 	}
 
 	template< typename CharT, typename VectLikeT >
-	void Split( OUT VectLikeT& rItems, const CharT* pSource, const CharT* pSep, bool clear = true )
+	inline void Split( OUT VectLikeT& rItems, const CharT* pSource, const CharT* pSep, bool clear = true )
 	{	// for containers with push_back() - VectLikeT is vector-like: vector, list, deque, stack
 		if ( clear )
 			rItems.clear();
@@ -727,7 +727,7 @@ namespace str
 	}
 
 	template< typename CharT, typename SetLikeT >
-	void SplitSet( OUT SetLikeT& rItems, const CharT* pSource, const CharT* pSep, bool clear = true )
+	inline void SplitSet( OUT SetLikeT& rItems, const CharT* pSource, const CharT* pSep, bool clear = true )
 	{	// SetLikeT is set-like: set, unordedred_set, list, etc
 		if ( clear )
 			rItems.clear();

@@ -67,7 +67,7 @@ BOOL CApplication::InitInstance( void )
 	m_sharedAccel.Load( IDR_MAIN_SHARED_ACCEL );
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
-	GetSharedImageStore()->RegisterAliases( ARRAY_PAIR( cmdAliases ) );
+	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( cmdAliases ) );
 
 	CBaseMainDialog::ParseCommandLine( __argc, __targv );
 

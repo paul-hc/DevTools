@@ -27,7 +27,7 @@ CInputBoxDialog::CInputBoxDialog( const TCHAR* pTitle /*= nullptr*/, const TCHAR
 	, m_inputText( pInputText )
 {
 	m_regSection = _T("InputBoxDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 }
 
 CInputBoxDialog::~CInputBoxDialog()

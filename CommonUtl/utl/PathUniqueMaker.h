@@ -12,7 +12,7 @@
 class CPathUniqueMaker
 {
 public:
-	CPathUniqueMaker( const TCHAR fmtNumSuffix[] = path::StdFormatNumSuffix() );
+	CPathUniqueMaker( const TCHAR fmtNumSuffix[] = path::CDelims::s_fmtNumSuffix.c_str() );
 
 	bool IsUniquePath( const fs::CPath& filePath ) const { ASSERT( !filePath.IsEmpty() ); return m_uniquePathsIndex.find( filePath ) == m_uniquePathsIndex.end(); }
 

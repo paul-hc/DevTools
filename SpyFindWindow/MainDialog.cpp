@@ -25,7 +25,7 @@ CMainDialog::CMainDialog( void )
 	: CBaseMainDialog( IDD_MAIN_DIALOG )
 {
 	m_regSection = _T("MainDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	GetLayoutEngine().MaxClientSize().cx = 0;
 
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_MAIN_DIALOG ) );

@@ -105,7 +105,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
 
 	m_regSection = reg::section_mainDialog;
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
 	m_filesSheet.m_regSection = CFileModel::section_filesSheet;
 	m_filesSheet.AddPage( new CRenameSimpleListPage( this ) );

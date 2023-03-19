@@ -141,7 +141,7 @@ CAboutBox::CAboutBox( CWnd* pParent )
 	, m_pBuildInfoList( new CReportListControl() )
 {
 	m_regSection = _T("utl\\About");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	GetLayoutEngine().MaxClientSize() = CSize( 600, 700 );
 
 	std::vector< std::tstring > columnSpecs;

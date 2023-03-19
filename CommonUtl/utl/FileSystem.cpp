@@ -177,7 +177,7 @@ namespace fs
 		// skip the root path and create successive subdirectories
 		for ( size_t pos = path::GetRootPath( dirPath.c_str() ).length(); pos != dirPath.length(); )
 		{
-			size_t posNext = dirPath.find_first_of( path::DirDelims(), pos );
+			size_t posNext = dirPath.find_first_of( path::CDelims::s_dirDelims, pos );
 			std::tstring subDir = dirPath.substr( 0, posNext );
 			if ( !fs::CreateDir( subDir.c_str() ) )
 				return false;

@@ -8,18 +8,17 @@
 
 namespace str
 {
-	template< typename CompareT = pred::TCompareCase, typename CharType = TCHAR >
+	template< typename EqualsNPredT = pred::TStrEqualsCase, typename CharType = TCHAR >
 	struct CTokenIterator
 	{
 		typedef std::basic_string<CharType> TString;
 
-		explicit CTokenIterator( const TString& text, size_t pos = 0, CompareT compare = CompareT() )
+		explicit CTokenIterator( const TString& text, size_t pos = 0, EqualsNPredT equalsN = EqualsNPredT() )
 			: m_text( text )
 			, m_pCurrent( m_text.c_str() )
 			, m_pos( 0 )
 			, m_length( m_text.length() )
-			, m_compare( compare )
-			, m_equals( compare )
+			, m_equalsN( equalsN )
 		{
 			SetWhiteSpace( str::StdWhitespace<CharType>() );
 			SetPos( pos );
@@ -141,7 +140,7 @@ namespace str
 			if ( !AtEnd() )
 			{
 				size_t tokenLen = str::GetLength( pToken );
-				typename TString::const_iterator itFound = std::search( m_text.begin() + m_pos, m_text.end(), pToken, pToken + tokenLen, m_equals );
+				typename TString::const_iterator itFound = std::search( m_text.begin() + m_pos, m_text.end(), pToken, pToken + tokenLen, m_equalsN );
 				if ( itFound != m_text.end() )
 				{
 					size_t newPos = std::distance( m_text.begin(), itFound );
@@ -159,7 +158,7 @@ namespace str
 
 		bool Matches( CharType token )
 		{
-			if ( !m_equals( m_text[ m_pos ], token ) )
+			if ( !m_equalsN( &m_text[ m_pos ], &token, 1 ) )
 				return false;
 			SetPos( m_pos + 1 );
 			return true;
@@ -169,7 +168,7 @@ namespace str
 		{
 			ASSERT_PTR( pToken );
 			size_t tokenLen = str::GetLength( pToken );
-			if ( 0 == tokenLen || m_compare( m_text.c_str() + m_pos, pToken, tokenLen ) != pred::Equal )
+			if ( 0 == tokenLen || !m_equalsN( m_text.c_str() + m_pos, pToken, tokenLen ) )
 				return false;
 
 			SetPos( m_pos + tokenLen );
@@ -179,7 +178,7 @@ namespace str
 		bool Matches( const TString& token )
 		{
 			size_t tokenLen = token.length();
-			if ( 0 == tokenLen || m_compare( m_text.c_str() + m_pos, token.c_str(), tokenLen ) != pred::Equal )
+			if ( 0 == tokenLen || !m_equalsN( m_text.c_str() + m_pos, token.c_str(), tokenLen ) )
 				return false;
 
 			SetPos( m_pos + tokenLen );
@@ -209,7 +208,7 @@ namespace str
 		bool MatchesWord( const TString& token, WordBreakPred isWordBreak )
 		{
 			size_t tokenLen = token.length();
-			if ( 0 == tokenLen || m_compare( m_text.c_str() + m_pos, token.c_str(), tokenLen ) != pred::Equal )
+			if ( 0 == tokenLen || !m_equalsN( m_text.c_str() + m_pos, token.c_str(), tokenLen ) )
 				return false;
 			if ( !isWordBreak( m_text.c_str()[ m_pos + tokenLen ] ) )		// check for token-end word breaks, etc
 				return false;
@@ -236,8 +235,7 @@ namespace str
 
 		static Range<size_t> s_posRange;		// default parameter for extract methods
 	public:
-		CompareT m_compare;
-		pred::IsEqual<CompareT> m_equals;
+		EqualsNPredT m_equalsN;
 	};
 
 

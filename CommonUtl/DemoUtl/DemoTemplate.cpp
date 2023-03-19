@@ -70,10 +70,10 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	, m_delimStatic( CThemeItem::m_null, CThemeItem( L"HEADER", vt::HP_HEADEROVERFLOW, vt::HOFS_NORMAL ) )
 {
 	ASSERT_PTR( m_pLayoutEngine );
-	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_PAIR( layout::templateStyles ) );
+	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_SPAN( layout::templateStyles ) );
 
 	const UINT buttonIds[] = { IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON };
-	m_seqCounterLabel.GetMateToolbar()->GetStrip().StoreButtonIds( ARRAY_PAIR( buttonIds ) );
+	m_seqCounterLabel.GetMateToolbar()->GetStrip().StoreButtonIds( ARRAY_SPAN( buttonIds ) );
 
 	m_pickFormatCheckedStatic.m_useText = true;
 	m_changeCaseButton.SetSelValue( ExtLowerCase );
@@ -344,7 +344,7 @@ CListPage::CListPage( void )
 	: CLayoutPropertyPage( IDD_LIST_PAGE )
 	, m_fileListView( IDC_FILE_RENAME_LIST, LVS_EX_GRIDLINES | lv::DefaultStyleEx )
 {
-	RegisterCtrlLayout( ARRAY_PAIR( layout::listPageStyles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::listPageStyles ) );
 }
 
 void CListPage::DoDataExchange( CDataExchange* pDX )
@@ -462,7 +462,7 @@ namespace layout
 CEditPage::CEditPage( void )
 	: CLayoutPropertyPage( IDD_EDIT_PAGE )
 {
-	RegisterCtrlLayout( ARRAY_PAIR( layout::editPageStyles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::editPageStyles ) );
 }
 
 void CEditPage::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
@@ -554,7 +554,7 @@ namespace layout
 CDetailsPage::CDetailsPage( void )
 	: CLayoutPropertyPage( IDD_DETAILS_PAGE )
 {
-	RegisterCtrlLayout( ARRAY_PAIR( layout::detailsPageStyles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::detailsPageStyles ) );
 
 	m_detailSheet.AddPage( new CListPage() );
 	m_detailSheet.AddPage( new CEditPage() );

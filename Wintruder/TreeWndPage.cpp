@@ -222,7 +222,7 @@ CTreeWndPage::CTreeWndPage( void )
 	: CLayoutPropertyPage( IDD_TREE_WND_PAGE )
 	, m_destroying( false )
 {
-	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	app::GetSvc().AddObserver( this );
 
 	m_treeCtrl.SetTextEffectCallback( this );

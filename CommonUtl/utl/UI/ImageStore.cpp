@@ -175,7 +175,7 @@ void CImageStore::RegisterToolbarImages( UINT toolBarId, COLORREF transpColor /*
 void CImageStore::RegisterButtonImages( const CToolImageList& toolImageList )
 {
 	REQUIRE( toolImageList.IsValid() );
-	RegisterButtonImages( *toolImageList.GetImageList(), ARRAY_PAIR_V( toolImageList.GetButtonIds() ), &toolImageList.GetImageSize() );
+	RegisterButtonImages( *toolImageList.GetImageList(), ARRAY_SPAN_V( toolImageList.GetButtonIds() ), &toolImageList.GetImageSize() );
 }
 
 void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize /*= nullptr*/ )

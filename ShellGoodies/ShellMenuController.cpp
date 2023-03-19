@@ -383,10 +383,10 @@ bool CShellMenuController::HandlePasteDeepCmd( MenuCommand menuCmd, CWnd* pParen
 
 const CShellMenuController::CMenuCmdInfo* CShellMenuController::FindCmd( MenuCommand cmd )
 {
-	if ( const CMenuCmdInfo* pFoundCmd = FindCmd( cmd, ARRAY_PAIR( s_rootCommands ) ) )
+	if ( const CMenuCmdInfo* pFoundCmd = FindCmd( cmd, ARRAY_SPAN( s_rootCommands ) ) )
 		return pFoundCmd;
 
-	return FindCmd( cmd, ARRAY_PAIR( s_moreCommands ) );
+	return FindCmd( cmd, ARRAY_SPAN( s_moreCommands ) );
 }
 
 const CShellMenuController::CMenuCmdInfo* CShellMenuController::FindCmd( MenuCommand cmd, const CMenuCmdInfo cmds[], size_t count )
@@ -419,7 +419,7 @@ const CFlagTags& CShellMenuController::GetTags_ContextMenuFlags( void )
 		{ FLAG_TAG( CMF_SYNCCASCADEMENU ) },
 		{ FLAG_TAG( CMF_DONOTPICKDEFAULT ) }
 	};
-	static const CFlagTags s_tags( ARRAY_PAIR( flagDefs ) );
+	static const CFlagTags s_tags( ARRAY_SPAN( flagDefs ) );
 	return s_tags;
 }
 
