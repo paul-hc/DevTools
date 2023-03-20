@@ -97,8 +97,9 @@ public:
 	// custom notifications: handled the standard way with ON_CONTROL( NotifyCode, id, memberFxn )
 	enum NotifCode { CN_EDITDETAILS = 0x0a00, CN_DETAILSCHANGED = 0x0b00 };
 
-	ui::CItemContent& GetContent( void ) { return m_content; }
+	ui::CItemContent& RefContent( void ) { return m_content; }
 
+	virtual const ui::CItemContent& GetItemContent( void ) const override { return m_content; }
 	virtual void SetContentType( ui::ContentType type );
 	void SetFileFilter( const TCHAR* pFileFilter );
 	void SetEnsurePathExist( void ) { SetFlag( m_content.m_itemsFlags, ui::CItemContent::EnsurePathExist ); }

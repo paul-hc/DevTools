@@ -21,6 +21,9 @@ public:
 
 	static CMenu& GetStdPathListPopupMenu( ListPopup popupType );
 
+	COLORREF GetMissingFileColor( void ) const { return m_missingFileColor; }
+	void SetMissingFileColor( COLORREF missingFileColor ) { m_missingFileColor = missingFileColor; }
+
 	// selection
 	template< typename PathType >
 	bool QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const;
@@ -29,7 +32,9 @@ public:
 	virtual CMenu* GetPopupMenu( ListPopup popupType );
 protected:
 	virtual bool TrackContextMenu( ListPopup popupType, const CPoint& screenPos );
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;	// ui::ITextEffectCallback interface
 private:
+	COLORREF m_missingFileColor;
 	// generated stuff
 public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );

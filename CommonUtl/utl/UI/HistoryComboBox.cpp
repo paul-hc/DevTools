@@ -188,6 +188,8 @@ BOOL CHistoryComboBox::PreTranslateMessage( MSG* pMsg )
 
 BEGIN_MESSAGE_MAP( CHistoryComboBox, TBaseClass )
 	ON_WM_CONTEXTMENU()
+	ON_CONTROL_REFLECT_EX( CBN_EDITCHANGE, OnChanged_Reflect )
+	ON_CONTROL_REFLECT_EX( CBN_SELCHANGE, OnChanged_Reflect )
 	ON_COMMAND( ID_ADD_ITEM, OnStoreEditItem )
 	ON_UPDATE_COMMAND_UI( ID_ADD_ITEM, OnUpdateSelectedListItem )
 	ON_COMMAND( ID_REMOVE_ITEM, OnDeleteListItem )
@@ -224,6 +226,17 @@ void CHistoryComboBox::OnContextMenu( CWnd* pWnd, CPoint point )
 	}
 
 	__super::OnContextMenu( pWnd, point );
+}
+
+BOOL CHistoryComboBox::OnChanged_Reflect( void )
+{
+	if ( GetItemContent().IsPathContent() )		// virtual call (for sub-classes that manage their own ui::CItemContent object)
+	{
+		fs::CPath filePath( ui::GetComboSelText( *this ) );
+
+		SetFrameColor( filePath.FileExist() ? CLR_NONE : color::ScarletRed );
+	}
+	return FALSE;					// continue routing
 }
 
 void CHistoryComboBox::OnUpdateSelectedListItem( CCmdUI* pCmdUI )

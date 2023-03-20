@@ -9,7 +9,7 @@ template< typename BaseCtrl >
 class CFrameHostCtrl : public BaseCtrl
 {
 public:
-	// required for C++ 14+ compilation
+	// required for C++ 11 compilation
 	using BaseCtrl::m_hWnd;
 	using BaseCtrl::GetParent;
 	using BaseCtrl::Invalidate;

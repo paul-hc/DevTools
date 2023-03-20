@@ -4,6 +4,7 @@
 #include "PathItemBase.h"
 #include "MenuUtilities.h"
 #include "StringUtilities.h"
+#include "StdColors.h"
 #include "WndUtils.h"
 #include "resource.h"
 #include "utl/TextClipboard.h"
@@ -17,6 +18,7 @@
 
 CPathItemListCtrl::CPathItemListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: CReportListControl( columnLayoutId, listStyleEx )
+	, m_missingFileColor( color::ScarletRed )
 {
 	SetCustomFileGlyphDraw();
 	SetPopupMenu( Nowhere, &GetStdPathListPopupMenu( Nowhere ) );
@@ -67,6 +69,22 @@ bool CPathItemListCtrl::TrackContextMenu( ListPopup popupType, const CPoint& scr
 	return false;
 }
 
+void CPathItemListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
+{
+	ASSERT( this == pCtrl );
+
+	if ( 0 == subItem && m_missingFileColor != CLR_NONE )
+		if ( const utl::ISubject* pObject = AsPtr<utl::ISubject>( rowKey ) )
+		{
+			const fs::CPath filePath( pObject->GetCode() );
+
+			if ( !filePath.FileExist() )
+				rTextEffect.m_textColor = m_missingFileColor;		// highlight in red text the missing file/directory
+		}
+
+	__super::CombineTextEffectAt( rTextEffect, rowKey, subItem, pCtrl );
+}
+
 BOOL CPathItemListCtrl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	if ( HandleCmdMsg( id, code, pExtra, pHandlerInfo ) )
@@ -100,7 +118,7 @@ BOOL CPathItemListCtrl::OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 		int itemIndex = HitTest( pNmItemActivate->ptAction, &flags );
 		if ( itemIndex != -1 && !HasFlag( flags, LVHT_ONITEMSTATEICON ) )				// on item but not checkbox
 			if ( utl::ISubject* pCaretObject = GetSubjectAt( pNmItemActivate->iItem ) )
-				return ShellInvokeDefaultVerb( std::vector< fs::CPath >( 1, pCaretObject->GetCode() ) );
+				return ShellInvokeDefaultVerb( std::vector<fs::CPath>( 1, pCaretObject->GetCode() ) );
 	}
 
 	return FALSE;			// raise the notification to parent

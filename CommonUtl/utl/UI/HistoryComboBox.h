@@ -41,7 +41,7 @@ public:
 
 	virtual const ui::CItemContent& GetItemContent( void ) const { return m_itemContent; }
 	void SetItemContent( const ui::CItemContent& itemContent ) { m_itemContent = itemContent; }
-	ui::CItemContent& RefItemContent( void ) { return m_itemContent; }
+	ui::CItemContent& RefItemContent( void ) { return const_cast<ui::CItemContent&>( GetItemContent() ); }
 
 	CTextEditor* GetEdit( void ) const { return m_pEdit.get(); }
 	void SetEdit( CTextEditor* pEdit );
@@ -55,7 +55,7 @@ protected:
 	const TCHAR* m_pItemSep;
 	str::CaseType m_caseType;
 private:
-	ui::CItemContent m_itemContent;			// self-encapsulated
+	ui::CItemContent m_itemContent;			// self-encapsulated, since some sub-classes may have their own content data-member
 	CAccelTable m_accel, m_dropDownAccel;
 	std::auto_ptr<CTextEditor> m_pEdit;
 	std::auto_ptr<CComboDropList> m_pDropList;
@@ -68,6 +68,7 @@ public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
+	afx_msg BOOL OnChanged_Reflect( void );
 	afx_msg void OnUpdateSelectedListItem( CCmdUI* pCmdUI );
 	afx_msg void OnDeleteListItem( void );
 	afx_msg void OnStoreEditItem( void );
