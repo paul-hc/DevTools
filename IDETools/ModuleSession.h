@@ -39,7 +39,7 @@ private:
 public:
 	// general options
 	std::tstring m_developerName;
-	fs::CPath m_codeTemplatePath;
+	fs::CPath m_codeSnippetsPath;
 	UINT m_splitMaxColumn;
 	UINT m_menuVertSplitCount;
 	std::tstring m_singleLineCommentToken;

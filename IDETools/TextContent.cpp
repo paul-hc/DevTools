@@ -1,7 +1,7 @@
 
 #include "pch.h"
 #include "TextContent.h"
-#include "CompoundTextParser.h"
+#include "CodeSnippetsParser.h"
 #include "StringUtilitiesEx.h"
 #include "utl/AppTools.h"
 #include "utl/RuntimeException.h"
@@ -131,11 +131,11 @@ BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName
 
 	try
 	{
-		CCompoundTextParser textParser;
+		CCodeSnippetsParser textParser;
 		fs::CPath filePath( compoundFilePath );
 
-		textParser.StoreFieldMappings( m_fieldReplacements );
-		textParser.ParseFile( filePath );
+		textParser.StoreLiterals( m_fieldReplacements );
+		textParser.LoadFile( filePath );
 
 		m_textContent = textParser.ExpandSection( sectionName );
 

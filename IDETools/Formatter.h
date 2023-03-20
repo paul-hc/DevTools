@@ -16,7 +16,7 @@ namespace code
 	enum LineBreakTokenMatch { LBT_NoMatch, LBT_OpenBrace, LBT_CloseBrace, LBT_BreakSeparator };
 
 
-	class CFormatter
+	class CFormatter : private utl::noncopyable
 	{
 	public:
 		CFormatter( const CFormatterOptions& options );

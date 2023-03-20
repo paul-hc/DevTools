@@ -1,25 +1,38 @@
-#ifndef CompoundTextParser_h
-#define CompoundTextParser_h
+#ifndef CodeSnippetsParser_h
+#define CodeSnippetsParser_h
 #pragma once
 
+#include "utl/Path.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringParsing.h"
 #include "CodeUtils.h"
 #include <map>
 
 
-class CCompoundTextParser
+class CCodeSnippetsParser
 {
 public:
-	CCompoundTextParser( const TCHAR* pOutLineEnd = code::g_pLineEnd );
-	~CCompoundTextParser();
+	CCodeSnippetsParser( const TCHAR* pOutLineEnd = code::g_pLineEnd );
+	~CCodeSnippetsParser();
 
-	void StoreFieldMappings( const std::map<std::tstring, std::tstring>& fieldMappings );
+	bool IsEmpty( void ) const { return m_sectionMap.empty(); }
+	void Reset( void );
 
-	void ParseFile( const fs::CPath& filePath ) throws_( CRuntimeException );
+	void LoadFile( const fs::CPath& filePath ) throws_( CRuntimeException );
 	void ParseStream( std::istream& is ) throws_( CRuntimeException );
 
+	// literals: pairs of keys to values, e.g. "%FileName%" -> "StripBar"
+	const std::tstring* FindLiteralValue( const std::tstring& literalKey ) const;	// e.g. "%FileName%"
+	std::tstring& LookupLiteralValue( const std::tstring& literalKey );				// for registration
+
+	template< typename ContainerT >
+	void StoreLiterals( const ContainerT& literals ) { m_literals.insert( m_literals.end(), literals.begin(), literals.end() ); UpdateFilePathLiterals(); }
+
+	// sections:
+	bool HasSection( const std::tstring& sectionName ) const { return FindSection( sectionName ) != nullptr; }
+	const std::tstring* FindSection( const std::tstring& sectionName ) const;
 	std::tstring ExpandSection( const std::tstring& sectionName ) throws_( CRuntimeException );
+	bool ExpandSection( OUT std::tstring* pSectionContent, const std::tstring& sectionName ) throws_( CRuntimeException );
 private:
 	typedef std::tstring::const_iterator TConstIterator;
 
@@ -36,10 +49,8 @@ private:
 	void AddTextContent( TConstIterator itFirst, TConstIterator itLast, bool fullLine );
 	void AddTextContentLine( const std::tstring& line ) { AddTextContent( line.begin(), line.end(), true ); }
 
-	std::tstring* FindFieldValue( const std::tstring& fieldKey );			// e.g. "%TypeName%"
-	std::tstring& LookupFieldValue( const std::tstring& fieldKey );			// e.g. "%TypeName%"
-	size_t ExpandFieldMappings( OUT std::tstring* pSectionContent );
-	void UpdateFilePathFields( void );
+	size_t ExpandLiterals( OUT std::tstring* pSectionContent );
+	void UpdateFilePathLiterals( void );
 
 	std::tstring* ExpandSectionRefs( const std::tstring& sectionName ) throws_( CRuntimeException );
 	bool PromptConditionalSectionRef( IN OUT std::tstring* pRefSectionName ) const;
@@ -49,34 +60,35 @@ private:
 
 	struct CParsingContext
 	{
-		CParsingContext( const fs::CPath& filePath ) : m_filePath( filePath ), m_lineNo( 1 ), m_pSectionContent( nullptr ) {}
+		CParsingContext( void ) : m_lineNo( 1 ), m_pSectionContent( nullptr ) {}
 	public:
-		const fs::CPath& m_filePath;
 		size_t m_lineNo;
 		std::tstring m_sectionName;				// current section being parsed
 		std::tstring* m_pSectionContent;		// content of the current section
 	};
 private:
 	typedef str::CEnclosedParser<TCHAR> TParser;
+	typedef std::pair<std::tstring, std::tstring> TLiteralPair;		// <name, value>
 	typedef std::map<std::tstring, std::tstring> TSectionMap;
 
 	std::tstring m_outLineEnd;				// for output formatting (may be different for testing)
 	const TParser m_sectionParser;			// for "[[section]]" tags
 	const TParser m_crossRefParser;			// for "<<section>>" tags (section cross-references)
-	std::vector< std::pair<std::tstring, std::tstring> > m_fieldMappings;	// e.g. "%FileName%" -> "StripBar"
+	std::vector<TLiteralPair> m_literals;	// e.g. "%FileName%" -> "StripBar"
 	std::auto_ptr<CParsingContext> m_pCtx;
 
+	fs::CPath m_filePath;
 	TSectionMap m_sectionMap;				// sections: name -> content
-
+private:
 	static const std::tstring s_endOfSection;				// "EOS" => "[[EOS]]" tags in the compound text file
 	static const TCHAR s_conditionalPrompt = _T('?');		// e.g. "<<?Section>>"
 	static const TCHAR s_eatLineEnd = _T('$');				// e.g. "<<Section>>$\r\n" => eat next "\r\n"
 
-	// predefined fields
+	// predefined literals
 	static const std::tstring s_year;		// "%YEAR%"  -> "2023"
 	static const std::tstring s_month;		// "%MONTH%" -> "Feb-2023"
 	static const std::tstring s_date;		// "%DATE%"  -> "27-Feb-2023"
 };
 
 
-#endif // CompoundTextParser_h
+#endif // CodeSnippetsParser_h

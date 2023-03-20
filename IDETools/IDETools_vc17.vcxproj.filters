@@ -206,7 +206,7 @@
     <ClCompile Include="test\CppCodeTests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="CompoundTextParser.cpp">
+    <ClCompile Include="CodeSnippetsParser.cpp">
       <Filter>Main Code\code + text</Filter>
     </ClCompile>
     <ClCompile Include="CodeUtils.cpp">
@@ -406,7 +406,7 @@
     <ClInclude Include="test\CppCodeTests.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="CompoundTextParser.h">
+    <ClInclude Include="CodeSnippetsParser.h">
       <Filter>Main Code\code + text</Filter>
     </ClInclude>
     <ClInclude Include="CodeUtils.h">

@@ -42,7 +42,7 @@ namespace path
 
 	pred::CompareResult CompareIntuitive( const TCHAR* pLeft, const TCHAR* pRight )
 	{
-		return pred::MakeIntuitiveComparator( func::ToNaturalPathCharValue() ).Compare( GetStart( pLeft ), GetStart( pRight ) );
+		return pred::MakeIntuitiveComparator( func::ToNaturalPathCharValue() ).Compare( pLeft, pRight );
 	}
 
 

@@ -17,7 +17,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestCompoundTextParser( void );
+	void TestCodeSnippetsParser( void );
 	void TestIterationSlices( void );
 	void TestResolveDefaultParams( void );
 	void TestExtractTemplateInstance( void );

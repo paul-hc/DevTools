@@ -5,6 +5,7 @@
 #include "FormatterOptions.h"
 #include "utl/Path.h"
 #include "utl/UI/DialogToolBar.h"
+#include "utl/UI/ItemContentHistoryCombo.h"
 #include "utl/UI/ItemContentEdit.h"
 #include "utl/UI/LayoutPropertyPage.h"
 #include "utl/UI/LayoutPropertySheet.h"
@@ -29,8 +30,11 @@ public:
 	CGeneralOptionsPage( void );
 	virtual ~CGeneralOptionsPage();
 
+	// base overrides
+	virtual void ApplyPageChanges( void ) throws_( CRuntimeException );
+public:
 	std::tstring m_developerName;
-	fs::CPath m_codeTemplatePath;
+	fs::CPath m_codeSnippetsPath;
 	UINT m_menuVertSplitCount;
 	CSpinButtonCtrl m_menuVertSplitCountSpin;
 	std::tstring m_singleLineCommentToken;
@@ -43,12 +47,15 @@ public:
 	bool m_duplicateLineMoveDown;
 private:
 	// enum { IDD = IDD_OPTIONS_GENERAL_PAGE };
-	CItemContentEdit m_templateFileEdit;
+
+	CItemContentHistoryCombo m_snippetsPathCombo;
 
 	// generated stuff
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
+	afx_msg void OnChange_SnippetsPath( void );
+
 	DECLARE_MESSAGE_MAP()
 };
 

@@ -1,14 +1,14 @@
 
 #include "pch.h"
-#include "IdeUtilities.h"
 #include "CppImplFormatter.h"
+#include "CodeSnippetsParser.h"
+#include "IdeUtilities.h"
 #include "IterationSlices.h"
 #include "FormatterOptions.h"
 #include "MethodPrototype.h"
 #include "CppParser.h"
 #include "InputTypeQualifierDialog.h"
 #include "TokenizeTextDialog.h"
-#include "TextContent.h"
 #include "ModuleSession.h"
 #include "Application.h"
 #include "resource.h"
@@ -46,16 +46,15 @@ namespace code
 
 	CCppImplFormatter::CCppImplFormatter( const CFormatterOptions& options )
 		: CFormatter( options )
-	{
-		setDocLanguage( DocLang_Cpp );
-
-		m_voidFunctionBody = _T("\
+		, m_voidFunctionBody( _T("\
 {\r\n\
-}\r\n");
-		m_returnFunctionBody = _T("\
+}\r\n") )
+		, m_returnFunctionBody( _T("\
 {\r\n\
 \treturn ?;\r\n\
-}\r\n");
+}\r\n") )
+	{
+		setDocLanguage( DocLang_Cpp );
 	}
 
 	CCppImplFormatter::~CCppImplFormatter()
@@ -72,7 +71,7 @@ namespace code
 	{
 		resetInternalState();
 		if ( !m_options.m_testMode )
-			LoadCodeSnippets();
+			StoreCodeSnippets();
 
 		CTypeDescriptor tdInfo( this, isInline );
 
@@ -124,24 +123,37 @@ namespace code
 		return implementedMethods;
 	}
 
-	bool CCppImplFormatter::LoadCodeSnippets( void )
+	CCodeSnippetsParser* CCppImplFormatter::EnsureSnippetsLoaded( void )
 	{
-		TextContent codeSnippets;
-		std::tstring filePath = app::GetModuleSession().m_codeTemplatePath.Get();
-
-		if ( app::GetModuleSession().m_useCommentDecoration )
+		if ( nullptr == m_pCodeSnippets.get() && app::GetModuleSession().m_codeSnippetsPath.FileExist() )
 		{
-			if ( codeSnippets.LoadFileSection( filePath.c_str(), _T("Single Line Decoration") ) )
-				m_commentDecorationTemplate = codeSnippets.GetText();
+			m_pCodeSnippets.reset( new CCodeSnippetsParser() );
+			try
+			{
+				m_pCodeSnippets->LoadFile( app::GetModuleSession().m_codeSnippetsPath );
+			}
+			catch ( const std::exception& exc )
+			{
+				app::ReportException( exc );
+				m_pCodeSnippets.reset();
+			}
+		}
+		return m_pCodeSnippets.get();
+	}
+
+	bool CCppImplFormatter::StoreCodeSnippets( void )
+	{
+		if ( CCodeSnippetsParser* pCodeSnippets = EnsureSnippetsLoaded() )
+		{
+			if ( app::GetModuleSession().m_useCommentDecoration )
+				pCodeSnippets->ExpandSection( &m_commentDecorationTemplate, _T("Single Line Decoration") );
+
+			pCodeSnippets->ExpandSection( &m_voidFunctionBody, _T("void Function Body") );
+			pCodeSnippets->ExpandSection( &m_returnFunctionBody, _T("return Function Body") );
+			return true;
 		}
 
-		if ( codeSnippets.LoadFileSection( filePath.c_str(), _T("void Function Body") ) )
-			m_voidFunctionBody = codeSnippets.GetText();
-
-		if ( codeSnippets.LoadFileSection( filePath.c_str(), _T("return Function Body") ) )
-			m_returnFunctionBody = codeSnippets.GetText();
-
-		return !m_commentDecorationTemplate.empty();
+		return false;
 	}
 
 	std::tstring CCppImplFormatter::MakeCommentDecoration( const std::tstring& decorationCore ) const
@@ -369,49 +381,54 @@ namespace code
 		return outCode;
 	}
 
-	std::tstring CCppImplFormatter::MakeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException )
+	std::tstring CCppImplFormatter::MakeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator )
 	{
-		CIterationSlices slices;
-		slices.ParseCode( pCodeText );
-
-		TextContent codeSnippets;
+		static const TCHAR s_section_ForLoopIterator[] = _T("ForLoopIterator");
 		std::tstring outCode;
 
-		if ( codeSnippets.LoadFileSection( app::GetModuleSession().m_codeTemplatePath.GetPtr(), _T("ForLoopIterator") ) )
-		{
-			codeSnippets.ReplaceText( _T("%ContainerType%"), slices.m_containerType.GetToken( pCodeText ).c_str(), TRUE);
-			codeSnippets.ReplaceText( _T("%IteratorType%"), isConstIterator ? _T("const_iterator") : _T("iterator"), TRUE );
-			codeSnippets.ReplaceText( _T("%IteratorName%"), slices.m_iteratorName.c_str(), TRUE);
-			codeSnippets.ReplaceText( _T("%Container%"), slices.m_containerName.GetToken( pCodeText ).c_str(), TRUE );
-			codeSnippets.ReplaceText( _T("%Selector%"), slices.m_pObjSelOp, TRUE );
-			codeSnippets.ReplaceText( _T("%LeadingSpaces%"), slices.m_leadingWhiteSpace.GetToken( pCodeText ).c_str(), TRUE );
+		if ( CCodeSnippetsParser* pCodeSnippets = EnsureSnippetsLoaded() )
+			if ( pCodeSnippets->HasSection( s_section_ForLoopIterator ) )
+			{
+				CIterationSlices slices;
+				slices.ParseCode( pCodeText );
 
-			outCode = codeSnippets.GetText();
-		}
+				pCodeSnippets->LookupLiteralValue( _T("%ContainerType%") ) = slices.m_containerType.GetToken( pCodeText );
+				pCodeSnippets->LookupLiteralValue( _T("%IteratorType%") ) = isConstIterator ? _T("const_iterator") : _T("iterator");
+				pCodeSnippets->LookupLiteralValue( _T("%IteratorName%") ) =  slices.m_iteratorName;
+				pCodeSnippets->LookupLiteralValue( _T("%Container%") ) = slices.m_containerName.GetToken( pCodeText );
+				pCodeSnippets->LookupLiteralValue( _T("%Selector%") ) = slices.m_pObjSelOp;
+				pCodeSnippets->LookupLiteralValue( _T("%LeadingSpaces%") ) = slices.m_leadingWhiteSpace.GetToken( pCodeText );
+
+				outCode = pCodeSnippets->ExpandSection( s_section_ForLoopIterator );
+			}
 
 		return outCode;
 	}
 
-	std::tstring CCppImplFormatter::MakeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException )
+	std::tstring CCppImplFormatter::MakeIndexLoop( const TCHAR* pCodeText )
 	{
-		CIterationSlices slices;
-		slices.ParseCode( pCodeText );
-
-		TextContent codeSnippets;
 		std::tstring outCode;
 
-		if ( codeSnippets.LoadFileSection( app::GetModuleSession().m_codeTemplatePath.GetPtr(), slices.m_isMfcList ? _T("ForLoopPosition") : _T("ForLoopIndex") ) )
+		if ( CCodeSnippetsParser* pCodeSnippets = EnsureSnippetsLoaded() )
 		{
-			codeSnippets.ReplaceText( _T("%IndexType%"), CIterationSlices::STL == slices.m_libraryType ? _T("size_t") : _T("int"), TRUE );
-			codeSnippets.ReplaceText( _T("%ObjectType%"), slices.m_valueType.getString( pCodeText ), TRUE );
-			codeSnippets.ReplaceText( _T("%ObjectName%"), slices.m_iteratorName.c_str(), TRUE);
-			codeSnippets.ReplaceText( _T("%Index%"), _T("i"), TRUE );
-			codeSnippets.ReplaceText( _T("%Container%"), slices.m_containerName.getString( pCodeText ), TRUE );
-			codeSnippets.ReplaceText( _T("%Selector%"), slices.m_pObjSelOp, TRUE );
-			codeSnippets.ReplaceText( _T("%GetSizeMethod%"), CIterationSlices::MFC == slices.m_libraryType ? _T("GetSize") : _T("size"), TRUE );
-			codeSnippets.ReplaceText( _T("%LeadingSpaces%"), slices.m_leadingWhiteSpace.getString( pCodeText ), TRUE );
+			CIterationSlices slices;
+			slices.ParseCode( pCodeText );
 
-			outCode = codeSnippets.GetText();
+			const TCHAR* pLoopSection = slices.m_isMfcList ? _T("ForLoopPosition") : _T("ForLoopIndex");
+
+			if ( pCodeSnippets->HasSection( pLoopSection ) )
+			{
+				pCodeSnippets->LookupLiteralValue( _T("%IndexType%") ) = CIterationSlices::STL == slices.m_libraryType ? _T("size_t") : _T("int");
+				pCodeSnippets->LookupLiteralValue( _T("%ObjectType%") ) = slices.m_valueType.GetToken( pCodeText );
+				pCodeSnippets->LookupLiteralValue( _T("%ObjectName%") ) = slices.m_iteratorName;
+				pCodeSnippets->LookupLiteralValue( _T("%Index%") ) = _T("i");
+				pCodeSnippets->LookupLiteralValue( _T("%Container%") ) = slices.m_containerName.GetToken( pCodeText );
+				pCodeSnippets->LookupLiteralValue( _T("%Selector%") ) = slices.m_pObjSelOp;
+				pCodeSnippets->LookupLiteralValue( _T("%GetSizeMethod%") ) = CIterationSlices::MFC == slices.m_libraryType ? _T("GetSize") : _T("size");
+				pCodeSnippets->LookupLiteralValue( _T("%LeadingSpaces%") ) = slices.m_leadingWhiteSpace.GetToken( pCodeText );
+
+				outCode = pCodeSnippets->ExpandSection( pLoopSection );
+			}
 		}
 
 		return outCode;

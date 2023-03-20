@@ -44,7 +44,7 @@ IMPLEMENT_DYNCREATE( CModuleSession, CCmdTarget )
 CModuleSession::CModuleSession( void )
 	: CCmdTarget()
 	, m_developerName( env::GetVariableValue( _T("USERNAME"), _T("<YourName>") ) )
-	, m_codeTemplatePath( GetDefaultCodeTemplatePath() )
+	, m_codeSnippetsPath( GetDefaultCodeTemplatePath() )
 	, m_splitMaxColumn( 140 )
 	, m_menuVertSplitCount( 40 )
 	, m_singleLineCommentToken( _T("#") )
@@ -92,12 +92,12 @@ fs::CPath CModuleSession::GetDefaultCodeTemplatePath( void )
 {
 	static const std::tstring nameExt = _T("StdCodeTemplates.ctf");
 
-	fs::CPath codeTemplatePath = GetDefaultConfigDirPath() / nameExt;
+	fs::CPath codeSnippetsPath = GetDefaultConfigDirPath() / nameExt;
 
-	if ( !codeTemplatePath.FileExist() )
-		codeTemplatePath = ide::vs6::GetMacrosDirPath() / nameExt;
+	if ( !codeSnippetsPath.FileExist() )
+		codeSnippetsPath = ide::vs6::GetMacrosDirPath() / nameExt;
 
-	return codeTemplatePath;
+	return codeSnippetsPath;
 }
 
 void CModuleSession::LoadFromRegistry( void )
@@ -105,7 +105,7 @@ void CModuleSession::LoadFromRegistry( void )
 	CWinApp* pApp = AfxGetApp();
 
 	m_developerName = pApp->GetProfileString( reg::section_settings, reg::entry_developerName, m_developerName.c_str() );
-	m_codeTemplatePath.Set( pApp->GetProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeTemplatePath.GetPtr() ).GetString() );
+	m_codeSnippetsPath.Set( pApp->GetProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeSnippetsPath.GetPtr() ).GetString() );
 	m_splitMaxColumn = pApp->GetProfileInt( reg::section_settings, reg::entry_splitMaxColumn, m_splitMaxColumn );
 	m_menuVertSplitCount = pApp->GetProfileInt( reg::section_settings, reg::entry_menuVertSplitCount, m_menuVertSplitCount );
 	m_menuVertSplitCount = std::max( m_menuVertSplitCount, 1u );
@@ -144,7 +144,7 @@ void CModuleSession::SaveToRegistry( void ) const
 	CWinApp* pApp = AfxGetApp();
 
 	pApp->WriteProfileString( reg::section_settings, reg::entry_developerName, m_developerName.c_str() );
-	pApp->WriteProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeTemplatePath.GetPtr() );
+	pApp->WriteProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeSnippetsPath.GetPtr() );
 	pApp->WriteProfileInt( reg::section_settings, reg::entry_splitMaxColumn, m_splitMaxColumn );
 	pApp->WriteProfileInt( reg::section_settings, reg::entry_menuVertSplitCount, m_menuVertSplitCount );
 	pApp->WriteProfileString( reg::section_settings, reg::entry_singleLineCommentToken, m_singleLineCommentToken.c_str() );
@@ -186,7 +186,7 @@ bool CModuleSession::EditOptions( void )
 	CGeneralOptionsPage* pGeneralPage = sheet.GetPageAs<CGeneralOptionsPage>( COptionsSheet::GeneralPage );
 
 	pGeneralPage->m_developerName = m_developerName;
-	pGeneralPage->m_codeTemplatePath = m_codeTemplatePath;
+	pGeneralPage->m_codeSnippetsPath = m_codeSnippetsPath;
 	pGeneralPage->m_menuVertSplitCount = m_menuVertSplitCount;
 	pGeneralPage->m_singleLineCommentToken = m_singleLineCommentToken;
 
@@ -210,7 +210,7 @@ bool CModuleSession::EditOptions( void )
 		return FALSE;
 
 	m_developerName = pGeneralPage->m_developerName;
-	m_codeTemplatePath = pGeneralPage->m_codeTemplatePath;
+	m_codeSnippetsPath = pGeneralPage->m_codeSnippetsPath;
 	m_menuVertSplitCount = pGeneralPage->m_menuVertSplitCount;
 	m_singleLineCommentToken = pGeneralPage->m_singleLineCommentToken;
 

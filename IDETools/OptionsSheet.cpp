@@ -17,6 +17,12 @@
 #define new DEBUG_NEW
 #endif
 
+namespace reg_gen
+{
+	static const TCHAR section_page[] = _T("GeneralPage");
+	static const TCHAR entry_CodeSnippetsHistory[] = _T("CodeSnippetsHistory");
+}
+
 
 // COptionsSheet implementation
 
@@ -52,26 +58,35 @@ static const TCHAR s_codeTemplateFilter[] =
 
 CGeneralOptionsPage::CGeneralOptionsPage( void )
 	: CLayoutPropertyPage( IDD_OPTIONS_GENERAL_PAGE )
-	, m_templateFileEdit( ui::FilePath, s_codeTemplateFilter )
+	, m_snippetsPathCombo( ui::FilePath, s_codeTemplateFilter )
 {
 	m_menuVertSplitCount = 1;
 	m_autoCodeGeneration = false;
 	m_displayErrorMessages = false;
 	m_useCommentDecoration = false;
 	m_duplicateLineMoveDown = false;
+
+	m_snippetsPathCombo.SetEnsurePathExist();
 }
 
 CGeneralOptionsPage::~CGeneralOptionsPage()
 {
 }
 
+void CGeneralOptionsPage::ApplyPageChanges( void ) throws_( CRuntimeException )
+{
+	// save history combos just before UpdateData( DialogSaveChanges ), so that HCN_VALIDATEITEMS notifications are received.
+	m_snippetsPathCombo.SaveHistory( reg_gen::section_page, reg_gen::entry_CodeSnippetsHistory );
+
+	__super::ApplyPageChanges();
+}
+
 void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = nullptr == m_menuVertSplitCountSpin.m_hWnd;
+	bool firstInit = nullptr == m_snippetsPathCombo.m_hWnd;
 
-	DDX_Control( pDX, IDC_TEXT_TEMPLATE_FILE_EDIT, m_templateFileEdit );
+	DDX_Control( pDX, IDC_TEXT_TEMPLATE_FILE_COMBO, m_snippetsPathCombo );
 	ui::DDX_Text( pDX, IDC_USER_NAME_EDIT, m_developerName );
-	ui::DDX_Path( pDX, IDC_TEXT_TEMPLATE_FILE_EDIT, m_codeTemplatePath );
 	DDX_Text( pDX, IDC_MENU_VERT_SPLIT_COUNT_EDIT, m_menuVertSplitCount );
 	DDX_Control( pDX, IDC_MENU_VERT_SPLIT_COUNT_SPIN, m_menuVertSplitCountSpin );
 	ui::DDX_Text( pDX, IDC_DEFAULT_COMMENT_COLUMN_EDIT, m_singleLineCommentToken );
@@ -84,25 +99,34 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_Bool( pDX, IDC_DUPLICATE_LINE_MOVE_DOWN_CHECK, m_duplicateLineMoveDown );
 
 	if ( firstInit )
+	{
 		m_menuVertSplitCountSpin.SetRange( 1, 300 );
+		m_snippetsPathCombo.LoadHistory( reg_gen::section_page, reg_gen::entry_CodeSnippetsHistory, m_codeSnippetsPath.GetStart() );
+	}
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BEGIN_MESSAGE_MAP( CGeneralOptionsPage, CLayoutPropertyPage )
+	ON_CBN_EDITCHANGE( IDC_TEXT_TEMPLATE_FILE_COMBO, OnChange_SnippetsPath )
+	ON_CBN_SELCHANGE( IDC_TEXT_TEMPLATE_FILE_COMBO, OnChange_SnippetsPath )
+	ON_CN_DETAILSCHANGED( IDC_TEXT_TEMPLATE_FILE_COMBO, OnChange_SnippetsPath )
 END_MESSAGE_MAP()
+
+void CGeneralOptionsPage::OnChange_SnippetsPath( void )
+{
+	m_snippetsPathCombo.UpdateWindow();		// instant visual feedback for long loads
+	m_codeSnippetsPath.Set( ui::GetComboSelText( m_snippetsPathCombo ) );
+}
 
 
 // CCodingStandardPage property page
 
-namespace reg
+namespace reg_csp
 {
-	namespace csp
-	{
-		static const TCHAR section_page[] = _T("CodingStandardPage");
-		static const TCHAR entry_selectedBraceRules[] = _T("SelectedBraceRules");
-		static const TCHAR entry_selectedOperatorRules[] = _T("SelectedOperatorRules");
-	}
+	static const TCHAR section_page[] = _T("CodingStandardPage");
+	static const TCHAR entry_selectedBraceRules[] = _T("SelectedBraceRules");
+	static const TCHAR entry_selectedOperatorRules[] = _T("SelectedOperatorRules");
 }
 
 const TCHAR CCodingStandardPage::m_breakSep[] = _T(" ");
@@ -154,14 +178,14 @@ void CCodingStandardPage::DoDataExchange( CDataExchange* pDX )
 			  itOpRule != m_operatorRules.end(); ++itOpRule )
 			m_operatorRulesCombo.AddString( itOpRule->m_pOperator );
 
-		m_braceRulesCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::csp::section_page, reg::csp::entry_selectedBraceRules, 0 ) );
-		m_operatorRulesCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::csp::section_page, reg::csp::entry_selectedOperatorRules, 0 ) );
+		m_braceRulesCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg_csp::section_page, reg_csp::entry_selectedBraceRules, 0 ) );
+		m_operatorRulesCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg_csp::section_page, reg_csp::entry_selectedOperatorRules, 0 ) );
 
 		CBnSelChange_BraceRules();
 		CBnSelChange_OperatorRules();
 	}
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BEGIN_MESSAGE_MAP( CCodingStandardPage, CLayoutPropertyPage )
@@ -181,7 +205,7 @@ void CCodingStandardPage::CBnSelChange_BraceRules( void )
 	CheckDlgButton( IDC_IS_ARGUMENT_LIST_BRACKET_CHECK, braceRule.m_isArgList );
 	CheckRadioButton( IDC_REMOVE_SPACES_RADIO, IDC_PRESERVE_SPACES_RADIO, IDC_REMOVE_SPACES_RADIO + braceRule.m_spacing );
 
-	AfxGetApp()->WriteProfileInt( reg::csp::section_page, reg::csp::entry_selectedBraceRules, selIndex );
+	AfxGetApp()->WriteProfileInt( reg_csp::section_page, reg_csp::entry_selectedBraceRules, selIndex );
 }
 
 void CCodingStandardPage::CBnSelChange_OperatorRules( void )
@@ -196,7 +220,7 @@ void CCodingStandardPage::CBnSelChange_OperatorRules( void )
 	CheckRadioButton( IDC_OP_AFTER_REMOVE_SPACES_RADIO, IDC_OP_AFTER_PRESERVE_SPACES_RADIO,
 					  IDC_OP_AFTER_REMOVE_SPACES_RADIO + operatorRule.m_spaceAfter );
 
-	AfxGetApp()->WriteProfileInt( reg::csp::section_page, reg::csp::entry_selectedOperatorRules, selIndex );
+	AfxGetApp()->WriteProfileInt( reg_csp::section_page, reg_csp::entry_selectedOperatorRules, selIndex );
 }
 
 void CCodingStandardPage::BnClicked_BraceRulesButton( UINT cmdId )
@@ -253,7 +277,7 @@ void CCppImplFormattingPage::DoDataExchange( CDataExchange* pDX )
 	if ( firstInit )
 		m_linesBetweenFunctionImplsSpin.SetRange( 0, 10 );
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BEGIN_MESSAGE_MAP( CCppImplFormattingPage, CLayoutPropertyPage )
@@ -342,7 +366,7 @@ void CBscPathPage::DoDataExchange( CDataExchange* pDX )
 		m_browseInfoPath.Set( str::Join( items, EDIT_SEP ) );
 	}
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -658,7 +682,7 @@ void CDirectoriesPage::DoDataExchange( CDataExchange* pDX )
 	hlp::DDX_DirPath( pDX, IDC_LIBRARY_PATH_EDIT, m_libraryPathEdit, pIncludePaths->m_library );
 	hlp::DDX_DirPath( pDX, IDC_BINARY_PATH_EDIT, m_binaryPathEdit, pIncludePaths->m_binary );
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 

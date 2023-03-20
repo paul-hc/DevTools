@@ -70,12 +70,12 @@ namespace pred
 
 namespace path
 {
-	inline bool Equivalent( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return pred::TEquivalentPath()( GetStart( pLeftPath ), GetStart( pRightPath ) ); }
-	inline bool Equals( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return str::Equals<str::IgnoreCase>( GetStart( pLeftPath ), GetStart( pRightPath ) ); }
+	inline bool Equivalent( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return pred::TEquivalentPath()( pLeftPath, pRightPath ); }
+	inline bool Equals( const TCHAR* pLeftPath, const TCHAR* pRightPath ) { return str::Equals<str::IgnoreCase>( pLeftPath, pRightPath ); }
 
 	inline pred::CompareResult CompareEquivalent( const TCHAR* pLeftPath, const TCHAR* pRightPath, size_t count = std::tstring::npos )
 	{
-		return func::TCompareEquivalentPath()( GetStart( pLeftPath ), GetStart( pRightPath ), count );
+		return func::TCompareEquivalentPath()( pLeftPath, pRightPath, count );
 	}
 
 	pred::CompareResult CompareIntuitive( const TCHAR* pLeft, const TCHAR* pRight );
@@ -239,12 +239,12 @@ namespace fs
 		template< typename ToCharFunc >
 		CPath& Convert( ToCharFunc toCharFunc )
 		{
-			std::tstring::iterator itStart = path::GetStart( m_filePath.begin(), m_filePath.end() );
-			std::transform( itStart, m_filePath.end(), itStart, toCharFunc );	// write to the same location
+			std::transform( m_filePath.begin(), m_filePath.end(), m_filePath.begin(), toCharFunc );	// write to the same location
 			return *this;
 		}
 
 		bool IsEmpty( void ) const { return m_filePath.empty(); }
+		bool IsHuge( void ) const { return path::HasHugePrefix( m_filePath.c_str() ); }
 		void Clear( void ) { m_filePath.clear(); }
 		void Swap( CPath& rOther ) { m_filePath.swap( rOther.m_filePath ); }
 
@@ -292,21 +292,19 @@ namespace fs
 		void Normalize( void ) { path::Normalize( m_filePath ); }
 		void Canonicalize( void ) { path::Canonicalize( m_filePath ); }
 
-		bool IsHuge( void ) const { return path::HasHugePrefix( m_filePath.c_str() ); }
-
-		CPath operator/( const CPath& right ) const { return CPath( path::Combine( GetPtr(), right.GetPtr() ) ); }
-		CPath operator/( const TCHAR* pRight ) const { return CPath( path::Combine( GetPtr(), pRight ) ); }
+		CPath operator/( const CPath& right ) const { return CPath( path::Combine( GetStart(), right.GetStart() ) ); }
+		CPath operator/( const TCHAR* pRight ) const { return CPath( path::Combine( GetStart(), path::GetStart( pRight ) ) ); }
 
 		CPath& operator/=( const CPath& right );
-		CPath& operator/=( const TCHAR* pRight ) { Set( path::Combine( GetPtr(), pRight ) ); return *this; }
+		CPath& operator/=( const TCHAR* pRight ) { Set( path::Combine( GetStart(), path::GetStart( pRight ) ) ); return *this; }
 
 		bool operator==( const CPath& right ) const { return Equivalent( right ); }
 		bool operator!=( const CPath& right ) const { return !operator==( right ); }
 
 		bool operator<( const CPath& right ) const;
 
-		bool Equivalent( const CPath& right ) const { return path::Equivalent( m_filePath.c_str(), right.m_filePath.c_str() ); }
-		bool Equals( const CPath& right ) const { return path::Equals( m_filePath.c_str(), right.m_filePath.c_str() ); }
+		bool Equivalent( const CPath& right ) const { return path::Equivalent( GetStart(), right.GetStart() ); }
+		bool Equals( const CPath& right ) const { return path::Equals( GetStart(), right.GetStart() ); }
 
 		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( m_filePath.c_str(), accessMode ); }
 

@@ -17,13 +17,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -31,12 +29,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "#ifndef APSTUDIO_INVOKED\r\n"
@@ -46,7 +44,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\IDETools.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -197,7 +195,7 @@ BEGIN
     PUSHBUTTON      "Sort &By >>",IDC_SORTBY_FILES,178,101,50,14,WS_GROUP
 END
 
-IDD_INPUT_BOX_DIALOG DIALOG  0, 0, 283, 89
+IDD_INPUT_BOX_DIALOG DIALOG 0, 0, 283, 89
 STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Input Box"
 FONT 8, "Tahoma"
@@ -247,19 +245,19 @@ FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     RTEXT           "&User name:",IDC_STATIC,55,9,38,8
     EDITTEXT        IDC_USER_NAME_EDIT,96,7,110,12,ES_AUTOHSCROLL | WS_GROUP
-    RTEXT           "&Code template file:",IDC_STATIC,26,25,67,8
-    EDITTEXT        IDC_TEXT_TEMPLATE_FILE_EDIT,96,23,204,12,ES_AUTOHSCROLL | WS_GROUP
-    RTEXT           "Max. vertical menu items:",IDC_STATIC,10,41,83,8
-    EDITTEXT        IDC_MENU_VERT_SPLIT_COUNT_EDIT,96,39,38,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
-    CONTROL         "Spin1",IDC_MENU_VERT_SPLIT_COUNT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_HOTTRACK,134,39,11,12
-    RTEXT           "Default comment to&ken:",IDC_STATIC,15,56,78,8
-    EDITTEXT        IDC_DEFAULT_COMMENT_COLUMN_EDIT,96,54,38,12,ES_AUTOHSCROLL | WS_GROUP
-    RTEXT           "Class standard prefix:",IDC_STATIC,187,41,72,8
-    EDITTEXT        IDC_CLASS_PREFIX_EDIT,262,39,38,12,ES_AUTOHSCROLL | WS_GROUP
-    RTEXT           "Struct standard prefix:",IDC_STATIC,185,56,74,8
-    EDITTEXT        IDC_STRUCT_PREFIX_EDIT,262,54,38,12,ES_AUTOHSCROLL
-    RTEXT           "Enum standard prefix:",IDC_STATIC,187,71,72,8
-    EDITTEXT        IDC_ENUM_PREFIX_EDIT,262,69,38,12,ES_AUTOHSCROLL
+    RTEXT           "&Code snippets file:",IDC_STATIC,26,25,67,8
+    COMBOBOX        IDC_TEXT_TEMPLATE_FILE_COMBO,96,23,204,165,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Max. vertical menu items:",IDC_STATIC,10,42,83,8
+    EDITTEXT        IDC_MENU_VERT_SPLIT_COUNT_EDIT,96,40,38,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_MENU_VERT_SPLIT_COUNT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_HOTTRACK,134,40,11,12
+    RTEXT           "Default comment to&ken:",IDC_STATIC,15,57,78,8
+    EDITTEXT        IDC_DEFAULT_COMMENT_COLUMN_EDIT,96,55,38,12,ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "Class standard prefix:",IDC_STATIC,187,42,72,8
+    EDITTEXT        IDC_CLASS_PREFIX_EDIT,262,40,38,12,ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "Struct standard prefix:",IDC_STATIC,185,57,74,8
+    EDITTEXT        IDC_STRUCT_PREFIX_EDIT,262,55,38,12,ES_AUTOHSCROLL
+    RTEXT           "Enum standard prefix:",IDC_STATIC,187,72,72,8
+    EDITTEXT        IDC_ENUM_PREFIX_EDIT,262,70,38,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,89,298,1
     CONTROL         "&Generate code for new files",IDC_AUTO_CODE_GENERATION_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,98,103,10
@@ -298,7 +296,7 @@ BEGIN
     EDITTEXT        IDC_CODE_FIELD_EDIT,37,28,245,110,ES_MULTILINE | ES_NOHIDESEL | ES_READONLY | NOT WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_GROUP,WS_EX_STATICEDGE
 END
 
-IDD_INPUT_TYPE_QUALIFIER_DIALOG DIALOG  0, 0, 130, 22
+IDD_INPUT_TYPE_QUALIFIER_DIALOG DIALOG 0, 0, 130, 22
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
 FONT 8, "Tahoma"
 BEGIN
@@ -347,7 +345,7 @@ BEGIN
                     "Button",BS_AUTORADIOBUTTON,225,110,69,10
 END
 
-IDD_OPTIONS_CPP_IMPL_FORMATTING_PAGE DIALOG  0, 0, 312, 133
+IDD_OPTIONS_CPP_IMPL_FORMATTING_PAGE DIALOG 0, 0, 312, 133
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "C++ Implementation"
 FONT 8, "Tahoma"
@@ -567,7 +565,9 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_IDE_TOOLS_APP       ICON                    "res\\IDETools.ico"
+
 IDI_INCBROWSER_ICON     ICON                    "res\\IncBrowser.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -740,7 +740,7 @@ END
 // Toolbar
 //
 
-IDR_IMAGE_STRIP TOOLBAR  16, 16
+IDR_IMAGE_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      IDD_FILE_LOCATOR_DIALOG
     BUTTON      IDD_WORKSPACE_SAVE_DIALOG
@@ -750,7 +750,7 @@ BEGIN
     BUTTON      IDC_FULLPATH_EDIT
 END
 
-IDR_BSC_PATH_STRIP TOOLBAR  16, 16
+IDR_BSC_PATH_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      CM_ADD_BSC_DIR_PATH
     BUTTON      CM_REMOVE_BSC_DIR_PATH
@@ -767,8 +767,11 @@ END
 //
 
 IDR_BSC_PATH_STRIP      BITMAP                  "res\\BscPathStrip.bmp"
+
 IDB_FILE_TYPE_STRIP     BITMAP                  "res\\FileTypeStrip.bmp"
+
 IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -776,7 +779,20 @@ IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
 //
 
 IDR_BSC_PATH_STRIP      PNG                     "res\\BscPathStrip.png"
+
 IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_OPTIONS_GENERAL_PAGE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -819,7 +835,7 @@ STRINGTABLE
 BEGIN
     CM_EDIT_BSC_DIR_PATH    "Modify the selected browse files folder\nModify Browse Folder"
     CM_MOVE_UP_BSC_DIR_PATH "Moves the selected folder up one position\nMove Folder Up"
-    CM_MOVE_DOWN_BSC_DIR_PATH
+    CM_MOVE_DOWN_BSC_DIR_PATH 
                             "Moves the selected folder down one position\nMove Folder Down"
 END
 
@@ -847,7 +863,7 @@ BEGIN
     ID_EDIT_CLEAR_ALL       "Clear All\nClear all text"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -4,7 +4,7 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "utl/StringUtilities.h"
 #include "test/CppCodeTests.h"
-#include "CompoundTextParser.h"
+#include "CodeSnippetsParser.h"
 #include "IterationSlices.h"
 #include "CppParser.h"
 
@@ -18,7 +18,7 @@
 
 namespace ut
 {
-	void ParseString( CCompoundTextParser* pParser, const std::string& text ) throws_( CRuntimeException )
+	void ParseString( CCodeSnippetsParser* pParser, const std::string& text ) throws_( CRuntimeException )
 	{
 		ASSERT_PTR( pParser );
 		std::istringstream is( text );
@@ -39,9 +39,9 @@ CCppCodeTests& CCppCodeTests::Instance( void )
 	return s_testCase;
 }
 
-void CCppCodeTests::TestCompoundTextParser( void )
+void CCppCodeTests::TestCodeSnippetsParser( void )
 {
-	CCompoundTextParser parser( _T("\n") );
+	CCodeSnippetsParser parser( _T("\n") );
 
 	{	// inline section content
 		ut::ParseString( &parser, "\
@@ -365,14 +365,14 @@ void CCppCodeTests::TestResolveDefaultParams( void )
 		ASSERT_EQUAL( "char Filter( const char** ppSrc /*= defPtr()*/ IN OUT, size_t* pLength /*= nullptr*/ OUT )",
 					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
 
-		ASSERT_EQUAL( "char Filter( const char** ppSrc _in_out_, size_t* pLength _out_ )",
+		ASSERT_EQUAL( "char Filter( const char** ppSrc IN OUT, size_t* pLength OUT )",
 					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
 
-		proto = "char Filter( const char** ppSrc = defPtr() _in_out_, size_t* pLength = nullptr _out_ )";
-		ASSERT_EQUAL( "char Filter( const char** ppSrc /*= defPtr()*/ _in_out_, size_t* pLength /*= nullptr*/ _out_ )",
+		proto = "char Filter( const char** ppSrc = defPtr() IN OUT, size_t* pLength = nullptr OUT )";
+		ASSERT_EQUAL( "char Filter( const char** ppSrc /*= defPtr()*/ IN OUT, size_t* pLength /*= nullptr*/ OUT )",
 					  cppParser.MakeRemoveDefaultParams( proto, true ) );		// comment-out default parameter values
 
-		ASSERT_EQUAL( "char Filter( const char** ppSrc _in_out_, size_t* pLength _out_ )",
+		ASSERT_EQUAL( "char Filter( const char** ppSrc IN OUT, size_t* pLength OUT )",
 					  cppParser.MakeRemoveDefaultParams( proto, false ) );		// remove default parameter values
 	}
 	{	// more involved cast expressions, unicode strings
@@ -418,7 +418,7 @@ void CCppCodeTests::TestExtractTemplateInstance( void )
 
 void CCppCodeTests::Run( void )
 {
-	RUN_TEST( TestCompoundTextParser );
+	RUN_TEST( TestCodeSnippetsParser );
 	RUN_TEST( TestIterationSlices );
 	RUN_TEST( TestResolveDefaultParams );
 	RUN_TEST( TestExtractTemplateInstance );

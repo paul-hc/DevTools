@@ -8,6 +8,7 @@
 #include "utl/RuntimeException.h"
 
 
+class CCodeSnippetsParser;
 class CMethodPrototypeTests;
 
 
@@ -32,16 +33,20 @@ namespace code
 
 		static bool IsCppTypeQualifier( std::tstring typeQualifier );
 	private:
-		bool LoadCodeSnippets( void );
+		//std::auto_ptr<CCodeSnippetsParser> m_pCodeSnippets;		// self-encapsulates, lazy loaded
+		CCodeSnippetsParser* EnsureSnippetsLoaded( void );
+		bool StoreCodeSnippets( void );
 		std::tstring MakeCommentDecoration( const std::tstring& decorationCore ) const;
 
 		std::tstring ImplementMethod( const std::tstring& methodProto, const CTypeDescriptor& tdInfo );
 		std::tstring InputDocTypeDescriptor( const fs::CPath& docPath ) const;
 
-		std::tstring MakeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator ) throws_( CRuntimeException );
-		std::tstring MakeIndexLoop( const TCHAR* pCodeText ) throws_( CRuntimeException );
-	protected:
-		// code templates
+		std::tstring MakeIteratorLoop( const TCHAR* pCodeText, bool isConstIterator );
+		std::tstring MakeIndexLoop( const TCHAR* pCodeText );
+	private:
+		std::auto_ptr<CCodeSnippetsParser> m_pCodeSnippets;		// self-encapsulates, lazy loaded
+
+		// code snippets
 		std::tstring m_voidFunctionBody;
 		std::tstring m_returnFunctionBody;
 		std::tstring m_commentDecorationTemplate;

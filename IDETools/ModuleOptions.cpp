@@ -95,12 +95,12 @@ void ModuleOptions::SetDeveloperName( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetCodeTemplateFile( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_codeTemplatePath.Get() );
+	return str::AllocSysString( app::GetModuleSession().m_codeSnippetsPath.Get() );
 }
 
 void ModuleOptions::SetCodeTemplateFile( LPCTSTR lpszNewValue )
 {
-	app::GetModuleSession().m_codeTemplatePath.Set( lpszNewValue );
+	app::GetModuleSession().m_codeSnippetsPath.Set( lpszNewValue );
 }
 
 long ModuleOptions::GetSplitMaxColumn( void )
