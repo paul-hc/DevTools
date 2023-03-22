@@ -108,8 +108,7 @@ namespace code
 				++formatTargetRange.m_start;
 
 		// Tabify leading whitespaces according to 'm_useTabs'
-		CString leadingWhiteSpace = makeLineIndentWhiteSpace( computeVisualEditorColumn( lineOfCode,
-																						   formatTargetRange.m_start ) - 1 );
+		CString leadingWhiteSpace = makeLineIndentWhiteSpace( computeVisualEditorColumn( lineOfCode, formatTargetRange.m_start ) - 1 );
 		CString targetCode = formatTargetRange.getString( lineOfCode );
 		CString coreFormatedCode = justAdjustWhiteSpace ? doAdjustWhitespaceLineOfCode( targetCode ) : doFormatLineOfCode( targetCode );
 
@@ -617,18 +616,15 @@ namespace code
 		return (int)outLinesOfCode.size();
 	}
 
-	CString CFormatter::unsplitMultipleLines( const std::vector< CString >& linesOfCode, const std::vector< CString >& lineEnds,
-											 int lineCount /*= -1*/ ) const
+	CString CFormatter::unsplitMultipleLines( const std::vector< CString >& linesOfCode, const std::vector< CString >& lineEnds ) const
 	{
-		if ( lineCount == -1 )
-			lineCount = (int)linesOfCode.size();
+		size_t lineCount = linesOfCode.size();
 
 		ASSERT( linesOfCode.size() == lineEnds.size() );
-		ASSERT( lineCount <= (int)linesOfCode.size() );
 
 		int requiredLength = 0;
 
-		for ( int i = 0; i != lineCount; ++i )
+		for ( size_t i = 0; i != lineCount; ++i )
 			requiredLength += linesOfCode[ i ].GetLength() + lineEnds[ i ].GetLength();
 
 		CString outCodeText;
@@ -638,7 +634,7 @@ namespace code
 
 		outCodeText.Empty();
 
-		for ( int i = 0; i != lineCount; ++i )
+		for ( size_t i = 0; i != lineCount; ++i )
 		{
 			outCodeText += linesOfCode[ i ];
 			outCodeText += lineEnds[ i ];

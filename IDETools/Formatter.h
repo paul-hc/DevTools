@@ -55,8 +55,7 @@ namespace code
 	protected:
 		int splitMultipleLines( std::vector< CString >& outLinesOfCode, std::vector< CString >& outLineEnds,
 								const TCHAR* pCodeText );
-		CString unsplitMultipleLines( const std::vector< CString >& linesOfCode, const std::vector< CString >& lineEnds,
-									  int lineCount = -1 ) const;
+		CString unsplitMultipleLines( const std::vector< CString >& linesOfCode, const std::vector< CString >& lineEnds ) const;
 		CString getArgListCodeText( const std::vector< CString >& linesOfCode ) const;
 
 		// formatting
