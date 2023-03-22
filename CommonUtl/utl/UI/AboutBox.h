@@ -24,6 +24,7 @@ private:
 
 	const fs::CPath* GetSelPath( void ) const;
 	void SetupBuildInfoList( void );
+	void AddBuildInfoPair( int pos, const TCHAR* pProperty, const std::tstring& value, const void* pItemData = nullptr );
 public:
 	static UINT s_appIconId;
 private:
@@ -37,6 +38,8 @@ private:
 	CStatic m_appIconStatic;
 	std::auto_ptr<CLinkStatic> m_pEmailStatic;
 	std::auto_ptr<CReportListControl> m_pBuildInfoList;
+
+	enum Column { Property, Value };
 
 	// generated overrides
 protected:

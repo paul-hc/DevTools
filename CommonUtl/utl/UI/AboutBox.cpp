@@ -21,12 +21,12 @@ namespace hlp
 {
 	struct CCompilerInfo
 	{
-		DWORD m_baseCompilerVer;			// ex: _MSC_VER=1400 for Visual Studio 2005
+		WORD m_baseCompilerVer;			// ex: _MSC_VER=1400 for Visual Studio 2005
 		const TCHAR* m_pVisualStudio;
 		const TCHAR* m_pVisualCpp;
 	};
 
-	const CCompilerInfo& FindCompilerInfo( DWORD mscVer = _MSC_VER )
+	const CCompilerInfo& FormatCompilerInfo( WORD mscVer = _MSC_VER )
 	{
 		static const CCompilerInfo s_compilers[] =
 		{
@@ -62,6 +62,7 @@ namespace hlp
 			{ 1932, _T("Visual Studio 2022"), _T("VC++ 17.2") },
 			{ 1933, _T("Visual Studio 2022"), _T("VC++ 17.3") },
 			{ 1934, _T("Visual Studio 2022"), _T("VC++ 17.4") },
+			{ 1935, _T("Visual Studio 2022"), _T("VC++ 17.5") },
 
 			{ 9999, _T("Visual Studio ?? TODO..."), _T("VC++ ??") }
 		};
@@ -70,7 +71,85 @@ namespace hlp
 			if ( mscVer >= s_compilers[ i ].m_baseCompilerVer && mscVer < s_compilers[ i + 1 ].m_baseCompilerVer )
 				return s_compilers[ i ];
 
+		//static CCompilerInfo s_unknown;
 		return s_compilers[ COUNT_OF( s_compilers ) - 1 ];
+	}
+
+	std::tstring FormatCompilerVersion( WORD mscVer = _MSC_VER )
+	{
+	#define MS_COMPILER_VER_MAJOR( x ) ( (x) / 100 )
+	#define MS_COMPILER_VER_MINOR( x ) ( (x) % 100 )
+
+		const hlp::CCompilerInfo& compilerInfo = hlp::FormatCompilerInfo( mscVer );
+
+		return str::Format( _T("%s, %s, MSC %d.%d"), compilerInfo.m_pVisualStudio, compilerInfo.m_pVisualCpp, MS_COMPILER_VER_MAJOR( mscVer ), MS_COMPILER_VER_MINOR( mscVer ) );
+	}
+
+
+	std::tstring FormatMFCVersion( WORD mfcVer = _MFC_VER )
+	{
+	#define MFC_VER_MAJOR( x ) ( ( (x) & 0xFFFF00 ) >> 8 )
+	#define MFC_VER_MINOR( x ) ( (x) & 0xFF )
+
+	#ifdef _AFXDLL
+		bool isMfcDll = true;
+	#else
+		bool isMfcDll = false;
+	#endif
+
+		return str::Format( _T("MFC %d.%d %c %s"),
+							MFC_VER_MAJOR( mfcVer ),
+							MFC_VER_MINOR( mfcVer ),
+							str::Conditional( L'\x25cf', '-' ),
+							isMfcDll ? _T("Dynamic Library") : _T("Static Library") );
+	}
+
+	const TCHAR* FormatWindowsVersion( WORD winVer = WINVER )		// _WIN32_WINNT_* macro (_WIN32_WINNT_WIN7) <=> high-word of NTDDI_* macro (e.g. NTDDI_WIN7)
+	{
+		switch ( winVer )
+		{
+			case 0x0400:	return _T("Windows NT 4");			// _WIN32_WINNT_NT4
+			case 0x0500:	return _T("Windows 2000");			// _WIN32_WINNT_WIN2K
+			case 0x0501:	return _T("Windows XP");			// _WIN32_WINNT_WINXP
+			case 0x0502:	return _T("Windows Server 2003");	// _WIN32_WINNT_WS03
+			case 0x0600:	return _T("Windows Vista");			// _WIN32_WINNT_VISTA
+			case 0x0601:	return _T("Windows 7");				// _WIN32_WINNT_WIN7
+			case 0x0602:	return _T("Windows 8");				// _WIN32_WINNT_WIN8
+			case 0x0603:	return _T("Windows 8.1");			// _WIN32_WINNT_WINBLUE
+			case 0x0A00:	return _T("Windows 10");			// _WIN32_WINNT_WIN10
+			case 0x0B00:	return _T("Windows 11");			// _WIN32_WINNT_WIN11
+			case 0x0C00:	return _T("Windows 12");			// _WIN32_WINNT_WIN12
+		}
+
+		static std::tstring s_text;
+		s_text = str::Format( _T("(Windows %d.%d)"), HIBYTE( winVer ), LOBYTE( winVer ) );
+		return s_text.c_str();
+	}
+
+	const TCHAR* FormatInternetExplorerVersion( WORD ieVer = _WIN32_IE )
+	{
+		switch ( ieVer )
+		{
+			case 0x0200:	return _T("Internet Explorer 2");		// _WIN32_IE_IE20
+			case 0x0300:	return _T("Internet Explorer 3");		// _WIN32_IE_IE30
+			case 0x0302:	return _T("Internet Explorer 3.02");	// _WIN32_IE_IE302
+			case 0x0400:	return _T("Internet Explorer 4");		// _WIN32_IE_IE40
+			case 0x0401:	return _T("Internet Explorer 4.01");	// _WIN32_IE_IE401
+			case 0x0500:	return _T("Internet Explorer 5");		// _WIN32_IE_IE50
+			case 0x0501:	return _T("Internet Explorer 5.01");	// _WIN32_IE_IE501
+			case 0x0550:	return _T("Internet Explorer 5.5");		// _WIN32_IE_IE55
+			case 0x0600:	return _T("Internet Explorer 6");		// _WIN32_IE_IE60
+			case 0x0601:	return _T("Internet Explorer 6 SP1");	// _WIN32_IE_IE60SP1
+			case 0x0603:	return _T("Internet Explorer 6 SP2");	// _WIN32_IE_IE60SP2
+			case 0x0700:	return _T("Internet Explorer 7");		// _WIN32_IE_IE70
+			case 0x0800:	return _T("Internet Explorer 8");		// _WIN32_IE_IE80
+			case 0x0900:	return _T("Internet Explorer 9");		// _WIN32_IE_IE90
+			case 0x0A00:	return _T("Internet Explorer 10");		// _WIN32_IE_IE100
+		}
+
+		static std::tstring s_text;
+		s_text = str::Format( _T("(Internet Explorer %d.%d)"), HIBYTE( ieVer ), LOBYTE( ieVer ) );
+		return s_text.c_str();
 	}
 
 
@@ -91,30 +170,14 @@ namespace hlp
 		return false;
 	#endif
 	}
-
-	inline bool IsMfcDll( void )
-	{
-	#ifdef _AFXDLL
-		return true;
-	#else
-		return false;
-	#endif
-	}
 }
-
-
-#define VERSION_MAJOR( x ) ( (x) / 100 )
-#define VERSION_MINOR( x ) ( (x) % 100 )
-
-#define VERSION_MAJOR_HEX( x ) ( ( (x) & 0xFFFF00 ) >> 8 )
-#define VERSION_MINOR_HEX( x ) ( (x) & 0xFF )
 
 
 // CAboutBox implementation
 
 namespace layout
 {
-	enum { CommentsPct = 75, ListPct = 100 - CommentsPct };
+	enum { CommentsPct = 60, ListPct = 100 - CommentsPct };
 
 	static const CLayoutStyle styles[] =
 	{
@@ -165,51 +228,39 @@ const fs::CPath* CAboutBox::GetSelPath( void ) const
 
 void CAboutBox::SetupBuildInfoList( void )
 {
-	DWORD mscVer = _MSC_VER;
-
 	CScopedInternalChange internalChange( m_pBuildInfoList.get() );
 	m_pBuildInfoList->DeleteAllItems();
 
-	enum Column { Property, Value };
-
 	int pos = 0;
 
-	m_pBuildInfoList->InsertItem( pos, _T("Platform") );
-	m_pBuildInfoList->SetItemText( pos, Value, str::Format( _T("%d bit"), utl::GetPlatformBits() ).c_str() );
+	AddBuildInfoPair( pos++, _T("Platform"), str::Format( _T("%d-bit"), utl::GetPlatformBits() ) );
 
-	m_pBuildInfoList->InsertItem( ++pos, _T("Build") );
-	m_pBuildInfoList->SetItemText( pos, Value, hlp::IsDebug() ? _T("DEBUG") : _T("RELEASE") );
-	if ( hlp::IsDebug() )
-	{
-		static const ui::CTextEffect s_debugEffect( ui::Bold, color::Red );
-		m_pBuildInfoList->MarkCellAt( pos, Value, s_debugEffect );
-	}
+	AddBuildInfoPair( pos++, _T("Build"), hlp::IsDebug() ? _T("DEBUG Build") : _T("RELEASE Build") );
+	m_pBuildInfoList->MarkCellAt( pos - 1, Value, ui::CTextEffect( ui::Bold, hlp::IsDebug() ? color::Red : color::BlueWindows10 ) );
 
-	m_pBuildInfoList->InsertItem( ++pos, _T("Character Set") );
-	m_pBuildInfoList->SetItemText( pos, Value, hlp::IsUnicode() ? _T("Unicode") : _T("ANSI") );
-
-	const hlp::CCompilerInfo& compilerInfo = hlp::FindCompilerInfo( mscVer );
-	m_pBuildInfoList->InsertItem( ++pos, _T("Compiler") );
-	m_pBuildInfoList->SetItemText( pos, Value,
-		str::Format( _T("%s, %s, MSC %d.%d"), compilerInfo.m_pVisualStudio, compilerInfo.m_pVisualCpp, VERSION_MAJOR( mscVer ), VERSION_MINOR( mscVer ) ).c_str() );
-
-	// ex: _MFC_VER 0x0700
-	m_pBuildInfoList->InsertItem( ++pos, _T("MFC") );
-	m_pBuildInfoList->SetItemText( pos, Value,
-		str::Format( _T("MFC %d.%d %c %s"),
-			VERSION_MAJOR_HEX( _MFC_VER ),
-			VERSION_MINOR_HEX( _MFC_VER ),
-			str::Conditional( L'\x25cf', '-' ),
-			hlp::IsMfcDll() ? _T("Dynamic Library") : _T("Static Library") ).c_str() );
+	AddBuildInfoPair( pos++, _T("Character Set"), hlp::IsUnicode() ? _T("Unicode") : _T("ANSI") );
+	AddBuildInfoPair( pos++, _T("Compiler"), hlp::FormatCompilerVersion( _MSC_VER ) );		// e.g. _MSC_VER 1500 for VC9 (VS-2008)
+	AddBuildInfoPair( pos++, _T("MFC"), hlp::FormatMFCVersion( _MFC_VER ) );				// e.g. _MFC_VER 0x0900
 
 	if ( m_modulePath != m_exePath )
-	{
-		m_pBuildInfoList->InsertItem( LVIF_TEXT | LVIF_PARAM, ++pos, _T("Module"), 0, 0, 0, (LPARAM)&m_modulePath );
-		m_pBuildInfoList->SetItemText( pos, Value, m_modulePath.GetPtr() );
-	}
+		AddBuildInfoPair( pos++, _T("Module"), m_modulePath.Get(), &m_modulePath );
 
-	m_pBuildInfoList->InsertItem( LVIF_TEXT | LVIF_PARAM, ++pos, _T("Executable"), 0, 0, 0, (LPARAM)&m_exePath );
-	m_pBuildInfoList->SetItemText( pos, Value, m_exePath.GetPtr() );
+	AddBuildInfoPair( pos++, _T("Executable"), m_exePath.Get(), &m_exePath );
+
+	// note: _WIN32_WINNT is a synonim of WINVER
+	AddBuildInfoPair( pos++, _T("WINVER"), str::Format( _T("0x%04X  %s"), WINVER, hlp::FormatWindowsVersion( WINVER ) ) );						// e.g. WINVER 0x0601
+	AddBuildInfoPair( pos++, _T("_WIN32_IE"), str::Format( _T("0x%04X  %s"), _WIN32_IE, hlp::FormatInternetExplorerVersion( _WIN32_IE ) ) );	// e.g. _WIN32_IE 0x0800
+
+	// ignore old Win95 macro: https://devblogs.microsoft.com/oldnewthing/20070411-00/?p=27283
+//#ifdef _WIN32_WINDOWS
+//	AddBuildInfoPair( pos++, _T("_WIN32_WINDOWS"), str::Format( _T("0x%04X  %s"), _WIN32_WINDOWS, hlp::FormatWindowsVersion( _WIN32_WINDOWS ) ) );	// e.g. _WIN32_WINDOWS 0x0410
+//#endif
+}
+
+void CAboutBox::AddBuildInfoPair( int pos, const TCHAR* pProperty, const std::tstring& value, const void* pItemData /*= nullptr*/ )
+{
+	m_pBuildInfoList->InsertItem( LVIF_TEXT | ( pItemData != nullptr ? LVIF_PARAM : 0 ), pos, pProperty, 0, 0, 0, (LPARAM)pItemData );
+	m_pBuildInfoList->SetItemText( pos, Value, value.c_str() );
 }
 
 void CAboutBox::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const

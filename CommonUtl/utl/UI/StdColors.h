@@ -76,6 +76,8 @@ namespace color
 		SpringGreen = RGB( 0, 255, 127 ),
 		NeonGreen = RGB( 0, 200, 0 ),
 		AzureBlue = RGB( 0, 125, 255 ),
+		BlueWindows10 = RGB( 27, 161, 226 ),
+		BlueTextWin10 = RGB( 83, 189, 235 ),
 		ScarletRed = RGB( 200, 0, 0 ),
 		Salmon = RGB( 255, 128, 128 ),
 		Pink = RGB( 255, 128, 255 ),
