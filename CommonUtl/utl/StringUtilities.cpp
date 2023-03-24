@@ -585,6 +585,18 @@ namespace word
 			FindNextWordBreak( text, 0, loc ) == text.length();
 	}
 
+
+	bool IsWordBreak( func::CharKind::Kind prevKind, func::CharKind::Kind kind )
+	{
+		if ( kind != prevKind )
+			if ( ( func::CharKind::Lower == prevKind && func::CharKind::Upper == kind ) ||		// transition Lower -> Upper
+				 ( func::CharKind::Lower == prevKind && func::CharKind::Digit == kind ) ||		// transition Lower -> Digit
+				 ( func::CharKind::Digit == prevKind && kind != func::CharKind::Digit ) )		// transition Digit -> non-Digit (Upper/Lower)
+				return true;
+
+		return false;
+	}
+
 } //namespace word
 
 

@@ -105,6 +105,36 @@ namespace path
 		std::tstring m_normalizedPath;
 		const bool m_isWindows;
 	};
+
+
+	struct CFnameExt
+	{
+		CFnameExt( const TCHAR* pFilename )
+		{
+			ASSERT_PTR( pFilename );
+			_tcscpy( m_fname, pFilename );
+			m_pExtCore = ::PathFindExtension( m_fname );
+			if ( HasExt() )
+			{
+				*m_pExtCore = '\0';
+				++m_pExtCore;
+			}
+		}
+
+		bool HasFname( void ) const { return m_fname[ 0 ] != '\0'; }
+		bool HasExt( void ) const { return *m_pExtCore != '\0'; }
+		bool IsEmpty( void ) const { return !HasFname() && !HasExt(); }
+
+		bool MatchWildcard( const CFnameExt& wild )
+		{
+			bool matchFname = wild.HasFname() ? ::PathMatchSpec( m_fname, wild.m_fname ) != FALSE : !HasFname();
+			bool matchExt = wild.HasExt() ? ::PathMatchSpec( m_pExtCore, wild.m_pExtCore ) != FALSE : !HasExt();
+			return matchFname && matchExt;
+		}
+	public:
+		TCHAR m_fname[ MAX_PATH ];		// "fname.ext" -> "fname"
+		TCHAR* m_pExtCore;				// "fname.ext" -> "ext"
+	};
 }
 
 
@@ -169,36 +199,6 @@ namespace path
 		utl::AssignPtr( pOutMatchLength, matchLength );
 		return IsBreakChar( *pPath ) && IsBreakChar( *pSegment );		// true if both break at end of match
 	}
-
-
-	struct CFnameExt
-	{
-		CFnameExt( const TCHAR* pFilename )
-		{
-			ASSERT_PTR( pFilename );
-			_tcscpy( m_fname, pFilename );
-			m_pExtCore = ::PathFindExtension( m_fname );
-			if ( HasExt() )
-			{
-				*m_pExtCore = '\0';
-				++m_pExtCore;
-			}
-		}
-
-		bool HasFname( void ) const { return m_fname[ 0 ] != '\0'; }
-		bool HasExt( void ) const { return *m_pExtCore != '\0'; }
-		bool IsEmpty( void ) const { return !HasFname() && !HasExt(); }
-
-		bool MatchWildcard( const CFnameExt& wild )
-		{
-			bool matchFname = wild.HasFname() ? ::PathMatchSpec( m_fname, wild.m_fname ) != FALSE : !HasFname();
-			bool matchExt = wild.HasExt() ? ::PathMatchSpec( m_pExtCore, wild.m_pExtCore ) != FALSE : !HasExt();
-			return matchFname && matchExt;
-		}
-	public:
-		TCHAR m_fname[ MAX_PATH ];		// "fname.ext" -> "fname"
-		TCHAR* m_pExtCore;				// "fname.ext" -> "ext"
-	};
 
 
 	bool DoMatchFilenameWildcard( const TCHAR* pFilename, const TCHAR* pWildSpec, const std::tstring& multiSpecDelims /*= CDelims::s_multiSpecDelims*/ )
@@ -743,6 +743,44 @@ namespace fs
 		m_ext.clear();
 	}
 
+	void CPathParts::SplitPath( const std::tstring& filePath )
+	{
+		TCHAR drive[ _MAX_DRIVE ], dir[ _MAX_DIR ], fname[ _MAX_FNAME ], ext[ _MAX_EXT ];
+		size_t sepPos = std::tstring::npos;
+
+		if ( !path::IsComplex( filePath.c_str() ) )
+			_tsplitpath( filePath.c_str(), drive, dir, fname, ext );
+		else
+		{
+			ASSERT( path::IsWellFormed( filePath.c_str() ) );
+
+			std::tstring tempPath = filePath;
+			sepPos = path::FindComplexSepPos( tempPath.c_str() );
+			tempPath[ sepPos ] = '/';			// temporary make it part of the dir path
+
+			_tsplitpath( tempPath.c_str(), drive, dir, fname, ext );
+		}
+
+		m_drive = drive;
+		m_dir = dir;
+		m_fname = fname;
+		m_ext = ext;
+
+		if ( sepPos != std::tstring::npos )
+		{
+			sepPos -= m_drive.length();
+			ASSERT( '/' == m_dir[ sepPos ] );	// restore to original
+			m_dir[ sepPos ] = path::CDelims::s_complexPathSep;
+		}
+	}
+
+	std::tstring CPathParts::MakeFullPath( const TCHAR* pDrive, const TCHAR* pDir, const TCHAR* pFname, const TCHAR* pExt )
+	{
+		TCHAR path[ MAX_PATH * 2 ];
+		_tmakepath( path, pDrive, pDir, pFname, pExt );
+		return path;
+	}
+
 	fs::CPath CPathParts::GetDirPath( void ) const
 	{
 		fs::CPath dirPath = m_drive;
@@ -791,44 +829,6 @@ namespace fs
 		}
 
 		return fs::CPath( path );
-	}
-
-	void CPathParts::SplitPath( const std::tstring& filePath )
-	{
-		TCHAR drive[ _MAX_DRIVE ], dir[ _MAX_DIR ], fname[ _MAX_FNAME ], ext[ _MAX_EXT ];
-		size_t sepPos = std::tstring::npos;
-
-		if ( !path::IsComplex( filePath.c_str() ) )
-			_tsplitpath( filePath.c_str(), drive, dir, fname, ext );
-		else
-		{
-			ASSERT( path::IsWellFormed( filePath.c_str() ) );
-
-			std::tstring tempPath = filePath;
-			sepPos = path::FindComplexSepPos( tempPath.c_str() );
-			tempPath[ sepPos ] = '/';			// temporary make it part of the dir path
-
-			_tsplitpath( tempPath.c_str(), drive, dir, fname, ext );
-		}
-
-		m_drive = drive;
-		m_dir = dir;
-		m_fname = fname;
-		m_ext = ext;
-
-		if ( sepPos != std::tstring::npos )
-		{
-			sepPos -= m_drive.length();
-			ASSERT( '/' == m_dir[ sepPos ] );	// restore to original
-			m_dir[ sepPos ] = path::CDelims::s_complexPathSep;
-		}
-	}
-
-	std::tstring CPathParts::MakeFullPath( const TCHAR* pDrive, const TCHAR* pDir, const TCHAR* pFname, const TCHAR* pExt )
-	{
-		TCHAR path[ MAX_PATH * 2 ];
-		_tmakepath( path, pDrive, pDir, pFname, pExt );
-		return path;
 	}
 
 

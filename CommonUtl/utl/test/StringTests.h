@@ -35,6 +35,7 @@ private:
 	void TestEnumTags( void );
 	void TestFlagTags( void );
 	void TestWordSelection( void );
+	void TestConvertWordBreaks( void );
 	void TestEnsureUniformNumPadding( void );
 	void TestTimeFormatting( void );
 

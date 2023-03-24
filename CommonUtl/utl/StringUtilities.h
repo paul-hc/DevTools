@@ -418,18 +418,6 @@ namespace ui
 }
 
 
-namespace word
-{
-	enum WordStatus { WordStart, WordCore, WordEnd, Whitespace };
-
-	WordStatus GetWordStatus( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
-	size_t FindPrevWordBreak( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
-	size_t FindNextWordBreak( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
-
-	bool IsAlphaNumericWord( const std::tstring& text, const std::locale& loc = str::GetUserLocale() );
-}
-
-
 namespace app
 {
 	bool HasCommandLineOption( const TCHAR* pOption, std::tstring* pValue = nullptr );
@@ -473,6 +461,118 @@ namespace arg
 	bool AddCmd_Param( std::tstring& rCmdLine, const ValueT& param )
 	{
 		return stream::Tag( rCmdLine, AutoEnquote( param ), _T(" ") );
+	}
+}
+
+
+namespace word
+{
+	enum WordStatus { WordStart, WordCore, WordEnd, Whitespace };
+
+	WordStatus GetWordStatus( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
+	size_t FindPrevWordBreak( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
+	size_t FindNextWordBreak( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
+
+	bool IsAlphaNumericWord( const std::tstring& text, const std::locale& loc = str::GetUserLocale() );
+
+
+	bool IsWordBreak( func::CharKind::Kind prevKind, func::CharKind::Kind kind );
+
+
+	template< typename CharT >
+	std::basic_string<CharT> ToSpacedWordBreaks( const CharT* pLiteral, char delim = ' ' )
+	{	// convert "DarkGrey80" to "Dark Grey 80"
+		ASSERT_PTR( pLiteral );
+		std::basic_string<CharT> outText;
+		outText.reserve( str::GetLength( pLiteral ) + 10 );
+
+		const func::CharKind charKindFunc;
+
+		for ( func::CharKind::Kind prevKind = func::CharKind::Delim; *pLiteral != '\0'; ++pLiteral )
+		{
+			func::CharKind::Kind kind = charKindFunc( *pLiteral );
+
+			if ( !outText.empty() && IsWordBreak( prevKind, kind ) )
+				outText += delim;
+
+			outText += *pLiteral;
+			prevKind = kind;
+		}
+
+		return outText;
+	}
+
+	template< typename CharT >
+	std::basic_string<CharT> ToUpperLiteral( const CharT* pLiteral, char delim = '_' )
+	{	// convert "DarkGrey80" or "Dark Grey 80" to "DARK_GREY_80"
+		ASSERT_PTR( pLiteral );
+		std::basic_string<CharT> outText;
+		outText.reserve( str::GetLength( pLiteral ) + 10 );
+
+		const func::CharKind charKindFunc;
+		const func::ToUpper toUpperFunc;
+		const pred::IsSpace isSpace;
+
+		for ( func::CharKind::Kind prevKind = func::CharKind::Delim; *pLiteral != '\0'; ++pLiteral )
+		{
+			func::CharKind::Kind kind = charKindFunc( *pLiteral );
+
+			if ( isSpace( *pLiteral ) )
+			{
+				if ( str::LastChar( outText ) != delim )			// avoid doubling the delimiter
+					outText += delim;
+			}
+			else if ( delim == *pLiteral )							// allow doubling the delimiter if in source literal
+				outText += *pLiteral;
+			else
+			{
+				if ( !outText.empty() && IsWordBreak( prevKind, kind ) )
+					if ( str::LastChar( outText ) != delim )		// avoid doubling the delimiter on word breaks
+						outText += delim;
+
+				outText += toUpperFunc( *pLiteral );
+			}
+
+			prevKind = kind;
+		}
+
+		return outText;
+	}
+
+	template< typename CharT >
+	std::basic_string<CharT> ToCapitalizedLiteral( const CharT* pLiteral, char delim = '_', bool camelCase = false )
+	{	// convert "DARK_GREY_80" to "DarkGrey80"
+		ASSERT_PTR( pLiteral );
+		std::basic_string<CharT> outText;
+		outText.reserve( str::GetLength( pLiteral ) );
+
+		const func::ToUpper toUpperFunc;
+		const func::ToLower toLowerFunc;
+
+		for ( bool nextUpper = !camelCase; *pLiteral != '\0'; ++pLiteral )
+			if ( delim == *pLiteral )
+				nextUpper = true;
+			else if ( nextUpper )
+			{
+				outText += toUpperFunc( *pLiteral );
+				nextUpper = false;
+			}
+			else
+				outText += toLowerFunc( *pLiteral );
+
+		return outText;
+	}
+
+	template< typename CharT >
+	inline std::basic_string<CharT> ToCamelCaseLiteral( const CharT* pLiteral, char delim = '_' ) { return ToCapitalizedLiteral( pLiteral, delim, true ); }
+
+	template< typename CharT >
+	std::basic_string<CharT> ToggleUpperLiteral( const CharT* pLiteral, char delim = '_', bool camelCase = false )
+	{	// cycle through "DARK_GREY_80" -> "DarkGrey80" -> "DARK_GREY_80" -> ...
+		if ( str::Contains( pLiteral, delim ) )		// is delimited?
+			return ToCapitalizedLiteral( pLiteral, delim, camelCase );
+		else
+			return ToUpperLiteral( pLiteral, delim );
 	}
 }
 

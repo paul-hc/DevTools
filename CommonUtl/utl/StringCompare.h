@@ -181,6 +181,28 @@ namespace func
 			CharT operator()( CharT chr ) const { return std::toupper( chr, m_loc ); }
 		};
 	}
+
+
+	struct CharKind			// for detecting word-breaks
+	{
+		enum Kind { Lower, Upper, Digit, Delim };
+
+		Kind operator()( wchar_t chr ) const
+		{
+			if ( m_isDigit( chr ) )
+				return Digit;
+			else if ( m_isLower( chr ) )
+				return Lower;
+			else if ( m_isUpper( chr ) )
+				return Upper;
+
+			return Delim;
+		}
+	public:
+		pred::IsLower m_isLower;
+		pred::IsUpper m_isUpper;
+		pred::IsDigit m_isDigit;
+	};
 }
 
 

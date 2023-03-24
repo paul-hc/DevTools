@@ -153,6 +153,9 @@ namespace str
 	template< typename CharT >
 	inline CharT CharAt( const std::basic_string<CharT>& text, size_t pos ) { REQUIRE( pos <= text.length() ); return text.c_str()[ pos ]; }
 
+	template< typename StringT >
+	inline typename StringT::value_type LastChar( const StringT& text ) { return !text.empty() ? text[ text.length() - 1 ] : '\0'; }
+
 
 	template< typename CharT >
 	bool Contains( const CharT* pText, wchar_t chr )

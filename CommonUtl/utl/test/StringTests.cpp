@@ -861,6 +861,38 @@ void CStringTests::TestWordSelection( void )
 	ASSERT_EQUAL( 16, word::FindNextWordBreak( text, 16 ) );
 }
 
+void CStringTests::TestConvertWordBreaks( void )
+{
+	ASSERT_EQUAL( "", word::ToSpacedWordBreaks( "" ) );
+	ASSERT_EQUAL( " \t ", word::ToSpacedWordBreaks( " \t " ) );
+	ASSERT_EQUAL( "grey", word::ToSpacedWordBreaks( "grey" ) );
+	ASSERT_EQUAL( "dark_grey", word::ToSpacedWordBreaks( "dark_grey" ) );
+	ASSERT_EQUAL( "grey 80", word::ToSpacedWordBreaks( "grey80" ) );
+	ASSERT_EQUAL( L"Dark Grey 80", word::ToSpacedWordBreaks( L"DarkGrey80" ) );
+	ASSERT_EQUAL( "Dark Grey 80 color", word::ToSpacedWordBreaks( "DarkGrey80color" ) );
+	ASSERT_EQUAL( L"Dark~Grey~80~color", word::ToSpacedWordBreaks( L"DarkGrey80color", '~' ) );
+	ASSERT_EQUAL( L"Dark Grey 80 Shade", word::ToSpacedWordBreaks( L"DarkGrey80Shade" ) );
+	ASSERT_EQUAL( "Dark Grey TINT80 Shade", word::ToSpacedWordBreaks( "DarkGreyTINT80Shade" ) );
+
+	ASSERT_EQUAL( "", word::ToUpperLiteral( "" ) );
+	ASSERT_EQUAL( "__", word::ToUpperLiteral( "__ \t " ) );
+	ASSERT_EQUAL( "DARK_GREY_80", word::ToUpperLiteral( "DarkGrey80" ) );
+	ASSERT_EQUAL( "DARK-GREY-80", word::ToUpperLiteral( "DarkGrey80", '-' ) );
+	ASSERT_EQUAL( L"DARK_GREY_80__", word::ToUpperLiteral( L"DARK_GREY_80__" ) );
+	ASSERT_EQUAL( "DARK_GREY_80", word::ToUpperLiteral( "Dark  Grey   80" ) );
+	ASSERT_EQUAL( "_DARK_GREY_80_", word::ToUpperLiteral( "\t dark  grey   80 \n" ) );
+
+	ASSERT_EQUAL( "", word::ToCapitalizedLiteral( "" ) );
+	ASSERT_EQUAL( "Dark", word::ToCapitalizedLiteral( "DARK" ) );
+	ASSERT_EQUAL( L"dark", word::ToCapitalizedLiteral( L"DARK", '_', true ) );				// camel case
+	ASSERT_EQUAL( "DarkGrey80", word::ToCapitalizedLiteral( "DARK_GREY_80" ) );
+	ASSERT_EQUAL( "darkGrey80", word::ToCapitalizedLiteral( "DARK_GREY_80", '_', true ) );	// camel case
+
+	ASSERT_EQUAL( "DarkGrey80", word::ToggleUpperLiteral( "DARK_GREY_80" ) );
+	ASSERT_EQUAL( "DARK_GREY_80", word::ToggleUpperLiteral( "DarkGrey80" ) );
+	ASSERT_EQUAL( "darkGrey80", word::ToggleUpperLiteral( "DARK_GREY_80", '_', true ) );	// camel case
+}
+
 void CStringTests::TestEnsureUniformNumPadding( void )
 {
 	static const TCHAR comma[] = _T(",");
@@ -947,6 +979,7 @@ void CStringTests::Run( void )
 	RUN_TEST( TestEnumTags );
 	RUN_TEST( TestFlagTags );
 	RUN_TEST( TestWordSelection );
+	RUN_TEST( TestConvertWordBreaks );
 	RUN_TEST( TestEnsureUniformNumPadding );
 	RUN_TEST( TestTimeFormatting );
 
