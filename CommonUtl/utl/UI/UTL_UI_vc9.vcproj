@@ -599,6 +599,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ColorRepository.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ColorRepository.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CommonWinDefs.h"
 				>
 			</File>

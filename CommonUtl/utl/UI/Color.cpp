@@ -1,7 +1,9 @@
 
 #include "stdafx.h"
 #include "Color.h"
+#include "ColorRepository.h"
 #include "StringUtilities.h"
+#include "utl/TextClipboard.h"
 #include <shlwapi.h>
 
 #ifdef _DEBUG
@@ -9,31 +11,17 @@
 #endif
 
 
-namespace hlp
+namespace ui
 {
-	bool ParseDecDigit( BYTE* pValue, const std::tstring& decString )
+	COLORREF EvalColor( COLORREF rawColor )
 	{
-		ASSERT_PTR( pValue );
-		std::tistringstream iss( decString );
-		int value = -1;
-		iss >> value;
-		if ( iss.fail() || value < 0 || value > 0xFF )
-			return false;
-		*pValue = static_cast<BYTE>( value );
-		return true;
-	}
+		if ( rawColor != CLR_NONE && rawColor != CLR_DEFAULT )
+			if ( IsSysColor( rawColor ) )
+				return ::GetSysColor( GetSysColorIndex( rawColor ) );
+			else
+				ASSERT( false );		// logical color type?
 
-	bool ParseHexDigit( BYTE* pValue, const std::tstring& hexString, int pos )
-	{
-		ASSERT_PTR( pValue );
-		enum { HexDigitLength = 2 };
-		std::tistringstream iss( hexString.substr( pos, HexDigitLength ) );
-		int value = -1;
-		iss >> std::hex >> value;
-		if ( iss.fail() || value < 0 || value > 0xFF )
-			return false;
-		*pValue = static_cast<BYTE>( value );
-		return true;
+		return rawColor;
 	}
 }
 
@@ -56,112 +44,201 @@ namespace ui
 
 namespace ui
 {
-	const std::tstring nullTag = _T("null");
-	const TCHAR rgbTag[] = _T("RGB");
-	const TCHAR htmlTag[] = _T("#");
-	const TCHAR sysTag[] = _T("SYS");
+	const std::tstring g_nullTag = _T("(null)");
+	const std::tstring g_rgbTag = _T("RGB");
+	const std::tstring g_htmlTag = _T("#");
+	const std::tstring g_sysTag = _T("SYS");
 
-
-	COLORREF ParseHtmlLiteral( const char* pHtmlLiteral )
-	{
-		// quick and less safe parsing
-		// HTML color format: #RRGGBB - "#FF0000" for bright red
-		ASSERT( pHtmlLiteral != nullptr && '#' == pHtmlLiteral[ 0 ] && 7 == strlen( pHtmlLiteral ) );
-
-		const char digits[] =
-		{
-			*++pHtmlLiteral, *++pHtmlLiteral, '-',
-			*++pHtmlLiteral, *++pHtmlLiteral, '-',
-			*++pHtmlLiteral, *++pHtmlLiteral, '\0'
-		};
-
-		unsigned int red, green, blue;
-		if ( sscanf( digits, "%x-%x-%x", &red, &green, &blue ) != 3 )
-		{
-			ASSERT( false );		// ill formed HTML colour literal
-			return CLR_NONE;
-		}
-
-		return RGB( red, green, blue );
-	}
-
-	std::tstring FormatRgb( COLORREF color )
-	{
-		return str::Format( _T("%s(%u, %u, %u)"), rgbTag, GetRValue( color ), GetGValue( color ), GetBValue( color ) );
-	}
-
-	std::tstring FormatHtml( COLORREF color )
-	{
-		return str::Format( _T("%s%02X%02X%02X"), htmlTag, GetRValue( color ), GetGValue( color ), GetBValue( color ) );
-	}
-
-
-	bool ParseRgb( COLORREF* pColor, const std::tstring& text )
-	{
-		ASSERT_PTR( pColor );
-		size_t pos = text.find( rgbTag );
-
-		if ( pos != std::tstring::npos )
-		{	// RGB( 255, 0, 0 ) color format for bright red
-			std::vector< std::tstring > tokens;
-			str::Tokenize( tokens, &text[ pos + 3 ], _T("(,) \t") );
-
-			BYTE r, g, b;
-			if ( tokens.size() >= 3 )
-				if ( hlp::ParseDecDigit( &r, tokens[ 0 ] ) && hlp::ParseDecDigit( &g, tokens[ 1 ] ) && hlp::ParseDecDigit( &b, tokens[ 2 ] ) )
-				{
-					*pColor = RGB( r, g, b );
-					return true;
-				}
-		}
-		return false;
-	}
-
-	bool ParseHtml( COLORREF* pColor, const std::tstring& text )
-	{
-		ASSERT_PTR( pColor );
-		size_t posTag = text.find( htmlTag );
-		if ( posTag != std::tstring::npos )
-		{	// HTML color format: "#FF0000" for bright red
-			enum { PosR = 0, PosG = 2, PosB = 4, MinLength = 6 };
-			int pos = static_cast<int>( posTag + 1 );
-			BYTE r, g, b;
-
-			if ( str::GetLength( &text[ pos ] ) >= MinLength &&
-				 hlp::ParseHexDigit( &r, text, pos + PosR ) &&
-				 hlp::ParseHexDigit( &g, text, pos + PosG ) &&
-				 hlp::ParseHexDigit( &b, text, pos + PosB ) )
-			{
-				*pColor = RGB( r, g, b );
-				return true;
-			}
-		}
-		return false;
-	}
 
 	std::tstring FormatColor( COLORREF color, const TCHAR* pSep /*= _T("  ")*/ )
 	{
 		if ( CLR_NONE == color )
-			return nullTag;
+			return g_nullTag;
+		else if ( CLR_DEFAULT == color )
+			return str::GetEmpty();
+
+		std::tstring colorLiteral;
+		colorLiteral.reserve( 24 );
+
+		if ( IsSysColor( color ) )
+			stream::Tag( colorLiteral, FormatSysColor( color ), pSep );
+
+		const COLORREF actualColor = EvalColor( color );
+
+		stream::Tag( colorLiteral, FormatRgbColor( actualColor ), pSep );
+		stream::Tag( colorLiteral, FormatHtmlColor( actualColor ), pSep );
+		return colorLiteral;
+	}
+
+	bool ParseColor( COLORREF* pOutColor, const TCHAR* pColorLiteral )
+	{
+		if ( str::Find<str::Case>( pColorLiteral, g_nullTag.c_str(), 0, g_nullTag.length() ) != utl::npos )
+		{
+			utl::AssignPtr( pOutColor, CLR_NONE );
+			return true;
+		}
+
+		if ( ParseSystemColor( pOutColor, pColorLiteral ) )
+			return true;
+
+		if ( ParseRgbColor( pOutColor, pColorLiteral ) )
+			return true;
+
+		if ( ParseHtmlColor( pOutColor, pColorLiteral ) )
+			return true;
+
+		return false;
+	}
+
+
+	std::tstring FormatRgbColor( COLORREF color )
+	{
+		return str::Format( _T("%s(%u, %u, %u)"), g_rgbTag.c_str(), GetRValue( color ), GetGValue( color ), GetBValue( color ) );
+	}
+
+	std::tstring FormatHtmlColor( COLORREF color )
+	{
+		return str::Format( _T("%s%02X%02X%02X"), g_htmlTag.c_str(), GetRValue( color ), GetGValue( color ), GetBValue( color ) );
+	}
+
+	std::tstring FormatSysColor( COLORREF color )
+	{
+		ASSERT( IsSysColor( color ) );
 
 		std::tostringstream oss;
-		oss << FormatHtml( color ) << pSep << FormatRgb( color );
+
+		oss << g_sysTag << '(' << GetSysColorIndex( color ) << ')';
+
+		if ( const CColorEntry* pSysColorName = CColorRepository::GetSystemTable()->FindColor( color ) )
+			oss << "  \"" << pSysColorName->m_name << "\"";
+
 		return oss.str();
 	}
 
-	bool ParseColor( COLORREF* pColor, const std::tstring& text )
+	bool ParseRgbColor( OUT COLORREF* pOutColor, const TCHAR* pRgbColorText )
 	{
-		ASSERT_PTR( pColor );
-		if ( text.find( htmlTag ) != std::tstring::npos && ParseHtml( pColor, text ) )
-			return true;
+		size_t pos = str::Find<str::Case>( pRgbColorText, g_rgbTag.c_str(), 0, g_rgbTag.length() );
 
-		if ( text.find( rgbTag ) != std::tstring::npos && ParseRgb( pColor, text ) )
-			return true;
+		if ( pos != utl::npos )
+		{	// RGB( 255, 0, 0 ) for bright red
+			const TCHAR* pText = str::SkipWhitespace( pRgbColorText + pos + g_rgbTag.length() );
+			unsigned int red, green, blue;
 
-		if ( text.find( nullTag ) != std::tstring::npos )
-			*pColor = CLR_NONE;
+			if ( 3 == _stscanf( pText, _T( "(%u,%u,%u)" ), &red, &green, &blue ) )
+				if ( red < 256 && green < 256 && blue < 256 )
+				{
+					utl::AssignPtr( pOutColor, RGB( red, green, blue ) );
+					return true;
+				}
+		}
+
+		TRACE( _T("Invalid RGB colour literal '%s'\n"), pRgbColorText );
+		return false;
+	}
+
+	bool ParseHtmlColor( OUT COLORREF* pOutColor, const TCHAR* pHtmlColorText )
+	{
+		// quick and less safe parsing
+		// HTML color format: #RRGGBB - "#FF0000" for bright red
+		const TCHAR* pText = str::SkipWhitespace( pHtmlColorText );
+
+		if ( '#' == pText[ 0 ] && str::GetLength( pText ) >= 7 )
+		{
+			const TCHAR digits[] =
+			{
+				*++pText, *++pText, '-',
+				*++pText, *++pText, '-',
+				*++pText, *++pText, '\0'
+			};
+
+			unsigned int red, green, blue;
+			if ( 3 == _stscanf( digits, _T( "%x-%x-%x" ), &red, &green, &blue ) )
+				if ( red < 256 && green < 256 && blue < 256 )
+				{
+					utl::AssignPtr( pOutColor, RGB( red, green, blue ) );
+					return true;
+				}
+		}
+
+		TRACE( _T("Invalid HTML colour literal '%s'\n"), pHtmlColorText );
+		return false;
+	}
+
+	bool ParseSystemColor( OUT COLORREF* pOutSysColor, const TCHAR* pSysColorText )
+	{	// format: 'SYS(16)  "Button Shadow"'
+		ASSERT_PTR( pSysColorText );
+
+		size_t pos = str::Find<str::Case>( pSysColorText, g_sysTag.c_str(), 0, g_sysTag.length() );
+
+		if ( pos != utl::npos )
+		{
+			const TCHAR* pText = str::SkipWhitespace( pSysColorText + pos + g_sysTag.length() );
+			TSysColorIndex sysColorIndex = -1;
+
+			if ( 1 == _stscanf( pText, _T("(%d)"), &sysColorIndex ) )
+				if ( ui::IsValidSysColorIndex( sysColorIndex ) )
+				{
+					utl::AssignPtr( pOutSysColor, MakeSysColor( sysColorIndex ) );
+					return true;
+				}
+		}
+
+		TRACE( _T("Invalid System Colour literal '%s'\n"), pSysColorText );
+		return false;
+	}
+
+
+	bool CopyColor( COLORREF color )
+	{
+		bool succeeded = false;
+		std::auto_ptr<CTextClipboard> pClipboard( CTextClipboard::Open( AfxGetMainWnd()->GetSafeHwnd() ) );
+
+		if ( pClipboard.get() != nullptr )
+		{
+			pClipboard->Clear();
+
+			if ( pClipboard->WriteString( FormatColor( color ) ) )
+				succeeded = true;
+
+			if ( pClipboard->Write( ui::GetColorClipboardFormat(), color ) )
+				succeeded = true;
+		}
+
+		return succeeded;
+	}
+
+	bool PasteColor( OUT COLORREF* pOutColor )
+	{
+		std::auto_ptr<CTextClipboard> pClipboard( CTextClipboard::Open( AfxGetMainWnd()->GetSafeHwnd() ) );
+
+		if ( pClipboard.get() != nullptr )
+		{
+			COLORREF color;
+			if ( pClipboard->Read( GetColorClipboardFormat(), color ) )
+			{
+				utl::AssignPtr( pOutColor, color );
+				return true;
+			}
+
+			std::tstring text;
+			if ( pClipboard->ReadString( text ) )
+				if ( ParseColor( pOutColor, text.c_str() ) )
+					return true;
+		}
 
 		return false;
+	}
+
+	bool CanPasteColor( void )
+	{
+		COLORREF color;
+		return PasteColor( &color );
+	}
+
+	UINT GetColorClipboardFormat( void )
+	{
+		static const UINT s_colorFormat = RegisterClipboardFormat( _T("UTL Color") );
+		return s_colorFormat;
 	}
 }
 
@@ -169,7 +246,7 @@ namespace ui
 namespace ui
 {
 	inline double Square( UINT comp ) { ASSERT( comp >= 0 && comp <= 255 ); return static_cast<double>( comp * comp ); }
-	inline double PercentToFactor( int pct ) { ASSERT( pct >= 0 && pct <= 100 ); return static_cast<double>( pct ) / 100.0; }
+	inline TFactor PercentToFactor( TPercent pct ) { ASSERT( pct >= 0 && pct <= 100 ); return static_cast<TFactor>( pct ) / 100.0; }
 	inline BYTE AsComponent( double component ) { ASSERT( component >= 0.0 && component < 256.0 ); return static_cast<BYTE>( component ); }
 
 
@@ -191,7 +268,7 @@ namespace ui
 		return AsComponent( sqrt( ( Square(comp1) + Square(comp2) + Square(comp3) ) / 3 ) );
 	}
 
-	BYTE GetWeightedMixComponent( UINT comp1, UINT comp2, double weight1 )
+	BYTE GetWeightedMixComponent( UINT comp1, UINT comp2, TFactor weight1 )
 	{
 		// For weighted mixes (i.e. 75% colour A, and 25% colour B) (same for G, B): NewColorR = sqrt( R1^2 * w + R2^2 * (1 - w) )
 		//   weight1 from 0.0 to 1.0
@@ -228,11 +305,11 @@ namespace ui
 		);
 	}
 
-	COLORREF GetWeightedMixColor( COLORREF color1, COLORREF color2, int pct1 )
+	COLORREF GetWeightedMixColor( COLORREF color1, COLORREF color2, TPercent pct1 )
 	{
 		ASSERT( IsActualColor( color1 ) && IsActualColor( color2 ) );
 
-		double weight1 = PercentToFactor( pct1 );
+		TFactor weight1 = PercentToFactor( pct1 );
 
 		return RGB(
 			GetWeightedMixComponent( GetRValue( color1 ), GetRValue( color2 ), weight1 ),
@@ -242,19 +319,19 @@ namespace ui
 	}
 
 
-	COLORREF GetAdjustLuminance( COLORREF color, int byPct )
+	COLORREF GetAdjustLuminance( COLORREF color, TPercent byPct )
 	{
 		CHslColor hslColor( color );
 		return hslColor.ScaleLuminance( byPct ).GetRGB();
 	}
 
-	COLORREF GetAdjustSaturation( COLORREF color, int byPct )
+	COLORREF GetAdjustSaturation( COLORREF color, TPercent byPct )
 	{
 		CHslColor hslColor( color );
 		return hslColor.ScaleSaturation( byPct ).GetRGB();
 	}
 
-	COLORREF GetAdjustHue( COLORREF color, int byPct )
+	COLORREF GetAdjustHue( COLORREF color, TPercent byPct )
 	{
 		CHslColor hslColor( color );
 		return hslColor.ScaleHue( byPct ).GetRGB();
@@ -267,7 +344,8 @@ namespace ui
 
 	CHslColor::CHslColor( COLORREF rgbColor )
 	{
-		REQUIRE( ui::IsActualColor( rgbColor ) );
+		if ( !ui::IsActualColor( rgbColor ) )
+			rgbColor = ui::EvalColor( rgbColor );
 
 		::ColorRGBToHLS( rgbColor, &m_hue, &m_luminance, &m_saturation );	// note the difference: Hsl vs HLS - L and S position is swapped in shell API
 	}
@@ -278,11 +356,11 @@ namespace ui
 		return ::ColorHLSToRGB( m_hue, m_luminance, m_saturation );			// note the difference: Hsl vs HLS - L and S position is swapped in shell API
 	}
 
-	WORD CHslColor::ModifyBy( WORD component, int byPercentage )
+	WORD CHslColor::ModifyBy( WORD component, TPercent byPercentage )
 	{
 		ASSERT( byPercentage >= -100 && byPercentage <= 100 );
 
-		const double byFactor = (double)byPercentage / 100.0;
+		const TFactor byFactor = static_cast<TFactor>( byPercentage ) / 100.0;
 		double newComponent = component;
 
 		if ( byFactor > 0.0 )

@@ -216,7 +216,7 @@ COLORREF CImageDialog::GetBkColor( void ) const
 		return GetSysColor( COLOR_BTNFACE );
 
 	COLORREF bkColor;
-	return ui::ParseColor( &bkColor, m_bkColorText ) ? bkColor : color::Salmon;
+	return ui::ParseColor( &bkColor, m_bkColorText.c_str() ) ? bkColor : color::Salmon;
 }
 
 int CImageDialog::GetZoomPct( void ) const
@@ -647,7 +647,7 @@ void CImageDialog::OnChange_BkColor( void )
 	std::tstring bkColorText = ui::GetComboSelText( m_bkColorCombo );
 
 	COLORREF bkColor;
-	if ( bkColorText.empty() || ui::ParseColor( &bkColor, bkColorText ) )
+	if ( bkColorText.empty() || ui::ParseColor( &bkColor, bkColorText.c_str() ) )
 	{
 		m_bkColorText = bkColorText;
 		RedrawSample();

@@ -359,7 +359,7 @@ void CImageTranspColors::Load( const TCHAR* pSection )
 		{
 			fs::CPath imagePath( itItem->substr( 0, sepPos ) );
 			COLORREF transpColor = CLR_NONE;
-			if ( ui::ParseHtml( &transpColor, itItem->substr( sepPos + 1 ) ) )
+			if ( ui::ParseHtmlColor( &transpColor, &(*itItem)[ sepPos + 1 ] ) )
 				if ( imagePath.FileExist() && transpColor != CLR_NONE )
 					m_transpColorMap[ imagePath ] = transpColor;
 		}
@@ -372,7 +372,7 @@ void CImageTranspColors::Save( const TCHAR* pSection ) const
 
 	for ( std::map<fs::CPath, COLORREF>::const_iterator itImage = m_transpColorMap.begin(); itImage != m_transpColorMap.end(); ++itImage )
 		if ( itImage->first.FileExist() && itImage->second != CLR_NONE )
-			items.push_back( str::Format( _T("%s|%s"), itImage->first.GetPtr(), ui::FormatHtml( itImage->second ).c_str() ) );
+			items.push_back( str::Format( _T("%s|%s"), itImage->first.GetPtr(), ui::FormatHtmlColor( itImage->second ).c_str() ) );
 
 	AfxGetApp()->WriteProfileString( pSection, s_entry, str::Join( items, _T(";") ).c_str() );
 }

@@ -617,6 +617,9 @@
     <ClInclude Include="TaskDialog.h">
       <Filter>UI\Dialogs</Filter>
     </ClInclude>
+    <ClInclude Include="ColorRepository.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1056,6 +1059,9 @@
     </ClCompile>
     <ClCompile Include="TaskDialog.cpp">
       <Filter>UI\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorRepository.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
