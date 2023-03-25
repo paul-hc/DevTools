@@ -21,6 +21,7 @@ private:
 	void TestStringCompare( void );
 	void TestStringFind( void );
 	void TestStringFindSequence( void );
+	void TestStringFindLast( void );
 	void TestStringOccurenceCount( void );
 	void TestStringMatch( void );
 	void TestStringSorting( void );

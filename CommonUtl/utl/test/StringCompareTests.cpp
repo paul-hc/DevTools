@@ -271,9 +271,9 @@ void CStringCompareTests::TestStringFind( void )
 			ASSERT_EQUAL( 0, str::Find<str::IgnoreCase>( "Some text", "" ) );
 
 			ASSERT_EQUAL( 0, str::Find<str::Case>( "Some text", "Some" ) );
-			ASSERT_EQUAL( 0, str::Find<str::Case>( "Some text", "SoXY", 0, 2 ) );
+			ASSERT_EQUAL( 0, str::Find<str::Case>( "Some text", "SoXY", 2, 0 ) );
 			ASSERT_EQUAL( utl::npos, str::Find<str::Case>( "Some text", "some" ) );
-			ASSERT_EQUAL( utl::npos, str::Find<str::Case>( "Some text", "Some", 1 ) );	// offset past match
+			ASSERT_EQUAL( utl::npos, str::Find<str::Case>( "Some text", "Some", utl::npos, 1 ) );	// offset past match
 
 			ASSERT_EQUAL( 0, str::Find<str::Case>( "Some text", L"Some" ) );
 			ASSERT_EQUAL( utl::npos, str::Find<str::Case>( "Some text", L"SOME" ) );
@@ -283,7 +283,7 @@ void CStringCompareTests::TestStringFind( void )
 
 			ASSERT_EQUAL( 5, str::Find<str::IgnoreCase>( "Some text", "text" ) );
 			ASSERT_EQUAL( 5, str::Find<str::IgnoreCase>( "Some text", "TEXT" ) );
-			ASSERT_EQUAL( 5, str::Find<str::IgnoreCase>( "Some text", "TEab", 0, 2 ) );
+			ASSERT_EQUAL( 5, str::Find<str::IgnoreCase>( "Some text", "TEab", 2, 0 ) );
 			ASSERT_EQUAL( utl::npos, str::Find<str::IgnoreCase>( "Some text", "q" ) );
 
 			ASSERT_EQUAL( 5, str::Find<str::IgnoreCase>( "Some text", L"text" ) );
@@ -344,6 +344,10 @@ void CStringCompareTests::TestStringFindSequence( void )
 
 	items.push_back( "Red Hat Linux" );
 	ASSERT( AllContain( items, str::CSequence<char>( "LIQUID", 2 ), pred::TStrEqualsIgnoreCase() ) );
+}
+
+void CStringCompareTests::TestStringFindLast( void )
+{
 }
 
 void CStringCompareTests::TestStringOccurenceCount( void )
@@ -538,6 +542,7 @@ void CStringCompareTests::Run( void )
 	RUN_TEST( TestStringCompare );
 	RUN_TEST( TestStringFind );
 	RUN_TEST( TestStringFindSequence );
+	RUN_TEST( TestStringFindLast );
 	RUN_TEST( TestStringOccurenceCount );
 	RUN_TEST( TestStringMatch );
 

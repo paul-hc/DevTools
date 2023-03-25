@@ -151,8 +151,8 @@ BOOL TextContent::LoadFileSection( LPCTSTR compoundFilePath, LPCTSTR sectionName
 long TextContent::FindText( LPCTSTR pattern, long startPos, BOOL caseSensitive )
 {
 	return caseSensitive
-		? static_cast<long>( str::Find<str::Case>( m_textContent.c_str(), pattern, startPos ) )
-		: static_cast<long>( str::Find<str::IgnoreCase>( m_textContent.c_str(), pattern, startPos ) );
+		? static_cast<long>( str::Find<str::Case>( m_textContent.c_str(), pattern, utl::npos, startPos ) )
+		: static_cast<long>( str::Find<str::IgnoreCase>( m_textContent.c_str(), pattern, utl::npos, startPos ) );
 }
 
 long TextContent::ReplaceText( LPCTSTR pattern, LPCTSTR replacement, BOOL caseSensitive )

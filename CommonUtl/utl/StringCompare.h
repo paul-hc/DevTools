@@ -690,7 +690,7 @@ namespace str
 	}
 
 	template< str::CaseType caseType, typename CharT, typename SeqCharT >
-	size_t Find( const CharT* pText, const SeqCharT* pSequence, size_t offset = 0, size_t seqLength = utl::npos )
+	size_t Find( const CharT* pText, const SeqCharT* pSequence, size_t seqLength = utl::npos, size_t offset = 0 )
 	{
 		ASSERT( pText != nullptr && offset <= GetLength( pText ) );
 
@@ -719,7 +719,7 @@ namespace str
 			const size_t searchLen = str::GetLength( pSearch ), replaceLen = str::GetLength( pReplace );
 
 			for ( size_t pos = 0;
-				  count != maxCount && ( pos = str::Find<caseType>( pText->c_str(), pSearch, pos, searchLen ) ) != std::string::npos;
+				  count != maxCount && ( pos = str::Find<caseType>( pText->c_str(), pSearch, searchLen, pos ) ) != std::string::npos;
 				  ++count, pos += replaceLen )
 				pText->replace( pText->begin() + pos, pText->begin() + pos + searchLen, pReplace, pReplace + replaceLen );
 		}
@@ -736,7 +736,7 @@ namespace str
 
 		if ( !str::IsEmpty( pSequence ) )
 			for ( size_t offset = 0;
-				  ( offset = str::Find<caseType>( pText, pSequence, offset ) ) != std::string::npos;
+				  ( offset = str::Find<caseType>( pText, pSequence, seqLen, offset ) ) != std::string::npos;
 				  offset += seqLen )
 				++count;
 
@@ -798,7 +798,7 @@ namespace str
 	template< typename CharT >
 	inline size_t FindSequence( const CharT* pText, const CSequence<CharT>& seq, size_t offset = 0 )
 	{
-		return Find<str::Case>( pText, seq.m_pSeq, offset, seq.m_length );
+		return Find<str::Case>( pText, seq.m_pSeq, seq.m_length, offset );
 	}
 
 	template< typename CharT, typename CharBinPredT >
