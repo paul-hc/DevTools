@@ -708,10 +708,35 @@ namespace str
 		return utl::npos;
 	}
 
+
 	template< str::CaseType caseType, typename CharT, typename SeqCharT >
-	size_t Replace( IN OUT std::basic_string<CharT>* pText, const SeqCharT* pSearch, const SeqCharT* pReplace, size_t maxCount = utl::npos )
+	size_t FindLast( const CharT* pText, const SeqCharT* pSequence, size_t seqLength = utl::npos, size_t offset = utl::npos )
 	{
-		ASSERT( pText != nullptr && pSearch != nullptr && pReplace != nullptr );
+		ASSERT_PTR( pText );
+
+		str::SettleLength( offset, pText );
+		str::SettleLength( seqLength, pSequence );
+
+		const CharT* pEnd = pText + offset;
+		const CharT* pSeqEnd = pSequence + seqLength;
+		const pred::CharEqual<caseType> charEqual;
+
+		const CharT* pFound = std::find_end( pText, pEnd, pSequence, pSeqEnd, charEqual );
+
+		return pFound != pEnd ? std::distance( pText, pFound ) : utl::npos;
+	}
+
+	template< str::CaseType caseType, typename CharT, typename SeqCharT >
+	inline size_t FindLast( const CharT* pText, SeqCharT chr, size_t offset = utl::npos )
+	{
+		return FindLast<caseType>( pText, &chr, 1, offset );
+	}
+
+
+	template< str::CaseType caseType, typename StringT, typename SeqCharT >
+	size_t Replace( IN OUT StringT* pString, const SeqCharT* pSearch, const SeqCharT* pReplace, size_t maxCount = utl::npos )
+	{
+		ASSERT( pString != nullptr && pSearch != nullptr && pReplace != nullptr );
 		size_t count = 0;
 
 		if ( !str::IsEmpty( pSearch ) )
@@ -719,9 +744,9 @@ namespace str
 			const size_t searchLen = str::GetLength( pSearch ), replaceLen = str::GetLength( pReplace );
 
 			for ( size_t pos = 0;
-				  count != maxCount && ( pos = str::Find<caseType>( pText->c_str(), pSearch, searchLen, pos ) ) != std::string::npos;
+				  count != maxCount && ( pos = str::Find<caseType>( pString->c_str(), pSearch, searchLen, pos ) ) != std::string::npos;
 				  ++count, pos += replaceLen )
-				pText->replace( pText->begin() + pos, pText->begin() + pos + searchLen, pReplace, pReplace + replaceLen );
+				pString->replace( pString->begin() + pos, pString->begin() + pos + searchLen, pReplace, pReplace + replaceLen );
 		}
 		else
 			ASSERT( !str::IsEmpty( pSearch ) );		// warning assertion

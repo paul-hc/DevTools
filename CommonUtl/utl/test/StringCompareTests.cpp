@@ -348,6 +348,68 @@ void CStringCompareTests::TestStringFindSequence( void )
 
 void CStringCompareTests::TestStringFindLast( void )
 {
+	const char* pText = "xy123xy987xy00xy";
+	size_t pos;
+
+	// case sensitive
+	{
+		{	// sequence
+			std::string seq = "xy";
+
+			ASSERT_EQUAL( utl::npos, str::FindLast<str::Case>( "", "" ) );
+			ASSERT_EQUAL( utl::npos, str::FindLast<str::Case>( pText, "pq" ) );
+
+			pos = str::FindLast<str::Case>( pText, seq.c_str(), seq.length() );
+			ASSERT_EQUAL_STR( "xy", pText + pos );
+			pos = str::FindLast<str::Case>( pText, seq.c_str(), seq.length(), pos );
+			ASSERT_HAS_PREFIX( "xy00", pText + pos );
+			pos = str::FindLast<str::Case>( pText, seq.c_str(), seq.length(), pos );
+			ASSERT_HAS_PREFIX( "xy987", pText + pos );
+			pos = str::FindLast<str::Case>( pText, seq.c_str(), seq.length(), pos );
+			ASSERT_HAS_PREFIX( "xy123", pText + pos );
+		}
+		{
+			// single character
+			pos = str::FindLast<str::Case>( pText, 'y' );
+			ASSERT_EQUAL_STR( "y", pText + pos );
+			pos = str::FindLast<str::Case>( pText, 'y', pos );
+			ASSERT_HAS_PREFIX( "y00", pText + pos );
+			pos = str::FindLast<str::Case>( pText, 'y', pos );
+			ASSERT_HAS_PREFIX( "y987", pText + pos );
+			pos = str::FindLast<str::Case>( pText, 'y', pos );
+			ASSERT_HAS_PREFIX( "y123", pText + pos );
+		}
+	}
+
+	// case in-sensitive
+	{
+		{	// sequence
+			std::string seq = "XY";
+
+			ASSERT_EQUAL( utl::npos, str::FindLast<str::IgnoreCase>( "", "" ) );
+			ASSERT_EQUAL( utl::npos, str::FindLast<str::IgnoreCase>( pText, "PQ" ) );
+
+			pos = str::FindLast<str::IgnoreCase>( pText, 'X' );
+			ASSERT_EQUAL_STR( "xy", pText + pos );
+			pos = str::FindLast<str::IgnoreCase>( pText, 'X', pos );
+			ASSERT_HAS_PREFIX( "xy00", pText + pos );
+			pos = str::FindLast<str::IgnoreCase>( pText, 'X', pos );
+			ASSERT_HAS_PREFIX( "xy987", pText + pos );
+			pos = str::FindLast<str::IgnoreCase>( pText, 'X', pos );
+			ASSERT_HAS_PREFIX( "xy123", pText + pos );
+		}
+
+		{	// single character
+			pos = str::FindLast<str::IgnoreCase>( pText, 'Y' );
+			ASSERT_EQUAL_STR( "y", pText + pos );
+			pos = str::FindLast<str::IgnoreCase>( pText, 'Y', pos );
+			ASSERT_HAS_PREFIX( "y00", pText + pos );
+			pos = str::FindLast<str::IgnoreCase>( pText, 'Y', pos );
+			ASSERT_HAS_PREFIX( "y987", pText + pos );
+			pos = str::FindLast<str::IgnoreCase>( pText, 'Y', pos );
+			ASSERT_HAS_PREFIX( "y123", pText + pos );
+		}
+	}
 }
 
 void CStringCompareTests::TestStringOccurenceCount( void )
