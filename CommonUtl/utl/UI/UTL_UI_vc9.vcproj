@@ -1342,6 +1342,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ColorPickerButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ColorPickerButton.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ContentFitBase.cpp"
 					>
 				</File>

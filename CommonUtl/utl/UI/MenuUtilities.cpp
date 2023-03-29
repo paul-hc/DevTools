@@ -110,7 +110,7 @@ namespace ui
 		if ( pExcludeRect != nullptr )			// pExcludeRect is ignored by TrackPopupMenu()
 			excludeParams.rcExclude = *pExcludeRect;
 
-		return ui::ToCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != nullptr ? &excludeParams : nullptr ) );
+		return ui::ToIntCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != nullptr ? &excludeParams : nullptr ) );
 	}
 
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign /*= DropDown*/,

@@ -98,7 +98,7 @@ namespace ide
 			hWnd, ui::GetClassName( hWnd ).c_str(), ui::GetWindowText( hWnd ).c_str(), style );
 
 		if ( HasFlag( style, WS_CHILD ) )
-			stream::Tag( text, str::Format( _T("child_id=%d"), ui::ToCmdId( ::GetDlgCtrlID( hWnd ) ) ), s_sep );
+			stream::Tag( text, str::Format( _T("child_id=%d"), ui::ToIntCmdId( ::GetDlgCtrlID( hWnd ) ) ), s_sep );
 
 		stream::Tag( text, str::Format( _T("pos(%d, %d), size(%d, %d)"), windowRect.left, windowRect.top, windowRect.Width(), windowRect.Height() ), s_sep );
 		return text;

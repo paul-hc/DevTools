@@ -2,8 +2,11 @@
 #include "stdafx.h"
 #include "ColorRepository.h"
 #include "Color.h"
+#include "utl/ContainerOwnership.h"
+#include "utl/EnumTags.h"
 #include "utl/Range.h"
 #include "utl/StringUtilities.h"
+#include <unordered_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -12,9 +15,16 @@
 
 namespace ui
 {
+	const CEnumTags& GetTags_ColorBatch( void )
+	{
+		static const CEnumTags s_tags( _T("System|Standard|Custom|DirectX|HTML|X11|Shades|User") );
+		return s_tags;
+	}
+
+
 	bool HasLuminanceVariation( COLORREF color, int startPct /*= 10*/, int endPct /*= 100*/ )
 	{
-		if ( !ui::IsActualColor( color ) )
+		if ( !ui::IsRealColor( color ) )
 			color = ui::EvalColor( color );
 
 		Range<COLORREF> colorRange( color );
@@ -26,7 +36,7 @@ namespace ui
 
 	bool HasSaturationVariation( COLORREF color, int startPct /*= 10*/, int endPct /*= 100*/ )
 	{
-		if ( !ui::IsActualColor( color ) )
+		if ( !ui::IsRealColor( color ) )
 			color = ui::EvalColor( color );
 
 		Range<COLORREF> colorRange( color );
@@ -51,49 +61,84 @@ namespace ui
 
 CColorEntry::CColorEntry( COLORREF color, const char* pLiteral )
 	: m_color( color )
-	, m_name( word::ToSpacedWordBreaks( str::FromAnsi( pLiteral ).c_str() ) )
+	, m_name( word::ToSpacedWordBreaks( str::FromAnsi( FindScopedLiteral( pLiteral ) ).c_str() ) )
+	, m_pBatch( nullptr )
 {
 }
 
+const char* CColorEntry::FindScopedLiteral( const char* pScopedColorName )
+{
+	static const std::string s_scopeOp = "::";
+	size_t posLastScope = str::FindLast<str::Case>( pScopedColorName, s_scopeOp.c_str(), s_scopeOp.length() );
 
-// CColorTable implementation
+	return posLastScope != std::string::npos ? ( pScopedColorName + posLastScope + s_scopeOp.length() ) : pScopedColorName;
+}
 
-CColorTable::CColorTable( size_t rowCount, UINT baseCmdId )
-	: m_rowCount( rowCount )
+
+// CColorBatch implementation
+
+CColorBatch::CColorBatch( ui::ColorBatch batchType, UINT baseCmdId, size_t capacity, int layoutCount /*= 1*/ )
+	: m_batchType( batchType )
 	, m_baseCmdId( baseCmdId )
+	, m_layoutCount( layoutCount )
 {
-	ASSERT( m_baseCmdId != 0 );
+	m_colors.reserve( capacity );
+	ENSURE( m_baseCmdId != 0 );
+	ENSURE( m_layoutCount != 0 );
 }
 
-UINT CColorTable::GetCmdIdAt( size_t index ) const
+CColorBatch::~CColorBatch()
 {
-	ASSERT( index < m_colors.size() );
-	return m_baseCmdId + static_cast<UINT>( index );
 }
 
-const CColorEntry* CColorTable::FindColor( COLORREF rawColor ) const
+const std::tstring& CColorBatch::GetBatchName( void ) const
 {
-	for ( std::vector<CColorEntry>::const_iterator itColor = m_colors.begin(); itColor != m_colors.end(); ++itColor )
-		if ( rawColor == itColor->m_color )
-			return &*itColor;
-
-	return nullptr;
+	return ui::GetTags_ColorBatch().FormatUi( m_batchType );
 }
 
-size_t CColorTable::FindCmdIndex( UINT cmdId ) const
+void CColorBatch::Add( const CColorEntry& colorEntry )
+{
+	m_colors.push_back( colorEntry );
+	m_colors.back().m_pBatch = this;
+}
+
+const CColorEntry* CColorBatch::FindColor( COLORREF rawColor ) const
+{
+	std::vector<CColorEntry>::const_iterator itFound = std::find( m_colors.begin(), m_colors.end(), rawColor );
+	if ( itFound == m_colors.end() )
+		return nullptr;
+
+	return &*itFound;
+}
+
+size_t CColorBatch::FindCmdIndex( UINT cmdId ) const
 {
 	size_t foundIndex = cmdId - m_baseCmdId;
 	return foundIndex < m_colors.size() ? foundIndex : utl::npos;
 }
 
-CColorTable* CColorTable::MakeShades( size_t shadesCount, COLORREF selColor )
+void CColorBatch::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const
+{
+	if ( m_layoutCount > 0 )		// column layout?
+	{
+		utl::AssignPtr( pRowCount, m_colors.size() / m_layoutCount );
+		utl::AssignPtr( pColumnCount, static_cast<size_t>( m_layoutCount ) );
+	}
+	else
+	{
+		utl::AssignPtr( pRowCount, static_cast<size_t>( -m_layoutCount ) );
+		utl::AssignPtr( pColumnCount, m_colors.size() / -m_layoutCount );
+	}
+}
+
+CColorBatch* CColorBatch::MakeShadesBatch( size_t shadesCount, COLORREF selColor )
 {
 	if ( 0 == shadesCount || ui::IsUndefinedColor( selColor ) )
 		return nullptr;
 
 	selColor = ui::EvalColor( selColor );
 
-	CColorTable* pShadesTable = new CColorTable( shadesCount, CColorRepository::ShadesTableBaseId );
+	CColorBatch* pShadesBatch = new CColorBatch( ui::Shades_Colors, CColorRepository::BaseId_Shades, shadesCount );
 
 	static const Range<ui::TPercent> s_pctRange( 10, 100 );			// [10% to 100%]
 	std::vector<ui::TPercent> percentages;
@@ -116,7 +161,7 @@ CColorTable* CColorTable::MakeShades( size_t shadesCount, COLORREF selColor )
 			ui::AdjustLuminance( lighter, percentages[ i ] );
 
 			CColorEntry colorEntry( lighter, str::Format( _T("%s +%d%%"), s_shadeTags[ Lightness ].c_str(), percentages[i] ) );
-			pShadesTable->m_colors.push_back( colorEntry );
+			pShadesBatch->Add( colorEntry );
 		}
 
 	if ( ui::HasLuminanceVariation( selColor, -percentages[ 0 ], -percentages[ 1 ] ) )		// some variation?
@@ -126,7 +171,7 @@ CColorTable* CColorTable::MakeShades( size_t shadesCount, COLORREF selColor )
 			ui::AdjustLuminance( darker, -percentages[ i ] );
 
 			CColorEntry colorEntry( darker, str::Format( _T("%s %d%%"), s_shadeTags[ Lightness ].c_str(), -percentages[i] ) );
-			pShadesTable->m_colors.push_back( colorEntry );
+			pShadesBatch->Add( colorEntry );
 		}
 
 	if ( ui::HasSaturationVariation( selColor, -percentages[ 0 ], -percentages[ 1 ] ) )		// some variation?
@@ -136,10 +181,96 @@ CColorTable* CColorTable::MakeShades( size_t shadesCount, COLORREF selColor )
 			ui::AdjustLuminance( desaturated, -percentages[ i ] );
 
 			CColorEntry colorEntry( desaturated, str::Format( _T("%s %d%%"), s_shadeTags[ Saturation ].c_str(), -percentages[i] ) );
-			pShadesTable->m_colors.push_back( colorEntry );
+			pShadesBatch->Add( colorEntry );
 		}
 
-	return pShadesTable;
+	return pShadesBatch;
+}
+
+
+// CColorBatchGroup implementation
+
+const CColorBatch* CColorBatchGroup::FindBatch( ui::ColorBatch batchType ) const
+{
+	for ( std::vector<CColorBatch*>::const_iterator itBatch = m_colorBatches.begin(); itBatch != m_colorBatches.end(); ++itBatch )
+		if ( (*itBatch)->GetBatchType() == batchType )
+			return *itBatch;
+
+	return nullptr;
+}
+
+const CColorEntry* CColorBatchGroup::FindColorEntry( COLORREF rawColor ) const
+{
+	if ( !ui::IsUndefinedColor( rawColor ) )		// a repo color?
+	{
+		if ( ui::IsSysColor( rawColor ) )
+		{	// look it up only in sys-colors batch
+			const CColorBatch* pSysColors = FindSystemBatch();
+			return pSysColors != nullptr ? pSysColors->FindColor( rawColor ) : nullptr;
+		}
+
+		rawColor = ui::EvalColor( rawColor );		// for the rest of the batches search for evaluated color
+
+		for ( std::vector<CColorBatch*>::const_iterator itBatch = m_colorBatches.begin(); itBatch != m_colorBatches.end(); ++itBatch )
+			if ( (*itBatch)->GetBatchType() != ui::System_Colors )		// look only in batches with real colors
+				if ( const CColorEntry* pFound = ( *itBatch )->FindColor( rawColor ) )
+					return pFound;
+	}
+
+	return nullptr;
+}
+
+void CColorBatchGroup::QueryMatchingColors( OUT std::vector<const CColorEntry*>& rColorEntries, COLORREF rawColor ) const
+{
+	if ( !ui::IsUndefinedColor( rawColor ) )				// color has entry?
+	{
+		if ( ui::IsSysColor( rawColor ) )
+		{	// look it up only in sys-colors batch
+			if ( const CColorBatch* pSysColors = FindSystemBatch() )
+				if ( const CColorEntry* pFound = pSysColors->FindColor( rawColor ) )
+					rColorEntries.push_back( pFound );
+		}
+		else
+		{
+			rawColor = ui::EvalColor( rawColor );			// for the rest of the batches search for evaluated color
+
+			for ( std::vector<CColorBatch*>::const_iterator itBatch = m_colorBatches.begin(); itBatch != m_colorBatches.end(); ++itBatch )
+				if ( (*itBatch)->GetBatchType() != ui::System_Colors )		// look only in batches with real colors
+					if ( const CColorEntry* pFound = ( *itBatch )->FindColor( rawColor ) )
+						rColorEntries.push_back( pFound );
+		}
+	}
+}
+
+std::tstring CColorBatchGroup::FormatColorMatch( COLORREF rawColor, bool multiple /*= true*/ ) const
+{
+	std::vector<const CColorEntry*> colorEntries;
+
+	if ( multiple )
+		QueryMatchingColors( colorEntries, rawColor );
+	else if ( const CColorEntry* pFoundEntry = FindColorEntry( rawColor ) )
+		colorEntries.push_back( pFoundEntry );
+
+	static const TCHAR s_sep[] = _T("  ");
+	func::ToQualifiedColorName toQualifiedName;
+	std::tstring outText;
+
+	if ( !colorEntries.empty() )
+		if ( colorEntries.size() > 1 )
+		{
+			std::unordered_set<std::tstring> colorNames;
+			std::transform( colorEntries.begin(), colorEntries.end(), std::inserter( colorNames, colorNames.begin() ), func::ToColorName() );
+
+			if ( 1 == colorNames.size() )		// single shared color name?
+				outText = *colorNames.begin() + s_sep + str::Enquote( str::Join( colorEntries, _T(", "), func::ToBatchName() ).c_str(), _T("("), _T(")") );
+			else
+				outText = str::Join( colorEntries, _T(", "), toQualifiedName );
+		}
+		else
+			outText = toQualifiedName( colorEntries.front(), s_sep );
+
+	stream::Tag( outText, ui::FormatColor( rawColor ), s_sep );
+	return outText;
 }
 
 
@@ -147,717 +278,745 @@ CColorTable* CColorTable::MakeShades( size_t shadesCount, COLORREF selColor )
 
 CColorRepository::CColorRepository( void )
 {
-	m_colorTables.push_back( GetTable_Standard() );
-	m_colorTables.push_back( GetTable_Custom() );
-	m_colorTables.push_back( GetHtmlTable() );
-	m_colorTables.push_back( GetPaintTable() );
-	m_colorTables.push_back( GetX11Table() );
+	// add color batches in ui::ColorBatch order:
+	m_colorBatches.push_back( MakeBatch_System() );
+	m_colorBatches.push_back( MakeBatch_Standard() );
+	m_colorBatches.push_back( MakeBatch_Custom() );
+	m_colorBatches.push_back( MakeBatch_DirectX() );
+	m_colorBatches.push_back( MakeBatch_HTML() );
+	m_colorBatches.push_back( MakeBatch_X11() );
 }
 
-CColorRepository::~CColorRepository()
+const CColorRepository* CColorRepository::Instance( void )
 {
+	static const CColorRepository s_colorRepo;
+	return &s_colorRepo;
 }
 
-const CColorRepository& CColorRepository::Instance( void )
+void CColorRepository::Clear( void )
 {
-	static const CColorRepository repository;
-	return repository;
+	utl::ClearOwningContainer( m_colorBatches );
 }
 
-CColorTable* CColorRepository::GetStockColorTable( void )
+
+CColorBatch* CColorRepository::MakeBatch_System( void )
 {
-	return GetHtmlTable();
+	CColorBatch* pSysBatch = new CColorBatch( ui::System_Colors, BaseId_System, 31, 2 );		// 31 colors: 2 columns x 16 rows
+
+	pSysBatch->Add( CColorEntry( COLOR_BACKGROUND, _T("Desktop Background") ) );
+	pSysBatch->Add( CColorEntry( COLOR_WINDOW, _T("Window Background") ) );
+	pSysBatch->Add( CColorEntry( COLOR_WINDOWTEXT, _T("Window Text") ) );
+	pSysBatch->Add( CColorEntry( COLOR_WINDOWFRAME, _T("Window Frame") ) );
+	pSysBatch->Add( CColorEntry( COLOR_BTNFACE, _T("Button Face") ) );
+	pSysBatch->Add( CColorEntry( COLOR_BTNHIGHLIGHT, _T("Button Highlight") ) );
+	pSysBatch->Add( CColorEntry( COLOR_BTNSHADOW, _T("Button Shadow") ) );
+	pSysBatch->Add( CColorEntry( COLOR_BTNTEXT, _T("Button Text") ) );
+	pSysBatch->Add( CColorEntry( COLOR_GRAYTEXT, _T("Disabled Text") ) );
+	pSysBatch->Add( CColorEntry( COLOR_3DDKSHADOW, _T("3D Dark Shadow") ) );
+	pSysBatch->Add( CColorEntry( COLOR_3DLIGHT, _T("3D Light Color") ) );
+	pSysBatch->Add( CColorEntry( COLOR_HIGHLIGHT, _T("Selected") ) );
+	pSysBatch->Add( CColorEntry( COLOR_HIGHLIGHTTEXT, _T("Selected Text") ) );
+	pSysBatch->Add( CColorEntry( COLOR_CAPTIONTEXT, _T("Scroll Bar Arrow") ) );
+	pSysBatch->Add( CColorEntry( COLOR_HOTLIGHT, _T("Hot-Track") ) );
+	pSysBatch->Add( CColorEntry( COLOR_INFOBK, _T("Tooltip Background") ) );
+	pSysBatch->Add( CColorEntry( COLOR_INFOTEXT, _T("Tooltip Text") ) );
+	pSysBatch->Add( CColorEntry( COLOR_SCROLLBAR, _T("Scroll Bar Gray Area") ) );
+	pSysBatch->Add( CColorEntry( COLOR_MENU, _T("Menu Background") ) );
+	pSysBatch->Add( CColorEntry( COLOR_MENUBAR, _T("Flat Menu Bar") ) );
+	pSysBatch->Add( CColorEntry( COLOR_MENUHILIGHT, _T("Menu Highlight") ) );
+	pSysBatch->Add( CColorEntry( COLOR_MENUTEXT, _T("Menu Text") ) );
+	pSysBatch->Add( CColorEntry( COLOR_ACTIVECAPTION, _T("Active Window Title Bar") ) );
+	pSysBatch->Add( CColorEntry( COLOR_GRADIENTACTIVECAPTION, _T("Active Window Gradient") ) );
+	pSysBatch->Add( CColorEntry( COLOR_ACTIVEBORDER, _T("Active Window Border") ) );
+	pSysBatch->Add( CColorEntry( COLOR_INACTIVECAPTION, _T("Inactive Window Caption") ) );
+	pSysBatch->Add( CColorEntry( COLOR_GRADIENTINACTIVECAPTION, _T("Inactive Window Gradient") ) );
+	pSysBatch->Add( CColorEntry( COLOR_INACTIVEBORDER, _T("Inactive Window Border") ) );
+	pSysBatch->Add( CColorEntry( COLOR_INACTIVECAPTIONTEXT, _T("Inactive Window Caption Text") ) );
+	pSysBatch->Add( CColorEntry( COLOR_APPWORKSPACE, _T("MDI Background") ) );
+	pSysBatch->Add( CColorEntry( COLOR_DESKTOP, _T("Desktop Background") ) );
+
+	return pSysBatch;
 }
 
-const CColorEntry* CColorRepository::FindEntry( COLORREF rawColor ) const
+CColorBatch* CColorRepository::MakeBatch_Standard( void )
 {
-	if ( ui::IsUndefinedColor( rawColor ) )
-		return nullptr;			// no entry for NULL color
+	CColorBatch* pBatch = new CColorBatch( ui::Standard_Colors, BaseId_Standard, color::_Standard_ColorCount, 8 );		// 40 colors: 8 columns x 6 rows
 
-	if ( ui::IsSysColor( rawColor ) )
-		if ( const CColorEntry* pFound = GetSystemTable()->FindColor( rawColor ) )
-			return pFound;
+	pBatch->Add( COLOR_ENTRY( color::Black ) );
+	pBatch->Add( COLOR_ENTRY( color::DarkRed ) );
+	pBatch->Add( COLOR_ENTRY( color::Red ) );
+	pBatch->Add( COLOR_ENTRY( color::Magenta ) );
+	pBatch->Add( COLOR_ENTRY( color::Rose ) );
+	pBatch->Add( COLOR_ENTRY( color::Brown ) );
+	pBatch->Add( COLOR_ENTRY( color::Orange ) );
+	pBatch->Add( COLOR_ENTRY( color::LightOrange ) );
+	pBatch->Add( COLOR_ENTRY( color::Gold ) );
+	pBatch->Add( COLOR_ENTRY( color::Tan ) );
+	pBatch->Add( COLOR_ENTRY( color::OliveGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::DarkYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::Lime ) );
+	pBatch->Add( COLOR_ENTRY( color::Yellow ) );
+	pBatch->Add( COLOR_ENTRY( color::LightYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::DarkGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::Green ) );
+	pBatch->Add( COLOR_ENTRY( color::SeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::BrightGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::LightGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::DarkTeal ) );
+	pBatch->Add( COLOR_ENTRY( color::Teal ) );
+	pBatch->Add( COLOR_ENTRY( color::Aqua ) );
+	pBatch->Add( COLOR_ENTRY( color::Turquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::LightTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::DarkBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::Blue ) );
+	pBatch->Add( COLOR_ENTRY( color::LightBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::SkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::PaleBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::Indigo ) );
+	pBatch->Add( COLOR_ENTRY( color::BlueGray ) );
+	pBatch->Add( COLOR_ENTRY( color::Violet ) );
+	pBatch->Add( COLOR_ENTRY( color::Plum ) );
+	pBatch->Add( COLOR_ENTRY( color::Lavender ) );
+	pBatch->Add( CColorEntry( color::Grey80, "Grey 80%" ) );
+	pBatch->Add( CColorEntry( color::Grey50, "Grey 50%" ) );
+	pBatch->Add( CColorEntry( color::Grey40, "Grey 40%" ) );
+	pBatch->Add( CColorEntry( color::Grey25, "Grey 25%" ) );
+	pBatch->Add( COLOR_ENTRY( color::White ) );
 
-	COLORREF color = ui::EvalColor( rawColor );
-
-	for ( std::vector<CColorTable*>::const_iterator itTable = m_colorTables.begin(); itTable != m_colorTables.end(); ++itTable )
-		if ( const CColorEntry* pFound = ( *itTable )->FindColor( color ) )
-			return pFound;
-
-	return nullptr;
+	return pBatch;
 }
 
-void CColorRepository::QueryTablesWithColor( OUT std::vector<CColorTable*>& rColorTables, COLORREF rawColor ) const
+CColorBatch* CColorRepository::MakeBatch_Custom( void )
 {
-	if ( ui::IsUndefinedColor( rawColor ) )
-		return;			// no entry for NULL color
+	CColorBatch* pBatch = new CColorBatch( ui::Custom_Colors, BaseId_Custom, color::_Custom_ColorCount, 4 );		// 23 colors: 4 columns x 6 rows
 
-	if ( ui::IsSysColor( rawColor ) )
-		if ( const CColorEntry* pFound = GetSystemTable()->FindColor( rawColor ) )
-			rColorTables.push_back( GetSystemTable() );
+	pBatch->Add( COLOR_ENTRY( color::VeryDarkGrey ) );
+	pBatch->Add( COLOR_ENTRY( color::DarkGrey ) );
+	pBatch->Add( COLOR_ENTRY( color::LightGrey ) );
+	pBatch->Add( COLOR_ENTRY( color::Grey60 ) );
+	pBatch->Add( COLOR_ENTRY( color::Cyan ) );
+	pBatch->Add( COLOR_ENTRY( color::DarkMagenta ) );
+	pBatch->Add( COLOR_ENTRY( color::LightGreenish ) );
+	pBatch->Add( COLOR_ENTRY( color::SpringGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::NeonGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::AzureBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::BlueWindows10 ) );
+	pBatch->Add( COLOR_ENTRY( color::BlueTextWin10 ) );
+	pBatch->Add( COLOR_ENTRY( color::ScarletRed ) );
+	pBatch->Add( COLOR_ENTRY( color::Salmon ) );
+	pBatch->Add( COLOR_ENTRY( color::Pink ) );
+	pBatch->Add( COLOR_ENTRY( color::PastelPink ) );
+	pBatch->Add( COLOR_ENTRY( color::LightPastelPink ) );
+	pBatch->Add( COLOR_ENTRY( color::ToolStripPink ) );
+	pBatch->Add( COLOR_ENTRY( color::TranspPink ) );
+	pBatch->Add( COLOR_ENTRY( color::SolidOrange ) );
+	pBatch->Add( COLOR_ENTRY( color::Amber ) );
+	pBatch->Add( COLOR_ENTRY( color::PaleYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::GhostWhite ) );
 
-	COLORREF color = ui::EvalColor( rawColor );
-
-	for ( std::vector< CColorTable* >::const_iterator itTable = m_colorTables.begin(); itTable != m_colorTables.end(); ++itTable )
-		if ( const CColorEntry* pFound = ( *itTable )->FindColor( color ) )
-			rColorTables.push_back( *itTable );
+	return pBatch;
 }
 
-CColorTable* CColorRepository::GetTable_Standard( void )
+CColorBatch* CColorRepository::MakeBatch_DirectX( void )
 {
-	static CColorTable table( 5, BaseId_Standard );
+	CColorBatch* pBatch = new CColorBatch( ui::DirectX_Colors, BaseId_DirectX, color::directx::_DirectX_ColorCount, 10 );		// 140 colors: 10 columns x 14 rows
 
-	if ( table.m_colors.empty() )
-	{
-		static const struct { COLORREF color; const TCHAR* pName; } colors[] =
-		{	// non-translatable color names
-			// column 0
-			{ color::Black,          _T("Black") },
-			{ color::DarkRed,        _T("Dark Red") },
-			{ color::Red,            _T("Red") },
-			{ color::Magenta,        _T("Magenta") },
-			{ color::Rose,           _T("Rose") },
-			// column 1
-			{ color::Brown,          _T("Brown") },
-			{ color::Orange,         _T("Orange") },
-			{ color::LightOrange,    _T("Light Orange") },
-			{ color::Gold,           _T("Gold") },
-			{ color::Tan,            _T("Tan") },
-			// column 2
-			{ color::OliveGreen,     _T("Olive Green") },
-			{ color::DarkYellow,     _T("Dark Yellow") },
-			{ color::Lime,           _T("Lime") },
-			{ color::Yellow,         _T("Yellow") },
-			{ color::LightYellow,    _T("Light Yellow") },
-			// column 3
-			{ color::DarkGreen,      _T("Dark Green") },
-			{ color::Green,          _T("Green") },
-			{ color::SeaGreen,       _T("Sea Green") },
-			{ color::BrightGreen,    _T("Bright Green") },
-			{ color::LightGreen,     _T("Light Green ") },
-			// column 4
-			{ color::DarkTeal,       _T("Dark Teal") },
-			{ color::Teal,           _T("Teal") },
-			{ color::Aqua,           _T("Aqua") },
-			{ color::Turquoise,      _T("Turquoise") },
-			{ color::LightTurquoise, _T("Light Turquoise") },
-			// column 5
-			{ color::DarkBlue,       _T("Dark Blue") },
-			{ color::Blue,           _T("Blue") },
-			{ color::LightBlue,      _T("Light Blue") },
-			{ color::SkyBlue,        _T("Sky Blue") },
-			{ color::PaleBlue,       _T("Pale Blue") },
-			// column 6
-			{ color::Indigo,         _T("Indigo") },
-			{ color::BlueGray,       _T("Blue-Gray") },
-			{ color::Violet,         _T("Violet") },
-			{ color::Plum,           _T("Plum") },
-			{ color::Lavender,       _T("Lavender") },
-			// column 7
-			{ color::Grey80,         _T("Grey 80%") },
-			{ color::Grey40,         _T("Grey 40%") },
-			{ color::Grey50,         _T("Grey 50%") },
-			{ color::Grey25,         _T("Grey 25%") },
-			{ color::White,          _T("White") }
-		};
+	pBatch->Add( COLOR_ENTRY( color::directx::AliceBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::AntiqueWhite ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Aqua ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Aquamarine ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Azure ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Beige ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Bisque ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Black ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::BlanchedAlmond ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Blue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::BlueViolet ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Brown ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::BurlyWood ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::CadetBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Chartreuse ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Chocolate ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Coral ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::CornflowerBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Cornsilk ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Crimson ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Cyan ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkCyan ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkGoldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkGray ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkKhaki ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkMagenta ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkOliveGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkOrange ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkOrchid ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkRed ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkSalmon ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkSlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkSlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DarkViolet ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DeepPink ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DeepSkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DimGray ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::DodgerBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Firebrick ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::FloralWhite ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::ForestGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Fuchsia ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Gainsboro ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::GhostWhite ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Gold ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Goldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Gray ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Green ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::GreenYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Honeydew ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::HotPink ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::IndianRed ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Indigo ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Ivory ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Khaki ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Lavender ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LavenderBlush ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LawnGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LemonChiffon ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightCoral ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightCyan ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightGoldenrodYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightGray ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightPink ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightSalmon ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightSkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightSlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightSteelBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LightYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Lime ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::LimeGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Linen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Magenta ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Maroon ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumAquamarine ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumOrchid ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumPurple ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumSlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumSpringGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MediumVioletRed ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MidnightBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MintCream ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::MistyRose ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Moccasin ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::NavajoWhite ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Navy ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::OldLace ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Olive ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::OliveDrab ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Orange ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::OrangeRed ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Orchid ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::PaleGoldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::PaleGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::PaleTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::PaleVioletRed ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::PapayaWhip ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::PeachPuff ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Peru ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Pink ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Plum ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::PowderBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Purple ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Red ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::RosyBrown ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::RoyalBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SaddleBrown ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Salmon ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SandyBrown ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SeaShell ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Sienna ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Silver ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Snow ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SpringGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::SteelBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Tan ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Teal ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Thistle ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Tomato ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Turquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Violet ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Wheat ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::White ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::WhiteSmoke ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::Yellow ) );
+	pBatch->Add( COLOR_ENTRY( color::directx::YellowGreen ) );
 
-		table.m_colors.reserve( COUNT_OF( colors ) );
-		for ( unsigned int i = 0; i != COUNT_OF( colors ); ++i )
-			table.m_colors.push_back( CColorEntry( colors[ i ].color, colors[ i ].pName ) );
-	}
-
-	return &table;
+	return pBatch;
 }
 
-CColorTable* CColorRepository::GetTable_Custom( void )
+CColorBatch* CColorRepository::MakeBatch_HTML( void )
 {
-	static CColorTable table( 1, BaseId_Custom );
+	CColorBatch* pBatch = new CColorBatch( ui::HTML_Colors, BaseId_HTML, color::html::_Html_ColorCount, 1 );		// 300 colors: 10 columns x 30 rows
 
-	if ( table.m_colors.empty() )
-	{
-		static const struct { COLORREF color; const TCHAR* pName; } colors[] =
-		{
-			// column 0
-			{ color::VeryDarkGrey,   _T("Darker Shadow Grey") },
-			{ color::LightGreenish,  _T("Light Greenish") },
-			{ color::SpringGreen,    _T("Spring Green") },
-			{ color::NeonGreen,      _T("Neon Green") },
-			{ color::AzureBlue,      _T("Azure Blue") },
-			{ color::ScarletRed,     _T("Scarlet Red") },
-			{ color::Salmon,         _T("Salmon") },
-			{ color::Pink,           _T("Pink") },
-			{ color::SolidOrange,    _T("Orange (solid)") },
-			{ color::Amber,          _T("Amber") },
-			{ color::PaleYellow,     _T("Pale Yellow") },
-			{ color::GhostWhite,     _T("Ghost White") }
-		};
+	pBatch->Add( COLOR_ENTRY( color::html::Black ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray0 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray18 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray21 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray23 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray24 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray25 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray26 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray27 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray28 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray29 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray30 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray31 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray32 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray34 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray35 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray36 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray37 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray38 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray39 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray40 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray41 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray42 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray43 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray44 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray45 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray46 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray47 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray48 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray49 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray50 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gray ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateGray4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSteelBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::html::CadetBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Thistle4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumSlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MidnightBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DimGray ) );
+	pBatch->Add( COLOR_ENTRY( color::html::CornflowerBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DeepSkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DeepSkyBlue2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DeepSkyBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DeepSkyBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DodgerBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DodgerBlue2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DodgerBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DodgerBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Violet ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSteelBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue5 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateGray3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::VioletRed ) );
+	pBatch->Add( COLOR_ENTRY( color::html::VioletRed1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::VioletRed2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DeepPink ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DeepPink2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DeepPink3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DeepPink4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumVioletRed ) );
+	pBatch->Add( COLOR_ENTRY( color::html::VioletRed3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Firebrick ) );
+	pBatch->Add( COLOR_ENTRY( color::html::VioletRed4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Maroon4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Maroon ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Maroon3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Maroon2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Maroon1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Magenta ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Magenta1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Magenta2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Magenta3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Purple ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Purple1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Purple2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Purple3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Purple4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkViolet ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Plum4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed ) );
+	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Plum ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Plum1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Plum2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Plum3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Thistle ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Thistle3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LavenderBlush2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LavenderBlush3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Thistle2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Thistle1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Lavender ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LavenderBlush ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSteelBlue1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightBlue1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightCyan ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateGray1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SlateGray2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSteelBlue2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Turquoise1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Cyan ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Cyan1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Cyan2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Turquoise2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Turquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Cyan3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Turquoise3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::CadetBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::PaleTurquoise3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightBlue2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Cyan4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSkyBlue2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSkyBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue5 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue6 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSkyBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightCyan2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightCyan3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightCyan4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightBlue3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightBlue4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::PaleTurquoise4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumAquamarine ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::ForestGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumForestGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOliveGreen4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Chartreuse4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Green4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::MediumSpringGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LimeGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Green3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Chartreuse3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::YellowGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen5 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Green ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LawnGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Green1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Green2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Chartreuse2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Chartreuse ) );
+	pBatch->Add( COLOR_ENTRY( color::html::GreenYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOliveGreen1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOliveGreen2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOliveGreen3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Yellow ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Yellow1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Khaki1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Khaki2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gold2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gold1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gold ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gold3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Khaki ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Khaki3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Khaki4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Sienna1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Sienna2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Sienna3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Sienna ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Sienna4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::IndianRed4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Salmon4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Gold4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSalmon4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Chocolate ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Coral3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Coral2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Coral ) );
+	pBatch->Add( COLOR_ENTRY( color::html::DarkSalmon ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Salmon1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Salmon2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Salmon3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSalmon3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSalmon2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightSalmon ) );
+	pBatch->Add( COLOR_ENTRY( color::html::SandyBrown ) );
+	pBatch->Add( COLOR_ENTRY( color::html::HotPink ) );
+	pBatch->Add( COLOR_ENTRY( color::html::HotPink1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::HotPink2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::HotPink3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::HotPink4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightCoral ) );
+	pBatch->Add( COLOR_ENTRY( color::html::IndianRed1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::IndianRed2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::IndianRed3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Red ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Red1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Red2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Firebrick1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Firebrick2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Firebrick3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Pink ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Pink2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightPink ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightPink1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightPink2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Pink3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightPink3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightPink4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Pink4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LavenderBlush4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrod4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LemonChiffon4 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LemonChiffon3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrod3 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightGolden2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrod1 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::BlanchedAlmond ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LemonChiffon2 ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LemonChiffon ) );
+	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrodYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::html::Cornsilk ) );
+	pBatch->Add( COLOR_ENTRY( color::html::White ) );
 
-		table.m_colors.reserve( COUNT_OF( colors ) );
-		for ( unsigned int i = 0; i != COUNT_OF( colors ); ++i )
-			table.m_colors.push_back( CColorEntry( colors[ i ].color, colors[ i ].pName ) );
-	}
-
-	return &table;
+	return pBatch;
 }
 
-CColorTable* CColorRepository::GetTable_Status( void )
+CColorBatch* CColorRepository::MakeBatch_X11( void )
 {
-	return nullptr;
-}
+	CColorBatch* pBatch = new CColorBatch( ui::X11_Colors, BaseId_HTML, color::x11::_X11_ColorCount, 1 );		// 140 colors: 10 columns x 14 rows
 
-CColorTable* CColorRepository::GetHtmlTable( void )
-{
-	static CColorTable table( 15, HtmlTableBaseId );
+	pBatch->Add( COLOR_ENTRY( color::x11::Black ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkSlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::SlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightSlateGray ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DimGray ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Gray ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkGray ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Silver ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightGrey ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Gainsboro ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::IndianRed ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightCoral ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Salmon ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkSalmon ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightSalmon ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Red ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Crimson ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::FireBrick ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkRed ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Pink ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightPink ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::HotPink ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DeepPink ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumVioletRed ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::PaleVioletRed ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightSalmon2 ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Coral ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Tomato ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::OrangeRed ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkOrange ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Orange ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Gold ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Yellow ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LemonChiffon ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightGoldenrodYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::PapayaWhip ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Moccasin ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::PeachPuff ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::PaleGoldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Khaki ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkKhaki ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Lavender ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Thistle ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Plum ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Violet ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Orchid ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Fuchsia ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Magenta ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumOrchid ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumPurple ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::BlueViolet ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkViolet ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkOrchid ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkMagenta ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Purple ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Indigo ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkSlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::SlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumSlateBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::GreenYellow ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Chartreuse ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LawnGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Lime ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LimeGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::PaleGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumSpringGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::SpringGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::SeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::ForestGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Green ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::YellowGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::OliveDrab ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Olive ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkOliveGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumAquamarine ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightSeaGreen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkCyan ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Teal ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Aqua ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Cyan ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightCyan ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::PaleTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Aquamarine ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Turquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkTurquoise ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::CadetBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::SteelBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightSteelBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::PowderBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::SkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LightSkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DeepSkyBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DodgerBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::CornflowerBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::RoyalBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Blue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MediumBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Navy ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MidnightBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Cornsilk ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::BlanchedAlmond ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Bisque ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::NavajoWhite ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Wheat ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::BurlyWood ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Tan ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::RosyBrown ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::SandyBrown ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Goldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::DarkGoldenrod ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Peru ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Chocolate ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::SaddleBrown ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Sienna ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Brown ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Maroon ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MistyRose ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::LavenderBlush ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Linen ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::AntiqueWhite ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Ivory ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::FloralWhite ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::OldLace ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Beige ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Seashell ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::WhiteSmoke ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::GhostWhite ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::AliceBlue ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Azure ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::MintCream ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::Honeydew ) );
+	pBatch->Add( COLOR_ENTRY( color::x11::White ) );
 
-	if ( table.m_colors.empty() )
-	{
-		static const struct { COLORREF color; const TCHAR* pName; } colors[] =
-		{
-			{ color::html::Black,                _T("Black") },
-			{ color::html::Gray0,                _T("Gray 0") },
-			{ color::html::Gray18,               _T("Gray 18") },
-			{ color::html::Gray21,               _T("Gray 21") },
-			{ color::html::Gray23,               _T("Gray 23") },
-			{ color::html::Gray24,               _T("Gray 24") },
-			{ color::html::Gray25,               _T("Gray 25") },
-			{ color::html::Gray26,               _T("Gray 26") },
-			{ color::html::Gray27,               _T("Gray 27") },
-			{ color::html::Gray28,               _T("Gray 28") },
-			{ color::html::Gray29,               _T("Gray 29") },
-			{ color::html::Gray30,               _T("Gray 30") },
-			{ color::html::Gray31,               _T("Gray 31") },
-			{ color::html::Gray32,               _T("Gray 32") },
-			{ color::html::Gray34,               _T("Gray 34") },
-			{ color::html::Gray35,               _T("Gray 35") },
-			{ color::html::Gray36,               _T("Gray 36") },
-			{ color::html::Gray37,               _T("Gray 37") },
-			{ color::html::Gray38,               _T("Gray 38") },
-			{ color::html::Gray39,               _T("Gray 39") },
-			{ color::html::Gray40,               _T("Gray 40") },
-			{ color::html::Gray41,               _T("Gray 41") },
-			{ color::html::Gray42,               _T("Gray 42") },
-			{ color::html::Gray43,               _T("Gray 43") },
-			{ color::html::Gray44,               _T("Gray 44") },
-			{ color::html::Gray45,               _T("Gray 45") },
-			{ color::html::Gray46,               _T("Gray 46") },
-			{ color::html::Gray47,               _T("Gray 47") },
-			{ color::html::Gray48,               _T("Gray 48") },
-			{ color::html::Gray49,               _T("Gray 49") },
-			{ color::html::Gray50,               _T("Gray 50") },
-			{ color::html::Gray,                 _T("Gray") },
-			{ color::html::SlateGray4,           _T("Slate Gray 4") },
-			{ color::html::SlateGray,            _T("Slate Gray") },
-			{ color::html::LightSteelBlue4,      _T("Light Steel Blue 4") },
-			{ color::html::LightSlateGray,       _T("Light Slate Gray") },
-			{ color::html::CadetBlue4,           _T("Cadet Blue 4") },
-			{ color::html::DarkSlateGray4,       _T("Dark Slate Gray 4") },
-			{ color::html::Thistle4,             _T("Thistle 4") },
-			{ color::html::MediumSlateBlue,      _T("Medium Slate Blue") },
-			{ color::html::MediumPurple4,        _T("Medium Purple 4") },
-			{ color::html::MidnightBlue,         _T("Midnight Blue") },
-			{ color::html::DarkSlateBlue,        _T("Dark Slate Blue") },
-			{ color::html::DarkSlateGray,        _T("Dark Slate Gray") },
-			{ color::html::DimGray,              _T("Dim Gray") },
-			{ color::html::CornflowerBlue,       _T("Cornflower Blue") },
-			{ color::html::RoyalBlue4,           _T("Royal Blue 4") },
-			{ color::html::SlateBlue4,           _T("Slate Blue 4") },
-			{ color::html::RoyalBlue,            _T("Royal Blue") },
-			{ color::html::RoyalBlue1,           _T("Royal Blue 1") },
-			{ color::html::RoyalBlue2,           _T("Royal Blue 2") },
-			{ color::html::RoyalBlue3,           _T("Royal Blue 3") },
-			{ color::html::DeepSkyBlue,          _T("Deep Sky Blue") },
-			{ color::html::DeepSkyBlue2,         _T("Deep Sky Blue 2") },
-			{ color::html::SlateBlue,            _T("Slate Blue") },
-			{ color::html::DeepSkyBlue3,         _T("Deep Sky Blue 3") },
-			{ color::html::DeepSkyBlue4,         _T("Deep Sky Blue 4") },
-			{ color::html::DodgerBlue,           _T("Dodger Blue") },
-			{ color::html::DodgerBlue2,          _T("Dodger Blue 2") },
-			{ color::html::DodgerBlue3,          _T("Dodger Blue 3") },
-			{ color::html::DodgerBlue4,          _T("Dodger Blue 4") },
-			{ color::html::SteelBlue4,           _T("Steel Blue 4") },
-			{ color::html::SteelBlue,            _T("Steel Blue") },
-			{ color::html::SlateBlue2,           _T("Slate Blue 2") },
-			{ color::html::Violet,               _T("Violet") },
-			{ color::html::MediumPurple3,        _T("Medium Purple 3") },
-			{ color::html::MediumPurple,         _T("Medium Purple") },
-			{ color::html::MediumPurple2,        _T("Medium Purple 2") },
-			{ color::html::MediumPurple1,        _T("Medium Purple 1") },
-			{ color::html::LightSteelBlue,       _T("Light Steel Blue") },
-			{ color::html::SteelBlue3,           _T("Steel Blue 3") },
-			{ color::html::SteelBlue2,           _T("Steel Blue 2") },
-			{ color::html::SteelBlue1,           _T("Steel Blue 1") },
-			{ color::html::SkyBlue3,             _T("Sky Blue 3") },
-			{ color::html::SkyBlue4,             _T("Sky Blue 4") },
-			{ color::html::SlateBlue3,           _T("Slate Blue 3") },
-			{ color::html::SlateBlue5,           _T("Slate Blue 5") },
-			{ color::html::SlateGray3,           _T("Slate Gray 3") },
-			{ color::html::VioletRed,            _T("Violet Red") },
-			{ color::html::VioletRed1,           _T("Violet Red 1") },
-			{ color::html::VioletRed2,           _T("Violet Red 2") },
-			{ color::html::DeepPink,             _T("Deep Pink") },
-			{ color::html::DeepPink2,            _T("Deep Pink 2") },
-			{ color::html::DeepPink3,            _T("Deep Pink 3") },
-			{ color::html::DeepPink4,            _T("Deep Pink 4") },
-			{ color::html::MediumVioletRed,      _T("Medium Violet Red") },
-			{ color::html::VioletRed3,           _T("Violet Red 3") },
-			{ color::html::Firebrick,            _T("Firebrick") },
-			{ color::html::VioletRed4,           _T("Violet Red 4") },
-			{ color::html::Maroon4,              _T("Maroon 4") },
-			{ color::html::Maroon,               _T("Maroon") },
-			{ color::html::Maroon3,              _T("Maroon 3") },
-			{ color::html::Maroon2,              _T("Maroon 2") },
-			{ color::html::Maroon1,              _T("Maroon 1") },
-			{ color::html::Magenta,              _T("Magenta") },
-			{ color::html::Magenta1,             _T("Magenta 1") },
-			{ color::html::Magenta2,             _T("Magenta 2") },
-			{ color::html::Magenta3,             _T("Magenta 3") },
-			{ color::html::MediumOrchid,         _T("Medium Orchid") },
-			{ color::html::MediumOrchid1,        _T("Medium Orchid 1") },
-			{ color::html::MediumOrchid2,        _T("Medium Orchid 2") },
-			{ color::html::MediumOrchid3,        _T("Medium Orchid 3") },
-			{ color::html::MediumOrchid4,        _T("Medium Orchid 4") },
-			{ color::html::Purple,               _T("Purple") },
-			{ color::html::Purple1,              _T("Purple 1") },
-			{ color::html::Purple2,              _T("Purple 2") },
-			{ color::html::Purple3,              _T("Purple 3") },
-			{ color::html::Purple4,              _T("Purple 4") },
-			{ color::html::DarkOrchid4,          _T("Dark Orchid 4") },
-			{ color::html::DarkOrchid,           _T("Dark Orchid") },
-			{ color::html::DarkViolet,           _T("Dark Violet") },
-			{ color::html::DarkOrchid3,          _T("Dark Orchid 3") },
-			{ color::html::DarkOrchid2,          _T("Dark Orchid 2") },
-			{ color::html::DarkOrchid1,          _T("Dark Orchid 1") },
-			{ color::html::Plum4,                _T("Plum 4") },
-			{ color::html::PaleVioletRed,        _T("Pale Violet Red") },
-			{ color::html::PaleVioletRed1,       _T("Pale Violet Red 1") },
-			{ color::html::PaleVioletRed2,       _T("Pale Violet Red 2") },
-			{ color::html::PaleVioletRed3,       _T("Pale Violet Red 3") },
-			{ color::html::PaleVioletRed4,       _T("Pale Violet Red 4") },
-			{ color::html::Plum,                 _T("Plum") },
-			{ color::html::Plum1,                _T("Plum 1") },
-			{ color::html::Plum2,                _T("Plum 2") },
-			{ color::html::Plum3,                _T("Plum 3") },
-			{ color::html::Thistle,              _T("Thistle") },
-			{ color::html::Thistle3,             _T("Thistle 3") },
-			{ color::html::LavenderBlush2,       _T("Lavender Blush 2") },
-			{ color::html::LavenderBlush3,       _T("Lavender Blush 3") },
-			{ color::html::Thistle2,             _T("Thistle 2") },
-			{ color::html::Thistle1,             _T("Thistle 1") },
-			{ color::html::Lavender,             _T("Lavender") },
-			{ color::html::LavenderBlush,        _T("Lavender Blush") },
-			{ color::html::LightSteelBlue1,      _T("Light Steel Blue 1") },
-			{ color::html::LightBlue,            _T("Light Blue") },
-			{ color::html::LightBlue1,           _T("Light Blue 1") },
-			{ color::html::LightCyan,            _T("Light Cyan") },
-			{ color::html::SlateGray1,           _T("Slate Gray 1") },
-			{ color::html::SlateGray2,           _T("Slate Gray 2") },
-			{ color::html::LightSteelBlue2,      _T("Light Steel Blue 2") },
-			{ color::html::Turquoise1,           _T("Turquoise 1") },
-			{ color::html::Cyan,                 _T("Cyan") },
-			{ color::html::Cyan1,                _T("Cyan 1") },
-			{ color::html::Cyan2,                _T("Cyan 2") },
-			{ color::html::Turquoise2,           _T("Turquoise 2") },
-			{ color::html::MediumTurquoise,      _T("Medium Turquoise") },
-			{ color::html::Turquoise,            _T("Turquoise") },
-			{ color::html::DarkSlateGray1,       _T("Dark Slate Gray 1") },
-			{ color::html::DarkSlateGray2,       _T("Dark Slate Gray 2") },
-			{ color::html::DarkSlateGray3,       _T("Dark Slate Gray 3") },
-			{ color::html::Cyan3,                _T("Cyan 3") },
-			{ color::html::Turquoise3,           _T("Turquoise 3") },
-			{ color::html::CadetBlue3,           _T("Cadet Blue 3") },
-			{ color::html::PaleTurquoise3,       _T("Pale Turquoise 3") },
-			{ color::html::LightBlue2,           _T("Light Blue 2") },
-			{ color::html::DarkTurquoise,        _T("Dark Turquoise") },
-			{ color::html::Cyan4,                _T("Cyan 4") },
-			{ color::html::LightSeaGreen,        _T("Light Sea Green") },
-			{ color::html::LightSkyBlue,         _T("Light Sky Blue") },
-			{ color::html::LightSkyBlue2,        _T("Light Sky Blue 2") },
-			{ color::html::LightSkyBlue3,        _T("Light Sky Blue 3") },
-			{ color::html::SkyBlue5,             _T("Sky Blue 5") },
-			{ color::html::SkyBlue6,             _T("Sky Blue 6") },
-			{ color::html::LightSkyBlue4,        _T("Light Sky Blue 4") },
-			{ color::html::SkyBlue,              _T("Sky Blue") },
-			{ color::html::LightSlateBlue,       _T("Light Slate Blue") },
-			{ color::html::LightCyan2,           _T("Light Cyan 2") },
-			{ color::html::LightCyan3,           _T("Light Cyan 3") },
-			{ color::html::LightCyan4,           _T("Light Cyan 4") },
-			{ color::html::LightBlue3,           _T("Light Blue 3") },
-			{ color::html::LightBlue4,           _T("Light Blue 4") },
-			{ color::html::PaleTurquoise4,       _T("Pale Turquoise 4") },
-			{ color::html::DarkSeaGreen4,        _T("Dark Sea Green 4") },
-			{ color::html::MediumAquamarine,     _T("Medium Aquamarine") },
-			{ color::html::MediumSeaGreen,       _T("Medium Sea Green") },
-			{ color::html::SeaGreen,             _T("Sea Green") },
-			{ color::html::DarkGreen,            _T("Dark Green") },
-			{ color::html::SeaGreen4,            _T("Sea Green 4") },
-			{ color::html::ForestGreen,          _T("Forest Green") },
-			{ color::html::MediumForestGreen,    _T("Medium Forest Green") },
-			{ color::html::SpringGreen4,         _T("Spring Green 4") },
-			{ color::html::DarkOliveGreen4,      _T("Dark Olive Green 4") },
-			{ color::html::Chartreuse4,          _T("Chartreuse 4") },
-			{ color::html::Green4,               _T("Green 4") },
-			{ color::html::MediumSpringGreen,    _T("Medium Spring Green") },
-			{ color::html::SpringGreen,          _T("Spring Green 2") },
-			{ color::html::LimeGreen,            _T("Lime Green") },
-			{ color::html::SpringGreen3,         _T("Spring Green") },
-			{ color::html::DarkSeaGreen,         _T("Dark Sea Green") },
-			{ color::html::DarkSeaGreen3,        _T("Dark Sea Green 3") },
-			{ color::html::Green3,               _T("Green 3") },
-			{ color::html::Chartreuse3,          _T("Chartreuse 3") },
-			{ color::html::YellowGreen,          _T("Yellow Green") },
-			{ color::html::SpringGreen5,         _T("Spring Green 3") },
-			{ color::html::SeaGreen3,            _T("Sea Green 3") },
-			{ color::html::SpringGreen2,         _T("Spring Green 2") },
-			{ color::html::SpringGreen1,         _T("Spring Green 1") },
-			{ color::html::SeaGreen2,            _T("Sea Green 2") },
-			{ color::html::SeaGreen1,            _T("Sea Green 1") },
-			{ color::html::DarkSeaGreen2,        _T("Dark Sea Green 2") },
-			{ color::html::DarkSeaGreen1,        _T("Dark Sea Green 1") },
-			{ color::html::Green,                _T("Green") },
-			{ color::html::LawnGreen,            _T("Lawn Green") },
-			{ color::html::Green1,               _T("Green 1") },
-			{ color::html::Green2,               _T("Green 2") },
-			{ color::html::Chartreuse2,          _T("Chartreuse 2") },
-			{ color::html::Chartreuse,           _T("Chartreuse") },
-			{ color::html::GreenYellow,          _T("Green Yellow") },
-			{ color::html::DarkOliveGreen1,      _T("Dark Olive Green 1") },
-			{ color::html::DarkOliveGreen2,      _T("Dark Olive Green 2") },
-			{ color::html::DarkOliveGreen3,      _T("Dark Olive Green 3") },
-			{ color::html::Yellow,               _T("Yellow") },
-			{ color::html::Yellow1,              _T("Yellow 1") },
-			{ color::html::Khaki1,               _T("Khaki 1") },
-			{ color::html::Khaki2,               _T("Khaki 2") },
-			{ color::html::Goldenrod,            _T("Goldenrod") },
-			{ color::html::Gold2,                _T("Gold 2") },
-			{ color::html::Gold1,                _T("Gold 1") },
-			{ color::html::Goldenrod1,           _T("Goldenrod 1") },
-			{ color::html::Goldenrod2,           _T("Goldenrod 2") },
-			{ color::html::Gold,                 _T("Gold") },
-			{ color::html::Gold3,                _T("Gold 3") },
-			{ color::html::Goldenrod3,           _T("Goldenrod 3") },
-			{ color::html::DarkGoldenrod,        _T("Dark Goldenrod") },
-			{ color::html::Khaki,                _T("Khaki") },
-			{ color::html::Khaki3,               _T("Khaki 3") },
-			{ color::html::Khaki4,               _T("Khaki 4") },
-			{ color::html::DarkGoldenrod1,       _T("Dark Goldenrod 1") },
-			{ color::html::DarkGoldenrod2,       _T("Dark Goldenrod 2") },
-			{ color::html::DarkGoldenrod3,       _T("Dark Goldenrod 3") },
-			{ color::html::Sienna1,              _T("Sienna 1") },
-			{ color::html::Sienna2,              _T("Sienna 2") },
-			{ color::html::DarkOrange,           _T("Dark Orange") },
-			{ color::html::DarkOrange1,          _T("Dark Orange 1") },
-			{ color::html::DarkOrange2,          _T("Dark Orange 2") },
-			{ color::html::DarkOrange3,          _T("Dark Orange 3") },
-			{ color::html::Sienna3,              _T("Sienna 3") },
-			{ color::html::Sienna,               _T("Sienna") },
-			{ color::html::Sienna4,              _T("Sienna 4") },
-			{ color::html::IndianRed4,           _T("Indian Red 4") },
-			{ color::html::DarkOrange4,          _T("Dark Orange 4") },
-			{ color::html::Salmon4,              _T("Salmon 4") },
-			{ color::html::DarkGoldenrod4,       _T("Dark Goldenrod 4") },
-			{ color::html::Gold4,                _T("Gold 4") },
-			{ color::html::Goldenrod4,           _T("Goldenrod 4") },
-			{ color::html::LightSalmon4,         _T("Light Salmon 4") },
-			{ color::html::Chocolate,            _T("Chocolate") },
-			{ color::html::Coral3,               _T("Coral 3") },
-			{ color::html::Coral2,               _T("Coral 2") },
-			{ color::html::Coral,                _T("Coral") },
-			{ color::html::DarkSalmon,           _T("Dark Salmon") },
-			{ color::html::Salmon1,              _T("Salmon 1") },
-			{ color::html::Salmon2,              _T("Salmon 2") },
-			{ color::html::Salmon3,              _T("Salmon 3") },
-			{ color::html::LightSalmon3,         _T("Light Salmon 3") },
-			{ color::html::LightSalmon2,         _T("Light Salmon 2") },
-			{ color::html::LightSalmon,          _T("Light Salmon") },
-			{ color::html::SandyBrown,           _T("Sandy Brown") },
-			{ color::html::HotPink,              _T("Hot Pink") },
-			{ color::html::HotPink1,             _T("Hot Pink 1") },
-			{ color::html::HotPink2,             _T("Hot Pink 2") },
-			{ color::html::HotPink3,             _T("Hot Pink 3") },
-			{ color::html::HotPink4,             _T("Hot Pink 4") },
-			{ color::html::LightCoral,           _T("Light Coral") },
-			{ color::html::IndianRed1,           _T("Indian Red 1") },
-			{ color::html::IndianRed2,           _T("Indian Red 2") },
-			{ color::html::IndianRed3,           _T("Indian Red 3") },
-			{ color::html::Red,                  _T("Red") },
-			{ color::html::Red1,                 _T("Red 1") },
-			{ color::html::Red2,                 _T("Red 2") },
-			{ color::html::Firebrick1,           _T("Firebrick 1") },
-			{ color::html::Firebrick2,           _T("Firebrick 2") },
-			{ color::html::Firebrick3,           _T("Firebrick 3") },
-			{ color::html::Pink,                 _T("Pink") },
-			{ color::html::RosyBrown1,           _T("Rosy Brown 1") },
-			{ color::html::RosyBrown2,           _T("Rosy Brown 2") },
-			{ color::html::Pink2,                _T("Pink 2") },
-			{ color::html::LightPink,            _T("Light Pink") },
-			{ color::html::LightPink1,           _T("Light Pink 1") },
-			{ color::html::LightPink2,           _T("Light Pink 2") },
-			{ color::html::Pink3,                _T("Pink 3") },
-			{ color::html::RosyBrown3,           _T("Rosy Brown 3") },
-			{ color::html::RosyBrown,            _T("Rosy Brown") },
-			{ color::html::LightPink3,           _T("Light Pink 3") },
-			{ color::html::RosyBrown4,           _T("Rosy Brown 4") },
-			{ color::html::LightPink4,           _T("Light Pink 4") },
-			{ color::html::Pink4,                _T("Pink 4") },
-			{ color::html::LavenderBlush4,       _T("Lavender Blush 4") },
-			{ color::html::LightGoldenrod4,      _T("Light Goldenrod 4") },
-			{ color::html::LemonChiffon4,        _T("Lemon Chiffon 4") },
-			{ color::html::LemonChiffon3,        _T("Lemon Chiffon 3") },
-			{ color::html::LightGoldenrod3,      _T("Light Goldenrod 3") },
-			{ color::html::LightGolden2,         _T("Light Golden 2") },
-			{ color::html::LightGoldenrod,       _T("Light Goldenrod") },
-			{ color::html::LightGoldenrod1,      _T("Light Goldenrod 1") },
-			{ color::html::BlanchedAlmond,       _T("Blanched Almond") },
-			{ color::html::LemonChiffon2,        _T("Lemon Chiffon 2") },
-			{ color::html::LemonChiffon,         _T("Lemon Chiffon") },
-			{ color::html::LightGoldenrodYellow, _T("Light Goldenrod Yellow") },
-			{ color::html::Cornsilk,             _T("Cornsilk") },
-			{ color::html::White,                _T("White") }
-		};
-
-		table.m_colors.reserve( COUNT_OF( colors ) );
-		for ( unsigned int i = 0; i != COUNT_OF( colors ); ++i )
-			table.m_colors.push_back( CColorEntry( colors[ i ].color, colors[ i ].pName ) );
-	}
-
-	return &table;
-}
-
-CColorTable* CColorRepository::GetPaintTable( void )
-{
-	static CColorTable table( 12, PaintTableBaseId );
-
-	if ( table.m_colors.empty() )
-	{
-		static const struct { COLORREF color; const TCHAR* pName; } colors[] =
-		{
-			{ color::paint::Black,               _T("Black") },
-			{ color::paint::White,               _T("White") }
-		};
-
-		table.m_colors.reserve( COUNT_OF( colors ) );
-		for ( unsigned int i = 0; i != COUNT_OF( colors ); ++i )
-			table.m_colors.push_back( CColorEntry( colors[ i ].color, colors[ i ].pName ) );
-	}
-
-	return &table;
-}
-
-CColorTable* CColorRepository::GetX11Table( void )
-{
-	static CColorTable table( 10, X11TableBaseId );
-
-	if ( table.m_colors.empty() )
-	{
-		static const struct { COLORREF color; const TCHAR* pName; } colors[] =
-		{
-			// gray colors
-			{ color::x11::Black,                _T("Black") },
-			{ color::x11::DarkSlateGray,        _T("Dark Slate Gray") },
-			{ color::x11::SlateGray,            _T("Slate Gray") },
-			{ color::x11::LightSlateGray,       _T("Light Slate Gray") },
-			{ color::x11::DimGray,              _T("Dim Gray") },
-			{ color::x11::Gray,                 _T("Gray") },
-			{ color::x11::DarkGray,             _T("Dark Gray") },
-			{ color::x11::Silver,               _T("Silver") },
-			{ color::x11::LightGrey,            _T("Light Grey") },
-			{ color::x11::Gainsboro,            _T("Gainsboro") },
-			// red colors
-			{ color::x11::IndianRed,            _T("Indian Red") },
-			{ color::x11::LightCoral,           _T("Light Coral") },
-			{ color::x11::Salmon,               _T("Salmon") },
-			{ color::x11::DarkSalmon,           _T("Dark Salmon") },
-			{ color::x11::LightSalmon,          _T("Light Salmon") },
-			{ color::x11::Red,                  _T("Red") },
-			{ color::x11::Crimson,              _T("Crimson") },
-			{ color::x11::FireBrick,            _T("Fire Brick") },
-			{ color::x11::DarkRed,              _T("Dark Red") },
-			// pink colors
-			{ color::x11::Pink,                 _T("Pink") },
-			{ color::x11::LightPink,            _T("Light Pink") },
-			{ color::x11::HotPink,              _T("Hot Pink") },
-			{ color::x11::DeepPink,             _T("Deep Pink") },
-			{ color::x11::MediumVioletRed,      _T("Medium Violet Red") },
-			{ color::x11::PaleVioletRed,        _T("Pale Violet Red") },
-			// orange colors
-			{ color::x11::LightSalmon2,         _T("Light Salmon") },
-			{ color::x11::Coral,                _T("Coral") },
-			{ color::x11::Tomato,               _T("Tomato") },
-			{ color::x11::OrangeRed,            _T("Orange Red") },
-			{ color::x11::DarkOrange,           _T("Dark Orange") },
-			{ color::x11::Orange,               _T("Orange") },
-			// yellow colors
-			{ color::x11::Gold,                 _T("Gold") },
-			{ color::x11::Yellow,               _T("Yellow") },
-			{ color::x11::LightYellow,          _T("Light Yellow") },
-			{ color::x11::LemonChiffon,         _T("Lemon Chiffon") },
-			{ color::x11::LightGoldenrodYellow, _T("Light Goldenrod Yellow") },
-			{ color::x11::PapayaWhip,           _T("Papaya Whip") },
-			{ color::x11::Moccasin,             _T("Moccasin") },
-			{ color::x11::PeachPuff,            _T("Peach Puff") },
-			{ color::x11::PaleGoldenrod,        _T("Pale Goldenrod") },
-			{ color::x11::Khaki,                _T("Khaki") },
-			{ color::x11::DarkKhaki,            _T("Dark Khaki") },
-			// purple colors
-			{ color::x11::Lavender,             _T("Lavender") },
-			{ color::x11::Thistle,              _T("Thistle") },
-			{ color::x11::Plum,                 _T("Plum") },
-			{ color::x11::Violet,               _T("Violet") },
-			{ color::x11::Orchid,               _T("Orchid") },
-			{ color::x11::Fuchsia,              _T("Fuchsia") },
-			{ color::x11::Magenta,              _T("Magenta") },
-			{ color::x11::MediumOrchid,         _T("Medium Orchid") },
-			{ color::x11::MediumPurple,         _T("Medium Purple") },
-			{ color::x11::BlueViolet,           _T("Blue Violet") },
-			{ color::x11::DarkViolet,           _T("Dark Violet") },
-			{ color::x11::DarkOrchid,           _T("Dark Orchid") },
-			{ color::x11::DarkMagenta,          _T("Dark Magenta") },
-			{ color::x11::Purple,               _T("Purple") },
-			{ color::x11::Indigo,               _T("Indigo") },
-			{ color::x11::DarkSlateBlue,        _T("Dark Slate Blue") },
-			{ color::x11::SlateBlue,            _T("Slate Blue") },
-			{ color::x11::MediumSlateBlue,      _T("Medium Slate Blue") },
-			// green colors
-			{ color::x11::GreenYellow,          _T("Green Yellow") },
-			{ color::x11::Chartreuse,           _T("Chartreuse") },
-			{ color::x11::LawnGreen,            _T("Lawn Green") },
-			{ color::x11::Lime,                 _T("Lime") },
-			{ color::x11::LimeGreen,            _T("Lime Green") },
-			{ color::x11::PaleGreen,            _T("Pale Green") },
-			{ color::x11::LightGreen,           _T("Light Green") },
-			{ color::x11::MediumSpringGreen,    _T("Medium Spring Green") },
-			{ color::x11::SpringGreen,          _T("Spring Green") },
-			{ color::x11::MediumSeaGreen,       _T("Medium Sea Green") },
-			{ color::x11::SeaGreen,             _T("Sea Green") },
-			{ color::x11::ForestGreen,          _T("Forest Green") },
-			{ color::x11::Green,                _T("Green") },
-			{ color::x11::DarkGreen,            _T("Dark Green") },
-			{ color::x11::YellowGreen,          _T("Yellow Green") },
-			{ color::x11::OliveDrab,            _T("Olive Drab") },
-			{ color::x11::Olive,                _T("Olive") },
-			{ color::x11::DarkOliveGreen,       _T("Dark Olive Green") },
-			{ color::x11::MediumAquamarine,     _T("Medium Aquamarine") },
-			{ color::x11::DarkSeaGreen,         _T("Dark Sea Green") },
-			{ color::x11::LightSeaGreen,        _T("Light Sea Green") },
-			{ color::x11::DarkCyan,             _T("Dark Cyan") },
-			{ color::x11::Teal,                 _T("Teal") },
-			// blue & cyan colors
-			{ color::x11::Aqua,                 _T("Aqua") },
-			{ color::x11::Cyan,                 _T("Cyan") },
-			{ color::x11::LightCyan,            _T("Light Cyan") },
-			{ color::x11::PaleTurquoise,        _T("Pale Turquoise") },
-			{ color::x11::Aquamarine,           _T("Aquamarine") },
-			{ color::x11::Turquoise,            _T("Turquoise") },
-			{ color::x11::MediumTurquoise,      _T("Medium Turquoise") },
-			{ color::x11::DarkTurquoise,        _T("Dark Turquoise") },
-			{ color::x11::CadetBlue,            _T("Cadet Blue") },
-			{ color::x11::SteelBlue,            _T("Steel Blue") },
-			{ color::x11::LightSteelBlue,       _T("Light Steel Blue") },
-			{ color::x11::PowderBlue,           _T("Powder Blue") },
-			{ color::x11::LightBlue,            _T("Light Blue") },
-			{ color::x11::SkyBlue,              _T("Sky Blue") },
-			{ color::x11::LightSkyBlue,         _T("Light Sky Blue") },
-			{ color::x11::DeepSkyBlue,          _T("Deep Sky Blue") },
-			{ color::x11::DodgerBlue,           _T("Dodger Blue") },
-			{ color::x11::CornflowerBlue,       _T("Cornflower Blue") },
-			{ color::x11::RoyalBlue,            _T("Royal Blue") },
-			{ color::x11::Blue,                 _T("Blue") },
-			{ color::x11::MediumBlue,           _T("Medium Blue") },
-			{ color::x11::DarkBlue,             _T("Dark Blue") },
-			{ color::x11::Navy,                 _T("Navy") },
-			{ color::x11::MidnightBlue,         _T("Midnight Blue") },
-			// brown colors
-			{ color::x11::Cornsilk,             _T("Cornsilk") },
-			{ color::x11::BlanchedAlmond,       _T("Blanched Almond") },
-			{ color::x11::Bisque,               _T("Bisque") },
-			{ color::x11::NavajoWhite,          _T("Navajo White") },
-			{ color::x11::Wheat,                _T("Wheat") },
-			{ color::x11::BurlyWood,            _T("Burly Wood") },
-			{ color::x11::Tan,                  _T("Tan") },
-			{ color::x11::RosyBrown,            _T("Rosy Brown") },
-			{ color::x11::SandyBrown,           _T("Sandy Brown") },
-			{ color::x11::Goldenrod,            _T("Goldenrod") },
-			{ color::x11::DarkGoldenrod,        _T("Dark Goldenrod") },
-			{ color::x11::Peru,                 _T("Peru") },
-			{ color::x11::Chocolate,            _T("Chocolate") },
-			{ color::x11::SaddleBrown,          _T("Saddle Brown") },
-			{ color::x11::Sienna,               _T("Sienna") },
-			{ color::x11::Brown,                _T("Brown") },
-			{ color::x11::Maroon,               _T("Maroon") },
-			// white colors
-			{ color::x11::MistyRose,            _T("Misty Rose") },
-			{ color::x11::LavenderBlush,        _T("Lavender Blush") },
-			{ color::x11::Linen,                _T("Linen") },
-			{ color::x11::AntiqueWhite,         _T("Antique White") },
-			{ color::x11::Ivory,                _T("Ivory") },
-			{ color::x11::FloralWhite,          _T("Floral White") },
-			{ color::x11::OldLace,              _T("Old Lace") },
-			{ color::x11::Beige,                _T("Beige") },
-			{ color::x11::Seashell,             _T("Seashell") },
-			{ color::x11::WhiteSmoke,           _T("White Smoke") },
-			{ color::x11::GhostWhite,           _T("Ghost White") },
-			{ color::x11::AliceBlue,            _T("Alice Blue") },
-			{ color::x11::Azure,                _T("Azure") },
-			{ color::x11::MintCream,            _T("Mint Cream") },
-			{ color::x11::Honeydew,             _T("Honeydew") },
-			{ color::x11::White,                _T("White") }
-		};
-
-		table.m_colors.reserve( COUNT_OF( colors ) );
-		for ( unsigned int i = 0; i != COUNT_OF( colors ); ++i )
-			table.m_colors.push_back( CColorEntry( colors[ i ].color, colors[ i ].pName ) );
-	}
-
-	return &table;
-}
-
-CColorTable* CColorRepository::GetSystemTable( void )
-{
-	static CColorTable sysTable( 1, SysTableBaseId );
-
-	if ( sysTable.m_colors.empty() )
-	{
-		static const struct { ui::TSysColorIndex sysColorIndex; const TCHAR* pName; } sysColors[] =
-		{
-			{ COLOR_BACKGROUND, _T("Desktop Background") },
-			{ COLOR_WINDOW, _T("Window Background") },
-			{ COLOR_WINDOWTEXT, _T("Window Text") },
-			{ COLOR_WINDOWFRAME, _T("Window Frame") },
-			{ COLOR_BTNFACE, _T("Button Face") },
-			{ COLOR_BTNHIGHLIGHT, _T("Button Highlight") },
-			{ COLOR_BTNSHADOW, _T("Button Shadow") },
-			{ COLOR_BTNTEXT, _T("Button Text") },
-			{ COLOR_GRAYTEXT, _T("Disabled Text") },
-			{ COLOR_3DDKSHADOW, _T("3D Dark Shadow") },
-			{ COLOR_3DLIGHT, _T("3D Light Color") },
-			{ COLOR_HIGHLIGHT, _T("Selected") },
-			{ COLOR_HIGHLIGHTTEXT, _T("Selected Text") },
-			{ COLOR_CAPTIONTEXT, _T("Scroll Bar Arrow") },
-			{ COLOR_HOTLIGHT, _T("Hot-Track") },
-			{ COLOR_INFOBK, _T("Tooltip Background") },
-			{ COLOR_INFOTEXT, _T("Tooltip Text") },
-			{ COLOR_SCROLLBAR, _T("Scroll Bar Gray Area") },
-			{ COLOR_MENU, _T("Menu Background") },
-			{ COLOR_MENUBAR, _T("Flat Menu Bar") },
-			{ COLOR_MENUHILIGHT, _T("Menu Highlight") },
-			{ COLOR_MENUTEXT, _T("Menu Text") },
-			{ COLOR_ACTIVECAPTION, _T("Active Window Title Bar") },
-			{ COLOR_GRADIENTACTIVECAPTION, _T("Active Window Gradient") },
-			{ COLOR_ACTIVEBORDER, _T("Active Window Border") },
-			{ COLOR_INACTIVECAPTION, _T("Inactive Window Caption") },
-			{ COLOR_GRADIENTINACTIVECAPTION, _T("Inactive Window Gradient") },
-			{ COLOR_INACTIVEBORDER, _T("Inactive Window Border") },
-			{ COLOR_INACTIVECAPTIONTEXT, _T("Inactive Window Caption Text") },
-			{ COLOR_APPWORKSPACE, _T("MDI Background") },
-			{ COLOR_DESKTOP, _T("Desktop Background") }
-		};
-
-		sysTable.m_colors.reserve( COUNT_OF( sysColors ) );
-		for ( unsigned int i = 0; i != COUNT_OF( sysColors ); ++i )
-			sysTable.m_colors.push_back( CColorEntry( ui::MakeSysColor( sysColors[ i ].sysColorIndex ), sysColors[ i ].pName ) );
-
-		sysTable.m_rowCount = sysTable.m_colors.size() / 2;
-	}
-
-	return &sysTable;
+	return pBatch;
 }

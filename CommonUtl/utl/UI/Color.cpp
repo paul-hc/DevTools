@@ -19,7 +19,7 @@ namespace ui
 			if ( IsSysColor( rawColor ) )
 				return ::GetSysColor( GetSysColorIndex( rawColor ) );
 			else
-				ASSERT( false );		// logical color type?
+				ASSERT( IsRealColor( rawColor ) );		// physical color?
 
 		return rawColor;
 	}
@@ -42,20 +42,25 @@ namespace ui
 }
 
 
-namespace ui
+namespace color
 {
 	const std::tstring g_nullTag = _T("(null)");
+	const std::tstring g_autoTag = _T("(Automatic)");
+	const std::tstring g_sysTag = _T("SYS");
 	const std::tstring g_rgbTag = _T("RGB");
 	const std::tstring g_htmlTag = _T("#");
-	const std::tstring g_sysTag = _T("SYS");
+	const std::tstring g_hexTag = _T("0x");
+}
 
 
+namespace ui
+{
 	std::tstring FormatColor( COLORREF color, const TCHAR* pSep /*= _T("  ")*/ )
 	{
 		if ( CLR_NONE == color )
-			return g_nullTag;
+			return color::g_nullTag;
 		else if ( CLR_DEFAULT == color )
-			return str::GetEmpty();
+			return color::g_autoTag;
 
 		std::tstring colorLiteral;
 		colorLiteral.reserve( 24 );
@@ -63,20 +68,32 @@ namespace ui
 		if ( IsSysColor( color ) )
 			stream::Tag( colorLiteral, FormatSysColor( color ), pSep );
 
-		const COLORREF actualColor = EvalColor( color );
+		const COLORREF realColor = EvalColor( color );
 
-		stream::Tag( colorLiteral, FormatRgbColor( actualColor ), pSep );
-		stream::Tag( colorLiteral, FormatHtmlColor( actualColor ), pSep );
+		stream::Tag( colorLiteral, FormatRgbColor( realColor ), pSep );
+		stream::Tag( colorLiteral, FormatHtmlColor( realColor ), pSep );
+		stream::Tag( colorLiteral, FormatHexColor( realColor ), pSep );
 		return colorLiteral;
+	}
+
+	bool ParseUndefinedColor( COLORREF* pOutColor, const TCHAR* pColorLiteral )
+	{
+		ASSERT_PTR( pColorLiteral );
+
+		if ( str::FindStr<str::IgnoreCase>( pColorLiteral, color::g_nullTag ) != utl::npos )
+			utl::AssignPtr( pOutColor, CLR_NONE );
+		else if ( str::FindStr<str::IgnoreCase>( pColorLiteral, color::g_autoTag ) != utl::npos )
+			utl::AssignPtr( pOutColor, CLR_DEFAULT );
+		else
+			return false;			// not a Windows-undefined CLR_* color
+
+		return true;
 	}
 
 	bool ParseColor( COLORREF* pOutColor, const TCHAR* pColorLiteral )
 	{
-		if ( str::Find<str::Case>( pColorLiteral, g_nullTag.c_str(), 0, g_nullTag.length() ) != utl::npos )
-		{
-			utl::AssignPtr( pOutColor, CLR_NONE );
+		if ( ParseUndefinedColor( pOutColor, pColorLiteral ) )
 			return true;
-		}
 
 		if ( ParseSystemColor( pOutColor, pColorLiteral ) )
 			return true;
@@ -87,19 +104,12 @@ namespace ui
 		if ( ParseHtmlColor( pOutColor, pColorLiteral ) )
 			return true;
 
+		if ( ParseHexColor( pOutColor, pColorLiteral ) )
+			return true;
+
 		return false;
 	}
 
-
-	std::tstring FormatRgbColor( COLORREF color )
-	{
-		return str::Format( _T("%s(%u, %u, %u)"), g_rgbTag.c_str(), GetRValue( color ), GetGValue( color ), GetBValue( color ) );
-	}
-
-	std::tstring FormatHtmlColor( COLORREF color )
-	{
-		return str::Format( _T("%s%02X%02X%02X"), g_htmlTag.c_str(), GetRValue( color ), GetGValue( color ), GetBValue( color ) );
-	}
 
 	std::tstring FormatSysColor( COLORREF color )
 	{
@@ -107,21 +117,66 @@ namespace ui
 
 		std::tostringstream oss;
 
-		oss << g_sysTag << '(' << GetSysColorIndex( color ) << ')';
+		oss << color::g_sysTag << '(' << GetSysColorIndex( color ) << ')';
 
-		if ( const CColorEntry* pSysColorName = CColorRepository::GetSystemTable()->FindColor( color ) )
+		if ( const CColorEntry* pSysColorName = CColorRepository::Instance()->GetSystemBatch()->FindColor( color ) )
 			oss << "  \"" << pSysColorName->m_name << "\"";
 
 		return oss.str();
 	}
 
+	std::tstring FormatRgbColor( COLORREF color )
+	{
+		ASSERT( IsRealColor( color ) );
+
+		return str::Format( _T("%s(%u, %u, %u)"), color::g_rgbTag.c_str(), GetRValue( color ), GetGValue( color ), GetBValue( color ) );
+	}
+
+	std::tstring FormatHtmlColor( COLORREF color )
+	{
+		ASSERT( IsRealColor( color ) );
+
+		return str::Format( _T("%s%02X%02X%02X"), color::g_htmlTag.c_str(), GetRValue( color ), GetGValue( color ), GetBValue( color ) );
+	}
+
+	std::tstring FormatHexColor( COLORREF color )
+	{
+		ASSERT( IsRealColor( color ) );
+
+		return str::Format( _T("0x%06X"), color );
+	}
+
+
+	bool ParseSystemColor( OUT COLORREF* pOutSysColor, const TCHAR* pSysColorText )
+	{	// format: 'SYS(16)  "Button Shadow"'
+		ASSERT_PTR( pSysColorText );
+
+		size_t pos = str::FindStr<str::Case>( pSysColorText, color::g_sysTag );
+
+		if ( pos != utl::npos )
+		{
+			const TCHAR* pText = str::SkipWhitespace( pSysColorText + pos + color::g_sysTag.length() );
+			TSysColorIndex sysColorIndex = -1;
+
+			if ( 1 == _stscanf( pText, _T("(%d)"), &sysColorIndex ) )
+				if ( ui::IsValidSysColorIndex( sysColorIndex ) )
+				{
+					utl::AssignPtr( pOutSysColor, MakeSysColor( sysColorIndex ) );
+					return true;
+				}
+		}
+
+		//TRACE( _T("Invalid System Colour literal '%s'\n"), pSysColorText );
+		return false;
+	}
+
 	bool ParseRgbColor( OUT COLORREF* pOutColor, const TCHAR* pRgbColorText )
 	{
-		size_t pos = str::Find<str::Case>( pRgbColorText, g_rgbTag.c_str(), 0, g_rgbTag.length() );
+		size_t pos = str::FindStr<str::Case>( pRgbColorText, color::g_rgbTag );
 
 		if ( pos != utl::npos )
 		{	// RGB( 255, 0, 0 ) for bright red
-			const TCHAR* pText = str::SkipWhitespace( pRgbColorText + pos + g_rgbTag.length() );
+			const TCHAR* pText = str::SkipWhitespace( pRgbColorText + pos + color::g_rgbTag.length() );
 			unsigned int red, green, blue;
 
 			if ( 3 == _stscanf( pText, _T( "(%u,%u,%u)" ), &red, &green, &blue ) )
@@ -132,7 +187,7 @@ namespace ui
 				}
 		}
 
-		TRACE( _T("Invalid RGB colour literal '%s'\n"), pRgbColorText );
+		//TRACE( _T("Invalid RGB colour literal '%s'\n"), pRgbColorText );
 		return false;
 	}
 
@@ -160,30 +215,26 @@ namespace ui
 				}
 		}
 
-		TRACE( _T("Invalid HTML colour literal '%s'\n"), pHtmlColorText );
+		//TRACE( _T("Invalid HTML colour literal '%s'\n"), pHtmlColorText );
 		return false;
 	}
 
-	bool ParseSystemColor( OUT COLORREF* pOutSysColor, const TCHAR* pSysColorText )
-	{	// format: 'SYS(16)  "Button Shadow"'
-		ASSERT_PTR( pSysColorText );
-
-		size_t pos = str::Find<str::Case>( pSysColorText, g_sysTag.c_str(), 0, g_sysTag.length() );
-
+	bool ParseHexColor( OUT COLORREF* pOutColor, const TCHAR* pHexColorText )
+	{
+		size_t pos = str::FindStr<str::IgnoreCase>( pHexColorText, color::g_hexTag );
 		if ( pos != utl::npos )
 		{
-			const TCHAR* pText = str::SkipWhitespace( pSysColorText + pos + g_sysTag.length() );
-			TSysColorIndex sysColorIndex = -1;
+			COLORREF rgbColor;
 
-			if ( 1 == _stscanf( pText, _T("(%d)"), &sysColorIndex ) )
-				if ( ui::IsValidSysColorIndex( sysColorIndex ) )
+			if ( 1 == _stscanf( pHexColorText, _T( "0x%06X" ), &rgbColor ) )
+				if ( IsRealColor( rgbColor ) )
 				{
-					utl::AssignPtr( pOutSysColor, MakeSysColor( sysColorIndex ) );
+					utl::AssignPtr( pOutColor, rgbColor );
 					return true;
 				}
 		}
 
-		TRACE( _T("Invalid System Colour literal '%s'\n"), pSysColorText );
+		//TRACE( _T("Invalid hex colour literal '%s'\n"), pHexColorText );
 		return false;
 	}
 
@@ -285,7 +336,7 @@ namespace ui
 		else if ( CLR_NONE == color2 )
 			return color1;
 
-		ASSERT( IsActualColor( color1 ) && IsActualColor( color2 ) );
+		ASSERT( IsRealColor( color1 ) && IsRealColor( color2 ) );
 
 		return RGB(
 			GetAverageComponent( GetRValue( color1 ), GetRValue( color2 ) ),
@@ -296,7 +347,7 @@ namespace ui
 
 	COLORREF GetBlendedColor( COLORREF color1, COLORREF color2, COLORREF color3 )
 	{
-		ASSERT( IsActualColor( color1 ) && IsActualColor( color2 ) && IsActualColor( color3 ) );
+		ASSERT( IsRealColor( color1 ) && IsRealColor( color2 ) && IsRealColor( color3 ) );
 
 		return RGB(
 			GetAverageComponent( GetRValue( color1 ), GetRValue( color2 ), GetRValue( color3 ) ),
@@ -307,7 +358,7 @@ namespace ui
 
 	COLORREF GetWeightedMixColor( COLORREF color1, COLORREF color2, TPercent pct1 )
 	{
-		ASSERT( IsActualColor( color1 ) && IsActualColor( color2 ) );
+		ASSERT( IsRealColor( color1 ) && IsRealColor( color2 ) );
 
 		TFactor weight1 = PercentToFactor( pct1 );
 
@@ -344,7 +395,7 @@ namespace ui
 
 	CHslColor::CHslColor( COLORREF rgbColor )
 	{
-		if ( !ui::IsActualColor( rgbColor ) )
+		if ( !ui::IsRealColor( rgbColor ) )
 			rgbColor = ui::EvalColor( rgbColor );
 
 		::ColorRGBToHLS( rgbColor, &m_hue, &m_luminance, &m_saturation );	// note the difference: Hsl vs HLS - L and S position is swapped in shell API

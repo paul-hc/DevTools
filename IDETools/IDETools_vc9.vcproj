@@ -221,6 +221,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CodeSnippetsParser.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CodeSnippetsParser.h"
+				>
+			</File>
+			<File
 				RelativePath=".\IDETools.def"
 				>
 			</File>
@@ -615,14 +623,6 @@
 				</File>
 				<File
 					RelativePath=".\CodeUtils.h"
-					>
-				</File>
-				<File
-					RelativePath=".\CompoundTextParser.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\CompoundTextParser.h"
 					>
 				</File>
 				<File

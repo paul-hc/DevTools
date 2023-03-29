@@ -620,6 +620,9 @@
     <ClInclude Include="ColorRepository.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="ColorPickerButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1062,6 +1065,9 @@
     </ClCompile>
     <ClCompile Include="ColorRepository.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorPickerButton.cpp">
+      <Filter>UI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

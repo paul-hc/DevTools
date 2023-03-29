@@ -93,11 +93,11 @@ COLORREF CReportListCustomDraw::GetRealizedBkColor( void ) const
 	if ( IsSelItemContrast() )
 		return GetSysColor( COLOR_HIGHLIGHT );
 
-	if ( ui::IsActualColor( m_pDraw->clrTextBk ) )
+	if ( ui::IsRealColor( m_pDraw->clrTextBk ) )
 		return m_pDraw->clrTextBk;
 
 	COLORREF bkColor = bkColor = m_pList->GetTextBkColor();
-	if ( ui::IsActualColor( bkColor ) )
+	if ( ui::IsRealColor( bkColor ) )
 		return bkColor;
 
 	return ui::GetActualColorSysdef( m_pList->GetBkColor(), COLOR_WINDOW );

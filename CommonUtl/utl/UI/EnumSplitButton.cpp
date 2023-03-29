@@ -52,6 +52,14 @@ void CEnumSplitButton::SetSelValue( int selValue )
 		SetButtonCaption( m_pEnumTags->FormatUi( m_selValue ) );
 }
 
+void CEnumSplitButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+{
+	cmdId, pTooltip;
+	//if ( (int)cmdId == GetDlgCtrlID() )
+	if ( m_pEnumTags != nullptr && m_selValue >= 0 )
+		rText = m_pEnumTags->FormatUi( m_selValue );
+}
+
 void CEnumSplitButton::PreSubclassWindow( void )
 {
 	CPopupSplitButton::PreSubclassWindow();

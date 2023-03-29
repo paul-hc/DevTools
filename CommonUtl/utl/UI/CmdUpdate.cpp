@@ -233,7 +233,7 @@ namespace ui
 		CCmdUI ctrlState;
 
 		ctrlState.m_nID = pCtrl->GetDlgCtrlID();
-		if ( -1 == ui::ToCmdId( ctrlState.m_nID ) )
+		if ( -1 == ui::ToIntCmdId( ctrlState.m_nID ) )
 			return false;			// avoid anonymous statics and group-boxes
 
 		ctrlState.m_pOther = pCtrl;

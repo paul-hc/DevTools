@@ -808,6 +808,22 @@ namespace ui
 		return false;
 	}
 
+	bool IsWriteableEditBox( HWND hCtrl )
+	{
+		if ( IsEditLikeCtrl( hCtrl ) )
+		{
+			DWORD style = GetStyle( hCtrl );
+
+			if ( HasFlag( style, WS_VISIBLE ) && !HasFlag( style, WS_DISABLED ) )
+				if ( IsEditBox( hCtrl ) )
+					return !HasFlag( style, ES_READONLY );
+				else if ( IsComboWithEdit( hCtrl ) )
+					return true;
+		}
+
+		return false;
+	}
+
 	bool IsComboWithEdit( HWND hCtrl )
 	{
 		DWORD comboStyle = 0;

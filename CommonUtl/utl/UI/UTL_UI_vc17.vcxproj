@@ -197,6 +197,7 @@
     <ClInclude Include="CmdInfoStore.h" />
     <ClInclude Include="CmdUpdate.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="ColorPickerButton.h" />
     <ClInclude Include="ColorRepository.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ContentFitBase.h" />
@@ -382,6 +383,7 @@
     <ClCompile Include="CmdInfoStore.cpp" />
     <ClCompile Include="CmdUpdate.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="ColorPickerButton.cpp" />
     <ClCompile Include="ColorRepository.cpp" />
     <ClCompile Include="ContentFitBase.cpp" />
     <ClCompile Include="Control_fwd.cpp" />

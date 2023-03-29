@@ -21,8 +21,8 @@
 // CBaseApp template code
 
 template< typename BaseClass >
-CBaseApp<BaseClass>::CBaseApp( const TCHAR* pAppName /*= nullptr*/ )
-	: BaseClass( pAppName )
+CBaseApp<BaseClass>::CBaseApp( void )
+	: BaseClass()
 	, CAppTools()
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
 	, m_isInteractive( true )

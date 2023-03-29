@@ -3,12 +3,14 @@
 #pragma once
 
 #include "PopupSplitButton.h"
+#include "Dialog_fwd.h"
 
 
 class CEnumTags;
 
 
 class CEnumSplitButton : public CPopupSplitButton
+	, public ui::ICustomCmdInfo
 {
 public:
 	CEnumSplitButton( const CEnumTags* pEnumTags );
@@ -31,6 +33,9 @@ private:
 	const CEnumTags* m_pEnumTags;
 	int m_selValue;
 protected:
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+
 	// generated overrides
 	public:
 	virtual void PreSubclassWindow( void );

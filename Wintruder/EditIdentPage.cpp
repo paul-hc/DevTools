@@ -64,7 +64,7 @@ void CEditIdentPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 
 	if ( validId )
 	{
-		m_id = static_cast<TCmdId>( ui::ToCmdId( targetWnd.GetDlgCtrlID() ) );
+		m_id = static_cast<TCmdId>( ui::ToIntCmdId( targetWnd.GetDlgCtrlID() ) );
 		m_decIdentEdit.SetValue( m_id );
 		m_hexIdentEdit.SetValue( m_id );
 		m_literalCombo.SetCurSel( FindLiteralPos( m_id ) );

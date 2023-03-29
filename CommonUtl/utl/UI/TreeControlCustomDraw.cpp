@@ -51,13 +51,13 @@ bool CTreeControlCustomDraw::ApplyEffect( const ui::CTextEffect& textEffect )
 
 	// CTreeCtrl: when assigning CLR_NONE, the tree view doesn't use the default colour properly: this->GetTextColor(), this->GetBkColor(). Whereas CListCtrl does.
 	// Therefore we don't assign default CLR_NONE colours.
-	if ( textEffect.m_textColor != m_pDraw->clrText && ui::IsActualColor( textEffect.m_textColor ) )
+	if ( textEffect.m_textColor != m_pDraw->clrText && ui::IsRealColor( textEffect.m_textColor ) )
 	{
 		m_pDraw->clrText = textEffect.m_textColor;
 		modified = true;
 	}
 
-	if ( textEffect.m_bkColor != m_pDraw->clrTextBk && ui::IsActualColor( textEffect.m_bkColor ) )
+	if ( textEffect.m_bkColor != m_pDraw->clrTextBk && ui::IsRealColor( textEffect.m_bkColor ) )
 	{
 		m_pDraw->clrTextBk = textEffect.m_bkColor;
 		modified = true;
@@ -71,7 +71,7 @@ COLORREF CTreeControlCustomDraw::GetRealizedBkColor( void ) const
 	if ( IsSelItemContrast() )
 		return GetSysColor( COLOR_HIGHLIGHT );
 
-	if ( ui::IsActualColor( m_pDraw->clrTextBk ) )
+	if ( ui::IsRealColor( m_pDraw->clrTextBk ) )
 		return m_pDraw->clrTextBk;
 
 	return ui::GetActualColorSysdef( m_pTree->GetBkColor(), COLOR_WINDOW );

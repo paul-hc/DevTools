@@ -259,7 +259,7 @@ bool CShellContextMenuHost::InvokeVerbIndex( int verbIndex )
 bool CShellContextMenuHost::InvokeDefaultVerb( void )
 {
 	CMenu* pPopupMenu = EnsurePopupShellCmds( CMF_DEFAULTONLY );		// narrow down to default verb
-	int defaultCmdId = ui::ToCmdId( pPopupMenu->GetDefaultItem( GMDI_GOINTOPOPUPS ) );
+	int defaultCmdId = ui::ToIntCmdId( pPopupMenu->GetDefaultItem( GMDI_GOINTOPOPUPS ) );
 
 	return
 		defaultCmdId >= ui::MinCmdId &&

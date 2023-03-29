@@ -28,7 +28,7 @@ CResizeFrameStatic::~CResizeFrameStatic()
 
 void CResizeFrameStatic::OnControlResized( UINT ctrlId )
 {
-	if ( GetDlgCtrlID() == ui::ToCmdId( ctrlId ) )
+	if ( GetDlgCtrlID() == ui::ToIntCmdId( ctrlId ) )
 		if ( m_pGripBar->m_hWnd != nullptr )
 			m_pGripBar->LayoutProportionally();
 }

@@ -272,7 +272,7 @@ CPoint CBaseZoomView::TranslatePointedPct( const CSize& pointedPct ) const
 
 COLORREF CBaseZoomView::MakeAccentedBkColor( COLORREF bkColor )
 {
-	if ( !ui::IsActualColor( bkColor ) )
+	if ( !ui::IsRealColor( bkColor ) )
 		return bkColor;			// ignore not evaluated
 
 	COLORREF newColor = bkColor;

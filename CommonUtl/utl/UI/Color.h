@@ -16,12 +16,7 @@ namespace ui
 	inline bool IsNullColor( COLORREF rawColor ) { return CLR_NONE == rawColor; }
 	inline bool IsDefaultColor( COLORREF rawColor ) { return CLR_DEFAULT == rawColor; }
 
-	inline bool IsUndefinedColor( COLORREF rawColor ) { return CLR_NONE == rawColor || CLR_DEFAULT == rawColor; }
-
-
-	enum StdTranspColor { Transp_LowColor = color::LightGrey, Transp_TrueColor = color::ToolStripPink };
-
-	inline COLORREF GetStdTranspColor( WORD bitsPerPixel ) { return bitsPerPixel >= 24 ? Transp_TrueColor : Transp_LowColor; }
+	inline bool IsUndefinedColor( COLORREF rawColor ) { return CLR_NONE == rawColor || CLR_DEFAULT == rawColor; }		// a Windows CLR_* color?
 
 
 	namespace color_info
@@ -34,17 +29,25 @@ namespace ui
 	inline BYTE GetColorFlags( COLORREF color ) { return LOBYTE( color >> 24 ); }				// highest BYTE
 
 
-	// system color index
+	inline bool IsRealColor( COLORREF rawColor ) { return 0 == GetColorFlags( rawColor ); }		// a real RGB color: not CLR_NONE, CLR_DEFAULT, sys-color, palette-index
+	COLORREF EvalColor( COLORREF rawColor );
+
+
+	// system color index (Win32)
 	inline bool IsSysColor( COLORREF color ) { return !IsUndefinedColor( color ) && color_info::FlagSysColorIndex == ( color & color_info::MaskColorFlags ); }
 		inline bool IsValidSysColorIndex( TSysColorIndex sysColorIndex ) { return ::GetSysColorBrush( sysColorIndex ) != nullptr; }
 		inline TSysColorIndex GetSysColorIndex( COLORREF color ) { ASSERT( IsSysColor( color ) ); return color & color_info::MaskSysIndex; }
 	inline COLORREF MakeSysColor( ui::TSysColorIndex sysColorIndex ) { ASSERT( IsValidSysColorIndex( sysColorIndex ) ); return color_info::FlagSysColorIndex | sysColorIndex; }
 
-	COLORREF EvalColor( COLORREF rawColor );
 
-	inline bool IsActualColor( COLORREF rawColor ) { return 0 == GetColorFlags( rawColor ); }			// not CLR_NONE, CLR_DEFAULT, other
-	inline COLORREF GetActualColor( COLORREF rawColor, COLORREF defaultColor ) { return IsActualColor( rawColor ) ? rawColor : defaultColor; }
-	inline COLORREF GetActualColorSysdef( COLORREF rawColor, TSysColorIndex defaultSysIndex ) { return IsActualColor( rawColor ) ? rawColor : ::GetSysColor( defaultSysIndex ); }
+	// conditional color
+	inline COLORREF GetActualColor( COLORREF rawColor, COLORREF defaultColor ) { return IsRealColor( rawColor ) ? rawColor : defaultColor; }
+	inline COLORREF GetActualColorSysdef( COLORREF rawColor, TSysColorIndex defaultSysIndex ) { return IsRealColor( rawColor ) ? rawColor : ::GetSysColor( defaultSysIndex ); }
+
+
+	enum StdTranspColor { Transp_LowColor = color::LightGrey, Transp_TrueColor = color::ToolStripPink };
+
+	inline COLORREF GetStdTranspColor( WORD bitsPerPixel ) { return bitsPerPixel >= 24 ? Transp_TrueColor : Transp_LowColor; }
 }
 
 
@@ -53,17 +56,20 @@ namespace ui
 
 namespace ui
 {
-	// string conversions
+	// color string conversions
+
 	std::tstring FormatColor( COLORREF color, const TCHAR* pSep = _T("  ") );
 	bool ParseColor( OUT COLORREF* pOutColor, const TCHAR* pColorLiteral );
 
+	std::tstring FormatSysColor( COLORREF color );
 	std::tstring FormatRgbColor( COLORREF color );
 	std::tstring FormatHtmlColor( COLORREF color );
-	std::tstring FormatSysColor( COLORREF color );
+	std::tstring FormatHexColor( COLORREF color );
 
+	bool ParseSystemColor( OUT COLORREF* pOutSysColor, const TCHAR* pSysColorText );
 	bool ParseRgbColor( OUT COLORREF* pOutColor, const TCHAR* pRgbColorText );
 	bool ParseHtmlColor( OUT COLORREF* pOutColor, const TCHAR* pHtmlColorText );
-	bool ParseSystemColor( OUT COLORREF* pOutSysColor, const TCHAR* pSysColorText );
+	bool ParseHexColor( OUT COLORREF* pOutColor, const TCHAR* pHexColorText );
 
 
 	// clipboard

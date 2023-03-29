@@ -220,7 +220,7 @@ namespace shell
 		{
 			TCHAR className[ 256 ];
 			::GetClassName( hCtrl, className, COUNT_OF( className ) );
-			return str::Find< str::IgnoreCase >( className, _T("SysTreeView") ) != std::tstring::npos;
+			return str::Find<str::IgnoreCase>( className, _T("SysTreeView") ) != std::tstring::npos;
 		}
 
 		static BOOL CALLBACK FindChildTreeCtrlProc( HWND hWnd, HWND* phCtrl )

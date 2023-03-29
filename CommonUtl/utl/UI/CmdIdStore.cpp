@@ -37,7 +37,7 @@ namespace ui
 			if ( itemInfo.GetMenuItemInfo( hMenu, i ) )
 			{
 				if ( itemInfo.wID != 0 && !HasFlag( itemInfo.fType, MFT_SEPARATOR /*| MFT_MENUBARBREAK | MFT_MENUBREAK*/ ) )
-					m_cmdIds.insert( ui::ToCmdId( itemInfo.wID ) );
+					m_cmdIds.insert( ui::ToIntCmdId( itemInfo.wID ) );
 			}
 			else
 				ASSERT( false );

@@ -294,6 +294,7 @@ namespace ui
 
 	std::tstring GetClassName( HWND hWnd );
 	bool IsEditBox( HWND hCtrl );
+	bool IsWriteableEditBox( HWND hCtrl );
 	bool IsComboWithEdit( HWND hCtrl );
 	bool IsGroupBox( HWND hWnd );
 	bool IsDialogBox( HWND hWnd );

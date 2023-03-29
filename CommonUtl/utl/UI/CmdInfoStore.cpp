@@ -48,8 +48,8 @@ namespace ui
 
 	CCmdInfoStore& CCmdInfoStore::Instance( void )
 	{
-		static CCmdInfoStore cmdStore;
-		return cmdStore;
+		static CCmdInfoStore s_cmdStore;
+		return s_cmdStore;
 	}
 
 	const CCmdInfo* CCmdInfoStore::FindInfo( UINT cmdId ) const
@@ -142,7 +142,7 @@ namespace ui
 			 ( m_pTttW != nullptr && HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) ) )
 		{
 			m_hCtrl = (HWND)pNmHdr->idFrom;						// idFrom is actually the HWND of the tool
-			m_cmdId = ui::ToCmdId( ::GetDlgCtrlID( m_hCtrl ) );
+			m_cmdId = ::GetDlgCtrlID( m_hCtrl );
 		}
 	}
 

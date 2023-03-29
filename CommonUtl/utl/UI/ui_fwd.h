@@ -132,7 +132,7 @@ namespace ui
 
 	enum { MinCmdId = 0, MaxCmdId = 0xFFFF, MinAppCmdId = 1, MaxAppCmdId = 0x7FFF, AtEnd = -1 };
 
-	inline int ToCmdId( UINT uCmdId ) { return (short)(unsigned short)( uCmdId ); }
+	inline int ToIntCmdId( UINT uCmdId ) { return (short)(unsigned short)( uCmdId ); }
 
 
 	CPoint GetCursorPos( HWND hWnd = nullptr );			// return screen coordinates if NULL

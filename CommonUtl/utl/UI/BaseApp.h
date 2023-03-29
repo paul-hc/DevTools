@@ -22,7 +22,7 @@ class CBaseApp
 	, public CAppTools
 {
 protected:
-	CBaseApp( const TCHAR* pAppName = nullptr );
+	CBaseApp( void );
 	virtual ~CBaseApp();
 
 	// call just before InitInstance:
