@@ -6,6 +6,15 @@
 enum SortType { NoSort, SortAscending, SortDescending };
 
 
+namespace func
+{
+	struct ToSelf
+	{
+		template< typename ValueT >
+		const ValueT& operator()( const ValueT& value ) const { return value; }
+	};
+}
+
 namespace pred
 {
 	enum CompareResult { Less = -1, Equal, Greater };

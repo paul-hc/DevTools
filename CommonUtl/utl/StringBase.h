@@ -761,33 +761,35 @@ namespace str
 	}
 
 
-	template< typename CharT, typename Iterator >
-	std::basic_string<CharT> Join( Iterator itFirstToken, Iterator itLastToken, const CharT* pSep )
+	template< typename CharT, typename Iterator, typename ToFieldFunc >
+	std::basic_string<CharT> Join( Iterator itFirst, Iterator itLast, const CharT* pSep, ToFieldFunc toField )
 	{	// works with any forward/reverse iterator
 		std::basic_ostringstream<CharT> oss;
-		for ( Iterator itItem = itFirstToken; itItem != itLastToken; ++itItem )
+		for ( Iterator itItem = itFirst; itItem != itLast; ++itItem )
 		{
-			if ( itItem != itFirstToken )
+			if ( itItem != itFirst )
 				oss << pSep;
-			oss << *itItem;
+			oss << toField( *itItem );
 		}
 		return oss.str();
 	}
 
-	// works with container of any value type that has stream insertor defined
-	//
-	template< typename CharT, typename ContainerT >
-	inline std::basic_string<CharT> Join( const ContainerT& items, const CharT* pSep )
-	{
-		return Join( items.begin(), items.end(), pSep );
+	template< typename CharT, typename Iterator >
+	std::basic_string<CharT> Join( Iterator itFirst, Iterator itLast, const CharT* pSep ) { return Join( itFirst, itLast, pSep, func::ToSelf() ); }
+
+	template< typename CharT, typename ContainerT, typename ToFieldFunc >
+	inline std::basic_string<CharT> Join( const ContainerT& items, const CharT* pSep, ToFieldFunc toField )
+	{	// works with container of any value type that has stream insertor defined
+		return Join( items.begin(), items.end(), pSep, toField );
 	}
 
+	template< typename CharT, typename ContainerT >
+	inline std::basic_string<CharT> Join( const ContainerT& items, const CharT* pSep ) { return Join( items.begin(), items.end(), pSep, func::ToSelf() ); }
 
-	// works with container of any value type that has stream insertor defined
-	//
+
 	template< typename ContainerT >
 	inline std::tstring FormatSet( const ContainerT& items, const TCHAR* pSep = _T(",") )
-	{
+	{	// works with container of any value type that has stream insertor defined
 		return str::Format( _T("{%s}:count=%d"), Join( items.begin(), items.end(), pSep ).c_str(), items.size() );
 	}
 }

@@ -708,6 +708,12 @@ namespace str
 		return utl::npos;
 	}
 
+	template< str::CaseType caseType, typename CharT, typename SeqStringT >
+	inline size_t FindStr( const CharT* pText, const SeqStringT& sequence, size_t offset = 0 )
+	{
+		return Find<caseType>( pText, sequence.c_str(), sequence.length(), offset );
+	}
+
 
 	template< str::CaseType caseType, typename CharT, typename SeqCharT >
 	size_t FindLast( const CharT* pText, const SeqCharT* pSequence, size_t seqLength = utl::npos, size_t offset = utl::npos )
@@ -730,6 +736,12 @@ namespace str
 	inline size_t FindLast( const CharT* pText, SeqCharT chr, size_t offset = utl::npos )
 	{
 		return FindLast<caseType>( pText, &chr, 1, offset );
+	}
+
+	template< str::CaseType caseType, typename CharT, typename SeqStringT >
+	inline size_t FindLastStr( const CharT* pText, const SeqStringT& sequence, size_t offset = utl::npos )
+	{
+		return FindLast<caseType>( pText, sequence.c_str(), sequence.length(), offset );
 	}
 
 

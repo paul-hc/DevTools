@@ -65,13 +65,6 @@ namespace func
 	};
 
 
-	struct ToSelf
-	{
-		template< typename ValueT >
-		const ValueT& operator()( const ValueT& value ) const { return value; }
-	};
-
-
 	template< typename Functor, typename Adapter, typename FunctorReturnT = typename Functor::TReturn >
 	struct ValueAdapter
 	{
