@@ -220,6 +220,7 @@
     <ClInclude Include="CustomTaskDialogs.h" />
     <ClInclude Include="DemoSysTray.h" />
     <ClInclude Include="DemoTemplate.h" />
+    <ClInclude Include="TestColorsDialog.h" />
     <ClInclude Include="FileChecksumsDialog.h" />
     <ClInclude Include="FileListDialog.h" />
     <ClInclude Include="FlagStrip.h" />
@@ -232,7 +233,7 @@
     <ClInclude Include="TestDialog.h" />
     <ClInclude Include="TestDoc.h" />
     <ClInclude Include="TestFormView.h" />
-    <ClInclude Include="TestMiscDialog.h" />
+    <ClInclude Include="TestToolbarDialog.h" />
     <ClInclude Include="TestPropertySheet.h" />
     <ClInclude Include="TestTaskDialog.h" />
     <ClInclude Include="test\ImageTests.h" />
@@ -243,6 +244,7 @@
     <ClCompile Include="ChildFrame.cpp" />
     <ClCompile Include="DemoSysTray.cpp" />
     <ClCompile Include="DemoTemplate.cpp" />
+    <ClCompile Include="TestColorsDialog.cpp" />
     <ClCompile Include="FileChecksumsDialog.cpp" />
     <ClCompile Include="FileListDialog.cpp" />
     <ClCompile Include="ImageDialog.cpp" />
@@ -258,7 +260,7 @@
     <ClCompile Include="TestDialog.cpp" />
     <ClCompile Include="TestDoc.cpp" />
     <ClCompile Include="TestFormView.cpp" />
-    <ClCompile Include="TestMiscDialog.cpp" />
+    <ClCompile Include="TestToolbarDialog.cpp" />
     <ClCompile Include="TestPropertySheet.cpp" />
     <ClCompile Include="TestTaskDialog.cpp" />
     <ClCompile Include="test\ImageTests.cpp" />

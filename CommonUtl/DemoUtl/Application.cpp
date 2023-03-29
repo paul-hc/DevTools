@@ -67,7 +67,7 @@ namespace hlp
 
 // CApplication implementation
 
-CApplication theApp;	// the one and only CApplication object
+CApplication g_theApp;	// the one and only CApplication object
 
 CApplication::CApplication( void )
 {
@@ -82,8 +82,10 @@ BOOL CApplication::InitInstance( void )
 {
 	m_pGdiPlusInit.reset( new CScopedGdiPlusInit() );
 
-	if ( !CBaseApp<CWinApp>::InitInstance() )
+	if ( !CBaseApp<CWinAppEx>::InitInstance() )
 		return FALSE;
+
+	SetRegistryBase( _T("Settings") );
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images
@@ -141,7 +143,7 @@ int CApplication::ExitInstance( void )
 	WriteProfileInt( reg::section, reg::entry_disableSmooth, !HasFlag( CLayoutEngine::m_defaultFlags, CLayoutEngine::SmoothGroups ) );
 	WriteProfileInt( reg::section, reg::entry_disableThemes, CVisualTheme::IsDisabled() );
 
-	return CBaseApp<CWinApp>::ExitInstance();
+	return CBaseApp<CWinAppEx>::ExitInstance();
 }
 
 void CApplication::OnInitAppResources( void )
@@ -190,9 +192,9 @@ bool CApplication::HasCommandLineOptions( void )
 }
 
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
-	ON_COMMAND( ID_FILE_NEW, &CBaseApp<CWinApp>::OnFileNew )
-	ON_COMMAND( ID_FILE_OPEN, &CBaseApp<CWinApp>::OnFileOpen )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinAppEx> )
+	ON_COMMAND( ID_FILE_NEW, &CBaseApp<CWinAppEx>::OnFileNew )
+	ON_COMMAND( ID_FILE_OPEN, &CBaseApp<CWinAppEx>::OnFileOpen )
 END_MESSAGE_MAP()
 
 

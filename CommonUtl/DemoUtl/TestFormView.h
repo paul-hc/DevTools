@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utl/UI/LayoutFormView.h"
+#include "utl/UI/EnumSplitButton.h"
 #include "ITestMarkup.h"
 
 
@@ -8,7 +9,7 @@ class CDemoTemplate;
 
 
 class CTestFormView : public CLayoutFormView
-					, public ITestMarkup
+	, public ITestMarkup
 {
 	DECLARE_DYNCREATE( CTestFormView )
 protected:
@@ -20,13 +21,18 @@ public:
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	CTestDoc* GetDocument( void ) const { return reinterpret_cast<CTestDoc*>( m_pDocument ); }
-protected:
-	// base overrides
-	virtual void OnIdleUpdateControls( void );
 private:
 	// enum { IDD = IDD_DEMO_FORM };
 
 	std::auto_ptr<CDemoTemplate> m_pDemo;
+	CEnumSplitButton m_miscDlgButton;
+private:
+	enum MiscDialog { ToolbarDialog, TestColorsDialog };
+
+	const CEnumTags& GetTags_MiscDialog( void );
+protected:
+	// base overrides
+	virtual void OnIdleUpdateControls( void );
 
 	// generated stuff
 public:

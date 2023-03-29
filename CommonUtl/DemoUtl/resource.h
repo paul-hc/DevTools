@@ -24,12 +24,13 @@
 #define IDB_PNG1                        148
 #define IDR_FLAG_STRIP_PNG              148
 #define IDD_TEST_TASK_DIALOG            149
-#define IDD_TEST_MISC_DIALOG            150
+#define IDD_TEST_TOOLBAR_DIALOG         150
 #define IDI_MY_TOOL_STRIP_ICON          150
 #define IDD_FILE_CHECKSUMS_DIALOG       151
 #define IDI_MY_TOOL_STRIP_ALPHA_ICON    151
 #define IDD_BUDDY_CONTROLS_DIALOG       152
 #define IDB_SEARCH_FILES_ANIM_STRIP     152
+#define IDD_TEST_COLORS_DIALOG          153
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_MODELESS_PROPERTIES_BUTTON  1002
@@ -129,8 +130,12 @@
 #define IDC_HORIZ_SPLITTER_STATIC       1101
 #define IDC_SEL_FILE_EDIT               1102
 #define IDC_SEL_FILE_PROGRESS           1103
-#define IDC_CHECK1                      1104
 #define IDC_BUDDY_MODELESS_CHECK        1104
+#define IDC_COLOR_PICKER_BUTTON         1105
+#define IDC_RGB_EDIT                    1106
+#define IDC_MY_COLOR_PICKER_BUTTON      1107
+#define IDC_COLOR_INFO_EDIT             1108
+#define IDC_REPO_COLOR_INFO_EDIT        1108
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -175,9 +180,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        153
+#define _APS_NEXT_RESOURCE_VALUE        154
 #define _APS_NEXT_COMMAND_VALUE         32813
-#define _APS_NEXT_CONTROL_VALUE         1105
+#define _APS_NEXT_CONTROL_VALUE         1107
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

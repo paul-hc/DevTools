@@ -509,6 +509,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TestColorsDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TestColorsDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\TestDialog.cpp"
 				>
 			</File>
@@ -533,14 +541,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TestMiscDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TestMiscDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\TestPropertySheet.cpp"
 				>
 			</File>
@@ -554,6 +554,14 @@
 			</File>
 			<File
 				RelativePath=".\TestTaskDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TestToolbarDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TestToolbarDialog.h"
 				>
 			</File>
 		</Filter>

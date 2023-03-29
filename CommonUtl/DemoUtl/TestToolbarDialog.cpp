@@ -1,6 +1,6 @@
 
 #include "pch.h"
-#include "TestMiscDialog.h"
+#include "TestToolbarDialog.h"
 #include "utl/AppTools.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/WndUtils.h"
@@ -26,8 +26,8 @@ namespace layout
 }
 
 
-CTestMiscDialog::CTestMiscDialog( CWnd* pParent )
-	: CLayoutDialog( IDD_TEST_MISC_DIALOG, pParent )
+CTestToolbarDialog::CTestToolbarDialog( CWnd* pParent )
+	: CLayoutDialog( IDD_TEST_TOOLBAR_DIALOG, pParent )
 	, m_toolbarDisabledGrayScale( gdi::DisabledGrayScale )
 	, m_toolbarDisabledGray( gdi::DisabledGrayOut )
 	, m_toolbarDisabledEffect( gdi::DisabledEffect )
@@ -48,11 +48,11 @@ CTestMiscDialog::CTestMiscDialog( CWnd* pParent )
 	m_toolbarDisabledBlendColor.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
 }
 
-CTestMiscDialog::~CTestMiscDialog()
+CTestToolbarDialog::~CTestToolbarDialog()
 {
 }
 
-void CTestMiscDialog::RegisterOwnCmds( void )
+void CTestToolbarDialog::RegisterOwnCmds( void )
 {
 	static bool registered = false;
 	if ( registered )
@@ -73,7 +73,7 @@ void CTestMiscDialog::RegisterOwnCmds( void )
 	registered = true;
 }
 
-void CTestMiscDialog::DoDataExchange( CDataExchange* pDX )
+void CTestToolbarDialog::DoDataExchange( CDataExchange* pDX )
 {
 //	bool firstInit = nullptr == m_toolbarStdEnabled.m_hWnd;
 	enum Align { BarAlign = H_AlignLeft | V_AlignCenter };
@@ -89,19 +89,19 @@ void CTestMiscDialog::DoDataExchange( CDataExchange* pDX )
 	CLayoutDialog::DoDataExchange( pDX );
 }
 
-BEGIN_MESSAGE_MAP( CTestMiscDialog, CLayoutDialog )
+BEGIN_MESSAGE_MAP( CTestToolbarDialog, CLayoutDialog )
 	ON_WM_DESTROY()
 	ON_UPDATE_COMMAND_UI_RANGE( IdFileNew, IdAppAbout, OnUpdateButton )
 END_MESSAGE_MAP()
 
-void CTestMiscDialog::OnDestroy( void )
+void CTestToolbarDialog::OnDestroy( void )
 {
 	//AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_dialogUsage, m_usageButton.GetSelValue() );
 
 	__super::OnDestroy();
 }
 
-void CTestMiscDialog::OnUpdateButton( CCmdUI* pCmdUI )
+void CTestToolbarDialog::OnUpdateButton( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( &m_toolbarStdEnabled == pCmdUI->m_pOther );
 }

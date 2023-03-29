@@ -4,15 +4,15 @@
 #include "utl/UI/DialogToolBar.h"
 
 
-class CTestMiscDialog : public CLayoutDialog
+class CTestToolbarDialog : public CLayoutDialog
 {
 public:
-	CTestMiscDialog( CWnd* pParent );
-	virtual ~CTestMiscDialog();
+	CTestToolbarDialog( CWnd* pParent );
+	virtual ~CTestToolbarDialog();
 private:
 	void RegisterOwnCmds( void );
 private:
-	// enum { IDD = IDD_TEST_MISC_DIALOG };
+	// enum { IDD = IDD_TEST_TOOLBAR_DIALOG };
 	enum OwnID { IdFileNew = 60, IdFileOpen, IdFileSave, IdEditCut, IdEditCopy, IdEditPaste, IdFilePrint, IdAppAbout };
 
 	CDialogToolBar m_toolbarStdEnabled;

@@ -1,12 +1,13 @@
 #pragma once
 
+#include <afxwinappex.h>
 #include "utl/UI/BaseApp.h"
 
 
 class CScopedGdiPlusInit;
 
 
-class CApplication : public CBaseApp<CWinApp>
+class CApplication : public CBaseApp<CWinAppEx>
 {
 public:
 	CApplication( void );
@@ -28,7 +29,7 @@ private:
 };
 
 
-extern CApplication theApp;
+extern CApplication g_theApp;
 
 
 class CEnumTags;

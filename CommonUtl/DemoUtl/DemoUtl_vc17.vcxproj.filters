@@ -68,7 +68,7 @@
     <ClInclude Include="TestFormView.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="TestMiscDialog.h">
+    <ClInclude Include="TestToolbarDialog.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="TestPropertySheet.h">
@@ -79,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="test\ImageTests.h">
       <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="TestColorsDialog.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -127,7 +130,7 @@
     <ClCompile Include="TestFormView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestMiscDialog.cpp">
+    <ClCompile Include="TestToolbarDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestPropertySheet.cpp">
@@ -138,6 +141,9 @@
     </ClCompile>
     <ClCompile Include="test\ImageTests.cpp">
       <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="TestColorsDialog.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

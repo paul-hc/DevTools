@@ -3,12 +3,13 @@
 #include "TestDoc.h"
 #include "TestFormView.h"
 #include "TestTaskDialog.h"
-#include "TestMiscDialog.h"
+#include "TestToolbarDialog.h"
 #include "DemoTemplate.h"
 #include "ImageDialog.h"
 #include "FileListDialog.h"
 #include "FileChecksumsDialog.h"
 #include "BuddyControlsDialog.h"
+#include "TestColorsDialog.h"
 #include "test/ImageTests.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/WndUtils.h"
@@ -24,6 +25,7 @@ namespace reg
 {
 	static const TCHAR section_formView[] = _T("TestForm");
 	static const TCHAR entry_modelessBuddyDlg[] = _T("ModelessBuddyDlg");
+	static const TCHAR entry_miscDlgButton[] = _T("MiscDlgButton");
 }
 
 
@@ -32,11 +34,19 @@ IMPLEMENT_DYNCREATE( CTestFormView, CFormView )
 CTestFormView::CTestFormView( void )
 	: CLayoutFormView( IDD_DEMO_FORM )
 	, m_pDemo( new CDemoTemplate( this ) )
+	, m_miscDlgButton( &GetTags_MiscDialog() )
 {
+	m_miscDlgButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_formView, reg::entry_miscDlgButton, m_miscDlgButton.GetSelValue() ) );
 }
 
 CTestFormView::~CTestFormView()
 {
+}
+
+const CEnumTags& CTestFormView::GetTags_MiscDialog( void )
+{
+	static const CEnumTags s_tags( _T("Toolbar Dialog|Colors Dialog") );
+	return s_tags;
 }
 
 void CTestFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
@@ -44,7 +54,7 @@ void CTestFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipC
 	m_pDemo->QueryTooltipText( rText, cmdId, pTooltip );
 
 	if ( rText.empty() )
-		CLayoutFormView::QueryTooltipText( rText, cmdId, pTooltip );
+		__super::QueryTooltipText( rText, cmdId, pTooltip );
 }
 
 void CTestFormView::DoDataExchange( CDataExchange* pDX )
@@ -54,6 +64,7 @@ void CTestFormView::DoDataExchange( CDataExchange* pDX )
 	m_pDemo->DoDataExchange( pDX );
 	ui::DDX_ButtonIcon( pDX, IDC_RUN_IMAGE_TESTS, ID_RUN_TESTS );
 	ui::DDX_ButtonIcon( pDX, ID_STUDY_IMAGE );
+	DDX_Control( pDX, ID_STUDY_MISC_DIALOG, m_miscDlgButton );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		if ( firstInit )
@@ -153,8 +164,25 @@ void CTestFormView::OnStudyTaskDialog( void )
 
 void CTestFormView::OnStudyMiscDialog( void )
 {
-	CTestMiscDialog dlg( this );
-	dlg.DoModal();
+	MiscDialog miscDlg = m_miscDlgButton.GetSelEnum<MiscDialog>();
+	AfxGetApp()->WriteProfileInt( reg::section_formView, reg::entry_miscDlgButton, miscDlg );
+
+	std::auto_ptr<CDialog> pDlg;
+
+	switch ( miscDlg )
+	{
+		case ToolbarDialog:
+			pDlg.reset( new CTestToolbarDialog( this ) );
+			break;
+		case TestColorsDialog:
+			pDlg.reset( new CTestColorsDialog( this ) );
+			break;
+		default:
+			break;
+	}
+
+	if ( pDlg.get() != nullptr )
+		pDlg->DoModal();
 }
 
 void CTestFormView::OnToggle_ModelessBuddyDlg( void )
