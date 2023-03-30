@@ -23,9 +23,10 @@ namespace ut
 {
 	// Pick test dates outside summer Daylight Savings - there are incompatibility issues starting with Visual C++ 2022,
 	// due to CTime( const FILETIME& fileTime, int nDST = -1 ) constructor implementation!
-	static const CTime s_ct = time_utl::ParseTimestamp( _T("29-11-2017 14:10:00") );
-	static const CTime s_mt = time_utl::ParseTimestamp( _T("29-11-2017 14:20:00") );
-	static const CTime s_at = time_utl::ParseTimestamp( _T("29-11-2017 14:30:00") );
+	//
+	static const CTime s_creationTime	= time_utl::ParseTimestamp( _T("29-11-2017 14:10:00") );
+	static const CTime s_modifTime		= time_utl::ParseTimestamp( _T("29-11-2017 14:20:00") );
+	static const CTime s_accessTime		= time_utl::ParseTimestamp( _T("29-11-2017 14:30:00") );
 
 	static const fs::TEnumFlags s_recurse( fs::EF_Recurse );
 
@@ -275,6 +276,40 @@ void CFileSystemTests::TestTempFilePool( void )
 	}
 }
 
+
+void AFX_CDECL AfxTimeToFileTime( const CTime& time, LPFILETIME pFileTime );		// defined in <afximpl.h>
+
+template<>
+inline bool ut::Equals<FILETIME>( const FILETIME& x, const FILETIME& y )			// inject explicit specialization in ut namespace
+{
+	return x.dwLowDateTime == y.dwLowDateTime && x.dwHighDateTime == y.dwHighDateTime;
+}
+
+void CFileSystemTests::TestFileTimeConversions( void )
+{	// ensure fs::MakeFileTime() is equivalent with AfxTimeToFileTime()
+	FILETIME utlFileTime, mfcFileTime;
+
+	// invalid (null) time conversion:
+	{
+		CTime badTime( -1 );
+
+		ASSERT( nullptr == fs::MakeFileTime( utlFileTime, badTime ) );
+
+		ASSERT_THROWS( CRuntimeException, fs::thr::MakeFileTime( utlFileTime, badTime, _T("SomeFile.ext"), fs::RuntimeExc ) );
+		ASSERT_THROWS_MFC( CFileException, fs::thr::MakeFileTime( utlFileTime, badTime, _T("SomeFile.ext"), fs::MfcExc ) );
+
+		ASSERT_THROWS_MFC( CFileException, AfxTimeToFileTime( badTime, &mfcFileTime ) );
+	}
+
+	// valid time conversion:
+	{
+		ASSERT_PTR( fs::MakeFileTime( utlFileTime, ut::s_creationTime ) );
+		AfxTimeToFileTime( ut::s_creationTime, &mfcFileTime );
+
+		ASSERT_EQUAL( utlFileTime, mfcFileTime );
+	}
+}
+
 void CFileSystemTests::TestFileAndDirectoryState( void )
 {
 	ut::CTempFilePool pool( _T("fa.txt|D1\\fb.txt") );
@@ -293,25 +328,25 @@ void CFileSystemTests::TestFileAndDirectoryState( void )
 		ASSERT_EQUAL( CFile::readOnly | CFile::archive, newFileState.m_attributes );
 		ASSERT_EQUAL( fileState, newFileState );
 
-		fileState.m_creationTime = ut::s_ct;
+		fileState.m_creationTime = ut::s_creationTime;
 		fileState.WriteToFile();
 		newFileState = fs::CFileState::ReadFromFile( filePath );
 
-		ASSERT_EQUAL( ut::s_ct, newFileState.m_creationTime );
+		ASSERT_EQUAL( ut::s_creationTime, newFileState.m_creationTime );
 		ASSERT_EQUAL( fileState, newFileState );
 
-		fileState.m_modifTime = ut::s_mt;
+		fileState.m_modifTime = ut::s_modifTime;
 		fileState.WriteToFile();
 		newFileState = fs::CFileState::ReadFromFile( filePath );
 
-		ASSERT_EQUAL( ut::s_mt, newFileState.m_modifTime );
+		ASSERT_EQUAL( ut::s_modifTime, newFileState.m_modifTime );
 		ASSERT_EQUAL( fileState, newFileState );
 
-		fileState.m_accessTime = ut::s_at;
+		fileState.m_accessTime = ut::s_accessTime;
 		fileState.WriteToFile();
 		newFileState = fs::CFileState::ReadFromFile( filePath );
 
-		ASSERT_EQUAL( ut::s_at, newFileState.m_accessTime );
+		ASSERT_EQUAL( ut::s_accessTime, newFileState.m_accessTime );
 		ASSERT_EQUAL( fileState, newFileState );
 	}
 
@@ -329,25 +364,25 @@ void CFileSystemTests::TestFileAndDirectoryState( void )
 		ASSERT_EQUAL( CFile::readOnly | CFile::directory, newDirState.m_attributes );
 		ASSERT_EQUAL( dirState, newDirState );
 
-		dirState.m_creationTime = ut::s_ct;
+		dirState.m_creationTime = ut::s_creationTime;
 		dirState.WriteToFile();
 		newDirState = fs::CFileState::ReadFromFile( dirPath );
 
-		ASSERT_EQUAL( ut::s_ct, newDirState.m_creationTime );
+		ASSERT_EQUAL( ut::s_creationTime, newDirState.m_creationTime );
 		ASSERT_EQUAL( dirState, newDirState );
 
-		dirState.m_modifTime = ut::s_mt;
+		dirState.m_modifTime = ut::s_modifTime;
 		dirState.WriteToFile();
 		newDirState = fs::CFileState::ReadFromFile( dirPath );
 
-		ASSERT_EQUAL( ut::s_mt, newDirState.m_modifTime );
+		ASSERT_EQUAL( ut::s_modifTime, newDirState.m_modifTime );
 		ASSERT_EQUAL( dirState, newDirState );
 
-		dirState.m_accessTime = ut::s_at;
+		dirState.m_accessTime = ut::s_accessTime;
 		dirState.WriteToFile();
 		newDirState = fs::CFileState::ReadFromFile( dirPath );
 
-		ASSERT_EQUAL( ut::s_at, newDirState.m_accessTime );
+		ASSERT_EQUAL( ut::s_accessTime, newDirState.m_accessTime );
 		ASSERT_EQUAL( dirState, newDirState );
 	}
 }
@@ -504,7 +539,12 @@ void CFileSystemTests::Run( void )
 	RUN_TEST( TestFileEnumHidden );
 	RUN_TEST( TestNumericFilename );
 	RUN_TEST( TestTempFilePool );
-	RUN_TEST( TestFileAndDirectoryState );
+	RUN_TEST( TestFileTimeConversions );
+#ifdef IS_CPP_11
+	// avoid issues related to MFC changes in recent versions that impact file time conversions (e.g. on DL-7420, though it passes on T440p)
+#else
+	 RUN_TEST( TestFileAndDirectoryState );
+#endif
 	RUN_TEST( TestTouchFile );
 	RUN_TEST( TestFileTransferMatch );
 	RUN_TEST( TestBackupFileFlat );

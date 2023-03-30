@@ -3,6 +3,7 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/FmtUtilsTests.h"
+#include "TimeUtils.h"
 #include "FmtUtils.h"
 
 #ifdef _DEBUG
@@ -13,9 +14,12 @@
 namespace ut
 {
 	static const std::tstring s_filePath = _T("C:\\download\\file.txt");
-	static const CTime s_ct( 2017, 7, 1, 14, 10, 0 );
-	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
-	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
+	// Pick test dates outside summer Daylight Savings - there are incompatibility issues starting with Visual C++ 2022,
+	// due to CTime( const FILETIME& fileTime, int nDST = -1 ) constructor implementation!
+	//
+	static const CTime s_creationTime	= time_utl::ParseTimestamp( _T("29-11-2017 14:10:00") );
+	static const CTime s_modifTime		= time_utl::ParseTimestamp( _T("29-11-2017 14:20:00") );
+	static const CTime s_accessTime		= time_utl::ParseTimestamp( _T("29-11-2017 14:30:00") );
 
 	static const fs::CFileState& GetStdFileState( void )
 	{
@@ -25,9 +29,9 @@ namespace ut
 		{
 			s_refState.m_fullPath.Set( s_filePath );
 			s_refState.m_attributes = CFile::readOnly | CFile::hidden;
-			s_refState.m_creationTime = s_ct;
-			s_refState.m_modifTime = s_mt;
-			s_refState.m_accessTime = s_at;
+			s_refState.m_creationTime = s_creationTime;
+			s_refState.m_modifTime = s_modifTime;
+			s_refState.m_accessTime = s_accessTime;
 		}
 		return s_refState;
 	}
@@ -54,21 +58,21 @@ void CFmtUtilsTests::TestFileState( void )
 
 	// tagged format
 	text = fmt::FormatClipFileState( refState );
-	ASSERT_EQUAL( _T("C:\\download\\file.txt\t{RH|C=01-07-2017 14:10:00|M=01-07-2017 14:20:00|A=01-07-2017 14:30:00}"), text );
+	ASSERT_EQUAL( _T("C:\\download\\file.txt\t{RH|C=29-11-2017 14:10:00|M=29-11-2017 14:20:00|A=29-11-2017 14:30:00}"), text );
 	ASSERT_EQUAL( refState, fmt::ParseClipFileState( newState, text ) );
 
 	// tagged format: A/M/C
-	ASSERT_EQUAL( refState, fmt::ParseClipFileState( newState, _T("C:\\download\\file.txt\t{RH|A=01-07-2017 14:30:00|M=01-07-2017 14:20:00|C=01-07-2017 14:10:00}") ) );
+	ASSERT_EQUAL( refState, fmt::ParseClipFileState( newState, _T("C:\\download\\file.txt\t{RH|A=29-11-2017 14:30:00|M=29-11-2017 14:20:00|C=29-11-2017 14:10:00}") ) );
 
 	// legacy untagged format
 	text = fmt::FormatClipFileState( refState, fmt::FullPath, false );
-	ASSERT_EQUAL( _T("C:\\download\\file.txt\t{RH|01-07-2017 14:10:00|01-07-2017 14:20:00|01-07-2017 14:30:00}"), text );			// time-field: C,M,A
+	ASSERT_EQUAL( _T("C:\\download\\file.txt\t{RH|29-11-2017 14:10:00|29-11-2017 14:20:00|29-11-2017 14:30:00}"), text );			// time-field: C,M,A
 	ASSERT_EQUAL( refState, fmt::ParseClipFileState( newState, text ) );
 
 	// tagged format: filename.ext
 	static const fs::CPath s_keyPath( _T("C:\\download\\file.txt") );
 	text = fmt::FormatClipFileState( refState, fmt::FilenameExt );
-	ASSERT_EQUAL( _T("file.txt\t{RH|C=01-07-2017 14:10:00|M=01-07-2017 14:20:00|A=01-07-2017 14:30:00}"), text );
+	ASSERT_EQUAL( _T("file.txt\t{RH|C=29-11-2017 14:10:00|M=29-11-2017 14:20:00|A=29-11-2017 14:30:00}"), text );
 	ASSERT_EQUAL( refState, fmt::ParseClipFileState( newState, text, &s_keyPath ) );		// use key path's directory to qualify "file.txt"
 }
 
@@ -81,12 +85,12 @@ void CFmtUtilsTests::TestTouchEntry( void )
 	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|||} -> {RH|||}"), fmt::FormatTouchEntry( srcState, destState, false ) );		// untagged legacy
 
 	destState.m_accessTime += _5_mins;
-	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|A=01-07-2017 14:30:00} -> {RH|A=01-07-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState ) );
-	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|||01-07-2017 14:30:00} -> {RH|||01-07-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState, false ) );	// C|M|A
+	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|A=29-11-2017 14:30:00} -> {RH|A=29-11-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState ) );
+	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|||29-11-2017 14:30:00} -> {RH|||29-11-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState, false ) );	// C|M|A
 
 	destState.m_creationTime += _5_mins;
-	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|C=01-07-2017 14:10:00|A=01-07-2017 14:30:00} -> {RH|C=01-07-2017 14:15:00|A=01-07-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState ) );
-	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|01-07-2017 14:10:00||01-07-2017 14:30:00} -> {RH|01-07-2017 14:15:00||01-07-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState, false ) );
+	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|C=29-11-2017 14:10:00|A=29-11-2017 14:30:00} -> {RH|C=29-11-2017 14:15:00|A=29-11-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState ) );
+	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|29-11-2017 14:10:00||29-11-2017 14:30:00} -> {RH|29-11-2017 14:15:00||29-11-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState, false ) );
 }
 
 

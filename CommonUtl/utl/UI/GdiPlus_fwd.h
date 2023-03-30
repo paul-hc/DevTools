@@ -2,7 +2,13 @@
 #define GdiPlus_fwd_h
 #pragma once
 
+#pragma warning( push, 3 )			// switch to warning level 3
+#pragma warning( disable: 4458 )	// warning C4458: declaration of 'nativeCap' hides class member
+
 #include <gdiplus.h>
+
+#pragma warning( pop )				// restore to the initial warning level
+
 
 using namespace Gdiplus;
 

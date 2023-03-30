@@ -133,6 +133,12 @@ namespace ut
 	try { ( statement ); _ASSERT_EXPR( false, L"Expected to throw " _CRT_WIDE(#ExceptionT) ); }\
 	catch ( const ExceptionT& exc ) { exc; }
 
+#ifdef _MFC_VER
+	#define ASSERT_THROWS_MFC( MfcExceptionT, statement )\
+		try { ( statement ); _ASSERT_EXPR( false, L"Expected to throw " _CRT_WIDE(#MfcExceptionT) ); }\
+		catch ( MfcExceptionT* pExc ) { pExc->Delete(); }
+#endif
+
 
 #define UT_TRACE( pMessage )  ut::impl::TraceMessage( (pMessage) )
 

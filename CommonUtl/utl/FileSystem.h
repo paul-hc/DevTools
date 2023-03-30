@@ -18,7 +18,7 @@ namespace fs
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
 	bool IsProtectedFile( const TCHAR* pFilePath );
 
-	void QueryFolderPaths( std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly = true );
+	void QueryFolderPaths( OUT std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly = true );
 
 	fs::TDirPath GetCurrentDirectory( void );				// current working directory
 	fs::CPath GetModuleFilePath( HINSTANCE hInstance );		// pass AfxGetApp()->m_hInstance in GUI apps, or NULL for the .exe
@@ -28,8 +28,8 @@ namespace fs
 	fs::CPath MakeAbsoluteToCWD( const TCHAR* pRelativePath );							// normalize, strip "./", "../", relative to CWD - current working directory
 	fs::CPath MakeRelativeTo( const TCHAR* pFromPath, const fs::TDirPath& dirPath );	// normalize, make relative to dirPath (such as "..\\.." etc)
 
-	inline fs::CPath& CvtAbsoluteToCWD( fs::CPath& rPath ) { return rPath = MakeAbsoluteToCWD( rPath.GetPtr() ); }
-	inline fs::CPath& CvtRelativeTo( fs::CPath& rPath, const fs::TDirPath& dirPath ) { return rPath = MakeRelativeTo( rPath.GetPtr(), dirPath ); }
+	inline fs::CPath& CvtAbsoluteToCWD( OUT fs::CPath& rPath ) { return rPath = MakeAbsoluteToCWD( rPath.GetPtr() ); }
+	inline fs::CPath& CvtRelativeTo( OUT fs::CPath& rPath, const fs::TDirPath& dirPath ) { return rPath = MakeRelativeTo( rPath.GetPtr(), dirPath ); }
 
 
 	fs::AcquireResult MakeFileWritable( const TCHAR* pFilePath );		// make file writable if read-only
@@ -41,7 +41,7 @@ namespace fs
 	bool DeleteAllFiles( const TCHAR* pDirPath );						// delete even if read-only sub-directories or embedded files
 
 
-	bool LocateExistingFile( fs::CPath* pFoundPath, const std::vector<fs::TDirPath>& searchPaths, const TCHAR* pFilenames, const TCHAR* pSep = _T("|") );
+	bool LocateExistingFile( OUT fs::CPath* pFoundPath, const std::vector<fs::TDirPath>& searchPaths, const TCHAR* pFilenames, const TCHAR* pSep = _T("|") );
 
 
 	enum ExcPolicy { RuntimeExc, MfcExc };
@@ -66,13 +66,13 @@ namespace fs
 
 	std::auto_ptr<CFile> OpenFile( const fs::CPath& filePath, bool throwMode = false, DWORD mode = CFile::modeRead | CFile::typeBinary ) throws_( CFileException* );
 
-	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize = 4 * KiloByte );		// 4096 works well because it's quicker to allocate
+	UINT64 BufferedCopy( OUT CFile& rDestFile, CFile& srcFile, size_t chunkSize = 4 * KiloByte );		// 4096 works well because it's quicker to allocate
 
 
 	class CTextFileWriter
 	{
 	public:
-		CTextFileWriter( CFile* pDestFile, bool isBinaryFile = true );
+		CTextFileWriter( OUT CFile* pDestFile, bool isBinaryFile = true );
 
 		void WriteText( const std::tstring& text );
 		void WriteLine( const std::tstring& text ) { WriteText( text + m_lineEnd ); }
@@ -106,7 +106,7 @@ namespace fs
 	FileExpireStatus CheckExpireStatus( const fs::CPath& filePath, const CTime& lastModifyTime );
 
 
-	FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time );
+	FILETIME* MakeFileTime( OUT FILETIME& rOutFileTime, const CTime& time );
 
 
 	namespace thr
@@ -117,7 +117,7 @@ namespace fs
 		void WriteFileTime( const TCHAR* pFilePath, TimeField timeField, const CTime& time,
 							fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* );
 
-		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time, const TCHAR* pFilePath,
+		FILETIME* MakeFileTime( OUT FILETIME& rOutFileTime, const CTime& time, const TCHAR* pFilePath,
 								fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* );
 
 		void TouchFile( const fs::CPath& filePath, const CTime& time = CTime::GetCurrentTime(), TimeField timeField = ModifiedDate,

@@ -13,7 +13,7 @@ namespace fs
 	struct CFileState
 	{
 		CFileState( void ) : m_fileSize( 0 ), m_attributes( s_invalidAttributes ), m_crc32( 0 ) {}
-		CFileState( const ::CFileStatus* pFileStatus );
+		CFileState( const ::CFileStatus* pMfcFileStatus );
 		CFileState( const CFileFind& foundFile );
 
 		void Clear( void ) { *this = CFileState(); }
@@ -55,8 +55,8 @@ namespace fs
 
 		static const CFlagTags& GetTags_FileAttributes( void );
 	private:
-		void ModifyFileStatus( const ::CFileStatus& newStatus ) const throws_( CFileException );
-		void ModifyFileTimes( const ::CFileStatus& newStatus, bool isDirectory ) const throws_( CFileException );
+		void ModifyFileStatus( const ::CFileStatus& mfcFileStatus ) const throws_( CFileException );
+		void ModifyFileTimes( const ::CFileStatus& mfcFileStatus, bool isDirectory ) const throws_( CFileException );
 
 		void ThrowLastError( DWORD osLastError = ::GetLastError() ) const throws_( CFileException ) { CFileException::ThrowOsError( osLastError, m_fullPath.GetPtr() ); }
 	public:

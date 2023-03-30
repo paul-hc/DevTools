@@ -23,6 +23,7 @@ private:
 	void TestFileEnumHidden( void );
 	void TestNumericFilename( void );
 	void TestTempFilePool( void );
+	void TestFileTimeConversions( void );
 	void TestFileAndDirectoryState( void );
 	void TestTouchFile( void );
 	void TestFileTransferMatch( void );

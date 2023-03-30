@@ -38,8 +38,8 @@ namespace hlp
 		return wordRange;
 	}
 
-	template< typename Iterator >
-	void ChangeCase( Iterator itStart, Iterator itEnd, UINT cmdId )
+	template< typename IteratorT >
+	void ChangeCase( IteratorT itStart, IteratorT itEnd, UINT cmdId )
 	{
 		switch ( cmdId )
 		{

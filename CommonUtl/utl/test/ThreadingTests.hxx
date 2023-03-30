@@ -7,16 +7,8 @@
 
 #include "UnitTest.h"
 
-#if defined(_HAS_CXX17) && !defined(_M_X64)
-	#pragma message( __WARN__ "Skipping CThreadingTests - 32-bit Boost libraries are missing for Visual C++ 2022!" )
-#else
-	#define TEST_BOOST_THREADS		// Boost 32-bit libraries are not available
-#endif
-
-#ifdef TEST_BOOST_THREADS
 #include "MultiThreading.h"
-#include <boost/thread.hpp>
-#endif //TEST_BOOST_THREADS
+#include "StdThread.h"
 
 
 class CThreadingTests : public ut::CConsoleTestCase
@@ -40,10 +32,10 @@ public:
 private:
 	void TestNestedLocking( void )			// OS sync objects
 	{
-	#ifdef TEST_BOOST_THREADS
 		// code demo - not a real unit test
-		{
-			CCriticalSection cs;				// serialize cache access for thread safety
+
+		{	// MFC locking:
+			CCriticalSection cs;			// serialize cache access for thread safety
 
 			mt::CAutoLock lock1( &cs );
 			TRACE( _T(" CCriticalSection: aquire 1st lock...") );
@@ -53,12 +45,11 @@ private:
 			}
 		}
 
-		{
-			boost::mutex mtx;
-			boost::lock_guard<boost::mutex> lock1( mtx );
-			TRACE( _T(" boost::mutex: aquire lock\n") );
+		{	// STL locking:
+			std::mutex mtx;
+			std::lock_guard<std::mutex> lock1( mtx );
+			TRACE( _T(" std::mutex: aquire lock\n") );
 		}
-	#endif //TEST_BOOST_THREADS
 	}
 };
 

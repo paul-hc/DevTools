@@ -23,8 +23,8 @@ namespace d2d
 	CComPtr<ID2D1RadialGradientBrush> CreateRadialGradientBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor );
 
 
-	template< typename Iterator >
-	void ReverseGradientStops( Iterator itFirst, Iterator itLast )
+	template< typename IteratorT >
+	void ReverseGradientStops( IteratorT itFirst, IteratorT itLast )
 	{
 		for ( ; itFirst < itLast; ++itFirst )
 			std::swap( itFirst->color, ( --itLast )->color );		// just reverse colors, keep positions (assuming they are evenly spread)

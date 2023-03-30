@@ -21,13 +21,13 @@ namespace fs
 {
 	// CFileState implementation
 
-	CFileState::CFileState( const ::CFileStatus* pFileStatus )
-		: m_fullPath( pFileStatus->m_szFullName )
-		, m_fileSize( static_cast<UINT64>( pFileStatus->m_size ) )
-		, m_attributes( static_cast<BYTE>( pFileStatus->m_attribute ) )
-		, m_creationTime( pFileStatus->m_ctime )
-		, m_modifTime( pFileStatus->m_mtime )
-		, m_accessTime( pFileStatus->m_atime )
+	CFileState::CFileState( const ::CFileStatus* pMfcFileStatus )
+		: m_fullPath( pMfcFileStatus->m_szFullName )
+		, m_fileSize( static_cast<UINT64>( pMfcFileStatus->m_size ) )
+		, m_attributes( static_cast<BYTE>( pMfcFileStatus->m_attribute ) )
+		, m_creationTime( pMfcFileStatus->m_ctime )
+		, m_modifTime( pMfcFileStatus->m_mtime )
+		, m_accessTime( pMfcFileStatus->m_atime )
 		, m_crc32( 0 )
 	{
 	}
@@ -45,31 +45,31 @@ namespace fs
 
 	CFileState CFileState::ReadFromFile( const fs::CPath& path )
 	{
-		::CFileStatus fileStatus;
-		if ( !CFile::GetStatus( path.GetPtr(), fileStatus ) )
+		::CFileStatus mfcFileStatus;
+		if ( !CFile::GetStatus( path.GetPtr(), mfcFileStatus ) )
 		{
 			CFileState badFileState;
 			badFileState.m_fullPath = path;
 			return badFileState;
 		}
 
-		return CFileState( &fileStatus );
+		return CFileState( &mfcFileStatus );
 	}
 
 	void CFileState::WriteToFile( void ) const throws_( CFileException, mfc::CRuntimeException )
 	{
 		REQUIRE( IsValid() );
 
-		::CFileStatus newStatus;
-		if ( !CFile::GetStatus( m_fullPath.GetPtr(), newStatus ) )
+		::CFileStatus mfcFileStatus;
+		if ( !CFile::GetStatus( m_fullPath.GetPtr(), mfcFileStatus ) )
 			throw new mfc::CRuntimeException( str::Format( _T("Cannot access file status for file: %s"), m_fullPath.GetPtr() ) );
 
-		newStatus.m_attribute = m_attributes;
-		newStatus.m_ctime = m_creationTime;
-		newStatus.m_mtime = m_modifTime;
-		newStatus.m_atime = m_accessTime;
+		mfcFileStatus.m_attribute = m_attributes;
+		mfcFileStatus.m_ctime = m_creationTime;
+		mfcFileStatus.m_mtime = m_modifTime;
+		mfcFileStatus.m_atime = m_accessTime;
 
-		ModifyFileStatus( newStatus );		// was CFile::SetStatus( m_fullPath.GetPtr(), newStatus );
+		ModifyFileStatus( mfcFileStatus );		// was CFile::SetStatus( m_fullPath.GetPtr(), mfcFileStatus );
 	}
 
 	bool CFileState::operator==( const CFileState& right ) const
@@ -94,7 +94,7 @@ namespace fs
 		}
 	}
 
-	void CFileState::ModifyFileStatus( const ::CFileStatus& newStatus ) const throws_( CFileException )
+	void CFileState::ModifyFileStatus( const ::CFileStatus& mfcFileStatus ) const throws_( CFileException )
 	{
 		// Verbatim from CFile::SetStatus( LPCTSTR lpszFileName, const CFileStatus& status ).
 		//	works for file using FILE_ATTRIBUTE_NORMAL - like CFile::SetStatus()
@@ -104,25 +104,25 @@ namespace fs
 		if ( INVALID_FILE_ATTRIBUTES == currentAttr )
 			ThrowLastError();
 
-		ModifyFileTimes( newStatus, HasFlag( currentAttr, FILE_ATTRIBUTE_DIRECTORY ) );
+		ModifyFileTimes( mfcFileStatus, HasFlag( currentAttr, FILE_ATTRIBUTE_DIRECTORY ) );
 
 		DWORD newAttr = currentAttr;
-		SetMaskedValue( newAttr, EDITABLE_ATTRIBUTE_MASK, static_cast<DWORD>( newStatus.m_attribute ) );
+		SetMaskedValue( newAttr, EDITABLE_ATTRIBUTE_MASK, static_cast<DWORD>( mfcFileStatus.m_attribute ) );
 
 		if ( newAttr != currentAttr )
 			if ( !::SetFileAttributes( m_fullPath.GetPtr(), newAttr ) )
 				ThrowLastError();
 	}
 
-	void CFileState::ModifyFileTimes( const ::CFileStatus& newStatus, bool isDirectory ) const throws_( CFileException )
+	void CFileState::ModifyFileTimes( const ::CFileStatus& mfcFileStatus, bool isDirectory ) const throws_( CFileException )
 	{
 		std::vector< std::pair<FILETIME, const FILETIME*> > times( _TimeFieldCount );		// pair.second: ptr not NULL when time is defined (!= 0)
 
-		times[ ModifiedDate ].second = fs::thr::MakeFileTime( times[ ModifiedDate ].first, newStatus.m_mtime, newStatus.m_szFullName, fs::MfcExc );			// last modification time
+		times[ ModifiedDate ].second = fs::thr::MakeFileTime( times[ ModifiedDate ].first, mfcFileStatus.m_mtime, mfcFileStatus.m_szFullName, fs::MfcExc );			// last modification time
 		if ( times[ ModifiedDate ].second != nullptr )
 		{
-			times[ AccessedDate ].second = fs::thr::MakeFileTime( times[ AccessedDate ].first, newStatus.m_atime, newStatus.m_szFullName, fs::MfcExc );		// last access time
-			times[ CreatedDate ].second = fs::thr::MakeFileTime( times[ CreatedDate ].first, newStatus.m_ctime, newStatus.m_szFullName, fs::MfcExc );		// create time
+			times[ AccessedDate ].second = fs::thr::MakeFileTime( times[ AccessedDate ].first, mfcFileStatus.m_atime, mfcFileStatus.m_szFullName, fs::MfcExc );		// last access time
+			times[ CreatedDate ].second = fs::thr::MakeFileTime( times[ CreatedDate ].first, mfcFileStatus.m_ctime, mfcFileStatus.m_szFullName, fs::MfcExc );		// create time
 
 			fs::CScopedWriteableFile scopedWriteable( m_fullPath.GetPtr() );
 			fs::CHandle file( ::CreateFile( m_fullPath.GetPtr(), GENERIC_READ | GENERIC_WRITE,

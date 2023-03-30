@@ -83,8 +83,8 @@ namespace fs
 			return true;
 		}
 
-		template< typename Iterator >
-		void Remove( Iterator itPathKeyStart, Iterator itPathKeyEnd )
+		template< typename IteratorT >
+		void Remove( IteratorT itPathKeyStart, IteratorT itPathKeyEnd )
 		{
 			for ( ; itPathKeyStart != itPathKeyEnd; ++itPathKeyStart )
 				Remove( *itPathKeyStart );
@@ -251,8 +251,8 @@ namespace fs
 			return _RemoveEntry( pathKey );
 		}
 
-		template< typename Iterator >
-		void Remove( Iterator itPathKeyStart, Iterator itPathKeyEnd )
+		template< typename IteratorT >
+		void Remove( IteratorT itPathKeyStart, IteratorT itPathKeyEnd )
 		{
 			mt::CAutoLock lock( &m_cs );
 			for ( ; itPathKeyStart != itPathKeyEnd; ++itPathKeyStart )

@@ -22,10 +22,10 @@ namespace time_utl
 
 namespace time_utl
 {
-	enum DaylightSavingsTimeUsage { UseSystemDefault = -1, UseStandardTime, UseDst };
+	enum DstUsage { UseSysDefault = -1, UseStandardTime = 0, UseDST = 1 };
 	enum CheckInvalid { NullOnInvalid, ThrowOnInvalid };
 
-	CTime FromOleTime( const COleDateTime& oleTime, CheckInvalid checkInvalid = NullOnInvalid, DaylightSavingsTimeUsage dstUsage = UseSystemDefault ) throws_( COleException );
+	CTime FromOleTime( const COleDateTime& oleTime, CheckInvalid checkInvalid = NullOnInvalid, DstUsage dstUsage = UseSysDefault ) throws_( COleException );
 	inline COleDateTime ToOleTime( const CTime& stdTime ) { return IsValid( stdTime ) ? COleDateTime( stdTime.GetTime() ) : GetNullOleDateTime(); }
 
 	inline Range<CTime> FromOleTimeRange( const Range<COleDateTime>& oleTimeRange ) { return Range<CTime>( FromOleTime( oleTimeRange.m_start ), FromOleTime( oleTimeRange.m_end ) ); }
@@ -56,8 +56,8 @@ namespace time_utl
 	extern const TCHAR s_parseFormatAlt[];		// example: "27/12/2017 19:54:20"
 
 	std::tstring FormatTimestamp( const CTime& dt, const TCHAR format[] = s_outFormat );
-	CTime ParseTimestamp( const std::tstring& text, const TCHAR format[] = s_parseFormat );
-	CTime ParseStdTimestamp( const std::tstring& text );
+	CTime ParseTimestamp( const std::tstring& text, const TCHAR format[] = s_parseFormat, DstUsage dstUsage = UseSysDefault );
+	CTime ParseStdTimestamp( const std::tstring& text, DstUsage dstUsage = UseSysDefault );
 }
 
 

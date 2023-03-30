@@ -59,7 +59,7 @@ namespace fs
 	}
 
 
-	void QueryFolderPaths( std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly /*= true*/ )
+	void QueryFolderPaths( OUT std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly /*= true*/ )
 	{
 		for ( std::vector<fs::CPath>::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 		{
@@ -231,7 +231,7 @@ namespace fs
 	}
 
 
-	bool LocateExistingFile( fs::CPath* pFoundPath, const std::vector<fs::TDirPath>& searchPaths, const TCHAR* pFilenameList, const TCHAR* pSep /*= _T("|")*/ )
+	bool LocateExistingFile( OUT fs::CPath* pFoundPath, const std::vector<fs::TDirPath>& searchPaths, const TCHAR* pFilenameList, const TCHAR* pSep /*= _T("|")*/ )
 	{
 		ASSERT_PTR( pFoundPath );
 
@@ -354,7 +354,7 @@ namespace fs
 		return pFile;
 	}
 
-	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize /*= 4 * KiloByte*/ )
+	UINT64 BufferedCopy( OUT CFile& rDestFile, CFile& srcFile, size_t chunkSize /*= 4 * KiloByte*/ )
 	{
 		UINT64 fileSize = srcFile.GetLength();
 		std::vector<BYTE> buffer;
@@ -374,7 +374,7 @@ namespace fs
 
 	// CTextFileWriter implementation
 
-	CTextFileWriter::CTextFileWriter( CFile* pDestFile, bool isBinaryFile /*= true*/ )
+	CTextFileWriter::CTextFileWriter( OUT CFile* pDestFile, bool isBinaryFile /*= true*/ )
 		: m_pDestFile( pDestFile )
 		, m_lineEnd( isBinaryFile ? _T("\r\n") : _T("\n") )
 	{
@@ -469,7 +469,7 @@ namespace fs
 	}
 
 
-	FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time )
+	FILETIME* MakeFileTime( OUT FILETIME& rOutFileTime, const CTime& time )
 	{
 		if ( time_utl::IsValid( time ) )
 		{
@@ -490,7 +490,6 @@ namespace fs
 		}
 
 		return nullptr;
-
 	}
 
 
@@ -541,7 +540,7 @@ namespace fs
 			}
 		}
 
-		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time, const TCHAR* pFilePath,
+		FILETIME* MakeFileTime( OUT FILETIME& rOutFileTime, const CTime& time, const TCHAR* pFilePath,
 								fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
 		{
 			FILETIME* pResult = fs::MakeFileTime( rOutFileTime, time );		// call the no-throw function
@@ -591,7 +590,11 @@ namespace fs
 				switch ( policy )
 				{
 					case RuntimeExc:
-						throw CRuntimeException( str::sq::Enquote( std::auto_ptr<CFileException>( pExc ).get()->m_strFileName.GetString() ) );	// pExc will be deleted
+					{	// avoid extracting the exception message for console program with no resources - nullptr AfxGetResourceHandle()
+						std::tstring message = str::Format( _T("CFileException for '%s'"), pExc->m_strFileName.GetString() );
+						pExc->Delete();
+						throw CRuntimeException( message );
+					}
 					case MfcExc:
 						throw pExc;
 					default: ASSERT( false );

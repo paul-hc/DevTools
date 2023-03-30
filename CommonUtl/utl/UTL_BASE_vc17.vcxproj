@@ -199,6 +199,7 @@
     <ClInclude Include="DuplicateFilesEnumerator.h" />
     <ClInclude Include="Language.hxx" />
     <ClInclude Include="RegAutomationSvr.h" />
+    <ClInclude Include="StdThread.h" />
     <ClInclude Include="StringParsing.h" />
     <ClInclude Include="EncodedFileBuffer.h" />
     <ClInclude Include="Encoding.h" />
@@ -301,6 +302,7 @@
     <ClInclude Include="test\TempFilePairPool.h" />
     <ClInclude Include="test\Test.h" />
     <ClInclude Include="test\TextFileIoTests.h" />
+    <ClInclude Include="test\ThreadingTests.hxx" />
     <ClInclude Include="test\UnitTest.h" />
     <ClInclude Include="test\UtlConsoleTests.h" />
     <ClInclude Include="TextClipboard.h" />

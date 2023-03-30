@@ -302,30 +302,30 @@ namespace utl
 	}
 
 
-	template< typename OutIteratorT, typename SrcContainerT, typename ConvertUnaryFunc >
-	inline void InsertFrom( OUT OutIteratorT destInserter, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	template< typename OutIteratorT, typename SrcContainerT, typename CvtUnaryFunc >
+	inline void InsertFrom( OUT OutIteratorT destInserter, const SrcContainerT& srcItems, CvtUnaryFunc cvtFunc )
 	{
 		std::transform( srcItems.begin(), srcItems.end(), destInserter, cvtFunc );
 	}
 
 
-	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
-	inline void Assign( OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	template< typename DestContainerT, typename SrcContainerT, typename CvtUnaryFunc >
+	inline void Assign( OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, CvtUnaryFunc cvtFunc )
 	{
 		rDestItems.resize( srcItems.size() );
 		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );
 	}
 
-	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
-	inline void Append( IN OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	template< typename DestContainerT, typename SrcContainerT, typename CvtUnaryFunc >
+	inline void Append( IN OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, CvtUnaryFunc cvtFunc )
 	{
 		size_t origDestCount = rDestItems.size();
 		rDestItems.insert( rDestItems.end(), srcItems.size(), typename DestContainerT::value_type() );		// append SRC count
 		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin() + origDestCount, cvtFunc );
 	}
 
-	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
-	void Prepend( IN OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	template< typename DestContainerT, typename SrcContainerT, typename CvtUnaryFunc >
+	void Prepend( IN OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, CvtUnaryFunc cvtFunc )
 	{
 		rDestItems.insert( rDestItems.begin(), srcItems.size(), typename DestContainerT::value_type() );	// prepend SRC count
 		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );

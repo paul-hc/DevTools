@@ -761,11 +761,11 @@ namespace str
 	}
 
 
-	template< typename CharT, typename Iterator, typename ToFieldFunc >
-	std::basic_string<CharT> Join( Iterator itFirst, Iterator itLast, const CharT* pSep, ToFieldFunc toField )
+	template< typename CharT, typename IteratorT, typename CvtUnaryFunc >
+	std::basic_string<CharT> Join( IteratorT itFirst, IteratorT itLast, const CharT* pSep, CvtUnaryFunc toField )
 	{	// works with any forward/reverse iterator
 		std::basic_ostringstream<CharT> oss;
-		for ( Iterator itItem = itFirst; itItem != itLast; ++itItem )
+		for ( IteratorT itItem = itFirst; itItem != itLast; ++itItem )
 		{
 			if ( itItem != itFirst )
 				oss << pSep;
@@ -774,11 +774,11 @@ namespace str
 		return oss.str();
 	}
 
-	template< typename CharT, typename Iterator >
-	std::basic_string<CharT> Join( Iterator itFirst, Iterator itLast, const CharT* pSep ) { return Join( itFirst, itLast, pSep, func::ToSelf() ); }
+	template< typename CharT, typename IteratorT >
+	std::basic_string<CharT> Join( IteratorT itFirst, IteratorT itLast, const CharT* pSep ) { return Join( itFirst, itLast, pSep, func::ToSelf() ); }
 
-	template< typename CharT, typename ContainerT, typename ToFieldFunc >
-	inline std::basic_string<CharT> Join( const ContainerT& items, const CharT* pSep, ToFieldFunc toField )
+	template< typename CharT, typename ContainerT, typename CvtUnaryFunc >
+	inline std::basic_string<CharT> Join( const ContainerT& items, const CharT* pSep, CvtUnaryFunc toField )
 	{	// works with container of any value type that has stream insertor defined
 		return Join( items.begin(), items.end(), pSep, toField );
 	}

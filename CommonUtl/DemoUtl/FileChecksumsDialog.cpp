@@ -15,7 +15,11 @@
 #include "resource.h"
 #include <fstream>
 
-#define USE_BOOST_CRC
+#ifdef IS_CPP_11
+	// avoid dependency to a newer version of boost for this compiler
+#else
+	#define USE_BOOST_CRC
+#endif
 #include "utl/Crc32.h"		// define func::ComputeBoostChecksum
 
 #ifdef _DEBUG
@@ -34,12 +38,22 @@ namespace hlp
 
 	UINT ComputeBoostFileStreamCrc32( const fs::CPath& filePath )
 	{
+	#ifdef USE_BOOST_CRC
 		return io::bin::ReadFileStream_NoThrow( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
+	#else
+		filePath;
+		return 0;
+	#endif
 	}
 
 	UINT ComputeBoostCFileCrc32( const fs::CPath& filePath )
 	{
+	#ifdef USE_BOOST_CRC
 		return io::bin::ReadCFile_NoThrow( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
+	#else
+		filePath;
+		return 0;
+	#endif
 	}
 }
 
@@ -215,9 +229,10 @@ void CFileChecksumsDialog::SetupFileListView( void )
 
 		m_fileListCtrl.DeleteAllItems();
 
-		unsigned int pos = 0;
+		std::tstring n_a = _T("<VC17_no_boost>"), textBoost_CFile_CRC32 = n_a, textBoost_ifs_CRC32 = n_a, textBoost_CFile_Elapsed = n_a, textBoost_ifs_Elapsed = n_a;
+		ui::CTextEffect disabled( ui::Regular, ::GetSysColor( COLOR_GRAYTEXT ) );
 
-		for ( ; pos != m_fileItems.size(); ++pos )
+		for ( unsigned int pos = 0; pos != m_fileItems.size(); ++pos )
 		{
 			const CFileChecksumItem* pFileItem = m_fileItems[ pos ];
 
@@ -225,11 +240,23 @@ void CFileChecksumsDialog::SetupFileListView( void )
 
 			if ( !pFileItem->IsProxy() )
 			{
+			#ifdef USE_BOOST_CRC
+				textBoost_CFile_CRC32 = str::Format( _T("%08X"), pFileItem->m_boostCFile.m_crc32 );
+				textBoost_ifs_CRC32 = str::Format( _T("%08X"), pFileItem->m_boostIfs.m_crc32 );
+				textBoost_CFile_Elapsed = CTimer::FormatSeconds( pFileItem->m_boostCFile.m_elapsedSecs );
+				textBoost_ifs_Elapsed = CTimer::FormatSeconds( pFileItem->m_boostIfs.m_elapsedSecs );
+			#else
+				m_fileListCtrl.MarkCellAt( pos, BoostCFile_CRC32, disabled );
+				m_fileListCtrl.MarkCellAt( pos, BoostCFile_Elapsed, disabled );
+				m_fileListCtrl.MarkCellAt( pos, Boost_ifs_CRC32, disabled );
+				m_fileListCtrl.MarkCellAt( pos, Boost_ifs_Elapsed, disabled );
+			#endif
+
 				m_fileListCtrl.SetSubItemText( pos, DirPath, pFileItem->GetFilePath().GetParentPath().Get() );
 				m_fileListCtrl.SetSubItemText( pos, UTL_CRC32, str::Format( _T("%08X"), pFileItem->m_utl.m_crc32 ) );
 				m_fileListCtrl.SetSubItemText( pos, UTL_ifs_CRC32, str::Format( _T("%08X"), pFileItem->m_utlIfs.m_crc32 ) );
-				m_fileListCtrl.SetSubItemText( pos, BoostCFile_CRC32, str::Format( _T("%08X"), pFileItem->m_boostCFile.m_crc32 ) );
-				m_fileListCtrl.SetSubItemText( pos, Boost_ifs_CRC32, str::Format( _T("%08X"), pFileItem->m_boostIfs.m_crc32 ) );
+				m_fileListCtrl.SetSubItemText( pos, BoostCFile_CRC32, textBoost_CFile_CRC32 );
+				m_fileListCtrl.SetSubItemText( pos, Boost_ifs_CRC32, textBoost_ifs_CRC32 );
 			}
 			else
 				m_fileListCtrl.MarkRowAt( pos, ui::CTextEffect( ui::Bold, color::Blue ) );
@@ -237,8 +264,8 @@ void CFileChecksumsDialog::SetupFileListView( void )
 			m_fileListCtrl.SetSubItemText( pos, FileSize, num::FormatFileSizeAsPair( pFileItem->m_fileSize ) );
 			m_fileListCtrl.SetSubItemText( pos, UTL_Elapsed, CTimer::FormatSeconds( pFileItem->m_utl.m_elapsedSecs ) );
 			m_fileListCtrl.SetSubItemText( pos, UTL_ifs_Elapsed, CTimer::FormatSeconds( pFileItem->m_utlIfs.m_elapsedSecs ) );
-			m_fileListCtrl.SetSubItemText( pos, BoostCFile_Elapsed, CTimer::FormatSeconds( pFileItem->m_boostCFile.m_elapsedSecs ) );
-			m_fileListCtrl.SetSubItemText( pos, Boost_ifs_Elapsed, CTimer::FormatSeconds( pFileItem->m_boostIfs.m_elapsedSecs ) );
+			m_fileListCtrl.SetSubItemText( pos, BoostCFile_Elapsed, textBoost_CFile_Elapsed );
+			m_fileListCtrl.SetSubItemText( pos, Boost_ifs_Elapsed, textBoost_ifs_Elapsed );
 		}
 	}
 

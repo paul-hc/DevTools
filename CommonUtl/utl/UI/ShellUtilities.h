@@ -9,8 +9,8 @@
 namespace utl
 {
 	// forward declarations - required for C++ 14+ compilation
-	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
-	void Assign( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc );
+	template< typename DestContainerT, typename SrcContainerT, typename CvtUnaryFunc >
+	void Assign( DestContainerT& rDestItems, const SrcContainerT& srcItems, CvtUnaryFunc cvtFunc );
 }
 
 

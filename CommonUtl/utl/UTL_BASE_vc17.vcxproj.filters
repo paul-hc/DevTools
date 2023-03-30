@@ -451,6 +451,12 @@
     <ClInclude Include="Code_fwd.h">
       <Filter>utl\code</Filter>
     </ClInclude>
+    <ClInclude Include="StdThread.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ThreadingTests.hxx">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

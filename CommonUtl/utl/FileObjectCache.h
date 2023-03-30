@@ -64,8 +64,8 @@ namespace fs
 			return _Remove( pathKey, cache::Remove );
 		}
 
-		template< typename Iterator >
-		void Remove( Iterator itPathKeyStart, Iterator itPathKeyEnd )
+		template< typename IteratorT >
+		void Remove( IteratorT itPathKeyStart, IteratorT itPathKeyEnd )
 		{
 			mt::CAutoLock lock( &m_cs );
 			for ( ; itPathKeyStart != itPathKeyEnd; ++itPathKeyStart )

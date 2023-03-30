@@ -100,7 +100,7 @@ namespace fs
 	CQueueListener<PathType>::~CQueueListener()
 	{
 		{
-			boost::lock_guard<boost::mutex> lock( m_mutex );
+			std::lock_guard<std::mutex> lock( m_mutex );
 			m_wantExit = true;
 			m_queuePending.notify_one();
 		}
@@ -110,7 +110,7 @@ namespace fs
 	template< typename PathType >
 	void CQueueListener<PathType>::Enqueue( const PathType& pathKey )
 	{
-		boost::lock_guard<boost::mutex> lock( m_mutex );
+		std::lock_guard<std::mutex> lock( m_mutex );
 		m_queue.push_front( pathKey );
 		m_queuePending.notify_one();
 	}
@@ -120,7 +120,7 @@ namespace fs
 	{
 		while ( !m_queue.empty() && !m_wantExit )
 		{
-			boost::lock_guard<boost::mutex> lock( m_mutex );
+			std::lock_guard<std::mutex> lock( m_mutex );
 			m_queuePending.notify_one();
 		}
 	}
@@ -134,7 +134,7 @@ namespace fs
 		for ( ;; m_queue.pop_back() )
 		{
 			{
-				boost::unique_lock<boost::mutex> lock( m_mutex );
+				std::unique_lock<std::mutex> lock( m_mutex );
 				m_queuePending.wait( lock, std::bind( &CQueueListener::WaitPred, this ) );
 
 				if ( m_wantExit )

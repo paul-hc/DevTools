@@ -3,7 +3,7 @@
 #pragma once
 
 #include "FileObjectCache.h"
-#include <boost/thread.hpp>
+#include "StdThread.h"
 
 
 namespace fs
@@ -76,9 +76,9 @@ namespace fs
 	private:
 		TAcquireFunc m_acquireFunc;
 		bool m_wantExit;
-		boost::thread m_thread;
-		boost::mutex m_mutex;
-		boost::condition_variable m_queuePending;
+		std::thread m_thread;
+		std::mutex m_mutex;
+		std::condition_variable m_queuePending;
 		std::deque<PathType> m_queue;
 	};
 }

@@ -31,7 +31,7 @@ namespace time_utl
 
 namespace time_utl
 {
-	CTime FromOleTime( const COleDateTime& oleTime, CheckInvalid checkInvalid /*= NullOnInvalid*/, DaylightSavingsTimeUsage dstUsage /*= UseSystemDefault*/ ) throws_( COleException )
+	CTime FromOleTime( const COleDateTime& oleTime, CheckInvalid checkInvalid /*= NullOnInvalid*/, DstUsage dstUsage /*= UseSysDefault*/ ) throws_( COleException )
 	{
 		if ( !IsValid( oleTime ) )
 			return CTime();
@@ -52,7 +52,7 @@ namespace time_utl
 		atm.tm_year = sysTime.wYear - 1900;		// 1900 based
 		atm.tm_isdst = dstUsage;
 
-		__time64_t time = _mktime64( &atm );
+		__time64_t time = std::mktime( &atm );	// was _mktime64
 		if ( -1 == time )						// indicates an illegal input time
 			if ( ThrowOnInvalid == checkInvalid )
 				AtlThrow( E_INVALIDARG );
@@ -194,7 +194,7 @@ namespace time_utl
 		return text;
 	}
 
-	CTime ParseTimestamp( const std::tstring& text, const TCHAR format[] /*= s_parseFormat*/ )
+	CTime ParseTimestamp( const std::tstring& text, const TCHAR format[] /*= s_parseFormat*/, DstUsage dstUsage /*= UseSysDefault*/ )
 	{
 		// this fails in non-US locale
 		int year,
@@ -212,18 +212,18 @@ namespace time_utl
 			 ( minute >= 0 && minute < MinutesPerHour ) &&
 			 ( second >= 0 && second < SecondsPerMinute ) )
 		{
-			return CTime( year, month, day, hour, minute, second );
+			return CTime( year, month, day, hour, minute, second, dstUsage );
 		}
 
 		return CTime();
 	}
 
-	CTime ParseStdTimestamp( const std::tstring& text )
+	CTime ParseStdTimestamp( const std::tstring& text, DstUsage dstUsage /*= UseSysDefault*/ )
 	{
-		CTime timestamp = ParseTimestamp( text, s_parseFormat );
+		CTime timestamp = ParseTimestamp( text, s_parseFormat, dstUsage );
 
 		if ( !time_utl::IsValid( timestamp ) )
-			timestamp = ParseTimestamp( text, s_parseFormatAlt );
+			timestamp = ParseTimestamp( text, s_parseFormatAlt, dstUsage );
 
 		return timestamp;
 	}
