@@ -310,8 +310,30 @@ void CFileSystemTests::TestFileTimeConversions( void )
 	}
 }
 
-void CFileSystemTests::TestFileAndDirectoryState( void )
+bool CFileSystemTests::CheckConsistentFileTime( void )
+{	// check if the file system file-times WRITE is consistent with READ
+	ut::CTempFilePool pool( _T("file.ext") );
+	const fs::CPath& filePath = pool.GetFilePaths()[ 0 ];
+
+	CFileStatus mfcStatus;
+	if ( CFile::GetStatus( filePath.GetPtr(), mfcStatus ) )			// read
+	{
+		mfcStatus.m_ctime = ut::s_creationTime;
+		CFile::SetStatus( filePath.GetPtr(), mfcStatus );			// write
+
+		if ( CFile::GetStatus( filePath.GetPtr(), mfcStatus ) )		// read again
+			if ( mfcStatus.m_ctime == ut::s_creationTime )
+				return true;	// creation file time was recorded right away without errors
+	}
+
+	return false;				// not consistent; with recent MFC versions, it may vary due to machine-specifics (time-zone related policies, etc)
+}
+
+bool CFileSystemTests::TestFileAndDirectoryState( void )
 {
+	if ( !CheckConsistentFileTime() )
+		return false;
+
 	ut::CTempFilePool pool( _T("fa.txt|D1\\fb.txt") );
 
 	{
@@ -385,6 +407,7 @@ void CFileSystemTests::TestFileAndDirectoryState( void )
 		ASSERT_EQUAL( ut::s_accessTime, newDirState.m_accessTime );
 		ASSERT_EQUAL( dirState, newDirState );
 	}
+	return true;
 }
 
 void CFileSystemTests::TestTouchFile( void )
@@ -540,11 +563,7 @@ void CFileSystemTests::Run( void )
 	RUN_TEST( TestNumericFilename );
 	RUN_TEST( TestTempFilePool );
 	RUN_TEST( TestFileTimeConversions );
-#ifdef IS_CPP_11
-	// avoid issues related to MFC changes in recent versions that impact file time conversions (e.g. on DL-7420, though it passes on T440p)
-#else
-	 RUN_TEST( TestFileAndDirectoryState );
-#endif
+	RUN_CONDITIONAL_TEST( TestFileAndDirectoryState );
 	RUN_TEST( TestTouchFile );
 	RUN_TEST( TestFileTransferMatch );
 	RUN_TEST( TestBackupFileFlat );

@@ -24,11 +24,13 @@ private:
 	void TestNumericFilename( void );
 	void TestTempFilePool( void );
 	void TestFileTimeConversions( void );
-	void TestFileAndDirectoryState( void );
+	bool TestFileAndDirectoryState( void );
 	void TestTouchFile( void );
 	void TestFileTransferMatch( void );
 	void TestBackupFileFlat( void );
 	void TestBackupFileSubDir( void );
+
+	static bool CheckConsistentFileTime( void );
 };
 
 

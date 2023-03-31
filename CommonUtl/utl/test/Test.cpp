@@ -111,7 +111,10 @@ namespace ut
 		if ( 0 == CScopedTestMethod::GetFailedTestCount() )
 			os << "OK (" << CScopedTestMethod::GetTestCount() << ')';
 		else
-			os << "FAILED (" << CScopedTestMethod::GetFailedTestCount() << "),   PASSED (" << CScopedTestMethod::GetPassedTestCount() << ')';
+			os << "FAILED (" << CScopedTestMethod::GetFailedTestCount() << "),  PASSED (" << CScopedTestMethod::GetPassedTestCount() << ')';
+
+		if ( CScopedTestMethod::GetSkippedTestCount() != 0 )
+			os << ",  SKIPPED (" << CScopedTestMethod::GetSkippedTestCount() << ')';
 
 		os << _T("   Elapsed: ") << m_timer.FormatElapsedSeconds() << std::endl;
 
@@ -126,9 +129,11 @@ namespace ut
 
 	size_t CScopedTestMethod::s_testCount = 0;
 	size_t CScopedTestMethod::s_failedTestCount = 0;
+	size_t CScopedTestMethod::s_skippedTestCount = 0;
 
 	CScopedTestMethod::CScopedTestMethod( const ITestCase* pTestCase, const char* pTestMethod )
 		: m_oldErrorCount( CAppTools::GetMainResultCode() )
+		, m_skipped( false )
 	{
 		ASSERT_PTR( pTestCase );
 
@@ -150,7 +155,7 @@ namespace ut
 
 	CScopedTestMethod::~CScopedTestMethod()
 	{
-		std::string text = "OK\n";
+		std::string text = m_skipped ? "SKIPPED!\n" : "OK\n";
 
 		if ( int failedCount = CAppTools::GetMainResultCode() - m_oldErrorCount )
 		{

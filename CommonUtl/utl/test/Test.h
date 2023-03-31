@@ -9,6 +9,9 @@
 #define RUN_TEST( testMethod )\
 	do { ut::CScopedTestMethod test( this, #testMethod ); (testMethod)(); } while ( false )
 
+#define RUN_CONDITIONAL_TEST( condTestMethod )\
+	do { ut::CScopedTestMethod test( this, #condTestMethod ); test.SetSkipped( !(condTestMethod)() ); } while ( false )
+
 #define RUN_TEST1( testMethod, arg1 )\
 	do { ut::CScopedTestMethod test( this, #testMethod ); (testMethod)( (arg1) ); } while ( false )
 
@@ -62,14 +65,25 @@ namespace ut
 		CScopedTestMethod( const ITestCase* pTestCase, const char* pTestMethod );
 		~CScopedTestMethod();
 
+		void SetSkipped( bool skipped )
+		{
+			m_skipped = skipped;
+
+			if ( m_skipped )
+				++s_skippedTestCount;
+		}
+
 		static size_t GetTestCount( void ) { return s_testCount; }
 		static size_t GetFailedTestCount( void ) { return s_failedTestCount; }
 		static size_t GetPassedTestCount( void ) { return s_testCount - s_failedTestCount; }
+		static size_t GetSkippedTestCount( void ) { return s_skippedTestCount; }
 	private:
 		int m_oldErrorCount;
+		bool m_skipped;						// controls test result for conditional tests
 
 		static size_t s_testCount;			// total test methods executed
 		static size_t s_failedTestCount;	// failed test methods
+		static size_t s_skippedTestCount;	// skipped conditional test methods
 	};
 }
 
