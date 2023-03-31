@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ProgressService.h"
 #include "ProgressDialog.h"
 #include "utl/AppTools.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImagingWic.h"
 #include "Imaging.h"
 #include "ResourceData.h"
@@ -88,7 +88,7 @@ namespace wic
 			::IsEqualGUID( containerFormatId, format ) != FALSE;
 	}
 
-	bool CBitmapDecoder::GetPixelFormatIds( std::vector< GUID* >& rPixelFormatIds ) const
+	bool CBitmapDecoder::GetPixelFormatIds( std::vector<GUID*>& rPixelFormatIds ) const
 	{
 		ASSERT_PTR( m_pDecoder );
 
@@ -536,15 +536,15 @@ namespace wic
 		else if ( RT_BITMAP == pResType )
 			return BmpFormat;
 		else if ( !IS_INTRESOURCE( pResType ) )
-			if ( str::Equals< str::IgnoreCase >( pResType, _T("PNG") ) )
+			if ( str::Equals<str::IgnoreCase>( pResType, _T("PNG") ) )
 				return PngFormat;
-			else if ( str::Equals< str::IgnoreCase >( pResType, _T("GIF") ) )
+			else if ( str::Equals<str::IgnoreCase>( pResType, _T("GIF") ) )
 				return GifFormat;
-			else if ( str::Equals< str::IgnoreCase >( pResType, _T("TIFF") ) )
+			else if ( str::Equals<str::IgnoreCase>( pResType, _T("TIFF") ) )
 				return TiffFormat;
-			else if ( str::Equals< str::IgnoreCase >( pResType, _T("JPG") ) )
+			else if ( str::Equals<str::IgnoreCase>( pResType, _T("JPG") ) )
 				return JpegFormat;
-			else if ( str::Equals< str::IgnoreCase >( pResType, _T("WMP") ) )
+			else if ( str::Equals<str::IgnoreCase>( pResType, _T("WMP") ) )
 				return WmpFormat;
 
 		return UnknownImageFormat;

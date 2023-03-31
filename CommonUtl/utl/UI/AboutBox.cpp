@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AboutBox.h"
 #include "CmdUpdate.h"
 #include "ImageStore.h"
@@ -207,7 +207,7 @@ CAboutBox::CAboutBox( CWnd* pParent )
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	GetLayoutEngine().MaxClientSize() = CSize( 600, 700 );
 
-	std::vector< std::tstring > columnSpecs;
+	std::vector<std::tstring> columnSpecs;
 	str::Split( columnSpecs, _T("Property=85|Value=-1"), _T("|") );
 	m_pBuildInfoList->SetLayoutInfo( columnSpecs );
 	m_pBuildInfoList->SetTabularTextSep( _T("\t") );

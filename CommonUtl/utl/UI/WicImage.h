@@ -76,11 +76,11 @@ private:
 		bool IsLoaded( UINT framePos ) const { return FindPosLoaded( framePos ) != utl::npos; }
 	private:
 		wic::CBitmapDecoder m_decoder;					// share the same decoder for frame access (keep it alive to avoid sharing violations on embedded storage IStream-s)
-		std::vector< CWicImage* > m_loadedFrames;
+		std::vector<CWicImage*> m_loadedFrames;
 	};
 	friend class CMultiFrameDecoder;
 
-	typedef fs::CPathMap< fs::CFlexPath, CMultiFrameDecoder > TMultiFrameDecoderMap;
+	typedef fs::CPathMap<fs::CFlexPath, CMultiFrameDecoder> TMultiFrameDecoderMap;
 
 	static TMultiFrameDecoderMap& SharedMultiFrameDecoders( void );
 

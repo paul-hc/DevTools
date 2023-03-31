@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "pch.h"
 #include "OleDragDrop_fwd.h"
 #include "resource.h"
 

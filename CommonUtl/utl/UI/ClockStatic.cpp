@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ClockStatic.h"
 
 #ifdef _DEBUG

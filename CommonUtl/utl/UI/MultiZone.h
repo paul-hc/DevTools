@@ -58,7 +58,7 @@ struct CMultiZoneIterator : public CMultiZone
 	CRect GetNextZone( void ) { return GetZoneRect( m_iterPos++ ); }		// sequential access
 	CRect GetZoneRect( unsigned int zonePos ) const;						// random access
 
-	void DrawLabels( CDC* pDC, const CRect& clientRect, const std::vector< std::tstring >& labels ) const;
+	void DrawLabels( CDC* pDC, const CRect& clientRect, const std::vector<std::tstring>& labels ) const;
 protected:
 	void ShrinkZoneExtent( long& rExtent ) const;
 	CSize GetZoneOffset( unsigned int zonePos ) const;
@@ -66,9 +66,9 @@ private:
 	enum { TextSpacingX = 3, TextSpacingY = 2 };
 	enum LabelLayout { Outside, Inside, Above };
 
-	std::pair<LabelLayout, UINT> FindLabelLayout( CDC* pDC, const CRect& clientRect, const std::vector< std::tstring >& labels ) const;
+	std::pair<LabelLayout, UINT> FindLabelLayout( CDC* pDC, const CRect& clientRect, const std::vector<std::tstring>& labels ) const;
 	CRect MakeLabelRect( LabelLayout layout, const CRect& zoneRect, const CRect& clientRect ) const;
-	CSize FindWidestSize( CDC* pDC, const std::vector< std::tstring >& labels ) const;
+	CSize FindWidestSize( CDC* pDC, const std::vector<std::tstring>& labels ) const;
 public:
 	CRect m_destRect;
 	int m_iterPos;

@@ -90,7 +90,7 @@ template< typename NumericT >
 bool CSpinEdit::ParseNumber( NumericT* pNumber ) const
 {
 	bool valid;
-	NumericT number = GetNumber< NumericT >( &valid );
+	NumericT number = GetNumber<NumericT>( &valid );
 	if ( !valid )
 		return false;
 
@@ -105,9 +105,9 @@ void CSpinEdit::DDX_Number( CDataExchange* pDX, NumericT& rValue, int ctrlId /*=
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
-		SetNumber< NumericT >( rValue );
+		SetNumber<NumericT>( rValue );
 	else
-		rValue = GetNumber< NumericT >();
+		rValue = GetNumber<NumericT>();
 }
 
 

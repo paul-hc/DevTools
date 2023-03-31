@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DibDraw.h"
 #include "DibSection.h"
 #include "DibPixels.h"
@@ -103,7 +103,7 @@ namespace gdi
 		CBitmap maskBitmap;
 		maskBitmap.CreateBitmap( imageSize.cx, imageSize.cy, 1, 1, nullptr );		// for color: maskBitmap.CreateCompatibleBitmap( pDC, cx, cy );
 
-		CScopedGdi< CBitmap > scopedBitmap( &memDC, &maskBitmap );
+		CScopedGdi<CBitmap> scopedBitmap( &memDC, &maskBitmap );
 
 		memDC.PatBlt( 0, 0, imageSize.cx, imageSize.cy, WHITENESS );		// fill background white first
 		DrawImage( &memDC, rImageList, imageSize, index, CPoint( 0, 0 ), imageSize, style | ILD_BLEND50, blendToColor );		// 50% blending
@@ -173,7 +173,7 @@ namespace gdi
 		{
 			CRect srcRect = info.MapSrcDibRect( i );
 			CRect destRect = info.GetDestRect( i );
-			pixels.CopyRect< CPixelBGRA, CPixelBGRA >( srcPixels, destRect, srcRect.TopLeft() );
+			pixels.CopyRect<CPixelBGRA, CPixelBGRA>( srcPixels, destRect, srcRect.TopLeft() );
 		}
 
 		switch ( style )

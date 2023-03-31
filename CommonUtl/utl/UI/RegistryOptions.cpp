@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "pch.h"
 #include "RegistryOptions.h"
 #include "RegistrySection.h"
 #include "CmdUpdate.h"
@@ -60,20 +60,20 @@ void CRegistryOptions::AddOption( reg::CBaseOption* pOption, UINT ctrlId /*= 0*/
 void CRegistryOptions::LoadAll( void )
 {
 	if ( IsPersistent() )
-		for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+		for ( std::vector<reg::CBaseOption*>::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
 			( *itOption )->Load();
 }
 
 void CRegistryOptions::SaveAll( void ) const
 {
 	if ( IsPersistent() )
-		for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+		for ( std::vector<reg::CBaseOption*>::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
 			(*itOption)->Save();
 }
 
 bool CRegistryOptions::AnyNonDefaultValue( void ) const
 {
-	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+	for ( std::vector<reg::CBaseOption*>::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
 		if ( !(*itOption)->HasDefaultValue() )
 			return true;
 
@@ -84,7 +84,7 @@ size_t CRegistryOptions::RestoreAllDefaultValues( void )
 {
 	size_t changedCount = 0;
 
-	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+	for ( std::vector<reg::CBaseOption*>::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
 		if ( RestoreOptionDefaultValue( *itOption ) )
 			++changedCount;
 
@@ -106,7 +106,7 @@ reg::CBaseOption& CRegistryOptions::LookupOption( const void* pDataMember ) cons
 {
 	ASSERT_PTR( pDataMember );
 
-	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+	for ( std::vector<reg::CBaseOption*>::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
 		if ( (*itOption)->HasDataMember( pDataMember ) )
 			return **itOption;
 
@@ -118,7 +118,7 @@ reg::CBaseOption* CRegistryOptions::FindOptionByID( UINT ctrlId ) const
 {
 	ASSERT( ctrlId != 0 );
 
-	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+	for ( std::vector<reg::CBaseOption*>::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
 		if ( (*itOption)->HasCtrlId( ctrlId ) )
 			return *itOption;
 
@@ -129,7 +129,7 @@ void CRegistryOptions::UpdateControls( CWnd* pTargetWnd )
 {
 	ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
 
-	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+	for ( std::vector<reg::CBaseOption*>::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
 		if ( (*itOption)->GetCtrlId() != 0 )
 			if ( CWnd* pCtrl = pTargetWnd->GetDlgItem( (*itOption)->GetCtrlId() ) )
 				ui::UpdateControlUI( pCtrl->GetSafeHwnd(), pTargetWnd );
@@ -222,32 +222,32 @@ namespace reg
 	}
 
 
-	// COption< fs::CPath > specialization
+	// COption<fs::CPath> specialization
 
 	template<>
-	void COption< fs::CPath >::Load( void )
+	void COption<fs::CPath>::Load( void )
 	{
 		*m_pValue = GetSection()->GetStringParameter( m_entry.c_str(), m_pValue->GetPtr() );
 	}
 
 	template<>
-	void COption< fs::CPath >::Save( void ) const
+	void COption<fs::CPath>::Save( void ) const
 	{
 		GetSection()->SaveParameter( m_entry.c_str(), m_pValue->GetPtr() );
 	}
 
 
-	// COption< double > serialization
+	// COption<double> serialization
 
 	template<>
-	void COption< double >::Load( void )
+	void COption<double>::Load( void )
 	{
 		std::tstring text = GetSection()->GetStringParameter( m_entry.c_str(), num::FormatNumber( *m_pValue ).c_str() );
 		num::ParseNumber( *m_pValue, text );
 	}
 
 	template<>
-	void COption< double >::Save( void ) const
+	void COption<double>::Save( void ) const
 	{
 		GetSection()->SaveParameter( m_entry.c_str(), num::FormatNumber( *m_pValue ) );
 	}

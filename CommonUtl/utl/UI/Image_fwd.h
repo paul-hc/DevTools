@@ -341,7 +341,7 @@ public:
 
 	// the DIB must be selected into pDC
 	COLORREF GetColorAt( const CDC* pDC, int index ) const;
-	const std::vector< RGBQUAD >& GetColorTable( const CDC* pDC );
+	const std::vector<RGBQUAD>& GetColorTable( const CDC* pDC );
 	CPalette* MakeColorPalette( const CDC* pDC );		// palette is owned
 
 	template< typename PixelFunc >
@@ -352,7 +352,7 @@ private:
 	using CBitmapInfo::IsDDB;
 private:
 	HBITMAP m_hDib;								// no ownership
-	std::vector< RGBQUAD > m_colorTable;		// self-encapsulated
+	std::vector<RGBQUAD> m_colorTable;		// self-encapsulated
 	std::auto_ptr<CPalette> m_pPalette;		// self-encapsulated, owned
 };
 
@@ -370,24 +370,24 @@ public:
 	BITMAPINFO* CreateDibInfo( int width, int height, UINT bitsPerPixel, const bmp::CSharedAccess* pSrcDib = nullptr );
 	BITMAPINFO* CreateDibInfo( UINT bitsPerPixel, const bmp::CSharedAccess& sourceDib );
 private:
-	std::vector< BYTE > m_buffer;
+	std::vector<BYTE> m_buffer;
 };
 
 
-class CSysColorTable
+class CHalftoneColorTable
 {
 public:
-	static const std::vector< RGBQUAD >& GetSysRgbTable( void );
+	static const std::vector<RGBQUAD>& GetHalftoneRgbTable( void );
 
 	static void MakeRgbTable( RGBQUAD* pRgbTable, size_t size );		// use (1 << bpp) as size; works for 1/4/8 bit
 
-	static inline void MakeRgbTable( std::vector< RGBQUAD >& rRgbTable, size_t size )
+	static inline void MakeRgbTable( std::vector<RGBQUAD>& rRgbTable, size_t size )
 	{
 		rRgbTable.resize( size );
 		MakeRgbTable( &rRgbTable.front(), size );						// use (1 << bpp) as size; works for 1/4/8 bit
 	}
 
-	static void MakeColorTable( std::vector< COLORREF >& rColorTable, size_t size );
+	static void MakeColorTable( std::vector<COLORREF>& rColorTable, size_t size );
 };
 
 

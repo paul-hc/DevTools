@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Imaging.h"
 #include "ImagingGdiPlus.h"
 #include "ImagingWic.h"

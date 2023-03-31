@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "pch.h"
 #include "RegistrySection.h"
 #include "utl/Algorithms.h"
 
@@ -73,7 +73,7 @@ struct CRegistryEntry
 	DWORD& ValueAsDWORD( void ) { ASSERT( REG_DWORD == m_type ); return *reinterpret_cast<DWORD*>( &m_valueBuffer.front() ); }
 public:
 	DWORD m_type;
-	std::vector< BYTE > m_valueBuffer;
+	std::vector<BYTE> m_valueBuffer;
 };
 
 
@@ -145,7 +145,7 @@ bool CRegistrySection::GetParameter( const TCHAR entryName[], CRegistryEntry& rE
 		return false;
 	}
 
-	std::vector< BYTE > valueBuffer( valueSize );
+	std::vector<BYTE> valueBuffer( valueSize );
 	LONG result = ::RegQueryValueEx( hSubKey, entryName, 0, &valueType, &valueBuffer.front(), &valueSize );
 
 	::RegCloseKey( hSubKey );
@@ -219,7 +219,7 @@ bool CRegistrySection::DeleteSection( void ) const
 		if( numSubKeys > 0 )
 		{
 			DWORD subKeyNameLength = subKeyMaxLength + 1;
-			std::vector< TCHAR > subKeyNameBuffer( subKeyNameLength );
+			std::vector<TCHAR> subKeyNameBuffer( subKeyNameLength );
 
 			if ( ::RegEnumKey( hSubKey, 0, &subKeyNameBuffer.front(), subKeyNameLength ) != ERROR_SUCCESS )
 			{

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WindowPlacement.h"
 #include "SystemTray.h"
 #include "WndUtils.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SplitPushButton.h"
 #include "ImageStore.h"
 #include "ScopedGdi.h"
@@ -70,7 +70,7 @@ CRect CSplitPushButton::GetRhsPartRect( const CRect* pClientRect /*= nullptr*/ )
 		if ( !m_rhsText.empty() )
 		{
 			CClientDC dc( const_cast<CSplitPushButton*>( this ) );
-			CScopedGdi< CFont > scopedFont( &dc, GetFont() );
+			CScopedGdi<CFont> scopedFont( &dc, GetFont() );
 			contentWidth += ui::GetTextSize( &dc, m_rhsText.c_str() ).cx + 2 * TextSpacing;
 		}
 		if ( contentWidth != 0 )
@@ -102,7 +102,7 @@ void CSplitPushButton::DrawRhsPart( CDC* pDC, const CRect& clientRect )
 	if ( !m_rhsText.empty() )
 	{
 		rect.left += TextSpacing;
-		CScopedGdi< CFont > scopedFont( pDC, GetFont() );
+		CScopedGdi<CFont> scopedFont( pDC, GetFont() );
 		COLORREF textColor = pDC->SetTextColor( GetSysColor( enabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT ) );
 		int oldBkMode = pDC->SetBkMode( TRANSPARENT );
 
@@ -127,7 +127,7 @@ void CSplitPushButton::DrawFocus( CDC* pDC, const CRect& clientRect )
 
 void CSplitPushButton::PreSubclassWindow( void )
 {
-	std::vector< std::tstring > textParts;
+	std::vector<std::tstring> textParts;
 	str::Split( textParts, ui::GetWindowText( this ).c_str(), _T("|") );
 	if ( 2 == textParts.size() )
 	{

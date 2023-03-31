@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DesktopDC.h"
 
 #ifdef _DEBUG
@@ -59,10 +59,10 @@ HDC CDesktopDC::InitNormal( bool clipTopLevelWindows )
 
 	if ( clipTopLevelWindows && hDC != nullptr )
 	{
-		std::vector< HWND > topLevelWindows;		// visible ones
+		std::vector<HWND> topLevelWindows;		// visible ones
 		ui::QueryTopLevelWindows( topLevelWindows, WS_VISIBLE );
 
-		for ( std::vector< HWND >::const_iterator itWnd = topLevelWindows.begin(); itWnd != topLevelWindows.end(); ++itWnd )
+		for ( std::vector<HWND>::const_iterator itWnd = topLevelWindows.begin(); itWnd != topLevelWindows.end(); ++itWnd )
 		{
 			CRect windowRect;
 			::GetWindowRect( *itWnd, &windowRect );
@@ -74,10 +74,10 @@ HDC CDesktopDC::InitNormal( bool clipTopLevelWindows )
 
 void CDesktopDC::MakeTopLevelRegion( CRgn& rRegion ) const
 {
-	std::vector< HWND > topLevelWindows;		// visible ones
+	std::vector<HWND> topLevelWindows;		// visible ones
 	ui::QueryTopLevelWindows( topLevelWindows, WS_VISIBLE );
 
-	for ( std::vector< HWND >::const_iterator itWnd = topLevelWindows.begin(); itWnd != topLevelWindows.end(); ++itWnd )
+	for ( std::vector<HWND>::const_iterator itWnd = topLevelWindows.begin(); itWnd != topLevelWindows.end(); ++itWnd )
 	{
 		CRect windowRect;
 		::GetWindowRect( *itWnd, &windowRect );

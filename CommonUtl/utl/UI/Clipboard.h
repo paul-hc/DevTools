@@ -13,7 +13,7 @@ public:
 public:
 	// CF_HDROP: cut or copied files
 	static bool HasDropFiles( void );
-	static DROPEFFECT QueryDropFilePaths( std::vector< fs::CPath >& rSrcPaths );
+	static DROPEFFECT QueryDropFilePaths( std::vector<fs::CPath>& rSrcPaths );
 	static bool AlsoCopyDropFilesAsPaths( CWnd* pParentOwner );		// if files Copied or Pasted on clipboard, also store their paths as text
 public:
 	static const CLIPFORMAT s_cfPreferredDropEffect;

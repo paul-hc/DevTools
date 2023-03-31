@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TrackStatic.h"
 #include "ImageStore.h"
 #include "WndUtils.h"

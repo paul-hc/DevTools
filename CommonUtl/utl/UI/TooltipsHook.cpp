@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TooltipsHook.h"
 #include "CmdInfoStore.h"
 #include "Dialog_fwd.h"

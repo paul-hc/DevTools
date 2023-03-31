@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BalloonMessageTip.h"
 #include "CmdInfoStore.h"
 #include "WndUtils.h"
@@ -29,7 +29,7 @@ namespace ui
 		// http://www.codeproject.com/script/Membership/Profiles.aspx?mid=22871
 		reg::CKey key;
 		if ( key.Open( HKEY_CURRENT_USER, reg::section_explorerAdvanced, KEY_READ ) )
-			return key.ReadNumberValue< DWORD >( reg::entry_enableBalloonTips, TRUE ) != FALSE;
+			return key.ReadNumberValue<DWORD>( reg::entry_enableBalloonTips, TRUE ) != FALSE;
 
 		return true;
 	}

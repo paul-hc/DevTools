@@ -62,10 +62,10 @@ private:
 private:
 	struct CDragInfo
 	{
-		CDragInfo( int sourceFlags, const std::vector< int >& selIndexes ) : m_sourceFlags( sourceFlags ), m_selIndexes( selIndexes ) {}
+		CDragInfo( int sourceFlags, const std::vector<int>& selIndexes ) : m_sourceFlags( sourceFlags ), m_selIndexes( selIndexes ) {}
 	public:
 		int m_sourceFlags;
-		const std::vector< int >& m_selIndexes;
+		const std::vector<int>& m_selIndexes;
 	};
 protected:
 	// generated stuff

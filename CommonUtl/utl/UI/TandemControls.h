@@ -33,7 +33,7 @@ public:
 	CDialogToolBar* GetMateToolbar( void ) const { return m_pMateToolbar.get(); }
 	void ResetMateToolbar( void );
 
-	const std::vector< UINT >& GetMateCommands( void ) const;
+	const std::vector<UINT>& GetMateCommands( void ) const;
 	bool ContainsMateCommand( UINT cmdId ) const;
 private:
 	void LayoutMates( void );
@@ -108,7 +108,7 @@ public:
 public:
 	virtual void PreSubclassWindow( void );
 protected:
-	virtual void OnDroppedFiles( const std::vector< fs::CPath >& filePaths ) = 0;
+	virtual void OnDroppedFiles( const std::vector<fs::CPath>& filePaths ) = 0;
 protected:
 	ui::CItemContent m_content;
 

@@ -89,11 +89,11 @@ namespace ui
 	int FindAfterMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );		// subsequent position
 
 	UINT GetTotalCmdCount( HMENU hMenu, RecursionDepth depth = Deep );						// just commands (excluding separators, sub-menus)
-	void QueryMenuItemIds( std::vector< UINT >& rItemIds, HMENU hMenu );
+	void QueryMenuItemIds( std::vector<UINT>& rItemIds, HMENU hMenu );
 
 	HMENU CloneMenu( HMENU hSrcMenu );
 
-	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds = nullptr );
+	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector<UINT>* pSrcIds = nullptr );
 	void DeleteMenuItem( CMenu& rDestMenu, UINT itemId );
 	void DeleteMenuItems( CMenu& rDestMenu, const UINT* pItemIds, size_t itemCount );
 

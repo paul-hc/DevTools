@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ReportListControl.h"
 #include "ReportListCustomDraw.h"
 #include "CustomDrawImager.h"
@@ -146,7 +146,7 @@ CReportListControl::~CReportListControl()
 {
 	ClearData();
 
-	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
+	for ( std::vector<CColumnComparator>::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
 		delete itColComparator->m_pComparator;
 }
 
@@ -340,7 +340,7 @@ void CReportListControl::SetupControl( void )
 		ASSERT( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) && pStateImageList != nullptr );
 		ASSERT( 2 == pStateImageList->GetImageCount() );				// standard check-box
 
-		if ( const std::vector< CThemeItem >* pThemeItems = m_pCheckStatePolicy->GetThemeItems() )
+		if ( const std::vector<CThemeItem>* pThemeItems = m_pCheckStatePolicy->GetThemeItems() )
 			// mask transparent colour - almost white, so that themes that render with alpha blending don't show weird colours (such as radio button)
 			ui::AppendToStateImageList( pStateImageList, *pThemeItems, ui::AlterColorSlightly( GetBkColor() ) );
 	}
@@ -673,7 +673,7 @@ void CReportListControl::AddColumnCompare( TColumn column, const pred::IComparat
 
 const pred::IComparator* CReportListControl::FindCompare( TColumn column ) const
 {
-	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
+	for ( std::vector<CColumnComparator>::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
 		if ( column == itColComparator->m_column )
 			return itColComparator->m_pComparator;
 
@@ -682,7 +682,7 @@ const pred::IComparator* CReportListControl::FindCompare( TColumn column ) const
 
 bool CReportListControl::IsDefaultAscending( TColumn column ) const
 {
-	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
+	for ( std::vector<CColumnComparator>::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
 		if ( column == itColComparator->m_column )
 			return itColComparator->m_defaultAscending;
 
@@ -800,23 +800,23 @@ bool CReportListControl::EnsureVisibleObject( const utl::ISubject* pObject )
 	return foundIndex != -1 && EnsureVisible( foundIndex, FALSE );
 }
 
-void CReportListControl::QueryItemsText( std::vector< std::tstring >& rItemsText, const std::vector< int >& indexes, int subItem /*= 0*/ ) const
+void CReportListControl::QueryItemsText( std::vector<std::tstring>& rItemsText, const std::vector<int>& indexes, int subItem /*= 0*/ ) const
 {
 	rItemsText.reserve( rItemsText.size() + indexes.size() );
 
-	for ( std::vector< int >::const_iterator itIndex = indexes.begin(); itIndex != indexes.end(); ++itIndex )
+	for ( std::vector<int>::const_iterator itIndex = indexes.begin(); itIndex != indexes.end(); ++itIndex )
 		rItemsText.push_back( GetItemText( *itIndex, subItem ).GetString() );
 }
 
-void CReportListControl::QuerySelectedItemsText( std::vector< std::tstring >& rItemsText, int subItem /*= 0*/ ) const
+void CReportListControl::QuerySelectedItemsText( std::vector<std::tstring>& rItemsText, int subItem /*= 0*/ ) const
 {
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	int caretIndex;
 	GetSelection( selIndexes, &caretIndex );
 	QueryItemsText( rItemsText, selIndexes, subItem );
 }
 
-void CReportListControl::QueryAllItemsText( std::vector< std::tstring >& rItemsText, int subItem /*= 0*/ ) const
+void CReportListControl::QueryAllItemsText( std::vector<std::tstring>& rItemsText, int subItem /*= 0*/ ) const
 {
 	size_t itemCount = GetItemCount();
 	rItemsText.clear();
@@ -844,7 +844,7 @@ void CReportListControl::SetLayoutInfo( UINT columnLayoutId )
 	SetLayoutInfo( str::LoadStrings( columnLayoutId ) );
 }
 
-void CReportListControl::SetLayoutInfo( const std::vector< std::tstring >& columnSpecs )
+void CReportListControl::SetLayoutInfo( const std::vector<std::tstring>& columnSpecs )
 {
 	if ( m_hWnd != nullptr )
 		DeleteAllColumns();
@@ -855,7 +855,7 @@ void CReportListControl::SetLayoutInfo( const std::vector< std::tstring >& colum
 		InsertAllColumns();
 }
 
-void CReportListControl::ParseColumnLayout( std::vector< CColumnInfo >& rColumnInfos, const std::vector< std::tstring >& columnSpecs )
+void CReportListControl::ParseColumnLayout( std::vector<CColumnInfo>& rColumnInfos, const std::vector<std::tstring>& columnSpecs )
 {
 	ASSERT( !columnSpecs.empty() );
 
@@ -917,7 +917,7 @@ void CReportListControl::ResetColumnLayout( void )
 {
 	CScopedLockRedraw freeze( this );
 
-	std::vector< std::tstring > columnSpecs = str::LoadStrings( m_columnLayoutId );
+	std::vector<std::tstring> columnSpecs = str::LoadStrings( m_columnLayoutId );
 	ParseColumnLayout( m_columnInfos, columnSpecs );
 
 	SetupColumnLayout( nullptr );
@@ -964,7 +964,7 @@ void CReportListControl::InsertAllColumns( void )
 	PostColumnLayout();
 }
 
-void CReportListControl::SetupColumnLayout( const std::vector< std::tstring >* pRegColumnLayoutItems )
+void CReportListControl::SetupColumnLayout( const std::vector<std::tstring>* pRegColumnLayoutItems )
 {
 	if ( !HasLayoutInfo() )
 		return;
@@ -1081,7 +1081,7 @@ bool CReportListControl::ResizeFlexColumns( void )
 			if ( ++s == stretchableCount )
 				fitWidth = remainderWidth;		// last flex column takes all the remainder width
 
-			fitWidth = std::max< int >( colInfo.m_minWidth, fitWidth );
+			fitWidth = std::max<int>( colInfo.m_minWidth, fitWidth );
 			SetColumnWidth( i, fitWidth );
 
 			remainderWidth -= fitWidth;
@@ -1096,7 +1096,7 @@ void CReportListControl::OnFinalReleaseInternalChange( void )
 	ResizeFlexColumns();		// layout flexible columns after list content has changed
 }
 
-void CReportListControl::InputColumnLayout( std::vector< std::tstring >& rRegColumnLayoutItems )
+void CReportListControl::InputColumnLayout( std::vector<std::tstring>& rRegColumnLayoutItems )
 {
 	if ( !HasLayoutInfo() )
 	{
@@ -1121,7 +1121,7 @@ bool CReportListControl::LoadFromRegistry( void )
 {
 	ASSERT( HasLayoutInfo() && !m_regSection.empty() );
 
-	std::vector< std::tstring > regColumnLayoutItems;
+	std::vector<std::tstring> regColumnLayoutItems;
 	regColumnLayoutItems.reserve( m_columnInfos.size() );
 
 	CWinApp* pApp = AfxGetApp();
@@ -1166,7 +1166,7 @@ void CReportListControl::SaveToRegistry( void )
 	CWinApp* pApp = AfxGetApp();
 	pApp->WriteProfileInt( m_regSection.c_str(), _T(""), (int)m_columnInfos.size() );	// saved column count
 
-	std::vector< std::tstring > regColumnLayoutItems;
+	std::vector<std::tstring> regColumnLayoutItems;
 	InputColumnLayout( regColumnLayoutItems );
 	ASSERT( regColumnLayoutItems.size() == m_columnInfos.size() );
 
@@ -1348,12 +1348,12 @@ void CReportListControl::SwapItems( int index1, int index2 )
 	SetItemDataAt( data2, index1 );
 }
 
-void CReportListControl::DropMoveItems( int destIndex, const std::vector< int >& selIndexes )
+void CReportListControl::DropMoveItems( int destIndex, const std::vector<int>& selIndexes )
 {
 	// assume that selIndexes are pre-sorted
 	ASSERT( destIndex >= 0 && destIndex <= GetItemCount() );
 
-	std::vector< CItemData > datas;
+	std::vector<CItemData> datas;
 	datas.resize( selIndexes.size() );
 
 	for ( size_t i = selIndexes.size(); i-- != 0; )
@@ -1366,7 +1366,7 @@ void CReportListControl::DropMoveItems( int destIndex, const std::vector< int >&
 			--destIndex;
 	}
 
-	for ( std::vector< CItemData >::const_iterator itItem = datas.begin(); itItem != datas.end(); ++itItem, ++destIndex )
+	for ( std::vector<CItemData>::const_iterator itItem = datas.begin(); itItem != datas.end(); ++itItem, ++destIndex )
 		InsertItemDataAt( *itItem, destIndex );
 
 	ForceRearrangeItems();
@@ -1483,11 +1483,11 @@ void CReportListControl::SetItemCheckState( int index, int checkState )
 			int radioGroupId = GetItemGroupId( index );
 			if ( radioGroupId != -1 )						// radio button item belongs to a group?
 			{
-				std::vector< utl::ISubject* > radioItems;
+				std::vector<utl::ISubject*> radioItems;
 				QueryGroupItems( radioItems, radioGroupId );
 
 				// uncheck all other radio button items
-				for ( std::vector< utl::ISubject* >::const_iterator itRadioItem = radioItems.begin(); itRadioItem != radioItems.end(); ++itRadioItem )
+				for ( std::vector<utl::ISubject*>::const_iterator itRadioItem = radioItems.begin(); itRadioItem != radioItems.end(); ++itRadioItem )
 				{
 					int radioIndex = FindItemIndex( *itRadioItem );
 					if ( radioIndex != -1 && radioIndex != index )
@@ -1591,7 +1591,7 @@ int CReportListControl::GetSelCaretIndex( void ) const
 	if ( !IsMultiSelectionList() )
 		return GetCurSel();
 
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	int caretIndex;
 
 	if ( GetSelection( selIndexes, &caretIndex ) )
@@ -1603,7 +1603,7 @@ int CReportListControl::GetSelCaretIndex( void ) const
 	return -1;
 }
 
-bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCaretIndex /*= nullptr*/, int* pTopIndex /*= nullptr*/ ) const
+bool CReportListControl::GetSelection( std::vector<int>& rSelIndexes, int* pCaretIndex /*= nullptr*/, int* pTopIndex /*= nullptr*/ ) const
 {
 	rSelIndexes.reserve( rSelIndexes.size() + GetSelectedCount() );
 
@@ -1622,7 +1622,7 @@ bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCa
 
 bool CReportListControl::GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex ) const
 {
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	if ( !GetSelection( selIndexes ) )
 	{
 		utl::AssignPtr( pMinSelIndex, -1 );
@@ -1649,7 +1649,7 @@ bool CReportListControl::Select( const void* pObject )
 	{
 		if ( indexFound != -1 )
 		{
-			std::vector< int > selIndexes;
+			std::vector<int> selIndexes;
 			selIndexes.push_back( indexFound );
 
 			SetSelection( selIndexes, indexFound );
@@ -1663,7 +1663,7 @@ bool CReportListControl::Select( const void* pObject )
 		return SetCurSel( indexFound );
 }
 
-void CReportListControl::SetSelection( const std::vector< int >& selIndexes, int caretIndex /*= -1*/ )
+void CReportListControl::SetSelection( const std::vector<int>& selIndexes, int caretIndex /*= -1*/ )
 {
 	// clear the selection
 	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
@@ -1686,7 +1686,7 @@ void CReportListControl::SetSelection( const std::vector< int >& selIndexes, int
 
 void CReportListControl::ClearSelection( void )
 {
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	if ( GetSelection( selIndexes ) )
 	{
 		// clear the selection
@@ -1704,7 +1704,7 @@ void CReportListControl::SelectAll( void )
 
 int CReportListControl::DeleteSelection( void )
 {
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	if ( !GetSelection( selIndexes ) )
 		return GetCaretIndex();
 
@@ -1714,7 +1714,7 @@ int CReportListControl::DeleteSelection( void )
 	{
 		CScopedInternalChange internalChange( this );
 
-		for ( std::vector< int >::const_reverse_iterator itSelIndex = selIndexes.rbegin(); itSelIndex != selIndexes.rend(); ++itSelIndex )
+		for ( std::vector<int>::const_reverse_iterator itSelIndex = selIndexes.rbegin(); itSelIndex != selIndexes.rend(); ++itSelIndex )
 			DeleteItem( *itSelIndex );
 	}
 
@@ -1733,7 +1733,7 @@ void CReportListControl::MoveSelectionTo( seq::MoveTo moveTo )
 	{
 		CScopedInternalChange internalChange( this );
 
-		std::vector< int > selIndexes;
+		std::vector<int> selIndexes;
 		GetSelection( selIndexes );
 
 		CListCtrlSequence sequence( this );
@@ -1756,9 +1756,9 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 	if ( HasFlag( sourceFlags, ds::Indexes ) )
 		selData.CacheTo( pDataSource );
 
-	std::vector< std::tstring > textLines;
+	std::vector<std::tstring> textLines;
 	if ( HasFlag( sourceFlags, ds::ItemsText | ds::ShellFiles ) )
-		for ( std::vector< int >::const_iterator itSelIndex = selData.m_selIndexes.begin(); itSelIndex != selData.m_selIndexes.end(); ++itSelIndex )
+		for ( std::vector<int>::const_iterator itSelIndex = selData.m_selIndexes.begin(); itSelIndex != selData.m_selIndexes.end(); ++itSelIndex )
 			textLines.push_back( FormatItemLine( *itSelIndex ) );
 
 	if ( HasFlag( sourceFlags, ds::ItemsText ) )
@@ -1766,7 +1766,7 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 
 	if ( HasFlag( sourceFlags, ds::ShellFiles ) )
 	{
-		std::vector< fs::CPath > filePaths;
+		std::vector<fs::CPath> filePaths;
 		utl::Assign( filePaths, textLines, func::tor::StringOf() );
 
 		pDataSource->CacheShellFilePaths( filePaths );
@@ -1815,7 +1815,7 @@ bool CReportListControl::Copy( int sourceFlags /*= ListSourcesMask*/ )
 	return false;
 }
 
-std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin /*= nullptr*/ )
+std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::vector<int>& indexes, CPoint* pFrameOrigin /*= nullptr*/ )
 {
 	std::auto_ptr<CImageList> pDragImage;			// imagelist with the merged drag images
 	if ( !indexes.empty() )
@@ -1842,12 +1842,12 @@ std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::v
 
 std::auto_ptr<CImageList> CReportListControl::CreateDragImageSelection( CPoint* pFrameOrigin /*= nullptr*/ )
 {
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	GetSelection( selIndexes );
 	return CreateDragImageMulti( selIndexes, pFrameOrigin );
 }
 
-CRect CReportListControl::GetFrameBounds( const std::vector< int >& indexes ) const
+CRect CReportListControl::GetFrameBounds( const std::vector<int>& indexes ) const
 {
 	CRect frameRect( 0, 0, 0, 0 );
 	for ( UINT i = 0; i != indexes.size(); ++i )
@@ -1890,7 +1890,7 @@ const ui::CTextEffect* CReportListControl::FindTextEffectAt( TRowKey rowKey, TCo
 
 const CReportListControl::CDiffColumnPair* CReportListControl::FindDiffColumnPair( TColumn column ) const
 {
-	for ( std::list< CDiffColumnPair >::const_iterator itDiffPair = m_diffColumnPairs.begin(); itDiffPair != m_diffColumnPairs.end(); ++itDiffPair )
+	for ( std::list<CDiffColumnPair>::const_iterator itDiffPair = m_diffColumnPairs.begin(); itDiffPair != m_diffColumnPairs.end(); ++itDiffPair )
 		if ( itDiffPair->HasColumn( column ) )
 			return &*itDiffPair;
 
@@ -2496,7 +2496,7 @@ void CReportListControl::OnMoveTo( UINT cmdId )
 
 void CReportListControl::OnUpdateMoveTo( CCmdUI* pCmdUI )
 {
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	GetSelection( selIndexes );
 
 	pCmdUI->Enable( seq::CanMoveSelection( GetItemCount(), selIndexes, lv::CmdIdToMoveTo( pCmdUI->m_nID ) ) );
@@ -2664,7 +2664,7 @@ namespace lv
 			}
 
 			int caretIndex;
-			std::vector< int > selIndexes;
+			std::vector<int> selIndexes;
 
 			m_pListCtrl->GetSelection( selIndexes, &caretIndex );
 			m_pListCtrl->QueryItemsText( m_selItems, selIndexes );
@@ -2681,9 +2681,9 @@ namespace lv
 		{
 			//CScopedInternalChange internalChange( m_pListCtrl );
 
-			std::vector< int > selIndexes;
+			std::vector<int> selIndexes;
 			selIndexes.reserve( m_selItems.size() );
-			for ( std::vector< std::tstring >::const_iterator itSelText = m_selItems.begin(); itSelText != m_selItems.end(); ++itSelText )
+			for ( std::vector<std::tstring>::const_iterator itSelText = m_selItems.begin(); itSelText != m_selItems.end(); ++itSelText )
 			{
 				int foundIndex = m_pListCtrl->FindItemIndex( *itSelText );
 				if ( foundIndex != -1 )

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CmdInfoStore.h"
 #include "CtrlInterfaces.h"
 #include "Dialog_fwd.h"
@@ -54,7 +54,7 @@ namespace ui
 
 	const CCmdInfo* CCmdInfoStore::FindInfo( UINT cmdId ) const
 	{
-		std::unordered_map< UINT, CCmdInfo >::const_iterator itFound = m_cmdInfos.find( cmdId );
+		std::unordered_map<UINT, CCmdInfo>::const_iterator itFound = m_cmdInfos.find( cmdId );
 		return itFound != m_cmdInfos.end() ? &itFound->second : nullptr;
 	}
 

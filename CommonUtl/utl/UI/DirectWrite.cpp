@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DirectWrite.h"
 #include "BaseApp.h"
 #include "WndUtils.h"

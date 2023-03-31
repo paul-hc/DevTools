@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TextEffect.h"
 
 #ifdef _DEBUG

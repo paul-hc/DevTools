@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ThumbPreviewCtrl.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FilterStore.h"
 #include "Registry.h"
 #include "ShellUtilities.h"
@@ -19,7 +19,7 @@ namespace fs
 	size_t CKnownExtensions::FindExtFilterPos( const TCHAR* pFilePath ) const
 	{
 		CPath ext( path::FindExt( pFilePath ) );
-		std::unordered_map< fs::CPath, size_t >::const_iterator itFound = m_knownExts.find( ext );
+		std::unordered_map<fs::CPath, size_t>::const_iterator itFound = m_knownExts.find( ext );
 		return itFound != m_knownExts.end() ? itFound->second : utl::npos;
 	}
 
@@ -30,14 +30,14 @@ namespace fs
 		return allExtensions;
 	}
 
-	void CKnownExtensions::QueryAllExts( std::vector< std::tstring >& rAllExts ) const
+	void CKnownExtensions::QueryAllExts( std::vector<std::tstring>& rAllExts ) const
 	{
 		str::Split( rAllExts, MakeAllExts().c_str(), CFilterStore::s_specSep );
 	}
 
-	void CKnownExtensions::Register( const std::vector< std::tstring >& exts, size_t filterPos )
+	void CKnownExtensions::Register( const std::vector<std::tstring>& exts, size_t filterPos )
 	{
-		for ( std::vector< std::tstring >::const_iterator itExtension = exts.begin(); itExtension != exts.end(); ++itExtension )
+		for ( std::vector<std::tstring>::const_iterator itExtension = exts.begin(); itExtension != exts.end(); ++itExtension )
 			Register( *itExtension, filterPos );
 	}
 
@@ -68,7 +68,7 @@ namespace fs
 
 	void CKnownExtensions::RegisterSpecs( const std::tstring& specs, size_t filterPos )
 	{
-		std::vector< std::tstring > exts;
+		std::vector<std::tstring> exts;
 		str::Split( exts, specs.c_str(), CFilterStore::s_specSep );
 		Register( exts, filterPos );
 	}
@@ -94,7 +94,7 @@ namespace fs
 
 	void CFilterStore::AddFilter( const TFilterPair& filter )
 	{
-		std::vector< std::tstring > extensions;
+		std::vector<std::tstring> extensions;
 		str::Split( extensions, filter.second.c_str(), s_specSep );
 		m_knownExts.Register( extensions, m_filters.size() );		// register known extension to entry pos
 
@@ -103,7 +103,7 @@ namespace fs
 
 	void CFilterStore::StreamFilters( std::tostringstream& oss ) const
 	{
-		for ( std::vector< TFilterPair >::const_iterator itFilter = m_filters.begin(); itFilter != m_filters.end(); ++itFilter )
+		for ( std::vector<TFilterPair>::const_iterator itFilter = m_filters.begin(); itFilter != m_filters.end(); ++itFilter )
 			StreamFilter( oss, *itFilter );
 	}
 
@@ -148,7 +148,7 @@ namespace fs
 	std::tstring CFilterJoiner::MakeFilters( shell::BrowseMode browseMode ) const
 	{
 		std::tostringstream oss;
-		for ( std::vector< std::tstring >::const_iterator itClassTag = m_classTags.begin(); itClassTag != m_classTags.end(); ++itClassTag )
+		for ( std::vector<std::tstring>::const_iterator itClassTag = m_classTags.begin(); itClassTag != m_classTags.end(); ++itClassTag )
 			if ( CFilterStore* pFilterStore = CFilterRepository::Instance().Lookup( *itClassTag, browseMode ) )
 			{
 				pFilterStore->StreamFilters( oss );
@@ -168,7 +168,7 @@ namespace fs
 	std::tstring CFilterJoiner::MakeSpecs( shell::BrowseMode browseMode ) const
 	{
 		std::tstring allKnownSpecs;
-		for ( std::vector< std::tstring >::const_iterator itClassTag = m_classTags.begin(); itClassTag != m_classTags.end(); ++itClassTag )
+		for ( std::vector<std::tstring>::const_iterator itClassTag = m_classTags.begin(); itClassTag != m_classTags.end(); ++itClassTag )
 			if ( CFilterStore* pFilterStore = CFilterRepository::Instance().Lookup( *itClassTag, browseMode ) )
 				stream::Tag( allKnownSpecs, pFilterStore->GetClassSpecs(), CFilterStore::s_specSep );
 
@@ -223,7 +223,7 @@ namespace fs
 
 	CFilterStore* CFilterRepository::Lookup( const std::tstring& classTag, shell::BrowseMode browseMode ) const
 	{
-		std::unordered_map< std::tstring, TOpenSavePair >::const_iterator itFound = m_stores.find( classTag );
+		std::unordered_map<std::tstring, TOpenSavePair>::const_iterator itFound = m_stores.find( classTag );
 		ASSERT( itFound != m_stores.end() );
 
 		if ( shell::FileSaveAs == browseMode && itFound->second.second != nullptr )
@@ -260,7 +260,7 @@ namespace fs
 
 	void CFilterRepository::Unregister( CFilterStore* pFilterStore, BrowseFlags browseFlags )
 	{
-		std::unordered_map< std::tstring, TOpenSavePair >::iterator itFound = m_stores.find( pFilterStore->GetClassTag() );
+		std::unordered_map<std::tstring, TOpenSavePair>::iterator itFound = m_stores.find( pFilterStore->GetClassTag() );
 		ASSERT( itFound != m_stores.end() );
 		TOpenSavePair& rStorePair = itFound->second;
 		switch ( browseFlags )

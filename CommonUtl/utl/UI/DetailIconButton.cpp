@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DetailIconButton.h"
 #include "WndUtils.h"
 #include "resource.h"

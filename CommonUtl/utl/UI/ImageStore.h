@@ -42,23 +42,23 @@ private:
 private:
 	UINT FindAliasIconId( UINT cmdId ) const
 	{
-		std::unordered_map< UINT, UINT >::const_iterator itFound = m_cmdAliasMap.find( cmdId );
+		std::unordered_map<UINT, UINT>::const_iterator itFound = m_cmdAliasMap.find( cmdId );
 		if ( itFound != m_cmdAliasMap.end() )
 			return itFound->second;					// found icon alias for the command
 		return cmdId;
 	}
 private:
-	std::unordered_map< UINT, UINT > m_cmdAliasMap;		// cmdId -> iconId: multiple commands sharing the same icon
+	std::unordered_map<UINT, UINT> m_cmdAliasMap;		// cmdId -> iconId: multiple commands sharing the same icon
 
 	typedef std::pair<UINT, IconStdSize> TIconKey;		// <iconId, IconStdSize> - synonym with CIconId with hash value convenience
-	typedef std::unordered_map< TIconKey, CIcon*, utl::CPairHasher > TIconMap;
+	typedef std::unordered_map<TIconKey, CIcon*, utl::CPairHasher> TIconMap;
 	TIconMap m_iconMap;
 
 	typedef std::pair<UINT, COLORREF> TBitmapKey;		// <iconId, transpColor>
-	typedef std::unordered_map< TBitmapKey, CBitmap*, utl::CPairHasher > TBitmapMap;
+	typedef std::unordered_map<TBitmapKey, CBitmap*, utl::CPairHasher> TBitmapMap;
 	TBitmapMap m_bitmapMap;				// regular bitmaps look better than menu bitmaps because they retain the alpha channel
 
-	std::unordered_map< UINT, TBitmapPair > m_menuBitmapMap;	// <iconId, <unchecked, checked> >
+	std::unordered_map<UINT, TBitmapPair> m_menuBitmapMap;	// <iconId, <unchecked, checked> >
 
 	std::auto_ptr<CThemeItem> m_pMenuItemBkTheme;
 	std::auto_ptr<CThemeItem> m_pCheckedMenuItemBkTheme;
@@ -88,7 +88,7 @@ public:
 	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId );
 	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
 private:
-	std::vector< ui::IImageStore* > m_imageStores;		// no ownership
+	std::vector<ui::IImageStore*> m_imageStores;		// no ownership
 };
 
 

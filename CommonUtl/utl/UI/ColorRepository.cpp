@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ColorRepository.h"
 #include "Color.h"
 #include "utl/ContainerOwnership.h"

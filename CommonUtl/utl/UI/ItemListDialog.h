@@ -35,7 +35,7 @@ public:
 	int GetSelItemIndex( void ) const { return static_cast<int>( m_selItemPos ); }
 
 	bool InputItem( size_t itemPos, const std::tstring& newItem );
-	bool InputAllItems( const std::vector< std::tstring >& items );
+	bool InputAllItems( const std::vector<std::tstring>& items );
 private:
 	detail::IContentPage* GetActivePage( void ) const { return dynamic_cast<detail::IContentPage*>( m_childSheet.GetActivePage() ); }
 	bool InEditMode( void ) const;
@@ -43,7 +43,7 @@ private:
 
 	static const TCHAR* FindSeparatorMostUsed( const std::tstring& text );
 public:
-	std::vector< std::tstring > m_items;
+	std::vector<std::tstring> m_items;
 	bool m_readOnly;
 private:
 	ui::CItemContent m_content;
@@ -96,14 +96,14 @@ public:
 	virtual bool EditSelItem( void );
 private:
 	std::tstring GetListItemText( int index ) const;
-	void QueryListItems( std::vector< std::tstring >& rItems ) const;
+	void QueryListItems( std::vector<std::tstring>& rItems ) const;
 	void OutputList( void );
 private:
 	CItemListDialog* m_pDialog;
 	const ui::CItemContent& m_rContent;
 	bool m_inEdit;
 
-	std::vector< CPathItem* > m_pathItems;
+	std::vector<CPathItem*> m_pathItems;
 private:
 	enum Column { Item };
 
@@ -136,7 +136,7 @@ private:
 	Range<int> GetLineRange( int linePos ) const;
 	Range<int> SelectLine( int linePos );
 
-	void QueryEditItems( std::vector< std::tstring >& rItems ) const;
+	void QueryEditItems( std::vector<std::tstring>& rItems ) const;
 	void OutputEdit( void );
 	void OnSelectedLinesChanged( void );
 private:

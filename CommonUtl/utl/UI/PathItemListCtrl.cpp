@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PathItemListCtrl.h"
 #include "PathItemBase.h"
 #include "MenuUtilities.h"
@@ -49,7 +49,7 @@ CMenu* CPathItemListCtrl::GetPopupMenu( ListPopup popupType )
 
 	if ( pSrcPopupMenu != nullptr && OnSelection == popupType && UseShellContextMenu() )
 	{
-		std::vector< fs::CPath > selFilePaths;
+		std::vector<fs::CPath> selFilePaths;
 		if ( QuerySelectedItemPaths( selFilePaths ) )
 			if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, selFilePaths ) )
 				return pContextPopup;
@@ -126,14 +126,14 @@ BOOL CPathItemListCtrl::OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 
 void CPathItemListCtrl::OnCopyFilenames( void )
 {
-	std::vector< std::tstring > selFilePaths;
+	std::vector<std::tstring> selFilePaths;
 	QuerySelectedItemPaths( selFilePaths );
 	ASSERT( !selFilePaths.empty() );
 
 	fs::CPath commonDirPath = path::ExtractCommonParentPath( selFilePaths );
 
 	if ( !commonDirPath.IsEmpty() )
-		for ( std::vector< std::tstring >::iterator itFilePath = selFilePaths.begin(); itFilePath != selFilePaths.end(); ++itFilePath )
+		for ( std::vector<std::tstring>::iterator itFilePath = selFilePaths.begin(); itFilePath != selFilePaths.end(); ++itFilePath )
 			path::StripPrefix( *itFilePath, commonDirPath.GetPtr() );
 
 	if ( !CTextClipboard::CopyToLines( selFilePaths, m_hWnd ) )
@@ -142,11 +142,11 @@ void CPathItemListCtrl::OnCopyFilenames( void )
 
 void CPathItemListCtrl::OnCopyFolders( void )
 {
-	std::vector< fs::CPath > selFilePaths;
+	std::vector<fs::CPath> selFilePaths;
 	QuerySelectedItemPaths( selFilePaths );
 	ASSERT( !selFilePaths.empty() );
 
-	std::vector< fs::CPath > parentDirPaths;
+	std::vector<fs::CPath> parentDirPaths;
 	path::QueryParentPaths( parentDirPaths, selFilePaths );
 
 	if ( !CTextClipboard::CopyToLines( parentDirPaths, m_hWnd ) )
@@ -155,7 +155,7 @@ void CPathItemListCtrl::OnCopyFolders( void )
 
 void CPathItemListCtrl::OnFileProperties( void )
 {
-	std::vector< fs::CPath > selFilePaths;
+	std::vector<fs::CPath> selFilePaths;
 	QuerySelectedItemPaths( selFilePaths );
 
 	ShellInvokeProperties( selFilePaths );

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellTypes.h"
 #include "utl/StdHashValue.h"
 #include <atlcomtime.h>		// for COleDateTime
@@ -221,7 +221,7 @@ namespace shell
 {
 	// obsolete, kept just for reference on using SHBindToParent
 	//
-	CComPtr<IShellFolder> _MakeChildPidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths )
+	CComPtr<IShellFolder> _MakeChildPidlArray( std::vector<PITEMID_CHILD>& rPidlItemsArray, const std::vector<std::tstring>& filePaths )
 	{
 		// MSDN: we assume that all objects are in the same folder
 		CComPtr<IShellFolder> pFirstParentFolder;

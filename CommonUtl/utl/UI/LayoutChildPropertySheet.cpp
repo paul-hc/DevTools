@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "LayoutChildPropertySheet.h"
 #include "LayoutEngine.h"
 #include "AccelTable.h"

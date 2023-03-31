@@ -117,7 +117,7 @@ namespace pixel
 	}
 
 	template<>
-	inline void BlendColor< CPixelBGRA >( CPixelBGRA& rPixel, const CPixelBGRA& toPixel )	// shifts the color towards toPixel using toPixel's alpha
+	inline void BlendColor<CPixelBGRA>( CPixelBGRA& rPixel, const CPixelBGRA& toPixel )	// shifts the color towards toPixel using toPixel's alpha
 	{
 		if ( rPixel.m_alpha != 0 )
 		{

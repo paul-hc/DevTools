@@ -47,9 +47,6 @@
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="test\BaseImageTestCase.h">
       <Filter>Tests</Filter>
     </ClInclude>
@@ -623,11 +620,11 @@
     <ClInclude Include="ColorPickerButton.h">
       <Filter>UI\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="test\BaseImageTestCase.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
@@ -1068,6 +1065,9 @@
     </ClCompile>
     <ClCompile Include="ColorPickerButton.cpp">
       <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

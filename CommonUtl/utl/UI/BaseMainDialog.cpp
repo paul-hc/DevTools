@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BaseMainDialog.h"
 #include "BaseApp.h"
 #include "Icon.h"
@@ -31,7 +31,7 @@ CBaseMainDialog::~CBaseMainDialog()
 
 void CBaseMainDialog::ParseCommandLine( int argc, TCHAR* argv[] )
 {
-	std::vector< std::tstring > unknown;
+	std::vector<std::tstring> unknown;
 
 	for ( int i = 1; i < argc; ++i )
 		if ( const TCHAR* pSwitch = arg::GetSwitch( argv[ i ] ) )

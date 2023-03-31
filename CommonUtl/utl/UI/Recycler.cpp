@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Recycler.h"
 #include "ShellContextMenuHost.h"
 #include "utl/Algorithms.h"
@@ -71,7 +71,7 @@ namespace shell
 		return nullptr;
 	}
 
-	void CRecycler::QueryRecycledItems( std::vector< IShellItem2* >& rRecycledItems, const TCHAR* pOrigPrefixOrSpec, path::SpecMatch minMatch /*= path::Match_Any*/ ) const
+	void CRecycler::QueryRecycledItems( std::vector<IShellItem2*>& rRecycledItems, const TCHAR* pOrigPrefixOrSpec, path::SpecMatch minMatch /*= path::Match_Any*/ ) const
 	{
 		// pOrigPrefixOrSpec could be:
 		//	"" or NULL - no filter, return all recycled items
@@ -93,19 +93,19 @@ namespace shell
 					}
 				}
 
-		std::sort( items.begin(), items.end(), pred::OrderByValue< pred::CompareSecond< pred::CompareValue > >( false ) );		// sort by Deleted Time descending: most recently deleted first
+		std::sort( items.begin(), items.end(), pred::OrderByValue< pred::CompareSecond<pred::CompareValue> >( false ) );		// sort by Deleted Time descending: most recently deleted first
 
 		for ( std::vector< std::pair<IShellItem2*, CTime> >::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 			rRecycledItems.push_back( itItem->first );
 	}
 
-	void CRecycler::QueryMultiRecycledItems( std::vector< IShellItem2* >& rRecycledItems, const std::vector< fs::CPath >& delFilePaths ) const
+	void CRecycler::QueryMultiRecycledItems( std::vector<IShellItem2*>& rRecycledItems, const std::vector<fs::CPath>& delFilePaths ) const
 	{
 		REQUIRE( rRecycledItems.empty() );						// any previous items must have been released by caller
 		rRecycledItems.resize( delFilePaths.size() );			// reset to NULL all recycled items (corresponding to each file in delFilePaths)
 
 		typedef std::vector< std::pair<IShellItem2*, CTime> > TFileRecycledItems;
-		std::vector< TFileRecycledItems > fileRecycledItems;		// indexed in sync with delFilePaths
+		std::vector<TFileRecycledItems> fileRecycledItems;		// indexed in sync with delFilePaths
 
 		fileRecycledItems.resize( delFilePaths.size() );
 
@@ -133,7 +133,7 @@ namespace shell
 			if ( !rMultiRecycledItems.empty() )
 			{
 				// a file with same path can be recycled multiple times; sorting by Deleted Time descending puts first the most recently deleted (up for undeletion)
-				std::sort( rMultiRecycledItems.begin(), rMultiRecycledItems.end(), pred::OrderByValue< pred::CompareSecond< pred::CompareValue > >( false ) );
+				std::sort( rMultiRecycledItems.begin(), rMultiRecycledItems.end(), pred::OrderByValue< pred::CompareSecond<pred::CompareValue> >( false ) );
 
 				std::for_each( rMultiRecycledItems.begin() + 1, rMultiRecycledItems.end(), func::ReleaseComFirst() );		// release the unused, previously AddRef-ed interfaces
 				rRecycledItems[ entryPos ] = rMultiRecycledItems.front().first;												// store returned recycled item interface (latest deleted)
@@ -143,8 +143,8 @@ namespace shell
 
 	IShellItem2* CRecycler::FindRecycledItem( const fs::CPath& delFilePath ) const
 	{
-		std::vector< IShellItem2* > recycledItems;
-		QueryMultiRecycledItems( recycledItems, std::vector< fs::CPath >( 1, delFilePath ) );
+		std::vector<IShellItem2*> recycledItems;
+		QueryMultiRecycledItems( recycledItems, std::vector<fs::CPath>( 1, delFilePath ) );
 		ASSERT( 1 == recycledItems.size() );
 
 		return recycledItems.front();
@@ -161,12 +161,12 @@ namespace shell
 		return succeeded;
 	}
 
-	size_t CRecycler::UndeleteMultiFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths /*= nullptr*/ )
+	size_t CRecycler::UndeleteMultiFiles( const std::vector<fs::CPath>& delFilePaths, CWnd* pWndOwner, std::vector<fs::CPath>* pErrorFilePaths /*= nullptr*/ )
 	{
-		std::vector< IShellItem2* > recycledItems;
+		std::vector<IShellItem2*> recycledItems;
 		QueryMultiRecycledItems( recycledItems, delFilePaths );
 
-		std::vector< fs::CPath > errorFilePaths;
+		std::vector<fs::CPath> errorFilePaths;
 
 		for ( size_t entryPos = 0; entryPos != recycledItems.size(); )
 		{
@@ -195,13 +195,13 @@ namespace shell
 		return undeletedCount;
 	}
 
-	size_t CRecycler::UndeleteMultiFiles2( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths /*= nullptr*/ )
+	size_t CRecycler::UndeleteMultiFiles2( const std::vector<fs::CPath>& delFilePaths, CWnd* pWndOwner, std::vector<fs::CPath>* pErrorFilePaths /*= nullptr*/ )
 	{
-		std::vector< IShellItem2* > recycledItems;
+		std::vector<IShellItem2*> recycledItems;
 		QueryMultiRecycledItems( recycledItems, delFilePaths );
 
 		size_t undeletedCount = 0;
-		std::vector< fs::CPath > errorFilePaths;
+		std::vector<fs::CPath> errorFilePaths;
 
 		for ( size_t entryPos = 0; entryPos != recycledItems.size(); ++entryPos )
 		{
@@ -252,9 +252,9 @@ namespace shell
 		return path::MatchesPrefix( GetOriginalFilePath( pRecycledItem ).GetPtr(), pOrigPrefixOrSpec );
 	}
 
-	void CRecycler::QueryAvailableDrives( std::vector< std::tstring >& rDriveRootPaths )
+	void CRecycler::QueryAvailableDrives( std::vector<std::tstring>& rDriveRootPaths )
 	{
-		std::vector< TCHAR > drivesBuffer( ::GetLogicalDriveStrings( 0, nullptr ) + 1 );
+		std::vector<TCHAR> drivesBuffer( ::GetLogicalDriveStrings( 0, nullptr ) + 1 );
 		if ( TCHAR* pDrivesList = &drivesBuffer.front() )
 		{
 			::GetLogicalDriveStrings( static_cast<DWORD>( drivesBuffer.size() ), pDrivesList );
@@ -264,11 +264,11 @@ namespace shell
 		}
 	}
 
-	void CRecycler::QueryDrivesWithRecycledItems( std::vector< std::tstring >& rDriveRootPaths )
+	void CRecycler::QueryDrivesWithRecycledItems( std::vector<std::tstring>& rDriveRootPaths )
 	{
 		QueryAvailableDrives( rDriveRootPaths );
 
-		for ( std::vector< std::tstring >::iterator itRootPath = rDriveRootPaths.begin(); itRootPath != rDriveRootPaths.end(); )
+		for ( std::vector<std::tstring>::iterator itRootPath = rDriveRootPaths.begin(); itRootPath != rDriveRootPaths.end(); )
 			if ( FindRecycledItemCount( itRootPath->c_str() ) != 0 )		// has deleted files in Recycle Bin?
 				++itRootPath;
 			else

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WicImageCache.h"
 #include "WicImage.h"
 #include "FlagTags.h"
@@ -80,10 +80,10 @@ bool CWicImageCache::Discard( const fs::TImagePathKey& imageKey )
 
 size_t CWicImageCache::DiscardFrames( const fs::CFlexPath& imagePath )
 {
-	std::vector< fs::TImagePathKey > discardedKeys;
+	std::vector<fs::TImagePathKey> discardedKeys;
 
-	const std::deque< fs::TImagePathKey >& pathKeys = m_imageCache.GetPathKeys();
-	for ( std::deque< fs::TImagePathKey >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
+	const std::deque<fs::TImagePathKey>& pathKeys = m_imageCache.GetPathKeys();
+	for ( std::deque<fs::TImagePathKey>::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
 		if ( imagePath == itPathKey->first )
 			discardedKeys.push_back( *itPathKey );
 
@@ -96,7 +96,7 @@ fs::cache::EnqueueResult CWicImageCache::Enqueue( const fs::TImagePathKey& image
 	return m_imageCache.Enqueue( imageKey );
 }
 
-void CWicImageCache::Enqueue( const std::vector< fs::TImagePathKey >& imageKeys )
+void CWicImageCache::Enqueue( const std::vector<fs::TImagePathKey>& imageKeys )
 {
 	m_imageCache.Enqueue( imageKeys );
 }
@@ -124,10 +124,10 @@ CSize CWicImageCache::LookupImageDim( const fs::TImagePathKey& imageKey ) const
 
 size_t CWicImageCache::DiscardWithPrefix( const TCHAR* pDirPrefix )
 {
-	std::vector< fs::TImagePathKey > discardedKeys;
+	std::vector<fs::TImagePathKey> discardedKeys;
 
-	const std::deque< fs::TImagePathKey >& pathKeys = m_imageCache.GetPathKeys();
-	for ( std::deque< fs::TImagePathKey >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
+	const std::deque<fs::TImagePathKey>& pathKeys = m_imageCache.GetPathKeys();
+	for ( std::deque<fs::TImagePathKey>::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
 		if ( path::MatchPrefix( itPathKey->first.GetPtr(), pDirPrefix ) )
 			discardedKeys.push_back( *itPathKey );
 

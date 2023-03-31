@@ -60,7 +60,7 @@ namespace ui
 
 		bool IsEmpty( void ) const { return m_issues.empty(); }
 		bool HasErrors( void ) const;
-		const std::vector< CIssue* >& GetIssues( void ) const { return m_issues; }
+		const std::vector<CIssue*>& GetIssues( void ) const { return m_issues; }
 		CIssue& BackIssue( void ) { ASSERT( !m_issues.empty() ); return *m_issues.back(); }
 
 		void AddIssue( const std::tstring& message, Issue issue = Warning );
@@ -70,7 +70,7 @@ namespace ui
 		std::tstring FormatIssues( void ) const;
 		bool ThrowErrors( Exception exceptionType );
 	private:
-		void StreamIssues( std::tostringstream& oss, const std::vector< CIssue* >& issues ) const;
+		void StreamIssues( std::tostringstream& oss, const std::vector<CIssue*>& issues ) const;
 	public:
 		struct CIssue
 		{
@@ -84,7 +84,7 @@ namespace ui
 		};
 	private:
 		std::tstring m_header;
-		std::vector< CIssue* > m_issues;
+		std::vector<CIssue*> m_issues;
 	};
 }
 

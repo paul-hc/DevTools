@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TreeControl.h"
 #include "TreeControlCustomDraw.h"
 #include "Color.h"
@@ -54,7 +54,7 @@ bool CTreeControl::Copy( void )
 	HTREEITEM hSelItem = GetSelectedItem();
 	return
 		hSelItem != nullptr &&
-		CTextClipboard::CopyText( FormatCode( GetItemObject< utl::ISubject >( hSelItem ) ), m_hWnd );
+		CTextClipboard::CopyText( FormatCode( GetItemObject<utl::ISubject>( hSelItem ) ), m_hWnd );
 }
 
 void CTreeControl::StoreImageList( CImageList* pImageList )
@@ -199,7 +199,7 @@ void CTreeControl::MarkItem( HTREEITEM hItem, const ui::CTextEffect& textEfect )
 
 void CTreeControl::UnmarkItem( HTREEITEM hItem )
 {
-	std::unordered_map< HTREEITEM, ui::CTextEffect >::iterator itFound = m_markedItems.find( hItem );
+	std::unordered_map<HTREEITEM, ui::CTextEffect>::iterator itFound = m_markedItems.find( hItem );
 	if ( itFound != m_markedItems.end() )
 		m_markedItems.erase( itFound );
 }
@@ -272,7 +272,7 @@ BOOL CTreeControl::EnsureVisible( HTREEITEM hItem )
 		{	// make the image and leading part visible
 			int horizPos = GetScrollPos( SB_HORZ );
 			horizPos -= ( clientRect.left - itemImageRect.left + GetIndent() );
-			horizPos = std::max< int >( horizPos, 0 );
+			horizPos = std::max<int>( horizPos, 0 );
 			SendMessage( WM_HSCROLL, MAKEWPARAM( SB_THUMBPOSITION, horizPos ), 0 );
 		}
 	}

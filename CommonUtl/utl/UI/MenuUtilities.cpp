@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "MenuUtilities.h"
 #include "ImageStore.h"
 #include "WndUtils.h"
@@ -311,7 +311,7 @@ namespace ui
 		return cmdCount;
 	}
 
-	void QueryMenuItemIds( std::vector< UINT >& rItemIds, HMENU hMenu )
+	void QueryMenuItemIds( std::vector<UINT>& rItemIds, HMENU hMenu )
 	{
 		ASSERT_PTR( hMenu );
 
@@ -354,7 +354,7 @@ namespace ui
 		return destMenu.Detach();
 	}
 
-	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds /*= nullptr*/ )
+	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector<UINT>* pSrcIds /*= nullptr*/ )
 	{
 		size_t copiedCount = 0;
 

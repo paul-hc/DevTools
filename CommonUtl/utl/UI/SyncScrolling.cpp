@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SyncScrolling.h"
 #include "WindowHook.h"
 #include "utl/Algorithms.h"
@@ -82,7 +82,7 @@ void CSyncScrolling::HookThumbTrack( void )
 	ASSERT( !m_ctrls.empty() );						// must be init
 	ASSERT( m_scrollHooks.empty() );				// hook only once
 
-	for ( std::vector< CWnd* >::const_iterator itCtrl = m_ctrls.begin(); itCtrl != m_ctrls.end(); ++itCtrl )
+	for ( std::vector<CWnd*>::const_iterator itCtrl = m_ctrls.begin(); itCtrl != m_ctrls.end(); ++itCtrl )
 		m_scrollHooks.push_back( new CThumbTrackScrollHook( this, *itCtrl ) );			// WM_VSCROLL/WM_HSCROLL: hook SB_THUMBTRACK events
 }
 
@@ -95,10 +95,10 @@ bool CSyncScrolling::Synchronize( CWnd* pRefCtrl )
 
 	std::vector< std::pair<UINT, int> > scrollPoses;
 	scrollPoses.reserve( m_scrollTypes.size() );
-	for ( std::vector< int >::const_iterator itScrollType = m_scrollTypes.begin(); itScrollType != m_scrollTypes.end(); ++itScrollType )
+	for ( std::vector<int>::const_iterator itScrollType = m_scrollTypes.begin(); itScrollType != m_scrollTypes.end(); ++itScrollType )
 		scrollPoses.push_back( std::make_pair( SB_VERT == *itScrollType ? WM_VSCROLL : WM_HSCROLL, pRefCtrl->GetScrollPos( *itScrollType ) ) );
 
-	for ( std::vector< CWnd* >::const_iterator itCtrl = m_ctrls.begin(); itCtrl != m_ctrls.end(); ++itCtrl )
+	for ( std::vector<CWnd*>::const_iterator itCtrl = m_ctrls.begin(); itCtrl != m_ctrls.end(); ++itCtrl )
 		if ( *itCtrl != pRefCtrl )
 			for ( std::vector< std::pair<UINT, int> >::const_iterator itScrollPos = scrollPoses.begin(); itScrollPos != scrollPoses.end(); ++itScrollPos )
 				( *itCtrl )->SendMessage( itScrollPos->first, MAKEWPARAM( SB_THUMBPOSITION, itScrollPos->second ) );

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "StockValuesComboBox.h"
 #include "IZoomBar.h"
 #include "utl/StringUtilities.h"
@@ -28,7 +28,7 @@ namespace ui
 		return &s_durationAdapter;
 	}
 
-	const std::vector< UINT >& CDurationInSecondsAdapter::GetStockValues( void ) const
+	const std::vector<UINT>& CDurationInSecondsAdapter::GetStockValues( void ) const
 	{
 		return m_stockMiliseconds;
 	}
@@ -84,7 +84,7 @@ namespace ui
 		return &s_zoomPercentageAdapter;
 	}
 
-	const std::vector< UINT >& CZoomPercentageAdapter::GetStockValues( void ) const
+	const std::vector<UINT>& CZoomPercentageAdapter::GetStockValues( void ) const
 	{
 		return ui::CStdZoom::Instance().m_zoomPcts;
 	}
@@ -93,8 +93,8 @@ namespace ui
 
 // CDurationComboBox implementation
 
-CDurationComboBox::CDurationComboBox( ui::TValueSetFlags flags /*= ui::LimitMinValue*/, const ui::IValueSetAdapter< UINT >* pStockAdapter /*= ui::CDurationInSecondsAdapter::Instance()*/ )
-	: CStockValuesComboBox< UINT >( pStockAdapter, flags )
+CDurationComboBox::CDurationComboBox( ui::TValueSetFlags flags /*= ui::LimitMinValue*/, const ui::IValueSetAdapter<UINT>* pStockAdapter /*= ui::CDurationInSecondsAdapter::Instance()*/ )
+	: CStockValuesComboBox<UINT>( pStockAdapter, flags )
 {
 }
 
@@ -102,8 +102,8 @@ CDurationComboBox::CDurationComboBox( ui::TValueSetFlags flags /*= ui::LimitMinV
 // CZoomComboBox implementation
 
 CZoomComboBox::CZoomComboBox( ui::TValueSetFlags flags /*= ui::LimitMinValue | ui::LimitMaxValue*/,
-							  const ui::IValueSetAdapter< UINT >* pStockAdapter /*= ui::CZoomPercentageAdapter::Instance()*/ )
-	: CStockValuesComboBox< UINT >( pStockAdapter, flags )
+							  const ui::IValueSetAdapter<UINT>* pStockAdapter /*= ui::CZoomPercentageAdapter::Instance()*/ )
+	: CStockValuesComboBox<UINT>( pStockAdapter, flags )
 {
 	SetValidRange( ui::CStdZoom::Instance().m_limits );
 }

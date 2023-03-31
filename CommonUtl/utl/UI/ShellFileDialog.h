@@ -35,7 +35,7 @@ public:
 	virtual ~CShellFileDialog();
 
 	bool RunModal( fs::CPath* pFilePath );
-	bool RunModal( std::vector< fs::CPath >& rFilePaths );
+	bool RunModal( std::vector<fs::CPath>& rFilePaths );
 private:
 	static const fs::CFilterJoiner& GetDefaultJoiner( void );			// "All files (*.*)"
 	static DWORD GetFlags( shell::BrowseMode browseMode, DWORD flags );

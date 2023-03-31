@@ -49,7 +49,7 @@ inline void CBaseHostToolbarCtrl<BaseCtrlT>::ResetMateToolbar( void )
 }
 
 template< typename BaseCtrlT >
-inline const std::vector< UINT >& CBaseHostToolbarCtrl<BaseCtrlT>::GetMateCommands( void ) const
+inline const std::vector<UINT>& CBaseHostToolbarCtrl<BaseCtrlT>::GetMateCommands( void ) const
 {
 	REQUIRE( HasMateToolbar() );
 	return m_pMateToolbar->GetStrip().GetButtonIds();
@@ -246,7 +246,7 @@ void CBaseItemContentCtrl<BaseCtrlT>::OnDropFiles( HDROP hDropInfo )
 {
 	if ( m_content.IsPathContent() )
 	{
-		std::vector< fs::CPath > filePaths;
+		std::vector<fs::CPath> filePaths;
 		shell::QueryDroppedFiles( filePaths, hDropInfo );
 
 		if ( !filePaths.empty() )

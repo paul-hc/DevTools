@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageEdit.h"
 
 #ifdef _DEBUG

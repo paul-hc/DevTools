@@ -26,7 +26,7 @@ public:
 
 	// selection
 	template< typename PathType >
-	bool QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const;
+	bool QuerySelectedItemPaths( std::vector<PathType>& rSelFilePaths ) const;
 
 	// base overrides
 	virtual CMenu* GetPopupMenu( ListPopup popupType );
@@ -51,9 +51,9 @@ protected:
 // template code
 
 template< typename PathType >
-bool CPathItemListCtrl::QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const
+bool CPathItemListCtrl::QuerySelectedItemPaths( std::vector<PathType>& rSelFilePaths ) const
 {
-	std::vector< utl::ISubject* > selItems;		// stands for CPathItemBase
+	std::vector<utl::ISubject*> selItems;		// stands for CPathItemBase
 	QuerySelectionAs( selItems );
 
 	if ( selItems.empty() )

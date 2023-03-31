@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BaseZoomView.h"
 #include "Color.h"
 #include "WndUtils.h"
@@ -103,7 +103,7 @@ bool CBaseZoomView::ZoomRelative( ZoomBy zoomBy )
 
 	UINT zoomPct = m_pZoomBar->InputZoomPct( ui::ByEdit );		// input zoom just in case combo is not updated (editing)
 
-	const std::vector< UINT >& stdZoomPcts = ui::CStdZoom::Instance().m_zoomPcts;
+	const std::vector<UINT>& stdZoomPcts = ui::CStdZoom::Instance().m_zoomPcts;
 	size_t newPos = std::distance( stdZoomPcts.begin(), std::lower_bound( stdZoomPcts.begin(), stdZoomPcts.end(), zoomPct ) );
 
 	if ( newPos < stdZoomPcts.size() && zoomPct == stdZoomPcts[ newPos ] )

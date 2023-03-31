@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ListCtrlEditorFrame.h"
 #include "ReportListControl.h"
 #include "WndUtils.h"

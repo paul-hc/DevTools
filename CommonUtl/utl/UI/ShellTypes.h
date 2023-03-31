@@ -73,20 +73,20 @@ namespace func
 namespace shell
 {
 	template< typename PathContainerT >
-	CComPtr<IShellFolder> MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
+	CComPtr<IShellFolder> MakeRelativePidlArray( std::vector<PIDLIST_RELATIVE>& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
 
-	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector< CComPtrIShellItem2 > >, std::vector< IShellItem* >, etc
-	void MakeAbsolutePidlArray( std::vector< PIDLIST_ABSOLUTE >& rPidlVector, const ShellItemContainerT& shellItems );
+	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector<CComPtrIShellItem2>, std::vector<IShellItem*>, etc
+	void MakeAbsolutePidlArray( std::vector<PIDLIST_ABSOLUTE>& rPidlVector, const ShellItemContainerT& shellItems );
 
 	template< typename ContainerT >
-	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector< LPITEMIDLIST >
+	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector<LPITEMIDLIST>
 	{
 		std::for_each( rPidls.begin(), rPidls.end(), func::TDeletePidl() );
 		rPidls.clear();
 	}
 
 	template< typename ShellItemContainerT >
-	void QueryFilePaths( std::vector< fs::CPath >& rFilePaths, const ShellItemContainerT& shellItems, SIGDN sigdn = SIGDN_FILESYSPATH )
+	void QueryFilePaths( std::vector<fs::CPath>& rFilePaths, const ShellItemContainerT& shellItems, SIGDN sigdn = SIGDN_FILESYSPATH )
 	{
 		rFilePaths.reserve( rFilePaths.size() + shellItems.size() );
 
@@ -257,7 +257,7 @@ namespace shell
 	// template code
 
 	template< typename PathContainerT >
-	CComPtr<IShellFolder> MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths )
+	CComPtr<IShellFolder> MakeRelativePidlArray( std::vector<PIDLIST_RELATIVE>& rPidlItemsArray, const PathContainerT& filePaths )
 	{	// for mixed files having a common ancestor folder
 		CComPtr<IShellFolder> pCommonFolder;
 		fs::CPath commonDirPath = path::ExtractCommonParentPath( filePaths );
@@ -280,8 +280,8 @@ namespace shell
 		return pCommonFolder;
 	}
 
-	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector< CComPtrIShellItem2 > >, std::vector< IShellItem* >, etc
-	void MakeAbsolutePidlArray( std::vector< PIDLIST_ABSOLUTE >& rPidlVector, const ShellItemContainerT& shellItems )
+	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector<CComPtrIShellItem2>, std::vector<IShellItem*>, etc
+	void MakeAbsolutePidlArray( std::vector<PIDLIST_ABSOLUTE>& rPidlVector, const ShellItemContainerT& shellItems )
 	{
 		REQUIRE( rPidlVector.empty() );
 
@@ -304,7 +304,7 @@ namespace shell
 	template< typename ShellItemContainerT >
 	CComPtr<IShellItemArray> MakeShellItemArray( const ShellItemContainerT& shellItems )
 	{
-		std::vector< PIDLIST_ABSOLUTE > pidlVector;
+		std::vector<PIDLIST_ABSOLUTE> pidlVector;
 		MakeAbsolutePidlArray( pidlVector, shellItems );
 
 		CComPtr<IShellItemArray> pShellItemArray;
@@ -340,7 +340,7 @@ namespace pred
 		}
 	};
 
-	typedef LessValue< CompareExplorerPath > TLess_ExplorerPath;
+	typedef LessValue<CompareExplorerPath> TLess_ExplorerPath;
 }
 
 
@@ -351,7 +351,7 @@ namespace shell
 	template< typename IteratorT >
 	inline void SortPaths( IteratorT itFirst, IteratorT itLast, bool ascending = true )
 	{
-		std::sort( itFirst, itLast, pred::OrderByValue< pred::CompareExplorerPath >( ascending ) );
+		std::sort( itFirst, itLast, pred::OrderByValue<pred::CompareExplorerPath>( ascending ) );
 	}
 
 	template< typename ContainerT >

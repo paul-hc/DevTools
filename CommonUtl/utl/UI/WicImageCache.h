@@ -13,7 +13,7 @@ namespace fs { enum FileExpireStatus; }
 
 
 class CWicImageCache : public CErrorHandler
-					 , private fs::ICacheOwner< fs::TImagePathKey, CWicImage >
+					 , private fs::ICacheOwner<fs::TImagePathKey, CWicImage>
 					 , private utl::noncopyable
 {
 	friend class CWicImageTests;
@@ -31,11 +31,11 @@ public:
 	size_t DiscardFrames( const fs::CFlexPath& imagePath );
 
 	fs::cache::EnqueueResult Enqueue( const fs::TImagePathKey& imageKey );
-	void Enqueue( const std::vector< fs::TImagePathKey >& imageKeys );
+	void Enqueue( const std::vector<fs::TImagePathKey>& imageKeys );
 
 	enum { MaxSize = 30u };
 
-	typedef fs::CCacheLoader< fs::TImagePathKey, CWicImage > TCacheLoader;
+	typedef fs::CCacheLoader<fs::TImagePathKey, CWicImage> TCacheLoader;
 
 	TCacheLoader* GetCache( void ) { return &m_imageCache; }
 
@@ -44,7 +44,7 @@ public:
 
 	size_t DiscardWithPrefix( const TCHAR* pDirPrefix );
 private:
-	// fs::ICacheOwner< fs::TImagePathKey, CWicImage > interface
+	// fs::ICacheOwner<fs::TImagePathKey, CWicImage> interface
 	virtual CWicImage* LoadObject( const fs::TImagePathKey& imageKey );
 	virtual void TraceObject( const fs::TImagePathKey& imageKey, CWicImage* pImage, fs::cache::TStatusFlags cacheFlags );
 private:

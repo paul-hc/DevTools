@@ -155,7 +155,7 @@ namespace serial
 		CTimer m_timer;
 		int m_streamingFlags;		// client code maintains the actual flags
 
-		static std::vector< CStreamingGuard* > s_instances;		// could be stacked, the deepest at the top (back)
+		static std::vector<CStreamingGuard*> s_instances;		// could be stacked, the deepest at the top (back)
 	};
 }
 

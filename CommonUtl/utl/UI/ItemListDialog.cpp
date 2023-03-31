@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ItemListDialog.h"
 #include "PathItemBase.h"
 #include "EnumTags.h"
@@ -93,7 +93,7 @@ bool CItemListDialog::InputItem( size_t itemPos, const std::tstring& newItem )
 		return false;
 	}
 
-	std::vector< std::tstring > items = m_items;
+	std::vector<std::tstring> items = m_items;
 	items[ itemPos ] = newItem;
 	m_content.FilterItems( items );					// rely on content-specific validation
 	if ( items.size() != m_items.size() )
@@ -108,7 +108,7 @@ bool CItemListDialog::InputItem( size_t itemPos, const std::tstring& newItem )
 	return true;
 }
 
-bool CItemListDialog::InputAllItems( const std::vector< std::tstring >& items )
+bool CItemListDialog::InputAllItems( const std::vector<std::tstring>& items )
 {
 	m_items = items;
 	m_content.FilterItems( m_items );				// rely on content-specific validation
@@ -372,7 +372,7 @@ std::tstring CItemsListPage::GetListItemText( int index ) const
 	return m_listCtrl.FormatCode( m_listCtrl.GetSubjectAt( index ) );
 }
 
-void CItemsListPage::QueryListItems( std::vector< std::tstring >& rItems ) const
+void CItemsListPage::QueryListItems( std::vector<std::tstring>& rItems ) const
 {
 	unsigned int count = m_listCtrl.GetItemCount();
 	rItems.clear();
@@ -383,7 +383,7 @@ void CItemsListPage::QueryListItems( std::vector< std::tstring >& rItems ) const
 
 void CItemsListPage::OutputList( void )
 {
-	std::vector< std::tstring > listItems;
+	std::vector<std::tstring> listItems;
 	QueryListItems( listItems );
 
 	CScopedInternalChange internalChange( &m_listCtrl );
@@ -547,14 +547,14 @@ Range<int> CItemsEditPage::SelectLine( int linePos )
 	return lineRange;
 }
 
-void CItemsEditPage::QueryEditItems( std::vector< std::tstring >& rItems ) const
+void CItemsEditPage::QueryEditItems( std::vector<std::tstring>& rItems ) const
 {
 	str::Split( rItems, m_mlEdit.GetText().c_str(), s_lineEnd );
 }
 
 void CItemsEditPage::OutputEdit( void )
 {
-	std::vector< std::tstring > editItems;
+	std::vector<std::tstring> editItems;
 	QueryEditItems( editItems );
 
 	CScopedInternalChange internalChange( &m_mlEdit );
@@ -588,7 +588,7 @@ void CItemsEditPage::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		QueryEditItems( items );
 		m_pDialog->InputAllItems( items );
 	}

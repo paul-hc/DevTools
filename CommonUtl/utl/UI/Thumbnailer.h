@@ -14,7 +14,7 @@ class CFlagTags;
 namespace fs { enum FileExpireStatus; }
 
 
-typedef std::pair< fs::CFlexPath, CComPtr<IShellItem> > TShellItemPair;		// source image path with its shell item
+typedef std::pair<fs::CFlexPath, CComPtr<IShellItem>> TShellItemPair;		// source image path with its shell item
 
 
 namespace thumb
@@ -106,7 +106,7 @@ public:
 private:
 	enum { MaxSize = 500 };
 
-	fs::CFileObjectCache< fs::CFlexPath, CCachedThumbBitmap > m_thumbsCache;
+	fs::CFileObjectCache<fs::CFlexPath, CCachedThumbBitmap> m_thumbsCache;
 public:
 	int m_flags;
 

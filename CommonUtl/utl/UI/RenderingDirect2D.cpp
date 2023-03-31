@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "RenderingDirect2D.h"
 #include "GdiCoords.h"
 #include "utl/EnumTags.h"
@@ -53,7 +53,7 @@ namespace d2d
 		ASSERT_PTR( pRenderTarget );
 		ASSERT( count > 1 );
 
-		std::vector< D2D1_GRADIENT_STOP > gradientStops( count );
+		std::vector<D2D1_GRADIENT_STOP> gradientStops( count );
 		gradientStops[ 0 ].position = 0.0f;
 		gradientStops[ 0 ].color = colors[ 0 ];
 
@@ -77,7 +77,7 @@ namespace d2d
 		ASSERT_PTR( pSrcGradientStops );
 
 		UINT count = pSrcGradientStops->GetGradientStopCount();
-		std::vector< D2D1_GRADIENT_STOP > gradientStops( count );
+		std::vector<D2D1_GRADIENT_STOP> gradientStops( count );
 		pSrcGradientStops->GetGradientStops( ARRAY_SPAN_V( gradientStops ) );
 		ReverseGradientStops( gradientStops.begin(), gradientStops.end() );			// reverse colour order
 
@@ -506,11 +506,11 @@ namespace d2d
 		CreateAsSolidBrush( m_pFrameBrush, pRenderTarget, solidColor );
 	}
 
-	CComPtr<ID2D1GradientStopCollection> COutlineFrame::MakeMirrorGradientStops( ID2D1RenderTarget* pRenderTarget, const std::vector< D2D1_COLOR_F >& srcColors )
+	CComPtr<ID2D1GradientStopCollection> COutlineFrame::MakeMirrorGradientStops( ID2D1RenderTarget* pRenderTarget, const std::vector<D2D1_COLOR_F>& srcColors )
 	{	// make a nicer looking gradient {to, ..., from, ..., to}
 		if ( srcColors.size() > 1 )
 		{
-			std::vector< D2D1_COLOR_F > mirroredColors = srcColors;
+			std::vector<D2D1_COLOR_F> mirroredColors = srcColors;
 			mirroredColors.insert( mirroredColors.end(), srcColors.rbegin() + 1, srcColors.rend() );
 
 			return CreateGradientStops( pRenderTarget, ARRAY_SPAN_V( mirroredColors ) );

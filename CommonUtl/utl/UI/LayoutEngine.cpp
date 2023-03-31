@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "LayoutEngine.h"
 #include "MemoryDC.h"
 #include "ScopedValue.h"
@@ -64,8 +64,8 @@ void CLayoutEngine::StoreInitialSize( CWnd* pDialog )
 	m_minClientSize = m_previousSize = clientRect.Size();
 	m_nonClientSize = windowRect.Size() - m_minClientSize;
 
-	m_maxClientSize.cx = std::max< long >( m_maxClientSize.cx, m_minClientSize.cx );
-	m_maxClientSize.cy = std::max< long >( m_maxClientSize.cy, m_minClientSize.cy );
+	m_maxClientSize.cx = std::max<long>( m_maxClientSize.cx, m_minClientSize.cx );
+	m_maxClientSize.cy = std::max<long>( m_maxClientSize.cy, m_minClientSize.cy );
 }
 
 void CLayoutEngine::Initialize( CWnd* pDialog )
@@ -91,7 +91,7 @@ void CLayoutEngine::Reset( void )
 	m_nonClientSize.cx = m_nonClientSize.cy = 0;
 	m_previousSize.cx = m_previousSize.cy = 0;
 
-	for ( std::unordered_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+	for ( std::unordered_map<UINT, layout::CControlState>::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 		itCtrlState->second.ResetCtrl();
 
 	m_hiddenGroups.clear();
@@ -114,7 +114,7 @@ void CLayoutEngine::SetupControlStates( void )
 	ASSERT( m_controlStates.empty() || !m_controlStates.begin()->second.IsCtrlInit() );		// initialize once
 
 	bool anyRepaintCtrl = false;
-	for ( std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+	for ( std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 	{
 		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::DoRepaint ) )
 			anyRepaintCtrl = true;
@@ -138,7 +138,7 @@ void CLayoutEngine::SetupControlStates( void )
 	for ( ; hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 		if ( UINT ctrlId = ::GetDlgCtrlID( hCtrl ) )								// ignore child dialogs in a property sheet
 		{
-			std::unordered_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.find( ctrlId );
+			std::unordered_map<UINT, layout::CControlState>::iterator itCtrlState = m_controlStates.find( ctrlId );
 			layout::CControlState* pControlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr;
 
 			if ( ui::IsGroupBox( hCtrl ) )
@@ -191,7 +191,7 @@ void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* p
 
 bool CLayoutEngine::AnyRepaintCtrl( void ) const
 {
-	for ( std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+	for ( std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::DoRepaint ) )
 			return true;
 
@@ -206,7 +206,7 @@ void CLayoutEngine::SetLayoutEnabled( bool layoutEnabled /*= true*/ )
 		LayoutControls();
 	else
 	{
-		for ( std::unordered_map< UINT, layout::CControlState >::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+		for ( std::unordered_map<UINT, layout::CControlState>::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 			itCtrlState->second.ResetCtrl();
 	}
 }
@@ -280,7 +280,7 @@ bool CLayoutEngine::LayoutControls( void )
 	m_pDialog->GetClientRect( &clientRect );
 
 	CSize minClientSize = GetMinClientSize();
-	CSize clientSize( std::max< int >( clientRect.Width(), minClientSize.cx ), std::max< int >( clientRect.Height(), minClientSize.cy ) );
+	CSize clientSize( std::max<int>( clientRect.Width(), minClientSize.cx ), std::max<int>( clientRect.Height(), minClientSize.cy ) );
 	return LayoutControls( clientSize );
 }
 
@@ -316,7 +316,7 @@ bool CLayoutEngine::LayoutSmoothly( const CSize& delta )
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
-		std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.find( ctrlId );
+		std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.find( ctrlId );
 
 		if ( const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
@@ -344,12 +344,12 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 	CRgn clientRegion;
 	clientRegion.CreateRectRgnIndirect( &clientRect );
 
-	std::vector< HWND > changedCtrls; changedCtrls.reserve( m_controlStates.size() );
+	std::vector<HWND> changedCtrls; changedCtrls.reserve( m_controlStates.size() );
 
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
-		std::unordered_map< UINT, layout::CControlState >::const_iterator itCtrlState = m_controlStates.find( ctrlId );
+		std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.find( ctrlId );
 		const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr;
 		if ( pCtrlState != nullptr )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
@@ -368,7 +368,7 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 
 	m_pDialog->InvalidateRgn( &clientRegion, TRUE );				// invalidate background by clipping the children
 
-	for ( std::vector< HWND >::const_iterator itCtrl = changedCtrls.begin(); itCtrl != changedCtrls.end(); ++itCtrl )
+	for ( std::vector<HWND>::const_iterator itCtrl = changedCtrls.begin(); itCtrl != changedCtrls.end(); ++itCtrl )
 	{
 		ui::RedrawControl( *itCtrl );
 
@@ -381,7 +381,7 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 
 layout::TStyle CLayoutEngine::FindLayoutStyle( UINT ctrlId ) const
 {
-	std::unordered_map< UINT, layout::CControlState >::const_iterator itFound = m_controlStates.find( ctrlId );
+	std::unordered_map<UINT, layout::CControlState>::const_iterator itFound = m_controlStates.find( ctrlId );
 	return itFound != m_controlStates.end() ? itFound->second.GetLayoutStyle( false ) : layout::None;
 }
 
@@ -429,7 +429,7 @@ ui::ILayoutFrame* CLayoutEngine::FindControlLayoutFrame( HWND hCtrl ) const
 	if ( ui::ILayoutFrame* pControlLayoutFrame = dynamic_cast<ui::ILayoutFrame*>( CWnd::FromHandlePermanent( hCtrl ) ) )
 		return pControlLayoutFrame;
 
-	std::unordered_map< UINT, ui::ILayoutFrame* >::const_iterator itFound = m_buddyCallbacks.find( ::GetDlgCtrlID( hCtrl ) );
+	std::unordered_map<UINT, ui::ILayoutFrame*>::const_iterator itFound = m_buddyCallbacks.find( ::GetDlgCtrlID( hCtrl ) );
 	if ( itFound != m_buddyCallbacks.end() )
 		return itFound->second;
 
@@ -491,7 +491,7 @@ bool CLayoutEngine::HandleEraseBkgnd( CDC* pDC )
 	if ( !HasFlag( m_flags, SmoothGroups ) || !IsInitialized() || HasFlag( m_flags, Erasing ) )
 		return false;
 
-	CScopedFlag< int > scopedErasing( &m_flags, Erasing );
+	CScopedFlag<int> scopedErasing( &m_flags, Erasing );
 	CRect clientRect;
 	m_pDialog->GetClientRect( &clientRect );
 
@@ -546,7 +546,7 @@ void CLayoutEngine::DrawBackground( CDC* pDC, const CRect& clientRect )
 		m_pGripper->Draw( *pDC );
 
 	// draw hidden group boxes smoothly
-	for ( std::vector< HWND >::iterator itGroup = m_hiddenGroups.begin(); itGroup != m_hiddenGroups.end(); ++itGroup )
+	for ( std::vector<HWND>::iterator itGroup = m_hiddenGroups.begin(); itGroup != m_hiddenGroups.end(); ++itGroup )
 	{
 		CRect ctrlRect;
 		::GetWindowRect( *itGroup, &ctrlRect );				// refresh with the real rect

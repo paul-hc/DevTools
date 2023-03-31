@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CheckStatePolicies.h"
 #include "ThemeItem.h"
 #include "ReportListControl.h"
@@ -24,12 +24,12 @@ namespace ui
 		return false;
 	}
 
-	void AppendToStateImageList( CImageList* pStateImageList, const std::vector< CThemeItem >& themeItems, COLORREF transpBkColor )
+	void AppendToStateImageList( CImageList* pStateImageList, const std::vector<CThemeItem>& themeItems, COLORREF transpBkColor )
 	{
 		ASSERT_PTR( pStateImageList->GetSafeHandle() );
 		CSize imageSize = gdi::GetImageIconSize( *pStateImageList );
 
-		for ( std::vector< CThemeItem >::const_iterator itThemeItem = themeItems.begin(); itThemeItem != themeItems.end(); ++itThemeItem )
+		for ( std::vector<CThemeItem>::const_iterator itThemeItem = themeItems.begin(); itThemeItem != themeItems.end(); ++itThemeItem )
 		{
 			CBitmap imageBitmap, maskBitmap;
 
@@ -69,9 +69,9 @@ int CheckEx::Toggle( int checkState ) const
 	return checkState;
 }
 
-const std::vector< CThemeItem >* CheckEx::GetThemeItems( void ) const
+const std::vector<CThemeItem>* CheckEx::GetThemeItems( void ) const
 {
-	static std::vector< CThemeItem > s_items;
+	static std::vector<CThemeItem> s_items;
 	if ( s_items.empty() )
 	{
 		s_items.reserve( _Count );
@@ -136,9 +136,9 @@ int CheckRadio::Toggle( int checkState ) const
 	return checkState;
 }
 
-const std::vector< CThemeItem >* CheckRadio::GetThemeItems( void ) const
+const std::vector<CThemeItem>* CheckRadio::GetThemeItems( void ) const
 {
-	static std::vector< CThemeItem > s_items;
+	static std::vector<CThemeItem> s_items;
 	if ( s_items.empty() )
 	{
 		s_items.reserve( _Count );

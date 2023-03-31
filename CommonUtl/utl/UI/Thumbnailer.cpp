@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Thumbnailer.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
@@ -204,9 +204,9 @@ bool CThumbnailer::DiscardThumbnail( const fs::CFlexPath& srcImagePath )
 
 size_t CThumbnailer::DiscardWithPrefix( const TCHAR* pDirPrefix )
 {
-	std::vector< fs::CFlexPath > discardedKeys;
+	std::vector<fs::CFlexPath> discardedKeys;
 
-	for ( std::deque< fs::CFlexPath >::const_iterator itPathKey = m_thumbsCache.GetPathKeys().begin(); itPathKey != m_thumbsCache.GetPathKeys().end(); ++itPathKey )
+	for ( std::deque<fs::CFlexPath>::const_iterator itPathKey = m_thumbsCache.GetPathKeys().begin(); itPathKey != m_thumbsCache.GetPathKeys().end(); ++itPathKey )
 		if ( path::MatchPrefix( itPathKey->GetPtr(), pDirPrefix ) )
 			discardedKeys.push_back( *itPathKey );
 

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WicImage.h"
 #include "WicAnimatedImage.h"
 #include "GdiCoords.h"
@@ -337,7 +337,7 @@ namespace fs
 				pDecoderInfo->GetFriendlyName( 0, nullptr, &nameLen );		// get necessary buffer sizes
 				pDecoderInfo->GetFileExtensions( 0, nullptr, &extsLen );
 
-				std::vector< wchar_t > nameBuffer( nameLen ), extsBuffer( extsLen );
+				std::vector<wchar_t> nameBuffer( nameLen ), extsBuffer( extsLen );
 				pDecoderInfo->GetFriendlyName( nameLen, &nameBuffer.front(), &nameLen );
 				pDecoderInfo->GetFileExtensions( extsLen, &extsBuffer.front(), &extsLen );
 

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CmdUpdate.h"
 #include "MenuUtilities.h"
 #include "WndUtils.h"

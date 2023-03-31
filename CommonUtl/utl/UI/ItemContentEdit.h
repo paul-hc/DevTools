@@ -15,7 +15,7 @@ public:
 	virtual ~CItemContentEdit();
 protected:
 	// base overrides
-	virtual void OnDroppedFiles( const std::vector< fs::CPath >& filePaths );
+	virtual void OnDroppedFiles( const std::vector<fs::CPath>& filePaths );
 
 	// interface IBuddyCommandHandler (may be overridden)
 	virtual bool OnBuddyCommand( UINT cmdId );
@@ -38,12 +38,12 @@ public:
 	void SetListEditor( ListEditor listEditor ) { m_listEditor = listEditor; }
 
 	void DDX_Items( CDataExchange* pDX, std::tstring& rFlatItems, int ctrlId = 0 );
-	void DDX_Items( CDataExchange* pDX, std::vector< std::tstring >& rItems, int ctrlId = 0 );
+	void DDX_Items( CDataExchange* pDX, std::vector<std::tstring>& rItems, int ctrlId = 0 );
 	void DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::tstring& rFlatItems, int ctrlId = 0 );
-	void DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector< std::tstring >& rItems, int ctrlId = 0 );
+	void DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector<std::tstring>& rItems, int ctrlId = 0 );
 protected:
 	// base overrides
-	virtual void OnDroppedFiles( const std::vector< fs::CPath >& filePaths );
+	virtual void OnDroppedFiles( const std::vector<fs::CPath>& filePaths );
 
 	// interface IBuddyCommandHandler
 	virtual bool OnBuddyCommand( UINT cmdId );

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ResourceData.h"
 #include "Image_fwd.h"
 

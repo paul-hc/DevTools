@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageProxy.h"
 #include "DibDraw.h"
 #include "Icon.h"
@@ -141,7 +141,7 @@ void CImageProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT style 
 		CBitmap monochromeBitmap;
 		monochromeBitmap.CreateBitmap( m_size.cx, m_size.cy, 1, 1, nullptr );		// for color: monochromeBitmap.CreateCompatibleBitmap( pDC, cx, cy );
 
-		CScopedGdi< CBitmap > scopedBitmap( &memDC, &monochromeBitmap );
+		CScopedGdi<CBitmap> scopedBitmap( &memDC, &monochromeBitmap );
 		CPoint posMem( 0, 0 );
 
 		memDC.PatBlt( posMem.x, posMem.y, m_size.cx, m_size.cy, WHITENESS );	// fill background white first
@@ -218,7 +218,7 @@ void CBitmapProxy::DrawDisabled( CDC* pDC, const CPoint& pos, UINT /*style = ILD
 		if ( monoDC.CreateCompatibleDC( &memDC ) &&
 			 maskBitmap.CreateBitmap( m_size.cx, m_size.cy, 1, 1, nullptr ) )
 		{
-			CScopedGdi< CBitmap > scopedMonoBitmap( &monoDC, &maskBitmap );
+			CScopedGdi<CBitmap> scopedMonoBitmap( &monoDC, &maskBitmap );
 
 			CreateMonochromeMask( &memDC, &monoDC );
 

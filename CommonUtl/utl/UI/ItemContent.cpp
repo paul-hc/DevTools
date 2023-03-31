@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ItemContent.h"
 #include "ShellDialogs.h"
 #include "StringUtilities.h"
@@ -24,7 +24,7 @@ namespace ui
 
 	// CItemContent implementation
 
-	void CItemContent::SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR sep[] ) const
+	void CItemContent::SplitItems( std::vector<std::tstring>& rItems, const std::tstring& source, const TCHAR sep[] ) const
 	{
 		str::Split( rItems, source.c_str(), sep );
 		FilterItems( rItems );
@@ -65,12 +65,12 @@ namespace ui
 		}
 	}
 
-	void CItemContent::FilterItems( std::vector< std::tstring >& rItems ) const
+	void CItemContent::FilterItems( std::vector<std::tstring>& rItems ) const
 	{
 		if ( HasFlag( m_itemsFlags, Trim ) )
 			str::TrimItems( rItems );
 
-		for ( std::vector< std::tstring >::const_iterator itItem = rItems.begin(); itItem != rItems.end(); )
+		for ( std::vector<std::tstring>::const_iterator itItem = rItems.begin(); itItem != rItems.end(); )
 			if ( IsValidItem( *itItem ) )
 				++itItem;
 			else

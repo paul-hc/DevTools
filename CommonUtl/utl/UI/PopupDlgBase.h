@@ -14,7 +14,7 @@ public:
 	void AddAccelTable( CAccelTable* pAccelTable );
 	bool TranslateAccels( MSG* pMsg, HWND hDialog );
 private:
-	std::vector< CAccelTable* > m_accelTables;		// pool of accel tables that translate commands to this dialog
+	std::vector<CAccelTable*> m_accelTables;		// pool of accel tables that translate commands to this dialog
 };
 
 
@@ -68,7 +68,7 @@ class CPopupWndPool : private utl::noncopyable		// singleton that stores all ope
 public:
 	static CPopupWndPool* Instance( void );
 
-	const std::vector< CWnd* >& GetPopupWnds( void ) const { return m_popupWnds; }
+	const std::vector<CWnd*>& GetPopupWnds( void ) const { return m_popupWnds; }
 
 	bool AddWindow( CWnd* pPopupTopWnd );
 	bool RemoveWindow( CWnd* pPopupTopWnd );
@@ -76,7 +76,7 @@ public:
 	void OnIdle( void );
 	static bool SendIdleUpdates( CWnd* pPopupWnd );
 private:
-	std::vector< CWnd* > m_popupWnds;		// all top-level windows (non-child)
+	std::vector<CWnd*> m_popupWnds;		// all top-level windows (non-child)
 };
 
 

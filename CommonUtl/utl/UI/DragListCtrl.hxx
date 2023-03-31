@@ -100,7 +100,7 @@ bool CDragListCtrl<BaseListCtrl>::DropSelection( void )
 		return false;
 
 	int dropIndex = m_dropIndex;
-	std::vector< int > selIndexes = m_pSrcDragging->m_selIndexes;
+	std::vector<int> selIndexes = m_pSrcDragging->m_selIndexes;
 
 	EndDragging();
 	{

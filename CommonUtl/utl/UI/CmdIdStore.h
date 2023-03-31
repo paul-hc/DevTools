@@ -16,7 +16,7 @@ namespace ui
 		bool IsEmpty( void ) const { return m_cmdIds.empty(); }
 
 		bool ContainsId( int cmdId ) const { return m_cmdIds.find( cmdId ) != m_cmdIds.end(); }
-		const std::set< int >& GetIds( void ) const { return m_cmdIds; }
+		const std::set<int>& GetIds( void ) const { return m_cmdIds; }
 		std::pair<int, int> GetMinMaxIds( void ) const;
 
 		void RegisterCommands( HMENU hMenu, RecursionDepth depth = Deep );
@@ -24,7 +24,7 @@ namespace ui
 		size_t Union( const CCmdIdStore& store );
 		size_t Subtract( const CCmdIdStore& store );
 	private:
-		std::set< int > m_cmdIds;
+		std::set<int> m_cmdIds;
 	};
 
 
@@ -53,7 +53,7 @@ namespace ui
 		};
 	private:
 		CCmdTarget* m_pCmdTarget;
-		utl::vector_map< CHandlerKey, bool > m_handledNotifyCodes;		// <handler_key, handled>
+		utl::vector_map<CHandlerKey, bool> m_handledNotifyCodes;		// <handler_key, handled>
 	};
 }
 

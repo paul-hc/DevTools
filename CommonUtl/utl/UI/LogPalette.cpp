@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "LogPalette.h"
 
 #ifdef _DEBUG

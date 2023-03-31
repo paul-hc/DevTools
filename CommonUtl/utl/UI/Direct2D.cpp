@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Direct2D.h"
 #include "BaseApp.h"
 #include "WndUtils.h"

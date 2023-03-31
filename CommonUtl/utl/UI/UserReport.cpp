@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "UserReport.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
@@ -133,7 +133,7 @@ namespace ui
 
 	bool CIssueStore::ThrowErrors( Exception exceptionType )
 	{
-		std::vector< CIssue* > errors;
+		std::vector<CIssue*> errors;
 		utl::QueryThat( errors, m_issues, pred::IsError() );
 		if ( errors.empty() )
 			return false;
@@ -149,7 +149,7 @@ namespace ui
 		}
 	}
 
-	void CIssueStore::StreamIssues( std::tostringstream& oss, const std::vector< CIssue* >& issues ) const
+	void CIssueStore::StreamIssues( std::tostringstream& oss, const std::vector<CIssue*>& issues ) const
 	{
 		if ( issues.empty() )
 			return;

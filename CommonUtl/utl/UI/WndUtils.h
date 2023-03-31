@@ -134,7 +134,7 @@ namespace ui
 		CRect m_rect;			// for child windows: in parent's client coordinates; for top windows: screen rect
 	};
 
-	bool RepositionControls( const std::vector< CCtrlPlace >& ctrlPlaces, bool invalidate = true, UINT swpFlags = 0 );
+	bool RepositionControls( const std::vector<CCtrlPlace>& ctrlPlaces, bool invalidate = true, UINT swpFlags = 0 );
 }
 
 
@@ -229,7 +229,7 @@ namespace ui
 
 	inline bool IsTopMost( HWND hWnd ) { return HasFlag( GetStyleEx( hWnd ), WS_EX_TOPMOST ); }
 	bool SetTopMost( HWND hWnd, bool topMost = true );
-	bool QueryTopLevelWindows( std::vector< HWND >& rTopWindows, DWORD styleFilter = WS_VISIBLE, DWORD dwThreadId = GetCurrentThreadId() );
+	bool QueryTopLevelWindows( std::vector<HWND>& rTopWindows, DWORD styleFilter = WS_VISIBLE, DWORD dwThreadId = GetCurrentThreadId() );
 
 	bool OwnsFocus( HWND hWnd );
 	bool TakeFocus( HWND hWnd );
@@ -376,11 +376,11 @@ namespace ui
 		return itemText.GetString();
 	}
 
-	void ReadListBoxItems( std::vector< std::tstring >& rOutItems, const CListBox& listBox );
-	void WriteListBoxItems( CListBox& rListBox, const std::vector< std::tstring >& items );
+	void ReadListBoxItems( std::vector<std::tstring>& rOutItems, const CListBox& listBox );
+	void WriteListBoxItems( CListBox& rListBox, const std::vector<std::tstring>& items );
 
-	void ReadComboItems( std::vector< std::tstring >& rOutItems, const CComboBox& combo );
-	void WriteComboItems( CComboBox& rCombo, const std::vector< std::tstring >& items );
+	void ReadComboItems( std::vector<std::tstring>& rOutItems, const CComboBox& combo );
+	void WriteComboItems( CComboBox& rCombo, const std::vector<std::tstring>& items );
 
 	template< typename ValueIterator_T, typename FormatFunc >
 	void WriteComboItemValues( CComboBox& rCombo, ValueIterator_T itStartValue, ValueIterator_T itEndValue, FormatFunc formatFunc )
@@ -439,11 +439,11 @@ namespace ui
 		CFont* Lookup( TFontEffect fontEffect );
 	private:
 		CFont m_sourceFont;
-		std::unordered_map< TFontEffect, CFont* > m_effectFonts;
+		std::unordered_map<TFontEffect, CFont*> m_effectFonts;
 	};
 
 	inline COLORREF GetInverseColor( COLORREF color ) { return RGB( 255 - GetRValue( color ), 255 - GetGValue( color ), 255 - GetBValue( color ) ); }
-	void AddSysColors( std::vector< COLORREF >& rColors, const int sysIndexes[], size_t count );
+	void AddSysColors( std::vector<COLORREF>& rColors, const int sysIndexes[], size_t count );
 
 
 	bool PumpPendingMessages( HWND hWnd = nullptr );
@@ -550,7 +550,7 @@ namespace ui
 		{
 			int selIndex;
 			DDX_CBIndex( pDX, comboId, selIndex );
-			rValue = enumTags.GetSelValue< EnumType >( selIndex );
+			rValue = enumTags.GetSelValue<EnumType>( selIndex );
 		}
 	}
 

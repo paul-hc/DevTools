@@ -96,8 +96,8 @@ private:
 
 	int m_flags;
 	bool m_layoutEnabled;
-	std::unordered_map< UINT, layout::CControlState > m_controlStates;
-	std::unordered_map< UINT, ui::ILayoutFrame* > m_buddyCallbacks;		// called back when buddy windows are moved or resized
+	std::unordered_map<UINT, layout::CControlState> m_controlStates;
+	std::unordered_map<UINT, ui::ILayoutFrame*> m_buddyCallbacks;		// called back when buddy windows are moved or resized
 
 	CWnd* m_pDialog;
 	CSize m_minClientSize;
@@ -109,7 +109,7 @@ private:
 	bool m_collapsed;
 
 	std::auto_ptr<layout::CResizeGripper> m_pGripper;		// bottom-right resize box
-	std::vector< HWND > m_hiddenGroups;						// hidden groups, drawn smoothly on WM_ERASEBKGND
+	std::vector<HWND> m_hiddenGroups;						// hidden groups, drawn smoothly on WM_ERASEBKGND
 public:
 	static int m_defaultFlags;								// for debugging, testing
 };

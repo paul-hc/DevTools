@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ContentFitBase.h"
 #include "LayoutEngine.h"
 #include "ScopedGdi.h"
@@ -111,7 +111,7 @@ namespace ui
 		if ( !text.empty() )
 		{
 			CClientDC clientDC( m_pCtrl );
-			CScopedGdi< CFont > scopedFont( &clientDC, m_pCtrl->GetFont() );
+			CScopedGdi<CFont> scopedFont( &clientDC, m_pCtrl->GetFont() );
 
 			ui::SetRectSize( textBounds, ui::GetTextSize( &clientDC, text.c_str(), GetDrawTextFlags() ) );
 		}

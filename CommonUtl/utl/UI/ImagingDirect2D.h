@@ -97,7 +97,7 @@ namespace d2d
 		virtual void PreDraw( const CViewCoords& coords );
 		virtual void PostDraw( const CViewCoords& coords );
 	private:
-		std::vector< IGadgetComponent* > m_gadgets;		// composite of gadgets (no ownership)
+		std::vector<IGadgetComponent*> m_gadgets;		// composite of gadgets (no ownership)
 		CComPtr<IWICBitmapSource> m_pWicBitmap;		// source bitmap
 		CComPtr<ID2D1Bitmap> m_pBitmap;				// self-encapsulated, released on device loss
 	};

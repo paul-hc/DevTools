@@ -74,7 +74,7 @@ namespace dw
 		const TCHAR* m_pFieldSep;
 
 		std::tstring m_fullText;
-		std::vector< DWRITE_TEXT_RANGE > m_fieldRanges;		// indexed by field
+		std::vector<DWRITE_TEXT_RANGE> m_fieldRanges;		// indexed by field
 	};
 }
 

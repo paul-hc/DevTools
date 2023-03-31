@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "MultiZone.h"
 #include "ComparePredicates.h"
 #include "EnumTags.h"
@@ -128,7 +128,7 @@ CMultiZoneIterator::CMultiZoneIterator( const CSize& zoneSize, int zoneSpacing, 
 void CMultiZoneIterator::ShrinkZoneExtent( long& rExtent ) const
 {
 	rExtent -= m_zoneSpacing * ( m_zoneCount - 1 );
-	rExtent = std::max< long >( 0, rExtent );					// safe for extreme m_zoneSpacing
+	rExtent = std::max<long>( 0, rExtent );					// safe for extreme m_zoneSpacing
 	rExtent /= m_zoneCount;
 }
 
@@ -163,23 +163,23 @@ namespace pred
 {
 	struct AsWidth { int operator()( const CSize& size ) const { return size.cx; } };
 
-	typedef CompareAdapter< pred::CompareValue, AsWidth > TCompareWidth;
+	typedef CompareAdapter<pred::CompareValue, AsWidth> TCompareWidth;
 }
 
-CSize CMultiZoneIterator::FindWidestSize( CDC* pDC, const std::vector< std::tstring >& labels ) const
+CSize CMultiZoneIterator::FindWidestSize( CDC* pDC, const std::vector<std::tstring>& labels ) const
 {
 	ASSERT( !labels.empty() );
 
-	std::vector< CSize > textSizes;
+	std::vector<CSize> textSizes;
 	textSizes.reserve( m_zoneCount );
 	for ( unsigned int i = 0; i != m_zoneCount; ++i )
 		textSizes.push_back( ui::GetTextSize( pDC, labels[ i ].c_str() ) );
 
-	return *std::max_element( textSizes.begin(), textSizes.end(), pred::LessValue< pred::TCompareWidth >() );
+	return *std::max_element( textSizes.begin(), textSizes.end(), pred::LessValue<pred::TCompareWidth>() );
 }
 
 std::pair<CMultiZoneIterator::LabelLayout, UINT>
-CMultiZoneIterator::FindLabelLayout( CDC* pDC, const CRect& clientRect, const std::vector< std::tstring >& labels ) const
+CMultiZoneIterator::FindLabelLayout( CDC* pDC, const CRect& clientRect, const std::vector<std::tstring>& labels ) const
 {
 	CSize labelSize = FindWidestSize( pDC, labels ) + CSize( TextSpacingX, TextSpacingY );
 
@@ -215,7 +215,7 @@ CRect CMultiZoneIterator::MakeLabelRect( LabelLayout layout, const CRect& zoneRe
 	return textRect;
 }
 
-void CMultiZoneIterator::DrawLabels( CDC* pDC, const CRect& clientRect, const std::vector< std::tstring >& labels ) const
+void CMultiZoneIterator::DrawLabels( CDC* pDC, const CRect& clientRect, const std::vector<std::tstring>& labels ) const
 {
 	ASSERT( IsValid() );
 	ASSERT( m_zoneCount == labels.size() );

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "OleDropTarget.h"
 #include "OleDragDrop_fwd.h"
 #include "OleUtils.h"

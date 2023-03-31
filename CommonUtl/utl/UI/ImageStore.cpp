@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageStore.h"
 #include "Imaging.h"
 #include "Dialog_fwd.h"
@@ -106,7 +106,7 @@ CBitmap* CImageStore::RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor
 
 ui::IImageStore::TBitmapPair CImageStore::RetrieveMenuBitmaps( const CIconId& cmdId )
 {
-	std::unordered_map< UINT, TBitmapPair >::const_iterator itFound = m_menuBitmapMap.find( cmdId.m_id );
+	std::unordered_map<UINT, TBitmapPair>::const_iterator itFound = m_menuBitmapMap.find( cmdId.m_id );
 	if ( itFound != m_menuBitmapMap.end() )
 		return itFound->second;
 
@@ -241,7 +241,7 @@ void CImageStoresSvc::PushStore( ui::IImageStore* pImageStore )
 
 void CImageStoresSvc::PopStore( ui::IImageStore* pImageStore )
 {
-	std::vector< ui::IImageStore* >::iterator itFound = std::find( m_imageStores.begin(), m_imageStores.end(), pImageStore );
+	std::vector<ui::IImageStore*>::iterator itFound = std::find( m_imageStores.begin(), m_imageStores.end(), pImageStore );
 	REQUIRE( itFound != m_imageStores.end() );
 
 	m_imageStores.erase( itFound );
@@ -250,7 +250,7 @@ void CImageStoresSvc::PopStore( ui::IImageStore* pImageStore )
 CIcon* CImageStoresSvc::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*/ ) const
 {
 	// reverse iterate so the most recent store has priority (stack top, at the back)
-	for ( std::vector< ui::IImageStore* >::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
+	for ( std::vector<ui::IImageStore*>::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
 		if ( CIcon* pFoundIcon = (*itStore)->FindIcon( cmdId, iconStdSize ) )
 			return pFoundIcon;
 
@@ -259,7 +259,7 @@ CIcon* CImageStoresSvc::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallI
 
 const CIcon* CImageStoresSvc::RetrieveIcon( const CIconId& cmdId )
 {
-	for ( std::vector< ui::IImageStore* >::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
+	for ( std::vector<ui::IImageStore*>::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
 		if ( const CIcon* pFoundIcon = (*itStore)->RetrieveIcon( cmdId ) )
 			return pFoundIcon;
 
@@ -268,7 +268,7 @@ const CIcon* CImageStoresSvc::RetrieveIcon( const CIconId& cmdId )
 
 CBitmap* CImageStoresSvc::RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor )
 {
-	for ( std::vector< ui::IImageStore* >::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
+	for ( std::vector<ui::IImageStore*>::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
 		if ( CBitmap* pFoundBitmap = (*itStore)->RetrieveBitmap( cmdId, transpColor ) )
 			return pFoundBitmap;
 
@@ -279,7 +279,7 @@ ui::IImageStore::TBitmapPair CImageStoresSvc::RetrieveMenuBitmaps( const CIconId
 {
 	TBitmapPair foundPair;
 
-	for ( std::vector< ui::IImageStore* >::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
+	for ( std::vector<ui::IImageStore*>::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
 	{
 		foundPair = (*itStore)->RetrieveMenuBitmaps( cmdId );
 		if ( foundPair.first != nullptr || foundPair.second != nullptr )
@@ -293,7 +293,7 @@ ui::IImageStore::TBitmapPair CImageStoresSvc::RetrieveMenuBitmaps( const CIconId
 {
 	TBitmapPair foundPair;
 
-	for ( std::vector< ui::IImageStore* >::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
+	for ( std::vector<ui::IImageStore*>::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
 	{
 		foundPair = (*itStore)->RetrieveMenuBitmaps( cmdId, useCheckedBitmaps );
 		if ( foundPair.first != nullptr || foundPair.second != nullptr )

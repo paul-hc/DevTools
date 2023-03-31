@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "OleDropSource.h"
 #include "ShellDropTip.h"
 #include "OleUtils.h"
@@ -146,7 +146,7 @@ namespace ole
 
 	HCURSOR CDropSource::GetNormalCursor( void )
 	{
-		// for OCR_NORMAL: add '#define OEMRESOURCE' on top of stdafx.h
+		// for OCR_NORMAL: add '#define OEMRESOURCE' on top of pch.h
 		static HCURSOR hCursor = (HCURSOR)::LoadImage( nullptr, MAKEINTRESOURCE( OCR_NORMAL ), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED );
 		return hCursor;
 	}

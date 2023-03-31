@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ObjectCtrlBase.h"
 #include "ShellContextMenuHost.h"
 #include "MenuUtilities.h"
@@ -104,7 +104,7 @@ void CObjectCtrlBase::SetShellContextMenuStyle( ShellContextMenuStyle shCtxStyle
 		m_shCtxQueryFlags = shCtxQueryFlags;
 }
 
-CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< fs::CPath >& filePaths )
+CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector<fs::CPath>& filePaths )
 {
 	REQUIRE( !filePaths.empty() );
 	ASSERT_NULL( m_pShellMenuHost.get() );
@@ -169,7 +169,7 @@ void CObjectCtrlBase::ResetShellContextMenu( void )
 	m_pShellMenuHost.reset();
 }
 
-bool CObjectCtrlBase::ShellInvokeDefaultVerb( const std::vector< fs::CPath >& filePaths )
+bool CObjectCtrlBase::ShellInvokeDefaultVerb( const std::vector<fs::CPath>& filePaths )
 {
 	REQUIRE( !filePaths.empty() );
 
@@ -179,7 +179,7 @@ bool CObjectCtrlBase::ShellInvokeDefaultVerb( const std::vector< fs::CPath >& fi
 	return contextMenu.InvokeDefaultVerb();
 }
 
-bool CObjectCtrlBase::ShellInvokeProperties( const std::vector< fs::CPath >& filePaths )
+bool CObjectCtrlBase::ShellInvokeProperties( const std::vector<fs::CPath>& filePaths )
 {
 	REQUIRE( !filePaths.empty() );
 

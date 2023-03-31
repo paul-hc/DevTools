@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WndUtils.h"
 #include "LayoutEngine.h"
 #include "HistoryComboBox.h"
@@ -306,10 +306,10 @@ namespace ui
 			m_rect = ui::GetControlRect( m_hCtrl );
 	}
 
-	bool RepositionControls( const std::vector< CCtrlPlace >& ctrlPlaces, bool invalidate /*= true*/, UINT swpFlags /*= 0*/ )
+	bool RepositionControls( const std::vector<CCtrlPlace>& ctrlPlaces, bool invalidate /*= true*/, UINT swpFlags /*= 0*/ )
 	{
 		HDWP hdwp = ::BeginDeferWindowPos( static_cast<int>( ctrlPlaces.size() ) );
-		std::vector< CCtrlPlace >::const_iterator itCtrl, itEnd = ctrlPlaces.end();
+		std::vector<CCtrlPlace>::const_iterator itCtrl, itEnd = ctrlPlaces.end();
 
 		for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd && hdwp != nullptr; ++itCtrl )
 			hdwp = ::DeferWindowPos( hdwp, itCtrl->m_hCtrl, nullptr,
@@ -388,7 +388,7 @@ namespace ui
 	void _GetWindowText( std::tstring& rText, HWND hWnd )
 	{
 		int length = ::GetWindowTextLength( hWnd );
-		std::vector< TCHAR > buffer( length + 1 );
+		std::vector<TCHAR> buffer( length + 1 );
 		TCHAR* pBuffer = &buffer.front();
 
 		::GetWindowText( hWnd, pBuffer, length + 1 );
@@ -402,7 +402,7 @@ namespace ui
 		// we use WM_GETTEXTLENGTH and WM_GETTEXT instead
 
 		int length = static_cast<int>( ::SendMessage( hWnd, WM_GETTEXTLENGTH, 0, 0 ) );	// ::GetWindowTextLength( hWnd );
-		std::vector< TCHAR > buffer( length + 1 );
+		std::vector<TCHAR> buffer( length + 1 );
 		TCHAR* pBuffer = &buffer.front();
 
 		::SendMessage( hWnd, WM_GETTEXT, length + 1, (LPARAM)pBuffer );						// ::GetWindowText( hWnd, pBuffer, length + 1 );
@@ -547,9 +547,9 @@ namespace ui
 
 	struct CWindowEnumParam
 	{
-		CWindowEnumParam( std::vector< HWND >* pWindows, DWORD styleFilter ) : m_pWindows( pWindows ), m_styleFilter( styleFilter ) { ASSERT_PTR( m_pWindows ); }
+		CWindowEnumParam( std::vector<HWND>* pWindows, DWORD styleFilter ) : m_pWindows( pWindows ), m_styleFilter( styleFilter ) { ASSERT_PTR( m_pWindows ); }
 	public:
-		std::vector< HWND >* m_pWindows;
+		std::vector<HWND>* m_pWindows;
 		DWORD m_styleFilter;
 	};
 
@@ -565,7 +565,7 @@ namespace ui
 		return TRUE;			// continue loop
 	}
 
-	bool QueryTopLevelWindows( std::vector< HWND >& rTopWindows, DWORD styleFilter /*= WS_VISIBLE*/, DWORD dwThreadId /*= GetCurrentThreadId()*/ )
+	bool QueryTopLevelWindows( std::vector<HWND>& rTopWindows, DWORD styleFilter /*= WS_VISIBLE*/, DWORD dwThreadId /*= GetCurrentThreadId()*/ )
 	{
 		CWindowEnumParam param( &rTopWindows, styleFilter );
 		return EnumThreadWindows( dwThreadId, &EnumWindowProc, reinterpret_cast<LPARAM>( &param ) ) != FALSE;
@@ -1184,7 +1184,7 @@ namespace ui
 		return -1;
 	}
 
-	void ReadListBoxItems( std::vector< std::tstring >& rOutItems, const CListBox& listBox )
+	void ReadListBoxItems( std::vector<std::tstring>& rOutItems, const CListBox& listBox )
 	{
 		CString itemText;
 		int count = listBox.GetCount();
@@ -1197,14 +1197,14 @@ namespace ui
 		}
 	}
 
-	void WriteListBoxItems( CListBox& rListBox, const std::vector< std::tstring >& items )
+	void WriteListBoxItems( CListBox& rListBox, const std::vector<std::tstring>& items )
 	{
 		rListBox.ResetContent();
-		for ( std::vector< std::tstring >::const_iterator it = items.begin(); it != items.end(); ++it )
+		for ( std::vector<std::tstring>::const_iterator it = items.begin(); it != items.end(); ++it )
 			rListBox.AddString( it->c_str() );
 	}
 
-	void ReadComboItems( std::vector< std::tstring >& rOutItems, const CComboBox& combo )
+	void ReadComboItems( std::vector<std::tstring>& rOutItems, const CComboBox& combo )
 	{
 		CString itemText;
 		int count = combo.GetCount();
@@ -1217,10 +1217,10 @@ namespace ui
 		}
 	}
 
-	void WriteComboItems( CComboBox& rCombo, const std::vector< std::tstring >& items )
+	void WriteComboItems( CComboBox& rCombo, const std::vector<std::tstring>& items )
 	{
 		rCombo.ResetContent();
-		for ( std::vector< std::tstring >::const_iterator it = items.begin(); it != items.end(); ++it )
+		for ( std::vector<std::tstring>::const_iterator it = items.begin(); it != items.end(); ++it )
 			rCombo.AddString( it->c_str() );
 	}
 
@@ -1340,7 +1340,7 @@ namespace ui
 
 	void LoadHistoryCombo( CComboBox& rHistoryCombo, const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText, const TCHAR* pSep /*= _T(";")*/ )
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, AfxGetApp()->GetProfileString( pSection, pEntry, pDefaultText ).GetString(), pSep );
 
 		if ( !items.empty() )		// keep default items if nothing saved
@@ -1357,7 +1357,7 @@ namespace ui
 	{
 		ui::UpdateHistoryCombo( rHistoryCombo, maxCount, caseType );
 
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		ui::ReadComboItems( items, rHistoryCombo );
 
 		if ( items.size() > maxCount )
@@ -1369,7 +1369,7 @@ namespace ui
 
 	std::tstring LoadHistorySelItem( const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText, const TCHAR* pSep /*= _T(";")*/ )
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		str::Split( items, AfxGetApp()->GetProfileString( pSection, pEntry, pDefaultText ).GetString(), pSep );
 
 		if ( items.empty() )
@@ -1466,7 +1466,7 @@ namespace ui
 	}
 
 
-	void AddSysColors( std::vector< COLORREF >& rColors, const int sysIndexes[], size_t count )
+	void AddSysColors( std::vector<COLORREF>& rColors, const int sysIndexes[], size_t count )
 	{
 		rColors.reserve( rColors.size() + count );
 		for ( size_t i = 0; i != count; ++i )

@@ -75,7 +75,7 @@ namespace lv
 		ui::CNmHdr m_nmHdr;
 		CPoint m_dropPoint;							// client coordinates
 		int m_dropItemIndex;
-		std::vector< fs::CPath > m_filePaths;		// sorted
+		std::vector<fs::CPath> m_filePaths;		// sorted
 	};
 
 
@@ -86,7 +86,7 @@ namespace lv
 	public:
 		ui::CNmHdr m_nmHdr;
 		int m_minSelIndex;
-		std::vector< utl::ISubject* > m_removedObjects;
+		std::vector<utl::ISubject*> m_removedObjects;
 	};
 
 
@@ -108,7 +108,7 @@ namespace lv
 		bool AddIndex( int itemIndex );
 	public:
 		ui::CNmHdr m_nmHdr;
-		std::vector< int > m_itemIndexes;		// all items impacted by the toggle; first index is the toggled reference
+		std::vector<int> m_itemIndexes;		// all items impacted by the toggle; first index is the toggled reference
 	};
 }
 
@@ -117,7 +117,7 @@ namespace lv
 {
 	struct CMatchEffects
 	{
-		CMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects )
+		CMatchEffects( std::vector<ui::CTextEffect>& rMatchEffects )
 			: m_rEqual( rMatchEffects[ str::MatchEqual ] )
 			, m_rEqualDiffCase( rMatchEffects[ str::MatchEqualDiffCase ] )
 			, m_rNotEqual( rMatchEffects[ str::MatchNotEqual ] )
@@ -174,7 +174,7 @@ protected:
 	public:
 		TColumn m_srcColumn;
 		TColumn m_destColumn;
-		std::unordered_map< TRowKey, str::TMatchSequence > m_rowSequences;		// TRowKey is invariant to sorting
+		std::unordered_map<TRowKey, str::TMatchSequence> m_rowSequences;		// TRowKey is invariant to sorting
 	};
 };
 
@@ -344,11 +344,11 @@ public:
 		int m_minWidth;
 	};
 
-	static void ParseColumnLayout( std::vector< CColumnInfo >& rColumnInfos, const std::vector< std::tstring >& columnSpecs );
+	static void ParseColumnLayout( std::vector<CColumnInfo>& rColumnInfos, const std::vector<std::tstring>& columnSpecs );
 
 	bool HasLayoutInfo( void ) const { return !m_columnInfos.empty(); }
 	void SetLayoutInfo( UINT columnLayoutId );
-	void SetLayoutInfo( const std::vector< std::tstring >& columnSpecs );
+	void SetLayoutInfo( const std::vector<std::tstring>& columnSpecs );
 
 	CReportListControl& AddTileColumn( UINT tileColumn );
 
@@ -361,9 +361,9 @@ private:
 	void InsertAllColumns( void );
 	void DeleteAllColumns( void );
 
-	void SetupColumnLayout( const std::vector< std::tstring >* pRegColumnLayoutItems );
+	void SetupColumnLayout( const std::vector<std::tstring>* pRegColumnLayoutItems );
 	void PostColumnLayout( void );
-	void InputColumnLayout( std::vector< std::tstring >& rRegColumnLayoutItems );
+	void InputColumnLayout( std::vector<std::tstring>& rRegColumnLayoutItems );
 protected:
 	void ClearData( void );
 
@@ -390,10 +390,10 @@ public:
 	ObjectT* GetObjectAt( int index ) const { return checked_static_cast<ObjectT*>( GetSubjectAt( index ) ); }
 
 	template< typename ObjectT >
-	void QueryObjectsSequence( std::vector< ObjectT* >& rObjects ) const;
+	void QueryObjectsSequence( std::vector<ObjectT*>& rObjects ) const;
 
 	template< typename ObjectT >
-	void QueryObjectsByIndex( std::vector< ObjectT* >& rObjects, const std::vector< int >& itemIndexes ) const;
+	void QueryObjectsByIndex( std::vector<ObjectT*>& rObjects, const std::vector<int>& itemIndexes ) const;
 
 	bool DeleteAllItems( void );
 	void RemoveAllGroups( void );
@@ -409,7 +409,7 @@ public:
 	static void StoreDispInfoItemText( NMLVDISPINFO* pDispInfo, const std::tstring& text );		// rarely used, normally client owns text buffers
 
 	void SwapItems( int index1, int index2 );
-	void DropMoveItems( int destIndex, const std::vector< int >& selIndexes );
+	void DropMoveItems( int destIndex, const std::vector<int>& selIndexes );
 	bool ForceRearrangeItems( void );				// for icon view modes
 
 	int FindItemIndex( const std::tstring& itemText ) const;
@@ -418,9 +418,9 @@ public:
 
 	bool EnsureVisibleObject( const utl::ISubject* pObject );
 
-	void QueryItemsText( std::vector< std::tstring >& rItemsText, const std::vector< int >& indexes, int subItem = 0 ) const;
-	void QuerySelectedItemsText( std::vector< std::tstring >& rItemsText, int subItem = 0 ) const;
-	void QueryAllItemsText( std::vector< std::tstring >& rItemsText, int subItem = 0 ) const;
+	void QueryItemsText( std::vector<std::tstring>& rItemsText, const std::vector<int>& indexes, int subItem = 0 ) const;
+	void QuerySelectedItemsText( std::vector<std::tstring>& rItemsText, int subItem = 0 ) const;
+	void QueryAllItemsText( std::vector<std::tstring>& rItemsText, int subItem = 0 ) const;
 
 	// item state
 	bool HasItemState( int index, UINT stateMask ) const { return ( GetItemState( index, stateMask ) & stateMask ) != 0; }
@@ -442,12 +442,12 @@ public:
 	bool SetChecked( int index, bool check = true ) { return SetCheck( index, check ) != FALSE; }
 
 	template< typename ObjectT >
-	bool QueryCheckedObjects( std::vector< ObjectT* >& rCheckedObjects ) const { return QueryObjectsWithCheckedState( rCheckedObjects, BST_CHECKED ); }
+	bool QueryCheckedObjects( std::vector<ObjectT*>& rCheckedObjects ) const { return QueryObjectsWithCheckedState( rCheckedObjects, BST_CHECKED ); }
 
 	template< typename ObjectT >
-	void SetCheckedObjects( const std::vector< ObjectT* >& objects, bool check = true, bool uncheckOthers = true ) { SetObjectsCheckedState( &objects, check ? BST_CHECKED : BST_UNCHECKED, uncheckOthers ); }
+	void SetCheckedObjects( const std::vector<ObjectT*>& objects, bool check = true, bool uncheckOthers = true ) { SetObjectsCheckedState( &objects, check ? BST_CHECKED : BST_UNCHECKED, uncheckOthers ); }
 
-	void SetCheckedAll( bool check = true ) { SetObjectsCheckedState( (const std::vector< utl::ISubject* >*)nullptr, check ? BST_CHECKED : BST_UNCHECKED, false ); }
+	void SetCheckedAll( bool check = true ) { SetObjectsCheckedState( (const std::vector<utl::ISubject*>*)nullptr, check ? BST_CHECKED : BST_UNCHECKED, false ); }
 
 	// Extended check-state (may include radio check-states).
 	//	Internally, the list-ctrl toggles through the sequence of states. That behaviour is replaced with custom togging when using a m_pCheckStatePolicy.
@@ -469,10 +469,10 @@ public:
 	bool ModifyObjectCheckState( const utl::ISubject* pObject, int checkState );
 
 	template< typename ObjectT >
-	bool QueryObjectsWithCheckedState( std::vector< ObjectT* >& rCheckedObjects, int checkState = BST_CHECKED ) const;
+	bool QueryObjectsWithCheckedState( std::vector<ObjectT*>& rCheckedObjects, int checkState = BST_CHECKED ) const;
 
 	template< typename ObjectT >
-	void SetObjectsCheckedState( const std::vector< ObjectT* >* pObjects, int checkState = BST_CHECKED, bool uncheckOthers = true );
+	void SetObjectsCheckedState( const std::vector<ObjectT*>* pObjects, int checkState = BST_CHECKED, bool uncheckOthers = true );
 private:
 	ui::TRawCheckState GetRawCheckState( int index ) const { return GetItemState( index, LVIS_STATEIMAGEMASK ); }
 	bool SetRawCheckState( int index, ui::TRawCheckState rawCheckState ) { return SetItemState( index, rawCheckState, LVIS_STATEIMAGEMASK ) != FALSE; }
@@ -503,8 +503,8 @@ public:
 	bool SetSelected( int index, bool doSelect = true ) { return SetItemState( index, doSelect ? LVIS_SELECTED : 0, LVIS_SELECTED ) != FALSE; }
 
 	// multiple selection
-	bool GetSelection( std::vector< int >& rSelIndexes, int* pCaretIndex = nullptr, int* pTopIndex = nullptr ) const;
-	void SetSelection( const std::vector< int >& selIndexes, int caretIndex = -1 );
+	bool GetSelection( std::vector<int>& rSelIndexes, int* pCaretIndex = nullptr, int* pTopIndex = nullptr ) const;
+	void SetSelection( const std::vector<int>& selIndexes, int caretIndex = -1 );
 	void ClearSelection( void );
 	void SelectAll( void );
 
@@ -517,10 +517,10 @@ public:
 	bool Select( const void* pObject );
 
 	template< typename ObjectT >
-	bool QuerySelectionAs( std::vector< ObjectT* >& rSelObjects ) const;
+	bool QuerySelectionAs( std::vector<ObjectT*>& rSelObjects ) const;
 
 	template< typename ObjectT >
-	void SelectObjects( const std::vector< ObjectT* >& objects );
+	void SelectObjects( const std::vector<ObjectT*>& objects );
 
 	// selection service API
 	int DeleteSelection( void );						// sends lv::LVN_ItemsRemoved
@@ -532,10 +532,10 @@ public:
 	bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags = ListSourcesMask ) const;		// for drag-drop or clipboard transfers
 	bool Copy( int sourceFlags = ListSourcesMask );						// creates a new COleDataSource object owned by the cliboard
 
-	std::auto_ptr<CImageList> CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin = nullptr );
+	std::auto_ptr<CImageList> CreateDragImageMulti( const std::vector<int>& indexes, CPoint* pFrameOrigin = nullptr );
 	std::auto_ptr<CImageList> CreateDragImageSelection( CPoint* pFrameOrigin = nullptr );
 
-	CRect GetFrameBounds( const std::vector< int >& indexes ) const;
+	CRect GetFrameBounds( const std::vector<int>& indexes ) const;
 public:
 	// custom cell marking: color, bold, italic, underline
 	void MarkCellAt( int index, TColumn subItem, const ui::CTextEffect& textEfect );
@@ -592,7 +592,7 @@ public:
 	bool SetItemGroupId( int itemIndex, int groupId );
 
 	template< typename ObjectT >
-	void QueryGroupItems( std::vector< ObjectT* >& rObjectItems, int groupId ) const;
+	void QueryGroupItems( std::vector<ObjectT*>& rObjectItems, int groupId ) const;
 
 	std::pair<int, UINT> _GetGroupItemsRange( int groupId ) const;		// <firstItemIndex, itemCount> - not reliable with groups/items custom sorting, use QueryGroupItems instead (just the first item index is accurate)
 
@@ -631,8 +631,8 @@ private:
 	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
 	std::tstring m_regSection;
-	persist std::vector< CColumnInfo > m_columnInfos;
-	std::vector< UINT > m_tileColumns;						// columns to be displayed as tile additional text (in gray)
+	persist std::vector<CColumnInfo> m_columnInfos;
+	std::vector<UINT> m_tileColumns;						// columns to be displayed as tile additional text (in gray)
 	int m_optionFlags;
 	bool m_subjectBased;									// objects stored as pointers are derived from utl::ISubject (polymorphic type)
 	const TCHAR* m_pTabularSep;								// NULL by default (copy Code column text); could be set to "\t" for a tab-separated copy to clipboard
@@ -641,19 +641,19 @@ private:
 	persist bool m_sortAscending;
 	PFNLVCOMPARE m_pComparePtrFunc;							// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pThis );
 
-	std::vector< CColumnComparator > m_comparators;
-	utl::vector_map< TRowKey, int > m_initialItemsOrder;	// stores items initial order just after list set-up
-	std::multimap< int, TRowKey > m_groupIdToItemsMap;		// group ID per row-key items map
+	std::vector<CColumnComparator> m_comparators;
+	utl::vector_map<TRowKey, int> m_initialItemsOrder;	// stores items initial order just after list set-up
+	std::multimap<int, TRowKey> m_groupIdToItemsMap;		// group ID per row-key items map
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
 	const ui::ICheckStatePolicy* m_pCheckStatePolicy;		// for extended check states
 
 	typedef std::pair<TRowKey, TColumn> TCellPair;			// invariant to sorting: favour LPARAMs instead of indexes
-	typedef std::unordered_map< TCellPair, ui::CTextEffect, utl::CPairHasher > TCellTextEffectMap;
+	typedef std::unordered_map<TCellPair, ui::CTextEffect, utl::CPairHasher> TCellTextEffectMap;
 	TCellTextEffectMap m_markedCells;
 
-	std::list< CDiffColumnPair > m_diffColumnPairs;
+	std::list<CDiffColumnPair> m_diffColumnPairs;
 
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
 	std::auto_ptr<CLabelEdit> m_pLabelEdit;					// stores the label info during inline editing
@@ -734,7 +734,7 @@ namespace lv
 		CReportListControl* m_pListCtrl;
 		ValueT m_topVisibleItem;
 		ValueT m_caretItem;
-		std::vector< ValueT > m_selItems;
+		std::vector<ValueT> m_selItems;
 	};
 
 
@@ -805,7 +805,7 @@ public:
 	virtual void Load( CArchive& archive ) throws_( CException* );
 public:
 	CWnd* m_pSrcWnd;
-	std::vector< int > m_selIndexes;
+	std::vector<int> m_selIndexes;
 };
 
 

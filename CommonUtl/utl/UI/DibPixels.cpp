@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DibPixels.h"
 #include "DibSection.h"
 #include "utl/Algorithms.h"
@@ -128,7 +128,7 @@ bool CDibPixels::ContainsAlpha( void ) const
 	typedef const CPixelBGRA* const_iterator;
 
 	if ( HasAlpha() )
-		for ( const_iterator pPixel = Begin< CPixelBGRA >(), pPixelEnd = End< CPixelBGRA >(); pPixel != pPixelEnd; ++pPixel )
+		for ( const_iterator pPixel = Begin<CPixelBGRA>(), pPixelEnd = End<CPixelBGRA>(); pPixel != pPixelEnd; ++pPixel )
 			if ( pPixel->m_alpha != 0 )
 				return true;
 
@@ -141,7 +141,7 @@ bool CDibPixels::NeedsPreMultiplyAlpha( void ) const
 	if ( 32 == m_bitsPerPixel )
 	{
 		typedef const CPixelBGRA* const_iterator;
-		for ( const_iterator pPixel = Begin< CPixelBGRA >(), pPixelEnd = End< CPixelBGRA >(); pPixel != pPixelEnd; ++pPixel )
+		for ( const_iterator pPixel = Begin<CPixelBGRA>(), pPixelEnd = End<CPixelBGRA>(); pPixel != pPixelEnd; ++pPixel )
 			if ( pPixel->NeedsPreMultiplyAlpha() )
 				return true;
 	}
@@ -160,7 +160,7 @@ bool CDibPixels::PreMultiplyAlpha( bool autoCheckPMA /*= false*/ )
 			return false;
 
 	typedef CPixelBGRA* iterator;
-	for ( iterator pPixel = Begin< CPixelBGRA >(), pPixelEnd = End< CPixelBGRA >(); pPixel != pPixelEnd; ++pPixel )
+	for ( iterator pPixel = Begin<CPixelBGRA>(), pPixelEnd = End<CPixelBGRA>(); pPixel != pPixelEnd; ++pPixel )
 		pPixel->PreMultiplyAlpha();
 
 	return true;
@@ -176,8 +176,8 @@ bool CDibPixels::CopyPixels( const CDibPixels& srcPixels )
 	if ( m_bitsPerPixel == srcPixels.m_bitsPerPixel )
 		switch ( m_bitsPerPixel )
 		{
-			case 32: Assign< CPixelBGRA, CPixelBGRA >( srcPixels, func::CopyPixel() ); break;
-			case 24: Assign< CPixelBGR, CPixelBGR >( srcPixels, func::CopyPixel() ); break;
+			case 32: Assign<CPixelBGRA, CPixelBGRA>( srcPixels, func::CopyPixel() ); break;
+			case 24: Assign<CPixelBGR, CPixelBGR>( srcPixels, func::CopyPixel() ); break;
 			case 16:
 			default: CopyBuffer( srcPixels ); break;
 		}
@@ -187,21 +187,21 @@ bool CDibPixels::CopyPixels( const CDibPixels& srcPixels )
 		{
 			case 32:
 				if ( 24 == srcPixels.m_bitsPerPixel )
-					Assign< CPixelBGRA, CPixelBGR >( srcPixels, func::CopyPixel() );
+					Assign<CPixelBGRA, CPixelBGR>( srcPixels, func::CopyPixel() );
 				else
-					AssignSrcColor< CPixelBGRA >( srcPixels, func::CopyPixel() );
+					AssignSrcColor<CPixelBGRA>( srcPixels, func::CopyPixel() );
 				break;
 			case 24:
 				if ( 32 == srcPixels.m_bitsPerPixel )
-					Assign< CPixelBGR, CPixelBGRA >( srcPixels, func::CopyPixel() );
+					Assign<CPixelBGR, CPixelBGRA>( srcPixels, func::CopyPixel() );
 				else
-					AssignSrcColor< CPixelBGR >( srcPixels, func::CopyPixel() );
+					AssignSrcColor<CPixelBGR>( srcPixels, func::CopyPixel() );
 				break;
 			default:
 				if ( 32 == srcPixels.m_bitsPerPixel )
-					AssignDestColor< CPixelBGRA >( srcPixels );
+					AssignDestColor<CPixelBGRA>( srcPixels );
 				else if ( 24 == srcPixels.m_bitsPerPixel )
-					AssignDestColor< CPixelBGR >( srcPixels );
+					AssignDestColor<CPixelBGR>( srcPixels );
 				else
 					return false;
 				break;

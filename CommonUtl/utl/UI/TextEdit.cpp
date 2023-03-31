@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TextEdit.h"
 #include "Dialog_fwd.h"
 #include "Icon.h"
@@ -162,7 +162,7 @@ std::tstring CTextEdit::GetLineText( TLine linePos ) const
 {
 	// Note: careful with LineLength() - the 'nLine' parameter is the index of the first character on the line (TCharPos), not the line index
 	size_t length = GetLineRange( linePos ).GetSpan<size_t>();
-	std::vector< TCHAR > lineBuffer( length + 1 );
+	std::vector<TCHAR> lineBuffer( length + 1 );
 
 	size_t newLength = GetLine( linePos, ARRAY_SPAN_V( lineBuffer ) );
 	ENSURE( length == newLength ); newLength;

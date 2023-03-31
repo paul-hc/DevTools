@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TextEditor.h"
 #include "MenuUtilities.h"
 #include "StringUtilities.h"
@@ -88,7 +88,7 @@ CTextEditor::SelType CTextEditor::GetSelType( void ) const
 	if ( sel.IsEmpty() )
 		return SelEmpty;
 
-	return sel.GetSpan< size_t >() == ui::GetWindowText( this ).length() ? SelAllText : SelSubText;
+	return sel.GetSpan<size_t>() == ui::GetWindowText( this ).length() ? SelAllText : SelSubText;
 }
 
 bool CTextEditor::HasSel( void ) const
@@ -188,7 +188,7 @@ void CTextEditor::OnChangeCase( UINT cmdId )
 		case SelSubText:
 		case SelAllText:
 		{
-			std::tstring subText = text.substr( sel.m_start, sel.GetSpan< size_t >() );
+			std::tstring subText = text.substr( sel.m_start, sel.GetSpan<size_t>() );
 			hlp::ChangeCase( subText.begin(), subText.end(), cmdId );
 			ReplaceSel( subText.c_str(), TRUE );
 			break;
@@ -204,7 +204,7 @@ void CTextEditor::OnChangeNumber( UINT cmdId )
 
 	if ( num::EnwrapNumericSequence( sel, text ) )							// find the entire digit sequence in the vicinity of selection
 	{
-		std::tstring numberText = text.substr( sel.m_start, sel.GetSpan< size_t >() );
+		std::tstring numberText = text.substr( sel.m_start, sel.GetSpan<size_t>() );
 		UINT number;
 		if ( num::ParseNumber( number, numberText ) )
 		{

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ColorPickerButton.h"
 #include "ColorRepository.h"
 

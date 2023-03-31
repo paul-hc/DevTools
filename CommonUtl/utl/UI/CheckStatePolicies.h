@@ -16,11 +16,11 @@ namespace ui
 		virtual bool IsEnabledState( int checkState ) const { checkState; return true; }
 
 		virtual int Toggle( int checkState ) const = 0;
-		virtual const std::vector< CThemeItem >* GetThemeItems( void ) const { return nullptr; }
+		virtual const std::vector<CThemeItem>* GetThemeItems( void ) const { return nullptr; }
 	};
 
 	bool IsCheckBoxState( int checkState, const ui::ICheckStatePolicy* pCheckStatePolicy = nullptr );
-	void AppendToStateImageList( CImageList* pStateImageList, const std::vector< CThemeItem >& themeItems, COLORREF transpBkColor );
+	void AppendToStateImageList( CImageList* pStateImageList, const std::vector<CThemeItem>& themeItems, COLORREF transpBkColor );
 }
 
 
@@ -34,7 +34,7 @@ struct CheckEx : public ui::ICheckStatePolicy
 	virtual bool IsCheckedState( int checkState ) const;
 	virtual bool IsEnabledState( int checkState ) const;
 	virtual int Toggle( int checkState ) const;
-	virtual const std::vector< CThemeItem >* GetThemeItems( void ) const;
+	virtual const std::vector<CThemeItem>* GetThemeItems( void ) const;
 };
 
 
@@ -54,7 +54,7 @@ struct CheckRadio : public ui::ICheckStatePolicy
 	virtual bool IsRadioState( int checkState ) const;
 	virtual bool IsEnabledState( int checkState ) const;
 	virtual int Toggle( int checkState ) const;
-	virtual const std::vector< CThemeItem >* GetThemeItems( void ) const;
+	virtual const std::vector<CThemeItem>* GetThemeItems( void ) const;
 
 	static void CheckRadioItems( CReportListControl* pListCtrl, int firstRadioIndex, UINT itemCount, int checkedPos, bool isEnabled = true );
 	static CheckState MakeCheckState( bool isRadio, bool isChecked, bool isEnabled );

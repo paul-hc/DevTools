@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SampleView.h"
 #include "GpUtilities.h"
 #include "WndUtils.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "IconButton.h"
 #include "ImageStore.h"
 #include "StringUtilities.h"

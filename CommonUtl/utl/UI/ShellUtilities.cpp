@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellUtilities.h"
 #include "ImagingWic.h"
 #include "Recycler.h"
@@ -43,7 +43,7 @@ namespace shell
 		return s_anyOperationAborted;
 	}
 
-	bool DoFileOperation( UINT shellOp, const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >* pDestPaths,
+	bool DoFileOperation( UINT shellOp, const std::vector<fs::CPath>& srcPaths, const std::vector<fs::CPath>* pDestPaths,
 						  CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		static const TCHAR* pShellOpTags[] = { _T("Move Files"), _T("Copy Files"), _T("Delete Files"), _T("Rename Files") };	// FO_MOVE, FO_COPY, FO_DELETE, FO_RENAME
@@ -51,7 +51,7 @@ namespace shell
 
 		ASSERT( !srcPaths.empty() );
 
-		std::vector< TCHAR > srcBuffer, destBuffer;
+		std::vector<TCHAR> srcBuffer, destBuffer;
 		shell::BuildFileListBuffer( srcBuffer, srcPaths );
 		if ( pDestPaths != nullptr )
 			shell::BuildFileListBuffer( destBuffer, *pDestPaths );
@@ -75,40 +75,40 @@ namespace shell
 		return succeeded && !s_anyOperationAborted;		// true for success AND not canceled by user
 	}
 
-	bool MoveFiles( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
+	bool MoveFiles( const std::vector<fs::CPath>& srcPaths, const std::vector<fs::CPath>& destPaths,
 					CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		return DoFileOperation( FO_MOVE, srcPaths, &destPaths, pWnd, flags );
 	}
 
-	bool MoveFiles( const std::vector< fs::CPath >& srcPaths, const fs::CPath& destFolderPath,
+	bool MoveFiles( const std::vector<fs::CPath>& srcPaths, const fs::CPath& destFolderPath,
 					CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
-		std::vector< fs::CPath > destPaths( 1, destFolderPath );
+		std::vector<fs::CPath> destPaths( 1, destFolderPath );
 		return DoFileOperation( FO_MOVE, srcPaths, &destPaths, pWnd, flags );
 	}
 
-	bool CopyFiles( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
+	bool CopyFiles( const std::vector<fs::CPath>& srcPaths, const std::vector<fs::CPath>& destPaths,
 					CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		return DoFileOperation( FO_COPY, srcPaths, &destPaths, pWnd, flags );
 	}
 
-	bool CopyFiles( const std::vector< fs::CPath >& srcPaths, const fs::CPath& destFolderPath, CWnd* pWnd /*= AfxGetMainWnd()*/,
+	bool CopyFiles( const std::vector<fs::CPath>& srcPaths, const fs::CPath& destFolderPath, CWnd* pWnd /*= AfxGetMainWnd()*/,
 					FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
-		std::vector< fs::CPath > destPaths( 1, destFolderPath );
+		std::vector<fs::CPath> destPaths( 1, destFolderPath );
 		return DoFileOperation( FO_COPY, srcPaths, &destPaths, pWnd, flags );
 	}
 
-	bool DeleteFiles( const std::vector< fs::CPath >& srcPaths, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
+	bool DeleteFiles( const std::vector<fs::CPath>& srcPaths, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		return DoFileOperation( FO_DELETE, srcPaths, nullptr, pWnd, flags );
 	}
 
 	bool DeleteFile( const fs::CPath& filePath, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
-		return DeleteFiles( std::vector< fs::CPath >( 1, filePath ), pWnd, flags );
+		return DeleteFiles( std::vector<fs::CPath>( 1, filePath ), pWnd, flags );
 	}
 
 
@@ -118,14 +118,14 @@ namespace shell
 		return recycleBin.UndeleteFile( delFilePath, pWnd );
 	}
 
-	size_t UndeleteFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWnd /*= AfxGetMainWnd()*/, std::vector< fs::CPath >* pErrorFilePaths /*= nullptr*/ )
+	size_t UndeleteFiles( const std::vector<fs::CPath>& delFilePaths, CWnd* pWnd /*= AfxGetMainWnd()*/, std::vector<fs::CPath>* pErrorFilePaths /*= nullptr*/ )
 	{
 		shell::CRecycler recycleBin;
 		return recycleBin.UndeleteMultiFiles( delFilePaths, pWnd, pErrorFilePaths );
 	}
 
 
-	size_t DeleteEmptySubdirs( const fs::CPath& topDirPath, const fs::CPath& subFolderPath, std::vector< fs::CPath >* pDelFolderPaths /*= nullptr*/ )
+	size_t DeleteEmptySubdirs( const fs::CPath& topDirPath, const fs::CPath& subFolderPath, std::vector<fs::CPath>* pDelFolderPaths /*= nullptr*/ )
 	{
 		REQUIRE( path::HasPrefix( subFolderPath.GetPtr(), topDirPath.GetPtr() ) );
 
@@ -149,7 +149,7 @@ namespace shell
 		return delSubdirCount;
 	}
 
-	size_t DeleteEmptyMultiSubdirs( const fs::CPath& topDirPath, std::vector< fs::CPath > subFolderPaths, std::vector< fs::CPath >* pDelFolderPaths /*= nullptr*/ )
+	size_t DeleteEmptyMultiSubdirs( const fs::CPath& topDirPath, std::vector<fs::CPath> subFolderPaths, std::vector<fs::CPath>* pDelFolderPaths /*= nullptr*/ )
 	{
 		ASSERT( !path::HasTrailingSlash( topDirPath.GetPtr() ) );
 
@@ -157,7 +157,7 @@ namespace shell
 
 		size_t delSubdirCount = 0;
 
-		for ( std::vector< fs::CPath >::const_iterator itSubFolderPath = subFolderPaths.begin(); itSubFolderPath != subFolderPaths.end(); ++itSubFolderPath )
+		for ( std::vector<fs::CPath>::const_iterator itSubFolderPath = subFolderPaths.begin(); itSubFolderPath != subFolderPaths.end(); ++itSubFolderPath )
 			delSubdirCount += DeleteEmptySubdirs( topDirPath, *itSubFolderPath, pDelFolderPaths );
 
 		return delSubdirCount;
@@ -268,12 +268,12 @@ namespace shell
 				cfFileGroupDescriptor == cfFormat;
 		}
 
-		HGLOBAL BuildHDrop( const std::vector< fs::CPath >& srcFiles )
+		HGLOBAL BuildHDrop( const std::vector<fs::CPath>& srcFiles )
 		{
 			if ( srcFiles.empty() )
 				return nullptr;
 
-			std::vector< TCHAR > srcBuffer;
+			std::vector<TCHAR> srcBuffer;
 			shell::BuildFileListBuffer( srcBuffer, srcFiles );
 
 			size_t byteSize = sizeof( TCHAR ) * srcBuffer.size();
@@ -297,7 +297,7 @@ namespace shell
 			return hGlobal;
 		}
 
-		HGLOBAL BuildFileGroupDescriptor( const std::vector< fs::CPath >& srcFiles )
+		HGLOBAL BuildFileGroupDescriptor( const std::vector<fs::CPath>& srcFiles )
 		{
 			size_t fileCount = srcFiles.size();
 			HGLOBAL hGlobal = nullptr;

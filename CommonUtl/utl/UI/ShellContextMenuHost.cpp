@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellContextMenuHost.h"
 #include "MenuUtilities.h"
 #include "WndUtils.h"
@@ -409,7 +409,7 @@ LRESULT CExplorerSubMenuHook::WindowProc( UINT message, WPARAM wParam, LPARAM lP
 
 // CShellLazyContextMenuHost implementation
 
-CShellLazyContextMenuHost::CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector< fs::CPath >& filePaths, UINT queryFlags /*= CMF_NORMAL*/ )
+CShellLazyContextMenuHost::CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector<fs::CPath>& filePaths, UINT queryFlags /*= CMF_NORMAL*/ )
 	: CShellContextMenuHost( pWndOwner )
 	, m_filePaths( filePaths )
 	, m_queryFlags( queryFlags )

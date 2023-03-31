@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ToolbarStrip.h"
 #include "DibDraw.h"
 #include "MenuUtilities.h"

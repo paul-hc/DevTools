@@ -43,8 +43,8 @@ public:
 	CImageList* EnsureImageList( void );					// ensure button images are loaded (by default from the store)
 	void ResetImageList( CImageList* pImageList );			// store the new imagelist along with the new image size
 
-	const std::vector< UINT >& GetButtonIds( void ) const { return m_buttonIds; }
-	std::vector< UINT >& RefButtonIds( void ) { return m_buttonIds; }
+	const std::vector<UINT>& GetButtonIds( void ) const { return m_buttonIds; }
+	std::vector<UINT>& RefButtonIds( void ) { return m_buttonIds; }
 	void StoreButtonIds( const UINT buttonIds[], size_t count ) { m_buttonIds.assign( buttonIds, buttonIds + count ); }
 
 	int GetImageCount( void ) const;										// buttons minus separators
@@ -59,7 +59,7 @@ public:
 private:
 	CIconSize m_imageSize;
 protected:
-	std::vector< UINT > m_buttonIds;
+	std::vector<UINT> m_buttonIds;
 	std::auto_ptr<CImageList> m_pImageList;
 };
 

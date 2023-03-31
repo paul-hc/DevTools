@@ -26,7 +26,7 @@ public:
 	void SetOwnerCallback( ui::ISystemTrayCallback* pOwnerCallback ) { m_pOwnerCallback = pOwnerCallback; }
 
 	bool IsEmpty( void ) const { return m_icons.empty(); }
-	const std::vector< CTrayIcon* >& GetIcons( void ) const { return m_icons; }
+	const std::vector<CTrayIcon*>& GetIcons( void ) const { return m_icons; }
 
 	CTrayIcon* FindIcon( UINT trayIconId ) const;
 	CTrayIcon& LookupIcon( UINT trayIconId ) const;
@@ -52,7 +52,7 @@ private:
 	size_t FindIconPos( UINT trayIconId ) const;
 private:
 	ui::ISystemTrayCallback* m_pOwnerCallback;		// receives tray icon notifications, and handles special events, e.g. NIN_SELECT, NINF_KEY, NIN_KEYSELECT, NIN_BALLOONSHOW, etc
-	std::vector< CTrayIcon* > m_icons;				// with ownership
+	std::vector<CTrayIcon*> m_icons;				// with ownership
 	UINT m_mainTrayIconId;
     UINT m_restoreShowCmd;
 

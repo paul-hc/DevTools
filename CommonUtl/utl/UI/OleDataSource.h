@@ -31,7 +31,7 @@ namespace ole
 		bool SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText = nullptr );
 
 		// data caching overridables
-		virtual void CacheShellFilePaths( const std::vector< fs::CPath >& filePaths );			// formats: shell::cfHDROP, shell::cfFileGroupDescriptor
+		virtual void CacheShellFilePaths( const std::vector<fs::CPath>& filePaths );			// formats: shell::cfHDROP, shell::cfFileGroupDescriptor
 		void CacheShellFilePath( const fs::CPath& filePath );
 
 		// data rendering (delayed)

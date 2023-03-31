@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "LayoutPropertyPage.h"
 #include "LayoutBasePropertySheet.h"
 #include "LayoutEngine.h"

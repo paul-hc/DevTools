@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DateTimeControl.h"
 #include "AccelTable.h"
 #include "CmdUpdate.h"

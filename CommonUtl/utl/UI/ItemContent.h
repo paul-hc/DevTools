@@ -36,8 +36,8 @@ namespace ui
 		bool IsValidItem( const std::tstring& item ) const;
 		std::tstring EditItem( const TCHAR* pItem, CWnd* pParent, UINT cmdId = 0 ) const;
 
-		void SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR sep[] ) const;
-		void FilterItems( std::vector< std::tstring >& rItems ) const;
+		void SplitItems( std::vector<std::tstring>& rItems, const std::tstring& source, const TCHAR sep[] ) const;
+		void FilterItems( std::vector<std::tstring>& rItems ) const;
 
 		bool IsPathContent( void ) const { return ui::FilePath == m_type || ui::DirPath == m_type || ui::MixedPath == m_type; }
 		bool IsValidPathItem( const std::tstring& pathItem ) const;

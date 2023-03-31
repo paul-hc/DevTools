@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "VersionInfo.h"
 #include "StringParsing.h"
 #include "TimeUtils.h"
@@ -106,10 +106,10 @@ std::tstring CVersionInfo::FormatFileVersion( void ) const
 
 std::tstring CVersionInfo::FormatComments( void ) const
 {
-	std::vector< std::tstring > items;
+	std::vector<std::tstring> items;
 	str::Split( items, GetComments().c_str(), _T("|") );
 
-	for ( std::vector< std::tstring >::iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+	for ( std::vector<std::tstring>::iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 	{
 		str::Trim( *itItem );
 

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "LayoutMetrics.h"
 #include "CtrlInterfaces.h"
 #include "ThemeItem.h"

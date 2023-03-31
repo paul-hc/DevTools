@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellFileDialog.h"
 
 #ifdef _DEBUG
@@ -33,7 +33,7 @@ bool CShellFileDialog::RunModal( fs::CPath* pFilePath )
 	return okay;
 }
 
-bool CShellFileDialog::RunModal( std::vector< fs::CPath >& rFilePaths )
+bool CShellFileDialog::RunModal( std::vector<fs::CPath>& rFilePaths )
 {
 	rFilePaths.clear();
 	if ( DoModal() != IDOK )

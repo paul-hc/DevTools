@@ -57,7 +57,7 @@ void CEnumComboBox::DDX_EnumValue( CDataExchange* pDX, int ctrlId, EnumType& rVa
 	if ( !pDX->m_bSaveAndValidate )
 		SetValue( rValue );
 	else
-		rValue = GetEnum< EnumType >();
+		rValue = GetEnum<EnumType>();
 }
 
 

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellDragImager.h"
 #include "WndUtils.h"
 #include <afxole.h>

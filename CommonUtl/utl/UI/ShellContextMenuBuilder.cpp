@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellContextMenuBuilder.h"
 #include "MenuUtilities.h"
 

@@ -21,7 +21,7 @@ namespace fs
 
 		// specs
 		bool IsEmpty( void ) const { return m_knownExts.empty(); }
-		const std::unordered_map< CPath, size_t >& GetMap( void ) const { return m_knownExts; }
+		const std::unordered_map<CPath, size_t>& GetMap( void ) const { return m_knownExts; }
 		const std::tstring& GetAllSpecs( void ) const { return m_allSpecs; }
 		const std::tstring& GetDefaultExt( void ) const { return m_defaultExt; }
 
@@ -29,13 +29,13 @@ namespace fs
 		size_t FindExtFilterPos( const TCHAR* pFilePath ) const;
 		bool ContainsExt( const TCHAR* pFilePath ) const { return FindExtFilterPos( pFilePath ) != utl::npos; }
 		std::tstring MakeAllExts( void ) const;
-		void QueryAllExts( std::vector< std::tstring >& rAllExts ) const;
+		void QueryAllExts( std::vector<std::tstring>& rAllExts ) const;
 
-		void Register( const std::vector< std::tstring >& exts, size_t filterPos );
+		void Register( const std::vector<std::tstring>& exts, size_t filterPos );
 		bool Register( const std::tstring& item, size_t filterPos );			// either ext ".bmp" or spec "*.bmp"
 		void RegisterSpecs( const std::tstring& specs, size_t filterPos );		// either ".bmp;.dib" or "*.bmp;*.dib"
 	private:
-		std::unordered_map< CPath, size_t > m_knownExts;			// known extensions to a filter entry pos (CFilterStore::m_filters)
+		std::unordered_map<CPath, size_t> m_knownExts;			// known extensions to a filter entry pos (CFilterStore::m_filters)
 		std::tstring m_allSpecs;
 		std::tstring m_defaultExt;
 	};
@@ -60,7 +60,7 @@ namespace fs
 		const std::tstring& GetClassTag( void ) const { return m_classTag; }						// name of all known file types
 		const std::tstring& GetClassSpecs( void ) const { return m_knownExts.GetAllSpecs(); }		// specs for all known extensions
 
-		const std::vector< TFilterPair >& GetFilters( void ) const { return m_filters; }
+		const std::vector<TFilterPair>& GetFilters( void ) const { return m_filters; }
 		const CKnownExtensions& GetKnownExtensions( void ) const { return m_knownExts; }
 
 		void AddFilter( const TFilterPair& filter );
@@ -80,7 +80,7 @@ namespace fs
 	private:
 		std::tstring m_classTag;					// unique tag of this filter class (displayed as all known file types)
 		BrowseFlags m_browseFlags;
-		std::vector< TFilterPair > m_filters;
+		std::vector<TFilterPair> m_filters;
 		CKnownExtensions m_knownExts;
 	public:
 		static const TFilterPair s_allFiles;
@@ -117,9 +117,9 @@ namespace fs
 		static std::tstring FormatHashKey( const std::tstring& key );
 		static UINT HashKey( const std::tstring& key );
 	private:
-		std::vector< std::tstring > m_classTags;		// for filters
-		mutable std::tstring m_key;						// self-encapsulated concatenation of class tags
-		static const TCHAR s_regSection[];				// section where last selected filter index is persisted
+		std::vector<std::tstring> m_classTags;		// for filters
+		mutable std::tstring m_key;					// self-encapsulated concatenation of class tags
+		static const TCHAR s_regSection[];			// section where last selected filter index is persisted
 	};
 
 
@@ -136,7 +136,7 @@ namespace fs
 	private:
 		typedef std::pair<CFilterStore*, CFilterStore*> TOpenSavePair;			// <filter_open, filter_save>
 
-		std::unordered_map< std::tstring, TOpenSavePair > m_stores;				// <class_tag, TOpenSavePair>
+		std::unordered_map<std::tstring, TOpenSavePair> m_stores;				// <class_tag, TOpenSavePair>
 	};
 
 } //namespace fs

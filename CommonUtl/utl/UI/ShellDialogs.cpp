@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellDialogs.h"
 #include "ShellTypes.h"
 #include "FileSystem_fwd.h"
@@ -31,7 +31,7 @@ namespace shell
 			std::auto_ptr<CFileDialog> m_pFileDlg;							// Vista style dialog requires COM initialization (done in CFileDialog)
 
 			static const TCHAR s_allFilesFilter[];
-			static std::unordered_map< std::tstring, int > s_selFilterMap;		// filter text to selected filter index
+			static std::unordered_map<std::tstring, int> s_selFilterMap;		// filter text to selected filter index
 		};
 
 
@@ -188,7 +188,7 @@ namespace shell
 		// CScopedFileDialog implementation
 
 		const TCHAR CScopedFileDialog::s_allFilesFilter[] = _T("All Files (*.*)|*.*||");
-		std::unordered_map< std::tstring, int > CScopedFileDialog::s_selFilterMap;
+		std::unordered_map<std::tstring, int> CScopedFileDialog::s_selFilterMap;
 
 		CScopedFileDialog::CScopedFileDialog( const TCHAR* pFileFilter )
 			: m_fileFilter( pFileFilter != nullptr ? pFileFilter : s_allFilesFilter )
@@ -200,7 +200,7 @@ namespace shell
 			ASSERT_PTR( pFileDlg );
 			m_pFileDlg.reset( pFileDlg );
 
-			std::unordered_map< std::tstring, int >::const_iterator itFilterIndex = s_selFilterMap.find( m_fileFilter );
+			std::unordered_map<std::tstring, int>::const_iterator itFilterIndex = s_selFilterMap.find( m_fileFilter );
 			if ( itFilterIndex != s_selFilterMap.end() )
 				m_pFileDlg->m_pOFN->nFilterIndex = itFilterIndex->second;				// use last selected filter
 		}

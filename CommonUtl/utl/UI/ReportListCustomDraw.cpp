@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ReportListCustomDraw.h"
 #include "Color.h"
 #include "GpUtilities.h"
@@ -140,7 +140,7 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMa
 	if ( str::IsEmpty( pText ) )
 		return;
 
-	std::vector< ui::CTextEffect > matchEffects;			// indexed by str::Match constants
+	std::vector<ui::CTextEffect> matchEffects;			// indexed by str::Match constants
 	BuildTextMatchEffects( matchEffects, diffSide, cellSeq );
 
 	CFont* pOldFont = m_pDC->GetCurrentFont();
@@ -148,7 +148,7 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMa
 	COLORREF oldBkColor = m_pDC->GetBkColor();
 	int oldBkMode = m_pDC->SetBkMode( TRANSPARENT );
 
-	const std::vector< str::Match >& matchSeq = SrcDiff == diffSide ? cellSeq.m_matchSeqPair.first : cellSeq.m_matchSeqPair.second;
+	const std::vector<str::Match>& matchSeq = SrcDiff == diffSide ? cellSeq.m_matchSeqPair.first : cellSeq.m_matchSeqPair.second;
 	CRect itemRect = textRect;
 
 	for ( size_t pos = 0; pos != matchSeq.size() && itemRect.left < itemRect.right; )
@@ -197,7 +197,7 @@ void CReportListCustomDraw::DrawTextFrame( const CRect& textRect, const ui::CFra
 	gp::FillRectangle( graphics, rect, &brush );
 }
 
-void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffSide diffSide, const str::TMatchSequence& cellSeq ) const
+void CReportListCustomDraw::BuildTextMatchEffects( std::vector<ui::CTextEffect>& rMatchEffects, DiffSide diffSide, const str::TMatchSequence& cellSeq ) const
 {
 	enum { LastMatch = str::MatchNotEqual, _MatchCount };
 

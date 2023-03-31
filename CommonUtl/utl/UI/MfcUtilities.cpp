@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "MfcUtilities.h"
 #include "Path.h"
 #include "Serialization.h"
@@ -103,7 +103,7 @@ namespace serial
 
 	// CStreamingGuard implementation
 
-	std::vector< CStreamingGuard* > CStreamingGuard::s_instances;
+	std::vector<CStreamingGuard*> CStreamingGuard::s_instances;
 
 	CStreamingGuard::CStreamingGuard( const CArchive& rArchive )
 		: m_rArchive( rArchive )

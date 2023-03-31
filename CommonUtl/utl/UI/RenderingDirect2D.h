@@ -112,7 +112,7 @@ namespace d2d
 		int GetFrameSize( void ) const { return m_frameSize; }
 		void SetFrameSize( int frameSize ) { m_frameSize = frameSize; DiscardDeviceResources(); }
 
-		const std::vector< D2D1_COLOR_F >& GetColors( void ) const { return m_colors; }
+		const std::vector<D2D1_COLOR_F>& GetColors( void ) const { return m_colors; }
 		void SetColors( const D2D1_COLOR_F colors[], size_t count ) { m_colors.assign( colors, colors + count ); DiscardDeviceResources(); }
 
 		// IDeviceComponent interface
@@ -131,7 +131,7 @@ namespace d2d
 		CRect MakeFrameRect( const CViewCoords& coords ) const;
 	protected:
 		int m_frameSize;
-		std::vector< D2D1_COLOR_F > m_colors;
+		std::vector<D2D1_COLOR_F> m_colors;
 		FrameStyle m_frameStyle;
 	private:
 		std::auto_ptr<IRenderFrame> m_pRenderFrame;
@@ -155,7 +155,7 @@ namespace d2d
 		void CreateSolidBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor );
 
 		// gradient outline
-		static CComPtr<ID2D1GradientStopCollection> MakeMirrorGradientStops( ID2D1RenderTarget* pRenderTarget, const std::vector< D2D1_COLOR_F >& srcColors );
+		static CComPtr<ID2D1GradientStopCollection> MakeMirrorGradientStops( ID2D1RenderTarget* pRenderTarget, const std::vector<D2D1_COLOR_F>& srcColors );
 
 		Direction GetGradientDirection( void ) const { return m_gradientDirection; }
 		void SetGradientDirection( Direction gradientDirection ) { m_gradientDirection = gradientDirection; }

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WinExplorer.h"
 #include "ShellTypes.h"
 #include "FileSystem.h"
@@ -99,7 +99,7 @@ namespace shell
 		CComPtr<IShellFolder> pDirFolder = FindShellFolder( filePath.GetParentPath().GetPtr() );
 		if ( pDirFolder != nullptr )
 		{
-			CComPtr<IExtractImage> pExtractImage = BindFileTo< IExtractImage >( pDirFolder, filePath.GetFilenamePtr() );
+			CComPtr<IExtractImage> pExtractImage = BindFileTo<IExtractImage>( pDirFolder, filePath.GetFilenamePtr() );
 			if ( pExtractImage != nullptr )
 			{
 				// define thumbnail properties
@@ -127,7 +127,7 @@ namespace shell
 		return hBitmap;
 	}
 
-	size_t CWinExplorer::ExploreAndSelectItems( const std::vector< fs::CPath >& itemPaths ) const
+	size_t CWinExplorer::ExploreAndSelectItems( const std::vector<fs::CPath>& itemPaths ) const
 	{
 		size_t selCount = 0;
 		if ( !itemPaths.empty() )
@@ -137,9 +137,9 @@ namespace shell
 			CPidl folderPidl;
 			if ( folderPidl.CreateAbsolute( folderPath.GetPtr() ) )
 			{
-				std::vector< LPITEMIDLIST > itemPidls; itemPidls.reserve( itemPaths.size() );
+				std::vector<LPITEMIDLIST> itemPidls; itemPidls.reserve( itemPaths.size() );
 
-				for ( std::vector< fs::CPath >::const_iterator itItemPath = itemPaths.begin(); itItemPath != itemPaths.end(); ++itItemPath )
+				for ( std::vector<fs::CPath>::const_iterator itItemPath = itemPaths.begin(); itItemPath != itemPaths.end(); ++itItemPath )
 					if ( folderPath == itItemPath->GetParentPath() )				// selectable in the same folder view?
 					{
 						CPidl itemPidl;

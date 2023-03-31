@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PasswordDialog.h"
 #include "LayoutEngine.h"
 #include "Path.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BufferedStatic.h"
 #include "MemoryDC.h"
 #include "ScopedGdi.h"
@@ -44,8 +44,8 @@ UINT CBufferedStatic::GetDrawTextFlags( void ) const
 
 void CBufferedStatic::PaintImpl( CDC* pDC, const CRect& clientRect )
 {
-	CScopedGdi< CBrush > scopedBrush( pDC, CBrush::FromHandle( ui::SendCtlColor( m_hWnd, *pDC, WM_CTLCOLORSTATIC ) ) );
-	CScopedGdi< CFont > scopedFont( pDC, GetFont() );
+	CScopedGdi<CBrush> scopedBrush( pDC, CBrush::FromHandle( ui::SendCtlColor( m_hWnd, *pDC, WM_CTLCOLORSTATIC ) ) );
+	CScopedGdi<CFont> scopedFont( pDC, GetFont() );
 
 	DrawBackground( pDC, clientRect );
 	Draw( pDC, clientRect );

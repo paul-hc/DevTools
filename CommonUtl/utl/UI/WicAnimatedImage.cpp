@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WicAnimatedImage.h"
 #include "ImagingDirect2D.h"
 #include "MfcUtilities.h"
@@ -107,7 +107,7 @@ bool CWicAnimatedImage::StoreBkgndColor( IWICMetadataQueryReader* pDecoderMetada
 	if ( SUCCEEDED( wic::CImagingFactory::Factory()->CreatePalette( &pPalette ) ) )
 		if ( SUCCEEDED( m_decoder.GetDecoder()->CopyPalette( pPalette ) ) )
 		{
-			std::vector< WICColor > colors( 256 );
+			std::vector<WICColor> colors( 256 );
 			UINT colorCount = 0;
 			if ( SUCCEEDED( pPalette->GetColors( static_cast<UINT>( colors.size() ), &colors.front(), &colorCount ) ) )
 			{

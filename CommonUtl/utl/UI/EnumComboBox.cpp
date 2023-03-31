@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "EnumComboBox.h"
 #include "WndUtils.h"
 #include "utl/EnumTags.h"
@@ -40,7 +40,7 @@ int CEnumComboBox::GetValue( void ) const
 		return -1;
 	}
 
-	return m_pEnumTags->GetSelValue< int >( selIndex );
+	return m_pEnumTags->GetSelValue<int>( selIndex );
 }
 
 bool CEnumComboBox::SetValue( int value )

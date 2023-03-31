@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "pch.h"
 #include "ResizeGripBar.h"
 #include "ResizeFrameStatic.h"
 #include "Color.h"

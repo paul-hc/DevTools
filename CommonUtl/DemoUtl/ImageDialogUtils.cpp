@@ -150,13 +150,13 @@ void CColorTable::Build( CDibSection* pDib )
 			}
 			break;
 		case System_1_bit:
-			CSysColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 1 );
+			CHalftoneColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 1 );
 			break;
 		case System_4_bit:
-			CSysColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 4 );
+			CHalftoneColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 4 );
 			break;
 		case System_8_bit:
-			CSysColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 8 );
+			CHalftoneColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 8 );
 			break;
 	}
 

@@ -23,7 +23,7 @@ namespace shell
 	{
 		CComPtr<IContextMenu> pCtxMenu;
 
-		std::vector< PIDLIST_RELATIVE > pidlItemsArray;
+		std::vector<PIDLIST_RELATIVE> pidlItemsArray;
 		if ( CComPtr<IShellFolder> pParentFolder = MakeRelativePidlArray( pidlItemsArray, filePaths ) )
 			if ( !pidlItemsArray.empty() )		// may be empty if a single file was deleted/renamed during the lifetime of filePaths
 				pCtxMenu = MakeFolderItemsContextMenu( &*pParentFolder, (PCUITEMID_CHILD_ARRAY)&pidlItemsArray.front(), pidlItemsArray.size(), hWndOwner );
@@ -35,7 +35,7 @@ namespace shell
 	template< typename ShellItemContainerT >
 	CComPtr<IContextMenu> MakeItemsContextMenu( const ShellItemContainerT& shellItems, HWND hWndOwner )
 	{
-		std::vector< fs::CPath > filePaths;
+		std::vector<fs::CPath> filePaths;
 		shell::QueryFilePaths( filePaths, shellItems );
 
 		return shell::MakeFilePathsContextMenu( filePaths, hWndOwner );
@@ -134,7 +134,7 @@ class CShellLazyContextMenuHost : public CShellContextMenuHost
 {
 	friend class CExplorerSubMenuHook;
 public:
-	CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector< fs::CPath >& filePaths, UINT queryFlags = CMF_NORMAL );
+	CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector<fs::CPath>& filePaths, UINT queryFlags = CMF_NORMAL );
 	virtual ~CShellLazyContextMenuHost();
 
 	// base overrides
@@ -143,7 +143,7 @@ protected:
 	virtual bool IsLazyUninit( void ) const;
 	bool LazyInit( void );
 private:
-	std::vector< fs::CPath > m_filePaths;
+	std::vector<fs::CPath> m_filePaths;
 	UINT m_queryFlags;
 	bool m_isLazyInit;
 	std::auto_ptr<CExplorerSubMenuHook> m_pExplorerSubMenuHook;		// for lazy init: monitors when "Explorer" sub-menu gets expanded first time

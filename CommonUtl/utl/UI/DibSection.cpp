@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DibSection.h"
 #include "DibPixels.h"
 #include "ImagingGdiPlus.h"
@@ -353,7 +353,7 @@ bool CDibSection::CreateDIBSection( CDibPixels& rPixels, const BITMAPINFO& dibIn
 
 		rPixels.Init( *this );
 		ENSURE( m_srcDibMeta.m_orientation == rPixels.GetOrientation() );
-		ENSURE( pPixels == rPixels.Begin< BYTE >() );
+		ENSURE( pPixels == rPixels.Begin<BYTE>() );
 		return true;
 	}
 

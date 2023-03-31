@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "EnumSplitButton.h"
 #include "EnumTags.h"
 #include "WndUtils.h"

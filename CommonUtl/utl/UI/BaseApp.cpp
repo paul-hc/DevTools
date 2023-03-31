@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BaseApp.h"
 #include "EnumTags.h"
 #include "MenuUtilities.h"
@@ -82,7 +82,7 @@ namespace app
 		if ( pForegroundWnd != nullptr && proc::InCurrentThread( pForegroundWnd->GetSafeHwnd() ) )
 		{
 			static HICON s_hToolIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_RUN_TESTS )->GetHandle();
-			std::vector< std::tstring > testNames;
+			std::vector<std::tstring> testNames;
 			ut::CTestSuite::Instance().QueryTestNames( testNames );
 
 			ui::ShowBalloonTip(

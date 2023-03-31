@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AnimatedFrameComposer.h"
 #include "ImagingWic.h"
 

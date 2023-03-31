@@ -102,7 +102,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>.;..;..\..;$(UTL_BOOST_INC_VC17)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -121,7 +121,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>.;..;..\..;$(UTL_BOOST_INC_VC17)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -140,7 +140,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>.;..;..\..;$(UTL_BOOST_INC_VC17)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -159,7 +159,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>.;..;..\..;$(UTL_BOOST_INC_VC17)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -278,6 +278,7 @@
     <ClInclude Include="OleUtils.h" />
     <ClInclude Include="PasswordDialog.h" />
     <ClInclude Include="PathItemListCtrl.h" />
+    <ClInclude Include="pch.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="PopupDlgBase.h" />
     <ClInclude Include="PopupSplitButton.h" />
@@ -311,7 +312,6 @@
     <ClInclude Include="SpinEdit.h" />
     <ClInclude Include="SpinTargetButton.h" />
     <ClInclude Include="SplitPushButton.h" />
-    <ClInclude Include="stdafx.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StdColors.h" />
     <ClInclude Include="StdManifest.h" />
@@ -445,6 +445,12 @@
     <ClCompile Include="OleUtils.cpp" />
     <ClCompile Include="PasswordDialog.cpp" />
     <ClCompile Include="PathItemListCtrl.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="PopupDlgBase.cpp" />
     <ClCompile Include="PopupSplitButton.cpp" />
     <ClCompile Include="PostCall.cpp" />
@@ -473,12 +479,6 @@
     <ClCompile Include="SpinEdit.cpp" />
     <ClCompile Include="SpinTargetButton.cpp" />
     <ClCompile Include="SplitPushButton.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="StockValuesComboBox.cpp" />
     <ClCompile Include="SyncScrolling.cpp" />
     <ClCompile Include="SystemTray.cpp" />

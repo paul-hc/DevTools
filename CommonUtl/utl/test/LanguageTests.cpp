@@ -645,7 +645,7 @@ void CLanguageTests::TestCpp_ParseNumericLiteral( void )
 
 	// CRT API tests
 	{
-		char* pEnd = NULL;
+		char* pEnd = nullptr;
 
 		pLiteral = "\t end";		// invalid numeric literal
 		pEnd = const_cast<char*>( pLiteral );

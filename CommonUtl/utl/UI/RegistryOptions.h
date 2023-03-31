@@ -80,7 +80,7 @@ protected:
 protected:
 	std::auto_ptr<IRegistrySection> m_pRegSection;
 	AutoSave m_autoSave;
-	std::vector< reg::CBaseOption* > m_options;
+	std::vector<reg::CBaseOption*> m_options;
 
 	// generated overrides
 protected:
@@ -158,15 +158,15 @@ namespace reg
 	};
 
 
-	typedef COption< bool > TBoolOption;
+	typedef COption<bool> TBoolOption;
 
 
-	class CEnumOption : public COption< int >
+	class CEnumOption : public COption<int>
 	{
 		typedef COption<int> TBaseClass;
 	public:
 		template< typename EnumType >
-		CEnumOption( EnumType* pValue, const TCHAR* pEntry ) : COption< int >( (int*)pValue, pEntry ), m_pTags( nullptr ), m_radioIds( 0 ) {}
+		CEnumOption( EnumType* pValue, const TCHAR* pEntry ) : COption<int>( (int*)pValue, pEntry ), m_pTags( nullptr ), m_radioIds( 0 ) {}
 
 		void SetEnumTags( const CEnumTags* pTags ) { m_pTags = pTags; }
 		void SetRadioIds( UINT firstRadioId, UINT lastRadioId ) { m_radioIds.SetRange( firstRadioId, lastRadioId ); }
@@ -188,7 +188,7 @@ namespace reg
 	class CMultipleOption : public CBaseOption			// ValueT must define stream insertors and extractors for string conversion
 	{
 	public:
-		CMultipleOption( std::vector< ValueT >* pValues, const TCHAR* pEntry, const TCHAR* pDelimiter = _T("|") )
+		CMultipleOption( std::vector<ValueT>* pValues, const TCHAR* pEntry, const TCHAR* pDelimiter = _T("|") )
 			: CBaseOption( pEntry )
 			, m_pValues( safe_ptr( pValues ) )
 			, m_defaultValues( *m_pValues )
@@ -212,8 +212,8 @@ namespace reg
 		virtual bool HasDefaultValue( void ) const { return m_defaultValues == *m_pValues; }
 		virtual void SetDefaultValue( void ) { *m_pValues = m_defaultValues; }
 	private:
-		std::vector< ValueT >* m_pValues;
-		std::vector< ValueT > m_defaultValues;
+		std::vector<ValueT>* m_pValues;
+		std::vector<ValueT> m_defaultValues;
 		const TCHAR* m_pDelimiter;
 	};
 }
@@ -247,31 +247,31 @@ inline bool CRegistryOptions::ModifyOption( ValueT* pDataMember, const ValueT& n
 
 namespace reg
 {
-	// COption< std::tstring > specialization
+	// COption<std::tstring> specialization
 
 	template<>
-	inline void COption< std::tstring >::Load( void )
+	inline void COption<std::tstring>::Load( void )
 	{
 		*m_pValue = GetSection()->GetStringParameter( m_entry.c_str(), m_pValue->c_str() );
 	}
 
 	template<>
-	inline void COption< std::tstring >::Save( void ) const
+	inline void COption<std::tstring>::Save( void ) const
 	{
 		GetSection()->SaveParameter( m_entry.c_str(), *m_pValue );
 	}
 
 
-	// COption< bool > specialization
+	// COption<bool> specialization
 
 	template<>
-	inline void COption< bool >::Load( void )
+	inline void COption<bool>::Load( void )
 	{
 		*m_pValue = GetSection()->GetIntParameter( m_entry.c_str(), *m_pValue ) != FALSE;
 	}
 
 	template<>
-	inline void COption< bool >::Save( void ) const
+	inline void COption<bool>::Save( void ) const
 	{
 		GetSection()->SaveParameter( m_entry.c_str(), *m_pValue );
 	}

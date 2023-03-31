@@ -8,7 +8,7 @@
 // See these sources for detailed information regarding the
 // Microsoft Foundation Classes product.
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TaskDialog.h"
 #include "WndUtils.h"
 
@@ -30,8 +30,8 @@ namespace ui
 		{
 			case TDN_BUTTON_CLICKED:
 				// wParam = Button ID
-				pTaskDialog->m_buttonId = static_cast<int>(wParam);
-				hRes = pTaskDialog->OnButtonClick(static_cast<int>(wParam));
+				pTaskDialog->m_buttonId = static_cast<int>( wParam );
+				hRes = pTaskDialog->OnButtonClick( static_cast<int>( wParam ) );
 				break;
 
 			case TDN_HYPERLINK_CLICKED:
@@ -41,7 +41,7 @@ namespace ui
 
 			case TDN_TIMER:
 				// wParam = Milliseconds since dialog created or timer reset
-				hRes = pTaskDialog->OnTimer(static_cast<long>(wParam));
+				hRes = pTaskDialog->OnTimer( static_cast<long>( wParam ) );
 				break;
 
 			case TDN_DESTROYED:
@@ -55,8 +55,8 @@ namespace ui
 
 			case TDN_RADIO_BUTTON_CLICKED:
 				// wParam = Radio Button ID
-				pTaskDialog->m_radioId = static_cast<int>(wParam);
-				hRes = pTaskDialog->OnRadioButtonClick(static_cast<int>(wParam));
+				pTaskDialog->m_radioId = static_cast<int>( wParam );
+				hRes = pTaskDialog->OnRadioButtonClick( static_cast<int>( wParam ) );
 				break;
 
 			case TDN_CREATED:
@@ -108,24 +108,24 @@ namespace ui
 				{
 					UINT buttonFlag = TDCBF_OK_BUTTON;
 
-					for(int i = 0; i < pTaskDialog->GetCommonButtonCount(); i++)
+					for ( int i = 0; i < pTaskDialog->GetCommonButtonCount(); ++i )
 					{
-						if (pTaskDialog->m_buttonDisabled & buttonFlag)
+						if ( pTaskDialog->m_buttonDisabled & buttonFlag )
 						{
-							//Make sure that button id is defined
-							ASSERT(pTaskDialog->GetCommonButtonId(buttonFlag));
+							// make sure that button id is defined
+							ASSERT( pTaskDialog->GetCommonButtonId( buttonFlag ) );
 
-							SendMessage(hWnd, TDM_ENABLE_BUTTON,
-								static_cast<WPARAM>(pTaskDialog->GetCommonButtonId(buttonFlag)), static_cast<LPARAM>(FALSE));
+							SendMessage( hWnd, TDM_ENABLE_BUTTON,
+								static_cast<WPARAM>( pTaskDialog->GetCommonButtonId( buttonFlag ) ), static_cast<LPARAM>( FALSE ) );
 						}
 
-						if (pTaskDialog->m_buttonElevation & buttonFlag)
+						if ( pTaskDialog->m_buttonElevation & buttonFlag )
 						{
-							//Make sure that button id is defined
-							ASSERT(pTaskDialog->GetCommonButtonId(buttonFlag));
+							// make sure that button id is defined
+							ASSERT( pTaskDialog->GetCommonButtonId( buttonFlag ) );
 
-							SendMessage(hWnd, TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE,
-								static_cast<WPARAM>(pTaskDialog->GetCommonButtonId(buttonFlag)), static_cast<LPARAM>(TRUE));
+							SendMessage( hWnd, TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE,
+								static_cast<WPARAM>( pTaskDialog->GetCommonButtonId( buttonFlag ) ), static_cast<LPARAM>( TRUE ) );
 						}
 
 						buttonFlag <<= 1;

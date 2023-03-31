@@ -38,7 +38,7 @@ private:
 	void UnregisterHook( void );
 	static void UnregisterAllHooksForWindow( HWND hWndHooked );
 private:
-	typedef std::unordered_map< HWND, CWindowHook* > THookMap;
+	typedef std::unordered_map<HWND, CWindowHook*> THookMap;
 
 	static CWindowHook* FindHook( HWND hWndHooked );
 	static THookMap& GetHookMap( void );

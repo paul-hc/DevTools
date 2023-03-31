@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CustomDrawImager.h"
 #include "Thumbnailer.h"
 #include "ImageStore.h"
@@ -85,7 +85,7 @@ void CFileItemsThumbnailStore::UnregisterControl( ICustomDrawControl* pCustomDra
 
 void CFileItemsThumbnailStore::UpdateControls( void )
 {
-	for ( std::vector< ICustomDrawControl* >::const_iterator itCustomDrawCtrl = m_customDrawCtrls.begin(); itCustomDrawCtrl != m_customDrawCtrls.end(); ++itCustomDrawCtrl )
+	for ( std::vector<ICustomDrawControl*>::const_iterator itCustomDrawCtrl = m_customDrawCtrls.begin(); itCustomDrawCtrl != m_customDrawCtrls.end(); ++itCustomDrawCtrl )
 		if ( CBaseCustomDrawImager* pImager = ( *itCustomDrawCtrl )->GetCustomDrawImager() )
 			if ( ui::ICustomImageDraw* pRenderer = pImager->GetRenderer() )
 				if ( pRenderer == GetThumbnailer( ui::SmallGlyph ) || pRenderer == GetThumbnailer( ui::LargeGlyph ) )		// uses any of the file thumbnailers?

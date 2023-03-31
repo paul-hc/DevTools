@@ -22,13 +22,13 @@ namespace shell
 		CComPtr<IEnumShellItems> GetEnumItems( void ) const;
 
 		// caller must release the IShellItem2 item interfaces returned
-		void QueryRecycledItems( std::vector< IShellItem2* >& rRecycledItems, const TCHAR* pOrigPrefixOrSpec, path::SpecMatch minMatch = path::Match_Any ) const;
-		void QueryMultiRecycledItems( std::vector< IShellItem2* >& rRecycledItems, const std::vector< fs::CPath >& delFilePaths ) const;		// returns 1 recycled item per file-path (or NULL if not recycled)
+		void QueryRecycledItems( std::vector<IShellItem2*>& rRecycledItems, const TCHAR* pOrigPrefixOrSpec, path::SpecMatch minMatch = path::Match_Any ) const;
+		void QueryMultiRecycledItems( std::vector<IShellItem2*>& rRecycledItems, const std::vector<fs::CPath>& delFilePaths ) const;		// returns 1 recycled item per file-path (or NULL if not recycled)
 		IShellItem2* FindRecycledItem( const fs::CPath& delFilePath ) const;
 
 		bool UndeleteFile( const fs::CPath& delFilePath, CWnd* pWndOwner );
-		size_t UndeleteMultiFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = nullptr );		// all at once
-		size_t UndeleteMultiFiles2( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = nullptr );		// one-by-one
+		size_t UndeleteMultiFiles( const std::vector<fs::CPath>& delFilePaths, CWnd* pWndOwner, std::vector<fs::CPath>* pErrorFilePaths = nullptr );		// all at once
+		size_t UndeleteMultiFiles2( const std::vector<fs::CPath>& delFilePaths, CWnd* pWndOwner, std::vector<fs::CPath>* pErrorFilePaths = nullptr );		// one-by-one
 
 		static bool Undelete( IContextMenu* pContextMenu, CWnd* pWndOwner );
 		static bool UndeleteItem( IShellItem2* pRecycledItem, CWnd* pWndOwner );
@@ -40,8 +40,8 @@ namespace shell
 
 		static path::SpecMatch OriginalPathMatchesPrefix( IShellItem* pRecycledItem, const TCHAR* pOrigPrefixOrSpec );
 
-		static void QueryAvailableDrives( std::vector< std::tstring >& rDriveRootPaths );
-		static void QueryDrivesWithRecycledItems( std::vector< std::tstring >& rDriveRootPaths );		// drive root paths that have deleted files in Recycle Bin
+		static void QueryAvailableDrives( std::vector<std::tstring>& rDriveRootPaths );
+		static void QueryDrivesWithRecycledItems( std::vector<std::tstring>& rDriveRootPaths );		// drive root paths that have deleted files in Recycle Bin
 
 		// pRootPath could be any directory path
 		static bool QueryRecycleBin( const TCHAR* pRootPath, size_t& rItemCount, ULONGLONG* pTotalSize = nullptr );

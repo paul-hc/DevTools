@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "utl/FileEnumerator.h"
@@ -63,12 +63,12 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 
 	fs::SortPaths( imageEnum.m_filePaths );
 
-	std::vector< fs::CPath >::const_iterator itFilePath = imageEnum.m_filePaths.begin();
+	std::vector<fs::CPath>::const_iterator itFilePath = imageEnum.m_filePaths.begin();
 
 	enum { MaxSize = 10u, N5 = 5u, N15 = 15u };
 
 	// enqueue 5 images files
-	std::vector< fs::TImagePathKey > imagePaths;
+	std::vector<fs::TImagePathKey> imagePaths;
 	for ( UINT count = 0; itFilePath != imageEnum.m_filePaths.end() && count != N5; ++itFilePath, ++count )
 		imagePaths.push_back( fs::TImagePathKey( itFilePath->Get(), 0 ) );
 

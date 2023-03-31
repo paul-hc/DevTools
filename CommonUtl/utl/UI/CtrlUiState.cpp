@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CtrlUiState.h"
 #include "utl/ContainerOwnership.h"
 
@@ -105,7 +105,7 @@ bool CTreeCtrlUiState::RestoreHorizontalScrollPosition( CTreeCtrl& rTreeCtrl ) c
 
 void CTreeCtrlUiState::RestoreExpandingState( CTreeCtrl& rTreeCtrl ) const
 {
-	for ( std::vector< CTreeNode* >::const_iterator itRootNode = m_expandedRootNodes.begin();
+	for ( std::vector<CTreeNode*>::const_iterator itRootNode = m_expandedRootNodes.begin();
 		  itRootNode != m_expandedRootNodes.end(); ++itRootNode )
 		if ( HTREEITEM hFoundRoot = ( *itRootNode )->m_item.FindInParent( rTreeCtrl, TVGN_ROOT ) )
 			( *itRootNode )->ExpandTreeItem( rTreeCtrl, hFoundRoot ); // restore the expansion state
@@ -250,7 +250,7 @@ HTREEITEM CTreeCtrlUiState::CTreeItemPath::FindItem( const CTreeCtrl& treeCtrl, 
 	if ( pDestIsFullMatch != nullptr )
 		*pDestIsFullMatch = true;
 
-	for ( std::vector< CTreeItem >::const_iterator itElement = m_elements.begin();
+	for ( std::vector<CTreeItem>::const_iterator itElement = m_elements.begin();
 		  itElement != m_elements.end(); ++itElement )
 		if ( HTREEITEM hChildItem = ( *itElement ).FindInParent( treeCtrl, hPathItem ) )
 			hPathItem = hChildItem; // recover as much as possible from original selected item path
@@ -315,7 +315,7 @@ void CTreeCtrlUiState::CTreeNode::ExpandTreeItem( CTreeCtrl& rTreeCtrl, HTREEITE
 
 	rTreeCtrl.Expand( hTargetItem, TVE_EXPAND );
 
-	for ( std::vector< CTreeNode* >::const_iterator itExpandedChild = m_children.begin(); itExpandedChild != m_children.end(); ++itExpandedChild )
+	for ( std::vector<CTreeNode*>::const_iterator itExpandedChild = m_children.begin(); itExpandedChild != m_children.end(); ++itExpandedChild )
 	{
 		HTREEITEM hMatchingChildItem = ( *itExpandedChild )->m_item.FindInParent( rTreeCtrl, hTargetItem );
 
@@ -338,7 +338,7 @@ void CTreeCtrlUiState::CTreeNode::TraceNode( int nestingLevel /*= 0*/ )
 
 	TRACE( _T("%s'%s':%d\n"), leadingSpaces.c_str(), (LPCTSTR)m_item.m_text, m_item.m_sameSiblingIndex );
 
-	for ( std::vector< CTreeNode* >::const_iterator itNode = m_children.begin(); itNode != m_children.end(); ++itNode )
+	for ( std::vector<CTreeNode*>::const_iterator itNode = m_children.begin(); itNode != m_children.end(); ++itNode )
 		( *itNode )->TraceNode( nestingLevel + 1 );
 
 #else

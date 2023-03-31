@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Image_fwd.h"
 #include "ImageStore.h"
 #include "DibSection.h"
@@ -347,7 +347,7 @@ namespace gdi
 		rMaskBitmap.CreateBitmap( bitmapSize.cx, bitmapSize.cy, 1, 1, nullptr );		// create monochrome (1 bit) mask bitmap
 
 		CScopedGdiObj scopedBitmap( &memDC, hSrcBitmap );
-		CScopedGdi< CBitmap > scopedMaskBitmap( &maskDC, &rMaskBitmap );
+		CScopedGdi<CBitmap> scopedMaskBitmap( &maskDC, &rMaskBitmap );
 
 		memDC.SetBkColor( transpColor );		// set the background colour of the colour image to the colour you want to be transparent
 
@@ -550,7 +550,7 @@ COLORREF CDibSectionInfo::GetColorAt( const CDC* pDC, int index ) const
 	return RGB( rgb.rgbRed, rgb.rgbGreen, rgb.rgbBlue );
 }
 
-const std::vector< RGBQUAD >& CDibSectionInfo::GetColorTable( const CDC* pDC )
+const std::vector<RGBQUAD>& CDibSectionInfo::GetColorTable( const CDC* pDC )
 {
 	ASSERT_PTR( pDC->GetSafeHdc() );
 	ASSERT( m_hDib == pDC->GetCurrentBitmap()->GetSafeHandle() );				// the DIB must be selected into pDC
@@ -576,7 +576,7 @@ CPalette* CDibSectionInfo::MakeColorPalette( const CDC* pDC )
 			m_pPalette->CreateHalftonePalette( const_cast<CDC*>( pDC ) );
 		else
 		{
-			std::vector< BYTE > buffer( sizeof( LOGPALETTE ) + ( sizeof( PALETTEENTRY ) * m_colorTable.size() ) );
+			std::vector<BYTE> buffer( sizeof( LOGPALETTE ) + ( sizeof( PALETTEENTRY ) * m_colorTable.size() ) );
 			LOGPALETTE* pLogPalette = reinterpret_cast<LOGPALETTE*>(  &buffer.front() );
 
 			pLogPalette->palVersion = 0x300;
@@ -598,7 +598,7 @@ CPalette* CDibSectionInfo::MakeColorPalette( const CDC* pDC )
 
 BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPerPixel, const bmp::CSharedAccess* pSrcDib /*= nullptr*/ )
 {
-	std::vector< RGBQUAD > rgbTable;
+	std::vector<RGBQUAD> rgbTable;
 	if ( bitsPerPixel <= 8 )			// got to build a color table
 	{
 		if ( pSrcDib != nullptr && pSrcDib->GetHandle() != nullptr )
@@ -612,7 +612,7 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPe
 		}
 
 		if ( rgbTable.empty() )
-			CSysColorTable::MakeRgbTable( rgbTable, static_cast<size_t>( 1 ) << bitsPerPixel );
+			CHalftoneColorTable::MakeRgbTable( rgbTable, static_cast<size_t>( 1 ) << bitsPerPixel );
 	}
 
 	m_buffer.resize( sizeof( BITMAPINFOHEADER ) + rgbTable.size() * sizeof( RGBQUAD ) );
@@ -640,11 +640,11 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( UINT bitsPerPixel, const bmp::CSha
 }
 
 
-// CSysColorTable implementation
+// CHalftoneColorTable implementation
 
-const std::vector< RGBQUAD >& CSysColorTable::GetSysRgbTable( void )
+const std::vector<RGBQUAD>& CHalftoneColorTable::GetHalftoneRgbTable( void )
 {
-	static std::vector< RGBQUAD > rgbTable;
+	static std::vector<RGBQUAD> rgbTable;
 	if ( rgbTable.empty() )
 	{
 		std::auto_ptr<CPalette> pPalette( new CPalette() );
@@ -653,24 +653,24 @@ const std::vector< RGBQUAD >& CSysColorTable::GetSysRgbTable( void )
 			pPalette->CreateHalftonePalette( &screenDC );
 		}
 
-		std::vector< PALETTEENTRY > entries;
+		std::vector<PALETTEENTRY> entries;
 		entries.resize( pPalette->GetEntryCount() );
 		pPalette->GetPaletteEntries( 0, (UINT)entries.size(), &entries.front() );
 
 		rgbTable.reserve( entries.size() );
-		for ( std::vector< PALETTEENTRY >::const_iterator itEntry = entries.begin(); itEntry != entries.end(); ++itEntry )
+		for ( std::vector<PALETTEENTRY>::const_iterator itEntry = entries.begin(); itEntry != entries.end(); ++itEntry )
 			rgbTable.push_back( gdi::ToRgbQuad( *itEntry ) );
 	}
 
 	return rgbTable;
 }
 
-void CSysColorTable::MakeRgbTable( RGBQUAD* pRgbTable, size_t size )
+void CHalftoneColorTable::MakeRgbTable( RGBQUAD* pRgbTable, size_t size )
 {
 	ASSERT( size != 0 && 0 == ( size % 2 ) );		// size must be multiple of 2
 	ASSERT( size <= 256 );
 
-	const std::vector< RGBQUAD >& sysTable = GetSysRgbTable();
+	const std::vector<RGBQUAD>& sysTable = GetHalftoneRgbTable();
 	const size_t halfSize = size >> 1;
 
 	// copy system colors in 2 chunks: first half, last half
@@ -678,10 +678,10 @@ void CSysColorTable::MakeRgbTable( RGBQUAD* pRgbTable, size_t size )
 	utl::Copy( sysTable.end() - halfSize, sysTable.end(), pRgbTable + halfSize );		// second half from the end
 }
 
-void CSysColorTable::MakeColorTable( std::vector< COLORREF >& rColorTable, size_t size )
+void CHalftoneColorTable::MakeColorTable( std::vector<COLORREF>& rColorTable, size_t size )
 {
-	MakeRgbTable( (std::vector< RGBQUAD >&)rColorTable, size );							// same storeage
+	MakeRgbTable( (std::vector<RGBQUAD>&)rColorTable, size );							// same storage
 
-	for ( std::vector< COLORREF >::iterator itColor = rColorTable.begin(); itColor != rColorTable.end(); ++itColor )
+	for ( std::vector<COLORREF>::iterator itColor = rColorTable.begin(); itColor != rColorTable.end(); ++itColor )
 		*itColor = CPixelBGR( (const RGBQUAD&)*itColor ).GetColor();
 }

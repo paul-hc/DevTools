@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ItemContentHistoryCombo.h"
 #include "WndUtils.h"
 
@@ -25,7 +25,7 @@ CItemContentHistoryCombo::~CItemContentHistoryCombo()
 {
 }
 
-void CItemContentHistoryCombo::OnDroppedFiles( const std::vector< fs::CPath >& filePaths )
+void CItemContentHistoryCombo::OnDroppedFiles( const std::vector<fs::CPath>& filePaths )
 {
 	REQUIRE( !filePaths.empty() );
 

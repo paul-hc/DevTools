@@ -77,7 +77,7 @@ public:
 		int BuildPath( const CTreeCtrl& treeCtrl, HTREEITEM hItem );
 		HTREEITEM FindItem( const CTreeCtrl& treeCtrl, bool* pDestIsFullMatch = nullptr ) const;
 	public:
-		std::vector< CTreeItem > m_elements;
+		std::vector<CTreeItem> m_elements;
 	};
 
 	struct CTreeItemPathSet
@@ -87,7 +87,7 @@ public:
 
 		void Clear( void );
 	public:
-		std::vector< CTreeItemPath* > m_paths;
+		std::vector<CTreeItemPath*> m_paths;
 	};
 private:
 	struct CTreeNode
@@ -104,12 +104,12 @@ private:
 		void TraceNode( int nestingLevel = 0 );
 	public:
 		CTreeItem m_item;
-		std::vector< CTreeNode* > m_children;
+		std::vector<CTreeNode*> m_children;
 	};
 
 	void ClearExpandedState( void );
 private:
-	std::vector< CTreeNode* > m_expandedRootNodes;
+	std::vector<CTreeNode*> m_expandedRootNodes;
 	CTreeItemPathSet m_selectedItems; // for multi-selection caret comes at end
 	CTreeItemPath m_topVisibleItemPath;
 	int m_horzScrollPos;

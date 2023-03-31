@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ItemContentEdit.h"
 #include "ItemListDialog.h"
 #include "StringUtilities.h"
@@ -26,7 +26,7 @@ CItemContentEdit::~CItemContentEdit()
 {
 }
 
-void CItemContentEdit::OnDroppedFiles( const std::vector< fs::CPath >& filePaths )
+void CItemContentEdit::OnDroppedFiles( const std::vector<fs::CPath>& filePaths )
 {
 	REQUIRE( !filePaths.empty() );
 
@@ -81,13 +81,13 @@ void CItemListEdit::DDX_Items( CDataExchange* pDX, std::tstring& rFlatItems, int
 		SetText( rFlatItems );
 	else
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		m_content.SplitItems( items, GetText().c_str(), m_pSeparator );		// trim, remove empty, ensure unique
 		rFlatItems = str::Join( items, m_pSeparator );
 	}
 }
 
-void CItemListEdit::DDX_Items( CDataExchange* pDX, std::vector< std::tstring >& rItems, int ctrlId /*= 0*/ )
+void CItemListEdit::DDX_Items( CDataExchange* pDX, std::vector<std::tstring>& rItems, int ctrlId /*= 0*/ )
 {
 	if ( nullptr == m_hWnd && ctrlId != 0 )
 		DDX_Control( pDX, ctrlId, *this );
@@ -107,13 +107,13 @@ void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::tstring& rFl
 		SetText( ui::FormatEscapeSeq( rFlatItems ) );
 	else
 	{
-		std::vector< std::tstring > items;
+		std::vector<std::tstring> items;
 		m_content.SplitItems( items, GetText().c_str(), m_pSeparator );		// trim, remove empty, ensure unique
 		rFlatItems = ui::ParseEscapeSeqs( str::Join( items, m_pSeparator ) );
 	}
 }
 
-void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector< std::tstring >& rItems, int ctrlId /*= 0*/ )
+void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector<std::tstring>& rItems, int ctrlId /*= 0*/ )
 {
 	if ( nullptr == m_hWnd && ctrlId != 0 )
 		DDX_Control( pDX, ctrlId, *this );
@@ -124,7 +124,7 @@ void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector< std:
 		m_content.SplitItems( rItems, ui::ParseEscapeSeqs( GetText() ).c_str(), m_pSeparator );
 }
 
-void CItemListEdit::OnDroppedFiles( const std::vector< fs::CPath >& filePaths )
+void CItemListEdit::OnDroppedFiles( const std::vector<fs::CPath>& filePaths )
 {
 	REQUIRE( !filePaths.empty() );
 

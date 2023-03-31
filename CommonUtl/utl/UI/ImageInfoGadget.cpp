@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageInfoGadget.h"
 #include "RenderingDirect2D.h"
 #include "StringUtilities.h"

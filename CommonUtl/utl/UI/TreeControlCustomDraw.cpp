@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TreeControlCustomDraw.h"
 #include "TreeControl.h"
 #include "Color.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DragListCtrl.h"
 #include "GpUtilities.h"
 #include "WndUtils.h"

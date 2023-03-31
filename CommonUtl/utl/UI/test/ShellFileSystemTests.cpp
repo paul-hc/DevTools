@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/ShellFileSystemTests.h"
@@ -19,7 +19,7 @@ namespace ut
 {
 	size_t ShellDeleteFiles( const ut::CTempFilePool& pool, const TCHAR relFilePaths[] )
 	{
-		std::vector< fs::CPath > fullPaths;
+		std::vector<fs::CPath> fullPaths;
 		pool.SplitQualifyPaths( fullPaths, relFilePaths );
 
 		return shell::DeleteFiles( fullPaths, AfxGetMainWnd(), FOF_ALLOWUNDO | FOF_SILENT | FOF_NOCONFIRMATION );
@@ -136,7 +136,7 @@ void CShellFileSystemTests::TestShellRelativePidl( void )
 {
 	ut::CTempFilePool pool( _T("a.txt|d1\\b.txt|d2\\sub3\\c.txt") );
 
-	std::vector< PIDLIST_RELATIVE > pidlItemsArray;
+	std::vector<PIDLIST_RELATIVE> pidlItemsArray;
 	CComPtr<IShellFolder> pCommonFolder = shell::MakeRelativePidlArray( pidlItemsArray, pool.GetFilePaths() );
 	ASSERT_PTR( pCommonFolder );
 
@@ -174,7 +174,7 @@ void CShellFileSystemTests::TestPathExplorerSort( void )
 		_T("Ardeal\\1254 Biertan_noDUP.txt|")
 		_T("Ardeal\\1254 Biertan.txt");
 
-	std::vector< fs::CPath > filePaths;
+	std::vector<fs::CPath> filePaths;
 	str::Split( filePaths, s_srcFiles, _T("|") );
 
 	std::random_shuffle( filePaths.begin(), filePaths.end() );
@@ -217,7 +217,7 @@ void CShellFileSystemTests::TestRecycler( void )
 	ASSERT( shell::UndeleteFile( poolDirPath / _T("B\\b2.txt") ) );
 	ASSERT_EQUAL( _T("B\\b1.txt|B\\b2.txt|B\\D\\d1.txt"), ut::EnumJoinFiles( pool.GetPoolDirPath() ) );
 
-	std::vector< fs::CPath > delFilePaths, errorFilePaths;
+	std::vector<fs::CPath> delFilePaths, errorFilePaths;
 	pool.SplitQualifyPaths( delFilePaths, _T("B\\C|a.txt|XXX\\foo.txt") );
 
 	ASSERT_EQUAL( 2, shell::UndeleteFiles( delFilePaths, AfxGetMainWnd(), &errorFilePaths ) );
@@ -229,11 +229,11 @@ void CShellFileSystemTests::TestRecycler( void )
 void CShellFileSystemTests::TestMultiFileContextMenu( void )
 {
 	ut::CTempFilePool pool( _T("file1.txt|file2.txt|DIR\\file3.txt") );
-	const std::vector< fs::CPath >& filePaths = pool.GetFilePaths();
+	const std::vector<fs::CPath>& filePaths = pool.GetFilePaths();
 
 	std::vector< CComPtr<IShellItem> > shellItems; shellItems.reserve( filePaths.size() );
 
-	for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+	for ( std::vector<fs::CPath>::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 	{
 		shellItems.push_back( shell::FindShellItem( *itFilePath ) );
 		ASSERT( shellItems.back() != nullptr );

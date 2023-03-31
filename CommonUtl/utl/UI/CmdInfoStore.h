@@ -38,7 +38,7 @@ namespace ui
 		bool HandleGetMessageString( std::tstring& rMessage, UINT cmdId );		// status bar info for
 		bool HandleTooltipNeedText( NMHDR* pNmHdr, LRESULT* pResult, const ui::ICustomCmdInfo* pCustomInfo = nullptr );	// tooltip notifications (TTN_NEEDTEXTA, TTN_NEEDTEXTW)
 	private:
-		std::unordered_map< UINT, CCmdInfo > m_cmdInfos;
+		std::unordered_map<UINT, CCmdInfo> m_cmdInfos;
 	public:
 		static const std::tstring m_nilText;		// use to preventing tooltips loaded by default
 		static int m_autoPopDuration;

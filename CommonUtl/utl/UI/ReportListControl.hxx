@@ -8,7 +8,7 @@
 // CReportListControl template code
 
 template< typename ObjectT >
-void CReportListControl::QueryObjectsSequence( std::vector< ObjectT* >& rObjects ) const
+void CReportListControl::QueryObjectsSequence( std::vector<ObjectT*>& rObjects ) const
 {
 	UINT count = GetItemCount();
 	rObjects.clear();
@@ -19,17 +19,17 @@ void CReportListControl::QueryObjectsSequence( std::vector< ObjectT* >& rObjects
 }
 
 template< typename ObjectT >
-void CReportListControl::QueryObjectsByIndex( std::vector< ObjectT* >& rObjects, const std::vector< int >& itemIndexes ) const
+void CReportListControl::QueryObjectsByIndex( std::vector<ObjectT*>& rObjects, const std::vector<int>& itemIndexes ) const
 {
 	rObjects.reserve( rObjects.size() + itemIndexes.size() );
 
-	for ( std::vector< int >::const_iterator itIndex = itemIndexes.begin(); itIndex != itemIndexes.end(); ++itIndex )
+	for ( std::vector<int>::const_iterator itIndex = itemIndexes.begin(); itIndex != itemIndexes.end(); ++itIndex )
 		if ( ObjectT* pObject = GetPtrAt<ObjectT>( *itIndex ) )
 			rObjects.push_back( pObject );
 }
 
 template< typename ObjectT >
-bool CReportListControl::QueryObjectsWithCheckedState( std::vector< ObjectT* >& rCheckedObjects, int checkState /*= BST_CHECKED*/ ) const
+bool CReportListControl::QueryObjectsWithCheckedState( std::vector<ObjectT*>& rCheckedObjects, int checkState /*= BST_CHECKED*/ ) const
 {
 	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
 		if ( GetCheckState( i ) == checkState )
@@ -39,7 +39,7 @@ bool CReportListControl::QueryObjectsWithCheckedState( std::vector< ObjectT* >& 
 }
 
 template< typename ObjectT >
-void CReportListControl::SetObjectsCheckedState( const std::vector< ObjectT* >* pObjects, int checkState /*= BST_CHECKED*/, bool uncheckOthers /*= true*/ )
+void CReportListControl::SetObjectsCheckedState( const std::vector<ObjectT*>* pObjects, int checkState /*= BST_CHECKED*/, bool uncheckOthers /*= true*/ )
 {
 	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
 		if ( nullptr == pObjects || utl::Contains( *pObjects, GetPtrAt<ObjectT>( i ) ) )
@@ -64,9 +64,9 @@ ObjectT* CReportListControl::GetSelected( void ) const
 }
 
 template< typename ObjectT >
-bool CReportListControl::QuerySelectionAs( std::vector< ObjectT* >& rSelObjects ) const
+bool CReportListControl::QuerySelectionAs( std::vector<ObjectT*>& rSelObjects ) const
 {
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	if ( !GetSelection( selIndexes ) )
 		return false;
 
@@ -77,10 +77,10 @@ bool CReportListControl::QuerySelectionAs( std::vector< ObjectT* >& rSelObjects 
 }
 
 template< typename ObjectT >
-void CReportListControl::SelectObjects( const std::vector< ObjectT* >& objects )
+void CReportListControl::SelectObjects( const std::vector<ObjectT*>& objects )
 {
-	std::vector< int > selIndexes;
-	for ( typename std::vector< ObjectT* >::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
+	std::vector<int> selIndexes;
+	for ( typename std::vector<ObjectT*>::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
 	{
 		int foundIndex = FindItemIndex( *itObject );
 		if ( foundIndex != -1 )
@@ -94,11 +94,11 @@ void CReportListControl::SelectObjects( const std::vector< ObjectT* >& objects )
 }
 
 template< typename ObjectT >
-void CReportListControl::QueryGroupItems( std::vector< ObjectT* >& rObjectItems, int groupId ) const
+void CReportListControl::QueryGroupItems( std::vector<ObjectT*>& rObjectItems, int groupId ) const
 {
 	REQUIRE( IsGroupViewEnabled() );
 
-	typedef std::multimap< int, TRowKey >::const_iterator TGroupMapIterator;
+	typedef std::multimap<int, TRowKey>::const_iterator TGroupMapIterator;
 	std::pair<TGroupMapIterator, TGroupMapIterator> itPair = m_groupIdToItemsMap.equal_range( groupId );
 
 	for ( TGroupMapIterator it = itPair.first; it != itPair.second; ++it )
@@ -110,7 +110,7 @@ void CReportListControl::SetupDiffColumnPair( TColumn srcColumn, TColumn destCol
 {
 	m_diffColumnPairs.push_back( CDiffColumnPair( srcColumn, destColumn ) );
 
-	std::unordered_map< TRowKey, str::TMatchSequence >& rRowSequences = m_diffColumnPairs.back().m_rowSequences;
+	std::unordered_map<TRowKey, str::TMatchSequence>& rRowSequences = m_diffColumnPairs.back().m_rowSequences;
 
 	for ( int index = 0, itemCount = GetItemCount(); index != itemCount; ++index )
 	{

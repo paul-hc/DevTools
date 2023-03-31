@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PopupDlgBase.h"
 #include "AboutBox.h"
 #include "AccelTable.h"
@@ -125,7 +125,7 @@ bool CAccelPool::TranslateAccels( MSG* pMsg, HWND hDialog )
 {
 	ASSERT_PTR( hDialog );
 
-	for ( std::vector< CAccelTable* >::const_iterator itAccelTable = m_accelTables.begin(); itAccelTable != m_accelTables.end(); ++itAccelTable )
+	for ( std::vector<CAccelTable*>::const_iterator itAccelTable = m_accelTables.begin(); itAccelTable != m_accelTables.end(); ++itAccelTable )
 		if ( ( *itAccelTable )->Translate( pMsg, hDialog ) )
 			return true;
 
@@ -158,7 +158,7 @@ bool CPopupWndPool::RemoveWindow( CWnd* pPopupTopWnd )
 {
 	ASSERT_PTR( pPopupTopWnd );
 
-	std::vector< CWnd* >::const_iterator itFound = std::find( m_popupWnds.begin(), m_popupWnds.end(), pPopupTopWnd );
+	std::vector<CWnd*>::const_iterator itFound = std::find( m_popupWnds.begin(), m_popupWnds.end(), pPopupTopWnd );
 
 	if ( itFound == m_popupWnds.end() )
 		return false;

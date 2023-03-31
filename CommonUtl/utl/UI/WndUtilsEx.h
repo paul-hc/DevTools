@@ -199,9 +199,9 @@ private:
 #include "ScopedValue.h"
 
 
-struct CScopedDisableBeep : private CScopedValue< bool >
+struct CScopedDisableBeep : private CScopedValue<bool>
 {
-	CScopedDisableBeep( void ) : CScopedValue< bool >( &ui::RefAsyncApiEnabled(), false ) {}
+	CScopedDisableBeep( void ) : CScopedValue<bool>( &ui::RefAsyncApiEnabled(), false ) {}
 };
 
 
@@ -269,7 +269,7 @@ namespace ui
 	inline void DDX_Handle( CDataExchange* pDX, int ctrlId, Handle& rHandle, const Handle* pNullHandle = nullptr )
 	{
 		typedef DWORD_PTR THandleValue;
-		DDX_HexValue< THandleValue >( pDX, ctrlId, (THandleValue&)rHandle, _T("%08X"), (const THandleValue*)pNullHandle );
+		DDX_HexValue<THandleValue>( pDX, ctrlId, (THandleValue&)rHandle, _T("%08X"), (const THandleValue*)pNullHandle );
 	}
 }
 
@@ -277,7 +277,7 @@ namespace ui
 namespace app
 {
 	template< typename Type >
-	bool GetProfileVector( std::vector< Type >& rOutVector, const TCHAR* pSection, const TCHAR* pEntry )
+	bool GetProfileVector( OUT std::vector<Type>& rOutVector, const TCHAR* pSection, const TCHAR* pEntry )
 	{
 		BYTE* pData = nullptr;
 		UINT byteCount;
@@ -296,7 +296,7 @@ namespace app
 	}
 
 	template< typename Type >
-	bool WriteProfileVector( const std::vector< Type >& rVector, const TCHAR* pSection, const TCHAR* pEntry )
+	bool WriteProfileVector( const std::vector<Type>& rVector, const TCHAR* pSection, const TCHAR* pEntry )
 	{
 		BYTE* pData = !rVector.empty() ? (BYTE*)( &rVector.front() ) : nullptr;
 		UINT byteCount = static_cast<UINT>( rVector.size() * sizeof( Type ) );

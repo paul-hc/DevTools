@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DialogToolBar.h"
 #include "Dialog_fwd.h"
 #include "WndUtils.h"

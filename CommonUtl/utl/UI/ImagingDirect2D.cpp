@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImagingDirect2D.h"
 #include "ImagingWic.h"
 #include "GdiCoords.h"
@@ -168,13 +168,13 @@ namespace d2d
 
 	void CRenderTarget::PreDraw( const CViewCoords& coords )
 	{
-		for ( std::vector< IGadgetComponent* >::const_iterator itGadget = m_gadgets.begin(); itGadget != m_gadgets.end(); ++itGadget )
+		for ( std::vector<IGadgetComponent*>::const_iterator itGadget = m_gadgets.begin(); itGadget != m_gadgets.end(); ++itGadget )
 			( *itGadget )->EraseBackground( coords );
 	}
 
 	void CRenderTarget::PostDraw( const CViewCoords& coords )
 	{
-		for ( std::vector< IGadgetComponent* >::const_iterator itGadget = m_gadgets.begin(); itGadget != m_gadgets.end(); ++itGadget )
+		for ( std::vector<IGadgetComponent*>::const_iterator itGadget = m_gadgets.begin(); itGadget != m_gadgets.end(); ++itGadget )
 			if ( IsGadgetVisible( *itGadget ) )
 				( *itGadget )->Draw( coords );
 	}

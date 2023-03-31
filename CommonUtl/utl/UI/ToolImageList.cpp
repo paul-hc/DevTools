@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ToolImageList.h"
 #include "Icon.h"
 #include "ImageStore.h"

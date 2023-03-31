@@ -24,9 +24,9 @@ public:
 
 	bool Synchronize( CWnd* pRefCtrl );		// call from a notification handler such as for edits: ON_CONTROL_RANGE( EN_VSCROLL, IDC_EDIT_1, IDC_EDIT_N, OnEnVScroll )
 private:
-	std::vector< int > m_scrollTypes;
-	std::vector< CWnd* > m_ctrls;
-	std::vector< CThumbTrackScrollHook* > m_scrollHooks;			// with auto-delete
+	std::vector<int> m_scrollTypes;
+	std::vector<CWnd*> m_ctrls;
+	std::vector<CThumbTrackScrollHook*> m_scrollHooks;			// with auto-delete
 };
 
 

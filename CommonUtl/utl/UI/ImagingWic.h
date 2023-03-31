@@ -54,7 +54,7 @@ namespace wic
 		CComPtr<IWICBitmapFrameDecode> GetFrameAt( UINT framePos ) const;
 		CComPtr<IWICBitmapSource> ConvertFrameAt( UINT framePos, const WICPixelFormatGUID* pPixelFormat = &GUID_WICPixelFormat32bppPBGRA ) const;		// releases any source dependencies (IStream, HFILE, etc)
 
-        bool GetPixelFormatIds( std::vector< GUID* >& rPixelFormatIds ) const;
+        bool GetPixelFormatIds( std::vector<GUID*>& rPixelFormatIds ) const;
 
 		// metadata
 		CComPtr<IWICMetadataQueryReader> GetDecoderMetadata( void ) const;				// global

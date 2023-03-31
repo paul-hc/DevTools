@@ -24,7 +24,7 @@ private:
 
 	typedef std::pair<std::wstring, TPartId> TClassKey;
 	typedef std::pair<TStateId, TState> TStatePair;
-	typedef std::vector< TStatePair > TStateSet;
+	typedef std::vector<TStatePair> TStateSet;
 
 	struct CCtrlStates
 	{
@@ -47,8 +47,8 @@ private:
 	static bool CustomDrawBk_MenuItem( int stateId, HDC hdc, const RECT& rect );
 	static bool CustomDrawBk_MenuChecked( int stateId, HDC hdc, const RECT& rect );
 private:
-	typedef std::unordered_map< TClassKey, CCtrlStates, utl::CPairHasher > TClassToStateMap;
-	typedef std::unordered_map< TClassKey, TCustomDrawBkFunc, utl::CPairHasher > TClassToCustomBkMap;
+	typedef std::unordered_map<TClassKey, CCtrlStates, utl::CPairHasher> TClassToStateMap;
+	typedef std::unordered_map<TClassKey, TCustomDrawBkFunc, utl::CPairHasher> TClassToCustomBkMap;
 
 	TClassToStateMap m_classToStateMap;
 	TClassToCustomBkMap m_classToCustomBkMap;

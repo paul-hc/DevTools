@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CmdIdStore.h"
 #include "MenuUtilities.h"
 #include "WndUtils.h"
@@ -18,7 +18,7 @@ namespace ui
 		std::pair<int, int> minMaxPair( 0, 0 );
 		if ( !IsEmpty() )
 		{
-			std::set< int >::const_iterator itLast = m_cmdIds.end();
+			std::set<int>::const_iterator itLast = m_cmdIds.end();
 
 			minMaxPair.first = *m_cmdIds.begin();
 			minMaxPair.second = *--itLast;
@@ -51,7 +51,7 @@ namespace ui
 	{
 		size_t oldSize = m_cmdIds.size();
 
-		for ( std::set< int >::const_iterator itCmdId = store.m_cmdIds.begin(); itCmdId != store.m_cmdIds.end(); ++itCmdId )
+		for ( std::set<int>::const_iterator itCmdId = store.m_cmdIds.begin(); itCmdId != store.m_cmdIds.end(); ++itCmdId )
 			m_cmdIds.insert( *itCmdId );
 
 		return m_cmdIds.size() - oldSize;		// added count
@@ -61,7 +61,7 @@ namespace ui
 	{
 		size_t oldSize = m_cmdIds.size();
 
-		for ( std::set< int >::const_iterator itCmdId = store.m_cmdIds.begin(); itCmdId != store.m_cmdIds.end(); ++itCmdId )
+		for ( std::set<int>::const_iterator itCmdId = store.m_cmdIds.begin(); itCmdId != store.m_cmdIds.end(); ++itCmdId )
 			m_cmdIds.erase( *itCmdId );
 
 		return m_cmdIds.size() - oldSize;		// subtracted count
@@ -73,7 +73,7 @@ namespace ui
 	bool CHandledNotificationsCache::HandlesMessage( int cmdId, UINT message, UINT notifyCode )
 	{
 		const CHandlerKey handlerKey( cmdId, message, notifyCode );
-		utl::vector_map< CHandlerKey, bool >::const_iterator itFound = m_handledNotifyCodes.find( handlerKey );
+		utl::vector_map<CHandlerKey, bool>::const_iterator itFound = m_handledNotifyCodes.find( handlerKey );
 
 		if ( itFound != m_handledNotifyCodes.end() )
 			return itFound->second;

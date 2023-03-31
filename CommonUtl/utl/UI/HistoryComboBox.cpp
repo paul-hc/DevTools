@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "HistoryComboBox.h"
 #include "TextEditor.h"
 #include "ItemListDialog.h"
@@ -135,10 +135,10 @@ void CHistoryComboBox::ValidateContent( void )
 {
 	ui::SendCommandToParent( m_hWnd, HCN_VALIDATEITEMS );		// give parent a chance to cleanup invalid items
 
-	std::vector< std::tstring > items;
+	std::vector<std::tstring> items;
 	ui::ReadComboItems( items, *this );
 
-	std::vector< std::tstring > newItems = items;
+	std::vector<std::tstring> newItems = items;
 	GetItemContent().FilterItems( newItems );
 
 	if ( newItems != items )

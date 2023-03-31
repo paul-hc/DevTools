@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WindowDebug.h"
 #include "SystemTray.h"
 #include "TrayIcon.h"

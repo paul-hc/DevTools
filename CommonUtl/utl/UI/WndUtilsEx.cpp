@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WndUtilsEx.h"
 #include "ScopedGdi.h"
 
@@ -13,8 +13,8 @@ namespace ui
 	void DrawBorder( CDC* pDC, const CRect& rect, COLORREF borderColor, int borderWidth /*= 1*/ )
 	{
 		CPen pen( PS_SOLID | PS_INSIDEFRAME, borderWidth, borderColor );
-		CScopedGdi< CPen > scopedPen( pDC, &pen );
-		CScopedGdi< CGdiObject > scopedBrush( pDC, HOLLOW_BRUSH );
+		CScopedGdi<CPen> scopedPen( pDC, &pen );
+		CScopedGdi<CGdiObject> scopedBrush( pDC, HOLLOW_BRUSH );
 
 		pDC->Rectangle( &rect );
 	}

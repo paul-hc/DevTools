@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageZoomViewD2D.h"
 #include "ImagingWic.h"
 #include "DirectWrite.h"

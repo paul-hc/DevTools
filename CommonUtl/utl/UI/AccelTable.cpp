@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AccelTable.h"
 #include "WndUtils.h"
 
@@ -72,7 +72,7 @@ CAccelTable::~CAccelTable()
 		::DestroyAcceleratorTable( m_hAccel );
 }
 
-void CAccelTable::QueryKeys( std::vector< ACCEL >& rKeys ) const
+void CAccelTable::QueryKeys( std::vector<ACCEL>& rKeys ) const
 {
 	if ( m_hAccel != nullptr )
 	{

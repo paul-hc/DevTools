@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "OleUtils.h"
 #include "OleDataSource.h"
 #include "Clipboard.h"

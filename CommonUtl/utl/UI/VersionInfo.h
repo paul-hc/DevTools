@@ -49,7 +49,7 @@ private:
 		WORD m_codePage;		// character set (code page)
 	};
 
-	std::vector< BYTE > m_versionInfo;		// a copy of the resource, required by VerQueryValue()
+	std::vector<BYTE> m_versionInfo;		// a copy of the resource, required by VerQueryValue()
 	VS_FIXEDFILEINFO m_fileInfo;
 	CLanguage m_translation;
 public:

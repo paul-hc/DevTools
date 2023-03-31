@@ -74,11 +74,11 @@ public:
 
 	bool IsShellMenuCmd( int cmdId ) const;
 
-	bool ShellInvokeDefaultVerb( const std::vector< fs::CPath >& filePaths );
-	bool ShellInvokeProperties( const std::vector< fs::CPath >& filePaths );
+	bool ShellInvokeDefaultVerb( const std::vector<fs::CPath>& filePaths );
+	bool ShellInvokeProperties( const std::vector<fs::CPath>& filePaths );
 protected:
-	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< fs::CPath >& filePaths );
-	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const fs::CPath& filePath ) { return MakeContextMenuHost( pSrcPopupMenu, std::vector< fs::CPath >( 1, filePath ) ); }
+	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector<fs::CPath>& filePaths );
+	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const fs::CPath& filePath ) { return MakeContextMenuHost( pSrcPopupMenu, std::vector<fs::CPath>( 1, filePath ) ); }
 
 	bool DoTrackContextMenu( CMenu* pPopupMenu, const CPoint& screenPos );
 	void ResetShellContextMenu( void );

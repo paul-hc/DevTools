@@ -44,37 +44,37 @@ namespace ui
 
 
 	// timespan duration field (miliseconds) displayed as seconds (double)
-	class CDurationInSecondsAdapter : public ui::IDisplayValueSetAdapter< UINT, double >		// UINT stands for __time64_t (timespan in miliseconds)
+	class CDurationInSecondsAdapter : public ui::IDisplayValueSetAdapter<UINT, double>		// UINT stands for __time64_t (timespan in miliseconds)
 	{
 	protected:
 		CDurationInSecondsAdapter( void );
 	public:
-		typedef ui::IDisplayValueSetAdapter< UINT, double > IAdapterBase;
+		typedef ui::IDisplayValueSetAdapter<UINT, double> IAdapterBase;
 
 		static IAdapterBase* Instance( void );
 
-		// IValueSetAdapter< UINT > interface
-		virtual const std::vector< UINT >& GetStockValues( void ) const;
+		// IValueSetAdapter<UINT> interface
+		virtual const std::vector<UINT>& GetStockValues( void ) const;
 		virtual std::tstring OutputValue( const UINT& miliseconds ) const;
 		virtual bool ParseValue( UINT* pOutMiliseconds, const std::tstring& text ) const;
 
-		// IDisplayValueSetAdapter< UINT, double > interface
+		// IDisplayValueSetAdapter<UINT, double> interface
 		virtual double ToDisplayValue( const UINT& miliseconds ) const;
 		virtual UINT FromDisplayValue( const double& seconds ) const;
 	private:
-		std::vector< UINT > m_stockMiliseconds;
+		std::vector<UINT> m_stockMiliseconds;
 	public:
 		static const UINT s_defaultMiliseconds[];
 	};
 
 
 	// percentage field (no specified value set)
-	abstract class CPercentageAdapterBase : public ui::IValueSetAdapter< UINT >
+	abstract class CPercentageAdapterBase : public ui::IValueSetAdapter<UINT>
 	{
 	public:
-		typedef ui::IValueSetAdapter< UINT > IAdapterBase;
+		typedef ui::IValueSetAdapter<UINT> IAdapterBase;
 
-		// IValueSetAdapter< UINT > interface
+		// IValueSetAdapter<UINT> interface
 		virtual std::tstring OutputValue( const UINT& zoomPct ) const;
 		virtual bool ParseValue( UINT* pOutZoomPct, const std::tstring& text ) const;
 	};
@@ -86,8 +86,8 @@ namespace ui
 	public:
 		static IAdapterBase* Instance( void );
 
-		// IValueSetAdapter< UINT > interface
-		virtual const std::vector< UINT >& GetStockValues( void ) const;
+		// IValueSetAdapter<UINT> interface
+		virtual const std::vector<UINT>& GetStockValues( void ) const;
 	};
 }
 
@@ -141,19 +141,19 @@ private:
 
 
 // edits a timespan duration field (miliseconds) displayed as seconds (double)
-class CDurationComboBox : public CStockValuesComboBox< UINT >
+class CDurationComboBox : public CStockValuesComboBox<UINT>
 {
 public:
-	CDurationComboBox( ui::TValueSetFlags flags = ui::LimitMinValue, const ui::IValueSetAdapter< UINT >* pStockAdapter = ui::CDurationInSecondsAdapter::Instance() );
+	CDurationComboBox( ui::TValueSetFlags flags = ui::LimitMinValue, const ui::IValueSetAdapter<UINT>* pStockAdapter = ui::CDurationInSecondsAdapter::Instance() );
 };
 
 
 // edits a zoom percentage field
-class CZoomComboBox : public CStockValuesComboBox< UINT >
+class CZoomComboBox : public CStockValuesComboBox<UINT>
 {
 public:
 	CZoomComboBox( ui::TValueSetFlags flags = ui::LimitMinValue | ui::LimitMaxValue,
-				   const ui::IValueSetAdapter< UINT >* pStockAdapter = ui::CZoomPercentageAdapter::Instance() );
+				   const ui::IValueSetAdapter<UINT>* pStockAdapter = ui::CZoomPercentageAdapter::Instance() );
 };
 
 

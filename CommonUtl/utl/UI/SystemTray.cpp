@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SystemTray.h"
 #include "TrayIcon.h"
 #include "ISystemTrayCallback.h"
@@ -242,7 +242,7 @@ bool CSystemTray::HandleSysCommand( UINT sysCmdId )
 
 bool CSystemTray::HandleTimer( UINT_PTR eventId )
 {
-	for ( std::vector< CTrayIcon* >::const_iterator itIcon = m_icons.begin(); itIcon != m_icons.end(); ++itIcon )
+	for ( std::vector<CTrayIcon*>::const_iterator itIcon = m_icons.begin(); itIcon != m_icons.end(); ++itIcon )
 		if ( (*itIcon)->HandleTimer( eventId ) )
 			return true;
 

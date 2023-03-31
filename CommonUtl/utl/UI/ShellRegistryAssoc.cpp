@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellRegistryAssoc.h"
 #include "Registry.h"
 #include "StringUtilities.h"

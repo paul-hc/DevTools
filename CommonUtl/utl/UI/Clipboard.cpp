@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Clipboard.h"
 #include "FileSystem.h"
 #include "utl/StringUtilities.h"
@@ -32,7 +32,7 @@ bool CClipboard::HasDropFiles( void )
 	return ::IsClipboardFormatAvailable( CF_HDROP ) != FALSE;
 }
 
-DROPEFFECT CClipboard::QueryDropFilePaths( std::vector< fs::CPath >& rSrcPaths )
+DROPEFFECT CClipboard::QueryDropFilePaths( std::vector<fs::CPath>& rSrcPaths )
 {
 	CComPtr<IDataObject> pDataObject;
 
@@ -61,7 +61,7 @@ bool CClipboard::AlsoCopyDropFilesAsPaths( CWnd* pParentOwner )
 	if ( CanPasteText() )
 		return false;				// avoid overriding existing text
 
-	std::vector< fs::CPath > srcPaths;
+	std::vector<fs::CPath> srcPaths;
 	QueryDropFilePaths( srcPaths );
 
 	if ( srcPaths.empty() )

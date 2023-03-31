@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ProgressDialog.h"
 #include "LayoutEngine.h"
 #include "ClockStatic.h"
@@ -358,7 +358,7 @@ bool CProgressDialog::ResizeLabelsContentsToFit( void )
 
 	enum { StageLabel, ItemLabel, StageStatic, ItemStatic };
 
-	std::vector< ui::CCtrlPlace > ctrls;
+	std::vector<ui::CCtrlPlace> ctrls;
 	ctrls.push_back( ui::CCtrlPlace( m_stageLabelStatic ) );
 	ctrls.push_back( ui::CCtrlPlace( m_itemLabelStatic ) );
 
