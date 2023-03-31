@@ -93,7 +93,7 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 
 	m_pMyColorPicker->EnableAutomaticButton( _T("Automatic"), color::Lime );
 	m_pMyColorPicker->EnableOtherButton( _T("Other") );
-	m_pMyColorPicker->SetColumnsNumber( 16 );
+//	m_pMyColorPicker->SetColumnsNumber( 16 );
 	m_pMyColorPicker->SetColor( m_color );
 }
 

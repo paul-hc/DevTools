@@ -51,13 +51,22 @@
 #include <sstream>
 #include <iosfwd>
 
+#include "CppVer.h"			// for IS_CPP_11
+
 
 #pragma warning( pop )				// restore to the initial warning level
 
 
 namespace std
 {
+#ifndef IS_CPP_11
 	using namespace tr1;
+
+	#define unique_ptr auto_ptr
+		// possible alternative:
+		//#include <boost/move/unique_ptr.hpp>
+		//using boost::movelib::unique_ptr;
+#endif
 
 
 #ifdef _UNICODE
