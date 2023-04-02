@@ -86,19 +86,19 @@
 #define IDC_SPACING_EDIT                1055
 #define IDC_STATUS_ALPHA_EDIT           1056
 #define IDC_SAMPLE_MODE_SHEET           1057
-#define IDC_SHOW_COLOR_TABLE_CHECK      1058
+#define IDC_SHOW_COLOR_BOARD_CHECK      1058
 #define IDC_SHOW_GUIDES_CHECK           1059
 #define IDC_SHOW_LABELS_CHECK           1060
 #define IDC_IMAGE_INFO_STATIC           1065
 #define IDC_IMAGE_SAMPLE                1066
 #define IDC_PIXEL_COLOR_SAMPLE          1067
 #define IDC_PIXEL_INFO_STATIC           1068
-#define IDC_COLOR_TABLE_MODE_COMBO      1069
-#define IDC_COLOR_TABLE_SAMPLE          1070
-#define IDC_COLOR_TABLE_INFO_STATIC     1071
+#define IDC_COLOR_BOARD_MODE_COMBO      1069
+#define IDC_COLOR_BOARD_SAMPLE          1070
+#define IDC_COLOR_BOARD_INFO_STATIC     1071
 #define IDC_UNIQUE_COLORS_CHECK         1072
 #define IDC_SHOW_COLOR_LABELS_CHECK     1073
-#define IDC_COLOR_TABLE_LABEL           1075
+#define IDC_COLOR_BOARD_LABEL           1075
 #define IDC_TRANSP_COLOR_SAMPLE         1077
 #define IDC_TRANSP_COLOR_INFO           1078
 #define IDC_TRANSP_COLOR_LABEL          1079
@@ -136,6 +136,7 @@
 #define IDC_MY_COLOR_PICKER_BUTTON      1107
 #define IDC_COLOR_INFO_EDIT             1108
 #define IDC_REPO_COLOR_INFO_EDIT        1108
+#define IDC_MY_MENU_PICKER_BUTTON       1109
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -177,12 +178,12 @@
 #define ID_APP_TRAY_ANIMATE             32804
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        154
 #define _APS_NEXT_COMMAND_VALUE         32813
-#define _APS_NEXT_CONTROL_VALUE         1107
+#define _APS_NEXT_CONTROL_VALUE         1110
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

@@ -50,15 +50,15 @@ namespace reg
 
 static const TCHAR bkColorSet[] = _T("#FFFFFF (White);#FFE5B4 (Peach);#ACE1AF (Celadon);#D1E231 (Pear);#F5DEB3 (Wheat);#C19A6B (Lion);#F4A460 (Sandy Brown)");
 
-enum { ImagePct = 80, ColorTablePct = 100 - ImagePct };
+enum { ImagePct = 80, ColorBoardPct = 100 - ImagePct };
 
 namespace layout
 {
 	#define Lay_SizeImageY pctSizeY( ImagePct )
 	#define Lay_MoveTableY pctMoveY( ImagePct )
-	#define Lay_SizeTableY pctSizeY( ColorTablePct )
+	#define Lay_SizeTableY pctSizeY( ColorBoardPct )
 
-	static CDualLayoutStyle dualStyles[] =
+	static CDualLayoutStyle s_dualStyles[] =
 	{
 		{ IDC_IMAGE_PATH_COMBO, SizeX, UseExpanded },
 		{ IDC_SAMPLE_MODE_SHEET, SizeX, UseExpanded },
@@ -70,14 +70,14 @@ namespace layout
 		{ IDC_IMAGE_SAMPLE, SizeX | Lay_SizeImageY, SizeX | SizeY },
 		{ IDC_PIXEL_COLOR_SAMPLE, Lay_MoveTableY, MoveY },
 		{ IDC_PIXEL_INFO_STATIC, SizeX | Lay_MoveTableY, SizeX | MoveY },
-		{ IDC_SHOW_COLOR_TABLE_CHECK, MoveX | Lay_MoveTableY, MoveX | MoveY },
+		{ IDC_SHOW_COLOR_BOARD_CHECK, MoveX | Lay_MoveTableY, MoveX | MoveY },
 
-		{ IDC_COLOR_TABLE_LABEL, Lay_MoveTableY, MoveY },
-		{ IDC_COLOR_TABLE_MODE_COMBO, Lay_MoveTableY | CollapsedTop, MoveY },
+		{ IDC_COLOR_BOARD_LABEL, Lay_MoveTableY, MoveY },
+		{ IDC_COLOR_BOARD_MODE_COMBO, Lay_MoveTableY | CollapsedTop, MoveY },
 		{ IDC_UNIQUE_COLORS_CHECK, Lay_MoveTableY, MoveY },
 		{ IDC_SHOW_COLOR_LABELS_CHECK, Lay_MoveTableY, MoveY },
-		{ IDC_COLOR_TABLE_INFO_STATIC, SizeX | Lay_MoveTableY, SizeX | MoveY },
-		{ IDC_COLOR_TABLE_SAMPLE, SizeX | Lay_MoveTableY | Lay_SizeTableY, SizeX | MoveY },
+		{ IDC_COLOR_BOARD_INFO_STATIC, SizeX | Lay_MoveTableY, SizeX | MoveY },
+		{ IDC_COLOR_BOARD_SAMPLE, SizeX | Lay_MoveTableY | Lay_SizeTableY, SizeX | MoveY },
 
 		{ IDCANCEL, MoveX, UseExpanded },
 		{ ID_REFRESH, MoveX, UseExpanded }
@@ -103,13 +103,13 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	, m_forceResolutionCombo( &GetTags_Resolution() )
 	, m_zoomCombo( &GetTags_Zoom() )
 	, m_stackingCombo( &CMultiZone::GetTags_Stacking() )
-	, m_colorTableModeCombo( &CColorTable::GetTags_Mode() )
+	, m_colorBoardModeCombo( &CColorBoard::GetTags_Mode() )
 
 	, m_transpColorSample( this )
 	, m_pImageToolbar( new CDialogToolBar() )
 	, m_sampleView( this )
 	, m_pPixelInfoSample( new CPixelInfoSample() )
-	, m_pColorTableSample( new CColorTableSample( &m_colorTable, this ) )
+	, m_pColorBoardSample( new CColorBoardSample( &m_colorBoard, this ) )
 	, m_statusAlphaEdit( IDC_STATUS_ALPHA_EDIT, &m_statusAlpha )
 	, m_modeSheet( m_sampleMode )
 
@@ -119,14 +119,14 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	, m_disabledAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section, reg::entry_disabledAlpha, 127 ) )
 {
 	m_regSection = reg::section;
-	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_SPAN( layout::dualStyles ) );
+	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_SPAN( layout::s_dualStyles ) );
 	LoadDlgIcon( ID_STUDY_IMAGE );
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_IMAGE_DIALOG ) );
 	m_initCentered = false;			// so that it uses WINDOWPLACEMENT
 	ui::LoadPopupMenu( m_contextMenu, IDR_CONTEXT_MENU, 0 );
 
 	m_multiZone.m_zoneSpacing = AfxGetApp()->GetProfileInt( reg::section, reg::entry_spacing, m_multiZone.m_zoneSpacing );
-	m_colorTable.Load( reg::section );
+	m_colorBoard.Load( reg::section );
 	m_transpColorCache.Load( reg::section );
 
 	m_imagePathCombo.SetEnsurePathExist();
@@ -179,7 +179,7 @@ CImageDialog::~CImageDialog()
 	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_sourceAlpha, m_sourceAlpha );
 	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_pixelAlpha, m_pixelAlpha );
 	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_disabledAlpha, m_disabledAlpha );
-	m_colorTable.Save( reg::section );
+	m_colorBoard.Save( reg::section );
 	m_transpColorCache.Save( reg::section );
 
 	utl::ClearOwningContainer( m_modeData );
@@ -294,7 +294,7 @@ void CImageDialog::UpdateImage( void )
 	}
 	m_pImageToolbar->UpdateCmdUI();
 
-	BuildColorTable();
+	BuildColorBoard();
 	CreateEffectDibs();
 
 	m_modeSheet.OutputPage( ShowImage );			// update transparent color info
@@ -330,29 +330,29 @@ void CImageDialog::RedrawSample( void )
 	m_sampleView.SafeRedraw();
 }
 
-void CImageDialog::BuildColorTable( void )
+void CImageDialog::BuildColorBoard( void )
 {
-	m_colorTable.Build( m_pDibSection.get() );
+	m_colorBoard.Build( m_pDibSection.get() );
 
 	std::tstring text;
-	if ( !m_colorTable.IsEmpty() )
-		if ( m_colorTable.m_totalColors == m_colorTable.m_colors.size() )
+	if ( !m_colorBoard.IsEmpty() )
+		if ( m_colorBoard.m_totalColors == m_colorBoard.m_colors.size() )
 		{
-			text = str::Format( _T("%d colors"), m_colorTable.m_colors.size() );
-			if ( !m_colorTable.m_dupColorsPos.empty() )
-				text += str::Format( _T(" (%d unique + %d duplicates)"), m_colorTable.m_colors.size() - m_colorTable.m_dupColorsPos.size(), m_colorTable.m_dupColorsPos.size() );
+			text = str::Format( _T("%d colors"), m_colorBoard.m_colors.size() );
+			if ( !m_colorBoard.m_dupColorsPos.empty() )
+				text += str::Format( _T(" (%d unique + %d duplicates)"), m_colorBoard.m_colors.size() - m_colorBoard.m_dupColorsPos.size(), m_colorBoard.m_dupColorsPos.size() );
 		}
 		else
-			text = str::Format( _T("%d colors (of total %d)"), m_colorTable.m_colors.size(), m_colorTable.m_totalColors );
+			text = str::Format( _T("%d colors (of total %d)"), m_colorBoard.m_colors.size(), m_colorBoard.m_totalColors );
 
-	ui::SetDlgItemText( m_hWnd, IDC_COLOR_TABLE_INFO_STATIC, text );
+	ui::SetDlgItemText( m_hWnd, IDC_COLOR_BOARD_INFO_STATIC, text );
 
-	RedrawColorTable();
+	RedrawColorBoard();
 }
 
-void CImageDialog::RedrawColorTable( void )
+void CImageDialog::RedrawColorBoard( void )
 {
-	m_pColorTableSample->SafeRedraw();
+	m_pColorBoardSample->SafeRedraw();
 }
 
 bool CImageDialog::IsValidImageMode( void ) const
@@ -461,12 +461,12 @@ void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color )
 
 		if ( color != CLR_NONE )
 		{
-			size_t oldSelPos = m_colorTable.m_selPos;
-			m_colorTable.SelectColor( color );
-			text = utl::FormatColorInfo( color, m_colorTable.m_selPos, pos );
+			size_t oldSelPos = m_colorBoard.m_selPos;
+			m_colorBoard.SelectColor( color );
+			text = utl::FormatColorInfo( color, m_colorBoard.m_selPos, pos );
 
-			if ( m_colorTable.m_selPos != oldSelPos )
-				RedrawColorTable();
+			if ( m_colorBoard.m_selPos != oldSelPos )
+				RedrawColorBoard();
 		}
 	}
 	else
@@ -482,7 +482,7 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 	m_transpColorSample.DDX_Placeholder( pDX, IDC_TRANSP_COLOR_SAMPLE );
 	m_sampleView.DDX_Placeholder( pDX, IDC_IMAGE_SAMPLE );
 	m_pPixelInfoSample->DDX_Placeholder( pDX, IDC_PIXEL_COLOR_SAMPLE );
-	m_pColorTableSample->DDX_Placeholder( pDX, IDC_COLOR_TABLE_SAMPLE );
+	m_pColorBoardSample->DDX_Placeholder( pDX, IDC_COLOR_BOARD_SAMPLE );
 	m_pImageToolbar->DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );
 
 	DDX_Control( pDX, IDC_IMAGE_PATH_COMBO, m_imagePathCombo );
@@ -515,9 +515,9 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 	m_forceResolutionCombo.DDX_EnumValue( pDX, IDC_FORCE_RESOLUTION_COMBO, m_forceResolution );
 	m_zoomCombo.DDX_EnumValue( pDX, IDC_ZOOM_COMBO, m_zoom );
 	m_stackingCombo.DDX_EnumValue( pDX, IDC_STACKING_COMBO, m_multiZone.RefStacking() );
-	m_colorTableModeCombo.DDX_EnumValue( pDX, IDC_COLOR_TABLE_MODE_COMBO, m_colorTable.m_mode );
-	ui::DDX_Bool( pDX, IDC_UNIQUE_COLORS_CHECK, m_colorTable.m_uniqueColors );
-	ui::DDX_Bool( pDX, IDC_SHOW_COLOR_LABELS_CHECK, m_colorTable.m_showLabels );
+	m_colorBoardModeCombo.DDX_EnumValue( pDX, IDC_COLOR_BOARD_MODE_COMBO, m_colorBoard.m_mode );
+	ui::DDX_Bool( pDX, IDC_UNIQUE_COLORS_CHECK, m_colorBoard.m_uniqueColors );
+	ui::DDX_Bool( pDX, IDC_SHOW_COLOR_LABELS_CHECK, m_colorBoard.m_showLabels );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		LoadSampleImage();
@@ -532,7 +532,7 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 
 	// post dialog init
 	if ( firstInit )
-		CheckDlgButton( IDC_SHOW_COLOR_TABLE_CHECK, !GetLayoutEngine().IsCollapsed() );
+		CheckDlgButton( IDC_SHOW_COLOR_BOARD_CHECK, !GetLayoutEngine().IsCollapsed() );
 }
 
 
@@ -556,10 +556,10 @@ BEGIN_MESSAGE_MAP( CImageDialog, CLayoutDialog )
 	ON_BN_CLICKED( ID_ZOOM_TOGGLE, OnToggle_Zoom )
 	ON_CBN_SELCHANGE( IDC_STACKING_COMBO, OnChange_Stacking )
 	ON_CONTROL_RANGE( BN_CLICKED, IDC_SHOW_GUIDES_CHECK, IDC_SHOW_LABELS_CHECK, OnToggle_ShowFlags )
-	ON_BN_CLICKED( IDC_SHOW_COLOR_TABLE_CHECK, OnToggle_ShowColorTable )
+	ON_BN_CLICKED( IDC_SHOW_COLOR_BOARD_CHECK, OnToggle_ShowColorBoard )
 	ON_EN_CHANGE( IDC_SPACING_EDIT, OnChange_Spacing )
 	ON_EN_CHANGE( IDC_STATUS_ALPHA_EDIT, OnRedrawSample )
-	ON_CBN_SELCHANGE( IDC_COLOR_TABLE_MODE_COMBO, OnChange_ColorTableMode )
+	ON_CBN_SELCHANGE( IDC_COLOR_BOARD_MODE_COMBO, OnChange_ColorBoardMode )
 	ON_BN_CLICKED( IDC_UNIQUE_COLORS_CHECK, OnToggle_UniqueColors )
 	ON_BN_CLICKED( IDC_SHOW_COLOR_LABELS_CHECK, OnToggle_ShowLabels )
 	ON_BN_CLICKED( ID_SET_TRANSP_COLOR, OnSetTranspColor )
@@ -609,7 +609,7 @@ HBRUSH CImageDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColorType )
 		switch ( pWnd->GetDlgCtrlID() )
 		{
 			case IDC_IMAGE_INFO_STATIC:
-			case IDC_COLOR_TABLE_INFO_STATIC:
+			case IDC_COLOR_BOARD_INFO_STATIC:
 				pDC->SetTextColor( color::Blue );
 				break;
 			case IDC_FORCE_RESOLUTION_LABEL:
@@ -719,9 +719,9 @@ void CImageDialog::OnToggle_ShowFlags( UINT checkId )
 	m_sampleView.Invalidate();
 }
 
-void CImageDialog::OnToggle_ShowColorTable( void )
+void CImageDialog::OnToggle_ShowColorBoard( void )
 {
-	GetLayoutEngine().SetCollapsed( !IsDlgButtonChecked( IDC_SHOW_COLOR_TABLE_CHECK ) );
+	GetLayoutEngine().SetCollapsed( !IsDlgButtonChecked( IDC_SHOW_COLOR_BOARD_CHECK ) );
 }
 
 void CImageDialog::OnChange_Spacing( void )
@@ -730,22 +730,22 @@ void CImageDialog::OnChange_Spacing( void )
 	RedrawSample();
 }
 
-void CImageDialog::OnChange_ColorTableMode( void )
+void CImageDialog::OnChange_ColorBoardMode( void )
 {
-	m_colorTable.m_mode = m_colorTableModeCombo.GetEnum<CColorTable::Mode>();
-	BuildColorTable();
+	m_colorBoard.m_mode = m_colorBoardModeCombo.GetEnum<CColorBoard::Mode>();
+	BuildColorBoard();
 }
 
 void CImageDialog::OnToggle_UniqueColors( void )
 {
-	m_colorTable.m_uniqueColors = IsDlgButtonChecked( IDC_UNIQUE_COLORS_CHECK ) != FALSE;
-	BuildColorTable();
+	m_colorBoard.m_uniqueColors = IsDlgButtonChecked( IDC_UNIQUE_COLORS_CHECK ) != FALSE;
+	BuildColorBoard();
 }
 
 void CImageDialog::OnToggle_ShowLabels( void )
 {
-	m_colorTable.m_showLabels = IsDlgButtonChecked( IDC_SHOW_COLOR_LABELS_CHECK ) != FALSE;
-	RedrawColorTable();
+	m_colorBoard.m_showLabels = IsDlgButtonChecked( IDC_SHOW_COLOR_LABELS_CHECK ) != FALSE;
+	RedrawColorBoard();
 }
 
 void CImageDialog::OnSetTranspColor( void )
@@ -783,12 +783,12 @@ void CImageDialog::OnRedrawSample( void )
 }
 
 
-// CColorTableSample implementation
+// CColorBoardSample implementation
 
-bool CColorTableSample::RenderSample( CDC* pDC, const CRect& clientRect )
+bool CColorBoardSample::RenderSample( CDC* pDC, const CRect& clientRect )
 {
 	CScopedDrawText scopedDrawText( pDC, this, GetParent()->GetFont() );
-	m_pColorTable->Draw( pDC, clientRect );
+	m_pColorBoard->Draw( pDC, clientRect );
 	return true;
 }
 
@@ -900,7 +900,7 @@ void CShowImagePage::DoDataExchange( CDataExchange* pDX )
 			COLORREF transpColor = m_pDialog->GetImage()->GetTranspColor();
 			m_transpColorSample.SetColor( transpColor );
 			if ( transpColor != CLR_NONE )
-				info = utl::FormatColorInfo( transpColor, m_pDialog->GetColorTable().FindColorPos( transpColor ) );
+				info = utl::FormatColorInfo( transpColor, m_pDialog->GetColorBoard().FindColorPos( transpColor ) );
 		}
 		ui::SetDlgItemText( this, IDC_TRANSP_COLOR_INFO, info );
 	}

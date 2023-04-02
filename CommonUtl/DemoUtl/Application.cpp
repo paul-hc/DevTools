@@ -99,7 +99,11 @@ BOOL CApplication::InitInstance( void )
 	if ( HasCommandLineOptions() )
 		return FALSE;					// no app loop
 
-	LoadStdProfileSettings( 4 );  // Load standard INI file options (including MRU)
+	// init MFC control bars:
+	InitContextMenuManager();
+	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerOffice2007 ) );
+
+	LoadStdProfileSettings( 10 );  // Load standard INI file options (including MRU)
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
 	AddDocTemplate( new CMultiDocTemplate( IDR_TEST_DOC_TYPE,

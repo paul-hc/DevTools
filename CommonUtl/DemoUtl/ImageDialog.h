@@ -17,7 +17,7 @@
 
 class CEnumTags;
 class CPixelInfoSample;
-class CColorTableSample;
+class CColorBoardSample;
 class CDialogToolBar;
 namespace gdi { enum Effect; }
 
@@ -34,10 +34,10 @@ public:
 	virtual ~CImageDialog();
 
 	CDibSection* GetImage( void ) const { return m_pDibSection.get(); }
-	const CColorTable& GetColorTable( void ) const { return m_colorTable; }
+	const CColorBoard& GetColorBoard( void ) const { return m_colorBoard; }
 
 	void SetImagePath( const std::tstring& imagePath ) { m_imagePath = imagePath; }
-	void BuildColorTable( void );
+	void BuildColorBoard( void );
 	void ConvertImages( void ) { CreateEffectDibs(); RedrawSample(); }
 private:
 	enum Resolution { Auto, Monochrome, Color4, Color8, Color16, Color24, Color32 };
@@ -55,7 +55,7 @@ private:
 	void LoadSampleImage( void );
 	void UpdateImage( void );
 	void RedrawSample( void );
-	void RedrawColorTable( void );
+	void RedrawColorBoard( void );
 
 	static std::tstring FormatDibInfo( const CDibSection& dib );
 
@@ -92,7 +92,7 @@ private:
 	std::tstring m_imagePath;
 	std::tstring m_bkColorText;
 	std::auto_ptr<CDibSection> m_pDibSection;
-	CColorTable m_colorTable;
+	CColorBoard m_colorBoard;
 	CImageTranspColors m_transpColorCache;
 	std::auto_ptr<CImageList> m_pImageList;
 
@@ -108,13 +108,13 @@ private:
 	CEnumComboBox m_forceResolutionCombo;
 	CEnumComboBox m_zoomCombo;
 	CEnumComboBox m_stackingCombo;
-	CEnumComboBox m_colorTableModeCombo;
+	CEnumComboBox m_colorBoardModeCombo;
 	CSpinEdit m_spacingEdit;
 	CColorSample m_transpColorSample;
 	std::auto_ptr<CDialogToolBar> m_pImageToolbar;
 	CSampleView m_sampleView;
 	std::auto_ptr<CPixelInfoSample> m_pPixelInfoSample;
-	std::auto_ptr<CColorTableSample> m_pColorTableSample;
+	std::auto_ptr<CColorBoardSample> m_pColorBoardSample;
 	CColorChannelEdit m_statusAlphaEdit;
 	CLayoutChildPropertySheet m_modeSheet;
 public:
@@ -146,8 +146,8 @@ protected:
 	afx_msg void OnChange_Stacking( void );
 	afx_msg void OnChange_Spacing( void );
 	afx_msg void OnToggle_ShowFlags( UINT checkId );
-	afx_msg void OnToggle_ShowColorTable( void );
-	afx_msg void OnChange_ColorTableMode( void );
+	afx_msg void OnToggle_ShowColorBoard( void );
+	afx_msg void OnChange_ColorBoardMode( void );
 	afx_msg void OnToggle_UniqueColors( void );
 	afx_msg void OnToggle_ShowLabels( void );
 	afx_msg void OnSetTranspColor( void );
@@ -172,15 +172,15 @@ private:
 };
 
 
-class CColorTableSample : public CColorSample
+class CColorBoardSample : public CColorSample
 {
 public:
-	CColorTableSample( const CColorTable* pColorTable, ISampleCallback* pRoutePixelInfo )
-		: CColorSample( pRoutePixelInfo ), m_pColorTable( pColorTable ) { ASSERT_PTR( m_pColorTable ); }
+	CColorBoardSample( const CColorBoard* pColorBoard, ISampleCallback* pRoutePixelInfo )
+		: CColorSample( pRoutePixelInfo ), m_pColorBoard( pColorBoard ) { ASSERT_PTR( m_pColorBoard ); }
 protected:
 	virtual bool RenderSample( CDC* pDC, const CRect& clientRect );
 private:
-	const CColorTable* m_pColorTable;
+	const CColorBoard* m_pColorBoard;
 };
 
 

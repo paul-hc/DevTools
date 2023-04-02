@@ -15,7 +15,7 @@
 
 namespace ui
 {
-	const CEnumTags& GetTags_ColorBatch( void )
+	const CEnumTags& GetTags_ColorTable( void )
 	{
 		static const CEnumTags s_tags( _T("System|Standard|Custom|DirectX|HTML|X11|Shades|User") );
 		return s_tags;
@@ -62,7 +62,7 @@ namespace ui
 CColorEntry::CColorEntry( COLORREF color, const char* pLiteral )
 	: m_color( color )
 	, m_name( word::ToSpacedWordBreaks( str::FromAnsi( FindScopedLiteral( pLiteral ) ).c_str() ) )
-	, m_pBatch( nullptr )
+	, m_pParentTable( nullptr )
 {
 }
 
@@ -75,10 +75,10 @@ const char* CColorEntry::FindScopedLiteral( const char* pScopedColorName )
 }
 
 
-// CColorBatch implementation
+// CColorTable implementation
 
-CColorBatch::CColorBatch( ui::ColorBatch batchType, UINT baseCmdId, size_t capacity, int layoutCount /*= 1*/ )
-	: m_batchType( batchType )
+CColorTable::CColorTable( ui::StdColorTable tableType, UINT baseCmdId, size_t capacity, int layoutCount /*= 1*/ )
+	: m_tableType( tableType )
 	, m_baseCmdId( baseCmdId )
 	, m_layoutCount( layoutCount )
 {
@@ -87,22 +87,22 @@ CColorBatch::CColorBatch( ui::ColorBatch batchType, UINT baseCmdId, size_t capac
 	ENSURE( m_layoutCount != 0 );
 }
 
-CColorBatch::~CColorBatch()
+CColorTable::~CColorTable()
 {
 }
 
-const std::tstring& CColorBatch::GetBatchName( void ) const
+const std::tstring& CColorTable::GetTableName( void ) const
 {
-	return ui::GetTags_ColorBatch().FormatUi( m_batchType );
+	return ui::GetTags_ColorTable().FormatUi( m_tableType );
 }
 
-void CColorBatch::Add( const CColorEntry& colorEntry )
+void CColorTable::Add( const CColorEntry& colorEntry )
 {
 	m_colors.push_back( colorEntry );
-	m_colors.back().m_pBatch = this;
+	m_colors.back().m_pParentTable = this;
 }
 
-const CColorEntry* CColorBatch::FindColor( COLORREF rawColor ) const
+const CColorEntry* CColorTable::FindColor( COLORREF rawColor ) const
 {
 	std::vector<CColorEntry>::const_iterator itFound = std::find( m_colors.begin(), m_colors.end(), rawColor );
 	if ( itFound == m_colors.end() )
@@ -111,13 +111,13 @@ const CColorEntry* CColorBatch::FindColor( COLORREF rawColor ) const
 	return &*itFound;
 }
 
-size_t CColorBatch::FindCmdIndex( UINT cmdId ) const
+size_t CColorTable::FindCmdIndex( UINT cmdId ) const
 {
 	size_t foundIndex = cmdId - m_baseCmdId;
 	return foundIndex < m_colors.size() ? foundIndex : utl::npos;
 }
 
-void CColorBatch::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const
+void CColorTable::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const
 {
 	if ( m_layoutCount > 0 )		// column layout?
 	{
@@ -131,14 +131,14 @@ void CColorBatch::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) c
 	}
 }
 
-CColorBatch* CColorBatch::MakeShadesBatch( size_t shadesCount, COLORREF selColor )
+CColorTable* CColorTable::MakeShadesTable( size_t shadesCount, COLORREF selColor )
 {
 	if ( 0 == shadesCount || ui::IsUndefinedColor( selColor ) )
 		return nullptr;
 
 	selColor = ui::EvalColor( selColor );
 
-	CColorBatch* pShadesBatch = new CColorBatch( ui::Shades_Colors, CColorRepository::BaseId_Shades, shadesCount );
+	CColorTable* pShadesTable = new CColorTable( ui::Shades_Colors, CColorRepository::BaseId_Shades, shadesCount );
 
 	static const Range<ui::TPercent> s_pctRange( 10, 100 );			// [10% to 100%]
 	std::vector<ui::TPercent> percentages;
@@ -161,7 +161,7 @@ CColorBatch* CColorBatch::MakeShadesBatch( size_t shadesCount, COLORREF selColor
 			ui::AdjustLuminance( lighter, percentages[ i ] );
 
 			CColorEntry colorEntry( lighter, str::Format( _T("%s +%d%%"), s_shadeTags[ Lightness ].c_str(), percentages[i] ) );
-			pShadesBatch->Add( colorEntry );
+			pShadesTable->Add( colorEntry );
 		}
 
 	if ( ui::HasLuminanceVariation( selColor, -percentages[ 0 ], -percentages[ 1 ] ) )		// some variation?
@@ -171,7 +171,7 @@ CColorBatch* CColorBatch::MakeShadesBatch( size_t shadesCount, COLORREF selColor
 			ui::AdjustLuminance( darker, -percentages[ i ] );
 
 			CColorEntry colorEntry( darker, str::Format( _T("%s %d%%"), s_shadeTags[ Lightness ].c_str(), -percentages[i] ) );
-			pShadesBatch->Add( colorEntry );
+			pShadesTable->Add( colorEntry );
 		}
 
 	if ( ui::HasSaturationVariation( selColor, -percentages[ 0 ], -percentages[ 1 ] ) )		// some variation?
@@ -181,68 +181,68 @@ CColorBatch* CColorBatch::MakeShadesBatch( size_t shadesCount, COLORREF selColor
 			ui::AdjustLuminance( desaturated, -percentages[ i ] );
 
 			CColorEntry colorEntry( desaturated, str::Format( _T("%s %d%%"), s_shadeTags[ Saturation ].c_str(), -percentages[i] ) );
-			pShadesBatch->Add( colorEntry );
+			pShadesTable->Add( colorEntry );
 		}
 
-	return pShadesBatch;
+	return pShadesTable;
 }
 
 
-// CColorBatchGroup implementation
+// CColorTableGroup implementation
 
-const CColorBatch* CColorBatchGroup::FindBatch( ui::ColorBatch batchType ) const
+const CColorTable* CColorTableGroup::FindTable( ui::StdColorTable tableType ) const
 {
-	for ( std::vector<CColorBatch*>::const_iterator itBatch = m_colorBatches.begin(); itBatch != m_colorBatches.end(); ++itBatch )
-		if ( (*itBatch)->GetBatchType() == batchType )
-			return *itBatch;
+	for ( std::vector<CColorTable*>::const_iterator itTable = m_colorTables.begin(); itTable != m_colorTables.end(); ++itTable )
+		if ( (*itTable)->GetTableType() == tableType )
+			return *itTable;
 
 	return nullptr;
 }
 
-const CColorEntry* CColorBatchGroup::FindColorEntry( COLORREF rawColor ) const
+const CColorEntry* CColorTableGroup::FindColorEntry( COLORREF rawColor ) const
 {
 	if ( !ui::IsUndefinedColor( rawColor ) )		// a repo color?
 	{
 		if ( ui::IsSysColor( rawColor ) )
 		{	// look it up only in sys-colors batch
-			const CColorBatch* pSysColors = FindSystemBatch();
+			const CColorTable* pSysColors = FindSystemTable();
 			return pSysColors != nullptr ? pSysColors->FindColor( rawColor ) : nullptr;
 		}
 
-		rawColor = ui::EvalColor( rawColor );		// for the rest of the batches search for evaluated color
+		rawColor = ui::EvalColor( rawColor );		// for the rest of the tables search for evaluated color
 
-		for ( std::vector<CColorBatch*>::const_iterator itBatch = m_colorBatches.begin(); itBatch != m_colorBatches.end(); ++itBatch )
-			if ( (*itBatch)->GetBatchType() != ui::System_Colors )		// look only in batches with real colors
-				if ( const CColorEntry* pFound = ( *itBatch )->FindColor( rawColor ) )
+		for ( std::vector<CColorTable*>::const_iterator itTable = m_colorTables.begin(); itTable != m_colorTables.end(); ++itTable )
+			if ( (*itTable)->GetTableType() != ui::System_Colors )		// look only in tables with real colors
+				if ( const CColorEntry* pFound = ( *itTable )->FindColor( rawColor ) )
 					return pFound;
 	}
 
 	return nullptr;
 }
 
-void CColorBatchGroup::QueryMatchingColors( OUT std::vector<const CColorEntry*>& rColorEntries, COLORREF rawColor ) const
+void CColorTableGroup::QueryMatchingColors( OUT std::vector<const CColorEntry*>& rColorEntries, COLORREF rawColor ) const
 {
 	if ( !ui::IsUndefinedColor( rawColor ) )				// color has entry?
 	{
 		if ( ui::IsSysColor( rawColor ) )
 		{	// look it up only in sys-colors batch
-			if ( const CColorBatch* pSysColors = FindSystemBatch() )
+			if ( const CColorTable* pSysColors = FindSystemTable() )
 				if ( const CColorEntry* pFound = pSysColors->FindColor( rawColor ) )
 					rColorEntries.push_back( pFound );
 		}
 		else
 		{
-			rawColor = ui::EvalColor( rawColor );			// for the rest of the batches search for evaluated color
+			rawColor = ui::EvalColor( rawColor );			// for the rest of the tables search for evaluated color
 
-			for ( std::vector<CColorBatch*>::const_iterator itBatch = m_colorBatches.begin(); itBatch != m_colorBatches.end(); ++itBatch )
-				if ( (*itBatch)->GetBatchType() != ui::System_Colors )		// look only in batches with real colors
-					if ( const CColorEntry* pFound = ( *itBatch )->FindColor( rawColor ) )
+			for ( std::vector<CColorTable*>::const_iterator itTable = m_colorTables.begin(); itTable != m_colorTables.end(); ++itTable )
+				if ( (*itTable)->GetTableType() != ui::System_Colors )		// look only in tables with real colors
+					if ( const CColorEntry* pFound = ( *itTable )->FindColor( rawColor ) )
 						rColorEntries.push_back( pFound );
 		}
 	}
 }
 
-std::tstring CColorBatchGroup::FormatColorMatch( COLORREF rawColor, bool multiple /*= true*/ ) const
+std::tstring CColorTableGroup::FormatColorMatch( COLORREF rawColor, bool multiple /*= true*/ ) const
 {
 	std::vector<const CColorEntry*> colorEntries;
 
@@ -262,7 +262,7 @@ std::tstring CColorBatchGroup::FormatColorMatch( COLORREF rawColor, bool multipl
 			std::transform( colorEntries.begin(), colorEntries.end(), std::inserter( colorNames, colorNames.begin() ), func::ToColorName() );
 
 			if ( 1 == colorNames.size() )		// single shared color name?
-				outText = *colorNames.begin() + s_sep + str::Enquote( str::Join( colorEntries, _T(", "), func::ToBatchName() ).c_str(), _T("("), _T(")") );
+				outText = *colorNames.begin() + s_sep + str::Enquote( str::Join( colorEntries, _T(", "), func::ToTableName() ).c_str(), _T("("), _T(")") );
 			else
 				outText = str::Join( colorEntries, _T(", "), toQualifiedName );
 		}
@@ -278,13 +278,13 @@ std::tstring CColorBatchGroup::FormatColorMatch( COLORREF rawColor, bool multipl
 
 CColorRepository::CColorRepository( void )
 {
-	// add color batches in ui::ColorBatch order:
-	m_colorBatches.push_back( MakeBatch_System() );
-	m_colorBatches.push_back( MakeBatch_Standard() );
-	m_colorBatches.push_back( MakeBatch_Custom() );
-	m_colorBatches.push_back( MakeBatch_DirectX() );
-	m_colorBatches.push_back( MakeBatch_HTML() );
-	m_colorBatches.push_back( MakeBatch_X11() );
+	// add color tables in ui::StdColorTable order:
+	m_colorTables.push_back( MakeTable_System() );
+	m_colorTables.push_back( MakeTable_Standard() );
+	m_colorTables.push_back( MakeTable_Custom() );
+	m_colorTables.push_back( MakeTable_DirectX() );
+	m_colorTables.push_back( MakeTable_HTML() );
+	m_colorTables.push_back( MakeTable_X11() );
 }
 
 const CColorRepository* CColorRepository::Instance( void )
@@ -295,728 +295,728 @@ const CColorRepository* CColorRepository::Instance( void )
 
 void CColorRepository::Clear( void )
 {
-	utl::ClearOwningContainer( m_colorBatches );
+	utl::ClearOwningContainer( m_colorTables );
 }
 
 
-CColorBatch* CColorRepository::MakeBatch_System( void )
+CColorTable* CColorRepository::MakeTable_System( void )
 {
-	CColorBatch* pSysBatch = new CColorBatch( ui::System_Colors, BaseId_System, 31, 2 );		// 31 colors: 2 columns x 16 rows
+	CColorTable* pSysTable = new CColorTable( ui::System_Colors, BaseId_System, 31, 2 );		// 31 colors: 2 columns x 16 rows
 
-	pSysBatch->Add( CColorEntry( COLOR_BACKGROUND, _T("Desktop Background") ) );
-	pSysBatch->Add( CColorEntry( COLOR_WINDOW, _T("Window Background") ) );
-	pSysBatch->Add( CColorEntry( COLOR_WINDOWTEXT, _T("Window Text") ) );
-	pSysBatch->Add( CColorEntry( COLOR_WINDOWFRAME, _T("Window Frame") ) );
-	pSysBatch->Add( CColorEntry( COLOR_BTNFACE, _T("Button Face") ) );
-	pSysBatch->Add( CColorEntry( COLOR_BTNHIGHLIGHT, _T("Button Highlight") ) );
-	pSysBatch->Add( CColorEntry( COLOR_BTNSHADOW, _T("Button Shadow") ) );
-	pSysBatch->Add( CColorEntry( COLOR_BTNTEXT, _T("Button Text") ) );
-	pSysBatch->Add( CColorEntry( COLOR_GRAYTEXT, _T("Disabled Text") ) );
-	pSysBatch->Add( CColorEntry( COLOR_3DDKSHADOW, _T("3D Dark Shadow") ) );
-	pSysBatch->Add( CColorEntry( COLOR_3DLIGHT, _T("3D Light Color") ) );
-	pSysBatch->Add( CColorEntry( COLOR_HIGHLIGHT, _T("Selected") ) );
-	pSysBatch->Add( CColorEntry( COLOR_HIGHLIGHTTEXT, _T("Selected Text") ) );
-	pSysBatch->Add( CColorEntry( COLOR_CAPTIONTEXT, _T("Scroll Bar Arrow") ) );
-	pSysBatch->Add( CColorEntry( COLOR_HOTLIGHT, _T("Hot-Track") ) );
-	pSysBatch->Add( CColorEntry( COLOR_INFOBK, _T("Tooltip Background") ) );
-	pSysBatch->Add( CColorEntry( COLOR_INFOTEXT, _T("Tooltip Text") ) );
-	pSysBatch->Add( CColorEntry( COLOR_SCROLLBAR, _T("Scroll Bar Gray Area") ) );
-	pSysBatch->Add( CColorEntry( COLOR_MENU, _T("Menu Background") ) );
-	pSysBatch->Add( CColorEntry( COLOR_MENUBAR, _T("Flat Menu Bar") ) );
-	pSysBatch->Add( CColorEntry( COLOR_MENUHILIGHT, _T("Menu Highlight") ) );
-	pSysBatch->Add( CColorEntry( COLOR_MENUTEXT, _T("Menu Text") ) );
-	pSysBatch->Add( CColorEntry( COLOR_ACTIVECAPTION, _T("Active Window Title Bar") ) );
-	pSysBatch->Add( CColorEntry( COLOR_GRADIENTACTIVECAPTION, _T("Active Window Gradient") ) );
-	pSysBatch->Add( CColorEntry( COLOR_ACTIVEBORDER, _T("Active Window Border") ) );
-	pSysBatch->Add( CColorEntry( COLOR_INACTIVECAPTION, _T("Inactive Window Caption") ) );
-	pSysBatch->Add( CColorEntry( COLOR_GRADIENTINACTIVECAPTION, _T("Inactive Window Gradient") ) );
-	pSysBatch->Add( CColorEntry( COLOR_INACTIVEBORDER, _T("Inactive Window Border") ) );
-	pSysBatch->Add( CColorEntry( COLOR_INACTIVECAPTIONTEXT, _T("Inactive Window Caption Text") ) );
-	pSysBatch->Add( CColorEntry( COLOR_APPWORKSPACE, _T("MDI Background") ) );
-	pSysBatch->Add( CColorEntry( COLOR_DESKTOP, _T("Desktop Background") ) );
+	pSysTable->Add( CColorEntry( COLOR_BACKGROUND, _T("Desktop Background") ) );
+	pSysTable->Add( CColorEntry( COLOR_WINDOW, _T("Window Background") ) );
+	pSysTable->Add( CColorEntry( COLOR_WINDOWTEXT, _T("Window Text") ) );
+	pSysTable->Add( CColorEntry( COLOR_WINDOWFRAME, _T("Window Frame") ) );
+	pSysTable->Add( CColorEntry( COLOR_BTNFACE, _T("Button Face") ) );
+	pSysTable->Add( CColorEntry( COLOR_BTNHIGHLIGHT, _T("Button Highlight") ) );
+	pSysTable->Add( CColorEntry( COLOR_BTNSHADOW, _T("Button Shadow") ) );
+	pSysTable->Add( CColorEntry( COLOR_BTNTEXT, _T("Button Text") ) );
+	pSysTable->Add( CColorEntry( COLOR_GRAYTEXT, _T("Disabled Text") ) );
+	pSysTable->Add( CColorEntry( COLOR_3DDKSHADOW, _T("3D Dark Shadow") ) );
+	pSysTable->Add( CColorEntry( COLOR_3DLIGHT, _T("3D Light Color") ) );
+	pSysTable->Add( CColorEntry( COLOR_HIGHLIGHT, _T("Selected") ) );
+	pSysTable->Add( CColorEntry( COLOR_HIGHLIGHTTEXT, _T("Selected Text") ) );
+	pSysTable->Add( CColorEntry( COLOR_CAPTIONTEXT, _T("Scroll Bar Arrow") ) );
+	pSysTable->Add( CColorEntry( COLOR_HOTLIGHT, _T("Hot-Track") ) );
+	pSysTable->Add( CColorEntry( COLOR_INFOBK, _T("Tooltip Background") ) );
+	pSysTable->Add( CColorEntry( COLOR_INFOTEXT, _T("Tooltip Text") ) );
+	pSysTable->Add( CColorEntry( COLOR_SCROLLBAR, _T("Scroll Bar Gray Area") ) );
+	pSysTable->Add( CColorEntry( COLOR_MENU, _T("Menu Background") ) );
+	pSysTable->Add( CColorEntry( COLOR_MENUBAR, _T("Flat Menu Bar") ) );
+	pSysTable->Add( CColorEntry( COLOR_MENUHILIGHT, _T("Menu Highlight") ) );
+	pSysTable->Add( CColorEntry( COLOR_MENUTEXT, _T("Menu Text") ) );
+	pSysTable->Add( CColorEntry( COLOR_ACTIVECAPTION, _T("Active Window Title Bar") ) );
+	pSysTable->Add( CColorEntry( COLOR_GRADIENTACTIVECAPTION, _T("Active Window Gradient") ) );
+	pSysTable->Add( CColorEntry( COLOR_ACTIVEBORDER, _T("Active Window Border") ) );
+	pSysTable->Add( CColorEntry( COLOR_INACTIVECAPTION, _T("Inactive Window Caption") ) );
+	pSysTable->Add( CColorEntry( COLOR_GRADIENTINACTIVECAPTION, _T("Inactive Window Gradient") ) );
+	pSysTable->Add( CColorEntry( COLOR_INACTIVEBORDER, _T("Inactive Window Border") ) );
+	pSysTable->Add( CColorEntry( COLOR_INACTIVECAPTIONTEXT, _T("Inactive Window Caption Text") ) );
+	pSysTable->Add( CColorEntry( COLOR_APPWORKSPACE, _T("MDI Background") ) );
+	pSysTable->Add( CColorEntry( COLOR_DESKTOP, _T("Desktop Background") ) );
 
-	return pSysBatch;
+	return pSysTable;
 }
 
-CColorBatch* CColorRepository::MakeBatch_Standard( void )
+CColorTable* CColorRepository::MakeTable_Standard( void )
 {
-	CColorBatch* pBatch = new CColorBatch( ui::Standard_Colors, BaseId_Standard, color::_Standard_ColorCount, 8 );		// 40 colors: 8 columns x 6 rows
+	CColorTable* pTable = new CColorTable( ui::Standard_Colors, BaseId_Standard, color::_Standard_ColorCount, 8 );		// 40 colors: 8 columns x 6 rows
 
-	pBatch->Add( COLOR_ENTRY( color::Black ) );
-	pBatch->Add( COLOR_ENTRY( color::DarkRed ) );
-	pBatch->Add( COLOR_ENTRY( color::Red ) );
-	pBatch->Add( COLOR_ENTRY( color::Magenta ) );
-	pBatch->Add( COLOR_ENTRY( color::Rose ) );
-	pBatch->Add( COLOR_ENTRY( color::Brown ) );
-	pBatch->Add( COLOR_ENTRY( color::Orange ) );
-	pBatch->Add( COLOR_ENTRY( color::LightOrange ) );
-	pBatch->Add( COLOR_ENTRY( color::Gold ) );
-	pBatch->Add( COLOR_ENTRY( color::Tan ) );
-	pBatch->Add( COLOR_ENTRY( color::OliveGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::DarkYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::Lime ) );
-	pBatch->Add( COLOR_ENTRY( color::Yellow ) );
-	pBatch->Add( COLOR_ENTRY( color::LightYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::DarkGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::Green ) );
-	pBatch->Add( COLOR_ENTRY( color::SeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::BrightGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::LightGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::DarkTeal ) );
-	pBatch->Add( COLOR_ENTRY( color::Teal ) );
-	pBatch->Add( COLOR_ENTRY( color::Aqua ) );
-	pBatch->Add( COLOR_ENTRY( color::Turquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::LightTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::DarkBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::Blue ) );
-	pBatch->Add( COLOR_ENTRY( color::LightBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::SkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::PaleBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::Indigo ) );
-	pBatch->Add( COLOR_ENTRY( color::BlueGray ) );
-	pBatch->Add( COLOR_ENTRY( color::Violet ) );
-	pBatch->Add( COLOR_ENTRY( color::Plum ) );
-	pBatch->Add( COLOR_ENTRY( color::Lavender ) );
-	pBatch->Add( CColorEntry( color::Grey80, "Grey 80%" ) );
-	pBatch->Add( CColorEntry( color::Grey50, "Grey 50%" ) );
-	pBatch->Add( CColorEntry( color::Grey40, "Grey 40%" ) );
-	pBatch->Add( CColorEntry( color::Grey25, "Grey 25%" ) );
-	pBatch->Add( COLOR_ENTRY( color::White ) );
+	pTable->Add( COLOR_ENTRY( color::Black ) );
+	pTable->Add( COLOR_ENTRY( color::DarkRed ) );
+	pTable->Add( COLOR_ENTRY( color::Red ) );
+	pTable->Add( COLOR_ENTRY( color::Magenta ) );
+	pTable->Add( COLOR_ENTRY( color::Rose ) );
+	pTable->Add( COLOR_ENTRY( color::Brown ) );
+	pTable->Add( COLOR_ENTRY( color::Orange ) );
+	pTable->Add( COLOR_ENTRY( color::LightOrange ) );
+	pTable->Add( COLOR_ENTRY( color::Gold ) );
+	pTable->Add( COLOR_ENTRY( color::Tan ) );
+	pTable->Add( COLOR_ENTRY( color::OliveGreen ) );
+	pTable->Add( COLOR_ENTRY( color::DarkYellow ) );
+	pTable->Add( COLOR_ENTRY( color::Lime ) );
+	pTable->Add( COLOR_ENTRY( color::Yellow ) );
+	pTable->Add( COLOR_ENTRY( color::LightYellow ) );
+	pTable->Add( COLOR_ENTRY( color::DarkGreen ) );
+	pTable->Add( COLOR_ENTRY( color::Green ) );
+	pTable->Add( COLOR_ENTRY( color::SeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::BrightGreen ) );
+	pTable->Add( COLOR_ENTRY( color::LightGreen ) );
+	pTable->Add( COLOR_ENTRY( color::DarkTeal ) );
+	pTable->Add( COLOR_ENTRY( color::Teal ) );
+	pTable->Add( COLOR_ENTRY( color::Aqua ) );
+	pTable->Add( COLOR_ENTRY( color::Turquoise ) );
+	pTable->Add( COLOR_ENTRY( color::LightTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::DarkBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Blue ) );
+	pTable->Add( COLOR_ENTRY( color::LightBlue ) );
+	pTable->Add( COLOR_ENTRY( color::SkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::PaleBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Indigo ) );
+	pTable->Add( COLOR_ENTRY( color::BlueGray ) );
+	pTable->Add( COLOR_ENTRY( color::Violet ) );
+	pTable->Add( COLOR_ENTRY( color::Plum ) );
+	pTable->Add( COLOR_ENTRY( color::Lavender ) );
+	pTable->Add( CColorEntry( color::Grey80, "Grey 80%" ) );
+	pTable->Add( CColorEntry( color::Grey50, "Grey 50%" ) );
+	pTable->Add( CColorEntry( color::Grey40, "Grey 40%" ) );
+	pTable->Add( CColorEntry( color::Grey25, "Grey 25%" ) );
+	pTable->Add( COLOR_ENTRY( color::White ) );
 
-	return pBatch;
+	return pTable;
 }
 
-CColorBatch* CColorRepository::MakeBatch_Custom( void )
+CColorTable* CColorRepository::MakeTable_Custom( void )
 {
-	CColorBatch* pBatch = new CColorBatch( ui::Custom_Colors, BaseId_Custom, color::_Custom_ColorCount, 4 );		// 23 colors: 4 columns x 6 rows
+	CColorTable* pTable = new CColorTable( ui::Custom_Colors, BaseId_Custom, color::_Custom_ColorCount, 4 );		// 23 colors: 4 columns x 6 rows
 
-	pBatch->Add( COLOR_ENTRY( color::VeryDarkGrey ) );
-	pBatch->Add( COLOR_ENTRY( color::DarkGrey ) );
-	pBatch->Add( COLOR_ENTRY( color::LightGrey ) );
-	pBatch->Add( COLOR_ENTRY( color::Grey60 ) );
-	pBatch->Add( COLOR_ENTRY( color::Cyan ) );
-	pBatch->Add( COLOR_ENTRY( color::DarkMagenta ) );
-	pBatch->Add( COLOR_ENTRY( color::LightGreenish ) );
-	pBatch->Add( COLOR_ENTRY( color::SpringGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::NeonGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::AzureBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::BlueWindows10 ) );
-	pBatch->Add( COLOR_ENTRY( color::BlueTextWin10 ) );
-	pBatch->Add( COLOR_ENTRY( color::ScarletRed ) );
-	pBatch->Add( COLOR_ENTRY( color::Salmon ) );
-	pBatch->Add( COLOR_ENTRY( color::Pink ) );
-	pBatch->Add( COLOR_ENTRY( color::PastelPink ) );
-	pBatch->Add( COLOR_ENTRY( color::LightPastelPink ) );
-	pBatch->Add( COLOR_ENTRY( color::ToolStripPink ) );
-	pBatch->Add( COLOR_ENTRY( color::TranspPink ) );
-	pBatch->Add( COLOR_ENTRY( color::SolidOrange ) );
-	pBatch->Add( COLOR_ENTRY( color::Amber ) );
-	pBatch->Add( COLOR_ENTRY( color::PaleYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::GhostWhite ) );
+	pTable->Add( COLOR_ENTRY( color::VeryDarkGrey ) );
+	pTable->Add( COLOR_ENTRY( color::DarkGrey ) );
+	pTable->Add( COLOR_ENTRY( color::LightGrey ) );
+	pTable->Add( COLOR_ENTRY( color::Grey60 ) );
+	pTable->Add( COLOR_ENTRY( color::Cyan ) );
+	pTable->Add( COLOR_ENTRY( color::DarkMagenta ) );
+	pTable->Add( COLOR_ENTRY( color::LightGreenish ) );
+	pTable->Add( COLOR_ENTRY( color::SpringGreen ) );
+	pTable->Add( COLOR_ENTRY( color::NeonGreen ) );
+	pTable->Add( COLOR_ENTRY( color::AzureBlue ) );
+	pTable->Add( COLOR_ENTRY( color::BlueWindows10 ) );
+	pTable->Add( COLOR_ENTRY( color::BlueTextWin10 ) );
+	pTable->Add( COLOR_ENTRY( color::ScarletRed ) );
+	pTable->Add( COLOR_ENTRY( color::Salmon ) );
+	pTable->Add( COLOR_ENTRY( color::Pink ) );
+	pTable->Add( COLOR_ENTRY( color::PastelPink ) );
+	pTable->Add( COLOR_ENTRY( color::LightPastelPink ) );
+	pTable->Add( COLOR_ENTRY( color::ToolStripPink ) );
+	pTable->Add( COLOR_ENTRY( color::TranspPink ) );
+	pTable->Add( COLOR_ENTRY( color::SolidOrange ) );
+	pTable->Add( COLOR_ENTRY( color::Amber ) );
+	pTable->Add( COLOR_ENTRY( color::PaleYellow ) );
+	pTable->Add( COLOR_ENTRY( color::GhostWhite ) );
 
-	return pBatch;
+	return pTable;
 }
 
-CColorBatch* CColorRepository::MakeBatch_DirectX( void )
+CColorTable* CColorRepository::MakeTable_DirectX( void )
 {
-	CColorBatch* pBatch = new CColorBatch( ui::DirectX_Colors, BaseId_DirectX, color::directx::_DirectX_ColorCount, 10 );		// 140 colors: 10 columns x 14 rows
+	CColorTable* pTable = new CColorTable( ui::DirectX_Colors, BaseId_DirectX, color::directx::_DirectX_ColorCount, 10 );		// 140 colors: 10 columns x 14 rows
 
-	pBatch->Add( COLOR_ENTRY( color::directx::AliceBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::AntiqueWhite ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Aqua ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Aquamarine ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Azure ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Beige ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Bisque ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Black ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::BlanchedAlmond ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Blue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::BlueViolet ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Brown ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::BurlyWood ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::CadetBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Chartreuse ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Chocolate ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Coral ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::CornflowerBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Cornsilk ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Crimson ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Cyan ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkCyan ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkGoldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkGray ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkKhaki ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkMagenta ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkOliveGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkOrange ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkOrchid ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkRed ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkSalmon ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkSlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkSlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DarkViolet ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DeepPink ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DeepSkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DimGray ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::DodgerBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Firebrick ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::FloralWhite ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::ForestGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Fuchsia ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Gainsboro ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::GhostWhite ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Gold ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Goldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Gray ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Green ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::GreenYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Honeydew ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::HotPink ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::IndianRed ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Indigo ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Ivory ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Khaki ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Lavender ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LavenderBlush ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LawnGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LemonChiffon ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightCoral ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightCyan ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightGoldenrodYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightGray ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightPink ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightSalmon ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightSkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightSlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightSteelBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LightYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Lime ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::LimeGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Linen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Magenta ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Maroon ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumAquamarine ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumOrchid ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumPurple ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumSlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumSpringGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MediumVioletRed ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MidnightBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MintCream ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::MistyRose ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Moccasin ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::NavajoWhite ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Navy ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::OldLace ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Olive ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::OliveDrab ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Orange ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::OrangeRed ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Orchid ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::PaleGoldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::PaleGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::PaleTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::PaleVioletRed ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::PapayaWhip ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::PeachPuff ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Peru ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Pink ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Plum ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::PowderBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Purple ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Red ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::RosyBrown ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::RoyalBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SaddleBrown ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Salmon ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SandyBrown ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SeaShell ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Sienna ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Silver ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Snow ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SpringGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::SteelBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Tan ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Teal ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Thistle ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Tomato ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Turquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Violet ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Wheat ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::White ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::WhiteSmoke ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::Yellow ) );
-	pBatch->Add( COLOR_ENTRY( color::directx::YellowGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::AliceBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::AntiqueWhite ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Aqua ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Aquamarine ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Azure ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Beige ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Bisque ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Black ) );
+	pTable->Add( COLOR_ENTRY( color::directx::BlanchedAlmond ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Blue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::BlueViolet ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Brown ) );
+	pTable->Add( COLOR_ENTRY( color::directx::BurlyWood ) );
+	pTable->Add( COLOR_ENTRY( color::directx::CadetBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Chartreuse ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Chocolate ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Coral ) );
+	pTable->Add( COLOR_ENTRY( color::directx::CornflowerBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Cornsilk ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Crimson ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Cyan ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkCyan ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkGoldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkGray ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkKhaki ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkMagenta ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkOliveGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkOrange ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkOrchid ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkRed ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkSalmon ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkSlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkSlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DarkViolet ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DeepPink ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DeepSkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DimGray ) );
+	pTable->Add( COLOR_ENTRY( color::directx::DodgerBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Firebrick ) );
+	pTable->Add( COLOR_ENTRY( color::directx::FloralWhite ) );
+	pTable->Add( COLOR_ENTRY( color::directx::ForestGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Fuchsia ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Gainsboro ) );
+	pTable->Add( COLOR_ENTRY( color::directx::GhostWhite ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Gold ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Goldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Gray ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Green ) );
+	pTable->Add( COLOR_ENTRY( color::directx::GreenYellow ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Honeydew ) );
+	pTable->Add( COLOR_ENTRY( color::directx::HotPink ) );
+	pTable->Add( COLOR_ENTRY( color::directx::IndianRed ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Indigo ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Ivory ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Khaki ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Lavender ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LavenderBlush ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LawnGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LemonChiffon ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightCoral ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightCyan ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightGoldenrodYellow ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightGray ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightPink ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightSalmon ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightSkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightSlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightSteelBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LightYellow ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Lime ) );
+	pTable->Add( COLOR_ENTRY( color::directx::LimeGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Linen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Magenta ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Maroon ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumAquamarine ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumOrchid ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumPurple ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumSlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumSpringGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MediumVioletRed ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MidnightBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MintCream ) );
+	pTable->Add( COLOR_ENTRY( color::directx::MistyRose ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Moccasin ) );
+	pTable->Add( COLOR_ENTRY( color::directx::NavajoWhite ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Navy ) );
+	pTable->Add( COLOR_ENTRY( color::directx::OldLace ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Olive ) );
+	pTable->Add( COLOR_ENTRY( color::directx::OliveDrab ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Orange ) );
+	pTable->Add( COLOR_ENTRY( color::directx::OrangeRed ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Orchid ) );
+	pTable->Add( COLOR_ENTRY( color::directx::PaleGoldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::directx::PaleGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::PaleTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::directx::PaleVioletRed ) );
+	pTable->Add( COLOR_ENTRY( color::directx::PapayaWhip ) );
+	pTable->Add( COLOR_ENTRY( color::directx::PeachPuff ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Peru ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Pink ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Plum ) );
+	pTable->Add( COLOR_ENTRY( color::directx::PowderBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Purple ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Red ) );
+	pTable->Add( COLOR_ENTRY( color::directx::RosyBrown ) );
+	pTable->Add( COLOR_ENTRY( color::directx::RoyalBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SaddleBrown ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Salmon ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SandyBrown ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SeaShell ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Sienna ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Silver ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Snow ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SpringGreen ) );
+	pTable->Add( COLOR_ENTRY( color::directx::SteelBlue ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Tan ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Teal ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Thistle ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Tomato ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Turquoise ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Violet ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Wheat ) );
+	pTable->Add( COLOR_ENTRY( color::directx::White ) );
+	pTable->Add( COLOR_ENTRY( color::directx::WhiteSmoke ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Yellow ) );
+	pTable->Add( COLOR_ENTRY( color::directx::YellowGreen ) );
 
-	return pBatch;
+	return pTable;
 }
 
-CColorBatch* CColorRepository::MakeBatch_HTML( void )
+CColorTable* CColorRepository::MakeTable_HTML( void )
 {
-	CColorBatch* pBatch = new CColorBatch( ui::HTML_Colors, BaseId_HTML, color::html::_Html_ColorCount, 1 );		// 300 colors: 10 columns x 30 rows
+	CColorTable* pTable = new CColorTable( ui::HTML_Colors, BaseId_HTML, color::html::_Html_ColorCount, 1 );		// 300 colors: 10 columns x 30 rows
 
-	pBatch->Add( COLOR_ENTRY( color::html::Black ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray0 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray18 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray21 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray23 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray24 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray25 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray26 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray27 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray28 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray29 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray30 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray31 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray32 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray34 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray35 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray36 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray37 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray38 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray39 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray40 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray41 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray42 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray43 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray44 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray45 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray46 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray47 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray48 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray49 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray50 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gray ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateGray4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSteelBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::html::CadetBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Thistle4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumSlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MidnightBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DimGray ) );
-	pBatch->Add( COLOR_ENTRY( color::html::CornflowerBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RoyalBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DeepSkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DeepSkyBlue2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DeepSkyBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DeepSkyBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DodgerBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DodgerBlue2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DodgerBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DodgerBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Violet ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumPurple1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSteelBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SteelBlue1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateBlue5 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateGray3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::VioletRed ) );
-	pBatch->Add( COLOR_ENTRY( color::html::VioletRed1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::VioletRed2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DeepPink ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DeepPink2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DeepPink3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DeepPink4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumVioletRed ) );
-	pBatch->Add( COLOR_ENTRY( color::html::VioletRed3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Firebrick ) );
-	pBatch->Add( COLOR_ENTRY( color::html::VioletRed4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Maroon4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Maroon ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Maroon3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Maroon2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Maroon1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Magenta ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Magenta1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Magenta2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Magenta3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumOrchid4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Purple ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Purple1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Purple2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Purple3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Purple4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkViolet ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrchid1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Plum4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed ) );
-	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::PaleVioletRed4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Plum ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Plum1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Plum2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Plum3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Thistle ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Thistle3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LavenderBlush2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LavenderBlush3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Thistle2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Thistle1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Lavender ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LavenderBlush ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSteelBlue1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightBlue1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightCyan ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateGray1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SlateGray2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSteelBlue2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Turquoise1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Cyan ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Cyan1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Cyan2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Turquoise2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Turquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSlateGray3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Cyan3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Turquoise3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::CadetBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::PaleTurquoise3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightBlue2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Cyan4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSkyBlue2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSkyBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue5 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue6 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSkyBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightCyan2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightCyan3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightCyan4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightBlue3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightBlue4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::PaleTurquoise4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumAquamarine ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::ForestGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumForestGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOliveGreen4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Chartreuse4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Green4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::MediumSpringGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LimeGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Green3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Chartreuse3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::YellowGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen5 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SpringGreen1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SeaGreen1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSeaGreen1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Green ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LawnGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Green1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Green2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Chartreuse2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Chartreuse ) );
-	pBatch->Add( COLOR_ENTRY( color::html::GreenYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOliveGreen1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOliveGreen2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOliveGreen3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Yellow ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Yellow1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Khaki1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Khaki2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gold2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gold1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gold ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gold3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Khaki ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Khaki3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Khaki4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Sienna1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Sienna2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Sienna3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Sienna ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Sienna4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::IndianRed4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkOrange4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Salmon4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkGoldenrod4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Gold4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Goldenrod4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSalmon4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Chocolate ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Coral3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Coral2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Coral ) );
-	pBatch->Add( COLOR_ENTRY( color::html::DarkSalmon ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Salmon1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Salmon2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Salmon3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSalmon3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSalmon2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightSalmon ) );
-	pBatch->Add( COLOR_ENTRY( color::html::SandyBrown ) );
-	pBatch->Add( COLOR_ENTRY( color::html::HotPink ) );
-	pBatch->Add( COLOR_ENTRY( color::html::HotPink1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::HotPink2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::HotPink3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::HotPink4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightCoral ) );
-	pBatch->Add( COLOR_ENTRY( color::html::IndianRed1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::IndianRed2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::IndianRed3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Red ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Red1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Red2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Firebrick1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Firebrick2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Firebrick3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Pink ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Pink2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightPink ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightPink1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightPink2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Pink3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightPink3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::RosyBrown4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightPink4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Pink4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LavenderBlush4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrod4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LemonChiffon4 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LemonChiffon3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrod3 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightGolden2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrod1 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::BlanchedAlmond ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LemonChiffon2 ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LemonChiffon ) );
-	pBatch->Add( COLOR_ENTRY( color::html::LightGoldenrodYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::html::Cornsilk ) );
-	pBatch->Add( COLOR_ENTRY( color::html::White ) );
+	pTable->Add( COLOR_ENTRY( color::html::Black ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray0 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray18 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray21 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray23 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray24 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray25 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray26 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray27 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray28 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray29 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray30 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray31 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray32 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray34 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray35 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray36 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray37 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray38 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray39 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray40 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray41 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray42 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray43 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray44 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray45 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray46 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray47 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray48 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray49 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray50 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gray ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateGray4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSteelBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::html::CadetBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSlateGray4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Thistle4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumSlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumPurple4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MidnightBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::html::DimGray ) );
+	pTable->Add( COLOR_ENTRY( color::html::CornflowerBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::RoyalBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::RoyalBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::RoyalBlue1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::RoyalBlue2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::RoyalBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DeepSkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::DeepSkyBlue2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::DeepSkyBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DeepSkyBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DodgerBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::DodgerBlue2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DodgerBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DodgerBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SteelBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SteelBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateBlue2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Violet ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumPurple3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumPurple ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumPurple2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumPurple1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSteelBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::SteelBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SteelBlue2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SteelBlue1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SkyBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SkyBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateBlue5 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateGray3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::VioletRed ) );
+	pTable->Add( COLOR_ENTRY( color::html::VioletRed1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::VioletRed2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DeepPink ) );
+	pTable->Add( COLOR_ENTRY( color::html::DeepPink2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DeepPink3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DeepPink4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumVioletRed ) );
+	pTable->Add( COLOR_ENTRY( color::html::VioletRed3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Firebrick ) );
+	pTable->Add( COLOR_ENTRY( color::html::VioletRed4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Maroon4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Maroon ) );
+	pTable->Add( COLOR_ENTRY( color::html::Maroon3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Maroon2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Maroon1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Magenta ) );
+	pTable->Add( COLOR_ENTRY( color::html::Magenta1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Magenta2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Magenta3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumOrchid ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumOrchid1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumOrchid2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumOrchid3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumOrchid4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Purple ) );
+	pTable->Add( COLOR_ENTRY( color::html::Purple1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Purple2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Purple3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Purple4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrchid4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrchid ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkViolet ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrchid3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrchid2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrchid1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Plum4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::PaleVioletRed ) );
+	pTable->Add( COLOR_ENTRY( color::html::PaleVioletRed1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::PaleVioletRed2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::PaleVioletRed3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::PaleVioletRed4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Plum ) );
+	pTable->Add( COLOR_ENTRY( color::html::Plum1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Plum2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Plum3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Thistle ) );
+	pTable->Add( COLOR_ENTRY( color::html::Thistle3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LavenderBlush2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LavenderBlush3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Thistle2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Thistle1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Lavender ) );
+	pTable->Add( COLOR_ENTRY( color::html::LavenderBlush ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSteelBlue1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightBlue1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightCyan ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateGray1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SlateGray2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSteelBlue2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Turquoise1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Cyan ) );
+	pTable->Add( COLOR_ENTRY( color::html::Cyan1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Cyan2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Turquoise2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::html::Turquoise ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSlateGray1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSlateGray2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSlateGray3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Cyan3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Turquoise3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::CadetBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::PaleTurquoise3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightBlue2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::html::Cyan4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSkyBlue2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSkyBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SkyBlue5 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SkyBlue6 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSkyBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightCyan2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightCyan3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightCyan4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightBlue3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightBlue4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::PaleTurquoise4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSeaGreen4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumAquamarine ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::SeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::SeaGreen4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::ForestGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumForestGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::SpringGreen4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOliveGreen4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Chartreuse4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Green4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::MediumSpringGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::SpringGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::LimeGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::SpringGreen3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSeaGreen3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Green3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Chartreuse3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::YellowGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::SpringGreen5 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SeaGreen3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SpringGreen2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SpringGreen1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SeaGreen2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::SeaGreen1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSeaGreen2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSeaGreen1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Green ) );
+	pTable->Add( COLOR_ENTRY( color::html::LawnGreen ) );
+	pTable->Add( COLOR_ENTRY( color::html::Green1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Green2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Chartreuse2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Chartreuse ) );
+	pTable->Add( COLOR_ENTRY( color::html::GreenYellow ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOliveGreen1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOliveGreen2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOliveGreen3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Yellow ) );
+	pTable->Add( COLOR_ENTRY( color::html::Yellow1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Khaki1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Khaki2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Goldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gold2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gold1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Goldenrod1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Goldenrod2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gold ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gold3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Goldenrod3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkGoldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::html::Khaki ) );
+	pTable->Add( COLOR_ENTRY( color::html::Khaki3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Khaki4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkGoldenrod1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkGoldenrod2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkGoldenrod3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Sienna1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Sienna2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrange ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrange1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrange2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrange3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Sienna3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Sienna ) );
+	pTable->Add( COLOR_ENTRY( color::html::Sienna4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::IndianRed4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkOrange4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Salmon4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkGoldenrod4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Gold4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Goldenrod4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSalmon4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Chocolate ) );
+	pTable->Add( COLOR_ENTRY( color::html::Coral3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Coral2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Coral ) );
+	pTable->Add( COLOR_ENTRY( color::html::DarkSalmon ) );
+	pTable->Add( COLOR_ENTRY( color::html::Salmon1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Salmon2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Salmon3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSalmon3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSalmon2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightSalmon ) );
+	pTable->Add( COLOR_ENTRY( color::html::SandyBrown ) );
+	pTable->Add( COLOR_ENTRY( color::html::HotPink ) );
+	pTable->Add( COLOR_ENTRY( color::html::HotPink1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::HotPink2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::HotPink3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::HotPink4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightCoral ) );
+	pTable->Add( COLOR_ENTRY( color::html::IndianRed1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::IndianRed2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::IndianRed3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Red ) );
+	pTable->Add( COLOR_ENTRY( color::html::Red1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Red2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Firebrick1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Firebrick2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Firebrick3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Pink ) );
+	pTable->Add( COLOR_ENTRY( color::html::RosyBrown1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::RosyBrown2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Pink2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightPink ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightPink1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightPink2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Pink3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::RosyBrown3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::RosyBrown ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightPink3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::RosyBrown4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightPink4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Pink4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LavenderBlush4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightGoldenrod4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LemonChiffon4 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LemonChiffon3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightGoldenrod3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightGolden2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightGoldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightGoldenrod1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::BlanchedAlmond ) );
+	pTable->Add( COLOR_ENTRY( color::html::LemonChiffon2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::LemonChiffon ) );
+	pTable->Add( COLOR_ENTRY( color::html::LightGoldenrodYellow ) );
+	pTable->Add( COLOR_ENTRY( color::html::Cornsilk ) );
+	pTable->Add( COLOR_ENTRY( color::html::White ) );
 
-	return pBatch;
+	return pTable;
 }
 
-CColorBatch* CColorRepository::MakeBatch_X11( void )
+CColorTable* CColorRepository::MakeTable_X11( void )
 {
-	CColorBatch* pBatch = new CColorBatch( ui::X11_Colors, BaseId_HTML, color::x11::_X11_ColorCount, 1 );		// 140 colors: 10 columns x 14 rows
+	CColorTable* pTable = new CColorTable( ui::X11_Colors, BaseId_HTML, color::x11::_X11_ColorCount, 1 );		// 140 colors: 10 columns x 14 rows
 
-	pBatch->Add( COLOR_ENTRY( color::x11::Black ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkSlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::SlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightSlateGray ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DimGray ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Gray ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkGray ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Silver ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightGrey ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Gainsboro ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::IndianRed ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightCoral ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Salmon ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkSalmon ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightSalmon ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Red ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Crimson ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::FireBrick ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkRed ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Pink ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightPink ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::HotPink ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DeepPink ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumVioletRed ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::PaleVioletRed ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightSalmon2 ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Coral ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Tomato ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::OrangeRed ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkOrange ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Orange ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Gold ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Yellow ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LemonChiffon ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightGoldenrodYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::PapayaWhip ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Moccasin ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::PeachPuff ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::PaleGoldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Khaki ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkKhaki ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Lavender ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Thistle ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Plum ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Violet ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Orchid ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Fuchsia ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Magenta ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumOrchid ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumPurple ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::BlueViolet ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkViolet ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkOrchid ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkMagenta ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Purple ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Indigo ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkSlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::SlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumSlateBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::GreenYellow ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Chartreuse ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LawnGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Lime ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LimeGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::PaleGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumSpringGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::SpringGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::SeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::ForestGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Green ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::YellowGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::OliveDrab ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Olive ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkOliveGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumAquamarine ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightSeaGreen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkCyan ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Teal ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Aqua ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Cyan ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightCyan ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::PaleTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Aquamarine ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Turquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkTurquoise ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::CadetBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::SteelBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightSteelBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::PowderBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::SkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LightSkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DeepSkyBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DodgerBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::CornflowerBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::RoyalBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Blue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MediumBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Navy ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MidnightBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Cornsilk ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::BlanchedAlmond ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Bisque ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::NavajoWhite ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Wheat ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::BurlyWood ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Tan ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::RosyBrown ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::SandyBrown ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Goldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::DarkGoldenrod ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Peru ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Chocolate ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::SaddleBrown ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Sienna ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Brown ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Maroon ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MistyRose ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::LavenderBlush ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Linen ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::AntiqueWhite ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Ivory ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::FloralWhite ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::OldLace ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Beige ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Seashell ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::WhiteSmoke ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::GhostWhite ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::AliceBlue ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Azure ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::MintCream ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::Honeydew ) );
-	pBatch->Add( COLOR_ENTRY( color::x11::White ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Black ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkSlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::x11::SlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightSlateGray ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DimGray ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Gray ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkGray ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Silver ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightGrey ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Gainsboro ) );
+	pTable->Add( COLOR_ENTRY( color::x11::IndianRed ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightCoral ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Salmon ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkSalmon ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightSalmon ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Red ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Crimson ) );
+	pTable->Add( COLOR_ENTRY( color::x11::FireBrick ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkRed ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Pink ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightPink ) );
+	pTable->Add( COLOR_ENTRY( color::x11::HotPink ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DeepPink ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumVioletRed ) );
+	pTable->Add( COLOR_ENTRY( color::x11::PaleVioletRed ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightSalmon2 ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Coral ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Tomato ) );
+	pTable->Add( COLOR_ENTRY( color::x11::OrangeRed ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkOrange ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Orange ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Gold ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Yellow ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightYellow ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LemonChiffon ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightGoldenrodYellow ) );
+	pTable->Add( COLOR_ENTRY( color::x11::PapayaWhip ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Moccasin ) );
+	pTable->Add( COLOR_ENTRY( color::x11::PeachPuff ) );
+	pTable->Add( COLOR_ENTRY( color::x11::PaleGoldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Khaki ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkKhaki ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Lavender ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Thistle ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Plum ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Violet ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Orchid ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Fuchsia ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Magenta ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumOrchid ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumPurple ) );
+	pTable->Add( COLOR_ENTRY( color::x11::BlueViolet ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkViolet ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkOrchid ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkMagenta ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Purple ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Indigo ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkSlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::SlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumSlateBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::GreenYellow ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Chartreuse ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LawnGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Lime ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LimeGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::PaleGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumSpringGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::SpringGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::SeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::ForestGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Green ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::YellowGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::OliveDrab ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Olive ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkOliveGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumAquamarine ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightSeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkCyan ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Teal ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Aqua ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Cyan ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightCyan ) );
+	pTable->Add( COLOR_ENTRY( color::x11::PaleTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Aquamarine ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Turquoise ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkTurquoise ) );
+	pTable->Add( COLOR_ENTRY( color::x11::CadetBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::SteelBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightSteelBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::PowderBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::SkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LightSkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DeepSkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DodgerBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::CornflowerBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::RoyalBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Blue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MediumBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Navy ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MidnightBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Cornsilk ) );
+	pTable->Add( COLOR_ENTRY( color::x11::BlanchedAlmond ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Bisque ) );
+	pTable->Add( COLOR_ENTRY( color::x11::NavajoWhite ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Wheat ) );
+	pTable->Add( COLOR_ENTRY( color::x11::BurlyWood ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Tan ) );
+	pTable->Add( COLOR_ENTRY( color::x11::RosyBrown ) );
+	pTable->Add( COLOR_ENTRY( color::x11::SandyBrown ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Goldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::x11::DarkGoldenrod ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Peru ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Chocolate ) );
+	pTable->Add( COLOR_ENTRY( color::x11::SaddleBrown ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Sienna ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Brown ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Maroon ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MistyRose ) );
+	pTable->Add( COLOR_ENTRY( color::x11::LavenderBlush ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Linen ) );
+	pTable->Add( COLOR_ENTRY( color::x11::AntiqueWhite ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Ivory ) );
+	pTable->Add( COLOR_ENTRY( color::x11::FloralWhite ) );
+	pTable->Add( COLOR_ENTRY( color::x11::OldLace ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Beige ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Seashell ) );
+	pTable->Add( COLOR_ENTRY( color::x11::WhiteSmoke ) );
+	pTable->Add( COLOR_ENTRY( color::x11::GhostWhite ) );
+	pTable->Add( COLOR_ENTRY( color::x11::AliceBlue ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Azure ) );
+	pTable->Add( COLOR_ENTRY( color::x11::MintCream ) );
+	pTable->Add( COLOR_ENTRY( color::x11::Honeydew ) );
+	pTable->Add( COLOR_ENTRY( color::x11::White ) );
 
-	return pBatch;
+	return pTable;
 }

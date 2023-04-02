@@ -7,6 +7,7 @@
 
 
 class CColorPickerButton;
+class CMenuPickerButton;
 
 
 class CTestColorsDialog : public CLayoutDialog
@@ -16,10 +17,13 @@ public:
 	virtual ~CTestColorsDialog();
 private:
 	COLORREF m_color;
+	CMenu m_popupMenu;
+	bool m_editChecked;
 private:
 	// enum { IDD = IDD_TEST_COLORS_DIALOG };
 	CMFCColorButton m_colorPickerButton;		// drop-down button
 	std::auto_ptr<CColorPickerButton> m_pMyColorPicker;
+	std::auto_ptr<CMenuPickerButton> m_pMenuPicker;
 
 	// generated stuff
 protected:
@@ -28,6 +32,8 @@ protected:
 protected:
 	afx_msg void OnColorPicker( void );
 	afx_msg void OnMyColorPicker( void );
+	afx_msg void OnMenuPicker( void );
+	afx_msg void OnUpdate_EditItem( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

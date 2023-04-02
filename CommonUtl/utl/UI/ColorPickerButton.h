@@ -3,10 +3,11 @@
 #pragma once
 
 #include <afxcolorbutton.h>
+#include <afxmenubutton.h>
 #include "Dialog_fwd.h"
 
 
-class CColorBatchGroup;
+class CColorTableGroup;
 
 
 class CColorPickerButton : public CMFCColorButton
@@ -16,13 +17,25 @@ public:
 	CColorPickerButton( void );
 	virtual ~CColorPickerButton();
 
-	const CColorBatchGroup& GetBatchGroup( void ) const { return *m_pBatchGroup; }
-	CColorBatchGroup& RefBatchGroup( void ) { return *m_pBatchGroup; }
+	const CColorTableGroup& GetTableGroup( void ) const { return *m_pTableGroup; }
+	CColorTableGroup& RefTableGroup( void ) { return *m_pTableGroup; }
 protected:
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
-	std::unique_ptr<CColorBatchGroup> m_pBatchGroup;
+	std::unique_ptr<CColorTableGroup> m_pTableGroup;
+};
+
+
+class CMenuPickerButton : public CMFCMenuButton
+{
+public:
+	CMenuPickerButton( void );
+	virtual ~CMenuPickerButton();
+protected:
+	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
+
+	DECLARE_MESSAGE_MAP()
 };
 
 

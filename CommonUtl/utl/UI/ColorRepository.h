@@ -6,19 +6,19 @@
 
 
 class CEnumTags;
-class CColorBatch;
+class CColorTable;
 
 
 namespace ui
 {
-	enum ColorBatch
+	enum StdColorTable
 	{
-		System_Colors, Standard_Colors, Custom_Colors, DirectX_Colors, HTML_Colors, X11_Colors,	// color-repo batches
+		System_Colors, Standard_Colors, Custom_Colors, DirectX_Colors, HTML_Colors, X11_Colors,	// color-repo standard tables
 		Shades_Colors, User_Colors,																// implementation (not based in repository)
-		_ColorBatchCount
+		_ColorTableCount
 	};
 
-	const CEnumTags& GetTags_ColorBatch( void );
+	const CEnumTags& GetTags_ColorTable( void );
 }
 
 
@@ -28,32 +28,32 @@ namespace ui
 class CColorEntry		// a named colour
 {
 public:
-	CColorEntry( void ) : m_color( CLR_NONE ), m_pBatch( nullptr ) {}
+	CColorEntry( void ) : m_color( CLR_NONE ), m_pParentTable( nullptr ) {}
 	CColorEntry( COLORREF color, const char* pLiteral );		// converts "DarkGrey80" to "Dark Grey 80"
-	explicit CColorEntry( COLORREF color, const std::tstring& name ) : m_color( color ), m_name( name ), m_pBatch( nullptr ) {}
+	explicit CColorEntry( COLORREF color, const std::tstring& name ) : m_color( color ), m_name( name ), m_pParentTable( nullptr ) {}
 
 	bool operator==( COLORREF rawColor ) const { return m_color == rawColor; }		// for std::find algorithms
 	static const char* FindScopedLiteral( const char* pScopedColorName );
 
-	const CColorBatch* GetColorBatch( void ) const { return m_pBatch; }
+	const CColorTable* GetParentTable( void ) const { return m_pParentTable; }
 public:
 	COLORREF m_color;
 	std::tstring m_name;
 private:
-	const CColorBatch* m_pBatch;
+	const CColorTable* m_pParentTable;
 
-	friend class CColorBatch;
+	friend class CColorTable;
 };
 
 
-class CColorBatch : private utl::noncopyable
+class CColorTable : private utl::noncopyable
 {
 public:
-	CColorBatch( ui::ColorBatch batchType, UINT baseCmdId, size_t capacity, int layoutCount = 1 /*single-column*/ );
-	~CColorBatch();
+	CColorTable( ui::StdColorTable tableType, UINT baseCmdId, size_t capacity, int layoutCount = 1 /*single-column*/ );
+	~CColorTable();
 
-	ui::ColorBatch GetBatchType( void ) const { return m_batchType; }
-	const std::tstring& GetBatchName( void ) const;
+	ui::StdColorTable GetTableType( void ) const { return m_tableType; }
+	const std::tstring& GetTableName( void ) const;
 
 	const std::vector<CColorEntry>& GetColors( void ) const { return m_colors; }
 	const CColorEntry* FindColor( COLORREF rawColor ) const;
@@ -66,61 +66,61 @@ public:
 
 	void Add( const CColorEntry& colorEntry );
 
-	static CColorBatch* MakeShadesBatch( size_t shadesCount, COLORREF selColor );
+	static CColorTable* MakeShadesTable( size_t shadesCount, COLORREF selColor );
 private:
-	const ui::ColorBatch m_batchType;
+	const ui::StdColorTable m_tableType;
 	const UINT m_baseCmdId;
 	std::vector<CColorEntry> m_colors;
 	int m_layoutCount;						// color picker layout: columnCount if positive, rowCount if negative
 };
 
 
-class CColorBatchGroup
+class CColorTableGroup
 {
 public:
-	CColorBatchGroup( void ) {}
+	CColorTableGroup( void ) {}
 
-	const std::vector<CColorBatch*>& GetBatches( void ) const { return m_colorBatches; }
-	std::vector<CColorBatch*>& RefBatches( void ) { return m_colorBatches; }
+	const std::vector<CColorTable*>& GetTables( void ) const { return m_colorTables; }
+	std::vector<CColorTable*>& RefTables( void ) { return m_colorTables; }
 
-	const CColorBatch* FindBatch( ui::ColorBatch batchType ) const;
-	const CColorBatch* FindSystemBatch( void ) const { return FindBatch( ui::System_Colors ); }
+	const CColorTable* FindTable( ui::StdColorTable tableType ) const;
+	const CColorTable* FindSystemTable( void ) const { return FindTable( ui::System_Colors ); }
 
 	// color entries lookup
 	const CColorEntry* FindColorEntry( COLORREF rawColor ) const;
 	void QueryMatchingColors( OUT std::vector<const CColorEntry*>& rColorEntries, COLORREF rawColor ) const;
 	std::tstring FormatColorMatch( COLORREF rawColor, bool multiple = true ) const;
 protected:
-	std::vector<CColorBatch*> m_colorBatches;		// no ownership
+	std::vector<CColorTable*> m_colorTables;		// no ownership
 };
 
 
-class CColorRepository : public CColorBatchGroup
+class CColorRepository : public CColorTableGroup
 {
 	CColorRepository( void );
 	~CColorRepository() { Clear(); }
 public:
 	static const CColorRepository* Instance( void );
 
-	void Clear( void );		// owns the color batches
+	void Clear( void );		// owns the color tables
 
-	const CColorBatch* GetBatch( ui::ColorBatch batchType ) const { REQUIRE( batchType < ui::_ColorBatchCount ); return m_colorBatches[ batchType ]; }
-	const CColorBatch* GetSystemBatch( void ) const { return GetBatch( ui::System_Colors ); }
-	const CColorBatch* GetStockColorBatch( void ) const { return GetBatch( ui::HTML_Colors ); }
+	const CColorTable* GetTable( ui::StdColorTable tableType ) const { REQUIRE( tableType < ui::_ColorTableCount ); return m_colorTables[ tableType ]; }
+	const CColorTable* GetSystemColorTable( void ) const { return GetTable( ui::System_Colors ); }
+	const CColorTable* GetStockColorTable( void ) const { return GetTable( ui::HTML_Colors ); }
 
-	enum BatchMenuBaseCmdId
+	enum TableMenuBaseCmdId
 	{
 		BaseId_System = 1000, BaseId_Shades = 2000, BaseId_User = 3000,
 		BaseId_Standard = 11000, BaseId_Custom = 12000,
 		BaseId_DirectX = 13000, BaseId_HTML = 14000, BaseId_X11 = 15000
 	};
 private:
-	static CColorBatch* MakeBatch_System( void );
-	static CColorBatch* MakeBatch_Standard( void );
-	static CColorBatch* MakeBatch_Custom( void );
-	static CColorBatch* MakeBatch_DirectX( void );
-	static CColorBatch* MakeBatch_HTML( void );
-	static CColorBatch* MakeBatch_X11( void );
+	static CColorTable* MakeTable_System( void );
+	static CColorTable* MakeTable_Standard( void );
+	static CColorTable* MakeTable_Custom( void );
+	static CColorTable* MakeTable_DirectX( void );
+	static CColorTable* MakeTable_HTML( void );
+	static CColorTable* MakeTable_X11( void );
 };
 
 
@@ -135,12 +135,12 @@ namespace func
 		}
 	};
 
-	struct ToBatchName
+	struct ToTableName
 	{
 		const std::tstring& operator()( const CColorEntry* pColorEntry ) const
 		{
 			ASSERT_PTR( pColorEntry );
-			return pColorEntry->GetColorBatch()->GetBatchName();
+			return pColorEntry->GetParentTable()->GetTableName();
 		}
 	};
 
@@ -149,7 +149,7 @@ namespace func
 		std::tstring operator()( const CColorEntry* pColorEntry, const TCHAR* pSep = _T(" ") ) const
 		{
 			ASSERT_PTR( pColorEntry );
-			return pColorEntry->m_name + pSep + _T('(') + pColorEntry->GetColorBatch()->GetBatchName() + _T(')');
+			return pColorEntry->m_name + pSep + _T('(') + pColorEntry->GetParentTable()->GetTableName() + _T(')');
 		}
 	};
 }

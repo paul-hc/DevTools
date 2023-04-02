@@ -34,7 +34,7 @@ namespace utl
 		return str::Format( _T("Hex RGB( %02X, %02X, %02X)"), color.m_red, color.m_green, color.m_blue );
 	}
 
-	std::tstring FormatColorInfo( const CPixelBGR& color, size_t colorTablePos /*= std::tstring::npos*/, const CPoint& pos /*= CPoint( -1, -1 )*/ )
+	std::tstring FormatColorInfo( const CPixelBGR& color, size_t colorBoardPos /*= std::tstring::npos*/, const CPoint& pos /*= CPoint( -1, -1 )*/ )
 	{
 		std::tstring text = str::Format( _T(" R=%d G=%d B=%d   Hex RGB( %02X, %02X, %02X)"),
 			color.m_red, color.m_green, color.m_blue,
@@ -43,8 +43,8 @@ namespace utl
 		if ( pos != CPoint( -1, -1 ) )
 			text += str::Format( _T("  (X=%d, Y=%d)"), pos.x, pos.y );
 
-		if ( colorTablePos != std::tstring::npos )
-			text += str::Format( _T("   (color table index: %d)"), colorTablePos );
+		if ( colorBoardPos != std::tstring::npos )
+			text += str::Format( _T("   (color table index: %d)"), colorBoardPos );
 		return text;
 	}
 
@@ -73,22 +73,22 @@ namespace utl
 }
 
 
-// CColorTableOptions implementation
+// CColorBoardOptions implementation
 
-const CEnumTags& CColorTableOptions::GetTags_Mode( void )
+const CEnumTags& CColorBoardOptions::GetTags_Mode( void )
 {
 	static const CEnumTags tags( _T("Image Color Table|System 1 bit (2 colors)|System 4 bit (16 colors)|System 8 bit (256 colors)") );
 	return tags;
 }
 
-void CColorTableOptions::Load( const TCHAR* pSection )
+void CColorBoardOptions::Load( const TCHAR* pSection )
 {
 	m_mode = (Mode)AfxGetApp()->GetProfileInt( pSection, reg::entry_mode, m_mode );
 	m_uniqueColors = AfxGetApp()->GetProfileInt( pSection, reg::entry_uniqueColors, m_uniqueColors ) != FALSE;
 	m_showLabels = AfxGetApp()->GetProfileInt( pSection, reg::entry_showLabels, m_showLabels ) != FALSE;
 }
 
-void CColorTableOptions::Save( const TCHAR* pSection ) const
+void CColorBoardOptions::Save( const TCHAR* pSection ) const
 {
 	AfxGetApp()->WriteProfileInt( pSection, reg::entry_mode, m_mode );
 	AfxGetApp()->WriteProfileInt( pSection, reg::entry_uniqueColors, m_uniqueColors );
@@ -96,14 +96,14 @@ void CColorTableOptions::Save( const TCHAR* pSection ) const
 }
 
 
-// CColorTable implementation
+// CColorBoard implementation
 
-CColorTable::CColorTable( void )
+CColorBoard::CColorBoard( void )
 	: m_totalColors( 0 )
 {
 }
 
-void CColorTable::Clear( void )
+void CColorBoard::Clear( void )
 {
 	m_colors.clear();
 	m_totalColors = 0;
@@ -111,27 +111,27 @@ void CColorTable::Clear( void )
 	m_dupColorsPos.clear();
 }
 
-bool CColorTable::IsDuplicateAt( size_t pos ) const
+bool CColorBoard::IsDuplicateAt( size_t pos ) const
 {
 	return utl::Contains( m_dupColorsPos, pos );
 }
 
-size_t CColorTable::FindUniqueColorPos( size_t pos ) const
+size_t CColorBoard::FindUniqueColorPos( size_t pos ) const
 {
 	return utl::FindPos( m_colors, m_colors[ pos ] );
 }
 
-size_t CColorTable::FindColorPos( COLORREF color ) const
+size_t CColorBoard::FindColorPos( COLORREF color ) const
 {
 	return utl::FindPos( m_colors, color );
 }
 
-void CColorTable::Build( CDibSection* pDib )
+void CColorBoard::Build( CDibSection* pDib )
 {
 	Clear();
 	switch ( m_mode )
 	{
-		case ImageColorTable:
+		case ImageColorBoard:
 			if ( pDib != nullptr && pDib->IsIndexed() )
 			{
 				CDibSectionInfo info( pDib->GetHandle() );
@@ -166,13 +166,13 @@ void CColorTable::Build( CDibSection* pDib )
 			m_dupColorsPos.push_back( i );
 }
 
-bool CColorTable::SelectColor( COLORREF color )
+bool CColorBoard::SelectColor( COLORREF color )
 {
 	m_selPos = utl::FindPos( m_colors, color );
 	return m_selPos != std::tstring::npos;
 }
 
-void CColorTable::Draw( CDC* pDC, const CRect& clientRect ) const
+void CColorBoard::Draw( CDC* pDC, const CRect& clientRect ) const
 {
 	if ( IsEmpty() )
 	{
@@ -182,30 +182,30 @@ void CColorTable::Draw( CDC* pDC, const CRect& clientRect ) const
 	}
 	else
 	{
-		CColorTableRenderer renderer( this, clientRect );
+		CColorBoardRenderer renderer( this, clientRect );
 		renderer.Draw( pDC );
 	}
 }
 
 
-// CColorTableRenderer implementation
+// CColorBoardRenderer implementation
 
-CColorTableRenderer::CColorTableRenderer( const CColorTable* pColorTable, const CRect& clientRect )
-	: m_pColorTable( pColorTable )
+CColorBoardRenderer::CColorBoardRenderer( const CColorBoard* pColorBoard, const CRect& clientRect )
+	: m_pColorBoard( pColorBoard )
 	, m_clientRect( clientRect )
 	, m_coreRect( CPoint( 0, 0 ), ComputeCoreSize() )
 	, m_cellSize( ComputeCellLayout( m_coreRect ) )
 {
-	ASSERT_PTR( m_pColorTable );
+	ASSERT_PTR( m_pColorBoard );
 
 	AlignTableCore();
 }
 
-CSize CColorTableRenderer::ComputeCoreSize( void )
+CSize CColorBoardRenderer::ComputeCoreSize( void )
 {
 	CSize coreSize = m_clientRect.Size();
 
-	if ( 2 == m_pColorTable->m_colors.size() )
+	if ( 2 == m_pColorBoard->m_colors.size() )
 	{
 		// limit the size of monochrome core (cell gets too big)
 		coreSize.cx -= coreSize.cx / 5;
@@ -218,52 +218,52 @@ CSize CColorTableRenderer::ComputeCoreSize( void )
 	return coreSize;
 }
 
-CSize CColorTableRenderer::ComputeCellLayout( const CRect& rect )
+CSize CColorBoardRenderer::ComputeCellLayout( const CRect& rect )
 {
-	ASSERT( !m_pColorTable->IsEmpty() );
+	ASSERT( !m_pColorBoard->IsEmpty() );
 
-	if ( 2 == m_pColorTable->m_colors.size() )
+	if ( 2 == m_pColorBoard->m_colors.size() )
 	{
 		m_columns = 2;
 		m_rows = 1;
 	}
-	else if ( 16 == m_pColorTable->m_colors.size() )
+	else if ( 16 == m_pColorBoard->m_colors.size() )
 	{
 		m_columns = 8;
 		m_rows = 2;
 	}
 	else
 	{
-		m_columns = static_cast<UINT>( sqrt( (double)m_pColorTable->m_colors.size() ) );
+		m_columns = static_cast<UINT>( sqrt( (double)m_pColorBoard->m_colors.size() ) );
 
 		for ( ; ; ++m_columns )
 		{
-			m_rows = static_cast<UINT>( m_pColorTable->m_colors.size() ) / m_columns;
+			m_rows = static_cast<UINT>( m_pColorBoard->m_colors.size() ) / m_columns;
 			CSize cellSize( rect.Width() / m_columns, rect.Height() / m_rows );
 			if ( ui::GetAspectRatio( cellSize ) <= 1.5 )
 				break;
 		}
 
-		if ( m_columns * m_rows < (UINT)m_pColorTable->m_colors.size() )
+		if ( m_columns * m_rows < (UINT)m_pColorBoard->m_colors.size() )
 			++m_rows;			// add an extra row if there is a reminder
 	}
 
 	return CSize( rect.Width() / m_columns, rect.Height() / m_rows );		// cell size
 }
 
-void CColorTableRenderer::AlignTableCore( void )
+void CColorBoardRenderer::AlignTableCore( void )
 {
 	// center the table
 	m_coreRect.SetRect( 0, 0, m_cellSize.cx * m_columns, m_cellSize.cy * m_rows );
 	ui::CenterRect( m_coreRect, m_clientRect );
-	if ( 16 == m_pColorTable->m_colors.size() )
+	if ( 16 == m_pColorBoard->m_colors.size() )
 	{
 		m_coreRect.top = m_clientRect.top;
 		m_coreRect.bottom = m_clientRect.bottom;			// cover vertically entirely
 	}
 }
 
-CRect CColorTableRenderer::MakeCellRect( UINT x, UINT y ) const
+CRect CColorBoardRenderer::MakeCellRect( UINT x, UINT y ) const
 {
 	ASSERT( x < m_columns );
 	ASSERT( y < m_rows );
@@ -271,9 +271,9 @@ CRect CColorTableRenderer::MakeCellRect( UINT x, UINT y ) const
 	return CRect( pos, m_cellSize );
 }
 
-void CColorTableRenderer::Draw( CDC* pDC ) const
+void CColorBoardRenderer::Draw( CDC* pDC ) const
 {
-	ASSERT( !m_pColorTable->IsEmpty() );
+	ASSERT( !m_pColorBoard->IsEmpty() );
 
 	EraseEdges( pDC );				// erase the background on the edges (no covered by cells)
 
@@ -283,18 +283,18 @@ void CColorTableRenderer::Draw( CDC* pDC ) const
 	for ( size_t pos = 0, totalSize = m_columns * m_rows; pos != totalSize; ++pos )
 	{
 		CRect cellRect = MakeCellRect( pos );
-		if ( pos < m_pColorTable->m_colors.size() )
+		if ( pos < m_pColorBoard->m_colors.size() )
 		{
-			::FillRect( *pDC, &cellRect, CBrush( m_pColorTable->m_colors[ pos ] ) );
+			::FillRect( *pDC, &cellRect, CBrush( m_pColorBoard->m_colors[ pos ] ) );
 
 			if ( showLabels )
 			{
-				pDC->SetTextColor( ui::GetContrastColor( m_pColorTable->m_colors[ pos ] ) );
+				pDC->SetTextColor( ui::GetContrastColor( m_pColorBoard->m_colors[ pos ] ) );
 				std::tstring label = num::FormatNumber( pos );
 				pDC->DrawText( label.c_str(), static_cast<int>( label.length() ), &cellRect, DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | DT_VCENTER );
 			}
 
-			if ( m_pColorTable->IsDuplicateAt( pos ) )
+			if ( m_pColorBoard->IsDuplicateAt( pos ) )
 				pDC->DrawEdge( &cellRect, BDR_SUNKENOUTER, BF_RECT );
 		}
 		else
@@ -304,7 +304,7 @@ void CColorTableRenderer::Draw( CDC* pDC ) const
 	DrawSelectedCell( pDC );				// draw at the end so that the selection frame is not obscured by table drawing
 }
 
-void CColorTableRenderer::EraseEdges( CDC* pDC ) const
+void CColorBoardRenderer::EraseEdges( CDC* pDC ) const
 {
 	if ( m_clientRect == m_coreRect )
 		return;
@@ -315,12 +315,12 @@ void CColorTableRenderer::EraseEdges( CDC* pDC ) const
 	::FillRgn( *pDC, edgeRegion, GetSysColorBrush( COLOR_BTNFACE ) );
 }
 
-void CColorTableRenderer::DrawSelectedCell( CDC* pDC ) const
+void CColorBoardRenderer::DrawSelectedCell( CDC* pDC ) const
 {
-	if ( !m_pColorTable->HasSelectedColor() )
+	if ( !m_pColorBoard->HasSelectedColor() )
 		return;
 
-	CRect cellRect = MakeCellRect( m_pColorTable->m_selPos );
+	CRect cellRect = MakeCellRect( m_pColorBoard->m_selPos );
 	cellRect.InflateRect( 2, 2 );
 	cellRect &= m_clientRect;
 
@@ -331,11 +331,11 @@ void CColorTableRenderer::DrawSelectedCell( CDC* pDC ) const
 	::FrameRect( *pDC, &cellRect, GetSysColorBrush( COLOR_WINDOW ) );
 }
 
-bool CColorTableRenderer::CanShowLabels( CDC* pDC ) const
+bool CColorBoardRenderer::CanShowLabels( CDC* pDC ) const
 {
-	if ( m_pColorTable->m_showLabels )
+	if ( m_pColorBoard->m_showLabels )
 	{
-		CSize textSize = ui::GetTextSize( pDC, num::FormatNumber( m_pColorTable->m_colors.size() - 1 ).c_str() );
+		CSize textSize = ui::GetTextSize( pDC, num::FormatNumber( m_pColorBoard->m_colors.size() - 1 ).c_str() );
 		return textSize.cx <= m_cellSize.cx && textSize.cy <= m_cellSize.cy;
 	}
 	return false;

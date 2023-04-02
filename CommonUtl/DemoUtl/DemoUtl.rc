@@ -26,19 +26,19 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\DemoUtl.rc2""       // non-Microsoft Visual C++ edited resources\r\n"
@@ -515,13 +515,13 @@ BEGIN
     LTEXT           "<tbar>",IDC_TOOLBAR_PLACEHOLDER,308,135,30,13,WS_BORDER
     CTEXT           "<pixel color>",IDC_PIXEL_COLOR_SAMPLE,7,216,58,13,SS_CENTERIMAGE,WS_EX_STATICEDGE
     LTEXT           "",IDC_PIXEL_INFO_STATIC,68,216,189,13,SS_CENTERIMAGE | SS_ENDELLIPSIS,WS_EX_STATICEDGE
-    CONTROL         "Show Color &Table",IDC_SHOW_COLOR_TABLE_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,267,218,71,10
-    LTEXT           "Color table style:",IDC_COLOR_TABLE_LABEL,7,235,56,8
-    COMBOBOX        IDC_COLOR_TABLE_MODE_COMBO,68,232,101,102,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Show Color &Table",IDC_SHOW_COLOR_BOARD_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,267,218,71,10
+    LTEXT           "Color table style:",IDC_COLOR_BOARD_LABEL,7,235,56,8
+    COMBOBOX        IDC_COLOR_BOARD_MODE_COMBO,68,232,101,102,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "&Unique Colors",IDC_UNIQUE_COLORS_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,202,234,60,10
     CONTROL         "Labels",IDC_SHOW_COLOR_LABELS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,267,234,36,10
-    LTEXT           "Static",IDC_COLOR_TABLE_INFO_STATIC,307,235,28,8,SS_ENDELLIPSIS
-    LTEXT           "",IDC_COLOR_TABLE_SAMPLE,7,248,331,19,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    LTEXT           "Static",IDC_COLOR_BOARD_INFO_STATIC,307,235,28,8,SS_ENDELLIPSIS
+    LTEXT           "",IDC_COLOR_BOARD_SAMPLE,7,248,331,19,SS_CENTERIMAGE,WS_EX_STATICEDGE
 END
 
 IDD_IMAGE_PAGE_EMPTY DIALOGEX 0, 0, 92, 14
@@ -680,6 +680,7 @@ BEGIN
     PUSHBUTTON      "Picker",IDC_COLOR_PICKER_BUTTON,78,7,70,14
     LTEXT           "UTL-&UI Color Picker:",IDC_STATIC,10,29,65,8
     PUSHBUTTON      "UTL Picker",IDC_MY_COLOR_PICKER_BUTTON,78,26,70,14
+    PUSHBUTTON      "Menu Button",IDC_MY_MENU_PICKER_BUTTON,78,45,70,14
     EDITTEXT        IDC_RGB_EDIT,7,100,239,12,ES_AUTOHSCROLL | ES_READONLY
     EDITTEXT        IDC_REPO_COLOR_INFO_EDIT,7,118,239,12,ES_AUTOHSCROLL | ES_READONLY
     DEFPUSHBUTTON   "OK",IDOK,195,7,50,14,WS_GROUP
@@ -1069,7 +1070,7 @@ END
 STRINGTABLE
 BEGIN
     IDC_DROP_DOWN_STATIC    "Drop down menu with unchecked and checked images"
-    IDC_FORCE_RESOLUTION_COMBO 
+    IDC_FORCE_RESOLUTION_COMBO
                             "Press Ctrl+F to toggle between original and 24 bit resolution"
     IDC_ZOOM_COMBO          "Press Ctrl+1 to toggle zoom between 100% and Scale to Fit"
 END
@@ -1089,9 +1090,9 @@ BEGIN
     ID_SET_AUTO_TRANSP_COLOR "Set image auto-transparent color"
     ID_RESET_TRANSP_COLOR   "Reset image transparent color"
     ID_STUDY_FILE_CHECKSUM  "Evaluate the performance of CRC32 file checksum calculation by comparing UTL_BASE vs Boost algorithms"
-    ID_MSG_TRAY_SHOW_NEXT_BALLOON 
+    ID_MSG_TRAY_SHOW_NEXT_BALLOON
                             "Show next balloon tip from message sequence\nShow Next Balloon (F5)"
-    ID_MSG_TRAY_HIDE_BALLOON 
+    ID_MSG_TRAY_HIDE_BALLOON
                             "Hide message balloon that is displayed\nHide Message Balloon (Ctrl+H)"
 END
 
@@ -1110,11 +1111,11 @@ END
 STRINGTABLE
 BEGIN
     ID_MSG_TRAY_ANIMATE     "Animate message icon\nAnimate (Ctrl+F5)"
-    ID_APP_TRAY_SHOW_BALLOON 
+    ID_APP_TRAY_SHOW_BALLOON
                             "Show next system tray icon balloon\nShow Tray Balloon (F8)"
-    ID_APP_TRAY_TOGGLE_TRAY_ICON 
+    ID_APP_TRAY_TOGGLE_TRAY_ICON
                             "Toggle system tray icon\nToggle Tray Icon (Shift+F8)"
-    ID_APP_TRAY_FOCUS_TRAY_ICON 
+    ID_APP_TRAY_FOCUS_TRAY_ICON
                             "Focus on system tray icon\nFocus Icon (Ctrl+F)"
     ID_APP_TRAY_ANIMATE     "Animate system tray icon\nAnimate Icon (Ctrl+F8)"
 END

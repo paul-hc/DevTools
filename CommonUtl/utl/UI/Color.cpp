@@ -119,7 +119,7 @@ namespace ui
 
 		oss << color::g_sysTag << '(' << GetSysColorIndex( color ) << ')';
 
-		if ( const CColorEntry* pSysColorName = CColorRepository::Instance()->GetSystemBatch()->FindColor( color ) )
+		if ( const CColorEntry* pSysColorName = CColorRepository::Instance()->GetSystemColorTable()->FindColor( color ) )
 			oss << "  \"" << pSysColorName->m_name << "\"";
 
 		return oss.str();

@@ -13,7 +13,7 @@ class CDibPixels;
 namespace utl
 {
 	std::tstring FormatHexColor( const CPixelBGR& color );
-	std::tstring FormatColorInfo( const CPixelBGR& color, size_t colorTablePos = std::tstring::npos, const CPoint& pos = CPoint( -1, -1 ) );
+	std::tstring FormatColorInfo( const CPixelBGR& color, size_t colorBoardPos = std::tstring::npos, const CPoint& pos = CPoint( -1, -1 ) );
 
 	void HorizGradientAlphaBlend( CDibPixels& rPixels, COLORREF bkColor );
 }
@@ -23,12 +23,12 @@ class CDibSection;
 class CEnumTags;
 
 
-struct CColorTableOptions			// persistent options
+struct CColorBoardOptions			// persistent options
 {
-	enum Mode { ImageColorTable, System_1_bit, System_4_bit, System_8_bit };
+	enum Mode { ImageColorBoard, System_1_bit, System_4_bit, System_8_bit };
 	static const CEnumTags& GetTags_Mode( void );
 
-	CColorTableOptions( void ) : m_uniqueColors( false ), m_mode( ImageColorTable ), m_showLabels( false ) {}
+	CColorBoardOptions( void ) : m_uniqueColors( false ), m_mode( ImageColorBoard ), m_showLabels( false ) {}
 
 	void Load( const TCHAR* pSection );
 	void Save( const TCHAR* pSection ) const;
@@ -39,9 +39,9 @@ public:
 };
 
 
-struct CColorTable : public CColorTableOptions
+struct CColorBoard : public CColorBoardOptions
 {
-	CColorTable( void );
+	CColorBoard( void );
 
 	bool IsEmpty( void ) const { return m_colors.empty(); }
 
@@ -65,10 +65,10 @@ public:
 };
 
 
-class CColorTableRenderer
+class CColorBoardRenderer
 {
 public:
-	CColorTableRenderer( const CColorTable* pColorTable, const CRect& clientRect );
+	CColorBoardRenderer( const CColorBoard* pColorBoard, const CRect& clientRect );
 
 	void Draw( CDC* pDC ) const;
 
@@ -83,7 +83,7 @@ private:
 	void DrawSelectedCell( CDC* pDC ) const;
 	bool CanShowLabels( CDC* pDC ) const;
 private:
-	const CColorTable* m_pColorTable;
+	const CColorBoard* m_pColorBoard;
 	CRect m_clientRect;
 	CRect m_coreRect;
 

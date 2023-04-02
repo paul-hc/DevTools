@@ -5,7 +5,9 @@
 #include "utl/UI/StdColors.h"
 #include "utl/UI/ColorPickerButton.h"
 #include "utl/UI/ColorRepository.h"
+#include "utl/UI/MenuUtilities.h"
 #include "utl/UI/WndUtils.h"
+#include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -82,19 +84,24 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_TEST_COLORS_DIALOG, pParent )
 	, m_color( CLR_NONE )
 	, m_pMyColorPicker( new CColorPickerButton() )
+	, m_pMenuPicker( new CMenuPickerButton() )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
 	m_colorPickerButton.EnableAutomaticButton( _T("Automatic"), color::Yellow );
 	m_colorPickerButton.EnableOtherButton( _T("Other") );
-	m_colorPickerButton.SetColumnsNumber( 16 );
+//	m_colorPickerButton.SetColumnsNumber( 16 );
 	m_colorPickerButton.SetColor( m_color );
 
 	m_pMyColorPicker->EnableAutomaticButton( _T("Automatic"), color::Lime );
 	m_pMyColorPicker->EnableOtherButton( _T("Other") );
 //	m_pMyColorPicker->SetColumnsNumber( 16 );
 	m_pMyColorPicker->SetColor( m_color );
+
+	ui::LoadPopupMenu( m_popupMenu, IDR_STD_CONTEXT_MENU, ui::DateTimePopup, ui::NoMenuImages );
+	m_pMenuPicker->m_bOSMenu = FALSE;
+	m_editChecked = true;
 }
 
 CTestColorsDialog::~CTestColorsDialog()
@@ -107,6 +114,7 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, m_colorPickerButton, &m_color );
 	ui::DDX_ColorButton( pDX, IDC_MY_COLOR_PICKER_BUTTON, *m_pMyColorPicker, &m_color );
+	DDX_Control( pDX, IDC_MY_MENU_PICKER_BUTTON, *m_pMenuPicker );
 
 	ui::DDX_ColorText( pDX, IDC_RGB_EDIT, &m_color );
 	ui::DDX_ColorRepoText( pDX, IDC_REPO_COLOR_INFO_EDIT, m_color );
@@ -115,11 +123,20 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
-		CClientDC dc( this );
-		CPalette halftonePalette;
-		VERIFY( halftonePalette.CreateHalftonePalette( &dc ) );
+		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );
 
-		m_colorPickerButton.SetPalette( &halftonePalette );
+		{
+			CClientDC dc( this );
+			CPalette halftonePalette;
+			VERIFY( halftonePalette.CreateHalftonePalette( &dc ) );
+
+			m_colorPickerButton.SetPalette( &halftonePalette );
+		}
+
+		//CMFCButton::EnableWindowsTheming();		already on!
+
+		m_pMenuPicker->m_hMenu = m_popupMenu;
+		m_pMenuPicker->SizeToContent();
 	}
 
 	__super::DoDataExchange( pDX );
@@ -131,6 +148,10 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 BEGIN_MESSAGE_MAP( CTestColorsDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_COLOR_PICKER_BUTTON, OnColorPicker )
 	ON_BN_CLICKED( IDC_MY_COLOR_PICKER_BUTTON, OnMyColorPicker )
+	ON_BN_CLICKED( IDC_MY_MENU_PICKER_BUTTON, OnMenuPicker )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdate_EditItem )
+	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdate_EditItem )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_ITEM, OnUpdate_EditItem )
 END_MESSAGE_MAP()
 
 void CTestColorsDialog::OnColorPicker( void )
@@ -149,4 +170,33 @@ void CTestColorsDialog::OnMyColorPicker( void )
 		m_color = m_pMyColorPicker->GetAutomaticColor();
 
 	UpdateData( DialogOutput );
+}
+
+void CTestColorsDialog::OnMenuPicker( void )
+{
+	switch ( m_pMenuPicker->m_nMenuResult )
+	{
+		case ID_EDIT_CUT:
+		case ID_EDIT_COPY:
+		case ID_EDIT_PASTE:
+		case ID_RESET_DEFAULT:
+			break;
+		case ID_EDIT_ITEM:
+			m_editChecked = !m_editChecked;
+			break;
+	}
+}
+
+void CTestColorsDialog::OnUpdate_EditItem( CCmdUI* pCmdUI )
+{
+	switch ( pCmdUI->m_nID )
+	{
+		case ID_EDIT_CUT:
+			pCmdUI->Enable( m_editChecked );
+			break;
+		case ID_RESET_DEFAULT:
+		case ID_EDIT_ITEM:
+			pCmdUI->SetCheck( m_editChecked );
+			break;
+	}
 }

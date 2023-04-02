@@ -393,6 +393,18 @@ namespace pred
 
 	typedef LessValue<CompareNaturalPath> TLess_NaturalPath;
 	typedef LessValue<TCompareNameExt> TLess_NameExt;
+}
+
+
+namespace pred
+{
+	// path unary predicates
+
+	template<>
+	inline bool IsEmpty::operator()( const fs::CPath& object ) const
+	{
+		return object.IsEmpty();
+	}
 
 
 	struct HasExtension : public std::unary_function<TCHAR, bool>
@@ -412,18 +424,6 @@ namespace pred
 	public:
 		const TCHAR* m_pExtension;
 	};
-}
-
-
-namespace pred
-{
-	// path unary predicates
-
-	template<>
-	inline bool IsEmpty::operator()( const fs::CPath& object ) const
-	{
-		return object.IsEmpty();
-	}
 
 
 	struct FileExist
