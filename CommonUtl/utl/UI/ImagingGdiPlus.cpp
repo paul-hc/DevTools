@@ -22,7 +22,7 @@ namespace gp
 			dibMeta.m_hDib = image.Detach();
 			dibMeta.StorePixelFormat();
 
-			if ( dibMeta.m_bitsPerPixel >= 32 && path::MatchExt( pFilePath, _T(".png") ) )
+			if ( dibMeta.m_bitsPerPixel >= 32 && path::MatchAnyExt( pFilePath, _T(".png|.bmp|.ico") ) )
 			{
 				CDibPixels dibPixels( dibMeta.m_hDib );
 				dibPixels.PreMultiplyAlpha();

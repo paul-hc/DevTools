@@ -358,6 +358,15 @@ namespace path
 		return pPath;
 	}
 
+	bool MatchAnyExt( const TCHAR* pPath, const TCHAR* pMultiExt, TCHAR sepChr /*= '|'*/ )
+	{
+		const TCHAR sep[] = { sepChr, '\0' };
+		std::vector<std::tstring> extensions;
+
+		str::Split( extensions, pMultiExt, sep );
+		return utl::Any( extensions, pred::HasExtension( pPath ) );
+	}
+
 
 	// huge prefix syntax: path prefixed with "\\?\"
 

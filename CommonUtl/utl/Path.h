@@ -131,6 +131,7 @@ namespace path
 	const TCHAR* SkipRoot( const TCHAR* pPath );		// ignore the drive letter or UNC (Universal Naming Convention) server/share path parts
 
 	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return path::Equivalent( FindExt( pPath ), pExt ); }		// pExt: ".txt"
+	bool MatchAnyExt( const TCHAR* pPath, const TCHAR* pMultiExt, TCHAR sepChr = '|' );
 
 
 	// complex path
@@ -392,6 +393,25 @@ namespace pred
 
 	typedef LessValue<CompareNaturalPath> TLess_NaturalPath;
 	typedef LessValue<TCompareNameExt> TLess_NameExt;
+
+
+	struct HasExtension : public std::unary_function<TCHAR, bool>
+	{
+		HasExtension( const TCHAR* pPath ) : m_pExtension( path::FindExt( pPath ) ) { ASSERT_PTR( m_pExtension ); }
+
+		bool operator()( const TCHAR* pExt ) const
+		{
+			ASSERT_PTR( pExt );
+			return path::Equivalent( m_pExtension, pExt );
+		}
+
+		bool operator()( const std::tstring& ext ) const
+		{
+			return path::Equivalent( m_pExtension, ext.c_str() );
+		}
+	public:
+		const TCHAR* m_pExtension;
+	};
 }
 
 
