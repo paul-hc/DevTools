@@ -2,6 +2,12 @@
 #include "pch.h"
 #include "ColorPickerButton.h"
 #include "ColorRepository.h"
+#include "Image_fwd.h"
+#include "utl/Algorithms.h"
+#include <math.h>
+
+#include <afxcolorpopupmenu.h>
+#include <afxcolorbar.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,12 +26,47 @@ CColorPickerButton::~CColorPickerButton()
 {
 }
 
-void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CColorPickerButton::StoreColors( const std::vector<COLORREF>& colors )
+{
+	m_Colors.SetSize( colors.size() );
+	utl::Copy( colors.begin(), colors.end(), m_Colors.GetData() );
+}
+
+void CColorPickerButton::SetHalftoneColors( size_t size /*= 256*/ )
+{
+	std::vector<COLORREF> halftoneColors;
+	CHalftoneColorTable::MakeColorTable( halftoneColors, size );
+	StoreColors( halftoneColors );
+}
+
+void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
 {
 	cmdId, pTooltip;
 
 	if ( m_pTableGroup.get() != nullptr )
 		rText = m_pTableGroup->FormatColorMatch( GetColor() );
+}
+
+
+// base overrides:
+
+void CColorPickerButton::OnShowColorPopup( void ) override
+{
+	if ( -1 == m_nColumns )		// auto-layout for columns?
+	{
+		size_t colorCount = m_Colors.GetSize();
+
+		if ( 16 == colorCount )
+			m_nColumns = 8;
+		else if ( colorCount >= 64 )
+			m_nColumns = static_cast<int>( sqrt( static_cast<double>( colorCount ) ) );
+	}
+
+	__super::OnShowColorPopup();
+
+	CMFCPopupMenuBar* pPopupMenuBar = m_pPopup->GetMenuBar();
+	CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( pPopupMenuBar );
+	pColorBar = pColorBar;
 }
 
 

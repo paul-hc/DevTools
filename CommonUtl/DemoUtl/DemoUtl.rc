@@ -26,19 +26,19 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\DemoUtl.rc2""       // non-Microsoft Visual C++ edited resources\r\n"
@@ -310,6 +310,27 @@ BEGIN
         MENUITEM "Set Auto Image Transparent Color", ID_SET_AUTO_TRANSP_COLOR
         MENUITEM SEPARATOR
         MENUITEM "Reset Image Transparent Color", ID_RESET_TRANSP_COLOR
+    END
+    POPUP "<edit>"
+    BEGIN
+        POPUP "Edit Sub-menu"
+        BEGIN
+            MENUITEM "Cut\tCtrl+X",                 ID_EDIT_CUT
+            MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+            MENUITEM "Paste\tCtrl+V",               ID_EDIT_PASTE
+            MENUITEM SEPARATOR
+            MENUITEM "Clear\tDelete",               ID_RESET_DEFAULT
+            MENUITEM SEPARATOR
+            MENUITEM "Now\tHome",                   ID_EDIT_ITEM
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Cut\tCtrl+X",                 ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "Paste\tCtrl+V",               ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "Clear\tDelete",               ID_RESET_DEFAULT
+        MENUITEM SEPARATOR
+        MENUITEM "Now\tHome",                   ID_EDIT_ITEM
     END
 END
 
@@ -1070,7 +1091,7 @@ END
 STRINGTABLE
 BEGIN
     IDC_DROP_DOWN_STATIC    "Drop down menu with unchecked and checked images"
-    IDC_FORCE_RESOLUTION_COMBO
+    IDC_FORCE_RESOLUTION_COMBO 
                             "Press Ctrl+F to toggle between original and 24 bit resolution"
     IDC_ZOOM_COMBO          "Press Ctrl+1 to toggle zoom between 100% and Scale to Fit"
 END
@@ -1090,9 +1111,9 @@ BEGIN
     ID_SET_AUTO_TRANSP_COLOR "Set image auto-transparent color"
     ID_RESET_TRANSP_COLOR   "Reset image transparent color"
     ID_STUDY_FILE_CHECKSUM  "Evaluate the performance of CRC32 file checksum calculation by comparing UTL_BASE vs Boost algorithms"
-    ID_MSG_TRAY_SHOW_NEXT_BALLOON
+    ID_MSG_TRAY_SHOW_NEXT_BALLOON 
                             "Show next balloon tip from message sequence\nShow Next Balloon (F5)"
-    ID_MSG_TRAY_HIDE_BALLOON
+    ID_MSG_TRAY_HIDE_BALLOON 
                             "Hide message balloon that is displayed\nHide Message Balloon (Ctrl+H)"
 END
 
@@ -1111,11 +1132,11 @@ END
 STRINGTABLE
 BEGIN
     ID_MSG_TRAY_ANIMATE     "Animate message icon\nAnimate (Ctrl+F5)"
-    ID_APP_TRAY_SHOW_BALLOON
+    ID_APP_TRAY_SHOW_BALLOON 
                             "Show next system tray icon balloon\nShow Tray Balloon (F8)"
-    ID_APP_TRAY_TOGGLE_TRAY_ICON
+    ID_APP_TRAY_TOGGLE_TRAY_ICON 
                             "Toggle system tray icon\nToggle Tray Icon (Shift+F8)"
-    ID_APP_TRAY_FOCUS_TRAY_ICON
+    ID_APP_TRAY_FOCUS_TRAY_ICON 
                             "Focus on system tray icon\nFocus Icon (Ctrl+F)"
     ID_APP_TRAY_ANIMATE     "Animate system tray icon\nAnimate Icon (Ctrl+F8)"
 END

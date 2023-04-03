@@ -379,15 +379,15 @@ class CHalftoneColorTable
 public:
 	static const std::vector<RGBQUAD>& GetHalftoneRgbTable( void );
 
-	static void MakeRgbTable( RGBQUAD* pRgbTable, size_t size );		// use (1 << bpp) as size; works for 1/4/8 bit
+	static void MakeRgbTable( OUT RGBQUAD* pRgbTable, size_t size );		// use (1 << bpp) as size; works for 1/4/8 bit
 
-	static inline void MakeRgbTable( std::vector<RGBQUAD>& rRgbTable, size_t size )
+	static inline void MakeRgbTable( OUT std::vector<RGBQUAD>& rRgbTable, size_t size )
 	{
 		rRgbTable.resize( size );
 		MakeRgbTable( &rRgbTable.front(), size );						// use (1 << bpp) as size; works for 1/4/8 bit
 	}
 
-	static void MakeColorTable( std::vector<COLORREF>& rColorTable, size_t size );
+	static void MakeColorTable( OUT std::vector<COLORREF>& rColorTable, size_t size );
 };
 
 

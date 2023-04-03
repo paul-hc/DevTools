@@ -19,9 +19,16 @@ public:
 
 	const CColorTableGroup& GetTableGroup( void ) const { return *m_pTableGroup; }
 	CColorTableGroup& RefTableGroup( void ) { return *m_pTableGroup; }
+
+	void StoreColors( const std::vector<COLORREF>& colors );
+	void SetHalftoneColors( size_t size = 256 );
 protected:
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+
+	// base overrides:
+protected:
+	virtual void OnShowColorPopup( void ) override;
 private:
 	std::unique_ptr<CColorTableGroup> m_pTableGroup;
 };

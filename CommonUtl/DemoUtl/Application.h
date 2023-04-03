@@ -40,3 +40,9 @@ const CEnumTags& GetTags_ResizeStyle( void );
 
 enum ChangeCase { LowerCase, UpperCase, FnameLowerCase, FnameUpperCase, ExtLowerCase, ExtUpperCase, NoExt };
 const CEnumTags& GetTags_ChangeCase( void );
+
+
+namespace app
+{
+	enum MenuPopup { ImageDialogPopup, TestColorsPopup };		// IDR_CONTEXT_MENU
+}

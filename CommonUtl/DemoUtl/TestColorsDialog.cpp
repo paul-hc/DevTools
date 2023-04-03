@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "TestColorsDialog.h"
+#include "Application.h"
 #include "utl/UI/Color.h"
 #include "utl/UI/StdColors.h"
 #include "utl/UI/ColorPickerButton.h"
@@ -99,7 +100,7 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 //	m_pMyColorPicker->SetColumnsNumber( 16 );
 	m_pMyColorPicker->SetColor( m_color );
 
-	ui::LoadPopupMenu( m_popupMenu, IDR_STD_CONTEXT_MENU, ui::DateTimePopup, ui::NoMenuImages );
+	ui::LoadPopupMenu( m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup, ui::NoMenuImages );
 	m_pMenuPicker->m_bOSMenu = FALSE;
 	m_editChecked = true;
 }
@@ -125,13 +126,7 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 
 		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );
 
-		{
-			CClientDC dc( this );
-			CPalette halftonePalette;
-			VERIFY( halftonePalette.CreateHalftonePalette( &dc ) );
-
-			m_colorPickerButton.SetPalette( &halftonePalette );
-		}
+		m_pMyColorPicker->SetHalftoneColors( 16 );
 
 		//CMFCButton::EnableWindowsTheming();		already on!
 

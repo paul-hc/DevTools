@@ -665,7 +665,7 @@ const std::vector<RGBQUAD>& CHalftoneColorTable::GetHalftoneRgbTable( void )
 	return rgbTable;
 }
 
-void CHalftoneColorTable::MakeRgbTable( RGBQUAD* pRgbTable, size_t size )
+void CHalftoneColorTable::MakeRgbTable( OUT RGBQUAD* pRgbTable, size_t size )
 {
 	ASSERT( size != 0 && 0 == ( size % 2 ) );		// size must be multiple of 2
 	ASSERT( size <= 256 );
@@ -678,7 +678,7 @@ void CHalftoneColorTable::MakeRgbTable( RGBQUAD* pRgbTable, size_t size )
 	utl::Copy( sysTable.end() - halfSize, sysTable.end(), pRgbTable + halfSize );		// second half from the end
 }
 
-void CHalftoneColorTable::MakeColorTable( std::vector<COLORREF>& rColorTable, size_t size )
+void CHalftoneColorTable::MakeColorTable( OUT std::vector<COLORREF>& rColorTable, size_t size )
 {
 	MakeRgbTable( (std::vector<RGBQUAD>&)rColorTable, size );							// same storage
 
