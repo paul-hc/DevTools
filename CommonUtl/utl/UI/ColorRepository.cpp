@@ -417,6 +417,54 @@ CColorTable* CColorRepository::MakeTable_Custom( void )
 	return pTable;
 }
 
+CColorTable* CColorRepository::MakeTable_Office2003( void )
+{
+	CColorTable* pTable = new CColorTable( ui::Office2003_Colors, BaseId_Office2003, color::Office2003::_Office2003_ColorCount, 8 );		// 40 colors: 8 columns x 5 rows
+
+	pTable->Add( COLOR_ENTRY( color::Office2003::Black ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Brown ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::OliveGreen ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::DarkGreen ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::DarkTeal ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::DarkBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Indigo ) );
+	pTable->Add( CColorEntry( color::Office2003::Gray80, "Gray 80%" ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::DarkRed ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Orange ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::DarkYellow ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Green ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Teal ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Blue ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::BlueGray ) );
+	pTable->Add( CColorEntry( color::Office2003::Gray50, "Gray 50%" ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Red ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::LightOrange ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Lime ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::SeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Aqua ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::LightBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Violet ) );
+	pTable->Add( CColorEntry( color::Office2003::Gray40, "Gray 40%" ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Pink ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Gold ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Yellow ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::BrightGreen ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Turqoise ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::SkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Plum ) );
+	pTable->Add( CColorEntry( color::Office2003::Gray25, "Gray 25%" ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Rose ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Tan ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::LightYellow ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::LightGreen ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::LightTurqoise ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::PaleBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::Lavender ) );
+	pTable->Add( COLOR_ENTRY( color::Office2003::White ) );
+
+	return pTable;
+}
+
 CColorTable* CColorRepository::MakeTable_DirectX( void )
 {
 	CColorTable* pTable = new CColorTable( ui::DirectX_Colors, BaseId_DirectX, color::directx::_DirectX_ColorCount, 10 );		// 140 colors: 10 columns x 14 rows

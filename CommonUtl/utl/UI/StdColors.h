@@ -106,6 +106,66 @@ namespace color
 	};
 
 
+	namespace paint
+	{
+		enum PaintColor
+		{
+			Black = 0x000000,
+			White = 0xFFFFFF
+		};
+	}
+
+
+	namespace Office2003
+	{
+		enum Color
+		{
+			Black			= RGB( 0, 0, 0 ),			// 0x000000		// row 1
+			Brown			= RGB( 153, 51, 0 ),		// 0x003399
+			OliveGreen		= RGB( 51, 51, 0 ),			// 0x003333
+			DarkGreen		= RGB( 0, 51, 0 ),			// 0x003300
+			DarkTeal		= RGB( 0, 51, 102 ),		// 0x663300
+			DarkBlue		= RGB( 0, 0, 128 ),			// 0x800000
+			Indigo			= RGB( 51, 51, 153 ),		// 0x993333
+			Gray80			= RGB( 51, 51, 51 ),		// 0x333333
+			DarkRed			= RGB( 128, 0, 0 ),			// 0x000080		// row 2
+			Orange			= RGB( 255, 102, 0 ),		// 0x0066FF
+			DarkYellow		= RGB( 128, 128, 0 ),		// 0x008080
+			Green			= RGB( 0, 128, 0 ),			// 0x008000
+			Teal			= RGB( 0, 128, 128 ),		// 0x808000
+			Blue			= RGB( 0, 0, 255 ),			// 0xFF0000
+			BlueGray		= RGB( 102, 102, 153 ),		// 0x996666
+			Gray50			= RGB( 128, 128, 128 ),		// 0x808080
+			Red				= RGB( 255, 0, 0 ),			// 0x0000FF		// row 3
+			LightOrange		= RGB( 255, 153, 0 ),		// 0x0099FF
+			Lime			= RGB( 153, 204, 0 ),		// 0x00CC99
+			SeaGreen		= RGB( 51, 153, 102 ),		// 0x669933
+			Aqua			= RGB( 51, 204, 204 ),		// 0xCCCC33
+			LightBlue		= RGB( 51, 102, 255 ),		// 0xFF6633
+			Violet			= RGB( 128, 0, 128 ),		// 0x800080
+			Gray40			= RGB( 150, 150, 150 ),		// 0x969696
+			Pink			= RGB( 255, 0, 255 ),		// 0xFF00FF		// row 4
+			Gold			= RGB( 255, 204, 0 ),		// 0x00CCFF
+			Yellow			= RGB( 255, 255, 0 ),		// 0x00FFFF
+			BrightGreen		= RGB( 0, 255, 0 ),			// 0x00FF00
+			Turqoise		= RGB( 0, 255, 255 ),		// 0xFFFF00
+			SkyBlue			= RGB( 0, 204, 255 ),		// 0xFFCC00
+			Plum			= RGB( 153, 51, 102 ),		// 0x663399
+			Gray25			= RGB( 192, 192, 192 ),		// 0xC0C0C0
+			Rose			= RGB( 255, 153, 204 ),		// 0xCC99FF		// row 5
+			Tan				= RGB( 255, 204, 153 ),		// 0x99CCFF
+			LightYellow		= RGB( 255, 255, 153 ),		// 0x99FFFF
+			LightGreen		= RGB( 204, 255, 204 ),		// 0xCCFFCC
+			LightTurqoise	= RGB( 204, 255, 255 ),		// 0xFFFFCC
+			PaleBlue		= RGB( 153, 204, 255 ),		// 0xFFCC99
+			Lavender		= RGB( 204, 153, 255 ),		// 0xFF99CC
+			White			= RGB( 255, 255, 255 ),		// 0xFFFFFF
+
+				_Office2003_ColorCount = 40
+		};
+	}
+
+
 	namespace directx
 	{
 		enum Enum
@@ -561,16 +621,6 @@ namespace color
 			White				 = 0xFFFFFF,
 
 				_Html_ColorCount = 300
-		};
-	}
-
-
-	namespace paint
-	{
-		enum PaintColor
-		{
-			Black = 0x000000,
-			White = 0xFFFFFF
 		};
 	}
 
