@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -128,7 +128,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE)"
+				AdditionalIncludeDirectories=".;$(UTL_ADDITIONAL_INCLUDE);$(UTL_BOOST_INC)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
