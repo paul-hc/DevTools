@@ -53,10 +53,14 @@ namespace reg
 		pKey->Reset();
 		return false;
 	}
+}
 
 
-
+namespace reg
+{
 	// CKey implementation
+
+	utl::CErrorCode CKey::s_lastError;
 
 	bool CKey::ParseFullPath( HKEY& rhHive, TKeyPath& rSubPath, const TCHAR* pKeyFullPath )
 	{
@@ -161,7 +165,7 @@ namespace reg
 	std::pair<DWORD, size_t> CKey::GetValueInfo( const TCHAR* pValueName ) const
 	{
 		DWORD type, bufferSize;
-		if ( ERROR_SUCCESS == ::RegQueryValueEx( Get(), pValueName, nullptr, &type, nullptr, &bufferSize ) )
+		if ( s_lastError.Store( ::RegQueryValueEx( Get(), pValueName, nullptr, &type, nullptr, &bufferSize ) ) )
 			return std::pair<DWORD, size_t>( type, static_cast<size_t>( bufferSize ) );
 
 		return std::pair<DWORD, size_t>( REG_NONE, 0 );
@@ -170,7 +174,7 @@ namespace reg
 	bool CKey::WriteStringValue( const TCHAR* pValueName, const std::tstring& text )
 	{
 		ASSERT( IsOpen() );
-		return ERROR_SUCCESS == m_key.SetStringValue( pValueName, text.c_str() );
+		return s_lastError.Store( m_key.SetStringValue( pValueName, text.c_str() ) );
 	}
 
 	bool CKey::QueryStringValue( const TCHAR* pValueName, std::tstring& rText ) const
@@ -182,10 +186,11 @@ namespace reg
 			return false;
 
 		ULONG count = static_cast<ULONG>( buffer.size() );
-		LONG result = m_key.QueryStringValue( pValueName, &buffer.front(), &count );
-		ASSERT( result != ERROR_MORE_DATA );		// GetValueBufferSize() sized the buffer properly?
 
-		if ( result != ERROR_SUCCESS )
+		s_lastError.Store( m_key.QueryStringValue( pValueName, &buffer.front(), &count ) );
+		ASSERT( s_lastError.Get() != ERROR_MORE_DATA );		// GetValueBufferSize() sized the buffer properly?
+
+		if ( s_lastError.IsError() )
 			return false;
 
 		rText = &buffer.front();
@@ -206,8 +211,8 @@ namespace reg
 		ASSERT_PTR( hKey );
 
 		FILETIME lastWriteTime;
-		if ( ERROR_SUCCESS == ::RegQueryInfoKey( hKey, nullptr, nullptr, nullptr, &m_subKeyCount, &m_subKeyNameMaxLen, nullptr,
-												 &m_valueCount, &m_valueNameMaxLen, &m_valueBufferMaxLen, nullptr, &lastWriteTime ) )
+		if ( CKey::RefLastError().Store( ::RegQueryInfoKey( hKey, nullptr, nullptr, nullptr, &m_subKeyCount, &m_subKeyNameMaxLen, nullptr,
+															&m_valueCount, &m_valueNameMaxLen, &m_valueBufferMaxLen, nullptr, &lastWriteTime ) ) )
 		{
 			m_lastWriteTime = CTime( lastWriteTime );
 			return true;

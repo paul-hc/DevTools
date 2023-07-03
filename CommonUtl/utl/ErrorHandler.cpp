@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "ErrorHandler.h"
+#include <comdef.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,4 +40,25 @@ const CErrorHandler* CErrorHandler::Ignorer( void )
 {
 	static const CErrorHandler s_ignoreHandler( utl::IgnoreMode );
 	return &s_ignoreHandler;
+}
+
+
+namespace utl
+{
+	// CErrorCode implementation
+
+	const std::tstring& CErrorCode::FormatError( void ) const
+	{
+		static std::tstring s_errorMessage;		// not a thread-safe function
+
+		if ( IsError() )
+		{
+			_com_error error( m_errorCode );
+			s_errorMessage = error.ErrorMessage();
+		}
+		else
+			s_errorMessage.clear();
+
+		return s_errorMessage;
+	}
 }

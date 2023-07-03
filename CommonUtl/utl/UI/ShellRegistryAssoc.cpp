@@ -55,11 +55,15 @@ namespace shell
 		{
 			reg::CKey key;
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath ) ||
-				 !key.WriteStringValue( nullptr, pVerbTag ) )					// default value of the key
+				 !key.WriteStringValue( nullptr, pVerbTag ) )				// default value of the key
+			{
+				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), verbPath.GetPtr(), key.GetLastError().FormatError().c_str() );
 				return false;
+			}
 		}
 
 		bool useDDE = !str::IsEmpty( pDdeCmd );
+		reg::TKeyPath subKeyPath;
 		{
 			std::tstring cmdLine;
 
@@ -75,17 +79,27 @@ namespace shell
 			}
 
 			reg::CKey key;
-			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath / _T("command") ) ||
-				 !key.WriteStringValue( nullptr, cmdLine ) )					// default value of the key
+
+			subKeyPath = verbPath / _T("command");
+			if ( !key.Create( HKEY_CLASSES_ROOT, subKeyPath ) ||
+				 !key.WriteStringValue( nullptr, cmdLine ) )				// default value of the key
+			{
+				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), subKeyPath.GetPtr(), key.GetLastError().FormatError().c_str() );
 				return false;
+			}
 		}
 
 		if ( useDDE )
 		{
 			reg::CKey key;
+
+			subKeyPath = verbPath / _T("ddeexec");
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath / _T("ddeexec") ) ||
 				 !key.WriteStringValue( nullptr, pDdeCmd ) )					// default value of the key
+			{
+				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), subKeyPath.GetPtr(), key.GetLastError().FormatError().c_str() );
 				return false;
+			}
 		}
 
 		return true;

@@ -744,7 +744,7 @@ BEGIN
     COMBOBOX        IDC_THUMB_BOUNDS_SIZE_COMBO,268,87,46,30,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     LTEXT           "Thumbnail list columns:",IDC_STATIC,193,105,74,8
     EDITTEXT        IDC_THUMB_COL_COUNT_EDIT,268,103,36,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Display thumbnails list",CK_SHOW_THUMB_VIEW,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,193,121,82,10
+    CONTROL         "Show thumbnails list",CK_SHOW_THUMB_VIEW,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,193,121,82,10
     CONTROL         "Use &themed thumbnail list drawing",IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,193,134,123,10
     CONTROL         "Regenerate small archived thumbnails",IDC_AUTO_REGEN_SMALL_STG_THUMBS_CHECK,
@@ -900,8 +900,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,8,3,0
- PRODUCTVERSION 5,8,3,0
+ FILEVERSION 5,8,3,1
+ PRODUCTVERSION 5,8,3,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -916,18 +916,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "03-02-2023 01:17:12"
-            VALUE "Comments", "VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]Frame navigation|[5.0] Images Model (ptrs)"
+            VALUE "BuildTimestamp", "03-07-2023 12:50:16"
+            VALUE "Comments", "RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]Frame navigation|[5.0] Images Model"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
-            VALUE "FileVersion", "5, 8, 3, 0"
+            VALUE "FileVersion", "5, 8, 3, 1"
             VALUE "InternalName", "Slider"
             VALUE "LegalCopyright", "Copyright (C) 2000-2023"
             VALUE "LegalTrademarks", "Enjoy it."
             VALUE "OriginalFilename", "Slider.exe"
             VALUE "ProductName", "Slider Application"
-            VALUE "ProductVersion", "5, 8, 3, 0"
+            VALUE "ProductVersion", "5, 8, 3, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END

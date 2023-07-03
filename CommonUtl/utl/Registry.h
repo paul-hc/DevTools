@@ -4,6 +4,7 @@
 
 #include <atlbase.h>
 #include "Registry_fwd.h"
+#include "ErrorHandler.h"
 
 
 namespace reg
@@ -18,8 +19,11 @@ namespace reg
 
 	bool OpenKey( CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired = KEY_READ | KEY_WRITE );
 	bool CreateKey( CKey* pKey, const TCHAR* pKeyFullPath );
+}
 
 
+namespace reg
+{
 	class CKey : private utl::noncopyable
 	{
 	public:
@@ -31,36 +35,39 @@ namespace reg
 
 		bool Open( HKEY hParentKey, const TCHAR* pSubKeyPath, REGSAM samDesired = KEY_READ | KEY_WRITE ) throw()
 		{
-			return ERROR_SUCCESS == m_key.Open( hParentKey, pSubKeyPath, samDesired );
+			return s_lastError.Store( m_key.Open( hParentKey, pSubKeyPath, samDesired ) );
 		}
 
 		bool Open( HKEY hParentKey, const TKeyPath& subKeyPath, REGSAM samDesired = KEY_READ | KEY_WRITE ) throw()
 		{
-			return ERROR_SUCCESS == m_key.Open( hParentKey, subKeyPath.GetPtr(), samDesired );
+			return s_lastError.Store( m_key.Open( hParentKey, subKeyPath.GetPtr(), samDesired ) );
 		}
 
 		bool Create( HKEY hParentKey, const TCHAR* pSubKeyPath, LPTSTR pClass = REG_NONE,
 					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = nullptr, DWORD* pDisposition = nullptr ) throw()
 		{
-			return ERROR_SUCCESS == m_key.Create( hParentKey, pSubKeyPath, pClass, dwOptions, samDesired, pSecAttr, pDisposition );
+			return s_lastError.Store( m_key.Create( hParentKey, pSubKeyPath, pClass, dwOptions, samDesired, pSecAttr, pDisposition ) );
 		}
 
 		bool Create( HKEY hParentKey, const TKeyPath& subKeyPath, LPTSTR pClass = REG_NONE,
 					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = nullptr, DWORD* pDisposition = nullptr ) throw()
 		{
-			return ERROR_SUCCESS == m_key.Create( hParentKey, subKeyPath.GetPtr(), pClass, dwOptions, samDesired, pSecAttr, pDisposition );
+			return s_lastError.Store( m_key.Create( hParentKey, subKeyPath.GetPtr(), pClass, dwOptions, samDesired, pSecAttr, pDisposition ) );
 		}
 
 		HKEY Get( void ) const { return m_key.m_hKey; }
 		CRegKey& GetKey( void ) { return m_key; }
 
+		static const utl::CErrorCode& GetLastError( void ) { return s_lastError; }		// last API call result
+		static utl::CErrorCode& RefLastError( void ) { return s_lastError; }
+
 		bool IsOpen( void ) const { return Get() != nullptr; }
 
-		bool Close( void ) { return ERROR_SUCCESS == m_key.Close(); }
+		bool Close( void ) { return s_lastError.Store( m_key.Close() ); }
 		void Reset( HKEY hKey = nullptr ) { Close(); m_key.Attach( hKey ); }
 		HKEY Detach( void ) { return m_key.Detach(); }
 
-		bool Flush( void ) { return ERROR_SUCCESS == m_key.Flush(); }		// flush the key's data to disk
+		bool Flush( void ) { return s_lastError.Store( m_key.Flush() ); }		// flush the key's data to disk - resource intensive!
 
 		static bool ParseFullPath( HKEY& rhHive, TKeyPath& rSubPath, const TCHAR* pKeyFullPath );		// full path includes registry hive (the root)
 
@@ -69,14 +76,14 @@ namespace reg
 		// SUB-KEYS
 		bool HasSubKey( const TCHAR* pSubKeyName ) const;
 		void QuerySubKeyNames( std::vector<std::tstring>& rSubKeyNames ) const;
-		bool DeleteSubKey( const TCHAR* pSubKey, RecursionDepth depth = Shallow ) { return ERROR_SUCCESS == ( Shallow == depth ? m_key.DeleteSubKey( pSubKey ) : m_key.RecurseDeleteKey( pSubKey ) ); }
+		bool DeleteSubKey( const TCHAR* pSubKey, RecursionDepth depth = Shallow ) { return s_lastError.Store( Shallow == depth ? m_key.DeleteSubKey( pSubKey ) : m_key.RecurseDeleteKey( pSubKey ) ); }
 		void DeleteAllSubKeys( void );
 
 		// VALUES
 		bool HasValue( const TCHAR* pValueName ) const { return GetValueType( pValueName ) != REG_NONE; }
 		void QueryValueNames( std::vector<std::tstring>& rValueNames ) const;
 
-		bool DeleteValue( const TCHAR* pValueName ) { return ERROR_SUCCESS == m_key.DeleteValue( pValueName ); }
+		bool DeleteValue( const TCHAR* pValueName ) { return s_lastError.Store( m_key.DeleteValue( pValueName ) ); }
 		void DeleteAllValues( void );
 
 		std::pair<DWORD, size_t> GetValueInfo( const TCHAR* pValueName ) const;		// <Type, BufferSize>
@@ -106,8 +113,8 @@ namespace reg
 		NumericT ReadNumberValue( const TCHAR* pValueName, NumericT defaultNumber = NumericT() ) const { NumericT number; return QueryNumberValue( pValueName, number ) ? number : defaultNumber; }
 
 		// GUID (persisted as string)
-		bool WriteGuidValue( const TCHAR* pValueName, const GUID& value ) { return ERROR_SUCCESS == m_key.SetGUIDValue( pValueName, value ); }
-		bool QueryGuidValue( const TCHAR* pValueName, GUID& rValue ) const { return ERROR_SUCCESS == m_key.QueryGUIDValue( pValueName, rValue ); }
+		bool WriteGuidValue( const TCHAR* pValueName, const GUID& value ) { return s_lastError.Store( m_key.SetGUIDValue( pValueName, value ) ); }
+		bool QueryGuidValue( const TCHAR* pValueName, GUID& rValue ) const { return s_lastError.Store( m_key.QueryGUIDValue( pValueName, rValue ) ); }
 
 		// binary structure
 		template< typename ValueT >
@@ -123,7 +130,8 @@ namespace reg
 		template< typename ValueT >
 		bool QueryBinaryBuffer( const TCHAR* pValueName, std::vector<ValueT>& rBufferValue ) const;
 	private:
-		mutable CRegKey m_key;			// friendly for Query... methods (declared non-const in CRegKey class)
+		mutable CRegKey m_key;					// the ATL key; mutable for friendly Query... methods (declared non-const in CRegKey class)
+		static utl::CErrorCode s_lastError;		// stores last API call result; not thread-safe, caller must serialize access for multi-threading
 	};
 
 
@@ -167,7 +175,7 @@ namespace reg
 
 		std::vector<TCHAR> msData;		// multi-string data: an array of zero-terminated strings, terminated by 2 zero characters
 		str::QuickTokenize( msData, str::JoinLines( values, _T("|") ).c_str(), _T("|") );
-		return ERROR_SUCCESS == m_key.SetMultiStringValue( pValueName, &msData.front() );
+		return s_lastError.Store( m_key.SetMultiStringValue( pValueName, &msData.front() ) );
 	}
 
 	template< typename StringyT >
@@ -180,9 +188,10 @@ namespace reg
 			return false;
 
 		ULONG count = static_cast<ULONG>( buffer.size() );
-		LONG result = m_key.QueryMultiStringValue( pValueName, &buffer.front(), &count );
-		ASSERT( result != ERROR_MORE_DATA );		// GetValueBufferSize() sized the buffer properly?
-		if ( result != ERROR_SUCCESS )
+
+		s_lastError.Store( m_key.QueryMultiStringValue( pValueName, &buffer.front(), &count ) );
+		ASSERT( s_lastError.Get() != ERROR_MORE_DATA );		// GetValueBufferSize() sized the buffer properly?
+		if ( s_lastError.IsError() )
 			return false;
 
 		rValues.clear();
@@ -197,9 +206,9 @@ namespace reg
 	{
 		ASSERT( IsOpen() );
 		if ( sizeof( ULONGLONG ) == sizeof( NumericT ) )
-			return ERROR_SUCCESS == m_key.SetQWORDValue( pValueName, static_cast<ULONGLONG>( value ) );
+			return s_lastError.Store( m_key.SetQWORDValue( pValueName, static_cast<ULONGLONG>( value ) ) );
 		else
-			return ERROR_SUCCESS == m_key.SetDWORDValue( pValueName, static_cast<DWORD>( value ) );
+			return s_lastError.Store( m_key.SetDWORDValue( pValueName, static_cast<DWORD>( value ) ) );
 	}
 
 	template< typename NumericT >
@@ -209,7 +218,7 @@ namespace reg
 		if ( sizeof( ULONGLONG ) == sizeof( NumericT ) )
 		{
 			ULONGLONG value;
-			if ( m_key.QueryQWORDValue( pValueName, value ) != ERROR_SUCCESS )
+			if ( !s_lastError.Store( m_key.QueryQWORDValue( pValueName, value ) ) )
 				return false;
 
 			rNumber = static_cast<NumericT>( value );
@@ -217,7 +226,7 @@ namespace reg
 		else
 		{
 			DWORD value;
-			if ( m_key.QueryDWORDValue( pValueName, value ) != ERROR_SUCCESS )
+			if ( !s_lastError.Store( m_key.QueryDWORDValue( pValueName, value ) ) )
 				return false;
 
 			rNumber = static_cast<NumericT>( value );
@@ -230,7 +239,7 @@ namespace reg
 	bool CKey::WriteBinaryValue( const TCHAR* pValueName, const ValueT& value )
 	{
 		ASSERT( IsOpen() );
-		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &value, static_cast<ULONG>( sizeof( value ) ) );
+		return s_lastError.Store( m_key.SetBinaryValue( pValueName, &value, static_cast<ULONG>( sizeof( value ) ) ) );
 	}
 
 	template< typename ValueT >
@@ -244,14 +253,14 @@ namespace reg
 			return false;				// bad size or it doesn't line up with ValueT's storage size
 
 		ULONG count = static_cast<ULONG>( byteSize );
-		return ERROR_SUCCESS == m_key.QueryBinaryValue( pValueName, pValue, &count );
+		return s_lastError.Store( m_key.QueryBinaryValue( pValueName, pValue, &count ) );
 	}
 
 
 	template< typename ValueT >
 	bool CKey::WriteBinaryBuffer( const TCHAR* pValueName, const std::vector<ValueT>& bufferValue )
 	{
-		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &bufferValue.front(), static_cast<ULONG>( utl::ByteSize( bufferValue ) ) );
+		return s_lastError.Store( m_key.SetBinaryValue( pValueName, &bufferValue.front(), static_cast<ULONG>( utl::ByteSize( bufferValue ) ) ) );
 	}
 
 	template< typename ValueT >
@@ -266,7 +275,7 @@ namespace reg
 		rBufferValue.resize( byteSize / sizeof( ValueT ) );
 
 		ULONG count = static_cast<ULONG>( byteSize );
-		return ERROR_SUCCESS == m_key.QueryBinaryValue( pValueName, &rBufferValue.front(), &count );
+		return s_lastError.Store( m_key.QueryBinaryValue( pValueName, &rBufferValue.front(), &count ) );
 	}
 }
 

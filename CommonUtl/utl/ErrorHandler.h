@@ -68,4 +68,30 @@ private:
 };
 
 
+namespace utl
+{
+	// stores last error code from a Windows API call (e.g. registry functions), and provides error formatting
+	//
+	class CErrorCode
+	{
+	public:
+		CErrorCode( LONG errorCode = ERROR_SUCCESS ) : m_errorCode( errorCode ) {}
+
+		bool IsSuccess( void ) const { return ERROR_SUCCESS == m_errorCode; }
+		bool IsError( void ) const { return !IsSuccess(); }
+		LONG Get( void ) const { return m_errorCode; }
+
+		const std::tstring& FormatError( void ) const;		// not a thread-safe function
+
+		bool Store( LONG errorCode )						// returns true if succeeded
+		{
+			m_errorCode = errorCode;
+			return ERROR_SUCCESS == m_errorCode;
+		}
+	private:
+		LONG m_errorCode;
+	};
+}
+
+
 #endif // ErrorHandler_h
