@@ -487,11 +487,22 @@ void CApplication::UpdateAllViews( UpdateViewHint hint /*= Hint_ViewUpdate*/, CD
 			}
 }
 
-// Process special shell commands like:
-//	[queue("D:\WINNT\Background\Tiles\JPGs\blue.jpg")]
+/* Process special shell commands such as:
+	- directory right-click > Slide View:
+		[open("C:\download\#\images\flowers")]
+
+	- image file right-click > Open With > Slider Application
+		[queue("D:\WINNT\Background\Tiles\JPGs\blue.jpg")]
+*/
 BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 {
+//ASSERT(false);		// DDE Open debugging
 	std::tstring command = pCommand;
+
+	if ( str::HasPrefix( command.c_str(), _T("[queue(") ) )
+		str::Replace( command, _T("queue("), _T("open("), 1 );		// handle "Open With" as standard /dde open: change command "queue" => "open"
+
+	/* OBSOLETE: it used to open individual images as albums, not very useful...
 	if ( str::StripPrefix( command, _T("[queue(") ) )
 		if ( str::StripSuffix( command, _T(")]") ) )
 		{	// process each DDE "queue" request for explicit albums
@@ -501,10 +512,11 @@ BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 			m_queuedAlbumFilePaths.push_back( command );
 
 			app::GetMainFrame()->StartEnqueuedAlbumTimer();
+			m_pCmdInfo = NULL;		// prevent crash on CWinApp::ExitInstance() - inspired by CDocManager::OnDDECommand() implementation
 			return TRUE;
-		}
+		}*/
 
-	return CBaseApp<CWinApp>::OnDDECommand( pCommand );
+	return CBaseApp<CWinApp>::OnDDECommand( (LPTSTR)command.c_str() );
 }
 
 BOOL CApplication::PreTranslateMessage( MSG* pMsg )
@@ -575,7 +587,7 @@ void CApplication::CCmdLineInfo::ParseParam( const TCHAR* pParam, BOOL isFlag, B
 			return;
 		}
 
-	CCommandLineInfo::ParseParam( pParam, isFlag, isLast );
+	__super::ParseParam( pParam, isFlag, isLast );
 }
 
 bool CApplication::CCmdLineInfo::ParseSwitch( const TCHAR* pSwitch )

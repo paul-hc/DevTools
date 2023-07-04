@@ -900,8 +900,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,8,3,1
- PRODUCTVERSION 5,8,3,1
+ FILEVERSION 5,8,3,2
+ PRODUCTVERSION 5,8,3,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -916,18 +916,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "03-07-2023 12:50:16"
+            VALUE "BuildTimestamp", "04-07-2023 23:45:06"
             VALUE "Comments", "RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]Frame navigation|[5.0] Images Model"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
-            VALUE "FileVersion", "5, 8, 3, 1"
+            VALUE "FileVersion", "5, 8, 3, 2"
             VALUE "InternalName", "Slider"
             VALUE "LegalCopyright", "Copyright (C) 2000-2023"
             VALUE "LegalTrademarks", "Enjoy it."
             VALUE "OriginalFilename", "Slider.exe"
             VALUE "ProductName", "Slider Application"
-            VALUE "ProductVersion", "5, 8, 3, 1"
+            VALUE "ProductVersion", "5, 8, 3, 2"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
