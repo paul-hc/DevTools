@@ -48,7 +48,7 @@ void CArchivingModel::Stream( CArchive& archive )
 	serial::SerializeValues( archive, m_pathPairs );
 }
 
-void CArchivingModel::SetupSourcePaths( const std::vector< CFileAttr* >& srcFiles )
+void CArchivingModel::SetupSourcePaths( const std::vector<CFileAttr*>& srcFiles )
 {
 	m_pathPairs.clear();
 	m_pathPairs.resize( srcFiles.size() );
@@ -59,7 +59,7 @@ void CArchivingModel::SetupSourcePaths( const std::vector< CFileAttr* >& srcFile
 
 void CArchivingModel::ResetDestPaths( void )
 {
-	for ( std::vector< TTransferPathPair >::iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
+	for ( std::vector<TTransferPathPair>::iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
 		it->second.Clear();			// reset the destination filepath
 }
 
@@ -67,7 +67,7 @@ bool CArchivingModel::CommitOperations( FileOp fileOp, bool isUndoOp /*= false*/
 {
 	CWaitCursor wait;
 
-	for ( std::vector< TTransferPathPair >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
+	for ( std::vector<TTransferPathPair>::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
 	{
 		try
 		{
@@ -114,11 +114,11 @@ void CArchivingModel::CommitOperation( FileOp fileOp, const TTransferPathPair& x
 	fileOperation.Log( app::GetApp()->GetLogger() );
 }
 
-bool CArchivingModel::CanCommitOperations( std::vector< TTransferPathPair >& rErrorPairs, FileOp fileOp, bool isUndoOp ) const
+bool CArchivingModel::CanCommitOperations( std::vector<TTransferPathPair>& rErrorPairs, FileOp fileOp, bool isUndoOp ) const
 {
 	rErrorPairs.clear();
 
-	for ( std::vector< TTransferPathPair >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
+	for ( std::vector<TTransferPathPair>::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
 		switch ( fileOp )
 		{
 			case FOP_FileCopy:
@@ -253,7 +253,7 @@ bool CArchivingModel::BuildArchiveStorageFile( const fs::TStgDocPath& destStgPat
 		pProgressSvc->AdvanceStage( _T("Delete source image files") );
 		pProgressSvc->SetBoundedProgressCount( m_pathPairs.size() );
 
-		for ( std::vector< TTransferPathPair >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
+		for ( std::vector<TTransferPathPair>::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
 		{
 			if ( it->first.FileExist() )
 				if ( !it->first.IsComplexPath() )

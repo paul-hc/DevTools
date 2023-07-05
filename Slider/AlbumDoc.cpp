@@ -243,7 +243,7 @@ const fs::TImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
 
 CAlbumImageView* CAlbumDoc::GetAlbumImageView( void ) const
 {
-	return ui::FindDocumentView< CAlbumImageView >( this );
+	return ui::FindDocumentView<CAlbumImageView>( this );
 }
 
 CSlideData* CAlbumDoc::GetActiveSlideData( void )
@@ -443,13 +443,13 @@ bool CAlbumDoc::EditAlbum( CAlbumImageView* pActiveView )
 	return true;
 }
 
-bool CAlbumDoc::AddExplicitFiles( const std::vector< fs::CPath >& filePaths, bool doUpdate /*= true*/ )
+bool CAlbumDoc::AddExplicitFiles( const std::vector<fs::CPath>& filePaths, bool doUpdate /*= true*/ )
 {
 	if ( m_model.IsAutoDropRecipient( false ) )
 		return false;
 
 	// add search attributes for each explicit file or directory
-	for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+	for ( std::vector<fs::CPath>::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 		m_model.RefSearchModel()->AddSearchPath( *itFilePath );
 
 	try
@@ -470,7 +470,7 @@ bool CAlbumDoc::AddExplicitFiles( const std::vector< fs::CPath >& filePaths, boo
 	return true;
 }
 
-TCurrImagePos CAlbumDoc::DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths )
+TCurrImagePos CAlbumDoc::DeleteFromAlbum( const std::vector<fs::CFlexPath>& selFilePaths )
 {
 	TCurrImagePos newCurrentIndex = m_model.DeleteFromAlbum( selFilePaths );
 	m_slideData.SetCurrentIndex( newCurrentIndex );
@@ -484,7 +484,7 @@ TCurrImagePos CAlbumDoc::DeleteFromAlbum( const std::vector< fs::CFlexPath >& se
 void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= AM_Init*/ )
 {
 	if ( AM_Regeneration == reason )
-		UpdateAllViewsOfType< CAlbumImageView >( NULL, Hint_BackupCurrSelection );		// backup current selection for all the owned views before re-generating the m_model member
+		UpdateAllViewsOfType<CAlbumImageView>( NULL, Hint_BackupCurrSelection );		// backup current selection for all the owned views before re-generating the m_model member
 
 	// We can't rely on reordering information since there might be new or removed files.
 	// However, we can keep file copy/move operations in undo/redo buffers.
@@ -504,7 +504,7 @@ void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= AM_Init*/ )
 	OnAlbumModelChanged( reason );
 
 	if ( AM_Regeneration == reason )
-		UpdateAllViewsOfType< CAlbumImageView >( NULL, Hint_RestoreSelection );		// restore backed-up selection for all the views
+		UpdateAllViewsOfType<CAlbumImageView>( NULL, Hint_RestoreSelection );		// restore backed-up selection for all the views
 
 	// since auto-drop operation is usually done from opened albums (as well as Windows Explorer),
 	// also redraw any of the opened views that may be affected by this, except for those views
@@ -519,7 +519,7 @@ void CAlbumDoc::ClearCustomOrder( custom_order::ClearMode clearMode /*= custom_o
 	m_customOrderRedoStack.ClearStack( clearMode );
 }
 
-bool CAlbumDoc::DropCustomOrder( int& rDropIndex, std::vector< int >& rSelIndexes )
+bool CAlbumDoc::DropCustomOrder( int& rDropIndex, std::vector<int>& rSelIndexes )
 {
 	custom_order::COpStep step;
 
@@ -551,7 +551,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 			return false;
 
 		CArchivingModel& rArchivingModel = topStep.RefArchivingModel();
-		std::vector< TTransferPathPair > errorPairs;
+		std::vector<TTransferPathPair> errorPairs;
 
 		if ( !rArchivingModel.CanCommitOperations( errorPairs, topStep.m_fileOp, isUndoOp ) )
 		{
@@ -586,7 +586,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		CAlbumImageView* pAlbumViewTarget = GetAlbumImageView();
 		ASSERT_PTR( pAlbumViewTarget );
 		// for the views != than the target view (if any), backup current/near selection before modifying the m_model
-		UpdateAllViewsOfType< CAlbumImageView >( pAlbumViewTarget, Hint_SmartBackupSelection );
+		UpdateAllViewsOfType<CAlbumImageView>( pAlbumViewTarget, Hint_SmartBackupSelection );
 
 		custom_order::COpStep step = rToStack.front();		// copy by value since redo modifies it
 
@@ -605,7 +605,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 
 		OnAlbumModelChanged( AM_CustomOrderChanged );
 
-		UpdateAllViewsOfType< CAlbumImageView >( pAlbumViewTarget, Hint_RestoreSelection );
+		UpdateAllViewsOfType<CAlbumImageView>( pAlbumViewTarget, Hint_RestoreSelection );
 
 		// select the un-dropped images
 		CListViewState dropState( step.m_dragSelIndexes );
@@ -691,7 +691,7 @@ CWicImage* CAlbumDoc::GetCurrentImage( void ) const
 	return pAlbumView != NULL ? pAlbumView->GetImage() : NULL;
 }
 
-bool CAlbumDoc::QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const
+bool CAlbumDoc::QuerySelectedImagePaths( std::vector<fs::CFlexPath>& rSelImagePaths ) const
 {
 	CAlbumImageView* pAlbumView = GetAlbumImageView();
 	return pAlbumView != NULL && pAlbumView->QuerySelImagePaths( rSelImagePaths );
@@ -811,11 +811,11 @@ void CAlbumDoc::OnExtractCatalog( void )
 
 	if ( shell::PickFolder( destFolderPath, NULL, 0, _T("Select Extract Folder") ) )
 	{
-		std::vector< fs::CFlexPath > srcImagePaths;
+		std::vector<fs::CFlexPath> srcImagePaths;
 		utl::Assign( srcImagePaths, m_model.GetImagesModel().GetFileAttrs(), func::ToFilePath() );
 
 		// make deep destination paths
-		std::vector< fs::CPath > destImagePaths( srcImagePaths.begin(), srcImagePaths.end() );
+		std::vector<fs::CPath> destImagePaths( srcImagePaths.begin(), srcImagePaths.end() );
 		svc::MakeDestFilePaths( destImagePaths, srcImagePaths, destFolderPath, Deep );
 
 		if ( svc::CheckOverrideExistingFiles( destImagePaths ) )
@@ -830,11 +830,11 @@ void CAlbumDoc::OnUpdate_IsCatalogStorage( CCmdUI* pCmdUI )
 
 void CAlbumDoc::On_ImageSaveAs( void )
 {
-	std::vector< fs::CFlexPath > srcFilePaths;
+	std::vector<fs::CFlexPath> srcFilePaths;
 	if ( !QuerySelectedImagePaths( srcFilePaths ) )
 		return;
 
-	std::vector< fs::CPath > destFilePaths;
+	std::vector<fs::CPath> destFilePaths;
 	if ( svc::PickDestImagePaths( destFilePaths, srcFilePaths ) )
 		svc::CopyFiles( srcFilePaths, destFilePaths, Shallow );
 }
@@ -847,28 +847,28 @@ void CAlbumDoc::OnUpdate_AnyCurrImage( CCmdUI* pCmdUI )
 
 void CAlbumDoc::OnUpdate_AllSelImagesRead( CCmdUI* pCmdUI )
 {
-	std::vector< fs::CFlexPath > selImagePaths;
+	std::vector<fs::CFlexPath> selImagePaths;
 	pCmdUI->Enable( QuerySelectedImagePaths( selImagePaths ) && utl::All( selImagePaths, pred::FlexFileExist() ) );
 }
 
 void CAlbumDoc::OnUpdate_AllSelImagesModify( CCmdUI* pCmdUI )
 {
-	std::vector< fs::CFlexPath > selImagePaths;
+	std::vector<fs::CFlexPath> selImagePaths;
 	pCmdUI->Enable( QuerySelectedImagePaths( selImagePaths ) && utl::All( selImagePaths, pred::CanAlterPhysicalImage() ) );
 }
 
 void CAlbumDoc::On_ImageOpen( void )
 {
-	std::vector< fs::CFlexPath > selImagePaths;
+	std::vector<fs::CFlexPath> selImagePaths;
 	QuerySelectedImagePaths( selImagePaths );
 
-	for ( std::vector< fs::CFlexPath >::const_iterator itImagePath = selImagePaths.begin(); itImagePath != selImagePaths.end(); ++itImagePath )
+	for ( std::vector<fs::CFlexPath>::const_iterator itImagePath = selImagePaths.begin(); itImagePath != selImagePaths.end(); ++itImagePath )
 		AfxGetApp()->OpenDocumentFile( itImagePath->GetPtr() );
 }
 
 void CAlbumDoc::On_ImageDelete( void )
 {
-	std::vector< fs::CFlexPath > selFilePaths;
+	std::vector<fs::CFlexPath> selFilePaths;
 	QuerySelectedImagePaths( selFilePaths );
 
 	if ( HandleDeleteImages( selFilePaths ) )
@@ -877,7 +877,7 @@ void CAlbumDoc::On_ImageDelete( void )
 
 void CAlbumDoc::On_ImageMove( void )
 {
-	std::vector< fs::CFlexPath > selFilePaths;
+	std::vector<fs::CFlexPath> selFilePaths;
 	QuerySelectedImagePaths( selFilePaths );
 
 	if ( HandleMoveImages( selFilePaths ) )

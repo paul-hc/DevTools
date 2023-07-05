@@ -130,7 +130,7 @@ END_MESSAGE_MAP()
 
 void CSearchPatternDialog::OnDropFiles( HDROP hDropInfo )
 {
-	std::vector< std::tstring > filePaths;
+	std::vector<std::tstring> filePaths;
 	shell::QueryDroppedFiles( filePaths, hDropInfo );
 
 	if ( !filePaths.empty() )
@@ -212,5 +212,5 @@ void CSearchPatternDialog::OnCBnSelChange_WildFilters( void )
 
 void CSearchPatternDialog::OnCBnSelChange_SearchMode( void )
 {
-	m_pSearchPattern->SetSearchMode( m_searchModeCombo.GetEnum< CSearchPattern::SearchMode >() );
+	m_pSearchPattern->SetSearchMode( m_searchModeCombo.GetEnum<CSearchPattern::SearchMode>() );
 }

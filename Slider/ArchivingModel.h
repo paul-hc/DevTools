@@ -20,8 +20,8 @@ public:
 	void StorePassword( const std::tstring& password ) { m_password = password; }
 
 	// piece-meal generation
-	const std::vector< TTransferPathPair >& GetPathPairs( void ) const { return m_pathPairs; }
-	void SetupSourcePaths( const std::vector< CFileAttr* >& srcFiles );
+	const std::vector<TTransferPathPair>& GetPathPairs( void ) const { return m_pathPairs; }
+	void SetupSourcePaths( const std::vector<CFileAttr*>& srcFiles );
 	void ResetDestPaths( void );
 
 	static bool IsValidFormat( const std::tstring& format );
@@ -30,12 +30,12 @@ public:
 	// service
 	bool BuildArchiveStorageFile( const fs::TStgDocPath& destStgPath, FileOp fileOp, CWnd* pParentWnd = AfxGetMainWnd() ) const;
 
-	bool CanCommitOperations( std::vector< TTransferPathPair >& rErrorPairs, FileOp fileOp, bool isUndoOp ) const;
+	bool CanCommitOperations( std::vector<TTransferPathPair>& rErrorPairs, FileOp fileOp, bool isUndoOp ) const;
 	bool CommitOperations( FileOp fileOp, bool isUndoOp = false ) const;
 private:
 	static void CommitOperation( FileOp fileOp, const TTransferPathPair& xferPair, bool isUndoOp = false ) throws_( CException* );
 private:
-	persist std::vector< TTransferPathPair > m_pathPairs;
+	persist std::vector<TTransferPathPair> m_pathPairs;
 
 	// transient
 	std::tstring m_password;

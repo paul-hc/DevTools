@@ -46,7 +46,7 @@ public:
 	bool IsMultiSelection( void ) const { return HasFlag( AsListBox()->GetStyle(), LBS_EXTENDEDSEL | LBS_MULTIPLESEL ); }
 	int GetCurSel( void ) const;
 	bool SetCurSel( int selIndex, bool notifySelChanged = false );
-	bool QuerySelItemPaths( std::vector< fs::CFlexPath >& rSelFilePaths ) const;
+	bool QuerySelItemPaths( std::vector<fs::CFlexPath>& rSelFilePaths ) const;
 
 	void GetListViewState( CListViewState& rLvState, bool filesMustExist = true, bool sortAscending = true ) const;
 	void SetListViewState( const CListViewState& lvState, bool notifySelChanged = false, const TCHAR* pDoRestore = _T("TSC") );
@@ -56,7 +56,7 @@ public:
 
 	bool BackupSelection( bool currentSelection = true );
 	void RestoreSelection( void );
-	bool SelectionOverlapsWith( const std::vector< int >& displayIndexes ) const;
+	bool SelectionOverlapsWith( const std::vector<int>& displayIndexes ) const;
 
 	// splitter width quantification
 	int QuantifyListWidth( int listWidth );
@@ -69,7 +69,7 @@ public:
 	CSize GetPageItemCounts( void ) const;		// item counts in the list: (horizontal, vertical)
 	static CRect GetListWindowRect( int columnCount = 1, CWnd* pListWnd = NULL );
 
-	const std::vector< int >& GetDragSelIndexes( void ) const { return m_dragSelIndexes; }
+	const std::vector<int>& GetDragSelIndexes( void ) const { return m_dragSelIndexes; }
 private:
 	CWicDibSection* GetItemThumb( int displayIndex ) const throws_();
 	const fs::CFlexPath* GetItemPath( int displayIndex ) const;
@@ -104,7 +104,7 @@ private:
 	CRect m_startDragRect;
 
 	// custom order drag & drop
-	std::vector< int > m_dragSelIndexes;			// contains indexes to be dropped in custom order
+	std::vector<int> m_dragSelIndexes;				// contains indexes to be dropped in custom order
 	ole::CDropTarget m_dropTarget;					// view is registered as drop target to this data-member
 	CPoint m_scrollTimerCounter;					// counter for custom order scrolling (D&D timer auto-scroll)
 	CListViewState m_selectionBackup;				// used for saving the selection (near or current)

@@ -35,9 +35,9 @@ namespace auto_drop
 
 	// group of potential multiple move/rename operations
 
-	class COpGroup : public std::deque< COpEntry >
+	class COpGroup : public std::deque<COpEntry>
 	{
-		typedef std::deque< COpEntry > TBase;
+		typedef std::deque<COpEntry> TBase;
 	public:
 		enum GroupType
 		{
@@ -56,9 +56,9 @@ namespace auto_drop
 
 	// stack of auto-drop file operation groups
 
-	class COpStack : public std::deque< COpGroup >
+	class COpStack : public std::deque<COpGroup>
 	{
-		typedef std::deque< COpGroup > TBase;
+		typedef std::deque<COpGroup> TBase;
 	public:
 		COpStack( void ) {}
 	};
@@ -102,7 +102,7 @@ namespace auto_drop
 
 		bool DoAutoDropOperation( const COpStack& dropStack, bool isUndoOp ) const;
 
-		static bool DoFileSetOperation( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
+		static bool DoFileSetOperation( const std::vector<fs::CPath>& srcPaths, const std::vector<fs::CPath>& destPaths,
 										FileSetOperation fileSetOp );
 
 		static FileSetOperation GetFileSetOperation( bool imageWasMoved, bool isUndoOp, int phaseNo )
@@ -114,8 +114,8 @@ namespace auto_drop
 		DropOperation m_dropOperation;
 		std::auto_ptr<CSearchPattern> m_pDestSearchPattern;		// search pattern containing the destination folder for dropped files
 	public:
-		std::vector< std::tstring > m_droppedSrcFiles;
-		std::vector< std::tstring > m_droppedDestFiles;		// drop source and destionation files
+		std::vector<std::tstring> m_droppedSrcFiles;
+		std::vector<std::tstring> m_droppedDestFiles;		// drop source and destionation files
 		fs::CFlexPath m_insertBefore;		// image file path pointed on drop (if any, otherwise empty)
 		CPoint m_dropScreenPos;				// screen position for drop
 

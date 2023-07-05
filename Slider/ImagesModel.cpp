@@ -66,7 +66,7 @@ void CImagesModel::Swap( CImagesModel& rImagesModel )
 void CImagesModel::SetUseIndexing( bool useIndexing /*= true*/ )
 {
 	ASSERT( IsEmpty() );
-	m_pIndexer.reset( useIndexing ? new fs::CPathIndex< fs::CFlexPath >() : NULL );
+	m_pIndexer.reset( useIndexing ? new fs::CPathIndex<fs::CFlexPath>() : NULL );
 }
 
 void CImagesModel::Stream( CArchive& archive )
@@ -74,7 +74,7 @@ void CImagesModel::Stream( CArchive& archive )
 	serial::StreamOwningPtrs( archive, m_fileAttributes );
 	serial::SerializeValues( archive, m_storagePaths );
 
-	std::vector< int > displaySequence;				// display indexes that points to a baseline position in m_fileAttributes
+	std::vector<int> displaySequence;				// display indexes that points to a baseline position in m_fileAttributes
 
 	if ( archive.IsLoading() )
 	{
@@ -155,7 +155,7 @@ bool CImagesModel::AddStoragePath( const fs::TStgDocPath& storagePath )
 void CImagesModel::ClearInvalidStoragePaths( void )
 {
 	// backwards compatibility: delete dangling embedded storages
-	for ( std::vector< fs::TStgDocPath >::iterator itStoragePath = m_storagePaths.begin(); itStoragePath != m_storagePaths.end(); )
+	for ( std::vector<fs::TStgDocPath>::iterator itStoragePath = m_storagePaths.begin(); itStoragePath != m_storagePaths.end(); )
 		if ( !fs::IsValidStructuredStorage( itStoragePath->GetPtr() ) )
 			itStoragePath = m_storagePaths.erase( itStoragePath );
 		else
@@ -242,7 +242,7 @@ void CImagesModel::FilterCorruptFiles( utl::IProgressService* pProgressSvc )
 
 	CTimer timer;
 
-	for ( std::vector< CFileAttr* >::iterator itFileAttr = m_fileAttributes.begin(); itFileAttr != m_fileAttributes.end(); )
+	for ( std::vector<CFileAttr*>::iterator itFileAttr = m_fileAttributes.begin(); itFileAttr != m_fileAttributes.end(); )
 	{
 		pProgressSvc->AdvanceItem( ( *itFileAttr )->GetPath().Get() );
 

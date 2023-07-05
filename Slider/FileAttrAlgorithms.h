@@ -9,23 +9,23 @@
 
 namespace fattr
 {
-	size_t FindPosWithPath( const std::vector< CFileAttr* >& fileAttributes, const fs::CPath& filePath );
+	size_t FindPosWithPath( const std::vector<CFileAttr*>& fileAttributes, const fs::CPath& filePath );
 
-	inline const CFileAttr* FindWithPath( const std::vector< CFileAttr* >& fileAttributes, const fs::CPath& filePath )
+	inline const CFileAttr* FindWithPath( const std::vector<CFileAttr*>& fileAttributes, const fs::CPath& filePath )
 	{
 		size_t foundPos = FindPosWithPath( fileAttributes, filePath );
 		return foundPos != utl::npos ? fileAttributes[ foundPos ] : NULL;
 	}
 
 	template< typename FileAttrT >
-	void StoreBaselineSequence( std::vector< FileAttrT* >& rFileAttributes )
+	void StoreBaselineSequence( std::vector<FileAttrT*>& rFileAttributes )
 	{
 		for ( size_t pos = 0; pos != rFileAttributes.size(); ++pos )
 			rFileAttributes[ pos ]->StoreBaselinePos( pos );
 	}
 
 	template< typename IndexT >
-	void QueryDisplayIndexSequence( std::vector< IndexT >* pDisplaySequence, const std::vector< CFileAttr* >& fileAttributes )
+	void QueryDisplayIndexSequence( std::vector<IndexT>* pDisplaySequence, const std::vector<CFileAttr*>& fileAttributes )
 	{	// pDisplaySequence contains baseline positions in current order
 		ASSERT_PTR( pDisplaySequence );
 
@@ -41,12 +41,12 @@ namespace fattr
 	class CRetainFileOrder
 	{
 	public:
-		CRetainFileOrder( const std::vector< CFileAttr* >& origSequence );
+		CRetainFileOrder( const std::vector<CFileAttr*>& origSequence );
 
-		void RestoreOriginalOrder( std::vector< CFileAttr* >* pNewSequence );
+		void RestoreOriginalOrder( std::vector<CFileAttr*>* pNewSequence );
 	private:
 		// original order
-		std::unordered_map< fs::CFlexPath, size_t > m_pathToOrigPosMap;
+		std::unordered_map<fs::CFlexPath, size_t> m_pathToOrigPosMap;
 	};
 }
 

@@ -17,8 +17,8 @@ struct CListViewState
 public:
 	CListViewState( void ) {}
 	CListViewState( StoreMode storeBy );
-	CListViewState( const std::vector< int >& selIndexes );
-	CListViewState( std::vector< std::tstring >& rSelStrings );
+	CListViewState( const std::vector<int>& selIndexes );
+	CListViewState( std::vector<std::tstring>& rSelStrings );
 	CListViewState( const CListViewState& src );
 	~CListViewState();
 
@@ -50,7 +50,7 @@ private:
 	void Reset( void ) { m_pIndexImpl.reset(); m_pStringImpl.reset(); }
 
 	template< typename Type > static void SetDefaultValue( Type& rValue ) { rValue = Type(); }
-	template<> static void SetDefaultValue< int >( int& rValue ) { rValue = -1; }
+	template<> static void SetDefaultValue<int>( int& rValue ) { rValue = -1; }
 public:
 	template< typename Type >
 	struct CImpl
@@ -70,7 +70,7 @@ public:
 			archive & m_caret & m_top;
 		}
 	public:
-		persist std::vector< Type > m_selItems;
+		persist std::vector<Type> m_selItems;
 		persist Type m_caret;
 		persist Type m_top;
 	};

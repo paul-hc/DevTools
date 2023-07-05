@@ -211,7 +211,7 @@ void CAlbumSettingsDialog::SetupPatternsListView( void )
 	// fill in the found files list (File Name|In Folder|Size|Date)
 	m_patternsListCtrl.DeleteAllItems();
 
-	const std::vector< CSearchPattern* >& patterns = m_model.GetSearchModel()->GetPatterns();
+	const std::vector<CSearchPattern*>& patterns = m_model.GetSearchModel()->GetPatterns();
 
 	for ( UINT i = 0, count = static_cast<UINT>( patterns.size() ); i != count; ++i )
 	{
@@ -362,7 +362,7 @@ void CAlbumSettingsDialog::UpdateCurrentFile( void )
 	int selCaretIndex = m_imagesListCtrl.GetSelCaretIndex();
 
 	if ( selCaretIndex != -1 )
-		currFilePath = m_imagesListCtrl.GetObjectAt< CFileAttr >( selCaretIndex )->GetPath();
+		currFilePath = m_imagesListCtrl.GetObjectAt<CFileAttr>( selCaretIndex )->GetPath();
 
 	m_thumbPreviewCtrl.SetImagePath( currFilePath );
 }
@@ -440,8 +440,8 @@ void CAlbumSettingsDialog::InputAll( void )
 	if ( ckState != BST_INDETERMINATE )
 		m_model.SetPersistFlag( CAlbumModel::AutoRegenerate, BST_CHECKED == ckState );		// the button is checked naturally, and not as a side effect of auto-drop feature
 
-	m_model.StoreFileOrder( m_sortOrderCombo.GetEnum< fattr::Order >() );
-	m_pCaretFileAttr = m_imagesListCtrl.GetSelected< CFileAttr >();
+	m_model.StoreFileOrder( m_sortOrderCombo.GetEnum<fattr::Order>() );
+	m_pCaretFileAttr = m_imagesListCtrl.GetSelected<CFileAttr>();
 }
 
 void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
@@ -603,10 +603,10 @@ void CAlbumSettingsDialog::OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pRes
 	*pResult = 0;
 
 	CSearchModel* pSearchModel = m_model.RefSearchModel();
-	std::vector< CSearchPattern* > droppedPatterns;
+	std::vector<CSearchPattern*> droppedPatterns;
 
 	size_t dropPos = pNmDropFiles->m_dropItemIndex;
-	for ( std::vector< fs::CPath >::const_iterator itSearchPath = pNmDropFiles->m_filePaths.begin(); itSearchPath != pNmDropFiles->m_filePaths.end(); ++itSearchPath )
+	for ( std::vector<fs::CPath>::const_iterator itSearchPath = pNmDropFiles->m_filePaths.begin(); itSearchPath != pNmDropFiles->m_filePaths.end(); ++itSearchPath )
 	{
 		std::pair<CSearchPattern*, bool> patternPair = pSearchModel->AddSearchPath( *itSearchPath, dropPos );
 		if ( patternPair.first != NULL )
@@ -629,12 +629,12 @@ void CAlbumSettingsDialog::OnLVnItemsRemoved_Patterns( NMHDR* pNmHdr, LRESULT* p
 	*pResult = 0;
 
 	CSearchModel* pSearchModel = m_model.RefSearchModel();
-	std::vector< CSearchPattern* >& rSearchPatterns = pSearchModel->RefPatterns();
+	std::vector<CSearchPattern*>& rSearchPatterns = pSearchModel->RefPatterns();
 
 	if ( pNmItemsRemoved->m_removedObjects.size() == rSearchPatterns.size() )		// remove all?
 		pSearchModel->ClearPatterns();
 	else
-		for ( std::vector< utl::ISubject* >::const_iterator itObject = pNmItemsRemoved->m_removedObjects.begin(); itObject != pNmItemsRemoved->m_removedObjects.end(); ++itObject )
+		for ( std::vector<utl::ISubject*>::const_iterator itObject = pNmItemsRemoved->m_removedObjects.begin(); itObject != pNmItemsRemoved->m_removedObjects.end(); ++itObject )
 		{
 			utl::RemoveExisting( rSearchPatterns, checked_static_cast<CSearchPattern*>( *itObject ) );
 			delete *itObject;
@@ -646,7 +646,7 @@ void CAlbumSettingsDialog::OnLVnItemsRemoved_Patterns( NMHDR* pNmHdr, LRESULT* p
 void CAlbumSettingsDialog::OnLVnItemsReorder_Patterns( void )
 {
 	// copy List sequence -> CSearchModel sequence
-	std::vector< CSearchPattern* > patternsSequence;
+	std::vector<CSearchPattern*> patternsSequence;
 	m_patternsListCtrl.QueryObjectsSequence( patternsSequence );
 
 	CSearchModel* pSearchModel = m_model.RefSearchModel();
@@ -683,7 +683,7 @@ void CAlbumSettingsDialog::On_ModifySearchPattern( void )
 	ASSERT( selIndex != utl::npos );		// should be validated
 
 	CSearchModel* pSearchModel = m_model.RefSearchModel();
-	std::vector< CSearchPattern* >& rSearchPatterns = pSearchModel->RefPatterns();
+	std::vector<CSearchPattern*>& rSearchPatterns = pSearchModel->RefPatterns();
 
 	CSearchPattern* pEditedPattern = rSearchPatterns[ selIndex ];
 
@@ -853,7 +853,7 @@ void CAlbumSettingsDialog::OnLVnGetDispInfo_FoundImages( NMHDR* pNmHdr, LRESULT*
 void CAlbumSettingsDialog::OnLVnItemsReorder_FoundImages( void )
 {
 	// input custom order
-	std::vector< CFileAttr* > customSequence;
+	std::vector<CFileAttr*> customSequence;
 	m_imagesListCtrl.QueryObjectsSequence( customSequence );
 
 	ASSERT( utl::SameContents( customSequence, m_model.GetImagesModel().GetFileAttrs() ) );
@@ -890,7 +890,7 @@ void CAlbumSettingsDialog::OnUpdateImageOrder( CCmdUI* pCmdUI )
 
 void CAlbumSettingsDialog::OnCBnSelChange_ImageOrder( void )
 {
-	fattr::Order selFileOrder = m_sortOrderCombo.GetEnum< fattr::Order >();
+	fattr::Order selFileOrder = m_sortOrderCombo.GetEnum<fattr::Order>();
 
 	std::pair<ImagesColumn, bool> sortPair = ToListSortOrder( selFileOrder );
 	m_imagesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
@@ -901,20 +901,20 @@ void CAlbumSettingsDialog::OnCBnSelChange_ImageOrder( void )
 
 void CAlbumSettingsDialog::On_ImageOpen( void )
 {
-	std::vector< fs::CFlexPath > selImagePaths;
+	std::vector<fs::CFlexPath> selImagePaths;
 	m_imagesListCtrl.QuerySelectedItemPaths( selImagePaths );
 
-	for ( std::vector< fs::CFlexPath >::const_iterator itImagePath = selImagePaths.begin(); itImagePath != selImagePaths.end(); ++itImagePath )
+	for ( std::vector<fs::CFlexPath>::const_iterator itImagePath = selImagePaths.begin(); itImagePath != selImagePaths.end(); ++itImagePath )
 		AfxGetApp()->OpenDocumentFile( itImagePath->GetPtr() );
 }
 
 void CAlbumSettingsDialog::On_ImageSaveAs( void )
 {
-	std::vector< fs::CFlexPath > selImagePaths;
+	std::vector<fs::CFlexPath> selImagePaths;
 	if ( !m_imagesListCtrl.QuerySelectedItemPaths( selImagePaths ) )
 		return;
 
-	std::vector< fs::CPath > destFilePaths;
+	std::vector<fs::CPath> destFilePaths;
 	if ( svc::PickDestImagePaths( destFilePaths, selImagePaths ) )
 	{
 		CFileOperation fileOp;
@@ -926,7 +926,7 @@ void CAlbumSettingsDialog::On_ImageSaveAs( void )
 
 void CAlbumSettingsDialog::On_ImageRemove( void )
 {
-	std::vector< fs::CFlexPath > selImagePaths;
+	std::vector<fs::CFlexPath> selImagePaths;
 	m_imagesListCtrl.QuerySelectedItemPaths( selImagePaths );
 
 	m_imagesListCtrl.DeleteSelection();
@@ -937,7 +937,7 @@ void CAlbumSettingsDialog::On_ImageRemove( void )
 
 void CAlbumSettingsDialog::On_ImageExplore( void )
 {
-	const CFileAttr* pCurrFileAttr = m_imagesListCtrl.GetSelected< CFileAttr >();
+	const CFileAttr* pCurrFileAttr = m_imagesListCtrl.GetSelected<CFileAttr>();
 	ASSERT_PTR( pCurrFileAttr );
 	shell::ExploreAndSelectFile( pCurrFileAttr->GetPath().GetPhysicalPath().GetPtr() );
 }
@@ -953,7 +953,7 @@ void CAlbumSettingsDialog::OnUpdate_ImageFileOp( CCmdUI* pCmdUI )
 			break;
 		case ID_IMAGE_EXPLORE:
 		{
-			const CFileAttr* pCurrFileAttr = m_imagesListCtrl.GetSelected< CFileAttr >();
+			const CFileAttr* pCurrFileAttr = m_imagesListCtrl.GetSelected<CFileAttr>();
 			pCmdUI->Enable( pCurrFileAttr != NULL && pCurrFileAttr->IsValid() );
 			break;
 		}

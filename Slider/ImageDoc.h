@@ -19,7 +19,7 @@ public:
 protected:
 	// base overrides
 	virtual CWicImage* GetCurrentImage( void ) const;
-	virtual bool QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const;
+	virtual bool QuerySelectedImagePaths( std::vector<fs::CFlexPath>& rSelImagePaths ) const;
 private:
 	fs::CFlexPath m_imagePath;
 	CCatalogStorageHost m_storageHost;		// holds the storage if image is embedded

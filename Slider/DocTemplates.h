@@ -44,7 +44,7 @@ namespace app
 		virtual Confidence MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch );
 
 		const fs::CFilterStore* GetFilterStore( void ) const { return m_pFilterStore; }
-		const std::vector< std::tstring >& GetAllExts( void ) const { return m_allExts; }
+		const std::vector<std::tstring>& GetAllExts( void ) const { return m_allExts; }
 
 		void RegisterAdditionalDocExtensions( void );
 		bool PromptFileDialog( CString& rFilePath, UINT titleId, DWORD flags, shell::BrowseMode browseMode ) const;

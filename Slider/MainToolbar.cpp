@@ -139,7 +139,7 @@ bool CMainToolbar::OutputScalingMode( ui::ImageScalingMode scalingMode )
 
 ui::ImageScalingMode CMainToolbar::InputScalingMode( void ) const
 {
-	return m_pScalingCombo->GetEnum< ui::ImageScalingMode >();
+	return m_pScalingCombo->GetEnum<ui::ImageScalingMode>();
 }
 
 bool CMainToolbar::OutputZoomPct( UINT zoomPct )

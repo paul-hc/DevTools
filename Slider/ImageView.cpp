@@ -395,7 +395,7 @@ void CImageView::OnLButtonDblClk( UINT mkFlags, CPoint point )
 	{
 		const fs::CFlexPath& filePath = GetImagePathKey().first;
 		if ( !filePath.IsComplexPath() )
-			ShellInvokeDefaultVerb( std::vector< fs::CPath >( 1, filePath ) );
+			ShellInvokeDefaultVerb( std::vector<fs::CPath>( 1, filePath ) );
 	}
 	else
 	{	// zoom to defaults: stretch to fit / 100%

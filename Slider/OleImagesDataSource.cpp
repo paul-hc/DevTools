@@ -21,7 +21,7 @@ namespace ole
 	{
 	}
 
-	void CImagesDataSource::CacheShellFilePaths( const std::vector< fs::CPath >& filePaths )
+	void CImagesDataSource::CacheShellFilePaths( const std::vector<fs::CPath>& filePaths )
 	{
 		if ( !m_tempClones.SetInputFilePaths( filePaths ) )			// use temporary copies of embedded image files
 			return;
@@ -59,12 +59,12 @@ CTempCloneFileSet::~CTempCloneFileSet()
 template< typename SrcContainerT >
 bool CTempCloneFileSet::SetInputFilePaths( const SrcContainerT& inputFilePaths )
 {
-	std::vector< fs::CFlexPath > flexPaths;
+	std::vector<fs::CFlexPath> flexPaths;
 	utl::Assign( flexPaths, inputFilePaths, func::tor::StringOf() );
 	return SetInputFilePaths( flexPaths );
 }
 
-bool CTempCloneFileSet::SetInputFilePaths( const std::vector< fs::CFlexPath >& inputFilePaths )
+bool CTempCloneFileSet::SetInputFilePaths( const std::vector<fs::CFlexPath>& inputFilePaths )
 {
 	ClearAllTempFiles();			// delete all previously cloned files to avoid renames due to collisions
 
@@ -76,7 +76,7 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector< fs::CFlexPath >& i
 	const fs::TDirPath& tempDirPath = GetTempDirPath();
 
 	ASSERT( tempDirPath.FileExist() );
-	for ( std::vector< fs::CFlexPath >::const_iterator itInputPath = inputFilePaths.begin(); itInputPath != inputFilePaths.end(); ++itInputPath )
+	for ( std::vector<fs::CFlexPath>::const_iterator itInputPath = inputFilePaths.begin(); itInputPath != inputFilePaths.end(); ++itInputPath )
 	{
 		if ( itInputPath->FileExist() )
 		{

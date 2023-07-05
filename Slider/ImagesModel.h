@@ -28,8 +28,8 @@ public:
 
 	bool IsEmpty( void ) const { return m_fileAttributes.empty(); }
 
-	const std::vector< CFileAttr* >& GetFileAttrs( void ) const { return m_fileAttributes; }
-	std::vector< CFileAttr* >& RefFileAttrs( void ) { return m_fileAttributes; }
+	const std::vector<CFileAttr*>& GetFileAttrs( void ) const { return m_fileAttributes; }
+	std::vector<CFileAttr*>& RefFileAttrs( void ) { return m_fileAttributes; }
 	const CFileAttr* GetFileAttrAt( size_t pos ) const { ASSERT( pos < m_fileAttributes.size() ); return m_fileAttributes[ pos ]; }
 	bool AddFileAttr( CFileAttr* pFileAttr );
 	std::auto_ptr<CFileAttr> RemoveFileAttrAt( size_t pos );
@@ -40,8 +40,8 @@ public:
 	const CFileAttr* FindFileAttr( const fs::CFlexPath& filePath ) const;
 
 	// embedded storages
-	const std::vector< fs::TStgDocPath >& GetStoragePaths( void ) const { return m_storagePaths; }
-	std::vector< fs::TStgDocPath >& RefStoragePaths( void ) { return m_storagePaths; }
+	const std::vector<fs::TStgDocPath>& GetStoragePaths( void ) const { return m_storagePaths; }
+	std::vector<fs::TStgDocPath>& RefStoragePaths( void ) { return m_storagePaths; }
 	bool AddStoragePath( const fs::TStgDocPath& storagePath );
 	void ClearInvalidStoragePaths( void );
 public:
@@ -50,11 +50,11 @@ private:
 	void FilterFileDuplicates( fattr::Order fileOrder, utl::IProgressService* pProgressSvc, bool compareImageDim = false );
 	void FilterCorruptFiles( utl::IProgressService* pProgressSvc );
 private:
-	persist std::vector< CFileAttr* > m_fileAttributes;			// owning container
-	persist std::vector< fs::TStgDocPath > m_storagePaths;		// such as .ias files, storages found during search - the catalogs are managed by parent album model
+	persist std::vector<CFileAttr*> m_fileAttributes;			// owning container
+	persist std::vector<fs::TStgDocPath> m_storagePaths;		// such as .ias files, storages found during search - the catalogs are managed by parent album model
 
 	// transient
-	std::auto_ptr< fs::CPathIndex< fs::CFlexPath > > m_pIndexer;
+	std::auto_ptr< fs::CPathIndex<fs::CFlexPath> > m_pIndexer;
 };
 
 

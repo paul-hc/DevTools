@@ -28,11 +28,11 @@ public:
 
 	int Find( const std::tstring& item ) const { return static_cast<int>( utl::FindPos( m_items, item ) ); }
 
-	void QueryIndexes( std::vector< int >& rIndexes, const std::vector< std::tstring >& items ) const
+	void QueryIndexes( std::vector<int>& rIndexes, const std::vector<std::tstring>& items ) const
 	{
 		rIndexes.clear();
 		rIndexes.reserve( items.size() );
-		for ( std::vector< std::tstring >::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( std::vector<std::tstring>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 		{
 			int pos = Find( *itItem );
 			if ( pos != -1 )
@@ -46,18 +46,18 @@ public:
 		return m_items[ pos ];
 	}
 
-	void QueryItems( std::vector< std::tstring >& rItems, std::vector< int >& indexes ) const
+	void QueryItems( std::vector<std::tstring>& rItems, std::vector<int>& indexes ) const
 	{
 		rItems.clear();
 		rItems.reserve( indexes.size() );
-		for ( std::vector< int >::const_iterator itIndex = indexes.begin(); itIndex != indexes.end(); ++itIndex )
+		for ( std::vector<int>::const_iterator itIndex = indexes.begin(); itIndex != indexes.end(); ++itIndex )
 		{
 			if ( (size_t)*itIndex < m_items.size() )
 				rItems.push_back( m_items[ *itIndex ] );
 		}
 	}
 private:
-	std::vector< std::tstring > m_items;
+	std::vector<std::tstring> m_items;
 };
 
 
@@ -72,13 +72,13 @@ CListViewState::CListViewState( StoreMode storeBy )
 	}
 }
 
-CListViewState::CListViewState( std::vector< std::tstring >& rSelStrings )
+CListViewState::CListViewState( std::vector<std::tstring>& rSelStrings )
 	: m_pStringImpl( new CImpl<std::tstring>() )
 {
 	m_pStringImpl->m_selItems.swap( rSelStrings );
 }
 
-CListViewState::CListViewState( const std::vector< int >& selIndexes )
+CListViewState::CListViewState( const std::vector<int>& selIndexes )
 	: m_pIndexImpl( new CImpl<int>() )
 {
 	m_pIndexImpl->m_selItems = selIndexes;
@@ -137,7 +137,7 @@ int CListViewState::GetSelCount( void ) const
 namespace hlp
 {
 	template< typename Type >
-	bool SetCaretOnSel( CListViewState::CImpl< Type >& rDataSet, bool firstSel )
+	bool SetCaretOnSel( CListViewState::CImpl<Type>& rDataSet, bool firstSel )
 	{
 		if ( rDataSet.m_selItems.empty() )
 			return false;
@@ -158,7 +158,7 @@ bool CListViewState::SetCaretOnSel( bool firstSel /*= true*/ )
 
 
 template< typename Type >
-std::tostream& operator<<( std::tostream& oss, const CListViewState::CImpl< Type >& impl )
+std::tostream& operator<<( std::tostream& oss, const CListViewState::CImpl<Type>& impl )
 {
 	return oss
 		<< _T(" SEL=") << str::FormatSet( impl.m_selItems )

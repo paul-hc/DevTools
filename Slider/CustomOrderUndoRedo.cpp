@@ -63,7 +63,7 @@ namespace custom_order
 			clear();
 		else
 		{	// clear selectively
-			std::deque< COpStep >::iterator it = begin();
+			std::deque<COpStep>::iterator it = begin();
 
 			while ( it != end() )
 				if ( ( CM_ClearReorder == clearMode && it->IsResequenceOperation() ) ||

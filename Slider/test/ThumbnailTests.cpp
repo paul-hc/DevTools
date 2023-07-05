@@ -147,7 +147,7 @@ void CThumbnailTests::TestImageThumbs( ut::CTestDevice* pTestDev )
 
 	shell::CWinExplorer explorer;
 	UINT count = 0;
-	for ( std::vector< fs::CPath >::const_iterator itFilePath = imageEnum.m_filePaths.begin(); itFilePath != imageEnum.m_filePaths.end() && count != MaxImageFiles; ++itFilePath, ++count )
+	for ( std::vector<fs::CPath>::const_iterator itFilePath = imageEnum.m_filePaths.begin(); itFilePath != imageEnum.m_filePaths.end() && count != MaxImageFiles; ++itFilePath, ++count )
 	{
 		if ( CComPtr<IShellItem> pShellItem = explorer.FindShellItem( *itFilePath ) )
 			if ( HBITMAP hThumbBitmap = explorer.ExtractThumbnail( pShellItem, ut::GetThumbnailer()->GetBoundsSize(), SIIGBF_BIGGERSIZEOK ) )		// SIIGBF_RESIZETOFIT, SIIGBF_BIGGERSIZEOK
@@ -185,7 +185,7 @@ void CThumbnailTests::TestThumbnailCache( ut::CTestDevice* pTestDev )
 
 	shell::CWinExplorer explorer;
 	UINT count = 0;
-	for ( std::vector< fs::CPath >::const_iterator itFilePath = imageEnum.m_filePaths.begin(); itFilePath != imageEnum.m_filePaths.end() && count != MaxImageFiles; ++itFilePath, ++count )
+	for ( std::vector<fs::CPath>::const_iterator itFilePath = imageEnum.m_filePaths.begin(); itFilePath != imageEnum.m_filePaths.end() && count != MaxImageFiles; ++itFilePath, ++count )
 	{
 		if ( CCachedThumbBitmap* pThumbBitmap = ut::GetThumbnailer()->AcquireThumbnail( fs::ToFlexPath( *itFilePath ) ) )
 		{

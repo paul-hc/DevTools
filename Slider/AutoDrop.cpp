@@ -182,7 +182,7 @@ namespace auto_drop
 		{	// check to see if is not actually a MOVE operation for all the dropped files
 			bool allSameSrcDestDir = true;
 
-			for ( std::vector< std::tstring >::const_iterator itDrop = m_droppedSrcFiles.begin(); allSameSrcDestDir && itDrop != m_droppedSrcFiles.end(); ++itDrop )
+			for ( std::vector<std::tstring>::const_iterator itDrop = m_droppedSrcFiles.begin(); allSameSrcDestDir && itDrop != m_droppedSrcFiles.end(); ++itDrop )
 				allSameSrcDestDir = GetDestSearchPath() == path::GetParentPath( itDrop->c_str() );
 
 			if ( allSameSrcDestDir )
@@ -221,17 +221,17 @@ namespace auto_drop
 		CImagesModel foundImagesModel;
 		SearchForImages( &foundImagesModel );		// search for all the existing image files
 
-		const std::vector< CFileAttr* >& existingFiles = foundImagesModel.GetFileAttrs();
+		const std::vector<CFileAttr*>& existingFiles = foundImagesModel.GetFileAttrs();
 
 		// NOTE: existingFiles contains only files that have numeric file-name
-		std::map< fs::CFlexPath, int > shiftMap;
-		std::map< fs::CFlexPath, int >::iterator itMap;
+		std::map<fs::CFlexPath, int> shiftMap;
+		std::map<fs::CFlexPath, int>::iterator itMap;
 
-		for ( std::vector< CFileAttr* >::const_iterator itFileAttr = existingFiles.begin(); itFileAttr != existingFiles.end(); ++itFileAttr )
+		for ( std::vector<CFileAttr*>::const_iterator itFileAttr = existingFiles.begin(); itFileAttr != existingFiles.end(); ++itFileAttr )
 			shiftMap[ ( *itFileAttr )->GetPath() ] = CSearchPattern::ParseNumFileNameNumber( ( *itFileAttr )->GetPath().GetPtr() );
 
 		// exclude files dropped from the auto-drop directory
-		for ( std::vector< std::tstring >::const_iterator itDrop = m_droppedSrcFiles.begin(); itDrop != m_droppedSrcFiles.end(); ++itDrop )
+		for ( std::vector<std::tstring>::const_iterator itDrop = m_droppedSrcFiles.begin(); itDrop != m_droppedSrcFiles.end(); ++itDrop )
 		{
 			itMap = shiftMap.find( fs::CFlexPath( *itDrop ) );
 			if ( itMap != shiftMap.end() )
@@ -239,7 +239,7 @@ namespace auto_drop
 		}
 
 		// shift the new numbers to make room for dropped files
-		std::map< fs::CFlexPath, int >::iterator itInsDrop = m_insertBefore.IsEmpty() ? shiftMap.end() : shiftMap.find( m_insertBefore );
+		std::map<fs::CFlexPath, int>::iterator itInsDrop = m_insertBefore.IsEmpty() ? shiftMap.end() : shiftMap.find( m_insertBefore );
 		int fileNumber = 1, fileNumberDrop = 0;
 
 		// reorder the entire map taking care to make room at insertion point (if any) for the dropped files
@@ -264,7 +264,7 @@ namespace auto_drop
 		COpGroup& rDroppedGroup = dropUndoStack.front();
 
 		// push the dropped files renames to the undo vector
-		for ( std::vector< std::tstring >::const_iterator itDrop = m_droppedSrcFiles.begin(); itDrop != m_droppedSrcFiles.end(); ++itDrop, ++fileNumberDrop )
+		for ( std::vector<std::tstring>::const_iterator itDrop = m_droppedSrcFiles.begin(); itDrop != m_droppedSrcFiles.end(); ++itDrop, ++fileNumberDrop )
 			if ( CSearchPattern::ParseNumFileNameNumber( itDrop->c_str() ) != fileNumberDrop )
 			{	// different new number, so push it to the dropped group
 				COpEntry droppedEntry( *itDrop, fileNumberDrop, m_dropOperation == FileMove );
@@ -281,7 +281,7 @@ namespace auto_drop
 		// also build the dropped files destination vector (for selection)
 		m_droppedDestFiles.resize( rDroppedGroup.size() );
 
-		std::vector< std::tstring >::iterator itDest = m_droppedDestFiles.begin();
+		std::vector<std::tstring>::iterator itDest = m_droppedDestFiles.begin();
 
 		for ( COpGroup::const_iterator itSrc = rDroppedGroup.begin(); itSrc != rDroppedGroup.end(); ++itSrc, ++itDest )
 			*itDest = itSrc->GetDestFullPath( GetDestSearchPath().GetPtr() );
@@ -329,7 +329,7 @@ namespace auto_drop
 		COpGroup& rShiftedGroup = dropUndoStack.front();
 
 		// NOTE: existingFiles contains only files that have numeric file-name
-		const std::vector< CFileAttr* >& existingFiles = foundImagesModel.GetFileAttrs();
+		const std::vector<CFileAttr*>& existingFiles = foundImagesModel.GetFileAttrs();
 
 		// append rename entries for shifted existing files
 		for ( size_t i = 0; i != existingFiles.size(); ++i )
@@ -387,13 +387,13 @@ namespace auto_drop
 			for ( itGroup = dropStack.begin(); itGroup != dropStack.end() && itGroup->m_groupID == groupID; ++itGroup )
 			{	// prepare data for two phase-rename
 				const COpGroup& group = *itGroup;
-				std::vector< fs::CPath > srcPaths, destPaths;
+				std::vector<fs::CPath> srcPaths, destPaths;
 
 				ASSERT( group.size() > 0 );
 				srcPaths.resize( group.size() );
 				destPaths.resize( group.size() );
 
-				std::vector< fs::CPath >::iterator itSrc = srcPaths.begin(), itDest = destPaths.begin();
+				std::vector<fs::CPath>::iterator itSrc = srcPaths.begin(), itDest = destPaths.begin();
 
 				for ( COpGroup::const_iterator itOp = group.begin(); itOp != group.end(); ++itOp, ++itSrc, ++itDest )
 					if ( 1 == phaseNo )
@@ -417,13 +417,13 @@ namespace auto_drop
 		return true;
 	}
 
-	bool CContext::DoFileSetOperation( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
+	bool CContext::DoFileSetOperation( const std::vector<fs::CPath>& srcPaths, const std::vector<fs::CPath>& destPaths,
 									   FileSetOperation fileSetOp )
 	{
 		ASSERT( srcPaths.size() == destPaths.size() );
 
 	#ifdef _DEBUG
-		std::vector< fs::CPath >::const_iterator itSrc = srcPaths.begin(), itDest = destPaths.begin();
+		std::vector<fs::CPath>::const_iterator itSrc = srcPaths.begin(), itDest = destPaths.begin();
 
 		TRACE( _T("* %s FileSetOperation\n"), opName[ fileSetOp ] );
 		for ( ; itSrc != srcPaths.end(); ++itSrc, ++itDest )

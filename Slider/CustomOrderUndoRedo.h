@@ -29,16 +29,16 @@ namespace custom_order
 	public:
 		persist FileOp m_fileOp;
 		persist int m_dropIndex;						// original insertion point (drop dest index)
-		persist std::vector< int > m_dragSelIndexes;	// selected indexes to be dropped
+		persist std::vector<int> m_dragSelIndexes;	// selected indexes to be dropped
 		persist int m_newDroppedIndex;					// destination index shifted after re-ordering
 	private:
 		persist CArchivingModel m_archivingModel;
 	};
 
 
-	struct COpStack : public std::deque< COpStep >, private utl::noncopyable
+	struct COpStack : public std::deque<COpStep>, private utl::noncopyable
 	{
-		typedef std::deque< COpStep > TBase;
+		typedef std::deque<COpStep> TBase;
 
 		COpStack( void ) {}
 

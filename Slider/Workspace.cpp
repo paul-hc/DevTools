@@ -301,7 +301,7 @@ bool CWorkspace::LoadDocuments( void )
 		m_pMainFrame->ShowControlBar( m_pMainFrame->GetStatusBar(), HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ), FALSE );
 
 	ASSERT_NULL( m_pLoadingImageState );
-	for ( std::vector< CImageState >::const_iterator itImageState = m_imageStates.begin(); itImageState != m_imageStates.end(); ++itImageState )
+	for ( std::vector<CImageState>::const_iterator itImageState = m_imageStates.begin(); itImageState != m_imageStates.end(); ++itImageState )
 	{
 		// newly created view will initialize it's visual state (frame placement, zoom, etc) on initial update based on m_pLoadingImageState
 		//

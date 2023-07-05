@@ -20,7 +20,7 @@
 
 namespace ut
 {
-	CComPtr<ICatalogStorage> CreateArchiveStorageFile( const fs::TStgDocPath& docStgPath, const std::vector< fs::CPath >& srcImagePaths ) throws_( CException* )
+	CComPtr<ICatalogStorage> CreateArchiveStorageFile( const fs::TStgDocPath& docStgPath, const std::vector<fs::CPath>& srcImagePaths ) throws_( CException* )
 	{
 		CCatalogStorageService storageSvc;
 
@@ -112,7 +112,7 @@ void CCatalogStorageTests::_TestLoadImageArchive( const fs::TStgDocPath& docStgP
 		const CImagesModel* pImagesModel = &pAlbumDoc->GetModel()->GetImagesModel();
 		ASSERT_EQUAL( srcImageCount, pImagesModel->GetFileAttrs().size() );
 
-		const std::vector< CFileAttr* >& fileAttrs = pImagesModel->GetFileAttrs();
+		const std::vector<CFileAttr*>& fileAttrs = pImagesModel->GetFileAttrs();
 
 		for ( size_t i = 0; i != fileAttrs.size(); ++i )
 			_TestAlbumFileAttr( pCatalogStorage, fileAttrs[ i ] );

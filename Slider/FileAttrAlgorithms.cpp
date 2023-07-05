@@ -24,7 +24,7 @@ namespace fattr
 	}
 
 
-	size_t FindPosWithPath( const std::vector< CFileAttr* >& fileAttributes, const fs::CPath& filePath )
+	size_t FindPosWithPath( const std::vector<CFileAttr*>& fileAttributes, const fs::CPath& filePath )
 	{
 		if ( !filePath.IsEmpty() )
 			for ( size_t pos = 0; pos != fileAttributes.size(); ++pos )
@@ -37,7 +37,7 @@ namespace fattr
 
 	// CRetainFileOrder class
 
-	CRetainFileOrder::CRetainFileOrder( const std::vector< CFileAttr* >& origSequence )
+	CRetainFileOrder::CRetainFileOrder( const std::vector<CFileAttr*>& origSequence )
 	{
 		// backup the original mapping between file-paths and their positions
 		for ( size_t pos = 0; pos != origSequence.size(); ++pos )
@@ -48,19 +48,19 @@ namespace fattr
 		}
 	}
 
-	void CRetainFileOrder::RestoreOriginalOrder( std::vector< CFileAttr* >* pNewSequence )
+	void CRetainFileOrder::RestoreOriginalOrder( std::vector<CFileAttr*>* pNewSequence )
 	{
 		ASSERT_PTR( pNewSequence );
 		size_t seqCount = pNewSequence->size(); seqCount;
 
 		// restore what's left of the original order, and append new files at end
 
-		std::vector< CFileAttr* > origFileAttributes;
+		std::vector<CFileAttr*> origFileAttributes;
 		origFileAttributes.resize( m_pathToOrigPosMap.size() );			// initially all NULLs
 
-		std::vector< CFileAttr* > newlyFoundFileAttributes;				// to be appended at the end
+		std::vector<CFileAttr*> newlyFoundFileAttributes;				// to be appended at the end
 
-		for ( std::vector< CFileAttr* >::const_iterator itFileAttr = pNewSequence->begin(); itFileAttr != pNewSequence->end(); ++itFileAttr )
+		for ( std::vector<CFileAttr*>::const_iterator itFileAttr = pNewSequence->begin(); itFileAttr != pNewSequence->end(); ++itFileAttr )
 			if ( size_t* pOrigPos = utl::FindValuePtr( m_pathToOrigPosMap, ( *itFileAttr )->GetPath() ) )
 				origFileAttributes[ *pOrigPos ] = *itFileAttr;			// place it at the original position
 			else

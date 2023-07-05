@@ -53,13 +53,13 @@ void CAlbumModel::OpenAllStorages( void )
 	if ( !m_docStgPath.IsEmpty() )										// catalog-based album?
 		m_storageHost.Push( m_docStgPath, MainStorage );
 
-	std::vector< fs::TStgDocPath > subStoragePaths;
+	std::vector<fs::TStgDocPath> subStoragePaths;
 	QueryEmbeddedStorages( subStoragePaths );
 
 	m_storageHost.PushMultiple( subStoragePaths, EmbeddedStorage );		// open embedded storages
 }
 
-void CAlbumModel::QueryEmbeddedStorages( std::vector< fs::TStgDocPath >& rSubStoragePaths ) const
+void CAlbumModel::QueryEmbeddedStorages( std::vector<fs::TStgDocPath>& rSubStoragePaths ) const
 {
 	rSubStoragePaths = m_imagesModel.GetStoragePaths();
 	m_searchModel.AugmentStoragePaths( rSubStoragePaths );		// add embedded storages in search model
@@ -148,7 +148,7 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd ) throws_( CException* )
 	progress.DestroyDialog();
 
 	// commit the transaction
-	std::vector< fs::TStgDocPath > oldStoragePaths = m_imagesModel.GetStoragePaths();		// baseline: store old embedded storages
+	std::vector<fs::TStgDocPath> oldStoragePaths = m_imagesModel.GetStoragePaths();		// baseline: store old embedded storages
 
 	m_imagesModel.Swap( foundImagesModel );
 	m_storageHost.ModifyMultiple( m_imagesModel.GetStoragePaths(), oldStoragePaths );
@@ -233,12 +233,12 @@ bool CAlbumModel::IsAutoDropRecipient( bool checkValidPath /*= true*/ ) const
 	return false;
 }
 
-void CAlbumModel::QueryFileAttrsSequence( std::vector< CFileAttr* >& rSequence, const std::vector< int >& selIndexes ) const
+void CAlbumModel::QueryFileAttrsSequence( std::vector<CFileAttr*>& rSequence, const std::vector<int>& selIndexes ) const
 {
 	rSequence.clear();
 	rSequence.reserve( selIndexes.size() );
 
-	for ( std::vector< int >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
+	for ( std::vector<int>::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
 		rSequence.push_back( const_cast<CFileAttr*>( GetFileAttr( *itSelIndex ) ) );
 }
 
@@ -254,7 +254,7 @@ bool CAlbumModel::ModifyFileOrder( fattr::Order fileOrder )
 	return DoOrderImagesModel( &m_imagesModel, svc::CNoProgressService::Instance() );
 }
 
-void CAlbumModel::SetCustomOrderSequence( const std::vector< CFileAttr* >& customSequence )
+void CAlbumModel::SetCustomOrderSequence( const std::vector<CFileAttr*>& customSequence )
 {
 	m_fileOrder = fattr::CustomOrder;
 
@@ -265,12 +265,12 @@ void CAlbumModel::SetCustomOrderSequence( const std::vector< CFileAttr* >& custo
 
 /** SERVICE API **/
 
-TCurrImagePos CAlbumModel::DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths )
+TCurrImagePos CAlbumModel::DeleteFromAlbum( const std::vector<fs::CFlexPath>& selFilePaths )
 {
-	std::vector< size_t > indexes;
+	std::vector<size_t> indexes;
 	indexes.reserve( selFilePaths.size() );
 
-	for ( std::vector< fs::CFlexPath >::const_iterator itImagePath = selFilePaths.begin(); itImagePath != selFilePaths.end(); ++itImagePath )
+	for ( std::vector<fs::CFlexPath>::const_iterator itImagePath = selFilePaths.begin(); itImagePath != selFilePaths.end(); ++itImagePath )
 	{
 		size_t foundPos = m_imagesModel.FindPosFileAttr( *itImagePath );
 		if ( foundPos != utl::npos )
@@ -302,14 +302,14 @@ TCurrImagePos CAlbumModel::DeleteFromAlbum( const std::vector< fs::CFlexPath >& 
 //	- rDropIndex: the new dropped position (after dropping);
 //	- rSelIndexes: the dropped display indexes;
 // Returns true if any display indexes were actually moved, otherwise false
-bool CAlbumModel::DropCustomOrderIndexes( int& rDropIndex, std::vector< int >& rSelIndexes )
+bool CAlbumModel::DropCustomOrderIndexes( int& rDropIndex, std::vector<int>& rSelIndexes )
 {
 	// switch to custom order if not already
 	if ( m_fileOrder != fattr::CustomOrder )
 		StoreFileOrder( fattr::CustomOrder );
 
-	std::vector< CFileAttr* > newSequence;
-	std::vector< int > droppedSelIndexes;		// will be adjusted after dropping
+	std::vector<CFileAttr*> newSequence;
+	std::vector<int> droppedSelIndexes;		// will be adjusted after dropping
 
 	rDropIndex = seq::MakeDropSequence( newSequence, m_imagesModel.GetFileAttrs(), rDropIndex, rSelIndexes, &droppedSelIndexes );
 
@@ -321,12 +321,12 @@ bool CAlbumModel::DropCustomOrderIndexes( int& rDropIndex, std::vector< int >& r
 	return true;
 }
 
-bool CAlbumModel::UndropCustomOrderIndexes( int droppedIndex, const std::vector< int >& origDragSelIndexes )
+bool CAlbumModel::UndropCustomOrderIndexes( int droppedIndex, const std::vector<int>& origDragSelIndexes )
 {
 	ASSERT( IsCustomOrder() );
 
 	// undo (reverse) a drop operation - original means before drop
-	std::vector< CFileAttr* > origSequence;
+	std::vector<CFileAttr*>origSequence;
 	int origDropIndex = seq::MakeUndoDropSequence( origSequence, m_imagesModel.GetFileAttrs(), droppedIndex, origDragSelIndexes );
 
 	m_imagesModel.RefFileAttrs().swap( origSequence );

@@ -30,7 +30,7 @@ namespace dbg
 {
 	std::tstring FormatSelectedItems( const CListBox* pListBox )
 	{
-		std::vector< int > selIndexes;
+		std::vector<int> selIndexes;
 		if ( HasFlag( pListBox->GetStyle(), LBS_EXTENDEDSEL | LBS_MULTIPLESEL ) )		// multi-selection list
 		{
 			if ( int selCount = pListBox->GetSelCount() )
@@ -205,7 +205,7 @@ bool CAlbumThumbListView::SetCurSel( int selIndex, bool notifySelChanged /*= fal
 	return true;
 }
 
-bool CAlbumThumbListView::QuerySelItemPaths( std::vector< fs::CFlexPath >& rSelFilePaths ) const
+bool CAlbumThumbListView::QuerySelItemPaths( std::vector<fs::CFlexPath>& rSelFilePaths ) const
 {
 	const CListBox* pListBox = AsListBox();
 
@@ -215,11 +215,11 @@ bool CAlbumThumbListView::QuerySelItemPaths( std::vector< fs::CFlexPath >& rSelF
 	{
 		if ( int selCount = pListBox->GetSelCount() )
 		{
-			std::vector< int > selIndexes;
+			std::vector<int> selIndexes;
 			selIndexes.resize( selCount );
 			pListBox->GetSelItems( selCount, &selIndexes.front() );
 
-			for ( std::vector< int >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
+			for ( std::vector<int>::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
 				if ( const fs::CFlexPath* pFlexPath = GetItemPath( *itSelIndex ) )
 					rSelFilePaths.push_back( *pFlexPath );
 		}
@@ -240,7 +240,7 @@ void CAlbumThumbListView::GetListViewState( CListViewState& rLvState, bool files
 	CFileListDisplayPaths displayPaths( *m_pAlbumModel, filesMustExist );
 
 	// work on an index state for simplicity
-	std::auto_ptr<CListViewState::CImpl< int >> pIndexState( new CListViewState::CImpl<int>() );
+	std::auto_ptr< CListViewState::CImpl<int> > pIndexState( new CListViewState::CImpl<int>() );
 	pIndexState->m_top = displayPaths.GetPos( pListBox->GetTopIndex() );
 
 	if ( IsMultiSelection() )
@@ -354,7 +354,7 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 	else
 	{	// backup the OUTER selection lvState
 		CListViewState indexesState( StoreByIndex );
-		std::vector< int >& selIndexes = indexesState.m_pIndexImpl->m_selItems;
+		std::vector<int>& selIndexes = indexesState.m_pIndexImpl->m_selItems;
 		int nextSelIndex = 0;
 
 		GetListViewState( indexesState );
@@ -408,7 +408,7 @@ void CAlbumThumbListView::RestoreSelection( void )
 // Returns true when some of the display indexes specified overlaps with some of the current selected files
 // Typically called to decide whether to use current or near selection backup on Hint_SmartBackupSelection notification
 //
-bool CAlbumThumbListView::SelectionOverlapsWith( const std::vector< int >& displayIndexes ) const
+bool CAlbumThumbListView::SelectionOverlapsWith( const std::vector<int>& displayIndexes ) const
 {
 	CListViewState currSelection( StoreByString );
 	GetListViewState( currSelection );
@@ -800,10 +800,10 @@ bool CAlbumThumbListView::DoDragDrop( void )
 	CListSelectionData selData( this );
 	selData.m_selIndexes = indexesToDropState.m_pIndexImpl->m_selItems;
 
-	std::vector< CFileAttr* > selSequence;
+	std::vector<CFileAttr*> selSequence;
 	m_pAlbumModel->QueryFileAttrsSequence( selSequence, selData.m_selIndexes );
 
-	std::vector< fs::CPath > filesToDrag;
+	std::vector<fs::CPath> filesToDrag;
 	utl::Assign( filesToDrag, selSequence, func::ToFilePath() );
 
 	ole::CImagesDataSource dataSource;
@@ -1192,10 +1192,10 @@ void CAlbumThumbListView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	CMenu* pSrcPopupMenu = &GetContextMenu();
 	if ( pSrcPopupMenu->GetSafeHmenu() != NULL )
 	{
-		std::vector< fs::CFlexPath > selFilePaths;
+		std::vector<fs::CFlexPath> selFilePaths;
 		if ( QuerySelItemPaths( selFilePaths ) )
 		{
-			std::vector< fs::CPath > docStgPaths;
+			std::vector<fs::CPath> docStgPaths;
 			if ( path::QueryStorageDocPaths( docStgPaths, selFilePaths ) )
 				if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, docStgPaths ) )
 					DoTrackContextMenu( pContextPopup, screenPos );

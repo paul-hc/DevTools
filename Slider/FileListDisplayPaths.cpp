@@ -36,9 +36,9 @@ void CFileListDisplayPaths::SetListState( CListViewState& rLvState, std::auto_pt
 		rLvState.m_pIndexImpl = pIndexState;
 	else
 	{
-		std::vector< std::tstring > selStrings;
+		std::vector<std::tstring> selStrings;
 		selStrings.reserve( pIndexState->m_selItems.size() );
-		for ( std::vector< int >::const_iterator itSelIndex = pIndexState->m_selItems.begin(); itSelIndex != pIndexState->m_selItems.end(); ++itSelIndex )
+		for ( std::vector<int>::const_iterator itSelIndex = pIndexState->m_selItems.begin(); itSelIndex != pIndexState->m_selItems.end(); ++itSelIndex )
 			if ( GetPos( *itSelIndex ) != -1 )
 				selStrings.push_back( m_paths[ *itSelIndex ]->Get() );
 
@@ -55,9 +55,9 @@ CListViewState::CImpl<int>* CFileListDisplayPaths::MakeIndexState( const CListVi
 	pIndexState->m_caret = model.FindIndexFileAttrWithPath( lvState.m_pStringImpl->m_caret );
 	pIndexState->m_top = model.FindIndexFileAttrWithPath( lvState.m_pStringImpl->m_top );
 
-	std::vector< int > selIndexes;
+	std::vector<int> selIndexes;
 	selIndexes.reserve( lvState.m_pStringImpl->m_selItems.size() );
-	for ( std::vector< std::tstring >::const_iterator itSelItem = lvState.m_pStringImpl->m_selItems.begin(); itSelItem != lvState.m_pStringImpl->m_selItems.end(); ++itSelItem )
+	for ( std::vector<std::tstring>::const_iterator itSelItem = lvState.m_pStringImpl->m_selItems.begin(); itSelItem != lvState.m_pStringImpl->m_selItems.end(); ++itSelItem )
 	{
 		int selIndex = model.FindIndexFileAttrWithPath( *itSelItem );
 		if ( selIndex != -1 )

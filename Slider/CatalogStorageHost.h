@@ -42,7 +42,7 @@ public:
 			Remove( *itDocFilePath );
 	}
 
-	void ModifyMultiple( const std::vector< fs::TStgDocPath >& newStgPaths, const std::vector< fs::TStgDocPath >& oldStgPaths, StorageType stgType = EmbeddedStorage );
+	void ModifyMultiple( const std::vector<fs::TStgDocPath>& newStgPaths, const std::vector<fs::TStgDocPath>& oldStgPaths, StorageType stgType = EmbeddedStorage );
 private:
 	size_t FindPos( const fs::TStgDocPath& docStgPath ) const;
 	static bool RetrofitStreamEncodingSchema( ICatalogStorage* pEmbeddedCatalog );

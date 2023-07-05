@@ -20,7 +20,7 @@ public:
 	bool Move( const fs::CFlexPath& srcFilePath, const fs::CFlexPath& destFilePath ) throws_( CException* );
 	bool Delete( const fs::CFlexPath& filePath ) throws_( CException* );
 
-	const std::vector< std::tstring >& GetLogLines( void ) const { return m_logLines; }
+	const std::vector<std::tstring>& GetLogLines( void ) const { return m_logLines; }
 	void ClearLog( void ) { m_logLines.clear(); }
 	void Log( CLogger& rLogger );
 private:
@@ -34,21 +34,21 @@ private:
 	bool HandleError( const std::tstring& errorMessage );
 	bool HandleLastError( void );
 private:
-	std::vector< std::tstring > m_logLines;
+	std::vector<std::tstring> m_logLines;
 };
 
 
 namespace svc
 {
-	size_t CopyFiles( const std::vector< fs::CFlexPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, RecursionDepth destDepth = Shallow );
-	size_t RelocateFiles( const std::vector< fs::CFlexPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, RecursionDepth destDepth = Shallow );		// mix: MOVE physical, COPY complex
+	size_t CopyFiles( const std::vector<fs::CFlexPath>& srcFilePaths, const std::vector<fs::CPath>& destFilePaths, RecursionDepth destDepth = Shallow );
+	size_t RelocateFiles( const std::vector<fs::CFlexPath>& srcFilePaths, const std::vector<fs::CPath>& destFilePaths, RecursionDepth destDepth = Shallow );		// mix: MOVE physical, COPY complex
 
 
-	bool PickDestImagePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths );
-	bool CheckOverrideExistingFiles( const std::vector< fs::CPath > destFilePaths, const TCHAR* pTitle = NULL );
+	bool PickDestImagePaths( std::vector<fs::CPath>& rDestFilePaths, const std::vector<fs::CFlexPath>& srcFilePaths );
+	bool CheckOverrideExistingFiles( const std::vector<fs::CPath> destFilePaths, const TCHAR* pTitle = NULL );
 
 
-	void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths, const fs::CPath& destFolderPath, RecursionDepth destDepth = Shallow );
+	void MakeDestFilePaths( std::vector<fs::CPath>& rDestFilePaths, const std::vector<fs::CFlexPath>& srcFilePaths, const fs::CPath& destFolderPath, RecursionDepth destDepth = Shallow );
 }
 
 

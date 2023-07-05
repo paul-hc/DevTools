@@ -20,7 +20,7 @@ public:
 
 	static CListViewState::CImpl<int>* MakeIndexState( const CListViewState& lvState, const CAlbumModel& model );
 private:
-	std::vector< const fs::CFlexPath* > m_paths;
+	std::vector<const fs::CFlexPath*> m_paths;
 	bool m_filesMustExist;
 };
 

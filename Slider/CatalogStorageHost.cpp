@@ -51,16 +51,16 @@ bool CCatalogStorageHost::Remove( const fs::TStgDocPath& docStgPath )
 	return true;
 }
 
-void CCatalogStorageHost::ModifyMultiple( const std::vector< fs::TStgDocPath >& newStgPaths, const std::vector< fs::TStgDocPath >& oldStgPaths,
+void CCatalogStorageHost::ModifyMultiple( const std::vector<fs::TStgDocPath>& newStgPaths, const std::vector<fs::TStgDocPath>& oldStgPaths,
 										  StorageType stgType /*= EmbeddedStorage*/ )
 {
 	// remove & close old storages that are no longer part of the new ones:
-	for ( std::vector< fs::TStgDocPath >::const_iterator itOldStgPath = oldStgPaths.begin(); itOldStgPath != oldStgPaths.end(); ++itOldStgPath )
+	for ( std::vector<fs::TStgDocPath>::const_iterator itOldStgPath = oldStgPaths.begin(); itOldStgPath != oldStgPaths.end(); ++itOldStgPath )
 		if ( utl::FindPos( newStgPaths.begin(), newStgPaths.end(), *itOldStgPath ) != utl::npos )
 			Remove( *itOldStgPath );
 
 	// push & open new storages:
-	for ( std::vector< fs::TStgDocPath >::const_iterator itNewStgPath = newStgPaths.begin(); itNewStgPath != newStgPaths.end(); ++itNewStgPath )
+	for ( std::vector<fs::TStgDocPath>::const_iterator itNewStgPath = newStgPaths.begin(); itNewStgPath != newStgPaths.end(); ++itNewStgPath )
 		if ( ICatalogStorage* pFoundCatalogStorage = Find( *itNewStgPath ) )		// found already open?
 			ASSERT( pFoundCatalogStorage->GetDocStorage()->IsOpenForReading() );
 		else

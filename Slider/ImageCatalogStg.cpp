@@ -95,7 +95,7 @@ size_t CImageCatalogStg::DiscardCachedImages( const fs::TStgDocPath& docStgPath 
 
 bool CImageCatalogStg::IsSpecialStreamName( const TCHAR* pStreamName )
 {
-	static std::vector< const TCHAR* > s_reservedStreamNames;
+	static std::vector<const TCHAR*> s_reservedStreamNames;
 	if ( s_reservedStreamNames.empty() )
 	{
 		s_reservedStreamNames.insert( s_reservedStreamNames.end(), s_passwordStreamNames, END_OF( s_passwordStreamNames ) );
@@ -181,7 +181,7 @@ void CImageCatalogStg::CreateImageArchiveFile( const fs::TStgDocPath& docStgPath
 
 void CImageCatalogStg::CreateImageFiles( CCatalogStorageService* pCatalogSvc ) throws_( CException* )
 {
-	std::vector< CTransferFileAttr* >& rTransferAttrs = pCatalogSvc->RefTransferAttrs();
+	std::vector<CTransferFileAttr*>& rTransferAttrs = pCatalogSvc->RefTransferAttrs();
 
 	CCatalogStorageFactory* pFactory = CCatalogStorageFactory::Instance();
 	CScopedErrorHandling scopedThrow( pFactory, utl::ThrowMode );
@@ -236,7 +236,7 @@ void CImageCatalogStg::CreateImageFiles( CCatalogStorageService* pCatalogSvc ) t
 
 void CImageCatalogStg::CreateThumbnailsSubStorage( const CCatalogStorageService* pCatalogSvc ) throws_( CException* )
 {
-	const std::vector< CTransferFileAttr* >& transferAttrs = pCatalogSvc->GetTransferAttrs();
+	const std::vector<CTransferFileAttr*>& transferAttrs = pCatalogSvc->GetTransferAttrs();
 
 	pCatalogSvc->GetProgress()->AdvanceStage( _T("Saving thumbnails") );
 	pCatalogSvc->GetProgress()->SetBoundedProgressCount( transferAttrs.size() );
@@ -249,7 +249,7 @@ void CImageCatalogStg::CreateThumbnailsSubStorage( const CCatalogStorageService*
 	size_t thumbCount = 0;
 	UINT64 totalThumbsSize = 0;
 
-	for ( std::vector< CTransferFileAttr* >::const_iterator itXferAttr = transferAttrs.begin(); itXferAttr != transferAttrs.end(); )
+	for ( std::vector<CTransferFileAttr*>::const_iterator itXferAttr = transferAttrs.begin(); itXferAttr != transferAttrs.end(); )
 	{
 		try
 		{
@@ -518,7 +518,7 @@ bool CImageCatalogStg::EnumerateImages( CImagesModel& rImagesModel )
 
 	const fs::TStgDocPath& docStgPath = GetDocFilePath();
 
-	for ( std::vector< fs::TEmbeddedPath >::const_iterator itStreamPath = imagesEnum.m_filePaths.begin(); itStreamPath != imagesEnum.m_filePaths.end(); ++itStreamPath )
+	for ( std::vector<fs::TEmbeddedPath>::const_iterator itStreamPath = imagesEnum.m_filePaths.begin(); itStreamPath != imagesEnum.m_filePaths.end(); ++itStreamPath )
 		if ( wic::FindFileImageFormat( itStreamPath->GetPtr() ) != wic::UnknownImageFormat )		// an image file?
 			if ( CComPtr<IStream> pImageStream = OpenStream( itStreamPath->GetPtr() ) )
 				if ( const fs::CStreamState* pSrcStreamState = FindOpenedStream( *itStreamPath ) )
@@ -691,7 +691,7 @@ bool CImageCatalogStg::LoadAlbumMap( std::tstring* pAlbumMapText )
 			ASSERT_PTR( pTextFile.get() );
 
 			UINT totalLength = static_cast<UINT>( pTextFile->GetLength() );
-			std::vector< char > buffer( totalLength + 1, _T('\0') );
+			std::vector<char> buffer( totalLength + 1, _T('\0') );
 			pTextFile->Read( &buffer.front(), totalLength );
 
 			*pAlbumMapText = str::FromUtf8( &buffer.front() );

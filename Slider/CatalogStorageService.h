@@ -51,8 +51,8 @@ public:
 	void BuildFromAlbumSaveAs( const CAlbumDoc* pSrcAlbumDoc );				// preserve SRC album, create a new image storage doc file
 
 	bool IsEmpty( void ) const { return m_transferAttrs.empty(); }
-	const std::vector< CTransferFileAttr* >& GetTransferAttrs( void ) const { return m_transferAttrs; }
-	std::vector< CTransferFileAttr* >& RefTransferAttrs( void ) { return m_transferAttrs; }
+	const std::vector<CTransferFileAttr*>& GetTransferAttrs( void ) const { return m_transferAttrs; }
+	std::vector<CTransferFileAttr*>& RefTransferAttrs( void ) { return m_transferAttrs; }
 
 	utl::IProgressService* GetProgress( void ) const { return m_pProgressSvc; }
 	ui::IUserReport* GetReport( void ) const { return m_pUserReport; }
@@ -60,7 +60,7 @@ protected:
 	utl::IProgressService* m_pProgressSvc;
 	ui::IUserReport* m_pUserReport;
 
-	std::vector< CTransferFileAttr* > m_transferAttrs;
+	std::vector<CTransferFileAttr*> m_transferAttrs;
 	std::auto_ptr<CAlbumDoc> m_pDestAlbumDoc;		// created ad-hoc as destination model conversion album
 	std::tstring m_password;						// used in catalog storages only
 
@@ -75,8 +75,8 @@ public:
 	CCatalogStorageService( void ) {}			// uses null-pattern, for testing
 	CCatalogStorageService( utl::IProgressService* pProgressSvc, ui::IUserReport* pUserReport ) : CTransferAlbumService( pProgressSvc, pUserReport ) {}
 
-	void BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths );				// for testing
-	void BuildFromTransferPairs( const std::vector< TTransferPathPair >& xferPairs );		// legacy archiving model
+	void BuildFromSrcPaths( const std::vector<fs::CPath>& srcImagePaths );				// for testing
+	void BuildFromTransferPairs( const std::vector<TTransferPathPair>& xferPairs );		// legacy archiving model
 
 	const std::tstring& GetPassword( void ) const { return m_password; }
 	void SetPassword( const std::tstring& password ) { m_password = password; }
@@ -86,7 +86,7 @@ protected:
 	// base overrides
 	virtual void BuildTransferAttrs( const CImagesModel* pImagesModel, bool useDeepStreamPaths = true );
 private:
-	std::vector< fs::TStgDocPath > m_srcDocStgPaths;
+	std::vector<fs::TStgDocPath> m_srcDocStgPaths;
 	CCatalogStorageHost m_srcStorageHost;			// open for reading during image archive construction
 };
 

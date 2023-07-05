@@ -33,11 +33,11 @@ CWicImage* CDocumentBase::AcquireImage( const fs::TImagePathKey& imageKey )
 }
 
 
-std::vector< fs::CPath > CDocumentBase::s_destFilePaths;		// used in image operations; concrete documents may refer to it
+std::vector<fs::CPath> CDocumentBase::s_destFilePaths;		// used in image operations; concrete documents may refer to it
 
-bool CDocumentBase::HandleDeleteImages( const std::vector< fs::CFlexPath >& selFilePaths )
+bool CDocumentBase::HandleDeleteImages( const std::vector<fs::CFlexPath>& selFilePaths )
 {
-	std::vector< fs::CPath > physicalPaths;
+	std::vector<fs::CPath> physicalPaths;
 	if ( path::QueryPhysicalPaths( physicalPaths, selFilePaths ) )
 	{
 		if ( !ui::IsKeyPressed( VK_SHIFT ) )
@@ -59,7 +59,7 @@ bool CDocumentBase::HandleDeleteImages( const std::vector< fs::CFlexPath >& selF
 	return true;
 }
 
-bool CDocumentBase::HandleMoveImages( const std::vector< fs::CFlexPath >& srcFilePaths )
+bool CDocumentBase::HandleMoveImages( const std::vector<fs::CFlexPath>& srcFilePaths )
 {
 	REQUIRE( !srcFilePaths.empty() );
 
@@ -101,6 +101,6 @@ void CDocumentBase::On_ImageExplore( void )
 
 void CDocumentBase::OnUpdate_ReadImageSingleFile( CCmdUI* pCmdUI )
 {
-	std::vector< fs::CFlexPath > selImagePaths;
+	std::vector<fs::CFlexPath> selImagePaths;
 	pCmdUI->Enable( QuerySelectedImagePaths( selImagePaths ) && 1 == selImagePaths.size() && selImagePaths.front().FileExist() );
 }

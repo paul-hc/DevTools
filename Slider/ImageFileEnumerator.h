@@ -17,7 +17,7 @@ public:
 	CImageFileEnumerator( IEnumerator* pProgressEnum = NULL );
 	~CImageFileEnumerator();
 
-	void Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException );
+	void Search( const std::vector<CSearchPattern*>& searchPatterns ) throws_( CException*, CUserAbortedException );
 	void Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException );
 	void SearchCatalogStorage( const fs::TStgDocPath& docStgPath ) throws_( CException*, CUserAbortedException );
 
@@ -37,7 +37,7 @@ private:
 
 	bool PassFilter( const CFileAttr& fileAttr ) const;
 	bool Push( CFileAttr* pFileAttr );
-	void PushMany( const std::vector< CFileAttr* >& fileAttrs );		// transfer ownership
+	void PushMany( const std::vector<CFileAttr*>& fileAttrs );		// transfer ownership
 private:
 	ui::CIssueStore m_issueStore;
 	const CSearchPattern* m_pCurrPattern;

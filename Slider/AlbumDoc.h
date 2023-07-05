@@ -56,11 +56,11 @@ public:
 	void OnAlbumModelChanged( AlbumModelChange reason = AM_Init );
 public:
 	bool EditAlbum( CAlbumImageView* pActiveView );
-	bool AddExplicitFiles( const std::vector< fs::CPath >& filePaths, bool doUpdate = true );
-	TCurrImagePos DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths );
+	bool AddExplicitFiles( const std::vector<fs::CPath>& filePaths, bool doUpdate = true );
+	TCurrImagePos DeleteFromAlbum( const std::vector<fs::CFlexPath>& selFilePaths );
 
 	// custom order support
-	bool DropCustomOrder( int& rDropIndex, std::vector< int >& rSelIndexes );
+	bool DropCustomOrder( int& rDropIndex, std::vector<int>& rSelIndexes );
 
 	// auto-drop support
 	bool InitAutoDropRecipient( void );
@@ -71,7 +71,7 @@ public:
 protected:
 	// base overrides
 	virtual CWicImage* GetCurrentImage( void ) const;
-	virtual bool QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const;
+	virtual bool QuerySelectedImagePaths( std::vector<fs::CFlexPath>& rSelImagePaths ) const;
 private:
 	bool BuildAlbum( const fs::CPath& searchPath );
 

@@ -24,13 +24,13 @@ public:
 	void UpdateAllViewsOfType( ViewT* pSenderView, int hint = 0, CObject* pHintObject = NULL );
 protected:
 	virtual CWicImage* GetCurrentImage( void ) const = 0;
-	virtual bool QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const = 0;
+	virtual bool QuerySelectedImagePaths( std::vector<fs::CFlexPath>& rSelImagePaths ) const = 0;
 
 	// image file service
-	static bool HandleDeleteImages( const std::vector< fs::CFlexPath >& selFilePaths );
-	static bool HandleMoveImages( const std::vector< fs::CFlexPath >& srcFilePaths );
+	static bool HandleDeleteImages( const std::vector<fs::CFlexPath>& selFilePaths );
+	static bool HandleMoveImages( const std::vector<fs::CFlexPath>& srcFilePaths );
 
-	static std::vector< fs::CPath > s_destFilePaths;		// used in image operations; concrete documents may refer to it
+	static std::vector<fs::CPath> s_destFilePaths;		// used in image operations; concrete documents may refer to it
 
 	// generated stuff
 protected:

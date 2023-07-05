@@ -35,12 +35,12 @@ void CImageFileEnumerator::Clear( void ) override
 	m_issueStore.Clear();
 }
 
-void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException )
+void CImageFileEnumerator::Search( const std::vector<CSearchPattern*>& searchPatterns ) throws_( CException*, CUserAbortedException )
 {
 	CWaitCursor wait;
 	CScopedErrorHandling scopedThrow( CCatalogStorageFactory::Instance(), utl::ThrowMode );		// report storage sharing violations, etc
 
-	for ( std::vector< CSearchPattern* >::const_iterator itPattern = searchPatterns.begin(); itPattern != searchPatterns.end(); )
+	for ( std::vector<CSearchPattern*>::const_iterator itPattern = searchPatterns.begin(); itPattern != searchPatterns.end(); )
 	{
 		m_pCurrPattern = *itPattern;
 
@@ -77,7 +77,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 
 void CImageFileEnumerator::Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException )
 {
-	std::vector< CSearchPattern* > searchPatterns( 1, const_cast<CSearchPattern*>( &searchPattern ) );
+	std::vector<CSearchPattern*> searchPatterns( 1, const_cast<CSearchPattern*>( &searchPattern ) );
 	Search( searchPatterns );
 }
 
@@ -133,10 +133,10 @@ bool CImageFileEnumerator::Push( CFileAttr* pFileAttr )
 	return true;
 }
 
-void CImageFileEnumerator::PushMany( const std::vector< CFileAttr* >& fileAttrs )
+void CImageFileEnumerator::PushMany( const std::vector<CFileAttr*>& fileAttrs )
 {
 	// go via filtering
-	for ( std::vector< CFileAttr* >::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end() && !MustStop(); ++itFileAttr )
+	for ( std::vector<CFileAttr*>::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end() && !MustStop(); ++itFileAttr )
 		Push( *itFileAttr );
 }
 
@@ -163,7 +163,7 @@ void CImageFileEnumerator::AddFoundFile( const fs::CPath& filePath ) override
 		{
 			AddFoundSubDir( filePath );									// an album counts as a sub-directory
 
-			std::vector< CFileAttr* > albumFileAttrs;
+			std::vector<CFileAttr*> albumFileAttrs;
 			pAlbumDoc->RefModel()->SwapFileAttrs( albumFileAttrs );		// take ownership of found image attributes
 
 			if ( !albumFileAttrs.empty() )
@@ -174,10 +174,10 @@ void CImageFileEnumerator::AddFoundFile( const fs::CPath& filePath ) override
 					m_foundImages.AddStoragePath( filePath );
 				else
 				{	// augment embedded catalog storages in a .sld
-					std::vector< fs::TStgDocPath > subStoragePaths;
+					std::vector<fs::TStgDocPath> subStoragePaths;
 					pAlbumDoc->GetModel()->QueryEmbeddedStorages( subStoragePaths );
 
-					for ( std::vector< fs::TStgDocPath >::const_iterator itStoragePath = subStoragePaths.begin(); itStoragePath != subStoragePaths.end(); ++itStoragePath )
+					for ( std::vector<fs::TStgDocPath>::const_iterator itStoragePath = subStoragePaths.begin(); itStoragePath != subStoragePaths.end(); ++itStoragePath )
 						m_foundImages.AddStoragePath( *itStoragePath );
 				}
 			}

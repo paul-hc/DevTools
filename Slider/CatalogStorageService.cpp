@@ -101,7 +101,7 @@ void CTransferAlbumService::CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc )
 	CImagesModel* pDestImagesModel = &pDestModel->RefImagesModel();
 
 	// copy the transfer attributes as album attributes
-	for ( std::vector< CTransferFileAttr* >::const_iterator itTransferAttr = m_transferAttrs.begin(); itTransferAttr != m_transferAttrs.end(); ++itTransferAttr )
+	for ( std::vector<CTransferFileAttr*>::const_iterator itTransferAttr = m_transferAttrs.begin(); itTransferAttr != m_transferAttrs.end(); ++itTransferAttr )
 		pDestImagesModel->AddFileAttr( new CFileAttr( **itTransferAttr ) );
 }
 
@@ -110,7 +110,7 @@ namespace cvt
 {
 	// conversion to catalog storage .ias album
 
-	size_t ConvertToEmbeddedPaths( std::vector< fs::TEmbeddedPath >& rDestStreamPaths, bool useDeepStreamPaths = true )
+	size_t ConvertToEmbeddedPaths( std::vector<fs::TEmbeddedPath>& rDestStreamPaths, bool useDeepStreamPaths = true )
 	{	// rDestStreamPaths: IN source paths, OUT embedded stream paths
 		if ( useDeepStreamPaths )
 		{
@@ -132,9 +132,9 @@ namespace cvt
 	}
 
 	template< typename SrcPathT >
-	void MakeTransferPathPairs( std::vector< TTransferPathPair >& rTransferPairs, const std::vector< SrcPathT >& srcImagePaths, bool useDeepStreamPaths = true )
+	void MakeTransferPathPairs( std::vector<TTransferPathPair>& rTransferPairs, const std::vector<SrcPathT>& srcImagePaths, bool useDeepStreamPaths = true )
 	{
-		std::vector< fs::TEmbeddedPath > destStreamPaths;
+		std::vector<fs::TEmbeddedPath> destStreamPaths;
 		utl::Assign( destStreamPaths, srcImagePaths, func::tor::StringOf() );
 
 		ConvertToEmbeddedPaths( destStreamPaths, useDeepStreamPaths );
@@ -188,12 +188,12 @@ void CCatalogStorageService::BuildTransferAttrs( const CImagesModel* pImagesMode
 	ASSERT_PTR( pImagesModel );
 	REQUIRE( m_transferAttrs.empty() && m_srcDocStgPaths.empty() && m_srcStorageHost.IsEmpty() );
 
-	const std::vector< CFileAttr* >& srcFileAttrs = pImagesModel->GetFileAttrs();
+	const std::vector<CFileAttr*>& srcFileAttrs = pImagesModel->GetFileAttrs();
 
 	m_pProgressSvc->AdvanceStage( s_buildTag );
 	m_pProgressSvc->SetBoundedProgressCount( srcFileAttrs.size() );
 
-	std::vector< fs::TEmbeddedPath > destImagePaths;
+	std::vector<fs::TEmbeddedPath> destImagePaths;
 	utl::Assign( destImagePaths, srcFileAttrs, func::ToFilePath() );
 	cvt::ConvertToEmbeddedPaths( destImagePaths, useDeepStreamPaths );
 	ENSURE( srcFileAttrs.size() == destImagePaths.size() );
@@ -217,9 +217,9 @@ void CCatalogStorageService::BuildTransferAttrs( const CImagesModel* pImagesMode
 	m_srcStorageHost.PushMultiple( m_srcDocStgPaths );		// open source storages for reading
 }
 
-void CCatalogStorageService::BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths )
+void CCatalogStorageService::BuildFromSrcPaths( const std::vector<fs::CPath>& srcImagePaths )
 {
-	std::vector< TTransferPathPair > xferPairs;
+	std::vector<TTransferPathPair> xferPairs;
 	cvt::MakeTransferPathPairs( xferPairs, srcImagePaths, true );
 
 	BuildFromTransferPairs( xferPairs );
@@ -229,21 +229,21 @@ void CCatalogStorageService::BuildFromSrcPaths( const std::vector< fs::CPath >& 
 
 	CImagesModel* pImagesModel = &m_pDestAlbumDoc->RefModel()->RefImagesModel();
 
-	for ( std::vector< CTransferFileAttr* >::const_iterator itTransferAttr = m_transferAttrs.begin(); itTransferAttr != m_transferAttrs.end(); ++itTransferAttr )
+	for ( std::vector<CTransferFileAttr*>::const_iterator itTransferAttr = m_transferAttrs.begin(); itTransferAttr != m_transferAttrs.end(); ++itTransferAttr )
 		pImagesModel->AddFileAttr( new CFileAttr( **itTransferAttr ) );
 
 	if ( !IsEmpty() )
 		m_pDestAlbumDoc->m_slideData.SetCurrentIndex( 0 );
 }
 
-void CCatalogStorageService::BuildFromTransferPairs( const std::vector< TTransferPathPair >& xferPairs )
+void CCatalogStorageService::BuildFromTransferPairs( const std::vector<TTransferPathPair>& xferPairs )
 {
 	m_pProgressSvc->AdvanceStage( s_buildTag );
 	m_pProgressSvc->SetBoundedProgressCount( xferPairs.size() );
 
 	m_transferAttrs.reserve( xferPairs.size() );
 
-	for ( std::vector< TTransferPathPair >::const_iterator itPair = xferPairs.begin(); itPair != xferPairs.end(); ++itPair )
+	for ( std::vector<TTransferPathPair>::const_iterator itPair = xferPairs.begin(); itPair != xferPairs.end(); ++itPair )
 		if ( itPair->first.FileExist() )
 		{
 			m_transferAttrs.push_back( new CTransferFileAttr( *itPair ) );

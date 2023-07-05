@@ -13,12 +13,12 @@ class CItemContentHistoryCombo;
 class CMoveFileDialog : public CLayoutDialog
 {
 public:
-	CMoveFileDialog( const std::vector< fs::CPath >& filesToMove, CWnd* pParent = NULL );
+	CMoveFileDialog( const std::vector<fs::CPath>& filesToMove, CWnd* pParent = NULL );
 	virtual ~CMoveFileDialog();
 public:
 	fs::TDirPath m_destFolderPath;
 private:
-	std::vector< fs::CPath > m_filesToMove;
+	std::vector<fs::CPath> m_filesToMove;
 private:
 	// enum { IDD = IDD_FILE_MOVE_DIALOG };
 

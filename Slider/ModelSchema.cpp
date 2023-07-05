@@ -12,7 +12,7 @@ namespace app
 {
 	ModelSchema GetLoadingSchema( const CArchive& rArchive )
 	{
-		return serial::CScopedLoadingArchive::GetModelSchema< app::ModelSchema >( rArchive );
+		return serial::CScopedLoadingArchive::GetModelSchema<app::ModelSchema>( rArchive );
 	}
 
 	std::tstring FormatModelVersion( ModelSchema modelSchemaVersion )

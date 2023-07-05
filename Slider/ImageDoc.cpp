@@ -33,7 +33,7 @@ CWicImage* CImageDoc::GetCurrentImage( void ) const
 	return GetImage( 0 );
 }
 
-bool CImageDoc::QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const
+bool CImageDoc::QuerySelectedImagePaths( std::vector<fs::CFlexPath>& rSelImagePaths ) const
 {
 	rSelImagePaths.push_back( m_imagePath );
 	return true;
@@ -133,7 +133,7 @@ void CImageDoc::OnUpdateFileSaveAs( CCmdUI* pCmdUI )
 
 void CImageDoc::On_ImageDelete( void )
 {
-	std::vector< fs::CFlexPath > selFilePaths;
+	std::vector<fs::CFlexPath> selFilePaths;
 	QuerySelectedImagePaths( selFilePaths );		// single selection
 
 	if ( HandleDeleteImages( selFilePaths ) )
@@ -142,7 +142,7 @@ void CImageDoc::On_ImageDelete( void )
 
 void CImageDoc::On_ImageMove( void )
 {
-	std::vector< fs::CFlexPath > selFilePaths;
+	std::vector<fs::CFlexPath> selFilePaths;
 	QuerySelectedImagePaths( selFilePaths );		// single selection
 
 	if ( !HandleMoveImages( selFilePaths ) )

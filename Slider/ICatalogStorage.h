@@ -95,7 +95,7 @@ public:
 
 	bool IsPasswordVerified( const fs::TStgDocPath& docStgPath ) const;
 private:
-	std::unordered_set< std::tstring > m_verifiedPasswords;
+	std::unordered_set<std::tstring> m_verifiedPasswords;
 };
 
 

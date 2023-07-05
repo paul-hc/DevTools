@@ -124,7 +124,7 @@ private:
 	persist bool m_isFullScreen;					// if true switch main frame in full-screen mode
 	persist CWindowPlacement m_mainPlacement;		// placement of the main frame
 	persist DWORD m_reserved;
-	persist std::vector< CImageState > m_imageStates;
+	persist std::vector<CImageState> m_imageStates;
 
 	// registry-based options
 	persist UINT m_defaultSlideDelay;				// in miliseconds

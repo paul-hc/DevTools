@@ -20,7 +20,7 @@
 
 namespace svc
 {
-	size_t CopyFiles( const std::vector< fs::CFlexPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, RecursionDepth destDepth /*= Shallow*/ )
+	size_t CopyFiles( const std::vector<fs::CFlexPath>& srcFilePaths, const std::vector<fs::CPath>& destFilePaths, RecursionDepth destDepth /*= Shallow*/ )
 	{
 		REQUIRE( srcFilePaths.size() == destFilePaths.size() );
 
@@ -35,14 +35,14 @@ namespace svc
 		return count;
 	}
 
-	size_t RelocateFiles( const std::vector< fs::CFlexPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, RecursionDepth destDepth /*= Shallow*/ )
+	size_t RelocateFiles( const std::vector<fs::CFlexPath>& srcFilePaths, const std::vector<fs::CPath>& destFilePaths, RecursionDepth destDepth /*= Shallow*/ )
 	{
 		REQUIRE( srcFilePaths.size() == destFilePaths.size() );
 
-		std::vector< fs::CPath > physicalSrc, physicalDest;
+		std::vector<fs::CPath> physicalSrc, physicalDest;
 
-		std::vector< fs::CFlexPath > complexSrc;
-		std::vector< fs::CPath > complexDest;
+		std::vector<fs::CFlexPath> complexSrc;
+		std::vector<fs::CPath> complexDest;
 
 		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
 			if ( srcFilePaths[ i ].IsComplexPath() )
@@ -69,7 +69,7 @@ namespace svc
 	}
 
 
-	bool PickDestImagePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths )
+	bool PickDestImagePaths( std::vector<fs::CPath>& rDestFilePaths, const std::vector<fs::CFlexPath>& srcFilePaths )
 	{
 		rDestFilePaths.clear();
 
@@ -101,9 +101,9 @@ namespace svc
 		return true;
 	}
 
-	bool CheckOverrideExistingFiles( const std::vector< fs::CPath > destFilePaths, const TCHAR* pTitle /*= NULL*/ )
+	bool CheckOverrideExistingFiles( const std::vector<fs::CPath> destFilePaths, const TCHAR* pTitle /*= NULL*/ )
 	{
-		std::vector< fs::CPath > existingPaths;
+		std::vector<fs::CPath> existingPaths;
 		utl::QueryThat( existingPaths, destFilePaths, pred::FileExist() );
 
 		if ( !existingPaths.empty() )
@@ -123,7 +123,7 @@ namespace svc
 	}
 
 
-	void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths, const fs::CPath& destFolderPath, RecursionDepth destDepth /*= Shallow*/ )
+	void MakeDestFilePaths( std::vector<fs::CPath>& rDestFilePaths, const std::vector<fs::CFlexPath>& srcFilePaths, const fs::CPath& destFolderPath, RecursionDepth destDepth /*= Shallow*/ )
 	{
 		utl::Assign( rDestFilePaths, srcFilePaths, func::tor::StringOf() );
 
@@ -258,7 +258,7 @@ void CFileOperation::AugmentLogError( const std::tstring& errorMessage )
 
 void CFileOperation::Log( CLogger& rLogger )
 {
-	for ( std::vector< std::tstring >::const_iterator itLogLine = m_logLines.begin(); itLogLine != m_logLines.end(); ++itLogLine )
+	for ( std::vector<std::tstring>::const_iterator itLogLine = m_logLines.begin(); itLogLine != m_logLines.end(); ++itLogLine )
 		rLogger.Log( itLogLine->c_str() );
 
 	ClearLog();
@@ -286,7 +286,8 @@ bool CFileOperation::HandleError( const std::tstring& errorMessage )
 
 bool CFileOperation::HandleLastError( void )
 {
-	std::vector< TCHAR > errorMessage( 512 );
+	std::vector<TCHAR> errorMessage( 512 );
+
 	::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL,
 		GetLastError(),

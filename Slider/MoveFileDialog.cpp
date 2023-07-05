@@ -30,7 +30,7 @@ namespace layout
 }
 
 
-CMoveFileDialog::CMoveFileDialog( const std::vector< fs::CPath >& filesToMove, CWnd* pParent /*= NULL*/ )
+CMoveFileDialog::CMoveFileDialog( const std::vector<fs::CPath>& filesToMove, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_FILE_MOVE_DIALOG, pParent )
 	, m_filesToMove( filesToMove )
 	, m_pDestFolderCombo( new CItemContentHistoryCombo( ui::DirPath ) )
@@ -93,7 +93,7 @@ void CMoveFileDialog::OnDropFiles( HDROP hDropInfo )
 {
 	SetForegroundWindow();				// activate us first
 
-	std::vector< fs::CPath > dirPaths;
+	std::vector<fs::CPath> dirPaths;
 	shell::QueryDroppedFiles( dirPaths, hDropInfo );
 
 	if ( 1 == dirPaths.size() )

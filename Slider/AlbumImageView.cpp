@@ -162,7 +162,7 @@ bool CAlbumImageView::UpdateImage( void )
 			{
 				success = true;
 
-				std::vector< fs::TImagePathKey > neighbours;
+				std::vector<fs::TImagePathKey> neighbours;
 				QueryNeighbouringPathKeys( neighbours );
 				CWicImageCache::Instance().Enqueue( neighbours );			// pre-emptively load the neighboring images - enqueue and load on queue listener thread
 			}
@@ -179,7 +179,7 @@ bool CAlbumImageView::UpdateImage( void )
 	return success;
 }
 
-void CAlbumImageView::QueryNeighbouringPathKeys( std::vector< fs::TImagePathKey >& rNeighbourKeys ) const
+void CAlbumImageView::QueryNeighbouringPathKeys( std::vector<fs::TImagePathKey>& rNeighbourKeys ) const
 {
 	CAlbumNavigator navigator( this );
 	nav::TIndexFramePosPair prevNavigInfo = navigator.GetNavigateInfo( nav::Previous );

@@ -78,7 +78,7 @@ bool CArchiveImagesDialog::FetchFileContext( void )
 	{
 		m_lvState.FromListCtrl( &m_filesListCtrl );
 
-		std::vector< CFileAttr* > selSrcFileAttrs;
+		std::vector<CFileAttr*> selSrcFileAttrs;
 		m_pModel->QueryFileAttrsSequence( selSrcFileAttrs, m_lvState.m_pIndexImpl->m_selItems );
 		m_archivingModel.SetupSourcePaths( selSrcFileAttrs );
 
@@ -139,7 +139,7 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 			}
 
 		// setup the destination for selected items
-		const std::vector< TTransferPathPair >& xferPairs = m_archivingModel.GetPathPairs();
+		const std::vector<TTransferPathPair>& xferPairs = m_archivingModel.GetPathPairs();
 		if ( m_destOnSelection )
 		{
 			for ( size_t i = 0; i != xferPairs.size(); ++i )

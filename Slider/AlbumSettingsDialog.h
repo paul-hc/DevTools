@@ -19,7 +19,7 @@
 
 class CImageView;
 class CListCtrlEditorFrame;
-typedef CDragListCtrl< CPathItemListCtrl > TDragPathItemListCtrl;
+typedef CDragListCtrl<CPathItemListCtrl> TDragPathItemListCtrl;
 
 
 class CAlbumSettingsDialog : public CLayoutDialog
@@ -52,7 +52,7 @@ private:
 	void SetupPatternsListView( void );
 
 	enum ImagesColumn { FileName, Folder, Dimensions, Size, Date, Unordered = -1 };
-	static std::pair<ImagesColumn, bool> ToListSortOrder( fattr::Order fileOrder );		// < sortByColumn, sortAscending >
+	static std::pair<ImagesColumn, bool> ToListSortOrder( fattr::Order fileOrder );		// <sortByColumn, sortAscending>
 
 	void SetupFoundImagesListView( void );
 
@@ -65,7 +65,7 @@ private:
 	const CFileAttr* m_pCaretFileAttr;
 	bool m_isDirty;
 
-	std::unordered_set< fs::CPath > m_origFilePaths;	// both patterns + found images (for highlighting new patterns/found images)
+	std::unordered_set<fs::CPath> m_origFilePaths;	// both patterns + found images (for highlighting new patterns/found images)
 private:
 	// enum { IDD = IDD_ALBUM_SETTINGS_DIALOG };
 
