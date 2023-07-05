@@ -88,7 +88,7 @@ private:
 	int m_runFlags;
 	int m_forceMask;
 	int m_forceFlags;
-	std::vector< fs::CPath > m_queuedAlbumFilePaths;
+	std::vector<fs::CPath> m_queuedAlbumFilePaths;
 	static std::tstring s_cmdLineHelpMsg;
 
 	// generated stuff

@@ -385,7 +385,7 @@ int CApplication::ExitInstance( void )
 	WriteProfileInt( reg::section_Settings, _T("EventLogger_Enabled"), GetEventLogger().m_enabled );
 	WriteProfileInt( reg::section_Settings, _T("EventLogger_PrependTimestamp"), GetEventLogger().m_prependTimestamp );
 
-	std::vector< COLORREF > customColors( CColorDialog::GetSavedCustomColors(), CColorDialog::GetSavedCustomColors() + 16 );
+	std::vector<COLORREF> customColors( CColorDialog::GetSavedCustomColors(), CColorDialog::GetSavedCustomColors() + 16 );
 	app::WriteProfileVector( customColors, reg::section_Settings, reg::entry_CustomColors );
 
 	m_pEventLogger.reset();
@@ -402,7 +402,7 @@ void CApplication::InitGlobals( void )
 	GetEventLogger().m_enabled = GetProfileInt( reg::section_Settings, _T("EventLogger_Enabled"), false ) != FALSE;		// disable logging by default
 	GetEventLogger().m_prependTimestamp = GetProfileInt( reg::section_Settings, _T("EventLogger_PrependTimestamp"), GetEventLogger().m_prependTimestamp ) != FALSE;
 
-	std::vector< COLORREF > customColors;
+	std::vector<COLORREF> customColors;
 	if ( app::GetProfileVector( customColors, reg::section_Settings, reg::entry_CustomColors ) )
 	{
 		ASSERT( 16 == customColors.size() );
@@ -492,17 +492,21 @@ void CApplication::UpdateAllViews( UpdateViewHint hint /*= Hint_ViewUpdate*/, CD
 		[open("C:\download\#\images\flowers")]
 
 	- image file right-click > Open With > Slider Application
-		[queue("D:\WINNT\Background\Tiles\JPGs\blue.jpg")]
+		[open("D:\WINNT\Background\Tiles\JPGs\blue.jpg")]		// the only one, since 2023-07-05
+		[queue("D:\WINNT\Background\Tiles\JPGs\blue.jpg")]		// OBSOLETE, now is just "[open("%1")]"
 */
 BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 {
 //ASSERT(false);		// DDE Open debugging
 	std::tstring command = pCommand;
 
-	if ( str::HasPrefix( command.c_str(), _T("[queue(") ) )
-		str::Replace( command, _T("queue("), _T("open("), 1 );		// handle "Open With" as standard /dde open: change command "queue" => "open"
+	app::GetMainFrame()->FlashWindowEx( FLASHW_ALL, 3, 0 );
 
-	/* OBSOLETE: it used to open individual images as albums, not very useful...
+	// OBSOLETE 2023-07-05:
+	// "[queue("%1")]" used to open individual images as albums, not very useful...
+	// handle "Open With" as standard /dde open: change command "queue" => "open"
+	// CAppDocManager::RegisterImageAdditionalShellExt(): we only register "[open("%1")]"
+	//
 	if ( str::StripPrefix( command, _T("[queue(") ) )
 		if ( str::StripSuffix( command, _T(")]") ) )
 		{	// process each DDE "queue" request for explicit albums
@@ -514,7 +518,7 @@ BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 			app::GetMainFrame()->StartEnqueuedAlbumTimer();
 			m_pCmdInfo = NULL;		// prevent crash on CWinApp::ExitInstance() - inspired by CDocManager::OnDDECommand() implementation
 			return TRUE;
-		}*/
+		}
 
 	return CBaseApp<CWinApp>::OnDDECommand( (LPTSTR)command.c_str() );
 }

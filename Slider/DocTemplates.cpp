@@ -18,6 +18,7 @@
 #include "utl/UI/ShellRegistryAssoc.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/WicImage.h"
+#include <unordered_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -72,38 +73,69 @@ BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD f
 void CAppDocManager::RegisterShellFileTypes( BOOL compatMode )
 {
 	{
-		CScopedValue< bool > scopedSingleExt( &app::CSharedDocTemplate::s_useSingleFilterExt, true );		// prevent creating ".sld;.ias;.cid;.icf" registry key
-		__super::RegisterShellFileTypes( compatMode );
+		CScopedValue<bool> scopedSingleExt( &app::CSharedDocTemplate::s_useSingleFilterExt, true );		// prevent creating multi-extension ".sld;.ias;.cid;.icf" registry key
+		__super::RegisterShellFileTypes( compatMode );			// CAlbumDocTemplate + CImageDocTemplate
 	}
 
-	m_pAlbumTemplate->RegisterAdditionalDocExtensions();
-	m_pAlbumTemplate->RegisterAlbumShellDirectory( true );
+	m_pAlbumTemplate->RegisterAdditionalDocExtensions();		// ".sld", ".ias", ".cid", ".icf"
+	m_pAlbumTemplate->RegisterAlbumShell_Directory( true );		// "HKEY_CLASSES_ROOT\Directory\shell\Slide &View"
 }
 
+/* Handlers sample (Windows 10 MyThinkPad): "<HANDLER>": "<EXT>"
+
+	"Photoshop.BMPFile.10": ".bmp"
+	"Paint.Picture": ".dib"
+	"rlefile": ".rle"
+	"giffile": ".gif"
+	"IcoFX.ico": ".ico"
+	"IcoFX.cur": ".cur"
+	"jpegfile": ".jpeg", ".jpe", ".jpg"
+	"pjpegfile": ".jfif"
+	"pngfile": ".png"
+	"Photoshop.TIFFFile.10": ".tiff", ".tif"
+	"Photoshop.CameraRawFileDigital.10": ".dng"
+	"wdpfile": ".wdp", ".jxr"
+	"ddsfile": ".dds"
+	"Photoshop.CameraRawFileCanon2.10": ".CR2"
+	"Photoshop.CameraRawFileCanon.10": ".CRW"
+	"dcsfile": ".DCS"
+	"Photoshop.CameraRawFileKodak.10": ".DCR"
+	"Photoshop.CameraRawFileEpson.10": ".ERF"
+	"Photoshop.CameraRawFileLeaf.10": ".MOS"
+	"Photoshop.CameraRawFileMinolta.10": ".MRW"
+	"Photoshop.CameraRawFileNikon.10": ".NEF"
+	"Photoshop.CameraRawFileOlympus.10": ".ORF"
+	"Photoshop.CameraRawFilePentax.10": ".PEF"
+	"Photoshop.CameraRawFileFujifilm.10": ".RAF"
+	"VisualStudio.srf.9.0": ".SRF"
+	"Photoshop.CameraRawFileFoveon.10": ".X3F"
+*/
 void CAppDocManager::RegisterImageAdditionalShellExt( bool doRegister )
 {
 	// process known registered image files extensions
-	const std::vector< std::tstring >& imageExts = app::CImageDocTemplate::Instance()->GetAllExts();
+	const std::vector<std::tstring>& imageExts = app::CImageDocTemplate::Instance()->GetAllExts();
+	std::tstring handlerName;
+	std::unordered_set<std::tstring> uniqueHandlers;
 
-	for ( std::vector< std::tstring >::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end(); ++itImageExt )
+	for ( std::vector<std::tstring>::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end(); ++itImageExt )
 	{
-		std::tstring handlerName;
-		if ( shell::QueryHandlerName( handlerName, itImageExt->c_str() ) )			// valid indirect shell extension handler?
-		{
-			reg::TKeyPath openPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("OpenWithSlider") );				// "<handler>\\shell\\OpenWithSlider"
-			reg::TKeyPath enqueuePath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("EnqueueInSlider") );			// "<handler>\\shell\\EnqueueInSlider"
+		if ( shell::QueryHandlerName( handlerName, itImageExt->c_str() ) )		// valid indirect shell extension handler?
+			if ( uniqueHandlers.insert( handlerName ).second )					// first entry encountered?
+			{	// e.g. "Photoshop.BMPFile.10", "Paint.Picture", "rlefile", "giffile", "IcoFX.ico", "IcoFX.cur", "jpegfile", 
+				reg::TKeyPath openPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("OpenWithSlider") );				// "<handler>\\shell\\OpenWithSlider"
+				reg::TKeyPath enqueuePath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("EnqueueInSlider") );			// "<handler>\\shell\\EnqueueInSlider" - obsolete
 
-			if ( doRegister )
-			{
-				shell::RegisterShellVerb( openPath, app::GetModulePath(), _T("Open with &Slider"), shell::GetDdeOpenCmd() );
-				shell::RegisterShellVerb( enqueuePath, app::GetModulePath(), _T("Enque&ue in Slider"), _T("[queue(\"%1\")]") );
+				if ( doRegister )
+				{
+					shell::RegisterShellVerb( openPath, app::GetModulePath(), _T("Open with &Slider"), shell::GetDdeOpenCmd() );
+					//shell::RegisterShellVerb( enqueuePath, app::GetModulePath(), _T("Enque&ue in Slider"), _T("[queue(\"%1\")]") );	// PHC 2023-07-05: remove the obsolete "[queue(\"%1\")" DDE command
+				}
+				else
+				{	// remove slider entries for shell
+					shell::UnregisterShellVerb( openPath );
+					shell::UnregisterShellVerb( enqueuePath );
+				}
 			}
-			else
-			{	// remove slider entries for shell
-				shell::UnregisterShellVerb( openPath );
-				shell::UnregisterShellVerb( enqueuePath );
-			}
-		}
 	}
 }
 
@@ -258,7 +290,7 @@ namespace app
 		}
 	}
 
-	void CAlbumDocTemplate::RegisterAlbumShellDirectory( bool doRegister )
+	void CAlbumDocTemplate::RegisterAlbumShell_Directory( bool doRegister )
 	{
 		// unregister any old Slider version 'Directory' entry - that's necessary since otherwise Explorer gets confused and invokes the old handler
 		reg::TKeyPath oldVerbPath = shell::MakeShellHandlerVerbPath( _T("Directory"), _T("Slide &View") );		// "Directory\\shell\\Slide &View"

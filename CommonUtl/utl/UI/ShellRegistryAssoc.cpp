@@ -95,7 +95,7 @@ namespace shell
 
 			subKeyPath = verbPath / _T("ddeexec");
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath / _T("ddeexec") ) ||
-				 !key.WriteStringValue( nullptr, pDdeCmd ) )					// default value of the key
+				 !key.WriteStringValue( nullptr, pDdeCmd ) )				// default value of the key
 			{
 				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), subKeyPath.GetPtr(), key.GetLastError().FormatError().c_str() );
 				return false;

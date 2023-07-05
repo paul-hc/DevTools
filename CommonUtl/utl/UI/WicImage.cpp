@@ -317,8 +317,8 @@ namespace fs
 
 	CImageFilterStore& CImageFilterStore::Instance( shell::BrowseMode browseMode )
 	{
-		static CImageFilterStore openFilterSpecs( WICDecoder ), saveFilterSpecs( WICEncoder );
-		return fs::BrowseOpen == browseMode ? openFilterSpecs : saveFilterSpecs;
+		static CImageFilterStore s_openFilterSpecs( WICDecoder ), s_saveFilterSpecs( WICEncoder );
+		return fs::BrowseOpen == browseMode ? s_openFilterSpecs : s_saveFilterSpecs;
 	}
 
 	void CImageFilterStore::Enumerate( WICComponentType codec )

@@ -54,7 +54,7 @@ namespace app
 		const fs::CFilterStore* m_pFilterStore;			// for file filters and known extensions
 		std::tstring m_fileFilters;
 		std::tstring m_knownExts;
-		std::vector< std::tstring > m_allExts;
+		std::vector<std::tstring> m_allExts;
 		bool m_acceptDirPath;							// true: open document on directory path
 	public:
 		CMenu m_menu;
@@ -82,7 +82,7 @@ namespace app
 		static OpenPathType GetOpenPathType( const TCHAR* pPath );
 		static bool IsSlideAlbumFile( const TCHAR* pFilePath );
 
-		void RegisterAlbumShellDirectory( bool doRegister );
+		void RegisterAlbumShell_Directory( bool doRegister );
 	protected:
 		// base overrides
 		virtual void AlterSaveAsPath( CString& rFilePath ) const;
