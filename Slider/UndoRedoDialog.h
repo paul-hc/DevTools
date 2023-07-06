@@ -9,7 +9,7 @@
 class CUndoRedoDialog : public CLayoutDialog
 {
 public:
-	CUndoRedoDialog( auto_drop::COpStack& rFromStack, auto_drop::COpStack& rToStack, bool isUndoOp, CWnd* pParent = NULL );
+	CUndoRedoDialog( auto_drop::COpStack& rFromStack, auto_drop::COpStack& rToStack, bool isUndoOp, CWnd* pParent = nullptr );
 	virtual ~CUndoRedoDialog();
 private:
 	auto_drop::COpStack& m_rFromStack;

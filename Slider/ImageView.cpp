@@ -39,7 +39,7 @@ CImageView::CImageView( void )
 	, m_bkColor( CLR_DEFAULT )
 	, m_initialized( false )
 	, m_pNavigBar( app::GetMainFrame()->GetToolbar() )
-	, m_pMdiChildFrame( NULL )
+	, m_pMdiChildFrame( nullptr )
 {
 	s_imageAccel.LoadOnce( IDR_IMAGEVIEW );
 	SetTrackMenuTarget( app::GetMainFrame() );
@@ -66,7 +66,7 @@ CMenu& CImageView::GetDocContextMenu( void ) const
 {
 	static CMenu s_contextMenu;
 
-	if ( NULL == (HMENU)s_contextMenu )
+	if ( nullptr == (HMENU)s_contextMenu )
 		ui::LoadPopupMenu( s_contextMenu, IDR_CONTEXT_MENU, app::ImagePopup );
 
 	return s_contextMenu;
@@ -86,7 +86,7 @@ void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )
 {
 	m_bkColor = bkColor;
 
-	if ( doRedraw && m_hWnd != NULL )
+	if ( doRedraw && m_hWnd != nullptr )
 		Invalidate();
 }
 
@@ -192,7 +192,7 @@ void CImageView::OnImageContentChanged( void )
 	//was: SetupContentMetrics( false );
 
 	if ( !m_initialized && !HasViewStatusFlag( ui::FullScreen ) )
-		if ( GetImage() != NULL )
+		if ( GetImage() != nullptr )
 			app::GetMainFrame()->ResizeViewToFit( this );				// first allow view to resize in order to fit with contents (resize to image aspect ratio)
 
 	AssignScalingMode( CWorkspace::GetData().m_scalingMode );			// TRICKY: switch to initial value without any recalculations
@@ -228,7 +228,7 @@ void CImageView::OnActivateView( BOOL bActivate, CView* pActivateView, CView* pD
 	__super::OnActivateView( bActivate, pActivateView, pDeactiveView );
 
 	if ( bActivate )
-		if ( pDeactiveView == NULL || pDeactiveView == pActivateView || pDeactiveView->GetParentFrame() != m_pMdiChildFrame )
+		if ( pDeactiveView == nullptr || pDeactiveView == pActivateView || pDeactiveView->GetParentFrame() != m_pMdiChildFrame )
 			EventChildFrameActivated();		// call only if is a frame activation, that is avoid calling when is a sibling view activation, as in case of CAlbumThumbListView for the CAlbumImageView derived
 }
 
@@ -347,7 +347,7 @@ void CImageView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	pWnd;
 
 	CMenu* pSrcPopupMenu = &GetDocContextMenu();
-	if ( pSrcPopupMenu->GetSafeHmenu() != NULL )
+	if ( pSrcPopupMenu->GetSafeHmenu() != nullptr )
 	{
 		if ( CWicImage* pImage = GetImage() )
 			if ( !pImage->GetImagePath().IsComplexPath() )
@@ -416,7 +416,7 @@ void CImageView::OnMButtonDown( UINT mkFlags, CPoint point )
 	__super::OnMButtonDown( mkFlags, point );
 	SetFocus();
 
-	if ( GetImage() != NULL && InContentRect( point ) )
+	if ( GetImage() != nullptr && InContentRect( point ) )
 		CZoomViewMouseTracker::Run( this, mkFlags, point );
 }
 
@@ -469,7 +469,7 @@ void CImageView::OnUpdateEditCopy( CCmdUI* pCmdUI )
 {
 	CWicImage* pImage = GetImage();
 
-	pCmdUI->Enable( pImage != NULL && !pImage->GetImagePath().IsEmpty() );
+	pCmdUI->Enable( pImage != nullptr && !pImage->GetImagePath().IsEmpty() );
 }
 
 void CImageView::OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI )
@@ -499,7 +499,7 @@ void CImageView::On_Zoom( UINT cmdId )
 
 void CImageView::CmResizeViewToFit( void )
 {
-	if ( GetImage() != NULL )
+	if ( GetImage() != nullptr )
 		app::GetMainFrame()->ResizeViewToFit( this );				// first allow view to resize in order to fit with contents
 }
 

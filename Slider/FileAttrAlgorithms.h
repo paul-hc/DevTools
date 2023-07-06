@@ -14,7 +14,7 @@ namespace fattr
 	inline const CFileAttr* FindWithPath( const std::vector<CFileAttr*>& fileAttributes, const fs::CPath& filePath )
 	{
 		size_t foundPos = FindPosWithPath( fileAttributes, filePath );
-		return foundPos != utl::npos ? fileAttributes[ foundPos ] : NULL;
+		return foundPos != utl::npos ? fileAttributes[ foundPos ] : nullptr;
 	}
 
 	template< typename FileAttrT >

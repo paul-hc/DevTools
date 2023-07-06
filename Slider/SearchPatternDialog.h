@@ -14,7 +14,7 @@
 class CSearchPatternDialog : public CLayoutDialog
 {
 public:
-	CSearchPatternDialog( const CSearchPattern* pSrcPattern, CWnd* pParent = NULL );
+	CSearchPatternDialog( const CSearchPattern* pSrcPattern, CWnd* pParent = nullptr );
 	virtual ~CSearchPatternDialog();
 private:
 	void ValidatePattern( ui::ComboField byField = ui::BySel );

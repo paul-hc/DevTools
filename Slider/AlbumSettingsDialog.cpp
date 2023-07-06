@@ -75,10 +75,10 @@ namespace layout
 }
 
 
-CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t currentPos, CWnd* pParent /*= NULL*/ )
+CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t currentPos, CWnd* pParent /*= nullptr*/ )
 	: CLayoutDialog( IDD_ALBUM_SETTINGS_DIALOG, pParent )
 	, m_model( model )
-	, m_pCaretFileAttr( currentPos < m_model.GetFileAttrCount() ? m_model.GetFileAttr( currentPos ) : NULL )
+	, m_pCaretFileAttr( currentPos < m_model.GetFileAttrCount() ? m_model.GetFileAttr( currentPos ) : nullptr )
 	, m_isDirty( false )
 
 	, m_patternsListCtrl( IDC_PATTERNS_LISTVIEW )
@@ -163,7 +163,7 @@ CAlbumSettingsDialog::~CAlbumSettingsDialog()
 
 int CAlbumSettingsDialog::GetCurrentIndex( void ) const
 {
-	if ( NULL == m_pCaretFileAttr )
+	if ( nullptr == m_pCaretFileAttr )
 		return m_model.AnyFoundFiles() ? 0 : -1;
 
 	return static_cast<int>( utl::FindPos( m_model.GetImagesModel().GetFileAttrs(), m_pCaretFileAttr ) );
@@ -172,7 +172,7 @@ int CAlbumSettingsDialog::GetCurrentIndex( void ) const
 CMenu& CAlbumSettingsDialog::GetAlbumModelPopupMenu( void )
 {
 	static CMenu s_popupMenu;
-	if ( NULL == s_popupMenu.GetSafeHmenu() )
+	if ( nullptr == s_popupMenu.GetSafeHmenu() )
 	{
 		CMenu popupMenu;
 		ui::LoadPopupSubMenu( s_popupMenu, IDR_CONTEXT_MENU, app::AlbumFoundListPopup );
@@ -332,7 +332,7 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 	ui::EnableControl( m_hWnd, IDCANCEL, false );
 
 	fs::CFlexPath currFilePath;
-	if ( m_pCaretFileAttr != NULL )
+	if ( m_pCaretFileAttr != nullptr )
 		currFilePath = m_pCaretFileAttr->GetPath();
 
 	try
@@ -348,7 +348,7 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 	if ( !currFilePath.IsEmpty() )
 		m_pCaretFileAttr = fattr::FindWithPath( m_model.GetImagesModel().GetFileAttrs(), currFilePath );
 	else
-		m_pCaretFileAttr = NULL;
+		m_pCaretFileAttr = nullptr;
 
 	SetupFoundImagesListView();		// fill in the found files list
 	SetDirty( false );
@@ -407,10 +407,10 @@ void CAlbumSettingsDialog::OutputAll( void )
 	SetupFoundImagesListView();
 
 	if ( !m_imagesListCtrl.AnySelected() )
-		if ( m_pCaretFileAttr != NULL )
+		if ( m_pCaretFileAttr != nullptr )
 			m_imagesListCtrl.Select( m_pCaretFileAttr );
 
-	m_thumbPreviewCtrl.SetImagePath( m_pCaretFileAttr != NULL ? m_pCaretFileAttr->GetPath() : fs::CFlexPath() );
+	m_thumbPreviewCtrl.SetImagePath( m_pCaretFileAttr != nullptr ? m_pCaretFileAttr->GetPath() : fs::CFlexPath() );
 }
 
 void CAlbumSettingsDialog::InputAll( void )
@@ -446,7 +446,7 @@ void CAlbumSettingsDialog::InputAll( void )
 
 void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_imagesListCtrl.m_hWnd;
+	bool firstInit = nullptr == m_imagesListCtrl.m_hWnd;
 
 	DDX_Control( pDX, IDC_PATTERNS_LISTVIEW, m_patternsListCtrl );
 	m_patternsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignRight | V_AlignCenter );
@@ -469,7 +469,7 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 		m_pPatternsEditor.reset( new CListCtrlEditorFrame( &m_patternsListCtrl, &m_patternsToolbar ) );
 		m_pImagesEditor.reset( new CListCtrlEditorFrame( &m_imagesListCtrl, &m_imagesToolbar ) );
 
-		if ( m_model.GetCatalogStorage() != NULL )
+		if ( m_model.GetCatalogStorage() != nullptr )
 			m_patternsListCtrl.EnableWindow( false );		// disable search patterns editing for catalog-based albums
 
 		m_imagesListCtrl.SetCompactIconSpacing();
@@ -578,11 +578,11 @@ void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 	if ( pWnd == &m_imagesListCtrl )
 	{
 		static CMenu contextMenu;
-		if ( NULL == (HMENU)contextMenu )
+		if ( nullptr == (HMENU)contextMenu )
 			ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AlbumFoundListPopup );
 
 		if ( m_imagesListCtrl.GetSelectedCount() != 0 )
-			if ( (HMENU)contextMenu != NULL )
+			if ( (HMENU)contextMenu != nullptr )
 				contextMenu.TrackPopupMenu( TPM_RIGHTBUTTON, point.x, point.y, this );
 	}
 }
@@ -609,7 +609,7 @@ void CAlbumSettingsDialog::OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pRes
 	for ( std::vector<fs::CPath>::const_iterator itSearchPath = pNmDropFiles->m_filePaths.begin(); itSearchPath != pNmDropFiles->m_filePaths.end(); ++itSearchPath )
 	{
 		std::pair<CSearchPattern*, bool> patternPair = pSearchModel->AddSearchPath( *itSearchPath, dropPos );
-		if ( patternPair.first != NULL )
+		if ( patternPair.first != nullptr )
 		{
 			droppedPatterns.push_back( patternPair.first );
 
@@ -954,7 +954,7 @@ void CAlbumSettingsDialog::OnUpdate_ImageFileOp( CCmdUI* pCmdUI )
 		case ID_IMAGE_EXPLORE:
 		{
 			const CFileAttr* pCurrFileAttr = m_imagesListCtrl.GetSelected<CFileAttr>();
-			pCmdUI->Enable( pCurrFileAttr != NULL && pCurrFileAttr->IsValid() );
+			pCmdUI->Enable( pCurrFileAttr != nullptr && pCurrFileAttr->IsValid() );
 			break;
 		}
 		default:

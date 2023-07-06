@@ -227,7 +227,7 @@ BOOL CMainToolbar::OnEraseBkgnd( CDC* pDC )
 void CMainToolbar::OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar )
 {
 	CToolbarStrip::OnHScroll( sbCode, nPos, pScrollBar );
-	if ( pScrollBar != NULL && pScrollBar->m_hWnd == m_navigSliderCtrl.m_hWnd )
+	if ( pScrollBar != nullptr && pScrollBar->m_hWnd == m_navigSliderCtrl.m_hWnd )
 	{
 		BOOL doCommit = true;
 		int pos;
@@ -279,7 +279,7 @@ BOOL CMainToolbar::On_EscapeKey( UINT cmdId )
 
 void CMainToolbar::On_FocusOnZoomCombo( void )
 {
-	if ( !ui::OwnsFocus( *m_pZoomCombo ) && app::GetMainFrame()->MDIGetActive() != NULL )
+	if ( !ui::OwnsFocus( *m_pZoomCombo ) && app::GetMainFrame()->MDIGetActive() != nullptr )
 		m_pZoomCombo->SetFocus();
 }
 
@@ -298,7 +298,7 @@ BOOL CMainToolbar::OnToolTipText_NavigSliderCtrl( UINT, NMHDR* pNmHdr, LRESULT* 
 {
 	ui::CTooltipTextMessage message( pNmHdr );
 	IImageView* pImageView = app::GetMainFrame()->GetActiveImageView();
-	if ( !message.IsValidNotification() || message.m_cmdId != IDW_NAVIG_SLIDER_CTRL || NULL == pImageView )
+	if ( !message.IsValidNotification() || message.m_cmdId != IDW_NAVIG_SLIDER_CTRL || nullptr == pImageView )
 		return FALSE;		// not handled, countinue routing
 
 	if ( !message.AssignTooltipText( pImageView->GetImagePathKey().first.GetPtr() ) )

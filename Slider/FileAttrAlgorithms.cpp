@@ -67,7 +67,7 @@ namespace fattr
 				newlyFoundFileAttributes.push_back( *itFileAttr );
 
 		// remove original NULLs: entries not found in the new sequence
-		origFileAttributes.erase( std::remove( origFileAttributes.begin(), origFileAttributes.end(), (CFileAttr*)NULL ), origFileAttributes.end() );
+		origFileAttributes.erase( std::remove( origFileAttributes.begin(), origFileAttributes.end(), (CFileAttr*)nullptr ), origFileAttributes.end() );
 
 		pNewSequence->clear();
 		pNewSequence->assign( origFileAttributes.begin(), origFileAttributes.end() );										// assign remaining originals

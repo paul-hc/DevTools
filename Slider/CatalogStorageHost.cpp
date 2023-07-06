@@ -29,7 +29,7 @@ ICatalogStorage* CCatalogStorageHost::Push( const fs::TStgDocPath& docStgPath, S
 	ASSERT_NULL( Find( docStgPath ) );			// add only once
 
 	CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );
-	if ( pCatalogStorage != NULL )
+	if ( pCatalogStorage != nullptr )
 	{
 		ENSURE( pCatalogStorage->GetDocStorage()->IsOpenForReading() );
 		m_imageStorages.push_back( pCatalogStorage );
@@ -81,7 +81,7 @@ const fs::TStgDocPath& CCatalogStorageHost::GetDocFilePathAt( size_t pos ) const
 ICatalogStorage* CCatalogStorageHost::Find( const fs::TStgDocPath& docStgPath ) const
 {
 	size_t foundPos = FindPos( docStgPath );
-	return foundPos != utl::npos ? GetAt( foundPos ) : NULL;
+	return foundPos != utl::npos ? GetAt( foundPos ) : nullptr;
 }
 
 size_t CCatalogStorageHost::FindPos( const fs::TStgDocPath& docStgPath ) const

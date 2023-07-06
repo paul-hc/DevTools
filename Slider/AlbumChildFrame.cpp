@@ -15,8 +15,8 @@ IMPLEMENT_DYNCREATE( CAlbumChildFrame, CChildFrame )
 
 CAlbumChildFrame::CAlbumChildFrame( void )
 	: CChildFrame()
-	, m_pThumbsListView( NULL )
-	, m_pAlbumImageView( NULL )
+	, m_pThumbsListView( nullptr )
+	, m_pAlbumImageView( nullptr )
 {
 }
 

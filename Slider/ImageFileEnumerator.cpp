@@ -15,10 +15,10 @@
 #endif
 
 
-CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressEnum /*= NULL*/ )
+CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressEnum /*= nullptr*/ )
 	: fs::CPathEnumerator( fs::TEnumFlags::Make( fs::EF_Recurse | fs::EF_IgnoreHiddenNodes | fs::EF_ResolveShellLinks ), pProgressEnum )
 	, m_issueStore( _T("Searching for images") )
-	, m_pCurrPattern( NULL )
+	, m_pCurrPattern( nullptr )
 {
 	m_foundImages.SetUseIndexing();			// optimize lookup performance when searching a large number of image files
 }
@@ -48,7 +48,7 @@ void CImageFileEnumerator::Search( const std::vector<CSearchPattern*>& searchPat
 		{
 			const size_t oldFoundSize = m_foundImages.GetFileAttrs().size();
 
-			if ( m_pChainEnum != NULL && m_pCurrPattern->IsDirPath() )
+			if ( m_pChainEnum != nullptr && m_pCurrPattern->IsDirPath() )
 				m_pChainEnum->AddFoundSubDir( m_pCurrPattern->GetFilePath() );		// progress only: advance stage to the root directory
 
 			m_pCurrPattern->EnumImageFiles( this );
@@ -72,7 +72,7 @@ void CImageFileEnumerator::Search( const std::vector<CSearchPattern*>& searchPat
 		++itPattern;
 	}
 
-	m_pCurrPattern = NULL;
+	m_pCurrPattern = nullptr;
 }
 
 void CImageFileEnumerator::Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException )
@@ -107,7 +107,7 @@ bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
 	if ( !PassFileFilter( fileState ) )
 		return false;
 
-	if ( m_pCurrPattern != NULL )
+	if ( m_pCurrPattern != nullptr )
 		if ( CSearchPattern::AutoDropNumFormat == m_pCurrPattern->GetSearchMode() )
 			if ( !CSearchPattern::IsNumFileName( fileAttr.GetPath().GetPtr() ) )
 				return false;
@@ -126,7 +126,7 @@ bool CImageFileEnumerator::Push( CFileAttr* pFileAttr )
 	if ( !m_foundImages.AddFileAttr( pFileAttr ) )
 		return false;			// found duplicate image path (could happen with multiple embedded albums referencing the same image)
 
-	if ( m_pChainEnum != NULL )
+	if ( m_pChainEnum != nullptr )
 		m_pChainEnum->AddFoundFile( pFileAttr->GetPath() );
 
 //Sleep( 100 );			// debug progress bar
@@ -159,7 +159,7 @@ void CImageFileEnumerator::AddFoundFile( const fs::CPath& filePath ) override
 		// note: we need to load as CAlbumDoc since its document schema may be older (backwards compatibility)
 
 		std::auto_ptr<CAlbumDoc> pAlbumDoc = CAlbumDoc::LoadAlbumDocument( filePath );
-		if ( pAlbumDoc.get() != NULL )
+		if ( pAlbumDoc.get() != nullptr )
 		{
 			AddFoundSubDir( filePath );									// an album counts as a sub-directory
 

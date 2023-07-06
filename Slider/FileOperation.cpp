@@ -89,7 +89,7 @@ namespace svc
 		else
 		{
 			fs::TDirPath destFolderPath;		// leave empty to pick the previous selected folder
-			if ( !shell::PickFolder( destFolderPath, NULL ) )		// multiple files: pick destination folder
+			if ( !shell::PickFolder( destFolderPath, nullptr ) )		// multiple files: pick destination folder
 				return false;
 
 			MakeDestFilePaths( rDestFilePaths, srcFilePaths, destFolderPath, Shallow );
@@ -101,7 +101,7 @@ namespace svc
 		return true;
 	}
 
-	bool CheckOverrideExistingFiles( const std::vector<fs::CPath> destFilePaths, const TCHAR* pTitle /*= NULL*/ )
+	bool CheckOverrideExistingFiles( const std::vector<fs::CPath> destFilePaths, const TCHAR* pTitle /*= nullptr*/ )
 	{
 		std::vector<fs::CPath> existingPaths;
 		utl::QueryThat( existingPaths, destFilePaths, pred::FileExist() );
@@ -115,7 +115,7 @@ namespace svc
 								 TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, TDF_SIZE_TO_CONTENT );
 
 			dlg.SetMainIcon( TD_WARNING_ICON );
-			if ( dlg.DoModal( NULL ) != IDYES )
+			if ( dlg.DoModal( nullptr ) != IDYES )
 				return false;			// cancelled by user
 		}
 
@@ -169,7 +169,7 @@ bool CFileOperation::Copy( const fs::CFlexPath& srcFilePath, const fs::CFlexPath
 				std::auto_ptr<CFile> pSrcFile = CCatalogStorageFactory::Instance()->OpenFlexImageFile( srcFilePath, CFile::modeRead );
 				std::auto_ptr<CFile> pDestFile = CCatalogStorageFactory::Instance()->OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite );
 
-				if ( pSrcFile.get() != NULL && pDestFile.get() != NULL )
+				if ( pSrcFile.get() != nullptr && pDestFile.get() != nullptr )
 					fs::BufferedCopy( *pDestFile, *pSrcFile );
 				else
 					return HandleError( str::Format( _T("Cannot find embedded file: %s"), srcFilePath.GetPtr() ) );
@@ -212,7 +212,7 @@ bool CFileOperation::Delete( const fs::CFlexPath& filePath ) throws_( CException
 		{
 			CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( filePath.GetPhysicalPath(), STGM_READWRITE );
 
-			if ( NULL == pCatalogStorage || !pCatalogStorage->GetDocStorage()->DeleteStream( filePath.GetEmbeddedPathPtr() ) )
+			if ( nullptr == pCatalogStorage || !pCatalogStorage->GetDocStorage()->DeleteStream( filePath.GetEmbeddedPathPtr() ) )
 				return HandleError( str::Format( _T("Cannot delete the embedded file '%s'"), filePath.GetPtr() ) );
 		}
 		else
@@ -232,11 +232,11 @@ const CEnumTags& CFileOperation::GetTags_Operation( void )
 	return tags;
 }
 
-void CFileOperation::AddLogMessage( Operation operation, const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath /*= NULL*/ )
+void CFileOperation::AddLogMessage( Operation operation, const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath /*= nullptr*/ )
 {
 	std::tostringstream oss;
 	oss << GetTags_Operation().GetUiTags()[ operation ] << _T(": ") << srcFilePath.Get();
-	if ( pDestFilePath != NULL )
+	if ( pDestFilePath != nullptr )
 		oss << _T(" -> ") << pDestFilePath->Get();
 
 	m_logLines.push_back( oss.str() );
@@ -289,12 +289,12 @@ bool CFileOperation::HandleLastError( void )
 	std::vector<TCHAR> errorMessage( 512 );
 
 	::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
+		nullptr,
 		GetLastError(),
 		MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
 		&errorMessage.front(),
 		0,
-		NULL );
+		nullptr );
 
 	AugmentLogError( &errorMessage.front() );
 	return HandleError( &errorMessage.front() );

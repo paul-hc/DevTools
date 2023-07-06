@@ -116,12 +116,12 @@ CWorkspace::CWorkspace( void )
 	: CCmdTarget()
 	, m_filePath( app::GetModulePath() )
 	, m_delayFullScreen( false )
-	, m_pMainFrame( NULL )
-	, m_pLoadingImageState( NULL )
+	, m_pMainFrame( nullptr )
+	, m_pLoadingImageState( nullptr )
 	, m_isFullScreen( false )
 	, m_reserved( 0 )
 	, m_defaultSlideDelay( 5000 )
-	, m_pEditingData( NULL )
+	, m_pEditingData( nullptr )
 {
 	m_filePath.ReplaceExt( _T(".slw") );
 
@@ -260,7 +260,7 @@ void CWorkspace::FetchSettings( void )
 
 	BOOL isMaximized;
 	CChildFrame* pActiveChildFrame = checked_static_cast<CChildFrame*>( m_pMainFrame->MDIGetActive( &isMaximized ) );
-	if ( pActiveChildFrame != NULL )				// any MDI child available
+	if ( pActiveChildFrame != nullptr )				// any MDI child available
 		SetFlag( m_data.m_wkspFlags, wf::MdiMaximized, isMaximized != FALSE );		// save MDI maximize state
 
 	// save toolbar and status-bar visibility state
@@ -270,8 +270,8 @@ void CWorkspace::FetchSettings( void )
 	m_imageStates.clear();
 
 	if ( HasFlag( m_data.m_wkspFlags, wf::PersistOpenDocs ) )
-		if ( pActiveChildFrame != NULL )
-			for ( CWnd* pChild = pActiveChildFrame->GetNextWindow( GW_HWNDLAST ); pChild != NULL; pChild = pChild->GetNextWindow( GW_HWNDPREV ) )
+		if ( pActiveChildFrame != nullptr )
+			for ( CWnd* pChild = pActiveChildFrame->GetNextWindow( GW_HWNDLAST ); pChild != nullptr; pChild = pChild->GetNextWindow( GW_HWNDPREV ) )
 			{
 				CChildFrame* pChildFrame = checked_static_cast<CChildFrame*>( pChild );
 				fs::CPath docFilePath( pChildFrame->GetActiveDocument()->GetPathName().GetString() );
@@ -307,10 +307,10 @@ bool CWorkspace::LoadDocuments( void )
 		//
 		m_pLoadingImageState = const_cast<CImageState*>( &*itImageState );
 
-		if ( NULL == AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str() ) )
+		if ( nullptr == AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str() ) )
 			TRACE( " * Failed loading document %s on workspace load!\n", m_pLoadingImageState->GetDocFilePath().c_str() );
 	}
-	m_pLoadingImageState = NULL;
+	m_pLoadingImageState = nullptr;
 	m_imageStates.clear();				// no longer needed
 
 	return !m_imageStates.empty();
@@ -404,7 +404,7 @@ void CWorkspace::CmEditWorkspace( void )
 
 	INT_PTR result = dlg.DoModal();
 
-	m_pEditingData = NULL;
+	m_pEditingData = nullptr;
 
 	if ( result != IDCANCEL )
 	{

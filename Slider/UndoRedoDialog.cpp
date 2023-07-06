@@ -17,7 +17,7 @@ namespace layout
 	};
 }
 
-CUndoRedoDialog::CUndoRedoDialog( auto_drop::COpStack& rFromStack, auto_drop::COpStack& rToStack, bool isUndoOp, CWnd* pParent /*= NULL*/ )
+CUndoRedoDialog::CUndoRedoDialog( auto_drop::COpStack& rFromStack, auto_drop::COpStack& rToStack, bool isUndoOp, CWnd* pParent /*= nullptr*/ )
 	: CLayoutDialog( IDD_UNDO_REDO_DIALOG, pParent )
 	, m_rFromStack( rFromStack )
 	, m_rToStack( rToStack )

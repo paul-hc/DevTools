@@ -90,7 +90,7 @@ public:
 	static CCatalogPasswordStore* Instance( void );
 
 	bool SavePassword( ICatalogStorage* pCatalogStorage );
-	bool LoadPasswordVerify( ICatalogStorage* pCatalogStorage, std::tstring* pOutPassword = NULL );
+	bool LoadPasswordVerify( ICatalogStorage* pCatalogStorage, std::tstring* pOutPassword = nullptr );
 	bool CacheVerifiedPassword( const std::tstring& password );
 
 	bool IsPasswordVerified( const fs::TStgDocPath& docStgPath ) const;

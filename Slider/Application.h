@@ -45,7 +45,7 @@ public:
 
 	void SetStatusBarMessage( const TCHAR* pMessage );
 
-	void UpdateAllViews( UpdateViewHint hint = Hint_ViewUpdate, CDocument* pSenderDoc = NULL, CView* pSenderView = NULL );
+	void UpdateAllViews( UpdateViewHint hint = Hint_ViewUpdate, CDocument* pSenderDoc = nullptr, CView* pSenderView = nullptr );
 private:
 	void InitGlobals( void );
 
@@ -154,12 +154,12 @@ namespace app
 		};
 
 		CScopedProgress( int autoClearDelay = 250 );
-		CScopedProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption = NULL, int autoClearDelay = 250 );
+		CScopedProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption = nullptr, int autoClearDelay = 250 );
 		~CScopedProgress();
 
 		bool IsActive( void ) const;
 
-		void Begin( int valueMin, int count, int stepCount, const TCHAR* pCaption = NULL );
+		void Begin( int valueMin, int count, int stepCount, const TCHAR* pCaption = nullptr );
 		void End( int clearDelay = ACD_NoClear );	// ACD_NoClear here it means use m_autoClearDelay value!
 
 		void SetStep( int step ) { ASSERT( IsActive() ); m_pSharedProgressBar->SetStep( step ); }

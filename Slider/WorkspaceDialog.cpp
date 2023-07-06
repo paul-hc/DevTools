@@ -19,7 +19,7 @@
 #include "utl/UI/StockValuesComboBox.hxx"
 
 
-CWorkspaceDialog::CWorkspaceDialog( CWnd* pParent /*= NULL*/ )
+CWorkspaceDialog::CWorkspaceDialog( CWnd* pParent /*= nullptr*/ )
 	: CDialog( IDD_WORKSPACE_DIALOG, pParent )
 	, m_data( CWorkspace::GetData() )
 	, m_thumbnailerFlags( app::GetThumbnailer()->m_flags )
@@ -36,7 +36,7 @@ CWorkspaceDialog::~CWorkspaceDialog()
 
 void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_mruCountEdit.m_hWnd;
+	bool firstInit = nullptr == m_mruCountEdit.m_hWnd;
 
 	ui::DDX_Bool( pDX, IDC_AUTOSAVE_CHECK, m_data.m_autoSave );
 	ui::DDX_Bool( pDX, IDC_ENLARGE_SMOOTHING_CHECK, m_smoothingMode );

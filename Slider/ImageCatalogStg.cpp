@@ -161,7 +161,7 @@ void CImageCatalogStg::CreateImageArchiveFile( const fs::TStgDocPath& docStgPath
 	ASSERT_PTR( pCatalogSvc );
 
 	CWaitCursor wait;
-	fs::stg::CScopedCreateDocMode scopedThrow( this, NULL );		// closes the archive when exiting the scope
+	fs::stg::CScopedCreateDocMode scopedThrow( this, nullptr );		// closes the archive when exiting the scope
 
 	CreateDocFile( docStgPath );
 	ASSERT( IsOpen() );
@@ -303,7 +303,7 @@ CCachedThumbBitmap* CImageCatalogStg::LoadThumbnail( const fs::CFlexPath& imageC
 		if ( const TCHAR* pThumbsFolderName = FindAlternate_DirName( ARRAY_SPAN( s_thumbsFolderNames ) ).first )
 			pThumbsStorage = OpenDir( pThumbsFolderName );
 
-		if ( pThumbsStorage != NULL )
+		if ( pThumbsStorage != nullptr )
 		{
 			CScopedCurrentDir scopedThumbsFolder( this, pThumbsStorage );
 
@@ -324,7 +324,7 @@ CCachedThumbBitmap* CImageCatalogStg::LoadThumbnail( const fs::CFlexPath& imageC
 	{
 		app::HandleException( pExc );
 	}
-	return NULL;
+	return nullptr;
 }
 
 CComPtr<IStream> CImageCatalogStg::OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath )
@@ -338,8 +338,8 @@ CComPtr<IStream> CImageCatalogStg::OpenThumbnailImageStream( const TCHAR* pImage
 		if ( StreamExist( pImageEmbeddedPath ) )			// backwards compatibility: also try with straight SRC image path as stream name
 			pThumbStreamName = pImageEmbeddedPath;
 
-	if ( NULL == pThumbStreamName )
-		return NULL;
+	if ( nullptr == pThumbStreamName )
+		return nullptr;
 
 	return OpenStream( pThumbStreamName );
 }
@@ -409,7 +409,7 @@ bool CImageCatalogStg::SaveAlbumStream( CObject* pAlbumDoc )
 	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );
 	std::auto_ptr<COleStreamFile> pAlbumFile( CreateStreamFile( s_pAlbumStreamName ) );
 
-	if ( NULL == pAlbumFile.get() )
+	if ( nullptr == pAlbumFile.get() )
 		return false;
 
 	CArchive archive( pAlbumFile.get(), CArchive::store );
@@ -429,7 +429,7 @@ bool CImageCatalogStg::LoadAlbumStream( CObject* pAlbumDoc )
 	{
 		std::auto_ptr<COleStreamFile> pAlbumFile = OpenStreamFile( s_pAlbumStreamName );		// load stream "_Album.sld"
 
-		if ( NULL == pAlbumFile.get() )
+		if ( nullptr == pAlbumFile.get() )
 			return false;
 
 		CArchive loadArchive( pAlbumFile.get(), CArchive::load );
@@ -467,7 +467,7 @@ bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CObject* pAlbumDoc )
 	{
 		std::auto_ptr<COleStreamFile> pMetadataFile = OpenStreamFile( s_metadataStreamName );
 
-		if ( pMetadataFile.get() != NULL )
+		if ( pMetadataFile.get() != nullptr )
 		{
 			CArchive loadArchive( pMetadataFile.get(), CArchive::load );
 			loadArchive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
@@ -581,7 +581,7 @@ bool CImageCatalogStg::SavePasswordStream( void )
 		CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );
 		std::auto_ptr<COleStreamFile> pPwdFile( CreateStreamFile( s_passwordStreamNames[ CurrentVer ] ) );
 
-		if ( NULL == pPwdFile.get() )
+		if ( nullptr == pPwdFile.get() )
 			return false;
 
 		std::tstring encryptedPassword = pwd::ToEncrypted( m_password );
@@ -605,7 +605,7 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 {
 	ASSERT( IsOpen() );
 
-	const TCHAR* pPasswordStreamName = NULL;
+	const TCHAR* pPasswordStreamName = nullptr;
 	bool hasWidePwd = true;				// found a WIDE stream?
 
 	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );			// start lookup in root (for backwards compatibility)
@@ -614,11 +614,11 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 		std::pair<const TCHAR*, size_t> streamName = FindAlternate_StreamName( ARRAY_SPAN( s_passwordStreamNames ) );
 		pPasswordStreamName = streamName.first;
 
-		if ( streamName.first != NULL )			// password stream found in the root?
+		if ( streamName.first != nullptr )			// password stream found in the root?
 			hasWidePwd = streamName.second != ( COUNT_OF( s_passwordStreamNames ) - 1 );		// oldest stream name uses ANSI stream?
 	}
 
-	if ( NULL == pPasswordStreamName )
+	if ( nullptr == pPasswordStreamName )
 		if ( StorageExist( s_pAlbumFolderName ) )
 		{
 			VERIFY( ChangeCurrentDir( s_pAlbumFolderName ) );
@@ -627,7 +627,7 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 				pPasswordStreamName = s_passwordStreamNames[ CurrentVer ];
 		}
 
-	if ( NULL == pPasswordStreamName )
+	if ( nullptr == pPasswordStreamName )
 	{
 		StorePassword( std::tstring() );
 		return true;					// document is not password-protected
@@ -676,7 +676,7 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 
 bool CImageCatalogStg::LoadAlbumMap( std::tstring* pAlbumMapText )
 {
-	if ( m_hasAlbumMap != utl::Default && NULL == pAlbumMapText )
+	if ( m_hasAlbumMap != utl::Default && nullptr == pAlbumMapText )
 		return utl::True == m_hasAlbumMap;
 
 	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName );
@@ -684,7 +684,7 @@ bool CImageCatalogStg::LoadAlbumMap( std::tstring* pAlbumMapText )
 	if ( utl::Default == m_hasAlbumMap )
 		utl::SetTernary( m_hasAlbumMap, StreamExist( s_pAlbumMapStreamName ) );
 
-	if ( pAlbumMapText != NULL )
+	if ( pAlbumMapText != nullptr )
 		if ( utl::True == m_hasAlbumMap )
 		{
 			std::auto_ptr<COleStreamFile> pTextFile = OpenStreamFile( s_pAlbumMapStreamName );

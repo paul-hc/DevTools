@@ -22,7 +22,7 @@ CNavigatorBase::CNavigatorBase( const CWicImage* pCurrImage )
 
 CNavigatorBase::CImageInfo::CImageInfo( const CWicImage* pImage )
 {
-	if ( pImage != NULL )
+	if ( pImage != nullptr )
 	{
 		m_isAnimated = pImage->IsAnimated();
 		m_framePos = pImage->GetFramePos();

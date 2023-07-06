@@ -12,9 +12,9 @@
 #endif
 
 
-CLoggerSetupDialog::CLoggerSetupDialog( CWnd* pParent /*=NULL*/ )
+CLoggerSetupDialog::CLoggerSetupDialog( CWnd* pParent /*=nullptr*/ )
 	: CDialog( IDD_LOGGER_DIALOG, pParent )
-	, m_pCurrLogger( NULL )
+	, m_pCurrLogger( nullptr )
 {
 }
 
@@ -82,7 +82,7 @@ void CLoggerSetupDialog::OnToggle_TimestampPrefix( void )
 void CLoggerSetupDialog::OnViewLogFileButton( void )
 {
 	// use text key (.txt) for text view, or the default for run
-	shell::Execute( this, m_pCurrLogger->GetLogFilePath().GetPtr(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, _T(".txt") );
+	shell::Execute( this, m_pCurrLogger->GetLogFilePath().GetPtr(), nullptr, SEE_MASK_FLAG_DDEWAIT, nullptr, nullptr, _T(".txt") );
 }
 
 void CLoggerSetupDialog::OnClearLogFileButton( void )

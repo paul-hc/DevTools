@@ -10,7 +10,7 @@
 class CWorkspaceDialog : public CDialog
 {
 public:
-	CWorkspaceDialog( CWnd* pParent = NULL );
+	CWorkspaceDialog( CWnd* pParent = nullptr );
 	virtual ~CWorkspaceDialog();
 public:
 	CWorkspaceData m_data;

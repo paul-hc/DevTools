@@ -134,9 +134,9 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 	//	3) This is messy, in order to keep CFileAttr::Stream() as clean as possible.
 
 	app::ModelSchema docModelSchema = app::GetLoadingSchema( rLoadArchive );
-	CAlbumModel* pAlbumModel = NULL;
+	CAlbumModel* pAlbumModel = nullptr;
 
-	if ( rLoadArchive.m_pDocument != NULL )
+	if ( rLoadArchive.m_pDocument != nullptr )
 		pAlbumModel = svc::ToAlbumModel( rLoadArchive.m_pDocument );
 
 	if ( serial::CStreamingGuard* pLoadGuard = serial::CStreamingGuard::GetTop() )
@@ -150,7 +150,7 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 				{
 					docModelSchema = app::Slider_v4_0;						// assume an earlier schema
 
-					if ( pAlbumModel != NULL )
+					if ( pAlbumModel != nullptr )
 						pAlbumModel->StoreModelSchema( docModelSchema );	// mark model to earlier version
 				}
 
@@ -181,7 +181,7 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 						docModelSchema = app::Slider_v3_1;							// assume the oldest Slider_v3_1 (-) document
 				}
 
-				if ( pAlbumModel != NULL )
+				if ( pAlbumModel != nullptr )
 					pAlbumModel->StoreModelSchema( docModelSchema );				// mark model to earlier version
 
 				TRACE( _T(" (!) CFileAttr::Stream() - detected earlier version %s in document '%s' (not using framePos with path)\n"),
@@ -189,7 +189,7 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 			}
 		}
 
-	if ( pAlbumModel != NULL )
+	if ( pAlbumModel != nullptr )
 		docModelSchema = std::min( docModelSchema, pAlbumModel->GetModelSchema() );		// use the earliest marked schema version
 
 	return docModelSchema;

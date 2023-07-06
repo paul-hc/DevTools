@@ -79,7 +79,7 @@ public:
 	static CWorkspaceData& RefData( void ) { return Instance().m_data; }
 	static int GetFlags( void ) { return Instance().m_data.m_wkspFlags; }
 
-	static const CWorkspaceData& GetLiveData( void ) { return Instance().m_pEditingData != NULL ? *Instance().m_pEditingData : Instance().m_data; }
+	static const CWorkspaceData& GetLiveData( void ) { return Instance().m_pEditingData != nullptr ? *Instance().m_pEditingData : Instance().m_data; }
 
 	virtual void Serialize( CArchive& archive );
 
@@ -93,7 +93,7 @@ public:
 
 	bool IsFullScreen( void ) const { return m_isFullScreen; }
 
-	CWindowPlacement* GetLoadedPlacement( void ) { return !m_mainPlacement.IsEmpty() ? &m_mainPlacement : NULL; }		// valid placement if it was loaded
+	CWindowPlacement* GetLoadedPlacement( void ) { return !m_mainPlacement.IsEmpty() ? &m_mainPlacement : nullptr; }		// valid placement if it was loaded
 
 	COLORREF GetImageSelTextColor( void ) const { return m_data.GetImageSelTextColor(); }
 	COLORREF GetImageSelColor( void ) const { return m_data.GetImageSelColor(); }

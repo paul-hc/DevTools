@@ -14,7 +14,7 @@ class CFileAttr;
 class CImageFileEnumerator : public fs::CPathEnumerator
 {
 public:
-	CImageFileEnumerator( IEnumerator* pProgressEnum = NULL );
+	CImageFileEnumerator( IEnumerator* pProgressEnum = nullptr );
 	~CImageFileEnumerator();
 
 	void Search( const std::vector<CSearchPattern*>& searchPatterns ) throws_( CException*, CUserAbortedException );

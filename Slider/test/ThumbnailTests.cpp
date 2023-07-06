@@ -20,7 +20,7 @@ namespace ut
 	static CThumbnailer* GetThumbnailer( void )
 	{
 		static std::auto_ptr<CThumbnailer> pThumbnailer;
-		if ( NULL == pThumbnailer.get() )
+		if ( nullptr == pThumbnailer.get() )
 		{
 			pThumbnailer.reset( new CThumbnailer() );
 			app::GetApp()->GetSharedResources().AddAutoPtr( &pThumbnailer );			// auto-reset in ExitInstance()

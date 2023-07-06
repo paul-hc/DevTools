@@ -21,7 +21,7 @@ public:
 	static CWicImage* AcquireImage( const fs::TImagePathKey& imageKey );
 
 	template< typename ViewT >
-	void UpdateAllViewsOfType( ViewT* pSenderView, int hint = 0, CObject* pHintObject = NULL );
+	void UpdateAllViewsOfType( ViewT* pSenderView, int hint = 0, CObject* pHintObject = nullptr );
 protected:
 	virtual CWicImage* GetCurrentImage( void ) const = 0;
 	virtual bool QuerySelectedImagePaths( std::vector<fs::CFlexPath>& rSelImagePaths ) const = 0;
@@ -44,11 +44,11 @@ protected:
 // CDocumentBase template code
 
 template< typename ViewT >
-void CDocumentBase::UpdateAllViewsOfType( ViewT* pSenderView, int hint /*= 0*/, CObject* pHintObject /*= NULL*/ )
+void CDocumentBase::UpdateAllViewsOfType( ViewT* pSenderView, int hint /*= 0*/, CObject* pHintObject /*= nullptr*/ )
 {
 	// must have views if sent by one of them
-	ASSERT( NULL == pSenderView || !m_viewList.IsEmpty() );
-	for ( POSITION pos = GetFirstViewPosition(); pos != NULL; )
+	ASSERT( nullptr == pSenderView || !m_viewList.IsEmpty() );
+	for ( POSITION pos = GetFirstViewPosition(); pos != nullptr; )
 	{
 		if ( ViewT* pView = dynamic_cast<ViewT*>( GetNextView( pos ) ) )
 			if ( pView != pSenderView )

@@ -9,7 +9,7 @@ class CLogger;
 class CLoggerSetupDialog : public CDialog
 {
 public:
-	CLoggerSetupDialog( CWnd* pParent = NULL );
+	CLoggerSetupDialog( CWnd* pParent = nullptr );
 private:
 	CLogger* m_pCurrLogger;
 public:

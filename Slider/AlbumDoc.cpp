@@ -81,7 +81,7 @@ void CAlbumDoc::CopyAlbumState( const CAlbumDoc* pSrcDoc )
 	m_slideData = pSrcDoc->m_slideData;
 	m_bkColor = pSrcDoc->m_bkColor;
 	m_smoothingMode = pSrcDoc->m_smoothingMode;
-	m_pImageState.reset( pSrcDoc->m_pImageState.get() != NULL ? new CImageState( *pSrcDoc->m_pImageState ) : NULL );
+	m_pImageState.reset( pSrcDoc->m_pImageState.get() != nullptr ? new CImageState( *pSrcDoc->m_pImageState ) : nullptr );
 	m_password = pSrcDoc->m_password;
 }
 
@@ -249,7 +249,7 @@ CAlbumImageView* CAlbumDoc::GetAlbumImageView( void ) const
 CSlideData* CAlbumDoc::GetActiveSlideData( void )
 {
 	CAlbumImageView* pAlbumView = GetAlbumImageView();
-	return pAlbumView != NULL ? pAlbumView->RefSlideData() : &m_slideData;
+	return pAlbumView != nullptr ? pAlbumView->RefSlideData() : &m_slideData;
 }
 
 
@@ -263,7 +263,7 @@ ICatalogStorage* CAlbumDoc::GetCatalogStorage( void )
 	if ( IsStorageAlbum() )
 		return m_model.GetCatalogStorage();
 
-	return NULL;
+	return nullptr;
 }
 
 std::auto_ptr<CAlbumDoc> CAlbumDoc::LoadAlbumDocument( const fs::CPath& docPath )
@@ -292,7 +292,7 @@ bool CAlbumDoc::LoadCatalogStorage( const fs::TStgDocPath& docStgPath )
 
 	CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );		// also prompts user to verify password (if password-protected)
 
-	if ( NULL == pCatalogStorage )
+	if ( nullptr == pCatalogStorage )
 		return false;
 
 	m_model.StoreCatalogDocPath( docStgPath );
@@ -342,12 +342,12 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::TStgDocPath& newDocStgPath )
 		else
 		{
 			ICatalogStorage* pCatalogStorage = GetCatalogStorage();
-			fs::stg::CScopedWriteDocMode scopedDocWrite( pCatalogStorage->GetDocStorage(), NULL );		// switch storage to write/throw mode
+			fs::stg::CScopedWriteDocMode scopedDocWrite( pCatalogStorage->GetDocStorage(), nullptr );		// switch storage to write/throw mode
 
 			pCatalogStorage->SavePasswordStream();
 			pCatalogStorage->SaveAlbumStream( this );
 
-			UpdateAllViews( NULL, Hint_ViewUpdate );		// revive current animated image
+			UpdateAllViews( nullptr, Hint_ViewUpdate );		// revive current animated image
 		}
 	}
 	catch ( CException* pExc )
@@ -366,8 +366,8 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::TStgDocPath& newDocStgPath )
 
 std::auto_ptr<CProgressService> CAlbumDoc::MakeProgress( const TCHAR* pOperationLabel ) const
 {
-	return std::auto_ptr<CProgressService>( !str::IsEmpty( pOperationLabel ) && GetAlbumImageView() != NULL
-		? new CProgressService( NULL, pOperationLabel )
+	return std::auto_ptr<CProgressService>( !str::IsEmpty( pOperationLabel ) && GetAlbumImageView() != nullptr
+		? new CProgressService( nullptr, pOperationLabel )
 		: new CProgressService()		// null progress (for non-interactive mode or unit testing)
 	);
 }
@@ -387,7 +387,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 		else
 		{
 			if ( m_model.SetupSingleSearchPattern( new CSearchPattern( searchPath ) ) )
-				m_model.SearchForFiles( NULL );		// this will open the embedded storgaes (to enable image caching)
+				m_model.SearchForFiles( nullptr );		// this will open the embedded storgaes (to enable image caching)
 			else
 				return false;
 		}
@@ -405,7 +405,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 		OnAlbumModelChanged();		// update the UI
 
 		if ( IsStorageAlbum() )
-			UpdateAllViews( NULL, Hint_DocSlideDataChanged );		// refresh view navigation from document (selected pos, etc)
+			UpdateAllViews( nullptr, Hint_DocSlideDataChanged );		// refresh view navigation from document (selected pos, etc)
 	}
 
 	return true;		// keep it open regardless of m_model.AnyFoundFiles();
@@ -422,7 +422,7 @@ void CAlbumDoc::OnAlbumModelChanged( AlbumModelChange reason /*= AM_Init*/ )
 		CWicImageCache::Instance().DiscardWithPrefix( m_autoDropContext.GetDestSearchPath().GetPtr() );
 	}
 
-	UpdateAllViews( NULL, Hint_AlbumModelChanged, app::ToHintPtr( reason ) );
+	UpdateAllViews( nullptr, Hint_AlbumModelChanged, app::ToHintPtr( reason ) );
 }
 
 
@@ -454,7 +454,7 @@ bool CAlbumDoc::AddExplicitFiles( const std::vector<fs::CPath>& filePaths, bool 
 
 	try
 	{
-		m_model.SearchForFiles( NULL );
+		m_model.SearchForFiles( nullptr );
 	}
 	catch ( CException* pExc )
 	{
@@ -484,7 +484,7 @@ TCurrImagePos CAlbumDoc::DeleteFromAlbum( const std::vector<fs::CFlexPath>& selF
 void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= AM_Init*/ )
 {
 	if ( AM_Regeneration == reason )
-		UpdateAllViewsOfType<CAlbumImageView>( NULL, Hint_BackupCurrSelection );		// backup current selection for all the owned views before re-generating the m_model member
+		UpdateAllViewsOfType<CAlbumImageView>( nullptr, Hint_BackupCurrSelection );		// backup current selection for all the owned views before re-generating the m_model member
 
 	// We can't rely on reordering information since there might be new or removed files.
 	// However, we can keep file copy/move operations in undo/redo buffers.
@@ -492,7 +492,7 @@ void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= AM_Init*/ )
 	try
 	{
 		CWaitCursor	wait;
-		m_model.SearchForFiles( NULL );
+		m_model.SearchForFiles( nullptr );
 	}
 	catch ( CException* pExc )
 	{
@@ -504,7 +504,7 @@ void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= AM_Init*/ )
 	OnAlbumModelChanged( reason );
 
 	if ( AM_Regeneration == reason )
-		UpdateAllViewsOfType<CAlbumImageView>( NULL, Hint_RestoreSelection );		// restore backed-up selection for all the views
+		UpdateAllViewsOfType<CAlbumImageView>( nullptr, Hint_RestoreSelection );		// restore backed-up selection for all the views
 
 	// since auto-drop operation is usually done from opened albums (as well as Windows Explorer),
 	// also redraw any of the opened views that may be affected by this, except for those views
@@ -612,7 +612,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		dropState.SetCaretOnSel();			// ensure that caret is visible: put caret on first selected item
 
 		pAlbumViewTarget->GetPeerThumbView()->SetListViewState( dropState, true );
-		pAlbumViewTarget->OnUpdate( NULL, 0, NULL );
+		pAlbumViewTarget->OnUpdate( nullptr, 0, nullptr );
 	}
 	return true;
 }
@@ -688,13 +688,13 @@ void CAlbumDoc::OnAutoDropRecipientChanged( void )
 CWicImage* CAlbumDoc::GetCurrentImage( void ) const
 {
 	CAlbumImageView* pAlbumView = GetAlbumImageView();
-	return pAlbumView != NULL ? pAlbumView->GetImage() : NULL;
+	return pAlbumView != nullptr ? pAlbumView->GetImage() : nullptr;
 }
 
 bool CAlbumDoc::QuerySelectedImagePaths( std::vector<fs::CFlexPath>& rSelImagePaths ) const
 {
 	CAlbumImageView* pAlbumView = GetAlbumImageView();
-	return pAlbumView != NULL && pAlbumView->QuerySelImagePaths( rSelImagePaths );
+	return pAlbumView != nullptr && pAlbumView->QuerySelImagePaths( rSelImagePaths );
 }
 
 
@@ -735,7 +735,7 @@ BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 		return SaveAsCatalogStorage( newDocPath );
 
 	if ( fs::IsValidDirectory( pPathName ) )
-		return DoSave( NULL );					// in effect SaveAs
+		return DoSave( nullptr );					// in effect SaveAs
 
 	if ( IsStorageAlbum() && app::IsSlideFile( pPathName ) )		// save .ias -> .sld?
 		m_model.SetupSingleSearchPattern( new CSearchPattern( GetDocFilePath() ) );		// references to external catalog storage embedded images
@@ -797,7 +797,7 @@ void CAlbumDoc::OnToggle_SmoothingMode( void )
 	if ( CAlbumImageView* pAlbumView = GetAlbumImageView() )
 		pAlbumView->RefDrawParams()->SetSmoothingMode( m_smoothingMode );
 
-	UpdateAllViewsOfType<CAlbumImageView>( NULL, Hint_RedrawAll );
+	UpdateAllViewsOfType<CAlbumImageView>( nullptr, Hint_RedrawAll );
 }
 
 void CAlbumDoc::OnUpdate_SmoothingMode( CCmdUI* pCmdUI )
@@ -809,7 +809,7 @@ void CAlbumDoc::OnExtractCatalog( void )
 {
 	fs::TDirPath destFolderPath = GetDocFilePath().GetFname() + _T("_extract");
 
-	if ( shell::PickFolder( destFolderPath, NULL, 0, _T("Select Extract Folder") ) )
+	if ( shell::PickFolder( destFolderPath, nullptr, 0, _T("Select Extract Folder") ) )
 	{
 		std::vector<fs::CFlexPath> srcImagePaths;
 		utl::Assign( srcImagePaths, m_model.GetImagesModel().GetFileAttrs(), func::ToFilePath() );
@@ -842,7 +842,7 @@ void CAlbumDoc::On_ImageSaveAs( void )
 void CAlbumDoc::OnUpdate_AnyCurrImage( CCmdUI* pCmdUI )
 {
 	CWicImage* pCurrImage = GetCurrentImage();
-	pCmdUI->Enable( pCurrImage != NULL && pCurrImage->IsValidFile() );
+	pCmdUI->Enable( pCurrImage != nullptr && pCurrImage->IsValidFile() );
 }
 
 void CAlbumDoc::OnUpdate_AllSelImagesRead( CCmdUI* pCmdUI )
@@ -956,7 +956,7 @@ void CAlbumDoc::OnToggleIsAutoDrop( void )
 	// regenerate the file list
 	try
 	{
-		m_model.SearchForFiles( NULL );
+		m_model.SearchForFiles( nullptr );
 	}
 	catch ( CException* pExc )
 	{
@@ -1062,7 +1062,7 @@ void CAlbumDoc::OnUpdateArchiveImages( CCmdUI* pCmdUI )
 void CAlbumDoc::OnEditArchivePassword( void )
 {
 	fs::CPath docFilePath( GetPathName().GetString() );
-	CPasswordDialog dlg( NULL, &docFilePath );
+	CPasswordDialog dlg( nullptr, &docFilePath );
 	dlg.SetPassword( m_password );
 
 	if ( IDOK == dlg.DoModal() )
@@ -1098,7 +1098,7 @@ void CAlbumDoc::OnUpdateEditCopyAlbumMap( CCmdUI* pCmdUI )
 {
 	ICatalogStorage* pCatalogStorage = GetCatalogStorage();
 
-	pCmdUI->Enable( pCatalogStorage != NULL && pCatalogStorage->LoadAlbumMap( NULL ) );
+	pCmdUI->Enable( pCatalogStorage != nullptr && pCatalogStorage->LoadAlbumMap( nullptr ) );
 }
 
 void CAlbumDoc::OnToggleSaveCOUndoRedoBuffer( void )
@@ -1124,5 +1124,5 @@ void CAlbumDoc::CmSelectAllThumbs( void )
 void CAlbumDoc::OnUpdateSelectAllThumbs( CCmdUI* pCmdUI )
 {
 	CAlbumImageView* pAlbumView = GetAlbumImageView();
-	pCmdUI->Enable( pAlbumView != NULL && pAlbumView->GetSlideData().HasShowFlag( af::ShowThumbView ) );
+	pCmdUI->Enable( pAlbumView != nullptr && pAlbumView->GetSlideData().HasShowFlag( af::ShowThumbView ) );
 }

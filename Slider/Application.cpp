@@ -181,7 +181,7 @@ namespace app
 	{
 	}
 
-	CScopedProgress::CScopedProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/, int autoClearDelay /*= 250*/ )
+	CScopedProgress::CScopedProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= nullptr*/, int autoClearDelay /*= 250*/ )
 		: m_pSharedProgressBar( app::GetMainFrame()->GetProgressCtrl() )
 		, m_autoClearDelay( autoClearDelay )
 		, m_pbStepIndex( 0 )
@@ -202,7 +202,7 @@ namespace app
 		return app::GetMainFrame()->InProgress();
 	}
 
-	void CScopedProgress::Begin( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/ )
+	void CScopedProgress::Begin( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= nullptr*/ )
 	{
 		app::GetMainFrame()->BeginProgress( valueMin, count, stepCount, pCaption );
 	}
@@ -223,7 +223,7 @@ namespace app
 		if ( m_pbStepDivider <= 1 || !( ++m_pbStepIndex % m_pbStepDivider ) )
 			app::GetMainFrame()->StepItProgress();
 
-		if ( m_pMessagePump.get() != NULL )
+		if ( m_pMessagePump.get() != nullptr )
 			m_pMessagePump->CheckPump();
 	}
 
@@ -282,7 +282,7 @@ CApplication theApp;
 
 CApplication::CApplication( void )
 	: CBaseApp<CWinApp>()
-	, m_pMainFrame( NULL )
+	, m_pMainFrame( nullptr )
 	, m_runFlags( 0 )
 	, m_forceMask( 0 )
 	, m_forceFlags( 0 )
@@ -425,9 +425,9 @@ void CApplication::InitGlobals( void )
 
 bool CApplication::OpenQueuedAlbum( void )
 {
-	CAlbumDoc* pAlbumDoc = NULL;
-	if ( m_pDocManager != NULL )
-		pAlbumDoc = (CAlbumDoc*)app::CAlbumDocTemplate::Instance()->OpenDocumentFile( NULL );		// create a new album document
+	CAlbumDoc* pAlbumDoc = nullptr;
+	if ( m_pDocManager != nullptr )
+		pAlbumDoc = (CAlbumDoc*)app::CAlbumDocTemplate::Instance()->OpenDocumentFile( nullptr );		// create a new album document
 
 	ASSERT_PTR( pAlbumDoc );
 
@@ -475,14 +475,14 @@ void CApplication::SetStatusBarMessage( const TCHAR* pMessage )
 	m_pMainFrame->SetMessageText( pMessage );
 }
 
-void CApplication::UpdateAllViews( UpdateViewHint hint /*= Hint_ViewUpdate*/, CDocument* pSenderDoc /*= NULL*/, CView* pSenderView /*= NULL*/ )
+void CApplication::UpdateAllViews( UpdateViewHint hint /*= Hint_ViewUpdate*/, CDocument* pSenderDoc /*= nullptr*/, CView* pSenderView /*= nullptr*/ )
 {
-	for ( POSITION templatePos = GetFirstDocTemplatePosition(); templatePos != NULL; )
+	for ( POSITION templatePos = GetFirstDocTemplatePosition(); templatePos != nullptr; )
 		if ( CDocTemplate* pTempl = GetNextDocTemplate( templatePos ) )
-			for ( POSITION docPos = pTempl->GetFirstDocPosition(); docPos != NULL; )
+			for ( POSITION docPos = pTempl->GetFirstDocPosition(); docPos != nullptr; )
 			{
 				CDocument* pDoc = pTempl->GetNextDoc( docPos );
-				if ( pDoc != NULL && pDoc != pSenderDoc )
+				if ( pDoc != nullptr && pDoc != pSenderDoc )
 					pDoc->UpdateAllViews( pSenderView, hint );	// Pass the 'hint' parameter to the view (pSenderView will be excepted from update)
 			}
 }
@@ -516,7 +516,7 @@ BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 			m_queuedAlbumFilePaths.push_back( command );
 
 			app::GetMainFrame()->StartEnqueuedAlbumTimer();
-			m_pCmdInfo = NULL;		// prevent crash on CWinApp::ExitInstance() - inspired by CDocManager::OnDDECommand() implementation
+			m_pCmdInfo = nullptr;		// prevent crash on CWinApp::ExitInstance() - inspired by CDocManager::OnDDECommand() implementation
 			return TRUE;
 		}
 

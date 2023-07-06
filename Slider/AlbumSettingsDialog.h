@@ -28,7 +28,7 @@ class CAlbumSettingsDialog : public CLayoutDialog
 						   , private ui::ITextEffectCallback
 {
 public:
-	CAlbumSettingsDialog( const CAlbumModel& model, size_t currentPos, CWnd* pParent = NULL );
+	CAlbumSettingsDialog( const CAlbumModel& model, size_t currentPos, CWnd* pParent = nullptr );
 	virtual ~CAlbumSettingsDialog();
 
 	const CAlbumModel& GetModel( void ) const { return m_model; }

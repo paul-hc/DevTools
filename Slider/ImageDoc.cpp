@@ -57,7 +57,7 @@ BOOL CImageDoc::OnOpenDocument( LPCTSTR pFilePath )
 			m_storageHost.Push( m_imagePath.GetPhysicalPath(), EmbeddedStorage );
 		}
 
-		if ( NULL == GetImage( 0 ) )
+		if ( nullptr == GetImage( 0 ) )
 			AfxThrowFileException( m_imagePath.FileExist( fs::Read ) ? CFileException::accessDenied : CFileException::fileNotFound, -1, pFilePath );
 	}
 	catch ( CException* pExc )
@@ -122,13 +122,13 @@ BOOL CImageDoc::OnNewDocument( void )
 void CImageDoc::OnUpdateFileSave( CCmdUI* pCmdUI )
 {
 	CWicImage* pImage = GetImage( 0 );
-	pCmdUI->Enable( pImage != NULL && pImage->IsValid() && !m_imagePath.IsComplexPath() );
+	pCmdUI->Enable( pImage != nullptr && pImage->IsValid() && !m_imagePath.IsComplexPath() );
 }
 
 void CImageDoc::OnUpdateFileSaveAs( CCmdUI* pCmdUI )
 {
 	CWicImage* pImage = GetImage( 0 );
-	pCmdUI->Enable( pImage != NULL && pImage->IsValid() );
+	pCmdUI->Enable( pImage != nullptr && pImage->IsValid() );
 }
 
 void CImageDoc::On_ImageDelete( void )
@@ -155,5 +155,5 @@ void CImageDoc::On_ImageMove( void )
 void CImageDoc::OnUpdate_AlterPhysicalImageFile( CCmdUI* pCmdUI )
 {
 	CWicImage* pImage = GetCurrentImage();
-	pCmdUI->Enable( pImage != NULL && pImage->IsValidPhysicalFile( fs::Write ) );
+	pCmdUI->Enable( pImage != nullptr && pImage->IsValidPhysicalFile( fs::Write ) );
 }

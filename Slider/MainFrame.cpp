@@ -51,7 +51,7 @@ size_t CMainFrame::GetMdiChildCount( void ) const
 	HWND hMDIChild = ::GetWindow( m_hWndMDIClient, GW_CHILD );
 
 	size_t mdiCount = 0;
-	for ( ; hMDIChild != NULL; ++mdiCount )
+	for ( ; hMDIChild != nullptr; ++mdiCount )
 		hMDIChild = ::GetWindow( hMDIChild, GW_HWNDNEXT );
 	return mdiCount;
 }
@@ -60,13 +60,13 @@ IImageView* CMainFrame::GetActiveImageView( void ) const
 {
 	if ( CChildFrame* pActiveChild = (CChildFrame*)MDIGetActive() )
 		return pActiveChild->GetImageView();
-	return NULL;
+	return nullptr;
 }
 
 bool CMainFrame::IsMdiRestored( void ) const
 {
 	BOOL isMaximized;
-	return MDIGetActive( &isMaximized ) != NULL && !isMaximized;
+	return MDIGetActive( &isMaximized ) != nullptr && !isMaximized;
 }
 
 void CMainFrame::StartEnqueuedAlbumTimer( UINT timerDelay /*= 750*/ )
@@ -183,7 +183,7 @@ bool CMainFrame::DoClearProgressCtrl( void )
 	return true;
 }
 
-void CMainFrame::BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/ )
+void CMainFrame::BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= nullptr*/ )
 {
 	m_progressCtrl.SetRange32( valueMin, valueMin + count );	// note that valueMax is out of range (100% is valMax - 1)
 	m_progressCtrl.SetPos( valueMin );
@@ -353,7 +353,7 @@ void CMainFrame::OnSize( UINT sizeType, int cx, int cy )
 {
 	CMDIFrameWnd::OnSize( sizeType, cx, cy );
 
-	if ( m_progressCtrl.m_hWnd != NULL )
+	if ( m_progressCtrl.m_hWnd != nullptr )
 	{	// move the progress bar on top of the associated statusbar item
 		CRect ctrlRect;
 		int progBarIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
@@ -408,7 +408,7 @@ void CMainFrame::OnTimer( UINT_PTR eventId )
 void CMainFrame::On_MdiClose( void )
 {
 	CFrameWnd* pActiveFrame = MDIGetActive();
-	if ( NULL == pActiveFrame )
+	if ( nullptr == pActiveFrame )
 		pActiveFrame = this;
 	pActiveFrame->SendMessage( WM_SYSCOMMAND, SC_CLOSE );
 }
@@ -420,7 +420,7 @@ void CMainFrame::On_MdiCloseAll( void )
 
 void CMainFrame::OnUpdateAnyMDIChild( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( MDIGetActive() != NULL );
+	pCmdUI->Enable( MDIGetActive() != nullptr );
 }
 
 void CMainFrame::OnToggleMaximize( void )
@@ -438,7 +438,7 @@ void CMainFrame::OnUpdateMaximize( CCmdUI* pCmdUI )
 	BOOL isMaximized;
 	CMDIChildWnd* pActiveChild = MDIGetActive( &isMaximized );
 
-	pCmdUI->Enable( pActiveChild != NULL );
+	pCmdUI->Enable( pActiveChild != nullptr );
 	pCmdUI->SetCheck( isMaximized );
 }
 

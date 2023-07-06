@@ -25,7 +25,7 @@ CAlbumDialogBar::CAlbumDialogBar( void )
 	, m_pToolbar( new CDialogToolBar() )
 	, m_pSlideDelayCombo( new CDurationComboBox() )
 	, m_pImagePathEdit( new CTextEdit( false ) )
-	, m_pAlbumView( NULL )
+	, m_pAlbumView( nullptr )
 {
 	m_pToolbar->GetStrip()
 		.AddButton( ID_EDIT_ALBUM );
@@ -114,7 +114,7 @@ void CAlbumDialogBar::OnSlideDelayChanged( void )
 
 void CAlbumDialogBar::LayoutControls( void )
 {
-	if ( NULL == m_pImagePathEdit->m_hWnd )
+	if ( nullptr == m_pImagePathEdit->m_hWnd )
 		return;
 
 	// layout the image path edit to right bound of the dialog-bar

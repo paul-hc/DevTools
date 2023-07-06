@@ -45,7 +45,7 @@ ICatalogStorage* CAlbumModel::GetCatalogStorage( void ) const
 	if ( !m_docStgPath.IsEmpty() )
 		return m_storageHost.Find( m_docStgPath );
 
-	return NULL;
+	return nullptr;
 }
 
 void CAlbumModel::OpenAllStorages( void )
@@ -211,7 +211,7 @@ void CAlbumModel::Stream( CArchive& archive )
 		if ( MustAutoRegenerate() )
 			try
 			{
-				SearchForFiles( NULL );			// regenerate the file list on archive load
+				SearchForFiles( nullptr );			// regenerate the file list on archive load
 			}
 			catch ( CException* pExc )
 			{

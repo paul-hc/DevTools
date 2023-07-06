@@ -56,8 +56,8 @@ namespace ole
 		virtual void CacheShellFilePaths( const std::vector< fs::CPath >& filePaths );
 
 		// pass m_nullRect to disable the start drag delay
-		DROPEFFECT DragAndDropImages( HWND hSrcWnd, DROPEFFECT dropEffect, const RECT* pStartDragRect = NULL );
-		DROPEFFECT DragAndDropImages( CWicDibSection* pBitmap, DROPEFFECT dropEffect, const RECT* pStartDragRect = NULL );
+		DROPEFFECT DragAndDropImages( HWND hSrcWnd, DROPEFFECT dropEffect, const RECT* pStartDragRect = nullptr );
+		DROPEFFECT DragAndDropImages( CWicDibSection* pBitmap, DROPEFFECT dropEffect, const RECT* pStartDragRect = nullptr );
 	private:
 		CTempCloneFileSet m_tempClones;
 	};

@@ -27,7 +27,7 @@ private:
 	enum Operation { CopyFile, MoveFile, DeleteFile };
 	static const CEnumTags& GetTags_Operation( void );
 
-	void AddLogMessage( Operation operation, const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath = NULL );
+	void AddLogMessage( Operation operation, const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath = nullptr );
 	void AugmentLogError( const std::tstring& errorMessage );
 
 	bool HandleError( CException* pExc );
@@ -45,7 +45,7 @@ namespace svc
 
 
 	bool PickDestImagePaths( std::vector<fs::CPath>& rDestFilePaths, const std::vector<fs::CFlexPath>& srcFilePaths );
-	bool CheckOverrideExistingFiles( const std::vector<fs::CPath> destFilePaths, const TCHAR* pTitle = NULL );
+	bool CheckOverrideExistingFiles( const std::vector<fs::CPath> destFilePaths, const TCHAR* pTitle = nullptr );
 
 
 	void MakeDestFilePaths( std::vector<fs::CPath>& rDestFilePaths, const std::vector<fs::CFlexPath>& srcFilePaths, const fs::CPath& destFolderPath, RecursionDepth destDepth = Shallow );

@@ -91,7 +91,7 @@ std::pair<CSearchPattern*, bool> CSearchModel::AddSearchPath( const fs::CPath& s
 	if ( !pNewPattern->IsValidPath() )
 	{
 		delete pNewPattern;
-		return std::pair<CSearchPattern*, bool>( NULL, false );			// could be a stray file of incompatible type
+		return std::pair<CSearchPattern*, bool>( nullptr, false );			// could be a stray file of incompatible type
 	}
 
 	AddPattern( pNewPattern, pos );

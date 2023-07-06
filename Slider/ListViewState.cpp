@@ -15,9 +15,9 @@
 class CListStringItems
 {
 public:
-	CListStringItems( const CListBox* pListBox = NULL )
+	CListStringItems( const CListBox* pListBox = nullptr )
 	{
-		if ( pListBox != NULL )
+		if ( pListBox != nullptr )
 			StoreItems( pListBox );
 	}
 
@@ -171,9 +171,9 @@ std::tstring CListViewState::dbgFormat( void )
 	std::tostringstream oss;
 #ifdef _DEBUG
 	oss << UseIndexes() ? _T("INDEXES") : _T("STRINGS");
-	if ( m_pIndexImpl.get() != NULL )
+	if ( m_pIndexImpl.get() != nullptr )
 		oss << *m_pIndexImpl;
-	else if ( m_pStringImpl.get() != NULL )
+	else if ( m_pStringImpl.get() != nullptr )
 		oss << *m_pStringImpl;
 #else // !_DEBUG
 
@@ -257,7 +257,7 @@ void CListViewState::FromListCtrl( const CReportListControl* pListCtrl )
 	ASSERT( UseIndexes() );
 	Clear();
 
-	for ( POSITION pos = pListCtrl->GetFirstSelectedItemPosition(); pos != NULL; )
+	for ( POSITION pos = pListCtrl->GetFirstSelectedItemPosition(); pos != nullptr; )
 		m_pIndexImpl->m_selItems.push_back( pListCtrl->GetNextSelectedItem( pos ) );
 
 	m_pIndexImpl->m_caret = pListCtrl->GetNextItem( -1, LVNI_ALL | LVNI_FOCUSED );

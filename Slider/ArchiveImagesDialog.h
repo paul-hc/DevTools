@@ -17,7 +17,7 @@ class CAlbumModel;
 class CArchiveImagesDialog : public CLayoutDialog
 {
 public:
-	CArchiveImagesDialog( const CAlbumModel* pModel, const std::tstring& srcDocPath, CWnd* pParent = NULL );
+	CArchiveImagesDialog( const CAlbumModel* pModel, const std::tstring& srcDocPath, CWnd* pParent = nullptr );
 	virtual ~CArchiveImagesDialog();
 
 	void StoreSelection( const CListViewState& lvState ) { m_lvState = lvState; }

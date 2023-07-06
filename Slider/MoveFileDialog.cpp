@@ -30,7 +30,7 @@ namespace layout
 }
 
 
-CMoveFileDialog::CMoveFileDialog( const std::vector<fs::CPath>& filesToMove, CWnd* pParent /*= NULL*/ )
+CMoveFileDialog::CMoveFileDialog( const std::vector<fs::CPath>& filesToMove, CWnd* pParent /*= nullptr*/ )
 	: CLayoutDialog( IDD_FILE_MOVE_DIALOG, pParent )
 	, m_filesToMove( filesToMove )
 	, m_pDestFolderCombo( new CItemContentHistoryCombo( ui::DirPath ) )
@@ -51,7 +51,7 @@ CMoveFileDialog::~CMoveFileDialog()
 
 void CMoveFileDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_pDestFolderCombo->m_hWnd;
+	bool firstInit = nullptr == m_pDestFolderCombo->m_hWnd;
 
 	DDX_Control( pDX, IDC_DEST_FOLDER_COMBO, *m_pDestFolderCombo );
 	DDX_Control( pDX, IDC_SOURCE_EDIT, m_srcFilesEdit );

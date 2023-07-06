@@ -65,9 +65,9 @@ CAlbumThumbListView::CAlbumThumbListView( void )
 	: CBaseItemTooltipsCtrl<CBaseCtrlView>()
 	, CObjectCtrlBase( this )
 	, m_autoDelete( true )
-	, m_pAlbumModel( NULL )
-	, m_pPeerImageView( NULL )
-	, m_pSplitterWnd( NULL )
+	, m_pAlbumModel( nullptr )
+	, m_pPeerImageView( nullptr )
+	, m_pSplitterWnd( nullptr )
 	, m_selBkThemeItem( L"LISTVIEW", LVP_GROUPHEADER, LVGH_CLOSESELECTED )
 	, m_beginDragTimer( this, ID_BEGIN_DRAG_TIMER, 350 )
 	, m_userChangeSel( 0 )
@@ -90,7 +90,7 @@ CAlbumThumbListView::~CAlbumThumbListView()
 utl::ISubject* CAlbumThumbListView::GetItemSubjectAt( int index ) const
 {
 	if ( !IsValidImageIndex( index ) )
-		return NULL;					// index violation, could happen in transient draws
+		return nullptr;					// index violation, could happen in transient draws
 
 	return const_cast<CFileAttr*>( m_pAlbumModel->GetFileAttr( index ) );
 }
@@ -133,7 +133,7 @@ void CAlbumThumbListView::SetupAlbumModel( const CAlbumModel* pAlbumModel, bool 
 {
 	CListBox* pListBox = AsListBox();
 	size_t countOld = pListBox->GetCount();
-	size_t countNew = pAlbumModel != NULL ? pAlbumModel->GetFileAttrCount() : 0;
+	size_t countNew = pAlbumModel != nullptr ? pAlbumModel->GetFileAttrCount() : 0;
 	bool doSmartUpdate = ( pAlbumModel == m_pAlbumModel && countOld > 0 && countNew > 0 );
 
 	m_pAlbumModel = pAlbumModel;
@@ -156,7 +156,7 @@ void CAlbumThumbListView::SetupAlbumModel( const CAlbumModel* pAlbumModel, bool 
 	for ( ; countOld < countNew; ++countOld )
 		pListBox->AddString( _T("") );
 
-	ASSERT( pListBox->GetCount() == static_cast<int>( m_pAlbumModel != NULL ? m_pAlbumModel->GetFileAttrCount() : 0 ) );
+	ASSERT( pListBox->GetCount() == static_cast<int>( m_pAlbumModel != nullptr ? m_pAlbumModel->GetFileAttrCount() : 0 ) );
 
 	SetRedraw( TRUE );
 	if ( doRedraw )
@@ -475,13 +475,13 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 
 			CDC dc;
 			CRgn bkRegion;
-			CSize thumbSize = pThumbDib != NULL ? pThumbDib->GetBmpFmt().m_size : CSize( 0, 0 );
+			CSize thumbSize = pThumbDib != nullptr ? pThumbDib->GetBmpFmt().m_size : CSize( 0, 0 );
 			CRect thumbRect( CPoint( 0, 0 ), thumbSize ), thumbZoneRect( pDIS->rcItem );
 
 			dc.Attach( pDIS->hDC );
 			thumbZoneRect.bottom -= 2 * cyTextSpace + s_fontHeight;
 
-			if ( pThumbDib != NULL )
+			if ( pThumbDib != nullptr )
 			{
 				ui::CenterRect( thumbRect, thumbZoneRect, true, true, false, CSize( 0, 1 ) );
 				ui::CombineRects( &bkRegion, pDIS->rcItem, thumbRect, RGN_DIFF );
@@ -495,7 +495,7 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 				{
 					dc.SelectClipRgn( &bkRegion );		// clip the thumb rect out of background drawing
 					themedSel = m_selBkThemeItem.DrawStatusBackground( listFocused ? CThemeItem::Hot : CThemeItem::Normal, dc, pDIS->rcItem );
-					dc.SelectClipRgn( NULL );			// un-clip the thumb rect
+					dc.SelectClipRgn( nullptr );			// un-clip the thumb rect
 				}
 
 				if ( !themedSel )
@@ -512,7 +512,7 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 			}
 
 			if ( ODA_DRAWENTIRE == pDIS->itemAction )
-				if ( pThumbDib != NULL )
+				if ( pThumbDib != nullptr )
 					pThumbDib->DrawAtPos( &dc, thumbRect.TopLeft() );
 
 			const TCHAR* pFileName = pFilePath->GetFilenamePtr();
@@ -569,7 +569,7 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 CMenu& CAlbumThumbListView::GetContextMenu( void )
 {
 	static CMenu contextMenu;
-	if ( NULL == (HMENU)contextMenu )
+	if ( nullptr == (HMENU)contextMenu )
 		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AlbumThumbsPopup );
 	return contextMenu;
 }
@@ -586,7 +586,7 @@ CSize CAlbumThumbListView::GetInitialSize( int columnCount /*= 1*/ )
 	return initSize;
 }
 
-CRect CAlbumThumbListView::GetListWindowRect( int columnCount /*= 1*/, CWnd* pListWnd /*= NULL */ )
+CRect CAlbumThumbListView::GetListWindowRect( int columnCount /*= 1*/, CWnd* pListWnd /*= nullptr */ )
 {
 	CRect ncExtent = GetNcExtentRect( columnCount, pListWnd );
 	CRect windowRect( 0, 0, GetInitialSize( columnCount ).cx, 0 );
@@ -606,12 +606,12 @@ int CAlbumThumbListView::QuantifyListWidth( int listWidth )
 	return newWindowRect.Width();
 }
 
-CRect CAlbumThumbListView::GetNcExtentRect( int columnCount /*= 1*/, CWnd* pListWnd /*= NULL*/ )
+CRect CAlbumThumbListView::GetNcExtentRect( int columnCount /*= 1*/, CWnd* pListWnd /*= nullptr*/ )
 {
 	static CSize frameSize( GetSystemMetrics( SM_CXBORDER ), GetSystemMetrics( SM_CYBORDER ) );
 	CRect ncExtent( frameSize.cx, frameSize.cy, frameSize.cx, frameSize.cy );
 
-	if ( pListWnd != NULL )
+	if ( pListWnd != nullptr )
 	{
 		CRect rectWindow, rectClient;
 
@@ -638,7 +638,7 @@ int CAlbumThumbListView::GetListClientWidth( int listWidth )
 {
 	int ncWidth = 0;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		CRect rectWindow, rectClient;
 
@@ -711,7 +711,7 @@ bool CAlbumThumbListView::RecreateView( int columnCount )
 
 	CBackupData orgViewData( this );
 	CFrameWnd* pFrame = GetParentFrame();
-	bool wasActive = pFrame != NULL && pFrame->GetActiveView() == this;
+	bool wasActive = pFrame != nullptr && pFrame->GetActiveView() == this;
 
 	m_autoDelete = false;				// prevent view object delete on window destroy
 	GetDocument()->RemoveView( this );
@@ -739,7 +739,7 @@ bool CAlbumThumbListView::RecreateView( int columnCount )
 
 void CAlbumThumbListView::EnsureCaptionFontCreated( void )
 {
-	if ( NULL == HFONT( s_fontCaption ) )
+	if ( nullptr == HFONT( s_fontCaption ) )
 	{
 		NONCLIENTMETRICS ncMetrics;
 
@@ -756,7 +756,7 @@ CWicDibSection* CAlbumThumbListView::GetItemThumb( int displayIndex ) const thro
 		if ( !pItemPath->IsEmpty() )
 			return app::GetThumbnailer()->AcquireThumbnailNoThrow( *pItemPath );
 
-	return NULL;
+	return nullptr;
 }
 
 const fs::CFlexPath* CAlbumThumbListView::GetItemPath( int displayIndex ) const
@@ -764,7 +764,7 @@ const fs::CFlexPath* CAlbumThumbListView::GetItemPath( int displayIndex ) const
 	if ( const CFileAttr* pFileAttr = GetItemObjectAt<CFileAttr>( displayIndex ) )
 		return &pFileAttr->GetPath();
 
-	return NULL;
+	return nullptr;
 }
 
 CSize CAlbumThumbListView::GetPageItemCounts( void ) const
@@ -841,7 +841,7 @@ DROPEFFECT CAlbumThumbListView::OnDragOver( COleDataObject* pDataObject, DWORD k
 	CListSelectionData selData;
 
 	if ( selData.ExtractFrom( pDataObject ) && selData.IsValid() )
-		if ( selData.m_pSrcWnd != NULL /*&& selData.m_pThumbView->GetAlbumDoc() == GetAlbumDoc()*/ )		// custom order D&D is allowed only between views of the same document
+		if ( selData.m_pSrcWnd != nullptr /*&& selData.m_pThumbView->GetAlbumDoc() == GetAlbumDoc()*/ )		// custom order D&D is allowed only between views of the same document
 		{
 			int dropIndex = GetItemFromPoint( point );
 			if ( -1 == dropIndex )
@@ -902,7 +902,7 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 		CListViewState dropState( m_dragSelIndexes );		// now it became 'droppedSelIndexes'
 
 		SetListViewState( dropState, true );
-		m_pPeerImageView->OnUpdate( NULL, 0, NULL );
+		m_pPeerImageView->OnUpdate( nullptr, 0, nullptr );
 
 		return TRUE;
 	}
@@ -979,7 +979,7 @@ BOOL CAlbumThumbListView::OnScrollBy( CSize sizeScroll, BOOL doScroll )
 	{
 		if ( doScroll )											// line scroll?
 			if ( !( m_scrollTimerCounter.x++ % scrollTimerDivider.cx ) )
-				SendMessage( WM_HSCROLL, MAKEWPARAM( scrollCommand.cx, 0 ), NULL );
+				SendMessage( WM_HSCROLL, MAKEWPARAM( scrollCommand.cx, 0 ), nullptr );
 		result = true;
 	}
 
@@ -987,7 +987,7 @@ BOOL CAlbumThumbListView::OnScrollBy( CSize sizeScroll, BOOL doScroll )
 	{
 		if ( doScroll && scrollCommand.cy != SB_ENDSCROLL )		// line scroll?
 			if ( !( m_scrollTimerCounter.y++ % scrollTimerDivider.cy ) )
-				SendMessage( WM_VSCROLL, MAKEWPARAM( scrollCommand.cy > 0, 0 ), NULL );
+				SendMessage( WM_VSCROLL, MAKEWPARAM( scrollCommand.cy > 0, 0 ), nullptr );
 		result = true;
 	}
 
@@ -999,7 +999,7 @@ void CAlbumThumbListView::OnActivateView( BOOL activate, CView* pActivateView, C
 	__super::OnActivateView( activate, pActivateView, pDeactiveView );
 
 	if ( activate )
-		if ( NULL == pDeactiveView || pDeactiveView == pActivateView || pDeactiveView->GetParentFrame() != GetParentFrame() )		// not a peer activation?
+		if ( nullptr == pDeactiveView || pDeactiveView == pActivateView || pDeactiveView->GetParentFrame() != GetParentFrame() )		// not a peer activation?
 			m_pPeerImageView->EventChildFrameActivated();
 }
 
@@ -1190,7 +1190,7 @@ void CAlbumThumbListView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	pWnd;
 
 	CMenu* pSrcPopupMenu = &GetContextMenu();
-	if ( pSrcPopupMenu->GetSafeHmenu() != NULL )
+	if ( pSrcPopupMenu->GetSafeHmenu() != nullptr )
 	{
 		std::vector<fs::CFlexPath> selFilePaths;
 		if ( QuerySelItemPaths( selFilePaths ) )

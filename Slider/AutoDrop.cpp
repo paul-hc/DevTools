@@ -94,7 +94,7 @@ namespace auto_drop
 		: m_dropOperation( PromptUser )
 		, m_dropScreenPos( -1, -1 )
 	{
-		if ( NULL == s_dropContextMenu.GetSafeHmenu() )
+		if ( nullptr == s_dropContextMenu.GetSafeHmenu() )
 			ui::LoadPopupMenu( s_dropContextMenu, IDR_CONTEXT_MENU, app::DropPopup );
 	}
 
@@ -114,7 +114,7 @@ namespace auto_drop
 
 	bool CContext::IsValidDropRecipient( bool checkValidPath /*= true*/ ) const
 	{
-		return m_pDestSearchPattern.get() != NULL && m_pDestSearchPattern->IsAutoDropDirPath( checkValidPath );
+		return m_pDestSearchPattern.get() != nullptr && m_pDestSearchPattern->IsAutoDropDirPath( checkValidPath );
 	}
 
 	const fs::CPath& CContext::GetDestSearchPath( void ) const
@@ -154,7 +154,7 @@ namespace auto_drop
 		else if ( ui::IsKeyPressed( VK_SHIFT ) )
 			m_dropOperation = FileMove;
 
-		UINT fileCount = ::DragQueryFile( hDropInfo, ( UINT )-1, NULL, 0 );
+		UINT fileCount = ::DragQueryFile( hDropInfo, ( UINT )-1, nullptr, 0 );
 		bool abortDrop = false;
 
 		for ( UINT i = 0; i != fileCount && !abortDrop; ++i )

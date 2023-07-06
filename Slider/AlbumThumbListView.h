@@ -67,7 +67,7 @@ public:
 	bool CheckListLayout( CheckLayoutMode checkMode = SplitterTrack );
 
 	CSize GetPageItemCounts( void ) const;		// item counts in the list: (horizontal, vertical)
-	static CRect GetListWindowRect( int columnCount = 1, CWnd* pListWnd = NULL );
+	static CRect GetListWindowRect( int columnCount = 1, CWnd* pListWnd = nullptr );
 
 	const std::vector<int>& GetDragSelIndexes( void ) const { return m_dragSelIndexes; }
 private:
@@ -77,7 +77,7 @@ private:
 	bool DoDragDrop( void );
 	void CancelDragCapture( void );
 
-	bool IsValidImageIndex( size_t displayIndex ) const { return m_pAlbumModel != NULL && displayIndex < m_pAlbumModel->GetFileAttrCount(); }
+	bool IsValidImageIndex( size_t displayIndex ) const { return m_pAlbumModel != nullptr && displayIndex < m_pAlbumModel->GetFileAttrCount(); }
 	bool IsValidFileAt( size_t displayIndex ) const;
 
 	bool NotifySelChange( void );
@@ -85,7 +85,7 @@ private:
 	bool RecreateView( int columnCount );
 
 	static CSize GetInitialSize( int columnCount = 1 );
-	static CRect GetNcExtentRect( int columnCount = 1, CWnd* pListWnd = NULL );
+	static CRect GetNcExtentRect( int columnCount = 1, CWnd* pListWnd = nullptr );
 	static int ComputeColumnCount( int listClientWidth ) { return int( double( listClientWidth ) / GetInitialSize().cx + 0.5 ); }
 	static CMenu& GetContextMenu( void );
 	static void EnsureCaptionFontCreated( void );

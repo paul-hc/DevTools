@@ -29,7 +29,7 @@ namespace ole
 		CDataSource::CacheShellFilePaths( m_tempClones.GetPhysicalFilePaths() );
 	}
 
-	DROPEFFECT CImagesDataSource::DragAndDropImages( HWND hSrcWnd, DROPEFFECT dropEffect, const RECT* pStartDragRect /*= NULL*/ )
+	DROPEFFECT CImagesDataSource::DragAndDropImages( HWND hSrcWnd, DROPEFFECT dropEffect, const RECT* pStartDragRect /*= nullptr*/ )
 	{
 		CScopedDisableDropTarget disableDropTarget( AfxGetMainWnd() );
 
@@ -37,11 +37,11 @@ namespace ole
 		return DragAndDrop( dropEffect, pStartDragRect );
 	}
 
-	DROPEFFECT CImagesDataSource::DragAndDropImages( CWicDibSection* pBitmap, DROPEFFECT dropEffect, const RECT* pStartDragRect /*= NULL*/ )
+	DROPEFFECT CImagesDataSource::DragAndDropImages( CWicDibSection* pBitmap, DROPEFFECT dropEffect, const RECT* pStartDragRect /*= nullptr*/ )
 	{
 		CScopedDisableDropTarget disableDropTarget( AfxGetMainWnd() );
 
-		if ( pBitmap != NULL )
+		if ( pBitmap != nullptr )
 			GetDragImager().SetFromBitmap( pBitmap->CloneBitmap(), CLR_NONE );		// drag imager will take ownership of the bitmap, so we need to pass a clone
 
 		return DragAndDrop( dropEffect, pStartDragRect );
@@ -101,7 +101,7 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector<fs::CFlexPath>& inp
 				m_physicalFilePaths.push_back( *itInputPath );
 		}
 
-		if ( pProgress.get() != NULL )
+		if ( pProgress.get() != nullptr )
 			pProgress->StepIt();
 	}
 

@@ -40,9 +40,9 @@ namespace layout
 }
 
 
-CSearchPatternDialog::CSearchPatternDialog( const CSearchPattern* pSrcPattern, CWnd* pParent /*=NULL*/ )
+CSearchPatternDialog::CSearchPatternDialog( const CSearchPattern* pSrcPattern, CWnd* pParent /*=nullptr*/ )
 	: CLayoutDialog( IDD_SEARCH_PATTERN_DIALOG, pParent )
-	, m_pSearchPattern( pSrcPattern != NULL ? new CSearchPattern( *pSrcPattern ) : new CSearchPattern() )
+	, m_pSearchPattern( pSrcPattern != nullptr ? new CSearchPattern( *pSrcPattern ) : new CSearchPattern() )
 	, m_searchPathCombo( ui::MixedPath )
 	, m_wildFiltersCombo( ui::HistoryMaxSize, PROF_SEP )
 	, m_searchModeCombo( &CSearchPattern::GetTags_SearchMode() )
@@ -63,7 +63,7 @@ CSearchPatternDialog::~CSearchPatternDialog()
 
 void CSearchPatternDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_searchPathCombo.m_hWnd;
+	bool firstInit = nullptr == m_searchPathCombo.m_hWnd;
 
 	m_searchPathCombo.DDX_Tandem( pDX, IDC_SEARCH_PATH_COMBO, this );
 	DDX_Control( pDX, IDC_SEARCH_FILTERS_COMBO, m_wildFiltersCombo );

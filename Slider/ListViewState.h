@@ -27,9 +27,9 @@ public:
 	void Clear( void ) { ASSERT( IsConsistent() ); UseIndexes() ? m_pIndexImpl->m_selItems.clear() : m_pStringImpl->m_selItems.clear(); }
 	void Stream( CArchive& archive );
 
-	bool IsConsistent( void ) const { return ( NULL == m_pStringImpl.get() ) != ( NULL == m_pIndexImpl.get() ); }
-	bool UseIndexes( void ) const { return m_pIndexImpl.get() != NULL; }
-	bool UseStrings( void ) const { return m_pStringImpl.get() != NULL; }
+	bool IsConsistent( void ) const { return ( nullptr == m_pStringImpl.get() ) != ( nullptr == m_pIndexImpl.get() ); }
+	bool UseIndexes( void ) const { return m_pIndexImpl.get() != nullptr; }
+	bool UseStrings( void ) const { return m_pStringImpl.get() != nullptr; }
 
 	bool IsEmpty( void ) const { return 0 == GetSelCount(); }
 	int GetSelCount( void ) const;

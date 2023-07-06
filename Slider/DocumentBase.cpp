@@ -29,7 +29,7 @@ CWicImage* CDocumentBase::AcquireImage( const fs::TImagePathKey& imageKey )
 	if ( !imageKey.first.IsEmpty() )
 		return CWicImageCache::Instance().Acquire( imageKey ).first;
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -64,7 +64,7 @@ bool CDocumentBase::HandleMoveImages( const std::vector<fs::CFlexPath>& srcFileP
 	REQUIRE( !srcFilePaths.empty() );
 
 	fs::TDirPath destFolderPath;
-	if ( !shell::PickFolder( destFolderPath, NULL, 0, _T("Select Destination Folder") ) )
+	if ( !shell::PickFolder( destFolderPath, nullptr, 0, _T("Select Destination Folder") ) )
 		return false;
 
 	s_destFilePaths.clear();

@@ -32,7 +32,7 @@ namespace app
 		fs::CPath filePath( rFilePath.GetString() );
 		std::tstring title = str::Load( titleId );
 
-		if ( !filterJoiner.BrowseFile( filePath, static_cast<shell::BrowseMode>( openDlg ), flags, NULL, NULL, !title.empty() ? title.c_str() : NULL ) )
+		if ( !filterJoiner.BrowseFile( filePath, static_cast<shell::BrowseMode>( openDlg ), flags, nullptr, nullptr, !title.empty() ? title.c_str() : nullptr ) )
 			return false;
 
 		rFilePath = filePath.GetPtr();
@@ -59,7 +59,7 @@ void CAppDocManager::OnFileNew( void )
 {
 	ASSERT_PTR( m_pAlbumTemplate );
 
-	m_pAlbumTemplate->OpenDocumentFile( NULL );
+	m_pAlbumTemplate->OpenDocumentFile( nullptr );
 }
 
 BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate )
@@ -148,7 +148,7 @@ namespace app
 
 	CSharedDocTemplate::CSharedDocTemplate( UINT idResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass )
 		: CMultiDocTemplate( idResource, pDocClass, pFrameClass, pViewClass )
-		, m_pFilterStore( NULL )
+		, m_pFilterStore( nullptr )
 		, m_acceptDirPath( false )
 		, m_accel( m_hAccelTable )
 	{
@@ -158,8 +158,8 @@ namespace app
 
 	CSharedDocTemplate::~CSharedDocTemplate()
 	{	// prevent deleting shared resources by CMultiDocTemplate dtor (owned by this class)
-		m_hMenuShared = NULL;
-		m_hAccelTable = NULL;
+		m_hMenuShared = nullptr;
+		m_hAccelTable = nullptr;
 	}
 
 	void CSharedDocTemplate::SetFilterStore( const fs::CFilterStore* pFilterStore )

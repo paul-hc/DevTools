@@ -54,7 +54,7 @@ public:
 	SearchMode& RefSearchMode( void ) { return m_searchMode; }
 	void SetSearchMode( SearchMode searchMode ) { m_searchMode = searchMode; }
 
-	bool BrowseFilePath( BrowseMode pathType = BrowseAsIs, CWnd* pParentWnd = NULL, DWORD extraFlags = OFN_FILEMUSTEXIST );
+	bool BrowseFilePath( BrowseMode pathType = BrowseAsIs, CWnd* pParentWnd = nullptr, DWORD extraFlags = OFN_FILEMUSTEXIST );
 
 	bool IsEmpty( void ) const { return GetFilePath().IsEmpty(); }
 	bool IsValidPath( void ) const;

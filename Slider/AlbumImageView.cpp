@@ -34,8 +34,8 @@ CAlbumImageView::CAlbumImageView( void )
 	: CImageView()
 	, m_navTimer( this, ID_NAVIGATION_TIMER, m_slideData.m_slideDelay )
 	, m_isDropTargetEnabled( false )
-	, m_pPeerThumbView( NULL )
-	, m_pAlbumDialogBar( NULL )
+	, m_pPeerThumbView( nullptr )
+	, m_pAlbumDialogBar( nullptr )
 {
 	ModifyScalingMode( ui::AutoFitLargeOnly );			// for albums use auto-fit by default
 }
@@ -68,7 +68,7 @@ HICON CAlbumImageView::GetDocTypeIcon( void ) const
 CMenu& CAlbumImageView::GetDocContextMenu( void ) const
 {
 	static CMenu s_contextMenu;
-	if ( NULL == s_contextMenu.GetSafeHmenu() )
+	if ( nullptr == s_contextMenu.GetSafeHmenu() )
 		ui::LoadPopupMenu( s_contextMenu, IDR_CONTEXT_MENU, app::AlbumPopup );
 
 	return s_contextMenu;
@@ -91,7 +91,7 @@ CWicImage* CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileD
 {
 	CWicImage* pImage = __super::QueryImageFileDetails( rFileDetails );
 
-	if ( pImage != NULL )
+	if ( pImage != nullptr )
 	{
 		const CAlbumModel* pAlbumModel = GetDocument()->GetModel();
 		int currIndex = m_slideData.GetCurrentIndex();
@@ -158,7 +158,7 @@ bool CAlbumImageView::UpdateImage( void )
 
 			pMainFrame->CancelStatusBarAutoClear();
 
-			if ( GetImage() != NULL )
+			if ( GetImage() != nullptr )
 			{
 				success = true;
 
@@ -473,7 +473,7 @@ void CAlbumImageView::OnInitialUpdate( void )
 	m_pAlbumDialogBar->OnNavRangeChanged();
 	m_pAlbumDialogBar->OnSlideDelayChanged();
 
-	if ( NULL == m_pPeerThumbView->GetAlbumModel() )		// avoid double setup on initialization (it might happen cause of different ways of init, e.g. load or drop)
+	if ( nullptr == m_pPeerThumbView->GetAlbumModel() )		// avoid double setup on initialization (it might happen cause of different ways of init, e.g. load or drop)
 		m_pPeerThumbView->SetupAlbumModel( GetDocument()->GetModel() );
 
 	OnAutoDropRecipientChanged();
@@ -543,8 +543,8 @@ void CAlbumImageView::OnToggleSiblingView( void )
 {
 	CView* pActiveView = m_pMdiChildFrame->GetActiveView();
 
-	ASSERT( NULL == pActiveView || ( pActiveView == this || pActiveView == m_pPeerThumbView ) );
-	if ( NULL == pActiveView || pActiveView == m_pPeerThumbView )
+	ASSERT( nullptr == pActiveView || ( pActiveView == this || pActiveView == m_pPeerThumbView ) );
+	if ( nullptr == pActiveView || pActiveView == m_pPeerThumbView )
 		m_pMdiChildFrame->SetActiveView( this );
 	else
 		m_pMdiChildFrame->SetActiveView( m_pPeerThumbView );

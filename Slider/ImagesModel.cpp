@@ -48,7 +48,7 @@ void CImagesModel::Clear( void )
 	utl::ClearOwningContainer( m_fileAttributes );
 	m_storagePaths.clear();
 
-	if ( m_pIndexer.get() != NULL )
+	if ( m_pIndexer.get() != nullptr )
 		m_pIndexer->Clear();
 }
 
@@ -66,7 +66,7 @@ void CImagesModel::Swap( CImagesModel& rImagesModel )
 void CImagesModel::SetUseIndexing( bool useIndexing /*= true*/ )
 {
 	ASSERT( IsEmpty() );
-	m_pIndexer.reset( useIndexing ? new fs::CPathIndex<fs::CFlexPath>() : NULL );
+	m_pIndexer.reset( useIndexing ? new fs::CPathIndex<fs::CFlexPath>() : nullptr );
 }
 
 void CImagesModel::Stream( CArchive& archive )
@@ -102,7 +102,7 @@ void CImagesModel::Stream( CArchive& archive )
 
 bool CImagesModel::ContainsFileAttr( const fs::CFlexPath& filePath ) const
 {
-	if ( m_pIndexer.get() != NULL )
+	if ( m_pIndexer.get() != nullptr )
 		return m_pIndexer->Contains( filePath );
 
 	return FindPosFileAttr( filePath ) != utl::npos;
@@ -123,7 +123,7 @@ bool CImagesModel::AddFileAttr( CFileAttr* pFileAttr )
 	ASSERT_PTR( pFileAttr );
 	//REQUIRE( !utl::Contains( m_fileAttributes, pFileAttr ) );		// added once?
 
-	bool exists = m_pIndexer.get() != NULL
+	bool exists = m_pIndexer.get() != nullptr
 		? !m_pIndexer->Register( pFileAttr->GetPath() )
 		: ( FindPosFileAttr( pFileAttr->GetPath() ) != utl::npos );
 

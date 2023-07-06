@@ -42,7 +42,7 @@ public:
 
 	bool IsEmpty( void ) const { return m_patterns.empty(); }
 	bool IsSinglePattern( void ) const { return 1 == m_patterns.size(); }
-	const CSearchPattern* GetSinglePattern( void ) const { return IsSinglePattern() ? m_patterns.front() : NULL; }
+	const CSearchPattern* GetSinglePattern( void ) const { return IsSinglePattern() ? m_patterns.front() : nullptr; }
 	CSearchPattern* RefSinglePattern( void ) { ASSERT( 1 == m_patterns.size() ); return m_patterns.front(); }
 private:
 	persist UINT m_maxFileCount;							// max count filter of found files (Slider_v4_2 +)

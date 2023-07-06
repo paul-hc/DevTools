@@ -37,7 +37,7 @@ public:
 
 	// shared progress bar
 	bool InProgress( void ) const { return m_inProgress.IsInternalChange(); }
-	void BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption = NULL );
+	void BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption = nullptr );
 	void EndProgress( int clearDelay );
 	void SetPosProgress( int value );
 	void StepItProgress( void );

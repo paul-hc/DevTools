@@ -60,7 +60,7 @@ ICatalogStorage* CCatalogStorageFactory::FindStorage( const fs::TStgDocPath& doc
 	if ( fs::CStructuredStorage* pOpenedStorage = fs::CStructuredStorage::FindOpenedStorage( docStgPath ) )		// opened in testing?
 		return checked_static_cast<CImageCatalogStg*>( pOpenedStorage );
 
-	return NULL;
+	return nullptr;
 }
 
 CComPtr<ICatalogStorage> CCatalogStorageFactory::AcquireStorage( const fs::TStgDocPath& docStgPath, DWORD mode /*= STGM_READ*/ )
@@ -76,11 +76,11 @@ CComPtr<ICatalogStorage> CCatalogStorageFactory::AcquireStorage( const fs::TStgD
 	CScopedErrorHandling scopedHandling( pDocStorage, this );		// pass current factory throw mode to the storage
 
 	if ( !pDocStorage->OpenDocFile( docStgPath, mode ) )
-		return NULL;
+		return nullptr;
 
 	if ( fs::CStructuredStorage::IsReadingMode( mode ) )
 		if ( !CCatalogPasswordStore::Instance()->LoadPasswordVerify( pNewCatalogStorage ) )
-			return NULL;			// password not verified correctly by user
+			return nullptr;			// password not verified correctly by user
 
 	return pNewCatalogStorage;
 }
@@ -110,7 +110,7 @@ std::auto_ptr<CFile> CCatalogStorageFactory::OpenFlexImageFile( const fs::CFlexP
 				else
 					pStreamLocation = pDocStorage->LocateWriteStream( flexImagePath.GetEmbeddedPath(), mode );
 
-				if ( pStreamLocation.get() != NULL && pStreamLocation->IsValid() )
+				if ( pStreamLocation.get() != nullptr && pStreamLocation->IsValid() )
 					pFile.reset( new fs::CManagedOleStreamFile( pStreamLocation, flexImagePath ) );
 			}
 			else
@@ -143,7 +143,7 @@ CCachedThumbBitmap* CCatalogStorageFactory::ExtractThumb( const fs::CFlexPath& s
 			return pCatalogStorage->LoadThumbnail( srcImagePath );
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 CCachedThumbBitmap* CCatalogStorageFactory::GenerateThumb( const fs::CFlexPath& srcImagePath )
@@ -166,7 +166,7 @@ CCachedThumbBitmap* CCatalogStorageFactory::GenerateThumb( const fs::CFlexPath& 
 			return pThumbBitmap;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -184,7 +184,7 @@ bool CCatalogPasswordStore::SavePassword( ICatalogStorage* pCatalogStorage )
 
 	try
 	{
-		fs::stg::CScopedWriteDocMode scopedDocWrite( pCatalogStorage->GetDocStorage(), NULL );		// switch storage to write/throw mode
+		fs::stg::CScopedWriteDocMode scopedDocWrite( pCatalogStorage->GetDocStorage(), nullptr );		// switch storage to write/throw mode
 
 		return pCatalogStorage->SavePasswordStream();
 	}
@@ -195,7 +195,7 @@ bool CCatalogPasswordStore::SavePassword( ICatalogStorage* pCatalogStorage )
 	}
 }
 
-bool CCatalogPasswordStore::LoadPasswordVerify( ICatalogStorage* pCatalogStorage, std::tstring* pOutPassword /*= NULL*/ )
+bool CCatalogPasswordStore::LoadPasswordVerify( ICatalogStorage* pCatalogStorage, std::tstring* pOutPassword /*= nullptr*/ )
 {
 	ASSERT_PTR( pCatalogStorage );
 

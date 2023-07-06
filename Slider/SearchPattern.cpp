@@ -132,7 +132,7 @@ bool CSearchPattern::IsValidPath( void ) const
 	}
 }
 
-bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pParentWnd /*= NULL*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
+bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pParentWnd /*= nullptr*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
 {
 	fs::CPath filePath = GetFilePath();
 
@@ -152,7 +152,7 @@ bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd*
 			filePath = filePath.GetParentPath();
 
 		picked = shell::PickFolder( filePath, pParentWnd, 0, s_dlgTitle );
-		//picked = shell::BrowseForFolder( filePath, pParentWnd, NULL, shell::BF_FileSystem, s_dlgTitle );
+		//picked = shell::BrowseForFolder( filePath, pParentWnd, nullptr, shell::BF_FileSystem, s_dlgTitle );
 	}
 	else
 		if ( AlbumFile == m_type )

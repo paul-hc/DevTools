@@ -68,14 +68,14 @@ bool CSplitterWindow::DoRecreateWindow( CAlbumThumbListView& rThumbView, const C
 	CView* pOldView = (CView*)GetActivePane();
 
 	// If no context specified, generate one from the currently selected client, if possible
-	if ( pOldView == NULL )
+	if ( pOldView == nullptr )
 		pOldView = (CView*)GetPane( 0, 1 );
-	if ( pOldView != NULL && pOldView->IsKindOf( RUNTIME_CLASS( CView ) ) )
+	if ( pOldView != nullptr && pOldView->IsKindOf( RUNTIME_CLASS( CView ) ) )
 	{	// Set info about last pane
-		ASSERT( context.m_pCurrentFrame == NULL );
+		ASSERT( context.m_pCurrentFrame == nullptr );
 		context.m_pLastView = pOldView;
 		context.m_pCurrentDoc = pOldView->GetDocument();
-		if ( context.m_pCurrentDoc != NULL )
+		if ( context.m_pCurrentDoc != nullptr )
 			context.m_pNewDocTemplate = context.m_pCurrentDoc->GetDocTemplate();
 	}
 	ASSERT_NULL( rThumbView.m_hWnd );					// shouldn't be already created
@@ -83,7 +83,7 @@ bool CSplitterWindow::DoRecreateWindow( CAlbumThumbListView& rThumbView, const C
 	DWORD style = AFX_WS_DEFAULT_VIEW & ~WS_BORDER;
 	CRect rect( CPoint( 0, 0 ), thumbSize );		// Create with the right size (wrong position)
 
-	if ( !rThumbView.Create( NULL, NULL, style, rect, this, IdFromRowCol( 0, 0 ), &context ) )
+	if ( !rThumbView.Create( nullptr, nullptr, style, rect, this, IdFromRowCol( 0, 0 ), &context ) )
 	{
 		TRACE( _T("Warning: couldn't re-create the thumb view for splitter.\n") );
 		return false;		// View will be cleaned up by PostNcDestroy
@@ -107,5 +107,5 @@ void CSplitterWindow::OnLButtonDblClk( UINT mkFlags, CPoint point )
 
 	// Toggle the thumb view on/off
 	// Call window proc directly for the thumb view
-	AfxCallWndProc( pThumbView, pThumbView->m_hWnd, WM_COMMAND, MAKEWPARAM( CK_SHOW_THUMB_VIEW, BN_CLICKED ), NULL );
+	AfxCallWndProc( pThumbView, pThumbView->m_hWnd, WM_COMMAND, MAKEWPARAM( CK_SHOW_THUMB_VIEW, BN_CLICKED ), nullptr );
 }

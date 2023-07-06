@@ -44,7 +44,7 @@ namespace layout
 const TCHAR CArchiveImagesDialog::s_archiveFnameSuffix[] = _T("_stg");
 
 
-CArchiveImagesDialog::CArchiveImagesDialog( const CAlbumModel* pModel, const std::tstring& srcDocPath, CWnd* pParent /*= NULL*/ )
+CArchiveImagesDialog::CArchiveImagesDialog( const CAlbumModel* pModel, const std::tstring& srcDocPath, CWnd* pParent /*= nullptr*/ )
 	: CLayoutDialog( IDD_ARCHIVE_IMAGES_DIALOG, pParent )
 	, m_pModel( pModel )
 	, m_srcDocPath( srcDocPath )
@@ -274,7 +274,7 @@ void CArchiveImagesDialog::UpdateTargetFileCountStatic( void )
 
 void CArchiveImagesDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_formatCombo.m_hWnd;
+	bool firstInit = nullptr == m_formatCombo.m_hWnd;
 
 	DDX_Control( pDX, IDC_TARGET_FILE_COUNT_STATIC, m_targetFileCountStatic );
 	DDX_Control( pDX, IDC_FILE_PATHS_LIST, m_filesListCtrl );
@@ -454,7 +454,7 @@ void CArchiveImagesDialog::CmBrowseDestPath( void )
 {
 	if ( ToDirectory == m_destType )
 	{
-		if ( !shell::BrowseForFolder( m_destPath, this, NULL, shell::BF_FileSystem, _T("Destination folder"), false ) )
+		if ( !shell::BrowseForFolder( m_destPath, this, nullptr, shell::BF_FileSystem, _T("Destination folder"), false ) )
 			return;
 	}
 	else
