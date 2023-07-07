@@ -22,6 +22,8 @@ public:
 
 	void StoreColors( const std::vector<COLORREF>& colors );
 	void SetHalftoneColors( size_t size = 256 );
+
+HMENU m_hPopup;
 protected:
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;

@@ -8,6 +8,7 @@
 
 #include <afxcolorpopupmenu.h>
 #include <afxcolorbar.h>
+#include <afxtoolbarmenubutton.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,6 +20,7 @@
 CColorPickerButton::CColorPickerButton( void )
 	: CMFCColorButton()
 	, m_pTableGroup( new CColorTableGroup( *CColorRepository::Instance() ) )
+	, m_hPopup( nullptr )
 {
 }
 
@@ -67,6 +69,14 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 	CMFCPopupMenuBar* pPopupMenuBar = m_pPopup->GetMenuBar();
 	CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( pPopupMenuBar );
 	pColorBar = pColorBar;
+
+	pColorBar->InsertSeparator();
+	if ( m_hPopup != nullptr )
+	{
+		//CMFCToolBarMenuButton* pPopulItem = new CMFCToolBarMenuButton( 333, m_dbgPopup, -1, _T("<debug-popup>") );
+		CMFCToolBarMenuButton popupItem( 333, m_hPopup, -1, _T("<debug-popup>") );
+		pColorBar->InsertButton( popupItem );
+	}
 }
 
 

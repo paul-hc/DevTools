@@ -103,6 +103,8 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	ui::LoadPopupMenu( m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup, ui::NoMenuImages );
 	m_pMenuPicker->m_bOSMenu = FALSE;
 	m_editChecked = true;
+
+	m_pMyColorPicker->m_hPopup = m_popupMenu;
 }
 
 CTestColorsDialog::~CTestColorsDialog()
