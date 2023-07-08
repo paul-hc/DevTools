@@ -114,6 +114,7 @@ protected:
 	virtual void DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus );
 private:
 	ui::PopupAlign m_popupAlign;
+
 	enum { ArrowDelta = 4 };
 };
 

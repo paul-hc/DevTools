@@ -257,14 +257,14 @@ void CStatusStatic::SetStyle( Style style )
 // CPickMenuStatic implementation
 
 CPickMenuStatic::CPickMenuStatic( ui::PopupAlign popupAlign /*= ui::DropRight*/ )
-	: CThemeStatic( CThemeItem( L"SCROLLBAR", vt::SBP_THUMBBTNHORZ, vt::SCRBS_NORMAL ), CThemeItem( L"HEADER", vt::HP_HEADEROVERFLOW, vt::HOFS_NORMAL ) )
-	, m_popupAlign( popupAlign )		// to match HP_HEADEROVERFLOW pointing right
+	: CThemeStatic( CThemeItem( L"BUTTON", vt::BP_PUSHBUTTON, vt::PBS_NORMAL ),			// background item
+					CThemeItem( L"BUTTON", vt::BP_PUSHBUTTON, vt::PBS_NORMAL ) )		// content item
+	, m_popupAlign( popupAlign )
 {
 	m_bkgndItem
-		.SetStateId( CThemeItem::Hot, vt::SCRBS_HOT )
-		.SetStateId( CThemeItem::Pressed, vt::SCRBS_PRESSED );
+		.SetStateId( CThemeItem::Hot, vt::PBS_HOT )
+		.SetStateId( CThemeItem::Pressed, vt::PBS_PRESSED );
 
-	m_textItem = CThemeItem( L"BUTTON", vt::BP_PUSHBUTTON, vt::PBS_NORMAL );
 	m_textItem.SetStateId( CThemeItem::Disabled, vt::PBS_DISABLED );
 
 	if ( m_popupAlign != ui::DropRight )
