@@ -33,6 +33,7 @@ protected:
 	afx_msg void OnColorPicker( void );
 	afx_msg void OnMyColorPicker( void );
 	afx_msg void OnMenuPicker( void );
+	afx_msg void On_EditColor( void );
 	afx_msg void OnUpdate_EditItem( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()

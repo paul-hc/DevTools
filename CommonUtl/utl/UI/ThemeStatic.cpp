@@ -12,7 +12,7 @@
 
 // CThemeStatic implementation
 
-CThemeStatic::CThemeStatic( const CThemeItem& bkgndItem, const CThemeItem& contentItem /*= CThemeItem::m_null*/ )
+CThemeStatic::CThemeStatic( const CThemeItem& bkgndItem, const CThemeItem& contentItem /*= CThemeItem::s_null*/ )
 	: CBufferedStatic()
 	, m_bkgndItem( bkgndItem )
 	, m_contentItem( contentItem )
@@ -222,7 +222,7 @@ void CHeadlineStatic::SetStyle( Style style )
 // CStatusStatic implementation
 
 CStatusStatic::CStatusStatic( Style style /*= Recessed*/ )
-	: CThemeStatic( CThemeItem::m_null )
+	: CThemeStatic( CThemeItem::s_null )
 {
 	m_useText = true;
 	SetStyle( style );
@@ -237,7 +237,7 @@ void CStatusStatic::SetStyle( Style style )
 		default: ASSERT( false );
 		case Recessed:
 			m_bkgndItem = CThemeItem( L"EXPLORERBAR", EBP_NORMALGROUPBACKGROUND, 0 );
-			m_textItem = CThemeItem::m_null;			// use m_bkgndItem for text
+			m_textItem = CThemeItem::s_null;			// use m_bkgndItem for text
 			break;
 		case Rounded:
 			m_bkgndItem = CThemeItem( L"LISTVIEW", LVP_GROUPHEADER, LVGH_CLOSESELECTEDNOTFOCUSED );
@@ -267,8 +267,7 @@ CPickMenuStatic::CPickMenuStatic( ui::PopupAlign popupAlign /*= ui::DropRight*/ 
 
 	m_textItem.SetStateId( CThemeItem::Disabled, vt::PBS_DISABLED );
 
-	if ( m_popupAlign != ui::DropRight )
-		SetPopupAlign( m_popupAlign );
+	SetPopupAlign( m_popupAlign );
 }
 
 CPickMenuStatic::~CPickMenuStatic()
@@ -278,7 +277,7 @@ CPickMenuStatic::~CPickMenuStatic()
 void CPickMenuStatic::SetPopupAlign( ui::PopupAlign popupAlign )
 {
 	m_popupAlign = popupAlign;
-	m_contentItem = CThemeItem::m_null;			// reset content item to display an arrow
+	m_contentItem = CThemeItem::s_null;			// reset content item to display an arrow
 }
 
 void CPickMenuStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus )

@@ -88,6 +88,32 @@ namespace ui
 	}
 
 
+	CRect& AlignPopupRect( CRect& rDest, const RECT& excludeRect, ui::PopupAlign popupAlign, const CSize& spacing /*= CSize( 0, 0 )*/ )
+	{
+		switch ( popupAlign )
+		{
+			default: ASSERT( false );
+			case DropDown:		rDest.MoveToXY( excludeRect.left, excludeRect.bottom + spacing.cy ); break;
+			case DropUp:		rDest.MoveToXY( excludeRect.left, excludeRect.top - rDest.Height() - spacing.cy ); break;
+			case DropRight:		rDest.MoveToXY( excludeRect.right + spacing.cx, excludeRect.top ); break;
+			case DropLeft:		rDest.MoveToXY( excludeRect.left - rDest.Width() - spacing.cx, excludeRect.top ); break;
+		}
+		return rDest;
+	}
+
+	ui::PopupAlign GetMirrorPopupAlign( ui::PopupAlign popupAlign )
+	{
+		switch ( popupAlign )
+		{
+			default: ASSERT( false );
+			case DropRight:		return DropLeft;
+			case DropDown:		return DropUp;
+			case DropLeft:		return DropRight;
+			case DropUp:		return DropDown;
+		}
+	}
+
+
 	bool IsValidAlignment( TAlignment alignment )
 	{
 		switch ( alignment & HorizontalMask )
@@ -232,31 +258,30 @@ namespace ui
 		}
 	}
 
-	bool EnsureVisibleRect( CRect& rDest, const RECT& anchor, bool horiz /*= true*/, bool vert /*= true*/ )
+	bool EnsureVisibleRect( CRect& rDest, const RECT& boundsRect, bool horiz /*= true*/, bool vert /*= true*/ )
 	{
-		if ( rDest.left >= anchor.left && rDest.top >= anchor.top &&
-			 rDest.right <= anchor.right && rDest.bottom <= anchor.bottom )
+		if ( ui::InBounds( boundsRect, rDest ) )
 			return false;		// no overflow, no change
 
 		CPoint offset( 0, 0 );
 
 		if ( horiz )
-			if ( rDest.Width() > RectWidth( anchor ) )
-				offset.x = anchor.left - rDest.left;
+			if ( rDest.Width() > RectWidth( boundsRect ) )
+				offset.x = boundsRect.left - rDest.left;
 			else
-				if ( rDest.left < anchor.left )
-					offset.x = anchor.left - rDest.left;
-				else if ( rDest.right > anchor.right )
-					offset.x = anchor.right - rDest.right;
+				if ( rDest.left < boundsRect.left )
+					offset.x = boundsRect.left - rDest.left;
+				else if ( rDest.right > boundsRect.right )
+					offset.x = boundsRect.right - rDest.right;
 
 		if ( vert )
-			if ( rDest.Height() > RectHeight( anchor ) )
-				offset.y = anchor.top - rDest.top;
+			if ( rDest.Height() > RectHeight( boundsRect ) )
+				offset.y = boundsRect.top - rDest.top;
 			else
-				if ( rDest.top < anchor.top )
-					offset.y = anchor.top - rDest.top;
-				else if ( rDest.bottom > anchor.bottom )
-					offset.y = anchor.bottom - rDest.bottom;
+				if ( rDest.top < boundsRect.top )
+					offset.y = boundsRect.top - rDest.top;
+				else if ( rDest.bottom > boundsRect.bottom )
+					offset.y = boundsRect.bottom - rDest.bottom;
 
 		if ( 0 == offset.x && 0 == offset.y )
 			return false;		// no change

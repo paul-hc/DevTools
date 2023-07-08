@@ -23,8 +23,9 @@ public:
 private:
 	CWnd* m_pBuddyCtrl;					// typically a CEdit
 	ui::ISpinTarget* m_pSpinTarget;
+
+	// generated stuff
 protected:
-	// generated message map functions
 	afx_msg BOOL OnUdnDeltaPos( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()

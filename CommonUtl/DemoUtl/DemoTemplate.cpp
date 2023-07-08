@@ -67,7 +67,7 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	, m_pickFormatCheckedStatic( ui::DropDown )
 	, m_resetSeqCounterButton( ID_RESET_DEFAULT )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
-	, m_delimStatic( CThemeItem::m_null, CThemeItem( L"HEADER", vt::HP_HEADEROVERFLOW, vt::HOFS_NORMAL ) )
+	, m_delimStatic( CThemeItem::s_null, CThemeItem( L"HEADER", vt::HP_HEADEROVERFLOW, vt::HOFS_NORMAL ) )
 {
 	ASSERT_PTR( m_pLayoutEngine );
 	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_SPAN( layout::templateStyles ) );

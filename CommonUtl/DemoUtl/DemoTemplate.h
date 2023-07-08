@@ -40,6 +40,7 @@ private:
 public:
 	CHostToolbarCtrl<CStatic> m_seqCounterLabel;
 	CEnumSplitButton m_dialogButton;
+
 	CComboBox m_formatCombo;
 	CPickMenuStatic m_pickFormatStatic;
 	CPickMenuStatic m_pickFormatCheckedStatic;		// with checked menu images

@@ -10,7 +10,7 @@
 class CThemeStatic : public CBufferedStatic
 {
 public:
-	CThemeStatic( const CThemeItem& bkgndItem, const CThemeItem& contentItem = CThemeItem::m_null );
+	CThemeStatic( const CThemeItem& bkgndItem, const CThemeItem& contentItem = CThemeItem::s_null );
 	virtual ~CThemeStatic();
 
 	bool IsThemed( void ) const { return m_bkgndItem.IsThemed() || m_contentItem.IsThemed(); }

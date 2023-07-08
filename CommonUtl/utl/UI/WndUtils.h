@@ -44,6 +44,9 @@ namespace ui
 	CSize GetScreenSize( HWND hWnd = AfxGetMainWnd()->GetSafeHwnd(), MonitorArea area = ui::Monitor );
 
 
+	CRect& AlignPopupWindowRect( CRect& rWindowRect, const RECT& excludeRect, ui::PopupAlign popupAlign, const CSize& spacing = CSize( 0, 0 ) );
+
+
 	inline CSize GetTextSize( CDC* pDC, const TCHAR* pText, DWORD extraFormat = 0 )		// pass DT_EDITCONTROL for multi-line
 	{	// more accurate, takes care of line-ends
 		CRect textRect( 0, 0, 0, 0 );
@@ -320,16 +323,6 @@ namespace ui
 } //namespace ui
 
 
-#include <vector>
-#include "utl/SubjectPredicates.h"
-
-
-class CPathItemBase;
-namespace pred { interface IComparator; }
-namespace num { const std::locale& GetEmptyLocale( void ); }
-namespace fs { class CPath; }
-
-
 namespace ui
 {
 	inline int MessageBox( const std::tstring& message, UINT mbFlags = MB_OK ) { return ::AfxMessageBox( message.c_str(), mbFlags ); }
@@ -345,6 +338,26 @@ namespace ui
 	bool& RefAsyncApiEnabled( void );
 
 
+	bool EditColor( COLORREF* pColor IN OUT, CWnd* pParentWnd, bool popupDlg, ui::PopupAlign popupAlign = ui::DropDown );
+
+	// color dialog style registry persist
+	ui::ColorDialogStyle LoadColorDialogStyle( void );
+	void SaveColorDialogStyle( ui::ColorDialogStyle dlgStyle );
+}
+
+
+#include <vector>
+#include "utl/SubjectPredicates.h"
+
+
+class CPathItemBase;
+namespace pred { interface IComparator; }
+namespace num { const std::locale& GetEmptyLocale( void ); }
+namespace fs { class CPath; }
+
+
+namespace ui
+{
 	void SetSpinRange( CWnd* pDlg, int ctrlId, int minValue, int maxValue );
 
 

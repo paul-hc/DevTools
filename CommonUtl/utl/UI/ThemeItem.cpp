@@ -10,7 +10,7 @@
 #endif
 
 
-const CThemeItem CThemeItem::m_null;
+const CThemeItem CThemeItem::s_null;
 
 
 CThemeItem::CThemeItem( void )

@@ -28,6 +28,7 @@
 #define IDC_RESIZE_SPLITTER_NS_CURSOR   28023
 #define IDC_RESIZE_SPLITTER_WE_CURSOR   28024
 #define IDI_UNKNOWN                     28025
+#define IDR_EDIT_ACCEL                  28026
 #define UTL_MIN_COMMAND_VALUE           28200
 #define ID_ADD_ITEM                     28201
 #define ID_REMOVE_ITEM                  28202
@@ -76,6 +77,8 @@
 #define ID_FILE_PROPERTIES              28245
 #define ID_APP_RESTORE                  28246
 #define ID_APP_MINIMIZE                 28247
+#define ID_USE_COLOR_DIALOG_MFC         28249
+#define ID_USE_COLOR_DIALOG_COMCTRL     28250
 #define UTL_MIN_CONTROL_VALUE           28500
 #define IDC_GROUP_BOX_1                 28501
 #define IDC_GROUP_BOX_2                 28502
@@ -119,8 +122,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        28026
-#define _APS_NEXT_COMMAND_VALUE         28248
+#define _APS_NEXT_RESOURCE_VALUE        28027
+#define _APS_NEXT_COMMAND_VALUE         28251
 #define _APS_NEXT_CONTROL_VALUE         28536
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif

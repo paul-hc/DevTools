@@ -41,7 +41,7 @@ private:
 
 	enum Column { Property, Value };
 
-	// generated overrides
+	// generated stuff
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:

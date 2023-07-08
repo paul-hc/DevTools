@@ -5,6 +5,7 @@
 #include "HistoryComboBox.h"
 #include "IconButton.h"
 #include "ImageStore.h"
+#include "ColorPopupDialogs.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/Path.h"
 #include "utl/PathItemBase.h"
@@ -15,6 +16,13 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace reg
+{
+	static const TCHAR section_Settings[] = _T("Settings");
+	static const TCHAR entry_ColorDialogStyle[] = _T("ColorDialogStyle");
+}
 
 
 namespace ui
@@ -123,6 +131,20 @@ namespace ui
 	CSize GetScreenSize( HWND hWnd /*= AfxGetMainWnd()->GetSafeHwnd()*/, MonitorArea area /*= ui::Monitor*/ )
 	{
 		return ui::FindMonitorRect( hWnd, area ).Size();
+	}
+
+
+	CRect& AlignPopupWindowRect( CRect& rWindowRect, const RECT& excludeRect, ui::PopupAlign popupAlign, const CSize& spacing /*= CSize( 0, 0 )*/ )
+	{
+		ui::AlignPopupRect( rWindowRect, excludeRect, popupAlign, spacing );
+
+		if ( ui::EnsureVisibleDesktopRect( rWindowRect ) )		// was adjusted?
+		{
+			ui::AlignPopupRect( rWindowRect, excludeRect, GetMirrorPopupAlign( popupAlign ), spacing );
+			ui::EnsureVisibleDesktopRect( rWindowRect );
+		}
+
+		return rWindowRect;
 	}
 }
 
@@ -958,6 +980,70 @@ namespace ui
 	}
 
 
+	bool EditColor( IN OUT COLORREF* pColor, CWnd* pParentWnd, bool popupDlg, ui::PopupAlign popupAlign /*= ui::DropDown*/ )
+	{
+		ASSERT_PTR( pColor );
+		REQUIRE( !popupDlg || pParentWnd != nullptr );
+
+		COLORREF color = *pColor;
+
+		for ( size_t count = 0; ; ++count )
+			if ( ui::OfficeColorDialog == LoadColorDialogStyle() )
+			{
+				COfficeColorPopupDialog dlg( pParentWnd, color );
+
+				if ( popupDlg )
+					dlg.SetPopupAlign( popupAlign );
+
+				if ( IDOK == dlg.DoModal() )
+				{
+					*pColor = dlg.GetColor();
+
+					if ( dlg.ShouldRestartDlg() )
+						continue;
+					else
+						return true;
+				}
+				else
+					break;
+			}
+			else
+			{
+				CColorPopupDialog dlg( pParentWnd, color );
+
+				if ( popupDlg )
+					dlg.SetPopupAlign( popupAlign );
+
+				if ( IDOK == dlg.DoModal() )
+				{
+					*pColor = dlg.GetColor();
+
+					if ( dlg.ShouldRestartDlg() )
+						continue;
+					else
+						return true;
+				}
+				else
+					break;
+			}
+
+		return false;
+	}
+
+	ui::ColorDialogStyle LoadColorDialogStyle( void )
+	{
+		return static_cast<ui::ColorDialogStyle>( AfxGetApp()->GetProfileInt( reg::section_Settings, reg::entry_ColorDialogStyle, ui::OfficeColorDialog ) );
+	}
+
+	void SaveColorDialogStyle( ui::ColorDialogStyle dlgStyle )
+	{
+		AfxGetApp()->WriteProfileInt( reg::section_Settings, reg::entry_ColorDialogStyle, dlgStyle );
+	}
+}
+
+
+namespace ui
+{
 	namespace ddx
 	{
 		void FailInput( CDataExchange* pDX, UINT ctrlId, const std::tstring& validationError )

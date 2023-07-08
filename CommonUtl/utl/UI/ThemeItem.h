@@ -43,7 +43,7 @@ public:
 	int m_partId;
 	int m_stateId[ _StatusCount ];
 
-	static const CThemeItem m_null;
+	static const CThemeItem s_null;
 };
 
 

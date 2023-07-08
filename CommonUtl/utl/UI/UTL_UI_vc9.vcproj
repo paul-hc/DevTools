@@ -1782,6 +1782,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ColorPopupDialogs.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ColorPopupDialogs.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ItemListDialog.cpp"
 					>
 				</File>

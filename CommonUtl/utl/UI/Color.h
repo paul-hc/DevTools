@@ -75,8 +75,7 @@ namespace ui
 	// clipboard
 	bool CopyColor( COLORREF color );
 	bool PasteColor( OUT COLORREF* pOutColor );
-	static bool CanPasteColor( void );
-	static UINT GetColorClipboardFormat( void );
+	bool CanPasteColor( void );
 
 	UINT GetColorClipboardFormat( void );
 }

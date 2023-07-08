@@ -7,23 +7,13 @@
 #include "StringUtilities.h"
 #include "WndUtils.h"
 #include "PostCall.h"
+#include "resource.h"
 #include "utl/TextClipboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
-static ACCEL s_editKeys[] =
-{
-	{ FVIRTKEY | FCONTROL, _T('C'), ID_EDIT_COPY },
-	{ FVIRTKEY | FCONTROL, VK_INSERT, ID_EDIT_COPY },
-	{ FVIRTKEY | FCONTROL, _T('X'), ID_EDIT_CUT },
-	{ FVIRTKEY | FSHIFT, VK_DELETE, ID_EDIT_CUT },
-	{ FVIRTKEY | FCONTROL, _T('V'), ID_EDIT_PASTE },
-	{ FVIRTKEY | FSHIFT, VK_INSERT, ID_EDIT_PASTE },
-	{ FVIRTKEY | FCONTROL, _T('A'), ID_EDIT_SELECT_ALL }
-};
 
 const TCHAR CTextEdit::s_lineEnd[] = _T("\r\n");
 
@@ -34,7 +24,7 @@ CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	, m_usePasteTransact( false )
 	, m_hookThumbTrack( true )
 	, m_visibleWhiteSpace( false )
-	, m_accel( ARRAY_SPAN( s_editKeys ) )
+	, m_accel( IDR_EDIT_ACCEL )
 	, m_pSyncScrolling( nullptr )
 	, m_lastSelRange( 0, 0 )
 {

@@ -137,6 +137,7 @@
 #define IDC_COLOR_INFO_EDIT             1108
 #define IDC_REPO_COLOR_INFO_EDIT        1108
 #define IDC_MY_MENU_PICKER_BUTTON       1109
+#define IDC_EDIT_COLOR_BUTTON           1110
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -178,12 +179,12 @@
 #define ID_APP_TRAY_ANIMATE             32804
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        154
 #define _APS_NEXT_COMMAND_VALUE         32813
-#define _APS_NEXT_CONTROL_VALUE         1110
+#define _APS_NEXT_CONTROL_VALUE         1111
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

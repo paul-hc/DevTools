@@ -146,6 +146,7 @@ BEGIN_MESSAGE_MAP( CTestColorsDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_COLOR_PICKER_BUTTON, OnColorPicker )
 	ON_BN_CLICKED( IDC_MY_COLOR_PICKER_BUTTON, OnMyColorPicker )
 	ON_BN_CLICKED( IDC_MY_MENU_PICKER_BUTTON, OnMenuPicker )
+	ON_BN_CLICKED( IDC_EDIT_COLOR_BUTTON, On_EditColor )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdate_EditItem )
 	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdate_EditItem )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_ITEM, OnUpdate_EditItem )
@@ -182,6 +183,12 @@ void CTestColorsDialog::OnMenuPicker( void )
 			m_editChecked = !m_editChecked;
 			break;
 	}
+}
+
+void CTestColorsDialog::On_EditColor( void )
+{
+	if ( ui::EditColor( &m_color, GetDlgItem( IDC_EDIT_COLOR_BUTTON ), !ui::IsKeyPressed( VK_CONTROL ) ) )
+		UpdateData( DialogOutput );
 }
 
 void CTestColorsDialog::OnUpdate_EditItem( CCmdUI* pCmdUI )

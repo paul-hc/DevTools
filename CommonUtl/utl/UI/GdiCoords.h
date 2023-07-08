@@ -111,6 +111,11 @@ namespace ui
 	inline int RectHeight( const RECT& rect ) { return rect.bottom - rect.top; }
 
 
+	// popup layout with excluding rect - similar to TrackPopupMenu() alignment:
+	CRect& AlignPopupRect( CRect& rDest, const RECT& excludeRect, ui::PopupAlign popupAlign, const CSize& spacing = CSize( 0, 0 ) );
+	ui::PopupAlign GetMirrorPopupAlign( ui::PopupAlign popupAlign );
+
+
 	bool IsValidAlignment( TAlignment alignment );
 
 	CRect& AlignRect( CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest = false );
@@ -129,8 +134,7 @@ namespace ui
 
 	void StretchRect( CRect& rDest, const RECT& anchor, Stretch stretch );
 
-
-	bool EnsureVisibleRect( CRect& rDest, const RECT& anchor, bool horiz = true, bool vert = true );
+	bool EnsureVisibleRect( CRect& rDest, const RECT& boundsRect, bool horiz = true, bool vert = true );
 	void EnsureMinEdge( CRect& rInner, const RECT& outer, int edge = 1 );
 
 

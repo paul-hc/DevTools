@@ -14,11 +14,13 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
+#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -66,15 +68,10 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\DemoUtl.ico"
-
 IDR_MESSAGE_TRAY_ICON   ICON                    "res\\AppMsgTray.ico"
-
 IDR_TEST_DOC_TYPE       ICON                    "res\\TestDoc.ico"
-
 IDI_MY_TOOL_STRIP_ICON  ICON                    "res\\MyToolStrip.ico"
-
 IDI_MY_TOOL_STRIP_ALPHA_ICON ICON                    "res\\MyToolStrip_alpha.ico"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -82,13 +79,9 @@ IDI_MY_TOOL_STRIP_ALPHA_ICON ICON                    "res\\MyToolStrip_alpha.ico
 //
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
-
 IDR_LOW_COLOR_STRIP     BITMAP                  "res\\LowColorStrip.bmp"
-
 IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
-
 IDB_SEARCH_FILES_ANIM_STRIP BITMAP                  "res\\SearchFilesAnimStrip.bmp"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -96,18 +89,15 @@ IDB_SEARCH_FILES_ANIM_STRIP BITMAP                  "res\\SearchFilesAnimStrip.b
 //
 
 IDR_MAINFRAME           PNG                     "res\\Toolbar.png"
-
 IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
-
 IDR_FLAG_STRIP_PNG      PNG                     "res\\FlagStrip.png"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR 16, 16
+IDR_MAINFRAME TOOLBAR  16, 16
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
@@ -122,13 +112,13 @@ BEGIN
     BUTTON      ID_APP_ABOUT
 END
 
-IDR_LOW_COLOR_STRIP TOOLBAR 16, 16
+IDR_LOW_COLOR_STRIP TOOLBAR  16, 16
 BEGIN
     BUTTON      ID_RECORD_NEXT
     BUTTON      ID_RECORD_PREV
 END
 
-IDR_IMAGE_STRIP TOOLBAR 16, 16
+IDR_IMAGE_STRIP TOOLBAR  16, 16
 BEGIN
     BUTTON      ID_STUDY_IMAGE
     SEPARATOR
@@ -145,7 +135,7 @@ END
 // Menu
 //
 
-IDR_MAINFRAME MENU
+IDR_MAINFRAME MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -187,7 +177,7 @@ BEGIN
     END
 END
 
-IDR_TEST_DOC_TYPE MENU
+IDR_TEST_DOC_TYPE MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -247,7 +237,7 @@ BEGIN
     END
 END
 
-IDR_FORMAT_PICKER_MENU MENU
+IDR_FORMAT_PICKER_MENU MENU 
 BEGIN
     POPUP "<Format Picker>"
     BEGIN
@@ -302,7 +292,7 @@ BEGIN
     END
 END
 
-IDR_CONTEXT_MENU MENU
+IDR_CONTEXT_MENU MENU 
 BEGIN
     POPUP "<Image Dialog>"
     BEGIN
@@ -340,7 +330,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS
+IDR_MAINFRAME ACCELERATORS 
 BEGIN
     VK_F1,          ID_APP_ABOUT,           VIRTKEY, NOINVERT
     VK_F8,          ID_APP_TRAY_ANIMATE,    VIRTKEY, CONTROL, NOINVERT
@@ -364,7 +354,7 @@ BEGIN
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
 END
 
-IDD_IMAGE_DIALOG ACCELERATORS
+IDD_IMAGE_DIALOG ACCELERATORS 
 BEGIN
     VK_F5,          ID_REFRESH,             VIRTKEY, NOINVERT
     "F",            ID_RESOLUTION_TOGGLE,   VIRTKEY, CONTROL, NOINVERT
@@ -698,10 +688,11 @@ CAPTION "Test Colors"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "&MFC Color Picker:",IDC_STATIC,10,10,57,8
-    PUSHBUTTON      "Picker",IDC_COLOR_PICKER_BUTTON,78,7,70,14
+    PUSHBUTTON      "&Picker",IDC_COLOR_PICKER_BUTTON,78,7,70,14
+    PUSHBUTTON      "&Edit...",IDC_EDIT_COLOR_BUTTON,154,7,30,14
     LTEXT           "UTL-&UI Color Picker:",IDC_STATIC,10,29,65,8
-    PUSHBUTTON      "UTL Picker",IDC_MY_COLOR_PICKER_BUTTON,78,26,70,14
-    PUSHBUTTON      "Menu Button",IDC_MY_MENU_PICKER_BUTTON,78,45,70,14
+    PUSHBUTTON      "&UTL Picker",IDC_MY_COLOR_PICKER_BUTTON,78,26,70,14
+    PUSHBUTTON      "&Menu Button",IDC_MY_MENU_PICKER_BUTTON,78,45,70,14
     EDITTEXT        IDC_RGB_EDIT,7,100,239,12,ES_AUTOHSCROLL | ES_READONLY
     EDITTEXT        IDC_REPO_COLOR_INFO_EDIT,7,118,239,12,ES_AUTOHSCROLL | ES_READONLY
     DEFPUSHBUTTON   "OK",IDOK,195,7,50,14,WS_GROUP
@@ -758,7 +749,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_DEMO_FORM, DIALOG
     BEGIN
@@ -912,9 +903,9 @@ END
 // AFX_DIALOG_LAYOUT
 //
 
-IDD_TEST_COLORS_DIALOG AFX_DIALOG_LAYOUT
+IDD_TEST_COLORS_DIALOG AFX_DIALOG_LAYOUT 
 BEGIN
-    0
+    0x0000
 END
 
 
@@ -923,30 +914,30 @@ END
 // String Table
 //
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_COMMAND_LINK1        "First command link option"
     ID_COMMAND_LINK2        "Second command link option"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_RADIO_BUTTON1        "First possible radio"
     ID_RADIO_BUTTON2        "Second possible radio"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
     IDS_CHANGE_CASE_TAGS    "filename.ext|FILENAME.EXT|filename.*|FILENAME.*|*.ext|*.EXT|* (no ext)"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDD_DEMO_DIALOG         "Full demo dialog embedded page"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDR_MAINFRAME           "DemoUtl"
     IDR_TEST_DOC_TYPE       "\nDemoUtl\nDemoUtl\n\n\nDemoUtl.Document\nDemoUtl.Document"
@@ -954,13 +945,13 @@ BEGIN
     IDD_DETAILS_PAGE        "Embedded property sheet details page"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     AFX_IDS_APP_TITLE       "Demo Utl"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_INDICATOR_EXT        "EXT"
     ID_INDICATOR_CAPS       "CAP"
@@ -970,7 +961,7 @@ BEGIN
     ID_INDICATOR_REC        "REC"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_FILE_NEW             "Create a new document\nNew"
     ID_FILE_OPEN            "Open an existing document\nOpen"
@@ -979,13 +970,13 @@ BEGIN
     ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -1005,13 +996,13 @@ BEGIN
     ID_FILE_MRU_FILE16      "Open this document"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
     ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
     ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
@@ -1021,7 +1012,7 @@ BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -1031,13 +1022,13 @@ BEGIN
     ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -1048,25 +1039,25 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
     AFX_IDS_MDICHILD        "Activate this window"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_EDIT_DETAILS         "Edit details"
     ID_REFRESH              "Press F5 to refresh"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDC_FILE_RENAME_LIST    "Source files=-40|Destination files=-20|Notes=-40"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDC_SEQ_COUNTER_RESET_BUTTON "Reset numeric sequence to 1"
     IDC_DETAIL_SHEET_STATIC "List control page|Edit, combo-boxes and button page|Embedded property sheet page|Embedded main demo page"
@@ -1075,12 +1066,12 @@ BEGIN
     IDC_CAPITALIZE_BUTTON   "Capitalize filename using sentence case, make extension lower case"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_CHANGE_CASE          "Make lower case|Make upper case|Make filename lower case|Make filename upper case|Make extension lower case|Make extension upper case|Remove extension"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDC_OPEN_DIALOG_BUTTON  "Resizable modal dialog|Horizontally resizable modal dialog|Vertically resizable modal dialog|Resizable with maximum size modal dialog"
     IDC_OPEN_PROPERTIES_BUTTON "Run a modal resizable property sheet"
@@ -1088,7 +1079,7 @@ BEGIN
     IDC_DROP_RIGHT_ARROW_STATIC "Formatting options"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDC_DROP_DOWN_STATIC    "Drop down menu with unchecked and checked images"
     IDC_FORCE_RESOLUTION_COMBO 
@@ -1096,17 +1087,17 @@ BEGIN
     IDC_ZOOM_COMBO          "Press Ctrl+1 to toggle zoom between 100% and Scale to Fit"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDC_STATUS_ALPHA_EDIT   "Opacity of the diagonal cross that signifies that the image has no alpha channel"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDC_TRANSP_COLOR_SAMPLE "Image transparent color"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_SET_AUTO_TRANSP_COLOR "Set image auto-transparent color"
     ID_RESET_TRANSP_COLOR   "Reset image transparent color"
@@ -1117,19 +1108,19 @@ BEGIN
                             "Hide message balloon that is displayed\nHide Message Balloon (Ctrl+H)"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDC_FILE_STATE_LIST     "File name=150|DEST File name=150|Attributes|DEST Attributes|Created Date=125|DEST Created Date=125|Notes=-1/150"
     IDC_FILE_STATE_EX_LIST  "File Path=-1|Size|Attributes|CRC32|Modified Date=125|Elapsed CRC32"
     IDC_FILE_CHECKSUMS_LIST "File name=150|Directory=-1/150|File Size|UTL: CRC32=100>|UTL: Elapsed=100>|UTL-ifs: CRC32=100>|UTL-ifs: Elapsed=100>|BoostCFile: CRC32=100>|BoostCFile: Elapsed=100>|Boost-ifs: CRC32=100>|Boost-ifs: Elapsed=100>"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDR_MESSAGE_TRAY_ICON   "Demo Messages"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     ID_MSG_TRAY_ANIMATE     "Animate message icon\nAnimate (Ctrl+F5)"
     ID_APP_TRAY_SHOW_BALLOON 
@@ -1141,7 +1132,12 @@ BEGIN
     ID_APP_TRAY_ANIMATE     "Animate system tray icon\nAnimate Icon (Ctrl+F8)"
 END
 
-#endif    // English (United States) resources
+STRINGTABLE 
+BEGIN
+    IDC_EDIT_COLOR_BUTTON   "Press Ctrl key to display as modal dialog, otherwise as drop-down"
+END
+
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

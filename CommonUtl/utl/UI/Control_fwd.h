@@ -49,7 +49,7 @@ namespace ui
 		CSize& RefSpacing( void ) { return m_spacing; }
 
 		// operations
-		void AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize = nullptr ) const;		// align rects of both host and mate controls
+		void AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize = nullptr ) const;	// align rects of both host and mate controls
 		void AlignMate( CRect& rMateRect, const RECT& hostRect, bool inTandem ) const;							// align mate rect relative to the host rect
 
 		void ShrinkHostRect( CRect& rHostRect, const CSize& mateSize ) const;
