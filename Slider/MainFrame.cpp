@@ -6,6 +6,7 @@
 #include "LoggerSetupDialog.h"
 #include "Workspace.h"
 #include "ChildFrame.h"
+#include "DocTemplates.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/UI/BaseZoomView.h"
@@ -292,6 +293,8 @@ BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
 	ON_COMMAND( CM_CLEAR_IMAGE_CACHE, CmClearImageCache )
 	ON_UPDATE_COMMAND_UI( CM_CLEAR_IMAGE_CACHE, OnUpdateAlwaysEnabled )
 	ON_UPDATE_COMMAND_UI( CM_CLEAR_TEMP_EMBEDDED_CLONES, OnUpdateAlwaysEnabled )
+	ON_COMMAND_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, On_RegisterImageAssoc )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, OnUpdate_RegisterImageAssoc )
 END_MESSAGE_MAP()
 
 int CMainFrame::OnCreate( CREATESTRUCT* pCS )
@@ -463,4 +466,19 @@ void CMainFrame::CmClearImageCache( void )
 void CMainFrame::CmRefreshContent( void )
 {
 	app::GetApp()->UpdateAllViews( Hint_ReloadImage );
+}
+
+void CMainFrame::On_RegisterImageAssoc( UINT cmdId )
+{
+	bool doRegister = ID_REGISTER_IMAGE_ASSOC == cmdId;
+
+	CAppDocManager::RegisterImageAdditionalShellExt( doRegister );
+}
+
+void CMainFrame::OnUpdate_RegisterImageAssoc( CCmdUI* pCmdUI )
+{
+	bool doRegister = ID_REGISTER_IMAGE_ASSOC == pCmdUI->m_nID;
+	bool isRegistered = CAppDocManager::IsAppRegisteredForImageExt();
+
+	pCmdUI->SetCheck( doRegister == isRegistered );
 }

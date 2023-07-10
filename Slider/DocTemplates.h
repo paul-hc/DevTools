@@ -20,7 +20,10 @@ public:
 	virtual BOOL DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate );
 	virtual void RegisterShellFileTypes( BOOL compatMode );
 
-	void RegisterImageAdditionalShellExt( bool doRegister );
+	static void RegisterImageAdditionalShellExt( bool doRegister );
+	static bool IsAppRegisteredForImageExt( const TCHAR imageExt[] = _T(".bmp") );
+	static bool CanRegisterImageExt( const TCHAR imageExt[] = _T(".bmp") );
+	static bool CheckCanRegisterImageExt( const TCHAR imageExt[] = _T(".bmp") );
 private:
 	app::CAlbumDocTemplate* m_pAlbumTemplate;
 };

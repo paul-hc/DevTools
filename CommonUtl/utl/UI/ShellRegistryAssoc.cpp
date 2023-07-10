@@ -21,7 +21,7 @@ namespace shell
 	bool QueryHandlerName( std::tstring& rHandlerName, const TCHAR ext[] )
 	{
 		reg::CKey key;
-		if ( key.Open( HKEY_CLASSES_ROOT, ext, KEY_READ ) )			// extension already registered?
+		if ( key.Open( HKEY_CLASSES_ROOT, ext, KEY_READ ) )				// extension already registered?
 			if ( key.QueryStringValue( nullptr, rHandlerName ) )		// query for default key value (shell handler name)
 				return !rHandlerName.empty();
 
@@ -46,8 +46,7 @@ namespace shell
 	//	pDdeCmd="[open(\"%1\")]" (optional DDE command)
 	//
 	bool RegisterShellVerb( const reg::TKeyPath& verbPath, const reg::TKeyPath& modulePath,
-							const TCHAR* pVerbTag /*= nullptr*/, const TCHAR* pDdeCmd /*= nullptr*/,
-							const std::tstring extraParams /*= str::GetEmpty()*/ )
+							const TCHAR* pVerbTag /*= nullptr*/, const TCHAR* pDdeCmd /*= nullptr*/ )
 	{
 		REQUIRE( !verbPath.IsEmpty() );
 
@@ -57,7 +56,7 @@ namespace shell
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath ) ||
 				 !key.WriteStringValue( nullptr, pVerbTag ) )				// default value of the key
 			{
-				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), verbPath.GetPtr(), key.GetLastError().FormatError().c_str() );
+				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), verbPath.GetPtr(), reg::CKey::GetLastError().FormatError().c_str() );
 				return false;
 			}
 		}

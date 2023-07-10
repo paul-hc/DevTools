@@ -83,6 +83,8 @@ protected:
 	afx_msg void CmLoggerOptions( void );
 	afx_msg void CmRefreshContent( void );
 	afx_msg void CmClearImageCache( void );
+	afx_msg void On_RegisterImageAssoc( UINT cmdId );
+	afx_msg void OnUpdate_RegisterImageAssoc( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateAlwaysEnabled( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()

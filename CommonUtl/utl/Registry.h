@@ -19,6 +19,9 @@ namespace reg
 
 	bool OpenKey( CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired = KEY_READ | KEY_WRITE );
 	bool CreateKey( CKey* pKey, const TCHAR* pKeyFullPath );
+
+	bool KeyExist( const TCHAR* pKeyFullPath, REGSAM samDesired = KEY_READ );
+	bool IsKeyWritable( const TCHAR* pKeyFullPath, bool* pAccessDenied = nullptr );
 }
 
 
@@ -61,9 +64,11 @@ namespace reg
 		static const utl::CErrorCode& GetLastError( void ) { return s_lastError; }		// last API call result
 		static utl::CErrorCode& RefLastError( void ) { return s_lastError; }
 
+		static bool IsLastError_AccessDenied( void ) { return ERROR_ACCESS_DENIED == s_lastError.Get(); }
+
 		bool IsOpen( void ) const { return Get() != nullptr; }
 
-		bool Close( void ) { return s_lastError.Store( m_key.Close() ); }
+		bool Close( void ) { return ERROR_SUCCESS == m_key.Close(); }			// does not override s_lastError, for further inspection of the open error cause
 		void Reset( HKEY hKey = nullptr ) { Close(); m_key.Attach( hKey ); }
 		HKEY Detach( void ) { return m_key.Detach(); }
 

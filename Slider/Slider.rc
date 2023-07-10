@@ -156,7 +156,6 @@ BEGIN
         MENUITEM "Open Folder...\tCtrl+Shift+D", ID_FILE_OPEN_ALBUM_FOLDER
         MENUITEM SEPARATOR
         MENUITEM "Save &Workspace\tCtrl+Shift+S", CM_SAVE_WORKSPACE
-        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
         MENUITEM SEPARATOR
         MENUITEM "Clear Image Cache",           CM_CLEAR_IMAGE_CACHE
         MENUITEM "Clear Temporary Embedded Clones", CM_CLEAR_TEMP_EMBEDDED_CLONES
@@ -167,10 +166,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
     END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "Wor&kspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
-    END
     POPUP "&View"
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
@@ -180,6 +175,16 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
         MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Workspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
+        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
+        MENUITEM SEPARATOR
+        MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
+        MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
     END
     POPUP "&Help"
     BEGIN
@@ -199,7 +204,6 @@ BEGIN
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
         MENUITEM SEPARATOR
         MENUITEM "Save &Workspace\tCtrl+Shift+S", CM_SAVE_WORKSPACE
-        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
         POPUP "&Image File"
         BEGIN
             MENUITEM "&Open\tCtrl+Shift+O",         ID_IMAGE_OPEN
@@ -232,11 +236,6 @@ BEGIN
         MENUITEM "&Clear Undo Buffer",          CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS
         MENUITEM SEPARATOR
         MENUITEM "Store Undo Information",      CK_SAVE_CU_UNDO_REDO_BUFFER
-        MENUITEM SEPARATOR
-        MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
-        MENUITEM "Password...",                 ID_EDIT_ARCHIVE_PASSWORD
-        MENUITEM SEPARATOR
-        MENUITEM "Wor&kspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
     END
     POPUP "&Album"
     BEGIN
@@ -252,8 +251,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Wrap Mode",                  ID_TOGGLE_NAVIG_WRAP_MODE
         MENUITEM SEPARATOR
-        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
-        MENUITEM SEPARATOR
         POPUP "&Auto-Drop Recipient"
         BEGIN
             MENUITEM "&Defragment Files",           CM_AUTO_DROP_DEFRAGMENT
@@ -268,6 +265,10 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Copy Album &Map",             ID_EDIT_COPY_ALBUM_MAP
         MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
+        MENUITEM SEPARATOR
+        MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
+        MENUITEM "Password Protect...",         ID_EDIT_ARCHIVE_PASSWORD
+        MENUITEM SEPARATOR
         MENUITEM "Album &Settings...\tCtrl+Space", ID_EDIT_ALBUM
     END
     POPUP "&View"
@@ -297,6 +298,16 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
         MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Workspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
+        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
+        MENUITEM SEPARATOR
+        MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
+        MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
     END
     POPUP "&Window"
     BEGIN
@@ -328,7 +339,6 @@ BEGIN
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
         MENUITEM SEPARATOR
         MENUITEM "Save &Workspace\tCtrl+Shift+S", CM_SAVE_WORKSPACE
-        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
         POPUP "&Image File"
         BEGIN
             MENUITEM "Delete...\tDelete",           ID_IMAGE_DELETE
@@ -353,10 +363,6 @@ BEGIN
         MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
-        MENUITEM SEPARATOR
-        MENUITEM "Wor&kspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
     END
     POPUP "&View"
     BEGIN
@@ -391,6 +397,16 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
         MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Workspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
+        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
+        MENUITEM SEPARATOR
+        MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
+        MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
     END
     POPUP "&Window"
     BEGIN
@@ -484,9 +500,6 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "&Clear Undo Buffer",          CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS
             MENUITEM SEPARATOR
-            MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
-            MENUITEM "Password...",                 ID_EDIT_ARCHIVE_PASSWORD
-            MENUITEM SEPARATOR
             MENUITEM "Store Undo Information",      CK_SAVE_CU_UNDO_REDO_BUFFER
         END
         POPUP "&View"
@@ -508,8 +521,11 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "E&xtract Catalog...",         ID_FILE_EXTRACT_CATALOG
         MENUITEM "Copy Album &Map",             ID_EDIT_COPY_ALBUM_MAP
-        MENUITEM SEPARATOR
         MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
+        MENUITEM SEPARATOR
+        MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
+        MENUITEM "Password Protect...",         ID_EDIT_ARCHIVE_PASSWORD
+        MENUITEM SEPARATOR
         MENUITEM "Album &Settings...\tCtrl+Space", ID_EDIT_ALBUM
     END
     POPUP "<album thumbs>"
@@ -533,8 +549,6 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "&Clear Undo Buffer",          CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS
             MENUITEM SEPARATOR
-            MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
-            MENUITEM SEPARATOR
             MENUITEM "Store Undo Information",      CK_SAVE_CU_UNDO_REDO_BUFFER
         END
         POPUP "&View"
@@ -555,6 +569,10 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
+        MENUITEM SEPARATOR
+        MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
+        MENUITEM "Password Protect...",         ID_EDIT_ARCHIVE_PASSWORD
+        MENUITEM SEPARATOR
         MENUITEM "Album &Settings...\tCtrl+Space", ID_EDIT_ALBUM
     END
     POPUP "<album found list>"

@@ -53,6 +53,21 @@ namespace reg
 		pKey->Reset();
 		return false;
 	}
+
+	bool KeyExist( const TCHAR* pKeyFullPath, REGSAM samDesired /*= KEY_READ*/ )
+	{
+		CKey key;
+		return OpenKey( &key, pKeyFullPath, samDesired );
+	}
+
+	bool IsKeyWritable( const TCHAR* pKeyFullPath, bool* pAccessDenied /*= nullptr*/ )
+	{
+		CKey key;
+		bool writeble = OpenKey( &key, pKeyFullPath, KEY_READ | KEY_WRITE );
+
+		utl::AssignPtr( pAccessDenied, reg::CKey::IsLastError_AccessDenied() );
+		return writeble;
+	}
 }
 
 

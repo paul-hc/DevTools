@@ -27,6 +27,23 @@
 
 namespace app
 {
+	static const TCHAR s_verb_OpenWithSlider[] = _T("OpenWithSlider");
+	static const TCHAR s_verb_EnqueueInSlider[] = _T("EnqueueInSlider");
+
+	reg::TKeyPath MakeShellHandlerVerbFullPath( const TCHAR imageExt[], const TCHAR verb[] = app::s_verb_OpenWithSlider )
+	{
+		REQUIRE( !str::IsEmpty( imageExt ) );
+
+		reg::TKeyPath openKeyPath;
+		std::tstring handlerName;
+
+		if ( shell::QueryHandlerName( handlerName, imageExt ) )		// valid indirect shell extension handler?
+			openKeyPath = reg::TKeyPath( _T("HKEY_CLASSES_ROOT") ) / shell::MakeShellHandlerVerbPath( handlerName.c_str(), verb );	// "HKEY_CLASSES_ROOT\\<handler>\\shell\\OpenWithSlider"
+
+		return openKeyPath;
+	}
+
+
 	bool PromptFileDialogImpl( CString& rFilePath, const fs::CFilterJoiner& filterJoiner, UINT titleId, DWORD flags, BOOL openDlg )
 	{
 		fs::CPath filePath( rFilePath.GetString() );
@@ -116,27 +133,57 @@ void CAppDocManager::RegisterImageAdditionalShellExt( bool doRegister )
 	const std::vector<std::tstring>& imageExts = app::CImageDocTemplate::Instance()->GetAllExts();
 	std::tstring handlerName;
 	std::unordered_set<std::tstring> uniqueHandlers;
+	bool accessDenied = false;
 
-	for ( std::vector<std::tstring>::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end(); ++itImageExt )
+	for ( std::vector<std::tstring>::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end() && !accessDenied; ++itImageExt )
 	{
 		if ( shell::QueryHandlerName( handlerName, itImageExt->c_str() ) )		// valid indirect shell extension handler?
 			if ( uniqueHandlers.insert( handlerName ).second )					// first entry encountered?
 			{	// e.g. "Photoshop.BMPFile.10", "Paint.Picture", "rlefile", "giffile", "IcoFX.ico", "IcoFX.cur", "jpegfile", 
-				reg::TKeyPath openPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("OpenWithSlider") );				// "<handler>\\shell\\OpenWithSlider"
-				reg::TKeyPath enqueuePath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("EnqueueInSlider") );			// "<handler>\\shell\\EnqueueInSlider" - obsolete
+				reg::TKeyPath openKeyPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), app::s_verb_OpenWithSlider );			// "<handler>\\shell\\OpenWithSlider"
+				reg::TKeyPath enqueueKeyPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), app::s_verb_EnqueueInSlider );		// "<handler>\\shell\\EnqueueInSlider" - obsolete
 
 				if ( doRegister )
 				{
-					shell::RegisterShellVerb( openPath, app::GetModulePath(), _T("Open with &Slider"), shell::GetDdeOpenCmd() );
-					//shell::RegisterShellVerb( enqueuePath, app::GetModulePath(), _T("Enque&ue in Slider"), _T("[queue(\"%1\")]") );	// PHC 2023-07-05: remove the obsolete "[queue(\"%1\")" DDE command
+					if ( !shell::RegisterShellVerb( openKeyPath, app::GetModulePath(), _T("Open with &Slider"), shell::GetDdeOpenCmd() ) )
+						accessDenied = reg::CKey::IsLastError_AccessDenied();
+
+					//shell::RegisterShellVerb( enqueueKeyPath, app::GetModulePath(), _T("Enque&ue in Slider"), _T("[queue(\"%1\")]") );	// PHC 2023-07-05: remove the obsolete "[queue(\"%1\")" DDE command
 				}
 				else
 				{	// remove slider entries for shell
-					shell::UnregisterShellVerb( openPath );
-					shell::UnregisterShellVerb( enqueuePath );
+					if ( !shell::UnregisterShellVerb( openKeyPath ) )
+						accessDenied = reg::CKey::IsLastError_AccessDenied();
+
+					if ( !shell::UnregisterShellVerb( enqueueKeyPath ) )
+						accessDenied = reg::CKey::IsLastError_AccessDenied();
 				}
 			}
 	}
+
+	if ( accessDenied )
+		ui::MessageBox( _T("WARNING:\nCannot register Slider application as handler for the known image file types!\n\nYou must run the program as Administrator."), MB_OK | MB_ICONWARNING );
+}
+
+bool CAppDocManager::IsAppRegisteredForImageExt( const TCHAR imageExt[] /*= _T(".bmp")*/ )
+{
+	reg::TKeyPath openKeyPath = app::MakeShellHandlerVerbFullPath( imageExt );
+
+	if ( !openKeyPath.IsEmpty() )		// valid indirect shell extension handler?
+		return reg::KeyExist( openKeyPath.GetPtr(), KEY_READ );
+
+	return false;
+}
+
+bool CAppDocManager::CanRegisterImageExt( const TCHAR imageExt[] /*= _T(".bmp")*/ )
+{
+	reg::TKeyPath openKeyPath = app::MakeShellHandlerVerbFullPath( imageExt );
+	bool accessDenied;
+
+	if ( !openKeyPath.IsEmpty() )		// valid indirect shell extension handler?
+		return reg::IsKeyWritable( openKeyPath.GetPtr(), &accessDenied ) && !accessDenied;
+
+	return false;
 }
 
 

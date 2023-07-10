@@ -348,7 +348,7 @@ BOOL CApplication::InitInstance( void )
 	RegisterShellFileTypes( TRUE );			// register image and album extensions and document types
 
 	if ( HasForceMask( app::RegImgAdditionalExt ) )
-		pAppDocManager->RegisterImageAdditionalShellExt( HasForceFlag( app::RegImgAdditionalExt ) );
+		CAppDocManager::RegisterImageAdditionalShellExt( HasForceFlag( app::RegImgAdditionalExt ) );
 
 	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
 
