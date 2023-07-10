@@ -1,7 +1,6 @@
 
 #include "pch.h"
 #include "ColorPopupDialogs.h"
-#include "WndUtils.h"
 #include <colordlg.h>
 
 #ifdef _DEBUG
@@ -68,7 +67,7 @@ void CColorPopupDialog::InitDialog( void ) override
 	m_menuPickerStatic.SetFont( pAddCustomColorButton->GetFont() );		// share the dialog control font
 }
 
-void CColorPopupDialog::AdjustWindowRect( CRect& rWindowRect ) override
+void CColorPopupDialog::AdjustDlgWindowRect( CRect& rWindowRect ) override
 {
 	enum { SpacingRight = 5 };
 

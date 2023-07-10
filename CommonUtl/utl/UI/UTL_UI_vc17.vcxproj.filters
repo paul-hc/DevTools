@@ -623,6 +623,9 @@
     <ClInclude Include="pch.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="ColorPopupDialogs.h">
+      <Filter>UI\Dialogs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1068,6 +1071,9 @@
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorPopupDialogs.cpp">
+      <Filter>UI\Dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

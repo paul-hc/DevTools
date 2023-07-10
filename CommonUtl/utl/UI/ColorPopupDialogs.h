@@ -10,6 +10,8 @@
 #include "Color.h"
 #include "CmdUpdate.h"
 #include "Dialog_fwd.h"
+#include "GdiCoords.h"
+#include "WndUtils.h"
 #include "resource.h"
 
 
@@ -44,7 +46,7 @@ protected:
 	virtual void ModifyColor( COLORREF newColor ) = 0;
 
 	virtual void InitDialog( void );
-	virtual void AdjustWindowRect( CRect& rWindowRect ) { rWindowRect; }
+	virtual void AdjustDlgWindowRect( CRect& rWindowRect ) { rWindowRect; }
 	virtual bool IsTracking( void ) const { return false; }
 
 	void CloseDialog( int cmdId );		// termination
@@ -100,7 +102,7 @@ protected:
 	virtual void ModifyColor( COLORREF newColor ) override { SetCurrentColor( newColor ); }
 
 	virtual void InitDialog( void ) override;
-	virtual void AdjustWindowRect( CRect& rWindowRect ) override;
+	virtual void AdjustDlgWindowRect( CRect& rWindowRect ) override;
 private:
 	void CreateSpin( UINT editId, CSpinButtonCtrl& rSpinButton, UINT spinId, int maxValue );
 	void OffsetControl( UINT ctrlId, int offsetX );
@@ -187,24 +189,24 @@ template< typename BaseDlg >
 void CBasePopupColorDialog<BaseDlg>::CloseDialog( int cmdId )
 {
 	REQUIRE( IDOK == cmdId || IDCANCEL == cmdId );
-	PostMessage( WM_COMMAND, MAKEWPARAM( cmdId, BN_CLICKED ) );			// common dialogs (e.g. CColorDialog) do not use EndDialog
+	this->PostMessage( WM_COMMAND, MAKEWPARAM( cmdId, BN_CLICKED ) );			// common dialogs (e.g. CColorDialog) do not use EndDialog
 }
 
 template< typename BaseDlg >
 void CBasePopupColorDialog<BaseDlg>::LayoutDialog( void )
 {
 	CRect windowRect, oldWindowRect;
-	GetWindowRect( &oldWindowRect );
+	this->GetWindowRect( &oldWindowRect );
 
 	if ( m_behaveLikeModeless )
 	{
-		GetClientRect( &oldWindowRect );
-		AdjustWindowRect( oldWindowRect );
+		this->GetClientRect( &oldWindowRect );
+		AdjustDlgWindowRect( oldWindowRect );
 
-		ModifyStyle( WS_BORDER | WS_DLGFRAME | WS_SYSMENU | DS_MODALFRAME, 0 );
-		ModifyStyleEx( WS_EX_WINDOWEDGE, 0 );
+		this->ModifyStyle( WS_BORDER | WS_DLGFRAME | WS_SYSMENU | DS_MODALFRAME, 0 );
+		this->ModifyStyleEx( WS_EX_WINDOWEDGE, 0 );
 
-		AdjustWindowRectEx( &oldWindowRect, GetStyle(), FALSE, GetExStyle() );
+		::AdjustWindowRectEx( &oldWindowRect, this->GetStyle(), FALSE, this->GetExStyle() );
 
 		ui::SetRectSize( windowRect, oldWindowRect.Size() );
 		ui::AlignPopupWindowRect( windowRect, GetAlignScreenRect(), m_popupAlign );
@@ -212,11 +214,11 @@ void CBasePopupColorDialog<BaseDlg>::LayoutDialog( void )
 	else
 	{	// enlarge slightly on the right
 		windowRect = oldWindowRect;
-		AdjustWindowRect( windowRect );
+		AdjustDlgWindowRect( windowRect );
 	}
 
-	SetWindowPos( NULL, windowRect.left, windowRect.top, windowRect.Width(), windowRect.Height(),
-				  SWP_DRAWFRAME | SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_NOZORDER /*| SWP_SHOWWINDOW*/ );
+	this->SetWindowPos( NULL, windowRect.left, windowRect.top, windowRect.Width(), windowRect.Height(),
+						SWP_DRAWFRAME | SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_NOZORDER /*| SWP_SHOWWINDOW*/ );
 }
 
 template< typename BaseDlg >
@@ -225,8 +227,8 @@ CRect CBasePopupColorDialog<BaseDlg>::GetAlignScreenRect( void ) const
 	CRect alignScreenRect = m_alignScreenRect;
 
 	if ( alignScreenRect.IsRectNull() )
-		if ( m_pParentWnd != nullptr )
-			m_pParentWnd->GetWindowRect( &alignScreenRect );	// align to parent
+		if ( this->m_pParentWnd != nullptr )
+			this->m_pParentWnd->GetWindowRect( &alignScreenRect );	// align to parent
 
 	return alignScreenRect;
 }
@@ -244,7 +246,7 @@ void CBasePopupColorDialog<BaseDlg>::DoDataExchange( CDataExchange* pDX )
 template< typename BaseDlg >
 BOOL CBasePopupColorDialog<BaseDlg>::PreTranslateMessage( MSG* pMsg )
 {
-	if ( m_accel.Translate( pMsg, m_hWnd ) )
+	if ( m_accel.Translate( pMsg, this->m_hWnd ) )
 		return TRUE;
 
 	return __super::PreTranslateMessage( pMsg );
@@ -266,7 +268,7 @@ BOOL CBasePopupColorDialog<BaseDlg>::OnNcActivate( BOOL active )
 template< typename BaseDlg >
 void CBasePopupColorDialog<BaseDlg>::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
-	AfxCancelModes( m_hWnd );
+	AfxCancelModes( this->m_hWnd );
 	if ( !isSysMenu )
 		ui::UpdateMenuUI( this, pPopupMenu );
 
@@ -328,7 +330,7 @@ inline void CBasePopupColorDialog<BaseDlg>::On_ResetDefaultColor( void )
 template< typename BaseDlg >
 void CBasePopupColorDialog<BaseDlg>::OnUpdate_ResetDefaultColor( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( GetColor() != m_defaultColor && !ui::IsNullColor( m_defaultColor ) );
+	pCmdUI->Enable( this->GetColor() != m_defaultColor && !ui::IsNullColor( m_defaultColor ) );
 }
 
 template< typename BaseDlg >
