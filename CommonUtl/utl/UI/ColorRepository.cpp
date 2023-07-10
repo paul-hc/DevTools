@@ -59,6 +59,8 @@ namespace ui
 
 // CColorEntry implementation
 
+const TCHAR CColorEntry::s_fieldSep[] = _T("  ");
+
 CColorEntry::CColorEntry( COLORREF color, const char* pLiteral )
 	: m_color( color )
 	, m_name( word::ToSpacedWordBreaks( str::FromAnsi( FindScopedLiteral( pLiteral ) ).c_str() ) )
@@ -72,6 +74,17 @@ const char* CColorEntry::FindScopedLiteral( const char* pScopedColorName )
 	size_t posLastScope = str::FindLast<str::Case>( pScopedColorName, s_scopeOp.c_str(), s_scopeOp.length() );
 
 	return posLastScope != std::string::npos ? ( pScopedColorName + posLastScope + s_scopeOp.length() ) : pScopedColorName;
+}
+
+std::tstring CColorEntry::FormatColor( void ) const
+{
+	std::tstring colorName = m_name;
+
+	if ( m_pParentTable != nullptr )
+		stream::Tag( colorName, str::Enquote( m_pParentTable->GetTableName().c_str(), _T("("), _T(")") ), s_fieldSep );
+
+	stream::Tag( colorName, ui::FormatColor( m_color ), s_fieldSep );
+	return colorName;
 }
 
 
@@ -117,6 +130,14 @@ size_t CColorTable::FindCmdIndex( UINT cmdId ) const
 	return foundIndex < m_colors.size() ? foundIndex : utl::npos;
 }
 
+int CColorTable::GetColumnsLayout( void ) const
+{
+	if ( m_layoutCount > 0 )		// column layout?
+		return m_layoutCount;
+	else
+		return static_cast<int>( m_colors.size() ) / -m_layoutCount;
+}
+
 void CColorTable::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const
 {
 	if ( m_layoutCount > 0 )		// column layout?
@@ -129,6 +150,20 @@ void CColorTable::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) c
 		utl::AssignPtr( pRowCount, static_cast<size_t>( -m_layoutCount ) );
 		utl::AssignPtr( pColumnCount, m_colors.size() / -m_layoutCount );
 	}
+}
+
+void CColorTable::QueryMfcColors( ui::TMFCColorArray& rColorArray ) const
+{
+	rColorArray.SetSize( m_colors.size() );
+
+	for ( size_t i = 0; i != m_colors.size(); ++i )
+		rColorArray[ i ] = m_colors[ i ].EvalColor();
+}
+
+void CColorTable::QueryMfcColors( ui::TMFCColorList& rColorList ) const
+{
+	for ( std::vector<CColorEntry>::const_iterator itColorEntry = m_colors.begin(); itColorEntry != m_colors.end(); ++itColorEntry )
+		rColorList.AddTail( ui::EvalColor( itColorEntry->m_color ) );
 }
 
 CColorTable* CColorTable::MakeShadesTable( size_t shadesCount, COLORREF selColor )
@@ -188,9 +223,9 @@ CColorTable* CColorTable::MakeShadesTable( size_t shadesCount, COLORREF selColor
 }
 
 
-// CColorTableGroup implementation
+// CColorStore implementation
 
-const CColorTable* CColorTableGroup::FindTable( ui::StdColorTable tableType ) const
+const CColorTable* CColorStore::FindTable( ui::StdColorTable tableType ) const
 {
 	for ( std::vector<CColorTable*>::const_iterator itTable = m_colorTables.begin(); itTable != m_colorTables.end(); ++itTable )
 		if ( (*itTable)->GetTableType() == tableType )
@@ -199,7 +234,7 @@ const CColorTable* CColorTableGroup::FindTable( ui::StdColorTable tableType ) co
 	return nullptr;
 }
 
-const CColorEntry* CColorTableGroup::FindColorEntry( COLORREF rawColor ) const
+const CColorEntry* CColorStore::FindColorEntry( COLORREF rawColor ) const
 {
 	if ( !ui::IsUndefinedColor( rawColor ) )		// a repo color?
 	{
@@ -220,7 +255,7 @@ const CColorEntry* CColorTableGroup::FindColorEntry( COLORREF rawColor ) const
 	return nullptr;
 }
 
-void CColorTableGroup::QueryMatchingColors( OUT std::vector<const CColorEntry*>& rColorEntries, COLORREF rawColor ) const
+void CColorStore::QueryMatchingColors( OUT std::vector<const CColorEntry*>& rColorEntries, COLORREF rawColor ) const
 {
 	if ( !ui::IsUndefinedColor( rawColor ) )				// color has entry?
 	{
@@ -242,7 +277,7 @@ void CColorTableGroup::QueryMatchingColors( OUT std::vector<const CColorEntry*>&
 	}
 }
 
-std::tstring CColorTableGroup::FormatColorMatch( COLORREF rawColor, bool multiple /*= true*/ ) const
+std::tstring CColorStore::FormatColorMatch( COLORREF rawColor, bool multiple /*= true*/ ) const
 {
 	std::vector<const CColorEntry*> colorEntries;
 
@@ -251,7 +286,6 @@ std::tstring CColorTableGroup::FormatColorMatch( COLORREF rawColor, bool multipl
 	else if ( const CColorEntry* pFoundEntry = FindColorEntry( rawColor ) )
 		colorEntries.push_back( pFoundEntry );
 
-	static const TCHAR s_sep[] = _T("  ");
 	func::ToQualifiedColorName toQualifiedName;
 	std::tstring outText;
 
@@ -262,14 +296,14 @@ std::tstring CColorTableGroup::FormatColorMatch( COLORREF rawColor, bool multipl
 			std::transform( colorEntries.begin(), colorEntries.end(), std::inserter( colorNames, colorNames.begin() ), func::ToColorName() );
 
 			if ( 1 == colorNames.size() )		// single shared color name?
-				outText = *colorNames.begin() + s_sep + str::Enquote( str::Join( colorEntries, _T(", "), func::ToTableName() ).c_str(), _T("("), _T(")") );
+				outText = *colorNames.begin() + CColorEntry::s_fieldSep + str::Enquote( str::Join( colorEntries, _T(", "), func::ToTableName() ).c_str(), _T("("), _T(")") );
 			else
 				outText = str::Join( colorEntries, _T(", "), toQualifiedName );
 		}
 		else
-			outText = toQualifiedName( colorEntries.front(), s_sep );
+			outText = toQualifiedName( colorEntries.front(), CColorEntry::s_fieldSep );
 
-	stream::Tag( outText, ui::FormatColor( rawColor ), s_sep );
+	stream::Tag( outText, ui::FormatColor( rawColor ), CColorEntry::s_fieldSep );
 	return outText;
 }
 

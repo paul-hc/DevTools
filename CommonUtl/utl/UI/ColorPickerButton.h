@@ -5,25 +5,28 @@
 #include <afxcolorbutton.h>
 #include <afxmenubutton.h>
 #include "Dialog_fwd.h"
+#include "StdColors.h"
 
 
-class CColorTableGroup;
+class CColorTable;
+class CColorStore;
 
 
 class CColorPickerButton : public CMFCColorButton
 	, public ui::ICustomCmdInfo
 {
 public:
-	CColorPickerButton( void );
+	CColorPickerButton( ui::StdColorTable tableType = ui::Standard_Colors );
 	virtual ~CColorPickerButton();
 
-	const CColorTableGroup& GetTableGroup( void ) const { return *m_pTableGroup; }
-	CColorTableGroup& RefTableGroup( void ) { return *m_pTableGroup; }
+	const CColorStore& GetColorStore( void ) const { return *m_pColorStore; }
 
 	void StoreColors( const std::vector<COLORREF>& colors );
 	void SetHalftoneColors( size_t size = 256 );
-
-HMENU m_hPopup;
+	void StoreColorTable( const CColorTable* pColorTable );
+	void StoreColorTable( ui::StdColorTable tableType );
+private:
+	static void RegisterColorNames( const CColorTable* pColorTable );
 protected:
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
@@ -32,7 +35,7 @@ protected:
 protected:
 	virtual void OnShowColorPopup( void ) override;
 private:
-	std::unique_ptr<CColorTableGroup> m_pTableGroup;
+	std::unique_ptr<CColorStore> m_pColorStore;
 };
 
 

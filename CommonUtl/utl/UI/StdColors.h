@@ -10,8 +10,27 @@ namespace color
 
 	__declspec( selectany ) extern const COLORREF Null = CLR_NONE;
 	__declspec( selectany ) extern const COLORREF Auto = CLR_DEFAULT;
+}
 
 
+class CEnumTags;
+
+
+namespace ui
+{
+	enum StdColorTable
+	{
+		System_Colors, Standard_Colors, Custom_Colors, Office2003_Colors, DirectX_Colors, HTML_Colors, X11_Colors,		// color-repo standard tables
+		Shades_Colors, User_Colors,				// implementation (not based in repository)
+		_ColorTableCount
+	};
+
+	const CEnumTags& GetTags_ColorTable( void );
+}
+
+
+namespace color
+{
 	enum StandardColor
 	{
 		// column 0

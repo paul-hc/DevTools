@@ -2,27 +2,21 @@
 #define ColorRepository_h
 #pragma once
 
+#include "Color.h"
 #include "StdColors.h"
 
 
-class CEnumTags;
-class CColorTable;
+#define COLOR_ENTRY( stdColor )  CColorEntry( (stdColor), CColorEntry::FindScopedLiteral( #stdColor ) )
 
 
 namespace ui
 {
-	enum StdColorTable
-	{
-		System_Colors, Standard_Colors, Custom_Colors, Office2003_Colors, DirectX_Colors, HTML_Colors, X11_Colors,		// color-repo standard tables
-		Shades_Colors, User_Colors,				// implementation (not based in repository)
-		_ColorTableCount
-	};
-
-	const CEnumTags& GetTags_ColorTable( void );
+	typedef CArray<COLORREF,COLORREF> TMFCColorArray;
+	typedef CList<COLORREF,COLORREF> TMFCColorList;
 }
 
 
-#define COLOR_ENTRY( stdColor )  CColorEntry( (stdColor), CColorEntry::FindScopedLiteral( #stdColor ) )
+class CColorTable;
 
 
 class CColorEntry		// a named colour
@@ -36,9 +30,14 @@ public:
 	static const char* FindScopedLiteral( const char* pScopedColorName );
 
 	const CColorTable* GetParentTable( void ) const { return m_pParentTable; }
+
+	COLORREF EvalColor( void ) const { return ui::EvalColor( m_color ); }
+	std::tstring FormatColor( void ) const;
 public:
 	COLORREF m_color;
 	std::tstring m_name;
+
+	static const TCHAR s_fieldSep[];
 private:
 	const CColorTable* m_pParentTable;
 
@@ -62,9 +61,13 @@ public:
 	UINT GetCmdIdAt( size_t index ) const { ASSERT( index < m_colors.size() ); return m_baseCmdId + static_cast<UINT>( index ); }
 	size_t FindCmdIndex( UINT cmdId ) const;
 
+	int GetColumnsLayout( void ) const;
 	void GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const;
 
 	void Add( const CColorEntry& colorEntry );
+
+	void QueryMfcColors( ui::TMFCColorArray& rColorArray ) const;
+	void QueryMfcColors( ui::TMFCColorList& rColorList ) const;
 
 	static CColorTable* MakeShadesTable( size_t shadesCount, COLORREF selColor );
 private:
@@ -75,10 +78,10 @@ private:
 };
 
 
-class CColorTableGroup
+class CColorStore			// collection of color tables
 {
 public:
-	CColorTableGroup( void ) {}
+	CColorStore( void ) {}
 
 	const std::vector<CColorTable*>& GetTables( void ) const { return m_colorTables; }
 	std::vector<CColorTable*>& RefTables( void ) { return m_colorTables; }
@@ -95,7 +98,7 @@ protected:
 };
 
 
-class CColorRepository : public CColorTableGroup
+class CColorRepository : public CColorStore
 {
 	CColorRepository( void );
 	~CColorRepository() { Clear(); }

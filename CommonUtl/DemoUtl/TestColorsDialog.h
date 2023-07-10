@@ -21,8 +21,8 @@ private:
 	bool m_editChecked;
 private:
 	// enum { IDD = IDD_TEST_COLORS_DIALOG };
-	CMFCColorButton m_colorPickerButton;		// drop-down button
-	std::auto_ptr<CColorPickerButton> m_pMyColorPicker;
+	CMFCColorButton m_mfcColorPickerButton;		// drop-down button
+	std::auto_ptr<CColorPickerButton> m_pUtlColorPicker;
 	std::auto_ptr<CMenuPickerButton> m_pMenuPicker;
 
 	// generated stuff

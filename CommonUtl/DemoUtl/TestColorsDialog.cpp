@@ -84,27 +84,30 @@ namespace layout
 CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_TEST_COLORS_DIALOG, pParent )
 	, m_color( CLR_NONE )
-	, m_pMyColorPicker( new CColorPickerButton() )
+	, m_pUtlColorPicker( new CColorPickerButton() )
 	, m_pMenuPicker( new CMenuPickerButton() )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
-	m_colorPickerButton.EnableAutomaticButton( _T("Automatic"), color::Yellow );
-	m_colorPickerButton.EnableOtherButton( _T("Other") );
-//	m_colorPickerButton.SetColumnsNumber( 16 );
-	m_colorPickerButton.SetColor( m_color );
+	m_mfcColorPickerButton.EnableAutomaticButton( _T("Automatic"), color::Yellow );
+	m_mfcColorPickerButton.EnableOtherButton( _T("More...") );
+	ui::TMFCColorList docColors;
+	CColorRepository::Instance()->GetTable( ui::Office2003_Colors )->QueryMfcColors( docColors );
+	m_mfcColorPickerButton.SetDocumentColors( _T(" ") /*_T("Document")*/, docColors);
+//	m_mfcColorPickerButton.SetColumnsNumber( 16 );
+	m_mfcColorPickerButton.SetColor( m_color );
 
-	m_pMyColorPicker->EnableAutomaticButton( _T("Automatic"), color::Lime );
-	m_pMyColorPicker->EnableOtherButton( _T("Other") );
-//	m_pMyColorPicker->SetColumnsNumber( 16 );
-	m_pMyColorPicker->SetColor( m_color );
+//	m_pUtlColorPicker->SetHalftoneColors( 16 );
+	m_pUtlColorPicker->EnableAutomaticButton( _T("Automatic"), color::Lime );
+	m_pUtlColorPicker->EnableOtherButton( _T("More...") );
+	m_pUtlColorPicker->SetColor( m_color );
 
 	ui::LoadPopupMenu( m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup, ui::NoMenuImages );
 	m_pMenuPicker->m_bOSMenu = FALSE;
 	m_editChecked = true;
 
-	m_pMyColorPicker->m_hPopup = m_popupMenu;
+	//m_pUtlColorPicker->m_hPopup = m_popupMenu;
 }
 
 CTestColorsDialog::~CTestColorsDialog()
@@ -113,10 +116,10 @@ CTestColorsDialog::~CTestColorsDialog()
 
 void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = nullptr == m_colorPickerButton.m_hWnd;
+	bool firstInit = nullptr == m_mfcColorPickerButton.m_hWnd;
 
-	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, m_colorPickerButton, &m_color );
-	ui::DDX_ColorButton( pDX, IDC_MY_COLOR_PICKER_BUTTON, *m_pMyColorPicker, &m_color );
+	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, m_mfcColorPickerButton, &m_color );
+	ui::DDX_ColorButton( pDX, IDC_MY_COLOR_PICKER_BUTTON, *m_pUtlColorPicker, &m_color );
 	DDX_Control( pDX, IDC_MY_MENU_PICKER_BUTTON, *m_pMenuPicker );
 
 	ui::DDX_ColorText( pDX, IDC_RGB_EDIT, &m_color );
@@ -127,8 +130,6 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
 		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );
-
-		m_pMyColorPicker->SetHalftoneColors( 16 );
 
 		//CMFCButton::EnableWindowsTheming();		already on!
 
@@ -154,18 +155,18 @@ END_MESSAGE_MAP()
 
 void CTestColorsDialog::OnColorPicker( void )
 {
-	m_color = m_colorPickerButton.GetColor();
+	m_color = m_mfcColorPickerButton.GetColor();
 	if ( CLR_NONE == m_color )
-		m_color = m_colorPickerButton.GetAutomaticColor();
+		m_color = m_mfcColorPickerButton.GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }
 
 void CTestColorsDialog::OnMyColorPicker( void )
 {
-	m_color = m_pMyColorPicker->GetColor();
+	m_color = m_pUtlColorPicker->GetColor();
 	if ( CLR_NONE == m_color )
-		m_color = m_pMyColorPicker->GetAutomaticColor();
+		m_color = m_pUtlColorPicker->GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }

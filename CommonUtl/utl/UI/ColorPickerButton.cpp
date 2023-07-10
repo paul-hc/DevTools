@@ -17,11 +17,11 @@
 
 // CColorPickerButton implementation
 
-CColorPickerButton::CColorPickerButton( void )
+CColorPickerButton::CColorPickerButton( ui::StdColorTable tableType /*= ui::Standard_Colors*/ )
 	: CMFCColorButton()
-	, m_pTableGroup( new CColorTableGroup( *CColorRepository::Instance() ) )
-	, m_hPopup( nullptr )
+	, m_pColorStore( new CColorStore( *CColorRepository::Instance() ) )
 {
+	StoreColorTable( tableType );
 }
 
 CColorPickerButton::~CColorPickerButton()
@@ -37,16 +37,42 @@ void CColorPickerButton::StoreColors( const std::vector<COLORREF>& colors )
 void CColorPickerButton::SetHalftoneColors( size_t size /*= 256*/ )
 {
 	std::vector<COLORREF> halftoneColors;
+
 	CHalftoneColorTable::MakeColorTable( halftoneColors, size );
 	StoreColors( halftoneColors );
+}
+
+void CColorPickerButton::StoreColorTable( const CColorTable* pColorTable )
+{
+	ASSERT_PTR( pColorTable );
+
+	m_Colors.RemoveAll();
+	pColorTable->QueryMfcColors( m_Colors );
+	RegisterColorNames( pColorTable );
+	SetColumnsNumber( pColorTable->GetColumnsLayout() );
+}
+
+void CColorPickerButton::StoreColorTable( ui::StdColorTable tableType )
+{
+	StoreColorTable( m_pColorStore->FindTable( tableType ) );
+}
+
+void CColorPickerButton::RegisterColorNames( const CColorTable* pColorTable )
+{
+	ASSERT_PTR( pColorTable );
+
+	const std::vector<CColorEntry>& colorEntries = pColorTable->GetColors();
+
+	for ( std::vector<CColorEntry>::const_iterator itColorEntry = colorEntries.begin(); itColorEntry != colorEntries.end(); ++itColorEntry )
+		CMFCColorButton::SetColorName( itColorEntry->EvalColor(), itColorEntry->FormatColor().c_str() );
 }
 
 void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
 {
 	cmdId, pTooltip;
 
-	if ( m_pTableGroup.get() != nullptr )
-		rText = m_pTableGroup->FormatColorMatch( GetColor() );
+	if ( m_pColorStore.get() != nullptr )
+		rText = m_pColorStore->FormatColorMatch( GetColor() );
 }
 
 
@@ -70,13 +96,13 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 	CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( pPopupMenuBar );
 	pColorBar = pColorBar;
 
-	pColorBar->InsertSeparator();
+/*	pColorBar->InsertSeparator();
 	if ( m_hPopup != nullptr )
 	{
 		//CMFCToolBarMenuButton* pPopulItem = new CMFCToolBarMenuButton( 333, m_dbgPopup, -1, _T("<debug-popup>") );
 		CMFCToolBarMenuButton popupItem( 333, m_hPopup, -1, _T("<debug-popup>") );
 		pColorBar->InsertButton( popupItem );
-	}
+	}*/
 }
 
 
