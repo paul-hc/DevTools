@@ -16,13 +16,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -112,7 +110,7 @@ END
 // Toolbar
 //
 
-IDR_LIST_STRIP TOOLBAR  16, 16
+IDR_LIST_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_ADD_ITEM
     BUTTON      ID_REMOVE_ITEM
@@ -139,7 +137,7 @@ BEGIN
     BUTTON      ID_LIST_VIEW_TILE
 END
 
-IDR_STD_STRIP TOOLBAR  16, 16
+IDR_STD_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_EDIT_COPY
     BUTTON      ID_EDIT_PASTE
@@ -185,9 +183,13 @@ END
 //
 
 IDR_LIST_STRIP          BITMAP                  "res\\ListStrip.bmp"
+
 IDR_STD_STRIP           BITMAP                  "res\\StdStrip.bmp"
+
 IDB_RESIZE_DOWN_UP_BITMAP BITMAP                  "res\\ArrowsDownUpStrip.bmp"
+
 IDB_RESIZE_RIGHT_LEFT_BITMAP BITMAP                  "res\\ArrowsRightLeftStrip.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -195,14 +197,16 @@ IDB_RESIZE_RIGHT_LEFT_BITMAP BITMAP                  "res\\ArrowsRightLeftStrip.
 //
 
 IDR_LIST_STRIP          PNG                     "res\\ListStrip.png"
+
 IDR_STD_STRIP           PNG                     "res\\StdStrip.png"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
 //
 
-IDR_LIST_EDITOR_ACCEL ACCELERATORS 
+IDR_LIST_EDITOR_ACCEL ACCELERATORS
 BEGIN
     VK_DELETE,      ID_REMOVE_ITEM,         VIRTKEY, NOINVERT
     VK_DOWN,        ID_MOVE_DOWN_ITEM,      VIRTKEY, CONTROL, NOINVERT
@@ -215,13 +219,13 @@ BEGIN
     VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
 END
 
-IDR_APP_SHARED_ACCEL ACCELERATORS 
+IDR_APP_SHARED_ACCEL ACCELERATORS
 BEGIN
     VK_F1,          ID_APP_ABOUT,           VIRTKEY, NOINVERT
     "T",            ID_RUN_TESTS,           VIRTKEY, CONTROL, NOINVERT
 END
 
-IDR_TEXT_EDITOR_ACCEL ACCELERATORS 
+IDR_TEXT_EDITOR_ACCEL ACCELERATORS
 BEGIN
     VK_DOWN,        ID_EDIT_NUM_DECREMENT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_UP,          ID_EDIT_NUM_INCREMENT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
@@ -234,14 +238,14 @@ BEGIN
     "W",            ID_EDIT_WORD_SELECT,    VIRTKEY, CONTROL, NOINVERT
 END
 
-IDD_ITEMS_EDIT_PAGE ACCELERATORS 
+IDD_ITEMS_EDIT_PAGE ACCELERATORS
 BEGIN
     VK_F2,          ID_EDIT_ITEM,           VIRTKEY, NOINVERT
     VK_DOWN,        ID_MOVE_DOWN_ITEM,      VIRTKEY, CONTROL, NOINVERT
     VK_UP,          ID_MOVE_UP_ITEM,        VIRTKEY, CONTROL, NOINVERT
 END
 
-IDR_EDIT_ACCEL ACCELERATORS 
+IDR_EDIT_ACCEL ACCELERATORS
 BEGIN
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
@@ -259,7 +263,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUT_BOX, DIALOG
     BEGIN
@@ -346,21 +350,30 @@ END
 //
 
 IDR_SCROLLABLE_CURSOR   CURSOR                  "res\\Scrollable.cur"
+
 IDR_SCROLL_DRAG_CURSOR  CURSOR                  "res\\ScrollDrag.cur"
+
 IDR_DROP_NONE_CURSOR    CURSOR                  "res\\DragDrop-None.cur"
+
 IDR_DROP_MOVE_CURSOR    CURSOR                  "res\\DragDrop-Move.cur"
+
 IDR_DROP_COPY_CURSOR    CURSOR                  "res\\DragDrop-Copy.cur"
+
 IDR_TRACK_SCROLL_CURSOR CURSOR                  "res\\TrackScroll.cur"
+
 IDR_TRACK_ZOOM_CURSOR   CURSOR                  "res\\TrackZoom.cur"
+
 IDC_RESIZE_SPLITTER_NS_CURSOR CURSOR                  "res\\ResizeSplitter-NS.cur"
+
 IDC_RESIZE_SPLITTER_WE_CURSOR CURSOR                  "res\\ResizeSplitter-WE.cur"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_STD_CONTEXT_MENU MENU 
+IDR_STD_CONTEXT_MENU MENU
 BEGIN
     POPUP "<app-main>"
     BEGIN
@@ -463,6 +476,24 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Now\tHome",                   ID_EDIT_ITEM
     END
+    POPUP "<color-picker>"
+    BEGIN
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "Copy Color Table",            ID_EDIT_LIST_ITEMS
+        MENUITEM SEPARATOR
+        POPUP "&Use Color Set"
+        BEGIN
+            MENUITEM "Halftone: 16 Colors",         ID_USE_HALFTONE_TABLE_16
+            MENUITEM "Halftone: 20 Colors",         ID_USE_HALFTONE_TABLE_20
+            MENUITEM "Halftone: 256 Colors",        ID_USE_HALFTONE_TABLE_256
+            MENUITEM SEPARATOR
+            MENUITEM "<color table base ID>",       ID_USE_COLOR_TABLE_MIN
+            MENUITEM SEPARATOR
+            MENUITEM "Custom Colors",               ID_USE_CUSTOM_COLOR_SET
+        END
+    END
     POPUP "<color-popup-dialog>"
     BEGIN
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
@@ -487,16 +518,18 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_UNKNOWN             ICON                    "res\\Unknown.ico"
+
 ID_TRANSPARENT          ICON                    "res\\Transparent.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // AFX_DIALOG_LAYOUT
 //
 
-IDD_ABOUT_BOX AFX_DIALOG_LAYOUT 
+IDD_ABOUT_BOX AFX_DIALOG_LAYOUT
 BEGIN
-    0x0000
+    0
 END
 
 
@@ -505,12 +538,12 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_ITEMS_LIST          "Separators=-1"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ADD_ITEM             "Add a new item\nAdd (Ins)"
     ID_REMOVE_ITEM          "Remove the selected item\nRemove (Delete)"
@@ -521,7 +554,7 @@ BEGIN
     ID_MOVE_DOWN_ITEM       "Move down selected item\nMove Down"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_COPY            "Copy to clipboard\nCopy to Clipboard (Ctrl+C)"
     ID_EDIT_CUT             "Cut to clipboard\nCut to Clipboard (Ctrl+X)"
@@ -530,7 +563,7 @@ BEGIN
     ID_EDIT_REDO            "Redo\nRedo (Ctrl+Y)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_MOVE_TOP_ITEM        "Move selected item to the top\nMove to Top"
     ID_MOVE_BOTTOM_ITEM     "Move selected item to the bottom\nMove to Bottom"
@@ -546,7 +579,7 @@ BEGIN
     ID_RESET_DEFAULT        "Reset to default"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_RUN_TESTS            "Run unit tests"
     ID_TRANSPARENT          "Transparent item"
@@ -559,7 +592,7 @@ BEGIN
                             "Arrange list items from left to right\nHorizontal Stacking"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_LIST_VIEW_STACK_TOPTOBOTTOM 
                             "Arrange list items from top to bottom\nVertical Stacking"
@@ -573,14 +606,15 @@ BEGIN
     ID_USE_COLOR_DIALOG_MFC "Use the new MS Office style color dialog\tUse Office Color Dialog"
     ID_USE_COLOR_DIALOG_COMCTRL 
                             "Use the classic style color dialog\tUse Classic Color Dialog"
+    ID_USE_COLOR_TABLE_MIN  "<color table base ID>"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDD_PASSWORD_DIALOG     "Password"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

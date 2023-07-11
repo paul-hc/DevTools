@@ -98,16 +98,12 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 //	m_mfcColorPickerButton.SetColumnsNumber( 16 );
 	m_mfcColorPickerButton.SetColor( m_color );
 
-//	m_pUtlColorPicker->SetHalftoneColors( 16 );
-	m_pUtlColorPicker->EnableAutomaticButton( _T("Automatic"), color::Lime );
-	m_pUtlColorPicker->EnableOtherButton( _T("More...") );
+	m_pUtlColorPicker->SetAutomaticColor( color::Lime );
 	m_pUtlColorPicker->SetColor( m_color );
 
 	ui::LoadPopupMenu( m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup, ui::NoMenuImages );
 	m_pMenuPicker->m_bOSMenu = FALSE;
 	m_editChecked = true;
-
-	//m_pUtlColorPicker->m_hPopup = m_popupMenu;
 }
 
 CTestColorsDialog::~CTestColorsDialog()

@@ -1,9 +1,11 @@
 
 #include "pch.h"
 #include "MenuUtilities.h"
+#include "CmdUpdate.h"
 #include "ImageStore.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
+#include <afxcontextmenumanager.h>
 
 #ifdef _DEBUG
 #include "FlagTags.h"
@@ -120,6 +122,35 @@ namespace ui
 			trackFlags |= GetAlignTrackFlags( popupAlign );
 
 		return TrackPopupMenu( rMenu, pTargetWnd, GetAlignTrackPos( popupAlign, excludeRect ), trackFlags, &excludeRect );
+	}
+
+
+	int TrackMfcPopupMenu( HMENU hPopupMenu, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand /*= true*/ )
+	{
+		UINT cmdId = 0;
+
+		REQUIRE( ::IsMenu( hPopupMenu ) );
+		AdjustMenuTrackPos( screenPos );
+
+		if ( afxContextMenuManager != NULL )
+		{
+			CWnd* pFocusWnd = CWnd::GetFocus();
+
+			cmdId = afxContextMenuManager->TrackPopupMenu( hPopupMenu, screenPos.x, screenPos.y, pTargetWnd );
+
+			if ( pFocusWnd != nullptr )
+				pFocusWnd->SetFocus();
+		}
+		else
+		{
+			ui::UpdateMenuUI( pTargetWnd, CMenu::FromHandle( hPopupMenu ) );
+			cmdId = ::TrackPopupMenu( hPopupMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, screenPos.x, screenPos.y, 0, pTargetWnd->GetSafeHwnd(), NULL );
+		}
+
+		if ( sendCommand && cmdId != 0 )
+			SendCommand( pTargetWnd->GetSafeHwnd(), cmdId);
+
+		return ui::ToIntCmdId( cmdId );
 	}
 
 	CWnd* AutoTargetWnd( CWnd* pTargetWnd )
@@ -274,6 +305,32 @@ namespace ui
 				return iFirst;
 
 		return -1;
+	}
+
+	CMenu* FindMenuItemIndex( int* pOutIndex, const CMenu* pMenu, UINT itemId, RecursionDepth depth /*= Deep*/ )
+	{
+		ASSERT_PTR( pMenu->GetSafeHmenu() );
+		ASSERT_PTR( pOutIndex );
+
+		for ( unsigned int i = 0, count = pMenu->GetMenuItemCount(); i != count; ++i )
+		{
+			UINT state = pMenu->GetMenuState( i, MF_BYPOSITION );
+			ASSERT( state != UINT_MAX );
+
+			if ( HasFlag( state, MF_POPUP ) )
+			{
+				if ( CMenu* pFoundSubMenu = FindMenuItemIndex( pOutIndex, pMenu->GetSubMenu( i ), itemId, depth ) )
+					return pFoundSubMenu;
+			}
+			else if ( itemId == pMenu->GetMenuItemID( i ) )
+			{
+				*pOutIndex = i;
+				return const_cast<CMenu*>( pMenu );
+			}
+		}
+
+		*pOutIndex = -1;
+		return nullptr;
 	}
 
 	int FindAfterMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst /*= 0*/ )

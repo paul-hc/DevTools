@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "Registry.h"
+#include "utl/StringCompare.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -9,6 +10,37 @@
 
 namespace reg
 {
+	void SplitEntryFullPath( TKeyPath* pOutSection, std::tstring* pOutEntry, const TCHAR* pEntryFullPath )
+	{
+		ASSERT_PTR( pOutSection );
+		ASSERT_PTR( pOutEntry );
+
+		if ( !str::IsEmpty( pEntryFullPath ) )
+		{
+			size_t sepPos = str::Find<str::Case>( pEntryFullPath, '|' );
+			if ( sepPos != utl::npos )
+			{	// e.g. "Settings\\Options|Size" -> section="Settings\\Options", entry="Size"
+				pOutSection->Set( std::tstring( pEntryFullPath, pEntryFullPath + sepPos ) );
+				*pOutEntry = pEntryFullPath + sepPos + 1;
+			}
+			else
+			{	// e.g. "Settings\\Options" -> section="Settings\\Options", entry=""
+				pOutSection->Set( pEntryFullPath );
+				pOutEntry->clear();
+			}
+		}
+		else
+		{
+			pOutSection->Clear();
+			pOutEntry->clear();
+		}
+	}
+}
+
+
+namespace reg
+{
+	void SplitEntryFullPath( TKeyPath* pOutSection, const std::tstring* pOutEntry, const TCHAR* pEntryFullPath );		// e.g. "Settings\\Options|Size" -> section="Settings\\Options", entry="Size"
 	bool WriteStringValue( HKEY hParentKey, const TKeyPath& keySubPath, const TCHAR* pValueName, const std::tstring& text )
 	{
 		CKey key;

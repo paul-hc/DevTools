@@ -2,48 +2,95 @@
 #define ColorPickerButton_h
 #pragma once
 
-#include <afxcolorbutton.h>
-#include <afxmenubutton.h>
+#include "AccelTable.h"
 #include "Dialog_fwd.h"
 #include "StdColors.h"
+#include "utl/Registry_fwd.h"
+#include <afxcolorbutton.h>
 
 
 class CColorTable;
-class CColorStore;
 
 
 class CColorPickerButton : public CMFCColorButton
 	, public ui::ICustomCmdInfo
 {
 public:
-	CColorPickerButton( ui::StdColorTable tableType = ui::Standard_Colors );
+	CColorPickerButton( void );
+	CColorPickerButton( ui::StdColorTable tableType );
 	virtual ~CColorPickerButton();
 
-	const CColorStore& GetColorStore( void ) const { return *m_pColorStore; }
+	const CColorTable* GetColorTable( void ) const { return m_pColorTable; }
 
-	void StoreColors( const std::vector<COLORREF>& colors );
-	void SetHalftoneColors( size_t size = 256 );
-	void StoreColorTable( const CColorTable* pColorTable );
-	void StoreColorTable( ui::StdColorTable tableType );
+	void SetRegSection( const std::tstring& regSection ) { m_regSection = regSection; }
+
+	void SetAutomaticColor( COLORREF autoColor, const TCHAR autoLabel[] = _T("Automatic") ) { EnableAutomaticButton( autoLabel, autoColor ); }
+
+	void SetColors( const std::vector<COLORREF>& colors );
+	void SetHalftoneColors( size_t halftoneSize = 256 );
+
+	bool SetColorTable( const CColorTable* pColorTable );
+	bool SetColorTable( ui::StdColorTable tableType );
+
+	void SetDocumentColors( const CColorTable* pColorTable, const TCHAR* pDocLabel = nullptr );		// additional 'Document' section of colors (below the main colors)
 private:
+	void Construct( void );
+	bool IsEmpty( void ) const { return m_Colors.IsEmpty() && m_lstDocColors.IsEmpty(); }
+	void AddColorTablesSubMenu( CMenu* pContextMenu );
+
+	void LoadFromRegistry( void );
+	void SaveToRegistry( void ) const;
+
 	static void RegisterColorNames( const CColorTable* pColorTable );
+private:
+	const CColorTable* m_pColorTable;
+	size_t m_halftoneSize;
+	bool m_useUserColors;					// neither from color tables, nor the halftone palette
+
+	std::tstring m_regSection;
+	CAccelTable m_accel;
 protected:
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	// base overrides:
-protected:
 	virtual void OnShowColorPopup( void ) override;
-private:
-	std::unique_ptr<CColorStore> m_pColorStore;
+
+	// generated stuff
+public:
+	virtual void PreSubclassWindow( void );
+	virtual BOOL PreTranslateMessage( MSG* pMsg );
+protected:
+	afx_msg void OnDestroy( void );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
+	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
+	afx_msg void OnCopy( void );
+	afx_msg void OnPaste( void );
+	afx_msg void OnUpdatePaste( CCmdUI* pCmdUI );
+	afx_msg void On_CopyColorTable( void );
+	afx_msg void On_HalftoneTable( UINT cmdId );
+	afx_msg void OnUpdate_HalftoneTable( CCmdUI* pCmdUI );
+	afx_msg void On_UseColorTable( UINT cmdId );
+	afx_msg void OnUpdate_UseColorTable( CCmdUI* pCmdUI );
+	afx_msg void OnUpdateEnable( CCmdUI* pCmdUI );
+
+	DECLARE_MESSAGE_MAP()
 };
+
+
+#include <afxmenubutton.h>
 
 
 class CMenuPickerButton : public CMFCMenuButton
 {
 public:
-	CMenuPickerButton( void );
+	CMenuPickerButton( CWnd* pTargetWnd = nullptr );
 	virtual ~CMenuPickerButton();
+
+	void SetTargetWnd( CWnd* pTargetWnd ) { m_pTargetWnd = pTargetWnd; }
+	CWnd* GetTargetWnd( void ) const;
+private:
+	CWnd* m_pTargetWnd;			// if null, parent dialog is the target
 protected:
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 

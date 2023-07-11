@@ -20,7 +20,7 @@ namespace ui
 {
 	enum StdColorTable
 	{
-		System_Colors, Standard_Colors, Custom_Colors, Office2003_Colors, DirectX_Colors, HTML_Colors, X11_Colors,		// color-repo standard tables
+		WindowsSys_Colors, Standard_Colors, Custom_Colors, Office2003_Colors, DirectX_Colors, HTML_Colors, X11_Colors,		// color-repo standard tables
 		Shades_Colors, User_Colors,				// implementation (not based in repository)
 		_ColorTableCount
 	};

@@ -8,6 +8,8 @@
 namespace reg
 {
 	typedef fs::CPath TKeyPath;
+
+	void SplitEntryFullPath( TKeyPath* pOutSection, std::tstring* pOutEntry, const TCHAR* pEntryFullPath );		// e.g. "Settings\\Options|Size" -> section="Settings\\Options", entry="Size"
 }
 
 

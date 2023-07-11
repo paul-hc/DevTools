@@ -5,13 +5,6 @@
 #include "ui_fwd.h"
 
 
-namespace ui { interface IImageStore; }
-
-
-// imports from <afximpl.h>
-void AFXAPI AfxCancelModes( HWND hWndRcvr );
-
-
 namespace ui
 {
 	struct CMenuItemRef
@@ -55,6 +48,8 @@ namespace ui
 
 namespace ui
 {
+	interface IImageStore;
+
 	enum UseMenuImages { NoMenuImages, NormalMenuImages, CheckedMenuImages };
 
 
@@ -66,6 +61,14 @@ namespace ui
 
 	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags = TPM_RIGHTBUTTON, const RECT* pExcludeRect = nullptr );
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign = DropDown, UINT trackFlags = TPM_RIGHTBUTTON );
+
+	// new MFC style popup menus:
+	inline void LoadMfcPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, std::tstring* pPopupText = nullptr )
+	{
+		LoadPopupMenu( rContextMenu, menuResId, popupIndex, NoMenuImages, pPopupText );		// no images
+	}
+
+	int TrackMfcPopupMenu( HMENU hPopupMenu, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand = true );
 
 
 	CWnd* AutoTargetWnd( CWnd* pTargetWnd );
@@ -86,6 +89,7 @@ namespace ui
 	}
 
 	int FindMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );
+	CMenu* FindMenuItemIndex( int* pOutIndex, const CMenu* pMenu, UINT itemId, RecursionDepth depth = Deep );
 	int FindAfterMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );		// subsequent position
 
 	UINT GetTotalCmdCount( HMENU hMenu, RecursionDepth depth = Deep );						// just commands (excluding separators, sub-menus)

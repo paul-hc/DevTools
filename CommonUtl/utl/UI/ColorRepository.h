@@ -32,7 +32,7 @@ public:
 	const CColorTable* GetParentTable( void ) const { return m_pParentTable; }
 
 	COLORREF EvalColor( void ) const { return ui::EvalColor( m_color ); }
-	std::tstring FormatColor( void ) const;
+	std::tstring FormatColor( const TCHAR fieldSep[] = s_fieldSep ) const;
 public:
 	COLORREF m_color;
 	std::tstring m_name;
@@ -57,6 +57,7 @@ public:
 	const std::vector<CColorEntry>& GetColors( void ) const { return m_colors; }
 	const CColorEntry* FindColor( COLORREF rawColor ) const;
 	bool ContainsColor( COLORREF rawColor ) const { return FindColor( rawColor ) != nullptr; }
+	const CColorEntry* FindEvaluatedColor( COLORREF color ) const;
 
 	UINT GetCmdIdAt( size_t index ) const { ASSERT( index < m_colors.size() ); return m_baseCmdId + static_cast<UINT>( index ); }
 	size_t FindCmdIndex( UINT cmdId ) const;
@@ -87,7 +88,8 @@ public:
 	std::vector<CColorTable*>& RefTables( void ) { return m_colorTables; }
 
 	const CColorTable* FindTable( ui::StdColorTable tableType ) const;
-	const CColorTable* FindSystemTable( void ) const { return FindTable( ui::System_Colors ); }
+	const CColorTable* FindTableByName( const std::tstring& tableName ) const;
+	const CColorTable* FindSystemTable( void ) const { return FindTable( ui::WindowsSys_Colors ); }
 
 	// color entries lookup
 	const CColorEntry* FindColorEntry( COLORREF rawColor ) const;
@@ -108,7 +110,7 @@ public:
 	void Clear( void );		// owns the color tables
 
 	const CColorTable* GetTable( ui::StdColorTable tableType ) const { REQUIRE( tableType < ui::_ColorTableCount ); return m_colorTables[ tableType ]; }
-	const CColorTable* GetSystemColorTable( void ) const { return GetTable( ui::System_Colors ); }
+	const CColorTable* GetSystemColorTable( void ) const { return GetTable( ui::WindowsSys_Colors ); }
 	const CColorTable* GetStockColorTable( void ) const { return GetTable( ui::HTML_Colors ); }
 
 	enum TableMenuBaseCmdId
@@ -155,6 +157,22 @@ namespace func
 			ASSERT_PTR( pColorEntry );
 			return pColorEntry->m_name + pSep + _T('(') + pColorEntry->GetParentTable()->GetTableName() + _T(')');
 		}
+	};
+}
+
+
+namespace pred
+{
+	struct HasEvalColor
+	{
+		HasEvalColor( COLORREF rawColor ) : m_color( ui::EvalColor( rawColor ) ) {}
+
+		bool operator()( const CColorEntry& colorEntry ) const
+		{
+			return m_color == colorEntry.EvalColor();
+		}
+	private:
+		COLORREF m_color;
 	};
 }
 
