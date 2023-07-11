@@ -66,7 +66,7 @@ CFont* CBufferedStatic::GetMarlettFont( void )
 
 void CBufferedStatic::PreSubclassWindow( void )
 {
-	CStatic::PreSubclassWindow();
+	__super::PreSubclassWindow();
 
 	DWORD style = GetStyle();			// get prior to modify
 

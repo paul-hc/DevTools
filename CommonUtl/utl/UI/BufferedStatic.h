@@ -8,7 +8,7 @@
 // flicker free painting using owner-draw
 //
 abstract class CBufferedStatic : public CStatic
-							   , public ui::CContentFitBase
+	, public ui::CContentFitBase
 {
 protected:
 	CBufferedStatic( void );

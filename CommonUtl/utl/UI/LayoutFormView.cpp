@@ -114,10 +114,7 @@ void CLayoutFormView::OnSize( UINT sizeType, int cx, int cy )
 
 void CLayoutFormView::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
-	AfxCancelModes( m_hWnd );
-	if ( !isSysMenu )
-		ui::UpdateMenuUI( this, pPopupMenu );
-
+	ui::HandleInitMenuPopup( this, pPopupMenu, !isSysMenu );
 	CFormView::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 

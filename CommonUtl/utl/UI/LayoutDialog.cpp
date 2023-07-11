@@ -2,8 +2,8 @@
 #include "pch.h"
 #include "LayoutDialog.h"
 #include "LayoutEngine.h"
-#include "CmdInfoStore.h"
 #include "CmdUpdate.h"
+#include "CmdInfoStore.h"
 #include "WindowPlacement.h"
 #include "WndUtils.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
@@ -443,10 +443,7 @@ void CLayoutDialog::OnPaint( void )
 
 void CLayoutDialog::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
-	AfxCancelModes( m_hWnd );
-	if ( !isSysMenu )
-		ui::UpdateMenuUI( this, pPopupMenu );
-
+	ui::HandleInitMenuPopup( this, pPopupMenu, !isSysMenu );
 	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 

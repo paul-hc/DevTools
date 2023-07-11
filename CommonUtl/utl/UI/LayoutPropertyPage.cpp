@@ -226,10 +226,7 @@ BOOL CLayoutPropertyPage::OnEraseBkgnd( CDC* pDC )
 
 void CLayoutPropertyPage::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
-	AfxCancelModes( m_hWnd );
-	if ( !isSysMenu )
-		ui::UpdateMenuUI( this, pPopupMenu );
-
+	ui::HandleInitMenuPopup( this, pPopupMenu, !isSysMenu );
 	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 

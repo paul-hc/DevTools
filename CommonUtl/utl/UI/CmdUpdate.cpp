@@ -240,3 +240,17 @@ namespace ui
 		return ctrlState.DoUpdate( pTargetWnd, FALSE ) != FALSE;
 	}
 }
+
+
+namespace ui
+{
+	void HandleInitMenuPopup( CWnd* pTargetWnd, CMenu* pPopupMenu, bool isUserMenu )
+	{
+		ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
+
+		::AfxCancelModes( pTargetWnd->GetSafeHwnd() );		// cancel any menus or combobox popups that could be in toolbars or dialog bars
+
+		if ( isUserMenu )
+			ui::UpdateMenuUI( pTargetWnd, pPopupMenu );
+	}
+}

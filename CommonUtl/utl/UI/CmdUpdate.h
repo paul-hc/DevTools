@@ -20,4 +20,12 @@ namespace ui
 }
 
 
+namespace ui
+{
+	// standard message handlers
+
+	void HandleInitMenuPopup( CWnd* pTargetWnd, CMenu* pPopupMenu, bool isUserMenu );		// WM_INITMENUPOPUP: send CCmdUI updates
+}
+
+
 #endif // CmdUpdate_h

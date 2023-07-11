@@ -268,10 +268,7 @@ BOOL CBasePopupColorDialog<BaseDlg>::OnNcActivate( BOOL active )
 template< typename BaseDlg >
 void CBasePopupColorDialog<BaseDlg>::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
-	AfxCancelModes( this->m_hWnd );
-	if ( !isSysMenu )
-		ui::UpdateMenuUI( this, pPopupMenu );
-
+	ui::HandleInitMenuPopup( this, pPopupMenu, !isSysMenu );
 	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
@@ -322,7 +319,7 @@ void CBasePopupColorDialog<BaseDlg>::OnUpdatePaste( CCmdUI* pCmdUI )
 }
 
 template< typename BaseDlg >
-inline void CBasePopupColorDialog<BaseDlg>::On_ResetDefaultColor( void )
+void CBasePopupColorDialog<BaseDlg>::On_ResetDefaultColor( void )
 {
 	ModifyColor( m_defaultColor );
 }
@@ -334,7 +331,7 @@ void CBasePopupColorDialog<BaseDlg>::OnUpdate_ResetDefaultColor( CCmdUI* pCmdUI 
 }
 
 template< typename BaseDlg >
-inline void CBasePopupColorDialog<BaseDlg>::On_ColorDialogStyle( UINT cmdId )
+void CBasePopupColorDialog<BaseDlg>::On_ColorDialogStyle( UINT cmdId )
 {
 	ui::SaveColorDialogStyle( ID_USE_COLOR_DIALOG_MFC == cmdId ? ui::OfficeColorDialog : ui::ClassicColorDialog );
 
@@ -343,7 +340,7 @@ inline void CBasePopupColorDialog<BaseDlg>::On_ColorDialogStyle( UINT cmdId )
 }
 
 template< typename BaseDlg >
-inline void CBasePopupColorDialog<BaseDlg>::OnUpdate_ColorDialogStyle( CCmdUI* pCmdUI )
+void CBasePopupColorDialog<BaseDlg>::OnUpdate_ColorDialogStyle( CCmdUI* pCmdUI )
 {
 	bool isCurrent = ( ID_USE_COLOR_DIALOG_MFC == pCmdUI->m_nID ) == ( ui::OfficeColorDialog == ui::LoadColorDialogStyle() );
 
