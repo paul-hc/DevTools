@@ -65,7 +65,7 @@ namespace ui
 		std::tstring colorLiteral;
 		colorLiteral.reserve( 24 );
 
-		if ( IsSysColor( color ) || '\t' == pSep[0] )
+		if ( IsSysColor( color ) )
 			stream::Tag( colorLiteral, FormatSysColor( color ), pSep );
 
 		const COLORREF realColor = EvalColor( color );
@@ -74,11 +74,6 @@ namespace ui
 		stream::Tag( colorLiteral, FormatHtmlColor( realColor ), pSep );
 		stream::Tag( colorLiteral, FormatHexColor( realColor ), pSep );
 		return colorLiteral;
-	}
-
-	std::tstring GetColorTableHeader( void )
-	{
-		return _T("");
 	}
 
 	bool ParseUndefinedColor( COLORREF* pOutColor, const TCHAR* pColorLiteral )

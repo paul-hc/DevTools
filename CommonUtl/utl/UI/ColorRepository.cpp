@@ -76,14 +76,14 @@ const char* CColorEntry::FindScopedLiteral( const char* pScopedColorName )
 	return posLastScope != std::string::npos ? ( pScopedColorName + posLastScope + s_scopeOp.length() ) : pScopedColorName;
 }
 
-std::tstring CColorEntry::FormatColor( const TCHAR fieldSep[] /*= s_fieldSep*/ ) const
+std::tstring CColorEntry::FormatColor( const TCHAR* pFieldSep /*= s_fieldSep*/, bool suffixTableName /*= true*/ ) const
 {
 	std::tstring colorName = m_name;
 
-	if ( m_pParentTable != nullptr )
+	if ( m_pParentTable != nullptr && suffixTableName )
 		stream::Tag( colorName, str::Enquote( m_pParentTable->GetTableName().c_str(), _T("["), _T("]") ), _T(" ") );
 
-	stream::Tag( colorName, ui::FormatColor( m_color, fieldSep ), fieldSep );
+	stream::Tag( colorName, ui::FormatColor( m_color, pFieldSep ), pFieldSep );
 	return colorName;
 }
 

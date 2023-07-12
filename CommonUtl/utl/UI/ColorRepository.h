@@ -32,7 +32,7 @@ public:
 	const CColorTable* GetParentTable( void ) const { return m_pParentTable; }
 
 	COLORREF EvalColor( void ) const { return ui::EvalColor( m_color ); }
-	std::tstring FormatColor( const TCHAR fieldSep[] = s_fieldSep ) const;
+	std::tstring FormatColor( const TCHAR* pFieldSep = s_fieldSep, bool suffixTableName = true ) const;
 public:
 	COLORREF m_color;
 	std::tstring m_name;
