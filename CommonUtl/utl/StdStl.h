@@ -53,7 +53,7 @@
 
 #include "CppVer.h"			// for IS_CPP_11
 
-#ifndef IS_CPP_11
+#if !defined(IS_CPP_11) && defined(USE_BOOST)
 	#include <boost/move/unique_ptr.hpp>	// practical replacement for C++ 03
 #endif
 
@@ -63,8 +63,11 @@
 namespace std
 {
 #ifndef IS_CPP_11
-	using boost::movelib::unique_ptr;
 	using namespace tr1;
+
+	#ifdef USE_BOOST
+		using boost::movelib::unique_ptr;
+	#endif
 #endif
 
 
