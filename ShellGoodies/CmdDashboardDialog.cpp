@@ -227,7 +227,7 @@ void CCmdDashboardDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPA
 {
 	subItem, pCtrl;
 
-	static const ui::CTextEffect s_editorCmd( ui::Regular, color::Grey40, CLR_NONE );
+	static const ui::CTextEffect s_editorCmd( ui::Regular, color::Gray40, CLR_NONE );
 	const cmd::IPersistentCmd* pPersistCmd = CReportListControl::AsPtr<CCommandItem>( rowKey )->GetCmdAs<cmd::IPersistentCmd>();
 
 	if ( NULL == pPersistCmd )

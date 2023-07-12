@@ -237,7 +237,7 @@ void CFlagsListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM r
 {
 	const CFlagInfo* pFlag = CReportListControl::AsPtr<CFlagInfo>( rowKey );
 	if ( pFlag->IsReadOnly() || pFlag->IsSeparator() )
-		rTextEffect.m_textColor = color::Grey60;
+		rTextEffect.m_textColor = color::Gray60;
 	else if ( pFlag->IsOn( GetFlags() ) )
 		rTextEffect.m_textColor = app::HotFieldColor;
 

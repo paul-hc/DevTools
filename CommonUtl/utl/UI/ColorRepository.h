@@ -4,6 +4,7 @@
 
 #include "Color.h"
 #include "StdColors.h"
+#include <afxtempl.h>
 
 
 #define COLOR_ENTRY( stdColor )  CColorEntry( (stdColor), CColorEntry::FindScopedLiteral( #stdColor ) )

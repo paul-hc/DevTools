@@ -670,7 +670,7 @@ void CFileTreeDialog::TVnCustomDraw_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 		case CDDS_ITEMPREPAINT:
 			if ( !IsOriginalItem( hItem ) )
 			{
-				pDraw->clrText = color::Grey60;
+				pDraw->clrText = color::Gray60;
 				*pResult = CDRF_NEWFONT;
 			}
 			else
