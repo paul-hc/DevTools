@@ -481,7 +481,7 @@ namespace word
 
 	template< typename CharT >
 	std::basic_string<CharT> ToSpacedWordBreaks( const CharT* pLiteral, char delim = ' ' )
-	{	// convert "DarkGrey80" to "Dark Grey 80"
+	{	// convert "DarkGray80" to "Dark Gray 80"
 		ASSERT_PTR( pLiteral );
 		std::basic_string<CharT> outText;
 		outText.reserve( str::GetLength( pLiteral ) + 10 );
@@ -504,7 +504,7 @@ namespace word
 
 	template< typename CharT >
 	std::basic_string<CharT> ToUpperLiteral( const CharT* pLiteral, char delim = '_' )
-	{	// convert "DarkGrey80" or "Dark Grey 80" to "DARK_GREY_80"
+	{	// convert "DarkGray80" or "Dark Gray 80" to "DARK_GRAY_80"
 		ASSERT_PTR( pLiteral );
 		std::basic_string<CharT> outText;
 		outText.reserve( str::GetLength( pLiteral ) + 10 );
@@ -541,7 +541,7 @@ namespace word
 
 	template< typename CharT >
 	std::basic_string<CharT> ToCapitalizedLiteral( const CharT* pLiteral, char delim = '_', bool camelCase = false )
-	{	// convert "DARK_GREY_80" to "DarkGrey80"
+	{	// convert "DARK_GRAY_80" to "DarkGray80"
 		ASSERT_PTR( pLiteral );
 		std::basic_string<CharT> outText;
 		outText.reserve( str::GetLength( pLiteral ) );
@@ -568,7 +568,7 @@ namespace word
 
 	template< typename CharT >
 	std::basic_string<CharT> ToggleUpperLiteral( const CharT* pLiteral, char delim = '_', bool camelCase = false )
-	{	// cycle through "DARK_GREY_80" -> "DarkGrey80" -> "DARK_GREY_80" -> ...
+	{	// cycle through "DARK_GRAY_80" -> "DarkGray80" -> "DARK_GRAY_80" -> ...
 		if ( str::Contains( pLiteral, delim ) )		// is delimited?
 			return ToCapitalizedLiteral( pLiteral, delim, camelCase );
 		else

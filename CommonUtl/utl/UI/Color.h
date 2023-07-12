@@ -45,7 +45,7 @@ namespace ui
 	inline COLORREF GetActualColorSysdef( COLORREF rawColor, TSysColorIndex defaultSysIndex ) { return IsRealColor( rawColor ) ? rawColor : ::GetSysColor( defaultSysIndex ); }
 
 
-	enum StdTranspColor { Transp_LowColor = color::LightGrey, Transp_TrueColor = color::ToolStripPink };
+	enum StdTranspColor { Transp_LowColor = color::LightGray, Transp_TrueColor = color::ToolStripPink };
 
 	inline COLORREF GetStdTranspColor( WORD bitsPerPixel ) { return bitsPerPixel >= 24 ? Transp_TrueColor : Transp_LowColor; }
 }

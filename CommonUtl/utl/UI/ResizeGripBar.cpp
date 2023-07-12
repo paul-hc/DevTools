@@ -53,15 +53,15 @@ void CResizeGripBar::CreateArrowsImageList( void )
 	m_arrowSize = LoadArrowsBitmap( &bitmapArrows, bitmapResId, GetHotArrowColor() );
 	m_windowDepth = GetArrowDepth() + DepthSpacing * 2;
 	VERIFY( m_arrowImageList.Create( m_arrowSize.cx, m_arrowSize.cy, ILC_COLORDDB | ILC_MASK, 0, 2 ) );
-	m_arrowImageList.Add( &bitmapArrows, color::LightGrey );
+	m_arrowImageList.Add( &bitmapArrows, color::LightGray );
 
 	// load state: Hot
 	LoadArrowsBitmap( &bitmapArrows, bitmapResId, GetSysColor( COLOR_BTNTEXT ) );
-	m_arrowImageList.Add( &bitmapArrows, color::LightGrey );
+	m_arrowImageList.Add( &bitmapArrows, color::LightGray );
 
 	// load state: Disabled
 	LoadArrowsBitmap( &bitmapArrows, bitmapResId, GetSysColor( COLOR_GRAYTEXT ) );
-	m_arrowImageList.Add( &bitmapArrows, color::LightGrey );
+	m_arrowImageList.Add( &bitmapArrows, color::LightGray );
 }
 
 CSize CResizeGripBar::LoadArrowsBitmap( CBitmap* pBitmap, UINT bitmapResId, COLORREF arrowColor )
@@ -596,7 +596,7 @@ BOOL CResizeGripBar::OnEraseBkgnd( CDC* pDC )
 		pDC->FillRect( &clientRect, &brush );
 	else
 	{
-		pDC->Draw3dRect( &clientRect, GetSysColor( COLOR_BTNHIGHLIGHT ), MildGrey );
+		pDC->Draw3dRect( &clientRect, GetSysColor( COLOR_BTNHIGHLIGHT ), MildGray );
 
 		clientRect.DeflateRect( 1, 1 );
 		pDC->FillRect( &clientRect, &brush );

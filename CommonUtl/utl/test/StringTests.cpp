@@ -865,32 +865,32 @@ void CStringTests::TestConvertWordBreaks( void )
 {
 	ASSERT_EQUAL( "", word::ToSpacedWordBreaks( "" ) );
 	ASSERT_EQUAL( " \t ", word::ToSpacedWordBreaks( " \t " ) );
-	ASSERT_EQUAL( "grey", word::ToSpacedWordBreaks( "grey" ) );
-	ASSERT_EQUAL( "dark_grey", word::ToSpacedWordBreaks( "dark_grey" ) );
-	ASSERT_EQUAL( "grey 80", word::ToSpacedWordBreaks( "grey80" ) );
-	ASSERT_EQUAL( L"Dark Grey 80", word::ToSpacedWordBreaks( L"DarkGrey80" ) );
-	ASSERT_EQUAL( "Dark Grey 80 color", word::ToSpacedWordBreaks( "DarkGrey80color" ) );
-	ASSERT_EQUAL( L"Dark~Grey~80~color", word::ToSpacedWordBreaks( L"DarkGrey80color", '~' ) );
-	ASSERT_EQUAL( L"Dark Grey 80 Shade", word::ToSpacedWordBreaks( L"DarkGrey80Shade" ) );
-	ASSERT_EQUAL( "Dark Grey TINT80 Shade", word::ToSpacedWordBreaks( "DarkGreyTINT80Shade" ) );
+	ASSERT_EQUAL( "gray", word::ToSpacedWordBreaks( "gray" ) );
+	ASSERT_EQUAL( "dark_gray", word::ToSpacedWordBreaks( "dark_gray" ) );
+	ASSERT_EQUAL( "gray 80", word::ToSpacedWordBreaks( "gray80" ) );
+	ASSERT_EQUAL( L"Dark Gray 80", word::ToSpacedWordBreaks( L"DarkGray80" ) );
+	ASSERT_EQUAL( "Dark Gray 80 color", word::ToSpacedWordBreaks( "DarkGray80color" ) );
+	ASSERT_EQUAL( L"Dark~Gray~80~color", word::ToSpacedWordBreaks( L"DarkGray80color", '~' ) );
+	ASSERT_EQUAL( L"Dark Gray 80 Shade", word::ToSpacedWordBreaks( L"DarkGray80Shade" ) );
+	ASSERT_EQUAL( "Dark Gray TINT80 Shade", word::ToSpacedWordBreaks( "DarkGrayTINT80Shade" ) );
 
 	ASSERT_EQUAL( "", word::ToUpperLiteral( "" ) );
 	ASSERT_EQUAL( "__", word::ToUpperLiteral( "__ \t " ) );
-	ASSERT_EQUAL( "DARK_GREY_80", word::ToUpperLiteral( "DarkGrey80" ) );
-	ASSERT_EQUAL( "DARK-GREY-80", word::ToUpperLiteral( "DarkGrey80", '-' ) );
-	ASSERT_EQUAL( L"DARK_GREY_80__", word::ToUpperLiteral( L"DARK_GREY_80__" ) );
-	ASSERT_EQUAL( "DARK_GREY_80", word::ToUpperLiteral( "Dark  Grey   80" ) );
-	ASSERT_EQUAL( "_DARK_GREY_80_", word::ToUpperLiteral( "\t dark  grey   80 \n" ) );
+	ASSERT_EQUAL( "DARK_GRAY_80", word::ToUpperLiteral( "DarkGray80" ) );
+	ASSERT_EQUAL( "DARK-GRAY-80", word::ToUpperLiteral( "DarkGray80", '-' ) );
+	ASSERT_EQUAL( L"DARK_GRAY_80__", word::ToUpperLiteral( L"DARK_GRAY_80__" ) );
+	ASSERT_EQUAL( "DARK_GRAY_80", word::ToUpperLiteral( "Dark  Gray   80" ) );
+	ASSERT_EQUAL( "_DARK_GRAY_80_", word::ToUpperLiteral( "\t dark  gray   80 \n" ) );
 
 	ASSERT_EQUAL( "", word::ToCapitalizedLiteral( "" ) );
 	ASSERT_EQUAL( "Dark", word::ToCapitalizedLiteral( "DARK" ) );
 	ASSERT_EQUAL( L"dark", word::ToCapitalizedLiteral( L"DARK", '_', true ) );				// camel case
-	ASSERT_EQUAL( "DarkGrey80", word::ToCapitalizedLiteral( "DARK_GREY_80" ) );
-	ASSERT_EQUAL( "darkGrey80", word::ToCapitalizedLiteral( "DARK_GREY_80", '_', true ) );	// camel case
+	ASSERT_EQUAL( "DarkGray80", word::ToCapitalizedLiteral( "DARK_GRAY_80" ) );
+	ASSERT_EQUAL( "darkGray80", word::ToCapitalizedLiteral( "DARK_GRAY_80", '_', true ) );	// camel case
 
-	ASSERT_EQUAL( "DarkGrey80", word::ToggleUpperLiteral( "DARK_GREY_80" ) );
-	ASSERT_EQUAL( "DARK_GREY_80", word::ToggleUpperLiteral( "DarkGrey80" ) );
-	ASSERT_EQUAL( "darkGrey80", word::ToggleUpperLiteral( "DARK_GREY_80", '_', true ) );	// camel case
+	ASSERT_EQUAL( "DarkGray80", word::ToggleUpperLiteral( "DARK_GRAY_80" ) );
+	ASSERT_EQUAL( "DARK_GRAY_80", word::ToggleUpperLiteral( "DarkGray80" ) );
+	ASSERT_EQUAL( "darkGray80", word::ToggleUpperLiteral( "DARK_GRAY_80", '_', true ) );	// camel case
 }
 
 void CStringTests::TestEnsureUniformNumPadding( void )

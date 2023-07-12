@@ -320,7 +320,7 @@ namespace ut
 		}
 	}
 
-	void CTestDevice::DrawTileFrame( COLORREF frameColor /*= color::LightGrey*/, int outerEdge /*= 1*/ )
+	void CTestDevice::DrawTileFrame( COLORREF frameColor /*= color::LightGray*/, int outerEdge /*= 1*/ )
 	{
 		if ( !IsEnabled() )
 			return;
@@ -331,7 +331,7 @@ namespace ut
 		gp::FrameRect( GetDC(), frameRect, frameColor, 50 );
 	}
 
-	void CTestDevice::DrawTileFrame( const CRect& tileRect, COLORREF frameColor /*= color::LightGrey*/, int outerEdge /*= 1*/ )
+	void CTestDevice::DrawTileFrame( const CRect& tileRect, COLORREF frameColor /*= color::LightGray*/, int outerEdge /*= 1*/ )
 	{
 		StoreTileRect( tileRect );
 		DrawTileFrame( frameColor, outerEdge );
@@ -510,7 +510,7 @@ namespace ut
 			return color::Red;
 		else if ( scaledBmpSize.cx > bmpSize.cx )		// stretched
 			return color::LightBlue;
-		return color::LightGrey;
+		return color::LightGray;
 	}
 
 } //namespace ut

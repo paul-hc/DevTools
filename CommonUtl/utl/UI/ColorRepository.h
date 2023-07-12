@@ -23,7 +23,7 @@ class CColorEntry		// a named colour
 {
 public:
 	CColorEntry( void ) : m_color( CLR_NONE ), m_pParentTable( nullptr ) {}
-	CColorEntry( COLORREF color, const char* pLiteral );		// converts "DarkGrey80" to "Dark Grey 80"
+	CColorEntry( COLORREF color, const char* pLiteral );		// converts "DarkGray80" to "Dark Gray 80"
 	explicit CColorEntry( COLORREF color, const std::tstring& name ) : m_color( color ), m_name( name ), m_pParentTable( nullptr ) {}
 
 	bool operator==( COLORREF rawColor ) const { return m_color == rawColor; }		// for std::find algorithms
@@ -126,7 +126,6 @@ private:
 	static CColorTable* MakeTable_Office2003( void );
 	static CColorTable* MakeTable_DirectX( void );
 	static CColorTable* MakeTable_HTML( void );
-	static CColorTable* MakeTable_X11( void );
 };
 
 

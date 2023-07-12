@@ -157,7 +157,7 @@ private:
 
 	static HCURSOR s_hCursors[ 2 ];		// indexed by orientation
 
-	enum Colors { HotCyan = RGB( 169, 219, 246 ), HotDeepCyan = RGB( 189, 237, 255 ), MildGrey = RGB( 192, 192, 192 ), MildDarkerGrey = RGB( 173, 178, 181 ) };
+	enum Colors { HotCyan = RGB( 169, 219, 246 ), HotDeepCyan = RGB( 189, 237, 255 ), MildGray = RGB( 192, 192, 192 ), MildDarkerGray = RGB( 173, 178, 181 ) };
 
 	// generated stuff
 protected:

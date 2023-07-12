@@ -422,7 +422,7 @@ bool CImageDialog::RenderSample( CDC* pDC, const CRect& clientRect )
 
 	if ( HasFlag( m_showFlags, ShowLabels ) && pModeData->GetZoneCount() > 1 )
 	{
-		CScopedDrawText scopedDrawText( pDC, &m_sampleView, GetFont(), color::White, color::Grey60 );
+		CScopedDrawText scopedDrawText( pDC, &m_sampleView, GetFont(), color::White, color::Gray60 );
 		itZone.DrawLabels( pDC, clientRect, pModeData->m_labels );
 	}
 

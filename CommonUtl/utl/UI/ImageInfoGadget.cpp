@@ -45,7 +45,7 @@ namespace d2d
 		// text drawing objects
 		enum { MyOliveGreen = RGB(204, 251, 93) };
 
-		CreateAsSolidBrush( m_pBkBrush, pRenderTarget, ToColor( color::VeryDarkGrey, 50 ) );
+		CreateAsSolidBrush( m_pBkBrush, pRenderTarget, ToColor( color::VeryDarkGray, 50 ) );
 		CreateAsSolidBrush( m_pTextBrush, pRenderTarget, ToColor( color::BrightGreen, 100 ) );
 		CreateAsSolidBrush( m_pDimensionsBrush, pRenderTarget, ToColor( MyOliveGreen, 90 ) );
 		CreateAsSolidBrush( m_pNavigBrush, pRenderTarget, ToColor( color::LightOrange ) );

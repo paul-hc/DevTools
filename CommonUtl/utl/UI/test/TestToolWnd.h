@@ -81,8 +81,8 @@ namespace ut
 		const CRect& GetTileRect( void ) const { return m_tileRect; }
 		void StoreTileRect( const CRect& tileRect );
 
-		void DrawTileFrame( COLORREF frameColor = color::LightGrey, int outerEdge = 1 );
-		void DrawTileFrame( const CRect& tileRect, COLORREF frameColor = color::LightGrey, int outerEdge = 1 );
+		void DrawTileFrame( COLORREF frameColor = color::LightGray, int outerEdge = 1 );
+		void DrawTileFrame( const CRect& tileRect, COLORREF frameColor = color::LightGray, int outerEdge = 1 );
 
 		void DrawBitmap( HBITMAP hBitmap );
 		void DrawBitmap( HBITMAP hBitmap, const CSize& boundsSize, CDC* pSrcDC = nullptr );

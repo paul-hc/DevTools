@@ -394,6 +394,8 @@ void CColorPickerButton::On_HalftoneTable( UINT cmdId )
 			SetHalftoneColors( 256 );
 			break;
 	}
+
+	OnShowColorPopup();
 }
 
 void CColorPickerButton::OnUpdate_HalftoneTable( CCmdUI* pCmdUI )
@@ -419,7 +421,9 @@ void CColorPickerButton::OnUpdate_HalftoneTable( CCmdUI* pCmdUI )
 void CColorPickerButton::On_UseColorTable( UINT cmdId )
 {
 	ui::StdColorTable cmdTableType = static_cast<ui::StdColorTable>( cmdId - ID_USE_COLOR_TABLE_MIN );
+
 	SetColorTable( cmdTableType );
+	OnShowColorPopup();
 }
 
 void CColorPickerButton::OnUpdate_UseColorTable( CCmdUI* pCmdUI )
