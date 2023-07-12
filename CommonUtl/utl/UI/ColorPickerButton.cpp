@@ -245,15 +245,23 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 
 	CMFCPopupMenuBar* pPopupMenuBar = m_pPopup->GetMenuBar();
 	CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( pPopupMenuBar );
-	pColorBar = pColorBar;
 
-/*	pColorBar->InsertSeparator();
-	if ( m_hPopup != nullptr )
+	pColorBar = pColorBar;
+	if (0)
 	{
-		//CMFCToolBarMenuButton* pPopulItem = new CMFCToolBarMenuButton( 333, m_dbgPopup, -1, _T("<debug-popup>") );
-		CMFCToolBarMenuButton popupItem( 333, m_hPopup, -1, _T("<debug-popup>") );
+		static CMenu s_popupMenu;
+		if ( nullptr == s_popupMenu.GetSafeHmenu() )
+			ui::LoadMfcPopupMenu( s_popupMenu, IDR_STD_CONTEXT_MENU, ui::ColorPickerPopup );
+
+		//CMFCToolBarMenuButton* pPopulItem = new CMFCToolBarMenuButton( 333, s_popupMenu, -1, _T("<debug-popup>") );
+		CMFCToolBarMenuButton popupItem( 333, s_popupMenu, -1, _T("<debug-popup>") );
+
+		pColorBar->InsertSeparator();
 		pColorBar->InsertButton( popupItem );
-	}*/
+		pColorBar->UpdateWindow();
+
+		pPopupMenuBar->UpdateWindow();
+	}
 }
 
 void CColorPickerButton::PreSubclassWindow( void )
