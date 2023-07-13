@@ -118,13 +118,14 @@ public:
 	{
 		BaseId_System = 1000, BaseId_Shades = 2000, BaseId_User = 3000,
 		BaseId_Standard = 11000, BaseId_Custom = 12000,
-		BaseId_Office2003 = 13000, BaseId_DirectX = 14000, BaseId_HTML = 15000, BaseId_X11 = 16000
+		BaseId_Office2003 = 13000, BaseId_Office2007 = 13500, BaseId_DirectX = 14000, BaseId_HTML = 15000, BaseId_X11 = 16000
 	};
 private:
 	static CColorTable* MakeTable_System( void );
 	static CColorTable* MakeTable_Standard( void );
 	static CColorTable* MakeTable_Custom( void );
 	static CColorTable* MakeTable_Office2003( void );
+	static CColorTable* MakeTable_Office2007( void );
 	static CColorTable* MakeTable_DirectX( void );
 	static CColorTable* MakeTable_HTML( void );
 };

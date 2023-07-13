@@ -91,6 +91,12 @@ public:
 	CWnd* GetTargetWnd( void ) const;
 private:
 	CWnd* m_pTargetWnd;			// if null, parent dialog is the target
+
+	// base overrides:
+protected:
+	virtual void OnShowMenu( void );
+
+	// generated stuff
 protected:
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 

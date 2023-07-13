@@ -243,8 +243,7 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 
 	__super::OnShowColorPopup();
 
-	CMFCPopupMenuBar* pPopupMenuBar = m_pPopup->GetMenuBar();
-	CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( pPopupMenuBar );
+	CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( m_pPopup->GetMenuBar() );
 
 	pColorBar = pColorBar;
 	if (0)
@@ -253,14 +252,11 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 		if ( nullptr == s_popupMenu.GetSafeHmenu() )
 			ui::LoadMfcPopupMenu( s_popupMenu, IDR_STD_CONTEXT_MENU, ui::ColorPickerPopup );
 
-		//CMFCToolBarMenuButton* pPopulItem = new CMFCToolBarMenuButton( 333, s_popupMenu, -1, _T("<debug-popup>") );
 		CMFCToolBarMenuButton popupItem( 333, s_popupMenu, -1, _T("<debug-popup>") );
 
 		pColorBar->InsertSeparator();
 		pColorBar->InsertButton( popupItem );
 		pColorBar->UpdateWindow();
-
-		pPopupMenuBar->UpdateWindow();
 	}
 }
 
@@ -457,8 +453,14 @@ CWnd* CMenuPickerButton::GetTargetWnd( void ) const
 	return m_pTargetWnd != nullptr ? m_pTargetWnd : const_cast<CMenuPickerButton*>( this );
 }
 
+void CMenuPickerButton::OnShowMenu( void )
+{
+	__super::OnShowMenu();
+}
+
 
 // message handlers
+
 BEGIN_MESSAGE_MAP(CMenuPickerButton, CMFCMenuButton)
 	ON_WM_INITMENUPOPUP()
 END_MESSAGE_MAP()

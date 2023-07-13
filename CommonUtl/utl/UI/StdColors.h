@@ -20,7 +20,7 @@ namespace ui
 {
 	enum StdColorTable
 	{
-		WindowsSys_Colors, Standard_Colors, Custom_Colors, Office2003_Colors, DirectX_Colors, HTML_Colors,		// color-repo standard tables
+		WindowsSys_Colors, Standard_Colors, Custom_Colors, Office2003_Colors, Office2007_Colors, DirectX_Colors, HTML_Colors,		// color-repo standard tables
 		Shades_Colors, User_Colors,				// implementation (not based in repository)
 		_ColorTableCount
 	};
@@ -184,6 +184,80 @@ namespace color
 		};
 	}
 
+	namespace Office2007
+	{
+		enum Color
+		{
+			WhiteBackground1			= RGB( 255, 255, 255 ),		// row 1 (base colors)
+			BlackText1					= RGB( 0, 0, 0 ),
+			TanBackground2				= RGB( 238, 236, 225 ),
+			DarkBlueText2				= RGB( 31, 73, 125 ),
+			BlueAccent1					= RGB( 79, 129, 189 ),
+			RedAccent2					= RGB( 192, 80, 77 ),
+			OliveGreenAccent3			= RGB( 155, 187, 89 ),
+			PurpleAccent4				= RGB( 128, 100, 162 ),
+			AquaAccent5					= RGB( 75, 172, 198 ),
+			OrangeAccent6				= RGB( 245, 150, 70 ),
+
+			WhiteBackground1Darker5		= RGB( 242, 242, 242 ),		// row 2
+			BlackText1Lighter50			= RGB( 127, 127, 127 ),
+			TanBackground2Darker10		= RGB( 214, 212, 202 ),
+			DarkBlueText2Lighter80		= RGB( 210, 218, 229 ),
+			BlueAccent1Lighter80		= RGB( 217, 228, 240 ),
+			RedAccent2Lighter80			= RGB( 244, 219, 218 ),
+			OliveGreenAccent3Lighter80	= RGB( 234, 241, 221 ),
+			PurpleAccent4Lighter80		= RGB( 229, 223, 235 ),
+			AquaAccent5Lighter80		= RGB( 216, 237, 242 ),
+			OrangeAccent6Lighter80		= RGB( 255, 234, 218 ),
+
+			WhiteBackground1Darker15	= RGB( 215, 215, 215 ),		// row 3
+			BlackText1Lighter35			= RGB( 89, 89, 89 ),
+			TanBackground2Darker25		= RGB( 177, 176, 167 ),
+			DarkBlueText2Lighter60		= RGB( 161, 180, 201 ),
+			BlueAccent1Lighter60		= RGB( 179, 202, 226 ),
+			RedAccent2Lighter60			= RGB( 233, 184, 182 ),
+			OliveGreenAccent3Lighter60	= RGB( 213, 226, 188 ),
+			PurpleAccent4Lighter60		= RGB( 203, 191, 215 ),
+			AquaAccent5Lighter60		= RGB( 176, 220, 231 ),
+			OrangeAccent6Lighter60		= RGB( 255, 212, 181 ),
+
+			WhiteBackground1Darker25	= RGB( 190, 190, 190 ),		// row 4
+			BlackText1Lighter25			= RGB( 65, 65, 65 ),
+			TanBackground2Darker35		= RGB( 118, 117, 112 ),
+			DarkBlueText2Lighter40		= RGB( 115, 143, 175 ),
+			BlueAccent1Lighter40		= RGB( 143, 177, 213 ),
+			RedAccent2Lighter40			= RGB( 222, 149, 147 ),
+			OliveGreenAccent3Lighter40	= RGB( 192, 213, 155 ),
+			PurpleAccent4Lighter40		= RGB( 177, 160, 197 ),
+			AquaAccent5Lighter40		= RGB( 137, 203, 218 ),
+			OrangeAccent6Lighter40		= RGB( 255, 191, 145 ),
+
+			WhiteBackground1Darker35	= RGB( 163, 163, 163 ),		// row 5
+			BlackText1Lighter15			= RGB( 42, 42, 42 ),
+			TanBackground2Darker50		= RGB( 61, 61, 59 ),
+			DarkBlueText2Darker25		= RGB( 20, 57, 92 ),
+			BlueAccent1Darker25			= RGB( 54, 96, 139 ),
+			RedAccent2Darker25			= RGB( 149, 63, 60 ),
+			OliveGreenAccent3Darker25	= RGB( 114, 139, 71 ),
+			PurpleAccent4Darker25		= RGB( 97, 76, 119 ),
+			AquaAccent5Darker25			= RGB( 41, 128, 146 ),
+			OrangeAccent6Darker25		= RGB( 190, 112, 59 ),
+
+			WhiteBackground1Darker50	= RGB( 126, 126, 126 ),		// row 6
+			BlackText1Lighter5			= RGB( 20, 20, 20 ),
+			TanBackground2Darker90		= RGB( 29, 29, 28 ),
+			DarkBlueText2Darker50		= RGB( 17, 40, 64 ),
+			BlueAccent1Darker50			= RGB( 38, 66, 94 ),
+			RedAccent2Darker50			= RGB( 100, 44, 43 ),
+			OliveGreenAccent3Darker50	= RGB( 77, 93, 49 ),
+			PurpleAccent4Darker50		= RGB( 67, 53, 81 ),
+			AquaAccent5Darker50			= RGB( 31, 86, 99 ),
+			OrangeAccent6Darker50		= RGB( 126, 77, 42 ),
+
+			_Office2007_ColorCount = 60
+		};
+	}
+
 
 	namespace directx		// aka X11
 	{
@@ -206,7 +280,7 @@ namespace color
 			LightSalmon			 = 0x7AA0E0,
 			Red					 = 0x0000FF,
 			Crimson				 = 0x3C14DC,
-			FireBrick			 = 0x2222B2,
+			Firebrick			 = 0x2222B2,
 			DarkRed				 = 0x00008B,
 			Pink				 = 0xCBC0FF,		// pink colors
 			LightPink			 = 0xC1B6FF,
@@ -428,7 +502,7 @@ namespace color
 			DeepPink4			 = 0x3F057D,
 			MediumVioletRed		 = 0x6B22CA,
 			VioletRed3			 = 0x6928C1,
-			FireBrick			 = 0x170580,
+			Firebrick			 = 0x170580,
 			VioletRed4			 = 0x41057D,
 			Maroon4				 = 0x52057D,
 			Maroon				 = 0x410581,
@@ -610,9 +684,9 @@ namespace color
 			Red					 = 0x0000FF,
 			Red1				 = 0x1722F6,
 			Red2				 = 0x171BE4,
-			FireBrick1			 = 0x1728F6,
-			FireBrick2			 = 0x1722E4,
-			FireBrick3			 = 0x171BC1,
+			Firebrick1			 = 0x1728F6,
+			Firebrick2			 = 0x1722E4,
+			Firebrick3			 = 0x171BC1,
 			Pink				 = 0xBEAFFA,
 			RosyBrown1			 = 0xB9BBFB,
 			RosyBrown2			 = 0xAAADE8,

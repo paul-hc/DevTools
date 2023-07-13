@@ -17,7 +17,7 @@ namespace ui
 {
 	const CEnumTags& GetTags_ColorTable( void )
 	{
-		static const CEnumTags s_tags( _T("Windows (System)|Standard|Custom|Office 2003|DirectX (X11)|HTML|Shades|User") );
+		static const CEnumTags s_tags( _T("Windows (System)|Standard|Custom|Office 2003|Office 2007|DirectX (X11)|HTML|Shades|User") );
 		return s_tags;
 	}
 
@@ -63,7 +63,7 @@ const TCHAR CColorEntry::s_fieldSep[] = _T("  ");
 
 CColorEntry::CColorEntry( COLORREF color, const char* pLiteral )
 	: m_color( color )
-	, m_name( word::ToSpacedWordBreaks( str::FromAnsi( FindScopedLiteral( pLiteral ) ).c_str() ) )
+	, m_name( word::ToSpacedWordBreaks( str::FromAnsi( pLiteral ).c_str() ) )
 	, m_pParentTable( nullptr )
 {
 }
@@ -81,7 +81,7 @@ std::tstring CColorEntry::FormatColor( const TCHAR* pFieldSep /*= s_fieldSep*/, 
 	std::tstring colorName = m_name;
 
 	if ( m_pParentTable != nullptr && suffixTableName )
-		stream::Tag( colorName, str::Enquote( m_pParentTable->GetTableName().c_str(), _T("["), _T("]") ), _T(" ") );
+		stream::Tag( colorName, str::Enquote( m_pParentTable->GetTableName().c_str() ), _T(" ") );
 
 	stream::Tag( colorName, ui::FormatColor( m_color, pFieldSep ), pFieldSep );
 	return colorName;
@@ -336,6 +336,7 @@ CColorRepository::CColorRepository( void )
 	m_colorTables.push_back( MakeTable_Standard() );
 	m_colorTables.push_back( MakeTable_Custom() );
 	m_colorTables.push_back( MakeTable_Office2003() );
+	m_colorTables.push_back( MakeTable_Office2007() );
 	m_colorTables.push_back( MakeTable_DirectX() );
 	m_colorTables.push_back( MakeTable_HTML() );
 }
@@ -518,6 +519,79 @@ CColorTable* CColorRepository::MakeTable_Office2003( void )
 	return pTable;
 }
 
+CColorTable* CColorRepository::MakeTable_Office2007( void )
+{
+	CColorTable* pTable = new CColorTable( ui::Office2007_Colors, BaseId_Office2007, color::Office2007::_Office2007_ColorCount, 10 );		// 60 colors: 10 columns x 6 rows
+
+	pTable->Add( CColorEntry( color::Office2007::WhiteBackground1			, _T("White, Background 1") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlackText1					, _T("Black, Text 1") ) );
+	pTable->Add( CColorEntry( color::Office2007::TanBackground2				, _T("Tan, Background 2") ) );
+	pTable->Add( CColorEntry( color::Office2007::DarkBlueText2				, _T("Dark Blue, Text 2") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlueAccent1				, _T("Blue, Accent 1") ) );
+	pTable->Add( CColorEntry( color::Office2007::RedAccent2					, _T("Red, Accent 2") ) );
+	pTable->Add( CColorEntry( color::Office2007::OliveGreenAccent3			, _T("Olive Green, Accent 3") ) );
+	pTable->Add( CColorEntry( color::Office2007::PurpleAccent4				, _T("Purple, Accent 4") ) );
+	pTable->Add( CColorEntry( color::Office2007::AquaAccent5				, _T("Aqua, Accent 5") ) );
+	pTable->Add( CColorEntry( color::Office2007::OrangeAccent6				, _T("Orange, Accent 6") ) );
+
+	pTable->Add( CColorEntry( color::Office2007::WhiteBackground1Darker5	, _T("White, Background 1, Darker 5%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlackText1Lighter50		, _T("Black, Text 1, Lighter 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::TanBackground2Darker10		, _T("Tan, Background 2, Darker 10%") ) );
+	pTable->Add( CColorEntry( color::Office2007::DarkBlueText2Lighter80		, _T("Dark Blue, Text 2, Lighter 80%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlueAccent1Lighter80		, _T("Blue, Accent 1, Lighter 80%") ) );
+	pTable->Add( CColorEntry( color::Office2007::RedAccent2Lighter80		, _T("Red, Accent 2, Lighter 80%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OliveGreenAccent3Lighter80	, _T("Olive Green, Accent 3, Lighter 80%") ) );
+	pTable->Add( CColorEntry( color::Office2007::PurpleAccent4Lighter80		, _T("Purple, Accent 4, Lighter 80%") ) );
+	pTable->Add( CColorEntry( color::Office2007::AquaAccent5Lighter80		, _T("Aqua, Accent 5, Lighter 80%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OrangeAccent6Lighter80		, _T("Orange, Accent 6, Lighter 80%") ) );
+
+	pTable->Add( CColorEntry( color::Office2007::WhiteBackground1Darker15	, _T("White, Background 1, Darker 15%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlackText1Lighter35		, _T("Black, Text 1, Lighter 35%") ) );
+	pTable->Add( CColorEntry( color::Office2007::TanBackground2Darker25		, _T("Tan, Background 2, Darker 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::DarkBlueText2Lighter60		, _T("Dark Blue, Text 2, Lighter 60%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlueAccent1Lighter60		, _T("Blue, Accent 1, Lighter 60%") ) );
+	pTable->Add( CColorEntry( color::Office2007::RedAccent2Lighter60		, _T("Red, Accent 2, Lighter 60%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OliveGreenAccent3Lighter60	, _T("Olive Green, Accent 3, Lighter 60%") ) );
+	pTable->Add( CColorEntry( color::Office2007::PurpleAccent4Lighter60		, _T("Purple, Accent 4, Lighter 60%") ) );
+	pTable->Add( CColorEntry( color::Office2007::AquaAccent5Lighter60		, _T("Aqua, Accent 5, Lighter 60%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OrangeAccent6Lighter60		, _T("Orange, Accent 6, Lighter 60%") ) );
+
+	pTable->Add( CColorEntry( color::Office2007::WhiteBackground1Darker25	, _T("White, Background 1, Darker 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlackText1Lighter25		, _T("Black, Text 1, Lighter 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::TanBackground2Darker35		, _T("Tan, Background 2, Darker 35%") ) );
+	pTable->Add( CColorEntry( color::Office2007::DarkBlueText2Lighter40		, _T("Dark Blue, Text 2, Lighter 40%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlueAccent1Lighter40		, _T("Blue, Accent 1, Lighter 40%") ) );
+	pTable->Add( CColorEntry( color::Office2007::RedAccent2Lighter40		, _T("Red, Accent 2, Lighter 40%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OliveGreenAccent3Lighter40	, _T("Olive Green, Accent 3, Lighter 40%") ) );
+	pTable->Add( CColorEntry( color::Office2007::PurpleAccent4Lighter40		, _T("Purple, Accent 4, Lighter 40%") ) );
+	pTable->Add( CColorEntry( color::Office2007::AquaAccent5Lighter40		, _T("Aqua, Accent 5, Lighter 40%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OrangeAccent6Lighter40		, _T("Orange, Accent 6, Lighter 40%") ) );
+
+	pTable->Add( CColorEntry( color::Office2007::WhiteBackground1Darker35	, _T("White, Background 1, Darker 35%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlackText1Lighter15		, _T("Black, Text 1, Lighter 15%") ) );
+	pTable->Add( CColorEntry( color::Office2007::TanBackground2Darker50		, _T("Tan, Background 2, Darker 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::DarkBlueText2Darker25		, _T("Dark Blue, Text 2, Darker 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlueAccent1Darker25		, _T("Blue, Accent 1, Darker 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::RedAccent2Darker25			, _T("Red, Accent 2, Darker 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OliveGreenAccent3Darker25	, _T("Olive Green, Accent 3, Darker 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::PurpleAccent4Darker25		, _T("Purple, Accent 4, Darker 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::AquaAccent5Darker25		, _T("Aqua, Accent 5, Darker 25%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OrangeAccent6Darker25		, _T("Orange, Accent 6, Darker 25%") ) );
+
+	pTable->Add( CColorEntry( color::Office2007::WhiteBackground1Darker50	, _T("White, Background 1, Darker 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlackText1Lighter5			, _T("Black, Text 1, Lighter 5%") ) );
+	pTable->Add( CColorEntry( color::Office2007::TanBackground2Darker90		, _T("Tan, Background 2, Darker 90%") ) );
+	pTable->Add( CColorEntry( color::Office2007::DarkBlueText2Darker50		, _T("Dark Blue, Text 2, Darker 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::BlueAccent1Darker50		, _T("Blue, Accent 1, Darker 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::RedAccent2Darker50			, _T("Red, Accent 2, Darker 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OliveGreenAccent3Darker50	, _T("Olive Green, Accent 3, Darker 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::PurpleAccent4Darker50		, _T("Purple, Accent 4, Darker 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::AquaAccent5Darker50		, _T("Aqua, Accent 5, Darker 50%") ) );
+	pTable->Add( CColorEntry( color::Office2007::OrangeAccent6Darker50		, _T("Orange, Accent 6, Darker 50%") ) );
+
+	return pTable;
+}
+
 CColorTable* CColorRepository::MakeTable_DirectX( void )
 {
 	CColorTable* pTable = new CColorTable( ui::DirectX_Colors, BaseId_DirectX, color::directx::_DirectX_ColorCount, 14 );		// 140 colors: 10 columns x 14 rows
@@ -539,7 +613,7 @@ CColorTable* CColorRepository::MakeTable_DirectX( void )
 	pTable->Add( COLOR_ENTRY( color::directx::LightSalmon ) );
 	pTable->Add( COLOR_ENTRY( color::directx::Red ) );
 	pTable->Add( COLOR_ENTRY( color::directx::Crimson ) );
-	pTable->Add( COLOR_ENTRY( color::directx::FireBrick ) );
+	pTable->Add( COLOR_ENTRY( color::directx::Firebrick ) );
 	pTable->Add( COLOR_ENTRY( color::directx::DarkRed ) );
 	pTable->Add( COLOR_ENTRY( color::directx::Pink ) );
 	pTable->Add( COLOR_ENTRY( color::directx::LightPink ) );
@@ -757,7 +831,7 @@ CColorTable* CColorRepository::MakeTable_HTML( void )
 	pTable->Add( COLOR_ENTRY( color::html::DeepPink4 ) );
 	pTable->Add( COLOR_ENTRY( color::html::MediumVioletRed ) );
 	pTable->Add( COLOR_ENTRY( color::html::VioletRed3 ) );
-	pTable->Add( COLOR_ENTRY( color::html::FireBrick ) );
+	pTable->Add( COLOR_ENTRY( color::html::Firebrick ) );
 	pTable->Add( COLOR_ENTRY( color::html::VioletRed4 ) );
 	pTable->Add( COLOR_ENTRY( color::html::Maroon4 ) );
 	pTable->Add( COLOR_ENTRY( color::html::Maroon ) );
@@ -939,9 +1013,9 @@ CColorTable* CColorRepository::MakeTable_HTML( void )
 	pTable->Add( COLOR_ENTRY( color::html::Red ) );
 	pTable->Add( COLOR_ENTRY( color::html::Red1 ) );
 	pTable->Add( COLOR_ENTRY( color::html::Red2 ) );
-	pTable->Add( COLOR_ENTRY( color::html::FireBrick1 ) );
-	pTable->Add( COLOR_ENTRY( color::html::FireBrick2 ) );
-	pTable->Add( COLOR_ENTRY( color::html::FireBrick3 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Firebrick1 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Firebrick2 ) );
+	pTable->Add( COLOR_ENTRY( color::html::Firebrick3 ) );
 	pTable->Add( COLOR_ENTRY( color::html::Pink ) );
 	pTable->Add( COLOR_ENTRY( color::html::RosyBrown1 ) );
 	pTable->Add( COLOR_ENTRY( color::html::RosyBrown2 ) );
