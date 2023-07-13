@@ -10,7 +10,7 @@ namespace ui
 	void SetRadio( CCmdUI* pCmdUI, BOOL checked = BST_CHECKED );
 	bool ExpandVersionInfoTags( CCmdUI* pCmdUI );				// based on CVersionInfo
 
-	void UpdateMenuUI( CWnd* pWnd, CMenu* pPopupMenu, bool autoMenuEnable = true );
+	void UpdateMenuUI( CWnd* pTargetWnd, CMenu* pMenu, bool autoMenuEnable = true, bool isTracking = false, RecursionDepth depth = Shallow );
 
 	void UpdateDlgControlsUI( HWND hDlg, CCmdTarget* pTarget = nullptr, bool disableIfNoHandler = false );
 	void UpdateDlgControlsUI( HWND hDlg, const UINT ctrlIds[], size_t count, CCmdTarget* pTarget = nullptr, bool disableIfNoHandler = false );

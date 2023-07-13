@@ -509,10 +509,11 @@ void CImageView::On_EditBkColor( void )
 		SetBkColor( CLR_DEFAULT );
 	else
 	{
-		COLORREF bkColor = m_bkColor;
+		COLORREF bkColor = ui::EvalColor( m_bkColor ), oldBkColor = bkColor;
 
 		if ( ui::EditColor( &bkColor, this, false ) )
-			SetBkColor( bkColor );
+			if ( bkColor != oldBkColor )
+				SetBkColor( bkColor );
 	}
 }
 
