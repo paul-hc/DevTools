@@ -6,7 +6,7 @@
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
-#include "utl/UI/Dialog_fwd.h"
+#include "utl/UI/ColorPickerButton.h"
 #include "utl/UI/Direct2D.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/WndUtils.h"
@@ -20,14 +20,21 @@
 
 
 CWorkspaceDialog::CWorkspaceDialog( CWnd* pParent /*= nullptr*/ )
-	: CDialog( IDD_WORKSPACE_DIALOG, pParent )
+	: CLayoutDialog( IDD_WORKSPACE_DIALOG, pParent )
 	, m_data( CWorkspace::GetData() )
 	, m_thumbnailerFlags( app::GetThumbnailer()->m_flags )
 	, m_smoothingMode( d2d::CSharedTraits::Instance().IsSmoothingMode() )
 	, m_defaultSlideDelay( CWorkspace::Instance().GetDefaultSlideDelay() )
+	, m_pDefBkColorPicker( new CColorPickerButton() )
+	, m_pImageSelColorPicker( new CColorPickerButton() )
+	, m_pImageSelTextColorPicker( new CColorPickerButton() )
 {
 	m_mruCountEdit.SetValidRange( Range<int>( 0, 16 ) );
 	m_thumbListColumnCountEdit.SetValidRange( Range<int>( 1, 25 ) );
+
+	m_pDefBkColorPicker->SetAutomaticColor( color::Null );
+	m_pImageSelColorPicker->SetAutomaticColor( color::Null );
+	m_pImageSelTextColorPicker->SetAutomaticColor( color::Null );
 }
 
 CWorkspaceDialog::~CWorkspaceDialog()
@@ -50,10 +57,12 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_Flag( pDX, IDC_VISTA_STYLE_FILE_DLG_CHECK, m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
 	ui::DDX_Flag( pDX, IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK, m_data.m_wkspFlags, wf::UseThemedThumbListDraw );
 
+	m_pDefBkColorPicker->DDX_Color( pDX, ID_EDIT_BK_COLOR, &m_data.m_defBkColor );
+	m_pImageSelColorPicker->DDX_Color( pDX, CM_EDIT_IMAGE_SEL_COLOR, &m_data.m_imageSelColor );
+	m_pImageSelTextColorPicker->DDX_Color( pDX, CM_EDIT_IMAGE_SEL_TEXT_COLOR, &m_data.m_imageSelTextColor );
+
 	ui::DDX_Flag( pDX, CK_SHOW_THUMB_VIEW, m_data.m_albumViewFlags, af::ShowThumbView );
-
 	ui::DDX_Flag( pDX, IDC_AUTO_REGEN_SMALL_STG_THUMBS_CHECK, m_thumbnailerFlags, CThumbnailer::AutoRegenSmallStgThumbs );
-
 	ui::DDX_EnumCombo( pDX, IDW_IMAGE_SCALING_COMBO, m_imageScalingCombo, m_data.m_scalingMode, ui::GetTags_ImageScalingMode() );
 
 	m_mruCountEdit.DDX_Number( pDX, m_data.m_mruCount, IDC_MAX_MRU_COUNT_EDIT );
@@ -70,14 +79,13 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 
 	m_slideDelayCombo.DDX_Value( pDX, m_defaultSlideDelay, IDC_DEFAULT_SLIDE_DELAY_COMBO );
 
-	CDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CWorkspaceDialog, CDialog )
-	ON_WM_DRAWITEM()
+BEGIN_MESSAGE_MAP( CWorkspaceDialog, CLayoutDialog )
 	ON_BN_CLICKED( ID_EDIT_BK_COLOR, On_EditBkColor )
 	ON_BN_CLICKED( CM_SAVE_WORKSPACE, OnSaveAndClose )
 	ON_BN_CLICKED( IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK, OnToggle_UseThemedThumbListDraw )
@@ -86,54 +94,19 @@ BEGIN_MESSAGE_MAP( CWorkspaceDialog, CDialog )
 	ON_BN_CLICKED( CM_EDIT_IMAGE_SEL_TEXT_COLOR, CmEditImageSelTextColor )
 END_MESSAGE_MAP()
 
-void CWorkspaceDialog::OnDrawItem( int ctlId, DRAWITEMSTRUCT* pDIS )
-{
-	switch ( ctlId )
-	{
-		case ID_EDIT_BK_COLOR:				FillRect( pDIS->hDC, &pDIS->rcItem, CBrush( m_data.m_defBkColor ) ); break;
-		case CM_EDIT_IMAGE_SEL_COLOR:		FillRect( pDIS->hDC, &pDIS->rcItem, CBrush( m_data.GetImageSelColor() ) ); break;
-		case CM_EDIT_IMAGE_SEL_TEXT_COLOR:	FillRect( pDIS->hDC, &pDIS->rcItem, CBrush( m_data.GetImageSelTextColor() ) ); break;
-		default:
-			CDialog::OnDrawItem( ctlId, pDIS );
-	}
-}
-
 void CWorkspaceDialog::On_EditBkColor( void )
 {
-	CColorDialog colorDialog( m_data.m_defBkColor, CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR, this );
-	if ( IDOK == colorDialog.DoModal() )
-	{
-		m_data.m_defBkColor = colorDialog.GetColor();
-		GetDlgItem( ID_EDIT_BK_COLOR )->Invalidate();
-	}
+	m_data.m_defBkColor = m_pDefBkColorPicker->GetColor();
 }
 
 void CWorkspaceDialog::CmEditImageSelColor( void )
 {
-	if ( ui::IsKeyPressed( VK_SHIFT ) || ui::IsKeyPressed( VK_CONTROL ) )
-		m_data.m_imageSelColor = color::Null;
-	else
-	{
-		CColorDialog colorDialog( m_data.GetImageSelColor(), CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR, this );
-		if ( IDOK == colorDialog.DoModal() )
-			m_data.m_imageSelColor = colorDialog.GetColor();
-	}
-	GetDlgItem( CM_EDIT_IMAGE_SEL_COLOR )->Invalidate();
-	GetDlgItem( CM_EDIT_IMAGE_SEL_TEXT_COLOR )->Invalidate();
+	m_data.m_imageSelColor = m_pImageSelColorPicker->GetColor();
 }
 
 void CWorkspaceDialog::CmEditImageSelTextColor( void )
 {
-	if ( ui::IsKeyPressed( VK_SHIFT ) || ui::IsKeyPressed( VK_CONTROL ) )
-		m_data.m_imageSelTextColor = color::Null;
-	else
-	{
-		CColorDialog colorDialog( m_data.GetImageSelTextColor(), CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR, this );
-		if ( IDOK == colorDialog.DoModal() )
-			m_data.m_imageSelTextColor = colorDialog.GetColor();
-	}
-	GetDlgItem( CM_EDIT_IMAGE_SEL_COLOR )->Invalidate();
-	GetDlgItem( CM_EDIT_IMAGE_SEL_TEXT_COLOR )->Invalidate();
+	m_data.m_imageSelTextColor = m_pImageSelTextColorPicker->GetColor();
 }
 
 void CWorkspaceDialog::OnSaveAndClose( void )

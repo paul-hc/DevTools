@@ -750,13 +750,12 @@ BEGIN
     LTEXT           "Default Slide &Delay:",IDC_STATIC,11,178,63,8
     COMBOBOX        IDC_DEFAULT_SLIDE_DELAY_COMBO,76,176,72,30,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     GROUPBOX        "Colours",IDC_STATIC,186,7,153,62
-    RTEXT           "Default background colour:",IDC_STATIC,188,18,90,8
-    CONTROL         "Bk Color",ID_EDIT_BK_COLOR,"Button",BS_OWNERDRAW,282,16,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
-    RTEXT           "Image selection colour:",IDC_STATIC,188,34,90,8
-    CONTROL         "Selection Color",CM_EDIT_IMAGE_SEL_COLOR,"Button",BS_OWNERDRAW,282,32,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
-    RTEXT           "Image selection text colour:",IDC_STATIC,188,50,90,8
-    CONTROL         "Selection Text Color",CM_EDIT_IMAGE_SEL_TEXT_COLOR,
-                    "Button",BS_OWNERDRAW,282,48,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
+    RTEXT           "Default background colour:",IDC_STATIC,188,19,90,8
+    PUSHBUTTON      "<background color>",ID_EDIT_BK_COLOR,282,16,50,14,NOT WS_TABSTOP
+    RTEXT           "Image selection colour:",IDC_STATIC,188,35,90,8
+    PUSHBUTTON      "<selection color>",CM_EDIT_IMAGE_SEL_COLOR,282,32,50,14,NOT WS_TABSTOP
+    RTEXT           "Image selection text colour:",IDC_STATIC,188,51,90,8
+    PUSHBUTTON      "<selection text color>",CM_EDIT_IMAGE_SEL_TEXT_COLOR,282,48,50,14,NOT WS_TABSTOP
     GROUPBOX        "Thumbnails",IDC_STATIC,186,77,153,112
     LTEXT           "Thumbnail size:",IDC_STATIC,217,89,50,8
     COMBOBOX        IDC_THUMB_BOUNDS_SIZE_COMBO,268,87,46,30,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP

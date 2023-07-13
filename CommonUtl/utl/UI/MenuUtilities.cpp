@@ -5,6 +5,7 @@
 #include "ImageStore.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
+#include "utl/ScopedValue.h"
 #include <afxcontextmenumanager.h>
 
 #ifdef _DEBUG
@@ -143,8 +144,11 @@ namespace ui
 		}
 		else
 		{
-			ui::UpdateMenuUI( pTargetWnd, CMenu::FromHandle( hPopupMenu ) );
-			cmdId = ::TrackPopupMenu( hPopupMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, screenPos.x, screenPos.y, 0, pTargetWnd->GetSafeHwnd(), NULL );
+			CScopedValue<HMENU> scopedTrackingMenu( &AfxGetThreadState()->m_hTrackingMenu, hPopupMenu );		// satisfy ui::UpdateMenuUI() implementation
+			CMenu* pPopupMenu = CMenu::FromHandle( hPopupMenu );
+
+			ui::UpdateMenuUI( pTargetWnd, pPopupMenu );
+			cmdId = pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, screenPos.x, screenPos.y, pTargetWnd );
 		}
 
 		if ( sendCommand && cmdId != 0 )

@@ -33,6 +33,8 @@ public:
 	bool SetColorTable( ui::StdColorTable tableType );
 
 	void SetDocumentColors( const CColorTable* pColorTable, const TCHAR* pDocLabel = nullptr );		// additional 'Document' section of colors (below the main colors)
+
+	void DDX_Color( CDataExchange* pDX, int ctrlId, COLORREF* pColor );
 private:
 	void Construct( void );
 	bool IsEmpty( void ) const { return m_Colors.IsEmpty() && m_lstDocColors.IsEmpty(); }
@@ -49,7 +51,11 @@ private:
 
 	std::tstring m_regSection;
 	CAccelTable m_accel;
+
+	static std::vector<CColorPickerButton*> s_instances;		// for color table notifications
 protected:
+	void NotifyColorSetChanged( void );
+
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 

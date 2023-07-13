@@ -32,6 +32,7 @@ namespace reg
 // CColorPickerButton implementation
 
 enum ColorTableId { ID_USE_COLOR_TABLE_MAX = ID_USE_COLOR_TABLE_MIN + 25 };
+std::vector<CColorPickerButton*> CColorPickerButton::s_instances;
 
 CColorPickerButton::CColorPickerButton( void )
 	: CMFCColorButton()
@@ -50,6 +51,9 @@ CColorPickerButton::CColorPickerButton( ui::StdColorTable tableType )
 
 CColorPickerButton::~CColorPickerButton()
 {
+	std::vector<CColorPickerButton*>::iterator itThis = std::find( s_instances.begin(), s_instances.end(), this );		// for color table notifications
+	ASSERT( itThis != s_instances.end() );
+	s_instances.erase( itThis );
 }
 
 void CColorPickerButton::Construct( void )
@@ -61,6 +65,9 @@ void CColorPickerButton::Construct( void )
 	m_accel.Load( IDR_EDIT_ACCEL );
 
 	EnableOtherButton( _T("More...") );
+
+	REQUIRE( !utl::Contains( s_instances, this ) );
+	s_instances.push_back( this );
 }
 
 void CColorPickerButton::SetColors( const std::vector<COLORREF>& colors )
@@ -139,19 +146,15 @@ void CColorPickerButton::RegisterColorNames( const CColorTable* pColorTable )
 		CMFCColorButton::SetColorName( itColorEntry->EvalColor(), itColorEntry->FormatColor().c_str() );
 }
 
-void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CColorPickerButton::DDX_Color( CDataExchange* pDX, int ctrlId, COLORREF* pColor )
 {
-	cmdId, pTooltip;
-	COLORREF color = GetColor();
+	DDX_Control( pDX, ctrlId, *this );
 
-	if ( m_pColorTable != nullptr )
-		if ( const CColorEntry* pColorEntry = m_pColorTable->FindEvaluatedColor( color ) )
-		{
-			rText = pColorEntry->FormatColor();
-			return;
-		}
-
-	rText = ui::FormatColor( color );
+	if ( pColor != nullptr )
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+			SetColor( *pColor );
+		else
+			*pColor = GetColor();
 }
 
 void CColorPickerButton::AddColorTablesSubMenu( CMenu* pContextMenu )
@@ -226,6 +229,32 @@ void CColorPickerButton::SaveToRegistry( void ) const
 	}
 }
 
+void CColorPickerButton::NotifyColorSetChanged( void )
+{
+	for ( std::vector<CColorPickerButton*>::const_iterator itPicker = s_instances.begin(); itPicker != s_instances.end(); ++itPicker )
+		if ( *itPicker != this )
+			if ( !(*itPicker)->m_regSection.empty() && !(*itPicker)->m_useUserColors )
+				if ( m_pColorTable != nullptr )
+					(*itPicker)->SetColorTable( m_pColorTable );
+				else if ( m_halftoneSize != 0 )
+					(*itPicker)->SetHalftoneColors( m_halftoneSize );
+}
+
+void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+{
+	cmdId, pTooltip;
+	COLORREF color = GetColor();
+
+	if ( m_pColorTable != nullptr )
+		if ( const CColorEntry* pColorEntry = m_pColorTable->FindEvaluatedColor( color ) )
+		{
+			rText = pColorEntry->FormatColor();
+			return;
+		}
+
+	rText = ui::FormatColor( color );
+}
+
 
 // base overrides:
 
@@ -243,15 +272,13 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 
 	__super::OnShowColorPopup();
 
-	CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( m_pPopup->GetMenuBar() );
-
-	pColorBar = pColorBar;
 	if (0)
 	{
 		static CMenu s_popupMenu;
 		if ( nullptr == s_popupMenu.GetSafeHmenu() )
 			ui::LoadMfcPopupMenu( s_popupMenu, IDR_STD_CONTEXT_MENU, ui::ColorPickerPopup );
 
+		CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( m_pPopup->GetMenuBar() );
 		CMFCToolBarMenuButton popupItem( 333, s_popupMenu, -1, _T("<debug-popup>") );
 
 		pColorBar->InsertSeparator();
@@ -391,6 +418,7 @@ void CColorPickerButton::On_HalftoneTable( UINT cmdId )
 			break;
 	}
 
+	NotifyColorSetChanged();
 	OnShowColorPopup();
 }
 
@@ -419,6 +447,7 @@ void CColorPickerButton::On_UseColorTable( UINT cmdId )
 	ui::StdColorTable cmdTableType = static_cast<ui::StdColorTable>( cmdId - ID_USE_COLOR_TABLE_MIN );
 
 	SetColorTable( cmdTableType );
+	NotifyColorSetChanged();
 	OnShowColorPopup();
 }
 

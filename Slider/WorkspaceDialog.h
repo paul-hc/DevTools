@@ -2,12 +2,16 @@
 #define WorkspaceDialog_h
 #pragma once
 
+#include "utl/UI/LayoutDialog.h"
 #include "utl/UI/SpinEdit.h"
 #include "utl/UI/StockValuesComboBox.h"
 #include "Workspace.h"
 
 
-class CWorkspaceDialog : public CDialog
+class CColorPickerButton;
+
+
+class CWorkspaceDialog : public CLayoutDialog
 {
 public:
 	CWorkspaceDialog( CWnd* pParent = nullptr );
@@ -25,12 +29,14 @@ private:
 	CSpinEdit m_thumbListColumnCountEdit;
 	CComboBox m_thumbBoundsSizeCombo;
 	CDurationComboBox m_slideDelayCombo;
+	std::auto_ptr<CColorPickerButton> m_pDefBkColorPicker;
+	std::auto_ptr<CColorPickerButton> m_pImageSelColorPicker;
+	std::auto_ptr<CColorPickerButton> m_pImageSelTextColorPicker;
 
 	// generated stuff
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );			// DDX/DDV support
 protected:
-	afx_msg void OnDrawItem( int ctlId, DRAWITEMSTRUCT* pDIS );
 	afx_msg void On_EditBkColor( void );
 	afx_msg void OnSaveAndClose( void );
 	afx_msg void OnToggle_UseThemedThumbListDraw( void );

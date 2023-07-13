@@ -47,6 +47,9 @@ public:
 };
 
 
+#include "Dialog_fwd.h"
+
+
 // template code
 
 template< typename EnumType >
@@ -54,7 +57,7 @@ void CEnumComboBox::DDX_EnumValue( CDataExchange* pDX, int ctrlId, EnumType& rVa
 {
 	DDX_Control( pDX, ctrlId, *this );
 
-	if ( !pDX->m_bSaveAndValidate )
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		SetValue( rValue );
 	else
 		rValue = GetEnum<EnumType>();

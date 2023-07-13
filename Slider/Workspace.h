@@ -5,6 +5,7 @@
 #include "ModelSchema.h"
 #include "ImageState.h"
 #include "utl/Path.h"
+#include "utl/UI/Color.h"
 #include "utl/UI/Image_fwd.h"		// ui::ImageScalingMode
 #include "utl/UI/WindowPlacement.h"
 
@@ -51,8 +52,8 @@ struct CWorkspaceData
 	bool operator!=( const CWorkspaceData& right ) const { return !operator==( right ); }
 
 	CSize GetThumbBoundsSize( void ) const { return CSize( m_thumbBoundsSize, m_thumbBoundsSize ); }
-	COLORREF GetImageSelColor( void ) const { return m_imageSelColor != color::Null ? m_imageSelColor : GetSysColor( COLOR_HIGHLIGHT ); }
-	COLORREF GetImageSelTextColor( void ) const { return m_imageSelTextColor != color::Null ? m_imageSelTextColor : GetSysColor( COLOR_HIGHLIGHTTEXT ); }
+	COLORREF GetImageSelColor( void ) const { return ui::GetActualColorSysdef( m_imageSelColor, COLOR_HIGHLIGHT ); }
+	COLORREF GetImageSelTextColor( void ) const { return ui::GetActualColorSysdef( m_imageSelTextColor, COLOR_HIGHLIGHTTEXT ); }
 public:
 	persist bool m_autoSave;						// automatic saving the workspace
 	persist wf::TWorkspaceFlags m_wkspFlags;		// workspace flags

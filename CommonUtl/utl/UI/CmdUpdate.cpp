@@ -76,19 +76,17 @@ namespace ui
 
 		// determine if menu is popup in top-level menu and set m_pOther to
 		//  it if so (m_pParentMenu == nullptr indicates that it is secondary popup)
-		HMENU hParentMenu;
 		if ( AfxGetThreadState()->m_hTrackingMenu == pPopupMenu->m_hMenu )
 			itemState.m_pParentMenu = pPopupMenu;					// parent == child for tracking popup
-		else if ( ( hParentMenu = ::GetMenu( pWnd->m_hWnd ) ) != nullptr )
+		else if ( HMENU hParentMenu = ::GetMenu( pWnd->m_hWnd ) )
 		{
-			CWnd* pParent = pWnd->GetTopLevelParent();		// child windows don't have menus - need to go to the top
+			CWnd* pTopWnd = pWnd->GetTopLevelParent();				// child windows don't have menus - need to go to the top
 
-			if ( pParent != nullptr &&
-				( hParentMenu = ::GetMenu( pParent->m_hWnd ) ) != nullptr )
+			if ( pTopWnd != nullptr && ( hParentMenu = ::GetMenu( pTopWnd->m_hWnd ) ) != nullptr )
 			{
 				int nIndexMax = ::GetMenuItemCount( hParentMenu );
 				for ( int nIndex = 0; nIndex < nIndexMax; nIndex++ )
-					if ( ::GetSubMenu( hParentMenu, nIndex ) == pPopupMenu->m_hMenu )	// popup found?
+					if ( ::GetSubMenu( hParentMenu, nIndex ) == pPopupMenu->m_hMenu )		// popup found?
 					{
 						itemState.m_pParentMenu = CMenu::FromHandle( hParentMenu );			// m_pParentMenu is the containing menu
 						break;
@@ -100,7 +98,7 @@ namespace ui
 		for ( itemState.m_nIndex = 0; itemState.m_nIndex < itemState.m_nIndexMax; ++itemState.m_nIndex )
 		{
 			itemState.m_nID = pPopupMenu->GetMenuItemID( itemState.m_nIndex );
-			if ( itemState.m_nID == 0 )
+			if ( 0 == itemState.m_nID )
 				continue;								// menu separator or invalid cmd - ignore it
 
 			ASSERT_NULL( itemState.m_pOther );
@@ -111,7 +109,7 @@ namespace ui
 				// possibly a popup menu, route to first item of that popup
 				itemState.m_pSubMenu = pPopupMenu->GetSubMenu( itemState.m_nIndex );
 				if ( itemState.m_pSubMenu == nullptr ||
-					( itemState.m_nID = itemState.m_pSubMenu->GetMenuItemID( 0 ) ) == 0 || itemState.m_nID == (UINT)-1 )
+					 0 == ( itemState.m_nID = itemState.m_pSubMenu->GetMenuItemID( 0 ) ) || itemState.m_nID == (UINT)-1 )
 					continue;	   // first item of popup can't be routed to
 
 				itemState.DoUpdate( pWnd, FALSE );		// popups are never auto disabled

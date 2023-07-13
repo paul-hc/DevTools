@@ -509,11 +509,10 @@ void CImageView::On_EditBkColor( void )
 		SetBkColor( CLR_DEFAULT );
 	else
 	{
-		COLORREF oldBkColor = m_bkColor;
-		CColorDialog colorDialog( oldBkColor, CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR, this );
-		if ( IDOK == colorDialog.DoModal() )
-			if ( colorDialog.GetColor() != oldBkColor )
-				SetBkColor( colorDialog.GetColor() );
+		COLORREF bkColor = m_bkColor;
+
+		if ( ui::EditColor( &bkColor, this, false ) )
+			SetBkColor( bkColor );
 	}
 }
 
