@@ -596,16 +596,20 @@ namespace ui
 
 	bool OwnsFocus( HWND hWnd )
 	{
-		if ( HWND hFocusWnd = ::GetFocus() )
-			if ( hWnd != nullptr )
-				if ( hFocusWnd == hWnd || ::IsChild( hWnd, hFocusWnd ) )
-					return true;
+		if ( ::IsWindow( hWnd ) )
+			if ( HWND hFocusWnd = ::GetFocus() )
+				if ( hWnd != nullptr )
+					if ( hFocusWnd == hWnd || ::IsChild( hWnd, hFocusWnd ) )
+						return true;
 
 		return false;
 	}
 
 	bool TakeFocus( HWND hWnd )
 	{
+		if ( !::IsWindow( hWnd ) )
+			return false;			// window was possibly destroyed
+
 		// if for instance a list control is in inline edit mode (owns focus), leave the focus in the child edit
 		if ( ui::OwnsFocus( hWnd ) )
 			return false;

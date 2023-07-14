@@ -9,35 +9,14 @@
 namespace ui
 {
 	interface IImageStore;
-	struct CMenuItemRef;			// defined further down
-
-
-	enum DeepPopupIndex {};			// composite of nested popup indexes (maximum 4 levels deep) - empty enum defines a type that has resolution for overloading
-
-	inline DeepPopupIndex MakeDeepPopupIndex( int popupIndex0, int popupIndex1 = -1, int popupIndex2 = -1, int popupIndex3 = -1 )
-	{
-		return static_cast<DeepPopupIndex>( popupIndex0 | ( popupIndex1 << 8 ) | ( popupIndex2 << 16 ) | ( popupIndex3 << 24 ) );
-	}
-
-	inline int GetPopupIndexAt( DeepPopupIndex deepPopupIndex, unsigned int depthLevel )
-	{
-		REQUIRE( depthLevel < 4 );
-		enum { FieldMask = 0xFF };
-
-		return (int)(signed char)( ( static_cast<int>( deepPopupIndex ) >> (depthLevel * 8) ) & FieldMask );
-	}
+	class CPopupIndexPath;		// store a popup index depth path of up to 4 depth levels; defined further down
+	struct CMenuItemRef;		// defined further down
 
 
 	enum UseMenuImages { NoMenuImages, NormalMenuImages, CheckedMenuImages };
 
 
-	bool LoadPopupMenu( CMenu* pContextMenu, UINT menuResId, DeepPopupIndex deepPopupIndex, UseMenuImages useMenuImages = NormalMenuImages, OUT std::tstring* pOutPopupText = nullptr );
-
-	inline
-	bool LoadPopupMenu( CMenu* pContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages = NormalMenuImages, OUT std::tstring* pOutPopupText = nullptr )
-	{
-		return LoadPopupMenu( pContextMenu, menuResId, MakeDeepPopupIndex( popupIndex ), useMenuImages, pOutPopupText );
-	}
+	bool LoadPopupMenu( CMenu* pContextMenu, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages = NormalMenuImages, OUT std::tstring* pOutPopupText = nullptr );
 
 	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = nullptr );
 	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId = 0, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = nullptr );
@@ -48,39 +27,22 @@ namespace ui
 
 	// context menu loading and tracking
 
-	int TrackContextMenu( UINT menuResId, DeepPopupIndex deepPopupIndex, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags = TPM_RIGHTBUTTON, const RECT* pExcludeRect = nullptr );
-
-	inline
-	int TrackContextMenu( UINT menuResId, int popupIndex, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags = TPM_RIGHTBUTTON, const RECT* pExcludeRect = nullptr )
-	{
-		return TrackContextMenu( menuResId, MakeDeepPopupIndex( popupIndex ), pTargetWnd, screenPos, trackFlags, pExcludeRect );
-	}
+	int TrackContextMenu( UINT menuResId, const CPopupIndexPath& popupIndexPath, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags = TPM_RIGHTBUTTON, const RECT* pExcludeRect = nullptr );
 
 
 	// new MFC style popup menus:
 
 	inline bool UseMfcMenuManager( void ) { return afxContextMenuManager != NULL; }
 
-	inline bool LoadMfcPopupMenu( CMenu* pContextMenu, UINT menuResId, DeepPopupIndex deepPopupIndex, OUT std::tstring* pOutPopupText = nullptr )
+	inline bool LoadMfcPopupMenu( CMenu* pContextMenu, UINT menuResId, const CPopupIndexPath& popupIndexPath, OUT std::tstring* pOutPopupText = nullptr )
 	{
-		return LoadPopupMenu( pContextMenu, menuResId, deepPopupIndex, UseMfcMenuManager() ? NoMenuImages : NormalMenuImages, pOutPopupText );		// auto-images
-	}
-
-	inline bool LoadMfcPopupMenu( CMenu* pContextMenu, UINT menuResId, int popupIndex, OUT std::tstring* pOutPopupText = nullptr )
-	{
-		return LoadPopupMenu( pContextMenu, menuResId, popupIndex, UseMfcMenuManager() ? NoMenuImages : NormalMenuImages, pOutPopupText );			// auto-images
+		return LoadPopupMenu( pContextMenu, menuResId, popupIndexPath, UseMfcMenuManager() ? NoMenuImages : NormalMenuImages, pOutPopupText );		// auto-images
 	}
 
 
-	int TrackMfcPopupMenu( HMENU hPopupMenu, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand = true );						// always returns the command ID
+	int TrackMfcPopupMenu( HMENU hPopupMenu, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand = true );		// track modal: always returns the command ID
 
-	int TrackMfcContextMenu( UINT menuResId, DeepPopupIndex deepPopupIndex, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand = true );		// always returns the command ID
-
-	inline
-	int TrackMfcContextMenu( UINT menuResId, int popupIndex, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand = true )		// always returns the command ID
-	{
-		return TrackMfcContextMenu( menuResId, MakeDeepPopupIndex( popupIndex ), pTargetWnd, screenPos, sendCommand );
-	}
+	int TrackMfcContextMenu( UINT menuResId, const CPopupIndexPath& popupIndexPath, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand = true );		// track modal: always returns the command ID
 
 
 	CWnd* AutoTargetWnd( CWnd* pTargetWnd );
@@ -156,6 +118,31 @@ namespace ui
 
 namespace ui
 {
+	class CPopupIndexPath		// store a popup index depth path of up to 4 depth levels
+	{
+	public:
+		CPopupIndexPath( int popupIndex0, int popupIndex1 = -1, int popupIndex2 = -1, int popupIndex3 = -1 )
+		{
+			m_popups[ 0 ] = static_cast<signed char>( popupIndex0 );
+			m_popups[ 1 ] = static_cast<signed char>( popupIndex1 );
+			m_popups[ 2 ] = static_cast<signed char>( popupIndex2 );
+			m_popups[ 3 ] = static_cast<signed char>( popupIndex3 );
+
+			m_depth = 0;
+			while ( m_depth != DepthLimit && m_popups[ m_depth ] != -1 )
+				++m_depth;
+		}
+
+		size_t GetDepth( void ) const { return m_depth; }
+		int GetPopupIndexAt( size_t depth ) const { ASSERT( depth < m_depth ); return static_cast<int>( m_popups[ depth ] ); }
+	private:
+		enum { DepthLimit = 4 };
+
+		signed char m_popups[ DepthLimit ];		// popup indexes by depth level [0, 3]
+		size_t m_depth;
+	};
+
+
 	struct CMenuItemRef
 	{
 		CMenuItemRef( UINT itemRef, UINT refFlags = MF_BYCOMMAND )			// item qualified with ID by default

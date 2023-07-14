@@ -42,6 +42,9 @@
     <Filter Include="UI\Shell Explorer API">
       <UniqueIdentifier>{f59e82d0-cc1e-4a4f-a3b9-03a8695e745a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Test Utils">
+      <UniqueIdentifier>{b2ce14c2-e5da-42c0-ae4d-400a060f3991}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -57,9 +60,6 @@
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="test\ShellFileSystemTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\TestToolWnd.h">
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="test\UtlUserInterfaceTests.h">
@@ -626,6 +626,12 @@
     <ClInclude Include="ColorPopupDialogs.h">
       <Filter>UI\Dialogs</Filter>
     </ClInclude>
+    <ClInclude Include="test\TestToolWnd.h">
+      <Filter>Test Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ResourceTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -638,9 +644,6 @@
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="test\ShellFileSystemTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="test\TestToolWnd.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="test\UtlUserInterfaceTests.cpp">
@@ -1074,6 +1077,12 @@
     </ClCompile>
     <ClCompile Include="ColorPopupDialogs.cpp">
       <Filter>UI\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TestToolWnd.cpp">
+      <Filter>Test Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ResourceTests.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

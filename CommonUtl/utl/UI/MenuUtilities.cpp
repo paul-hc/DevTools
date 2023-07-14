@@ -14,21 +14,23 @@
 
 namespace ui
 {
-	bool LoadPopupMenu( CMenu* pContextMenu, UINT menuResId, DeepPopupIndex deepPopupIndex, UseMenuImages useMenuImages /*= NormalMenuImages*/, OUT std::tstring* pOutPopupText /*= nullptr*/ )
+	bool LoadPopupMenu( CMenu* pContextMenu, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages /*= NormalMenuImages*/, OUT std::tstring* pOutPopupText /*= nullptr*/ )
 	{
 		ASSERT_PTR( pContextMenu );
+		REQUIRE( popupIndexPath.GetDepth() > 0 );
+
 		pContextMenu->DestroyMenu();
 
 		CMenu menuBar;
 		VERIFY( menuBar.LoadMenu( menuResId ) );
 
 		CMenu* pParentMenu = &menuBar;
-		int depthLevel = 0;
-		int popupIndex = GetPopupIndexAt( deepPopupIndex, depthLevel );
+		size_t depthLevel = 0;
+		int popupIndex = popupIndexPath.GetPopupIndexAt( depthLevel );
 
-		while ( ++depthLevel != 4 && pParentMenu != nullptr )
+		while ( ++depthLevel != popupIndexPath.GetDepth() && pParentMenu != nullptr )
 		{
-			int index = GetPopupIndexAt( deepPopupIndex, depthLevel );
+			int index = popupIndexPath.GetPopupIndexAt( depthLevel );
 
 			if ( -1 == index )
 				break;				// no more depth requested
@@ -129,11 +131,11 @@ namespace ui
 	}
 
 
-	int TrackContextMenu( UINT menuResId, DeepPopupIndex deepPopupIndex, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags /*= TPM_RIGHTBUTTON*/, const RECT* pExcludeRect /*= nullptr*/ )
+	int TrackContextMenu( UINT menuResId, const CPopupIndexPath& popupIndexPath, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags /*= TPM_RIGHTBUTTON*/, const RECT* pExcludeRect /*= nullptr*/ )
 	{
 		CMenu contextMenu;
 
-		ui::LoadPopupMenu( &contextMenu, menuResId, deepPopupIndex );
+		ui::LoadPopupMenu( &contextMenu, menuResId, popupIndexPath );
 		return ui::TrackPopupMenu( contextMenu, pTargetWnd, screenPos, trackFlags, pExcludeRect );
 	}
 
@@ -148,19 +150,18 @@ namespace ui
 
 		if ( UseMfcMenuManager() )
 		{
-			CWnd* pFocusWnd = CWnd::GetFocus();
+			HWND hFocusWnd = ::GetFocus();
 
 			cmdId = afxContextMenuManager->TrackPopupMenu( hPopupMenu, screenPos.x, screenPos.y, pTargetWnd );
 
-			if ( pFocusWnd != nullptr )
-				pFocusWnd->SetFocus();
+			ui::TakeFocus( hFocusWnd );
 		}
 		else
 		{
 			CMenu* pPopupMenu = CMenu::FromHandle( hPopupMenu );
 
 			// avoid deep updates, since we don't use the TPM_NONOTIFY tracking flag!
-			//ui::UpdateMenuUI( pTargetWnd, pPopupMenu, true, true, Deep );		// Deep update since with TPM_NONOTIFY flag, WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus
+			//ui::UpdateMenuUI( pTargetWnd, pPopupMenu, true, true, Deep );		// Deep update when using TPM_NONOTIFY flag, WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus
 
 			// not using TPM_NONOTIFY for proper WM_INITMENUPOPUP menu updates
 			cmdId = pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD /*| TPM_NONOTIFY*/, screenPos.x, screenPos.y, pTargetWnd );
@@ -172,11 +173,11 @@ namespace ui
 		return ui::ToIntCmdId( cmdId );
 	}
 
-	int TrackMfcContextMenu( UINT menuResId, DeepPopupIndex deepPopupIndex, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand /*= true*/ )
+	int TrackMfcContextMenu( UINT menuResId, const CPopupIndexPath& popupIndexPath, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand /*= true*/ )
 	{
 		CMenu contextMenu;
 
-		ui::LoadMfcPopupMenu( &contextMenu, menuResId, deepPopupIndex );
+		ui::LoadMfcPopupMenu( &contextMenu, menuResId, popupIndexPath );
 		return TrackMfcPopupMenu( contextMenu, pTargetWnd, screenPos, sendCommand );
 	}
 

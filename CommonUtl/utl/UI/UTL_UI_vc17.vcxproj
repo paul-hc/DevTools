@@ -326,6 +326,7 @@
     <ClInclude Include="TaskDialog.h" />
     <ClInclude Include="test\BaseImageTestCase.h" />
     <ClInclude Include="test\ColorTests.h" />
+    <ClInclude Include="test\ResourceTests.h" />
     <ClInclude Include="test\SerializationTests.h" />
     <ClInclude Include="test\ShellFileSystemTests.h" />
     <ClInclude Include="test\TestToolWnd.h" />
@@ -487,6 +488,7 @@
     <ClCompile Include="TaskDialog.cpp" />
     <ClCompile Include="test\BaseImageTestCase.cpp" />
     <ClCompile Include="test\ColorTests.cpp" />
+    <ClCompile Include="test\ResourceTests.cpp" />
     <ClCompile Include="test\SerializationTests.cpp" />
     <ClCompile Include="test\ShellFileSystemTests.cpp" />
     <ClCompile Include="test\TestToolWnd.cpp" />

@@ -1844,7 +1844,7 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Unit Testing"
+			Name="Test Utils"
 			>
 			<File
 				RelativePath=".\test\TestToolWnd.cpp"

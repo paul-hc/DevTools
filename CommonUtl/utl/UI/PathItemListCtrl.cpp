@@ -39,7 +39,7 @@ CMenu& CPathItemListCtrl::GetStdPathListPopupMenu( ListPopup popupType )
 	static CMenu s_stdPopupMenu[ _ListPopupCount ];
 	CMenu& rMenu = s_stdPopupMenu[ popupType ];
 	if ( nullptr == rMenu.GetSafeHmenu() )
-		ui::LoadPopupMenu( &rMenu, IDR_STD_CONTEXT_MENU, ui::MakeDeepPopupIndex( ui::ListView, OnSelection == popupType ? lv::PathItemOnSelectionSubPopup : lv::PathItemNowhereSubPopup ) );
+		ui::LoadPopupMenu( &rMenu, IDR_STD_CONTEXT_MENU, ui::CPopupIndexPath( ui::ListView, OnSelection == popupType ? lv::PathItemOnSelectionSubPopup : lv::PathItemNowhereSubPopup ) );
 	return rMenu;
 }
 
