@@ -38,7 +38,7 @@ CMainFrame::CMainFrame( void )
 	: CBaseFrameWnd<CMDIFrameWnd>()
 {
 	m_regSection = reg::section_MainFrame;
-	ui::LoadPopupMenu( m_trayPopupMenu, IDR_STD_CONTEXT_MENU, ui::AppSysTray );
+	ui::LoadPopupMenu( &m_trayPopupMenu, IDR_STD_CONTEXT_MENU, ui::AppSysTray );
 	m_trayPopupMenu.SetDefaultItem( ID_APP_MINIMIZE );
 }
 

@@ -99,7 +99,9 @@ bool CTextEditor::HasSel( void ) const
 
 BOOL CTextEditor::PreTranslateMessage( MSG* pMsg )
 {
-	return m_editorAccel.Translate( pMsg, m_hWnd ) || CTextEdit::PreTranslateMessage( pMsg );
+	return
+		m_editorAccel.Translate( pMsg, m_hWnd ) ||
+		__super::PreTranslateMessage( pMsg );
 }
 
 
@@ -113,21 +115,17 @@ BEGIN_MESSAGE_MAP( CTextEditor, CTextEdit )
 	ON_COMMAND_RANGE( ID_EDIT_NUM_INCREMENT, ID_EDIT_NUM_DECREMENT, OnChangeNumber )
 END_MESSAGE_MAP()
 
-void CTextEditor::OnContextMenu( CWnd* pWnd, CPoint point )
+void CTextEditor::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	if ( this == pWnd && ui::IsKeyPressed( VK_CONTROL ) && IsWritable() )
-	{
-		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_STD_CONTEXT_MENU, ui::TextEditorPopup );
-		ui::TrackPopupMenu( contextMenu, this, point, TPM_RIGHTBUTTON );
-	}
+		ui::TrackContextMenu( IDR_STD_CONTEXT_MENU, ui::TextEditorPopup, this, screenPos );
 	else
-		CTextEdit::OnContextMenu( pWnd, point );
+		__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CTextEditor::OnLButtonDblClk( UINT flags, CPoint point )
 {
-	CTextEdit::OnLButtonDblClk( flags, point );
+	__super::OnLButtonDblClk( flags, point );
 
 	Range<size_t> sel = GetSelRange<int>();
 	std::tstring selText = GetSelText();

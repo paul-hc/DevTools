@@ -124,7 +124,7 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	LoadDlgIcon( ID_STUDY_IMAGE );
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_IMAGE_DIALOG ) );
 	m_initCentered = false;			// so that it uses WINDOWPLACEMENT
-	ui::LoadPopupMenu( m_contextMenu, IDR_CONTEXT_MENU, app::ImageDialogPopup );
+	ui::LoadPopupMenu( &m_contextMenu, IDR_CONTEXT_MENU, app::ImageDialogPopup );
 
 	m_multiZone.m_zoneSpacing = AfxGetApp()->GetProfileInt( reg::section, reg::entry_spacing, m_multiZone.m_zoneSpacing );
 	m_colorBoard.Load( reg::section );

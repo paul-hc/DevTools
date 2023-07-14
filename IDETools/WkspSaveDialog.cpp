@@ -48,7 +48,7 @@ CWkspSaveDialog::CWkspSaveDialog( WorkspaceProfile& rWkspProfile, const CString&
 	if ( m_currProjectName.IsEmpty() )
 		m_currProjectName = WorkspaceProfile::s_defaulProjectName;
 
-	ui::LoadPopupMenu( m_sortOrderPopup, IDR_CONTEXT_MENU, app::FileSortOrderPopup );
+	ui::LoadPopupMenu( &m_sortOrderPopup, IDR_CONTEXT_MENU, app::FileSortOrderPopup );
 
 	CWinApp* pApp = AfxGetApp();
 

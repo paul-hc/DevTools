@@ -69,7 +69,7 @@ CMenu& CAlbumImageView::GetDocContextMenu( void ) const
 {
 	static CMenu s_contextMenu;
 	if ( nullptr == s_contextMenu.GetSafeHmenu() )
-		ui::LoadPopupMenu( s_contextMenu, IDR_CONTEXT_MENU, app::AlbumPopup );
+		ui::LoadPopupMenu( &s_contextMenu, IDR_CONTEXT_MENU, app::AlbumPopup );
 
 	return s_contextMenu;
 }

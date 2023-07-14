@@ -32,7 +32,7 @@ namespace ui
 		GetCursorPos( &screenPos );
 
 		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AutoMakeCodePopup );
+		ui::LoadPopupMenu( &contextMenu, IDR_CONTEXT_MENU, app::AutoMakeCodePopup );
 
 		ide::CScopedWindow scopedIDE;
 		return scopedIDE.TrackPopupMenu( contextMenu, screenPos );

@@ -289,7 +289,7 @@ CMenu& CFindDuplicatesDialog::GetDupListPopupMenu( CReportListControl::ListPopup
 	if ( NULL == rMenu.GetSafeHmenu() )
 	{
 		CMenu popupMenu;
-		ui::LoadPopupSubMenu( rMenu, IDR_CONTEXT_MENU, popup::DuplicatesList, CReportListControl::OnSelection == popupType ? DupListOnSelection : DupListNowhere );
+		ui::LoadPopupMenu( &rMenu, IDR_CONTEXT_MENU, ui::MakeDeepPopupIndex( popup::DuplicatesList, CReportListControl::OnSelection == popupType ? DupListOnSelection : DupListNowhere ) );
 		ui::JoinMenuItems( rMenu, CPathItemListCtrl::GetStdPathListPopupMenu( popupType ) );
 	}
 	return rMenu;

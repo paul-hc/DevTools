@@ -4,6 +4,7 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "UtlUserInterfaceTests.h"
 #include "ColorTests.h"
+#include "ResourceTests.h"
 #include "SerializationTests.h"
 #include "ShellFileSystemTests.h"
 
@@ -18,6 +19,7 @@ namespace ut
 	{
 		// register UTL tests
 		CColorTests::Instance();
+		CResourceTests::Instance();
 		CSerializationTests::Instance();
 		CShellFileSystemTests::Instance();
 	}

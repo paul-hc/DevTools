@@ -37,9 +37,7 @@ namespace app
 		popup = ui::AppDebugPopup;
 	#endif
 
-		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_STD_CONTEXT_MENU, popup );
-		ui::TrackPopupMenu( contextMenu, pTargetWnd, screenPos, TPM_RIGHTBUTTON );
+		ui::TrackContextMenu( IDR_STD_CONTEXT_MENU, popup, pTargetWnd, screenPos );
 	}
 
 	UINT ToMsgBoxFlags( app::MsgType msgType )

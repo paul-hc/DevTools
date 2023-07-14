@@ -341,7 +341,7 @@ void CPickMenuStatic::TrackMenu( CWnd* pTargetWnd, CMenu* pPopupMenu )
 void CPickMenuStatic::TrackMenu( CWnd* pTargetWnd, UINT menuId, int popupIndex, bool useCheckedBitmaps /*= false*/ )
 {
 	CMenu popupMenu;
-	ui::LoadPopupMenu( popupMenu, menuId, popupIndex, useCheckedBitmaps ? ui::CheckedMenuImages : ui::NormalMenuImages );
+	ui::LoadPopupMenu( &popupMenu, menuId, popupIndex, useCheckedBitmaps ? ui::CheckedMenuImages : ui::NormalMenuImages );
 	TrackMenu( pTargetWnd, &popupMenu );
 }
 

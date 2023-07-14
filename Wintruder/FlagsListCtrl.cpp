@@ -38,7 +38,7 @@ CFlagsListCtrl::CFlagsListCtrl( void )
 	SetCheckStatePolicy( CheckRadio::Instance() );
 	SetToggleCheckSelItems();
 
-	ui::LoadPopupMenu( m_contextMenu, IDR_CONTEXT_MENU, app::FlagsListPopup );
+	ui::LoadPopupMenu( &m_contextMenu, IDR_CONTEXT_MENU, app::FlagsListPopup );
 }
 
 CFlagsListCtrl::~CFlagsListCtrl( void )

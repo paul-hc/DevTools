@@ -42,7 +42,7 @@ private:
 protected:
 	virtual BOOL OnInitDialog( void );
 	afx_msg void OnDestroy( void );
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	virtual void OnOK( void );
 	afx_msg void CkShowFullPath( void );
 	afx_msg void CkCloseAllBeforeOpen( void );

@@ -201,7 +201,7 @@ BEGIN_MESSAGE_MAP( CHistoryComboBox, TBaseClass )
 	ON_COMMAND( CHistoryComboBox::Cmd_ResetDropSelIndex, OnResetDropSelIndex )
 END_MESSAGE_MAP()
 
-void CHistoryComboBox::OnContextMenu( CWnd* pWnd, CPoint point )
+void CHistoryComboBox::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	CMenu contextMenu;
 
@@ -211,21 +211,21 @@ void CHistoryComboBox::OnContextMenu( CWnd* pWnd, CPoint point )
 		COMBOBOXINFO cbInfo = { sizeof( COMBOBOXINFO ) };
 		if ( GetComboBoxInfo( &cbInfo ) )
 			if ( pWnd == m_pDropList.get() )
-				ui::LoadPopupMenu( contextMenu, IDR_STD_CONTEXT_MENU, ui::HistoryComboPopup );
+				ui::LoadPopupMenu( &contextMenu, IDR_STD_CONTEXT_MENU, ui::HistoryComboPopup );
 	}
 	else if ( pWnd == this )
-		ui::LoadPopupMenu( contextMenu, IDR_STD_CONTEXT_MENU, ui::HistoryComboPopup );
+		ui::LoadPopupMenu( &contextMenu, IDR_STD_CONTEXT_MENU, ui::HistoryComboPopup );
 
 	if ( contextMenu.GetSafeHmenu() != nullptr )
 	{
 		m_dropSelIndex = GetCurSel();
-		ui::TrackPopupMenu( contextMenu, this, point, TPM_RIGHTBUTTON );
+		ui::TrackPopupMenu( contextMenu, this, screenPos, TPM_RIGHTBUTTON );
 		// delayed reset of m_dropSelIndex, after the actual command is processed
 		PostMessage( WM_COMMAND, MAKEWPARAM( Cmd_ResetDropSelIndex, BN_CLICKED ), 0 );
 		return;
 	}
 
-	__super::OnContextMenu( pWnd, point );
+	__super::OnContextMenu( pWnd, screenPos );
 }
 
 BOOL CHistoryComboBox::OnChanged_Reflect( void )

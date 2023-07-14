@@ -475,6 +475,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ResourceTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ResourceTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\SerializationTests.cpp"
 				>
 			</File>
@@ -488,14 +496,6 @@
 			</File>
 			<File
 				RelativePath=".\test\ShellFileSystemTests.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\TestToolWnd.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\TestToolWnd.h"
 				>
 			</File>
 			<File
@@ -1842,6 +1842,18 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Unit Testing"
+			>
+			<File
+				RelativePath=".\test\TestToolWnd.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TestToolWnd.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

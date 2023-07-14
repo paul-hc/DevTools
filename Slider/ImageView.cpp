@@ -66,8 +66,8 @@ CMenu& CImageView::GetDocContextMenu( void ) const
 {
 	static CMenu s_contextMenu;
 
-	if ( nullptr == (HMENU)s_contextMenu )
-		ui::LoadPopupMenu( s_contextMenu, IDR_CONTEXT_MENU, app::ImagePopup );
+	if ( nullptr == s_contextMenu.GetSafeHmenu() )
+		ui::LoadPopupMenu( &s_contextMenu, IDR_CONTEXT_MENU, app::ImagePopup );
 
 	return s_contextMenu;
 }
@@ -344,21 +344,23 @@ void CImageView::OnKillFocus( CWnd* pNewWnd )
 
 void CImageView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
-	pWnd;
-
-	CMenu* pSrcPopupMenu = &GetDocContextMenu();
-	if ( pSrcPopupMenu->GetSafeHmenu() != nullptr )
+	if ( this == pWnd )
 	{
-		if ( CWicImage* pImage = GetImage() )
-			if ( !pImage->GetImagePath().IsComplexPath() )
-				if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, pImage->GetImagePath() ) )
-				{
-					DoTrackContextMenu( pContextPopup, screenPos );
-					return;
-				}
+		if ( CMenu* pSrcPopupMenu = &GetDocContextMenu() )
+		{
+			if ( CWicImage* pImage = GetImage() )
+				if ( !pImage->GetImagePath().IsComplexPath() )
+					if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, pImage->GetImagePath() ) )
+					{
+						DoTrackContextMenu( pContextPopup, screenPos );
+						return;
+					}
 
-		DoTrackContextMenu( pSrcPopupMenu, screenPos );
+			DoTrackContextMenu( pSrcPopupMenu, screenPos );
+		}
 	}
+	else
+		__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CImageView::OnLButtonDown( UINT mkFlags, CPoint point )

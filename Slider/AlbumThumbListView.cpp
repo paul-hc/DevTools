@@ -566,14 +566,6 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 	}
 }
 
-CMenu& CAlbumThumbListView::GetContextMenu( void )
-{
-	static CMenu contextMenu;
-	if ( nullptr == (HMENU)contextMenu )
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AlbumThumbsPopup );
-	return contextMenu;
-}
-
 CSize CAlbumThumbListView::GetInitialSize( int columnCount /*= 1*/ )
 {
 	EnsureCaptionFontCreated();
@@ -1187,22 +1179,24 @@ BOOL CAlbumThumbListView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint pt )
 
 void CAlbumThumbListView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
-	pWnd;
-
-	CMenu* pSrcPopupMenu = &GetContextMenu();
-	if ( pSrcPopupMenu->GetSafeHmenu() != nullptr )
+	if ( this == pWnd )
 	{
+		CMenu contextMenu;
+		ui::LoadPopupMenu( &contextMenu, IDR_CONTEXT_MENU, app::AlbumThumbsPopup );
+
 		std::vector<fs::CFlexPath> selFilePaths;
 		if ( QuerySelItemPaths( selFilePaths ) )
 		{
 			std::vector<fs::CPath> docStgPaths;
 			if ( path::QueryStorageDocPaths( docStgPaths, selFilePaths ) )
-				if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, docStgPaths ) )
+				if ( CMenu* pContextPopup = MakeContextMenuHost( &contextMenu, docStgPaths ) )
 					DoTrackContextMenu( pContextPopup, screenPos );
 		}
 		else
-			DoTrackContextMenu( pSrcPopupMenu, screenPos );
+			DoTrackContextMenu( &contextMenu, screenPos );
 	}
+	else
+		__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CAlbumThumbListView::OnTimer( UINT_PTR eventId )

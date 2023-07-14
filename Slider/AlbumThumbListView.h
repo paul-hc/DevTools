@@ -87,7 +87,6 @@ private:
 	static CSize GetInitialSize( int columnCount = 1 );
 	static CRect GetNcExtentRect( int columnCount = 1, CWnd* pListWnd = nullptr );
 	static int ComputeColumnCount( int listClientWidth ) { return int( double( listClientWidth ) / GetInitialSize().cx + 0.5 ); }
-	static CMenu& GetContextMenu( void );
 	static void EnsureCaptionFontCreated( void );
 	static DWORD GetListCreationStyle( int columnCount ) { return 1 == columnCount ? ( WS_VSCROLL | LBS_DISABLENOSCROLL ) : ( LBS_MULTICOLUMN | WS_HSCROLL ); }
 public:

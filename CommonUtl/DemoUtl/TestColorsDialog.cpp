@@ -101,7 +101,7 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	m_pUtlColorPicker->SetAutomaticColor( color::Lime );
 	m_pUtlColorPicker->SetColor( m_color );
 
-	ui::LoadPopupMenu( m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup, ui::NoMenuImages );
+	ui::LoadPopupMenu( &m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup );
 	m_pMenuPicker->m_bOSMenu = FALSE;
 	m_editChecked = true;
 }

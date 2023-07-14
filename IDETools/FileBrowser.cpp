@@ -459,7 +459,7 @@ bool CTargetMenu::AppendContextSubMenu( CMenu* pMenu, app::ContextPopup popupInd
 
 	CMenu subMenu;
 	std::tstring subMenuCaption;
-	ui::LoadPopupMenu( subMenu, IDR_CONTEXT_MENU, popupIndex, ui::NormalMenuImages, &subMenuCaption );
+	ui::LoadPopupMenu( &subMenu, IDR_CONTEXT_MENU, popupIndex, ui::NormalMenuImages, &subMenuCaption );
 
 	return AppendSubMenu( pMenu, subMenu.Detach(), subMenuCaption );
 }
@@ -686,7 +686,7 @@ CMenu* CFileBrowser::BuildMenu( void )
 
 	ui::DeleteLastMenuSeparator( *pPopupMenu );
 
-	ENSURE( ui::IsValidMenu( pPopupMenu->GetSafeHmenu() ) );
+	ENSURE( ui::EnsureDeepValidMenu( pPopupMenu->GetSafeHmenu() ) );
 	return pPopupMenu;
 }
 

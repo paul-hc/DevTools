@@ -298,9 +298,9 @@ CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
 		switch ( popupType )
 		{
 			default: ASSERT( false );
-			case Nowhere:		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, lv::NowhereSubPopup ); break;
-			case OnSelection:	ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, lv::OnSelectionSubPopup ); break;
-			case OnGroup:		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, lv::OnGroupSubPopup ); break;
+			case Nowhere:		ui::LoadPopupMenu( &rMenu, IDR_STD_CONTEXT_MENU, ui::MakeDeepPopupIndex( ui::ListView, lv::NowhereSubPopup ) ); break;
+			case OnSelection:	ui::LoadPopupMenu( &rMenu, IDR_STD_CONTEXT_MENU, ui::MakeDeepPopupIndex( ui::ListView, lv::OnSelectionSubPopup ) ); break;
+			case OnGroup:		ui::LoadPopupMenu( &rMenu, IDR_STD_CONTEXT_MENU, ui::MakeDeepPopupIndex( ui::ListView, lv::OnGroupSubPopup ) ); break;
 		}
 	}
 	return rMenu;

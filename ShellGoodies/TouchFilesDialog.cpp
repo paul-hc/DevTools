@@ -581,9 +581,7 @@ void CTouchFilesDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	if ( &m_fileListCtrl == pWnd )
 	{
-		CMenu popupMenu;
-		ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::TouchList );
-		ui::TrackPopupMenu( popupMenu, this, screenPos );
+		ui::TrackContextMenu( IDR_CONTEXT_MENU, popup::TouchList, this, screenPos );
 		return;					// supress rising WM_CONTEXTMENU to the parent
 	}
 

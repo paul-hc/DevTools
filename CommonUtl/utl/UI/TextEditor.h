@@ -27,7 +27,7 @@ private:
 public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnLButtonDblClk( UINT flags, CPoint point );
 	afx_msg void OnWordSelection( UINT cmdId );
 	afx_msg void OnChangeCase( UINT cmdId );

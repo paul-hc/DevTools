@@ -531,7 +531,7 @@ void CFileTreeDialog::DoDataExchange( CDataExchange* pDX )
 		BuildIncludeTree();
 	}
 
-	CLayoutDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -586,22 +586,20 @@ BOOL CFileTreeDialog::PreTranslateMessage( MSG* pMsg )
 {
 	return
 		m_accelTreeFocus.TranslateIfOwnsFocus( pMsg, m_hWnd, m_treeCtrl ) ||		// special processing when tree has focus
-		CLayoutDialog::PreTranslateMessage( pMsg );
+		__super::PreTranslateMessage( pMsg );
 }
 
 void CFileTreeDialog::OnDestroy( void )
 {
-	CLayoutDialog::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CFileTreeDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	if ( pWnd == &m_treeCtrl )
-	{
-		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, m_rOpt.m_noDuplicates ? app::IncludeTree_NoDupsPopup : app::IncludeTreePopup );
-		ui::TrackPopupMenu( contextMenu, this, screenPos );
-	}
+		ui::TrackContextMenu( IDR_CONTEXT_MENU, m_rOpt.m_noDuplicates ? app::IncludeTree_NoDupsPopup : app::IncludeTreePopup, this, screenPos );
+	else
+		__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CFileTreeDialog::OnDropFiles( HDROP hDropInfo )
@@ -618,7 +616,7 @@ void CFileTreeDialog::OnDropFiles( HDROP hDropInfo )
 
 void CFileTreeDialog::OnInitMenuPopup( CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu )
 {
-	CLayoutDialog::OnInitMenuPopup( pPopupMenu, nIndex, bSysMenu );
+	__super::OnInitMenuPopup( pPopupMenu, nIndex, bSysMenu );
 	if ( !bSysMenu )
 		ui::UpdateMenuUI( this, pPopupMenu );
 }
@@ -928,7 +926,7 @@ void CFileTreeDialog::OnOK( void )
 	{
 		if ( HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem() )
 			m_rootPath = GetItemInfo( hSelItem )->m_path.Get();
-		CLayoutDialog::OnOK();
+		__super::OnOK();
 	}
 }
 
@@ -937,7 +935,7 @@ void CFileTreeDialog::OnCancel( void )
 	if ( m_treeCtrl.GetEditControl() != nullptr )
 		m_treeCtrl.SetFocus();				// first cancel label edit modal state
 	else
-		CLayoutDialog::OnCancel();
+		__super::OnCancel();
 }
 
 void CFileTreeDialog::CmOpenComplementary( void )

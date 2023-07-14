@@ -14,49 +14,54 @@
 
 namespace ui
 {
-	void LoadPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages /*= NormalMenuImages*/, std::tstring* pPopupText /*= nullptr*/ )
+	bool LoadPopupMenu( CMenu* pContextMenu, UINT menuResId, DeepPopupIndex deepPopupIndex, UseMenuImages useMenuImages /*= NormalMenuImages*/, OUT std::tstring* pOutPopupText /*= nullptr*/ )
 	{
+		ASSERT_PTR( pContextMenu );
+		pContextMenu->DestroyMenu();
+
 		CMenu menuBar;
 		VERIFY( menuBar.LoadMenu( menuResId ) );
 
-		if ( pPopupText != nullptr )
+		CMenu* pParentMenu = &menuBar;
+		int depthLevel = 0;
+		int popupIndex = GetPopupIndexAt( deepPopupIndex, depthLevel );
+
+		while ( ++depthLevel != 4 && pParentMenu != nullptr )
 		{
-			CString popupText;
-			menuBar.GetMenuString( popupIndex, popupText, MF_BYPOSITION );
-			*pPopupText = popupText.GetString();
+			int index = GetPopupIndexAt( deepPopupIndex, depthLevel );
+
+			if ( -1 == index )
+				break;				// no more depth requested
+
+			pParentMenu = pParentMenu->GetSubMenu( popupIndex );
+			popupIndex = index;
 		}
 
-		HMENU hSubMenu = ::GetSubMenu( menuBar, popupIndex );
-		ASSERT_PTR( hSubMenu );
+		if ( pParentMenu != nullptr && popupIndex >= 0 )
+		{
+			if ( pOutPopupText != nullptr )
+			{
+				CString popupText;
+				pParentMenu->GetMenuString( popupIndex, popupText, MF_BYPOSITION );
+				*pOutPopupText = popupText.GetString();
+			}
 
-		rContextMenu.Attach( hSubMenu );
-		VERIFY( menuBar.RemoveMenu( popupIndex, MF_BYPOSITION ) );
+			if ( HMENU hSubMenu = ::GetSubMenu( *pParentMenu, popupIndex ) )
+			{
+				pContextMenu->Attach( hSubMenu );
+				VERIFY( pParentMenu->RemoveMenu( popupIndex, MF_BYPOSITION ) );
 
-		if ( useMenuImages != NoMenuImages || !UseMfcMenuManager() )
-			SetMenuImages( rContextMenu, CheckedMenuImages == useMenuImages );		// set shared bitmap images
-	}
+				if ( useMenuImages != NoMenuImages )
+					SetMenuImages( *pContextMenu, CheckedMenuImages == useMenuImages );		// set shared bitmap images
+				return true;
+			}
+			else
+				ENSURE( false );		// the requested popup is not a sub-menu
+		}
+		else
+			ENSURE( false );			// couldn't locate the requested popup
 
-	void LoadPopupSubMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex1, int popupIndex2 /*= -1*/, int popupIndex3 /*= -1*/ )
-	{
-		CMenu menuBar;
-		VERIFY( menuBar.LoadMenu( menuResId ) );
-
-		int popupIndex;
-		HMENU hParentMenu = menuBar, hSubMenu = safe_ptr( ::GetSubMenu( hParentMenu, popupIndex = popupIndex1 ) );
-
-		if ( popupIndex2 != -1 )
-			hSubMenu = safe_ptr( ::GetSubMenu( hParentMenu = hSubMenu, popupIndex = popupIndex2 ) );
-
-		if ( popupIndex3 != -1 )
-			hSubMenu = safe_ptr( ::GetSubMenu( hParentMenu = hSubMenu, popupIndex = popupIndex3 ) );
-
-		ASSERT_PTR( hParentMenu );
-		ASSERT_PTR( hSubMenu );
-
-		rContextMenu.Attach( hSubMenu );
-		VERIFY( ::RemoveMenu( hParentMenu, popupIndex, MF_BYPOSITION ) );		// detach popup from its parent
-
-		SetMenuImages( rContextMenu );											// set shared bitmap images
+		return false;
 	}
 
 
@@ -124,6 +129,16 @@ namespace ui
 	}
 
 
+	int TrackContextMenu( UINT menuResId, DeepPopupIndex deepPopupIndex, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags /*= TPM_RIGHTBUTTON*/, const RECT* pExcludeRect /*= nullptr*/ )
+	{
+		CMenu contextMenu;
+
+		ui::LoadPopupMenu( &contextMenu, menuResId, deepPopupIndex );
+		return ui::TrackPopupMenu( contextMenu, pTargetWnd, screenPos, trackFlags, pExcludeRect );
+	}
+
+
+
 	int TrackMfcPopupMenu( HMENU hPopupMenu, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand /*= true*/ )
 	{
 		UINT cmdId = 0;
@@ -156,6 +171,15 @@ namespace ui
 
 		return ui::ToIntCmdId( cmdId );
 	}
+
+	int TrackMfcContextMenu( UINT menuResId, DeepPopupIndex deepPopupIndex, CWnd* pTargetWnd, CPoint screenPos, bool sendCommand /*= true*/ )
+	{
+		CMenu contextMenu;
+
+		ui::LoadMfcPopupMenu( &contextMenu, menuResId, deepPopupIndex );
+		return TrackMfcPopupMenu( contextMenu, pTargetWnd, screenPos, sendCommand );
+	}
+
 
 	CWnd* AutoTargetWnd( CWnd* pTargetWnd )
 	{
@@ -220,80 +244,6 @@ namespace ui
 			case DropLeft:
 				return CPoint( excludeRect.left, excludeRect.top );
 		}
-	}
-
-
-
-	bool IsValidMenu( HMENU hMenu, unsigned int depth /*= 0*/ )
-	{
-		ASSERT_PTR( hMenu );
-
-		if ( !::IsMenu( hMenu ) )
-			return false;
-
-		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
-			switch ( ::GetMenuItemID( hMenu, i ) )
-			{
-				case 0:				// separator
-					break;
-				case UINT_MAX:		// sub-menu?
-					if ( HMENU hSubMenu = ::GetSubMenu( hMenu, i ) )
-						if ( !IsValidMenu( hSubMenu, depth + 1 ) )
-						{
-							TCHAR text[ 256 ] = { 0 };
-							::GetMenuString( hMenu, i, text, COUNT_OF( text ), MF_BYPOSITION );
-
-							std::tstring indentPrefix( depth, _T(' ') );
-
-							TRACE( _T("%s- Invalid sub-menu item: hMenu=0x%08x  itemPos=%d  itemText='%s'  hSubMenu=0x%08x  depth=%d\n"), indentPrefix.c_str(), hMenu, i, text, hSubMenu, depth );
-							return false;
-						}
-					break;
-			}
-
-		return true;
-	}
-}
-
-
-namespace ui
-{
-	// MENUITEMINFO_BUFF implementation
-
-	MENUITEMINFO_BUFF::MENUITEMINFO_BUFF( void )
-	{
-		utl::ZeroWinStruct( static_cast<MENUITEMINFO*>( this ) );
-	}
-
-	void MENUITEMINFO_BUFF::ClearTextBuffer( void )
-	{
-		if ( dwTypeData != nullptr && HasText() )		// text buffer allocated internally?
-			delete[] dwTypeData;
-
-		dwTypeData = nullptr;
-		cch = 0;
-	}
-
-	bool MENUITEMINFO_BUFF::GetMenuItemInfo( HMENU hMenu, UINT item, bool byPos /*= true*/,
-											 UINT mask /*= MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP*/ )
-	{
-		ASSERT( ::IsMenu( hMenu ) );
-
-		ClearTextBuffer();
-		utl::ZeroWinStruct( static_cast<MENUITEMINFO*>( this ) );
-
-		fMask = mask;					// MIIM_TYPE replaced by MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP
-
-		if ( !::GetMenuItemInfo( hMenu, item, byPos, this ) )
-			return false;
-
-		if ( HasFlag( fMask, MIIM_STRING ) && cch != 0 )
-		{
-			dwTypeData = new TCHAR[ ++cch ];									// enlarge text buffer with EOS & allocate it
-			return ::GetMenuItemInfo( hMenu, item, byPos, this ) != FALSE;		// also fetch item text
-		}
-
-		return true;
 	}
 }
 
@@ -593,6 +543,37 @@ namespace ui
 
 		return true;
 	}
+
+
+	bool EnsureDeepValidMenu( HMENU hMenu, unsigned int depth /*= 0*/ )
+	{
+		ASSERT_PTR( hMenu );
+
+		if ( !::IsMenu( hMenu ) )
+			return false;
+
+		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+			switch ( ::GetMenuItemID( hMenu, i ) )
+			{
+				case 0:				// separator
+					break;
+				case UINT_MAX:		// sub-menu?
+					if ( HMENU hSubMenu = ::GetSubMenu( hMenu, i ) )
+						if ( !EnsureDeepValidMenu( hSubMenu, depth + 1 ) )
+						{
+							TCHAR text[ 256 ] = { 0 };
+							::GetMenuString( hMenu, i, text, COUNT_OF( text ), MF_BYPOSITION );
+
+							std::tstring indentPrefix( depth, _T(' ') );
+
+							TRACE( _T("%s- Invalid sub-menu item: hMenu=0x%08x  itemPos=%d  itemText='%s'  hSubMenu=0x%08x  depth=%d\n"), indentPrefix.c_str(), hMenu, i, text, hSubMenu, depth );
+							return false;
+						}
+					break;
+			}
+
+		return true;
+	}
 }
 
 
@@ -670,6 +651,48 @@ namespace ui
 		}
 
 		return false;
+	}
+}
+
+
+namespace ui
+{
+	// MENUITEMINFO_BUFF implementation
+
+	MENUITEMINFO_BUFF::MENUITEMINFO_BUFF( void )
+	{
+		utl::ZeroWinStruct( static_cast<MENUITEMINFO*>( this ) );
+	}
+
+	void MENUITEMINFO_BUFF::ClearTextBuffer( void )
+	{
+		if ( dwTypeData != nullptr && HasText() )		// text buffer allocated internally?
+			delete[] dwTypeData;
+
+		dwTypeData = nullptr;
+		cch = 0;
+	}
+
+	bool MENUITEMINFO_BUFF::GetMenuItemInfo( HMENU hMenu, UINT item, bool byPos /*= true*/,
+											 UINT mask /*= MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP*/ )
+	{
+		ASSERT( ::IsMenu( hMenu ) );
+
+		ClearTextBuffer();
+		utl::ZeroWinStruct( static_cast<MENUITEMINFO*>( this ) );
+
+		fMask = mask;					// MIIM_TYPE replaced by MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP
+
+		if ( !::GetMenuItemInfo( hMenu, item, byPos, this ) )
+			return false;
+
+		if ( HasFlag( fMask, MIIM_STRING ) && cch != 0 )
+		{
+			dwTypeData = new TCHAR[ ++cch ];									// enlarge text buffer with EOS & allocate it
+			return ::GetMenuItemInfo( hMenu, item, byPos, this ) != FALSE;		// also fetch item text
+		}
+
+		return true;
 	}
 }
 

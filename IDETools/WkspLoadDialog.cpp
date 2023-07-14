@@ -191,7 +191,7 @@ void CWkspLoadDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_FILES_LIST, m_fileList );
 	DDX_Control( pDX, IDC_FULLPATH_EDIT, m_fullPathEdit );
 
-	CLayoutDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -209,7 +209,7 @@ END_MESSAGE_MAP()
 
 BOOL CWkspLoadDialog::OnInitDialog( void )
 {
-	CLayoutDialog::OnInitDialog();
+	__super::OnInitDialog();
 
 	CheckDlgButton( IDC_SHOW_FULL_PATH_CHECK, m_options.m_displayFullPath );
 	CheckDlgButton( IDC_CLOSE_ALL_BEFORE_OPEN_CHECK, m_rWkspProfile.m_mustCloseAll );
@@ -221,27 +221,21 @@ BOOL CWkspLoadDialog::OnInitDialog( void )
 void CWkspLoadDialog::OnDestroy( void )
 {
 	cleanupWindow();
-	CLayoutDialog::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CWkspLoadDialog::OnOK( void )
 {
 	transferFiles();
-	CLayoutDialog::OnOK();
+	__super::OnOK();
 }
 
-void CWkspLoadDialog::OnContextMenu( CWnd* pWnd, CPoint point )
+void CWkspLoadDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	if ( pWnd == &m_fileList )
-	{
-		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::ProfileListContextPopup );
-
-		if ( point.x == -1 || point.y == -1 )
-			::GetCursorPos( &point );
-
-		contextMenu.TrackPopupMenu( TPM_RIGHTBUTTON, point.x, point.y, this );
-	}
+		ui::TrackContextMenu( IDR_CONTEXT_MENU, app::ProfileListContextPopup, this, screenPos );
+	else
+		__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CWkspLoadDialog::CkShowFullPath( void )

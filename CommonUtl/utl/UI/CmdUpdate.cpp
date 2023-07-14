@@ -106,7 +106,7 @@ namespace ui
 				ASSERT_NULL( itemState.m_pOther );
 				ASSERT_PTR( itemState.m_pMenu );
 
-				if ( itemState.m_nID == (UINT)-1 )		// sub-menu?
+				if ( UINT_MAX == itemState.m_nID )			// sub-menu?
 				{	// sub-menu popup, route to first command in that popup
 					itemState.m_pSubMenu = pMenu->GetSubMenu( itemState.m_nIndex );
 

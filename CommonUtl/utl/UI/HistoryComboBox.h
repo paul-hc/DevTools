@@ -67,7 +67,7 @@ public:
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg BOOL OnChanged_Reflect( void );
 	afx_msg void OnUpdateSelectedListItem( CCmdUI* pCmdUI );
 	afx_msg void OnDeleteListItem( void );

@@ -838,7 +838,7 @@ void CRenameFilesDialog::OnPickFormatToken( void )
 {
 //DBG: OnUpdate(NULL, NULL);
 	CMenu popupMenu;
-	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::FormatPicker );
+	ui::LoadPopupMenu( &popupMenu, IDR_CONTEXT_MENU, popup::FormatPicker );
 
 	m_formatCombo.GetMateToolbar()->TrackButtonMenu( ID_PICK_FORMAT_TOKEN, this, &popupMenu, ui::DropDown );
 }
@@ -870,7 +870,7 @@ void CRenameFilesDialog::OnDirPathPicked( UINT cmdId )
 void CRenameFilesDialog::OnPickTextTools( void )
 {
 	CMenu popupMenu;
-	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::TextTools );
+	ui::LoadPopupMenu( &popupMenu, IDR_CONTEXT_MENU, popup::TextTools );
 
 	m_formatCombo.GetMateToolbar()->TrackButtonMenu( ID_PICK_TEXT_TOOLS, this, &popupMenu, ui::DropDown );
 }

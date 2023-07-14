@@ -31,7 +31,7 @@ CPopupSplitButton::~CPopupSplitButton()
 void CPopupSplitButton::LoadMenu( UINT menuId, int popupIndex )
 {
 	if ( menuId != 0 )
-		ui::LoadPopupMenu( m_popupMenu, menuId, popupIndex );
+		ui::LoadPopupMenu( &m_popupMenu, menuId, popupIndex );
 	else
 		m_popupMenu.DestroyMenu();
 }

@@ -191,14 +191,9 @@ END_MESSAGE_MAP()
 void CDateTimeControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	if ( this == pWnd )
-	{
-		CMenu popupMenu;
-		ui::LoadPopupMenu( popupMenu, IDR_STD_CONTEXT_MENU, ui::DateTimePopup );
-		ui::TrackPopupMenu( popupMenu, this, screenPos );
-		return;					// supress rising WM_CONTEXTMENU to the parent
-	}
-
-	Default();
+		ui::TrackContextMenu( IDR_STD_CONTEXT_MENU, ui::DateTimePopup, this, screenPos );
+	else
+		__super::OnContextMenu( pWnd, screenPos );
 }
 
 BOOL CDateTimeControl::OnDtnDateTimeChange_Reflect( NMHDR* pNmHdr, LRESULT* pResult )

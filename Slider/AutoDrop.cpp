@@ -95,7 +95,7 @@ namespace auto_drop
 		, m_dropScreenPos( -1, -1 )
 	{
 		if ( nullptr == s_dropContextMenu.GetSafeHmenu() )
-			ui::LoadPopupMenu( s_dropContextMenu, IDR_CONTEXT_MENU, app::DropPopup );
+			ui::LoadPopupMenu( &s_dropContextMenu, IDR_CONTEXT_MENU, app::DropPopup );
 	}
 
 	CContext::~CContext()

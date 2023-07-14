@@ -276,7 +276,7 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 	{
 		static CMenu s_popupMenu;
 		if ( nullptr == s_popupMenu.GetSafeHmenu() )
-			ui::LoadMfcPopupMenu( s_popupMenu, IDR_STD_CONTEXT_MENU, ui::ColorPickerPopup );
+			ui::LoadMfcPopupMenu( &s_popupMenu, IDR_STD_CONTEXT_MENU, ui::ColorPickerPopup );
 
 		CMFCColorBar* pColorBar = checked_static_cast<CMFCColorBar*>( m_pPopup->GetMenuBar() );
 		CMFCToolBarMenuButton popupItem( 333, s_popupMenu, -1, _T("<debug-popup>") );
@@ -338,7 +338,7 @@ void CColorPickerButton::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	{
 		CMenu popupMenu;
 
-		ui::LoadMfcPopupMenu( popupMenu, IDR_STD_CONTEXT_MENU, ui::ColorPickerPopup );
+		ui::LoadMfcPopupMenu( &popupMenu, IDR_STD_CONTEXT_MENU, ui::ColorPickerPopup );
 		AddColorTablesSubMenu( &popupMenu );
 
 		ui::TrackMfcPopupMenu( popupMenu.GetSafeHmenu(), this, screenPos );

@@ -175,7 +175,7 @@ CMenu& CAlbumSettingsDialog::GetAlbumModelPopupMenu( void )
 	if ( nullptr == s_popupMenu.GetSafeHmenu() )
 	{
 		CMenu popupMenu;
-		ui::LoadPopupSubMenu( s_popupMenu, IDR_CONTEXT_MENU, app::AlbumFoundListPopup );
+		ui::LoadPopupMenu( &s_popupMenu, IDR_CONTEXT_MENU, app::AlbumFoundListPopup );
 		ui::JoinMenuItems( s_popupMenu, CPathItemListCtrl::GetStdPathListPopupMenu( CReportListControl::OnSelection ) );
 	}
 	return s_popupMenu;
@@ -573,18 +573,15 @@ void CAlbumSettingsDialog::OnIdleUpdateControls( void )
 	ui::UpdateDlgItemUI( this, ID_EDIT_ARCHIVE_PASSWORD );		// update button icon for password protected state
 }
 
-void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )
+void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	if ( pWnd == &m_imagesListCtrl )
 	{
-		static CMenu contextMenu;
-		if ( nullptr == (HMENU)contextMenu )
-			ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AlbumFoundListPopup );
-
 		if ( m_imagesListCtrl.GetSelectedCount() != 0 )
-			if ( (HMENU)contextMenu != nullptr )
-				contextMenu.TrackPopupMenu( TPM_RIGHTBUTTON, point.x, point.y, this );
+			ui::TrackContextMenu( IDR_CONTEXT_MENU, app::AlbumFoundListPopup, this, screenPos );
 	}
+	else
+		__super::OnContextMenu( pWnd, screenPos );
 }
 
 

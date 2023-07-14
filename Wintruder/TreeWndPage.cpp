@@ -230,7 +230,7 @@ CTreeWndPage::CTreeWndPage( void )
 
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_TREE_WND_PAGE ) );
 
-	ui::LoadPopupMenu( m_treeCtrl.GetContextMenu(), IDR_CONTEXT_MENU, app::TreePopup, ui::CheckedMenuImages );
+	ui::LoadPopupMenu( &m_treeCtrl.GetContextMenu(), IDR_CONTEXT_MENU, app::TreePopup, ui::CheckedMenuImages );
 	m_treeCtrl.GetContextMenu().SetDefaultItem( CM_HIGHLIGHT_WINDOW );
 }
 

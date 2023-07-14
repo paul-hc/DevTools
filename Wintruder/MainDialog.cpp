@@ -68,7 +68,7 @@ CMainDialog::CMainDialog( void )
 	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_SPAN( layout::dualLayoutStyles ) );
 	m_regSection = reg::section;
 	m_initCollapsed = true;
-	ui::LoadPopupMenu( m_trayPopupMenu, IDR_CONTEXT_MENU, app::SysTrayPopup );
+	ui::LoadPopupMenu( &m_trayPopupMenu, IDR_CONTEXT_MENU, app::SysTrayPopup );
 	m_trayPopupMenu.SetDefaultItem( ID_APP_MINIMIZE );
 
 	app::GetSvc().AddObserver( this );

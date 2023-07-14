@@ -97,7 +97,7 @@ protected:
 protected:
 	virtual void OnOK( void );
 	virtual void OnIdleUpdateControls( void );
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 
 	afx_msg void OnLVnDblClk_Patterns( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pResult );
