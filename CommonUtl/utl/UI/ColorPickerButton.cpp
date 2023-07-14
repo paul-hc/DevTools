@@ -163,7 +163,7 @@ void CColorPickerButton::AddColorTablesSubMenu( CMenu* pContextMenu )
 
 	int index = 0;
 
-	if ( CMenu* pSetSubMenu = ui::FindMenuItemIndex( &index, pContextMenu, ID_USE_COLOR_TABLE_MIN ) )
+	if ( CMenu* pSetSubMenu = ui::SafeFromHandle( ui::FindMenuItemIndex( &index, pContextMenu->GetSafeHmenu(), ID_USE_COLOR_TABLE_MIN ) ) )
 	{
 		pSetSubMenu->DeleteMenu( index, MF_BYPOSITION );
 

@@ -67,75 +67,78 @@ namespace ui
 	}
 
 
-	CMenu* _FindParentMenu( const CWnd* pTargetWnd, const CMenu* pMenu )
-	{	// locate the parent menu for frame windows (non-tracking) case
-		ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
-		ASSERT_PTR( pMenu->GetSafeHmenu() );
-
-		if ( HMENU hParentMenu = ::GetMenu( pTargetWnd->m_hWnd ) )
-			if ( CWnd* pTopWnd = pTargetWnd->GetTopLevelParent() )				// child windows don't have menus - need to go to the top
-				if ( ( hParentMenu = ::GetMenu( pTopWnd->m_hWnd ) ) != nullptr )
-					for ( int index = 0, count = ::GetMenuItemCount( hParentMenu ); index != count; ++index )
-						if ( ::GetSubMenu( hParentMenu, index ) == pMenu->m_hMenu )		// popup found?
-							return CMenu::FromHandle( hParentMenu );			// m_pParentMenu is the containing menu
-
-		return nullptr;
-	}
-
-	void _UpdateMenuUI_Impl( CWnd* pTargetWnd, CMenu* pMenu, CMenu* pParentMenu, bool autoMenuEnable, RecursionDepth depth )
+	namespace impl
 	{
-		// Note: Deep recursion depth is useful only for tracking menus with TPM_NONOTIFY flag, when WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus
-		ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
+		CMenu* FindParentMenu( const CWnd* pTargetWnd, const CMenu* pMenu )
+		{	// locate the parent menu for frame windows (non-tracking) case
+			ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
+			ASSERT_PTR( pMenu->GetSafeHmenu() );
 
-		CCmdUI itemState;
+			if ( HMENU hParentMenu = ::GetMenu( pTargetWnd->m_hWnd ) )
+				if ( CWnd* pTopWnd = pTargetWnd->GetTopLevelParent() )				// child windows don't have menus - need to go to the top
+					if ( ( hParentMenu = ::GetMenu( pTopWnd->m_hWnd ) ) != nullptr )
+						for ( int index = 0, count = ::GetMenuItemCount( hParentMenu ); index != count; ++index )
+							if ( ::GetSubMenu( hParentMenu, index ) == pMenu->m_hMenu )		// popup found?
+								return CMenu::FromHandle( hParentMenu );			// m_pParentMenu is the containing menu
 
-		itemState.m_pMenu = pMenu;
-		itemState.m_pParentMenu = pParentMenu;
-		ASSERT_NULL( itemState.m_pOther );
+			return nullptr;
+		}
 
-		itemState.m_nIndexMax = pMenu->GetMenuItemCount();
-		for ( itemState.m_nIndex = 0; itemState.m_nIndex < itemState.m_nIndexMax; ++itemState.m_nIndex )
+		void UpdateMenuUI_Impl( CWnd* pTargetWnd, CMenu* pMenu, CMenu* pParentMenu, bool autoMenuEnable, RecursionDepth depth )
 		{
-			itemState.m_nID = pMenu->GetMenuItemID( itemState.m_nIndex );
-			if ( 0 == itemState.m_nID )
-				continue;								// menu separator or invalid cmd - ignore it
+			// Note: Deep recursion depth is useful only for tracking menus with TPM_NONOTIFY flag,
+			// when WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus.
+			ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
 
+			CCmdUI itemState;
+
+			itemState.m_pMenu = pMenu;
+			itemState.m_pParentMenu = pParentMenu;
 			ASSERT_NULL( itemState.m_pOther );
-			ASSERT_PTR( itemState.m_pMenu );
 
-			if ( itemState.m_nID == (UINT)-1 )
+			itemState.m_nIndexMax = pMenu->GetMenuItemCount();
+			for ( itemState.m_nIndex = 0; itemState.m_nIndex < itemState.m_nIndexMax; ++itemState.m_nIndex )
 			{
-				// possibly a popup menu, route to first item of that popup
-				itemState.m_pSubMenu = pMenu->GetSubMenu( itemState.m_nIndex );
+				itemState.m_nID = pMenu->GetMenuItemID( itemState.m_nIndex );
+				if ( 0 == itemState.m_nID )
+					continue;								// menu separator or invalid cmd - ignore it
 
-				if ( itemState.m_pSubMenu != nullptr )
-				{
-					itemState.m_nID = itemState.m_pSubMenu->GetMenuItemID( 0 );		// use ID of the first item of popup
-					if ( itemState.m_nID != 0 && itemState.m_nID != (UINT)-1 )
-						itemState.DoUpdate( pTargetWnd, FALSE );					// update the popup item (popups are never auto disabled)
+				ASSERT_NULL( itemState.m_pOther );
+				ASSERT_PTR( itemState.m_pMenu );
 
-					if ( Deep == depth )
-						_UpdateMenuUI_Impl( pTargetWnd, itemState.m_pSubMenu, pMenu, autoMenuEnable, depth );
+				if ( itemState.m_nID == (UINT)-1 )		// sub-menu?
+				{	// sub-menu popup, route to first command in that popup
+					itemState.m_pSubMenu = pMenu->GetSubMenu( itemState.m_nIndex );
+
+					if ( itemState.m_pSubMenu != nullptr )
+					{
+						if ( ui::FindFirstMenuCommand( &itemState.m_nID, *itemState.m_pSubMenu ) != nullptr )	// use the ID of the first command of the sub-menu
+							itemState.DoUpdate( pTargetWnd, FALSE );		// update the popup item (popups are never auto disabled)
+
+						if ( Deep == depth )
+							UpdateMenuUI_Impl( pTargetWnd, itemState.m_pSubMenu, pMenu, autoMenuEnable, depth );
+					}
 				}
-			}
-			else
-			{
-				// normal menu item
-				// auto enable/disable according to autoMenuEnable
-				//	set and command is _not_ a system command.
-				itemState.m_pSubMenu = nullptr;
-				itemState.DoUpdate( pTargetWnd, !autoMenuEnable && itemState.m_nID < 0xF000 );
-			}
+				else
+				{
+					// normal menu item
+					// auto enable/disable according to autoMenuEnable
+					//	set and command is _not_ a system command.
+					itemState.m_pSubMenu = nullptr;
+					itemState.DoUpdate( pTargetWnd, !autoMenuEnable && itemState.m_nID < 0xF000 );
+				}
 
-			// adjust for menu deletions and additions
-			UINT itemCount = pMenu->GetMenuItemCount();
-			if ( itemCount < itemState.m_nIndexMax )
-			{
-				itemState.m_nIndex -= ( itemState.m_nIndexMax - itemCount );
-				while ( itemState.m_nIndex < itemCount && pMenu->GetMenuItemID( itemState.m_nIndex ) == itemState.m_nID )
-					++itemState.m_nIndex;
+				// adjust for menu deletions and additions
+				UINT itemCount = pMenu->GetMenuItemCount();
+				if ( itemCount < itemState.m_nIndexMax )
+				{
+					itemState.m_nIndex -= ( itemState.m_nIndexMax - itemCount );
+
+					while ( itemState.m_nIndex < itemCount && pMenu->GetMenuItemID( itemState.m_nIndex ) == itemState.m_nID )
+						++itemState.m_nIndex;
+				}
+				itemState.m_nIndexMax = itemCount;
 			}
-			itemState.m_nIndexMax = itemCount;
 		}
 	}
 
@@ -150,9 +153,9 @@ namespace ui
 		if ( isTracking || AfxGetThreadState()->m_hTrackingMenu == pMenu->m_hMenu )
 			pParentMenu = pMenu;					// parent == child for tracking popup
 		else
-			pParentMenu = _FindParentMenu( pTargetWnd, pMenu );		// locate the parent menu for frame windows menu update
+			pParentMenu = impl::FindParentMenu( pTargetWnd, pMenu );		// locate the parent menu for frame windows menu update
 
-		_UpdateMenuUI_Impl( pTargetWnd, pMenu, pParentMenu, autoMenuEnable, depth );
+		impl::UpdateMenuUI_Impl( pTargetWnd, pMenu, pParentMenu, autoMenuEnable, depth );
 	}
 
 

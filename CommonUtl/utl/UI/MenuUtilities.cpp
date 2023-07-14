@@ -5,7 +5,6 @@
 #include "ImageStore.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
-#include <afxcontextmenumanager.h>
 
 #ifdef _DEBUG
 #include "FlagTags.h"
@@ -33,7 +32,7 @@ namespace ui
 		rContextMenu.Attach( hSubMenu );
 		VERIFY( menuBar.RemoveMenu( popupIndex, MF_BYPOSITION ) );
 
-		if ( useMenuImages != NoMenuImages )
+		if ( useMenuImages != NoMenuImages || !UseMfcMenuManager() )
 			SetMenuImages( rContextMenu, CheckedMenuImages == useMenuImages );		// set shared bitmap images
 	}
 
@@ -68,7 +67,7 @@ namespace ui
 		if ( nullptr == pImageStore )
 			return false;
 
-		for ( unsigned int i = 0, count = rMenu.GetMenuItemCount(); i != count; ++i )
+		for ( UINT i = 0, count = rMenu.GetMenuItemCount(); i != count; ++i )
 		{
 			UINT state = rMenu.GetMenuState( i, MF_BYPOSITION );
 
@@ -132,7 +131,7 @@ namespace ui
 		REQUIRE( ::IsMenu( hPopupMenu ) );
 		AdjustMenuTrackPos( screenPos );
 
-		if ( afxContextMenuManager != NULL )
+		if ( UseMfcMenuManager() )
 		{
 			CWnd* pFocusWnd = CWnd::GetFocus();
 
@@ -145,12 +144,15 @@ namespace ui
 		{
 			CMenu* pPopupMenu = CMenu::FromHandle( hPopupMenu );
 
-			ui::UpdateMenuUI( pTargetWnd, pPopupMenu, true, true, Deep );	// Deep update since with TPM_NONOTIFY flag, WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus
-			cmdId = pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, screenPos.x, screenPos.y, pTargetWnd );
+			// avoid deep updates, since we don't use the TPM_NONOTIFY tracking flag!
+			//ui::UpdateMenuUI( pTargetWnd, pPopupMenu, true, true, Deep );		// Deep update since with TPM_NONOTIFY flag, WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus
+
+			// not using TPM_NONOTIFY for proper WM_INITMENUPOPUP menu updates
+			cmdId = pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD /*| TPM_NONOTIFY*/, screenPos.x, screenPos.y, pTargetWnd );
 		}
 
 		if ( sendCommand && cmdId != 0 )
-			SendCommand( pTargetWnd->GetSafeHwnd(), cmdId);
+			SendCommand( pTargetWnd->GetSafeHwnd(), cmdId );
 
 		return ui::ToIntCmdId( cmdId );
 	}
@@ -309,32 +311,6 @@ namespace ui
 		return -1;
 	}
 
-	CMenu* FindMenuItemIndex( int* pOutIndex, const CMenu* pMenu, UINT itemId, RecursionDepth depth /*= Deep*/ )
-	{
-		ASSERT_PTR( pMenu->GetSafeHmenu() );
-		ASSERT_PTR( pOutIndex );
-
-		for ( unsigned int i = 0, count = pMenu->GetMenuItemCount(); i != count; ++i )
-		{
-			UINT state = pMenu->GetMenuState( i, MF_BYPOSITION );
-			ASSERT( state != UINT_MAX );
-
-			if ( HasFlag( state, MF_POPUP ) )
-			{
-				if ( CMenu* pFoundSubMenu = FindMenuItemIndex( pOutIndex, pMenu->GetSubMenu( i ), itemId, depth ) )
-					return pFoundSubMenu;
-			}
-			else if ( itemId == pMenu->GetMenuItemID( i ) )
-			{
-				*pOutIndex = i;
-				return const_cast<CMenu*>( pMenu );
-			}
-		}
-
-		*pOutIndex = -1;
-		return nullptr;
-	}
-
 	int FindAfterMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst /*= 0*/ )
 	{
 		int atIndex = FindMenuItemIndex( hMenu, itemId, iFirst );
@@ -344,9 +320,65 @@ namespace ui
 		return atIndex + 1;			// the position just after
 	}
 
+
+	HMENU FindMenuItemIndex( OUT int* pOutIndex, HMENU hMenu, UINT itemId, RecursionDepth depth /*= Deep*/ )
+	{
+		REQUIRE( ::IsMenu( hMenu ) );
+		ASSERT_PTR( pOutIndex );
+
+		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+		{
+			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
+			ASSERT( state != UINT_MAX );
+
+			if ( HasFlag( state, MF_POPUP ) )
+			{
+				if ( Deep == depth )
+					if ( HMENU hFoundSubMenu = FindMenuItemIndex( pOutIndex, ::GetSubMenu( hMenu, i ), itemId, depth ) )
+						return hFoundSubMenu;
+			}
+			else if ( itemId == ::GetMenuItemID( hMenu, i ) )
+			{
+				*pOutIndex = i;
+				return hMenu;
+			}
+		}
+
+		*pOutIndex = -1;
+		return nullptr;
+	}
+
+	HMENU FindFirstMenuCommand( OUT UINT* pOutCmdId, HMENU hMenu, RecursionDepth depth /*= Deep*/ )
+	{
+		REQUIRE( ::IsMenu( hMenu ) );
+		ASSERT_PTR( pOutCmdId );
+
+		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+		{
+			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
+			ASSERT( state != UINT_MAX );
+
+			if ( HasFlag( state, MF_POPUP ) )
+			{
+				if ( Deep == depth )
+					if ( HMENU hFoundSubMenu = FindFirstMenuCommand( pOutCmdId, ::GetSubMenu( hMenu, i ), depth ) )
+						return hFoundSubMenu;
+			}
+			else if ( !HasFlag( state, MF_SEPARATOR ) )
+				if ( UINT cmdId = ::GetMenuItemID( hMenu, i ) )
+				{
+					*pOutCmdId = cmdId;
+					return hMenu;
+				}
+		}
+
+		*pOutCmdId = 0;
+		return nullptr;
+	}
+
 	UINT GetTotalCmdCount( HMENU hMenu, RecursionDepth depth /*= Deep*/ )
 	{
-		ASSERT_PTR( hMenu );
+		REQUIRE( ::IsMenu( hMenu ) );
 		UINT cmdCount = 0;
 
 		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
@@ -370,25 +402,28 @@ namespace ui
 		return cmdCount;
 	}
 
-	void QueryMenuItemIds( std::vector<UINT>& rItemIds, HMENU hMenu )
+	void QueryMenuItemIds( std::vector<UINT>& rItemIds, HMENU hMenu, RecursionDepth depth /*= Deep*/ )
 	{
-		ASSERT_PTR( hMenu );
+		REQUIRE( ::IsMenu( hMenu ) );
 
-		for ( unsigned int i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
 		{
 			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
 			ASSERT( state != UINT_MAX );
 
 			if ( HasFlag( state, MF_POPUP ) )
-				QueryMenuItemIds( rItemIds, ::GetSubMenu( hMenu, i ) );
-			else if ( HasFlag( state, MFT_OWNERDRAW ) )
+			{
+				if ( Deep == depth )
+					QueryMenuItemIds( rItemIds, ::GetSubMenu( hMenu, i ), depth );
+			}
+			else if ( !HasFlag( state, MF_SEPARATOR ) )
 				utl::AddUnique( rItemIds, ::GetMenuItemID( hMenu, i ) );		// even separators are added to m_noTouch map
 		}
 	}
 
 	HMENU CloneMenu( HMENU hSrcMenu )
 	{
-		ASSERT( ::IsMenu( hSrcMenu ) );
+		REQUIRE( ::IsMenu( hSrcMenu ) );
 
 		CMenu destMenu;
 		destMenu.CreatePopupMenu();
@@ -417,7 +452,7 @@ namespace ui
 	{
 		size_t copiedCount = 0;
 
-		for ( unsigned int i = 0, srcCount = srcMenu.GetMenuItemCount(); i != srcCount; ++i )
+		for ( UINT i = 0, srcCount = srcMenu.GetMenuItemCount(); i != srcCount; ++i )
 		{
 			UINT srcId = srcMenu.GetMenuItemID( i );
 
@@ -454,7 +489,7 @@ namespace ui
 	{
 		ASSERT_PTR( pItemIds );
 
-		for ( unsigned int i = 0; i != itemCount; ++i )
+		for ( UINT i = 0; i != itemCount; ++i )
 		{
 			ASSERT( pItemIds[ i ] != 0 );
 			rDestMenu.DeleteMenu( pItemIds[ i ], MF_BYCOMMAND );

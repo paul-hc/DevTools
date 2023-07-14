@@ -367,8 +367,8 @@ void CWorkspace::SetImageSelColor( COLORREF imageSelColor )
 	m_imageSelColorBrush.CreateSolidBrush( GetImageSelColor() );
 
 	// set the selected text color
-	if ( color::Null == m_data.m_imageSelColor )
-		m_data.m_imageSelTextColor = color::Null;
+//	if ( color::Null == m_data.m_imageSelColor )
+//		m_data.m_imageSelTextColor = color::Null;
 }
 
 
