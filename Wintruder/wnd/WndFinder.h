@@ -19,10 +19,10 @@ public:
 	bool IsValidMatch( HWND hWnd ) const;
 	bool IsValidMatchIgnore( HWND hWnd ) const;		// uses ignore options
 
-	static inline int GetRectArea( const CRect& rect, int minExtent = 1 ) { return std::max< int >( rect.Width(), minExtent ) * std::max< int >( rect.Height(), minExtent ); }
+	static inline int GetRectArea( const CRect& rect, int minExtent = 1 ) { return std::max<int>( rect.Width(), minExtent ) * std::max<int>( rect.Height(), minExtent ); }
 
 	// pattern searching
-	HWND FindWindow( const CWndSearchPattern& pattern, HWND hStartWnd = NULL );
+	HWND FindWindow( const CWndSearchPattern& pattern, HWND hStartWnd = nullptr );
 
 	// auto-update target
 	CWndSpot FindUpdateTarget( void ) const;
@@ -32,7 +32,8 @@ private:
 	bool ContainsPoint( HWND hWnd, const CPoint& screenPos ) const;
 
 	HWND FindActiveWnd( void ) const;
-	HWND FindFocusWnd( void ) const;
+	HWND FindFocusedWnd( void ) const;
+	HWND FindCapturedWnd( void ) const;
 	HWND FindTopmostWnd( opt::UpdateTarget topmostTarget ) const;
 private:
 	DWORD m_appProcessId, m_thisThreadId;

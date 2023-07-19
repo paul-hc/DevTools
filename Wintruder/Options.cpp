@@ -22,7 +22,7 @@ namespace opt
 
 	const CEnumTags& GetTags_AutoUpdateTarget( void )
 	{
-		static const CEnumTags tags( _T("Current|At Mouse|Foreground|Active|Focus|Topmost|Topmost Non-Child|Topmost Visible") );
+		static const CEnumTags tags( _T("Current|At Mouse|Foreground|Active|Focused|Captured|Topmost|Topmost Non-Child|Topmost Visible") );
 		return tags;
 	}
 

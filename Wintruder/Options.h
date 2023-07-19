@@ -14,7 +14,7 @@ namespace opt
 	enum FrameStyle { EntireWindow, NonClient, Frame };
 	const CEnumTags& GetTags_FrameStyle( void );
 
-	enum UpdateTarget { CurrentWnd, AtMouseWnd, ForegroundWnd, ActiveWnd, FocusWnd, TopmostWnd, TopmostPopupWnd, TopmostVisibleWnd };
+	enum UpdateTarget { CurrentWnd, AtMouseWnd, ForegroundWnd, ActiveWnd, FocusedWnd, CapturedWnd, TopmostWnd, TopmostPopupWnd, TopmostVisibleWnd };
 	const CEnumTags& GetTags_AutoUpdateTarget( void );
 
 	enum QueryWndIcons { NoWndIcons, TopWndIcons, AllWndIcons };

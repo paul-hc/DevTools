@@ -283,7 +283,15 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 
 		pColorBar->InsertSeparator();
 		pColorBar->InsertButton( popupItem );
-		pColorBar->UpdateWindow();
+		if ( 0 )
+		{
+			static_cast<CMFCToolBar*>( pColorBar )->AdjustLayout();
+			pColorBar->RecalcLayout();
+			m_pPopup->RecalcLayout();
+
+			pColorBar->UpdateWindow();
+		}
+		SizeToContent();
 	}
 }
 

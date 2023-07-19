@@ -66,7 +66,7 @@ CWndSpot CWndFinder::WindowFromPoint( const CPoint& screenPos ) const
 {
 	CWndSpot wndSpot( ::WindowFromPoint( screenPos ), screenPos );
 	if ( !wndSpot.IsValid() || !IsValidMatchIgnore( wndSpot.m_hWnd ) )
-		return CWndSpot( NULL, screenPos );
+		return CWndSpot( nullptr, screenPos );
 
 	HWND hParentWnd = ::GetParent( wndSpot.m_hWnd );
 	CRect hitRect = wndSpot.GetWindowRect();
@@ -102,7 +102,7 @@ HWND CWndFinder::FindBestFitSibling( HWND hWnd, const CRect& hitRect, const CPoi
 	ASSERT_PTR( hWnd );
 	bool foundAny = false;
 
-	for ( HWND hSibling = ::GetWindow( hWnd, GW_HWNDFIRST ); hSibling != NULL; hSibling = ::GetWindow( hSibling, GW_HWNDNEXT ) )
+	for ( HWND hSibling = ::GetWindow( hWnd, GW_HWNDFIRST ); hSibling != nullptr; hSibling = ::GetWindow( hSibling, GW_HWNDNEXT ) )
 		if ( ContainsPoint( hSibling, screenPos ) )
 		{
 			CRect siblingRect;
@@ -129,7 +129,7 @@ HWND CWndFinder::FindChildWindow( HWND hWndParent, const CRect& hitRect, const C
 	if ( HWND hChild = ::GetWindow( hWndParent, GW_CHILD ) )
 	{
 		hChild = FindBestFitSibling( hChild, hitRect, screenPos );
-		if ( hChild != NULL )
+		if ( hChild != nullptr )
 			if ( ContainsPoint( hChild, screenPos ) )
 				return hChild;
 	}
@@ -155,10 +155,10 @@ bool CWndFinder::ContainsPoint( HWND hWnd, const CPoint& screenPos ) const
 	return windowRect.PtInRect( screenPos ) != FALSE;
 }
 
-HWND CWndFinder::FindWindow( const CWndSearchPattern& pattern, HWND hStartWnd /*= NULL*/ )
+HWND CWndFinder::FindWindow( const CWndSearchPattern& pattern, HWND hStartWnd /*= nullptr*/ )
 {
-	if ( pattern.m_handle != NULL )
-		return ::IsWindow( pattern.m_handle ) ? pattern.m_handle : NULL;
+	if ( pattern.m_handle != nullptr )
+		return ::IsWindow( pattern.m_handle ) ? pattern.m_handle : nullptr;
 
 	CWndEnumerator enumerator;
 	enumerator.Build( ::GetDesktopWindow() );
@@ -166,7 +166,7 @@ HWND CWndFinder::FindWindow( const CWndSearchPattern& pattern, HWND hStartWnd /*
 	const std::vector< HWND >& windows = enumerator.GetWindows();
 
 	if ( pattern.m_fromBeginning )
-		hStartWnd = NULL;
+		hStartWnd = nullptr;
 
 	if ( pattern.m_forward )
 		return utl::CircularFind( windows.begin(), windows.end(), hStartWnd, pred::Matches( &pattern ) );
@@ -193,8 +193,11 @@ CWndSpot CWndFinder::FindUpdateTarget( void ) const
 		case opt::ActiveWnd:
 			foundWnd = FindActiveWnd();
 			break;
-		case opt::FocusWnd:
-			foundWnd = FindFocusWnd();
+		case opt::FocusedWnd:
+			foundWnd = FindFocusedWnd();
+			break;
+		case opt::CapturedWnd:
+			foundWnd = FindCapturedWnd();
 			break;
 		case opt::TopmostWnd:
 		case opt::TopmostPopupWnd:
@@ -203,37 +206,47 @@ CWndSpot CWndFinder::FindUpdateTarget( void ) const
 	}
 
 	if ( !IsValidMatch( foundWnd.m_hWnd ) )
-		foundWnd.SetWnd( NULL );
+		foundWnd.SetWnd( nullptr );
 
 	return foundWnd;
 }
 
 HWND CWndFinder::FindActiveWnd( void ) const
 {
-	if ( HWND hForeground = ::GetForegroundWindow() )
+	if ( HWND hForegroundWnd = ::GetForegroundWindow() )
 	{
-		CScopedAttachThreadInput scopedThreadAccess( hForeground );
+		CScopedAttachThreadInput scopedThreadAccess( hForegroundWnd );
 		return ::GetActiveWindow();
 	}
-	return NULL;
+	return nullptr;
 }
 
-HWND CWndFinder::FindFocusWnd( void ) const
+HWND CWndFinder::FindFocusedWnd( void ) const
 {
-	if ( HWND hForeground = ::GetForegroundWindow() )
+	if ( HWND hForegroundWnd = ::GetForegroundWindow() )
 	{
-		CScopedAttachThreadInput scopedThreadAccess( hForeground );
+		CScopedAttachThreadInput scopedThreadAccess( hForegroundWnd );
 		return ::GetFocus();
 	}
-	return NULL;
+	return nullptr;
+}
+
+HWND CWndFinder::FindCapturedWnd( void ) const
+{
+	if ( HWND hForegroundWnd = ::GetForegroundWindow() )
+	{
+		CScopedAttachThreadInput scopedThreadAccess( hForegroundWnd );
+		return ::GetCapture();
+	}
+	return nullptr;
 }
 
 HWND CWndFinder::FindTopmostWnd( opt::UpdateTarget topmostTarget ) const
 {
-	HWND hShellTrayWnd = ::FindWindow( _T("Shell_TrayWnd"), NULL );
-	HWND hFoundWnd = NULL;
+	HWND hShellTrayWnd = ::FindWindow( _T("Shell_TrayWnd"), nullptr );
+	HWND hFoundWnd = nullptr;
 
-	for ( HWND hWnd = ::GetWindow( ::GetDesktopWindow(), GW_CHILD ); hWnd != NULL; hWnd = ::GetWindow( hWnd, GW_HWNDNEXT ) )
+	for ( HWND hWnd = ::GetWindow( ::GetDesktopWindow(), GW_CHILD ); hWnd != nullptr; hWnd = ::GetWindow( hWnd, GW_HWNDNEXT ) )
 		if ( IsValidMatch( hWnd ) )
 			switch ( topmostTarget )
 			{
