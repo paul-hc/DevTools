@@ -16,51 +16,6 @@
 #endif
 
 
-namespace ui
-{
-	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, CMFCColorButton& rCtrl, COLORREF* pColor )
-	{
-		ASSERT_PTR( pColor );
-		DDX_Control( pDX, ctrlId, rCtrl );
-
-		if ( pColor != nullptr )
-			if ( DialogOutput == pDX->m_bSaveAndValidate )
-				rCtrl.SetColor( *pColor );
-			else
-			{
-				*pColor = rCtrl.GetColor();
-				//if ( CLR_NONE == *pColor )
-				//	*pColor = rCtrl.GetAutomaticColor();
-			}
-	}
-
-	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput /*= false*/ )
-	{
-		HWND hCtrl = pDX->PrepareEditCtrl( ctrlId );
-		ASSERT_PTR( pColor );
-		ASSERT_PTR( hCtrl );
-
-		if ( DialogOutput == pDX->m_bSaveAndValidate )
-			ui::SetWindowText( hCtrl, ui::FormatColor( *pColor ) );
-		else if ( doInput && ui::IsWriteableEditBox( hCtrl ) )
-		{
-			std::tstring text = ui::GetWindowText( hCtrl );
-			if ( !ui::ParseColor( pColor, text.c_str() ) )
-				 ui::ddx::FailInput( pDX, ctrlId, str::Format( _T("Error parsing color text: '%s'"), text.c_str() ) );
-		}
-	}
-
-	void DDX_ColorRepoText( CDataExchange* pDX, int ctrlId, COLORREF color )
-	{
-		HWND hCtrl = pDX->PrepareEditCtrl( ctrlId );
-		ASSERT_PTR( hCtrl );
-
-		if ( DialogOutput == pDX->m_bSaveAndValidate )
-			ui::SetWindowText( hCtrl, CColorRepository::Instance()->FormatColorMatch( color ) );
-	}
-}
-
-
 namespace reg
 {
 	static const TCHAR section_dialog[] = _T("TestColorsDialog");
@@ -84,26 +39,26 @@ namespace layout
 CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_TEST_COLORS_DIALOG, pParent )
 	, m_color( CLR_NONE )
-	, m_pUtlColorPicker( new CColorPickerButton() )
+	, m_editChecked( true )
+	, m_pColorPicker( new CColorPickerButton() )
+	, m_pColorStorePicker( new CColorStorePicker() )
 	, m_pMenuPicker( new CMenuPickerButton() )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
+	m_mfcColorPickerButton.SetColor( m_color );
 	m_mfcColorPickerButton.EnableAutomaticButton( _T("Automatic"), color::Yellow );
 	m_mfcColorPickerButton.EnableOtherButton( _T("More...") );
 	ui::TMFCColorList docColors;
 	CColorRepository::Instance()->GetTable( ui::Office2003_Colors )->QueryMfcColors( docColors );
-	m_mfcColorPickerButton.SetDocumentColors( _T(" ") /*_T("Document")*/, docColors);
-//	m_mfcColorPickerButton.SetColumnsNumber( 16 );
-	m_mfcColorPickerButton.SetColor( m_color );
+	m_mfcColorPickerButton.SetDocumentColors( _T("Document:"), docColors );
 
-	m_pUtlColorPicker->SetAutomaticColor( color::Lime );
-	m_pUtlColorPicker->SetColor( m_color );
+	m_pColorPicker->SetColor( m_color );
+	m_pColorPicker->SetAutomaticColor( color::Lime );
 
 	ui::LoadPopupMenu( &m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup );
-	m_pMenuPicker->m_bOSMenu = FALSE;
-	m_editChecked = true;
+	m_pMenuPicker->m_hMenu = m_popupMenu;
 }
 
 CTestColorsDialog::~CTestColorsDialog()
@@ -115,7 +70,8 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = nullptr == m_mfcColorPickerButton.m_hWnd;
 
 	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, m_mfcColorPickerButton, &m_color );
-	ui::DDX_ColorButton( pDX, IDC_MY_COLOR_PICKER_BUTTON, *m_pUtlColorPicker, &m_color );
+	ui::DDX_ColorButton( pDX, IDC_MY_COLOR_PICKER_BUTTON, *m_pColorPicker, &m_color );
+	ui::DDX_ColorButton( pDX, IDC_MY_COLOR_STORE_PICKER_BUTTON, *m_pColorStorePicker, &m_color );
 	DDX_Control( pDX, IDC_MY_MENU_PICKER_BUTTON, *m_pMenuPicker );
 
 	ui::DDX_ColorText( pDX, IDC_RGB_EDIT, &m_color );
@@ -125,12 +81,7 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
-		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );
-
-		//CMFCButton::EnableWindowsTheming();		already on!
-
-		m_pMenuPicker->m_hMenu = m_popupMenu;
-		m_pMenuPicker->SizeToContent();
+		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );		// feed afxCommandManager[:CCommandManager] with images from the strip
 	}
 
 	__super::DoDataExchange( pDX );
@@ -160,9 +111,9 @@ void CTestColorsDialog::OnColorPicker( void )
 
 void CTestColorsDialog::OnMyColorPicker( void )
 {
-	m_color = m_pUtlColorPicker->GetColor();
+	m_color = m_pColorPicker->GetColor();
 	if ( CLR_NONE == m_color )
-		m_color = m_pUtlColorPicker->GetAutomaticColor();
+		m_color = m_pColorPicker->GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }

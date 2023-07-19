@@ -10,6 +10,8 @@ class CDemoSysTray;
 class CMainFrame : public CBaseFrameWnd<CMDIFrameWnd>
 {
 	DECLARE_DYNAMIC( CMainFrame )
+
+	typedef CBaseFrameWnd<CMDIFrameWnd> TBaseFrameWnd;
 public:
 	CMainFrame( void );
 	virtual ~CMainFrame();

@@ -202,6 +202,7 @@
     <ClInclude Include="ColorRepository.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ContentFitBase.h" />
+    <ClInclude Include="ContextMenuMgr.h" />
     <ClInclude Include="Control_fwd.h" />
     <ClInclude Include="CtrlInterfaces.h" />
     <ClInclude Include="CtrlUiState.h" />
@@ -282,6 +283,8 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="PopupDlgBase.h" />
+    <ClInclude Include="PopupMenus.h" />
+    <ClInclude Include="PopupMenus_fwd.h" />
     <ClInclude Include="PopupSplitButton.h" />
     <ClInclude Include="PostCall.h" />
     <ClInclude Include="ProcessUtils.h" />
@@ -389,6 +392,7 @@
     <ClCompile Include="ColorPopupDialogs.cpp" />
     <ClCompile Include="ColorRepository.cpp" />
     <ClCompile Include="ContentFitBase.cpp" />
+    <ClCompile Include="ContextMenuMgr.cpp" />
     <ClCompile Include="Control_fwd.cpp" />
     <ClCompile Include="CtrlUiState.cpp" />
     <ClCompile Include="CustomDrawImager.cpp" />
@@ -455,6 +459,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PopupDlgBase.cpp" />
+    <ClCompile Include="PopupMenus.cpp" />
     <ClCompile Include="PopupSplitButton.cpp" />
     <ClCompile Include="PostCall.cpp" />
     <ClCompile Include="ProcessUtils.cpp" />

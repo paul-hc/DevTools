@@ -35,7 +35,7 @@ static UINT s_sbIndicators[] =
 IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWnd )
 
 CMainFrame::CMainFrame( void )
-	: CBaseFrameWnd<CMDIFrameWnd>()
+	: TBaseFrameWnd()
 {
 	m_regSection = reg::section_MainFrame;
 	ui::LoadPopupMenu( &m_trayPopupMenu, IDR_STD_CONTEXT_MENU, ui::AppSysTray );
@@ -82,7 +82,7 @@ BOOL CMainFrame::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CMainFrame, CBaseFrameWnd<CMDIFrameWnd> )
+BEGIN_MESSAGE_MAP( CMainFrame, TBaseFrameWnd )
 	ON_WM_CREATE()
 	ON_MESSAGE( WM_IDLEUPDATECMDUI, OnIdleUpdateCmdUI )
 END_MESSAGE_MAP()
@@ -118,6 +118,6 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 LRESULT CMainFrame::OnIdleUpdateCmdUI( WPARAM wParam, LPARAM lParam )
 {
 	wParam, lParam;
-	__super::OnIdleUpdateCmdUI();
+	__super::OnIdleUpdateCmdUI( /*wParam, lParam*/ );
 	return 0L;
 }

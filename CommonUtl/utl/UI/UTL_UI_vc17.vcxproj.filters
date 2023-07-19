@@ -45,6 +45,9 @@
     <Filter Include="Test Utils">
       <UniqueIdentifier>{b2ce14c2-e5da-42c0-ae4d-400a060f3991}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\MFC+">
+      <UniqueIdentifier>{33930c41-6700-4981-9191-15309f4b774a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -632,6 +635,15 @@
     <ClInclude Include="test\ResourceTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="ContextMenuMgr.h">
+      <Filter>UI\MFC+</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupMenus.h">
+      <Filter>UI\MFC+</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupMenus_fwd.h">
+      <Filter>UI\MFC+</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1083,6 +1095,12 @@
     </ClCompile>
     <ClCompile Include="test\ResourceTests.cpp">
       <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="ContextMenuMgr.cpp">
+      <Filter>UI\MFC+</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupMenus.cpp">
+      <Filter>UI\MFC+</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

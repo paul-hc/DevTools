@@ -7,6 +7,7 @@
 
 
 class CColorPickerButton;
+class CColorStorePicker;
 class CMenuPickerButton;
 
 
@@ -17,12 +18,15 @@ public:
 	virtual ~CTestColorsDialog();
 private:
 	COLORREF m_color;
-	CMenu m_popupMenu;
 	bool m_editChecked;
+	CMenu m_popupMenu;
 private:
 	// enum { IDD = IDD_TEST_COLORS_DIALOG };
 	CMFCColorButton m_mfcColorPickerButton;		// drop-down button
-	std::auto_ptr<CColorPickerButton> m_pUtlColorPicker;
+
+	std::auto_ptr<CColorPickerButton> m_pColorPicker;
+	std::auto_ptr<CColorStorePicker> m_pColorStorePicker;
+
 	std::auto_ptr<CMenuPickerButton> m_pMenuPicker;
 
 	// generated stuff
@@ -38,17 +42,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
-
-
-class CMFCColorButton;
-
-
-namespace ui
-{
-	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, CMFCColorButton& rCtrl, COLORREF* pColor = nullptr );
-	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput = false );
-	void DDX_ColorRepoText( CDataExchange* pDX, int ctrlId, COLORREF color );
-}
 
 
 #endif // TestColorsDialog_h

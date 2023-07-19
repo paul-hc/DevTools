@@ -9,6 +9,26 @@
 #include <afxcolorbutton.h>
 
 
+namespace ui
+{
+	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput = false );
+	void DDX_ColorRepoText( CDataExchange* pDX, int ctrlId, COLORREF color );
+
+
+	template< typename ColorCtrlT >
+	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor )
+	{
+		::DDX_Control( pDX, ctrlId, rCtrl );
+
+		if ( pColor != nullptr )
+			if ( DialogOutput == pDX->m_bSaveAndValidate )
+				rCtrl.SetColor( *pColor );
+			else
+				*pColor = rCtrl.GetColor();
+	}
+}
+
+
 class CColorTable;
 
 
@@ -33,8 +53,6 @@ public:
 	bool SetColorTable( ui::StdColorTable tableType );
 
 	void SetDocumentColors( const CColorTable* pColorTable, const TCHAR* pDocLabel = nullptr );		// additional 'Document' section of colors (below the main colors)
-
-	void DDX_Color( CDataExchange* pDX, int ctrlId, COLORREF* pColor );
 private:
 	void Construct( void );
 	bool IsEmpty( void ) const { return m_Colors.IsEmpty() && m_lstDocColors.IsEmpty(); }
@@ -42,8 +60,6 @@ private:
 
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
-
-	static void RegisterColorNames( const CColorTable* pColorTable );
 private:
 	const CColorTable* m_pColorTable;
 	size_t m_halftoneSize;
@@ -105,6 +121,48 @@ protected:
 	// generated stuff
 protected:
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+#include "PopupMenus_fwd.h"
+
+
+class CColorStore;
+
+
+class CColorStorePicker : public CMenuPickerButton
+	, private ui::ICustomPopupMenu
+{
+public:
+	CColorStorePicker( CWnd* pTargetWnd = nullptr );
+	virtual ~CColorStorePicker();
+
+	const CColorStore* GetColorStore( void ) const { return m_pColorStore; }
+	void SetColorStore( const CColorStore* pColorStore ) { m_pColorStore = pColorStore; ResetPopupMenu(); }
+
+	COLORREF GetColor( void ) const { return m_color; }
+	void SetColor( COLORREF color );		// CLR_NONE: automatic
+private:
+	void SetupPopupMenu( void );
+	void ResetPopupMenu( void ) { m_popupMenu.DestroyMenu(); m_hMenu = nullptr; }
+
+	// ui::ICustomPopupMenu interface
+	virtual void OnCustomizeMenuBar( mfc::CTrackingPopupMenu* pMenuPopup );
+private:
+	const CColorStore* m_pColorStore;
+	COLORREF m_color;
+
+	CMenu m_popupMenu;
+
+	// base overrides:
+protected:
+	virtual void OnShowMenu( void );
+
+	// generated stuff
+protected:
+	afx_msg void OnUpdate_UseColorTable( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

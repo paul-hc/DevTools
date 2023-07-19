@@ -20,9 +20,16 @@ namespace ui
 {
 	enum StdColorTable
 	{
-		WindowsSys_Colors, Standard_Colors, Custom_Colors, Office2003_Colors, Office2007_Colors, DirectX_Colors, HTML_Colors,		// color-repo standard tables
-		Shades_Colors, User_Colors,				// implementation (not based in repository)
-		_ColorTableCount
+		// CColorRepository::Instance():
+		Standard_Colors, Custom_Colors, Office2003_Colors, Office2007_Colors, DirectX_Colors, HTML_Colors,		// color-repo standard tables
+		WindowsSys_Colors,
+
+		// CHalftoneRepository::Instance():
+		Halftone16_Colors, Halftone20_Colors, Halftone256_Colors, HalftoneCustom_Colors,
+
+		// implementation (not based in repository)
+		Shades_Colors, User_Colors,
+			_ColorTableCount
 	};
 
 	const CEnumTags& GetTags_ColorTable( void );

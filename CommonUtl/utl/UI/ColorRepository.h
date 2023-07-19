@@ -14,6 +14,9 @@ namespace ui
 {
 	typedef CArray<COLORREF,COLORREF> TMFCColorArray;
 	typedef CList<COLORREF,COLORREF> TMFCColorList;
+
+
+	inline bool IsHalftoneTable( ui::StdColorTable tableType ) { return tableType >= ui::Halftone16_Colors && tableType <= ui::HalftoneCustom_Colors; }
 }
 
 
@@ -49,32 +52,34 @@ private:
 class CColorTable : private utl::noncopyable
 {
 public:
-	CColorTable( ui::StdColorTable tableType, UINT baseCmdId, size_t capacity, int layoutCount = 1 /*single-column*/ );
+	CColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount = 1 /*single-column*/ );
 	~CColorTable();
+
+	void Reset( size_t capacity, int layoutCount );
 
 	ui::StdColorTable GetTableType( void ) const { return m_tableType; }
 	const std::tstring& GetTableName( void ) const;
+
+	bool IsHalftoneTable( void ) const { return ui::IsHalftoneTable( GetTableType() ); }
 
 	const std::vector<CColorEntry>& GetColors( void ) const { return m_colors; }
 	const CColorEntry* FindColor( COLORREF rawColor ) const;
 	bool ContainsColor( COLORREF rawColor ) const { return FindColor( rawColor ) != nullptr; }
 	const CColorEntry* FindEvaluatedColor( COLORREF color ) const;
 
-	UINT GetCmdIdAt( size_t index ) const { ASSERT( index < m_colors.size() ); return m_baseCmdId + static_cast<UINT>( index ); }
-	size_t FindCmdIndex( UINT cmdId ) const;
-
-	int GetColumnsLayout( void ) const;
-	void GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const;
+	int GetColumnCount( void ) const;
+	bool GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const;
 
 	void Add( const CColorEntry& colorEntry );
 
+	// CMFCColorButton support
 	void QueryMfcColors( ui::TMFCColorArray& rColorArray ) const;
 	void QueryMfcColors( ui::TMFCColorList& rColorList ) const;
+	size_t RegisterColorButtonNames( void ) const;			// for color button tooltips
 
 	static CColorTable* MakeShadesTable( size_t shadesCount, COLORREF selColor );
 private:
 	const ui::StdColorTable m_tableType;
-	const UINT m_baseCmdId;
 	std::vector<CColorEntry> m_colors;
 	int m_layoutCount;						// color picker layout: columnCount if positive, rowCount if negative
 };
@@ -97,26 +102,39 @@ public:
 	void QueryMatchingColors( OUT std::vector<const CColorEntry*>& rColorEntries, COLORREF rawColor ) const;
 	std::tstring FormatColorMatch( COLORREF rawColor, bool multiple = true ) const;
 protected:
+	void Clear( void );		// only for stores that own the color tables
+protected:
 	std::vector<CColorTable*> m_colorTables;		// no ownership
+};
+
+
+class CHalftoneRepository : public CColorStore
+{
+	CHalftoneRepository( void );
+	~CHalftoneRepository() { Clear(); }		// owns the color tables
+public:
+	static const CHalftoneRepository* Instance( void );
+
+	CColorTable* RebuildHalftoneCustomTable( size_t halftoneSize, unsigned int columnCount = 0 );		// for dynamic updates
+private:
+	static CColorTable* MakeHalftoneTable( ui::StdColorTable halftoneType, size_t halftoneSize, unsigned int columnCount );
+	static CColorTable* SetupHalftoneTable( CColorTable* pHalftoneTable );
 };
 
 
 class CColorRepository : public CColorStore
 {
 	CColorRepository( void );
-	~CColorRepository() { Clear(); }
+	~CColorRepository() { Clear(); }		// owns the color tables
 public:
 	static const CColorRepository* Instance( void );
 
-	void Clear( void );		// owns the color tables
-
 	const CColorTable* GetTable( ui::StdColorTable tableType ) const { REQUIRE( tableType < ui::_ColorTableCount ); return m_colorTables[ tableType ]; }
 	const CColorTable* GetSystemColorTable( void ) const { return GetTable( ui::WindowsSys_Colors ); }
-	const CColorTable* GetStockColorTable( void ) const { return GetTable( ui::HTML_Colors ); }
 
-	enum TableMenuBaseCmdId
+	enum TableMenuBaseCmdId		// not used, just for illustration
 	{
-		BaseId_System = 1000, BaseId_Shades = 2000, BaseId_User = 3000,
+		BaseId_WindowsSystem = 1000, BaseId_Shades = 2000, BaseId_User = 3000,
 		BaseId_Standard = 11000, BaseId_Custom = 12000,
 		BaseId_Office2003 = 13000, BaseId_Office2007 = 13500, BaseId_DirectX = 14000, BaseId_HTML = 15000, BaseId_X11 = 16000
 	};

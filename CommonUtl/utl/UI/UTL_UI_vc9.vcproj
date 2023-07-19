@@ -934,6 +934,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Image_fwd.hxx"
+					>
+				</File>
+				<File
 					RelativePath=".\ImagePathKey.h"
 					>
 				</File>
@@ -1839,6 +1843,30 @@
 				</File>
 				<File
 					RelativePath=".\ProgressService.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="MFC+"
+				>
+				<File
+					RelativePath=".\ContextMenuMgr.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ContextMenuMgr.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PopupMenus.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PopupMenus.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PopupMenus_fwd.h"
 					>
 				</File>
 			</Filter>
