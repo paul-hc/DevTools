@@ -187,4 +187,40 @@ namespace ui
 }
 
 
+namespace ui
+{
+	void MakeHalftoneColorTable( OUT std::vector<COLORREF>& rColorTable, size_t size );
+
+
+	namespace halftone
+	{
+		void QueryRgbTableHalftone256( OUT std::vector<RGBQUAD>& rRgbTable );
+		void MakeRgbTable( OUT RGBQUAD* pRgbTable, size_t size );		// use (1 << bpp) as size; works for 1/4/8 bit
+
+		inline void MakeRgbTable( OUT std::vector<RGBQUAD>& rRgbTable, size_t size )
+		{
+			rRgbTable.resize( size );
+			MakeRgbTable( &rRgbTable.front(), size );					// use (1 << bpp) as size; works for 1/4/8 bit
+		}
+	}
+}
+
+
+namespace func
+{
+	struct ToColor
+	{
+		COLORREF operator()( const RGBQUAD& rgbQuad ) const
+		{
+			return RGB( rgbQuad.rgbRed, rgbQuad.rgbGreen, rgbQuad.rgbBlue );
+		}
+
+		COLORREF operator()( const PALETTEENTRY& palEntry ) const
+		{
+			return RGB( palEntry.peRed, palEntry.peGreen, palEntry.peBlue );
+		}
+	};
+}
+
+
 #endif // Color_h

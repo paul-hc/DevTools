@@ -612,7 +612,7 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPe
 		}
 
 		if ( rgbTable.empty() )
-			CHalftoneColorTable::MakeRgbTable( rgbTable, static_cast<size_t>( 1 ) << bitsPerPixel );
+			ui::halftone::MakeRgbTable( rgbTable, static_cast<size_t>( 1 ) << bitsPerPixel );
 	}
 
 	m_buffer.resize( sizeof( BITMAPINFOHEADER ) + rgbTable.size() * sizeof( RGBQUAD ) );
@@ -637,51 +637,4 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( UINT bitsPerPixel, const bmp::CSha
 {
 	CSize srcBitmapSize = gdi::GetBitmapSize( sourceDib.GetHandle() );
 	return CreateDibInfo( srcBitmapSize.cx, srcBitmapSize.cy, bitsPerPixel, &sourceDib );
-}
-
-
-// CHalftoneColorTable implementation
-
-const std::vector<RGBQUAD>& CHalftoneColorTable::GetHalftoneRgbTable( void )
-{
-	static std::vector<RGBQUAD> rgbTable;
-	if ( rgbTable.empty() )
-	{
-		std::auto_ptr<CPalette> pPalette( new CPalette() );
-		{
-			CWindowDC screenDC( nullptr );
-			pPalette->CreateHalftonePalette( &screenDC );
-		}
-
-		std::vector<PALETTEENTRY> entries;
-		entries.resize( pPalette->GetEntryCount() );
-		pPalette->GetPaletteEntries( 0, (UINT)entries.size(), &entries.front() );
-
-		rgbTable.reserve( entries.size() );
-		for ( std::vector<PALETTEENTRY>::const_iterator itEntry = entries.begin(); itEntry != entries.end(); ++itEntry )
-			rgbTable.push_back( gdi::ToRgbQuad( *itEntry ) );
-	}
-
-	return rgbTable;
-}
-
-void CHalftoneColorTable::MakeRgbTable( OUT RGBQUAD* pRgbTable, size_t size )
-{
-	ASSERT( size != 0 && 0 == ( size % 2 ) );		// size must be multiple of 2
-	ASSERT( size <= 256 );
-
-	const std::vector<RGBQUAD>& sysTable = GetHalftoneRgbTable();
-	const size_t halfSize = size >> 1;
-
-	// copy system colors in 2 chunks: first half, last half
-	utl::Copy( sysTable.begin(), sysTable.begin() + halfSize, pRgbTable );				// first half from the beginning
-	utl::Copy( sysTable.end() - halfSize, sysTable.end(), pRgbTable + halfSize );		// second half from the end
-}
-
-void CHalftoneColorTable::MakeColorTable( OUT std::vector<COLORREF>& rColorTable, size_t size )
-{
-	MakeRgbTable( (std::vector<RGBQUAD>&)rColorTable, size );							// same storage
-
-	for ( std::vector<COLORREF>::iterator itColor = rColorTable.begin(); itColor != rColorTable.end(); ++itColor )
-		*itColor = CPixelBGR( (const RGBQUAD&)*itColor ).GetColor();
 }

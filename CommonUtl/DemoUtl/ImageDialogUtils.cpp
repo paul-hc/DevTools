@@ -150,13 +150,13 @@ void CColorBoard::Build( CDibSection* pDib )
 			}
 			break;
 		case System_1_bit:
-			CHalftoneColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 1 );
+			ui::MakeHalftoneColorTable( m_colors, m_totalColors = 1 << 1 );
 			break;
 		case System_4_bit:
-			CHalftoneColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 4 );
+			ui::MakeHalftoneColorTable( m_colors, m_totalColors = 1 << 4 );
 			break;
 		case System_8_bit:
-			CHalftoneColorTable::MakeColorTable( m_colors, m_totalColors = 1 << 8 );
+			ui::MakeHalftoneColorTable( m_colors, m_totalColors = 1 << 8 );
 			break;
 	}
 

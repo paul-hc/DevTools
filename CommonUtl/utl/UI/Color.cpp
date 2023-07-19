@@ -2,7 +2,9 @@
 #include "pch.h"
 #include "Color.h"
 #include "ColorRepository.h"
+#include "Image_fwd.h"
 #include "StringUtilities.h"
+#include "utl/Algorithms.h"
 #include "utl/TextClipboard.h"
 #include <shlwapi.h>
 
@@ -423,5 +425,54 @@ namespace ui
 		s_dValidRange.Constrain( newComponent );
 
 		return static_cast<WORD>( newComponent );
+	}
+}
+
+
+namespace ui
+{
+	void MakeHalftoneColorTable( OUT std::vector<COLORREF>& rColorTable, size_t size )
+	{
+		std::vector<RGBQUAD> rgbTable;
+		halftone::MakeRgbTable( rgbTable, size );
+
+		rColorTable.resize( rgbTable.size() );
+		std::transform( rgbTable.begin(), rgbTable.end(), rColorTable.begin(), func::ToColor() );
+	}
+
+
+	namespace halftone
+	{
+		void QueryRgbTableHalftone256( OUT std::vector<RGBQUAD>& rRgbTable )
+		{
+			std::auto_ptr<CPalette> pPalette( new CPalette() );
+			{
+				CWindowDC screenDC( nullptr );
+				pPalette->CreateHalftonePalette( &screenDC );
+			}
+
+			std::vector<PALETTEENTRY> entries;
+			entries.resize( pPalette->GetEntryCount() );
+			pPalette->GetPaletteEntries( 0, (UINT)entries.size(), &entries.front() );
+
+			rRgbTable.reserve( entries.size() );
+			for ( std::vector<PALETTEENTRY>::const_iterator itEntry = entries.begin(); itEntry != entries.end(); ++itEntry )
+				rRgbTable.push_back( gdi::ToRgbQuad( *itEntry ) );
+		}
+
+		void MakeRgbTable( OUT RGBQUAD* pRgbTable, size_t size )
+		{
+			ASSERT( size != 0 && 0 == ( size % 2 ) );		// size must be multiple of 2
+			ASSERT( size <= 256 );
+
+			std::vector<RGBQUAD> sysTable;
+			QueryRgbTableHalftone256( sysTable );
+
+			const size_t halfSize = size >> 1;
+
+			// copy system colors in 2 chunks: first half, last half
+			utl::Copy( sysTable.begin(), sysTable.begin() + halfSize, pRgbTable );				// first half from the beginning
+			utl::Copy( sysTable.end() - halfSize, sysTable.end(), pRgbTable + halfSize );		// second half from the end
+		}
 	}
 }
