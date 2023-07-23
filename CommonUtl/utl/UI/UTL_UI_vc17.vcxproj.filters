@@ -1102,6 +1102,9 @@
     <ClCompile Include="PopupMenus.cpp">
       <Filter>UI\MFC+</Filter>
     </ClCompile>
+    <ClCompile Include="PopupMenus_fwd.cpp">
+      <Filter>UI\MFC+</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="utl_ui.rc">

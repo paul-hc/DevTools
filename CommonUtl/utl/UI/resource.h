@@ -79,12 +79,13 @@
 #define ID_APP_MINIMIZE                 28247
 #define ID_USE_COLOR_DIALOG_MFC         28249
 #define ID_USE_COLOR_DIALOG_COMCTRL     28250
-#define ID_USE_HALFTONE_TABLE_16        28251
-#define ID_USE_HALFTONE_TABLE_20        28252
-#define ID_USE_HALFTONE_TABLE_256       28253
-#define ID_USE_CUSTOM_COLOR_SET         28254
-#define ID_USE_COLOR_TABLE_MIN          28255
-#define ID_USE_COLOR_TABLE_MAX          ID_USE_COLOR_TABLE_MIN + 20		// preserve this range of IDs
+#define ID_HALFTONE_TABLE_16            28251
+#define ID_HALFTONE_TABLE_20            28252
+#define ID_HALFTONE_TABLE_256           28253
+#define ID_USER_CUSTOM_COLOR_SET        28254
+#define ID_SHADES_COLOR_SET             28255
+#define ID_REPO_COLOR_TABLE_MIN         28256
+#define ID_REPO_COLOR_TABLE_MAX         ID_REPO_COLOR_TABLE_MIN + 20		// preserve this range of IDs
 #define UTL_MIN_CONTROL_VALUE           28500
 #define IDC_GROUP_BOX_1                 28501
 #define IDC_GROUP_BOX_2                 28502
@@ -129,7 +130,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        28027
-#define _APS_NEXT_COMMAND_VALUE         28276
+#define _APS_NEXT_COMMAND_VALUE         28277
 #define _APS_NEXT_CONTROL_VALUE         28536
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif

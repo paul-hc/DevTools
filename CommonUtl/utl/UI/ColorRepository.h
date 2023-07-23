@@ -12,15 +12,16 @@
 
 namespace ui
 {
-	typedef CArray<COLORREF,COLORREF> TMFCColorArray;
-	typedef CList<COLORREF,COLORREF> TMFCColorList;
+	typedef CArray<COLORREF, COLORREF> TMFCColorArray;
+	typedef CList<COLORREF, COLORREF> TMFCColorList;
 
 
-	inline bool IsHalftoneTable( ui::StdColorTable tableType ) { return tableType >= ui::Halftone16_Colors && tableType <= ui::HalftoneCustom_Colors; }
+	inline bool IsHalftoneTable( ui::StdColorTable tableType ) { return tableType >= ui::Halftone16_Colors && tableType <= ui::Halftone256_Colors; }
 }
 
 
 class CColorTable;
+class CColorStore;
 
 
 class CColorEntry		// a named colour
@@ -52,16 +53,23 @@ private:
 class CColorTable : private utl::noncopyable
 {
 public:
-	CColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount = 1 /*single-column*/ );
+	CColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount = 0 /*default color bar columns*/ );
 	~CColorTable();
 
 	void Reset( size_t capacity, int layoutCount );
+	void Clear( void );
+	void CopyFrom( const CColorTable& srcTable );
+	void StoreTableInfo( const CColorStore* pParentStore, UINT tableItemId );
+
+	const CColorStore* GetParentStore( void ) const { return m_pParentStore; }
+	UINT GetTableItemId( void ) const { return m_tableItemId; }
 
 	ui::StdColorTable GetTableType( void ) const { return m_tableType; }
 	const std::tstring& GetTableName( void ) const;
 
 	bool IsHalftoneTable( void ) const { return ui::IsHalftoneTable( GetTableType() ); }
 
+	bool IsEmpty( void ) const { return m_colors.empty(); }
 	const std::vector<CColorEntry>& GetColors( void ) const { return m_colors; }
 	const CColorEntry* FindColor( COLORREF rawColor ) const;
 	bool ContainsColor( COLORREF rawColor ) const { return FindColor( rawColor ) != nullptr; }
@@ -75,13 +83,17 @@ public:
 	// CMFCColorButton support
 	void QueryMfcColors( ui::TMFCColorArray& rColorArray ) const;
 	void QueryMfcColors( ui::TMFCColorList& rColorList ) const;
-	size_t RegisterColorButtonNames( void ) const;			// for color button tooltips
+	size_t RegisterColorButtonNames( void ) const;			// for shared color button tooltips stored in CMFCColorButton
+	void SetupMfcColors( const ui::TMFCColorArray& customColors, int columnCount = 0 );
 
-	static CColorTable* MakeShadesTable( size_t shadesCount, COLORREF selColor );
+	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades
 private:
 	const ui::StdColorTable m_tableType;
 	std::vector<CColorEntry> m_colors;
 	int m_layoutCount;						// color picker layout: columnCount if positive, rowCount if negative
+
+	const CColorStore* m_pParentStore;
+	UINT m_tableItemId;						// menu item ID, used in context menus
 };
 
 
@@ -91,61 +103,73 @@ public:
 	CColorStore( void ) {}
 
 	const std::vector<CColorTable*>& GetTables( void ) const { return m_colorTables; }
+	const CColorTable* GetTableAt( size_t pos ) const { ASSERT( pos < m_colorTables.size() ); return m_colorTables[ pos ]; }
 	std::vector<CColorTable*>& RefTables( void ) { return m_colorTables; }
 
 	const CColorTable* FindTable( ui::StdColorTable tableType ) const;
 	const CColorTable* FindTableByName( const std::tstring& tableName ) const;
-	const CColorTable* FindSystemTable( void ) const { return FindTable( ui::WindowsSys_Colors ); }
 
 	// color entries lookup
 	const CColorEntry* FindColorEntry( COLORREF rawColor ) const;
 	void QueryMatchingColors( OUT std::vector<const CColorEntry*>& rColorEntries, COLORREF rawColor ) const;
 	std::tstring FormatColorMatch( COLORREF rawColor, bool multiple = true ) const;
+
+	static const CColorTable* LookupSystemTable( void );
 protected:
 	void Clear( void );		// only for stores that own the color tables
-protected:
+	void AddTable( CColorTable* pNewTable, UINT tableItemId );
+private:
 	std::vector<CColorTable*> m_colorTables;		// no ownership
 };
 
 
-class CHalftoneRepository : public CColorStore
+class CScratchColorStore : public CColorStore		// contains {ui::Shades_Colors, ui::UserCustom_Colors}
+{
+public:
+	CScratchColorStore( void );
+	~CScratchColorStore() { Clear(); }		// owns the color tables
+
+	CColorTable* GetShadesTable( void ) const { return m_pShadesTable; }
+	CColorTable* GetUserCustomTable( void ) const { return m_pUserCustomTable; }
+
+	size_t UpdateShadesTable( COLORREF selColor, size_t columnCount ) { return m_pShadesTable->SetupShadesTable( selColor, columnCount ); }
+	void UpdateUserCustomTable( const ui::TMFCColorArray& customColors, int columnCount = 0 ) { return m_pUserCustomTable->SetupMfcColors( customColors, columnCount ); }
+private:
+	CColorTable* m_pShadesTable;
+	CColorTable* m_pUserCustomTable;
+};
+
+
+class CHalftoneRepository : public CColorStore		// contains {ui::Halftone16_Colors, ui::Halftone20_Colors, ui::Halftone256_Colors}
 {
 	CHalftoneRepository( void );
 	~CHalftoneRepository() { Clear(); }		// owns the color tables
 public:
 	static const CHalftoneRepository* Instance( void );
-
-	CColorTable* RebuildHalftoneCustomTable( size_t halftoneSize, unsigned int columnCount = 0 );		// for dynamic updates
 private:
 	static CColorTable* MakeHalftoneTable( ui::StdColorTable halftoneType, size_t halftoneSize, unsigned int columnCount );
-	static CColorTable* SetupHalftoneTable( CColorTable* pHalftoneTable );
+	static CColorTable* SetupHalftoneTable( CColorTable* pHalftoneTable, size_t halftoneSize );
 };
 
 
-class CColorRepository : public CColorStore
+class CColorRepository : public CColorStore			// contains {ui::Standard_Colors, ... ui::WindowsSys_Colors}
 {
 	CColorRepository( void );
 	~CColorRepository() { Clear(); }		// owns the color tables
 public:
 	static const CColorRepository* Instance( void );
 
-	const CColorTable* GetTable( ui::StdColorTable tableType ) const { REQUIRE( tableType < ui::_ColorTableCount ); return m_colorTables[ tableType ]; }
-	const CColorTable* GetSystemColorTable( void ) const { return GetTable( ui::WindowsSys_Colors ); }
-
-	enum TableMenuBaseCmdId		// not used, just for illustration
-	{
-		BaseId_WindowsSystem = 1000, BaseId_Shades = 2000, BaseId_User = 3000,
-		BaseId_Standard = 11000, BaseId_Custom = 12000,
-		BaseId_Office2003 = 13000, BaseId_Office2007 = 13500, BaseId_DirectX = 14000, BaseId_HTML = 15000, BaseId_X11 = 16000
-	};
+	const CColorTable* GetSystemColorTable( void ) const { return m_pWindowsSystemTable; }
 private:
-	static CColorTable* MakeTable_System( void );
 	static CColorTable* MakeTable_Standard( void );
-	static CColorTable* MakeTable_Custom( void );
+	static CColorTable* MakeTable_Dev( void );
 	static CColorTable* MakeTable_Office2003( void );
 	static CColorTable* MakeTable_Office2007( void );
 	static CColorTable* MakeTable_DirectX( void );
 	static CColorTable* MakeTable_HTML( void );
+	static CColorTable* MakeTable_WindowsSystem( void );
+private:
+	CColorTable* m_pWindowsSystemTable;
 };
 
 

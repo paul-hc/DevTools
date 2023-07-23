@@ -28,6 +28,7 @@ protected:
 	// call just before InitInstance:
 	void StoreAppNameSuffix( const std::tstring& appNameSuffix ) { m_appNameSuffix = appNameSuffix; }
 	void StoreProfileSuffix( const std::tstring& profileSuffix ) { m_profileSuffix = profileSuffix; }
+	void StoreVisualManagerClass( CRuntimeClass* pVisualManagerClass ) { m_pVisualManagerClass = pVisualManagerClass; }
 
 	bool IsInitAppResources( void ) const { return m_pSharedResources.get() != nullptr; }
 	void SetLazyInitAppResources( void ) { m_lazyInitAppResources = true; }			// for extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe
@@ -69,6 +70,7 @@ private:
 	std::auto_ptr<CImageStore> m_pSharedImageStore;				// managed lifetime of shared resources (lazy initialized)
 	CAccelTable m_appAccel;
 	std::tstring m_appNameSuffix, m_profileSuffix;				// could be set to "_v2" when required
+	CRuntimeClass* m_pVisualManagerClass;						// for creating the CMFCVisualManager singleton
 	bool m_isInteractive;										// true by default; for apps with a message loop it starts false until application becomes idle for the first time
 	bool m_lazyInitAppResources;								// true for extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe
 protected:

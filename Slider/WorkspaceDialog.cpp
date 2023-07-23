@@ -57,9 +57,9 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_Flag( pDX, IDC_VISTA_STYLE_FILE_DLG_CHECK, m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
 	ui::DDX_Flag( pDX, IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK, m_data.m_wkspFlags, wf::UseThemedThumbListDraw );
 
-	m_pDefBkColorPicker->DDX_Color( pDX, ID_EDIT_BK_COLOR, &m_data.m_defBkColor );
-	m_pImageSelColorPicker->DDX_Color( pDX, CM_EDIT_IMAGE_SEL_COLOR, &m_data.m_imageSelColor );
-	m_pImageSelTextColorPicker->DDX_Color( pDX, CM_EDIT_IMAGE_SEL_TEXT_COLOR, &m_data.m_imageSelTextColor );
+	ui::DDX_ColorButton( pDX, ID_EDIT_BK_COLOR, *m_pDefBkColorPicker, &m_data.m_defBkColor );
+	ui::DDX_ColorButton( pDX, CM_EDIT_IMAGE_SEL_COLOR, *m_pImageSelColorPicker, &m_data.m_imageSelColor );
+	ui::DDX_ColorButton( pDX, CM_EDIT_IMAGE_SEL_TEXT_COLOR, *m_pImageSelTextColorPicker, &m_data.m_imageSelTextColor );
 
 	ui::DDX_Flag( pDX, CK_SHOW_THUMB_VIEW, m_data.m_albumViewFlags, af::ShowThumbView );
 	ui::DDX_Flag( pDX, IDC_AUTO_REGEN_SMALL_STG_THUMBS_CHECK, m_thumbnailerFlags, CThumbnailer::AutoRegenSmallStgThumbs );

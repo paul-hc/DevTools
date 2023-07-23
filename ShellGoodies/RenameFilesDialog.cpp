@@ -23,6 +23,7 @@
 #include "utl/UI/BalloonMessageTip.h"
 #include "utl/UI/CmdInfoStore.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/SystemTray_fwd.h"
 #include "utl/UI/TaskDialog.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/VisualTheme.h"
@@ -204,8 +205,9 @@ void CRenameFilesDialog::PostMakeDest( bool silent /*= false*/ ) override
 					pPage->EnsureVisibleItem( pFirstErrorItem );
 
 		SwitchMode( EditMode );
+
 		if ( !silent )
-			ui::ReportError( str::Format( _T("Detected duplicate file name collisions in destination:\r\n%s"), JoinErrorDestPaths().c_str() ) );
+			sys_tray::ShowBalloonMessage( str::Format( _T("Detected duplicate file name collisions in destination:\r\n%s"), JoinErrorDestPaths().c_str() ), nullptr, app::Warning );
 	}
 }
 

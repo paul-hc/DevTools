@@ -290,7 +290,7 @@ CMenu& CFindDuplicatesDialog::GetDupListPopupMenu( CReportListControl::ListPopup
 	{
 		CMenu popupMenu;
 		ui::LoadPopupMenu( &rMenu, IDR_CONTEXT_MENU, ui::CPopupIndexPath( popup::DuplicatesList, CReportListControl::OnSelection == popupType ? DupListOnSelection : DupListNowhere ) );
-		ui::JoinMenuItems( rMenu, CPathItemListCtrl::GetStdPathListPopupMenu( popupType ) );
+		ui::JoinMenuItems( &rMenu, &CPathItemListCtrl::GetStdPathListPopupMenu( popupType ) );
 	}
 	return rMenu;
 }

@@ -32,4 +32,15 @@ namespace vt
 }
 
 
+namespace mfc
+{
+	template< typename NosyT, typename ObjectT >
+	inline NosyT* nosy_cast( const ObjectT* pObject )		// cast to 'nosy' types, that provide access to protected methods or data members, typically for MFC objects
+	{
+		ASSERT_PTR( pObject );
+		return (NosyT*)pObject;
+	}
+}
+
+
 #endif // CommonWinDefs_h

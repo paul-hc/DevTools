@@ -108,6 +108,10 @@ BOOL CApplication::InitInstance( void )
 {
 	m_pGdiPlusInit.reset( new CScopedGdiPlusInit() );
 
+	// init MFC control bars:
+	InitContextMenuMgr();
+	StoreVisualManagerClass( RUNTIME_CLASS( CMFCVisualManagerOffice2007 ) );
+
 	if ( !CBaseWinAppEx::InitInstance() )
 		return FALSE;
 
@@ -124,10 +128,6 @@ BOOL CApplication::InitInstance( void )
 	//hlp::CheckScalarTypes();
 	if ( HasCommandLineOptions() )
 		return FALSE;					// no app loop
-
-	// init MFC control bars:
-	InitContextMenuMgr();
-	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerOffice2007 ) );		// wordpad: CMFCVisualManagerOfficeXP
 
 	LoadStdProfileSettings( 10 );  // Load standard INI file options (including MRU)
 	// Register the application's document templates.  Document templates

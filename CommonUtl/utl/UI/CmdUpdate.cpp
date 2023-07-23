@@ -17,7 +17,7 @@ namespace ui
 		ASSERT_PTR( pCmdUI );
 
 		if ( pCmdUI->m_pMenu != nullptr )
-			return ui::GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID, MF_BYCOMMAND );
+			return ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID, MF_BYCOMMAND );
 		else if ( pCmdUI->m_pOther != nullptr )
 			return ui::GetWindowText( pCmdUI->m_pOther );
 
@@ -54,7 +54,7 @@ namespace ui
 		if ( pCmdUI->m_pMenu != nullptr && nullptr == pCmdUI->m_pSubMenu )		// a menu but not sub-menu (don't change submenus indirectly, wait for their expansion)
 		{
 			static CVersionInfo s_versionInfo;
-			std::tstring menuItemText = GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID );
+			std::tstring menuItemText = GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 			std::tstring newMenuItemText = s_versionInfo.ExpandValues( menuItemText.c_str() );
 
 			if ( newMenuItemText != menuItemText )

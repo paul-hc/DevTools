@@ -460,6 +460,7 @@
     </ClCompile>
     <ClCompile Include="PopupDlgBase.cpp" />
     <ClCompile Include="PopupMenus.cpp" />
+    <ClCompile Include="PopupMenus_fwd.cpp" />
     <ClCompile Include="PopupSplitButton.cpp" />
     <ClCompile Include="PostCall.cpp" />
     <ClCompile Include="ProcessUtils.cpp" />

@@ -176,7 +176,7 @@ CMenu& CAlbumSettingsDialog::GetAlbumModelPopupMenu( void )
 	{
 		CMenu popupMenu;
 		ui::LoadPopupMenu( &s_popupMenu, IDR_CONTEXT_MENU, app::AlbumFoundListPopup );
-		ui::JoinMenuItems( s_popupMenu, CPathItemListCtrl::GetStdPathListPopupMenu( CReportListControl::OnSelection ) );
+		ui::JoinMenuItems( &s_popupMenu, &CPathItemListCtrl::GetStdPathListPopupMenu( CReportListControl::OnSelection ) );
 	}
 	return s_popupMenu;
 }

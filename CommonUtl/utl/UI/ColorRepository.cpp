@@ -3,6 +3,8 @@
 #include "ColorRepository.h"
 #include "Color.h"
 #include "Image_fwd.h"
+#include "resource.h"
+#include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/EnumTags.h"
 #include "utl/Range.h"
@@ -20,10 +22,11 @@ namespace ui
 	const CEnumTags& GetTags_ColorTable( void )
 	{
 		static const CEnumTags s_tags( _T("\
-Standard Colors|Custom Colors|Office 2003 Colors|Office 2007 Colors|DirectX (X11) Colors|HTML Colors|\
+Standard Colors|Office 2003 Colors|Office 2007 Colors|DirectX (X11) Colors|HTML Colors|\
 Windows (System) Colors|\
-Halftone: 16 Colors|Halftone: 20 Colors|Halftone: 256 Colors|Halftone: Custom Colors\
-Color Shades|User Colors"
+Halftone: 16 Colors|Halftone: 20 Colors|Halftone: 256 Colors|\
+Color Shades|User Custom Colors|\
+Development Colors"
 ) );
 		return s_tags;
 	}
@@ -99,8 +102,10 @@ std::tstring CColorEntry::FormatColor( const TCHAR* pFieldSep /*= s_fieldSep*/, 
 
 // CColorTable implementation
 
-CColorTable::CColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount /*= 1*/ )
+CColorTable::CColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount /*= 0*/ )
 	: m_tableType( tableType )
+	, m_pParentStore( nullptr )
+	, m_tableItemId( 0 )
 {
 	Reset( capacity, layoutCount );
 }
@@ -111,8 +116,29 @@ CColorTable::~CColorTable()
 
 void CColorTable::Reset( size_t capacity, int layoutCount )
 {
-	m_layoutCount = layoutCount;
 	m_colors.reserve( capacity );
+	m_layoutCount = layoutCount;
+}
+
+void CColorTable::Clear( void )
+{
+	m_colors.clear();
+	m_layoutCount = 0;
+}
+
+void CColorTable::CopyFrom( const CColorTable& srcTable )
+{
+	ASSERT( &srcTable != this );
+
+	m_colors = srcTable.m_colors;
+	m_layoutCount = srcTable.m_layoutCount;
+}
+
+void CColorTable::StoreTableInfo( const CColorStore* pParentStore, UINT tableItemId )
+{
+	ASSERT_NULL( m_pParentStore );
+	m_pParentStore = pParentStore;
+	m_tableItemId = tableItemId;
 }
 
 const std::tstring& CColorTable::GetTableName( void ) const
@@ -198,60 +224,84 @@ size_t CColorTable::RegisterColorButtonNames( void ) const
 	return count;
 }
 
-CColorTable* CColorTable::MakeShadesTable( size_t shadesCount, COLORREF selColor )
+void CColorTable::SetupMfcColors( const ui::TMFCColorArray& customColors, int columnCount )
 {
-	if ( 0 == shadesCount || ui::IsUndefinedColor( selColor ) )
-		return nullptr;
+	const CColorRepository* pColorRepo = CColorRepository::Instance();		// to borrow color names
+
+	Clear();
+	Reset( customColors.GetSize(), columnCount );
+
+	for ( INT_PTR i = 0; i != customColors.GetSize(); ++i )
+	{
+		m_colors.push_back( CColorEntry() );
+
+		CColorEntry* pColorEntry = &m_colors.back();
+
+		pColorEntry->m_color = customColors[ i ];
+
+		if ( const CColorEntry* pRepoColor = pColorRepo->FindColorEntry( pColorEntry->m_color ) )
+			pColorEntry->m_name = pRepoColor->FormatColor( nullptr );		// borrow the qualified color name from the repo
+		else
+			pColorEntry->m_name.clear();
+	}
+}
+
+size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
+{
+	REQUIRE( ui::Shades_Colors == m_tableType );
+
+	Clear();
+	Reset( columnCount * 3, static_cast<int>( columnCount ) );
+
+	if ( 0 == columnCount || ui::IsUndefinedColor( selColor ) )
+		return 0;
 
 	selColor = ui::EvalColor( selColor );
 
-	CColorTable* pShadesTable = new CColorTable( ui::Shades_Colors, shadesCount );
-
 	static const Range<ui::TPercent> s_pctRange( 10, 100 );			// [10% to 100%]
 	std::vector<ui::TPercent> percentages;
-	const ui::TPercent pctStep = ( s_pctRange.m_end - s_pctRange.m_start ) / ( (int)shadesCount - 1 );
+	const ui::TPercent pctStep = ( s_pctRange.m_end - s_pctRange.m_start ) / ( (int)columnCount - 1 );
 
-	percentages.reserve( shadesCount );
-	for ( unsigned int i = 0; i != shadesCount; ++i )
+	percentages.reserve( columnCount );
+	for ( unsigned int i = 0; i != columnCount; ++i )
 		percentages.push_back( s_pctRange.m_start + i * pctStep );
 
 	static std::vector<std::tstring> s_shadeTags;
-	if ( s_shadeTags.empty() )
-		str::Split( s_shadeTags, _T("Lightness|Saturation"), _T("|") );
+	str::SplitOnce( s_shadeTags, _T("Lightness|Saturation"), _T("|") );
 
 	enum ShadeTag { Lightness, Saturation };
 
-	if ( ui::HasLuminanceVariation( selColor, percentages[ 0 ], percentages[ 1 ] ) )			// some variation?
+	if ( ui::HasLuminanceVariation( selColor, percentages[ 0 ], percentages[ 1 ] ) )		// Lighter Shades: have some step variation?
 		for ( size_t i = 0; i != percentages.size(); ++i )
 		{
 			COLORREF lighter = selColor;
 			ui::AdjustLuminance( lighter, percentages[ i ] );
 
 			CColorEntry colorEntry( lighter, str::Format( _T("%s +%d%%"), s_shadeTags[ Lightness ].c_str(), percentages[i] ) );
-			pShadesTable->Add( colorEntry );
+			Add( colorEntry );
 		}
 
-	if ( ui::HasLuminanceVariation( selColor, -percentages[ 0 ], -percentages[ 1 ] ) )		// some variation?
-		for ( unsigned int i = 0; i != shadesCount; ++i )
+	if ( ui::HasLuminanceVariation( selColor, -percentages[ 0 ], -percentages[ 1 ] ) )		// Darker Shades: have some step variation?
+		for ( size_t i = 0; i != columnCount; ++i )
 		{
 			COLORREF darker = selColor;
 			ui::AdjustLuminance( darker, -percentages[ i ] );
 
 			CColorEntry colorEntry( darker, str::Format( _T("%s %d%%"), s_shadeTags[ Lightness ].c_str(), -percentages[i] ) );
-			pShadesTable->Add( colorEntry );
+			Add( colorEntry );
 		}
 
-	if ( ui::HasSaturationVariation( selColor, -percentages[ 0 ], -percentages[ 1 ] ) )		// some variation?
-		for ( unsigned int i = 0; i != shadesCount; ++i )
+	if ( ui::HasSaturationVariation( selColor, -percentages[ 0 ], -percentages[ 1 ] ) )		// Desaturated Shades: have some step variation?
+		for ( size_t i = 0; i != columnCount; ++i )
 		{
 			COLORREF desaturated = selColor;
-			ui::AdjustLuminance( desaturated, -percentages[ i ] );
+			ui::AdjustSaturation( desaturated, -percentages[ i ] );
 
 			CColorEntry colorEntry( desaturated, str::Format( _T("%s %d%%"), s_shadeTags[ Saturation ].c_str(), -percentages[i] ) );
-			pShadesTable->Add( colorEntry );
+			Add( colorEntry );
 		}
 
-	return pShadesTable;
+	return m_colors.size();
 }
 
 
@@ -260,6 +310,14 @@ CColorTable* CColorTable::MakeShadesTable( size_t shadesCount, COLORREF selColor
 void CColorStore::Clear( void )
 {
 	utl::ClearOwningContainer( m_colorTables );
+}
+
+void CColorStore::AddTable( CColorTable* pNewTable, UINT tableItemId )
+{
+	ASSERT_PTR( pNewTable );
+
+	utl::PushUnique( m_colorTables, pNewTable );
+	pNewTable->StoreTableInfo( this, tableItemId );
 }
 
 const CColorTable* CColorStore::FindTable( ui::StdColorTable tableType ) const
@@ -287,7 +345,7 @@ const CColorEntry* CColorStore::FindColorEntry( COLORREF rawColor ) const
 	{
 		if ( ui::IsSysColor( rawColor ) )
 		{	// look it up only in sys-colors batch
-			const CColorTable* pSysColors = FindSystemTable();
+			const CColorTable* pSysColors = LookupSystemTable();
 			return pSysColors != nullptr ? pSysColors->FindColor( rawColor ) : nullptr;
 		}
 
@@ -308,7 +366,7 @@ void CColorStore::QueryMatchingColors( OUT std::vector<const CColorEntry*>& rCol
 	{
 		if ( ui::IsSysColor( rawColor ) )
 		{	// look it up only in sys-colors batch
-			if ( const CColorTable* pSysColors = FindSystemTable() )
+			if ( const CColorTable* pSysColors = LookupSystemTable() )
 				if ( const CColorEntry* pFound = pSysColors->FindColor( rawColor ) )
 					rColorEntries.push_back( pFound );
 		}
@@ -354,16 +412,32 @@ std::tstring CColorStore::FormatColorMatch( COLORREF rawColor, bool multiple /*=
 	return outText;
 }
 
+const CColorTable* CColorStore::LookupSystemTable( void )
+{
+	return CColorRepository::Instance()->GetSystemColorTable();
+}
+
+
+// CScratchColorStore implementation
+
+CScratchColorStore::CScratchColorStore( void )
+	: CColorStore()
+	, m_pShadesTable( new CColorTable( ui::Shades_Colors, 0, 0 ) )
+	, m_pUserCustomTable( new CColorTable( ui::UserCustom_Colors, 0, 0 ) )
+{
+	AddTable( m_pShadesTable, ID_SHADES_COLOR_SET );
+	AddTable( m_pUserCustomTable, ID_USER_CUSTOM_COLOR_SET );
+}
+
 
 // CHalftoneRepository implementation
 
 CHalftoneRepository::CHalftoneRepository( void )
 {
 	// add color tables in ui::StdColorTable order:
-	m_colorTables.push_back( MakeHalftoneTable( ui::Halftone16_Colors, 16, 8 ) );
-	m_colorTables.push_back( MakeHalftoneTable( ui::Halftone20_Colors, 20, 0 ) );
-	m_colorTables.push_back( MakeHalftoneTable( ui::Halftone256_Colors, 256, 8 ) );
-	m_colorTables.push_back( MakeHalftoneTable( ui::HalftoneCustom_Colors, 64, 0 ) );
+	AddTable( MakeHalftoneTable( ui::Halftone16_Colors, 16, 8 ), ID_HALFTONE_TABLE_16 );
+	AddTable( MakeHalftoneTable( ui::Halftone20_Colors, 20, 0 ), ID_HALFTONE_TABLE_20 );
+	AddTable( MakeHalftoneTable( ui::Halftone256_Colors, 256, 16 ), ID_HALFTONE_TABLE_256 );
 }
 
 const CHalftoneRepository* CHalftoneRepository::Instance( void )
@@ -374,27 +448,16 @@ const CHalftoneRepository* CHalftoneRepository::Instance( void )
 
 CColorTable* CHalftoneRepository::MakeHalftoneTable( ui::StdColorTable halftoneType, size_t halftoneSize, unsigned int columnCount )
 {
-	return SetupHalftoneTable( new CColorTable( halftoneType, halftoneSize, columnCount ) );
+	return SetupHalftoneTable( new CColorTable( halftoneType, halftoneSize, columnCount ), halftoneSize );
 }
 
-CColorTable* CHalftoneRepository::RebuildHalftoneCustomTable( size_t halftoneSize, unsigned int columnCount )
-{
-	CColorTable* pHalftoneCustomTable = const_cast<CColorTable*>( FindTable( ui::HalftoneCustom_Colors ) );
-	ASSERT_PTR( pHalftoneCustomTable );
-
-	if ( pHalftoneCustomTable->GetColors().size() != halftoneSize )
-		pHalftoneCustomTable->Reset( halftoneSize, columnCount );
-
-	return pHalftoneCustomTable;
-}
-
-CColorTable* CHalftoneRepository::SetupHalftoneTable( CColorTable* pHalftoneTable )
+CColorTable* CHalftoneRepository::SetupHalftoneTable( CColorTable* pHalftoneTable, size_t halftoneSize )
 {
 	ASSERT_PTR( pHalftoneTable );
 	const CColorRepository* pColorRepo = CColorRepository::Instance();		// to borrow color names
 
 	std::vector<COLORREF> halftoneColors;
-	ui::MakeHalftoneColorTable( halftoneColors, pHalftoneTable->GetColors().size() );
+	ui::MakeHalftoneColorTable( halftoneColors, halftoneSize );
 
 	for ( std::vector<COLORREF>::const_iterator itColor = halftoneColors.begin(); itColor != halftoneColors.end(); ++itColor )
 	{
@@ -413,15 +476,19 @@ CColorTable* CHalftoneRepository::SetupHalftoneTable( CColorTable* pHalftoneTabl
 // CColorRepository implementation
 
 CColorRepository::CColorRepository( void )
+	: CColorStore()
+	, m_pWindowsSystemTable( MakeTable_WindowsSystem() )
 {
+	UINT tableItemId = ID_REPO_COLOR_TABLE_MIN;
+
 	// add color tables in ui::StdColorTable order:
-	m_colorTables.push_back( MakeTable_Standard() );
-	m_colorTables.push_back( MakeTable_Custom() );
-	m_colorTables.push_back( MakeTable_Office2003() );
-	m_colorTables.push_back( MakeTable_Office2007() );
-	m_colorTables.push_back( MakeTable_DirectX() );
-	m_colorTables.push_back( MakeTable_HTML() );
-	m_colorTables.push_back( MakeTable_System() );
+	AddTable( MakeTable_Standard(), tableItemId++ );
+	AddTable( MakeTable_Office2003(), tableItemId++ );
+	AddTable( MakeTable_Office2007(), tableItemId++ );
+	AddTable( MakeTable_DirectX(), tableItemId++ );
+	AddTable( MakeTable_HTML(), tableItemId++ );
+	//AddTable( MakeTable_Dev(), tableItemId++ );
+	AddTable( m_pWindowsSystemTable, tableItemId++ );
 }
 
 const CColorRepository* CColorRepository::Instance( void )
@@ -431,7 +498,7 @@ const CColorRepository* CColorRepository::Instance( void )
 }
 
 
-CColorTable* CColorRepository::MakeTable_System( void )
+CColorTable* CColorRepository::MakeTable_WindowsSystem( void )
 {
 	CColorTable* pSysTable = new CColorTable( ui::WindowsSys_Colors, 31, 8 );		// 31 colors: 2 columns x 16 rows
 
@@ -514,37 +581,6 @@ CColorTable* CColorRepository::MakeTable_Standard( void )
 	pTable->Add( CColorEntry( color::Gray40, "Gray 40%" ) );
 	pTable->Add( CColorEntry( color::Gray25, "Gray 25%" ) );
 	pTable->Add( COLOR_ENTRY( color::White ) );
-
-	return pTable;
-}
-
-CColorTable* CColorRepository::MakeTable_Custom( void )
-{
-	CColorTable* pTable = new CColorTable( ui::Custom_Colors, color::_Custom_ColorCount, 4 );		// 23 colors: 4 columns x 6 rows
-
-	pTable->Add( COLOR_ENTRY( color::VeryDarkGray ) );
-	pTable->Add( COLOR_ENTRY( color::DarkGray ) );
-	pTable->Add( COLOR_ENTRY( color::LightGray ) );
-	pTable->Add( COLOR_ENTRY( color::Gray60 ) );
-	pTable->Add( COLOR_ENTRY( color::Cyan ) );
-	pTable->Add( COLOR_ENTRY( color::DarkMagenta ) );
-	pTable->Add( COLOR_ENTRY( color::LightGreenish ) );
-	pTable->Add( COLOR_ENTRY( color::SpringGreen ) );
-	pTable->Add( COLOR_ENTRY( color::NeonGreen ) );
-	pTable->Add( COLOR_ENTRY( color::AzureBlue ) );
-	pTable->Add( COLOR_ENTRY( color::BlueWindows10 ) );
-	pTable->Add( COLOR_ENTRY( color::BlueTextWin10 ) );
-	pTable->Add( COLOR_ENTRY( color::ScarletRed ) );
-	pTable->Add( COLOR_ENTRY( color::Salmon ) );
-	pTable->Add( COLOR_ENTRY( color::Pink ) );
-	pTable->Add( COLOR_ENTRY( color::PastelPink ) );
-	pTable->Add( COLOR_ENTRY( color::LightPastelPink ) );
-	pTable->Add( COLOR_ENTRY( color::ToolStripPink ) );
-	pTable->Add( COLOR_ENTRY( color::TranspPink ) );
-	pTable->Add( COLOR_ENTRY( color::SolidOrange ) );
-	pTable->Add( COLOR_ENTRY( color::Amber ) );
-	pTable->Add( COLOR_ENTRY( color::PaleYellow ) );
-	pTable->Add( COLOR_ENTRY( color::GhostWhite ) );
 
 	return pTable;
 }
@@ -1122,6 +1158,38 @@ CColorTable* CColorRepository::MakeTable_HTML( void )
 	pTable->Add( COLOR_ENTRY( color::html::LightGoldenrodYellow ) );
 	pTable->Add( COLOR_ENTRY( color::html::Cornsilk ) );
 	pTable->Add( COLOR_ENTRY( color::html::White ) );
+
+	return pTable;
+}
+
+
+CColorTable* CColorRepository::MakeTable_Dev( void )
+{
+	CColorTable* pTable = new CColorTable( ui::Dev_Colors, color::_Custom_ColorCount, 6 );		// 23 colors: 6 columns x 4 rows
+
+	pTable->Add( COLOR_ENTRY( color::VeryDarkGray ) );
+	pTable->Add( COLOR_ENTRY( color::DarkGray ) );
+	pTable->Add( COLOR_ENTRY( color::LightGray ) );
+	pTable->Add( COLOR_ENTRY( color::Gray60 ) );
+	pTable->Add( COLOR_ENTRY( color::Cyan ) );
+	pTable->Add( COLOR_ENTRY( color::DarkMagenta ) );
+	pTable->Add( COLOR_ENTRY( color::LightGreenish ) );
+	pTable->Add( COLOR_ENTRY( color::SpringGreen ) );
+	pTable->Add( COLOR_ENTRY( color::NeonGreen ) );
+	pTable->Add( COLOR_ENTRY( color::AzureBlue ) );
+	pTable->Add( COLOR_ENTRY( color::BlueWindows10 ) );
+	pTable->Add( COLOR_ENTRY( color::BlueTextWin10 ) );
+	pTable->Add( COLOR_ENTRY( color::ScarletRed ) );
+	pTable->Add( COLOR_ENTRY( color::Salmon ) );
+	pTable->Add( COLOR_ENTRY( color::Pink ) );
+	pTable->Add( COLOR_ENTRY( color::PastelPink ) );
+	pTable->Add( COLOR_ENTRY( color::LightPastelPink ) );
+	pTable->Add( COLOR_ENTRY( color::ToolStripPink ) );
+	pTable->Add( COLOR_ENTRY( color::TranspPink ) );
+	pTable->Add( COLOR_ENTRY( color::SolidOrange ) );
+	pTable->Add( COLOR_ENTRY( color::Amber ) );
+	pTable->Add( COLOR_ENTRY( color::PaleYellow ) );
+	pTable->Add( COLOR_ENTRY( color::GhostWhite ) );
 
 	return pTable;
 }

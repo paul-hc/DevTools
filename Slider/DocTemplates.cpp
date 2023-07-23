@@ -200,7 +200,7 @@ namespace app
 		, m_accel( m_hAccelTable )
 	{
 		m_menu.Attach( m_hMenuShared );
-		VERIFY( ui::SetMenuImages( m_menu ) );
+		VERIFY( ui::SetMenuImages( &m_menu ) );
 	}
 
 	CSharedDocTemplate::~CSharedDocTemplate()

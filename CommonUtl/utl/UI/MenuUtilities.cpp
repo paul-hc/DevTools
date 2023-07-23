@@ -14,7 +14,7 @@
 
 namespace ui
 {
-	bool LoadPopupMenu( CMenu* pContextMenu, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages /*= NormalMenuImages*/, OUT std::tstring* pOutPopupText /*= nullptr*/ )
+	bool LoadPopupMenu( OUT CMenu* pContextMenu, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages /*= NormalMenuImages*/, OUT std::tstring* pOutPopupText /*= nullptr*/ )
 	{
 		ASSERT_PTR( pContextMenu );
 		REQUIRE( popupIndexPath.GetDepth() > 0 );
@@ -54,7 +54,7 @@ namespace ui
 				VERIFY( pParentMenu->RemoveMenu( popupIndex, MF_BYPOSITION ) );
 
 				if ( useMenuImages != NoMenuImages )
-					SetMenuImages( *pContextMenu, CheckedMenuImages == useMenuImages );		// set shared bitmap images
+					SetMenuImages( pContextMenu, CheckedMenuImages == useMenuImages );		// set shared bitmap images
 				return true;
 			}
 			else
@@ -67,41 +67,45 @@ namespace ui
 	}
 
 
-	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= nullptr*/ )
+	bool SetMenuImages( OUT CMenu* pMenu, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= nullptr*/ )
 	{
+		REQUIRE( ::IsMenu( pMenu->GetSafeHmenu() ) );
+
 		if ( nullptr == pImageStore )
 			pImageStore = ui::GetImageStoresSvc();
 		if ( nullptr == pImageStore )
 			return false;
 
-		for ( UINT i = 0, count = rMenu.GetMenuItemCount(); i != count; ++i )
+		for ( UINT i = 0, count = pMenu->GetMenuItemCount(); i != count; ++i )
 		{
-			UINT state = rMenu.GetMenuState( i, MF_BYPOSITION );
+			UINT state = pMenu->GetMenuState( i, MF_BYPOSITION );
 
 			if ( HasFlag( state, MF_POPUP ) )
-				SetMenuImages( *rMenu.GetSubMenu( i ), useCheckedBitmaps, pImageStore );
+				SetMenuImages( pMenu->GetSubMenu( i ), useCheckedBitmaps, pImageStore );
 			else if ( !HasFlag( state, MF_SEPARATOR | MF_MENUBREAK | MFT_OWNERDRAW ) )
 			{
-				UINT itemId = rMenu.GetMenuItemID( i );
+				UINT itemId = pMenu->GetMenuItemID( i );
 				ASSERT( itemId != 0 && itemId != UINT_MAX );
 
 				std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( itemId, useCheckedBitmaps );
 				if ( bitmaps.first != nullptr || bitmaps.second != nullptr )
-					rMenu.SetMenuItemBitmaps( i, MF_BYPOSITION, bitmaps.first, bitmaps.second );
+					pMenu->SetMenuItemBitmaps( i, MF_BYPOSITION, bitmaps.first, bitmaps.second );
 			}
 		}
 		return true;
 	}
 
-	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId /*= 0*/, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= nullptr*/ )
+	bool SetMenuItemImage( OUT CMenu* pMenu, const CMenuItemRef& itemRef, UINT iconId /*= 0*/, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= nullptr*/ )
 	{
+		REQUIRE( ::IsMenu( pMenu->GetSafeHmenu() ) );
+
 		if ( nullptr == pImageStore )
 			pImageStore = ui::GetImageStoresSvc();
 
 		std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( 0 == iconId ? itemRef.GetCmdId() : iconId, useCheckedBitmaps );
 		if ( bitmaps.first != nullptr || bitmaps.second != nullptr )
 		{
-			rMenu.SetMenuItemBitmaps( itemRef.m_itemRef, itemRef.m_refFlags, bitmaps.first, bitmaps.second );
+			pMenu->SetMenuItemBitmaps( itemRef.m_itemRef, itemRef.m_refFlags, bitmaps.first, bitmaps.second );
 			return true;
 		}
 
@@ -164,7 +168,7 @@ namespace ui
 			//ui::UpdateMenuUI( pTargetWnd, pPopupMenu, true, true, Deep );		// Deep update when using TPM_NONOTIFY flag, WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus
 
 			// not using TPM_NONOTIFY for proper WM_INITMENUPOPUP menu updates
-			cmdId = pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD /*| TPM_NONOTIFY*/, screenPos.x, screenPos.y, pTargetWnd );
+			cmdId = pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD /*| TPM_NONOTIFY*/, screenPos.x, screenPos.y, pTargetWnd );
 		}
 
 		if ( sendCommand && cmdId != 0 )
@@ -251,6 +255,43 @@ namespace ui
 
 namespace ui
 {
+	UINT GetMenuItemType( HMENU hMenu, UINT item, bool byPos )
+	{
+		MENUITEMINFO itemInfo;
+		utl::ZeroWinStruct( &itemInfo );
+		itemInfo.fMask = MIIM_TYPE;
+
+		if ( !::GetMenuItemInfo( hMenu, item, byPos, &itemInfo ) )
+			return 0;
+
+		return (DWORD_PTR)itemInfo.fType;
+	}
+
+	void* GetMenuItemData( HMENU hMenu, UINT item, bool byPos /*= true*/ )
+	{
+		MENUITEMINFO itemInfo;
+
+		utl::ZeroWinStruct( &itemInfo );
+		itemInfo.fMask = MIIM_DATA;
+
+		if ( !::GetMenuItemInfo( hMenu, item, byPos, &itemInfo ) )
+			return 0;
+
+		return reinterpret_cast<void*>( itemInfo.dwItemData );
+	}
+
+	bool SetMenuItemData( HMENU hMenu, UINT item, const void* pItemData, bool byPos /*= true*/ )
+	{
+		MENUITEMINFO itemInfo;
+
+		utl::ZeroWinStruct( &itemInfo );
+		itemInfo.fMask = MIIM_DATA;
+		itemInfo.dwItemData = reinterpret_cast<DWORD_PTR>( pItemData );
+
+		return ::SetMenuItemInfo( hMenu, item, byPos, &itemInfo ) != FALSE;
+	}
+
+
 	int FindMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst /*= 0*/ )
 	{
 		ASSERT_PTR( hMenu );
@@ -390,7 +431,7 @@ namespace ui
 				VERIFY( destMenu.InsertMenuItem( i, &itemInfo, TRUE ) );
 
 				if ( !itemInfo.IsSeparator() )
-					SetMenuItemImage( destMenu, itemInfo.wID );
+					SetMenuItemImage( &destMenu, itemInfo.wID );
 			}
 			else
 				ASSERT( false );		// invalid item?
@@ -399,23 +440,24 @@ namespace ui
 		return destMenu.Detach();
 	}
 
-	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector<UINT>* pSrcIds /*= nullptr*/ )
+	size_t CopyMenuItems( OUT CMenu* pDestMenu, unsigned int destIndex, const CMenu* pSrcMenu, const std::vector<UINT>* pSrcIds /*= nullptr*/ )
 	{
+		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
 		size_t copiedCount = 0;
 
-		for ( UINT i = 0, srcCount = srcMenu.GetMenuItemCount(); i != srcCount; ++i )
+		for ( UINT i = 0, srcCount = pSrcMenu->GetMenuItemCount(); i != srcCount; ++i )
 		{
-			UINT srcId = srcMenu.GetMenuItemID( i );
+			UINT srcId = pSrcMenu->GetMenuItemID( i );
 
 			if ( nullptr == pSrcIds || ( 0 == srcId || std::find( pSrcIds->begin(), pSrcIds->end(), srcId ) != pSrcIds->end() ) )
 			{
 				MENUITEMINFO_BUFF itemInfo;
-				if ( itemInfo.GetMenuItemInfo( srcMenu, i ) )
+				if ( itemInfo.GetMenuItemInfo( pSrcMenu->GetSafeHmenu(), i ) )
 				{
-					VERIFY( rDestMenu.InsertMenuItem( destIndex, &itemInfo, TRUE ) );
+					VERIFY( pDestMenu->InsertMenuItem( destIndex, &itemInfo, TRUE ) );
 
 					if ( !itemInfo.IsSeparator() )
-						SetMenuItemImage( rDestMenu, itemInfo.wID );
+						SetMenuItemImage( pDestMenu, itemInfo.wID );
 
 					++copiedCount;
 					++destIndex;
@@ -428,119 +470,142 @@ namespace ui
 		return copiedCount;
 	}
 
-	void DeleteMenuItem( CMenu& rDestMenu, UINT itemId )
+	void DeleteMenuItem( CMenu* pDestMenu, UINT itemId )
 	{
+		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
 		ASSERT( itemId != 0 );
 
-		if ( rDestMenu.DeleteMenu( itemId, MF_BYCOMMAND ) )
-			CleanupMenuSeparators( rDestMenu );
+		if ( pDestMenu->DeleteMenu( itemId, MF_BYCOMMAND ) )
+			CleanupMenuSeparators( pDestMenu );
 	}
 
-	void DeleteMenuItems( CMenu& rDestMenu, const UINT* pItemIds, size_t itemCount )
+	size_t DeleteMenuItems( CMenu* pDestMenu, const UINT* pItemIds, size_t itemCount )
 	{
+		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
 		ASSERT_PTR( pItemIds );
 
+		size_t delCount = 0;
 		for ( UINT i = 0; i != itemCount; ++i )
 		{
 			ASSERT( pItemIds[ i ] != 0 );
-			rDestMenu.DeleteMenu( pItemIds[ i ], MF_BYCOMMAND );
+			if ( pDestMenu->DeleteMenu( pItemIds[ i ], MF_BYCOMMAND ) )
+				++delCount;
 		}
 
-		CleanupMenuSeparators( rDestMenu );
+		return delCount + CleanupMenuSeparators( pDestMenu );
 	}
 
-	void CleanupMenuDuplicates( CMenu& rDestMenu )
+	size_t CleanupMenuDuplicates( OUT CMenu* pDestMenu )
 	{
-		// first delete any duplicate commands (no separators)
-		for ( int i = 0, count = rDestMenu.GetMenuItemCount(); i != count; ++i )
-		{
-			UINT itemId = rDestMenu.GetMenuItemID( i );
+		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
 
-			if ( UINT_MAX == itemId ) // sub-menu
+		size_t delCount = 0;
+
+		// first delete any duplicate commands (no separators)
+		for ( int i = 0, count = pDestMenu->GetMenuItemCount(); i != count; ++i )
+		{
+			UINT itemId = pDestMenu->GetMenuItemID( i );
+
+			if ( UINT_MAX == itemId )	// sub-menu
 			{
-				if ( CMenu* pSubMenu = rDestMenu.GetSubMenu( i ) )
-					CleanupMenuDuplicates( *pSubMenu );
+				if ( CMenu* pSubMenu = pDestMenu->GetSubMenu( i ) )
+					delCount += CleanupMenuDuplicates( pSubMenu );
 			}
-			else if ( itemId != 0 ) // normal command, no separator
+			else if ( itemId != 0 )		// normal command, no separator
 			{
 				for ( ;; )
 				{
-					unsigned int iDuplicate = FindMenuItemIndex( rDestMenu, itemId, i + 1 );
+					UINT iDuplicate = FindMenuItemIndex( pDestMenu->GetSafeHmenu(), itemId, i + 1 );
 
-					if ( iDuplicate != UINT_MAX ) // found a duplicate
-						rDestMenu.DeleteMenu( iDuplicate, MF_BYPOSITION ); // delete duplicate command
+					if ( iDuplicate != UINT_MAX )								// found a duplicate?
+					{
+						pDestMenu->DeleteMenu( iDuplicate, MF_BYPOSITION );
+						++delCount;
+					}
 					else
 						break;
 				}
 			}
 		}
 
-		CleanupMenuSeparators( rDestMenu );
+		return delCount + CleanupMenuSeparators( pDestMenu );
 	}
 
-	void CleanupMenuSeparators( CMenu& rDestMenu )
-	{
-		UINT i = rDestMenu.GetMenuItemCount();
-		for ( UINT prevId = UINT_MAX; i-- != 0; )
-		{
-			UINT itemId = rDestMenu.GetMenuItemID( i );
 
-			if ( 0 == itemId && 0 == prevId )
-				rDestMenu.DeleteMenu( i, MF_BYPOSITION );		// delete double separator
+	size_t CleanupMenuSeparators( OUT CMenu* pDestMenu )
+	{
+		size_t delCount;
+
+		delCount = DeleteMenuLeadingSeparators( pDestMenu );
+		delCount += DeleteMenuTrailingSeparators( pDestMenu );
+
+		// delete duplicate separators in reverse order
+		for ( UINT index = pDestMenu->GetMenuItemCount(), prevSep = FALSE; index-- != 0; )
+			if ( IsSeparatorItem( *pDestMenu, index ) )
+			{
+				if ( prevSep )
+				{	// delete double separator in sequence
+					pDestMenu->DeleteMenu( index, MF_BYPOSITION );
+					++delCount;
+					// previous stays still as separator
+				}
+				else
+					prevSep = TRUE;
+			}
 			else
-				prevId = itemId;
-		}
+				prevSep = FALSE;
 
-		DeleteFirstMenuSeparator( rDestMenu );
-		DeleteLastMenuSeparator( rDestMenu );
+		return delCount;
 	}
 
-	bool DeleteFirstMenuSeparator( CMenu& rDestMenu )
+	size_t DeleteMenuLeadingSeparators( OUT CMenu* pDestMenu )
 	{
-		return
-			rDestMenu.GetMenuItemCount() != 0 &&
-			0 == rDestMenu.GetMenuItemID( 0 ) &&
-			rDestMenu.DeleteMenu( 0, MF_BYPOSITION ) != FALSE;		// delete first separator
+		size_t delCount = 0;
+
+		for ( UINT count = pDestMenu->GetMenuItemCount(); count != 0 && IsSeparatorItem( *pDestMenu, 0 ); ++delCount )
+			pDestMenu->DeleteMenu( 0, MF_BYPOSITION );
+
+		return delCount;
 	}
 
-	bool DeleteLastMenuSeparator( CMenu& rDestMenu )
+	size_t DeleteMenuTrailingSeparators( OUT CMenu* pDestMenu )
 	{
-		UINT i = rDestMenu.GetMenuItemCount();
+		size_t delCount = 0;
 
-		return
-			i != 0 &&
-			0 == rDestMenu.GetMenuItemID( --i ) &&
-			rDestMenu.DeleteMenu( i, MF_BYPOSITION ) != FALSE;		// delete last separator
+		for ( UINT count = pDestMenu->GetMenuItemCount(); count-- != 0 && IsSeparatorItem( *pDestMenu, count ); ++delCount )
+			pDestMenu->DeleteMenu( count, MF_BYPOSITION );
+
+		return delCount;
 	}
 
 
-	bool JoinMenuItems( CMenu& rDestMenu, const CMenu& srcMenu, MenuInsert menuInsert /*= AppendSrc*/, bool addSep /*= true*/, UseMenuImages useMenuImages /*= NormalMenuImages*/ )
+	bool JoinMenuItems( OUT CMenu* pDestMenu, const CMenu* pSrcMenu, MenuInsert menuInsert /*= AppendSrc*/, bool addSep /*= true*/, UseMenuImages useMenuImages /*= NormalMenuImages*/ )
 	{
-		ASSERT_PTR( rDestMenu.GetSafeHmenu() );
-		ASSERT_PTR( srcMenu.GetSafeHmenu() );
+		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
+		REQUIRE( ::IsMenu( pSrcMenu->GetSafeHmenu() ) );
 
-		if ( 0 == srcMenu.GetMenuItemCount() )
+		if ( 0 == pSrcMenu->GetMenuItemCount() )
 			return false;
 
 		switch ( menuInsert )
 		{
 			case PrependSrc:
 				if ( addSep )
-					rDestMenu.InsertMenu( 0, MF_SEPARATOR | MF_BYPOSITION );
-				CopyMenuItems( rDestMenu, 0, srcMenu );
+					pDestMenu->InsertMenu( 0, MF_SEPARATOR | MF_BYPOSITION );
+				CopyMenuItems( pDestMenu, 0, pSrcMenu );
 				break;
 			case AppendSrc:
 				if ( addSep )
-					rDestMenu.InsertMenu( rDestMenu.GetMenuItemCount(), MF_SEPARATOR | MF_BYPOSITION );
-				CopyMenuItems( rDestMenu, rDestMenu.GetMenuItemCount(), srcMenu );
+					pDestMenu->InsertMenu( pDestMenu->GetMenuItemCount(), MF_SEPARATOR | MF_BYPOSITION );
+				CopyMenuItems( pDestMenu, pDestMenu->GetMenuItemCount(), pSrcMenu );
 				break;
 		}
 
-		CleanupMenuDuplicates( rDestMenu );
-		CleanupMenuSeparators( rDestMenu );
+		CleanupMenuDuplicates( pDestMenu );
+		CleanupMenuSeparators( pDestMenu );
 
 		if ( useMenuImages != NoMenuImages )
-			SetMenuImages( rDestMenu, CheckedMenuImages == useMenuImages );
+			SetMenuImages( pDestMenu, CheckedMenuImages == useMenuImages );
 
 		return true;
 	}
@@ -750,6 +815,16 @@ namespace dbg
 
 namespace dbg
 {
+	void TrackMenu( CMenu* pPopupMenu, CWnd* pTargetWnd )
+	{
+	#ifdef _DEBUG
+		CPoint point = ui::GetCursorPos();
+		pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_RETURNCMD, point.x, point.y, pTargetWnd );
+	#else
+		pPopupMenu, pTargetWnd;
+	#endif
+	}
+
 	void TraceMenu( HMENU hMenu, unsigned int indentLevel /*= 0*/ )
 	{
 	#ifdef _DEBUG

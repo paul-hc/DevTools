@@ -4,6 +4,7 @@
 
 #include "AccelTable.h"
 #include "Dialog_fwd.h"
+#include "PopupMenus_fwd.h"
 #include "StdColors.h"
 #include "utl/Registry_fwd.h"
 #include <afxcolorbutton.h>
@@ -11,10 +12,6 @@
 
 namespace ui
 {
-	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput = false );
-	void DDX_ColorRepoText( CDataExchange* pDX, int ctrlId, COLORREF color );
-
-
 	template< typename ColorCtrlT >
 	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor )
 	{
@@ -26,10 +23,14 @@ namespace ui
 			else
 				*pColor = rCtrl.GetColor();
 	}
+
+	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput = false );
+	void DDX_ColorRepoText( CDataExchange* pDX, int ctrlId, COLORREF color );
 }
 
 
 class CColorTable;
+namespace mfc { class CColorPopupMenu; }
 
 
 class CColorPickerButton : public CMFCColorButton
@@ -60,6 +61,9 @@ private:
 
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
+
+	void NotifyColorSetChanged( void );
+	void ShowColorPopupImpl( mfc::CColorPopupMenu* pTrackingColorPopup );
 private:
 	const CColorTable* m_pColorTable;
 	size_t m_halftoneSize;
@@ -70,8 +74,6 @@ private:
 
 	static std::vector<CColorPickerButton*> s_instances;		// for color table notifications
 protected:
-	void NotifyColorSetChanged( void );
-
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
@@ -116,7 +118,7 @@ private:
 
 	// base overrides:
 protected:
-	virtual void OnShowMenu( void );
+	virtual void OnShowMenu( void ) override;
 
 	// generated stuff
 protected:
@@ -126,10 +128,9 @@ protected:
 };
 
 
-#include "PopupMenus_fwd.h"
-
-
 class CColorStore;
+class CScratchColorStore;
+namespace mfc { class CColorMenuButton; }
 
 
 class CColorStorePicker : public CMenuPickerButton
@@ -139,29 +140,45 @@ public:
 	CColorStorePicker( CWnd* pTargetWnd = nullptr );
 	virtual ~CColorStorePicker();
 
-	const CColorStore* GetColorStore( void ) const { return m_pColorStore; }
-	void SetColorStore( const CColorStore* pColorStore ) { m_pColorStore = pColorStore; ResetPopupMenu(); }
+	const CColorStore* GetMainStore( void ) const { return m_pMainStore; }
+	void SetMainStore( const CColorStore* pMainStore );
 
 	COLORREF GetColor( void ) const { return m_color; }
 	void SetColor( COLORREF color );		// CLR_NONE: automatic
+protected:
+	/*virtual*/ void UpdateColor( COLORREF newColor );
+	void UpdateShadesTable( void );
 private:
-	void SetupPopupMenu( void );
 	void ResetPopupMenu( void ) { m_popupMenu.DestroyMenu(); m_hMenu = nullptr; }
+	void SetupPopupMenu( void );
+	void ModifyPopupMenuTableItems( const CColorStore* pColorStore );
+	void InsertPopupMenuTableItems( const CColorStore* pColorStore );
+	CColorTable* LookupPopupColorTable( UINT colorBtnId ) const;
+
+	mfc::CColorMenuButton* MakeColorMenuButton( UINT colorBtnId, const CColorTable* pColorTable ) const;
+	static CMFCPopupMenu* GetTrackingPopupMenu( void );
+	static const mfc::CColorMenuButton* LookupPopupColorButton( UINT colorBtnId );
 
 	// ui::ICustomPopupMenu interface
-	virtual void OnCustomizeMenuBar( mfc::CTrackingPopupMenu* pMenuPopup );
+	virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) override;
 private:
-	const CColorStore* m_pColorStore;
 	COLORREF m_color;
+	const CColorStore* m_pMainStore;		// by default CColorRepository::Instance(); enumerates the main ID_REPO_COLOR_TABLE_MIN/MAX color tables
+	const CColorTable* m_pSelColorTable;	// selected color table
+	std::auto_ptr<CScratchColorStore> m_pScratchStore;
 
-	CMenu m_popupMenu;
+	CMenu m_popupMenu;						// template for the tracking CMFCPopupMenu (created on the fly)
 
 	// base overrides:
 protected:
-	virtual void OnShowMenu( void );
+	virtual void OnShowMenu( void ) override;
 
 	// generated stuff
+public:
+	virtual void PreSubclassWindow( void );
 protected:
+	afx_msg void On_ColorSelected( UINT selColorBtnId );
+	afx_msg void On_UseColorTable( UINT selColorBtnId );
 	afx_msg void OnUpdate_UseColorTable( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()

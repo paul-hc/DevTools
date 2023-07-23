@@ -485,22 +485,26 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Use Color Set"
         BEGIN
-            MENUITEM "Halftone: 16 Colors",         ID_USE_HALFTONE_TABLE_16
-            MENUITEM "Halftone: 20 Colors",         ID_USE_HALFTONE_TABLE_20
-            MENUITEM "Halftone: 256 Colors",        ID_USE_HALFTONE_TABLE_256
+            MENUITEM "<halftone 16 colors>",        ID_HALFTONE_TABLE_16
+            MENUITEM "<halftone 20 colors>",        ID_HALFTONE_TABLE_20
+            MENUITEM "<halftone 256 colors>",       ID_HALFTONE_TABLE_256
             MENUITEM SEPARATOR
-            MENUITEM "<color table base ID>",       ID_USE_COLOR_TABLE_MIN
+            MENUITEM "<repo table base ID>",        ID_REPO_COLOR_TABLE_MIN
             MENUITEM SEPARATOR
-            MENUITEM "Custom Colors",               ID_USE_CUSTOM_COLOR_SET
+            MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
+            MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
         END
     END
     POPUP "<color-store-picker>"
     BEGIN
-        MENUITEM "Halftone: 16 Colors",         ID_USE_HALFTONE_TABLE_16
-        MENUITEM "Halftone: 20 Colors",         ID_USE_HALFTONE_TABLE_20
-        MENUITEM "Halftone: 256 Colors",        ID_USE_HALFTONE_TABLE_256
+        MENUITEM "<halftone 16 colors>",        ID_HALFTONE_TABLE_16
+        MENUITEM "<halftone 20 colors>",        ID_HALFTONE_TABLE_20
+        MENUITEM "<halftone 256 colors>",       ID_HALFTONE_TABLE_256
         MENUITEM SEPARATOR
-        MENUITEM "<color table base ID>",       ID_USE_COLOR_TABLE_MIN
+        MENUITEM "<repo table base ID>",        ID_REPO_COLOR_TABLE_MIN
+        MENUITEM SEPARATOR
+        MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
+        MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
         MENUITEM SEPARATOR
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
@@ -701,7 +705,11 @@ BEGIN
     ID_USE_COLOR_DIALOG_MFC "Use the new MS Office style color dialog\tUse Office Color Dialog"
     ID_USE_COLOR_DIALOG_COMCTRL 
                             "Use the classic style color dialog\tUse Classic Color Dialog"
-    ID_USE_COLOR_TABLE_MIN  "<color table base ID>"
+END
+
+STRINGTABLE
+BEGIN
+    ID_REPO_COLOR_TABLE_MIN "<color table base ID>"
 END
 
 STRINGTABLE

@@ -91,7 +91,7 @@ void CPopupDlgBase::AddAboutMenuItem( CMenu* pMenu )
 
 	pMenu->AppendMenu( MF_SEPARATOR );
 	pMenu->AppendMenu( MF_STRING, ID_APP_ABOUT, menuItemText.c_str() );
-	ui::SetMenuItemImage( *pMenu, ID_APP_ABOUT );
+	ui::SetMenuItemImage( pMenu, ID_APP_ABOUT );
 }
 
 bool CPopupDlgBase::HandleCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )

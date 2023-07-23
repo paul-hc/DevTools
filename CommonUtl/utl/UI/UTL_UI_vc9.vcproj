@@ -1866,6 +1866,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PopupMenus_fwd.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\PopupMenus_fwd.h"
 					>
 				</File>

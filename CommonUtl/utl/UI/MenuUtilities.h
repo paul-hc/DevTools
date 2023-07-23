@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ui_fwd.h"
-#include <afxcontextmenumanager.h>
+#include <afxcontextmenumanager.h>		// for afxContextMenuManager
 
 
 namespace ui
@@ -16,10 +16,10 @@ namespace ui
 	enum UseMenuImages { NoMenuImages, NormalMenuImages, CheckedMenuImages };
 
 
-	bool LoadPopupMenu( CMenu* pContextMenu, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages = NormalMenuImages, OUT std::tstring* pOutPopupText = nullptr );
+	bool LoadPopupMenu( OUT CMenu* pContextMenu, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages = NormalMenuImages, OUT std::tstring* pOutPopupText = nullptr );
 
-	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = nullptr );
-	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId = 0, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = nullptr );
+	bool SetMenuImages( OUT CMenu* pMenu, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = nullptr );
+	bool SetMenuItemImage( OUT CMenu* pMenu, const CMenuItemRef& itemRef, UINT iconId = 0, bool useCheckedBitmaps = false, ui::IImageStore* pImageStore = nullptr );
 
 	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags = TPM_RIGHTBUTTON, const RECT* pExcludeRect = nullptr );
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign = DropDown, UINT trackFlags = TPM_RIGHTBUTTON );
@@ -63,12 +63,28 @@ namespace ui
 
 	// menu item
 
-	inline std::tstring GetMenuItemText( const CMenu& menu, UINT itemId, UINT flags = MF_BYCOMMAND )
+	inline std::tstring GetMenuItemText( const CMenu* pMenu, UINT item, UINT flags = MF_BYCOMMAND )
 	{
 		CString itemText;
-		menu.GetMenuString( itemId, itemText, flags );
+		pMenu->GetMenuString( item, itemText, flags );
 		return itemText.GetString();
 	}
+
+
+	UINT GetMenuItemType( HMENU hMenu, UINT item, bool byPos = true );						// 'item' is either itemId or itemIndex, depending on byPos
+
+	void* GetMenuItemData( HMENU hMenu, UINT item, bool byPos = true );						// 'item' is either itemId or itemIndex, depending on byPos
+	bool SetMenuItemData( HMENU hMenu, UINT item, const void* pItemData, bool byPos = true );
+
+	template< typename Type >
+	inline Type* GetMenuItemPtr( HMENU hMenu, UINT item, bool byPos = true ) { return reinterpret_cast<Type*>( GetMenuItemData( hMenu, item, byPos ) ); }
+
+	template< typename Type >
+	inline bool SetMenuItemPtr( HMENU hMenu, UINT item, const Type* pItemPtr, bool byPos = true ) { return SetMenuItemData( hMenu, item, pItemPtr, byPos ); }
+
+	inline bool HasSeparatorItemState( UINT itemState ) { return itemState != UINT_MAX && HasFlag( itemState, MF_SEPARATOR | MF_MENUBARBREAK | MF_MENUBREAK ); }
+	inline bool IsSeparatorItem( HMENU hMenu, UINT item, bool byPos = true ) { return HasSeparatorItemState( ::GetMenuState( hMenu, item, byPos ? MF_BYPOSITION : MF_BYCOMMAND ) ); }
+
 
 	// shallow menu API
 
@@ -78,6 +94,11 @@ namespace ui
 	// deep menu API
 
 	HMENU FindMenuItemIndex( OUT int* pOutIndex, HMENU hMenu, UINT itemId, RecursionDepth depth = Deep );
+	inline CMenu* FindMenuItemIndex( OUT int* pOutIndex, const CMenu* pMenu, UINT itemId, RecursionDepth depth = Deep )
+	{
+		return ui::SafeFromHandle( FindMenuItemIndex( pOutIndex, pMenu->GetSafeHmenu(), itemId, depth ) );
+	}
+
 	HMENU FindFirstMenuCommand( OUT UINT* pOutCmdId, HMENU hMenu, RecursionDepth depth = Deep );		// first valid command (not separator)
 
 	UINT GetTotalCmdCount( HMENU hMenu, RecursionDepth depth = Deep );						// just commands (excluding separators, sub-menus)
@@ -85,19 +106,19 @@ namespace ui
 
 	HMENU CloneMenu( HMENU hSrcMenu );
 
-	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector<UINT>* pSrcIds = nullptr );
-	void DeleteMenuItem( CMenu& rDestMenu, UINT itemId );
-	void DeleteMenuItems( CMenu& rDestMenu, const UINT* pItemIds, size_t itemCount );
+	size_t CopyMenuItems( OUT CMenu* pDestMenu, unsigned int destIndex, const CMenu* pSrcMenu, const std::vector<UINT>* pSrcIds = nullptr );
+	void DeleteMenuItem( OUT CMenu* pDestMenu, UINT itemId );
+	size_t DeleteMenuItems( OUT CMenu* pDestMenu, const UINT* pItemIds, size_t itemCount );
 
-	void CleanupMenuDuplicates( CMenu& rDestMenu );
-	void CleanupMenuSeparators( CMenu& rDestMenu );
+	size_t CleanupMenuDuplicates( OUT CMenu* pDestMenu );
+	size_t CleanupMenuSeparators( OUT CMenu* pDestMenu );
 
-	bool DeleteFirstMenuSeparator( CMenu& rDestMenu );
-	bool DeleteLastMenuSeparator( CMenu& rDestMenu );
+	size_t DeleteMenuLeadingSeparators( OUT CMenu* pDestMenu );
+	size_t DeleteMenuTrailingSeparators( OUT CMenu* pDestMenu );
 
 	enum MenuInsert { PrependSrc, AppendSrc };
 
-	bool JoinMenuItems( CMenu& rDestMenu, const CMenu& srcMenu, MenuInsert menuInsert = AppendSrc, bool addSep = true, UseMenuImages useMenuImages = NormalMenuImages );
+	bool JoinMenuItems( OUT CMenu* pDestMenu, const CMenu* pSrcMenu, MenuInsert menuInsert = AppendSrc, bool addSep = true, UseMenuImages useMenuImages = NormalMenuImages );
 
 
 	bool EnsureDeepValidMenu( HMENU hMenu, unsigned int depth = 0 );
@@ -184,6 +205,8 @@ namespace ui
 
 namespace dbg
 {
+	void TrackMenu( CMenu* pPopupMenu, CWnd* pTargetWnd );
+
 	void TraceMenu( HMENU hMenu, unsigned int indentLevel = 0 );
 	void TraceMenuItem( HMENU hMenu, int itemPos );
 	void TraceMenuItem( const ui::MENUITEMINFO_BUFF& itemInfo, int itemPos, unsigned int indentLevel = 0 );

@@ -293,7 +293,7 @@ void CPickDataset::MakePickDirMenu( CMenu* pPopupMenu ) const
 	for ( std::vector< std::tstring >::const_iterator itSubDir = m_subDirs.begin(), itLast = m_subDirs.end() - 1; itSubDir != m_subDirs.end(); ++itSubDir, ++cmdId )
 	{
 		pPopupMenu->AppendMenu( MF_STRING, cmdId, EscapeAmpersand( *itSubDir ) );
-		ui::SetMenuItemImage( *pPopupMenu, cmdId, itSubDir != itLast ? ID_BROWSE_FILE : ID_PARENT_FOLDER );
+		ui::SetMenuItemImage( pPopupMenu, cmdId, itSubDir != itLast ? ID_BROWSE_FILE : ID_PARENT_FOLDER );
 	}
 }
 

@@ -21,15 +21,18 @@ namespace ui
 	enum StdColorTable
 	{
 		// CColorRepository::Instance():
-		Standard_Colors, Custom_Colors, Office2003_Colors, Office2007_Colors, DirectX_Colors, HTML_Colors,		// color-repo standard tables
+		Standard_Colors, Office2003_Colors, Office2007_Colors, DirectX_Colors, HTML_Colors,		// color-repo standard tables
 		WindowsSys_Colors,
 
 		// CHalftoneRepository::Instance():
-		Halftone16_Colors, Halftone20_Colors, Halftone256_Colors, HalftoneCustom_Colors,
+		Halftone16_Colors, Halftone20_Colors, Halftone256_Colors,
 
 		// implementation (not based in repository)
-		Shades_Colors, User_Colors,
-			_ColorTableCount
+		Shades_Colors, UserCustom_Colors,
+		Dev_Colors,
+
+			_ColorTableCount,
+			NullColorTable
 	};
 
 	const CEnumTags& GetTags_ColorTable( void );
@@ -93,7 +96,7 @@ namespace color
 	};
 
 
-	enum CustomColor
+	enum DevColor		// not in CColorRepository
 	{
 		VeryDarkGray	= RGB( 64, 64, 64 ),
 		DarkGray		= Gray40,

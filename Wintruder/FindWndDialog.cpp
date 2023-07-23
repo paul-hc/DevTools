@@ -144,7 +144,7 @@ void CFindWndDialog::OnUpdateCopyTargetWndHandle( CCmdUI* pCmdUI )
 
 	if ( pCmdUI->m_pMenu != NULL )
 	{
-		static const std::tstring baseItemText = ui::GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID );
+		static const std::tstring baseItemText = ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 		std::tostringstream itemText;
 		itemText << baseItemText;
 		if ( enable )
@@ -170,7 +170,7 @@ void CFindWndDialog::OnUpdateCopyWndClass( CCmdUI* pCmdUI )
 
 	if ( pCmdUI->m_pMenu != NULL )
 	{
-		static const std::tstring baseItemText = ui::GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID );
+		static const std::tstring baseItemText = ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 		std::tostringstream itemText;
 		itemText << baseItemText;
 		if ( enable )
@@ -200,7 +200,7 @@ void CFindWndDialog::OnUpdateCopyWndCaption( CCmdUI* pCmdUI )
 
 	if ( pCmdUI->m_pMenu != NULL )
 	{
-		static const std::tstring baseItemText = ui::GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID );
+		static const std::tstring baseItemText = ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 		std::tostringstream itemText;
 		itemText << baseItemText;
 		if ( enable )
@@ -230,7 +230,7 @@ void CFindWndDialog::OnUpdateCopyWndIdent( CCmdUI* pCmdUI )
 
 	if ( pCmdUI->m_pMenu != NULL )
 	{
-		static const std::tstring baseItemText = ui::GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID );
+		static const std::tstring baseItemText = ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 		std::tostringstream itemText;
 		itemText << baseItemText;
 		if ( enable )

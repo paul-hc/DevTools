@@ -3,15 +3,28 @@
 #pragma once
 
 
-namespace mfc { class CTrackingPopupMenu; }
+class CMFCPopupMenu;
+class CMFCToolBar;
+class CMFCToolBarButton;
 
 
 namespace ui
 {
 	interface ICustomPopupMenu
 	{
-		virtual void OnCustomizeMenuBar( mfc::CTrackingPopupMenu* pMenuPopup ) = 0;
+		virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) = 0;
 	};
+}
+
+
+namespace mfc
+{
+	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
+	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );
+	CMFCToolBarButton* FindBarButton( const CMFCPopupMenu* pPopupMenu, UINT btnId );
+
+	void* GetItemData( const CMFCToolBarButton* pButton );
+	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 }
 
 

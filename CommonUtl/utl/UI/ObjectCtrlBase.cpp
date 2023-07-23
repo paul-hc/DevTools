@@ -124,7 +124,7 @@ CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::ve
 
 		pContextPopup->AppendMenu( MF_BYPOSITION, MF_SEPARATOR );
 		pContextPopup->AppendMenu( MF_BYPOSITION | MF_POPUP, (UINT_PTR)m_pShellMenuHost->GetPopupMenu()->GetSafeHmenu(), _T("E&xplorer") );
-		ui::SetMenuItemImage( *pContextPopup, ui::CMenuItemRef::ByPosition( pContextPopup->GetMenuItemCount() - 1 ), ID_SHELL_SUBMENU );
+		ui::SetMenuItemImage( pContextPopup, ui::CMenuItemRef::ByPosition( pContextPopup->GetMenuItemCount() - 1 ), ID_SHELL_SUBMENU );
 		return pContextPopup;
 	}
 

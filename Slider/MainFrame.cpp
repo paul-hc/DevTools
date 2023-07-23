@@ -303,7 +303,7 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 		return -1;
 
 	ASSERT_PTR( pCS->hMenu );
-	ui::SetMenuImages( *CMenu::FromHandle( pCS->hMenu ) );			// m_hMenuDefault not initialized yet, but will
+	ui::SetMenuImages( CMenu::FromHandle( pCS->hMenu ) );			// m_hMenuDefault not initialized yet, but will
 
 	DragAcceptFiles();			// enable drag&drop open
 

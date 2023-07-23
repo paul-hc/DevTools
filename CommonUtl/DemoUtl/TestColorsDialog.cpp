@@ -51,7 +51,7 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	m_mfcColorPickerButton.EnableAutomaticButton( _T("Automatic"), color::Yellow );
 	m_mfcColorPickerButton.EnableOtherButton( _T("More...") );
 	ui::TMFCColorList docColors;
-	CColorRepository::Instance()->GetTable( ui::Office2003_Colors )->QueryMfcColors( docColors );
+	CColorRepository::Instance()->FindTable( ui::Office2003_Colors )->QueryMfcColors( docColors );
 	m_mfcColorPickerButton.SetDocumentColors( _T("Document:"), docColors );
 
 	m_pColorPicker->SetColor( m_color );
@@ -81,7 +81,7 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
-		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );		// feed afxCommandManager[:CCommandManager] with images from the strip
+		//CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );		// feed afxCommandManager[:CCommandManager] with images from the strip
 	}
 
 	__super::DoDataExchange( pDX );
@@ -93,6 +93,7 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 BEGIN_MESSAGE_MAP( CTestColorsDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_COLOR_PICKER_BUTTON, OnColorPicker )
 	ON_BN_CLICKED( IDC_MY_COLOR_PICKER_BUTTON, OnMyColorPicker )
+	ON_BN_CLICKED( IDC_MY_COLOR_STORE_PICKER_BUTTON, OnMyColorStorePicker )
 	ON_BN_CLICKED( IDC_MY_MENU_PICKER_BUTTON, OnMenuPicker )
 	ON_BN_CLICKED( IDC_EDIT_COLOR_BUTTON, On_EditColor )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdate_EditItem )
@@ -114,6 +115,15 @@ void CTestColorsDialog::OnMyColorPicker( void )
 	m_color = m_pColorPicker->GetColor();
 	if ( CLR_NONE == m_color )
 		m_color = m_pColorPicker->GetAutomaticColor();
+
+	UpdateData( DialogOutput );
+}
+
+void CTestColorsDialog::OnMyColorStorePicker( void )
+{
+	m_color = m_pColorStorePicker->GetColor();
+	//if ( CLR_NONE == m_color )
+	//	m_color = m_pColorStorePicker->GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }

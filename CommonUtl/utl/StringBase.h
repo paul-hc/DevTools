@@ -729,6 +729,16 @@ namespace str
 		SplitOut( std::back_inserter( rItems ), pSource, pSep );
 	}
 
+	template< typename CharT, typename VectLikeT >
+	inline bool SplitOnce( OUT VectLikeT& rStaticItems, const CharT* pSource, const CharT* pSep )
+	{	// for splitting to a static container, initialize only once
+		if ( !rStaticItems.empty() )
+			return false;				// already splitted
+
+		Split( rStaticItems, pSource, pSep, false );
+		return true;
+	}
+
 	template< typename CharT, typename SetLikeT >
 	inline void SplitSet( OUT SetLikeT& rItems, const CharT* pSource, const CharT* pSep, bool clear = true )
 	{	// SetLikeT is set-like: set, unordedred_set, list, etc

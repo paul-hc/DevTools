@@ -10,6 +10,7 @@
 #include "WndUtils.h"
 #include "resource.h"
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
+#include <afxtoolbar.h>				// for CMFCToolBar::AddToolBarForImageCollection()
 
 #ifdef USE_UT
 #include "utl/test/Test.h"
@@ -24,9 +25,10 @@ template< typename BaseClass >
 CBaseApp<BaseClass>::CBaseApp( void )
 	: BaseClass()
 	, CAppTools()
-	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
+	, m_pVisualManagerClass( RUNTIME_CLASS( CMFCVisualManagerWindows ) )
 	, m_isInteractive( true )
 	, m_lazyInitAppResources( false )
+	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
 {
 #if _MSC_VER >= 1800	// Visual C++ 2013
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;	// support Restart Manager
@@ -101,8 +103,14 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_STRIP );
 
+	if ( afxContextMenuManager != nullptr )
+	{	// feed afxCommandManager[:CCommandManager] with images from the strip
+		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );
+		//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_STRIP );
+	}
+
 	// activate "Windows Native" visual manager for enabling themes in MFC controls
-	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );
+	CMFCVisualManager::SetDefaultManager( m_pVisualManagerClass );
 
 #ifdef USE_UT
 	ut::RegisterUtlConsoleTests();
