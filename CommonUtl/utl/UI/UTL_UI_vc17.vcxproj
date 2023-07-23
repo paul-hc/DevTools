@@ -537,10 +537,12 @@
   <ItemGroup>
     <Image Include="res\ArrowsDownUpStrip.bmp" />
     <Image Include="res\ArrowsRightLeftStrip.bmp" />
-    <Image Include="res\ListStrip.bmp" />
-    <Image Include="res\ListStrip.png" />
-    <Image Include="res\StdStrip.bmp" />
-    <Image Include="res\StdStrip.png" />
+    <Image Include="res\StripListEditor.bmp" />
+    <Image Include="res\StripListEditor.png" />
+    <Image Include="res\StripStdButtons.bmp" />
+    <Image Include="res\StripStdButtons.png" />
+    <Image Include="res\StripStdStatus.bmp" />
+    <Image Include="res\StripStdStatus.png" />
     <Image Include="res\Transparent.ico" />
     <Image Include="res\Unknown.ico" />
   </ItemGroup>

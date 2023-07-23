@@ -30,7 +30,6 @@ namespace ui
 
 
 class CColorTable;
-namespace mfc { class CColorPopupMenu; }
 
 
 class CColorPickerButton : public CMFCColorButton
@@ -62,8 +61,7 @@ private:
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
 
-	void NotifyColorSetChanged( void );
-	void ShowColorPopupImpl( mfc::CColorPopupMenu* pTrackingColorPopup );
+	void NotifyColorTableChanged( void );
 private:
 	const CColorTable* m_pColorTable;
 	size_t m_halftoneSize;
@@ -140,11 +138,14 @@ public:
 	CColorStorePicker( CWnd* pTargetWnd = nullptr );
 	virtual ~CColorStorePicker();
 
-	const CColorStore* GetMainStore( void ) const { return m_pMainStore; }
-	void SetMainStore( const CColorStore* pMainStore );
-
 	COLORREF GetColor( void ) const { return m_color; }
 	void SetColor( COLORREF color );		// CLR_NONE: automatic
+
+	const CColorTable* GetSelectedColorTable( void ) const { return m_pSelColorTable; }
+	void SetSelectedColorTable( const CColorTable* pSelColorTable );
+
+	const CColorStore* GetMainStore( void ) const { return m_pMainStore; }
+	void SetMainStore( const CColorStore* pMainStore );
 protected:
 	/*virtual*/ void UpdateColor( COLORREF newColor );
 	void UpdateShadesTable( void );
@@ -156,8 +157,7 @@ private:
 	CColorTable* LookupPopupColorTable( UINT colorBtnId ) const;
 
 	mfc::CColorMenuButton* MakeColorMenuButton( UINT colorBtnId, const CColorTable* pColorTable ) const;
-	static CMFCPopupMenu* GetTrackingPopupMenu( void );
-	static const mfc::CColorMenuButton* LookupPopupColorButton( UINT colorBtnId );
+	static mfc::CColorMenuButton* FindPopupColorButton( UINT colorBtnId );
 
 	// ui::ICustomPopupMenu interface
 	virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) override;
@@ -178,8 +178,7 @@ public:
 	virtual void PreSubclassWindow( void );
 protected:
 	afx_msg void On_ColorSelected( UINT selColorBtnId );
-	afx_msg void On_UseColorTable( UINT selColorBtnId );
-	afx_msg void OnUpdate_UseColorTable( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_ColorTable( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -249,7 +249,7 @@ void CColorPickerButton::SaveToRegistry( void ) const
 	}
 }
 
-void CColorPickerButton::NotifyColorSetChanged( void )
+void CColorPickerButton::NotifyColorTableChanged( void )
 {
 	for ( std::vector<CColorPickerButton*>::const_iterator itPicker = s_instances.begin(); itPicker != s_instances.end(); ++itPicker )
 		if ( *itPicker != this )
@@ -275,56 +275,6 @@ void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToo
 	rText = ui::FormatColor( color );
 }
 
-void CColorPickerButton::ShowColorPopupImpl( mfc::CColorPopupMenu* pTrackingColorPopup )
-{
-	// verbatim from CMFCColorButton::OnShowColorPopup(), but caller allocates pTrackingColorPopup
-	//
-	if ( m_pPopup != nullptr )
-	{
-		m_pPopup->SendMessage( WM_CLOSE );
-		m_pPopup = nullptr;
-		return;
-	}
-
-	if ( m_Colors.IsEmpty() )
-		nosy::CColorBar_::InitColors( nullptr, m_Colors );
-
-	m_pPopup = pTrackingColorPopup;
-	pTrackingColorPopup->SetEnabledInCustomizeMode( m_bEnabledInCustomizeMode );
-
-	CRect wndRect;
-	GetWindowRect( &wndRect );
-
-	if ( !m_pPopup->Create( this, wndRect.left, wndRect.bottom, nullptr, m_bEnabledInCustomizeMode ) )
-	{
-		ASSERT( false );
-		delete m_pPopup;
-		m_pPopup = nullptr;
-		TRACE(_T("Color menu can't be used in the customization mode. You need to set CMFCColorButton::m_bEnabledInCustomizeMode\n"));
-	}
-	else
-	{
-		if ( m_bEnabledInCustomizeMode )
-			if ( CMFCColorBar* pColorBar = pTrackingColorPopup->GetColorMenuBar() )
-			{
-				ASSERT_VALID( pColorBar );
-				( (nosy::CColorBar_*)pColorBar )->m_bInternal = TRUE;
-			}
-
-		m_pPopup->GetWindowRect( &wndRect );
-		m_pPopup->UpdateShadow( &wndRect );
-
-		if ( m_bAutoSetFocus )
-			m_pPopup->GetMenuBar()->SetFocus();
-	}
-
-	if ( m_bCaptured )
-	{
-		ReleaseCapture();
-		m_bCaptured = FALSE;
-	}
-}
-
 
 // base overrides:
 
@@ -343,16 +293,8 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 	// Note:
 	//	- this class can't be customized with new buttons or sub-menus, since it's using CMFCToolBarColorButton defined privately in afxcolorbar.cpp
 	//	- layout and drawing methods ignore buttons that are not CMFCToolBarColorButton
-	//
-	if ( true )
-	{
-		mfc::CColorPopupMenu* pTrackingColorPopup = new mfc::CColorPopupMenu( this, m_Colors, m_Color, m_strAutoColorText, m_strOtherText, m_strDocColorsText,
-																			  m_lstDocColors, m_nColumns, m_ColorAutomatic );
 
-		ShowColorPopupImpl( pTrackingColorPopup );
-	}
-	else
-		__super::OnShowColorPopup();
+	__super::OnShowColorPopup();
 }
 
 void CColorPickerButton::PreSubclassWindow( void )
@@ -486,7 +428,7 @@ void CColorPickerButton::On_HalftoneTable( UINT cmdId )
 			break;
 	}
 
-	NotifyColorSetChanged();
+	NotifyColorTableChanged();
 	OnShowColorPopup();
 }
 
@@ -515,7 +457,7 @@ void CColorPickerButton::On_UseColorTable( UINT cmdId )
 	ui::StdColorTable cmdTableType = static_cast<ui::StdColorTable>( cmdId - ID_REPO_COLOR_TABLE_MIN );
 
 	SetColorTable( cmdTableType );
-	NotifyColorSetChanged();
+	NotifyColorTableChanged();
 	OnShowColorPopup();
 }
 
@@ -603,9 +545,15 @@ void CColorStorePicker::SetColor( COLORREF color )
 	// TODO: update all the sub color bars
 }
 
+void CColorStorePicker::SetSelectedColorTable( const CColorTable* pSelColorTable )
+{
+	m_pSelColorTable = pSelColorTable;
+}
+
 void CColorStorePicker::UpdateColor( COLORREF newColor )
 {
 	SetColor( newColor );
+	/*TEMP*/ ui::SendCommandToParent( m_hWnd, BN_CLICKED );
 }
 
 void CColorStorePicker::UpdateShadesTable( void )
@@ -690,25 +638,17 @@ CColorTable* CColorStorePicker::LookupPopupColorTable( UINT colorBtnId ) const
 	return pColorTable;
 }
 
-const mfc::CColorMenuButton* CColorStorePicker::LookupPopupColorButton( UINT colorBtnId )
-{
-	const mfc::CColorMenuButton* pSelTableButton = checked_static_cast<const mfc::CColorMenuButton*>( mfc::FindBarButton( GetTrackingPopupMenu(), colorBtnId ) );
-	ASSERT_PTR( pSelTableButton );
-	return pSelTableButton;
-}
 
-
-CMFCPopupMenu* CColorStorePicker::GetTrackingPopupMenu( void )
+mfc::CColorMenuButton* CColorStorePicker::FindPopupColorButton( UINT colorBtnId )
 {
-	return mfc::CContextMenuMgr::Instance()->GetTrackingPopupMenu();
+	return checked_static_cast<mfc::CColorMenuButton*>( mfc::CTrackingPopupMenu::FindTrackingBarButton( colorBtnId ) );
 }
 
 mfc::CColorMenuButton* CColorStorePicker::MakeColorMenuButton( UINT colorBtnId, const CColorTable* pColorTable ) const
 {
 	mfc::CColorMenuButton* pColorButton = new mfc::CColorMenuButton( colorBtnId, pColorTable );
-	int imageIndex = -1;
 
-	if ( pColorTable == m_pSelColorTable )		// button of selected table?
+	if ( pColorTable == m_pSelColorTable )		// button for selected table?
 	{	// richer configuration on the selected color table:
 		pColorButton->EnableAutomaticButton( _T("Automatic"), /*this->GetAutomaticColor()*/ color::PaleBlue );
 		pColorButton->EnableOtherButton( _T("More Colors...") );
@@ -718,10 +658,9 @@ mfc::CColorMenuButton* CColorStorePicker::MakeColorMenuButton( UINT colorBtnId, 
 		if ( !pShadesTable->IsEmpty() )
 			pColorButton->SetDocColorTable( pShadesTable );
 
-		imageIndex = afxCommandManager->GetCmdImage( ID_APP_ABOUT, FALSE );
+		pColorButton->SetColor( ui::EvalColor( m_color ), false );
+		pColorButton->SetSelected();
 	}
-
-	pColorButton->SetImage( imageIndex );
 
 	return pColorButton;
 }
@@ -776,8 +715,7 @@ void CColorStorePicker::PreSubclassWindow( void )
 
 BEGIN_MESSAGE_MAP( CColorStorePicker, CMenuPickerButton )
 	ON_CONTROL_RANGE( mfc::CColorMenuButton::CMBN_COLORSELECTED, ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, On_ColorSelected )
-	ON_COMMAND_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, On_UseColorTable )
-	ON_UPDATE_COMMAND_UI_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, OnUpdate_UseColorTable )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, OnUpdate_ColorTable )
 END_MESSAGE_MAP()
 
 void CColorStorePicker::On_ColorSelected( UINT selColorBtnId )
@@ -785,33 +723,23 @@ void CColorStorePicker::On_ColorSelected( UINT selColorBtnId )
 	// Called when a color bar button (CMFCToolBarColorButton) is clicked in one of the mfc::CColorMenuButton sub-menus.
 	//	selColorBtnId: the ID of the mfc::CColorMenuButton that pops-up the tracking color bar
 
-	const mfc::CColorMenuButton* pSelTableButton = LookupPopupColorButton( selColorBtnId );
-
-	m_pSelColorTable = LookupPopupColorTable( selColorBtnId );
-
-CColorTable* pBtnColorTable = (CColorTable*)mfc::GetButtonItemData( GetTrackingPopupMenu(), selColorBtnId );
-	ENSURE( pBtnColorTable == pSelTableButton->GetColorTable() );		// the color button should've inherited the same item data
-
-	UpdateColor( pSelTableButton->GetColor() );
+	if ( const mfc::CColorMenuButton* pSelTableButton = FindPopupColorButton( selColorBtnId ) )
+	{
+		SetSelectedColorTable( pSelTableButton->GetColorTable() );
+		// TODO: if table is WindowsSys_Colors, decode the clicked color by hit-testing the clicked CMFCColorBar
+		UpdateColor( pSelTableButton->GetColor() );
+	}
+	else
+		ASSERT( false );
 }
 
-void CColorStorePicker::On_UseColorTable( UINT selColorBtnId )
+void CColorStorePicker::OnUpdate_ColorTable( CCmdUI* pCmdUI )
 {
-	// Called when a color bar button (CMFCToolBarColorButton) is clicked in one of the mfc::CColorMenuButton sub-menus.
-	//	selColorBtnId: the ID of the mfc::CColorMenuButton sub-menu
+	// For menu tracking, this is called on 3 cases:
+	//	1) for the m_popupMenu item: pCmdUI->m_pOther = nullptr
+	//	2) for the store item: pCmdUI->m_pOther = CMFCPopupMenuBar*;
+	//	3) for the embedded color bar when it pops-up: pCmdUI->m_pOther = CMFCColorBar*.
 
-	CColorTable* pSelColorTable = LookupPopupColorTable( selColorBtnId );
-int g=0;
-}
-
-void CColorStorePicker::OnUpdate_UseColorTable( CCmdUI* pCmdUI )
-{
-	// Note on pCmdUI->m_pOther: called on 2 cases:
-	//	1) for the store item [CMFCPopupMenuBar], or
-	//	2) for the embedded color bar when it pops-up [CMFCColorBar]
-	// So color button are going to get disabled by default without this handler for the ID range of the stores/halftone colors.
-
-	CColorTable* pColorTable = LookupPopupColorTable( pCmdUI->m_nID );
-
-	pCmdUI->SetRadio( pColorTable == m_pSelColorTable );
+	//CColorTable* pColorTable = LookupPopupColorTable( pCmdUI->m_nID );
+	pCmdUI->Enable();		// prevent disabling the color buttons by CMFCColorBar::OnUpdateCmdUI()
 }

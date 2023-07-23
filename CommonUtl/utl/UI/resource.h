@@ -6,9 +6,10 @@
 #define IDR_MESSAGE_TRAY_ICON           28001
 #define IDR_APP_SHARED_ACCEL            28002
 #define IDD_ABOUT_BOX                   28003
-#define IDR_LIST_STRIP                  28004
-#define IDR_STD_STRIP                   28005
-#define IDD_ITEM_LIST_DIALOG            28006
+#define IDR_LIST_EDITOR_STRIP           28004
+#define IDR_STD_BUTTONS_STRIP           28005
+#define IDR_STD_STATUS_STRIP            28006
+#define IDD_ITEM_LIST_DIALOG            28007
 #define IDR_SCROLLABLE_CURSOR           28008
 #define IDR_SCROLL_DRAG_CURSOR          28009
 #define IDR_STD_CONTEXT_MENU            28010
@@ -17,18 +18,18 @@
 #define IDR_DROP_MOVE_CURSOR            28013
 #define IDR_DROP_COPY_CURSOR            28014
 #define IDR_TRACK_SCROLL_CURSOR         28015
-#define IDD_ITEMS_LIST_PAGE             28015
-#define IDR_LIST_EDITOR_ACCEL           28015
-#define IDR_TRACK_ZOOM_CURSOR           28016
-#define IDD_ITEMS_EDIT_PAGE             28016
-#define IDD_PROGRESS_DIALOG             28017
-#define IDD_PASSWORD_DIALOG             28018
-#define IDB_RESIZE_DOWN_UP_BITMAP       28019
-#define IDB_RESIZE_RIGHT_LEFT_BITMAP    28020
-#define IDC_RESIZE_SPLITTER_NS_CURSOR   28023
-#define IDC_RESIZE_SPLITTER_WE_CURSOR   28024
-#define IDI_UNKNOWN                     28025
-#define IDR_EDIT_ACCEL                  28026
+#define IDD_ITEMS_LIST_PAGE             28016
+#define IDR_LIST_EDITOR_ACCEL           28017
+#define IDR_TRACK_ZOOM_CURSOR           28018
+#define IDD_ITEMS_EDIT_PAGE             28019
+#define IDD_PROGRESS_DIALOG             28020
+#define IDD_PASSWORD_DIALOG             28021
+#define IDB_RESIZE_DOWN_UP_BITMAP       28022
+#define IDB_RESIZE_RIGHT_LEFT_BITMAP    28023
+#define IDC_RESIZE_SPLITTER_NS_CURSOR   28024
+#define IDC_RESIZE_SPLITTER_WE_CURSOR   28025
+#define IDI_UNKNOWN                     28026
+#define IDR_EDIT_ACCEL                  28027
 #define UTL_MIN_COMMAND_VALUE           28200
 #define ID_ADD_ITEM                     28201
 #define ID_REMOVE_ITEM                  28202
@@ -85,7 +86,8 @@
 #define ID_USER_CUSTOM_COLOR_SET        28254
 #define ID_SHADES_COLOR_SET             28255
 #define ID_REPO_COLOR_TABLE_MIN         28256
-#define ID_REPO_COLOR_TABLE_MAX         ID_REPO_COLOR_TABLE_MIN + 20		// preserve this range of IDs
+#define ID_REPO_COLOR_TABLE_MAX         28276     // ID_REPO_COLOR_TABLE_MIN + 20 - preserve this range of IDs
+#define ID_SELECTED_COLOR_BUTTON        28277
 #define UTL_MIN_CONTROL_VALUE           28500
 #define IDC_GROUP_BOX_1                 28501
 #define IDC_GROUP_BOX_2                 28502
@@ -129,8 +131,8 @@
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        28027
-#define _APS_NEXT_COMMAND_VALUE         28277
+#define _APS_NEXT_RESOURCE_VALUE        28028
+#define _APS_NEXT_COMMAND_VALUE         28278
 #define _APS_NEXT_CONTROL_VALUE         28536
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif

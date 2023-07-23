@@ -110,7 +110,7 @@ END
 // Toolbar
 //
 
-IDR_LIST_STRIP TOOLBAR 16, 16
+IDR_LIST_EDITOR_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_ADD_ITEM
     BUTTON      ID_REMOVE_ITEM
@@ -137,7 +137,7 @@ BEGIN
     BUTTON      ID_LIST_VIEW_TILE
 END
 
-IDR_STD_STRIP TOOLBAR 16, 16
+IDR_STD_BUTTONS_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_EDIT_COPY
     BUTTON      ID_EDIT_PASTE
@@ -176,19 +176,27 @@ BEGIN
     BUTTON      IDD_PASSWORD_DIALOG
 END
 
+IDR_STD_STATUS_STRIP TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_TRANSPARENT
+    BUTTON      ID_SELECTED_COLOR_BUTTON
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
-IDR_LIST_STRIP          BITMAP                  "res\\ListStrip.bmp"
+IDR_LIST_EDITOR_STRIP   BITMAP                  "res\\StripListEditor.bmp"
 
-IDR_STD_STRIP           BITMAP                  "res\\StdStrip.bmp"
+IDR_STD_BUTTONS_STRIP   BITMAP                  "res\\StripStdButtons.bmp"
 
 IDB_RESIZE_DOWN_UP_BITMAP BITMAP                  "res\\ArrowsDownUpStrip.bmp"
 
 IDB_RESIZE_RIGHT_LEFT_BITMAP BITMAP                  "res\\ArrowsRightLeftStrip.bmp"
+
+IDR_STD_STATUS_STRIP    BITMAP                  "res\\StripStdStatus.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -196,9 +204,11 @@ IDB_RESIZE_RIGHT_LEFT_BITMAP BITMAP                  "res\\ArrowsRightLeftStrip.
 // PNG
 //
 
-IDR_LIST_STRIP          PNG                     "res\\ListStrip.png"
+IDR_LIST_EDITOR_STRIP   PNG                     "res\\StripListEditor.png"
 
-IDR_STD_STRIP           PNG                     "res\\StdStrip.png"
+IDR_STD_BUTTONS_STRIP   PNG                     "res\\StripStdButtons.png"
+
+IDR_STD_STATUS_STRIP    PNG                     "res\\StripStdStatus.png"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -489,7 +499,7 @@ BEGIN
             MENUITEM "<halftone 20 colors>",        ID_HALFTONE_TABLE_20
             MENUITEM "<halftone 256 colors>",       ID_HALFTONE_TABLE_256
             MENUITEM SEPARATOR
-            MENUITEM "<repo table base ID>",        ID_REPO_COLOR_TABLE_MIN
+            MENUITEM "<repo table base 0..N>",      ID_REPO_COLOR_TABLE_MIN
             MENUITEM SEPARATOR
             MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
             MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
@@ -501,7 +511,7 @@ BEGIN
         MENUITEM "<halftone 20 colors>",        ID_HALFTONE_TABLE_20
         MENUITEM "<halftone 256 colors>",       ID_HALFTONE_TABLE_256
         MENUITEM SEPARATOR
-        MENUITEM "<repo table base ID>",        ID_REPO_COLOR_TABLE_MIN
+        MENUITEM "<repo table base 0..N>",      ID_REPO_COLOR_TABLE_MIN
         MENUITEM SEPARATOR
         MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
         MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
@@ -715,6 +725,11 @@ END
 STRINGTABLE
 BEGIN
     IDD_PASSWORD_DIALOG     "Password"
+END
+
+STRINGTABLE
+BEGIN
+    ID_SELECTED_COLOR_BUTTON "Selected color glyph"
 END
 
 #endif    // English (United States) resources

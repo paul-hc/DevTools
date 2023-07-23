@@ -100,13 +100,14 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	//GetLogger().LogLine( _T(""), false );					// new-line as session separator
 
 	// register stock images
-	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_STRIP );
-	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_STRIP );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_BUTTONS_STRIP );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_EDITOR_STRIP );
 
 	if ( afxContextMenuManager != nullptr )
-	{	// feed afxCommandManager[:CCommandManager] with images from the strip
-		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );
-		//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_STRIP );
+	{	// feed afxCommandManager [class CCommandManager] with images from the strip
+		//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );
+		//CMFCToolBar::AddToolBarForImageCollection( IDR_STD_BUTTONS_STRIP );
+		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STATUS_STRIP );
 	}
 
 	// activate "Windows Native" visual manager for enabling themes in MFC controls

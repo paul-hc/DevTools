@@ -1118,22 +1118,28 @@
     <Image Include="res\ArrowsRightLeftStrip.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ListStrip.bmp">
+    <Image Include="res\StripListEditor.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ListStrip.png">
+    <Image Include="res\StripListEditor.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\StdStrip.bmp">
+    <Image Include="res\StripStdButtons.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\StdStrip.png">
+    <Image Include="res\StripStdButtons.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Transparent.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Unknown.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\StripStdStatus.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\StripStdStatus.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

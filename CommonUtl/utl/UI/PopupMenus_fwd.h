@@ -7,6 +7,9 @@ class CMFCPopupMenu;
 class CMFCToolBar;
 class CMFCToolBarButton;
 
+class CMFCColorPopupMenu;
+class CMFCColorBar;
+
 
 namespace ui
 {
@@ -19,12 +22,14 @@ namespace ui
 
 namespace mfc
 {
+	void* GetItemData( const CMFCToolBarButton* pButton );
+	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
+
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
 	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );
 	CMFCToolBarButton* FindBarButton( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 
-	void* GetItemData( const CMFCToolBarButton* pButton );
-	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
+	CMFCColorBar* GetColorMenuBar( CMFCColorPopupMenu* pColorPopupMenu );
 }
 
 

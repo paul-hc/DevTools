@@ -81,7 +81,7 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
-		//CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STRIP );		// feed afxCommandManager[:CCommandManager] with images from the strip
+		//CMFCToolBar::AddToolBarForImageCollection( IDR_STD_BUTTONS_STRIP );		// feed afxCommandManager [:CCommandManager] with images from the strip
 	}
 
 	__super::DoDataExchange( pDX );

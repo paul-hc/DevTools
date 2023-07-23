@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "PopupMenus_fwd.h"
 #include <afxpopupmenu.h>
+#include <afxcolorpopupmenu.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,6 +21,25 @@ namespace nosy
 
 namespace mfc
 {
+	void* GetItemData( const CMFCToolBarButton* pButton )
+	{
+		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetItemData();
+	}
+
+	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId )
+	{
+		CMFCToolBarButton* pFoundButton = FindBarButton( pPopupMenu, btnId );
+
+		if ( nullptr == pFoundButton )
+		{
+			ASSERT( false );
+			return 0;
+		}
+
+		return GetItemData( pFoundButton );
+	}
+
+
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu )
 	{
 		if ( pPopupMenu != nullptr && ::IsWindow( pPopupMenu->m_hWnd ) && CWnd::FromHandlePermanent( pPopupMenu->m_hWnd ) != nullptr )
@@ -41,21 +61,9 @@ namespace mfc
 		return pPopupMenu != nullptr ? FindToolBarButton( const_cast<CMFCPopupMenu*>( pPopupMenu )->GetMenuBar(), btnId ) : nullptr;
 	}
 
-	void* GetItemData( const CMFCToolBarButton* pButton )
+
+	CMFCColorBar* GetColorMenuBar( CMFCColorPopupMenu* pColorPopupMenu )
 	{
-		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetItemData();
-	}
-
-	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId )
-	{
-		CMFCToolBarButton* pFoundButton = FindBarButton( pPopupMenu, btnId );
-
-		if ( nullptr == pFoundButton )
-		{
-			ASSERT( false );
-			return 0;
-		}
-
-		return GetItemData( pFoundButton );
+		return checked_static_cast<CMFCColorBar*>( pColorPopupMenu->GetMenuBar() );
 	}
 }

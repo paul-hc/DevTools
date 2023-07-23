@@ -246,6 +246,24 @@ void CColorTable::SetupMfcColors( const ui::TMFCColorArray& customColors, int co
 	}
 }
 
+namespace func
+{
+	template< typename ValueT >
+	struct AddSequence
+	{
+		AddSequence( ValueT startValue, ValueT stepBy ) : m_startValue( startValue ), m_stepBy( stepBy ), m_pos( 0 ) {}
+
+		ValueT operator()( void )
+		{
+			return m_startValue + m_stepBy * static_cast<ValueT>( m_pos++ );
+		}
+	public:
+		ValueT m_startValue;
+		ValueT m_stepBy;
+		size_t m_pos;
+	};
+}
+
 size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 {
 	REQUIRE( ui::Shades_Colors == m_tableType );
@@ -259,17 +277,13 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 	selColor = ui::EvalColor( selColor );
 
 	static const Range<ui::TPercent> s_pctRange( 10, 100 );			// [10% to 100%]
+	const ui::TPercent pctStep = s_pctRange.GetSpan<ui::TPercent>() / ( (int)columnCount - 1 );
 	std::vector<ui::TPercent> percentages;
-	const ui::TPercent pctStep = ( s_pctRange.m_end - s_pctRange.m_start ) / ( (int)columnCount - 1 );
 
-	percentages.reserve( columnCount );
-	for ( unsigned int i = 0; i != columnCount; ++i )
-		percentages.push_back( s_pctRange.m_start + i * pctStep );
+	std::generate_n( std::back_inserter( percentages ), columnCount, func::AddSequence<ui::TPercent>( s_pctRange.m_start, pctStep ) );
 
-	static std::vector<std::tstring> s_shadeTags;
-	str::SplitOnce( s_shadeTags, _T("Lightness|Saturation"), _T("|") );
-
-	enum ShadeTag { Lightness, Saturation };
+	static const TCHAR* s_pShadeTags[] = { _T("Lighter"), _T("Darker"), _T("Desaturated") };
+	enum ShadeTag { Lighter, Darker, Desaturated };
 
 	if ( ui::HasLuminanceVariation( selColor, percentages[ 0 ], percentages[ 1 ] ) )		// Lighter Shades: have some step variation?
 		for ( size_t i = 0; i != percentages.size(); ++i )
@@ -277,7 +291,7 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 			COLORREF lighter = selColor;
 			ui::AdjustLuminance( lighter, percentages[ i ] );
 
-			CColorEntry colorEntry( lighter, str::Format( _T("%s +%d%%"), s_shadeTags[ Lightness ].c_str(), percentages[i] ) );
+			CColorEntry colorEntry( lighter, str::Format( _T("%s %d%%"), s_pShadeTags[ Lighter ], percentages[i] ) );
 			Add( colorEntry );
 		}
 
@@ -287,7 +301,7 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 			COLORREF darker = selColor;
 			ui::AdjustLuminance( darker, -percentages[ i ] );
 
-			CColorEntry colorEntry( darker, str::Format( _T("%s %d%%"), s_shadeTags[ Lightness ].c_str(), -percentages[i] ) );
+			CColorEntry colorEntry( darker, str::Format( _T("%s %d%%"), s_pShadeTags[ Darker ], percentages[i] ) );
 			Add( colorEntry );
 		}
 
@@ -297,7 +311,7 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 			COLORREF desaturated = selColor;
 			ui::AdjustSaturation( desaturated, -percentages[ i ] );
 
-			CColorEntry colorEntry( desaturated, str::Format( _T("%s %d%%"), s_shadeTags[ Saturation ].c_str(), -percentages[i] ) );
+			CColorEntry colorEntry( desaturated, str::Format( _T("%s %d%%"), s_pShadeTags[ Desaturated ], percentages[i] ) );
 			Add( colorEntry );
 		}
 

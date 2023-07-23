@@ -383,11 +383,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\ListStrip.bmp"
+				RelativePath=".\res\StripListEditor.bmp"
 				>
 			</File>
 			<File
-				RelativePath=".\res\ListStrip.png"
+				RelativePath=".\res\StripListEditor.png"
 				>
 			</File>
 			<File
@@ -411,11 +411,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\StdStrip.bmp"
+				RelativePath=".\res\StripStdButtons.bmp"
 				>
 			</File>
 			<File
-				RelativePath=".\res\StdStrip.png"
+				RelativePath=".\res\StripStdButtons.png"
+				>
+			</File>
+			<File
+				RelativePath=".\res\StripStdStatus.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\StripStdStatus.png"
 				>
 			</File>
 			<File

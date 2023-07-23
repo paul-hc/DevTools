@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "PopupMenus.h"
 #include "MenuUtilities.h"
+#include "ContextMenuMgr.h"
 #include "ColorRepository.h"
 #include "WndUtils.h"
 #include "resource.h"
@@ -21,10 +22,29 @@ namespace mfc
 	{
 	}
 
+	CTrackingPopupMenu::~CTrackingPopupMenu()
+	{
+	}
+
 	void CTrackingPopupMenu::CloseActiveMenu( void )
 	{
 		if ( CMFCPopupMenu* pMenuActive = CMFCPopupMenu::GetActiveMenu() )
 			pMenuActive->SendMessage( WM_CLOSE );
+	}
+
+	CMFCToolBarButton* CTrackingPopupMenu::FindTrackingBarButton( UINT btnId )
+	{
+		const CMFCPopupMenu* pPopupMenu = mfc::CContextMenuMgr::Instance()->GetTrackingPopupMenu();
+		CMFCToolBarButton* pButton = nullptr;
+
+		if ( pPopupMenu != nullptr )
+			pButton = mfc::FindBarButton( pPopupMenu, btnId );
+
+		if ( nullptr == pButton )
+			if ( ( pPopupMenu = CMFCPopupMenu::GetActiveMenu() ) != nullptr )
+				pButton = mfc::FindBarButton( pPopupMenu, btnId );		// the button could be on a sub-popup, i.e. the active one
+
+		return pButton;
 	}
 
 	BOOL CTrackingPopupMenu::InitMenuBar( void )
@@ -63,64 +83,6 @@ namespace mfc
 
 namespace mfc
 {
-	// CColorPopupMenu implementation
-
-	CColorPopupMenu::CColorPopupMenu( CMFCColorButton* pParentBtn, const ui::TMFCColorArray& colors, COLORREF color,
-									  const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
-									  ui::TMFCColorList& docColors, int columns, COLORREF colorAuto )
-		: CMFCColorPopupMenu( pParentBtn, colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, colorAuto )
-	{
-	}
-
-	CColorPopupMenu::~CColorPopupMenu()
-	{
-	}
-
-
-	// message handlers
-
-	BEGIN_MESSAGE_MAP(CColorPopupMenu, CMFCColorPopupMenu)
-		//ON_WM_CREATE()
-	END_MESSAGE_MAP()
-
-	/*
-	int CColorPopupMenu::OnCreate( CREATESTRUCT* pCreateStruct )
-	{
-		// verbatim from CMFCColorPopupMenu::OnCreate()
-		//
-		if ( CMFCToolBar::IsCustomizeMode() && !m_bEnabledInCustomizeMode )
-			return -1;			// don't show color popup in customization mode
-
-		if ( -1 == CMiniFrameWnd::OnCreate( pCreateStruct ) )
-			return -1;
-
-		DWORD toolbarStyle = AFX_DEFAULT_TOOLBAR_STYLE;
-
-		if ( GetAnimationType() != NO_ANIMATION && !CMFCToolBar::IsCustomizeMode() )
-			toolbarStyle &= ~WS_VISIBLE;
-
-		if ( !m_wndColorBar.Create( this, toolbarStyle | CBRS_TOOLTIPS | CBRS_FLYBY, 1 ) )
-			return -1;			// can't create popup menu bar
-
-		CWnd* pWndParent = GetParent();
-		ASSERT_VALID( pWndParent );
-
-		m_wndColorBar.SetOwner( pWndParent );
-		m_wndColorBar.SetPaneStyle( m_wndColorBar.GetPaneStyle() | CBRS_TOOLTIPS );
-
-		//if ( m_pCustomPopupMenu != nullptr )
-		//	m_pCustomPopupMenu->OnCustomizeMenuBar( this );		// UTL-UI: inject the menu bar customization code
-
-		// maybe, main application frame should update the popup menu context before it displayed (example: windows list)
-		ActivatePopupMenu( AFXGetTopLevelFrame( pWndParent ), this );
-		RecalcLayout();
-		return 0;
-	}*/
-}
-
-
-namespace mfc
-{
 	// CColorMenuButton implementation
 
 	IMPLEMENT_SERIAL( CColorMenuButton, CMFCColorMenuButton, VERSIONABLE_SCHEMA | 1 )
@@ -138,6 +100,8 @@ namespace mfc
 		, m_pDocColorTable( nullptr )
 	{
 		ASSERT_PTR( m_pColorTable );
+
+		SetImage( -1 );			// mark as unselected by default
 
 		m_Colors.RemoveAll();
 		m_pColorTable->QueryMfcColors( m_Colors );
@@ -159,12 +123,41 @@ namespace mfc
 			EnableDocumentColors( m_pDocColorTable->GetTableName().c_str() );
 	}
 
+	void CColorMenuButton::SetSelected( bool isTableSelected /*= true*/ )
+	{
+		SetImage( isTableSelected ? afxCommandManager->GetCmdImage( ID_SELECTED_COLOR_BUTTON, FALSE ) : -1 );
+	}
+
+
+	void CColorMenuButton::SetImage( int iImage )
+	{
+		//__super::SetImage( iImage );
+
+		// Need to override default processing, which alters this button image in afxCommandManager, and switches to m_bUserButton = TRUE.
+		// This is to prevent the stickiness of the selected table button, after selecting a color from another table
+		m_iImage = iImage;
+		m_bImage = m_iImage != -1;
+		m_bText = TRUE;
+		m_bUserButton = FALSE;
+		//afxCommandManager->SetCmdImage( m_nID, m_iImage, m_bUserButton );
+
+		if ( m_pWndParent != NULL )
+		{
+			CRect rectImage;
+			GetImageRect( rectImage );
+
+			m_pWndParent->InvalidateRect( &rectImage );
+			m_pWndParent->UpdateWindow();
+		}
+	}
+
 	void CColorMenuButton::SetColor( COLORREF color, BOOL notify )
 	{
 		__super::SetColor( color, notify );
 
-		if ( CWnd* pMessageWnd = m_pPopupMenu->GetMessageWnd() )
-			ui::SendCommand( pMessageWnd->GetSafeHwnd(), m_nID, CMBN_COLORSELECTED, m_pPopupMenu->GetMenuBar()->GetSafeHwnd() );
+		if ( m_pPopupMenu != nullptr )			// not a proxy source button?
+			if ( CWnd* pMessageWnd = m_pPopupMenu->GetMessageWnd() )
+				ui::SendCommand( pMessageWnd->GetSafeHwnd(), m_nID, CMBN_COLORSELECTED, m_pPopupMenu->GetMenuBar()->GetSafeHwnd() );
 	}
 
 	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& colorRes )
@@ -217,10 +210,5 @@ namespace mfc
 									   m_bIsOtherButton ? m_strOtherButtonLabel.GetString() : nullptr,
 									   m_bIsDocumentColors ? m_strDocumentColorsLabel.GetString() : nullptr,
 									   docColors, m_nColumns, m_nHorzDockRows, m_nVertDockColumns, m_colorAutomatic, m_nID, m_bStdColorDlg );
-	}
-
-	void CColorMenuButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz, BOOL bCustomizeMode, BOOL bHighlight, BOOL bDrawBorder, BOOL bGrayDisabledButtons )
-	{
-		__super::OnDraw( pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder, bGrayDisabledButtons );
 	}
 }
