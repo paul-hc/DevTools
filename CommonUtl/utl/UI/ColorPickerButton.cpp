@@ -53,17 +53,6 @@ namespace ui
 }
 
 
-namespace nosy
-{
-	struct CColorBar_ : public CMFCColorBar
-	{
-		// public access
-		using CMFCColorBar::InitColors;
-		using CMFCColorBar::m_bInternal;
-	};
-}
-
-
 namespace reg
 {
 	static const TCHAR section_picker[] = _T("Settings\\ColorPicker");			// default section
@@ -150,7 +139,7 @@ bool CColorPickerButton::SetColorTable( const CColorTable* pColorTable )
 
 	m_Colors.RemoveAll();
 	pColorTable->QueryMfcColors( m_Colors );
-	pColorTable->RegisterColorButtonNames();
+	pColorTable->RegisterNamesToColorButtons();
 
 	SetColumnsNumber( pColorTable->GetColumnCount() );
 	return true;
@@ -168,7 +157,7 @@ void CColorPickerButton::SetDocumentColors( const CColorTable* pColorTable, cons
 	if ( pColorTable != nullptr )
 	{
 		pColorTable->QueryMfcColors( docColors );
-		pColorTable->RegisterColorButtonNames();
+		pColorTable->RegisterNamesToColorButtons();
 
 		if ( str::IsEmpty( pDocLabel ) )
 			pDocLabel = pColorTable->GetTableName().c_str();
@@ -723,11 +712,10 @@ void CColorStorePicker::On_ColorSelected( UINT selColorBtnId )
 	// Called when a color bar button (CMFCToolBarColorButton) is clicked in one of the mfc::CColorMenuButton sub-menus.
 	//	selColorBtnId: the ID of the mfc::CColorMenuButton that pops-up the tracking color bar
 
-	if ( const mfc::CColorMenuButton* pSelTableButton = FindPopupColorButton( selColorBtnId ) )
+	if ( mfc::CColorMenuButton* pSelTableButton = FindPopupColorButton( selColorBtnId ) )
 	{
 		SetSelectedColorTable( pSelTableButton->GetColorTable() );
-		// TODO: if table is WindowsSys_Colors, decode the clicked color by hit-testing the clicked CMFCColorBar
-		UpdateColor( pSelTableButton->GetColor() );
+		UpdateColor( pSelTableButton->GetRawColor() );
 	}
 	else
 		ASSERT( false );

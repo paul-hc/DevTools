@@ -8,19 +8,15 @@
 #include <afxcolormenubutton.h>
 
 
+class CColorEntry;
 class CColorTable;
 class CColorStore;
 
 
-namespace ui
-{
-	typedef CArray<COLORREF, COLORREF> TMFCColorArray;
-	typedef CList<COLORREF, COLORREF> TMFCColorList;
-}
-
-
 namespace mfc
 {
+	// Customized tracking menu to be used by mfc::CContextMenuMgr::TrackPopupMenu().
+	//
 	class CTrackingPopupMenu : public CMFCPopupMenu
 	{
 	public:
@@ -37,14 +33,16 @@ namespace mfc
 	protected:
 		virtual BOOL InitMenuBar( void );
 	private:
-		ui::ICustomPopupMenu* m_pCustomPopupMenu;
+		ui::ICustomPopupMenu* m_pCustomPopupMenu;				// client code can customize the tracking menu content: replace buttons, etc
 	};
 }
 
 
 namespace mfc
 {
-	class CColorMenuButton : public CMFCColorMenuButton			// Office-like color picker button, used in MFC toolbars and popup menus; tracks an embedded CMFCColorBar
+	// Office-like color picker button, to be used via ReplaceButton() in MFC toolbars and popup menus; tracks an embedded CMFCColorBar.
+	//
+	class CColorMenuButton : public CMFCColorMenuButton
 	{
 		DECLARE_SERIAL( CColorMenuButton )
 
@@ -54,6 +52,7 @@ namespace mfc
 		virtual ~CColorMenuButton();
 
 		const CColorTable* GetColorTable( void ) const { return m_pColorTable; }
+		COLORREF GetRawColor( void ) const;
 
 		void SetDocColorTable( const CColorTable* pDocColorTable );
 		void SetSelected( bool isTableSelected = true );
@@ -61,6 +60,9 @@ namespace mfc
 		enum NotifCode { CMBN_COLORSELECTED = CBN_SELCHANGE };		// note: notifications are suppressed during parent's UpdateData()
 	protected:
 		CWnd* GetMessageWnd( void ) const;
+
+		const CColorEntry* FindClickedColorEntry( void ) const;
+		size_t FindClickedColorButtonPos( void ) const;
 
 		// base overrides
 	public:
@@ -72,7 +74,7 @@ namespace mfc
 		virtual CMFCPopupMenu* CreatePopupMenu( void );
 	private:
 		const CColorTable* m_pColorTable;
-		const CColorTable* m_pDocColorTable;		// typically for the "Shades Colors" table
+		const CColorTable* m_pDocColorTable;		// typically for the "Color Shades" table
 	};
 }
 

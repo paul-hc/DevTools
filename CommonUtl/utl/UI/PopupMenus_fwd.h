@@ -13,6 +13,13 @@ class CMFCColorBar;
 
 namespace ui
 {
+	typedef CArray<COLORREF, COLORREF> TMFCColorArray;
+	typedef CList<COLORREF, COLORREF> TMFCColorList;
+}
+
+
+namespace ui
+{
 	interface ICustomPopupMenu
 	{
 		virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) = 0;
@@ -22,6 +29,13 @@ namespace ui
 
 namespace mfc
 {
+	// CMFCColorBar protected access:
+	//
+	int ColorBar_InitColors( ui::TMFCColorArray& colors, CPalette* pPalette = nullptr );
+	bool ColorBar_FindColorName( COLORREF realColor, OUT OPTIONAL std::tstring* pColorName = nullptr );
+	inline bool ColorBar_ContainsColorName( COLORREF realColor ) { return ColorBar_FindColorName( realColor ); }
+	void ColorBar_RegisterColorName( COLORREF realColor, const std::tstring& colorName );
+
 	void* GetItemData( const CMFCToolBarButton* pButton );
 	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 
@@ -29,7 +43,7 @@ namespace mfc
 	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );
 	CMFCToolBarButton* FindBarButton( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 
-	CMFCColorBar* GetColorMenuBar( CMFCColorPopupMenu* pColorPopupMenu );
+	CMFCColorBar* GetColorMenuBar( const CMFCPopupMenu* pColorPopupMenu );
 }
 
 

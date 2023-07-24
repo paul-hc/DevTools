@@ -16,7 +16,12 @@ namespace ui
 	typedef CList<COLORREF, COLORREF> TMFCColorList;
 
 
+	// color table categories:
+	//
 	inline bool IsHalftoneTable( ui::StdColorTable tableType ) { return tableType >= ui::Halftone16_Colors && tableType <= ui::Halftone256_Colors; }
+	inline bool IsRepositoryTable( ui::StdColorTable tableType ) { return tableType >= ui::Standard_Colors && tableType <= ui::WindowsSys_Colors; }		// originally named colors in CColorRepository?
+	inline bool IsWindowsSysTable( ui::StdColorTable tableType ) { return ui::WindowsSys_Colors == tableType; }
+	inline bool IsScratchTable( ui::StdColorTable tableType ) { return ui::Shades_Colors == tableType || ui::UserCustom_Colors == tableType; }
 }
 
 
@@ -36,12 +41,17 @@ public:
 
 	const CColorTable* GetParentTable( void ) const { return m_pParentTable; }
 
+	COLORREF GetColor( void ) const { return m_color; }
 	COLORREF EvalColor( void ) const { return ui::EvalColor( m_color ); }
+
+	const std::tstring& GetName( void ) const { return m_name; }
+	void SetName( const std::tstring& name ) { m_name = name; }
+
 	std::tstring FormatColor( const TCHAR* pFieldSep = s_fieldSep, bool suffixTableName = true ) const;
-public:
+private:
 	COLORREF m_color;
 	std::tstring m_name;
-
+public:
 	static const TCHAR s_fieldSep[];
 private:
 	const CColorTable* m_pParentTable;
@@ -83,7 +93,7 @@ public:
 	// CMFCColorButton support
 	void QueryMfcColors( ui::TMFCColorArray& rColorArray ) const;
 	void QueryMfcColors( ui::TMFCColorList& rColorList ) const;
-	size_t RegisterColorButtonNames( void ) const;			// for shared color button tooltips stored in CMFCColorButton
+	size_t RegisterNamesToColorButtons( bool force = false ) const;			// for shared color button tooltips stored in CMFCColorButton
 	void SetupMfcColors( const ui::TMFCColorArray& customColors, int columnCount = 0 );
 
 	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades
@@ -180,7 +190,7 @@ namespace func
 		const std::tstring& operator()( const CColorEntry* pColorEntry ) const
 		{
 			ASSERT_PTR( pColorEntry );
-			return pColorEntry->m_name;
+			return pColorEntry->GetName();
 		}
 	};
 
@@ -198,7 +208,7 @@ namespace func
 		std::tstring operator()( const CColorEntry* pColorEntry, const TCHAR* pSep = _T(" ") ) const
 		{
 			ASSERT_PTR( pColorEntry );
-			return pColorEntry->m_name + pSep + _T('(') + pColorEntry->GetParentTable()->GetTableName() + _T(')');
+			return pColorEntry->GetName() + pSep + _T('(') + pColorEntry->GetParentTable()->GetTableName() + _T(')');
 		}
 	};
 }

@@ -105,7 +105,7 @@ namespace mfc
 
 		m_Colors.RemoveAll();
 		m_pColorTable->QueryMfcColors( m_Colors );
-		m_pColorTable->RegisterColorButtonNames();
+		m_pColorTable->RegisterNamesToColorButtons();
 		m_dwdItemData = reinterpret_cast<DWORD_PTR>( m_pColorTable );
 
 		SetColumnsNumber( m_pColorTable->GetColumnCount() );
@@ -113,6 +113,17 @@ namespace mfc
 
 	CColorMenuButton::~CColorMenuButton()
 	{
+	}
+
+	COLORREF CColorMenuButton::GetRawColor( void ) const
+	{
+		COLORREF rawColor = GetColor();
+
+		if ( ui::WindowsSys_Colors == m_pColorTable->GetTableType() )
+			if ( const CColorEntry* pClickedColorEntry = FindClickedColorEntry() )
+				rawColor = pClickedColorEntry->GetColor();		// lookup the proper raw sys-color
+
+		return rawColor;
 	}
 
 	void CColorMenuButton::SetDocColorTable( const CColorTable* pDocColorTable )
@@ -126,6 +137,49 @@ namespace mfc
 	void CColorMenuButton::SetSelected( bool isTableSelected /*= true*/ )
 	{
 		SetImage( isTableSelected ? afxCommandManager->GetCmdImage( ID_SELECTED_COLOR_BUTTON, FALSE ) : -1 );
+	}
+
+	const CColorEntry* CColorMenuButton::FindClickedColorEntry( void ) const
+	{
+		size_t colorTablePos = FindClickedColorButtonPos();
+		const CColorEntry* pClikedColor = nullptr;
+
+		if ( colorTablePos != utl::npos && colorTablePos < m_pColorTable->GetColors().size() )
+			pClikedColor = &m_pColorTable->GetColors()[ colorTablePos ];
+
+		return pClikedColor;
+	}
+
+	size_t CColorMenuButton::FindClickedColorButtonPos( void ) const
+	{
+		size_t colorTablePos = utl::npos;
+
+		if ( m_pPopupMenu != nullptr )
+			if ( CMFCColorBar* pColorBar = mfc::GetColorMenuBar( m_pPopupMenu ) )
+			{
+				int clickedBtnPos = pColorBar->HitTest( ui::GetCursorPos( pColorBar->GetSafeHwnd() ) );
+
+				if ( clickedBtnPos != -1 )
+				{
+					CMFCToolBarButton* pClickedButton = pColorBar->GetButton( clickedBtnPos );
+
+					// offset clickedBtnPos to exclude text (non-color) buttons:
+					for ( int i = 0, count = pColorBar->GetCount(); i != count; ++i )
+					{
+						CMFCToolBarButton* pButton = pColorBar->GetButton( i );
+
+						if ( pClickedButton == pButton )
+							break;
+
+						if ( !pButton->m_strText.IsEmpty() )
+							--clickedBtnPos;		// skip "Automatic", "Document Colors" buttons, etc
+					}
+
+					colorTablePos = clickedBtnPos;
+				}
+			}
+
+		return colorTablePos;
 	}
 
 

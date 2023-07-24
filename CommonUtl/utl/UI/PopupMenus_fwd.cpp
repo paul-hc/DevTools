@@ -16,11 +16,42 @@ namespace nosy
 		// public access
 		void* GetItemData( void ) const { return reinterpret_cast<void*>( m_dwdItemData ); }
 	};
+
+	struct CColorBar_ : public CMFCColorBar
+	{
+		// public access
+		using CMFCColorBar::InitColors;
+		using CMFCColorBar::m_ColorNames;		// CMap<COLORREF,COLORREF,CString, LPCTSTR>
+	};
 }
 
 
 namespace mfc
 {
+	int ColorBar_InitColors( ui::TMFCColorArray& colors, CPalette* pPalette /*= nullptr*/ )
+	{
+		return nosy::CColorBar_::InitColors( pPalette, colors );
+	}
+
+	bool ColorBar_FindColorName( COLORREF realColor, OUT OPTIONAL std::tstring* pColorName /*= nullptr*/ )
+	{
+		CString colorName;
+
+		if ( !nosy::CColorBar_::m_ColorNames.Lookup( realColor, colorName ) )
+			return false;
+
+		if ( pColorName != nullptr )
+			*pColorName = colorName.GetString();
+
+		return true;
+	}
+
+	void ColorBar_RegisterColorName( COLORREF realColor, const std::tstring& colorName )
+	{
+		CMFCColorBar::SetColorName( realColor, colorName.c_str() );
+	}
+
+
 	void* GetItemData( const CMFCToolBarButton* pButton )
 	{
 		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetItemData();
@@ -62,8 +93,9 @@ namespace mfc
 	}
 
 
-	CMFCColorBar* GetColorMenuBar( CMFCColorPopupMenu* pColorPopupMenu )
+	CMFCColorBar* GetColorMenuBar( const CMFCPopupMenu* pColorPopupMenu )
 	{
-		return checked_static_cast<CMFCColorBar*>( pColorPopupMenu->GetMenuBar() );
+		ASSERT( is_a<CMFCColorPopupMenu>( pColorPopupMenu ) );
+		return checked_static_cast<CMFCColorBar*>( const_cast<CMFCPopupMenu*>( pColorPopupMenu )->GetMenuBar() );
 	}
 }
