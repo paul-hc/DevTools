@@ -131,14 +131,13 @@
 #define IDC_SEL_FILE_EDIT               1102
 #define IDC_SEL_FILE_PROGRESS           1103
 #define IDC_BUDDY_MODELESS_CHECK        1104
-#define IDC_COLOR_PICKER_BUTTON         1105
+#define IDC_MFC_COLOR_PICKER_BUTTON     1105
 #define IDC_RGB_EDIT                    1106
-#define IDC_MY_COLOR_PICKER_BUTTON      1107
+#define IDC_COLOR_PICKER_BUTTON         1107
 #define IDC_COLOR_INFO_EDIT             1108
 #define IDC_REPO_COLOR_INFO_EDIT        1108
-#define IDC_MY_MENU_PICKER_BUTTON       1109
+#define IDC_MENU_PICKER_BUTTON          1109
 #define IDC_EDIT_COLOR_BUTTON           1110
-#define IDC_MY_COLOR_STORE_PICKER_BUTTON 1111
 #define IDC_PICKER_USER_COLORS_TOGGLE   1112
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
@@ -181,7 +180,7 @@
 #define ID_APP_TRAY_ANIMATE             32804
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        154

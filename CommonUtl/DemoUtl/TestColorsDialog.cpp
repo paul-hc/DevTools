@@ -5,6 +5,7 @@
 #include "utl/UI/Color.h"
 #include "utl/UI/StdColors.h"
 #include "utl/UI/ColorPickerButton.h"
+#include "utl/UI/MenuPickerButton.h"
 #include "utl/UI/ColorRepository.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/WndUtils.h"
@@ -40,7 +41,6 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	, m_color( CLR_NONE )
 	, m_editChecked( true )
 	, m_pColorPicker( new CColorPickerButton() )
-	, m_pColorStorePicker( new CColorStorePicker() )
 	, m_pMenuPicker( new CMenuPickerButton() )
 {
 	m_regSection = reg::section_dialog;
@@ -80,10 +80,9 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_mfcColorPickerButton.m_hWnd;
 
-	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, m_mfcColorPickerButton, &m_color );
-	ui::DDX_ColorButton( pDX, IDC_MY_COLOR_PICKER_BUTTON, *m_pColorPicker, &m_color );
-	ui::DDX_ColorButton( pDX, IDC_MY_COLOR_STORE_PICKER_BUTTON, *m_pColorStorePicker, &m_color );
-	DDX_Control( pDX, IDC_MY_MENU_PICKER_BUTTON, *m_pMenuPicker );
+	ui::DDX_ColorButton( pDX, IDC_MFC_COLOR_PICKER_BUTTON, m_mfcColorPickerButton, &m_color );
+	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, *m_pColorPicker, &m_color );
+	DDX_Control( pDX, IDC_MENU_PICKER_BUTTON, *m_pMenuPicker );
 
 	ui::DDX_ColorText( pDX, IDC_RGB_EDIT, &m_color );
 	ui::DDX_ColorRepoText( pDX, IDC_REPO_COLOR_INFO_EDIT, m_color );
@@ -102,10 +101,9 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CTestColorsDialog, CLayoutDialog )
+	ON_BN_CLICKED( IDC_MFC_COLOR_PICKER_BUTTON, OnMfcColorPicker )
 	ON_BN_CLICKED( IDC_COLOR_PICKER_BUTTON, OnColorPicker )
-	ON_BN_CLICKED( IDC_MY_COLOR_PICKER_BUTTON, OnMyColorPicker )
-	ON_BN_CLICKED( IDC_MY_COLOR_STORE_PICKER_BUTTON, OnMyColorStorePicker )
-	ON_BN_CLICKED( IDC_MY_MENU_PICKER_BUTTON, OnMenuPicker )
+	ON_BN_CLICKED( IDC_MENU_PICKER_BUTTON, OnMenuPicker )
 	ON_BN_CLICKED( IDC_EDIT_COLOR_BUTTON, On_EditColor )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdate_EditItem )
 	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdate_EditItem )
@@ -113,7 +111,7 @@ BEGIN_MESSAGE_MAP( CTestColorsDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_PICKER_USER_COLORS_TOGGLE, OnToggle_PickerUserColors )
 END_MESSAGE_MAP()
 
-void CTestColorsDialog::OnColorPicker( void )
+void CTestColorsDialog::OnMfcColorPicker( void )
 {
 	m_color = m_mfcColorPickerButton.GetColor();
 	if ( CLR_NONE == m_color )
@@ -122,20 +120,11 @@ void CTestColorsDialog::OnColorPicker( void )
 	UpdateData( DialogOutput );
 }
 
-void CTestColorsDialog::OnMyColorPicker( void )
+void CTestColorsDialog::OnColorPicker( void )
 {
 	m_color = m_pColorPicker->GetColor();
 	if ( CLR_NONE == m_color )
 		m_color = m_pColorPicker->GetAutomaticColor();
-
-	UpdateData( DialogOutput );
-}
-
-void CTestColorsDialog::OnMyColorStorePicker( void )
-{
-	m_color = m_pColorStorePicker->GetColor();
-	//if ( CLR_NONE == m_color )
-	//	m_color = m_pColorStorePicker->GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }

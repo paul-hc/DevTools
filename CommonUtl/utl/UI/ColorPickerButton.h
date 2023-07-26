@@ -32,8 +32,9 @@ namespace ui
 class CColorTable;
 class CColorStore;
 class CScratchColorStore;
-class CColorMenuTrackingImpl;
 namespace mfc { class CColorMenuButton; }
+
+class CColorMenuTrackingImpl;
 
 
 class CColorPickerButton : public CMFCColorButton
@@ -85,14 +86,14 @@ private:
 	void TrackMenuColorTables( void );
 private:
 	persist const CColorTable* m_pSelColorTable;
-	persist PickingMode m_pickingMode;				// by default PickColorBar (single color table), or PickMenuColorTables (shows a menu with multiple color tables)
+	persist PickingMode m_pickingMode;						// by default PickColorBar (single color table), or PickMenuColorTables (shows a menu with multiple color tables)
 
 	const CColorTable* m_pDocColorTable;
 
 	std::tstring m_regSection;
 	CAccelTable m_accel;
 
-	std::auto_ptr<CColorMenuTrackingImpl> m_pMenuImpl;
+	std::auto_ptr<CColorMenuTrackingImpl> m_pMenuImpl;		// a CCmdTarget that manages set up of the popup menu, and has the color stores
 
 	enum TrackingMode { NoTracking, TrackingColorBar, TrackingMenuColorTables, TrackingContextMenu };
 	TrackingMode m_trackingMode;
@@ -123,84 +124,6 @@ protected:
 	afx_msg void On_PickingMode( UINT pickRadioId );
 	afx_msg void OnUpdate_PickingMode( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateEnable( CCmdUI* pCmdUI );
-
-	DECLARE_MESSAGE_MAP()
-};
-
-
-#include <afxmenubutton.h>
-
-
-class CMenuPickerButton : public CMFCMenuButton
-{
-public:
-	CMenuPickerButton( CWnd* pTargetWnd = nullptr );
-	virtual ~CMenuPickerButton();
-
-	void SetTargetWnd( CWnd* pTargetWnd ) { m_pTargetWnd = pTargetWnd; }
-	CWnd* GetTargetWnd( void ) const;
-private:
-	CWnd* m_pTargetWnd;			// if null, parent dialog is the target
-
-	// base overrides:
-protected:
-	virtual void OnShowMenu( void ) override;
-
-	// generated stuff
-protected:
-	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
-
-	DECLARE_MESSAGE_MAP()
-};
-
-
-class CColorStorePicker : public CMenuPickerButton
-	, private ui::ICustomPopupMenu
-{
-public:
-	CColorStorePicker( CWnd* pTargetWnd = nullptr );
-	virtual ~CColorStorePicker();
-
-	COLORREF GetColor( void ) const { return m_color; }
-	void SetColor( COLORREF color );		// CLR_NONE: automatic
-
-	const CColorTable* GetSelColorTable( void ) const { return m_pSelColorTable; }
-	void SetSelColorTable( const CColorTable* pSelColorTable );
-
-	const CColorStore* GetMainStore( void ) const { return m_pMainStore; }
-	void SetMainStore( const CColorStore* pMainStore );
-protected:
-	/*virtual*/ void UpdateColor( COLORREF newColor );
-	void UpdateShadesTable( void );
-private:
-	void SetupMenu( void );
-	void ModifyMenuTableItems( const CColorStore* pColorStore );
-	void InsertMenuTableItems( const CColorStore* pColorStore );
-	CColorTable* LookupMenuColorTable( UINT colorBtnId ) const;
-
-	mfc::CColorMenuButton* MakeColorMenuButton( UINT colorBtnId, const CColorTable* pColorTable ) const;
-	static mfc::CColorMenuButton* FindColorMenuButton( UINT colorBtnId );
-
-	// ui::ICustomPopupMenu interface
-	virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) override;
-private:
-	COLORREF m_color;
-	const CColorStore* m_pMainStore;		// by default CColorRepository::Instance(); enumerates the main ID_REPO_COLOR_TABLE_MIN/MAX color tables
-	const CColorTable* m_pSelColorTable;	// selected color table
-	std::auto_ptr<CScratchColorStore> m_pScratchStore;
-
-	CMenu m_contextMenu;					// template for the tracking CMFCPopupMenu (created on the fly)
-
-	// base overrides:
-protected:
-	virtual void OnShowMenu( void ) override;
-
-	// generated stuff
-public:
-	virtual void PreSubclassWindow( void );
-protected:
-	afx_msg void On_ColorSelected( UINT selColorBtnId );
-	afx_msg void OnUpdate_ColorTable( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

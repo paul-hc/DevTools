@@ -7,7 +7,6 @@
 
 
 class CColorPickerButton;
-class CColorStorePicker;
 class CMenuPickerButton;
 
 
@@ -27,7 +26,6 @@ private:
 	CMFCColorButton m_mfcColorPickerButton;		// drop-down button
 
 	std::auto_ptr<CColorPickerButton> m_pColorPicker;
-	std::auto_ptr<CColorStorePicker> m_pColorStorePicker;
 
 	std::auto_ptr<CMenuPickerButton> m_pMenuPicker;
 
@@ -36,9 +34,8 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual void OnCancel( void ) { OnOK(); }
 protected:
+	afx_msg void OnMfcColorPicker( void );
 	afx_msg void OnColorPicker( void );
-	afx_msg void OnMyColorPicker( void );
-	afx_msg void OnMyColorStorePicker( void );
 	afx_msg void OnMenuPicker( void );
 	afx_msg void On_EditColor( void );
 	afx_msg void OnUpdate_EditItem( CCmdUI* pCmdUI );

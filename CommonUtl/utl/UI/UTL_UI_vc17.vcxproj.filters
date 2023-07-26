@@ -644,6 +644,9 @@
     <ClInclude Include="PopupMenus_fwd.h">
       <Filter>UI\MFC+</Filter>
     </ClInclude>
+    <ClInclude Include="MenuPickerButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1104,6 +1107,9 @@
     </ClCompile>
     <ClCompile Include="PopupMenus_fwd.cpp">
       <Filter>UI\MFC+</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuPickerButton.cpp">
+      <Filter>UI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -527,22 +527,6 @@ BEGIN
             MENUITEM "Pick &Multiple Color Tables", ID_PICK_COLOR_MENU_RADIO
         END
     END
-    POPUP "<color-store-picker>"
-    BEGIN
-        MENUITEM "<halftone 16 colors>",        ID_HALFTONE_TABLE_16
-        MENUITEM "<halftone 20 colors>",        ID_HALFTONE_TABLE_20
-        MENUITEM "<halftone 256 colors>",       ID_HALFTONE_TABLE_256
-        MENUITEM SEPARATOR
-        MENUITEM "<repo table base 0..N>",      ID_REPO_COLOR_TABLE_MIN
-        MENUITEM SEPARATOR
-        MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
-        MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
-        MENUITEM SEPARATOR
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "&Default Color",              ID_RESET_DEFAULT
-    END
     POPUP "<color-popup-dialog>"
     BEGIN
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY

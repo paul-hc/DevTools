@@ -128,7 +128,7 @@ namespace ui
 	enum StdPopup			// IDR_STD_CONTEXT_MENU popups
 	{
 		AppMainPopup, AppSysTray, AppDebugPopup, TextEditorPopup, HistoryComboPopup,
-		ListView, DateTimePopup, ColorPickerPopup, ColorStorePickerPopup, ColorPopupDialog,
+		ListView, DateTimePopup, ColorPickerPopup, ColorPopupDialog,
 		TestPopup
 	};
 
