@@ -266,3 +266,47 @@ namespace mfc
 									   docColors, m_nColumns, m_nHorzDockRows, m_nVertDockColumns, m_colorAutomatic, m_nID, m_bStdColorDlg );
 	}
 }
+
+
+namespace mfc
+{
+	// CColorPopupMenu implementation
+
+	CColorPopupMenu::CColorPopupMenu( CColorMenuButton* pParentMenuBtn,
+									  const ui::TMFCColorArray& colors, COLORREF color,
+									  const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
+									  ui::TMFCColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
+									  COLORREF colorAuto, UINT uiCmdID, bool stdColorDlg /*= false*/ )
+		: CMFCColorPopupMenu( colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, horzDockRows, vertDockColumns, colorAuto, uiCmdID, stdColorDlg )
+		, m_pParentMenuBtn( pParentMenuBtn )
+	{	// general constructor, for e.g. CColorMenuButton
+	}
+
+	CColorPopupMenu::CColorPopupMenu( CMFCColorButton* pParentBtn,
+									  const ui::TMFCColorArray& colors, COLORREF color,
+									  const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
+									  ui::TMFCColorList& docColors, int columns, COLORREF colorAuto )
+		: CMFCColorPopupMenu( pParentBtn, colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, colorAuto )
+		, m_pParentMenuBtn( nullptr )
+	{	// color picker constructor
+	}
+
+	CColorPopupMenu::~CColorPopupMenu()
+	{
+	}
+
+
+	// message handlers
+
+	BEGIN_MESSAGE_MAP( CColorPopupMenu, CMFCColorPopupMenu )
+		ON_WM_CREATE()
+	END_MESSAGE_MAP()
+
+	int CColorPopupMenu::OnCreate( CREATESTRUCT* pCreateStruct )
+	{
+		if ( -1 == __super::OnCreate( pCreateStruct ) )
+			return -1;
+
+		return 0;
+	}
+}

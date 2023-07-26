@@ -164,11 +164,8 @@ namespace ui
 		{
 			CMenu* pPopupMenu = CMenu::FromHandle( hPopupMenu );
 
-			// avoid deep updates, since we don't use the TPM_NONOTIFY tracking flag!
-			//ui::UpdateMenuUI( pTargetWnd, pPopupMenu, true, true, Deep );		// Deep update when using TPM_NONOTIFY flag, WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus
-
 			// not using TPM_NONOTIFY for proper WM_INITMENUPOPUP menu updates
-			cmdId = pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD /*| TPM_NONOTIFY*/, screenPos.x, screenPos.y, pTargetWnd );
+			cmdId = pPopupMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, screenPos.x, screenPos.y, pTargetWnd );
 		}
 
 		if ( sendCommand && cmdId != 0 )
@@ -470,7 +467,7 @@ namespace ui
 		return copiedCount;
 	}
 
-	void DeleteMenuItem( CMenu* pDestMenu, UINT itemId )
+	void DeleteMenuItem( OUT CMenu* pDestMenu, UINT itemId )
 	{
 		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
 		ASSERT( itemId != 0 );
@@ -479,7 +476,7 @@ namespace ui
 			CleanupMenuSeparators( pDestMenu );
 	}
 
-	size_t DeleteMenuItems( CMenu* pDestMenu, const UINT* pItemIds, size_t itemCount )
+	size_t DeleteMenuItems( OUT CMenu* pDestMenu, const UINT* pItemIds, size_t itemCount )
 	{
 		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
 		ASSERT_PTR( pItemIds );
@@ -534,46 +531,35 @@ namespace ui
 
 	size_t CleanupMenuSeparators( OUT CMenu* pDestMenu )
 	{
-		size_t delCount;
+		size_t delCount = 0;
+		MENUITEMINFO itemInfo;
 
-		delCount = DeleteMenuLeadingSeparators( pDestMenu );
-		delCount += DeleteMenuTrailingSeparators( pDestMenu );
+		utl::ZeroWinStruct( &itemInfo );
+		itemInfo.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
 
 		// delete duplicate separators in reverse order
-		for ( UINT index = pDestMenu->GetMenuItemCount(), prevSep = FALSE; index-- != 0; )
-			if ( IsSeparatorItem( *pDestMenu, index ) )
-			{
-				if ( prevSep )
-				{	// delete double separator in sequence
-					pDestMenu->DeleteMenu( index, MF_BYPOSITION );
-					++delCount;
-					// previous stays still as separator
+		bool prevSep = false;
+		for ( UINT count = pDestMenu->GetMenuItemCount(), i = count; i-- != 0; )
+			if ( pDestMenu->GetMenuItemInfo( i, &itemInfo, true ) )
+				if ( HasFlag( itemInfo.fType, MFT_SEPARATOR | MFT_MENUBARBREAK | MFT_MENUBREAK ) )
+				{
+					if ( prevSep || 0 == i || ( count - 1 ) == i )		// duplicate, leading, or trailing separator
+					{
+						pDestMenu->DeleteMenu( i, MF_BYPOSITION );
+						++delCount;
+					}
+					prevSep = true;
 				}
 				else
-					prevSep = TRUE;
-			}
-			else
-				prevSep = FALSE;
+				{
+					prevSep = false;
 
-		return delCount;
-	}
+					if ( itemInfo.hSubMenu != nullptr )
+						delCount += CleanupMenuSeparators( pDestMenu->GetSubMenu( i ) );
+				}
 
-	size_t DeleteMenuLeadingSeparators( OUT CMenu* pDestMenu )
-	{
-		size_t delCount = 0;
-
-		for ( UINT count = pDestMenu->GetMenuItemCount(); count != 0 && IsSeparatorItem( *pDestMenu, 0 ); ++delCount )
+		if ( prevSep )			// a leftover leading separator?  it can happen in case of a leading multiple separator sequence
 			pDestMenu->DeleteMenu( 0, MF_BYPOSITION );
-
-		return delCount;
-	}
-
-	size_t DeleteMenuTrailingSeparators( OUT CMenu* pDestMenu )
-	{
-		size_t delCount = 0;
-
-		for ( UINT count = pDestMenu->GetMenuItemCount(); count-- != 0 && IsSeparatorItem( *pDestMenu, count ); ++delCount )
-			pDestMenu->DeleteMenu( count, MF_BYPOSITION );
 
 		return delCount;
 	}

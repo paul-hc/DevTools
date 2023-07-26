@@ -31,9 +31,9 @@ CPopupSplitButton::~CPopupSplitButton()
 void CPopupSplitButton::LoadMenu( UINT menuId, int popupIndex )
 {
 	if ( menuId != 0 )
-		ui::LoadPopupMenu( &m_popupMenu, menuId, popupIndex );
+		ui::LoadPopupMenu( &m_contextMenu, menuId, popupIndex );
 	else
-		m_popupMenu.DestroyMenu();
+		m_contextMenu.DestroyMenu();
 }
 
 CRect CPopupSplitButton::GetRhsPartRect( const CRect* pClientRect /*= nullptr*/ ) const
@@ -81,13 +81,13 @@ void CPopupSplitButton::DrawRhsPart( CDC* pDC, const CRect& clientRect )
 
 void CPopupSplitButton::DropDown( void )
 {
-	ASSERT_PTR( m_popupMenu.GetSafeHmenu() );
+	ASSERT_PTR( m_contextMenu.GetSafeHmenu() );
 	CRect buttonRect;
 	GetWindowRect( &buttonRect );
 	buttonRect.DeflateRect( 1, 1 );		// exclude default frame
 
 	CPoint trackPos( buttonRect.left, buttonRect.bottom );
-	ui::TrackPopupMenu( m_popupMenu, m_pTargetWnd != nullptr ? m_pTargetWnd : GetParent(), trackPos, TPM_LEFTALIGN | TPM_TOPALIGN, &buttonRect );
+	ui::TrackPopupMenu( m_contextMenu, m_pTargetWnd != nullptr ? m_pTargetWnd : GetParent(), trackPos, TPM_LEFTALIGN | TPM_TOPALIGN, &buttonRect );
 }
 
 

@@ -488,12 +488,7 @@ BEGIN
     END
     POPUP "<color-picker>"
     BEGIN
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "Copy Color Table",            ID_EDIT_LIST_ITEMS
-        MENUITEM SEPARATOR
-        POPUP "&Use Color Set"
+        POPUP "<tracking-menu>"
         BEGIN
             MENUITEM "<halftone 16 colors>",        ID_HALFTONE_TABLE_16
             MENUITEM "<halftone 20 colors>",        ID_HALFTONE_TABLE_20
@@ -503,6 +498,33 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
             MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
+            MENUITEM SEPARATOR
+            MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+            MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+            MENUITEM SEPARATOR
+            MENUITEM "&Default Color",              ID_RESET_DEFAULT
+        END
+        POPUP "<context-menu>"
+        BEGIN
+            MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+            MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+            MENUITEM SEPARATOR
+            MENUITEM "Copy Color &Table",           ID_EDIT_LIST_ITEMS
+            MENUITEM SEPARATOR
+            POPUP "&Select Color Table"
+            BEGIN
+                MENUITEM "<halftone 16 colors>",        ID_HALFTONE_TABLE_16
+                MENUITEM "<halftone 20 colors>",        ID_HALFTONE_TABLE_20
+                MENUITEM "<halftone 256 colors>",       ID_HALFTONE_TABLE_256
+                MENUITEM SEPARATOR
+                MENUITEM "<repo table base 0..N>",      ID_REPO_COLOR_TABLE_MIN
+                MENUITEM SEPARATOR
+                MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
+                MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
+            END
+            MENUITEM SEPARATOR
+            MENUITEM "Pick &Single Color Table",    ID_PICK_COLOR_BAR_RADIO
+            MENUITEM "Pick &Multiple Color Tables", ID_PICK_COLOR_MENU_RADIO
         END
     END
     POPUP "<color-store-picker>"

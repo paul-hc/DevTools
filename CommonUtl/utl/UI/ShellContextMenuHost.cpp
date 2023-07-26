@@ -105,7 +105,7 @@ CShellContextMenuHost::CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pCo
 	: m_pWndOwner( pWndOwner )
 	, m_menuOwnership( InternalMenu )
 {
-	m_popupMenu.CreatePopupMenu();
+	m_contextMenu.CreatePopupMenu();
 	Reset( pContextMenu );
 }
 
@@ -114,7 +114,7 @@ CShellContextMenuHost::~CShellContextMenuHost()
 	Reset();
 
 	if ( ExternalMenu == m_menuOwnership )
-		m_popupMenu.Detach();			// avoid destroying externally owned menu
+		m_contextMenu.Detach();			// avoid destroying externally owned menu
 }
 
 void CShellContextMenuHost::Reset( IContextMenu* pContextMenu /*= nullptr*/ )
@@ -128,12 +128,12 @@ void CShellContextMenuHost::SetPopupMenu( HMENU hMenu, MenuOwnership ownership /
 
 	if ( hMenu != nullptr )
 	{
-		m_popupMenu.Attach( hMenu );
+		m_contextMenu.Attach( hMenu );
 		m_menuOwnership = ownership;
 	}
 	else
 	{
-		m_popupMenu.CreatePopupMenu();
+		m_contextMenu.CreatePopupMenu();
 		m_menuOwnership = InternalMenu;
 	}
 }
@@ -141,9 +141,9 @@ void CShellContextMenuHost::SetPopupMenu( HMENU hMenu, MenuOwnership ownership /
 void CShellContextMenuHost::DeletePopupMenu( void )
 {
 	if ( InternalMenu == m_menuOwnership )
-		m_popupMenu.DestroyMenu();
+		m_contextMenu.DestroyMenu();
 	else
-		m_popupMenu.Detach();
+		m_contextMenu.Detach();
 }
 
 bool CShellContextMenuHost::MakePopupMenu( CMenu& rPopupMenu, int atIndex /*= AtEnd*/, UINT queryFlags /*= CMF_EXPLORE*/ )
@@ -209,7 +209,7 @@ bool CShellContextMenuHost::IsLazyUninit( void ) const
 CMenu* CShellContextMenuHost::EnsurePopupShellCmds( UINT queryFlags )
 {
 	if ( HasShellCmds() )
-		return &m_popupMenu;
+		return &m_contextMenu;
 
 	// inplace query using a temporary popup menu
 	CMenu* pPopupMenu = CMenu::FromHandle( ::CreatePopupMenu() );

@@ -17,6 +17,8 @@ public:
 	CTestColorsDialog( CWnd* pParent );
 	virtual ~CTestColorsDialog();
 private:
+	void SetPickerUserColors( bool pickerUserColors );
+private:
 	COLORREF m_color;
 	bool m_editChecked;
 	CMenu m_popupMenu;
@@ -40,6 +42,7 @@ protected:
 	afx_msg void OnMenuPicker( void );
 	afx_msg void On_EditColor( void );
 	afx_msg void OnUpdate_EditItem( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_PickerUserColors( void );
 
 	DECLARE_MESSAGE_MAP()
 };

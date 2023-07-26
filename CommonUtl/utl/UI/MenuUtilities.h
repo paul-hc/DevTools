@@ -83,7 +83,7 @@ namespace ui
 	inline bool SetMenuItemPtr( HMENU hMenu, UINT item, const Type* pItemPtr, bool byPos = true ) { return SetMenuItemData( hMenu, item, pItemPtr, byPos ); }
 
 	inline bool HasSeparatorItemState( UINT itemState ) { return itemState != UINT_MAX && HasFlag( itemState, MF_SEPARATOR | MF_MENUBARBREAK | MF_MENUBREAK ); }
-	inline bool IsSeparatorItem( HMENU hMenu, UINT item, bool byPos = true ) { return HasSeparatorItemState( ::GetMenuState( hMenu, item, byPos ? MF_BYPOSITION : MF_BYCOMMAND ) ); }
+	inline bool IsSeparatorItem( HMENU hMenu, UINT item, bool byPos = true ) { return HasSeparatorItemState( GetMenuItemType( hMenu, item, byPos ) ); }
 
 
 	// shallow menu API
@@ -112,9 +112,6 @@ namespace ui
 
 	size_t CleanupMenuDuplicates( OUT CMenu* pDestMenu );
 	size_t CleanupMenuSeparators( OUT CMenu* pDestMenu );
-
-	size_t DeleteMenuLeadingSeparators( OUT CMenu* pDestMenu );
-	size_t DeleteMenuTrailingSeparators( OUT CMenu* pDestMenu );
 
 	enum MenuInsert { PrependSrc, AppendSrc };
 

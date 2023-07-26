@@ -65,7 +65,7 @@ public:
 	// context popup menu
 	enum MenuOwnership { InternalMenu, ExternalMenu };
 
-	CMenu* GetPopupMenu( void ) { ASSERT_PTR( m_popupMenu.GetSafeHmenu() ); return &m_popupMenu; }
+	CMenu* GetPopupMenu( void ) { ASSERT_PTR( m_contextMenu.GetSafeHmenu() ); return &m_contextMenu; }
 	void SetPopupMenu( HMENU hMenu, MenuOwnership ownership = InternalMenu );			// pass NULL for using internal popup menu
 	void DeletePopupMenu( void );
 
@@ -74,7 +74,7 @@ public:
 	bool HasShellCmds( void ) { return !m_shellIdStore.IsEmpty(); }		// has it called QueryContextMenu(), are there common commands?
 	bool HasShellCmd( int cmdId ) const { return m_shellIdStore.ContainsId( cmdId ); }
 
-	bool MakePopupMenu( UINT queryFlags = CMF_NORMAL ) { return MakePopupMenu( m_popupMenu, AtEnd, queryFlags ); }		// internal menu
+	bool MakePopupMenu( UINT queryFlags = CMF_NORMAL ) { return MakePopupMenu( m_contextMenu, AtEnd, queryFlags ); }		// internal menu
 	bool MakePopupMenu( CMenu& rPopupMenu, int atIndex = AtEnd, UINT queryFlags = CMF_EXPLORE );
 
 	int TrackMenu( const CPoint& screenPos, UINT atIndex = AtEnd, UINT queryFlags = CMF_EXPLORE );						// internal menu
@@ -113,7 +113,7 @@ protected:
 protected:
 	CWnd* m_pWndOwner;
 private:
-	CMenu m_popupMenu;
+	CMenu m_contextMenu;
 	MenuOwnership m_menuOwnership;
 	ui::CCmdIdStore m_shellIdStore;					// contains only commands belonging to the shell context menu
 	CComPtr<IContextMenu> m_pContextMenu;

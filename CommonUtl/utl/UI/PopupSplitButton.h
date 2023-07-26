@@ -22,14 +22,14 @@ public:
 	virtual void DropDown( void );
 
 	// base overrides
-	virtual bool HasRhsPart( void ) const { return m_popupMenu.GetSafeHmenu() != nullptr; }
+	virtual bool HasRhsPart( void ) const { return m_contextMenu.GetSafeHmenu() != nullptr; }
 	virtual CRect GetRhsPartRect( const CRect* pClientRect = nullptr ) const;
 protected:
 	virtual void DrawRhsPart( CDC* pDC, const CRect& clientRect );
 protected:
 	enum { DropWidth = 18 };
 
-	CMenu m_popupMenu;
+	CMenu m_contextMenu;
 	CWnd* m_pTargetWnd;				// receives popup menu commands
 private:
 	CThemeItem m_dropItem;

@@ -139,6 +139,7 @@
 #define IDC_MY_MENU_PICKER_BUTTON       1109
 #define IDC_EDIT_COLOR_BUTTON           1110
 #define IDC_MY_COLOR_STORE_PICKER_BUTTON 1111
+#define IDC_PICKER_USER_COLORS_TOGGLE   1112
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -185,7 +186,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        154
 #define _APS_NEXT_COMMAND_VALUE         32813
-#define _APS_NEXT_CONTROL_VALUE         1111
+#define _APS_NEXT_CONTROL_VALUE         1113
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

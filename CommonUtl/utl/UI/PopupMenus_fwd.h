@@ -10,6 +10,9 @@ class CMFCToolBarButton;
 class CMFCColorPopupMenu;
 class CMFCColorBar;
 
+class CColorEntry;
+class CColorTable;
+
 
 namespace ui
 {
@@ -23,6 +26,26 @@ namespace ui
 	interface ICustomPopupMenu
 	{
 		virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) = 0;
+	};
+
+
+	interface IColorHost
+	{
+		virtual COLORREF GetColor( void ) const = 0;
+		virtual const CColorEntry* GetRawColor( void ) const = 0;
+		virtual COLORREF GetAutoColor( void ) const = 0;
+
+		virtual const CColorTable* GetSelColorTable( void ) const = 0;
+		virtual const CColorTable* GetDocColorTable( void ) const = 0;
+		virtual bool UseUserColors( void ) const = 0;
+	};
+
+	interface IColorEditorHost : public IColorHost
+	{
+		virtual void SetColor( COLORREF rawColor, bool notify ) = 0;
+
+		virtual void SetSelColorTable( const CColorTable* pSelColorTable ) = 0;
+		virtual void SetDocColorTable( const CColorTable* pDocColorTable ) = 0;
 	};
 }
 

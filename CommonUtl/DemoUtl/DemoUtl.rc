@@ -700,9 +700,11 @@ BEGIN
     LTEXT           "&MFC Color Picker:",IDC_STATIC,15,10,57,8
     PUSHBUTTON      "&Picker",IDC_COLOR_PICKER_BUTTON,83,7,70,14
     PUSHBUTTON      "&Edit...",IDC_EDIT_COLOR_BUTTON,159,7,30,14
-    GROUPBOX        "UTL UI Color Pickers",IDC_STATIC,7,26,151,69
+    GROUPBOX        "UTL UI Color Pickers",IDC_STATIC,7,26,239,69
     LTEXT           "Color &Picker:",IDC_STATIC,15,39,41,8
     PUSHBUTTON      "CColorPickerButton",IDC_MY_COLOR_PICKER_BUTTON,83,36,70,14
+    CONTROL         "User custom colors",IDC_PICKER_USER_COLORS_TOGGLE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,39,76,10
     LTEXT           "Color Store Picker:",IDC_STATIC,15,56,60,8
     PUSHBUTTON      "CColorStorePicker",IDC_MY_COLOR_STORE_PICKER_BUTTON,83,53,70,14
     PUSHBUTTON      "&Menu Button",IDC_MY_MENU_PICKER_BUTTON,83,76,70,14

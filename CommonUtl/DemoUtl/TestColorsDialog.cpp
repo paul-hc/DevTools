@@ -19,7 +19,6 @@
 namespace reg
 {
 	static const TCHAR section_dialog[] = _T("TestColorsDialog");
-	static const TCHAR entry_color[] = _T("Color");
 }
 
 namespace layout
@@ -65,6 +64,18 @@ CTestColorsDialog::~CTestColorsDialog()
 {
 }
 
+void CTestColorsDialog::SetPickerUserColors( bool pickerUserColors )
+{
+	if ( pickerUserColors )
+	{
+		std::vector<COLORREF> userColors;
+		ui::MakeHalftoneColorTable( userColors, 24 );
+		m_pColorPicker->SetUserColors( userColors, 8 );
+	}
+	else
+		m_pColorPicker->SetSelColorTable( CHalftoneRepository::Instance()->FindTable( ui::Halftone16_Colors ) );
+}
+
 void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_mfcColorPickerButton.m_hWnd;
@@ -99,6 +110,7 @@ BEGIN_MESSAGE_MAP( CTestColorsDialog, CLayoutDialog )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdate_EditItem )
 	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdate_EditItem )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_ITEM, OnUpdate_EditItem )
+	ON_BN_CLICKED( IDC_PICKER_USER_COLORS_TOGGLE, OnToggle_PickerUserColors )
 END_MESSAGE_MAP()
 
 void CTestColorsDialog::OnColorPicker( void )
@@ -161,4 +173,9 @@ void CTestColorsDialog::OnUpdate_EditItem( CCmdUI* pCmdUI )
 			pCmdUI->SetCheck( m_editChecked );
 			break;
 	}
+}
+
+void CTestColorsDialog::OnToggle_PickerUserColors( void )
+{
+	SetPickerUserColors( BST_CHECKED == IsDlgButtonChecked( IDC_PICKER_USER_COLORS_TOGGLE ) );
 }
