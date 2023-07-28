@@ -10,7 +10,6 @@
 #include "utl/Range.h"
 #include "utl/StringUtilities.h"
 #include <unordered_set>
-#include <afxcolorbutton.h>		// for CColorTable::RegisterNamesToColorButtons()
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -201,33 +200,13 @@ void CColorTable::QueryMfcColors( ui::TMFCColorArray& rColorArray ) const
 	rColorArray.SetSize( m_colors.size() );
 
 	for ( size_t i = 0; i != m_colors.size(); ++i )
-		rColorArray[i] = ui::EncodeToColorBar( m_colors[i].GetColor() );			// use "encoded" colors for populating color bars
+		rColorArray[i] = m_colors[i].EvalColor();
 }
 
 void CColorTable::QueryMfcColors( ui::TMFCColorList& rColorList ) const
 {
 	for ( std::vector<CColorEntry>::const_iterator itColorEntry = m_colors.begin(); itColorEntry != m_colors.end(); ++itColorEntry )
-		rColorList.AddTail( ui::EncodeToColorBar( itColorEntry->GetColor() ) );		// use "encoded" colors for populating color bars
-}
-
-size_t CColorTable::RegisterNamesToColorButtons( bool force /*= false*/ ) const
-{
-	size_t count = 0;
-
-	if ( force || CColorRepository::Instance() == GetParentStore() )
-		for ( std::vector<CColorEntry>::const_iterator itColorEntry = m_colors.begin(); itColorEntry != m_colors.end(); ++itColorEntry )
-			if ( !itColorEntry->m_name.empty() )
-			{
-				COLORREF encodedRealColor = ui::EncodeToColorBar( itColorEntry->m_color );
-
-				if ( !mfc::ColorBar_ContainsColorName( encodedRealColor ) )		// avoid overriding colors already registered
-				{
-					CMFCColorButton::SetColorName( encodedRealColor, itColorEntry->FormatColor().c_str() );
-					++count;
-				}
-			}
-
-	return count;
+		rColorList.AddTail( itColorEntry->EvalColor() );
 }
 
 void CColorTable::SetupMfcColors( const ui::TMFCColorArray& customColors, int columnCount )

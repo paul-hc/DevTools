@@ -32,8 +32,6 @@ namespace ui
 	inline bool IsRealColor( COLORREF rawColor ) { return 0 == GetColorFlags( rawColor ); }		// a real RGB color: not CLR_NONE, CLR_DEFAULT, sys-color, palette-index
 	COLORREF EvalColor( COLORREF rawColor );
 
-	COLORREF EncodeToColorBar( COLORREF rawColor );
-
 
 	// system color index (Win32)
 	inline bool IsSysColor( COLORREF color ) { return !IsUndefinedColor( color ) && color_info::FlagSysColorIndex == ( color & color_info::MaskColorFlags ); }

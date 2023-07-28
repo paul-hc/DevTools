@@ -15,6 +15,17 @@ namespace ui
 	};
 
 
+	// implemented by an object that overrides the default handling of TTN_NEEDTEXT notifications
+	//
+	interface IToolTipsHandler
+	{
+		virtual bool Handle_TtnNeedText( TOOLTIPTEXT* pNmToolTipText, const CPoint& point ) = 0;		// returns true if TTN_NEEDTEXT message handled, and false to do default handling
+	};
+}
+
+
+namespace ui
+{
 	enum TandemAlign		// works in combination with enum ::Alignment values
 	{
 		H_ShrinkHost	= BIT_FLAG( 16 ),

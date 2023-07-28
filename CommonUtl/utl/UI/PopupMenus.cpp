@@ -4,8 +4,12 @@
 #include "MenuUtilities.h"
 #include "ContextMenuMgr.h"
 #include "ColorRepository.h"
+#include "CmdInfoStore.h"
+#include "TooltipsHook.h"
 #include "WndUtils.h"
 #include "resource.h"
+#include "utl/Range.h"
+#include <afxcolorbutton.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -105,7 +109,6 @@ namespace mfc
 
 		m_Colors.RemoveAll();
 		m_pColorTable->QueryMfcColors( m_Colors );
-		m_pColorTable->RegisterNamesToColorButtons();
 		m_dwdItemData = reinterpret_cast<DWORD_PTR>( m_pColorTable );
 
 		SetColumnsNumber( m_pColorTable->GetColumnCount() );
@@ -113,17 +116,6 @@ namespace mfc
 
 	CColorMenuButton::~CColorMenuButton()
 	{
-	}
-
-	COLORREF CColorMenuButton::GetRawColor( void ) const
-	{
-		COLORREF rawColor = GetColor();
-
-		if ( ui::WindowsSys_Colors == m_pColorTable->GetTableType() )
-			if ( const CColorEntry* pClickedColorEntry = FindClickedColorEntry() )
-				rawColor = pClickedColorEntry->GetColor();		// lookup the proper raw sys-color
-
-		return rawColor;
 	}
 
 	void CColorMenuButton::SetDocColorTable( const CColorTable* pDocColorTable )
@@ -139,47 +131,18 @@ namespace mfc
 		SetImage( isTableSelected ? afxCommandManager->GetCmdImage( ID_SELECTED_COLOR_BUTTON, FALSE ) : -1 );
 	}
 
-	const CColorEntry* CColorMenuButton::FindClickedColorEntry( void ) const
+	const CColorEntry* CColorMenuButton::FindClickedBarColorEntry( void ) const
 	{
-		size_t colorTablePos = FindClickedColorButtonPos();
-		const CColorEntry* pClikedColor = nullptr;
+		ASSERT_PTR( m_pPopupMenu );		// should be called while tracking!
 
-		if ( colorTablePos != utl::npos && colorTablePos < m_pColorTable->GetColors().size() )
-			pClikedColor = &m_pColorTable->GetColors()[ colorTablePos ];
+		const CColorEntry* pClikedColor = nullptr;
+		CMFCColorBar* pColorBar = mfc::GetColorMenuBar( m_pPopupMenu );
+		int clickedBtnPos = pColorBar->HitTest( ui::GetCursorPos( pColorBar->GetSafeHwnd() ) );
+
+		if ( clickedBtnPos != -1 )
+			pClikedColor = reinterpret_cast<const CColorEntry*>( mfc::GetButtonItemData( pColorBar->GetButton( clickedBtnPos ) ) );
 
 		return pClikedColor;
-	}
-
-	size_t CColorMenuButton::FindClickedColorButtonPos( void ) const
-	{
-		size_t colorTablePos = utl::npos;
-
-		if ( m_pPopupMenu != nullptr )
-			if ( CMFCColorBar* pColorBar = mfc::GetColorMenuBar( m_pPopupMenu ) )
-			{
-				int clickedBtnPos = pColorBar->HitTest( ui::GetCursorPos( pColorBar->GetSafeHwnd() ) );
-
-				if ( clickedBtnPos != -1 )
-				{
-					CMFCToolBarButton* pClickedButton = pColorBar->GetButton( clickedBtnPos );
-
-					// offset clickedBtnPos to exclude text (non-color) buttons:
-					for ( int i = 0, count = pColorBar->GetCount(); i != count; ++i )
-					{
-						CMFCToolBarButton* pButton = pColorBar->GetButton( i );
-
-						if ( pClickedButton == pButton )
-							break;
-
-						if ( !pButton->m_strText.IsEmpty() )
-							--clickedBtnPos;		// skip "Automatic", "Document Colors" buttons, etc
-					}
-
-					colorTablePos = clickedBtnPos;
-				}
-			}
-
-		return colorTablePos;
 	}
 
 
@@ -207,6 +170,11 @@ namespace mfc
 
 	void CColorMenuButton::SetColor( COLORREF color, BOOL notify )
 	{
+		if ( notify && m_pPopupMenu != nullptr )
+			if ( const CColorEntry* pClickedColorEntry = FindClickedBarColorEntry() )
+				color = pClickedColorEntry->GetColor();		// lookup the proper raw sys-color
+
+		// if notify is true, this gets called by CMFCColorBar::OnSendCommand() on user color selection
 		__super::SetColor( color, notify );
 
 		if ( m_pPopupMenu != nullptr )			// not a proxy source button?
@@ -259,11 +227,11 @@ namespace mfc
 			m_pDocColorTable->QueryMfcColors( docColors );
 		}
 
-		return new CMFCColorPopupMenu( m_Colors, m_Color,
-									   m_bIsAutomaticButton ? m_strAutomaticButtonLabel.GetString() : nullptr,
-									   m_bIsOtherButton ? m_strOtherButtonLabel.GetString() : nullptr,
-									   m_bIsDocumentColors ? m_strDocumentColorsLabel.GetString() : nullptr,
-									   docColors, m_nColumns, m_nHorzDockRows, m_nVertDockColumns, m_colorAutomatic, m_nID, m_bStdColorDlg );
+		return new CColorPopupMenu( this, m_Colors, m_Color,
+									m_bIsAutomaticButton ? m_strAutomaticButtonLabel.GetString() : nullptr,
+									m_bIsOtherButton ? m_strOtherButtonLabel.GetString() : nullptr,
+									m_bIsDocumentColors ? m_strDocumentColorsLabel.GetString() : nullptr,
+									docColors, m_nColumns, m_nHorzDockRows, m_nVertDockColumns, m_colorAutomatic, m_nID, m_bStdColorDlg );
 	}
 }
 
@@ -279,22 +247,169 @@ namespace mfc
 									  COLORREF colorAuto, UINT uiCmdID, bool stdColorDlg /*= false*/ )
 		: CMFCColorPopupMenu( colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, horzDockRows, vertDockColumns, colorAuto, uiCmdID, stdColorDlg )
 		, m_pParentMenuBtn( pParentMenuBtn )
+		, m_pColorTable( nullptr )
+		, m_pDocColorTable( nullptr )
+		, m_rawAutoColor( CLR_NONE )
+		, m_rawSelColor( CLR_NONE )
 	{	// general constructor, for e.g. CColorMenuButton
+		m_pColorBar = mfc::nosy_cast<nosy::CColorBar_>( &m_wndColorBar );
+
+		if ( m_pParentMenuBtn != nullptr )
+		{
+			m_pColorTable = m_pParentMenuBtn->GetColorTable();
+			m_pDocColorTable = m_pParentMenuBtn->GetDocColorTable();
+		}
 	}
 
-	CColorPopupMenu::CColorPopupMenu( CMFCColorButton* pParentBtn,
+	CColorPopupMenu::CColorPopupMenu( CMFCColorButton* pParentPickerBtn,
 									  const ui::TMFCColorArray& colors, COLORREF color,
 									  const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
 									  ui::TMFCColorList& docColors, int columns, COLORREF colorAuto )
-		: CMFCColorPopupMenu( pParentBtn, colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, colorAuto )
+		: CMFCColorPopupMenu( pParentPickerBtn, colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, colorAuto )
 		, m_pParentMenuBtn( nullptr )
+		, m_pColorTable( nullptr )
+		, m_pDocColorTable( nullptr )
+		, m_rawAutoColor( CLR_NONE )
+		, m_rawSelColor( CLR_NONE )
 	{	// color picker constructor
+		m_pColorBar = mfc::nosy_cast<nosy::CColorBar_>( &m_wndColorBar );
+		m_bEnabledInCustomizeMode = pParentPickerBtn->m_bEnabledInCustomizeMode;
 	}
 
 	CColorPopupMenu::~CColorPopupMenu()
 	{
 	}
 
+	void CColorPopupMenu::SetColorHost( const ui::IColorHost* pColorHost )
+	{	// called by picker button that implements ui::IColorHost interface
+		ASSERT_PTR( pColorHost );
+		m_pColorTable = pColorHost->GetSelColorTable();
+		m_pDocColorTable = pColorHost->GetDocColorTable();
+	}
+
+	void CColorPopupMenu::StoreBtnColorEntries( void )
+	{
+		Range<int> btnIndex;		// ranges are [start, end) for iteration
+		const CColorEntry* pColorEntry = nullptr;
+
+		// for each Color button: store pointers color entry into button's m_dwdItemData
+		if ( m_pColorTable != nullptr && !m_pColorBar->m_colors.IsEmpty() )
+		{
+			btnIndex.SetEmptyRange( m_pColorBar->HasAutoBtn() ? 1 : 0 );	// skip Automatic, if any
+			btnIndex.m_end += m_pColorBar->m_colors.GetSize();
+
+			for ( pColorEntry = &m_pColorTable->GetColors().front();
+				  btnIndex.m_start != btnIndex.m_end;
+				  ++btnIndex.m_start, ++pColorEntry )
+				StoreButtonColorEntry( m_pColorBar->GetButton( btnIndex.m_start ), pColorEntry );
+		}
+
+		// for each Document Color button: store pointers color entry
+		if ( m_pDocColorTable != nullptr && !m_pColorBar->m_lstDocColors.IsEmpty() )
+		{
+			btnIndex.SetEmptyRange( btnIndex.m_end + 2 );				// skip Separator + Doc Label
+			btnIndex.m_end += m_pColorBar->m_lstDocColors.GetSize();
+
+			for ( pColorEntry = &m_pDocColorTable->GetColors().front();
+				  btnIndex.m_start != btnIndex.m_end;
+				  ++btnIndex.m_start, ++pColorEntry )
+				StoreButtonColorEntry( m_pColorBar->GetButton( btnIndex.m_start ), pColorEntry );
+		}
+
+		// replace display colors with evaluated colors
+		if ( m_pColorBar->HasAutoBtn() )
+		{
+			m_rawAutoColor = m_pColorBar->GetAutoColor();
+			m_pColorBar->SetAutoColor( ui::EvalColor( m_rawAutoColor ) );	// show the display color
+		}
+
+		if ( m_pColorBar->HasMoreBtn() )
+		{
+			m_rawSelColor = m_pColorBar->GetColor();
+			m_pColorBar->SetColor( ui::EvalColor( m_rawSelColor ) );		// show the display color
+		}
+	}
+
+	void CColorPopupMenu::StoreButtonColorEntry( CMFCToolBarButton* pButton, const CColorEntry* pColorEntry )
+	{
+		ASSERT_PTR( pButton );
+		ASSERT_PTR( pColorEntry );
+
+		ASSERT( pButton->m_nStyle != TBBS_SEPARATOR );
+		ASSERT( pButton->m_bImage );
+
+		// store the color entry for:
+		//	1) so that we can handle TTN_NEEDTEXT only for these color buttons, and do default handling for the other color buttons;
+		//	2) get the raw color when a bar button is pressed.
+		mfc::SetButtonItemData( pButton, pColorEntry );
+	}
+
+	const CColorEntry* CColorPopupMenu::FindColorEntry( COLORREF rawColor ) const
+	{
+		if ( m_pColorTable != nullptr )
+			if ( const CColorEntry* pColorEntry = m_pColorTable->FindColor( rawColor ) )
+				return pColorEntry;
+
+		if ( m_pDocColorTable != nullptr )
+			if ( const CColorEntry* pColorEntry = m_pDocColorTable->FindColor( rawColor ) )
+				return pColorEntry;
+
+		return nullptr;
+	}
+
+	bool CColorPopupMenu::FormatBtnColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const
+	{
+		ASSERT_PTR( pButton );
+
+		const CColorEntry* pColorEntry = reinterpret_cast<const CColorEntry*>( mfc::GetButtonItemData( pButton ) );
+
+		if ( nullptr == pColorEntry )
+		{
+			COLORREF color = CLR_NONE;
+
+			if ( 0 == hitBtnIndex && m_pColorBar->HasAutoBtn() )
+				pColorEntry = FindColorEntry( color = m_rawAutoColor );
+			else if ( m_pColorBar->HasMoreBtn() )
+				pColorEntry = FindColorEntry( color = m_rawSelColor );
+
+			if ( nullptr == pColorEntry && color != CLR_NONE )
+			{
+				rTipText = ui::FormatColor( color );		// format the auto/other color
+				return true;
+			}
+		}
+
+		if ( pColorEntry != nullptr )
+		{
+			rTipText = pColorEntry->FormatColor();			// format the table-qualified color entry
+			return true;
+		}
+
+		return false;
+	}
+
+	bool CColorPopupMenu::Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point )
+	{
+		int hitBtnIndex = m_pColorBar->HitTest( point );
+
+		if ( hitBtnIndex != -1 )
+			if ( const CMFCToolBarButton* pButton = m_pColorBar->GetButton( hitBtnIndex ) )
+			{
+				std::tstring tipText;
+
+				if ( FormatBtnColorTipText( tipText, pButton, hitBtnIndex ) )
+				{
+					ui::CTooltipTextMessage message( pNmDispInfo );
+					ASSERT( message.IsValidNotification() );		// stray notifications should've been filtered-out
+
+					// equivalent with CTooltipManager::SetTooltipText(pTI, m_pToolTip, AFX_TOOLTIP_TYPE_TOOLBAR, strText, strDescr) - excluding strDescr on Status Bar:
+					message.AssignTooltipText( tipText );
+					return true;
+				}
+			}
+
+		return false;
+	}
 
 	// message handlers
 
@@ -307,6 +422,10 @@ namespace mfc
 		if ( -1 == __super::OnCreate( pCreateStruct ) )
 			return -1;
 
+		StoreBtnColorEntries();			// store pointers color entry into m_dwdItemData
+
+		// install hook to override handling of TTN_NEEDTEXT notifications for color buttons with an attached CColorEntry
+		m_pColorBarTipsHook.reset( CToolTipsHandlerHook::CreateHook( m_pColorBar, this, mfc::ToolBar_GetToolTip( m_pColorBar ) ) );
 		return 0;
 	}
 }

@@ -22,7 +22,7 @@ CWindowHook::~CWindowHook()
 
 void CWindowHook::HookWindow( HWND hWndToHook )
 {
-	ASSERT( hWndToHook != nullptr && ::IsWindow( hWndToHook ) );
+	ASSERT( ::IsWindow( hWndToHook ) );
 
 	if ( IsHooked() )
 	{	// unhook previous hooked window

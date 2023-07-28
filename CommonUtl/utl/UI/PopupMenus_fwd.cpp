@@ -15,19 +15,26 @@ namespace nosy
 	{
 		// public access
 		void* GetItemData( void ) const { return reinterpret_cast<void*>( m_dwdItemData ); }
+		void SetItemData( const void* pItemData ) { m_dwdItemData = reinterpret_cast<DWORD_PTR>( pItemData ); }
 	};
 
-	struct CColorBar_ : public CMFCColorBar
+
+	struct CToolBar_ : public CMFCToolBar
 	{
 		// public access
-		using CMFCColorBar::InitColors;
-		using CMFCColorBar::m_ColorNames;		// CMap<COLORREF,COLORREF,CString, LPCTSTR>
+		CToolTipCtrl* GetToolTip( void ) const { return m_pToolTip; }
 	};
 }
 
 
 namespace mfc
 {
+	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar )
+	{
+		return mfc::nosy_cast<nosy::CToolBar_>( pToolBar )->GetToolTip();
+	}
+
+
 	int ColorBar_InitColors( ui::TMFCColorArray& colors, CPalette* pPalette /*= nullptr*/ )
 	{
 		return nosy::CColorBar_::InitColors( pPalette, colors );
@@ -52,9 +59,14 @@ namespace mfc
 	}
 
 
-	void* GetItemData( const CMFCToolBarButton* pButton )
+	void* GetButtonItemData( const CMFCToolBarButton* pButton )
 	{
 		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetItemData();
+	}
+
+	void SetButtonItemData( CMFCToolBarButton* pButton, const void* pItemData )
+	{
+		mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->SetItemData( pItemData );
 	}
 
 	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId )
@@ -67,7 +79,7 @@ namespace mfc
 			return 0;
 		}
 
-		return GetItemData( pFoundButton );
+		return GetButtonItemData( pFoundButton );
 	}
 
 

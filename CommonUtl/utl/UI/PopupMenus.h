@@ -56,15 +56,12 @@ namespace mfc
 		const CColorTable* GetDocColorTable( void ) const { return m_pDocColorTable; }
 		void SetDocColorTable( const CColorTable* pDocColorTable );
 
-		COLORREF GetRawColor( void ) const;
 		void SetSelected( bool isTableSelected = true );
 
 		enum NotifCode { CMBN_COLORSELECTED = CBN_SELCHANGE };		// note: notifications are suppressed during parent's UpdateData()
 	protected:
 		CWnd* GetMessageWnd( void ) const;
-
-		const CColorEntry* FindClickedColorEntry( void ) const;
-		size_t FindClickedColorButtonPos( void ) const;
+		const CColorEntry* FindClickedBarColorEntry( void ) const;
 
 		// base overrides
 	public:
@@ -81,14 +78,23 @@ namespace mfc
 }
 
 
+#include "Control_fwd.h"
+
+
+class CWindowHook;
+namespace nosy { struct CColorBar_; }
+
+
+
 namespace mfc
 {
 	// Customized tracking popup color bar, that allows custom handling of color button tooltips
 	//
 	class CColorPopupMenu : public CMFCColorPopupMenu
+		, private ui::IToolTipsHandler
 	{
 	public:
-		// CColorMenuButton constructor (more general, pParentBtn could be null)
+		// general constructor (pParentMenuBtn could be null)
 		CColorPopupMenu( CColorMenuButton* pParentMenuBtn,
 						 const ui::TMFCColorArray& colors, COLORREF color,
 						 const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
@@ -96,18 +102,37 @@ namespace mfc
 						 COLORREF colorAuto, UINT uiCmdID, bool stdColorDlg = false );
 
 		// color picker constructor
-		CColorPopupMenu( CMFCColorButton* pParentBtn,
+		CColorPopupMenu( CMFCColorButton* pParentPickerBtn,
 						 const ui::TMFCColorArray& colors, COLORREF color,
 						 const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
 						 ui::TMFCColorList& docColors, int columns, COLORREF colorAuto );
 
 		virtual ~CColorPopupMenu();
+
+		nosy::CColorBar_* GetColorBar( void ) const { return m_pColorBar; }
+		void SetColorHost( const ui::IColorHost* pColorHost );
+	private:
+		void StoreBtnColorEntries( void );
+		static void StoreButtonColorEntry( CMFCToolBarButton* pButton, const CColorEntry* pColorEntry );
+
+		const CColorEntry* FindColorEntry( COLORREF rawColor ) const;
+		bool FormatBtnColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const;
+
+		// ui::IToolTipsHandler interface
+		virtual bool Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point ) override;
 	private:
 		CColorMenuButton* m_pParentMenuBtn;
+		const CColorTable* m_pColorTable;
+		const CColorTable* m_pDocColorTable;
+
+		nosy::CColorBar_* m_pColorBar;						// points to CMFCColorPopupMenu::m_wndColorBar data-member, with access to protected data-members
+		std::auto_ptr<CWindowHook> m_pColorBarTipsHook;		// for formatted color entry based handling
+		COLORREF m_rawAutoColor;
+		COLORREF m_rawSelColor;
 
 		// generated stuff
 	protected:
-		virtual int OnCreate( CREATESTRUCT* pCreateStruct );
+		afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
 
 		DECLARE_MESSAGE_MAP()
 	};

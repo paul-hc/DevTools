@@ -100,6 +100,7 @@ CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nu
 	: CMFCColorButton()
 	, m_pSelColorTable( nullptr )
 	, m_pickingMode( PickColorBar )
+	, m_pSelColorEntry( nullptr )
 	, m_pDocColorTable( nullptr )
 	, m_regSection( reg::section_picker )
 	, m_accel( IDR_EDIT_ACCEL )
@@ -158,12 +159,12 @@ void CColorPickerButton::SetUserColors( const std::vector<COLORREF>& userColors,
 
 const CColorEntry* CColorPickerButton::GetRawColor( void ) const
 {
-	// TODO...
-	return nullptr;
+	return m_pSelColorEntry;
 }
 
 void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ )
 {
+	m_pSelColorEntry = m_pMenuImpl->m_pMainStore->FindColorEntry( rawColor );
 	COLORREF color = ui::EvalColor( rawColor );
 
 	if ( notify && m_hWnd != nullptr )
@@ -197,7 +198,6 @@ void CColorPickerButton::SetSelColorTable( const CColorTable* pSelColorTable )
 	if ( m_pSelColorTable != nullptr )
 	{
 		pSelColorTable->QueryMfcColors( m_Colors );
-		pSelColorTable->RegisterNamesToColorButtons();
 
 		SetColumnsNumber( pSelColorTable->GetColumnCount() );
 	}
@@ -212,7 +212,6 @@ void CColorPickerButton::SetDocColorTable( const CColorTable* pDocColorTable )
 	if ( m_pDocColorTable != nullptr && !m_pDocColorTable->IsEmpty() )
 	{
 		m_pDocColorTable->QueryMfcColors( docColors );
-		m_pDocColorTable->RegisterNamesToColorButtons();
 		pDocLabel = m_pDocColorTable->GetTableName().c_str();
 	}
 
@@ -286,6 +285,13 @@ void CColorPickerButton::NotifyMatchingPickers( ChangedField field )
 void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
 {
 	cmdId, pTooltip;
+
+	if ( m_pSelColorEntry != nullptr )
+	{
+		rText = m_pSelColorEntry->FormatColor();
+		return;
+	}
+
 	COLORREF color = GetColor();
 
 	if ( m_pSelColorTable != nullptr )
@@ -296,6 +302,57 @@ void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToo
 		}
 
 	rText = ui::FormatColor( color );
+}
+
+void CColorPickerButton::ShowColorTablePopup( void )
+{	// modeless display of the color popup
+
+	//__super::OnShowColorPopup();
+
+	if ( m_pPopup != NULL )
+	{
+		m_pPopup->SendMessage( WM_CLOSE );
+		m_pPopup = NULL;
+		return;
+	}
+
+	if ( m_Colors.IsEmpty() )
+	{
+		ASSERT( false );
+		mfc::ColorBar_InitColors( m_Colors );		// use default pallete
+	}
+
+	CRect rect;
+	GetWindowRect( &rect );
+
+	mfc::CColorPopupMenu* pColorPopupMenu = new mfc::CColorPopupMenu( this, m_Colors, m_Color,
+																	  m_strAutoColorText, m_strOtherText, m_strDocColorsText,
+																	  m_lstDocColors, m_nColumns, m_ColorAutomatic );
+	pColorPopupMenu->SetColorHost( this );
+	m_pPopup = pColorPopupMenu;
+
+	if ( !m_pPopup->Create( this, rect.left, rect.bottom, NULL, m_bEnabledInCustomizeMode ) )
+	{
+		ASSERT( false );	// color menu can't be used in the customization mode; you need to set CMFCColorButton::m_bEnabledInCustomizeMode.
+		m_pPopup = NULL;
+	}
+	else
+	{
+		if ( m_bEnabledInCustomizeMode )
+			pColorPopupMenu->GetColorBar()->SetInternal( true );
+
+		m_pPopup->GetWindowRect( &rect );
+		m_pPopup->UpdateShadow( &rect );
+
+		if ( m_bAutoSetFocus )
+			m_pPopup->GetMenuBar()->SetFocus();
+	}
+
+	if ( m_bCaptured )
+	{
+		ReleaseCapture();
+		m_bCaptured = FALSE;
+	}
 }
 
 void CColorPickerButton::TrackMenuColorTables( void )
@@ -362,7 +419,7 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 	else
 	{
 		m_trackingMode = trackingMode;
-		__super::OnShowColorPopup();	// modeless call
+		ShowColorTablePopup();			// modeless call
 	}
 }
 
@@ -616,7 +673,7 @@ mfc::CColorMenuButton* CColorMenuTrackingImpl::MakeColorMenuButton( UINT colorBt
 
 	if ( pColorTable == m_pHost->GetSelColorTable() )		// button for selected table?
 	{	// richer configuration on the selected color table:
-		pColorButton->EnableAutomaticButton( _T("Automatic"), /*this->GetAutomaticColor()*/ color::PaleBlue );
+		pColorButton->EnableAutomaticButton( _T("Automatic"), m_pHost->GetAutoColor() );
 		pColorButton->EnableOtherButton( _T("More Colors...") );
 
 		CColorTable* pShadesTable = m_pScratchStore->GetShadesTable();
@@ -669,9 +726,9 @@ void CColorMenuTrackingImpl::On_ColorSelected( UINT selColorBtnId )
 
 	if ( mfc::CColorMenuButton* pSelTableButton = FindColorMenuButton( selColorBtnId ) )
 	{
-		m_pHost->SetColor( pSelTableButton->GetRawColor(), true );
+		m_pHost->SetColor( pSelTableButton->GetColor(), true );
 
-		// if using user custom color table, color can be picked from any table, but the selected user table is retained (not switched to picked table)
+		// if using a user custom color table, color can be picked from any table, but the selected user table is retained (not switched to picked table)
 		if ( !m_pHost->UseUserColors() )
 			m_pHost->SetSelColorTable( pSelTableButton->GetColorTable() );
 	}

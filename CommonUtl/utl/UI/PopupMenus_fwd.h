@@ -52,6 +52,10 @@ namespace ui
 
 namespace mfc
 {
+	// CMFCToolBar protected access:
+	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
+
+
 	// CMFCColorBar protected access:
 	//
 	int ColorBar_InitColors( ui::TMFCColorArray& colors, CPalette* pPalette = nullptr );
@@ -59,14 +63,44 @@ namespace mfc
 	inline bool ColorBar_ContainsColorName( COLORREF realColor ) { return ColorBar_FindColorName( realColor ); }
 	void ColorBar_RegisterColorName( COLORREF realColor, const std::tstring& colorName );
 
-	void* GetItemData( const CMFCToolBarButton* pButton );
+
+	void* GetButtonItemData( const CMFCToolBarButton* pButton );
+	void SetButtonItemData( CMFCToolBarButton* pButton, const void* pItemData );
+
 	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
+
 
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
 	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );
 	CMFCToolBarButton* FindBarButton( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 
 	CMFCColorBar* GetColorMenuBar( const CMFCPopupMenu* pColorPopupMenu );
+}
+
+
+#include <afxcolorbar.h>
+
+
+namespace nosy
+{
+	struct CColorBar_ : public CMFCColorBar
+	{
+		// public access
+		using CMFCColorBar::m_colors;
+		using CMFCColorBar::m_lstDocColors;
+		using CMFCColorBar::m_ColorNames;		// CMap<COLORREF,COLORREF,CString, LPCTSTR>
+
+		using CMFCColorBar::InitColors;
+
+		bool HasAutoBtn( void ) const { return !m_strAutoColor.IsEmpty(); }
+		bool HasMoreBtn( void ) const { return !m_strOtherColor.IsEmpty(); }
+		bool HasDocColorBtns( void ) const { return !m_strDocColors.IsEmpty(); }
+
+		COLORREF GetAutoColor( void ) const { return m_ColorAutomatic; }
+		void SetAutoColor( COLORREF autoColor ) { m_ColorAutomatic = autoColor; }
+
+		void SetInternal( bool bInternal = true ) { m_bInternal = bInternal; }		// for customization mode
+	};
 }
 
 

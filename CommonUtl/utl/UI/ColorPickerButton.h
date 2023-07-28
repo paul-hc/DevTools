@@ -83,11 +83,13 @@ private:
 	enum ChangedField { SelColorTableChanged, PickingModeChanged };
 	void NotifyMatchingPickers( ChangedField field );
 
+	void ShowColorTablePopup( void );
 	void TrackMenuColorTables( void );
 private:
 	persist const CColorTable* m_pSelColorTable;
 	persist PickingMode m_pickingMode;						// by default PickColorBar (single color table), or PickMenuColorTables (shows a menu with multiple color tables)
 
+	const CColorEntry* m_pSelColorEntry;					// raw color entry
 	const CColorTable* m_pDocColorTable;
 
 	std::tstring m_regSection;

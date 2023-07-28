@@ -93,7 +93,6 @@ public:
 	// CMFCColorButton support
 	void QueryMfcColors( ui::TMFCColorArray& rColorArray ) const;
 	void QueryMfcColors( ui::TMFCColorList& rColorList ) const;
-	size_t RegisterNamesToColorButtons( bool force = false ) const;			// for shared color button tooltips stored in CMFCColorButton
 	void SetupMfcColors( const ui::TMFCColorArray& customColors, int columnCount = 0 );
 
 	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades

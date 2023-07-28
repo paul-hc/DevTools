@@ -146,6 +146,22 @@ namespace ui
 		}
 	}
 
+	CTooltipTextMessage::CTooltipTextMessage( TOOLTIPTEXT* pNmToolTipText )
+		: m_pTooltip( static_cast<CToolTipCtrl*>( CWnd::FromHandlePermanent( pNmToolTipText->hdr.hwndFrom ) ) )
+		, m_pTttA( nullptr )
+		, m_pTttW( pNmToolTipText )
+		, m_cmdId( static_cast<UINT>( pNmToolTipText->hdr.idFrom ) )
+		, m_hCtrl( nullptr )
+	{
+		ASSERT_PTR( m_pTttW );
+
+		if ( HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) )
+		{
+			m_hCtrl = (HWND)pNmToolTipText->hdr.idFrom;			// idFrom is actually the HWND of the tool
+			m_cmdId = ::GetDlgCtrlID( m_hCtrl );
+		}
+	}
+
 	bool CTooltipTextMessage::IsValidNotification( void ) const
 	{
 		return m_cmdId != 0;

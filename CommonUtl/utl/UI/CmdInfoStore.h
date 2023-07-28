@@ -50,6 +50,7 @@ namespace ui
 	struct CTooltipTextMessage
 	{
 		CTooltipTextMessage( NMHDR* pNmHdr );
+		CTooltipTextMessage( TOOLTIPTEXT* pNmToolTipText );
 
 		bool IsValidNotification( void ) const;
 		bool AssignTooltipText( const std::tstring& text );

@@ -25,42 +25,6 @@ namespace ui
 
 		return rawColor;
 	}
-
-	namespace impl
-	{
-		BYTE EncodeComponent( BYTE component )
-		{
-			if ( 255 == component )
-				return component - 1;
-			else
-				return component + 1;
-		}
-
-		BYTE DecodeComponent( BYTE component )
-		{
-			if ( 254 == component )
-				return component + 1;
-			else
-				return component - 1;
-		}
-	}
-
-	COLORREF EncodeToColorBar( COLORREF rawColor )
-	{
-		bool isSysColor = IsSysColor( rawColor );
-		COLORREF color = EvalColor( rawColor );
-
-		if ( isSysColor )
-		{
-			// Encoded colors are a display proxy real colors slightly shifted in value, to avoid name matches of system colors with any real repository color.
-			//	shift RGB component slightly (by 1), to make it appear the same real color, but not matching accidentally any real repository color
-
-			BYTE r = impl::EncodeComponent( GetRValue( color ) ), g = impl::EncodeComponent( GetGValue( color ) ), b = impl::EncodeComponent( GetBValue( color ) );
-			color = RGB( r, g, b );
-		}
-
-		return color;
-	}
 }
 
 
