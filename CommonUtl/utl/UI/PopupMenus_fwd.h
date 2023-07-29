@@ -25,6 +25,9 @@ namespace mfc
 
 namespace ui
 {
+	bool IsUndefinedColor( COLORREF rawColor );		// defined in Color.h
+
+
 	interface ICustomPopupMenu
 	{
 		virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) = 0;
@@ -40,6 +43,12 @@ namespace ui
 		virtual const CColorTable* GetSelColorTable( void ) const = 0;
 		virtual const CColorTable* GetDocColorTable( void ) const = 0;
 		virtual bool UseUserColors( void ) const = 0;
+
+		COLORREF GetActualColor( void ) const
+		{
+			COLORREF actualColor = GetColor();
+			return ui::IsUndefinedColor( actualColor ) ? GetAutoColor() : actualColor;		// the color current selection amounts to
+		}
 	};
 
 	interface IColorEditorHost : public IColorHost
