@@ -646,7 +646,7 @@ void CColorMenuTrackingImpl::InsertMenuTableItems( const CColorStore* pColorStor
 		pParentMenu->DeleteMenu( index, MF_BYPOSITION );
 
 		if ( pColorStore != nullptr )
-			for ( size_t i = 0; i != pColorStore->GetTables().size(); ++i )
+			for ( UINT i = 0; i != pColorStore->GetTables().size(); ++i )
 			{
 				const CColorTable* pColorTable = pColorStore->GetTableAt( i );
 

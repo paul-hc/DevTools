@@ -296,7 +296,7 @@ namespace mfc
 		if ( m_pColorTable != nullptr && !m_pColorBar->m_colors.IsEmpty() )
 		{
 			btnIndex.SetEmptyRange( m_pColorBar->HasAutoBtn() ? 1 : 0 );	// skip Automatic, if any
-			btnIndex.m_end += m_pColorBar->m_colors.GetSize();
+			btnIndex.m_end += static_cast<int>( m_pColorBar->m_colors.GetSize() );
 
 			for ( pColorEntry = &m_pColorTable->GetColors().front();
 				  btnIndex.m_start != btnIndex.m_end;
@@ -308,7 +308,7 @@ namespace mfc
 		if ( m_pDocColorTable != nullptr && !m_pColorBar->m_lstDocColors.IsEmpty() )
 		{
 			btnIndex.SetEmptyRange( btnIndex.m_end + 2 );				// skip Separator + Doc Label
-			btnIndex.m_end += m_pColorBar->m_lstDocColors.GetSize();
+			btnIndex.m_end += static_cast<INT>( m_pColorBar->m_lstDocColors.GetSize() );
 
 			for ( pColorEntry = &m_pDocColorTable->GetColors().front();
 				  btnIndex.m_start != btnIndex.m_end;
