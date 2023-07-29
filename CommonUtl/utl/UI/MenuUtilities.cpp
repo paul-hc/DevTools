@@ -116,8 +116,7 @@ namespace ui
 	{
 		AdjustMenuTrackPos( screenPos );
 
-		TPMPARAMS excludeParams;
-		utl::ZeroWinStruct( &excludeParams );
+		TPMPARAMS excludeParams; utl::ZeroWinStruct( &excludeParams );
 
 		if ( pExcludeRect != nullptr )			// pExcludeRect is ignored by TrackPopupMenu()
 			excludeParams.rcExclude = *pExcludeRect;
@@ -254,8 +253,8 @@ namespace ui
 {
 	UINT GetMenuItemType( HMENU hMenu, UINT item, bool byPos )
 	{
-		MENUITEMINFO itemInfo;
-		utl::ZeroWinStruct( &itemInfo );
+		MENUITEMINFO itemInfo; utl::ZeroWinStruct( &itemInfo );
+
 		itemInfo.fMask = MIIM_TYPE;
 
 		if ( !::GetMenuItemInfo( hMenu, item, byPos, &itemInfo ) )
@@ -266,9 +265,8 @@ namespace ui
 
 	void* GetMenuItemData( HMENU hMenu, UINT item, bool byPos /*= true*/ )
 	{
-		MENUITEMINFO itemInfo;
+		MENUITEMINFO itemInfo; utl::ZeroWinStruct( &itemInfo );
 
-		utl::ZeroWinStruct( &itemInfo );
 		itemInfo.fMask = MIIM_DATA;
 
 		if ( !::GetMenuItemInfo( hMenu, item, byPos, &itemInfo ) )
@@ -279,9 +277,8 @@ namespace ui
 
 	bool SetMenuItemData( HMENU hMenu, UINT item, const void* pItemData, bool byPos /*= true*/ )
 	{
-		MENUITEMINFO itemInfo;
+		MENUITEMINFO itemInfo; utl::ZeroWinStruct( &itemInfo );
 
-		utl::ZeroWinStruct( &itemInfo );
 		itemInfo.fMask = MIIM_DATA;
 		itemInfo.dwItemData = reinterpret_cast<DWORD_PTR>( pItemData );
 
@@ -532,9 +529,8 @@ namespace ui
 	size_t CleanupMenuSeparators( OUT CMenu* pDestMenu )
 	{
 		size_t delCount = 0;
-		MENUITEMINFO itemInfo;
+		MENUITEMINFO itemInfo; utl::ZeroWinStruct( &itemInfo );
 
-		utl::ZeroWinStruct( &itemInfo );
 		itemInfo.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
 
 		// delete duplicate separators in reverse order
