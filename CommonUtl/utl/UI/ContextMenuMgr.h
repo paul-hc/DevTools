@@ -17,7 +17,7 @@ namespace mfc
 		virtual ~CContextMenuMgr();
 
 		CMFCPopupMenu* GetTrackingPopupMenu( void ) const;
-		void ResetNewTrackingPopupMenu( mfc::CTrackingPopupMenu* pNewTrackingPopupMenu );		// custom tracking popup menu: used instead of creating a 'new CMFCPopupMenu;' in ShowPopupMenu()
+		void ResetNewTrackingPopupMenu( mfc::CTrackingPopupMenu* pNewTrackingPopupMenu );		// custom tracking popup menu: used instead of creating a 'new CMFCPopupMenu' in ShowPopupMenu()
 
 		static CContextMenuMgr* Instance( void ) { return s_pInstance; }
 

@@ -244,7 +244,7 @@ namespace mfc
 									  const ui::TMFCColorArray& colors, COLORREF color,
 									  const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
 									  ui::TMFCColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
-									  COLORREF colorAuto, UINT uiCmdID, bool stdColorDlg /*= false*/ )
+									  COLORREF colorAuto, UINT uiCmdID, BOOL stdColorDlg /*= false*/ )
 		: CMFCColorPopupMenu( colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, horzDockRows, vertDockColumns, colorAuto, uiCmdID, stdColorDlg )
 		, m_pParentMenuBtn( pParentMenuBtn )
 		, m_pColorTable( nullptr )

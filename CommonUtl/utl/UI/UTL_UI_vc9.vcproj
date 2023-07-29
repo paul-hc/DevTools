@@ -383,14 +383,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\StripListEditor.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\res\StripListEditor.png"
-				>
-			</File>
-			<File
 				RelativePath=".\res\ResizeSplitter-NS.cur"
 				>
 			</File>
@@ -408,6 +400,14 @@
 			</File>
 			<File
 				RelativePath=".\res\ScrollDrag.cur"
+				>
+			</File>
+			<File
+				RelativePath=".\res\StripListEditor.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\StripListEditor.png"
 				>
 			</File>
 			<File
@@ -1358,14 +1358,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ColorPickerButton.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ColorPickerButton.h"
-					>
-				</File>
-				<File
 					RelativePath=".\ContentFitBase.cpp"
 					>
 				</File>
@@ -1701,6 +1693,26 @@
 					RelativePath=".\TreeControlCustomDraw.h"
 					>
 				</File>
+				<Filter
+					Name="MFC+"
+					>
+					<File
+						RelativePath=".\ColorPickerButton.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ColorPickerButton.h"
+						>
+					</File>
+					<File
+						RelativePath=".\MenuPickerButton.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\MenuPickerButton.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Registry"

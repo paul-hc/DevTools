@@ -4,8 +4,6 @@
 
 #include "PopupMenus_fwd.h"
 #include <afxpopupmenu.h>
-#include <afxcolorpopupmenu.h>
-#include <afxcolormenubutton.h>
 
 
 class CColorEntry;
@@ -36,6 +34,9 @@ namespace mfc
 		ui::ICustomPopupMenu* m_pCustomPopupMenu;				// client code can customize the tracking menu content: replace buttons, etc
 	};
 }
+
+
+#include <afxcolormenubutton.h>
 
 
 namespace mfc
@@ -79,6 +80,7 @@ namespace mfc
 
 
 #include "Control_fwd.h"
+#include <afxcolorpopupmenu.h>
 
 
 class CWindowHook;
@@ -99,7 +101,7 @@ namespace mfc
 						 const ui::TMFCColorArray& colors, COLORREF color,
 						 const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
 						 ui::TMFCColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
-						 COLORREF colorAuto, UINT uiCmdID, bool stdColorDlg = false );
+						 COLORREF colorAuto, UINT uiCmdID, BOOL stdColorDlg = false );
 
 		// color picker constructor
 		CColorPopupMenu( CMFCColorButton* pParentPickerBtn,

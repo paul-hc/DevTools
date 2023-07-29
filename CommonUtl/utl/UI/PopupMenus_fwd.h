@@ -2,6 +2,8 @@
 #define PopupMenus_fwd_h
 #pragma once
 
+#include <afxtempl.h>
+
 
 class CMFCPopupMenu;
 class CMFCToolBar;
