@@ -181,7 +181,7 @@ void CColorPickerButton::UpdateShadesTable( void )
 
 	pShadesTable->SetupShadesTable( GetColor(), m_pSelColorTable != nullptr ? m_pSelColorTable->GetColumnCount() : 8 );
 
-	ui::TMFCColorList shadesColorList;
+	mfc::TColorList shadesColorList;
 	pShadesTable->QueryMfcColors( shadesColorList );
 	SetDocumentColors( pShadesTable->IsEmpty() ? nullptr : pShadesTable->GetTableName().c_str(), shadesColorList );
 }
@@ -205,7 +205,7 @@ void CColorPickerButton::SetSelColorTable( const CColorTable* pSelColorTable )
 
 void CColorPickerButton::SetDocColorTable( const CColorTable* pDocColorTable )
 {
-	ui::TMFCColorList docColors;
+	mfc::TColorList docColors;
 	const TCHAR* pDocLabel = nullptr;
 
 	m_pDocColorTable = pDocColorTable;

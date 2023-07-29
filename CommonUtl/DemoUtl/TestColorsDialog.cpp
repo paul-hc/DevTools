@@ -49,7 +49,7 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	m_mfcColorPickerButton.SetColor( m_color );
 	m_mfcColorPickerButton.EnableAutomaticButton( _T("Automatic"), color::Yellow );
 	m_mfcColorPickerButton.EnableOtherButton( _T("More...") );
-	ui::TMFCColorList docColors;
+	mfc::TColorList docColors;
 	CColorRepository::Instance()->FindTable( ui::Office2003_Colors )->QueryMfcColors( docColors );
 	m_mfcColorPickerButton.SetDocumentColors( _T("Document:"), docColors );
 

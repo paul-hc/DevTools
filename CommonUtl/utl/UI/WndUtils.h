@@ -71,6 +71,10 @@ namespace ui
 
 namespace ui
 {
+	// forward declared in ui_fwd.h
+	//CPoint GetCursorPos( HWND hWnd = nullptr );			// return screen coordinates if NULL
+
+
 	// window coords
 
 	inline CPoint ScreenToClient( HWND hWnd, const CPoint& screenPos )

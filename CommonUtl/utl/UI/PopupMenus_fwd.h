@@ -16,10 +16,10 @@ class CColorEntry;
 class CColorTable;
 
 
-namespace ui
+namespace mfc
 {
-	typedef CArray<COLORREF, COLORREF> TMFCColorArray;
-	typedef CList<COLORREF, COLORREF> TMFCColorList;
+	typedef CArray<COLORREF, COLORREF> TColorArray;
+	typedef CList<COLORREF, COLORREF> TColorList;
 }
 
 
@@ -60,7 +60,7 @@ namespace mfc
 
 	// CMFCColorBar protected access:
 	//
-	int ColorBar_InitColors( ui::TMFCColorArray& colors, CPalette* pPalette = nullptr );
+	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette = nullptr );
 	bool ColorBar_FindColorName( COLORREF realColor, OUT OPTIONAL std::tstring* pColorName = nullptr );
 	inline bool ColorBar_ContainsColorName( COLORREF realColor ) { return ColorBar_FindColorName( realColor ); }
 	void ColorBar_RegisterColorName( COLORREF realColor, const std::tstring& colorName );

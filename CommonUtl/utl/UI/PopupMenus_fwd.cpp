@@ -35,7 +35,7 @@ namespace mfc
 	}
 
 
-	int ColorBar_InitColors( ui::TMFCColorArray& colors, CPalette* pPalette /*= nullptr*/ )
+	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette /*= nullptr*/ )
 	{
 		return nosy::CColorBar_::InitColors( pPalette, colors );
 	}

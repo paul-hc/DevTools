@@ -219,7 +219,7 @@ namespace mfc
 		//return __super::CreatePopupMenu();
 
 		// customize document colors table (if any)
-		ui::TMFCColorList docColors;
+		mfc::TColorList docColors;
 
 		if ( m_bIsDocumentColors != FALSE )
 		{
@@ -241,9 +241,9 @@ namespace mfc
 	// CColorPopupMenu implementation
 
 	CColorPopupMenu::CColorPopupMenu( CColorMenuButton* pParentMenuBtn,
-									  const ui::TMFCColorArray& colors, COLORREF color,
+									  const mfc::TColorArray& colors, COLORREF color,
 									  const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
-									  ui::TMFCColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
+									  mfc::TColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
 									  COLORREF colorAuto, UINT uiCmdID, BOOL stdColorDlg /*= false*/ )
 		: CMFCColorPopupMenu( colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, horzDockRows, vertDockColumns, colorAuto, uiCmdID, stdColorDlg )
 		, m_pParentMenuBtn( pParentMenuBtn )
@@ -262,9 +262,9 @@ namespace mfc
 	}
 
 	CColorPopupMenu::CColorPopupMenu( CMFCColorButton* pParentPickerBtn,
-									  const ui::TMFCColorArray& colors, COLORREF color,
+									  const mfc::TColorArray& colors, COLORREF color,
 									  const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
-									  ui::TMFCColorList& docColors, int columns, COLORREF colorAuto )
+									  mfc::TColorList& docColors, int columns, COLORREF colorAuto )
 		: CMFCColorPopupMenu( pParentPickerBtn, colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, colorAuto )
 		, m_pParentMenuBtn( nullptr )
 		, m_pColorTable( nullptr )
@@ -372,6 +372,7 @@ namespace mfc
 			else if ( m_pColorBar->HasMoreBtn() )
 				pColorEntry = FindColorEntry( color = m_rawSelColor );
 
+			//if (0)
 			if ( nullptr == pColorEntry && color != CLR_NONE )
 			{
 				rTipText = ui::FormatColor( color );		// format the auto/other color

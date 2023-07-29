@@ -195,7 +195,7 @@ bool CColorTable::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) c
 	return true;
 }
 
-void CColorTable::QueryMfcColors( ui::TMFCColorArray& rColorArray ) const
+void CColorTable::QueryMfcColors( OUT mfc::TColorArray& rColorArray ) const
 {
 	rColorArray.SetSize( m_colors.size() );
 
@@ -203,13 +203,13 @@ void CColorTable::QueryMfcColors( ui::TMFCColorArray& rColorArray ) const
 		rColorArray[i] = m_colors[i].EvalColor();
 }
 
-void CColorTable::QueryMfcColors( ui::TMFCColorList& rColorList ) const
+void CColorTable::QueryMfcColors( OUT mfc::TColorList& rColorList ) const
 {
 	for ( std::vector<CColorEntry>::const_iterator itColorEntry = m_colors.begin(); itColorEntry != m_colors.end(); ++itColorEntry )
 		rColorList.AddTail( itColorEntry->EvalColor() );
 }
 
-void CColorTable::SetupMfcColors( const ui::TMFCColorArray& customColors, int columnCount )
+void CColorTable::SetupMfcColors( const mfc::TColorArray& customColors, int columnCount )
 {
 	const CColorRepository* pColorRepo = CColorRepository::Instance();		// to borrow color names
 

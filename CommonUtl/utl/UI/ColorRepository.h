@@ -10,12 +10,15 @@
 #define COLOR_ENTRY( stdColor )  CColorEntry( (stdColor), CColorEntry::FindScopedLiteral( #stdColor ) )
 
 
+namespace mfc
+{
+	typedef CArray<COLORREF, COLORREF> TColorArray;
+	typedef CList<COLORREF, COLORREF> TColorList;
+}
+
+
 namespace ui
 {
-	typedef CArray<COLORREF, COLORREF> TMFCColorArray;
-	typedef CList<COLORREF, COLORREF> TMFCColorList;
-
-
 	// color table categories:
 	//
 	inline bool IsHalftoneTable( ui::StdColorTable tableType ) { return tableType >= ui::Halftone16_Colors && tableType <= ui::Halftone256_Colors; }
@@ -91,9 +94,9 @@ public:
 	void Add( const CColorEntry& colorEntry );
 
 	// CMFCColorButton support
-	void QueryMfcColors( ui::TMFCColorArray& rColorArray ) const;
-	void QueryMfcColors( ui::TMFCColorList& rColorList ) const;
-	void SetupMfcColors( const ui::TMFCColorArray& customColors, int columnCount = 0 );
+	void QueryMfcColors( OUT mfc::TColorArray& rColorArray ) const;
+	void QueryMfcColors( OUT mfc::TColorList& rColorList ) const;
+	void SetupMfcColors( const mfc::TColorArray& customColors, int columnCount = 0 );
 
 	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades
 private:
@@ -142,7 +145,7 @@ public:
 	CColorTable* GetUserCustomTable( void ) const { return m_pUserCustomTable; }
 
 	size_t UpdateShadesTable( COLORREF selColor, size_t columnCount ) { return m_pShadesTable->SetupShadesTable( selColor, columnCount ); }
-	void UpdateUserCustomTable( const ui::TMFCColorArray& customColors, int columnCount = 0 ) { return m_pUserCustomTable->SetupMfcColors( customColors, columnCount ); }
+	void UpdateUserCustomTable( const mfc::TColorArray& customColors, int columnCount = 0 ) { return m_pUserCustomTable->SetupMfcColors( customColors, columnCount ); }
 private:
 	CColorTable* m_pShadesTable;
 	CColorTable* m_pUserCustomTable;

@@ -87,7 +87,6 @@ class CWindowHook;
 namespace nosy { struct CColorBar_; }
 
 
-
 namespace mfc
 {
 	// Customized tracking popup color bar, that allows custom handling of color button tooltips
@@ -98,16 +97,16 @@ namespace mfc
 	public:
 		// general constructor (pParentMenuBtn could be null)
 		CColorPopupMenu( CColorMenuButton* pParentMenuBtn,
-						 const ui::TMFCColorArray& colors, COLORREF color,
+						 const mfc::TColorArray& colors, COLORREF color,
 						 const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
-						 ui::TMFCColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
+						 mfc::TColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
 						 COLORREF colorAuto, UINT uiCmdID, BOOL stdColorDlg = false );
 
 		// color picker constructor
 		CColorPopupMenu( CMFCColorButton* pParentPickerBtn,
-						 const ui::TMFCColorArray& colors, COLORREF color,
+						 const mfc::TColorArray& colors, COLORREF color,
 						 const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
-						 ui::TMFCColorList& docColors, int columns, COLORREF colorAuto );
+						 mfc::TColorList& docColors, int columns, COLORREF colorAuto );
 
 		virtual ~CColorPopupMenu();
 
