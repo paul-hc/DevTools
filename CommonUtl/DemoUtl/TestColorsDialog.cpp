@@ -45,6 +45,7 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
+	//m_color = ui::MakeSysColor( COLOR_MENUHILIGHT );
 
 	m_mfcColorPickerButton.SetColor( m_color );
 	m_mfcColorPickerButton.EnableAutomaticButton( _T("Automatic"), color::Yellow );
@@ -114,8 +115,8 @@ END_MESSAGE_MAP()
 void CTestColorsDialog::OnMfcColorPicker( void )
 {
 	m_color = m_mfcColorPickerButton.GetColor();
-	if ( CLR_NONE == m_color )
-		m_color = m_mfcColorPickerButton.GetAutomaticColor();
+	//if ( CLR_NONE == m_color )
+	//	m_color = m_mfcColorPickerButton.GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }
@@ -123,8 +124,8 @@ void CTestColorsDialog::OnMfcColorPicker( void )
 void CTestColorsDialog::OnColorPicker( void )
 {
 	m_color = m_pColorPicker->GetColor();
-	if ( CLR_NONE == m_color )
-		m_color = m_pColorPicker->GetAutomaticColor();
+	//if ( CLR_NONE == m_color )
+	//	m_color = m_pColorPicker->GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }

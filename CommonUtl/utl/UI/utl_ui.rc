@@ -511,6 +511,8 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Copy Color &Table",           ID_EDIT_LIST_ITEMS
             MENUITEM SEPARATOR
+            MENUITEM "&Default Color",              ID_RESET_DEFAULT
+            MENUITEM SEPARATOR
             POPUP "&Select Color Table"
             BEGIN
                 MENUITEM "<halftone 16 colors>",        ID_HALFTONE_TABLE_16

@@ -106,7 +106,7 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	if ( afxContextMenuManager != nullptr )
 	{	// feed afxCommandManager [class CCommandManager] with images from the strip
 		//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );
-		//CMFCToolBar::AddToolBarForImageCollection( IDR_STD_BUTTONS_STRIP );
+		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_BUTTONS_STRIP );
 		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STATUS_STRIP );
 	}
 

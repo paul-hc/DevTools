@@ -131,20 +131,6 @@ namespace mfc
 		SetImage( isTableSelected ? afxCommandManager->GetCmdImage( ID_SELECTED_COLOR_BUTTON, FALSE ) : -1 );
 	}
 
-	const CColorEntry* CColorMenuButton::FindClickedBarColorEntry( void ) const
-	{
-		ASSERT_PTR( m_pPopupMenu );		// should be called while tracking!
-
-		const CColorEntry* pClikedColor = nullptr;
-		CMFCColorBar* pColorBar = mfc::GetColorMenuBar( m_pPopupMenu );
-		int clickedBtnPos = pColorBar->HitTest( ui::GetCursorPos( pColorBar->GetSafeHwnd() ) );
-
-		if ( clickedBtnPos != -1 )
-			pClikedColor = reinterpret_cast<const CColorEntry*>( mfc::GetButtonItemData( pColorBar->GetButton( clickedBtnPos ) ) );
-
-		return pClikedColor;
-	}
-
 
 	void CColorMenuButton::SetImage( int iImage )
 	{
@@ -171,7 +157,7 @@ namespace mfc
 	void CColorMenuButton::SetColor( COLORREF color, BOOL notify )
 	{
 		if ( notify && m_pPopupMenu != nullptr )
-			if ( const CColorEntry* pClickedColorEntry = FindClickedBarColorEntry() )
+			if ( const CColorEntry* pClickedColorEntry = checked_static_cast<const mfc::CColorPopupMenu*>( m_pPopupMenu )->FindClickedBarColorEntry() )
 				color = pClickedColorEntry->GetColor();		// lookup the proper raw sys-color
 
 		// if notify is true, this gets called by CMFCColorBar::OnSendCommand() on user color selection
@@ -287,6 +273,15 @@ namespace mfc
 		m_pDocColorTable = pColorHost->GetDocColorTable();
 	}
 
+	const CColorEntry* CColorPopupMenu::FindClickedBarColorEntry( void ) const
+	{
+		int clickedBtnPos = m_pColorBar->HitTest( ui::GetCursorPos( m_pColorBar->GetSafeHwnd() ) );
+		if ( -1 == clickedBtnPos )
+			return nullptr;
+
+		return reinterpret_cast<const CColorEntry*>( mfc::GetButtonItemData( m_pColorBar->GetButton( clickedBtnPos ) ) );
+	}
+
 	void CColorPopupMenu::StoreBtnColorEntries( void )
 	{
 		Range<int> btnIndex;		// ranges are [start, end) for iteration
@@ -357,10 +352,8 @@ namespace mfc
 		return nullptr;
 	}
 
-	bool CColorPopupMenu::FormatBtnColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const
+	bool CColorPopupMenu::FormatColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const
 	{
-		ASSERT_PTR( pButton );
-
 		const CColorEntry* pColorEntry = reinterpret_cast<const CColorEntry*>( mfc::GetButtonItemData( pButton ) );
 
 		if ( nullptr == pColorEntry )
@@ -398,7 +391,7 @@ namespace mfc
 			{
 				std::tstring tipText;
 
-				if ( FormatBtnColorTipText( tipText, pButton, hitBtnIndex ) )
+				if ( FormatColorTipText( tipText, pButton, hitBtnIndex ) )
 				{
 					ui::CTooltipTextMessage message( pNmDispInfo );
 					ASSERT( message.IsValidNotification() );		// stray notifications should've been filtered-out

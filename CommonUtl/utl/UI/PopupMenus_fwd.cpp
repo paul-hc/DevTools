@@ -61,11 +61,13 @@ namespace mfc
 
 	void* GetButtonItemData( const CMFCToolBarButton* pButton )
 	{
+		ASSERT_PTR( pButton );
 		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetItemData();
 	}
 
 	void SetButtonItemData( CMFCToolBarButton* pButton, const void* pItemData )
 	{
+		ASSERT_PTR( pButton );
 		mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->SetItemData( pItemData );
 	}
 

@@ -106,7 +106,9 @@ protected:
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	// base overrides:
+	virtual void UpdateColor( COLORREF color ) override;
 	virtual void OnShowColorPopup( void ) override;
+	virtual void OnDraw( CDC* pDC, const CRect& rect, UINT uiState );
 
 	// generated stuff
 public:
@@ -120,6 +122,8 @@ protected:
 	afx_msg void OnCopy( void );
 	afx_msg void OnPaste( void );
 	afx_msg void OnUpdatePaste( CCmdUI* pCmdUI );
+	afx_msg void On_ResetColor( void );
+	afx_msg void OnUpdate_ResetColor( CCmdUI* pCmdUI );
 	afx_msg void On_CopyColorTable( void );
 	afx_msg void On_SelectColorTable( UINT colorTableId );
 	afx_msg void OnUpdate_SelectColorTable( CCmdUI* pCmdUI );

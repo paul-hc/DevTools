@@ -7,7 +7,7 @@ template< typename ValueType >
 class CScopedValue
 {
 public:
-	CScopedValue( ValueType* pValue )
+	CScopedValue( ValueType* pValue )		// constructor for conditional assignment
 		: m_pValue( pValue )
 	{
 		ASSERT_PTR( m_pValue );
@@ -25,6 +25,11 @@ public:
 	~CScopedValue()
 	{
 		*m_pValue = m_oldValue;
+	}
+
+	void SetValue( const ValueType& newValue )
+	{
+		*m_pValue = newValue;
 	}
 private:
 	ValueType* m_pValue;

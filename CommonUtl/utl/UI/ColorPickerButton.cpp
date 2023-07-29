@@ -10,6 +10,7 @@
 #include "resource.h"
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
+#include "utl/ScopedValue.h"
 #include "utl/StringUtilities.h"
 #include "utl/TextClipboard.h"
 #include <math.h>
@@ -114,6 +115,12 @@ CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nu
 	EnableOtherButton( _T("More...") );
 
 	SetSelColorTable( pSelColorTable != nullptr ? pSelColorTable : CHalftoneRepository::Instance()->FindTable( ui::Halftone16_Colors ) );
+
+	const ACCEL accelKeys[] =
+	{
+		{ FVIRTKEY, VK_DELETE, ID_RESET_DEFAULT }
+	};
+	m_accel.Augment( ARRAY_SPAN( accelKeys ) );
 }
 
 CColorPickerButton::~CColorPickerButton()
@@ -164,15 +171,34 @@ const CColorEntry* CColorPickerButton::GetRawColor( void ) const
 
 void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ )
 {
-	m_pSelColorEntry = m_pMenuImpl->m_pMainStore->FindColorEntry( rawColor );
-	COLORREF color = ui::EvalColor( rawColor );
+	if ( notify )
+	{
+		if ( TrackingColorBar == m_trackingMode && m_pPopup->GetSafeHwnd() != nullptr )
+		{
+			m_pSelColorEntry = checked_static_cast<const mfc::CColorPopupMenu*>( m_pPopup )->FindClickedBarColorEntry();
+
+			if ( m_pSelColorEntry != nullptr )
+				rawColor = m_pSelColorEntry->GetColor();		// is a system color selected, assign the real raw color
+		}
+		else
+			m_pSelColorEntry = nullptr;			// to be looked-up next
+
+		if ( nullptr == m_pSelColorEntry )
+			m_pSelColorEntry = m_pMenuImpl->m_pMainStore->FindColorEntry( rawColor );		// fallback to table lookup by raw color
+	}
+
+	CMFCColorButton::SetColor( rawColor );
 
 	if ( notify && m_hWnd != nullptr )
-		UpdateColor( color );
-	else
-		CMFCColorButton::SetColor( color );
+		ui::SendCommandToParent( m_hWnd, BN_CLICKED );
 
 	UpdateShadesTable();
+}
+
+void CColorPickerButton::UpdateColor( COLORREF color ) override
+{	// base override
+	//__super::UpdateColor( color );
+	SetColor( color, true );
 }
 
 void CColorPickerButton::UpdateShadesTable( void )
@@ -292,10 +318,10 @@ void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToo
 		return;
 	}
 
-	COLORREF color = GetColor();
+	COLORREF color = GetActualColor();
 
 	if ( m_pSelColorTable != nullptr )
-		if ( const CColorEntry* pColorEntry = m_pSelColorTable->FindEvaluatedColor( color ) )
+		if ( const CColorEntry* pColorEntry = m_pSelColorTable->FindColor( color ) )
 		{
 			rText = pColorEntry->FormatColor();
 			return;
@@ -307,12 +333,12 @@ void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToo
 void CColorPickerButton::ShowColorTablePopup( void )
 {	// modeless display of the color popup
 
-	//__super::OnShowColorPopup();
+	//__super::OnShowColorPopup();		// original behaviour using CMFCColorPopupMenu
 
-	if ( m_pPopup != NULL )
+	if ( m_pPopup != nullptr )
 	{
 		m_pPopup->SendMessage( WM_CLOSE );
-		m_pPopup = NULL;
+		m_pPopup = nullptr;
 		return;
 	}
 
@@ -331,10 +357,10 @@ void CColorPickerButton::ShowColorTablePopup( void )
 	pColorPopupMenu->SetColorHost( this );
 	m_pPopup = pColorPopupMenu;
 
-	if ( !m_pPopup->Create( this, rect.left, rect.bottom, NULL, m_bEnabledInCustomizeMode ) )
+	if ( !m_pPopup->Create( this, rect.left, rect.bottom, nullptr, m_bEnabledInCustomizeMode ) )
 	{
 		ASSERT( false );	// color menu can't be used in the customization mode; you need to set CMFCColorButton::m_bEnabledInCustomizeMode.
-		m_pPopup = NULL;
+		m_pPopup = nullptr;
 	}
 	else
 	{
@@ -423,6 +449,23 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 	}
 }
 
+void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState )
+{
+	CScopedValue<COLORREF> scColor( &m_Color );
+	CScopedValue<COLORREF> scAutoColor( &m_ColorAutomatic );
+	CScopedValue<CString>  scAutoLabel( &m_strAutoColorText );
+
+	if ( ui::IsSysColor( m_Color ) )
+		if ( const CColorEntry* pColorEntry = CColorRepository::Instance()->GetSystemColorTable()->FindColor( m_Color ) )
+		{	// while drawing system colors, temporarily evaluate the color and display with label
+			scAutoLabel.SetValue( pColorEntry->GetName().c_str() );
+			scAutoColor.SetValue( ui::EvalColor( m_Color ) );
+			scColor.SetValue( CLR_NONE );		// fallback to Auto drawing mode: small color square + label
+		}
+
+	__super::OnDraw( pDC, rect, uiState );
+}
+
 void CColorPickerButton::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
@@ -459,6 +502,8 @@ BEGIN_MESSAGE_MAP( CColorPickerButton, CMFCColorButton )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateEnable )
 	ON_COMMAND( ID_EDIT_PASTE, OnPaste )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_PASTE, OnUpdatePaste )
+	ON_COMMAND( ID_RESET_DEFAULT, On_ResetColor )
+	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdate_ResetColor )
 	ON_COMMAND( ID_EDIT_LIST_ITEMS, On_CopyColorTable )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_LIST_ITEMS, OnUpdateEnable )
 	ON_COMMAND_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, On_SelectColorTable )
@@ -507,12 +552,25 @@ void CColorPickerButton::OnPaste( void )
 	COLORREF newColor;
 
 	if ( ui::PasteColor( &newColor ) )
-		SetColor( newColor, true );
+		UpdateColor( newColor );
 }
 
 void CColorPickerButton::OnUpdatePaste( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( ui::CanPasteColor() );
+}
+
+void CColorPickerButton::On_ResetColor( void )
+{
+	UpdateColor( CLR_NONE );
+}
+
+void CColorPickerButton::OnUpdate_ResetColor( CCmdUI* pCmdUI )
+{
+	bool isAutoColor = CLR_NONE == GetColor();
+
+	pCmdUI->Enable( !isAutoColor );
+	pCmdUI->SetCheck( isAutoColor );
 }
 
 void CColorPickerButton::On_CopyColorTable( void )

@@ -112,12 +112,14 @@ namespace mfc
 
 		nosy::CColorBar_* GetColorBar( void ) const { return m_pColorBar; }
 		void SetColorHost( const ui::IColorHost* pColorHost );
+
+		const CColorEntry* FindClickedBarColorEntry( void ) const;
 	private:
 		void StoreBtnColorEntries( void );
 		static void StoreButtonColorEntry( CMFCToolBarButton* pButton, const CColorEntry* pColorEntry );
 
 		const CColorEntry* FindColorEntry( COLORREF rawColor ) const;
-		bool FormatBtnColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const;
+		bool FormatColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const;
 
 		// ui::IToolTipsHandler interface
 		virtual bool Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point ) override;

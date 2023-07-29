@@ -22,7 +22,7 @@ namespace ui
 	// color table categories:
 	//
 	inline bool IsHalftoneTable( ui::StdColorTable tableType ) { return tableType >= ui::Halftone16_Colors && tableType <= ui::Halftone256_Colors; }
-	inline bool IsRepositoryTable( ui::StdColorTable tableType ) { return tableType >= ui::Standard_Colors && tableType <= ui::WindowsSys_Colors; }		// originally named colors in CColorRepository?
+	inline bool IsRepositoryTable( ui::StdColorTable tableType ) { return tableType >= ui::Office2003_Colors && tableType <= ui::WindowsSys_Colors; }		// originally named colors in CColorRepository?
 	inline bool IsWindowsSysTable( ui::StdColorTable tableType ) { return ui::WindowsSys_Colors == tableType; }
 	inline bool IsScratchTable( ui::StdColorTable tableType ) { return ui::Shades_Colors == tableType || ui::UserCustom_Colors == tableType; }
 }
@@ -79,6 +79,7 @@ public:
 
 	ui::StdColorTable GetTableType( void ) const { return m_tableType; }
 	const std::tstring& GetTableName( void ) const;
+	const std::tstring& GetShortTableName( void ) const;
 
 	bool IsHalftoneTable( void ) const { return ui::IsHalftoneTable( GetTableType() ); }
 
@@ -164,7 +165,7 @@ private:
 };
 
 
-class CColorRepository : public CColorStore			// contains {ui::Standard_Colors, ... ui::WindowsSys_Colors}
+class CColorRepository : public CColorStore			// contains {ui::Office2003_Colors, ... ui::WindowsSys_Colors}
 {
 	CColorRepository( void );
 	~CColorRepository() { Clear(); }		// owns the color tables
@@ -173,7 +174,6 @@ public:
 
 	const CColorTable* GetSystemColorTable( void ) const { return m_pWindowsSystemTable; }
 private:
-	static CColorTable* MakeTable_Standard( void );
 	static CColorTable* MakeTable_Dev( void );
 	static CColorTable* MakeTable_Office2003( void );
 	static CColorTable* MakeTable_Office2007( void );

@@ -21,11 +21,18 @@ namespace ui
 	const CEnumTags& GetTags_ColorTable( void )
 	{
 		static const CEnumTags s_tags( _T("\
-Standard Colors|Office 2003 Colors|Office 2007 Colors|DirectX (X11) Colors|HTML Colors|\
-Windows (System) Colors|\
+Office 2003 Colors|Office 2007 Colors|DirectX (X11) Colors|HTML Colors|\
+Windows System Colors|\
 Halftone: 16 Colors|Halftone: 20 Colors|Halftone: 256 Colors|\
 Color Shades|User Custom Colors|\
 Development Colors"
+),
+		_T("\
+Office 2003|Office 2007|DirectX (X11)|HTML|\
+Windows|\
+Halftone 16|Halftone 20|Halftone 256|\
+Color Shades|User Custom|\
+Development"
 ) );
 		return s_tags;
 	}
@@ -90,7 +97,7 @@ std::tstring CColorEntry::FormatColor( const TCHAR* pFieldSep /*= s_fieldSep*/, 
 	std::tstring colorName = m_name;
 
 	if ( suffixTableName && m_pParentTable != nullptr && !m_pParentTable->IsHalftoneTable() )
-		stream::Tag( colorName, str::Enquote( m_pParentTable->GetTableName().c_str() ), _T(" ") );
+		stream::Tag( colorName, str::Enquote( m_pParentTable->GetShortTableName().c_str() ), _T(" ") );
 
 	if ( pFieldSep != nullptr )			// requesting full color name?
 		stream::Tag( colorName, ui::FormatColor( m_color, pFieldSep ), pFieldSep );
@@ -143,6 +150,11 @@ void CColorTable::StoreTableInfo( const CColorStore* pParentStore, UINT tableIte
 const std::tstring& CColorTable::GetTableName( void ) const
 {
 	return ui::GetTags_ColorTable().FormatUi( m_tableType );
+}
+
+const std::tstring& CColorTable::GetShortTableName( void ) const
+{
+	return ui::GetTags_ColorTable().FormatKey( m_tableType );
 }
 
 void CColorTable::Add( const CColorEntry& colorEntry )
@@ -481,7 +493,6 @@ CColorRepository::CColorRepository( void )
 	UINT tableItemId = ID_REPO_COLOR_TABLE_MIN;
 
 	// add color tables in ui::StdColorTable order:
-	AddTable( MakeTable_Standard(), tableItemId++ );
 	AddTable( MakeTable_Office2003(), tableItemId++ );
 	AddTable( MakeTable_Office2007(), tableItemId++ );
 	AddTable( MakeTable_DirectX(), tableItemId++ );
@@ -536,98 +547,50 @@ CColorTable* CColorRepository::MakeTable_WindowsSystem( void )
 	return pSysTable;
 }
 
-CColorTable* CColorRepository::MakeTable_Standard( void )
-{
-	CColorTable* pTable = new CColorTable( ui::Standard_Colors, color::_Standard_ColorCount, 8 );		// 40 colors: 8 columns x 6 rows
-
-	pTable->Add( COLOR_ENTRY( color::Black ) );
-	pTable->Add( COLOR_ENTRY( color::DarkRed ) );
-	pTable->Add( COLOR_ENTRY( color::Red ) );
-	pTable->Add( COLOR_ENTRY( color::Magenta ) );
-	pTable->Add( COLOR_ENTRY( color::Rose ) );
-	pTable->Add( COLOR_ENTRY( color::Brown ) );
-	pTable->Add( COLOR_ENTRY( color::Orange ) );
-	pTable->Add( COLOR_ENTRY( color::LightOrange ) );
-	pTable->Add( COLOR_ENTRY( color::Gold ) );
-	pTable->Add( COLOR_ENTRY( color::Tan ) );
-	pTable->Add( COLOR_ENTRY( color::OliveGreen ) );
-	pTable->Add( COLOR_ENTRY( color::DarkYellow ) );
-	pTable->Add( COLOR_ENTRY( color::Lime ) );
-	pTable->Add( COLOR_ENTRY( color::Yellow ) );
-	pTable->Add( COLOR_ENTRY( color::LightYellow ) );
-	pTable->Add( COLOR_ENTRY( color::DarkGreen ) );
-	pTable->Add( COLOR_ENTRY( color::Green ) );
-	pTable->Add( COLOR_ENTRY( color::SeaGreen ) );
-	pTable->Add( COLOR_ENTRY( color::BrightGreen ) );
-	pTable->Add( COLOR_ENTRY( color::LightGreen ) );
-	pTable->Add( COLOR_ENTRY( color::DarkTeal ) );
-	pTable->Add( COLOR_ENTRY( color::Teal ) );
-	pTable->Add( COLOR_ENTRY( color::Aqua ) );
-	pTable->Add( COLOR_ENTRY( color::Turquoise ) );
-	pTable->Add( COLOR_ENTRY( color::LightTurquoise ) );
-	pTable->Add( COLOR_ENTRY( color::DarkBlue ) );
-	pTable->Add( COLOR_ENTRY( color::Blue ) );
-	pTable->Add( COLOR_ENTRY( color::LightBlue ) );
-	pTable->Add( COLOR_ENTRY( color::SkyBlue ) );
-	pTable->Add( COLOR_ENTRY( color::PaleBlue ) );
-	pTable->Add( COLOR_ENTRY( color::Indigo ) );
-	pTable->Add( COLOR_ENTRY( color::BlueGray ) );
-	pTable->Add( COLOR_ENTRY( color::Violet ) );
-	pTable->Add( COLOR_ENTRY( color::Plum ) );
-	pTable->Add( COLOR_ENTRY( color::Lavender ) );
-	pTable->Add( CColorEntry( color::Gray80, "Gray 80%" ) );
-	pTable->Add( CColorEntry( color::Gray50, "Gray 50%" ) );
-	pTable->Add( CColorEntry( color::Gray40, "Gray 40%" ) );
-	pTable->Add( CColorEntry( color::Gray25, "Gray 25%" ) );
-	pTable->Add( COLOR_ENTRY( color::White ) );
-
-	return pTable;
-}
-
 CColorTable* CColorRepository::MakeTable_Office2003( void )
 {
-	CColorTable* pTable = new CColorTable( ui::Office2003_Colors, color::Office2003::_Office2003_ColorCount, 8 );		// 40 colors: 8 columns x 5 rows
+	CColorTable* pTable = new CColorTable( ui::Office2003_Colors, color::_Office2003_ColorCount, 8 );		// 40 colors: 8 columns x 5 rows
 
-	pTable->Add( COLOR_ENTRY( color::Office2003::Black ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Brown ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::OliveGreen ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::DarkGreen ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::DarkTeal ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::DarkBlue ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Indigo ) );
-	pTable->Add( CColorEntry( color::Office2003::Gray80, "Gray 80%" ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::DarkRed ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Orange ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::DarkYellow ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Green ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Teal ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Blue ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::BlueGray ) );
-	pTable->Add( CColorEntry( color::Office2003::Gray50, "Gray 50%" ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Red ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::LightOrange ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Lime ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::SeaGreen ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Aqua ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::LightBlue ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Violet ) );
-	pTable->Add( CColorEntry( color::Office2003::Gray40, "Gray 40%" ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Pink ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Gold ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Yellow ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::BrightGreen ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Turqoise ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::SkyBlue ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Plum ) );
-	pTable->Add( CColorEntry( color::Office2003::Gray25, "Gray 25%" ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Rose ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Tan ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::LightYellow ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::LightGreen ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::LightTurqoise ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::PaleBlue ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::Lavender ) );
-	pTable->Add( COLOR_ENTRY( color::Office2003::White ) );
+	pTable->Add( COLOR_ENTRY( color::Black ) );
+	pTable->Add( COLOR_ENTRY( color::Brown ) );
+	pTable->Add( COLOR_ENTRY( color::OliveGreen ) );
+	pTable->Add( COLOR_ENTRY( color::DarkGreen ) );
+	pTable->Add( COLOR_ENTRY( color::DarkTeal ) );
+	pTable->Add( COLOR_ENTRY( color::DarkBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Indigo ) );
+	pTable->Add( CColorEntry( color::Gray80, "Gray 80%" ) );
+	pTable->Add( COLOR_ENTRY( color::DarkRed ) );
+	pTable->Add( COLOR_ENTRY( color::Orange ) );
+	pTable->Add( COLOR_ENTRY( color::DarkYellow ) );
+	pTable->Add( COLOR_ENTRY( color::Green ) );
+	pTable->Add( COLOR_ENTRY( color::Teal ) );
+	pTable->Add( COLOR_ENTRY( color::Blue ) );
+	pTable->Add( COLOR_ENTRY( color::BlueGray ) );
+	pTable->Add( CColorEntry( color::Gray50, "Gray 50%" ) );
+	pTable->Add( COLOR_ENTRY( color::Red ) );
+	pTable->Add( COLOR_ENTRY( color::LightOrange ) );
+	pTable->Add( COLOR_ENTRY( color::Lime ) );
+	pTable->Add( COLOR_ENTRY( color::SeaGreen ) );
+	pTable->Add( COLOR_ENTRY( color::Aqua ) );
+	pTable->Add( COLOR_ENTRY( color::LightBlue ) );
+	pTable->Add( CColorEntry( color::Violet, "Violet (Dark Magenta)" ) );
+	pTable->Add( CColorEntry( color::Gray40, "Gray 40%" ) );
+	pTable->Add( CColorEntry( color::Magenta, "Magenta (Pink)" ) );
+	pTable->Add( COLOR_ENTRY( color::Gold ) );
+	pTable->Add( COLOR_ENTRY( color::Yellow ) );
+	pTable->Add( COLOR_ENTRY( color::BrightGreen ) );
+	pTable->Add( COLOR_ENTRY( color::Turqoise ) );
+	pTable->Add( COLOR_ENTRY( color::SkyBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Plum ) );
+	pTable->Add( CColorEntry( color::Gray25, "Gray 25%" ) );
+	pTable->Add( COLOR_ENTRY( color::Rose ) );
+	pTable->Add( COLOR_ENTRY( color::Tan ) );
+	pTable->Add( COLOR_ENTRY( color::LightYellow ) );
+	pTable->Add( COLOR_ENTRY( color::LightGreen ) );
+	pTable->Add( COLOR_ENTRY( color::LightTurqoise ) );
+	pTable->Add( COLOR_ENTRY( color::PaleBlue ) );
+	pTable->Add( COLOR_ENTRY( color::Lavender ) );
+	pTable->Add( COLOR_ENTRY( color::White ) );
 
 	return pTable;
 }

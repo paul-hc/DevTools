@@ -102,7 +102,7 @@ bool CAccelTable::LoadOnce( UINT accelId )
 	return true;
 }
 
-void CAccelTable::Create( ACCEL keys[], int count )
+void CAccelTable::Create( const ACCEL keys[], int count )
 {
 	if ( m_hAccel != nullptr )
 		::DestroyAcceleratorTable( m_hAccel );
@@ -125,7 +125,7 @@ void CAccelTable::Augment( UINT accelId )
 	}
 }
 
-void CAccelTable::Augment( ACCEL keys[], int count )
+void CAccelTable::Augment( const ACCEL keys[], int count )
 {
 	if ( nullptr == m_hAccel )
 		Create( keys, count );

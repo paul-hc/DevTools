@@ -17,11 +17,11 @@ public:
 
 	void Load( UINT accelId );
 	bool LoadOnce( UINT accelId );								// convenient for static data member initialization
-	void Create( ACCEL keys[], int count );
-	void Create( std::vector<ACCEL>& keys ) { Create( ARRAY_SPAN_V( keys ) ); }
+	void Create( const ACCEL keys[], int count );
+	void Create( const std::vector<ACCEL>& keys ) { Create( ARRAY_SPAN_V( keys ) ); }
 
 	void Augment( UINT accelId );
-	void Augment( ACCEL keys[], int count );
+	void Augment( const ACCEL keys[], int count );
 
 	bool Translate( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus = nullptr ) const;
 	bool TranslateIfOwnsFocus( MSG* pMsg, HWND hTargetWnd, HWND hCondFocus ) const;

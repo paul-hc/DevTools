@@ -684,7 +684,7 @@ CMenu* CFileBrowser::BuildMenu( void )
 		CTargetMenu::AppendContextSubMenu( pPopupMenu, app::FileSortOrderPopup );
 	}
 
-	ui::DeleteMenuTrailingSeparators( pPopupMenu );
+	ui::CleanupMenuSeparators( pPopupMenu );
 
 	ENSURE( ui::EnsureDeepValidMenu( pPopupMenu->GetSafeHmenu() ) );
 	return pPopupMenu;
