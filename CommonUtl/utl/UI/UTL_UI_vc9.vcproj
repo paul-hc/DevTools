@@ -847,6 +847,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WindowHook_fwd.h"
+				>
+			</File>
+			<File
 				RelativePath=".\WindowPlacement.cpp"
 				>
 			</File>
