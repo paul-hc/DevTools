@@ -66,12 +66,12 @@ namespace mfc
 
 		// base overrides
 	public:
-		virtual void SetImage( int iImage );
-		virtual void SetColor( COLORREF color, BOOL notify = TRUE );
-		virtual BOOL OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& colorRes );
+		virtual void SetImage( int iImage ) override;
+		virtual void SetColor( COLORREF color, BOOL notify = TRUE ) override;
+		virtual BOOL OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) override;
 	protected:
-		virtual void CopyFrom( const CMFCToolBarButton& src );
-		virtual CMFCPopupMenu* CreatePopupMenu( void );
+		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
+		virtual CMFCPopupMenu* CreatePopupMenu( void ) override;
 	private:
 		const CColorTable* m_pColorTable;
 		const CColorTable* m_pDocColorTable;		// typically for the "Color Shades" table
@@ -138,7 +138,7 @@ namespace mfc
 		const CColorTable* m_pDocColorTable;
 
 		nosy::CColorBar_* m_pColorBar;						// points to CMFCColorPopupMenu::m_wndColorBar data-member, with access to protected data-members
-		std::auto_ptr<CWindowHook> m_pColorBarTipsHook;		// for formatted color entry based handling
+		std::auto_ptr<CWindowHook> m_pColorBarHook;		// handles formatted color entry + some button clicks
 		COLORREF m_rawAutoColor;
 		COLORREF m_rawSelColor;
 

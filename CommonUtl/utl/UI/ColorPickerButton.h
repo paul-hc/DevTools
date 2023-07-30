@@ -109,12 +109,12 @@ protected:
 	// base overrides:
 	virtual void UpdateColor( COLORREF color ) override;
 	virtual void OnShowColorPopup( void ) override;
-	virtual void OnDraw( CDC* pDC, const CRect& rect, UINT uiState );
+	virtual void OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) override;
 
 	// generated stuff
 public:
-	virtual void PreSubclassWindow( void );
-	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual void PreSubclassWindow( void ) override;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
 protected:
 	afx_msg void OnDestroy( void );

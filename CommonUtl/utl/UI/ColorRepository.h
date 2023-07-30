@@ -45,7 +45,7 @@ public:
 	const CColorTable* GetParentTable( void ) const { return m_pParentTable; }
 
 	COLORREF GetColor( void ) const { return m_color; }
-	COLORREF EvalColor( void ) const { return ui::EvalColor( m_color ); }
+	ui::TDisplayColor EvalColor( void ) const { return ui::EvalColor( m_color ); }
 
 	const std::tstring& GetName( void ) const { return m_name; }
 	void SetName( const std::tstring& name ) { m_name = name; }
@@ -67,7 +67,7 @@ class CColorTable : private utl::noncopyable
 {
 public:
 	CColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount = 0 /*default color bar columns*/ );
-	~CColorTable();
+	virtual ~CColorTable();
 
 	void Reset( size_t capacity, int layoutCount );
 	void Clear( void );
@@ -86,9 +86,11 @@ public:
 	bool IsEmpty( void ) const { return m_colors.empty(); }
 	const std::vector<CColorEntry>& GetColors( void ) const { return m_colors; }
 	const CColorEntry& GetColorAt( size_t pos ) const { ASSERT( pos < m_colors.size() ); return m_colors[ pos ]; }
+
+	ui::TDisplayColor GetDisplayColorAt( size_t pos ) const { return EncodeRawColor( GetColorAt( pos ).GetColor() ); }
+
 	const CColorEntry* FindColor( COLORREF rawColor ) const;
 	bool ContainsColor( COLORREF rawColor ) const { return FindColor( rawColor ) != nullptr; }
-	const CColorEntry* FindEvaluatedColor( COLORREF color ) const;
 
 	int GetColumnCount( void ) const;
 	bool GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const;
@@ -101,6 +103,9 @@ public:
 	void SetupMfcColors( const mfc::TColorArray& customColors, int columnCount = 0 );
 
 	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades
+protected:
+	virtual void OnTableChanged( void ) {}
+	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const { ASSERT( ui::IsRealColor( rawColor ) ); return rawColor; }
 private:
 	const ui::StdColorTable m_tableType;
 	std::vector<CColorEntry> m_colors;
@@ -108,6 +113,23 @@ private:
 
 	const CColorStore* m_pParentStore;
 	UINT m_tableItemId;						// menu item ID, used in context menus
+};
+
+
+#include <unordered_map>
+
+
+class CSystemColorTable : public CColorTable	// table of Windows System colors, that require custom encoding for display colors
+{
+public:
+	CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount = 0 );
+	virtual ~CSystemColorTable();
+protected:
+	// base overrides
+	virtual void OnTableChanged( void ) override;
+	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const override;
+private:
+	std::unordered_map<COLORREF, ui::TDisplayColor> m_displaySysColors;		// raw -> unique encoded colors, to disambiguate selected color in MFC color bars
 };
 
 
@@ -213,22 +235,6 @@ namespace func
 			ASSERT_PTR( pColorEntry );
 			return pColorEntry->GetName() + pSep + _T('(') + pColorEntry->GetParentTable()->GetTableName() + _T(')');
 		}
-	};
-}
-
-
-namespace pred
-{
-	struct HasEvalColor
-	{
-		HasEvalColor( COLORREF rawColor ) : m_color( ui::EvalColor( rawColor ) ) {}
-
-		bool operator()( const CColorEntry& colorEntry ) const
-		{
-			return m_color == colorEntry.EvalColor();
-		}
-	private:
-		COLORREF m_color;
 	};
 }
 

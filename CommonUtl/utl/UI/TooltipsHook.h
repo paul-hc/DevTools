@@ -15,7 +15,7 @@ public:
 
 	void HookControl( CWnd* pCtrlToHook );
 protected:
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
 protected:
 	bool OnTtnNeedText( NMHDR* pNmHdr );
 protected:
@@ -36,7 +36,7 @@ public:
 
 	static CWindowHook* CreateHook( CWnd* pToolTipOwnerWnd, ui::IToolTipsHandler* pToolTipsHandler, CToolTipCtrl* pToolTip );		// by default managed by the client (m_autoDelete = false)
 protected:
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
 protected:
 	bool OnTtnNeedText( NMHDR* pNmHdr );		// handles only TTN_NEEDTEXT (which is TTN_NEEDTEXTW on Unicode builds)
 protected:

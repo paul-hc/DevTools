@@ -43,7 +43,7 @@ public:
 		m_pWnd->SetWindowPos( nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER );
 	}
 protected:
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
 private:
 	CWnd* m_pWnd;
 	INonClientRender* m_pCallback;

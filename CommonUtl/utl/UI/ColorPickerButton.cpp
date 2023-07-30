@@ -118,7 +118,8 @@ CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nu
 
 	const ACCEL accelKeys[] =
 	{
-		{ FVIRTKEY, VK_DELETE, ID_RESET_DEFAULT }
+		{ FVIRTKEY, VK_DELETE, ID_RESET_DEFAULT },
+		{ FVIRTKEY | FCONTROL | FSHIFT, 'T', ID_EDIT_LIST_ITEMS }
 	};
 	m_accel.Augment( ARRAY_SPAN( accelKeys ) );
 }
@@ -449,7 +450,7 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 	}
 }
 
-void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState )
+void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) override
 {
 	CScopedValue<COLORREF> scColor( &m_Color );
 	CScopedValue<COLORREF> scAutoColor( &m_ColorAutomatic );
@@ -466,7 +467,7 @@ void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState )
 	__super::OnDraw( pDC, rect, uiState );
 }
 
-void CColorPickerButton::PreSubclassWindow( void )
+void CColorPickerButton::PreSubclassWindow( void ) override
 {
 	__super::PreSubclassWindow();
 
@@ -474,7 +475,7 @@ void CColorPickerButton::PreSubclassWindow( void )
 		LoadFromRegistry();
 }
 
-BOOL CColorPickerButton::PreTranslateMessage( MSG* pMsg )
+BOOL CColorPickerButton::PreTranslateMessage( MSG* pMsg ) override
 {
 	if ( m_accel.Translate( pMsg, this->m_hWnd ) )
 		return TRUE;

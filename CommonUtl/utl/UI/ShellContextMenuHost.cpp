@@ -387,13 +387,13 @@ public:
 	CExplorerSubMenuHook( CShellLazyContextMenuHost* pLazyHost, CWnd* pWndOwner ) : CWindowHook( false ), m_pLazyHost( pLazyHost ) { HookWindow( pWndOwner->GetSafeHwnd() ); }
 	virtual ~CExplorerSubMenuHook() { if ( IsHooked() ) UnhookWindow(); }
 protected:
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );		// base override
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
 private:
 	CShellLazyContextMenuHost* m_pLazyHost;
 };
 
 
-LRESULT CExplorerSubMenuHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CExplorerSubMenuHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
 {
 	if ( WM_INITMENUPOPUP == message )
 		if ( (HMENU)wParam == m_pLazyHost->GetPopupMenu()->GetSafeHmenu() )

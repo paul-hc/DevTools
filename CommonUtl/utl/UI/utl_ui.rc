@@ -502,16 +502,18 @@ BEGIN
             MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
             MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
             MENUITEM SEPARATOR
-            MENUITEM "&Default Color",              ID_RESET_DEFAULT
+            MENUITEM "Copy Color &Table",           ID_EDIT_LIST_ITEMS
+            MENUITEM SEPARATOR
+            MENUITEM "&Automatic Color\tDel",       ID_RESET_DEFAULT
         END
         POPUP "<context-menu>"
         BEGIN
             MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
             MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
             MENUITEM SEPARATOR
-            MENUITEM "Copy Color &Table",           ID_EDIT_LIST_ITEMS
+            MENUITEM "Copy Color &Table\tCtrl+Shift+T", ID_EDIT_LIST_ITEMS
             MENUITEM SEPARATOR
-            MENUITEM "&Default Color",              ID_RESET_DEFAULT
+            MENUITEM "&Automatic Color\tDel",       ID_RESET_DEFAULT
             MENUITEM SEPARATOR
             POPUP "&Select Color Table"
             BEGIN

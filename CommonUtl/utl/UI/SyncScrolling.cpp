@@ -14,13 +14,13 @@ class CThumbTrackScrollHook : public CWindowHook
 public:
 	CThumbTrackScrollHook( CSyncScrolling* pOwner, CWnd* pCtrl ) : CWindowHook( true ), m_pOwner( pOwner ) { HookWindow( pCtrl->GetSafeHwnd() ); }
 private:
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
 private:
 	CSyncScrolling* m_pOwner;
 };
 
 
-LRESULT CThumbTrackScrollHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CThumbTrackScrollHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
 {
 	LRESULT result = CWindowHook::WindowProc( message, wParam, lParam );
 	if ( WM_VSCROLL == message || WM_HSCROLL == message )

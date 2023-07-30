@@ -48,7 +48,7 @@ public:
 
 	void Stop( void );
 protected:
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
 private:
 	ISequenceTimerCallback* m_pCallback;
 	UINT_PTR m_eventId;

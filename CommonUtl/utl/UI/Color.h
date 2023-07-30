@@ -30,8 +30,12 @@ namespace ui
 
 
 	inline bool IsRealColor( COLORREF rawColor ) { return 0 == GetColorFlags( rawColor ); }		// a real RGB color: not CLR_NONE, CLR_DEFAULT, sys-color, palette-index
-	COLORREF EvalColor( COLORREF rawColor );
-	inline COLORREF EvalColorIf( COLORREF rawColor, bool doEvalColor ) { return doEvalColor ? EvalColor( rawColor ) : rawColor; }
+
+
+	typedef COLORREF TDisplayColor;
+
+	TDisplayColor EvalColor( COLORREF rawColor );
+	inline TDisplayColor EvalColorIf( COLORREF rawColor, bool doEvalColor ) { return doEvalColor ? EvalColor( rawColor ) : rawColor; }
 
 
 	// system color index (Win32)
@@ -42,8 +46,8 @@ namespace ui
 
 
 	// conditional color
-	inline COLORREF GetActualColor( COLORREF rawColor, COLORREF defaultColor ) { return IsRealColor( rawColor ) ? rawColor : defaultColor; }
-	inline COLORREF GetActualColorSysdef( COLORREF rawColor, TSysColorIndex defaultSysIndex ) { return IsRealColor( rawColor ) ? rawColor : ::GetSysColor( defaultSysIndex ); }
+	inline TDisplayColor GetActualColor( COLORREF rawColor, COLORREF defaultColor ) { return IsRealColor( rawColor ) ? rawColor : defaultColor; }
+	inline TDisplayColor GetActualColorSysdef( COLORREF rawColor, TSysColorIndex defaultSysIndex ) { return IsRealColor( rawColor ) ? rawColor : ::GetSysColor( defaultSysIndex ); }
 
 
 	enum StdTranspColor { Transp_LowColor = color::LightGray, Transp_TrueColor = color::ToolStripPink };

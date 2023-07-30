@@ -131,7 +131,7 @@ namespace mfc
 	}
 
 
-	void CColorMenuButton::SetImage( int iImage )
+	void CColorMenuButton::SetImage( int iImage ) override
 	{
 		//__super::SetImage( iImage );
 
@@ -153,7 +153,7 @@ namespace mfc
 		}
 	}
 
-	void CColorMenuButton::SetColor( COLORREF color, BOOL notify )
+	void CColorMenuButton::SetColor( COLORREF color, BOOL notify ) override
 	{
 		if ( notify && m_pPopupMenu != nullptr )
 			if ( const CColorEntry* pClickedColorEntry = checked_static_cast<const mfc::CColorPopupMenu*>( m_pPopupMenu )->FindClickedBarColorEntry() )
@@ -167,14 +167,14 @@ namespace mfc
 				ui::SendCommand( pMessageWnd->GetSafeHwnd(), m_nID, CMBN_COLORSELECTED, m_pPopupMenu->GetMenuBar()->GetSafeHwnd() );
 	}
 
-	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& colorRes )
+	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) override
 	{
 		COLORREF color = colorDefault;
 
 		if ( !ui::EditColor( &color, GetMessageWnd(), true) )
 			return false;
 
-		colorRes = color;
+		rColor = color;
 		return true;
 	}
 
@@ -189,7 +189,7 @@ namespace mfc
 		return nullptr;
 	}
 
-	void CColorMenuButton::CopyFrom( const CMFCToolBarButton& src )
+	void CColorMenuButton::CopyFrom( const CMFCToolBarButton& src ) override
 	{
 		__super::CopyFrom( src );
 
@@ -199,7 +199,7 @@ namespace mfc
 		m_pDocColorTable = srcButton.m_pDocColorTable;
 	}
 
-	CMFCPopupMenu* CColorMenuButton::CreatePopupMenu( void )
+	CMFCPopupMenu* CColorMenuButton::CreatePopupMenu( void ) override
 	{
 		//return __super::CreatePopupMenu();
 
@@ -279,7 +279,7 @@ namespace mfc
 	{
 		REQUIRE( pEditorHost );
 		CWnd* pParentWnd = dynamic_cast<CWnd*>( pEditorHost );
-		COLORREF color = ui::EvalColor( pEditorHost->GetActualColor() );
+		ui::TDisplayColor color = ui::EvalColor( pEditorHost->GetActualColor() );
 
 		if ( !ui::EditColor( &color, pParentWnd, true) )
 			return false;
@@ -464,8 +464,8 @@ namespace mfc
 		StoreBtnColorEntries();			// store pointers color entry into m_dwdItemData
 
 		// install hook to override handling of TTN_NEEDTEXT notifications for color buttons with an attached CColorEntry
-		m_pColorBarTipsHook.reset( CToolTipsHandlerHook::CreateHook( m_pColorBar, this, mfc::ToolBar_GetToolTip( m_pColorBar ) ) );
-		m_pColorBarTipsHook->SetHookHandler( this );		// for custom handling of WM_LBUTTONUP on More Color button
+		m_pColorBarHook.reset( CToolTipsHandlerHook::CreateHook( m_pColorBar, this, mfc::ToolBar_GetToolTip( m_pColorBar ) ) );
+		m_pColorBarHook->SetHookHandler( this );		// for custom handling of WM_LBUTTONUP on More Color button
 		return 0;
 	}
 }

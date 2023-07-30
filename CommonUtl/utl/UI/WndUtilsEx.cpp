@@ -69,7 +69,7 @@ CNonClientDraw::~CNonClientDraw()
 		UnhookWindow();
 }
 
-LRESULT CNonClientDraw::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CNonClientDraw::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
 {
 	LRESULT result = CWindowHook::WindowProc( message, wParam, lParam );
 	if ( WM_NCPAINT == message && m_pCallback != nullptr )

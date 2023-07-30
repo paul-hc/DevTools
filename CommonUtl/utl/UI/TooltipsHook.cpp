@@ -25,7 +25,7 @@ void CTooltipsHook::HookControl( CWnd* pCtrlToHook )
 	m_pCustomCmdInfo = dynamic_cast<ui::ICustomCmdInfo*>( pCtrlToHook->GetParent() );
 }
 
-LRESULT CTooltipsHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CTooltipsHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
 {
 	if ( WM_NOTIFY == message )
 	{
@@ -36,7 +36,7 @@ LRESULT CTooltipsHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
 				return TRUE;
 	}
 
-	return CWindowHook::WindowProc( message, wParam, lParam );
+	return __super::WindowProc( message, wParam, lParam );
 }
 
 bool CTooltipsHook::OnTtnNeedText( NMHDR* pNmHdr )
@@ -71,7 +71,7 @@ CWindowHook* CToolTipsHandlerHook::CreateHook( CWnd* pToolTipOwnerWnd, ui::ITool
 	return pHook;
 }
 
-LRESULT CToolTipsHandlerHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CToolTipsHandlerHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
 {
 	if ( WM_NOTIFY == message )
 	{

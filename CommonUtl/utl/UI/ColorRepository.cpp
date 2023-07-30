@@ -145,6 +145,7 @@ void CColorTable::StoreTableInfo( const CColorStore* pParentStore, UINT tableIte
 	ASSERT_NULL( m_pParentStore );
 	m_pParentStore = pParentStore;
 	m_tableItemId = tableItemId;
+	OnTableChanged();
 }
 
 const std::tstring& CColorTable::GetTableName( void ) const
@@ -166,15 +167,6 @@ void CColorTable::Add( const CColorEntry& colorEntry )
 const CColorEntry* CColorTable::FindColor( COLORREF rawColor ) const
 {
 	std::vector<CColorEntry>::const_iterator itFound = std::find( m_colors.begin(), m_colors.end(), rawColor );
-	if ( itFound == m_colors.end() )
-		return nullptr;
-
-	return &*itFound;
-}
-
-const CColorEntry* CColorTable::FindEvaluatedColor( COLORREF color ) const
-{
-	std::vector<CColorEntry>::const_iterator itFound = std::find_if( m_colors.begin(), m_colors.end(), pred::HasEvalColor( color ) );
 	if ( itFound == m_colors.end() )
 		return nullptr;
 
@@ -212,13 +204,13 @@ void CColorTable::QueryMfcColors( OUT mfc::TColorArray& rColorArray ) const
 	rColorArray.SetSize( m_colors.size() );
 
 	for ( size_t i = 0; i != m_colors.size(); ++i )
-		rColorArray[i] = m_colors[i].EvalColor();
+		rColorArray[i] = GetDisplayColorAt( i );
 }
 
 void CColorTable::QueryMfcColors( OUT mfc::TColorList& rColorList ) const
 {
-	for ( std::vector<CColorEntry>::const_iterator itColorEntry = m_colors.begin(); itColorEntry != m_colors.end(); ++itColorEntry )
-		rColorList.AddTail( itColorEntry->EvalColor() );
+	for ( size_t i = 0; i != m_colors.size(); ++i )
+		rColorList.AddTail( GetDisplayColorAt( i ) );
 }
 
 void CColorTable::SetupMfcColors( const mfc::TColorArray& customColors, int columnCount )
@@ -241,6 +233,8 @@ void CColorTable::SetupMfcColors( const mfc::TColorArray& customColors, int colu
 		else
 			pColorEntry->m_name.clear();
 	}
+
+	OnTableChanged();
 }
 
 namespace func
@@ -312,7 +306,54 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 			Add( colorEntry );
 		}
 
+	OnTableChanged();
 	return m_colors.size();
+}
+
+
+// CSystemColorTable implementation
+
+CSystemColorTable::CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount )
+	: CColorTable( tableType, capacity, layoutCount )
+{
+}
+
+CSystemColorTable::~CSystemColorTable()
+{
+}
+
+void CSystemColorTable::OnTableChanged( void )
+{
+	__super::OnTableChanged();
+
+	std::vector<ui::TDisplayColor> uniqueColors;
+
+	m_displaySysColors.clear();
+	for ( std::vector<CColorEntry>::const_iterator itColorEntry = GetColors().begin(), itEnd = GetColors().end(); itColorEntry != itEnd; ++itColorEntry )
+	{
+		COLORREF rawColor = itColorEntry->GetColor();
+
+		if ( ui::IsSysColor( rawColor ) )		// only system colors need encoding
+		{
+			ui::TDisplayColor displayColor = ui::EvalColor( rawColor );
+			const int redShiftBy = GetRValue( displayColor ) < 240 ? 1 : -1;
+
+			// in case of collision with existing encoded color, encode a unique color nearby by shifting slightly the RED component
+			while ( utl::Contains( uniqueColors, displayColor ) )
+				displayColor = RGB( GetRValue( displayColor ) + redShiftBy, GetGValue( displayColor ), GetBValue( displayColor ) );
+
+			uniqueColors.push_back( displayColor );
+			m_displaySysColors[ rawColor ] = displayColor;
+		}
+	}
+}
+
+ui::TDisplayColor CSystemColorTable::EncodeRawColor( COLORREF rawColor ) const
+{
+	if ( const ui::TDisplayColor* pEncodedSysColor = utl::FindValuePtr( m_displaySysColors, rawColor ) )
+		return *pEncodedSysColor;
+
+	return __super::EncodeRawColor( rawColor );
 }
 
 
@@ -510,7 +551,7 @@ const CColorRepository* CColorRepository::Instance( void )
 
 CColorTable* CColorRepository::MakeTable_WindowsSystem( void )
 {
-	CColorTable* pSysTable = new CColorTable( ui::WindowsSys_Colors, 31, 8 );		// 31 colors: 2 columns x 16 rows
+	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, 31, 8 );		// 31 colors: 2 columns x 16 rows
 
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BACKGROUND ), _T("Desktop Background") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_WINDOW ), _T("Window Background") ) );
