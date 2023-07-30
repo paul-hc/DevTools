@@ -233,6 +233,7 @@ namespace mfc
 									  COLORREF colorAuto, UINT uiCmdID, BOOL stdColorDlg /*= false*/ )
 		: CMFCColorPopupMenu( colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, horzDockRows, vertDockColumns, colorAuto, uiCmdID, stdColorDlg )
 		, m_pParentMenuBtn( pParentMenuBtn )
+		, m_pEditorHost( nullptr )
 		, m_pColorTable( nullptr )
 		, m_pDocColorTable( nullptr )
 		, m_rawAutoColor( CLR_NONE )
@@ -253,6 +254,7 @@ namespace mfc
 									  mfc::TColorList& docColors, int columns, COLORREF colorAuto )
 		: CMFCColorPopupMenu( pParentPickerBtn, colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, colorAuto )
 		, m_pParentMenuBtn( nullptr )
+		, m_pEditorHost( nullptr )
 		, m_pColorTable( nullptr )
 		, m_pDocColorTable( nullptr )
 		, m_rawAutoColor( CLR_NONE )
@@ -266,11 +268,25 @@ namespace mfc
 	{
 	}
 
-	void CColorPopupMenu::SetColorHost( const ui::IColorHost* pColorHost )
+	void CColorPopupMenu::SetColorEditorHost( ui::IColorEditorHost* pEditorHost )
 	{	// called by picker button that implements ui::IColorHost interface
-		ASSERT_PTR( pColorHost );
-		m_pColorTable = pColorHost->GetSelColorTable();
-		m_pDocColorTable = pColorHost->GetDocColorTable();
+		ASSERT_PTR( pEditorHost );
+		m_pEditorHost = pEditorHost;
+		m_pColorTable = pEditorHost->GetSelColorTable();
+		m_pDocColorTable = pEditorHost->GetDocColorTable();
+	}
+
+	bool CColorPopupMenu::OpenColorDialog( ui::IColorEditorHost* pEditorHost )
+	{
+		REQUIRE( pEditorHost );
+		CWnd* pParentWnd = dynamic_cast<CWnd*>( pEditorHost );
+		COLORREF color = ui::EvalColor( pEditorHost->GetActualColor() );
+
+		if ( !ui::EditColor( &color, pParentWnd, true) )
+			return false;
+
+		pEditorHost->SetColor( color, true );
+		return true;
 	}
 
 	const CColorEntry* CColorPopupMenu::FindClickedBarColorEntry( void ) const
@@ -405,6 +421,35 @@ namespace mfc
 		return false;
 	}
 
+	bool CColorPopupMenu::Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* /*pHook*/ )
+	{
+		if ( WM_LBUTTONUP == msg.message )
+		{
+			REQUIRE( m_pColorBar->GetSafeHwnd() == msg.hwnd );
+
+			if ( nullptr == m_pParentMenuBtn && m_pEditorHost != nullptr )
+			{
+				if ( CMFCToolBarButton* pClickedButton = mfc::ToolBar_ButtonHitTest( m_pColorBar, CPoint( msg.lParam ) ) )
+				{
+					if ( m_pColorBar->IsMoreBtn( pClickedButton ) )
+					{
+						ui::IColorEditorHost* pEditorHost = m_pEditorHost;		// store it since this will get destroyed next
+
+						m_pColorBar->InvokeMenuCommand( 0, pClickedButton );	// destroy this popup menu the graceful way - it will delete 'this'
+						OpenColorDialog( pEditorHost );
+						rResult = 0;
+						return true;			// handled the message
+					}
+				}
+			}
+			else
+			{	// no need to override: CMFCColorBar redirects properly to parent CMFCColorMenuButton the OpenColorDialog() call, in this case CColorMenuButton::OpenColorDialog()
+			}
+		}
+
+		return false;
+	}
+
 	// message handlers
 
 	BEGIN_MESSAGE_MAP( CColorPopupMenu, CMFCColorPopupMenu )
@@ -420,6 +465,7 @@ namespace mfc
 
 		// install hook to override handling of TTN_NEEDTEXT notifications for color buttons with an attached CColorEntry
 		m_pColorBarTipsHook.reset( CToolTipsHandlerHook::CreateHook( m_pColorBar, this, mfc::ToolBar_GetToolTip( m_pColorBar ) ) );
+		m_pColorBarTipsHook->SetHookHandler( this );		// for custom handling of WM_LBUTTONUP on More Color button
 		return 0;
 	}
 }

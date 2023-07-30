@@ -354,7 +354,7 @@ void CColorPickerButton::ShowColorTablePopup( void )
 	mfc::CColorPopupMenu* pColorPopupMenu = new mfc::CColorPopupMenu( this, m_Colors, m_Color,
 																	  m_strAutoColorText, m_strOtherText, m_strDocColorsText,
 																	  m_lstDocColors, m_nColumns, m_ColorAutomatic );
-	pColorPopupMenu->SetColorHost( this );
+	pColorPopupMenu->SetColorEditorHost( this );
 	m_pPopup = pColorPopupMenu;
 
 	if ( !m_pPopup->Create( this, rect.left, rect.bottom, nullptr, m_bEnabledInCustomizeMode ) )

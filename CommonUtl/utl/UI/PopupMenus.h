@@ -79,6 +79,7 @@ namespace mfc
 }
 
 
+#include "WindowHook_fwd.h"
 #include "Control_fwd.h"
 #include <afxcolorpopupmenu.h>
 
@@ -89,10 +90,11 @@ namespace nosy { struct CColorBar_; }
 
 namespace mfc
 {
-	// Customized tracking popup color bar, that allows custom handling of color button tooltips
+	// Customized tracking popup color bar, that allows custom handling of color button tooltips and certain button commands.
 	//
 	class CColorPopupMenu : public CMFCColorPopupMenu
 		, private ui::IToolTipsHandler
+		, private ui::IWindowHookHandler
 	{
 	public:
 		// general constructor (pParentMenuBtn could be null)
@@ -111,20 +113,25 @@ namespace mfc
 		virtual ~CColorPopupMenu();
 
 		nosy::CColorBar_* GetColorBar( void ) const { return m_pColorBar; }
-		void SetColorHost( const ui::IColorHost* pColorHost );
+		void SetColorEditorHost( ui::IColorEditorHost* pEditorHost );
 
 		const CColorEntry* FindClickedBarColorEntry( void ) const;
 	private:
 		void StoreBtnColorEntries( void );
 		static void StoreButtonColorEntry( CMFCToolBarButton* pButton, const CColorEntry* pColorEntry );
+		static bool OpenColorDialog( ui::IColorEditorHost* pEditorHost );
 
 		const CColorEntry* FindColorEntry( COLORREF rawColor ) const;
 		bool FormatColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const;
 
 		// ui::IToolTipsHandler interface
 		virtual bool Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point ) override;
+
+		// ui::IWindowHookHandler interface
+		virtual bool Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* pHook ) override;	// to handle WM_LBUTTONUP on More Color button
 	private:
 		CColorMenuButton* m_pParentMenuBtn;
+		ui::IColorEditorHost* m_pEditorHost;
 		const CColorTable* m_pColorTable;
 		const CColorTable* m_pDocColorTable;
 

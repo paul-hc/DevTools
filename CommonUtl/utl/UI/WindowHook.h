@@ -2,6 +2,7 @@
 #define WindowHook_h
 #pragma once
 
+#include "WindowHook_fwd.h"
 #include <unordered_map>
 
 
@@ -28,6 +29,8 @@ public:
 
 	// CWnd-like overrides for message processing
 	LRESULT Default( void );
+
+	void SetHookHandler( ui::IWindowHookHandler* pHookHandler ) { m_pHookHandler = pHookHandler; }
 protected:
 	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
 private:
@@ -49,6 +52,7 @@ protected:
 private:
 	WNDPROC m_pOrgWndProc;		// hooked window original window callback procedure (replaced by HookedWindowsProc)
 	CWindowHook* m_pNextHook;	// next in the hook chain for m_hWnd
+	ui::IWindowHookHandler* m_pHookHandler;		// optional: client callback handler of messages, before default handling
 };
 
 

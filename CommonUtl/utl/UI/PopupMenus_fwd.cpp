@@ -34,28 +34,21 @@ namespace mfc
 		return mfc::nosy_cast<nosy::CToolBar_>( pToolBar )->GetToolTip();
 	}
 
+	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex /*= nullptr*/ )
+	{
+		int btnIndex = const_cast<CMFCToolBar*>( pToolBar )->HitTest( clientPos );
+
+		utl::AssignPtr( pBtnIndex, btnIndex );
+		if ( -1 == btnIndex )
+			return nullptr;
+
+		return pToolBar->GetButton( btnIndex );
+	}
+
 
 	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette /*= nullptr*/ )
 	{
 		return nosy::CColorBar_::InitColors( pPalette, colors );
-	}
-
-	bool ColorBar_FindColorName( COLORREF realColor, OUT OPTIONAL std::tstring* pColorName /*= nullptr*/ )
-	{
-		CString colorName;
-
-		if ( !nosy::CColorBar_::m_ColorNames.Lookup( realColor, colorName ) )
-			return false;
-
-		if ( pColorName != nullptr )
-			*pColorName = colorName.GetString();
-
-		return true;
-	}
-
-	void ColorBar_RegisterColorName( COLORREF realColor, const std::tstring& colorName )
-	{
-		CMFCColorBar::SetColorName( realColor, colorName.c_str() );
 	}
 
 

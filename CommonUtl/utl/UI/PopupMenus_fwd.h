@@ -65,14 +65,9 @@ namespace mfc
 {
 	// CMFCToolBar protected access:
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
+	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex = nullptr );
 
-
-	// CMFCColorBar protected access:
-	//
-	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette = nullptr );
-	bool ColorBar_FindColorName( COLORREF realColor, OUT OPTIONAL std::tstring* pColorName = nullptr );
-	inline bool ColorBar_ContainsColorName( COLORREF realColor ) { return ColorBar_FindColorName( realColor ); }
-	void ColorBar_RegisterColorName( COLORREF realColor, const std::tstring& colorName );
+	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette = nullptr );	// CMFCColorBar protected access
 
 
 	void* GetButtonItemData( const CMFCToolBarButton* pButton );
@@ -102,6 +97,7 @@ namespace nosy
 		using CMFCColorBar::m_ColorNames;		// CMap<COLORREF,COLORREF,CString, LPCTSTR>
 
 		using CMFCColorBar::InitColors;
+		using CMFCColorBar::InvokeMenuCommand;
 
 		bool HasAutoBtn( void ) const { return !m_strAutoColor.IsEmpty(); }
 		bool HasMoreBtn( void ) const { return !m_strOtherColor.IsEmpty(); }
@@ -111,6 +107,10 @@ namespace nosy
 		void SetAutoColor( COLORREF autoColor ) { m_ColorAutomatic = autoColor; }
 
 		void SetInternal( bool bInternal = true ) { m_bInternal = bInternal; }		// for customization mode
+
+		bool IsAutoBtn( const CMFCToolBarButton* pButton ) const { return HasAutoBtn() && pButton->m_strText == m_strAutoColor; }
+		bool IsMoreBtn( const CMFCToolBarButton* pButton ) const { return HasMoreBtn() && pButton->m_strText == m_strOtherColor; }
+		bool IsMoreColorSampleBtn( const CMFCToolBarButton* pButton ) const { return pButton->m_bImage && HasMoreBtn() && pButton == GetButton( GetCount() - 1 ); }
 	};
 }
 

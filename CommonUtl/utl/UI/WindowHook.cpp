@@ -12,6 +12,7 @@ CWindowHook::CWindowHook( bool autoDelete /*= false*/ )
 	, m_hWnd( nullptr )
 	, m_pOrgWndProc( nullptr )
 	, m_pNextHook( nullptr )
+	, m_pHookHandler( nullptr )
 {
 }
 
@@ -58,6 +59,17 @@ LRESULT CWindowHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
 {
 	ASSERT_PTR( m_pOrgWndProc );
 
+	if ( m_pHookHandler != nullptr )
+	{
+		LRESULT lResult = -333;
+
+		if ( m_pHookHandler->Handle_HookMessage( lResult, AfxGetThreadState()->m_lastSentMsg, this ) )
+		{
+			ENSURE( lResult != -333 );		// custom handler must have explicitly set the result
+			return lResult;
+		}
+	}
+
 	return m_pNextHook != nullptr
 		? m_pNextHook->WindowProc( message, wParam, lParam )
 		: ::CallWindowProc( m_pOrgWndProc, m_hWnd, message, wParam, lParam );
@@ -68,7 +80,7 @@ LRESULT CWindowHook::Default( void )
 	// MFC stores current MSG in thread state
 	MSG& rLastMsg = AfxGetThreadState()->m_lastSentMsg;
 
-	// must explicitly call CWindowHook::WindowProc to avoid infinte recursion on virtual function
+	// non-virtual call to avoid infinte recursion on virtual function
 	return CWindowHook::WindowProc( rLastMsg.message, rLastMsg.wParam, rLastMsg.lParam );
 }
 

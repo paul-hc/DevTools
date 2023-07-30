@@ -366,6 +366,7 @@
     <ClInclude Include="WicImageCache.h" />
     <ClInclude Include="WindowDebug.h" />
     <ClInclude Include="WindowHook.h" />
+    <ClInclude Include="WindowHook_fwd.h" />
     <ClInclude Include="WindowPlacement.h" />
     <ClInclude Include="WindowTimer.h" />
     <ClInclude Include="WinExplorer.h" />
