@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AccelTable.h"
+#include "Color.h"
 #include "Dialog_fwd.h"
 #include "PopupMenus_fwd.h"
 #include "StdColors.h"
@@ -13,15 +14,15 @@
 namespace ui
 {
 	template< typename ColorCtrlT >
-	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor )
-	{
+	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor, bool evalColor = false )
+	{	// pass evalColor: true for CMFCColorButton, but false for CColorPickerButton (which manages well logical colors)
 		::DDX_Control( pDX, ctrlId, rCtrl );
 
 		if ( pColor != nullptr )
 			if ( DialogOutput == pDX->m_bSaveAndValidate )
-				rCtrl.SetColor( *pColor );
+				rCtrl.SetColor( ui::EvalColorIf( *pColor, evalColor ) );
 			else
-				*pColor = rCtrl.GetColor();
+				*pColor = ui::EvalColorIf( rCtrl.GetColor(), evalColor );
 	}
 
 	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput = false );

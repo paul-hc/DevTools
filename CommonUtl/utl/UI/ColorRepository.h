@@ -85,6 +85,7 @@ public:
 
 	bool IsEmpty( void ) const { return m_colors.empty(); }
 	const std::vector<CColorEntry>& GetColors( void ) const { return m_colors; }
+	const CColorEntry& GetColorAt( size_t pos ) const { ASSERT( pos < m_colors.size() ); return m_colors[ pos ]; }
 	const CColorEntry* FindColor( COLORREF rawColor ) const;
 	bool ContainsColor( COLORREF rawColor ) const { return FindColor( rawColor ) != nullptr; }
 	const CColorEntry* FindEvaluatedColor( COLORREF color ) const;

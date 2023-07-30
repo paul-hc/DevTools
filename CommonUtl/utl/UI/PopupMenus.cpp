@@ -8,7 +8,6 @@
 #include "TooltipsHook.h"
 #include "WndUtils.h"
 #include "resource.h"
-#include "utl/Range.h"
 #include <afxcolorbutton.h>
 
 #ifdef _DEBUG
@@ -301,7 +300,6 @@ namespace mfc
 	void CColorPopupMenu::StoreBtnColorEntries( void )
 	{
 		Range<int> btnIndex;		// ranges are [start, end) for iteration
-		const CColorEntry* pColorEntry = nullptr;
 
 		// for each Color button: store pointers color entry into button's m_dwdItemData
 		if ( m_pColorTable != nullptr && !m_pColorBar->m_colors.IsEmpty() )
@@ -309,10 +307,7 @@ namespace mfc
 			btnIndex.SetEmptyRange( m_pColorBar->HasAutoBtn() ? 1 : 0 );	// skip Automatic, if any
 			btnIndex.m_end += static_cast<int>( m_pColorBar->m_colors.GetSize() );
 
-			for ( pColorEntry = &m_pColorTable->GetColors().front();
-				  btnIndex.m_start != btnIndex.m_end;
-				  ++btnIndex.m_start, ++pColorEntry )
-				StoreButtonColorEntry( m_pColorBar->GetButton( btnIndex.m_start ), pColorEntry );
+			StoreBtnColorTableEntries( btnIndex, m_pColorTable );
 		}
 
 		// for each Document Color button: store pointers color entry
@@ -321,10 +316,7 @@ namespace mfc
 			btnIndex.SetEmptyRange( btnIndex.m_end + 2 );				// skip Separator + Doc Label
 			btnIndex.m_end += static_cast<INT>( m_pColorBar->m_lstDocColors.GetSize() );
 
-			for ( pColorEntry = &m_pDocColorTable->GetColors().front();
-				  btnIndex.m_start != btnIndex.m_end;
-				  ++btnIndex.m_start, ++pColorEntry )
-				StoreButtonColorEntry( m_pColorBar->GetButton( btnIndex.m_start ), pColorEntry );
+			StoreBtnColorTableEntries( btnIndex, m_pDocColorTable );
 		}
 
 		// replace display colors with evaluated colors
@@ -339,6 +331,14 @@ namespace mfc
 			m_rawSelColor = m_pColorBar->GetColor();
 			m_pColorBar->SetColor( ui::EvalColor( m_rawSelColor ) );		// show the display color
 		}
+	}
+
+	void CColorPopupMenu::StoreBtnColorTableEntries( IN OUT Range<int>& rBtnIndex, const CColorTable* pColorTable )
+	{
+		REQUIRE( rBtnIndex.GetSpan<size_t>() == pColorTable->GetColors().size() );		// button range matches the table size?
+
+		for ( size_t colorPos = 0; rBtnIndex.m_start != rBtnIndex.m_end; ++rBtnIndex.m_start, ++colorPos )
+			StoreButtonColorEntry( m_pColorBar->GetButton( rBtnIndex.m_start ), &pColorTable->GetColorAt( colorPos ) );
 	}
 
 	void CColorPopupMenu::StoreButtonColorEntry( CMFCToolBarButton* pButton, const CColorEntry* pColorEntry )

@@ -79,6 +79,7 @@ namespace mfc
 }
 
 
+#include "utl/Range.h"
 #include "WindowHook_fwd.h"
 #include "Control_fwd.h"
 #include <afxcolorpopupmenu.h>
@@ -118,6 +119,7 @@ namespace mfc
 		const CColorEntry* FindClickedBarColorEntry( void ) const;
 	private:
 		void StoreBtnColorEntries( void );
+		void StoreBtnColorTableEntries( IN OUT Range<int>& rBtnIndex, const CColorTable* pColorTable );
 		static void StoreButtonColorEntry( CMFCToolBarButton* pButton, const CColorEntry* pColorEntry );
 		static bool OpenColorDialog( ui::IColorEditorHost* pEditorHost );
 
