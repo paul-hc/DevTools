@@ -42,7 +42,7 @@ public:
 	const CColorStore* GetMainStore( void ) const;
 	void SetMainStore( const CColorStore* pMainStore );
 
-	void SetAutomaticColor( COLORREF autoColor, const TCHAR autoLabel[] = _T("Automatic") ) { EnableAutomaticButton( autoLabel, autoColor ); }
+	void SetAutomaticColor( COLORREF autoColor, const TCHAR autoLabel[] = mfc::CColorLabels::s_autoLabel ) { EnableAutomaticButton( autoLabel, autoColor ); }
 
 	void SetUserColors( const std::vector<COLORREF>& userColors, int columnCount = 0 );		// custom colors, not based on a color table
 

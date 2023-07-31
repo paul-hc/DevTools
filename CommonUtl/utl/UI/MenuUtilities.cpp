@@ -76,22 +76,22 @@ namespace ui
 		if ( nullptr == pImageStore )
 			return false;
 
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
+		info.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
+
 		for ( UINT i = 0, count = pMenu->GetMenuItemCount(); i != count; ++i )
-		{
-			UINT state = pMenu->GetMenuState( i, MF_BYPOSITION );
+			if ( pMenu->GetMenuItemInfo( i, &info, true ) )
+				if ( info.hSubMenu != nullptr )
+					SetMenuImages( CMenu::FromHandle( info.hSubMenu ), useCheckedBitmaps, pImageStore );
+				else if ( !HasFlag( info.fType, MFT_SEPARATOR | MFT_OWNERDRAW ) )
+				{
+					ASSERT( info.wID != 0 && info.wID != UINT_MAX );
 
-			if ( HasFlag( state, MF_POPUP ) )
-				SetMenuImages( pMenu->GetSubMenu( i ), useCheckedBitmaps, pImageStore );
-			else if ( !HasFlag( state, MF_SEPARATOR | MF_MENUBREAK | MFT_OWNERDRAW ) )
-			{
-				UINT itemId = pMenu->GetMenuItemID( i );
-				ASSERT( itemId != 0 && itemId != UINT_MAX );
+					std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( info.wID, useCheckedBitmaps );
+					if ( bitmaps.first != nullptr || bitmaps.second != nullptr )
+						pMenu->SetMenuItemBitmaps( i, MF_BYPOSITION, bitmaps.first, bitmaps.second );
+				}
 
-				std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( itemId, useCheckedBitmaps );
-				if ( bitmaps.first != nullptr || bitmaps.second != nullptr )
-					pMenu->SetMenuItemBitmaps( i, MF_BYPOSITION, bitmaps.first, bitmaps.second );
-			}
-		}
 		return true;
 	}
 
@@ -253,36 +253,36 @@ namespace ui
 {
 	UINT GetMenuItemType( HMENU hMenu, UINT item, bool byPos )
 	{
-		MENUITEMINFO itemInfo; utl::ZeroWinStruct( &itemInfo );
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
 
-		itemInfo.fMask = MIIM_TYPE;
+		info.fMask = MIIM_TYPE;
 
-		if ( !::GetMenuItemInfo( hMenu, item, byPos, &itemInfo ) )
+		if ( !::GetMenuItemInfo( hMenu, item, byPos, &info ) )
 			return 0;
 
-		return (DWORD_PTR)itemInfo.fType;
+		return (DWORD_PTR)info.fType;
 	}
 
 	void* GetMenuItemData( HMENU hMenu, UINT item, bool byPos /*= true*/ )
 	{
-		MENUITEMINFO itemInfo; utl::ZeroWinStruct( &itemInfo );
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
 
-		itemInfo.fMask = MIIM_DATA;
+		info.fMask = MIIM_DATA;
 
-		if ( !::GetMenuItemInfo( hMenu, item, byPos, &itemInfo ) )
+		if ( !::GetMenuItemInfo( hMenu, item, byPos, &info ) )
 			return 0;
 
-		return reinterpret_cast<void*>( itemInfo.dwItemData );
+		return reinterpret_cast<void*>( info.dwItemData );
 	}
 
 	bool SetMenuItemData( HMENU hMenu, UINT item, const void* pItemData, bool byPos /*= true*/ )
 	{
-		MENUITEMINFO itemInfo; utl::ZeroWinStruct( &itemInfo );
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
 
-		itemInfo.fMask = MIIM_DATA;
-		itemInfo.dwItemData = reinterpret_cast<DWORD_PTR>( pItemData );
+		info.fMask = MIIM_DATA;
+		info.dwItemData = reinterpret_cast<DWORD_PTR>( pItemData );
 
-		return ::SetMenuItemInfo( hMenu, item, byPos, &itemInfo ) != FALSE;
+		return ::SetMenuItemInfo( hMenu, item, byPos, &info ) != FALSE;
 	}
 
 
@@ -307,58 +307,55 @@ namespace ui
 	}
 
 
-	HMENU FindMenuItemIndex( OUT int* pOutIndex, HMENU hMenu, UINT itemId, RecursionDepth depth /*= Deep*/ )
+	HMENU FindMenuItemIndex( OUT int* pIndex, HMENU hMenu, UINT itemId, RecursionDepth depth /*= Deep*/ )
 	{
 		REQUIRE( ::IsMenu( hMenu ) );
-		ASSERT_PTR( pOutIndex );
+		ASSERT_PTR( pIndex );
+
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
+		info.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
 
 		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
-		{
-			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
-			ASSERT( state != UINT_MAX );
+			if ( ::GetMenuItemInfo( hMenu, i, true, &info ) )
+				if ( info.hSubMenu != nullptr )
+				{
+					if ( Deep == depth )
+						if ( HMENU hFoundSubMenu = FindMenuItemIndex( pIndex, info.hSubMenu, itemId, depth ) )
+							return hFoundSubMenu;
+				}
+				else if ( itemId == info.wID )
+				{
+					*pIndex = i;
+					return hMenu;
+				}
 
-			if ( HasFlag( state, MF_POPUP ) )
-			{
-				if ( Deep == depth )
-					if ( HMENU hFoundSubMenu = FindMenuItemIndex( pOutIndex, ::GetSubMenu( hMenu, i ), itemId, depth ) )
-						return hFoundSubMenu;
-			}
-			else if ( itemId == ::GetMenuItemID( hMenu, i ) )
-			{
-				*pOutIndex = i;
-				return hMenu;
-			}
-		}
-
-		*pOutIndex = -1;
+		*pIndex = -1;
 		return nullptr;
 	}
 
-	HMENU FindFirstMenuCommand( OUT UINT* pOutCmdId, HMENU hMenu, RecursionDepth depth /*= Deep*/ )
+	HMENU FindFirstMenuCommand( OUT UINT* pCmdId, HMENU hMenu, RecursionDepth depth /*= Deep*/ )
 	{
 		REQUIRE( ::IsMenu( hMenu ) );
-		ASSERT_PTR( pOutCmdId );
+		ASSERT_PTR( pCmdId );
+
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
+		info.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
 
 		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
-		{
-			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
-			ASSERT( state != UINT_MAX );
-
-			if ( HasFlag( state, MF_POPUP ) )
-			{
-				if ( Deep == depth )
-					if ( HMENU hFoundSubMenu = FindFirstMenuCommand( pOutCmdId, ::GetSubMenu( hMenu, i ), depth ) )
-						return hFoundSubMenu;
-			}
-			else if ( !HasFlag( state, MF_SEPARATOR ) )
-				if ( UINT cmdId = ::GetMenuItemID( hMenu, i ) )
+			if ( ::GetMenuItemInfo( hMenu, i, true, &info ) )
+				if ( info.hSubMenu != nullptr )
 				{
-					*pOutCmdId = cmdId;
+					if ( Deep == depth )
+						if ( HMENU hFoundSubMenu = FindFirstMenuCommand( pCmdId, info.hSubMenu, depth ) )
+							return hFoundSubMenu;
+				}
+				else if ( !HasFlag( info.fType, MFT_SEPARATOR ) )
+				{
+					*pCmdId = info.wID;
 					return hMenu;
 				}
-		}
 
-		*pOutCmdId = 0;
+		*pCmdId = 0;
 		return nullptr;
 	}
 
@@ -367,23 +364,18 @@ namespace ui
 		REQUIRE( ::IsMenu( hMenu ) );
 		UINT cmdCount = 0;
 
-		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
-		{
-			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
-			ASSERT( state != UINT_MAX );
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
+		info.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
 
-			if ( HasFlag( state, MF_POPUP ) )
-			{
-				if ( Deep == depth )
-					cmdCount += GetTotalCmdCount( ::GetSubMenu( hMenu, i ), Deep );
-			}
-			else if ( !HasFlag( state, MF_SEPARATOR ) )
-			{
-				UINT cmdId = ::GetMenuItemID( hMenu, i );
-				if ( cmdId != 0 && cmdId != UINT_MAX )
+		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+			if ( ::GetMenuItemInfo( hMenu, i, true, &info ) )
+				if ( info.hSubMenu != nullptr )
+				{
+					if ( Deep == depth )
+						cmdCount += GetTotalCmdCount( info.hSubMenu, Deep );
+				}
+				else if ( !HasFlag( info.fType, MFT_SEPARATOR ) )
 					++cmdCount;
-			}
-		}
 
 		return cmdCount;
 	}
@@ -392,19 +384,18 @@ namespace ui
 	{
 		REQUIRE( ::IsMenu( hMenu ) );
 
-		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
-		{
-			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
-			ASSERT( state != UINT_MAX );
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
+		info.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
 
-			if ( HasFlag( state, MF_POPUP ) )
-			{
-				if ( Deep == depth )
-					QueryMenuItemIds( rItemIds, ::GetSubMenu( hMenu, i ), depth );
-			}
-			else if ( !HasFlag( state, MF_SEPARATOR ) )
-				utl::AddUnique( rItemIds, ::GetMenuItemID( hMenu, i ) );		// even separators are added to m_noTouch map
-		}
+		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+			if ( ::GetMenuItemInfo( hMenu, i, true, &info ) )
+				if ( info.hSubMenu != nullptr )
+				{
+					if ( Deep == depth )
+						QueryMenuItemIds( rItemIds, info.hSubMenu, depth );
+				}
+				else if ( !HasFlag( info.fType, MFT_SEPARATOR ) )
+					utl::AddUnique( rItemIds, info.wID );
 	}
 
 	HMENU CloneMenu( HMENU hSrcMenu )
@@ -416,16 +407,16 @@ namespace ui
 
 		for ( int i = 0, count = ::GetMenuItemCount( hSrcMenu ); i != count; ++i )
 		{
-			MENUITEMINFO_BUFF itemInfo;
-			if ( itemInfo.GetMenuItemInfo( hSrcMenu, i ) )
+			MENUITEMINFO_BUFF info;
+			if ( info.GetMenuItemInfo( hSrcMenu, i ) )
 			{
-				if ( itemInfo.hSubMenu != nullptr )
-					itemInfo.hSubMenu = ui::CloneMenu( itemInfo.hSubMenu );		// clone the sub-menu inplace
+				if ( info.hSubMenu != nullptr )
+					info.hSubMenu = ui::CloneMenu( info.hSubMenu );		// clone the sub-menu inplace
 
-				VERIFY( destMenu.InsertMenuItem( i, &itemInfo, TRUE ) );
+				VERIFY( destMenu.InsertMenuItem( i, &info, TRUE ) );
 
-				if ( !itemInfo.IsSeparator() )
-					SetMenuItemImage( &destMenu, itemInfo.wID );
+				if ( !info.IsSeparator() )
+					SetMenuItemImage( &destMenu, info.wID );
 			}
 			else
 				ASSERT( false );		// invalid item?
@@ -445,13 +436,13 @@ namespace ui
 
 			if ( nullptr == pSrcIds || ( 0 == srcId || std::find( pSrcIds->begin(), pSrcIds->end(), srcId ) != pSrcIds->end() ) )
 			{
-				MENUITEMINFO_BUFF itemInfo;
-				if ( itemInfo.GetMenuItemInfo( pSrcMenu->GetSafeHmenu(), i ) )
+				MENUITEMINFO_BUFF info;
+				if ( info.GetMenuItemInfo( pSrcMenu->GetSafeHmenu(), i ) )
 				{
-					VERIFY( pDestMenu->InsertMenuItem( destIndex, &itemInfo, TRUE ) );
+					VERIFY( pDestMenu->InsertMenuItem( destIndex, &info, TRUE ) );
 
-					if ( !itemInfo.IsSeparator() )
-						SetMenuItemImage( pDestMenu, itemInfo.wID );
+					if ( !info.IsSeparator() )
+						SetMenuItemImage( pDestMenu, info.wID );
 
 					++copiedCount;
 					++destIndex;
@@ -464,56 +455,56 @@ namespace ui
 		return copiedCount;
 	}
 
-	void DeleteMenuItem( OUT CMenu* pDestMenu, UINT itemId )
+	void DeleteMenuItem( OUT CMenu* pMenu, UINT itemId )
 	{
-		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
+		REQUIRE( ::IsMenu( pMenu->GetSafeHmenu() ) );
 		ASSERT( itemId != 0 );
 
-		if ( pDestMenu->DeleteMenu( itemId, MF_BYCOMMAND ) )
-			CleanupMenuSeparators( pDestMenu );
+		if ( pMenu->DeleteMenu( itemId, MF_BYCOMMAND ) )
+			CleanupMenuSeparators( pMenu );
 	}
 
-	size_t DeleteMenuItems( OUT CMenu* pDestMenu, const UINT* pItemIds, size_t itemCount )
+	size_t DeleteMenuItems( OUT CMenu* pMenu, const UINT* pItemIds, size_t itemCount )
 	{
-		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
+		REQUIRE( ::IsMenu( pMenu->GetSafeHmenu() ) );
 		ASSERT_PTR( pItemIds );
 
 		size_t delCount = 0;
 		for ( UINT i = 0; i != itemCount; ++i )
 		{
 			ASSERT( pItemIds[ i ] != 0 );
-			if ( pDestMenu->DeleteMenu( pItemIds[ i ], MF_BYCOMMAND ) )
+			if ( pMenu->DeleteMenu( pItemIds[ i ], MF_BYCOMMAND ) )
 				++delCount;
 		}
 
-		return delCount + CleanupMenuSeparators( pDestMenu );
+		return delCount + CleanupMenuSeparators( pMenu );
 	}
 
-	size_t CleanupMenuDuplicates( OUT CMenu* pDestMenu )
+	size_t CleanupMenuDuplicates( OUT CMenu* pMenu )
 	{
-		REQUIRE( ::IsMenu( pDestMenu->GetSafeHmenu() ) );
+		REQUIRE( ::IsMenu( pMenu->GetSafeHmenu() ) );
 
 		size_t delCount = 0;
 
 		// first delete any duplicate commands (no separators)
-		for ( int i = 0, count = pDestMenu->GetMenuItemCount(); i != count; ++i )
+		for ( int i = 0, count = pMenu->GetMenuItemCount(); i != count; ++i )
 		{
-			UINT itemId = pDestMenu->GetMenuItemID( i );
+			UINT itemId = pMenu->GetMenuItemID( i );
 
 			if ( UINT_MAX == itemId )	// sub-menu
 			{
-				if ( CMenu* pSubMenu = pDestMenu->GetSubMenu( i ) )
+				if ( CMenu* pSubMenu = pMenu->GetSubMenu( i ) )
 					delCount += CleanupMenuDuplicates( pSubMenu );
 			}
 			else if ( itemId != 0 )		// normal command, no separator
 			{
 				for ( ;; )
 				{
-					UINT iDuplicate = FindMenuItemIndex( pDestMenu->GetSafeHmenu(), itemId, i + 1 );
+					UINT iDuplicate = FindMenuItemIndex( pMenu->GetSafeHmenu(), itemId, i + 1 );
 
 					if ( iDuplicate != UINT_MAX )								// found a duplicate?
 					{
-						pDestMenu->DeleteMenu( iDuplicate, MF_BYPOSITION );
+						pMenu->DeleteMenu( iDuplicate, MF_BYPOSITION );
 						++delCount;
 					}
 					else
@@ -522,26 +513,26 @@ namespace ui
 			}
 		}
 
-		return delCount + CleanupMenuSeparators( pDestMenu );
+		return delCount + CleanupMenuSeparators( pMenu );
 	}
 
 
-	size_t CleanupMenuSeparators( OUT CMenu* pDestMenu )
+	size_t CleanupMenuSeparators( OUT CMenu* pMenu )
 	{
 		size_t delCount = 0;
-		MENUITEMINFO itemInfo; utl::ZeroWinStruct( &itemInfo );
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
 
-		itemInfo.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
+		info.fMask = MIIM_FTYPE | MIIM_SUBMENU | MIIM_ID;
 
 		// delete duplicate separators in reverse order
 		bool prevSep = false;
-		for ( UINT count = pDestMenu->GetMenuItemCount(), i = count; i-- != 0; )
-			if ( pDestMenu->GetMenuItemInfo( i, &itemInfo, true ) )
-				if ( HasFlag( itemInfo.fType, MFT_SEPARATOR | MFT_MENUBARBREAK | MFT_MENUBREAK ) )
+		for ( UINT count = pMenu->GetMenuItemCount(), i = count; i-- != 0; )
+			if ( pMenu->GetMenuItemInfo( i, &info, true ) )
+				if ( HasFlag( info.fType, MFT_SEPARATOR ) )
 				{
 					if ( prevSep || 0 == i || ( count - 1 ) == i )		// duplicate, leading, or trailing separator
 					{
-						pDestMenu->DeleteMenu( i, MF_BYPOSITION );
+						pMenu->DeleteMenu( i, MF_BYPOSITION );
 						++delCount;
 					}
 					prevSep = true;
@@ -550,12 +541,12 @@ namespace ui
 				{
 					prevSep = false;
 
-					if ( itemInfo.hSubMenu != nullptr )
-						delCount += CleanupMenuSeparators( pDestMenu->GetSubMenu( i ) );
+					if ( info.hSubMenu != nullptr )
+						delCount += CleanupMenuSeparators( CMenu::FromHandle( info.hSubMenu ) );
 				}
 
 		if ( prevSep )			// a leftover leading separator?  it can happen in case of a leading multiple separator sequence
-			pDestMenu->DeleteMenu( 0, MF_BYPOSITION );
+			pMenu->DeleteMenu( 0, MF_BYPOSITION );
 
 		return delCount;
 	}
@@ -640,10 +631,13 @@ namespace ui
 	{
 		ASSERT_PTR( hMenu );
 
-		UINT itemState = ::GetMenuState( hMenu, itemPos, MF_BYPOSITION );
-		if ( itemState != UINT_MAX )
-			if ( !HasFlag( itemState, MF_GRAYED | MF_DISABLED | MF_POPUP | MF_SEPARATOR ) )
-				return HasFlag( itemState, MF_HILITE );
+		MENUITEMINFO info; utl::ZeroWinStruct( &info );
+		info.fMask = MIIM_FTYPE | MIIM_STATE | MIIM_SUBMENU | MIIM_ID;
+
+		if ( ::GetMenuItemInfo( hMenu, itemPos, true, &info ) )
+			if ( !HasFlag( info.fType, MFT_SEPARATOR ) && nullptr == info.hSubMenu )
+				if ( !HasFlag( info.fState, MFS_GRAYED | MFS_DISABLED ) )
+					return HasFlag( info.fState, MF_HILITE );
 
 		return false;
 	}
@@ -658,7 +652,7 @@ namespace ui
 	bool ScrollVisibleMenuItem( HWND hTrackWnd, HMENU hMenu, UINT hiliteId )
 	{
 		ASSERT( hiliteId != 0 );
-		ASSERT_PTR( hTrackWnd );
+		ASSERT( ::IsWindow( hTrackWnd ) );
 		ASSERT( ::IsMenu( hMenu ) );
 
 		// post arrow down for non-separator items until reaching the hiliteId item; scrolls the menu if necessary
@@ -814,15 +808,15 @@ namespace dbg
 
 		for ( int i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
 		{
-			ui::MENUITEMINFO_BUFF itemInfo;
+			ui::MENUITEMINFO_BUFF info;
 
-			if ( itemInfo.GetMenuItemInfo( hMenu, i ) )
-				TraceMenuItem( itemInfo, i, indentLevel );
+			if ( info.GetMenuItemInfo( hMenu, i ) )
+				TraceMenuItem( info, i, indentLevel );
 			else
 				ASSERT( false );
 
-			if ( itemInfo.hSubMenu != nullptr )
-				TraceMenu( itemInfo.hSubMenu, indentLevel + 1 );		// trace the sub-menu
+			if ( info.hSubMenu != nullptr )
+				TraceMenu( info.hSubMenu, indentLevel + 1 );		// trace the sub-menu
 		}
 	#else
 		hMenu, indentLevel;
@@ -832,10 +826,10 @@ namespace dbg
 	void TraceMenuItem( HMENU hMenu, int itemPos )
 	{
 	#ifdef _DEBUG
-		ui::MENUITEMINFO_BUFF itemInfo;
+		ui::MENUITEMINFO_BUFF info;
 
-		if ( itemInfo.GetMenuItemInfo( hMenu, itemPos ) )
-			TraceMenuItem( itemInfo, itemPos );
+		if ( info.GetMenuItemInfo( hMenu, itemPos ) )
+			TraceMenuItem( info, itemPos );
 		else
 			TRACE( _T("?? Invalid menu item: hMenu=0x%08x itemPos=%d\n"), hMenu, itemPos );
 	#else

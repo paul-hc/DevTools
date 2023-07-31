@@ -327,7 +327,7 @@ namespace mfc
 		}
 
 		return new mfc::CColorPopupMenu( this, m_Colors, m_Color,
-										 m_strAutomaticButtonLabel.GetString(), m_strOtherButtonLabel.GetString(), m_strDocumentColorsLabel.GetString(),
+										 m_strAutomaticButtonLabel, m_strOtherButtonLabel, m_strDocumentColorsLabel,
 										 docColors, m_nColumns, m_nHorzDockRows, m_nVertDockColumns, m_colorAutomatic, m_nID, m_bStdColorDlg );
 	}
 }

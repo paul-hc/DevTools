@@ -112,7 +112,7 @@ CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nu
 
 	m_pMenuImpl.reset( new CColorMenuTrackingImpl( this ) );
 
-	EnableOtherButton( _T("More...") );
+	EnableOtherButton( mfc::CColorLabels::s_moreLabel );
 
 	SetSelColorTable( pSelColorTable != nullptr ? pSelColorTable : CHalftoneRepository::Instance()->FindTable( ui::Halftone16_Colors ) );
 
@@ -739,8 +739,8 @@ mfc::CColorMenuButton* CColorMenuTrackingImpl::MakeColorMenuButton( UINT colorBt
 
 	if ( pColorTable == m_pHost->GetSelColorTable() )		// button for selected table?
 	{	// richer configuration on the selected color table:
-		pColorButton->EnableAutomaticButton( _T("Automatic"), m_pHost->GetAutoColor() );
-		pColorButton->EnableOtherButton( _T("More Colors...") );
+		pColorButton->EnableAutomaticButton( mfc::CColorLabels::s_autoLabel, m_pHost->GetAutoColor() );
+		pColorButton->EnableOtherButton( mfc::CColorLabels::s_moreLabel );
 
 		CColorTable* pShadesTable = m_pScratchStore->GetShadesTable();
 

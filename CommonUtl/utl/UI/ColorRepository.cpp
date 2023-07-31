@@ -22,7 +22,7 @@ namespace ui
 	{
 		static const CEnumTags s_tags( _T("\
 Office 2003 Colors|Office 2007 Colors|DirectX (X11) Colors|HTML Colors|\
-Windows System Colors|\
+Windows Colors|\
 Halftone: 16 Colors|Halftone: 20 Colors|Halftone: 256 Colors|\
 Color Shades|User Custom Colors|\
 Development Colors"

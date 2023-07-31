@@ -61,6 +61,10 @@ namespace nosy
 
 namespace mfc
 {
+	const TCHAR CColorLabels::s_autoLabel[] = _T("Automatic");
+	const TCHAR CColorLabels::s_moreLabel[] = _T("More Colors...");
+
+
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar )
 	{
 		return mfc::nosy_cast<nosy::CToolBar_>( pToolBar )->GetToolTip();

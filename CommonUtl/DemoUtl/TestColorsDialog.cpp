@@ -48,8 +48,8 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	//m_color = ui::MakeSysColor( COLOR_MENUHILIGHT );
 
 	m_mfcColorPickerButton.SetColor( m_color );
-	m_mfcColorPickerButton.EnableAutomaticButton( _T("Automatic"), color::Yellow );
-	m_mfcColorPickerButton.EnableOtherButton( _T("More...") );
+	m_mfcColorPickerButton.EnableAutomaticButton( mfc::CColorLabels::s_autoLabel, color::Yellow );
+	m_mfcColorPickerButton.EnableOtherButton( mfc::CColorLabels::s_moreLabel );
 	mfc::TColorList docColors;
 	CColorRepository::Instance()->FindTable( ui::Office2003_Colors )->QueryMfcColors( docColors );
 	m_mfcColorPickerButton.SetDocumentColors( _T("Document:"), docColors );

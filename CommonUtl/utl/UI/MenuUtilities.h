@@ -93,13 +93,13 @@ namespace ui
 
 	// deep menu API
 
-	HMENU FindMenuItemIndex( OUT int* pOutIndex, HMENU hMenu, UINT itemId, RecursionDepth depth = Deep );
-	inline CMenu* FindMenuItemIndex( OUT int* pOutIndex, const CMenu* pMenu, UINT itemId, RecursionDepth depth = Deep )
+	HMENU FindMenuItemIndex( OUT int* pIndex, HMENU hMenu, UINT itemId, RecursionDepth depth = Deep );
+	inline CMenu* FindMenuItemIndex( OUT int* pIndex, const CMenu* pMenu, UINT itemId, RecursionDepth depth = Deep )
 	{
-		return ui::SafeFromHandle( FindMenuItemIndex( pOutIndex, pMenu->GetSafeHmenu(), itemId, depth ) );
+		return ui::SafeFromHandle( FindMenuItemIndex( pIndex, pMenu->GetSafeHmenu(), itemId, depth ) );
 	}
 
-	HMENU FindFirstMenuCommand( OUT UINT* pOutCmdId, HMENU hMenu, RecursionDepth depth = Deep );		// first valid command (not separator)
+	HMENU FindFirstMenuCommand( OUT UINT* pCmdId, HMENU hMenu, RecursionDepth depth = Deep );		// first valid command (not separator)
 
 	UINT GetTotalCmdCount( HMENU hMenu, RecursionDepth depth = Deep );						// just commands (excluding separators, sub-menus)
 	void QueryMenuItemIds( std::vector<UINT>& rItemIds, HMENU hMenu, RecursionDepth depth = Deep );
@@ -107,11 +107,11 @@ namespace ui
 	HMENU CloneMenu( HMENU hSrcMenu );
 
 	size_t CopyMenuItems( OUT CMenu* pDestMenu, unsigned int destIndex, const CMenu* pSrcMenu, const std::vector<UINT>* pSrcIds = nullptr );
-	void DeleteMenuItem( OUT CMenu* pDestMenu, UINT itemId );
-	size_t DeleteMenuItems( OUT CMenu* pDestMenu, const UINT* pItemIds, size_t itemCount );
+	void DeleteMenuItem( OUT CMenu* pMenu, UINT itemId );
+	size_t DeleteMenuItems( OUT CMenu* pMenu, const UINT* pItemIds, size_t itemCount );
 
-	size_t CleanupMenuDuplicates( OUT CMenu* pDestMenu );
-	size_t CleanupMenuSeparators( OUT CMenu* pDestMenu );
+	size_t CleanupMenuDuplicates( OUT CMenu* pMenu );
+	size_t CleanupMenuSeparators( OUT CMenu* pMenu );
 
 	enum MenuInsert { PrependSrc, AppendSrc };
 

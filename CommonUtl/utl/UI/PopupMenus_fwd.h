@@ -63,6 +63,13 @@ namespace ui
 
 namespace mfc
 {
+	struct CColorLabels
+	{
+		static const TCHAR s_autoLabel[];
+		static const TCHAR s_moreLabel[];
+	};
+
+
 	// CMFCToolBar protected access:
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
 	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex = nullptr );
