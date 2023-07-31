@@ -67,7 +67,7 @@ private:
 	static mfc::CColorMenuButton* FindColorMenuButton( UINT colorBtnId );
 
 	// ui::ICustomPopupMenu interface
-	virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) override;
+	virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int trackingMode ) override;
 private:
 	ui::IColorEditorHost* m_pHost;
 public:
@@ -361,6 +361,7 @@ void CColorPickerButton::ShowColorTablePopup( void )
 	if ( !m_pPopup->Create( this, rect.left, rect.bottom, nullptr, m_bEnabledInCustomizeMode ) )
 	{
 		ASSERT( false );	// color menu can't be used in the customization mode; you need to set CMFCColorButton::m_bEnabledInCustomizeMode.
+		delete m_pPopup;
 		m_pPopup = nullptr;
 	}
 	else
@@ -388,7 +389,7 @@ void CColorPickerButton::TrackMenuColorTables( void )
 		return;
 
 	m_trackingMode = TrackingMenuColorTables;
-	mfc::CContextMenuMgr::Instance()->ResetNewTrackingPopupMenu( new mfc::CTrackingPopupMenu( m_pMenuImpl.get() ) );
+	mfc::CContextMenuMgr::Instance()->ResetNewTrackingPopupMenu( new mfc::CTrackingPopupMenu( m_pMenuImpl.get(), m_trackingMode ) );
 
 	CRect btnScreenRect;
 	GetWindowRect( &btnScreenRect );
@@ -528,6 +529,7 @@ void CColorPickerButton::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 		m_trackingMode = TrackingContextMenu;
 
 		m_pMenuImpl->SetupMenu( true );
+		mfc::CContextMenuMgr::Instance()->ResetNewTrackingPopupMenu( new mfc::CTrackingPopupMenu( m_pMenuImpl.get(), m_trackingMode ) );
 		ui::TrackMfcPopupMenu( m_pMenuImpl->m_menu.GetSafeHmenu(), this, screenPos );
 
 		m_trackingMode = NoTracking;
@@ -726,6 +728,11 @@ CColorTable* CColorMenuTrackingImpl::LookupMenuColorTable( UINT colorBtnId ) con
 	return pColorTable;
 }
 
+mfc::CColorMenuButton* CColorMenuTrackingImpl::FindColorMenuButton( UINT colorBtnId )
+{
+	return checked_static_cast<mfc::CColorMenuButton*>( mfc::CTrackingPopupMenu::FindTrackingBarButton( colorBtnId ) );
+}
+
 mfc::CColorMenuButton* CColorMenuTrackingImpl::MakeColorMenuButton( UINT colorBtnId, const CColorTable* pColorTable ) const
 {
 	mfc::CColorMenuButton* pColorButton = new mfc::CColorMenuButton( colorBtnId, pColorTable );
@@ -747,28 +754,27 @@ mfc::CColorMenuButton* CColorMenuTrackingImpl::MakeColorMenuButton( UINT colorBt
 	return pColorButton;
 }
 
-mfc::CColorMenuButton* CColorMenuTrackingImpl::FindColorMenuButton( UINT colorBtnId )
-{
-	return checked_static_cast<mfc::CColorMenuButton*>( mfc::CTrackingPopupMenu::FindTrackingBarButton( colorBtnId ) );
-}
-
-void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup )
+void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int trackingMode )
 {	// called in menu tracking mode
 	ASSERT_PTR( pMenuPopup );
 	REQUIRE( m_menu.GetSafeHmenu() == pMenuPopup->GetHMenu() );
 
 	CMFCPopupMenuBar* pMenuBar = pMenuPopup->GetMenuBar();
+	int index = 0;
 
-	for ( UINT index = 0, count = m_menu.GetMenuItemCount(); index != count; ++index )
-		if ( const CColorTable* pColorTable = ui::GetMenuItemPtr<CColorTable>( m_menu, index ) )
-		{
-			ASSERT( !pColorTable->IsEmpty() );		// should've been excluded on popup menu set up
+	if ( CColorPickerButton::TrackingMenuColorTables == trackingMode )		// need to replace color table sub-menus?
+		for ( int count = m_menu.GetMenuItemCount(); index != count; ++index )
+			if ( const CColorTable* pColorTable = ui::GetMenuItemPtr<CColorTable>( m_menu, index ) )
+			{
+				ASSERT( !pColorTable->IsEmpty() );		// should've been excluded on popup menu set up
 
-			UINT colorBtnId = m_menu.GetMenuItemID( index );
-			std::auto_ptr<mfc::CColorMenuButton> pColorButton( MakeColorMenuButton( colorBtnId, pColorTable ) );
+				UINT colorBtnId = m_menu.GetMenuItemID( index );
+				std::auto_ptr<mfc::CColorMenuButton> pColorButton( MakeColorMenuButton( colorBtnId, pColorTable ) );
 
-			pMenuBar->ReplaceButton( colorBtnId, *pColorButton );
-		}
+				pMenuBar->ReplaceButton( colorBtnId, *pColorButton );
+			}
+
+	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_RESET_DEFAULT, m_pHost->GetAutoColor(), &index );	// to display the Automatic color box on the menu item
 }
 
 // message handlers

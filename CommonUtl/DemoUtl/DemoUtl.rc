@@ -319,7 +319,7 @@ BEGIN
             MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
             MENUITEM "Paste\tCtrl+V",               ID_EDIT_PASTE
             MENUITEM SEPARATOR
-            MENUITEM "Clear\tDelete",               ID_RESET_DEFAULT
+            MENUITEM "Clear\tDelete",               ID_RESET_DEFAULT, MENUBREAK
             MENUITEM SEPARATOR
             MENUITEM "Now\tHome",                   ID_EDIT_ITEM
         END

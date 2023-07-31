@@ -14,16 +14,7 @@
 namespace ui
 {
 	template< typename ColorCtrlT >
-	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor, bool evalColor = false )
-	{	// pass evalColor: true for CMFCColorButton, but false for CColorPickerButton (which manages well logical colors)
-		::DDX_Control( pDX, ctrlId, rCtrl );
-
-		if ( pColor != nullptr )
-			if ( DialogOutput == pDX->m_bSaveAndValidate )
-				rCtrl.SetColor( ui::EvalColorIf( *pColor, evalColor ) );
-			else
-				*pColor = ui::EvalColorIf( rCtrl.GetColor(), evalColor );
-	}
+	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor, bool evalColor = false );
 
 	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput = false );
 	void DDX_ColorRepoText( CDataExchange* pDX, int ctrlId, COLORREF color );
@@ -73,6 +64,8 @@ public:
 	virtual void SetColor( COLORREF rawColor, bool notify = false );
 	virtual void SetSelColorTable( const CColorTable* pSelColorTable );
 	virtual void SetDocColorTable( const CColorTable* pDocColorTable );		// additional 'Document' section of colors (below the main colors)
+
+	enum TrackingMode { NoTracking, TrackingColorBar, TrackingMenuColorTables, TrackingContextMenu };
 protected:
 	void UpdateShadesTable( void );
 private:
@@ -98,10 +91,9 @@ private:
 
 	std::auto_ptr<CColorMenuTrackingImpl> m_pMenuImpl;		// a CCmdTarget that manages set up of the popup menu, and has the color stores
 
-	enum TrackingMode { NoTracking, TrackingColorBar, TrackingMenuColorTables, TrackingContextMenu };
 	TrackingMode m_trackingMode;
 
-	static std::vector<CColorPickerButton*> s_instances;		// for color table notifications
+	static std::vector<CColorPickerButton*> s_instances;	// for color table notifications
 protected:
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
@@ -134,6 +126,24 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
+
+
+// template code
+
+namespace ui
+{
+	template< typename ColorCtrlT >
+	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor, bool evalColor /*= false*/ )
+	{	// pass evalColor: true for CMFCColorButton, but false for CColorPickerButton (which manages well logical colors)
+		::DDX_Control( pDX, ctrlId, rCtrl );
+
+		if ( pColor != nullptr )
+			if ( DialogOutput == pDX->m_bSaveAndValidate )
+				rCtrl.SetColor( ui::EvalColorIf( *pColor, evalColor ) );
+			else
+				*pColor = ui::EvalColorIf( rCtrl.GetColor(), evalColor );
+	}
+}
 
 
 #endif // ColorPickerButton_h

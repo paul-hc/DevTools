@@ -16,6 +16,38 @@ namespace nosy
 		// public access
 		void* GetItemData( void ) const { return reinterpret_cast<void*>( m_dwdItemData ); }
 		void SetItemData( const void* pItemData ) { m_dwdItemData = reinterpret_cast<DWORD_PTR>( pItemData ); }
+
+		CRect GetImageBoundsRect( void ) const
+		{
+			CRect imageBoundsRect = m_rect;
+
+			imageBoundsRect.left += CMFCVisualManager::GetInstance()->GetMenuImageMargin();
+			imageBoundsRect.right = imageBoundsRect.left + CMFCToolBar::GetMenuImageSize().cx + CMFCVisualManager::GetInstance()->GetMenuImageMargin();
+			return imageBoundsRect;
+		}
+
+		CRect GetImageRect( bool bounds = true ) const
+		{
+			CRect imageRect = m_rect;
+
+			if ( bounds )
+			{
+				int margin = CMFCVisualManager::GetInstance()->GetMenuImageMargin();
+				imageRect.DeflateRect( margin, margin );
+			}
+			return imageRect;
+		}
+
+		void RedrawImage( void )
+		{
+			if ( m_pWndParent != nullptr )
+			{
+				CRect imageRect = GetImageRect();
+
+				m_pWndParent->InvalidateRect( &imageRect );
+				m_pWndParent->UpdateWindow();
+			}
+		}
 	};
 
 
@@ -52,19 +84,17 @@ namespace mfc
 	}
 
 
-	void* GetButtonItemData( const CMFCToolBarButton* pButton )
+	void* Button_GetItemData( const CMFCToolBarButton* pButton )
 	{
-		ASSERT_PTR( pButton );
 		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetItemData();
 	}
 
-	void SetButtonItemData( CMFCToolBarButton* pButton, const void* pItemData )
+	void Button_SetItemData( CMFCToolBarButton* pButton, const void* pItemData )
 	{
-		ASSERT_PTR( pButton );
 		mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->SetItemData( pItemData );
 	}
 
-	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId )
+	void* Button_GetItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId )
 	{
 		CMFCToolBarButton* pFoundButton = FindBarButton( pPopupMenu, btnId );
 
@@ -74,7 +104,17 @@ namespace mfc
 			return 0;
 		}
 
-		return GetButtonItemData( pFoundButton );
+		return Button_GetItemData( pFoundButton );
+	}
+
+	CRect Button_GetImageRect( const CMFCToolBarButton* pButton, bool bounds /*= true*/ )
+	{
+		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetImageRect( bounds );
+	}
+
+	void Button_RedrawImage( CMFCToolBarButton* pButton )
+	{
+		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->RedrawImage();
 	}
 
 

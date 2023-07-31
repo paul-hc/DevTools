@@ -18,7 +18,7 @@ namespace mfc
 	class CTrackingPopupMenu : public CMFCPopupMenu
 	{
 	public:
-		CTrackingPopupMenu( ui::ICustomPopupMenu* pCustomPopupMenu = nullptr );
+		CTrackingPopupMenu( ui::ICustomPopupMenu* pCustomPopupMenu = nullptr, int trackingMode = 0 );
 		virtual ~CTrackingPopupMenu();
 
 		void SetTrackMode( BOOL trackMode ) { m_bTrackMode = trackMode; }
@@ -31,7 +31,39 @@ namespace mfc
 	protected:
 		virtual BOOL InitMenuBar( void );
 	private:
-		ui::ICustomPopupMenu* m_pCustomPopupMenu;				// client code can customize the tracking menu content: replace buttons, etc
+		ui::ICustomPopupMenu* m_pCustomPopupMenu;		// client code can customize the tracking menu content: replace buttons, etc
+		int m_trackingMode;								// client-specific cookie
+	};
+}
+
+
+#include <afxtoolbarmenubutton.h>
+
+
+namespace mfc
+{
+	class CToolBarColorButton : public CMFCToolBarMenuButton		// a normal toolbar item, that draws the color instead of a glyph
+	{
+		DECLARE_SERIAL( CToolBarColorButton );
+
+		CToolBarColorButton( void );
+	public:
+		CToolBarColorButton( UINT btnID, HMENU hMenu, int iImage, const TCHAR* pText = nullptr );
+		CToolBarColorButton( const CMFCToolBarButton* pSrcButton, COLORREF color );
+
+		void SetColor( COLORREF color );
+
+		static CToolBarColorButton* ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnID, COLORREF color, OUT int* pIndex = nullptr );
+	private:
+		COLORREF m_color;
+
+		// base overrides
+	public:
+		virtual void SetImage( int iImage ) override;
+	protected:
+		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
+		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE,
+							 BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE );
 	};
 }
 
@@ -45,11 +77,11 @@ namespace mfc
 	//
 	class CColorMenuButton : public CMFCColorMenuButton
 	{
-		DECLARE_SERIAL( CColorMenuButton )
+		DECLARE_SERIAL( CColorMenuButton );
 
 		CColorMenuButton( void );			// private constructor for serialization
 	public:
-		CColorMenuButton( UINT uiCmdID, const CColorTable* pColorTable );
+		CColorMenuButton( UINT btnID, const CColorTable* pColorTable );
 		virtual ~CColorMenuButton();
 
 		const CColorTable* GetColorTable( void ) const { return m_pColorTable; }
@@ -137,7 +169,7 @@ namespace mfc
 		const CColorTable* m_pColorTable;
 		const CColorTable* m_pDocColorTable;
 
-		nosy::CColorBar_* m_pColorBar;						// points to CMFCColorPopupMenu::m_wndColorBar data-member, with access to protected data-members
+		nosy::CColorBar_* m_pColorBar;					// points to CMFCColorPopupMenu::m_wndColorBar data-member, with access to protected data-members
 		std::auto_ptr<CWindowHook> m_pColorBarHook;		// handles formatted color entry + some button clicks
 		COLORREF m_rawAutoColor;
 		COLORREF m_rawSelColor;

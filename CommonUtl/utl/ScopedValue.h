@@ -31,6 +31,11 @@ public:
 	{
 		*m_pValue = newValue;
 	}
+
+	void SetFlag( const ValueType& newFlag, bool on = true )
+	{
+		::SetFlag( *m_pValue, newFlag, on );
+	}
 private:
 	ValueType* m_pValue;
 	ValueType m_oldValue;

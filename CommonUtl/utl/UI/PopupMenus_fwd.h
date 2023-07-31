@@ -30,7 +30,7 @@ namespace ui
 
 	interface ICustomPopupMenu
 	{
-		virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup ) = 0;
+		virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int trackingMode ) = 0;
 	};
 
 
@@ -67,13 +67,16 @@ namespace mfc
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
 	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex = nullptr );
 
-	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette = nullptr );	// CMFCColorBar protected access
+	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette = nullptr );		// CMFCColorBar protected access
 
 
-	void* GetButtonItemData( const CMFCToolBarButton* pButton );
-	void SetButtonItemData( CMFCToolBarButton* pButton, const void* pItemData );
+	// CMFCToolBarButton protected access:
+	void* Button_GetItemData( const CMFCToolBarButton* pButton );
+	void Button_SetItemData( CMFCToolBarButton* pButton, const void* pItemData );
+	void* Button_GetItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 
-	void* GetButtonItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
+	CRect Button_GetImageRect( const CMFCToolBarButton* pButton, bool bounds = true );
+	void Button_RedrawImage( CMFCToolBarButton* pButton );
 
 
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
