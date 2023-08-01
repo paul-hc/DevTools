@@ -349,7 +349,7 @@ namespace mfc
 
 	void CColorMenuButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz, BOOL bCustomizeMode, BOOL bHighlight, BOOL bDrawBorder, BOOL bGrayDisabledButtons )
 	{
-		CScopedValue<COLORREF> scColor( &m_Color, m_pEditorHost != nullptr ? m_pEditorHost->GetActualColor() : ui::EvalColor( m_Color ) );		// show the display color while drawing
+		CScopedValue<COLORREF> scColor( &m_Color, ui::EvalColor( m_pEditorHost != nullptr ? m_pEditorHost->GetActualColor() : m_Color ) );		// show the display color while drawing
 
 		__super::OnDraw( pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder, bGrayDisabledButtons );
 	}
@@ -399,10 +399,11 @@ namespace mfc
 
 		if ( pParentMenuBtn != nullptr )
 		{
+			m_pEditorHost = pParentMenuBtn->GetEditorHost();
 			m_pColorTable = pParentMenuBtn->GetColorTable();
 
-			if ( pParentMenuBtn->GetEditorHost() != nullptr )
-				m_pDocColorTable = pParentMenuBtn->GetEditorHost()->GetDocColorTable();
+			if ( m_pEditorHost != nullptr )
+				m_pDocColorTable = m_pEditorHost->GetDocColorTable();
 		}
 	}
 

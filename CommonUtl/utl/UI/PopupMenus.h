@@ -164,9 +164,8 @@ namespace mfc
 		virtual bool Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point ) override;
 
 		// ui::IWindowHookHandler interface
-		virtual bool Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* pHook ) override;	// to handle WM_LBUTTONUP on More Color button
+		virtual bool Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* pHook ) override;		// to handle WM_LBUTTONUP on More Color button
 	private:
-		//CColorMenuButton* m_pParentMenuBtn;
 		ui::IColorEditorHost* m_pEditorHost;
 		const CColorTable* m_pColorTable;
 		const CColorTable* m_pDocColorTable;

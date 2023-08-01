@@ -24,7 +24,7 @@ namespace reg
 
 namespace layout
 {
-	static CLayoutStyle styles[] =
+	static CLayoutStyle s_styles[] =
 	{
 		{ IDC_RGB_EDIT, SizeX },
 		{ IDC_REPO_COLOR_INFO_EDIT, SizeX },
@@ -36,25 +36,26 @@ namespace layout
 
 // CTestColorsDialog implementation
 
+COLORREF CTestColorsDialog::s_color = CLR_NONE;
+
 CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_TEST_COLORS_DIALOG, pParent )
-	, m_color( CLR_NONE )
 	, m_editChecked( true )
 	, m_pColorPicker( new CColorPickerButton() )
 	, m_pMenuPicker( new CMenuPickerButton() )
 {
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
-	//m_color = ui::MakeSysColor( COLOR_MENUHILIGHT );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
+	//s_color = ui::MakeSysColor( COLOR_MENUHILIGHT );
 
-	m_mfcColorPickerButton.SetColor( m_color );
+	m_mfcColorPickerButton.SetColor( s_color );
 	m_mfcColorPickerButton.EnableAutomaticButton( mfc::CColorLabels::s_autoLabel, color::Yellow );
 	m_mfcColorPickerButton.EnableOtherButton( mfc::CColorLabels::s_moreLabel );
 	mfc::TColorList docColors;
 	CColorRepository::Instance()->FindTable( ui::Office2003_Colors )->QueryMfcColors( docColors );
 	m_mfcColorPickerButton.SetDocumentColors( _T("Document:"), docColors );
 
-	m_pColorPicker->SetColor( m_color );
+	m_pColorPicker->SetColor( s_color );
 	m_pColorPicker->SetAutomaticColor( color::Lime );
 
 	ui::LoadPopupMenu( &m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup );
@@ -81,12 +82,12 @@ void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_mfcColorPickerButton.m_hWnd;
 
-	ui::DDX_ColorButton( pDX, IDC_MFC_COLOR_PICKER_BUTTON, m_mfcColorPickerButton, &m_color, true );	// evaluate color
-	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, *m_pColorPicker, &m_color );
+	ui::DDX_ColorButton( pDX, IDC_MFC_COLOR_PICKER_BUTTON, m_mfcColorPickerButton, &s_color, true );	// evaluate color
+	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, *m_pColorPicker, &s_color );
 	DDX_Control( pDX, IDC_MENU_PICKER_BUTTON, *m_pMenuPicker );
 
-	ui::DDX_ColorText( pDX, IDC_RGB_EDIT, &m_color );
-	ui::DDX_ColorRepoText( pDX, IDC_REPO_COLOR_INFO_EDIT, m_color );
+	ui::DDX_ColorText( pDX, IDC_RGB_EDIT, &s_color );
+	ui::DDX_ColorRepoText( pDX, IDC_REPO_COLOR_INFO_EDIT, s_color );
 
 	if ( firstInit )
 	{
@@ -114,18 +115,18 @@ END_MESSAGE_MAP()
 
 void CTestColorsDialog::OnMfcColorPicker( void )
 {
-	m_color = m_mfcColorPickerButton.GetColor();
-	//if ( CLR_NONE == m_color )
-	//	m_color = m_mfcColorPickerButton.GetAutomaticColor();
+	s_color = m_mfcColorPickerButton.GetColor();
+	//if ( CLR_NONE == s_color )
+	//	s_color = m_mfcColorPickerButton.GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }
 
 void CTestColorsDialog::OnColorPicker( void )
 {
-	m_color = m_pColorPicker->GetColor();
-	//if ( CLR_NONE == m_color )
-	//	m_color = m_pColorPicker->GetAutomaticColor();
+	s_color = m_pColorPicker->GetColor();
+	//if ( CLR_NONE == s_color )
+	//	s_color = m_pColorPicker->GetAutomaticColor();
 
 	UpdateData( DialogOutput );
 }
@@ -147,7 +148,7 @@ void CTestColorsDialog::OnMenuPicker( void )
 
 void CTestColorsDialog::On_EditColor( void )
 {
-	if ( ui::EditColor( &m_color, GetDlgItem( IDC_EDIT_COLOR_BUTTON ), !ui::IsKeyPressed( VK_CONTROL ) ) )
+	if ( ui::EditColor( &s_color, GetDlgItem( IDC_EDIT_COLOR_BUTTON ), !ui::IsKeyPressed( VK_CONTROL ) ) )
 		UpdateData( DialogOutput );
 }
 
