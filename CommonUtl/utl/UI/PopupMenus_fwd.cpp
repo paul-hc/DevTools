@@ -51,6 +51,13 @@ namespace nosy
 	};
 
 
+	struct CBasePane_ : public CBasePane
+	{
+		// public access
+		void SetIsDialogControl( bool isDlgControl = true ) { m_bIsDlgControl = isDlgControl; }
+	};
+
+
 	struct CToolBar_ : public CMFCToolBar
 	{
 		// public access
@@ -63,6 +70,12 @@ namespace mfc
 {
 	const TCHAR CColorLabels::s_autoLabel[] = _T("Automatic");
 	const TCHAR CColorLabels::s_moreLabel[] = _T("More Colors...");
+
+
+	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl /*= true*/ )
+	{
+		mfc::nosy_cast<nosy::CBasePane_>( pBasePane )->SetIsDialogControl( isDlgControl );
+	}
 
 
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar )

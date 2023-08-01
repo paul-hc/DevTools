@@ -48,7 +48,7 @@ namespace mfc
 
 		CToolBarColorButton( void );
 	public:
-		CToolBarColorButton( UINT btnID, HMENU hMenu, int iImage, const TCHAR* pText = nullptr );
+		CToolBarColorButton( UINT btnID, int iImage, const TCHAR* pText = nullptr, HMENU hMenu = nullptr );
 		CToolBarColorButton( const CMFCToolBarButton* pSrcButton, COLORREF color );
 
 		void SetColor( COLORREF color );

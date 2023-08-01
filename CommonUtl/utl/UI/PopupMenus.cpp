@@ -98,7 +98,7 @@ namespace mfc
 	{
 	}
 
-	CToolBarColorButton::CToolBarColorButton( UINT btnID, HMENU hMenu, int iImage, const TCHAR* pText /*= nullptr*/ )
+	CToolBarColorButton::CToolBarColorButton( UINT btnID, int iImage, const TCHAR* pText /*= nullptr*/, HMENU hMenu /*= nullptr*/ )
 		: CMFCToolBarMenuButton( btnID, hMenu, iImage, pText, false )
 		, m_color( CLR_NONE )
 	{

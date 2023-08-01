@@ -5,6 +5,7 @@
 #include <afxtempl.h>
 
 
+class CBasePane;
 class CMFCPopupMenu;
 class CMFCToolBar;
 class CMFCToolBarButton;
@@ -68,6 +69,9 @@ namespace mfc
 		static const TCHAR s_autoLabel[];
 		static const TCHAR s_moreLabel[];
 	};
+
+
+	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
 
 
 	// CMFCToolBar protected access:
