@@ -86,10 +86,11 @@ namespace mfc
 
 		const CColorTable* GetColorTable( void ) const { return m_pColorTable; }
 
-		const CColorTable* GetDocColorTable( void ) const { return m_pDocColorTable; }
-		void SetDocColorTable( const CColorTable* pDocColorTable );
+		ui::IColorEditorHost* GetEditorHost( void ) const { return m_pEditorHost; }
+		void SetEditorHost( ui::IColorEditorHost* pEditorHost );
 
-		void SetSelected( bool isTableSelected = true );
+		void SetSelectedTable( COLORREF color, COLORREF autoColor, const CColorTable* pDocColorsTable );
+		void SetDisplayColorBox( UINT imageId = 0 );				// 0 for transparent: empty image with color band at bottom;  UINT_MAX for hiding the color box
 
 		enum NotifCode { CMBN_COLORSELECTED = CBN_SELCHANGE };		// note: notifications are suppressed during parent's UpdateData()
 	protected:
@@ -101,12 +102,14 @@ namespace mfc
 		virtual void SetImage( int iImage ) override;
 		virtual void SetColor( COLORREF color, BOOL notify = TRUE ) override;
 		virtual BOOL OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) override;
+		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE,
+							 BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE );
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
 		virtual CMFCPopupMenu* CreatePopupMenu( void ) override;
 	private:
-		const CColorTable* m_pColorTable;
-		const CColorTable* m_pDocColorTable;		// typically for the "Color Shades" table
+		const CColorTable* m_pColorTable;			// required field
+		ui::IColorEditorHost* m_pEditorHost;		// optional field; if null, it sends CMBN_COLORSELECTED notifications
 	};
 }
 
@@ -153,7 +156,6 @@ namespace mfc
 		void StoreBtnColorEntries( void );
 		void StoreBtnColorTableEntries( IN OUT Range<int>& rBtnIndex, const CColorTable* pColorTable );
 		static void StoreButtonColorEntry( CMFCToolBarButton* pButton, const CColorEntry* pColorEntry );
-		static bool OpenColorDialog( ui::IColorEditorHost* pEditorHost );
 
 		const CColorEntry* FindColorEntry( COLORREF rawColor ) const;
 		bool FormatColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const;
@@ -164,7 +166,7 @@ namespace mfc
 		// ui::IWindowHookHandler interface
 		virtual bool Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* pHook ) override;	// to handle WM_LBUTTONUP on More Color button
 	private:
-		CColorMenuButton* m_pParentMenuBtn;
+		//CColorMenuButton* m_pParentMenuBtn;
 		ui::IColorEditorHost* m_pEditorHost;
 		const CColorTable* m_pColorTable;
 		const CColorTable* m_pDocColorTable;

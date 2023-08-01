@@ -109,8 +109,8 @@ namespace mfc
 		: CMFCToolBarMenuButton()
 		, m_color( CLR_NONE )
 	{
-		REQUIRE( is_a<CMFCToolBarMenuButton>( pSrcButton ) );		// standard source menu button, as created by CMFCPopupMenuBar::ImportFromMenu()
-		CMFCToolBarMenuButton::CopyFrom( *pSrcButton );		// non-virtual call
+		REQUIRE( is_a<CMFCToolBarMenuButton>( pSrcButton ) );	// standard source menu button, as created by CMFCPopupMenuBar::ImportFromMenu()
+		CMFCToolBarMenuButton::CopyFrom( *pSrcButton );			// non-virtual call
 		SetColor( color );
 	}
 
@@ -139,7 +139,7 @@ namespace mfc
 
 	void CToolBarColorButton::SetImage( int iImage ) override
 	{
-		//__super::SetImage( iImage );
+			//__super::SetImage( iImage );
 
 		// Need to override default processing, which alters this button image in afxCommandManager, and switches to m_bUserButton = TRUE.
 		// This is to prevent the stickiness of the selected table button, after selecting a color from another table
@@ -207,14 +207,14 @@ namespace mfc
 	CColorMenuButton::CColorMenuButton( void )
 		: CMFCColorMenuButton()
 		, m_pColorTable( nullptr )
-		, m_pDocColorTable( nullptr )
+		, m_pEditorHost( nullptr )
 	{
 	}
 
 	CColorMenuButton::CColorMenuButton( UINT btnID, const CColorTable* pColorTable )
 		: CMFCColorMenuButton( btnID, safe_ptr( pColorTable )->GetTableName().c_str() )
 		, m_pColorTable( pColorTable )
-		, m_pDocColorTable( nullptr )
+		, m_pEditorHost( nullptr )
 	{
 		ASSERT_PTR( m_pColorTable );
 
@@ -231,65 +231,35 @@ namespace mfc
 	{
 	}
 
-	void CColorMenuButton::SetDocColorTable( const CColorTable* pDocColorTable )
+	void CColorMenuButton::SetEditorHost( ui::IColorEditorHost* pEditorHost )
 	{
-		m_pDocColorTable = pDocColorTable;
+		m_pEditorHost = pEditorHost;
 
-		if ( m_pDocColorTable != nullptr && !m_pDocColorTable->IsEmpty() )
-			EnableDocumentColors( m_pDocColorTable->GetTableName().c_str() );
+		if ( m_pEditorHost != nullptr && m_pColorTable == m_pEditorHost->GetSelColorTable() )		// button of the selected table?
+			SetSelectedTable( m_pEditorHost->GetColor(), m_pEditorHost->GetAutoColor(), m_pEditorHost->GetDocColorTable() );
 	}
 
-	void CColorMenuButton::SetSelected( bool isTableSelected /*= true*/ )
+	void CColorMenuButton::SetSelectedTable( COLORREF color, COLORREF autoColor, const CColorTable* pDocColorsTable )
 	{
-		SetImage( isTableSelected ? afxCommandManager->GetCmdImage( ID_SELECTED_COLOR_BUTTON, FALSE ) : -1 );
+		SetDisplayColorBox( ID_SELECTED_COLOR_BUTTON );
+
+		if ( autoColor != CLR_NONE )
+			EnableAutomaticButton( mfc::CColorLabels::s_autoLabel, color );
+
+		EnableOtherButton( mfc::CColorLabels::s_moreLabel );
+
+		if ( pDocColorsTable != nullptr && !pDocColorsTable->IsEmpty() )
+			EnableDocumentColors( pDocColorsTable->GetTableName().c_str() );
+
+		SetColor( color, false );
 	}
 
-
-	void CColorMenuButton::SetImage( int iImage ) override
+	void CColorMenuButton::SetDisplayColorBox( UINT imageId )
 	{
-		//__super::SetImage( iImage );
-
-		// Need to override default processing, which alters this button image in afxCommandManager, and switches to m_bUserButton = TRUE.
-		// This is to prevent the stickiness of the selected table button, after selecting a color from another table
-		m_iImage = iImage;
-		m_bImage = m_iImage != -1;
-		m_bText = TRUE;
-		m_bUserButton = FALSE;
-		//afxCommandManager->SetCmdImage( m_nID, m_iImage, m_bUserButton );
-
-		if ( m_pWndParent != NULL )
-		{
-			CRect rectImage;
-			GetImageRect( rectImage );
-
-			m_pWndParent->InvalidateRect( &rectImage );
-			m_pWndParent->UpdateWindow();
-		}
-	}
-
-	void CColorMenuButton::SetColor( COLORREF color, BOOL notify ) override
-	{
-		if ( notify && m_pPopupMenu != nullptr )
-			if ( const CColorEntry* pClickedColorEntry = checked_static_cast<const mfc::CColorPopupMenu*>( m_pPopupMenu )->FindClickedBarColorEntry() )
-				color = pClickedColorEntry->GetColor();		// lookup the proper raw sys-color
-
-		// if notify is true, this gets called by CMFCColorBar::OnSendCommand() on user color selection
-		__super::SetColor( color, notify );
-
-		if ( m_pPopupMenu != nullptr )			// not a proxy source button?
-			if ( CWnd* pMessageWnd = m_pPopupMenu->GetMessageWnd() )
-				ui::SendCommand( pMessageWnd->GetSafeHwnd(), m_nID, CMBN_COLORSELECTED, m_pPopupMenu->GetMenuBar()->GetSafeHwnd() );
-	}
-
-	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) override
-	{
-		COLORREF color = colorDefault;
-
-		if ( !ui::EditColor( &color, GetMessageWnd(), true) )
-			return false;
-
-		rColor = color;
-		return true;
+		if ( imageId != UINT_MAX )
+			SetImage( afxCommandManager->GetCmdImage( imageId != 0 ? imageId : ID_TRANSPARENT, FALSE ) );
+		else
+			SetImage( -1 );
 	}
 
 	CWnd* CColorMenuButton::GetMessageWnd( void ) const
@@ -303,6 +273,70 @@ namespace mfc
 		return nullptr;
 	}
 
+	void CColorMenuButton::SetImage( int iImage ) override
+	{
+			//__super::SetImage( iImage );
+
+		// Need to override default processing, which alters this button image in afxCommandManager, and switches to m_bUserButton = TRUE.
+		// This is to prevent the stickiness of the selected table button, after selecting a color from another table
+		m_iImage = iImage;
+		m_bImage = m_iImage != -1;
+		m_bText = TRUE;
+		m_bUserButton = FALSE;
+
+		if ( m_pWndParent != NULL )
+		{
+			CRect rectImage;
+			GetImageRect( rectImage );
+
+			m_pWndParent->InvalidateRect( &rectImage );
+			m_pWndParent->UpdateWindow();
+		}
+	}
+
+	void CColorMenuButton::SetColor( COLORREF color, BOOL notify ) override
+	{
+		bool isTrackingMFCColorBar = m_pPopupMenu != nullptr && is_a<CMFCColorBar>( m_pPopupMenu->GetMenuBar() );
+
+		if ( notify )
+		{
+			// if using a user custom color table, color can be picked from any table, but the selected user table is retained (not switched to picked table)
+			if ( m_pEditorHost != nullptr && !m_pEditorHost->UseUserColors() )
+				m_pEditorHost->SetSelColorTable( m_pColorTable );
+
+			if ( isTrackingMFCColorBar )
+				if ( const CColorEntry* pClickedColorEntry = checked_static_cast<const mfc::CColorPopupMenu*>( m_pPopupMenu )->FindClickedBarColorEntry() )
+					color = pClickedColorEntry->GetColor();		// lookup the proper raw sys-color
+		}
+
+		// if notify is true, this gets called by CMFCColorBar::OnSendCommand() on user color selection
+		__super::SetColor( color, notify );
+
+		if ( notify )
+			if ( m_pEditorHost != nullptr )
+				m_pEditorHost->SetColor( color, true );
+			else if ( m_pPopupMenu != nullptr )			// tracking?
+				if ( CWnd* pMessageWnd = m_pPopupMenu->GetMessageWnd() )
+					ui::SendCommand( pMessageWnd->GetSafeHwnd(), m_nID, CMBN_COLORSELECTED, m_pPopupMenu->GetMenuBar()->GetSafeHwnd() );
+	}
+
+	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) override
+	{
+		if ( m_pEditorHost != nullptr )
+		{
+			m_pEditorHost->OpenColorDialog();
+			return false;		// handled internally already
+		}
+
+		COLORREF color = colorDefault;
+
+		if ( !ui::EditColor( &color, GetMessageWnd(), true ) )
+			return false;
+
+		rColor = color;
+		return true;
+	}
+
 	void CColorMenuButton::CopyFrom( const CMFCToolBarButton& src ) override
 	{
 		__super::CopyFrom( src );
@@ -310,20 +344,31 @@ namespace mfc
 		const CColorMenuButton& srcButton = (const CColorMenuButton&)src;
 
 		m_pColorTable = srcButton.m_pColorTable;
-		m_pDocColorTable = srcButton.m_pDocColorTable;
+		m_pEditorHost = srcButton.m_pEditorHost;
+	}
+
+	void CColorMenuButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz, BOOL bCustomizeMode, BOOL bHighlight, BOOL bDrawBorder, BOOL bGrayDisabledButtons )
+	{
+		CScopedValue<COLORREF> scColor( &m_Color, m_pEditorHost != nullptr ? m_pEditorHost->GetActualColor() : ui::EvalColor( m_Color ) );		// show the display color while drawing
+
+		__super::OnDraw( pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder, bGrayDisabledButtons );
 	}
 
 	CMFCPopupMenu* CColorMenuButton::CreatePopupMenu( void ) override
 	{
-		//return __super::CreatePopupMenu();
+			//return __super::CreatePopupMenu();
 
 		// customize document colors table (if any)
 		mfc::TColorList docColors;
 
-		if ( m_bIsDocumentColors != FALSE )
+		if ( m_bIsDocumentColors )
 		{
-			REQUIRE( m_pDocColorTable != nullptr && !m_pDocColorTable->IsEmpty() );
-			m_pDocColorTable->QueryMfcColors( docColors );
+			ASSERT_PTR( m_pEditorHost );
+
+			const CColorTable* pShadesTable = m_pEditorHost->GetDocColorTable();
+
+			if ( !pShadesTable->IsEmpty() )
+				pShadesTable->QueryMfcColors( docColors );
 		}
 
 		return new mfc::CColorPopupMenu( this, m_Colors, m_Color,
@@ -343,19 +388,21 @@ namespace mfc
 									  mfc::TColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
 									  COLORREF colorAuto, UINT uiCmdID, BOOL stdColorDlg /*= false*/ )
 		: CMFCColorPopupMenu( colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, horzDockRows, vertDockColumns, colorAuto, uiCmdID, stdColorDlg )
-		, m_pParentMenuBtn( pParentMenuBtn )
 		, m_pEditorHost( nullptr )
 		, m_pColorTable( nullptr )
 		, m_pDocColorTable( nullptr )
 		, m_rawAutoColor( CLR_NONE )
 		, m_rawSelColor( CLR_NONE )
 	{	// general constructor, for e.g. CColorMenuButton
+		m_pParentBtn = pParentMenuBtn;
 		m_pColorBar = mfc::nosy_cast<nosy::CColorBar_>( &m_wndColorBar );
 
-		if ( m_pParentMenuBtn != nullptr )
+		if ( pParentMenuBtn != nullptr )
 		{
-			m_pColorTable = m_pParentMenuBtn->GetColorTable();
-			m_pDocColorTable = m_pParentMenuBtn->GetDocColorTable();
+			m_pColorTable = pParentMenuBtn->GetColorTable();
+
+			if ( pParentMenuBtn->GetEditorHost() != nullptr )
+				m_pDocColorTable = pParentMenuBtn->GetEditorHost()->GetDocColorTable();
 		}
 	}
 
@@ -364,7 +411,6 @@ namespace mfc
 									  const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
 									  mfc::TColorList& docColors, int columns, COLORREF colorAuto )
 		: CMFCColorPopupMenu( pParentPickerBtn, colors, color, pAutoColorLabel, pMoreColorLabel, pDocColorsLabel, docColors, columns, colorAuto )
-		, m_pParentMenuBtn( nullptr )
 		, m_pEditorHost( nullptr )
 		, m_pColorTable( nullptr )
 		, m_pDocColorTable( nullptr )
@@ -385,19 +431,6 @@ namespace mfc
 		m_pEditorHost = pEditorHost;
 		m_pColorTable = pEditorHost->GetSelColorTable();
 		m_pDocColorTable = pEditorHost->GetDocColorTable();
-	}
-
-	bool CColorPopupMenu::OpenColorDialog( ui::IColorEditorHost* pEditorHost )
-	{
-		REQUIRE( pEditorHost );
-		CWnd* pParentWnd = dynamic_cast<CWnd*>( pEditorHost );
-		ui::TDisplayColor color = ui::EvalColor( pEditorHost->GetActualColor() );
-
-		if ( !ui::EditColor( &color, pParentWnd, true) )
-			return false;
-
-		pEditorHost->SetColor( color, true );
-		return true;
 	}
 
 	const CColorEntry* CColorPopupMenu::FindClickedBarColorEntry( void ) const
@@ -539,7 +572,7 @@ namespace mfc
 		{
 			REQUIRE( m_pColorBar->GetSafeHwnd() == msg.hwnd );
 
-			if ( nullptr == m_pParentMenuBtn && m_pEditorHost != nullptr )
+			if ( nullptr == m_pParentBtn && m_pEditorHost != nullptr )
 			{
 				if ( CMFCToolBarButton* pClickedButton = mfc::ToolBar_ButtonHitTest( m_pColorBar, CPoint( msg.lParam ) ) )
 				{
@@ -548,7 +581,7 @@ namespace mfc
 						ui::IColorEditorHost* pEditorHost = m_pEditorHost;		// store it since this will get destroyed next
 
 						m_pColorBar->InvokeMenuCommand( 0, pClickedButton );	// destroy this popup menu the graceful way - it will delete 'this'
-						OpenColorDialog( pEditorHost );
+						pEditorHost->OpenColorDialog();
 						rResult = 0;
 						return true;			// handled the message
 					}

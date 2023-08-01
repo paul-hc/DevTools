@@ -45,6 +45,7 @@ namespace ui
 		virtual const CColorTable* GetDocColorTable( void ) const = 0;
 		virtual bool UseUserColors( void ) const = 0;
 
+		// implemented
 		COLORREF GetActualColor( void ) const
 		{
 			COLORREF actualColor = GetColor();
@@ -54,10 +55,13 @@ namespace ui
 
 	interface IColorEditorHost : public IColorHost
 	{
-		virtual void SetColor( COLORREF rawColor, bool notify ) = 0;
+		virtual CWnd* GetHostWindow( void ) const = 0;
 
+		virtual void SetColor( COLORREF rawColor, bool notify ) = 0;
 		virtual void SetSelColorTable( const CColorTable* pSelColorTable ) = 0;
-		virtual void SetDocColorTable( const CColorTable* pDocColorTable ) = 0;
+
+		// implemented
+		bool OpenColorDialog( void );
 	};
 }
 

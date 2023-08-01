@@ -1,12 +1,30 @@
 
 #include "pch.h"
 #include "PopupMenus_fwd.h"
+#include "Color.h"
+#include "WndUtils.h"
 #include <afxpopupmenu.h>
 #include <afxcolorpopupmenu.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace ui
+{
+	bool IColorEditorHost::OpenColorDialog( void )
+	{
+		CWnd* pHostWnd = GetHostWindow();
+		ui::TDisplayColor color = ui::EvalColor( GetActualColor() );
+
+		if ( !ui::EditColor( &color, pHostWnd, true ) )
+			return false;
+
+		SetColor( color, true );
+		return true;
+	}
+}
 
 
 namespace nosy

@@ -58,12 +58,13 @@ public:
 
 	void SetupMenu( bool isContextMenu );
 
+	CColorTable* GetShadesTable( void ) { return m_pScratchStore->GetShadesTable(); }
+
 	CColorTable* LookupMenuColorTable( UINT colorBtnId ) const;
 private:
 	void ModifyMenuTableItems( const CColorStore* pColorStore );
 	void InsertMenuTableItems( const CColorStore* pColorStore );
 
-	mfc::CColorMenuButton* MakeColorMenuButton( UINT colorBtnId, const CColorTable* pColorTable ) const;
 	static mfc::CColorMenuButton* FindColorMenuButton( UINT colorBtnId );
 
 	// ui::ICustomPopupMenu interface
@@ -110,18 +111,19 @@ CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nu
 	REQUIRE( !utl::Contains( s_instances, this ) );
 	s_instances.push_back( this );
 
-	m_pMenuImpl.reset( new CColorMenuTrackingImpl( this ) );
-
-	EnableOtherButton( mfc::CColorLabels::s_moreLabel );
-
-	SetSelColorTable( pSelColorTable != nullptr ? pSelColorTable : CHalftoneRepository::Instance()->FindTable( ui::Halftone16_Colors ) );
-
 	const ACCEL accelKeys[] =
 	{
 		{ FVIRTKEY, VK_DELETE, ID_RESET_DEFAULT },
 		{ FVIRTKEY | FCONTROL | FSHIFT, 'T', ID_EDIT_LIST_ITEMS }
 	};
 	m_accel.Augment( ARRAY_SPAN( accelKeys ) );
+
+	m_pMenuImpl.reset( new CColorMenuTrackingImpl( this ) );
+
+	EnableOtherButton( mfc::CColorLabels::s_moreLabel );
+
+	SetSelColorTable( pSelColorTable != nullptr ? pSelColorTable : CHalftoneRepository::Instance()->FindTable( ui::Halftone16_Colors ) );
+	SetDocColorTable( m_pMenuImpl->GetShadesTable() );
 }
 
 CColorPickerButton::~CColorPickerButton()
@@ -148,7 +150,7 @@ void CColorPickerButton::SetMainStore( const CColorStore* pMainStore )
 		SetSelColorTable( m_pMenuImpl->m_pMainStore->GetTables().front() );
 }
 
-bool CColorPickerButton::UseUserColors( void ) const
+bool CColorPickerButton::UseUserColors( void ) const override
 {
 	return ( nullptr == m_pSelColorTable || ui::UserCustom_Colors == m_pSelColorTable->GetTableType() ) && !m_Colors.IsEmpty();
 }
@@ -165,12 +167,12 @@ void CColorPickerButton::SetUserColors( const std::vector<COLORREF>& userColors,
 	SetSelColorTable( pUserCustomTable );
 }
 
-const CColorEntry* CColorPickerButton::GetRawColor( void ) const
+const CColorEntry* CColorPickerButton::GetRawColor( void ) const override
 {
 	return m_pSelColorEntry;
 }
 
-void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ )
+void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) override
 {
 	if ( notify )
 	{
@@ -197,8 +199,9 @@ void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ )
 }
 
 void CColorPickerButton::UpdateColor( COLORREF color ) override
-{	// base override
-	//__super::UpdateColor( color );
+{
+		//__super::UpdateColor( color );
+
 	SetColor( color, true );
 }
 
@@ -213,7 +216,7 @@ void CColorPickerButton::UpdateShadesTable( void )
 	SetDocumentColors( pShadesTable->IsEmpty() ? nullptr : pShadesTable->GetTableName().c_str(), shadesColorList );
 }
 
-void CColorPickerButton::SetSelColorTable( const CColorTable* pSelColorTable )
+void CColorPickerButton::SetSelColorTable( const CColorTable* pSelColorTable ) override
 {
 	ASSERT_PTR( pSelColorTable );
 	if ( m_pSelColorTable == pSelColorTable )
@@ -334,7 +337,7 @@ void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToo
 void CColorPickerButton::ShowColorTablePopup( void )
 {	// modeless display of the color popup
 
-	//__super::OnShowColorPopup();		// original behaviour using CMFCColorPopupMenu
+		//__super::OnShowColorPopup();		// original behaviour using CMFCColorPopupMenu
 
 	if ( m_pPopup != nullptr )
 	{
@@ -395,11 +398,12 @@ void CColorPickerButton::TrackMenuColorTables( void )
 	GetWindowRect( &btnScreenRect );
 
 	CPoint screenPos( btnScreenRect.left, btnScreenRect.bottom );
-	int cmdId = ui::TrackMfcPopupMenu( m_pMenuImpl->m_menu.GetSafeHmenu(), this, screenPos, false );		// no WM_COMMAND, notifications work via mfc::CColorMenuButton::CMBN_COLORSELECTED
+	int cmdId = ui::TrackMfcPopupMenu( m_pMenuImpl->m_menu.GetSafeHmenu(), this, screenPos, false );
+		// no WM_COMMAND, notifications work via ui::IColorEditorHost::SetColor(), or mfc::CColorMenuButton::CMBN_COLORSELECTED
 
 	m_trackingMode = NoTracking;
 
-	if ( cmdId != 0 && !( cmdId >= ID_HALFTONE_TABLE_16 && cmdId <= ID_REPO_COLOR_TABLE_MAX ) )		// menu command other than a color table?
+	if ( cmdId != 0 && !( cmdId >= ID_HALFTONE_TABLE_16 && cmdId <= ID_REPO_COLOR_TABLE_MAX ) )			// menu command other than a color table?
 		ui::SendCommand( m_hWnd, cmdId );			// send ID_EDIT_COPY, etc
 
 	// CMFCColorButton boilerplate:
@@ -594,7 +598,7 @@ void CColorPickerButton::On_CopyColorTable( void )
 		const std::vector<CColorEntry>& colorEntries = m_pSelColorTable->GetColors();
 
 		for ( size_t i = 0; i != colorEntries.size(); ++i )
-			stream::Tag( tabbedText, num::FormatNumber( i + 1 ) + s_tab + colorEntries[ i ].FormatColor( s_tab, false ), s_lineEnd );		// 1-based indexMin
+			stream::Tag( tabbedText, num::FormatNumber( i + 1 ) + s_tab + colorEntries[ i ].FormatColor( s_tab, false ), s_lineEnd );	// 1-based indexMin
 	}
 	else
 	{
@@ -602,7 +606,7 @@ void CColorPickerButton::On_CopyColorTable( void )
 		stream::Tag( tabbedText, s_header[ RgbColor ], s_lineEnd );
 
 		for ( INT_PTR i = 0; i != m_Colors.GetSize(); ++i )
-			stream::Tag( tabbedText, num::FormatNumber( i + 1 ) + s_tab + ui::FormatColor( m_Colors[ i ], s_tab ), s_lineEnd );		// 1-based indexMin
+			stream::Tag( tabbedText, num::FormatNumber( i + 1 ) + s_tab + ui::FormatColor( m_Colors[ i ], s_tab ), s_lineEnd );			// 1-based indexMin
 	}
 
 	CTextClipboard::CopyText( tabbedText, m_hWnd );
@@ -636,8 +640,8 @@ void CColorPickerButton::On_PickingMode( UINT pickRadioId )
 
 void CColorPickerButton::OnUpdate_PickingMode( CCmdUI* pCmdUI )
 {
-	ui::SetRadio( pCmdUI, ( pCmdUI->m_nID - ID_PICK_COLOR_BAR_RADIO ) == (UINT)m_pickingMode );
-	//pCmdUI->SetRadio( ( pCmdUI->m_nID - ID_PICK_COLOR_BAR_RADIO ) == (UINT)m_pickingMode );
+	pCmdUI->SetRadio( ( pCmdUI->m_nID - ID_PICK_COLOR_BAR_RADIO ) == (UINT)m_pickingMode );
+	//ui::SetRadio( pCmdUI, ( pCmdUI->m_nID - ID_PICK_COLOR_BAR_RADIO ) == (UINT)m_pickingMode );
 }
 
 void CColorPickerButton::OnUpdateEnable( CCmdUI* pCmdUI )
@@ -733,27 +737,6 @@ mfc::CColorMenuButton* CColorMenuTrackingImpl::FindColorMenuButton( UINT colorBt
 	return checked_static_cast<mfc::CColorMenuButton*>( mfc::CTrackingPopupMenu::FindTrackingBarButton( colorBtnId ) );
 }
 
-mfc::CColorMenuButton* CColorMenuTrackingImpl::MakeColorMenuButton( UINT colorBtnId, const CColorTable* pColorTable ) const
-{
-	mfc::CColorMenuButton* pColorButton = new mfc::CColorMenuButton( colorBtnId, pColorTable );
-
-	if ( pColorTable == m_pHost->GetSelColorTable() )		// button for selected table?
-	{	// richer configuration on the selected color table:
-		pColorButton->EnableAutomaticButton( mfc::CColorLabels::s_autoLabel, m_pHost->GetAutoColor() );
-		pColorButton->EnableOtherButton( mfc::CColorLabels::s_moreLabel );
-
-		CColorTable* pShadesTable = m_pScratchStore->GetShadesTable();
-
-		if ( !pShadesTable->IsEmpty() )
-			pColorButton->SetDocColorTable( pShadesTable );
-
-		pColorButton->SetColor( m_pHost->GetColor(), false );
-		pColorButton->SetSelected();
-	}
-
-	return pColorButton;
-}
-
 void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int trackingMode )
 {	// called in menu tracking mode
 	ASSERT_PTR( pMenuPopup );
@@ -769,9 +752,10 @@ void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int 
 				ASSERT( !pColorTable->IsEmpty() );		// should've been excluded on popup menu set up
 
 				UINT colorBtnId = m_menu.GetMenuItemID( index );
-				std::auto_ptr<mfc::CColorMenuButton> pColorButton( MakeColorMenuButton( colorBtnId, pColorTable ) );
+				mfc::CColorMenuButton colorButton( colorBtnId, pColorTable );
 
-				pMenuBar->ReplaceButton( colorBtnId, *pColorButton );
+				colorButton.SetEditorHost( m_pHost );
+				pMenuBar->ReplaceButton( colorBtnId, colorButton );
 			}
 
 	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_RESET_DEFAULT, m_pHost->GetAutoColor(), &index );	// to display the Automatic color box on the menu item
@@ -780,7 +764,7 @@ void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int 
 // message handlers
 
 BEGIN_MESSAGE_MAP( CColorMenuTrackingImpl, CCmdTarget )
-	ON_CONTROL_RANGE( mfc::CColorMenuButton::CMBN_COLORSELECTED, ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, On_ColorSelected )
+	ON_CONTROL_RANGE( mfc::CColorMenuButton::CMBN_COLORSELECTED, ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, On_ColorSelected )	// not called, just for illustration
 	ON_UPDATE_COMMAND_UI_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, OnUpdate_ColorTable )
 END_MESSAGE_MAP()
 
@@ -788,6 +772,8 @@ void CColorMenuTrackingImpl::On_ColorSelected( UINT selColorBtnId )
 {
 	// Called when a color bar button (CMFCToolBarColorButton) is clicked in one of the mfc::CColorMenuButton sub-menus.
 	//	selColorBtnId: the ID of the mfc::CColorMenuButton that pops-up the tracking color bar
+
+	ASSERT( false );	// new: in our case shouldn't get called, since we're passing ui::IColorEditorHost to the mfc::CColorMenuButton => will handle this internally
 
 	if ( mfc::CColorMenuButton* pSelTableButton = FindColorMenuButton( selColorBtnId ) )
 	{

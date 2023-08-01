@@ -43,7 +43,7 @@ public:
 	void SetMainStore( const CColorStore* pMainStore );
 
 	void SetAutomaticColor( COLORREF autoColor, const TCHAR autoLabel[] = mfc::CColorLabels::s_autoLabel ) { EnableAutomaticButton( autoLabel, autoColor ); }
-
+	void SetDocColorTable( const CColorTable* pDocColorTable );		// additional 'Document' section of colors (below the main colors)
 	void SetUserColors( const std::vector<COLORREF>& userColors, int columnCount = 0 );		// custom colors, not based on a color table
 
 	enum PickingMode { PickColorBar, PickMenuColorTables };
@@ -52,18 +52,18 @@ public:
 	void SetPickingMode( PickingMode pickingMode ) { m_pickingMode = pickingMode; }
 
 	// ui::IColorHost interface
-	virtual COLORREF GetColor( void ) const { return CMFCColorButton::GetColor(); }
-	virtual const CColorEntry* GetRawColor( void ) const;
-	virtual COLORREF GetAutoColor( void ) const { return GetAutomaticColor(); }
+	virtual COLORREF GetColor( void ) const override { return CMFCColorButton::GetColor(); }
+	virtual const CColorEntry* GetRawColor( void ) const override;
+	virtual COLORREF GetAutoColor( void ) const override { return GetAutomaticColor(); }
 
-	virtual const CColorTable* GetSelColorTable( void ) const { return m_pSelColorTable; }
-	virtual const CColorTable* GetDocColorTable( void ) const { return m_pDocColorTable; }
-	virtual bool UseUserColors( void ) const;
+	virtual const CColorTable* GetSelColorTable( void ) const override { return m_pSelColorTable; }
+	virtual const CColorTable* GetDocColorTable( void ) const override { return m_pDocColorTable; }
+	virtual bool UseUserColors( void ) const override;
 
 	// ui::IColorEditorHost interface
-	virtual void SetColor( COLORREF rawColor, bool notify = false );
-	virtual void SetSelColorTable( const CColorTable* pSelColorTable );
-	virtual void SetDocColorTable( const CColorTable* pDocColorTable );		// additional 'Document' section of colors (below the main colors)
+	virtual CWnd* GetHostWindow( void ) const override { return const_cast<CColorPickerButton*>( this ); }
+	virtual void SetColor( COLORREF rawColor, bool notify = false ) override;
+	virtual void SetSelColorTable( const CColorTable* pSelColorTable ) override;
 
 	enum TrackingMode { NoTracking, TrackingColorBar, TrackingMenuColorTables, TrackingContextMenu };
 protected:
