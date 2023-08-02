@@ -48,12 +48,13 @@ namespace mfc
 
 		CToolBarColorButton( void );
 	public:
-		CToolBarColorButton( UINT btnID, int iImage, const TCHAR* pText = nullptr, HMENU hMenu = nullptr );
+		CToolBarColorButton( UINT btnId, COLORREF color, const TCHAR* pText = nullptr );
+		CToolBarColorButton( UINT btnId, const CColorEntry* pColorEntry );
 		CToolBarColorButton( const CMFCToolBarButton* pSrcButton, COLORREF color );
 
 		void SetColor( COLORREF color );
 
-		static CToolBarColorButton* ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnID, COLORREF color, OUT int* pIndex = nullptr );
+		static CToolBarColorButton* ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT int* pIndex = nullptr );
 	private:
 		COLORREF m_color;
 
@@ -81,7 +82,7 @@ namespace mfc
 
 		CColorMenuButton( void );			// private constructor for serialization
 	public:
-		CColorMenuButton( UINT btnID, const CColorTable* pColorTable );
+		CColorMenuButton( UINT btnId, const CColorTable* pColorTable );
 		virtual ~CColorMenuButton();
 
 		const CColorTable* GetColorTable( void ) const { return m_pColorTable; }
@@ -133,14 +134,14 @@ namespace mfc
 		, private ui::IWindowHookHandler
 	{
 	public:
-		// general constructor (pParentMenuBtn could be null)
+		// general constructor: pParentMenuBtn could be null, and it provides the color table
 		CColorPopupMenu( CColorMenuButton* pParentMenuBtn,
 						 const mfc::TColorArray& colors, COLORREF color,
 						 const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
 						 mfc::TColorList& docColors, int columns, int horzDockRows, int vertDockColumns,
 						 COLORREF colorAuto, UINT uiCmdID, BOOL stdColorDlg = false );
 
-		// color picker constructor
+		// color picker constructor: uses the selected color table
 		CColorPopupMenu( CMFCColorButton* pParentPickerBtn,
 						 const mfc::TColorArray& colors, COLORREF color,
 						 const TCHAR* pAutoColorLabel, const TCHAR* pMoreColorLabel, const TCHAR* pDocColorsLabel,
@@ -174,6 +175,58 @@ namespace mfc
 		std::auto_ptr<CWindowHook> m_pColorBarHook;		// handles formatted color entry + some button clicks
 		COLORREF m_rawAutoColor;
 		COLORREF m_rawSelColor;
+
+		// generated stuff
+	protected:
+		afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
+
+		DECLARE_MESSAGE_MAP()
+	};
+}
+
+
+namespace mfc
+{
+	class CColorTableBar;
+
+
+	class CColorTablePopupMenu : public CMFCPopupMenu		// displays CToolBarColorButton named colors on multiple column layout
+	{
+	public:
+		CColorTablePopupMenu( CColorMenuButton* pParentMenuBtn );		// pParentMenuBtn provides the color table
+		CColorTablePopupMenu( ui::IColorEditorHost* pEditorHost );		// picker constructor: uses the selected color table
+		virtual ~CColorTablePopupMenu();
+
+		// base overrides
+	public:
+		virtual CMFCPopupMenuBar* GetMenuBar( void ) override;
+	private:
+		std::auto_ptr<CColorTableBar> m_pColorBar;
+
+		enum { ToolBarId = 1, ToolBarStyle = AFX_DEFAULT_TOOLBAR_STYLE | CBRS_TOOLTIPS | CBRS_FLYBY };
+
+		// generated stuff
+	protected:
+		afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
+
+		DECLARE_MESSAGE_MAP()
+	};
+
+
+	class CColorTableBar : public CMFCPopupMenuBar
+	{
+	public:
+		CColorTableBar( const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost );
+		virtual ~CColorTableBar();
+
+		void SetupButtons( void );
+	private:
+		const CColorTable* m_pColorTable;
+		ui::IColorEditorHost* m_pEditorHost;
+		CMFCColorButton* m_pParentBtn;
+		int m_columnCount;
+
+		enum { AutoId = 70, MoreId, ColorIdMin };
 
 		// generated stuff
 	protected:

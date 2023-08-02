@@ -5,6 +5,7 @@
 #include "WndUtils.h"
 #include <afxpopupmenu.h>
 #include <afxcolorpopupmenu.h>
+#include <afxbutton.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -81,6 +82,13 @@ namespace nosy
 		// public access
 		CToolTipCtrl* GetToolTip( void ) const { return m_pToolTip; }
 	};
+
+
+	struct CMFCButton_ : public CMFCButton
+	{
+		// public access
+		using CMFCButton::m_bCaptured;
+	};
 }
 
 
@@ -140,6 +148,22 @@ namespace mfc
 		}
 
 		return Button_GetItemData( pFoundButton );
+	}
+
+	void MfcButton_SetCaptured( CMFCButton* pButton, bool captured )
+	{
+		mfc::nosy_cast<nosy::CMFCButton_>( pButton )->m_bCaptured = captured;
+	}
+
+	void Button_SetImageById( CMFCToolBarButton* pButton, UINT btnId, bool userImage /*= false*/ )
+	{
+		ASSERT_PTR( pButton );
+		pButton->SetImage( FindImageIndex( btnId, userImage ) );
+	}
+
+	int FindImageIndex( UINT btnId, bool userImage /*= false*/ )
+	{
+		return afxCommandManager->GetCmdImage( btnId, userImage );
 	}
 
 	CRect Button_GetImageRect( const CMFCToolBarButton* pButton, bool bounds /*= true*/ )

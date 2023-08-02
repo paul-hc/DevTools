@@ -82,6 +82,7 @@ public:
 	const std::tstring& GetShortTableName( void ) const;
 
 	bool IsHalftoneTable( void ) const { return ui::IsHalftoneTable( GetTableType() ); }
+	bool IsSysColorTable( void ) const { return ui::WindowsSys_Colors == m_tableType; }
 
 	bool IsEmpty( void ) const { return m_colors.empty(); }
 	const std::vector<CColorEntry>& GetColors( void ) const { return m_colors; }

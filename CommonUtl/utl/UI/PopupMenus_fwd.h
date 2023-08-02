@@ -13,6 +13,8 @@ class CMFCToolBarButton;
 class CMFCColorPopupMenu;
 class CMFCColorBar;
 
+class CMFCButton;
+
 class CColorEntry;
 class CColorTable;
 
@@ -89,9 +91,14 @@ namespace mfc
 	void* Button_GetItemData( const CMFCToolBarButton* pButton );
 	void Button_SetItemData( CMFCToolBarButton* pButton, const void* pItemData );
 	void* Button_GetItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
+	void Button_SetImageById( CMFCToolBarButton* pButton, UINT btnId, bool userImage = false );
+	int FindImageIndex( UINT btnId, bool userImage = false );
 
 	CRect Button_GetImageRect( const CMFCToolBarButton* pButton, bool bounds = true );
 	void Button_RedrawImage( CMFCToolBarButton* pButton );
+
+	// CMFCButton protected access:
+	void MfcButton_SetCaptured( CMFCButton* pButton, bool captured );
 
 
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
