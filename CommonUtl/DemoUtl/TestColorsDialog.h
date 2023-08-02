@@ -18,7 +18,7 @@ public:
 private:
 	void SetPickerUserColors( bool pickerUserColors );
 private:
-	static COLORREF s_color;		// survives dialog's lifetime
+	COLORREF m_color;
 	bool m_editChecked;
 	CMenu m_popupMenu;
 private:
