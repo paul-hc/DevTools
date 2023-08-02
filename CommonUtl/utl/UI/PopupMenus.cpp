@@ -16,6 +16,19 @@
 #endif
 
 
+namespace hlp
+{
+	template< typename StringT >
+	typename StringT::value_type* AllocStringCopy( const StringT& text )
+	{
+		typedef typename StringT::value_type TChar;
+		TChar* pText = (TChar*)::calloc( text.length() + 1, sizeof( TChar ) );
+
+		return pText != nullptr ? _tcscpy( pText, text.c_str() ) : nullptr;
+	}
+}
+
+
 namespace mfc
 {
 	// CTrackingPopupMenu implementation
@@ -174,6 +187,27 @@ namespace mfc
 		const CToolBarColorButton& srcButton = (const CToolBarColorButton&)src;
 
 		m_color = srcButton.m_color;
+	}
+
+	BOOL CToolBarColorButton::OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI )
+	{
+		if ( CMFCToolBar::GetShowTooltips() && pTI != nullptr && !ui::IsUndefinedColor( m_color ) )		// prevent displaying the pointless "(null)"
+		{
+			const CColorEntry* pColorEntry = GetColorEntry();
+
+			if ( nullptr == pColorEntry )
+				pColorEntry = CColorRepository::Instance()->FindColorEntry( m_color );
+
+			if ( pColorEntry != nullptr )
+				pTI->lpszText = hlp::AllocStringCopy( pColorEntry->FormatColor( CColorEntry::s_fieldSep, false ) );
+			else
+				pTI->lpszText = hlp::AllocStringCopy( ui::FormatColor( m_color, CColorEntry::s_fieldSep ) );
+
+			if ( pTI->lpszText != nullptr )
+				return true;
+		}
+
+		return __super::OnToolHitTest( pWnd, pTI );
 	}
 
 	void CToolBarColorButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz /*= TRUE*/, BOOL bCustomizeMode /*= FALSE*/,
@@ -669,37 +703,6 @@ namespace mfc
 		return m_pColorBar.get();
 	}
 
-	// message handlers
-
-	BEGIN_MESSAGE_MAP( CColorTablePopupMenu, CMFCPopupMenu )
-		ON_WM_CREATE()
-	END_MESSAGE_MAP()
-
-	int CColorTablePopupMenu::OnCreate( CREATESTRUCT* pCreateStruct )
-	{
-		if ( -1 == CMFCPopupMenu::OnCreate( pCreateStruct ) )
-			return -1;
-
-		//if ( -1 == CMiniFrameWnd::OnCreate( pCreateStruct ) )
-		//	return -1;
-
-		//if ( !m_pColorBar->Create( this, ToolBarStyle, ToolBarId ) )
-		//{
-		//	TRACE( _T("Can't create popup menu bar\n") );
-		//	return -1;
-		//}
-
-		//CWnd* pWndParent = GetParent();
-		//ASSERT_PTR( pWndParent->GetSafeHwnd() );
-
-		//m_pColorBar->SetOwner( pWndParent );
-		//m_pColorBar->SetPaneStyle( m_pColorBar->GetPaneStyle() | CBRS_TOOLTIPS );
-
-		//ActivatePopupMenu( AFXGetTopLevelFrame( pWndParent ), this );
-		//RecalcLayout();
-		return 0;
-	}
-
 
 	// CColorTableBar implementation
 
@@ -761,12 +764,6 @@ namespace mfc
 		}
 	}
 
-	// message handlers
-
-	BEGIN_MESSAGE_MAP( CColorTableBar, CMFCPopupMenuBar )
-		ON_WM_CREATE()
-	END_MESSAGE_MAP()
-
 	BOOL CColorTableBar::OnSendCommand( const CMFCToolBarButton* pButton )
 	{
 		if ( m_pParentPickerButton != nullptr )
@@ -794,6 +791,17 @@ namespace mfc
 
 		return TRUE;
 	}
+
+	void CColorTableBar::AdjustLocations( void )
+	{
+		__super::AdjustLocations();
+	}
+
+	// message handlers
+
+	BEGIN_MESSAGE_MAP( CColorTableBar, CMFCPopupMenuBar )
+		ON_WM_CREATE()
+	END_MESSAGE_MAP()
 
 	int CColorTableBar::OnCreate( CREATESTRUCT* pCreateStruct )
 	{

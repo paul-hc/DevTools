@@ -67,6 +67,7 @@ namespace mfc
 		// base overrides
 	public:
 		virtual void SetImage( int iImage ) override;
+		virtual BOOL OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI ) override;
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
 		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE,
@@ -208,14 +209,6 @@ namespace mfc
 		virtual CMFCPopupMenuBar* GetMenuBar( void ) override;
 	private:
 		std::auto_ptr<CColorTableBar> m_pColorBar;
-
-		enum { ToolBarId = 1, ToolBarStyle = AFX_DEFAULT_TOOLBAR_STYLE | CBRS_TOOLTIPS | CBRS_FLYBY };
-
-		// generated stuff
-	protected:
-		afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
-
-		DECLARE_MESSAGE_MAP()
 	};
 
 
@@ -236,7 +229,8 @@ namespace mfc
 
 		// base overrides
 	protected:
-		virtual BOOL OnSendCommand( const CMFCToolBarButton* pButton );
+		virtual BOOL OnSendCommand( const CMFCToolBarButton* pButton ) override;
+		virtual void AdjustLocations( void ) override;
 
 		// generated stuff
 	protected:
