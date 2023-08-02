@@ -52,7 +52,13 @@ namespace mfc
 		CToolBarColorButton( UINT btnId, const CColorEntry* pColorEntry );
 		CToolBarColorButton( const CMFCToolBarButton* pSrcButton, COLORREF color );
 
+		COLORREF GetColor( void ) const { return m_color; }
 		void SetColor( COLORREF color );
+
+		const CColorEntry* GetColorEntry( void ) const { return reinterpret_cast<const CColorEntry*>( m_dwdItemData ); }
+
+		void SetChecked( bool checked = true );
+		void UpdateSelectedColor( COLORREF selColor ) { SetChecked( m_color == selColor ); }
 
 		static CToolBarColorButton* ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT int* pIndex = nullptr );
 	private:
@@ -221,12 +227,16 @@ namespace mfc
 
 		void SetupButtons( void );
 	private:
-		const CColorTable* m_pColorTable;
-		ui::IColorEditorHost* m_pEditorHost;
-		CMFCColorButton* m_pParentBtn;
+		const CColorTable* m_pColorTable;			// required field
+		ui::IColorEditorHost* m_pEditorHost;		// required field
+		CMFCColorButton* m_pParentPickerButton;
 		int m_columnCount;
 
-		enum { AutoId = 70, MoreId, ColorIdMin };
+		enum { AutoId = 70, MoreColorsId, ColorIdMin };
+
+		// base overrides
+	protected:
+		virtual BOOL OnSendCommand( const CMFCToolBarButton* pButton );
 
 		// generated stuff
 	protected:

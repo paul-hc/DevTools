@@ -110,6 +110,8 @@ namespace mfc
 		: CMFCToolBarMenuButton( btnId, nullptr, -1, pColorEntry->GetName().c_str() )
 		, m_color( pColorEntry->GetColor() )
 	{
+		m_dwdItemData = reinterpret_cast<DWORD_PTR>( pColorEntry );
+
 		if ( !ui::IsUndefinedColor( m_color ) )
 			mfc::Button_SetImageById( this, ID_TRANSPARENT );		// draw color on top of transparent background
 	}
@@ -129,6 +131,13 @@ namespace mfc
 
 		mfc::Button_SetImageById( this, m_color != CLR_NONE ? ID_TRANSPARENT : m_nID );		// draw color on top of transparent background, or standard image if null color
 		mfc::Button_RedrawImage( this );
+	}
+
+	void CToolBarColorButton::SetChecked( bool checked )
+	{
+		UINT style = m_nStyle;
+		SetFlag( style, TBBS_CHECKED, checked );
+		SetStyle( style );
 	}
 
 	CToolBarColorButton* CToolBarColorButton::ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT int* pIndex )
@@ -179,8 +188,8 @@ namespace mfc
 		CRect colorRect = pImages->GetLastImageRect();
 		bool enabled = !HasFlag( m_nStyle, TBBS_DISABLED );
 
-		if ( enabled )			// avoid double frame drawing (due to base drawing)
-			FillInterior( pDC, colorRect, bHighlight );		// fill button interior and frame
+		if ( enabled && !HasFlag( m_nStyle, TBBS_CHECKED ) )	// avoid double frame drawing (due to base drawing)
+			FillInterior( pDC, colorRect, bHighlight );			// fill button interior and frame
 
 		colorRect.DeflateRect( 2, 2 );
 
@@ -700,11 +709,17 @@ namespace mfc
 		, m_pEditorHost( pEditorHost )
 		, m_columnCount( 0 )
 	{
-		if ( m_pEditorHost != nullptr )
-			m_pParentBtn = dynamic_cast<CMFCColorButton*>( m_pEditorHost->GetHostWindow() );
-
 		ASSERT_PTR( m_pColorTable );
+		ASSERT_PTR( m_pEditorHost );
+
+		if ( m_pEditorHost != nullptr )
+			m_pParentPickerButton = dynamic_cast<CMFCColorButton*>( m_pEditorHost->GetHostWindow() );
+
 		m_columnCount = pColorTable->IsSysColorTable() ? 2 : pColorTable->GetColumnCount();
+
+		// customize menu bar aspect
+		m_bIsDlgControl = true;					// stretch separators to the entire bar width
+		m_bDisableSideBarInXPMode = true;		// disable filling the image gutter: blue-gray zone on bar left
 	}
 
 	CColorTableBar::~CColorTableBar()
@@ -718,13 +733,31 @@ namespace mfc
 
 		RemoveAllButtons();
 
-		if ( m_pEditorHost != nullptr )
-		{
-			if ( !ui::IsUndefinedColor( m_pEditorHost->GetAutoColor() ) )
-				InsertButton( new CToolBarColorButton( AutoId, m_pEditorHost->GetAutoColor(), mfc::CColorLabels::s_autoLabel ) );
+		COLORREF selColor = m_pEditorHost->GetColor();
+		bool isSelTable = m_pColorTable == m_pEditorHost->GetSelColorTable();	// selected table?
+		bool isForeignColor = selColor != CLR_NONE && !m_pColorTable->ContainsColor( selColor );
+		CToolBarColorButton* pColorButton = nullptr;
 
-			if ( m_pColorTable == m_pEditorHost->GetSelColorTable() )		// selected table?
-				InsertButton( new CToolBarColorButton( AutoId, m_pEditorHost->GetActualColor(), mfc::CColorLabels::s_moreLabel ) );
+		if ( isSelTable && !ui::IsUndefinedColor( m_pEditorHost->GetAutoColor() ) )
+		{
+			InsertButton( pColorButton = new CToolBarColorButton( AutoId, m_pEditorHost->GetAutoColor(), mfc::CColorLabels::s_autoLabel ) );
+			pColorButton->SetChecked( CLR_NONE == selColor );
+			InsertSeparator();
+		}
+
+		for ( UINT i = 0; i != m_pColorTable->GetColors().size(); ++i )
+		{
+			InsertButton( pColorButton = new CToolBarColorButton( ColorIdMin + i, &m_pColorTable->GetColorAt( i ) ) );
+			pColorButton->UpdateSelectedColor( selColor );
+		}
+
+		if ( isSelTable )
+		{
+			InsertSeparator();
+			InsertButton( pColorButton = new CToolBarColorButton( MoreColorsId, isForeignColor ? m_pEditorHost->GetActualColor() : CLR_NONE, mfc::CColorLabels::s_moreLabel ) );
+
+			if ( isForeignColor )
+				pColorButton->UpdateSelectedColor( selColor );
 		}
 	}
 
@@ -734,17 +767,47 @@ namespace mfc
 		ON_WM_CREATE()
 	END_MESSAGE_MAP()
 
+	BOOL CColorTableBar::OnSendCommand( const CMFCToolBarButton* pButton )
+	{
+		if ( m_pParentPickerButton != nullptr )
+			ReleaseCapture();
+
+		int btnId = static_cast<int>( pButton->m_nID );
+		COLORREF newColor = CLR_DEFAULT;
+		ui::IColorEditorHost* pEditorHost = m_pEditorHost;		// store since 'this' will get deleted
+
+		if ( btnId >= AutoId )
+		{
+			newColor = AutoId == btnId ? CLR_NONE : checked_static_cast<const CToolBarColorButton*>( pButton )->GetColor();
+
+			if ( !m_pEditorHost->UseUserColors() )					// not a 'read-only' table?
+				m_pEditorHost->SetSelColorTable( m_pColorTable );	// select the new table
+		}
+
+		if ( !__super::OnSendCommand( pButton ) )		// will destroy this popup menu the graceful way - it will delete 'this'
+			return FALSE;
+
+		if ( MoreColorsId == btnId )
+			pEditorHost->OpenColorDialog();
+		else if ( newColor != CLR_DEFAULT )
+			pEditorHost->SetColor( newColor, true );
+
+		return TRUE;
+	}
+
 	int CColorTableBar::OnCreate( CREATESTRUCT* pCreateStruct )
 	{
 		if ( -1 == __super::OnCreate( pCreateStruct ) )
 			return -1;
 
+		SetPaneStyle( GetPaneStyle() | CBRS_TOOLTIPS );
+
 		SetupButtons();
 
-		if ( m_pParentBtn != NULL )
+		if ( m_pParentPickerButton != NULL )
 		{
 			//SetCapture();		// PHC: don't do this, since it will freeze the sibling sub-popups
-			mfc::MfcButton_SetCaptured( m_pParentBtn, false );
+			mfc::MfcButton_SetCaptured( m_pParentPickerButton, false );
 		}
 		return 0;
 	}
