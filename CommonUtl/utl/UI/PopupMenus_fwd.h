@@ -63,7 +63,8 @@ namespace ui
 		virtual void SetSelColorTable( const CColorTable* pSelColorTable ) = 0;
 
 		// implemented
-		bool OpenColorDialog( void );
+		bool EditColorDialog( void );
+		bool SwitchSelColorTable( const CColorTable* pSelColorTable );
 	};
 }
 

@@ -355,28 +355,41 @@ void CColorPickerButton::ShowColorTablePopup( void )
 	CRect rect;
 	GetWindowRect( &rect );
 
-	mfc::CColorPopupMenu* pColorPopupMenu = new mfc::CColorPopupMenu( this, m_Colors, m_Color,
-																	  m_strAutoColorText, m_strOtherText, m_strDocColorsText,
-																	  m_lstDocColors, m_nColumns, m_ColorAutomatic );
-	pColorPopupMenu->SetColorEditorHost( this );
-	m_pPopup = pColorPopupMenu;
+	CMFCPopupMenu* pPopupMenu = nullptr;
+	BOOL created = false;
 
-	if ( !m_pPopup->Create( this, rect.left, rect.bottom, nullptr, m_bEnabledInCustomizeMode ) )
+	if ( m_pSelColorTable != nullptr && m_pSelColorTable->IsSysColorTable() )
 	{
-		ASSERT( false );	// color menu can't be used in the customization mode; you need to set CMFCColorButton::m_bEnabledInCustomizeMode.
-		delete m_pPopup;
-		m_pPopup = nullptr;
+		pPopupMenu = new mfc::CColorTablePopupMenu( this );
+		created = pPopupMenu->Create( this, rect.left, rect.bottom, nullptr, FALSE, TRUE );
+		//pPopupMenu->GetMenuBar()->SetCapture();
 	}
 	else
 	{
-		if ( m_bEnabledInCustomizeMode )
-			pColorPopupMenu->GetColorBar()->SetInternal( true );
+		mfc::CColorPopupMenu* pColorPopupMenu = new mfc::CColorPopupMenu( this, m_Colors, m_Color,
+																		  m_strAutoColorText, m_strOtherText, m_strDocColorsText,
+																		  m_lstDocColors, m_nColumns, m_ColorAutomatic );
+		pColorPopupMenu->SetColorEditorHost( this );
+		pPopupMenu = m_pPopup = pColorPopupMenu;
+		created = m_pPopup->Create( this, rect.left, rect.bottom, nullptr, m_bEnabledInCustomizeMode );
 
-		m_pPopup->GetWindowRect( &rect );
-		m_pPopup->UpdateShadow( &rect );
+		if ( created && m_bEnabledInCustomizeMode )
+			pColorPopupMenu->GetColorBar()->SetInternal( true );
+	}
+
+	if ( created )
+	{
+		pPopupMenu->GetWindowRect( &rect );
+		pPopupMenu->UpdateShadow( &rect );
 
 		if ( m_bAutoSetFocus )
-			m_pPopup->GetMenuBar()->SetFocus();
+			pPopupMenu->GetMenuBar()->SetFocus();
+	}
+	else
+	{
+		ASSERT( false );	// color menu can't be used in the customization mode; you need to set CMFCColorButton::m_bEnabledInCustomizeMode.
+		delete pPopupMenu;
+		pPopupMenu = m_pPopup = nullptr;
 	}
 
 	if ( m_bCaptured )
@@ -778,10 +791,7 @@ void CColorMenuTrackingImpl::On_ColorSelected( UINT selColorBtnId )
 	if ( mfc::CColorMenuButton* pSelTableButton = FindColorMenuButton( selColorBtnId ) )
 	{
 		m_pHost->SetColor( pSelTableButton->GetColor(), true );
-
-		// if using a user custom color table, color can be picked from any table, but the selected user table is retained (not switched to picked table)
-		if ( !m_pHost->UseUserColors() )
-			m_pHost->SetSelColorTable( pSelTableButton->GetColorTable() );
+		m_pHost->SwitchSelColorTable( pSelTableButton->GetColorTable() );
 	}
 	else
 		ASSERT( false );

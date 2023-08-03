@@ -14,7 +14,7 @@
 
 namespace ui
 {
-	bool IColorEditorHost::OpenColorDialog( void )
+	bool IColorEditorHost::EditColorDialog( void )
 	{
 		CWnd* pHostWnd = GetHostWindow();
 		ui::TDisplayColor color = ui::EvalColor( GetActualColor() );
@@ -23,6 +23,15 @@ namespace ui
 			return false;
 
 		SetColor( color, true );
+		return true;
+	}
+
+	bool IColorEditorHost::SwitchSelColorTable( const CColorTable* pSelColorTable )
+	{	// when using a user custom color table, color can be picked from any table, but the selected user table is retained (not switched to picked table)
+		if ( UseUserColors() )
+			return false;						// prevent switching the 'read-only' table?
+
+		SetSelColorTable( pSelColorTable );		// switch to the new table
 		return true;
 	}
 }

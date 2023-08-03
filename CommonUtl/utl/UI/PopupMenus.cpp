@@ -168,7 +168,7 @@ namespace mfc
 		return checked_static_cast<CToolBarColorButton*>( pToolBar->GetButton( index ) );	// the button clone
 	}
 
-	void CToolBarColorButton::SetImage( int iImage ) override
+	void CToolBarColorButton::SetImage( int iImage ) overrides( CMFCToolBarButton )
 	{
 			//__super::SetImage( iImage );
 
@@ -180,7 +180,7 @@ namespace mfc
 		mfc::Button_RedrawImage( this );
 	}
 
-	void CToolBarColorButton::CopyFrom( const CMFCToolBarButton& src ) override
+	void CToolBarColorButton::CopyFrom( const CMFCToolBarButton& src ) overrides( CMFCToolBarMenuButton )
 	{
 		__super::CopyFrom( src );
 
@@ -189,7 +189,7 @@ namespace mfc
 		m_color = srcButton.m_color;
 	}
 
-	BOOL CToolBarColorButton::OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI )
+	BOOL CToolBarColorButton::OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI ) overrides( CMFCToolBarButton )
 	{
 		if ( CMFCToolBar::GetShowTooltips() && pTI != nullptr && !ui::IsUndefinedColor( m_color ) )		// prevent displaying the pointless "(null)"
 		{
@@ -211,7 +211,7 @@ namespace mfc
 	}
 
 	void CToolBarColorButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz /*= TRUE*/, BOOL bCustomizeMode /*= FALSE*/,
-									  BOOL bHighlight /*= FALSE*/, BOOL bDrawBorder /*= TRUE*/, BOOL bGrayDisabledButtons /*= TRUE*/ )
+									  BOOL bHighlight /*= FALSE*/, BOOL bDrawBorder /*= TRUE*/, BOOL bGrayDisabledButtons /*= TRUE*/ ) overrides( CMFCToolBarMenuButton )
 	{
 		__super::OnDraw( pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder, bGrayDisabledButtons );
 
@@ -326,7 +326,7 @@ namespace mfc
 		return nullptr;
 	}
 
-	void CColorMenuButton::SetImage( int iImage ) override
+	void CColorMenuButton::SetImage( int iImage ) overrides( CMFCToolBarButton )
 	{
 			//__super::SetImage( iImage );
 
@@ -347,15 +347,15 @@ namespace mfc
 		}
 	}
 
-	void CColorMenuButton::SetColor( COLORREF color, BOOL notify ) override
+	void CColorMenuButton::SetColor( COLORREF color, BOOL notify ) overrides( CMFCColorMenuButton )
 	{
 		bool isTrackingMFCColorBar = m_pPopupMenu != nullptr && is_a<CMFCColorBar>( m_pPopupMenu->GetMenuBar() );
 
 		if ( notify )
 		{
 			// if using a user custom color table, color can be picked from any table, but the selected user table is retained (not switched to picked table)
-			if ( m_pEditorHost != nullptr && !m_pEditorHost->UseUserColors() )
-				m_pEditorHost->SetSelColorTable( m_pColorTable );
+			if ( m_pEditorHost != nullptr )
+				m_pEditorHost->SwitchSelColorTable( m_pColorTable );
 
 			if ( isTrackingMFCColorBar )
 				if ( const CColorEntry* pClickedColorEntry = checked_static_cast<const mfc::CColorPopupMenu*>( m_pPopupMenu )->FindClickedBarColorEntry() )
@@ -373,11 +373,11 @@ namespace mfc
 					ui::SendCommand( pMessageWnd->GetSafeHwnd(), m_nID, CMBN_COLORSELECTED, m_pPopupMenu->GetMenuBar()->GetSafeHwnd() );
 	}
 
-	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) override
+	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) overrides( CMFCColorMenuButton )
 	{
 		if ( m_pEditorHost != nullptr )
 		{
-			m_pEditorHost->OpenColorDialog();
+			m_pEditorHost->EditColorDialog();
 			return false;		// handled internally already
 		}
 
@@ -390,7 +390,7 @@ namespace mfc
 		return true;
 	}
 
-	void CColorMenuButton::CopyFrom( const CMFCToolBarButton& src ) override
+	void CColorMenuButton::CopyFrom( const CMFCToolBarButton& src ) overrides( CMFCColorMenuButton )
 	{
 		__super::CopyFrom( src );
 
@@ -400,14 +400,15 @@ namespace mfc
 		m_pEditorHost = srcButton.m_pEditorHost;
 	}
 
-	void CColorMenuButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz, BOOL bCustomizeMode, BOOL bHighlight, BOOL bDrawBorder, BOOL bGrayDisabledButtons )
+	void CColorMenuButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
+								   BOOL bHorz, BOOL bCustomizeMode, BOOL bHighlight, BOOL bDrawBorder, BOOL bGrayDisabledButtons ) overrides( CMFCColorMenuButton )
 	{
 		CScopedValue<COLORREF> scDisplayColor( &m_Color, ui::EvalColor( m_pEditorHost != nullptr ? m_pEditorHost->GetActualColor() : m_Color ) );		// show the display color while drawing
 
 		__super::OnDraw( pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder, bGrayDisabledButtons );
 	}
 
-	CMFCPopupMenu* CColorMenuButton::CreatePopupMenu( void ) override
+	CMFCPopupMenu* CColorMenuButton::CreatePopupMenu( void ) overrides( CMFCColorMenuButton )
 	{
 			//return __super::CreatePopupMenu();
 
@@ -640,7 +641,7 @@ namespace mfc
 						ui::IColorEditorHost* pEditorHost = m_pEditorHost;		// store it since this will get destroyed next
 
 						m_pColorBar->InvokeMenuCommand( 0, pClickedButton );	// destroy this popup menu the graceful way - it will delete 'this'
-						pEditorHost->OpenColorDialog();
+						pEditorHost->EditColorDialog();
 						rResult = 0;
 						return true;			// handled the message
 					}
@@ -692,15 +693,56 @@ namespace mfc
 	{
 		ASSERT_PTR( pEditorHost );
 		m_pColorBar.reset( new CColorTableBar( pEditorHost->GetSelColorTable(), pEditorHost ) );
+
+		m_pColorBar->StoreParentPicker( dynamic_cast<CMFCColorButton*>( pEditorHost->GetHostWindow() ) );		// changes the modeless popup behaviour
 	}
 
 	CColorTablePopupMenu::~CColorTablePopupMenu()
 	{
 	}
 
-	CMFCPopupMenuBar* CColorTablePopupMenu::GetMenuBar( void )
+	CMFCPopupMenuBar* CColorTablePopupMenu::GetMenuBar( void ) overrides( CMFCPopupMenuBar )
 	{
 		return m_pColorBar.get();
+	}
+
+	BOOL CColorTablePopupMenu::OnCmdMsg( UINT btnId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) overrides( CMFCPopupMenu )
+	{
+		if ( m_pColorBar->IsColorBtnId( btnId ) )
+			return true;			// (!) color buttons state is managed internally, so prevent disabling while tracking and handling CColorTableBar::OnUpdateCmdUI() updates
+
+		return __super::OnCmdMsg( btnId, code, pExtra, pHandlerInfo );
+	}
+
+	// message handlers
+
+	BEGIN_MESSAGE_MAP( CColorTablePopupMenu, CMFCPopupMenu )
+		ON_WM_CREATE()
+	END_MESSAGE_MAP()
+
+	int CColorTablePopupMenu::OnCreate( CREATESTRUCT* pCreateStruct )
+	{
+		//if ( -1 == CMFCPopupMenu::OnCreate( pCreateStruct ) )
+		//	return -1;
+
+		if ( -1 == CMiniFrameWnd::OnCreate( pCreateStruct ) )
+			return -1;
+
+		if ( !m_pColorBar->Create( this, ToolBarStyle, ToolBarId ) )
+		{
+			TRACE( _T("Can't create popup menu bar\n") );
+			return -1;
+		}
+
+		CWnd* pWndParent = GetParent();
+		ASSERT_PTR( pWndParent->GetSafeHwnd() );
+
+		m_pColorBar->SetOwner( pWndParent );
+		m_pColorBar->SetPaneStyle( m_pColorBar->GetPaneStyle() | CBRS_TOOLTIPS );
+
+		ActivatePopupMenu( AFXGetTopLevelFrame( pWndParent ), this );
+		RecalcLayout();
+		return 0;
 	}
 
 
@@ -710,13 +752,11 @@ namespace mfc
 		: CMFCPopupMenuBar()
 		, m_pColorTable( pColorTable )
 		, m_pEditorHost( pEditorHost )
+		, m_pParentPickerButton( nullptr )
 		, m_columnCount( 0 )
 	{
 		ASSERT_PTR( m_pColorTable );
 		ASSERT_PTR( m_pEditorHost );
-
-		if ( m_pEditorHost != nullptr )
-			m_pParentPickerButton = dynamic_cast<CMFCColorButton*>( m_pEditorHost->GetHostWindow() );
 
 		m_columnCount = pColorTable->IsSysColorTable() ? 2 : pColorTable->GetColumnCount();
 
@@ -764,37 +804,41 @@ namespace mfc
 		}
 	}
 
-	BOOL CColorTableBar::OnSendCommand( const CMFCToolBarButton* pButton )
+	bool CColorTableBar::IsColorBtnId( UINT btnId ) const
+	{
+		return btnId >= AutoId && btnId < ColorIdMin + m_pColorTable->GetColors().size();
+	}
+
+	void CColorTableBar::AdjustLocations( void ) overrides( CMFCPopupMenuBar )
+	{
+		__super::AdjustLocations();
+	}
+
+	BOOL CColorTableBar::OnSendCommand( const CMFCToolBarButton* pButton ) overrides( CMFCPopupMenuBar )
 	{
 		if ( m_pParentPickerButton != nullptr )
 			ReleaseCapture();
 
 		int btnId = static_cast<int>( pButton->m_nID );
 		COLORREF newColor = CLR_DEFAULT;
-		ui::IColorEditorHost* pEditorHost = m_pEditorHost;		// store since 'this' will get deleted
+		ui::IColorEditorHost* pEditorHost = m_pEditorHost;			// store since 'this' will get deleted
 
-		if ( btnId >= AutoId )
+		if ( IsColorBtnId( btnId ) )
 		{
 			newColor = AutoId == btnId ? CLR_NONE : checked_static_cast<const CToolBarColorButton*>( pButton )->GetColor();
 
-			if ( !m_pEditorHost->UseUserColors() )					// not a 'read-only' table?
-				m_pEditorHost->SetSelColorTable( m_pColorTable );	// select the new table
+			m_pEditorHost->SwitchSelColorTable( m_pColorTable );	// select the new table
 		}
 
 		if ( !__super::OnSendCommand( pButton ) )		// will destroy this popup menu the graceful way - it will delete 'this'
 			return FALSE;
 
 		if ( MoreColorsId == btnId )
-			pEditorHost->OpenColorDialog();
+			pEditorHost->EditColorDialog();
 		else if ( newColor != CLR_DEFAULT )
 			pEditorHost->SetColor( newColor, true );
 
 		return TRUE;
-	}
-
-	void CColorTableBar::AdjustLocations( void )
-	{
-		__super::AdjustLocations();
 	}
 
 	// message handlers
@@ -808,13 +852,12 @@ namespace mfc
 		if ( -1 == __super::OnCreate( pCreateStruct ) )
 			return -1;
 
-		SetPaneStyle( GetPaneStyle() | CBRS_TOOLTIPS );
-
 		SetupButtons();
 
-		if ( m_pParentPickerButton != NULL )
+		if ( m_pParentPickerButton != NULL )		// modeless popup mode?
 		{
 			//SetCapture();		// PHC: don't do this, since it will freeze the sibling sub-popups
+			SetCapture();		// note: should not be called in menu popup tracking
 			mfc::MfcButton_SetCaptured( m_pParentPickerButton, false );
 		}
 		return 0;
