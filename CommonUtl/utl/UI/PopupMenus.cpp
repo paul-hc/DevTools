@@ -770,6 +770,7 @@ namespace mfc
 		// customize menu bar aspect
 		m_bIsDlgControl = true;					// stretch separators to the entire bar width
 		m_bDisableSideBarInXPMode = true;		// disable filling the image gutter: blue-gray zone on bar left
+		m_xSeparatorOffsetLeft = m_xSeparatorOffsetRight = 3;	// enlarge separator to ~ client width
 	}
 
 	CColorTableBar::~CColorTableBar()
@@ -795,7 +796,7 @@ namespace mfc
 			InsertSeparator();
 		}
 
-		for ( UINT i = 0; i != m_pColorTable->GetColors().size(); ++i )
+		for ( UINT i = 0, count = m_pColorTable->GetColors().size(); i != count; ++i )
 		{
 			InsertButton( pColorButton = new CToolBarColorButton( ColorIdMin + i, &m_pColorTable->GetColorAt( i ) ) );
 			pColorButton->UpdateSelectedColor( selColor );
@@ -816,9 +817,123 @@ namespace mfc
 		return btnId >= AutoId && btnId < ColorIdMin + m_pColorTable->GetColors().size();
 	}
 
+	enum MenuMetrics { HorzMargin = 2, VertMargin = 2, SeparatorHeight = 2, EmptyMenuWidth = 50, EmptyMenuHeight = 20 };
+
+	CSize CColorTableBar::CalcSize( BOOL vertDock )
+	{
+		CSize barSize = __super::CalcSize( vertDock );
+
+/*		if ( CMFCToolBarButton* pColorBtn = mfc::FindToolBarButton(this, ColorIdMin) )
+		{
+			CSize buttonSize = pColorBtn->Rect().Size();
+		}*/
+
+		return barSize;
+	}
+
 	void CColorTableBar::AdjustLocations( void ) overrides( CMFCPopupMenuBar )
 	{
 		__super::AdjustLocations();
+
+		if ( nullptr == GetSafeHwnd() || !::IsWindow( m_hWnd ) || m_bInUpdateShadow || m_Buttons.IsEmpty() )
+			return;
+
+		CMFCToolBarButton* pColorBtn = mfc::FindToolBarButton( this, ColorIdMin );
+		if (true|| nullptr == pColorBtn )
+			return;			// no change of layout is necessary
+
+		CSize buttonSize = pColorBtn->Rect().Size();
+
+		CRect clientRect;
+		GetClientRect( &clientRect );
+
+		clientRect.DeflateRect( HorzMargin, VertMargin );
+
+		//CSize boxSize = GetMenuImageSize();
+		//++boxSize.cx; ++boxSize.cy;
+
+		CPoint point = clientRect.TopLeft();
+		bool prevSeparator = false;
+		//bool hasMoreBtn = m_pColorTable == m_pEditorHost->GetSelColorTable();	// selected table?
+		int i = 0;
+
+		for ( POSITION pos = m_Buttons.GetHeadPosition(); pos != NULL; ++i )
+		{
+			CRect rectButton( 0, 0, 0, 0 );
+			CMFCToolBarButton* pButton = (CMFCToolBarButton*)m_Buttons.GetNext( pos );
+
+			if ( HasFlag( pButton->m_nStyle, TBBS_SEPARATOR ) )
+			{
+				if ( prevSeparator )
+					rectButton.SetRectEmpty();
+				else
+				{
+					if ( point.x > clientRect.left )
+					{	// next line
+						point.x = clientRect.left;
+						point.y += buttonSize.cy + VertMargin;
+					}
+
+					rectButton = CRect( point, CSize( clientRect.Width(), SeparatorHeight ) );
+
+					point.y += SeparatorHeight + 2;
+					point.x = clientRect.left;
+				}
+
+				prevSeparator = true;
+			}
+			else
+			{
+				CToolBarColorButton* pColorButton = DYNAMIC_DOWNCAST( CToolBarColorButton, pButton );
+
+				if ( nullptr == pColorButton )
+					continue;
+
+				/*if ( pColorButton->m_bIsDocument && !m_bShowDocColorsWhenDocked && !IsFloating() )
+					rectButton.SetRectEmpty();
+				else*/ if ( IsColorBtnId( pColorButton->m_nID ) )
+				{
+					if ( point.x + buttonSize.cx > clientRect.right )
+					{
+						point.x = clientRect.left;
+						point.y += buttonSize.cy;
+					}
+
+					rectButton = CRect( point, buttonSize );
+					point.x += buttonSize.cx;
+				}
+				else
+				{
+					if ( point.x > clientRect.left )
+					{	// next line
+						point.x = clientRect.left;
+						point.y += buttonSize.cy + VertMargin;
+					}
+
+					if ( MoreColorsId == pColorButton->m_nID )
+					{	// stretch to entire width
+						rectButton = CRect( point, CSize( clientRect.Width() - buttonSize.cx, buttonSize.cy - VertMargin / 2 ) );
+						point.x = rectButton.right;
+						point.y += ( rectButton.Height() - buttonSize.cy ) / 2;
+					}
+					else
+					{
+						rectButton = CRect( point, CSize( clientRect.Width(), buttonSize.cy - VertMargin / 2 ) );
+						point.y += buttonSize.cy - VertMargin / 2;
+						point.x = clientRect.left;
+					}
+
+					if ( MoreColorsId == pColorButton->m_nID )
+						rectButton.DeflateRect( HorzMargin / 2, VertMargin / 2 );
+				}
+
+				prevSeparator = false;
+			}
+
+			pButton->SetRect( rectButton );
+		}
+
+		UpdateTooltips();
 	}
 
 	BOOL CColorTableBar::OnSendCommand( const CMFCToolBarButton* pButton ) overrides( CMFCPopupMenuBar )

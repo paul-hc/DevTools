@@ -231,7 +231,6 @@ namespace mfc
 		void SetupButtons( void );
 		void StoreParentPicker( CMFCColorButton* pParentPickerButton ) { m_pParentPickerButton = pParentPickerButton; }
 
-		bool IsModelessPopup( void ) const { return m_isModelessPopup; }
 		bool IsColorBtnId( UINT btnId ) const;
 	private:
 		const CColorTable* m_pColorTable;			// required field
@@ -245,6 +244,7 @@ namespace mfc
 
 		// base overrides
 	protected:
+		virtual CSize CalcSize( BOOL vertDock ) overrides( CMFCPopupMenuBar );
 		virtual void AdjustLocations( void ) overrides( CMFCPopupMenuBar );
 		virtual BOOL OnSendCommand( const CMFCToolBarButton* pButton ) overrides( CMFCPopupMenuBar );
 
