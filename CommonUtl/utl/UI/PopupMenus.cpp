@@ -708,8 +708,8 @@ namespace mfc
 
 	BOOL CColorTablePopupMenu::OnCmdMsg( UINT btnId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) overrides( CMFCPopupMenu )
 	{
-		if ( m_pColorBar->IsColorBtnId( btnId ) )
-			return true;			// (!) color buttons state is managed internally, so prevent disabling while tracking and handling CColorTableBar::OnUpdateCmdUI() updates
+		if ( m_pColorBar->IsColorBtnId( btnId ) )		// note: color buttons status and command processing is managed internally
+			return true;		// so prevent disabling while tracking and handling CColorTableBar::OnUpdateCmdUI() updates
 
 		return __super::OnCmdMsg( btnId, code, pExtra, pHandlerInfo );
 	}
@@ -722,27 +722,33 @@ namespace mfc
 
 	int CColorTablePopupMenu::OnCreate( CREATESTRUCT* pCreateStruct )
 	{
-		//if ( -1 == CMFCPopupMenu::OnCreate( pCreateStruct ) )
-		//	return -1;
+		int result = 0;
 
-		if ( -1 == CMiniFrameWnd::OnCreate( pCreateStruct ) )
-			return -1;
+		if ( m_bTrackMode )			// popup in modal tracking mode via CContextMenuManager::TrackPopupMenu()?
+			result = __super::OnCreate( pCreateStruct );
+		else
+		{	// verbatim from CMFCColorBar::OnCreate():
+			result = CMiniFrameWnd::OnCreate( pCreateStruct );
 
-		if ( !m_pColorBar->Create( this, ToolBarStyle, ToolBarId ) )
-		{
-			TRACE( _T("Can't create popup menu bar\n") );
-			return -1;
+			if ( 0 == result )		// creation succeeded?
+				if ( m_pColorBar->Create( this, ToolBarStyle, ToolBarId ) )
+				{
+					CWnd* pWndParent = GetParent();
+					ASSERT_PTR( pWndParent->GetSafeHwnd() );
+
+					m_pColorBar->SetOwner( pWndParent );
+
+					ActivatePopupMenu( AFXGetTopLevelFrame( pWndParent ), this );
+					RecalcLayout();
+				}
+				else
+				{
+					ASSERT( false );		// * can't create the color table popup menu bar!
+					result = -1;
+				}
 		}
 
-		CWnd* pWndParent = GetParent();
-		ASSERT_PTR( pWndParent->GetSafeHwnd() );
-
-		m_pColorBar->SetOwner( pWndParent );
-		m_pColorBar->SetPaneStyle( m_pColorBar->GetPaneStyle() | CBRS_TOOLTIPS );
-
-		ActivatePopupMenu( AFXGetTopLevelFrame( pWndParent ), this );
-		RecalcLayout();
-		return 0;
+		return result;
 	}
 
 
@@ -752,8 +758,9 @@ namespace mfc
 		: CMFCPopupMenuBar()
 		, m_pColorTable( pColorTable )
 		, m_pEditorHost( pEditorHost )
-		, m_pParentPickerButton( nullptr )
 		, m_columnCount( 0 )
+		, m_pParentPickerButton( nullptr )
+		, m_isModelessPopup( false )
 	{
 		ASSERT_PTR( m_pColorTable );
 		ASSERT_PTR( m_pEditorHost );
@@ -852,14 +859,19 @@ namespace mfc
 		if ( -1 == __super::OnCreate( pCreateStruct ) )
 			return -1;
 
+		const CMFCPopupMenu* pParentPopupMenu = dynamic_cast<const CMFCPopupMenu*>( GetParent() );
+		m_isModelessPopup = nullptr == pParentPopupMenu || !mfc::PopupMenu_InTrackMode( pParentPopupMenu );
+
 		SetupButtons();
 
-		if ( m_pParentPickerButton != NULL )		// modeless popup mode?
-		{
-			//SetCapture();		// PHC: don't do this, since it will freeze the sibling sub-popups
-			SetCapture();		// note: should not be called in menu popup tracking
+		// Note: support for modeless execution is not fully implemented (but fairly functional), so modal tracking should be the preferred way to use this.
+		//
+		if ( m_isModelessPopup )	// modeless popup mode?
+			SetCapture();			// note: should not be called in menu popup tracking, since it freezes other sibling popups that need expanding
+
+		if ( m_pParentPickerButton != NULL )
 			mfc::MfcButton_SetCaptured( m_pParentPickerButton, false );
-		}
+
 		return 0;
 	}
 }

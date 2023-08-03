@@ -114,7 +114,7 @@ namespace ui
 
 	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags /*= TPM_RIGHTBUTTON*/, const RECT* pExcludeRect /*= nullptr*/ )
 	{
-		AdjustMenuTrackPos( screenPos );
+		AdjustMenuTrackPos( screenPos, nullptr );
 
 		TPMPARAMS excludeParams; utl::ZeroWinStruct( &excludeParams );
 
@@ -149,7 +149,7 @@ namespace ui
 		UINT cmdId = 0;
 
 		REQUIRE( ::IsMenu( hPopupMenu ) );
-		AdjustMenuTrackPos( screenPos );
+		AdjustMenuTrackPos( screenPos, pTargetWnd );
 
 		if ( UseMfcMenuManager() )
 		{
@@ -201,16 +201,20 @@ namespace ui
 		return pCmdTargetWnd;
 	}
 
-	bool AdjustMenuTrackPos( CPoint& rScreenPos )
+	bool AdjustMenuTrackPos( CPoint& rScreenPos, CWnd* pWndAlign )
 	{
 		if ( -1 == rScreenPos.x && -1 == rScreenPos.y )
 		{
-			if ( const CWnd* pFocusWnd = CWnd::GetFocus() )
+			if ( nullptr == pWndAlign )
+				pWndAlign = CWnd::GetFocus();
+
+			if ( pWndAlign != nullptr )
 			{
 				CRect targetRect;
-				pFocusWnd->GetWindowRect( &targetRect );
-				rScreenPos = targetRect.TopLeft();
-				rScreenPos += CPoint( 1, 1 );
+				pWndAlign->GetWindowRect( &targetRect );
+
+				rScreenPos.x = targetRect.left + 1;			// skip the border of target window
+				rScreenPos.y = targetRect.bottom;
 			}
 			else
 				::GetCursorPos( &rScreenPos );

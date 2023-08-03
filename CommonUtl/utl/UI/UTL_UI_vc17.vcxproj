@@ -550,6 +550,7 @@
     <Image Include="res\Unknown.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="res\DragDrop-Copy.cur" />
     <None Include="res\DragDrop-Move.cur" />
     <None Include="res\DragDrop-None.cur" />

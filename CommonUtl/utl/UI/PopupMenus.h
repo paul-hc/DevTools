@@ -13,7 +13,8 @@ class CColorStore;
 
 namespace mfc
 {
-	// Customized tracking menu to be used by mfc::CContextMenuMgr::TrackPopupMenu().
+	// Customizable tracking menu to be used by mfc::CContextMenuMgr::TrackPopupMenu().
+	//	To customize content pass a ui::ICustomPopupMenu callback interface pointer.
 	//
 	class CTrackingPopupMenu : public CMFCPopupMenu
 	{
@@ -229,12 +230,16 @@ namespace mfc
 
 		void SetupButtons( void );
 		void StoreParentPicker( CMFCColorButton* pParentPickerButton ) { m_pParentPickerButton = pParentPickerButton; }
+
+		bool IsModelessPopup( void ) const { return m_isModelessPopup; }
 		bool IsColorBtnId( UINT btnId ) const;
 	private:
 		const CColorTable* m_pColorTable;			// required field
 		ui::IColorEditorHost* m_pEditorHost;		// required field
-		CMFCColorButton* m_pParentPickerButton;		// set only when created as modeless popup from the picker button
 		int m_columnCount;
+
+		CMFCColorButton* m_pParentPickerButton;		// set only when created as modeless popup from the picker button
+		bool m_isModelessPopup;
 
 		enum { AutoId = 70, MoreColorsId, ColorIdMin };
 

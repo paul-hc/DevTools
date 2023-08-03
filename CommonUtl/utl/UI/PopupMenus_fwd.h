@@ -101,6 +101,10 @@ namespace mfc
 	// CMFCButton protected access:
 	void MfcButton_SetCaptured( CMFCButton* pButton, bool captured );
 
+	// CMFCPopupMenu protected access:
+	bool PopupMenu_InTrackMode( const CMFCPopupMenu* pPopupMenu );		// in modal tracking mode?
+	void PopupMenu_SetTrackMode( CMFCPopupMenu* pPopupMenu, BOOL trackMode = true );
+
 
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
 	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );

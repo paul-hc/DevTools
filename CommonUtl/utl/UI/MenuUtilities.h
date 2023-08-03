@@ -46,7 +46,7 @@ namespace ui
 
 
 	CWnd* AutoTargetWnd( CWnd* pTargetWnd );
-	bool AdjustMenuTrackPos( CPoint& rScreenPos );
+	bool AdjustMenuTrackPos( CPoint& rScreenPos, CWnd* pWndAlign );
 	DWORD GetAlignTrackFlags( PopupAlign popupAlign );
 	CPoint GetAlignTrackPos( PopupAlign popupAlign, const RECT& excludeRect );
 }

@@ -198,7 +198,7 @@ void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) 
 	UpdateShadesTable();
 }
 
-void CColorPickerButton::UpdateColor( COLORREF color ) override
+void CColorPickerButton::UpdateColor( COLORREF color ) overrides( CMFCColorButton )
 {
 		//__super::UpdateColor( color );
 
@@ -353,16 +353,31 @@ void CColorPickerButton::ShowColorTablePopup( void )
 	}
 
 	CRect rect;
-	GetWindowRect( &rect );
+	GetWindowRect( &rect ); ++rect.left;
 
 	CMFCPopupMenu* pPopupMenu = nullptr;
 	BOOL created = false;
 
 	if ( m_pSelColorTable != nullptr && m_pSelColorTable->IsSysColorTable() )
 	{
-		pPopupMenu = new mfc::CColorTablePopupMenu( this );
-		created = pPopupMenu->Create( this, rect.left, rect.bottom, nullptr, FALSE, TRUE );
-		//pPopupMenu->GetMenuBar()->SetCapture();
+		enum { TrackModeless, TrackModal = 1 };
+
+		if ( TrackModal )
+		{
+			if ( m_bCaptured )
+			{
+				ReleaseCapture();
+				m_bCaptured = FALSE;
+			}
+
+			TrackModalPopupImpl( nullptr, new mfc::CColorTablePopupMenu( this ), false );
+			return;
+		}
+		else
+		{	// display modeless popup
+			pPopupMenu = new mfc::CColorTablePopupMenu( this );
+			created = pPopupMenu->Create( this, rect.left, rect.bottom, nullptr, FALSE, TRUE );
+		}
 	}
 	else
 	{
@@ -405,19 +420,23 @@ void CColorPickerButton::TrackMenuColorTables( void )
 		return;
 
 	m_trackingMode = TrackingMenuColorTables;
-	mfc::CContextMenuMgr::Instance()->ResetNewTrackingPopupMenu( new mfc::CTrackingPopupMenu( m_pMenuImpl.get(), m_trackingMode ) );
 
-	CRect btnScreenRect;
-	GetWindowRect( &btnScreenRect );
+	UINT cmdId = TrackModalPopupImpl( m_pMenuImpl->m_menu.GetSafeHmenu(), new mfc::CTrackingPopupMenu( m_pMenuImpl.get(), m_trackingMode ), false );
 
-	CPoint screenPos( btnScreenRect.left, btnScreenRect.bottom );
-	int cmdId = ui::TrackMfcPopupMenu( m_pMenuImpl->m_menu.GetSafeHmenu(), this, screenPos, false );
-		// no WM_COMMAND, notifications work via ui::IColorEditorHost::SetColor(), or mfc::CColorMenuButton::CMBN_COLORSELECTED
-
-	m_trackingMode = NoTracking;
-
+	// no WM_COMMAND sent: notifications work via ui::IColorEditorHost::SetColor(), or mfc::CColorMenuButton::CMBN_COLORSELECTED
 	if ( cmdId != 0 && !( cmdId >= ID_HALFTONE_TABLE_16 && cmdId <= ID_REPO_COLOR_TABLE_MAX ) )			// menu command other than a color table?
 		ui::SendCommand( m_hWnd, cmdId );			// send ID_EDIT_COPY, etc
+}
+
+UINT CColorPickerButton::TrackModalPopupImpl( HMENU hMenuPopup, CMFCPopupMenu* pPopupMenu, bool sendCommand, CPoint screenPos /*= CPoint( -1, -1 )*/ )
+{
+	ASSERT_PTR( pPopupMenu );
+
+	mfc::CContextMenuMgr::Instance()->ResetTrackingPopup( pPopupMenu );
+
+	UINT cmdId = mfc::CContextMenuMgr::Instance()->TrackModalPopup( hMenuPopup, this, sendCommand, screenPos );
+
+	m_trackingMode = NoTracking;
 
 	// CMFCColorButton boilerplate:
 	m_bPushed = FALSE;
@@ -431,11 +450,13 @@ void CColorPickerButton::TrackMenuColorTables( void )
 		ReleaseCapture();
 		m_bCaptured = FALSE;
 	}
+
+	return cmdId;
 }
 
 // base overrides:
 
-void CColorPickerButton::OnShowColorPopup( void ) override
+void CColorPickerButton::OnShowColorPopup( void ) overrides( CMFCColorButton )
 {
 	if ( -1 == m_nColumns )		// auto-layout for columns?
 	{
@@ -468,7 +489,7 @@ void CColorPickerButton::OnShowColorPopup( void ) override
 	}
 }
 
-void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) override
+void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) overrides( CMFCColorButton )
 {
 	CScopedValue<COLORREF> scColor( &m_Color );
 	CScopedValue<COLORREF> scAutoColor( &m_ColorAutomatic );
@@ -546,10 +567,7 @@ void CColorPickerButton::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 		m_trackingMode = TrackingContextMenu;
 
 		m_pMenuImpl->SetupMenu( true );
-		mfc::CContextMenuMgr::Instance()->ResetNewTrackingPopupMenu( new mfc::CTrackingPopupMenu( m_pMenuImpl.get(), m_trackingMode ) );
-		ui::TrackMfcPopupMenu( m_pMenuImpl->m_menu.GetSafeHmenu(), this, screenPos );
-
-		m_trackingMode = NoTracking;
+		TrackModalPopupImpl( m_pMenuImpl->m_menu.GetSafeHmenu(), new mfc::CTrackingPopupMenu( m_pMenuImpl.get(), m_trackingMode ), true, screenPos );		// returns the command
 	}
 	else
 		__super::OnContextMenu( pWnd, screenPos );

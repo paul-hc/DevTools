@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "ContextMenuMgr.h"
 #include "PopupMenus.h"
+#include "MenuUtilities.h"
+#include "WndUtils.h"
 #include <afxpopupmenu.h>
 #include <afxmenutearoffmanager.h>
 
@@ -37,19 +39,52 @@ namespace mfc
 		return mfc::GetSafePopupMenu( m_pTrackingPopupMenu );
 	}
 
-	void CContextMenuMgr::ResetNewTrackingPopupMenu( mfc::CTrackingPopupMenu* pNewTrackingPopupMenu )
+	void CContextMenuMgr::ResetTrackingPopup( CMFCPopupMenu* pNewTrackingPopup )
 	{
 		// If allocated by the caller right before a TrackPopupMenu(), it will be used instead of creating a 'new CMFCPopupMenu;' in ShowPopupMenu().
 
-		m_pNewTrackingPopupMenu.reset( pNewTrackingPopupMenu );
+		ASSERT_NULL( m_pNewTrackingPopup.get() );		// never double allocate!
+		m_pNewTrackingPopup.reset( pNewTrackingPopup );
 	}
 
-	CMFCPopupMenu* CContextMenuMgr::ShowPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bOwnMessage /*= FALSE*/, BOOL bAutoDestroy /*= TRUE*/, BOOL bRightAlign /*= FALSE*/ )
-	{
-		REQUIRE( ::IsMenu( hMenuPopup ) );
+	UINT CContextMenuMgr::TrackModalPopup( OPTIONAL HMENU hMenuPopup, CWnd* pTargetWnd, bool sendCommand, CPoint screenPos /*= CPoint( -1, -1 )*/, bool rightAlign /*= false*/ )
+	{	// tracks either the hMenuPopup (if specified), or externally stored m_pNewTrackingPopup
+		ASSERT( hMenuPopup != nullptr || m_pNewTrackingPopup.get() != nullptr );	// tracking popup must be set by client if hMenuPopup is null
 
-		if ( nullptr == m_pNewTrackingPopupMenu.get() )
+		UINT cmdId = 0;
+		HWND hFocusWnd = ::GetFocus();
+
+		ui::AdjustMenuTrackPos( screenPos, pTargetWnd );
+
+		cmdId = TrackPopupMenu( hMenuPopup, screenPos.x, screenPos.y, pTargetWnd, rightAlign );		// HMENU is optional
+
+		ui::TakeFocus( hFocusWnd );
+
+		if ( sendCommand && cmdId != 0 )
+			ui::SendCommand( pTargetWnd->GetSafeHwnd(), cmdId );
+
+		return cmdId;
+	}
+
+	UINT CContextMenuMgr::TrackModalPopup( CMFCPopupMenu* pPopupMenu, CWnd* pTargetWnd, bool sendCommand, CPoint screenPos, bool rightAlign )
+	{
+		ASSERT_PTR( pPopupMenu );
+
+		if ( nullptr == m_pNewTrackingPopup.get() )
+			ResetTrackingPopup( pPopupMenu );
+
+		return TrackModalPopup( (HMENU)nullptr, pTargetWnd, sendCommand, screenPos, rightAlign );	// track popup window with its own custom menu set up
+	}
+
+
+	CMFCPopupMenu* CContextMenuMgr::ShowPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bOwnMessage /*= FALSE*/, BOOL bAutoDestroy /*= TRUE*/, BOOL bRightAlign /*= FALSE*/ ) override
+	{
+		// hMenuPopup is optional if we have m_pNewTrackingPopup set up
+
+		if ( nullptr == m_pNewTrackingPopup.get() )
 		{
+			REQUIRE( ::IsMenu( hMenuPopup ) );
+
 			m_pTrackingPopupMenu = __super::ShowPopupMenu( hMenuPopup, x, y, pWndOwner, bOwnMessage, bAutoDestroy, bRightAlign );		// use standard MFC implementation
 			return m_pTrackingPopupMenu;
 		}
@@ -62,36 +97,36 @@ namespace mfc
 				return nullptr;
 			}
 
-		if ( g_pTearOffMenuManager != NULL )
+		if ( hMenuPopup != nullptr && g_pTearOffMenuManager != nullptr )
 			g_pTearOffMenuManager->SetupTearOffMenus( hMenuPopup );
 
 		if ( m_bTrackMode )
 			bOwnMessage = TRUE;
 
 		if ( !bOwnMessage )
-			while ( pWndOwner != NULL && HasFlag( pWndOwner->GetStyle(), WS_CHILD ) )
+			while ( pWndOwner != nullptr && HasFlag( pWndOwner->GetStyle(), WS_CHILD ) )
 				pWndOwner = pWndOwner->GetParent();
 
-		mfc::CTrackingPopupMenu* pPopupMenu = m_pNewTrackingPopupMenu.get();
+		CMFCPopupMenu* pPopupMenu = m_pNewTrackingPopup.get();
 
 		pPopupMenu->SetAutoDestroy( FALSE );
-		pPopupMenu->SetTrackMode( m_bTrackMode );
 		pPopupMenu->SetRightAlign( bRightAlign );
+		mfc::PopupMenu_SetTrackMode( pPopupMenu, m_bTrackMode );
 
 		if ( !m_bDontCloseActiveMenu )
 			CTrackingPopupMenu::CloseActiveMenu();
 
 		if ( !pPopupMenu->Create( pWndOwner, x, y, hMenuPopup, FALSE, bOwnMessage ) )
 		{
-			m_pNewTrackingPopupMenu.reset();			// delete the tracking menu
+			m_pNewTrackingPopup.reset();			// delete the tracking menu
 			return nullptr;
 		}
 
-		m_pTrackingPopupMenu = m_pNewTrackingPopupMenu.release();	// pass ownership to the caller
+		m_pTrackingPopupMenu = m_pNewTrackingPopup.release();	// pass ownership to the caller
 		return m_pTrackingPopupMenu;
 	}
 
-	UINT CContextMenuMgr::TrackPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bRightAlign /*= FALSE*/ )
+	UINT CContextMenuMgr::TrackPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bRightAlign /*= FALSE*/ ) override
 	{
 		UINT selCmdId = __super::TrackPopupMenu( hMenuPopup, x, y, pWndOwner, bRightAlign );
 

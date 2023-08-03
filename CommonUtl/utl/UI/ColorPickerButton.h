@@ -79,6 +79,8 @@ private:
 
 	void ShowColorTablePopup( void );
 	void TrackMenuColorTables( void );
+
+	UINT TrackModalPopupImpl( HMENU hMenuPopup, CMFCPopupMenu* pPopupMenu, bool sendCommand, CPoint screenPos = CPoint( -1, -1 ) );		// returns the command
 private:
 	persist const CColorTable* m_pSelColorTable;
 	persist PickingMode m_pickingMode;						// by default PickColorBar (single color table), or PickMenuColorTables (shows a menu with multiple color tables)
@@ -99,9 +101,9 @@ protected:
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	// base overrides:
-	virtual void UpdateColor( COLORREF color ) override;
-	virtual void OnShowColorPopup( void ) override;
-	virtual void OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) override;
+	virtual void UpdateColor( COLORREF color ) overrides( CMFCColorButton );
+	virtual void OnShowColorPopup( void ) overrides( CMFCColorButton );
+	virtual void OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) overrides( CMFCColorButton );
 
 	// generated stuff
 public:

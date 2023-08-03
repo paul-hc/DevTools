@@ -86,6 +86,13 @@ namespace nosy
 	};
 
 
+	struct CPopupMenu_ : public CMFCPopupMenu
+	{
+		// public access
+		using CMFCPopupMenu::m_bTrackMode;
+	};
+
+
 	struct CToolBar_ : public CMFCToolBar
 	{
 		// public access
@@ -159,10 +166,6 @@ namespace mfc
 		return Button_GetItemData( pFoundButton );
 	}
 
-	void MfcButton_SetCaptured( CMFCButton* pButton, bool captured )
-	{
-		mfc::nosy_cast<nosy::CMFCButton_>( pButton )->m_bCaptured = captured;
-	}
 
 	void Button_SetImageById( CMFCToolBarButton* pButton, UINT btnId, bool userImage /*= false*/ )
 	{
@@ -183,6 +186,23 @@ namespace mfc
 	void Button_RedrawImage( CMFCToolBarButton* pButton )
 	{
 		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->RedrawImage();
+	}
+
+
+	void MfcButton_SetCaptured( CMFCButton* pButton, bool captured )
+	{
+		mfc::nosy_cast<nosy::CMFCButton_>( pButton )->m_bCaptured = captured;
+	}
+
+
+	bool PopupMenu_InTrackMode( const CMFCPopupMenu* pPopupMenu )
+	{
+		return mfc::nosy_cast<nosy::CPopupMenu_>( pPopupMenu )->m_bTrackMode != FALSE;
+	}
+
+	void PopupMenu_SetTrackMode( CMFCPopupMenu* pPopupMenu, BOOL trackMode /*= true*/ )
+	{
+		mfc::nosy_cast<nosy::CPopupMenu_>( pPopupMenu )->m_bTrackMode = trackMode;
 	}
 
 
