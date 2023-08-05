@@ -69,14 +69,14 @@ public:
 		return m_pOldGdiObject;
 	}
 
-	void SelectObject( GdiObjectType* pNewGdiObject )
+	GdiObjectType* SelectObject( GdiObjectType* pNewGdiObject )
 	{
-		m_pDC->SelectObject( pNewGdiObject );
+		return checked_static_cast<GdiObjectType*>( m_pDC->SelectObject( pNewGdiObject ) );
 	}
 
-	void SelectStockObject( int stockObjectIndex )
+	CGdiObject* SelectStockObject( int stockObjectIndex )
 	{
-		m_pDC->SelectStockObject( stockObjectIndex );
+		return m_pDC->SelectStockObject( stockObjectIndex );
 	}
 private:
 	CDC* m_pDC;

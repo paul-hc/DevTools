@@ -198,7 +198,7 @@ namespace mfc
 	class CColorTableBar;
 
 
-	class CColorTablePopupMenu : public CMFCPopupMenu		// displays CToolBarColorButton named colors on multiple column layout
+	class CColorTablePopupMenu : public CMFCPopupMenu		// displays named colors (CToolBarColorButton) on multiple column grid layout
 	{
 	public:
 		CColorTablePopupMenu( CColorMenuButton* pParentMenuBtn );		// pParentMenuBtn provides the color table
@@ -222,6 +222,9 @@ namespace mfc
 	};
 
 
+	struct CColorButtonsGridLayout;
+
+
 	class CColorTableBar : public CMFCPopupMenuBar
 	{
 	public:
@@ -235,12 +238,13 @@ namespace mfc
 	private:
 		const CColorTable* m_pColorTable;			// required field
 		ui::IColorEditorHost* m_pEditorHost;		// required field
-		int m_columnCount;
+		UINT m_columnCount;
 
 		CMFCColorButton* m_pParentPickerButton;		// set only when created as modeless popup from the picker button
 		bool m_isModelessPopup;
+		std::auto_ptr<CColorButtonsGridLayout> m_pLayout;
 
-		enum { AutoId = 70, MoreColorsId, ColorIdMin };
+		enum { AutoId = 70, MoreColorsId, ColorIdMin, PadId = 0 };
 
 		// base overrides
 	protected:

@@ -209,7 +209,7 @@ void CColorPickerButton::UpdateShadesTable( void )
 {
 	CColorTable* pShadesTable = m_pMenuImpl->m_pScratchStore->GetShadesTable();
 
-	pShadesTable->SetupShadesTable( GetColor(), m_pSelColorTable != nullptr ? m_pSelColorTable->GetColumnCount() : 8 );
+	pShadesTable->SetupShadesTable( GetColor(), ( m_pSelColorTable != nullptr && !m_pSelColorTable->IsSysColorTable() ) ? m_pSelColorTable->GetColumnCount() : 8 );
 
 	mfc::TColorList shadesColorList;
 	pShadesTable->QueryMfcColors( shadesColorList );

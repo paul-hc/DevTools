@@ -6,6 +6,7 @@
 #include "ColorRepository.h"
 #include "CmdInfoStore.h"
 #include "TooltipsHook.h"
+#include "ScopedGdi.h"
 #include "WndUtils.h"
 #include "resource.h"
 #include "utl/ScopedValue.h"
@@ -146,11 +147,9 @@ namespace mfc
 		mfc::Button_RedrawImage( this );
 	}
 
-	void CToolBarColorButton::SetChecked( bool checked )
+	void CToolBarColorButton::SetChecked( bool checked /*= true*/ )
 	{
-		UINT style = m_nStyle;
-		SetFlag( style, TBBS_CHECKED, checked );
-		SetStyle( style );
+		mfc::Button_SetStyleFlag( this, TBBS_CHECKED, checked );
 	}
 
 	CToolBarColorButton* CToolBarColorButton::ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT int* pIndex )
@@ -752,25 +751,63 @@ namespace mfc
 	}
 
 
+	struct CColorButtonsGridLayout
+	{	// layout of AutoBtns (top) + ColorGrid (middle) + MoreBtns (bottom)
+	public:
+		CColorButtonsGridLayout( CMFCPopupMenuBar* pMenuBar, size_t colorCount, size_t columnCount );
+
+		bool HasLayout( void ) const { return !ui::IsEmptySize( m_boundsSize ); }
+
+		void Setup( bool hasAutoButton );
+		CSize CalcLayout( int barMinWidth, int barMaxWidth );
+		void LayoutButtons( void );
+	private:
+		CMFCToolBarButton* GetNextButton( IN OUT POSITION& rListPos ) const;
+		void GetGridRowColumnAt( OUT size_t* pRow, OUT size_t* pColumn, size_t gridPos ) const;
+
+		CSize StoreButtonSize( CDC* pDC, CMFCToolBarButton* pButton, int maxWidth );
+	public:
+		const size_t m_colorCount;
+		const size_t m_columnCount;
+		const size_t m_rowCount;
+	private:
+		CMFCPopupMenuBar* m_pMenuBar;
+		size_t m_autoCount;					// 0 or 2 (Auto + Sep) - also position of first color button in the grid
+		Range<CToolBarColorButton*> m_colorButtonRange;		// [start, end]
+
+		// layout
+		CSize m_boundsSize;
+		int m_autoHeight;
+		int m_moreHeight;
+		int m_gridHeight;
+		std::vector<int> m_columnRights;	// by grid column index: right edge of the column
+		std::vector<int> m_buttonHeights;	// by bar button index
+
+		// dynamic metrics
+		CSize m_defaultMenuBtnSize;			// self-encapsulated
+		int m_menuArrowWidth;				// to subtract from text width to compact the layout
+
+		enum MenuMetrics { HorzMargin = 2, VertMargin = 2, MinTabSpace = 10, EmptyMenuWidth = 50, EmptyMenuHeight = 20, SeparatorHeight = 8, SeparatorOffsetX = 3 };
+	};
+
+
 	// CColorTableBar implementation
 
 	CColorTableBar::CColorTableBar( const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost )
 		: CMFCPopupMenuBar()
 		, m_pColorTable( pColorTable )
 		, m_pEditorHost( pEditorHost )
-		, m_columnCount( 0 )
+		, m_columnCount( !CMFCToolBar::IsCustomizeMode() ? m_pColorTable->GetColumnCount() : 1 )
 		, m_pParentPickerButton( nullptr )
 		, m_isModelessPopup( false )
 	{
 		ASSERT_PTR( m_pColorTable );
 		ASSERT_PTR( m_pEditorHost );
 
-		m_columnCount = pColorTable->IsSysColorTable() ? 2 : pColorTable->GetColumnCount();
-
 		// customize menu bar aspect
 		m_bIsDlgControl = true;					// stretch separators to the entire bar width
 		m_bDisableSideBarInXPMode = true;		// disable filling the image gutter: blue-gray zone on bar left
-		m_xSeparatorOffsetLeft = m_xSeparatorOffsetRight = 3;	// enlarge separator to ~ client width
+		//m_xSeparatorOffsetLeft = m_xSeparatorOffsetRight = 10;	// enlarge separator to ~ client width - no effect due to m_bDisableSideBarInXPMode=true
 	}
 
 	CColorTableBar::~CColorTableBar()
@@ -785,9 +822,12 @@ namespace mfc
 		RemoveAllButtons();
 
 		COLORREF selColor = m_pEditorHost->GetColor();
-		bool isSelTable = m_pColorTable == m_pEditorHost->GetSelColorTable();	// selected table?
+		bool isSelTable = m_pColorTable == m_pEditorHost->GetSelColorTable();	// selected table: add detail buttons?
+		bool hasAutoButton = isSelTable && !ui::IsUndefinedColor( m_pEditorHost->GetAutoColor() );
 		bool isForeignColor = selColor != CLR_NONE && !m_pColorTable->ContainsColor( selColor );
 		CToolBarColorButton* pColorButton = nullptr;
+
+		m_pLayout.reset( new CColorButtonsGridLayout( this, m_pColorTable->GetColors().size(), m_columnCount ) );
 
 		if ( isSelTable && !ui::IsUndefinedColor( m_pEditorHost->GetAutoColor() ) )
 		{
@@ -796,7 +836,7 @@ namespace mfc
 			InsertSeparator();
 		}
 
-		for ( UINT i = 0, count = m_pColorTable->GetColors().size(); i != count; ++i )
+		for ( UINT i = 0, colorCount = static_cast<UINT>( m_pLayout->m_colorCount ); i != colorCount; ++i )
 		{
 			InsertButton( pColorButton = new CToolBarColorButton( ColorIdMin + i, &m_pColorTable->GetColorAt( i ) ) );
 			pColorButton->UpdateSelectedColor( selColor );
@@ -810,6 +850,8 @@ namespace mfc
 			if ( isForeignColor )
 				pColorButton->UpdateSelectedColor( selColor );
 		}
+
+		m_pLayout->Setup( hasAutoButton );
 	}
 
 	bool CColorTableBar::IsColorBtnId( UINT btnId ) const
@@ -817,121 +859,23 @@ namespace mfc
 		return btnId >= AutoId && btnId < ColorIdMin + m_pColorTable->GetColors().size();
 	}
 
-	enum MenuMetrics { HorzMargin = 2, VertMargin = 2, SeparatorHeight = 2, EmptyMenuWidth = 50, EmptyMenuHeight = 20 };
-
 	CSize CColorTableBar::CalcSize( BOOL vertDock )
 	{
-		CSize barSize = __super::CalcSize( vertDock );
+		vertDock;
+		if ( m_bPaletteMode )
+			return __super::CalcSize( FALSE );
 
-/*		if ( CMFCToolBarButton* pColorBtn = mfc::FindToolBarButton(this, ColorIdMin) )
-		{
-			CSize buttonSize = pColorBtn->Rect().Size();
-		}*/
-
-		return barSize;
+		return m_pLayout->CalcLayout( m_iMinWidth, m_iMaxWidth );
 	}
 
 	void CColorTableBar::AdjustLocations( void ) overrides( CMFCPopupMenuBar )
 	{
-		__super::AdjustLocations();
-
 		if ( nullptr == GetSafeHwnd() || !::IsWindow( m_hWnd ) || m_bInUpdateShadow || m_Buttons.IsEmpty() )
 			return;
-
-		CMFCToolBarButton* pColorBtn = mfc::FindToolBarButton( this, ColorIdMin );
-		if (true|| nullptr == pColorBtn )
-			return;			// no change of layout is necessary
-
-		CSize buttonSize = pColorBtn->Rect().Size();
-
-		CRect clientRect;
-		GetClientRect( &clientRect );
-
-		clientRect.DeflateRect( HorzMargin, VertMargin );
-
-		//CSize boxSize = GetMenuImageSize();
-		//++boxSize.cx; ++boxSize.cy;
-
-		CPoint point = clientRect.TopLeft();
-		bool prevSeparator = false;
-		//bool hasMoreBtn = m_pColorTable == m_pEditorHost->GetSelColorTable();	// selected table?
-		int i = 0;
-
-		for ( POSITION pos = m_Buttons.GetHeadPosition(); pos != NULL; ++i )
-		{
-			CRect rectButton( 0, 0, 0, 0 );
-			CMFCToolBarButton* pButton = (CMFCToolBarButton*)m_Buttons.GetNext( pos );
-
-			if ( HasFlag( pButton->m_nStyle, TBBS_SEPARATOR ) )
-			{
-				if ( prevSeparator )
-					rectButton.SetRectEmpty();
-				else
-				{
-					if ( point.x > clientRect.left )
-					{	// next line
-						point.x = clientRect.left;
-						point.y += buttonSize.cy + VertMargin;
-					}
-
-					rectButton = CRect( point, CSize( clientRect.Width(), SeparatorHeight ) );
-
-					point.y += SeparatorHeight + 2;
-					point.x = clientRect.left;
-				}
-
-				prevSeparator = true;
-			}
-			else
-			{
-				CToolBarColorButton* pColorButton = DYNAMIC_DOWNCAST( CToolBarColorButton, pButton );
-
-				if ( nullptr == pColorButton )
-					continue;
-
-				/*if ( pColorButton->m_bIsDocument && !m_bShowDocColorsWhenDocked && !IsFloating() )
-					rectButton.SetRectEmpty();
-				else*/ if ( IsColorBtnId( pColorButton->m_nID ) )
-				{
-					if ( point.x + buttonSize.cx > clientRect.right )
-					{
-						point.x = clientRect.left;
-						point.y += buttonSize.cy;
-					}
-
-					rectButton = CRect( point, buttonSize );
-					point.x += buttonSize.cx;
-				}
-				else
-				{
-					if ( point.x > clientRect.left )
-					{	// next line
-						point.x = clientRect.left;
-						point.y += buttonSize.cy + VertMargin;
-					}
-
-					if ( MoreColorsId == pColorButton->m_nID )
-					{	// stretch to entire width
-						rectButton = CRect( point, CSize( clientRect.Width() - buttonSize.cx, buttonSize.cy - VertMargin / 2 ) );
-						point.x = rectButton.right;
-						point.y += ( rectButton.Height() - buttonSize.cy ) / 2;
-					}
-					else
-					{
-						rectButton = CRect( point, CSize( clientRect.Width(), buttonSize.cy - VertMargin / 2 ) );
-						point.y += buttonSize.cy - VertMargin / 2;
-						point.x = clientRect.left;
-					}
-
-					if ( MoreColorsId == pColorButton->m_nID )
-						rectButton.DeflateRect( HorzMargin / 2, VertMargin / 2 );
-				}
-
-				prevSeparator = false;
-			}
-
-			pButton->SetRect( rectButton );
-		}
+		else if ( m_bPaletteMode )
+			CMFCToolBar::AdjustLocations();
+		else if ( m_pLayout.get() != nullptr && m_pLayout->HasLayout() )
+			m_pLayout->LayoutButtons();
 
 		UpdateTooltips();
 	}
@@ -988,5 +932,228 @@ namespace mfc
 			mfc::MfcButton_SetCaptured( m_pParentPickerButton, false );
 
 		return 0;
+	}
+
+
+	// CColorButtonsGridLayout implementation
+
+	CColorButtonsGridLayout::CColorButtonsGridLayout( CMFCPopupMenuBar* pMenuBar, size_t colorCount, size_t columnCount )
+		: m_colorCount( colorCount )
+		, m_columnCount( columnCount )
+		, m_rowCount( m_colorCount / m_columnCount + ( 0 == ( m_colorCount % m_columnCount ) ? 0 : 1 ) )
+		, m_pMenuBar( pMenuBar )
+		, m_autoCount( 0 )
+		, m_boundsSize( 0, 0 )
+		, m_autoHeight( 0 )
+		, m_moreHeight( 0 )
+		, m_gridHeight( 0 )
+	{
+		ASSERT_PTR( m_pMenuBar );
+
+		m_defaultMenuBtnSize = CMFCToolBar::GetMenuImageSize() + CSize( 2 * HorzMargin, 2 * VertMargin );
+		m_defaultMenuBtnSize.cy = utl::max( m_defaultMenuBtnSize.cy, GetGlobalData()->GetTextHeight() );
+		m_menuArrowWidth = GetGlobalData()->GetTextWidth() - 3;
+	}
+
+	void CColorButtonsGridLayout::Setup( bool hasAutoButton )
+	{
+		size_t btnCount = m_pMenuBar->GetCount();
+		ASSERT( btnCount != 0 && m_buttonHeights.empty() );
+
+		m_buttonHeights.reserve( btnCount );
+		m_autoCount = hasAutoButton ? 2 : 0;
+
+		if ( m_colorCount != 0 )
+		{
+			m_colorButtonRange.m_start = checked_static_cast<CToolBarColorButton*>( m_pMenuBar->GetButton( static_cast<int>( m_autoCount ) ) );
+			m_colorButtonRange.m_end = checked_static_cast<CToolBarColorButton*>( m_pMenuBar->GetButton( static_cast<int>( m_autoCount + m_colorCount - 1 ) ) );	// last color button
+		}
+	}
+
+	CSize CColorButtonsGridLayout::CalcLayout( int barMinWidth, int barMaxWidth )
+	{
+		m_boundsSize.cx = m_boundsSize.cy = 0;
+		m_autoHeight = m_moreHeight = m_gridHeight = 0;
+		m_columnRights.clear();
+		m_buttonHeights.clear();
+
+		POSITION pos = m_pMenuBar->GetAllButtons().GetHeadPosition();
+
+		if ( nullptr == pos )		// no buttons (called before set up)?
+			m_boundsSize = CSize( EmptyMenuWidth, EmptyMenuHeight );
+		else
+		{
+			CClientDC dc( m_pMenuBar );
+			CScopedGdi<CFont> scFont( &dc, &GetGlobalData()->fontRegular );
+
+			size_t btnIndex = 0, btnCount = m_pMenuBar->GetCount();
+
+			// Auto buttons:
+			for ( ; btnIndex != m_autoCount; ++btnIndex )
+			{
+				REQUIRE( btnIndex != btnCount );
+				CMFCToolBarButton* pButton = GetNextButton( pos );
+				CSize buttonSize = StoreButtonSize( &dc, pButton, barMaxWidth );
+
+				m_boundsSize.cx = utl::max( buttonSize.cx, m_boundsSize.cx );
+				m_boundsSize.cy += buttonSize.cy;
+			}
+			m_autoHeight = m_boundsSize.cy;
+
+			// color grid buttons:
+			CSize gridSize( 0, 0 );
+			int columnWidth = 0;
+
+			for ( size_t i = 0; i != m_colorCount; ++i, ++btnIndex )
+			{
+				REQUIRE( btnIndex != btnCount );
+				CMFCToolBarButton* pButton = GetNextButton( pos );
+				CSize buttonSize = StoreButtonSize( &dc, pButton, barMaxWidth );
+
+				size_t column, row;
+				GetGridRowColumnAt( &row, &column, i );
+
+				if ( 0 == row )					// switched to new column?
+					if ( columnWidth != 0 )		// column break: any previous columnSize?
+					{
+						gridSize.cx += columnWidth + HorzMargin;
+						m_columnRights.push_back( gridSize.cx );
+						columnWidth = 0;
+					}
+
+				columnWidth = utl::max( buttonSize.cx, columnWidth );
+
+				if ( 0 == column )						// first column?
+					gridSize.cy += buttonSize.cy;		// only extend vertically on the first column; the following columns will share same height
+			}
+			gridSize.cx += columnWidth;
+			m_gridHeight = gridSize.cy;
+
+			m_boundsSize.cx = utl::max( gridSize.cx, m_boundsSize.cx );
+			m_boundsSize.cy += gridSize.cy;
+
+			// More buttons:
+			for ( ; btnIndex != btnCount; ++btnIndex )
+			{
+				CMFCToolBarButton* pButton = GetNextButton( pos );
+				CSize buttonSize = StoreButtonSize( &dc, pButton, barMaxWidth );
+
+				m_moreHeight += buttonSize.cy;
+				m_boundsSize.cx = utl::max( buttonSize.cx, m_boundsSize.cx );
+			}
+			m_boundsSize.cy += m_moreHeight;
+		}
+
+		m_boundsSize += CSize( 2 * HorzMargin, 2 * VertMargin );
+
+		if ( barMaxWidth > 0 && m_boundsSize.cx > barMaxWidth )
+			m_boundsSize.cx = barMaxWidth;
+
+		if ( barMinWidth > 0 && m_boundsSize.cx < barMinWidth )
+			m_boundsSize.cx = barMinWidth;
+
+		m_columnRights.push_back( m_boundsSize.cx );			// last column is the entire client width
+		ENSURE( m_buttonHeights.size() == static_cast<size_t>( m_pMenuBar->GetCount() ) );
+
+		return m_boundsSize;
+	}
+
+	void CColorButtonsGridLayout::LayoutButtons( void )
+	{
+		REQUIRE( HasLayout() );
+
+		CRect clientRect;
+		m_pMenuBar->GetClientRect( &clientRect );
+
+		CPoint origin( clientRect.left, clientRect.top + VertMargin );
+		int right = clientRect.Width();
+		const int gridTop = origin.y + m_autoHeight;
+		POSITION pos = m_pMenuBar->GetAllButtons().GetHeadPosition();
+
+		for ( size_t btnIndex = 0, btnCount = m_pMenuBar->GetCount(), gridPos = utl::npos; btnIndex != btnCount; ++btnIndex )
+		{
+			CMFCToolBarButton* pButton = GetNextButton( pos );
+
+			if ( pButton == m_colorButtonRange.m_start )
+				gridPos = 0;		// enter color grid
+
+			if ( gridPos != utl::npos )		// use grid layout?
+			{
+				size_t row, column;
+				GetGridRowColumnAt( &row, &column, gridPos );
+
+				if ( 0 == row )		// switched to new column?
+				{
+					origin.y = gridTop;
+
+					if ( column != 0 )
+						origin.x = right + HorzMargin;
+
+					right = m_columnRights[ column ];
+				}
+			}
+
+			CRect buttonRect( origin.x, origin.y, right, origin.y + m_buttonHeights[ btnIndex ] );
+
+			if ( HasFlag( pButton->m_nStyle, TBBS_SEPARATOR ) )
+				buttonRect.DeflateRect( SeparatorOffsetX, 0 );		// no effect due to m_bDisableSideBarInXPMode=true
+
+			pButton->SetRect( buttonRect );
+			origin.y += buttonRect.Height();
+
+			if ( pButton == m_colorButtonRange.m_end )
+			{
+				gridPos = utl::npos;		// exit color grid
+
+				// reset to More origin
+				origin.x = clientRect.left;
+				origin.y = gridTop + m_gridHeight;
+				right = clientRect.Width();			// stretch again horizontally
+			}
+			else if ( gridPos != utl::npos )
+				++gridPos;
+		}
+	}
+
+	CMFCToolBarButton* CColorButtonsGridLayout::GetNextButton( IN OUT POSITION& rListPos ) const
+	{
+		ASSERT_PTR( rListPos );
+		return (CMFCToolBarButton*)m_pMenuBar->GetAllButtons().GetNext( rListPos );
+	}
+
+	void CColorButtonsGridLayout::GetGridRowColumnAt( OUT size_t* pRow, OUT size_t* pColumn, size_t gridPos ) const
+	{
+		REQUIRE( gridPos < m_colorCount && m_rowCount != 0 );
+
+		*pRow = gridPos % m_rowCount;
+		*pColumn = gridPos / m_rowCount;
+	}
+
+	CSize CColorButtonsGridLayout::StoreButtonSize( CDC* pDC, CMFCToolBarButton* pButton, int maxWidth )
+	{
+		UINT defaultMenuId = m_pMenuBar->GetDefaultMenuId();
+		CFont* pOldFont = nullptr;
+
+		if ( defaultMenuId != 0 && defaultMenuId == pButton->m_nID )
+			pOldFont = pDC->SelectObject( &GetGlobalData()->fontBold );
+
+		CSize buttonSize = pButton->OnCalculateSize( pDC, m_defaultMenuBtnSize, TRUE );
+		buttonSize.cx -= m_menuArrowWidth;			// make it more compact horizontally (cut the unused popup arrow area)
+
+		if ( pOldFont != nullptr )
+			pDC->SelectObject( pOldFont );			// rollback the font
+
+		if ( HasFlag( pButton->m_nStyle, TBBS_SEPARATOR ) )
+			buttonSize.cy = SeparatorHeight;
+		else
+		{
+			if ( pButton->IsDrawText() && pButton->m_strText.Find( _T('\t') ) > 0 )
+				buttonSize.cx += MinTabSpace;
+
+			pButton->m_bWholeText = ( maxWidth <= 0 || buttonSize.cx <= maxWidth - 2 * HorzMargin );
+		}
+
+		m_buttonHeights.push_back( buttonSize.cy );		// store button height for final laying out of buttons
+		return buttonSize;
 	}
 }

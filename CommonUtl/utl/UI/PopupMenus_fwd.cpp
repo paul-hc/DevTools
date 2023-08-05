@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "PopupMenus_fwd.h"
 #include "Color.h"
+#include "ColorRepository.h"
 #include "WndUtils.h"
 #include <afxpopupmenu.h>
 #include <afxcolorpopupmenu.h>
@@ -27,8 +28,8 @@ namespace ui
 	}
 
 	bool IColorEditorHost::SwitchSelColorTable( const CColorTable* pSelColorTable )
-	{	// when using a user custom color table, color can be picked from any table, but the selected user table is retained (not switched to picked table)
-		if ( UseUserColors() )
+	{	// when using a Shades_Colors or UserCustom_Colors table, color can be picked from any table, but the selected table is retained (not switched to the picked table)
+		if ( UseUserColors() || ( pSelColorTable != nullptr && ui::Shades_Colors == pSelColorTable->GetTableType() ) )
 			return false;						// prevent switching the 'read-only' table?
 
 		SetSelColorTable( pSelColorTable );		// switch to the new table
@@ -143,6 +144,20 @@ namespace mfc
 	}
 
 
+	bool Button_SetStyleFlag( CMFCToolBarButton* pButton, UINT styleFlag, bool on /*= true*/ )
+	{
+		ASSERT_PTR( pButton );
+
+		UINT newStyle = pButton->m_nStyle;
+		SetFlag( newStyle, styleFlag, on );
+
+		if ( newStyle == pButton->m_nStyle )
+			return false;
+
+		pButton->SetStyle( newStyle );
+		return true;
+	}
+
 	void* Button_GetItemData( const CMFCToolBarButton* pButton )
 	{
 		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetItemData();
@@ -170,10 +185,10 @@ namespace mfc
 	void Button_SetImageById( CMFCToolBarButton* pButton, UINT btnId, bool userImage /*= false*/ )
 	{
 		ASSERT_PTR( pButton );
-		pButton->SetImage( FindImageIndex( btnId, userImage ) );
+		pButton->SetImage( Button_FindImageIndex( btnId, userImage ) );
 	}
 
-	int FindImageIndex( UINT btnId, bool userImage /*= false*/ )
+	int Button_FindImageIndex( UINT btnId, bool userImage /*= false*/ )
 	{
 		return afxCommandManager->GetCmdImage( btnId, userImage );
 	}

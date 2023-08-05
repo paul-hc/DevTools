@@ -262,7 +262,7 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 	Clear();
 	Reset( columnCount * 3, static_cast<int>( columnCount ) );
 
-	if ( 0 == columnCount || !ui::IsRealColor( selColor ) )
+	if ( 0 == columnCount /*|| !ui::IsRealColor( selColor )*/ )
 		return 0;
 
 	selColor = ui::EvalColor( selColor );
@@ -551,7 +551,7 @@ const CColorRepository* CColorRepository::Instance( void )
 
 CColorTable* CColorRepository::MakeTable_WindowsSystem( void )
 {
-	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, 31, 8 );		// 31 colors: 2 columns x 16 rows
+	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, 31, 2 );		// 31 colors: 2 columns x 16 rows
 
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BACKGROUND ), _T("Desktop Background") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_WINDOW ), _T("Window Background") ) );

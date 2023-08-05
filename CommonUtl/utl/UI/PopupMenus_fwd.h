@@ -89,11 +89,12 @@ namespace mfc
 
 
 	// CMFCToolBarButton protected access:
+	bool Button_SetStyleFlag( CMFCToolBarButton* pButton, UINT styleFlag, bool on = true );
 	void* Button_GetItemData( const CMFCToolBarButton* pButton );
 	void Button_SetItemData( CMFCToolBarButton* pButton, const void* pItemData );
 	void* Button_GetItemData( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 	void Button_SetImageById( CMFCToolBarButton* pButton, UINT btnId, bool userImage = false );
-	int FindImageIndex( UINT btnId, bool userImage = false );
+	int Button_FindImageIndex( UINT btnId, bool userImage = false );
 
 	CRect Button_GetImageRect( const CMFCToolBarButton* pButton, bool bounds = true );
 	void Button_RedrawImage( CMFCToolBarButton* pButton );
