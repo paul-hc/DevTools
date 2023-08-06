@@ -40,7 +40,7 @@ CBaseFlagsCtrl* CFlagsListPage::GetFlagsCtrl( void )
 	return m_pFlagsListCtrl.get();
 }
 
-void CFlagsListPage::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
+void CFlagsListPage::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
 {
 	if ( IDC_FLAGS_EDITOR_LIST == cmdId )
 		rText = m_pFlagsListCtrl->FormatTooltip();

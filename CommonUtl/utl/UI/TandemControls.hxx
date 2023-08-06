@@ -2,7 +2,6 @@
 #define TandemControls_hxx
 
 #include "BaseTrackMenuWnd.hxx"
-#include "CmdInfoStore.h"
 #include "CmdUpdate.h"
 #include "Dialog_fwd.h"
 #include "DialogToolBar.h"

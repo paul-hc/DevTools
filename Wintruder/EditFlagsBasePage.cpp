@@ -53,7 +53,7 @@ void CEditFlagsBasePage::LoadPageInfo( UINT id )
 	SetTitle( m_pageInfo.m_statusText );
 }
 
-void CEditFlagsBasePage::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CEditFlagsBasePage::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	if ( GetTemplateId() == cmdId )
 		rText = m_pageInfo.m_tooltipText;

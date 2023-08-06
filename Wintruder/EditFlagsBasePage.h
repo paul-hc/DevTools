@@ -23,7 +23,7 @@ public:
 	virtual void ApplyPageChanges( void ) throws_( CRuntimeException );
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 protected:
 	// ui::IEmbeddedPageCallback interface
 	virtual void OnChildPageNotify( CLayoutPropertyPage* pEmbeddedPage, CWnd* pCtrl, int notifCode );

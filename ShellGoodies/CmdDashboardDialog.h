@@ -37,7 +37,7 @@ private:
 	static bool IsSelContiguousToTop( const std::vector< int >& selIndexes );
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;

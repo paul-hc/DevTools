@@ -33,7 +33,7 @@ public:
 	virtual bool IsRollMode( void ) const override;
 protected:
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	enum Mode					// determines the OK button label
 	{

@@ -90,7 +90,7 @@ bool CLayoutDialog::HasControlLayout( void ) const override
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
-void CLayoutDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CLayoutDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
 {
 	rText, cmdId, pTooltip;
 }

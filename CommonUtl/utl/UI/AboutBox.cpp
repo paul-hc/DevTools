@@ -263,7 +263,7 @@ void CAboutBox::AddBuildInfoPair( int pos, const TCHAR* pProperty, const std::ts
 	m_pBuildInfoList->SetItemText( pos, Value, value.c_str() );
 }
 
-void CAboutBox::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CAboutBox::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	switch ( cmdId )
 	{

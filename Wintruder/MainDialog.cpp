@@ -157,7 +157,7 @@ void CMainDialog::OnAppEvent( app::Event appEvent )
 	}
 }
 
-void CMainDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CMainDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	pTooltip;
 	switch ( cmdId )

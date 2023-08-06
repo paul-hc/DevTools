@@ -2,7 +2,7 @@
 #define BaseItemTooltipsCtrl_hxx
 
 #include "ui_fwd.h"
-#include "CmdInfoStore.h"
+#include "MfcUtilities.h"		// for ui::CTooltipTextMessage
 
 
 // CBaseItemTooltipsCtrl template code

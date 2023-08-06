@@ -126,7 +126,7 @@ void CLayoutBasePropertySheet::DeleteAllPages( void )
 		delete GetPage( i );
 }
 
-void CLayoutBasePropertySheet::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CLayoutBasePropertySheet::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	if ( pTooltip != nullptr && m_pTooltipCtrl.get() == pTooltip )
 	{

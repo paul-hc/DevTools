@@ -14,7 +14,7 @@ namespace ui
 	//
 	interface ICustomCmdInfo
 	{
-		virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const = 0;
+		virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const = 0;
 	};
 
 

@@ -43,7 +43,7 @@ bool CLayoutFormView::HasControlLayout( void ) const
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
-void CLayoutFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CLayoutFormView::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	rText, cmdId, pTooltip;
 }

@@ -20,7 +20,7 @@ public:
 	CDetailMateCtrl( ui::IBuddyCommandHandler* pHostCmdHandler );
 protected:
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 protected:
 	ui::IBuddyCommandHandler* m_pHostCmdHandler;
 	CWnd* m_pHostCtrl;

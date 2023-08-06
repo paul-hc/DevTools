@@ -24,7 +24,7 @@ public:
 	virtual ~CDemoTemplate();
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
@@ -99,7 +99,7 @@ public:
 	CEditPage( void );
 	virtual ~CEditPage() {}
 
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 private:
@@ -117,7 +117,7 @@ public:
 	virtual ~CDemoPage();
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const { m_pDemo->QueryTooltipText( rText, cmdId, pTooltip ); }
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const { m_pDemo->QueryTooltipText( rText, cmdId, pTooltip ); }
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );

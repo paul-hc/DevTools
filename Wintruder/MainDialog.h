@@ -40,7 +40,7 @@ private:
 	virtual void OnAppEvent( app::Event appEvent );
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 protected:
 	// base overrides
 	virtual void LoadFromRegistry( void );

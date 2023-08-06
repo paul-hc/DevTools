@@ -1,7 +1,6 @@
 
 #include "pch.h"
 #include "BalloonMessageTip.h"
-#include "CmdInfoStore.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"

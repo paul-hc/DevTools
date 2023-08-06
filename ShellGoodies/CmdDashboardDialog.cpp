@@ -211,7 +211,7 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 	ui::EnableControl( *this, IDOK, !selIndexes.empty() );		// undo/redo acts strictly on selection
 }
 
-void CCmdDashboardDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CCmdDashboardDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	switch ( cmdId )
 	{

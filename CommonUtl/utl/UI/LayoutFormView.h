@@ -23,7 +23,7 @@ public:
 	virtual bool HasControlLayout( void ) const;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 protected:
 	virtual void OnIdleUpdateControls( void );			// override to update specific controls
 private:

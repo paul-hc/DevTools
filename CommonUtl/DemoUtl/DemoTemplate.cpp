@@ -107,7 +107,7 @@ const std::vector<std::tstring>& CDemoTemplate::GetTextItems( void )
 	return items;
 }
 
-void CDemoTemplate::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CDemoTemplate::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	pTooltip;
 	switch ( cmdId )
@@ -465,7 +465,7 @@ CEditPage::CEditPage( void )
 	RegisterCtrlLayout( ARRAY_SPAN( layout::editPageStyles ) );
 }
 
-void CEditPage::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CEditPage::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	rText, cmdId, pTooltip;
 	if ( cmdId == GetTemplateId() )

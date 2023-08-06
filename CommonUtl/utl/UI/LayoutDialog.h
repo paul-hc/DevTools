@@ -45,7 +45,7 @@ public:
 	virtual bool HasControlLayout( void ) const override;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	// overridables
 	virtual void LoadFromRegistry( void );

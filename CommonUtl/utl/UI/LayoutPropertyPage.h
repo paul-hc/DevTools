@@ -41,7 +41,7 @@ public:
 	virtual bool HasControlLayout( void ) const;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	// overridables
 	virtual void ApplyPageChanges( void ) throws_( CRuntimeException );

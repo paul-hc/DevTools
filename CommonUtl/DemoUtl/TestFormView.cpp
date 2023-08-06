@@ -49,7 +49,7 @@ const CEnumTags& CTestFormView::GetTags_MiscDialog( void )
 	return s_tags;
 }
 
-void CTestFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CTestFormView::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	m_pDemo->QueryTooltipText( rText, cmdId, pTooltip );
 

@@ -52,7 +52,7 @@ void CEnumSplitButton::SetSelValue( int selValue )
 		SetButtonCaption( m_pEnumTags->FormatUi( m_selValue ) );
 }
 
-void CEnumSplitButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CEnumSplitButton::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	cmdId, pTooltip;
 	//if ( (int)cmdId == GetDlgCtrlID() )

@@ -50,7 +50,7 @@ protected:
 	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	virtual void SwitchMode( Mode mode ) override;
 private:

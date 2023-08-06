@@ -59,7 +59,7 @@ bool CFileEditorBaseDialog::IsRollMode( void ) const override
 	return RollBackMode == m_mode || RollForwardMode == m_mode;
 }
 
-void CFileEditorBaseDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CFileEditorBaseDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
 {
 	switch ( cmdId )
 	{

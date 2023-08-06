@@ -19,7 +19,7 @@ public:
 	CBaseFlagsCtrl* GetFlagsCtrl( void );
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
 	ui::IEmbeddedPageCallback* m_pParentCallback;
 private:

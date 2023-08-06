@@ -15,7 +15,7 @@ CDetailMateCtrl<BaseCtrl>::CDetailMateCtrl( ui::IBuddyCommandHandler* pHostCmdHa
 }
 
 template< typename BaseCtrl >
-void CDetailMateCtrl<BaseCtrl>::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CDetailMateCtrl<BaseCtrl>::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	pTooltip;
 	if ( const ui::CCmdInfo* pFoundInfo = ui::CCmdInfoStore::Instance().RetrieveInfo( cmdId ) )

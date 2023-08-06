@@ -293,7 +293,7 @@ void CRenameFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstri
 	}
 }
 
-void CRenameFilesDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
 {
 	switch ( cmdId )
 	{

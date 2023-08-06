@@ -44,7 +44,7 @@ bool CLayoutPropertyPage::HasControlLayout( void ) const
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
-void CLayoutPropertyPage::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CLayoutPropertyPage::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	rText, cmdId, pTooltip;
 }

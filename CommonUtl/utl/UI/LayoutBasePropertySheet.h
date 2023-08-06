@@ -65,7 +65,7 @@ public:
 	virtual const std::tstring& GetCode( void ) const override { return m_titleCode; }
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	// overridables
 	virtual void LoadFromRegistry( void );
