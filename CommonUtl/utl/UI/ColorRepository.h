@@ -95,6 +95,7 @@ public:
 
 	int GetColumnCount( void ) const;
 	bool GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const;
+	virtual int GetCompactGridColumnCount( void ) const { return GetColumnCount(); }	// for nameless display in CMFCColorBar
 
 	void Add( const CColorEntry& colorEntry );
 
@@ -123,13 +124,16 @@ private:
 class CSystemColorTable : public CColorTable	// table of Windows System colors, that require custom encoding for display colors
 {
 public:
-	CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount = 0 );
+	CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int columnCount, UINT compactGridColumnCount );
 	virtual ~CSystemColorTable();
+
+	virtual int GetCompactGridColumnCount( void ) const { return m_compactGridColumnCount; }	// for nameless display in CMFCColorBar
 protected:
 	// base overrides
 	virtual void OnTableChanged( void ) override;
 	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const override;
 private:
+	UINT m_compactGridColumnCount;			// used for display in CMFCColorBar (compact grid, nameless)
 	std::unordered_map<COLORREF, ui::TDisplayColor> m_displaySysColors;		// raw -> unique encoded colors, to disambiguate selected color in MFC color bars
 };
 

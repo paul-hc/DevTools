@@ -86,7 +86,7 @@
 #define ID_USER_CUSTOM_COLOR_SET        28254
 #define ID_SHADES_COLOR_SET             28255
 #define ID_REPO_COLOR_TABLE_MIN         28256
-#define ID_REPO_COLOR_TABLE_MAX         28276     // ID_REPO_COLOR_TABLE_MIN + 20 - preserve this range of IDs
+#define ID_REPO_COLOR_TABLE_MAX         28276
 #define ID_PICK_COLOR_BAR_RADIO         28277
 #define ID_PICK_COLOR_MENU_RADIO        28278
 #define ID_SELECTED_COLOR_BUTTON        28279
@@ -128,14 +128,15 @@
 #define IDC_CONFIRM_PASSWORD_STATIC     28534
 #define IDC_SHOW_PASSWORD_CHECK         28535
 #define UTL_MIN_SYMED_VALUE             28800
+#define IDS_COLOR_PICKER_BUTTON_HELP    28801
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        28028
 #define _APS_NEXT_COMMAND_VALUE         28280
 #define _APS_NEXT_CONTROL_VALUE         28536
-#define _APS_NEXT_SYMED_VALUE           28801
+#define _APS_NEXT_SYMED_VALUE           28802
 #endif
 #endif

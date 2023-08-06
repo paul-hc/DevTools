@@ -198,7 +198,7 @@ void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) 
 	UpdateShadesTable();
 }
 
-void CColorPickerButton::UpdateColor( COLORREF color ) overrides( CMFCColorButton )
+void CColorPickerButton::UpdateColor( COLORREF color ) overrides(CMFCColorButton)
 {
 		//__super::UpdateColor( color );
 
@@ -312,26 +312,42 @@ void CColorPickerButton::NotifyMatchingPickers( ChangedField field )
 				}
 }
 
-void CColorPickerButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CColorPickerButton::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
 {
 	cmdId, pTooltip;
+	std::tstring text;
 
-	if ( m_pSelColorEntry != nullptr )
-	{
-		rText = m_pSelColorEntry->FormatColor();
-		return;
-	}
+	if ( text.empty() && m_pSelColorEntry != nullptr )
+		text = m_pSelColorEntry->FormatColor();
 
 	COLORREF color = GetActualColor();
 
-	if ( m_pSelColorTable != nullptr )
+	if ( text.empty() && m_pSelColorTable != nullptr )
 		if ( const CColorEntry* pColorEntry = m_pSelColorTable->FindColor( color ) )
-		{
-			rText = pColorEntry->FormatColor();
-			return;
-		}
+			text = pColorEntry->FormatColor();
 
-	rText = ui::FormatColor( color );
+	if ( text.empty() )
+		text = ui::FormatColor( color );
+
+	if ( !text.empty() )
+		stream::Tag( rText, text, _T(":  ") );
+
+	if ( pTooltip != nullptr )
+		pTooltip->SetDelayTime( TTDT_AUTOPOP, 30 * 1000 );		// display for 1/2 minute (16-bit limit: it doesn't work beyond 32768 miliseconds)
+
+	// append the help message
+	static const std::tstring s_helpMessage = str::Load( IDS_COLOR_PICKER_BUTTON_HELP );
+	stream::Tag( rText, s_helpMessage, _T("\r\n\r\n") );
+}
+
+bool CColorPickerButton::DoReleaseCapture( void )
+{
+	if ( !m_bCaptured )
+		return false;
+
+	::ReleaseCapture();
+	m_bCaptured = FALSE;
+	return true;
 }
 
 void CColorPickerButton::ShowColorTablePopup( void )
@@ -360,24 +376,9 @@ void CColorPickerButton::ShowColorTablePopup( void )
 
 	if ( m_pSelColorTable != nullptr && m_pSelColorTable->IsSysColorTable() )
 	{
-		enum { TrackModeless, TrackModal = 1 };
-
-		if ( TrackModal )
-		{
-			if ( m_bCaptured )
-			{
-				ReleaseCapture();
-				m_bCaptured = FALSE;
-			}
-
-			TrackModalPopupImpl( nullptr, new mfc::CColorTablePopupMenu( this ), false );
-			return;
-		}
-		else
-		{	// display modeless popup
-			pPopupMenu = new mfc::CColorTablePopupMenu( this );
-			created = pPopupMenu->Create( this, rect.left, rect.bottom, nullptr, FALSE, TRUE );
-		}
+		// display modeless popup (modeless support not fully implemented, therefore not the preferred way)
+		pPopupMenu = new mfc::CColorTablePopupMenu( this );
+		created = pPopupMenu->Create( this, rect.left, rect.bottom, nullptr, FALSE, TRUE );
 	}
 	else
 	{
@@ -407,11 +408,7 @@ void CColorPickerButton::ShowColorTablePopup( void )
 		pPopupMenu = m_pPopup = nullptr;
 	}
 
-	if ( m_bCaptured )
-	{
-		ReleaseCapture();
-		m_bCaptured = FALSE;
-	}
+	DoReleaseCapture();
 }
 
 void CColorPickerButton::TrackMenuColorTables( void )
@@ -432,6 +429,8 @@ UINT CColorPickerButton::TrackModalPopupImpl( HMENU hMenuPopup, CMFCPopupMenu* p
 {
 	ASSERT_PTR( pPopupMenu );
 
+	DoReleaseCapture();
+
 	mfc::CContextMenuMgr::Instance()->ResetTrackingPopup( pPopupMenu );
 
 	UINT cmdId = mfc::CContextMenuMgr::Instance()->TrackModalPopup( hMenuPopup, this, sendCommand, screenPos );
@@ -445,18 +444,12 @@ UINT CColorPickerButton::TrackModalPopupImpl( HMENU hMenuPopup, CMFCPopupMenu* p
 	Invalidate();
 	UpdateWindow();
 
-	if ( m_bCaptured )
-	{
-		ReleaseCapture();
-		m_bCaptured = FALSE;
-	}
-
 	return cmdId;
 }
 
 // base overrides:
 
-void CColorPickerButton::OnShowColorPopup( void ) overrides( CMFCColorButton )
+void CColorPickerButton::OnShowColorPopup( void ) overrides(CMFCColorButton)
 {
 	if ( -1 == m_nColumns )		// auto-layout for columns?
 	{
@@ -485,11 +478,20 @@ void CColorPickerButton::OnShowColorPopup( void ) overrides( CMFCColorButton )
 	else
 	{
 		m_trackingMode = trackingMode;
-		ShowColorTablePopup();			// modeless call
+
+		bool useNamedColorTable = m_pSelColorTable != nullptr && m_pSelColorTable->IsSysColorTable();
+
+		if ( ui::IsKeyPressed( VK_SHIFT ) )
+			useNamedColorTable = !useNamedColorTable;
+
+		if ( useNamedColorTable )
+			TrackModalPopupImpl( nullptr, new mfc::CColorTablePopupMenu( this ), false );
+		else
+			ShowColorTablePopup();			// modeless call
 	}
 }
 
-void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) overrides( CMFCColorButton )
+void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) overrides(CMFCColorButton)
 {
 	CScopedValue<COLORREF> scColor( &m_Color );
 	CScopedValue<COLORREF> scAutoColor( &m_ColorAutomatic );

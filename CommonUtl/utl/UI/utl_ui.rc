@@ -739,6 +739,12 @@ END
 
 STRINGTABLE
 BEGIN
+    IDS_COLOR_PICKER_BUTTON_HELP 
+                            "More Options:\r\n- Right-click to show the context menu;\r\n- Press CONTROL key to show alternate popup color picker;\r\n- Press SHIFT key to toggle display of color names."
+END
+
+STRINGTABLE
+BEGIN
     ID_SELECTED_COLOR_BUTTON "Selected color glyph"
 END
 

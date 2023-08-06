@@ -68,6 +68,7 @@ public:
 	enum TrackingMode { NoTracking, TrackingColorBar, TrackingMenuColorTables, TrackingContextMenu };
 protected:
 	void UpdateShadesTable( void );
+	bool DoReleaseCapture( void );
 private:
 	bool IsEmpty( void ) const { return m_Colors.IsEmpty() && m_lstDocColors.IsEmpty(); }
 
@@ -98,12 +99,12 @@ private:
 	static std::vector<CColorPickerButton*> s_instances;	// for color table notifications
 protected:
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
 
 	// base overrides:
-	virtual void UpdateColor( COLORREF color ) overrides( CMFCColorButton );
-	virtual void OnShowColorPopup( void ) overrides( CMFCColorButton );
-	virtual void OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) overrides( CMFCColorButton );
+	virtual void UpdateColor( COLORREF color ) overrides(CMFCColorButton);
+	virtual void OnShowColorPopup( void ) overrides(CMFCColorButton);
+	virtual void OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) overrides(CMFCColorButton);
 
 	// generated stuff
 public:

@@ -313,8 +313,9 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 
 // CSystemColorTable implementation
 
-CSystemColorTable::CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount )
+CSystemColorTable::CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount, UINT compactGridColumnCount )
 	: CColorTable( tableType, capacity, layoutCount )
+	, m_compactGridColumnCount( compactGridColumnCount )
 {
 }
 
@@ -551,7 +552,8 @@ const CColorRepository* CColorRepository::Instance( void )
 
 CColorTable* CColorRepository::MakeTable_WindowsSystem( void )
 {
-	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, 31, 2 );		// 31 colors: 2 columns x 16 rows - for customized display in CColorTablePopupMenu
+	// 31 colors: 2 columns x 16 rows - for display in named CColorTablePopupMenu, or 8 columns x 4 rows in nameless CMFCColorBar
+	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, 31, 2, 8 );
 
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BACKGROUND ), _T("Desktop Background") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_WINDOW ), _T("Window Background") ) );

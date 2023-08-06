@@ -67,12 +67,12 @@ namespace mfc
 
 		// base overrides
 	public:
-		virtual void SetImage( int iImage ) overrides( CMFCToolBarButton );
-		virtual BOOL OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI ) overrides( CMFCToolBarButton );
+		virtual void SetImage( int iImage ) overrides(CMFCToolBarButton);
+		virtual BOOL OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI ) overrides(CMFCToolBarButton);
 	protected:
-		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides( CMFCToolBarMenuButton );
+		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCToolBarMenuButton);
 		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE,
-							 BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) overrides( CMFCToolBarMenuButton );
+							 BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) overrides(CMFCToolBarMenuButton);
 	};
 }
 
@@ -108,14 +108,14 @@ namespace mfc
 
 		// base overrides
 	public:
-		virtual void SetImage( int iImage ) overrides( CMFCToolBarButton );
-		virtual void SetColor( COLORREF color, BOOL notify = TRUE ) overrides( CMFCColorMenuButton );
-		virtual BOOL OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) overrides( CMFCColorMenuButton );
+		virtual void SetImage( int iImage ) overrides(CMFCToolBarButton);
+		virtual void SetColor( COLORREF color, BOOL notify = TRUE ) overrides(CMFCColorMenuButton);
+		virtual BOOL OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) overrides(CMFCColorMenuButton);
 		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE,
-							 BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) overrides( CMFCColorMenuButton );
+							 BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) overrides(CMFCColorMenuButton);
 	protected:
-		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides( CMFCColorMenuButton );
-		virtual CMFCPopupMenu* CreatePopupMenu( void ) overrides( CMFCColorMenuButton );
+		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCColorMenuButton);
+		virtual CMFCPopupMenu* CreatePopupMenu( void ) overrides(CMFCColorMenuButton);
 	private:
 		const CColorTable* m_pColorTable;			// required field
 		ui::IColorEditorHost* m_pEditorHost;		// optional field; if null, it sends CMBN_COLORSELECTED notifications
@@ -211,8 +211,8 @@ namespace mfc
 
 		// base overrides
 	public:
-		virtual CMFCPopupMenuBar* GetMenuBar( void ) overrides( CMFCPopupMenuBar );
-		virtual BOOL OnCmdMsg( UINT btnId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) overrides( CMFCPopupMenu );
+		virtual CMFCPopupMenuBar* GetMenuBar( void ) overrides(CMFCPopupMenuBar);
+		virtual BOOL OnCmdMsg( UINT btnId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) overrides(CMFCPopupMenu);
 
 		// generated stuff
 	protected:
@@ -247,10 +247,12 @@ namespace mfc
 		enum { AutoId = 70, MoreColorsId, ColorIdMin, PadId = 0 };
 
 		// base overrides
+	public:
+		virtual void OnFillBackground( CDC* pDC ) overrides(CMFCToolBar);
 	protected:
-		virtual CSize CalcSize( BOOL vertDock ) overrides( CMFCPopupMenuBar );
-		virtual void AdjustLocations( void ) overrides( CMFCPopupMenuBar );
-		virtual BOOL OnSendCommand( const CMFCToolBarButton* pButton ) overrides( CMFCPopupMenuBar );
+		virtual CSize CalcSize( BOOL vertDock ) overrides(CMFCPopupMenuBar);
+		virtual void AdjustLocations( void ) overrides(CMFCPopupMenuBar);
+		virtual BOOL OnSendCommand( const CMFCToolBarButton* pButton ) overrides(CMFCPopupMenuBar);
 
 		// generated stuff
 	protected:

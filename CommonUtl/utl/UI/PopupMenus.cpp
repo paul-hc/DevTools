@@ -4,10 +4,10 @@
 #include "MenuUtilities.h"
 #include "ContextMenuMgr.h"
 #include "ColorRepository.h"
-#include "CmdInfoStore.h"
 #include "TooltipsHook.h"
 #include "ScopedGdi.h"
 #include "WndUtils.h"
+#include "MfcUtilities.h"
 #include "resource.h"
 #include "utl/ScopedValue.h"
 #include <afxcolorbutton.h>
@@ -167,7 +167,7 @@ namespace mfc
 		return checked_static_cast<CToolBarColorButton*>( pToolBar->GetButton( index ) );	// the button clone
 	}
 
-	void CToolBarColorButton::SetImage( int iImage ) overrides( CMFCToolBarButton )
+	void CToolBarColorButton::SetImage( int iImage ) overrides(CMFCToolBarButton)
 	{
 			//__super::SetImage( iImage );
 
@@ -179,7 +179,7 @@ namespace mfc
 		mfc::Button_RedrawImage( this );
 	}
 
-	void CToolBarColorButton::CopyFrom( const CMFCToolBarButton& src ) overrides( CMFCToolBarMenuButton )
+	void CToolBarColorButton::CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCToolBarMenuButton)
 	{
 		__super::CopyFrom( src );
 
@@ -188,7 +188,7 @@ namespace mfc
 		m_color = srcButton.m_color;
 	}
 
-	BOOL CToolBarColorButton::OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI ) overrides( CMFCToolBarButton )
+	BOOL CToolBarColorButton::OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI ) overrides(CMFCToolBarButton)
 	{
 		if ( CMFCToolBar::GetShowTooltips() && pTI != nullptr && !ui::IsUndefinedColor( m_color ) )		// prevent displaying the pointless "(null)"
 		{
@@ -210,7 +210,7 @@ namespace mfc
 	}
 
 	void CToolBarColorButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz /*= TRUE*/, BOOL bCustomizeMode /*= FALSE*/,
-									  BOOL bHighlight /*= FALSE*/, BOOL bDrawBorder /*= TRUE*/, BOOL bGrayDisabledButtons /*= TRUE*/ ) overrides( CMFCToolBarMenuButton )
+									  BOOL bHighlight /*= FALSE*/, BOOL bDrawBorder /*= TRUE*/, BOOL bGrayDisabledButtons /*= TRUE*/ ) overrides(CMFCToolBarMenuButton)
 	{
 		__super::OnDraw( pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder, bGrayDisabledButtons );
 
@@ -276,7 +276,7 @@ namespace mfc
 		m_pColorTable->QueryMfcColors( m_Colors );
 		m_dwdItemData = reinterpret_cast<DWORD_PTR>( m_pColorTable );
 
-		SetColumnsNumber( m_pColorTable->GetColumnCount() );
+		SetColumnsNumber( m_pColorTable->GetCompactGridColumnCount() );	// by default assume using CMFCColorBar nameless grid
 	}
 
 	CColorMenuButton::~CColorMenuButton()
@@ -325,7 +325,7 @@ namespace mfc
 		return nullptr;
 	}
 
-	void CColorMenuButton::SetImage( int iImage ) overrides( CMFCToolBarButton )
+	void CColorMenuButton::SetImage( int iImage ) overrides(CMFCToolBarButton)
 	{
 			//__super::SetImage( iImage );
 
@@ -346,7 +346,7 @@ namespace mfc
 		}
 	}
 
-	void CColorMenuButton::SetColor( COLORREF color, BOOL notify ) overrides( CMFCColorMenuButton )
+	void CColorMenuButton::SetColor( COLORREF color, BOOL notify ) overrides(CMFCColorMenuButton)
 	{
 		bool isTrackingMFCColorBar = m_pPopupMenu != nullptr && is_a<CMFCColorBar>( m_pPopupMenu->GetMenuBar() );
 
@@ -372,7 +372,7 @@ namespace mfc
 					ui::SendCommand( pMessageWnd->GetSafeHwnd(), m_nID, CMBN_COLORSELECTED, m_pPopupMenu->GetMenuBar()->GetSafeHwnd() );
 	}
 
-	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) overrides( CMFCColorMenuButton )
+	BOOL CColorMenuButton::OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) overrides(CMFCColorMenuButton)
 	{
 		if ( m_pEditorHost != nullptr )
 		{
@@ -389,7 +389,7 @@ namespace mfc
 		return true;
 	}
 
-	void CColorMenuButton::CopyFrom( const CMFCToolBarButton& src ) overrides( CMFCColorMenuButton )
+	void CColorMenuButton::CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCColorMenuButton)
 	{
 		__super::CopyFrom( src );
 
@@ -400,14 +400,14 @@ namespace mfc
 	}
 
 	void CColorMenuButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
-								   BOOL bHorz, BOOL bCustomizeMode, BOOL bHighlight, BOOL bDrawBorder, BOOL bGrayDisabledButtons ) overrides( CMFCColorMenuButton )
+								   BOOL bHorz, BOOL bCustomizeMode, BOOL bHighlight, BOOL bDrawBorder, BOOL bGrayDisabledButtons ) overrides(CMFCColorMenuButton)
 	{
 		CScopedValue<COLORREF> scDisplayColor( &m_Color, ui::EvalColor( m_pEditorHost != nullptr ? m_pEditorHost->GetActualColor() : m_Color ) );		// show the display color while drawing
 
 		__super::OnDraw( pDC, rect, pImages, bHorz, bCustomizeMode, bHighlight, bDrawBorder, bGrayDisabledButtons );
 	}
 
-	CMFCPopupMenu* CColorMenuButton::CreatePopupMenu( void ) overrides( CMFCColorMenuButton )
+	CMFCPopupMenu* CColorMenuButton::CreatePopupMenu( void ) overrides(CMFCColorMenuButton)
 	{
 			//return __super::CreatePopupMenu();
 
@@ -424,12 +424,18 @@ namespace mfc
 				pShadesTable->QueryMfcColors( docColors );
 		}
 
-		if ( m_pColorTable->IsSysColorTable() )
+		bool useNamedColorTable = m_pColorTable->IsSysColorTable();
+
+		if ( ui::IsKeyPressed( VK_SHIFT ) )
+			useNamedColorTable = !useNamedColorTable;
+
+		if ( useNamedColorTable )
 			return new mfc::CColorTablePopupMenu( this );
 
 		return new mfc::CColorPopupMenu( this, m_Colors, m_Color,
 										 m_strAutomaticButtonLabel, m_strOtherButtonLabel, m_strDocumentColorsLabel,
-										 docColors, m_nColumns, m_nHorzDockRows, m_nVertDockColumns, m_colorAutomatic, m_nID, m_bStdColorDlg );
+										 docColors, m_nColumns,
+										 m_nHorzDockRows, m_nVertDockColumns, m_colorAutomatic, m_nID, m_bStdColorDlg );
 	}
 }
 
@@ -700,12 +706,12 @@ namespace mfc
 	{
 	}
 
-	CMFCPopupMenuBar* CColorTablePopupMenu::GetMenuBar( void ) overrides( CMFCPopupMenuBar )
+	CMFCPopupMenuBar* CColorTablePopupMenu::GetMenuBar( void ) overrides(CMFCPopupMenuBar)
 	{
 		return m_pColorBar.get();
 	}
 
-	BOOL CColorTablePopupMenu::OnCmdMsg( UINT btnId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) overrides( CMFCPopupMenu )
+	BOOL CColorTablePopupMenu::OnCmdMsg( UINT btnId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) overrides(CMFCPopupMenu)
 	{
 		if ( m_pColorBar->IsColorBtnId( btnId ) )		// note: color buttons status and command processing is managed internally
 			return true;		// so prevent disabling while tracking and handling CColorTableBar::OnUpdateCmdUI() updates
@@ -804,6 +810,11 @@ namespace mfc
 		ASSERT_PTR( m_pColorTable );
 		ASSERT_PTR( m_pEditorHost );
 
+		if ( 0 == m_columnCount )
+			m_columnCount = (size_t)sqrt( m_pColorTable->GetColors().size() );		// default row/col layout
+
+		m_columnCount = utl::min( 8, m_columnCount );		// limit to maximum 8 columns
+
 		// customize menu bar aspect
 		m_bIsDlgControl = true;					// stretch separators to the entire bar width
 		m_bDisableSideBarInXPMode = true;		// disable filling the image gutter: blue-gray zone on bar left
@@ -868,7 +879,7 @@ namespace mfc
 		return m_pLayout->CalcLayout( m_iMinWidth, m_iMaxWidth );
 	}
 
-	void CColorTableBar::AdjustLocations( void ) overrides( CMFCPopupMenuBar )
+	void CColorTableBar::AdjustLocations( void ) overrides(CMFCPopupMenuBar)
 	{
 		if ( nullptr == GetSafeHwnd() || !::IsWindow( m_hWnd ) || m_bInUpdateShadow || m_Buttons.IsEmpty() )
 			return;
@@ -880,7 +891,7 @@ namespace mfc
 		UpdateTooltips();
 	}
 
-	BOOL CColorTableBar::OnSendCommand( const CMFCToolBarButton* pButton ) overrides( CMFCPopupMenuBar )
+	BOOL CColorTableBar::OnSendCommand( const CMFCToolBarButton* pButton ) overrides(CMFCPopupMenuBar)
 	{
 		if ( m_pParentPickerButton != nullptr )
 			ReleaseCapture();
@@ -907,6 +918,34 @@ namespace mfc
 		return TRUE;
 	}
 
+	void CColorTableBar::OnFillBackground( CDC* pDC ) overrides(CMFCToolBar)
+	{
+		__super::OnFillBackground( pDC );
+
+		if ( m_isModelessPopup )
+		{	// modeless popup mode: display the side bar (gutter) in pink for visual feedback - kind of a warning, as modeless support is partial
+			int gutterWidth = 0;
+			{
+				CScopedValue<BOOL> scSideBar( &m_bDisableSideBarInXPMode, false );		// GetGutterWidth() returns non-0 if m_bDisableSideBarInXPMode=true
+				gutterWidth = GetGutterWidth();
+			}
+
+			CRect rect;
+			GetClientRect( &rect );
+
+			rect.right = rect.left + gutterWidth;
+			rect.DeflateRect ( 0, 1 );
+
+			COLORREF bkColor = ::GetSysColor( COLOR_3DFACE );
+			COLORREF accentBkColor = ui::GetWeightedMixColor( bkColor, color::LightPastelPink, 50 );
+
+			ui::FillRect( *pDC, rect, accentBkColor );
+
+			rect.left = rect.right; ++rect.right;
+			ui::FillRect( *pDC, rect, color::PastelPink );		// vertical bar as "separator"
+		}
+	}
+
 	// message handlers
 
 	BEGIN_MESSAGE_MAP( CColorTableBar, CMFCPopupMenuBar )
@@ -926,7 +965,9 @@ namespace mfc
 		// Note: support for modeless execution is not fully implemented (but fairly functional), so modal tracking should be the preferred way to use this.
 		//
 		if ( m_isModelessPopup )	// modeless popup mode?
+		{
 			SetCapture();			// note: should not be called in menu popup tracking, since it freezes other sibling popups that need expanding
+		}
 
 		if ( m_pParentPickerButton != NULL )
 			mfc::MfcButton_SetCaptured( m_pParentPickerButton, false );
