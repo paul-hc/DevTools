@@ -7,6 +7,7 @@
 
 class CBasePane;
 class CMFCPopupMenu;
+class CMFCPopupMenuBar;
 class CMFCToolBar;
 class CMFCToolBarButton;
 
@@ -106,6 +107,8 @@ namespace mfc
 	bool PopupMenu_InTrackMode( const CMFCPopupMenu* pPopupMenu );		// in modal tracking mode?
 	void PopupMenu_SetTrackMode( CMFCPopupMenu* pPopupMenu, BOOL trackMode = true );
 
+	// CMFCPopupMenuBar protected access:
+	int PopupMenuBar_GetGutterWidth( const CMFCPopupMenuBar* pPopupMenuBar );
 
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
 	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );

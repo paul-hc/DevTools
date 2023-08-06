@@ -9,6 +9,13 @@ void AFXAPI AfxCancelModes( HWND hWndRcvr );													// <src/mfc/afximpl.h>
 BOOL AFXAPI AfxFullPath( _Pre_notnull_ _Post_z_ LPTSTR lpszPathOut, LPCTSTR lpszFileIn );		// <src/mfc/afximpl.h>
 
 
+#if _MFC_VER <= 0x0900		// MFC version 9.00 or less
+	#include <afxglobals.h>
+
+	inline AFX_GLOBAL_DATA* GetGlobalData( void ) { return &afxGlobalData; }
+#endif
+
+
 // headers to pre-compile
 #include "StdColors.h"
 

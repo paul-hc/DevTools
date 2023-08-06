@@ -11,6 +11,7 @@
 #include "resource.h"
 #include "utl/ScopedValue.h"
 #include <afxcolorbutton.h>
+#include <math.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -239,8 +240,8 @@ namespace mfc
 			pDC->Draw3dRect( colorRect, GetGlobalData()->clrBarShadow, GetGlobalData()->clrBarShadow );
 		else
 		{
-			colorRect.right--;
-			colorRect.bottom--;
+			--colorRect.right;
+			--colorRect.bottom;
 
 			pDC->Draw3dRect( colorRect, GetGlobalData()->clrBarHilite, GetGlobalData()->clrBarShadow );
 			colorRect.OffsetRect( 1, 1 );
@@ -811,7 +812,7 @@ namespace mfc
 		ASSERT_PTR( m_pEditorHost );
 
 		if ( 0 == m_columnCount )
-			m_columnCount = (size_t)sqrt( m_pColorTable->GetColors().size() );		// default row/col layout
+			m_columnCount = (size_t)sqrt( (double)m_pColorTable->GetColors().size() );		// default row/col layout
 
 		m_columnCount = utl::min( 8, m_columnCount );		// limit to maximum 8 columns
 
@@ -927,7 +928,7 @@ namespace mfc
 			int gutterWidth = 0;
 			{
 				CScopedValue<BOOL> scSideBar( &m_bDisableSideBarInXPMode, false );		// GetGutterWidth() returns non-0 if m_bDisableSideBarInXPMode=true
-				gutterWidth = GetGutterWidth();
+				gutterWidth = mfc::PopupMenuBar_GetGutterWidth( this );
 			}
 
 			CRect rect;

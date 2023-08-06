@@ -221,6 +221,16 @@ namespace mfc
 	}
 
 
+	int PopupMenuBar_GetGutterWidth( const CMFCPopupMenuBar* pPopupMenuBar )
+	{
+	#if _MFC_VER > 0x0900		// MFC version 9.00 or less
+		return const_cast<CMFCPopupMenuBar*>( pPopupMenuBar )->GetGutterWidth();
+	#else
+		pPopupMenuBar;
+		return CMFCToolBar::GetMenuImageSize().cx + 2 * CMFCVisualManager::GetInstance()->GetMenuImageMargin() + 2;
+	#endif
+	}
+
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu )
 	{
 		if ( pPopupMenu != nullptr && ::IsWindow( pPopupMenu->m_hWnd ) && CWnd::FromHandlePermanent( pPopupMenu->m_hWnd ) != nullptr )

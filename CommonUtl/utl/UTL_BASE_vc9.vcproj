@@ -305,6 +305,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\CppVer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
@@ -414,10 +418,6 @@
 			</File>
 			<File
 				RelativePath=".\ContainerOwnership.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CppVer.h"
 				>
 			</File>
 			<File
