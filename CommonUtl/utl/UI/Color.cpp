@@ -57,7 +57,7 @@ namespace color
 
 namespace ui
 {
-	std::tstring FormatColor( COLORREF color, const TCHAR* pSep /*= _T("  ")*/ )
+	std::tstring FormatColor( COLORREF color, const TCHAR* pSep /*= _T("  ")*/, bool inColorEntry /*= false*/ )
 	{
 		if ( CLR_NONE == color )
 			return color::g_nullTag;
@@ -68,7 +68,7 @@ namespace ui
 		colorLiteral.reserve( 24 );
 
 		if ( IsSysColor( color ) )
-			stream::Tag( colorLiteral, FormatSysColor( color ), pSep );
+			stream::Tag( colorLiteral, FormatSysColor( color, inColorEntry ), pSep );
 
 		const COLORREF realColor = EvalColor( color );
 
@@ -113,7 +113,7 @@ namespace ui
 	}
 
 
-	std::tstring FormatSysColor( COLORREF color )
+	std::tstring FormatSysColor( COLORREF color, bool inColorEntry /*= false*/ )
 	{
 		ASSERT( IsSysColor( color ) );
 
@@ -121,8 +121,9 @@ namespace ui
 
 		oss << color::g_sysTag << '(' << GetSysColorIndex( color ) << ')';
 
-		if ( const CColorEntry* pSysColorName = CColorRepository::Instance()->GetSystemColorTable()->FindColor( color ) )
-			oss << "  \"" << pSysColorName->GetName() << "\"";
+		if ( !inColorEntry )		// avoid double tagging the system color when is in a color table entry
+			if ( const CColorEntry* pSysColorName = CColorRepository::Instance()->GetSystemColorTable()->FindColor( color ) )
+				oss << "  \"" << pSysColorName->GetName() << "\"";
 
 		return oss.str();
 	}

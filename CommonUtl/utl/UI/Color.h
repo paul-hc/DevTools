@@ -63,10 +63,10 @@ namespace ui
 {
 	// color string conversions
 
-	std::tstring FormatColor( COLORREF color, const TCHAR* pSep = _T("  ") );
+	std::tstring FormatColor( COLORREF color, const TCHAR* pSep = _T("  "), bool inColorEntry = false );
 	bool ParseColor( OUT COLORREF* pOutColor, const TCHAR* pColorLiteral );
 
-	std::tstring FormatSysColor( COLORREF color );
+	std::tstring FormatSysColor( COLORREF color, bool inColorEntry = false );
 	std::tstring FormatRgbColor( COLORREF color );
 	std::tstring FormatHtmlColor( COLORREF color );
 	std::tstring FormatHexColor( COLORREF color );

@@ -100,7 +100,7 @@ std::tstring CColorEntry::FormatColor( const TCHAR* pFieldSep /*= s_fieldSep*/, 
 		stream::Tag( colorName, str::Enquote( m_pParentTable->GetShortTableName().c_str() ), _T(" ") );
 
 	if ( pFieldSep != nullptr )			// requesting full color name?
-		stream::Tag( colorName, ui::FormatColor( m_color, pFieldSep ), pFieldSep );
+		stream::Tag( colorName, ui::FormatColor( m_color, pFieldSep, true ), pFieldSep );
 
 	return colorName;
 }
@@ -551,7 +551,7 @@ const CColorRepository* CColorRepository::Instance( void )
 
 CColorTable* CColorRepository::MakeTable_WindowsSystem( void )
 {
-	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, 31, 2 );		// 31 colors: 2 columns x 16 rows
+	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, 31, 2 );		// 31 colors: 2 columns x 16 rows - for customized display in CColorTablePopupMenu
 
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BACKGROUND ), _T("Desktop Background") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_WINDOW ), _T("Window Background") ) );
