@@ -201,4 +201,28 @@ namespace ui
 }
 
 
+namespace ui
+{
+	struct CTooltipTextMessage		// wrapper for TOOLTIPTEXTA/TOOLTIPTEXTW
+	{
+		CTooltipTextMessage( NMHDR* pNmHdr );
+		CTooltipTextMessage( TOOLTIPTEXT* pNmToolTipText );
+
+		bool IsValidNotification( void ) const;
+		bool AssignTooltipText( const std::tstring& text );		// automatically configures the tooltip for multi-line display if text contains a '\n'
+
+		bool IgnoreResourceString( void ) const;
+		static bool IgnoreResourceString( HWND hCtrl );
+	public:
+		CToolTipCtrl* m_pTooltip;
+		TOOLTIPTEXTA* m_pTttA;
+		TOOLTIPTEXTW* m_pTttW;
+		UINT m_cmdId;
+		HWND m_hCtrl;
+
+		static const std::tstring s_nilText;		// use to preventing tooltips loaded by default
+	};
+}
+
+
 #endif // MfcUtilities_h

@@ -40,29 +40,7 @@ namespace ui
 	private:
 		std::unordered_map<UINT, CCmdInfo> m_cmdInfos;
 	public:
-		static const std::tstring m_nilText;		// use to preventing tooltips loaded by default
-		static int m_autoPopDuration;
-	};
-
-
-	// wrapper for TOOLTIPTEXTA/TOOLTIPTEXTW
-
-	struct CTooltipTextMessage
-	{
-		CTooltipTextMessage( NMHDR* pNmHdr );
-		CTooltipTextMessage( TOOLTIPTEXT* pNmToolTipText );
-
-		bool IsValidNotification( void ) const;
-		bool AssignTooltipText( const std::tstring& text );
-
-		bool IgnoreResourceString( void ) const;
-		static bool IgnoreResourceString( HWND hCtrl );
-	public:
-		CToolTipCtrl* m_pTooltip;
-		TOOLTIPTEXTA* m_pTttA;
-		TOOLTIPTEXTW* m_pTttW;
-		UINT m_cmdId;
-		HWND m_hCtrl;
+		static int s_autoPopDuration;
 	};
 }
 

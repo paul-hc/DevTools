@@ -3,9 +3,8 @@
 #include "CmdInfoStore.h"
 #include "CtrlInterfaces.h"
 #include "Dialog_fwd.h"
-#include "ReportListControl.h"
+#include "MfcUtilities.h"		// for struct ui::CTooltipTextMessage
 #include "WndUtils.h"
-#include "ThemeStatic.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,8 +42,7 @@ namespace ui
 
 	// CCmdInfoStore implementation
 
-	const std::tstring CCmdInfoStore::m_nilText = _T("<nil>");
-	int CCmdInfoStore::m_autoPopDuration = 0;
+	int CCmdInfoStore::s_autoPopDuration = 0;
 
 	CCmdInfoStore& CCmdInfoStore::Instance( void )
 	{
@@ -97,8 +95,8 @@ namespace ui
 			return false;				// ignore stray notifications
 
 		if ( message.m_pTooltip != nullptr )
-			if ( m_autoPopDuration != 0 && m_autoPopDuration != message.m_pTooltip->GetDelayTime( TTDT_AUTOPOP ) )
-				message.m_pTooltip->SetDelayTime( TTDT_AUTOPOP, m_autoPopDuration );
+			if ( s_autoPopDuration != 0 && s_autoPopDuration != message.m_pTooltip->GetDelayTime( TTDT_AUTOPOP ) )
+				message.m_pTooltip->SetDelayTime( TTDT_AUTOPOP, s_autoPopDuration );
 
 		std::tstring text;
 
@@ -124,88 +122,5 @@ namespace ui
 
 		utl::AssignPtr( pResult, (LRESULT)0 );		// prevent 64 bit errors
 		return true;					// message was handled
-	}
-
-
-	// CTooltipTextMessage implementation
-
-	CTooltipTextMessage::CTooltipTextMessage( NMHDR* pNmHdr )
-		: m_pTooltip( static_cast<CToolTipCtrl*>( CWnd::FromHandlePermanent( pNmHdr->hwndFrom ) ) )
-		, m_pTttA( TTN_NEEDTEXTA == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTA*>( pNmHdr ) : nullptr )
-		, m_pTttW( TTN_NEEDTEXTW == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTW*>( pNmHdr ) : nullptr )
-		, m_cmdId( static_cast<UINT>( pNmHdr->idFrom ) )
-		, m_hCtrl( nullptr )
-	{
-		ASSERT( m_pTttA != nullptr || m_pTttW != nullptr );
-
-		if ( ( m_pTttA != nullptr && HasFlag( m_pTttA->uFlags, TTF_IDISHWND ) ) ||
-			 ( m_pTttW != nullptr && HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) ) )
-		{
-			m_hCtrl = (HWND)pNmHdr->idFrom;						// idFrom is actually the HWND of the tool
-			m_cmdId = ::GetDlgCtrlID( m_hCtrl );
-		}
-	}
-
-	CTooltipTextMessage::CTooltipTextMessage( TOOLTIPTEXT* pNmToolTipText )
-		: m_pTooltip( static_cast<CToolTipCtrl*>( CWnd::FromHandlePermanent( pNmToolTipText->hdr.hwndFrom ) ) )
-		, m_pTttA( nullptr )
-		, m_pTttW( pNmToolTipText )
-		, m_cmdId( static_cast<UINT>( pNmToolTipText->hdr.idFrom ) )
-		, m_hCtrl( nullptr )
-	{
-		ASSERT_PTR( m_pTttW );
-
-		if ( HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) )
-		{
-			m_hCtrl = (HWND)pNmToolTipText->hdr.idFrom;			// idFrom is actually the HWND of the tool
-			m_cmdId = ::GetDlgCtrlID( m_hCtrl );
-		}
-	}
-
-	bool CTooltipTextMessage::IsValidNotification( void ) const
-	{
-		return m_cmdId != 0;
-	}
-
-	bool CTooltipTextMessage::AssignTooltipText( const std::tstring& text )
-	{
-		if ( text.empty() || CCmdInfoStore::m_nilText == text )
-			return false;
-
-		if ( m_pTttA != nullptr )
-		{
-			static std::string s_narrowText;			// static buffer (can be longer than 80 characters default limit)
-			s_narrowText = str::AsNarrow( text );
-			m_pTttA->lpszText = const_cast<char*>( s_narrowText.c_str() );
-		}
-		else if ( m_pTttW != nullptr )
-		{
-			static std::wstring s_wideText;				// static buffer (can be longer than 80 characters default limit)
-			s_wideText = str::AsWide( text );
-			m_pTttW->lpszText = const_cast<wchar_t*>( s_wideText.c_str() );
-		}
-		else
-			ASSERT( false );
-
-		// bring the tooltip window above other popup windows
-		if ( m_pTooltip != nullptr )
-			ui::BringWndToTop( *m_pTooltip );			// move window to the top/bottom of Z-order (above other popup windows)
-
-		return true;			// valid tooltip text
-	}
-
-	bool CTooltipTextMessage::IgnoreResourceString( void ) const
-	{
-		return m_hCtrl != nullptr && IgnoreResourceString( m_hCtrl );
-	}
-
-	bool CTooltipTextMessage::IgnoreResourceString( HWND hCtrl )
-	{
-		if ( CWnd* pCtrl = CWnd::FromHandlePermanent( hCtrl ) )
-			return		// ignore column layout descriptors (list controls, grids, etc)
-				is_a<CReportListControl>( pCtrl ) ||
-				is_a<CStatusStatic>( pCtrl );
-
-		return false;
 	}
 }

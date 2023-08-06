@@ -4,6 +4,8 @@
 #include "Path.h"
 #include "Serialization.h"
 #include "WndUtils.h"
+#include "ListLikeCtrlBase.h"	// for is_a<CListLikeCtrlBase>()
+#include "ThemeStatic.h"		// for is_a<CStatusStatic>()
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -193,5 +195,99 @@ namespace ui
 			}
 
 		__super::ReportSaveLoadException( pFilePath, pExc, isSaving, idDefaultPrompt );
+	}
+}
+
+
+namespace ui
+{
+	// CTooltipTextMessage implementation
+
+	const std::tstring CTooltipTextMessage::s_nilText = _T("<nil>");
+
+	CTooltipTextMessage::CTooltipTextMessage( NMHDR* pNmHdr )
+		: m_pTooltip( static_cast<CToolTipCtrl*>( CWnd::FromHandlePermanent( pNmHdr->hwndFrom ) ) )
+		, m_pTttA( TTN_NEEDTEXTA == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTA*>( pNmHdr ) : nullptr )
+		, m_pTttW( TTN_NEEDTEXTW == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTW*>( pNmHdr ) : nullptr )
+		, m_cmdId( static_cast<UINT>( pNmHdr->idFrom ) )
+		, m_hCtrl( nullptr )
+	{
+		ASSERT( m_pTttA != nullptr || m_pTttW != nullptr );
+
+		if ( ( m_pTttA != nullptr && HasFlag( m_pTttA->uFlags, TTF_IDISHWND ) ) ||
+			 ( m_pTttW != nullptr && HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) ) )
+		{
+			m_hCtrl = (HWND)pNmHdr->idFrom;						// idFrom is actually the HWND of the tool
+			m_cmdId = ::GetDlgCtrlID( m_hCtrl );
+		}
+	}
+
+	CTooltipTextMessage::CTooltipTextMessage( TOOLTIPTEXT* pNmToolTipText )
+		: m_pTooltip( static_cast<CToolTipCtrl*>( CWnd::FromHandlePermanent( pNmToolTipText->hdr.hwndFrom ) ) )
+		, m_pTttA( nullptr )
+		, m_pTttW( pNmToolTipText )
+		, m_cmdId( static_cast<UINT>( pNmToolTipText->hdr.idFrom ) )
+		, m_hCtrl( nullptr )
+	{
+		ASSERT_PTR( m_pTttW );
+
+		if ( HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) )
+		{
+			m_hCtrl = (HWND)pNmToolTipText->hdr.idFrom;			// idFrom is actually the HWND of the tool
+			m_cmdId = ::GetDlgCtrlID( m_hCtrl );
+		}
+	}
+
+	bool CTooltipTextMessage::IsValidNotification( void ) const
+	{
+		return m_cmdId != 0;
+	}
+
+	bool CTooltipTextMessage::AssignTooltipText( const std::tstring& text )
+	{
+		if ( text.empty() || s_nilText == text )
+			return false;
+
+		if ( m_pTttA != nullptr )
+		{
+			static std::string s_narrowText;			// static buffer (can be longer than 80 characters default limit)
+			s_narrowText = str::AsNarrow( text );
+			m_pTttA->lpszText = const_cast<char*>( s_narrowText.c_str() );
+		}
+		else if ( m_pTttW != nullptr )
+		{
+			static std::wstring s_wideText;				// static buffer (can be longer than 80 characters default limit)
+			s_wideText = str::AsWide( text );
+			m_pTttW->lpszText = const_cast<wchar_t*>( s_wideText.c_str() );
+		}
+		else
+			ASSERT( false );
+
+		if ( text.find( '\n' ) != std::tstring::npos )		// multi-line text?
+			if ( m_pTooltip->GetSafeHwnd() != nullptr )
+			{
+				// Win32 requirement for multi-line tooltips: we must send TTM_SETMAXTIPWIDTH to the tooltip
+				if ( -1 == m_pTooltip->GetMaxTipWidth() )	// not initialized?
+					m_pTooltip->SetMaxTipWidth( ui::FindMonitorRect( m_pTooltip->GetSafeHwnd(), ui::Workspace ).Width() );		// the entire desktop width
+			}
+
+		// bring the tooltip window above other popup windows
+		if ( m_pTooltip != nullptr )
+			ui::BringWndToTop( *m_pTooltip );			// move window to the top/bottom of Z-order (above other popup windows)
+
+		return true;			// valid tooltip text
+	}
+
+	bool CTooltipTextMessage::IgnoreResourceString( void ) const
+	{
+		return m_hCtrl != nullptr && IgnoreResourceString( m_hCtrl );
+	}
+
+	bool CTooltipTextMessage::IgnoreResourceString( HWND hCtrl )
+	{
+		if ( CWnd* pCtrl = CWnd::FromHandlePermanent( hCtrl ) )
+			return is_a<CListLikeCtrlBase>( pCtrl ) || is_a<CStatusStatic>( pCtrl );	// ignore column layout descriptors (list controls, grids, etc)
+
+		return false;
 	}
 }
