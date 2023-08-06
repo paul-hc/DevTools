@@ -282,6 +282,7 @@
     <ClInclude Include="SubjectPredicates.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="test\AlgorithmsTests.h" />
+    <ClInclude Include="test\GridLayoutTests.h" />
     <ClInclude Include="test\LanguageTests.h" />
     <ClInclude Include="test\DuplicateFilesTests.h" />
     <ClInclude Include="test\EndiannessTests.h" />
@@ -378,6 +379,7 @@
     <ClCompile Include="StructuredStorage.cpp" />
     <ClCompile Include="Subject.cpp" />
     <ClCompile Include="test\AlgorithmsTests.cpp" />
+    <ClCompile Include="test\GridLayoutTests.cpp" />
     <ClCompile Include="test\LanguageTests.cpp" />
     <ClCompile Include="test\DuplicateFilesTests.cpp" />
     <ClCompile Include="test\EndiannessTests.cpp" />

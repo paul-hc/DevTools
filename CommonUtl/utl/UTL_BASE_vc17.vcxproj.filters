@@ -457,6 +457,9 @@
     <ClInclude Include="CppVer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="test\GridLayoutTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -700,6 +703,9 @@
       <Filter>utl\Registry</Filter>
     </ClCompile>
     <ClCompile Include="test\StringCompareTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\GridLayoutTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>

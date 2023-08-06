@@ -14,6 +14,7 @@
 #include "LcsTests.h"
 #include "RegistryTests.h"
 #include "ResequenceTests.h"
+#include "GridLayoutTests.h"
 #include "FmtUtilsTests.h"
 #include "PathTests.h"
 #include "PathGeneratorTests.h"
@@ -44,6 +45,7 @@ namespace ut
 		CLcsTests::Instance();
 		CRegistryTests::Instance();
 		CResequenceTests::Instance();
+		CGridLayoutTests::Instance();
 		CFmtUtilsTests::Instance();
 
 		CPathTests::Instance();

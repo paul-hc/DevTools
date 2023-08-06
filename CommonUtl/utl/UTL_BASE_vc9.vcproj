@@ -1113,6 +1113,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\GridLayoutTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\GridLayoutTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\LanguageTests.cpp"
 				>
 			</File>
