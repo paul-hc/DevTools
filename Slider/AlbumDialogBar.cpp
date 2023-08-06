@@ -6,7 +6,7 @@
 #include "FileAttr.h"
 #include "resource.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/MfcUtilities.h"
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/StockValuesComboBox.h"
 #include "utl/UI/TextEdit.h"

@@ -8,7 +8,7 @@
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/MfcUtilities.h"
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/StockValuesComboBox.h"
 #include "utl/UI/WndUtils.h"
