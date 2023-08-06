@@ -592,7 +592,6 @@ namespace mfc
 			else if ( m_pColorBar->HasMoreBtn() )
 				pColorEntry = FindColorEntry( color = m_rawSelColor );
 
-			//if (0)
 			if ( nullptr == pColorEntry && color != CLR_NONE )
 			{
 				rTipText = ui::FormatColor( color );		// format the auto/other color
@@ -768,6 +767,9 @@ namespace mfc
 		void Setup( bool hasAutoButton );
 		CSize CalcLayout( int barMinWidth, int barMaxWidth );
 		void LayoutButtons( void );
+
+		size_t ToGridIndex( size_t row, size_t column ) const;
+		size_t ToTransposedGridIndex( size_t gridPos ) const;
 	private:
 		CMFCToolBarButton* GetNextButton( IN OUT POSITION& rListPos ) const;
 		void GetGridRowColumnAt( OUT size_t* pRow, OUT size_t* pColumn, size_t gridPos ) const;
@@ -814,7 +816,8 @@ namespace mfc
 		if ( 0 == m_columnCount )
 			m_columnCount = (size_t)sqrt( (double)m_pColorTable->GetColors().size() );		// default row/col layout
 
-		m_columnCount = utl::min( 8, m_columnCount );		// limit to maximum 8 columns
+		if ( m_columnCount > 8 )
+			m_columnCount /= 2;			// halve the columns to "square" the table a bit - but by a factor of 2, so that ToTransposedGridIndex() does not go out of bounds
 
 		// customize menu bar aspect
 		m_bIsDlgControl = true;					// stretch separators to the entire bar width
@@ -837,6 +840,7 @@ namespace mfc
 		bool isSelTable = m_pColorTable == m_pEditorHost->GetSelColorTable();	// selected table: add detail buttons?
 		bool hasAutoButton = isSelTable && !ui::IsUndefinedColor( m_pEditorHost->GetAutoColor() );
 		bool isForeignColor = selColor != CLR_NONE && !m_pColorTable->ContainsColor( selColor );
+		bool transposeColors = !m_pColorTable->IsSysColorTable();		// for non-system colors use left-to-right filling order, to be consistent with CMFCColorBar grid
 		CToolBarColorButton* pColorButton = nullptr;
 
 		m_pLayout.reset( new CColorButtonsGridLayout( this, m_pColorTable->GetColors().size(), m_columnCount ) );
@@ -850,7 +854,9 @@ namespace mfc
 
 		for ( UINT i = 0, colorCount = static_cast<UINT>( m_pLayout->m_colorCount ); i != colorCount; ++i )
 		{
-			InsertButton( pColorButton = new CToolBarColorButton( ColorIdMin + i, &m_pColorTable->GetColorAt( i ) ) );
+			size_t colorIndex = transposeColors ? m_pLayout->ToTransposedGridIndex( i ) : i;
+
+			InsertButton( pColorButton = new CToolBarColorButton( ColorIdMin + i, &m_pColorTable->GetColorAt( colorIndex ) ) );
 			pColorButton->UpdateSelectedColor( selColor );
 		}
 
@@ -1163,12 +1169,35 @@ namespace mfc
 		return (CMFCToolBarButton*)m_pMenuBar->GetAllButtons().GetNext( rListPos );
 	}
 
+	size_t CColorButtonsGridLayout::ToGridIndex( size_t row, size_t column ) const
+	{
+		REQUIRE( row < m_rowCount && column < m_columnCount );
+		return column * m_rowCount + row;
+	}
+
+	size_t CColorButtonsGridLayout::ToTransposedGridIndex( size_t gridPos ) const
+	{
+		REQUIRE( gridPos < m_colorCount && m_rowCount != 0 );
+
+		size_t row, column;
+		GetGridRowColumnAt( &row, &column, gridPos );
+
+		size_t transposedIndex = row * m_columnCount + column;
+
+		//transposedIndex = utl::min( m_colorCount - 1, transposedIndex );
+		ENSURE( transposedIndex < m_colorCount );		// if this fails, it means m_columnCount is shrunk by a factor different than 2 in CColorTableBar constructor
+		return transposedIndex;
+	}
+
 	void CColorButtonsGridLayout::GetGridRowColumnAt( OUT size_t* pRow, OUT size_t* pColumn, size_t gridPos ) const
 	{
+		ASSERT( pRow != nullptr && pColumn != nullptr );
 		REQUIRE( gridPos < m_colorCount && m_rowCount != 0 );
 
 		*pRow = gridPos % m_rowCount;
 		*pColumn = gridPos / m_rowCount;
+
+		ENSURE( *pRow < m_rowCount && *pColumn < m_columnCount );
 	}
 
 	CSize CColorButtonsGridLayout::StoreButtonSize( CDC* pDC, CMFCToolBarButton* pButton, int maxWidth )

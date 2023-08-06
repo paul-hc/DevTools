@@ -198,7 +198,7 @@ namespace mfc
 	class CColorTableBar;
 
 
-	class CColorTablePopupMenu : public CMFCPopupMenu		// displays named colors (CToolBarColorButton) on multiple column grid layout
+	class CColorTablePopupMenu : public CMFCPopupMenu		// displays named colors (CToolBarColorButton) on multiple column grid layout, typically for Windows System colors
 	{
 	public:
 		CColorTablePopupMenu( CColorMenuButton* pParentMenuBtn );		// pParentMenuBtn provides the color table
