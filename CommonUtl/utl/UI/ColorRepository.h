@@ -10,6 +10,9 @@
 #define COLOR_ENTRY( stdColor )  CColorEntry( (stdColor), CColorEntry::FindScopedLiteral( #stdColor ) )
 
 
+class CPalette;
+
+
 namespace mfc
 {
 	typedef CArray<COLORREF, COLORREF> TColorArray;
@@ -103,6 +106,8 @@ public:
 	void QueryMfcColors( OUT mfc::TColorArray& rColorArray ) const;
 	void QueryMfcColors( OUT mfc::TColorList& rColorList ) const;
 	void SetupMfcColors( const mfc::TColorArray& customColors, int columnCount = 0 );
+
+	bool BuildPalette( OUT CPalette* pPalette ) const;
 
 	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades
 protected:

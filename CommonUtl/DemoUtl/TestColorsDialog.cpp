@@ -79,7 +79,7 @@ void CTestColorsDialog::SetPickerUserColors( bool pickerUserColors )
 
 void CTestColorsDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = nullptr == m_mfcColorPickerButton.m_hWnd;
+	bool firstInit = nullptr == m_pColorPicker->m_hWnd;
 
 	ui::DDX_ColorButton( pDX, IDC_MFC_COLOR_PICKER_BUTTON, m_mfcColorPickerButton, &m_color, true );	// evaluate color
 	ui::DDX_ColorButton( pDX, IDC_COLOR_PICKER_BUTTON, *m_pColorPicker, &m_color );

@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "ColorRepository.h"
 #include "Color.h"
-#include "PopupMenus_fwd.h"
+#include "LogPalette.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
@@ -235,6 +235,22 @@ void CColorTable::SetupMfcColors( const mfc::TColorArray& customColors, int colu
 	}
 
 	OnTableChanged();
+}
+
+bool CColorTable::BuildPalette( OUT CPalette* pPalette ) const
+{
+	ASSERT_PTR( pPalette );		// caller owns the palette object
+
+	CLogPalette logPalette( *this );
+
+	if ( !logPalette.MakePalette( pPalette ) )
+	{
+		TRACE( _T("\n\t* CColorTable::BuildPalette() failed: color table '%s' with %d colors.\n"), GetTableName().c_str(), m_colors.size() );
+		return false;		// something wrong with the creation of the logical palette?
+	}
+
+	TRACE( _T("\n\t- CColorTable::BuildPalette(): color table '%s' with %d colors, logical palette created with %d colors.\n"), GetTableName().c_str(), m_colors.size(), pPalette->GetEntryCount() );
+	return true;
 }
 
 namespace func

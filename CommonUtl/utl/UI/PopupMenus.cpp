@@ -277,11 +277,14 @@ namespace mfc
 		m_pColorTable->QueryMfcColors( m_Colors );
 		m_dwdItemData = reinterpret_cast<DWORD_PTR>( m_pColorTable );
 
-		SetColumnsNumber( m_pColorTable->GetCompactGridColumnCount() );	// by default assume using CMFCColorBar nameless grid
+		SetColumnsNumber( m_pColorTable->GetCompactGridColumnCount() );		// by default assume using CMFCColorBar nameless grid
 	}
 
 	CColorMenuButton::~CColorMenuButton()
 	{
+		// IMP: remove the stickyness of colors associated with this button ID, which can cause parasitic color selections.
+		//	Example: 'select Salmon "DirectX (X11)"' an then select 'Thistle 1 "HTML"', and by popping up each seem selected, which is wrong.
+		m_ColorsByID.RemoveKey( m_nID );
 	}
 
 	void CColorMenuButton::SetEditorHost( ui::IColorEditorHost* pEditorHost )

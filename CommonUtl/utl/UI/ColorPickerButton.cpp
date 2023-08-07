@@ -227,9 +227,13 @@ void CColorPickerButton::SetSelColorTable( const CColorTable* pSelColorTable ) o
 
 	if ( m_pSelColorTable != nullptr )
 	{
+		SetColumnsNumber( pSelColorTable->GetColumnCount() );
+
 		pSelColorTable->QueryMfcColors( m_Colors );
 
-		SetColumnsNumber( pSelColorTable->GetColumnCount() );
+		// this has no functional impact for True Color mode, so it's not necessary:
+		//delete m_pPalette;
+		//VERIFY( pSelColorTable->BuildPalette( m_pPalette = new CPalette() ) );
 	}
 }
 
@@ -583,8 +587,7 @@ void CColorPickerButton::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL is
 
 void CColorPickerButton::OnCopy( void )
 {
-	// TODO: lookup the color name from the CColorEntry
-	ui::CopyColor( GetColor() );
+	ui::CopyColor( GetColor(), m_pSelColorTable );		// copy the qualified color name
 }
 
 void CColorPickerButton::OnPaste( void )
