@@ -322,22 +322,19 @@ void CColorPickerButton::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, 
 	std::tstring text;
 
 	if ( text.empty() && m_pSelColorEntry != nullptr )
-		text = m_pSelColorEntry->FormatColor();
+		text = m_pSelColorEntry->FormatColor( CColorEntry::s_multiLineTipSep );
 
 	COLORREF color = GetActualColor();
 
 	if ( text.empty() && m_pSelColorTable != nullptr )
 		if ( const CColorEntry* pColorEntry = m_pSelColorTable->FindColor( color ) )
-			text = pColorEntry->FormatColor();
+			text = pColorEntry->FormatColor( CColorEntry::s_multiLineTipSep );
 
 	if ( text.empty() )
 		text = ui::FormatColor( color );
 
 	if ( !text.empty() )
 		stream::Tag( rText, text, _T(":  ") );
-
-	if ( pTooltip != nullptr )
-		pTooltip->SetDelayTime( TTDT_AUTOPOP, 30 * 1000 );		// display for 1/2 minute (16-bit limit: it doesn't work beyond 32768 miliseconds)
 
 	// append the help message
 	static const std::tstring s_helpMessage = str::Load( IDS_COLOR_PICKER_BUTTON_HELP );
@@ -497,15 +494,16 @@ void CColorPickerButton::OnShowColorPopup( void ) overrides(CMFCColorButton)
 
 void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) overrides(CMFCColorButton)
 {
+	COLORREF displayRawColor = m_Color != CLR_NONE ? m_Color : m_ColorAutomatic;
 	CScopedValue<COLORREF> scColor( &m_Color );
 	CScopedValue<COLORREF> scAutoColor( &m_ColorAutomatic );
 	CScopedValue<CString>  scAutoLabel( &m_strAutoColorText );
 
-	if ( ui::IsSysColor( m_Color ) )
-		if ( const CColorEntry* pColorEntry = CColorRepository::Instance()->GetSystemColorTable()->FindColor( m_Color ) )
+	if ( ui::IsSysColor( displayRawColor ) )
+		if ( const CColorEntry* pColorEntry = CColorRepository::Instance()->GetSystemColorTable()->FindColor( displayRawColor ) )
 		{	// while drawing system colors, temporarily evaluate the color and display with label
 			scAutoLabel.SetValue( pColorEntry->GetName().c_str() );
-			scAutoColor.SetValue( ui::EvalColor( m_Color ) );
+			scAutoColor.SetValue( ui::EvalColor( displayRawColor ) );
 			scColor.SetValue( CLR_NONE );		// fallback to Auto drawing mode: small color square + label
 		}
 

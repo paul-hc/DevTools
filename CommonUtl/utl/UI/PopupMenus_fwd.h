@@ -14,6 +14,7 @@ class CMFCToolBarButton;
 class CMFCColorPopupMenu;
 class CMFCColorBar;
 
+class CToolTipCtrl;
 class CMFCButton;
 
 class CColorEntry;
@@ -115,6 +116,9 @@ namespace mfc
 	CMFCToolBarButton* FindBarButton( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 
 	CMFCColorBar* GetColorMenuBar( const CMFCPopupMenu* pColorPopupMenu );
+
+
+	bool AssignTooltipText( OUT TOOLINFO* pToolInfo, const std::tstring& text );
 }
 
 
@@ -137,14 +141,14 @@ namespace nosy
 		bool HasMoreBtn( void ) const { return !m_strOtherColor.IsEmpty(); }
 		bool HasDocColorBtns( void ) const { return !m_strDocColors.IsEmpty(); }
 
-		COLORREF GetAutoColor( void ) const { return m_ColorAutomatic; }
-		void SetAutoColor( COLORREF autoColor ) { m_ColorAutomatic = autoColor; }
-
 		void SetInternal( bool bInternal = true ) { m_bInternal = bInternal; }		// for customization mode
 
 		bool IsAutoBtn( const CMFCToolBarButton* pButton ) const { return HasAutoBtn() && pButton->m_strText == m_strAutoColor; }
 		bool IsMoreBtn( const CMFCToolBarButton* pButton ) const { return HasMoreBtn() && pButton->m_strText == m_strOtherColor; }
 		bool IsMoreColorSampleBtn( const CMFCToolBarButton* pButton ) const { return pButton->m_bImage && HasMoreBtn() && pButton == GetButton( GetCount() - 1 ); }
+
+		COLORREF GetAutoColor( void ) const { return m_ColorAutomatic; }
+		//void SetAutoColor( COLORREF autoColor ) { m_ColorAutomatic = autoColor; }		// not reliable after Rebuild(), since it dosn't update the Auto button
 	};
 }
 

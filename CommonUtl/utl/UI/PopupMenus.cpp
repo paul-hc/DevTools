@@ -18,19 +18,6 @@
 #endif
 
 
-namespace hlp
-{
-	template< typename StringT >
-	typename StringT::value_type* AllocStringCopy( const StringT& text )
-	{
-		typedef typename StringT::value_type TChar;
-		TChar* pText = (TChar*)::calloc( text.length() + 1, sizeof( TChar ) );
-
-		return pText != nullptr ? _tcscpy( pText, text.c_str() ) : nullptr;
-	}
-}
-
-
 namespace mfc
 {
 	// CTrackingPopupMenu implementation
@@ -189,25 +176,27 @@ namespace mfc
 		m_color = srcButton.m_color;
 	}
 
-	BOOL CToolBarColorButton::OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI ) overrides(CMFCToolBarButton)
+	BOOL CToolBarColorButton::OnToolHitTest( const CWnd* pWnd, TOOLINFO* pToolInfo ) overrides(CMFCToolBarButton)
 	{
-		if ( CMFCToolBar::GetShowTooltips() && pTI != nullptr && !ui::IsUndefinedColor( m_color ) )		// prevent displaying the pointless "(null)"
+		if ( CMFCToolBar::GetShowTooltips() && pToolInfo != nullptr && !ui::IsUndefinedColor( m_color ) )		// prevent displaying the pointless "(null)"
 		{
 			const CColorEntry* pColorEntry = GetColorEntry();
 
 			if ( nullptr == pColorEntry )
 				pColorEntry = CColorRepository::Instance()->FindColorEntry( m_color );
 
-			if ( pColorEntry != nullptr )
-				pTI->lpszText = hlp::AllocStringCopy( pColorEntry->FormatColor( CColorEntry::s_fieldSep, false ) );
-			else
-				pTI->lpszText = hlp::AllocStringCopy( ui::FormatColor( m_color, CColorEntry::s_fieldSep ) );
+			std::tstring tipText;
 
-			if ( pTI->lpszText != nullptr )
+			if ( pColorEntry != nullptr )
+				tipText = pColorEntry->FormatColor( CColorEntry::s_multiLineTipSep );
+			else
+				tipText = ui::FormatColor( m_color, CColorEntry::s_fieldSep );
+
+			if ( mfc::AssignTooltipText( pToolInfo, tipText ) )
 				return true;
 		}
 
-		return __super::OnToolHitTest( pWnd, pTI );
+		return __super::OnToolHitTest( pWnd, pToolInfo );
 	}
 
 	void CToolBarColorButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz /*= TRUE*/, BOOL bCustomizeMode /*= FALSE*/,
@@ -300,7 +289,7 @@ namespace mfc
 		SetDisplayColorBox( ID_SELECTED_COLOR_BUTTON );
 
 		if ( autoColor != CLR_NONE )
-			EnableAutomaticButton( mfc::CColorLabels::s_autoLabel, color );
+			EnableAutomaticButton( mfc::CColorLabels::s_autoLabel, ui::EvalColor( autoColor ) );	// display Auto color
 
 		EnableOtherButton( mfc::CColorLabels::s_moreLabel );
 
@@ -535,14 +524,11 @@ namespace mfc
 
 		// replace display colors with evaluated colors
 		if ( m_pColorBar->HasAutoBtn() )
-		{
-			m_rawAutoColor = m_pColorBar->GetAutoColor();
-			m_pColorBar->SetAutoColor( ui::EvalColor( m_rawAutoColor ) );	// show the display color
-		}
+			m_rawAutoColor = m_pEditorHost != nullptr ? m_pEditorHost->GetAutoColor() : m_pColorBar->GetAutoColor();
 
 		if ( m_pColorBar->HasMoreBtn() )
 		{
-			m_rawSelColor = m_pColorBar->GetColor();
+			m_rawSelColor = m_pEditorHost != nullptr ? m_pEditorHost->GetColor() : m_pColorBar->GetColor();
 			m_pColorBar->SetColor( ui::EvalColor( m_rawSelColor ) );		// show the display color
 		}
 	}
@@ -579,6 +565,10 @@ namespace mfc
 			if ( const CColorEntry* pColorEntry = m_pDocColorTable->FindColor( rawColor ) )
 				return pColorEntry;
 
+		if ( ui::IsSysColor( rawColor ) )
+			if ( const CColorEntry* pSysColorEntry = CColorRepository::Instance()->GetSystemColorTable()->FindColor( rawColor ) )
+				return pSysColorEntry;
+
 		return nullptr;
 	}
 
@@ -597,14 +587,14 @@ namespace mfc
 
 			if ( nullptr == pColorEntry && color != CLR_NONE )
 			{
-				rTipText = ui::FormatColor( color );		// format the auto/other color
+				rTipText = ui::FormatColor( color );			// format the auto/other color
 				return true;
 			}
 		}
 
 		if ( pColorEntry != nullptr )
 		{
-			rTipText = pColorEntry->FormatColor();			// format the table-qualified color entry
+			rTipText = pColorEntry->FormatColor( CColorEntry::s_multiLineTipSep );	// format the multi-line tooltip with table-qualified color entry
 			return true;
 		}
 

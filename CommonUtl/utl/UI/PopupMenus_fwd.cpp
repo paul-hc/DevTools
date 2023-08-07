@@ -258,4 +258,34 @@ namespace mfc
 		ASSERT( is_a<CMFCColorPopupMenu>( pColorPopupMenu ) );
 		return checked_static_cast<CMFCColorBar*>( const_cast<CMFCPopupMenu*>( pColorPopupMenu )->GetMenuBar() );
 	}
+
+
+	bool AssignTooltipText( OUT TOOLINFO* pToolInfo, const std::tstring& text )
+	{
+		ASSERT_PTR( pToolInfo );
+		ASSERT_NULL( pToolInfo->lpszText );
+
+		if ( text.empty() )
+			return false;
+
+		pToolInfo->lpszText = (TCHAR*)::calloc( text.length() + 1, sizeof( TCHAR ) );
+
+		if ( nullptr == pToolInfo->lpszText )
+			return false;
+
+		_tcscpy( pToolInfo->lpszText, text.c_str() );
+
+		if ( text.find( '\n' ) != std::tstring::npos )		// multi-line text?
+			if ( const CMFCPopupMenuBar* pMenuBar = dynamic_cast<const CMFCPopupMenuBar*>( CWnd::FromHandlePermanent( pToolInfo->hwnd ) ) )
+				if ( CToolTipCtrl* pToolTip = mfc::ToolBar_GetToolTip( pMenuBar ) )
+				{
+					// Win32 requirement for multi-line tooltips: we must send TTM_SETMAXTIPWIDTH to the tooltip
+					if ( -1 == pToolTip->GetMaxTipWidth() )	// not initialized?
+						pToolTip->SetMaxTipWidth( ui::FindMonitorRect( pToolTip->GetSafeHwnd(), ui::Workspace ).Width() );		// the entire desktop width
+
+					pToolTip->SetDelayTime( TTDT_AUTOPOP, 30 * 1000 );		// display for 1/2 minute (16-bit limit: it doesn't work beyond 32768 miliseconds)
+				}
+
+		return true;
+	}
 }

@@ -45,6 +45,7 @@ public:
 	bool operator==( COLORREF rawColor ) const { return m_color == rawColor; }		// for std::find algorithms
 	static const char* FindScopedLiteral( const char* pScopedColorName );
 
+	bool IsRepoColor( void ) const;
 	const CColorTable* GetParentTable( void ) const { return m_pParentTable; }
 
 	COLORREF GetColor( void ) const { return m_color; }
@@ -59,6 +60,7 @@ private:
 	std::tstring m_name;
 public:
 	static const TCHAR s_fieldSep[];
+	static const TCHAR s_multiLineTipSep[];
 private:
 	const CColorTable* m_pParentTable;
 
@@ -86,6 +88,7 @@ public:
 
 	bool IsHalftoneTable( void ) const { return ui::IsHalftoneTable( GetTableType() ); }
 	bool IsSysColorTable( void ) const { return ui::WindowsSys_Colors == m_tableType; }
+	bool IsRepoTable( void ) const;
 
 	bool IsEmpty( void ) const { return m_colors.empty(); }
 	const std::vector<CColorEntry>& GetColors( void ) const { return m_colors; }

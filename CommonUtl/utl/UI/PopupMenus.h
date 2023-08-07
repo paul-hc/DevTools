@@ -68,7 +68,7 @@ namespace mfc
 		// base overrides
 	public:
 		virtual void SetImage( int iImage ) overrides(CMFCToolBarButton);
-		virtual BOOL OnToolHitTest( const CWnd* pWnd, TOOLINFO* pTI ) overrides(CMFCToolBarButton);
+		virtual BOOL OnToolHitTest( const CWnd* pWnd, TOOLINFO* pToolInfo ) overrides(CMFCToolBarButton);
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCToolBarMenuButton);
 		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE,

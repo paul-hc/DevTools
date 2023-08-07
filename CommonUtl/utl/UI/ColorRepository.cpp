@@ -76,6 +76,7 @@ Development"
 // CColorEntry implementation
 
 const TCHAR CColorEntry::s_fieldSep[] = _T("  ");
+const TCHAR CColorEntry::s_multiLineTipSep[] = _T("\n\n");
 
 CColorEntry::CColorEntry( COLORREF color, const char* pLiteral )
 	: m_color( color )
@@ -92,15 +93,30 @@ const char* CColorEntry::FindScopedLiteral( const char* pScopedColorName )
 	return posLastScope != std::string::npos ? ( pScopedColorName + posLastScope + s_scopeOp.length() ) : pScopedColorName;
 }
 
+bool CColorEntry::IsRepoColor( void ) const
+{
+	return m_pParentTable != nullptr && m_pParentTable->IsRepoTable();
+}
+
 std::tstring CColorEntry::FormatColor( const TCHAR* pFieldSep /*= s_fieldSep*/, bool suffixTableName /*= true*/ ) const
 {
 	std::tstring colorName = m_name;
 
-	if ( suffixTableName && m_pParentTable != nullptr && !m_pParentTable->IsHalftoneTable() )
+	if ( suffixTableName && m_pParentTable != nullptr && IsRepoColor() )
 		stream::Tag( colorName, str::Enquote( m_pParentTable->GetShortTableName().c_str() ), _T(" ") );
 
 	if ( pFieldSep != nullptr )			// requesting full color name?
-		stream::Tag( colorName, ui::FormatColor( m_color, pFieldSep, true ), pFieldSep );
+	{
+		const TCHAR* pValueBreakSep = pFieldSep;
+
+		if ( '\n' == pFieldSep[ 0 ] )
+		{
+			pValueBreakSep = pFieldSep;
+			pFieldSep = s_fieldSep;
+		}
+
+		stream::Tag( colorName, ui::FormatColor( m_color, pFieldSep, true ), pValueBreakSep );
+	}
 
 	return colorName;
 }
@@ -156,6 +172,11 @@ const std::tstring& CColorTable::GetTableName( void ) const
 const std::tstring& CColorTable::GetShortTableName( void ) const
 {
 	return ui::GetTags_ColorTable().FormatKey( m_tableType );
+}
+
+bool CColorTable::IsRepoTable( void ) const
+{
+	return CColorRepository::Instance() == m_pParentStore;
 }
 
 void CColorTable::Add( const CColorEntry& colorEntry )
@@ -278,7 +299,7 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 	Clear();
 	Reset( columnCount * 3, static_cast<int>( columnCount ) );
 
-	if ( 0 == columnCount /*|| !ui::IsRealColor( selColor )*/ )
+	if ( 0 == columnCount )
 		return 0;
 
 	selColor = ui::EvalColor( selColor );
@@ -289,7 +310,7 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 
 	std::generate_n( std::back_inserter( percentages ), columnCount, func::AddSequence<ui::TPercent>( s_pctRange.m_start, pctStep ) );
 
-	static const TCHAR* s_pShadeTags[] = { _T("Lighter"), _T("Darker"), _T("Desaturated") };
+	static const TCHAR* s_pShadeTags[] = { _T("Lighter by"), _T("Darker by"), _T("Desaturated by") };
 	enum ShadeTag { Lighter, Darker, Desaturated };
 
 	if ( ui::HasLuminanceVariation( selColor, percentages[ 0 ], percentages[ 1 ] ) )		// Lighter Shades: have some step variation?

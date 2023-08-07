@@ -263,12 +263,14 @@ namespace ui
 		else
 			ASSERT( false );
 
-		if ( text.find( '\n' ) != std::tstring::npos )		// multi-line text?
+		if ( text.find( '\n' ) != std::tstring::npos )	// multi-line text?
 			if ( m_pTooltip->GetSafeHwnd() != nullptr )
 			{
 				// Win32 requirement for multi-line tooltips: we must send TTM_SETMAXTIPWIDTH to the tooltip
 				if ( -1 == m_pTooltip->GetMaxTipWidth() )	// not initialized?
 					m_pTooltip->SetMaxTipWidth( ui::FindMonitorRect( m_pTooltip->GetSafeHwnd(), ui::Workspace ).Width() );		// the entire desktop width
+
+				m_pTooltip->SetDelayTime( TTDT_AUTOPOP, 30 * 1000 );		// display for 1/2 minute (16-bit limit: it doesn't work beyond 32768 miliseconds)
 			}
 
 		// bring the tooltip window above other popup windows

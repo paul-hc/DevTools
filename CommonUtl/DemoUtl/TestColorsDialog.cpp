@@ -55,7 +55,7 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 	m_mfcColorPickerButton.SetDocumentColors( _T("Document:"), docColors );
 
 	m_pColorPicker->SetColor( m_color );
-	m_pColorPicker->SetAutomaticColor( color::Lime );
+	m_pColorPicker->SetAutomaticColor( ui::MakeSysColor( COLOR_GRADIENTACTIVECAPTION ) /*color::Lime*/ );
 
 	ui::LoadPopupMenu( &m_popupMenu, IDR_CONTEXT_MENU, app::TestColorsPopup );
 	m_pMenuPicker->m_hMenu = m_popupMenu;
