@@ -59,6 +59,9 @@ namespace ui
 #define HTML_COLOR( htmlLiteral ) ( ui::ParseHtmlColor( #htmlLiteral ) )
 
 
+class CColorTable;
+
+
 namespace ui
 {
 	// color string conversions
@@ -77,8 +80,11 @@ namespace ui
 	bool ParseHexColor( OUT COLORREF* pOutColor, const TCHAR* pHexColorText );
 
 
+	std::tstring FormatQualifiedColor( COLORREF rawColor, const CColorTable* pSelColorTable = nullptr, bool lookupRepoName = false );
+
+
 	// clipboard
-	bool CopyColor( COLORREF color );
+	bool CopyColor( COLORREF rawColor, const CColorTable* pSelColorTable = nullptr );		// pass selected table for richer text formatting
 	bool PasteColor( OUT COLORREF* pOutColor );
 	bool CanPasteColor( void );
 

@@ -241,8 +241,18 @@ namespace ui
 		return false;
 	}
 
+	std::tstring FormatQualifiedColor( COLORREF rawColor, const CColorTable* pSelColorTable /*= nullptr*/, bool lookupRepoName /*= false*/ )
+	{
+		const CColorEntry* pColorEntry = pSelColorTable != nullptr ? pSelColorTable->FindColor( rawColor ) : nullptr;
 
-	bool CopyColor( COLORREF color )
+		if ( nullptr == pColorEntry && lookupRepoName )
+			pColorEntry = CColorRepository::Instance()->FindColorEntry( rawColor );
+
+		return pColorEntry != nullptr ? pColorEntry->FormatColor() : ui::FormatColor( rawColor );
+	}
+
+
+	bool CopyColor( COLORREF rawColor, const CColorTable* pSelColorTable /*= nullptr*/ )
 	{
 		bool succeeded = false;
 		std::auto_ptr<CTextClipboard> pClipboard( CTextClipboard::Open( AfxGetMainWnd()->GetSafeHwnd() ) );
@@ -251,10 +261,10 @@ namespace ui
 		{
 			pClipboard->Clear();
 
-			if ( pClipboard->WriteString( FormatColor( color ) ) )
+			if ( pClipboard->WriteString( ui::FormatQualifiedColor( rawColor, pSelColorTable, nullptr == pSelColorTable ) ) )
 				succeeded = true;
 
-			if ( pClipboard->Write( ui::GetColorClipboardFormat(), color ) )
+			if ( pClipboard->Write( ui::GetColorClipboardFormat(), rawColor ) )
 				succeeded = true;
 		}
 

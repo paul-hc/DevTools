@@ -713,7 +713,7 @@ CColorTable* CColorRepository::MakeTable_Office2007( void )
 
 CColorTable* CColorRepository::MakeTable_DirectX( void )
 {
-	CColorTable* pTable = new CColorTable( ui::DirectX_Colors, color::directx::_DirectX_ColorCount, 14 );		// 140 colors: 10 columns x 14 rows
+	CColorTable* pTable = new CColorTable( ui::DirectX_Colors, color::directx::_DirectX_ColorCount, 10 );		// 140 colors: 10 columns x 14 rows
 
 	pTable->Add( COLOR_ENTRY( color::directx::Black ) );
 	pTable->Add( COLOR_ENTRY( color::directx::DarkSlateGray ) );
@@ -861,7 +861,7 @@ CColorTable* CColorRepository::MakeTable_DirectX( void )
 
 CColorTable* CColorRepository::MakeTable_HTML( void )
 {
-	CColorTable* pTable = new CColorTable( ui::HTML_Colors, color::html::_Html_ColorCount, 20 );		// 300 colors: 20 columns x 15 rows
+	CColorTable* pTable = new CColorTable( ui::HTML_Colors, color::html::_Html_ColorCount, 15 );		// 300 colors: 15 columns x 20 rows
 
 	pTable->Add( COLOR_ENTRY( color::html::Black ) );
 	pTable->Add( COLOR_ENTRY( color::html::Gray0 ) );

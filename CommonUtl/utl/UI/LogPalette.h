@@ -3,26 +3,26 @@
 #pragma once
 
 
+class CColorTable;
+
+
 class CLogPalette
 {
 public:
+	CLogPalette( size_t count );
 	CLogPalette( const COLORREF colors[], size_t count );
+	CLogPalette( const CColorTable& colorTable );
 	~CLogPalette();
 
 	LOGPALETTE* Get( void ) { return m_pLogPalette; }
 
 	void SetAt( size_t pos, COLORREF color );
 
-	void MakePalette( CPalette* pPalette ) const
-	{
-		VERIFY( pPalette->CreatePalette( m_pLogPalette ) );
-	}
+	bool MakePalette( OUT CPalette* pPalette ) const;
 
-	static void MakePalette( CPalette* pPalette, const COLORREF colors[], size_t count )
-	{
-		CLogPalette logPalette( colors, count );
-		VERIFY( pPalette->CreatePalette( logPalette.Get() ) );
-	}
+	static bool MakePalette( OUT CPalette* pPalette, const COLORREF colors[], size_t count );
+private:
+	void Construct( size_t count );
 private:
 	BYTE* m_pBuffer;
 	LOGPALETTE* m_pLogPalette;
