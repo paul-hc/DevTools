@@ -27,7 +27,12 @@ public:
 	}
 
 	ui::PopupAlign GetPopupAlign( void ) const { return m_popupAlign; }
-	void SetPopupAlign( ui::PopupAlign popupAlign = ui::DropDown ) { m_popupAlign = popupAlign; m_behaveLikeModeless = true; }
+
+	void SetPopupAlign( ui::PopupAlign popupAlign = ui::DropDown )
+	{
+		m_popupAlign = popupAlign;
+		m_behaveLikeModeless = true;
+	}
 
 	void SetAlignScreenRect( const CRect& alignScreenRect )
 	{
@@ -97,11 +102,11 @@ public:
 	CColorPopupDialog( CWnd* pParentWnd, COLORREF color, DWORD dwFlags = CC_FULLOPEN | CC_ANYCOLOR | CC_RGBINIT );
 
 	// base overrides
-	virtual COLORREF GetCurrentColor( void ) const override;
+	virtual COLORREF GetCurrentColor( void ) const overrides(CBasePopupColorDialog);
 protected:
-	virtual void ModifyColor( COLORREF newColor ) override { SetCurrentColor( newColor ); }
+	virtual void ModifyColor( COLORREF newColor ) overrides(CBasePopupColorDialog) { SetCurrentColor( newColor ); }
 
-	virtual void InitDialog( void ) override;
+	virtual void InitDialog( void ) overrides(CBasePopupColorDialog);
 	virtual void AdjustDlgWindowRect( CRect& rWindowRect ) override;
 private:
 	void CreateSpin( UINT editId, CSpinButtonCtrl& rSpinButton, UINT spinId, int maxValue );
@@ -129,15 +134,25 @@ protected:
 class COfficeColorPopupDialog : public CBasePopupColorDialog<CMFCColorDialog>		// MS-Office style MFC colors dialog
 {
 public:
-	COfficeColorPopupDialog( CWnd* pParentWnd, COLORREF color );
+	COfficeColorPopupDialog( CWnd* pParentWnd, COLORREF color, int activePageIndex = -1 );
 
+	enum ColorPage { StandardColorsPage, CustomColorsPage };
+private:
+	int m_activePageIndex;
+	CPropertySheet* m_pPropertySheet;
+public:
 	// base overrides
-	virtual COLORREF GetCurrentColor( void ) const override { return GetColor(); }
+	virtual COLORREF GetCurrentColor( void ) const overrides(CBasePopupColorDialog) { return GetColor(); }
+	virtual BOOL OnInitDialog( void ) overrides(CMFCColorDialog);
 protected:
-	virtual void ModifyColor( COLORREF newColor ) override;
+	virtual void ModifyColor( COLORREF newColor ) overrides(CBasePopupColorDialog);
 
-	virtual void InitDialog( void ) override;
+	virtual void InitDialog( void ) overrides(CBasePopupColorDialog);
 	virtual bool IsTracking( void ) const { return m_bPickerMode != FALSE; }
+protected:
+	afx_msg void OnDestroy( void );
+
+	DECLARE_MESSAGE_MAP()
 };
 
 

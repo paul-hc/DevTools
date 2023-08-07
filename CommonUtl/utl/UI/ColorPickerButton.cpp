@@ -96,6 +96,8 @@ namespace reg
 
 // CColorPickerButton implementation
 
+enum PrivateIDs { IDP_COPY_COLOR_TABLE = ID_EDIT_LIST_ITEMS };
+
 std::vector<CColorPickerButton*> CColorPickerButton::s_instances;
 
 CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nullptr*/ )
@@ -113,8 +115,8 @@ CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nu
 
 	const ACCEL accelKeys[] =
 	{
-		{ FVIRTKEY, VK_DELETE, ID_RESET_DEFAULT },
-		{ FVIRTKEY | FCONTROL | FSHIFT, 'T', ID_EDIT_LIST_ITEMS }
+		{ FVIRTKEY, VK_DELETE, ID_SET_AUTO_COLOR },
+		{ FVIRTKEY | FCONTROL | FSHIFT, 'T', IDP_COPY_COLOR_TABLE }
 	};
 	m_accel.Augment( ARRAY_SPAN( accelKeys ) );
 
@@ -165,11 +167,6 @@ void CColorPickerButton::SetUserColors( const std::vector<COLORREF>& userColors,
 
 	m_pSelColorTable = nullptr;		// to force a setup
 	SetSelColorTable( pUserCustomTable );
-}
-
-const CColorEntry* CColorPickerButton::GetRawColor( void ) const override
-{
-	return m_pSelColorEntry;
 }
 
 void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) override
@@ -546,10 +543,12 @@ BEGIN_MESSAGE_MAP( CColorPickerButton, CMFCColorButton )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateEnable )
 	ON_COMMAND( ID_EDIT_PASTE, OnPaste )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_PASTE, OnUpdatePaste )
-	ON_COMMAND( ID_RESET_DEFAULT, On_ResetColor )
-	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdate_ResetColor )
-	ON_COMMAND( ID_EDIT_LIST_ITEMS, On_CopyColorTable )
-	ON_UPDATE_COMMAND_UI( ID_EDIT_LIST_ITEMS, OnUpdateEnable )
+	ON_COMMAND( ID_SET_AUTO_COLOR, On_SetAutoColor )
+	ON_UPDATE_COMMAND_UI( ID_SET_AUTO_COLOR, OnUpdate_SetAutoColor )
+	ON_COMMAND( ID_MORE_COLORS, On_MoreColors )
+	ON_UPDATE_COMMAND_UI( ID_MORE_COLORS, OnUpdate_MoreColors )
+	ON_COMMAND( IDP_COPY_COLOR_TABLE, On_CopyColorTable )
+	ON_UPDATE_COMMAND_UI( IDP_COPY_COLOR_TABLE, OnUpdateEnable )
 	ON_COMMAND_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, On_SelectColorTable )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, OnUpdate_SelectColorTable )
 	ON_COMMAND_RANGE( ID_PICK_COLOR_BAR_RADIO, ID_PICK_COLOR_MENU_RADIO, On_PickingMode )
@@ -601,17 +600,29 @@ void CColorPickerButton::OnUpdatePaste( CCmdUI* pCmdUI )
 	pCmdUI->Enable( ui::CanPasteColor() );
 }
 
-void CColorPickerButton::On_ResetColor( void )
+void CColorPickerButton::On_SetAutoColor( void )
 {
 	UpdateColor( CLR_NONE );
 }
 
-void CColorPickerButton::OnUpdate_ResetColor( CCmdUI* pCmdUI )
+void CColorPickerButton::OnUpdate_SetAutoColor( CCmdUI* pCmdUI )
 {
 	bool isAutoColor = CLR_NONE == GetColor();
 
 	pCmdUI->Enable( !isAutoColor );
 	pCmdUI->SetCheck( isAutoColor );
+}
+
+void CColorPickerButton::On_MoreColors( void )
+{
+	EditColorDialog();
+}
+
+void CColorPickerButton::OnUpdate_MoreColors( CCmdUI* pCmdUI )
+{
+	bool isForeignColor = IsForeignColor();
+
+	pCmdUI->SetCheck( isForeignColor );
 }
 
 void CColorPickerButton::On_CopyColorTable( void )
@@ -792,7 +803,8 @@ void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int 
 				pMenuBar->ReplaceButton( colorBtnId, colorButton );
 			}
 
-	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_RESET_DEFAULT, m_pHost->GetAutoColor(), &index );	// to display the Automatic color box on the menu item
+	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_SET_AUTO_COLOR, m_pHost->GetAutoColor() );		// to display the Automatic color box on the menu item
+	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_MORE_COLORS, m_pHost->GetForeignColor() );		// to display the More Colors color box on the menu item
 }
 
 // message handlers

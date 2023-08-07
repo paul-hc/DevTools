@@ -53,7 +53,6 @@ public:
 
 	// ui::IColorHost interface
 	virtual COLORREF GetColor( void ) const override { return CMFCColorButton::GetColor(); }
-	virtual const CColorEntry* GetRawColor( void ) const override;
 	virtual COLORREF GetAutoColor( void ) const override { return GetAutomaticColor(); }
 
 	virtual const CColorTable* GetSelColorTable( void ) const override { return m_pSelColorTable; }
@@ -118,8 +117,10 @@ protected:
 	afx_msg void OnCopy( void );
 	afx_msg void OnPaste( void );
 	afx_msg void OnUpdatePaste( CCmdUI* pCmdUI );
-	afx_msg void On_ResetColor( void );
-	afx_msg void OnUpdate_ResetColor( CCmdUI* pCmdUI );
+	afx_msg void On_SetAutoColor( void );
+	afx_msg void OnUpdate_SetAutoColor( CCmdUI* pCmdUI );
+	afx_msg void On_MoreColors( void );
+	afx_msg void OnUpdate_MoreColors( CCmdUI* pCmdUI );
 	afx_msg void On_CopyColorTable( void );
 	afx_msg void On_SelectColorTable( UINT colorTableId );
 	afx_msg void OnUpdate_SelectColorTable( CCmdUI* pCmdUI );

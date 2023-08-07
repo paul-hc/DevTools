@@ -140,7 +140,7 @@ namespace mfc
 		mfc::Button_SetStyleFlag( this, TBBS_CHECKED, checked );
 	}
 
-	CToolBarColorButton* CToolBarColorButton::ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT int* pIndex )
+	CToolBarColorButton* CToolBarColorButton::ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex /*= nullptr*/ )
 	{
 		ASSERT_PTR( pToolBar->GetSafeHwnd() );
 		int index = pToolBar->CommandToIndex( btnId );
@@ -924,12 +924,7 @@ namespace mfc
 
 		if ( m_isModelessPopup )
 		{	// modeless popup mode: display the side bar (gutter) in pink for visual feedback - kind of a warning, as modeless support is partial
-			int gutterWidth = 0;
-			{
-				CScopedValue<BOOL> scSideBar( &m_bDisableSideBarInXPMode, false );		// GetGutterWidth() returns non-0 if m_bDisableSideBarInXPMode=true
-				gutterWidth = mfc::PopupMenuBar_GetGutterWidth( this );
-			}
-
+			int gutterWidth = mfc::PopupMenuBar_GetGutterWidth( this );
 			CRect rect;
 			GetClientRect( &rect );
 

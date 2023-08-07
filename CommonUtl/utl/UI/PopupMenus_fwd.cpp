@@ -4,6 +4,7 @@
 #include "Color.h"
 #include "ColorRepository.h"
 #include "WndUtils.h"
+#include "utl/ScopedValue.h"
 #include <afxpopupmenu.h>
 #include <afxcolorpopupmenu.h>
 #include <afxbutton.h>
@@ -15,12 +16,21 @@
 
 namespace ui
 {
+	bool IColorHost::IsForeignColor( void ) const
+	{
+		COLORREF selColor = GetColor();
+		const CColorTable* pSelColorTable = GetSelColorTable();
+
+		return selColor != CLR_NONE && ( nullptr == pSelColorTable || !pSelColorTable->ContainsColor( selColor ) );
+	}
+
+
 	bool IColorEditorHost::EditColorDialog( void )
 	{
 		CWnd* pHostWnd = GetHostWindow();
 		ui::TDisplayColor color = ui::EvalColor( GetActualColor() );
 
-		if ( !ui::EditColor( &color, pHostWnd, true ) )
+		if ( !ui::EditColor( &color, pHostWnd, !ui::IsKeyPressed( VK_CONTROL ) ) )
 			return false;
 
 		SetColor( color, true );
@@ -221,9 +231,10 @@ namespace mfc
 	}
 
 
-	int PopupMenuBar_GetGutterWidth( const CMFCPopupMenuBar* pPopupMenuBar )
+	int PopupMenuBar_GetGutterWidth( CMFCPopupMenuBar* pPopupMenuBar )
 	{
 	#if _MFC_VER > 0x0900		// MFC version 9.00 or less
+		CScopedValue<BOOL> scSideBar( &pPopupMenuBar->m_bDisableSideBarInXPMode, false );		// GetGutterWidth() returns 0 if m_bDisableSideBarInXPMode=true
 		return const_cast<CMFCPopupMenuBar*>( pPopupMenuBar )->GetGutterWidth();
 	#else
 		pPopupMenuBar;

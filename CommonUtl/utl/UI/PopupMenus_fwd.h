@@ -42,7 +42,6 @@ namespace ui
 	interface IColorHost
 	{
 		virtual COLORREF GetColor( void ) const = 0;
-		virtual const CColorEntry* GetRawColor( void ) const = 0;
 		virtual COLORREF GetAutoColor( void ) const = 0;
 
 		virtual const CColorTable* GetSelColorTable( void ) const = 0;
@@ -55,6 +54,9 @@ namespace ui
 			COLORREF actualColor = GetColor();
 			return ui::IsUndefinedColor( actualColor ) ? GetAutoColor() : actualColor;		// the color current selection amounts to
 		}
+
+		bool IsForeignColor( void ) const;
+		COLORREF GetForeignColor( void ) const { return IsForeignColor() ? GetColor() : CLR_NONE; }
 	};
 
 	interface IColorEditorHost : public IColorHost
@@ -109,7 +111,7 @@ namespace mfc
 	void PopupMenu_SetTrackMode( CMFCPopupMenu* pPopupMenu, BOOL trackMode = true );
 
 	// CMFCPopupMenuBar protected access:
-	int PopupMenuBar_GetGutterWidth( const CMFCPopupMenuBar* pPopupMenuBar );
+	int PopupMenuBar_GetGutterWidth( CMFCPopupMenuBar* pPopupMenuBar );
 
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
 	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );

@@ -61,7 +61,7 @@ namespace mfc
 		void SetChecked( bool checked = true );
 		void UpdateSelectedColor( COLORREF selColor ) { SetChecked( m_color == selColor ); }
 
-		static CToolBarColorButton* ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT int* pIndex = nullptr );
+		static CToolBarColorButton* ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex = nullptr );
 	private:
 		COLORREF m_color;
 

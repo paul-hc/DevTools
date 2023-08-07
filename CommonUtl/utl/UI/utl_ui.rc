@@ -504,7 +504,8 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Copy Color &Table",           ID_EDIT_LIST_ITEMS
             MENUITEM SEPARATOR
-            MENUITEM "&Automatic Color\tDelete",    ID_RESET_DEFAULT
+            MENUITEM "&Automatic Color\tDelete",    ID_SET_AUTO_COLOR
+            MENUITEM "&More Colors...",             ID_MORE_COLORS
         END
         POPUP "<context-menu>"
         BEGIN
@@ -513,7 +514,8 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Copy Color &Table\tCtrl+Shift+T", ID_EDIT_LIST_ITEMS
             MENUITEM SEPARATOR
-            MENUITEM "&Automatic Color\tDelete",    ID_RESET_DEFAULT
+            MENUITEM "&Automatic Color\tDelete",    ID_SET_AUTO_COLOR
+            MENUITEM "&More Colors...",             ID_MORE_COLORS
             MENUITEM SEPARATOR
             POPUP "&Select Color Table"
             BEGIN
@@ -740,7 +742,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_COLOR_PICKER_BUTTON_HELP 
-                            "More Options:\r\n- Right-click to show the context menu;\r\n- Press CONTROL key to show alternate popup color picker;\r\n- Press SHIFT key to toggle display of color names."
+                            "More Options:\r\n- Right-click to show the context menu.\r\n- Hold down the CONTROL key to show alternate popup color picker.\r\n- Hold down the SHIFT key to toggle display of color names."
 END
 
 STRINGTABLE

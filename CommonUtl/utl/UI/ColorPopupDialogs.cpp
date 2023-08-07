@@ -24,7 +24,7 @@ CColorPopupDialog::CColorPopupDialog( CWnd* pParentWnd, COLORREF color, DWORD dw
 {
 }
 
-COLORREF CColorPopupDialog::GetCurrentColor( void ) const
+COLORREF CColorPopupDialog::GetCurrentColor( void ) const overrides(CBasePopupColorDialog)
 {
 	return RGB(
 		GetDlgItemInt( COLOR_RED, NULL, FALSE ),
@@ -33,7 +33,7 @@ COLORREF CColorPopupDialog::GetCurrentColor( void ) const
 	);
 }
 
-void CColorPopupDialog::InitDialog( void ) override
+void CColorPopupDialog::InitDialog( void ) overrides(CBasePopupColorDialog)
 {
 	__super::InitDialog();
 
@@ -113,10 +113,19 @@ BEGIN_MESSAGE_MAP( CColorPopupDialog, CBasePopupColorDialog<CColorDialog> )
 END_MESSAGE_MAP()
 
 
+namespace reg
+{
+	static const TCHAR section_Settings[] = _T("Settings");			// default section
+	static const TCHAR entry_ActiveColorPage[] = _T("ActiveColorPage");
+}
+
+
 // COfficeColorPopupDialog implementation
 
-COfficeColorPopupDialog::COfficeColorPopupDialog( CWnd* pParentWnd, COLORREF color )
+COfficeColorPopupDialog::COfficeColorPopupDialog( CWnd* pParentWnd, COLORREF color, int activePageIndex /*= -1*/ )
 	: CBasePopupColorDialog<CMFCColorDialog>( color, 0, pParentWnd )
+	, m_activePageIndex( activePageIndex != -1 ? activePageIndex : AfxGetApp()->GetProfileInt( reg::section_Settings, reg::entry_ActiveColorPage, 0 ) )
+	, m_pPropertySheet( nullptr )
 {
 	m_menuPickerStatic.SetPopupAlign( ui::DropRight );
 }
@@ -128,7 +137,7 @@ void COfficeColorPopupDialog::ModifyColor( COLORREF newColor ) override
 	SetPageTwo( GetRValue( m_NewColor ), GetGValue( m_NewColor ), GetBValue( m_NewColor ) );
 }
 
-void COfficeColorPopupDialog::InitDialog( void ) override
+void COfficeColorPopupDialog::InitDialog( void ) overrides(CBasePopupColorDialog)
 {
 	__super::InitDialog();
 
@@ -141,4 +150,29 @@ void COfficeColorPopupDialog::InitDialog( void ) override
 
 	VERIFY( m_menuPickerStatic.Create( _T("&Tools"), WS_CHILD | WS_VISIBLE | WS_GROUP | SS_NOTIFY | SS_CENTER | SS_CENTERIMAGE, pickButtonRect, this, IDC_EDIT_PICK_STATIC ) );
 	m_menuPickerStatic.SetFont( pSelectButton->GetFont() );		// share the dialog control font
+}
+
+BOOL COfficeColorPopupDialog::OnInitDialog( void ) overrides(CMFCColorDialog)
+{
+	BOOL result = __super::OnInitDialog();
+
+	// only now the child property sheet is created and available
+	m_pPropertySheet = (CPropertySheet*)m_pPropSheet;
+	m_pPropertySheet->SetActivePage( m_activePageIndex );
+	return result;
+}
+
+
+// message handlers
+
+BEGIN_MESSAGE_MAP( COfficeColorPopupDialog, CBasePopupColorDialog<CMFCColorDialog> )
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
+
+void COfficeColorPopupDialog::OnDestroy( void )
+{
+	if ( m_pPropertySheet != nullptr )
+		AfxGetApp()->WriteProfileInt( reg::section_Settings, reg::entry_ActiveColorPage, m_pPropertySheet->GetActiveIndex() );
+
+	__super::OnDestroy();
 }
