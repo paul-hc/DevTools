@@ -11,7 +11,7 @@ public:
 	~CEnumTags();
 
 	bool IsEmpty( void ) const { return m_uiTags.empty() && m_keyTags.empty(); }
-	void AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag = nullptr );
+	CEnumTags& AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag = nullptr );
 
 	const std::vector<std::tstring>& GetUiTags( void ) const { return m_uiTags; }
 

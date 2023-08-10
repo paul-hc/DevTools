@@ -17,7 +17,7 @@ protected:
 	void Serialize( CArchive& archive );				// CObject-like serialization: called from the serializable derived class
 public:
 	// utl::IMessage interface (partial)
-	virtual int GetTypeID( void ) const override;
+	virtual int GetTypeID( void ) const implement;
 
 	std::tstring FormatExecTitle( utl::Verbosity verbosity = utl::Detailed ) const;
 
@@ -55,11 +55,11 @@ public:
 	virtual ~CCommand();
 
 	// utl::IMessage interface (partial)
-	virtual std::tstring Format( utl::Verbosity verbosity ) const override;			// override for special formatting
+	virtual std::tstring Format( utl::Verbosity verbosity ) const implement;			// override for special formatting
 
 	// utl::ICommand interface (partial)
-	virtual bool Unexecute( void ) override;
-	virtual bool IsUndoable( void ) const override;
+	virtual bool Unexecute( void ) implement;
+	virtual bool IsUndoable( void ) const implement;
 private:
 	const CEnumTags* m_pCmdTags;
 };
@@ -85,17 +85,17 @@ public:
 	void AddMainCmd( utl::ICommand* pMainCmd ) { m_pMainCmd = pMainCmd; AddCmd( pMainCmd ); }
 
 	// utl::IMessage interface (partial)
-	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
+	virtual std::tstring Format( utl::Verbosity verbosity ) const implement;
 
 	// utl::ICommand interface
-	virtual bool Execute( void ) override;
-	virtual bool Unexecute( void ) override;
-	virtual bool IsUndoable( void ) const override;
+	virtual bool Execute( void ) implement;
+	virtual bool Unexecute( void ) implement;
+	virtual bool IsUndoable( void ) const implement;
 protected:
 	void Serialize( CArchive& archive );				// CObject-like serialization: called from the serializable derived class
 protected:
 	persist std::tstring m_userInfo;
-	persist std::vector<utl::ICommand*> m_subCommands;		// with ownership
+	persist std::vector<utl::ICommand*> m_subCommands;	// with ownership
 	persist utl::ICommand* m_pMainCmd;
 };
 
@@ -117,7 +117,7 @@ public:
 	SubjectType* GetObject( void ) const { return m_pObject; }
 
 	// base overrides
-	virtual std::tstring Format( utl::Verbosity verbosity ) const override			// standard implementation
+	virtual std::tstring Format( utl::Verbosity verbosity ) const overrides( CCommand )			// standard implementation
 	{
 		std::tstring info = CCommand::Format( verbosity );
 		if ( verbosity != utl::Brief )
@@ -125,7 +125,7 @@ public:
 		return info;
 	}
 
-	virtual bool Execute( void ) override
+	virtual bool Execute( void ) overrides( CCommand )
 	{
 		if ( !DoExecute() )
 			return false;
@@ -145,7 +145,7 @@ protected:
 // Concrete command class must implement IsUndoable(), DoExecute() and Unexecute().
 //
 template< typename SubjectType, typename PropertyType >
-class CObjectPropertyCommand : public CObjectCommand<SubjectType>
+abstract class CObjectPropertyCommand : public CObjectCommand<SubjectType>
 {
 protected:
 	CObjectPropertyCommand( int typeId, SubjectType* pObject, const PropertyType& rValue, const CEnumTags* pCmdTags = nullptr )

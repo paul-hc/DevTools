@@ -23,7 +23,7 @@ CBaseCommand::CBaseCommand( int typeId, utl::ISubject* pSubject )
 {
 }
 
-int CBaseCommand::GetTypeID( void ) const override
+int CBaseCommand::GetTypeID( void ) const implement
 {
 	return m_typeId;
 }
@@ -60,7 +60,7 @@ CCommand::~CCommand()
 {
 }
 
-std::tstring CCommand::Format( utl::Verbosity verbosity ) const override
+std::tstring CCommand::Format( utl::Verbosity verbosity ) const implement
 {
 	if ( HasOriginCmd() )
 		return GetOriginCmd()->Format( verbosity );
@@ -69,13 +69,13 @@ std::tstring CCommand::Format( utl::Verbosity verbosity ) const override
 	return m_pCmdTags->Format( GetTypeID(), verbosity != utl::Brief ? CEnumTags::UiTag : CEnumTags::KeyTag );
 }
 
-bool CCommand::Unexecute( void ) override
+bool CCommand::Unexecute( void ) implement
 {
 	ASSERT( false );
 	return false;
 }
 
-bool CCommand::IsUndoable( void ) const override
+bool CCommand::IsUndoable( void ) const implement
 {
 	return true;
 }
@@ -103,7 +103,7 @@ void CMacroCommand::AddCmd( utl::ICommand* pSubCmd )
 	m_subCommands.push_back( pSubCmd );
 }
 
-std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const override
+std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const implement
 {
 	if ( HasOriginCmd() )
 		return GetOriginCmd()->Format( verbosity );
@@ -139,7 +139,7 @@ std::tstring CMacroCommand::Format( utl::Verbosity verbosity ) const override
 	return text;
 }
 
-bool CMacroCommand::Execute( void ) override
+bool CMacroCommand::Execute( void ) implement
 {
 	bool succeded = !m_subCommands.empty();
 
@@ -150,7 +150,7 @@ bool CMacroCommand::Execute( void ) override
 	return succeded;
 }
 
-bool CMacroCommand::Unexecute( void ) override
+bool CMacroCommand::Unexecute( void ) implement
 {
 	bool succeded = !m_subCommands.empty();
 
@@ -161,7 +161,7 @@ bool CMacroCommand::Unexecute( void ) override
 	return succeded;
 }
 
-bool CMacroCommand::IsUndoable( void ) const override
+bool CMacroCommand::IsUndoable( void ) const implement
 {
 	for ( std::vector<utl::ICommand*>::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
 		if ( ( *itSubCmd )->IsUndoable() )

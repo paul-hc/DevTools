@@ -170,10 +170,10 @@ namespace mfc
 		bool FormatColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const;
 
 		// ui::IToolTipsHandler interface
-		virtual bool Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point ) override;
+		virtual bool Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point ) implement;
 
 		// ui::IWindowHookHandler interface
-		virtual bool Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* pHook ) override;		// to handle WM_LBUTTONUP on More Color button
+		virtual bool Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* pHook ) implement;		// to handle WM_LBUTTONUP on More Color button
 	private:
 		ui::IColorEditorHost* m_pEditorHost;
 		const CColorTable* m_pColorTable;

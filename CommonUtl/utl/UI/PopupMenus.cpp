@@ -601,7 +601,7 @@ namespace mfc
 		return false;
 	}
 
-	bool CColorPopupMenu::Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point )
+	bool CColorPopupMenu::Handle_TtnNeedText( NMTTDISPINFO* pNmDispInfo, const CPoint& point ) implement
 	{
 		int hitBtnIndex = m_pColorBar->HitTest( point );
 
@@ -624,7 +624,7 @@ namespace mfc
 		return false;
 	}
 
-	bool CColorPopupMenu::Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* /*pHook*/ )
+	bool CColorPopupMenu::Handle_HookMessage( OUT LRESULT& rResult, const MSG& msg, const CWindowHook* /*pHook*/ ) implement
 	{
 		if ( WM_LBUTTONUP == msg.message )
 		{

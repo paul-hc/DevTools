@@ -30,7 +30,7 @@ CCommandService::~CCommandService()
 {
 }
 
-size_t CCommandService::FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const
+size_t CCommandService::FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const override
 {
 	const std::deque<utl::ICommand*>& rStack = svc::Undo == stackType ? m_pCommandModel->GetUndoStack() : m_pCommandModel->GetRedoStack();
 	size_t topPos = utl::FindPos( rStack, pCmd );
@@ -40,12 +40,12 @@ size_t CCommandService::FindCmdTopPos( svc::StackType stackType, utl::ICommand* 
 	return topPos;
 }
 
-utl::ICommand* CCommandService::PeekCmd( svc::StackType stackType ) const
+utl::ICommand* CCommandService::PeekCmd( svc::StackType stackType ) const override
 {
 	return svc::Undo == stackType ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo();
 }
 
-bool CCommandService::CanUndoRedo( svc::StackType stackType, int cmdTypeId /*= 0*/ ) const
+bool CCommandService::CanUndoRedo( svc::StackType stackType, int cmdTypeId /*= 0*/ ) const override
 {
 	if ( utl::ICommand* pTopCmd = PeekCmdAs<utl::ICommand>( stackType ) )
 		if ( 0 == cmdTypeId || cmdTypeId == pTopCmd->GetTypeID() )
@@ -56,13 +56,13 @@ bool CCommandService::CanUndoRedo( svc::StackType stackType, int cmdTypeId /*= 0
 	return false;
 }
 
-bool CCommandService::UndoRedo( svc::StackType stackType )
+bool CCommandService::UndoRedo( svc::StackType stackType ) override
 {
 	m_dirty = true;
 	return svc::Undo == stackType ? m_pCommandModel->Undo() : m_pCommandModel->Redo();
 }
 
-bool CCommandService::Execute( utl::ICommand* pCmd )
+bool CCommandService::Execute( utl::ICommand* pCmd ) override
 {
 	if ( !m_pCommandModel->Execute( pCmd ) )
 		return false;
@@ -71,7 +71,7 @@ bool CCommandService::Execute( utl::ICommand* pCmd )
 	return true;
 }
 
-bool CCommandService::SafeExecuteCmd( utl::ICommand* pCmd, bool execInline /*= false*/ )
+bool CCommandService::SafeExecuteCmd( utl::ICommand* pCmd, bool execInline /*= false*/ ) override
 {
 	if ( nullptr == pCmd )
 		return false;

@@ -59,6 +59,7 @@ namespace ui
 		COLORREF GetForeignColor( void ) const { return IsForeignColor() ? GetColor() : CLR_NONE; }
 	};
 
+
 	interface IColorEditorHost : public IColorHost
 	{
 		virtual CWnd* GetHostWindow( void ) const = 0;

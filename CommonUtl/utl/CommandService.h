@@ -5,6 +5,8 @@
 #include "CommandModel.h"
 
 
+// service that implements application-wide command execution with Undo/Redo support
+
 class CCommandService : public svc::ICommandService
 {
 public:
@@ -17,12 +19,12 @@ public:
 	void SetDirty( void ) { m_dirty = true; }		// use with care, called in very special cases
 
 	// svc::ICommandService interface
-	virtual size_t FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const;
-	virtual utl::ICommand* PeekCmd( svc::StackType stackType ) const;
-	virtual bool CanUndoRedo( svc::StackType stackType, int cmdTypeId = 0 ) const;
-	virtual bool UndoRedo( svc::StackType stackType );
-	virtual bool Execute( utl::ICommand* pCmd );
-	virtual bool SafeExecuteCmd( utl::ICommand* pCmd, bool execInline = false );
+	virtual size_t FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const override;
+	virtual utl::ICommand* PeekCmd( svc::StackType stackType ) const override;
+	virtual bool CanUndoRedo( svc::StackType stackType, int cmdTypeId = 0 ) const override;
+	virtual bool UndoRedo( svc::StackType stackType ) override;
+	virtual bool Execute( utl::ICommand* pCmd ) override;
+	virtual bool SafeExecuteCmd( utl::ICommand* pCmd, bool execInline = false ) override;
 
 	template< typename PredType >
 	void RemoveCommandsThat( PredType pred )

@@ -72,7 +72,7 @@ void CCommandModel::RemoveExpiredCommands( size_t maxSize )
 	}
 }
 
-bool CCommandModel::Execute( utl::ICommand* pCmd )
+bool CCommandModel::Execute( utl::ICommand* pCmd ) override
 {
 	ASSERT_PTR( pCmd );
 
@@ -88,7 +88,8 @@ bool CCommandModel::Execute( utl::ICommand* pCmd )
 	}
 	catch ( CUserAbortedException& exc )
 	{	// cancelled by the user
-		exc; TRACE( _T(" * Execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+		exc;
+		TRACE( _T(" * Execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
 	}
 
 	delete pCmd;

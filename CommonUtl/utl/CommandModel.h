@@ -31,7 +31,7 @@ public:
 	static std::tstring PrefixExecMessage( const std::tstring& message );		// prefixes the message with the current ExecMode (do/undo/redo)
 
 	// utl::ICommandExecutor interface
-	virtual bool Execute( utl::ICommand* pCmd );
+	virtual bool Execute( utl::ICommand* pCmd ) override;
 
 	void Push( utl::ICommand* pCmd );					// already executed by the caller
 
