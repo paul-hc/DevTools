@@ -67,7 +67,7 @@ void CColorPopupDialog::InitDialog( void ) overrides(CBasePopupColorDialog)
 	m_menuPickerStatic.SetFont( pAddCustomColorButton->GetFont() );		// share the dialog control font
 }
 
-void CColorPopupDialog::AdjustDlgWindowRect( CRect& rWindowRect ) override
+void CColorPopupDialog::AdjustDlgWindowRect( CRect& rWindowRect ) overrides(CBasePopupColorDialog)
 {
 	enum { SpacingRight = 5 };
 
@@ -130,7 +130,7 @@ COfficeColorPopupDialog::COfficeColorPopupDialog( CWnd* pParentWnd, COLORREF col
 	m_menuPickerStatic.SetPopupAlign( ui::DropRight );
 }
 
-void COfficeColorPopupDialog::ModifyColor( COLORREF newColor ) override
+void COfficeColorPopupDialog::ModifyColor( COLORREF newColor ) overrides(CBasePopupColorDialog)
 {
 	SetNewColor( newColor );
 	SetPageOne( GetRValue( m_NewColor ), GetGValue( m_NewColor ), GetBValue( m_NewColor ) );

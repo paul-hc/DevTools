@@ -107,7 +107,7 @@ protected:
 	virtual void ModifyColor( COLORREF newColor ) overrides(CBasePopupColorDialog) { SetCurrentColor( newColor ); }
 
 	virtual void InitDialog( void ) overrides(CBasePopupColorDialog);
-	virtual void AdjustDlgWindowRect( CRect& rWindowRect ) override;
+	virtual void AdjustDlgWindowRect( CRect& rWindowRect ) overrides(CBasePopupColorDialog);
 private:
 	void CreateSpin( UINT editId, CSpinButtonCtrl& rSpinButton, UINT spinId, int maxValue );
 	void OffsetControl( UINT ctrlId, int offsetX );
@@ -192,7 +192,7 @@ CBasePopupColorDialog<BaseDlg>::CBasePopupColorDialog( COLORREF color, DWORD dwF
 }
 
 template< typename BaseDlg >
-void CBasePopupColorDialog<BaseDlg>::InitDialog( void ) override
+void CBasePopupColorDialog<BaseDlg>::InitDialog( void )
 {
 	REQUIRE( m_firstInit );
 
