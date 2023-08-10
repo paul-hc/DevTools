@@ -17,6 +17,23 @@ namespace utl
 		static const CEnumTags s_tags( _T("|Undo|Redo"), _T("|UNDO|REDO") );
 		return s_tags;
 	}
+
+
+	// ICommandExecutor implementation
+
+	bool ICommandExecutor::SafeExecuteCmd( utl::ICommand* pCmd, bool execInline /*= false*/ ) implement
+	{
+		if ( nullptr == pCmd )
+			return false;
+
+		if ( execInline )
+		{
+			std::auto_ptr<utl::ICommand> pEditCmd( pCmd );		// take ownership, delete right after execution
+			return pEditCmd->Execute();
+		}
+
+		return Execute( pCmd );
+	}
 }
 
 
@@ -72,7 +89,7 @@ void CCommandModel::RemoveExpiredCommands( size_t maxSize )
 	}
 }
 
-bool CCommandModel::Execute( utl::ICommand* pCmd ) override
+bool CCommandModel::Execute( utl::ICommand* pCmd ) implement
 {
 	ASSERT_PTR( pCmd );
 

@@ -16,7 +16,7 @@ namespace utl
 
 
 	interface ICommand : public IMessage
-					   , public utl::IMemoryManaged
+		, public utl::IMemoryManaged
 	{
 		virtual bool Execute( void ) = 0;
 		virtual bool Unexecute( void ) = 0;
@@ -26,6 +26,9 @@ namespace utl
 	interface ICommandExecutor
 	{
 		virtual bool Execute( ICommand* pCmd ) = 0;
+
+		// implemented
+		virtual bool SafeExecuteCmd( utl::ICommand* pCmd, bool execInline = false );	// could be overridden for special handling (e.g. conditional Undo/Redo, etc)
 	};
 }
 
@@ -44,7 +47,6 @@ namespace svc
 		virtual bool CanUndoRedo( svc::StackType stackType, int typeId = 0 ) const = 0;
 		virtual bool UndoRedo( svc::StackType stackType ) = 0;
 		virtual bool Execute( utl::ICommand* pCmd ) = 0;
-		virtual bool SafeExecuteCmd( utl::ICommand* pCmd, bool execInline = false ) = 0;
 
 		template< typename CmdType >
 		CmdType* PeekCmdAs( svc::StackType stackType ) const { return dynamic_cast<CmdType*>( PeekCmd( stackType ) ); }

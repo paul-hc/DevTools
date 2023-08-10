@@ -19,12 +19,11 @@ public:
 	void SetDirty( void ) { m_dirty = true; }		// use with care, called in very special cases
 
 	// svc::ICommandService interface
-	virtual size_t FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const override;
-	virtual utl::ICommand* PeekCmd( svc::StackType stackType ) const override;
-	virtual bool CanUndoRedo( svc::StackType stackType, int cmdTypeId = 0 ) const override;
-	virtual bool UndoRedo( svc::StackType stackType ) override;
-	virtual bool Execute( utl::ICommand* pCmd ) override;
-	virtual bool SafeExecuteCmd( utl::ICommand* pCmd, bool execInline = false ) override;
+	virtual size_t FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const implement;
+	virtual utl::ICommand* PeekCmd( svc::StackType stackType ) const implement;
+	virtual bool CanUndoRedo( svc::StackType stackType, int cmdTypeId = 0 ) const implement;
+	virtual bool UndoRedo( svc::StackType stackType ) implement;
+	virtual bool Execute( utl::ICommand* pCmd ) implement;
 
 	template< typename PredType >
 	void RemoveCommandsThat( PredType pred )

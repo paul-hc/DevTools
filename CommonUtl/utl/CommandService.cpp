@@ -30,7 +30,7 @@ CCommandService::~CCommandService()
 {
 }
 
-size_t CCommandService::FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const override
+size_t CCommandService::FindCmdTopPos( svc::StackType stackType, utl::ICommand* pCmd ) const implement
 {
 	const std::deque<utl::ICommand*>& rStack = svc::Undo == stackType ? m_pCommandModel->GetUndoStack() : m_pCommandModel->GetRedoStack();
 	size_t topPos = utl::FindPos( rStack, pCmd );
@@ -40,12 +40,12 @@ size_t CCommandService::FindCmdTopPos( svc::StackType stackType, utl::ICommand* 
 	return topPos;
 }
 
-utl::ICommand* CCommandService::PeekCmd( svc::StackType stackType ) const override
+utl::ICommand* CCommandService::PeekCmd( svc::StackType stackType ) const implement
 {
 	return svc::Undo == stackType ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo();
 }
 
-bool CCommandService::CanUndoRedo( svc::StackType stackType, int cmdTypeId /*= 0*/ ) const override
+bool CCommandService::CanUndoRedo( svc::StackType stackType, int cmdTypeId /*= 0*/ ) const implement
 {
 	if ( utl::ICommand* pTopCmd = PeekCmdAs<utl::ICommand>( stackType ) )
 		if ( 0 == cmdTypeId || cmdTypeId == pTopCmd->GetTypeID() )
@@ -56,31 +56,17 @@ bool CCommandService::CanUndoRedo( svc::StackType stackType, int cmdTypeId /*= 0
 	return false;
 }
 
-bool CCommandService::UndoRedo( svc::StackType stackType ) override
+bool CCommandService::UndoRedo( svc::StackType stackType ) implement
 {
 	m_dirty = true;
 	return svc::Undo == stackType ? m_pCommandModel->Undo() : m_pCommandModel->Redo();
 }
 
-bool CCommandService::Execute( utl::ICommand* pCmd ) override
+bool CCommandService::Execute( utl::ICommand* pCmd ) implement
 {
 	if ( !m_pCommandModel->Execute( pCmd ) )
 		return false;
 
 	m_dirty = true;
 	return true;
-}
-
-bool CCommandService::SafeExecuteCmd( utl::ICommand* pCmd, bool execInline /*= false*/ ) override
-{
-	if ( nullptr == pCmd )
-		return false;
-
-	if ( execInline )
-	{
-		std::auto_ptr<utl::ICommand> pEditCmd( pCmd );		// take ownership
-		return pEditCmd->Execute();
-	}
-
-	return Execute( pCmd );
 }
