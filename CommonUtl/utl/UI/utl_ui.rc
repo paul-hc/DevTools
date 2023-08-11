@@ -504,6 +504,9 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Copy Color &Table",           ID_EDIT_LIST_ITEMS
             MENUITEM SEPARATOR
+            MENUITEM "Undo\tCtrl+Z",                ID_EDIT_UNDO
+            MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO
+            MENUITEM SEPARATOR
             MENUITEM "&Automatic Color\tDelete",    ID_SET_AUTO_COLOR
             MENUITEM "&More Colors...",             ID_MORE_COLORS
         END
@@ -513,6 +516,9 @@ BEGIN
             MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
             MENUITEM SEPARATOR
             MENUITEM "Copy Color &Table\tCtrl+Shift+T", ID_EDIT_LIST_ITEMS
+            MENUITEM SEPARATOR
+            MENUITEM "Undo\tCtrl+Z",                ID_EDIT_UNDO
+            MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO
             MENUITEM SEPARATOR
             MENUITEM "&Automatic Color\tDelete",    ID_SET_AUTO_COLOR
             MENUITEM "&More Colors...",             ID_MORE_COLORS

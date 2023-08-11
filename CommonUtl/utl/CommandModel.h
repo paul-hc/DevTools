@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ICommand.h"
+#include "Serialization_fwd.h"
 #include <deque>
 
 
@@ -15,7 +16,26 @@ public:
 };
 
 
+namespace func
+{
+	template< typename CmdT, typename HostT >
+	struct SetCmdHost			// for convenient batch host re-assignment
+	{
+		SetCmdHost( HostT* pHost ) { m_pHost = pHost; ASSERT_PTR( m_pHost ); }
+
+		void operator()( utl::ICommand* pCmd ) const
+		{
+			CmdT* pCommand = checked_static_cast<CmdT*>( pCmd );
+			pCommand->SetHost( m_pHost );
+		}
+	private:
+		HostT* m_pHost;
+	};
+}
+
+
 class CCommandModel : public utl::ICommandExecutor
+					, public serial::ISerializable
 					, private utl::noncopyable
 {
 	friend struct CScopedExecMode;
@@ -50,18 +70,24 @@ public:
 	void SwapUndoStack( std::deque<utl::ICommand*>& rUndoStack ) { m_undoStack.swap( rUndoStack ); }
 	void SwapRedoStack( std::deque<utl::ICommand*>& rRedoStack ) { m_redoStack.swap( rRedoStack ); }
 
+	// persistence
+	virtual void Serialize( CArchive& archive ) implement;
+
+	template< typename CmdT, typename HostT >
+	void ReHostCommands( HostT* pHost );			// called after loading, to update the host interface pointer (parent) of each persistent command
+
 	// commands removal
 	void RemoveExpiredCommands( size_t maxSize );
 
-	template< typename PredType >
-	void RemoveCommandsThat( PredType pred );
+	template< typename PredT >
+	void RemoveCommandsThat( PredT pred );
 private:
-	template< typename PredType >
-	static void RemoveStackCommandsThat( std::deque<utl::ICommand*>& rStack, PredType pred );
+	template< typename PredT >
+	static void RemoveStackCommandsThat( std::deque<utl::ICommand*>& rStack, PredT pred );
 private:
 	// commands stored in UNDO and REDO must keep their objects alive
-	std::deque<utl::ICommand*> m_undoStack;			// stack top at end
-	std::deque<utl::ICommand*> m_redoStack;			// stack top at end
+	persist std::deque<utl::ICommand*> m_undoStack;			// stack top at end
+	persist std::deque<utl::ICommand*> m_redoStack;			// stack top at end
 
 	static utl::ExecMode s_execMode;
 };
@@ -69,8 +95,17 @@ private:
 
 // template code
 
-template< typename PredType >
-void CCommandModel::RemoveStackCommandsThat( std::deque<utl::ICommand*>& rStack, PredType pred )
+template< typename CmdT, typename HostT >
+void CCommandModel::ReHostCommands( HostT* pHost )
+{	// called after loading, to update the host interface pointer (parent) of each persistent command
+	func::SetCmdHost<CmdT, HostT> setCmdHost( pHost );
+
+	std::for_each( m_undoStack.begin(), m_undoStack.end(), setCmdHost );
+	std::for_each( m_redoStack.begin(), m_redoStack.end(), setCmdHost );
+}
+
+template< typename PredT >
+void CCommandModel::RemoveStackCommandsThat( std::deque<utl::ICommand*>& rStack, PredT pred )
 {
 	for ( std::deque<utl::ICommand*>::iterator itCmd = rStack.begin(); itCmd != rStack.end(); )
 		if ( pred( *itCmd ) )
@@ -82,8 +117,8 @@ void CCommandModel::RemoveStackCommandsThat( std::deque<utl::ICommand*>& rStack,
 			++itCmd;
 }
 
-template< typename PredType >
-inline void CCommandModel::RemoveCommandsThat( PredType pred )
+template< typename PredT >
+inline void CCommandModel::RemoveCommandsThat( PredT pred )
 {
 	RemoveStackCommandsThat( m_undoStack, pred );
 	RemoveStackCommandsThat( m_redoStack, pred );

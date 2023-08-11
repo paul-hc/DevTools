@@ -12,6 +12,28 @@
 #endif
 
 
+namespace nosy
+{
+	struct CMemFile_ : public CMemFile
+	{
+		// public access
+		using CMemFile::m_lpBuffer;
+	};
+}
+
+
+namespace mfc
+{
+	const BYTE* GetFileBuffer( const CMemFile* pMemFile, OUT OPTIONAL size_t* pBufferSize /*= nullptr*/ )
+	{
+		ASSERT_PTR( pMemFile );
+
+		utl::AssignPtr( pBufferSize, static_cast<size_t>( pMemFile->GetLength() ) );
+		return mfc::nosy_cast<nosy::CMemFile_>( pMemFile )->m_lpBuffer;
+	}
+}
+
+
 namespace utl
 {
 	CGlobalMemFile::CGlobalMemFile( HGLOBAL hSrcBuffer ) throws_( CException )

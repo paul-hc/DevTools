@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "UserReport.h"
+#include "AppTools.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
@@ -29,8 +30,8 @@ namespace ui
 
 	IUserReport& CSilentMode::Instance( void )
 	{
-		static CSilentMode silentMode;
-		return silentMode;
+		static CSilentMode s_silentMode;
+		return s_silentMode;
 	}
 
 	int CSilentMode::MessageBox( const std::tstring& message, UINT mbType /*= MB_OK*/ )
@@ -56,7 +57,8 @@ namespace ui
 
 	int CSilentMode::ReportError( CException* pExc, UINT mbType /*= MB_OK*/ )
 	{
-		pExc;
+		app::TraceException( pExc );
+		pExc->Delete();
 		return MessageBox( std::tstring(), mbType );
 	}
 
@@ -65,8 +67,8 @@ namespace ui
 
 	IUserReport& CInteractiveMode::Instance( void )
 	{
-		static CInteractiveMode interactiveMode;
-		return interactiveMode;
+		static CInteractiveMode s_interactiveMode;
+		return s_interactiveMode;
 	}
 
 	int CInteractiveMode::MessageBox( const std::tstring& message, UINT mbType /*= MB_OK*/ )

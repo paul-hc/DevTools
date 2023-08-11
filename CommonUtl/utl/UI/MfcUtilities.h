@@ -52,6 +52,12 @@ namespace com
 }
 
 
+namespace mfc
+{
+	const BYTE* GetFileBuffer( const CMemFile* pMemFile, OUT OPTIONAL size_t* pBufferSize = nullptr );
+}
+
+
 namespace utl
 {
 	template< typename Type >

@@ -25,6 +25,7 @@ class CColorTable;
 class CColorStore;
 class CScratchColorStore;
 namespace mfc { class CColorMenuButton; }
+namespace ui { class CCommandSvcHandler; }
 
 class CColorMenuTrackingImpl;
 
@@ -52,17 +53,17 @@ public:
 	void SetPickingMode( PickingMode pickingMode ) { m_pickingMode = pickingMode; }
 
 	// ui::IColorHost interface
-	virtual COLORREF GetColor( void ) const override { return CMFCColorButton::GetColor(); }
-	virtual COLORREF GetAutoColor( void ) const override { return GetAutomaticColor(); }
+	virtual COLORREF GetColor( void ) const implement { return CMFCColorButton::GetColor(); }
+	virtual COLORREF GetAutoColor( void ) const implement { return GetAutomaticColor(); }
 
-	virtual const CColorTable* GetSelColorTable( void ) const override { return m_pSelColorTable; }
-	virtual const CColorTable* GetDocColorTable( void ) const override { return m_pDocColorTable; }
-	virtual bool UseUserColors( void ) const override;
+	virtual const CColorTable* GetSelColorTable( void ) const implement { return m_pSelColorTable; }
+	virtual const CColorTable* GetDocColorTable( void ) const implement { return m_pDocColorTable; }
+	virtual bool UseUserColors( void ) const implement;
 
 	// ui::IColorEditorHost interface
-	virtual CWnd* GetHostWindow( void ) const override { return const_cast<CColorPickerButton*>( this ); }
-	virtual void SetColor( COLORREF rawColor, bool notify = false ) override;
-	virtual void SetSelColorTable( const CColorTable* pSelColorTable ) override;
+	virtual CWnd* GetHostWindow( void ) const implement { return const_cast<CColorPickerButton*>( this ); }
+	virtual void SetColor( COLORREF rawColor, bool notify = false ) implement;
+	virtual void SetSelColorTable( const CColorTable* pSelColorTable ) implement;
 
 	enum TrackingMode { NoTracking, TrackingColorBar, TrackingMenuColorTables, TrackingContextMenu };
 protected:
@@ -70,9 +71,11 @@ protected:
 	bool DoReleaseCapture( void );
 private:
 	bool IsEmpty( void ) const { return m_Colors.IsEmpty() && m_lstDocColors.IsEmpty(); }
+	void SetColorImpl( COLORREF rawColor, bool notify );
 
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
+	std::tstring FormatEntryCommands( void ) const;
 
 	enum ChangedField { SelColorTableChanged, PickingModeChanged };
 	void NotifyMatchingPickers( ChangedField field );
@@ -91,9 +94,11 @@ private:
 	std::tstring m_regSection;
 	CAccelTable m_accel;
 
+	std::auto_ptr<ui::CCommandSvcHandler> m_pCmdSvc;		// a CCmdTarget that manages color commands, undo, redo
 	std::auto_ptr<CColorMenuTrackingImpl> m_pMenuImpl;		// a CCmdTarget that manages set up of the popup menu, and has the color stores
 
 	TrackingMode m_trackingMode;
+	bool m_inCmd;											// internal, true while a CSetColorCmd is being executed as a result of user action (notify)
 
 	static std::vector<CColorPickerButton*> s_instances;	// for color table notifications
 protected:

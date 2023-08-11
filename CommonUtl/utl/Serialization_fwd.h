@@ -36,6 +36,15 @@ namespace portable
 
 namespace serial
 {
+	interface ISerializable		// equivalent with CObject as base class, but implemented by non MFC dynamic objects
+	{
+		virtual void Serialize( CArchive& archive ) = 0;
+	};
+}
+
+
+namespace serial
+{
 	interface IStreamable
 	{
 		virtual void Save( CArchive& archive ) throws_( CException* ) = 0;

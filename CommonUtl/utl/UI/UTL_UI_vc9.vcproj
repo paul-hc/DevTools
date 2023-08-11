@@ -1862,11 +1862,27 @@
 				Name="Service"
 				>
 				<File
+					RelativePath=".\CommandSvcHandler.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CommandSvcHandler.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ProgressService.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\ProgressService.h"
+					>
+				</File>
+				<File
+					RelativePath=".\UiCommands.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\UiCommands.h"
 					>
 				</File>
 			</Filter>

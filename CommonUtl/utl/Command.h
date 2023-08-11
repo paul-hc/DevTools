@@ -58,7 +58,7 @@ public:
 	virtual std::tstring Format( utl::Verbosity verbosity ) const implement;			// override for special formatting
 
 	// utl::ICommand interface (partial)
-	virtual bool Unexecute( void ) implement;
+	virtual bool Unexecute( void ) implement;			// dummy implementation with assetion failure, must override to do something
 	virtual bool IsUndoable( void ) const implement;
 private:
 	const CEnumTags* m_pCmdTags;

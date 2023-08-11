@@ -200,6 +200,7 @@
     <ClInclude Include="ColorPickerButton.h" />
     <ClInclude Include="ColorPopupDialogs.h" />
     <ClInclude Include="ColorRepository.h" />
+    <ClInclude Include="CommandSvcHandler.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ContentFitBase.h" />
     <ClInclude Include="ContextMenuMgr.h" />
@@ -294,6 +295,7 @@
     <ClInclude Include="Recycler.h" />
     <ClInclude Include="RegistryOptions.h" />
     <ClInclude Include="RegistrySection.h" />
+    <ClInclude Include="RegistrySerialization.h" />
     <ClInclude Include="RenderingDirect2D.h" />
     <ClInclude Include="ReportListControl.h" />
     <ClInclude Include="ReportListControl.hxx" />
@@ -352,6 +354,7 @@
     <ClInclude Include="TrayIcon.h" />
     <ClInclude Include="TreeControl.h" />
     <ClInclude Include="TreeControlCustomDraw.h" />
+    <ClInclude Include="UiCommands.h" />
     <ClInclude Include="ui_fwd.h" />
     <ClInclude Include="UserReport.h" />
     <ClInclude Include="utl_ui.h" />
@@ -393,6 +396,7 @@
     <ClCompile Include="ColorPickerButton.cpp" />
     <ClCompile Include="ColorPopupDialogs.cpp" />
     <ClCompile Include="ColorRepository.cpp" />
+    <ClCompile Include="CommandSvcHandler.cpp" />
     <ClCompile Include="ContentFitBase.cpp" />
     <ClCompile Include="ContextMenuMgr.cpp" />
     <ClCompile Include="Control_fwd.cpp" />
@@ -472,6 +476,7 @@
     <ClCompile Include="Recycler.cpp" />
     <ClCompile Include="RegistryOptions.cpp" />
     <ClCompile Include="RegistrySection.cpp" />
+    <ClCompile Include="RegistrySerialization.cpp" />
     <ClCompile Include="RenderingDirect2D.cpp" />
     <ClCompile Include="ReportListControl.cpp" />
     <ClCompile Include="ReportListCustomDraw.cpp" />
@@ -518,6 +523,7 @@
     <ClCompile Include="TrayIcon.cpp" />
     <ClCompile Include="TreeControl.cpp" />
     <ClCompile Include="TreeControlCustomDraw.cpp" />
+    <ClCompile Include="UiCommands.cpp" />
     <ClCompile Include="UserReport.cpp" />
     <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="VisualTheme.cpp" />

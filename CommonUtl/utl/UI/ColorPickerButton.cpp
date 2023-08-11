@@ -6,6 +6,8 @@
 #include "PopupMenus.h"
 #include "ContextMenuMgr.h"
 #include "MenuUtilities.h"
+#include "CommandSvcHandler.h"
+#include "UiCommands.h"
 #include "WndUtils.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
@@ -53,7 +55,7 @@ class CColorMenuTrackingImpl : public CCmdTarget		// tracks a mfc::CColorPopupMe
 	, public ui::ICustomPopupMenu
 {
 public:
-	CColorMenuTrackingImpl( ui::IColorEditorHost* pHost );
+	CColorMenuTrackingImpl( ui::IColorEditorHost* pHost, const CCommandModel* pCmdModel );
 	virtual ~CColorMenuTrackingImpl();
 
 	void SetupMenu( bool isContextMenu );
@@ -68,9 +70,13 @@ private:
 	static mfc::CColorMenuButton* FindColorMenuButton( UINT colorBtnId );
 
 	// ui::ICustomPopupMenu interface
-	virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int trackingMode ) override;
+	virtual void OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int trackingMode ) implement;
+
+	COLORREF PeekUndoTopColor( void ) const;
+	COLORREF PeekRedoTopColor( void ) const;
 private:
 	ui::IColorEditorHost* m_pHost;
+	const CCommandModel* m_pCmdModel;
 public:
 	const CColorStore* m_pMainStore;		// by default CColorRepository::Instance(); enumerates the main ID_REPO_COLOR_TABLE_MIN/MAX color tables
 	std::auto_ptr<CScratchColorStore> m_pScratchStore;
@@ -91,6 +97,7 @@ namespace reg
 	static const TCHAR section_picker[] = _T("Settings\\ColorPicker");			// default section
 	static const TCHAR entry_ColorTableName[] = _T("ColorTableName");
 	static const TCHAR entry_PickingMode[] = _T("PickingMode");
+	static const TCHAR entry_Commands[] = _T("Commands");
 }
 
 
@@ -109,18 +116,25 @@ CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nu
 	, m_regSection( reg::section_picker )
 	, m_accel( IDR_EDIT_ACCEL )
 	, m_trackingMode( NoTracking )
+	, m_inCmd( false )
 {
 	REQUIRE( !utl::Contains( s_instances, this ) );
 	s_instances.push_back( this );
 
 	const ACCEL accelKeys[] =
 	{
-		{ FVIRTKEY, VK_DELETE, ID_SET_AUTO_COLOR },
-		{ FVIRTKEY | FCONTROL | FSHIFT, 'T', IDP_COPY_COLOR_TABLE }
+		{ FVIRTKEY, VK_DELETE, ID_SET_AUTO_COLOR },						// Delete
+		{ FVIRTKEY | FCONTROL | FSHIFT, 'T', IDP_COPY_COLOR_TABLE },	// Ctrl+Shift+T
+		{ FVIRTKEY | FCONTROL, 'Z', ID_EDIT_UNDO },						// Ctrl+Z
+		{ FVIRTKEY | FALT, VK_BACK, ID_EDIT_UNDO },						// Alt+Backspace
+		{ FVIRTKEY | FCONTROL, 'Y', ID_EDIT_REDO },						// Ctrl+Shift+Z
+		{ FVIRTKEY | FCONTROL | FSHIFT, 'Z', ID_EDIT_REDO },			// Ctrl+Shift+Z
+		{ FVIRTKEY | FALT | FSHIFT, VK_BACK, ID_EDIT_REDO }				// Shift+Alt+Backspace
 	};
 	m_accel.Augment( ARRAY_SPAN( accelKeys ) );
 
-	m_pMenuImpl.reset( new CColorMenuTrackingImpl( this ) );
+	m_pCmdSvc.reset( new ui::CCommandSvcHandler() );
+	m_pMenuImpl.reset( new CColorMenuTrackingImpl( this, m_pCmdSvc->GetCmdModel() ) );
 
 	EnableOtherButton( mfc::CColorLabels::s_moreLabel );
 
@@ -152,7 +166,7 @@ void CColorPickerButton::SetMainStore( const CColorStore* pMainStore )
 		SetSelColorTable( m_pMenuImpl->m_pMainStore->GetTables().front() );
 }
 
-bool CColorPickerButton::UseUserColors( void ) const override
+bool CColorPickerButton::UseUserColors( void ) const implement
 {
 	return ( nullptr == m_pSelColorTable || ui::UserCustom_Colors == m_pSelColorTable->GetTableType() ) && !m_Colors.IsEmpty();
 }
@@ -169,7 +183,20 @@ void CColorPickerButton::SetUserColors( const std::vector<COLORREF>& userColors,
 	SetSelColorTable( pUserCustomTable );
 }
 
-void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) override
+void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) implement
+{
+	if ( notify && !m_inCmd && m_pCmdSvc.get() != nullptr && utl::ExecDo == CCommandModel::GetExecMode() )
+	{
+		CScopedValue<bool> scInCmd( &m_inCmd, true );
+
+		m_pCmdSvc->Execute( new CSetColorCmd( this, rawColor ) );
+		return;
+	}
+
+	SetColorImpl( rawColor, notify );
+}
+
+void CColorPickerButton::SetColorImpl( COLORREF rawColor, bool notify )
 {
 	if ( notify )
 	{
@@ -213,7 +240,7 @@ void CColorPickerButton::UpdateShadesTable( void )
 	SetDocumentColors( pShadesTable->IsEmpty() ? nullptr : pShadesTable->GetTableName().c_str(), shadesColorList );
 }
 
-void CColorPickerButton::SetSelColorTable( const CColorTable* pSelColorTable ) override
+void CColorPickerButton::SetSelColorTable( const CColorTable* pSelColorTable ) implement
 {
 	ASSERT_PTR( pSelColorTable );
 	if ( m_pSelColorTable == pSelColorTable )
@@ -273,6 +300,9 @@ void CColorPickerButton::LoadFromRegistry( void )
 		}
 
 		m_pickingMode = static_cast<PickingMode>( pApp->GetProfileInt( m_regSection.c_str(), reg::entry_PickingMode, m_pickingMode ) );
+
+		if ( m_pCmdSvc->LoadState( m_regSection.c_str(), FormatEntryCommands().c_str() ) )
+			m_pCmdSvc->RefCmdModel()->ReHostCommands<CSetColorCmd>( this );
 	}
 
 	if ( pSelColorTable != m_pSelColorTable )
@@ -291,7 +321,19 @@ void CColorPickerButton::SaveToRegistry( void ) const
 
 		pApp->WriteProfileString( m_regSection.c_str(), reg::entry_ColorTableName, colorTableName.c_str() );
 		pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_PickingMode, m_pickingMode );
+
+		m_pCmdSvc->SaveState( m_regSection.c_str(), FormatEntryCommands().c_str() );
 	}
+}
+
+std::tstring CColorPickerButton::FormatEntryCommands( void ) const
+{
+	REQUIRE( !m_regSection.empty() );
+
+	if ( m_regSection == reg::section_picker )		// shared section?
+		return str::Format( _T("%s_%d"), reg::entry_Commands, GetDlgCtrlID() );		// use unique Commands_CtrlID entries to disambiguate
+
+	return reg::entry_Commands;
 }
 
 void CColorPickerButton::NotifyMatchingPickers( ChangedField field )
@@ -529,6 +571,9 @@ BOOL CColorPickerButton::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDL
 		if ( m_pMenuImpl->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 			return true;
 
+	if ( m_pCmdSvc->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return true;		// handle Undo/Redo commands
+
 	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
@@ -697,8 +742,9 @@ void CColorPickerButton::OnUpdateEnable( CCmdUI* pCmdUI )
 
 // CColorMenuTrackingImpl implementation
 
-CColorMenuTrackingImpl::CColorMenuTrackingImpl( ui::IColorEditorHost* pHost )
+CColorMenuTrackingImpl::CColorMenuTrackingImpl( ui::IColorEditorHost* pHost, const CCommandModel* pCmdModel )
 	: m_pHost( pHost )
+	, m_pCmdModel( pCmdModel )
 	, m_pMainStore( CColorRepository::Instance() )
 	, m_pScratchStore( new CScratchColorStore() )
 {
@@ -782,7 +828,7 @@ mfc::CColorMenuButton* CColorMenuTrackingImpl::FindColorMenuButton( UINT colorBt
 	return checked_static_cast<mfc::CColorMenuButton*>( mfc::CTrackingPopupMenu::FindTrackingBarButton( colorBtnId ) );
 }
 
-void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int trackingMode )
+void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int trackingMode ) implement
 {	// called in menu tracking mode
 	ASSERT_PTR( pMenuPopup );
 	REQUIRE( m_menu.GetSafeHmenu() == pMenuPopup->GetHMenu() );
@@ -805,6 +851,25 @@ void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int 
 
 	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_SET_AUTO_COLOR, m_pHost->GetAutoColor() );		// to display the Automatic color box on the menu item
 	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_MORE_COLORS, m_pHost->GetForeignColor() );		// to display the More Colors color box on the menu item
+
+	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_EDIT_UNDO, PeekUndoTopColor() );					// to display the Undo top old color
+	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_EDIT_REDO, PeekRedoTopColor() );					// to display the Redo top color
+}
+
+COLORREF CColorMenuTrackingImpl::PeekUndoTopColor( void ) const
+{
+	if ( const CSetColorCmd* pTopCmd = checked_static_cast<const CSetColorCmd*>( m_pCmdModel->PeekUndo() ) )
+		return pTopCmd->GetOldColor();
+
+	return CLR_NONE;
+}
+
+COLORREF CColorMenuTrackingImpl::PeekRedoTopColor( void ) const
+{
+	if ( const CSetColorCmd* pTopCmd = checked_static_cast<const CSetColorCmd*>( m_pCmdModel->PeekRedo() ) )
+		return pTopCmd->GetColor();
+
+	return CLR_NONE;
 }
 
 // message handlers

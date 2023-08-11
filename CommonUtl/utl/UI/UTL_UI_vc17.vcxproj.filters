@@ -653,6 +653,15 @@
     <ClInclude Include="WindowHook_fwd.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="CommandSvcHandler.h">
+      <Filter>UI\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="UiCommands.h">
+      <Filter>UI\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="RegistrySerialization.h">
+      <Filter>UI\Registry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1116,6 +1125,15 @@
     </ClCompile>
     <ClCompile Include="MenuPickerButton.cpp">
       <Filter>UI\Controls\MFC+</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandSvcHandler.cpp">
+      <Filter>UI\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="UiCommands.cpp">
+      <Filter>UI\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="RegistrySerialization.cpp">
+      <Filter>UI\Registry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

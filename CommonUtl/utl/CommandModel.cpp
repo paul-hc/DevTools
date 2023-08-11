@@ -9,6 +9,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Serialization.hxx"
+
 
 namespace utl
 {
@@ -195,6 +197,18 @@ bool CCommandModel::CanRedo( void ) const
 std::tstring CCommandModel::PrefixExecMessage( const std::tstring& message )
 {
 	std::tstring execMessage = utl::GetTags_ExecMode().FormatUi( CCommandModel::GetExecMode() );
+
 	stream::Tag( execMessage, message, _T(": ") );
 	return execMessage;
+}
+
+void CCommandModel::Serialize( CArchive& archive ) implement
+{
+	if ( archive.IsLoading() )
+		Clear();
+
+	serial::Serialize_CObjects_Mixed( archive, m_undoStack );
+	serial::Serialize_CObjects_Mixed( archive, m_redoStack );
+
+	// note: on loading, caller must call this->ReHostCommands() to rebind the host to the loaded commands
 }

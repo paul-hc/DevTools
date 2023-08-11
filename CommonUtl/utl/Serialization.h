@@ -10,7 +10,9 @@ namespace serial
 	// adapts a class that implements "void Serialize( CArchive& archive )" to a IStreamable interface
 	//
 	template< typename BaseClass >
-	abstract class CStreamableAdapter : public BaseClass, public IStreamable
+	abstract class CStreamableAdapter
+		: public BaseClass
+		, public IStreamable
 	{
 	protected:
 		CStreamableAdapter( void ) : BaseClass() {}
