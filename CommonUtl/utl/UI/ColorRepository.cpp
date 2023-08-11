@@ -121,6 +121,26 @@ std::tstring CColorEntry::FormatColor( const TCHAR* pFieldSep /*= s_fieldSep*/, 
 	return colorName;
 }
 
+std::tostream& CColorEntry::TabularOutColor( IN OUT std::tostream& os, size_t pos ) const
+{
+	const COLORREF realColor = ui::EvalColor( m_color );
+	const TCHAR tab = _T('\t');
+
+	if ( pos != utl::npos )
+		os << ( pos + 1 );			// 1-based index
+
+	os
+		<< tab<< m_name
+		<< tab<< ui::FormatRgbColor( realColor )
+		<< tab<< ui::FormatHexColor( realColor )
+		<< tab<< ui::FormatHtmlColor( realColor );
+
+	if ( ui::IsSysColor( m_color ) )
+		os << tab << ui::FormatSysColor( m_color, true );
+
+	return os;
+}
+
 
 // CColorTable implementation
 
@@ -218,6 +238,23 @@ bool CColorTable::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) c
 		return false;
 
 	return true;
+}
+
+std::tostream& CColorTable::TabularOut( IN OUT std::tostream& os ) const
+{
+	// table headline
+	os << _T("Color Table: \"") << GetTableName() << _T("\"  [") << m_colors.size() << _T(" colors]") << std::endl;
+
+	// column header
+	os << _T("INDEX\tNAME\tRGB\tHEX\tHTML");
+	if ( IsSysColorTable() )
+		os << _T("\tSYS_COLOR");
+	os << std::endl;
+
+	for ( size_t i = 0; i != m_colors.size(); ++i )
+		m_colors[ i ].TabularOutColor( os, i ) << std::endl;
+
+	return os;
 }
 
 void CColorTable::QueryMfcColors( OUT mfc::TColorArray& rColorArray ) const
@@ -589,40 +626,45 @@ const CColorRepository* CColorRepository::Instance( void )
 
 CColorTable* CColorRepository::MakeTable_WindowsSystem( void )
 {
-	// 31 colors: 2 columns x 16 rows - for display in named CColorTablePopupMenu, or 8 columns x 4 rows in nameless CMFCColorBar
-	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, 31, 2, 8 );
+	// 31 colors: 2 columns x 15 rows - for display in named CColorTablePopupMenu, or 6 columns x 3 rows in nameless CMFCColorBar
+	enum { SysColorCount = 30 };		// plus some aliases
+	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, SysColorCount, 2, 6 );
 
+	// row 1:
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BACKGROUND ), _T("Desktop Background") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_WINDOW ), _T("Window Background") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_WINDOWTEXT ), _T("Window Text") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_WINDOWFRAME ), _T("Window Frame") ) );
-	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BTNFACE ), _T("Button Face") ) );
-	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BTNHIGHLIGHT ), _T("Button Highlight") ) );
-	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BTNSHADOW ), _T("Button Shadow") ) );
-	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BTNTEXT ), _T("Button Text") ) );
-	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_GRAYTEXT ), _T("Disabled Text") ) );
+	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_INFOBK ), _T("Tooltip Background") ) );
+	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_INFOTEXT ), _T("Tooltip Text") ) );
+	// row 2:
+	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BTNFACE ), _T("Button (3D) Face") ) );
+	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BTNHIGHLIGHT ), _T("Button (3D) Highlight") ) );
+	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BTNSHADOW ), _T("Button (3D) Shadow") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_3DDKSHADOW ), _T("3D Dark Shadow") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_3DLIGHT ), _T("3D Light Color") ) );
+	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BTNTEXT ), _T("Button Text") ) );
+	// row 3:
+	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_GRAYTEXT ), _T("Disabled Text") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_HIGHLIGHT ), _T("Selected") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_HIGHLIGHTTEXT ), _T("Selected Text") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_CAPTIONTEXT ), _T("Scroll Bar Arrow") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_HOTLIGHT ), _T("Hot-Track") ) );
-	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_INFOBK ), _T("Tooltip Background") ) );
-	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_INFOTEXT ), _T("Tooltip Text") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_SCROLLBAR ), _T("Scroll Bar Gray Area") ) );
+	// row 4:
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_MENU ), _T("Menu Background") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_MENUBAR ), _T("Flat Menu Bar") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_MENUHILIGHT ), _T("Menu Highlight") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_MENUTEXT ), _T("Menu Text") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_ACTIVECAPTION ), _T("Active Window Title Bar") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_GRADIENTACTIVECAPTION ), _T("Active Window Gradient") ) );
+	// row 5:
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_ACTIVEBORDER ), _T("Active Window Border") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_INACTIVECAPTION ), _T("Inactive Window Caption") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_GRADIENTINACTIVECAPTION ), _T("Inactive Window Gradient") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_INACTIVEBORDER ), _T("Inactive Window Border") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_INACTIVECAPTIONTEXT ), _T("Inactive Window Caption Text") ) );
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_APPWORKSPACE ), _T("MDI Background") ) );
-	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_DESKTOP ), _T("Desktop Background") ) );
 
 	return pSysTable;
 }

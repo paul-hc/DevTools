@@ -55,6 +55,7 @@ public:
 	void SetName( const std::tstring& name ) { m_name = name; }
 
 	std::tstring FormatColor( const TCHAR* pFieldSep = s_fieldSep, bool suffixTableName = true ) const;
+	std::tostream& TabularOutColor( IN OUT std::tostream& os, size_t pos ) const;
 private:
 	COLORREF m_color;
 	std::tstring m_name;
@@ -104,6 +105,8 @@ public:
 	virtual int GetCompactGridColumnCount( void ) const { return GetColumnCount(); }	// for nameless display in CMFCColorBar
 
 	void Add( const CColorEntry& colorEntry );
+
+	std::tostream& TabularOut( IN OUT std::tostream& os ) const;
 
 	// CMFCColorButton support
 	void QueryMfcColors( OUT mfc::TColorArray& rColorArray ) const;

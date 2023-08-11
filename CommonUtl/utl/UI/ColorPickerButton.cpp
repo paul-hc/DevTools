@@ -593,7 +593,7 @@ BEGIN_MESSAGE_MAP( CColorPickerButton, CMFCColorButton )
 	ON_COMMAND( ID_MORE_COLORS, On_MoreColors )
 	ON_UPDATE_COMMAND_UI( ID_MORE_COLORS, OnUpdate_MoreColors )
 	ON_COMMAND( IDP_COPY_COLOR_TABLE, On_CopyColorTable )
-	ON_UPDATE_COMMAND_UI( IDP_COPY_COLOR_TABLE, OnUpdateEnable )
+	ON_UPDATE_COMMAND_UI( IDP_COPY_COLOR_TABLE, OnUpdate_CopyColorTable )
 	ON_COMMAND_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, On_SelectColorTable )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_HALFTONE_TABLE_16, ID_REPO_COLOR_TABLE_MAX, OnUpdate_SelectColorTable )
 	ON_COMMAND_RANGE( ID_PICK_COLOR_BAR_RADIO, ID_PICK_COLOR_MENU_RADIO, On_PickingMode )
@@ -672,29 +672,18 @@ void CColorPickerButton::OnUpdate_MoreColors( CCmdUI* pCmdUI )
 
 void CColorPickerButton::On_CopyColorTable( void )
 {
-	static const TCHAR s_lineEnd[] = _T("\r\n");
-	static const TCHAR s_tab[] = _T("\t");
+	ASSERT_PTR( m_pSelColorTable );
 
-	std::tstring tabbedText;
+	std::tostringstream oss;
 
-	tabbedText.reserve( ( m_Colors.GetSize() + 1 ) * 32 );
-	if ( m_pSelColorTable != nullptr )
-	{
-		std::tstring headerRow = _T("INDEX\tNAME\tRGB\tHTML\tHEX");
+	m_pSelColorTable->TabularOut( oss );
 
-		if ( m_pSelColorTable->IsSysColorTable() )
-			headerRow += _T("\tSYS_COLOR");
+	CTextClipboard::CopyText( oss.str(), m_hWnd );
+}
 
-		stream::Tag( tabbedText, str::Format( _T("Color Table: \"%s\"  [%d colors]"), m_pSelColorTable->GetTableName().c_str(), m_Colors.GetSize() ), s_lineEnd );
-		stream::Tag( tabbedText, headerRow, s_lineEnd );
-
-		const std::vector<CColorEntry>& colorEntries = m_pSelColorTable->GetColors();
-
-		for ( size_t i = 0; i != colorEntries.size(); ++i )
-			stream::Tag( tabbedText, num::FormatNumber( i + 1 ) + s_tab + colorEntries[ i ].FormatColor( s_tab, false ), s_lineEnd );	// 1-based indexMin
-	}
-
-	CTextClipboard::CopyText( tabbedText, m_hWnd );
+void CColorPickerButton::OnUpdate_CopyColorTable( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_pSelColorTable != nullptr );
 }
 
 void CColorPickerButton::On_SelectColorTable( UINT colorTableId )

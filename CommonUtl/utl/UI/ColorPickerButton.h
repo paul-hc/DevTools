@@ -127,6 +127,7 @@ protected:
 	afx_msg void On_MoreColors( void );
 	afx_msg void OnUpdate_MoreColors( CCmdUI* pCmdUI );
 	afx_msg void On_CopyColorTable( void );
+	afx_msg void OnUpdate_CopyColorTable( CCmdUI* pCmdUI );
 	afx_msg void On_SelectColorTable( UINT colorTableId );
 	afx_msg void OnUpdate_SelectColorTable( CCmdUI* pCmdUI );
 	afx_msg void On_PickingMode( UINT pickRadioId );
