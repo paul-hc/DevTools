@@ -672,31 +672,26 @@ void CColorPickerButton::OnUpdate_MoreColors( CCmdUI* pCmdUI )
 
 void CColorPickerButton::On_CopyColorTable( void )
 {
-	static const std::tstring s_header[] = { _T("INDEX\tRGB\tHTML\tHEX"), _T("INDEX\tNAME\tRGB\tHTML\tHEX"), _T("INDEX\tNAME\tSYS_COLOR\tRGB\tHTML\tHEX") };
 	static const TCHAR s_lineEnd[] = _T("\r\n");
 	static const TCHAR s_tab[] = _T("\t");
-	enum ColorType { RgbColor, NamedColor, WindowsSysColor };
 
 	std::tstring tabbedText;
 
 	tabbedText.reserve( ( m_Colors.GetSize() + 1 ) * 32 );
 	if ( m_pSelColorTable != nullptr )
 	{
-		stream::Tag( tabbedText, str::Format( _T("Color Table: %s  [%d colors]"), m_pSelColorTable->GetTableName().c_str(), m_Colors.GetSize() ), s_lineEnd );
-		stream::Tag( tabbedText, s_header[ ui::WindowsSys_Colors == m_pSelColorTable->GetTableType() ? WindowsSysColor : NamedColor ], s_lineEnd );
+		std::tstring headerRow = _T("INDEX\tNAME\tRGB\tHTML\tHEX");
+
+		if ( m_pSelColorTable->IsSysColorTable() )
+			headerRow += _T("\tSYS_COLOR");
+
+		stream::Tag( tabbedText, str::Format( _T("Color Table: \"%s\"  [%d colors]"), m_pSelColorTable->GetTableName().c_str(), m_Colors.GetSize() ), s_lineEnd );
+		stream::Tag( tabbedText, headerRow, s_lineEnd );
 
 		const std::vector<CColorEntry>& colorEntries = m_pSelColorTable->GetColors();
 
 		for ( size_t i = 0; i != colorEntries.size(); ++i )
 			stream::Tag( tabbedText, num::FormatNumber( i + 1 ) + s_tab + colorEntries[ i ].FormatColor( s_tab, false ), s_lineEnd );	// 1-based indexMin
-	}
-	else
-	{
-		stream::Tag( tabbedText, str::Format( _T("%s [%d colors]"), _T("User"), m_Colors.GetSize() ), s_lineEnd );
-		stream::Tag( tabbedText, s_header[ RgbColor ], s_lineEnd );
-
-		for ( INT_PTR i = 0; i != m_Colors.GetSize(); ++i )
-			stream::Tag( tabbedText, num::FormatNumber( i + 1 ) + s_tab + ui::FormatColor( m_Colors[ i ], s_tab ), s_lineEnd );			// 1-based indexMin
 	}
 
 	CTextClipboard::CopyText( tabbedText, m_hWnd );

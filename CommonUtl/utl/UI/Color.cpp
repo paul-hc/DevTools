@@ -64,10 +64,11 @@ namespace ui
 		else if ( CLR_DEFAULT == color )
 			return color::g_autoTag;
 
+		bool isTabular = '\t' == pSep[ 0 ];
 		std::tstring colorLiteral;
 		colorLiteral.reserve( 24 );
 
-		if ( IsSysColor( color ) )
+		if ( ui::IsSysColor( color ) && !isTabular )		// non-tabular system color format?
 			stream::Tag( colorLiteral, FormatSysColor( color, inColorEntry ), pSep );
 
 		const COLORREF realColor = EvalColor( color );
@@ -75,6 +76,10 @@ namespace ui
 		stream::Tag( colorLiteral, FormatRgbColor( realColor ), pSep );
 		stream::Tag( colorLiteral, FormatHtmlColor( realColor ), pSep );
 		stream::Tag( colorLiteral, FormatHexColor( realColor ), pSep );
+
+		if ( ui::IsSysColor( color ) && isTabular )			// tabular system color format: maintain compatible column structure, add SYS-index on last column
+			stream::Tag( colorLiteral, FormatSysColor( color, inColorEntry ), pSep );
+
 		return colorLiteral;
 	}
 
