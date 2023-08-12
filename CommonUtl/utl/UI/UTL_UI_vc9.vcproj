@@ -1737,6 +1737,14 @@
 					RelativePath=".\RegistrySection.h"
 					>
 				</File>
+				<File
+					RelativePath=".\RegistrySerialization.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RegistrySerialization.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="DirectX"
