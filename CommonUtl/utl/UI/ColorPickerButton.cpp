@@ -112,7 +112,7 @@ std::vector<CColorPickerButton*> CColorPickerButton::s_instances;
 CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nullptr*/ )
 	: CMFCColorButton()
 	, m_pSelColorTable( nullptr )
-	, m_pickingMode( PickColorBar )
+	, m_pickingMode( PickMenuColorTables )
 	, m_pSelColorEntry( nullptr )
 	, m_pDocColorTable( nullptr )
 	, m_regSection( reg::section_picker )
@@ -341,7 +341,7 @@ std::tstring CColorPickerButton::FormatEntryCommands( void ) const
 	REQUIRE( !m_regSection.empty() );
 
 	if ( m_regSection == reg::section_picker )		// shared section?
-		return str::Format( _T("%s_%d"), reg::entry_Commands, GetDlgCtrlID() );		// use unique Commands_CtrlID entries to disambiguate
+		return str::Format( _T("%s: %d"), reg::entry_Commands, GetDlgCtrlID() );		// use unique Commands_CtrlID entries to disambiguate
 
 	return reg::entry_Commands;
 }
@@ -427,7 +427,7 @@ void CColorPickerButton::ShowColorTablePopup( void )
 	if ( m_pSelColorTable != nullptr && m_pSelColorTable->IsSysColorTable() )
 	{
 		// display modeless popup (modeless support not fully implemented, therefore not the preferred way)
-		pPopupMenu = new mfc::CColorTablePopupMenu( this );
+		pPopupMenu = new mfc::CColorGridPopupMenu( this );
 		created = pPopupMenu->Create( this, rect.left, rect.bottom, nullptr, FALSE, TRUE );
 	}
 	else
@@ -529,13 +529,13 @@ void CColorPickerButton::OnShowColorPopup( void ) overrides(CMFCColorButton)
 	{
 		m_trackingMode = trackingMode;
 
-		bool useNamedColorTable = m_pSelColorTable != nullptr && m_pSelColorTable->BrowseNamedPopupGrid();
+		bool useNamedColorTable = m_pSelColorTable != nullptr && m_pSelColorTable->BrowseTaggedPopupGrid();
 
 		if ( ui::IsKeyPressed( VK_SHIFT ) )
 			useNamedColorTable = !useNamedColorTable;
 
 		if ( useNamedColorTable )
-			TrackModalPopupImpl( nullptr, new mfc::CColorTablePopupMenu( this ), false );
+			TrackModalPopupImpl( nullptr, new mfc::CColorGridPopupMenu( this ), false );
 		else
 			ShowColorTablePopup();			// modeless call
 	}

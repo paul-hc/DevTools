@@ -266,7 +266,7 @@ namespace mfc
 		m_pColorTable->QueryMfcColors( m_Colors );
 		m_dwdItemData = reinterpret_cast<DWORD_PTR>( m_pColorTable );
 
-		SetColumnsNumber( m_pColorTable->GetCompactGridColumnCount() );		// by default assume using CMFCColorBar nameless grid
+		SetColumnsNumber( m_pColorTable->GetColumnCount() );		// by default assume using CMFCColorBar nameless grid
 		SetEditorHost( pEditorHost );
 	}
 
@@ -441,13 +441,13 @@ namespace mfc
 				pShadesTable->QueryMfcColors( docColors );
 		}
 
-		bool useNamedColorTable = m_pColorTable->BrowseNamedPopupGrid();
+		bool useNamedColorTable = m_pColorTable->BrowseTaggedPopupGrid();
 
 		if ( ui::IsKeyPressed( VK_SHIFT ) )
 			useNamedColorTable = !useNamedColorTable;
 
 		if ( useNamedColorTable )
-			return new mfc::CColorTablePopupMenu( this );
+			return new mfc::CColorGridPopupMenu( this );
 
 		return new mfc::CColorPopupMenu( this, m_Colors, m_Color,
 										 m_strAutomaticButtonLabel, m_strOtherButtonLabel, m_strDocumentColorsLabel,
@@ -700,49 +700,49 @@ namespace mfc
 
 namespace mfc
 {
-	// CColorTablePopupMenu implementation
+	// CColorGridPopupMenu implementation
 
-	CColorTablePopupMenu::CColorTablePopupMenu( CColorMenuButton* pParentMenuBtn )
+	CColorGridPopupMenu::CColorGridPopupMenu( CColorMenuButton* pParentMenuBtn )
 		: CMFCPopupMenu()
 	{
 		ASSERT_PTR( pParentMenuBtn );
 		m_pParentBtn = pParentMenuBtn;
-		m_pColorBar.reset( new CColorTableBar( pParentMenuBtn->GetColorTable(), pParentMenuBtn->GetEditorHost() ) );
+		m_pColorBar.reset( new CColorGridBar( pParentMenuBtn->GetColorTable(), pParentMenuBtn->GetEditorHost() ) );
 	}
 
-	CColorTablePopupMenu::CColorTablePopupMenu( ui::IColorEditorHost* pEditorHost )
+	CColorGridPopupMenu::CColorGridPopupMenu( ui::IColorEditorHost* pEditorHost )
 		: CMFCPopupMenu()
 	{
 		ASSERT_PTR( pEditorHost );
-		m_pColorBar.reset( new CColorTableBar( pEditorHost->GetSelColorTable(), pEditorHost ) );
+		m_pColorBar.reset( new CColorGridBar( pEditorHost->GetSelColorTable(), pEditorHost ) );
 
 		m_pColorBar->StoreParentPicker( dynamic_cast<CMFCColorButton*>( pEditorHost->GetHostWindow() ) );		// changes the modeless popup behaviour
 	}
 
-	CColorTablePopupMenu::~CColorTablePopupMenu()
+	CColorGridPopupMenu::~CColorGridPopupMenu()
 	{
 	}
 
-	CMFCPopupMenuBar* CColorTablePopupMenu::GetMenuBar( void ) overrides(CMFCPopupMenuBar)
+	CMFCPopupMenuBar* CColorGridPopupMenu::GetMenuBar( void ) overrides(CMFCPopupMenuBar)
 	{
 		return m_pColorBar.get();
 	}
 
-	BOOL CColorTablePopupMenu::OnCmdMsg( UINT btnId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) overrides(CMFCPopupMenu)
+	BOOL CColorGridPopupMenu::OnCmdMsg( UINT btnId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) overrides(CMFCPopupMenu)
 	{
 		if ( m_pColorBar->IsColorBtnId( btnId ) )		// note: color buttons status and command processing is managed internally
-			return true;		// so prevent disabling while tracking and handling CColorTableBar::OnUpdateCmdUI() updates
+			return true;		// so prevent disabling while tracking and handling CColorGridBar::OnUpdateCmdUI() updates
 
 		return __super::OnCmdMsg( btnId, code, pExtra, pHandlerInfo );
 	}
 
 	// message handlers
 
-	BEGIN_MESSAGE_MAP( CColorTablePopupMenu, CMFCPopupMenu )
+	BEGIN_MESSAGE_MAP( CColorGridPopupMenu, CMFCPopupMenu )
 		ON_WM_CREATE()
 	END_MESSAGE_MAP()
 
-	int CColorTablePopupMenu::OnCreate( CREATESTRUCT* pCreateStruct )
+	int CColorGridPopupMenu::OnCreate( CREATESTRUCT* pCreateStruct )
 	{
 		int result = 0;
 
@@ -817,24 +817,21 @@ namespace mfc
 	};
 
 
-	// CColorTableBar implementation
+	// CColorGridBar implementation
 
-	CColorTableBar::CColorTableBar( const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost )
+	CColorGridBar::CColorGridBar( const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost )
 		: CMFCPopupMenuBar()
 		, m_pColorTable( pColorTable )
 		, m_pEditorHost( pEditorHost )
-		, m_columnCount( !CMFCToolBar::IsCustomizeMode() ? m_pColorTable->GetColumnCount() : 1 )
+		, m_columnCount( 1 )
 		, m_pParentPickerButton( nullptr )
 		, m_isModelessPopup( false )
 	{
 		ASSERT_PTR( m_pColorTable );
 		ASSERT_PTR( m_pEditorHost );
 
-		if ( 0 == m_columnCount )
-			m_columnCount = (size_t)sqrt( (double)m_pColorTable->GetColors().size() );		// default row/col layout
-
-		if ( m_columnCount > 8 )
-			m_columnCount /= 2;			// halve the columns to "square" the table a bit - but by a factor of 2, so that ToTransposedGridIndex() does not go out of bounds
+		if ( !CMFCToolBar::IsCustomizeMode() )
+			StoreDisplayColumnCount();
 
 		// customize menu bar aspect
 		m_bIsDlgControl = true;					// stretch separators to the entire bar width
@@ -842,11 +839,25 @@ namespace mfc
 		//m_xSeparatorOffsetLeft = m_xSeparatorOffsetRight = 10;	// enlarge separator to ~ client width - no effect due to m_bDisableSideBarInXPMode=true
 	}
 
-	CColorTableBar::~CColorTableBar()
+	CColorGridBar::~CColorGridBar()
 	{
 	}
 
-	void CColorTableBar::SetupButtons( void )
+	void CColorGridBar::StoreDisplayColumnCount( void )
+	{
+		m_columnCount = m_pColorTable->GetTaggedGridColumnCount();
+
+		if ( 0 == m_columnCount )
+			m_columnCount = (size_t)sqrt( (double)m_pColorTable->GetColors().size() );		// default row/col layout
+
+		if ( m_columnCount > 8 )
+			m_columnCount /= 2;			// halve the columns to "square" the table a bit - but by a factor of 2, so that ToTransposedGridIndex() does not go out of bounds
+
+		if ( m_pColorTable->GetColors().size() < 8 )
+			m_columnCount = utl::min( 1, m_columnCount );		// limit to maximum 1 column if only a few colors
+	}
+
+	void CColorGridBar::SetupButtons( void )
 	{
 		if ( nullptr == GetSafeHwnd() )
 			return;
@@ -857,7 +868,7 @@ namespace mfc
 		bool isSelTable = m_pColorTable == m_pEditorHost->GetSelColorTable();	// selected table: add detail buttons?
 		bool hasAutoButton = isSelTable && !ui::IsUndefinedColor( m_pEditorHost->GetAutoColor() );
 		bool isForeignColor = selColor != CLR_NONE && !m_pColorTable->ContainsColor( selColor );
-		bool transposeColors = !m_pColorTable->BrowseNamedPopupGrid();		// for non-system colors use left-to-right filling order, to be consistent with CMFCColorBar grid
+		bool transposeColors = !m_pColorTable->BrowseTaggedPopupGrid();		// for non-system colors use left-to-right filling order, to be consistent with CMFCColorBar grid
 		CToolBarColorButton* pColorButton = nullptr;
 
 		m_pLayout.reset( new CColorButtonsGridLayout( this, m_pColorTable->GetColors().size(), m_columnCount ) );
@@ -889,12 +900,12 @@ namespace mfc
 		m_pLayout->Setup( hasAutoButton );
 	}
 
-	bool CColorTableBar::IsColorBtnId( UINT btnId ) const
+	bool CColorGridBar::IsColorBtnId( UINT btnId ) const
 	{
 		return btnId >= AutoId && btnId < ColorIdMin + m_pColorTable->GetColors().size();
 	}
 
-	CSize CColorTableBar::CalcSize( BOOL vertDock )
+	CSize CColorGridBar::CalcSize( BOOL vertDock )
 	{
 		vertDock;
 		if ( m_bPaletteMode )
@@ -903,7 +914,7 @@ namespace mfc
 		return m_pLayout->CalcLayout( m_iMinWidth, m_iMaxWidth );
 	}
 
-	void CColorTableBar::AdjustLocations( void ) overrides(CMFCPopupMenuBar)
+	void CColorGridBar::AdjustLocations( void ) overrides(CMFCPopupMenuBar)
 	{
 		if ( nullptr == GetSafeHwnd() || !::IsWindow( m_hWnd ) || m_bInUpdateShadow || m_Buttons.IsEmpty() )
 			return;
@@ -915,7 +926,7 @@ namespace mfc
 		UpdateTooltips();
 	}
 
-	BOOL CColorTableBar::OnSendCommand( const CMFCToolBarButton* pButton ) overrides(CMFCPopupMenuBar)
+	BOOL CColorGridBar::OnSendCommand( const CMFCToolBarButton* pButton ) overrides(CMFCPopupMenuBar)
 	{
 		if ( m_pParentPickerButton != nullptr )
 			ReleaseCapture();
@@ -942,7 +953,7 @@ namespace mfc
 		return TRUE;
 	}
 
-	void CColorTableBar::OnFillBackground( CDC* pDC ) overrides(CMFCToolBar)
+	void CColorGridBar::OnFillBackground( CDC* pDC ) overrides(CMFCToolBar)
 	{
 		__super::OnFillBackground( pDC );
 
@@ -967,11 +978,11 @@ namespace mfc
 
 	// message handlers
 
-	BEGIN_MESSAGE_MAP( CColorTableBar, CMFCPopupMenuBar )
+	BEGIN_MESSAGE_MAP( CColorGridBar, CMFCPopupMenuBar )
 		ON_WM_CREATE()
 	END_MESSAGE_MAP()
 
-	int CColorTableBar::OnCreate( CREATESTRUCT* pCreateStruct )
+	int CColorGridBar::OnCreate( CREATESTRUCT* pCreateStruct )
 	{
 		if ( -1 == __super::OnCreate( pCreateStruct ) )
 			return -1;
@@ -1197,7 +1208,7 @@ namespace mfc
 		size_t transposedIndex = row * m_columnCount + column;
 
 		//transposedIndex = utl::min( m_colorCount - 1, transposedIndex );
-		ENSURE( transposedIndex < m_colorCount );		// if this fails, it means m_columnCount is shrunk by a factor different than 2 in CColorTableBar constructor
+		ENSURE( transposedIndex < m_colorCount );		// if this fails, it means m_columnCount is shrunk by a factor different than 2 in CColorGridBar constructor
 		return transposedIndex;
 	}
 

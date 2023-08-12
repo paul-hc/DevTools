@@ -197,17 +197,20 @@ namespace mfc
 
 namespace mfc
 {
-	class CColorTableBar;
+	class CColorGridBar;
 
 
-	class CColorTablePopupMenu : public CMFCPopupMenu		// displays named colors (CToolBarColorButton) on multiple column grid layout, typically for Windows System colors
+	// Displays named colors (CToolBarColorButton) on multiple column grid layout, typically for Windows System colors.
+	// Usually displays colors top-to-bottom (transposed, in contrast with CMFCColorBar left-to-right grid).
+
+	class CColorGridPopupMenu : public CMFCPopupMenu
 	{
 	public:
-		CColorTablePopupMenu( CColorMenuButton* pParentMenuBtn );		// pParentMenuBtn provides the color table
-		CColorTablePopupMenu( ui::IColorEditorHost* pEditorHost );		// picker constructor: uses the selected color table, runs in modeless popup mode
-		virtual ~CColorTablePopupMenu();
+		CColorGridPopupMenu( CColorMenuButton* pParentMenuBtn );		// pParentMenuBtn provides the color table
+		CColorGridPopupMenu( ui::IColorEditorHost* pEditorHost );		// picker constructor: uses the selected color table, runs in modeless popup mode
+		virtual ~CColorGridPopupMenu();
 	private:
-		std::auto_ptr<CColorTableBar> m_pColorBar;
+		std::auto_ptr<CColorGridBar> m_pColorBar;
 
 		enum { ToolBarId = 1, ToolBarStyle = AFX_DEFAULT_TOOLBAR_STYLE | CBRS_TOOLTIPS | CBRS_FLYBY };
 
@@ -224,19 +227,21 @@ namespace mfc
 	};
 
 
-	struct CColorButtonsGridLayout;
+	struct CColorButtonsGridLayout;		// implementation-heavy buttons layout details
 
 
-	class CColorTableBar : public CMFCPopupMenuBar
+	class CColorGridBar : public CMFCPopupMenuBar
 	{
 	public:
-		CColorTableBar( const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost );
-		virtual ~CColorTableBar();
+		CColorGridBar( const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost );
+		virtual ~CColorGridBar();
 
 		void SetupButtons( void );
 		void StoreParentPicker( CMFCColorButton* pParentPickerButton ) { m_pParentPickerButton = pParentPickerButton; }
 
 		bool IsColorBtnId( UINT btnId ) const;
+	private:
+		void StoreDisplayColumnCount( void );
 	private:
 		const CColorTable* m_pColorTable;			// required field
 		ui::IColorEditorHost* m_pEditorHost;		// required field

@@ -100,9 +100,9 @@ public:
 	const CColorEntry* FindColor( COLORREF rawColor ) const;
 	bool ContainsColor( COLORREF rawColor ) const { return FindColor( rawColor ) != nullptr; }
 
-	int GetColumnCount( void ) const;
-	virtual int GetCompactGridColumnCount( void ) const { return GetColumnCount(); }	// for nameless display in CMFCColorBar
-	virtual bool BrowseNamedPopupGrid( void ) const { return false; }
+	int GetColumnCount( void ) const;						// for display in CMFCColorBar (compact grid, nameless)
+	virtual int GetTaggedGridColumnCount( void ) const;		// for display in mfc::CColorGridBar named colors grid
+	virtual bool BrowseTaggedPopupGrid( void ) const { return false; }
 
 	size_t Add( const CColorEntry& colorEntry, size_t atPos = utl::npos );
 
@@ -117,7 +117,7 @@ public:
 
 	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades
 protected:
-	virtual int ToDisplayColumnCount( int columnCount ) const;
+	int ToDisplayColumnCount( int columnCount ) const;
 
 	virtual void OnTableChanged( void ) {}
 	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const { ASSERT( ui::IsRealColor( rawColor ) ); return rawColor; }
@@ -140,17 +140,17 @@ private:
 class CSystemColorTable : public CColorTable	// table of Windows System colors, that require custom encoding for display colors
 {
 public:
-	CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int columnCount, UINT compactGridColumnCount );
+	CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int columnCount, UINT taggedGridColumns );
 	virtual ~CSystemColorTable();
 
-	virtual int GetCompactGridColumnCount( void ) const;
-	virtual bool BrowseNamedPopupGrid( void ) const { return true; }		// top-to-bottom filled named grid
+	virtual int GetTaggedGridColumnCount( void ) const overrides(CColorTable);
+	virtual bool BrowseTaggedPopupGrid( void ) const { return true; }		// top-to-bottom filled named grid
 protected:
 	// base overrides
 	virtual void OnTableChanged( void ) overrides(CColorTable);
 	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const override;
 private:
-	UINT m_compactGridColumnCount;			// used for display in CMFCColorBar (compact grid, nameless)
+	UINT m_taggedGridColumns;					// used for display in CColorGridBar named colors grid
 	std::unordered_map<COLORREF, ui::TDisplayColor> m_displaySysColors;		// raw -> unique encoded colors, to disambiguate selected color in MFC color bars
 };
 
@@ -170,10 +170,11 @@ private:
 	bool PushFrontColorImpl( COLORREF rawColor, COLORREF autoColor );
 protected:
 	// base overrides
-	virtual int ToDisplayColumnCount( int columnCount ) const overrides(CColorTable);
 	virtual void OnTableChanged( void ) overrides(CSystemColorTable);
 private:
 	size_t m_maxColors;		// history limit
+
+	enum { ColorBar_Columns = 8, TaggedGrid_Columns = 2 };
 };
 
 

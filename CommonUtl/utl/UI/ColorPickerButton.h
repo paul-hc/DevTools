@@ -86,7 +86,7 @@ private:
 	UINT TrackModalPopupImpl( HMENU hMenuPopup, CMFCPopupMenu* pPopupMenu, bool sendCommand, CPoint screenPos = CPoint( -1, -1 ) );		// returns the command
 private:
 	persist const CColorTable* m_pSelColorTable;
-	persist PickingMode m_pickingMode;						// by default PickColorBar (single color table), or PickMenuColorTables (shows a menu with multiple color tables)
+	persist PickingMode m_pickingMode;						// PickColorBar (single color table), or PickMenuColorTables (shows a menu with multiple color tables)
 
 	const CColorEntry* m_pSelColorEntry;					// raw color entry
 	const CColorTable* m_pDocColorTable;

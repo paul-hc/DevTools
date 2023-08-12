@@ -269,6 +269,11 @@ int CColorTable::GetColumnCount( void ) const
 	return ToDisplayColumnCount( columnCount );
 }
 
+int CColorTable::GetTaggedGridColumnCount( void ) const
+{
+	return GetColumnCount();
+}
+
 int CColorTable::ToDisplayColumnCount( int columnCount ) const
 {
 	return std::min( columnCount, static_cast<int>( m_colors.size() ) );	// for small tables (e.g. Recent Colors): limit the columns to at most total count
@@ -421,9 +426,9 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 
 // CSystemColorTable implementation
 
-CSystemColorTable::CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount, UINT compactGridColumnCount )
+CSystemColorTable::CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int layoutCount, UINT taggedGridColumns )
 	: CColorTable( tableType, capacity, layoutCount )
-	, m_compactGridColumnCount( compactGridColumnCount )
+	, m_taggedGridColumns( taggedGridColumns )
 {
 }
 
@@ -431,9 +436,9 @@ CSystemColorTable::~CSystemColorTable()
 {
 }
 
-int CSystemColorTable::GetCompactGridColumnCount( void ) const
+int CSystemColorTable::GetTaggedGridColumnCount( void ) const overrides(CColorTable)
 {
-	return ToDisplayColumnCount( m_compactGridColumnCount );	// for nameless display in CMFCColorBar
+	return m_taggedGridColumns;
 }
 
 void CSystemColorTable::OnTableChanged( void ) overrides(CColorTable)
@@ -474,7 +479,7 @@ ui::TDisplayColor CSystemColorTable::EncodeRawColor( COLORREF rawColor ) const
 // CRecentColorTable implementation
 
 CRecentColorTable::CRecentColorTable( size_t maxColors /*= 20*/ )
-	: CSystemColorTable( ui::Recent_Colors, 0, 2, 8 )
+	: CSystemColorTable( ui::Recent_Colors, 0, ColorBar_Columns, TaggedGrid_Columns )
 	, m_maxColors( maxColors )
 {
 }
@@ -531,16 +536,6 @@ bool CRecentColorTable::PushFrontColorImpl( COLORREF rawColor, COLORREF autoColo
 
 	Add( CColorEntry( rawColor, colorName ), 0 );
 	return true;
-}
-
-int CRecentColorTable::ToDisplayColumnCount( int columnCount ) const overrides(CColorTable)
-{
-	columnCount = __super::ToDisplayColumnCount( columnCount );
-
-	if ( GetColors().size() < 8 )
-		return utl::min( 1, columnCount );
-
-	return columnCount;
 }
 
 void CRecentColorTable::OnTableChanged( void ) overrides(CSystemColorTable)
@@ -752,9 +747,13 @@ const CColorRepository* CColorRepository::Instance( void )
 
 CColorTable* CColorRepository::MakeTable_WindowsSystem( void )
 {
-	// 31 colors: 2 columns x 15 rows - for display in named CColorTablePopupMenu, or 6 columns x 3 rows in nameless CMFCColorBar
-	enum { SysColorCount = 30 };		// plus some aliases
-	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, SysColorCount, 2, 6 );
+	// 30 colors displayed:
+	//	6 columns x 5 rows in nameless CMFCColorBar
+	//	2 columns x 15 rows - for display in named grid CColorGridPopupMenu
+	//
+	enum { SysColorCount = 30, ColorBar_Columns = 6, TaggedGridBar_Columns = 2 };
+
+	CColorTable* pSysTable = new CSystemColorTable( ui::WindowsSys_Colors, SysColorCount, ColorBar_Columns, TaggedGridBar_Columns );
 
 	// row 1:
 	pSysTable->Add( CColorEntry( ui::MakeSysColor( COLOR_BACKGROUND ), _T("Desktop Background") ) );
