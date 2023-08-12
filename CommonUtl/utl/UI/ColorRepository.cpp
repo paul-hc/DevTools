@@ -206,7 +206,7 @@ size_t CColorTable::Add( const CColorEntry& colorEntry, size_t atPos /*= utl::np
 	if ( utl::npos == atPos )
 		atPos = m_colors.size();
 
-	ASSERT( atPos < m_colors.size() );
+	ASSERT( atPos <= m_colors.size() );
 	m_colors.insert( m_colors.begin() + atPos, colorEntry );
 	m_colors[ atPos ].m_pParentTable = this;
 	return atPos;
