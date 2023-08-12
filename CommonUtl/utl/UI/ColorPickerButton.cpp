@@ -51,7 +51,8 @@ namespace ui
 }
 
 
-class CColorMenuTrackingImpl : public CCmdTarget		// tracks a mfc::CColorPopupMenu as context menu drop-down
+class CColorMenuTrackingImpl
+	: public CCmdTarget					// tracks a mfc::CColorPopupMenu as context menu drop-down
 	, public ui::ICustomPopupMenu
 {
 public:
@@ -61,6 +62,7 @@ public:
 	void SetupMenu( bool isContextMenu );
 
 	CColorTable* GetShadesTable( void ) { return m_pScratchStore->GetShadesTable(); }
+	CRecentColorTable* GetRecentTable( void ) const { return m_pScratchStore->GetRecentTable(); }
 
 	CColorTable* LookupMenuColorTable( UINT colorBtnId ) const;
 private:
@@ -79,7 +81,7 @@ private:
 	const CCommandModel* m_pCmdModel;
 public:
 	const CColorStore* m_pMainStore;		// by default CColorRepository::Instance(); enumerates the main ID_REPO_COLOR_TABLE_MIN/MAX color tables
-	std::auto_ptr<CScratchColorStore> m_pScratchStore;
+	CScratchColorStore* m_pScratchStore;
 
 	CMenu m_menu;							// template for the tracking CMFCPopupMenu (created on the fly), or context menu for right-click tracking
 
@@ -185,12 +187,17 @@ void CColorPickerButton::SetUserColors( const std::vector<COLORREF>& userColors,
 
 void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) implement
 {
-	if ( notify && !m_inCmd && m_pCmdSvc.get() != nullptr && utl::ExecDo == CCommandModel::GetExecMode() )
+	if ( notify )
 	{
-		CScopedValue<bool> scInCmd( &m_inCmd, true );
+		if ( !m_inCmd && m_pCmdSvc.get() != nullptr && utl::ExecDo == CCommandModel::GetExecMode() )
+		{
+			CScopedValue<bool> scInCmd( &m_inCmd, true );
 
-		m_pCmdSvc->Execute( new CSetColorCmd( this, rawColor ) );
-		return;
+			m_pCmdSvc->Execute( new CSetColorCmd( this, rawColor ) );
+			return;
+		}
+
+		m_pMenuImpl->GetRecentTable()->PushColor( rawColor );		// at stack top (most recent)
 	}
 
 	SetColorImpl( rawColor, notify );
@@ -231,7 +238,7 @@ void CColorPickerButton::UpdateColor( COLORREF color ) overrides(CMFCColorButton
 
 void CColorPickerButton::UpdateShadesTable( void )
 {
-	CColorTable* pShadesTable = m_pMenuImpl->m_pScratchStore->GetShadesTable();
+	CColorTable* pShadesTable = m_pMenuImpl->GetShadesTable();
 
 	pShadesTable->SetupShadesTable( GetColor(), ( m_pSelColorTable != nullptr && !m_pSelColorTable->IsSysColorTable() ) ? m_pSelColorTable->GetColumnCount() : 8 );
 
@@ -302,7 +309,10 @@ void CColorPickerButton::LoadFromRegistry( void )
 		m_pickingMode = static_cast<PickingMode>( pApp->GetProfileInt( m_regSection.c_str(), reg::entry_PickingMode, m_pickingMode ) );
 
 		if ( m_pCmdSvc->LoadState( m_regSection.c_str(), FormatEntryCommands().c_str() ) )
+		{
 			m_pCmdSvc->RefCmdModel()->ReHostCommands<CSetColorCmd>( this );
+			m_pMenuImpl->GetRecentTable()->PushColorHistory( m_pCmdSvc->GetCmdModel() );
+		}
 	}
 
 	if ( pSelColorTable != m_pSelColorTable )
@@ -699,8 +709,12 @@ void CColorPickerButton::On_SelectColorTable( UINT colorTableId )
 void CColorPickerButton::OnUpdate_SelectColorTable( CCmdUI* pCmdUI )
 {
 	const CColorTable* pColorTable = m_pMenuImpl->LookupMenuColorTable( pCmdUI->m_nID );
+	bool enable = pColorTable->GetParentStore() != CScratchColorStore::Instance();			// a switchable table
 
-	pCmdUI->Enable( !UseUserColors() || ui::UserCustom_Colors == pColorTable->GetTableType() );		// user table is exclusive (can't be switched off to another table)
+	if ( UseUserColors() )
+		enable = CScratchColorStore::Instance()->GetUserCustomTable() == pColorTable;
+
+	pCmdUI->Enable( enable );		// user table is exclusive (can't be switched off to another table)
 	pCmdUI->SetRadio( pColorTable != nullptr && pColorTable == m_pSelColorTable );
 }
 
@@ -730,7 +744,7 @@ CColorMenuTrackingImpl::CColorMenuTrackingImpl( ui::IColorEditorHost* pHost, con
 	: m_pHost( pHost )
 	, m_pCmdModel( pCmdModel )
 	, m_pMainStore( CColorRepository::Instance() )
-	, m_pScratchStore( new CScratchColorStore() )
+	, m_pScratchStore( CScratchColorStore::Instance() )
 {
 	ASSERT_PTR( pHost );
 }
@@ -745,7 +759,7 @@ void CColorMenuTrackingImpl::SetupMenu( bool isContextMenu )
 	VERIFY( ui::LoadMfcPopupMenu( &m_menu, IDR_STD_CONTEXT_MENU, ui::CPopupIndexPath( ui::ColorPickerPopup, isContextMenu ? ContextMenu : TrackingMenu ) ) );
 
 	ModifyMenuTableItems( CHalftoneRepository::Instance() );
-	ModifyMenuTableItems( m_pScratchStore.get() );
+	ModifyMenuTableItems( m_pScratchStore );
 	InsertMenuTableItems( m_pMainStore );
 
 	ui::CleanupMenuSeparators( &m_menu );

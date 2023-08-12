@@ -39,7 +39,7 @@ namespace ui
 
 	bool IColorEditorHost::SwitchSelColorTable( const CColorTable* pSelColorTable )
 	{	// when using a Shades_Colors or UserCustom_Colors table, color can be picked from any table, but the selected table is retained (not switched to the picked table)
-		if ( UseUserColors() || ( pSelColorTable != nullptr && ui::Shades_Colors == pSelColorTable->GetTableType() ) )
+		if ( pSelColorTable != nullptr && CScratchColorStore::Instance() == pSelColorTable->GetParentStore() )
 			return false;						// prevent switching the 'read-only' table?
 
 		SetSelColorTable( pSelColorTable );		// switch to the new table

@@ -101,10 +101,9 @@ public:
 	bool ContainsColor( COLORREF rawColor ) const { return FindColor( rawColor ) != nullptr; }
 
 	int GetColumnCount( void ) const;
-	bool GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const;
 	virtual int GetCompactGridColumnCount( void ) const { return GetColumnCount(); }	// for nameless display in CMFCColorBar
 
-	void Add( const CColorEntry& colorEntry );
+	size_t Add( const CColorEntry& colorEntry, size_t atPos = utl::npos );
 
 	std::tostream& TabularOut( IN OUT std::tostream& os ) const;
 
@@ -117,8 +116,12 @@ public:
 
 	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades
 protected:
+	int ToDisplayColumnCount( int columnCount ) const;
+
 	virtual void OnTableChanged( void ) {}
 	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const { ASSERT( ui::IsRealColor( rawColor ) ); return rawColor; }
+
+	bool Remove( COLORREF rawColor );
 private:
 	const ui::StdColorTable m_tableType;
 	std::vector<CColorEntry> m_colors;
@@ -138,14 +141,33 @@ public:
 	CSystemColorTable( ui::StdColorTable tableType, size_t capacity, int columnCount, UINT compactGridColumnCount );
 	virtual ~CSystemColorTable();
 
-	virtual int GetCompactGridColumnCount( void ) const { return m_compactGridColumnCount; }	// for nameless display in CMFCColorBar
+	virtual int GetCompactGridColumnCount( void ) const;
 protected:
 	// base overrides
-	virtual void OnTableChanged( void ) override;
+	virtual void OnTableChanged( void ) overrides(CColorTable);
 	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const override;
 private:
 	UINT m_compactGridColumnCount;			// used for display in CMFCColorBar (compact grid, nameless)
 	std::unordered_map<COLORREF, ui::TDisplayColor> m_displaySysColors;		// raw -> unique encoded colors, to disambiguate selected color in MFC color bars
+};
+
+
+class CCommandModel;
+
+
+class CRecentColorTable : public CSystemColorTable	// table of most recent used colors; may also contain system colors, so it inherits from CSystemColorTable
+{
+public:
+	CRecentColorTable( void );
+
+	// push means at the front of the table (LIFO)
+	bool PushColor( COLORREF rawColor );
+	size_t PushColorHistory( const CCommandModel* pCmdModel );
+private:
+	bool PushFrontColorImpl( COLORREF rawColor );
+protected:
+	// base overrides
+	virtual void OnTableChanged( void ) overrides(CColorTable);
 };
 
 
@@ -177,18 +199,21 @@ private:
 
 class CScratchColorStore : public CColorStore		// contains {ui::Shades_Colors, ui::UserCustom_Colors}
 {
-public:
 	CScratchColorStore( void );
 	~CScratchColorStore() { Clear(); }		// owns the color tables
+public:
+	static CScratchColorStore* Instance( void );
 
 	CColorTable* GetShadesTable( void ) const { return m_pShadesTable; }
 	CColorTable* GetUserCustomTable( void ) const { return m_pUserCustomTable; }
+	CRecentColorTable* GetRecentTable( void ) const { return m_pRecentTable; }
 
 	size_t UpdateShadesTable( COLORREF selColor, size_t columnCount ) { return m_pShadesTable->SetupShadesTable( selColor, columnCount ); }
 	void UpdateUserCustomTable( const mfc::TColorArray& customColors, int columnCount = 0 ) { return m_pUserCustomTable->SetupMfcColors( customColors, columnCount ); }
 private:
 	CColorTable* m_pShadesTable;
 	CColorTable* m_pUserCustomTable;
+	CRecentColorTable* m_pRecentTable;		// most recently used colors
 };
 
 

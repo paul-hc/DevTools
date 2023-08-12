@@ -28,7 +28,7 @@ namespace ui
 		Halftone16_Colors, Halftone20_Colors, Halftone256_Colors,
 
 		// implementation (not based in repository)
-		Shades_Colors, UserCustom_Colors,
+		Shades_Colors, UserCustom_Colors, Recent_Colors,
 		Dev_Colors,
 
 			_ColorTableCount,

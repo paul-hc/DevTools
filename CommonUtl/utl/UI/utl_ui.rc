@@ -506,6 +506,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Undo\tCtrl+Z",                ID_EDIT_UNDO
             MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO
+            MENUITEM "<recent colors>",             ID_RECENT_COLOR_SET
             MENUITEM SEPARATOR
             MENUITEM "&Automatic Color\tDelete",    ID_SET_AUTO_COLOR
             MENUITEM "&More Colors...",             ID_MORE_COLORS
@@ -532,7 +533,6 @@ BEGIN
                 MENUITEM "<repo table base 0..N>",      ID_REPO_COLOR_TABLE_MIN
                 MENUITEM SEPARATOR
                 MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
-                MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
             END
             MENUITEM SEPARATOR
             MENUITEM "Pick &Single Color Table",    ID_PICK_COLOR_BAR_RADIO

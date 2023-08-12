@@ -3,9 +3,11 @@
 #include "ColorRepository.h"
 #include "Color.h"
 #include "LogPalette.h"
+#include "UiCommands.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
+#include "utl/CommandModel.h"
 #include "utl/EnumTags.h"
 #include "utl/Range.h"
 #include "utl/StringUtilities.h"
@@ -24,14 +26,14 @@ namespace ui
 Office 2003 Colors|Office 2007 Colors|DirectX (X11) Colors|HTML Colors|\
 Windows Colors|\
 Halftone: 16 Colors|Halftone: 20 Colors|Halftone: 256 Colors|\
-Color Shades|User Custom Colors|\
+Color Shades|User Custom Colors|Recent Colors|\
 Development Colors"
 ),
 		_T("\
 Office 2003|Office 2007|DirectX (X11)|HTML|\
 Windows|\
 Halftone 16|Halftone 20|Halftone 256|\
-Color Shades|User Custom|\
+Color Shades|User Custom|Recent|\
 Development"
 ) );
 		return s_tags;
@@ -199,10 +201,25 @@ bool CColorTable::IsRepoTable( void ) const
 	return CColorRepository::Instance() == m_pParentStore;
 }
 
-void CColorTable::Add( const CColorEntry& colorEntry )
+size_t CColorTable::Add( const CColorEntry& colorEntry, size_t atPos /*= utl::npos*/ )
 {
-	m_colors.push_back( colorEntry );
-	m_colors.back().m_pParentTable = this;
+	if ( utl::npos == atPos )
+		atPos = m_colors.size();
+
+	ASSERT( atPos < m_colors.size() );
+	m_colors.insert( m_colors.begin() + atPos, colorEntry );
+	m_colors[ atPos ].m_pParentTable = this;
+	return atPos;
+}
+
+bool CColorTable::Remove( COLORREF rawColor )
+{
+	std::vector<CColorEntry>::iterator itFound = std::find( m_colors.begin(), m_colors.end(), rawColor );
+	if ( itFound == m_colors.end() )
+		return false;
+
+	m_colors.erase( itFound );
+	return true;
 }
 
 const CColorEntry* CColorTable::FindColor( COLORREF rawColor ) const
@@ -216,28 +233,19 @@ const CColorEntry* CColorTable::FindColor( COLORREF rawColor ) const
 
 int CColorTable::GetColumnCount( void ) const
 {
+	int columnCount = 0;
+
 	if ( m_layoutCount >= 0 )		// column layout?
-		return m_layoutCount;
+		columnCount = m_layoutCount;
 	else
-		return static_cast<int>( m_colors.size() ) / -m_layoutCount;
+		columnCount = static_cast<int>( m_colors.size() ) / -m_layoutCount;
+
+	return ToDisplayColumnCount( columnCount );
 }
 
-bool CColorTable::GetLayout( OUT size_t* pRowCount, OUT size_t* pColumnCount ) const
+int CColorTable::ToDisplayColumnCount( int columnCount ) const
 {
-	if ( m_layoutCount > 0 )		// column layout?
-	{
-		utl::AssignPtr( pRowCount, m_colors.size() / m_layoutCount );
-		utl::AssignPtr( pColumnCount, static_cast<size_t>( m_layoutCount ) );
-	}
-	else if ( m_layoutCount < 0 )	// row layout?
-	{
-		utl::AssignPtr( pRowCount, static_cast<size_t>( -m_layoutCount ) );
-		utl::AssignPtr( pColumnCount, m_colors.size() / -m_layoutCount );
-	}
-	else
-		return false;
-
-	return true;
+	return std::min( columnCount, static_cast<int>( m_colors.size() ) );	// for small tables (e.g. Recent Colors): limit the columns to at most total count
 }
 
 std::tostream& CColorTable::TabularOut( IN OUT std::tostream& os ) const
@@ -397,7 +405,12 @@ CSystemColorTable::~CSystemColorTable()
 {
 }
 
-void CSystemColorTable::OnTableChanged( void )
+int CSystemColorTable::GetCompactGridColumnCount( void ) const
+{
+	return ToDisplayColumnCount( m_compactGridColumnCount );	// for nameless display in CMFCColorBar
+}
+
+void CSystemColorTable::OnTableChanged( void ) overrides(CColorTable)
 {
 	__super::OnTableChanged();
 
@@ -429,6 +442,79 @@ ui::TDisplayColor CSystemColorTable::EncodeRawColor( COLORREF rawColor ) const
 		return *pEncodedSysColor;
 
 	return __super::EncodeRawColor( rawColor );
+}
+
+
+// CRecentColorTable implementation
+
+CRecentColorTable::CRecentColorTable( void )
+	: CSystemColorTable( ui::Recent_Colors, 0, 2, 8 )
+{
+}
+
+bool CRecentColorTable::PushColor( COLORREF rawColor )
+{
+	if ( !PushFrontColorImpl( rawColor ) )
+		return false;
+
+	OnTableChanged();
+	return true;
+}
+
+namespace hlp
+{
+	template< typename CommandsT >
+	void QueryCmdColors( OUT std::vector<COLORREF>& rColorHistory, const CommandsT& commands, bool isUndo )
+	{
+		for ( typename CommandsT::const_iterator itCmd = commands.begin(); itCmd != commands.end(); ++itCmd )
+			if ( cmd::SetColor == ( *itCmd )->GetTypeID() )
+			{
+				const CSetColorCmd* pCmd = checked_static_cast<const CSetColorCmd*>( *itCmd );
+				COLORREF color = isUndo ? pCmd->GetOldColor() : pCmd->GetColor();
+
+				if ( !ui::IsUndefinedColor( color ) )
+					rColorHistory.push_back( color );
+			}
+	}
+}
+
+size_t CRecentColorTable::PushColorHistory( const CCommandModel* pCmdModel )
+{
+	ASSERT_PTR( pCmdModel );
+
+	std::vector<COLORREF> colorHistory;
+
+	hlp::QueryCmdColors( colorHistory, pCmdModel->GetRedoStack(), false );
+	hlp::QueryCmdColors( colorHistory, pCmdModel->GetUndoStack(), true );
+
+	std::reverse( colorHistory.begin(), colorHistory.end() );		// most recent first
+	utl::Uniquify( colorHistory );
+
+	// insert last to first at the beginning:
+	size_t pushedCount = 0;
+	for ( std::vector<COLORREF>::const_reverse_iterator itColor = colorHistory.rbegin(); itColor != colorHistory.rend(); ++itColor )
+		if ( PushFrontColorImpl( *itColor ) )
+			++pushedCount;
+
+	if ( pushedCount != 0 )
+		OnTableChanged();
+
+	return pushedCount;
+}
+
+bool CRecentColorTable::PushFrontColorImpl( COLORREF rawColor )
+{
+	if ( ui::IsUndefinedColor( rawColor ) )
+		return false;
+
+	Remove( rawColor );		// remove existing, since the pushed color comes first
+	Add( CColorEntry( rawColor, str::GetEmpty() ), 0 );
+	return true;
+}
+
+void CRecentColorTable::OnTableChanged( void ) override
+{
+	__super::OnTableChanged();
 }
 
 
@@ -551,9 +637,17 @@ CScratchColorStore::CScratchColorStore( void )
 	: CColorStore()
 	, m_pShadesTable( new CColorTable( ui::Shades_Colors, 0, 0 ) )
 	, m_pUserCustomTable( new CColorTable( ui::UserCustom_Colors, 0, 0 ) )
+	, m_pRecentTable( new CRecentColorTable() )
 {
 	AddTable( m_pShadesTable, ID_SHADES_COLOR_SET );
 	AddTable( m_pUserCustomTable, ID_USER_CUSTOM_COLOR_SET );
+	AddTable( m_pRecentTable, ID_RECENT_COLOR_SET );
+}
+
+CScratchColorStore* CScratchColorStore::Instance( void )
+{
+	static CScratchColorStore s_store;
+	return &s_store;
 }
 
 
