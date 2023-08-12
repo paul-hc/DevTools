@@ -197,7 +197,7 @@ void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) 
 			return;
 		}
 
-		m_pMenuImpl->GetRecentTable()->PushColor( rawColor );		// at stack top (most recent)
+		m_pMenuImpl->GetRecentTable()->PushColor( rawColor, GetAutoColor() );		// at stack top (most recent)
 	}
 
 	SetColorImpl( rawColor, notify );
@@ -311,7 +311,7 @@ void CColorPickerButton::LoadFromRegistry( void )
 		if ( m_pCmdSvc->LoadState( m_regSection.c_str(), FormatEntryCommands().c_str() ) )
 		{
 			m_pCmdSvc->RefCmdModel()->ReHostCommands<CSetColorCmd>( this );
-			m_pMenuImpl->GetRecentTable()->PushColorHistory( m_pCmdSvc->GetCmdModel() );
+			m_pMenuImpl->GetRecentTable()->PushColorHistory( m_pCmdSvc->GetCmdModel(), GetAutoColor() );
 		}
 	}
 
@@ -529,7 +529,7 @@ void CColorPickerButton::OnShowColorPopup( void ) overrides(CMFCColorButton)
 	{
 		m_trackingMode = trackingMode;
 
-		bool useNamedColorTable = m_pSelColorTable != nullptr && m_pSelColorTable->IsSysColorTable();
+		bool useNamedColorTable = m_pSelColorTable != nullptr && m_pSelColorTable->BrowseNamedPopupGrid();
 
 		if ( ui::IsKeyPressed( VK_SHIFT ) )
 			useNamedColorTable = !useNamedColorTable;
@@ -713,6 +713,8 @@ void CColorPickerButton::OnUpdate_SelectColorTable( CCmdUI* pCmdUI )
 
 	if ( UseUserColors() )
 		enable = CScratchColorStore::Instance()->GetUserCustomTable() == pColorTable;
+	else if ( CScratchColorStore::Instance()->GetRecentTable() == pColorTable )
+		enable = !pColorTable->IsEmpty();
 
 	pCmdUI->Enable( enable );		// user table is exclusive (can't be switched off to another table)
 	pCmdUI->SetRadio( pColorTable != nullptr && pColorTable == m_pSelColorTable );
@@ -834,38 +836,42 @@ void CColorMenuTrackingImpl::OnCustomizeMenuBar( CMFCPopupMenu* pMenuPopup, int 
 	CMFCPopupMenuBar* pMenuBar = pMenuPopup->GetMenuBar();
 	int index = 0;
 
-	if ( CColorPickerButton::TrackingMenuColorTables == trackingMode )		// need to replace color table sub-menus?
+	if ( CColorPickerButton::TrackingMenuColorTables == trackingMode )		// need to replace all color table sub-menus?
+	{
 		for ( int count = m_menu.GetMenuItemCount(); index != count; ++index )
 			if ( const CColorTable* pColorTable = ui::GetMenuItemPtr<CColorTable>( m_menu, index ) )
 			{
 				ASSERT( !pColorTable->IsEmpty() );		// should've been excluded on popup menu set up
 
 				UINT colorBtnId = m_menu.GetMenuItemID( index );
-				mfc::CColorMenuButton colorButton( colorBtnId, pColorTable );
-
-				colorButton.SetEditorHost( m_pHost );
-				pMenuBar->ReplaceButton( colorBtnId, colorButton );
+				mfc::CColorMenuButton::ReplaceBarButton( pMenuBar, colorBtnId, pColorTable, m_pHost );
 			}
+	}
+	else if ( CColorPickerButton::TrackingContextMenu == trackingMode )
+	{
+		if ( const CColorTable* pColorTable = ui::GetMenuItemPtr<CColorTable>( m_menu, ID_RECENT_COLOR_SET, false ) )		// item not removed due to empty MRU colors?
+			mfc::CColorMenuButton::ReplaceBarButton( pMenuBar, ID_RECENT_COLOR_SET, pColorTable, m_pHost );
+	}
 
-	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_SET_AUTO_COLOR, m_pHost->GetAutoColor() );		// to display the Automatic color box on the menu item
-	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_MORE_COLORS, m_pHost->GetForeignColor() );		// to display the More Colors color box on the menu item
+	mfc::CToolBarColorButton::ReplaceBarButton( pMenuBar, ID_SET_AUTO_COLOR, m_pHost->GetAutoColor() );		// to display the Automatic color box on the menu item
+	mfc::CToolBarColorButton::ReplaceBarButton( pMenuBar, ID_MORE_COLORS, m_pHost->GetForeignColor() );		// to display the More Colors color box on the menu item
 
-	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_EDIT_UNDO, PeekUndoTopColor() );					// to display the Undo top old color
-	mfc::CToolBarColorButton::ReplaceWithColorButton( pMenuBar, ID_EDIT_REDO, PeekRedoTopColor() );					// to display the Redo top color
+	mfc::CToolBarColorButton::ReplaceBarButton( pMenuBar, ID_EDIT_UNDO, PeekUndoTopColor() );					// to display the Undo top old color
+	mfc::CToolBarColorButton::ReplaceBarButton( pMenuBar, ID_EDIT_REDO, PeekRedoTopColor() );					// to display the Redo top color
 }
 
 COLORREF CColorMenuTrackingImpl::PeekUndoTopColor( void ) const
 {
-	if ( const CSetColorCmd* pTopCmd = checked_static_cast<const CSetColorCmd*>( m_pCmdModel->PeekUndo() ) )
-		return pTopCmd->GetOldColor();
+	if ( const CSetColorCmd* pUndoCmd = checked_static_cast<const CSetColorCmd*>( m_pCmdModel->PeekUndo() ) )
+		return m_pHost->GetFallbackColor( pUndoCmd->GetOldColor() );
 
 	return CLR_NONE;
 }
 
 COLORREF CColorMenuTrackingImpl::PeekRedoTopColor( void ) const
 {
-	if ( const CSetColorCmd* pTopCmd = checked_static_cast<const CSetColorCmd*>( m_pCmdModel->PeekRedo() ) )
-		return pTopCmd->GetColor();
+	if ( const CSetColorCmd* pRedoCmd = checked_static_cast<const CSetColorCmd*>( m_pCmdModel->PeekRedo() ) )
+		return m_pHost->GetFallbackColor( pRedoCmd->GetColor() );
 
 	return CLR_NONE;
 }

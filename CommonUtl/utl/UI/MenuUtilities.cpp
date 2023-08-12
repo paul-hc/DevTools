@@ -273,8 +273,8 @@ namespace ui
 
 		info.fMask = MIIM_DATA;
 
-		if ( !::GetMenuItemInfo( hMenu, item, byPos, &info ) )
-			return 0;
+		if ( !::GetMenuItemInfo( hMenu, item, byPos, &info ) )		// menu item not present
+			return nullptr;
 
 		return reinterpret_cast<void*>( info.dwItemData );
 	}

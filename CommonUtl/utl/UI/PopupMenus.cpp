@@ -140,7 +140,7 @@ namespace mfc
 		mfc::Button_SetStyleFlag( this, TBBS_CHECKED, checked );
 	}
 
-	CToolBarColorButton* CToolBarColorButton::ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex /*= nullptr*/ )
+	CToolBarColorButton* CToolBarColorButton::ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex /*= nullptr*/ )
 	{
 		ASSERT_PTR( pToolBar->GetSafeHwnd() );
 		int index = pToolBar->CommandToIndex( btnId );
@@ -253,7 +253,7 @@ namespace mfc
 	{
 	}
 
-	CColorMenuButton::CColorMenuButton( UINT btnId, const CColorTable* pColorTable )
+	CColorMenuButton::CColorMenuButton( UINT btnId, const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost /*= nullptr*/ )
 		: CMFCColorMenuButton( btnId, safe_ptr( pColorTable )->GetTableName().c_str() )
 		, m_pColorTable( pColorTable )
 		, m_pEditorHost( nullptr )
@@ -267,6 +267,7 @@ namespace mfc
 		m_dwdItemData = reinterpret_cast<DWORD_PTR>( m_pColorTable );
 
 		SetColumnsNumber( m_pColorTable->GetCompactGridColumnCount() );		// by default assume using CMFCColorBar nameless grid
+		SetEditorHost( pEditorHost );
 	}
 
 	CColorMenuButton::~CColorMenuButton()
@@ -305,6 +306,29 @@ namespace mfc
 			mfc::Button_SetImageById( this, imageId != 0 ? imageId : ID_TRANSPARENT );
 		else
 			SetImage( -1 );
+	}
+
+	CColorMenuButton* CColorMenuButton::ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost,
+														  OUT OPTIONAL int* pIndex /*= nullptr*/ )
+	{
+		ASSERT_PTR( pToolBar->GetSafeHwnd() );
+		ASSERT_PTR( pColorTable );
+		int index = pToolBar->CommandToIndex( btnId );
+
+		utl::AssignPtr( pIndex, index );
+		if ( -1 == index )
+			return nullptr;
+
+		if ( pColorTable->IsEmpty() )
+		{	// normally empty color tables should be removed from source HMENU prior to calling this method
+			pToolBar->RemoveButton( index );
+			return nullptr;
+		}
+
+		mfc::CColorMenuButton colorPopupButton( btnId, pColorTable, pEditorHost );
+
+		pToolBar->ReplaceButton( colorPopupButton.m_nID, colorPopupButton );
+		return checked_static_cast<CColorMenuButton*>( pToolBar->GetButton( index ) );	// the button clone
 	}
 
 	CWnd* CColorMenuButton::GetMessageWnd( void ) const
@@ -417,7 +441,7 @@ namespace mfc
 				pShadesTable->QueryMfcColors( docColors );
 		}
 
-		bool useNamedColorTable = m_pColorTable->IsSysColorTable();
+		bool useNamedColorTable = m_pColorTable->BrowseNamedPopupGrid();
 
 		if ( ui::IsKeyPressed( VK_SHIFT ) )
 			useNamedColorTable = !useNamedColorTable;
@@ -833,7 +857,7 @@ namespace mfc
 		bool isSelTable = m_pColorTable == m_pEditorHost->GetSelColorTable();	// selected table: add detail buttons?
 		bool hasAutoButton = isSelTable && !ui::IsUndefinedColor( m_pEditorHost->GetAutoColor() );
 		bool isForeignColor = selColor != CLR_NONE && !m_pColorTable->ContainsColor( selColor );
-		bool transposeColors = !m_pColorTable->IsSysColorTable();		// for non-system colors use left-to-right filling order, to be consistent with CMFCColorBar grid
+		bool transposeColors = !m_pColorTable->BrowseNamedPopupGrid();		// for non-system colors use left-to-right filling order, to be consistent with CMFCColorBar grid
 		CToolBarColorButton* pColorButton = nullptr;
 
 		m_pLayout.reset( new CColorButtonsGridLayout( this, m_pColorTable->GetColors().size(), m_columnCount ) );

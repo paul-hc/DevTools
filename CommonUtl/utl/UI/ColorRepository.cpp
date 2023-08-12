@@ -74,6 +74,22 @@ Development"
 	}
 }
 
+namespace cmd
+{
+	template< typename CommandsT >
+	void QueryCmdColors( OUT std::vector<COLORREF>& rColorHistory, const CommandsT& commands, bool isUndo )
+	{
+		for ( typename CommandsT::const_iterator itCmd = commands.begin(); itCmd != commands.end(); ++itCmd )
+			if ( cmd::SetColor == ( *itCmd )->GetTypeID() )
+			{
+				const CSetColorCmd* pCmd = checked_static_cast<const CSetColorCmd*>( *itCmd );
+				COLORREF color = isUndo ? pCmd->GetOldColor() : pCmd->GetColor();
+
+				rColorHistory.push_back( color );
+			}
+	}
+}
+
 
 // CColorEntry implementation
 
@@ -220,6 +236,16 @@ bool CColorTable::Remove( COLORREF rawColor )
 
 	m_colors.erase( itFound );
 	return true;
+}
+
+size_t CColorTable::Clamp( size_t maxCount )
+{
+	ptrdiff_t extraCount = m_colors.size() - maxCount;
+
+	if ( extraCount > 0 )
+		m_colors.erase( m_colors.begin() + maxCount, m_colors.end() );
+
+	return extraCount;
 }
 
 const CColorEntry* CColorTable::FindColor( COLORREF rawColor ) const
@@ -447,45 +473,29 @@ ui::TDisplayColor CSystemColorTable::EncodeRawColor( COLORREF rawColor ) const
 
 // CRecentColorTable implementation
 
-CRecentColorTable::CRecentColorTable( void )
+CRecentColorTable::CRecentColorTable( size_t maxColors /*= 20*/ )
 	: CSystemColorTable( ui::Recent_Colors, 0, 2, 8 )
+	, m_maxColors( maxColors )
 {
 }
 
-bool CRecentColorTable::PushColor( COLORREF rawColor )
+bool CRecentColorTable::PushColor( COLORREF rawColor, COLORREF autoColor /*= CLR_NONE*/ )
 {
-	if ( !PushFrontColorImpl( rawColor ) )
+	if ( !PushFrontColorImpl( rawColor, autoColor ) )
 		return false;
 
 	OnTableChanged();
 	return true;
 }
 
-namespace hlp
-{
-	template< typename CommandsT >
-	void QueryCmdColors( OUT std::vector<COLORREF>& rColorHistory, const CommandsT& commands, bool isUndo )
-	{
-		for ( typename CommandsT::const_iterator itCmd = commands.begin(); itCmd != commands.end(); ++itCmd )
-			if ( cmd::SetColor == ( *itCmd )->GetTypeID() )
-			{
-				const CSetColorCmd* pCmd = checked_static_cast<const CSetColorCmd*>( *itCmd );
-				COLORREF color = isUndo ? pCmd->GetOldColor() : pCmd->GetColor();
-
-				if ( !ui::IsUndefinedColor( color ) )
-					rColorHistory.push_back( color );
-			}
-	}
-}
-
-size_t CRecentColorTable::PushColorHistory( const CCommandModel* pCmdModel )
+size_t CRecentColorTable::PushColorHistory( const CCommandModel* pCmdModel, COLORREF autoColor /*= CLR_NONE*/ )
 {
 	ASSERT_PTR( pCmdModel );
 
 	std::vector<COLORREF> colorHistory;
 
-	hlp::QueryCmdColors( colorHistory, pCmdModel->GetRedoStack(), false );
-	hlp::QueryCmdColors( colorHistory, pCmdModel->GetUndoStack(), true );
+	cmd::QueryCmdColors( colorHistory, pCmdModel->GetRedoStack(), false );
+	cmd::QueryCmdColors( colorHistory, pCmdModel->GetUndoStack(), true );
 
 	std::reverse( colorHistory.begin(), colorHistory.end() );		// most recent first
 	utl::Uniquify( colorHistory );
@@ -493,7 +503,7 @@ size_t CRecentColorTable::PushColorHistory( const CCommandModel* pCmdModel )
 	// insert last to first at the beginning:
 	size_t pushedCount = 0;
 	for ( std::vector<COLORREF>::const_reverse_iterator itColor = colorHistory.rbegin(); itColor != colorHistory.rend(); ++itColor )
-		if ( PushFrontColorImpl( *itColor ) )
+		if ( PushFrontColorImpl( *itColor, autoColor ) )
 			++pushedCount;
 
 	if ( pushedCount != 0 )
@@ -502,18 +512,40 @@ size_t CRecentColorTable::PushColorHistory( const CCommandModel* pCmdModel )
 	return pushedCount;
 }
 
-bool CRecentColorTable::PushFrontColorImpl( COLORREF rawColor )
+bool CRecentColorTable::PushFrontColorImpl( COLORREF rawColor, COLORREF autoColor )
 {
+	if ( ui::IsUndefinedColor( rawColor ) )
+		rawColor = autoColor;
+
 	if ( ui::IsUndefinedColor( rawColor ) )
 		return false;
 
 	Remove( rawColor );		// remove existing, since the pushed color comes first
-	Add( CColorEntry( rawColor, str::GetEmpty() ), 0 );
+
+	std::tstring colorName;
+
+	if ( const CColorEntry* pFoundRepoEntry = CColorRepository::Instance()->FindColorEntry( rawColor ) )
+		colorName = pFoundRepoEntry->GetName();			// inherit color name from the repo
+	else
+		colorName = ui::FormatHtmlColor( rawColor );	// tag it for display
+
+	Add( CColorEntry( rawColor, colorName ), 0 );
 	return true;
 }
 
-void CRecentColorTable::OnTableChanged( void ) override
+int CRecentColorTable::ToDisplayColumnCount( int columnCount ) const overrides(CColorTable)
 {
+	columnCount = __super::ToDisplayColumnCount( columnCount );
+
+	if ( GetColors().size() < 8 )
+		return utl::min( 1, columnCount );
+
+	return columnCount;
+}
+
+void CRecentColorTable::OnTableChanged( void ) overrides(CSystemColorTable)
+{
+	Clamp( m_maxColors );
 	__super::OnTableChanged();
 }
 

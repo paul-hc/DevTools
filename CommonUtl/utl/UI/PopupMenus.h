@@ -61,7 +61,7 @@ namespace mfc
 		void SetChecked( bool checked = true );
 		void UpdateSelectedColor( COLORREF selColor ) { SetChecked( m_color == selColor ); }
 
-		static CToolBarColorButton* ReplaceWithColorButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex = nullptr );
+		static CToolBarColorButton* ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex = nullptr );
 	private:
 		COLORREF m_color;
 
@@ -90,7 +90,7 @@ namespace mfc
 
 		CColorMenuButton( void );			// private constructor for serialization
 	public:
-		CColorMenuButton( UINT btnId, const CColorTable* pColorTable );
+		CColorMenuButton( UINT btnId, const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost = nullptr );
 		virtual ~CColorMenuButton();
 
 		const CColorTable* GetColorTable( void ) const { return m_pColorTable; }
@@ -102,6 +102,8 @@ namespace mfc
 		void SetDisplayColorBox( UINT imageId = 0 );				// 0 for transparent: empty image with color band at bottom;  UINT_MAX for hiding the color box
 
 		enum NotifCode { CMBN_COLORSELECTED = CBN_SELCHANGE };		// note: notifications are suppressed during parent's UpdateData()
+
+		static CColorMenuButton* ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost, OUT OPTIONAL int* pIndex = nullptr );
 	protected:
 		CWnd* GetMessageWnd( void ) const;
 		const CColorEntry* FindClickedBarColorEntry( void ) const;

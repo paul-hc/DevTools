@@ -49,10 +49,14 @@ namespace ui
 		virtual bool UseUserColors( void ) const = 0;
 
 		// implemented
+		COLORREF GetFallbackColor( COLORREF rawColor ) const
+		{
+			return ui::IsUndefinedColor( rawColor ) ? GetAutoColor() : rawColor;		// fallback to auto-color if color undefined (CLR_NONE)
+		}
+
 		COLORREF GetActualColor( void ) const
 		{
-			COLORREF actualColor = GetColor();
-			return ui::IsUndefinedColor( actualColor ) ? GetAutoColor() : actualColor;		// the color current selection amounts to
+			return GetFallbackColor( GetColor() );		// the color current selection amounts to
 		}
 
 		bool IsForeignColor( void ) const;

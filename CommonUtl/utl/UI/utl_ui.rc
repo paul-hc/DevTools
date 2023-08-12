@@ -498,6 +498,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "<user custom colors>",        ID_USER_CUSTOM_COLOR_SET
             MENUITEM "<color Shades>",              ID_SHADES_COLOR_SET
+            MENUITEM "<recent colors>",             ID_RECENT_COLOR_SET
             MENUITEM SEPARATOR
             MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
             MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
@@ -506,7 +507,6 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Undo\tCtrl+Z",                ID_EDIT_UNDO
             MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO
-            MENUITEM "<recent colors>",             ID_RECENT_COLOR_SET
             MENUITEM SEPARATOR
             MENUITEM "&Automatic Color\tDelete",    ID_SET_AUTO_COLOR
             MENUITEM "&More Colors...",             ID_MORE_COLORS
@@ -523,6 +523,8 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "&Automatic Color\tDelete",    ID_SET_AUTO_COLOR
             MENUITEM "&More Colors...",             ID_MORE_COLORS
+            MENUITEM SEPARATOR
+            MENUITEM "<recent colors>",             ID_RECENT_COLOR_SET
             MENUITEM SEPARATOR
             POPUP "&Select Color Table"
             BEGIN

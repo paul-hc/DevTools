@@ -102,6 +102,7 @@ public:
 
 	int GetColumnCount( void ) const;
 	virtual int GetCompactGridColumnCount( void ) const { return GetColumnCount(); }	// for nameless display in CMFCColorBar
+	virtual bool BrowseNamedPopupGrid( void ) const { return false; }
 
 	size_t Add( const CColorEntry& colorEntry, size_t atPos = utl::npos );
 
@@ -116,12 +117,13 @@ public:
 
 	size_t SetupShadesTable( COLORREF selColor, size_t columnCount );	// 3 rows x columnCount - Lighter, Darker, Desaturated shades
 protected:
-	int ToDisplayColumnCount( int columnCount ) const;
+	virtual int ToDisplayColumnCount( int columnCount ) const;
 
 	virtual void OnTableChanged( void ) {}
 	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const { ASSERT( ui::IsRealColor( rawColor ) ); return rawColor; }
 
 	bool Remove( COLORREF rawColor );
+	size_t Clamp( size_t maxCount );
 private:
 	const ui::StdColorTable m_tableType;
 	std::vector<CColorEntry> m_colors;
@@ -142,6 +144,7 @@ public:
 	virtual ~CSystemColorTable();
 
 	virtual int GetCompactGridColumnCount( void ) const;
+	virtual bool BrowseNamedPopupGrid( void ) const { return true; }		// top-to-bottom filled named grid
 protected:
 	// base overrides
 	virtual void OnTableChanged( void ) overrides(CColorTable);
@@ -158,16 +161,19 @@ class CCommandModel;
 class CRecentColorTable : public CSystemColorTable	// table of most recent used colors; may also contain system colors, so it inherits from CSystemColorTable
 {
 public:
-	CRecentColorTable( void );
+	CRecentColorTable( size_t maxColors = 20 );
 
 	// push means at the front of the table (LIFO)
-	bool PushColor( COLORREF rawColor );
-	size_t PushColorHistory( const CCommandModel* pCmdModel );
+	bool PushColor( COLORREF rawColor, COLORREF autoColor /*= CLR_NONE*/ );
+	size_t PushColorHistory( const CCommandModel* pCmdModel, COLORREF autoColor /*= CLR_NONE*/ );
 private:
-	bool PushFrontColorImpl( COLORREF rawColor );
+	bool PushFrontColorImpl( COLORREF rawColor, COLORREF autoColor );
 protected:
 	// base overrides
-	virtual void OnTableChanged( void ) overrides(CColorTable);
+	virtual int ToDisplayColumnCount( int columnCount ) const overrides(CColorTable);
+	virtual void OnTableChanged( void ) overrides(CSystemColorTable);
+private:
+	size_t m_maxColors;		// history limit
 };
 
 
