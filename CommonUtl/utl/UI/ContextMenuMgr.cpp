@@ -41,14 +41,16 @@ namespace mfc
 
 	void CContextMenuMgr::ResetTrackingPopup( CMFCPopupMenu* pNewTrackingPopup )
 	{
-		// If allocated by the caller right before a TrackPopupMenu(), it will be used instead of creating a 'new CMFCPopupMenu;' in ShowPopupMenu().
+		ASSERT_PTR( this );		// requires that CContextMenuMgr has been initialized in app InitInstance()
 
+		// if allocated by the caller right before a TrackPopupMenu(), it will be used instead of creating a 'new CMFCPopupMenu;' in ShowPopupMenu()
 		ASSERT_NULL( m_pNewTrackingPopup.get() );		// never double allocate!
 		m_pNewTrackingPopup.reset( pNewTrackingPopup );
 	}
 
 	UINT CContextMenuMgr::TrackModalPopup( OPTIONAL HMENU hMenuPopup, CWnd* pTargetWnd, bool sendCommand, CPoint screenPos /*= CPoint( -1, -1 )*/, bool rightAlign /*= false*/ )
 	{	// tracks either the hMenuPopup (if specified), or externally stored m_pNewTrackingPopup
+		ASSERT_PTR( this );		// requires that CContextMenuMgr has been initialized in app InitInstance()
 		ASSERT( hMenuPopup != nullptr || m_pNewTrackingPopup.get() != nullptr );	// tracking popup must be set by client if hMenuPopup is null
 
 		UINT cmdId = 0;

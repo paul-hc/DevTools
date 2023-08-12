@@ -284,7 +284,7 @@ void CArchiveImagesDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		if ( firstInit )
 		{
-			m_formatCombo.LimitText( _MAX_PATH );
+			m_formatCombo.LimitText( MAX_PATH );
 			m_formatCombo.LoadHistory( m_regSection.c_str(), reg::entry_FormatHistory, _T("*.*") );
 		}
 

@@ -17,6 +17,7 @@
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/AboutBox.h"
+#include "utl/UI/ContextMenuMgr.h"
 #include "utl/UI/DragListCtrl.h"
 #include "utl/UI/GdiPlus_fwd.h"
 #include "utl/UI/MfcUtilities.h"
@@ -281,7 +282,7 @@ namespace reg
 CApplication theApp;
 
 CApplication::CApplication( void )
-	: CBaseApp<CWinApp>()
+	: CBaseApp<CWinAppEx>()
 	, m_pMainFrame( nullptr )
 	, m_runFlags( 0 )
 	, m_forceMask( 0 )
@@ -308,7 +309,13 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	if ( !CBaseApp<CWinApp>::InitInstance() )
+	// init MFC control bars:
+	ASSERT_NULL( afxContextMenuManager );	// shouldn't be already initialized
+	afxContextMenuManager = new mfc::CContextMenuMgr();		// replace base singleton CContextMenuManager with ui::CContextMenuMgr, that has custom functionality
+	m_bContextMenuManagerAutocreated = true;
+	StoreVisualManagerClass( RUNTIME_CLASS( CMFCVisualManagerOffice2007 ) );
+
+	if ( !CBaseApp<CWinAppEx>::InitInstance() )
 		return FALSE;
 
 	InitGlobals();
@@ -390,7 +397,7 @@ int CApplication::ExitInstance( void )
 
 	m_pEventLogger.reset();
 
-	return CBaseApp<CWinApp>::ExitInstance();
+	return CBaseApp<CWinAppEx>::ExitInstance();
 }
 
 void CApplication::InitGlobals( void )
@@ -520,7 +527,7 @@ BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 			return TRUE;
 		}
 
-	return CBaseApp<CWinApp>::OnDDECommand( (LPTSTR)command.c_str() );
+	return CBaseApp<CWinAppEx>::OnDDECommand( (LPTSTR)command.c_str() );
 }
 
 BOOL CApplication::PreTranslateMessage( MSG* pMsg )
@@ -530,17 +537,17 @@ BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 			if ( m_sharedAccel.Translate( pMsg, hMainWnd ) )
 				return TRUE;
 
-	return CBaseApp<CWinApp>::PreTranslateMessage( pMsg );
+	return CBaseApp<CWinAppEx>::PreTranslateMessage( pMsg );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
-	ON_COMMAND( ID_FILE_NEW, CBaseApp<CWinApp>::OnFileNew )
-	ON_COMMAND( ID_FILE_OPEN, CBaseApp<CWinApp>::OnFileOpen )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinAppEx> )
+	ON_COMMAND( ID_FILE_NEW, CBaseApp<CWinAppEx>::OnFileNew )
+	ON_COMMAND( ID_FILE_OPEN, CBaseApp<CWinAppEx>::OnFileOpen )
 	ON_COMMAND( ID_FILE_OPEN_ALBUM_FOLDER, OnFileOpenAlbumFolder )
-	ON_COMMAND( ID_FILE_PRINT_SETUP, CBaseApp<CWinApp>::OnFilePrintSetup )
+	ON_COMMAND( ID_FILE_PRINT_SETUP, CBaseApp<CWinAppEx>::OnFilePrintSetup )
 	ON_COMMAND( CM_CLEAR_TEMP_EMBEDDED_CLONES, OnClearTempEmbeddedClones )
 END_MESSAGE_MAP()
 

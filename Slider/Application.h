@@ -4,6 +4,7 @@
 
 #include "utl/UI/BaseApp.h"
 #include "Application_fwd.h"
+#include <afxwinappex.h>
 
 
 class CMainFrame;
@@ -27,7 +28,7 @@ namespace app
 }
 
 
-class CApplication : public CBaseApp<CWinApp>
+class CApplication : public CBaseApp<CWinAppEx>
 {
 public:
 	CApplication( void );
