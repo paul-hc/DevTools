@@ -190,7 +190,7 @@ void CColorPickerButton::SetColor( COLORREF rawColor, bool notify /*= false*/ ) 
 	if ( notify )
 	{
 		if ( !m_inCmd && m_pCmdSvc.get() != nullptr && utl::ExecDo == CCommandModel::GetExecMode() )
-		{
+		{	// convert notification to command, so that will get stored in the Undo stack
 			CScopedValue<bool> scInCmd( &m_inCmd, true );
 
 			m_pCmdSvc->Execute( new CSetColorCmd( this, rawColor ) );

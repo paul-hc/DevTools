@@ -853,7 +853,7 @@ namespace mfc
 		if ( m_columnCount > 8 )
 			m_columnCount /= 2;			// halve the columns to "square" the table a bit - but by a factor of 2, so that ToTransposedGridIndex() does not go out of bounds
 
-		if ( m_pColorTable->GetColors().size() < 8 )
+		if ( m_pColorTable->GetColors().size() <= 10 )
 			m_columnCount = utl::min( 1, m_columnCount );		// limit to maximum 1 column if only a few colors
 	}
 
