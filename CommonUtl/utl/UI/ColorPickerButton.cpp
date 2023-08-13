@@ -35,10 +35,10 @@ namespace ui
 		if ( pColorValue != nullptr )
 			if ( DialogOutput == pDX->m_bSaveAndValidate )
 			{
-				pColorEditor->SetColor( pColorValue->Get(), false );
-
 				if ( firstInit )
-					pColorEditor->SetAutoColor( pColorValue->GetActual() );
+					pColorEditor->SetAutoColor( pColorValue->GetAutoColor() );
+
+				pColorEditor->SetColor( pColorValue->Get(), false );
 			}
 			else
 				pColorValue->Set( pColorEditor->GetColor() );
