@@ -17,7 +17,7 @@ using namespace Gdiplus;
 	You have to initialize/uninitialize GDI+ outside of DLL and do it only once.
     GDI+ is not thread safe. So you should use it in main app thread only.
 
-	This must be used in an EXE or regular DLL (never when called from DllMain).
+	This must be used in an EXE or regular user DLL (never when called from DllMain).
 	If using MFC with a CWinApp object, it should be created in InitInstance() and destroyed in ExitInstance().
 */
 class CScopedGdiPlusInit

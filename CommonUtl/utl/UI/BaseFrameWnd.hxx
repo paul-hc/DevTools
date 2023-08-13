@@ -3,6 +3,7 @@
 
 #include "SystemTray.h"
 #include "WindowPlacement.h"
+#include "resource.h"
 
 
 // CBaseFrameWnd template code
@@ -65,7 +66,7 @@ bool CBaseFrameWnd<BaseWnd>::ShowAppWindow( int cmdShow )
 			return true;
 		}
 
-	return ShowWindow( cmdShow ) != FALSE;
+	return this->ShowWindow( cmdShow ) != FALSE;
 }
 
 template< typename BaseWnd >
@@ -101,7 +102,7 @@ void CBaseFrameWnd<BaseWnd>::OnClose( void )
 template< typename BaseWnd >
 void CBaseFrameWnd<BaseWnd>::OnAppRestore( void )
 {
-	SendMessage( WM_SYSCOMMAND, SC_RESTORE );
+	this->SendMessage( WM_SYSCOMMAND, SC_RESTORE );
 }
 
 template< typename BaseWnd >
@@ -113,7 +114,7 @@ void CBaseFrameWnd<BaseWnd>::OnUpdateAppRestore( CCmdUI* pCmdUI )
 template< typename BaseWnd >
 void CBaseFrameWnd<BaseWnd>::OnAppMinimize( void )
 {
-	SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
+	this->SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
 }
 
 template< typename BaseWnd >
