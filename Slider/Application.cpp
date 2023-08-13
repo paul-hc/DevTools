@@ -17,7 +17,6 @@
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/AboutBox.h"
-#include "utl/UI/ContextMenuMgr.h"
 #include "utl/UI/DragListCtrl.h"
 #include "utl/UI/GdiPlus_fwd.h"
 #include "utl/UI/MfcUtilities.h"
@@ -309,13 +308,7 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	// init MFC control bars:
-	ASSERT_NULL( afxContextMenuManager );	// shouldn't be already initialized
-	afxContextMenuManager = new mfc::CContextMenuMgr();		// replace base singleton CContextMenuManager with ui::CContextMenuMgr, that has custom functionality
-	m_bContextMenuManagerAutocreated = true;
-	StoreVisualManagerClass( RUNTIME_CLASS( CMFCVisualManagerOffice2007 ) );
-
-	if ( !CBaseApp<CWinAppEx>::InitInstance() )
+	if ( !__super::InitInstance() )
 		return FALSE;
 
 	InitGlobals();
@@ -397,7 +390,7 @@ int CApplication::ExitInstance( void )
 
 	m_pEventLogger.reset();
 
-	return CBaseApp<CWinAppEx>::ExitInstance();
+	return __super::ExitInstance();
 }
 
 void CApplication::InitGlobals( void )
@@ -527,7 +520,7 @@ BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 			return TRUE;
 		}
 
-	return CBaseApp<CWinAppEx>::OnDDECommand( (LPTSTR)command.c_str() );
+	return __super::OnDDECommand( (LPTSTR)command.c_str() );
 }
 
 BOOL CApplication::PreTranslateMessage( MSG* pMsg )
@@ -537,7 +530,7 @@ BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 			if ( m_sharedAccel.Translate( pMsg, hMainWnd ) )
 				return TRUE;
 
-	return CBaseApp<CWinAppEx>::PreTranslateMessage( pMsg );
+	return __super::PreTranslateMessage( pMsg );
 }
 
 

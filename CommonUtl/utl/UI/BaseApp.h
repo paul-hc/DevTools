@@ -98,6 +98,8 @@ protected:
 namespace app
 {
 	void InitUtlBase( void );
+	bool InitMfcControlBars( CWinApp* pWinApp, CRuntimeClass* pVisualManagerClass );	// init MFC control bars
+
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos );
 	UINT ToMsgBoxFlags( app::MsgType msgType );
 

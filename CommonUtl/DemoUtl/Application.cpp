@@ -19,38 +19,12 @@
 #include "utl/UI/VisualTheme.h"
 #include "utl/test/ThreadingTests.hxx"		// include only in this test project to avoid the link dependency on Boost libraries in regular projects
 
-#include "utl/UI/ContextMenuMgr.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 #include "utl/UI/BaseApp.hxx"
 #include "utl/UI/BaseFrameWnd.hxx"
-
-
-CBaseWinAppEx::CBaseWinAppEx( void )
-	: CBaseApp<CWinAppEx>()
-{
-}
-
-CBaseWinAppEx::~CBaseWinAppEx()
-{
-}
-
-bool CBaseWinAppEx::InitContextMenuMgr( void )
-{
-	// superseeds CWinAppEx::InitContextMenuManager()
-	if ( afxContextMenuManager != NULL )
-	{
-		ASSERT( false );		// already initialized
-		return false;
-	}
-
-	afxContextMenuManager = new mfc::CContextMenuMgr();		// replace base singleton CContextMenuManager with ui::CContextMenuMgr, that has custom functionality
-	m_bContextMenuManagerAutocreated = true;
-	return true;
-}
 
 
 namespace reg
@@ -108,11 +82,7 @@ BOOL CApplication::InitInstance( void )
 {
 	m_pGdiPlusInit.reset( new CScopedGdiPlusInit() );
 
-	// init MFC control bars:
-	InitContextMenuMgr();
-	StoreVisualManagerClass( RUNTIME_CLASS( CMFCVisualManagerOffice2007 ) );
-
-	if ( !CBaseWinAppEx::InitInstance() )
+	if ( !__super::InitInstance() )
 		return FALSE;
 
 	SetRegistryBase( _T("Settings") );
@@ -173,7 +143,7 @@ int CApplication::ExitInstance( void )
 	WriteProfileInt( reg::section, reg::entry_disableSmooth, !HasFlag( CLayoutEngine::m_defaultFlags, CLayoutEngine::SmoothGroups ) );
 	WriteProfileInt( reg::section, reg::entry_disableThemes, CVisualTheme::IsDisabled() );
 
-	return CBaseWinAppEx::ExitInstance();
+	return __super::ExitInstance();
 }
 
 void CApplication::OnInitAppResources( void )
@@ -222,9 +192,9 @@ bool CApplication::HasCommandLineOptions( void )
 }
 
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseWinAppEx )
-	ON_COMMAND( ID_FILE_NEW, &CBaseWinAppEx::OnFileNew )
-	ON_COMMAND( ID_FILE_OPEN, &CBaseWinAppEx::OnFileOpen )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinAppEx> )
+	ON_COMMAND( ID_FILE_NEW, &CBaseApp<CWinAppEx>::OnFileNew )
+	ON_COMMAND( ID_FILE_OPEN, &CBaseApp<CWinAppEx>::OnFileOpen )
 END_MESSAGE_MAP()
 
 

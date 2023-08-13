@@ -2,8 +2,8 @@
 #define Slider_h
 #pragma once
 
-#include "utl/UI/BaseApp.h"
 #include "Application_fwd.h"
+#include "utl/UI/BaseApp.h"
 #include <afxwinappex.h>
 
 

@@ -1,29 +1,13 @@
 #pragma once
 
-#include <afxwinappex.h>
 #include "utl/UI/BaseApp.h"
-
-
 #include <afxwinappex.h>
-
-
-class CBaseWinAppEx : public CBaseApp<CWinAppEx>
-{
-protected:
-	CBaseWinAppEx( void );
-	virtual ~CBaseWinAppEx();
-
-	bool InitContextMenuMgr( void );		// superseeds CWinAppEx::InitContextMenuManager()
-private:
-	// hiden methods
-	using CWinAppEx::InitContextMenuManager;
-};
 
 
 class CScopedGdiPlusInit;
 
 
-class CApplication : public CBaseWinAppEx
+class CApplication : public CBaseApp<CWinAppEx>
 {
 public:
 	CApplication( void );

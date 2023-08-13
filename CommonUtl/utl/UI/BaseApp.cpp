@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "BaseApp.h"
+#include "ContextMenuMgr.h"
 #include "EnumTags.h"
 #include "MenuUtilities.h"
 #include "RuntimeException.h"
@@ -9,6 +10,8 @@
 #include "WindowDebug.h"
 #include "resource.h"
 #include "utl/FileEnumerator.h"
+#include <afxwinappex.h>
+#include <afxtoolbar.h>		// for CMFCToolBar::AddToolBarForImageCollection()
 
 #ifdef _DEBUG
 #include "utl/test/Test.h"
@@ -17,6 +20,16 @@
 
 #define new DEBUG_NEW
 #endif
+
+
+namespace nosy
+{
+	struct CWinAppEx_ : public CWinAppEx
+	{
+		// public access
+		using CWinAppEx::m_bContextMenuManagerAutocreated;
+	};
+}
 
 
 //ATL::CTraceCategory traceThumbs( _T("UTL Thumbnails") );
@@ -28,6 +41,38 @@ namespace app
 	{
 		// inject UTL_UI.lib code into UTL_BASE.lib:
 		fs::StoreResolveShortcutProc( &shell::ResolveShortcut );
+	}
+
+	bool InitMfcControlBars( CWinApp* pWinApp, CRuntimeClass* pVisualManagerClass )
+	{
+		if ( !is_a<CWinAppEx>( pWinApp ) )
+			return false;
+
+		nosy::CWinAppEx_* pWinAppEx = mfc::nosy_cast<nosy::CWinAppEx_>( pWinApp );
+
+		TRACE( _T("* Initializing MFC Ribbon resources for application '%s'\n"), pWinAppEx->m_pszAppName );
+
+		// superseeds CWinAppEx::InitContextMenuManager()
+		if ( afxContextMenuManager != NULL )
+		{
+			ASSERT( false );		// already initialized
+			return false;
+		}
+
+		afxContextMenuManager = new mfc::CContextMenuMgr();		// replace base singleton CContextMenuManager with ui::CContextMenuMgr, that has custom functionality
+		pWinAppEx->m_bContextMenuManagerAutocreated = true;
+
+		if ( afxContextMenuManager != nullptr )
+		{	// feed afxCommandManager [class CCommandManager] with images from the strip
+			//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );
+			CMFCToolBar::AddToolBarForImageCollection( IDR_STD_BUTTONS_STRIP );
+			CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STATUS_STRIP );
+		}
+
+		// activate "Windows Native" visual manager for enabling themes in MFC controls
+		CMFCVisualManager::SetDefaultManager( pVisualManagerClass );
+
+		return true;
 	}
 
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos )

@@ -9,8 +9,7 @@
 #include "ToolStrip.h"
 #include "WndUtils.h"
 #include "resource.h"
-#include <afxcontrolbars.h>			// MFC support for ribbons and control bars
-#include <afxtoolbar.h>				// for CMFCToolBar::AddToolBarForImageCollection()
+#include <afxvisualmanageroffice2007.h>		// MFC support for ribbons and control bars
 
 #ifdef USE_UT
 #include "utl/test/Test.h"
@@ -25,7 +24,7 @@ template< typename BaseClass >
 CBaseApp<BaseClass>::CBaseApp( void )
 	: BaseClass()
 	, CAppTools()
-	, m_pVisualManagerClass( RUNTIME_CLASS( CMFCVisualManagerWindows ) )
+	, m_pVisualManagerClass( RUNTIME_CLASS( CMFCVisualManagerOffice2007 ) )
 	, m_isInteractive( true )
 	, m_lazyInitAppResources( false )
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
@@ -90,6 +89,9 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 {
 	ASSERT_NULL( m_pSharedResources.get() );		// init once
 
+	// init MFC control bars:
+	app::InitMfcControlBars( this, m_pVisualManagerClass );
+
 	m_pSharedResources.reset( new utl::CResourcePool() );
 	m_pLogger.reset( new CLogger() );
 	m_appAccel.Load( IDR_APP_SHARED_ACCEL );
@@ -102,16 +104,6 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	// register stock images
 	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_BUTTONS_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_EDITOR_STRIP );
-
-	if ( afxContextMenuManager != nullptr )
-	{	// feed afxCommandManager [class CCommandManager] with images from the strip
-		//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );
-		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_BUTTONS_STRIP );
-		CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STATUS_STRIP );
-	}
-
-	// activate "Windows Native" visual manager for enabling themes in MFC controls
-	CMFCVisualManager::SetDefaultManager( m_pVisualManagerClass );
 
 #ifdef USE_UT
 	ut::RegisterUtlConsoleTests();
