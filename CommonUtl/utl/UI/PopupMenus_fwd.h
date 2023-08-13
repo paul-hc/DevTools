@@ -28,6 +28,16 @@ namespace mfc
 }
 
 
+namespace mfc
+{
+	struct CColorLabels
+	{
+		static const TCHAR s_autoLabel[];
+		static const TCHAR s_moreLabel[];
+	};
+}
+
+
 namespace ui
 {
 	bool IsUndefinedColor( COLORREF rawColor );		// defined in Color.h
@@ -69,6 +79,7 @@ namespace ui
 		virtual CWnd* GetHostWindow( void ) const = 0;
 
 		virtual void SetColor( COLORREF rawColor, bool notify ) = 0;
+		virtual void SetAutoColor( COLORREF autoColor, const TCHAR* pAutoLabel = mfc::CColorLabels::s_autoLabel ) = 0;
 		virtual void SetSelColorTable( const CColorTable* pSelColorTable ) = 0;
 
 		// implemented
@@ -80,13 +91,6 @@ namespace ui
 
 namespace mfc
 {
-	struct CColorLabels
-	{
-		static const TCHAR s_autoLabel[];
-		static const TCHAR s_moreLabel[];
-	};
-
-
 	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
 
 

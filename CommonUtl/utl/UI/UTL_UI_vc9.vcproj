@@ -603,22 +603,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Color.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Color.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ColorRepository.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ColorRepository.h"
-				>
-			</File>
-			<File
 				RelativePath=".\CommonWinDefs.h"
 				>
 			</File>
@@ -668,14 +652,6 @@
 			</File>
 			<File
 				RelativePath=".\IZoomBar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LogPalette.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LogPalette.h"
 				>
 			</File>
 			<File
@@ -1919,6 +1895,38 @@
 				</File>
 				<File
 					RelativePath=".\PopupMenus_fwd.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Color"
+				>
+				<File
+					RelativePath=".\Color.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Color.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ColorRepository.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ColorRepository.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ColorValue.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LogPalette.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LogPalette.h"
 					>
 				</File>
 			</Filter>

@@ -4,6 +4,7 @@
 
 #include "AccelTable.h"
 #include "Color.h"
+#include "ColorValue.h"
 #include "Dialog_fwd.h"
 #include "PopupMenus_fwd.h"
 #include "StdColors.h"
@@ -13,11 +14,13 @@
 
 namespace ui
 {
-	template< typename ColorCtrlT >
-	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor, bool evalColor = false );
+	void DDX_ColorEditor( CDataExchange* pDX, int ctrlId, ui::IColorEditorHost* pColorEditor, IN OUT CColorValue* pColorValue );
 
 	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput = false );
 	void DDX_ColorRepoText( CDataExchange* pDX, int ctrlId, COLORREF color );
+
+	template< typename ColorCtrlT >
+	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, IN OUT COLORREF* pColor, bool evalColor = false );
 }
 
 
@@ -43,7 +46,6 @@ public:
 	const CColorStore* GetMainStore( void ) const;
 	void SetMainStore( const CColorStore* pMainStore );
 
-	void SetAutomaticColor( COLORREF autoColor, const TCHAR autoLabel[] = mfc::CColorLabels::s_autoLabel ) { EnableAutomaticButton( autoLabel, autoColor ); }
 	void SetDocColorTable( const CColorTable* pDocColorTable );		// additional 'Document' section of colors (below the main colors)
 	void SetUserColors( const std::vector<COLORREF>& userColors, int columnCount = 0 );		// custom colors, not based on a color table
 
@@ -63,6 +65,7 @@ public:
 	// ui::IColorEditorHost interface
 	virtual CWnd* GetHostWindow( void ) const implement { return const_cast<CColorPickerButton*>( this ); }
 	virtual void SetColor( COLORREF rawColor, bool notify = false ) implement;
+	virtual void SetAutoColor( COLORREF autoColor, const TCHAR* pAutoLabel = mfc::CColorLabels::s_autoLabel ) implement;
 	virtual void SetSelColorTable( const CColorTable* pSelColorTable ) implement;
 
 	enum TrackingMode { NoTracking, TrackingColorBar, TrackingMenuColorTables, TrackingContextMenu };
@@ -143,7 +146,7 @@ protected:
 namespace ui
 {
 	template< typename ColorCtrlT >
-	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, COLORREF* pColor, bool evalColor /*= false*/ )
+	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, IN OUT COLORREF* pColor, bool evalColor /*= false*/ )
 	{	// pass evalColor: true for CMFCColorButton, but false for CColorPickerButton (which manages well logical colors)
 		::DDX_Control( pDX, ctrlId, rCtrl );
 

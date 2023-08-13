@@ -29,6 +29,7 @@
 #define override			// method suffix to indicate a base override - note: replaces the CLR override keyword
 #define overrides( ... )	// annotates the base class that virtual method overrides
 #define implement			// method suffix to indicate an interface method is implemented
+#define implements( ... )	// annotates the interface that virtual method implements
 #define persist				// persistent data-member
 #define throws_( ... )
 #define throws_cond( ... )	// throws conditionally, depending on a specific parameter

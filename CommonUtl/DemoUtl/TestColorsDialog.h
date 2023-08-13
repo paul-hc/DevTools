@@ -2,6 +2,7 @@
 #define TestColorsDialog_h
 #pragma once
 
+#include "utl/UI/ColorValue.h"
 #include "utl/UI/LayoutDialog.h"
 #include <afxcontrolbars.h>		// MFC support for ribbon and control bars
 
@@ -18,7 +19,7 @@ public:
 private:
 	void SetPickerUserColors( bool pickerUserColors );
 private:
-	COLORREF m_color;
+	CColorValue m_color;
 	bool m_editChecked;
 	CMenu m_popupMenu;
 private:

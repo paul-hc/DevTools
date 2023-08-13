@@ -51,6 +51,9 @@
     <Filter Include="UI\Controls\MFC+">
       <UniqueIdentifier>{c3128501-7031-498e-8ea4-2d7e128f262b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\Color">
+      <UniqueIdentifier>{64c70437-b3d5-4c5b-a1ae-a1d0c9d732fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -119,9 +122,6 @@
     <ClInclude Include="CmdUpdate.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Color.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="CommonWinDefs.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -147,9 +147,6 @@
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="IZoomBar.h">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="LogPalette.h">
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="MemoryDC.h">
@@ -620,9 +617,6 @@
     <ClInclude Include="TaskDialog.h">
       <Filter>UI\Dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="ColorRepository.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -661,6 +655,18 @@
     </ClInclude>
     <ClInclude Include="RegistrySerialization.h">
       <Filter>UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>UI\Color</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorRepository.h">
+      <Filter>UI\Color</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorValue.h">
+      <Filter>UI\Color</Filter>
+    </ClInclude>
+    <ClInclude Include="LogPalette.h">
+      <Filter>UI\Color</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -703,9 +709,6 @@
     <ClCompile Include="CmdUpdate.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="Color.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
     <ClCompile Include="DesktopDC.cpp">
       <Filter>UI</Filter>
     </ClCompile>
@@ -716,9 +719,6 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="IZoomBar.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="LogPalette.cpp">
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="MemoryDC.cpp">
@@ -1096,9 +1096,6 @@
     <ClCompile Include="TaskDialog.cpp">
       <Filter>UI\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="ColorRepository.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1134,6 +1131,15 @@
     </ClCompile>
     <ClCompile Include="RegistrySerialization.cpp">
       <Filter>UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="Color.cpp">
+      <Filter>UI\Color</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorRepository.cpp">
+      <Filter>UI\Color</Filter>
+    </ClCompile>
+    <ClCompile Include="LogPalette.cpp">
+      <Filter>UI\Color</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

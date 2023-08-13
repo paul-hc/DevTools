@@ -24,6 +24,26 @@
 
 namespace ui
 {
+	void DDX_ColorEditor( CDataExchange* pDX, int ctrlId, ui::IColorEditorHost* pColorEditor, IN OUT CColorValue* pColorValue )
+	{
+		ASSERT_PTR( pColorEditor );
+
+		bool firstInit = nullptr == pColorEditor->GetHostWindow()->GetSafeHwnd();
+
+		::DDX_Control( pDX, ctrlId, *pColorEditor->GetHostWindow() );
+
+		if ( pColorValue != nullptr )
+			if ( DialogOutput == pDX->m_bSaveAndValidate )
+			{
+				pColorEditor->SetColor( pColorValue->Get(), false );
+
+				if ( firstInit )
+					pColorEditor->SetAutoColor( pColorValue->GetActual() );
+			}
+			else
+				pColorValue->Set( pColorEditor->GetColor() );
+	}
+
 	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput /*= false*/ )
 	{
 		HWND hCtrl = pDX->PrepareEditCtrl( ctrlId );
@@ -236,6 +256,12 @@ void CColorPickerButton::UpdateColor( COLORREF color ) overrides(CMFCColorButton
 	SetColor( color, true );
 }
 
+void CColorPickerButton::SetAutoColor( COLORREF autoColor, const TCHAR* pAutoLabel /*= mfc::CColorLabels::s_autoLabel*/ ) implement
+{
+	if ( autoColor != m_ColorAutomatic || m_strAutoColorText != pAutoLabel )
+		EnableAutomaticButton( pAutoLabel, autoColor, !ui::IsUndefinedColor( autoColor ) );
+}
+
 void CColorPickerButton::UpdateShadesTable( void )
 {
 	CColorTable* pShadesTable = m_pMenuImpl->GetShadesTable();
@@ -245,6 +271,8 @@ void CColorPickerButton::UpdateShadesTable( void )
 	mfc::TColorList shadesColorList;
 	pShadesTable->QueryMfcColors( shadesColorList );
 	SetDocumentColors( pShadesTable->IsEmpty() ? nullptr : pShadesTable->GetTableName().c_str(), shadesColorList );
+
+	ENSURE( pShadesTable->GetColors().size() == (size_t)m_lstDocColors.GetSize() );
 }
 
 void CColorPickerButton::SetSelColorTable( const CColorTable* pSelColorTable ) implement
@@ -510,6 +538,9 @@ void CColorPickerButton::OnShowColorPopup( void ) overrides(CMFCColorButton)
 		else if ( colorCount >= 64 )
 			m_nColumns = static_cast<int>( sqrt( static_cast<double>( colorCount ) ) );
 	}
+
+	// IMP bug fix: multiple pickers in the same dialog share the same global Shades table, which may need different shades count per picker; so we need to update it while popup browsing
+	UpdateShadesTable();
 
 	// Note:
 	//	- this class can't be customized with new buttons or sub-menus, since it's using CMFCToolBarColorButton defined privately in afxcolorbar.cpp

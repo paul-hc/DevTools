@@ -18,6 +18,9 @@ class CEnumTags;
 
 namespace ui
 {
+	typedef COLORREF TDisplayColor;
+
+
 	enum StdColorTable
 	{
 		// CColorRepository::Instance():

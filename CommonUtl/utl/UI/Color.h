@@ -32,8 +32,6 @@ namespace ui
 	inline bool IsRealColor( COLORREF rawColor ) { return 0 == GetColorFlags( rawColor ); }		// a real RGB color: not CLR_NONE, CLR_DEFAULT, sys-color, palette-index
 
 
-	typedef COLORREF TDisplayColor;
-
 	TDisplayColor EvalColor( COLORREF rawColor );
 	inline TDisplayColor EvalColorIf( COLORREF rawColor, bool doEvalColor ) { return doEvalColor ? EvalColor( rawColor ) : rawColor; }
 

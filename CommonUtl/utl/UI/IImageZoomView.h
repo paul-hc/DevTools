@@ -24,7 +24,7 @@ namespace ui
 		virtual CScrollView* GetScrollView( void ) = 0;
 
 		virtual CSize GetSourceSize( void ) const = 0;
-		virtual COLORREF GetBkColor( void ) const = 0;
+		virtual ui::TDisplayColor GetBkColor( void ) const = 0;
 
 		virtual ui::ImageScalingMode GetScalingMode( void ) const = 0;
 		virtual UINT GetZoomPct( void ) const = 0;

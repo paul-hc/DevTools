@@ -200,6 +200,7 @@
     <ClInclude Include="ColorPickerButton.h" />
     <ClInclude Include="ColorPopupDialogs.h" />
     <ClInclude Include="ColorRepository.h" />
+    <ClInclude Include="ColorValue.h" />
     <ClInclude Include="CommandSvcHandler.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ContentFitBase.h" />

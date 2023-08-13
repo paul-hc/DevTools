@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "Color.h"
+#include "ColorValue.h"			// include to make Intellisense happy in the header
 #include "ColorRepository.h"
 #include "Image_fwd.h"
 #include "StringUtilities.h"
