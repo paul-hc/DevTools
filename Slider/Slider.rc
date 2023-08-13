@@ -755,9 +755,9 @@ BEGIN
     GROUPBOX        "Colours",IDC_STATIC,186,7,153,62
     RTEXT           "Default background:",IDC_STATIC,188,19,69,8
     PUSHBUTTON      "<background color>",ID_EDIT_BK_COLOR,259,16,75,14,NOT WS_TABSTOP
-    RTEXT           "Image selection:",IDC_STATIC,188,35,69,8
+    RTEXT           "Image selection:",IDC_EDIT_IMAGE_SEL_COLOR_LABEL,188,35,69,8
     PUSHBUTTON      "<selection color>",CM_EDIT_IMAGE_SEL_COLOR,259,32,75,14,NOT WS_TABSTOP
-    RTEXT           "Image selection text:",IDC_STATIC,188,51,69,8
+    RTEXT           "Image selection text:",IDC_EDIT_IMAGE_SEL_TEXT_COLOR_LABEL,188,51,69,8
     PUSHBUTTON      "<selection text color>",CM_EDIT_IMAGE_SEL_TEXT_COLOR,259,48,75,14,NOT WS_TABSTOP
     GROUPBOX        "Thumbnails",IDC_STATIC,186,77,153,112
     LTEXT           "Thumbnail size:",IDC_STATIC,217,89,50,8

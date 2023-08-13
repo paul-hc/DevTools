@@ -37,6 +37,14 @@ CWorkspaceDialog::~CWorkspaceDialog()
 {
 }
 
+void CWorkspaceDialog::EnableCtrls( void )
+{
+	// enable
+	const UINT ctrlIds[] = { CM_EDIT_IMAGE_SEL_COLOR, IDC_EDIT_IMAGE_SEL_COLOR_LABEL, CM_EDIT_IMAGE_SEL_TEXT_COLOR, IDC_EDIT_IMAGE_SEL_TEXT_COLOR_LABEL };
+
+	ui::EnableControls( m_hWnd, ARRAY_SPAN( ctrlIds ), !HasFlag( m_data.m_wkspFlags, wf::UseThemedThumbListDraw ) );	// disable non-themed color editing
+}
+
 void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_mruCountEdit.m_hWnd;
@@ -69,6 +77,9 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		ui::WriteComboItems( m_thumbBoundsSizeCombo, thumb::GetTags_StdBoundsSize().GetUiTags() );
 	}
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+		EnableCtrls();
 
 	ui::DDX_Number( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_data.m_thumbBoundsSize );
 	ui::DDV_NumberMinMax( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_data.m_thumbBoundsSize, thumb::MinBoundsSize, thumb::MaxBoundsSize );
@@ -114,6 +125,7 @@ void CWorkspaceDialog::OnSaveAndClose( void )
 void CWorkspaceDialog::OnToggle_UseThemedThumbListDraw( void )
 {
 	SetFlag( m_data.m_wkspFlags, wf::UseThemedThumbListDraw, IsDlgButtonChecked( IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK ) != FALSE );
+	EnableCtrls();
 	app::GetApp()->UpdateAllViews( Hint_ViewUpdate );
 }
 

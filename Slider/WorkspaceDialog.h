@@ -16,6 +16,8 @@ class CWorkspaceDialog : public CLayoutDialog
 public:
 	CWorkspaceDialog( CWnd* pParent = nullptr );
 	virtual ~CWorkspaceDialog();
+private:
+	void EnableCtrls( void );
 public:
 	CWorkspaceData m_data;
 	int m_thumbnailerFlags;
