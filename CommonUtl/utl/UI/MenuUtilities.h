@@ -54,6 +54,31 @@ namespace ui
 
 namespace ui
 {
+	class CScopedTrackMfcPopupMenu
+	{
+	public:
+		CScopedTrackMfcPopupMenu( bool trackMfcPopup = true )
+			: m_oldTrackMfcPopup( s_trackMfcPopup )
+		{
+			s_trackMfcPopup = trackMfcPopup;
+		}
+
+		~CScopedTrackMfcPopupMenu()
+		{
+			s_trackMfcPopup = m_oldTrackMfcPopup;
+		}
+
+		static bool GetTrackMfcPopup( void ) { return s_trackMfcPopup; }
+	private:
+		bool m_oldTrackMfcPopup;
+		static bool s_trackMfcPopup;
+	};
+
+}
+
+
+namespace ui
+{
 	inline CMenu* SafeFromHandle( HMENU hMenu )		// safe version, for convenient conditional expressions
 	{
 		REQUIRE( nullptr == hMenu || ::IsMenu( hMenu ) );

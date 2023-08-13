@@ -114,14 +114,25 @@ namespace ui
 
 	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags /*= TPM_RIGHTBUTTON*/, const RECT* pExcludeRect /*= nullptr*/ )
 	{
-		AdjustMenuTrackPos( screenPos, nullptr );
+		int cmdId = 0;
 
-		TPMPARAMS excludeParams; utl::ZeroWinStruct( &excludeParams );
+		if ( UseMfcMenuManager() && CScopedTrackMfcPopupMenu::GetTrackMfcPopup() )
+		{
+			cmdId = TrackMfcPopupMenu( rMenu.GetSafeHmenu(), pTargetWnd, screenPos, !HasFlag( trackFlags, TPM_RETURNCMD ) );
+		}
+		else
+		{
+			AdjustMenuTrackPos( screenPos, nullptr );
 
-		if ( pExcludeRect != nullptr )			// pExcludeRect is ignored by TrackPopupMenu()
-			excludeParams.rcExclude = *pExcludeRect;
+			TPMPARAMS excludeParams; utl::ZeroWinStruct( &excludeParams );
 
-		return ui::ToIntCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != nullptr ? &excludeParams : nullptr ) );
+			if ( pExcludeRect != nullptr )			// pExcludeRect is ignored by TrackPopupMenu()
+				excludeParams.rcExclude = *pExcludeRect;
+
+			cmdId = ui::ToIntCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != nullptr ? &excludeParams : nullptr ) );
+		}
+
+		return cmdId;
 	}
 
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign /*= DropDown*/,
@@ -250,6 +261,12 @@ namespace ui
 				return CPoint( excludeRect.left, excludeRect.top );
 		}
 	}
+}
+
+
+namespace ui
+{
+	bool CScopedTrackMfcPopupMenu::s_trackMfcPopup = false;
 }
 
 

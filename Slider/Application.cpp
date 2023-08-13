@@ -28,6 +28,7 @@
 #include "utl/UI/WicImageCache.h"
 #include "utl/UI/test/WicImageTests.h"
 #include <io.h>
+#include <afxtoolbar.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -421,6 +422,9 @@ void CApplication::InitGlobals( void )
 	GetSharedImageStore()->RegisterToolbarImages( IDR_MAINFRAME );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_APP_TOOL_STRIP );
 	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
+
+	// add MFC popup menu tracking images
+	CMFCToolBar::AddToolBarForImageCollection( IDR_MAINFRAME );
 }
 
 bool CApplication::OpenQueuedAlbum( void )

@@ -348,6 +348,8 @@ void CImageView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	{
 		if ( CMenu* pSrcPopupMenu = &GetDocContextMenu() )
 		{
+			//ui::CScopedTrackMfcPopupMenu scTrackMfcPopup;
+
 			if ( CWicImage* pImage = GetImage() )
 				if ( !pImage->GetImagePath().IsComplexPath() )
 					if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, pImage->GetImagePath() ) )
