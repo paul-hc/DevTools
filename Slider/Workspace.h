@@ -5,7 +5,7 @@
 #include "ModelSchema.h"
 #include "ImageState.h"
 #include "utl/Path.h"
-#include "utl/UI/Color.h"
+#include "utl/UI/ColorValue.h"
 #include "utl/UI/Image_fwd.h"		// ui::ImageScalingMode
 #include "utl/UI/WindowPlacement.h"
 
@@ -52,8 +52,6 @@ struct CWorkspaceData
 	bool operator!=( const CWorkspaceData& right ) const { return !operator==( right ); }
 
 	CSize GetThumbBoundsSize( void ) const { return CSize( m_thumbBoundsSize, m_thumbBoundsSize ); }
-	COLORREF GetImageSelColor( void ) const { return ui::GetActualColorSysdef( m_imageSelColor, COLOR_HIGHLIGHT ); }
-	COLORREF GetImageSelTextColor( void ) const { return ui::GetActualColorSysdef( m_imageSelTextColor, COLOR_HIGHLIGHTTEXT ); }
 public:
 	persist bool m_autoSave;						// automatic saving the workspace
 	persist wf::TWorkspaceFlags m_wkspFlags;		// workspace flags
@@ -62,9 +60,9 @@ public:
 	persist int m_thumbListColumnCount;				// default count of columns in the thumb list
 	persist int m_thumbBoundsSize;					// size of the square bounds of the thumbnails (app::Slider_v3_6+)
 	persist ui::ImageScalingMode m_scalingMode;		// default image scaling mode (app::Slider_v4_0+)
-	persist COLORREF m_defBkColor;					// default background color
-	persist COLORREF m_imageSelColor;				// image selection color
-	persist COLORREF m_imageSelTextColor;			// image selection text color
+	persist CColorValue m_defBkColor;				// default background color
+	persist CColorValue m_imageSelColor;			// image selection color
+	persist CColorValue m_imageSelTextColor;		// image selection text color
 };
 
 
@@ -96,9 +94,8 @@ public:
 
 	CWindowPlacement* GetLoadedPlacement( void ) { return !m_mainPlacement.IsEmpty() ? &m_mainPlacement : nullptr; }		// valid placement if it was loaded
 
-	COLORREF GetImageSelTextColor( void ) const { return m_data.GetImageSelTextColor(); }
-	COLORREF GetImageSelColor( void ) const { return m_data.GetImageSelColor(); }
-	CBrush& GetImageSelColorBrush( void ) const { return const_cast<CBrush&>( m_imageSelColorBrush ); }
+	COLORREF GetImageSelTextColor( void ) const { return m_data.m_imageSelTextColor.Evaluate(); }
+	COLORREF GetImageSelColor( void ) const { return m_data.m_imageSelColor.Evaluate(); }
 
 	CImageState* RefLoadingImageState( void ) { return m_pLoadingImageState; }
 
@@ -119,7 +116,6 @@ private:
 
 	CMainFrame* m_pMainFrame;
 	CImageState* m_pLoadingImageState;
-	CBrush m_imageSelColorBrush;
 
 	persist CWorkspaceData m_data;					// data subset edited in CWorkspaceDialog
 	persist bool m_isFullScreen;					// if true switch main frame in full-screen mode

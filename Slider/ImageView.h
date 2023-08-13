@@ -17,8 +17,8 @@ interface INavigationBar;
 
 
 class CImageView : public CImageZoomViewD2D
-				 , public CObjectCtrlBase
-				 , public IImageView
+	, public CObjectCtrlBase
+	, public IImageView
 {
 	typedef CImageZoomViewD2D TBaseClass;
 protected:
@@ -32,23 +32,23 @@ public:
 	COLORREF GetRawBkColor( void ) const { return m_bkColor; }
 	void SetBkColor( COLORREF bkColor, bool doRedraw = true );
 
-	// base overrides
+	// overridables
 	virtual HICON GetDocTypeIcon( void ) const;
 	virtual CMenu& GetDocContextMenu( void ) const;
 
-	// ui::IScrollZoomView interface
-	virtual COLORREF GetBkColor( void ) const;
+	// ui::IZoomView interface
+	virtual ui::TDisplayColor GetBkColor( void ) const implements(ui::IZoomView);
 
-	// ui::IImageZoomView interface
-	virtual CWicImage* GetImage( void ) const;
-	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
+	// ui::IImageZoomView interface (inherited from CImageZoomViewD2D)
+	virtual CWicImage* GetImage( void ) const implements(ui::IImageZoomView, IImageView);
+	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const implements(ui::IImageZoomView);
 
 	// IImageView interface
-	virtual fs::TImagePathKey GetImagePathKey( void ) const;
-	virtual CScrollView* GetScrollView( void );
-	virtual void RegainFocus( RegainAction regainAction, int ctrlId = 0 );
-	virtual void EventChildFrameActivated( void );
-	virtual void EventNavigSliderPosChanged( bool thumbTracking );
+	virtual fs::TImagePathKey GetImagePathKey( void ) const implements(IImageView);
+	virtual CScrollView* GetScrollView( void ) implements(IImageView);
+	virtual void RegainFocus( RegainAction regainAction, int ctrlId = 0 ) implements(IImageView);
+	virtual void EventChildFrameActivated( void ) implements(IImageView);
+	virtual void EventNavigSliderPosChanged( bool thumbTracking ) implements(IImageView);
 
 	// overrideables
 	virtual CImageState* GetLoadingImageState( void ) const;
@@ -82,8 +82,8 @@ public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
-	virtual void OnActivateView( BOOL bActivate, CView* pActivateView, CView* pDeactiveView );
-	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint );
+	virtual void OnActivateView( BOOL bActivate, CView* pActivateView, CView* pDeactiveView ) overrides(CView);
+	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint ) overrides(CView);
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
 	afx_msg void OnSetFocus( CWnd* pOldWnd );

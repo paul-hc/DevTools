@@ -30,23 +30,23 @@ public:
 	CAlbumThumbListView* GetPeerThumbView( void ) const { return safe_ptr( m_pPeerThumbView ); }
 
 	// base overrides
-	virtual HICON GetDocTypeIcon( void ) const;
-	virtual CMenu& GetDocContextMenu( void ) const;
+	virtual HICON GetDocTypeIcon( void ) const overrides(CImageView);
+	virtual CMenu& GetDocContextMenu( void ) const overrides(CImageView);
+	virtual CImageState* GetLoadingImageState( void ) const overrides(CImageView);
 
 	// ui::IImageZoomView overrides
-	virtual CWicImage* GetImage( void ) const;					// also an IImageView override
-	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
+	virtual CWicImage* GetImage( void ) const overrides(CImageView);		// also an IImageView override
+	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const overrides(CImageView);
 
 	// IImageView overrides
-	virtual fs::TImagePathKey GetImagePathKey( void ) const;
-	virtual void EventChildFrameActivated( void );
-	virtual void EventNavigSliderPosChanged( bool thumbTracking );
-
-	virtual CImageState* GetLoadingImageState( void ) const;
+	virtual fs::TImagePathKey GetImagePathKey( void ) const overrides(CImageView);
+	virtual void EventChildFrameActivated( void ) overrides(CImageView);
+	virtual void EventNavigSliderPosChanged( bool thumbTracking ) overrides(CImageView);
 protected:
-	virtual void OnImageContentChanged( void );
-	virtual bool OutputNavigSlider( void );
-	virtual bool CanEnterDragMode( void ) const;
+	// base overrides
+	virtual void OnImageContentChanged( void ) overrides(CImageView);
+	virtual bool OutputNavigSlider( void ) overrides(CImageView);
+	virtual bool CanEnterDragMode( void ) const overrides(CImageView);
 public:
 	// navigation support
 	bool IsValidIndex( size_t index ) const;
@@ -90,7 +90,7 @@ private:
 
 	// generated stuff
 public:
-	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint );
+	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint ) overrides(CImageView);
 
 	virtual void OnInitialUpdate( void );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );

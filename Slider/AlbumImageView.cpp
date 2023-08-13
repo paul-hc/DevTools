@@ -59,13 +59,13 @@ CAlbumDoc* CAlbumImageView::GetDocument( void ) const
 	return checked_static_cast<CAlbumDoc*>( m_pDocument );
 }
 
-HICON CAlbumImageView::GetDocTypeIcon( void ) const
+HICON CAlbumImageView::GetDocTypeIcon( void ) const overrides(CImageView)
 {
 	static HICON hIconImage = AfxGetApp()->LoadIcon( IDR_ALBUMTYPE );
 	return hIconImage;
 }
 
-CMenu& CAlbumImageView::GetDocContextMenu( void ) const
+CMenu& CAlbumImageView::GetDocContextMenu( void ) const overrides(CImageView)
 {
 	static CMenu s_contextMenu;
 	if ( nullptr == s_contextMenu.GetSafeHmenu() )
@@ -74,7 +74,12 @@ CMenu& CAlbumImageView::GetDocContextMenu( void ) const
 	return s_contextMenu;
 }
 
-fs::TImagePathKey CAlbumImageView::GetImagePathKey( void ) const
+CImageState* CAlbumImageView::GetLoadingImageState( void ) const overrides(CImageView)
+{
+	return GetDocument()->GetImageState();
+}
+
+fs::TImagePathKey CAlbumImageView::GetImagePathKey( void ) const overrides(CImageView)
 {
 	fs::TImagePathKey imagePathKey = GetDocument()->GetImageFilePathAt( m_slideData.GetCurrentIndex() );
 
@@ -82,12 +87,12 @@ fs::TImagePathKey CAlbumImageView::GetImagePathKey( void ) const
 	return imagePathKey;
 }
 
-CWicImage* CAlbumImageView::GetImage( void ) const
+CWicImage* CAlbumImageView::GetImage( void ) const overrides(CImageView)
 {
 	return CAlbumDoc::AcquireImage( GetImagePathKey() );
 }
 
-CWicImage* CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
+CWicImage* CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const overrides(CImageView)
 {
 	CWicImage* pImage = __super::QueryImageFileDetails( rFileDetails );
 
@@ -104,7 +109,7 @@ CWicImage* CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileD
 	return pImage;
 }
 
-void CAlbumImageView::OnImageContentChanged( void )
+void CAlbumImageView::OnImageContentChanged( void ) overrides(CImageView)
 {
 	// BUG - Windows Vista+ with scroll bar window theme: CScrollView::UpdateBars() succeeds for the SB_HORZ (1st) bar, but not for SB_VERT (2nd) bar.
 	//	workaround: force a WM_SIZE
@@ -112,7 +117,7 @@ void CAlbumImageView::OnImageContentChanged( void )
 	//was: SetupContentMetrics( true );
 }
 
-bool CAlbumImageView::OutputNavigSlider( void )
+bool CAlbumImageView::OutputNavigSlider( void ) overrides(CImageView)
 {
 	if ( !app::GetMainFrame()->IsViewActive( this ) )
 		return false;
@@ -124,14 +129,9 @@ bool CAlbumImageView::OutputNavigSlider( void )
 	return true;
 }
 
-bool CAlbumImageView::CanEnterDragMode( void ) const
+bool CAlbumImageView::CanEnterDragMode( void ) const overrides(CImageView)
 {
 	return !GetDocument()->GetModel()->IsAutoDropRecipient( false );
-}
-
-CImageState* CAlbumImageView::GetLoadingImageState( void ) const
-{
-	return GetDocument()->GetImageState();
 }
 
 
@@ -372,14 +372,14 @@ void CAlbumImageView::OnSelChangeThumbList( void )
 	UpdateImage();
 }
 
-void CAlbumImageView::EventChildFrameActivated( void )
+void CAlbumImageView::EventChildFrameActivated( void ) overrides(CImageView)
 {
 	// called when the parent frame activates -> this will be the curent image view
 	__super::EventChildFrameActivated();
 	GetDocument()->m_slideData = m_slideData;		// copy current navigation attributes to document (i.e. persistent attributes)
 }
 
-void CAlbumImageView::EventNavigSliderPosChanged( bool thumbTracking )
+void CAlbumImageView::EventNavigSliderPosChanged( bool thumbTracking ) overrides(CImageView)
 {
 	m_slideData.SetCurrentIndex( m_pNavigBar->InputNavigPos() );
 
@@ -389,7 +389,7 @@ void CAlbumImageView::EventNavigSliderPosChanged( bool thumbTracking )
 		UpdateImage();
 }
 
-void CAlbumImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
+void CAlbumImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint ) overrides(CImageView)
 {
 	UpdateViewHint hint = (UpdateViewHint)lHint;
 

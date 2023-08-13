@@ -495,12 +495,14 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 				{
 					dc.SelectClipRgn( &bkRegion );		// clip the thumb rect out of background drawing
 					themedSel = m_selBkThemeItem.DrawStatusBackground( listFocused ? CThemeItem::Hot : CThemeItem::Normal, dc, pDIS->rcItem );
-					dc.SelectClipRgn( nullptr );			// un-clip the thumb rect
+					dc.SelectClipRgn( nullptr );		// un-clip the thumb rect
 				}
 
 				if ( !themedSel )
 				{
-					::FillRgn( dc, bkRegion, CWorkspace::Instance().GetImageSelColorBrush() );
+					CBrush selBrush( CWorkspace::Instance().GetImageSelColor() );
+
+					::FillRgn( dc, bkRegion, selBrush );
 					itemRect.DeflateRect( 1, 1 );
 					::FrameRect( dc, &itemRect, GetSysColorBrush( COLOR_WINDOW ) );
 				}

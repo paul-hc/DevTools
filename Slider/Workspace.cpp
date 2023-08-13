@@ -39,8 +39,8 @@ CWorkspaceData::CWorkspaceData( void )
 	, m_albumViewFlags( af::DefaultFlags )
 	, m_mruCount( 16 )
 	, m_defBkColor( color::VeryDarkGray )
-	, m_imageSelColor( color::Null )
-	, m_imageSelTextColor( color::Null )
+	, m_imageSelColor( ui::MakeSysColor( COLOR_HIGHLIGHT ) )
+	, m_imageSelTextColor( ui::MakeSysColor( COLOR_HIGHLIGHTTEXT ) )
 	, m_thumbListColumnCount( 1 )
 	, m_thumbBoundsSize( app::GetThumbnailer()->GetBoundsSize().cx )
 {
@@ -64,9 +64,9 @@ void CWorkspaceData::Save( CArchive& archive )
 	archive << m_albumViewFlags;
 	archive << m_mruCount;
 	archive << m_thumbListColumnCount;
-	archive << m_defBkColor;
-	archive << m_imageSelColor;
-	archive << m_imageSelTextColor;
+	archive << *m_defBkColor.GetPtr();
+	archive << *m_imageSelColor.GetPtr();
+	archive << *m_imageSelTextColor.GetPtr();
 
 	archive << m_thumbBoundsSize;
 	archive << (int&)m_scalingMode;
@@ -94,9 +94,9 @@ app::ModelSchema CWorkspaceData::Load( CArchive& archive )
 		archive >> m_albumViewFlags;
 		archive >> m_mruCount;
 		archive >> m_thumbListColumnCount;
-		archive >> m_defBkColor;
-		archive >> m_imageSelColor;
-		archive >> m_imageSelTextColor;
+		archive >> *m_defBkColor.GetPtr();
+		archive >> *m_imageSelColor.GetPtr();
+		archive >> *m_imageSelTextColor.GetPtr();
 
 		if ( savedModelSchema >= app::Slider_v3_6 )
 			archive >> m_thumbBoundsSize;
@@ -124,8 +124,6 @@ CWorkspace::CWorkspace( void )
 	, m_pEditingData( nullptr )
 {
 	m_filePath.ReplaceExt( _T(".slw") );
-
-	SetImageSelColor( color::Null );	// also create the associated brush
 }
 
 CWorkspace::~CWorkspace()
@@ -167,16 +165,14 @@ void CWorkspace::Serialize( CArchive& archive )
 			archive >> m_data.m_albumViewFlags;
 			archive & m_delayFullScreen;			// temporary replacer for m_isFullScreen
 			archive >> m_data.m_mruCount;
-			archive >> m_data.m_defBkColor;
-			archive >> m_data.m_imageSelColor;
-			archive >> m_data.m_imageSelTextColor;
+			archive >> *m_data.m_defBkColor.GetPtr();
+			archive >> *m_data.m_imageSelColor.GetPtr();
+			archive >> *m_data.m_imageSelTextColor.GetPtr();
 			archive >> m_data.m_thumbListColumnCount;
 			archive >> m_mainPlacement;
 			archive >> (int&)savedModelSchema;		// the real saved old version
 			archive >> m_reserved;
 		}
-
-		SetImageSelColor( m_data.m_imageSelColor );
 
 		// workspace loaded: will use SW_HIDE on 1st show (CommitWnd), then pass the final mode from placement on 2nd step for MFC to show
 		if ( savedModelSchema < app::Slider_v3_2 )
@@ -360,17 +356,6 @@ void CWorkspace::ToggleFullScreen( void )
 	app::GetApp()->UpdateAllViews( Hint_ToggleFullScreen );
 }
 
-void CWorkspace::SetImageSelColor( COLORREF imageSelColor )
-{
-	m_data.m_imageSelColor = imageSelColor;
-	m_imageSelColorBrush.DeleteObject();
-	m_imageSelColorBrush.CreateSolidBrush( GetImageSelColor() );
-
-	// set the selected text color
-//	if ( color::Null == m_data.m_imageSelColor )
-//		m_data.m_imageSelTextColor = color::Null;
-}
-
 
 // commands handlers
 
@@ -412,7 +397,6 @@ void CWorkspace::CmEditWorkspace( void )
 		if ( dlg.m_data != m_data )
 		{
 			m_data = dlg.m_data;
-			SetImageSelColor( m_data.m_imageSelColor );
 			shell::s_useVistaStyle = HasFlag( m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
 
 			changed = std::make_pair( Hint_ViewUpdate, true );

@@ -58,8 +58,8 @@ CImageView::~CImageView()
 
 HICON CImageView::GetDocTypeIcon( void ) const
 {
-	static HICON hIconImage = AfxGetApp()->LoadIcon( IDR_IMAGETYPE );
-	return hIconImage;
+	static HICON s_hIconImage = AfxGetApp()->LoadIcon( IDR_IMAGETYPE );
+	return s_hIconImage;
 }
 
 CMenu& CImageView::GetDocContextMenu( void ) const
@@ -77,9 +77,9 @@ CImageDoc* CImageView::GetDocument( void ) const
 	return checked_static_cast<CImageDoc*>( m_pDocument );
 }
 
-COLORREF CImageView::GetBkColor( void ) const
+ui::TDisplayColor CImageView::GetBkColor( void ) const implements(ui::IZoomView)
 {
-	return m_bkColor != CLR_DEFAULT ? m_bkColor : CWorkspace::GetData().m_defBkColor;
+	return ui::GetActualColor( m_bkColor, CWorkspace::GetData().m_defBkColor.Evaluate() );
 }
 
 void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )
@@ -90,27 +90,27 @@ void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )
 		Invalidate();
 }
 
-CWicImage* CImageView::GetImage( void ) const
+CWicImage* CImageView::GetImage( void ) const implements(ui::IImageZoomView, IImageView)
 {
 	return GetDocument()->GetImage( m_imageFramePos );
 }
 
-CWicImage* CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
+CWicImage* CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const implements(ui::IImageZoomView)
 {
 	return __super::QueryImageFileDetails( rFileDetails );		// TODO: make CImageView aware of multi-frame images, with frame navigation
 }
 
-fs::TImagePathKey CImageView::GetImagePathKey( void ) const
+fs::TImagePathKey CImageView::GetImagePathKey( void ) const implements(IImageView)
 {
 	return fs::TImagePathKey( GetDocument()->GetImagePath(), m_imageFramePos );
 }
 
-CScrollView* CImageView::GetScrollView( void )
+CScrollView* CImageView::GetScrollView( void ) implements(IImageView)
 {
 	return TBaseClass::GetScrollView();
 }
 
-void CImageView::RegainFocus( RegainAction regainAction, int ctrlId /*= 0*/ )
+void CImageView::RegainFocus( RegainAction regainAction, int ctrlId /*= 0*/ ) implements(IImageView)
 {
 	switch ( regainAction )
 	{
@@ -125,7 +125,7 @@ void CImageView::RegainFocus( RegainAction regainAction, int ctrlId /*= 0*/ )
 	}
 }
 
-void CImageView::EventChildFrameActivated( void )
+void CImageView::EventChildFrameActivated( void ) implements(IImageView)
 {
 	// called when this view or a sibling view is activated (i.e. CAlbumThumbListView)
 	OutputScalingMode();
@@ -133,7 +133,7 @@ void CImageView::EventChildFrameActivated( void )
 	OutputNavigSlider();
 }
 
-void CImageView::EventNavigSliderPosChanged( bool thumbTracking )
+void CImageView::EventNavigSliderPosChanged( bool thumbTracking ) implements(IImageView)
 {
 	thumbTracking;
 }
@@ -223,7 +223,7 @@ nav::Navigate CImageView::CmdToNavigate( UINT cmdId )
 	}
 }
 
-void CImageView::OnActivateView( BOOL bActivate, CView* pActivateView, CView* pDeactiveView )
+void CImageView::OnActivateView( BOOL bActivate, CView* pActivateView, CView* pDeactiveView ) overrides(CView)
 {
 	__super::OnActivateView( bActivate, pActivateView, pDeactiveView );
 
@@ -232,7 +232,7 @@ void CImageView::OnActivateView( BOOL bActivate, CView* pActivateView, CView* pD
 			EventChildFrameActivated();		// call only if is a frame activation, that is avoid calling when is a sibling view activation, as in case of CAlbumThumbListView for the CAlbumImageView derived
 }
 
-void CImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
+void CImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint ) overrides(CView)
 {
 	UpdateViewHint hint = (UpdateViewHint)lHint;
 	switch ( hint )
@@ -511,7 +511,7 @@ void CImageView::On_EditBkColor( void )
 		SetBkColor( CLR_DEFAULT );
 	else
 	{
-		COLORREF bkColor = ui::EvalColor( m_bkColor ), oldBkColor = bkColor;
+		COLORREF bkColor = GetBkColor(), oldBkColor = bkColor;
 
 		if ( ui::EditColor( &bkColor, this, false ) )
 			if ( bkColor != oldBkColor )
