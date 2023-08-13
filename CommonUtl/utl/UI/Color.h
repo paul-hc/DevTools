@@ -44,8 +44,8 @@ namespace ui
 
 
 	// conditional color
-	inline TDisplayColor GetActualColor( COLORREF rawColor, COLORREF defaultColor ) { return IsRealColor( rawColor ) ? rawColor : defaultColor; }
-	inline TDisplayColor GetActualColorSysdef( COLORREF rawColor, TSysColorIndex defaultSysIndex ) { return IsRealColor( rawColor ) ? rawColor : ::GetSysColor( defaultSysIndex ); }
+	inline TDisplayColor GetFallbackColor( COLORREF rawColor, COLORREF defaultColor ) { return IsRealColor( rawColor ) ? rawColor : defaultColor; }
+	inline TDisplayColor GetFallbackSysColor( COLORREF rawColor, TSysColorIndex defaultSysIndex ) { return IsRealColor( rawColor ) ? rawColor : ::GetSysColor( defaultSysIndex ); }
 
 
 	enum StdTranspColor { Transp_LowColor = color::LightGray, Transp_TrueColor = color::ToolStripPink };

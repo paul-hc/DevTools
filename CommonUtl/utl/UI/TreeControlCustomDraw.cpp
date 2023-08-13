@@ -74,7 +74,7 @@ COLORREF CTreeControlCustomDraw::GetRealizedBkColor( void ) const
 	if ( ui::IsRealColor( m_pDraw->clrTextBk ) )
 		return m_pDraw->clrTextBk;
 
-	return ui::GetActualColorSysdef( m_pTree->GetBkColor(), COLOR_WINDOW );
+	return ui::GetFallbackSysColor( m_pTree->GetBkColor(), COLOR_WINDOW );
 }
 
 bool CTreeControlCustomDraw::SelectTextEffect( const ui::CTextEffect& textEffect )

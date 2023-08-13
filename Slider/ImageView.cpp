@@ -79,7 +79,7 @@ CImageDoc* CImageView::GetDocument( void ) const
 
 ui::TDisplayColor CImageView::GetBkColor( void ) const implements(ui::IZoomView)
 {
-	return ui::GetActualColor( m_bkColor, CWorkspace::GetData().m_defBkColor.Evaluate() );
+	return ui::GetFallbackColor( m_bkColor, CWorkspace::GetData().m_defBkColor.Evaluate() );
 }
 
 void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )

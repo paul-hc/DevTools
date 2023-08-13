@@ -212,7 +212,7 @@ void CTreeControl::ClearMarkedItems( void )
 
 COLORREF CTreeControl::GetActualTextColor( void ) const
 {
-	return ui::GetActualColorSysdef( GetTextColor(), COLOR_WINDOWTEXT );
+	return ui::GetFallbackSysColor( GetTextColor(), COLOR_WINDOWTEXT );
 }
 
 const ui::CTextEffect* CTreeControl::FindTextEffect( HTREEITEM hItem ) const

@@ -100,7 +100,7 @@ COLORREF CReportListCustomDraw::GetRealizedBkColor( void ) const
 	if ( ui::IsRealColor( bkColor ) )
 		return bkColor;
 
-	return ui::GetActualColorSysdef( m_pList->GetBkColor(), COLOR_WINDOW );
+	return ui::GetFallbackSysColor( m_pList->GetBkColor(), COLOR_WINDOW );
 }
 
 COLORREF CReportListCustomDraw::GetRealizedTextColor( DiffSide diffSide, const str::TMatchSequence* pCellSeq /*= nullptr*/ ) const
@@ -111,7 +111,7 @@ COLORREF CReportListCustomDraw::GetRealizedTextColor( DiffSide diffSide, const s
 	if ( DestDiff == diffSide && pCellSeq != nullptr && str::MatchEqual == pCellSeq->m_match )
 		return m_pList->m_matchDest_DiffEffect.m_textColor;				// gray-out text of unmodified DEST files, but continue with default drawing
 
-	return ui::GetActualColorSysdef( m_pList->m_ctrlTextEffect.m_textColor, COLOR_WINDOWTEXT );
+	return ui::GetFallbackSysColor( m_pList->m_ctrlTextEffect.m_textColor, COLOR_WINDOWTEXT );
 }
 
 bool CReportListCustomDraw::DrawCellTextDiffs( void )

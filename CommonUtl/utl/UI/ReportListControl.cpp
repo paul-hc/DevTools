@@ -184,7 +184,7 @@ bool CReportListControl::ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT sw
 
 COLORREF CReportListControl::GetActualTextColor( void ) const
 {
-	return ui::GetActualColorSysdef( GetTextColor(), COLOR_WINDOWTEXT );
+	return ui::GetFallbackSysColor( GetTextColor(), COLOR_WINDOWTEXT );
 }
 
 bool CReportListControl::DeleteAllItems( void )

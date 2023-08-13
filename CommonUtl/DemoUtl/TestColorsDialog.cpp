@@ -49,7 +49,7 @@ CTestColorsDialog::CTestColorsDialog( CWnd* pParent )
 
 	m_color.Set( static_cast<COLORREF>( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_SelColor, CLR_NONE ) ) );
 
-	m_mfcColorPickerButton.SetColor( m_color.EvalColor() );
+	m_mfcColorPickerButton.SetColor( m_color.Evaluate() );
 	m_mfcColorPickerButton.EnableAutomaticButton( mfc::CColorLabels::s_autoLabel, color::Yellow );
 	m_mfcColorPickerButton.EnableOtherButton( mfc::CColorLabels::s_moreLabel );
 	mfc::TColorList docColors;
