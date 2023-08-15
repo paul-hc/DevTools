@@ -16,6 +16,8 @@
 
 namespace ui
 {
+	// IColorHost implementation
+
 	bool IColorHost::IsForeignColor( void ) const
 	{
 		COLORREF selColor = GetColor();
@@ -24,6 +26,8 @@ namespace ui
 		return selColor != CLR_NONE && ( nullptr == pSelColorTable || !pSelColorTable->ContainsColor( selColor ) );
 	}
 
+
+	// IColorEditorHost implementation
 
 	bool IColorEditorHost::EditColorDialog( void )
 	{

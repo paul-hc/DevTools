@@ -36,7 +36,12 @@ namespace ui
 			if ( DialogOutput == pDX->m_bSaveAndValidate )
 			{
 				if ( firstInit )
+				{
 					pColorEditor->SetAutoColor( pColorValue->GetAutoColor() );
+
+					if ( ui::IsSysColor( pColorValue->GetActual() ) )
+						pColorEditor->SetSelColorTable( CColorRepository::Instance()->GetSystemColorTable() );		// auto-select "Windows Colors" table
+				}
 
 				pColorEditor->SetColor( pColorValue->Get(), false );
 			}
@@ -133,9 +138,8 @@ CColorPickerButton::CColorPickerButton( const CColorTable* pSelColorTable /*= nu
 	: CMFCColorButton()
 	, m_pSelColorTable( nullptr )
 	, m_pickingMode( PickMenuColorTables )
-	, m_pSelColorEntry( nullptr )
 	, m_pDocColorTable( nullptr )
-	, m_regSection( reg::section_picker )
+	, m_pSelColorEntry( nullptr )
 	, m_accel( IDR_EDIT_ACCEL )
 	, m_trackingMode( NoTracking )
 	, m_inCmd( false )
@@ -313,12 +317,14 @@ void CColorPickerButton::SetDocColorTable( const CColorTable* pDocColorTable )
 
 void CColorPickerButton::LoadFromRegistry( void )
 {
-	REQUIRE( !UseUserColors() );		// there is no point in switching color tables for user-specified colors
+	if ( m_regSection.empty() )
+		return;
+
+	CWinApp* pApp = AfxGetApp();
 	const CColorTable* pSelColorTable = m_pSelColorTable;
 
-	if ( !m_regSection.empty() )
+	if ( !UseUserColors() )		// switchable color table?
 	{
-		CWinApp* pApp = AfxGetApp();
 		std::tstring colorTableName;
 
 		if ( m_pSelColorTable != nullptr )
@@ -333,14 +339,14 @@ void CColorPickerButton::LoadFromRegistry( void )
 			else
 				pSelColorTable = CHalftoneRepository::Instance()->FindTable( ui::Halftone16_Colors );
 		}
+	}
 
-		m_pickingMode = static_cast<PickingMode>( pApp->GetProfileInt( m_regSection.c_str(), reg::entry_PickingMode, m_pickingMode ) );
+	m_pickingMode = static_cast<PickingMode>( pApp->GetProfileInt( reg::section_picker, reg::entry_PickingMode, m_pickingMode ) );	// section shared by all pickers
 
-		if ( m_pCmdSvc->LoadState( m_regSection.c_str(), FormatEntryCommands().c_str() ) )
-		{
-			m_pCmdSvc->RefCmdModel()->ReHostCommands<CSetColorCmd>( this );
-			m_pMenuImpl->GetRecentTable()->PushColorHistory( m_pCmdSvc->GetCmdModel(), GetAutoColor() );
-		}
+	if ( m_pCmdSvc->LoadState( m_regSection.c_str(), reg::entry_Commands ) )
+	{
+		m_pCmdSvc->RefCmdModel()->ReHostCommands<CSetColorCmd>( this );
+		m_pMenuImpl->GetRecentTable()->PushColorHistory( m_pCmdSvc->GetCmdModel(), GetAutoColor() );
 	}
 
 	if ( pSelColorTable != m_pSelColorTable )
@@ -349,29 +355,23 @@ void CColorPickerButton::LoadFromRegistry( void )
 
 void CColorPickerButton::SaveToRegistry( void ) const
 {
-	if ( !m_regSection.empty() )
+	if ( m_regSection.empty() )
+		return;
+
+	CWinApp* pApp = AfxGetApp();
+
+	if ( !UseUserColors() )
 	{
-		CWinApp* pApp = AfxGetApp();
 		std::tstring colorTableName;
 
 		if ( m_pSelColorTable != nullptr )
 			colorTableName = m_pSelColorTable->GetTableName();
 
 		pApp->WriteProfileString( m_regSection.c_str(), reg::entry_ColorTableName, colorTableName.c_str() );
-		pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_PickingMode, m_pickingMode );
-
-		m_pCmdSvc->SaveState( m_regSection.c_str(), FormatEntryCommands().c_str() );
 	}
-}
 
-std::tstring CColorPickerButton::FormatEntryCommands( void ) const
-{
-	REQUIRE( !m_regSection.empty() );
-
-	if ( m_regSection == reg::section_picker )		// shared section?
-		return str::Format( _T("%s: %d"), reg::entry_Commands, GetDlgCtrlID() );		// use unique Commands_CtrlID entries to disambiguate
-
-	return reg::entry_Commands;
+	pApp->WriteProfileInt( reg::section_picker, reg::entry_PickingMode, m_pickingMode );	// section shared by all pickers
+	m_pCmdSvc->SaveState( m_regSection.c_str(), reg::entry_Commands );
 }
 
 void CColorPickerButton::NotifyMatchingPickers( ChangedField field )
@@ -594,8 +594,10 @@ void CColorPickerButton::PreSubclassWindow( void ) override
 {
 	__super::PreSubclassWindow();
 
-	if ( !UseUserColors() )
-		LoadFromRegistry();
+	if ( m_regSection.empty() )
+		m_regSection = str::Format( _T("%s\\%d"), reg::section_picker, GetDlgCtrlID() );	// make specific registry sub-keys to prevent controls saving over each other's state in a dialog
+
+	LoadFromRegistry();
 }
 
 BOOL CColorPickerButton::PreTranslateMessage( MSG* pMsg ) override

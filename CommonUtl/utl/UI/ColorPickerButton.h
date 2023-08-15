@@ -19,6 +19,7 @@ namespace ui
 	void DDX_ColorText( CDataExchange* pDX, int ctrlId, COLORREF* pColor, bool doInput = false );
 	void DDX_ColorRepoText( CDataExchange* pDX, int ctrlId, COLORREF color );
 
+	// use for CMFCColorButton, but it's preferable to use DDX_ColorEditor() for CColorPickerButton
 	template< typename ColorCtrlT >
 	void DDX_ColorButton( CDataExchange* pDX, int ctrlId, ColorCtrlT& rCtrl, IN OUT COLORREF* pColor, bool evalColor = false );
 }
@@ -78,7 +79,6 @@ private:
 
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
-	std::tstring FormatEntryCommands( void ) const;
 
 	enum ChangedField { SelColorTableChanged, PickingModeChanged };
 	void NotifyMatchingPickers( ChangedField field );
@@ -91,8 +91,8 @@ private:
 	persist const CColorTable* m_pSelColorTable;
 	persist PickingMode m_pickingMode;						// PickColorBar (single color table), or PickMenuColorTables (shows a menu with multiple color tables)
 
-	const CColorEntry* m_pSelColorEntry;					// raw color entry
 	const CColorTable* m_pDocColorTable;
+	const CColorEntry* m_pSelColorEntry;					// raw color entry
 
 	std::tstring m_regSection;
 	CAccelTable m_accel;
