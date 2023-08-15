@@ -18,6 +18,7 @@
 #include "utl/UI/LayoutEngine.h"
 #include "utl/UI/VisualTheme.h"
 #include "utl/test/ThreadingTests.hxx"		// include only in this test project to avoid the link dependency on Boost libraries in regular projects
+#include <afxtoolbar.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,7 +36,7 @@ namespace reg
 }
 
 
-static const CImageStore::CCmdAlias s_cmdAliases[] =
+static const ui::CCmdAlias s_cmdAliases[] =
 {
 	{ IDC_CLEAR_FILES_BUTTON, ID_REMOVE_ALL_ITEMS },
 	{ IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY },
@@ -90,6 +91,8 @@ BOOL CApplication::InitInstance( void )
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images
 	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
+
+	GetSharedImageStore()->RegisterAlias( ID_EDIT_ITEM, ID_NUMERIC_SEQUENCE );		// for tracking context menu example in CTestColorsDialog::m_pMenuPicker drop-down
 
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	CLayoutEngine::m_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
@@ -149,6 +152,8 @@ int CApplication::ExitInstance( void )
 void CApplication::OnInitAppResources( void )
 {
 	__super::OnInitAppResources();
+
+	CMFCToolBar::AddToolBarForImageCollection( IDR_IMAGE_STRIP );
 
 #ifdef USE_UT
 	// special case: in this demo project we include the threading tests, with their dependency on Boos Threads library

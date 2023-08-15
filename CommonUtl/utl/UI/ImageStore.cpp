@@ -5,8 +5,10 @@
 #include "Dialog_fwd.h"
 #include "ThemeItem.h"
 #include "ToolImageList.h"
+#include "PopupMenus_fwd.h"			// for mfc::RegisterCmdImageAlias()
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
+#include <afxcommandmanager.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -55,6 +57,7 @@ CIcon* CImageStore::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*
 	TIconMap::const_iterator itFound = m_iconMap.find( key );
 	if ( itFound == m_iconMap.end() )
 		return nullptr;
+
 	return itFound->second;
 }
 
@@ -62,12 +65,14 @@ void CImageStore::RegisterAlias( UINT cmdId, UINT iconId )
 {
 	ASSERT( cmdId != 0 && iconId != 0 );
 	m_cmdAliasMap[ cmdId ] = iconId;
+
+	mfc::RegisterCmdImageAlias( cmdId, iconId );
 }
 
-void CImageStore::RegisterAliases( const CCmdAlias iconAliases[], size_t count )
+void CImageStore::RegisterAliases( const ui::CCmdAlias iconAliases[], size_t count )
 {
 	for ( size_t i = 0; i != count; ++i )
-		RegisterAlias( iconAliases[ i ].m_cmdId, iconAliases[ i ].m_iconId );
+		RegisterAlias( iconAliases[ i ].m_cmdId, iconAliases[ i ].m_imageCmdId );
 }
 
 const CIcon* CImageStore::RetrieveIcon( const CIconId& cmdId )

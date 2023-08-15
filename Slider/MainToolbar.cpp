@@ -227,6 +227,7 @@ BOOL CMainToolbar::OnEraseBkgnd( CDC* pDC )
 void CMainToolbar::OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar )
 {
 	CToolbarStrip::OnHScroll( sbCode, nPos, pScrollBar );
+
 	if ( pScrollBar != nullptr && pScrollBar->m_hWnd == m_navigSliderCtrl.m_hWnd )
 	{
 		BOOL doCommit = true;

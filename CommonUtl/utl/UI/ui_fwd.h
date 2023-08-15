@@ -138,6 +138,8 @@ namespace ui
 	enum ColorDialogStyle { OfficeColorDialog, ClassicColorDialog };
 
 
+	struct CCmdAlias { UINT m_cmdId, m_imageCmdId; };
+
 	enum { MinCmdId = 0, MaxCmdId = 0xFFFF, MinAppCmdId = 1, MaxAppCmdId = 0x7FFF, AtEnd = -1 };
 
 	inline int ToIntCmdId( UINT uCmdId ) { return (short)(unsigned short)( uCmdId ); }

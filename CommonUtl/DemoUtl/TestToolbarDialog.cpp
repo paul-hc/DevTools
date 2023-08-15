@@ -58,7 +58,7 @@ void CTestToolbarDialog::RegisterOwnCmds( void )
 	if ( registered )
 		return;
 
-	static const CImageStore::CCmdAlias s_aliases[] =
+	static const ui::CCmdAlias s_aliases[] =
 	{
 		{ IdFileNew, ID_FILE_NEW },
 		{ IdFileOpen, ID_FILE_OPEN },

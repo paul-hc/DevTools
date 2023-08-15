@@ -9,6 +9,7 @@
 
 struct CThemeItem;
 class CToolImageList;
+namespace ui { struct CCmdAlias; }
 
 
 class CImageStore : public ui::IImageStore, private utl::noncopyable
@@ -33,10 +34,9 @@ public:
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );		// takes ownership of pIcon
 	void RegisterIcon( UINT cmdId, HICON hIcon ) { return RegisterIcon( cmdId, CIcon::NewIcon( hIcon ) ); }
 
-	struct CCmdAlias { UINT m_cmdId, m_iconId; };
-
+	// aliases are registered in this store, as well as in afxCommandManager (for MFC control-bars)
 	void RegisterAlias( UINT cmdId, UINT iconId );
-	void RegisterAliases( const CCmdAlias iconAliases[], size_t count );
+	void RegisterAliases( const ui::CCmdAlias iconAliases[], size_t count );
 private:
 	CBitmap* RenderMenuBitmap( const CIcon& icon, bool checked ) const;
 private:

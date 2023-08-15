@@ -129,6 +129,62 @@ namespace mfc
 	const TCHAR CColorLabels::s_moreLabel[] = _T("More Colors...");
 
 
+	bool RegisterCmdImageAlias( UINT aliasCmdId, UINT imageCmdId )
+	{
+		ASSERT_PTR( afxCommandManager );
+		// register command image alias for MFC control-bars
+		int iconImagePos = afxCommandManager->GetCmdImage( imageCmdId );
+
+		if ( iconImagePos != -1 )
+		{
+			afxCommandManager->SetCmdImage( aliasCmdId, iconImagePos, false );
+			return true;			// image registered for alias command
+		}
+
+		return false;
+	}
+
+	void RegisterCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count )
+	{
+		for ( size_t i = 0; i != count; ++i )
+			RegisterCmdImageAlias( cmdAliases[i].m_cmdId, cmdAliases[i].m_imageCmdId );
+	}
+
+
+	// CScopedCmdImageAliases implementation
+
+	CScopedCmdImageAliases::CScopedCmdImageAliases( UINT aliasCmdId, UINT imageCmdId )
+	{
+		m_oldCmdImages.push_back( TCmdImagePair( aliasCmdId, afxCommandManager->GetCmdImage( imageCmdId ) ) );		// store original image index
+		mfc::RegisterCmdImageAlias( aliasCmdId, imageCmdId );
+	}
+
+	CScopedCmdImageAliases::CScopedCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count )
+	{
+		m_oldCmdImages.reserve( count );
+
+		for ( size_t i = 0; i != count; ++i )
+		{
+			m_oldCmdImages.push_back( TCmdImagePair( cmdAliases[i].m_cmdId, afxCommandManager->GetCmdImage( cmdAliases[i].m_cmdId ) ) );	// store original image index
+			RegisterCmdImageAlias( cmdAliases[i].m_cmdId, cmdAliases[i].m_imageCmdId );
+		}
+	}
+
+	CScopedCmdImageAliases::~CScopedCmdImageAliases()
+	{
+		ASSERT_PTR( afxCommandManager );
+
+		for ( std::vector<TCmdImagePair>::const_iterator itPair = m_oldCmdImages.begin(); itPair != m_oldCmdImages.end(); ++itPair )
+			if ( itPair->second != -1 )
+				afxCommandManager->SetCmdImage( itPair->first, itPair->second, false );
+			else
+				afxCommandManager->ClearCmdImage( itPair->first );
+	}
+}
+
+
+namespace mfc
+{
 	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl /*= true*/ )
 	{
 		mfc::nosy_cast<nosy::CBasePane_>( pBasePane )->SetIsDialogControl( isDlgControl );

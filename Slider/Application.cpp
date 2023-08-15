@@ -37,7 +37,7 @@
 #include "utl/UI/BaseApp.hxx"
 
 
-static const CImageStore::CCmdAlias s_cmdAliases[] =
+static const ui::CCmdAlias s_cmdAliases[] =
 {
 	{ ID_IMAGE_OPEN, ID_FILE_OPEN },
 	{ ID_IMAGE_SAVE_AS, ID_FILE_SAVE },

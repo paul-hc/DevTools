@@ -17,7 +17,7 @@
 #include "utl/UI/BaseApp.hxx"
 
 
-static const CImageStore::CCmdAlias cmdAliases[] =
+static const ui::CCmdAlias cmdAliases[] =
 {
 	{ CM_REFRESH, ID_REFRESH },
 	{ CM_MOVE_WINDOW_UP, ID_SHUTTLE_UP },

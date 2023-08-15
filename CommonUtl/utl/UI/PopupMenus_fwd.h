@@ -20,6 +20,8 @@ class CMFCButton;
 class CColorEntry;
 class CColorTable;
 
+namespace ui { struct CCmdAlias; }
+
 
 namespace mfc
 {
@@ -35,6 +37,24 @@ namespace mfc
 		static const TCHAR s_autoLabel[];
 		static const TCHAR s_moreLabel[];
 	};
+
+
+	bool RegisterCmdImageAlias( UINT aliasCmdId, UINT imageCmdId );
+	void RegisterCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count );
+
+
+	class CScopedCmdImageAliases
+	{
+	public:
+		CScopedCmdImageAliases( UINT aliasCmdId, UINT imageCmdId );
+		CScopedCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count );
+		~CScopedCmdImageAliases();
+	private:
+		typedef std::pair<UINT, int> TCmdImagePair;		// <cmdId, imageIndex>
+
+		std::vector<TCmdImagePair> m_oldCmdImages;
+	};
+
 }
 
 
@@ -159,7 +179,7 @@ namespace nosy
 		bool IsMoreColorSampleBtn( const CMFCToolBarButton* pButton ) const { return pButton->m_bImage && HasMoreBtn() && pButton == GetButton( GetCount() - 1 ); }
 
 		COLORREF GetAutoColor( void ) const { return m_ColorAutomatic; }
-		//void SetAutoColor( COLORREF autoColor ) { m_ColorAutomatic = autoColor; }		// not reliable after Rebuild(), since it dosn't update the Auto button
+		//void SetAutoColor( COLORREF autoColor ) { m_ColorAutomatic = autoColor; }		// not reliable after Rebuild(), since it doesn't update the Auto button
 	};
 }
 
