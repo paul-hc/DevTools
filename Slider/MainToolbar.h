@@ -52,13 +52,15 @@ private:
 
 	// generated stuff
 protected:
-	afx_msg void OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar );
 	afx_msg BOOL OnEraseBkgnd( CDC* pDC );
 	afx_msg void OnOk( void );
 	afx_msg BOOL On_EscapeKey( UINT cmdId );
 	afx_msg void On_FocusOnZoomCombo( void );
-	afx_msg void On_FocusOnSliderCtrl( void );
 	afx_msg void OnCBnCloseUp_ZoomCombo( void );
+
+	// navigation bar:
+	afx_msg void OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar );
+	afx_msg void On_FocusOnSliderCtrl( void );
 	afx_msg BOOL OnToolTipText_NavigSliderCtrl( UINT, NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()

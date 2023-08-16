@@ -24,6 +24,7 @@ CToolbarStrip::~CToolbarStrip()
 bool CToolbarStrip::LoadToolStrip( UINT toolStripId, COLORREF transpColor /*= color::Auto*/ )
 {
 	ASSERT_PTR( m_hWnd );
+
 	return
 		m_strip.LoadToolbar( toolStripId, transpColor ) &&
 		InitToolbarButtons();

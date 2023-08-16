@@ -78,6 +78,8 @@ bool CMainToolbar::InitToolbar( void )
 	if ( !InitToolbarButtons() )
 		return false;
 
+	SetWindowText( _T("Standard") );
+
 	enum { ScalingModeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 65, NavigSliderCtrlWidth = 150 };
 
 	CreateBarCtrl( (CComboBox*)m_pScalingCombo.get(), IDW_IMAGE_SCALING_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, ScalingModeComboWidth );
@@ -203,13 +205,15 @@ bool CMainToolbar::HandleCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHAND
 
 BEGIN_MESSAGE_MAP( CMainToolbar, CToolbarStrip )
 	ON_WM_ERASEBKGND()
-	ON_WM_HSCROLL()
 	ON_COMMAND( IDOK, OnOk )
 	ON_COMMAND_EX( ID_CM_ESCAPE_KEY, On_EscapeKey )
 	ON_COMMAND( ID_FOCUS_ON_ZOOM_COMBO, On_FocusOnZoomCombo )
-	ON_COMMAND( ID_FOCUS_ON_SLIDER_CTRL, On_FocusOnSliderCtrl )
 	ON_CBN_CLOSEUP( IDW_ZOOM_COMBO, OnCBnCloseUp_ZoomCombo )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnToolTipText_NavigSliderCtrl )
+
+	// navigation bar:
+	ON_WM_HSCROLL()
+	ON_COMMAND( ID_FOCUS_ON_SLIDER_CTRL, On_FocusOnSliderCtrl )
+	//ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnToolTipText_NavigSliderCtrl )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, ui::MinCmdId, ui::MaxCmdId, OnToolTipText_NavigSliderCtrl )
 END_MESSAGE_MAP()
 
@@ -222,39 +226,6 @@ BOOL CMainToolbar::OnEraseBkgnd( CDC* pDC )
 	::FillRect( pDC->m_hDC, &clientRect, ::GetSysColorBrush( COLOR_3DFACE ) );
 
 	return CToolbarStrip::OnEraseBkgnd( pDC );
-}
-
-void CMainToolbar::OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar )
-{
-	CToolbarStrip::OnHScroll( sbCode, nPos, pScrollBar );
-
-	if ( pScrollBar != nullptr && pScrollBar->m_hWnd == m_navigSliderCtrl.m_hWnd )
-	{
-		BOOL doCommit = true;
-		int pos;
-
-		switch ( sbCode )
-		{
-			case SB_LINELEFT:
-			case SB_LINERIGHT:
-			case SB_PAGELEFT:
-			case SB_PAGERIGHT:
-			case SB_LEFT:
-			case SB_RIGHT:
-			case SB_ENDSCROLL:
-				pos = m_navigSliderCtrl.GetPos();
-				break;
-			case SB_THUMBTRACK:
-				pos = nPos;
-				doCommit = false;
-				break;
-			default:
-				return;
-		}
-
-		if ( IImageView* pImageView = app::GetMainFrame()->GetActiveImageView() )
-			pImageView->EventNavigSliderPosChanged( SB_THUMBTRACK == sbCode );
-	}
 }
 
 void CMainToolbar::OnOk( void )
@@ -293,6 +264,42 @@ void CMainToolbar::On_FocusOnSliderCtrl( void )
 void CMainToolbar::OnCBnCloseUp_ZoomCombo( void )
 {
 	On_EscapeKey( IDW_ZOOM_COMBO );
+}
+
+
+// navigation bar notifications:
+
+void CMainToolbar::OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar )
+{
+	CToolbarStrip::OnHScroll( sbCode, nPos, pScrollBar );
+
+	if ( pScrollBar != nullptr && pScrollBar->m_hWnd == m_navigSliderCtrl.m_hWnd )
+	{
+		BOOL doCommit = true;
+		int pos;
+
+		switch ( sbCode )
+		{
+			case SB_LINELEFT:
+			case SB_LINERIGHT:
+			case SB_PAGELEFT:
+			case SB_PAGERIGHT:
+			case SB_LEFT:
+			case SB_RIGHT:
+			case SB_ENDSCROLL:
+				pos = m_navigSliderCtrl.GetPos();
+				break;
+			case SB_THUMBTRACK:
+				pos = nPos;
+				doCommit = false;
+				break;
+			default:
+				return;
+		}
+
+		if ( IImageView* pImageView = app::GetMainFrame()->GetActiveImageView() )
+			pImageView->EventNavigSliderPosChanged( SB_THUMBTRACK == sbCode );
+	}
 }
 
 BOOL CMainToolbar::OnToolTipText_NavigSliderCtrl( UINT, NMHDR* pNmHdr, LRESULT* pResult )
