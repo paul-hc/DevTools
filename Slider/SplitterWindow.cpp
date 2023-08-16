@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SplitterWindow.h"
 #include "AlbumThumbListView.h"
 #include "resource.h"
@@ -107,5 +107,5 @@ void CSplitterWindow::OnLButtonDblClk( UINT mkFlags, CPoint point )
 
 	// Toggle the thumb view on/off
 	// Call window proc directly for the thumb view
-	AfxCallWndProc( pThumbView, pThumbView->m_hWnd, WM_COMMAND, MAKEWPARAM( CK_SHOW_THUMB_VIEW, BN_CLICKED ), nullptr );
+	AfxCallWndProc( pThumbView, pThumbView->m_hWnd, WM_COMMAND, MAKEWPARAM( CK_SHOW_THUMB_VIEW, BN_CLICKED ), 0L );
 }

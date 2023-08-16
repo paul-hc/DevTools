@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageView.h"
 #include "INavigationBar.h"
 #include "ImageNavigator.h"

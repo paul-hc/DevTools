@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "MainFrame.h"
 #include "MainToolbar.h"
 #include "IImageView.h"

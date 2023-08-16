@@ -1,0 +1,385 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd;cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{401d2f5a-a2d8-4992-893b-16bedf1f5205}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\model">
+      <UniqueIdentifier>{9f0d28b1-26af-49b5-84da-48d39fa69221}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\service">
+      <UniqueIdentifier>{dc3602e7-21f1-4119-8df6-10cb522e7be2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ChildFrame.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrame.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\CatalogStorageTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ImagingD2DTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ThumbnailTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Album_fwd.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbumChildFrame.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbumDialogBar.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbumDoc.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbumImageView.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbumSettingsDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbumThumbListView.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Application_fwd.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArchiveImagesDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DocTemplates.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DocumentBase.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileListDisplayPaths.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IImageView.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageDoc.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageView.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INavigationBar.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ListViewState.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoggerSetupDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainToolbar.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveFileDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OleImagesDataSource.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchPatternDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SplitterWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UndoRedoDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Workspace.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkspaceDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbumModel.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ArchivingModel.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ArchivingModel_fwd.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoDrop.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="CatalogStorageHost.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomOrderUndoRedo.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAttr.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAttr_fwd.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAttrAlgorithms.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ICatalogStorage.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageCatalogStg.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagesModel.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageState.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelSchema.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchModel.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchPattern.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="SlideData.h">
+      <Filter>Source Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="CatalogStorageService.h">
+      <Filter>Source Files\service</Filter>
+    </ClInclude>
+    <ClInclude Include="FileOperation.h">
+      <Filter>Source Files\service</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageFileEnumerator.h">
+      <Filter>Source Files\service</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageNavigator.h">
+      <Filter>Source Files\service</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageNavigator_fwd.h">
+      <Filter>Source Files\service</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MainFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChildFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\CatalogStorageTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ImagingD2DTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ThumbnailTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbumChildFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbumDialogBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbumDoc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbumImageView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbumSettingsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbumThumbListView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ArchiveImagesDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DocTemplates.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DocumentBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileListDisplayPaths.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageDoc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ListViewState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoggerSetupDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainToolbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveFileDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OleImagesDataSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SearchPatternDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SplitterWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UndoRedoDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Workspace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkspaceDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbumModel.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="ArchivingModel.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoDrop.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="CatalogStorageHost.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomOrderUndoRedo.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="FileAttr.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="FileAttrAlgorithms.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="ICatalogStorage.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageCatalogStg.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagesModel.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageState.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelSchema.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="SearchModel.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="SearchPattern.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="SlideData.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="CatalogStorageService.cpp">
+      <Filter>Source Files\service</Filter>
+    </ClCompile>
+    <ClCompile Include="FileOperation.cpp">
+      <Filter>Source Files\service</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageFileEnumerator.cpp">
+      <Filter>Source Files\service</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageNavigator.cpp">
+      <Filter>Source Files\service</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Slider.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\userimages.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\SliderDoc.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Slider.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar256.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\AlbumDoc.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\AppToolStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\AppToolStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ImageDoc.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Slider.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Doc Templates.xls" />
+    <None Include="Slider.reg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

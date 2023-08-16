@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AlbumChildFrame.h"
 #include "AlbumImageView.h"
 #include "AlbumThumbListView.h"
@@ -11,7 +11,6 @@
 
 
 IMPLEMENT_DYNCREATE( CAlbumChildFrame, CChildFrame )
-
 
 CAlbumChildFrame::CAlbumChildFrame( void )
 	: CChildFrame()

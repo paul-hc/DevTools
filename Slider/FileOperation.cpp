@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileOperation.h"
 #include "ICatalogStorage.h"
 #include "utl/Algorithms.h"

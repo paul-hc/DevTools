@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "OleImagesDataSource.h"
 #include "FileOperation.h"
 #include "Workspace.h"

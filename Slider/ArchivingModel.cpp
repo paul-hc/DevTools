@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ArchivingModel.h"
 #include "CatalogStorageService.h"
 #include "ICatalogStorage.h"

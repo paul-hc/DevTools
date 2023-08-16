@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "MoveFileDialog.h"
 #include "resource.h"
 #include "utl/FileSystem.h"

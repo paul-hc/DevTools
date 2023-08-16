@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AlbumDoc.h"
 #include "Workspace.h"
 #include "DocTemplates.h"
@@ -207,7 +207,7 @@ bool CAlbumDoc::PromptSaveConvertModelSchema( void ) const
 		app::FormatModelVersion( GetModelSchema() ).c_str(),
 		app::FormatModelVersion( app::Slider_LatestModelSchema ).c_str(),
 		is_Album_sld ? _T('!') : _T('?'),
-		m_strPathName );
+		m_strPathName.GetString() );
 
 	bool proceed = true;
 #ifdef _DEBUG

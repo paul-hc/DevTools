@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileListDisplayPaths.h"
 #include "AlbumModel.h"
 #include "FileAttr.h"

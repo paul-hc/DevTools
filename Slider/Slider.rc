@@ -8,18 +8,16 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "utl/UI/resource.h"
-#include "afxres.h"
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -76,8 +74,11 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\Slider.ico"
+
 IDR_ALBUMTYPE           ICON                    "res\\AlbumDoc.ico"
+
 IDR_IMAGETYPE           ICON                    "res\\ImageDoc.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -85,7 +86,9 @@ IDR_IMAGETYPE           ICON                    "res\\ImageDoc.ico"
 //
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+
 IDR_APP_TOOL_STRIP      BITMAP                  "res\\AppToolStrip.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -93,14 +96,16 @@ IDR_APP_TOOL_STRIP      BITMAP                  "res\\AppToolStrip.bmp"
 //
 
 IDR_MAINFRAME           PNG                     "res\\Toolbar.png"
+
 IDR_APP_TOOL_STRIP      PNG                     "res\\AppToolStrip.png"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR  16, 16
+IDR_MAINFRAME TOOLBAR 16, 16
 BEGIN
     BUTTON      CK_FULL_SCREEN
     BUTTON      CK_SHOW_THUMB_VIEW
@@ -132,7 +137,7 @@ BEGIN
     BUTTON      ID_EDIT_BK_COLOR
 END
 
-IDR_APP_TOOL_STRIP TOOLBAR  16, 16
+IDR_APP_TOOL_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_ORDER_ORIGINAL
     BUTTON      ID_ORDER_CUSTOM
@@ -150,7 +155,7 @@ END
 // Menu
 //
 
-IDR_MAINFRAME MENU 
+IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -195,7 +200,7 @@ BEGIN
     END
 END
 
-IDR_ALBUMTYPE MENU 
+IDR_ALBUMTYPE MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -330,7 +335,7 @@ BEGIN
     END
 END
 
-IDR_IMAGETYPE MENU 
+IDR_IMAGETYPE MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -428,7 +433,7 @@ BEGIN
     END
 END
 
-IDR_CONTEXT_MENU MENU 
+IDR_CONTEXT_MENU MENU
 BEGIN
     POPUP "<image>"
     BEGIN
@@ -606,7 +611,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS 
+IDR_MAINFRAME ACCELERATORS
 BEGIN
     VK_F11,         CK_FULL_SCREEN,         VIRTKEY, NOINVERT
     VK_F5,          CM_CLEAR_IMAGE_CACHE,   VIRTKEY, CONTROL, NOINVERT
@@ -653,7 +658,7 @@ BEGIN
     "X",            ID_APP_EXIT,            VIRTKEY, ALT, NOINVERT
 END
 
-IDR_IMAGEVIEW ACCELERATORS 
+IDR_IMAGEVIEW ACCELERATORS
 BEGIN
     VK_DOWN,        CM_SCROLL_DOWN,         VIRTKEY, CONTROL, NOINVERT
     VK_LEFT,        CM_SCROLL_LEFT,         VIRTKEY, CONTROL, NOINVERT
@@ -675,13 +680,13 @@ BEGIN
     VK_UP,          ID_NAVIG_SEEK_PREV,     VIRTKEY, NOINVERT
 END
 
-IDR_COMMAND_BAR_ACCEL ACCELERATORS 
+IDR_COMMAND_BAR_ACCEL ACCELERATORS
 BEGIN
     VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
     "D",            ID_FILE_OPEN_ALBUM_FOLDER, VIRTKEY, SHIFT, CONTROL, NOINVERT
 END
 
-IDR_ALBUMTYPE ACCELERATORS 
+IDR_ALBUMTYPE ACCELERATORS
 BEGIN
     "A",            CM_SELECT_ALL_THUMBS,   VIRTKEY, CONTROL, NOINVERT
     "A",            CM_ARCHIVE_IMAGES,      VIRTKEY, SHIFT, CONTROL, NOINVERT
@@ -700,13 +705,13 @@ BEGIN
     "Y",            CM_CUSTOM_ORDER_REDO,   VIRTKEY, CONTROL, NOINVERT
 END
 
-IDR_IMAGETYPE ACCELERATORS 
+IDR_IMAGETYPE ACCELERATORS
 BEGIN
     "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_F1,          ID_APP_ABOUT,           VIRTKEY, SHIFT, CONTROL, ALT, NOINVERT
 END
 
-IDD_ALBUM_SETTINGS_DIALOG ACCELERATORS 
+IDD_ALBUM_SETTINGS_DIALOG ACCELERATORS
 BEGIN
     VK_DELETE,      ID_IMAGE_DELETE,        VIRTKEY, NOINVERT
     "M",            ID_IMAGE_MOVE,          VIRTKEY, CONTROL, NOINVERT
@@ -847,7 +852,7 @@ BEGIN
     EDITTEXT        IDC_SOURCE_EDIT,7,46,264,47,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_GROUP
 END
 
-IDD_LOGGER_DIALOG DIALOG  0, 0, 213, 66
+IDD_LOGGER_DIALOG DIALOG 0, 0, 213, 66
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Logger Setup"
 FONT 8, "MS Sans Serif"
@@ -863,7 +868,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,273,7,57,14,WS_GROUP | NOT WS_TABSTOP
 END
 
-IDD_LAYOUT_DIALOG DIALOG  0, 0, 186, 95
+IDD_LAYOUT_DIALOG DIALOG 0, 0, 186, 95
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Layout Dialog"
 FONT 8, "MS Sans Serif"
@@ -872,7 +877,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
 END
 
-IDD_UNDO_REDO_DIALOG DIALOG  0, 0, 200, 191
+IDD_UNDO_REDO_DIALOG DIALOG 0, 0, 200, 191
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Undo/Redo Auto-Drop Operations"
 FONT 8, "MS Sans Serif"
@@ -920,8 +925,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,8,3,3
- PRODUCTVERSION 5,8,3,3
+ FILEVERSION 5,8,4,0
+ PRODUCTVERSION 5,8,4,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -936,18 +941,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "05-07-2023 14:04:02"
-            VALUE "Comments", "RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]Frame navigation|[5.0] Images Model"
+            VALUE "BuildTimestamp", "16-08-2023 12:50:48"
+            VALUE "Comments", "Slider_vc17.sln|RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]Frame navigation"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
-            VALUE "FileVersion", "5, 8, 3, 3"
+            VALUE "FileVersion", "5.8.4.0"
             VALUE "InternalName", "Slider"
             VALUE "LegalCopyright", "Copyright (C) 2000-2023"
             VALUE "LegalTrademarks", "Enjoy it."
             VALUE "OriginalFilename", "Slider.exe"
             VALUE "ProductName", "Slider Application"
-            VALUE "ProductVersion", "5, 8, 3, 3"
+            VALUE "ProductVersion", "5.8.4.0"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -964,7 +969,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_WORKSPACE_DIALOG, DIALOG
     BEGIN
@@ -1062,20 +1067,20 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "Slider"
     IDR_ALBUMTYPE           "\nAlbum\nAlbum\nAlbums (*.sld;*.ias)\n.sld;.ias\nSliderAlbum.Document\nSlider Album Document"
     IDR_IMAGETYPE           "\nImage\nImage\nImages (*.bmp)\n.bmp\nSliderImage.Document\nSlider Image Document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "Slider"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_INDICATOR_EXT        "EXT"
     ID_INDICATOR_CAPS       "CAP"
@@ -1085,7 +1090,7 @@ BEGIN
     ID_INDICATOR_REC        "REC"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_NEW             "Create a new document\nNew Album (Ctrl+N)"
     ID_FILE_OPEN            "Open an existing document\nOpen (Ctrl+O)"
@@ -1098,13 +1103,13 @@ BEGIN
     ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -1124,13 +1129,13 @@ BEGIN
     ID_FILE_MRU_FILE16      "Open this document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
     ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_WINDOW_NEW           "Open another window for the active document\nNew Window (Ctrl+Shift+N)"
     ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
@@ -1140,7 +1145,7 @@ BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -1150,13 +1155,13 @@ BEGIN
     ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -1167,19 +1172,19 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
     AFX_IDS_MDICHILD        "Activate this window"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDW_SB_PROGRESS_CAPTION "<progress bar caption field>"
     IDW_SB_PROGRESS_BAR     "<progress bar text>"
@@ -1198,7 +1203,7 @@ BEGIN
                             "Scale image to fit the entire width in the view\nFit Width"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_TOGGLE_SCALING_FIT_HEIGHT 
                             "Scale image to fit the entire heigh in the view\nFit Height"
@@ -1218,7 +1223,7 @@ BEGIN
                             "Toggle wrap navigation mode (circular play)\nToggle Wrap Mode"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_NAVIG_SEEK_PREV      "Move to previous image\nPrevious Image (Up/Left Arrow)"
     ID_NAVIG_SEEK_NEXT      "Move to next image\nNext Image (Down/Right Arrow)"
@@ -1226,7 +1231,7 @@ BEGIN
     ID_NAVIG_SEEK_LAST      "Move to last image\nLast Image (End)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     CM_SAVE_WORKSPACE       "Save current workspace to the workspace file\nSave Workspace"
     CM_EDIT_WORKSPACE       "Edit current workspace settings\nWorkspace Settings"
@@ -1239,7 +1244,7 @@ BEGIN
     ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_IMAGE_DELETE         "Delete the file using shell operation\nDelete"
     ID_IMAGE_MOVE           "Move current image file to another folder\nMove File"
@@ -1252,7 +1257,7 @@ BEGIN
     CM_AUTO_DROP_DEFRAGMENT "Renames files in an auto-drop recipient to ensure contiguos numeric filename\nDefragment Image Files"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ERROR_CANNOTEXPLORE "Cannot explore the selected file '%s'!\n\nFile does not exist."
     IDS_ERROR_NOSELECTION   "No file currently selected!"
@@ -1279,13 +1284,13 @@ BEGIN
                             "Unable to %s the %d %s operations out of %d due to file inconsistencies!\n\nDo you still want to perform the operation?"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_SLIDE_ALBUM_FILTER_SPEC "Slide Albums|*.sld"
     IDS_CATALOG_STG_FILTER_SPEC "Catalog Storage Albums|*.ias;*.cid;*.icf"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
     CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
@@ -1306,7 +1311,7 @@ BEGIN
                             "Edit password in image archive storage\nEdit Password"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_SEEK_CURR_POS_EDIT  "Position of the current slide image\nSlide Image Position"
     IDC_CURR_IMAGE_PATH_EDIT 
@@ -1316,14 +1321,14 @@ BEGIN
     IDC_PATTERNS_LISTVIEW   "Path=-1|Type=100|Depth=75"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_FOUND_IMAGES_LISTVIEW 
                             "File Name=-1|In Folder=200|Dimensions=75|Size=55|Date=120"
     IDC_SEARCH_FOR_FILES    "Search for Images (F5)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ORDER_ORIGINAL       "Original Search Order"
     ID_ORDER_CUSTOM         "Custom Order"
@@ -1336,12 +1341,12 @@ BEGIN
     ID_ORDER_BY_DIMENSION_DESC "Order by Dimension Descending"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_FILE_PATHS_LIST     "Source Folder|Source Filename|Destination Filename"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_DELETE_ATTR_PROMPT  "Are you sure you want to delete the path below ?\n\n%s"
     IDS_NO_DIR_SEARCH_SPEC  "In order to enable the ""Auto Drop Recipient"" feature, you must have one valid directory search path specifier ""Auto-drop numeric filenames"" option selected!"
@@ -1351,14 +1356,14 @@ BEGIN
                             "Continue saving full image information"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
     IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
     IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -1390,7 +1395,7 @@ END
 #include "afxribbon.rc"      // Ribbon and control bars
 #endif
 
-#endif
+#endif
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

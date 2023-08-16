@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SearchPattern.h"
 #include "Application_fwd.h"
 #include "resource.h"

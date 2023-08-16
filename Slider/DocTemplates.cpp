@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DocTemplates.h"
 #include "AlbumDoc.h"
 #include "AlbumChildFrame.h"

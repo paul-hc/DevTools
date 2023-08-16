@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CatalogStorageService.h"
 #include "FileAttrAlgorithms.h"
 #include "AlbumDoc.h"

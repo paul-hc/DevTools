@@ -53,7 +53,7 @@ namespace ole
 		virtual ~CImagesDataSource();
 
 		// caching overrides
-		virtual void CacheShellFilePaths( const std::vector< fs::CPath >& filePaths );
+		virtual void CacheShellFilePaths( const std::vector<fs::CPath>& filePaths );
 
 		// pass m_nullRect to disable the start drag delay
 		DROPEFFECT DragAndDropImages( HWND hSrcWnd, DROPEFFECT dropEffect, const RECT* pStartDragRect = nullptr );

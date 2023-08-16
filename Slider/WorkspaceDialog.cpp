@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WorkspaceDialog.h"
 #include "Album_fwd.h"
 #include "Application.h"

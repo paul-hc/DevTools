@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AlbumSettingsDialog.h"
 #include "FileAttrAlgorithms.h"
 #include "ICatalogStorage.h"
@@ -633,8 +633,10 @@ void CAlbumSettingsDialog::OnLVnItemsRemoved_Patterns( NMHDR* pNmHdr, LRESULT* p
 	else
 		for ( std::vector<utl::ISubject*>::const_iterator itObject = pNmItemsRemoved->m_removedObjects.begin(); itObject != pNmItemsRemoved->m_removedObjects.end(); ++itObject )
 		{
-			utl::RemoveExisting( rSearchPatterns, checked_static_cast<CSearchPattern*>( *itObject ) );
-			delete *itObject;
+			CSearchPattern* pPattern = checked_static_cast<CSearchPattern*>( *itObject );
+
+			utl::RemoveExisting( rSearchPatterns, pPattern );
+			delete pPattern;
 		}
 
 	SetDirty();

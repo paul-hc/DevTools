@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileAttr.h"
 #include "ModelSchema.h"
 #include "ICatalogStorage.h"			// for CCatalogStorageFactory::IsVintageCatalog()

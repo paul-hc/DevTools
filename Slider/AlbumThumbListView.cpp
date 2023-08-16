@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AlbumThumbListView.h"
 #include "Workspace.h"
 #include "MainFrame.h"
@@ -973,7 +973,8 @@ BOOL CAlbumThumbListView::OnScrollBy( CSize sizeScroll, BOOL doScroll )
 	{
 		if ( doScroll )											// line scroll?
 			if ( !( m_scrollTimerCounter.x++ % scrollTimerDivider.cx ) )
-				SendMessage( WM_HSCROLL, MAKEWPARAM( scrollCommand.cx, 0 ), nullptr );
+				SendMessage( WM_HSCROLL, MAKEWPARAM( scrollCommand.cx, 0 ), 0L );
+
 		result = true;
 	}
 
@@ -981,7 +982,8 @@ BOOL CAlbumThumbListView::OnScrollBy( CSize sizeScroll, BOOL doScroll )
 	{
 		if ( doScroll && scrollCommand.cy != SB_ENDSCROLL )		// line scroll?
 			if ( !( m_scrollTimerCounter.y++ % scrollTimerDivider.cy ) )
-				SendMessage( WM_VSCROLL, MAKEWPARAM( scrollCommand.cy > 0, 0 ), nullptr );
+				SendMessage( WM_VSCROLL, MAKEWPARAM( scrollCommand.cy > 0, 0 ), 0L );
+
 		result = true;
 	}
 

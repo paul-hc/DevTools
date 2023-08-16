@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DocumentBase.h"
 #include "FileOperation.h"
 #include "resource.h"

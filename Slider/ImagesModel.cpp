@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImagesModel.h"
 #include "FileAttr.h"
 #include "FileAttrAlgorithms.h"

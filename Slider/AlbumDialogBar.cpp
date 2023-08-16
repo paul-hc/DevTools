@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AlbumDialogBar.h"
 #include "AlbumDoc.h"
 #include "AlbumImageView.h"

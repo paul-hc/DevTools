@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ModelSchema.h"
 #include "utl/UI/MfcUtilities.h"
 

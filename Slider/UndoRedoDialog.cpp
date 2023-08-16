@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "UndoRedoDialog.h"
 #include "resource.h"
 

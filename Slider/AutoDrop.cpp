@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "AutoDrop.h"
 #include "SearchPattern.h"
 #include "FileAttr.h"

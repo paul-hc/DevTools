@@ -44,7 +44,7 @@ public:
 
 	void OpenAllStorages( void );
 	void CloseAllStorages( void );
-	void QueryEmbeddedStorages( std::vector< fs::TStgDocPath >& rSubStoragePaths ) const;
+	void QueryEmbeddedStorages( std::vector<fs::TStgDocPath>& rSubStoragePaths ) const;
 public:
 	enum PersistFlag
 	{
@@ -63,13 +63,13 @@ public:
 	bool IsAutoDropRecipient( bool checkValidPath = true ) const;		// single search pattern
 public:
 	// found image files
-	void SwapFileAttrs( std::vector< CFileAttr* >& rFileAttributes ) { m_imagesModel.RefFileAttrs().swap( rFileAttributes ); }
+	void SwapFileAttrs( std::vector<CFileAttr*>& rFileAttributes ) { m_imagesModel.RefFileAttrs().swap( rFileAttributes ); }
 
 	bool AnyFoundFiles( void ) const { return !m_imagesModel.IsEmpty(); }
 	size_t GetFileAttrCount( void ) const { return m_imagesModel.GetFileAttrs().size(); }
 	const CFileAttr* GetFileAttr( size_t pos ) const { return m_imagesModel.GetFileAttrAt( pos ); }
 
-	void QueryFileAttrsSequence( std::vector< CFileAttr* >& rSequence, const std::vector< int >& selIndexes ) const;
+	void QueryFileAttrsSequence( std::vector<CFileAttr*>& rSequence, const std::vector<int>& selIndexes ) const;
 
 	int FindIndexFileAttrWithPath( const fs::CPath& filePath ) const;
 
@@ -80,16 +80,16 @@ public:
 
 	// custom order
 	bool IsCustomOrder( void ) const { return fattr::CustomOrder == GetFileOrder(); }
-	void SetCustomOrderSequence( const std::vector< CFileAttr* >& customSequence );			// explicit custom order
+	void SetCustomOrderSequence( const std::vector<CFileAttr*>& customSequence );			// explicit custom order
 public:
 	/** SERVICE API **/
 
 	// image file operations
-	TCurrImagePos DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths );
+	TCurrImagePos DeleteFromAlbum( const std::vector<fs::CFlexPath>& selFilePaths );
 
 	// custom order Drag & Drop
-	bool DropCustomOrderIndexes( int& rDropIndex, std::vector< int >& rSelIndexes );
-	bool UndropCustomOrderIndexes( int droppedIndex, const std::vector< int >& origDragSelIndexes );
+	bool DropCustomOrderIndexes( int& rDropIndex, std::vector<int>& rSelIndexes );
+	bool UndropCustomOrderIndexes( int droppedIndex, const std::vector<int>& origDragSelIndexes );
 private:
 	bool DoOrderImagesModel( CImagesModel* pImagesModel, utl::IProgressService* pProgressSvc );
 private:

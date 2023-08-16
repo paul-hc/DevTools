@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "LoggerSetupDialog.h"
 #include "Application.h"
 #include "resource.h"

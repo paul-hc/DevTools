@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Workspace.h"
 #include "WorkspaceDialog.h"
 #include "SlideData.h"

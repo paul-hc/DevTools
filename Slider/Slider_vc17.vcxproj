@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugU|Win32">
+      <Configuration>DebugU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|Win32">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugU|x64">
+      <Configuration>DebugU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|x64">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{E6C00AB5-5960-4118-A70E-205BE39062BA}</ProjectGuid>
+    <Keyword>MFCProj</Keyword>
+    <RootNamespace>Slider</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Slider</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <PreBuildEvent>
+      <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Stamping build time in resource file...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <PreBuildEvent>
+      <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Stamping build time in resource file...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="AlbumChildFrame.h" />
+    <ClInclude Include="AlbumDialogBar.h" />
+    <ClInclude Include="AlbumDoc.h" />
+    <ClInclude Include="AlbumImageView.h" />
+    <ClInclude Include="AlbumModel.h" />
+    <ClInclude Include="AlbumSettingsDialog.h" />
+    <ClInclude Include="AlbumThumbListView.h" />
+    <ClInclude Include="Album_fwd.h" />
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="Application_fwd.h" />
+    <ClInclude Include="ArchiveImagesDialog.h" />
+    <ClInclude Include="ArchivingModel.h" />
+    <ClInclude Include="ArchivingModel_fwd.h" />
+    <ClInclude Include="AutoDrop.h" />
+    <ClInclude Include="CatalogStorageHost.h" />
+    <ClInclude Include="CatalogStorageService.h" />
+    <ClInclude Include="ChildFrame.h" />
+    <ClInclude Include="CustomOrderUndoRedo.h" />
+    <ClInclude Include="DocTemplates.h" />
+    <ClInclude Include="DocumentBase.h" />
+    <ClInclude Include="FileAttr.h" />
+    <ClInclude Include="FileAttrAlgorithms.h" />
+    <ClInclude Include="FileAttr_fwd.h" />
+    <ClInclude Include="FileListDisplayPaths.h" />
+    <ClInclude Include="FileOperation.h" />
+    <ClInclude Include="ICatalogStorage.h" />
+    <ClInclude Include="IImageView.h" />
+    <ClInclude Include="ImageCatalogStg.h" />
+    <ClInclude Include="ImageDoc.h" />
+    <ClInclude Include="ImageFileEnumerator.h" />
+    <ClInclude Include="ImageNavigator.h" />
+    <ClInclude Include="ImageNavigator_fwd.h" />
+    <ClInclude Include="ImagesModel.h" />
+    <ClInclude Include="ImageState.h" />
+    <ClInclude Include="ImageView.h" />
+    <ClInclude Include="INavigationBar.h" />
+    <ClInclude Include="ListViewState.h" />
+    <ClInclude Include="LoggerSetupDialog.h" />
+    <ClInclude Include="MainFrame.h" />
+    <ClInclude Include="MainToolbar.h" />
+    <ClInclude Include="ModelSchema.h" />
+    <ClInclude Include="MoveFileDialog.h" />
+    <ClInclude Include="OleImagesDataSource.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SearchModel.h" />
+    <ClInclude Include="SearchPattern.h" />
+    <ClInclude Include="SearchPatternDialog.h" />
+    <ClInclude Include="SlideData.h" />
+    <ClInclude Include="SplitterWindow.h" />
+    <ClInclude Include="test\CatalogStorageTests.h" />
+    <ClInclude Include="test\ImagingD2DTests.h" />
+    <ClInclude Include="test\ThumbnailTests.h" />
+    <ClInclude Include="UndoRedoDialog.h" />
+    <ClInclude Include="Workspace.h" />
+    <ClInclude Include="WorkspaceDialog.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AlbumChildFrame.cpp" />
+    <ClCompile Include="AlbumDialogBar.cpp" />
+    <ClCompile Include="AlbumDoc.cpp" />
+    <ClCompile Include="AlbumImageView.cpp" />
+    <ClCompile Include="AlbumModel.cpp" />
+    <ClCompile Include="AlbumSettingsDialog.cpp" />
+    <ClCompile Include="AlbumThumbListView.cpp" />
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="ArchiveImagesDialog.cpp" />
+    <ClCompile Include="ArchivingModel.cpp" />
+    <ClCompile Include="AutoDrop.cpp" />
+    <ClCompile Include="CatalogStorageHost.cpp" />
+    <ClCompile Include="CatalogStorageService.cpp" />
+    <ClCompile Include="ChildFrame.cpp" />
+    <ClCompile Include="CustomOrderUndoRedo.cpp" />
+    <ClCompile Include="DocTemplates.cpp" />
+    <ClCompile Include="DocumentBase.cpp" />
+    <ClCompile Include="FileAttr.cpp" />
+    <ClCompile Include="FileAttrAlgorithms.cpp" />
+    <ClCompile Include="FileListDisplayPaths.cpp" />
+    <ClCompile Include="FileOperation.cpp" />
+    <ClCompile Include="ICatalogStorage.cpp" />
+    <ClCompile Include="ImageCatalogStg.cpp" />
+    <ClCompile Include="ImageDoc.cpp" />
+    <ClCompile Include="ImageFileEnumerator.cpp" />
+    <ClCompile Include="ImageNavigator.cpp" />
+    <ClCompile Include="ImagesModel.cpp" />
+    <ClCompile Include="ImageState.cpp" />
+    <ClCompile Include="ImageView.cpp" />
+    <ClCompile Include="ListViewState.cpp" />
+    <ClCompile Include="LoggerSetupDialog.cpp" />
+    <ClCompile Include="MainFrame.cpp" />
+    <ClCompile Include="MainToolbar.cpp" />
+    <ClCompile Include="ModelSchema.cpp" />
+    <ClCompile Include="MoveFileDialog.cpp" />
+    <ClCompile Include="OleImagesDataSource.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="SearchModel.cpp" />
+    <ClCompile Include="SearchPattern.cpp" />
+    <ClCompile Include="SearchPatternDialog.cpp" />
+    <ClCompile Include="SlideData.cpp" />
+    <ClCompile Include="SplitterWindow.cpp" />
+    <ClCompile Include="test\CatalogStorageTests.cpp" />
+    <ClCompile Include="test\ImagingD2DTests.cpp" />
+    <ClCompile Include="test\ThumbnailTests.cpp" />
+    <ClCompile Include="UndoRedoDialog.cpp" />
+    <ClCompile Include="Workspace.cpp" />
+    <ClCompile Include="WorkspaceDialog.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Slider.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\AlbumDoc.ico" />
+    <Image Include="res\AppToolStrip.bmp" />
+    <Image Include="res\AppToolStrip.png" />
+    <Image Include="res\ImageDoc.ico" />
+    <Image Include="res\Slider.ico" />
+    <Image Include="res\SliderDoc.ico" />
+    <Image Include="res\Toolbar.bmp" />
+    <Image Include="res\Toolbar.png" />
+    <Image Include="res\Toolbar256.bmp" />
+    <Image Include="res\userimages.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Doc Templates.xls" />
+    <None Include="res\Slider.rc2" />
+    <None Include="Slider.reg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtl\utl\UI\UTL_UI_vc17.vcxproj">
+      <Project>{ced87d7e-e07c-4158-bcdb-d3dcf1acf42c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonUtl\utl\UTL_BASE_vc17.vcxproj">
+      <Project>{bd40f5cd-069f-428f-8e05-ba1b85940a9c}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

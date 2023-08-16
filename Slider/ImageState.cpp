@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ImageState.h"
 #include "ModelSchema.h"
 #include "utl/Serialization.h"

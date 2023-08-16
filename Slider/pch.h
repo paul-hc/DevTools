@@ -1,4 +1,4 @@
-// stdafx.h : include file for standard system include files,
+// pch.h : include file for standard system include files,
 // or project specific include files that are used frequently,
 // but are changed infrequently
 
@@ -6,6 +6,9 @@
 
 #include "utl/utl_base.h"
 #include "utl/UI/utl_ui.h"
+
+#include <afxcontrolbars.h>		// MFC support for ribbons and control bars
+
 
 
 #ifdef _DEBUG
