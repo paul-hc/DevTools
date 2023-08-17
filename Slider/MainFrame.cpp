@@ -30,7 +30,10 @@ static UINT s_sbIndicators[] =
 {
 	ID_SEPARATOR,					// status line indicator
 	IDW_SB_PROGRESS_CAPTION,		// caption of the shared progress bar
-	IDW_SB_PROGRESS_BAR				// application shared progress bar
+	IDW_SB_PROGRESS_BAR,			// application shared progress bar
+	ID_INDICATOR_CAPS,
+	ID_INDICATOR_NUM,
+	ID_INDICATOR_SCRL
 };
 
 
@@ -341,13 +344,17 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	// Allow user-defined toolbars operations:
 	InitUserToolbars( nullptr, FirstUserToolBarId, LastUserToolBarId );
 
-	if ( !m_statusBar.Create( this ) )
+	if ( !m_statusBar.Create( this ) ||
+		 !m_statusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
 	{
 		TRACE( "Failed to create status bar\n" );
 		return -1;      // fail to create
 	}
 
-	m_statusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) );
+	m_statusBar.SetPaneStyle( Status_ProgressLabel, SBPS_NOBORDERS );
+	m_statusBar.SetPaneStyle( Status_Info, SBPS_STRETCH | SBPS_NOBORDERS );
+	m_statusBar.SetPaneWidth( Status_Progress, 100 );
+	m_statusBar.EnablePaneDoubleClick();
 
 	// TODO: Delete these five lines if you don't want the toolbar and menubar to be dockable
 	m_menuBar.EnableDocking( CBRS_ALIGN_ANY );

@@ -11,6 +11,7 @@ protected:
 	CBaseMainFrameWndEx( void ) : BaseFrameWnd() {}
 	virtual ~CBaseMainFrameWndEx();
 public:
+	enum { MaxUserToolbars = 10, FirstUserToolBarId = AFX_IDW_CONTROLBAR_FIRST + 40, LastUserToolBarId = FirstUserToolBarId + MaxUserToolbars - 1 };
 
 	// generated stuff
 protected:

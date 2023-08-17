@@ -1256,8 +1256,8 @@ END
 
 STRINGTABLE
 BEGIN
-    IDW_SB_PROGRESS_CAPTION "<progress bar caption field>"
-    IDW_SB_PROGRESS_BAR     "<progress bar text>"
+    IDW_SB_PROGRESS_CAPTION "<progress caption>"
+    IDW_SB_PROGRESS_BAR     "<progress bar>"
     IDW_IMAGE_SCALING_COMBO "Edit the auto image size mode\nAuto Image Size"
     IDW_ZOOM_COMBO          "Zoom\nZoom (Ctrl+Z)"
     IDW_NAVIG_SLIDER_CTRL   "Navigation slider\nNavigation Slider"

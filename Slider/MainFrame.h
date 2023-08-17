@@ -13,6 +13,8 @@ class CMainToolbar;
 
 typedef CBaseMainFrameWndEx<CMDIFrameWndEx> TMDIFrameWndEx;
 
+enum StatusBarFields { Status_Info, Status_ProgressLabel, Status_Progress };
+
 
 class CMainFrame : public TMDIFrameWndEx
 {
@@ -67,7 +69,6 @@ private:
 	CWindowTimer m_progBarResetTimer;
 	CInternalChange m_inProgress;
 
-	enum { MaxUserToolbars = 10, FirstUserToolBarId = AFX_IDW_CONTROLBAR_FIRST + 40, LastUserToolBarId = FirstUserToolBarId + MaxUserToolbars - 1 };
 	enum Metrics { ProgressBarWidth = 150 };
 	enum TimerIds { MessageTimerId = 2000, QueueTimerId, ProgressResetTimerId };
 
