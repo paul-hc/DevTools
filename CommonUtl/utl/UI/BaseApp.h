@@ -3,18 +3,26 @@
 #pragma once
 
 #ifndef __AFXWIN_H__
-#error "include 'pch.h' before including this file for PCH"
+	#error "include 'pch.h' before including this file for PCH"
 #endif
 
 
 #include "utl/AppTools.h"
-#include "AppLook.h"
 #include "AccelTable.h"
 #include "ResourcePool.h"
 
 
 // UTL global trace categories
 //DECLARE_AFX_TRACE_CATEGORY( traceThumbs )
+
+
+namespace app
+{
+	enum AppLook { Windows_2000, Office_XP, Windows_XP, Office_2003, VS_2005, VS_2008, Office_2007_Blue, Office_2007_Black, Office_2007_Silver, Office_2007_Aqua, Windows_7 };
+}
+
+
+class CAppLook;
 
 
 template< typename BaseClass = CWinApp >		// could use CWinAppEx base for new MFC app support (ribbons, etc)
@@ -92,6 +100,28 @@ protected:
 	afx_msg void OnUpdateAppAbout( CCmdUI* pCmdUI );
 	afx_msg void OnRunUnitTests( void );
 	afx_msg void OnUpdateRunUnitTests( CCmdUI* pCmdUI );
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+class CAppLook : public CCmdTarget
+{
+public:
+	CAppLook( app::AppLook appLook );
+	virtual ~CAppLook();
+
+	void SetAppLook( app::AppLook appLook );
+	void Save( void );
+
+	static app::AppLook FromId( UINT cmdId );
+private:
+	persist app::AppLook m_appLook;
+
+	// generated stuff
+protected:
+	afx_msg void OnApplicationLook( UINT cmdId );
+	afx_msg void OnUpdateApplicationLook( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
