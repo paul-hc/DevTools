@@ -239,10 +239,10 @@ BEGIN
             MENUITEM "Visual Studio 200&5",         ID_VIEW_APPLOOK_VS_2005
             MENUITEM "Visual Studio 200&8",         ID_VIEW_APPLOOK_VS_2008
             MENUITEM SEPARATOR
-            MENUITEM "Office 2007\t&Blue Style",    ID_VIEW_APPLOOK_OFFICE_2007_BLUE
-            MENUITEM "Office 2007\tB&lack Style",   ID_VIEW_APPLOOK_OFFICE_2007_BLACK
-            MENUITEM "Office 2007\t&Silver Style",  ID_VIEW_APPLOOK_OFFICE_2007_SILVER
-            MENUITEM "Office 2007\t&Aqua Style",    ID_VIEW_APPLOOK_OFFICE_2007_AQUA
+            MENUITEM "Office 2007: &Blue",          ID_VIEW_APPLOOK_OFFICE_2007_BLUE
+            MENUITEM "Office 2007: B&lack",         ID_VIEW_APPLOOK_OFFICE_2007_BLACK
+            MENUITEM "Office 2007: &Silver",        ID_VIEW_APPLOOK_OFFICE_2007_SILVER
+            MENUITEM "Office 2007: &Aqua",          ID_VIEW_APPLOOK_OFFICE_2007_AQUA
             MENUITEM SEPARATOR
             MENUITEM "Windows 7",                   ID_VIEW_APPLOOK_WINDOWS_7
         END

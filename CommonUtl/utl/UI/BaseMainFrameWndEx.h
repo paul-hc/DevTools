@@ -4,7 +4,7 @@
 
 
 template< typename BaseFrameWnd >
-abstract class CBaseMainFrameWndEx : public BaseFrameWnd		// abstract base for main windows that customize application look, control bars, etc
+abstract class CBaseMainFrameWndEx : public BaseFrameWnd		// abstract base for main windows that customize application look, control bars, etc - e.g. BaseFrameWnd is CMDIFrameWndEx
 {
 	typedef BaseFrameWnd TBaseClass;
 protected:
