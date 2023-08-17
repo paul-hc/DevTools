@@ -668,6 +668,15 @@
     <ClInclude Include="LogPalette.h">
       <Filter>UI\Color</Filter>
     </ClInclude>
+    <ClInclude Include="BaseMainFrameWndEx.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseMainFrameWndEx.hxx">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="AppLook.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1140,6 +1149,9 @@
     </ClCompile>
     <ClCompile Include="LogPalette.cpp">
       <Filter>UI\Color</Filter>
+    </ClCompile>
+    <ClCompile Include="AppLook.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

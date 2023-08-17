@@ -43,7 +43,7 @@ namespace app
 		fs::StoreResolveShortcutProc( &shell::ResolveShortcut );
 	}
 
-	bool InitMfcControlBars( CWinApp* pWinApp, CRuntimeClass* pVisualManagerClass )
+	bool InitMfcControlBars( CWinApp* pWinApp )
 	{
 		if ( !is_a<CWinAppEx>( pWinApp ) )
 			return false;
@@ -68,9 +68,6 @@ namespace app
 			CMFCToolBar::AddToolBarForImageCollection( IDR_STD_BUTTONS_STRIP );
 			//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );
 		}
-
-		// activate "Windows Native" visual manager for enabling themes in MFC controls
-		CMFCVisualManager::SetDefaultManager( pVisualManagerClass );
 
 		return true;
 	}

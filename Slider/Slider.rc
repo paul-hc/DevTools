@@ -8,7 +8,7 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "utl/UI/resource.h"
-#include "afxres.h"
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -89,11 +89,19 @@ IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 
 IDR_APP_TOOL_STRIP      BITMAP                  "res\\AppToolStrip.bmp"
 
+IDR_TOOLBAR_STANDARD    BITMAP                  "res\\ToolbarStandard.bmp"
+
+IDR_TOOLBAR_ALBUM       BITMAP                  "res\\ToolbarAlbum.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // PNG
 //
+
+IDR_TOOLBAR_STANDARD    PNG                     "res\\ToolbarStandard.png"
+
+IDR_TOOLBAR_ALBUM       PNG                     "res\\ToolbarAlbum.png"
 
 IDR_MAINFRAME           PNG                     "res\\Toolbar.png"
 
@@ -149,6 +157,47 @@ BEGIN
     BUTTON      ID_ORDER_BY_DIMENSION_DESC
 END
 
+IDR_TOOLBAR_STANDARD TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_OPEN_ALBUM_FOLDER
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_COPY
+    SEPARATOR
+    BUTTON      CM_REFRESH_CONTENT
+    BUTTON      CM_CLEAR_IMAGE_CACHE
+    SEPARATOR
+    BUTTON      CK_FULL_SCREEN
+    BUTTON      CK_SHOW_THUMB_VIEW
+    SEPARATOR
+    BUTTON      IDW_IMAGE_SCALING_COMBO
+    BUTTON      IDW_ZOOM_COMBO
+    BUTTON      ID_ZOOM_NORMAL_100
+    BUTTON      ID_ZOOM_IN
+    BUTTON      ID_ZOOM_OUT
+    SEPARATOR
+    BUTTON      IDW_SMOOTHING_MODE_CHECK
+END
+
+IDR_TOOLBAR_ALBUM TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_TOGGLE_NAVIG_PLAY
+    SEPARATOR
+    BUTTON      ID_NAVIG_SEEK_FIRST
+    BUTTON      ID_NAVIG_SEEK_PREV
+    BUTTON      ID_NAVIG_SEEK_NEXT
+    BUTTON      ID_NAVIG_SEEK_LAST
+    SEPARATOR
+    BUTTON      ID_TOGGLE_NAVIG_DIR_REV
+    BUTTON      ID_TOGGLE_NAVIG_DIR_FWD
+    SEPARATOR
+    BUTTON      ID_TOGGLE_NAVIG_WRAP_MODE
+    SEPARATOR
+    BUTTON      IDW_NAVIG_SLIDER_CTRL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -176,7 +225,10 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        POPUP "&Toolbars"
+        BEGIN
+            MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
+        END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
@@ -1070,6 +1122,8 @@ END
 STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "Slider"
+    IDR_TOOLBAR_STANDARD    "Standard"
+    IDR_TOOLBAR_ALBUM       "Album Navigation"
     IDR_ALBUMTYPE           "\nAlbum\nAlbum\nAlbums (*.sld;*.ias)\n.sld;.ias\nSliderAlbum.Document\nSlider Album Document"
     IDR_IMAGETYPE           "\nImage\nImage\nImages (*.bmp)\n.bmp\nSliderImage.Document\nSlider Image Document"
 END
@@ -1201,16 +1255,16 @@ BEGIN
                             "Scale image for best fit in the view\nBest Fit (All)"
     ID_TOGGLE_SCALING_FIT_WIDTH 
                             "Scale image to fit the entire width in the view\nFit Width"
-END
-
-STRINGTABLE
-BEGIN
     ID_TOGGLE_SCALING_FIT_HEIGHT 
                             "Scale image to fit the entire heigh in the view\nFit Height"
     ID_TOGGLE_SCALING_ACTUAL_SIZE 
                             "Display the image with the actual dimensions (using scroll bars)\nActual Size"
     ID_TOGGLE_SCALING_USE_ZOOM_PCT 
                             "Scale the image with the current zoom level (using scroll bars)\nUse Zoom Level"
+END
+
+STRINGTABLE
+BEGIN
     ID_ZOOM_NORMAL_100      "Zoom to actual image dimension (100%)\nZoom to 100%"
     ID_ZOOM_IN              "Increase zoom factor\nZoom In"
     ID_ZOOM_OUT             "Decrease zoom factor\nZoom Out"
@@ -1221,10 +1275,6 @@ BEGIN
     ID_TOGGLE_NAVIG_DIR_REV "Play in reverse direction\nReverse Direction"
     ID_TOGGLE_NAVIG_WRAP_MODE 
                             "Toggle wrap navigation mode (circular play)\nToggle Wrap Mode"
-END
-
-STRINGTABLE
-BEGIN
     ID_NAVIG_SEEK_PREV      "Move to previous image\nPrevious Image (Up/Left Arrow)"
     ID_NAVIG_SEEK_NEXT      "Move to next image\nNext Image (Down/Right Arrow)"
     ID_NAVIG_SEEK_FIRST     "Move to first image\nFirst Image (Home)"
@@ -1238,14 +1288,14 @@ BEGIN
     ID_FILE_EXTRACT_CATALOG "Extract the image catalog storage contents to a directory\nExtract Catalog Images"
     CK_FULL_SCREEN          "Toggle between normal and full screen mode\nToggle Full Screen (F11)"
     CM_TOGGLE_MAXIMIZE      "Toggle between maximize and restore modes\nMaximize/Restore"
-    ID_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
-    CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
-    ID_IMAGE_OPEN           "Opens the selected image file(s) as standalone images\nOpen Selected Images"
-    ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
 END
 
 STRINGTABLE
 BEGIN
+    ID_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
+    CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
+    ID_IMAGE_OPEN           "Opens the selected image file(s) as standalone images\nOpen Selected Images"
+    ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
     ID_IMAGE_DELETE         "Delete the file using shell operation\nDelete"
     ID_IMAGE_MOVE           "Move current image file to another folder\nMove File"
     ID_IMAGE_EXPLORE        "Open Windows Explorer and select the current image file name\nExplore Image"
@@ -1254,7 +1304,29 @@ BEGIN
     CM_DROP_MOVE_IMAGE      "Move and rename the dropped image file\nMove and Rename Image File"
     CM_DROP_COPY_IMAGE      "Copy and rename the dropped image file\nCopy and Rename Image File"
     CM_CANCEL_DROP          "Cancel the drop operation\nCancel Drop"
+END
+
+STRINGTABLE
+BEGIN
     CM_AUTO_DROP_DEFRAGMENT "Renames files in an auto-drop recipient to ensure contiguos numeric filename\nDefragment Image Files"
+    CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
+    CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
+    CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS 
+                            "Clear the Undo and Redo buffer\nClear Undo/Redo Buffer"
+    CM_REGENERATE_ALBUM     "Regenerates the files in the current album using the search specifiers' criteria\nRegenerate Album"
+    CM_IS_AUTO_DROP         "Toggle this album as auto-drop recipient (four digit numeric filenames only)\tAuto Drop Recipient"
+    CM_ARCHIVE_IMAGES       "Archive the image files in an album\nArchive Images"
+    CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
+    CM_CUSTOM_ORDER_REDO    "Redo the last drop reorder operation\nRedo Custom Order Operation"
+    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS 
+                            "Clear the file operation undo and redo buffer\nClear File Operation Undo Buffer"
+    CK_SAVE_CU_UNDO_REDO_BUFFER 
+                            "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
+    ID_FILE_OPEN_ALBUM_FOLDER 
+                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+D)"
+    ID_EDIT_ARCHIVE_PASSWORD 
+                            "Edit password in image archive storage\nEdit Password"
+    ID_ORDER_ORIGINAL       "Original Search Order"
 END
 
 STRINGTABLE
@@ -1275,6 +1347,10 @@ BEGIN
     IDS_PROMPT_REGENERATE_ALBUM "Do you want to regenerate the album?"
     IDS_PROMPT_CANT_CREATE_DEST_FOLDER 
                             "Cannot create destination folder:\n\n%s"
+END
+
+STRINGTABLE
+BEGIN
     IDS_PROMPT_CREATED_DEST_FOLDER 
                             "Destination folder successfully created!\n\n%s"
     IDS_PROMPT_COPYMOVEFILEOP "Do you want to %s the file %s operation?"
@@ -1282,33 +1358,15 @@ BEGIN
                             "An error occured while parsing the format: %s!\n\n%s"
     IDS_UNDOREDO_INVALID_FILE_PAIRS 
                             "Unable to %s the %d %s operations out of %d due to file inconsistencies!\n\nDo you still want to perform the operation?"
+    IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
+    IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
+    IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
 END
 
 STRINGTABLE
 BEGIN
     IDS_SLIDE_ALBUM_FILTER_SPEC "Slide Albums|*.sld"
     IDS_CATALOG_STG_FILTER_SPEC "Catalog Storage Albums|*.ias;*.cid;*.icf"
-END
-
-STRINGTABLE
-BEGIN
-    CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
-    CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
-    CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS 
-                            "Clear the Undo and Redo buffer\nClear Undo/Redo Buffer"
-    CM_REGENERATE_ALBUM     "Regenerates the files in the current album using the search specifiers' criteria\nRegenerate Album"
-    CM_IS_AUTO_DROP         "Toggle this album as auto-drop recipient (four digit numeric filenames only)\tAuto Drop Recipient"
-    CM_ARCHIVE_IMAGES       "Archive the image files in an album\nArchive Images"
-    CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
-    CM_CUSTOM_ORDER_REDO    "Redo the last drop reorder operation\nRedo Custom Order Operation"
-    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS 
-                            "Clear the file operation undo and redo buffer\nClear File Operation Undo Buffer"
-    CK_SAVE_CU_UNDO_REDO_BUFFER 
-                            "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
-    ID_FILE_OPEN_ALBUM_FOLDER 
-                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+D)"
-    ID_EDIT_ARCHIVE_PASSWORD 
-                            "Edit password in image archive storage\nEdit Password"
 END
 
 STRINGTABLE
@@ -1330,7 +1388,6 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_ORDER_ORIGINAL       "Original Search Order"
     ID_ORDER_CUSTOM         "Custom Order"
     ID_ORDER_RANDOM_SHUFFLE "Shuffle images in random order\nRandom Shuffle"
     ID_ORDER_RANDOM_SHUFFLE_SAME_SEED 
@@ -1354,13 +1411,6 @@ BEGIN
                             "Speed-up saving (skip image dimension evaluation)"
     ID_KEEP_IMAGE_DIM_EVALUATION_CMDLINK 
                             "Continue saving full image information"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
-    IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
-    IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
 END
 
 #endif    // English (United States) resources
@@ -1395,7 +1445,7 @@ END
 #include "afxribbon.rc"      // Ribbon and control bars
 #endif
 
-#endif
+#endif
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

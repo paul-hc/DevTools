@@ -24,7 +24,6 @@ template< typename BaseClass >
 CBaseApp<BaseClass>::CBaseApp( void )
 	: BaseClass()
 	, CAppTools()
-	, m_pVisualManagerClass( RUNTIME_CLASS( CMFCVisualManagerOffice2007 ) )
 	, m_isInteractive( true )
 	, m_lazyInitAppResources( false )
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
@@ -39,6 +38,15 @@ CBaseApp<BaseClass>::~CBaseApp()
 {
 	ASSERT_NULL( m_pLogger.get() );			// should've been released on ExitInstance
 	ASSERT_NULL( m_pSharedImageStore.get() );
+}
+
+template< typename BaseClass >
+void CBaseApp<BaseClass>::SetUseAppLook( app::AppLook appLook )
+{
+	if ( nullptr == m_pAppLook.get() )			// not yet explicitly set up?
+		m_pAppLook.reset( new CAppLook( appLook ) );
+	else
+		m_pAppLook->SetAppLook( appLook );
 }
 
 template< typename BaseClass >
@@ -81,6 +89,10 @@ template< typename BaseClass >
 int CBaseApp<BaseClass>::ExitInstance( void )
 {
 	m_pSharedResources.reset();					// release all shared resource
+
+	if ( m_pAppLook.get() != nullptr )
+		m_pAppLook->Save();
+
 	return BaseClass::ExitInstance();
 }
 
@@ -90,7 +102,9 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	ASSERT_NULL( m_pSharedResources.get() );		// init once
 
 	// init MFC control bars:
-	app::InitMfcControlBars( this, m_pVisualManagerClass );
+	if ( app::InitMfcControlBars( this ) )
+		if ( nullptr == m_pAppLook.get() )			// not yet explicitly set up?
+			m_pAppLook.reset( new CAppLook( app::Office_2007_Blue ) );
 
 	m_pSharedResources.reset( new utl::CResourcePool() );
 	m_pLogger.reset( new CLogger() );

@@ -758,6 +758,12 @@ BEGIN
     ID_SELECTED_COLOR_BUTTON "Selected color glyph"
 END
 
+STRINGTABLE
+BEGIN
+    ID_WINDOW_MANAGER       "&Windows..."
+    ID_VIEW_CUSTOMIZE       "Customize..."
+END
+
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 

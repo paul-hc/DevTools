@@ -175,6 +175,7 @@
     <ClInclude Include="AboutBox.h" />
     <ClInclude Include="AccelTable.h" />
     <ClInclude Include="AnimatedFrameComposer.h" />
+    <ClInclude Include="AppLook.h" />
     <ClInclude Include="BalloonMessageTip.h" />
     <ClInclude Include="BaseApp.h" />
     <ClInclude Include="BaseApp.hxx" />
@@ -183,6 +184,8 @@
     <ClInclude Include="BaseItemTooltipsCtrl.h" />
     <ClInclude Include="BaseItemTooltipsCtrl.hxx" />
     <ClInclude Include="BaseMainDialog.h" />
+    <ClInclude Include="BaseMainFrameWndEx.h" />
+    <ClInclude Include="BaseMainFrameWndEx.hxx" />
     <ClInclude Include="BaseSplitButton.h" />
     <ClInclude Include="BaseStockContentCtrl.h" />
     <ClInclude Include="BaseStockContentCtrl.hxx" />
@@ -381,6 +384,7 @@
     <ClCompile Include="AboutBox.cpp" />
     <ClCompile Include="AccelTable.cpp" />
     <ClCompile Include="AnimatedFrameComposer.cpp" />
+    <ClCompile Include="AppLook.cpp" />
     <ClCompile Include="BalloonMessageTip.cpp" />
     <ClCompile Include="BaseApp.cpp" />
     <ClCompile Include="BaseMainDialog.cpp" />

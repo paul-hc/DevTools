@@ -23,6 +23,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/BaseMainFrameWndEx.hxx"
+
 
 static UINT s_sbIndicators[] =
 {
@@ -32,10 +34,10 @@ static UINT s_sbIndicators[] =
 };
 
 
-IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWnd )
+IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWndEx )
 
 CMainFrame::CMainFrame( void )
-	: CMDIFrameWnd()
+	: TMDIFrameWndEx()
 	, m_pToolbar( new CMainToolbar() )
 	, m_messageClearTimer( this, MessageTimerId, 5000 )
 	, m_ddeEnqueuedTimer( this, QueueTimerId, 750 )
@@ -125,18 +127,18 @@ void CMainFrame::CleanupWindow( void )
 
 bool CMainFrame::CreateProgressCtrl( void )
 {
-	ASSERT_PTR( m_statusBar.m_hWnd );
+	ASSERT_PTR( m_oldStatusBar.m_hWnd );
 
-	int progBarIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
+	int progBarIndex = m_oldStatusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
 
 	SetProgressCaptionText( _T("") );
 
 	if ( ProgressBarWidth != -1 )
-		m_statusBar.SetPaneInfo( progBarIndex, IDW_SB_PROGRESS_BAR, SBPS_NOBORDERS, ProgressBarWidth );
+		m_oldStatusBar.SetPaneInfo( progBarIndex, IDW_SB_PROGRESS_BAR, SBPS_NOBORDERS, ProgressBarWidth );
 
-	m_statusBar.SetPaneText( progBarIndex, _T("") );
+	m_oldStatusBar.SetPaneText( progBarIndex, _T("") );
 
-	if ( !m_progressCtrl.Create( WS_CHILD | PBS_SMOOTH, CRect( 0, 0, 0, 0 ), &m_statusBar, IDW_SB_PROGRESS_BAR ) )
+	if ( !m_progressCtrl.Create( WS_CHILD | PBS_SMOOTH, CRect( 0, 0, 0, 0 ), &m_oldStatusBar, IDW_SB_PROGRESS_BAR ) )
 	{
 		TRACE( "Failed to create the progress bar\n" );
 		return false;
@@ -146,19 +148,19 @@ bool CMainFrame::CreateProgressCtrl( void )
 
 void CMainFrame::SetProgressCaptionText( const TCHAR* pCaption )
 {
-	int progCaptionIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_CAPTION );
+	int progCaptionIndex = m_oldStatusBar.CommandToIndex( IDW_SB_PROGRESS_CAPTION );
 
-	if ( m_statusBar.GetPaneText( progCaptionIndex ) != pCaption )
+	if ( m_oldStatusBar.GetPaneText( progCaptionIndex ) != pCaption )
 	{
 		CSize textExtent;
 		{
-			CClientDC clientDC( &m_statusBar );
-			CFont* orgFont = clientDC.SelectObject( m_statusBar.GetFont() );
+			CClientDC clientDC( &m_oldStatusBar );
+			CFont* orgFont = clientDC.SelectObject( m_oldStatusBar.GetFont() );
 			textExtent = ui::GetTextSize( &clientDC, pCaption );
 			clientDC.SelectObject( orgFont );
 		}
-		m_statusBar.SetPaneInfo( progCaptionIndex, IDW_SB_PROGRESS_CAPTION, SBPS_NOBORDERS, textExtent.cx /*- 5*/ );
-		m_statusBar.SetPaneText( progCaptionIndex, pCaption );
+		m_oldStatusBar.SetPaneInfo( progCaptionIndex, IDW_SB_PROGRESS_CAPTION, SBPS_NOBORDERS, textExtent.cx /*- 5*/ );
+		m_oldStatusBar.SetPaneText( progCaptionIndex, pCaption );
 	}
 }
 
@@ -262,7 +264,7 @@ BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINF
 	CPushRoutingFrame push( this );
 
 	return
-		CMDIFrameWnd::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||				// first allow the active view/doc to override central command handlers
+		__super::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||				// first allow the active view/doc to override central command handlers
 		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
 		m_pToolbar->HandleCmdMsg( cmdId, code, pExtra, pHandlerInfo );
 }
@@ -270,7 +272,7 @@ BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINF
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
+BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWndEx )
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_CLOSE()
@@ -299,9 +301,75 @@ END_MESSAGE_MAP()
 
 int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 {
-	if ( -1 == CMDIFrameWnd::OnCreate( pCS ) )
+	if ( -1 == __super::OnCreate( pCS ) )
 		return -1;
 
+	if ( !m_menuBar.Create( this ) )
+	{
+		TRACE0("Failed to create menubar\n");
+		return -1;      // fail to create
+	}
+
+	m_menuBar.SetPaneStyle( m_menuBar.GetPaneStyle() | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY );
+
+	// prevent the menu bar from taking the focus on activation
+	CMFCPopupMenu::SetForceMenuFocus( FALSE );
+
+	if ( !m_standardToolBar.CreateEx( this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC ) ||
+		 !m_standardToolBar.LoadToolBar( IDR_TOOLBAR_STANDARD ) )
+	{
+		TRACE0("Failed to create toolbar\n");
+		return -1;      // fail to create
+	}
+
+	m_standardToolBar.SetWindowText( str::Load( IDR_TOOLBAR_STANDARD ).c_str() );
+
+	CString customizeLabel;
+	VERIFY( customizeLabel.LoadString( ID_VIEW_CUSTOMIZE ) );
+	m_standardToolBar.EnableCustomizeButton( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel );
+
+	// Allow user-defined toolbars operations:
+	InitUserToolbars( nullptr, FirstUserToolBarId, LastUserToolBarId );
+
+	if ( !m_statusBar.Create( this ) )
+	{
+		TRACE0("Failed to create status bar\n");
+		return -1;      // fail to create
+	}
+
+	m_statusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) );
+
+	// TODO: Delete these five lines if you don't want the toolbar and menubar to be dockable
+	m_menuBar.EnableDocking( CBRS_ALIGN_ANY );
+	m_standardToolBar.EnableDocking( CBRS_ALIGN_ANY );
+	EnableDocking( CBRS_ALIGN_ANY );
+	DockPane( &m_menuBar );
+	DockPane( &m_standardToolBar );
+	//DockPaneLeftOf( &m_wndToolbarEdit /*left*/, &m_wndToolbarBuild /*right*/ );
+
+
+	// enable Visual Studio 2005 style docking window behavior
+	CDockingManager::SetDockingMode( DT_SMART );
+
+	// enable Visual Studio 2005 style docking window auto-hide behavior
+	EnableAutoHidePanes( CBRS_ALIGN_ANY );
+
+	// set the visual manager and style based on persisted value
+	//TODO: OnApplicationLook( theApp.m_nAppLook );
+
+	// Enable enhanced windows management dialog
+	EnableWindowsDialog( ID_WINDOW_MANAGER, ID_WINDOW_MANAGER, TRUE );
+
+	// Enable toolbar and docking window menu replacement
+	EnablePaneMenu( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel, ID_VIEW_TOOLBAR );
+
+	// enable quick (Alt+drag) toolbar customization
+	CMFCToolBar::EnableQuickCustomization();
+
+
+
+
+	/*** OLD Toolbars ***/
 	ASSERT_PTR( pCS->hMenu );
 	ui::SetMenuImages( CMenu::FromHandle( pCS->hMenu ) );			// m_hMenuDefault not initialized yet, but will
 
@@ -320,7 +388,7 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 		return -1;	  // fail to create
 	}
 
-	if ( !m_statusBar.Create( this ) || !m_statusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
+	if ( !m_oldStatusBar.Create( this ) || !m_oldStatusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
 	{
 		TRACE( "Failed to create status bar\n" );
 		return -1;	  // fail to create
@@ -329,39 +397,39 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 
 	// TODO: delete these three lines if you don't want the toolbar to be dockable
 	m_pToolbar->EnableDocking( CBRS_ALIGN_ANY );
-	EnableDocking( CBRS_ALIGN_ANY );
-	DockControlBar( m_pToolbar.get() );
+//	EnableDocking( CBRS_ALIGN_ANY );
+//	DockControlBar( m_pToolbar.get() );
 	return 0;
 }
 
 void CMainFrame::OnDestroy( void )
 {
 	CleanupWindow();
-	CMDIFrameWnd::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CMainFrame::OnClose( void )
 {
 	CWorkspace::Instance().FetchSettings();
-	CMDIFrameWnd::OnClose();
+	__super::OnClose();
 }
 
 void CMainFrame::OnGetMinMaxInfo( MINMAXINFO* mmi )
 {
 	if ( !CWorkspace::Instance().IsFullScreen() )
-		CMDIFrameWnd::OnGetMinMaxInfo( mmi );
+		__super::OnGetMinMaxInfo( mmi );
 }
 
 void CMainFrame::OnSize( UINT sizeType, int cx, int cy )
 {
-	CMDIFrameWnd::OnSize( sizeType, cx, cy );
+	__super::OnSize( sizeType, cx, cy );
 
 	if ( m_progressCtrl.m_hWnd != nullptr )
 	{	// move the progress bar on top of the associated statusbar item
 		CRect ctrlRect;
-		int progBarIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
+		int progBarIndex = m_oldStatusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
 
-		m_statusBar.GetItemRect( progBarIndex, &ctrlRect );
+		m_oldStatusBar.GetItemRect( progBarIndex, &ctrlRect );
 		m_progressCtrl.MoveWindow( &ctrlRect );
 	}
 }
@@ -369,19 +437,19 @@ void CMainFrame::OnSize( UINT sizeType, int cx, int cy )
 void CMainFrame::OnWindowPosChanging( WINDOWPOS* wndPos )
 {
 	if ( !CWorkspace::Instance().IsFullScreen() )
-		CMDIFrameWnd::OnWindowPosChanging( wndPos );
+		__super::OnWindowPosChanging( wndPos );
 }
 
 void CMainFrame::OnShowWindow( BOOL bShow, UINT nStatus )
 {
 	// Hooked just for debugging...
-	CMDIFrameWnd::OnShowWindow( bShow, nStatus );
+	__super::OnShowWindow( bShow, nStatus );
 }
 
 void CMainFrame::OnDropFiles( HDROP hDropInfo )
 {
 	SetForegroundWindow();
-	CMDIFrameWnd::OnDropFiles( hDropInfo );
+	__super::OnDropFiles( hDropInfo );
 }
 
 void CMainFrame::OnTimer( UINT_PTR eventId )
@@ -405,7 +473,7 @@ void CMainFrame::OnTimer( UINT_PTR eventId )
 	else if ( m_progBarResetTimer.IsHit( eventId ) )
 		DoClearProgressCtrl();
 	else
-		CMDIFrameWnd::OnTimer( eventId );
+		__super::OnTimer( eventId );
 }
 
 void CMainFrame::On_MdiClose( void )

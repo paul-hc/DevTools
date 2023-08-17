@@ -341,9 +341,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\userimages.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\SliderDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
@@ -351,9 +348,6 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\Toolbar256.bmp">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\AlbumDoc.ico">
@@ -371,12 +365,23 @@
     <Image Include="res\Toolbar.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\ToolbarStandard.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarAlbum.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarAlbum.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarStandard.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Slider.rc2">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Doc Templates.xls" />
     <None Include="Slider.reg" />
   </ItemGroup>
   <ItemGroup>

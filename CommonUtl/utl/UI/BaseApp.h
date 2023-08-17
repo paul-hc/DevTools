@@ -8,6 +8,7 @@
 
 
 #include "utl/AppTools.h"
+#include "AppLook.h"
 #include "AccelTable.h"
 #include "ResourcePool.h"
 
@@ -28,7 +29,7 @@ protected:
 	// call just before InitInstance:
 	void StoreAppNameSuffix( const std::tstring& appNameSuffix ) { m_appNameSuffix = appNameSuffix; }
 	void StoreProfileSuffix( const std::tstring& profileSuffix ) { m_profileSuffix = profileSuffix; }
-	void StoreVisualManagerClass( CRuntimeClass* pVisualManagerClass ) { m_pVisualManagerClass = pVisualManagerClass; }
+	void SetUseAppLook( app::AppLook appLook );			// by default uses app::Office_2007_Blue
 
 	bool IsInitAppResources( void ) const { return m_pSharedResources.get() != nullptr; }
 	void SetLazyInitAppResources( void ) { m_lazyInitAppResources = true; }			// for extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe
@@ -68,9 +69,9 @@ private:
 	std::auto_ptr<utl::CResourcePool> m_pSharedResources;		// application shared resources, released on ExitInstance()
 	std::auto_ptr<CLogger> m_pLogger;
 	std::auto_ptr<CImageStore> m_pSharedImageStore;				// managed lifetime of shared resources (lazy initialized)
+	std::auto_ptr<CAppLook> m_pAppLook;							// visual manager singleton, for enabling themes in MFC controls
 	CAccelTable m_appAccel;
 	std::tstring m_appNameSuffix, m_profileSuffix;				// could be set to "_v2" when required
-	CRuntimeClass* m_pVisualManagerClass;						// for creating the CMFCVisualManager singleton
 	bool m_isInteractive;										// true by default; for apps with a message loop it starts false until application becomes idle for the first time
 	bool m_lazyInitAppResources;								// true for extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe
 protected:
@@ -98,7 +99,7 @@ protected:
 namespace app
 {
 	void InitUtlBase( void );
-	bool InitMfcControlBars( CWinApp* pWinApp, CRuntimeClass* pVisualManagerClass );	// init MFC control bars
+	bool InitMfcControlBars( CWinApp* pWinApp );		// init MFC control bars: singletons and load standard UTL_UI images
 
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos );
 	UINT ToMsgBoxFlags( app::MsgType msgType );

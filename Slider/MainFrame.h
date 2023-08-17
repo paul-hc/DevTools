@@ -4,14 +4,17 @@
 
 #include "utl/UI/InternalChange.h"
 #include "utl/UI/WindowTimer.h"
+#include "utl/UI/BaseMainFrameWndEx.h"
 
 
 interface IImageView;
 class CBaseZoomView;
 class CMainToolbar;
 
+typedef CBaseMainFrameWndEx<CMDIFrameWndEx> TMDIFrameWndEx;
 
-class CMainFrame : public CMDIFrameWnd
+
+class CMainFrame : public TMDIFrameWndEx
 {
 	DECLARE_DYNAMIC( CMainFrame )
 public:
@@ -24,7 +27,7 @@ public:
 	bool IsMdiRestored( void ) const;			// current document not maximized?
 
 	CMainToolbar* GetToolbar( void ) { return m_pToolbar.get(); }
-	CStatusBar* GetStatusBar( void ) { return &m_statusBar; }
+	CStatusBar* GetStatusBar( void ) { return &m_oldStatusBar; }
 	CProgressCtrl* GetProgressCtrl( void ) { return &m_progressCtrl; }
 
 	// status bar temporary messages
@@ -50,15 +53,21 @@ private:
 	void SetProgressCaptionText( const TCHAR* pCaption );
 	bool DoClearProgressCtrl( void );
 private:
-	std::auto_ptr<CMainToolbar> m_pToolbar;
-	CStatusBar m_statusBar;
-	CProgressCtrl m_progressCtrl;
+	CMFCMenuBar	m_menuBar;
+	CMFCToolBar m_standardToolBar;
+	CMFCToolBar m_albumToolBar;
+	CMFCStatusBar m_statusBar;
+
+		std::auto_ptr<CMainToolbar> m_pToolbar;
+		CStatusBar m_oldStatusBar;
+		CProgressCtrl m_progressCtrl;
 
 	CWindowTimer m_messageClearTimer;
 	CWindowTimer m_ddeEnqueuedTimer;				// monitors enqueued image paths
 	CWindowTimer m_progBarResetTimer;
 	CInternalChange m_inProgress;
 
+	enum { MaxUserToolbars = 10, FirstUserToolBarId = AFX_IDW_CONTROLBAR_FIRST + 40, LastUserToolBarId = FirstUserToolBarId + MaxUserToolbars - 1 };
 	enum Metrics { ProgressBarWidth = 150 };
 	enum TimerIds { MessageTimerId = 2000, QueueTimerId, ProgressResetTimerId };
 
