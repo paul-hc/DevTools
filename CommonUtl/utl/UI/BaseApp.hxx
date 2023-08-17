@@ -215,6 +215,16 @@ BOOL CBaseApp<BaseClass>::PreTranslateMessage( MSG* pMsg )
 }
 
 template< typename BaseClass >
+BOOL CBaseApp<BaseClass>::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( m_pAppLook.get() != nullptr )
+		if ( m_pAppLook->OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) )
+			return TRUE;
+
+	return BaseClass::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo );
+}
+
+template< typename BaseClass >
 BOOL CBaseApp<BaseClass>::OnIdle( LONG count )
 {
 	if ( !m_isInteractive )

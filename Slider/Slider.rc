@@ -230,6 +230,22 @@ BEGIN
             MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        POPUP "&Application Look"
+        BEGIN
+            MENUITEM "Windows &2000",               ID_VIEW_APPLOOK_WINDOWS_2000
+            MENUITEM "Office &XP",                  ID_VIEW_APPLOOK_OFFICE_XP
+            MENUITEM "&Windows XP",                 ID_VIEW_APPLOOK_WINDOWS_XP
+            MENUITEM "Office 200&3",                ID_VIEW_APPLOOK_OFFICE_2003
+            MENUITEM "Visual Studio 200&5",         ID_VIEW_APPLOOK_VS_2005
+            MENUITEM "Visual Studio 200&8",         ID_VIEW_APPLOOK_VS_2008
+            MENUITEM SEPARATOR
+            MENUITEM "Office 2007\t&Blue Style",    ID_VIEW_APPLOOK_OFFICE_2007_BLUE
+            MENUITEM "Office 2007\tB&lack Style",   ID_VIEW_APPLOOK_OFFICE_2007_BLACK
+            MENUITEM "Office 2007\t&Silver Style",  ID_VIEW_APPLOOK_OFFICE_2007_SILVER
+            MENUITEM "Office 2007\t&Aqua Style",    ID_VIEW_APPLOOK_OFFICE_2007_AQUA
+            MENUITEM SEPARATOR
+            MENUITEM "Windows 7",                   ID_VIEW_APPLOOK_WINDOWS_7
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
         MENUITEM SEPARATOR

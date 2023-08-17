@@ -85,6 +85,7 @@ public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual BOOL OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	virtual BOOL OnIdle( LONG count );
 protected:
 	afx_msg void OnAppAbout( void );
