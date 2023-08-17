@@ -318,22 +318,32 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	if ( !m_standardToolBar.CreateEx( this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC ) ||
 		 !m_standardToolBar.LoadToolBar( IDR_TOOLBAR_STANDARD ) )
 	{
-		TRACE0("Failed to create toolbar\n");
+		TRACE( "Failed to create toolbar\n" );
 		return -1;      // fail to create
 	}
 
+	if ( !m_albumToolBar.Create( this, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE | CBRS_SIZE_DYNAMIC | CBRS_GRIPPER | CBRS_BORDER_3D, IDR_TOOLBAR_ALBUM ) ||
+		 !m_albumToolBar.LoadToolBar( IDR_TOOLBAR_ALBUM ) )
+	{
+		TRACE( "Failed to create album toolbar\n" );
+		return FALSE;      // fail to create
+	}
+
 	m_standardToolBar.SetWindowText( str::Load( IDR_TOOLBAR_STANDARD ).c_str() );
+	m_albumToolBar.SetWindowText( str::Load( IDR_TOOLBAR_ALBUM ).c_str() );
 
 	CString customizeLabel;
 	VERIFY( customizeLabel.LoadString( ID_VIEW_CUSTOMIZE ) );
+
 	m_standardToolBar.EnableCustomizeButton( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel );
+	m_albumToolBar.EnableCustomizeButton( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel );
 
 	// Allow user-defined toolbars operations:
 	InitUserToolbars( nullptr, FirstUserToolBarId, LastUserToolBarId );
 
 	if ( !m_statusBar.Create( this ) )
 	{
-		TRACE0("Failed to create status bar\n");
+		TRACE( "Failed to create status bar\n" );
 		return -1;      // fail to create
 	}
 
@@ -342,10 +352,12 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	// TODO: Delete these five lines if you don't want the toolbar and menubar to be dockable
 	m_menuBar.EnableDocking( CBRS_ALIGN_ANY );
 	m_standardToolBar.EnableDocking( CBRS_ALIGN_ANY );
+	m_albumToolBar.EnableDocking( CBRS_ALIGN_ANY );
 	EnableDocking( CBRS_ALIGN_ANY );
+
 	DockPane( &m_menuBar );
-	DockPane( &m_standardToolBar );
-	//DockPaneLeftOf( &m_wndToolbarEdit /*left*/, &m_wndToolbarBuild /*right*/ );
+	DockPane( &m_albumToolBar );
+	DockPaneLeftOf( &m_standardToolBar /*left*/, &m_albumToolBar /*right*/ );
 
 
 	// enable Visual Studio 2005 style docking window behavior
