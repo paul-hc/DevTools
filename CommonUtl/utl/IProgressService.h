@@ -49,7 +49,7 @@ namespace utl
 
 		// implemented
 		void Advance( ptrdiff_t step = 1 ) { SetPos( GetPos() + step ); }
-		void GotoEnd( void ) { SetPos( GetMaxPos() ); }
+		void SkipToMax( void ) { SetPos( GetMaxPos() ); }
 	};
 }
 

@@ -14,10 +14,10 @@ class CStatusProgressService : public utl::IStatusProgressService
 {
 	friend class CDelayedHideImpl;
 public:
-	CStatusProgressService( size_t maxPos, size_t pos = 0 );
+	CStatusProgressService( size_t maxPos = 0, size_t pos = 0 );	// if maxPos=0, progress is not activated
 	~CStatusProgressService();
 
-	static void InitStatusBarInfo( CMFCStatusBar* pStatusBar, int progPaneIndex, int labelPaneIndex = -1 );		// called after status bar creation in main frame creation
+	void StartProgress( size_t maxPos, size_t pos = 0 );			// lazy initialization, when using the default constructor
 
 	enum { DefaultHideDelayMs = 3000 };
 
@@ -25,7 +25,7 @@ public:
 	void SetAutoHide( bool autoHide = true ) { m_autoHide = autoHide; }
 	void SetAutoWrap( bool autoWrap = true ) { m_autoWrap = autoWrap; }
 	void SetHideElapseMs( UINT hideDelayMs = DefaultHideDelayMs ) { m_hideDelayMs = hideDelayMs; }
-	void SetDisplayText( bool displayText = true );		// inside the progress bar
+	void SetDisplayText( bool displayText = true );			// inside the progress bar
 
 	// utl::IStatusProgressService interface
 	virtual bool SetLabelText( const std::tstring& text, COLORREF labelTextColor = CLR_DEFAULT, COLORREF labelBkColor = CLR_DEFAULT ) implement;
@@ -36,12 +36,15 @@ public:
 	// progress
 	bool IsActive( void ) const { return m_isActive; }
 	bool Deactivate( void );	// stop progress
+
+	static void InitStatusBarInfo( CMFCStatusBar* pStatusBar, int progPaneIndex, int labelPaneIndex = -1 );		// called after status bar creation in main frame creation
 private:
 	bool Activate( void );		// start progress
 
 	static bool IsInit( void );
 	static bool IsPaneProgressOn( void );
 	static bool HideProgressPanes( void );
+	static void HideProgressPanesImpl( void );
 private:
 	size_t m_maxPos;
 

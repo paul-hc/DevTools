@@ -38,7 +38,7 @@ int CStatusProgressService::s_labelPaneIndex = -1;
 int CStatusProgressService::s_progressPaneWidth = 0;
 
 CStatusProgressService::CStatusProgressService( size_t maxPos, size_t pos /*= 0*/ )
-	: m_maxPos( maxPos )
+	: m_maxPos( 0 )
 	, m_autoHide( true )
 	, m_autoWrap( false )
 	, m_isActive( false )
@@ -46,8 +46,8 @@ CStatusProgressService::CStatusProgressService( size_t maxPos, size_t pos /*= 0*
 {
 	REQUIRE( IsInit() );		// CStatusProgressService::InitStatusBarInfo() must be called before using CStatusProgressService class!
 
-	if ( Activate() )
-		SetPos( pos );
+	if ( maxPos != 0 )
+		StartProgress( maxPos, pos );
 }
 
 CStatusProgressService::~CStatusProgressService()
@@ -56,24 +56,15 @@ CStatusProgressService::~CStatusProgressService()
 		Deactivate();
 }
 
-void CStatusProgressService::InitStatusBarInfo( CMFCStatusBar* pStatusBar, int progPaneIndex, int labelPaneIndex /*= -1*/ )
+void CStatusProgressService::StartProgress( size_t maxPos, size_t pos /*= 0*/ )
 {
-	s_pStatusBar = pStatusBar;
-	s_progressPaneIndex = progPaneIndex;
-	s_labelPaneIndex = labelPaneIndex;
+	REQUIRE( maxPos != 0 );
+	REQUIRE( IsInit() );
 
-	if ( s_pStatusBar != nullptr )
-	{
-		ENSURE( s_pStatusBar->GetItemID( s_progressPaneIndex ) != 0 );
-		ENSURE( -1 == s_labelPaneIndex || s_pStatusBar->GetItemID( s_labelPaneIndex ) != 0 );
+	m_maxPos = maxPos;
 
-		// note: at this early stage, s_pStatusBar->GetPaneWidth( s_progressPaneIndex ) returns 0 since the client rect is empty,
-		// so we need store the pPaneInfo->cxText as pane width
-		const CMFCStatusBarPaneInfo* pPaneInfo = mfc::StatusBar_GetPaneInfo( s_pStatusBar, s_progressPaneIndex );
-		s_progressPaneWidth = pPaneInfo->cxText;
-
-		HideProgressPanes();		// hide panes since progress is off initially
-	}
+	if ( Activate() )
+		SetPos( pos );
 }
 
 bool CStatusProgressService::Activate( void )
@@ -172,6 +163,27 @@ void CStatusProgressService::SetDisplayText( bool displayText /*= true*/ )
 	}
 }
 
+
+void CStatusProgressService::InitStatusBarInfo( CMFCStatusBar* pStatusBar, int progPaneIndex, int labelPaneIndex /*= -1*/ )
+{
+	s_pStatusBar = pStatusBar;
+	s_progressPaneIndex = progPaneIndex;
+	s_labelPaneIndex = labelPaneIndex;
+
+	if ( s_pStatusBar != nullptr )
+	{
+		ENSURE( s_pStatusBar->GetItemID( s_progressPaneIndex ) != 0 );
+		ENSURE( -1 == s_labelPaneIndex || s_pStatusBar->GetItemID( s_labelPaneIndex ) != 0 );
+
+		// note: at this early stage, s_pStatusBar->GetPaneWidth( s_progressPaneIndex ) returns 0 since the client rect is empty,
+		// so we need store the pPaneInfo->cxText as pane width
+		const CMFCStatusBarPaneInfo* pPaneInfo = mfc::StatusBar_GetPaneInfo( s_pStatusBar, s_progressPaneIndex );
+		s_progressPaneWidth = pPaneInfo->cxText;
+
+		HideProgressPanesImpl();		// hide panes since progress is off initially
+	}
+}
+
 bool CStatusProgressService::IsInit( void )
 {
 	return s_pStatusBar->GetSafeHwnd() != nullptr;
@@ -191,6 +203,14 @@ bool CStatusProgressService::HideProgressPanes( void )
 	if ( nullptr == s_pStatusBar->GetSafeHwnd() || !IsPaneProgressOn() )
 		return false;		// destroyed in the meantime or hidden
 
+	HideProgressPanesImpl();
+	return true;
+}
+
+void CStatusProgressService::HideProgressPanesImpl( void )
+{
+	ASSERT_PTR( s_pStatusBar->GetSafeHwnd() );
+
 	s_pStatusBar->EnablePaneProgressBar( s_progressPaneIndex, -1 );		// switch it off
 	s_pStatusBar->SetPaneWidth( s_progressPaneIndex, 0 );
 
@@ -199,8 +219,6 @@ bool CStatusProgressService::HideProgressPanes( void )
 		s_pStatusBar->SetPaneText( s_labelPaneIndex, nullptr );
 		s_pStatusBar->SetPaneWidth( s_labelPaneIndex, 0 );
 	}
-
-	return true;
 }
 
 
