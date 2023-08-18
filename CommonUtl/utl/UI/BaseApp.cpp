@@ -24,7 +24,7 @@
 #include <afxvisualmanageroffice2007.h>
 #include <afxdockingmanager.h>
 
-#if _MFC_VER > 0x0900		// MFC version 9.00 or less
+#if _MFC_VER > 0x0900		// newer MFC version?
 	#include <afxvisualmanagerwindows7.h>
 	#include <afxvisualmanagervs2008.h>
 #endif
@@ -46,7 +46,7 @@ namespace reg
 
 	const TCHAR* GetEntry_AppLook( void )
 	{
-	#if _MFC_VER > 0x0900
+	#if _MFC_VER > 0x0900		// newer MFC version?
 		return entry_AppLook;
 	#else	// MFC version 9.00 or less
 		return entry_AppLook_MFC90;
@@ -108,19 +108,19 @@ void CAppLook::SetAppLook( app::AppLook appLook )
 			CDockingManager::SetDockingMode( DT_SMART );
 			break;
 		case app::VS_2008:
-		#if _MFC_VER > 0x0900		// MFC version 9.00 or less
+		#if _MFC_VER > 0x0900		// newer MFC version?
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerVS2008 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
 		#else
-			ASSERT( false );			// theme incompatible with MFC version
+			ASSERT( false );		// theme incompatible with MFC version
 		#endif
 			break;
 		case app::Windows_7:
-		#if _MFC_VER > 0x0900		// MFC version 9.00 or less
+		#if _MFC_VER > 0x0900		// newer MFC version?
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows7 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
 		#else
-			ASSERT( false );			// theme incompatible with MFC version
+			ASSERT( false );		// theme incompatible with MFC version
 		#endif
 			break;
 		default:
