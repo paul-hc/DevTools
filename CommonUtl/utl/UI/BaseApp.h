@@ -114,6 +114,7 @@ public:
 	void SetAppLook( app::AppLook appLook );
 	void Save( void );
 
+	static app::AppLook GetCompatibleTheme( app::AppLook appLook );
 	static app::AppLook FromId( UINT cmdId );
 private:
 	persist app::AppLook m_appLook;

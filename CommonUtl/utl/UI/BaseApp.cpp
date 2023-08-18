@@ -42,6 +42,16 @@ namespace reg
 {
 	static const TCHAR section_Settings[] = _T("Settings");
 	static const TCHAR entry_AppLook[] = _T("AppLook");
+	static const TCHAR entry_AppLook_MFC90[] = _T("AppLook-MFC 9.0");
+
+	const TCHAR* GetEntry_AppLook( void )
+	{
+	#if _MFC_VER > 0x0900
+		return entry_AppLook;
+	#else	// MFC version 9.00 or less
+		return entry_AppLook_MFC90;
+	#endif
+	}
 }
 
 
@@ -59,7 +69,7 @@ namespace nosy
 
 CAppLook::CAppLook( app::AppLook appLook )
 	: CCmdTarget()
-	, m_appLook( static_cast<app::AppLook>( AfxGetApp()->GetProfileInt( reg::section_Settings, reg::entry_AppLook, appLook ) ) )
+	, m_appLook( static_cast<app::AppLook>( AfxGetApp()->GetProfileInt( reg::section_Settings, reg::GetEntry_AppLook(), appLook ) ) )
 {
 	SetAppLook( m_appLook );
 }
@@ -70,12 +80,12 @@ CAppLook::~CAppLook()
 
 void CAppLook::Save( void )
 {
-	AfxGetApp()->WriteProfileInt( reg::section_Settings, reg::entry_AppLook, m_appLook );
+	AfxGetApp()->WriteProfileInt( reg::section_Settings, reg::GetEntry_AppLook(), m_appLook );
 }
 
 void CAppLook::SetAppLook( app::AppLook appLook )
 {
-	m_appLook = appLook;
+	m_appLook = GetCompatibleTheme( appLook );
 
 	switch ( m_appLook )
 	{
@@ -101,20 +111,18 @@ void CAppLook::SetAppLook( app::AppLook appLook )
 		#if _MFC_VER > 0x0900		// MFC version 9.00 or less
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerVS2008 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
-			break;
 		#else
-			SetAppLook( app::VS_2005 );
-			return;
+			ASSERT( false );			// theme incompatible with MFC version
 		#endif
+			break;
 		case app::Windows_7:
 		#if _MFC_VER > 0x0900		// MFC version 9.00 or less
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows7 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
-			break;
 		#else
-			SetAppLook( app::Windows_XP );
-			return;
+			ASSERT( false );			// theme incompatible with MFC version
 		#endif
+			break;
 		default:
 			switch ( m_appLook )
 			{
@@ -140,22 +148,40 @@ void CAppLook::SetAppLook( app::AppLook appLook )
 		AfxGetMainWnd()->RedrawWindow( nullptr, nullptr, RDW_ALLCHILDREN | RDW_INVALIDATE | RDW_UPDATENOW | RDW_FRAME | RDW_ERASE );
 }
 
+app::AppLook CAppLook::GetCompatibleTheme( app::AppLook appLook )
+{
+#if _MFC_VER <= 0x0900		// MFC version 9.00 or less?
+	// make substitutions for themes not available in older MFC
+	switch ( appLook )
+	{
+		case app::VS_2008:
+			appLook = app::VS_2005;
+			break;
+		case app::Windows_7:
+			appLook = app::Windows_XP;
+			break;
+	}
+#endif
+	return appLook;
+}
+
 app::AppLook CAppLook::FromId( UINT cmdId )
 {
 	switch ( cmdId )
 	{
-		case ID_VIEW_APPLOOK_WINDOWS_2000:			return app::Windows_2000;
-		case ID_VIEW_APPLOOK_OFFICE_XP:				return app::Office_XP;
-		case ID_VIEW_APPLOOK_WINDOWS_XP:			return app::Windows_XP;
-		case ID_VIEW_APPLOOK_OFFICE_2003:			return app::Office_2003;
-		case ID_VIEW_APPLOOK_VS_2005:				return app::VS_2005;
-		case ID_VIEW_APPLOOK_VS_2008:				return app::VS_2008;
-		case ID_VIEW_APPLOOK_WINDOWS_7:				return app::Windows_7;
-		default: ASSERT( false );
-		case ID_VIEW_APPLOOK_OFFICE_2007_BLUE:		return app::Office_2007_Blue;
-		case ID_VIEW_APPLOOK_OFFICE_2007_BLACK:		return app::Office_2007_Black;
-		case ID_VIEW_APPLOOK_OFFICE_2007_SILVER:	return app::Office_2007_Silver;
-		case ID_VIEW_APPLOOK_OFFICE_2007_AQUA:		return app::Office_2007_Aqua;
+		case ID_APPLOOK_WINDOWS_2000:		return app::Windows_2000;
+		case ID_APPLOOK_OFFICE_XP:			return app::Office_XP;
+		case ID_APPLOOK_WINDOWS_XP:			return app::Windows_XP;
+		case ID_APPLOOK_OFFICE_2003:		return app::Office_2003;
+		case ID_APPLOOK_VS_2005:			return app::VS_2005;
+		case ID_APPLOOK_VS_2008:			return app::VS_2008;
+		case ID_APPLOOK_WINDOWS_7:			return app::Windows_7;
+		default:
+			ASSERT( false );
+		case ID_APPLOOK_OFFICE_2007_BLUE:	return app::Office_2007_Blue;
+		case ID_APPLOOK_OFFICE_2007_BLACK:	return app::Office_2007_Black;
+		case ID_APPLOOK_OFFICE_2007_SILVER:	return app::Office_2007_Silver;
+		case ID_APPLOOK_OFFICE_2007_AQUA:	return app::Office_2007_Aqua;
 	}
 }
 
@@ -163,8 +189,8 @@ app::AppLook CAppLook::FromId( UINT cmdId )
 // command handlers
 
 BEGIN_MESSAGE_MAP( CAppLook, CCmdTarget )
-	ON_COMMAND_RANGE( ID_VIEW_APPLOOK_WINDOWS_2000, ID_VIEW_APPLOOK_WINDOWS_7, OnApplicationLook )
-	ON_UPDATE_COMMAND_UI_RANGE( ID_VIEW_APPLOOK_WINDOWS_2000, ID_VIEW_APPLOOK_WINDOWS_7, OnUpdateApplicationLook )
+	ON_COMMAND_RANGE( ID_APPLOOK_WINDOWS_2000, ID_APPLOOK_WINDOWS_7, OnApplicationLook )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_APPLOOK_WINDOWS_2000, ID_APPLOOK_WINDOWS_7, OnUpdateApplicationLook )
 END_MESSAGE_MAP()
 
 void CAppLook::OnApplicationLook( UINT cmdId )
@@ -178,12 +204,16 @@ void CAppLook::OnApplicationLook( UINT cmdId )
 void CAppLook::OnUpdateApplicationLook( CCmdUI* pCmdUI )
 {
 	app::AppLook appLook = FromId( pCmdUI->m_nID );
-
-	pCmdUI->SetRadio( m_appLook == appLook );
+	bool enable = true;
 
 #if _MFC_VER <= 0x0900		// MFC version 9.00 or less
-	pCmdUI->Enable( m_appLook != app::VS_2008 && m_appLook != app::Windows_7 );
+	if ( app::VS_2008 == appLook || app::Windows_7 == appLook )
+		enable = false;		// visual managers not available in MFC 9.0
 #endif
+
+	pCmdUI->Enable( enable );
+	pCmdUI->SetRadio( m_appLook == appLook );
+
 }
 
 
