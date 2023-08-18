@@ -11,7 +11,7 @@
 #include "resource.h"
 #include "utl/UI/BaseZoomView.h"
 #include "utl/UI/MenuUtilities.h"
-#include "utl/UI/StatusBarProgressService.h"
+#include "utl/UI/StatusProgressService.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
@@ -359,7 +359,7 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	m_statusBar.SetPaneWidth( Status_Progress, 100 );
 	m_statusBar.EnablePaneDoubleClick();
 
-	CStatusBarProgressService::InitStatusBarInfo( &m_statusBar, Status_Progress, Status_ProgressLabel );		// initialize once the status progress service
+	CStatusProgressService::InitStatusBarInfo( &m_statusBar, Status_Progress, Status_ProgressLabel );		// initialize once the status progress service
 
 	// TODO: Delete these five lines if you don't want the toolbar and menubar to be dockable
 	m_menuBar.EnableDocking( CBRS_ALIGN_ANY );

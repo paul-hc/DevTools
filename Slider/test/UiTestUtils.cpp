@@ -3,7 +3,7 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "UiTestUtils.h"
-#include "utl/UI/StatusBarProgressService.h"
+#include "utl/UI/StatusProgressService.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,11 +18,11 @@ namespace ut
 		: CWindowHook( true )
 		, m_maxSeconds( maxSeconds )
 		, m_progressTimer( pWnd, AdvanceTimer, 50 )
-		, m_pProgressSvc( new CStatusBarProgressService( 50 ) )
+		, m_pProgressSvc( new CStatusProgressService( 50 ) )
 	{
 		m_pProgressSvc->SetAutoWrap();
 		m_pProgressSvc->SetDisplayText();
-		m_pProgressSvc->SetLabelText( _T("Testing progress service:"), color::Red );
+		m_pProgressSvc->SetLabelText( _T("Testing progress service:"), color::Red, color::LightYellow );
 
 		HookWindow( pWnd->GetSafeHwnd() );
 		m_progressTimer.Start();

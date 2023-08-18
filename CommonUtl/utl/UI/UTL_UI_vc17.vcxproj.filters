@@ -674,7 +674,7 @@
     <ClInclude Include="BaseMainFrameWndEx.hxx">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="StatusBarProgressService.h">
+    <ClInclude Include="StatusProgressService.h">
       <Filter>UI\Service</Filter>
     </ClInclude>
     <ClInclude Include="ControlBar_fwd.h">
@@ -1153,7 +1153,7 @@
     <ClCompile Include="LogPalette.cpp">
       <Filter>UI\Color</Filter>
     </ClCompile>
-    <ClCompile Include="StatusBarProgressService.cpp">
+    <ClCompile Include="StatusProgressService.cpp">
       <Filter>UI\Service</Filter>
     </ClCompile>
     <ClCompile Include="ControlBar_fwd.cpp">

@@ -324,7 +324,7 @@
     <ClInclude Include="SpinTargetButton.h" />
     <ClInclude Include="SplitPushButton.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="StatusBarProgressService.h" />
+    <ClInclude Include="StatusProgressService.h" />
     <ClInclude Include="StdColors.h" />
     <ClInclude Include="StdManifest.h" />
     <ClInclude Include="StockValuesComboBox.h" />
@@ -502,7 +502,7 @@
     <ClCompile Include="SpinEdit.cpp" />
     <ClCompile Include="SpinTargetButton.cpp" />
     <ClCompile Include="SplitPushButton.cpp" />
-    <ClCompile Include="StatusBarProgressService.cpp" />
+    <ClCompile Include="StatusProgressService.cpp" />
     <ClCompile Include="StockValuesComboBox.cpp" />
     <ClCompile Include="SyncScrolling.cpp" />
     <ClCompile Include="SystemTray.cpp" />

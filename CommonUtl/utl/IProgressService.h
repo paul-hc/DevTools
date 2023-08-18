@@ -42,12 +42,14 @@ namespace utl
 
 	interface IStatusProgressService		// implemented in status bar, simple service
 	{
-		virtual bool SetLabelText( const std::tstring& text, COLORREF labelTextColor = CLR_DEFAULT ) = 0;
+		virtual bool SetLabelText( const std::tstring& text, COLORREF labelTextColor = CLR_DEFAULT, COLORREF labelBkColor = CLR_DEFAULT ) = 0;
+		virtual size_t GetMaxPos( void ) const = 0;
 		virtual size_t GetPos( void ) const = 0;
 		virtual void SetPos( size_t pos ) = 0;
 
 		// implemented
 		void Advance( ptrdiff_t step = 1 ) { SetPos( GetPos() + step ); }
+		void GotoEnd( void ) { SetPos( GetMaxPos() ); }
 	};
 }
 

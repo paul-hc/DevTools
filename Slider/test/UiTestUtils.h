@@ -10,7 +10,7 @@
 #include "utl/UI/WindowTimer.h"
 
 
-class CStatusBarProgressService;
+class CStatusProgressService;
 
 
 namespace ut
@@ -25,7 +25,7 @@ namespace ut
 		double m_maxSeconds;
 		CWindowTimer m_progressTimer;
 		CTimer m_elapsedTimer;
-		std::auto_ptr<CStatusBarProgressService> m_pProgressSvc;
+		std::auto_ptr<CStatusProgressService> m_pProgressSvc;
 
 		enum { AdvanceTimer = 999 };
 	};
