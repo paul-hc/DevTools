@@ -188,6 +188,9 @@
     <ClInclude Include="ImageNavigator_fwd.h">
       <Filter>Source Files\service</Filter>
     </ClInclude>
+    <ClInclude Include="test\UiTestUtils.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainFrame.cpp">
@@ -333,6 +336,9 @@
     </ClCompile>
     <ClCompile Include="ImageNavigator.cpp">
       <Filter>Source Files\service</Filter>
+    </ClCompile>
+    <ClCompile Include="test\UiTestUtils.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -855,6 +855,14 @@
 				RelativePath=".\test\ThumbnailTests.h"
 				>
 			</File>
+			<File
+				RelativePath=".\test\UiTestUtils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\UiTestUtils.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"

@@ -94,13 +94,6 @@ namespace nosy
 	};
 
 
-	struct CBasePane_ : public CBasePane
-	{
-		// public access
-		void SetIsDialogControl( bool isDlgControl = true ) { m_bIsDlgControl = isDlgControl; }
-	};
-
-
 	struct CPopupMenu_ : public CMFCPopupMenu
 	{
 		// public access
@@ -185,12 +178,6 @@ namespace mfc
 
 namespace mfc
 {
-	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl /*= true*/ )
-	{
-		mfc::nosy_cast<nosy::CBasePane_>( pBasePane )->SetIsDialogControl( isDlgControl );
-	}
-
-
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar )
 	{
 		return mfc::nosy_cast<nosy::CToolBar_>( pToolBar )->GetToolTip();

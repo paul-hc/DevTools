@@ -563,6 +563,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BaseMainFrameWndEx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BaseMainFrameWndEx.hxx"
+				>
+			</File>
+			<File
 				RelativePath=".\BaseTrackMenuWnd.h"
 				>
 			</File>
@@ -1862,6 +1870,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\StatusBarProgressService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StatusBarProgressService.h"
+					>
+				</File>
+				<File
 					RelativePath=".\UiCommands.cpp"
 					>
 				</File>
@@ -1879,6 +1895,14 @@
 				</File>
 				<File
 					RelativePath=".\ContextMenuMgr.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ControlBar_fwd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ControlBar_fwd.h"
 					>
 				</File>
 				<File

@@ -5,7 +5,6 @@
 #include <afxtempl.h>
 
 
-class CBasePane;
 class CMFCPopupMenu;
 class CMFCPopupMenuBar;
 class CMFCToolBar;
@@ -111,9 +110,6 @@ namespace ui
 
 namespace mfc
 {
-	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
-
-
 	// CMFCToolBar protected access:
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
 	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex = nullptr );
@@ -141,6 +137,7 @@ namespace mfc
 
 	// CMFCPopupMenuBar protected access:
 	int PopupMenuBar_GetGutterWidth( CMFCPopupMenuBar* pPopupMenuBar );
+
 
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
 	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );

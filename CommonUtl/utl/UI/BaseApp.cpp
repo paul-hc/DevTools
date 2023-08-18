@@ -21,10 +21,13 @@
 #include <afxvisualmanagerwindows.h>
 #include <afxvisualmanageroffice2003.h>
 #include <afxvisualmanagervs2005.h>
-#include <afxvisualmanagervs2008.h>
 #include <afxvisualmanageroffice2007.h>
-#include <afxvisualmanagerwindows7.h>
 #include <afxdockingmanager.h>
+
+#if _MFC_VER > 0x0900		// MFC version 9.00 or less
+	#include <afxvisualmanagerwindows7.h>
+	#include <afxvisualmanagervs2008.h>
+#endif
 
 #ifdef _DEBUG
 #include "utl/test/Test.h"
@@ -88,20 +91,30 @@ void CAppLook::SetAppLook( app::AppLook appLook )
 			break;
 		case app::Office_2003:
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerOffice2003 ) );
-			CDockingManager::SetDockingMode(DT_SMART);
+			CDockingManager::SetDockingMode( DT_SMART );
 			break;
 		case app::VS_2005:
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerVS2005 ) );
-			CDockingManager::SetDockingMode(DT_SMART);
+			CDockingManager::SetDockingMode( DT_SMART );
 			break;
 		case app::VS_2008:
+		#if _MFC_VER > 0x0900		// MFC version 9.00 or less
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerVS2008 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
 			break;
+		#else
+			SetAppLook( app::VS_2005 );
+			return;
+		#endif
 		case app::Windows_7:
+		#if _MFC_VER > 0x0900		// MFC version 9.00 or less
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows7 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
 			break;
+		#else
+			SetAppLook( app::Windows_XP );
+			return;
+		#endif
 		default:
 			switch ( m_appLook )
 			{
@@ -164,7 +177,13 @@ void CAppLook::OnApplicationLook( UINT cmdId )
 
 void CAppLook::OnUpdateApplicationLook( CCmdUI* pCmdUI )
 {
-	pCmdUI->SetRadio( m_appLook == FromId( pCmdUI->m_nID ) );
+	app::AppLook appLook = FromId( pCmdUI->m_nID );
+
+	pCmdUI->SetRadio( m_appLook == appLook );
+
+#if _MFC_VER <= 0x0900		// MFC version 9.00 or less
+	pCmdUI->Enable( m_appLook != app::VS_2008 && m_appLook != app::Windows_7 );
+#endif
 }
 
 

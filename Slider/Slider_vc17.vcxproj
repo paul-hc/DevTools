@@ -263,6 +263,7 @@
     <ClInclude Include="test\CatalogStorageTests.h" />
     <ClInclude Include="test\ImagingD2DTests.h" />
     <ClInclude Include="test\ThumbnailTests.h" />
+    <ClInclude Include="test\UiTestUtils.h" />
     <ClInclude Include="UndoRedoDialog.h" />
     <ClInclude Include="Workspace.h" />
     <ClInclude Include="WorkspaceDialog.h" />
@@ -318,6 +319,7 @@
     <ClCompile Include="test\CatalogStorageTests.cpp" />
     <ClCompile Include="test\ImagingD2DTests.cpp" />
     <ClCompile Include="test\ThumbnailTests.cpp" />
+    <ClCompile Include="test\UiTestUtils.cpp" />
     <ClCompile Include="UndoRedoDialog.cpp" />
     <ClCompile Include="Workspace.cpp" />
     <ClCompile Include="WorkspaceDialog.cpp" />

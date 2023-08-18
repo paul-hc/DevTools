@@ -11,11 +11,13 @@
 #include "resource.h"
 #include "utl/UI/BaseZoomView.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/StatusBarProgressService.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 #include "utl/UI/WindowPlacement.h"
 #include "utl/UI/resource.h"
+#include "test/UiTestUtils.h"
 #include <afxpriv.h>		// for WM_SETMESSAGESTRING
 #include <dde.h>
 
@@ -300,6 +302,7 @@ BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWndEx )
 	ON_UPDATE_COMMAND_UI( CM_CLEAR_TEMP_EMBEDDED_CLONES, OnUpdateAlwaysEnabled )
 	ON_COMMAND_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, On_RegisterImageAssoc )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, OnUpdate_RegisterImageAssoc )
+	ON_UPDATE_COMMAND_UI( IDW_SB_PROGRESS_CAPTION, OnUpdateAlwaysEnabled )
 END_MESSAGE_MAP()
 
 int CMainFrame::OnCreate( CREATESTRUCT* pCS )
@@ -351,10 +354,12 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 		return -1;      // fail to create
 	}
 
-	m_statusBar.SetPaneStyle( Status_ProgressLabel, SBPS_NOBORDERS );
+	m_statusBar.SetPaneStyle( Status_ProgressLabel, SBPS_NOBORDERS | SBPS_POPOUT );
 	m_statusBar.SetPaneStyle( Status_Info, SBPS_STRETCH | SBPS_NOBORDERS );
 	m_statusBar.SetPaneWidth( Status_Progress, 100 );
 	m_statusBar.EnablePaneDoubleClick();
+
+	CStatusBarProgressService::InitStatusBarInfo( &m_statusBar, Status_Progress, Status_ProgressLabel );		// initialize once the status progress service
 
 	// TODO: Delete these five lines if you don't want the toolbar and menubar to be dockable
 	m_menuBar.EnableDocking( CBRS_ALIGN_ANY );
@@ -552,6 +557,9 @@ void CMainFrame::CmClearImageCache( void )
 
 void CMainFrame::CmRefreshContent( void )
 {
+#ifdef USE_UT		// no UT code in release builds
+	new ut::CTestStatusProgress( this, 10.0 );
+#endif
 	app::GetApp()->UpdateAllViews( Hint_ReloadImage );
 }
 

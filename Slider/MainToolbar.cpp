@@ -213,8 +213,7 @@ BEGIN_MESSAGE_MAP( CMainToolbar, CToolbarStrip )
 	// navigation bar:
 	ON_WM_HSCROLL()
 	ON_COMMAND( ID_FOCUS_ON_SLIDER_CTRL, On_FocusOnSliderCtrl )
-	//ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnToolTipText_NavigSliderCtrl )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, ui::MinCmdId, ui::MaxCmdId, OnToolTipText_NavigSliderCtrl )
+	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXT, ui::MinCmdId, ui::MaxCmdId, OnToolTipText_NavigSliderCtrl )
 END_MESSAGE_MAP()
 
 BOOL CMainToolbar::OnEraseBkgnd( CDC* pDC )
