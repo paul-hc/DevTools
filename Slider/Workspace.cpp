@@ -16,6 +16,7 @@
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
+#include <afxstatusbar.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -291,10 +292,11 @@ bool CWorkspace::LoadDocuments( void )
 	// (!) next time, show the window as default in order to properly handle in CFrameWnd::OnDDEExecute the ShowWindow calls
 	app::GetApp()->StoreCmdShow( -1 );
 
-	if ( !m_pMainFrame->GetToolbar()->IsVisible() == HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) )
+	if ( (bool)m_pMainFrame->GetToolbar()->IsVisible() != HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) )
 		m_pMainFrame->ShowControlBar( m_pMainFrame->GetToolbar(), HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ), FALSE );
-	if ( !m_pMainFrame->GetStatusBar()->IsVisible() == HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ) )
-		m_pMainFrame->ShowControlBar( m_pMainFrame->GetStatusBar(), HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ), FALSE );
+
+	if ( (bool)m_pMainFrame->GetStatusBar()->IsWindowVisible() != HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ) )
+		m_pMainFrame->ShowPane( m_pMainFrame->GetStatusBar(), HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ), FALSE, FALSE );
 
 	ASSERT_NULL( m_pLoadingImageState );
 	for ( std::vector<CImageState>::const_iterator itImageState = m_imageStates.begin(); itImageState != m_imageStates.end(); ++itImageState )

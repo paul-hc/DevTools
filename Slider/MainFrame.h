@@ -29,8 +29,7 @@ public:
 	bool IsMdiRestored( void ) const;			// current document not maximized?
 
 	CMainToolbar* GetToolbar( void ) { return m_pToolbar.get(); }
-	CStatusBar* GetStatusBar( void ) { return &m_oldStatusBar; }
-	CProgressCtrl* GetProgressCtrl( void ) { return &m_progressCtrl; }
+	CMFCStatusBar* GetStatusBar( void ) { return &m_statusBar; }
 
 	// status bar temporary messages
 	bool IsStatusBarAutoClear( void ) const { return m_messageClearTimer.IsStarted(); }
@@ -40,37 +39,23 @@ public:
 
 	void StartEnqueuedAlbumTimer( UINT timerDelay = 750 );
 
-	// shared progress bar
-	bool InProgress( void ) const { return m_inProgress.IsInternalChange(); }
-	void BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption = nullptr );
-	void EndProgress( int clearDelay );
-	void SetPosProgress( int value );
-	void StepItProgress( void );
-
 	bool ResizeViewToFit( CBaseZoomView* pZoomScrollView );
 protected:
 	void CleanupWindow( void );
-private:
-	bool CreateProgressCtrl( void );
-	void SetProgressCaptionText( const TCHAR* pCaption );
-	bool DoClearProgressCtrl( void );
 private:
 	CMFCMenuBar	m_menuBar;
 	CMFCToolBar m_standardToolBar;
 	CMFCToolBar m_albumToolBar;
 	CMFCStatusBar m_statusBar;
 
+		// obsolete	
 		std::auto_ptr<CMainToolbar> m_pToolbar;
-		CStatusBar m_oldStatusBar;
-		CProgressCtrl m_progressCtrl;
 
 	CWindowTimer m_messageClearTimer;
 	CWindowTimer m_ddeEnqueuedTimer;				// monitors enqueued image paths
-	CWindowTimer m_progBarResetTimer;
-	CInternalChange m_inProgress;
 
-	enum Metrics { ProgressBarWidth = 150 };
-	enum TimerIds { MessageTimerId = 2000, QueueTimerId, ProgressResetTimerId };
+	enum Metrics { ProgressBarWidth = 100 };
+	enum TimerIds { MessageTimerId = 2000, QueueTimerId };
 
 	// generated stuff
 public:
@@ -82,7 +67,6 @@ protected:
 	afx_msg void OnShowWindow( BOOL bShow, UINT nStatus );
 	afx_msg void OnDropFiles( HDROP hDropInfo );
 	afx_msg void OnTimer( UINT_PTR eventId );
-	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg void OnWindowPosChanging( WINDOWPOS* wndPos );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* mmi );
 	afx_msg void On_MdiClose( void );

@@ -46,7 +46,6 @@ CMainFrame::CMainFrame( void )
 	, m_pToolbar( new CMainToolbar() )
 	, m_messageClearTimer( this, MessageTimerId, 5000 )
 	, m_ddeEnqueuedTimer( this, QueueTimerId, 750 )
-	, m_progBarResetTimer( this, ProgressResetTimerId, 250 )
 {
 }
 
@@ -130,107 +129,6 @@ void CMainFrame::CleanupWindow( void )
 		CWorkspace::Instance().SaveRegSettings();		// registry settings always get saved
 }
 
-bool CMainFrame::CreateProgressCtrl( void )
-{
-	ASSERT_PTR( m_oldStatusBar.m_hWnd );
-
-	int progBarIndex = m_oldStatusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
-
-	SetProgressCaptionText( _T("") );
-
-	if ( ProgressBarWidth != -1 )
-		m_oldStatusBar.SetPaneInfo( progBarIndex, IDW_SB_PROGRESS_BAR, SBPS_NOBORDERS, ProgressBarWidth );
-
-	m_oldStatusBar.SetPaneText( progBarIndex, _T("") );
-
-	if ( !m_progressCtrl.Create( WS_CHILD | PBS_SMOOTH, CRect( 0, 0, 0, 0 ), &m_oldStatusBar, IDW_SB_PROGRESS_BAR ) )
-	{
-		TRACE( "Failed to create the progress bar\n" );
-		return false;
-	}
-	return true;
-}
-
-void CMainFrame::SetProgressCaptionText( const TCHAR* pCaption )
-{
-	int progCaptionIndex = m_oldStatusBar.CommandToIndex( IDW_SB_PROGRESS_CAPTION );
-
-	if ( m_oldStatusBar.GetPaneText( progCaptionIndex ) != pCaption )
-	{
-		CSize textExtent;
-		{
-			CClientDC clientDC( &m_oldStatusBar );
-			CFont* orgFont = clientDC.SelectObject( m_oldStatusBar.GetFont() );
-			textExtent = ui::GetTextSize( &clientDC, pCaption );
-			clientDC.SelectObject( orgFont );
-		}
-		m_oldStatusBar.SetPaneInfo( progCaptionIndex, IDW_SB_PROGRESS_CAPTION, SBPS_NOBORDERS, textExtent.cx /*- 5*/ );
-		m_oldStatusBar.SetPaneText( progCaptionIndex, pCaption );
-	}
-}
-
-bool CMainFrame::DoClearProgressCtrl( void )
-{
-	m_progBarResetTimer.Stop();
-
-	// IMP: in order to clear the progress-bar, it must be "logically" turned OFF already, otherwise remains ON.
-	// That's because delayed timer tick may come after re-activation
-	if ( InProgress() )
-		return false;
-
-	// hide the progress-bar (if not already)
-	if ( HasFlag( m_progressCtrl.GetStyle(), WS_VISIBLE ) )
-		m_progressCtrl.ShowWindow( SW_HIDE );
-
-	// clear the progress-bar internal
-	m_progressCtrl.SetPos( 0 );
-	m_progressCtrl.SetRange32( 0, 1 );
-	m_progressCtrl.SetStep( 1 );
-
-	SetProgressCaptionText( _T("") );
-	return true;
-}
-
-void CMainFrame::BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= nullptr*/ )
-{
-	m_progressCtrl.SetRange32( valueMin, valueMin + count );	// note that valueMax is out of range (100% is valMax - 1)
-	m_progressCtrl.SetPos( valueMin );
-	m_progressCtrl.SetStep( stepCount );
-
-	// show the progress-bar (if not already)
-	ui::ShowWindow( m_progressCtrl );
-	SetProgressCaptionText( pCaption );
-
-	m_inProgress.AddInternalChange();
-}
-
-void CMainFrame::EndProgress( int clearDelay )
-{
-	bool wasInProgress = InProgress();
-
-	m_inProgress.ReleaseInternalChange();		// turn off the progress bar (logically)
-	if ( wasInProgress )
-		if ( clearDelay != app::CScopedProgress::ACD_NoClear )
-		{
-			m_progBarResetTimer.SetElapsed( clearDelay );
-			m_progBarResetTimer.Start();
-		}
-		else
-			DoClearProgressCtrl();
-}
-
-void CMainFrame::SetPosProgress( int value )
-{
-	ASSERT( InProgress() );
-	m_progressCtrl.SetPos( value );
-}
-
-void CMainFrame::StepItProgress( void )
-{
-	ASSERT( InProgress() );
-	m_progressCtrl.StepIt();
-}
-
 bool CMainFrame::ResizeViewToFit( CBaseZoomView* pZoomScrollView )
 {
 	ASSERT_PTR( pZoomScrollView->GetSafeHwnd() );
@@ -282,7 +180,6 @@ BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWndEx )
 	ON_WM_DESTROY()
 	ON_WM_CLOSE()
 	ON_WM_GETMINMAXINFO()
-	ON_WM_SIZE()
 	ON_WM_WINDOWPOSCHANGING()
 	ON_WM_SHOWWINDOW()
 	ON_WM_DROPFILES()
@@ -356,7 +253,7 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 
 	m_statusBar.SetPaneStyle( Status_ProgressLabel, SBPS_NOBORDERS | SBPS_POPOUT );
 	m_statusBar.SetPaneStyle( Status_Info, SBPS_STRETCH | SBPS_NOBORDERS );
-	m_statusBar.SetPaneWidth( Status_Progress, 100 );
+	m_statusBar.SetPaneWidth( Status_Progress, ProgressBarWidth );
 	m_statusBar.EnablePaneDoubleClick();
 
 	CStatusProgressService::InitStatusBarInfo( &m_statusBar, Status_Progress, Status_ProgressLabel );		// initialize once the status progress service
@@ -412,13 +309,6 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 		return -1;	  // fail to create
 	}
 
-	if ( !m_oldStatusBar.Create( this ) || !m_oldStatusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
-	{
-		TRACE( "Failed to create status bar\n" );
-		return -1;	  // fail to create
-	}
-	CreateProgressCtrl();
-
 	// TODO: delete these three lines if you don't want the toolbar to be dockable
 	m_pToolbar->EnableDocking( CBRS_ALIGN_ANY );
 //	EnableDocking( CBRS_ALIGN_ANY );
@@ -442,20 +332,6 @@ void CMainFrame::OnGetMinMaxInfo( MINMAXINFO* mmi )
 {
 	if ( !CWorkspace::Instance().IsFullScreen() )
 		__super::OnGetMinMaxInfo( mmi );
-}
-
-void CMainFrame::OnSize( UINT sizeType, int cx, int cy )
-{
-	__super::OnSize( sizeType, cx, cy );
-
-	if ( m_progressCtrl.m_hWnd != nullptr )
-	{	// move the progress bar on top of the associated statusbar item
-		CRect ctrlRect;
-		int progBarIndex = m_oldStatusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
-
-		m_oldStatusBar.GetItemRect( progBarIndex, &ctrlRect );
-		m_progressCtrl.MoveWindow( &ctrlRect );
-	}
 }
 
 void CMainFrame::OnWindowPosChanging( WINDOWPOS* wndPos )
@@ -494,8 +370,6 @@ void CMainFrame::OnTimer( UINT_PTR eventId )
 			app::GetApp()->OpenQueuedAlbum();
 		}
 	}
-	else if ( m_progBarResetTimer.IsHit( eventId ) )
-		DoClearProgressCtrl();
 	else
 		__super::OnTimer( eventId );
 }
@@ -505,6 +379,7 @@ void CMainFrame::On_MdiClose( void )
 	CFrameWnd* pActiveFrame = MDIGetActive();
 	if ( nullptr == pActiveFrame )
 		pActiveFrame = this;
+
 	pActiveFrame->SendMessage( WM_SYSCOMMAND, SC_CLOSE );
 }
 
@@ -558,7 +433,7 @@ void CMainFrame::CmClearImageCache( void )
 void CMainFrame::CmRefreshContent( void )
 {
 #ifdef USE_UT		// no UT code in release builds
-	new ut::CTestStatusProgress( this, 10.0 );
+	ut::CTestStatusProgress::Start( this, 10.0 );
 #endif
 	app::GetApp()->UpdateAllViews( Hint_ReloadImage );
 }

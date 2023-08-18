@@ -17,15 +17,22 @@ namespace ut
 {
 	class CTestStatusProgress : public CWindowHook
 	{
+		CTestStatusProgress( CWnd* pWnd, double maxSeconds );		// auto-delete
 	public:
-		CTestStatusProgress( CWnd* pWnd, double maxSeconds = 10.0 );
+		virtual ~CTestStatusProgress();
+
+		static CTestStatusProgress* Start( CWnd* pWnd, double maxSeconds = 10.0 );
 	protected:
+		void Kill( void );
+
 		virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
 	private:
 		double m_maxSeconds;
 		CWindowTimer m_progressTimer;
 		CTimer m_elapsedTimer;
 		std::auto_ptr<CStatusProgressService> m_pProgressSvc;
+
+		static CTestStatusProgress* s_pRunning;
 
 		enum { AdvanceTimer = 999 };
 	};

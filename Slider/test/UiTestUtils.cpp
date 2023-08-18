@@ -14,7 +14,9 @@ namespace ut
 {
 	// CTestStatusProgress implementation
 
-	CTestStatusProgress::CTestStatusProgress( CWnd* pWnd, double maxSeconds /*= 10.0*/ )
+	CTestStatusProgress* CTestStatusProgress::s_pRunning = nullptr;
+
+	CTestStatusProgress::CTestStatusProgress( CWnd* pWnd, double maxSeconds )
 		: CWindowHook( true )
 		, m_maxSeconds( maxSeconds )
 		, m_progressTimer( pWnd, AdvanceTimer, 50 )
@@ -26,6 +28,32 @@ namespace ut
 
 		HookWindow( pWnd->GetSafeHwnd() );
 		m_progressTimer.Start();
+
+		ASSERT_NULL( s_pRunning );
+		s_pRunning = this;
+	}
+
+	CTestStatusProgress::~CTestStatusProgress()
+	{
+		if ( IsHooked() )		// restartable timer still on?
+			Kill();
+
+		ASSERT( s_pRunning == this );
+		s_pRunning = nullptr;
+	}
+
+	CTestStatusProgress* CTestStatusProgress::Start( CWnd* pWnd, double maxSeconds )
+	{
+		if ( s_pRunning != nullptr )
+			s_pRunning->Kill();
+
+		return new CTestStatusProgress( pWnd, maxSeconds );
+	}
+
+	void CTestStatusProgress::Kill( void )
+	{
+		m_progressTimer.Stop();
+		UnhookWindow();
 	}
 
 	LRESULT CTestStatusProgress::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
@@ -36,10 +64,7 @@ namespace ut
 				m_pProgressSvc->Advance();
 
 				if ( m_elapsedTimer.ElapsedSeconds() > m_maxSeconds )
-				{
-					m_progressTimer.Stop();
-					UnhookWindow();
-				}
+					Kill();
 
 				return 0L;
 			}
