@@ -1870,11 +1870,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\StatusBarProgressService.cpp"
+					RelativePath=".\StatusProgressService.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\StatusBarProgressService.h"
+					RelativePath=".\StatusProgressService.h"
 					>
 				</File>
 				<File
