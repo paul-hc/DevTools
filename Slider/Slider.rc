@@ -34,7 +34,7 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
-    "#include ""afxres.h""\r\0"
+    "#include ""afxres.h""\r\n\0"
 END
 
 3 TEXTINCLUDE 
@@ -231,22 +231,7 @@ BEGIN
             MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        POPUP "&Application Look"
-        BEGIN
-            MENUITEM "Windows &2000",               ID_APPLOOK_WINDOWS_2000
-            MENUITEM "Office &XP",                  ID_APPLOOK_OFFICE_XP
-            MENUITEM "&Windows XP",                 ID_APPLOOK_WINDOWS_XP
-            MENUITEM "Office 200&3",                ID_APPLOOK_OFFICE_2003
-            MENUITEM "Visual Studio 200&5",         ID_APPLOOK_VS_2005
-            MENUITEM "Visual Studio 200&8",         ID_APPLOOK_VS_2008
-            MENUITEM SEPARATOR
-            MENUITEM "Office 2007: &Blue",          ID_APPLOOK_OFFICE_2007_BLUE
-            MENUITEM "Office 2007: B&lack",         ID_APPLOOK_OFFICE_2007_BLACK
-            MENUITEM "Office 2007: &Silver",        ID_APPLOOK_OFFICE_2007_SILVER
-            MENUITEM "Office 2007: &Aqua",          ID_APPLOOK_OFFICE_2007_AQUA
-            MENUITEM SEPARATOR
-            MENUITEM "Windows 7",                   ID_APPLOOK_WINDOWS_7
-        END
+        MENUITEM "<app-look-popup>",            ID_APPLOOK_POPUP
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
         MENUITEM SEPARATOR
@@ -350,8 +335,12 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        POPUP "&Toolbars"
+        BEGIN
+            MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
+        END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "<app-look-popup>",            ID_APPLOOK_POPUP
         MENUITEM SEPARATOR
         MENUITEM "Album Info &Bar\tCtrl+B",     ID_VIEW_ALBUMDIALOGBAR
         MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
@@ -443,8 +432,12 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        POPUP "&Toolbars"
+        BEGIN
+            MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
+        END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "<app-look-popup>",            ID_APPLOOK_POPUP
         MENUITEM SEPARATOR
         POPUP "Multi-page"
         BEGIN

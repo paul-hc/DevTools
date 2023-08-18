@@ -266,7 +266,7 @@ namespace app
 
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos )
 	{
-		ui::StdPopup popup = ui::AppMainPopup;
+		ui::StdContext popup = ui::AppMainPopup;
 	#ifdef _DEBUG
 		popup = ui::AppDebugPopup;
 	#endif

@@ -116,6 +116,9 @@ namespace ui
 	int FindMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );
 	int FindAfterMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );		// subsequent position
 
+	bool ReplaceMenuItemWithPopup( CMenu* pPopupMenu, UINT itemId, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages = ui::NoMenuImages );
+
+
 	// deep menu API
 
 	HMENU FindMenuItemIndex( OUT int* pIndex, HMENU hMenu, UINT itemId, RecursionDepth depth = Deep );
