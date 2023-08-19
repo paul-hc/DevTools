@@ -153,15 +153,11 @@ void CAppLook::SetAppLook( app::AppLook appLook )
 app::AppLook CAppLook::GetCompatibleTheme( app::AppLook appLook )
 {
 #if _MFC_VER <= 0x0900		// MFC version 9.00 or less?
-	// make substitutions for themes not available in older MFC
+	// substitute themes not available in older MFC
 	switch ( appLook )
 	{
-		case app::VS_2008:
-			appLook = app::VS_2005;
-			break;
-		case app::Windows_7:
-			appLook = app::Windows_XP;
-			break;
+		case app::VS_2008:		appLook = app::VS_2005; break;
+		case app::Windows_7:	appLook = app::Windows_XP; break;
 	}
 #endif
 	return appLook;
