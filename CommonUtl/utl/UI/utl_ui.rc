@@ -782,6 +782,8 @@ STRINGTABLE
 BEGIN
     ID_WINDOW_MANAGER       "&Windows..."
     ID_VIEW_CUSTOMIZE       "Customize..."
+    ID_TOOLS_RESET_ALL_TOOLBARS 
+                            "Reset all toolbars and menus. All your changes will be lost!\nReset all Toolbars"
 END
 
 #endif    // English (United States) resources

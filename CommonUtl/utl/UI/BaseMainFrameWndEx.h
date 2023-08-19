@@ -17,7 +17,6 @@ public:
 protected:
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 	afx_msg void OnWindowManager( void );
-	afx_msg void OnViewCustomize( void );
 	afx_msg LRESULT OnToolbarCreateNew( WPARAM wParam, LPARAM lParam );
 
 	DECLARE_MESSAGE_MAP()

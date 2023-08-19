@@ -13,7 +13,6 @@ class CMFCToolBarButton;
 class CMFCColorPopupMenu;
 class CMFCColorBar;
 
-class CToolTipCtrl;
 class CMFCButton;
 
 class CColorEntry;
@@ -110,11 +109,11 @@ namespace ui
 
 namespace mfc
 {
-	// CMFCToolBar protected access:
-	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
+	// CMFCToolBar utils:
 	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex = nullptr );
 
-	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette = nullptr );		// CMFCColorBar protected access
+	// CMFCColorBar protected access:
+	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette = nullptr );
 
 
 	// CMFCToolBarButton protected access:

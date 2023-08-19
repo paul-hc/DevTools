@@ -209,23 +209,24 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 
 	if ( !m_menuBar.Create( this ) )
 	{
-		TRACE0("Failed to create menubar\n");
+		TRACE( "Failed to create menubar\n" );
 		return -1;      // fail to create
 	}
 
 	m_menuBar.SetPaneStyle( m_menuBar.GetPaneStyle() | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY );
 
-	// prevent the menu bar from taking the focus on activation
-	CMFCPopupMenu::SetForceMenuFocus( FALSE );
+	CMFCPopupMenu::SetForceMenuFocus( FALSE );		// prevent the menu bar from taking the focus on activation
 
-	if ( !m_standardToolBar.CreateEx( this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC ) ||
+	// create first toolbar - use CreateEx()
+	if ( !m_standardToolBar.CreateEx( this, TBSTYLE_FLAT, mfc::FirstToolbarStyle ) ||
 		 !m_standardToolBar.LoadToolBar( IDR_TOOLBAR_STANDARD ) )
 	{
 		TRACE( "Failed to create toolbar\n" );
 		return -1;      // fail to create
 	}
 
-	if ( !m_albumToolBar.Create( this, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE | CBRS_SIZE_DYNAMIC | CBRS_GRIPPER | CBRS_BORDER_3D, IDR_TOOLBAR_ALBUM ) ||
+	// create additional toolbar - use Create(), passing toolbar ID
+	if ( !m_albumToolBar.Create( this, mfc::AdditionalToolbarStyle, IDR_TOOLBAR_ALBUM ) ||
 		 !m_albumToolBar.LoadToolBar( IDR_TOOLBAR_ALBUM ) )
 	{
 		TRACE( "Failed to create album toolbar\n" );
@@ -265,27 +266,19 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	EnableDocking( CBRS_ALIGN_ANY );
 
 	DockPane( &m_menuBar );
-	DockPane( &m_albumToolBar );
-	DockPaneLeftOf( &m_standardToolBar /*left*/, &m_albumToolBar /*right*/ );
+	mfc::DockPanesOnRow( GetDockingManager(), 2, &m_standardToolBar, &m_albumToolBar );
 
 
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode( DT_SMART );
 
-	// enable Visual Studio 2005 style docking window auto-hide behavior
-	EnableAutoHidePanes( CBRS_ALIGN_ANY );
-
-	// set the visual manager and style based on persisted value
-	//TODO: OnApplicationLook( theApp.m_nAppLook );
-
-	// Enable enhanced windows management dialog
-	EnableWindowsDialog( ID_WINDOW_MANAGER, ID_WINDOW_MANAGER, TRUE );
+	EnableAutoHidePanes( CBRS_ALIGN_ANY );											// enable Visual Studio 2005 style docking window auto-hide behavior
+	EnableWindowsDialog( ID_WINDOW_MANAGER, ID_WINDOW_MANAGER, TRUE );				// enable enhanced windows management dialog
 
 	// Enable toolbar and docking window menu replacement
-	EnablePaneMenu( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel, ID_VIEW_TOOLBAR );
+	EnablePaneMenu( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel, ID_VIEW_TOOLBAR );		// IMP: any popup containing ID_VIEW_TOOLBAR will be rebuilt on via CDockingManager::BuildPanesMenu() with app tolbars
 
-	// enable quick (Alt+drag) toolbar customization
-	CMFCToolBar::EnableQuickCustomization();
+	CMFCToolBar::EnableQuickCustomization();			// enable quick (Alt+drag) toolbar customization
 
 
 

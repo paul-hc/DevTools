@@ -2,7 +2,6 @@
 #define MainFrame_h
 #pragma once
 
-#include "utl/UI/InternalChange.h"
 #include "utl/UI/WindowTimer.h"
 #include "utl/UI/BaseMainFrameWndEx.h"
 
@@ -48,7 +47,7 @@ private:
 	CMFCToolBar m_albumToolBar;
 	CMFCStatusBar m_statusBar;
 
-		// obsolete	
+		// obsolete
 		std::auto_ptr<CMainToolbar> m_pToolbar;
 
 	CWindowTimer m_messageClearTimer;

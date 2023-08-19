@@ -327,6 +327,14 @@ namespace ui
 		return atIndex + 1;			// the position just after
 	}
 
+	int ContainsMenuItem( HMENU hMenu, UINT itemId, RecursionDepth depth /*= Shallow*/ )
+	{
+		if ( Shallow == depth )
+			return ui::FindMenuItemIndex( hMenu, itemId ) != -1;
+
+		return ::GetMenuState( hMenu, itemId, MF_BYCOMMAND ) != UINT_MAX;		// this finds deep menu items (searching in sub-menus)
+	}
+
 	bool ReplaceMenuItemWithPopup( CMenu* pPopupMenu, UINT itemId, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages /*= ui::NoMenuImages*/ )
 	{
 		int itemPos = ui::FindMenuItemIndex( pPopupMenu->GetSafeHmenu(), itemId );

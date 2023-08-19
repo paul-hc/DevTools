@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "PopupMenus.h"
+#include "ControlBar_fwd.h"
 #include "MenuUtilities.h"
 #include "ContextMenuMgr.h"
 #include "ColorRepository.h"

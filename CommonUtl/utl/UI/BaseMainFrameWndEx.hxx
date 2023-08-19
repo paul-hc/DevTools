@@ -3,8 +3,8 @@
 #pragma once
 
 #include "MenuUtilities.h"
+#include "ControlBar_fwd.h"		// for mfc::FrameToolbarStyle (required in the final main frame)
 #include "resource.h"
-#include <afxtoolbar.h>
 
 
 // CBaseFrameWnd template code
@@ -20,7 +20,6 @@ CBaseMainFrameWndEx<BaseFrameWnd>::~CBaseMainFrameWndEx()
 BEGIN_TEMPLATE_MESSAGE_MAP( CBaseMainFrameWndEx, BaseFrameWnd, TBaseClass )
 	ON_WM_INITMENUPOPUP()
 	ON_COMMAND( ID_WINDOW_MANAGER, OnWindowManager )
-	ON_COMMAND( ID_VIEW_CUSTOMIZE, OnViewCustomize )
 	ON_REGISTERED_MESSAGE( AFX_WM_CREATETOOLBAR, OnToolbarCreateNew )
 END_MESSAGE_MAP()
 
@@ -40,15 +39,6 @@ void CBaseMainFrameWndEx<BaseFrameWnd>::OnWindowManager( void )
 {
 	if ( CMDIFrameWndEx* pMdiFrameWnd = dynamic_cast<CMDIFrameWndEx*>( this ) )
 		pMdiFrameWnd->ShowWindowsDialog();
-}
-
-template< typename BaseFrameWnd >
-void CBaseMainFrameWndEx<BaseFrameWnd>::OnViewCustomize( void )
-{
-	CMFCToolBarsCustomizeDialog* pDlgCust = new CMFCToolBarsCustomizeDialog( this, TRUE /* scan menus */ );
-
-	pDlgCust->EnableUserDefinedToolbars();
-	pDlgCust->Create();
 }
 
 template< typename BaseFrameWnd >

@@ -34,6 +34,7 @@
 #define UTL_MIN_COMMAND_VALUE           28100
 #define ID_WINDOW_MANAGER               28101
 #define ID_VIEW_CUSTOMIZE               28102
+#define ID_TOOLS_RESET_ALL_TOOLBARS     28103
 #define ID_APPLOOK_POPUP                28120
 #define ID_APPLOOK_WINDOWS_2000         28121
 #define ID_APPLOOK_OFFICE_XP            28122
@@ -149,7 +150,7 @@
 #define IDS_COLOR_PICKER_BUTTON_HELP    28801
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        28029

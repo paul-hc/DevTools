@@ -9,7 +9,6 @@
 //
 #include "utl/UI/resource.h"
 #include "afxres.h"
-
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -34,7 +33,7 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
-    "#include ""afxres.h""\r\n\0"
+    "#include ""afxres.h""\0"
 END
 
 3 TEXTINCLUDE 
@@ -247,6 +246,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
         MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
+        MENUITEM SEPARATOR
+        MENUITEM "Reset All &Toolbars...",      ID_TOOLS_RESET_ALL_TOOLBARS
+        MENUITEM "&Customize...",               ID_VIEW_CUSTOMIZE
     END
     POPUP "&Help"
     BEGIN
@@ -374,6 +376,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
         MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
+        MENUITEM SEPARATOR
+        MENUITEM "Reset All &Toolbars...",      ID_TOOLS_RESET_ALL_TOOLBARS
+        MENUITEM "&Customize...",               ID_VIEW_CUSTOMIZE
     END
     POPUP "&Window"
     BEGIN
@@ -477,6 +482,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
         MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
+        MENUITEM SEPARATOR
+        MENUITEM "Reset All &Toolbars...",      ID_TOOLS_RESET_ALL_TOOLBARS
+        MENUITEM "&Customize...",               ID_VIEW_CUSTOMIZE
     END
     POPUP "&Window"
     BEGIN
@@ -1455,8 +1463,7 @@ END
 #include "afxribbon.rc"      // Ribbon and control bars
 #endif
 
-#endif
-
+#endif
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

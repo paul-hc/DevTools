@@ -123,6 +123,9 @@ private:
 protected:
 	afx_msg void OnApplicationLook( UINT cmdId );
 	afx_msg void OnUpdateApplicationLook( CCmdUI* pCmdUI );
+	afx_msg void OnResetAllControlBars( void );
+	afx_msg void OnViewCustomize( void );
+	afx_msg void OnUpdate_Enable( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

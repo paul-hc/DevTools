@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "BaseApp.h"
 #include "ContextMenuMgr.h"
+#include "ControlBar_fwd.h"
 #include "EnumTags.h"
 #include "MenuUtilities.h"
 #include "RuntimeException.h"
@@ -13,6 +14,7 @@
 
 #include <afxwinappex.h>
 #include <afxtoolbar.h>			// for CMFCToolBar::AddToolBarForImageCollection()
+#include <afxtoolbarscustomizedialog.h>
 #include <afxtooltipmanager.h>
 
 // for CAppLook class
@@ -191,6 +193,9 @@ app::AppLook CAppLook::FromId( UINT cmdId )
 BEGIN_MESSAGE_MAP( CAppLook, CCmdTarget )
 	ON_COMMAND_RANGE( ID_APPLOOK_WINDOWS_2000, ID_APPLOOK_WINDOWS_7, OnApplicationLook )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_APPLOOK_WINDOWS_2000, ID_APPLOOK_WINDOWS_7, OnUpdateApplicationLook )
+	ON_COMMAND( ID_TOOLS_RESET_ALL_TOOLBARS, OnResetAllControlBars )
+	ON_UPDATE_COMMAND_UI( ID_TOOLS_RESET_ALL_TOOLBARS, OnUpdate_Enable )
+	ON_COMMAND( ID_VIEW_CUSTOMIZE, OnViewCustomize )
 END_MESSAGE_MAP()
 
 void CAppLook::OnApplicationLook( UINT cmdId )
@@ -213,7 +218,24 @@ void CAppLook::OnUpdateApplicationLook( CCmdUI* pCmdUI )
 
 	pCmdUI->Enable( enable );
 	pCmdUI->SetRadio( m_appLook == appLook );
+}
 
+void CAppLook::OnResetAllControlBars( void )
+{
+	if ( IDYES == AfxMessageBox( _T("All your changes will be lost!\n\nDo you really want to reset all toolbars and menus?"), MB_YESNO | MB_ICONQUESTION ) )
+		mfc::ResetAllControlBars();
+}
+
+void CAppLook::OnViewCustomize( void )
+{
+	CMFCToolBarsCustomizeDialog* pDlgCust = new CMFCToolBarsCustomizeDialog( checked_static_cast<CFrameWnd*>( AfxGetMainWnd() ), TRUE /* scan menus */ );
+
+	pDlgCust->EnableUserDefinedToolbars();
+	pDlgCust->Create();
+}
+
+void CAppLook::OnUpdate_Enable( CCmdUI* /*pCmdUI*/ )
+{
 }
 
 

@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "PopupMenus_fwd.h"
+#include "ControlBar_fwd.h"
 #include "Color.h"
 #include "ColorRepository.h"
 #include "WndUtils.h"
@@ -101,13 +102,6 @@ namespace nosy
 	};
 
 
-	struct CToolBar_ : public CMFCToolBar
-	{
-		// public access
-		CToolTipCtrl* GetToolTip( void ) const { return m_pToolTip; }
-	};
-
-
 	struct CMFCButton_ : public CMFCButton
 	{
 		// public access
@@ -178,11 +172,6 @@ namespace mfc
 
 namespace mfc
 {
-	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar )
-	{
-		return mfc::nosy_cast<nosy::CToolBar_>( pToolBar )->GetToolTip();
-	}
-
 	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex /*= nullptr*/ )
 	{
 		int btnIndex = const_cast<CMFCToolBar*>( pToolBar )->HitTest( clientPos );
