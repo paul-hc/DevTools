@@ -24,7 +24,7 @@ namespace ut
 	{
 		m_pProgressSvc->SetAutoWrap();
 		m_pProgressSvc->SetDisplayText();
-		m_pProgressSvc->SetLabelText( _T("Testing progress service:"), color::Red, color::LightYellow );
+		m_pProgressSvc->SetLabelText( _T("Testing progress service:"), color::Red /*, color::LightYellow*/ );
 
 		HookWindow( pWnd->GetSafeHwnd() );
 		m_progressTimer.Start();
