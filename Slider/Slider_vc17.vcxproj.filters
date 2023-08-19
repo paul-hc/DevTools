@@ -353,9 +353,6 @@
     <Image Include="res\Slider.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\Toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\AlbumDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
@@ -368,19 +365,22 @@
     <Image Include="res\ImageDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\Toolbar.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\ToolbarStandard.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ToolbarAlbum.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\ToolbarAlbum.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\ToolbarStandard.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarNavigate.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarNavigate.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar_Old.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar_Old.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -85,13 +85,13 @@ IDR_IMAGETYPE           ICON                    "res\\ImageDoc.ico"
 // Bitmap
 //
 
-IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar_Old.bmp"
 
 IDR_APP_TOOL_STRIP      BITMAP                  "res\\AppToolStrip.bmp"
 
 IDR_TOOLBAR_STANDARD    BITMAP                  "res\\ToolbarStandard.bmp"
 
-IDR_TOOLBAR_ALBUM       BITMAP                  "res\\ToolbarAlbum.bmp"
+IDR_TOOLBAR_NAVIGATE    BITMAP                  "res\\ToolbarNavigate.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -101,9 +101,9 @@ IDR_TOOLBAR_ALBUM       BITMAP                  "res\\ToolbarAlbum.bmp"
 
 IDR_TOOLBAR_STANDARD    PNG                     "res\\ToolbarStandard.png"
 
-IDR_TOOLBAR_ALBUM       PNG                     "res\\ToolbarAlbum.png"
+IDR_TOOLBAR_NAVIGATE    PNG                     "res\\ToolbarNavigate.png"
 
-IDR_MAINFRAME           PNG                     "res\\Toolbar.png"
+IDR_MAINFRAME           PNG                     "res\\Toolbar_Old.png"
 
 IDR_APP_TOOL_STRIP      PNG                     "res\\AppToolStrip.png"
 
@@ -181,14 +181,14 @@ BEGIN
     BUTTON      IDW_SMOOTHING_MODE_CHECK
 END
 
-IDR_TOOLBAR_ALBUM TOOLBAR 16, 16
+IDR_TOOLBAR_NAVIGATE TOOLBAR 16, 16
 BEGIN
-    BUTTON      ID_TOGGLE_NAVIG_PLAY
-    SEPARATOR
     BUTTON      ID_NAVIG_SEEK_FIRST
     BUTTON      ID_NAVIG_SEEK_PREV
     BUTTON      ID_NAVIG_SEEK_NEXT
     BUTTON      ID_NAVIG_SEEK_LAST
+    SEPARATOR
+    BUTTON      ID_TOGGLE_NAVIG_PLAY
     SEPARATOR
     BUTTON      ID_TOGGLE_NAVIG_DIR_REV
     BUTTON      ID_TOGGLE_NAVIG_DIR_FWD
@@ -1141,7 +1141,7 @@ STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "Slider"
     IDR_TOOLBAR_STANDARD    "Standard"
-    IDR_TOOLBAR_ALBUM       "Album Navigation"
+    IDR_TOOLBAR_NAVIGATE    "Navigation"
     IDR_ALBUMTYPE           "\nAlbum\nAlbum\nAlbums (*.sld;*.ias)\n.sld;.ias\nSliderAlbum.Document\nSlider Album Document"
     IDR_IMAGETYPE           "\nImage\nImage\nImages (*.bmp)\n.bmp\nSliderImage.Document\nSlider Image Document"
 END

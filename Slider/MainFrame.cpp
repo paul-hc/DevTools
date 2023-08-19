@@ -226,15 +226,15 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	}
 
 	// create additional toolbar - use Create(), passing toolbar ID
-	if ( !m_albumToolBar.Create( this, mfc::AdditionalToolbarStyle, IDR_TOOLBAR_ALBUM ) ||
-		 !m_albumToolBar.LoadToolBar( IDR_TOOLBAR_ALBUM ) )
+	if ( !m_albumToolBar.Create( this, mfc::AdditionalToolbarStyle, IDR_TOOLBAR_NAVIGATE ) ||
+		 !m_albumToolBar.LoadToolBar( IDR_TOOLBAR_NAVIGATE ) )
 	{
 		TRACE( "Failed to create album toolbar\n" );
 		return FALSE;      // fail to create
 	}
 
 	m_standardToolBar.SetWindowText( str::Load( IDR_TOOLBAR_STANDARD ).c_str() );
-	m_albumToolBar.SetWindowText( str::Load( IDR_TOOLBAR_ALBUM ).c_str() );
+	m_albumToolBar.SetWindowText( str::Load( IDR_TOOLBAR_NAVIGATE ).c_str() );
 
 	CString customizeLabel;
 	VERIFY( customizeLabel.LoadString( ID_VIEW_CUSTOMIZE ) );

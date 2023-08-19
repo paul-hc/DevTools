@@ -334,12 +334,12 @@
     <Image Include="res\ImageDoc.ico" />
     <Image Include="res\Slider.ico" />
     <Image Include="res\SliderDoc.ico" />
-    <Image Include="res\Toolbar.bmp" />
-    <Image Include="res\Toolbar.png" />
-    <Image Include="res\ToolbarAlbum.bmp" />
-    <Image Include="res\ToolbarAlbum.png" />
+    <Image Include="res\ToolbarNavigate.bmp" />
+    <Image Include="res\ToolbarNavigate.png" />
     <Image Include="res\ToolbarStandard.bmp" />
     <Image Include="res\ToolbarStandard.png" />
+    <Image Include="res\Toolbar_Old.bmp" />
+    <Image Include="res\Toolbar_Old.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Slider.rc2" />

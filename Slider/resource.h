@@ -5,7 +5,7 @@
 #define IDD_ALBUMDIALOGBAR              106
 #define IDR_MAINFRAME                   128
 #define IDR_TOOLBAR_STANDARD            129
-#define IDR_TOOLBAR_ALBUM               130
+#define IDR_TOOLBAR_NAVIGATE            130
 #define IDR_ALBUMTYPE                   131
 #define IDR_IMAGETYPE                   132
 #define IDR_IMAGEVIEW                   141
@@ -205,7 +205,7 @@
 #define ID_UNREGISTER_IMAGE_ASSOC       32889
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
