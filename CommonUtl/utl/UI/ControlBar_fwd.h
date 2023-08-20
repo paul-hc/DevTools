@@ -48,6 +48,10 @@ namespace mfc
 }
 
 
+#include <afxtoolbar.h>
+#include <afxtoolbarbutton.h>
+
+
 namespace mfc
 {
 	// global control bars:
@@ -87,7 +91,7 @@ namespace mfc
 	}
 
 	template< typename ButtonT >
-	void QueryCommandButtons( OUT std::vector<ButtonT*>& rButtons, UINT btnId )
+	void QueryMatchingButtons( OUT std::vector<ButtonT*>& rButtons, UINT btnId )
 	{	// to sync other buttons on all toolbars that share the same btnId:
 		CObList buttonList;
 
@@ -100,7 +104,10 @@ namespace mfc
 
 
 	template< typename ButtonT >
-	inline ButtonT* FindNotifyingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, CMFCToolBar::IsLastCommandFromButton ); }
+	inline ButtonT* FindNotifyingMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, &CMFCToolBar::IsLastCommandFromButton ); }
+
+	template< typename ButtonT >
+	inline ButtonT* FindFocusedMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, std::mem_fun( &CMFCToolBarButton::HasFocus ) ); }
 }
 
 

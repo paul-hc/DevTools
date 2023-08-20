@@ -175,7 +175,7 @@ bool CMainFrame::OutputScalingMode( ui::ImageScalingMode scalingMode )
 
 ui::ImageScalingMode CMainFrame::InputScalingMode( void ) const
 {
-	mfc::CEnumComboBoxButton* pScalingCombo = mfc::FindNotifyingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO );
+	mfc::CEnumComboBoxButton* pScalingCombo = mfc::FindNotifyingMatchingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO );
 
 	ASSERT_PTR( pScalingCombo );
 	return pScalingCombo->GetEnum<ui::ImageScalingMode>();
