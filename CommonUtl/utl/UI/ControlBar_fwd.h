@@ -2,11 +2,14 @@
 #define ControlBar_fwd_h
 #pragma once
 
+#include "utl/Functional.h"
+
 
 class CBasePane;
 class CMFCToolBar;
 class CMFCStatusBar;
 class CMFCStatusBarPaneInfo;
+class CMFCToolBarButton;
 class CToolTipCtrl;
 class CDockingManager;
 
@@ -17,9 +20,10 @@ namespace mfc
 	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
 
 
-	// CMFCToolBar protected access:
+	// CMFCToolBar access:
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
-
+	CMFCToolBarButton* ToolBar_FindButton( const CMFCToolBar* pToolBar, UINT btnId );
+	bool ToolBar_RestoreOriginalState( CMFCToolBar* pToolBar );
 
 	// CMFCStatusBar protected access:
 	CMFCStatusBarPaneInfo* StatusBar_GetPaneInfo( const CMFCStatusBar* pStatusBar, int index );
@@ -31,12 +35,6 @@ namespace mfc
 
 namespace mfc
 {
-	// global control bars:
-
-	void QueryAllCustomizableControlBars( OUT std::vector<CMFCToolBar*>& rToolbars, CWnd* pFrameWnd = AfxGetMainWnd() );
-	void ResetAllControlBars( CWnd* pFrameWnd = AfxGetMainWnd() );
-
-
 	// FrameWnd:
 
 	enum FrameToolbarStyle
@@ -47,6 +45,62 @@ namespace mfc
 
 
 	void DockPanesOnRow( CDockingManager* pFrameDocManager, size_t barCount, CMFCToolBar* pFirstToolBar, ... );
+}
+
+
+namespace mfc
+{
+	// global control bars:
+
+	void QueryAllCustomizableControlBars( OUT std::vector<CMFCToolBar*>& rToolbars, CWnd* pFrameWnd = AfxGetMainWnd() );
+	void ResetAllControlBars( CWnd* pFrameWnd = AfxGetMainWnd() );
+
+
+	// CMFCToolBar algorithms:
+
+	template< typename ButtonT, typename FuncT >
+	inline FuncT ForEachMatchingButton( UINT btnId, FuncT func )
+	{
+		CObList buttonList;
+		CMFCToolBar::GetCommandButtons( btnId, buttonList );
+
+		for ( POSITION pos = buttonList.GetHeadPosition(); pos != NULL; )
+			func( checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) ) );
+
+		return func;
+	}
+
+	template< typename ButtonT, typename UnaryPred >
+	ButtonT* FindMatchingButtonThat( UINT btnId, UnaryPred pred )		// find first ID-matching button satisfying the predicate
+	{
+		CObList buttonList;
+		CMFCToolBar::GetCommandButtons( btnId, buttonList );
+
+		for ( POSITION pos = buttonList.GetHeadPosition(); pos != NULL; )
+		{
+			ButtonT* pButton = checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) );
+			if ( pred( pButton ) )
+				return pButton;
+		}
+
+		return nullptr;
+	}
+
+	template< typename ButtonT >
+	void QueryCommandButtons( OUT std::vector<ButtonT*>& rButtons, UINT btnId )
+	{	// to sync other buttons on all toolbars that share the same btnId:
+		CObList buttonList;
+
+		CMFCToolBar::GetCommandButtons( btnId, buttonList );
+		rButtons.reserve( buttonList.GetSize() );
+
+		for ( POSITION pos = buttonList.GetHeadPosition(); pos != NULL; )
+			rButtons.push_back( checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) ) );
+	}
+
+
+	template< typename ButtonT >
+	inline ButtonT* FindNotifyingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, CMFCToolBar::IsLastCommandFromButton ); }
 }
 
 

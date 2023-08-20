@@ -139,7 +139,6 @@ namespace mfc
 
 
 	CMFCPopupMenu* GetSafePopupMenu( CMFCPopupMenu* pPopupMenu );
-	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId );
 	CMFCToolBarButton* FindBarButton( const CMFCPopupMenu* pPopupMenu, UINT btnId );
 
 	CMFCColorBar* GetColorMenuBar( const CMFCPopupMenu* pColorPopupMenu );

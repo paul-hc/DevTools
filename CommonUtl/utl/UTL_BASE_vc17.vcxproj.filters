@@ -460,6 +460,9 @@
     <ClInclude Include="test\GridLayoutTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="Functional.h">
+      <Filter>utl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

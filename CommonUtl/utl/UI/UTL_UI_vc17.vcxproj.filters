@@ -680,6 +680,9 @@
     <ClInclude Include="ControlBar_fwd.h">
       <Filter>UI\MFC+</Filter>
     </ClInclude>
+    <ClInclude Include="ToolbarButtons.h">
+      <Filter>UI\MFC+</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1157,6 +1160,9 @@
       <Filter>UI\Service</Filter>
     </ClCompile>
     <ClCompile Include="ControlBar_fwd.cpp">
+      <Filter>UI\MFC+</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolbarButtons.cpp">
       <Filter>UI\MFC+</Filter>
     </ClCompile>
   </ItemGroup>

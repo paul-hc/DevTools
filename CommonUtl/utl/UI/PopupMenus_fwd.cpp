@@ -118,13 +118,13 @@ namespace mfc
 
 	bool RegisterCmdImageAlias( UINT aliasCmdId, UINT imageCmdId )
 	{
-		ASSERT_PTR( afxCommandManager );
+		ASSERT_PTR( GetCmdMgr() );
 		// register command image alias for MFC control-bars
-		int iconImagePos = afxCommandManager->GetCmdImage( imageCmdId );
+		int iconImagePos = GetCmdMgr()->GetCmdImage( imageCmdId );
 
 		if ( iconImagePos != -1 )
 		{
-			afxCommandManager->SetCmdImage( aliasCmdId, iconImagePos, false );
+			GetCmdMgr()->SetCmdImage( aliasCmdId, iconImagePos, false );
 			return true;			// image registered for alias command
 		}
 
@@ -142,7 +142,7 @@ namespace mfc
 
 	CScopedCmdImageAliases::CScopedCmdImageAliases( UINT aliasCmdId, UINT imageCmdId )
 	{
-		m_oldCmdImages.push_back( TCmdImagePair( aliasCmdId, afxCommandManager->GetCmdImage( imageCmdId ) ) );		// store original image index
+		m_oldCmdImages.push_back( TCmdImagePair( aliasCmdId, GetCmdMgr()->GetCmdImage( imageCmdId ) ) );		// store original image index
 		mfc::RegisterCmdImageAlias( aliasCmdId, imageCmdId );
 	}
 
@@ -152,20 +152,20 @@ namespace mfc
 
 		for ( size_t i = 0; i != count; ++i )
 		{
-			m_oldCmdImages.push_back( TCmdImagePair( cmdAliases[i].m_cmdId, afxCommandManager->GetCmdImage( cmdAliases[i].m_cmdId ) ) );	// store original image index
+			m_oldCmdImages.push_back( TCmdImagePair( cmdAliases[i].m_cmdId, GetCmdMgr()->GetCmdImage( cmdAliases[i].m_cmdId ) ) );	// store original image index
 			RegisterCmdImageAlias( cmdAliases[i].m_cmdId, cmdAliases[i].m_imageCmdId );
 		}
 	}
 
 	CScopedCmdImageAliases::~CScopedCmdImageAliases()
 	{
-		ASSERT_PTR( afxCommandManager );
+		ASSERT_PTR( GetCmdMgr() );
 
 		for ( std::vector<TCmdImagePair>::const_iterator itPair = m_oldCmdImages.begin(); itPair != m_oldCmdImages.end(); ++itPair )
 			if ( itPair->second != -1 )
-				afxCommandManager->SetCmdImage( itPair->first, itPair->second, false );
+				GetCmdMgr()->SetCmdImage( itPair->first, itPair->second, false );
 			else
-				afxCommandManager->ClearCmdImage( itPair->first );
+				GetCmdMgr()->ClearCmdImage( itPair->first );
 	}
 }
 
@@ -236,7 +236,7 @@ namespace mfc
 
 	int Button_FindImageIndex( UINT btnId, bool userImage /*= false*/ )
 	{
-		return afxCommandManager->GetCmdImage( btnId, userImage );
+		return GetCmdMgr()->GetCmdImage( btnId, userImage );
 	}
 
 	CRect Button_GetImageRect( const CMFCToolBarButton* pButton, bool bounds /*= true*/ )
@@ -286,17 +286,9 @@ namespace mfc
 		return nullptr;
 	}
 
-	CMFCToolBarButton* FindToolBarButton( const CMFCToolBar* pToolBar, UINT btnId )
-	{
-		ASSERT_PTR( pToolBar );
-		int btnIndex = pToolBar->CommandToIndex( btnId );
-
-		return btnIndex != -1 ? pToolBar->GetButton( btnIndex ) : nullptr;
-	}
-
 	CMFCToolBarButton* FindBarButton( const CMFCPopupMenu* pPopupMenu, UINT btnId )
 	{	// buttons reside in the embedded bar
-		return pPopupMenu != nullptr ? FindToolBarButton( const_cast<CMFCPopupMenu*>( pPopupMenu )->GetMenuBar(), btnId ) : nullptr;
+		return pPopupMenu != nullptr ? ToolBar_FindButton( const_cast<CMFCPopupMenu*>( pPopupMenu )->GetMenuBar(), btnId ) : nullptr;
 	}
 
 

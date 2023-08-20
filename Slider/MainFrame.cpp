@@ -12,6 +12,7 @@
 #include "utl/UI/BaseZoomView.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/StatusProgressService.h"
+#include "utl/UI/ToolbarButtons.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
@@ -43,7 +44,7 @@ IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWndEx )
 
 CMainFrame::CMainFrame( void )
 	: TMDIFrameWndEx()
-	, m_pToolbar( new CMainToolbar() )
+	, m_pOldToolbar( new CMainToolbar() )
 	, m_messageClearTimer( this, MessageTimerId, 5000 )
 	, m_ddeEnqueuedTimer( this, QueueTimerId, 750 )
 {
@@ -84,8 +85,9 @@ void CMainFrame::StartEnqueuedAlbumTimer( UINT timerDelay /*= 750*/ )
 
 bool CMainFrame::CancelStatusBarAutoClear( UINT idleMessageID /*= AFX_IDS_IDLEMESSAGE*/ )
 {
-	if ( !IsStatusBarAutoClear() )
+	if ( !m_messageClearTimer.IsStarted() )
 		return false;
+
 	SetIdleStatusBarMessage( idleMessageID );
 	return true;
 }
@@ -162,6 +164,68 @@ bool CMainFrame::ResizeViewToFit( CBaseZoomView* pZoomScrollView )
 	return true;
 }
 
+
+// ui::IZoomBar interface
+
+bool CMainFrame::OutputScalingMode( ui::ImageScalingMode scalingMode )
+{
+	mfc::ForEachMatchingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO, func::MakeSetter( &mfc::CEnumComboBoxButton::SetValue, (int)scalingMode ) );
+	return true;
+}
+
+ui::ImageScalingMode CMainFrame::InputScalingMode( void ) const
+{
+	mfc::CEnumComboBoxButton* pScalingCombo = mfc::FindNotifyingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO );
+
+	ASSERT_PTR( pScalingCombo );
+	return pScalingCombo->GetEnum<ui::ImageScalingMode>();
+}
+
+bool CMainFrame::OutputZoomPct( UINT zoomPct )
+{
+//	std::auto_ptr<CZoomComboBox> m_pZoomCombo;
+//	return m_pZoomCombo->OutputValue( zoomPct );
+/*TMP*/	return m_pOldToolbar->OutputZoomPct( zoomPct );
+}
+
+UINT CMainFrame::InputZoomPct( ui::ComboField byField ) const
+{
+	/*TMP*/	return m_pOldToolbar->InputZoomPct( byField );
+}
+
+// INavigationBar interface
+
+bool CMainFrame::OutputNavigRange( UINT imageCount )
+{
+/*TMP*/	return m_pOldToolbar->OutputNavigRange( imageCount );
+}
+
+bool CMainFrame::OutputNavigPos( int imagePos )
+{
+/*TMP*/	return m_pOldToolbar->OutputNavigPos( imagePos );
+}
+
+int CMainFrame::InputNavigPos( void ) const
+{
+/*TMP*/	return m_pOldToolbar->InputNavigPos();
+}
+
+
+void CMainFrame::HandleResetToolbar( UINT toolBarResId )
+{	// called after loading each toolbar from resource to initialize custom buttons
+	switch ( toolBarResId )
+	{
+		case IDR_TOOLBAR_STANDARD:
+		{
+			mfc::CEnumComboBoxButton scalingButton( IDW_IMAGE_SCALING_COMBO, &ui::GetTags_ImageScalingMode(), ScalingModeComboWidth );
+			m_standardToolBar.ReplaceButton( IDW_IMAGE_SCALING_COMBO, scalingButton );
+			break;
+		}
+		case IDR_TOOLBAR_NAVIGATE:
+			break;
+	}
+}
+
 BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	CPushRoutingFrame push( this );
@@ -169,7 +233,7 @@ BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINF
 	return
 		__super::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||				// first allow the active view/doc to override central command handlers
 		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
-		m_pToolbar->HandleCmdMsg( cmdId, code, pExtra, pHandlerInfo );
+		m_pOldToolbar->HandleCmdMsg( cmdId, code, pExtra, pHandlerInfo );
 }
 
 
@@ -184,6 +248,7 @@ BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWndEx )
 	ON_WM_SHOWWINDOW()
 	ON_WM_DROPFILES()
 	ON_WM_TIMER()
+	ON_REGISTERED_MESSAGE( AFX_WM_RESETTOOLBAR, OnResetToolbar )
 	ON_COMMAND( ID_CM_ESCAPE_KEY, On_MdiClose )
 	ON_COMMAND( ID_CM_MDI_CLOSE_ALL, On_MdiCloseAll )
 	ON_UPDATE_COMMAND_UI( ID_CM_MDI_CLOSE_ALL, OnUpdateAnyMDIChild )
@@ -226,21 +291,22 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	}
 
 	// create additional toolbar - use Create(), passing toolbar ID
-	if ( !m_albumToolBar.Create( this, mfc::AdditionalToolbarStyle, IDR_TOOLBAR_NAVIGATE ) ||
-		 !m_albumToolBar.LoadToolBar( IDR_TOOLBAR_NAVIGATE ) )
+	if ( !m_navigateToolBar.Create( this, mfc::AdditionalToolbarStyle, IDR_TOOLBAR_NAVIGATE ) ||
+		 !m_navigateToolBar.LoadToolBar( IDR_TOOLBAR_NAVIGATE ) )
 	{
 		TRACE( "Failed to create album toolbar\n" );
 		return FALSE;      // fail to create
 	}
 
 	m_standardToolBar.SetWindowText( str::Load( IDR_TOOLBAR_STANDARD ).c_str() );
-	m_albumToolBar.SetWindowText( str::Load( IDR_TOOLBAR_NAVIGATE ).c_str() );
+	m_navigateToolBar.SetWindowText( str::Load( IDR_TOOLBAR_NAVIGATE ).c_str() );
+	m_navigateToolBar.SetToolBarBtnText( m_navigateToolBar.CommandToIndex( ID_TOGGLE_NAVIG_PLAY ), _T("Play") );
 
 	CString customizeLabel;
 	VERIFY( customizeLabel.LoadString( ID_VIEW_CUSTOMIZE ) );
 
 	m_standardToolBar.EnableCustomizeButton( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel );
-	m_albumToolBar.EnableCustomizeButton( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel );
+	m_navigateToolBar.EnableCustomizeButton( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel );
 
 	// Allow user-defined toolbars operations:
 	InitUserToolbars( nullptr, FirstUserToolBarId, LastUserToolBarId );
@@ -262,11 +328,11 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	// TODO: Delete these five lines if you don't want the toolbar and menubar to be dockable
 	m_menuBar.EnableDocking( CBRS_ALIGN_ANY );
 	m_standardToolBar.EnableDocking( CBRS_ALIGN_ANY );
-	m_albumToolBar.EnableDocking( CBRS_ALIGN_ANY );
+	m_navigateToolBar.EnableDocking( CBRS_ALIGN_ANY );
 	EnableDocking( CBRS_ALIGN_ANY );
 
 	DockPane( &m_menuBar );
-	mfc::DockPanesOnRow( GetDockingManager(), 2, &m_standardToolBar, &m_albumToolBar );
+	mfc::DockPanesOnRow( GetDockingManager(), 2, &m_standardToolBar, &m_navigateToolBar );
 
 
 	// enable Visual Studio 2005 style docking window behavior
@@ -281,6 +347,9 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	CMFCToolBar::EnableQuickCustomization();			// enable quick (Alt+drag) toolbar customization
 
 
+	OutputScalingMode( CWorkspace::GetData().m_scalingMode );
+
+
 
 
 	/*** OLD Toolbars ***/
@@ -292,20 +361,20 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	if ( CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
 		pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
 
-	if ( !m_pToolbar->CreateEx( this, TBSTYLE_FLAT | TBSTYLE_TRANSPARENT,
+	if ( !m_pOldToolbar->CreateEx( this, TBSTYLE_FLAT | TBSTYLE_TRANSPARENT,
 								WS_CHILD | WS_VISIBLE |
 								CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC,
 								CRect( 0, 2, 0, 2 ) ) ||
-		 !m_pToolbar->InitToolbar() )
+		 !m_pOldToolbar->InitToolbar() )
 	{
 		TRACE( "Failed to create toolbar\n" );
 		return -1;	  // fail to create
 	}
 
 	// TODO: delete these three lines if you don't want the toolbar to be dockable
-	m_pToolbar->EnableDocking( CBRS_ALIGN_ANY );
+	m_pOldToolbar->EnableDocking( CBRS_ALIGN_ANY );
 //	EnableDocking( CBRS_ALIGN_ANY );
-//	DockControlBar( m_pToolbar.get() );
+//	DockControlBar( m_pOldToolbar.get() );
 	return 0;
 }
 
@@ -319,6 +388,12 @@ void CMainFrame::OnClose( void )
 {
 	CWorkspace::Instance().FetchSettings();
 	__super::OnClose();
+}
+
+LRESULT CMainFrame::OnResetToolbar( WPARAM toolBarResId, LPARAM )
+{
+	HandleResetToolbar( static_cast<UINT>( toolBarResId ) );
+	return 0L;
 }
 
 void CMainFrame::OnGetMinMaxInfo( MINMAXINFO* mmi )

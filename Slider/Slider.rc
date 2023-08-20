@@ -225,14 +225,14 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
+        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
         POPUP "&Toolbars"
         BEGIN
             MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM "<app-look-popup>",            ID_APPLOOK_POPUP
-        MENUITEM SEPARATOR
-        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
         MENUITEM SEPARATOR
         MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
         MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
@@ -337,6 +337,8 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
+        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
         POPUP "&Toolbars"
         BEGIN
             MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
@@ -346,8 +348,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Album Info &Bar\tCtrl+B",     ID_VIEW_ALBUMDIALOGBAR
         MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
-        MENUITEM SEPARATOR
-        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
         MENUITEM SEPARATOR
         POPUP "&Auto Image Size"
         BEGIN
@@ -437,6 +437,8 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
+        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
         POPUP "&Toolbars"
         BEGIN
             MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
@@ -452,8 +454,6 @@ BEGIN
             MENUITEM "&Begin\tHome",                ID_NAVIG_SEEK_FIRST
             MENUITEM "&End\tEnd",                   ID_NAVIG_SEEK_LAST
         END
-        MENUITEM SEPARATOR
-        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
         MENUITEM SEPARATOR
         POPUP "&Auto Image Size"
         BEGIN

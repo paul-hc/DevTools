@@ -115,12 +115,15 @@ namespace mfc
 		virtual BOOL OpenColorDialog( const COLORREF colorDefault, OUT COLORREF& rColor ) overrides(CMFCColorMenuButton);
 		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages, BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE,
 							 BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) overrides(CMFCColorMenuButton);
+		virtual void OnChangeParentWnd( CWnd* pWndParent );
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCColorMenuButton);
 		virtual CMFCPopupMenu* CreatePopupMenu( void ) overrides(CMFCColorMenuButton);
 	private:
-		const CColorTable* m_pColorTable;			// required field
-		ui::IColorEditorHost* m_pEditorHost;		// optional field; if null, it sends CMBN_COLORSELECTED notifications
+		rebound const CColorTable* m_pColorTable;		// required field
+		rebound ui::IColorEditorHost* m_pEditorHost;	// optional field; if null, it sends CMBN_COLORSELECTED notifications
+
+		enum PtrDataMemberPos { PosColorTable, PosEditorHost };
 	};
 }
 

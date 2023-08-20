@@ -58,6 +58,23 @@ namespace mfc
 		return mfc::nosy_cast<nosy::CToolBar_>( pToolBar )->GetToolTip();
 	}
 
+	CMFCToolBarButton* ToolBar_FindButton( const CMFCToolBar* pToolBar, UINT btnId )
+	{
+		ASSERT_PTR( pToolBar );
+		int btnIndex = pToolBar->CommandToIndex( btnId );
+
+		return btnIndex != -1 ? pToolBar->GetButton( btnIndex ) : nullptr;
+	}
+
+	bool ToolBar_RestoreOriginalState( CMFCToolBar* pToolBar )
+	{
+	#if _MFC_VER > 0x0900		// newer MFC version?
+		return pToolBar->RestoreOriginalState() != FALSE;
+	#else
+		return pToolBar->RestoreOriginalstate() != FALSE;		// workaround typo in older MFC
+	#endif
+	}
+
 
 	// CMFCStatusBar access
 
@@ -120,7 +137,7 @@ namespace mfc
 
 		for ( std::vector<CMFCToolBar*>::const_iterator itToolbar = toolbars.begin(); itToolbar != toolbars.end(); ++itToolbar )
 			if ( (*itToolbar)->CanBeRestored() )
-				(*itToolbar)->RestoreOriginalState();
+				mfc::ToolBar_RestoreOriginalState( *itToolbar );
 
 		// TODO: check whether we need to re-assign the command aliases after this!
 	}

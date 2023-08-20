@@ -1921,6 +1921,14 @@
 					RelativePath=".\PopupMenus_fwd.h"
 					>
 				</File>
+				<File
+					RelativePath=".\ToolbarButtons.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolbarButtons.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Color"

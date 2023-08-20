@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "PopupMenus.h"
 #include "ControlBar_fwd.h"
+#include "ToolbarButtons.h"
 #include "MenuUtilities.h"
 #include "ContextMenuMgr.h"
 #include "ColorRepository.h"
@@ -260,6 +261,7 @@ namespace mfc
 		, m_pEditorHost( nullptr )
 	{
 		ASSERT_PTR( m_pColorTable );
+		mfc::CToolbarButtonsRefBinder::Instance()->RegisterPointer( m_nID, PosColorTable, m_pColorTable );
 
 		SetImage( -1 );			// mark as unselected by default
 
@@ -281,6 +283,7 @@ namespace mfc
 	void CColorMenuButton::SetEditorHost( ui::IColorEditorHost* pEditorHost )
 	{
 		m_pEditorHost = pEditorHost;
+		mfc::CToolbarButtonsRefBinder::Instance()->RegisterPointer( m_nID, PosEditorHost, m_pEditorHost );
 
 		if ( m_pEditorHost != nullptr && m_pColorTable == m_pEditorHost->GetSelColorTable() )		// button of the selected table?
 			SetSelectedTable( m_pEditorHost->GetColor(), m_pEditorHost->GetAutoColor(), m_pEditorHost->GetDocColorTable() );
@@ -415,6 +418,18 @@ namespace mfc
 
 		m_pColorTable = srcButton.m_pColorTable;
 		m_pEditorHost = srcButton.m_pEditorHost;
+	}
+
+	void CColorMenuButton::OnChangeParentWnd( CWnd* pWndParent )
+	{
+		__super::OnChangeParentWnd( pWndParent );
+
+		// when this a button is used on a persistent toolbar: re-bind pointers if parent toolbar is loading state (de-serializing):
+		if ( nullptr == m_pColorTable )		// parent toolbar is loading state (de-serializing)?
+			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pColorTable, m_nID, PosColorTable );
+
+		if ( nullptr == m_pEditorHost )		// parent toolbar is loading state (de-serializing)?
+			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pEditorHost, m_nID, PosEditorHost );
 	}
 
 	void CColorMenuButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,

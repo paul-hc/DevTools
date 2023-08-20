@@ -47,7 +47,8 @@ CImageView::CImageView( void )
 	m_minContentSize.cx = 145;		// avoid very small view sizes (for icons, etc)
 	m_minContentSize.cy = 64;
 
-	SetZoomBar( app::GetMainFrame()->GetToolbar() );
+	SetZoomBar( app::GetMainFrame()->GetZoomBar() );
+	//SetZoomBar( app::GetMainFrame()->GetToolbar() );
 	SetScaleZoom( CWorkspace::GetData().m_scalingMode, 100 );
 	SetFlag( RefViewStatusFlags(), ui::FullScreen, CWorkspace::Instance().IsFullScreen() );			// copy the actual FullScreen status
 }
@@ -290,7 +291,9 @@ BEGIN_MESSAGE_MAP( CImageView, TBaseClass )
 	ON_COMMAND( ID_RESIZE_VIEW_TO_FIT, CmResizeViewToFit )
 	ON_COMMAND( ID_EDIT_BK_COLOR, On_EditBkColor )
 	ON_COMMAND_RANGE( CM_SCROLL_LEFT, CM_SCROLL_PAGE_DOWN, CmScroll )
-	ON_CBN_SELCHANGE( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
+	ON_COMMAND( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
+	ON_CBN_SELENDOK( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
+	//ON_CBN_SELCHANGE( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
 	ON_CBN_SELCHANGE( IDW_ZOOM_COMBO, OnCBnSelChange_ZoomCombo )
 	// standard printing
 	ON_COMMAND( ID_FILE_PRINT, CScrollView::OnFilePrint )
