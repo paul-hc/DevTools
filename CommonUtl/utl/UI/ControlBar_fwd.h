@@ -25,11 +25,16 @@ namespace mfc
 	CMFCToolBarButton* ToolBar_FindButton( const CMFCToolBar* pToolBar, UINT btnId );
 	bool ToolBar_RestoreOriginalState( CMFCToolBar* pToolBar );
 
+
 	// CMFCStatusBar protected access:
 	CMFCStatusBarPaneInfo* StatusBar_GetPaneInfo( const CMFCStatusBar* pStatusBar, int index );
 	int StatusBar_CalcPaneTextWidth( const CMFCStatusBar* pStatusBar, const CMFCStatusBarPaneInfo* pPaneInfo );
 	inline int StatusBar_CalcPaneTextWidth( const CMFCStatusBar* pStatusBar, int index ) { return StatusBar_CalcPaneTextWidth( pStatusBar, StatusBar_GetPaneInfo( pStatusBar, index ) ); }
 	int StatusBar_ResizePaneToFitText( OUT CMFCStatusBar* pStatusBar, int index );
+
+
+	// CMFCToolBarButton access:
+	void ToolBarButton_Redraw( CMFCToolBarButton* pButton );
 }
 
 
@@ -63,7 +68,7 @@ namespace mfc
 	// CMFCToolBar algorithms:
 
 	template< typename ButtonT, typename FuncT >
-	inline FuncT ForEachMatchingButton( UINT btnId, FuncT func )
+	FuncT ForEachMatchingButton( UINT btnId, FuncT func )
 	{
 		CObList buttonList;
 		CMFCToolBar::GetCommandButtons( btnId, buttonList );
@@ -101,6 +106,9 @@ namespace mfc
 		for ( POSITION pos = buttonList.GetHeadPosition(); pos != NULL; )
 			rButtons.push_back( checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) ) );
 	}
+
+
+	inline void RedrawMatchingButtons( UINT btnId ) { ForEachMatchingButton<CMFCToolBarButton>( btnId, &mfc::ToolBarButton_Redraw ); }
 
 
 	template< typename ButtonT >

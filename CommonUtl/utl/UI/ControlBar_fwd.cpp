@@ -105,6 +105,25 @@ namespace mfc
 
 		return pPaneInfo->cxText;
 	}
+
+
+	// CMFCToolBarButton access:
+
+	void ToolBarButton_Redraw( CMFCToolBarButton* pButton )
+	{
+		ASSERT_PTR( pButton );
+
+		if ( pButton->GetParentWnd()->GetSafeHwnd() != nullptr )
+		{
+			CRect rect = pButton->GetInvalidateRect();
+
+			rect.InflateRect( 2, 2 );
+			pButton->GetParentWnd()->RedrawWindow( &rect, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_FRAME );
+		}
+
+		if ( HWND hCtrl = pButton->GetHwnd() )
+			::RedrawWindow( hCtrl, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_FRAME );
+	}
 }
 
 

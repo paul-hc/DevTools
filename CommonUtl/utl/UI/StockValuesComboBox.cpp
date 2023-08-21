@@ -38,7 +38,7 @@ namespace ui
 		return num::FormatNumber( ToDisplayValue( miliseconds ) ) + _T(" sec");
 	}
 
-	bool CDurationInSecondsAdapter::ParseValue( UINT* pOutMiliseconds, const std::tstring& text ) const
+	bool CDurationInSecondsAdapter::ParseValue( OUT UINT* pOutMiliseconds, const std::tstring& text ) const
 	{
 		ASSERT_PTR( pOutMiliseconds );
 
@@ -68,7 +68,7 @@ namespace ui
 		return str::Format( _T("%d %%"), zoomPct );
 	}
 
-	bool CPercentageAdapterBase::ParseValue( UINT* pOutZoomPct, const std::tstring& text ) const
+	bool CPercentageAdapterBase::ParseValue( OUT UINT* pOutZoomPct, const std::tstring& text ) const
 	{
 		ASSERT_PTR( pOutZoomPct );
 

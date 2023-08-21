@@ -24,7 +24,7 @@ namespace ui
 
 		virtual const std::vector<ValueT>& GetStockValues( void ) const = 0;
 		virtual std::tstring OutputValue( const ValueT& value ) const = 0;
-		virtual bool ParseValue( ValueT* pOutValue, const std::tstring& text ) const = 0;
+		virtual bool ParseValue( OUT ValueT* pOutValue, const std::tstring& text ) const = 0;
 	};
 
 
@@ -56,7 +56,7 @@ namespace ui
 		// IValueSetAdapter<UINT> interface
 		virtual const std::vector<UINT>& GetStockValues( void ) const;
 		virtual std::tstring OutputValue( const UINT& miliseconds ) const;
-		virtual bool ParseValue( UINT* pOutMiliseconds, const std::tstring& text ) const;
+		virtual bool ParseValue( OUT UINT* pOutMiliseconds, const std::tstring& text ) const;
 
 		// IDisplayValueSetAdapter<UINT, double> interface
 		virtual double ToDisplayValue( const UINT& miliseconds ) const;
@@ -76,7 +76,7 @@ namespace ui
 
 		// IValueSetAdapter<UINT> interface
 		virtual std::tstring OutputValue( const UINT& zoomPct ) const;
-		virtual bool ParseValue( UINT* pOutZoomPct, const std::tstring& text ) const;
+		virtual bool ParseValue( OUT UINT* pOutZoomPct, const std::tstring& text ) const;
 	};
 
 

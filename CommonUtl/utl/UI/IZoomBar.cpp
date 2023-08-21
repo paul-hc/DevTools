@@ -20,7 +20,7 @@ namespace ui
 
 	CStdZoom& CStdZoom::Instance( void )
 	{
-		static CStdZoom stdZoomInfo;
-		return stdZoomInfo;
+		static CStdZoom s_stdZoomInfo;
+		return s_stdZoomInfo;
 	}
 }
