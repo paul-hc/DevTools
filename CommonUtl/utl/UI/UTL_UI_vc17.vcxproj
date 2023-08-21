@@ -213,6 +213,8 @@
     <ClInclude Include="CtrlUiState.h" />
     <ClInclude Include="CustomDrawImager.h" />
     <ClInclude Include="CustomDrawImager_fwd.h" />
+    <ClInclude Include="DataAdapters.h" />
+    <ClInclude Include="DataAdapters_fwd.h" />
     <ClInclude Include="DateTimeControl.h" />
     <ClInclude Include="DesktopDC.h" />
     <ClInclude Include="DetailIconButton.h" />
@@ -409,6 +411,7 @@
     <ClCompile Include="Control_fwd.cpp" />
     <ClCompile Include="CtrlUiState.cpp" />
     <ClCompile Include="CustomDrawImager.cpp" />
+    <ClCompile Include="DataAdapters.cpp" />
     <ClCompile Include="DateTimeControl.cpp" />
     <ClCompile Include="DesktopDC.cpp" />
     <ClCompile Include="DetailIconButton.cpp" />

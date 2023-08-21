@@ -4,6 +4,7 @@
 
 #include "utl/StdHashValue.h"
 #include "ui_fwd.h"
+#include "DataAdapters.h"
 #include <afxtoolbarcomboboxbutton.h>
 #include <unordered_map>
 
@@ -84,103 +85,37 @@ namespace mfc
 }
 
 
-interface IValueTags
-{
-	virtual void QueryStockTags( OUT std::vector<std::tstring>& rTags ) const = 0;
-	virtual std::tstring GetTag( void ) const = 0;
-	virtual bool StoreTag( const std::tstring& tag ) = 0;
-};
-
-
-template< typename ValueT >
-interface IValueAdapter
-{
-	virtual std::tstring FormatValue( const ValueT& value ) const = 0;
-	virtual bool ParseValue( OUT ValueT* pOutValue, const std::tstring& text ) const = 0;
-};
-
-
-template< typename ValueT >
-class CStockValues : public IValueTags
-{
-public:
-	CStockValues( IValueAdapter<ValueT> pAdapter, ValueT value, const TCHAR* pStockTags )
-		: m_pAdapter( pAdapter )
-		, m_value( value )
-	{
-		SplitStockTags( pStockTags );
-	}
-
-	~CStockValues() {}
-
-	ValueT GetValue( void ) const { return m_value; }
-	void SetValue( ValueT value ) { m_value = value; }
-
-
-	// IValueTags interface
-
-	virtual void QueryStockTags( OUT std::vector<std::tstring>& rTags ) const implement
-	{
-		rTags.reserve( m_stockValues.size() );
-		for ( typename std::vector<ValueT>::const_iterator itValue = m_stockValues.begin(); itValue != m_stockValues.end(); ++itValue )
-			rTags.push_back( m_pAdapter->FormatValue( *itValue ) );
-	}
-
-	virtual std::tstring GetTag( void ) const implement
-	{
-		return m_pAdapter->FormatValue( m_value );
-	}
-
-	virtual bool StoreTag( const std::tstring& tag ) implement
-	{
-		return m_pAdapter->ParseValue( &m_value, tag );
-	}
-
-
-	void SplitStockTags( const TCHAR* pStockTags )
-	{
-		std::vector<std::tstring> stockTags;
-		str::Split( stockTags, pStockTags, _T("|") );
-
-		m_stockValues.reserve( stockTags.size() );
-		for ( std::vector<std::tstring>::const_iterator itTag = stockTags.begin(); itTag != stockTags.end(); ++itTag )
-		{
-			ValueT value;
-
-			if ( m_pAdapter->ParseValue( &value, *itTag ) )
-				m_stockValues.push_back( value );
-			else
-				ASSERT( false );		// parsing error in pStockTags?
-		}
-	}
-private:
-	IValueAdapter<ValueT> m_pAdapter;
-	ValueT m_value;
-	std::vector<ValueT> m_stockValues;
-};
-
-
 namespace mfc
 {
 	class CStockValuesComboBoxButton : public CMFCToolBarComboBoxButton
+		, private ui::IValueEditorHost
 	{
 		DECLARE_SERIAL( CStockValuesComboBoxButton )
 	protected:
 		CStockValuesComboBoxButton( void );
 	public:
-		CStockValuesComboBoxButton( UINT btnId, IValueTags* pValueTags, int width, DWORD dwStyle = CBS_DROPDOWN | CBS_DISABLENOSCROLL );
+		CStockValuesComboBoxButton( UINT btnId, ui::IValueTags* pValueTags, int width, DWORD dwStyle = CBS_DROPDOWN | CBS_DISABLENOSCROLL );
 		virtual ~CStockValuesComboBoxButton();
 
-		const IValueTags* GetTags( void ) const { return m_pValueTags; }
-		void SetTags( IValueTags* pValueTags );
+		const ui::IValueTags* GetTags( void ) const { return m_pValueTags; }
+
+		template< typename StockValuesT >
+		StockValuesT* GetTagsAs( void ) { return checked_static_cast<StockValuesT*>( m_pValueTags ); }
+	private:
+		void SetTags( ui::IValueTags* pValueTags );
+
+		// ui::IValueEditorHost interface
+		virtual void OutputValue( void ) implements(ui::IValueEditorHost);
+		virtual void OnInputError( void ) implements(ui::IValueEditorHost);
 
 		// base overrides
+	public:
 		virtual void OnChangeParentWnd( CWnd* pWndParent );
 		virtual BOOL CanBeStretched( void ) const { return true; }
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCToolBarComboBoxButton);
 	private:
-		rebound IValueTags* m_pValueTags;
+		rebound ui::IValueTags* m_pValueTags;
 	};
 }
 

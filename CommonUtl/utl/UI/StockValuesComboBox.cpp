@@ -80,8 +80,8 @@ namespace ui
 
 	CZoomPercentageAdapter::IAdapterBase* CZoomPercentageAdapter::Instance( void )
 	{
-		static CZoomPercentageAdapter s_zoomPercentageAdapter;
-		return &s_zoomPercentageAdapter;
+		static CZoomPercentageAdapter s_zoomPct;
+		return &s_zoomPct;
 	}
 
 	const std::vector<UINT>& CZoomPercentageAdapter::GetStockValues( void ) const
@@ -93,7 +93,7 @@ namespace ui
 
 // CDurationComboBox implementation
 
-CDurationComboBox::CDurationComboBox( ui::TValueSetFlags flags /*= ui::LimitMinValue*/, const ui::IValueSetAdapter<UINT>* pStockAdapter /*= ui::CDurationInSecondsAdapter::Instance()*/ )
+CDurationComboBox::CDurationComboBox( ui::TStockValueFlags flags /*= ui::LimitMinValue*/, const ui::IValueSetAdapter<UINT>* pStockAdapter /*= ui::CDurationInSecondsAdapter::Instance()*/ )
 	: CStockValuesComboBox<UINT>( pStockAdapter, flags )
 {
 }
@@ -101,7 +101,7 @@ CDurationComboBox::CDurationComboBox( ui::TValueSetFlags flags /*= ui::LimitMinV
 
 // CZoomComboBox implementation
 
-CZoomComboBox::CZoomComboBox( ui::TValueSetFlags flags /*= ui::LimitMinValue | ui::LimitMaxValue*/,
+CZoomComboBox::CZoomComboBox( ui::TStockValueFlags flags /*= ui::LimitMinValue | ui::LimitMaxValue*/,
 							  const ui::IValueSetAdapter<UINT>* pStockAdapter /*= ui::CZoomPercentageAdapter::Instance()*/ )
 	: CStockValuesComboBox<UINT>( pStockAdapter, flags )
 {

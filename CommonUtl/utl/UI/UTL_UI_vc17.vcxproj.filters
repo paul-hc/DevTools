@@ -683,6 +683,12 @@
     <ClInclude Include="ToolbarButtons.h">
       <Filter>UI\MFC+</Filter>
     </ClInclude>
+    <ClInclude Include="DataAdapters.h">
+      <Filter>UI\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="DataAdapters_fwd.h">
+      <Filter>UI\Service</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1164,6 +1170,9 @@
     </ClCompile>
     <ClCompile Include="ToolbarButtons.cpp">
       <Filter>UI\MFC+</Filter>
+    </ClCompile>
+    <ClCompile Include="DataAdapters.cpp">
+      <Filter>UI\Service</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -3,6 +3,7 @@
 #include "ToolbarButtons.h"
 #include "ControlBar_fwd.h"
 #include "PopupMenus_fwd.h"
+#include "WndUtils.h"
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 
@@ -181,7 +182,7 @@ namespace mfc
 	{
 	}
 
-	CStockValuesComboBoxButton::CStockValuesComboBoxButton( UINT btnId, IValueTags* pValueTags, int width, DWORD dwStyle /*= CBS_DROPDOWN | CBS_DISABLENOSCROLL*/ )
+	CStockValuesComboBoxButton::CStockValuesComboBoxButton( UINT btnId, ui::IValueTags* pValueTags, int width, DWORD dwStyle /*= CBS_DROPDOWN | CBS_DISABLENOSCROLL*/ )
 		: CMFCToolBarComboBoxButton( btnId, mfc::Button_FindImageIndex( btnId ), dwStyle, width )
 		, m_pValueTags( nullptr )
 	{
@@ -190,21 +191,45 @@ namespace mfc
 
 	CStockValuesComboBoxButton::~CStockValuesComboBoxButton()
 	{
+		// Note: after this button get deleted, the editor host interface pointer stored in m_pValueTags will be dangling.
+		//	That's ok as long as the destination button updates the editor host interface pointer to itself - via SetTags().
 	}
 
-	void CStockValuesComboBoxButton::SetTags( IValueTags* pValueTags )
+	void CStockValuesComboBoxButton::SetTags( ui::IValueTags* pValueTags )
 	{
 		m_pValueTags = pValueTags;
 		mfc::CToolbarButtonsRefBinder::Instance()->RegisterPointer( m_nID, 0, m_pValueTags );
 
 		if ( m_pValueTags != nullptr )
 		{
+			m_pValueTags->StoreEditorHost( this );
+
 			std::vector<std::tstring> tags;
 			m_pValueTags->QueryStockTags( tags );
 			mfc::WriteComboItems( *this, tags );
 		}
 		else
 			RemoveAllItems();
+	}
+
+	void CStockValuesComboBoxButton::OutputValue( void ) implements(ui::IValueUiHost)
+	{
+		if ( m_pValueTags != nullptr )
+		{
+			mfc::SetComboEditText( *this, m_pValueTags->GetTag() );
+
+			if ( HasFocus() && GetHwnd() != nullptr )
+				m_pWndCombo->SetEditSel( 0, -1 );
+		}
+		else
+			ASSERT( false );
+	}
+
+	void CStockValuesComboBoxButton::OnInputError( void )
+	{
+		// give parent a chance to restore previous valid value
+		if ( m_pWndParent->GetSafeHwnd() != nullptr )
+			ui::SendCommand( m_pWndParent->GetOwner()->GetSafeHwnd(), m_nID, ui::CN_INPUTERROR, GetHwnd() );
 	}
 
 	void CStockValuesComboBoxButton::OnChangeParentWnd( CWnd* pWndParent )
@@ -221,7 +246,7 @@ namespace mfc
 
 		const CStockValuesComboBoxButton& srcButton = (const CStockValuesComboBoxButton&)src;
 
-		m_pValueTags = srcButton.m_pValueTags;
+		SetTags( srcButton.m_pValueTags );		// will store the editor host pointer to this
 		ASSERT_PTR( m_pValueTags );
 	}
 }

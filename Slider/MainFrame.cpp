@@ -216,9 +216,12 @@ void CMainFrame::HandleResetToolbar( UINT toolBarResId )
 	switch ( toolBarResId )
 	{
 		case IDR_TOOLBAR_STANDARD:
-		{
+		{	// replace custom buttons:
 			mfc::CEnumComboBoxButton scalingButton( IDW_IMAGE_SCALING_COMBO, &ui::GetTags_ImageScalingMode(), ScalingModeComboWidth );
 			m_standardToolBar.ReplaceButton( IDW_IMAGE_SCALING_COMBO, scalingButton );
+
+			//mfc::CStockValuesComboBoxButton zoomButton( IDW_ZOOM_COMBO, &, ZoomComboWidth );
+			//m_standardToolBar.ReplaceButton( IDW_ZOOM_COMBO, scalingButton );
 			break;
 		}
 		case IDR_TOOLBAR_NAVIGATE:

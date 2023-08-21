@@ -8,7 +8,7 @@
 namespace ui
 {
 	template< typename ValueT >
-	std::tstring FormatValidationMessage( const IValueSetAdapter<ValueT>* pAdapter, ui::TValueSetFlags flags, const Range<ValueT>& validRange )
+	std::tstring FormatValidationMessage( const IValueSetAdapter<ValueT>* pAdapter, ui::TStockValueFlags flags, const Range<ValueT>& validRange )
 	{
 		ASSERT_PTR( pAdapter );
 
@@ -29,7 +29,7 @@ namespace ui
 // CStockValuesComboBox template code
 
 template< typename ValueT >
-CStockValuesComboBox<ValueT>::CStockValuesComboBox( const ui::IValueSetAdapter<ValueT>* pStockAdapter, ui::TValueSetFlags flags /*= 0*/ )
+CStockValuesComboBox<ValueT>::CStockValuesComboBox( const ui::IValueSetAdapter<ValueT>* pStockAdapter, ui::TStockValueFlags flags /*= 0*/ )
 	: CBaseStockContentCtrl<CComboBox>()
 	, m_pStockAdapter( nullptr )
 	, m_flags( flags )
