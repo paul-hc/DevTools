@@ -226,6 +226,7 @@ void CMainFrame::HandleResetToolbar( UINT toolBarResId )
 		{	// replace custom buttons:
 			mfc::ToolBar_ReplaceButton( &m_standardToolBar, mfc::CEnumComboBoxButton( IDW_IMAGE_SCALING_COMBO, &ui::GetTags_ImageScalingMode(), ScalingModeComboWidth ) );
 			mfc::ToolBar_ReplaceButton( &m_standardToolBar, mfc::CStockValuesComboBoxButton( IDW_ZOOM_COMBO, ui::CZoomStockTags::Instance(), ZoomComboWidth ) );
+			mfc::ToolBar_SetBtnText( &m_standardToolBar, IDW_SMOOTHING_MODE_CHECK, _T("&Smooth"), true, false );
 			break;
 		}
 		case IDR_TOOLBAR_NAVIGATE:

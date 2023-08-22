@@ -67,6 +67,14 @@ namespace mfc
 		return btnIndex != -1 ? pToolBar->GetButton( btnIndex ) : nullptr;
 	}
 
+	void ToolBar_SetBtnText( OUT CMFCToolBar* pToolBar, UINT btnId, const TCHAR* pText /*= nullptr*/, bool showText /*= true*/, bool showImage /*= true*/ )
+	{
+		ASSERT_PTR( pToolBar );
+		int btnIndex = pToolBar->CommandToIndex( btnId );
+		ENSURE( btnIndex != -1 );
+		pToolBar->SetToolBarBtnText( btnIndex, pText, showText, showImage );
+	}
+
 	bool ToolBar_RestoreOriginalState( OUT CMFCToolBar* pToolBar )
 	{
 	#if _MFC_VER > 0x0900		// newer MFC version?

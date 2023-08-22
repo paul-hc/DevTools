@@ -24,10 +24,9 @@ namespace mfc
 	// CMFCToolBar access:
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
 	CMFCToolBarButton* ToolBar_FindButton( const CMFCToolBar* pToolBar, UINT btnId );
+	inline int ToolBar_ReplaceButton( OUT CMFCToolBar* pToolBar, const CMFCToolBarButton& srcButton ) { return safe_ptr( pToolBar )->ReplaceButton( srcButton.m_nID, srcButton ); }
+	void ToolBar_SetBtnText( OUT CMFCToolBar* pToolBar, UINT btnId, const TCHAR* pText = nullptr, bool showText = true, bool showImage = true );
 	bool ToolBar_RestoreOriginalState( OUT CMFCToolBar* pToolBar );
-
-	template< typename ButtonT >
-	inline int ToolBar_ReplaceButton( OUT CMFCToolBar* pToolBar, const ButtonT& srcButton ) { return safe_ptr( pToolBar )->ReplaceButton( srcButton.m_nID, srcButton ); }
 
 
 	// CMFCStatusBar protected access:
