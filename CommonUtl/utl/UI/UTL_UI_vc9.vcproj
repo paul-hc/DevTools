@@ -1862,6 +1862,18 @@
 					>
 				</File>
 				<File
+					RelativePath=".\DataAdapters.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DataAdapters.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DataAdapters_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ProgressService.cpp"
 					>
 				</File>

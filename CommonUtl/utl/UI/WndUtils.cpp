@@ -607,7 +607,7 @@ namespace ui
 
 	bool TakeFocus( HWND hWnd )
 	{
-		if ( !::IsWindow( hWnd ) )
+		if ( !::IsWindow( hWnd ) || ui::IsDisabled( hWnd ) )
 			return false;			// window was possibly destroyed
 
 		// if for instance a list control is in inline edit mode (owns focus), leave the focus in the child edit
@@ -617,7 +617,12 @@ namespace ui
 		if ( !HasFlag( GetStyle( hWnd ), WS_CHILD ) )
 			::SetFocus( hWnd );
 		else
-			ui::GotoDlgCtrl( hWnd );
+		{
+			if ( !ui::OwnsFocus( ::GetParent( hWnd ) ) )
+				::SetFocus( hWnd );
+
+			ui::GotoDlgCtrl( hWnd );		// selects all text for edit, combo-box, etc
+		}
 
 		return true;
 	}
@@ -1335,10 +1340,10 @@ namespace ui
 		return nullptr;
 	}
 
-	std::tstring GetComboSelText( const CComboBox& rCombo, ui::ComboField byField /*= BySel*/ )
+	std::tstring GetComboSelText( const CComboBox& rCombo, ui::ComboField byField /*= ui::BySel*/ )
 	{
 		int selIndex = rCombo.GetCurSel();
-		if ( ByEdit == byField || CB_ERR == selIndex )
+		if ( ui::ByEdit == byField || CB_ERR == selIndex )
 			return ui::GetWindowText( rCombo );
 		else
 			return GetComboItemText( rCombo, selIndex );

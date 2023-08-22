@@ -27,7 +27,7 @@ namespace mfc
 	bool ToolBar_RestoreOriginalState( OUT CMFCToolBar* pToolBar );
 
 	template< typename ButtonT >
-	inline int ToolBar_ReplaceButton( OUT CMFCToolBar* pToolBar, const ButtonT& srcButton ) { return pToolBar->ReplaceButton( srcButton.m_nID, srcButton ); }
+	inline int ToolBar_ReplaceButton( OUT CMFCToolBar* pToolBar, const ButtonT& srcButton ) { return safe_ptr( pToolBar )->ReplaceButton( srcButton.m_nID, srcButton ); }
 
 
 	// CMFCStatusBar protected access:
@@ -38,6 +38,8 @@ namespace mfc
 
 
 	// CMFCToolBarButton access:
+	inline HWND ToolBarButton_GetHwnd( const CMFCToolBarButton* pButton ) { return const_cast<CMFCToolBarButton*>( pButton )->GetHwnd(); }
+	bool ToolBarButton_EditSelectAll( CMFCToolBarButton* pButton );
 	void ToolBarButton_Redraw( CMFCToolBarButton* pButton );
 }
 
@@ -119,6 +121,9 @@ namespace mfc
 
 	inline void RedrawMatchingButtons( UINT btnId ) { ForEachMatchingButton<CMFCToolBarButton>( btnId, &mfc::ToolBarButton_Redraw ); }
 
+
+	template< typename ButtonT >
+	inline ButtonT* FindFirstMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, pred::True() ); }
 
 	template< typename ButtonT >
 	inline ButtonT* FindNotifyingMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, &CMFCToolBar::IsLastCommandFromButton ); }

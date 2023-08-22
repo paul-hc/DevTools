@@ -207,7 +207,6 @@ BEGIN_MESSAGE_MAP( CMainToolbar, CToolbarStrip )
 	ON_WM_ERASEBKGND()
 	ON_COMMAND( IDOK, OnOk )
 	ON_COMMAND_EX( ID_CM_ESCAPE_KEY, On_EscapeKey )
-	ON_COMMAND( ID_FOCUS_ON_ZOOM_COMBO, On_FocusOnZoomCombo )
 	ON_CBN_CLOSEUP( IDW_ZOOM_COMBO, OnCBnCloseUp_ZoomCombo )
 
 	// navigation bar:
@@ -246,12 +245,6 @@ BOOL CMainToolbar::On_EscapeKey( UINT cmdId )
 	if ( IImageView* pImageView = app::GetMainFrame()->GetActiveImageView() )
 		pImageView->RegainFocus( IImageView::Escape );
 	return TRUE;
-}
-
-void CMainToolbar::On_FocusOnZoomCombo( void )
-{
-	if ( !ui::OwnsFocus( *m_pZoomCombo ) && app::GetMainFrame()->MDIGetActive() != nullptr )
-		m_pZoomCombo->SetFocus();
 }
 
 void CMainToolbar::On_FocusOnSliderCtrl( void )

@@ -24,14 +24,15 @@ namespace nosy
 
 namespace mfc
 {
-	void WriteComboItems( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::vector<std::tstring>& items )
+	std::tstring GetComboSelText( const CMFCToolBarComboBoxButton* pComboBtn, ui::ComboField byField /*= ui::BySel*/ )
 	{
 		ASSERT_PTR( pComboBtn );
 
-		pComboBtn->RemoveAllItems();
-
-		for ( std::vector<std::tstring>::const_iterator it = items.begin(); it != items.end(); ++it )
-			pComboBtn->AddItem( it->c_str() );
+		int selIndex = pComboBtn->GetCurSel();
+		if ( ui::ByEdit == byField || CB_ERR == selIndex )
+			return pComboBtn->GetText();
+		else
+			return pComboBtn->GetItem( selIndex );
 	}
 
 	std::pair<bool, ui::ComboField> SetComboEditText( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::tstring& newText )
@@ -43,11 +44,24 @@ namespace mfc
 
 		if ( result.first )		// text will change?
 		{
-			pComboBtn->SelectItem( selIndex, false );		// select/unselect index preemptively, so that CMFCToolBarComboBoxButton::SetText() does not send notification
+			pComboBtn->SelectItem( selIndex, false );			// select/unselect index preemptively, so that CMFCToolBarComboBoxButton::SetText() does not send notification
 			pComboBtn->SetText( newText.c_str() );
+
+			if ( pComboBtn->GetEditCtrl()->GetSafeHwnd() != nullptr )
+				pComboBtn->GetEditCtrl()->SetSel( 0, -1 );		// select all text in the edit field
 		}
 
 		return result;
+	}
+
+	void WriteComboItems( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::vector<std::tstring>& items )
+	{
+		ASSERT_PTR( pComboBtn );
+
+		pComboBtn->RemoveAllItems();
+
+		for ( std::vector<std::tstring>::const_iterator it = items.begin(); it != items.end(); ++it )
+			pComboBtn->AddItem( it->c_str() );
 	}
 
 

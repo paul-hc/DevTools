@@ -38,7 +38,7 @@ CImageView::CImageView( void )
 	, m_imageFramePos( 0 )
 	, m_bkColor( CLR_DEFAULT )
 	, m_initialized( false )
-	, m_pNavigBar( app::GetMainFrame()->GetToolbar() )
+	, m_pNavigBar( app::GetMainFrame()->GetOldToolbar() )
 	, m_pMdiChildFrame( nullptr )
 {
 	s_imageAccel.LoadOnce( IDR_IMAGEVIEW );
@@ -48,7 +48,7 @@ CImageView::CImageView( void )
 	m_minContentSize.cy = 64;
 
 	SetZoomBar( app::GetMainFrame()->GetZoomBar() );
-	//SetZoomBar( app::GetMainFrame()->GetToolbar() );
+	//SetZoomBar( app::GetMainFrame()->GetOldToolbar() );
 	SetScaleZoom( CWorkspace::GetData().m_scalingMode, 100 );
 	SetFlag( RefViewStatusFlags(), ui::FullScreen, CWorkspace::Instance().IsFullScreen() );			// copy the actual FullScreen status
 }
@@ -294,6 +294,7 @@ BEGIN_MESSAGE_MAP( CImageView, TBaseClass )
 	ON_COMMAND( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
 	ON_CBN_SELENDOK( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
 	//ON_CBN_SELCHANGE( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
+	ON_BN_CLICKED( IDW_ZOOM_COMBO, OnEditInput_ZoomCombo )
 	ON_CBN_SELCHANGE( IDW_ZOOM_COMBO, OnCBnSelChange_ZoomCombo )
 	// standard printing
 	ON_COMMAND( ID_FILE_PRINT, CScrollView::OnFilePrint )
@@ -543,6 +544,11 @@ void CImageView::CmScroll( UINT cmdId )
 void CImageView::OnCBnSelChange_ImageScalingModeCombo( void )
 {
 	InputScalingMode();
+}
+
+void CImageView::OnEditInput_ZoomCombo( void )
+{
+	InputZoomPct( ui::ByEdit );
 }
 
 void CImageView::OnCBnSelChange_ZoomCombo( void )

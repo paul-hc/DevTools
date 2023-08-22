@@ -6,6 +6,8 @@
 #include <afxstatusbar.h>
 #include <afxdockingmanager.h>
 #include <afxdropdowntoolbar.h>		// for is_a()
+#include <afxtoolbareditboxbutton.h>
+#include <afxtoolbarcomboboxbutton.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -107,6 +109,23 @@ namespace mfc
 
 
 	// CMFCToolBarButton access:
+
+	bool ToolBarButton_EditSelectAll( CMFCToolBarButton* pButton )
+	{	// select all text in the edit field
+		ASSERT_PTR( pButton );
+		CEdit* pEdit = nullptr;
+
+		if ( CMFCToolBarComboBoxButton* pComboBtn = dynamic_cast<CMFCToolBarComboBoxButton*>( pButton ) )
+			pEdit = pComboBtn->GetEditCtrl();
+		else if ( CMFCToolBarEditBoxButton* pEditBtn = dynamic_cast<CMFCToolBarEditBoxButton*>( pButton ) )
+			pEdit = pEditBtn->GetEditBox();
+
+		if ( nullptr == pEdit->GetSafeHwnd() )
+			return false;
+
+		pEdit->SetSel( 0, -1 );
+		return true;
+	}
 
 	void ToolBarButton_Redraw( CMFCToolBarButton* pButton )
 	{

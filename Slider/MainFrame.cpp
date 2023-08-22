@@ -175,7 +175,7 @@ bool CMainFrame::OutputScalingMode( ui::ImageScalingMode scalingMode )
 
 ui::ImageScalingMode CMainFrame::InputScalingMode( void ) const
 {
-	mfc::CEnumComboBoxButton* pScalingCombo = mfc::FindNotifyingMatchingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO );
+	const mfc::CEnumComboBoxButton* pScalingCombo = mfc::FindNotifyingMatchingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO );
 
 	ASSERT_PTR( pScalingCombo );
 	return pScalingCombo->GetEnum<ui::ImageScalingMode>();
@@ -194,7 +194,7 @@ UINT CMainFrame::InputZoomPct( ui::ComboField byField ) const
 	UINT zoomPct;
 
 	ASSERT_PTR( pZoomCombo );
-	if ( !pZoomCombo->InputValue( &zoomPct, true ) )
+	if ( !pZoomCombo->InputValue( &zoomPct, byField, true ) )
 		zoomPct = 0;
 
 	return zoomPct;
@@ -272,6 +272,7 @@ BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWndEx )
 	ON_COMMAND_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, On_RegisterImageAssoc )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, OnUpdate_RegisterImageAssoc )
 	ON_UPDATE_COMMAND_UI( IDW_SB_PROGRESS_CAPTION, OnUpdateAlwaysEnabled )
+	ON_COMMAND( ID_FOCUS_ON_ZOOM_COMBO, On_FocusOnZoomCombo )
 END_MESSAGE_MAP()
 
 int CMainFrame::OnCreate( CREATESTRUCT* pCS )
@@ -449,6 +450,11 @@ void CMainFrame::OnTimer( UINT_PTR eventId )
 		__super::OnTimer( eventId );
 }
 
+void CMainFrame::OnUpdateAlwaysEnabled( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( TRUE );
+}
+
 void CMainFrame::On_MdiClose( void )
 {
 	CFrameWnd* pActiveFrame = MDIGetActive();
@@ -493,11 +499,6 @@ void CMainFrame::CmLoggerOptions( void )
 	loggerDialog.DoModal();
 }
 
-void CMainFrame::OnUpdateAlwaysEnabled( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable( TRUE );
-}
-
 void CMainFrame::CmClearImageCache( void )
 {
 	app::GetThumbnailer()->Clear();
@@ -526,4 +527,11 @@ void CMainFrame::OnUpdate_RegisterImageAssoc( CCmdUI* pCmdUI )
 	bool isRegistered = CAppDocManager::IsAppRegisteredForImageExt();
 
 	pCmdUI->SetCheck( doRegister == isRegistered );
+}
+
+void CMainFrame::On_FocusOnZoomCombo( void )
+{
+	if ( CMFCToolBarComboBoxButton* pComboBtn = mfc::FindFirstMatchingButton<CMFCToolBarComboBoxButton>( IDW_ZOOM_COMBO ) )
+		if ( !pComboBtn->HasFocus() )
+			ui::TakeFocus( pComboBtn->GetHwnd() );
 }

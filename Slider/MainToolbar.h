@@ -55,7 +55,6 @@ protected:
 	afx_msg BOOL OnEraseBkgnd( CDC* pDC );
 	afx_msg void OnOk( void );
 	afx_msg BOOL On_EscapeKey( UINT cmdId );
-	afx_msg void On_FocusOnZoomCombo( void );
 	afx_msg void OnCBnCloseUp_ZoomCombo( void );
 
 	// navigation bar:

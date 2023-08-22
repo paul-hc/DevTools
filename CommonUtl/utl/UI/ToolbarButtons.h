@@ -14,8 +14,9 @@ class CEnumTags;
 
 namespace mfc
 {
-	void WriteComboItems( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::vector<std::tstring>& items );
+	std::tstring GetComboSelText( const CMFCToolBarComboBoxButton* pComboBtn, ui::ComboField byField = ui::BySel );
 	std::pair<bool, ui::ComboField> SetComboEditText( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::tstring& newText );
+	void WriteComboItems( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::vector<std::tstring>& items );
 
 	DWORD ToolBarComboBoxButton_GetStyle( const CMFCToolBarComboBoxButton* pComboButton );
 
@@ -103,7 +104,7 @@ namespace mfc
 		bool OutputValue( ValueT value );
 
 		template< typename ValueT >
-		bool InputValue( OUT ValueT* pOutValue, bool showErrors = true ) const;
+		bool InputValue( OUT ValueT* pOutValue, ui::ComboField byField, bool showErrors = true ) const;		// ui::BySel for CBN_SELCHANGE, ui::ByEdit
 	private:
 		template< typename ValueT >
 		typename const ui::CStockTags<ValueT>* GetTagsAs( void ) const { return checked_static_cast< const ui::CStockTags<ValueT>* >( m_pStockTags ); }
@@ -137,11 +138,11 @@ namespace mfc
 	}
 
 	template< typename ValueT >
-	bool CStockValuesComboBoxButton::InputValue( OUT ValueT* pOutValue, bool showErrors /*= true*/ ) const
+	bool CStockValuesComboBoxButton::InputValue( OUT ValueT* pOutValue, ui::ComboField byField, bool showErrors /*= true*/ ) const
 	{
 		if ( const ui::CStockTags<ValueT>* pStockTags = GetTagsAs<ValueT>() )
 		{
-			std::tstring currentTag = GetText();
+			std::tstring currentTag = mfc::GetComboSelText( this, byField );
 
 			if ( pStockTags->ParseValue( pOutValue, currentTag ) )
 				if ( pStockTags->IsValidValue( *pOutValue ) )

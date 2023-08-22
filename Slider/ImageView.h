@@ -108,6 +108,7 @@ protected:
 	afx_msg void On_EditBkColor( void );
 	afx_msg void CmScroll( UINT cmdId );
 	afx_msg void OnCBnSelChange_ImageScalingModeCombo( void );
+	afx_msg void OnEditInput_ZoomCombo( void );
 	afx_msg void OnCBnSelChange_ZoomCombo( void );
 
 	DECLARE_MESSAGE_MAP()

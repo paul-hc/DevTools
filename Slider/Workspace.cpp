@@ -261,7 +261,7 @@ void CWorkspace::FetchSettings( void )
 		SetFlag( m_data.m_wkspFlags, wf::MdiMaximized, isMaximized != FALSE );		// save MDI maximize state
 
 	// save toolbar and status-bar visibility state
-	SetFlag( m_data.m_wkspFlags, wf::ShowToolBar, ui::IsVisible( m_pMainFrame->GetToolbar()->GetSafeHwnd() ) );
+	SetFlag( m_data.m_wkspFlags, wf::ShowToolBar, ui::IsVisible( m_pMainFrame->GetStandardToolbar()->GetSafeHwnd() ) );
 	SetFlag( m_data.m_wkspFlags, wf::ShowStatusBar, ui::IsVisible( m_pMainFrame->GetStatusBar()->GetSafeHwnd() ) );
 
 	m_imageStates.clear();
@@ -292,10 +292,10 @@ bool CWorkspace::LoadDocuments( void )
 	// (!) next time, show the window as default in order to properly handle in CFrameWnd::OnDDEExecute the ShowWindow calls
 	app::GetApp()->StoreCmdShow( -1 );
 
-	if ( (bool)m_pMainFrame->GetToolbar()->IsVisible() != HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) )
-		m_pMainFrame->ShowControlBar( m_pMainFrame->GetToolbar(), HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ), FALSE );
+	if ( HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) != ui::IsWindowVisible( m_pMainFrame->GetStandardToolbar()->GetSafeHwnd() ) )
+		m_pMainFrame->ShowPane( m_pMainFrame->GetStandardToolbar(), HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ), FALSE, FALSE );
 
-	if ( (bool)m_pMainFrame->GetStatusBar()->IsWindowVisible() != HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ) )
+	if ( HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ) != ui::IsWindowVisible( m_pMainFrame->GetStatusBar()->GetSafeHwnd() ) )
 		m_pMainFrame->ShowPane( m_pMainFrame->GetStatusBar(), HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ), FALSE, FALSE );
 
 	ASSERT_NULL( m_pLoadingImageState );
