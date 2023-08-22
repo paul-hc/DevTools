@@ -74,7 +74,7 @@ namespace mfc
 	// CMFCToolBar algorithms:
 
 	template< typename ButtonT, typename FuncT >
-	FuncT ForEachMatchingButton( UINT btnId, FuncT func )
+	FuncT ForEachMatchingButton( UINT btnId, FuncT func, const ButtonT* pExceptBtn = nullptr )
 	{
 		CObList buttonList;
 		CMFCToolBar::GetCommandButtons( btnId, buttonList );
@@ -83,7 +83,7 @@ namespace mfc
 		{
 			ButtonT* pButton = checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) );
 
-			if ( !CMFCToolBar::IsLastCommandFromButton( pButton ) )		// exclude the button handling the command
+			if ( pButton != pExceptBtn && !CMFCToolBar::IsLastCommandFromButton( pButton ) )		// exclude the button handling the command
 				func( pButton );
 		}
 

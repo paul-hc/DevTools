@@ -143,6 +143,8 @@ namespace mfc
 		if ( const ui::CStockTags<ValueT>* pStockTags = GetTagsAs<ValueT>() )
 		{
 			std::tstring currentTag = mfc::GetComboSelText( this, byField );
+			if ( currentTag.empty() )
+				return false;			// transient empty text, e.g. when the combo list is still dropped down, etc
 
 			if ( pStockTags->ParseValue( pOutValue, currentTag ) )
 				if ( pStockTags->IsValidValue( *pOutValue ) )
@@ -151,7 +153,7 @@ namespace mfc
 			OnInputError();		// give owner a chance to restore previous valid value
 
 			if ( showErrors )
-				return ui::ShowInputError( (CWnd*)this, pStockTags->FormatValidationError(), MB_ICONERROR );		// invalid input
+				return ui::ShowInputError( GetComboBox(), pStockTags->FormatValidationError(), MB_ICONERROR );		// invalid input
 		}
 		else
 			ASSERT( false );

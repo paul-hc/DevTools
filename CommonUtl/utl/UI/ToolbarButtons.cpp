@@ -29,6 +29,7 @@ namespace mfc
 		ASSERT_PTR( pComboBtn );
 
 		int selIndex = pComboBtn->GetCurSel();
+
 		if ( ui::ByEdit == byField || CB_ERR == selIndex )
 			return pComboBtn->GetText();
 		else
@@ -44,11 +45,17 @@ namespace mfc
 
 		if ( result.first )		// text will change?
 		{
+bool stop = newText == L"3";
+if (stop)
+	stop = stop;
 			pComboBtn->SelectItem( selIndex, false );			// select/unselect index preemptively, so that CMFCToolBarComboBoxButton::SetText() does not send notification
 			pComboBtn->SetText( newText.c_str() );
 
 			if ( pComboBtn->GetEditCtrl()->GetSafeHwnd() != nullptr )
-				pComboBtn->GetEditCtrl()->SetSel( 0, -1 );		// select all text in the edit field
+				pComboBtn->GetEditCtrl()->SetSel( 0, -1 );		// select all edit text
+
+if (stop)
+	stop = stop;
 		}
 
 		return result;
