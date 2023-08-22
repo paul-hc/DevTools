@@ -31,7 +31,7 @@ namespace ui
 
 
 	template< typename ValueT >
-	std::tstring FormatValidationMessage( const IValueSetAdapter<ValueT>* pAdapter, ui::TStockValueFlags flags, const Range<ValueT>& validRange );
+	std::tstring FormatValidationMessage( const IValueSetAdapter<ValueT>* pAdapter, ui::TValueLimitFlags flags, const Range<ValueT>& validRange );
 
 
 	// timespan duration field (miliseconds) displayed as seconds (double)
@@ -91,13 +91,13 @@ template< typename ValueT >
 class CStockValuesComboBox : public CBaseStockContentCtrl<CComboBox>
 {
 public:
-	CStockValuesComboBox( const ui::IValueSetAdapter<ValueT>* pStockAdapter, ui::TStockValueFlags flags = 0 );
+	CStockValuesComboBox( const ui::IValueSetAdapter<ValueT>* pStockAdapter, ui::TValueLimitFlags flags = 0 );
 
 	const ui::IValueSetAdapter<ValueT>* GetAdapter( void ) const { return m_pStockAdapter; }
 	void SetAdapter( const ui::IValueSetAdapter<ValueT>* pStockAdapter );
 
-	ui::TStockValueFlags GetFlags( void ) const { return m_flags; }
-	void SetFlags( ui::TStockValueFlags flags ) { m_flags = flags ; }
+	ui::TValueLimitFlags GetFlags( void ) const { return m_flags; }
+	void SetFlags( ui::TValueLimitFlags flags ) { m_flags = flags ; }
 
 	const Range<ValueT>& GetValidRange( void ) const { return m_validRange; }
 	void SetValidRange( const Range<ValueT>& validRange ) { m_validRange = validRange; }
@@ -126,7 +126,7 @@ protected:
 	// generated stuff
 private:
 	const ui::IValueSetAdapter<ValueT>* m_pStockAdapter;
-	ui::TStockValueFlags m_flags;
+	ui::TValueLimitFlags m_flags;
 	Range<ValueT> m_validRange;
 };
 
@@ -135,7 +135,7 @@ private:
 class CDurationComboBox : public CStockValuesComboBox<UINT>
 {
 public:
-	CDurationComboBox( ui::TStockValueFlags flags = ui::LimitMinValue, const ui::IValueSetAdapter<UINT>* pStockAdapter = ui::CDurationInSecondsAdapter::Instance() );
+	CDurationComboBox( ui::TValueLimitFlags flags = ui::LimitMinValue, const ui::IValueSetAdapter<UINT>* pStockAdapter = ui::CDurationInSecondsAdapter::Instance() );
 };
 
 
@@ -143,7 +143,7 @@ public:
 class CZoomComboBox : public CStockValuesComboBox<UINT>
 {
 public:
-	CZoomComboBox( ui::TStockValueFlags flags = ui::LimitMinValue | ui::LimitMaxValue,
+	CZoomComboBox( ui::TValueLimitFlags flags = ui::LimitMinValue | ui::LimitMaxValue,
 				   const ui::IValueSetAdapter<UINT>* pStockAdapter = ui::CZoomPercentageAdapter::Instance() );
 };
 

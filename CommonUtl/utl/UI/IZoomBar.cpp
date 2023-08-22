@@ -18,7 +18,7 @@ namespace ui
 		m_zoomPcts.assign( s_zoomPcts, END_OF( s_zoomPcts ) );
 	}
 
-	CStdZoom& CStdZoom::Instance( void )
+	const CStdZoom& CStdZoom::Instance( void )
 	{
 		static CStdZoom s_stdZoomInfo;
 		return s_stdZoomInfo;

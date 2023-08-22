@@ -14,8 +14,8 @@ class CEnumTags;
 
 namespace mfc
 {
-	void WriteComboItems( OUT CMFCToolBarComboBoxButton& rComboButton, const std::vector<std::tstring>& items );
-	std::pair<bool, ui::ComboField> SetComboEditText( OUT CMFCToolBarComboBoxButton& rComboButton, const std::tstring& currText );
+	void WriteComboItems( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::vector<std::tstring>& items );
+	std::pair<bool, ui::ComboField> SetComboEditText( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::tstring& newText );
 
 	DWORD ToolBarComboBoxButton_GetStyle( const CMFCToolBarComboBoxButton* pComboButton );
 
@@ -88,25 +88,30 @@ namespace mfc
 namespace mfc
 {
 	class CStockValuesComboBoxButton : public CMFCToolBarComboBoxButton
-		, private ui::IValueEditorHost
 	{
 		DECLARE_SERIAL( CStockValuesComboBoxButton )
 	protected:
 		CStockValuesComboBoxButton( void );
 	public:
-		CStockValuesComboBoxButton( UINT btnId, ui::IValueTags* pValueTags, int width, DWORD dwStyle = CBS_DROPDOWN | CBS_DISABLENOSCROLL );
+		CStockValuesComboBoxButton( UINT btnId, const ui::IStockTags* pStockTags, int width, DWORD dwStyle = CBS_DROPDOWN | CBS_DISABLENOSCROLL );
 		virtual ~CStockValuesComboBoxButton();
 
-		const ui::IValueTags* GetTags( void ) const { return m_pValueTags; }
+		const ui::IStockTags* GetTags( void ) const { return m_pStockTags; }
 
-		template< typename StockValuesT >
-		StockValuesT* GetTagsAs( void ) { return checked_static_cast<StockValuesT*>( m_pValueTags ); }
+		// input/output
+		template< typename ValueT >
+		bool OutputValue( ValueT value );
+
+		template< typename ValueT >
+		bool InputValue( OUT ValueT* pOutValue, bool showErrors = true ) const;
 	private:
-		void SetTags( ui::IValueTags* pValueTags );
+		template< typename ValueT >
+		typename const ui::CStockTags<ValueT>* GetTagsAs( void ) const { return checked_static_cast< const ui::CStockTags<ValueT>* >( m_pStockTags ); }
 
-		// ui::IValueEditorHost interface
-		virtual void OutputValue( void ) implements(ui::IValueEditorHost);
-		virtual void OnInputError( void ) implements(ui::IValueEditorHost);
+		void SetTags( const ui::IStockTags* pStockTags );
+
+		bool OutputTag( const std::tstring& tag );
+		void OnInputError( void ) const;
 
 		// base overrides
 	public:
@@ -115,8 +120,43 @@ namespace mfc
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCToolBarComboBoxButton);
 	private:
-		rebound ui::IValueTags* m_pValueTags;
+		rebound const ui::IStockTags* m_pStockTags;
 	};
+
+
+	// CStockValuesComboBoxButton template code
+
+	template< typename ValueT >
+	bool CStockValuesComboBoxButton::OutputValue( ValueT value )
+	{
+		if ( const ui::CStockTags<ValueT>* pStockTags = GetTagsAs<ValueT>() )
+			return OutputTag( pStockTags->FormatValue( value ) );
+
+		ASSERT( false );
+		return false;
+	}
+
+	template< typename ValueT >
+	bool CStockValuesComboBoxButton::InputValue( OUT ValueT* pOutValue, bool showErrors /*= true*/ ) const
+	{
+		if ( const ui::CStockTags<ValueT>* pStockTags = GetTagsAs<ValueT>() )
+		{
+			std::tstring currentTag = GetText();
+
+			if ( pStockTags->ParseValue( pOutValue, currentTag ) )
+				if ( pStockTags->IsValidValue( *pOutValue ) )
+					return true;
+
+			OnInputError();		// give owner a chance to restore previous valid value
+
+			if ( showErrors )
+				return ui::ShowInputError( (CWnd*)this, pStockTags->FormatValidationError(), MB_ICONERROR );		// invalid input
+		}
+		else
+			ASSERT( false );
+
+		return false;
+	}
 }
 
 

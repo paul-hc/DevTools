@@ -183,14 +183,21 @@ ui::ImageScalingMode CMainFrame::InputScalingMode( void ) const
 
 bool CMainFrame::OutputZoomPct( UINT zoomPct )
 {
-//	std::auto_ptr<CZoomComboBox> m_pZoomCombo;
-//	return m_pZoomCombo->OutputValue( zoomPct );
-/*TMP*/	return m_pOldToolbar->OutputZoomPct( zoomPct );
+	mfc::ForEachMatchingButton<mfc::CStockValuesComboBoxButton>( IDW_ZOOM_COMBO, func::MakeSetter( &mfc::CStockValuesComboBoxButton::template OutputValue<UINT>, zoomPct ) );
+	return true;
 }
 
 UINT CMainFrame::InputZoomPct( ui::ComboField byField ) const
 {
-	/*TMP*/	return m_pOldToolbar->InputZoomPct( byField );
+	byField;
+	const mfc::CStockValuesComboBoxButton* pZoomCombo = mfc::FindNotifyingMatchingButton<mfc::CStockValuesComboBoxButton>( IDW_ZOOM_COMBO );
+	UINT zoomPct;
+
+	ASSERT_PTR( pZoomCombo );
+	if ( !pZoomCombo->InputValue( &zoomPct, true ) )
+		zoomPct = 0;
+
+	return zoomPct;
 }
 
 // INavigationBar interface
@@ -217,11 +224,8 @@ void CMainFrame::HandleResetToolbar( UINT toolBarResId )
 	{
 		case IDR_TOOLBAR_STANDARD:
 		{	// replace custom buttons:
-			mfc::CEnumComboBoxButton scalingButton( IDW_IMAGE_SCALING_COMBO, &ui::GetTags_ImageScalingMode(), ScalingModeComboWidth );
-			m_standardToolBar.ReplaceButton( IDW_IMAGE_SCALING_COMBO, scalingButton );
-
-			//mfc::CStockValuesComboBoxButton zoomButton( IDW_ZOOM_COMBO, &, ZoomComboWidth );
-			//m_standardToolBar.ReplaceButton( IDW_ZOOM_COMBO, scalingButton );
+			mfc::ToolBar_ReplaceButton( &m_standardToolBar, mfc::CEnumComboBoxButton( IDW_IMAGE_SCALING_COMBO, &ui::GetTags_ImageScalingMode(), ScalingModeComboWidth ) );
+			mfc::ToolBar_ReplaceButton( &m_standardToolBar, mfc::CStockValuesComboBoxButton( IDW_ZOOM_COMBO, ui::CZoomStockTags::Instance(), ZoomComboWidth ) );
 			break;
 		}
 		case IDR_TOOLBAR_NAVIGATE:

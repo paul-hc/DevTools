@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/Functional.h"
+#include <afxtoolbar.h>
 
 
 class CBasePane;
@@ -17,13 +18,16 @@ class CDockingManager;
 namespace mfc
 {
 	// CBasePane protected access:
-	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
+	void BasePane_SetIsDialogControl( OUT CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
 
 
 	// CMFCToolBar access:
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
 	CMFCToolBarButton* ToolBar_FindButton( const CMFCToolBar* pToolBar, UINT btnId );
-	bool ToolBar_RestoreOriginalState( CMFCToolBar* pToolBar );
+	bool ToolBar_RestoreOriginalState( OUT CMFCToolBar* pToolBar );
+
+	template< typename ButtonT >
+	inline int ToolBar_ReplaceButton( OUT CMFCToolBar* pToolBar, const ButtonT& srcButton ) { return pToolBar->ReplaceButton( srcButton.m_nID, srcButton ); }
 
 
 	// CMFCStatusBar protected access:
@@ -74,7 +78,12 @@ namespace mfc
 		CMFCToolBar::GetCommandButtons( btnId, buttonList );
 
 		for ( POSITION pos = buttonList.GetHeadPosition(); pos != NULL; )
-			func( checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) ) );
+		{
+			ButtonT* pButton = checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) );
+
+			if ( !CMFCToolBar::IsLastCommandFromButton( pButton ) )		// exclude the button handling the command
+				func( pButton );
+		}
 
 		return func;
 	}

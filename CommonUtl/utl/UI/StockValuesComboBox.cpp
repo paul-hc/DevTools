@@ -93,7 +93,7 @@ namespace ui
 
 // CDurationComboBox implementation
 
-CDurationComboBox::CDurationComboBox( ui::TStockValueFlags flags /*= ui::LimitMinValue*/, const ui::IValueSetAdapter<UINT>* pStockAdapter /*= ui::CDurationInSecondsAdapter::Instance()*/ )
+CDurationComboBox::CDurationComboBox( ui::TValueLimitFlags flags /*= ui::LimitMinValue*/, const ui::IValueSetAdapter<UINT>* pStockAdapter /*= ui::CDurationInSecondsAdapter::Instance()*/ )
 	: CStockValuesComboBox<UINT>( pStockAdapter, flags )
 {
 }
@@ -101,7 +101,7 @@ CDurationComboBox::CDurationComboBox( ui::TStockValueFlags flags /*= ui::LimitMi
 
 // CZoomComboBox implementation
 
-CZoomComboBox::CZoomComboBox( ui::TStockValueFlags flags /*= ui::LimitMinValue | ui::LimitMaxValue*/,
+CZoomComboBox::CZoomComboBox( ui::TValueLimitFlags flags /*= ui::LimitMinValue | ui::LimitMaxValue*/,
 							  const ui::IValueSetAdapter<UINT>* pStockAdapter /*= ui::CZoomPercentageAdapter::Instance()*/ )
 	: CStockValuesComboBox<UINT>( pStockAdapter, flags )
 {

@@ -24,45 +24,30 @@ namespace nosy
 
 namespace mfc
 {
-	void WriteComboItems( OUT CMFCToolBarComboBoxButton& rComboButton, const std::vector<std::tstring>& items )
+	void WriteComboItems( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::vector<std::tstring>& items )
 	{
-		rComboButton.RemoveAllItems();
+		ASSERT_PTR( pComboBtn );
+
+		pComboBtn->RemoveAllItems();
 
 		for ( std::vector<std::tstring>::const_iterator it = items.begin(); it != items.end(); ++it )
-			rComboButton.AddItem( it->c_str() );
+			pComboBtn->AddItem( it->c_str() );
 	}
 
-	std::pair<bool, ui::ComboField> SetComboEditText( OUT CMFCToolBarComboBoxButton& rComboButton, const std::tstring& currText )
+	std::pair<bool, ui::ComboField> SetComboEditText( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::tstring& newText )
 	{
-		int oldSelPos = rComboButton.GetCurSel();
-		int foundListPos = rComboButton.FindItem( currText.c_str() );
-		DWORD comboStyle = mfc::ToolBarComboBoxButton_GetStyle( &rComboButton );
-		CComboBox* pComboBox = rComboButton.GetComboBox();
+		ASSERT_PTR( pComboBtn );
 
-		if ( foundListPos != CB_ERR )
-			if ( oldSelPos == foundListPos )
-				return std::make_pair( false, ui::BySel );		// no change in selection
-			else if ( rComboButton.SelectItem( foundListPos, false ) != CB_ERR )
-			{
-				if ( pComboBox->GetSafeHwnd() != nullptr )
-					pComboBox->UpdateWindow();					// force redraw when mouse is tracking (no WM_PAINT sent)
+		int selIndex = pComboBtn->FindItem( newText.c_str() );
+		std::pair<bool, ui::ComboField> result( newText != pComboBtn->GetText(), selIndex != CB_ERR ? ui::BySel : ui::ByEdit );
 
-				return std::make_pair( true, ui::BySel );		// select existing item from the list
-			}
+		if ( result.first )		// text will change?
+		{
+			pComboBtn->SelectItem( selIndex, false );		// select/unselect index preemptively, so that CMFCToolBarComboBoxButton::SetText() does not send notification
+			pComboBtn->SetText( newText.c_str() );
+		}
 
-		if ( EqMaskedValue( comboStyle, 0x0F, CBS_DROPDOWNLIST ) )
-			return std::make_pair( false, ui::BySel );			// no selection hit (combo has no edit)
-
-		// clear selected item to mark the dirty list state for the new item
-		bool selChanged = oldSelPos != CB_ERR;					// had an old selection?
-		if ( selChanged )
-			rComboButton.SelectItem( CB_ERR, false );			// clear selection: will clear the edit text, but it will not notify CBN_EDITCHANGE
-
-		// change edit text
-		rComboButton.SetText( currText.c_str() );
-
-		mfc::ToolBarButton_Redraw( &rComboButton );
-		return std::make_pair( selChanged, ui::ByEdit );		// changed edit text
+		return result;
 	}
 
 
@@ -145,7 +130,7 @@ namespace mfc
 		mfc::CToolbarButtonsRefBinder::Instance()->RegisterPointer( m_nID, 0, m_pEnumTags );
 
 		if ( m_pEnumTags != nullptr )
-			mfc::WriteComboItems( *this, m_pEnumTags->GetUiTags() );
+			mfc::WriteComboItems( this, m_pEnumTags->GetUiTags() );
 		else
 			RemoveAllItems();
 	}
@@ -178,66 +163,61 @@ namespace mfc
 
 	CStockValuesComboBoxButton::CStockValuesComboBoxButton( void )
 		: CMFCToolBarComboBoxButton()
-		, m_pValueTags( nullptr )
+		, m_pStockTags( nullptr )
 	{
 	}
 
-	CStockValuesComboBoxButton::CStockValuesComboBoxButton( UINT btnId, ui::IValueTags* pValueTags, int width, DWORD dwStyle /*= CBS_DROPDOWN | CBS_DISABLENOSCROLL*/ )
+	CStockValuesComboBoxButton::CStockValuesComboBoxButton( UINT btnId, const ui::IStockTags* pStockTags, int width, DWORD dwStyle /*= CBS_DROPDOWN | CBS_DISABLENOSCROLL*/ )
 		: CMFCToolBarComboBoxButton( btnId, mfc::Button_FindImageIndex( btnId ), dwStyle, width )
-		, m_pValueTags( nullptr )
+		, m_pStockTags( nullptr )
 	{
-		SetTags( pValueTags );
+		SetTags( pStockTags );
 	}
 
 	CStockValuesComboBoxButton::~CStockValuesComboBoxButton()
 	{
-		// Note: after this button get deleted, the editor host interface pointer stored in m_pValueTags will be dangling.
+		// Note: after this button get deleted, the editor host interface pointer stored in m_pStockTags will be dangling.
 		//	That's ok as long as the destination button updates the editor host interface pointer to itself - via SetTags().
 	}
 
-	void CStockValuesComboBoxButton::SetTags( ui::IValueTags* pValueTags )
+	void CStockValuesComboBoxButton::SetTags( const ui::IStockTags* pStockTags )
 	{
-		m_pValueTags = pValueTags;
-		mfc::CToolbarButtonsRefBinder::Instance()->RegisterPointer( m_nID, 0, m_pValueTags );
+		m_pStockTags = pStockTags;
+		mfc::CToolbarButtonsRefBinder::Instance()->RegisterPointer( m_nID, 0, m_pStockTags );
 
-		if ( m_pValueTags != nullptr )
+		if ( m_pStockTags != nullptr )
 		{
-			m_pValueTags->StoreEditorHost( this );
-
 			std::vector<std::tstring> tags;
-			m_pValueTags->QueryStockTags( tags );
-			mfc::WriteComboItems( *this, tags );
+			m_pStockTags->QueryStockTags( tags );
+			mfc::WriteComboItems( this, tags );
 		}
 		else
 			RemoveAllItems();
 	}
 
-	void CStockValuesComboBoxButton::OutputValue( void ) implements(ui::IValueUiHost)
+	bool CStockValuesComboBoxButton::OutputTag( const std::tstring& tag )
 	{
-		if ( m_pValueTags != nullptr )
-		{
-			mfc::SetComboEditText( *this, m_pValueTags->GetTag() );
+		std::pair<bool, ui::ComboField> result = mfc::SetComboEditText( this, tag );
 
-			if ( HasFocus() && GetHwnd() != nullptr )
-				m_pWndCombo->SetEditSel( 0, -1 );
-		}
-		else
-			ASSERT( false );
+		if ( HasFocus() && GetHwnd() != nullptr )
+			m_pWndCombo->SetEditSel( 0, -1 );
+
+		return result.first;		// true if changed
 	}
 
-	void CStockValuesComboBoxButton::OnInputError( void )
+	void CStockValuesComboBoxButton::OnInputError( void ) const
 	{
 		// give parent a chance to restore previous valid value
 		if ( m_pWndParent->GetSafeHwnd() != nullptr )
-			ui::SendCommand( m_pWndParent->GetOwner()->GetSafeHwnd(), m_nID, ui::CN_INPUTERROR, GetHwnd() );
+			ui::SendCommand( m_pWndParent->GetOwner()->GetSafeHwnd(), m_nID, ui::CN_INPUTERROR, GetComboBox()->GetSafeHwnd() );
 	}
 
 	void CStockValuesComboBoxButton::OnChangeParentWnd( CWnd* pWndParent )
 	{
 		__super::OnChangeParentWnd( pWndParent );
 
-		if ( nullptr == m_pValueTags )		// parent toolbar is loading state (de-serializing)?
-			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pValueTags, m_nID, 0 );
+		if ( nullptr == m_pStockTags )		// parent toolbar is loading state (de-serializing)?
+			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pStockTags, m_nID, 0 );
 	}
 
 	void CStockValuesComboBoxButton::CopyFrom( const CMFCToolBarButton& src )
@@ -246,7 +226,7 @@ namespace mfc
 
 		const CStockValuesComboBoxButton& srcButton = (const CStockValuesComboBoxButton&)src;
 
-		SetTags( srcButton.m_pValueTags );		// will store the editor host pointer to this
-		ASSERT_PTR( m_pValueTags );
+		SetTags( srcButton.m_pStockTags );		// will store the editor host pointer to this
+		ASSERT_PTR( m_pStockTags );
 	}
 }

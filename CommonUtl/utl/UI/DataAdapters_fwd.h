@@ -7,13 +7,15 @@
 
 namespace ui
 {
-	enum StockValueFlags
+	enum ValueLimitFlags
 	{
 		LimitMinValue	= BIT_FLAG( 0 ),
-		LimitMaxValue	= BIT_FLAG( 1 )
+		LimitMaxValue	= BIT_FLAG( 1 ),
+
+			LimitRange = LimitMinValue | LimitMaxValue
 	};
 
-	typedef int TStockValueFlags;
+	typedef int TValueLimitFlags;
 }
 
 

@@ -3,7 +3,6 @@
 #include "ControlBar_fwd.h"
 #include "utl/Algorithms_fwd.h"
 #include <afxbasepane.h>
-#include <afxtoolbar.h>
 #include <afxstatusbar.h>
 #include <afxdockingmanager.h>
 #include <afxdropdowntoolbar.h>		// for is_a()
@@ -45,7 +44,7 @@ namespace mfc
 {
 	// CBasePane access
 
-	void BasePane_SetIsDialogControl( CBasePane* pBasePane, bool isDlgControl /*= true*/ )
+	void BasePane_SetIsDialogControl( OUT CBasePane* pBasePane, bool isDlgControl /*= true*/ )
 	{
 		mfc::nosy_cast<nosy::CBasePane_>( pBasePane )->SetIsDialogControl( isDlgControl );
 	}
@@ -66,7 +65,7 @@ namespace mfc
 		return btnIndex != -1 ? pToolBar->GetButton( btnIndex ) : nullptr;
 	}
 
-	bool ToolBar_RestoreOriginalState( CMFCToolBar* pToolBar )
+	bool ToolBar_RestoreOriginalState( OUT CMFCToolBar* pToolBar )
 	{
 	#if _MFC_VER > 0x0900		// newer MFC version?
 		return pToolBar->RestoreOriginalState() != FALSE;
