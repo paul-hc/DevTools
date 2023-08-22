@@ -3,6 +3,7 @@
 #include "ToolbarButtons.h"
 #include "ControlBar_fwd.h"
 #include "PopupMenus_fwd.h"
+#include "ComboBoxEdit.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
@@ -45,17 +46,11 @@ namespace mfc
 
 		if ( result.first )		// text will change?
 		{
-bool stop = newText == L"3";
-if (stop)
-	stop = stop;
 			pComboBtn->SelectItem( selIndex, false );			// select/unselect index preemptively, so that CMFCToolBarComboBoxButton::SetText() does not send notification
 			pComboBtn->SetText( newText.c_str() );
 
 			if ( pComboBtn->GetEditCtrl()->GetSafeHwnd() != nullptr )
 				pComboBtn->GetEditCtrl()->SetSel( 0, -1 );		// select all edit text
-
-if (stop)
-	stop = stop;
 		}
 
 		return result;
@@ -239,6 +234,9 @@ namespace mfc
 
 		if ( nullptr == m_pStockTags )		// parent toolbar is loading state (de-serializing)?
 			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pStockTags, m_nID, 0 );
+
+		if ( m_pWndCombo->GetSafeHwnd() != nullptr )
+			CComboDropList::MakeSubclass( m_pWndCombo, true, true );		// use LB_FINDSTRINGEXACT to avoid partial matches (auto-delete)
 	}
 
 	void CStockValuesComboBoxButton::CopyFrom( const CMFCToolBarButton& src )

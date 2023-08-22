@@ -203,6 +203,7 @@
     <ClInclude Include="ColorPopupDialogs.h" />
     <ClInclude Include="ColorRepository.h" />
     <ClInclude Include="ColorValue.h" />
+    <ClInclude Include="ComboBoxEdit.h" />
     <ClInclude Include="CommandSvcHandler.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ContentFitBase.h" />
@@ -404,6 +405,7 @@
     <ClCompile Include="ColorPickerButton.cpp" />
     <ClCompile Include="ColorPopupDialogs.cpp" />
     <ClCompile Include="ColorRepository.cpp" />
+    <ClCompile Include="ComboBoxEdit.cpp" />
     <ClCompile Include="CommandSvcHandler.cpp" />
     <ClCompile Include="ContentFitBase.cpp" />
     <ClCompile Include="ContextMenuMgr.cpp" />
