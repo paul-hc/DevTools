@@ -98,9 +98,6 @@
     <ClInclude Include="LoggerSetupDialog.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainToolbar.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="MoveFileDialog.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -254,9 +251,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LoggerSetupDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainToolbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MoveFileDialog.cpp">

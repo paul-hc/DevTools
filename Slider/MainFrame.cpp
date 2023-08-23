@@ -1,7 +1,6 @@
 
 #include "pch.h"
 #include "MainFrame.h"
-#include "MainToolbar.h"
 #include "IImageView.h"
 #include "LoggerSetupDialog.h"
 #include "Workspace.h"
@@ -44,7 +43,6 @@ IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWndEx )
 
 CMainFrame::CMainFrame( void )
 	: TMDIFrameWndEx()
-	, m_pOldToolbar( new CMainToolbar() )
 	, m_messageClearTimer( this, MessageTimerId, 5000 )
 	, m_ddeEnqueuedTimer( this, QueueTimerId, 750 )
 {
@@ -189,7 +187,6 @@ bool CMainFrame::OutputZoomPct( UINT zoomPct )
 
 UINT CMainFrame::InputZoomPct( ui::ComboField byField ) const
 {
-	byField;
 	const mfc::CStockValuesComboBoxButton* pZoomCombo = mfc::FindNotifyingMatchingButton<mfc::CStockValuesComboBoxButton>( IDW_ZOOM_COMBO );
 	UINT zoomPct;
 
@@ -204,17 +201,35 @@ UINT CMainFrame::InputZoomPct( ui::ComboField byField ) const
 
 bool CMainFrame::OutputNavigRange( UINT imageCount )
 {
-/*TMP*/	return m_pOldToolbar->OutputNavigRange( imageCount );
+	enum { ThresholdCount = 30 };
+
+	if ( mfc::CSliderButton* pSliderButton = mfc::FindFirstMatchingButton<mfc::CSliderButton>( IDW_NAVIG_SLIDER_CTRL ) )
+		return pSliderButton->SetCountRange( imageCount, ThresholdCount );
+
+	return false;
 }
 
 bool CMainFrame::OutputNavigPos( int imagePos )
 {
-/*TMP*/	return m_pOldToolbar->OutputNavigPos( imagePos );
+	if ( mfc::CSliderButton* pSliderButton = mfc::FindFirstMatchingButton<mfc::CSliderButton>( IDW_NAVIG_SLIDER_CTRL ) )
+	{
+		if ( imagePos < 0 || imagePos > pSliderButton->GetRange().m_end )
+			imagePos = 0;
+
+		if ( pSliderButton->SetPos( imagePos, false ) )
+			return true;
+	}
+
+	return false;
 }
 
 int CMainFrame::InputNavigPos( void ) const
 {
-/*TMP*/	return m_pOldToolbar->InputNavigPos();
+	if ( mfc::CSliderButton* pSliderButton = mfc::FindFirstMatchingButton<mfc::CSliderButton>( IDW_NAVIG_SLIDER_CTRL ) )
+		return pSliderButton->GetPos();
+
+	ASSERT( false );		// shouldn't be called
+	return 0;
 }
 
 
@@ -230,7 +245,10 @@ void CMainFrame::HandleResetToolbar( UINT toolBarResId )
 			break;
 		}
 		case IDR_TOOLBAR_NAVIGATE:
+		{
+			mfc::ToolBar_ReplaceButton( &m_navigateToolBar, mfc::CSliderButton( IDW_NAVIG_SLIDER_CTRL, NavigSliderCtrlWidth ) );
 			break;
+		}
 	}
 }
 
@@ -240,8 +258,7 @@ BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINF
 
 	return
 		__super::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||				// first allow the active view/doc to override central command handlers
-		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
-		m_pOldToolbar->HandleCmdMsg( cmdId, code, pExtra, pHandlerInfo );
+		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo );
 }
 
 
@@ -257,7 +274,7 @@ BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWndEx )
 	ON_WM_DROPFILES()
 	ON_WM_TIMER()
 	ON_REGISTERED_MESSAGE( AFX_WM_RESETTOOLBAR, OnResetToolbar )
-	ON_COMMAND( ID_CM_ESCAPE_KEY, On_MdiClose )
+	ON_COMMAND( ID_CM_ESCAPE_KEY, On_EscapeKey )
 	ON_COMMAND( ID_CM_MDI_CLOSE_ALL, On_MdiCloseAll )
 	ON_UPDATE_COMMAND_UI( ID_CM_MDI_CLOSE_ALL, OnUpdateAnyMDIChild )
 	ON_COMMAND( CM_TOGGLE_MAXIMIZE, OnToggleMaximize )
@@ -274,6 +291,7 @@ BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWndEx )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, OnUpdate_RegisterImageAssoc )
 	ON_UPDATE_COMMAND_UI( IDW_SB_PROGRESS_CAPTION, OnUpdateAlwaysEnabled )
 	ON_COMMAND( ID_FOCUS_ON_ZOOM_COMBO, On_FocusOnZoomCombo )
+	ON_COMMAND( ID_FOCUS_ON_SLIDER_CTRL, On_FocusOnSliderCtrl )
 END_MESSAGE_MAP()
 
 int CMainFrame::OnCreate( CREATESTRUCT* pCS )
@@ -370,20 +388,6 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	if ( CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
 		pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
 
-	if ( !m_pOldToolbar->CreateEx( this, TBSTYLE_FLAT | TBSTYLE_TRANSPARENT,
-								WS_CHILD | WS_VISIBLE |
-								CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC,
-								CRect( 0, 2, 0, 2 ) ) ||
-		 !m_pOldToolbar->InitToolbar() )
-	{
-		TRACE( "Failed to create toolbar\n" );
-		return -1;	  // fail to create
-	}
-
-	// TODO: delete these three lines if you don't want the toolbar to be dockable
-	m_pOldToolbar->EnableDocking( CBRS_ALIGN_ANY );
-//	EnableDocking( CBRS_ALIGN_ANY );
-//	DockControlBar( m_pOldToolbar.get() );
 	return 0;
 }
 
@@ -456,9 +460,19 @@ void CMainFrame::OnUpdateAlwaysEnabled( CCmdUI* pCmdUI )
 	pCmdUI->Enable( TRUE );
 }
 
-void CMainFrame::On_MdiClose( void )
+void CMainFrame::On_EscapeKey( void )
 {
 	CFrameWnd* pActiveFrame = MDIGetActive();
+
+	if ( pActiveFrame != nullptr )
+		if ( !ui::OwnsFocus( pActiveFrame->GetSafeHwnd() ) )
+		{	// a toolbar control is focused -> focus the active view
+			if ( CView* pActiveView = pActiveFrame->GetActiveView() )
+				pActiveView->SetFocus();
+
+			return;
+		}
+
 	if ( nullptr == pActiveFrame )
 		pActiveFrame = this;
 
@@ -535,4 +549,11 @@ void CMainFrame::On_FocusOnZoomCombo( void )
 	if ( CMFCToolBarComboBoxButton* pComboBtn = mfc::FindFirstMatchingButton<CMFCToolBarComboBoxButton>( IDW_ZOOM_COMBO ) )
 		if ( !pComboBtn->HasFocus() )
 			ui::TakeFocus( pComboBtn->GetHwnd() );
+}
+
+void CMainFrame::On_FocusOnSliderCtrl( void )
+{
+	if ( mfc::CSliderButton* pSliderBtn = mfc::FindFirstMatchingButton<mfc::CSliderButton>( IDW_NAVIG_SLIDER_CTRL ) )
+		if ( !pSliderBtn->HasFocus() )
+			ui::TakeFocus( pSliderBtn->GetHwnd() );
 }

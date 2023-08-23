@@ -76,7 +76,7 @@ namespace mfc
 		void SetTags( const CEnumTags* pEnumTags );
 
 		// base overrides
-		virtual void OnChangeParentWnd( CWnd* pWndParent );
+		virtual void OnChangeParentWnd( CWnd* pParentWnd );
 		virtual BOOL CanBeStretched( void ) const { return true; }
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCToolBarComboBoxButton);
@@ -116,13 +116,24 @@ namespace mfc
 
 		// base overrides
 	public:
-		virtual void OnChangeParentWnd( CWnd* pWndParent );
+		virtual void OnChangeParentWnd( CWnd* pParentWnd );
 		virtual BOOL CanBeStretched( void ) const { return true; }
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCToolBarComboBoxButton);
 	private:
 		rebound const ui::IStockTags* m_pStockTags;
 	};
+}
+
+
+class CSliderCtrl;
+
+
+namespace ui
+{
+	// CSliderCtrl utils
+	bool IsValidPos( const CSliderCtrl* pSliderCtrl, int newPos );
+	bool ValidatePos( const CSliderCtrl* pSliderCtrl, OUT int* pNewPos );		// true if changed, after clamping
 }
 
 
@@ -142,10 +153,12 @@ namespace mfc
 
 		CSliderCtrl* GetSliderCtrl( void ) const;
 
-		void SetRange( int minValue, int maxValue );		// will sync all buttons
+		const Range<int>& GetRange( void ) const { return m_limits; }
+		void SetRange( int minValue, int maxValue );	// will sync all buttons
+		bool SetCountRange( size_t count, size_t tickFreqThresholdCount = TickFreqThresholdCount );		// set [0, count-1] range, auto tick frequency; will sync all buttons
 
 		int GetPos( void ) const;
-		void SetPos( int pos, bool notify = true );
+		bool SetPos( int pos, bool notify );
 	private:
 		void SetLimits( const Range<int>& limits );
 
@@ -154,7 +167,7 @@ namespace mfc
 		virtual void Serialize( CArchive& archive );
 		virtual SIZE OnCalculateSize( CDC* pDC, const CSize& sizeDefault, BOOL horz );
 		virtual void OnShow( BOOL show );
-		virtual void OnChangeParentWnd( CWnd* pWndParent );
+		virtual void OnChangeParentWnd( CWnd* pParentWnd );
 		virtual void OnMove( void );
 		virtual void OnSize( int width );
 		virtual HWND GetHwnd( void ) { return GetSliderCtrl()->GetSafeHwnd(); }
@@ -171,13 +184,13 @@ namespace mfc
 	private:
 		persist int m_width;
 		persist DWORD m_dwStyle;
-
 		persist Range<int> m_limits;
 		persist int m_pos;
 
 		std::auto_ptr<CCustomSliderCtrl> m_pSliderCtrl;
 
-		enum { DefaultWidth = 150, DefaultHeight = 25, DefaultStyle = TBS_HORZ | TBS_AUTOTICKS | TBS_TRANSPARENTBKGND | TBS_TOOLTIPS };
+		enum { DefaultStyle = TBS_HORZ | TBS_AUTOTICKS | TBS_TRANSPARENTBKGND | TBS_NOTIFYBEFOREMOVE | TBS_TOOLTIPS };
+		enum { DefaultWidth = 150, DefaultHeight = 25, TickFreqThresholdCount = 30 };
 	};
 }
 

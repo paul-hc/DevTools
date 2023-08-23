@@ -152,9 +152,9 @@ namespace mfc
 			RemoveAllItems();
 	}
 
-	void CEnumComboBoxButton::OnChangeParentWnd( CWnd* pWndParent )
+	void CEnumComboBoxButton::OnChangeParentWnd( CWnd* pParentWnd )
 	{
-		__super::OnChangeParentWnd( pWndParent );
+		__super::OnChangeParentWnd( pParentWnd );
 
 		if ( nullptr == m_pEnumTags )		// parent toolbar is loading state (de-serializing)?
 			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pEnumTags, m_nID, 0 );
@@ -229,9 +229,9 @@ namespace mfc
 			ui::SendCommand( m_pWndParent->GetOwner()->GetSafeHwnd(), m_nID, ui::CN_INPUTERROR, GetComboBox()->GetSafeHwnd() );
 	}
 
-	void CStockValuesComboBoxButton::OnChangeParentWnd( CWnd* pWndParent )
+	void CStockValuesComboBoxButton::OnChangeParentWnd( CWnd* pParentWnd )
 	{
-		__super::OnChangeParentWnd( pWndParent );
+		__super::OnChangeParentWnd( pParentWnd );
 
 		if ( nullptr == m_pStockTags )		// parent toolbar is loading state (de-serializing)?
 			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pStockTags, m_nID, 0 );
@@ -252,6 +252,32 @@ namespace mfc
 }
 
 
+namespace ui
+{
+	// CSliderCtrl utils
+
+	bool IsValidPos( const CSliderCtrl* pSliderCtrl, int newPos )
+	{
+		ASSERT_PTR( pSliderCtrl );
+		Range<int> limits;
+
+		pSliderCtrl->GetRange( limits.m_start, limits.m_end );
+		return limits.Contains( newPos );
+	}
+
+	bool ValidatePos( const CSliderCtrl* pSliderCtrl, OUT int* pNewPos )
+	{
+		ASSERT_PTR( pSliderCtrl );
+		Range<int> limits;
+
+		pSliderCtrl->GetRange( limits.m_start, limits.m_end );
+		limits.Constrain( *pNewPos );
+
+		return limits.Contains( *pNewPos ) && *pNewPos != pSliderCtrl->GetPos();
+	}
+}
+
+
 namespace mfc
 {
 	class CCustomSliderCtrl : public CSliderCtrl
@@ -261,6 +287,7 @@ namespace mfc
 		virtual ~CCustomSliderCtrl();
 
 		bool IsVisible( void ) const { return ui::IsVisible( m_hWnd ); }
+		bool UpdatePos( int pos );
 	private:
 		CSliderButton* m_pButton;
 	protected:
@@ -272,9 +299,7 @@ namespace mfc
 	};
 
 
-
 	IMPLEMENT_SERIAL( CSliderButton, CMFCToolBarButton, 1 )
-
 
 	CSliderButton::CSliderButton( void )
 		: CMFCToolBarButton()
@@ -307,33 +332,26 @@ namespace mfc
 		return m_pSliderCtrl.get();
 	}
 
-	int CSliderButton::GetPos( void ) const
-	{
-		if ( m_pSliderCtrl->GetSafeHwnd() != nullptr )
-			ASSERT( m_pSliderCtrl->GetPos() == m_pos );		// current pos consistent with the slider ctrl?
-
-		return m_pos;
-	}
-
-	void CSliderButton::SetPos( int pos, bool notify /*= true*/ )
-	{
-		m_pos = pos;
-
-		if ( GetHwnd() != nullptr )
-			m_pSliderCtrl->SetPos( pos );
-
-		// sync other buttons on all toolbars with the same btnId
-		mfc::ForEachMatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter( &mfc::CSliderButton::SetPos, m_pos, false ), this );
-
-		if ( notify && m_pSliderCtrl->GetSafeHwnd() != nullptr )
-			ui::SendCommand( m_pSliderCtrl->GetOwner()->GetSafeHwnd(), m_nID, BN_CLICKED, m_pSliderCtrl->GetSafeHwnd() );
-	}
-
 	void CSliderButton::SetRange( int minValue, int maxValue )
 	{
 		SetLimits( Range<int>( minValue, maxValue ) );
 
 		mfc::ForEachMatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter<const Range<int>&>( &mfc::CSliderButton::SetLimits, m_limits ), this );
+	}
+
+	bool CSliderButton::SetCountRange( size_t count, size_t tickFreqThresholdCount /*= TickFreqThresholdCount*/ )
+	{
+		Range<int> limits( 0, utl::max( 2, count - 1 ) );
+
+		if ( m_limits == limits )
+			return false;		// no change
+
+		SetRange( limits.m_start, limits.m_end );
+
+		if ( GetHwnd() != nullptr )
+			m_pSliderCtrl->SetTicFreq( static_cast<int>( 1 + count / tickFreqThresholdCount ) );
+
+		return true;
 	}
 
 	void CSliderButton::SetLimits( const Range<int>& limits )
@@ -342,6 +360,33 @@ namespace mfc
 
 		if ( m_pSliderCtrl->GetSafeHwnd() != nullptr )
 			m_pSliderCtrl->SetRange( m_limits.m_start, m_limits.m_end, true );
+	}
+
+	int CSliderButton::GetPos( void ) const
+	{
+		if ( m_pSliderCtrl->GetSafeHwnd() != nullptr )
+			ASSERT( m_pSliderCtrl->GetPos() == m_pos );		// current pos consistent with the slider ctrl?
+
+		return m_pos;
+	}
+
+	bool CSliderButton::SetPos( int pos, bool notify )
+	{
+		bool changed = pos != m_pos;
+
+		m_pos = pos;
+
+		if ( GetHwnd() != nullptr )
+			if ( m_pSliderCtrl->UpdatePos( m_pos ) )
+				changed = true;
+
+		// sync other buttons on all toolbars with the same btnId
+		mfc::ForEachMatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter( &mfc::CSliderButton::SetPos, m_pos, false ), this );
+
+		if ( notify && m_pSliderCtrl->GetSafeHwnd() != nullptr )
+			ui::SendCommand( m_pSliderCtrl->GetOwner()->GetSafeHwnd(), m_nID, BN_CLICKED, m_pSliderCtrl->GetSafeHwnd() );
+
+		return changed;
 	}
 
 	void CSliderButton::CopyFrom( const CMFCToolBarButton& s )
@@ -383,31 +428,33 @@ namespace mfc
 		}
 	}
 
-	void CSliderButton::OnChangeParentWnd( CWnd* pWndParent )
+	void CSliderButton::OnChangeParentWnd( CWnd* pParentWnd )
 	{
+		__super::OnChangeParentWnd( pParentWnd );
+
 		if ( m_pSliderCtrl->GetSafeHwnd() != nullptr )
 		{
-			CWnd* pWndParentCurr = m_pSliderCtrl->GetParent();
-			ASSERT_PTR( pWndParentCurr );
+			CWnd* pOldParentWnd = m_pSliderCtrl->GetParent();
+			ASSERT_PTR( pOldParentWnd );
 
-			if ( pWndParent != nullptr && pWndParentCurr != nullptr && pWndParentCurr->GetSafeHwnd() == pWndParent->GetSafeHwnd() )
+			if ( pParentWnd != nullptr && pOldParentWnd->GetSafeHwnd() == pParentWnd->GetSafeHwnd() )
 				return;
 
 			m_pSliderCtrl->DestroyWindow();
 		}
 
-		if ( nullptr == pWndParent || nullptr == pWndParent->GetSafeHwnd() )
-			return;
+		if ( pParentWnd->GetSafeHwnd() != nullptr )
+			if ( m_pSliderCtrl->Create( m_dwStyle, m_rect, pParentWnd, m_nID ) )
+			{
+				m_pSliderCtrl->SetRange( m_limits.m_start, m_limits.m_end );
+				m_pSliderCtrl->SetPos( m_pos );
+				m_pSliderCtrl->SetOwner( pParentWnd->GetTopLevelFrame() );
 
-		if ( !m_pSliderCtrl->Create( m_dwStyle, m_rect, pWndParent, m_nID ) )
-		{
-			ASSERT( false );
-			return;
-		}
-
-		m_pSliderCtrl->SetRange( m_limits.m_start, m_limits.m_end );
-		m_pSliderCtrl->SetPos( m_pos );
-		m_pSliderCtrl->SetOwner( pWndParent->GetTopLevelFrame() );
+				//m_pSliderCtrl->SetLineSize( 1 );
+				//m_pSliderCtrl->SetPageSize( 10 );
+			}
+			else
+				ASSERT( false );
 	}
 
 	SIZE CSliderButton::OnCalculateSize( CDC* pDC, const CSize& sizeDefault, BOOL horz )
@@ -489,6 +536,16 @@ namespace mfc
 
 	CCustomSliderCtrl::~CCustomSliderCtrl()
 	{
+	}
+
+	bool CCustomSliderCtrl::UpdatePos( int pos )
+	{
+		int oldPos = GetPos();
+		if ( oldPos == pos )
+			return false;
+
+		SetPos( pos );
+		return true;
 	}
 
 

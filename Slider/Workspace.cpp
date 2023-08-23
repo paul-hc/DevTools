@@ -4,7 +4,6 @@
 #include "WorkspaceDialog.h"
 #include "SlideData.h"
 #include "MainFrame.h"
-#include "MainToolbar.h"
 #include "ImageView.h"
 #include "ChildFrame.h"
 #include "Application.h"

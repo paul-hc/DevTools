@@ -5,7 +5,6 @@
 #include "ImageNavigator.h"
 #include "Workspace.h"
 #include "MainFrame.h"
-#include "MainToolbar.h"
 #include "ChildFrame.h"
 #include "ImageState.h"
 #include "ImageDoc.h"
@@ -18,8 +17,10 @@
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/PostCall.h"
+#include "utl/UI/MfcUtilities.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/WndUtils.h"
+#include "utl/UI/ToolbarButtons.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 
@@ -38,7 +39,7 @@ CImageView::CImageView( void )
 	, m_imageFramePos( 0 )
 	, m_bkColor( CLR_DEFAULT )
 	, m_initialized( false )
-	, m_pNavigBar( app::GetMainFrame()->GetOldToolbar() )
+	, m_pNavigBar( app::GetMainFrame()->GetNavigationBar() )
 	, m_pMdiChildFrame( nullptr )
 {
 	s_imageAccel.LoadOnce( IDR_IMAGEVIEW );
@@ -111,21 +112,6 @@ CScrollView* CImageView::GetScrollView( void ) implements(IImageView)
 	return TBaseClass::GetScrollView();
 }
 
-void CImageView::RegainFocus( RegainAction regainAction, int ctrlId /*= 0*/ ) implements(IImageView)
-{
-	switch ( regainAction )
-	{
-		case Enter:
-			if ( IDW_ZOOM_COMBO == ctrlId )				// ENTER key pressed with the zoom combo focused?
-				if ( InputZoomPct( ui::ByEdit ) )		// successful zoom input?
-					SetFocus();
-			break;
-		case Escape:
-			SetFocus();
-			break;
-	}
-}
-
 void CImageView::EventChildFrameActivated( void ) implements(IImageView)
 {
 	// called when this view or a sibling view is activated (i.e. CAlbumThumbListView)
@@ -134,9 +120,16 @@ void CImageView::EventChildFrameActivated( void ) implements(IImageView)
 	OutputNavigSlider();
 }
 
-void CImageView::EventNavigSliderPosChanged( bool thumbTracking ) implements(IImageView)
+void CImageView::HandleNavigSliderPosChanging( int newPos, bool thumbTracking )
 {
 	thumbTracking;
+	CImageFrameNavigator navigator( GetImage() );
+
+	if ( navigator.IsStaticMultiFrameImage() )
+	{
+		m_imageFramePos = newPos;
+		OnImageContentChanged();
+	}
 }
 
 CImageState* CImageView::GetLoadingImageState( void ) const
@@ -178,9 +171,32 @@ bool CImageView::OutputNavigSlider( void )
 	if ( !app::GetMainFrame()->IsViewActive( this ) )
 		return false;
 
-	m_pNavigBar->OutputNavigRange( 1 );
-	m_pNavigBar->OutputNavigPos( 0 );
+	CImageFrameNavigator navigator( GetImage() );
+
+	if ( navigator.IsStaticMultiFrameImage() )
+	{
+		m_pNavigBar->OutputNavigRange( navigator.GetFrameCount() );
+		m_pNavigBar->OutputNavigPos( m_imageFramePos );
+	}
+	else
+	{
+		m_pNavigBar->OutputNavigRange( 1 );
+		m_pNavigBar->OutputNavigPos( 0 );
+	}
+
 	return true;
+}
+
+std::tstring CImageView::FormatTipText_NavigSliderCtrl( void ) const
+{
+	fs::TImagePathKey imgPathKey = GetImagePathKey();
+	std::tstring tipText = imgPathKey.first.Get();
+	CImageFrameNavigator navigator( GetImage() );
+
+	if ( navigator.IsStaticMultiFrameImage() )
+		tipText += str::Format( _T("  [frame %d of %d]"), m_imageFramePos + 1, navigator.GetFrameCount() );
+
+	return tipText;
 }
 
 void CImageView::OnImageContentChanged( void )
@@ -198,6 +214,8 @@ void CImageView::OnImageContentChanged( void )
 
 	AssignScalingMode( CWorkspace::GetData().m_scalingMode );			// TRICKY: switch to initial value without any recalculations
 	Invalidate( TRUE );
+
+	OutputNavigSlider();			// update the slider range and position (for multi-frame images)
 }
 
 CWicImage* CImageView::ForceReloadImage( void )
@@ -279,22 +297,29 @@ BEGIN_MESSAGE_MAP( CImageView, TBaseClass )
 	ON_WM_MBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_MOUSEWHEEL()
-	ON_COMMAND_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, On_NavigSeek )
-	ON_UPDATE_COMMAND_UI_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, OnUpdate_NavigSeek )
 	ON_COMMAND( ID_EDIT_COPY, OnEditCopy )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateEditCopy )
-	ON_UPDATE_COMMAND_UI( IDW_NAVIG_SLIDER_CTRL, OnUpdate_NavigSliderCtrl )
+
+	ON_COMMAND_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, On_NavigSeek )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, OnUpdate_NavigSeek )
+
 	ON_COMMAND_RANGE( ID_TOGGLE_SCALING_AUTO_FIT_LARGE, ID_TOGGLE_SCALING_USE_ZOOM_PCT, OnRadio_ImageScalingMode )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_TOGGLE_SCALING_AUTO_FIT_LARGE, ID_TOGGLE_SCALING_USE_ZOOM_PCT, OnUpdate_ImageScalingMode )
+
 	ON_COMMAND( ID_ZOOM_NORMAL_100, On_ZoomNormal100 )		// ID_ZOOM_NORMAL_100 is kind of synonym with ID_TOGGLE_SCALE_ACTUAL_SIZE, but with an image
 	ON_COMMAND_RANGE( ID_ZOOM_IN, ID_ZOOM_OUT, On_Zoom )
 	ON_COMMAND( ID_RESIZE_VIEW_TO_FIT, CmResizeViewToFit )
 	ON_COMMAND( ID_EDIT_BK_COLOR, On_EditBkColor )
 	ON_COMMAND_RANGE( CM_SCROLL_LEFT, CM_SCROLL_PAGE_DOWN, CmScroll )
+
 	ON_COMMAND( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
 	ON_CBN_SELENDOK( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
 	ON_BN_CLICKED( IDW_ZOOM_COMBO, OnEditInput_ZoomCombo )
 	ON_CBN_SELENDOK( IDW_ZOOM_COMBO, OnCBnSelChange_ZoomCombo )
+	ON_COMMAND( IDW_NAVIG_SLIDER_CTRL, OnPosChanged_NavigSliderCtrl )
+	ON_NOTIFY( TRBN_THUMBPOSCHANGING, IDW_NAVIG_SLIDER_CTRL, OnThumbPosChanging_NavigSliderCtrl )
+	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXT, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText_NavigSliderCtrl )
+	ON_UPDATE_COMMAND_UI( IDW_NAVIG_SLIDER_CTRL, OnUpdate_NavigSliderCtrl )
 	// standard printing
 	ON_COMMAND( ID_FILE_PRINT, CScrollView::OnFilePrint )
 	ON_COMMAND( ID_FILE_PRINT_DIRECT, CScrollView::OnFilePrint )
@@ -446,6 +471,22 @@ BOOL CImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
 	return FALSE;		//__super::OnMouseWheel( mkFlags, zDelta, point );
 }
 
+void CImageView::OnEditCopy( void )
+{
+	std::tstring imageFileName;
+	if ( CWicImage* pImage = GetImage() )
+		imageFileName = pImage->GetImagePath().Get();
+
+	CTextClipboard::CopyText( imageFileName, m_hWnd );
+}
+
+void CImageView::OnUpdateEditCopy( CCmdUI* pCmdUI )
+{
+	CWicImage* pImage = GetImage();
+
+	pCmdUI->Enable( pImage != nullptr && !pImage->GetImagePath().IsEmpty() );
+}
+
 void CImageView::On_NavigSeek( UINT cmdId )
 {
 	CImageFrameNavigator navigator( GetImage() );
@@ -463,25 +504,48 @@ void CImageView::OnUpdate_NavigSeek( CCmdUI* pCmdUI )
 	pCmdUI->Enable( navigator.CanNavigate( navigate ) );
 }
 
-void CImageView::OnEditCopy( void )
+void CImageView::OnPosChanged_NavigSliderCtrl( void )	// OBSOLETE
 {
-	std::tstring imageFileName;
-	if ( CWicImage* pImage = GetImage() )
-		imageFileName = pImage->GetImagePath().Get();
-
-	CTextClipboard::CopyText( imageFileName, m_hWnd );
-}
-
-void CImageView::OnUpdateEditCopy( CCmdUI* pCmdUI )
-{
-	CWicImage* pImage = GetImage();
-
-	pCmdUI->Enable( pImage != nullptr && !pImage->GetImagePath().IsEmpty() );
 }
 
 void CImageView::OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( false );
+	CImageFrameNavigator navigator( GetImage() );
+
+	pCmdUI->Enable( navigator.IsStaticMultiFrameImage() );
+}
+
+void CImageView::OnThumbPosChanging_NavigSliderCtrl( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	const NMTRBTHUMBPOSCHANGING* pNmPosChanging = (NMTRBTHUMBPOSCHANGING*)pNmHdr;
+
+	if ( pNmHdr->hwndFrom != nullptr )
+		if ( const CSliderCtrl* pSliderCtrl = checked_static_cast<const CSliderCtrl*>( CWnd::FromHandlePermanent( pNmHdr->hwndFrom ) ) )
+		{
+			int newPos = static_cast<int>( pNmPosChanging->dwPos );
+			if ( ui::ValidatePos( pSliderCtrl, &newPos ) )
+			{
+				HandleNavigSliderPosChanging( static_cast<int>( pNmPosChanging->dwPos ), TB_THUMBTRACK == pNmPosChanging->nReason );
+				*pResult = 0;		// enable input
+				return;
+			}
+		}
+
+	*pResult = 1;		// reject input
+}
+
+BOOL CImageView::OnTtnNeedText_NavigSliderCtrl( UINT, NMHDR* pNmHdr, LRESULT* pResult )
+{
+	ui::CTooltipTextMessage message( pNmHdr );
+
+	if ( !message.IsValidNotification() || message.m_cmdId != IDW_NAVIG_SLIDER_CTRL )
+		return FALSE;		// not handled, countinue routing
+
+	if ( !message.AssignTooltipText( FormatTipText_NavigSliderCtrl() ) )
+		return FALSE;		// countinue routing
+
+	*pResult = 0;
+	return TRUE;			// message was handled
 }
 
 void CImageView::OnRadio_ImageScalingMode( UINT cmdId )

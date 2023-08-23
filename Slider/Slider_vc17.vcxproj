@@ -249,7 +249,6 @@
     <ClInclude Include="ListViewState.h" />
     <ClInclude Include="LoggerSetupDialog.h" />
     <ClInclude Include="MainFrame.h" />
-    <ClInclude Include="MainToolbar.h" />
     <ClInclude Include="ModelSchema.h" />
     <ClInclude Include="MoveFileDialog.h" />
     <ClInclude Include="OleImagesDataSource.h" />
@@ -301,7 +300,6 @@
     <ClCompile Include="ListViewState.cpp" />
     <ClCompile Include="LoggerSetupDialog.cpp" />
     <ClCompile Include="MainFrame.cpp" />
-    <ClCompile Include="MainToolbar.cpp" />
     <ClCompile Include="ModelSchema.cpp" />
     <ClCompile Include="MoveFileDialog.cpp" />
     <ClCompile Include="OleImagesDataSource.cpp" />

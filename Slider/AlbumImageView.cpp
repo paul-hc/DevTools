@@ -137,6 +137,19 @@ bool CAlbumImageView::CanEnterDragMode( void ) const overrides(CImageView)
 
 // navigation support
 
+std::tstring CAlbumImageView::FormatTipText_NavigSliderCtrl( void ) const overrides(CImageView)
+{
+	fs::TImagePathKey imgPathKey = GetImagePathKey();
+	int imageCount = static_cast<int>( GetDocument()->GetImageCount() );
+	std::tstring tipText = imgPathKey.first.Get() + str::Format( _T("  (%d of %d)"), m_slideData.GetCurrentIndex(), imageCount );
+	CImageFrameNavigator imgFrame( GetImage() );
+
+	if ( imgFrame.IsStaticMultiFrameImage() )
+		tipText += str::Format( _T(" - [frame %d/%d]"), m_slideData.GetCurrentIndex(), imgFrame.GetFramePos() + 1, imgFrame.GetFrameCount() );
+
+	return tipText;
+}
+
 bool CAlbumImageView::IsValidIndex( size_t index ) const
 {
 	return GetDocument()->IsValidIndex( index );
@@ -379,9 +392,9 @@ void CAlbumImageView::EventChildFrameActivated( void ) overrides(CImageView)
 	GetDocument()->m_slideData = m_slideData;		// copy current navigation attributes to document (i.e. persistent attributes)
 }
 
-void CAlbumImageView::EventNavigSliderPosChanged( bool thumbTracking ) overrides(CImageView)
+void CAlbumImageView::HandleNavigSliderPosChanging( int newPos, bool thumbTracking ) overrides(CImageView)
 {
-	m_slideData.SetCurrentIndex( m_pNavigBar->InputNavigPos() );
+	m_slideData.SetCurrentIndex( newPos /*m_pNavigBar->InputNavigPos()*/ );
 
 	if ( thumbTracking )
 		OnCurrPosChanged( false );

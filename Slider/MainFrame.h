@@ -10,7 +10,6 @@
 
 interface IImageView;
 class CBaseZoomView;
-class CMainToolbar;
 
 typedef CBaseMainFrameWndEx<CMDIFrameWndEx> TMDIFrameWndEx;
 
@@ -33,7 +32,6 @@ public:
 
 	CMFCToolBar* GetStandardToolbar( void ) { return &m_standardToolBar; }
 	CMFCStatusBar* GetStatusBar( void ) { return &m_statusBar; }
-		CMainToolbar* GetOldToolbar( void ) { return m_pOldToolbar.get(); }
 
 	ui::IZoomBar* GetZoomBar( void ) { return this; }
 	INavigationBar* GetNavigationBar( void ) { return this; }
@@ -67,10 +65,6 @@ private:
 	CMFCToolBar m_navigateToolBar;
 	CMFCStatusBar m_statusBar;
 
-
-		// obsolete
-		std::auto_ptr<CMainToolbar> m_pOldToolbar;
-
 	CWindowTimer m_messageClearTimer;
 	CWindowTimer m_ddeEnqueuedTimer;				// monitors enqueued image paths
 
@@ -92,7 +86,7 @@ protected:
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* mmi );
 	afx_msg LRESULT OnResetToolbar( WPARAM toolBarResId, LPARAM );
 	afx_msg void OnUpdateAlwaysEnabled( CCmdUI* pCmdUI );
-	afx_msg void On_MdiClose( void );
+	afx_msg void On_EscapeKey( void );
 	afx_msg void On_MdiCloseAll( void );
 	afx_msg void OnUpdateAnyMDIChild( CCmdUI* pCmdUI );
 	afx_msg void OnToggleMaximize( void );
@@ -103,6 +97,7 @@ protected:
 	afx_msg void On_RegisterImageAssoc( UINT cmdId );
 	afx_msg void OnUpdate_RegisterImageAssoc( CCmdUI* pCmdUI );
 	afx_msg void On_FocusOnZoomCombo( void );
+	afx_msg void On_FocusOnSliderCtrl( void );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -41,11 +41,12 @@ public:
 	// IImageView overrides
 	virtual fs::TImagePathKey GetImagePathKey( void ) const overrides(CImageView);
 	virtual void EventChildFrameActivated( void ) overrides(CImageView);
-	virtual void EventNavigSliderPosChanged( bool thumbTracking ) overrides(CImageView);
 protected:
 	// base overrides
 	virtual void OnImageContentChanged( void ) overrides(CImageView);
 	virtual bool OutputNavigSlider( void ) overrides(CImageView);
+	virtual void HandleNavigSliderPosChanging( int newPos, bool thumbTracking ) overrides(CImageView);
+	virtual std::tstring FormatTipText_NavigSliderCtrl( void ) const overrides(CImageView);
 	virtual bool CanEnterDragMode( void ) const overrides(CImageView);
 public:
 	// navigation support

@@ -38,6 +38,10 @@ class CImageFrameNavigator : public CNavigatorBase
 public:
 	CImageFrameNavigator( const CWicImage* pCurrImage );
 
+	bool IsStaticMultiFrameImage( void ) const { return !m_imageInfo.m_isAnimated && m_imageInfo.IsMultiFrameImage(); }
+	UINT GetFramePos( void ) const { return m_imageInfo.m_framePos; }
+	UINT GetFrameCount( void ) const { return m_imageInfo.m_frameCount; }
+
 	bool CanNavigate( nav::Navigate navigate, UINT step = 1 ) const;
 	UINT GetNavigateFramePos( nav::Navigate navigate, UINT step = 1 ) const;
 
