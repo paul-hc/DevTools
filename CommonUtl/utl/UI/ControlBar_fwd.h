@@ -82,7 +82,7 @@ namespace mfc
 		{
 			ButtonT* pButton = checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) );
 
-			if ( pButton != pExceptBtn && !CMFCToolBar::IsLastCommandFromButton( pButton ) )		// exclude the button handling the command
+			if ( pExceptBtn != nullptr ? ( pButton != pExceptBtn ) : !CMFCToolBar::IsLastCommandFromButton( pButton ) )		// exclude pExceptBtn or the one handling the message
 				func( pButton );
 		}
 

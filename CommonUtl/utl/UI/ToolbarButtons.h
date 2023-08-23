@@ -123,8 +123,67 @@ namespace mfc
 	private:
 		rebound const ui::IStockTags* m_pStockTags;
 	};
+}
 
 
+namespace mfc
+{
+	class CCustomSliderCtrl;
+
+
+	class CSliderButton : public CMFCToolBarButton
+	{
+		DECLARE_SERIAL( CSliderButton )
+
+		CSliderButton( void );
+	public:
+		CSliderButton( UINT btnId, int width = 0, DWORD dwStyle = DefaultStyle );
+		virtual ~CSliderButton();
+
+		CSliderCtrl* GetSliderCtrl( void ) const;
+
+		void SetRange( int minValue, int maxValue );		// will sync all buttons
+
+		int GetPos( void ) const;
+		void SetPos( int pos, bool notify = true );
+	private:
+		void SetLimits( const Range<int>& limits );
+
+		// base overrides
+	public:
+		virtual void Serialize( CArchive& archive );
+		virtual SIZE OnCalculateSize( CDC* pDC, const CSize& sizeDefault, BOOL horz );
+		virtual void OnShow( BOOL show );
+		virtual void OnChangeParentWnd( CWnd* pWndParent );
+		virtual void OnMove( void );
+		virtual void OnSize( int width );
+		virtual HWND GetHwnd( void ) { return GetSliderCtrl()->GetSafeHwnd(); }
+		virtual BOOL CanBeStretched( void ) const { return TRUE; }
+		virtual BOOL HaveHotBorder( void ) const { return FALSE; }
+
+		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
+							 BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE,
+							 BOOL bHighlight = FALSE,
+							 BOOL bDrawBorder = TRUE,
+							 BOOL bGrayDisabledButtons = TRUE );		// no-op
+	protected:
+		virtual void CopyFrom( const CMFCToolBarButton& src );
+	private:
+		persist int m_width;
+		persist DWORD m_dwStyle;
+
+		persist Range<int> m_limits;
+		persist int m_pos;
+
+		std::auto_ptr<CCustomSliderCtrl> m_pSliderCtrl;
+
+		enum { DefaultWidth = 150, DefaultHeight = 25, DefaultStyle = TBS_HORZ | TBS_AUTOTICKS | TBS_TRANSPARENTBKGND | TBS_TOOLTIPS };
+	};
+}
+
+
+namespace mfc
+{
 	// CStockValuesComboBoxButton template code
 
 	template< typename ValueT >
