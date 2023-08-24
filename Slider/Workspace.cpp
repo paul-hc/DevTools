@@ -270,14 +270,18 @@ void CWorkspace::FetchSettings( void )
 			for ( CWnd* pChild = pActiveChildFrame->GetNextWindow( GW_HWNDLAST ); pChild != nullptr; pChild = pChild->GetNextWindow( GW_HWNDPREV ) )
 			{
 				CChildFrame* pChildFrame = checked_static_cast<CChildFrame*>( pChild );
-				fs::CPath docFilePath( pChildFrame->GetActiveDocument()->GetPathName().GetString() );
 
-				if ( !docFilePath.IsEmpty() )
-					if ( IImageView* pImageView = pChildFrame->GetImageView() )			// ensure not a print preview, etc
-					{
-						m_imageStates.push_back( CImageState() );
-						dynamic_cast<const CImageView*>( pChildFrame->GetImageView()->GetScrollView() )->MakeImageState( &m_imageStates.back() );
-					}
+				if ( CDocument* pActiveDoc = pChildFrame->GetActiveDocument() )
+				{
+					fs::CPath docFilePath( pActiveDoc->GetPathName().GetString() );
+
+					if ( !docFilePath.IsEmpty() )
+						if ( IImageView* pImageView = pChildFrame->GetImageView() )			// ensure not a print preview, etc
+						{
+							m_imageStates.push_back( CImageState() );
+							dynamic_cast<const CImageView*>( pImageView->GetScrollView() )->MakeImageState( &m_imageStates.back() );
+						}
+				}
 			}
 }
 
