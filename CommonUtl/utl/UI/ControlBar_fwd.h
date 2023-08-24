@@ -73,7 +73,7 @@ namespace mfc
 	// CMFCToolBar algorithms:
 
 	template< typename ButtonT, typename FuncT >
-	FuncT ForEachMatchingButton( UINT btnId, FuncT func, const ButtonT* pExceptBtn = nullptr )
+	FuncT ForEach_MatchingButton( UINT btnId, FuncT func, const ButtonT* pExceptBtn = nullptr )
 	{
 		CObList buttonList;
 		CMFCToolBar::GetCommandButtons( btnId, buttonList );
@@ -118,7 +118,7 @@ namespace mfc
 	}
 
 
-	inline void RedrawMatchingButtons( UINT btnId ) { ForEachMatchingButton<CMFCToolBarButton>( btnId, &mfc::ToolBarButton_Redraw ); }
+	inline void RedrawMatchingButtons( UINT btnId ) { ForEach_MatchingButton<CMFCToolBarButton>( btnId, &mfc::ToolBarButton_Redraw ); }
 
 
 	template< typename ButtonT >

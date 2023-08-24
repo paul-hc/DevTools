@@ -54,6 +54,7 @@ BOOL CChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext )
 
 	if ( pContext != nullptr && pContext->m_pNewViewClass != nullptr )
 		m_pImageView = dynamic_cast<IImageView*>( CreateView( pContext, AFX_IDW_PANE_FIRST ) );
+
 	return m_pImageView != nullptr;
 }
 

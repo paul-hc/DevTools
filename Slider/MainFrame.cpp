@@ -167,7 +167,7 @@ bool CMainFrame::ResizeViewToFit( CBaseZoomView* pZoomScrollView )
 
 bool CMainFrame::OutputScalingMode( ui::ImageScalingMode scalingMode )
 {
-	mfc::ForEachMatchingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO, func::MakeSetter( &mfc::CEnumComboBoxButton::SetValue, (int)scalingMode ) );
+	mfc::ForEach_MatchingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO, func::MakeSetter( &mfc::CEnumComboBoxButton::SetValue, (int)scalingMode ) );
 	return true;
 }
 
@@ -181,7 +181,7 @@ ui::ImageScalingMode CMainFrame::InputScalingMode( void ) const
 
 bool CMainFrame::OutputZoomPct( UINT zoomPct )
 {
-	mfc::ForEachMatchingButton<mfc::CStockValuesComboBoxButton>( IDW_ZOOM_COMBO, func::MakeSetter( &mfc::CStockValuesComboBoxButton::template OutputValue<UINT>, zoomPct ) );
+	mfc::ForEach_MatchingButton<mfc::CStockValuesComboBoxButton>( IDW_ZOOM_COMBO, func::MakeSetter( &mfc::CStockValuesComboBoxButton::template OutputValue<UINT>, zoomPct ) );
 	return true;
 }
 

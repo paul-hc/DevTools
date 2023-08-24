@@ -11,6 +11,7 @@
 
 
 class CMainFrame;
+class CChildFrame;
 
 
 namespace wf
@@ -109,7 +110,7 @@ public:
 
 	void ToggleFullScreen( void );
 private:
-	void SetImageSelColor( COLORREF imageSelColor );
+	bool AddImageViewState( CChildFrame* pChildFrame );
 private:
 	fs::CPath m_filePath;
 	bool m_delayFullScreen;							// intermediate mirror flag for m_isFullScreen

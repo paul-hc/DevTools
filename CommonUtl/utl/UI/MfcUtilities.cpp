@@ -315,3 +315,26 @@ namespace ui
 		return false;
 	}
 }
+
+
+namespace mfc
+{
+	CMDIChildWnd* GetFirstMdiChildFrame( const CMDIFrameWnd* pMdiFrameWnd /*= mfc::GetMainMdiFrameWnd()*/ )
+	{
+		ASSERT_PTR( pMdiFrameWnd->GetSafeHwnd() );
+		ASSERT_PTR( pMdiFrameWnd->m_hWndMDIClient );
+
+		if ( CWnd* pMdiChild = CWnd::FromHandle( pMdiFrameWnd->m_hWndMDIClient )->GetWindow( GW_CHILD ) )
+		{
+			pMdiChild = pMdiChild->GetWindow( GW_HWNDLAST );		// in display terms, last MDI means on top of the MDI children Z order
+			ASSERT_PTR( pMdiChild );
+
+			while ( !is_a<CMDIChildWnd>( pMdiChild ) )
+				pMdiChild = pMdiChild->GetWindow( GW_HWNDPREV );	// assume MDI Client has other windows other than frames (which is very unusual)
+
+			return checked_static_cast<CMDIChildWnd*>( pMdiChild );
+		}
+
+		return nullptr;
+	}
+}

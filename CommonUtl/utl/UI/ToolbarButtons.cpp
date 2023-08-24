@@ -336,7 +336,7 @@ namespace mfc
 	{
 		SetLimits( Range<int>( minValue, maxValue ) );
 
-		mfc::ForEachMatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter<const Range<int>&>( &mfc::CSliderButton::SetLimits, m_limits ), this );
+		mfc::ForEach_MatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter<const Range<int>&>( &mfc::CSliderButton::SetLimits, m_limits ), this );
 	}
 
 	bool CSliderButton::SetCountRange( size_t count, size_t tickFreqThresholdCount /*= TickFreqThresholdCount*/ )
@@ -381,7 +381,7 @@ namespace mfc
 				changed = true;
 
 		// sync other buttons on all toolbars with the same btnId
-		mfc::ForEachMatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter( &mfc::CSliderButton::SetPos, m_pos, false ), this );
+		mfc::ForEach_MatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter( &mfc::CSliderButton::SetPos, m_pos, false ), this );
 
 		if ( notify && m_pSliderCtrl->GetSafeHwnd() != nullptr )
 			ui::SendCommand( m_pSliderCtrl->GetOwner()->GetSafeHwnd(), m_nID, BN_CLICKED, m_pSliderCtrl->GetSafeHwnd() );

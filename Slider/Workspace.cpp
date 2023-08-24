@@ -263,26 +263,27 @@ void CWorkspace::FetchSettings( void )
 	SetFlag( m_data.m_wkspFlags, wf::ShowToolBar, ui::IsVisible( m_pMainFrame->GetStandardToolbar()->GetSafeHwnd() ) );
 	SetFlag( m_data.m_wkspFlags, wf::ShowStatusBar, ui::IsVisible( m_pMainFrame->GetStatusBar()->GetSafeHwnd() ) );
 
+	using std::placeholders::_1;
+
 	m_imageStates.clear();
-
 	if ( HasFlag( m_data.m_wkspFlags, wf::PersistOpenDocs ) )
-		if ( pActiveChildFrame != nullptr )
-			for ( CWnd* pChild = pActiveChildFrame->GetNextWindow( GW_HWNDLAST ); pChild != nullptr; pChild = pChild->GetNextWindow( GW_HWNDPREV ) )
-			{
-				CChildFrame* pChildFrame = checked_static_cast<CChildFrame*>( pChild );
+		mfc::ForEach_MdiChildFrame<CChildFrame>( std::bind( &CWorkspace::AddImageViewState, this, _1 ) );
+}
 
-				if ( CDocument* pActiveDoc = pChildFrame->GetActiveDocument() )
-				{
-					fs::CPath docFilePath( pActiveDoc->GetPathName().GetString() );
+bool CWorkspace::AddImageViewState( CChildFrame* pChildFrame )
+{
+	ASSERT_PTR( pChildFrame );
 
-					if ( !docFilePath.IsEmpty() )
-						if ( IImageView* pImageView = pChildFrame->GetImageView() )			// ensure not a print preview, etc
-						{
-							m_imageStates.push_back( CImageState() );
-							dynamic_cast<const CImageView*>( pImageView->GetScrollView() )->MakeImageState( &m_imageStates.back() );
-						}
-				}
-			}
+	if ( IImageView* pImageView = pChildFrame->GetImageView() )
+	{
+		const CImageView* pView = checked_static_cast<const CImageView*>( pImageView->GetScrollView() );
+
+		m_imageStates.push_back( CImageState() );
+		pView->MakeImageState( &m_imageStates.back() );
+		return true;
+	}
+
+	return false;
 }
 
 bool CWorkspace::LoadDocuments( void )

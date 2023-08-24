@@ -7,26 +7,28 @@
 
 namespace func
 {
-	// unary functor adapter for setter (non-const) methods with 1 argument - for no arguments use: std::mem_fun( &ObjectT::SetMethod )
+	// unary functor adapter for setter (non-const) methods with 1 argument
+		// - for no arguments use: std::mem_fun( &ObjectT::SetMethod )
+		// - for container ElementT* arguments use: std::bind( &ObjectT::AddMethod, pObject, _1 )	- where _1 refers to ElementT*
 
 	template< typename ResultT, typename ObjectT, typename Arg1T >
 	class Setter1 : public std::binary_function<ObjectT*, Arg1T, ResultT>
 	{
 	public:
-		explicit Setter1( ResultT (ObjectT::*pSetMethod)( Arg1T ), Arg1T value ) : m_pSetMethod( pSetMethod ), m_value( value ) {}
+		explicit Setter1( ResultT (ObjectT::*pSetMethod)( Arg1T ), Arg1T arg1 ) : m_pSetMethod( pSetMethod ), m_arg1( arg1 ) {}
 
 		ResultT operator()( ObjectT* pObject ) const	// for containers of pointers
 		{
-			return (pObject->*m_pSetMethod)( m_value );
+			return (pObject->*m_pSetMethod)( m_arg1 );
 		}
 
-		ResultT operator()( ObjectT& rObject ) const	// for containers of objects by value
+		ResultT operator()( ObjectT& rObject ) const	// for containers of objects by arg1
 		{
-			return (rObject.*m_pSetMethod)( m_value );
+			return (rObject.*m_pSetMethod)( m_arg1 );
 		}
 	private:
 		ResultT (ObjectT::*m_pSetMethod)( Arg1T );		// the method pointer
-		Arg1T m_value;
+		Arg1T m_arg1;
 	};
 
 
