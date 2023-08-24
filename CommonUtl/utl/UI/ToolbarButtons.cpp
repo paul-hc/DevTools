@@ -370,7 +370,7 @@ namespace mfc
 		return m_pos;
 	}
 
-	bool CSliderButton::SetPos( int pos, bool notify )
+	bool CSliderButton::SetPos( int pos, bool notify, bool syncAll /*= true*/ )
 	{
 		bool changed = pos != m_pos;
 
@@ -380,8 +380,9 @@ namespace mfc
 			if ( m_pSliderCtrl->UpdatePos( m_pos ) )
 				changed = true;
 
-		// sync other buttons on all toolbars with the same btnId
-		mfc::ForEach_MatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter( &mfc::CSliderButton::SetPos, m_pos, false ), this );
+		if ( syncAll )
+			// sync other buttons on all toolbars with the same btnId
+			mfc::ForEach_MatchingButton<mfc::CSliderButton>( m_nID, func::MakeSetter( &mfc::CSliderButton::SetPos, m_pos, false, false ), this );
 
 		if ( notify && m_pSliderCtrl->GetSafeHwnd() != nullptr )
 			ui::SendCommand( m_pSliderCtrl->GetOwner()->GetSafeHwnd(), m_nID, BN_CLICKED, m_pSliderCtrl->GetSafeHwnd() );

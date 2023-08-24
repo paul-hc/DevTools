@@ -158,7 +158,7 @@ namespace mfc
 		bool SetCountRange( size_t count, size_t tickFreqThresholdCount = TickFreqThresholdCount );		// set [0, count-1] range, auto tick frequency; will sync all buttons
 
 		int GetPos( void ) const;
-		bool SetPos( int pos, bool notify );
+		bool SetPos( int pos, bool notify, bool syncAll = true );
 	private:
 		void SetLimits( const Range<int>& limits );
 
