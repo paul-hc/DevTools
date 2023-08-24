@@ -270,6 +270,7 @@
     <ClInclude Include="LayoutEngine.h" />
     <ClInclude Include="LayoutFormView.h" />
     <ClInclude Include="LayoutMetrics.h" />
+    <ClInclude Include="LayoutPaneDialog.h" />
     <ClInclude Include="LayoutPropertyPage.h" />
     <ClInclude Include="LayoutPropertySheet.h" />
     <ClInclude Include="ListCtrlEditorFrame.h" />
@@ -453,6 +454,7 @@
     <ClCompile Include="LayoutEngine.cpp" />
     <ClCompile Include="LayoutFormView.cpp" />
     <ClCompile Include="LayoutMetrics.cpp" />
+    <ClCompile Include="LayoutPaneDialog.cpp" />
     <ClCompile Include="LayoutPropertyPage.cpp" />
     <ClCompile Include="LayoutPropertySheet.cpp" />
     <ClCompile Include="ListCtrlEditorFrame.cpp" />

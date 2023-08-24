@@ -692,6 +692,9 @@
     <ClInclude Include="ComboBoxEdit.h">
       <Filter>UI\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="LayoutPaneDialog.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1179,6 +1182,9 @@
     </ClCompile>
     <ClCompile Include="ComboBoxEdit.cpp">
       <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutPaneDialog.cpp">
+      <Filter>UI\Layout</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -13,10 +13,10 @@
 #endif
 
 
-IMPLEMENT_DYNCREATE( CChildFrame, CMDIChildWndEx )
+IMPLEMENT_DYNCREATE( CChildFrame, TChildFrameBase )
 
 CChildFrame::CChildFrame( void )
-	: CMDIChildWndEx()
+	: TChildFrameBase()
 	, m_pImageView( nullptr )
 	, m_pImageAccel( &app::CImageDocTemplate::Instance()->m_accel )
 {
@@ -64,7 +64,7 @@ BOOL CChildFrame::PreTranslateMessage( MSG* pMsg ) override
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CChildFrame, CMDIChildWndEx )
+BEGIN_MESSAGE_MAP( CChildFrame, TChildFrameBase )
 	ON_WM_DESTROY()
 	ON_WM_WINDOWPOSCHANGING()
 	ON_WM_NCLBUTTONDBLCLK()

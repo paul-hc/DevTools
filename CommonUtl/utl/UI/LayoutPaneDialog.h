@@ -1,22 +1,24 @@
-#ifndef LayoutFormView_h
-#define LayoutFormView_h
+#ifndef LayoutPaneDialog_h
+#define LayoutPaneDialog_h
 #pragma once
 
 #include "Dialog_fwd.h"
 #include "LayoutMetrics.h"
+#include <afxpanedialog.h>
 
 
-// base class for form views that require dynamic control layout based on a layout description
-
-class CLayoutFormView : public CFormView
+class CLayoutPaneDialog : public CPaneDialog
 	, public ui::ILayoutEngine
 	, public ui::ICustomCmdInfo
 {
-protected:
-	CLayoutFormView( UINT templateId );
-	CLayoutFormView( const TCHAR* pTemplateName );
-	virtual ~CLayoutFormView();
+	DECLARE_SERIAL( CLayoutPaneDialog )
 public:
+	CLayoutPaneDialog( bool fillToolBarBkgnd = true );
+	virtual ~CLayoutPaneDialog();
+
+	bool GetFillToolBarBkgnd( void ) const { return m_fillToolBarBkgnd; }
+	void SetFillToolBarBkgnd( bool fillToolBarBkgnd = true ) { m_fillToolBarBkgnd = fillToolBarBkgnd; }
+
 	// ui::ILayoutEngine interface
 	virtual CLayoutEngine& GetLayoutEngine( void );
 	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
@@ -24,16 +26,17 @@ public:
 
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
-protected:
-	virtual void OnIdleUpdateControls( void );			// override to update specific controls
+
+	// base overrides
+	virtual void Serialize( CArchive& archive ) overrides(CDockablePane);
+	virtual void CopyState( CDockablePane* pSrc ) overrides(CDockablePane);
 private:
 	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
+	bool m_fillToolBarBkgnd;			// if false use dialog background, true for themed toolbar background fill
 
 	// generated stuff
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
-public:
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
@@ -45,4 +48,4 @@ protected:
 };
 
 
-#endif // LayoutFormView_h
+#endif // LayoutPaneDialog_h

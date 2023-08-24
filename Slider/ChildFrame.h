@@ -6,8 +6,10 @@
 interface IImageView;
 class CAccelTable;
 
+#define TChildFrameBase CMDIChildWndEx
 
-class CChildFrame : public CMDIChildWndEx
+
+class CChildFrame : public TChildFrameBase
 {
 	DECLARE_DYNCREATE( CChildFrame )
 public:
@@ -15,6 +17,8 @@ public:
 	virtual ~CChildFrame();
 
 	virtual IImageView* GetImageView( void ) const;		// CImageView or CAlbumImageView
+protected:
+	void StoreImageView( IImageView* pImageView ) { m_pImageView = pImageView; }
 private:
 	IImageView* m_pImageView;
 	const CAccelTable* m_pImageAccel;

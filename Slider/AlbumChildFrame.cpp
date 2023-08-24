@@ -49,7 +49,7 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 	return 0;
 }
 
-BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext )
+BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext ) overrides(CChildFrame)
 {
 	pCS;
 	VERIFY( m_splitterWnd.CreateStatic( this, 1, 2, WS_CHILD | WS_VISIBLE, AFX_IDW_PANE_FIRST ) );
@@ -64,6 +64,7 @@ BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pConte
 
 	m_pThumbsListView = checked_static_cast<CAlbumThumbListView*>( m_splitterWnd.GetPane( 0, ThumbView ) );
 	m_pAlbumImageView = checked_static_cast<CAlbumImageView*>( m_splitterWnd.GetPane( 0, PictureView ) );
+	StoreImageView( m_pAlbumImageView );
 
 	m_pThumbsListView->StorePeerView( m_pAlbumImageView );
 	m_pAlbumImageView->StorePeerView( m_pThumbsListView, &m_albumInfoBar );

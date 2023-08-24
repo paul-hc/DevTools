@@ -32,10 +32,10 @@ private:
 
 	CAlbumThumbListView* m_pThumbsListView;
 	CAlbumImageView* m_pAlbumImageView;
-public:
+
 	// generated stuff
-	protected:
-	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext );
+protected:
+	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext ) overrides(CChildFrame);
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
 	afx_msg BOOL OnBarCheck( UINT dlgBarId );
