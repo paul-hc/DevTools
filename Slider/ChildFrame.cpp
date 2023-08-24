@@ -13,10 +13,10 @@
 #endif
 
 
-IMPLEMENT_DYNCREATE( CChildFrame, CMDIChildWnd )
+IMPLEMENT_DYNCREATE( CChildFrame, CMDIChildWndEx )
 
 CChildFrame::CChildFrame( void )
-	: CMDIChildWnd()
+	: CMDIChildWndEx()
 	, m_pImageView( nullptr )
 	, m_pImageAccel( &app::CImageDocTemplate::Instance()->m_accel )
 {
@@ -31,7 +31,7 @@ IImageView* CChildFrame::GetImageView( void ) const
 	return m_pImageView;
 }
 
-void CChildFrame::ActivateFrame( int cmdShow )
+void CChildFrame::ActivateFrame( int cmdShow ) override
 {
 	if ( -1 == cmdShow )
 	{
@@ -40,17 +40,13 @@ void CChildFrame::ActivateFrame( int cmdShow )
 		if ( HasFlag( CWorkspace::GetFlags(), wf::MdiMaximized ) && 1 == pMainFrame->GetMdiChildCount() )
 			cmdShow = SW_SHOWMAXIMIZED;
 	}
-	CMDIChildWnd::ActivateFrame( cmdShow );
+	__super::ActivateFrame( cmdShow );
 }
 
-BOOL CChildFrame::PreCreateWindow( CREATESTRUCT& rCS )
-{
-	return CMDIChildWnd::PreCreateWindow( rCS );
-}
-
-BOOL CChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext )
+BOOL CChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext ) overrides(CFrameWnd)
 {
 	pCS;
+		//__super::OnCreateClient( pCS, pContext );
 
 	if ( pContext != nullptr && pContext->m_pNewViewClass != nullptr )
 		m_pImageView = dynamic_cast<IImageView*>( CreateView( pContext, AFX_IDW_PANE_FIRST ) );
@@ -58,17 +54,17 @@ BOOL CChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext )
 	return m_pImageView != nullptr;
 }
 
-BOOL CChildFrame::PreTranslateMessage( MSG* pMsg )
+BOOL CChildFrame::PreTranslateMessage( MSG* pMsg ) override
 {
 	return
-		CMDIChildWnd::PreTranslateMessage( pMsg ) ||
+		__super::PreTranslateMessage( pMsg ) ||
 		m_pImageAccel->Translate( pMsg, GetMDIFrame()->m_hWnd );		// image specific
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CChildFrame, CMDIChildWnd )
+BEGIN_MESSAGE_MAP( CChildFrame, CMDIChildWndEx )
 	ON_WM_DESTROY()
 	ON_WM_WINDOWPOSCHANGING()
 	ON_WM_NCLBUTTONDBLCLK()
@@ -80,12 +76,12 @@ void CChildFrame::OnDestroy( void )
 	if ( 1 == pMainFrame->GetMdiChildCount() )
 		SetFlag( CWorkspace::RefData().m_wkspFlags, wf::MdiMaximized, HasFlag( GetStyle(), WS_MAXIMIZE ) );
 
-	CMDIChildWnd::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CChildFrame::OnNcLButtonDblClk( UINT hitTest, CPoint point )
 {
-	CMDIChildWnd::OnNcLButtonDblClk( hitTest, point );
+	__super::OnNcLButtonDblClk( hitTest, point );
 
 	switch ( hitTest )
 	{
@@ -106,5 +102,5 @@ void CChildFrame::OnNcLButtonDblClk( UINT hitTest, CPoint point )
 void CChildFrame::OnWindowPosChanging( WINDOWPOS* pWndPos )
 {
 	if ( !CWorkspace::Instance().IsFullScreen() )
-		CMDIChildWnd::OnWindowPosChanging( pWndPos );
+		__super::OnWindowPosChanging( pWndPos );
 }
