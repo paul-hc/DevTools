@@ -492,10 +492,10 @@ void CAlbumImageView::OnInitialUpdate( void )
 	OnAutoDropRecipientChanged();
 
 	UpdateImage();			// only after this call image become valid (with proper metrics)
+	OnDocSlideDataChanged();		// bug fix: sync with the assigned slide data from document after loading
 
 	__super::OnInitialUpdate();
 
-	OnDocSlideDataChanged();		// bug fix: sync with the assigned slide data from document after loading
 	UpdateWindow();
 	ui::PostCall( this, &CAlbumImageView::LateInitialUpdate );
 }
