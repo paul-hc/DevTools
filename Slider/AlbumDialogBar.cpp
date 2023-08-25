@@ -19,14 +19,29 @@
 
 #include "utl/UI/StockValuesComboBox.hxx"
 
+namespace layout
+{
+	enum { CommentsPct = 60, ListPct = 100 - CommentsPct };
+
+	static const CLayoutStyle s_styles[] =
+	{
+		{ IDC_CURR_IMAGE_PATH_EDIT, SizeX }
+	};
+}
+
 
 CAlbumDialogBar::CAlbumDialogBar( void )
-	: CDialogBar()
+	: CLayoutPaneDialog()
 	, m_pToolbar( new CDialogToolBar() )
 	, m_pSlideDelayCombo( new CDurationComboBox() )
 	, m_pImagePathEdit( new CTextEdit( false ) )
 	, m_pAlbumView( nullptr )
 {
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
+
+	//m_fillToolBarBkgnd = true;
+	m_showControlBarMenu = false;
+
 	m_pToolbar->GetStrip()
 		.AddButton( ID_EDIT_ALBUM );
 }
@@ -39,12 +54,6 @@ void CAlbumDialogBar::InitAlbumImageView( CAlbumImageView* pAlbumView )
 {
 	m_pAlbumView = pAlbumView;
 	ui::EnableWindow( m_hWnd );
-}
-
-void CAlbumDialogBar::ShowBar( bool show )
-{
-	if ( show != HasFlag( GetStyle(), WS_VISIBLE ) )
-		GetParentFrame()->ShowControlBar( this, show, FALSE );
 }
 
 bool CAlbumDialogBar::SetCurrentPos( int currIndex, bool forceLoad /*= false*/ )
@@ -112,24 +121,48 @@ void CAlbumDialogBar::OnSlideDelayChanged( void )
 	m_pSlideDelayCombo->OutputValue( m_pAlbumView->GetSlideData().m_slideDelay );
 }
 
-void CAlbumDialogBar::LayoutControls( void )
+void CAlbumDialogBar::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const overrides( CLayoutPaneDialog )
 {
-	if ( nullptr == m_pImagePathEdit->m_hWnd )
-		return;
+	if ( IDC_CURR_IMAGE_PATH_EDIT == cmdId )
+		rText = m_pAlbumView->GetImagePathKey().first.Get();
+	else
+		__super::QueryTooltipText( rText, cmdId, pTooltip );
+}
 
-	// layout the image path edit to right bound of the dialog-bar
-	CRect barRect, pathEditRect = ui::GetControlRect( *m_pImagePathEdit );
+void CAlbumDialogBar::DoDataExchange( CDataExchange* pDX )
+{
+	bool firstInit = nullptr == m_pSlideDelayCombo->m_hWnd;
 
-	GetClientRect( &barRect );
-	pathEditRect.right = barRect.right - 2;
-	m_pImagePathEdit->MoveWindow( &pathEditRect );
+	m_pToolbar->DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
+	DDX_Control( pDX, IDC_PLAY_DELAY_COMBO, *m_pSlideDelayCombo );
+	DDX_Control( pDX, IDC_SEEK_CURR_POS_EDIT, m_navPosEdit );
+	DDX_Control( pDX, IDC_SCROLL_POS_SPIN, m_scrollSpin );
+	DDX_Control( pDX, IDC_NAV_COUNT_STATIC, m_infoStatic );
+	DDX_Control( pDX, IDC_CURR_IMAGE_PATH_EDIT, *m_pImagePathEdit );
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	{
+		if ( firstInit )
+		{
+			m_pToolbar->SetOwner( AfxGetMainWnd() );
+
+			LOGFONT logFont;
+			if ( GetFont()->GetLogFont( &logFont ) )
+			{
+				logFont.lfWeight = FW_BOLD;
+				if ( m_boldFont.CreateFontIndirect( &logFont ) )
+					m_pImagePathEdit->SetFont( &m_boldFont );
+			}
+		}
+	}
+
+	__super::DoDataExchange( pDX );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CAlbumDialogBar, CDialogBar )
-	ON_WM_SIZE()
+BEGIN_MESSAGE_MAP( CAlbumDialogBar, CLayoutPaneDialog )
 	ON_WM_CTLCOLOR()
 	ON_WM_VSCROLL()
 	ON_COMMAND( IDOK, OnOk )
@@ -139,47 +172,11 @@ BEGIN_MESSAGE_MAP( CAlbumDialogBar, CDialogBar )
 	ON_CN_INPUTERROR( IDC_PLAY_DELAY_COMBO, OnCBnInputError_SlideDelay )
 	ON_UPDATE_COMMAND_UI( IDC_PLAY_DELAY_COMBO, OnUpdate_SlideDelay )
 	ON_EN_KILLFOCUS( IDC_SEEK_CURR_POS_EDIT, OnEnKillFocus_SeekCurrPos )
-	ON_MESSAGE( WM_INITDIALOG, HandleInitDialog )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnToolTipText )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, ui::MinCmdId, ui::MaxCmdId, OnToolTipText )
 END_MESSAGE_MAP()
-
-LRESULT CAlbumDialogBar::HandleInitDialog( WPARAM wParam, LPARAM lParam )
-{
-	CDialogBar::HandleInitDialog( wParam, lParam );
-
-	m_pToolbar->CreateReplacePlaceholder( this, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
-	m_pToolbar->SetOwner( AfxGetMainWnd() );
-
-	VERIFY( m_pSlideDelayCombo->SubclassDlgItem( IDC_PLAY_DELAY_COMBO, this ) );
-	VERIFY( m_navPosEdit.SubclassDlgItem( IDC_SEEK_CURR_POS_EDIT, this ) );
-	VERIFY( m_scrollSpin.SubclassDlgItem( IDC_SCROLL_POS_SPIN, this ) );
-	VERIFY( m_infoStatic.SubclassDlgItem( IDC_NAV_COUNT_STATIC, this ) );
-	VERIFY( m_pImagePathEdit->SubclassDlgItem( IDC_CURR_IMAGE_PATH_EDIT, this ) );
-
-	LOGFONT logFont;
-	if ( GetFont()->GetLogFont( &logFont ) )
-	{
-		logFont.lfWeight = FW_BOLD;
-		if ( m_boldFont.CreateFontIndirect( &logFont ) )
-		{
-			//m_infoStatic.SetFont( &m_boldFont );
-			m_pImagePathEdit->SetFont( &m_boldFont );
-		}
-	}
-	LayoutControls();
-	return TRUE;
-}
-
-void CAlbumDialogBar::OnSize( UINT sizeType, int cx, int cy )
-{
-	CDialogBar::OnSize( sizeType, cx, cy );
-	LayoutControls();
-}
 
 HBRUSH CAlbumDialogBar::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor )
 {
-	HBRUSH hBrush = CDialogBar::OnCtlColor( pDC, pWnd, ctlColor );
+	HBRUSH hBrush = __super::OnCtlColor( pDC, pWnd, ctlColor );
 
 	if ( CTLCOLOR_STATIC == ctlColor )
 		if ( pWnd->m_hWnd == m_infoStatic.m_hWnd )
@@ -192,7 +189,7 @@ HBRUSH CAlbumDialogBar::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor )
 
 void CAlbumDialogBar::OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 {
-	CDialogBar::OnVScroll( sbCode, pos, pScrollBar );
+	__super::OnVScroll( sbCode, pos, pScrollBar );
 
 	if ( pScrollBar->m_hWnd == m_scrollSpin.m_hWnd )
 		switch ( sbCode )
@@ -247,6 +244,11 @@ void CAlbumDialogBar::OnCBnInputError_SlideDelay( void )
 	OnSlideDelayChanged();
 }
 
+void CAlbumDialogBar::OnUpdate_SlideDelay( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( true );
+}
+
 void CAlbumDialogBar::OnEnKillFocus_SeekCurrPos( void )
 {
 	BOOL validInput;
@@ -254,22 +256,4 @@ void CAlbumDialogBar::OnEnKillFocus_SeekCurrPos( void )
 
 	if ( !validInput || currIndex != m_pAlbumView->GetSlideData().GetCurrentIndex() )
 		OnCurrPosChanged();
-}
-
-void CAlbumDialogBar::OnUpdate_SlideDelay( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable( true );
-}
-
-BOOL CAlbumDialogBar::OnToolTipText( UINT, NMHDR* pNmHdr, LRESULT* pResult )
-{
-	ui::CTooltipTextMessage message( pNmHdr );
-	if ( !message.IsValidNotification() || message.m_cmdId != IDC_CURR_IMAGE_PATH_EDIT )
-		return FALSE;		// not handled
-
-	if ( !message.AssignTooltipText( m_pAlbumView->GetImagePathKey().first.Get() ) )
-		return FALSE;
-
-	*pResult = 0;
-	return TRUE;	// message was handled
 }

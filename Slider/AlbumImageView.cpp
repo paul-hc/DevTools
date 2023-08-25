@@ -282,7 +282,7 @@ void CAlbumImageView::LateInitialUpdate( void )
 
 void CAlbumImageView::UpdateChildBarsState( bool onInit /*= false*/ )
 {
-	m_pAlbumDialogBar->ShowBar( m_slideData.HasShowFlag( af::ShowAlbumDialogBar ) );
+	m_pAlbumDialogBar->ShowPane( m_slideData.HasShowFlag( af::ShowAlbumDialogBar ), false, false );
 	m_pPeerThumbView->CheckListLayout( onInit ? CAlbumThumbListView::AlbumViewInit : CAlbumThumbListView::ShowCommand );
 }
 

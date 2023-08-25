@@ -38,8 +38,8 @@ protected:
 	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext ) overrides(CChildFrame);
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
-	afx_msg BOOL OnBarCheck( UINT dlgBarId );
-	afx_msg void OnUpdateBarCheck( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_ViewAlbumPane( void );
+	afx_msg void OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

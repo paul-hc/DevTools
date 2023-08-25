@@ -4,6 +4,7 @@
 #include "AlbumImageView.h"
 #include "AlbumThumbListView.h"
 #include "resource.h"
+#include "utl/UI/PostCall.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,6 +18,7 @@ CAlbumChildFrame::CAlbumChildFrame( void )
 	, m_pThumbsListView( nullptr )
 	, m_pAlbumImageView( nullptr )
 {
+	GetDockingManager()->DisableRestoreDockState( TRUE );		// to disable loading of docking layout from the Registry
 }
 
 CAlbumChildFrame::~CAlbumChildFrame()
@@ -33,8 +35,8 @@ IImageView* CAlbumChildFrame::GetImageView( void ) const
 
 BEGIN_MESSAGE_MAP( CAlbumChildFrame, CChildFrame )
 	ON_WM_CREATE()
-	ON_COMMAND_EX( ID_VIEW_ALBUMDIALOGBAR, OnBarCheck )
-	ON_UPDATE_COMMAND_UI( ID_VIEW_ALBUMDIALOGBAR, OnUpdateBarCheck )		// CFrameWnd::OnUpdateControlBarMenu
+	ON_COMMAND( ID_VIEW_ALBUMDIALOGBAR, OnToggle_ViewAlbumPane )
+	ON_UPDATE_COMMAND_UI( ID_VIEW_ALBUMDIALOGBAR, OnUpdate_ViewAlbumPane )		// CFrameWnd::OnUpdateControlBarMenu
 END_MESSAGE_MAP()
 
 int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
@@ -43,9 +45,14 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 		return -1;
 
 	// initialize album dialog-bar
-	VERIFY( m_albumInfoBar.Create( this, IDD_ALBUMDIALOGBAR, CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE, ID_VIEW_ALBUMDIALOGBAR ) );
-	//m_albumInfoBar.EnableWindow( FALSE );		// by default disable the navigation bar
-	ShowControlBar( &m_albumInfoBar, FALSE, FALSE );
+	enum { PaneStyle = WS_VISIBLE | WS_CHILD | CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY };
+
+	VERIFY( m_albumInfoBar.Create( _T(""), this, false, IDD_ALBUMDIALOGBAR, PaneStyle, ID_VIEW_ALBUMDIALOGBAR ) );
+
+	m_albumInfoBar.DockToFrameWindow( CBRS_ALIGN_TOP );		// make the dialog pane stretchable horizontally
+	//DockPane( &m_albumInfoBar );
+
+	// note: it's too early to update pane visibility; we have to delay to after loading CSlideData data-memberby CAlbumDoc, in CAlbumImageView::UpdateChildBarsState()
 	return 0;
 }
 
@@ -71,15 +78,20 @@ BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pConte
 	return TRUE;
 }
 
-BOOL CAlbumChildFrame::OnBarCheck( UINT dlgBarId )
-{
-	GetAlbumImageView()->RefSlideData()->ToggleShowFlag( af::ShowAlbumDialogBar );		// toggle visibility flag
+void CAlbumChildFrame::OnToggle_ViewAlbumPane( void )
+{	// toggle the visibility of the album dialog bar
+	REQUIRE( (BOOL)GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar ) == m_albumInfoBar.IsVisible() );	// consistent?
 
-	return CChildFrame::OnBarCheck( dlgBarId );		// toggle the visibility of the album dialog bar
+	GetAlbumImageView()->RefSlideData()->ToggleShowFlag( af::ShowAlbumDialogBar );		// toggle visibility flag
+	bool show = GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar );
+
+	ShowPane( &m_albumInfoBar, show, false, false );
 }
 
-void CAlbumChildFrame::OnUpdateBarCheck( CCmdUI* pCmdUI )
+void CAlbumChildFrame::OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable();
-	CFrameWnd::OnUpdateControlBarMenu( pCmdUI );
+	pCmdUI->SetCheck( m_albumInfoBar.IsVisible() );
+
+	//__super::OnUpdatePaneMenu( pCmdUI );
 }

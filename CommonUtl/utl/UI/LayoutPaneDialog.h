@@ -13,26 +13,25 @@ class CLayoutPaneDialog : public CPaneDialog
 {
 	DECLARE_SERIAL( CLayoutPaneDialog )
 public:
-	CLayoutPaneDialog( bool fillToolBarBkgnd = true );
+	CLayoutPaneDialog( void );
 	virtual ~CLayoutPaneDialog();
 
-	bool GetFillToolBarBkgnd( void ) const { return m_fillToolBarBkgnd; }
-	void SetFillToolBarBkgnd( bool fillToolBarBkgnd = true ) { m_fillToolBarBkgnd = fillToolBarBkgnd; }
-
 	// ui::ILayoutEngine interface
-	virtual CLayoutEngine& GetLayoutEngine( void );
-	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
-	virtual bool HasControlLayout( void ) const;
+	virtual CLayoutEngine& GetLayoutEngine( void ) implements(ui::ILayoutEngine);
+	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) implements(ui::ILayoutEngine);
+	virtual bool HasControlLayout( void ) const implements(ui::ILayoutEngine);
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const implements(ui::ICustomCmdInfo);
 
 	// base overrides
-	virtual void Serialize( CArchive& archive ) overrides(CDockablePane);
-	virtual void CopyState( CDockablePane* pSrc ) overrides(CDockablePane);
+	virtual BOOL OnShowControlBarMenu( CPoint point ) overrides(CPane);
 private:
 	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
+protected:
+	// transient data members (managed by concrete subclass)
 	bool m_fillToolBarBkgnd;			// if false use dialog background, true for themed toolbar background fill
+	bool m_showControlBarMenu;			// if false prevents displaying the pane standard context menu (Floating|Docked|etc)
 
 	// generated stuff
 protected:

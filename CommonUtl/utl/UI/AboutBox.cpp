@@ -179,7 +179,7 @@ namespace layout
 {
 	enum { CommentsPct = 60, ListPct = 100 - CommentsPct };
 
-	static const CLayoutStyle styles[] =
+	static const CLayoutStyle s_styles[] =
 	{
 		{ IDC_ABOUT_NAME_VERSION_STATIC, SizeX },
 		{ IDC_ABOUT_COPYRIGHT_STATIC, SizeX },
@@ -204,7 +204,7 @@ CAboutBox::CAboutBox( CWnd* pParent )
 	, m_pBuildInfoList( new CReportListControl() )
 {
 	m_regSection = _T("utl\\About");
-	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	GetLayoutEngine().MaxClientSize() = CSize( 600, 700 );
 
 	std::vector<std::tstring> columnSpecs;

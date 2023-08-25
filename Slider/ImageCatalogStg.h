@@ -17,7 +17,7 @@ namespace wic { enum ImageFormat; }
 // Maintains deep image stream paths from the source images (relative to SRC common root path).
 // Deep image stream paths are flattened using '|' as separator (formerly '*') - this avoids the use of sub-storages for images and thumbnails.
 class CImageCatalogStg : public fs::CStructuredStorage
-					   , public utl::IUnknownImpl<ICatalogStorage>				// the public gateway for manipulating image archives
+	, public utl::IUnknownImpl<ICatalogStorage>				// the public gateway for manipulating image archives
 {
 	CImageCatalogStg( void );
 	virtual ~CImageCatalogStg();
