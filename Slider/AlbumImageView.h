@@ -9,7 +9,7 @@
 
 
 class CAlbumDoc;
-class CAlbumDialogBar;
+class CAlbumDialogPane;
 class CAlbumThumbListView;
 
 
@@ -20,7 +20,7 @@ class CAlbumImageView : public CImageView
 	CAlbumImageView( void );
 	virtual ~CAlbumImageView();
 public:
-	void StorePeerView( CAlbumThumbListView* pPeerThumbView, CAlbumDialogBar* pAlbumDialogBar );
+	void StorePeerView( CAlbumThumbListView* pPeerThumbView, CAlbumDialogPane* pAlbumDlgPane );
 
 	CAlbumDoc* GetDocument( void ) const;
 
@@ -85,7 +85,7 @@ private:
 	bool m_isDropTargetEnabled;			// internal flag that synchronizes with DragAcceptFiles( TRUE/FALSE )
 
 	CAlbumThumbListView* m_pPeerThumbView;
-	CAlbumDialogBar* m_pAlbumDialogBar;
+	CAlbumDialogPane* m_pAlbumDlgPane;
 
 	enum { ID_NAVIGATION_TIMER = 4000 };
 

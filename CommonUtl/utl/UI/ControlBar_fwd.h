@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/Functional.h"
+#include <afxtempl.h>
 #include <afxtoolbar.h>
 
 
@@ -14,9 +15,52 @@ class CMFCToolBarButton;
 class CToolTipCtrl;
 class CDockingManager;
 
+namespace ui { struct CCmdAlias; }
+
 
 namespace mfc
 {
+	typedef CArray<COLORREF, COLORREF> TColorArray;
+	typedef CList<COLORREF, COLORREF> TColorList;
+
+
+	struct CColorLabels
+	{
+		static const TCHAR s_autoLabel[];
+		static const TCHAR s_moreLabel[];
+	};
+}
+
+
+namespace mfc
+{
+	bool RegisterCmdImageAlias( UINT aliasCmdId, UINT imageCmdId );
+	void RegisterCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count );
+
+
+	class CScopedCmdImageAliases
+	{
+	public:
+		CScopedCmdImageAliases( UINT aliasCmdId, UINT imageCmdId );
+		CScopedCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count );
+		~CScopedCmdImageAliases();
+	private:
+		typedef std::pair<UINT, int> TCmdImagePair;		// <cmdId, imageIndex>
+
+		std::vector<TCmdImagePair> m_oldCmdImages;
+	};
+
+
+	bool AssignTooltipText( OUT TOOLINFO* pToolInfo, const std::tstring& text );
+}
+
+
+namespace mfc
+{
+	// CCommandManager utils:
+	int FindButtonImageIndex( UINT btnId, bool userImage = false );
+
+
 	// CBasePane protected access:
 	void BasePane_SetIsDialogControl( OUT CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
 
@@ -27,6 +71,7 @@ namespace mfc
 	inline int ToolBar_ReplaceButton( OUT CMFCToolBar* pToolBar, const CMFCToolBarButton& srcButton ) { return safe_ptr( pToolBar )->ReplaceButton( srcButton.m_nID, srcButton ); }
 	void ToolBar_SetBtnText( OUT CMFCToolBar* pToolBar, UINT btnId, const TCHAR* pText = nullptr, bool showText = true, bool showImage = true );
 	bool ToolBar_RestoreOriginalState( OUT CMFCToolBar* pToolBar );
+	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex = nullptr );
 
 
 	// CMFCStatusBar protected access:
@@ -36,10 +81,26 @@ namespace mfc
 	int StatusBar_ResizePaneToFitText( OUT CMFCStatusBar* pStatusBar, int index );
 
 
-	// CMFCToolBarButton access:
+	// CMFCToolBarButton protected access:
+	bool ToolBarButton_SetStyleFlag( CMFCToolBarButton* pButton, UINT styleFlag, bool on = true );
+	void* ToolBarButton_GetItemData( const CMFCToolBarButton* pButton );
+	void ToolBarButton_SetItemData( CMFCToolBarButton* pButton, const void* pItemData );
+	void ToolBarButton_SetImageById( CMFCToolBarButton* pButton, UINT btnId, bool userImage = false );
+
+	template< typename ObjectT >
+	ObjectT* ToolBarButton_GetItemPtr( const CMFCToolBarButton* pButton ) { return reinterpret_cast<ObjectT*>( ToolBarButton_GetItemData( pButton ) ); }
+
+	CRect ToolBarButton_GetImageRect( const CMFCToolBarButton* pButton, bool bounds = true );
+
+	// CMFCToolBarButton utils:
 	inline HWND ToolBarButton_GetHwnd( const CMFCToolBarButton* pButton ) { return const_cast<CMFCToolBarButton*>( pButton )->GetHwnd(); }
 	bool ToolBarButton_EditSelectAll( CMFCToolBarButton* pButton );
 	void ToolBarButton_Redraw( CMFCToolBarButton* pButton );
+	void ToolBarButton_RedrawImage( CMFCToolBarButton* pButton );
+
+
+	// CMFCColorBar protected access:
+	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette = nullptr );		// protected access
 }
 
 
@@ -129,6 +190,37 @@ namespace mfc
 
 	template< typename ButtonT >
 	inline ButtonT* FindFocusedMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, std::mem_fun( &CMFCToolBarButton::HasFocus ) ); }
+}
+
+
+#include <afxcolorbar.h>
+
+
+namespace nosy
+{
+	struct CColorBar_ : public CMFCColorBar
+	{
+		// public access
+		using CMFCColorBar::m_colors;
+		using CMFCColorBar::m_lstDocColors;
+		using CMFCColorBar::m_ColorNames;		// CMap<COLORREF,COLORREF,CString, LPCTSTR>
+
+		using CMFCColorBar::InitColors;
+		using CMFCColorBar::InvokeMenuCommand;
+
+		bool HasAutoBtn( void ) const { return !m_strAutoColor.IsEmpty(); }
+		bool HasMoreBtn( void ) const { return !m_strOtherColor.IsEmpty(); }
+		bool HasDocColorBtns( void ) const { return !m_strDocColors.IsEmpty(); }
+
+		void SetInternal( bool bInternal = true ) { m_bInternal = bInternal; }		// for customization mode
+
+		bool IsAutoBtn( const CMFCToolBarButton* pButton ) const { return HasAutoBtn() && pButton->m_strText == m_strAutoColor; }
+		bool IsMoreBtn( const CMFCToolBarButton* pButton ) const { return HasMoreBtn() && pButton->m_strText == m_strOtherColor; }
+		bool IsMoreColorSampleBtn( const CMFCToolBarButton* pButton ) const { return pButton->m_bImage && HasMoreBtn() && pButton == GetButton( GetCount() - 1 ); }
+
+		COLORREF GetAutoColor( void ) const { return m_ColorAutomatic; }
+		//void SetAutoColor( COLORREF autoColor ) { m_ColorAutomatic = autoColor; }		// not reliable after Rebuild(), since it doesn't update the Auto button
+	};
 }
 
 

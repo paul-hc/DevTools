@@ -106,7 +106,7 @@ namespace mfc
 	}
 
 	CEnumComboBoxButton::CEnumComboBoxButton( UINT btnId, const CEnumTags* pEnumTags, int width, DWORD dwStyle /*= CBS_DROPDOWNLIST*/ )
-		: CMFCToolBarComboBoxButton( btnId, mfc::Button_FindImageIndex( btnId ), dwStyle, width )
+		: CMFCToolBarComboBoxButton( btnId, mfc::FindButtonImageIndex( btnId ), dwStyle, width )
 		, m_pEnumTags( nullptr )
 	{
 		SetTags( pEnumTags );
@@ -185,7 +185,7 @@ namespace mfc
 	}
 
 	CStockValuesComboBoxButton::CStockValuesComboBoxButton( UINT btnId, const ui::IStockTags* pStockTags, int width, DWORD dwStyle /*= CBS_DROPDOWN | CBS_DISABLENOSCROLL*/ )
-		: CMFCToolBarComboBoxButton( btnId, mfc::Button_FindImageIndex( btnId ), dwStyle, width )
+		: CMFCToolBarComboBoxButton( btnId, mfc::FindButtonImageIndex( btnId ), dwStyle, width )
 		, m_pStockTags( nullptr )
 	{
 		SetTags( pStockTags );
@@ -312,7 +312,7 @@ namespace mfc
 	}
 
 	CSliderButton::CSliderButton( UINT btnId, int width, DWORD dwStyle /*= DefaultStyle*/ )
-		: CMFCToolBarButton( btnId, mfc::Button_FindImageIndex( btnId ) )
+		: CMFCToolBarButton( btnId, mfc::FindButtonImageIndex( btnId ) )
 		, m_width( 0 == width ? DefaultWidth : width )
 		, m_dwStyle( dwStyle | WS_CHILD | WS_VISIBLE | DefaultStyle )
 		, m_limits( 0, 0 )

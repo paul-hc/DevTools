@@ -30,7 +30,7 @@ namespace layout
 }
 
 
-CAlbumDialogBar::CAlbumDialogBar( void )
+CAlbumDialogPane::CAlbumDialogPane( void )
 	: CLayoutPaneDialog()
 	, m_pToolbar( new CDialogToolBar() )
 	, m_pSlideDelayCombo( new CDurationComboBox() )
@@ -46,17 +46,17 @@ CAlbumDialogBar::CAlbumDialogBar( void )
 		.AddButton( ID_EDIT_ALBUM );
 }
 
-CAlbumDialogBar::~CAlbumDialogBar()
+CAlbumDialogPane::~CAlbumDialogPane()
 {
 }
 
-void CAlbumDialogBar::InitAlbumImageView( CAlbumImageView* pAlbumView )
+void CAlbumDialogPane::InitAlbumImageView( CAlbumImageView* pAlbumView )
 {
 	m_pAlbumView = pAlbumView;
 	ui::EnableWindow( m_hWnd );
 }
 
-bool CAlbumDialogBar::SetCurrentPos( int currIndex, bool forceLoad /*= false*/ )
+bool CAlbumDialogPane::SetCurrentPos( int currIndex, bool forceLoad /*= false*/ )
 {
 	if ( !m_pAlbumView->IsValidIndex( currIndex ) )
 		return false;
@@ -72,7 +72,7 @@ bool CAlbumDialogBar::SetCurrentPos( int currIndex, bool forceLoad /*= false*/ )
 	return true;
 }
 
-bool CAlbumDialogBar::InputSlideDelay( ui::ComboField byField )
+bool CAlbumDialogPane::InputSlideDelay( ui::ComboField byField )
 {
 	UINT slideDelay;
 	if ( !m_pSlideDelayCombo->InputValue( &slideDelay, byField, true ) )
@@ -85,14 +85,14 @@ bool CAlbumDialogBar::InputSlideDelay( ui::ComboField byField )
 }
 
 // displayed index is actually 1-based
-void CAlbumDialogBar::OnNavRangeChanged( void )
+void CAlbumDialogPane::OnNavRangeChanged( void )
 {
 	int imageCount = (int)m_pAlbumView->GetDocument()->GetImageCount();
 	m_scrollSpin.SetRange32( 1, imageCount );
 	ui::SetDlgItemText( m_hWnd, IDC_NAV_COUNT_STATIC, str::Format( _T("/ %s"), num::FormatNumber( imageCount, str::GetUserLocale() ).c_str() ) );
 }
 
-void CAlbumDialogBar::OnCurrPosChanged( void )
+void CAlbumDialogPane::OnCurrPosChanged( void )
 {
 	int currIndex = m_pAlbumView->GetSlideData().GetCurrentIndex();
 	bool valid = m_pAlbumView->IsValidIndex( currIndex );
@@ -116,12 +116,12 @@ void CAlbumDialogBar::OnCurrPosChanged( void )
 	m_pImagePathEdit->SetText( imageFileInfo );
 }
 
-void CAlbumDialogBar::OnSlideDelayChanged( void )
+void CAlbumDialogPane::OnSlideDelayChanged( void )
 {
 	m_pSlideDelayCombo->OutputValue( m_pAlbumView->GetSlideData().m_slideDelay );
 }
 
-void CAlbumDialogBar::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const overrides( CLayoutPaneDialog )
+void CAlbumDialogPane::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const overrides( CLayoutPaneDialog )
 {
 	if ( IDC_CURR_IMAGE_PATH_EDIT == cmdId )
 		rText = m_pAlbumView->GetImagePathKey().first.Get();
@@ -129,7 +129,7 @@ void CAlbumDialogBar::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CTo
 		__super::QueryTooltipText( rText, cmdId, pTooltip );
 }
 
-void CAlbumDialogBar::DoDataExchange( CDataExchange* pDX )
+void CAlbumDialogPane::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_pSlideDelayCombo->m_hWnd;
 
@@ -162,7 +162,7 @@ void CAlbumDialogBar::DoDataExchange( CDataExchange* pDX )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CAlbumDialogBar, CLayoutPaneDialog )
+BEGIN_MESSAGE_MAP( CAlbumDialogPane, CLayoutPaneDialog )
 	ON_WM_CTLCOLOR()
 	ON_WM_VSCROLL()
 	ON_COMMAND( IDOK, OnOk )
@@ -174,7 +174,7 @@ BEGIN_MESSAGE_MAP( CAlbumDialogBar, CLayoutPaneDialog )
 	ON_EN_KILLFOCUS( IDC_SEEK_CURR_POS_EDIT, OnEnKillFocus_SeekCurrPos )
 END_MESSAGE_MAP()
 
-HBRUSH CAlbumDialogBar::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor )
+HBRUSH CAlbumDialogPane::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor )
 {
 	HBRUSH hBrush = __super::OnCtlColor( pDC, pWnd, ctlColor );
 
@@ -187,7 +187,7 @@ HBRUSH CAlbumDialogBar::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor )
 	return hBrush;
 }
 
-void CAlbumDialogBar::OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
+void CAlbumDialogPane::OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 {
 	__super::OnVScroll( sbCode, pos, pScrollBar );
 
@@ -204,7 +204,7 @@ void CAlbumDialogBar::OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 		}
 }
 
-void CAlbumDialogBar::OnOk( void )
+void CAlbumDialogPane::OnOk( void )
 {
 	if ( !ui::OwnsFocus( m_hWnd ) )
 		return;
@@ -223,33 +223,33 @@ void CAlbumDialogBar::OnOk( void )
 	}
 }
 
-void CAlbumDialogBar::On_EscapeKey( void )
+void CAlbumDialogPane::On_EscapeKey( void )
 {
 	if ( ui::OwnsFocus( m_hWnd ) )
 		m_pAlbumView->SetFocus();
 }
 
-void CAlbumDialogBar::OnCBnSelChange_SlideDelay( void )
+void CAlbumDialogPane::OnCBnSelChange_SlideDelay( void )
 {
 	InputSlideDelay( ui::BySel );
 }
 
-void CAlbumDialogBar::OnCBnCloseUp_SlideDelay( void )
+void CAlbumDialogPane::OnCBnCloseUp_SlideDelay( void )
 {
 	m_pAlbumView->SetFocus();
 }
 
-void CAlbumDialogBar::OnCBnInputError_SlideDelay( void )
+void CAlbumDialogPane::OnCBnInputError_SlideDelay( void )
 {
 	OnSlideDelayChanged();
 }
 
-void CAlbumDialogBar::OnUpdate_SlideDelay( CCmdUI* pCmdUI )
+void CAlbumDialogPane::OnUpdate_SlideDelay( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( true );
 }
 
-void CAlbumDialogBar::OnEnKillFocus_SeekCurrPos( void )
+void CAlbumDialogPane::OnEnKillFocus_SeekCurrPos( void )
 {
 	BOOL validInput;
 	int currIndex = GetDlgItemInt( IDC_SEEK_CURR_POS_EDIT, &validInput ) - 1;

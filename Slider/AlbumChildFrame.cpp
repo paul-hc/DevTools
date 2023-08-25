@@ -47,10 +47,10 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 	// initialize album dialog-bar
 	enum { PaneStyle = WS_VISIBLE | WS_CHILD | CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY };
 
-	VERIFY( m_albumInfoBar.Create( _T(""), this, false, IDD_ALBUMDIALOGBAR, PaneStyle, ID_VIEW_ALBUMDIALOGBAR ) );
+	VERIFY( m_albumDlgPane.Create( _T(""), this, false, IDD_ALBUMDIALOGBAR, PaneStyle, ID_VIEW_ALBUMDIALOGBAR ) );
 
-	m_albumInfoBar.DockToFrameWindow( CBRS_ALIGN_TOP );		// make the dialog pane stretchable horizontally
-	//DockPane( &m_albumInfoBar );
+	m_albumDlgPane.DockToFrameWindow( CBRS_ALIGN_TOP );		// make the dialog pane stretchable horizontally
+	//DockPane( &m_albumDlgPane );
 
 	// note: it's too early to update pane visibility; we have to delay to after loading CSlideData data-memberby CAlbumDoc, in CAlbumImageView::UpdateChildBarsState()
 	return 0;
@@ -74,24 +74,22 @@ BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pConte
 	StoreImageView( m_pAlbumImageView );
 
 	m_pThumbsListView->StorePeerView( m_pAlbumImageView );
-	m_pAlbumImageView->StorePeerView( m_pThumbsListView, &m_albumInfoBar );
+	m_pAlbumImageView->StorePeerView( m_pThumbsListView, &m_albumDlgPane );
 	return TRUE;
 }
 
 void CAlbumChildFrame::OnToggle_ViewAlbumPane( void )
 {	// toggle the visibility of the album dialog bar
-	REQUIRE( (BOOL)GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar ) == m_albumInfoBar.IsVisible() );	// consistent?
+	REQUIRE( (BOOL)GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar ) == m_albumDlgPane.IsVisible() );	// consistent?
 
 	GetAlbumImageView()->RefSlideData()->ToggleShowFlag( af::ShowAlbumDialogBar );		// toggle visibility flag
 	bool show = GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar );
 
-	ShowPane( &m_albumInfoBar, show, false, false );
+	ShowPane( &m_albumDlgPane, show, false, false );
 }
 
 void CAlbumChildFrame::OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable();
-	pCmdUI->SetCheck( m_albumInfoBar.IsVisible() );
-
-	//__super::OnUpdatePaneMenu( pCmdUI );
+	pCmdUI->SetCheck( m_albumDlgPane.IsVisible() );
 }

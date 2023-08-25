@@ -27,7 +27,7 @@ public:
 private:
 	enum SplitterPane { ThumbView, PictureView };
 
-	CAlbumDialogBar m_albumInfoBar;
+	CAlbumDialogPane m_albumDlgPane;
 	CSplitterWindow m_splitterWnd;
 
 	CAlbumThumbListView* m_pThumbsListView;

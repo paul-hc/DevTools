@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "ControlBar_fwd.h"
+#include "WndUtils.h"
 #include "utl/Algorithms_fwd.h"
 #include <afxbasepane.h>
 #include <afxstatusbar.h>
@@ -39,11 +40,149 @@ namespace nosy
 		using CMFCStatusBar::_GetPanePtr;
 		using CMFCStatusBar::GetCurrentFont;
 	};
+
+
+	struct CToolBarButton_ : public CMFCToolBarButton
+	{
+		// public access
+		void* GetItemData( void ) const { return reinterpret_cast<void*>( m_dwdItemData ); }
+		void SetItemData( const void* pItemData ) { m_dwdItemData = reinterpret_cast<DWORD_PTR>( pItemData ); }
+
+		CRect GetImageBoundsRect( void ) const
+		{
+			CRect imageBoundsRect = m_rect;
+
+			imageBoundsRect.left += CMFCVisualManager::GetInstance()->GetMenuImageMargin();
+			imageBoundsRect.right = imageBoundsRect.left + CMFCToolBar::GetMenuImageSize().cx + CMFCVisualManager::GetInstance()->GetMenuImageMargin();
+			return imageBoundsRect;
+		}
+
+		CRect GetImageRect( bool bounds = true ) const
+		{
+			CRect imageRect = m_rect;
+
+			if ( bounds )
+			{
+				int margin = CMFCVisualManager::GetInstance()->GetMenuImageMargin();
+				imageRect.DeflateRect( margin, margin );
+			}
+			return imageRect;
+		}
+
+		void RedrawImage( void )
+		{
+			if ( m_pWndParent != nullptr )
+			{
+				CRect imageRect = GetImageRect();
+
+				m_pWndParent->InvalidateRect( &imageRect );
+				m_pWndParent->UpdateWindow();
+			}
+		}
+	};
 }
 
 
 namespace mfc
 {
+	const TCHAR CColorLabels::s_autoLabel[] = _T("Automatic");
+	const TCHAR CColorLabels::s_moreLabel[] = _T("More Colors...");
+
+
+	bool RegisterCmdImageAlias( UINT aliasCmdId, UINT imageCmdId )
+	{
+		ASSERT_PTR( GetCmdMgr() );
+		// register command image alias for MFC control-bars
+		int iconImagePos = GetCmdMgr()->GetCmdImage( imageCmdId );
+
+		if ( iconImagePos != -1 )
+		{
+			GetCmdMgr()->SetCmdImage( aliasCmdId, iconImagePos, false );
+			return true;			// image registered for alias command
+		}
+
+		return false;
+	}
+
+	void RegisterCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count )
+	{
+		for ( size_t i = 0; i != count; ++i )
+			RegisterCmdImageAlias( cmdAliases[i].m_cmdId, cmdAliases[i].m_imageCmdId );
+	}
+
+
+	// CScopedCmdImageAliases implementation
+
+	CScopedCmdImageAliases::CScopedCmdImageAliases( UINT aliasCmdId, UINT imageCmdId )
+	{
+		m_oldCmdImages.push_back( TCmdImagePair( aliasCmdId, GetCmdMgr()->GetCmdImage( imageCmdId ) ) );		// store original image index
+		mfc::RegisterCmdImageAlias( aliasCmdId, imageCmdId );
+	}
+
+	CScopedCmdImageAliases::CScopedCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count )
+	{
+		m_oldCmdImages.reserve( count );
+
+		for ( size_t i = 0; i != count; ++i )
+		{
+			m_oldCmdImages.push_back( TCmdImagePair( cmdAliases[i].m_cmdId, GetCmdMgr()->GetCmdImage( cmdAliases[i].m_cmdId ) ) );	// store original image index
+			RegisterCmdImageAlias( cmdAliases[i].m_cmdId, cmdAliases[i].m_imageCmdId );
+		}
+	}
+
+	CScopedCmdImageAliases::~CScopedCmdImageAliases()
+	{
+		ASSERT_PTR( GetCmdMgr() );
+
+		for ( std::vector<TCmdImagePair>::const_iterator itPair = m_oldCmdImages.begin(); itPair != m_oldCmdImages.end(); ++itPair )
+			if ( itPair->second != -1 )
+				GetCmdMgr()->SetCmdImage( itPair->first, itPair->second, false );
+			else
+				GetCmdMgr()->ClearCmdImage( itPair->first );
+	}
+
+
+	bool AssignTooltipText( OUT TOOLINFO* pToolInfo, const std::tstring& text )
+	{
+		ASSERT_PTR( pToolInfo );
+		ASSERT_NULL( pToolInfo->lpszText );
+
+		if ( text.empty() )
+			return false;
+
+		pToolInfo->lpszText = (TCHAR*)::calloc( text.length() + 1, sizeof( TCHAR ) );
+
+		if ( nullptr == pToolInfo->lpszText )
+			return false;
+
+		_tcscpy( pToolInfo->lpszText, text.c_str() );
+
+		if ( text.find( '\n' ) != std::tstring::npos )		// multi-line text?
+			if ( const CMFCPopupMenuBar* pMenuBar = dynamic_cast<const CMFCPopupMenuBar*>( CWnd::FromHandlePermanent( pToolInfo->hwnd ) ) )
+				if ( CToolTipCtrl* pToolTip = mfc::ToolBar_GetToolTip( pMenuBar ) )
+				{
+					// Win32 requirement for multi-line tooltips: we must send TTM_SETMAXTIPWIDTH to the tooltip
+					if ( -1 == pToolTip->GetMaxTipWidth() )	// not initialized?
+						pToolTip->SetMaxTipWidth( ui::FindMonitorRect( pToolTip->GetSafeHwnd(), ui::Workspace ).Width() );		// the entire desktop width
+
+					pToolTip->SetDelayTime( TTDT_AUTOPOP, 30 * 1000 );		// display for 1/2 minute (16-bit limit: it doesn't work beyond 32768 miliseconds)
+				}
+
+		return true;
+	}
+}
+
+
+namespace mfc
+{
+	// CCommandManager utils
+
+	int FindButtonImageIndex( UINT btnId, bool userImage /*= false*/ )
+	{
+		return GetCmdMgr()->GetCmdImage( btnId, userImage );
+	}
+
+
 	// CBasePane access
 
 	void BasePane_SetIsDialogControl( OUT CBasePane* pBasePane, bool isDlgControl /*= true*/ )
@@ -84,6 +223,17 @@ namespace mfc
 	#endif
 	}
 
+	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex /*= nullptr*/ )
+	{
+		int btnIndex = const_cast<CMFCToolBar*>( pToolBar )->HitTest( clientPos );
+
+		utl::AssignPtr( pBtnIndex, btnIndex );
+		if ( -1 == btnIndex )
+			return nullptr;
+
+		return pToolBar->GetButton( btnIndex );
+	}
+
 
 	// CMFCStatusBar access
 
@@ -114,9 +264,50 @@ namespace mfc
 
 		return pPaneInfo->cxText;
 	}
+}
 
 
+namespace mfc
+{
 	// CMFCToolBarButton access:
+	bool ToolBarButton_SetStyleFlag( CMFCToolBarButton* pButton, UINT styleFlag, bool on /*= true*/ )
+	{
+		ASSERT_PTR( pButton );
+
+		UINT newStyle = pButton->m_nStyle;
+		SetFlag( newStyle, styleFlag, on );
+
+		if ( newStyle == pButton->m_nStyle )
+			return false;
+
+		pButton->SetStyle( newStyle );
+		return true;
+	}
+
+	void* ToolBarButton_GetItemData( const CMFCToolBarButton* pButton )
+	{
+		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetItemData();
+	}
+
+	void ToolBarButton_SetItemData( CMFCToolBarButton* pButton, const void* pItemData )
+	{
+		mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->SetItemData( pItemData );
+	}
+
+
+	void ToolBarButton_SetImageById( CMFCToolBarButton* pButton, UINT btnId, bool userImage /*= false*/ )
+	{
+		ASSERT_PTR( pButton );
+		pButton->SetImage( FindButtonImageIndex( btnId, userImage ) );
+	}
+
+	CRect ToolBarButton_GetImageRect( const CMFCToolBarButton* pButton, bool bounds /*= true*/ )
+	{
+		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->GetImageRect( bounds );
+	}
+
+
+	// CMFCToolBarButton utils:
 
 	bool ToolBarButton_EditSelectAll( CMFCToolBarButton* pButton )
 	{	// select all text in the edit field
@@ -149,6 +340,20 @@ namespace mfc
 
 		if ( HWND hCtrl = pButton->GetHwnd() )
 			::RedrawWindow( hCtrl, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_FRAME );
+	}
+
+	void ToolBarButton_RedrawImage( CMFCToolBarButton* pButton )
+	{
+		return mfc::nosy_cast<nosy::CToolBarButton_>( pButton )->RedrawImage();
+	}
+}
+
+
+namespace mfc
+{
+	int ColorBar_InitColors( mfc::TColorArray& colors, CPalette* pPalette /*= nullptr*/ )
+	{
+		return nosy::CColorBar_::InitColors( pPalette, colors );
 	}
 }
 

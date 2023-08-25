@@ -12,11 +12,11 @@ class CDurationComboBox;
 class CTextEdit;
 
 
-class CAlbumDialogBar : public CLayoutPaneDialog
+class CAlbumDialogPane : public CLayoutPaneDialog
 {
 public:
-	CAlbumDialogBar( void );
-	virtual ~CAlbumDialogBar();
+	CAlbumDialogPane( void );
+	virtual ~CAlbumDialogPane();
 
 	void InitAlbumImageView( CAlbumImageView* pAlbumView );
 
