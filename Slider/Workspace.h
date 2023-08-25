@@ -138,6 +138,11 @@ protected:
 	afx_msg void OnUpdateFullScreen( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_SmoothingMode( void );
 	afx_msg void OnUpdate_SmoothingMode( CCmdUI* pCmdUI );
+	// default handling of workspace flags, also handled by current album view (if open):
+	afx_msg void OnToggle_ShowThumbView( void );
+	afx_msg void OnUpdate_ShowThumbView( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_ViewAlbumPane( void );
+	afx_msg void OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

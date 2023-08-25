@@ -171,6 +171,7 @@ BEGIN
     SEPARATOR
     BUTTON      CK_FULL_SCREEN
     BUTTON      CK_SHOW_THUMB_VIEW
+    BUTTON      ID_VIEW_ALBUMDIALOGBAR
     SEPARATOR
     BUTTON      IDW_IMAGE_SCALING_COMBO
     BUTTON      IDW_ZOOM_COMBO
@@ -1463,8 +1464,7 @@ END
 #include "afxribbon.rc"      // Ribbon and control bars
 #endif
 
-#endif
-
+#endif
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

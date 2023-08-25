@@ -309,7 +309,7 @@ bool CWorkspace::LoadDocuments( void )
 		//
 		m_pLoadingImageState = const_cast<CImageState*>( &*itImageState );
 
-		if ( nullptr == AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str() ) )
+		if ( nullptr == AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str(), FALSE ) )
 			TRACE( " * Failed loading document %s on workspace load!\n", m_pLoadingImageState->GetDocFilePath().c_str() );
 	}
 	m_pLoadingImageState = nullptr;
@@ -373,6 +373,10 @@ BEGIN_MESSAGE_MAP( CWorkspace, CCmdTarget )
 	ON_UPDATE_COMMAND_UI( CK_FULL_SCREEN, OnUpdateFullScreen )
 	ON_COMMAND( IDW_SMOOTHING_MODE_CHECK, OnToggle_SmoothingMode )
 	ON_UPDATE_COMMAND_UI( IDW_SMOOTHING_MODE_CHECK, OnUpdate_SmoothingMode )
+	ON_COMMAND( CK_SHOW_THUMB_VIEW, OnToggle_ShowThumbView )
+	ON_UPDATE_COMMAND_UI( CK_SHOW_THUMB_VIEW, OnUpdate_ShowThumbView )
+	ON_COMMAND( ID_VIEW_ALBUMDIALOGBAR, OnToggle_ViewAlbumPane )
+	ON_UPDATE_COMMAND_UI( ID_VIEW_ALBUMDIALOGBAR, OnUpdate_ViewAlbumPane )		// CFrameWnd::OnUpdateControlBarMenu
 END_MESSAGE_MAP()
 
 void CWorkspace::CmLoadWorkspaceDocs( void )
@@ -459,4 +463,24 @@ void CWorkspace::OnToggle_SmoothingMode( void )
 void CWorkspace::OnUpdate_SmoothingMode( CCmdUI* pCmdUI )
 {
 	pCmdUI->SetCheck( d2d::CSharedTraits::Instance().IsSmoothingMode() );
+}
+
+void CWorkspace::OnToggle_ShowThumbView( void )
+{
+	ToggleFlag( m_data.m_albumViewFlags, af::ShowThumbView );
+}
+
+void CWorkspace::OnUpdate_ShowThumbView( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( HasFlag( m_data.m_albumViewFlags, af::ShowThumbView ) );
+}
+
+void CWorkspace::OnToggle_ViewAlbumPane( void )
+{	// toggle the visibility of the album dialog bar
+	ToggleFlag( m_data.m_albumViewFlags, af::ShowAlbumDialogBar );
+}
+
+void CWorkspace::OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( HasFlag( m_data.m_albumViewFlags, af::ShowAlbumDialogBar ) );
 }

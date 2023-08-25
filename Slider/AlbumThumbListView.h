@@ -160,8 +160,8 @@ protected:
 	afx_msg BOOL OnMouseWheel( UINT mkFlags, short zDelta, CPoint pt );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnTimer( UINT_PTR eventId );
-	afx_msg void OnToggleShowThumbView( void );
-	afx_msg void OnUpdateShowThumbView( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_ShowThumbView( void );
+	afx_msg void OnUpdate_ShowThumbView( CCmdUI* pCmdUI );
 	afx_msg void OnLBnSelChange( void );
 
 	DECLARE_MESSAGE_MAP()
