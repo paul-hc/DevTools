@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "AlbumImageView.h"
 #include "AlbumDoc.h"
-#include "AlbumDialogBar.h"
 #include "AlbumThumbListView.h"
 #include "ImageNavigator.h"
 #include "INavigationBar.h"
@@ -483,7 +482,6 @@ void CAlbumImageView::OnInitialUpdate( void )
 	SetBkColor( pDoc->GetBkColor(), false );
 	RefDrawParams()->SetSmoothingMode( pDoc->GetSmoothingMode() );
 
-	m_pAlbumBar->InitAlbumImageView( this );
 	UpdateChildBarsState( true );		// info bar and thumb pane are hidden in full screen mode
 
 	m_pAlbumBar->OnNavRangeChanged();

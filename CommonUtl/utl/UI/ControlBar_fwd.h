@@ -224,6 +224,9 @@ namespace mfc
 		CFixedToolBar( void );
 		virtual ~CFixedToolBar();
 
+		bool IsBarVisible( void ) const { return IsVisible() != FALSE; }
+		void ShowBar( bool show = true ) { ShowPane( show, false, false ); }
+
 		// base overrides
 		virtual BOOL CanBeRestored( void ) const { return false; }
 		virtual BOOL AllowShowOnList( void ) const { return false; }		// don't list it on Customize > Toolbars

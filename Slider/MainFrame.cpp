@@ -465,13 +465,12 @@ void CMainFrame::On_EscapeKey( void )
 	CFrameWnd* pActiveFrame = MDIGetActive();
 
 	if ( pActiveFrame != nullptr )
-		if ( !ui::OwnsFocus( pActiveFrame->GetSafeHwnd() ) )
-		{	// a toolbar control is focused -> focus the active view
-			if ( CView* pActiveView = pActiveFrame->GetActiveView() )
+		if ( CView* pActiveView = pActiveFrame->GetActiveView() )
+			if ( !ui::OwnsFocus( pActiveView->GetSafeHwnd() ) )			// focused owned by a toolbar?
+			{
 				pActiveView->SetFocus();
-
-			return;
-		}
+				return;
+			}
 
 	if ( nullptr == pActiveFrame )
 		pActiveFrame = this;

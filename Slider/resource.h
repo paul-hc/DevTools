@@ -2,7 +2,6 @@
 // Microsoft Visual C++ generated include file.
 // Used by Slider.rc
 //
-#define IDD_ALBUMDIALOGBAR              106
 #define IDR_MAINFRAME                   128
 #define IDR_TOOLBAR_STANDARD            129
 #define IDR_TOOLBAR_NAVIGATE            130
@@ -117,10 +116,9 @@
 #define IDW_SMOOTHING_MODE_CHECK        32815
 #define IDW_PLAY_DELAY_COMBO            32830
 #define IDW_SEEK_CURR_POS_SPINEDIT      32831
-#define IDW_SCROLL_POS_SPIN             32832
-#define IDW_NAV_COUNT_LABEL             32833
-#define IDW_CURR_IMAGE_PATH_LABEL       32834
-#define ID_COPY_CURR_IMAGE_PATH         32835
+#define IDW_NAV_COUNT_LABEL             32832
+#define IDW_CURR_IMAGE_PATH_LABEL       32833
+#define ID_COPY_CURR_IMAGE_PATH         32834
 #define ID_CM_ESCAPE_KEY                32850
 #define ID_CM_MDI_CLOSE_ALL             32851
 #define ID_TOGGLE_SCALING_AUTO_FIT_LARGE 32900

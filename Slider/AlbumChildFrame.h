@@ -3,10 +3,10 @@
 #pragma once
 
 #include "ChildFrame.h"
-#include "AlbumDialogBar.h"
 #include "SplitterWindow.h"
 #include "INavigationBar.h"			// for IAlbumBar
 #include "utl/UI/Dialog_fwd.h"
+#include "utl/UI/ui_fwd.h"
 
 
 class CAlbumThumbListView;
@@ -24,7 +24,7 @@ protected:
 	virtual ~CAlbumChildFrame();
 public:
 	// base overrides
-	virtual IImageView* GetImageView( void ) const;		// could be either CImageView or CAlbumImageView (but not CAlbumThumbListView!)
+	virtual IImageView* GetImageView( void ) const override;		// could be either CImageView or CAlbumImageView (but not CAlbumThumbListView!)
 
 	// view panes
 	CAlbumThumbListView* GetThumbView( void ) const { return safe_ptr( m_pThumbsListView ); }
@@ -36,10 +36,7 @@ private:
 	void BuildAlbumToolbar( void );
 
 	// IAlbumBar interface
-	virtual void InitAlbumImageView( CAlbumImageView* pAlbumView ) implement;
 	virtual void ShowBar( bool show ) implement;
-
-	// IAlbumBar events
 	virtual void OnCurrPosChanged( void ) implement;
 	virtual void OnNavRangeChanged( void ) implement;
 	virtual void OnSlideDelayChanged( void ) implement;
@@ -51,13 +48,10 @@ private:
 
 	std::auto_ptr<mfc::CFixedToolBar> m_pAlbumToolBar;
 
-	CAlbumDialogPane m_albumDlgPane;
 	CSplitterWindow m_splitterWnd;
 
 	CAlbumThumbListView* m_pThumbsListView;
 	CAlbumImageView* m_pAlbumImageView;
-
-	CAlbumImageView* m_pAlbumView;
 
 	enum { DurationComboWidth = 70, SeekCurrPosSpinEditWidth = 60 };
 
@@ -68,7 +62,6 @@ protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
 	afx_msg void OnToggle_ViewAlbumPane( void );
 	afx_msg void OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI );
-
 	afx_msg void OnEditInput_PlayDelayCombo( void );
 	afx_msg void OnCBnSelChange_PlayDelayCombo( void );
 	afx_msg void OnUpdateAlways( CCmdUI* pCmdUI );

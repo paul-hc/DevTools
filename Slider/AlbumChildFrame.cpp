@@ -55,8 +55,6 @@ namespace app
 }
 
 
-static const bool s_newBar = true;
-
 // CAlbumChildFrame implementation
 
 IMPLEMENT_DYNCREATE( CAlbumChildFrame, CChildFrame )
@@ -66,63 +64,44 @@ CAlbumChildFrame::CAlbumChildFrame( void )
 	, m_pAlbumToolBar( new mfc::CFixedToolBar() )
 	, m_pThumbsListView( nullptr )
 	, m_pAlbumImageView( nullptr )
-	, m_pAlbumView( nullptr )
 {
+	m_bEnableFloatingBars = TRUE;
 	GetDockingManager()->DisableRestoreDockState( TRUE );		// to disable loading of docking layout from the Registry
-	if ( s_newBar )
-		m_bEnableFloatingBars = TRUE;
 }
 
 CAlbumChildFrame::~CAlbumChildFrame()
 {
 }
 
-IImageView* CAlbumChildFrame::GetImageView( void ) const
+IImageView* CAlbumChildFrame::GetImageView( void ) const override
 {
 	return m_pAlbumImageView;
 }
 
-void CAlbumChildFrame::InitAlbumImageView( CAlbumImageView* pAlbumView ) implement
-{
-	m_pAlbumView = pAlbumView;
-
-	if ( s_newBar )
-		m_albumDlgPane.InitAlbumImageView( pAlbumView );
-}
-
 void CAlbumChildFrame::ShowBar( bool show ) implement
 {
-	s_newBar ? m_pAlbumToolBar->ShowPane( show, false, false ) : m_albumDlgPane.ShowPane( show, false, false );
+	m_pAlbumToolBar->ShowBar( show );
 }
 
 void CAlbumChildFrame::OnNavRangeChanged( void ) implement
 {	// 1-based displayed index
-	if ( nullptr == m_pAlbumView )
-		return;		// not yet initialized
-
-	int imageCount = static_cast<int>( m_pAlbumView->GetDocument()->GetImageCount() );
+	int imageCount = static_cast<int>( m_pAlbumImageView->GetDocument()->GetImageCount() );
 
 	CMFCToolBarSpinEditBoxButton* pSpinEdit = mfc::ToolBar_LookupButton<CMFCToolBarSpinEditBoxButton>( *m_pAlbumToolBar, IDW_SEEK_CURR_POS_SPINEDIT );
 	pSpinEdit->SetRange( 1, imageCount );
 
 	static const std::tstring prefix = _T("of ");
 	mfc::ToolBar_SetBtnText( m_pAlbumToolBar.get(), IDW_NAV_COUNT_LABEL, prefix + num::FormatNumber(imageCount, str::GetUserLocale()));
-
-	if ( s_newBar )
-		m_albumDlgPane.OnNavRangeChanged();
 }
 
 void CAlbumChildFrame::OnCurrPosChanged( void ) implement
 {
-	if ( nullptr == m_pAlbumView )
-		return;		// not yet initialized
-
-	int currIndex = m_pAlbumView->GetSlideData().GetCurrentIndex();
-	bool valid = m_pAlbumView->IsValidIndex( currIndex );
+	int currIndex = m_pAlbumImageView->GetSlideData().GetCurrentIndex();
+	bool valid = m_pAlbumImageView->IsValidIndex( currIndex );
 	std::tstring imageFilePath;
 
 	if ( valid )
-		if ( const CFileAttr* pFileAttr = m_pAlbumView->GetDocument()->GetModel()->GetFileAttr( currIndex ) )
+		if ( const CFileAttr* pFileAttr = m_pAlbumImageView->GetDocument()->GetModel()->GetFileAttr( currIndex ) )
 			imageFilePath = pFileAttr->GetPath().FormatPretty();
 
 	CMFCToolBarSpinEditBoxButton* pSpinEdit = mfc::ToolBar_LookupButton<CMFCToolBarSpinEditBoxButton>( *m_pAlbumToolBar, IDW_SEEK_CURR_POS_SPINEDIT );
@@ -140,20 +119,14 @@ void CAlbumChildFrame::OnCurrPosChanged( void ) implement
 
 	mfc::ToolBar_SetBtnText( m_pAlbumToolBar.get(), IDW_CURR_IMAGE_PATH_LABEL, imageFilePath);
 	m_pAlbumToolBar->AdjustLayout();
-
-	if ( s_newBar )
-		m_albumDlgPane.OnCurrPosChanged();
 }
 
 void CAlbumChildFrame::OnSlideDelayChanged( void ) implement
 {
 	mfc::CStockValuesComboBoxButton* pPlayDelayCombo = mfc::ToolBar_LookupButton<mfc::CStockValuesComboBoxButton>( *m_pAlbumToolBar, IDW_PLAY_DELAY_COMBO );
-	double slideDelaySecs = app::CDurationSecondsStockTags::FromMiliseconds( m_pAlbumView->GetSlideData().m_slideDelay );
+	double slideDelaySecs = app::CDurationSecondsStockTags::FromMiliseconds( m_pAlbumImageView->GetSlideData().m_slideDelay );
 
 	pPlayDelayCombo->OutputValue( slideDelaySecs );
-
-	if ( s_newBar )
-		m_albumDlgPane.OnSlideDelayChanged();
 }
 
 bool CAlbumChildFrame::InputSlideDelay( ui::ComboField byField )
@@ -165,7 +138,7 @@ bool CAlbumChildFrame::InputSlideDelay( ui::ComboField byField )
 	if ( !pPlayDelayCombo->InputValue( &slideDelaySecs, byField, true ) )
 		return false;
 
-	m_pAlbumView->SetSlideDelay( app::CDurationSecondsStockTags::ToMiliseconds( slideDelaySecs ) );
+	m_pAlbumImageView->SetSlideDelay( app::CDurationSecondsStockTags::ToMiliseconds( slideDelaySecs ) );
 	OnSlideDelayChanged();			// update the content of combo box
 	return true;
 }
@@ -175,11 +148,11 @@ bool CAlbumChildFrame::InputCurrentPos( void )
 	CSpinButtonCtrl* pSpinCtrl = mfc::ToolBar_LookupButton<CMFCToolBarSpinEditBoxButton>( *m_pAlbumToolBar, IDW_SEEK_CURR_POS_SPINEDIT )->GetSpinControl();
 	int currIndex = pSpinCtrl->GetPos() - 1;
 
-	if ( !m_pAlbumView->IsValidIndex( currIndex ) )
+	if ( !m_pAlbumImageView->IsValidIndex( currIndex ) )
 		return false;
 
-	m_pAlbumView->RefSlideData()->SetCurrentIndex( currIndex, true );
-	m_pAlbumView->UpdateImage();		// this will also feedback on OnCurrPosChanged()
+	m_pAlbumImageView->RefSlideData()->SetCurrentIndex( currIndex, true );
+	m_pAlbumImageView->UpdateImage();		// this will also feedback on OnCurrPosChanged()
 
 	return true;
 }
@@ -194,7 +167,6 @@ void CAlbumChildFrame::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CT
 
 void CAlbumChildFrame::BuildAlbumToolbar( void )
 {
-	VERIFY( m_pAlbumToolBar->LoadToolBar( ID_VIEW_ALBUM_DIALOG_BAR ) );	// just one blank button placeholder - required to display the replacement button
 	m_pAlbumToolBar->SetWindowText( _T("Album") );
 	m_pAlbumToolBar->RemoveAllButtons();
 
@@ -235,38 +207,14 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 	if ( -1 == CChildFrame::OnCreate( pCS ) )
 		return -1;
 
-	if ( s_newBar )
-	{
-		if ( m_pAlbumToolBar->Create( this, mfc::CFixedToolBar::Style, ID_VIEW_ALBUM_DIALOG_BAR ) )
-			BuildAlbumToolbar();
-		else
-			return -1;
+	if ( !m_pAlbumToolBar->Create( this, mfc::CFixedToolBar::Style, ID_VIEW_ALBUM_DIALOG_BAR ) ||
+		 !m_pAlbumToolBar->LoadToolBar( ID_VIEW_ALBUM_DIALOG_BAR ) )					// just one blank button placeholder - required to display the replacement button
+		return -1;
 
-		DockPane( m_pAlbumToolBar.get() );		// toolbar will stretch horizontally
-		//m_pAlbumToolBar->DockToFrameWindow( CBRS_ALIGN_TOP );		// make the dialog pane stretchable horizontally
-	}
+	BuildAlbumToolbar();
 
-	// initialize album dialog-bar
-	enum { PaneStyle = WS_VISIBLE | WS_CHILD | CBRS_FLOAT_MULTI | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_FIXED /*| CBRS_BOTTOM*/ };
-
-	VERIFY( m_albumDlgPane.Create( _T("Album Dialog Bar (old)"), this, false, IDD_ALBUMDIALOGBAR, PaneStyle, ID_VIEW_ALBUM_DIALOG_BAR ) );
-
-	if ( !s_newBar )
-		m_albumDlgPane.DockToFrameWindow( CBRS_ALIGN_BOTTOM );		// make the dialog pane stretchable horizontally
-	else
-	{
-		CSize minSize;
-		m_albumDlgPane.GetMinSize( minSize );
-		minSize.cy += 30;		// floating frame height
-
-		CRect screenRect;
-		GetWindowRect( &screenRect );
-		screenRect.OffsetRect( 16, screenRect.Height() + 10 );
-		ui::SetRectSize( screenRect, minSize );
-
-		m_albumDlgPane.FloatPane( screenRect );
-		m_albumDlgPane.ShowBar( true );
-	}
+	DockPane( m_pAlbumToolBar.get() );		// toolbar will stretch horizontally
+	//m_pAlbumToolBar->DockToFrameWindow( CBRS_ALIGN_TOP );		// make the dialog pane stretchable horizontally
 
 	// note: it's too early to update pane visibility; we have to delay to after loading CSlideData data-memberby CAlbumDoc, in CAlbumImageView::UpdateChildBarsState()
 	return 0;
@@ -290,29 +238,23 @@ BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pConte
 	StoreImageView( m_pAlbumImageView );
 
 	m_pThumbsListView->StorePeerView( m_pAlbumImageView );
-	m_pAlbumImageView->StorePeerView( m_pThumbsListView, s_newBar ? static_cast<IAlbumBar*>( this ) : static_cast<IAlbumBar*>( &m_albumDlgPane ) );
+	m_pAlbumImageView->StorePeerView( m_pThumbsListView, this );
 	return TRUE;
 }
 
 void CAlbumChildFrame::OnToggle_ViewAlbumPane( void )
 {	// toggle the visibility of the album dialog bar
-	REQUIRE( (BOOL)GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar ) == m_albumDlgPane.IsVisible() );	// consistent?
-
+	REQUIRE( GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar ) == m_pAlbumToolBar->IsBarVisible() );	// consistent?
 	GetAlbumImageView()->RefSlideData()->ToggleShowFlag( af::ShowAlbumDialogBar );		// toggle visibility flag
-	bool show = GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar );
 
-	ShowPane( &m_albumDlgPane, show, false, false );
+	bool show = GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar );
+	m_pAlbumToolBar->ShowBar( show );
 }
 
 void CAlbumChildFrame::OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable();
-	pCmdUI->SetCheck( m_albumDlgPane.IsVisible() );
-}
-
-void CAlbumChildFrame::OnUpdateAlways( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable();
+	pCmdUI->SetCheck( m_pAlbumToolBar->IsBarVisible() );
 }
 
 void CAlbumChildFrame::OnEnChange_SeekCurrPosSpinEdit( void )
@@ -324,7 +266,7 @@ void CAlbumChildFrame::OnEnChange_SeekCurrPosSpinEdit( void )
 void CAlbumChildFrame::OnEditInput_PlayDelayCombo( void )
 {
 	if ( InputSlideDelay( ui::ByEdit ) )
-		m_pAlbumView->SetFocus();
+		m_pAlbumImageView->SetFocus();
 	else
 		ui::BeepSignal();
 }
@@ -332,10 +274,15 @@ void CAlbumChildFrame::OnEditInput_PlayDelayCombo( void )
 void CAlbumChildFrame::OnCBnSelChange_PlayDelayCombo( void )
 {
 	if ( InputSlideDelay( ui::BySel ) )
-		m_pAlbumView->SetFocus();
+		m_pAlbumImageView->SetFocus();
 }
 
 void CAlbumChildFrame::On_CopyCurrImagePath( void )
 {
 	CTextClipboard::CopyText( mfc::ToolBar_LookupButton<mfc::CLabelButton>( *m_pAlbumToolBar, IDW_CURR_IMAGE_PATH_LABEL )->m_strText.GetString(), m_hWnd );
+}
+
+void CAlbumChildFrame::OnUpdateAlways( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable();
 }

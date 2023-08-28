@@ -47,9 +47,6 @@
     <ClInclude Include="AlbumChildFrame.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="AlbumDialogBar.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="AlbumDoc.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -209,9 +206,6 @@
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="AlbumChildFrame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AlbumDialogBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AlbumDoc.cpp">

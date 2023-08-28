@@ -211,7 +211,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AlbumChildFrame.h" />
-    <ClInclude Include="AlbumDialogBar.h" />
     <ClInclude Include="AlbumDoc.h" />
     <ClInclude Include="AlbumImageView.h" />
     <ClInclude Include="AlbumModel.h" />
@@ -269,7 +268,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AlbumChildFrame.cpp" />
-    <ClCompile Include="AlbumDialogBar.cpp" />
     <ClCompile Include="AlbumDoc.cpp" />
     <ClCompile Include="AlbumImageView.cpp" />
     <ClCompile Include="AlbumModel.cpp" />

@@ -11,12 +11,8 @@ interface INavigationBar
 };
 
 
-class CAlbumImageView;
-
-
 interface IAlbumBar
 {
-	virtual void InitAlbumImageView( CAlbumImageView* pAlbumView ) = 0;
 	virtual void ShowBar( bool show ) = 0;
 
 	// events
