@@ -6,6 +6,7 @@
 #include "ui_fwd.h"
 #include "DataAdapters.h"
 #include <afxtoolbarcomboboxbutton.h>
+#include <afxtoolbareditboxbutton.h>
 #include <unordered_map>
 
 
@@ -19,6 +20,8 @@ namespace mfc
 	void WriteComboItems( OUT CMFCToolBarComboBoxButton* pComboBtn, const std::vector<std::tstring>& items );
 
 	DWORD ToolBarComboBoxButton_GetStyle( const CMFCToolBarComboBoxButton* pComboButton );
+
+	bool StretchToolbarButton( CMFCToolBarButton* pStretchableButton, int rightSpacing = 2 );
 
 
 	// App singleton that stores all custom toolbar button pointers that must be re-bound when CToolBar::LoadState() - deserializing.
@@ -47,6 +50,89 @@ namespace mfc
 		typedef std::unordered_map<TBtnId_PtrPosPair, void*, utl::CPairHasher> TRebindMap;
 
 		TRebindMap m_btnRebindPointers;		// <BtnId_PtrPosPair, pointer> - NULL data pointers are allowed as valid values
+	};
+}
+
+
+namespace mfc
+{
+	enum ButtonOptionFlags
+	{
+		BO_Transparent	= BIT_FLAG( 0 ),
+		BO_BoldFont		= BIT_FLAG( 1 ),
+
+		BO_QueryToolTip	= BIT_FLAG( 8 ),
+		BO_StretchWidth	= BIT_FLAG( 9 )
+	};
+
+
+	class CLabelButton : public CMFCToolBarButton
+	{
+		DECLARE_SERIAL( CLabelButton )
+	protected:
+		CLabelButton( void );
+	public:
+		CLabelButton( UINT btnId, int optionFlags = 0, const TCHAR* pText = nullptr );
+
+		bool HasOptionFlag( int flag ) const { return HasFlag( m_optionFlags, flag ); }
+		void SetOptionFlag( int flag, bool on = true ) { SetFlag( m_optionFlags, flag, on ); }
+
+		// base overrides
+		virtual void Serialize( CArchive& archive );
+		virtual BOOL OnUpdateToolTip( CWnd* pWndParent, int buttonIndex, CToolTipCtrl& wndToolTip, CString& rTipText );
+		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
+							 BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE, BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) override;
+	protected:
+		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
+	private:
+		persist int m_optionFlags;
+	};
+}
+
+
+namespace mfc
+{
+	class CEditBoxButton : public CMFCToolBarEditBoxButton
+	{
+		DECLARE_SERIAL( CEditBoxButton )
+	protected:
+		CEditBoxButton( void );
+	public:
+		CEditBoxButton( UINT btnId, int width, DWORD dwStyle = ES_AUTOHSCROLL, int optionFlags = 0 );
+		virtual ~CEditBoxButton();
+
+		bool HasOptionFlag( int flag ) const { return HasFlag( m_optionFlags, flag ); }
+		void SetOptionFlag( int flag, bool on = true ) { SetFlag( m_optionFlags, flag, on ); OnOptionFlagsChanged(); }
+
+		// base overrides
+		virtual void Serialize( CArchive& archive );
+		virtual void OnChangeParentWnd( CWnd* pParentWnd );
+		virtual CEdit* CreateEdit( CWnd* pWndParent, const CRect& rect );
+		virtual void OnGlobalFontsChanged( void );
+		virtual BOOL OnUpdateToolTip( CWnd* pWndParent, int buttonIndex, CToolTipCtrl& wndToolTip, CString& rTipText );
+	protected:
+		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
+
+		void OnOptionFlagsChanged( void );
+	private:
+		persist int m_optionFlags;
+	};
+
+
+	class CToolBarEditCtrl : public CMFCToolBarEditCtrl
+	{
+	public:
+		CToolBarEditCtrl( CMFCToolBarEditBoxButton& editButton, bool transparent );
+	private:
+		bool m_transparent;
+
+		// generated stuff
+	protected:
+		afx_msg BOOL OnEraseBkgnd( CDC* pDC );
+		HBRUSH CtlColor( CDC* pDC, UINT ctlColor );
+		afx_msg BOOL OnEnUpdate_Reflect( void );
+
+		DECLARE_MESSAGE_MAP()
 	};
 }
 
@@ -190,7 +276,7 @@ namespace mfc
 		std::auto_ptr<CCustomSliderCtrl> m_pSliderCtrl;
 
 		enum { DefaultStyle = TBS_HORZ | TBS_AUTOTICKS | TBS_TRANSPARENTBKGND | TBS_NOTIFYBEFOREMOVE | TBS_TOOLTIPS };
-		enum { DefaultWidth = 150, DefaultHeight = 25, TickFreqThresholdCount = 30 };
+		enum { DefaultWidth = 150, DefaultHeight = 22 /*25*/, TickFreqThresholdCount = 30 };
 	};
 }
 

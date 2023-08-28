@@ -19,13 +19,14 @@
 
 #include "utl/UI/StockValuesComboBox.hxx"
 
+
 namespace layout
 {
 	enum { CommentsPct = 60, ListPct = 100 - CommentsPct };
 
 	static const CLayoutStyle s_styles[] =
 	{
-		{ IDC_CURR_IMAGE_PATH_EDIT, SizeX }
+		{ IDW_CURR_IMAGE_PATH_LABEL, SizeX }
 	};
 }
 
@@ -50,50 +51,33 @@ CAlbumDialogPane::~CAlbumDialogPane()
 {
 }
 
-void CAlbumDialogPane::InitAlbumImageView( CAlbumImageView* pAlbumView )
+void CAlbumDialogPane::InitAlbumImageView( CAlbumImageView* pAlbumView ) implement
 {
 	m_pAlbumView = pAlbumView;
 	ui::EnableWindow( m_hWnd );
 }
 
-bool CAlbumDialogPane::SetCurrentPos( int currIndex, bool forceLoad /*= false*/ )
+void CAlbumDialogPane::ShowBar( bool show ) implement
 {
-	if ( !m_pAlbumView->IsValidIndex( currIndex ) )
-		return false;
-
-	if ( currIndex != m_pAlbumView->GetSlideData().GetCurrentIndex() || forceLoad )
-	{
-		m_pAlbumView->RefSlideData()->SetCurrentIndex( currIndex, true );
-		m_pAlbumView->UpdateImage();		// this will also feedback on OnCurrPosChanged()
-	}
-	else if ( m_scrollSpin.GetPos() - 1 != currIndex )
-		m_scrollSpin.SetPos( currIndex + 1 );
-
-	return true;
-}
-
-bool CAlbumDialogPane::InputSlideDelay( ui::ComboField byField )
-{
-	UINT slideDelay;
-	if ( !m_pSlideDelayCombo->InputValue( &slideDelay, byField, true ) )
-		return false;		// invalid delay
-
-	m_pAlbumView->SetSlideDelay( slideDelay );
-	m_pAlbumView->OnSlideDataChanged( false );		// don't set modified flag for this change
-	OnSlideDelayChanged();			// update the content of combo box
-	return true;
+	ShowPane( show, false, false );
 }
 
 // displayed index is actually 1-based
-void CAlbumDialogPane::OnNavRangeChanged( void )
+void CAlbumDialogPane::OnNavRangeChanged( void ) implement
 {
+	if ( nullptr == m_pAlbumView )
+		return;		// not yet initialized
+
 	int imageCount = (int)m_pAlbumView->GetDocument()->GetImageCount();
 	m_scrollSpin.SetRange32( 1, imageCount );
-	ui::SetDlgItemText( m_hWnd, IDC_NAV_COUNT_STATIC, str::Format( _T("/ %s"), num::FormatNumber( imageCount, str::GetUserLocale() ).c_str() ) );
+	ui::SetDlgItemText( m_hWnd, IDW_NAV_COUNT_LABEL, str::Format( _T("/ %s"), num::FormatNumber( imageCount, str::GetUserLocale() ).c_str() ) );
 }
 
-void CAlbumDialogPane::OnCurrPosChanged( void )
+void CAlbumDialogPane::OnCurrPosChanged( void ) implement
 {
+	if ( nullptr == m_pAlbumView )
+		return;		// not yet initialized
+
 	int currIndex = m_pAlbumView->GetSlideData().GetCurrentIndex();
 	bool valid = m_pAlbumView->IsValidIndex( currIndex );
 	std::tstring imageFileInfo;
@@ -116,17 +100,48 @@ void CAlbumDialogPane::OnCurrPosChanged( void )
 	m_pImagePathEdit->SetText( imageFileInfo );
 }
 
-void CAlbumDialogPane::OnSlideDelayChanged( void )
+void CAlbumDialogPane::OnSlideDelayChanged( void ) implement
 {
+	if ( nullptr == m_pAlbumView )
+		return;		// not yet initialized
+
 	m_pSlideDelayCombo->OutputValue( m_pAlbumView->GetSlideData().m_slideDelay );
 }
 
 void CAlbumDialogPane::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const overrides( CLayoutPaneDialog )
 {
-	if ( IDC_CURR_IMAGE_PATH_EDIT == cmdId )
+	if ( IDW_CURR_IMAGE_PATH_LABEL == cmdId )
 		rText = m_pAlbumView->GetImagePathKey().first.Get();
 	else
 		__super::QueryTooltipText( rText, cmdId, pTooltip );
+}
+
+bool CAlbumDialogPane::InputSlideDelay( ui::ComboField byField )
+{
+	UINT slideDelay;
+	if ( !m_pSlideDelayCombo->InputValue( &slideDelay, byField, true ) )
+		return false;		// invalid delay
+
+	m_pAlbumView->SetSlideDelay( slideDelay );
+	//m_pAlbumView->OnSlideDataChanged( false );		// don't set modified flag for this change
+	OnSlideDelayChanged();			// update the content of combo box
+	return true;
+}
+
+bool CAlbumDialogPane::SeekCurrentPos( int currIndex, bool forceLoad /*= false*/ )
+{
+	if ( !m_pAlbumView->IsValidIndex( currIndex ) )
+		return false;
+
+	if ( currIndex != m_pAlbumView->GetSlideData().GetCurrentIndex() || forceLoad )
+	{
+		m_pAlbumView->RefSlideData()->SetCurrentIndex( currIndex, true );
+		m_pAlbumView->UpdateImage();		// this will also feedback on OnCurrPosChanged()
+	}
+	else if ( m_scrollSpin.GetPos() - 1 != currIndex )
+		m_scrollSpin.SetPos( currIndex + 1 );
+
+	return true;
 }
 
 void CAlbumDialogPane::DoDataExchange( CDataExchange* pDX )
@@ -134,11 +149,11 @@ void CAlbumDialogPane::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = nullptr == m_pSlideDelayCombo->m_hWnd;
 
 	m_pToolbar->DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
-	DDX_Control( pDX, IDC_PLAY_DELAY_COMBO, *m_pSlideDelayCombo );
-	DDX_Control( pDX, IDC_SEEK_CURR_POS_EDIT, m_navPosEdit );
-	DDX_Control( pDX, IDC_SCROLL_POS_SPIN, m_scrollSpin );
-	DDX_Control( pDX, IDC_NAV_COUNT_STATIC, m_infoStatic );
-	DDX_Control( pDX, IDC_CURR_IMAGE_PATH_EDIT, *m_pImagePathEdit );
+	DDX_Control( pDX, IDW_PLAY_DELAY_COMBO, *m_pSlideDelayCombo );
+	DDX_Control( pDX, IDW_SEEK_CURR_POS_SPINEDIT, m_navPosEdit );
+	DDX_Control( pDX, IDW_SCROLL_POS_SPIN, m_scrollSpin );
+	DDX_Control( pDX, IDW_NAV_COUNT_LABEL, m_infoStatic );
+	DDX_Control( pDX, IDW_CURR_IMAGE_PATH_LABEL, *m_pImagePathEdit );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -167,11 +182,11 @@ BEGIN_MESSAGE_MAP( CAlbumDialogPane, CLayoutPaneDialog )
 	ON_WM_VSCROLL()
 	ON_COMMAND( IDOK, OnOk )
 	ON_COMMAND( ID_CM_ESCAPE_KEY, On_EscapeKey )
-	ON_CBN_SELCHANGE( IDC_PLAY_DELAY_COMBO, OnCBnSelChange_SlideDelay )
-	ON_CBN_CLOSEUP( IDC_PLAY_DELAY_COMBO, OnCBnCloseUp_SlideDelay )
-	ON_CN_INPUTERROR( IDC_PLAY_DELAY_COMBO, OnCBnInputError_SlideDelay )
-	ON_UPDATE_COMMAND_UI( IDC_PLAY_DELAY_COMBO, OnUpdate_SlideDelay )
-	ON_EN_KILLFOCUS( IDC_SEEK_CURR_POS_EDIT, OnEnKillFocus_SeekCurrPos )
+	ON_CBN_SELCHANGE( IDW_PLAY_DELAY_COMBO, OnCBnSelChange_SlideDelay )
+	ON_CBN_CLOSEUP( IDW_PLAY_DELAY_COMBO, OnCBnCloseUp_SlideDelay )
+	ON_CN_INPUTERROR( IDW_PLAY_DELAY_COMBO, OnCBnInputError_SlideDelay )
+	ON_UPDATE_COMMAND_UI( IDW_PLAY_DELAY_COMBO, OnUpdate_SlideDelay )
+	ON_EN_KILLFOCUS( IDW_SEEK_CURR_POS_SPINEDIT, OnEnKillFocus_SeekCurrPos )
 END_MESSAGE_MAP()
 
 HBRUSH CAlbumDialogPane::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor )
@@ -218,7 +233,7 @@ void CAlbumDialogPane::OnOk( void )
 	}
 	else if ( ui::OwnsFocus( m_navPosEdit ) )
 	{
-		if ( !SetCurrentPos( m_scrollSpin.GetPos() - 1, true ) )
+		if ( !SeekCurrentPos( m_scrollSpin.GetPos() - 1, true ) )
 			ui::BeepSignal();
 	}
 }
@@ -252,7 +267,7 @@ void CAlbumDialogPane::OnUpdate_SlideDelay( CCmdUI* pCmdUI )
 void CAlbumDialogPane::OnEnKillFocus_SeekCurrPos( void )
 {
 	BOOL validInput;
-	int currIndex = GetDlgItemInt( IDC_SEEK_CURR_POS_EDIT, &validInput ) - 1;
+	int currIndex = GetDlgItemInt( IDW_SEEK_CURR_POS_SPINEDIT, &validInput ) - 1;
 
 	if ( !validInput || currIndex != m_pAlbumView->GetSlideData().GetCurrentIndex() )
 		OnCurrPosChanged();

@@ -32,7 +32,7 @@ public:
 		*m_pValue = newValue;
 	}
 
-	void SetFlag( const ValueType& newFlag, bool on = true )
+	void SetFlag( ValueType newFlag, bool on = true )
 	{
 		::SetFlag( *m_pValue, newFlag, on );
 	}

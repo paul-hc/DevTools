@@ -93,6 +93,8 @@ IDR_TOOLBAR_STANDARD    BITMAP                  "res\\ToolbarStandard.bmp"
 
 IDR_TOOLBAR_NAVIGATE    BITMAP                  "res\\ToolbarNavigate.bmp"
 
+ID_VIEW_ALBUM_DIALOG_BAR BITMAP                  "res\\ToolbarAlbum.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -171,7 +173,7 @@ BEGIN
     SEPARATOR
     BUTTON      CK_FULL_SCREEN
     BUTTON      CK_SHOW_THUMB_VIEW
-    BUTTON      ID_VIEW_ALBUMDIALOGBAR
+    BUTTON      ID_VIEW_ALBUM_DIALOG_BAR
     SEPARATOR
     BUTTON      IDW_IMAGE_SCALING_COMBO
     BUTTON      IDW_ZOOM_COMBO
@@ -197,6 +199,11 @@ BEGIN
     BUTTON      ID_TOGGLE_NAVIG_WRAP_MODE
     SEPARATOR
     BUTTON      IDW_NAVIG_SLIDER_CTRL
+END
+
+ID_VIEW_ALBUM_DIALOG_BAR TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_EDIT_ALBUM
 END
 
 
@@ -347,7 +354,7 @@ BEGIN
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM "<app-look-popup>",            ID_APPLOOK_POPUP
         MENUITEM SEPARATOR
-        MENUITEM "Album Info &Bar\tCtrl+B",     ID_VIEW_ALBUMDIALOGBAR
+        MENUITEM "Album Info &Bar\tCtrl+B",     ID_VIEW_ALBUM_DIALOG_BAR
         MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
         MENUITEM SEPARATOR
         POPUP "&Auto Image Size"
@@ -583,7 +590,7 @@ BEGIN
         END
         POPUP "&View"
         BEGIN
-            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUMDIALOGBAR
+            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUM_DIALOG_BAR
             MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
         END
         POPUP "&Auto-Drop Recipient"
@@ -632,7 +639,7 @@ BEGIN
         END
         POPUP "&View"
         BEGIN
-            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUMDIALOGBAR
+            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUM_DIALOG_BAR
             MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
         END
         POPUP "&Auto-Drop Recipient"
@@ -762,7 +769,7 @@ IDR_ALBUMTYPE ACCELERATORS
 BEGIN
     "A",            CM_SELECT_ALL_THUMBS,   VIRTKEY, CONTROL, NOINVERT
     "A",            CM_ARCHIVE_IMAGES,      VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "B",            ID_VIEW_ALBUMDIALOGBAR, VIRTKEY, CONTROL, NOINVERT
+    "B",            ID_VIEW_ALBUM_DIALOG_BAR, VIRTKEY, CONTROL, NOINVERT
     "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
     "O",            ID_IMAGE_OPEN,          VIRTKEY, SHIFT, CONTROL, NOINVERT
     "T",            CK_SHOW_THUMB_VIEW,     VIRTKEY, SHIFT, CONTROL, NOINVERT
@@ -810,7 +817,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,30,108,10
     CONTROL         "Restore zoom and scroll state in albums",IDC_PERSIST_ALBUM_IMAGE_STATE_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,42,140,10
-    CONTROL         "Show the information bar in albums",ID_VIEW_ALBUMDIALOGBAR,
+    CONTROL         "Show the information bar in albums",ID_VIEW_ALBUM_DIALOG_BAR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,54,145,10
     CONTROL         "Save custom order undo/redo buffer",IDC_SAVECUSTOMORDERUNDOREDO_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,66,131,10
@@ -856,11 +863,11 @@ STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     CTEXT           "<tb>",IDC_STRIP_BAR_1,2,2,16,12,SS_CENTERIMAGE | NOT WS_VISIBLE | WS_BORDER
-    COMBOBOX        IDC_PLAY_DELAY_COMBO,20,2,46,129,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    EDITTEXT        IDC_SEEK_CURR_POS_EDIT,72,2,37,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
-    CONTROL         "Spin1",IDC_SCROLL_POS_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,102,2,11,12
-    LTEXT           "/ 10,000",IDC_NAV_COUNT_STATIC,113,4,53,8
-    EDITTEXT        IDC_CURR_IMAGE_PATH_EDIT,170,4,346,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_GROUP
+    COMBOBOX        IDW_PLAY_DELAY_COMBO,20,2,46,129,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    EDITTEXT        IDW_SEEK_CURR_POS_SPINEDIT,72,2,37,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDW_SCROLL_POS_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,102,2,11,12
+    LTEXT           "/ 10,000",IDW_NAV_COUNT_LABEL,113,4,53,8
+    EDITTEXT        IDW_CURR_IMAGE_PATH_LABEL,170,4,346,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_GROUP
 END
 
 IDD_ALBUM_SETTINGS_DIALOG DIALOGEX 0, 0, 499, 279
@@ -1259,6 +1266,8 @@ END
 
 STRINGTABLE
 BEGIN
+    ID_VIEW_ALBUM_DIALOG_BAR 
+                            "Show or hide album information bar\nToggle Album Info Bar"
     IDW_SB_PROGRESS_CAPTION "<progress caption>"
     IDW_SB_PROGRESS_BAR     "<progress bar>"
     IDW_IMAGE_SCALING_COMBO "Edit the auto image size mode\nAuto Image Size"
@@ -1266,8 +1275,15 @@ BEGIN
     IDW_NAVIG_SLIDER_CTRL   "Navigation slider\nNavigation Slider"
     IDW_SMOOTHING_MODE_CHECK 
                             "Toggle the smoothing effect when scaling up an image\nSmooth Mode (toggle off for icons and glyps)"
+END
+
+STRINGTABLE
+BEGIN
     ID_CM_MDI_CLOSE_ALL     "Close all opened documents\nClose All"
-    ID_VIEW_ALBUMDIALOGBAR  "Show or hide album information bar\nToggle Album Info Bar"
+END
+
+STRINGTABLE
+BEGIN
     ID_TOGGLE_SCALING_AUTO_FIT_LARGE 
                             "Shrink large images to best fit the view\nBest Fit (Large Only)"
     ID_TOGGLE_SCALING_AUTO_FIT_ALL 
@@ -1280,14 +1296,14 @@ BEGIN
                             "Display the image with the actual dimensions (using scroll bars)\nActual Size"
     ID_TOGGLE_SCALING_USE_ZOOM_PCT 
                             "Scale the image with the current zoom level (using scroll bars)\nUse Zoom Level"
-END
-
-STRINGTABLE
-BEGIN
     ID_ZOOM_NORMAL_100      "Zoom to actual image dimension (100%)\nZoom to 100%"
     ID_ZOOM_IN              "Increase zoom factor\nZoom In"
     ID_ZOOM_OUT             "Decrease zoom factor\nZoom Out"
     ID_RESIZE_VIEW_TO_FIT   "Resize current view to fit entire image\nResize View to Fit"
+END
+
+STRINGTABLE
+BEGIN
     ID_EDIT_ALBUM           "Edit album settings\nEdit Album Settings (Ctrl+Space)"
     ID_TOGGLE_NAVIG_PLAY    "Toggle auto sliding\nToggle Play (Space)"
     ID_TOGGLE_NAVIG_DIR_FWD "Play in forward direction\nForward Direction"
@@ -1307,13 +1323,13 @@ BEGIN
     ID_FILE_EXTRACT_CATALOG "Extract the image catalog storage contents to a directory\nExtract Catalog Images"
     CK_FULL_SCREEN          "Toggle between normal and full screen mode\nToggle Full Screen (F11)"
     CM_TOGGLE_MAXIMIZE      "Toggle between maximize and restore modes\nMaximize/Restore"
+    ID_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
+    CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
+    ID_IMAGE_OPEN           "Opens the selected image file(s) as standalone images\nOpen Selected Images"
 END
 
 STRINGTABLE
 BEGIN
-    ID_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
-    CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
-    ID_IMAGE_OPEN           "Opens the selected image file(s) as standalone images\nOpen Selected Images"
     ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
     ID_IMAGE_DELETE         "Delete the file using shell operation\nDelete"
     ID_IMAGE_MOVE           "Move current image file to another folder\nMove File"
@@ -1323,16 +1339,16 @@ BEGIN
     CM_DROP_MOVE_IMAGE      "Move and rename the dropped image file\nMove and Rename Image File"
     CM_DROP_COPY_IMAGE      "Copy and rename the dropped image file\nCopy and Rename Image File"
     CM_CANCEL_DROP          "Cancel the drop operation\nCancel Drop"
-END
-
-STRINGTABLE
-BEGIN
     CM_AUTO_DROP_DEFRAGMENT "Renames files in an auto-drop recipient to ensure contiguos numeric filename\nDefragment Image Files"
     CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
     CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
     CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS 
                             "Clear the Undo and Redo buffer\nClear Undo/Redo Buffer"
     CM_REGENERATE_ALBUM     "Regenerates the files in the current album using the search specifiers' criteria\nRegenerate Album"
+END
+
+STRINGTABLE
+BEGIN
     CM_IS_AUTO_DROP         "Toggle this album as auto-drop recipient (four digit numeric filenames only)\tAuto Drop Recipient"
     CM_ARCHIVE_IMAGES       "Archive the image files in an album\nArchive Images"
     CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
@@ -1346,6 +1362,12 @@ BEGIN
     ID_EDIT_ARCHIVE_PASSWORD 
                             "Edit password in image archive storage\nEdit Password"
     ID_ORDER_ORIGINAL       "Original Search Order"
+    ID_ORDER_CUSTOM         "Custom Order"
+    ID_ORDER_RANDOM_SHUFFLE "Shuffle images in random order\nRandom Shuffle"
+    ID_ORDER_RANDOM_SHUFFLE_SAME_SEED 
+                            "Shuffle images in the same random order\nRandom Shuffle (same seed)"
+    ID_ORDER_BY_FULL_PATH_ASC "Order by Image Path Ascending"
+    ID_ORDER_BY_FULL_PATH_DESC "Order by Image Path Descending"
 END
 
 STRINGTABLE
@@ -1390,11 +1412,21 @@ END
 
 STRINGTABLE
 BEGIN
-    IDC_SEEK_CURR_POS_EDIT  "Position of the current slide image\nSlide Image Position"
-    IDC_CURR_IMAGE_PATH_EDIT 
+    IDW_PLAY_DELAY_COMBO    "Set the delay in seconds for animated album play\nPlay Animation Delay (seconds)"
+    IDW_SEEK_CURR_POS_SPINEDIT 
+                            "Position of the current slide image\nSlide Image Position"
+END
+
+STRINGTABLE
+BEGIN
+    IDW_NAV_COUNT_LABEL     "The total number of images in this album\nTotal Image Count"
+    IDW_CURR_IMAGE_PATH_LABEL 
                             "Full path name of the current image file\nImage File Path"
-    IDC_NAV_COUNT_STATIC    "The total number of images in this album\nTotal Image Count"
-    IDC_PLAY_DELAY_COMBO    "Set the delay in seconds for animated album play\nPlay Animation Delay (seconds)"
+    ID_COPY_CURR_IMAGE_PATH "Copy the selected image file path to clipboard\nCopy Image Path"
+END
+
+STRINGTABLE
+BEGIN
     IDC_PATTERNS_LISTVIEW   "Path=-1|Type=100|Depth=75"
 END
 
@@ -1407,12 +1439,6 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_ORDER_CUSTOM         "Custom Order"
-    ID_ORDER_RANDOM_SHUFFLE "Shuffle images in random order\nRandom Shuffle"
-    ID_ORDER_RANDOM_SHUFFLE_SAME_SEED 
-                            "Shuffle images in the same random order\nRandom Shuffle (same seed)"
-    ID_ORDER_BY_FULL_PATH_ASC "Order by Image Path Ascending"
-    ID_ORDER_BY_FULL_PATH_DESC "Order by Image Path Descending"
     ID_ORDER_BY_DIMENSION_ASC "Order by Dimension Ascending"
     ID_ORDER_BY_DIMENSION_DESC "Order by Dimension Descending"
 END

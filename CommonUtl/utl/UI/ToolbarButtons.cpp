@@ -7,6 +7,7 @@
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
+#include "utl/ScopedValue.h"
 #include "utl/SerializeStdTypes.h"
 
 #ifdef _DEBUG
@@ -74,6 +75,50 @@ namespace mfc
 	}
 
 
+	bool StretchToolbarButton( CMFCToolBarButton* pStretchableButton, int rightSpacing /*= 2*/ )
+	{
+		// advanced method: called during CMFCToolBar::AdjustLocations(), after buttons have been layed-out and tooltips get updated via UpdateTooltips()
+		const CMFCToolBar* pToolBar = dynamic_cast<const CMFCToolBar*>( pStretchableButton->GetParentWnd() );
+
+		if ( nullptr == pToolBar || !HasFlag( pToolBar->GetCurrentAlignment(), CBRS_ORIENT_HORZ ) )
+			return false;		// not a horizontal layout toolbar
+
+		CRect barClientRect;
+		pToolBar->GetClientRect( &barClientRect );
+
+		// stretch this button, and move the trailing buttons to the right
+		const CObList& buttons = pToolBar->GetAllButtons();
+		CMFCToolBarButton* pLastButton = (CMFCToolBarButton*)buttons.GetTail();
+		int stretchBy = barClientRect.right - pLastButton->Rect().right - rightSpacing;		// horizontal slack delta
+
+		if ( stretchBy <= 0 )
+			return false;					// no more space for stretching
+
+		CRect buttonRect = pStretchableButton->Rect();
+
+		buttonRect.right += stretchBy;		// stretch this button
+		pStretchableButton->SetRect( buttonRect );
+
+		// shift trailing buttons to the right (if any)
+		POSITION pos = buttons.Find( pStretchableButton );
+		CMFCToolBarButton* pButton = (CMFCToolBarButton*)buttons.GetNext( pos );
+
+		ENSURE( pStretchableButton == pButton );
+		while ( pos != nullptr )
+		{
+			pButton = (CMFCToolBarButton*)buttons.GetNext( pos );
+			if ( pButton == nullptr )
+				break;
+
+			buttonRect = pButton->Rect();
+			buttonRect.OffsetRect( stretchBy, 0 );		// shift button to the right
+			pButton->SetRect( buttonRect );
+		}
+
+		return true;		// done stretching
+	}
+
+
 	// CToolbarButtonsRefBinder implementation
 
 	CToolbarButtonsRefBinder* CToolbarButtonsRefBinder::Instance( void )
@@ -91,6 +136,216 @@ namespace mfc
 	void* CToolbarButtonsRefBinder::RebindPointerData( UINT btnId, int ptrPos ) const
 	{
 		return utl::FindValue( m_btnRebindPointers, TBtnId_PtrPosPair( btnId, ptrPos ) );
+	}
+}
+
+
+namespace mfc
+{
+	// CLabelButton implementation
+
+	IMPLEMENT_SERIAL( CLabelButton, CMFCToolBarButton, 1 )
+
+	CLabelButton::CLabelButton( void )
+		: CMFCToolBarButton()
+		, m_optionFlags( 0 )
+	{
+	}
+
+	CLabelButton::CLabelButton( UINT btnId, int optionFlags /*= 0*/, const TCHAR* pText /*= nullptr*/ )
+		: CMFCToolBarButton( btnId, mfc::FindButtonImageIndex( btnId ) )
+		, m_optionFlags( optionFlags )
+	{
+		if ( pText != nullptr )
+			m_strText = pText;
+
+		m_bText = TRUE;
+	}
+
+	void CLabelButton::Serialize( CArchive& archive )
+	{
+		__super::Serialize( archive );
+
+		archive & m_optionFlags;
+	}
+
+	void CLabelButton::CopyFrom( const CMFCToolBarButton& src ) override
+	{
+		__super::CopyFrom( src );
+
+		const CLabelButton& srcButton = (const CLabelButton&)src;
+
+		m_optionFlags = srcButton.m_optionFlags;
+	}
+
+	BOOL CLabelButton::OnUpdateToolTip( CWnd* pWndParent, int buttonIndex, CToolTipCtrl& wndToolTip, CString& rTipText )
+	{
+		enum { RightSpacing = 2 };
+
+		if ( HasOptionFlag( BO_StretchWidth ) )
+			mfc::StretchToolbarButton( this, RightSpacing );
+
+		if ( HasOptionFlag( BO_QueryToolTip ) )
+			return false;			// dynamic query for tooltip text, evenually via frame's ui::ICustomCmdInfo interface
+
+		return __super::OnUpdateToolTip( pWndParent, buttonIndex, wndToolTip, rTipText );
+	}
+
+	void CLabelButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
+							   BOOL bHorz /*= TRUE*/, BOOL /*bCustomizeMode = FALSE*/, BOOL /*bHighlight = FALSE*/,
+							   BOOL /*bDrawBorder = TRUE*/,	BOOL /*bGrayDisabledButtons = TRUE*/ ) override
+	{
+		CScopedGdi<CFont> scFont( pDC, &( HasOptionFlag( BO_BoldFont ) ? GetGlobalData()->fontBold : GetGlobalData()->fontRegular ) );
+		CScopedValue<UINT> scStyle( &m_nStyle );		// display as enabled while drawing
+
+		scStyle.SetFlag( TBBS_DISABLED, false );
+
+		CMFCToolBarButton::OnDraw( pDC, rect, pImages, bHorz, FALSE, FALSE, FALSE, FALSE );
+	}
+}
+
+
+namespace mfc
+{
+	// CEditBoxButton implementation
+
+	IMPLEMENT_SERIAL( CEditBoxButton, CMFCToolBarEditBoxButton, 1 );
+
+	CEditBoxButton::CEditBoxButton( void )
+		: CMFCToolBarEditBoxButton()
+		, m_optionFlags( 0 )
+	{
+	}
+
+	CEditBoxButton::CEditBoxButton( UINT btnId, int width, DWORD dwStyle /*= ES_AUTOHSCROLL*/, int optionFlags /*= 0*/ )
+		: CMFCToolBarEditBoxButton( btnId, mfc::FindButtonImageIndex( btnId ), dwStyle, width )
+		, m_optionFlags( optionFlags )
+	{
+		OnOptionFlagsChanged();
+	}
+
+	CEditBoxButton::~CEditBoxButton()
+	{
+	}
+
+	void CEditBoxButton::OnOptionFlagsChanged( void )
+	{
+		ASSERT_NULL( GetHwnd() );
+
+		SetFlag( m_dwStyle, ES_MULTILINE, HasOptionFlag( BO_Transparent ) );		// transparency requires ES_MULTILINE edit style!  (otherwise the background turns black)
+	}
+
+	void CEditBoxButton::Serialize( CArchive& archive )
+	{
+		__super::Serialize( archive );
+
+		archive & m_optionFlags;
+	}
+
+	void CEditBoxButton::CopyFrom( const CMFCToolBarButton& src ) override
+	{
+		__super::CopyFrom( src );
+
+		const CEditBoxButton& srcButton = (const CEditBoxButton&)src;
+
+		m_optionFlags = srcButton.m_optionFlags;
+	}
+
+	void CEditBoxButton::OnChangeParentWnd( CWnd* pParentWnd )
+	{
+		__super::OnChangeParentWnd( pParentWnd );
+
+		if ( HasOptionFlag( BO_BoldFont ) )
+			m_pWndEdit->SetFont( &GetGlobalData()->fontBold );
+	}
+
+	CEdit* CEditBoxButton::CreateEdit( CWnd* pWndParent, const CRect& rect )
+	{
+		CToolBarEditCtrl* pWndEdit = new CToolBarEditCtrl( *this, HasOptionFlag( BO_Transparent ) );
+
+		if ( !pWndEdit->Create( m_dwStyle, rect, pWndParent, m_nID ) )
+		{
+			delete pWndEdit;
+			return nullptr;
+		}
+
+		if ( HasOptionFlag( BO_Transparent ) )
+			pWndEdit->ModifyStyleEx( 0, WS_EX_TRANSPARENT );
+
+		return pWndEdit;
+	}
+
+	void CEditBoxButton::OnGlobalFontsChanged( void )
+	{
+		__super::OnGlobalFontsChanged();
+
+		if ( HasOptionFlag( BO_BoldFont ) )
+			if ( m_pWndEdit->GetSafeHwnd() != nullptr )
+				m_pWndEdit->SetFont( &GetGlobalData()->fontBold );
+	}
+
+	BOOL CEditBoxButton::OnUpdateToolTip( CWnd* pWndParent, int buttonIndex, CToolTipCtrl& wndToolTip, CString& rTipText )
+	{
+		enum { RightSpacing = 2 };
+
+		if ( HasOptionFlag( BO_StretchWidth ) )
+			mfc::StretchToolbarButton( this, RightSpacing );
+
+		if ( HasOptionFlag( BO_QueryToolTip ) )
+			return false;			// dynamic query for tooltip text, evenually via frame's ui::ICustomCmdInfo interface
+
+		return __super::OnUpdateToolTip( pWndParent, buttonIndex, wndToolTip, rTipText );
+	}
+
+
+	// CToolBarEditCtrl implementation
+
+	BEGIN_MESSAGE_MAP( CToolBarEditCtrl, CMFCToolBarEditCtrl )
+		ON_WM_ERASEBKGND()
+		ON_WM_CTLCOLOR_REFLECT()
+		ON_CONTROL_REFLECT_EX( EN_UPDATE, OnEnUpdate_Reflect )
+	END_MESSAGE_MAP()
+
+	CToolBarEditCtrl::CToolBarEditCtrl( CMFCToolBarEditBoxButton& editButton, bool transparent )
+		: CMFCToolBarEditCtrl( editButton )
+		, m_transparent( transparent )
+	{
+		REQUIRE( m_transparent );		// Warning: transparency support does not work for edit box; the code is just experimental!
+	}
+
+	BOOL CToolBarEditCtrl::OnEraseBkgnd( CDC* pDC )
+	{
+		if ( m_transparent )
+		{
+			//CMFCVisualManager::GetInstance()->OnFillButtonInterior( pDC, &m_buttonEdit, clientRect, CMFCVisualManager::ButtonsIsRegular );
+			return TRUE;
+		}
+		return __super::OnEraseBkgnd( pDC );
+	}
+
+	HBRUSH CToolBarEditCtrl::CtlColor( CDC* pDC, UINT ctlColor )
+	{
+		ctlColor;
+		if ( m_transparent )
+		{
+			pDC->SetBkMode( TRANSPARENT );
+			return (HBRUSH)::GetStockObject( HOLLOW_BRUSH );
+		}
+
+		return nullptr; //::GetSysColorBrush( COLOR_BTNFACE );
+	}
+
+	BOOL CToolBarEditCtrl::OnEnUpdate_Reflect( void )
+	{
+		CWnd* pToolBar = m_buttonEdit.GetParentWnd();
+		CRect ctrlRect;
+
+		GetWindowRect( &ctrlRect );
+		pToolBar->ScreenToClient( &ctrlRect );
+		pToolBar->InvalidateRect( &ctrlRect );
+		pToolBar->UpdateWindow();
+
+		return FALSE;					// continue routing
 	}
 }
 

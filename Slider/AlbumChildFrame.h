@@ -5,13 +5,18 @@
 #include "ChildFrame.h"
 #include "AlbumDialogBar.h"
 #include "SplitterWindow.h"
+#include "INavigationBar.h"			// for IAlbumBar
+#include "utl/UI/Dialog_fwd.h"
 
 
 class CAlbumThumbListView;
 class CAlbumImageView;
+namespace mfc { class CFixedToolBar; }
 
 
 class CAlbumChildFrame : public CChildFrame
+	, public IAlbumBar
+	, public ui::ICustomCmdInfo
 {
 	DECLARE_DYNCREATE( CAlbumChildFrame )
 protected:
@@ -24,14 +29,37 @@ public:
 	// view panes
 	CAlbumThumbListView* GetThumbView( void ) const { return safe_ptr( m_pThumbsListView ); }
 	CAlbumImageView* GetAlbumImageView( void ) const { return safe_ptr( m_pAlbumImageView ); }
+
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+private:
+	void BuildAlbumToolbar( void );
+
+	// IAlbumBar interface
+	virtual void InitAlbumImageView( CAlbumImageView* pAlbumView ) implement;
+	virtual void ShowBar( bool show ) implement;
+
+	// IAlbumBar events
+	virtual void OnCurrPosChanged( void ) implement;
+	virtual void OnNavRangeChanged( void ) implement;
+	virtual void OnSlideDelayChanged( void ) implement;
+
+	bool InputSlideDelay( ui::ComboField byField );
+	bool InputCurrentPos( void );
 private:
 	enum SplitterPane { ThumbView, PictureView };
+
+	std::auto_ptr<mfc::CFixedToolBar> m_pAlbumToolBar;
 
 	CAlbumDialogPane m_albumDlgPane;
 	CSplitterWindow m_splitterWnd;
 
 	CAlbumThumbListView* m_pThumbsListView;
 	CAlbumImageView* m_pAlbumImageView;
+
+	CAlbumImageView* m_pAlbumView;
+
+	enum { DurationComboWidth = 70, SeekCurrPosSpinEditWidth = 60 };
 
 	// generated stuff
 protected:
@@ -40,6 +68,12 @@ protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
 	afx_msg void OnToggle_ViewAlbumPane( void );
 	afx_msg void OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI );
+
+	afx_msg void OnEditInput_PlayDelayCombo( void );
+	afx_msg void OnCBnSelChange_PlayDelayCombo( void );
+	afx_msg void OnUpdateAlways( CCmdUI* pCmdUI );
+	afx_msg void OnEnChange_SeekCurrPosSpinEdit( void );
+	afx_msg void On_CopyCurrImagePath( void );
 
 	DECLARE_MESSAGE_MAP()
 };

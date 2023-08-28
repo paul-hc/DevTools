@@ -11,4 +11,19 @@ interface INavigationBar
 };
 
 
+class CAlbumImageView;
+
+
+interface IAlbumBar
+{
+	virtual void InitAlbumImageView( CAlbumImageView* pAlbumView ) = 0;
+	virtual void ShowBar( bool show ) = 0;
+
+	// events
+	virtual void OnCurrPosChanged( void ) = 0;
+	virtual void OnNavRangeChanged( void ) = 0;
+	virtual void OnSlideDelayChanged( void ) = 0;
+};
+
+
 #endif // INavigationBar_h

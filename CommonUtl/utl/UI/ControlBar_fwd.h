@@ -29,11 +29,33 @@ namespace mfc
 		static const TCHAR s_autoLabel[];
 		static const TCHAR s_moreLabel[];
 	};
+
+
+	template< typename CListT, typename ObjectT >
+	bool CList_Remove( CListT& rObjectList, ObjectT* pTargetObject )
+	{
+		for ( POSITION pos = rObjectList.GetHeadPosition(); pos != NULL; )
+		{
+			POSITION removePos = pos;
+			ObjectT* pObject = checked_static_cast<ObjectT*>( rObjectList.GetNext( pos ) );
+
+			if ( pObject == pTargetObject )
+			{
+				rObjectList.RemoveAt( removePos );
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
 
 
 namespace mfc
 {
+	// CCommandManager utils:
+	int FindButtonImageIndex( UINT btnId, bool userImage = false );
+
 	bool RegisterCmdImageAlias( UINT aliasCmdId, UINT imageCmdId );
 	void RegisterCmdImageAliases( const ui::CCmdAlias cmdAliases[], size_t count );
 
@@ -57,10 +79,6 @@ namespace mfc
 
 namespace mfc
 {
-	// CCommandManager utils:
-	int FindButtonImageIndex( UINT btnId, bool userImage = false );
-
-
 	// CBasePane protected access:
 	void BasePane_SetIsDialogControl( OUT CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
 
@@ -69,9 +87,12 @@ namespace mfc
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
 	CMFCToolBarButton* ToolBar_FindButton( const CMFCToolBar* pToolBar, UINT btnId );
 	inline int ToolBar_ReplaceButton( OUT CMFCToolBar* pToolBar, const CMFCToolBarButton& srcButton ) { return safe_ptr( pToolBar )->ReplaceButton( srcButton.m_nID, srcButton ); }
-	void ToolBar_SetBtnText( OUT CMFCToolBar* pToolBar, UINT btnId, const TCHAR* pText = nullptr, bool showText = true, bool showImage = true );
+	void ToolBar_SetBtnText( OUT CMFCToolBar* pToolBar, UINT btnId, const std::tstring& text, bool showText = true, bool showImage = true );
 	bool ToolBar_RestoreOriginalState( OUT CMFCToolBar* pToolBar );
 	CMFCToolBarButton* ToolBar_ButtonHitTest( const CMFCToolBar* pToolBar, const CPoint& clientPos, OUT int* pBtnIndex = nullptr );
+
+	template< typename ButtonT >
+	inline ButtonT* ToolBar_LookupButton( const CMFCToolBar& toolBar, UINT btnId ) { return safe_ptr( checked_static_cast<ButtonT*>( ToolBar_FindButton( &toolBar, btnId ) ) ); }
 
 
 	// CMFCStatusBar protected access:
@@ -190,6 +211,35 @@ namespace mfc
 
 	template< typename ButtonT >
 	inline ButtonT* FindFocusedMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, std::mem_fun( &CMFCToolBarButton::HasFocus ) ); }
+}
+
+
+namespace mfc
+{
+	// for toolbars hosted in child frames, which are not customizable, persistent, and its buttons don't sync with copies with same ID
+
+	class CFixedToolBar : public CMFCToolBar
+	{
+	public:
+		CFixedToolBar( void );
+		virtual ~CFixedToolBar();
+
+		// base overrides
+		virtual BOOL CanBeRestored( void ) const { return false; }
+		virtual BOOL AllowShowOnList( void ) const { return false; }		// don't list it on Customize > Toolbars
+		virtual BOOL OnShowControlBarMenu( CPoint point ) overrides(CMFCBaseToolBar) { point; return TRUE; }	// prevent displaying the toolbar context menu
+		virtual BOOL OnUserToolTip( CMFCToolBarButton* pButton, CString& rTipText ) const overrides(CMFCToolBar);
+
+		using CMFCToolBar::InsertButton;		// both the protected and public
+	public:
+		enum { Style = WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_HIDE_INPLACE };
+
+		// generated stuff
+	protected:
+		afx_msg int OnCreate( CREATESTRUCT* pCS );		// remove this from CMFCToolBar::GetAllToolbars() to disable button value syncing
+
+		DECLARE_MESSAGE_MAP()
+	};
 }
 
 

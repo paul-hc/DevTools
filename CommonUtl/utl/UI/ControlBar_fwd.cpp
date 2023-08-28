@@ -89,6 +89,13 @@ namespace mfc
 	const TCHAR CColorLabels::s_moreLabel[] = _T("More Colors...");
 
 
+	// CCommandManager utils
+
+	int FindButtonImageIndex( UINT btnId, bool userImage /*= false*/ )
+	{
+		return GetCmdMgr()->GetCmdImage( btnId, userImage );
+	}
+
 	bool RegisterCmdImageAlias( UINT aliasCmdId, UINT imageCmdId )
 	{
 		ASSERT_PTR( GetCmdMgr() );
@@ -99,6 +106,11 @@ namespace mfc
 		{
 			GetCmdMgr()->SetCmdImage( aliasCmdId, iconImagePos, false );
 			return true;			// image registered for alias command
+		}
+		else
+		{
+			TRACE( "\n ~ Could not find image for command ID %d (0x%04X).  Must load it with CMFCToolBar::AddToolBarForImageCollection( toolBarId ).\n", imageCmdId, imageCmdId );
+			ASSERT( false );
 		}
 
 		return false;
@@ -175,14 +187,6 @@ namespace mfc
 
 namespace mfc
 {
-	// CCommandManager utils
-
-	int FindButtonImageIndex( UINT btnId, bool userImage /*= false*/ )
-	{
-		return GetCmdMgr()->GetCmdImage( btnId, userImage );
-	}
-
-
 	// CBasePane access
 
 	void BasePane_SetIsDialogControl( OUT CBasePane* pBasePane, bool isDlgControl /*= true*/ )
@@ -206,12 +210,13 @@ namespace mfc
 		return btnIndex != -1 ? pToolBar->GetButton( btnIndex ) : nullptr;
 	}
 
-	void ToolBar_SetBtnText( OUT CMFCToolBar* pToolBar, UINT btnId, const TCHAR* pText /*= nullptr*/, bool showText /*= true*/, bool showImage /*= true*/ )
+	void ToolBar_SetBtnText( OUT CMFCToolBar* pToolBar, UINT btnId, const std::tstring& text, bool showText /*= true*/, bool showImage /*= true*/ )
 	{
 		ASSERT_PTR( pToolBar );
 		int btnIndex = pToolBar->CommandToIndex( btnId );
+
 		ENSURE( btnIndex != -1 );
-		pToolBar->SetToolBarBtnText( btnIndex, pText, showText, showImage );
+		pToolBar->SetToolBarBtnText( btnIndex, text.c_str(), showText, showImage );
 	}
 
 	bool ToolBar_RestoreOriginalState( OUT CMFCToolBar* pToolBar )
@@ -419,5 +424,57 @@ namespace mfc
 
 		for ( ; i-- != 0; pRightToolbar = toolbars[i] )
 			pFrameDocManager->DockPaneLeftOf( toolbars[i] /*LEFT*/, pRightToolbar );
+	}
+}
+
+
+namespace mfc
+{
+	// CFixedToolBar implementation
+
+	CFixedToolBar::CFixedToolBar( void )
+	{
+		m_bDisableCustomize = true;
+		SetPermament();		// m_bPermament = true;
+	}
+
+	CFixedToolBar::~CFixedToolBar()
+	{
+	}
+
+	BOOL CFixedToolBar::OnUserToolTip( CMFCToolBarButton* pButton, CString& rTipText ) const overrides(CMFCToolBar)
+	{
+		if ( const ui::ICustomCmdInfo* pCmdInfo = dynamic_cast<const ui::ICustomCmdInfo*>( GetOwner() ) )
+		{	// owner frame implements ui::ICustomCmdInfo
+			std::tstring tipText;
+
+			pCmdInfo->QueryTooltipText( tipText, pButton->m_nID, nullptr );
+			if ( !tipText.empty() )
+			{
+				rTipText = tipText.c_str();
+				return TRUE;
+			}
+		}
+
+		return __super::OnUserToolTip( pButton, rTipText );
+	}
+
+
+	// message handlers
+
+	BEGIN_MESSAGE_MAP( CFixedToolBar, CMFCToolBar )
+		ON_WM_CREATE()
+	END_MESSAGE_MAP()
+
+	int CFixedToolBar::OnCreate( CREATESTRUCT* pCS )
+	{
+		if ( -1 == __super::OnCreate( pCS ) )
+			return -1;
+
+		CObList& rAllToolbars = const_cast<CObList&>( CMFCToolBar::GetAllToolbars() );
+
+		ASSERT( rAllToolbars.GetTail() == this );
+		rAllToolbars.RemoveTail();		// prevent buttons updating across different album bars (!)
+		return 0;
 	}
 }

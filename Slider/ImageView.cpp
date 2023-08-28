@@ -538,14 +538,15 @@ BOOL CImageView::OnTtnNeedText_NavigSliderCtrl( UINT, NMHDR* pNmHdr, LRESULT* pR
 {
 	ui::CTooltipTextMessage message( pNmHdr );
 
-	if ( !message.IsValidNotification() || message.m_cmdId != IDW_NAVIG_SLIDER_CTRL )
-		return FALSE;		// not handled, countinue routing
+	if ( message.IsValidNotification() )
+		if ( IDW_NAVIG_SLIDER_CTRL == message.m_cmdId )
+			if ( message.AssignTooltipText( FormatTipText_NavigSliderCtrl() ) )
+			{
+				*pResult = 0;
+				return TRUE;			// message was handled
+			}
 
-	if ( !message.AssignTooltipText( FormatTipText_NavigSliderCtrl() ) )
-		return FALSE;		// countinue routing
-
-	*pResult = 0;
-	return TRUE;			// message was handled
+	return FALSE;		// countinue routing
 }
 
 void CImageView::OnRadio_ImageScalingMode( UINT cmdId )

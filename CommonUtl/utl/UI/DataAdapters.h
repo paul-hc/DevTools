@@ -73,13 +73,13 @@ namespace ui
 
 namespace num
 {
-	const std::locale& GetEmptyLocale( void );
+	const std::locale& GetEmptyLocale( void );		// empty locale (devoid of facets)
 
 	template< typename ValueT >
-	std::tstring FormatNumber( ValueT value, const std::locale& loc /*= GetEmptyLocale()*/ );
+	std::tstring FormatNumber( ValueT value, const std::locale& loc /*= str::GetUserLocale()*/ );
 
 	template< typename ValueT >
-	bool ParseNumber( OUT ValueT& rNumber, const std::tstring& text, size_t* pSkipLength /*= nullptr*/, const std::locale& loc /*= GetEmptyLocale()*/ );
+	bool ParseNumber( OUT ValueT& rNumber, const std::tstring& text, size_t* pSkipLength /*= nullptr*/, const std::locale& loc /*= str::GetUserLocale()*/ );
 
 	template< typename ValueT >
 	ValueT MinValue( void );
@@ -98,7 +98,7 @@ namespace ui
 	class CNumericAdapter : public ui::IValueAdapter<NumT>
 	{
 	public:
-		CNumericAdapter( const std::locale& loc = num::GetEmptyLocale() ) : m_loc( loc ) {}
+		CNumericAdapter( const std::locale& loc = str::GetUserLocale() ) : m_loc( loc ) {}
 
 		// ui::IValueAdapter<NumT> interface
 		virtual std::tstring FormatValue( NumT value ) const implement { return num::FormatNumber( value, m_loc ); }
@@ -109,10 +109,10 @@ namespace ui
 
 
 	template< typename NumT >
-	class CPercentageAdapter : public CNumericAdapter<NumT>
+	class CNumericUnitAdapter : public CNumericAdapter<NumT>
 	{
 	public:
-		CPercentageAdapter( const TCHAR* pSuffix = _T(" %") )
+		CNumericUnitAdapter( const TCHAR* pSuffix = _T(" %") )
 			: CNumericAdapter<NumT>()
 			, m_pSuffix( pSuffix )
 		{
@@ -125,9 +125,9 @@ namespace ui
 	};
 
 
-	class CPositivePercentageAdapter : public CPercentageAdapter<UINT>
+	class CPositivePercentageAdapter : public CNumericUnitAdapter<UINT>
 	{
-		CPositivePercentageAdapter( void ) {}
+		CPositivePercentageAdapter( void ) : CNumericUnitAdapter( _T(" %") ) {}
 	public:
 		static const CPositivePercentageAdapter* Instance( void );
 	};

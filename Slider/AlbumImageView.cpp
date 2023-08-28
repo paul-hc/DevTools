@@ -35,7 +35,7 @@ CAlbumImageView::CAlbumImageView( void )
 	, m_navTimer( this, ID_NAVIGATION_TIMER, m_slideData.m_slideDelay )
 	, m_isDropTargetEnabled( false )
 	, m_pPeerThumbView( nullptr )
-	, m_pAlbumDlgPane( nullptr )
+	, m_pAlbumBar( nullptr )
 {
 	ModifyScalingMode( ui::AutoFitLargeOnly );			// for albums use auto-fit by default
 }
@@ -44,14 +44,14 @@ CAlbumImageView::~CAlbumImageView()
 {
 }
 
-void CAlbumImageView::StorePeerView( CAlbumThumbListView* pPeerThumbView, CAlbumDialogPane* pAlbumDlgPane )
+void CAlbumImageView::StorePeerView( CAlbumThumbListView* pPeerThumbView, IAlbumBar* pAlbumBar )
 {
 	// called just after creation, before initial update
 	ASSERT_NULL( m_pPeerThumbView );
-	ASSERT_NULL( m_pAlbumDlgPane );
+	ASSERT_NULL( m_pAlbumBar );
 
 	m_pPeerThumbView = pPeerThumbView;
-	m_pAlbumDlgPane = pAlbumDlgPane;
+	m_pAlbumBar = pAlbumBar;
 }
 
 CAlbumDoc* CAlbumImageView::GetDocument( void ) const
@@ -227,6 +227,7 @@ void CAlbumImageView::RestartPlayTimer( void )
 void CAlbumImageView::SetSlideDelay( UINT slideDelay )
 {
 	m_navTimer.SetElapsed( m_slideData.m_slideDelay = slideDelay );
+	OnSlideDataChanged( false );		// don't set modified flag for this change
 }
 
 void CAlbumImageView::HandleNavTick( void )
@@ -284,7 +285,7 @@ void CAlbumImageView::LateInitialUpdate( void )
 
 void CAlbumImageView::UpdateChildBarsState( bool onInit /*= false*/ )
 {
-	m_pAlbumDlgPane->ShowPane( m_slideData.HasShowFlag( af::ShowAlbumDialogBar ), false, false );
+	m_pAlbumBar->ShowBar( m_slideData.HasShowFlag( af::ShowAlbumDialogBar ) );
 	m_pPeerThumbView->CheckListLayout( onInit ? CAlbumThumbListView::AlbumViewInit : CAlbumThumbListView::ShowCommand );
 }
 
@@ -314,7 +315,7 @@ void CAlbumImageView::OnAlbumModelChanged( AlbumModelChange reason /*= AM_Init*/
 		case AM_Init:
 		case AM_Regeneration:
 		case AM_AutoDropOp:
-			m_pAlbumDlgPane->OnNavRangeChanged();
+			m_pAlbumBar->OnNavRangeChanged();
 			OutputNavigSlider();
 			break;
 	}
@@ -369,7 +370,7 @@ void CAlbumImageView::OnDocSlideDataChanged( void )
 
 void CAlbumImageView::OnCurrPosChanged( bool alsoSliderCtrl /*= true*/ )
 {
-	m_pAlbumDlgPane->OnCurrPosChanged();
+	m_pAlbumBar->OnCurrPosChanged();
 	OnImageContentChanged();
 
 	int currIndex = m_slideData.GetCurrentIndex();
@@ -482,11 +483,11 @@ void CAlbumImageView::OnInitialUpdate( void )
 	SetBkColor( pDoc->GetBkColor(), false );
 	RefDrawParams()->SetSmoothingMode( pDoc->GetSmoothingMode() );
 
-	m_pAlbumDlgPane->InitAlbumImageView( this );
+	m_pAlbumBar->InitAlbumImageView( this );
 	UpdateChildBarsState( true );		// info bar and thumb pane are hidden in full screen mode
 
-	m_pAlbumDlgPane->OnNavRangeChanged();
-	m_pAlbumDlgPane->OnSlideDelayChanged();
+	m_pAlbumBar->OnNavRangeChanged();
+	m_pAlbumBar->OnSlideDelayChanged();
 
 	if ( nullptr == m_pPeerThumbView->GetAlbumModel() )		// avoid double setup on initialization (it might happen cause of different ways of init, e.g. load or drop)
 		m_pPeerThumbView->SetupAlbumModel( GetDocument()->GetModel() );

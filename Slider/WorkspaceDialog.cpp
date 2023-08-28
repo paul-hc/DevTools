@@ -54,7 +54,7 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_Flag( pDX, IDC_PERSIST_OPEN_DOCS_CHECK, m_data.m_wkspFlags, wf::PersistOpenDocs );
 	ui::DDX_Flag( pDX, IDC_PERSIST_ALBUM_IMAGE_STATE_CHECK, m_data.m_wkspFlags, wf::PersistAlbumImageState );
-	ui::DDX_Flag( pDX, ID_VIEW_ALBUMDIALOGBAR, m_data.m_albumViewFlags, af::ShowAlbumDialogBar );
+	ui::DDX_Flag( pDX, ID_VIEW_ALBUM_DIALOG_BAR, m_data.m_albumViewFlags, af::ShowAlbumDialogBar );
 	ui::DDX_Flag( pDX, IDC_SAVECUSTOMORDERUNDOREDO_CHECK, m_data.m_albumViewFlags, af::SaveCustomOrderUndoRedo );
 	ui::DDX_Flag( pDX, IDC_PREFIX_DEEP_STREAM_NAMES_CHECK, m_data.m_wkspFlags, wf::DeepStreamPaths );
 	ui::DDX_Flag( pDX, IDC_ALLOW_EMBEDDED_FILE_TRANFERS_CHECK, m_data.m_wkspFlags, wf::AllowEmbeddedFileTransfers );

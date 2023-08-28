@@ -309,7 +309,13 @@ bool CWorkspace::LoadDocuments( void )
 		//
 		m_pLoadingImageState = const_cast<CImageState*>( &*itImageState );
 
-		if ( nullptr == AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str(), FALSE ) )
+		CDocument* pNewDoc =
+	#if _MFC_VER > 0x0900		// newer MFC version?
+			AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str(), FALSE );
+	#else
+			AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str() );
+	#endif
+		if ( nullptr == pNewDoc )
 			TRACE( " * Failed loading document %s on workspace load!\n", m_pLoadingImageState->GetDocFilePath().c_str() );
 	}
 	m_pLoadingImageState = nullptr;
@@ -375,8 +381,8 @@ BEGIN_MESSAGE_MAP( CWorkspace, CCmdTarget )
 	ON_UPDATE_COMMAND_UI( IDW_SMOOTHING_MODE_CHECK, OnUpdate_SmoothingMode )
 	ON_COMMAND( CK_SHOW_THUMB_VIEW, OnToggle_ShowThumbView )
 	ON_UPDATE_COMMAND_UI( CK_SHOW_THUMB_VIEW, OnUpdate_ShowThumbView )
-	ON_COMMAND( ID_VIEW_ALBUMDIALOGBAR, OnToggle_ViewAlbumPane )
-	ON_UPDATE_COMMAND_UI( ID_VIEW_ALBUMDIALOGBAR, OnUpdate_ViewAlbumPane )		// CFrameWnd::OnUpdateControlBarMenu
+	ON_COMMAND( ID_VIEW_ALBUM_DIALOG_BAR, OnToggle_ViewAlbumPane )
+	ON_UPDATE_COMMAND_UI( ID_VIEW_ALBUM_DIALOG_BAR, OnUpdate_ViewAlbumPane )		// CFrameWnd::OnUpdateControlBarMenu
 END_MESSAGE_MAP()
 
 void CWorkspace::CmLoadWorkspaceDocs( void )

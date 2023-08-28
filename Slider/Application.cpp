@@ -346,12 +346,13 @@ void CApplication::InitGlobals( void )
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
 
+	// add MFC popup menu tracking images
+	CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );		// for ID_EDIT_ITEM
+	CMFCToolBar::AddToolBarForImageCollection( IDR_MAINFRAME );
+
 	GetSharedImageStore()->RegisterToolbarImages( IDR_MAINFRAME );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_APP_TOOL_STRIP );
 	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
-
-	// add MFC popup menu tracking images
-	CMFCToolBar::AddToolBarForImageCollection( IDR_MAINFRAME );
 }
 
 bool CApplication::OpenQueuedAlbum( void )
