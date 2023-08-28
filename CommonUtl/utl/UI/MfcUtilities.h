@@ -225,6 +225,7 @@ namespace ui
 		TOOLTIPTEXTW* m_pTttW;
 		UINT m_cmdId;
 		HWND m_hCtrl;
+		void* m_pData;		// from TOOLINFO::lParam
 
 		static const std::tstring s_nilText;		// use to preventing tooltips loaded by default
 	};

@@ -25,8 +25,7 @@ void CBaseItemTooltipsCtrl<BaseCtrl>::PreSubclassWindow( void )
 // message handlers
 
 BEGIN_TEMPLATE_MESSAGE_MAP( CBaseItemTooltipsCtrl, BaseCtrl, TBaseClass )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
+	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXT, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
 END_MESSAGE_MAP()
 
 template< typename BaseCtrl >
@@ -39,10 +38,12 @@ INT_PTR CBaseItemTooltipsCtrl<BaseCtrl>::OnToolHitTest( CPoint point, TOOLINFO* 
 
 	CRect itemRect = GetItemRectAt( itemIndex );
 
+	SetFlag( pToolInfo->uFlags, TTF_CENTERTIP );
 	pToolInfo->rect = itemRect;
 	pToolInfo->hwnd = m_hWnd;
-	pToolInfo->uId = itemIndex + 1;					// index to row number (0 doesn't work)
-	pToolInfo->lpszText = LPSTR_TEXTCALLBACK;		// send a TTN_NEEDTEXT notifications
+	pToolInfo->uId = itemIndex + 1;				// index to row number (0 doesn't work)
+	pToolInfo->lpszText = LPSTR_TEXTCALLBACK;	// send TTN_NEEDTEXT notifications dynamically
+	pToolInfo->lParam = reinterpret_cast<LPARAM>( this );		// identify this control as source window object
 	return pToolInfo->uId;
 }
 
@@ -52,16 +53,19 @@ BOOL CBaseItemTooltipsCtrl<BaseCtrl>::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, 
 	cmdId;
 	ui::CTooltipTextMessage message( pNmHdr );
 
-	if ( !message.IsValidNotification() )
-		return FALSE;		// not handled
+	if ( message.IsValidNotification() )
+		if ( this == message.m_pData )
+		{
+			int itemIndex = message.m_cmdId - 1;	// row number to index
 
-	int itemIndex = message.m_cmdId - 1;			// row number to index
+			if ( message.AssignTooltipText( GetItemTooltipTextAt( itemIndex ) ) )
+			{
+				*pResult = 0;
+				return TRUE;	// message was handled, tip-text was stored
+			}
+		}
 
-	if ( !message.AssignTooltipText( GetItemTooltipTextAt( itemIndex ) ) )
-		return FALSE;
-
-	*pResult = 0;
-	return TRUE;			// message was handled
+	return FALSE;				// not handled
 }
 
 

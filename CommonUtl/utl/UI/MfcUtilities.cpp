@@ -233,11 +233,11 @@ namespace ui
 		, m_pTttW( TTN_NEEDTEXTW == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTW*>( pNmHdr ) : nullptr )
 		, m_cmdId( static_cast<UINT>( pNmHdr->idFrom ) )
 		, m_hCtrl( nullptr )
+		, m_pData( reinterpret_cast<void*>( m_pTttW != nullptr ? m_pTttW->lParam : m_pTttA->lParam ) )
 	{
 		ASSERT( m_pTttA != nullptr || m_pTttW != nullptr );
 
-		if ( ( m_pTttA != nullptr && HasFlag( m_pTttA->uFlags, TTF_IDISHWND ) ) ||
-			 ( m_pTttW != nullptr && HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) ) )
+		if ( HasFlag( m_pTttW != nullptr ? m_pTttW->uFlags : m_pTttA->uFlags, TTF_IDISHWND ) )
 		{
 			m_hCtrl = (HWND)pNmHdr->idFrom;						// idFrom is actually the HWND of the tool
 			m_cmdId = ::GetDlgCtrlID( m_hCtrl );
@@ -250,6 +250,7 @@ namespace ui
 		, m_pTttW( pNmToolTipText )
 		, m_cmdId( static_cast<UINT>( pNmToolTipText->hdr.idFrom ) )
 		, m_hCtrl( nullptr )
+		, m_pData( reinterpret_cast<void*>( m_pTttW->lParam ) )
 	{
 		ASSERT_PTR( m_pTttW );
 

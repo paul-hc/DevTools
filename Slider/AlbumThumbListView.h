@@ -18,8 +18,8 @@ class CSplitterWindow;
 class CWicDibSection;
 
 
-class CAlbumThumbListView : public CBaseItemTooltipsCtrl<CBaseCtrlView>
-						  , public CObjectCtrlBase
+class CAlbumThumbListView : public CBaseItemTooltipsCtrl<CBaseCtrlView>		// a view encapsulating a CListBox
+	, public CObjectCtrlBase
 {
 	typedef CBaseItemTooltipsCtrl<CBaseCtrlView> TBaseClass;
 
