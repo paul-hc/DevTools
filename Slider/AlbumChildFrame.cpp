@@ -117,7 +117,7 @@ void CAlbumChildFrame::OnCurrPosChanged( void ) implement
 	else
 		pSpinEdit->SetContents( _T("") );
 
-	mfc::ToolBar_SetBtnText( m_pAlbumToolBar.get(), IDW_CURR_IMAGE_PATH_LABEL, imageFilePath);
+	mfc::ToolBar_SetBtnText( m_pAlbumToolBar.get(), IDW_CURR_IMAGE_PATH_LABEL, imageFilePath );
 	m_pAlbumToolBar->AdjustLayout();
 }
 
@@ -177,10 +177,9 @@ void CAlbumChildFrame::BuildAlbumToolbar( void )
 	m_pAlbumToolBar->InsertButton( new CMFCToolBarSpinEditBoxButton( IDW_SEEK_CURR_POS_SPINEDIT, -1, ES_NUMBER | ES_AUTOHSCROLL, SeekCurrPosSpinEditWidth ) );
 	m_pAlbumToolBar->InsertButton( new mfc::CLabelButton( IDW_NAV_COUNT_LABEL ) );
 	m_pAlbumToolBar->InsertSeparator();
-	m_pAlbumToolBar->InsertButton( new mfc::CLabelButton( IDW_CURR_IMAGE_PATH_LABEL, mfc::BO_StretchWidth | mfc::BO_BoldFont | mfc::BO_QueryToolTip ) );
-	m_pAlbumToolBar->InsertButton( new CMFCToolBarButton( ID_COPY_CURR_IMAGE_PATH, mfc::FindButtonImageIndex( ID_EDIT_COPY ) ) );
+	m_pAlbumToolBar->InsertButton( new mfc::CLabelButton( IDW_CURR_IMAGE_PATH_LABEL, mfc::BO_BoldFont | mfc::BO_QueryToolTip /*| mfc::BO_StretchWidth*/ ) );
 
-	mfc::ToolBar_SetBtnText( m_pAlbumToolBar.get(), ID_EDIT_ALBUM, _T("Edit Album"));
+	mfc::ToolBar_SetBtnText( m_pAlbumToolBar.get(), ID_EDIT_ALBUM, _T("Edit Album") );
 	m_pAlbumToolBar->RecalcLayout();
 }
 
@@ -198,8 +197,6 @@ BEGIN_MESSAGE_MAP( CAlbumChildFrame, CChildFrame )
 	ON_UPDATE_COMMAND_UI( IDW_SEEK_CURR_POS_SPINEDIT, OnUpdateAlways )
 	ON_COMMAND( IDW_CURR_IMAGE_PATH_LABEL, On_CopyCurrImagePath )
 	ON_UPDATE_COMMAND_UI( IDW_CURR_IMAGE_PATH_LABEL, OnUpdateAlways )
-	ON_COMMAND( ID_COPY_CURR_IMAGE_PATH, On_CopyCurrImagePath )
-	ON_UPDATE_COMMAND_UI( ID_COPY_CURR_IMAGE_PATH, OnUpdateAlways )
 END_MESSAGE_MAP()
 
 int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )

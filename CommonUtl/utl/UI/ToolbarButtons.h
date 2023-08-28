@@ -80,10 +80,13 @@ namespace mfc
 		// base overrides
 		virtual void Serialize( CArchive& archive );
 		virtual BOOL OnUpdateToolTip( CWnd* pWndParent, int buttonIndex, CToolTipCtrl& wndToolTip, CString& rTipText );
+		virtual SIZE OnCalculateSize( CDC* pDC, const CSize& sizeDefault, BOOL horz );
 		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
 							 BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE, BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) override;
 	protected:
 		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
+
+		CFont* GetFont( void ) const;
 	private:
 		persist int m_optionFlags;
 	};

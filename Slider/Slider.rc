@@ -1401,8 +1401,7 @@ STRINGTABLE
 BEGIN
     IDW_NAV_COUNT_LABEL     "The total number of images in this album\nTotal Image Count"
     IDW_CURR_IMAGE_PATH_LABEL 
-                            "Full path name of the current image file\nImage File Path"
-    ID_COPY_CURR_IMAGE_PATH "Copy the selected image file path to clipboard\nCopy Image Path"
+                            "Copy file path of the current image file\nImage File Path"
 END
 
 STRINGTABLE

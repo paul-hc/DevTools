@@ -33,8 +33,6 @@ public:
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
-	void BuildAlbumToolbar( void );
-
 	// IAlbumBar interface
 	virtual void ShowBar( bool show ) implement;
 	virtual void OnCurrPosChanged( void ) implement;
@@ -43,6 +41,8 @@ private:
 
 	bool InputSlideDelay( ui::ComboField byField );
 	bool InputCurrentPos( void );
+
+	void BuildAlbumToolbar( void );
 private:
 	enum SplitterPane { ThumbView, PictureView };
 

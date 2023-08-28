@@ -162,6 +162,11 @@ namespace mfc
 		m_bText = TRUE;
 	}
 
+	CFont* CLabelButton::GetFont( void ) const
+	{
+		return HasOptionFlag( BO_BoldFont ) ? &GetGlobalData()->fontBold : &GetGlobalData()->fontRegular;
+	}
+
 	void CLabelButton::Serialize( CArchive& archive )
 	{
 		__super::Serialize( archive );
@@ -191,16 +196,23 @@ namespace mfc
 		return __super::OnUpdateToolTip( pWndParent, buttonIndex, wndToolTip, rTipText );
 	}
 
-	void CLabelButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
-							   BOOL bHorz /*= TRUE*/, BOOL /*bCustomizeMode = FALSE*/, BOOL /*bHighlight = FALSE*/,
-							   BOOL /*bDrawBorder = TRUE*/,	BOOL /*bGrayDisabledButtons = TRUE*/ ) override
+	SIZE CLabelButton::OnCalculateSize( CDC* pDC, const CSize& sizeDefault, BOOL horz )
 	{
-		CScopedGdi<CFont> scFont( pDC, &( HasOptionFlag( BO_BoldFont ) ? GetGlobalData()->fontBold : GetGlobalData()->fontRegular ) );
+		CScopedGdi<CFont> scFont( pDC, GetFont() );
+
+		return __super::OnCalculateSize( pDC, sizeDefault, horz );
+	}
+
+	void CLabelButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
+							   BOOL bHorz /*= TRUE*/, BOOL /*bCustomizeMode = FALSE*/, BOOL bHighlight /*= FALSE*/,
+							   BOOL bDrawBorder /*= TRUE*/,	BOOL /*bGrayDisabledButtons = TRUE*/ ) override
+	{
+		CScopedGdi<CFont> scFont( pDC, GetFont() );
 		CScopedValue<UINT> scStyle( &m_nStyle );		// display as enabled while drawing
 
 		scStyle.SetFlag( TBBS_DISABLED, false );
 
-		CMFCToolBarButton::OnDraw( pDC, rect, pImages, bHorz, FALSE, FALSE, FALSE, FALSE );
+		CMFCToolBarButton::OnDraw( pDC, rect, pImages, bHorz, FALSE, bHighlight, bDrawBorder, FALSE );
 	}
 }
 
