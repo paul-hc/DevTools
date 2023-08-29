@@ -991,8 +991,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,8,4,0
- PRODUCTVERSION 5,8,4,0
+ FILEVERSION 6,0,0,1
+ PRODUCTVERSION 6,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1007,18 +1007,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "16-08-2023 12:50:48"
-            VALUE "Comments", "Slider_vc17.sln|RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]Frame navigation"
+            VALUE "BuildTimestamp", "29-08-2023 12:54:22"
+            VALUE "Comments", "MFC FeaturePack|Slider_vc17.sln|RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
-            VALUE "FileVersion", "5.8.4.0"
+            VALUE "FileVersion", "6.0.0.1"
             VALUE "InternalName", "Slider"
             VALUE "LegalCopyright", "Copyright (C) 2000-2023"
             VALUE "LegalTrademarks", "Enjoy it."
             VALUE "OriginalFilename", "Slider.exe"
             VALUE "ProductName", "Slider Application"
-            VALUE "ProductVersion", "5.8.4.0"
+            VALUE "ProductVersion", "6.0.0.1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -1469,7 +1469,7 @@ END
 #include "afxribbon.rc"      // Ribbon and control bars
 #endif
 
-#endif
+#endif
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

@@ -367,11 +367,15 @@ bool CApplication::OpenQueuedAlbum( void )
 
 	// show the application window
 	int cmdShow = m_nCmdShow;
+
 	if ( -1 == cmdShow || SW_SHOWNORMAL == cmdShow )
 		cmdShow = m_pMainWnd->IsIconic() ? SW_RESTORE : SW_SHOW;
+
 	m_pMainWnd->ShowWindow( cmdShow );
+
 	if ( cmdShow != SW_MINIMIZE )
 		m_pMainWnd->SetForegroundWindow();
+
 	StoreCmdShow( -1 );		// next time, show the window as default
 
 	// add the queued files to the album
