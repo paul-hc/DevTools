@@ -233,11 +233,11 @@ namespace ui
 		, m_pTttW( TTN_NEEDTEXTW == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTW*>( pNmHdr ) : nullptr )
 		, m_cmdId( static_cast<UINT>( pNmHdr->idFrom ) )
 		, m_hCtrl( nullptr )
+		, m_pData( reinterpret_cast<void*>( m_pTttW != nullptr ? m_pTttW->lParam : m_pTttA->lParam ) )
 	{
 		ASSERT( m_pTttA != nullptr || m_pTttW != nullptr );
 
-		if ( ( m_pTttA != nullptr && HasFlag( m_pTttA->uFlags, TTF_IDISHWND ) ) ||
-			 ( m_pTttW != nullptr && HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) ) )
+		if ( HasFlag( m_pTttW != nullptr ? m_pTttW->uFlags : m_pTttA->uFlags, TTF_IDISHWND ) )
 		{
 			m_hCtrl = (HWND)pNmHdr->idFrom;						// idFrom is actually the HWND of the tool
 			m_cmdId = ::GetDlgCtrlID( m_hCtrl );
@@ -250,6 +250,7 @@ namespace ui
 		, m_pTttW( pNmToolTipText )
 		, m_cmdId( static_cast<UINT>( pNmToolTipText->hdr.idFrom ) )
 		, m_hCtrl( nullptr )
+		, m_pData( reinterpret_cast<void*>( m_pTttW->lParam ) )
 	{
 		ASSERT_PTR( m_pTttW );
 
@@ -313,5 +314,28 @@ namespace ui
 			return is_a<CListLikeCtrlBase>( pCtrl ) || is_a<CStatusStatic>( pCtrl );	// ignore column layout descriptors (list controls, grids, etc)
 
 		return false;
+	}
+}
+
+
+namespace mfc
+{
+	CMDIChildWnd* GetFirstMdiChildFrame( const CMDIFrameWnd* pMdiFrameWnd /*= mfc::GetMainMdiFrameWnd()*/ )
+	{
+		ASSERT_PTR( pMdiFrameWnd->GetSafeHwnd() );
+		ASSERT_PTR( pMdiFrameWnd->m_hWndMDIClient );
+
+		if ( CWnd* pMdiChild = CWnd::FromHandle( pMdiFrameWnd->m_hWndMDIClient )->GetWindow( GW_CHILD ) )
+		{
+			pMdiChild = pMdiChild->GetWindow( GW_HWNDLAST );		// in display terms, last MDI means on top of the MDI children Z order
+			ASSERT_PTR( pMdiChild );
+
+			while ( !is_a<CMDIChildWnd>( pMdiChild ) )
+				pMdiChild = pMdiChild->GetWindow( GW_HWNDPREV );	// assume MDI Client has other windows other than frames (which is very unusual)
+
+			return checked_static_cast<CMDIChildWnd*>( pMdiChild );
+		}
+
+		return nullptr;
 	}
 }

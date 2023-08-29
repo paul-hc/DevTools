@@ -7,8 +7,8 @@
 // Useful for controls such as CComboBox, that can't add items on PreSubclassWindow() when created via CreateWindow().
 // In this case the content is initialized later, when handling WM_CREATE.
 //
-template< typename BaseCtrl >
-abstract class CBaseStockContentCtrl : public BaseCtrl
+template< typename BaseCtrlT >
+abstract class CBaseStockContentCtrl : public BaseCtrlT
 {
 protected:
 	CBaseStockContentCtrl( void );

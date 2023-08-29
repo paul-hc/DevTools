@@ -4,7 +4,6 @@
 #include "WorkspaceDialog.h"
 #include "SlideData.h"
 #include "MainFrame.h"
-#include "MainToolbar.h"
 #include "ImageView.h"
 #include "ChildFrame.h"
 #include "Application.h"
@@ -16,6 +15,7 @@
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
+#include <afxstatusbar.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -260,25 +260,30 @@ void CWorkspace::FetchSettings( void )
 		SetFlag( m_data.m_wkspFlags, wf::MdiMaximized, isMaximized != FALSE );		// save MDI maximize state
 
 	// save toolbar and status-bar visibility state
-	SetFlag( m_data.m_wkspFlags, wf::ShowToolBar, ui::IsVisible( m_pMainFrame->GetToolbar()->GetSafeHwnd() ) );
+	SetFlag( m_data.m_wkspFlags, wf::ShowToolBar, ui::IsVisible( m_pMainFrame->GetStandardToolbar()->GetSafeHwnd() ) );
 	SetFlag( m_data.m_wkspFlags, wf::ShowStatusBar, ui::IsVisible( m_pMainFrame->GetStatusBar()->GetSafeHwnd() ) );
 
+	using std::placeholders::_1;
+
 	m_imageStates.clear();
-
 	if ( HasFlag( m_data.m_wkspFlags, wf::PersistOpenDocs ) )
-		if ( pActiveChildFrame != nullptr )
-			for ( CWnd* pChild = pActiveChildFrame->GetNextWindow( GW_HWNDLAST ); pChild != nullptr; pChild = pChild->GetNextWindow( GW_HWNDPREV ) )
-			{
-				CChildFrame* pChildFrame = checked_static_cast<CChildFrame*>( pChild );
-				fs::CPath docFilePath( pChildFrame->GetActiveDocument()->GetPathName().GetString() );
+		mfc::ForEach_MdiChildFrame<CChildFrame>( std::bind( &CWorkspace::AddImageViewState, this, _1 ) );
+}
 
-				if ( !docFilePath.IsEmpty() )
-					if ( IImageView* pImageView = pChildFrame->GetImageView() )			// ensure not a print preview, etc
-					{
-						m_imageStates.push_back( CImageState() );
-						dynamic_cast<const CImageView*>( pChildFrame->GetImageView()->GetScrollView() )->MakeImageState( &m_imageStates.back() );
-					}
-			}
+bool CWorkspace::AddImageViewState( CChildFrame* pChildFrame )
+{
+	ASSERT_PTR( pChildFrame );
+
+	if ( IImageView* pImageView = pChildFrame->GetImageView() )
+	{
+		const CImageView* pView = checked_static_cast<const CImageView*>( pImageView->GetScrollView() );
+
+		m_imageStates.push_back( CImageState() );
+		pView->MakeImageState( &m_imageStates.back() );
+		return true;
+	}
+
+	return false;
 }
 
 bool CWorkspace::LoadDocuments( void )
@@ -291,10 +296,11 @@ bool CWorkspace::LoadDocuments( void )
 	// (!) next time, show the window as default in order to properly handle in CFrameWnd::OnDDEExecute the ShowWindow calls
 	app::GetApp()->StoreCmdShow( -1 );
 
-	if ( !m_pMainFrame->GetToolbar()->IsVisible() == HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) )
-		m_pMainFrame->ShowControlBar( m_pMainFrame->GetToolbar(), HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ), FALSE );
-	if ( !m_pMainFrame->GetStatusBar()->IsVisible() == HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ) )
-		m_pMainFrame->ShowControlBar( m_pMainFrame->GetStatusBar(), HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ), FALSE );
+	if ( HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) != ui::IsWindowVisible( m_pMainFrame->GetStandardToolbar()->GetSafeHwnd() ) )
+		m_pMainFrame->ShowPane( m_pMainFrame->GetStandardToolbar(), HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ), FALSE, FALSE );
+
+	if ( HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ) != ui::IsWindowVisible( m_pMainFrame->GetStatusBar()->GetSafeHwnd() ) )
+		m_pMainFrame->ShowPane( m_pMainFrame->GetStatusBar(), HasFlag( m_data.m_wkspFlags, wf::ShowStatusBar ), FALSE, FALSE );
 
 	ASSERT_NULL( m_pLoadingImageState );
 	for ( std::vector<CImageState>::const_iterator itImageState = m_imageStates.begin(); itImageState != m_imageStates.end(); ++itImageState )
@@ -303,7 +309,13 @@ bool CWorkspace::LoadDocuments( void )
 		//
 		m_pLoadingImageState = const_cast<CImageState*>( &*itImageState );
 
-		if ( nullptr == AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str() ) )
+		CDocument* pNewDoc =
+	#if _MFC_VER > 0x0900		// newer MFC version?
+			AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str(), FALSE );
+	#else
+			AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str() );
+	#endif
+		if ( nullptr == pNewDoc )
 			TRACE( " * Failed loading document %s on workspace load!\n", m_pLoadingImageState->GetDocFilePath().c_str() );
 	}
 	m_pLoadingImageState = nullptr;
@@ -367,6 +379,10 @@ BEGIN_MESSAGE_MAP( CWorkspace, CCmdTarget )
 	ON_UPDATE_COMMAND_UI( CK_FULL_SCREEN, OnUpdateFullScreen )
 	ON_COMMAND( IDW_SMOOTHING_MODE_CHECK, OnToggle_SmoothingMode )
 	ON_UPDATE_COMMAND_UI( IDW_SMOOTHING_MODE_CHECK, OnUpdate_SmoothingMode )
+	ON_COMMAND( CK_SHOW_THUMB_VIEW, OnToggle_ShowThumbView )
+	ON_UPDATE_COMMAND_UI( CK_SHOW_THUMB_VIEW, OnUpdate_ShowThumbView )
+	ON_COMMAND( ID_VIEW_ALBUM_DIALOG_BAR, OnToggle_ViewAlbumPane )
+	ON_UPDATE_COMMAND_UI( ID_VIEW_ALBUM_DIALOG_BAR, OnUpdate_ViewAlbumPane )		// CFrameWnd::OnUpdateControlBarMenu
 END_MESSAGE_MAP()
 
 void CWorkspace::CmLoadWorkspaceDocs( void )
@@ -453,4 +469,24 @@ void CWorkspace::OnToggle_SmoothingMode( void )
 void CWorkspace::OnUpdate_SmoothingMode( CCmdUI* pCmdUI )
 {
 	pCmdUI->SetCheck( d2d::CSharedTraits::Instance().IsSmoothingMode() );
+}
+
+void CWorkspace::OnToggle_ShowThumbView( void )
+{
+	ToggleFlag( m_data.m_albumViewFlags, af::ShowThumbView );
+}
+
+void CWorkspace::OnUpdate_ShowThumbView( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( HasFlag( m_data.m_albumViewFlags, af::ShowThumbView ) );
+}
+
+void CWorkspace::OnToggle_ViewAlbumPane( void )
+{	// toggle the visibility of the album dialog bar
+	ToggleFlag( m_data.m_albumViewFlags, af::ShowAlbumDialogBar );
+}
+
+void CWorkspace::OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( HasFlag( m_data.m_albumViewFlags, af::ShowAlbumDialogBar ) );
 }

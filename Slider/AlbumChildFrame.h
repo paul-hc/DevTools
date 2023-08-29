@@ -3,15 +3,20 @@
 #pragma once
 
 #include "ChildFrame.h"
-#include "AlbumDialogBar.h"
 #include "SplitterWindow.h"
+#include "INavigationBar.h"			// for IAlbumBar
+#include "utl/UI/Dialog_fwd.h"		// for ui::ICustomCmdInfo
+#include "utl/UI/ui_fwd.h"
 
 
 class CAlbumThumbListView;
 class CAlbumImageView;
+namespace mfc { class CFixedToolBar; }
 
 
 class CAlbumChildFrame : public CChildFrame
+	, public IAlbumBar
+	, public ui::ICustomCmdInfo
 {
 	DECLARE_DYNCREATE( CAlbumChildFrame )
 protected:
@@ -19,27 +24,49 @@ protected:
 	virtual ~CAlbumChildFrame();
 public:
 	// base overrides
-	virtual IImageView* GetImageView( void ) const;		// could be either CImageView or CAlbumImageView (but not CAlbumThumbListView!)
+	virtual IImageView* GetImageView( void ) const override;		// could be either CImageView or CAlbumImageView (but not CAlbumThumbListView!)
 
 	// view panes
 	CAlbumThumbListView* GetThumbView( void ) const { return safe_ptr( m_pThumbsListView ); }
 	CAlbumImageView* GetAlbumImageView( void ) const { return safe_ptr( m_pAlbumImageView ); }
+
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+private:
+	// IAlbumBar interface
+	virtual void ShowBar( bool show ) implement;
+	virtual void OnCurrPosChanged( void ) implement;
+	virtual void OnNavRangeChanged( void ) implement;
+	virtual void OnSlideDelayChanged( void ) implement;
+
+	bool InputSlideDelay( ui::ComboField byField );
+	bool InputCurrentPos( void );
+
+	void BuildAlbumToolbar( void );
 private:
 	enum SplitterPane { ThumbView, PictureView };
 
-	CAlbumDialogBar m_albumInfoBar;
+	std::auto_ptr<mfc::CFixedToolBar> m_pAlbumToolBar;
+
 	CSplitterWindow m_splitterWnd;
 
 	CAlbumThumbListView* m_pThumbsListView;
 	CAlbumImageView* m_pAlbumImageView;
-public:
+
+	enum { DurationComboWidth = 70, SeekCurrPosSpinEditWidth = 60 };
+
 	// generated stuff
-	protected:
-	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext );
+protected:
+	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext ) overrides(CChildFrame);
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
-	afx_msg BOOL OnBarCheck( UINT dlgBarId );
-	afx_msg void OnUpdateBarCheck( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_ViewAlbumPane( void );
+	afx_msg void OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI );
+	afx_msg void OnEditInput_PlayDelayCombo( void );
+	afx_msg void OnCBnSelChange_PlayDelayCombo( void );
+	afx_msg void OnUpdateAlways( CCmdUI* pCmdUI );
+	afx_msg void OnEnChange_SeekCurrPosSpinEdit( void );
+	afx_msg void On_CopyCurrImagePath( void );
 
 	DECLARE_MESSAGE_MAP()
 };

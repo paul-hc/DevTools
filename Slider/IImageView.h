@@ -14,12 +14,8 @@ interface IImageView
 	virtual CWicImage* GetImage( void ) const = 0;
 	virtual CScrollView* GetScrollView( void ) = 0;
 
-	enum RegainAction { Enter, Escape };
-	virtual void RegainFocus( RegainAction regainAction, int ctrlId = 0 ) = 0;
-
 	// events
 	virtual void EventChildFrameActivated( void ) = 0;
-	virtual void EventNavigSliderPosChanged( bool thumbTracking ) = 0;
 };
 
 

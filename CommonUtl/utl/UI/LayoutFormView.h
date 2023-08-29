@@ -9,8 +9,8 @@
 // base class for form views that require dynamic control layout based on a layout description
 
 class CLayoutFormView : public CFormView
-					  , public ui::ILayoutEngine
-					  , public ui::ICustomCmdInfo
+	, public ui::ILayoutEngine
+	, public ui::ICustomCmdInfo
 {
 protected:
 	CLayoutFormView( UINT templateId );
@@ -34,7 +34,7 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
-public:
+protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );

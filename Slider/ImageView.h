@@ -46,9 +46,7 @@ public:
 	// IImageView interface
 	virtual fs::TImagePathKey GetImagePathKey( void ) const implements(IImageView);
 	virtual CScrollView* GetScrollView( void ) implements(IImageView);
-	virtual void RegainFocus( RegainAction regainAction, int ctrlId = 0 ) implements(IImageView);
 	virtual void EventChildFrameActivated( void ) implements(IImageView);
-	virtual void EventNavigSliderPosChanged( bool thumbTracking ) implements(IImageView);
 
 	// overrideables
 	virtual CImageState* GetLoadingImageState( void ) const;
@@ -62,6 +60,8 @@ private:
 protected:
 	virtual void OnImageContentChanged( void );
 	virtual bool OutputNavigSlider( void );
+	virtual void HandleNavigSliderPosChanging( int newPos, bool thumbTracking );
+	virtual std::tstring FormatTipText_NavigSliderCtrl( void ) const;
 	virtual bool CanEnterDragMode( void ) const;
 
 	static nav::Navigate CmdToNavigate( UINT cmdId );
@@ -95,11 +95,14 @@ protected:
 	afx_msg void OnRButtonDown( UINT mkFlags, CPoint point );
 	virtual BOOL OnMouseWheel( UINT mkFlags, short zDelta, CPoint point );
 
-	virtual void On_NavigSeek( UINT cmdId );
-	virtual void OnUpdate_NavigSeek( CCmdUI* pCmdUI );
 	afx_msg void OnEditCopy( void );
 	afx_msg void OnUpdateEditCopy( CCmdUI* pCmdUI );
+	virtual void On_NavigSeek( UINT cmdId );
+	virtual void OnUpdate_NavigSeek( CCmdUI* pCmdUI );
+	afx_msg void OnPosChanged_NavigSliderCtrl( void );
 	afx_msg void OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI );
+	afx_msg void OnThumbPosChanging_NavigSliderCtrl( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg BOOL OnTtnNeedText_NavigSliderCtrl( UINT, NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnRadio_ImageScalingMode( UINT cmdId );
 	afx_msg void OnUpdate_ImageScalingMode( CCmdUI* pCmdUI );
 	afx_msg void On_ZoomNormal100( void );
@@ -108,6 +111,7 @@ protected:
 	afx_msg void On_EditBkColor( void );
 	afx_msg void CmScroll( UINT cmdId );
 	afx_msg void OnCBnSelChange_ImageScalingModeCombo( void );
+	afx_msg void OnEditInput_ZoomCombo( void );
 	afx_msg void OnCBnSelChange_ZoomCombo( void );
 
 	DECLARE_MESSAGE_MAP()

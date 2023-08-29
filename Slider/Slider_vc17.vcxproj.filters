@@ -47,9 +47,6 @@
     <ClInclude Include="AlbumChildFrame.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="AlbumDialogBar.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="AlbumDoc.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -96,9 +93,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="LoggerSetupDialog.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MainToolbar.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="MoveFileDialog.h">
@@ -188,6 +182,9 @@
     <ClInclude Include="ImageNavigator_fwd.h">
       <Filter>Source Files\service</Filter>
     </ClInclude>
+    <ClInclude Include="test\UiTestUtils.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainFrame.cpp">
@@ -209,9 +206,6 @@
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="AlbumChildFrame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AlbumDialogBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AlbumDoc.cpp">
@@ -251,9 +245,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LoggerSetupDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainToolbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MoveFileDialog.cpp">
@@ -334,6 +325,9 @@
     <ClCompile Include="ImageNavigator.cpp">
       <Filter>Source Files\service</Filter>
     </ClCompile>
+    <ClCompile Include="test\UiTestUtils.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Slider.rc">
@@ -341,19 +335,10 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\userimages.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\SliderDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Slider.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\Toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\Toolbar256.bmp">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\AlbumDoc.ico">
@@ -368,7 +353,25 @@
     <Image Include="res\ImageDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\Toolbar.png">
+    <Image Include="res\ToolbarStandard.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarStandard.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarNavigate.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarNavigate.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar_Old.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar_Old.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarAlbum.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -376,7 +379,6 @@
     <None Include="res\Slider.rc2">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Doc Templates.xls" />
     <None Include="Slider.reg" />
   </ItemGroup>
   <ItemGroup>

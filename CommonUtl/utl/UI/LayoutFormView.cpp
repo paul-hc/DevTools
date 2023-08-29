@@ -28,7 +28,7 @@ CLayoutFormView::~CLayoutFormView()
 {
 }
 
-inline CLayoutEngine& CLayoutFormView::GetLayoutEngine( void )
+CLayoutEngine& CLayoutFormView::GetLayoutEngine( void )
 {
 	return *m_pLayoutEngine;
 }
@@ -65,7 +65,19 @@ void CLayoutFormView::DoDataExchange( CDataExchange* pDX )
 		}
 	}
 
-	CFormView::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
+}
+
+BOOL CLayoutFormView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( __super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return TRUE;
+
+	if ( CWinThread* pThread = AfxGetThread() )
+		if ( pThread->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )			// last crack goes to the current CWinThread object
+			return TRUE;
+
+	return FALSE;
 }
 
 
@@ -81,21 +93,9 @@ BEGIN_MESSAGE_MAP( CLayoutFormView, CFormView )
 	ON_MESSAGE_VOID( WM_IDLEUPDATECMDUI, OnIdleUpdateControls )
 END_MESSAGE_MAP()
 
-BOOL CLayoutFormView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	if ( CFormView::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-		return TRUE;
-
-	if ( CWinThread* pThread = AfxGetThread() )
-		if ( pThread->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )			// last crack goes to the current CWinThread object
-			return TRUE;
-
-	return FALSE;
-}
-
 int CLayoutFormView::OnCreate( CREATESTRUCT* pCreateStruct )
 {
-	if ( -1 == CFormView::OnCreate( pCreateStruct ) )
+	if ( -1 == __super::OnCreate( pCreateStruct ) )
 		return -1;
 
 	ASSERT( !m_pLayoutEngine->IsInitialized() );
@@ -109,20 +109,20 @@ void CLayoutFormView::OnSize( UINT sizeType, int cx, int cy )
 		if ( m_pLayoutEngine->IsInitialized() )
 			m_pLayoutEngine->LayoutControls();
 
-	CFormView::OnSize( sizeType, cx, cy );
+	__super::OnSize( sizeType, cx, cy );
 }
 
 void CLayoutFormView::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
 	ui::HandleInitMenuPopup( this, pPopupMenu, !isSysMenu );
-	CFormView::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
+	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
 BOOL CLayoutFormView::OnEraseBkgnd( CDC* pDC )
 {
 	return
 		m_pLayoutEngine->HandleEraseBkgnd( pDC ) ||
-		CFormView::OnEraseBkgnd( pDC );
+		__super::OnEraseBkgnd( pDC );
 }
 
 BOOL CLayoutFormView::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pResult )

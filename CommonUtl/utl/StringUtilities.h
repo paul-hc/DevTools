@@ -203,14 +203,14 @@ namespace num
 
 
 	template< typename ValueT >
-	inline ValueT MinValue( void ) { return (std::numeric_limits<ValueT>::min)(); }
+	inline ValueT MinValue( void ) { return std::numeric_limits<ValueT>::min(); }
 
 	// for double doesn't work (DBL_MIN is minimal positive value); in C++ 11 use lowest()
 	template<>
-	inline double MinValue<double>( void ) { return -(std::numeric_limits<double>::max)(); }	// min doesn't work (DBL_MIN is minimal positive value)
+	inline double MinValue<double>( void ) { return -std::numeric_limits<double>::max(); }	// min doesn't work (DBL_MIN is minimal positive value)
 
 	template< typename ValueT >
-	inline ValueT MaxValue( void ) { return (std::numeric_limits<ValueT>::max)(); }
+	inline ValueT MaxValue( void ) { return std::numeric_limits<ValueT>::max(); }
 
 
 	template< typename ValueT >		// [0, MAX]

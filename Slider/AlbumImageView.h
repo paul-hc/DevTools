@@ -9,8 +9,8 @@
 
 
 class CAlbumDoc;
-class CAlbumDialogBar;
 class CAlbumThumbListView;
+interface IAlbumBar;
 
 
 class CAlbumImageView : public CImageView
@@ -20,7 +20,7 @@ class CAlbumImageView : public CImageView
 	CAlbumImageView( void );
 	virtual ~CAlbumImageView();
 public:
-	void StorePeerView( CAlbumThumbListView* pPeerThumbView, CAlbumDialogBar* pAlbumDialogBar );
+	void StorePeerView( CAlbumThumbListView* pPeerThumbView, IAlbumBar* pAlbumBar );
 
 	CAlbumDoc* GetDocument( void ) const;
 
@@ -41,11 +41,12 @@ public:
 	// IImageView overrides
 	virtual fs::TImagePathKey GetImagePathKey( void ) const overrides(CImageView);
 	virtual void EventChildFrameActivated( void ) overrides(CImageView);
-	virtual void EventNavigSliderPosChanged( bool thumbTracking ) overrides(CImageView);
 protected:
 	// base overrides
 	virtual void OnImageContentChanged( void ) overrides(CImageView);
 	virtual bool OutputNavigSlider( void ) overrides(CImageView);
+	virtual void HandleNavigSliderPosChanging( int newPos, bool thumbTracking ) overrides(CImageView);
+	virtual std::tstring FormatTipText_NavigSliderCtrl( void ) const overrides(CImageView);
 	virtual bool CanEnterDragMode( void ) const overrides(CImageView);
 public:
 	// navigation support
@@ -84,7 +85,7 @@ private:
 	bool m_isDropTargetEnabled;			// internal flag that synchronizes with DragAcceptFiles( TRUE/FALSE )
 
 	CAlbumThumbListView* m_pPeerThumbView;
-	CAlbumDialogBar* m_pAlbumDialogBar;
+	IAlbumBar* m_pAlbumBar;
 
 	enum { ID_NAVIGATION_TIMER = 4000 };
 

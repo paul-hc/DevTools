@@ -183,6 +183,8 @@
     <ClInclude Include="BaseItemTooltipsCtrl.h" />
     <ClInclude Include="BaseItemTooltipsCtrl.hxx" />
     <ClInclude Include="BaseMainDialog.h" />
+    <ClInclude Include="BaseMainFrameWndEx.h" />
+    <ClInclude Include="BaseMainFrameWndEx.hxx" />
     <ClInclude Include="BaseSplitButton.h" />
     <ClInclude Include="BaseStockContentCtrl.h" />
     <ClInclude Include="BaseStockContentCtrl.hxx" />
@@ -201,15 +203,19 @@
     <ClInclude Include="ColorPopupDialogs.h" />
     <ClInclude Include="ColorRepository.h" />
     <ClInclude Include="ColorValue.h" />
+    <ClInclude Include="ComboBoxEdit.h" />
     <ClInclude Include="CommandSvcHandler.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ContentFitBase.h" />
     <ClInclude Include="ContextMenuMgr.h" />
+    <ClInclude Include="ControlBar_fwd.h" />
     <ClInclude Include="Control_fwd.h" />
     <ClInclude Include="CtrlInterfaces.h" />
     <ClInclude Include="CtrlUiState.h" />
     <ClInclude Include="CustomDrawImager.h" />
     <ClInclude Include="CustomDrawImager_fwd.h" />
+    <ClInclude Include="DataAdapters.h" />
+    <ClInclude Include="DataAdapters_fwd.h" />
     <ClInclude Include="DateTimeControl.h" />
     <ClInclude Include="DesktopDC.h" />
     <ClInclude Include="DetailIconButton.h" />
@@ -264,6 +270,7 @@
     <ClInclude Include="LayoutEngine.h" />
     <ClInclude Include="LayoutFormView.h" />
     <ClInclude Include="LayoutMetrics.h" />
+    <ClInclude Include="LayoutPaneDialog.h" />
     <ClInclude Include="LayoutPropertyPage.h" />
     <ClInclude Include="LayoutPropertySheet.h" />
     <ClInclude Include="ListCtrlEditorFrame.h" />
@@ -321,6 +328,7 @@
     <ClInclude Include="SpinTargetButton.h" />
     <ClInclude Include="SplitPushButton.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="StatusProgressService.h" />
     <ClInclude Include="StdColors.h" />
     <ClInclude Include="StdManifest.h" />
     <ClInclude Include="StockValuesComboBox.h" />
@@ -347,6 +355,7 @@
     <ClInclude Include="Thumbnailer.h" />
     <ClInclude Include="Thumbnailer_fwd.h" />
     <ClInclude Include="ThumbPreviewCtrl.h" />
+    <ClInclude Include="ToolbarButtons.h" />
     <ClInclude Include="ToolbarStrip.h" />
     <ClInclude Include="ToolImageList.h" />
     <ClInclude Include="ToolStrip.h" />
@@ -397,12 +406,15 @@
     <ClCompile Include="ColorPickerButton.cpp" />
     <ClCompile Include="ColorPopupDialogs.cpp" />
     <ClCompile Include="ColorRepository.cpp" />
+    <ClCompile Include="ComboBoxEdit.cpp" />
     <ClCompile Include="CommandSvcHandler.cpp" />
     <ClCompile Include="ContentFitBase.cpp" />
     <ClCompile Include="ContextMenuMgr.cpp" />
+    <ClCompile Include="ControlBar_fwd.cpp" />
     <ClCompile Include="Control_fwd.cpp" />
     <ClCompile Include="CtrlUiState.cpp" />
     <ClCompile Include="CustomDrawImager.cpp" />
+    <ClCompile Include="DataAdapters.cpp" />
     <ClCompile Include="DateTimeControl.cpp" />
     <ClCompile Include="DesktopDC.cpp" />
     <ClCompile Include="DetailIconButton.cpp" />
@@ -442,6 +454,7 @@
     <ClCompile Include="LayoutEngine.cpp" />
     <ClCompile Include="LayoutFormView.cpp" />
     <ClCompile Include="LayoutMetrics.cpp" />
+    <ClCompile Include="LayoutPaneDialog.cpp" />
     <ClCompile Include="LayoutPropertyPage.cpp" />
     <ClCompile Include="LayoutPropertySheet.cpp" />
     <ClCompile Include="ListCtrlEditorFrame.cpp" />
@@ -497,6 +510,7 @@
     <ClCompile Include="SpinEdit.cpp" />
     <ClCompile Include="SpinTargetButton.cpp" />
     <ClCompile Include="SplitPushButton.cpp" />
+    <ClCompile Include="StatusProgressService.cpp" />
     <ClCompile Include="StockValuesComboBox.cpp" />
     <ClCompile Include="SyncScrolling.cpp" />
     <ClCompile Include="SystemTray.cpp" />
@@ -516,6 +530,7 @@
     <ClCompile Include="ThemeStatic.cpp" />
     <ClCompile Include="Thumbnailer.cpp" />
     <ClCompile Include="ThumbPreviewCtrl.cpp" />
+    <ClCompile Include="ToolbarButtons.cpp" />
     <ClCompile Include="ToolbarStrip.cpp" />
     <ClCompile Include="ToolImageList.cpp" />
     <ClCompile Include="ToolStrip.cpp" />

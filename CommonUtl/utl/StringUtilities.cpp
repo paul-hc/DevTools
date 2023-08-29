@@ -189,8 +189,8 @@ namespace num
 {
 	const std::locale& GetEmptyLocale( void )
 	{
-		static const std::locale emptyLocale( std::locale::empty() );	// empty locale (devoid of facets)
-		return emptyLocale;
+		static const std::locale s_emptyLocale( std::locale::empty() );	// empty locale (devoid of facets)
+		return s_emptyLocale;
 	}
 
 	bool StripFractionalZeros( OUT std::tstring& rText, const std::locale& loc /*= str::GetUserLocale()*/ )

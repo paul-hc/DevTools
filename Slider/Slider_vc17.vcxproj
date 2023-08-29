@@ -211,7 +211,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AlbumChildFrame.h" />
-    <ClInclude Include="AlbumDialogBar.h" />
     <ClInclude Include="AlbumDoc.h" />
     <ClInclude Include="AlbumImageView.h" />
     <ClInclude Include="AlbumModel.h" />
@@ -249,7 +248,6 @@
     <ClInclude Include="ListViewState.h" />
     <ClInclude Include="LoggerSetupDialog.h" />
     <ClInclude Include="MainFrame.h" />
-    <ClInclude Include="MainToolbar.h" />
     <ClInclude Include="ModelSchema.h" />
     <ClInclude Include="MoveFileDialog.h" />
     <ClInclude Include="OleImagesDataSource.h" />
@@ -263,13 +261,13 @@
     <ClInclude Include="test\CatalogStorageTests.h" />
     <ClInclude Include="test\ImagingD2DTests.h" />
     <ClInclude Include="test\ThumbnailTests.h" />
+    <ClInclude Include="test\UiTestUtils.h" />
     <ClInclude Include="UndoRedoDialog.h" />
     <ClInclude Include="Workspace.h" />
     <ClInclude Include="WorkspaceDialog.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AlbumChildFrame.cpp" />
-    <ClCompile Include="AlbumDialogBar.cpp" />
     <ClCompile Include="AlbumDoc.cpp" />
     <ClCompile Include="AlbumImageView.cpp" />
     <ClCompile Include="AlbumModel.cpp" />
@@ -300,7 +298,6 @@
     <ClCompile Include="ListViewState.cpp" />
     <ClCompile Include="LoggerSetupDialog.cpp" />
     <ClCompile Include="MainFrame.cpp" />
-    <ClCompile Include="MainToolbar.cpp" />
     <ClCompile Include="ModelSchema.cpp" />
     <ClCompile Include="MoveFileDialog.cpp" />
     <ClCompile Include="OleImagesDataSource.cpp" />
@@ -318,6 +315,7 @@
     <ClCompile Include="test\CatalogStorageTests.cpp" />
     <ClCompile Include="test\ImagingD2DTests.cpp" />
     <ClCompile Include="test\ThumbnailTests.cpp" />
+    <ClCompile Include="test\UiTestUtils.cpp" />
     <ClCompile Include="UndoRedoDialog.cpp" />
     <ClCompile Include="Workspace.cpp" />
     <ClCompile Include="WorkspaceDialog.cpp" />
@@ -332,13 +330,15 @@
     <Image Include="res\ImageDoc.ico" />
     <Image Include="res\Slider.ico" />
     <Image Include="res\SliderDoc.ico" />
-    <Image Include="res\Toolbar.bmp" />
-    <Image Include="res\Toolbar.png" />
-    <Image Include="res\Toolbar256.bmp" />
-    <Image Include="res\userimages.bmp" />
+    <Image Include="res\ToolbarAlbum.bmp" />
+    <Image Include="res\ToolbarNavigate.bmp" />
+    <Image Include="res\ToolbarNavigate.png" />
+    <Image Include="res\ToolbarStandard.bmp" />
+    <Image Include="res\ToolbarStandard.png" />
+    <Image Include="res\Toolbar_Old.bmp" />
+    <Image Include="res\Toolbar_Old.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Doc Templates.xls" />
     <None Include="res\Slider.rc2" />
     <None Include="Slider.reg" />
   </ItemGroup>

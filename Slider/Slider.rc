@@ -33,7 +33,7 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
-    "#include ""afxres.h""\r\0"
+    "#include ""afxres.h""\0"
 END
 
 3 TEXTINCLUDE 
@@ -85,9 +85,15 @@ IDR_IMAGETYPE           ICON                    "res\\ImageDoc.ico"
 // Bitmap
 //
 
-IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar_Old.bmp"
 
 IDR_APP_TOOL_STRIP      BITMAP                  "res\\AppToolStrip.bmp"
+
+IDR_TOOLBAR_STANDARD    BITMAP                  "res\\ToolbarStandard.bmp"
+
+IDR_TOOLBAR_NAVIGATE    BITMAP                  "res\\ToolbarNavigate.bmp"
+
+ID_VIEW_ALBUM_DIALOG_BAR BITMAP                  "res\\ToolbarAlbum.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -95,7 +101,11 @@ IDR_APP_TOOL_STRIP      BITMAP                  "res\\AppToolStrip.bmp"
 // PNG
 //
 
-IDR_MAINFRAME           PNG                     "res\\Toolbar.png"
+IDR_TOOLBAR_STANDARD    PNG                     "res\\ToolbarStandard.png"
+
+IDR_TOOLBAR_NAVIGATE    PNG                     "res\\ToolbarNavigate.png"
+
+IDR_MAINFRAME           PNG                     "res\\Toolbar_Old.png"
 
 IDR_APP_TOOL_STRIP      PNG                     "res\\AppToolStrip.png"
 
@@ -149,6 +159,53 @@ BEGIN
     BUTTON      ID_ORDER_BY_DIMENSION_DESC
 END
 
+IDR_TOOLBAR_STANDARD TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_OPEN_ALBUM_FOLDER
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_COPY
+    SEPARATOR
+    BUTTON      CM_REFRESH_CONTENT
+    BUTTON      CM_CLEAR_IMAGE_CACHE
+    SEPARATOR
+    BUTTON      CK_FULL_SCREEN
+    BUTTON      CK_SHOW_THUMB_VIEW
+    BUTTON      ID_VIEW_ALBUM_DIALOG_BAR
+    SEPARATOR
+    BUTTON      IDW_IMAGE_SCALING_COMBO
+    BUTTON      IDW_ZOOM_COMBO
+    BUTTON      ID_ZOOM_NORMAL_100
+    BUTTON      ID_ZOOM_IN
+    BUTTON      ID_ZOOM_OUT
+    SEPARATOR
+    BUTTON      IDW_SMOOTHING_MODE_CHECK
+END
+
+IDR_TOOLBAR_NAVIGATE TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_NAVIG_SEEK_FIRST
+    BUTTON      ID_NAVIG_SEEK_PREV
+    BUTTON      ID_NAVIG_SEEK_NEXT
+    BUTTON      ID_NAVIG_SEEK_LAST
+    SEPARATOR
+    BUTTON      ID_TOGGLE_NAVIG_PLAY
+    SEPARATOR
+    BUTTON      ID_TOGGLE_NAVIG_DIR_REV
+    BUTTON      ID_TOGGLE_NAVIG_DIR_FWD
+    SEPARATOR
+    BUTTON      ID_TOGGLE_NAVIG_WRAP_MODE
+    SEPARATOR
+    BUTTON      IDW_NAVIG_SLIDER_CTRL
+END
+
+ID_VIEW_ALBUM_DIALOG_BAR TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_EDIT_ALBUM
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -176,10 +233,14 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
+        POPUP "&Toolbars"
+        BEGIN
+            MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
+        END
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "<app-look-popup>",            ID_APPLOOK_POPUP
         MENUITEM SEPARATOR
         MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
         MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
@@ -193,6 +254,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
         MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
+        MENUITEM SEPARATOR
+        MENUITEM "Reset All &Toolbars...",      ID_TOOLS_RESET_ALL_TOOLBARS
+        MENUITEM "&Customize...",               ID_VIEW_CUSTOMIZE
     END
     POPUP "&Help"
     BEGIN
@@ -281,13 +345,17 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        MENUITEM SEPARATOR
-        MENUITEM "Album Info &Bar\tCtrl+B",     ID_VIEW_ALBUMDIALOGBAR
-        MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
-        MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
+        POPUP "&Toolbars"
+        BEGIN
+            MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
+        END
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "<app-look-popup>",            ID_APPLOOK_POPUP
+        MENUITEM SEPARATOR
+        MENUITEM "Album Info &Bar\tCtrl+B",     ID_VIEW_ALBUM_DIALOG_BAR
+        MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
         MENUITEM SEPARATOR
         POPUP "&Auto Image Size"
         BEGIN
@@ -316,6 +384,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
         MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
+        MENUITEM SEPARATOR
+        MENUITEM "Reset All &Toolbars...",      ID_TOOLS_RESET_ALL_TOOLBARS
+        MENUITEM "&Customize...",               ID_VIEW_CUSTOMIZE
     END
     POPUP "&Window"
     BEGIN
@@ -374,8 +445,14 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
+        POPUP "&Toolbars"
+        BEGIN
+            MENUITEM "<placeholder>",               ID_VIEW_TOOLBAR
+        END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "<app-look-popup>",            ID_APPLOOK_POPUP
         MENUITEM SEPARATOR
         POPUP "Multi-page"
         BEGIN
@@ -385,8 +462,6 @@ BEGIN
             MENUITEM "&Begin\tHome",                ID_NAVIG_SEEK_FIRST
             MENUITEM "&End\tEnd",                   ID_NAVIG_SEEK_LAST
         END
-        MENUITEM SEPARATOR
-        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
         MENUITEM SEPARATOR
         POPUP "&Auto Image Size"
         BEGIN
@@ -415,6 +490,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Register Associations for Image Files...", ID_REGISTER_IMAGE_ASSOC
         MENUITEM "&Unregister Associations for Image Files...", ID_UNREGISTER_IMAGE_ASSOC
+        MENUITEM SEPARATOR
+        MENUITEM "Reset All &Toolbars...",      ID_TOOLS_RESET_ALL_TOOLBARS
+        MENUITEM "&Customize...",               ID_VIEW_CUSTOMIZE
     END
     POPUP "&Window"
     BEGIN
@@ -512,7 +590,7 @@ BEGIN
         END
         POPUP "&View"
         BEGIN
-            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUMDIALOGBAR
+            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUM_DIALOG_BAR
             MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
         END
         POPUP "&Auto-Drop Recipient"
@@ -561,7 +639,7 @@ BEGIN
         END
         POPUP "&View"
         BEGIN
-            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUMDIALOGBAR
+            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUM_DIALOG_BAR
             MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
         END
         POPUP "&Auto-Drop Recipient"
@@ -615,24 +693,15 @@ IDR_MAINFRAME ACCELERATORS
 BEGIN
     VK_F11,         CK_FULL_SCREEN,         VIRTKEY, NOINVERT
     VK_F5,          CM_CLEAR_IMAGE_CACHE,   VIRTKEY, CONTROL, NOINVERT
-    VK_DELETE,      ID_IMAGE_DELETE,        VIRTKEY, NOINVERT
-    "K",            ID_EDIT_BK_COLOR,       VIRTKEY, CONTROL, NOINVERT
     "W",            CM_EDIT_WORKSPACE,      VIRTKEY, CONTROL, NOINVERT
-    VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
-    "E",            ID_IMAGE_EXPLORE,       VIRTKEY, CONTROL, NOINVERT
-    "Z",            ID_FOCUS_ON_ZOOM_COMBO, VIRTKEY, CONTROL, NOINVERT
-    "1",            ID_TOGGLE_SCALING_ACTUAL_SIZE, VIRTKEY, CONTROL, NOINVERT
-    "0",            ID_TOGGLE_SCALING_AUTO_FIT_ALL, VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "0",            ID_TOGGLE_SCALING_AUTO_FIT_LARGE, VIRTKEY, CONTROL, NOINVERT
     "W",            CM_LOAD_WORKSPACE_DOCS, VIRTKEY, SHIFT, CONTROL, ALT, NOINVERT
-    "X",            ID_CM_MDI_CLOSE_ALL,    VIRTKEY, CONTROL, ALT, NOINVERT
-    "M",            ID_IMAGE_MOVE,          VIRTKEY, CONTROL, NOINVERT
     VK_F5,          CM_REFRESH_CONTENT,     VIRTKEY, NOINVERT
-    "F",            ID_RESIZE_VIEW_TO_FIT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
     "S",            CM_SAVE_WORKSPACE,      VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_F8,          CM_TOGGLE_MAXIMIZE,     VIRTKEY, NOINVERT
-    VK_ADD,         ID_ZOOM_IN,             VIRTKEY, CONTROL, NOINVERT
-    VK_SUBTRACT,    ID_ZOOM_OUT,            VIRTKEY, CONTROL, NOINVERT
+    "X",            ID_APP_EXIT,            VIRTKEY, ALT, NOINVERT
+    VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
+    "X",            ID_CM_MDI_CLOSE_ALL,    VIRTKEY, CONTROL, ALT, NOINVERT
+    "K",            ID_EDIT_BK_COLOR,       VIRTKEY, CONTROL, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
@@ -652,10 +721,19 @@ BEGIN
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_FOCUS_ON_ZOOM_COMBO, VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_IMAGE_DELETE,        VIRTKEY, NOINVERT
+    "E",            ID_IMAGE_EXPLORE,       VIRTKEY, CONTROL, NOINVERT
+    "M",            ID_IMAGE_MOVE,          VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    "F",            ID_RESIZE_VIEW_TO_FIT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "1",            ID_TOGGLE_SCALING_ACTUAL_SIZE, VIRTKEY, CONTROL, NOINVERT
+    "0",            ID_TOGGLE_SCALING_AUTO_FIT_ALL, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "0",            ID_TOGGLE_SCALING_AUTO_FIT_LARGE, VIRTKEY, CONTROL, NOINVERT
     "T",            ID_VIEW_TOOLBAR,        VIRTKEY, CONTROL, NOINVERT
-    "X",            ID_APP_EXIT,            VIRTKEY, ALT, NOINVERT
+    VK_ADD,         ID_ZOOM_IN,             VIRTKEY, CONTROL, NOINVERT
+    VK_SUBTRACT,    ID_ZOOM_OUT,            VIRTKEY, CONTROL, NOINVERT
 END
 
 IDR_IMAGEVIEW ACCELERATORS
@@ -684,16 +762,16 @@ IDR_COMMAND_BAR_ACCEL ACCELERATORS
 BEGIN
     VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
     "D",            ID_FILE_OPEN_ALBUM_FOLDER, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "Q",            ID_FOCUS_ON_SLIDER_CTRL, VIRTKEY, CONTROL, NOINVERT
 END
 
 IDR_ALBUMTYPE ACCELERATORS
 BEGIN
     "A",            CM_SELECT_ALL_THUMBS,   VIRTKEY, CONTROL, NOINVERT
     "A",            CM_ARCHIVE_IMAGES,      VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "B",            ID_VIEW_ALBUMDIALOGBAR, VIRTKEY, CONTROL, NOINVERT
+    "B",            ID_VIEW_ALBUM_DIALOG_BAR, VIRTKEY, CONTROL, NOINVERT
     "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
     "O",            ID_IMAGE_OPEN,          VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "Q",            ID_FOCUS_ON_SLIDER_CTRL, VIRTKEY, CONTROL, NOINVERT
     "T",            CK_SHOW_THUMB_VIEW,     VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_BACK,        CM_CUSTOM_ORDER_UNDO,   VIRTKEY, ALT, NOINVERT
     VK_BACK,        CM_CUSTOM_ORDER_REDO,   VIRTKEY, SHIFT, ALT, NOINVERT
@@ -707,8 +785,8 @@ END
 
 IDR_IMAGETYPE ACCELERATORS
 BEGIN
-    "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_F1,          ID_APP_ABOUT,           VIRTKEY, SHIFT, CONTROL, ALT, NOINVERT
+    "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
 END
 
 IDD_ALBUM_SETTINGS_DIALOG ACCELERATORS
@@ -739,7 +817,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,30,108,10
     CONTROL         "Restore zoom and scroll state in albums",IDC_PERSIST_ALBUM_IMAGE_STATE_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,42,140,10
-    CONTROL         "Show the information bar in albums",ID_VIEW_ALBUMDIALOGBAR,
+    CONTROL         "Show the information bar in albums",ID_VIEW_ALBUM_DIALOG_BAR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,54,145,10
     CONTROL         "Save custom order undo/redo buffer",IDC_SAVECUSTOMORDERUNDOREDO_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,66,131,10
@@ -778,18 +856,6 @@ BEGIN
     PUSHBUTTON      "&Save",CM_SAVE_WORKSPACE,7,198,50,14
     DEFPUSHBUTTON   "OK",IDOK,235,198,50,14,WS_GROUP
     PUSHBUTTON      "Cancel",IDCANCEL,289,198,50,14
-END
-
-IDD_ALBUMDIALOGBAR DIALOGEX 0, 0, 517, 16
-STYLE DS_SETFONT | WS_CHILD
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    CTEXT           "<tb>",IDC_STRIP_BAR_1,2,2,16,12,SS_CENTERIMAGE | NOT WS_VISIBLE | WS_BORDER
-    COMBOBOX        IDC_PLAY_DELAY_COMBO,20,2,46,129,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    EDITTEXT        IDC_SEEK_CURR_POS_EDIT,72,2,37,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
-    CONTROL         "Spin1",IDC_SCROLL_POS_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,102,2,11,12
-    LTEXT           "/ 10,000",IDC_NAV_COUNT_STATIC,113,4,53,8
-    EDITTEXT        IDC_CURR_IMAGE_PATH_EDIT,170,4,346,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_GROUP
 END
 
 IDD_ALBUM_SETTINGS_DIALOG DIALOGEX 0, 0, 499, 279
@@ -979,14 +1045,6 @@ BEGIN
         BOTTOMMARGIN, 212
     END
 
-    IDD_ALBUMDIALOGBAR, DIALOG
-    BEGIN
-        LEFTMARGIN, 2
-        RIGHTMARGIN, 516
-        TOPMARGIN, 2
-        BOTTOMMARGIN, 14
-    END
-
     IDD_ALBUM_SETTINGS_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1070,6 +1128,8 @@ END
 STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "Slider"
+    IDR_TOOLBAR_STANDARD    "Standard"
+    IDR_TOOLBAR_NAVIGATE    "Navigation"
     IDR_ALBUMTYPE           "\nAlbum\nAlbum\nAlbums (*.sld;*.ias)\n.sld;.ias\nSliderAlbum.Document\nSlider Album Document"
     IDR_IMAGETYPE           "\nImage\nImage\nImages (*.bmp)\n.bmp\nSliderImage.Document\nSlider Image Document"
 END
@@ -1186,25 +1246,30 @@ END
 
 STRINGTABLE
 BEGIN
-    IDW_SB_PROGRESS_CAPTION "<progress bar caption field>"
-    IDW_SB_PROGRESS_BAR     "<progress bar text>"
+    ID_VIEW_ALBUM_DIALOG_BAR 
+                            "Show or hide album information bar\nToggle Album Info Bar"
+    IDW_SB_PROGRESS_CAPTION "<progress caption>"
+    IDW_SB_PROGRESS_BAR     "<progress bar>"
     IDW_IMAGE_SCALING_COMBO "Edit the auto image size mode\nAuto Image Size"
     IDW_ZOOM_COMBO          "Zoom\nZoom (Ctrl+Z)"
     IDW_NAVIG_SLIDER_CTRL   "Navigation slider\nNavigation Slider"
     IDW_SMOOTHING_MODE_CHECK 
                             "Toggle the smoothing effect when scaling up an image\nSmooth Mode (toggle off for icons and glyps)"
+END
+
+STRINGTABLE
+BEGIN
     ID_CM_MDI_CLOSE_ALL     "Close all opened documents\nClose All"
-    ID_VIEW_ALBUMDIALOGBAR  "Show or hide album information bar\nToggle Album Info Bar"
+END
+
+STRINGTABLE
+BEGIN
     ID_TOGGLE_SCALING_AUTO_FIT_LARGE 
                             "Shrink large images to best fit the view\nBest Fit (Large Only)"
     ID_TOGGLE_SCALING_AUTO_FIT_ALL 
                             "Scale image for best fit in the view\nBest Fit (All)"
     ID_TOGGLE_SCALING_FIT_WIDTH 
                             "Scale image to fit the entire width in the view\nFit Width"
-END
-
-STRINGTABLE
-BEGIN
     ID_TOGGLE_SCALING_FIT_HEIGHT 
                             "Scale image to fit the entire heigh in the view\nFit Height"
     ID_TOGGLE_SCALING_ACTUAL_SIZE 
@@ -1215,16 +1280,16 @@ BEGIN
     ID_ZOOM_IN              "Increase zoom factor\nZoom In"
     ID_ZOOM_OUT             "Decrease zoom factor\nZoom Out"
     ID_RESIZE_VIEW_TO_FIT   "Resize current view to fit entire image\nResize View to Fit"
+END
+
+STRINGTABLE
+BEGIN
     ID_EDIT_ALBUM           "Edit album settings\nEdit Album Settings (Ctrl+Space)"
     ID_TOGGLE_NAVIG_PLAY    "Toggle auto sliding\nToggle Play (Space)"
     ID_TOGGLE_NAVIG_DIR_FWD "Play in forward direction\nForward Direction"
     ID_TOGGLE_NAVIG_DIR_REV "Play in reverse direction\nReverse Direction"
     ID_TOGGLE_NAVIG_WRAP_MODE 
                             "Toggle wrap navigation mode (circular play)\nToggle Wrap Mode"
-END
-
-STRINGTABLE
-BEGIN
     ID_NAVIG_SEEK_PREV      "Move to previous image\nPrevious Image (Up/Left Arrow)"
     ID_NAVIG_SEEK_NEXT      "Move to next image\nNext Image (Down/Right Arrow)"
     ID_NAVIG_SEEK_FIRST     "Move to first image\nFirst Image (Home)"
@@ -1241,11 +1306,11 @@ BEGIN
     ID_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
     CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
     ID_IMAGE_OPEN           "Opens the selected image file(s) as standalone images\nOpen Selected Images"
-    ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
 END
 
 STRINGTABLE
 BEGIN
+    ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
     ID_IMAGE_DELETE         "Delete the file using shell operation\nDelete"
     ID_IMAGE_MOVE           "Move current image file to another folder\nMove File"
     ID_IMAGE_EXPLORE        "Open Windows Explorer and select the current image file name\nExplore Image"
@@ -1255,6 +1320,34 @@ BEGIN
     CM_DROP_COPY_IMAGE      "Copy and rename the dropped image file\nCopy and Rename Image File"
     CM_CANCEL_DROP          "Cancel the drop operation\nCancel Drop"
     CM_AUTO_DROP_DEFRAGMENT "Renames files in an auto-drop recipient to ensure contiguos numeric filename\nDefragment Image Files"
+    CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
+    CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
+    CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS 
+                            "Clear the Undo and Redo buffer\nClear Undo/Redo Buffer"
+    CM_REGENERATE_ALBUM     "Regenerates the files in the current album using the search specifiers' criteria\nRegenerate Album"
+END
+
+STRINGTABLE
+BEGIN
+    CM_IS_AUTO_DROP         "Toggle this album as auto-drop recipient (four digit numeric filenames only)\tAuto Drop Recipient"
+    CM_ARCHIVE_IMAGES       "Archive the image files in an album\nArchive Images"
+    CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
+    CM_CUSTOM_ORDER_REDO    "Redo the last drop reorder operation\nRedo Custom Order Operation"
+    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS 
+                            "Clear the file operation undo and redo buffer\nClear File Operation Undo Buffer"
+    CK_SAVE_CU_UNDO_REDO_BUFFER 
+                            "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
+    ID_FILE_OPEN_ALBUM_FOLDER 
+                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+D)"
+    ID_EDIT_ARCHIVE_PASSWORD 
+                            "Edit password in image archive storage\nEdit Password"
+    ID_ORDER_ORIGINAL       "Original Search Order"
+    ID_ORDER_CUSTOM         "Custom Order"
+    ID_ORDER_RANDOM_SHUFFLE "Shuffle images in random order\nRandom Shuffle"
+    ID_ORDER_RANDOM_SHUFFLE_SAME_SEED 
+                            "Shuffle images in the same random order\nRandom Shuffle (same seed)"
+    ID_ORDER_BY_FULL_PATH_ASC "Order by Image Path Ascending"
+    ID_ORDER_BY_FULL_PATH_DESC "Order by Image Path Descending"
 END
 
 STRINGTABLE
@@ -1275,6 +1368,10 @@ BEGIN
     IDS_PROMPT_REGENERATE_ALBUM "Do you want to regenerate the album?"
     IDS_PROMPT_CANT_CREATE_DEST_FOLDER 
                             "Cannot create destination folder:\n\n%s"
+END
+
+STRINGTABLE
+BEGIN
     IDS_PROMPT_CREATED_DEST_FOLDER 
                             "Destination folder successfully created!\n\n%s"
     IDS_PROMPT_COPYMOVEFILEOP "Do you want to %s the file %s operation?"
@@ -1282,6 +1379,9 @@ BEGIN
                             "An error occured while parsing the format: %s!\n\n%s"
     IDS_UNDOREDO_INVALID_FILE_PAIRS 
                             "Unable to %s the %d %s operations out of %d due to file inconsistencies!\n\nDo you still want to perform the operation?"
+    IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
+    IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
+    IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
 END
 
 STRINGTABLE
@@ -1292,32 +1392,20 @@ END
 
 STRINGTABLE
 BEGIN
-    CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
-    CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
-    CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS 
-                            "Clear the Undo and Redo buffer\nClear Undo/Redo Buffer"
-    CM_REGENERATE_ALBUM     "Regenerates the files in the current album using the search specifiers' criteria\nRegenerate Album"
-    CM_IS_AUTO_DROP         "Toggle this album as auto-drop recipient (four digit numeric filenames only)\tAuto Drop Recipient"
-    CM_ARCHIVE_IMAGES       "Archive the image files in an album\nArchive Images"
-    CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
-    CM_CUSTOM_ORDER_REDO    "Redo the last drop reorder operation\nRedo Custom Order Operation"
-    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS 
-                            "Clear the file operation undo and redo buffer\nClear File Operation Undo Buffer"
-    CK_SAVE_CU_UNDO_REDO_BUFFER 
-                            "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
-    ID_FILE_OPEN_ALBUM_FOLDER 
-                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+D)"
-    ID_EDIT_ARCHIVE_PASSWORD 
-                            "Edit password in image archive storage\nEdit Password"
+    IDW_PLAY_DELAY_COMBO    "Set the delay in seconds for animated album play\nPlay Animation Delay (seconds)"
+    IDW_SEEK_CURR_POS_SPINEDIT 
+                            "Position of the current slide image\nSlide Image Position"
 END
 
 STRINGTABLE
 BEGIN
-    IDC_SEEK_CURR_POS_EDIT  "Position of the current slide image\nSlide Image Position"
-    IDC_CURR_IMAGE_PATH_EDIT 
-                            "Full path name of the current image file\nImage File Path"
-    IDC_NAV_COUNT_STATIC    "The total number of images in this album\nTotal Image Count"
-    IDC_PLAY_DELAY_COMBO    "Set the delay in seconds for animated album play\nPlay Animation Delay (seconds)"
+    IDW_NAV_COUNT_LABEL     "The total number of images in this album\nTotal Image Count"
+    IDW_CURR_IMAGE_PATH_LABEL 
+                            "Copy file path of the current image file\nImage File Path"
+END
+
+STRINGTABLE
+BEGIN
     IDC_PATTERNS_LISTVIEW   "Path=-1|Type=100|Depth=75"
 END
 
@@ -1330,13 +1418,6 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_ORDER_ORIGINAL       "Original Search Order"
-    ID_ORDER_CUSTOM         "Custom Order"
-    ID_ORDER_RANDOM_SHUFFLE "Shuffle images in random order\nRandom Shuffle"
-    ID_ORDER_RANDOM_SHUFFLE_SAME_SEED 
-                            "Shuffle images in the same random order\nRandom Shuffle (same seed)"
-    ID_ORDER_BY_FULL_PATH_ASC "Order by Image Path Ascending"
-    ID_ORDER_BY_FULL_PATH_DESC "Order by Image Path Descending"
     ID_ORDER_BY_DIMENSION_ASC "Order by Dimension Ascending"
     ID_ORDER_BY_DIMENSION_DESC "Order by Dimension Descending"
 END
@@ -1354,13 +1435,6 @@ BEGIN
                             "Speed-up saving (skip image dimension evaluation)"
     ID_KEEP_IMAGE_DIM_EVALUATION_CMDLINK 
                             "Continue saving full image information"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
-    IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
-    IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
 END
 
 #endif    // English (United States) resources
@@ -1395,7 +1469,7 @@ END
 #include "afxribbon.rc"      // Ribbon and control bars
 #endif
 
-#endif
+#endif
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

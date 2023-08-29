@@ -225,9 +225,32 @@ namespace ui
 		TOOLTIPTEXTW* m_pTttW;
 		UINT m_cmdId;
 		HWND m_hCtrl;
+		void* m_pData;		// from TOOLINFO::lParam
 
 		static const std::tstring s_nilText;		// use to preventing tooltips loaded by default
 	};
+}
+
+
+namespace mfc
+{
+	// CMDIFrameWnd algorithms:
+
+	inline CMDIFrameWnd* GetMainMdiFrameWnd( void ) { return checked_static_cast<CMDIFrameWnd*>( AfxGetMainWnd() ); }
+
+	CMDIChildWnd* GetFirstMdiChildFrame( const CMDIFrameWnd* pMdiFrameWnd = mfc::GetMainMdiFrameWnd() );	// in display order (Z-order): GW_HWNDLAST
+
+	template< typename MdiChildFrameT, typename FuncT >
+	FuncT ForEach_MdiChildFrame( FuncT func, const MdiChildFrameT* pExceptMdiChild = nullptr )
+	{
+		// iterate in MDI child frame in display order (Z-order), which is reverese order GW_HWNDLAST -> GW_HWNDPREV (Z-top -> Z-bottm)
+		for ( CWnd* pChild = mfc::GetFirstMdiChildFrame(); pChild != nullptr; pChild = pChild->GetNextWindow( GW_HWNDPREV ) )
+			if ( MdiChildFrameT* pMdiChild = dynamic_cast<MdiChildFrameT*>( pChild ) )
+				if ( pMdiChild != pExceptMdiChild )		// exclude exception, if any
+					func( pMdiChild );
+
+		return func;
+	}
 }
 
 

@@ -141,47 +141,6 @@ namespace app
 		static ui::IUserReport* s_pUserReport;
 	};
 
-
-	// shared app progress bar support
-
-	class CScopedProgress : private utl::noncopyable
-	{
-	public:
-		enum AutoClearDelay
-		{
-			ACD_Immediate		= 0,
-			ACD_DefaultDelay	= 500,
-			ACD_NoClear			= INT_MAX
-		};
-
-		CScopedProgress( int autoClearDelay = 250 );
-		CScopedProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption = nullptr, int autoClearDelay = 250 );
-		~CScopedProgress();
-
-		bool IsActive( void ) const;
-
-		void Begin( int valueMin, int count, int stepCount, const TCHAR* pCaption = nullptr );
-		void End( int clearDelay = ACD_NoClear );	// ACD_NoClear here it means use m_autoClearDelay value!
-
-		void SetStep( int step ) { ASSERT( IsActive() ); m_pSharedProgressBar->SetStep( step ); }
-		void StepIt( void );
-
-		void SetStepDivider( UINT pbStepDivider ) { m_pbStepDivider = pbStepDivider; }
-
-		int GetPos( void ) const { ASSERT( IsActive() ); return m_pSharedProgressBar->GetPos(); }
-		void SetPos( int value );
-		void OffsetPos( int by ) { ASSERT( IsActive() ); m_pSharedProgressBar->OffsetPos( by ); }
-
-		void GotoBegin( void );
-		void GotoEnd( void );
-	private:
-		CProgressCtrl* m_pSharedProgressBar;
-		int m_autoClearDelay;			// remove delay for the progress bar in mili-secs, 0 for immediate or ACD_NoClear for no reset
-		UINT m_pbStepIndex;
-		UINT m_pbStepDivider;
-		std::auto_ptr<CScopedPumpMessage> m_pMessagePump;
-	};
-
 } //namespace app
 
 

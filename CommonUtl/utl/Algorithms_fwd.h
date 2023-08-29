@@ -15,6 +15,29 @@ namespace pred
 }
 
 
+namespace utl
+{
+	// va_list algorithms
+
+	template< typename ArgT >
+	void QueryArgumentList( OUT std::vector<ArgT>& rArguments, va_list argList, size_t argCount = utl::npos /* NULL terminated */ )
+	{
+		if ( argCount != utl::npos )
+			rArguments.reserve( argCount );
+
+		for ( size_t i = 0; i != argCount; ++i )
+		{
+			ArgT argument = va_arg( argList, ArgT );
+
+			if ( utl::npos == argCount && 0 == argument )
+				break;			// reached the terminating NULL
+
+			rArguments.push_back( argument );
+		}
+	}
+}
+
+
 // general algorithms
 
 namespace utl

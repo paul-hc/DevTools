@@ -1,6 +1,8 @@
 
 #include "pch.h"
 #include "PopupMenus.h"
+#include "ControlBar_fwd.h"
+#include "ToolbarButtons.h"
 #include "MenuUtilities.h"
 #include "ContextMenuMgr.h"
 #include "ColorRepository.h"
@@ -105,7 +107,7 @@ namespace mfc
 		, m_color( color )
 	{
 		if ( !ui::IsUndefinedColor( m_color ) )
-			mfc::Button_SetImageById( this, ID_TRANSPARENT );		// draw color on top of transparent background
+			mfc::ToolBarButton_SetImageById( this, ID_TRANSPARENT );		// draw color on top of transparent background
 	}
 
 	CToolBarColorButton::CToolBarColorButton( UINT btnId, const CColorEntry* pColorEntry )
@@ -115,7 +117,7 @@ namespace mfc
 		m_dwdItemData = reinterpret_cast<DWORD_PTR>( pColorEntry );
 
 		if ( !ui::IsUndefinedColor( m_color ) )
-			mfc::Button_SetImageById( this, ID_TRANSPARENT );		// draw color on top of transparent background
+			mfc::ToolBarButton_SetImageById( this, ID_TRANSPARENT );		// draw color on top of transparent background
 	}
 
 	CToolBarColorButton::CToolBarColorButton( const CMFCToolBarButton* pSrcButton, COLORREF color )
@@ -131,13 +133,13 @@ namespace mfc
 	{
 		m_color = color;
 
-		mfc::Button_SetImageById( this, m_color != CLR_NONE ? ID_TRANSPARENT : m_nID );		// draw color on top of transparent background, or standard image if null color
-		mfc::Button_RedrawImage( this );
+		mfc::ToolBarButton_SetImageById( this, m_color != CLR_NONE ? ID_TRANSPARENT : m_nID );		// draw color on top of transparent background, or standard image if null color
+		mfc::ToolBarButton_RedrawImage( this );
 	}
 
 	void CToolBarColorButton::SetChecked( bool checked /*= true*/ )
 	{
-		mfc::Button_SetStyleFlag( this, TBBS_CHECKED, checked );
+		mfc::ToolBarButton_SetStyleFlag( this, TBBS_CHECKED, checked );
 	}
 
 	CToolBarColorButton* CToolBarColorButton::ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex /*= nullptr*/ )
@@ -164,7 +166,7 @@ namespace mfc
 		m_iImage = iImage;
 		m_bImage = m_iImage != -1;
 
-		mfc::Button_RedrawImage( this );
+		mfc::ToolBarButton_RedrawImage( this );
 	}
 
 	void CToolBarColorButton::CopyFrom( const CMFCToolBarButton& src ) overrides(CMFCToolBarMenuButton)
@@ -259,6 +261,7 @@ namespace mfc
 		, m_pEditorHost( nullptr )
 	{
 		ASSERT_PTR( m_pColorTable );
+		mfc::CToolbarButtonsRefBinder::Instance()->RegisterPointer( m_nID, PosColorTable, m_pColorTable );
 
 		SetImage( -1 );			// mark as unselected by default
 
@@ -280,6 +283,7 @@ namespace mfc
 	void CColorMenuButton::SetEditorHost( ui::IColorEditorHost* pEditorHost )
 	{
 		m_pEditorHost = pEditorHost;
+		mfc::CToolbarButtonsRefBinder::Instance()->RegisterPointer( m_nID, PosEditorHost, m_pEditorHost );
 
 		if ( m_pEditorHost != nullptr && m_pColorTable == m_pEditorHost->GetSelColorTable() )		// button of the selected table?
 			SetSelectedTable( m_pEditorHost->GetColor(), m_pEditorHost->GetAutoColor(), m_pEditorHost->GetDocColorTable() );
@@ -303,7 +307,7 @@ namespace mfc
 	void CColorMenuButton::SetDisplayColorBox( UINT imageId )
 	{
 		if ( imageId != UINT_MAX )
-			mfc::Button_SetImageById( this, imageId != 0 ? imageId : ID_TRANSPARENT );
+			mfc::ToolBarButton_SetImageById( this, imageId != 0 ? imageId : ID_TRANSPARENT );
 		else
 			SetImage( -1 );
 	}
@@ -416,6 +420,18 @@ namespace mfc
 		m_pEditorHost = srcButton.m_pEditorHost;
 	}
 
+	void CColorMenuButton::OnChangeParentWnd( CWnd* pWndParent )
+	{
+		__super::OnChangeParentWnd( pWndParent );
+
+		// when this a button is used on a persistent toolbar: re-bind pointers if parent toolbar is loading state (de-serializing):
+		if ( nullptr == m_pColorTable )		// parent toolbar is loading state (de-serializing)?
+			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pColorTable, m_nID, PosColorTable );
+
+		if ( nullptr == m_pEditorHost )		// parent toolbar is loading state (de-serializing)?
+			mfc::CToolbarButtonsRefBinder::Instance()->RebindPointer( m_pEditorHost, m_nID, PosEditorHost );
+	}
+
 	void CColorMenuButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
 								   BOOL bHorz, BOOL bCustomizeMode, BOOL bHighlight, BOOL bDrawBorder, BOOL bGrayDisabledButtons ) overrides(CMFCColorMenuButton)
 	{
@@ -521,7 +537,7 @@ namespace mfc
 		if ( -1 == clickedBtnPos )
 			return nullptr;
 
-		return reinterpret_cast<const CColorEntry*>( mfc::Button_GetItemData( m_pColorBar->GetButton( clickedBtnPos ) ) );
+		return mfc::ToolBarButton_GetItemPtr<CColorEntry>( m_pColorBar->GetButton( clickedBtnPos ) );
 	}
 
 	void CColorPopupMenu::StoreBtnColorEntries( void )
@@ -576,7 +592,7 @@ namespace mfc
 		// store the color entry for:
 		//	1) so that we can handle TTN_NEEDTEXT only for these color buttons, and do default handling for the other color buttons;
 		//	2) get the raw color when a bar button is pressed.
-		mfc::Button_SetItemData( pButton, pColorEntry );
+		mfc::ToolBarButton_SetItemData( pButton, pColorEntry );
 	}
 
 	const CColorEntry* CColorPopupMenu::FindColorEntry( COLORREF rawColor ) const
@@ -598,7 +614,7 @@ namespace mfc
 
 	bool CColorPopupMenu::FormatColorTipText( OUT std::tstring& rTipText, const CMFCToolBarButton* pButton, int hitBtnIndex ) const
 	{
-		const CColorEntry* pColorEntry = reinterpret_cast<const CColorEntry*>( mfc::Button_GetItemData( pButton ) );
+		const CColorEntry* pColorEntry = mfc::ToolBarButton_GetItemPtr<CColorEntry>( pButton );
 
 		if ( nullptr == pColorEntry )
 		{

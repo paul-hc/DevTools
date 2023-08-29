@@ -38,6 +38,19 @@ namespace utl
 		virtual void AdvanceItemToEnd( void ) throws_( CUserAbortedException ) = 0;
 		virtual void ProcessInput( void ) const throws_( CUserAbortedException ) = 0;		// yield cooperatively
 	};
+
+
+	interface IStatusProgressService		// implemented in status bar, simple service
+	{
+		virtual bool SetLabelText( const std::tstring& text, COLORREF labelTextColor = CLR_DEFAULT, COLORREF labelBkColor = CLR_DEFAULT ) = 0;
+		virtual size_t GetMaxPos( void ) const = 0;
+		virtual size_t GetPos( void ) const = 0;
+		virtual void SetPos( size_t pos ) = 0;
+
+		// implemented
+		void Advance( ptrdiff_t step = 1 ) { SetPos( GetPos() + step ); }
+		void SkipToMax( void ) { SetPos( GetMaxPos() ); }
+	};
 }
 
 

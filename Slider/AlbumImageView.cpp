@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "AlbumImageView.h"
 #include "AlbumDoc.h"
-#include "AlbumDialogBar.h"
 #include "AlbumThumbListView.h"
 #include "ImageNavigator.h"
 #include "INavigationBar.h"
@@ -35,7 +34,7 @@ CAlbumImageView::CAlbumImageView( void )
 	, m_navTimer( this, ID_NAVIGATION_TIMER, m_slideData.m_slideDelay )
 	, m_isDropTargetEnabled( false )
 	, m_pPeerThumbView( nullptr )
-	, m_pAlbumDialogBar( nullptr )
+	, m_pAlbumBar( nullptr )
 {
 	ModifyScalingMode( ui::AutoFitLargeOnly );			// for albums use auto-fit by default
 }
@@ -44,14 +43,14 @@ CAlbumImageView::~CAlbumImageView()
 {
 }
 
-void CAlbumImageView::StorePeerView( CAlbumThumbListView* pPeerThumbView, CAlbumDialogBar* pAlbumDialogBar )
+void CAlbumImageView::StorePeerView( CAlbumThumbListView* pPeerThumbView, IAlbumBar* pAlbumBar )
 {
 	// called just after creation, before initial update
 	ASSERT_NULL( m_pPeerThumbView );
-	ASSERT_NULL( m_pAlbumDialogBar );
+	ASSERT_NULL( m_pAlbumBar );
 
 	m_pPeerThumbView = pPeerThumbView;
-	m_pAlbumDialogBar = pAlbumDialogBar;
+	m_pAlbumBar = pAlbumBar;
 }
 
 CAlbumDoc* CAlbumImageView::GetDocument( void ) const
@@ -137,6 +136,19 @@ bool CAlbumImageView::CanEnterDragMode( void ) const overrides(CImageView)
 
 // navigation support
 
+std::tstring CAlbumImageView::FormatTipText_NavigSliderCtrl( void ) const overrides(CImageView)
+{
+	fs::TImagePathKey imgPathKey = GetImagePathKey();
+	int imageCount = static_cast<int>( GetDocument()->GetImageCount() );
+	std::tstring tipText = imgPathKey.first.Get() + str::Format( _T("  (%d of %d)"), m_slideData.GetCurrentIndex(), imageCount );
+	CImageFrameNavigator imgFrame( GetImage() );
+
+	if ( imgFrame.IsStaticMultiFrameImage() )
+		tipText += str::Format( _T(" - [frame %d/%d]"), m_slideData.GetCurrentIndex(), imgFrame.GetFramePos() + 1, imgFrame.GetFrameCount() );
+
+	return tipText;
+}
+
 bool CAlbumImageView::IsValidIndex( size_t index ) const
 {
 	return GetDocument()->IsValidIndex( index );
@@ -214,6 +226,7 @@ void CAlbumImageView::RestartPlayTimer( void )
 void CAlbumImageView::SetSlideDelay( UINT slideDelay )
 {
 	m_navTimer.SetElapsed( m_slideData.m_slideDelay = slideDelay );
+	OnSlideDataChanged( false );		// don't set modified flag for this change
 }
 
 void CAlbumImageView::HandleNavTick( void )
@@ -256,8 +269,10 @@ void CAlbumImageView::NavigateTo( int pos, bool relative /*= false*/ )
 void CAlbumImageView::LateInitialUpdate( void )
 {
 	const CListViewState& currListState = m_slideData.GetCurrListState();
+
 	if ( !currListState.IsEmpty() )
 		m_pPeerThumbView->SetListViewState( currListState );		// restore the persistent selection
+
 	m_pPeerThumbView->ShowWindow( SW_SHOW );
 
 	CView* pViewToActivate = m_slideData.HasShowFlag( af::ShowThumbView ) ? static_cast<CView*>( m_pPeerThumbView ) : this;
@@ -269,7 +284,7 @@ void CAlbumImageView::LateInitialUpdate( void )
 
 void CAlbumImageView::UpdateChildBarsState( bool onInit /*= false*/ )
 {
-	m_pAlbumDialogBar->ShowBar( m_slideData.HasShowFlag( af::ShowAlbumDialogBar ) );
+	m_pAlbumBar->ShowBar( m_slideData.HasShowFlag( af::ShowAlbumDialogBar ) );
 	m_pPeerThumbView->CheckListLayout( onInit ? CAlbumThumbListView::AlbumViewInit : CAlbumThumbListView::ShowCommand );
 }
 
@@ -299,7 +314,7 @@ void CAlbumImageView::OnAlbumModelChanged( AlbumModelChange reason /*= AM_Init*/
 		case AM_Init:
 		case AM_Regeneration:
 		case AM_AutoDropOp:
-			m_pAlbumDialogBar->OnNavRangeChanged();
+			m_pAlbumBar->OnNavRangeChanged();
 			OutputNavigSlider();
 			break;
 	}
@@ -354,7 +369,7 @@ void CAlbumImageView::OnDocSlideDataChanged( void )
 
 void CAlbumImageView::OnCurrPosChanged( bool alsoSliderCtrl /*= true*/ )
 {
-	m_pAlbumDialogBar->OnCurrPosChanged();
+	m_pAlbumBar->OnCurrPosChanged();
 	OnImageContentChanged();
 
 	int currIndex = m_slideData.GetCurrentIndex();
@@ -379,9 +394,9 @@ void CAlbumImageView::EventChildFrameActivated( void ) overrides(CImageView)
 	GetDocument()->m_slideData = m_slideData;		// copy current navigation attributes to document (i.e. persistent attributes)
 }
 
-void CAlbumImageView::EventNavigSliderPosChanged( bool thumbTracking ) overrides(CImageView)
+void CAlbumImageView::HandleNavigSliderPosChanging( int newPos, bool thumbTracking ) overrides(CImageView)
 {
-	m_slideData.SetCurrentIndex( m_pNavigBar->InputNavigPos() );
+	m_slideData.SetCurrentIndex( newPos /*m_pNavigBar->InputNavigPos()*/ );
 
 	if ( thumbTracking )
 		OnCurrPosChanged( false );
@@ -467,11 +482,10 @@ void CAlbumImageView::OnInitialUpdate( void )
 	SetBkColor( pDoc->GetBkColor(), false );
 	RefDrawParams()->SetSmoothingMode( pDoc->GetSmoothingMode() );
 
-	m_pAlbumDialogBar->InitAlbumImageView( this );
 	UpdateChildBarsState( true );		// info bar and thumb pane are hidden in full screen mode
 
-	m_pAlbumDialogBar->OnNavRangeChanged();
-	m_pAlbumDialogBar->OnSlideDelayChanged();
+	m_pAlbumBar->OnNavRangeChanged();
+	m_pAlbumBar->OnSlideDelayChanged();
 
 	if ( nullptr == m_pPeerThumbView->GetAlbumModel() )		// avoid double setup on initialization (it might happen cause of different ways of init, e.g. load or drop)
 		m_pPeerThumbView->SetupAlbumModel( GetDocument()->GetModel() );
@@ -479,6 +493,7 @@ void CAlbumImageView::OnInitialUpdate( void )
 	OnAutoDropRecipientChanged();
 
 	UpdateImage();			// only after this call image become valid (with proper metrics)
+	OnDocSlideDataChanged();		// bug fix: sync with the assigned slide data from document after loading
 
 	__super::OnInitialUpdate();
 

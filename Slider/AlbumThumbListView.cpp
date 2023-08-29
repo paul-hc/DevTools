@@ -1041,8 +1041,8 @@ BEGIN_MESSAGE_MAP( CAlbumThumbListView, TBaseClass )
 	ON_WM_MOUSEWHEEL()
 	ON_WM_CONTEXTMENU()
 	ON_WM_TIMER()
-	ON_COMMAND( CK_SHOW_THUMB_VIEW, OnToggleShowThumbView )
-	ON_UPDATE_COMMAND_UI( CK_SHOW_THUMB_VIEW, OnUpdateShowThumbView )
+	ON_COMMAND( CK_SHOW_THUMB_VIEW, OnToggle_ShowThumbView )
+	ON_UPDATE_COMMAND_UI( CK_SHOW_THUMB_VIEW, OnUpdate_ShowThumbView )
 	ON_CONTROL_REFLECT( LBN_SELCHANGE, OnLBnSelChange )
 END_MESSAGE_MAP()
 
@@ -1211,13 +1211,13 @@ void CAlbumThumbListView::OnTimer( UINT_PTR eventId )
 		__super::OnTimer( eventId );
 }
 
-void CAlbumThumbListView::OnToggleShowThumbView( void )
+void CAlbumThumbListView::OnToggle_ShowThumbView( void )
 {
 	m_pPeerImageView->RefSlideData()->ToggleShowFlag( af::ShowThumbView );
 	CheckListLayout( ShowCommand );
 }
 
-void CAlbumThumbListView::OnUpdateShowThumbView( CCmdUI* pCmdUI )
+void CAlbumThumbListView::OnUpdate_ShowThumbView( CCmdUI* pCmdUI )
 {
 	pCmdUI->SetCheck( m_pPeerImageView->GetSlideData().HasShowFlag( af::ShowThumbView ) );
 }

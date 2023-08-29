@@ -638,6 +638,26 @@ BEGIN
     END
 END
 
+IDR_STD_POPUPS_MENU MENU
+BEGIN
+    POPUP "Application &Look"
+    BEGIN
+        MENUITEM "Windows &2000",               ID_APPLOOK_WINDOWS_2000
+        MENUITEM "Office &XP",                  ID_APPLOOK_OFFICE_XP
+        MENUITEM "&Windows XP",                 ID_APPLOOK_WINDOWS_XP
+        MENUITEM "Office 200&3",                ID_APPLOOK_OFFICE_2003
+        MENUITEM "Visual Studio 200&5",         ID_APPLOOK_VS_2005
+        MENUITEM "Visual Studio 200&8",         ID_APPLOOK_VS_2008
+        MENUITEM SEPARATOR
+        MENUITEM "Office 2007 - &Blue",         ID_APPLOOK_OFFICE_2007_BLUE
+        MENUITEM "Office 2007 - Blac&k",        ID_APPLOOK_OFFICE_2007_BLACK
+        MENUITEM "Office 2007 - &Silver",       ID_APPLOOK_OFFICE_2007_SILVER
+        MENUITEM "Office 2007 - &Aqua",         ID_APPLOOK_OFFICE_2007_AQUA
+        MENUITEM SEPARATOR
+        MENUITEM "Windows &7",                  ID_APPLOOK_WINDOWS_7
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -756,6 +776,14 @@ END
 STRINGTABLE
 BEGIN
     ID_SELECTED_COLOR_BUTTON "Selected color glyph"
+END
+
+STRINGTABLE
+BEGIN
+    ID_WINDOW_MANAGER       "&Windows..."
+    ID_VIEW_CUSTOMIZE       "Customize..."
+    ID_TOOLS_RESET_ALL_TOOLBARS 
+                            "Reset all toolbars and menus. All your changes will be lost!\nReset all Toolbars"
 END
 
 #endif    // English (United States) resources

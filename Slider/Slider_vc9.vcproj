@@ -548,14 +548,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MainToolbar.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MainToolbar.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MoveFileDialog.cpp"
 				>
 			</File>
@@ -853,6 +845,14 @@
 			</File>
 			<File
 				RelativePath=".\test\ThumbnailTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\UiTestUtils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\UiTestUtils.h"
 				>
 			</File>
 		</Filter>

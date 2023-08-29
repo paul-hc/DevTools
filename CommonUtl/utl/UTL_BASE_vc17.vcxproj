@@ -184,6 +184,7 @@
     <ClInclude Include="CodeAlgorithms.h" />
     <ClInclude Include="Code_fwd.h" />
     <ClInclude Include="CppVer.h" />
+    <ClInclude Include="Functional.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandModel.h" />

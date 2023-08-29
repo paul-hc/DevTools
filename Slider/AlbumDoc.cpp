@@ -715,14 +715,18 @@ BOOL CAlbumDoc::OnOpenDocument( LPCTSTR pPath )
 
 			m_model.OpenAllStorages();			// to enable image caching
 			SetModifiedFlag( Clean );			// start off clean
-			return TRUE;
+			break;
 		case app::CAlbumDocTemplate::DirPath:
 		case app::CAlbumDocTemplate::CatalogStorageDoc:
-			return BuildAlbum( filePath );
+			if ( !BuildAlbum( filePath ) )
+				return FALSE;
+			break;
 		default:
 			app::GetUserReport().MessageBox( str::Format( _T("Cannot open unrecognized album file:\n\n%s"), filePath.GetPtr() ) );
 			return FALSE;
 	}
+
+	return TRUE;
 }
 
 BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )

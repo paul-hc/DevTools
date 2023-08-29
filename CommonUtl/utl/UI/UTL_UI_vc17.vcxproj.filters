@@ -668,6 +668,33 @@
     <ClInclude Include="LogPalette.h">
       <Filter>UI\Color</Filter>
     </ClInclude>
+    <ClInclude Include="BaseMainFrameWndEx.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseMainFrameWndEx.hxx">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusProgressService.h">
+      <Filter>UI\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="ControlBar_fwd.h">
+      <Filter>UI\MFC+</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolbarButtons.h">
+      <Filter>UI\MFC+</Filter>
+    </ClInclude>
+    <ClInclude Include="DataAdapters.h">
+      <Filter>UI\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="DataAdapters_fwd.h">
+      <Filter>UI\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="ComboBoxEdit.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutPaneDialog.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1140,6 +1167,24 @@
     </ClCompile>
     <ClCompile Include="LogPalette.cpp">
       <Filter>UI\Color</Filter>
+    </ClCompile>
+    <ClCompile Include="StatusProgressService.cpp">
+      <Filter>UI\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlBar_fwd.cpp">
+      <Filter>UI\MFC+</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolbarButtons.cpp">
+      <Filter>UI\MFC+</Filter>
+    </ClCompile>
+    <ClCompile Include="DataAdapters.cpp">
+      <Filter>UI\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="ComboBoxEdit.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutPaneDialog.cpp">
+      <Filter>UI\Layout</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

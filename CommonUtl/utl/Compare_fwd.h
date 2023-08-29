@@ -15,6 +15,7 @@ namespace func
 	};
 }
 
+
 namespace pred
 {
 	enum CompareResult { Less = -1, Equal, Greater };
@@ -89,6 +90,18 @@ namespace pred
 		{
 			return !is_a<ObjectT>( pObject );
 		}
+	};
+
+
+	// predicate that's always true
+
+	struct True
+	{
+		template< typename ValueT >
+		bool operator()( const ValueT* ) const { return true; }
+
+		template< typename ValueT >
+		bool operator()( const ValueT& ) const { return true; }
 	};
 }
 

@@ -3,10 +3,11 @@
 #include "OleImagesDataSource.h"
 #include "FileOperation.h"
 #include "Workspace.h"
-#include "Application.h"
+#include "Application_fwd.h"
 #include "utl/Algorithms.h"
 #include "utl/FileEnumerator.h"
 #include "utl/UI/ShellUtilities.h"
+#include "utl/UI/StatusProgressService.h"
 #include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/WicDibSection.h"
 
@@ -68,10 +69,13 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector<fs::CFlexPath>& inp
 {
 	ClearAllTempFiles();			// delete all previously cloned files to avoid renames due to collisions
 
-	std::auto_ptr<app::CScopedProgress> pProgress;
+	CStatusProgressService progressSvc;
 
 	if ( HasFlag( CWorkspace::GetFlags(), wf::AllowEmbeddedFileTransfers ) )
-		pProgress.reset( new app::CScopedProgress( 0, (int)inputFilePaths.size(), 1, _T("Create physical backup:") ) );
+	{
+		progressSvc.StartProgress( inputFilePaths.size() - 1 );
+		progressSvc.SetLabelText( _T("Create physical backup:") );
+	}
 
 	const fs::TDirPath& tempDirPath = GetTempDirPath();
 
@@ -101,8 +105,8 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector<fs::CFlexPath>& inp
 				m_physicalFilePaths.push_back( *itInputPath );
 		}
 
-		if ( pProgress.get() != nullptr )
-			pProgress->StepIt();
+		if ( progressSvc.IsActive() )
+			progressSvc.Advance();
 	}
 
 	return !m_physicalFilePaths.empty();

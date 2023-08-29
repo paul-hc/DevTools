@@ -327,6 +327,30 @@ namespace ui
 		return atIndex + 1;			// the position just after
 	}
 
+	int ContainsMenuItem( HMENU hMenu, UINT itemId, RecursionDepth depth /*= Shallow*/ )
+	{
+		if ( Shallow == depth )
+			return ui::FindMenuItemIndex( hMenu, itemId ) != -1;
+
+		return ::GetMenuState( hMenu, itemId, MF_BYCOMMAND ) != UINT_MAX;		// this finds deep menu items (searching in sub-menus)
+	}
+
+	bool ReplaceMenuItemWithPopup( CMenu* pPopupMenu, UINT itemId, UINT menuResId, const CPopupIndexPath& popupIndexPath, UseMenuImages useMenuImages /*= ui::NoMenuImages*/ )
+	{
+		int itemPos = ui::FindMenuItemIndex( pPopupMenu->GetSafeHmenu(), itemId );
+
+		if ( -1 == itemPos )
+			return false;		// item not found
+
+		CMenu subMenu;
+		std::tstring popupText = ui::GetMenuItemText( pPopupMenu, itemPos, MF_BYPOSITION );
+		std::tstring* pOutPopupText = ( popupText.empty() || '<' == popupText[0] ) ? &popupText : nullptr;		// use standard sub-menu item text if existing item has placeholder text
+
+		return
+			ui::LoadPopupMenu( &subMenu, menuResId, popupIndexPath, useMenuImages, pOutPopupText )
+			&& pPopupMenu->ModifyMenu( itemPos, MF_POPUP | MF_BYPOSITION, reinterpret_cast<UINT_PTR>( subMenu.Detach() ), popupText.c_str() ) != FALSE;
+	}
+
 
 	HMENU FindMenuItemIndex( OUT int* pIndex, HMENU hMenu, UINT itemId, RecursionDepth depth /*= Deep*/ )
 	{

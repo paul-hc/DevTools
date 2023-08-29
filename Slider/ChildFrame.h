@@ -6,8 +6,10 @@
 interface IImageView;
 class CAccelTable;
 
+#define TChildFrameBase CMDIChildWndEx
 
-class CChildFrame : public CMDIChildWnd
+
+class CChildFrame : public TChildFrameBase
 {
 	DECLARE_DYNCREATE( CChildFrame )
 public:
@@ -15,17 +17,18 @@ public:
 	virtual ~CChildFrame();
 
 	virtual IImageView* GetImageView( void ) const;		// CImageView or CAlbumImageView
+protected:
+	void StoreImageView( IImageView* pImageView ) { m_pImageView = pImageView; }
 private:
 	IImageView* m_pImageView;
 	const CAccelTable* m_pImageAccel;
 
 	// generated stuff
 protected:
-	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext );
+	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext ) overrides(CFrameWnd);
 public:
-	virtual BOOL PreCreateWindow( CREATESTRUCT& rCS );
-	virtual void ActivateFrame( int cmdShow = -1 );
-	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual void ActivateFrame( int cmdShow = -1 ) override;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
 protected:
 	afx_msg void OnDestroy( void );
 	afx_msg void OnWindowPosChanging( WINDOWPOS* pWndPos );

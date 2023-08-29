@@ -1,7 +1,6 @@
 
 #include "pch.h"
 #include "MainFrame.h"
-#include "MainToolbar.h"
 #include "IImageView.h"
 #include "LoggerSetupDialog.h"
 #include "Workspace.h"
@@ -11,11 +10,14 @@
 #include "resource.h"
 #include "utl/UI/BaseZoomView.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/StatusProgressService.h"
+#include "utl/UI/ToolbarButtons.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 #include "utl/UI/WindowPlacement.h"
 #include "utl/UI/resource.h"
+#include "test/UiTestUtils.h"
 #include <afxpriv.h>		// for WM_SETMESSAGESTRING
 #include <dde.h>
 
@@ -23,23 +25,26 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/BaseMainFrameWndEx.hxx"
+
 
 static UINT s_sbIndicators[] =
 {
 	ID_SEPARATOR,					// status line indicator
 	IDW_SB_PROGRESS_CAPTION,		// caption of the shared progress bar
-	IDW_SB_PROGRESS_BAR				// application shared progress bar
+	IDW_SB_PROGRESS_BAR,			// application shared progress bar
+	ID_INDICATOR_CAPS,
+	ID_INDICATOR_NUM,
+	ID_INDICATOR_SCRL
 };
 
 
-IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWnd )
+IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWndEx )
 
 CMainFrame::CMainFrame( void )
-	: CMDIFrameWnd()
-	, m_pToolbar( new CMainToolbar() )
+	: TMDIFrameWndEx()
 	, m_messageClearTimer( this, MessageTimerId, 5000 )
 	, m_ddeEnqueuedTimer( this, QueueTimerId, 750 )
-	, m_progBarResetTimer( this, ProgressResetTimerId, 250 )
 {
 }
 
@@ -78,8 +83,9 @@ void CMainFrame::StartEnqueuedAlbumTimer( UINT timerDelay /*= 750*/ )
 
 bool CMainFrame::CancelStatusBarAutoClear( UINT idleMessageID /*= AFX_IDS_IDLEMESSAGE*/ )
 {
-	if ( !IsStatusBarAutoClear() )
+	if ( !m_messageClearTimer.IsStarted() )
 		return false;
+
 	SetIdleStatusBarMessage( idleMessageID );
 	return true;
 }
@@ -123,107 +129,6 @@ void CMainFrame::CleanupWindow( void )
 		CWorkspace::Instance().SaveRegSettings();		// registry settings always get saved
 }
 
-bool CMainFrame::CreateProgressCtrl( void )
-{
-	ASSERT_PTR( m_statusBar.m_hWnd );
-
-	int progBarIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
-
-	SetProgressCaptionText( _T("") );
-
-	if ( ProgressBarWidth != -1 )
-		m_statusBar.SetPaneInfo( progBarIndex, IDW_SB_PROGRESS_BAR, SBPS_NOBORDERS, ProgressBarWidth );
-
-	m_statusBar.SetPaneText( progBarIndex, _T("") );
-
-	if ( !m_progressCtrl.Create( WS_CHILD | PBS_SMOOTH, CRect( 0, 0, 0, 0 ), &m_statusBar, IDW_SB_PROGRESS_BAR ) )
-	{
-		TRACE( "Failed to create the progress bar\n" );
-		return false;
-	}
-	return true;
-}
-
-void CMainFrame::SetProgressCaptionText( const TCHAR* pCaption )
-{
-	int progCaptionIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_CAPTION );
-
-	if ( m_statusBar.GetPaneText( progCaptionIndex ) != pCaption )
-	{
-		CSize textExtent;
-		{
-			CClientDC clientDC( &m_statusBar );
-			CFont* orgFont = clientDC.SelectObject( m_statusBar.GetFont() );
-			textExtent = ui::GetTextSize( &clientDC, pCaption );
-			clientDC.SelectObject( orgFont );
-		}
-		m_statusBar.SetPaneInfo( progCaptionIndex, IDW_SB_PROGRESS_CAPTION, SBPS_NOBORDERS, textExtent.cx /*- 5*/ );
-		m_statusBar.SetPaneText( progCaptionIndex, pCaption );
-	}
-}
-
-bool CMainFrame::DoClearProgressCtrl( void )
-{
-	m_progBarResetTimer.Stop();
-
-	// IMP: in order to clear the progress-bar, it must be "logically" turned OFF already, otherwise remains ON.
-	// That's because delayed timer tick may come after re-activation
-	if ( InProgress() )
-		return false;
-
-	// hide the progress-bar (if not already)
-	if ( HasFlag( m_progressCtrl.GetStyle(), WS_VISIBLE ) )
-		m_progressCtrl.ShowWindow( SW_HIDE );
-
-	// clear the progress-bar internal
-	m_progressCtrl.SetPos( 0 );
-	m_progressCtrl.SetRange32( 0, 1 );
-	m_progressCtrl.SetStep( 1 );
-
-	SetProgressCaptionText( _T("") );
-	return true;
-}
-
-void CMainFrame::BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= nullptr*/ )
-{
-	m_progressCtrl.SetRange32( valueMin, valueMin + count );	// note that valueMax is out of range (100% is valMax - 1)
-	m_progressCtrl.SetPos( valueMin );
-	m_progressCtrl.SetStep( stepCount );
-
-	// show the progress-bar (if not already)
-	ui::ShowWindow( m_progressCtrl );
-	SetProgressCaptionText( pCaption );
-
-	m_inProgress.AddInternalChange();
-}
-
-void CMainFrame::EndProgress( int clearDelay )
-{
-	bool wasInProgress = InProgress();
-
-	m_inProgress.ReleaseInternalChange();		// turn off the progress bar (logically)
-	if ( wasInProgress )
-		if ( clearDelay != app::CScopedProgress::ACD_NoClear )
-		{
-			m_progBarResetTimer.SetElapsed( clearDelay );
-			m_progBarResetTimer.Start();
-		}
-		else
-			DoClearProgressCtrl();
-}
-
-void CMainFrame::SetPosProgress( int value )
-{
-	ASSERT( InProgress() );
-	m_progressCtrl.SetPos( value );
-}
-
-void CMainFrame::StepItProgress( void )
-{
-	ASSERT( InProgress() );
-	m_progressCtrl.StepIt();
-}
-
 bool CMainFrame::ResizeViewToFit( CBaseZoomView* pZoomScrollView )
 {
 	ASSERT_PTR( pZoomScrollView->GetSafeHwnd() );
@@ -257,30 +162,119 @@ bool CMainFrame::ResizeViewToFit( CBaseZoomView* pZoomScrollView )
 	return true;
 }
 
+
+// ui::IZoomBar interface
+
+bool CMainFrame::OutputScalingMode( ui::ImageScalingMode scalingMode )
+{
+	mfc::ForEach_MatchingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO, func::MakeSetter( &mfc::CEnumComboBoxButton::SetValue, (int)scalingMode ) );
+	return true;
+}
+
+ui::ImageScalingMode CMainFrame::InputScalingMode( void ) const
+{
+	const mfc::CEnumComboBoxButton* pScalingCombo = mfc::FindNotifyingMatchingButton<mfc::CEnumComboBoxButton>( IDW_IMAGE_SCALING_COMBO );
+
+	ASSERT_PTR( pScalingCombo );
+	return pScalingCombo->GetEnum<ui::ImageScalingMode>();
+}
+
+bool CMainFrame::OutputZoomPct( UINT zoomPct )
+{
+	mfc::ForEach_MatchingButton<mfc::CStockValuesComboBoxButton>( IDW_ZOOM_COMBO, func::MakeSetter( &mfc::CStockValuesComboBoxButton::template OutputValue<UINT>, zoomPct ) );
+	return true;
+}
+
+UINT CMainFrame::InputZoomPct( ui::ComboField byField ) const
+{
+	const mfc::CStockValuesComboBoxButton* pZoomCombo = mfc::FindNotifyingMatchingButton<mfc::CStockValuesComboBoxButton>( IDW_ZOOM_COMBO );
+	UINT zoomPct;
+
+	ASSERT_PTR( pZoomCombo );
+	if ( !pZoomCombo->InputValue( &zoomPct, byField, true ) )
+		zoomPct = 0;
+
+	return zoomPct;
+}
+
+// INavigationBar interface
+
+bool CMainFrame::OutputNavigRange( UINT imageCount )
+{
+	enum { ThresholdCount = 30 };
+
+	if ( mfc::CSliderButton* pSliderButton = mfc::FindFirstMatchingButton<mfc::CSliderButton>( IDW_NAVIG_SLIDER_CTRL ) )
+		return pSliderButton->SetCountRange( imageCount, ThresholdCount );
+
+	return false;
+}
+
+bool CMainFrame::OutputNavigPos( int imagePos )
+{
+	if ( mfc::CSliderButton* pSliderButton = mfc::FindFirstMatchingButton<mfc::CSliderButton>( IDW_NAVIG_SLIDER_CTRL ) )
+	{
+		if ( imagePos < 0 || imagePos > pSliderButton->GetRange().m_end )
+			imagePos = 0;
+
+		if ( pSliderButton->SetPos( imagePos, false ) )
+			return true;
+	}
+
+	return false;
+}
+
+int CMainFrame::InputNavigPos( void ) const
+{
+	if ( mfc::CSliderButton* pSliderButton = mfc::FindFirstMatchingButton<mfc::CSliderButton>( IDW_NAVIG_SLIDER_CTRL ) )
+		return pSliderButton->GetPos();
+
+	ASSERT( false );		// shouldn't be called
+	return 0;
+}
+
+
+void CMainFrame::HandleResetToolbar( UINT toolBarResId )
+{	// called after loading each toolbar from resource to initialize custom buttons
+	switch ( toolBarResId )
+	{
+		case IDR_TOOLBAR_STANDARD:
+		{	// replace custom buttons:
+			mfc::ToolBar_ReplaceButton( &m_standardToolBar, mfc::CEnumComboBoxButton( IDW_IMAGE_SCALING_COMBO, &ui::GetTags_ImageScalingMode(), ScalingModeComboWidth ) );
+			mfc::ToolBar_ReplaceButton( &m_standardToolBar, mfc::CStockValuesComboBoxButton( IDW_ZOOM_COMBO, ui::CZoomStockTags::Instance(), ZoomComboWidth ) );
+			mfc::ToolBar_SetBtnText( &m_standardToolBar, IDW_SMOOTHING_MODE_CHECK, _T("&Smooth"), true, false );
+			break;
+		}
+		case IDR_TOOLBAR_NAVIGATE:
+		{
+			mfc::ToolBar_ReplaceButton( &m_navigateToolBar, mfc::CSliderButton( IDW_NAVIG_SLIDER_CTRL, NavigSliderCtrlWidth ) );
+			break;
+		}
+	}
+}
+
 BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	CPushRoutingFrame push( this );
 
 	return
-		CMDIFrameWnd::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||				// first allow the active view/doc to override central command handlers
-		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
-		m_pToolbar->HandleCmdMsg( cmdId, code, pExtra, pHandlerInfo );
+		__super::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||				// first allow the active view/doc to override central command handlers
+		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
+BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWndEx )
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_CLOSE()
 	ON_WM_GETMINMAXINFO()
-	ON_WM_SIZE()
 	ON_WM_WINDOWPOSCHANGING()
 	ON_WM_SHOWWINDOW()
 	ON_WM_DROPFILES()
 	ON_WM_TIMER()
-	ON_COMMAND( ID_CM_ESCAPE_KEY, On_MdiClose )
+	ON_REGISTERED_MESSAGE( AFX_WM_RESETTOOLBAR, OnResetToolbar )
+	ON_COMMAND( ID_CM_ESCAPE_KEY, On_EscapeKey )
 	ON_COMMAND( ID_CM_MDI_CLOSE_ALL, On_MdiCloseAll )
 	ON_UPDATE_COMMAND_UI( ID_CM_MDI_CLOSE_ALL, OnUpdateAnyMDIChild )
 	ON_COMMAND( CM_TOGGLE_MAXIMIZE, OnToggleMaximize )
@@ -295,13 +289,97 @@ BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
 	ON_UPDATE_COMMAND_UI( CM_CLEAR_TEMP_EMBEDDED_CLONES, OnUpdateAlwaysEnabled )
 	ON_COMMAND_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, On_RegisterImageAssoc )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_REGISTER_IMAGE_ASSOC, ID_UNREGISTER_IMAGE_ASSOC, OnUpdate_RegisterImageAssoc )
+	ON_UPDATE_COMMAND_UI( IDW_SB_PROGRESS_CAPTION, OnUpdateAlwaysEnabled )
+	ON_COMMAND( ID_FOCUS_ON_ZOOM_COMBO, On_FocusOnZoomCombo )
+	ON_COMMAND( ID_FOCUS_ON_SLIDER_CTRL, On_FocusOnSliderCtrl )
 END_MESSAGE_MAP()
 
 int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 {
-	if ( -1 == CMDIFrameWnd::OnCreate( pCS ) )
+	if ( -1 == __super::OnCreate( pCS ) )
 		return -1;
 
+	if ( !m_menuBar.Create( this ) )
+	{
+		TRACE( "Failed to create menubar\n" );
+		return -1;      // fail to create
+	}
+
+	m_menuBar.SetPaneStyle( m_menuBar.GetPaneStyle() | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY );
+
+	CMFCPopupMenu::SetForceMenuFocus( FALSE );		// prevent the menu bar from taking the focus on activation
+
+	// create first toolbar - use CreateEx()
+	if ( !m_standardToolBar.CreateEx( this, TBSTYLE_FLAT, mfc::FirstToolbarStyle ) ||
+		 !m_standardToolBar.LoadToolBar( IDR_TOOLBAR_STANDARD ) )
+	{
+		TRACE( "Failed to create toolbar\n" );
+		return -1;      // fail to create
+	}
+
+	// create additional toolbar - use Create(), passing toolbar ID
+	if ( !m_navigateToolBar.Create( this, mfc::AdditionalToolbarStyle, IDR_TOOLBAR_NAVIGATE ) ||
+		 !m_navigateToolBar.LoadToolBar( IDR_TOOLBAR_NAVIGATE ) )
+	{
+		TRACE( "Failed to create album toolbar\n" );
+		return FALSE;      // fail to create
+	}
+
+	m_standardToolBar.SetWindowText( str::Load( IDR_TOOLBAR_STANDARD ).c_str() );
+	m_navigateToolBar.SetWindowText( str::Load( IDR_TOOLBAR_NAVIGATE ).c_str() );
+	m_navigateToolBar.SetToolBarBtnText( m_navigateToolBar.CommandToIndex( ID_TOGGLE_NAVIG_PLAY ), _T("Play") );
+
+	CString customizeLabel;
+	VERIFY( customizeLabel.LoadString( ID_VIEW_CUSTOMIZE ) );
+
+	m_standardToolBar.EnableCustomizeButton( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel );
+	m_navigateToolBar.EnableCustomizeButton( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel );
+
+	// Allow user-defined toolbars operations:
+	InitUserToolbars( nullptr, FirstUserToolBarId, LastUserToolBarId );
+
+	if ( !m_statusBar.Create( this ) ||
+		 !m_statusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
+	{
+		TRACE( "Failed to create status bar\n" );
+		return -1;      // fail to create
+	}
+
+	m_statusBar.SetPaneStyle( Status_ProgressLabel, SBPS_NOBORDERS | SBPS_POPOUT );
+	m_statusBar.SetPaneStyle( Status_Info, SBPS_STRETCH | SBPS_NOBORDERS );
+	m_statusBar.SetPaneWidth( Status_Progress, ProgressBarWidth );
+	m_statusBar.EnablePaneDoubleClick();
+
+	CStatusProgressService::InitStatusBarInfo( &m_statusBar, Status_Progress, Status_ProgressLabel );		// initialize once the status progress service
+
+	// TODO: Delete these five lines if you don't want the toolbar and menubar to be dockable
+	m_menuBar.EnableDocking( CBRS_ALIGN_ANY );
+	m_standardToolBar.EnableDocking( CBRS_ALIGN_ANY );
+	m_navigateToolBar.EnableDocking( CBRS_ALIGN_ANY );
+	EnableDocking( CBRS_ALIGN_ANY );
+
+	DockPane( &m_menuBar );
+	mfc::DockPanesOnRow( GetDockingManager(), 2, &m_standardToolBar, &m_navigateToolBar );
+
+
+	// enable Visual Studio 2005 style docking window behavior
+	CDockingManager::SetDockingMode( DT_SMART );
+
+	EnableAutoHidePanes( CBRS_ALIGN_ANY );											// enable Visual Studio 2005 style docking window auto-hide behavior
+	EnableWindowsDialog( ID_WINDOW_MANAGER, ID_WINDOW_MANAGER, TRUE );				// enable enhanced windows management dialog
+
+	// Enable toolbar and docking window menu replacement
+	EnablePaneMenu( TRUE, ID_VIEW_CUSTOMIZE, customizeLabel, ID_VIEW_TOOLBAR );		// IMP: any popup containing ID_VIEW_TOOLBAR will be rebuilt on via CDockingManager::BuildPanesMenu() with app tolbars
+
+	CMFCToolBar::EnableQuickCustomization();			// enable quick (Alt+drag) toolbar customization
+
+
+	OutputScalingMode( CWorkspace::GetData().m_scalingMode );
+
+
+
+
+	/*** OLD Toolbars ***/
 	ASSERT_PTR( pCS->hMenu );
 	ui::SetMenuImages( CMenu::FromHandle( pCS->hMenu ) );			// m_hMenuDefault not initialized yet, but will
 
@@ -310,78 +388,49 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	if ( CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
 		pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
 
-	if ( !m_pToolbar->CreateEx( this, TBSTYLE_FLAT | TBSTYLE_TRANSPARENT,
-								WS_CHILD | WS_VISIBLE |
-								CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC,
-								CRect( 0, 2, 0, 2 ) ) ||
-		 !m_pToolbar->InitToolbar() )
-	{
-		TRACE( "Failed to create toolbar\n" );
-		return -1;	  // fail to create
-	}
-
-	if ( !m_statusBar.Create( this ) || !m_statusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
-	{
-		TRACE( "Failed to create status bar\n" );
-		return -1;	  // fail to create
-	}
-	CreateProgressCtrl();
-
-	// TODO: delete these three lines if you don't want the toolbar to be dockable
-	m_pToolbar->EnableDocking( CBRS_ALIGN_ANY );
-	EnableDocking( CBRS_ALIGN_ANY );
-	DockControlBar( m_pToolbar.get() );
 	return 0;
 }
 
 void CMainFrame::OnDestroy( void )
 {
 	CleanupWindow();
-	CMDIFrameWnd::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CMainFrame::OnClose( void )
 {
 	CWorkspace::Instance().FetchSettings();
-	CMDIFrameWnd::OnClose();
+	__super::OnClose();
+}
+
+LRESULT CMainFrame::OnResetToolbar( WPARAM toolBarResId, LPARAM )
+{
+	HandleResetToolbar( static_cast<UINT>( toolBarResId ) );
+	return 0L;
 }
 
 void CMainFrame::OnGetMinMaxInfo( MINMAXINFO* mmi )
 {
 	if ( !CWorkspace::Instance().IsFullScreen() )
-		CMDIFrameWnd::OnGetMinMaxInfo( mmi );
-}
-
-void CMainFrame::OnSize( UINT sizeType, int cx, int cy )
-{
-	CMDIFrameWnd::OnSize( sizeType, cx, cy );
-
-	if ( m_progressCtrl.m_hWnd != nullptr )
-	{	// move the progress bar on top of the associated statusbar item
-		CRect ctrlRect;
-		int progBarIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
-
-		m_statusBar.GetItemRect( progBarIndex, &ctrlRect );
-		m_progressCtrl.MoveWindow( &ctrlRect );
-	}
+		__super::OnGetMinMaxInfo( mmi );
 }
 
 void CMainFrame::OnWindowPosChanging( WINDOWPOS* wndPos )
 {
 	if ( !CWorkspace::Instance().IsFullScreen() )
-		CMDIFrameWnd::OnWindowPosChanging( wndPos );
+		__super::OnWindowPosChanging( wndPos );
 }
 
 void CMainFrame::OnShowWindow( BOOL bShow, UINT nStatus )
 {
 	// Hooked just for debugging...
-	CMDIFrameWnd::OnShowWindow( bShow, nStatus );
+	__super::OnShowWindow( bShow, nStatus );
 }
 
 void CMainFrame::OnDropFiles( HDROP hDropInfo )
 {
 	SetForegroundWindow();
-	CMDIFrameWnd::OnDropFiles( hDropInfo );
+	__super::OnDropFiles( hDropInfo );
 }
 
 void CMainFrame::OnTimer( UINT_PTR eventId )
@@ -402,17 +451,30 @@ void CMainFrame::OnTimer( UINT_PTR eventId )
 			app::GetApp()->OpenQueuedAlbum();
 		}
 	}
-	else if ( m_progBarResetTimer.IsHit( eventId ) )
-		DoClearProgressCtrl();
 	else
-		CMDIFrameWnd::OnTimer( eventId );
+		__super::OnTimer( eventId );
 }
 
-void CMainFrame::On_MdiClose( void )
+void CMainFrame::OnUpdateAlwaysEnabled( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( TRUE );
+}
+
+void CMainFrame::On_EscapeKey( void )
 {
 	CFrameWnd* pActiveFrame = MDIGetActive();
+
+	if ( pActiveFrame != nullptr )
+		if ( CView* pActiveView = pActiveFrame->GetActiveView() )
+			if ( !ui::OwnsFocus( pActiveView->GetSafeHwnd() ) )			// focused owned by a toolbar?
+			{
+				pActiveView->SetFocus();
+				return;
+			}
+
 	if ( nullptr == pActiveFrame )
 		pActiveFrame = this;
+
 	pActiveFrame->SendMessage( WM_SYSCOMMAND, SC_CLOSE );
 }
 
@@ -451,11 +513,6 @@ void CMainFrame::CmLoggerOptions( void )
 	loggerDialog.DoModal();
 }
 
-void CMainFrame::OnUpdateAlwaysEnabled( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable( TRUE );
-}
-
 void CMainFrame::CmClearImageCache( void )
 {
 	app::GetThumbnailer()->Clear();
@@ -465,6 +522,9 @@ void CMainFrame::CmClearImageCache( void )
 
 void CMainFrame::CmRefreshContent( void )
 {
+#ifdef USE_UT		// no UT code in release builds
+	ut::CTestStatusProgress::Start( this, 10.0 );
+#endif
 	app::GetApp()->UpdateAllViews( Hint_ReloadImage );
 }
 
@@ -481,4 +541,18 @@ void CMainFrame::OnUpdate_RegisterImageAssoc( CCmdUI* pCmdUI )
 	bool isRegistered = CAppDocManager::IsAppRegisteredForImageExt();
 
 	pCmdUI->SetCheck( doRegister == isRegistered );
+}
+
+void CMainFrame::On_FocusOnZoomCombo( void )
+{
+	if ( CMFCToolBarComboBoxButton* pComboBtn = mfc::FindFirstMatchingButton<CMFCToolBarComboBoxButton>( IDW_ZOOM_COMBO ) )
+		if ( !pComboBtn->HasFocus() )
+			ui::TakeFocus( pComboBtn->GetHwnd() );
+}
+
+void CMainFrame::On_FocusOnSliderCtrl( void )
+{
+	if ( mfc::CSliderButton* pSliderBtn = mfc::FindFirstMatchingButton<mfc::CSliderButton>( IDW_NAVIG_SLIDER_CTRL ) )
+		if ( !pSliderBtn->HasFocus() )
+			ui::TakeFocus( pSliderBtn->GetHwnd() );
 }

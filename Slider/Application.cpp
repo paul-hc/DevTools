@@ -43,6 +43,7 @@ static const ui::CCmdAlias s_cmdAliases[] =
 	{ ID_IMAGE_SAVE_AS, ID_FILE_SAVE },
 	{ ID_IMAGE_DELETE, ID_REMOVE_ITEM },
 	{ ID_EDIT_ALBUM, ID_EDIT_ITEM },
+	{ IDW_CURR_IMAGE_PATH_LABEL, ID_EDIT_COPY },
 	{ ID_EDIT_ARCHIVE_PASSWORD, IDD_PASSWORD_DIALOG },
 	{ CM_REFRESH_CONTENT, ID_REFRESH },
 	{ ID_FILE_OPEN_ALBUM_FOLDER, ID_BROWSE_FOLDER },
@@ -169,79 +170,6 @@ namespace app
 	int CInteractiveMode::ReportError( CException* pExc, UINT mbType /*= MB_OK*/ )
 	{
 		return HandleReportException( pExc, mbType );
-	}
-
-
-	// CScopedProgress implementation
-
-	CScopedProgress::CScopedProgress( int autoClearDelay /*= 250*/ )
-		: m_pSharedProgressBar( app::GetMainFrame()->GetProgressCtrl() )
-		, m_autoClearDelay( autoClearDelay )
-		, m_pbStepIndex( 0 )
-		, m_pbStepDivider( 1 )
-	{
-	}
-
-	CScopedProgress::CScopedProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= nullptr*/, int autoClearDelay /*= 250*/ )
-		: m_pSharedProgressBar( app::GetMainFrame()->GetProgressCtrl() )
-		, m_autoClearDelay( autoClearDelay )
-		, m_pbStepIndex( 0 )
-		, m_pbStepDivider( 1 )
-		, m_pMessagePump( new CScopedPumpMessage( 5, CWnd::GetActiveWindow() ) )
-	{
-		Begin( valueMin, count, stepCount, pCaption );
-	}
-
-	CScopedProgress::~CScopedProgress()
-	{
-		if ( m_autoClearDelay != ACD_NoClear )
-			End();
-	}
-
-	bool CScopedProgress::IsActive( void ) const
-	{
-		return app::GetMainFrame()->InProgress();
-	}
-
-	void CScopedProgress::Begin( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= nullptr*/ )
-	{
-		app::GetMainFrame()->BeginProgress( valueMin, count, stepCount, pCaption );
-	}
-
-	void CScopedProgress::End( int clearDelay /*= ACD_NoClear*/ )
-	{
-		app::GetMainFrame()->EndProgress( clearDelay == ACD_NoClear ? m_autoClearDelay : clearDelay );
-	}
-
-	void CScopedProgress::SetPos( int value )
-	{
-		app::GetMainFrame()->SetPosProgress( value );
-	}
-
-	void CScopedProgress::StepIt( void )
-	{
-		// if m_pbStepDivider > 1 divide StepIt calls by m_pbStepDivider
-		if ( m_pbStepDivider <= 1 || !( ++m_pbStepIndex % m_pbStepDivider ) )
-			app::GetMainFrame()->StepItProgress();
-
-		if ( m_pMessagePump.get() != nullptr )
-			m_pMessagePump->CheckPump();
-	}
-
-	void CScopedProgress::GotoBegin( void )
-	{
-		int valueMin, valueMax;
-		ASSERT( IsActive() );
-		m_pSharedProgressBar->GetRange( valueMin, valueMax );
-		m_pSharedProgressBar->SetPos( valueMin );
-	}
-
-	void CScopedProgress::GotoEnd( void )
-	{
-		int valueMin, valueMax;
-		ASSERT( IsActive() );
-		m_pSharedProgressBar->GetRange( valueMin, valueMax );
-		m_pSharedProgressBar->SetPos( valueMax - 1 );
 	}
 
 } //namespace app
@@ -419,12 +347,14 @@ void CApplication::InitGlobals( void )
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
 
+	// add MFC popup menu tracking images
+	CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );		// for ID_EDIT_ITEM
+	CMFCToolBar::AddToolBarForImageCollection( IDR_MAINFRAME );
+	CMFCToolBar::AddToolBarForImageCollection( IDR_APP_TOOL_STRIP );
+
 	GetSharedImageStore()->RegisterToolbarImages( IDR_MAINFRAME );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_APP_TOOL_STRIP );
 	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
-
-	// add MFC popup menu tracking images
-	CMFCToolBar::AddToolBarForImageCollection( IDR_MAINFRAME );
 }
 
 bool CApplication::OpenQueuedAlbum( void )

@@ -163,6 +163,7 @@ namespace ui
 	inline DWORD GetStyleEx( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::GetWindowLong( hWnd, GWL_EXSTYLE ); }
 	inline bool IsDisabled( HWND hWnd ) { ASSERT_PTR( hWnd ); return HasFlag( GetStyle( hWnd ), WS_DISABLED ); }
 	inline bool IsVisible( HWND hWnd ) { ASSERT_PTR( hWnd ); return HasFlag( GetStyle( hWnd ), WS_VISIBLE ); }
+	inline bool IsWindowVisible( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::IsWindowVisible( hWnd ) != FALSE; }
 	inline bool IsTransparent( HWND hWnd ) { ASSERT_PTR( hWnd ); return HasFlag( GetStyleEx( hWnd ), WS_EX_TRANSPARENT ); }
 
 	inline bool IsChild( HWND hWnd ) { return HasFlag( GetStyle( hWnd ), WS_CHILD ); }
@@ -416,9 +417,9 @@ namespace ui
 	CEdit* GetComboEdit( const CComboBox& rCombo );
 	CWnd* GetComboDropList( const CComboBox& rCombo );
 
-	std::tstring GetComboSelText( const CComboBox& rCombo, ComboField byField = BySel );
-	std::pair<bool, ComboField> SetComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );		// <changed, by_field>
-	std::pair<bool, ComboField> ReplaceComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );
+	std::tstring GetComboSelText( const CComboBox& rCombo, ui::ComboField byField = ui::BySel );
+	std::pair<bool, ui::ComboField> SetComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );		// <changed, by_field>
+	std::pair<bool, ui::ComboField> ReplaceComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );
 
 	void UpdateHistoryCombo( CComboBox& rCombo, size_t maxCount, str::CaseType caseType = str::Case );
 
