@@ -1343,6 +1343,7 @@ namespace ui
 	std::tstring GetComboSelText( const CComboBox& rCombo, ui::ComboField byField /*= ui::BySel*/ )
 	{
 		int selIndex = rCombo.GetCurSel();
+
 		if ( ui::ByEdit == byField || CB_ERR == selIndex )
 			return ui::GetWindowText( rCombo );
 		else

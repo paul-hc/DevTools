@@ -32,4 +32,23 @@ namespace ui
 		static CZoomStockTags s_zoomTags;
 		return &s_zoomTags;
 	}
+
+
+	// CDurationSecondsStockTags implementation
+
+	const ui::CNumericUnitAdapter<double> CDurationSecondsStockTags::s_secondsAdapter( _T(" sec") );
+
+	CDurationSecondsStockTags::CDurationSecondsStockTags( void )
+		: CStockTags<double>( &s_secondsAdapter, _T("0.1|0.25|0.5|0.75|1|1.5|2|3|4|5|8|10|12|15|17|20|25|30") )
+	{
+		Range<double> limits( FromMiliseconds( USER_TIMER_MINIMUM ), FromMiliseconds( USER_TIMER_MAXIMUM ) );
+
+		SetLimits( limits, ui::LimitRange );
+	}
+
+	const CDurationSecondsStockTags* CDurationSecondsStockTags::Instance( void )
+	{
+		static const CDurationSecondsStockTags s_stockTags;
+		return &s_stockTags;
+	}
 }

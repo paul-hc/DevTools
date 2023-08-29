@@ -146,6 +146,19 @@ namespace ui
 	public:
 		static const CZoomStockTags* Instance( void );
 	};
+
+
+	class CDurationSecondsStockTags : public ui::CStockTags<double>
+	{
+		CDurationSecondsStockTags( void );
+	public:
+		static const CDurationSecondsStockTags* Instance( void );
+
+		static double FromMiliseconds( UINT miliseconds ) { return static_cast<double>( miliseconds ) / 1000.0; }
+		static UINT ToMiliseconds( double seconds ) { return static_cast<UINT>( seconds * 1000.0 ); }
+	public:
+		static const ui::CNumericUnitAdapter<double> s_secondsAdapter;
+	};
 }
 
 

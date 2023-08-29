@@ -3,149 +3,125 @@
 #pragma once
 
 #include "ui_fwd.h"
-#include "DataAdapters_fwd.h"
-
-
-namespace ui
-{
-	template< typename ValueT >
-	interface IValueSetAdapter
-	{
-		typedef ValueT TValue;
-
-		virtual const std::vector<ValueT>& GetStockValues( void ) const = 0;
-		virtual std::tstring OutputValue( const ValueT& value ) const = 0;
-		virtual bool ParseValue( OUT ValueT* pOutValue, const std::tstring& text ) const = 0;
-	};
-
-
-	template< typename ValueT, typename DisplayValueT = ValueT >
-	interface IDisplayValueSetAdapter : public IValueSetAdapter<ValueT>
-	{
-		typedef DisplayValueT TDisplayValue;
-
-		// display type conversion
-		virtual DisplayValueT ToDisplayValue( const ValueT& value ) const = 0;
-		virtual ValueT FromDisplayValue( const DisplayValueT& displayValue ) const = 0;
-	};
-
-
-	template< typename ValueT >
-	std::tstring FormatValidationMessage( const IValueSetAdapter<ValueT>* pAdapter, ui::TValueLimitFlags flags, const Range<ValueT>& validRange );
-
-
-	// timespan duration field (miliseconds) displayed as seconds (double)
-	class CDurationInSecondsAdapter : public ui::IDisplayValueSetAdapter<UINT, double>		// UINT stands for __time64_t (timespan in miliseconds)
-	{
-	protected:
-		CDurationInSecondsAdapter( void );
-	public:
-		typedef ui::IDisplayValueSetAdapter<UINT, double> IAdapterBase;
-
-		static IAdapterBase* Instance( void );
-
-		// IValueSetAdapter<UINT> interface
-		virtual const std::vector<UINT>& GetStockValues( void ) const;
-		virtual std::tstring OutputValue( const UINT& miliseconds ) const;
-		virtual bool ParseValue( OUT UINT* pOutMiliseconds, const std::tstring& text ) const;
-
-		// IDisplayValueSetAdapter<UINT, double> interface
-		virtual double ToDisplayValue( const UINT& miliseconds ) const;
-		virtual UINT FromDisplayValue( const double& seconds ) const;
-	private:
-		std::vector<UINT> m_stockMiliseconds;
-	public:
-		static const UINT s_defaultMiliseconds[];
-	};
-
-
-	// percentage field (no specified value set)
-	abstract class CPercentageAdapterBase : public ui::IValueSetAdapter<UINT>
-	{
-	public:
-		typedef ui::IValueSetAdapter<UINT> IAdapterBase;
-
-		// IValueSetAdapter<UINT> interface
-		virtual std::tstring OutputValue( const UINT& zoomPct ) const;
-		virtual bool ParseValue( OUT UINT* pOutZoomPct, const std::tstring& text ) const;
-	};
-
-
-	// zoom percentage field (value set defined in ui::CStdZoom::m_zoomPcts)
-	class CZoomPercentageAdapter : public CPercentageAdapterBase
-	{
-	public:
-		static IAdapterBase* Instance( void );
-
-		// IValueSetAdapter<UINT> interface
-		virtual const std::vector<UINT>& GetStockValues( void ) const;
-	};
-}
-
-
+#include "DataAdapters.h"
 #include "BaseStockContentCtrl.h"
 
 
-// edits a formatted predefined value set augmented with custom values
-template< typename ValueT >
+// edits a formatted predefined value set, augmented with custom values entered by user
+
 class CStockValuesComboBox : public CBaseStockContentCtrl<CComboBox>
 {
 public:
-	CStockValuesComboBox( const ui::IValueSetAdapter<ValueT>* pStockAdapter, ui::TValueLimitFlags flags = 0 );
+	CStockValuesComboBox( const ui::IStockTags* pStockTags );
 
-	const ui::IValueSetAdapter<ValueT>* GetAdapter( void ) const { return m_pStockAdapter; }
-	void SetAdapter( const ui::IValueSetAdapter<ValueT>* pStockAdapter );
-
-	ui::TValueLimitFlags GetFlags( void ) const { return m_flags; }
-	void SetFlags( ui::TValueLimitFlags flags ) { m_flags = flags ; }
-
-	const Range<ValueT>& GetValidRange( void ) const { return m_validRange; }
-	void SetValidRange( const Range<ValueT>& validRange ) { m_validRange = validRange; }
+	const ui::IStockTags* GetTags( void ) const { return m_pStockTags; }
+	void SetTags( const ui::IStockTags* pStockTags );
 
 	// input/output
+	template< typename ValueT >
 	bool OutputValue( ValueT value );
-	bool InputValue( ValueT* pOutValue, ui::ComboField byField, bool showErrors = false ) const;
 
-	bool IsValidValue( ValueT value ) const;
+	template< typename ValueT >
+	bool InputValue( OUT ValueT* pOutValue, ui::ComboField byField, bool showErrors = true ) const;		// ui::BySel for CBN_SELCHANGE, ui::ByEdit for CBN_EDITCHANGE
 
+	template< typename ValueT >
 	void DDX_Value( CDataExchange* pDX, ValueT& rValue, int comboId );
-	std::tstring FormatValidationError( void ) const;
 protected:
 	// base overrides
-	virtual void InitStockContent( void );
+	virtual void InitStockContent( void ) override;
 
-	struct OutputFormatter
-	{
-		OutputFormatter( const ui::IValueSetAdapter<ValueT>* pStockAdapter ) : m_pStockAdapter( pStockAdapter ) { ASSERT_PTR( m_pStockAdapter ); }
+	template< typename ValueT >
+	typename const ui::CStockTags<ValueT>* GetTagsAs( void ) const { return checked_static_cast< const ui::CStockTags<ValueT>* >( m_pStockTags ); }
 
-		std::tstring operator()( ValueT value ) const { return m_pStockAdapter->OutputValue( value ); }
-	private:
-		const ui::IValueSetAdapter<ValueT>* m_pStockAdapter;
-	};
-
-	// generated stuff
+	bool OutputTag( const std::tstring& tag );
+	void OnInputError( void ) const;
 private:
-	const ui::IValueSetAdapter<ValueT>* m_pStockAdapter;
-	ui::TValueLimitFlags m_flags;
-	Range<ValueT> m_validRange;
+	const ui::IStockTags* m_pStockTags;
 };
 
 
 // edits a timespan duration field (miliseconds) displayed as seconds (double)
-class CDurationComboBox : public CStockValuesComboBox<UINT>
+class CDurationComboBox : public CStockValuesComboBox
 {
 public:
-	CDurationComboBox( ui::TValueLimitFlags flags = ui::LimitMinValue, const ui::IValueSetAdapter<UINT>* pStockAdapter = ui::CDurationInSecondsAdapter::Instance() );
+	CDurationComboBox( const ui::IStockTags* pStockTags = ui::CDurationSecondsStockTags::Instance() );
+
+	bool OutputMiliseconds( UINT durationMs );
+	bool InputMiliseconds( OUT UINT* pDurationMs, ui::ComboField byField, bool showErrors = false ) const;
+
+	void DDX_Miliseconds( CDataExchange* pDX, IN OUT UINT& rDurationMs, int comboId );
 };
 
 
 // edits a zoom percentage field
-class CZoomComboBox : public CStockValuesComboBox<UINT>
+class CZoomComboBox : public CStockValuesComboBox
 {
 public:
-	CZoomComboBox( ui::TValueLimitFlags flags = ui::LimitMinValue | ui::LimitMaxValue,
-				   const ui::IValueSetAdapter<UINT>* pStockAdapter = ui::CZoomPercentageAdapter::Instance() );
+	CZoomComboBox( const ui::IStockTags* pStockTags = ui::CZoomStockTags::Instance() );
 };
+
+
+namespace ui
+{
+	// WndUtils.h forward declarations
+
+	std::tstring GetComboSelText( const CComboBox& rCombo, ui::ComboField byField /*= ui::BySel*/ );
+}
+
+
+#include "Dialog_fwd.h"
+
+
+// CStockValuesComboBox template code
+
+template< typename ValueT >
+bool CStockValuesComboBox::OutputValue( ValueT value )
+{
+	if ( const ui::CStockTags<ValueT>* pStockTags = GetTagsAs<ValueT>() )
+		return OutputTag( pStockTags->FormatValue( value ) );
+
+	ASSERT( false );
+	return false;
+}
+
+template< typename ValueT >
+bool CStockValuesComboBox::InputValue( OUT ValueT* pOutValue, ui::ComboField byField, bool showErrors /*= true*/ ) const
+{
+	if ( const ui::CStockTags<ValueT>* pStockTags = GetTagsAs<ValueT>() )
+	{
+		std::tstring currentTag = ui::GetComboSelText( *this, byField );
+
+		if ( currentTag.empty() )
+			return false;			// transient empty text, e.g. when the combo list is still dropped down, etc
+
+		if ( pStockTags->ParseValue( pOutValue, currentTag ) )
+			if ( pStockTags->IsValidValue( *pOutValue ) )
+				return true;
+
+		OnInputError();
+
+		if ( showErrors )
+			return ui::ShowInputError( const_cast<CStockValuesComboBox*>( this ), pStockTags->FormatValidationError(), MB_ICONERROR );		// invalid input
+	}
+	else
+		ASSERT( false );
+
+	return false;
+}
+
+template< typename ValueT >
+void CStockValuesComboBox::DDX_Value( CDataExchange* pDX, ValueT& rValue, int comboId )
+{
+	DDX_Control( pDX, comboId, *this );
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+		OutputValue( rValue );
+	else
+	{
+		if ( !InputValue( &rValue, ui::ByEdit, true ) )
+			pDX->Fail();
+	}
+}
 
 
 #endif // StockValuesComboBox_h

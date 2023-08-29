@@ -304,6 +304,7 @@ namespace mfc
 		if ( const ui::CStockTags<ValueT>* pStockTags = GetTagsAs<ValueT>() )
 		{
 			std::tstring currentTag = mfc::GetComboSelText( this, byField );
+
 			if ( currentTag.empty() )
 				return false;			// transient empty text, e.g. when the combo list is still dropped down, etc
 

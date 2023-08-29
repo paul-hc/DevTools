@@ -84,7 +84,7 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_Number( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_data.m_thumbBoundsSize );
 	ui::DDV_NumberMinMax( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_data.m_thumbBoundsSize, thumb::MinBoundsSize, thumb::MaxBoundsSize );
 
-	m_slideDelayCombo.DDX_Value( pDX, m_defaultSlideDelay, IDC_DEFAULT_SLIDE_DELAY_COMBO );
+	m_slideDelayCombo.DDX_Miliseconds( pDX, m_defaultSlideDelay, IDC_DEFAULT_SLIDE_DELAY_COMBO );
 
 	__super::DoDataExchange( pDX );
 }

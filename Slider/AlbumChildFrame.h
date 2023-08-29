@@ -5,7 +5,7 @@
 #include "ChildFrame.h"
 #include "SplitterWindow.h"
 #include "INavigationBar.h"			// for IAlbumBar
-#include "utl/UI/Dialog_fwd.h"
+#include "utl/UI/Dialog_fwd.h"		// for ui::ICustomCmdInfo
 #include "utl/UI/ui_fwd.h"
 
 

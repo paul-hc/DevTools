@@ -10,7 +10,6 @@
 #include "utl/StringUtilities.h"
 #include "utl/TextClipboard.h"
 #include "utl/UI/ControlBar_fwd.h"
-#include "utl/UI/DataAdapters.h"
 #include "utl/UI/ToolbarButtons.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
@@ -18,41 +17,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-namespace app
-{
-	class CDurationSecondsStockTags : public ui::CStockTags<double>
-	{
-		CDurationSecondsStockTags( void );
-	public:
-		static const CDurationSecondsStockTags* Instance( void );
-
-		static double FromMiliseconds( UINT miliseconds ) { return static_cast<double>( miliseconds ) / 1000.0; }
-		static UINT ToMiliseconds( double seconds ) { return static_cast<UINT>( seconds * 1000.0 ); }
-	public:
-		static const ui::CNumericUnitAdapter<double> s_secondsAdapter;
-	};
-
-
-	// CDurationSecondsStockTags implementation
-
-	const ui::CNumericUnitAdapter<double> CDurationSecondsStockTags::s_secondsAdapter( _T(" sec") );
-
-	CDurationSecondsStockTags::CDurationSecondsStockTags( void )
-		: CStockTags<double>( &s_secondsAdapter, _T("0.1|0.25|0.5|0.75|1|1.5|2|3|4|5|8|10|12|15|17|20|25|30") )
-	{
-		Range<double> limits( FromMiliseconds( USER_TIMER_MINIMUM ), FromMiliseconds( USER_TIMER_MAXIMUM ) );
-
-		SetLimits( limits, ui::LimitRange );
-	}
-
-	const CDurationSecondsStockTags* CDurationSecondsStockTags::Instance( void )
-	{
-		static const CDurationSecondsStockTags s_stockTags;
-		return &s_stockTags;
-	}
-}
 
 
 // CAlbumChildFrame implementation
@@ -124,7 +88,7 @@ void CAlbumChildFrame::OnCurrPosChanged( void ) implement
 void CAlbumChildFrame::OnSlideDelayChanged( void ) implement
 {
 	mfc::CStockValuesComboBoxButton* pPlayDelayCombo = mfc::ToolBar_LookupButton<mfc::CStockValuesComboBoxButton>( *m_pAlbumToolBar, IDW_PLAY_DELAY_COMBO );
-	double slideDelaySecs = app::CDurationSecondsStockTags::FromMiliseconds( m_pAlbumImageView->GetSlideData().m_slideDelay );
+	double slideDelaySecs = ui::CDurationSecondsStockTags::FromMiliseconds( m_pAlbumImageView->GetSlideData().m_slideDelay );
 
 	pPlayDelayCombo->OutputValue( slideDelaySecs );
 }
@@ -138,7 +102,7 @@ bool CAlbumChildFrame::InputSlideDelay( ui::ComboField byField )
 	if ( !pPlayDelayCombo->InputValue( &slideDelaySecs, byField, true ) )
 		return false;
 
-	m_pAlbumImageView->SetSlideDelay( app::CDurationSecondsStockTags::ToMiliseconds( slideDelaySecs ) );
+	m_pAlbumImageView->SetSlideDelay( ui::CDurationSecondsStockTags::ToMiliseconds( slideDelaySecs ) );
 	OnSlideDelayChanged();			// update the content of combo box
 	return true;
 }
@@ -172,7 +136,7 @@ void CAlbumChildFrame::BuildAlbumToolbar( void )
 
 	m_pAlbumToolBar->InsertButton( new CMFCToolBarButton( ID_EDIT_ALBUM, mfc::FindButtonImageIndex( ID_EDIT_ITEM ) ) );
 	m_pAlbumToolBar->InsertSeparator();
-	m_pAlbumToolBar->InsertButton( new mfc::CStockValuesComboBoxButton( IDW_PLAY_DELAY_COMBO, app::CDurationSecondsStockTags::Instance(), DurationComboWidth ) );
+	m_pAlbumToolBar->InsertButton( new mfc::CStockValuesComboBoxButton( IDW_PLAY_DELAY_COMBO, ui::CDurationSecondsStockTags::Instance(), DurationComboWidth ) );
 	m_pAlbumToolBar->InsertSeparator();
 	m_pAlbumToolBar->InsertButton( new CMFCToolBarSpinEditBoxButton( IDW_SEEK_CURR_POS_SPINEDIT, -1, ES_NUMBER | ES_AUTOHSCROLL, SeekCurrPosSpinEditWidth ) );
 	m_pAlbumToolBar->InsertButton( new mfc::CLabelButton( IDW_NAV_COUNT_LABEL ) );

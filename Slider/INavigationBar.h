@@ -2,6 +2,8 @@
 #define INavigationBar_h
 #pragma once
 
+#include "utl/UI/DataAdapters.h"
+
 
 interface INavigationBar
 {
