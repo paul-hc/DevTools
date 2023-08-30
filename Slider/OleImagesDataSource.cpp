@@ -69,15 +69,8 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector<fs::CFlexPath>& inp
 {
 	ClearAllTempFiles();			// delete all previously cloned files to avoid renames due to collisions
 
-	CStatusProgressService progressSvc;
-
-	if ( HasFlag( CWorkspace::GetFlags(), wf::AllowEmbeddedFileTransfers ) )
-	{
-		progressSvc.StartProgress( inputFilePaths.size() - 1 );
-		progressSvc.SetLabelText( _T("Create physical backup:") );
-	}
-
 	const fs::TDirPath& tempDirPath = GetTempDirPath();
+	CStatusProgressService progressSvc;
 
 	ASSERT( tempDirPath.FileExist() );
 	for ( std::vector<fs::CFlexPath>::const_iterator itInputPath = inputFilePaths.begin(); itInputPath != inputFilePaths.end(); ++itInputPath )
@@ -85,9 +78,15 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector<fs::CFlexPath>& inp
 		if ( itInputPath->FileExist() )
 		{
 			if ( itInputPath->IsComplexPath() )
-			{
+			{	// file drag & drop works only with physical files: we have to mirror the storage files as temporary physical copies during drag & drop
 				if ( HasFlag( CWorkspace::GetFlags(), wf::AllowEmbeddedFileTransfers ) )
 				{
+					if ( !progressSvc.IsActive() )
+					{	// lazy enter progress mode
+						progressSvc.StartProgress( inputFilePaths.size() );
+						progressSvc.SetLabelText( _T("Create physical backup:") );
+					}
+
 					// make a unique numeric physical temp path
 					fs::CFlexPath physicalTempPath( fs::MakeUniqueNumFilename( tempDirPath / itInputPath->GetFilename() ).Get() );
 
