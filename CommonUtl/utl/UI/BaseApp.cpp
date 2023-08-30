@@ -272,12 +272,15 @@ namespace app
 		ttInfo.m_bVislManagerTheme = TRUE;
 		pWinAppEx->GetTooltipManager()->SetTooltipParams( AFX_TOOLTIP_TYPE_ALL, RUNTIME_CLASS( CMFCToolTipCtrl ), &ttInfo );	// multi-line nice looking tooltips
 
+		/* Obsolete: RegisterToolbarImages() does that automatically : add MFC popup menu tracking images
+
+		// automatically load by CImageStore::RegisterToolbarImages()
 		if ( afxContextMenuManager != nullptr )
 		{	// feed afxCommandManager [class CCommandManager] with images from the strip
 			CMFCToolBar::AddToolBarForImageCollection( IDR_STD_STATUS_STRIP );
 			CMFCToolBar::AddToolBarForImageCollection( IDR_STD_BUTTONS_STRIP );
 			//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );
-		}
+		}*/
 
 		return true;
 	}

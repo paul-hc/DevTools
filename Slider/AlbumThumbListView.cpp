@@ -657,7 +657,7 @@ int CAlbumThumbListView::GetListClientWidth( int listWidth )
 bool CAlbumThumbListView::CheckListLayout( CheckLayoutMode checkMode /*= SplitterTrack*/ )
 {
 	int columnCount = 0;
-	CSlideData* pSlideData = m_pPeerImageView->RefSlideData();
+	CSlideData* pSlideData = m_pPeerImageView->PtrSlideData();
 
 	// first determine the column count
 	switch ( checkMode )
@@ -1213,7 +1213,7 @@ void CAlbumThumbListView::OnTimer( UINT_PTR eventId )
 
 void CAlbumThumbListView::OnToggle_ShowThumbView( void )
 {
-	m_pPeerImageView->RefSlideData()->ToggleShowFlag( af::ShowThumbView );
+	m_pPeerImageView->PtrSlideData()->ToggleShowFlag( af::ShowThumbView );
 	CheckListLayout( ShowCommand );
 }
 

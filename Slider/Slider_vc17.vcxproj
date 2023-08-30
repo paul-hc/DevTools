@@ -325,18 +325,15 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\AlbumDoc.ico" />
-    <Image Include="res\AppToolStrip.bmp" />
-    <Image Include="res\AppToolStrip.png" />
     <Image Include="res\ImageDoc.ico" />
     <Image Include="res\Slider.ico" />
     <Image Include="res\SliderDoc.ico" />
-    <Image Include="res\ToolbarAlbum.bmp" />
-    <Image Include="res\ToolbarNavigate.bmp" />
-    <Image Include="res\ToolbarNavigate.png" />
-    <Image Include="res\ToolbarStandard.bmp" />
-    <Image Include="res\ToolbarStandard.png" />
-    <Image Include="res\Toolbar_Old.bmp" />
-    <Image Include="res\Toolbar_Old.png" />
+    <Image Include="res\ToolBarNavigate.bmp" />
+    <Image Include="res\ToolBarNavigate.png" />
+    <Image Include="res\ToolBarStandard.bmp" />
+    <Image Include="res\ToolBarStandard.png" />
+    <Image Include="res\ToolstripMenu.bmp" />
+    <Image Include="res\ToolstripMenu.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Slider.rc2" />

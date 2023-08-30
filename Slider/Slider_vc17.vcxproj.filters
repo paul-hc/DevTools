@@ -344,34 +344,25 @@
     <Image Include="res\AlbumDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\AppToolStrip.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\AppToolStrip.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\ImageDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ToolbarStandard.bmp">
+    <Image Include="res\ToolstripMenu.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ToolbarStandard.png">
+    <Image Include="res\ToolstripMenu.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ToolbarNavigate.bmp">
+    <Image Include="res\ToolBarNavigate.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ToolbarNavigate.png">
+    <Image Include="res\ToolBarNavigate.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\Toolbar_Old.bmp">
+    <Image Include="res\ToolBarStandard.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\Toolbar_Old.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\ToolbarAlbum.bmp">
+    <Image Include="res\ToolBarStandard.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

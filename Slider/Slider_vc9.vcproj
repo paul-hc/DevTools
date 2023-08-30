@@ -346,19 +346,11 @@
 	<Files>
 		<Filter
 			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
+			Filter="rc;ico;cur;bmp;png;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
 				RelativePath=".\res\AlbumDoc.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\res\AppToolStrip.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\res\AppToolStrip.png"
 				>
 			</File>
 			<File
@@ -382,11 +374,27 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\Toolbar.bmp"
+				RelativePath=".\res\ToolBarNavigate.bmp"
 				>
 			</File>
 			<File
-				RelativePath=".\res\Toolbar.png"
+				RelativePath=".\res\ToolBarNavigate.png"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ToolBarStandard.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ToolBarStandard.png"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ToolstripMenu.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ToolstripMenu.png"
 				>
 			</File>
 		</Filter>
@@ -405,14 +413,6 @@
 			</File>
 			<File
 				RelativePath=".\AlbumChildFrame.h"
-				>
-			</File>
-			<File
-				RelativePath=".\AlbumDialogBar.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\AlbumDialogBar.h"
 				>
 			</File>
 			<File

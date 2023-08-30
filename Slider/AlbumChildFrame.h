@@ -52,6 +52,7 @@ private:
 
 	CAlbumThumbListView* m_pThumbsListView;
 	CAlbumImageView* m_pAlbumImageView;
+	bool m_doneInit;
 
 	enum { DurationComboWidth = 70, SeekCurrPosSpinEditWidth = 60 };
 
@@ -64,9 +65,12 @@ protected:
 	afx_msg void OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI );
 	afx_msg void OnEditInput_PlayDelayCombo( void );
 	afx_msg void OnCBnSelChange_PlayDelayCombo( void );
-	afx_msg void OnUpdateAlways( CCmdUI* pCmdUI );
-	afx_msg void OnEnChange_SeekCurrPosSpinEdit( void );
+	afx_msg void OnToggle_AutoSeekImagePos( void );
+	afx_msg void OnUpdate_AutoSeekImagePos( CCmdUI* pCmdUI );
+	afx_msg void OnEnUpdate_SeekCurrPosSpinEdit( void );
+	afx_msg void On_SeekCurrPosSpinEdit( void );
 	afx_msg void On_CopyCurrImagePath( void );
+	afx_msg void OnUpdateAlways( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

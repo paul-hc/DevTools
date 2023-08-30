@@ -9,6 +9,7 @@
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
 #include <afxcommandmanager.h>
+#include <afxcontextmenumanager.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -175,6 +176,9 @@ void CImageStore::RegisterToolbarImages( UINT toolBarId, COLORREF transpColor /*
 
 	VERIFY( strip.LoadToolbar( toolBarId, transpColor ) );
 	RegisterButtonImages( strip );
+
+	if ( afxContextMenuManager != nullptr )
+		CMFCToolBar::AddToolBarForImageCollection( toolBarId );		// also load the MFC control bar images for the toolbar
 }
 
 void CImageStore::RegisterButtonImages( const CToolImageList& toolImageList )

@@ -85,15 +85,11 @@ IDR_IMAGETYPE           ICON                    "res\\ImageDoc.ico"
 // Bitmap
 //
 
-IDR_MAINFRAME           BITMAP                  "res\\Toolbar_Old.bmp"
+IDR_TOOLBAR_STANDARD    BITMAP                  "res\\ToolBarStandard.bmp"
 
-IDR_APP_TOOL_STRIP      BITMAP                  "res\\AppToolStrip.bmp"
+IDR_TOOLBAR_NAVIGATE    BITMAP                  "res\\ToolBarNavigate.bmp"
 
-IDR_TOOLBAR_STANDARD    BITMAP                  "res\\ToolbarStandard.bmp"
-
-IDR_TOOLBAR_NAVIGATE    BITMAP                  "res\\ToolbarNavigate.bmp"
-
-ID_VIEW_ALBUM_DIALOG_BAR BITMAP                  "res\\ToolbarAlbum.bmp"
+IDR_TOOLSTRIP_MENU      BITMAP                  "res\\ToolstripMenu.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -101,13 +97,11 @@ ID_VIEW_ALBUM_DIALOG_BAR BITMAP                  "res\\ToolbarAlbum.bmp"
 // PNG
 //
 
-IDR_TOOLBAR_STANDARD    PNG                     "res\\ToolbarStandard.png"
+IDR_TOOLBAR_STANDARD    PNG                     "res\\ToolBarStandard.png"
 
-IDR_TOOLBAR_NAVIGATE    PNG                     "res\\ToolbarNavigate.png"
+IDR_TOOLBAR_NAVIGATE    PNG                     "res\\ToolBarNavigate.png"
 
-IDR_MAINFRAME           PNG                     "res\\Toolbar_Old.png"
-
-IDR_APP_TOOL_STRIP      PNG                     "res\\AppToolStrip.png"
+IDR_TOOLSTRIP_MENU      PNG                     "res\\ToolstripMenu.png"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -115,40 +109,20 @@ IDR_APP_TOOL_STRIP      PNG                     "res\\AppToolStrip.png"
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR 16, 16
+IDR_TOOLSTRIP_MENU TOOLBAR 16, 16
 BEGIN
-    BUTTON      CK_FULL_SCREEN
-    BUTTON      CK_SHOW_THUMB_VIEW
+    BUTTON      ID_EDIT_ALBUM
+    BUTTON      IDW_AUTO_SEEK_IMAGE_POS_CHECK
     SEPARATOR
-    BUTTON      ID_ZOOM_NORMAL_100
-    BUTTON      ID_ZOOM_IN
-    BUTTON      ID_ZOOM_OUT
-    SEPARATOR
-    BUTTON      ID_TOGGLE_NAVIG_PLAY
-    SEPARATOR
-    BUTTON      ID_NAVIG_SEEK_FIRST
-    BUTTON      ID_NAVIG_SEEK_PREV
-    BUTTON      ID_NAVIG_SEEK_NEXT
-    BUTTON      ID_NAVIG_SEEK_LAST
-    SEPARATOR
-    BUTTON      ID_TOGGLE_NAVIG_DIR_REV
-    BUTTON      ID_TOGGLE_NAVIG_DIR_FWD
-    SEPARATOR
-    BUTTON      ID_TOGGLE_NAVIG_WRAP_MODE
+    BUTTON      ID_IMAGE_MOVE
+    BUTTON      ID_IMAGE_EXPLORE
+    BUTTON      ID_EDIT_BK_COLOR
     SEPARATOR
     BUTTON      CM_ARCHIVE_IMAGES
     BUTTON      CM_REGENERATE_ALBUM
     BUTTON      CM_AUTO_DROP_UNDO
     BUTTON      CM_AUTO_DROP_REDO
-    BUTTON      CM_CLEAR_IMAGE_CACHE
-    BUTTON      CM_EDIT_WORKSPACE
-    BUTTON      ID_IMAGE_MOVE
-    BUTTON      ID_IMAGE_EXPLORE
-    BUTTON      ID_EDIT_BK_COLOR
-END
-
-IDR_APP_TOOL_STRIP TOOLBAR 16, 16
-BEGIN
+    SEPARATOR
     BUTTON      ID_ORDER_ORIGINAL
     BUTTON      ID_ORDER_CUSTOM
     BUTTON      ID_ORDER_RANDOM_SHUFFLE
@@ -170,6 +144,8 @@ BEGIN
     SEPARATOR
     BUTTON      CM_REFRESH_CONTENT
     BUTTON      CM_CLEAR_IMAGE_CACHE
+    SEPARATOR
+    BUTTON      CM_EDIT_WORKSPACE
     SEPARATOR
     BUTTON      CK_FULL_SCREEN
     BUTTON      CK_SHOW_THUMB_VIEW
@@ -199,11 +175,6 @@ BEGIN
     BUTTON      ID_TOGGLE_NAVIG_WRAP_MODE
     SEPARATOR
     BUTTON      IDW_NAVIG_SLIDER_CTRL
-END
-
-ID_VIEW_ALBUM_DIALOG_BAR TOOLBAR 16, 16
-BEGIN
-    BUTTON      ID_EDIT_ALBUM
 END
 
 
@@ -991,8 +962,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 6,0,0,1
- PRODUCTVERSION 6,0,0,1
+ FILEVERSION 6,0,0,2
+ PRODUCTVERSION 6,0,0,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1007,18 +978,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "29-08-2023 12:54:22"
-            VALUE "Comments", "MFC FeaturePack|Slider_vc17.sln|RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]"
+            VALUE "BuildTimestamp", "30-08-2023 11:23:00"
+            VALUE "Comments", "NewBars|MFC FeaturePack|Slider_vc17.sln|RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
-            VALUE "FileVersion", "6.0.0.1"
+            VALUE "FileVersion", "6.0.0.2"
             VALUE "InternalName", "Slider"
             VALUE "LegalCopyright", "Copyright (C) 2000-2023"
             VALUE "LegalTrademarks", "Enjoy it."
             VALUE "OriginalFilename", "Slider.exe"
             VALUE "ProductName", "Slider Application"
-            VALUE "ProductVersion", "6.0.0.1"
+            VALUE "ProductVersion", "6.0.0.2"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -1399,6 +1370,8 @@ END
 
 STRINGTABLE
 BEGIN
+    IDW_AUTO_SEEK_IMAGE_POS_CHECK 
+                            "Automatically seek to the new image position, selected in the spin edit\nAuto Seek Image"
     IDW_NAV_COUNT_LABEL     "The total number of images in this album\nTotal Image Count"
     IDW_CURR_IMAGE_PATH_LABEL 
                             "Copy file path of the current image file\nImage File Path"

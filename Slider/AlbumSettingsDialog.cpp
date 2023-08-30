@@ -463,6 +463,7 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_DOC_VERSION_LABEL, m_docVersionLabel );
 	DDX_Control( pDX, IDC_DOC_VERSION_STATIC, m_docVersionStatic );
 	DDX_Control( pDX, IDOK, m_okButton );
+	ui::DDX_ButtonIcon( pDX, ID_EDIT_ARCHIVE_PASSWORD, /*ID_EDIT_PASTE*/ IDD_PASSWORD_DIALOG );		// decorate with icon: doesn't work in Slider, but works fine in DemoUtl.exe
 
 	if ( firstInit )
 	{

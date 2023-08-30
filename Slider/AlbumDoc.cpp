@@ -249,7 +249,7 @@ CAlbumImageView* CAlbumDoc::GetAlbumImageView( void ) const
 CSlideData* CAlbumDoc::GetActiveSlideData( void )
 {
 	CAlbumImageView* pAlbumView = GetAlbumImageView();
-	return pAlbumView != nullptr ? pAlbumView->RefSlideData() : &m_slideData;
+	return pAlbumView != nullptr ? pAlbumView->PtrSlideData() : &m_slideData;
 }
 
 

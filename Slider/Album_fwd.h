@@ -12,6 +12,8 @@ namespace af
 
 		SaveCustomOrderUndoRedo	= BIT_FLAG( 2 ),
 
+		AutoSeekAlbumImagePos	= BIT_FLAG( 4 ),		// auto-seek to image index (album bar spin-edit)
+
 			DefaultFlags = ShowThumbView | ShowAlbumDialogBar | SaveCustomOrderUndoRedo,
 			ShowMask = ShowThumbView | ShowAlbumDialogBar
 	};

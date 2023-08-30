@@ -2,22 +2,22 @@
 // Microsoft Visual C++ generated include file.
 // Used by Slider.rc
 //
-#define IDR_MAINFRAME                   128
-#define IDR_TOOLBAR_STANDARD            129
-#define IDR_TOOLBAR_NAVIGATE            130
-#define IDR_ALBUMTYPE                   131
-#define IDR_IMAGETYPE                   132
-#define IDR_IMAGEVIEW                   141
-#define IDD_WORKSPACE_DIALOG            142
-#define IDR_COMMAND_BAR_ACCEL           143
-#define IDR_CONTEXT_MENU                149
-#define IDD_ALBUM_SETTINGS_DIALOG       150
-#define IDD_SEARCH_PATTERN_DIALOG       151
-#define IDD_FILE_MOVE_DIALOG            161
-#define IDD_LOGGER_DIALOG               162
-#define IDD_LAYOUT_DIALOG               166
-#define IDD_UNDO_REDO_DIALOG            168
-#define IDR_APP_TOOL_STRIP              169
+#define IDR_MAINFRAME                   130
+#define IDR_TOOLBAR_STANDARD            131
+#define IDR_TOOLBAR_NAVIGATE            132
+#define IDR_TOOLSTRIP_MENU              133
+#define IDR_ALBUMTYPE                   140
+#define IDR_IMAGETYPE                   141
+#define IDR_IMAGEVIEW                   142
+#define IDD_WORKSPACE_DIALOG            143
+#define IDR_COMMAND_BAR_ACCEL           144
+#define IDR_CONTEXT_MENU                145
+#define IDD_ALBUM_SETTINGS_DIALOG       146
+#define IDD_SEARCH_PATTERN_DIALOG       147
+#define IDD_FILE_MOVE_DIALOG            148
+#define IDD_LOGGER_DIALOG               149
+#define IDD_LAYOUT_DIALOG               150
+#define IDD_UNDO_REDO_DIALOG            151
 #define IDD_ARCHIVE_IMAGES_DIALOG       201
 #define IDC_FILE_PATHS_LIST             201
 #define IDC_FORMAT_COMBO                203
@@ -116,8 +116,9 @@
 #define IDW_SMOOTHING_MODE_CHECK        32815
 #define IDW_PLAY_DELAY_COMBO            32830
 #define IDW_SEEK_CURR_POS_SPINEDIT      32831
-#define IDW_NAV_COUNT_LABEL             32832
-#define IDW_CURR_IMAGE_PATH_LABEL       32833
+#define IDW_AUTO_SEEK_IMAGE_POS_CHECK   32832
+#define IDW_NAV_COUNT_LABEL             32833
+#define IDW_CURR_IMAGE_PATH_LABEL       32834
 #define ID_CM_ESCAPE_KEY                32850
 #define ID_CM_MDI_CLOSE_ALL             32851
 #define ID_TOGGLE_SCALING_AUTO_FIT_LARGE 32900
@@ -201,6 +202,8 @@
 #define ID_EDIT_COPY_ALBUM_MAP          32978
 #define ID_REGISTER_IMAGE_ASSOC         32979
 #define ID_UNREGISTER_IMAGE_ASSOC       32980
+#define ID_BUTTON32982                  32982
+#define ID_BUTTON32983                  32983
 
 // Next default values for new objects
 // 
@@ -208,7 +211,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        170
-#define _APS_NEXT_COMMAND_VALUE         32981
+#define _APS_NEXT_COMMAND_VALUE         32984
 #define _APS_NEXT_CONTROL_VALUE         1096
 #define _APS_NEXT_SYMED_VALUE           3019
 #endif

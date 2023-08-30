@@ -153,7 +153,7 @@ void CApplication::OnInitAppResources( void )
 {
 	__super::OnInitAppResources();
 
-	CMFCToolBar::AddToolBarForImageCollection( IDR_IMAGE_STRIP );
+	//CMFCToolBar::AddToolBarForImageCollection( IDR_IMAGE_STRIP );
 
 #ifdef USE_UT
 	// special case: in this demo project we include the threading tests, with their dependency on Boos Threads library

@@ -42,7 +42,7 @@ static const ui::CCmdAlias s_cmdAliases[] =
 	{ ID_IMAGE_OPEN, ID_FILE_OPEN },
 	{ ID_IMAGE_SAVE_AS, ID_FILE_SAVE },
 	{ ID_IMAGE_DELETE, ID_REMOVE_ITEM },
-	{ ID_EDIT_ALBUM, ID_EDIT_ITEM },
+	//{ ID_EDIT_ALBUM, ID_EDIT_ITEM },
 	{ IDW_CURR_IMAGE_PATH_LABEL, ID_EDIT_COPY },
 	{ ID_EDIT_ARCHIVE_PASSWORD, IDD_PASSWORD_DIALOG },
 	{ CM_REFRESH_CONTENT, ID_REFRESH },
@@ -347,13 +347,13 @@ void CApplication::InitGlobals( void )
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
 
-	// add MFC popup menu tracking images
-	CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );		// for ID_EDIT_ITEM
-	CMFCToolBar::AddToolBarForImageCollection( IDR_MAINFRAME );
-	CMFCToolBar::AddToolBarForImageCollection( IDR_APP_TOOL_STRIP );
+	// Obsolete: RegisterToolbarImages() does that automatically: add MFC popup menu tracking images
+	//CMFCToolBar::AddToolBarForImageCollection( IDR_LIST_EDITOR_STRIP );		// for ID_EDIT_ITEM
+	//CMFCToolBar::AddToolBarForImageCollection( IDR_TOOLSTRIP_MENU );
 
-	GetSharedImageStore()->RegisterToolbarImages( IDR_MAINFRAME );
-	GetSharedImageStore()->RegisterToolbarImages( IDR_APP_TOOL_STRIP );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_TOOLBAR_STANDARD );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_TOOLBAR_NAVIGATE );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_TOOLSTRIP_MENU );
 	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
 }
 

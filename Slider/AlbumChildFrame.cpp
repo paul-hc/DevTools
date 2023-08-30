@@ -28,6 +28,7 @@ CAlbumChildFrame::CAlbumChildFrame( void )
 	, m_pAlbumToolBar( new mfc::CFixedToolBar() )
 	, m_pThumbsListView( nullptr )
 	, m_pAlbumImageView( nullptr )
+	, m_doneInit( false )
 {
 	m_bEnableFloatingBars = TRUE;
 	GetDockingManager()->DisableRestoreDockState( TRUE );		// to disable loading of docking layout from the Registry
@@ -115,7 +116,7 @@ bool CAlbumChildFrame::InputCurrentPos( void )
 	if ( !m_pAlbumImageView->IsValidIndex( currIndex ) )
 		return false;
 
-	m_pAlbumImageView->RefSlideData()->SetCurrentIndex( currIndex, true );
+	m_pAlbumImageView->PtrSlideData()->SetCurrentIndex( currIndex, true );
 	m_pAlbumImageView->UpdateImage();		// this will also feedback on OnCurrPosChanged()
 
 	return true;
@@ -134,14 +135,15 @@ void CAlbumChildFrame::BuildAlbumToolbar( void )
 	m_pAlbumToolBar->SetWindowText( _T("Album") );
 	m_pAlbumToolBar->RemoveAllButtons();
 
-	m_pAlbumToolBar->InsertButton( new CMFCToolBarButton( ID_EDIT_ALBUM, mfc::FindButtonImageIndex( ID_EDIT_ITEM ) ) );
+	m_pAlbumToolBar->InsertButton( new CMFCToolBarButton( ID_EDIT_ALBUM, -1 ) );
 	m_pAlbumToolBar->InsertSeparator();
 	m_pAlbumToolBar->InsertButton( new mfc::CStockValuesComboBoxButton( IDW_PLAY_DELAY_COMBO, ui::CDurationSecondsStockTags::Instance(), DurationComboWidth ) );
 	m_pAlbumToolBar->InsertSeparator();
+	m_pAlbumToolBar->InsertButton( new CMFCToolBarButton( IDW_AUTO_SEEK_IMAGE_POS_CHECK, -1 ) );
 	m_pAlbumToolBar->InsertButton( new CMFCToolBarSpinEditBoxButton( IDW_SEEK_CURR_POS_SPINEDIT, -1, ES_NUMBER | ES_AUTOHSCROLL, SeekCurrPosSpinEditWidth ) );
 	m_pAlbumToolBar->InsertButton( new mfc::CLabelButton( IDW_NAV_COUNT_LABEL ) );
 	m_pAlbumToolBar->InsertSeparator();
-	m_pAlbumToolBar->InsertButton( new mfc::CLabelButton( IDW_CURR_IMAGE_PATH_LABEL, mfc::BO_BoldFont | mfc::BO_QueryToolTip /*| mfc::BO_StretchWidth*/ ) );
+	m_pAlbumToolBar->InsertButton( new mfc::CLabelButton( IDW_CURR_IMAGE_PATH_LABEL, mfc::BO_BoldFont | mfc::BO_QueryToolTip ) );
 
 	mfc::ToolBar_SetBtnText( m_pAlbumToolBar.get(), ID_EDIT_ALBUM, _T("Edit Album") );
 	m_pAlbumToolBar->RecalcLayout();
@@ -153,11 +155,14 @@ void CAlbumChildFrame::BuildAlbumToolbar( void )
 BEGIN_MESSAGE_MAP( CAlbumChildFrame, CChildFrame )
 	ON_WM_CREATE()
 	ON_COMMAND( ID_VIEW_ALBUM_DIALOG_BAR, OnToggle_ViewAlbumPane )
-	ON_UPDATE_COMMAND_UI( ID_VIEW_ALBUM_DIALOG_BAR, OnUpdate_ViewAlbumPane )		// CFrameWnd::OnUpdateControlBarMenu
+	ON_UPDATE_COMMAND_UI( ID_VIEW_ALBUM_DIALOG_BAR, OnUpdate_ViewAlbumPane )	// CFrameWnd::OnUpdateControlBarMenu
 	ON_BN_CLICKED( IDW_PLAY_DELAY_COMBO, OnEditInput_PlayDelayCombo )
 	ON_CBN_SELENDOK( IDW_PLAY_DELAY_COMBO, OnCBnSelChange_PlayDelayCombo )
 	ON_UPDATE_COMMAND_UI( IDW_PLAY_DELAY_COMBO, OnUpdateAlways )
-	ON_COMMAND( IDW_SEEK_CURR_POS_SPINEDIT, OnEnChange_SeekCurrPosSpinEdit )		// covers for EN_CHANGE
+	ON_COMMAND( IDW_AUTO_SEEK_IMAGE_POS_CHECK, OnToggle_AutoSeekImagePos )
+	ON_UPDATE_COMMAND_UI( IDW_AUTO_SEEK_IMAGE_POS_CHECK, OnUpdate_AutoSeekImagePos )
+	ON_EN_UPDATE( IDW_SEEK_CURR_POS_SPINEDIT, OnEnUpdate_SeekCurrPosSpinEdit )
+	ON_COMMAND( IDW_SEEK_CURR_POS_SPINEDIT, On_SeekCurrPosSpinEdit )			// called when ENTER is pressed
 	ON_UPDATE_COMMAND_UI( IDW_SEEK_CURR_POS_SPINEDIT, OnUpdateAlways )
 	ON_COMMAND( IDW_CURR_IMAGE_PATH_LABEL, On_CopyCurrImagePath )
 	ON_UPDATE_COMMAND_UI( IDW_CURR_IMAGE_PATH_LABEL, OnUpdateAlways )
@@ -169,7 +174,7 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 		return -1;
 
 	if ( !m_pAlbumToolBar->Create( this, mfc::CFixedToolBar::Style, ID_VIEW_ALBUM_DIALOG_BAR ) ||
-		 !m_pAlbumToolBar->LoadToolBar( ID_VIEW_ALBUM_DIALOG_BAR ) )					// just one blank button placeholder - required to display the replacement button
+		 !m_pAlbumToolBar->LoadToolBar( IDR_STD_STATUS_STRIP ) )					// placeholder toolbar resource - required to display the replacement button
 		return -1;
 
 	BuildAlbumToolbar();
@@ -177,6 +182,7 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 	DockPane( m_pAlbumToolBar.get() );		// toolbar will stretch horizontally
 	//m_pAlbumToolBar->DockToFrameWindow( CBRS_ALIGN_TOP );		// make the dialog pane stretchable horizontally
 
+	m_doneInit = true;		// can start processing notifications
 	// note: it's too early to update pane visibility; we have to delay to after loading CSlideData data-memberby CAlbumDoc, in CAlbumImageView::UpdateChildBarsState()
 	return 0;
 }
@@ -206,9 +212,9 @@ BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pConte
 void CAlbumChildFrame::OnToggle_ViewAlbumPane( void )
 {	// toggle the visibility of the album dialog bar
 	REQUIRE( GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar ) == m_pAlbumToolBar->IsBarVisible() );	// consistent?
-	GetAlbumImageView()->RefSlideData()->ToggleShowFlag( af::ShowAlbumDialogBar );		// toggle visibility flag
 
-	bool show = GetAlbumImageView()->GetSlideData().HasShowFlag( af::ShowAlbumDialogBar );
+	bool show = GetAlbumImageView()->PtrSlideData()->ToggleShowFlag( af::ShowAlbumDialogBar );		// toggle visibility flag
+
 	m_pAlbumToolBar->ShowBar( show );
 }
 
@@ -216,12 +222,6 @@ void CAlbumChildFrame::OnUpdate_ViewAlbumPane( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable();
 	pCmdUI->SetCheck( m_pAlbumToolBar->IsBarVisible() );
-}
-
-void CAlbumChildFrame::OnEnChange_SeekCurrPosSpinEdit( void )
-{
-	if ( !InputCurrentPos() )
-		ui::BeepSignal();
 }
 
 void CAlbumChildFrame::OnEditInput_PlayDelayCombo( void )
@@ -236,6 +236,30 @@ void CAlbumChildFrame::OnCBnSelChange_PlayDelayCombo( void )
 {
 	if ( InputSlideDelay( ui::BySel ) )
 		m_pAlbumImageView->SetFocus();
+}
+
+void CAlbumChildFrame::OnToggle_AutoSeekImagePos( void )
+{
+	if ( m_pAlbumImageView->PtrSlideData()->ToggleShowFlag( af::AutoSeekAlbumImagePos ) )
+		InputCurrentPos();
+}
+
+void CAlbumChildFrame::OnUpdate_AutoSeekImagePos( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( m_pAlbumImageView->GetSlideData().HasShowFlag( af::AutoSeekAlbumImagePos ) );
+}
+
+void CAlbumChildFrame::OnEnUpdate_SeekCurrPosSpinEdit( void )
+{
+	if ( m_doneInit )
+		if ( m_pAlbumImageView->GetSlideData().HasShowFlag( af::AutoSeekAlbumImagePos ) )
+			On_SeekCurrPosSpinEdit();
+}
+
+void CAlbumChildFrame::On_SeekCurrPosSpinEdit( void )
+{
+	if ( !InputCurrentPos() )
+		ui::BeepSignal();
 }
 
 void CAlbumChildFrame::On_CopyCurrImagePath( void )
