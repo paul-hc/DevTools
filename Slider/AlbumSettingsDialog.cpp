@@ -53,7 +53,7 @@ namespace hlp
 
 namespace layout
 {
-	static const CLayoutStyle styles[] =
+	static const CLayoutStyle s_styles[] =
 	{
 		{ IDC_GROUP_BOX_1, SizeX },
 		{ IDC_PATTERNS_LISTVIEW, SizeX },
@@ -93,14 +93,14 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 {
 	// base init
 	m_regSection = _T("AlbumSettingsDialog");
-	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	m_initCentered = false;
 	LoadDlgIcon( ID_EDIT_ALBUM );
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_ALBUM_SETTINGS_DIALOG ) );
 
 	m_patternsListCtrl.SetSection( m_regSection + _T("\\PatternsList") );
 	m_patternsListCtrl.SetAcceptDropFiles();
-	m_patternsListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );			// display full paths
+	m_patternsListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );	// display full paths
 	m_patternsListCtrl.SetTextEffectCallback( this );
 
 	m_imagesListCtrl.SetSection( m_regSection + _T("\\ImagesList") );
@@ -108,8 +108,8 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 	m_imagesListCtrl.SetTextEffectCallback( this );
 	m_imagesListCtrl.SetSortInternally( false );
 	m_imagesListCtrl.SetUseAlternateRowColoring();
-	m_imagesListCtrl.SetDataSourceFactory( this );								// uses temporary file clones for embedded images
-	m_imagesListCtrl.SetTrackMenuTarget( this );								// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
+	m_imagesListCtrl.SetDataSourceFactory( this );		// uses temporary file clones for embedded images
+	m_imagesListCtrl.SetTrackMenuTarget( this );		// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
 	m_imagesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetAlbumModelPopupMenu() );
 
 	m_imagesListCtrl

@@ -23,9 +23,9 @@ typedef CDragListCtrl<CPathItemListCtrl> TDragPathItemListCtrl;
 
 
 class CAlbumSettingsDialog : public CLayoutDialog
-						   , public CInternalChange
-						   , public ole::IDataSourceFactory
-						   , private ui::ITextEffectCallback
+	, public CInternalChange
+	, public ole::IDataSourceFactory
+	, private ui::ITextEffectCallback
 {
 public:
 	CAlbumSettingsDialog( const CAlbumModel& model, size_t currentPos, CWnd* pParent = nullptr );

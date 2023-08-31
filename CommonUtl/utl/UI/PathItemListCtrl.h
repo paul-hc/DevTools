@@ -35,6 +35,7 @@ protected:
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;	// ui::ITextEffectCallback interface
 private:
 	COLORREF m_missingFileColor;
+
 	// generated stuff
 public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );

@@ -695,6 +695,9 @@
     <ClInclude Include="LayoutPaneDialog.h">
       <Filter>UI\Layout</Filter>
     </ClInclude>
+    <ClInclude Include="test\ToolBarImagesTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1185,6 +1188,9 @@
     </ClCompile>
     <ClCompile Include="LayoutPaneDialog.cpp">
       <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ToolBarImagesTests.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

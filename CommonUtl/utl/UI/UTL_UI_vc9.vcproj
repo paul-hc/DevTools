@@ -515,6 +515,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ToolBarImagesTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ToolBarImagesTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\UtlUserInterfaceTests.cpp"
 				>
 			</File>

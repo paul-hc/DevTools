@@ -26,6 +26,7 @@
 #include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
+#include "utl/UI/test/ToolBarImagesTests.h"
 #include "utl/UI/test/WicImageTests.h"
 #include <io.h>
 #include <afxtoolbar.h>
@@ -394,6 +395,7 @@ bool CApplication::HandleAppTests( void )
 
 	if ( !HasFlag( m_runFlags, SkipUiTests ) )	// UI tests are not skipped?
 	{
+		CToolBarImagesTests::Instance();
 		CWicImageTests::Instance();
 		CThumbnailTests::Instance();
 		CImagingD2DTests::Instance();

@@ -345,6 +345,7 @@
     <ClInclude Include="test\SerializationTests.h" />
     <ClInclude Include="test\ShellFileSystemTests.h" />
     <ClInclude Include="test\TestToolWnd.h" />
+    <ClInclude Include="test\ToolBarImagesTests.h" />
     <ClInclude Include="test\UtlUserInterfaceTests.h" />
     <ClInclude Include="test\WicImageTests.h" />
     <ClInclude Include="TextEdit.h" />
@@ -521,6 +522,7 @@
     <ClCompile Include="test\SerializationTests.cpp" />
     <ClCompile Include="test\ShellFileSystemTests.cpp" />
     <ClCompile Include="test\TestToolWnd.cpp" />
+    <ClCompile Include="test\ToolBarImagesTests.cpp" />
     <ClCompile Include="test\UtlUserInterfaceTests.cpp" />
     <ClCompile Include="test\WicImageTests.cpp" />
     <ClCompile Include="TextEdit.cpp" />
