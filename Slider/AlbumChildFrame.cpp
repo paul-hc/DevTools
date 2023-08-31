@@ -31,7 +31,7 @@ CAlbumChildFrame::CAlbumChildFrame( void )
 	, m_doneInit( false )
 {
 	m_bEnableFloatingBars = TRUE;
-	GetDockingManager()->DisableRestoreDockState( TRUE );		// to disable loading of docking layout from the Registry
+	GetDockingManager()->DisableRestoreDockState( TRUE );		// for this frame: disable loading of docking layout from the Registry
 }
 
 CAlbumChildFrame::~CAlbumChildFrame()
@@ -104,7 +104,7 @@ bool CAlbumChildFrame::InputSlideDelay( ui::ComboField byField )
 		return false;
 
 	m_pAlbumImageView->SetSlideDelay( ui::CDurationSecondsStockTags::ToMiliseconds( slideDelaySecs ) );
-	OnSlideDelayChanged();			// update the content of combo box
+	OnSlideDelayChanged();					// update the content of combo box
 	return true;
 }
 
@@ -174,7 +174,7 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 		return -1;
 
 	if ( !m_pAlbumToolBar->Create( this, mfc::CFixedToolBar::Style, ID_VIEW_ALBUM_DIALOG_BAR ) ||
-		 !m_pAlbumToolBar->LoadToolBar( IDR_STD_STATUS_STRIP ) )					// placeholder toolbar resource - required to display the replacement button
+		 !m_pAlbumToolBar->LoadToolBar( IDR_STD_STATUS_STRIP ) )				// placeholder toolbar resource - required to display the replacement button
 		return -1;
 
 	BuildAlbumToolbar();
@@ -183,7 +183,8 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 	//m_pAlbumToolBar->DockToFrameWindow( CBRS_ALIGN_TOP );		// make the dialog pane stretchable horizontally
 
 	m_doneInit = true;		// can start processing notifications
-	// note: it's too early to update pane visibility; we have to delay to after loading CSlideData data-memberby CAlbumDoc, in CAlbumImageView::UpdateChildBarsState()
+
+	// note: it's too early to update pane visibility; we have to delay to after loading CSlideData data-member by CAlbumDoc, in CAlbumImageView::UpdateChildBarsState()
 	return 0;
 }
 
