@@ -244,6 +244,7 @@
     <ClInclude Include="Icon.h" />
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="IImageZoomView.h" />
+    <ClInclude Include="ImageCommandLookup.h" />
     <ClInclude Include="ImageEdit.h" />
     <ClInclude Include="ImageInfoGadget.h" />
     <ClInclude Include="ImagePathKey.h" />
@@ -434,6 +435,7 @@
     <ClCompile Include="HistoryComboBox.cpp" />
     <ClCompile Include="Icon.cpp" />
     <ClCompile Include="IconButton.cpp" />
+    <ClCompile Include="ImageCommandLookup.cpp" />
     <ClCompile Include="ImageEdit.cpp" />
     <ClCompile Include="ImageInfoGadget.cpp" />
     <ClCompile Include="ImageProxy.cpp" />

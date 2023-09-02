@@ -8,9 +8,11 @@
 #include "Image_fwd.h"
 #include "ImagingDirect2D.h"
 #include "ImagingWic.h"
+#include "ImageCommandLookup.h"
 #include "WicDibSection.h"
 #include "ScopedGdi.h"
 #include "WndUtilsEx.h"
+#include <afxtoolbarimages.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,6 +69,17 @@ namespace ut
 		return
 			AlphaBlend( pDC, destRect, pSrcDC, srcRect ) ||
 			Blit( pDC, destRect, pSrcDC, srcRect );
+	}
+
+	void DrawGlyphFramePoints( CDC* pDC, const CRect& imageRect )
+	{
+		CRect frameBounds = imageRect;
+
+		frameBounds.InflateRect( 1, 1 );
+		pDC->SetPixel( frameBounds.left, frameBounds.top, color::Blue );
+		pDC->SetPixel( frameBounds.left, frameBounds.bottom, color::Blue );
+		pDC->SetPixel( frameBounds.right, frameBounds.top, color::Red );
+		pDC->SetPixel( frameBounds.right, frameBounds.bottom, color::Red );
 	}
 }
 
@@ -456,6 +469,63 @@ namespace ut
 				boundsRect |= textRect;
 			}
 		}
+		DrawTileFrame( boundsRect );
+	}
+
+	void CTestDevice::DrawImages( CMFCToolBarImages* pImages, bool putTags /*= false*/ )
+	{
+		if ( !IsEnabled() )
+			return;
+
+		ASSERT_PTR( pImages );
+
+		enum { FrameSpacingX = 2, FrameSpacingY = 2, TextSpacingX = 5 };
+		const CSize frameSize( FrameSpacingX * 2, FrameSpacingY * 2 );
+
+		UINT imageCount = pImages->GetCount();
+		CSize imageSize = pImages->GetImageSize();
+		CSize itemSize = ui::InflateSize( imageSize, frameSize );
+
+		CRect itemRect = CRect( m_pToolWnd->m_drawPos, itemSize );
+		CRect boundsRect = itemRect;			// bounds drawn
+
+		CAfxDrawState drawState;
+		if ( !pImages->PrepareDrawImage( drawState ) )
+			return;
+
+		mfc::CImageCommandLookup imageCmd;
+		CDC* pDC = GetDC();
+
+		for ( UINT i = 0; i != imageCount; ++i, itemRect.OffsetRect( 0, itemSize.cy ) )
+		{
+			CRect imageRect = itemRect;
+
+			imageRect.DeflateRect( frameSize );
+			ut::DrawGlyphFramePoints( pDC, imageRect );
+
+			pImages->Draw( pDC, imageRect.left, imageRect.top, i );
+
+			boundsRect |= itemRect;
+
+			if ( putTags )
+			{
+				std::tstring tag = str::Format( _T("[%d]"), i + 1 );
+
+				if ( const std::tstring* pCmdName = imageCmd.FindCommandNameByPos( i ) )
+					stream::Tag( tag, *pCmdName, _T("  ") );
+
+				int width = ui::GetTextSize( GetDC(), tag.c_str() ).cx + TextSpacingX;
+
+				CRect textRect = itemRect;
+				textRect.left = itemRect.right + 5;
+				textRect.right = textRect.left + width;
+				GetDC()->DrawText( tag.c_str(), -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE );
+
+				boundsRect |= textRect;
+			}
+		}
+		pImages->EndDrawImage( drawState );
+
 		DrawTileFrame( boundsRect );
 	}
 

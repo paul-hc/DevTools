@@ -9,6 +9,7 @@
 
 
 interface IWICBitmapSource;
+class CMFCToolBarImages;
 
 namespace d2d
 {
@@ -91,6 +92,7 @@ namespace ut
 		void DrawIcon( HICON hIcon, const CSize& boundsSize, UINT flags = DI_NORMAL );
 		void DrawImage( CImageList* pImageList, int index, UINT style = ILD_TRANSPARENT );
 		void DrawImageList( CImageList* pImageList, bool putTags = false, UINT style = ILD_TRANSPARENT );
+		void DrawImages( CMFCToolBarImages* pImages, bool putTags = false );
 
 		void DrawTextInfo( const std::tstring& text );
 		void DrawBitmapInfo( HBITMAP hBitmap );

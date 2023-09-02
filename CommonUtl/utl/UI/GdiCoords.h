@@ -15,6 +15,9 @@ namespace ui
 
 	inline bool IsEmptySize( const SIZE& size ) { return 0 == size.cx || 0 == size.cy; }
 
+	inline CSize InflateSize( const SIZE& size, int by ) { return CSize( size.cx + by * 2, size.cy + by * 2 ); }
+	inline CSize InflateSize( const SIZE& size, const SIZE& bySize ) { return CSize( size.cx + bySize.cx * 2, size.cy + bySize.cy * 2 ); }
+
 	inline CSize ScaleSize( const SIZE& size, int mulBy, int divBy = 100 )
 	{
 		return CSize( MulDiv( size.cx, mulBy, divBy ), MulDiv( size.cy, mulBy, divBy ) );

@@ -37,7 +37,9 @@ void CToolBarImagesTests::TestToolBarImagesBitmap( ut::CTestDevice* pTestDev )
 
 	do
 	{
-		pTestDev->DrawBitmap( pImages->GetImageWell()/*, imageSize*/ );
+		pTestDev->DrawImages( pImages, true );
+		//pTestDev->DrawBitmap( pImages->GetImageWell()/*, imageSize*/ );
+
 		pTestDev->DrawTileCaption( str::Format( _T("%d total images"), imageCount ) );
 		++*pTestDev;
 	}
