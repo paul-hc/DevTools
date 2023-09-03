@@ -50,7 +50,7 @@ namespace ui
 	inline CSize GetTextSize( CDC* pDC, const TCHAR* pText, DWORD extraFormat = 0 )		// pass DT_EDITCONTROL for multi-line
 	{	// more accurate, takes care of line-ends
 		CRect textRect( 0, 0, 0, 0 );
-		pDC->DrawText( pText, -1, &textRect, DT_CALCRECT | DT_LEFT | DT_VCENTER | extraFormat ); // more accurate, takes care of line-ends; DT_VCENTER ignored if multi- line
+		pDC->DrawText( pText, -1, &textRect, DT_CALCRECT | DT_LEFT | DT_VCENTER | extraFormat ); // more accurate, takes care of line-ends; DT_VCENTER ignored if multi-line
 		return textRect.Size();
 	}
 

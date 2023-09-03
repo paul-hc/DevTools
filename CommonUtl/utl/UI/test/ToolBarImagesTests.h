@@ -21,6 +21,7 @@ public:
 	virtual void Run( void );
 private:
 	void TestToolBarImagesBitmap( ut::CTestDevice* pTestDev );
+	void TestToolBarImagesDetails( ut::CTestDevice* pTestDev );
 };
 
 

@@ -46,6 +46,8 @@ namespace ut
 	public:
 		CPoint m_drawPos;							// drawing cursor position in the current strip
 
+		CFont m_headlineFont;						// larger bold font for titles
+
 		// generated stuff
 	protected:
 		afx_msg void OnTimer( UINT_PTR eventId );
@@ -92,11 +94,15 @@ namespace ut
 		void DrawIcon( HICON hIcon, const CSize& boundsSize, UINT flags = DI_NORMAL );
 		void DrawImage( CImageList* pImageList, int index, UINT style = ILD_TRANSPARENT );
 		void DrawImageList( CImageList* pImageList, bool putTags = false, UINT style = ILD_TRANSPARENT );
-		void DrawImages( CMFCToolBarImages* pImages, bool putTags = false );
+
+		bool DrawWideBitmap( HBITMAP hBitmap, const CSize& glyphSize );		// on multiple rows
+		void DrawImages( CMFCToolBarImages* pImages, const TCHAR* pHeadline = nullptr );
+		void DrawImagesDetails( CMFCToolBarImages* pImages );
 
 		void DrawTextInfo( const std::tstring& text );
 		void DrawBitmapInfo( HBITMAP hBitmap );
 
+		void DrawHeadline( const TCHAR* pHeadline, COLORREF textColor = color::Blue );	// draw headline title on a new strip, under the last drawn tile rect
 		void DrawTileCaption( const std::tstring& text );		// draw text under the last drawn tile rect
 
 		enum { PauseTime = 500 };

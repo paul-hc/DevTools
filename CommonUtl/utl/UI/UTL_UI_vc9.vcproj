@@ -1942,6 +1942,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ImageCommandLookup.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageCommandLookup.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PopupMenus.cpp"
 					>
 				</File>

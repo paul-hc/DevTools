@@ -45,6 +45,12 @@ namespace mfc
 		LoadCommandNames();
 	}
 
+	CImageCommandLookup* CImageCommandLookup::Instance( void )
+	{
+		static CImageCommandLookup s_imageCmdLookup;
+		return &s_imageCmdLookup;
+	}
+
 	UINT CImageCommandLookup::FindCommand( int imagePos ) const
 	{
 		return utl::FindValue( m_imagePosToCommand, imagePos );

@@ -10,14 +10,16 @@ namespace mfc
 {
 	class CImageCommandLookup		// provides CCommandManager reverse lookup: imageIndex -> command
 	{
-	public:
 		CImageCommandLookup( void );
+	public:
+		static CImageCommandLookup* Instance( void );
 
 		UINT FindCommand( int imagePos ) const;
 		const std::tstring* FindCommandName( UINT cmdId ) const;
 		const std::tstring* FindCommandNameByPos( int imagePos ) const;
-	private:
+
 		void LoadCommandNames( void );
+	private:
 		void SetupFromMenus( void );
 		void AddMenuCommands( const CMenu* pMenu, bool isPopup, const std::tstring& menuPath = str::GetEmpty() );
 	private:

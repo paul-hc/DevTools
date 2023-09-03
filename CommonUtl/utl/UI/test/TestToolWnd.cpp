@@ -1,4 +1,4 @@
-
+﻿
 #include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
@@ -17,6 +17,24 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace str
+{
+	template< typename StringT >
+	StringT& ClampLeading( OUT StringT& rOutText, size_t maxLength, const typename StringT::value_type* pMorePrefix = nullptr )
+	{	// clamps string to a maxLength, eventually adding a prefix
+		//std::basic_string<CharT> outText( text, 0, std::min( maxLength, text.length() ) );
+
+		if ( rOutText.length() > maxLength )
+			if ( pMorePrefix != nullptr )
+				rOutText.replace( 0, rOutText.length() - maxLength + str::GetLength( pMorePrefix ), pMorePrefix );
+			else
+				rOutText.erase( 0, rOutText.length() - maxLength );
+
+		return rOutText;
+	}
+}
 
 
 namespace ut
@@ -101,6 +119,8 @@ namespace ut
 	{
 		ASSERT_NULL( s_pWndTool );
 		s_pWndTool = this;
+
+		ui::MakeStandardControlFont( m_headlineFont, ui::CFontInfo( ui::Bold, 110 ) );
 	}
 
 	CTestToolWnd::~CTestToolWnd()
@@ -472,14 +492,78 @@ namespace ut
 		DrawTileFrame( boundsRect );
 	}
 
-	void CTestDevice::DrawImages( CMFCToolBarImages* pImages, bool putTags /*= false*/ )
+	bool CTestDevice::DrawWideBitmap( HBITMAP hBitmap, const CSize& glyphSize )
+	{	// draw a wide bitmap (e.g. CMFCToolBarImages::GetImageWell), spanning over multiple rows until the entire bitmap width is diplayed
+		if ( !IsEnabled() || nullptr == hBitmap )
+			return false;
+
+		enum { RowSpacingY = 5 };
+
+		CSize fullSize = gdi::GetBitmapSize( hBitmap );
+		size_t columnCount = m_workAreaRect.Width() / glyphSize.cx;
+		int rowMaxWidth = columnCount * glyphSize.cx;
+
+		CDC* pDC = GetDC();
+		CDC memDC;
+
+		if ( !memDC.CreateCompatibleDC( pDC ) )
+			return false;
+
+		CScopedGdiObj scopedBitmap( &memDC, hBitmap );
+
+		CRect boundsRect( m_pToolWnd->m_drawPos, CSize( 0, 0 ) );
+		CRect srcRect( 0, 0, 0, fullSize.cy );
+
+		for ( int srcWidth = fullSize.cx; srcWidth != 0; )
+		{
+			ASSERT( srcWidth > 0 );
+
+			int rowWidth = utl::min( srcWidth, rowMaxWidth );
+			CRect rowRect( m_pToolWnd->m_drawPos, CSize( rowWidth, fullSize.cy ) );
+
+			srcRect.left = srcRect.right;
+			srcRect.right = srcRect.left + rowWidth;
+
+			boundsRect |= rowRect;
+
+			ut::DrawBitmap( pDC, rowRect, &memDC, srcRect );
+			DrawTileFrame( rowRect, color::LightGray );
+
+			srcWidth -= srcRect.Width();
+			m_pToolWnd->m_drawPos.y += rowRect.Height() + RowSpacingY;
+		}
+
+		m_workAreaRect.top = boundsRect.bottom;
+		m_tileRect.right = m_workAreaRect.right;
+		return true;
+	}
+
+	void CTestDevice::DrawImages( CMFCToolBarImages* pImages, const TCHAR* pHeadline /*= nullptr*/ )
+	{
+		if ( !IsEnabled() || nullptr == pImages || nullptr == pImages->GetImageWell() )
+			return;
+
+		DrawHeadline( pHeadline );
+
+		HBITMAP hBitmap = pImages->GetImageWell();
+		CSize glyphSize = pImages->GetImageSize();
+
+		ASSERT_PTR( hBitmap );
+		DrawWideBitmap( hBitmap, glyphSize );		// draw wide bitmap spanning on multiple rows
+		DrawTileCaption( str::Format( _T("%d total images"), pImages->GetCount() ) );
+
+		m_workAreaRect.top = m_stripRect.bottom + 10;
+		m_pToolWnd->m_drawPos = m_workAreaRect.TopLeft();
+	}
+
+	void CTestDevice::DrawImagesDetails( CMFCToolBarImages* pImages )
 	{
 		if ( !IsEnabled() )
 			return;
 
 		ASSERT_PTR( pImages );
 
-		enum { FrameSpacingX = 2, FrameSpacingY = 2, TextSpacingX = 5 };
+		enum { FrameSpacingX = 1, FrameSpacingY = 1, TextSpacingX = 5 };
 		const CSize frameSize( FrameSpacingX * 2, FrameSpacingY * 2 );
 
 		UINT imageCount = pImages->GetCount();
@@ -493,10 +577,10 @@ namespace ut
 		if ( !pImages->PrepareDrawImage( drawState ) )
 			return;
 
-		mfc::CImageCommandLookup imageCmd;
+		mfc::CImageCommandLookup* pImageCmd = mfc::CImageCommandLookup::Instance();
 		CDC* pDC = GetDC();
 
-		for ( UINT i = 0; i != imageCount; ++i, itemRect.OffsetRect( 0, itemSize.cy ) )
+		for ( UINT i = 0; i != imageCount; ++i )
 		{
 			CRect imageRect = itemRect;
 
@@ -507,12 +591,17 @@ namespace ut
 
 			boundsRect |= itemRect;
 
-			if ( putTags )
 			{
 				std::tstring tag = str::Format( _T("[%d]"), i + 1 );
 
-				if ( const std::tstring* pCmdName = imageCmd.FindCommandNameByPos( i ) )
-					stream::Tag( tag, *pCmdName, _T("  ") );
+				if ( const std::tstring* pCmdName = pImageCmd->FindCommandNameByPos( i ) )
+				{
+					std::tstring displayName = *pCmdName;
+					enum { MaxDisplayLength = 17 };
+
+					str::ClampLeading( displayName, MaxDisplayLength, _T("~") );
+					stream::Tag( tag, displayName, _T("  ") );
+				}
 
 				int width = ui::GetTextSize( GetDC(), tag.c_str() ).cx + TextSpacingX;
 
@@ -523,7 +612,16 @@ namespace ut
 
 				boundsRect |= textRect;
 			}
+
+			itemRect.OffsetRect( 0, itemSize.cy );
+
+			if ( itemRect.bottom >= m_workAreaRect.bottom )		// bottom overflow?
+			{	// start a new column
+				m_pToolWnd->m_drawPos = CPoint( boundsRect.right, m_workAreaRect.top );
+				itemRect = CRect( m_pToolWnd->m_drawPos, itemSize );
+			}
 		}
+
 		pImages->EndDrawImage( drawState );
 
 		DrawTileFrame( boundsRect );
@@ -550,6 +648,33 @@ namespace ut
 		DrawTextInfo( CBitmapInfo( hBitmap ).FormatDbg() );
 	}
 
+	void CTestDevice::DrawHeadline( const TCHAR* pHeadline, COLORREF textColor /*= color::Blue*/ )
+	{
+		enum { TitleSpacingY = 4, DtFormat = DT_NOPREFIX | DT_SINGLELINE };
+
+		if ( m_stripRect.Height() != 0 )
+			m_stripRect.top = m_stripRect.bottom = m_stripRect.bottom + TitleSpacingY;		// collapse to the bottom
+
+		m_stripRect.right = m_workAreaRect.right;
+
+		std::tstring text = _T("● "); text += pHeadline;
+
+		CDC* pDC = GetDC();
+		CScopedGdi<CFont> scFont( pDC, &m_pToolWnd->m_headlineFont );
+		COLORREF oldTextColor = pDC->SetTextColor( textColor );
+		int textHeight = ui::GetTextSize( pDC, text.c_str() ).cy;
+
+		//textHeight = utl::max( pDC->GetTextExtent( text.c_str(), (int)text.length() ).cy, textHeight );		// compensate since ui::GetTextSize() not acurate with vertical size
+		m_stripRect.bottom += textHeight;
+
+		GetDC()->DrawText( text.c_str(), (int)text.length(), &m_stripRect, DT_END_ELLIPSIS | DtFormat );
+		//gp::FrameRect( pDC, m_stripRect, color::LightGray, 50 );
+		pDC->SetTextColor( oldTextColor );
+
+		m_pToolWnd->m_drawPos.y += m_stripRect.Height() + TitleSpacingY;
+		m_stripRect.TopLeft() = m_stripRect.BottomRight() = m_pToolWnd->m_drawPos;
+	}
+
 	void CTestDevice::DrawTileCaption( const std::tstring& text )
 	{
 		if ( !IsEnabled() || text.empty() )
@@ -557,10 +682,10 @@ namespace ut
 
 		ASSERT( !m_tileRect.IsRectEmpty() );
 
-		enum { TextEdge = 3, dtFormat = DT_NOPREFIX | DT_SINGLELINE };
+		enum { TextEdge = 3, DtFormat = DT_NOPREFIX | DT_SINGLELINE };
 
 		CDC* pDC = GetDC();
-		CSize textSize = ui::GetTextSize( pDC, text.c_str(), dtFormat );
+		CSize textSize = ui::GetTextSize( pDC, text.c_str(), DtFormat );
 
 		textSize.cx = std::min( (long)m_tileRect.Width(), textSize.cx );
 		textSize.cy = std::max( pDC->GetTextExtent( text.c_str(), (int)text.length() ).cy, textSize.cy );	// compensate since ui::GetTextSize() not acurate with vertical size
@@ -570,7 +695,7 @@ namespace ut
 		ui::AlignRectOutside( textRect, m_tileRect, H_AlignCenter | V_AlignBottom, CSize( 0, TextEdge ) );
 		m_stripRect.bottom = std::max( textRect.bottom, m_stripRect.bottom );
 
-		GetDC()->DrawText( text.c_str(), (int)text.length(), &textRect, DT_END_ELLIPSIS | dtFormat );
+		GetDC()->DrawText( text.c_str(), (int)text.length(), &textRect, DT_END_ELLIPSIS | DtFormat );
 	}
 
 
@@ -580,6 +705,7 @@ namespace ut
 			return color::Red;
 		else if ( scaledBmpSize.cx > bmpSize.cx )		// stretched
 			return color::LightBlue;
+
 		return color::LightGray;
 	}
 
