@@ -658,6 +658,79 @@ BEGIN
     END
 END
 
+IDR_STD_UTL_UI_MENU MENU
+BEGIN
+    POPUP "status"
+    BEGIN
+        MENUITEM "Transparent",                 ID_TRANSPARENT
+        MENUITEM "Selected Color",              ID_SELECTED_COLOR_BUTTON
+    END
+    POPUP "buttons"
+    BEGIN
+        MENUITEM "Edit Copy",                   ID_EDIT_COPY
+        MENUITEM "Edit Paste",                  ID_EDIT_PASTE
+        MENUITEM "Edit Cut",                    ID_EDIT_CUT
+        MENUITEM "Edit Clear",                  ID_EDIT_CLEAR
+        MENUITEM "Edit Clear All",              ID_EDIT_CLEAR_ALL
+        MENUITEM SEPARATOR
+        MENUITEM "Edit Undo",                   ID_EDIT_UNDO
+        MENUITEM "Edit Redo",                   ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Edit Properties",             ID_EDIT_PROPERTIES
+        MENUITEM "File Properties",             ID_FILE_PROPERTIES
+        MENUITEM "Edit Find",                   ID_EDIT_FIND
+        MENUITEM "Edit Replace",                ID_EDIT_REPLACE
+        MENUITEM SEPARATOR
+        MENUITEM "Expand",                      ID_EXPAND
+        MENUITEM "Collapse",                    ID_COLLAPSE
+        MENUITEM SEPARATOR
+        MENUITEM "File New",                    ID_FILE_NEW
+        MENUITEM "File Open",                   ID_FILE_OPEN
+        MENUITEM "File Save",                   ID_FILE_SAVE
+        MENUITEM "File Print",                  ID_FILE_PRINT
+        MENUITEM "App About",                   ID_APP_ABOUT
+        MENUITEM "Shell Submenu",               ID_SHELL_SUBMENU
+        MENUITEM SEPARATOR
+        MENUITEM "Edit Details",                ID_EDIT_DETAILS
+        MENUITEM "Edit List Items",             ID_EDIT_LIST_ITEMS
+        MENUITEM "Browse File",                 ID_BROWSE_FILE
+        MENUITEM "Browse Folder",               ID_BROWSE_FOLDER
+        MENUITEM "Reset Default",               ID_RESET_DEFAULT
+        MENUITEM SEPARATOR
+        MENUITEM "Refresh",                     ID_REFRESH
+        MENUITEM "Options",                     ID_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "Run Tests",                   ID_RUN_TESTS
+        MENUITEM "Password Dialog",             IDD_PASSWORD_DIALOG
+    END
+    POPUP "list editor"
+    BEGIN
+        MENUITEM "Add Item",                    ID_ADD_ITEM
+        MENUITEM "Remove Item",                 ID_REMOVE_ITEM
+        MENUITEM "Remove All Items",            ID_REMOVE_ALL_ITEMS
+        MENUITEM SEPARATOR
+        MENUITEM "Rename Item",                 ID_RENAME_ITEM
+        MENUITEM "Edit Item",                   ID_EDIT_ITEM
+        MENUITEM "Edit Select All",             ID_EDIT_SELECT_ALL
+        MENUITEM SEPARATOR
+        MENUITEM "Move Up",                     ID_MOVE_UP_ITEM
+        MENUITEM "Move Down",                   ID_MOVE_DOWN_ITEM
+        MENUITEM "Move to Top",                 ID_MOVE_TOP_ITEM
+        MENUITEM "Move to Bottom",              ID_MOVE_BOTTOM_ITEM
+        MENUITEM SEPARATOR
+        MENUITEM "Shuttle Up",                  ID_SHUTTLE_UP
+        MENUITEM "Shuttle Down",                ID_SHUTTLE_DOWN
+        MENUITEM "Shuttle to Top",              ID_SHUTTLE_TOP
+        MENUITEM "Shuttle to Bottom",           ID_SHUTTLE_BOTTOM
+        MENUITEM SEPARATOR
+        MENUITEM "List View Large Icon",        ID_LIST_VIEW_ICON_LARGE
+        MENUITEM "List View Small Icon",        ID_LIST_VIEW_ICON_SMALL
+        MENUITEM "List View List",              ID_LIST_VIEW_LIST
+        MENUITEM "List View Report",            ID_LIST_VIEW_REPORT
+        MENUITEM "List View Tiles",             ID_LIST_VIEW_TILE
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

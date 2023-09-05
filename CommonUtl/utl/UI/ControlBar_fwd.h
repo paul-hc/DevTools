@@ -84,6 +84,7 @@ namespace mfc
 
 
 	// CMFCToolBar access:
+	const CMap<UINT, UINT, int, int>& ToolBar_GetDefaultImages( void );
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar );
 	CMFCToolBarButton* ToolBar_FindButton( const CMFCToolBar* pToolBar, UINT btnId );
 	inline int ToolBar_ReplaceButton( OUT CMFCToolBar* pToolBar, const CMFCToolBarButton& srcButton ) { return safe_ptr( pToolBar )->ReplaceButton( srcButton.m_nID, srcButton ); }

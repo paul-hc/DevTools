@@ -116,6 +116,7 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	//GetLogger().LogLine( _T(""), false );					// new-line as session separator
 
 	// register stock images
+	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_STATUS_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_BUTTONS_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_EDITOR_STRIP );
 

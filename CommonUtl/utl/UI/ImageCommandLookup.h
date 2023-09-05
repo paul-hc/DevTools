@@ -21,7 +21,7 @@ namespace mfc
 		void LoadCommandNames( void );
 	private:
 		void SetupFromMenus( void );
-		void AddMenuCommands( const CMenu* pMenu, bool isPopup, const std::tstring& menuPath = str::GetEmpty() );
+		void AddMenuCommands( const CMenu* pMenu, const std::tstring& menuPath = str::GetEmpty() );
 	private:
 		std::unordered_map<int, UINT> m_imagePosToCommand;
 		std::unordered_map<UINT, std::tstring> m_cmdToName;

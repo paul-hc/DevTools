@@ -30,8 +30,9 @@ void CToolBarImagesTests::TestToolBarImagesBitmap( ut::CTestDevice* pTestDev )
 		return;
 
 	pTestDev->SetSubTitle( _T("CToolBarImagesTests::TestToolBarImagesBitmap") );
+	pTestDev->DrawHeadline( _T("CMFCToolBar::GetImages()") );
 
-	pTestDev->DrawImages( CMFCToolBar::GetImages(), _T("CMFCToolBar::GetImages()") );
+	pTestDev->DrawImages( CMFCToolBar::GetImages() );
 
 	pTestDev->Await( 1000 );
 }

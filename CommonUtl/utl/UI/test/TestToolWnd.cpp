@@ -19,24 +19,6 @@
 #endif
 
 
-namespace str
-{
-	template< typename StringT >
-	StringT& ClampLeading( OUT StringT& rOutText, size_t maxLength, const typename StringT::value_type* pMorePrefix = nullptr )
-	{	// clamps string to a maxLength, eventually adding a prefix
-		//std::basic_string<CharT> outText( text, 0, std::min( maxLength, text.length() ) );
-
-		if ( rOutText.length() > maxLength )
-			if ( pMorePrefix != nullptr )
-				rOutText.replace( 0, rOutText.length() - maxLength + str::GetLength( pMorePrefix ), pMorePrefix );
-			else
-				rOutText.erase( 0, rOutText.length() - maxLength );
-
-		return rOutText;
-	}
-}
-
-
 namespace ut
 {
 	// CTestDC class (private)
@@ -538,12 +520,10 @@ namespace ut
 		return true;
 	}
 
-	void CTestDevice::DrawImages( CMFCToolBarImages* pImages, const TCHAR* pHeadline /*= nullptr*/ )
+	void CTestDevice::DrawImages( CMFCToolBarImages* pImages )
 	{
 		if ( !IsEnabled() || nullptr == pImages || nullptr == pImages->GetImageWell() )
 			return;
-
-		DrawHeadline( pHeadline );
 
 		HBITMAP hBitmap = pImages->GetImageWell();
 		CSize glyphSize = pImages->GetImageSize();
@@ -592,16 +572,11 @@ namespace ut
 			boundsRect |= itemRect;
 
 			{
-				std::tstring tag = str::Format( _T("[%d]"), i + 1 );
+				std::tstring tag = str::Format( _T("[%d]"), i /*+ 1*/ );
+				enum { MaxDisplayLength = 17 };
 
 				if ( const std::tstring* pCmdName = pImageCmd->FindCommandNameByPos( i ) )
-				{
-					std::tstring displayName = *pCmdName;
-					enum { MaxDisplayLength = 17 };
-
-					str::ClampLeading( displayName, MaxDisplayLength, _T("~") );
-					stream::Tag( tag, displayName, _T("  ") );
-				}
+					stream::Tag( tag, str::GetClampLeading( *pCmdName, MaxDisplayLength, _T("~") ), _T("  ") );
 
 				int width = ui::GetTextSize( GetDC(), tag.c_str() ).cx + TextSpacingX;
 

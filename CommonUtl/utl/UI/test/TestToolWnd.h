@@ -96,7 +96,7 @@ namespace ut
 		void DrawImageList( CImageList* pImageList, bool putTags = false, UINT style = ILD_TRANSPARENT );
 
 		bool DrawWideBitmap( HBITMAP hBitmap, const CSize& glyphSize );		// on multiple rows
-		void DrawImages( CMFCToolBarImages* pImages, const TCHAR* pHeadline = nullptr );
+		void DrawImages( CMFCToolBarImages* pImages );
 		void DrawImagesDetails( CMFCToolBarImages* pImages );
 
 		void DrawTextInfo( const std::tstring& text );

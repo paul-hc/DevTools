@@ -27,6 +27,7 @@ namespace nosy
 	struct CToolBar_ : public CMFCToolBar
 	{
 		// public access
+		using CMFCToolBar::m_DefaultImages;
 		using CMFCToolBar::m_bMasked;
 		using CMFCToolBar::AllowShowOnList;
 
@@ -196,6 +197,11 @@ namespace mfc
 
 
 	// CMFCToolBar access
+
+	const CMap<UINT, UINT, int, int>& ToolBar_GetDefaultImages( void )
+	{
+		return nosy::CToolBar_::m_DefaultImages;
+	}
 
 	CToolTipCtrl* ToolBar_GetToolTip( const CMFCToolBar* pToolBar )
 	{

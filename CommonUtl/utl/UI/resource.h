@@ -31,6 +31,7 @@
 #define IDC_RESIZE_SPLITTER_WE_CURSOR   28026
 #define IDI_UNKNOWN                     28027
 #define IDR_EDIT_ACCEL                  28028
+#define IDR_STD_UTL_UI_MENU             28029
 #define UTL_MIN_COMMAND_VALUE           28100
 #define ID_WINDOW_MANAGER               28101
 #define ID_VIEW_CUSTOMIZE               28102
@@ -150,10 +151,10 @@
 #define IDS_COLOR_PICKER_BUTTON_HELP    28801
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        28029
+#define _APS_NEXT_RESOURCE_VALUE        28030
 #define _APS_NEXT_COMMAND_VALUE         28283
 #define _APS_NEXT_CONTROL_VALUE         28536
 #define _APS_NEXT_SYMED_VALUE           28802
