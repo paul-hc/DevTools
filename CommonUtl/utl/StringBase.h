@@ -358,16 +358,6 @@ namespace str
 
 
 	template< typename CharT >
-	std::basic_string<CharT> Clamp( const std::basic_string<CharT>& text, size_t maxLength, const TCHAR* pMoreSuffix = nullptr )
-	{	// clamps string to a maxLength, eventually adding a suffix
-		std::basic_string<CharT> outText( text, 0, std::min( maxLength, text.length() ) );
-		if ( text.length() > maxLength && pMoreSuffix != nullptr )
-			outText += pMoreSuffix;
-		return outText;
-	}
-
-
-	template< typename CharT >
 	inline std::basic_string<CharT>& PopBack( OUT std::basic_string<CharT>& rText )
 	{	// placeholder for basic_string::pop_back() that's missing in earlier versions of STD C++
 		ASSERT( !rText.empty() );
@@ -643,8 +633,120 @@ namespace str
 
 	inline BSTR AllocSysString( const std::tstring& text ) { return CString( text.c_str() ).AllocSysString(); }
 #endif //_MFC_VER
+}
 
 
+namespace str
+{
+	template< typename StringT >
+	bool ClampTrailing( OUT StringT& rOutText, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
+	{	// clamps string to a maxLength, eventually adding a placeholder suffix
+		if ( rOutText.length() <= maxLength )
+			return false;
+
+		if ( pMoreSuffix != nullptr )
+			rOutText.replace( std::max( static_cast<ptrdiff_t>( maxLength - str::GetLength( pMoreSuffix ) ), 0 ), std::tstring::npos, pMoreSuffix );
+		else
+			rOutText.erase( maxLength, rOutText.length() - maxLength );
+
+		return true;
+	}
+
+	template< typename StringT >
+	bool ClampLeading( OUT StringT& rOutText, size_t maxLength, const typename StringT::value_type* pMorePrefix = nullptr )
+	{	// clamps string to a maxLength, eventually adding a placeholder prefix
+		if ( rOutText.length() <= maxLength )
+			return false;
+
+		if ( pMorePrefix != nullptr )
+			rOutText.replace( 0, rOutText.length() - std::max( static_cast<ptrdiff_t>( maxLength - str::GetLength( pMorePrefix ) ), 0 ), pMorePrefix );
+		else
+			rOutText.erase( 0, rOutText.length() - maxLength );
+
+		return true;
+	}
+
+
+	template< typename StringT >
+	StringT GetClampTrailing( const StringT& text, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
+	{	// clamps string to a maxLength, eventually adding a placeholder suffix
+		StringT outText = text;
+		ClampTrailing( outText, maxLength, pMoreSuffix );
+		return outText;
+	}
+
+	template< typename StringT >
+	StringT GetClampLeading( const StringT& text, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
+	{	// clamps string to a maxLength, eventually adding a placeholder suffix
+		StringT outText = text;
+		ClampLeading( outText, maxLength, pMoreSuffix );
+		return outText;
+	}
+
+
+	template< typename StringT >
+	bool ExtractLeftOf( OUT StringT& rOutText, typename StringT::value_type delim )
+	{	// if delimiter found: extract the leading string, up to and excluding the delimiter
+		size_t pos = rOutText.find( delim );
+
+		if ( StringT::npos == pos )
+			return false;
+
+		rOutText.erase( pos, StringT::npos );
+		return true;
+	}
+
+	template< typename StringT >
+	bool ExtractRightOf( OUT StringT& rOutText, typename StringT::value_type delim )
+	{	// if delimiter found: extract the trailing string, excluding the delimiter
+		size_t pos = rOutText.find( delim );
+
+		if ( StringT::npos == pos )
+			return false;
+
+		rOutText.erase( 0, pos + 1 );
+		return true;
+	}
+
+
+	template< typename StringT >
+	StringT GetLeftOf( const StringT& text, typename StringT::value_type delim )
+	{	// if delimiter found: returns the leading string, excluding the delimiter
+		StringT leftText = text;
+		ExtractLeftOf( leftText, delim );
+		return leftText;
+	}
+
+	template< typename StringT >
+	StringT GetRightOf( const StringT& text, typename StringT::value_type delim )
+	{	// if delimiter found: returns the trailing string, excluding the delimiter
+		StringT rightText = text;
+		ExtractRightOf( rightText, delim );
+		return rightText;
+	}
+
+
+	template< typename StringT >
+	bool SplitAtDelim( OUT StringT* pLeftText, OUT StringT* pRightText, const StringT& text, typename StringT::value_type delim )
+	{	// if delimiter found: extract the trailing string, excluding the delimiter
+		size_t pos = text.find( delim );
+
+		if ( StringT::npos == pos )
+			return false;
+
+		if ( pLeftText != nullptr )
+			pLeftText->assign( text.begin(), text.begin() + pos );
+
+		if ( pRightText != nullptr )
+			pRightText->assign( text.begin() + pos + 1, text.end() );
+
+		return true;
+	}
+}
+
+
+namespace str
+{
 	template< typename CharT >
 	size_t Replace( IN OUT std::basic_string<CharT>& rText, const CharT* pSearch, const CharT* pReplace, size_t maxCount = utl::npos )
 	{

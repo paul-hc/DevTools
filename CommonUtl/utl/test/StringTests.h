@@ -21,7 +21,9 @@ private:
 	void TestIsCharType( void );
 	void TestValueToString( void );
 	void TestTrim( void );
+	void TestStringClamp( void );
 	void TestEnquote( void );
+
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
 	void TestStringPrefixSuffix( void );

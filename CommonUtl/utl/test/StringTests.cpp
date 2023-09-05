@@ -236,6 +236,80 @@ void CStringTests::TestTrim( void )
 	}
 }
 
+void CStringTests::TestStringClamp( void )
+{
+	{	// str::ClampTrailing
+		const std::string src = "0123456789";
+		std::string text;
+
+		text = src;
+		ASSERT( !str::ClampTrailing( text, 32 ) );
+		ASSERT_EQUAL( src, text );
+		ASSERT( str::ClampTrailing( text, 5 ) );
+		ASSERT_EQUAL( "01234", text );
+		text = src;
+		ASSERT( str::ClampTrailing( text, 5, ".." ) );
+		ASSERT_EQUAL( "012..", text );
+
+		// str::ClampLeading
+		text = src;
+		ASSERT( !str::ClampLeading( text, 32 ) );
+		ASSERT_EQUAL( src, text );
+		ASSERT( str::ClampLeading( text, 5 ) );
+		ASSERT_EQUAL( "56789", text );
+		text = src;
+		ASSERT( str::ClampLeading( text, 5, ".." ) );
+		ASSERT_EQUAL( "..789", text );
+
+		// str::GetClampTrailing
+		ASSERT_EQUAL( "0123456789", str::GetClampTrailing( src, 32 ) );
+		ASSERT_EQUAL( "01234", str::GetClampTrailing( src, 5 ) );
+		ASSERT_EQUAL( "012..", str::GetClampTrailing( src, 5, ".." ) );
+		ASSERT_EQUAL( "..", str::GetClampTrailing( src, 0, ".." ) );
+
+		// str::GetClampLeading
+		ASSERT_EQUAL( "0123456789", str::GetClampLeading( src, 32 ) );
+		ASSERT_EQUAL( "56789", str::GetClampLeading( src, 5 ) );
+		ASSERT_EQUAL( "..789", str::GetClampLeading( src, 5, ".." ) );
+		ASSERT_EQUAL( "..", str::GetClampLeading( src, 0, ".." ) );
+	}
+
+	{	// str::ExtractLeftOf
+		const std::string src = "left|RIGHT";
+		std::string text;
+
+		text = src;
+		ASSERT( !str::ExtractLeftOf( text, '#' ) );
+		ASSERT_EQUAL( "left|RIGHT", text );
+		ASSERT( str::ExtractLeftOf( text, '|' ) );
+		ASSERT_EQUAL( "left", text );
+
+		// str::ExtractRightOf
+		text = src;
+		ASSERT( !str::ExtractRightOf( text, '#' ) );
+		ASSERT_EQUAL( "left|RIGHT", text );
+		ASSERT( str::ExtractRightOf( text, '|' ) );
+		ASSERT_EQUAL( "RIGHT", text );
+
+		// str::GetLeftOf
+		text = src;
+		ASSERT_EQUAL( "left|RIGHT", str::GetLeftOf( text, '#' ) );
+		ASSERT_EQUAL( "left", str::GetLeftOf( text, '|' ) );
+
+		// str::GetRightOf
+		ASSERT_EQUAL( "left|RIGHT", str::GetRightOf( text, '#' ) );
+		ASSERT_EQUAL( "RIGHT", str::GetRightOf( text, '|' ) );
+
+		// str::SplitAtDelim
+		std::string left, right;
+		ASSERT( !str::SplitAtDelim( &left, &right, src, '#' ) );
+
+		ASSERT( str::SplitAtDelim( &left, &right, src, '|' ) );
+		ASSERT_EQUAL( "left", left );
+		ASSERT_EQUAL( "RIGHT", right );
+	}
+}
+
 void CStringTests::TestEnquote( void )
 {
 	// NARROW:
@@ -966,7 +1040,9 @@ void CStringTests::Run( void )
 	RUN_TEST( TestIsCharType );
 	RUN_TEST( TestValueToString );
 	RUN_TEST( TestTrim );
+	RUN_TEST( TestStringClamp );
 	RUN_TEST( TestEnquote );
+
 	RUN_TEST( TestStringSplit );
 	RUN_TEST( TestStringTokenize );
 	RUN_TEST( TestStringPrefixSuffix );
