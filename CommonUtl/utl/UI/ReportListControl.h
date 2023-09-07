@@ -642,7 +642,7 @@ private:
 	PFNLVCOMPARE m_pComparePtrFunc;							// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pThis );
 
 	std::vector<CColumnComparator> m_comparators;
-	utl::vector_map<TRowKey, int> m_initialItemsOrder;	// stores items initial order just after list set-up
+	utl::vector_map<TRowKey, int> m_initialItemsOrder;		// stores items initial order just after list set-up
 	std::multimap<int, TRowKey> m_groupIdToItemsMap;		// group ID per row-key items map
 
 	CImageList* m_pImageList;

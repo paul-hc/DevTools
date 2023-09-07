@@ -16,6 +16,9 @@ namespace dbg { std::string MapToString( const CMap<UINT, UINT, int, int>& cmdTo
 #endif
 
 
+#define REGISTER_LITERAL( mapCmdToLiteral, id )		(mapCmdToLiteral)[ id ] = _T(#id)
+
+
 namespace nosy
 {
 	struct CCommandManager_ : public CCommandManager
@@ -53,7 +56,7 @@ namespace mfc
 		LoadCommandNames();
 	}
 
-	CImageCommandLookup* CImageCommandLookup::Instance( void )
+	const CImageCommandLookup* CImageCommandLookup::Instance( void )
 	{
 		static CImageCommandLookup s_imageCmdLookup;
 		return &s_imageCmdLookup;
@@ -67,6 +70,11 @@ namespace mfc
 	const std::tstring* CImageCommandLookup::FindCommandName( UINT cmdId ) const
 	{
 		return utl::FindValuePtr( m_cmdToName, cmdId );
+	}
+
+	const std::tstring* CImageCommandLookup::FindCommandLiteral( UINT cmdId ) const
+	{
+		return utl::FindValuePtr( m_cmdToLiteral, cmdId );
 	}
 
 	const std::tstring* CImageCommandLookup::FindCommandNameByPos( int imagePos ) const
@@ -89,6 +97,8 @@ namespace mfc
 
 				m_cmdToName[it->second] = cmdTags.m_tooltipText;
 			}
+
+		RegisterCmdLiterals();
 	}
 
 	void CImageCommandLookup::SetupFromMenus( void )
@@ -165,6 +175,161 @@ namespace mfc
 				}
 			}
 		}
+	}
+
+	void CImageCommandLookup::RegisterCmdLiterals( void )
+	{
+		// afxres.h IDs:
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_APP_TITLE );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_IDLEMESSAGE );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_HELPMODEMESSAGE );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_APP_TITLE_EMBEDDING );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_COMPANY_NAME );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_OBJ_TITLE_INPLACE );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_APP_ID );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_NEW );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_OPEN );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_CLOSE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_SAVE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_SAVE_AS );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_PAGE_SETUP );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_PRINT_SETUP );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_PRINT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_PRINT_DIRECT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_PRINT_PREVIEW );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_UPDATE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_SAVE_COPY_AS );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_SEND_MAIL );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_NEW_FRAME );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FIRST );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE1 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE2 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE3 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE4 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE5 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE6 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE7 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE8 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE9 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE10 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE11 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE12 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE13 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE14 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE15 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_FILE16 );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_MRU_LAST );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_CLEAR );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_CLEAR_ALL );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_COPY );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_CUT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_FIND );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_PASTE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_PASTE_LINK );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_PASTE_SPECIAL );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_REPEAT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_REPLACE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_SELECT_ALL );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_UNDO );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_REDO );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_WINDOW_NEW );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_WINDOW_ARRANGE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_WINDOW_CASCADE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_WINDOW_TILE_HORZ );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_WINDOW_TILE_VERT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_WINDOW_SPLIT );
+
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDM_WINDOW_FIRST );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDM_WINDOW_LAST );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDM_FIRST_MDICHILD );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_APP_ABOUT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_APP_EXIT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_HELP_INDEX );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_HELP_FINDER );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_HELP_USING );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_CONTEXT_HELP );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_HELP );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_DEFAULT_HELP );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_NEXT_PANE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_PREV_PANE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FORMAT_FONT );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_INSERT_NEW );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_EDIT_LINKS );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_EDIT_CONVERT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_EDIT_CHANGE_ICON );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_EDIT_PROPERTIES );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_VERB_FIRST );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_VERB_LAST );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_VERB_POPUP );
+
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_CLOSE );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_NUMPAGE );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_NEXT );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_PREV );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_PRINT );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_ZOOMIN );
+		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_ZOOMOUT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_TOOLBAR );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_STATUS_BAR );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_REBAR );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_AUTOARRANGE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_SMALLICON );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_LARGEICON );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_LIST );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_DETAILS );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_LINEUP );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_VIEW_BYNAME );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_RECORD_FIRST );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_RECORD_LAST );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_RECORD_NEXT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_RECORD_PREV );
+		m_cmdToLiteral[ 0xFFFF ] = _T("IDC_STATIC");
+
+		// utl_ui.rc literals:
+		REGISTER_LITERAL( m_cmdToLiteral, ID_TRANSPARENT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_SELECTED_COLOR_BUTTON );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_PROPERTIES );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_PROPERTIES );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EXPAND );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_COLLAPSE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_SHELL_SUBMENU );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_DETAILS );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_LIST_ITEMS );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_BROWSE_FILE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_BROWSE_FOLDER );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_RESET_DEFAULT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_REFRESH );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_OPTIONS );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_RUN_TESTS );
+		REGISTER_LITERAL( m_cmdToLiteral, IDD_PASSWORD_DIALOG );
+
+		REGISTER_LITERAL( m_cmdToLiteral, ID_ADD_ITEM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_REMOVE_ITEM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_REMOVE_ALL_ITEMS );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_RENAME_ITEM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_ITEM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_EDIT_SELECT_ALL );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_MOVE_UP_ITEM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_MOVE_DOWN_ITEM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_MOVE_TOP_ITEM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_MOVE_BOTTOM_ITEM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_SHUTTLE_UP );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_SHUTTLE_DOWN );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_SHUTTLE_TOP );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_SHUTTLE_BOTTOM );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_LIST_VIEW_ICON_LARGE );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_LIST_VIEW_ICON_SMALL );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_LIST_VIEW_LIST );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_LIST_VIEW_REPORT );
+		REGISTER_LITERAL( m_cmdToLiteral, ID_LIST_VIEW_TILE );
 	}
 }
 

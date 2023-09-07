@@ -358,6 +358,7 @@
     <ClInclude Include="Thumbnailer_fwd.h" />
     <ClInclude Include="ThumbPreviewCtrl.h" />
     <ClInclude Include="ToolbarButtons.h" />
+    <ClInclude Include="ToolbarImagesDialog.h" />
     <ClInclude Include="ToolbarStrip.h" />
     <ClInclude Include="ToolImageList.h" />
     <ClInclude Include="ToolStrip.h" />
@@ -535,6 +536,7 @@
     <ClCompile Include="Thumbnailer.cpp" />
     <ClCompile Include="ThumbPreviewCtrl.cpp" />
     <ClCompile Include="ToolbarButtons.cpp" />
+    <ClCompile Include="ToolbarImagesDialog.cpp" />
     <ClCompile Include="ToolbarStrip.cpp" />
     <ClCompile Include="ToolImageList.cpp" />
     <ClCompile Include="ToolStrip.cpp" />

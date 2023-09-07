@@ -557,7 +557,7 @@ namespace ut
 		if ( !pImages->PrepareDrawImage( drawState ) )
 			return;
 
-		mfc::CImageCommandLookup* pImageCmd = mfc::CImageCommandLookup::Instance();
+		const mfc::CImageCommandLookup* pImageCmd = mfc::CImageCommandLookup::Instance();
 		CDC* pDC = GetDC();
 
 		for ( UINT i = 0; i != imageCount; ++i )

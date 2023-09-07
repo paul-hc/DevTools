@@ -24,7 +24,7 @@ namespace reg
 
 namespace layout
 {
-	static CLayoutStyle styles[] =
+	static CLayoutStyle s_styles[] =
 	{
 		{ IDC_TOOLBAR_PLACEHOLDER, SizeX },
 		{ IDC_ITEMS_SHEET, Size },
@@ -41,7 +41,7 @@ CItemListDialog::CItemListDialog( CWnd* pParent, const ui::CItemContent& content
 	, m_selItemPos( utl::npos )
 {
 	m_regSection = m_childSheet.m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	LoadDlgIcon( ID_EDIT_LIST_ITEMS );
 	m_idleUpdateDeep = true;				// for CItemsEditPage::OnSelectedLinesChanged
 
@@ -310,7 +310,7 @@ void CItemListDialog::OnUpdatePasteItems( CCmdUI* pCmdUI )
 
 namespace layout
 {
-	static CLayoutStyle listPageStyles[] =
+	static CLayoutStyle s_listPageStyles[] =
 	{
 		{ IDC_ITEMS_LIST, Size }
 	};
@@ -323,7 +323,7 @@ CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
 	, m_listCtrl( IDC_ITEMS_LIST )
 	, m_accel( IDR_LIST_EDITOR_ACCEL )
 {
-	RegisterCtrlLayout( ARRAY_SPAN( layout::listPageStyles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_listPageStyles ) );
 	SetUseLazyUpdateData();			// call UpdateData on page activation change
 
 	m_listCtrl.SetSection( reg::section_list );
@@ -481,7 +481,7 @@ void CItemsListPage::OnLvnEndLabelEdit_Items( NMHDR* pNmHdr, LRESULT* pResult )
 
 namespace layout
 {
-	static CLayoutStyle editPageStyles[] =
+	static CLayoutStyle s_editPageStyles[] =
 	{
 		{ IDC_ITEMS_EDIT, Size }
 	};
@@ -496,7 +496,7 @@ CItemsEditPage::CItemsEditPage( CItemListDialog* pDialog )
 	, m_selLineRange( -1 )
 	, m_accel( IDD_ITEMS_EDIT_PAGE )
 {
-	RegisterCtrlLayout( ARRAY_SPAN( layout::editPageStyles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_editPageStyles ) );
 	SetUseLazyUpdateData();			// call UpdateData on page activation change
 	m_mlEdit.SetKeepSelOnFocus();
 }

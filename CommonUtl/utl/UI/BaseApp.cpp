@@ -8,6 +8,7 @@
 #include "RuntimeException.h"
 #include "ShellTypes.h"
 #include "ProcessUtils.h"
+#include "ToolbarImagesDialog.h"
 #include "WindowDebug.h"
 #include "resource.h"
 #include "utl/FileEnumerator.h"
@@ -43,6 +44,7 @@
 namespace reg
 {
 	static const TCHAR section_Settings[] = _T("Settings");
+	static const TCHAR entry_ToolBarsCustomizeActivePage[] = _T("ToolBarsCustomize.ActivePage");
 	static const TCHAR entry_AppLook[] = _T("AppLook");
 	static const TCHAR entry_AppLook_MFC90[] = _T("AppLook-MFC 9.0");
 
@@ -64,6 +66,41 @@ namespace nosy
 		// public access
 		using CWinAppEx::m_bContextMenuManagerAutocreated;
 	};
+}
+
+
+namespace mfc
+{
+	class CToolBarsCustomizeDialog : public CMFCToolBarsCustomizeDialog
+	{
+		enum DlgParams { ScanMenus = TRUE, UiFlags = 0xFFFF };
+	public:
+		CToolBarsCustomizeDialog( CFrameWnd* pParentFrame = checked_static_cast<CFrameWnd*>( AfxGetMainWnd() ) )
+			: CMFCToolBarsCustomizeDialog( pParentFrame, ScanMenus, UiFlags, CToolbarImagesDialog::GetCustomPages() )
+		{
+			SetActivePage( AfxGetApp()->GetProfileInt( reg::section_Settings, reg::entry_ToolBarsCustomizeActivePage, GetActiveIndex() ) );
+		}
+
+		virtual ~CToolBarsCustomizeDialog()
+		{
+		}
+		// generated stuff
+	protected:
+		afx_msg void OnDestroy( void )
+		{
+			AfxGetApp()->WriteProfileInt( reg::section_Settings, reg::entry_ToolBarsCustomizeActivePage, GetActiveIndex() );
+			__super::OnDestroy();
+		}
+
+		DECLARE_MESSAGE_MAP()
+	};
+
+
+	// CToolBarsCustomizeDialog message handlers
+
+	BEGIN_MESSAGE_MAP( CToolBarsCustomizeDialog, CMFCToolBarsCustomizeDialog )
+		ON_WM_DESTROY()
+	END_MESSAGE_MAP()
 }
 
 
@@ -224,7 +261,7 @@ void CAppLook::OnResetAllControlBars( void )
 
 void CAppLook::OnViewCustomize( void )
 {
-	CMFCToolBarsCustomizeDialog* pDlgCust = new CMFCToolBarsCustomizeDialog( checked_static_cast<CFrameWnd*>( AfxGetMainWnd() ), TRUE /* scan menus */ );
+	CMFCToolBarsCustomizeDialog* pDlgCust = new mfc::CToolBarsCustomizeDialog();
 
 	pDlgCust->EnableUserDefinedToolbars();
 	pDlgCust->Create();

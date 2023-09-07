@@ -5,6 +5,28 @@
 #include "ISubject.h"
 
 
+// stripped down implementation of utl::ISubject-derived interface, with no observers - to be used for list-ctrl items, etc
+//
+template< typename ISubjectT >
+abstract class CBasicSubjectImpl : public ISubjectT
+{
+protected:
+	CBasicSubjectImpl( void ) {}
+public:
+	virtual ~CBasicSubjectImpl()
+	{
+	}
+
+	// utl::ISubject interface (partial)
+	virtual void AddObserver( utl::IObserver* pObserver ) implement { pObserver; }
+	virtual void RemoveObserver( utl::IObserver* pObserver ) implement { pObserver; }
+	virtual void UpdateAllObservers( utl::IMessage* pMessage ) implement { pMessage; ASSERT( false ); }
+};
+
+
+typedef CBasicSubjectImpl<utl::ISubject> TBasicSubject;
+
+
 // standard implementation of utl::ISubject or a utl::ISubject-derived interface
 //
 template< typename ISubjectT >
@@ -23,7 +45,7 @@ public:
 
 	// utl::ISubject interface (partial)
 
-	virtual void AddObserver( utl::IObserver* pObserver )
+	virtual void AddObserver( utl::IObserver* pObserver ) implement
 	{
 		ASSERT_PTR( pObserver );
 		ASSERT( std::find( m_observers.begin(), m_observers.end(), pObserver ) == m_observers.end() );
@@ -31,7 +53,7 @@ public:
 		m_observers.push_back( pObserver );
 	}
 
-	virtual void RemoveObserver( utl::IObserver* pObserver )
+	virtual void RemoveObserver( utl::IObserver* pObserver ) implement
 	{
 		ASSERT_PTR( pObserver );
 
@@ -42,7 +64,7 @@ public:
 			TRACE( _T(" # Observer %s already removed from subject %s.\n"), str::GetTypeName( typeid( *pObserver ) ).c_str(), str::GetTypeName( typeid( *this ) ).c_str() );
 	}
 
-	virtual void UpdateAllObservers( utl::IMessage* pMessage )
+	virtual void UpdateAllObservers( utl::IMessage* pMessage ) implement
 	{
 		for ( std::vector<utl::IObserver*>::const_iterator itObserver = m_observers.begin(); itObserver != m_observers.end(); ++itObserver )
 			(*itObserver)->OnUpdate( this, pMessage );

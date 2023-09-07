@@ -45,7 +45,7 @@ namespace ui
 
 	interface ICustomImageDraw
 	{
-		virtual CSize GetItemImageSize( GlyphGauge glyphGauge = SmallGlyph ) const = 0;
+		virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const = 0;
 		virtual bool SetItemImageSize( const CSize& imageBoundsSize ) = 0;											// call when UI control drives image bounds size
 		virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect ) = 0;		// e.g. pSubject->GetCode() refers to a fs::CPath
 

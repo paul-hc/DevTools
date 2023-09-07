@@ -12,19 +12,23 @@ namespace mfc
 	{
 		CImageCommandLookup( void );
 	public:
-		static CImageCommandLookup* Instance( void );
+		static const CImageCommandLookup* Instance( void );
 
 		UINT FindCommand( int imagePos ) const;
 		const std::tstring* FindCommandName( UINT cmdId ) const;
-		const std::tstring* FindCommandNameByPos( int imagePos ) const;
+		const std::tstring* FindCommandLiteral( UINT cmdId ) const;
 
-		void LoadCommandNames( void );
+		const std::tstring* FindCommandNameByPos( int imagePos ) const;
 	private:
+		void LoadCommandNames( void );
+
 		void SetupFromMenus( void );
 		void AddMenuCommands( const CMenu* pMenu, const std::tstring& menuPath = str::GetEmpty() );
+		void RegisterCmdLiterals( void );		// just for MFC + UTL UI standard commands
 	private:
 		std::unordered_map<int, UINT> m_imagePosToCommand;
 		std::unordered_map<UINT, std::tstring> m_cmdToName;
+		std::unordered_map<UINT, std::tstring> m_cmdToLiteral;	// ID_FILE_OPEN, ID_REFRESH, etc
 	};
 }
 

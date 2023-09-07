@@ -701,6 +701,9 @@
     <ClInclude Include="ImageCommandLookup.h">
       <Filter>UI\MFC+</Filter>
     </ClInclude>
+    <ClInclude Include="ToolbarImagesDialog.h">
+      <Filter>UI\Dialogs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1197,6 +1200,9 @@
     </ClCompile>
     <ClCompile Include="ImageCommandLookup.cpp">
       <Filter>UI\MFC+</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolbarImagesDialog.cpp">
+      <Filter>UI\Dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

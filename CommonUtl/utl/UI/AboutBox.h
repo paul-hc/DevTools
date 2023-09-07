@@ -48,6 +48,7 @@ protected:
 	afx_msg void OnLvnItemChanged_ListItems( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnExploreModule( void );
 	afx_msg void OnUpdateExploreModule( CCmdUI* pCmdUI );
+	afx_msg void OnViewToolBars( void );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -85,7 +85,7 @@ class CPathItem;
 
 
 class CItemsListPage : public CLayoutPropertyPage
-					 , public detail::IContentPage
+	, public detail::IContentPage
 {
 public:
 	CItemsListPage( CItemListDialog* pDialog );
@@ -124,7 +124,7 @@ protected:
 
 
 class CItemsEditPage : public CLayoutPropertyPage
-					 , public detail::IContentPage
+	, public detail::IContentPage
 {
 public:
 	CItemsEditPage( CItemListDialog* pDialog );
