@@ -639,7 +639,7 @@ namespace str
 namespace str
 {
 	template< typename StringT >
-	bool ClampTrailing( OUT StringT& rOutText, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
+	bool ClampTail( OUT StringT& rOutText, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
 	{	// clamps string to a maxLength, eventually adding a placeholder suffix
 		if ( rOutText.length() <= maxLength )
 			return false;
@@ -653,7 +653,7 @@ namespace str
 	}
 
 	template< typename StringT >
-	bool ClampLeading( OUT StringT& rOutText, size_t maxLength, const typename StringT::value_type* pMorePrefix = nullptr )
+	bool ClampHead( OUT StringT& rOutText, size_t maxLength, const typename StringT::value_type* pMorePrefix = nullptr )
 	{	// clamps string to a maxLength, eventually adding a placeholder prefix
 		if ( rOutText.length() <= maxLength )
 			return false;
@@ -668,18 +668,18 @@ namespace str
 
 
 	template< typename StringT >
-	StringT GetClampTrailing( const StringT& text, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
+	inline StringT GetClampTail( const StringT& text, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
 	{	// clamps string to a maxLength, eventually adding a placeholder suffix
 		StringT outText = text;
-		ClampTrailing( outText, maxLength, pMoreSuffix );
+		ClampTail( outText, maxLength, pMoreSuffix );
 		return outText;
 	}
 
 	template< typename StringT >
-	StringT GetClampLeading( const StringT& text, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
+	inline StringT GetClampHead( const StringT& text, size_t maxLength, const typename StringT::value_type* pMoreSuffix = nullptr )
 	{	// clamps string to a maxLength, eventually adding a placeholder suffix
 		StringT outText = text;
-		ClampLeading( outText, maxLength, pMoreSuffix );
+		ClampHead( outText, maxLength, pMoreSuffix );
 		return outText;
 	}
 
@@ -710,7 +710,7 @@ namespace str
 
 
 	template< typename StringT >
-	StringT GetLeftOf( const StringT& text, typename StringT::value_type delim )
+	inline StringT GetLeftOf( const StringT& text, typename StringT::value_type delim )
 	{	// if delimiter found: returns the leading string, excluding the delimiter
 		StringT leftText = text;
 		ExtractLeftOf( leftText, delim );
@@ -718,7 +718,7 @@ namespace str
 	}
 
 	template< typename StringT >
-	StringT GetRightOf( const StringT& text, typename StringT::value_type delim )
+	inline StringT GetRightOf( const StringT& text, typename StringT::value_type delim )
 	{	// if delimiter found: returns the trailing string, excluding the delimiter
 		StringT rightText = text;
 		ExtractRightOf( rightText, delim );

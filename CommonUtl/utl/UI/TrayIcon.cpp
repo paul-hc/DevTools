@@ -202,7 +202,7 @@ bool CTrayIcon::SetTooltipText( const TCHAR* pIconTipText )
 
 bool CTrayIcon::ShowBalloonTip( const std::tstring& text, const TCHAR* pTitle /*= nullptr*/, app::MsgType msgType /*= app::Info*/, UINT timeoutSecs /*= 0*/ )
 {
-	//TRACE( _T("CTrayIcon::ShowBalloonTip( %s ) {...\n"), str::GetClampTrailing( text, 24, _T("...") ).c_str() );
+	//TRACE( _T("CTrayIcon::ShowBalloonTip( %s ) {...\n"), str::GetClampTail( text, 24, _T("...") ).c_str() );
 
 	bool hasText = !text.empty() || !str::IsEmpty( pTitle );
 

@@ -186,7 +186,9 @@ namespace mfc
 		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_APP_TITLE_EMBEDDING );
 		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_COMPANY_NAME );
 		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_OBJ_TITLE_INPLACE );
+	#if _MFC_VER > 0x0900		// newer MFC version?
 		REGISTER_LITERAL( m_cmdToLiteral, AFX_IDS_APP_ID );
+	#endif
 
 		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_NEW );
 		REGISTER_LITERAL( m_cmdToLiteral, ID_FILE_OPEN );
@@ -266,7 +268,9 @@ namespace mfc
 		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_EDIT_PROPERTIES );
 		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_VERB_FIRST );
 		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_VERB_LAST );
+	#if _MFC_VER > 0x0900		// newer MFC version?
 		REGISTER_LITERAL( m_cmdToLiteral, ID_OLE_VERB_POPUP );
+	#endif
 
 		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_CLOSE );
 		REGISTER_LITERAL( m_cmdToLiteral, AFX_ID_PREVIEW_NUMPAGE );

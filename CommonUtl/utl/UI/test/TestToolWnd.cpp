@@ -576,7 +576,7 @@ namespace ut
 				enum { MaxDisplayLength = 17 };
 
 				if ( const std::tstring* pCmdName = pImageCmd->FindCommandNameByPos( i ) )
-					stream::Tag( tag, str::GetClampLeading( *pCmdName, MaxDisplayLength, _T("~") ), _T("  ") );
+					stream::Tag( tag, str::GetClampHead( *pCmdName, MaxDisplayLength, _T("~") ), _T("  ") );
 
 				int width = ui::GetTextSize( GetDC(), tag.c_str() ).cx + TextSpacingX;
 

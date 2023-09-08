@@ -238,40 +238,40 @@ void CStringTests::TestTrim( void )
 
 void CStringTests::TestStringClamp( void )
 {
-	{	// str::ClampTrailing
+	{	// str::ClampTail
 		const std::string src = "0123456789";
 		std::string text;
 
 		text = src;
-		ASSERT( !str::ClampTrailing( text, 32 ) );
+		ASSERT( !str::ClampTail( text, 32 ) );
 		ASSERT_EQUAL( src, text );
-		ASSERT( str::ClampTrailing( text, 5 ) );
+		ASSERT( str::ClampTail( text, 5 ) );
 		ASSERT_EQUAL( "01234", text );
 		text = src;
-		ASSERT( str::ClampTrailing( text, 5, ".." ) );
+		ASSERT( str::ClampTail( text, 5, ".." ) );
 		ASSERT_EQUAL( "012..", text );
 
-		// str::ClampLeading
+		// str::ClampHead
 		text = src;
-		ASSERT( !str::ClampLeading( text, 32 ) );
+		ASSERT( !str::ClampHead( text, 32 ) );
 		ASSERT_EQUAL( src, text );
-		ASSERT( str::ClampLeading( text, 5 ) );
+		ASSERT( str::ClampHead( text, 5 ) );
 		ASSERT_EQUAL( "56789", text );
 		text = src;
-		ASSERT( str::ClampLeading( text, 5, ".." ) );
+		ASSERT( str::ClampHead( text, 5, ".." ) );
 		ASSERT_EQUAL( "..789", text );
 
-		// str::GetClampTrailing
-		ASSERT_EQUAL( "0123456789", str::GetClampTrailing( src, 32 ) );
-		ASSERT_EQUAL( "01234", str::GetClampTrailing( src, 5 ) );
-		ASSERT_EQUAL( "012..", str::GetClampTrailing( src, 5, ".." ) );
-		ASSERT_EQUAL( "..", str::GetClampTrailing( src, 0, ".." ) );
+		// str::GetClampTail
+		ASSERT_EQUAL( "0123456789", str::GetClampTail( src, 32 ) );
+		ASSERT_EQUAL( "01234", str::GetClampTail( src, 5 ) );
+		ASSERT_EQUAL( "012..", str::GetClampTail( src, 5, ".." ) );
+		ASSERT_EQUAL( "..", str::GetClampTail( src, 0, ".." ) );
 
-		// str::GetClampLeading
-		ASSERT_EQUAL( "0123456789", str::GetClampLeading( src, 32 ) );
-		ASSERT_EQUAL( "56789", str::GetClampLeading( src, 5 ) );
-		ASSERT_EQUAL( "..789", str::GetClampLeading( src, 5, ".." ) );
-		ASSERT_EQUAL( "..", str::GetClampLeading( src, 0, ".." ) );
+		// str::GetClampHead
+		ASSERT_EQUAL( "0123456789", str::GetClampHead( src, 32 ) );
+		ASSERT_EQUAL( "56789", str::GetClampHead( src, 5 ) );
+		ASSERT_EQUAL( "..789", str::GetClampHead( src, 5, ".." ) );
+		ASSERT_EQUAL( "..", str::GetClampHead( src, 0, ".." ) );
 	}
 
 	{	// str::ExtractLeftOf

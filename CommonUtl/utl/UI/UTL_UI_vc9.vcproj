@@ -305,14 +305,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\LayoutPaneDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutPaneDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
@@ -1294,6 +1286,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\LayoutPaneDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutPaneDialog.h"
+					>
+				</File>
+				<File
 					RelativePath=".\LayoutPropertyPage.cpp"
 					>
 				</File>
@@ -1871,6 +1871,14 @@
 				</File>
 				<File
 					RelativePath=".\TaskDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolbarImagesDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolbarImagesDialog.h"
 					>
 				</File>
 			</Filter>
