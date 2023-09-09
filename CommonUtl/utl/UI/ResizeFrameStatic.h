@@ -7,7 +7,7 @@
 
 
 class CResizeFrameStatic : public CStatic
-						 , public ui::ILayoutFrame
+	, public ui::ILayoutFrame
 {
 public:
 	CResizeFrameStatic( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Orientation orientation = resize::NorthSouth, resize::ToggleStyle toggleStyle = resize::ToggleSecond );

@@ -126,8 +126,6 @@
 #define IDC_SEARCH_PATH_COMBO           1097
 #define IDC_FIND_FILES_BUTTON           1098
 #define IDC_FOLDER_PATH_COMBO           1099
-#define IDC_VERT_SPLITTER_STATIC        1100
-#define IDC_HORIZ_SPLITTER_STATIC       1101
 #define IDC_SEL_FILE_EDIT               1102
 #define IDC_SEL_FILE_PROGRESS           1103
 #define IDC_BUDDY_MODELESS_CHECK        1104
