@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "ToolbarImagesDialog.h"
 #include "ImageCommandLookup.h"
+#include "ControlBar_fwd.h"
+#include "SampleView.h"
 #include "WndUtils.h"
 #include "resource.h"
 #include "utl/ContainerOwnership.h"
@@ -12,6 +14,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "ReportListControl.hxx"
 
 
 namespace reg
@@ -33,8 +37,8 @@ namespace layout
 	};
 }
 
-CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParent )
-	: CLayoutDialog( IDD_TOOLBAR_IMAGES_DIALOG, pParent )
+CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParentWnd )
+	: CLayoutDialog( IDD_TOOLBAR_IMAGES_DIALOG, pParentWnd )
 {
 	m_regSection = m_childSheet.m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
@@ -118,7 +122,8 @@ namespace layout
 		{ IDC_ALPHA_SRC_LABEL, MoveY },
 		{ IDC_DRAW_DISABLED_CHECK, MoveY },
 		{ IDC_ALPHA_SRC_EDIT, MoveY },
-		{ IDC_ALPHA_SRC_SPIN, MoveY }
+		{ IDC_ALPHA_SRC_SPIN, MoveY },
+		{ IDC_TOOLBAR_IMAGE_SAMPLE, MoveY | SizeX }
 	};
 }
 
@@ -128,11 +133,11 @@ CToolbarImagesPage::CToolbarImagesPage( CMFCToolBarImages* pImages /*= nullptr*/
 	: CLayoutPropertyPage( IDD_TOOLBAR_IMAGES_PAGE )
 	, m_pImages( pImages != nullptr ? pImages : CMFCToolBar::GetImages() )
 	, m_imageSize( m_pImages->GetImageSize() )
+	, m_imageBoundsSize( CIconSize::GetSizeOf( SmallIcon ) )
 	, m_selItemIndex( AfxGetApp()->GetProfileInt( reg::section_MfcPage, reg::entry_SelItemIndex, 0 ) )
 	, m_drawDisabled( AfxGetApp()->GetProfileInt( reg::section_MfcPage, reg::entry_DrawDisabled, false ) != FALSE )
 	, m_alphaSrc( static_cast<BYTE>( AfxGetApp()->GetProfileInt( reg::section_MfcPage, reg::entry_AlphaSrc, 255u ) ) )
 	, m_imageListCtrl( IDC_TOOLBAR_IMAGES_LIST )
-	, m_imageBoundsSize( CIconSize::GetSizeOf( SmallIcon ) )
 {
 	RegisterCtrlLayout( ARRAY_SPAN( layout::s_mfcPageStyles ) );
 	SetUseLazyUpdateData();			// call UpdateData on page activation change
@@ -141,6 +146,9 @@ CToolbarImagesPage::CToolbarImagesPage( CMFCToolBarImages* pImages /*= nullptr*/
 	m_imageListCtrl.SetSection( reg::section_MfcPage );
 	m_imageListCtrl.SetCustomIconDraw( this );
 	m_imageListCtrl.SetUseAlternateRowColoring();
+
+	m_pSampleView.reset( new CSampleView( this ) );
+	m_pSampleView->SetBorderColor( CLR_DEFAULT );
 
 	UINT imageCount = m_pImages->GetCount();
 	const mfc::CImageCommandLookup* pImageCmds = mfc::CImageCommandLookup::Instance();
@@ -222,12 +230,45 @@ bool CToolbarImagesPage::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject,
 	return true;
 }
 
+bool CToolbarImagesPage::RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
+{
+	GetGlobalData()->DrawParentBackground( m_pSampleView.get(), pDC, const_cast<CRect*>( &boundsRect ) );
+
+	if ( CImageItem* pImageItem = m_imageListCtrl.GetCaretAs<CImageItem>() )
+	{
+		CRect normalBoundsRect = boundsRect, largeBoundsRect = boundsRect;
+
+		normalBoundsRect.right = normalBoundsRect.left + normalBoundsRect.Height();
+		largeBoundsRect.left = normalBoundsRect.right;
+
+		int zoomSize = std::min( largeBoundsRect.Width(), largeBoundsRect.Height() );
+
+		CRect normalRect( 0, 0, m_imageSize.cx, m_imageSize.cy ), largeRect( 0, 0, zoomSize, zoomSize );
+
+		ui::CenterRect( normalRect, normalBoundsRect );
+		ui::CenterRect( largeRect, largeBoundsRect );
+
+		CAfxDrawState drawState;
+
+		if ( !m_pImages->PrepareDrawImage( drawState ) )
+			return false;
+
+		m_pImages->Draw( pDC, normalRect.left, normalRect.top, pImageItem->m_index, FALSE, m_drawDisabled, FALSE, FALSE, FALSE, m_alphaSrc );
+		mfc::ToolBarImages_DrawStretch( m_pImages, pDC, largeRect, pImageItem->m_index, false, m_drawDisabled, false, false, false, m_alphaSrc );
+
+		m_pImages->EndDrawImage( drawState );
+	}
+
+	return true;
+}
+
 void CToolbarImagesPage::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
 	static std::tstring s_imageCountFmt = ui::GetDlgItemText( this, IDC_TOOLBAR_IMAGES_STATIC );
 
 	DDX_Control( pDX, IDC_TOOLBAR_IMAGES_LIST, m_imageListCtrl );
+	m_pSampleView->DDX_Placeholder( pDX, IDC_TOOLBAR_IMAGE_SAMPLE );
 	ui::DDX_Bool( pDX, IDC_DRAW_DISABLED_CHECK, m_drawDisabled );
 	ui::DDX_Number( pDX, IDC_ALPHA_SRC_EDIT, m_alphaSrc );
 
@@ -280,7 +321,10 @@ void CToolbarImagesPage::OnLvnItemChanged_ImageListCtrl( NMHDR* pNmHdr, LRESULT*
 	*pResult = 0;
 
 	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	{
 		m_selItemIndex = m_imageListCtrl.GetCurSel();
+		m_pSampleView->Invalidate();
+	}
 }
 
 void CToolbarImagesPage::OnRedrawImagesList( void )

@@ -4,14 +4,7 @@
 
 #include "Range.h"
 #include "ui_fwd.h"
-
-
-interface ISampleCallback
-{
-	virtual void RenderBackground( CDC* pDC, const CRect& clientRect ) { pDC, clientRect; }
-	virtual bool RenderSample( CDC* pDC, const CRect& clientRect ) = 0;
-	virtual void ShowPixelInfo( const CPoint& pos, COLORREF color ) { pos, color; }
-};
+#include "SampleView_fwd.h"
 
 
 // a scrollable view used as control in a dialog
@@ -19,12 +12,16 @@ interface ISampleCallback
 class CSampleView : public CScrollView
 {
 public:
-	CSampleView( ISampleCallback* pSampleCallback );
+	CSampleView( ui::ISampleCallback* pSampleCallback, bool useDoubleBuffering = true );
 	virtual ~CSampleView();
 
 	void DDX_Placeholder( CDataExchange* pDX, int placeholderId );		// create and replace a placeholder static (with the same id)
 
-	void SetSampleCallback( ISampleCallback* pSampleCallback ) { m_pSampleCallback = pSampleCallback; SafeRedraw(); }
+	void SetSampleCallback( ui::ISampleCallback* pSampleCallback ) { m_pSampleCallback = pSampleCallback; SafeRedraw(); }
+
+	void SetUseDoubleBuffering( bool useDoubleBuffering = true ) { m_useDoubleBuffering = useDoubleBuffering; }
+	void SetBorderColor( COLORREF borderColor = CLR_DEFAULT ) { m_borderColor = borderColor; SafeRedraw(); }
+	void SetBkColor( COLORREF bkColor ) { m_bkColor = bkColor; SafeRedraw(); }
 
 	enum ContentUnits { Logical, Device };								// device units are compatible with client rect
 	CSize GetContentSize( ContentUnits units = Device ) const { return Device == units ? m_totalDev : m_totalLog; }
@@ -42,17 +39,26 @@ public:
 	void DrawError( CDC* pDC, const CRect& rect );
 	void DrawCross( CDC* pDC, const CRect& rect, COLORREF color, BYTE alpha = 127 );
 	void DrawDiagonalCross( CDC* pDC, const CRect& rect, COLORREF color, BYTE alpha = 127 );
+
+	enum { LightCyan = RGB( 204, 232, 255 ) };
 private:
 	void RunTrackScroll( CPoint point );
 	bool TrackingScroll( const CPoint& mouseAnchor, const CPoint& scrollAnchor );
+
+	void Draw( CDC* pDC, IN OUT CRect& rBoundsRect, const CRect& clipRect );
+	void FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect );
 private:
-	ISampleCallback* m_pSampleCallback;
+	ui::ISampleCallback* m_pSampleCallback;
+	bool m_useDoubleBuffering;
+	COLORREF m_borderColor;				// by default CLR_NONE, it uses WS_EX_STATICEDGE extended style; if CLR_DEFAULT it uses LightCyan
+	COLORREF m_bkColor;
+
 	HCURSOR m_hScrollableCursor, m_hScrollDragCursor;
 
 	// generated stuff
 protected:
 	virtual void PostNcDestroy( void );
-	virtual void OnDraw( CDC* pDC );
+	virtual void OnDraw( CDC* pPaintDC );
 public:
 	virtual void OnInitialUpdate( void );
 protected:

@@ -4,8 +4,6 @@
 
 #include "LayoutDialog.h"
 #include "LayoutChildPropertySheet.h"
-#include "LayoutPropertyPage.h"
-#include "ReportListControl.h"
 #include <afxtempl.h>
 
 
@@ -15,7 +13,7 @@ typedef CList<CRuntimeClass*, CRuntimeClass*> TRuntimeClassList;
 class CToolbarImagesDialog : public CLayoutDialog
 {
 public:
-	CToolbarImagesDialog( CWnd* pParent );
+	CToolbarImagesDialog( CWnd* pParentWnd );
 	virtual ~CToolbarImagesDialog();
 
 	static TRuntimeClassList* GetCustomPages( void );		// additional pages to add to CMFCToolBarsCustomizeDialog
@@ -37,11 +35,15 @@ class CMFCToolBarImages;
 struct CImageItem;
 
 
+#include "LayoutPropertyPage.h"
+#include "ReportListControl.h"
+#include "SampleView_fwd.h"
 #include "Image_fwd.h"
 
 
 class CToolbarImagesPage : public CLayoutPropertyPage
 	, private ui::ICustomImageDraw
+	, public ui::ISampleCallback
 {
 	DECLARE_DYNCREATE( CToolbarImagesPage )
 public:
@@ -54,10 +56,14 @@ private:
 	virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const implements(ui::ICustomImageDraw);
 	virtual bool SetItemImageSize( const CSize& imageBoundsSize ) implements(ui::ICustomImageDraw);
 	virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect ) implements(ui::ICustomImageDraw);
+
+	// ui::ISampleCallback interface
+	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
 private:
 	// enum { IDD = IDD_TOOLBAR_IMAGES_PAGE };
 	CMFCToolBarImages* m_pImages;
 	CSize m_imageSize;
+	CSize m_imageBoundsSize;
 	std::vector<CImageItem*> m_imageItems;
 
 	persist int m_selItemIndex;
@@ -65,7 +71,7 @@ private:
 	persist BYTE m_alphaSrc;
 
 	CReportListControl m_imageListCtrl;
-	CSize m_imageBoundsSize;
+	std::auto_ptr<CSampleView> m_pSampleView;
 
 	enum Column { CommandName, Index, CmdId, CmdLiteral };
 

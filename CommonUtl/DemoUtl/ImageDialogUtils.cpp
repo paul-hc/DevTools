@@ -416,7 +416,7 @@ void CModeData::Clear( void )
 
 // CColorSample implementation
 
-bool CColorSample::RenderSample( CDC* pDC, const CRect& clientRect )
+bool CColorSample::RenderSample( CDC* pDC, const CRect& clientRect ) implements(ui::ISampleCallback)
 {
 	if ( m_color != CLR_NONE )
 	{
@@ -433,7 +433,7 @@ bool CColorSample::RenderSample( CDC* pDC, const CRect& clientRect )
 	return true;
 }
 
-void CColorSample::ShowPixelInfo( const CPoint& pos, COLORREF color )
+void CColorSample::ShowPixelInfo( const CPoint& pos, COLORREF color ) implements(ui::ISampleCallback)
 {
 	if ( m_pRoutePixelInfo != nullptr )
 		m_pRoutePixelInfo->ShowPixelInfo( pos, color );

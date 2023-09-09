@@ -74,11 +74,18 @@ namespace mfc
 
 
 	bool AssignTooltipText( OUT TOOLINFO* pToolInfo, const std::tstring& text );
+
 }
 
 
 namespace mfc
 {
+	// CMFCToolBarImages protected access:
+	bool ToolBarImages_DrawStretch( CMFCToolBarImages* pImages, CDC* pDC, const CRect& destRect, int imageIndex,
+									bool hilite = false, bool disabled = false, bool indeterminate = false, bool shadow = false, bool inactive = false,
+									BYTE alphaSrc = 255 );
+
+
 	// CBasePane protected access:
 	void BasePane_SetIsDialogControl( OUT CBasePane* pBasePane, bool isDlgControl = true );		// getter IsDialogControl() is public
 

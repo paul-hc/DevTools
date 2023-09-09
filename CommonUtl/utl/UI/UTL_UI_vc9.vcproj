@@ -735,6 +735,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SampleView_fwd.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ScopedBitmapMemDC.h"
 				>
 			</File>

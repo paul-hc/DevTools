@@ -112,6 +112,7 @@
 #define ID_PICK_COLOR_BAR_RADIO         28280
 #define ID_PICK_COLOR_MENU_RADIO        28281
 #define ID_SELECTED_COLOR_BUTTON        28282
+#define ID_VIEW_TOOLBAR_IMAGES          28283
 #define UTL_MIN_CONTROL_VALUE           28500
 #define IDC_GROUP_BOX_1                 28501
 #define IDC_GROUP_BOX_2                 28502
@@ -155,6 +156,7 @@
 #define IDC_ALPHA_SRC_LABEL             28539
 #define IDC_ALPHA_SRC_EDIT              28540
 #define IDC_ALPHA_SRC_SPIN              28541
+#define IDC_TOOLBAR_IMAGE_SAMPLE        28542
 #define UTL_MIN_SYMED_VALUE             28800
 #define IDS_COLOR_PICKER_BUTTON_HELP    28801
 
@@ -163,8 +165,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        28027
-#define _APS_NEXT_COMMAND_VALUE         28283
-#define _APS_NEXT_CONTROL_VALUE         28542
+#define _APS_NEXT_COMMAND_VALUE         28284
+#define _APS_NEXT_CONTROL_VALUE         28543
 #define _APS_NEXT_SYMED_VALUE           28802
 #endif
 #endif

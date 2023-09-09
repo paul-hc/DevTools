@@ -704,6 +704,9 @@
     <ClInclude Include="ToolbarImagesDialog.h">
       <Filter>UI\Dialogs</Filter>
     </ClInclude>
+    <ClInclude Include="SampleView_fwd.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">

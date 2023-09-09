@@ -313,6 +313,7 @@
     <ClInclude Include="ResizeGripBar.h" />
     <ClInclude Include="ResourceData.h" />
     <ClInclude Include="SampleView.h" />
+    <ClInclude Include="SampleView_fwd.h" />
     <ClInclude Include="ScopedBitmapMemDC.h" />
     <ClInclude Include="ScopedGdi.h" />
     <ClInclude Include="ShellContextMenuBuilder.h" />

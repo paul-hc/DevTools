@@ -3,6 +3,7 @@
 #include "ControlBar_fwd.h"
 #include "WndUtils.h"
 #include "utl/Algorithms_fwd.h"
+#include "utl/ScopedValue.h"
 #include <afxbasepane.h>
 #include <afxstatusbar.h>
 #include <afxdockingmanager.h>
@@ -17,6 +18,14 @@
 
 namespace nosy
 {
+	struct CToolBarImages_ : public CMFCToolBarImages
+	{
+		// public access
+		using CMFCToolBarImages::m_sizeImageDest;
+		using CMFCToolBarImages::m_bStretch;
+	};
+
+
 	struct CBasePane_ : public CBasePane
 	{
 		// public access
@@ -188,6 +197,19 @@ namespace mfc
 
 namespace mfc
 {
+	// CMFCToolBarImages protected access:
+	bool ToolBarImages_DrawStretch( CMFCToolBarImages* pImages, CDC* pDC, const CRect& destRect, int imageIndex,
+									bool hilite /*= false*/, bool disabled /*= false*/, bool indeterminate /*= false*/, bool shadow /*= false*/, bool inactive /*= false*/,
+									BYTE alphaSrc /*= 255*/ )
+	{
+		nosy::CToolBarImages_* pNosyImages = mfc::nosy_cast<nosy::CToolBarImages_>( pImages );
+		CScopedValue<CSize> scDestImageSize( &pNosyImages->m_sizeImageDest, destRect.Size() );		// temp destination size glyph
+		CScopedValue<BOOL> scStretch( &pNosyImages->m_bStretch, TRUE );
+
+		return pImages->Draw( pDC, destRect.left, destRect.top, imageIndex, hilite, disabled, indeterminate, shadow, inactive, alphaSrc ) != FALSE;
+	}
+
+
 	// CBasePane access
 
 	void BasePane_SetIsDialogControl( OUT CBasePane* pBasePane, bool isDlgControl /*= true*/ )

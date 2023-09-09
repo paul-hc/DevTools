@@ -383,21 +383,21 @@ CSize CImageDialog::ComputeContentSize( void )
 	return CSize( 0, 0 );			// not scrollable
 }
 
-void CImageDialog::RenderBackground( CDC* pDC, const CRect& clientRect )
+void CImageDialog::RenderBackground( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
 {
 	CBrush bkBrush( GetBkColor() );
-	pDC->FillRect( &clientRect, &bkBrush );
+	pDC->FillRect( &boundsRect, &bkBrush );
 }
 
-bool CImageDialog::RenderSample( CDC* pDC, const CRect& clientRect )
+bool CImageDialog::RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
 {
 	if ( RectsAlphaBlend == m_sampleMode )
-		return Render_RectsAlphaBlend( pDC, clientRect );
+		return Render_RectsAlphaBlend( pDC, boundsRect );
 
 	if ( nullptr == m_pDibSection.get() && m_sampleMode != RectsAlphaBlend )
 		return false;
 
-	CRect contentRect = MakeContentRect( clientRect );
+	CRect contentRect = MakeContentRect( boundsRect );
 	CMultiZoneIterator itZone( m_multiZone, contentRect );
 
 	switch ( m_sampleMode )
@@ -423,7 +423,7 @@ bool CImageDialog::RenderSample( CDC* pDC, const CRect& clientRect )
 	if ( HasFlag( m_showFlags, ShowLabels ) && pModeData->GetZoneCount() > 1 )
 	{
 		CScopedDrawText scopedDrawText( pDC, &m_sampleView, GetFont(), color::White, color::Gray60 );
-		itZone.DrawLabels( pDC, clientRect, pModeData->m_labels );
+		itZone.DrawLabels( pDC, boundsRect, pModeData->m_labels );
 	}
 
 	if ( HasFlag( m_showFlags, ShowGuides ) && m_sampleMode != ImageList )
@@ -453,7 +453,7 @@ CRect CImageDialog::MakeContentRect( const CRect& clientRect ) const
 		: m_sampleView.MakeDisplayRect( clientRect, m_multiZone.GetTotalSize() );
 }
 
-void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color )
+void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color ) implements(ui::ISampleCallback)
 {
 	std::tstring text;
 	if ( m_pDibSection.get() != nullptr || RectsAlphaBlend == m_sampleMode )
@@ -786,10 +786,10 @@ void CImageDialog::OnRedrawSample( void )
 
 // CColorBoardSample implementation
 
-bool CColorBoardSample::RenderSample( CDC* pDC, const CRect& clientRect )
+bool CColorBoardSample::RenderSample( CDC* pDC, const CRect& boundsRect )
 {
 	CScopedDrawText scopedDrawText( pDC, this, GetParent()->GetFont() );
-	m_pColorBoard->Draw( pDC, clientRect );
+	m_pColorBoard->Draw( pDC, boundsRect );
 	return true;
 }
 

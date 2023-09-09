@@ -4,16 +4,22 @@
 #include "GpUtilities.h"
 #include "WndUtils.h"
 #include "resource.h"
-#include <afxpriv.h>
+#include <afxcontrolbarutil.h>		// for CMemDC
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-CSampleView::CSampleView( ISampleCallback* pSampleCallback )
+#define WM_INITIALUPDATE    0x0364  // defined in <afxpriv.h>
+
+
+CSampleView::CSampleView( ui::ISampleCallback* pSampleCallback, bool useDoubleBuffering /*= true*/ )
 	: CScrollView()
 	, m_pSampleCallback( pSampleCallback )
+	, m_useDoubleBuffering( useDoubleBuffering )
+	, m_borderColor( CLR_NONE )
+	, m_bkColor( CLR_NONE )
 	, m_hScrollableCursor( AfxGetApp()->LoadCursor( IDR_SCROLLABLE_CURSOR ) )
 	, m_hScrollDragCursor( AfxGetApp()->LoadCursor( IDR_SCROLL_DRAG_CURSOR ) )
 {
@@ -28,7 +34,9 @@ void CSampleView::DDX_Placeholder( CDataExchange* pDX, int placeholderId )
 	if ( nullptr == m_hWnd )
 	{
 		VERIFY( Create( nullptr, nullptr, WS_CHILD | WS_VISIBLE, CRect( 0, 0, 0, 0 ), pDX->m_pDlgWnd, (WORD)-1 ) );
-		ModifyStyleEx( 0, WS_EX_STATICEDGE );
+
+		if ( CLR_NONE == m_borderColor )
+			ModifyStyleEx( 0, WS_EX_STATICEDGE );
 
 		ui::AlignToPlaceholder( this, placeholderId )->DestroyWindow();
 		SetDlgCtrlID( placeholderId );
@@ -176,6 +184,32 @@ bool CSampleView::TrackingScroll( const CPoint& mouseAnchor, const CPoint& scrol
 	return true;
 }
 
+void CSampleView::Draw( CDC* pDC, IN OUT CRect& rBoundsRect, const CRect& clipRect )
+{
+	clipRect;
+	if ( m_pSampleCallback != nullptr )
+	{
+		if ( m_useDoubleBuffering )
+			FillBackground( pDC, rBoundsRect );
+
+		if ( m_pSampleCallback->RenderSample( pDC, rBoundsRect ) )
+			return;
+	}
+
+	DrawError( pDC, rBoundsRect );
+}
+
+void CSampleView::FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect )
+{
+	if ( m_borderColor != CLR_NONE )
+	{
+		ui::FrameRect( *pDC, rBoundsRect, m_borderColor != CLR_DEFAULT ? m_borderColor : LightCyan );		// draw the border
+		rBoundsRect.DeflateRect( 1, 1 );
+	}
+
+	m_pSampleCallback->RenderBackground( pDC, rBoundsRect );
+}
+
 
 // message handlers
 
@@ -197,23 +231,36 @@ void CSampleView::OnInitialUpdate( void )
 	SetNotScrollable();
 }
 
-void CSampleView::OnDraw( CDC* pDC )
+void CSampleView::OnDraw( CDC* pPaintDC )
 {
-	CRect clientRect;
-	GetClientRect( &clientRect );
+	CRect clientRect, clipRect;
 
-	if ( nullptr == m_pSampleCallback || !m_pSampleCallback->RenderSample( pDC, clientRect ) )
-		DrawError( pDC, clientRect );
+	GetClientRect( &clientRect );
+	pPaintDC->GetClipBox( &clipRect );
+
+	if ( m_useDoubleBuffering )
+	{
+		CMemDC memDC( *pPaintDC, this );
+		CDC* pDC = &memDC.GetDC();
+
+		Draw( pDC, clientRect, clipRect );
+	}
+	else
+		Draw( pPaintDC, clientRect, clipRect );
 }
 
 BOOL CSampleView::OnEraseBkgnd( CDC* pDC )
 {
+	if ( m_useDoubleBuffering )
+		return TRUE;		// simulate that we erased the background to prevent default erasing
+
 	if ( nullptr == m_pSampleCallback )
 		return CScrollView::OnEraseBkgnd( pDC );
 
 	CRect clientRect;
+
 	GetClientRect( &clientRect );
-	m_pSampleCallback->RenderBackground( pDC, clientRect );
+	FillBackground( pDC, clientRect );
 	return TRUE;			// erased
 }
 

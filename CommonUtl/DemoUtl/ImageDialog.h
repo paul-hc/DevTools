@@ -23,7 +23,7 @@ namespace gdi { enum Effect; }
 
 
 class CImageDialog : public CLayoutDialog
-	, public ISampleCallback
+	, public ui::ISampleCallback
 {
 	friend class CModePage;
 public:
@@ -59,10 +59,10 @@ private:
 
 	static std::tstring FormatDibInfo( const CDibSection& dib );
 
-	// ISampleCallback interface
-	virtual void RenderBackground( CDC* pDC, const CRect& clientRect );
-	virtual bool RenderSample( CDC* pDC, const CRect& clientRect );
-	virtual void ShowPixelInfo( const CPoint& pos, COLORREF color );
+	// ui::ISampleCallback interface
+	virtual void RenderBackground( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
+	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
+	virtual void ShowPixelInfo( const CPoint& pos, COLORREF color ) implements(ui::ISampleCallback);
 
 	// sample rendering
 	void CreateEffectDibs( void );
@@ -165,7 +165,7 @@ class CPixelInfoSample : public CColorSample
 public:
 	CPixelInfoSample( void ) : m_pos( -1, -1 ) {}
 
-	void SetPixelInfo( COLORREF color, const CPoint& pos ) { m_pos = pos; SetColor( color ); }
+	void SetPixelInfo( COLORREF color, const CPoint& pos ) override { m_pos = pos; SetColor( color ); }
 	void Reset( void ) { SetPixelInfo( CLR_NONE, CPoint( -1, -1 ) ); }
 private:
 	CPoint m_pos;
@@ -175,10 +175,10 @@ private:
 class CColorBoardSample : public CColorSample
 {
 public:
-	CColorBoardSample( const CColorBoard* pColorBoard, ISampleCallback* pRoutePixelInfo )
+	CColorBoardSample( const CColorBoard* pColorBoard, ui::ISampleCallback* pRoutePixelInfo )
 		: CColorSample( pRoutePixelInfo ), m_pColorBoard( pColorBoard ) { ASSERT_PTR( m_pColorBoard ); }
 protected:
-	virtual bool RenderSample( CDC* pDC, const CRect& clientRect );
+	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) override;
 private:
 	const CColorBoard* m_pColorBoard;
 };

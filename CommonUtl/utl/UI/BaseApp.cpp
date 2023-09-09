@@ -229,6 +229,8 @@ BEGIN_MESSAGE_MAP( CAppLook, CCmdTarget )
 	ON_COMMAND( ID_TOOLS_RESET_ALL_TOOLBARS, OnResetAllControlBars )
 	ON_UPDATE_COMMAND_UI( ID_TOOLS_RESET_ALL_TOOLBARS, OnUpdate_Enable )
 	ON_COMMAND( ID_VIEW_CUSTOMIZE, OnViewCustomize )
+	ON_COMMAND( ID_VIEW_TOOLBAR_IMAGES, OnViewToolBarImages )
+	ON_UPDATE_COMMAND_UI( IDD_TOOLBAR_IMAGES_DIALOG, OnUpdate_Enable )
 END_MESSAGE_MAP()
 
 void CAppLook::OnApplicationLook( UINT cmdId )
@@ -265,6 +267,12 @@ void CAppLook::OnViewCustomize( void )
 
 	pDlgCust->EnableUserDefinedToolbars();
 	pDlgCust->Create();
+}
+
+void CAppLook::OnViewToolBarImages( void )
+{
+	CToolbarImagesDialog dlg( AfxGetMainWnd() );
+	dlg.DoModal();
 }
 
 void CAppLook::OnUpdate_Enable( CCmdUI* /*pCmdUI*/ )

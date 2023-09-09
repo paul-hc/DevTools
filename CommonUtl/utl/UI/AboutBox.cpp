@@ -190,7 +190,7 @@ namespace layout
 		{ IDC_ABOUT_BUILD_INFO_LABEL, pctMoveY( CommentsPct ) },
 		{ IDC_ABOUT_BUILD_INFO_LIST, pctMoveY( CommentsPct ) | SizeX | pctSizeY( ListPct ) },
 		{ IDC_ABOUT_EXPLORE_MODULE, MoveY },
-		{ IDD_TOOLBAR_IMAGES_DIALOG, MoveY },
+		{ ID_VIEW_TOOLBAR_IMAGES, MoveY },
 		{ IDOK, Move }
 	};
 }
@@ -320,7 +320,7 @@ BEGIN_MESSAGE_MAP( CAboutBox, CLayoutDialog )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_ABOUT_BUILD_INFO_LIST, OnLvnItemChanged_ListItems )
 	ON_BN_CLICKED( IDC_ABOUT_EXPLORE_MODULE, OnExploreModule )
 	ON_UPDATE_COMMAND_UI( IDC_ABOUT_EXPLORE_MODULE, OnUpdateExploreModule )
-	ON_BN_CLICKED( IDD_TOOLBAR_IMAGES_DIALOG, OnViewToolBars )
+	ON_BN_CLICKED( ID_VIEW_TOOLBAR_IMAGES, OnViewToolBars )
 END_MESSAGE_MAP()
 
 void CAboutBox::OnLvnItemChanged_ListItems( NMHDR* pNmHdr, LRESULT* pResult )
