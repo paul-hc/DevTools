@@ -36,12 +36,12 @@ public:
 	void SetTitle( const std::tstring& pageTitle );
 
 	// ui::ILayoutEngine interface
-	virtual CLayoutEngine& GetLayoutEngine( void );
-	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
-	virtual bool HasControlLayout( void ) const;
+	virtual CLayoutEngine& GetLayoutEngine( void ) implements(ui::ILayoutEngine);
+	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) implements(ui::ILayoutEngine);
+	virtual bool HasControlLayout( void ) const implements(ui::ILayoutEngine);
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const implements(ui::ICustomCmdInfo);
 
 	// overridables
 	virtual void ApplyPageChanges( void ) throws_( CRuntimeException );

@@ -114,6 +114,7 @@ void CLayoutEngine::SetupControlStates( void )
 	ASSERT( m_controlStates.empty() || !m_controlStates.begin()->second.IsCtrlInit() );		// initialize once
 
 	bool anyRepaintCtrl = false;
+
 	for ( std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 	{
 		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::DoRepaint ) )
@@ -138,14 +139,13 @@ void CLayoutEngine::SetupControlStates( void )
 	for ( ; hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 		if ( UINT ctrlId = ::GetDlgCtrlID( hCtrl ) )								// ignore child dialogs in a property sheet
 		{
-			std::unordered_map<UINT, layout::CControlState>::iterator itCtrlState = m_controlStates.find( ctrlId );
-			layout::CControlState* pControlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr;
+			layout::CControlState* pCtrlState = LookupControlState( ctrlId );
 
 			if ( ui::IsGroupBox( hCtrl ) )
-				SetupGroupBoxState( hCtrl, pControlState );
+				SetupGroupBoxState( hCtrl, pCtrlState );
 
-			if ( pControlState )
-				pControlState->InitCtrl( hCtrl );
+			if ( pCtrlState != nullptr )
+				pCtrlState->InitCtrl( hCtrl );
 		}
 }
 
@@ -164,7 +164,7 @@ void CLayoutEngine::SetupCollapsedState( UINT ctrlId, layout::TStyle style )
 		m_collapsedDelta.cy = clientRect.bottom - anchorRect.top;
 }
 
-void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pControlState )
+void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pCtrlState )
 {
 	if ( HasFlag( m_flags, SmoothGroups ) )
 	{
@@ -175,8 +175,8 @@ void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* p
 	}
 	else
 	{
-		if ( HasFlag( m_flags, GroupsRepaint ) && pControlState != nullptr )
-			pControlState->ModifyLayoutStyle( 0, layout::DoRepaint );		// force groups repaint
+		if ( HasFlag( m_flags, GroupsRepaint ) && pCtrlState != nullptr )
+			pCtrlState->ModifyLayoutStyle( 0, layout::DoRepaint );		// force groups repaint
 
 		if ( HasFlag( m_flags, GroupsTransparent ) )
 		{
@@ -280,7 +280,8 @@ bool CLayoutEngine::LayoutControls( void )
 	m_pDialog->GetClientRect( &clientRect );
 
 	CSize minClientSize = GetMinClientSize();
-	CSize clientSize( std::max<int>( clientRect.Width(), minClientSize.cx ), std::max<int>( clientRect.Height(), minClientSize.cy ) );
+	CSize clientSize( std::max<long>( clientRect.Width(), minClientSize.cx ), std::max<long>( clientRect.Height(), minClientSize.cy ) );
+
 	return LayoutControls( clientSize );
 }
 
@@ -316,13 +317,13 @@ bool CLayoutEngine::LayoutSmoothly( const CSize& delta )
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
-		std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.find( ctrlId );
 
-		if ( const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr )
+		if ( const layout::CControlState* pCtrlState = LookupControlState( ctrlId ) )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
 			{
-				if ( ui::ILayoutFrame* pControlFrame = FindControlLayoutFrame( hCtrl ) )
-					pControlFrame->OnControlResized( ctrlId );		// notify controls having dependent layout
+				if ( ui::ILayoutFrame* pCtrlFrame = FindControlLayoutFrame( hCtrl ) )
+					pCtrlFrame->OnControlResized();		// notify controls having dependent layout
+
 				++changedCount;
 			}
 	}
@@ -349,8 +350,8 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
-		std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.find( ctrlId );
-		const layout::CControlState* pCtrlState = itCtrlState != m_controlStates.end() ? &itCtrlState->second : nullptr;
+		const layout::CControlState* pCtrlState = LookupControlState( ctrlId );
+
 		if ( pCtrlState != nullptr )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
 				changedCtrls.push_back( hCtrl );
@@ -372,8 +373,8 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 	{
 		ui::RedrawControl( *itCtrl );
 
-		if ( ui::ILayoutFrame* pControlFrame = FindControlLayoutFrame( *itCtrl ) )
-			pControlFrame->OnControlResized( ::GetDlgCtrlID( *itCtrl ) );		// notify controls having dependent layout
+		if ( ui::ILayoutFrame* pCtrlFrame = FindControlLayoutFrame( *itCtrl ) )
+			pCtrlFrame->OnControlResized();				// notify controls having dependent layout
 	}
 
 	return !changedCtrls.empty();
@@ -393,12 +394,12 @@ layout::CControlState* CLayoutEngine::LookupControlState( UINT ctrlId )
 bool CLayoutEngine::RefreshControlHandle( UINT ctrlId )
 {
 	if ( m_pDialog != nullptr )
-		if ( layout::CControlState* pControlState = LookupControlState( ctrlId ) )
+		if ( layout::CControlState* pCtrlState = LookupControlState( ctrlId ) )
 		{
 			if ( HWND hControlNew = ::GetDlgItem( m_pDialog->m_hWnd, ctrlId ) )
-				return utl::ModifyValue( pControlState->m_hControl, hControlNew );
+				return utl::ModifyValue( pCtrlState->m_hControl, hControlNew );
 
-			pControlState->ResetCtrl();
+			pCtrlState->ResetCtrl();
 			return true;		// changed
 		}
 

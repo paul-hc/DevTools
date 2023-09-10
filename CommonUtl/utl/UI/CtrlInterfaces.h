@@ -9,7 +9,7 @@ namespace ui
 	//
 	interface ILayoutFrame
 	{
-		virtual void OnControlResized( UINT ctrlId ) = 0;
+		virtual void OnControlResized( void ) = 0;
 	};
 
 

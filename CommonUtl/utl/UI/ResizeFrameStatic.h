@@ -18,7 +18,7 @@ public:
 	CResizeGripBar& GetGripBar( void ) const { return *m_pGripBar; }
 public:
 	// ui::ILayoutFrame interface
-	virtual void OnControlResized( UINT ctrlId );
+	virtual void OnControlResized( void );
 
 	enum Notification { RF_GRIPPER_TOGGLE = 1, RF_GRIPPER_RESIZING, RF_GRIPPER_RESIZED };
 

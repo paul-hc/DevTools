@@ -19,6 +19,7 @@ namespace layout
 
 		if ( HasFlag( ui::GetStyleEx( hWnd ), WS_EX_LAYOUTRTL ) )
 			CRect::SwapLeftRight( &rRect );
+
 		return true;
 	}
 
@@ -206,7 +207,7 @@ namespace layout
 		::SetWindowPos( hCtrl, nullptr, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), swpFlags );		// reposition changed control
 
 		if ( ui::ILayoutFrame* pCtrlFrame = dynamic_cast<ui::ILayoutFrame*>( CWnd::FromHandlePermanent( hCtrl ) ) )		// control is a frame?
-			pCtrlFrame->OnControlResized( ::GetDlgCtrlID( hCtrl ) );		// notify controls having dependent layout
+			pCtrlFrame->OnControlResized();		// notify controls having dependent layout
 	}
 
 	void MoveControl( HWND hCtrl, const CRect& ctrlRect, bool repaint /*= true*/ )
@@ -215,6 +216,6 @@ namespace layout
 		::MoveWindow( hCtrl, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), repaint );
 
 		if ( ui::ILayoutFrame* pCtrlFrame = dynamic_cast<ui::ILayoutFrame*>( CWnd::FromHandlePermanent( hCtrl ) ) )		// control is a frame?
-			pCtrlFrame->OnControlResized( ::GetDlgCtrlID( hCtrl ) );		// notify controls having dependent layout
+			pCtrlFrame->OnControlResized();		// notify controls having dependent layout
 	}
 }

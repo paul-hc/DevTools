@@ -26,11 +26,10 @@ CResizeFrameStatic::~CResizeFrameStatic()
 {
 }
 
-void CResizeFrameStatic::OnControlResized( UINT ctrlId )
+void CResizeFrameStatic::OnControlResized( void )
 {
-	if ( GetDlgCtrlID() == ui::ToIntCmdId( ctrlId ) )
-		if ( m_pGripBar->m_hWnd != nullptr )
-			m_pGripBar->LayoutProportionally();
+	if ( m_pGripBar->m_hWnd != nullptr )
+		m_pGripBar->LayoutProportionally();
 }
 
 void CResizeFrameStatic::NotifyParent( Notification notification )

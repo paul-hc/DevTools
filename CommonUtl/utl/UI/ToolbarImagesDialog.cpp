@@ -3,6 +3,7 @@
 #include "ToolbarImagesDialog.h"
 #include "ImageCommandLookup.h"
 #include "ControlBar_fwd.h"
+#include "ResizeFrameStatic.h"
 #include "SampleView.h"
 #include "WndUtils.h"
 #include "resource.h"
@@ -22,6 +23,7 @@ namespace reg
 {
 	static const TCHAR section_dialog[] = _T("utl\\ToolbarImagesDialog");
 	static const TCHAR section_MfcPage[] = _T("utl\\ToolbarImagesDialog\\MFC Page");
+	static const TCHAR section_MfcPageSplitterH[] = _T("utl\\ToolbarImagesDialog\\MFC Page\\SplitterH");
 	static const TCHAR entry_SelItemIndex[] = _T("SelItemIndex");
 	static const TCHAR entry_DrawDisabled[] = _T("DrawDisabled");
 	static const TCHAR entry_AlphaSrc[] = _T("AlphaSrc");
@@ -43,7 +45,6 @@ CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParentWnd )
 	m_regSection = m_childSheet.m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	LoadDlgIcon( ID_EDIT_LIST_ITEMS );
-	//m_idleUpdateDeep = true;				// for CItemsEditPage::OnSelectedLinesChanged
 
 	m_childSheet.AddPage( new CToolbarImagesPage( CMFCToolBar::GetImages() ) );
 }
@@ -52,9 +53,9 @@ CToolbarImagesDialog::~CToolbarImagesDialog()
 {
 }
 
-TRuntimeClassList* CToolbarImagesDialog::GetCustomPages( void )
+mfc::TRuntimeClassList* CToolbarImagesDialog::GetCustomPages( void )
 {
-	static TRuntimeClassList s_pagesList;
+	static mfc::TRuntimeClassList s_pagesList;
 
 	if ( s_pagesList.IsEmpty() )
 	{
@@ -150,6 +151,12 @@ CToolbarImagesPage::CToolbarImagesPage( CMFCToolBarImages* pImages /*= nullptr*/
 	m_pSampleView.reset( new CSampleView( this ) );
 	m_pSampleView->SetBorderColor( CLR_DEFAULT );
 
+	m_pHorizSplitterFrame.reset( new CResizeFrameStatic( &m_imageListCtrl, m_pSampleView.get(), resize::NorthSouth ) );
+	m_pHorizSplitterFrame->SetSection( reg::section_MfcPageSplitterH );
+	m_pHorizSplitterFrame->GetGripBar()
+		.SetMinExtents( 50, 16 )
+		.SetFirstExtentPercentage( 75 );
+
 	UINT imageCount = m_pImages->GetCount();
 	const mfc::CImageCommandLookup* pImageCmds = mfc::CImageCommandLookup::Instance();
 
@@ -236,9 +243,11 @@ bool CToolbarImagesPage::RenderSample( CDC* pDC, const CRect& boundsRect ) imple
 
 	if ( CImageItem* pImageItem = m_imageListCtrl.GetCaretAs<CImageItem>() )
 	{
+		enum { NormalEdge = 10 };
+
 		CRect normalBoundsRect = boundsRect, largeBoundsRect = boundsRect;
 
-		normalBoundsRect.right = normalBoundsRect.left + normalBoundsRect.Height();
+		normalBoundsRect.right = normalBoundsRect.left + m_imageSize.cx + NormalEdge * 2;
 		largeBoundsRect.left = normalBoundsRect.right;
 
 		int zoomSize = std::min( largeBoundsRect.Width(), largeBoundsRect.Height() );

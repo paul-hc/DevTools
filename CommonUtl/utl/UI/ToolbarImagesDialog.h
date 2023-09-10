@@ -7,7 +7,10 @@
 #include <afxtempl.h>
 
 
-typedef CList<CRuntimeClass*, CRuntimeClass*> TRuntimeClassList;
+namespace mfc
+{
+	typedef CList<CRuntimeClass*, CRuntimeClass*> TRuntimeClassList;
+}
 
 
 class CToolbarImagesDialog : public CLayoutDialog
@@ -16,7 +19,7 @@ public:
 	CToolbarImagesDialog( CWnd* pParentWnd );
 	virtual ~CToolbarImagesDialog();
 
-	static TRuntimeClassList* GetCustomPages( void );		// additional pages to add to CMFCToolBarsCustomizeDialog
+	static mfc::TRuntimeClassList* GetCustomPages( void );		// additional pages to add to CMFCToolBarsCustomizeDialog
 private:
 	// enum { IDD = IDD_TOOLBAR_IMAGES_DIALOG };
 	CLayoutChildPropertySheet m_childSheet;
@@ -39,6 +42,9 @@ struct CImageItem;
 #include "ReportListControl.h"
 #include "SampleView_fwd.h"
 #include "Image_fwd.h"
+
+
+class CResizeFrameStatic;
 
 
 class CToolbarImagesPage : public CLayoutPropertyPage
@@ -72,6 +78,7 @@ private:
 
 	CReportListControl m_imageListCtrl;
 	std::auto_ptr<CSampleView> m_pSampleView;
+	std::auto_ptr<CResizeFrameStatic> m_pHorizSplitterFrame;		// embedded inside of vertical splitter
 
 	enum Column { CommandName, Index, CmdId, CmdLiteral };
 

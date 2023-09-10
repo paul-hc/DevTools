@@ -29,22 +29,22 @@ CLayoutPropertyPage::~CLayoutPropertyPage()
 {
 }
 
-CLayoutEngine& CLayoutPropertyPage::GetLayoutEngine( void )
+CLayoutEngine& CLayoutPropertyPage::GetLayoutEngine( void ) implements(ui::ILayoutEngine)
 {
 	return *m_pLayoutEngine;
 }
 
-void CLayoutPropertyPage::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count )
+void CLayoutPropertyPage::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) implements(ui::ILayoutEngine)
 {
 	m_pLayoutEngine->RegisterCtrlLayout( layoutStyles, count );
 }
 
-bool CLayoutPropertyPage::HasControlLayout( void ) const
+bool CLayoutPropertyPage::HasControlLayout( void ) const implements(ui::ILayoutEngine)
 {
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
-void CLayoutPropertyPage::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+void CLayoutPropertyPage::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const implements(ui::ICustomCmdInfo)
 {
 	rText, cmdId, pTooltip;
 }

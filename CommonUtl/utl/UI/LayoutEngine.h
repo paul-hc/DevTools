@@ -85,7 +85,7 @@ public:
 private:
 	void SetupControlStates( void );
 	void SetupCollapsedState( UINT ctrlId, layout::TStyle style );
-	void SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pControlState );
+	void SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pCtrlState );
 	bool AnyRepaintCtrl( void ) const;
 	bool LayoutSmoothly( const CSize& delta );
 	bool LayoutNormal( const CSize& delta );
