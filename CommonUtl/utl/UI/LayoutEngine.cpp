@@ -32,18 +32,20 @@ CLayoutEngine::~CLayoutEngine()
 {
 }
 
-void CLayoutEngine::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count )
+void CLayoutEngine::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], UINT count )
 {
-	for ( unsigned int i = 0; i != count; ++i )
+	for ( UINT i = 0; i != count; ++i )
 	{
-		ASSERT( layoutStyles[ i ].m_ctrlId != 0 );
-		m_controlStates[ layoutStyles[ i ].m_ctrlId ].SetLayoutStyle( layoutStyles[ i ].m_layoutStyle, false );
+		const CLayoutStyle* pStyle = &layoutStyles[i];
+
+		ASSERT( pStyle->m_ctrlId != 0 );
+		m_controlStates[ pStyle->m_ctrlId ].SetLayoutStyle( pStyle->m_layoutStyle, false );
 	}
 }
 
-void CLayoutEngine::RegisterDualCtrlLayout( const CDualLayoutStyle dualLayoutStyles[], unsigned int count )
+void CLayoutEngine::RegisterDualCtrlLayout( const CDualLayoutStyle dualLayoutStyles[], UINT count )
 {
-	for ( unsigned int i = 0; i != count; ++i )
+	for ( UINT i = 0; i != count; ++i )
 	{
 		ASSERT( dualLayoutStyles[ i ].m_ctrlId != 0 );
 		layout::CControlState& rCtrlState = m_controlStates[ dualLayoutStyles[ i ].m_ctrlId ];
@@ -126,7 +128,7 @@ void CLayoutEngine::SetupControlStates( void )
 
 	if ( anyRepaintCtrl )
 	{
-		ModifyFlags( m_flags, SmoothGroups, GroupsTransparent | GroupsRepaint );		// disable SmoothGroups and WS_CLIPCHILDREN when one control requires repaint (layout::DoRepaint)
+		ModifyFlags( m_flags, SmoothGroups, GroupsTransparent | GroupsRepaint );	// disable SmoothGroups and WS_CLIPCHILDREN when one control requires repaint (layout::DoRepaint)
 		m_pDialog->ModifyStyle( WS_CLIPCHILDREN, 0 );
 	}
 

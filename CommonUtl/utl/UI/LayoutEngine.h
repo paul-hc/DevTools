@@ -30,10 +30,10 @@ public:
 	void SetFlags( int flags ) { m_flags = flags; }
 
 	bool HasCtrlLayout( void ) const { return !m_controlStates.empty(); }
-	void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
+	void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], UINT count );
 
 	// some dialogs require different layouts for collapsed state (e.g. proportional expanded, full size collapsed)
-	void RegisterDualCtrlLayout( const CDualLayoutStyle dualLayoutStyles[], unsigned int count );
+	void RegisterDualCtrlLayout( const CDualLayoutStyle dualLayoutStyles[], UINT count );
 
 	bool HasInitialSize( void ) const { return m_minClientSize.cx != 0 && m_minClientSize.cy != 0; }
 	void StoreInitialSize( CWnd* pDialog );		// called before Initialize() by form views, etc
