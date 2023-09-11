@@ -19,10 +19,13 @@ CLayoutEngine::CLayoutEngine( int flags /*= m_defaultFlags*/ )
 	: m_flags( flags )
 	, m_layoutEnabled( true )
 	, m_pDialog( nullptr )
+	, m_pLayoutFrame( nullptr )
 	, m_minClientSize( 0, 0 )
 	, m_maxClientSize( INT_MAX, INT_MAX )
 	, m_nonClientSize( 0, 0 )
-	, m_previousSize( 0, 0 )
+	, m_prevSize( 0, 0 )
+	, m_frameOrigin( 0, 0 )
+	, m_prevFrameOrigin( 0, 0 )
 	, m_collapsedDelta( 0, 0 )
 	, m_collapsed( false )
 {
@@ -56,42 +59,18 @@ void CLayoutEngine::RegisterDualCtrlLayout( const CDualLayoutStyle dualLayoutSty
 	}
 }
 
-void CLayoutEngine::StoreInitialSize( CWnd* pDialog )
-{
-	CRect clientRect, windowRect;
-	pDialog->GetClientRect( &clientRect );
-	pDialog->GetWindowRect( &windowRect );
-
-	// store initial size of the dialog
-	m_minClientSize = m_previousSize = clientRect.Size();
-	m_nonClientSize = windowRect.Size() - m_minClientSize;
-
-	m_maxClientSize.cx = std::max<long>( m_maxClientSize.cx, m_minClientSize.cx );
-	m_maxClientSize.cy = std::max<long>( m_maxClientSize.cy, m_minClientSize.cy );
-}
-
-void CLayoutEngine::Initialize( CWnd* pDialog )
-{
-	ASSERT( !IsInitialized() );
-
-	m_pDialog = pDialog;
-	ASSERT( ::IsWindow( m_pDialog->GetSafeHwnd() ) );
-
-	if ( !HasInitialSize() )
-		StoreInitialSize( m_pDialog );
-
-	ASSERT( HasInitialSize() );		// should have a size by this time
-
-	SetupControlStates();
-}
-
 void CLayoutEngine::Reset( void )
 {
 	m_pDialog = nullptr;
+	m_pLayoutFrame = nullptr;
+
 	m_minClientSize.cx = m_minClientSize.cy = 0;
 	m_maxClientSize.cx = m_maxClientSize.cy = INT_MAX;
 	m_nonClientSize.cx = m_nonClientSize.cy = 0;
-	m_previousSize.cx = m_previousSize.cy = 0;
+	m_prevSize.cx = m_prevSize.cy = 0;
+
+	m_frameOrigin.x = m_frameOrigin.y = 0;
+	m_prevFrameOrigin.x = m_prevFrameOrigin.y = 0;
 
 	for ( std::unordered_map<UINT, layout::CControlState>::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 		itCtrlState->second.ResetCtrl();
@@ -108,6 +87,76 @@ void CLayoutEngine::CreateResizeGripper( const CSize& offset /*= CSize( 1, 0 )*/
 layout::CResizeGripper* CLayoutEngine::GetResizeGripper( void ) const
 {
 	return IsInitialized() && !m_pDialog->IsZoomed() ? m_pGripper.get() : nullptr;
+}
+
+void CLayoutEngine::StoreInitialSize( CWnd* pDialog )
+{
+	CRect clientRect, windowRect;
+	pDialog->GetClientRect( &clientRect );
+	pDialog->GetWindowRect( &windowRect );
+
+	// store initial size of the dialog
+	m_minClientSize = m_prevSize = clientRect.Size();
+	m_nonClientSize = windowRect.Size() - m_minClientSize;
+
+	m_maxClientSize.cx = std::max( m_maxClientSize.cx, m_minClientSize.cx );
+	m_maxClientSize.cy = std::max( m_maxClientSize.cy, m_minClientSize.cy );
+
+	m_frameOrigin = m_prevFrameOrigin = CPoint( 0, 0 );
+}
+
+void CLayoutEngine::StoreInitialFrameSize( void )
+{	// for layout frame: compute initial size of the bounding rect based on dialog template initial positions of controls:
+	ASSERT_PTR( m_pDialog->GetSafeHwnd() );
+	ASSERT_PTR( m_pLayoutFrame );
+
+	CRect ctrlBoundsRect( 0, 0, 0, 0 );		// control bounds rect in parent dialog coordinates
+
+	for ( std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrl = m_controlStates.begin(); itCtrl != m_controlStates.end(); ++itCtrl )
+		if ( CWnd* pCtrl = m_pDialog->GetDlgItem( itCtrl->first ) )
+		{
+			CRect ctrlRect = ui::GetControlRect( pCtrl->m_hWnd );
+
+			if ( ctrlBoundsRect.IsRectEmpty() )
+				ctrlBoundsRect = ctrlRect;
+			else
+				ctrlBoundsRect |= ctrlRect;
+		}
+		else
+			ASSERT( false );		// control ID not found?
+
+
+	// store initial size of the layout frame
+	m_minClientSize = m_prevSize = ctrlBoundsRect.Size();
+
+	if ( CWnd* pFrameCtrl = m_pLayoutFrame->GetControl() )
+		m_nonClientSize = ui::GetNonClientSize( pFrameCtrl->m_hWnd );		// not really useful for child frames, but let's keep track of it
+
+	m_maxClientSize.cx = std::max( m_maxClientSize.cx, m_minClientSize.cx );
+	m_maxClientSize.cy = std::max( m_maxClientSize.cy, m_minClientSize.cy );
+
+	m_frameOrigin = m_prevFrameOrigin = ctrlBoundsRect.TopLeft();
+}
+
+void CLayoutEngine::Initialize( CWnd* pDialog, ui::ILayoutFrame* pLayoutFrame /*= nullptr*/ )
+{
+	ASSERT( !IsInitialized() );
+
+	m_pDialog = pDialog;
+	m_pLayoutFrame = pLayoutFrame;
+
+	ENSURE( ::IsWindow( m_pDialog->GetSafeHwnd() ) );
+	ENSURE( ui::IsDialogBox( m_pDialog->GetSafeHwnd() ) );
+
+	if ( !HasInitialSize() )
+		if ( IsMasterLayout() )
+			StoreInitialSize( m_pDialog );
+		else
+			StoreInitialFrameSize();
+
+	ASSERT( HasInitialSize() );		// should have a size by this time
+
+	SetupControlStates();
 }
 
 void CLayoutEngine::SetupControlStates( void )
@@ -143,8 +192,9 @@ void CLayoutEngine::SetupControlStates( void )
 		{
 			layout::CControlState* pCtrlState = LookupControlState( ctrlId );
 
-			if ( ui::IsGroupBox( hCtrl ) )
-				SetupGroupBoxState( hCtrl, pCtrlState );
+			if ( IsMasterLayout() )
+				if ( ui::IsGroupBox( hCtrl ) )
+					SetupGroupBoxState( hCtrl, pCtrlState );
 
 			if ( pCtrlState != nullptr )
 				pCtrlState->InitCtrl( hCtrl );
@@ -216,6 +266,7 @@ void CLayoutEngine::SetLayoutEnabled( bool layoutEnabled /*= true*/ )
 CSize CLayoutEngine::GetMinClientSize( bool collapsed ) const
 {
 	CSize minClientSize = m_minClientSize;
+
 	if ( collapsed )
 		minClientSize -= m_collapsedDelta;
 
@@ -263,7 +314,9 @@ bool CLayoutEngine::SetCollapsed( bool collapsed )
 	}
 	else
 	{
-		m_previousSize.cx = m_previousSize.cy = 0;
+		m_prevSize.cx = m_prevSize.cy = 0;
+		m_prevFrameOrigin.x = m_prevFrameOrigin.y = 0;
+
 		LayoutControls();
 	}
 
@@ -279,15 +332,19 @@ bool CLayoutEngine::LayoutControls( void )
 	ASSERT( IsInitialized() );
 
 	CRect clientRect;
-	m_pDialog->GetClientRect( &clientRect );
+
+	if ( IsMasterLayout() )
+		m_pDialog->GetClientRect( &clientRect );
+	else if ( CWnd* pCtrlFrame = m_pLayoutFrame->GetControl() )
+		clientRect = ui::GetControlRect( pCtrlFrame->m_hWnd );
 
 	CSize minClientSize = GetMinClientSize();
 	CSize clientSize( std::max<long>( clientRect.Width(), minClientSize.cx ), std::max<long>( clientRect.Height(), minClientSize.cy ) );
 
-	return LayoutControls( clientSize );
+	return LayoutControls( clientRect.TopLeft(), clientSize );
 }
 
-bool CLayoutEngine::LayoutControls( const CSize& clientSize )
+bool CLayoutEngine::LayoutControls( const CPoint& clientOrigin, const CSize& clientSize )
 {
 	ASSERT( ::IsWindow( m_pDialog->GetSafeHwnd() ) );
 	ASSERT( ::GetWindow( m_pDialog->GetSafeHwnd(), GW_CHILD ) );		// controls created from template
@@ -295,21 +352,23 @@ bool CLayoutEngine::LayoutControls( const CSize& clientSize )
 	if ( !m_layoutEnabled || !HasCtrlLayout() )
 		return false;
 
-	if ( m_previousSize == clientSize )
-		return false;							// skip when same size and already layed-out
+	if ( m_prevFrameOrigin == clientOrigin && m_prevSize == clientSize )
+		return false;							// skip when same origin & size and already layed-out
 
 	if ( GetResizeGripper() != nullptr )
 		m_pGripper->Layout();
 
-	CSize delta = clientSize - GetMinClientSize();
-	m_previousSize = clientSize;
+	layout::CDelta delta( clientOrigin - m_frameOrigin, clientSize - GetMinClientSize() );
+
+	m_prevFrameOrigin = clientOrigin;
+	m_prevSize = clientSize;
 
 	return HasFlag( m_flags, SmoothGroups )
 		? LayoutSmoothly( delta )
 		: LayoutNormal( delta );
 }
 
-bool CLayoutEngine::LayoutSmoothly( const CSize& delta )
+bool CLayoutEngine::LayoutSmoothly( const layout::CDelta& delta )
 {
 	bool visible = m_pDialog->IsWindowVisible() != FALSE;
 	if ( visible )
@@ -335,11 +394,12 @@ bool CLayoutEngine::LayoutSmoothly( const CSize& delta )
 
 	if ( 0 == changedCount )
 		return false;
+
 	m_pDialog->RedrawWindow( nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN );
 	return changedCount != 0;
 }
 
-bool CLayoutEngine::LayoutNormal( const CSize& delta )
+bool CLayoutEngine::LayoutNormal( const layout::CDelta& delta )
 {
 	CRect clientRect;
 	m_pDialog->GetClientRect( &clientRect );
@@ -447,8 +507,10 @@ void CLayoutEngine::HandleGetMinMaxInfo( MINMAXINFO* pMinMaxInfo ) const
 	pMinMaxInfo->ptMinTrackSize = GetMinWindowSize();
 
 	CSize maxClientSize = GetMaxClientSize();
+
 	if ( maxClientSize.cx != INT_MAX )
 		pMinMaxInfo->ptMaxTrackSize.x = maxClientSize.cx + m_nonClientSize.cx;
+
 	if ( maxClientSize.cy != INT_MAX )
 		pMinMaxInfo->ptMaxTrackSize.y = maxClientSize.cy + m_nonClientSize.cy;
 }

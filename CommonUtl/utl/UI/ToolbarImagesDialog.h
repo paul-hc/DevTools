@@ -45,6 +45,7 @@ struct CImageItem;
 
 
 class CResizeFrameStatic;
+class CLayoutStatic;
 
 
 class CToolbarImagesPage : public CLayoutPropertyPage
@@ -78,6 +79,8 @@ private:
 
 	CReportListControl m_imageListCtrl;
 	std::auto_ptr<CSampleView> m_pSampleView;
+
+	std::auto_ptr<CLayoutStatic> m_pBottomLayoutStatic;
 	std::auto_ptr<CResizeFrameStatic> m_pHorizSplitterFrame;		// embedded inside of vertical splitter
 
 	enum Column { CommandName, Index, CmdId, CmdLiteral };

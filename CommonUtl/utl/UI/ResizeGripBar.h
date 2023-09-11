@@ -26,7 +26,7 @@ public:
 	CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Orientation orientation, resize::ToggleStyle toggleStyle = resize::ToggleSecond );
 	virtual ~CResizeGripBar();
 
-	CResizeGripBar& SetMinExtents( TValueOrPct firstMinExtent, TValueOrPct secondMinExtent ) { m_layout.m_minExtents = std::make_pair( firstMinExtent, secondMinExtent ); return *this; }
+	CResizeGripBar& SetMinExtents( TValueOrPct firstMinExtent, TValueOrPct secondMinExtent );
 
 	bool HasBorder( void ) const { return m_layout.m_hasBorder; }
 	bool SetBorder( bool hasBorder = true ) { return m_layout.m_hasBorder = hasBorder; }

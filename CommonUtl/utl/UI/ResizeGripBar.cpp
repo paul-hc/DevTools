@@ -13,6 +13,18 @@
 #endif
 
 
+namespace layout
+{
+	bool ShowPaneWindow( CWnd* pPaneWnd, bool show /*= true*/ )
+	{
+		if ( const ui::ILayoutFrame* pLayoutFrame = dynamic_cast<const ui::ILayoutFrame*>( pPaneWnd ) )
+			return false;
+
+		return ui::ShowWindow( pPaneWnd->GetSafeHwnd(), show );
+	}
+}
+
+
 HCURSOR CResizeGripBar::s_hCursors[ 2 ] = { nullptr, nullptr };
 
 
@@ -40,6 +52,12 @@ CResizeGripBar::CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Ori
 CResizeGripBar::~CResizeGripBar()
 {
 	delete m_pTrackingInfo;
+}
+
+CResizeGripBar& CResizeGripBar::SetMinExtents( TValueOrPct firstMinExtent, TValueOrPct secondMinExtent )
+{
+	m_layout.m_minExtents = std::make_pair( firstMinExtent, secondMinExtent );
+	return *this;
 }
 
 void CResizeGripBar::CreateArrowsImageList( void )
@@ -198,16 +216,17 @@ void CResizeGripBar::LayoutGripperTo( const CFrameLayoutInfo& info, const int fi
 	ComputeLayoutRects( gripperRect, firstRect, secondRect, info, firstExtent );
 
 	if ( resize::ToggleFirst == m_toggleStyle )
-		ui::ShowWindow( *m_panelCtrls.first, !m_layout.m_isCollapsed || resize::ToggleSecond == m_toggleStyle );
+		layout::ShowPaneWindow( m_panelCtrls.first, !m_layout.m_isCollapsed || resize::ToggleSecond == m_toggleStyle );
 
 	if ( resize::ToggleSecond == m_toggleStyle )
-		ui::ShowWindow( *m_panelCtrls.second, !m_layout.m_isCollapsed || resize::ToggleFirst == m_toggleStyle );
+		layout::ShowPaneWindow( m_panelCtrls.second, !m_layout.m_isCollapsed || resize::ToggleFirst == m_toggleStyle );
 
 	layout::MoveControl( *m_panelCtrls.first, firstRect, repaint );
 	layout::MoveControl( *m_panelCtrls.second, secondRect, repaint );
 
 	// move lastly to prevent dirty painting issues
 	this->MoveWindow( &gripperRect, false );
+
 	if ( repaint )
 		ui::RedrawControl( m_hWnd );
 }
@@ -285,6 +304,7 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 		pHiddenWnd = m_toggleStyle == resize::ToggleFirst ? m_panelCtrls.first : m_panelCtrls.second;
 
 	if ( resize::NorthSouth == m_layout.m_orientation )
+	{
 		if ( pHiddenWnd == m_panelCtrls.first )
 		{	// first collapsed  - gripper at top
 			rFirstRect.bottom = rFirstRect.top + firstExtent;
@@ -306,7 +326,9 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 			rGripperRect.bottom = rGripperRect.top + m_windowDepth;
 			rSecondRect.top = rGripperRect.bottom;
 		}
+	}
 	else
+	{
 		if ( pHiddenWnd == m_panelCtrls.first )
 		{	// first collapsed  - gripper at left
 			rFirstRect.right = rFirstRect.left + firstExtent;
@@ -328,6 +350,7 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 			rGripperRect.right = rGripperRect.left + m_windowDepth;
 			rSecondRect.left = rGripperRect.right;
 		}
+	}
 
 	ENSURE( ui::IsNormalized( rGripperRect ) );
 	ENSURE( ui::IsNormalized( rFirstRect ) );
@@ -505,6 +528,14 @@ void CResizeGripBar::OnLButtonDown( UINT flags, CPoint point )
 {
 	__super::OnLButtonDown( flags, point );
 
+	if ( m_pTrackingInfo != nullptr )
+	{	// can happen while debugging layout, and hitting a breakpoint; we need to exit tracking mode first
+		if ( ::GetCapture() == m_hWnd )
+			ReleaseCapture();
+
+		delete m_pTrackingInfo;
+		m_pTrackingInfo = nullptr;
+	}
 	ASSERT_NULL( m_pTrackingInfo );
 
 	if ( GripBar == m_hitOn )

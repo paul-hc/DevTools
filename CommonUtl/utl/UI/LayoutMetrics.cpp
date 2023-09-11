@@ -105,7 +105,7 @@ namespace layout
 		}
 	}
 
-	bool CControlState::ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const CSize& delta, bool collapsed ) const
+	bool CControlState::ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const CDelta& delta, bool collapsed ) const
 	{
 		const Metrics& metrics = GetMetrics( collapsed );
 
@@ -123,14 +123,16 @@ namespace layout
 		// proportional layout for control's origin
 		CPoint origin = m_initialOrigin;
 
-		origin.x += MulDiv( delta.cx, metrics.m_fields.m_moveX, 100 );
-		origin.y += MulDiv( delta.cy, metrics.m_fields.m_moveY, 100 );
+		origin += delta.m_origin;
+
+		origin.x += MulDiv( delta.m_size.cx, metrics.m_fields.m_moveX, 100 );
+		origin.y += MulDiv( delta.m_size.cy, metrics.m_fields.m_moveY, 100 );
 
 		// proportional layout for control's size
 		CSize size = m_initialSize;
 
-		size.cx += MulDiv( delta.cx, metrics.m_fields.m_sizeX, 100 );
-		size.cy += MulDiv( delta.cy, metrics.m_fields.m_sizeY, 100 );
+		size.cx += MulDiv( delta.m_size.cx, metrics.m_fields.m_sizeX, 100 );
+		size.cy += MulDiv( delta.m_size.cy, metrics.m_fields.m_sizeY, 100 );
 
 		// set output parameters
 		rCtrlRect = CRect( origin, size );
@@ -147,7 +149,7 @@ namespace layout
 		return true;	// true if origin or size has changed
 	}
 
-	bool CControlState::RepositionCtrl( const CSize& delta, bool collapsed ) const
+	bool CControlState::RepositionCtrl( const CDelta& delta, bool collapsed ) const
 	{
 		CRect ctrlRect;
 		UINT swpFlags = SWP_NOREDRAW | SWP_NOACTIVATE | SWP_NOZORDER;

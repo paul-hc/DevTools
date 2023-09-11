@@ -36,10 +36,11 @@ public:
 	void RegisterDualCtrlLayout( const CDualLayoutStyle dualLayoutStyles[], UINT count );
 
 	bool HasInitialSize( void ) const { return m_minClientSize.cx != 0 && m_minClientSize.cy != 0; }
-	void StoreInitialSize( CWnd* pDialog );		// called before Initialize() by form views, etc
+	void StoreInitialSize( CWnd* pDialog );		// called before Initialize() by dialogs, property pages, form views, etc
+	void StoreInitialFrameSize( void );			// called before Initialize() by static layout frames, etc
 
 	bool IsInitialized( void ) const { return m_pDialog->GetSafeHwnd() != nullptr; }
-	void Initialize( CWnd* pDialog );
+	void Initialize( CWnd* pDialog, ui::ILayoutFrame* pLayoutFrame = nullptr );
 	void Reset( void );						// un-initialize: for form view recreation
 
 	layout::CResizeGripper* GetResizeGripper( void ) const;
@@ -53,7 +54,6 @@ public:
 	bool SetCollapsed( bool collapsed );
 	void ToggleCollapsed( void ) { SetCollapsed( !IsCollapsed() ); }
 
-	bool LayoutControls( const CSize& clientSize );
 	bool LayoutControls( void );
 
 	void HandleGetMinMaxInfo( MINMAXINFO* pMinMaxInfo ) const;
@@ -83,12 +83,17 @@ public:
 	bool RefreshControlHandle( UINT ctrlId );			// call after control with same ID gets recreated
 	void AdjustControlInitialPosition( UINT ctrlId, const CSize& deltaOrigin, const CSize& deltaSize );		// when stretching content to fit: to retain original layout behaviour
 private:
+	bool IsMasterLayout( void ) const { return m_pDialog != nullptr && nullptr == m_pLayoutFrame; }		// a dialog layout engine?
+
 	void SetupControlStates( void );
 	void SetupCollapsedState( UINT ctrlId, layout::TStyle style );
 	void SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pCtrlState );
 	bool AnyRepaintCtrl( void ) const;
-	bool LayoutSmoothly( const CSize& delta );
-	bool LayoutNormal( const CSize& delta );
+
+	bool LayoutControls( const CPoint& clientOrigin, const CSize& clientSize );
+	bool LayoutSmoothly( const layout::CDelta& delta );
+	bool LayoutNormal( const layout::CDelta& delta );
+
 	void DrawBackground( CDC* pDC, const CRect& clientRect );
 	bool CanClip( HWND hCtrl ) const;
 private:
@@ -100,10 +105,14 @@ private:
 	std::unordered_map<UINT, ui::ILayoutFrame*> m_buddyCallbacks;		// called back when buddy windows are moved or resized
 
 	CWnd* m_pDialog;
+	ui::ILayoutFrame* m_pLayoutFrame;	// not null for child layout engines
 	CSize m_minClientSize;
-	CSize m_maxClientSize;									// cx/cy: 0 for no resize, otherwise max size
+	CSize m_maxClientSize;				// cx/cy: 0 for no resize, otherwise max size
 	CSize m_nonClientSize;
-	CSize m_previousSize;
+	CSize m_prevSize;
+
+	CPoint m_frameOrigin;				// only for frame child layouts: dlg template origin of the frame bounds
+	CPoint m_prevFrameOrigin;			// only for frame child layouts: dlg template origin of the frame bounds
 
 	CSize m_collapsedDelta;
 	bool m_collapsed;

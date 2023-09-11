@@ -158,6 +158,15 @@ namespace layout
 	}
 
 
+	struct CDelta
+	{
+		CDelta( const CSize& origin, const CSize& size ) : m_origin( origin ), m_size( size ) {}
+	public:
+		const CSize m_origin;
+		const CSize m_size;
+	};
+
+
 	class CControlState
 	{
 	public:
@@ -175,8 +184,8 @@ namespace layout
 		void InitCtrl( HWND hControl );
 		void ResetCtrl( void ) { InitCtrl( nullptr ); }
 
-		bool ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const CSize& delta, bool collapsed ) const;
-		bool RepositionCtrl( const CSize& delta, bool collapsed ) const;
+		bool ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const CDelta& delta, bool collapsed ) const;
+		bool RepositionCtrl( const CDelta& delta, bool collapsed ) const;
 
 		// advanced control layout (use with care)
 		void AdjustInitialPosition( const CSize& deltaOrigin, const CSize& deltaSize );			// when stretching content to fit: to retain original layout behaviour

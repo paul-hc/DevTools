@@ -154,9 +154,12 @@ namespace ui
 	CPoint GetCursorPos( HWND hWnd /*= nullptr*/ )
 	{
 		CPoint mousePos;
+
 		::GetCursorPos( &mousePos );
+
 		if ( hWnd != nullptr )
 			::ScreenToClient( hWnd, &mousePos );			// convert to client coords
+
 		return mousePos;
 	}
 
@@ -164,6 +167,7 @@ namespace ui
 	CSize GetNonClientOffset( HWND hWnd )
 	{
 		CRect windowRect, clientRect;
+
 		::GetWindowRect( hWnd, &windowRect );
 		::GetClientRect( hWnd, &clientRect );
 		ClientToScreen( hWnd, clientRect );
@@ -173,6 +177,7 @@ namespace ui
 	CSize GetNonClientSize( HWND hWnd )
 	{
 		CRect windowRect, clientRect;
+
 		::GetWindowRect( hWnd, &windowRect );
 		::GetClientRect( hWnd, &clientRect );
 		ClientToScreen( hWnd, clientRect );

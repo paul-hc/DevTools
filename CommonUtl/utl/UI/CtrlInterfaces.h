@@ -9,7 +9,9 @@ namespace ui
 	//
 	interface ILayoutFrame
 	{
+		virtual CWnd* GetControl( void ) const = 0;
 		virtual void OnControlResized( void ) = 0;
+		virtual bool ShowFrame( bool show ) = 0;
 	};
 
 

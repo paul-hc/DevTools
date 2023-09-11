@@ -118,13 +118,19 @@ namespace layout
 	static CLayoutStyle s_mfcPageStyles[] =
 	{
 		{ IDC_TOOLBAR_IMAGES_STATIC, SizeX },
-		{ IDC_TOOLBAR_IMAGES_LIST, Size },
-		{ IDC_GROUP_BOX_1, MoveY },
+		{ IDC_HORIZ_SPLITTER_STATIC, Size },
+		//{ IDC_TOOLBAR_IMAGES_LIST, Size },
+
+	};
+
+	static CLayoutStyle s_bottomFrameStyles[] =
+	{
+		{ IDC_TOOLBAR_IMAGE_SAMPLE, Size },
+		{ IDC_GROUP_BOX_1, SizeY },
 		{ IDC_ALPHA_SRC_LABEL, MoveY },
 		{ IDC_DRAW_DISABLED_CHECK, MoveY },
 		{ IDC_ALPHA_SRC_EDIT, MoveY },
-		{ IDC_ALPHA_SRC_SPIN, MoveY },
-		{ IDC_TOOLBAR_IMAGE_SAMPLE, MoveY | SizeX }
+		{ IDC_ALPHA_SRC_SPIN, MoveY }
 	};
 }
 
@@ -151,7 +157,10 @@ CToolbarImagesPage::CToolbarImagesPage( CMFCToolBarImages* pImages /*= nullptr*/
 	m_pSampleView.reset( new CSampleView( this ) );
 	m_pSampleView->SetBorderColor( CLR_DEFAULT );
 
-	m_pHorizSplitterFrame.reset( new CResizeFrameStatic( &m_imageListCtrl, m_pSampleView.get(), resize::NorthSouth ) );
+	m_pBottomLayoutStatic.reset( new CLayoutStatic() );
+	m_pBottomLayoutStatic->RegisterCtrlLayout( ARRAY_SPAN( layout::s_bottomFrameStyles ) );
+
+	m_pHorizSplitterFrame.reset( new CResizeFrameStatic( &m_imageListCtrl, m_pBottomLayoutStatic.get(), resize::NorthSouth ) );
 	m_pHorizSplitterFrame->SetSection( reg::section_MfcPageSplitterH );
 	m_pHorizSplitterFrame->GetGripBar()
 		.SetMinExtents( 50, 16 )
@@ -280,6 +289,9 @@ void CToolbarImagesPage::DoDataExchange( CDataExchange* pDX )
 	m_pSampleView->DDX_Placeholder( pDX, IDC_TOOLBAR_IMAGE_SAMPLE );
 	ui::DDX_Bool( pDX, IDC_DRAW_DISABLED_CHECK, m_drawDisabled );
 	ui::DDX_Number( pDX, IDC_ALPHA_SRC_EDIT, m_alphaSrc );
+
+	DDX_Control( pDX, IDC_LAYOUT_FRAME_1_STATIC, *m_pBottomLayoutStatic );
+	DDX_Control( pDX, IDC_HORIZ_SPLITTER_STATIC, *m_pHorizSplitterFrame );
 
 	if ( firstInit )
 	{
