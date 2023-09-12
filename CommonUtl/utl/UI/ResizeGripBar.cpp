@@ -7,6 +7,7 @@
 #include "WndUtils.h"
 #include "ThemeItem.h"
 #include "resource.h"
+#include <afxcontrolbarutil.h>		// for CMemDC
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -451,6 +452,47 @@ bool CResizeGripBar::SetHitOn( HitTest hitOn )
 	return true;
 }
 
+
+void CResizeGripBar::Draw( CDC* pDC, const CRect& clientRect )
+{
+	DrawBackground( pDC, clientRect );
+
+	CDrawAreas areas = GetDrawAreas();
+	HitTest hitOn = GetMouseHitTest( areas );
+
+	if ( !IsCollapsed() )
+		DrawGripBar( pDC, areas.m_gripRect );
+
+	if ( m_toggleStyle != resize::NoToggle )
+	{
+		ArrowPart part = GetArrowPart();
+		ArrowState state = GetArrowState( hitOn );
+
+		DrawArrow( pDC, areas.m_arrowRect1, part, state );
+		DrawArrow( pDC, areas.m_arrowRect2, part, state );
+	}
+
+	if ( !IsCollapsed() )
+		if ( m_layout.m_hasBorder )
+			pDC->Draw3dRect( &areas.m_clientRect, GetSysColor( COLOR_BTNHIGHLIGHT ), GetSysColor( COLOR_BTNSHADOW ) );
+}
+
+void CResizeGripBar::DrawBackground( CDC* pDC, const CRect& clientRect )
+{
+	CBrush brush( Nowhere == m_hitOn ? GetSysColor( COLOR_3DLIGHT ) : HotCyan );
+	CRect rect = clientRect;
+
+	if ( !IsCollapsed() )
+		pDC->FillRect( &rect, &brush );
+	else
+	{
+		pDC->Draw3dRect( &rect, GetSysColor( COLOR_BTNHIGHLIGHT ), MildGray );
+
+		rect.DeflateRect( 1, 1 );
+		pDC->FillRect( &rect, &brush );
+	}
+}
+
 void CResizeGripBar::DrawGripBar( CDC* pDC, const CRect& rectZone )
 {
 	CRect gripRect = rectZone;
@@ -514,6 +556,26 @@ BEGIN_MESSAGE_MAP( CResizeGripBar, CStatic )
 	ON_WM_ERASEBKGND()
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
+
+BOOL CResizeGripBar::OnEraseBkgnd( CDC* pDC )
+{
+	pDC;
+	return TRUE;			// erased, no default erasing
+}
+
+void CResizeGripBar::OnPaint( void )
+{
+	CPaintDC paintDC( this );
+
+	// draw background + foreground using double buffering
+	CMemDC memDC( paintDC, this );
+	CDC* pDC = &memDC.GetDC();
+
+	CRect clientRect;
+	GetClientRect( &clientRect );
+
+	Draw( pDC, clientRect );
+}
 
 BOOL CResizeGripBar::OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message )
 {
@@ -617,50 +679,6 @@ LRESULT CResizeGripBar::OnMouseLeave( WPARAM, LPARAM )
 {
 	SetHitOn( Nowhere );
 	return TRUE;
-}
-
-BOOL CResizeGripBar::OnEraseBkgnd( CDC* pDC )
-{
-	CRect clientRect;
-	GetClientRect( &clientRect );
-
-	CBrush brush( Nowhere == m_hitOn ? GetSysColor( COLOR_3DLIGHT ) : HotCyan );
-
-	if ( !IsCollapsed() )
-		pDC->FillRect( &clientRect, &brush );
-	else
-	{
-		pDC->Draw3dRect( &clientRect, GetSysColor( COLOR_BTNHIGHLIGHT ), MildGray );
-
-		clientRect.DeflateRect( 1, 1 );
-		pDC->FillRect( &clientRect, &brush );
-	}
-
-	return TRUE;			// erased
-}
-
-void CResizeGripBar::OnPaint( void )
-{
-	CPaintDC dc( this );
-
-	CDrawAreas areas = GetDrawAreas();
-	HitTest hitOn = GetMouseHitTest( areas );
-
-	if ( !IsCollapsed() )
-		DrawGripBar( &dc, areas.m_gripRect );
-
-	if ( m_toggleStyle != resize::NoToggle )
-	{
-		ArrowPart part = GetArrowPart();
-		ArrowState state = GetArrowState( hitOn );
-
-		DrawArrow( &dc, areas.m_arrowRect1, part, state );
-		DrawArrow( &dc, areas.m_arrowRect2, part, state );
-	}
-
-	if ( !IsCollapsed() )
-		if ( m_layout.m_hasBorder )
-			dc.Draw3dRect( &areas.m_clientRect, GetSysColor( COLOR_BTNHIGHLIGHT ), GetSysColor( COLOR_BTNSHADOW ) );
 }
 
 

@@ -727,14 +727,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SampleView.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SampleView.h"
-				>
-			</File>
-			<File
 				RelativePath=".\SampleView_fwd.h"
 				>
 			</File>
@@ -1599,6 +1591,14 @@
 				</File>
 				<File
 					RelativePath=".\ResizeGripBar.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SampleView.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SampleView.h"
 					>
 				</File>
 				<File

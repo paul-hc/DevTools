@@ -170,9 +170,6 @@
     <ClInclude Include="ResourceData.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="SampleView.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="ScopedBitmapMemDC.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -707,6 +704,9 @@
     <ClInclude Include="SampleView_fwd.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="SampleView.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -779,9 +779,6 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="ResourceData.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="SampleView.cpp">
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="SyncScrolling.cpp">
@@ -1206,6 +1203,9 @@
     </ClCompile>
     <ClCompile Include="ToolbarImagesDialog.cpp">
       <Filter>UI\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleView.cpp">
+      <Filter>UI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -37,6 +37,8 @@ public:
 	bool IsCollapsed( void ) const { return m_layout.m_isCollapsed; }
 	CResizeGripBar& SetCollapsed( bool collapsed );
 
+	bool IsTracking( void ) const { return m_pTrackingInfo != nullptr; }
+
 	// size of the small dimension (height for an up-down, width for an left-right)
 	int GetWindowDepth( void ) const { return m_windowDepth; }
 	void SetWindowDepth( int windowDepth ) { m_windowDepth = windowDepth; }
@@ -45,8 +47,6 @@ public:
 	bool CreateGripper( CResizeFrameStatic* pResizeFrame, UINT id = 0xFFFF );
 
 	void LayoutProportionally( bool repaint = true );		// preserves existing aspect ratio
-
-	bool IsTracking( void ) const { return m_pTrackingInfo != nullptr; }
 
 	static COLORREF GetHotArrowColor( void );
 public:
@@ -88,7 +88,7 @@ protected:
 
 	struct CFrameLayoutInfo
 	{
-		CRect m_frameRect; // in parent coordinates
+		CRect m_frameRect;		// in parent coordinates
 		int m_maxExtent;
 	};
 
@@ -139,6 +139,9 @@ private:
 private:
 	CDrawAreas GetDrawAreas( void ) const;
 	HitTest GetMouseHitTest( const CDrawAreas& rAreas ) const;
+
+	void Draw( CDC* pDC, const CRect& clientRect );
+	void DrawBackground( CDC* pDC, const CRect& clientRect );
 
 	void DrawGripBar( CDC* pDC, const CRect& rect );
 	void DrawArrow( CDC* pDC, const CRect& rect, ArrowPart part, ArrowState state );

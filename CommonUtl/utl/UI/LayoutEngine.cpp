@@ -657,7 +657,7 @@ bool CPaneLayoutEngine::ShowPaneControls( bool show /*= true*/ )
 		 || ( m_pDlgLayout != nullptr && HasFlag( m_pDlgLayout->GetFlags(), InLayout ) ) )
 		return false;				// called too early, defer for after initialization
 
-	bool changeCount = 0;
+	UINT changeCount = 0;
 
 	for ( std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrl = m_controlStates.begin(); itCtrl != m_controlStates.end(); ++itCtrl )
 		if ( itCtrl->second.IsInitialVisible() )
