@@ -215,11 +215,14 @@ void CResizeGripBar::LayoutGripperTo( const CFrameLayoutInfo& info, const int fi
 	CRect gripperRect, firstRect, secondRect;
 	ComputeLayoutRects( gripperRect, firstRect, secondRect, info, firstExtent );
 
-	if ( resize::ToggleFirst == m_toggleStyle )
-		layout::ShowPaneWindow( m_panelCtrls.first, !m_layout.m_isCollapsed || resize::ToggleSecond == m_toggleStyle );
+	if ( !IsTracking() )		// avoid toggling pane visibility during tracking, since it leads to partial background erasing for group boxes in pane frames
+	{
+		if ( resize::ToggleFirst == m_toggleStyle )
+			layout::ShowPaneWindow( m_panelCtrls.first, !m_layout.m_isCollapsed || resize::ToggleSecond == m_toggleStyle );
 
-	if ( resize::ToggleSecond == m_toggleStyle )
-		layout::ShowPaneWindow( m_panelCtrls.second, !m_layout.m_isCollapsed || resize::ToggleFirst == m_toggleStyle );
+		if ( resize::ToggleSecond == m_toggleStyle )
+			layout::ShowPaneWindow( m_panelCtrls.second, !m_layout.m_isCollapsed || resize::ToggleFirst == m_toggleStyle );
+	}
 
 	layout::MoveControl( *m_panelCtrls.first, firstRect, repaint );
 	layout::MoveControl( *m_panelCtrls.second, secondRect, repaint );
@@ -528,7 +531,7 @@ void CResizeGripBar::OnLButtonDown( UINT flags, CPoint point )
 {
 	__super::OnLButtonDown( flags, point );
 
-	if ( m_pTrackingInfo != nullptr )
+	if ( IsTracking() )
 	{	// can happen while debugging layout, and hitting a breakpoint; we need to exit tracking mode first
 		if ( ::GetCapture() == m_hWnd )
 			ReleaseCapture();
@@ -536,7 +539,7 @@ void CResizeGripBar::OnLButtonDown( UINT flags, CPoint point )
 		delete m_pTrackingInfo;
 		m_pTrackingInfo = nullptr;
 	}
-	ASSERT_NULL( m_pTrackingInfo );
+	ENSURE( !IsTracking() );
 
 	if ( GripBar == m_hitOn )
 	{
@@ -558,7 +561,7 @@ void CResizeGripBar::OnLButtonUp( UINT flags, CPoint point )
 {
 	enum Event { None, EndResize, Toggle } event = None;
 
-	if ( m_pTrackingInfo != nullptr )
+	if ( IsTracking() )
 	{
 		if ( ::GetCapture() == m_hWnd )
 			ReleaseCapture();

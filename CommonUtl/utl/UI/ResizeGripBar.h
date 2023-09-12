@@ -46,6 +46,8 @@ public:
 
 	void LayoutProportionally( bool repaint = true );		// preserves existing aspect ratio
 
+	bool IsTracking( void ) const { return m_pTrackingInfo != nullptr; }
+
 	static COLORREF GetHotArrowColor( void );
 public:
 	typedef std::pair<TValueOrPct, TValueOrPct> TPanelMinExtents;

@@ -654,7 +654,7 @@ bool CPaneLayoutEngine::ShowPaneControls( bool show /*= true*/ )
 {
 	if ( !IsInitialized()										// called too early, defer for after initialization?
 		 || HasFlag( m_flags, InLayout )						// avoid changing control visibility while the dialog is in SetRedraw( FALSE ) mode!
-		 || HasFlag( m_pDlgLayout->GetFlags(), InLayout ) )
+		 || ( m_pDlgLayout != nullptr && HasFlag( m_pDlgLayout->GetFlags(), InLayout ) ) )
 		return false;				// called too early, defer for after initialization
 
 	bool changeCount = 0;
