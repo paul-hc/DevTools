@@ -17,8 +17,8 @@ namespace layout
 {
 	bool ShowPaneWindow( CWnd* pPaneWnd, bool show /*= true*/ )
 	{
-		if ( const ui::ILayoutFrame* pLayoutFrame = dynamic_cast<const ui::ILayoutFrame*>( pPaneWnd ) )
-			return false;
+		if ( ui::ILayoutFrame* pLayoutFrame = dynamic_cast<ui::ILayoutFrame*>( pPaneWnd ) )
+			return pLayoutFrame->ShowPane( show );
 
 		return ui::ShowWindow( pPaneWnd->GetSafeHwnd(), show );
 	}

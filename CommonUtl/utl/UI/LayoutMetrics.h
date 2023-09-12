@@ -45,6 +45,7 @@ public:
 
 
 class CLayoutEngine;
+class CPaneLayoutEngine;
 
 
 namespace ui
@@ -112,7 +113,7 @@ namespace layout
 	{
 		None		= 0,
 
-		OffsetOrigin = None,		// only for frame layouts: offset control's origin when resizing split panes, etc.
+		OffsetOrigin = None,		// only for pane layouts: offset control's origin when resizing split panes, etc.
 
 		// move & size 100%
 		MoveX		= 100 << Metrics::Shift_MoveX,

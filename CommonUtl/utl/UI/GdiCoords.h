@@ -34,7 +34,7 @@ namespace ui
 		return CSize( rect.right - rect.left, rect.bottom - rect.top );
 	}
 
-	inline CRect& SetRectSize( CRect& rRect, const SIZE& size )
+	inline CRect& SetRectSize( OUT CRect& rRect, const SIZE& size )
 	{
 		rRect.BottomRight() = rRect.TopLeft() + size;
 		return rRect;
@@ -46,7 +46,7 @@ namespace ui
 	}
 
 	template< typename RectT >
-	inline RectT& NormalizeRect( RectT& rRect )
+	inline RectT& NormalizeRect( OUT RectT& rRect )
 	{
 		if ( rRect.left > rRect.right )
 			std::swap( rRect.left, rRect.right );
@@ -115,30 +115,30 @@ namespace ui
 
 
 	// popup layout with excluding rect - similar to TrackPopupMenu() alignment:
-	CRect& AlignPopupRect( CRect& rDest, const RECT& excludeRect, ui::PopupAlign popupAlign, const CSize& spacing = CSize( 0, 0 ) );
+	CRect& AlignPopupRect( OUT CRect& rDest, const RECT& excludeRect, ui::PopupAlign popupAlign, const CSize& spacing = CSize( 0, 0 ) );
 	ui::PopupAlign GetMirrorPopupAlign( ui::PopupAlign popupAlign );
 
 
 	bool IsValidAlignment( TAlignment alignment );
 
-	CRect& AlignRect( CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest = false );
+	CRect& AlignRect( OUT CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest = false );
 
-	inline CRect& AlignRectHV( CRect& rDest, const RECT& anchor, Alignment horz, Alignment vert, bool limitDest = false )
+	inline CRect& AlignRectHV( OUT CRect& rDest, const RECT& anchor, Alignment horz, Alignment vert, bool limitDest = false )
 	{
 		return AlignRect( rDest, anchor, horz | vert, limitDest );
 	}
 
-	CRect& AlignRectOutside( CRect& rDest, const RECT& anchor, TAlignment alignment, const CSize& spacing = CSize( 0, 0 ) );	// buddy or tile align: layout the rect outside the anchor (by the anchor)
+	CRect& AlignRectOutside( OUT CRect& rDest, const RECT& anchor, TAlignment alignment, const CSize& spacing = CSize( 0, 0 ) );	// buddy or tile align: layout the rect outside the anchor (by the anchor)
 
-	CRect& CenterRect( CRect& rDest, const RECT& anchor, bool horiz = true, bool vert = true, bool limitDest = false, const CSize& offset = CSize( 0, 0 ) );
+	CRect& CenterRect( OUT CRect& rDest, const RECT& anchor, bool horiz = true, bool vert = true, bool limitDest = false, const CSize& offset = CSize( 0, 0 ) );
 
 
 	enum Stretch { Width, Height, Size };
 
-	void StretchRect( CRect& rDest, const RECT& anchor, Stretch stretch );
+	void StretchRect( OUT CRect& rDest, const RECT& anchor, Stretch stretch );
 
-	bool EnsureVisibleRect( CRect& rDest, const RECT& boundsRect, bool horiz = true, bool vert = true );
-	void EnsureMinEdge( CRect& rInner, const RECT& outer, int edge = 1 );
+	bool EnsureVisibleRect( OUT CRect& rDest, const RECT& boundsRect, bool horiz = true, bool vert = true );
+	void EnsureMinEdge( OUT CRect& rInner, const RECT& outer, int edge = 1 );
 
 
 	enum LineOrientation { HorizontalLine, VerticalLine, DiagonalLine, NoLine };
@@ -151,8 +151,8 @@ namespace ui
 {
 	// GDI utils
 
-	int CombineWithRegion( CRgn* pCombined, const RECT& rect, int combineMode );
-	int CombineRects( CRgn* pCombined, const RECT& outerRect, const RECT& innerRect, int combineMode = RGN_DIFF );
+	int CombineWithRegion( OUT CRgn* pCombined, const RECT& rect, int combineMode );
+	int CombineRects( OUT CRgn* pCombined, const RECT& outerRect, const RECT& innerRect, int combineMode = RGN_DIFF );
 }
 
 

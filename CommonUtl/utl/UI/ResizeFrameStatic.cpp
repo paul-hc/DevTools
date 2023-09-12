@@ -34,13 +34,18 @@ CWnd* CResizeFrameStatic::GetControl( void ) const implements(ui::ILayoutFrame)
 	return const_cast<CResizeFrameStatic*>( this );
 }
 
+CWnd* CResizeFrameStatic::GetDialog( void ) const implements(ui::ILayoutFrame)
+{
+	return GetParent();
+}
+
 void CResizeFrameStatic::OnControlResized( void ) implements(ui::ILayoutFrame)
 {
 	if ( m_pGripBar->m_hWnd != nullptr )
 		m_pGripBar->LayoutProportionally();
 }
 
-bool CResizeFrameStatic::ShowFrame( bool show ) implements(ui::ILayoutFrame)
+bool CResizeFrameStatic::ShowPane( bool show ) implements(ui::ILayoutFrame)
 {
 	return ui::ShowWindow( m_hWnd, show );
 }
@@ -89,7 +94,7 @@ void CResizeFrameStatic::OnDestroy( void )
 
 CLayoutStatic::CLayoutStatic( void )
 	: CStatic()
-	, m_pLayoutEngine( new CLayoutEngine() )
+	, m_pPaneLayoutEngine( new CPaneLayoutEngine() )
 {
 }
 
@@ -99,17 +104,17 @@ CLayoutStatic::~CLayoutStatic()
 
 CLayoutEngine& CLayoutStatic::GetLayoutEngine( void ) implements(ui::ILayoutEngine)
 {
-	return *m_pLayoutEngine;
+	return *m_pPaneLayoutEngine;
 }
 
 void CLayoutStatic::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) implements(ui::ILayoutEngine)
 {
-	m_pLayoutEngine->RegisterCtrlLayout( layoutStyles, count );
+	m_pPaneLayoutEngine->RegisterCtrlLayout( layoutStyles, count );
 }
 
 bool CLayoutStatic::HasControlLayout( void ) const implements(ui::ILayoutEngine)
 {
-	return m_pLayoutEngine->HasCtrlLayout();
+	return m_pPaneLayoutEngine->HasCtrlLayout();
 }
 
 CWnd* CLayoutStatic::GetControl( void ) const implements(ui::ILayoutFrame)
@@ -117,24 +122,23 @@ CWnd* CLayoutStatic::GetControl( void ) const implements(ui::ILayoutFrame)
 	return const_cast<CLayoutStatic*>( this );
 }
 
+CWnd* CLayoutStatic::GetDialog( void ) const implements(ui::ILayoutFrame)
+{
+	return GetParent();
+}
+
 void CLayoutStatic::OnControlResized( void ) implements(ui::ILayoutFrame)
 {
-	if ( !m_pLayoutEngine->IsInitialized() )
-		m_pLayoutEngine->Initialize( GetParent(), this );
+	if ( !m_pPaneLayoutEngine->IsInitialized() )
+		m_pPaneLayoutEngine->InitializePane( this );
 
-	ASSERT( m_pLayoutEngine->IsInitialized() );
-	m_pLayoutEngine->LayoutControls();
+	ENSURE( m_pPaneLayoutEngine->IsInitialized() );
+	m_pPaneLayoutEngine->LayoutControls();
 }
 
-bool CLayoutStatic::ShowFrame( bool show ) implements(ui::ILayoutFrame)
+bool CLayoutStatic::ShowPane( bool show ) implements(ui::ILayoutFrame)
 {
-	show;
-	return false;
-}
-
-void CLayoutStatic::PreSubclassWindow( void )
-{
-	__super::PreSubclassWindow();
+	return m_pPaneLayoutEngine->ShowPaneControls( show );
 }
 
 

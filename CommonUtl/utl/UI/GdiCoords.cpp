@@ -88,7 +88,7 @@ namespace ui
 	}
 
 
-	CRect& AlignPopupRect( CRect& rDest, const RECT& excludeRect, ui::PopupAlign popupAlign, const CSize& spacing /*= CSize( 0, 0 )*/ )
+	CRect& AlignPopupRect( OUT CRect& rDest, const RECT& excludeRect, ui::PopupAlign popupAlign, const CSize& spacing /*= CSize( 0, 0 )*/ )
 	{
 		switch ( popupAlign )
 		{
@@ -140,7 +140,7 @@ namespace ui
 		return true;		// no alignment conflicts
 	}
 
-	CRect& AlignRect( CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest /*= false*/ )
+	CRect& AlignRect( OUT CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest /*= false*/ )
 	{
 		CSize offset( 0, 0 );
 
@@ -186,7 +186,7 @@ namespace ui
 		return rDest;
 	}
 
-	CRect& AlignRectOutside( CRect& rDest, const RECT& anchor, TAlignment alignment, const CSize& spacing /*= CSize( 0, 0 )*/ )
+	CRect& AlignRectOutside( OUT CRect& rDest, const RECT& anchor, TAlignment alignment, const CSize& spacing /*= CSize( 0, 0 )*/ )
 	{	// buddy or tile align: layout the rect outside the anchor (by the anchor)
 		CSize offset( 0, 0 );
 
@@ -228,7 +228,7 @@ namespace ui
 		return rDest;
 	}
 
-	CRect& CenterRect( CRect& rDest, const RECT& anchor, bool horiz /*= true*/, bool vert /*= true*/, bool limitDest /*= false*/,
+	CRect& CenterRect( OUT CRect& rDest, const RECT& anchor, bool horiz /*= true*/, bool vert /*= true*/, bool limitDest /*= false*/,
 					   const CSize& offset /*= CSize( 0, 0 )*/ )
 	{
 		CPoint delta = TopLeft( anchor ) - rDest.TopLeft() + ScaleSize( RectSize( anchor ) - rDest.Size() + offset, 1, 2 );
@@ -244,7 +244,7 @@ namespace ui
 		return rDest;
 	}
 
-	void StretchRect( CRect& rDest, const RECT& anchor, Stretch stretch )
+	void StretchRect( OUT CRect& rDest, const RECT& anchor, Stretch stretch )
 	{
 		if ( Width == stretch || Size == stretch )
 		{
@@ -258,7 +258,7 @@ namespace ui
 		}
 	}
 
-	bool EnsureVisibleRect( CRect& rDest, const RECT& boundsRect, bool horiz /*= true*/, bool vert /*= true*/ )
+	bool EnsureVisibleRect( OUT CRect& rDest, const RECT& boundsRect, bool horiz /*= true*/, bool vert /*= true*/ )
 	{
 		if ( ui::InBounds( boundsRect, rDest ) )
 			return false;		// no overflow, no change
@@ -290,7 +290,7 @@ namespace ui
 		return true;
 	}
 
-	void EnsureMinEdge( CRect& rInner, const RECT& outer, int edge /*= 1*/ )
+	void EnsureMinEdge( OUT CRect& rInner, const RECT& outer, int edge /*= 1*/ )
 	{
 		if ( rInner.Width() * rInner.Height() != 0 )
 		{
@@ -324,14 +324,14 @@ namespace ui
 
 namespace ui
 {
-	int CombineWithRegion( CRgn* pCombined, const RECT& rect, int combineMode )
+	int CombineWithRegion( OUT CRgn* pCombined, const RECT& rect, int combineMode )
 	{
 		CRgn rectRgn;
 		rectRgn.CreateRectRgnIndirect( &rect );
 		return pCombined->CombineRgn( pCombined, &rectRgn, combineMode );
 	}
 
-	int CombineRects( CRgn* pCombined, const RECT& outerRect, const RECT& innerRect, int combineMode /*= RGN_DIFF*/ )
+	int CombineRects( OUT CRgn* pCombined, const RECT& outerRect, const RECT& innerRect, int combineMode /*= RGN_DIFF*/ )
 	{
 		CRgn outerRgn, innerRgn;
 		outerRgn.CreateRectRgnIndirect( &outerRect );

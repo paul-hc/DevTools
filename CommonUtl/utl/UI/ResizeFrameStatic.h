@@ -19,8 +19,9 @@ public:
 public:
 	// ui::ILayoutFrame interface
 	virtual CWnd* GetControl( void ) const implements(ui::ILayoutFrame);
+	virtual CWnd* GetDialog( void ) const implements(ui::ILayoutFrame);
 	virtual void OnControlResized( void ) implements(ui::ILayoutFrame);
-	virtual bool ShowFrame( bool show ) implements(ui::ILayoutFrame);
+	virtual bool ShowPane( bool show ) implements(ui::ILayoutFrame);
 
 	enum Notification { RF_GRIPPER_TOGGLE = 1, RF_GRIPPER_RESIZING, RF_GRIPPER_RESIZED };
 
@@ -57,14 +58,13 @@ public:
 
 	// ui::ILayoutFrame interface
 	virtual CWnd* GetControl( void ) const implements(ui::ILayoutFrame);
+	virtual CWnd* GetDialog( void ) const implements(ui::ILayoutFrame);
 	virtual void OnControlResized( void ) implements(ui::ILayoutFrame);
-	virtual bool ShowFrame( bool show ) implements(ui::ILayoutFrame);
+	virtual bool ShowPane( bool show ) implements(ui::ILayoutFrame);
 private:
-	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
+	std::auto_ptr<CPaneLayoutEngine> m_pPaneLayoutEngine;
 
 	// generated stuff
-public:
-	virtual void PreSubclassWindow( void );
 protected:
 	afx_msg BOOL OnEraseBkgnd( CDC* pDC );
 	afx_msg void OnPaint( void );
