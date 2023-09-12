@@ -112,6 +112,8 @@ namespace layout
 	{
 		None		= 0,
 
+		OffsetOrigin = None,		// only for frame layouts: offset control's origin when resizing split panes, etc.
+
 		// move & size 100%
 		MoveX		= 100 << Metrics::Shift_MoveX,
 		MoveY		= 100 << Metrics::Shift_MoveY,
@@ -162,8 +164,8 @@ namespace layout
 	{
 		CDelta( const CSize& origin, const CSize& size ) : m_origin( origin ), m_size( size ) {}
 	public:
-		const CSize m_origin;
-		const CSize m_size;
+		const CSize m_origin;		// used by frame layout engine only, otherwise is (0, 0)
+		const CSize m_size;			// used by any layout engine
 	};
 
 
@@ -181,11 +183,12 @@ namespace layout
 		void ModifyLayoutStyle( int clearStyle, int setStyle );
 
 		bool IsCtrlInit( void ) const { return m_hControl != nullptr; };
-		void InitCtrl( HWND hControl );
-		void ResetCtrl( void ) { InitCtrl( nullptr ); }
+		void ResetCtrl( HWND hControl = nullptr );
 
-		bool ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const CDelta& delta, bool collapsed ) const;
-		bool RepositionCtrl( const CDelta& delta, bool collapsed ) const;
+		bool IsInitialVisible( void ) const { ASSERT( IsCtrlInit() ); return m_initialVisible; }
+
+		bool ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const layout::CDelta& delta, bool collapsed ) const;
+		bool RepositionCtrl( const layout::CDelta& delta, bool collapsed ) const;
 
 		// advanced control layout (use with care)
 		void AdjustInitialPosition( const CSize& deltaOrigin, const CSize& deltaSize );			// when stretching content to fit: to retain original layout behaviour
@@ -197,6 +200,7 @@ namespace layout
 	private:
 		CPoint m_initialOrigin;
 		CSize m_initialSize;
+		bool m_initialVisible;
 	};
 
 

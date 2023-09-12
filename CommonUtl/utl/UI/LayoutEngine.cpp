@@ -12,10 +12,10 @@
 #endif
 
 
-int CLayoutEngine::m_defaultFlags = Smooth;
+int CLayoutEngine::s_defaultFlags = Smooth;
 
 
-CLayoutEngine::CLayoutEngine( int flags /*= m_defaultFlags*/ )
+CLayoutEngine::CLayoutEngine( int flags /*= s_defaultFlags*/ )
 	: m_flags( flags )
 	, m_layoutEnabled( true )
 	, m_pDialog( nullptr )
@@ -197,7 +197,7 @@ void CLayoutEngine::SetupControlStates( void )
 					SetupGroupBoxState( hCtrl, pCtrlState );
 
 			if ( pCtrlState != nullptr )
-				pCtrlState->InitCtrl( hCtrl );
+				pCtrlState->ResetCtrl( hCtrl );
 		}
 }
 

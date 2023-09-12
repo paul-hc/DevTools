@@ -233,8 +233,8 @@ void CBuddyControlsDialog::SetupFileListView( void )
 BOOL CBuddyControlsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
-		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) /*||
-		m_fileListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo )*/;
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo )
+		;//|| m_fileListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 void CBuddyControlsDialog::DoDataExchange( CDataExchange* pDX )

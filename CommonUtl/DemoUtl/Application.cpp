@@ -95,7 +95,7 @@ BOOL CApplication::InitInstance( void )
 	GetSharedImageStore()->RegisterAlias( ID_EDIT_ITEM, ID_NUMERIC_SEQUENCE );		// for tracking context menu example in CTestColorsDialog::m_pMenuPicker drop-down
 
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
-	CLayoutEngine::m_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
+	CLayoutEngine::s_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
 	CVisualTheme::SetEnabled( !GetProfileInt( reg::section, reg::entry_disableThemes, FALSE ) );
 
 	//hlp::CheckScalarTypes();
@@ -143,7 +143,7 @@ BOOL CApplication::InitInstance( void )
 
 int CApplication::ExitInstance( void )
 {
-	WriteProfileInt( reg::section, reg::entry_disableSmooth, !HasFlag( CLayoutEngine::m_defaultFlags, CLayoutEngine::SmoothGroups ) );
+	WriteProfileInt( reg::section, reg::entry_disableSmooth, !HasFlag( CLayoutEngine::s_defaultFlags, CLayoutEngine::SmoothGroups ) );
 	WriteProfileInt( reg::section, reg::entry_disableThemes, CVisualTheme::IsDisabled() );
 
 	return __super::ExitInstance();

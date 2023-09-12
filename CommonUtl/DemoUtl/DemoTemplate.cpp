@@ -167,7 +167,7 @@ void CDemoTemplate::DoDataExchange( CDataExchange* pDX )
 			ui::StretchWindow( m_pickFormatStatic, m_formatCombo, ui::Height, CSize( 0, 1 ) );
 
 		m_dialogButton.SetSelValue( m_dialogResizeStyle );
-		m_pOwner->CheckDlgButton( IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, CLayoutEngine::Normal == CLayoutEngine::m_defaultFlags );
+		m_pOwner->CheckDlgButton( IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, CLayoutEngine::Normal == CLayoutEngine::s_defaultFlags );
 		m_pOwner->CheckDlgButton( IDC_DISABLE_THEMES_TOGGLE, CVisualTheme::IsDisabled() );
 	}
 }
@@ -199,7 +199,8 @@ END_MESSAGE_MAP()
 
 void CDemoTemplate::OnToggle_DisableSmoothResize( void )
 {
-	CLayoutEngine::m_defaultFlags = m_pOwner->IsDlgButtonChecked( IDC_DISABLE_SMOOTH_RESIZE_TOGGLE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
+	CLayoutEngine::s_defaultFlags = m_pOwner->IsDlgButtonChecked( IDC_DISABLE_SMOOTH_RESIZE_TOGGLE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
+
 	ui::SendCommand( *AfxGetMainWnd(), ID_FILE_CLOSE );
 	ui::SendCommand( *AfxGetMainWnd(), ID_FILE_NEW );
 }

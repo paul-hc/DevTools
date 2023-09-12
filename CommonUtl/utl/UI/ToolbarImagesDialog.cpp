@@ -127,10 +127,10 @@ namespace layout
 	{
 		{ IDC_TOOLBAR_IMAGE_SAMPLE, Size },
 		{ IDC_GROUP_BOX_1, SizeY },
-		{ IDC_ALPHA_SRC_LABEL, MoveY },
-		{ IDC_DRAW_DISABLED_CHECK, MoveY },
-		{ IDC_ALPHA_SRC_EDIT, MoveY },
-		{ IDC_ALPHA_SRC_SPIN, MoveY }
+		{ IDC_ALPHA_SRC_LABEL, OffsetOrigin },			// use to offset controls in frame layout (non-master layout)
+		{ IDC_DRAW_DISABLED_CHECK, OffsetOrigin },
+		{ IDC_ALPHA_SRC_EDIT, OffsetOrigin },
+		{ IDC_ALPHA_SRC_SPIN, OffsetOrigin }
 	};
 }
 

@@ -23,7 +23,7 @@ public:
 		Normal = GroupsTransparent | GroupsRepaint,
 	};
 public:
-	CLayoutEngine( int flags = m_defaultFlags );
+	CLayoutEngine( int flags = s_defaultFlags );
 	~CLayoutEngine();
 
 	int GetFlags( void ) const { return m_flags; }
@@ -84,6 +84,7 @@ public:
 	void AdjustControlInitialPosition( UINT ctrlId, const CSize& deltaOrigin, const CSize& deltaSize );		// when stretching content to fit: to retain original layout behaviour
 private:
 	bool IsMasterLayout( void ) const { return m_pDialog != nullptr && nullptr == m_pLayoutFrame; }		// a dialog layout engine?
+	bool IsFrameLayout( void ) const { return m_pLayoutFrame != nullptr; }								// a CLayoutStatic layout engine?
 
 	void SetupControlStates( void );
 	void SetupCollapsedState( UINT ctrlId, layout::TStyle style );
@@ -120,7 +121,7 @@ private:
 	std::auto_ptr<layout::CResizeGripper> m_pGripper;		// bottom-right resize box
 	std::vector<HWND> m_hiddenGroups;						// hidden groups, drawn smoothly on WM_ERASEBKGND
 public:
-	static int m_defaultFlags;								// for debugging, testing
+	static int s_defaultFlags;								// for debugging, testing
 };
 
 

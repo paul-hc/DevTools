@@ -59,6 +59,7 @@ namespace layout
 		, m_collapsedMetrics( UINT_MAX )
 		, m_hControl( nullptr )
 		, m_hParent( nullptr )
+		, m_initialVisible( false )
 	{
 	}
 
@@ -82,13 +83,14 @@ namespace layout
 			ModifyFlags( m_collapsedMetrics.m_layoutStyle, clearStyle, setStyle );
 	}
 
-	void CControlState::InitCtrl( HWND hControl )
+	void CControlState::ResetCtrl( HWND hControl /*= nullptr*/ )
 	{
 		if ( hControl != nullptr )
 		{
 			m_hControl = hControl;
 			m_hParent = ::GetParent( m_hControl );
-			ASSERT( ::IsWindow( m_hControl ) && ::IsWindow( m_hParent ) );
+
+			ENSURE( ::IsWindow( m_hControl ) && ::IsWindow( m_hParent ) );
 
 			CRect initialControlRect;
 			::GetWindowRect( m_hControl, &initialControlRect );
@@ -96,16 +98,18 @@ namespace layout
 
 			m_initialOrigin = initialControlRect.TopLeft();
 			m_initialSize = initialControlRect.Size();
+			m_initialVisible = ui::IsVisible( m_hControl );
 		}
 		else
 		{
 			m_hControl = m_hParent = nullptr;
 			m_initialOrigin = CPoint( 0, 0 );
 			m_initialSize = CSize( 0, 0 );
+			m_initialVisible = false;
 		}
 	}
 
-	bool CControlState::ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const CDelta& delta, bool collapsed ) const
+	bool CControlState::ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const layout::CDelta& delta, bool collapsed ) const
 	{
 		const Metrics& metrics = GetMetrics( collapsed );
 
@@ -113,12 +117,13 @@ namespace layout
 		ASSERT( ::IsWindow( m_hControl ) );		// controls initialized? was __super::DoDataExchange() called after subclassing all controls?
 
 		if ( !metrics.HasEffect() )
-			return false;
+			if ( 0 == delta.m_origin.cx && 0 == delta.m_origin.cy )		// this is a master layout (not a frame layout)?
+				return false;
 
-		CRect currentControlRect;
+		CRect currCtrlRect;
 
-		::GetWindowRect( m_hControl, &currentControlRect );
-		layout::ScreenToClient( m_hParent, currentControlRect );
+		::GetWindowRect( m_hControl, &currCtrlRect );
+		layout::ScreenToClient( m_hParent, currCtrlRect );
 
 		// proportional layout for control's origin
 		CPoint origin = m_initialOrigin;
@@ -137,19 +142,19 @@ namespace layout
 		// set output parameters
 		rCtrlRect = CRect( origin, size );
 
-		if ( rCtrlRect == currentControlRect )
+		if ( rCtrlRect == currCtrlRect )
 			return false;			// layout hasn't changed
 
-		if ( rCtrlRect.TopLeft() == currentControlRect.TopLeft() )
+		if ( rCtrlRect.TopLeft() == currCtrlRect.TopLeft() )
 			rSwpFlags |= SWP_NOMOVE;
 
-		if ( rCtrlRect.Size() == currentControlRect.Size() )
+		if ( rCtrlRect.Size() == currCtrlRect.Size() )
 			rSwpFlags |= SWP_NOSIZE;
 
 		return true;	// true if origin or size has changed
 	}
 
-	bool CControlState::RepositionCtrl( const CDelta& delta, bool collapsed ) const
+	bool CControlState::RepositionCtrl( const layout::CDelta& delta, bool collapsed ) const
 	{
 		CRect ctrlRect;
 		UINT swpFlags = SWP_NOREDRAW | SWP_NOACTIVATE | SWP_NOZORDER;
