@@ -864,7 +864,7 @@ namespace mfc
 		m_columnCount = m_pColorTable->GetTaggedGridColumnCount();
 
 		if ( 0 == m_columnCount )
-			m_columnCount = (size_t)sqrt( (double)m_pColorTable->GetColors().size() );		// default row/col layout
+			m_columnCount = (UINT)sqrt( (double)m_pColorTable->GetColors().size() );		// default row/col layout
 
 		if ( m_columnCount > 8 )
 			m_columnCount /= 2;			// halve the columns to "square" the table a bit - but by a factor of 2, so that ToTransposedGridIndex() does not go out of bounds

@@ -483,7 +483,7 @@ namespace ut
 
 		CSize fullSize = gdi::GetBitmapSize( hBitmap );
 		size_t columnCount = m_workAreaRect.Width() / glyphSize.cx;
-		int rowMaxWidth = columnCount * glyphSize.cx;
+		int rowMaxWidth = static_cast<int>( columnCount * glyphSize.cx );
 
 		CDC* pDC = GetDC();
 		CDC memDC;

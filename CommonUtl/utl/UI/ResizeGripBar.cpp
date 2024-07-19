@@ -305,7 +305,7 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 	CWnd* pHiddenWnd = nullptr;
 
 	if ( m_layout.m_isCollapsed )
-		pHiddenWnd = m_toggleStyle == resize::ToggleFirst ? m_panelCtrls.first : m_panelCtrls.second;
+		pHiddenWnd = resize::ToggleFirst == m_toggleStyle ? m_panelCtrls.first : m_panelCtrls.second;
 
 	if ( resize::NorthSouth == m_layout.m_orientation )
 	{

@@ -282,7 +282,7 @@ namespace mfc
 		CClientDC screenDC( nullptr );
 		HGDIOBJ hOldFont = screenDC.SelectObject( mfc::nosy_cast<nosy::CStatusBar_>( pStatusBar )->GetCurrentFont() );
 
-		int textWidth = screenDC.GetTextExtent( pPaneInfo->lpszText, str::GetLength( pPaneInfo->lpszText ) ).cx;
+		int textWidth = screenDC.GetTextExtent( pPaneInfo->lpszText, (int)str::GetLength( pPaneInfo->lpszText ) ).cx;
 
 		screenDC.SelectObject( hOldFont );
 		return textWidth;

@@ -39,10 +39,10 @@ public:
 
 	bool IsTracking( void ) const { return m_pTrackingInfo != nullptr; }
 
-	// size of the small dimension (height for an up-down, width for an left-right)
-	int GetWindowDepth( void ) const { return m_windowDepth; }
-	void SetWindowDepth( int windowDepth ) { m_windowDepth = windowDepth; }
-	void IncreaseWindowDepth( int byWindowDepth ) { m_windowDepth += byWindowDepth; }
+	// size of the small dimension of the bar: height for an up-down, width for an left-right
+	//int GetWindowDepth( void ) const { return m_windowDepth; }
+	//void SetWindowDepth( int windowDepth ) { m_windowDepth = windowDepth; }
+	//void IncreaseWindowDepth( int byWindowDepth ) { m_windowDepth += byWindowDepth; }
 
 	bool CreateGripper( CResizeFrameStatic* pResizeFrame, UINT id = 0xFFFF );
 

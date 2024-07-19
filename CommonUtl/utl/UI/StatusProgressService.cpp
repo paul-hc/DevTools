@@ -129,7 +129,7 @@ void CStatusProgressService::SetPos( size_t pos ) implement
 	if ( pos > m_maxPos )
 		pos = m_autoWrap ? 0 : m_maxPos;
 
-	s_pStatusBar->SetPaneProgress( s_progressPaneIndex, pos );
+	s_pStatusBar->SetPaneProgress( s_progressPaneIndex, (long)pos );
 }
 
 bool CStatusProgressService::SetLabelText( const std::tstring& text, COLORREF labelTextColor /*= CLR_DEFAULT*/, COLORREF labelBkColor /*= CLR_DEFAULT*/ ) implement

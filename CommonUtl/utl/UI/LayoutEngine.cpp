@@ -601,7 +601,7 @@ bool CLayoutEngine::CanClip( HWND hCtrl ) const
 CPaneLayoutEngine::CPaneLayoutEngine( int flags /*= s_defaultFlags*/ )
 	: CLayoutEngine( flags )
 	, m_pLayoutFrame( nullptr )
-	, m_pDlgLayout( nullptr )
+	, m_pMasterLayout( nullptr )
 {
 	m_layoutType = PaneLayout;
 }
@@ -615,7 +615,7 @@ void CPaneLayoutEngine::Reset( void ) override
 	__super::Reset();
 
 	m_pLayoutFrame = nullptr;
-	m_pDlgLayout = nullptr;
+	m_pMasterLayout = nullptr;
 }
 
 void CPaneLayoutEngine::GetClientRectangle( OUT CRect* pClientRect ) const override
@@ -633,11 +633,11 @@ void CPaneLayoutEngine::InitializePane( ui::ILayoutFrame* pLayoutFrame )
 	REQUIRE( !IsInitialized() );
 	ASSERT_PTR( pLayoutFrame );
 
-	m_pDialog = pLayoutFrame->GetDialog();
 	m_pLayoutFrame = pLayoutFrame;
+	__super::m_pDialog = pLayoutFrame->GetDialog();
 
-	if ( ui::ILayoutEngine* pDlgLayout = dynamic_cast<ui::ILayoutEngine*>( m_pDialog ) )
-		m_pDlgLayout = &pDlgLayout->GetLayoutEngine();
+	if ( ui::ILayoutEngine* pMasterLayout = dynamic_cast<ui::ILayoutEngine*>( m_pDialog ) )
+		m_pMasterLayout = &pMasterLayout->GetLayoutEngine();
 
 	ENSURE( ::IsWindow( m_pDialog->GetSafeHwnd() ) );
 	ENSURE( ui::IsDialogBox( m_pDialog->GetSafeHwnd() ) );
@@ -654,7 +654,7 @@ bool CPaneLayoutEngine::ShowPaneControls( bool show /*= true*/ )
 {
 	if ( !IsInitialized()										// called too early, defer for after initialization?
 		 || HasFlag( m_flags, InLayout )						// avoid changing control visibility while the dialog is in SetRedraw( FALSE ) mode!
-		 || ( m_pDlgLayout != nullptr && HasFlag( m_pDlgLayout->GetFlags(), InLayout ) ) )
+		 || ( m_pMasterLayout != nullptr && HasFlag( m_pMasterLayout->GetFlags(), InLayout ) ) )
 		return false;				// called too early, defer for after initialization
 
 	UINT changeCount = 0;

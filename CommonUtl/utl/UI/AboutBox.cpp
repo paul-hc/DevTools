@@ -65,6 +65,14 @@ namespace hlp
 			{ 1934, _T("Visual Studio 2022"), _T("VC++ 17.4") },
 			{ 1935, _T("Visual Studio 2022"), _T("VC++ 17.5") },
 
+			{ 1936, _T("Visual Studio 2022"), _T("VC++ 17.6") },
+			{ 1937, _T("Visual Studio 2022"), _T("VC++ 17.7") },
+			{ 1938, _T("Visual Studio 2022"), _T("VC++ 17.8") },
+			{ 1939, _T("Visual Studio 2022"), _T("VC++ 17.9") },
+			{ 1940, _T("Visual Studio 2022"), _T("VC++ 17.10") },
+
+			{ 1941, _T("Visual Studio 2022"), _T("VC++ 17.10+ (must update)") },
+
 			{ 9999, _T("Visual Studio ?? TODO..."), _T("VC++ ??") }
 		};
 

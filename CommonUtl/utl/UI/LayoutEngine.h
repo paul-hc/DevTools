@@ -145,7 +145,7 @@ private:
 	void StoreInitialPaneSize( void );
 private:
 	ui::ILayoutFrame* m_pLayoutFrame;	// not null for child layout engines
-	CLayoutEngine* m_pDlgLayout;		// the master layout engine for the dialog
+	CLayoutEngine* m_pMasterLayout;		// master layout engine for the dialog
 };
 
 
