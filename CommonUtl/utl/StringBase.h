@@ -645,7 +645,7 @@ namespace str
 			return false;
 
 		if ( pMoreSuffix != nullptr )
-			rOutText.replace( std::max( maxLength - str::GetLength( pMoreSuffix ), size_t(0) ), std::tstring::npos, pMoreSuffix );
+			rOutText.replace( std::max( (ptrdiff_t)maxLength - (ptrdiff_t)str::GetLength( pMoreSuffix ), ptrdiff_t(0) ), std::tstring::npos, pMoreSuffix );
 		else
 			rOutText.erase( maxLength, rOutText.length() - maxLength );
 
@@ -659,7 +659,7 @@ namespace str
 			return false;
 
 		if ( pMorePrefix != nullptr )
-			rOutText.replace( 0, rOutText.length() - std::max( maxLength - str::GetLength( pMorePrefix ), size_t(0) ), pMorePrefix );
+			rOutText.replace( 0, rOutText.length() - std::max( (ptrdiff_t)maxLength - (ptrdiff_t)str::GetLength( pMorePrefix ), ptrdiff_t(0) ), pMorePrefix );
 		else
 			rOutText.erase( 0, rOutText.length() - maxLength );
 
