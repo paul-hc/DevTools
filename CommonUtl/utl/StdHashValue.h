@@ -36,7 +36,7 @@ namespace utl
 	inline size_t GetPairHashValue( const std::pair<T, U>& p ) { return GetHashCombine( p.first, p.second ); }
 
 
-	struct CPairHasher
+	struct CPairHasher		// use with std::unordered_map<> for pairs
 	{
 		template< typename T, typename U >
 		inline size_t operator()( const std::pair<T, U>& p ) const

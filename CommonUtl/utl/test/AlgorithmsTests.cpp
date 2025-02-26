@@ -109,9 +109,56 @@ void CAlgorithmsTests::TestBuffer( void )
 	UT_TRACE( "(TODO: implement...)  " );
 }
 
-void CAlgorithmsTests::TestLookup( void )
+void CAlgorithmsTests::TestSetLookup( void )
 {
-	UT_TRACE( "(TODO: implement...)  " );
+	std::set<int> s;
+
+	s.insert( 10 );
+	s.insert( 20 );
+	s.insert( 30 );
+	s.insert( 40 );
+	s.insert( 50 );
+
+	std::set<int, std::string>::const_iterator nullEnd = s.end();
+
+	ASSERT_EQUAL( 10, *s.lower_bound( 9 ) );
+	ASSERT_EQUAL( 10, *s.upper_bound( 9 ) );
+
+	ASSERT_EQUAL( 10, *s.lower_bound( 10 ) );
+	ASSERT_EQUAL( 20, *s.upper_bound( 10 ) );
+
+
+	ASSERT_EQUAL( 50, *s.lower_bound( 50 ) );
+	ASSERT( nullEnd == s.upper_bound( 50 ) );
+
+	ASSERT( nullEnd == s.lower_bound( 51 ) );
+	ASSERT( nullEnd == s.upper_bound( 51 ) );
+}
+
+void CAlgorithmsTests::TestMapLookup( void )
+{
+	std::map<int, std::string> m;
+
+	m[10] = "a";
+	m[20] = "b";
+	m[30] = "c";
+	m[40] = "d";
+	m[50] = "e";
+
+	std::map<int, std::string>::const_iterator nullEnd = m.end();
+
+	ASSERT_EQUAL( 10, m.lower_bound( 9 )->first );		// TreeMap.floorKey   => std::map::lower_bound()?
+	ASSERT_EQUAL( 10, m.upper_bound( 9 )->first );		// TreeMap.ceilingKey => std::map::upper_bound()?
+
+	ASSERT_EQUAL( 10, m.lower_bound( 10 )->first );
+	ASSERT_EQUAL( 20, m.upper_bound( 10 )->first );
+
+
+	ASSERT_EQUAL( 50, m.lower_bound( 50 )->first );
+	ASSERT( nullEnd == m.upper_bound( 50 ) );
+
+	ASSERT( nullEnd == m.lower_bound( 51 ) );
+	ASSERT( nullEnd == m.upper_bound( 51 ) );
 }
 
 void CAlgorithmsTests::TestBinaryLookup( void )
@@ -534,7 +581,8 @@ void CAlgorithmsTests::Run( void )
 
 	RUN_TEST( TestBasicUtils );
 	RUN_TEST( TestBuffer );
-	RUN_TEST( TestLookup );
+	RUN_TEST( TestSetLookup );
+	RUN_TEST( TestMapLookup );
 	RUN_TEST( TestBinaryLookup );
 	RUN_TEST( TestIsOrdered );
 	RUN_TEST( TestQuery );

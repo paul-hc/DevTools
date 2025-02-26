@@ -21,7 +21,8 @@ private:
 
 	void TestBasicUtils( void );
 	void TestBuffer( void );
-	void TestLookup( void );
+	void TestSetLookup( void );
+	void TestMapLookup( void );
 	void TestBinaryLookup( void );
 	void TestIsOrdered( void );
 	void TestQuery( void );
