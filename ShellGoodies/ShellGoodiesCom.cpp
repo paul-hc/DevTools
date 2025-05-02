@@ -90,7 +90,7 @@ STDMETHODIMP CShellGoodiesCom::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 
 	TRACE( _T(" CShellGoodiesCom::QueryContextMenu(): flags=0x%X {%s}\n"), flags, CShellMenuController::GetTags_ContextMenuFlags().FormatKey( flags ).c_str() );
 
-	// res\ShellGoodiesCom.rgs: this shell extension registers itself for both "*" and "lnkfile" types as ContextMenuHandlers.
+	// res\ShellGoodiesCom.rgs: this shell extension registers itself for both "*", "lnkfile" and "Directory" types as ContextMenuHandlers.
 	//		http://microsoft.public.platformsdk.shell.narkive.com/yr1YoK9e/obtaining-selected-shortcut-lnk-files-inside-ishellextinit-initialize
 	//		https://stackoverflow.com/questions/21848694/windows-shell-extension-doesnt-give-exact-file-paths
 	//

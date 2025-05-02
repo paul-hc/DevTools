@@ -127,6 +127,12 @@ void CAlgorithmsTests::TestSetLookup( void )
 	ASSERT_EQUAL( 10, *s.lower_bound( 10 ) );
 	ASSERT_EQUAL( 20, *s.upper_bound( 10 ) );
 
+	ASSERT_EQUAL( 20, *s.lower_bound( 20 ) );
+	ASSERT_EQUAL( 30, *s.upper_bound( 20 ) );
+
+	ASSERT_EQUAL( 30, *s.lower_bound( 25 ) );
+	ASSERT_EQUAL( 30, *s.upper_bound( 25 ) );
+
 
 	ASSERT_EQUAL( 50, *s.lower_bound( 50 ) );
 	ASSERT( nullEnd == s.upper_bound( 50 ) );
