@@ -119,7 +119,7 @@ void CAlgorithmsTests::TestSetLookup( void )
 	s.insert( 40 );
 	s.insert( 50 );
 
-	std::set<int, std::string>::const_iterator nullEnd = s.end();
+	std::set<int>::const_iterator nullEnd = s.end();
 
 	ASSERT_EQUAL( 10, *s.lower_bound( 9 ) );
 	ASSERT_EQUAL( 10, *s.upper_bound( 9 ) );
