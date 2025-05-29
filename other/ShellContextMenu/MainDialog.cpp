@@ -2,14 +2,14 @@
 #include "stdafx.h"
 #include "MainDialog.h"
 #include "FileItemInfo.h"
-#include "utl/ContainerUtilities.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/Path.h"
 #include "utl/FileSystem.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ShellContextMenuHost.h"
 #include "utl/UI/ShellTypes.h"
-#include "utl/UI/Utilities.h"
+#include "utl/UI/MenuUtilities.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -41,7 +41,7 @@ const TCHAR CMainDialog::s_rootPath[] = _T("C:\\");
 
 CMainDialog::CMainDialog( void )
 	: CBaseMainDialog( IDD_MAIN_DIALOG )
-	, m_listViewMode( static_cast< ListViewMode >( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_listViewMode, ReportView ) ) )
+	, m_listViewMode( static_cast<ListViewMode>( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_listViewMode, ReportView ) ) )
 	, m_useCustomMenu( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useCustomMenu, false ) != FALSE )
 	, m_currDirPath( AfxGetApp()->GetProfileString( reg::section_dialog, reg::entry_currDirPath, s_rootPath ).GetString() )
 	, m_currDirImageIndex( -1 )
@@ -50,6 +50,7 @@ CMainDialog::CMainDialog( void )
 	RegisterCtrlLayout( layout::s_styles, COUNT_OF( layout::s_styles ) );
 	m_regSection = reg::section_dialog;
 	m_fileListCtrl.SetSection( reg::section_fileList );
+	m_fileListCtrl.SetTrackMenuTarget( this );
 
 	if ( !fs::IsValidDirectory( m_currDirPath.c_str() ) )
 		m_currDirPath = s_rootPath;
@@ -87,13 +88,13 @@ void CMainDialog::ReadDirectory( const std::tstring& dirPath )
 	QueryDirectoryItems( m_items, m_currDirPath );
 
 	m_fileListCtrl.SetItemCountEx( 0, LVSICF_NOINVALIDATEALL );
-	m_fileListCtrl.SetItemCountEx( static_cast< int >( m_items.size() ), LVSICF_NOINVALIDATEALL );
+	m_fileListCtrl.SetItemCountEx( static_cast<int>( m_items.size() ), LVSICF_NOINVALIDATEALL );
 
 	m_dirPathEdit.SetImageIndex( m_currDirImageIndex );
 	m_dirPathEdit.SetText( m_currDirPath );
 }
 
-void CMainDialog::QueryDirectoryItems( std::vector< CFileItemInfo* >& rItems, const std::tstring& dirPath )
+void CMainDialog::QueryDirectoryItems( std::vector<CFileItemInfo*>& rItems, const std::tstring& dirPath )
 {
 	if ( CFileItemInfo* pParentDirItem = CFileItemInfo::MakeParentDirItem( dirPath ) )		// not a root directory?
 		rItems.push_back( pParentDirItem );
@@ -101,7 +102,7 @@ void CMainDialog::QueryDirectoryItems( std::vector< CFileItemInfo* >& rItems, co
 	std::tstring dirSpecAll = path::Combine( dirPath.c_str(), _T("*.*") );
 
 	// add sub-directory items first, then append file items
-	std::vector< CFileItemInfo* > fileItems;
+	std::vector<CFileItemInfo*> fileItems;
 
 	CFileFind finder;
 	for ( BOOL found = finder.FindFile( dirSpecAll.c_str() ); found;  )
@@ -121,7 +122,7 @@ void CMainDialog::QueryDirectoryItems( std::vector< CFileItemInfo* >& rItems, co
 	rItems.insert( rItems.end(), fileItems.begin(), fileItems.end() );			// add file items after sub-directories
 }
 
-void CMainDialog::QuerySelectedFilePaths( std::vector< std::tstring >& rSelFilePaths ) const
+void CMainDialog::QuerySelectedFilePaths( std::vector<std::tstring>& rSelFilePaths ) const
 {
 	for ( POSITION pos = m_fileListCtrl.GetFirstSelectedItemPosition(); pos != NULL; )
 	{
@@ -130,7 +131,7 @@ void CMainDialog::QuerySelectedFilePaths( std::vector< std::tstring >& rSelFileP
 	}
 }
 
-int CMainDialog::TrackContextMenu( const std::vector< std::tstring >& selFilePaths, const CPoint& screenPos )
+int CMainDialog::TrackContextMenu( const std::vector<std::tstring>& selFilePaths, const CPoint& screenPos )
 {
 	CShellContextMenuHost contextMenu( this );
 	contextMenu.Reset( shell::MakeFilePathsContextMenu( selFilePaths, m_hWnd ) );
@@ -145,7 +146,7 @@ int CMainDialog::TrackContextMenu( const std::vector< std::tstring >& selFilePat
 				CMenu customPopup;
 
 				customPopup.CreatePopupMenu();
-				ui::CopyMenuItems( customPopup, 0, *pViewPopup );				// copy View popup items so the the original items won't get deleted
+				ui::CopyMenuItems( &customPopup, 0, pViewPopup );				// copy View popup items so the the original items won't get deleted
 
 				customPopup.CheckMenuRadioItem( IDM_VIEW_LARGEICONS, IDM_VIEW_REPORT, IDM_VIEW_LARGEICONS + m_listViewMode, MF_BYCOMMAND );
 				customPopup.CheckMenuItem( IDM_VIEW_USE_CUSTOM_MENU, m_useCustomMenu ? MF_CHECKED : MF_UNCHECKED );
@@ -163,7 +164,7 @@ int CMainDialog::TrackContextMenu( const std::vector< std::tstring >& selFilePat
 	return 0;
 }
 
-bool CMainDialog::InvokeDefaultVerb( const std::vector< std::tstring >& selFilePaths )
+bool CMainDialog::InvokeDefaultVerb( const std::vector<std::tstring>& selFilePaths )
 {
 	CShellContextMenuHost contextMenu( this );
 	contextMenu.Reset( shell::MakeFilePathsContextMenu( selFilePaths, m_hWnd ) );
@@ -220,7 +221,7 @@ void CMainDialog::OnLvnRClick_FileList( NMHDR* pNmHdr, LRESULT* pResult )
 	NMITEMACTIVATE* pNmItemActivate = (NMITEMACTIVATE*)pNmHdr;
 	*pResult = 0;
 
-	std::vector< std::tstring > selFilePaths;
+	std::vector<std::tstring> selFilePaths;
 	QuerySelectedFilePaths( selFilePaths );
 
 	if ( !selFilePaths.empty() )
@@ -245,7 +246,7 @@ void CMainDialog::OnLvnDblclk_FileList( NMHDR* pNmHdr, LRESULT* pResult )
 			ReadDirectory( pItem->m_fullPath );
 		else
 		{
-			std::vector< std::tstring > selFilePaths;
+			std::vector<std::tstring> selFilePaths;
 			QuerySelectedFilePaths( selFilePaths );
 
 			if ( !selFilePaths.empty() )
@@ -287,7 +288,7 @@ void CMainDialog::OnUpdateViewMode( CCmdUI* pCmdUI )
 
 void CMainDialog::OnViewMode( UINT cmdId )
 {
-	SetListViewMode( static_cast< ListViewMode >( cmdId - IDM_VIEW_LARGEICONS ) );
+	SetListViewMode( static_cast<ListViewMode>( cmdId - IDM_VIEW_LARGEICONS ) );
 }
 
 void CMainDialog::OnUseCustomMenu( void )

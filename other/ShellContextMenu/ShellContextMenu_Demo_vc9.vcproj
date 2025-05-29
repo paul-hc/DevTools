@@ -4,7 +4,7 @@
 	Version="9.00"
 	Name="ShellContextMenu_Demo"
 	ProjectGUID="{780E0B78-A578-43C1-89EF-7907E8D83F3B}"
-	RootNamespace="ShellContextMenu_Demo"
+	RootNamespace="ShellContextMenu_Demo_vc9"
 	Keyword="MFCProj"
 	TargetFrameworkVersion="0"
 	>

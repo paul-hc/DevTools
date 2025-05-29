@@ -3,7 +3,7 @@
 #include "utl/UI/BaseApp.h"
 
 
-class CApplication : public CBaseApp< CWinApp >
+class CApplication : public CBaseApp<CWinApp>
 {
 public:
 	CApplication( void );

@@ -25,18 +25,18 @@ public:
 private:
 	void ReadDirectory( const std::tstring& dirPath );
 
-	void QuerySelectedFilePaths( std::vector< std::tstring >& rSelFilePaths ) const;
-	int TrackContextMenu( const std::vector< std::tstring >& selFilePaths, const CPoint& screenPos );
-	bool InvokeDefaultVerb( const std::vector< std::tstring >& selFilePaths );
+	void QuerySelectedFilePaths( std::vector<std::tstring>& rSelFilePaths ) const;
+	int TrackContextMenu( const std::vector<std::tstring>& selFilePaths, const CPoint& screenPos );
+	bool InvokeDefaultVerb( const std::vector<std::tstring>& selFilePaths );
 
-	static void QueryDirectoryItems( std::vector< CFileItemInfo* >& rItems, const std::tstring& dirPath );
+	static void QueryDirectoryItems( std::vector<CFileItemInfo*>& rItems, const std::tstring& dirPath );
 private:
 	ListViewMode m_listViewMode;
 	bool m_useCustomMenu;
 	std::tstring m_currDirPath;
 	int m_currDirImageIndex;
 
-	std::vector< CFileItemInfo* > m_items;
+	std::vector<CFileItemInfo*> m_items;
 	static const TCHAR s_rootPath[];
 private:
 	// enum { IDD = IDD_MAIN_DIALOG };

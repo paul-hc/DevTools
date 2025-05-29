@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShellContextMenu_Demo", "ShellContextMenu_Demo.vcproj", "{780E0B78-A578-43C1-89EF-7907E8D83F3B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShellContextMenu_Demo", "ShellContextMenu_Demo_vc9.vcproj", "{780E0B78-A578-43C1-89EF-7907E8D83F3B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{41170314-6427-4CBA-B589-0EF552648693} = {41170314-6427-4CBA-B589-0EF552648693}
 		{8B2AA3E4-1B23-48B6-AD2B-838FF7A5D89C} = {8B2AA3E4-1B23-48B6-AD2B-838FF7A5D89C}

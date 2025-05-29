@@ -14,7 +14,7 @@
 CApplication theApp;
 
 CApplication::CApplication( void )
-	: CBaseApp< CWinApp >()
+	: CBaseApp<CWinApp>()
 {
 	m_appRegistryKeyName += _T("\\other");
 	StoreAppNameSuffix( str::Format( _T(" [%d-bit]"), utl::GetPlatformBits() ) );		// identify the primary target platform
@@ -22,7 +22,7 @@ CApplication::CApplication( void )
 
 BOOL CApplication::InitInstance()
 {
-	if ( !CBaseApp< CWinApp >::InitInstance() )
+	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
 
 	CMainDialog mainDialog;
@@ -37,7 +37,7 @@ BOOL CApplication::InitInstance()
 
 // command handlers
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 	ON_COMMAND( ID_APP_ABOUT, OnAppAbout )
 END_MESSAGE_MAP()
 
