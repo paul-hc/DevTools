@@ -228,6 +228,8 @@ void CMainDialog::OnLvnRClick_FileList( NMHDR* pNmHdr, LRESULT* pResult )
 
 void CMainDialog::OnLvnDblclk_FileList( NMHDR* pNmHdr, LRESULT* pResult )
 {
+	pNmHdr, pResult;
+
 	int itemIndex = m_fileListCtrl.GetNextItem( -1, LVNI_FOCUSED );
 	if ( itemIndex != -1 )
 	{

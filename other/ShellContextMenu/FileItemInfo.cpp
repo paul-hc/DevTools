@@ -97,7 +97,7 @@ void CFileItemInfo::CDetails::LazyInit( const CFileItemInfo* pItem )
 
 std::tstring CFileItemInfo::CDetails::FormatAttributes( DWORD fileAttributes )
 {
-	static const struct { DWORD m_attribute; const TCHAR m_char; } s_attrTags[] =
+	static const struct { DWORD m_attribute; TCHAR m_char; } s_attrTags[] =
 	{
 		{ FILE_ATTRIBUTE_ARCHIVE, _T('A') },
 		{ FILE_ATTRIBUTE_HIDDEN, _T('H') },

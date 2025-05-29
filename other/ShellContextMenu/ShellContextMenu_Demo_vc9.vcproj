@@ -57,7 +57,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="pch.h"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -144,7 +144,7 @@
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="pch.h"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
 			/>
