@@ -19,7 +19,7 @@
 		<Configuration
 			Name="DebugU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -51,6 +51,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -99,7 +100,7 @@
 		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -134,6 +135,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -214,7 +216,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\stdafx.cpp"
+				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
 					Name="DebugU|Win32"
@@ -234,7 +236,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\stdafx.h"
+				RelativePath=".\pch.h"
 				>
 			</File>
 		</Filter>
