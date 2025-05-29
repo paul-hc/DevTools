@@ -210,6 +210,9 @@ public:
 	bool GetAcceptDropFiles( void ) const { return HasFlag( m_optionFlags, AcceptDropFiles ); }
 	void SetAcceptDropFiles( bool acceptDropFiles = true ) { SetOptionFlag( AcceptDropFiles, acceptDropFiles ); }
 
+	bool GetUseExternalImages( void ) const { return HasFlag( m_optionFlags, UseExternalImages ); }
+	void SetUseExternalImages( bool useSmallImages = true, bool useLargeImages = true ) { SetOptionFlag( UseExternalImagesSmall, useSmallImages ); SetOptionFlag( UseExternalImagesLarge, useLargeImages ); }
+
 	bool IsCommandFrame( void ) const { return HasFlag( m_optionFlags, CommandFrame ); }
 	void SetCommandFrame( bool isCommandFrame = true ) { SetTrackMenuTarget( this ); SetOptionFlag( CommandFrame, isCommandFrame ); }
 	void SetFrameEditor( ui::ICommandFrame* pFrameEditor ) { m_pFrameEditor = pFrameEditor; SetCommandFrame( m_pFrameEditor != nullptr ); }
@@ -623,7 +626,10 @@ private:
 		AcceptDropFiles				= BIT_FLAG( 3 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
 		CommandFrame				= BIT_FLAG( 4 ),		// list is the command target FIRST, also owner of the paired toolbar (for multiple lists in the same dialog, that have similar commands) - optionally may use m_pFrameEditor
 		HighlightTextDiffsFrame		= BIT_FLAG( 5 ),		// highlight text differences with a filled frame
-		ToggleCheckSelItems			= BIT_FLAG( 6 )			// multi-selection: toggle checked state for the selected items
+		ToggleCheckSelItems			= BIT_FLAG( 6 ),		// multi-selection: toggle checked state for the selected items
+		UseExternalImagesSmall		= BIT_FLAG( 7 ),		// externally managed small images
+		UseExternalImagesLarge		= BIT_FLAG( 8 ),		// externally managed large images
+			UseExternalImages		= UseExternalImagesSmall | UseExternalImagesLarge
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );

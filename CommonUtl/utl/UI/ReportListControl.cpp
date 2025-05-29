@@ -2436,7 +2436,17 @@ void CReportListControl::OnListViewMode( UINT cmdId )
 void CReportListControl::OnUpdateListViewMode( CCmdUI* pCmdUI )
 {
 	DWORD viewMode = lv::CmdIdToListViewMode( pCmdUI->m_nID );
-	bool modeHasImages = ( LV_VIEW_ICON == viewMode ? m_pLargeImageList : m_pImageList ) != nullptr;
+	bool modeHasImages = false;
+
+	switch ( viewMode )
+	{
+		case LV_VIEW_ICON:
+		case LV_VIEW_TILE:
+			modeHasImages = m_pLargeImageList != nullptr || HasFlag( m_optionFlags, UseExternalImagesLarge );
+			break;
+		default:
+			modeHasImages = m_pImageList != nullptr || HasFlag( m_optionFlags, UseExternalImagesSmall );
+	}
 
 	pCmdUI->Enable( modeHasImages );
 	ui::SetRadio( pCmdUI, viewMode == GetView() );

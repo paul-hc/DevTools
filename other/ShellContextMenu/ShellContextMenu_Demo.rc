@@ -87,10 +87,12 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Large Icons",                IDM_VIEW_LARGEICONS
-        MENUITEM "&Small Icons",                IDM_VIEW_SMALLICONS
-        MENUITEM "&List",                       IDM_VIEW_LIST
-        MENUITEM "&Report",                     IDM_VIEW_REPORT
+        MENUITEM "&Large Icons",                ID_LIST_VIEW_ICON_LARGE
+        MENUITEM "&Small Icons",                ID_LIST_VIEW_ICON_SMALL
+        MENUITEM "&List",                       ID_LIST_VIEW_LIST
+        MENUITEM "&Report",                     ID_LIST_VIEW_REPORT
+        MENUITEM SEPARATOR
+        MENUITEM "Tile",                        ID_LIST_VIEW_TILE
         MENUITEM SEPARATOR
         MENUITEM "&Use Custom Menu\t(add to shell menu)", IDM_VIEW_USE_CUSTOM_MENU
     END

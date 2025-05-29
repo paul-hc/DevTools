@@ -18,7 +18,6 @@ public:
 	virtual ~CMainDialog();
 public:
 	ListViewMode GetViewMode( void ) const { return m_listViewMode; }
-	void SetListViewMode( ListViewMode listViewMode );
 
 	bool UseCustomMenu( void ) const { return m_useCustomMenu; }
 	void SetUseCustomMenu( bool useCustomMenu = true ) { m_useCustomMenu = useCustomMenu; }
@@ -46,6 +45,8 @@ private:
 	CReportListControl m_fileListCtrl;		// virtual list control
 
 	// generated stuff
+public:
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
@@ -53,8 +54,6 @@ protected:
 	afx_msg void OnLvnRClick_FileList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnDblclk_FileList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnGetDispInfoFileList( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnViewMode( UINT cmdId );
-	afx_msg void OnUpdateViewMode( CCmdUI* pCmdUI );
 	afx_msg void OnUseCustomMenu( void );
 	afx_msg void OnUpdateUseCustomMenu( CCmdUI* pCmdUI );
 

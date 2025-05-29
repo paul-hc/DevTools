@@ -50,6 +50,7 @@ CMainDialog::CMainDialog( void )
 	RegisterCtrlLayout( layout::s_styles, COUNT_OF( layout::s_styles ) );
 	m_regSection = reg::section_dialog;
 	m_fileListCtrl.SetSection( reg::section_fileList );
+	m_fileListCtrl.SetUseExternalImages();
 	m_fileListCtrl.SetTrackMenuTarget( this );
 
 	if ( !fs::IsValidDirectory( m_currDirPath.c_str() ) )
@@ -59,24 +60,6 @@ CMainDialog::CMainDialog( void )
 CMainDialog::~CMainDialog()
 {
 	utl::ClearOwningContainer( m_items );
-}
-
-void CMainDialog::SetListViewMode( ListViewMode listViewMode )
-{
-	int viewMode = LV_VIEW_DETAILS;
-
-	m_listViewMode = listViewMode;
-	switch ( m_listViewMode )
-	{
-		case LargeIconView:	ModifyStyle( LVS_TYPEMASK, LVS_ICON ); viewMode = LV_VIEW_ICON; break;
-		case SmallIconView:	ModifyStyle( LVS_TYPEMASK, LVS_SMALLICON ); viewMode = LV_VIEW_SMALLICON; break;
-		case ListView:		ModifyStyle( LVS_TYPEMASK, LVS_LIST ); viewMode = LV_VIEW_LIST; break;
-		default:
-			ASSERT( false );
-		case ReportView:	ModifyStyle( LVS_TYPEMASK, LVS_REPORT ); viewMode = LV_VIEW_DETAILS; break;
-	}
-
-	m_fileListCtrl.SetView( viewMode );
 }
 
 void CMainDialog::ReadDirectory( const std::tstring& dirPath )
@@ -148,7 +131,6 @@ int CMainDialog::TrackContextMenu( const std::vector<std::tstring>& selFilePaths
 				customPopup.CreatePopupMenu();
 				ui::CopyMenuItems( &customPopup, 0, pViewPopup );				// copy View popup items so the the original items won't get deleted
 
-				customPopup.CheckMenuRadioItem( IDM_VIEW_LARGEICONS, IDM_VIEW_REPORT, IDM_VIEW_LARGEICONS + m_listViewMode, MF_BYCOMMAND );
 				customPopup.CheckMenuItem( IDM_VIEW_USE_CUSTOM_MENU, m_useCustomMenu ? MF_CHECKED : MF_UNCHECKED );
 
 				CMenu* pContextPopup = contextMenu.GetPopupMenu();
@@ -170,6 +152,17 @@ bool CMainDialog::InvokeDefaultVerb( const std::vector<std::tstring>& selFilePat
 	contextMenu.Reset( shell::MakeFilePathsContextMenu( selFilePaths, m_hWnd ) );
 
 	return contextMenu.InvokeDefaultVerb();
+}
+
+BOOL CMainDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( m_fileListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return TRUE;			// handled by the list
+
+	if ( __super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return TRUE;			// handled by this frame
+
+	return FALSE;
 }
 
 void CMainDialog::DoDataExchange( CDataExchange* pDX )
@@ -201,8 +194,6 @@ BEGIN_MESSAGE_MAP( CMainDialog, CBaseMainDialog )
 	ON_NOTIFY( NM_RCLICK, IDC_FILE_LIST, OnLvnRClick_FileList )
 	ON_NOTIFY( NM_DBLCLK, IDC_FILE_LIST, OnLvnDblclk_FileList )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FILE_LIST, OnGetDispInfoFileList )
-	ON_COMMAND_RANGE( IDM_VIEW_LARGEICONS, IDM_VIEW_REPORT, OnViewMode )
-	ON_UPDATE_COMMAND_UI_RANGE( IDM_VIEW_LARGEICONS, IDM_VIEW_REPORT, OnUpdateViewMode )
 	ON_COMMAND( IDM_VIEW_USE_CUSTOM_MENU, OnUseCustomMenu )
 	ON_UPDATE_COMMAND_UI( IDM_VIEW_USE_CUSTOM_MENU, OnUpdateUseCustomMenu )
 END_MESSAGE_MAP()
@@ -276,19 +267,6 @@ void CMainDialog::OnGetDispInfoFileList( NMHDR* pNmHdr, LRESULT* pResult )
 			case LastModified:	_tcscpy( pLvItem->pszText, itemDetails.m_modifiedDateText.c_str() ); break;
 			case Attributes:	_tcscpy( pLvItem->pszText, itemDetails.m_fileAttributesText.c_str() ); break;
 		}
-}
-
-void CMainDialog::OnUpdateViewMode( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable();
-
-	UINT selCmdId = IDM_VIEW_LARGEICONS + GetViewMode();
-	ui::SetRadio( pCmdUI, selCmdId == pCmdUI->m_nID );
-}
-
-void CMainDialog::OnViewMode( UINT cmdId )
-{
-	SetListViewMode( static_cast<ListViewMode>( cmdId - IDM_VIEW_LARGEICONS ) );
 }
 
 void CMainDialog::OnUseCustomMenu( void )

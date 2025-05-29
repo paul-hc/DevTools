@@ -7,10 +7,6 @@
 #define IDD_MAIN_DIALOG                 130
 #define IDC_FILE_LIST                   1001
 #define IDC_DIR_PATH_EDIT               1002
-#define IDM_VIEW_LARGEICONS             32771
-#define IDM_VIEW_SMALLICONS             32772
-#define IDM_VIEW_LIST                   32773
-#define IDM_VIEW_REPORT                 32774
 #define IDM_VIEW_USE_CUSTOM_MENU        32775
 
 // Next default values for new objects
