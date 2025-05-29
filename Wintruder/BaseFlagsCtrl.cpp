@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BaseFlagsCtrl.h"
 #include "resource.h"
 #include "utl/StringUtilities.h"

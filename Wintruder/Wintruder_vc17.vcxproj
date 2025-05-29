@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugU|Win32">
+      <Configuration>DebugU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|Win32">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugU|x64">
+      <Configuration>DebugU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|x64">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{91F95A2B-459B-40D7-5F31-F3145F1B2D64}</ProjectGuid>
+    <Keyword>MFCProj</Keyword>
+    <RootNamespace>Wintruder_vc17</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Wintruder</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <PreBuildEvent>
+      <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Stamping build time in resource file...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>.;$(UTL_ADDITIONAL_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);$(UTL_ADDITIONAL_RES_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <PreBuildEvent>
+      <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Stamping build time in resource file...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="AppService.h" />
+    <ClInclude Include="BaseFlagsCtrl.h" />
+    <ClInclude Include="DetailBasePage.h" />
+    <ClInclude Include="EditCaptionPage.h" />
+    <ClInclude Include="EditFlagsBasePage.h" />
+    <ClInclude Include="EditIdentPage.h" />
+    <ClInclude Include="EditPlacementPage.h" />
+    <ClInclude Include="EditStyleExPage.h" />
+    <ClInclude Include="EditStylePage.h" />
+    <ClInclude Include="FindWndDialog.h" />
+    <ClInclude Include="FlagsEdit.h" />
+    <ClInclude Include="FlagsListCtrl.h" />
+    <ClInclude Include="FlagsListPage.h" />
+    <ClInclude Include="GeneralPage.h" />
+    <ClInclude Include="MainDialog.h" />
+    <ClInclude Include="Observers.h" />
+    <ClInclude Include="Options.h" />
+    <ClInclude Include="OptionsPage.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="PromptDialog.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="TrackWndPickerStatic.h" />
+    <ClInclude Include="TreeWndPage.h" />
+    <ClInclude Include="WndInfoEdit.h" />
+    <ClInclude Include="wnd\FlagRepository.h" />
+    <ClInclude Include="wnd\FlagStore.h" />
+    <ClInclude Include="wnd\ValueRepository.h" />
+    <ClInclude Include="wnd\WindowClass.h" />
+    <ClInclude Include="wnd\WindowInfoStore.h" />
+    <ClInclude Include="wnd\WndEnumerator.h" />
+    <ClInclude Include="wnd\WndFinder.h" />
+    <ClInclude Include="wnd\WndHighlighter.h" />
+    <ClInclude Include="wnd\WndImageRepository.h" />
+    <ClInclude Include="wnd\WndSearchPattern.h" />
+    <ClInclude Include="wnd\WndSpot.h" />
+    <ClInclude Include="wnd\WndUtils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="AppService.cpp" />
+    <ClCompile Include="BaseFlagsCtrl.cpp" />
+    <ClCompile Include="DetailBasePage.cpp" />
+    <ClCompile Include="EditCaptionPage.cpp" />
+    <ClCompile Include="EditFlagsBasePage.cpp" />
+    <ClCompile Include="EditIdentPage.cpp" />
+    <ClCompile Include="EditPlacementPage.cpp" />
+    <ClCompile Include="EditStyleExPage.cpp" />
+    <ClCompile Include="EditStylePage.cpp" />
+    <ClCompile Include="FindWndDialog.cpp" />
+    <ClCompile Include="FlagsEdit.cpp" />
+    <ClCompile Include="FlagsListCtrl.cpp" />
+    <ClCompile Include="FlagsListPage.cpp" />
+    <ClCompile Include="GeneralPage.cpp" />
+    <ClCompile Include="MainDialog.cpp" />
+    <ClCompile Include="Observers.cpp" />
+    <ClCompile Include="Options.cpp" />
+    <ClCompile Include="OptionsPage.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PromptDialog.cpp" />
+    <ClCompile Include="TrackWndPickerStatic.cpp" />
+    <ClCompile Include="TreeWndPage.cpp" />
+    <ClCompile Include="WndInfoEdit.cpp" />
+    <ClCompile Include="wnd\FlagRepository.cpp" />
+    <ClCompile Include="wnd\FlagStore.cpp" />
+    <ClCompile Include="wnd\ValueRepository.cpp" />
+    <ClCompile Include="wnd\WindowClass.cpp" />
+    <ClCompile Include="wnd\WindowInfoStore.cpp" />
+    <ClCompile Include="wnd\WndEnumerator.cpp" />
+    <ClCompile Include="wnd\WndFinder.cpp" />
+    <ClCompile Include="wnd\WndHighlighter.cpp" />
+    <ClCompile Include="wnd\WndImageRepository.cpp" />
+    <ClCompile Include="wnd\WndSearchPattern.cpp" />
+    <ClCompile Include="wnd\WndSpot.cpp" />
+    <ClCompile Include="wnd\WndUtils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Wintruder.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\ImageStrip.bmp" />
+    <Image Include="res\ImageStrip.png" />
+    <Image Include="res\Wintruder.ico" />
+    <Image Include="res\WintruderSmall.ico" />
+    <Image Include="res\WndTypesStrip.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Move.cur" />
+    <None Include="res\SizeBottomRight.cur" />
+    <None Include="res\SizeTopLeft.cur" />
+    <None Include="res\WindowPointer.cur" />
+    <None Include="res\Wintruder.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtl\utl\UI\UTL_UI_vc17.vcxproj">
+      <Project>{ced87d7e-e07c-4158-bcdb-d3dcf1acf42c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonUtl\utl\UTL_BASE_vc17.vcxproj">
+      <Project>{bd40f5cd-069f-428f-8e05-ba1b85940a9c}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

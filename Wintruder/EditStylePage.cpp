@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "EditStylePage.h"
 #include "resource.h"
 #include "wnd/FlagRepository.h"

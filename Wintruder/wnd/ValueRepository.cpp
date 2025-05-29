@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ValueRepository.h"
 #include "utl/ContainerOwnership.h"
 
@@ -9,7 +9,7 @@
 
 
 #define VALUE_INFO( value ) { static_cast<short>( value ), _T(#value), NULL }
-#define MFC_VALUE_INFO( value ) { static_cast<unsigned short>( value ), _T(#value), NULL }
+#define MFC_VALUE_INFO( value ) { (short)static_cast<unsigned short>( value ), _T(#value), NULL }
 
 
 // IDENTIFIER DEFINITIONS
@@ -613,8 +613,10 @@ namespace ident
 			// OLE control standard components
 			VALUE_INFO( AFX_IDD_PROPPAGE_COLOR ),
 			VALUE_INFO( AFX_IDD_PROPPAGE_FONT ),
-			VALUE_INFO( AFX_IDD_PROPPAGE_PICTURE ),
-			VALUE_INFO( AFX_IDB_TRUETYPE )
+			VALUE_INFO( AFX_IDD_PROPPAGE_PICTURE )
+		#if _MSC_VER <= 1500	// MSVC++ 9.0 (Visual Studio 2008)
+			, VALUE_INFO( AFX_IDB_TRUETYPE )
+		#endif
 		};
 	}
 }

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WindowInfoStore.h"
 #include "WndUtils.h"
 #include "AppService.h"

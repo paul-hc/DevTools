@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WndFinder.h"
 #include "WndEnumerator.h"
 #include "WndSearchPattern.h"

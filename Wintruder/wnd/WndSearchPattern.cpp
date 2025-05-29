@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WndSearchPattern.h"
 #include "WindowClass.h"
 #include "wnd/WndUtils.h"

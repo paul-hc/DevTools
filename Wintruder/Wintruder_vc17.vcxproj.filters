@@ -1,0 +1,287 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd;cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\wnd">
+      <UniqueIdentifier>{7121db88-1708-4ffc-8a99-33d40240afc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Controls">
+      <UniqueIdentifier>{f583e15d-6f7f-414b-b587-0eb92d13d590}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Detail Pages">
+      <UniqueIdentifier>{bedaa6ef-b17c-4b4e-8dcd-865efb5ff173}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Top Pages">
+      <UniqueIdentifier>{9cfb663d-dfb9-433e-91ce-34ef1ff09090}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\FlagRepository.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\FlagStore.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\ValueRepository.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WindowClass.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WindowInfoStore.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WndEnumerator.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WndFinder.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WndHighlighter.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WndImageRepository.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WndSearchPattern.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WndSpot.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WndUtils.h">
+      <Filter>Source Files\wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFlagsCtrl.h">
+      <Filter>Source Files\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="FlagsEdit.h">
+      <Filter>Source Files\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="FlagsListCtrl.h">
+      <Filter>Source Files\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackWndPickerStatic.h">
+      <Filter>Source Files\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="WndInfoEdit.h">
+      <Filter>Source Files\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DetailBasePage.h">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="EditCaptionPage.h">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="EditFlagsBasePage.h">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="EditIdentPage.h">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="EditPlacementPage.h">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="EditStyleExPage.h">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="EditStylePage.h">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="FlagsListPage.h">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneralPage.h">
+      <Filter>Source Files\Top Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionsPage.h">
+      <Filter>Source Files\Top Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeWndPage.h">
+      <Filter>Source Files\Top Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AppService.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FindWndDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Observers.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Options.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PromptDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="wnd\FlagRepository.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\FlagStore.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\ValueRepository.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WindowClass.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WindowInfoStore.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WndEnumerator.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WndFinder.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WndHighlighter.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WndImageRepository.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WndSearchPattern.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WndSpot.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WndUtils.cpp">
+      <Filter>Source Files\wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseFlagsCtrl.cpp">
+      <Filter>Source Files\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="FlagsEdit.cpp">
+      <Filter>Source Files\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="FlagsListCtrl.cpp">
+      <Filter>Source Files\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackWndPickerStatic.cpp">
+      <Filter>Source Files\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="WndInfoEdit.cpp">
+      <Filter>Source Files\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="DetailBasePage.cpp">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="EditCaptionPage.cpp">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="EditFlagsBasePage.cpp">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="EditIdentPage.cpp">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="EditPlacementPage.cpp">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="EditStyleExPage.cpp">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="EditStylePage.cpp">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="FlagsListPage.cpp">
+      <Filter>Source Files\Detail Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneralPage.cpp">
+      <Filter>Source Files\Top Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsPage.cpp">
+      <Filter>Source Files\Top Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeWndPage.cpp">
+      <Filter>Source Files\Top Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AppService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FindWndDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Observers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Options.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PromptDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Wintruder.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\WintruderSmall.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Wintruder.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ImageStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ImageStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\WndTypesStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Wintruder.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Move.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\SizeBottomRight.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\SizeTopLeft.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\WindowPointer.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "OptionsPage.h"
 #include "AppService.h"
 #include "MainDialog.h"

@@ -54,6 +54,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
@@ -137,6 +138,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -221,6 +223,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -307,6 +310,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -414,15 +418,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PromptDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PromptDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.cpp"
+				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
 					Name="DebugU|Win32"
@@ -458,7 +454,15 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\stdafx.h"
+				RelativePath=".\pch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PromptDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PromptDialog.h"
 				>
 			</File>
 			<Filter

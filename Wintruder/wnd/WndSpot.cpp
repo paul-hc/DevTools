@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WndSpot.h"
 #include "utl/UI/WndUtils.h"
 

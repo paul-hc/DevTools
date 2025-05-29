@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FlagsEdit.h"
 #include "resource.h"
 #include "utl/TextClipboard.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WndImageRepository.h"
 #include "WindowClass.h"
 #include "resource.h"

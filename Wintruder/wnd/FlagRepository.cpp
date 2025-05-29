@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FlagRepository.h"
 #include "utl/ContainerOwnership.h"
 #include <unordered_map>
@@ -23,8 +23,13 @@
 #define FLAG( value, mask ) { value, mask, CFlagInfo::Editable, _T(#value) }
 #define FLAG_READONLY( value, mask ) { value, mask, CFlagInfo::ReadOnly, _T(#value) }
 #define FLAG_NAME( value, mask, name ) { value, mask, CFlagInfo::Editable, name }
-#define FLAG_ALIASES( value, mask, aliases ) { value, mask, CFlagInfo::Editable, _T(#value)_T("/")_T(#aliases) }
 #define GROUP_SEPARATOR( pName ) { 0, 0, CFlagInfo::Separator, pName }
+
+#ifdef IS_CPP_11
+	#define FLAG_ALIASES( value, mask, aliases ) { value, mask, CFlagInfo::Editable, _T(#value"/"#aliases) }
+#else
+	#define FLAG_ALIASES( value, mask, aliases ) { value, mask, CFlagInfo::Editable, _T(#value)_T("/")_T(#aliases) }
+#endif
 
 
 #define BAR_COMMCTRL_FLAGS\

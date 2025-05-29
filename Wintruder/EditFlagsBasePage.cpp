@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "EditFlagsBasePage.h"
 #include "FlagsListPage.h"
 #include "PromptDialog.h"

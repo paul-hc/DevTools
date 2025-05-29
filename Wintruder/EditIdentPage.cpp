@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "EditIdentPage.h"
 #include "AppService.h"
 #include "wnd/ValueRepository.h"

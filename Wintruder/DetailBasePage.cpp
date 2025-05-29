@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "DetailBasePage.h"
 #include "AppService.h"
 #include "utl/UI/LayoutBasePropertySheet.h"

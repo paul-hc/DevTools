@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Application.h"
 #include "AppService.h"
 #include "MainDialog.h"
@@ -17,7 +17,7 @@
 #include "utl/UI/BaseApp.hxx"
 
 
-static const ui::CCmdAlias cmdAliases[] =
+static const ui::CCmdAlias s_cmdAliases[] =
 {
 	{ CM_REFRESH, ID_REFRESH },
 	{ CM_MOVE_WINDOW_UP, ID_SHUTTLE_UP },
@@ -67,7 +67,7 @@ BOOL CApplication::InitInstance( void )
 	m_sharedAccel.Load( IDR_MAIN_SHARED_ACCEL );
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
-	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( cmdAliases ) );
+	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
 
 	CBaseMainDialog::ParseCommandLine( __argc, __targv );
 

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WndInfoEdit.h"
 #include "AppService.h"
 #include "wnd/WndImageRepository.h"

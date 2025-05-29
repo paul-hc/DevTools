@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "PromptDialog.h"
 #include "AppService.h"
 #include "resource.h"

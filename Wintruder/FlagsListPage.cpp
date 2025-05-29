@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FlagsListPage.h"
 #include "FlagsListCtrl.h"
 #include "AppService.h"

@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WindowClass.h"
 #include "WndUtils.h"
 #include "utl/StringUtilities.h"
