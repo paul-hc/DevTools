@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "FileItemInfo.h"
 #include "utl/FileSystem.h"
 #include "utl/UI/ShellTypes.h"

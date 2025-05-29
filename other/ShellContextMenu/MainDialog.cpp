@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "MainDialog.h"
 #include "FileItemInfo.h"
 #include "utl/ContainerOwnership.h"
