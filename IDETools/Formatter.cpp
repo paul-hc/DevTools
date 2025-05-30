@@ -78,13 +78,13 @@ namespace code
 	{
 		resetInternalState();
 
-		std::vector< CString > linesOfCode, lineEnds;
+		std::vector<CString> linesOfCode, lineEnds;
 
 		// break the code into lines
 		splitMultipleLines( linesOfCode, lineEnds, pCodeText );
 
 		// format each line
-		for ( std::vector< CString >::iterator itLineOfCode = linesOfCode.begin(); itLineOfCode != linesOfCode.end(); ++itLineOfCode )
+		for ( std::vector<CString>::iterator itLineOfCode = linesOfCode.begin(); itLineOfCode != linesOfCode.end(); ++itLineOfCode )
 			*itLineOfCode = formatLineOfCode( *itLineOfCode, protectLeadingWhiteSpace, justAdjustWhiteSpace );
 
 		return unsplitMultipleLines( linesOfCode, lineEnds );
@@ -136,7 +136,7 @@ namespace code
 
 		// zero-based index
 		int maxEditorColIndex = std::max( maxColumn != UINT_MAX ? (int)maxColumn : (int)app::GetModuleSession().m_splitMaxColumn, 1 ) - 1;
-		std::vector< CString > brokenLines;
+		std::vector<CString> brokenLines;
 
 		brokenLines.push_back( makeNormalizedFormattedPrototype( pCodeText ) );
 
@@ -145,7 +145,7 @@ namespace code
 				breakToken.m_end = doSplitArgumentList( brokenLines, breakToken, maxEditorColIndex );
 
 		if ( m_useTabs )
-			for ( std::vector< CString >::iterator itLine = brokenLines.begin(); itLine != brokenLines.end(); ++itLine )
+			for ( std::vector<CString>::iterator itLine = brokenLines.begin(); itLine != brokenLines.end(); ++itLine )
 				*itLine = tabifyLineOfCode( *itLine );
 
 		brokenLines.push_back( CString() );
@@ -170,7 +170,7 @@ namespace code
 			commentState = m_languageEngine.isSingleLineCommentStatement( newCodeText, 0 ) ? SingleLineComment : MultiLineComment;
 
 		const CommentTokens& langCommentTokens = CommentTokens::getLanguageSpecific( m_docLanguage );
-		std::vector< CString > linesOfCode, lineEnds;
+		std::vector<CString> linesOfCode, lineEnds;
 
 		splitMultipleLines( linesOfCode, lineEnds, newCodeText );
 		if ( !linesOfCode.empty() )
@@ -201,7 +201,7 @@ namespace code
 					case NoComment:
 						if ( langCommentTokens.hasSingleLineComment() )
 						{
-							for ( std::vector< CString >::iterator itLineOfCode = linesOfCode.begin(), itLast = linesOfCode.end() - 1;
+							for ( std::vector<CString>::iterator itLineOfCode = linesOfCode.begin(), itLast = linesOfCode.end() - 1;
 								  itLineOfCode != itLast; ++itLineOfCode )
 								*itLineOfCode = comment( *itLineOfCode, true, SingleLineComment );
 							return unsplitMultipleLines( linesOfCode, lineEnds );
@@ -211,7 +211,7 @@ namespace code
 					case SingleLineComment:
 						if ( langCommentTokens.hasMultiLineComment() )
 						{
-							for ( std::vector< CString >::iterator itLineOfCode = linesOfCode.begin(), itLast = linesOfCode.end() - 1;
+							for ( std::vector<CString>::iterator itLineOfCode = linesOfCode.begin(), itLast = linesOfCode.end() - 1;
 								  itLineOfCode != itLast; ++itLineOfCode )
 								*itLineOfCode = uncomment( *itLineOfCode, true );
 
@@ -228,7 +228,7 @@ namespace code
 
 	CString CFormatter::generateConsecutiveNumbers( const TCHAR* pCodeText, unsigned int startingNumber /*= UINT_MAX*/ ) throws_( CRuntimeException )
 	{
-		std::vector< CString > linesOfCode, lineEnds;
+		std::vector<CString> linesOfCode, lineEnds;
 
 		// break the code into lines
 		splitMultipleLines( linesOfCode, lineEnds, pCodeText );
@@ -241,13 +241,13 @@ namespace code
 		if ( lineCount < 2 )
 			throw CRuntimeException( _T("You must select at least 2 lines of code!"), UTL_FILE_LINE );
 
-		FormattedNumber< unsigned int > number( startingNumber, _T("%u") );
+		FormattedNumber<unsigned int> number( startingNumber, _T("%u") );
 
 		if ( UINT_MAX == startingNumber )
 			number = m_languageEngine.extractNumber( linesOfCode.front() );
 
 		// format each line
-		for ( std::vector< CString >::iterator itLine = linesOfCode.begin() + 1; itLine != linesOfCode.end(); ++itLine )
+		for ( std::vector<CString>::iterator itLine = linesOfCode.begin() + 1; itLine != linesOfCode.end(); ++itLine )
 		{
 			itLine->TrimLeft();
 			itLine->TrimRight();
@@ -269,7 +269,7 @@ namespace code
 
 	CString CFormatter::sortLines( const TCHAR* pCodeText, bool ascending ) throws_( CRuntimeException )
 	{
-		std::vector< CString > linesOfCode, lineEnds;
+		std::vector<CString> linesOfCode, lineEnds;
 
 		// break the code into lines
 		splitMultipleLines( linesOfCode, lineEnds, pCodeText );
@@ -381,7 +381,7 @@ namespace code
 		return outCode;
 	}
 
-	bool CFormatter::IsBraceCharAt( const TCHAR code[], size_t pos ) const
+	bool CFormatter::IsBraceCharAt( const TCHAR code[], int pos ) const
 	{
 		TCHAR chr = str::charAt( code, pos );
 
@@ -584,7 +584,7 @@ namespace code
 		return ++pos;
 	}
 
-	int CFormatter::splitMultipleLines( std::vector< CString >& outLinesOfCode, std::vector< CString >& outLineEnds, const TCHAR* pCodeText )
+	int CFormatter::splitMultipleLines( std::vector<CString>& outLinesOfCode, std::vector<CString>& outLineEnds, const TCHAR* pCodeText )
 	{
 		if ( pCodeText != nullptr && pCodeText[ 0 ] != '\0' )
 			for ( int pos = 0; ; )
@@ -616,7 +616,7 @@ namespace code
 		return (int)outLinesOfCode.size();
 	}
 
-	CString CFormatter::unsplitMultipleLines( const std::vector< CString >& linesOfCode, const std::vector< CString >& lineEnds ) const
+	CString CFormatter::unsplitMultipleLines( const std::vector<CString>& linesOfCode, const std::vector<CString>& lineEnds ) const
 	{
 		size_t lineCount = linesOfCode.size();
 
@@ -643,7 +643,7 @@ namespace code
 		return outCodeText;
 	}
 
-	CString CFormatter::getArgListCodeText( const std::vector< CString >& linesOfCode ) const
+	CString CFormatter::getArgListCodeText( const std::vector<CString>& linesOfCode ) const
 	{
 		CString resultCodeText = str::unsplit( linesOfCode,
 											   m_docLanguage != DocLang_Basic ? code::g_pLineEnd : code::g_pBasicLineBreak );
@@ -682,7 +682,7 @@ namespace code
 		if ( DocLang_Basic == m_docLanguage )
 			normalizedCode.Replace( code::g_pBasicLineBreak, code::g_pLineEnd );
 
-		std::vector< CString > linesOfCode, __lineEnds;
+		std::vector<CString> linesOfCode, __lineEnds;
 
 		// break the code into lines
 		splitMultipleLines( linesOfCode, __lineEnds, normalizedCode );
@@ -690,7 +690,7 @@ namespace code
 		// Build the normalized line by concatenating each line.
 		normalizedCode.Empty();
 
-		for ( std::vector< CString >::iterator itLineOfCode = linesOfCode.begin(); itLineOfCode != linesOfCode.end(); ++itLineOfCode )
+		for ( std::vector<CString>::iterator itLineOfCode = linesOfCode.begin(); itLineOfCode != linesOfCode.end(); ++itLineOfCode )
 		{
 			CString line = transformTrailingSingleLineComment( *itLineOfCode, forImplementation ? RemoveComment : ToMultiLineComment );
 
@@ -810,7 +810,7 @@ namespace code
 		return outCode;
 	}
 
-	int CFormatter::doSplitArgumentList( std::vector< CString >& brokenLines, const TokenRange& openBraceRange, int maxEditorColIndex )
+	int CFormatter::doSplitArgumentList( std::vector<CString>& brokenLines, const TokenRange& openBraceRange, int maxEditorColIndex )
 	{
 		ASSERT( openBraceRange.getLength() == 1 );
 
@@ -918,7 +918,7 @@ namespace code
 			}
 			else if ( ( pBreakSeparatorFound = m_options.FindBreakSeparator( pCursor ) ) != nullptr )
 			{
-				pOutToken->setWithLength( int( pCursor - pCodeText ), pBreakSeparatorFound->length() );
+				pOutToken->setWithLength( int( pCursor - pCodeText ), static_cast<int>( pBreakSeparatorFound->length() ) );
 				return LBT_BreakSeparator;
 			}
 			else if ( code::isOpenBraceChar( *pCursor ) && m_validArgListOpenBraces.Find( *pCursor ) != -1 )

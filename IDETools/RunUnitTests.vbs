@@ -9,6 +9,9 @@
 '
 '	For Debugging IDETools.dll
 '		Original Command:	C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\MSDEV.EXE
+'
+'	Note: when running the 64-bit cscript.exe, CreateObject() creates the IDETools.dll (32-bit), and not the expected IDETools64.dll (64-bit).
+
 
 Sub RunIdeToolsTests()
 	'DESCRIPTION: Runs the unit tests defined in IDETools.dll

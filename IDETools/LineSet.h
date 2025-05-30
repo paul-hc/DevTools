@@ -26,7 +26,7 @@ struct CLineSet
 private:
 	bool m_lastEmptyLine;
 public:
-	std::vector< std::tstring > m_lines;
+	std::vector<std::tstring> m_lines;
 
 	static const TCHAR s_winLineEnd[];
 	static const TCHAR s_unixLineEnd[];
@@ -58,14 +58,14 @@ private:
 		bool EqualsColumns( const CRow& right, size_t columnPos, str::CaseType caseType ) const;
 		void ResetEqualColumns( const CRow& prevRow, str::CaseType caseType );
 	private:
-		std::vector< std::tstring > m_columns;
+		std::vector<std::tstring> m_columns;
 	};
 private:
 	str::CaseType m_caseType;
 	const TCHAR* m_pLineSep;
 	const TCHAR* m_pColumnSep;
 
-	std::vector< CRow > m_rows;
+	std::vector<CRow> m_rows;
 	bool m_lastEmptyLine;
 
 	static const TCHAR s_columnSep[];

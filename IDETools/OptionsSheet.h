@@ -69,9 +69,9 @@ public:
 	bool m_preserveMultipleWhiteSpace;
 	bool m_deleteTrailingWhiteSpace;
 	UINT m_splitMaxColumn;
-	std::vector< std::tstring > m_breakSeparators;
-	std::vector< code::CFormatterOptions::CBraceRule > m_braceRules;
-	std::vector< code::CFormatterOptions::COperatorRule > m_operatorRules;
+	std::vector<std::tstring> m_breakSeparators;
+	std::vector<code::CFormatterOptions::CBraceRule> m_braceRules;
+	std::vector<code::CFormatterOptions::COperatorRule> m_operatorRules;
 private:
 	// enum { IDD = IDD_OPTIONS_CODE_FORMATTING_PAGE };
 	CSpinEdit m_splitMaxColumnEdit;
@@ -160,7 +160,7 @@ private:
 public:
 	fs::CPath m_browseInfoPath;
 private:
-	std::vector< CSearchPathItem > m_pathItems;
+	std::vector<CSearchPathItem> m_pathItems;
 	ui::CItemContent m_folderContent;
 	bool m_isUserUpdate;
 

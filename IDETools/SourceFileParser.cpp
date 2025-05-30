@@ -40,8 +40,8 @@ void CSourceFileParser::AddSourceFile( const fs::CPath& sourceFilePath )
 
 void CSourceFileParser::RemoveDuplicates( void )
 {
-	std::vector< CIncludeNode* > duplicates;
-	utl::Uniquify< pred::TLess_TreeItemPath >( m_includeNodes, &duplicates );
+	std::vector<CIncludeNode*> duplicates;
+	utl::Uniquify<pred::TLess_TreeItemPath>( m_includeNodes, &duplicates );
 	utl::ClearOwningContainer( duplicates );
 }
 
@@ -53,7 +53,7 @@ void CSourceFileParser::ParseRootFile( int maxParseLines /*= 1000*/ )
 
 	try
 	{
-		io::CTextFileParser< std::tstring > parser( this );
+		io::CTextFileParser<std::tstring> parser( this );
 		parser.SetMaxLineCount( maxParseLines );
 		parser.ParseFile( m_rootFilePath );
 	}

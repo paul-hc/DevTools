@@ -81,7 +81,7 @@ int OutputActivator::Run( void )
 
 	TCHAR			caption[ 128 ];
 
-	for ( int i = 0; i < 20; ++i )
+	for ( int i = 0; i != 20; ++i )
 	{
 		if ( ::GetWindowText( hWndTab, caption, COUNT_OF( caption ) ) > 0 )
 			if ( !_tcsicmp( caption, tabCaption ) )

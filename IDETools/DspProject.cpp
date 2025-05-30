@@ -55,22 +55,22 @@ void DspProject::lookupSourceFiles( void )
 	m_filesToAdd.clear();
 	m_filesToRemove.clear();
 
-	std::set< CString > sourceFolders;
-	std::vector< PathInfoEx >::const_iterator itFile;
+	std::set<CString> sourceFolders;
+	std::vector<PathInfoEx>::const_iterator itFile;
 
 	// find the source folders based on the existing DSP source folders
 	for ( itFile = m_projectFiles.begin(); itFile != m_projectFiles.end(); ++itFile )
 		sourceFolders.insert( ( *itFile ).getDirPath() );
 
 	CFileFind fileFinder;
-	std::set< CString >::const_iterator itFolder;
+	std::set<CString>::const_iterator itFolder;
 
-	static std::vector< PathInfoEx > defaultFileFilters( 1, PathInfoEx( _T("*.*") ) );
-	const std::vector< PathInfoEx >* pFileFilters = !m_sourceFileFilters.empty() ? &m_sourceFileFilters : &defaultFileFilters;
+	static std::vector<PathInfoEx> defaultFileFilters( 1, PathInfoEx( _T("*.*") ) );
+	const std::vector<PathInfoEx>* pFileFilters = !m_sourceFileFilters.empty() ? &m_sourceFileFilters : &defaultFileFilters;
 
 	// Find all the source files
 	for ( itFolder = sourceFolders.begin(); itFolder != sourceFolders.end(); ++itFolder )
-		for ( std::vector< PathInfoEx >::const_iterator itFilter = pFileFilters->begin();
+		for ( std::vector<PathInfoEx>::const_iterator itFilter = pFileFilters->begin();
 			  itFilter != pFileFilters->end(); ++itFilter )
 		{
 			CString fileFilter = *itFolder + ( *itFilter ).fullPath;
@@ -103,7 +103,7 @@ size_t DspProject::filterProjectFiles( void )
 {
 	size_t orgFileCount = m_projectFiles.size();
 
-	std::vector< PathInfoEx >::iterator fileIt = m_projectFiles.begin();
+	std::vector<PathInfoEx>::iterator fileIt = m_projectFiles.begin();
 
 	while ( fileIt != m_projectFiles.end() )
 		if ( isSourceFileMatch( *fileIt ) )
@@ -117,7 +117,7 @@ size_t DspProject::filterProjectFiles( void )
 // Compares only the extension
 bool DspProject::isSourceFileMatch( const PathInfoEx& filePath ) const
 {
-	for ( std::vector< PathInfoEx >::const_iterator filterIt = m_sourceFileFilters.begin(); filterIt != m_sourceFileFilters.end(); ++filterIt )
+	for ( std::vector<PathInfoEx>::const_iterator filterIt = m_sourceFileFilters.begin(); filterIt != m_sourceFileFilters.end(); ++filterIt )
 		if ( path::Equivalent( ( *filterIt ).name, _T("*") ) || path::Equivalent( ( *filterIt ).name, filePath.name ) )
 			if ( path::Equivalent( ( *filterIt ).ext, _T("*") ) || path::Equivalent( ( *filterIt ).ext, filePath.ext ) )
 				return true;

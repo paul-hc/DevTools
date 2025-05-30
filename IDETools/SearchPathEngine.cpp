@@ -69,11 +69,11 @@ namespace inc
 
 	void CSearchPathEngine::SearchIncludePaths( CFoundPaths& rResults, const CIncludeTag& includeTag ) const
 	{
-		const std::vector< TDirSearchPair >& specs = CIncludeDirectories::Instance().GetSearchSpecs();
+		const std::vector<TDirSearchPair>& specs = CIncludeDirectories::Instance().GetSearchSpecs();
 
-		for ( std::vector< TDirSearchPair >::const_iterator itSpec = specs.begin(); itSpec != specs.end(); ++itSpec )
+		for ( std::vector<TDirSearchPair>::const_iterator itSpec = specs.begin(); itSpec != specs.end(); ++itSpec )
 			if ( HasFlag( m_searchFlags, itSpec->second ) )			// location selected?
-				for ( std::vector< fs::CPath >::const_iterator itDirPath = itSpec->first->GetPaths().begin(); itDirPath != itSpec->first->GetPaths().end(); ++itDirPath )
+				for ( std::vector<fs::CPath>::const_iterator itDirPath = itSpec->first->GetPaths().begin(); itDirPath != itSpec->first->GetPaths().end(); ++itDirPath )
 				{
 					fs::CPath fullPath = MakeDirPath( *itDirPath ) / includeTag.GetFilePath();
 

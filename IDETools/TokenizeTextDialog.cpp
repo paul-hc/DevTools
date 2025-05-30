@@ -149,7 +149,7 @@ std::tstring CTokenizeTextDialog::GenerateOutputText( void )
 			str::ToWindowsLineEnds( &inputSep );
 			str::ToWindowsLineEnds( &outputSep );
 
-			std::vector< std::tstring > parts;
+			std::vector<std::tstring> parts;
 
 			switch ( m_action )
 			{

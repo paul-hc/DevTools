@@ -24,14 +24,14 @@ namespace str
 
 	// tokenize/untokenize
 
-	size_t split( std::vector< CString >& rOutDestTokens, const TCHAR* flatString, const TCHAR* separator );
-	size_t tokenize( std::vector< CString >& rOutDestTokens, const TCHAR* flatString, const TCHAR* separators );
+	size_t split( std::vector<CString>& rOutDestTokens, const TCHAR* flatString, const TCHAR* separator );
+	size_t tokenize( std::vector<CString>& rOutDestTokens, const TCHAR* flatString, const TCHAR* separators );
 
-	CString unsplit( std::vector< CString >::const_iterator startToken, std::vector< CString >::const_iterator endToken, const TCHAR* separator );
-	CString unsplit( const std::vector< CString >& rSrcTokens, const TCHAR* separator );
+	CString unsplit( std::vector<CString>::const_iterator startToken, std::vector<CString>::const_iterator endToken, const TCHAR* separator );
+	CString unsplit( const std::vector<CString>& rSrcTokens, const TCHAR* separator );
 
 	template< typename Type, typename EqualPred >
-	void removeDuplicates( std::vector< Type >& rTarget, EqualPred isEqual );
+	void removeDuplicates( std::vector<Type>& rTarget, EqualPred isEqual );
 
 
 	// numeric conversions
@@ -238,7 +238,7 @@ namespace str
 
 	// inline code
 
-	inline CString unsplit( const std::vector< CString >& rSrcTokens, const TCHAR* separator )
+	inline CString unsplit( const std::vector<CString>& rSrcTokens, const TCHAR* separator )
 	{
 		return unsplit( rSrcTokens.begin(), rSrcTokens.end(), separator );
 	}
@@ -250,11 +250,11 @@ namespace str
 	}
 
 	template< typename Type, typename EqualPred >
-	inline void removeDuplicates( std::vector< Type >& rTarget, EqualPred isEqualPred )
+	inline void removeDuplicates( std::vector<Type>& rTarget, EqualPred isEqualPred )
 	{
-		for ( typename std::vector< Type >::iterator it = rTarget.begin(); it != rTarget.end(); ++it )
+		for ( typename std::vector<Type>::iterator it = rTarget.begin(); it != rTarget.end(); ++it )
 		{
-			for ( typename std::vector< Type >::iterator itTrailing = it + 1; itTrailing != rTarget.end(); )
+			for ( typename std::vector<Type>::iterator itTrailing = it + 1; itTrailing != rTarget.end(); )
 				if ( isEqualPred( *itTrailing, *it ) )
 					itTrailing = rTarget.erase( itTrailing );
 				else

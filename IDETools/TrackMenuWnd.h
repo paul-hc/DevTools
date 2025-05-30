@@ -28,7 +28,7 @@ private:
 	UINT m_hilightId;					// item to auto-hilight when tracking the menu (simulate as selected)
 
 	UINT m_selCmdId;
-	std::vector< HMENU > m_subMenus;	// temporary
+	std::vector<HMENU> m_subMenus;		// temporary
 
 	// generated stuff
 public:

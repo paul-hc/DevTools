@@ -173,8 +173,8 @@ namespace code
 			"[[templateDecl]\r\n][typeQualifier]"
 
 		Examples:
-			"template< typename T, class Pred, int dim >\r\nMyClass< T, Pred, i >::"
-			"template<>\r\nMyClass< std::string, LessThanString, 5 >::"
+			"template< typename T, class Pred, int dim >\r\nMyClass<T, Pred, i>::"
+			"template<>\r\nMyClass<std::string, LessThanString, 5>::"
 			"MyClass::"
 			"MyClass::NestedClass::"
 	*/
@@ -477,7 +477,7 @@ namespace code
 			//
 			// Example:
 			//	for descriptor: "template< typename T, class C >\r\nOuterClass::Embedded::"
-			//	rTypeQualifier should be: "OuterClass< T, C >::Embedded::"
+			//	rTypeQualifier should be: "OuterClass<T, C>::Embedded::"
 
 			CCppCodeParser tqParser( &m_typeQualifier );
 			TokenRange endOfOuterClassRange;

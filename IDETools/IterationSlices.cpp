@@ -154,7 +154,7 @@ namespace code
 		if ( core.length() > 1 )
 		{
 			CCppCodeParser parser( &core );
-			TokenRange coreRange( 0, core.length() );
+			TokenRange coreRange( 0, static_cast<int>( core.length() ) );
 			const TCHAR* pCore = core.c_str();
 
 			if ( 'p' == core[ coreRange.m_start ] || 'r' == core[ coreRange.m_start ] )

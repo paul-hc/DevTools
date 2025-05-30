@@ -93,10 +93,10 @@ bool CWkspSaveDialog::loadExistingProjects( void )
 	if ( !projectsKey.IsOpen() )
 		return false;
 
-	std::vector< std::tstring > subKeyNames;
+	std::vector<std::tstring> subKeyNames;
 	projectsKey.QuerySubKeyNames( subKeyNames );
 
-	for ( std::vector< std::tstring >::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
+	for ( std::vector<std::tstring>::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
 		m_rWkspProfile.AddProjectName( itSubKeyName->c_str() );
 
 	return !subKeyNames.empty();
@@ -117,7 +117,7 @@ void CWkspSaveDialog::updateFileContents( void )
 	m_fileList.SetRedraw( FALSE );
 	m_fileList.ResetContent();
 
-	const std::vector< CFileItem* >& fileItems = m_folderItem.GetFileItems();
+	const std::vector<CFileItem*>& fileItems = m_folderItem.GetFileItems();
 	for ( unsigned int index = 0; index != fileItems.size(); ++index )
 	{
 		CFileItem* pFileItem = fileItems[ index ];
@@ -253,7 +253,7 @@ END_MESSAGE_MAP()
 LRESULT CWkspSaveDialog::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
 {
 	if ( message == WM_DragListNotify )
-		if ( !dragListNotify( wParam, *(DRAGLISTINFO*)lParam ) )
+		if ( !dragListNotify( static_cast<UINT>( wParam ), *(DRAGLISTINFO*)lParam ) )
 			return FALSE;
 
 	return CLayoutDialog::WindowProc( message, wParam, lParam );

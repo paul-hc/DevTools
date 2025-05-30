@@ -421,7 +421,7 @@ namespace code
 		return numberRange;
 	}
 
-	FormattedNumber< unsigned int > LanguageSearchEngine::extractNumber( const TCHAR* text, int startPos /*= 0*/ ) throws_( CRuntimeException )
+	FormattedNumber<unsigned int> LanguageSearchEngine::extractNumber( const TCHAR* text, int startPos /*= 0*/ ) throws_( CRuntimeException )
 	{
 		TokenRange numberRange = findNextNumber( text, startPos );
 		if ( numberRange.IsEmpty() )
@@ -434,7 +434,7 @@ namespace code
 		if ( str::NoNumber == numType )
 			throw CRuntimeException( str::Format( _T("invalid unsigned int number '%s'"), text + numberRange.m_start ), UTL_FILE_LINE );
 
-		FormattedNumber< unsigned int > parsedNumber( value, _T("%u") );
+		FormattedNumber<unsigned int> parsedNumber( value, _T("%u") );
 
 		switch ( numType )
 		{

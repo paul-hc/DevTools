@@ -42,7 +42,7 @@ public:
 		tok_MaxCount,
 	};
 
-	typedef std::map< CString, TokenSemantic > TMapTokenToSemantic;
+	typedef std::map<CString, TokenSemantic> TMapTokenToSemantic;
 public:
 	DspParser( const CString& _dspFilePath );
 	virtual ~DspParser();
@@ -65,8 +65,8 @@ public:
 	bool findConfiguration( const TCHAR* configurationName );
 	bool findFile( const TCHAR* fileFullPath );
 	CString GetAdditionalIncludePath( const TCHAR* activeConfiguration = nullptr, bool useAnyConfig = true );
-	size_t querySourceFiles( std::vector< PathInfoEx >& rOutSourceFiles );
-	size_t querySourceFiles( std::vector< CString >& rOutSourceFiles );
+	size_t querySourceFiles( std::vector<PathInfoEx>& rOutSourceFiles );
+	size_t querySourceFiles( std::vector<CString>& rOutSourceFiles );
 
 	bool seekAfterConfigurations( void );
 	bool seekToSourceFiles( void );

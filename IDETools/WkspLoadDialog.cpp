@@ -91,10 +91,10 @@ bool CWkspLoadDialog::loadExistingProjects( void )
 	if ( !projectsKey.IsOpen() )
 		return false;
 
-	std::vector< std::tstring > projects;
+	std::vector<std::tstring> projects;
 	projectsKey.QuerySubKeyNames( projects );
 
-	for ( std::vector< std::tstring >::const_iterator itProject = projects.begin(); itProject != projects.end(); ++itProject )
+	for ( std::vector<std::tstring>::const_iterator itProject = projects.begin(); itProject != projects.end(); ++itProject )
 		m_rWkspProfile.AddProjectName( itProject->c_str() );
 
 	return !projects.empty();
@@ -112,10 +112,10 @@ void CWkspLoadDialog::updateFileContents( void )
 			reg::CKey projectKey;
 			if ( projectKey.Open( workspacesKey.Get(), m_currProjectName.GetString(), KEY_READ ) )
 			{
-				std::vector< std::tstring > valueNames;
+				std::vector<std::tstring> valueNames;
 				projectKey.QueryValueNames( valueNames );
 
-				for ( std::vector< std::tstring >::const_iterator itValueName = valueNames.begin(); itValueName != valueNames.end(); ++itValueName )
+				for ( std::vector<std::tstring>::const_iterator itValueName = valueNames.begin(); itValueName != valueNames.end(); ++itValueName )
 					m_folderItem.AddFileItem( nullptr, projectKey.ReadStringValue( itValueName->c_str() ) );		// was m_rWkspProfile.getFileEntryName( i )
 			}
 		}
@@ -124,7 +124,7 @@ void CWkspLoadDialog::updateFileContents( void )
 	m_fileList.SetRedraw( FALSE );
 	m_fileList.ResetContent();
 
-	const std::vector< CFileItem* >& fileItems = m_folderItem.GetFileItems();
+	const std::vector<CFileItem*>& fileItems = m_folderItem.GetFileItems();
 	for ( unsigned int index = 0; index != fileItems.size(); ++index )
 	{
 		CFileItem* pFileItem = fileItems[ index ];
@@ -145,15 +145,15 @@ bool CWkspLoadDialog::transferFiles( void )
 	if ( !readProjectName() )
 		return false;
 
-	size_t selCount = m_fileList.GetSelCount();
+	int selCount = m_fileList.GetSelCount();
 
 	m_rWkspProfile.fileArray.clear();
 	if ( selCount != 0 )
 	{
-		std::vector< int > selection( selCount );
+		std::vector<int> selection( selCount );
 
 		VERIFY( m_fileList.GetSelItems( selCount, &selection.front() ) != LB_ERR );
-		for ( size_t i = 0; i < selCount; ++i )
+		for ( int i = 0; i < selCount; ++i )
 			m_rWkspProfile.fileArray.push_back( GetListFileItem( selection[ i ] )->GetFilePath().GetPtr() );
 	}
 	return true;

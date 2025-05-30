@@ -20,7 +20,7 @@ inline const TCHAR* revFindChars( const TCHAR* string, const TCHAR* chars )
 
 namespace path
 {
-	void normalizePaths( std::vector< CString >& rOutFilepaths );
+	void normalizePaths( std::vector<CString>& rOutFilepaths );
 }
 
 
@@ -48,7 +48,7 @@ public:
 	bool operator==( const PathInfo& right ) const;
 	bool operator!=( const PathInfo& right ) const { return !operator==( right ); }
 	bool operator<( const PathInfo& right ) const { return path::CompareEquivalent( GetFullPath(), right.GetFullPath() ) < 0; }
-	pred::CompareResult Compare( const PathInfo& right, const std::vector< PathField >& orderFields = GetDefaultOrder(),
+	pred::CompareResult Compare( const PathInfo& right, const std::vector<PathField>& orderFields = GetDefaultOrder(),
 								 const TCHAR* pDefaultDirName = nullptr ) const;
 	bool smartNameExtEQ( const PathInfo& right ) const;
 
@@ -92,7 +92,7 @@ public:
 	static inline TCHAR* findSubString( const TCHAR* pPath, const TCHAR* pSubString );
 	static int find( const TCHAR* pPath, const TCHAR* pSubString, int startPos = 0 );
 
-	static const std::vector< PathField >& GetDefaultOrder( void );
+	static const std::vector<PathField>& GetDefaultOrder( void );
 protected:
 	void setupDirName( void );
 

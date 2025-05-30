@@ -53,15 +53,15 @@ namespace code
 	protected:
 		void resetInternalState( void );
 	protected:
-		int splitMultipleLines( std::vector< CString >& outLinesOfCode, std::vector< CString >& outLineEnds,
+		int splitMultipleLines( std::vector<CString>& outLinesOfCode, std::vector<CString>& outLineEnds,
 								const TCHAR* pCodeText );
-		CString unsplitMultipleLines( const std::vector< CString >& linesOfCode, const std::vector< CString >& lineEnds ) const;
-		CString getArgListCodeText( const std::vector< CString >& linesOfCode ) const;
+		CString unsplitMultipleLines( const std::vector<CString>& linesOfCode, const std::vector<CString>& lineEnds ) const;
+		CString getArgListCodeText( const std::vector<CString>& linesOfCode ) const;
 
 		// formatting
 		CString doFormatLineOfCode( const TCHAR lineOfCode[] );
 		CString doAdjustWhitespaceLineOfCode( const TCHAR lineOfCode[] );
-		bool IsBraceCharAt( const TCHAR code[], size_t pos ) const;
+		bool IsBraceCharAt( const TCHAR code[], int pos ) const;
 
 		int replaceMultipleWhiteSpace( CString& targetString, int pos, const TCHAR* newWhitespace = _T(" ") );
 		int resolveSpaceAfterToken( CString& targetString, const TokenRange& tokenRange, bool mustSpaceIt );
@@ -75,7 +75,7 @@ namespace code
 
 		CString makeNormalizedFormattedPrototype( const TCHAR* pMethodProto, bool forImplementation = false );
 		CString transformTrailingSingleLineComment( const TCHAR* lineOfCode, HandleSingleLineComments handleComments = ToMultiLineComment );
-		int doSplitArgumentList( std::vector< CString >& brokenLines, const TokenRange& openBraceRange, int maxEditorColIndex );
+		int doSplitArgumentList( std::vector<CString>& brokenLines, const TokenRange& openBraceRange, int maxEditorColIndex );
 
 		TEditorColumn computeVisualEditorColumn( const TCHAR* pCodeText, int index ) const;
 		int computeVisualEditorIndex( const TCHAR* pCodeText, int index ) const { return (int)computeVisualEditorColumn( pCodeText, index ) - 1; }

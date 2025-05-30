@@ -170,11 +170,11 @@ void CCodingStandardPage::DoDataExchange( CDataExchange* pDX )
 		m_braceRulesCombo.SetFont( CTextEdit::GetFixedFont( CTextEdit::Large ) );
 		m_operatorRulesCombo.SetFont( CTextEdit::GetFixedFont( CTextEdit::Large ) );
 
-		for ( std::vector< code::CFormatterOptions::CBraceRule >::const_iterator itBraceRule = m_braceRules.begin();
+		for ( std::vector<code::CFormatterOptions::CBraceRule>::const_iterator itBraceRule = m_braceRules.begin();
 			  itBraceRule != m_braceRules.end(); ++itBraceRule )
 			m_braceRulesCombo.AddString( str::Format( _T("%c%c"), itBraceRule->m_braceOpen, itBraceRule->m_braceClose ).c_str() );
 
-		for ( std::vector< code::CFormatterOptions::COperatorRule >::const_iterator itOpRule = m_operatorRules.begin();
+		for ( std::vector<code::CFormatterOptions::COperatorRule>::const_iterator itOpRule = m_operatorRules.begin();
 			  itOpRule != m_operatorRules.end(); ++itOpRule )
 			m_operatorRulesCombo.AddString( itOpRule->m_pOperator );
 
@@ -343,7 +343,7 @@ void CBscPathPage::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_DISPLAY_TAG_EDIT, m_displayTagEdit );
 	m_toolBar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter, IDR_BSC_PATH_STRIP );
 
-	std::vector< std::tstring > items;
+	std::vector<std::tstring> items;
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{	// load controls
@@ -357,7 +357,7 @@ void CBscPathPage::DoDataExchange( CDataExchange* pDX )
 	}
 	else
 	{	// save controls
-		std::vector< fs::CPath > uniqueDirs;
+		std::vector<fs::CPath> uniqueDirs;
 		for ( unsigned int i = 0; i != m_pathItems.size(); ++i )
 			if ( utl::AddUnique( uniqueDirs, m_pathItems[ i ].m_searchPath ) )
 				items.push_back( m_pathItems[ i ].Format() );
@@ -665,12 +665,12 @@ void CDirectoriesPage::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
-		std::vector< std::tstring > setNames; setNames.reserve( m_pDirSets->Get().size() );
-		for ( utl::vector_map< std::tstring, CIncludePaths* > ::const_iterator itPathSet = m_pDirSets->Get().begin(); itPathSet != m_pDirSets->Get().end(); ++itPathSet )
+		std::vector<std::tstring> setNames; setNames.reserve( m_pDirSets->Get().size() );
+		for ( utl::vector_map<std::tstring, CIncludePaths*> ::const_iterator itPathSet = m_pDirSets->Get().begin(); itPathSet != m_pDirSets->Get().end(); ++itPathSet )
 			setNames.push_back( itPathSet->first );
 
 		ui::WriteComboItems( m_dirSetsCombo, setNames );
-		m_dirSetsCombo.SetCurSel( m_pDirSets->GetCurrentPos() );
+		m_dirSetsCombo.SetCurSel( static_cast<int>( m_pDirSets->GetCurrentPos() ) );
 	}
 	else
 		m_pDirSets->SetCurrentPos( m_dirSetsCombo.GetCurSel() );

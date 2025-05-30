@@ -18,13 +18,13 @@ namespace inc
 
 		bool IsFull( void ) const { return m_foundFiles.size() >= m_maxCount; }
 
-		const std::vector< TPathLocPair >& Get( void ) const { return m_foundFiles; }
-		void Swap( std::vector< TPathLocPair >& rFoundFiles ) { rFoundFiles.swap( m_foundFiles ); }
+		const std::vector<TPathLocPair>& Get( void ) const { return m_foundFiles; }
+		void Swap( std::vector<TPathLocPair>& rFoundFiles ) { rFoundFiles.swap( m_foundFiles ); }
 
 		bool AddValidPath( const fs::CPath& fullPath, Location location );
 	private:
 		size_t m_maxCount;
-		std::vector< TPathLocPair > m_foundFiles;
+		std::vector<TPathLocPair> m_foundFiles;
 		fs::TPathSet m_uniquePaths;
 	};
 

@@ -30,7 +30,7 @@ namespace fs
 		void RegisterCustomOrder( const TCHAR extOrderList[] = s_defaultExtOrder, const TCHAR sep[] = _T("|") );		// list of extensions
 		UINT LookupExtOrder( const std::tstring& ext ) const;
 	private:
-		std::unordered_map< CPath, UINT > m_extToOrderMap;		// use fs::CPath for natural compare
+		std::unordered_map<CPath, UINT> m_extToOrderMap;		// use fs::CPath for natural compare
 		static const TCHAR s_defaultExtOrder[];
 	};
 }
@@ -50,13 +50,13 @@ class CPathSortOrder
 public:
 	CPathSortOrder( void ) { ResetDefaultOrder(); }
 
-	static const std::vector< PathField >& GetDefaultOrder( void );
+	static const std::vector<PathField>& GetDefaultOrder( void );
 
 	bool IsEmpty( void ) const { return m_fields.empty(); }
 	size_t FindFieldPos( PathField field ) const;
 
-	const std::vector< PathField >& GetFields( void ) const { return m_fields; }
-	void SetFields( const std::vector< PathField >& fields ) { m_fields = fields; StoreOrderText(); }
+	const std::vector<PathField>& GetFields( void ) const { return m_fields; }
+	void SetFields( const std::vector<PathField>& fields ) { m_fields = fields; StoreOrderText(); }
 
 	bool IsDefaultOrder( void ) const { return m_fields == GetDefaultOrder(); }
 	void ResetDefaultOrder( void ) { SetFields( GetDefaultOrder() ); }
@@ -74,7 +74,7 @@ private:
 
 	static const CEnumTags& GetTags_PathField( void );
 private:
-	std::vector< PathField > m_fields;
+	std::vector<PathField> m_fields;
 	std::tstring m_orderText;
 };
 

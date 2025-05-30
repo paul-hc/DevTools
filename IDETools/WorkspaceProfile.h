@@ -17,8 +17,8 @@ public:
 	CString getFileEntryName( int fileIndex ) const;
 public:
 	CFolderOptions m_options;
-	std::vector< CString > projectNameArray;
-	std::vector< CString > fileArray;
+	std::vector<CString> projectNameArray;
+	std::vector<CString> fileArray;
 
 	static const TCHAR s_defaulWkspSection[];
 	static const TCHAR s_defaulProjectName[];

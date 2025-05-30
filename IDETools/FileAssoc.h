@@ -33,16 +33,16 @@ public:
 	static bool IsResourceHeaderFile( const fs::CPathParts& parts );
 protected:
 	int GetNextIndex( int& index, bool forward = true ) const;
-	void GetComplIndex( std::vector< CircularIndex >& rIndexes ) const;
+	void GetComplIndex( std::vector<CircularIndex>& rIndexes ) const;
 
 	fs::CPath FindAssociation( const TCHAR* pExt ) const;
 
 	static fs::CPath LookupSpecialFullPath( const fs::CPath& wildPattern );
-	static void QueryComplementaryParentDirs( std::vector< fs::CPath >& rComplementaryDirs, const fs::CPath& dir );
+	static void QueryComplementaryParentDirs( std::vector<fs::CPath>& rComplementaryDirs, const fs::CPath& dir );
 
 	fs::CPath GetSpecialComplementaryAssoc( void ) const;
 
-	void FindVariationsOf( std::vector< fs::CPath >& rVariations, int& rThisIdx, const fs::CPath& pattern );
+	void FindVariationsOf( std::vector<fs::CPath>& rVariations, int& rThisIdx, const fs::CPath& pattern );
 protected:
 	fs::CPathParts m_parts;
 	ft::FileType m_fileType;

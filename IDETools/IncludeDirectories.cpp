@@ -46,7 +46,7 @@ void CIncludeDirectories::Assign( const CIncludeDirectories& right )
 {
 	Clear();
 
-	for ( utl::vector_map< std::tstring, CIncludePaths* >::const_iterator itSrc = right.m_includePaths.begin(); itSrc != right.m_includePaths.end(); ++itSrc )
+	for ( utl::vector_map<std::tstring, CIncludePaths*>::const_iterator itSrc = right.m_includePaths.begin(); itSrc != right.m_includePaths.end(); ++itSrc )
 		m_includePaths[ itSrc->first ] = new CIncludePaths( *itSrc->second );
 
 	m_currSetPos = right.m_currSetPos;
@@ -82,7 +82,7 @@ CIncludePaths* CIncludeDirectories::Add( const std::tstring& setName, bool doSel
 void CIncludeDirectories::RemoveCurrent( void )
 {
 	const std::tstring& setName = GetCurrentName();
-	utl::vector_map< std::tstring, CIncludePaths* >::iterator itFound = m_includePaths.find( setName );
+	utl::vector_map<std::tstring, CIncludePaths*>::iterator itFound = m_includePaths.find( setName );
 	ASSERT( itFound != m_includePaths.end() );
 
 	delete itFound->second;
@@ -134,7 +134,7 @@ void CIncludeDirectories::SetCurrentPos( size_t currSetPos )
 	m_searchSpecs.clear();
 }
 
-const std::vector< inc::TDirSearchPair >& CIncludeDirectories::GetSearchSpecs( void ) const
+const std::vector<inc::TDirSearchPair>& CIncludeDirectories::GetSearchSpecs( void ) const
 {
 	const CIncludePaths* pIncludePaths = GetCurrentPaths();
 	ASSERT_PTR( pIncludePaths );
@@ -161,14 +161,14 @@ void CIncludeDirectories::Load( void )
 
 	reg::CKey sectionKey( pApp->GetSectionKey( reg::section.GetPtr() ) );
 
-	std::vector< std::tstring > subKeyNames;
+	std::vector<std::tstring> subKeyNames;
 	sectionKey.QuerySubKeyNames( subKeyNames );
 
 	if ( !subKeyNames.empty() )
 	{
 		Clear();
 
-		for ( std::vector< std::tstring >::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
+		for ( std::vector<std::tstring>::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
 			Add( *itSubKeyName )->Load( reg::section / *itSubKeyName );
 	}
 
@@ -185,14 +185,14 @@ void CIncludeDirectories::Save( void ) const
 	// delete keys no longer used
 	reg::CKey key( pApp->GetSectionKey( reg::section.GetPtr() ) );
 
-	std::vector< std::tstring > subKeyNames;
+	std::vector<std::tstring> subKeyNames;
 	key.QuerySubKeyNames( subKeyNames );
 
-	for ( std::vector< std::tstring >::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
+	for ( std::vector<std::tstring>::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
 		if ( nullptr == utl::FindValue( m_includePaths, *itSubKeyName ) )
 			key.DeleteSubKey( itSubKeyName->c_str() );
 
-	for ( utl::vector_map< std::tstring, CIncludePaths* >::const_iterator itIncludePath = m_includePaths.begin(); itIncludePath != m_includePaths.end(); ++itIncludePath )
+	for ( utl::vector_map<std::tstring, CIncludePaths*>::const_iterator itIncludePath = m_includePaths.begin(); itIncludePath != m_includePaths.end(); ++itIncludePath )
 		itIncludePath->second->Save( reg::section / itIncludePath->first );
 
 	pApp->WriteProfileInt( reg::section.GetPtr(), reg::entry_currSetPos, static_cast<int>( m_currSetPos ) );

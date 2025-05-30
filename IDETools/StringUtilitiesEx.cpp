@@ -121,7 +121,7 @@ namespace str
 	}
 
 	// doesn't clear rOutDestTokens, it appends tokens to it
-	size_t split( std::vector< CString >& rOutDestTokens, const TCHAR* flatString, const TCHAR* separator )
+	size_t split( std::vector<CString>& rOutDestTokens, const TCHAR* flatString, const TCHAR* separator )
 	{
 		ASSERT( separator != nullptr && *separator != '\0' );
 
@@ -151,7 +151,7 @@ namespace str
 	}
 
 	// doesn't clear rOutDestTokens, it appends tokens to it
-	size_t tokenize( std::vector< CString >& rOutDestTokens, const TCHAR* flatString, const TCHAR* separators )
+	size_t tokenize( std::vector<CString>& rOutDestTokens, const TCHAR* flatString, const TCHAR* separators )
 	{
 		CString flatCopy = flatString;
 
@@ -169,18 +169,18 @@ namespace str
 		return rOutDestTokens.size();
 	}
 
-	CString unsplit( std::vector< CString >::const_iterator startToken, std::vector< CString >::const_iterator endToken,
+	CString unsplit( std::vector<CString>::const_iterator startToken, std::vector<CString>::const_iterator endToken,
 					 const TCHAR* separator )
 	{
 		int separatorLength = str::Length( separator );
 		int requiredBufferLength = 1; // include zero-terminator
 
-		std::vector< CString >::const_iterator tokenIter;
+		std::vector<CString>::const_iterator tokenIter;
 
 		for ( tokenIter = startToken; tokenIter != endToken; ++tokenIter )
 			requiredBufferLength += ( *tokenIter ).GetLength();
 
-		int tokenCount = endToken - startToken;
+		int tokenCount = static_cast<int>( endToken - startToken );
 
 		if ( tokenCount > 1 )
 			requiredBufferLength += ( tokenCount - 1 ) * separatorLength;

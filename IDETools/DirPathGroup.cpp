@@ -34,13 +34,13 @@ namespace inc
 
 	std::tstring CDirPathGroup::Format( void ) const
 	{
-		return str::FormatNameValueSpec< TCHAR >( GetTags_Location().FormatUi( m_location ), Join() );
+		return str::FormatNameValueSpec<TCHAR>( GetTags_Location().FormatUi( m_location ), Join() );
 	}
 
 	bool CDirPathGroup::Parse( const std::tstring& spec )
 	{
 		std::tstring tag, value;
-		if ( str::ParseNameValue< TCHAR >( tag, value, spec ) )
+		if ( str::ParseNameValue<TCHAR>( tag, value, spec ) )
 			if ( m_location == GetTags_Location().ParseUi( tag ) )
 			{
 				Split( value.c_str() );

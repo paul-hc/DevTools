@@ -81,7 +81,7 @@ namespace code
 		TokenRange findComment( const TCHAR* pString, int startPos = 0, str::CaseType caseType = str::Case ) const;
 
 		TokenRange findNextNumber( const TCHAR* text, int startPos = 0 );
-		FormattedNumber< unsigned int > extractNumber( const TCHAR* text, int startPos = 0 ) throws_( CRuntimeException );
+		FormattedNumber<unsigned int> extractNumber( const TCHAR* text, int startPos = 0 ) throws_( CRuntimeException );
 
 		// Token matching
 		bool isTokenMatch( const TCHAR* pString, int pos, const TCHAR* token, bool skipFwdWhiteSpace = true ) const;
@@ -133,7 +133,7 @@ namespace code
 		{
 			ASSERT( pString != nullptr );
 
-			IsPredMatch< UnaryPredType > predIsPredMatch( pString, predicate );
+			IsPredMatch<UnaryPredType> predIsPredMatch( pString, predicate );
 
 			if ( !findNextMatch( pString, startPos, predIsPredMatch ) )
 				return str::Length( pString );
@@ -146,7 +146,7 @@ namespace code
 		{
 			ASSERT( pString != nullptr );
 
-			IsPredMatch< UnaryPredType > predIsPredMatch( pString, predicate, true /*negate the predicate*/ );
+			IsPredMatch<UnaryPredType> predIsPredMatch( pString, predicate, true /*negate the predicate*/ );
 
 			if ( !findNextMatch( pString, startPos, predIsPredMatch ) )
 				return str::Length( pString );

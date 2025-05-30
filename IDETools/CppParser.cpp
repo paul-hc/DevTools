@@ -138,7 +138,7 @@ bool CCppCodeParser::SkipMatchingToken( IN OUT TPos* pPos, const std::tstring& t
 	if ( !str::EqualsSeq( m_itBegin + *pPos, m_itEnd, token ) )
 		return false;
 
-	*pPos += token.length();
+	*pPos += static_cast<TPos>( token.length() );
 	SkipWhitespace( pPos );
 	return true;
 }
@@ -184,7 +184,7 @@ CCppMethodParser::CCppMethodParser( void )
 bool CCppMethodParser::ParseCode( const std::tstring& codeText )
 {
 	m_codeSlices.clear();
-	m_emptyRange.SetEmptyRange( codeText.length() );
+	m_emptyRange.SetEmptyRange( static_cast<int>( codeText.length() ) );
 
 	TConstIterator itCode = codeText.begin(), itEnd = codeText.end(), it = itCode;
 	const TLanguage::TSeparatorsPair& sepsPair = m_lang.GetParser().GetSeparators();
@@ -260,14 +260,14 @@ void CCppMethodParser::ParseQualifiedMethod( const std::tstring& codeText )
 	if ( const TokenRange* pQualifiedMethod = FindSliceRange( QualifiedMethod ) )
 	{
 		ASSERT( !pQualifiedMethod->IsEmpty() );
-		size_t posScopeOp = codeText.rfind( s_scopeOp, pQualifiedMethod->m_end );
+		int posScopeOp = static_cast<int>( codeText.rfind( s_scopeOp, pQualifiedMethod->m_end ) );
 
-		if ( pQualifiedMethod->Contains( posScopeOp ) )
+		if ( pQualifiedMethod->Contains( static_cast<int>( posScopeOp ) ) )
 		{
-			posScopeOp += s_scopeOp.length();
+			posScopeOp += static_cast<int>( s_scopeOp.length() );
 			m_codeSlices[ ClassQualifier ] = TokenRange( pQualifiedMethod->m_start, posScopeOp );
 
-			if ( posScopeOp < codeText.length() )			// is there a function name?  (i.e. not the case "int CFile::")
+			if ( posScopeOp < static_cast<int>( codeText.length() ) )			// is there a function name?  (i.e. not the case "int CFile::")
 				m_codeSlices[ FunctionName ] = TokenRange( posScopeOp, pQualifiedMethod->m_end );
 		}
 		else

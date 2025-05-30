@@ -143,9 +143,9 @@ void CFileTreeDialog::BuildIncludeTree( void )
 
 	m_treeCtrl.DeleteAllItems();
 
-	std::vector< CIncludeNode* > treeItems;
+	std::vector<CIncludeNode*> treeItems;
 	rootParser.SwapIncludeNodes( treeItems );		// acquire ownership
-	for ( std::vector< CIncludeNode* >::const_iterator itItem = treeItems.begin(); itItem != treeItems.end(); ++itItem )
+	for ( std::vector<CIncludeNode*>::const_iterator itItem = treeItems.begin(); itItem != treeItems.end(); ++itItem )
 	{
 		int orderIndex = 0;							// keep root items unsorted
 		bool originalItem;
@@ -187,10 +187,10 @@ bool CFileTreeDialog::AddIncludedChildren( TTreeItemPair& rParentPair, bool doRe
 	fileParser.ParseRootFile( m_rOpt.m_maxParseLines );
 
 	int addedCount = 0, orderIndex = 0;
-	std::vector< CIncludeNode* > treeItems;
+	std::vector<CIncludeNode*> treeItems;
 	fileParser.SwapIncludeNodes( treeItems );			// acquire ownership
 
-	for ( std::vector< CIncludeNode* >::const_iterator itItem = treeItems.begin(); itItem != treeItems.end(); ++itItem )
+	for ( std::vector<CIncludeNode*>::const_iterator itItem = treeItems.begin(); itItem != treeItems.end(); ++itItem )
 	{
 		bool originalItem;
 		TTreeItemPair itemPair = AddTreeItem( rParentPair.first, *itItem, orderIndex, originalItem );
@@ -604,7 +604,7 @@ void CFileTreeDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 
 void CFileTreeDialog::OnDropFiles( HDROP hDropInfo )
 {
-	std::vector< fs::CPath > filePaths;
+	std::vector<fs::CPath> filePaths;
 	shell::QueryDroppedFiles( filePaths, hDropInfo );
 
 	if ( !filePaths.empty() )
@@ -792,12 +792,12 @@ void CFileTreeDialog::OnToggle_NoDuplicates( void )
 
 void CFileTreeDialog::CBnSelChangeViewModeCombo( void )
 {
-	SetViewMode( m_viewModeCombo.GetEnum< ViewMode >() );
+	SetViewMode( m_viewModeCombo.GetEnum<ViewMode>() );
 }
 
 void CFileTreeDialog::CBnSelChangeOrder( void )
 {
-	SetOrder( m_orderCombo.GetEnum< Ordering >() );
+	SetOrder( m_orderCombo.GetEnum<Ordering>() );
 }
 
 void CFileTreeDialog::CmOptions( void )

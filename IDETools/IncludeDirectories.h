@@ -23,7 +23,7 @@ public:
 	void Load( void );
 	void Save( void ) const;
 
-	const utl::vector_map< std::tstring, CIncludePaths* >& Get( void ) const { return m_includePaths; }
+	const utl::vector_map<std::tstring, CIncludePaths*>& Get( void ) const { return m_includePaths; }
 	CIncludePaths* Add( const std::tstring& setName, bool doSelect = true );
 
 	void RemoveCurrent( void );
@@ -37,13 +37,13 @@ public:
 
 	const std::tstring& GetCurrentName( void ) const { ASSERT( m_currSetPos != utl::npos ); return m_includePaths.at( m_currSetPos ).first; }
 
-	const std::vector< inc::TDirSearchPair >& GetSearchSpecs( void ) const;
+	const std::vector<inc::TDirSearchPair>& GetSearchSpecs( void ) const;
 private:
 	void Clear( void );
 private:
-	utl::vector_map< std::tstring, CIncludePaths* > m_includePaths;		// set-name to include paths
+	utl::vector_map<std::tstring, CIncludePaths*> m_includePaths;		// set-name to include paths
 	size_t m_currSetPos;
-	mutable std::vector< inc::TDirSearchPair > m_searchSpecs;			// self-encapsulated cache of search specs
+	mutable std::vector<inc::TDirSearchPair> m_searchSpecs;			// self-encapsulated cache of search specs
 
 	static const std::tstring s_defaultSetName;
 	static bool s_created;

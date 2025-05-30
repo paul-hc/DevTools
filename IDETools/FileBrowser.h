@@ -24,8 +24,8 @@ public:
 
 	void Clear( void );
 
-	const std::vector< CFileItem* >& GetFileItems( void ) const { return m_files; }
-	const std::vector< CFolderItem* >& GetSubFolders( void ) const { return m_subFolders; }
+	const std::vector<CFileItem*>& GetFileItems( void ) const { return m_files; }
+	const std::vector<CFolderItem*>& GetSubFolders( void ) const { return m_subFolders; }
 
 	bool HasAnyLeafs( void ) const { return m_deepLeafCount != 0; }
 
@@ -54,8 +54,8 @@ private:
 
 	// composite
 	CFolderItem* m_pParentFolder;
-	std::vector< CFileItem* > m_files;			// files in folder
-	std::vector< CFolderItem* > m_subFolders;	// sub-folders in folder (if deep recurse enabled)
+	std::vector<CFileItem*> m_files;			// files in folder
+	std::vector<CFolderItem*> m_subFolders;	// sub-folders in folder (if deep recurse enabled)
 	size_t m_deepLeafCount;
 };
 
@@ -88,7 +88,7 @@ public:
 	bool Contains( const fs::CPath& filePath ) const { return m_allPaths.find( filePath ) != m_allPaths.end(); }
 	bool RegisterUnique( const fs::CPath& filePath ) { return m_allPaths.insert( filePath ).second; }
 private:
-	std::set< fs::CPath > m_allPaths;		// unique files and folders
+	std::set<fs::CPath> m_allPaths;		// unique files and folders
 };
 
 
@@ -213,16 +213,16 @@ public:
 private:
 	bool BuildFolderItem( CMenu* pParentMenu, const CFolderItem* pFolderItem );
 	void AppendFolderItem( CTargetMenu* pTargetMenu, const CFolderItem* pFolderItem );
-	void AppendSubFolders( CTargetMenu* pTargetMenu, const std::vector< CFolderItem* >& subFolders );
-	void AppendFileItems( CTargetMenu* pTargetMenu, const std::vector< CFileItem* >& fileItems );
+	void AppendSubFolders( CTargetMenu* pTargetMenu, const std::vector<CFolderItem*>& subFolders );
+	void AppendFileItems( CTargetMenu* pTargetMenu, const std::vector<CFileItem*>& fileItems );
 	bool RegisterMenuUniqueItem( const CMenu* pPopupMenu, const CFileItem* pItem );
 
 	bool UseSubMenu( const CFolderItem* pFolderItem ) const;
 	UINT GetNextFileItemId( void ) { return m_fileItemId++; }
 private:
-	typedef std::unordered_map< UINT, const CFileItem* > TMapIdToItem;
+	typedef std::unordered_map<UINT, const CFileItem*> TMapIdToItem;
 
-	typedef std::unordered_map< TMenuPathKey, const CFileItem* > TMapMenuPathToItem;
+	typedef std::unordered_map<TMenuPathKey, const CFileItem*> TMapMenuPathToItem;
 private:
 	const CFolderOptions* m_pOptions;
 	UINT m_fileItemId;							// self-encapsulated

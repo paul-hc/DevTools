@@ -35,17 +35,17 @@ std::tstring CLineSet::FormatText( const TCHAR* pLineEnd /*= s_winLineEnd*/ ) co
 
 void CLineSet::TrimLines( const TCHAR* pWhiteSpace /*= nullptr*/ )
 {
-	for ( std::vector< std::tstring >::iterator itLine = m_lines.begin(); itLine != m_lines.end(); ++itLine )
+	for ( std::vector<std::tstring>::iterator itLine = m_lines.begin(); itLine != m_lines.end(); ++itLine )
 		str::Trim( *itLine, pWhiteSpace );
 }
 
 void CLineSet::RemoveDuplicateLines( str::CaseType caseType )
 {
-	std::vector< std::tstring > sourceLines;
+	std::vector<std::tstring> sourceLines;
 	sourceLines.swap( m_lines );
 	m_lines.reserve( sourceLines.size() );
 
-	for ( std::vector< std::tstring >::const_iterator itLine = sourceLines.begin(); itLine != sourceLines.end(); ++itLine )
+	for ( std::vector<std::tstring>::const_iterator itLine = sourceLines.begin(); itLine != sourceLines.end(); ++itLine )
 		if ( std::find_if( m_lines.begin(), m_lines.end(), pred::EqualString<std::tstring>( *itLine, caseType ) ) == m_lines.end() &&
 			 !( m_lastEmptyLine && itLine->empty() ) )
 			m_lines.push_back( *itLine );
@@ -58,12 +58,12 @@ void CLineSet::Reverse( void )
 
 void CLineSet::SortAscending( void )
 {
-	std::stable_sort( m_lines.begin(), m_lines.end(), pred::LessValue< pred::CompareValue >() );
+	std::stable_sort( m_lines.begin(), m_lines.end(), pred::LessValue<pred::CompareValue>() );
 }
 
 void CLineSet::SortDescending( void )
 {
-	std::stable_sort( m_lines.rbegin(), m_lines.rend(), pred::LessValue< pred::CompareValue >() );		// sort descending
+	std::stable_sort( m_lines.rbegin(), m_lines.rend(), pred::LessValue<pred::CompareValue>() );		// sort descending
 }
 
 
@@ -112,9 +112,9 @@ std::tstring CTableSet::FormatText( void ) const
 
 void CTableSet::ResetDuplicateColumns( void )
 {
-	for ( std::vector< CRow >::reverse_iterator itRow = m_rows.rbegin(), itEnd = m_rows.rend(); itRow != itEnd; )
+	for ( std::vector<CRow>::reverse_iterator itRow = m_rows.rbegin(), itEnd = m_rows.rend(); itRow != itEnd; )
 	{
-		std::vector< CRow >::reverse_iterator itNextRow = itRow + 1;		// NextRow means PreviousRow as we reverse iterate
+		std::vector<CRow>::reverse_iterator itNextRow = itRow + 1;		// NextRow means PreviousRow as we reverse iterate
 
 		if ( itNextRow != itEnd )
 			itRow->ResetEqualColumns( *itNextRow, m_caseType );

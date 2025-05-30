@@ -128,14 +128,14 @@ void CModuleSession::LoadFromRegistry( void )
 		reg::CKey key;
 		if ( key.Open( HKEY_CURRENT_USER, _T("Software\\Microsoft\\DevStudio\\6.0\\Text Editor\\Tabs/Language Settings\\C/C++"), KEY_READ ) )
 		{
-			m_vsTabSizeCpp = key.ReadNumberValue< int >( _T("TabSize"), m_vsTabSizeCpp );
-			m_vsKeepTabsCpp = ( 0 == key.ReadNumberValue< int >( _T("InsertSpaces"), m_vsKeepTabsCpp ) );
+			m_vsTabSizeCpp = key.ReadNumberValue<int>( _T("TabSize"), m_vsTabSizeCpp );
+			m_vsKeepTabsCpp = ( 0 == key.ReadNumberValue<int>( _T("InsertSpaces"), m_vsKeepTabsCpp ) );
 		}
 	}
 	{
 		reg::CKey key;
 		if ( key.Open( HKEY_CURRENT_USER, _T("Software\\Microsoft\\DevStudio\\6.0\\General"), KEY_READ ) )
-			m_vsUseStandardWindowsMenu = key.ReadNumberValue< int >( _T("TraditionalMenu"), m_vsUseStandardWindowsMenu ) != 0;
+			m_vsUseStandardWindowsMenu = key.ReadNumberValue<int>( _T("TraditionalMenu"), m_vsUseStandardWindowsMenu ) != 0;
 	}
 }
 

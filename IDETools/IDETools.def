@@ -1,6 +1,10 @@
 ; IDETools.def : Declares the module parameters for the DLL.
 
-LIBRARY      "IDETools"
+; note: comment-out the "IDETools" library name below to prevent the warning in 64-bit build:
+;	warning LNK4070: /OUT:IDETools.dll directive in .EXP differs from output filename 'C:\dev\DevTools\IDETools\bin\vc17\x64_ReleaseU\IDETools64.dll'; ignoring directive
+; LIBRARY      "IDETools"
+
+LIBRARY
 
 EXPORTS
     ; Explicit exports can go here

@@ -33,8 +33,8 @@ private:
 	bool saveCurrentTagToHistory( void );
 private:
 	int getCurrentFoundFile( void ) const;
-	int getSelectedFoundFiles( std::vector< int >& selFiles );
-	std::tstring getSelectedFoundFilesFlat( const std::vector< int >& selFiles, const TCHAR* sep = _T(";") ) const;
+	int getSelectedFoundFiles( std::vector<int>& selFiles );
+	std::tstring getSelectedFoundFilesFlat( const std::vector<int>& selFiles, const TCHAR* sep = _T(";") ) const;
 	int storeSelection( void );
 protected:
 	// CProjectContext base overrides
@@ -47,10 +47,10 @@ public:
 
 	// output properties
 	std::tstring m_selectedFilePath;
-	std::vector< inc::TPathLocPair > m_selectedFiles;
+	std::vector<inc::TPathLocPair> m_selectedFiles;
 private:
 	std::tstring m_foundFilesFormat;
-	std::vector< inc::TPathLocPair > m_foundFiles;
+	std::vector<inc::TPathLocPair> m_foundFiles;
 	int m_intrinsic;
 	bool m_closedOK;
 	std::tstring m_defaultExt;

@@ -27,8 +27,8 @@ struct CSourceFileParser : private io::ILineParserCallback<std::tstring>
 
 	void ParseRootFile( int m_maxParseLines = 1000 );
 
-	const std::vector< CIncludeNode* >& GetIncludeNodes( void ) const { return m_includeNodes; }
-	void SwapIncludeNodes( std::vector< CIncludeNode* >& rIncludeNodes ) { rIncludeNodes.swap( m_includeNodes ); }		// called gets ownership
+	const std::vector<CIncludeNode*>& GetIncludeNodes( void ) const { return m_includeNodes; }
+	void SwapIncludeNodes( std::vector<CIncludeNode*>& rIncludeNodes ) { rIncludeNodes.swap( m_includeNodes ); }		// called gets ownership
 	void ClearIncludeNodes( void );
 private:
 	// io::ILineParserCallback interface
@@ -40,10 +40,10 @@ private:
 
 	bool IsIDLFile( void ) const { return ft::IDL == m_fileType; }
 private:
-	fs::CPath m_rootFilePath;							// "D:\My\Tools\Iterable.h"
+	fs::CPath m_rootFilePath;						// "D:\My\Tools\Iterable.h"
 	ft::FileType m_fileType;
-	fs::CPath m_localDirPath;							// "D:\My\Tools"
-	std::vector< CIncludeNode* > m_includeNodes;		// has ownership
+	fs::CPath m_localDirPath;						// "D:\My\Tools"
+	std::vector<CIncludeNode*> m_includeNodes;		// has ownership
 };
 
 

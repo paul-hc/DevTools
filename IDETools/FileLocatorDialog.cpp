@@ -110,7 +110,7 @@ void CFileLocatorDialog::readProfile( void )
 	BOOL isLocalTag = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( isLocalTag ), TRUE ) != FALSE;
 	CheckRadioButton( IDC_SYSTEM_TAG_RADIO, IDC_LOCAL_TAG_RADIO, IDC_SYSTEM_TAG_RADIO + isLocalTag );
 
-	std::vector< std::tstring > tagHistoryArray;
+	std::vector<std::tstring> tagHistoryArray;
 	str::Split( tagHistoryArray, (LPCTSTR)pApp->GetProfileString( m_regSection.c_str(), ENTRY_OF( tagHistory ), _T("") ), _T(";") );
 	ui::WriteComboItems( m_includeTagCombo, tagHistoryArray );
 
@@ -139,7 +139,7 @@ void CFileLocatorDialog::saveProfile( void )
 
 void CFileLocatorDialog::SaveHistory( void )
 {
-	std::vector< std::tstring > items;
+	std::vector<std::tstring> items;
 	ui::ReadComboItems( items, m_includeTagCombo );
 	str::RemoveEmptyItems( items );
 
@@ -283,7 +283,7 @@ int CFileLocatorDialog::SearchForTag( const std::tstring& includeTag )
 
 bool CFileLocatorDialog::EnableCommandButtons( void )
 {
-	std::vector< int > selFiles;
+	std::vector<int> selFiles;
 	bool anySelected;
 
 	getSelectedFoundFiles( selFiles );
@@ -338,11 +338,11 @@ int CFileLocatorDialog::getCurrentFoundFile( void ) const
 }
 
 // Returns the index of the first selected item (if any), that is usually the caret item.
-int CFileLocatorDialog::getSelectedFoundFiles( std::vector< int >& selFiles )
+int CFileLocatorDialog::getSelectedFoundFiles( std::vector<int>& selFiles )
 {
 	POSITION pos = m_foundFilesListCtrl.GetFirstSelectedItemPosition();
 	int selIndex = -1;
-	std::vector< inc::TPathLocPair >::const_iterator itFoundBase = m_foundFiles.begin();
+	std::vector<inc::TPathLocPair>::const_iterator itFoundBase = m_foundFiles.begin();
 
 	while ( pos != nullptr )
 	{
@@ -355,7 +355,7 @@ int CFileLocatorDialog::getSelectedFoundFiles( std::vector< int >& selFiles )
 	return selIndex;
 }
 
-std::tstring CFileLocatorDialog::getSelectedFoundFilesFlat( const std::vector< int >& selFiles, const TCHAR* sep /*= _T(";")*/ ) const
+std::tstring CFileLocatorDialog::getSelectedFoundFilesFlat( const std::vector<int>& selFiles, const TCHAR* sep /*= _T(";")*/ ) const
 {
 	std::tstring selFilesFlat;
 
@@ -370,7 +370,7 @@ std::tstring CFileLocatorDialog::getSelectedFoundFilesFlat( const std::vector< i
 
 int CFileLocatorDialog::storeSelection( void )
 {
-	std::vector< int > selFiles;
+	std::vector<int> selFiles;
 
 	getSelectedFoundFiles( selFiles );
 	m_selectedFiles.clear();
@@ -584,7 +584,7 @@ void CFileLocatorDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	if ( pWnd == &m_foundFilesListCtrl )
 	{
-		std::vector< int > selFiles;
+		std::vector<int> selFiles;
 		getSelectedFoundFiles( selFiles );
 		if ( !selFiles.empty() )
 		{
@@ -611,7 +611,7 @@ void CFileLocatorDialog::CmExploreFile( void )
 
 void CFileLocatorDialog::CmViewFile( UINT cmdId )
 {
-	std::vector< int > selFiles;
+	std::vector<int> selFiles;
 
 	getSelectedFoundFiles( selFiles );
 	for ( size_t i = 0; i != selFiles.size(); ++i )
@@ -630,7 +630,7 @@ void CFileLocatorDialog::CmViewFile( UINT cmdId )
 
 void CFileLocatorDialog::OnStoreFullPath( void )
 {
-	std::vector< int > selFiles;
+	std::vector<int> selFiles;
 
 	getSelectedFoundFiles( selFiles );
 	if ( selFiles.size() > 0 )

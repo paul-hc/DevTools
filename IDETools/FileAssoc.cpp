@@ -142,14 +142,14 @@ bool CFileAssoc::IsResourceHeaderFile( const fs::CPathParts& parts )
 
 fs::CPath CFileAssoc::FindAssociation( const TCHAR* pExt ) const
 {
-	std::vector< fs::CPath > alternateDirs;
+	std::vector<fs::CPath> alternateDirs;
 
 	for ( unsigned int i = 0; i != COUNT_OF( s_relDirs ); ++i )
 		alternateDirs.push_back( fs::CPath( m_parts.m_dir ) / fs::CPath( s_relDirs[ i ] ) );
 
 	QueryComplementaryParentDirs( alternateDirs, m_parts.m_dir );		// also add complementary parent directories, such as SOURCE/INCLUDE
 
-	for ( std::vector< fs::CPath >::const_iterator itDir = alternateDirs.begin(); itDir != alternateDirs.end(); ++itDir )
+	for ( std::vector<fs::CPath>::const_iterator itDir = alternateDirs.begin(); itDir != alternateDirs.end(); ++itDir )
 	{
 		fs::CPath assocFullPath = fs::CPathParts::MakeFullPath( m_parts.m_drive.c_str(), itDir->GetPtr(), m_parts.m_fname.c_str(), pExt );
 		if ( assocFullPath.FileExist() )
@@ -159,11 +159,11 @@ fs::CPath CFileAssoc::FindAssociation( const TCHAR* pExt ) const
 	return s_emptyPath;
 }
 
-void CFileAssoc::QueryComplementaryParentDirs( std::vector< fs::CPath >& rComplementaryDirs, const fs::CPath& dir )
+void CFileAssoc::QueryComplementaryParentDirs( std::vector<fs::CPath>& rComplementaryDirs, const fs::CPath& dir )
 {
 	// dir and rComplementaryDirs should look like "\WINNT\system32\"
 
-	std::vector< std::tstring > dirTokens;
+	std::vector<std::tstring> dirTokens;
 	str::Split( dirTokens, dir.GetPtr(), _T("\\") );
 
 	// reverse iteration
@@ -208,7 +208,7 @@ int CFileAssoc::GetNextIndex( int& index, bool forward /*= true*/ ) const
 	return index;
 }
 
-void CFileAssoc::GetComplIndex( std::vector< CircularIndex >& rIndexes ) const
+void CFileAssoc::GetComplIndex( std::vector<CircularIndex>& rIndexes ) const
 {
 	rIndexes.clear();
 	switch ( m_circularIndex )
@@ -300,9 +300,9 @@ fs::CPath CFileAssoc::GetComplementaryAssoc( void )
 				return associatedFullPath;
 		}
 
-		std::vector< CircularIndex > indexes;
+		std::vector<CircularIndex> indexes;
 		GetComplIndex( indexes );
-		for ( std::vector< CircularIndex >::const_iterator itIndex = indexes.begin(); itIndex != indexes.end(); ++itIndex )
+		for ( std::vector<CircularIndex>::const_iterator itIndex = indexes.begin(); itIndex != indexes.end(); ++itIndex )
 		{
 			associatedFullPath = FindAssociation( s_circularExt[ *itIndex ] );
 			if ( !associatedFullPath.IsEmpty() )
@@ -316,7 +316,7 @@ fs::CPath CFileAssoc::GetComplementaryAssoc( void )
 fs::CPath CFileAssoc::LookupSpecialFullPath( const fs::CPath& wildPattern )
 {
 	_tfinddata_t findInfo;
-	long hFile = _tfindfirst( wildPattern.GetPtr(), &findInfo );
+	intptr_t hFile = _tfindfirst( wildPattern.GetPtr(), &findInfo );
 	std::tstring specFullPath;
 
 	if ( hFile != -1L )
@@ -356,7 +356,7 @@ fs::CPath CFileAssoc::GetSpecialComplementaryAssoc( void ) const
 	return s_emptyPath;
 }
 
-void CFileAssoc::FindVariationsOf( std::vector< fs::CPath >& rVariations, int& rThisIdx, const fs::CPath& pattern )
+void CFileAssoc::FindVariationsOf( std::vector<fs::CPath>& rVariations, int& rThisIdx, const fs::CPath& pattern )
 {
 	CFileFind findVariations;
 	for( BOOL found = findVariations.FindFile( pattern.GetPtr() ); found; )
@@ -376,7 +376,7 @@ void CFileAssoc::FindVariationsOf( std::vector< fs::CPath >& rVariations, int& r
 
 fs::CPath CFileAssoc::GetNextFileNameVariation( bool forward /*= true*/ )
 {
-	std::vector< fs::CPath > variations;
+	std::vector<fs::CPath> variations;
 	int thisVariationIdx = -1;
 	std::tstring nameBase;
 	size_t lastUnderscorePos = m_parts.m_fname.rfind( _T('_') );

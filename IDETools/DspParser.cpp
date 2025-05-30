@@ -346,7 +346,7 @@ bool DspParser::findFile( const TCHAR* fileFullPath )
 	return false;
 }
 
-size_t DspParser::querySourceFiles( std::vector< PathInfoEx >& rOutSourceFiles )
+size_t DspParser::querySourceFiles( std::vector<PathInfoEx>& rOutSourceFiles )
 {
 	registerToken( tok_SOURCE );		// Ensure that tok_SOURCE is already registered
 
@@ -375,9 +375,9 @@ size_t DspParser::querySourceFiles( std::vector< PathInfoEx >& rOutSourceFiles )
 	return rOutSourceFiles.size();
 }
 
-size_t DspParser::querySourceFiles( std::vector< CString >& rOutSourceFiles )
+size_t DspParser::querySourceFiles( std::vector<CString>& rOutSourceFiles )
 {
-	std::vector< PathInfoEx > sourceFilePaths;
+	std::vector<PathInfoEx> sourceFilePaths;
 
 	querySourceFiles( sourceFilePaths );
 

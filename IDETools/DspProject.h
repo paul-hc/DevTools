@@ -22,13 +22,13 @@ private:
 	bool isSourceFileMatch( const PathInfoEx& filePath ) const;
 	size_t filterProjectFiles( void );
 private:
-	std::vector< PathInfoEx > m_sourceFileFilters;
+	std::vector<PathInfoEx> m_sourceFileFilters;
 
 	std::auto_ptr<DspParser> m_parserPtr;
-	std::vector< PathInfoEx > m_projectFiles;
-	std::vector< PathInfoEx > m_diskSourceFiles;
-	std::vector< PathInfoEx > m_filesToAdd;
-	std::vector< PathInfoEx > m_filesToRemove;
+	std::vector<PathInfoEx> m_projectFiles;
+	std::vector<PathInfoEx> m_diskSourceFiles;
+	std::vector<PathInfoEx> m_filesToAdd;
+	std::vector<PathInfoEx> m_filesToRemove;
 public:
 
 	// generated stuff

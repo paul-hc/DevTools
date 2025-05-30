@@ -47,17 +47,17 @@ namespace fs
 
 	void CExtCustomOrder::RegisterCustomOrder( const TCHAR extOrderList[] /*= s_defaultExtOrder*/, const TCHAR sep[] /*= _T("|")*/ )
 	{
-		std::vector< fs::CPath > extensions;
+		std::vector<fs::CPath> extensions;
 		str::Split( extensions, extOrderList, sep );
 
-		for ( size_t order = 0; order != extensions.size(); ++order )
+		for ( UINT order = 0; order != extensions.size(); ++order )
 			m_extToOrderMap[ extensions[ order ] ] = order;
 	}
 
 	UINT CExtCustomOrder::LookupExtOrder( const std::tstring& ext ) const
 	{
 		// straight cast to fs::CPath since it's are binary compatible (avoid creating temporary variables)
-		std::unordered_map< CPath, UINT >::const_iterator itFound = m_extToOrderMap.find( (const fs::CPath&)ext );
+		std::unordered_map<CPath, UINT>::const_iterator itFound = m_extToOrderMap.find( (const fs::CPath&)ext );
 		if ( itFound != m_extToOrderMap.end() )
 			return itFound->second;
 
@@ -103,10 +103,10 @@ namespace pred
 
 // CPathSortOrder implementation
 
-const std::vector< PathField >& CPathSortOrder::GetDefaultOrder( void )
+const std::vector<PathField>& CPathSortOrder::GetDefaultOrder( void )
 {
 	static const PathField s_defaultFields[] = { pfDirName, pfName, pfExt };
-	static std::vector< PathField > s_defaultOrder( s_defaultFields, END_OF( s_defaultFields ) );
+	static std::vector<PathField> s_defaultOrder( s_defaultFields, END_OF( s_defaultFields ) );
 
 	return s_defaultOrder;
 }
@@ -132,7 +132,7 @@ void CPathSortOrder::Add( PathField field )
 
 void CPathSortOrder::Toggle( PathField field )
 {
-	std::vector< PathField >::iterator itFound = std::find( m_fields.begin(), m_fields.end(), field );
+	std::vector<PathField>::iterator itFound = std::find( m_fields.begin(), m_fields.end(), field );
 	if ( itFound != m_fields.end() )
 		m_fields.erase( itFound );
 	else
@@ -143,9 +143,9 @@ void CPathSortOrder::Toggle( PathField field )
 
 void CPathSortOrder::StoreOrderText( void )
 {
-	std::vector< std::tstring > tags; tags.reserve( m_fields.size() );
+	std::vector<std::tstring> tags; tags.reserve( m_fields.size() );
 
-	for ( std::vector< PathField >::const_iterator itField = m_fields.begin(); itField != m_fields.end(); ++itField )
+	for ( std::vector<PathField>::const_iterator itField = m_fields.begin(); itField != m_fields.end(); ++itField )
 		tags.push_back( GetTags_PathField().FormatUi( *itField ) );
 
 	m_orderText = str::Join( tags, _T("|") );
@@ -153,12 +153,12 @@ void CPathSortOrder::StoreOrderText( void )
 
 bool CPathSortOrder::ParseOrderText( void )
 {
-	std::vector< PathField > newFields;
+	std::vector<PathField> newFields;
 
-	std::vector< std::tstring > tags;
+	std::vector<std::tstring> tags;
 	str::Split( tags, m_orderText.c_str(), _T("|") );
 
-	for ( std::vector< std::tstring >::const_iterator itTag = tags.begin(); itTag != tags.end(); ++itTag )
+	for ( std::vector<std::tstring>::const_iterator itTag = tags.begin(); itTag != tags.end(); ++itTag )
 	{
 		PathField field;
 

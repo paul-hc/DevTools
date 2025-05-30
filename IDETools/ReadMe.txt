@@ -27,6 +27,9 @@ Using the Class Wizard in VS 2008:
 DEBUGGING:
 ---------
 ● RunUnitTests (on Windows 64-bit):	=> runs RunUnitTests.vbs script
+	Command: RunUnitTests.bat
+	Command Arguments: <n/a>
+  or:
 	Command: $(MyWinSys32Bit)\cscript.exe
 	Command Arguments: RunUnitTests.vbs
 		- runs CreateObject("IDETools.UserInterface").RunUnitTests()
@@ -95,7 +98,7 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\7.1\VC\VC_OBJECTS_PLATFORM_IN
 Known bugs:
 - faulty line split for:
 	printf( "\n*** ADD current='%s'   original='%s'\n", currentRecord.getChangeoverPatternKey().c_str(), originalPatternRecord_.getChangeoverPatternKey().c_str() );
-	vector< BmCompositeAttribute* >::const_iterator foundStateIt = std::find( flowStates_.begin(), flowStates_.end(), BmCompositeAttribute::BmNameMatcher( rFlowStateName ) );
+	vector<BmCompositeAttribute*>::const_iterator foundStateIt = std::find( flowStates_.begin(), flowStates_.end(), BmCompositeAttribute::BmNameMatcher( rFlowStateName ) );
 
 
 

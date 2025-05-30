@@ -65,7 +65,7 @@ void CIncludePaths::Save( const fs::CPath& section ) const
 
 std::tstring CIncludePaths::FormatLines( const TCHAR lineSep[] /*= s_lineSep*/ ) const
 {
-	std::vector< std::tstring > lines; lines.reserve( 4 );
+	std::vector<std::tstring> lines; lines.reserve( 4 );
 	lines.push_back( m_standard.Format() );
 	lines.push_back( m_source.Format() );
 	lines.push_back( m_library.Format() );
@@ -75,7 +75,7 @@ std::tstring CIncludePaths::FormatLines( const TCHAR lineSep[] /*= s_lineSep*/ )
 
 bool CIncludePaths::ParseLines( const std::tstring& linesSpec, const TCHAR lineSep[] /*= s_lineSep*/ )
 {
-	std::vector< std::tstring > lines;
+	std::vector<std::tstring> lines;
 	str::Split( lines, linesSpec.c_str(), lineSep );
 
 	return

@@ -11,10 +11,29 @@
 #include "utl/Registry.h"
 #include "utl/TextClipboard.h"
 #include "utl/UI/WndUtils.h"
+#include <iostream>
+#include <conio.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace ut
+{
+	int ReadChar( void )
+	{
+		int ch = ::_getch();
+		switch ( ch )
+		{
+			case 0:			// function key
+			case 0xE0:		// arrow key
+				ch = ::_getch();
+				break;
+		}
+		return ch;
+	}
+}
 
 
 IMPLEMENT_DYNCREATE(UserInterface, CCmdTarget)
@@ -117,6 +136,10 @@ void UserInterface::SetIDEToolsRegistryKey( LPCTSTR lpszNewValue )
 void UserInterface::RunUnitTests( void )
 {
 	CApplication::GetApp()->OnRunUnitTests();
+
+	std::clog << std::endl << "Press any key to continue . . .";
+	ut::ReadChar();
+	std::clog << std::endl;
 }
 
 BSTR UserInterface::InputBox( LPCTSTR title, LPCTSTR prompt, LPCTSTR initialValue )

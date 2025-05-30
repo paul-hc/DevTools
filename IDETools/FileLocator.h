@@ -14,7 +14,7 @@ protected:
 	virtual ~FileLocator();
 private:
 	std::tstring m_selectedFilesFlat;
-	std::vector< inc::TPathLocPair > m_selectedFiles;
+	std::vector<inc::TPathLocPair> m_selectedFiles;
 	CProjectContext m_projCtx;
 
 	// generated stuff

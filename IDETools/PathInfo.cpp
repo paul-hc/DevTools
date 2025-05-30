@@ -32,9 +32,9 @@ int revFindCharsPos( const TCHAR* string, const TCHAR* chars, int pos /*= -1*/ )
 
 namespace path
 {
-	void normalizePaths( std::vector< CString >& rOutFilepaths )
+	void normalizePaths( std::vector<CString>& rOutFilepaths )
 	{
-		for ( std::vector< CString >::iterator itPath = rOutFilepaths.begin(); itPath != rOutFilepaths.end(); ++itPath )
+		for ( std::vector<CString>::iterator itPath = rOutFilepaths.begin(); itPath != rOutFilepaths.end(); ++itPath )
 			*itPath = path::MakeWindows( itPath->GetString() ).c_str();
 	}
 }
@@ -117,7 +117,7 @@ PathInfo::~PathInfo()
 {
 }
 
-const std::vector< PathField >& PathInfo::GetDefaultOrder( void )
+const std::vector<PathField>& PathInfo::GetDefaultOrder( void )
 {
 	return CPathSortOrder::GetDefaultOrder();
 }
@@ -176,7 +176,7 @@ bool PathInfo::operator==( const PathInfo& right ) const
 }
 
 pred::CompareResult PathInfo::Compare( const PathInfo& right,
-									   const std::vector< PathField >& orderFields /*= GetDefaultOrder()*/,
+									   const std::vector<PathField>& orderFields /*= GetDefaultOrder()*/,
 									   const TCHAR* pDefaultDirName /*= nullptr*/ ) const
 {
 	// make field comparisions as specified by orderFields while most signifiant fileds are equal

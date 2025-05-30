@@ -74,7 +74,7 @@ bool CTrackMenuWnd::_HighlightMenuItem( HMENU hHoverPopup )
 std::pair<HMENU, UINT> CTrackMenuWnd::FindMenuItemFromPoint( const CPoint& screenPos ) const
 {
 	if ( HWND hMenuWnd = ui::FindMenuWindowFromPoint( screenPos ) )
-		for ( std::vector< HMENU >::const_iterator itSubMenu = m_subMenus.begin(); itSubMenu != m_subMenus.end(); ++itSubMenu )
+		for ( std::vector<HMENU>::const_iterator itSubMenu = m_subMenus.begin(); itSubMenu != m_subMenus.end(); ++itSubMenu )
 		{
 			HMENU hSubMenu = *itSubMenu;
 			int itemPos = ::MenuItemFromPoint( hMenuWnd, hSubMenu, screenPos );

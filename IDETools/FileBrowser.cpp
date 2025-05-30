@@ -73,7 +73,7 @@ void CFolderItem::SortFileItems( const CPathSortOrder& fileSortOrder )
 {
 	std::sort( m_files.begin(), m_files.end(), pred::MakeLessPtr( pred::CompareFileItem( &fileSortOrder ) ) );
 
-	for ( std::vector< CFolderItem* >::const_iterator itSubFolder = m_subFolders.begin(); itSubFolder != m_subFolders.end(); ++itSubFolder )
+	for ( std::vector<CFolderItem*>::const_iterator itSubFolder = m_subFolders.begin(); itSubFolder != m_subFolders.end(); ++itSubFolder )
 		( *itSubFolder )->SortFileItems( fileSortOrder );
 }
 
@@ -92,7 +92,7 @@ void CFolderItem::SearchForFiles( RecursionDepth depth, CPathIndex* pPathIndex )
 
 	fs::SortPaths( found.m_filePaths );				// natural path order
 
-	for ( std::vector< fs::CPath >::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
+	for ( std::vector<fs::CPath>::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
 		if ( nullptr == pPathIndex || pPathIndex->RegisterUnique( *itFilePath ) )
 			m_files.push_back( new CFileItem( this, *itFilePath ) );
 
@@ -102,7 +102,7 @@ void CFolderItem::SearchForFiles( RecursionDepth depth, CPathIndex* pPathIndex )
 	{
 		fs::SortPaths( found.m_subDirPaths );		// natural path order
 
-		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); ++itSubDirPath )
+		for ( std::vector<fs::CPath>::const_iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); ++itSubDirPath )
 			if ( nullptr == pPathIndex || pPathIndex->RegisterUnique( *itSubDirPath ) )
 			{
 				std::auto_ptr<CFolderItem> pNewFolder( new CFolderItem( this, *itSubDirPath ) );
@@ -146,7 +146,7 @@ void CFolderItem::AddSubFolderItem( CFolderItem* pSubFolder )
 
 CFileItem* CFolderItem::FindFilePath( const fs::CPath& filePath ) const
 {
-	for ( std::vector< CFileItem* >::const_iterator itFile = m_files.begin(); itFile != m_files.end(); ++itFile )
+	for ( std::vector<CFileItem*>::const_iterator itFile = m_files.begin(); itFile != m_files.end(); ++itFile )
 		if ( ( *itFile )->GetFilePath() == filePath )
 			return *itFile;
 
@@ -206,10 +206,10 @@ namespace pred
 {
 	CompareResult CompareFileItem::operator()( const CFileItem* pLeft, const CFileItem* pRight ) const
 	{
-		const std::vector< PathField >& fields = m_pSortOrder->GetFields();
+		const std::vector<PathField>& fields = m_pSortOrder->GetFields();
 		CompareResult result = Equal;
 
-		for ( std::vector< PathField >::const_iterator itField = fields.begin(); Equal == result && itField != fields.end(); ++itField )
+		for ( std::vector<PathField>::const_iterator itField = fields.begin(); Equal == result && itField != fields.end(); ++itField )
 			result = ComparePathField( pLeft->GetSortParts(), pRight->GetSortParts(), *itField );
 
 		return result;
@@ -564,15 +564,15 @@ void CFileMenuBuilder::AppendFolderItem( CTargetMenu* pTargetMenu, const CFolder
 	AppendSubFolders( pTargetMenu, pFolderItem->GetSubFolders() );
 }
 
-void CFileMenuBuilder::AppendSubFolders( CTargetMenu* pTargetMenu, const std::vector< CFolderItem* >& subFolders )
+void CFileMenuBuilder::AppendSubFolders( CTargetMenu* pTargetMenu, const std::vector<CFolderItem*>& subFolders )
 {
-	for ( std::vector< CFolderItem* >::const_iterator itSubFolder = subFolders.begin(); itSubFolder != subFolders.end(); ++itSubFolder )
+	for ( std::vector<CFolderItem*>::const_iterator itSubFolder = subFolders.begin(); itSubFolder != subFolders.end(); ++itSubFolder )
 		BuildFolderItem( pTargetMenu->GetMenu(), *itSubFolder );
 }
 
-void CFileMenuBuilder::AppendFileItems( CTargetMenu* pTargetMenu, const std::vector< CFileItem* >& fileItems )
+void CFileMenuBuilder::AppendFileItems( CTargetMenu* pTargetMenu, const std::vector<CFileItem*>& fileItems )
 {
-	for ( std::vector< CFileItem* >::const_iterator itFileItem = fileItems.begin(); itFileItem != fileItems.end(); ++itFileItem )
+	for ( std::vector<CFileItem*>::const_iterator itFileItem = fileItems.begin(); itFileItem != fileItems.end(); ++itFileItem )
 		if ( RegisterMenuUniqueItem( pTargetMenu->GetMenu(), *itFileItem ) )		// unique path item in the popup?
 		{
 			UINT cmdId = GetNextFileItemId();
@@ -638,10 +638,10 @@ bool CFileBrowser::AddFolderItems( const TCHAR* pFolderItems )
 	// example:
 	//	"D:\Development\Tools\Slider\LogicalFilesBackup.h,LogicalFilesBackup.hxx,LogicalFilesBackup.cxx|ASSOCIATIONS;D:\Development\Tools\Slider\slider Desc\LogicalFilesBackup_Factory.*,LogicalFilesBackup_Tags.*|FACTORY"
 
-	std::vector< std::tstring > dualArray;
+	std::vector<std::tstring> dualArray;
 	str::Split( dualArray, pFolderItems, _T(";") );
 
-	for ( std::vector< std::tstring >::const_iterator itFolderItem = dualArray.begin(); itFolderItem != dualArray.end(); ++itFolderItem )
+	for ( std::vector<std::tstring>::const_iterator itFolderItem = dualArray.begin(); itFolderItem != dualArray.end(); ++itFolderItem )
 	{
 		ASSERT( !itFolderItem->empty() );
 		size_t sepPos = itFolderItem->find( PROF_SEP );
