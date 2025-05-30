@@ -100,7 +100,7 @@ BOOL CApplication::InitInstance( void )
 
 	//hlp::CheckScalarTypes();
 	if ( HasCommandLineOptions() )
-		return FALSE;					// no app loop
+		return FALSE;				// no app loop
 
 	LoadStdProfileSettings( 10 );  // Load standard INI file options (including MRU)
 	// Register the application's document templates.  Document templates
