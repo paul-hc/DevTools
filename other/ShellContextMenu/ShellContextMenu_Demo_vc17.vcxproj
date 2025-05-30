@@ -78,23 +78,23 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <IntDir>$(OutDir)</IntDir>
     <TargetName>$(ProjectName)64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <IntDir>$(OutDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <IntDir>$(OutDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <IntDir>$(OutDir)</IntDir>
     <TargetName>$(ProjectName)64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">

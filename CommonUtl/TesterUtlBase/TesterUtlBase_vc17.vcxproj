@@ -77,19 +77,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <IntDir>$(OutDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <IntDir>$(OutDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <IntDir>$(OutDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <IntDir>$(OutDir)</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
     <ClCompile>

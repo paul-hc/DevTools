@@ -22,7 +22,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <ProjectGuid>{E6C00AB5-5960-4118-A70E-205BE39062BA}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
-    <RootNamespace>Slider</RootNamespace>
+    <RootNamespace>Slider_vc17</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>Slider</ProjectName>
   </PropertyGroup>
@@ -77,24 +77,24 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(OutDir)</IntDir>
     <TargetName>$(ProjectName)64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(OutDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(OutDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
-    <IntDir>bin\vc17\$(PlatformName)_$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(OutDir)</IntDir>
     <TargetName>$(ProjectName)64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
