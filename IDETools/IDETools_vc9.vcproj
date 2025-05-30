@@ -4,7 +4,7 @@
 	Version="9.00"
 	Name="IDETools"
 	ProjectGUID="{19895B58-C082-41A6-BD7D-93812EA44ADA}"
-	RootNamespace="IDETools"
+	RootNamespace="IDETools_vc9"
 	Keyword="MFCDLLProj"
 	TargetFrameworkVersion="196613"
 	>
@@ -19,7 +19,7 @@
 		<Configuration
 			Name="DebugU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="2"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -108,7 +108,7 @@
 		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="2"
 			UseOfMFC="1"
 			CharacterSet="1"

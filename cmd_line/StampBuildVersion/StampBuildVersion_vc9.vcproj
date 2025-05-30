@@ -4,7 +4,7 @@
 	Version="9.00"
 	Name="StampBuildVersion"
 	ProjectGUID="{F8FC3A4A-D533-41CE-8AEC-FFDFBC98F327}"
-	RootNamespace="StampBuildVersion"
+	RootNamespace="StampBuildVersion_vc9"
 	Keyword="MFCProj"
 	TargetFrameworkVersion="0"
 	>
@@ -19,7 +19,7 @@
 		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -54,7 +54,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				AssemblerListingLocation=""
 				ObjectFile="$(IntDir)\"
@@ -118,7 +118,7 @@
 		<Configuration
 			Name="DebugU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -151,7 +151,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				AssemblerListingLocation=""
 				ObjectFile="$(IntDir)\"
@@ -271,15 +271,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ResourceFile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ResourceFile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.cpp"
+				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
 					Name="ReleaseU|Win32"
@@ -301,7 +293,15 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\stdafx.h"
+				RelativePath=".\pch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ResourceFile.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ResourceFile.h"
 				>
 			</File>
 		</Filter>

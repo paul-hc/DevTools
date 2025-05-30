@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Directory.h"
 #include "CmdLineOptions.h"
 #include "Table.h"

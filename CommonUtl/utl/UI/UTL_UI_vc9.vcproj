@@ -4,7 +4,7 @@
 	Version="9.00"
 	Name="UTL_UI"
 	ProjectGUID="{41170314-6427-4CBA-B589-0EF552648693}"
-	RootNamespace="UTL_UI"
+	RootNamespace="UTL_UI_vc9"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -22,7 +22,7 @@
 		<Configuration
 			Name="DebugU|Win32"
 			OutputDirectory="$(ProjectDir)..\bin\vc9"
-			IntermediateDirectory="..\bin\vc9\UI\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)..\bin\vc9\UI\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -90,7 +90,7 @@
 		<Configuration
 			Name="DebugU|x64"
 			OutputDirectory="$(ProjectDir)..\bin\vc9"
-			IntermediateDirectory="..\bin\vc9\UI\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)..\bin\vc9\UI\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -159,7 +159,7 @@
 		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)..\bin\vc9"
-			IntermediateDirectory="..\bin\vc9\UI\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)..\bin\vc9\UI\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -228,7 +228,7 @@
 		<Configuration
 			Name="ReleaseU|x64"
 			OutputDirectory="$(ProjectDir)..\bin\vc9"
-			IntermediateDirectory="..\bin\vc9\UI\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)..\bin\vc9\UI\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="1"
 			CharacterSet="1"

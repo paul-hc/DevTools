@@ -1,6 +1,6 @@
 // Defines the entry point for the console application.
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Application.h"
 #include "CmdLineOptions.h"
 #include "ResourceFile.h"

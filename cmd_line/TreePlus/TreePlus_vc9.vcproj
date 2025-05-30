@@ -4,7 +4,7 @@
 	Version="9.00"
 	Name="TreePlus"
 	ProjectGUID="{1650995D-2259-426E-A835-12405E2E201E}"
-	RootNamespace="TreePlus"
+	RootNamespace="TreePlus_vc9"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -22,7 +22,7 @@
 		<Configuration
 			Name="DebugU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -52,7 +52,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -102,7 +102,7 @@
 		<Configuration
 			Name="DebugU|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -133,7 +133,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -183,7 +183,7 @@
 		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -216,7 +216,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -270,7 +270,7 @@
 		<Configuration
 			Name="ReleaseU|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -304,7 +304,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderThrough="pch.h"
 				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -456,7 +456,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\stdafx.cpp"
+				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
 					Name="DebugU|Win32"
@@ -492,7 +492,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\stdafx.h"
+				RelativePath=".\pch.h"
 				>
 			</File>
 			<File

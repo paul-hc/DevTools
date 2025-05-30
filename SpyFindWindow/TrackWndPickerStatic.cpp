@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "TrackWndPickerStatic.h"
 #include "WndFinder.h"
 #include "WndHighlighter.h"

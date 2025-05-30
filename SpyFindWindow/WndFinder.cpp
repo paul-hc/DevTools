@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "WndFinder.h"
 #include "Application.h"
 #include "utl/UI/WndUtils.h"

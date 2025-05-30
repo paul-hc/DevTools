@@ -1,5 +1,5 @@
 ﻿
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef USE_UT		// no UT code in release builds
 
