@@ -54,7 +54,7 @@ COLORREF COptions::GetBkColor( void ) const
 
 	enum { Salmon = RGB( 255, 145, 164 ) };
 	COLORREF bkColor;
-	return ui::ParseColor( &bkColor, m_bkColorText ) ? bkColor : Salmon;
+	return ui::ParseColor( &bkColor, m_bkColorText.c_str() ) ? bkColor : Salmon;
 }
 
 CHistoryComboBox* COptions::GetBkColorCombo( void ) const
@@ -88,7 +88,7 @@ void COptions::OnChange_BkColor( void )
 	std::tstring bkColorText = ui::GetComboSelText( *pCombo );
 
 	COLORREF bkColor;
-	if ( bkColorText.empty() || ui::ParseColor( &bkColor, bkColorText ) )
+	if ( bkColorText.empty() || ui::ParseColor( &bkColor, bkColorText.c_str() ) )
 	{
 		m_bkColorText = bkColorText;
 		m_pCallback->RedrawSamples();

@@ -75,7 +75,7 @@ CMainDialog::CMainDialog( COptions* pOptions, const CThemeStore* pThemeStore )
 	, m_classList( IDC_THEME_CLASS_LIST )
 {
 	m_regSection = _T("MainDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::s_styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 
 	m_pOptions->SetCallback( this );
 
@@ -87,7 +87,7 @@ CMainDialog::CMainDialog( COptions* pOptions, const CThemeStore* pThemeStore )
 	m_partStateTree.SetTextEffectCallback( this );
 	m_partStateTree.SetTrackMenuTarget( this );
 	m_partStateTree.GetCtrlAccel().Load( IDC_PARTS_AND_STATES_TREE );
-	ui::LoadPopupMenu( m_partStateTree.GetContextMenu(), IDR_CONTEXT_MENU, app::ListTreePopup );
+	ui::LoadPopupMenu( &m_partStateTree.GetContextMenu(), IDR_CONTEXT_MENU, app::ListTreePopup );
 
 	m_toolbar.GetStrip()
 		.AddButton( ID_COPY_THEME )
@@ -161,7 +161,7 @@ void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowK
 				rTextEffect.m_textColor = GetSysColor( COLOR_GRAYTEXT );
 				break;
 			case ObscureRelevance:
-				rTextEffect.m_textColor = color::Grey25;
+				rTextEffect.m_textColor = color::Gray25;
 				break;
 		}
 }

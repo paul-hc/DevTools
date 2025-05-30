@@ -6,6 +6,8 @@
 #include "MainDialog.h"
 #include "resource.h"
 #include "utl/UI/GpUtilities.h"
+#include <afxshellmanager.h>
+#include <afxvisualmanagerwindows.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

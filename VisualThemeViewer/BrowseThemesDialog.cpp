@@ -44,7 +44,7 @@ CBrowseThemesDialog::CBrowseThemesDialog( const COptions* pOptions, const CTheme
 	, m_pSelNode( NULL )
 {
 	m_regSection = _T("BrowseThemesDialog");
-	RegisterCtrlLayout( ARRAY_PAIR( layout::s_styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 
 	m_themesTree.SetTextEffectCallback( this );
 	m_themesTree.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : NULL );
@@ -87,7 +87,7 @@ void CBrowseThemesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPA
 			rTextEffect.m_textColor = GetSysColor( COLOR_GRAYTEXT );
 			break;
 		case ObscureRelevance:
-			rTextEffect.m_textColor = color::Grey25;
+			rTextEffect.m_textColor = color::Gray25;
 			break;
 	}
 }

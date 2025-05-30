@@ -13,7 +13,7 @@ const TCHAR CThemeContext::s_paramSep[] = _T(", ");
 CThemeItem CThemeContext::GetThemeItem( void ) const
 {
 	if ( !IsValid() )
-		return CThemeItem::m_null;
+		return CThemeItem::s_null;
 
 	return CThemeItem( m_pClass->m_className.c_str(), m_pPart->m_partId, m_pState != NULL ? m_pState->m_stateId : 0 );
 }
