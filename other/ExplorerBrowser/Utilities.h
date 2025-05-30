@@ -85,9 +85,9 @@ namespace str
 
 
 	template< typename Iterator, typename CharType >
-	std::basic_string< CharType > Join( Iterator itFirstToken, Iterator itLastToken, const CharType* pSep )
+	std::basic_string<CharType> Join( Iterator itFirstToken, Iterator itLastToken, const CharType* pSep )
 	{	// works with any forward/reverse iterator
-		std::basic_ostringstream< CharType > oss;
+		std::basic_ostringstream<CharType> oss;
 		for ( Iterator itItem = itFirstToken; itItem != itLastToken; ++itItem )
 		{
 			if ( itItem != itFirstToken )
@@ -100,14 +100,14 @@ namespace str
 	// works with container of any value type that has stream insertor defined
 	//
 	template< typename ContainerType, typename CharType >
-	inline std::basic_string< CharType > Join( const ContainerType& items, const CharType* pSep )
+	inline std::basic_string<CharType> Join( const ContainerType& items, const CharType* pSep )
 	{
 		return Join( items.begin(), items.end(), pSep );
 	}
 
 
 	template< typename CharType, typename StringType >
-	void SplitAdd( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pSep )
+	void SplitAdd( std::vector<StringType>& rItems, const CharType* pSource, const CharType* pSep )
 	{
 		ASSERT( !str::IsEmpty( pSep ) );
 
@@ -121,12 +121,12 @@ namespace str
 				const_iterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
 				if ( itItemEnd != itEnd )
 				{
-					rItems.push_back( std::basic_string< CharType >( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
+					rItems.push_back( std::basic_string<CharType>( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
 					itItemStart = itItemEnd + sepLen;
 				}
 				else
 				{
-					rItems.push_back( std::basic_string< CharType >( itItemStart ) );			// last item
+					rItems.push_back( std::basic_string<CharType>( itItemStart ) );			// last item
 					break;
 				}
 			}
@@ -134,7 +134,7 @@ namespace str
 	}
 
 	template< typename CharType, typename StringType >
-	inline void Split( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pSep )
+	inline void Split( std::vector<StringType>& rItems, const CharType* pSource, const CharType* pSep )
 	{
 		rItems.clear();
 		SplitAdd( rItems, pSource, pSep );

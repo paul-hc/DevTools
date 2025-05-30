@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BrowserDoc.h"
 
 #ifdef _DEBUG
@@ -20,7 +20,7 @@ IMPLEMENT_DYNCREATE( CBrowserDoc, CDocument )
 
 CBrowserDoc::CBrowserDoc( void )
 	: CDocument()
-	, m_filePaneViewMode( static_cast< FOLDERVIEWMODE >( AfxGetApp()->GetProfileInt( reg::section_view, reg::entry_viewMode, FVM_DETAILS ) ) )
+	, m_filePaneViewMode( static_cast<FOLDERVIEWMODE>( AfxGetApp()->GetProfileInt( reg::section_view, reg::entry_viewMode, FVM_DETAILS ) ) )
 {
 }
 
@@ -83,18 +83,18 @@ void CBrowserDoc::Serialize( CArchive& ar )
 	}
 }
 
-bool CBrowserDoc::QuerySelItems( std::vector< std::tstring >& rSelItems )
+bool CBrowserDoc::QuerySelItems( std::vector<std::tstring>& rSelItems )
 {
 	m_selItems = AfxGetApp()->GetProfileString( reg::section_selItems, GetPathName().GetString() ).GetString();		// use dir path as registry value name
 	str::Split( rSelItems, m_selItems.c_str(), _T("|") );
 	return !m_selItems.empty();
 }
 
-void CBrowserDoc::StoreSelItems( const std::vector< std::tstring >& selPaths )
+void CBrowserDoc::StoreSelItems( const std::vector<std::tstring>& selPaths )
 {
-	std::vector< std::tstring > selFilenames; selFilenames.reserve( selPaths.size() );
+	std::vector<std::tstring> selFilenames; selFilenames.reserve( selPaths.size() );
 
-	for ( std::vector< std::tstring >::const_iterator itSelPath = selPaths.begin(); itSelPath != selPaths.end(); ++itSelPath )
+	for ( std::vector<std::tstring>::const_iterator itSelPath = selPaths.begin(); itSelPath != selPaths.end(); ++itSelPath )
 		selFilenames.push_back( ::PathFindFileName( itSelPath->c_str() ) );			// just the filename
 
 	m_selItems = str::Join( selFilenames, _T("|") );

@@ -4,7 +4,7 @@
 	Version="9.00"
 	Name="ExplorerBrowser"
 	ProjectGUID="{A153F354-E953-4B13-8EBB-9BD69A6228E5}"
-	RootNamespace="ExplorerBrowser"
+	RootNamespace="ExplorerBrowser_vc9"
 	Keyword="MFCProj"
 	TargetFrameworkVersion="131072"
 	>
@@ -22,7 +22,7 @@
 		<Configuration
 			Name="DebugU_DLL|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -54,6 +54,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -105,7 +106,7 @@
 		<Configuration
 			Name="DebugU_DLL|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -137,6 +138,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -188,7 +190,7 @@
 		<Configuration
 			Name="ReleaseU_DLL|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -219,6 +221,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -272,7 +275,7 @@
 		<Configuration
 			Name="ReleaseU_DLL|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -303,6 +306,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -356,7 +360,7 @@
 		<Configuration
 			Name="DebugU_Static|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -388,6 +392,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -439,7 +444,7 @@
 		<Configuration
 			Name="DebugU_Static|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			UseOfATL="1"
@@ -471,6 +476,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -522,7 +528,7 @@
 		<Configuration
 			Name="ReleaseU_Static|Win32"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			UseOfATL="1"
@@ -553,6 +559,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -606,7 +613,7 @@
 		<Configuration
 			Name="ReleaseU_Static|x64"
 			OutputDirectory="$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\vc9\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			UseOfATL="1"
@@ -637,6 +644,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -861,15 +869,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ShellTypes.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ShellTypes.h"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.cpp"
+				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
 					Name="DebugU_DLL|Win32"
@@ -937,7 +937,15 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\stdafx.h"
+				RelativePath=".\pch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ShellTypes.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ShellTypes.h"
 				>
 			</File>
 			<File
@@ -972,10 +980,6 @@
 			</File>
 			<File
 				RelativePath=".\res\ExplorerBrowser.rc2"
-				>
-			</File>
-			<File
-				RelativePath=".\ExplorerBrowser.rgs"
 				>
 			</File>
 			<File

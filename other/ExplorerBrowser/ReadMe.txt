@@ -98,7 +98,7 @@ Printing and Print Preview support
 
 Other standard files:
 
-stdafx.h, stdafx.cpp
+pch.h, pch.cpp
     These files are used to build a precompiled header (PCH) file
     named ExplorerBrowser.pch and a precompiled types file named StdAfx.obj.
 

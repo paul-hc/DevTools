@@ -19,16 +19,16 @@ namespace shell
 		bool Create( CWnd* pParent, bool showFolders, FOLDERVIEWMODE filePaneViewMode );
 
 		IExplorerBrowser* Get( void ) const { return m_pExplorerBrowser; }
-		CComPtr< IShellView > GetShellView( void ) const;
-		CComPtr< IFolderView2 > GetFolderView( void ) const;
+		CComPtr<IShellView> GetShellView( void ) const;
+		CComPtr<IFolderView2> GetFolderView( void ) const;
 
-		CComPtr< IShellFolder > GetCurrentFolder( void ) const;
+		CComPtr<IShellFolder> GetCurrentFolder( void ) const;
 
 		bool GetCurrentDirPidl( CPidl& rCurrDirPidl ) const;
 		std::tstring GetCurrentDirPath( void ) const;		// dir path of the current folder in explorer view
 
-		void QuerySelectedFiles( std::vector< std::tstring >& rSelPaths ) const;
-		bool SelectItems( const std::vector< std::tstring >& itemFilenames );
+		void QuerySelectedFiles( std::vector<std::tstring>& rSelPaths ) const;
+		bool SelectItems( const std::vector<std::tstring>& itemFilenames );
 
 		FOLDERVIEWMODE GetFilePaneViewMode( UINT* pOutFolderFlags = NULL ) const;
 		bool SetFilePaneViewMode( FOLDERVIEWMODE filePaneViewMode, FOLDERFLAGS flags = FWF_NONE ) const;
@@ -39,7 +39,7 @@ namespace shell
 
 		bool RenameFile( void );
 	private:
-		CComPtr< IExplorerBrowser > m_pExplorerBrowser;
+		CComPtr<IExplorerBrowser> m_pExplorerBrowser;
 	};
 }
 

@@ -1,7 +1,7 @@
 // BrowserView.cpp : implementation of the CBrowserView class
 //
 
-#include "stdafx.h"
+#include "pch.h"
 #include "BrowserView.h"
 #include "BrowserDoc.h"
 #include "Application.h"
@@ -103,8 +103,8 @@ int CBrowserView::OnCreate( CREATESTRUCT* pCreateStruct )
 	m_pBrowser.reset( new shell::CExplorerBrowser );
 	if ( m_pBrowser->Create( this, g_theApp.m_showFrames, GetDocument()->GetFilePaneViewMode() ) )
 	{
-		CComObject< CExplorerBrowserEvents >* pExplorerEvents;
-		if ( SUCCEEDED( CComObject< CExplorerBrowserEvents >::CreateInstance( &pExplorerEvents ) ) )
+		CComObject<CExplorerBrowserEvents>* pExplorerEvents;
+		if ( SUCCEEDED( CComObject<CExplorerBrowserEvents>::CreateInstance( &pExplorerEvents ) ) )
 		{
 			pExplorerEvents->AddRef();
 
@@ -128,7 +128,7 @@ void CBrowserView::OnDestroy( void )
 		pDoc->SetFilePaneViewMode( m_pBrowser->GetFilePaneViewMode() );
 		pDoc->SetPathName( m_pBrowser->GetCurrentDirPath().c_str(), TRUE );
 
-		std::vector< std::tstring > selPaths;
+		std::vector<std::tstring> selPaths;
 		m_pBrowser->QuerySelectedFiles( selPaths );
 		pDoc->StoreSelItems( selPaths );
 	}
@@ -151,7 +151,7 @@ void CBrowserView::OnInitialUpdate( void )
 	if ( fs::IsValidDirectory( dirPath ) )
 		if ( m_pBrowser->NavigateTo( dirPath ) )			// navigate to document's directory
 		{
-			std::vector< std::tstring > selItems;
+			std::vector<std::tstring> selItems;
 			if ( pDoc->QuerySelItems( selItems ) )
 				m_pBrowser->SelectItems( selItems );
 
@@ -237,7 +237,7 @@ void CBrowserView::OnUpdateViewFrames( CCmdUI* pCmdUI )
 
 void CBrowserView::OnViewShowselection( void )
 {
-	std::vector< std::tstring > selPaths;
+	std::vector<std::tstring> selPaths;
 	m_pBrowser->QuerySelectedFiles( selPaths );
 
 	CString message;

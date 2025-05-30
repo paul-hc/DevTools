@@ -13,7 +13,7 @@ protected:
 	CBrowserView( void );
 	virtual ~CBrowserView();
 public:
-	CBrowserDoc* GetDocument( void ) const { return reinterpret_cast< CBrowserDoc* >( m_pDocument ); }
+	CBrowserDoc* GetDocument( void ) const { return reinterpret_cast<CBrowserDoc*>( m_pDocument ); }
 private:
 	// event callbacks
 	HRESULT OnNavigationPending( PCIDLIST_ABSOLUTE pidlFolder );
@@ -25,10 +25,11 @@ private:
 
 	friend class CExplorerBrowserEvents;
 private:
-	std::auto_ptr< shell::CExplorerBrowser > m_pBrowser;
+	std::auto_ptr<shell::CExplorerBrowser> m_pBrowser;
 	bool m_showFrames;
 	DWORD m_dwAdviseCookie;
 protected:
+
 	// generated stuff
 	public:
 	virtual void OnInitialUpdate( void );
@@ -53,7 +54,7 @@ protected:
 };
 
 
-class CExplorerBrowserEvents : public CComObjectRootEx< CComSingleThreadModel >
+class CExplorerBrowserEvents : public CComObjectRootEx<CComSingleThreadModel>
 							 , public IExplorerBrowserEvents
 {
 public:

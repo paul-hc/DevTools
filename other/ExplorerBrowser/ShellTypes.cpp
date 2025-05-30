@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ShellTypes.h"
 #include <xhash>
 
@@ -70,7 +70,7 @@ namespace shell
 
 	void CPidl::RemoveLast( void )
 	{
-		if ( LPITEMIDLIST lastPidl = const_cast< LPITEMIDLIST >( Pidl_GetLastItem( m_pidl ) ) )
+		if ( LPITEMIDLIST lastPidl = const_cast<LPITEMIDLIST>( Pidl_GetLastItem( m_pidl ) ) )
 			lastPidl->mkid.cb = 0;
 	}
 
@@ -86,9 +86,9 @@ namespace shell
 
 	bool CPidl::CreateAbsolute( const TCHAR fullPath[] )			// obsolete? same as CreateFromPath()?
 	{
-		CComPtr< IShellFolder > pDesktopFolder;
+		CComPtr<IShellFolder> pDesktopFolder;
 		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
-			if ( HR_OK( pDesktopFolder->ParseDisplayName( NULL, NULL, const_cast< TCHAR* >( fullPath ), NULL, &m_pidl, NULL ) ) )
+			if ( HR_OK( pDesktopFolder->ParseDisplayName( NULL, NULL, const_cast<TCHAR*>( fullPath ), NULL, &m_pidl, NULL ) ) )
 				return true;
 
 		Delete();
@@ -110,7 +110,7 @@ namespace shell
 
 	bool CPidl::CreateFromFolder( IShellFolder* pShellFolder )
 	{
-		CComQIPtr< IPersistFolder2 > pFolder( pShellFolder );
+		CComQIPtr<IPersistFolder2> pFolder( pShellFolder );
 		if ( pFolder != NULL )
 			if ( HR_OK( pFolder->GetCurFolder( &*this ) ) )
 				return true;
@@ -119,9 +119,9 @@ namespace shell
 		return false;
 	}
 
-	CComPtr< IShellItem > CPidl::FindItem( IShellFolder* pParentFolder ) const
+	CComPtr<IShellItem> CPidl::FindItem( IShellFolder* pParentFolder ) const
 	{
-		CComPtr< IShellItem > pShellItem;
+		CComPtr<IShellItem> pShellItem;
 
 		if ( pParentFolder != NULL )
 		{
@@ -137,11 +137,11 @@ namespace shell
 		return NULL;
 	}
 
-	CComPtr< IShellFolder > CPidl::FindFolder( IShellFolder* pParentFolder /*= GetDesktopFolder()*/ ) const
+	CComPtr<IShellFolder> CPidl::FindFolder( IShellFolder* pParentFolder /*= GetDesktopFolder()*/ ) const
 	{
 		ASSERT_PTR( pParentFolder );
 
-		CComPtr< IShellFolder > pShellFolder;
+		CComPtr<IShellFolder> pShellFolder;
 		if ( HR_OK( pParentFolder->BindToObject( m_pidl, NULL, IID_PPV_ARGS( &pShellFolder ) ) ) )
 			return pShellFolder;
 
@@ -179,7 +179,7 @@ namespace shell
 	bool CPidl::WriteToStream( IStream* pStream ) const
 	{
 		ULONG bytesWritten = 0;
-		UINT size = static_cast< UINT >( GetByteSize() );
+		UINT size = static_cast<UINT>( GetByteSize() );
 
 		if ( HR_OK( pStream->Write( &size, sizeof( size ), &bytesWritten ) ) )
 			if ( HR_OK( pStream->Write( Get(), size, &bytesWritten ) ) )
@@ -310,9 +310,9 @@ namespace shell
 		return pred::ToCompareResult( (short)HRESULT_CODE( hResult ) );
 	}
 
-	CComPtr< IShellFolder > CPidl::GetDesktopFolder( void )
+	CComPtr<IShellFolder> CPidl::GetDesktopFolder( void )
 	{
-		CComPtr< IShellFolder > pDesktopFolder;
+		CComPtr<IShellFolder> pDesktopFolder;
 		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
 			return pDesktopFolder;
 

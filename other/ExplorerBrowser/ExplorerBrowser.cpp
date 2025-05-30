@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "ExplorerBrowser.h"
 
 #ifdef _DEBUG
@@ -13,7 +13,7 @@ namespace shell
 	{
 		std::tstring displayName;
 
-		CComPtr< IShellFolder > pDesktopFolder;
+		CComPtr<IShellFolder> pDesktopFolder;
 		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
 		{
 			STRRET strDisplayName;
@@ -56,29 +56,29 @@ namespace shell
 		return false;
 	}
 
-	CComPtr< IShellView > CExplorerBrowser::GetShellView( void ) const
+	CComPtr<IShellView> CExplorerBrowser::GetShellView( void ) const
 	{
-		CComPtr< IShellView > pShellView;
+		CComPtr<IShellView> pShellView;
 		if ( HR_OK( m_pExplorerBrowser->GetCurrentView( IID_PPV_ARGS( &pShellView ) ) ) )
 			return pShellView;
 
 		return NULL;
 	}
 
-	CComPtr< IFolderView2 > CExplorerBrowser::GetFolderView( void ) const
+	CComPtr<IFolderView2> CExplorerBrowser::GetFolderView( void ) const
 	{
-		CComPtr< IFolderView2 > pFolderView;
+		CComPtr<IFolderView2> pFolderView;
 		if ( HR_OK( m_pExplorerBrowser->GetCurrentView( IID_PPV_ARGS( &pFolderView ) ) ) )
 			return pFolderView;
 
 		return NULL;
 	}
 
-	CComPtr< IShellFolder > CExplorerBrowser::GetCurrentFolder( void ) const
+	CComPtr<IShellFolder> CExplorerBrowser::GetCurrentFolder( void ) const
 	{
-		CComPtr< IShellFolder > pCurrShellFolder;
+		CComPtr<IShellFolder> pCurrShellFolder;
 
-		if ( CComPtr< IFolderView2 > pFolderView = GetFolderView() )
+		if ( CComPtr<IFolderView2> pFolderView = GetFolderView() )
 			if ( HR_OK( pFolderView->GetFolder( IID_PPV_ARGS( &pCurrShellFolder ) ) ) )
 				return pCurrShellFolder;
 
@@ -89,9 +89,9 @@ namespace shell
 	{
 		rCurrDirPidl.Reset();
 
-		if ( CComPtr< IFolderView2 > pFolderView = GetFolderView() )
+		if ( CComPtr<IFolderView2> pFolderView = GetFolderView() )
 		{
-			CComPtr< IPersistFolder2 > pCurrFolder;
+			CComPtr<IPersistFolder2> pCurrFolder;
 			if ( HR_OK( pFolderView->GetFolder( IID_PPV_ARGS( &pCurrFolder ) ) ) )
 				if ( HR_OK( pCurrFolder->GetCurFolder( &rCurrDirPidl ) ) )
 					return true;
@@ -112,11 +112,11 @@ namespace shell
 		return std::tstring();
 	}
 
-	void CExplorerBrowser::QuerySelectedFiles( std::vector< std::tstring >& rSelPaths ) const
+	void CExplorerBrowser::QuerySelectedFiles( std::vector<std::tstring>& rSelPaths ) const
 	{
-		if ( CComPtr< IShellView > pShellView = GetShellView() )
+		if ( CComPtr<IShellView> pShellView = GetShellView() )
 		{
-			CComPtr< IDataObject > pDataObject;
+			CComPtr<IDataObject> pDataObject;
 			if ( HR_OK( pShellView->GetItemObject( SVGIO_SELECTION, IID_PPV_ARGS( &pDataObject ) ) ) )
 			{
 				// code adapted from http://www.codeproject.com/shell/shellextguide1.asp
@@ -144,14 +144,14 @@ namespace shell
 		}
 	}
 
-	bool CExplorerBrowser::SelectItems( const std::vector< std::tstring >& itemFilenames )
+	bool CExplorerBrowser::SelectItems( const std::vector<std::tstring>& itemFilenames )
 	{
-		CComPtr< IShellFolder > pCurrFolder = GetCurrentFolder();
+		CComPtr<IShellFolder> pCurrFolder = GetCurrentFolder();
 		SVSIF selectFlags = SVSI_SELECT | SVSI_FOCUSED | SVSI_ENSUREVISIBLE | SVSI_DESELECTOTHERS;
 		size_t selCount = 0;
 
-		if ( CComPtr< IShellView > pShellView = GetShellView() )
-			for ( std::vector< std::tstring >::const_iterator itFilename = itemFilenames.begin(); itFilename != itemFilenames.end(); ++itFilename )
+		if ( CComPtr<IShellView> pShellView = GetShellView() )
+			for ( std::vector<std::tstring>::const_iterator itFilename = itemFilenames.begin(); itFilename != itemFilenames.end(); ++itFilename )
 			{
 				CPidl selItemPidl;
 				if ( selItemPidl.CreateChild( pCurrFolder, itFilename->c_str() ) )
@@ -171,7 +171,7 @@ namespace shell
 	{
 		ASSERT_PTR( m_pExplorerBrowser );
 
-		if ( CComPtr< IShellView > pShellView = GetShellView() )
+		if ( CComPtr<IShellView> pShellView = GetShellView() )
 		{
 			FOLDERSETTINGS settings;
 			if ( HR_OK( pShellView->GetCurrentInfo( &settings ) ) )
@@ -179,7 +179,7 @@ namespace shell
 				if ( pOutFolderFlags != NULL )
 					*pOutFolderFlags = settings.fFlags;
 
-				return static_cast< FOLDERVIEWMODE >( settings.ViewMode );
+				return static_cast<FOLDERVIEWMODE>( settings.ViewMode );
 			}
 		}
 
@@ -205,7 +205,7 @@ namespace shell
 	{
 		ASSERT_PTR( m_pExplorerBrowser );
 
-		if ( CComPtr< IFolderView2 > pFolderView = GetFolderView() )
+		if ( CComPtr<IFolderView2> pFolderView = GetFolderView() )
 			return HR_OK( pFolderView->DoRename() );
 
 		return false;

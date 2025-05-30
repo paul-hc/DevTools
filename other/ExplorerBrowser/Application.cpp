@@ -1,7 +1,7 @@
 // ExplorerBrowser.cpp : Defines the class behaviors for the application.
 //
 
-#include "stdafx.h"
+#include "pch.h"
 #include "Application.h"
 #include "MainFrame.h"
 #include "ChildFrame.h"
@@ -37,7 +37,7 @@ BOOL CApplication::InitInstance( void )
 	initCtrls.dwICC = ICC_WIN95_CLASSES;		// set this to include all the common control classes you want to use in your application
 	InitCommonControlsEx( &initCtrls );
 
-	CWinApp::InitInstance();
+	__super::InitInstance();
 
 	if ( !AfxOleInit() )		// initialize OLE libraries
 	{
@@ -113,7 +113,7 @@ BOOL CApplication::ExitInstance( void )
 #if !defined(_WIN32_WCE) || defined(_CE_DCOM)
 	g_atlModule.RevokeClassObjects();
 #endif
-	return CWinApp::ExitInstance();
+	return __super::ExitInstance();
 }
 
 
