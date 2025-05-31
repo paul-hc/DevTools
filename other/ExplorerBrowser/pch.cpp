@@ -1,6 +1,4 @@
-// pch.cpp : source file that includes just the standard includes
-// ExplorerBrowser.pch will be the pre-compiled header
-// pch.obj will contain the pre-compiled type information
+// pch.cpp: source file corresponding to the pre-compiled header
 
 #include "pch.h"
 

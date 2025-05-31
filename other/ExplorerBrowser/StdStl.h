@@ -29,7 +29,6 @@
 #pragma warning( disable: 4663 )	// C++ language change: to explicitly specialize class template use the following syntax
 
 #include <yvals.h>
-#include <typeinfo.h>
 #include <utility>
 #include <vector>
 #include <functional>
@@ -46,7 +45,7 @@
 
 namespace std
 {
-	using namespace tr1;
+	//using namespace tr1;
 
 
 #ifdef _UNICODE

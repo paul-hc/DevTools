@@ -1,7 +1,6 @@
 
 #include "pch.h"
 #include "ShellTypes.h"
-#include <xhash>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -26,7 +25,7 @@ namespace shell
 
 		const BYTE* pBytes = GetBuffer();
 
-		return stdext::_Hash_value( pBytes, pBytes + GetByteSize() );
+		return utl::HashValue( pBytes, GetByteSize() );
 	}
 
 	void CPidl::Concatenate( LPCITEMIDLIST rightPidl )

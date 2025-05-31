@@ -48,7 +48,7 @@ namespace shell
 			if ( showFolders )
 				m_pExplorerBrowser->SetOptions( EBO_SHOWFRAMES );
 
-			FOLDERSETTINGS settings = { filePaneViewMode, FWF_NONE };
+			FOLDERSETTINGS settings = { static_cast<UINT>( filePaneViewMode ), FWF_NONE };
 			if ( HR_OK( m_pExplorerBrowser->Initialize( pParent->GetSafeHwnd(), &browserRect, &settings ) ) )
 				return true;
 		}
@@ -188,7 +188,7 @@ namespace shell
 
 	bool CExplorerBrowser::SetFilePaneViewMode( FOLDERVIEWMODE filePaneViewMode, FOLDERFLAGS flags /*= FWF_NONE*/ ) const
 	{
-		FOLDERSETTINGS settings = { filePaneViewMode, flags };
+		FOLDERSETTINGS settings = { static_cast<UINT>( filePaneViewMode ), static_cast<UINT>( flags ) };
 		return HR_OK( m_pExplorerBrowser->SetFolderSettings( &settings ) );
 	}
 

@@ -9,7 +9,7 @@
 #include "BrowserView.h"
 #include "resource.h"
 #include <initguid.h>
-#include "ExplorerBrowser_i.c"
+#include "gen/ExplorerBrowser_i.c"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

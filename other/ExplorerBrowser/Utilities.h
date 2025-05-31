@@ -162,6 +162,8 @@ namespace pred
 
 namespace utl
 {
+	size_t HashValue( const void* pFirst, size_t count );
+
 	HRESULT Audit( HRESULT hResult, const char* pFuncName );
 	inline bool Check( HRESULT hResult, const char* pFuncName ) { return SUCCEEDED( Audit( hResult, pFuncName ) ); }
 }

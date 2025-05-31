@@ -4,7 +4,7 @@
 	#error "include 'pch.h' before including this file for PCH"
 #endif
 
-#include "ExplorerBrowser_i.h"
+#include "gen/ExplorerBrowser_i.h"
 
 
 class CApplication : public CWinApp
