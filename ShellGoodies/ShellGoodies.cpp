@@ -67,7 +67,7 @@ STDAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 STDAPI DllRegisterServer( void )
 {
 	// OBSOLETE: the type library is not necessary for a shell extension DLL
-	//return HR_AUDIT( g_comModule.RegisterServer( TRUE ) );		// registers object, typelib and all interfaces in typelib
+	//return HR_AUDIT( g_comModule.RegisterServer( TRUE ) );	// registers object, typelib and all interfaces in typelib
 
 	return HR_AUDIT( g_comModule.RegisterServer( FALSE ) );		// registers object, NO TYPELIB (read ProjectNotes.txt)
 }
@@ -80,6 +80,6 @@ STDAPI DllUnregisterServer( void )
 	// OBSOLETE: the type library is not necessary for a shell extension DLL
 	//return HR_AUDIT( g_comModule.UnregisterServer( TRUE ) );
 
-	return HR_AUDIT( g_comModule.UnregisterServer( FALSE ) );		// NO TYPELIB (read ProjectNotes.txt)
+	return HR_AUDIT( g_comModule.UnregisterServer( FALSE ) );	// NO TYPELIB (read ProjectNotes.txt)
 
 }

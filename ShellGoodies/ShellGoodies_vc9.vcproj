@@ -47,8 +47,12 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-				HeaderFileName=""
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(IntDir)/$(ProjectName).tlb"
+				OutputDirectory="gen"
+				HeaderFileName="$(ProjectName)_i.h"
+				InterfaceIdentifierFileName="$(ProjectName)_i.c"
+				ProxyFileName="$(ProjectName)_p.c"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -144,8 +148,12 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-				HeaderFileName=""
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(IntDir)/$(ProjectName).tlb"
+				OutputDirectory="gen"
+				HeaderFileName="$(ProjectName)_i.h"
+				InterfaceIdentifierFileName="$(ProjectName)_i.c"
+				ProxyFileName="$(ProjectName)_p.c"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -242,8 +250,12 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-				HeaderFileName=""
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(IntDir)/$(ProjectName).tlb"
+				OutputDirectory="gen"
+				HeaderFileName="$(ProjectName)_i.h"
+				InterfaceIdentifierFileName="$(ProjectName)_i.c"
+				ProxyFileName="$(ProjectName)_p.c"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -345,8 +357,12 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-				HeaderFileName=""
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(IntDir)/$(ProjectName).tlb"
+				OutputDirectory="gen"
+				HeaderFileName="$(ProjectName)_i.h"
+				InterfaceIdentifierFileName="$(ProjectName)_i.c"
+				ProxyFileName="$(ProjectName)_p.c"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -569,54 +585,6 @@
 			<File
 				RelativePath="ShellGoodies.idl"
 				>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCMIDLTool"
-						GenerateStublessProxies="true"
-						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-						OutputDirectory="gen"
-						HeaderFileName="ShellGoodies_i.h"
-						InterfaceIdentifierFileName="ShellGoodies_i.c"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|x64"
-					>
-					<Tool
-						Name="VCMIDLTool"
-						GenerateStublessProxies="true"
-						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-						OutputDirectory="gen"
-						HeaderFileName="ShellGoodies_i.h"
-						InterfaceIdentifierFileName="ShellGoodies_i.c"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCMIDLTool"
-						GenerateStublessProxies="true"
-						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-						OutputDirectory="gen"
-						HeaderFileName="ShellGoodies_i.h"
-						InterfaceIdentifierFileName="ShellGoodies_i.c"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseU|x64"
-					>
-					<Tool
-						Name="VCMIDLTool"
-						GenerateStublessProxies="true"
-						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
-						OutputDirectory="gen"
-						HeaderFileName="ShellGoodies_i.h"
-						InterfaceIdentifierFileName="ShellGoodies_i.c"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\ShellGoodiesCom.cpp"

@@ -1,5 +1,5 @@
 
-BUILD the shell extension
+BUILD the shell extension:
 =========================
 - If already loaded, cannot link the dll: kill the explorer.exe process from Task Manager.
 - Windows 10: run Visual Studio 2008 as administrator:
@@ -7,7 +7,7 @@ BUILD the shell extension
 	- For proper registration in the final location use "Tools > Copy to Tools/mine/" and "Tools > Register DLL to Tools/mine/" while running as administrator.
 
 
-DEBUG the shell extension (ShellGoodies64.dll/ShellGoodies32.dll)
+DEBUG the shell extension (ShellGoodies64.dll/ShellGoodies32.dll):
 =========================
 1) Use ExplorerBrowser tool from CodeProject
 - this works like a charm for 32/64 bit shell extension.
@@ -31,7 +31,7 @@ DEBUG the shell extension (ShellGoodies64.dll/ShellGoodies32.dll)
 	Explorer: load the ShellGoodies shell extension (right click on a file), the attach the debugger to the corresponding explorer.exe process instance.
 
 
-DEBUG the REGISTRATION of shell extension (through regsvr32.exe)
+DEBUG the REGISTRATION of shell extension (through regsvr32.exe):
 =========================================
 	Command=regsvr32.exe
 	Command Arguments=-s $(TargetPath)
@@ -46,14 +46,32 @@ Note:
 Customize for dual VC9/VC17 projects:
 ====================================
 1) ShellGoodies > Properties > Configuration Properties > General:
-	Intermediate Directory=$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)
+	Output Directory=$(ProjectDir)bin\vc9\$(PlatformName)_$(ConfigurationName)
+	Intermediate Directory=$(OutDir)
+
 		Note:
 			I prefixed with "$(ProjectDir)", so that $(IntDir) is no longer a relative path.
 			That's required so that when I customize MIDL settings on ShellGoodies.idl and set Output Directory=gen\vc9,
 			it doesn't generate the .tlb deep under gen\vc9\bin\vc9\Win32_DebugU\ShellGoodies.tlb
 
-2) ShellGoodies.idl > Properties > MIDL > Output:
+2) ShellGoodies > Properties > Configuration Properties > MIDL > Output:	[2025-05-31]
+- select "ShellGoodies" project:
 	Output directory=gen
+	Header File=$(ProjectName)_i.h
+	DLL Data File=dlldata.c
+	IID File=$(ProjectName)_i.c
+	Proxy File=$(ProjectName)_p.c
+	Generate Type Library=Yes
+	Type Library=$(IntDir)/$(ProjectName).tlb
+- select "ShellGoodies.idl" file:
+	- All settings are inherited from project default:
+	Output directory=gen
+	Header File=$(ProjectName)_i.h
+	DLL Data File=dlldata.c
+	IID File=$(ProjectName)_i.c
+	Proxy File=$(ProjectName)_p.c
+	Generate Type Library=Yes
+	Type Library=$(IntDir)/$(ProjectName).tlb
 
 3) Create project filters "Source Files/gen" and "Source Files/gen/excluded", and add the following files:
 	Source Files/gen
