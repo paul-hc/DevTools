@@ -114,7 +114,7 @@ namespace mfc
 		: CMFCToolBarMenuButton( btnId, nullptr, -1, pColorEntry->GetName().c_str() )
 		, m_color( pColorEntry->GetColor() )
 	{
-		m_dwdItemData = reinterpret_cast<DWORD_PTR>( pColorEntry );
+		utl::StoreValueAs( m_dwdItemData, pColorEntry );
 
 		if ( !ui::IsUndefinedColor( m_color ) )
 			mfc::ToolBarButton_SetImageById( this, ID_TRANSPARENT );		// draw color on top of transparent background
@@ -267,7 +267,7 @@ namespace mfc
 
 		m_Colors.RemoveAll();
 		m_pColorTable->QueryMfcColors( m_Colors );
-		m_dwdItemData = reinterpret_cast<DWORD_PTR>( m_pColorTable );
+		utl::StoreValueAs( m_dwdItemData, m_pColorTable );
 
 		SetColumnsNumber( m_pColorTable->GetColumnCount() );		// by default assume using CMFCColorBar nameless grid
 		SetEditorHost( pEditorHost );

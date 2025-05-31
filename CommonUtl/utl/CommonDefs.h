@@ -313,6 +313,13 @@ namespace utl
 	inline size_t GetLastPos( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return rItems.size() - 1; }
 
 
+	template< typename DestT, typename SrcT >
+	void StoreValueAs( DestT& rDestValue, const SrcT& srcValue )
+	{	// use as scalar assignment workaround for MFC framework changes across versions, e.g. with DestT as DWORD (version 1) and DWORD_PTR (version2)
+		rDestValue = reinterpret_cast<DestT>( srcValue );
+	}
+
+
 	template< typename ValueType >
 	inline void AssignPtr( ValueType* pField, const ValueType& value )
 	{

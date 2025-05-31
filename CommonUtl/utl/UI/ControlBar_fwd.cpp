@@ -56,7 +56,7 @@ namespace nosy
 	{
 		// public access
 		void* GetItemData( void ) const { return reinterpret_cast<void*>( m_dwdItemData ); }
-		void SetItemData( const void* pItemData ) { m_dwdItemData = reinterpret_cast<DWORD_PTR>( pItemData ); }
+		void SetItemData( const void* pItemData ) { utl::StoreValueAs( m_dwdItemData, pItemData ); }
 
 		CRect GetImageBoundsRect( void ) const
 		{
