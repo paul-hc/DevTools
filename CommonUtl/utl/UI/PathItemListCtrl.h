@@ -24,9 +24,11 @@ public:
 	COLORREF GetMissingFileColor( void ) const { return m_missingFileColor; }
 	void SetMissingFileColor( COLORREF missingFileColor ) { m_missingFileColor = missingFileColor; }
 
+	static fs::CPath AsPath( const utl::ISubject* pObject );		// expands environment variables ("%WIN_VAR%" and "$(VC_MACRO_VAR)")
+
 	// selection
 	template< typename PathType >
-	bool QuerySelectedItemPaths( std::vector<PathType>& rSelFilePaths ) const;
+	bool QuerySelectedItemPaths( std::vector<PathType>& rSelFilePaths, bool expanded = true ) const;
 
 	// base overrides
 	virtual CMenu* GetPopupMenu( ListPopup popupType );
@@ -52,7 +54,7 @@ protected:
 // template code
 
 template< typename PathType >
-bool CPathItemListCtrl::QuerySelectedItemPaths( std::vector<PathType>& rSelFilePaths ) const
+bool CPathItemListCtrl::QuerySelectedItemPaths( std::vector<PathType>& rSelFilePaths, bool expanded /*= true*/ ) const
 {
 	std::vector<utl::ISubject*> selItems;		// stands for CPathItemBase
 	QuerySelectionAs( selItems );
@@ -61,6 +63,10 @@ bool CPathItemListCtrl::QuerySelectedItemPaths( std::vector<PathType>& rSelFileP
 		return false;
 
 	utl::QueryObjectCodes( rSelFilePaths, selItems );
+
+	if ( expanded )
+		std::for_each( rSelFilePaths.begin(), rSelFilePaths.end(), func::ExpandPath() );
+
 	return true;
 }
 

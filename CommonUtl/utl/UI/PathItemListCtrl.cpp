@@ -43,6 +43,16 @@ CMenu& CPathItemListCtrl::GetStdPathListPopupMenu( ListPopup popupType )
 	return rMenu;
 }
 
+fs::CPath CPathItemListCtrl::AsPath( const utl::ISubject* pObject )
+{
+	fs::CPath filePath;
+
+	if ( pObject != nullptr )
+		filePath = env::ExpandPaths( pObject->GetCode().c_str() );		// expand environment variables ("%WIN_VAR%" and "$(VC_MACRO_VAR)")
+
+	return filePath;
+}
+
 CMenu* CPathItemListCtrl::GetPopupMenu( ListPopup popupType )
 {
 	CMenu* pSrcPopupMenu = __super::GetPopupMenu( popupType );
@@ -76,7 +86,7 @@ void CPathItemListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	if ( 0 == subItem && m_missingFileColor != CLR_NONE )
 		if ( const utl::ISubject* pObject = AsPtr<utl::ISubject>( rowKey ) )
 		{
-			const fs::CPath filePath( pObject->GetCode() );
+			const fs::CPath filePath = AsPath( pObject );
 
 			if ( !filePath.FileExist() )
 				rTextEffect.m_textColor = m_missingFileColor;		// highlight in red text the missing file/directory
@@ -118,7 +128,7 @@ BOOL CPathItemListCtrl::OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 		int itemIndex = HitTest( pNmItemActivate->ptAction, &flags );
 		if ( itemIndex != -1 && !HasFlag( flags, LVHT_ONITEMSTATEICON ) )				// on item but not checkbox
 			if ( utl::ISubject* pCaretObject = GetSubjectAt( pNmItemActivate->iItem ) )
-				return ShellInvokeDefaultVerb( std::vector<fs::CPath>( 1, pCaretObject->GetCode() ) );
+				return ShellInvokeDefaultVerb( std::vector<fs::CPath>( 1, AsPath( pCaretObject ) ) );
 	}
 
 	return FALSE;			// raise the notification to parent

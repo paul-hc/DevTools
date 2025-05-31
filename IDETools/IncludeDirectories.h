@@ -41,7 +41,7 @@ public:
 private:
 	void Clear( void );
 private:
-	utl::vector_map<std::tstring, CIncludePaths*> m_includePaths;		// set-name to include paths
+	utl::vector_map<std::tstring, CIncludePaths*> m_includePaths;	// set-name to include paths
 	size_t m_currSetPos;
 	mutable std::vector<inc::TDirSearchPair> m_searchSpecs;			// self-encapsulated cache of search specs
 

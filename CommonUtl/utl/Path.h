@@ -339,6 +339,12 @@ struct std::hash<fs::CPath>
 };
 
 
+namespace env
+{
+	std::tstring ExpandPaths( const TCHAR* pSource );			// fwd-declare from StringUtilities.h
+}
+
+
 namespace func
 {
 	struct ToNameExt
@@ -351,10 +357,36 @@ namespace func
 	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
 
 	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }
+
+
+	struct ExpandPath
+	{
+		void operator()( std::tstring& rFilePath ) const
+		{
+			rFilePath = env::ExpandPaths( rFilePath.c_str() );
+		}
+
+		template< typename PathT >
+		void operator()( PathT& rPath ) const
+		{
+			rPath.Set( env::ExpandPaths( rPath.GetPtr() ) );
+		}
+	};
 }
 
 
-namespace fs { struct CFileState; }
+namespace fs
+{
+	struct CFileState;
+
+
+	template< typename PathT >
+	const PathT& ExpandPath( PathT& rPath )
+	{
+		func::ExpandPath( rPath );
+		return rPath;
+	}
+}
 
 
 namespace pred
