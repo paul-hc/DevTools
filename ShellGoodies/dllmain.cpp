@@ -22,64 +22,72 @@
 //	  run nmake -f ShellGoodiesps.mk in the project directory.
 
 #include "pch.h"
+#include "dllmain.h"
 #include "Application.h"
 
 #include "gen/ShellGoodies_i.h"
-#include "gen/ShellGoodies_i.c"
-#include "ShellGoodiesCom.h"
+#include "gen/ShellGoodies_i.c"		// for LIBID_ShellGoodiesLib linkage
 
 
-BEGIN_OBJECT_MAP( s_objectMap )
-	OBJECT_ENTRY( CLSID_ShellGoodiesCom, CShellGoodiesCom )
-END_OBJECT_MAP()
+CShellGoodiesModule g_atlModule;	// the ATL DLL module global singleton (replaces the CComModule singleton)
 
 
-namespace app
-{
-	HRESULT InitModule( HINSTANCE hInstance )
-	{
-		return g_comModule.Init( s_objectMap, hInstance, &LIBID_ShellGoodiesLib );
-	}
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE
-
+//
 STDAPI DllCanUnloadNow( void )
 {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
-	return ( S_OK == AfxDllCanUnloadNow() && 0 == g_comModule.GetLockCount() ) ? S_OK : S_FALSE;
+	return ( S_OK == AfxDllCanUnloadNow() && 0 == g_atlModule.GetLockCount() ) ? S_OK : S_FALSE;
 }
 
 
-/////////////////////////////////////////////////////////////////////////////
-// Returns a class factory to create an object of the requested type
-
+// Returns a class factory to create an object of the requested type.
+//
 STDAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 {
-	return g_comModule.GetClassObject(rclsid, riid, ppv);
+	return g_atlModule.GetClassObject(rclsid, riid, ppv);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// DllRegisterServer - Adds entries to the system registry
-
+// Adds entries to the system registry.
+//
 STDAPI DllRegisterServer( void )
 {
 	// OBSOLETE: the type library is not necessary for a shell extension DLL
-	//return HR_AUDIT( g_comModule.RegisterServer( TRUE ) );	// registers object, typelib and all interfaces in typelib
+	//return HR_AUDIT( g_atlModule.RegisterServer( TRUE ) );	// registers object, typelib and all interfaces in typelib
 
-	return HR_AUDIT( g_comModule.RegisterServer( FALSE ) );		// registers object, NO TYPELIB (read ProjectNotes.txt)
+	return HR_AUDIT( g_atlModule.RegisterServer( FALSE ) );		// registers object, NO TYPELIB (read ProjectNotes.txt)
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// DllUnregisterServer - Removes entries from the system registry
-
+// Removes entries from the system registry.
+//
 STDAPI DllUnregisterServer( void )
 {
 	// OBSOLETE: the type library is not necessary for a shell extension DLL
-	//return HR_AUDIT( g_comModule.UnregisterServer( TRUE ) );
+	//return HR_AUDIT( g_atlModule.UnregisterServer( TRUE ) );
 
-	return HR_AUDIT( g_comModule.UnregisterServer( FALSE ) );	// NO TYPELIB (read ProjectNotes.txt)
+	return HR_AUDIT( g_atlModule.UnregisterServer( FALSE ) );	// NO TYPELIB (read ProjectNotes.txt)
+}
 
+// Adds/Removes entries to the system registry per user per machine.
+//
+STDAPI DllInstall( BOOL install, /*_In_opt_*/ LPCWSTR pCmdLine )
+{
+	static const wchar_t s_userSwitch[] = L"user";
+	HRESULT hResult = E_FAIL;
+
+	if ( pCmdLine != nullptr )
+	{
+		if ( 0 == _wcsnicmp( pCmdLine, s_userSwitch, _countof( s_userSwitch ) ) )
+			ATL::AtlSetPerUserRegistration( true );
+	}
+
+	if ( install )
+	{
+		if ( !HR_OK( hResult = DllRegisterServer() ) )
+			DllUnregisterServer();
+	}
+	else
+		HR_AUDIT( hResult = DllUnregisterServer() );
+
+	return hResult;
 }

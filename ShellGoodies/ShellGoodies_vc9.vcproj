@@ -478,7 +478,7 @@
 					>
 					<Tool
 						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="MY_RC_WIN64"
 						AdditionalIncludeDirectories="$(OUTDIR)"
 					/>
 				</FileConfiguration>
@@ -496,7 +496,7 @@
 					>
 					<Tool
 						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="MY_RC_WIN64"
 						AdditionalIncludeDirectories="$(OUTDIR)"
 					/>
 				</FileConfiguration>
@@ -528,6 +528,14 @@
 			</File>
 			<File
 				RelativePath=".\Application_fwd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dllmain.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dllmain.h"
 				>
 			</File>
 			<File
@@ -572,10 +580,6 @@
 			</File>
 			<File
 				RelativePath=".\pch.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ShellGoodies.cpp"
 				>
 			</File>
 			<File

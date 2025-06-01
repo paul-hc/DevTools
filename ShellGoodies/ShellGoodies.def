@@ -4,8 +4,11 @@
 ;LIBRARY      "ShellGoodies32.DLL"
 ;LIBRARY      "ShellGoodies64.DLL"
 
+LIBRARY
+
 EXPORTS
 	DllCanUnloadNow PRIVATE
 	DllGetClassObject PRIVATE
 	DllRegisterServer PRIVATE
     DllUnregisterServer PRIVATE
+	DllInstall		PRIVATE

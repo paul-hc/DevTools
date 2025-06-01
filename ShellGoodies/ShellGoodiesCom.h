@@ -3,7 +3,7 @@
 #pragma once
 
 #include "gen/ShellGoodies_i.h"
-#include "resource.h"
+#include "resource.h"				// for IDR_SHELL_GOODIES_APP
 
 
 class CShellMenuController;
@@ -48,6 +48,10 @@ public:
 	STDMETHOD( InvokeCommand )( CMINVOKECOMMANDINFO* pCmi );
 	STDMETHOD( GetCommandString )( UINT_PTR idCmd, UINT flags, UINT* pReserved, LPSTR pName, UINT cchMax );
 };
+
+
+OBJECT_ENTRY_AUTO( __uuidof( ShellGoodiesCom ), CShellGoodiesCom )
+	// [2025] VC17 ATL AppWiz: this replaces the obsolete "BEGIN_OBJECT_MAP( s_objectMap ) OBJECT_ENTRY( CLSID_ShellGoodiesCom, CShellGoodiesCom ) END_OBJECT_MAP()" code
 
 
 #endif // ShellGoodiesCom_h

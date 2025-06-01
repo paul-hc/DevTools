@@ -100,8 +100,8 @@ Remove OLE Automation features that we don't need (wizard-generated code) from S
 Remove the type library from ShellGoodies.rc resources: Resource Includes > Compile-time directives, remove the line:
 	1 TYPELIB "ShellGoodies.tlb"
 Change module server registration in ShellGoodies.cpp:
-	return g_comModule.RegisterServer( FALSE );			// registers object, NO TYPELIB (read ProjectNotes.txt)
-	return g_comModule.UnregisterServer( FALSE );		// NO TYPELIB (read ProjectNotes.txt)
+	return g_atlModule.RegisterServer( FALSE );			// registers object, NO TYPELIB (read ProjectNotes.txt)
+	return g_atlModule.UnregisterServer( FALSE );		// NO TYPELIB (read ProjectNotes.txt)
 
 Final registration detail: on NT it's advisable to put our shell extension in a list of "approved" extensions.
 There is a system policy that can be set to prevent extensions from being loaded if they are not on the approved list.
@@ -147,6 +147,11 @@ Generated ShellGoodies_vc17.sln with ATL AppWizard in VC++ 2022, with the option
 	[X] Support MFC
 
 Migrated ShellGoodies_vc17.sln in DevTools\ShellGoodies.
+
+4) [2025-06-01]
+Replaced 'CComModule g_comModule;' with 'CShellGoodiesModule g_atlModule;' ATL DLL module singleton object.
+This was inspired by the new wizard-generated ATL DLL project: C:\Users\Paul\source\repos\ShellGoodies\ShellGoodies.sln in Visual Studio 2022.
+
 
 
 BUGS:

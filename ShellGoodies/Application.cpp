@@ -16,8 +16,7 @@
 #include "utl/UI/BaseApp.hxx"
 
 
-CComModule g_comModule;			// the global singleton COM DLL module
-CApplication g_mfcApp;			// the global singleton MFC CWinApp
+CApplication g_mfcApp;				// the global singleton MFC CWinApp
 
 
 namespace ut
@@ -66,10 +65,6 @@ CApplication::~CApplication()
 BOOL CApplication::InitInstance( void ) override
 {
 	// called once when the user right-clicks on selected files in Explorer for the first time.
-
-	if ( !HR_OK( app::InitModule( m_hInstance ) ) )
-		return FALSE;
-
 	AfxSetResourceHandle( m_hInstance );
 
 	return __super::InitInstance();
@@ -87,8 +82,6 @@ int CApplication::ExitInstance( void ) override
 
 		CGeneralOptions::Instance().SaveToRegistry();
 	}
-
-	g_comModule.Term();
 	return __super::ExitInstance();
 }
 

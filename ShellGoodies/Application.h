@@ -55,15 +55,10 @@ private:
 };
 
 
-extern CComModule g_comModule;
-
-
 namespace app
 {
 	CApplication* GetApp( void );
 	inline CWnd* GetMainWnd( void ) { return CScopedMainWnd::GetParentOwnerWnd(); }
-
-	HRESULT InitModule( HINSTANCE hInstance );
 }
 
 
