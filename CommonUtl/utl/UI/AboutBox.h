@@ -27,6 +27,7 @@ private:
 	void AddBuildInfoPair( int pos, const TCHAR* pProperty, const std::tstring& value, const void* pItemData = nullptr );
 public:
 	static UINT s_appIconId;
+	static const TCHAR s_blackCircleCh;
 private:
 	st::CScopedInitializeOle m_scopedOle;		// enable clipboard support
 

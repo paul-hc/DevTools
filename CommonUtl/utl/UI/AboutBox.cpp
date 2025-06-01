@@ -95,7 +95,10 @@ namespace hlp
 
 		const hlp::CCompilerInfo& compilerInfo = hlp::FormatCompilerInfo( mscVer );
 
-		return str::Format( _T("%s, %s, MSC %d.%d"), compilerInfo.m_pVisualStudio, compilerInfo.m_pVisualCpp, MS_COMPILER_VER_MAJOR( mscVer ), MS_COMPILER_VER_MINOR( mscVer ) );
+		return str::Format( _T("%s   %c   %s   %c   MSC %d.%d"),
+			compilerInfo.m_pVisualStudio, CAboutBox::s_blackCircleCh,
+			compilerInfo.m_pVisualCpp, CAboutBox::s_blackCircleCh,
+			MS_COMPILER_VER_MAJOR( mscVer ), MS_COMPILER_VER_MINOR( mscVer ) );
 	}
 
 
@@ -110,11 +113,11 @@ namespace hlp
 		bool isMfcDll = false;
 	#endif
 
-		return str::Format( _T("MFC %d.%d %c %s"),
-							MFC_VER_MAJOR( mfcVer ),
-							MFC_VER_MINOR( mfcVer ),
-							str::Conditional( L'\x25cf', '-' ),
-							isMfcDll ? _T("Dynamic Library") : _T("Static Library") );
+		return str::Format( _T("MFC %d.%d   %c   %s"),
+			MFC_VER_MAJOR( mfcVer ),
+			MFC_VER_MINOR( mfcVer ),
+			CAboutBox::s_blackCircleCh,
+			isMfcDll ? _T("Dynamic Library") : _T("Static Library") );
 	}
 
 	const TCHAR* FormatWindowsVersion( WORD winVer = WINVER )		// _WIN32_WINNT_* macro (_WIN32_WINNT_WIN7) <=> high-word of NTDDI_* macro (e.g. NTDDI_WIN7)
@@ -209,6 +212,7 @@ namespace layout
 
 
 UINT CAboutBox::s_appIconId = 0;
+const TCHAR CAboutBox::s_blackCircleCh = str::Conditional( L'\x25cf', '-' );
 
 CAboutBox::CAboutBox( CWnd* pParent )
 	: CLayoutDialog( IDD_ABOUT_BOX, pParent )
