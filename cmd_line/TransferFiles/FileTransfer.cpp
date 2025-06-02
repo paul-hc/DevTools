@@ -74,7 +74,7 @@ int CFileTransfer::Transfer( void )
 		}
 	}
 
-	return m_fileCount;
+	return static_cast<int>( m_fileCount );
 }
 
 void CFileTransfer::SearchSourceFiles( const fs::CPath& dirPath )
