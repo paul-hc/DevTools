@@ -78,25 +78,25 @@
     <OutDir>$(ProjectDir)bin\vc17\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(OutDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>xFer.exe</TargetName>
+    <TargetName>xFer</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\vc17\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(OutDir)</IntDir>
-    <TargetName>xFer.exe</TargetName>
+    <TargetName>xFer</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
     <OutDir>$(ProjectDir)bin\vc17\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(OutDir)</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>xFer.exe</TargetName>
+    <TargetName>xFer</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\vc17\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(OutDir)</IntDir>
-    <TargetName>xFer.exe</TargetName>
+    <TargetName>xFer</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
     <Midl>
