@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{e4a917c5-c712-4aa9-b224-6b00802241d7}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{e96ab493-bf67-46ac-ab73-eaea502022d3}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{4658aa31-444d-44fa-b7d0-2c6b1c83b288}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code">
+      <UniqueIdentifier>{3c263fc6-8137-449c-9d12-b4f3fba87d83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\UI">
+      <UniqueIdentifier>{e5ccf827-3843-4423-9bcc-d94c315301f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\command">
+      <UniqueIdentifier>{72ac1bf8-e925-4a37-b077-94bf3a8c6ac5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\model">
+      <UniqueIdentifier>{4bb78c21-77c2-4f87-b8de-1f045dc12644}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main Code\service">
+      <UniqueIdentifier>{c24c7b05-8e69-4cb3-96f7-fbe2635ff18f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{0db1fbaa-d65b-4374-bdc3-247078ee9202}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files\excluded">
+      <UniqueIdentifier>{f2442b3c-9858-448c-9de8-92449130f6d3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\ImageStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ImageStrip.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\MessageTray.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ShellGoodies.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ShellGoodies.rgs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ToolStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ToolStrip.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ShellGoodies.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="_scratch.txt" />
+    <None Include="ProjectNotes.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Application_fwd.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dllmain.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellGoodiesCom.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\RenameFilesTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TextAlgorithmsTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdDashboardDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="FileEditorBaseDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="FindDuplicatesDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionsPages.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionsSheet.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="RenameFilesDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="RenamePages.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ReplaceDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TouchFilesDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="AppCommands.h">
+      <Filter>Main Code\command</Filter>
+    </ClInclude>
+    <ClInclude Include="AppCommands_fwd.h">
+      <Filter>Main Code\command</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandModelPersist.h">
+      <Filter>Main Code\command</Filter>
+    </ClInclude>
+    <ClInclude Include="EditingCommands.h">
+      <Filter>Main Code\command</Filter>
+    </ClInclude>
+    <ClInclude Include="EditingCommands.hxx">
+      <Filter>Main Code\command</Filter>
+    </ClInclude>
+    <ClInclude Include="FileGroupCommands.h">
+      <Filter>Main Code\command</Filter>
+    </ClInclude>
+    <ClInclude Include="FileMacroCommands.h">
+      <Filter>Main Code\command</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandItem.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="DropFilesModel.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="FileModel.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneralOptions.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="IFileEditor.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="PathItemSorting.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="RenameItem.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellMenuController.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="TouchItem.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
+    <ClInclude Include="AppCmdService.h">
+      <Filter>Main Code\service</Filter>
+    </ClInclude>
+    <ClInclude Include="FileService.h">
+      <Filter>Main Code\service</Filter>
+    </ClInclude>
+    <ClInclude Include="RenameService.h">
+      <Filter>Main Code\service</Filter>
+    </ClInclude>
+    <ClInclude Include="TextAlgorithms.h">
+      <Filter>Main Code\service</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleCapitalizer.h">
+      <Filter>Main Code\service</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ShellGoodies.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellGoodiesCom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\RenameFilesTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TextAlgorithmsTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdDashboardDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="FileEditorBaseDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="FindDuplicatesDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsPages.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="RenameFilesDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="RenamePages.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ReplaceDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TouchFilesDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="AppCommands.cpp">
+      <Filter>Main Code\command</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandModelPersist.cpp">
+      <Filter>Main Code\command</Filter>
+    </ClCompile>
+    <ClCompile Include="EditingCommands.cpp">
+      <Filter>Main Code\command</Filter>
+    </ClCompile>
+    <ClCompile Include="FileGroupCommands.cpp">
+      <Filter>Main Code\command</Filter>
+    </ClCompile>
+    <ClCompile Include="FileMacroCommands.cpp">
+      <Filter>Main Code\command</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandItem.cpp">
+      <Filter>Main Code\model</Filter>
+    </ClCompile>
+    <ClCompile Include="DropFilesModel.cpp">
+      <Filter>Main Code\model</Filter>
+    </ClCompile>
+    <ClCompile Include="FileModel.cpp">
+      <Filter>Main Code\model</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneralOptions.cpp">
+      <Filter>Main Code\model</Filter>
+    </ClCompile>
+    <ClCompile Include="PathItemSorting.cpp">
+      <Filter>Main Code\model</Filter>
+    </ClCompile>
+    <ClCompile Include="RenameItem.cpp">
+      <Filter>Main Code\model</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellMenuController.cpp">
+      <Filter>Main Code\model</Filter>
+    </ClCompile>
+    <ClCompile Include="TouchItem.cpp">
+      <Filter>Main Code\model</Filter>
+    </ClCompile>
+    <ClCompile Include="AppCmdService.cpp">
+      <Filter>Main Code\service</Filter>
+    </ClCompile>
+    <ClCompile Include="FileService.cpp">
+      <Filter>Main Code\service</Filter>
+    </ClCompile>
+    <ClCompile Include="RenameService.cpp">
+      <Filter>Main Code\service</Filter>
+    </ClCompile>
+    <ClCompile Include="TextAlgorithms.cpp">
+      <Filter>Main Code\service</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleCapitalizer.cpp">
+      <Filter>Main Code\service</Filter>
+    </ClCompile>
+    <ClCompile Include="gen\ShellGoodies_i.c">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gen\ShellGoodies_p.c">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gen\dlldata.c">
+      <Filter>Generated Files\excluded</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="ShellGoodies.idl">
+      <Filter>Source Files</Filter>
+    </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="gen\ShellGoodies_i.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>
