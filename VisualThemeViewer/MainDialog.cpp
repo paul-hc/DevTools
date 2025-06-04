@@ -146,13 +146,13 @@ void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowK
 
 	if ( &m_classList == pCtrl )
 	{
-		pThemeNode = m_classList.AsPtr< IThemeNode >( rowKey );
+		pThemeNode = m_classList.AsPtr<IThemeNode>( rowKey );
 
 		if ( 0 == subItem )
 			rTextEffect.m_fontEffect = ui::Bold;
 	}
 	if ( &m_partStateTree == pCtrl )
-		pThemeNode = m_partStateTree.GetItemObject< IThemeNode >( reinterpret_cast< HTREEITEM >( rowKey ) );
+		pThemeNode = m_partStateTree.GetItemObject<IThemeNode>( reinterpret_cast<HTREEITEM>( rowKey ) );
 
 	if ( 0 == subItem )
 		switch ( pThemeNode->GetRelevance() )
@@ -174,7 +174,7 @@ void CMainDialog::SetupClassesList( void )
 
 		m_classList.DeleteAllItems();
 
-		Relevance classFilter = static_cast< Relevance >( m_classFilterCombo.GetCurSel() );
+		Relevance classFilter = static_cast<Relevance>( m_classFilterCombo.GetCurSel() );
 
 		unsigned int index = 0;
 		for ( CThemeClass* pClass : m_pThemeStore->m_classes )
@@ -189,7 +189,7 @@ void CMainDialog::SetupClassesList( void )
 	}
 
 	if ( NULL == m_pSelClass || !m_classList.Select( m_pSelClass ) )
-		m_classList.Select( m_pSelClass = m_classList.GetObjectAt< CThemeClass >( 0 ) );
+		m_classList.Select( m_pSelClass = m_classList.GetObjectAt<CThemeClass>( 0 ) );
 
 	ui::SetDlgItemText( this, IDC_CLASS_LABEL,
 		str::Format( _T("Theme &Class (%s):"), hlp::FormatCounts( m_classList.GetItemCount(), m_pThemeStore->m_classes.size() ).c_str() ) );
@@ -204,7 +204,7 @@ void CMainDialog::SetupPartsAndStatesTree( void )
 		CScopedLockRedraw freeze( &m_partStateTree );
 		CScopedInternalChange internalChange( &m_partStateTree );
 
-		Relevance partsStatesFilter = static_cast< Relevance >( m_partsFilterCombo.GetCurSel() );
+		Relevance partsStatesFilter = static_cast<Relevance>( m_partsFilterCombo.GetCurSel() );
 
 		m_partStateTree.DeleteAllItems();
 
@@ -230,7 +230,7 @@ void CMainDialog::SetupPartsAndStatesTree( void )
 	}
 
 	if ( NULL == m_pSelNode || !m_partStateTree.SetSelected( m_pSelNode ) )
-		m_partStateTree.SetSelected( m_pSelNode = m_partStateTree.GetItemObject< IThemeNode >( m_partStateTree.GetChildItem( TVI_ROOT ) ) );
+		m_partStateTree.SetSelected( m_pSelNode = m_partStateTree.GetItemObject<IThemeNode>( m_partStateTree.GetChildItem( TVI_ROOT ) ) );
 
 	ui::SetDlgItemText( this, IDC_PARTS_AND_STATES_LABEL,
 		str::Format( _T("&Parts (%s) && States (%s):"),
@@ -265,11 +265,11 @@ CThemeContext CMainDialog::GetSelThemeContext( void ) const
 		switch ( m_pSelNode->GetNodeType() )
 		{
 			case IThemeNode::State:
-				selTheme.m_pState = static_cast< CThemeState* >( m_pSelNode );
-				selTheme.m_pPart = selTheme.m_pState->GetParentAs< CThemePart >();
+				selTheme.m_pState = static_cast<CThemeState*>( m_pSelNode );
+				selTheme.m_pPart = selTheme.m_pState->GetParentAs<CThemePart>();
 				break;
 			case IThemeNode::Part:
-				selTheme.m_pPart = static_cast< CThemePart* >( m_pSelNode );
+				selTheme.m_pPart = static_cast<CThemePart*>( m_pSelNode );
 				break;
 		}
 
@@ -376,7 +376,7 @@ void CMainDialog::OnLvnItemChanged_ThemeClass( NMHDR* pNmHdr, LRESULT* pResult )
 	if ( !m_classList.IsInternalChange() )
 		if ( CReportListControl::IsSelectionChangeNotify( pNmList ) && HasFlag( pNmList->uNewState, LVIS_SELECTED ) )		// new item selected?
 		{
-			m_pSelClass = m_classList.GetSelected< CThemeClass >();
+			m_pSelClass = m_classList.GetSelected<CThemeClass>();
 			SetupPartsAndStatesTree();
 		}
 }
@@ -388,7 +388,7 @@ void CMainDialog::OnTvnSelChanged_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult
 
 	if ( !m_partStateTree.IsInternalChange() )
 	{
-		m_pSelNode = m_partStateTree.GetSelected< IThemeNode >();
+		m_pSelNode = m_partStateTree.GetSelected<IThemeNode>();
 		OutputCurrentTheme();
 	}
 }
@@ -429,7 +429,7 @@ void CMainDialog::OnUpdateCopyTheme( CCmdUI* pCmdUI )
 
 void CMainDialog::OnBrowseThemes( void )
 {
-	Relevance relevanceFilter = static_cast< Relevance >( std::max( m_classFilterCombo.GetCurSel(), m_partsFilterCombo.GetCurSel() ) );
+	Relevance relevanceFilter = static_cast<Relevance>( std::max( m_classFilterCombo.GetCurSel(), m_partsFilterCombo.GetCurSel() ) );
 	CBrowseThemesDialog dlg( m_pOptions, m_pThemeStore, relevanceFilter, this );
 
 	dlg.SetSelectedNode( m_pSelNode );

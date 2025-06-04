@@ -60,25 +60,25 @@ CThemeClass* CBrowseThemesDialog::GetSelectedClass( void ) const
 	if ( NULL == m_pSelNode )
 		return NULL;
 
-	if ( CThemeClass* pSelClass = dynamic_cast< CThemeClass* >( m_pSelNode ) )
+	if ( CThemeClass* pSelClass = dynamic_cast<CThemeClass*>( m_pSelNode ) )
 		return pSelClass;
 
-	if ( CThemePart* pSelPart = dynamic_cast< CThemePart* >( m_pSelNode ) )
-		return pSelPart->GetParentAs< CThemeClass >();
+	if ( CThemePart* pSelPart = dynamic_cast<CThemePart*>( m_pSelNode ) )
+		return pSelPart->GetParentAs<CThemeClass>();
 
-	CThemeState* pSelState = checked_static_cast< CThemeState* >( m_pSelNode );
+	CThemeState* pSelState = checked_static_cast<CThemeState*>( m_pSelNode );
 
-	return pSelState->GetParentAs< CThemePart >()->GetParentAs< CThemeClass >();
+	return pSelState->GetParentAs<CThemePart>()->GetParentAs<CThemeClass>();
 }
 
 void CBrowseThemesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
 	subItem, pCtrl;
-	const IThemeNode* pThemeNode = m_themesTree.GetItemObject< IThemeNode >( reinterpret_cast< HTREEITEM >( rowKey ) );
+	const IThemeNode* pThemeNode = m_themesTree.GetItemObject<IThemeNode>( reinterpret_cast<HTREEITEM>( rowKey ) );
 
-	if ( is_a< CThemeClass >( pThemeNode ) )
+	if ( is_a<CThemeClass>( pThemeNode ) )
 		rTextEffect.m_fontEffect = ui::Bold | ui::Underline;
-	else if ( is_a< CThemePart >( pThemeNode ) )
+	else if ( is_a<CThemePart>( pThemeNode ) )
 		rTextEffect.m_fontEffect = ui::Bold;
 
 	switch ( pThemeNode->GetRelevance() )
@@ -100,7 +100,7 @@ void CBrowseThemesDialog::SetupTree( void )
 
 		m_themesTree.DeleteAllItems();
 
-		Relevance relevanceFilter = static_cast< Relevance >( m_filterCombo.GetCurSel() );
+		Relevance relevanceFilter = static_cast<Relevance>( m_filterCombo.GetCurSel() );
 
 		for ( CThemeClass* pClass : m_pThemeStore->m_classes )
 			if ( pClass->GetRelevance() <= relevanceFilter )
@@ -124,7 +124,7 @@ void CBrowseThemesDialog::SetupTree( void )
 	if ( NULL == m_pSelNode || !m_themesTree.SetSelected( m_pSelNode ) )
 	{
 		HTREEITEM hFirstItem = m_themesTree.GetChildItem( TVI_ROOT );
-		m_pSelNode = m_themesTree.GetItemObject< IThemeNode >( hFirstItem );
+		m_pSelNode = m_themesTree.GetItemObject<IThemeNode>( hFirstItem );
 		m_themesTree.SelectItem( hFirstItem );
 	}
 
@@ -177,5 +177,5 @@ void CBrowseThemesDialog::OnTvnSelChanged_ThemesTree( NMHDR* pNmHdr, LRESULT* pR
 
 	if ( !m_themesTree.IsInternalChange() )
 		if ( HTREEITEM hSelItem = m_themesTree.GetSelectedItem() )
-			SetSelectedNode( m_themesTree.GetItemObject< IThemeNode >( hSelItem ) );
+			SetSelectedNode( m_themesTree.GetItemObject<IThemeNode>( hSelItem ) );
 }

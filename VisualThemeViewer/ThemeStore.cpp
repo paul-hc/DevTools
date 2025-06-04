@@ -36,9 +36,9 @@ const CEnumTags& GetTags_Relevance( void )
 
 CThemeItemNode CThemeState::MakeThemeItem( void ) const
 {
-	const CThemePart* pPart = GetParentAs< CThemePart >();
+	const CThemePart* pPart = GetParentAs<CThemePart>();
 
-	return CThemeItemNode( pPart->GetParentAs< CThemeClass >()->m_className.c_str(), pPart->m_partId, m_stateId, this );
+	return CThemeItemNode( pPart->GetParentAs<CThemeClass>()->m_className.c_str(), pPart->m_partId, m_stateId, this );
 }
 
 
@@ -74,7 +74,7 @@ CThemeItemNode CThemePart::MakeThemeItem( void ) const
 	if ( const CThemeState* pPreviewState = GetPreviewState() )
 		return pPreviewState->MakeThemeItem();
 
-	return CThemeItemNode( GetParentAs< CThemeClass >()->m_className.c_str(), m_partId, 0, this );
+	return CThemeItemNode( GetParentAs<CThemeClass>()->m_className.c_str(), m_partId, 0, this );
 }
 
 bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
@@ -101,7 +101,7 @@ bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 const CThemeState* CThemePart::GetPreviewState( void ) const
 {
 	if ( NULL == m_pPreviewState && !m_states.empty() )
-		m_pPreviewState = *std::min_element( m_states.begin(), m_states.end(), pred::LessValue< pred::TCompareRelevance >() );
+		m_pPreviewState = *std::min_element( m_states.begin(), m_states.end(), pred::LessValue<pred::TCompareRelevance>() );
 
 	return m_pPreviewState;
 }
@@ -112,7 +112,7 @@ void CThemePart::SetPreviewState( const CThemeState* pPreviewState, RecursionDep
 	m_pPreviewState = pPreviewState;
 
 	if ( Deep == depth )
-		GetParentAs< CThemeClass >()->SetPreviewPart( this );
+		GetParentAs<CThemeClass>()->SetPreviewPart( this );
 }
 
 
@@ -166,7 +166,7 @@ CThemeItemNode CThemeClass::MakeThemeItem( void ) const
 bool CThemeClass::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 {
 	int implCount = 0;
-	for ( std::vector< CThemePart* >::const_iterator itPart = m_parts.begin(); itPart != m_parts.end(); ++itPart )
+	for ( std::vector<CThemePart*>::const_iterator itPart = m_parts.begin(); itPart != m_parts.end(); ++itPart )
 		if ( ( *itPart )->SetupNotImplemented( rTheme, hDC ) )
 			++implCount;
 		else
@@ -178,7 +178,7 @@ bool CThemeClass::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 const CThemePart* CThemeClass::GetPreviewPart( void ) const
 {
 	if ( NULL == m_pPreviewPart && !m_parts.empty() )
-		m_pPreviewPart = *std::min_element( m_parts.begin(), m_parts.end(), pred::LessValue< pred::TCompareRelevance >() );
+		m_pPreviewPart = *std::min_element( m_parts.begin(), m_parts.end(), pred::LessValue<pred::TCompareRelevance>() );
 
 	return m_pPreviewPart;
 }
@@ -217,11 +217,11 @@ bool CThemeStore::SetupNotImplementedThemes( void )
     CDC memoryDC;
 	memoryDC.CreateCompatibleDC( NULL );
 
-	CScopedValue< bool > scopedThemesEnabled( CVisualTheme::GetEnabledPtr(), true );
-	CScopedValue< bool > scopedThemeFallbackEnabled( CVisualTheme::GetFallbackEnabledPtr(), false );
+	CScopedValue<bool> scopedThemesEnabled( CVisualTheme::GetEnabledPtr(), true );
+	CScopedValue<bool> scopedThemeFallbackEnabled( CVisualTheme::GetFallbackEnabledPtr(), false );
 	int implCount = 0;
 
-	for ( std::vector< CThemeClass* >::const_iterator itClass = m_classes.begin(); itClass != m_classes.end(); ++itClass )
+	for ( std::vector<CThemeClass*>::const_iterator itClass = m_classes.begin(); itClass != m_classes.end(); ++itClass )
 	{
 		CVisualTheme theme( ( *itClass )->m_className.c_str() );
 		if ( theme.IsValid() && ( *itClass )->SetupNotImplemented( theme, memoryDC ) )

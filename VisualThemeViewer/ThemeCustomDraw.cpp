@@ -113,7 +113,7 @@ bool CThemeCustomDraw::SetItemImageSize( const CSize& boundsSize )
 
 bool CThemeCustomDraw::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemRect )
 {
-	const CBaseNode* pThemeNode = checked_static_cast< const CBaseNode* >( pSubject );
+	const CBaseNode* pThemeNode = checked_static_cast<const CBaseNode*>( pSubject );
 	ASSERT_PTR( pThemeNode );
 	CThemeItemNode themeItem = pThemeNode->MakeThemeItem();
 	int nodeFlags = themeItem.m_pDeepNode->GetFlags();

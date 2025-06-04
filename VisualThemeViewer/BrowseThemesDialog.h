@@ -37,7 +37,7 @@ private:
 	const COptions* m_pOptions;
 	const CThemeStore* m_pThemeStore;
 	Relevance m_relevanceFilter;
-	std::auto_ptr< CThemeCustomDraw > m_pTreeCustomDraw;
+	std::auto_ptr<CThemeCustomDraw> m_pTreeCustomDraw;
 
 	IThemeNode* m_pSelNode;
 private:

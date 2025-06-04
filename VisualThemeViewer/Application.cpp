@@ -60,11 +60,11 @@ BOOL CApplication::InitInstance( void )
 int CApplication::ExitInstance( void )
 {
 	m_pGdiPlusInit.reset();
-	return CBaseApp< CWinApp >::ExitInstance();
+	return CBaseApp<CWinApp>::ExitInstance();
 }
 
 
 // command handlers
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 END_MESSAGE_MAP()

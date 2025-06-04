@@ -59,7 +59,7 @@ COLORREF COptions::GetBkColor( void ) const
 
 CHistoryComboBox* COptions::GetBkColorCombo( void ) const
 {
-	return static_cast< CHistoryComboBox* >( m_pCallback->GetWnd()->GetDlgItem( IDC_BK_COLOR_COMBO ) );
+	return static_cast<CHistoryComboBox*>( m_pCallback->GetWnd()->GetDlgItem( IDC_BK_COLOR_COMBO ) );
 }
 
 void COptions::OnOptionChanged( const void* pDataMember )

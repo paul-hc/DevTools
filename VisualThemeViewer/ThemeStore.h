@@ -50,7 +50,7 @@ interface IThemeNode : public utl::ISubject
 };
 
 
-abstract class CBaseNode : public CSubjectImpl< IThemeNode >
+abstract class CBaseNode : public CSubjectImpl<IThemeNode>
 {
 protected:
 	CBaseNode( Relevance relevance, int flags ) : m_relevance( relevance ), m_pParentNode( NULL ), m_flags( flags ) {}
@@ -64,7 +64,7 @@ public:
 	void SetParentNode( IThemeNode* pParentNode ) { m_pParentNode = pParentNode; }
 
 	template< typename NodeT >
-	NodeT* GetParentAs( void ) const { return const_cast< NodeT* >( checked_static_cast< const NodeT* >( GetParentNode() ) ); }
+	NodeT* GetParentAs( void ) const { return const_cast<NodeT*>( checked_static_cast<const NodeT*>( GetParentNode() ) ); }
 
 	bool ModifyFlags( unsigned int clearFlags, unsigned int setFlags ) { return ::ModifyFlags( m_flags, clearFlags, setFlags ); }
 private:
@@ -109,7 +109,7 @@ struct CThemePart : public CBaseNode
 public:
 	int m_partId;
 	std::wstring m_partName;
-	std::vector< CThemeState* > m_states;
+	std::vector<CThemeState*> m_states;
 private:
 	mutable const CThemeState* m_pPreviewState;		// self-encapsulated through GetPreviewState()
 };
@@ -134,7 +134,7 @@ struct CThemeClass : public CBaseNode
 	void SetPreviewPart( const CThemePart* pPreviewPart ) { ASSERT_PTR( pPreviewPart ); m_pPreviewPart = pPreviewPart; }
 public:
 	std::wstring m_className;
-	std::vector< CThemePart* > m_parts;
+	std::vector<CThemePart*> m_parts;
 private:
 	mutable const CThemePart* m_pPreviewPart;		// self-encapsulated through GetPreviewPart()
 };
@@ -154,7 +154,7 @@ private:
 	CThemeClass* AddClass( const std::wstring& className, Relevance relevance = HighRelevance );
 	void RegisterStandardClasses( void );
 public:
-	std::vector< CThemeClass* > m_classes;
+	std::vector<CThemeClass*> m_classes;
 };
 
 
@@ -163,13 +163,13 @@ namespace func
 	struct AsRelevance
 	{
 		Relevance operator()( const IThemeNode* pThemeNode ) const { return pThemeNode->GetRelevance(); }
-		Relevance operator()( const utl::ISubject* pSubject ) const { return static_cast< const IThemeNode* >( pSubject )->GetRelevance(); }
+		Relevance operator()( const utl::ISubject* pSubject ) const { return static_cast<const IThemeNode*>( pSubject )->GetRelevance(); }
 	};
 }
 
 namespace pred
 {
-	typedef CompareScalarAdapterPtr< func::AsRelevance > TCompareRelevance;
+	typedef CompareScalarAdapterPtr<func::AsRelevance> TCompareRelevance;
 }
 
 
