@@ -346,7 +346,10 @@ void CGeneralPage::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
+		static const TCHAR s_tripleBullet[] = L"\x25E6\x25E6\x25E6";
+
 		m_pInfoEdit->SetupWindow();
+		m_drillButton.SetWindowText( s_tripleBullet );
 		OutputTargetWnd();
 	}
 

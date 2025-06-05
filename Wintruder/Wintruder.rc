@@ -14,13 +14,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -30,7 +28,9 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDD_MAIN_DIALOG         ICON                    "res\\Wintruder.ico"
+
 IDI_APP_SMALL_ICON      ICON                    "res\\WintruderSmall.ico"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION | WS_SYSMENU
 CAPTION "General"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    PUSHBUTTON      "···",IDC_FIELD_EDIT_BUTTON,219,0,12,8,NOT WS_VISIBLE | WS_GROUP | NOT WS_TABSTOP
+    PUSHBUTTON      "â€¢â€¢â€¢",IDC_FIELD_EDIT_BUTTON,219,0,12,8,NOT WS_VISIBLE | WS_GROUP | NOT WS_TABSTOP
     RTEXT           "Handle:\nWindow Class:\nCaption:\nID:\nStyle:\nExtended Style:\nWindow Rect:\nClient Rect:",IDC_STATIC,0,0,54,74
     EDITTEXT        IDC_GENERAL_INFO_EDIT,55,0,154,74,ES_MULTILINE | ES_AUTOHSCROLL | ES_NOHIDESEL | ES_READONLY | NOT WS_BORDER | WS_GROUP
 END
@@ -189,7 +189,7 @@ BEGIN
     LTEXT           "Do you want to modify attributes for window:",IDC_STATIC,35,6,140,8
 END
 
-IDD_EDIT_CAPTION_PAGE DIALOG  0, 0, 192, 82
+IDD_EDIT_CAPTION_PAGE DIALOG 0, 0, 192, 82
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION
 CAPTION "Caption"
 FONT 8, "MS Sans Serif"
@@ -277,8 +277,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,4,0,2
- PRODUCTVERSION 5,4,0,2
+ FILEVERSION 5,4,1,0
+ PRODUCTVERSION 5,4,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -293,18 +293,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "29-05-2025 02:50:41"
+            VALUE "BuildTimestamp", "05-06-2025 21:36:58"
             VALUE "Comments", "FindCapturedWnd|VC++ 2022|CTrayIcon|NewSysTray|Window Tree Enhancements|New Button Styles (split, link)|Split UTL_BASE/UTL_UI projects|Main dialog toolbar|Windows 10 fixes|Valuable hacking tool"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Wintruder Application"
-            VALUE "FileVersion", "5, 4, 0, 2"
+            VALUE "FileVersion", "5.4.1.0"
             VALUE "InternalName", "Wintruder"
-            VALUE "LegalCopyright", "Copyright © 1998-2023"
+            VALUE "LegalCopyright", "Copyright © 1998-2025"
             VALUE "LegalTrademarks", "Use it freely."
             VALUE "OriginalFilename", "Wintruder64.exe"
             VALUE "ProductName", "Wintruder"
-            VALUE "ProductVersion", "5, 4, 0, 2"
+            VALUE "ProductVersion", "5.4.1.0"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -321,7 +321,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_MAIN_DIALOG, DIALOG
     BEGIN
@@ -385,21 +385,25 @@ END
 //
 
 IDR_POINTER_CURSOR      CURSOR                  "res\\WindowPointer.cur"
+
 ID_MOVE_TOOL            CURSOR                  "res\\Move.cur"
+
 ID_SIZE_TOP_LEFT_TOOL   CURSOR                  "res\\SizeTopLeft.cur"
+
 ID_SIZE_BOTTOM_RIGHT_TOOL CURSOR                  "res\\SizeBottomRight.cur"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
 //
 
-IDD_GENERAL_PAGE ACCELERATORS 
+IDD_GENERAL_PAGE ACCELERATORS
 BEGIN
     VK_RETURN,      IDC_FIELD_EDIT_BUTTON,  VIRTKEY, NOINVERT
 END
 
-IDR_MAIN_SHARED_ACCEL ACCELERATORS 
+IDR_MAIN_SHARED_ACCEL ACCELERATORS
 BEGIN
     "A",            CM_ACTIVATE_WINDOW,     VIRTKEY, SHIFT, CONTROL, NOINVERT
     "1",            CM_EDIT_CAPTION,        VIRTKEY, CONTROL, NOINVERT
@@ -427,14 +431,14 @@ BEGIN
     VK_F2,          IDC_EXPAND_DETAILS,     VIRTKEY, NOINVERT
 END
 
-IDR_FLAGS_CONTROL_ACCEL ACCELERATORS 
+IDR_FLAGS_CONTROL_ACCEL ACCELERATORS
 BEGIN
     "C",            CM_COPY_FORMATTED,      VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      CM_COPY_FORMATTED,      VIRTKEY, CONTROL, NOINVERT
     "C",            CM_COPY_SELECTED,       VIRTKEY, SHIFT, CONTROL, NOINVERT
 END
 
-IDD_TREE_WND_PAGE ACCELERATORS 
+IDD_TREE_WND_PAGE ACCELERATORS
 BEGIN
     VK_DOWN,        CM_MOVE_WINDOW_DOWN,    VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_END,         CM_MOVE_WINDOW_TO_BOTTOM, VIRTKEY, SHIFT, CONTROL, NOINVERT
@@ -452,7 +456,7 @@ END
 // Menu
 //
 
-IDR_CONTEXT_MENU MENU 
+IDR_CONTEXT_MENU MENU
 BEGIN
     POPUP "<sys-tray icon>"
     BEGIN
@@ -552,7 +556,9 @@ END
 //
 
 IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+
 IDR_WND_TYPES_STRIP     BITMAP                  "res\\WndTypesStrip.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -561,12 +567,13 @@ IDR_WND_TYPES_STRIP     BITMAP                  "res\\WndTypesStrip.bmp"
 
 IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_IMAGE_STRIP TOOLBAR  16, 16
+IDR_IMAGE_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_MOVE_TOOL
     BUTTON      ID_SIZE_TOOL
@@ -590,7 +597,7 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_WND_EXPIRED_FMT     "Window with handle %08X does no longer exist."
     IDS_WND_NOT_FOUND       "Cannot find window with:"
@@ -602,18 +609,18 @@ BEGIN
     IDS_IDENT_PROMPTTITLE   "Modify Child Window Identifier"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PLACE_PROMPTTITLE   "Modify Window Placement"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_TRACK_TOOL_ICON     "Track Select Window"
     IDC_EXPAND_DETAILS      "Toggle window detail properties (F2)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     CM_EDIT_CAPTION         "Edit Window Caption (Ctrl+1)"
     CM_EDIT_IDENT           "Edit Child Window Identifier (Ctrl+2)"
@@ -621,7 +628,7 @@ BEGIN
     CM_EDIT_STYLE_EX        "Edit Window Extended Style (Ctrl+4)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     CM_EDIT_PLACE           "Edit Window Placement (Ctrl+5)"
     CM_HIGHLIGHT_WINDOW     "Highlight Current Window (F4)"
@@ -635,7 +642,7 @@ BEGIN
     CM_ACTIVATE_WINDOW      "Activate current window"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     CM_SHOW_WINDOW          "Show current window"
     CM_HIDE_WINDOW          "Hide current window"
@@ -643,7 +650,7 @@ BEGIN
     CM_TOGGLE_ENABLE_WINDOW "Toggle current window enabled state"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDD_MAIN_DIALOG         "About (F1), Toggle Details (F2), Find Next (F3), Find Previous (Shift+F3)"
     IDD_GENERAL_PAGE        "Alt+1"
@@ -654,12 +661,12 @@ BEGIN
     IDD_EDIT_PLACEMENT_PAGE "Ctrl+5"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_FLAGS_EDITOR_LIST   "Style Name=-1|Value=75"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_TOP_MOST_CHECK       "Keep Wintruder window on-top of other windows\tAlways on Top"
     ID_AUTO_HIDE_CHECK      "Hides Wintruder application when tracking"
@@ -680,22 +687,22 @@ BEGIN
     ID_SIZE_TOP_LEFT_TOOL   "Track top-left corner"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_SIZE_BOTTOM_RIGHT_TOOL "Track bottom-right corner"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_APPLY_NOW            "Apply Modified Attributes"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "Wintruder"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
