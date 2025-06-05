@@ -307,6 +307,9 @@ void CToolbarImagesPage::DoDataExchange( CDataExchange* pDX )
 		OutputList();
 	}
 
+	static const UINT s_alphaCtrls[] = { IDC_ALPHA_SRC_LABEL, IDC_ALPHA_SRC_EDIT };
+	ui::EnableControls( m_hWnd, ARRAY_SPAN( s_alphaCtrls ), !m_drawDisabled );
+
 	CLayoutPropertyPage::DoDataExchange( pDX );
 }
 
@@ -353,6 +356,8 @@ void CToolbarImagesPage::OnRedrawImagesList( void )
 	if ( nullptr == m_imageListCtrl.m_hWnd )
 		return;		// dialog not initialized
 
-	UpdateData();
+	UpdateData( DialogSaveChanges );
+
 	m_imageListCtrl.Invalidate();
+	m_pSampleView->Invalidate();
 }
