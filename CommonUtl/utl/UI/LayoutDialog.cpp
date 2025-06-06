@@ -3,7 +3,7 @@
 #include "LayoutDialog.h"
 #include "LayoutEngine.h"
 #include "CmdUpdate.h"
-#include "CmdInfoStore.h"
+#include "CmdTagStore.h"
 #include "WindowPlacement.h"
 #include "WndUtils.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
@@ -460,7 +460,7 @@ void CLayoutDialog::OnSysCommand( UINT cmdId, LPARAM lParam )
 BOOL CLayoutDialog::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pResult )
 {
 	cmdId;
-	if ( ui::CCmdInfoStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
+	if ( ui::CCmdTagStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
 		return TRUE;		// message handled
 
 	return Default() != 0;

@@ -21,7 +21,6 @@
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
 #include "utl/UI/BalloonMessageTip.h"
-#include "utl/UI/CmdInfoStore.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/SystemTray_fwd.h"
 #include "utl/UI/TaskDialog.h"

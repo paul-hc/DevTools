@@ -116,7 +116,7 @@
     <ClInclude Include="CmdIdStore.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="CmdInfoStore.h">
+    <ClInclude Include="CmdTagStore.h">
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="CmdUpdate.h">
@@ -742,7 +742,7 @@
     <ClCompile Include="CmdIdStore.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="CmdInfoStore.cpp">
+    <ClCompile Include="CmdTagStore.cpp">
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="CmdUpdate.cpp">

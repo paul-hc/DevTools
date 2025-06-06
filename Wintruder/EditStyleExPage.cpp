@@ -3,7 +3,6 @@
 #include "EditStyleExPage.h"
 #include "resource.h"
 #include "wnd/FlagRepository.h"
-#include "utl/UI/CmdInfoStore.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

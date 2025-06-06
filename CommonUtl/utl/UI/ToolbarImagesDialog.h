@@ -35,7 +35,7 @@ protected:
 
 
 class CMFCToolBarImages;
-struct CImageItem;
+struct CBaseImageItem;
 
 
 #include "LayoutPropertyPage.h"
@@ -67,7 +67,7 @@ private:
 	// ui::ISampleCallback interface
 	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
 protected:
-	std::vector<CImageItem*> m_imageItems;
+	std::vector<CBaseImageItem*> m_imageItems;
 	CSize m_imageBoundsSize;
 
 	persist int m_selItemIndex;

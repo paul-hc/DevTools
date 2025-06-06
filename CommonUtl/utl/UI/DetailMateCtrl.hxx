@@ -1,7 +1,7 @@
 #ifndef DetailMateCtrl_hxx
 #define DetailMateCtrl_hxx
 
-#include "CmdInfoStore.h"
+#include "CmdTagStore.h"
 
 
 // CDetailMateCtrl template code
@@ -18,9 +18,9 @@ template< typename BaseCtrl >
 void CDetailMateCtrl<BaseCtrl>::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	pTooltip;
-	if ( const ui::CCmdInfo* pFoundInfo = ui::CCmdInfoStore::Instance().RetrieveInfo( cmdId ) )
-		if ( pFoundInfo->IsValid() )
-			rText = pFoundInfo->m_tooltipText;
+	if ( const ui::CCmdTag* pFoundCmdTag = ui::CCmdTagStore::Instance().RetrieveTag( cmdId ) )
+		if ( pFoundCmdTag->IsValid() )
+			rText = pFoundCmdTag->m_tooltipText;
 }
 
 // message handlers

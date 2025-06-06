@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "ImageCommandLookup.h"
 #include "ControlBar_fwd.h"
-#include "CmdInfoStore.h"
+#include "CmdTagStore.h"
 #include "MenuUtilities.h"
 #include "resource.h"			// for IDR_STD_UTL_UI_MENU
 #include "utl/Algorithms.h"
@@ -93,9 +93,9 @@ namespace mfc
 		for ( std::unordered_map<int, UINT>::const_iterator it = m_imagePosToCommand.begin(); it != m_imagePosToCommand.end(); ++it )
 			if ( nullptr == FindCommandName( it->second ) )		// not registered yet?
 			{
-				ui::CCmdInfo cmdTags( it->second );
+				ui::CCmdTag cmdTag( it->second );
 
-				m_cmdToName[it->second] = cmdTags.m_tooltipText;
+				m_cmdToName[ it->second ] = cmdTag.m_tooltipText;
 			}
 
 		RegisterCmdLiterals();

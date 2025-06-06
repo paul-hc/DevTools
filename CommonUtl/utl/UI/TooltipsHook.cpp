@@ -1,7 +1,7 @@
 
 #include "pch.h"
 #include "TooltipsHook.h"
-#include "CmdInfoStore.h"
+#include "CmdTagStore.h"
 #include "Dialog_fwd.h"
 #include "Control_fwd.h"
 #include "ui_fwd.h"
@@ -41,7 +41,7 @@ LRESULT CTooltipsHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) 
 
 bool CTooltipsHook::OnTtnNeedText( NMHDR* pNmHdr )
 {
-	if ( ui::CCmdInfoStore::Instance().HandleTooltipNeedText( pNmHdr, nullptr, m_pCustomCmdInfo ) )
+	if ( ui::CCmdTagStore::Instance().HandleTooltipNeedText( pNmHdr, nullptr, m_pCustomCmdInfo ) )
 		return true;		// message handled
 
 	return false;

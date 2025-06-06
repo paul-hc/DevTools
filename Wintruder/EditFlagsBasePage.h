@@ -2,7 +2,7 @@
 #define EditFlagsBasePage_h
 #pragma once
 
-#include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/CmdTagStore.h"
 #include "utl/UI/LayoutChildPropertySheet.h"
 #include "DetailBasePage.h"
 #include "FlagsEdit.h"
@@ -48,7 +48,7 @@ protected:
 	std::auto_ptr<DWORD> m_pSpecificFlags;		// for extended styles class specific is separate from m_flags
 
 	HWND m_hWndLastTarget;
-	ui::CCmdInfo m_pageInfo;						// caption, tooltip
+	ui::CCmdTag m_pageInfo;						// caption, tooltip
 	std::tstring m_childPageTipText[ PageCount ];
 	std::tstring m_unknownTipLabel;
 protected:

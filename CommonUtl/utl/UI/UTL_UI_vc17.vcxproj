@@ -196,7 +196,7 @@
     <ClInclude Include="Clipboard.h" />
     <ClInclude Include="ClockStatic.h" />
     <ClInclude Include="CmdIdStore.h" />
-    <ClInclude Include="CmdInfoStore.h" />
+    <ClInclude Include="CmdTagStore.h" />
     <ClInclude Include="CmdUpdate.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="ColorPickerButton.h" />
@@ -404,7 +404,7 @@
     <ClCompile Include="Clipboard.cpp" />
     <ClCompile Include="ClockStatic.cpp" />
     <ClCompile Include="CmdIdStore.cpp" />
-    <ClCompile Include="CmdInfoStore.cpp" />
+    <ClCompile Include="CmdTagStore.cpp" />
     <ClCompile Include="CmdUpdate.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="ColorPickerButton.cpp" />

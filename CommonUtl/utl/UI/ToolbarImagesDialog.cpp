@@ -96,9 +96,9 @@ END_MESSAGE_MAP()
 
 // CToolbarImagesPage class
 
-struct CImageItem : public TBasicSubject
+struct CBaseImageItem : public TBasicSubject
 {
-	CImageItem( int index, UINT cmdId, const std::tstring* pCmdName = nullptr, const std::tstring* pCmdLiteral = nullptr )
+	CBaseImageItem( int index, UINT cmdId, const std::tstring* pCmdName = nullptr, const std::tstring* pCmdLiteral = nullptr )
 		: m_index( index )
 		, m_cmdId( cmdId )
 		, m_imageSize( 0, 0 )
@@ -127,10 +127,10 @@ public:
 
 // CToolbarImageItem class
 
-struct CToolbarImageItem : public CImageItem
+struct CToolbarImageItem : public CBaseImageItem
 {
 	CToolbarImageItem( CMFCToolBarImages* pImages, int index, UINT cmdId, const std::tstring* pCmdName = nullptr, const std::tstring* pCmdLiteral = nullptr )
-		: CImageItem( index, cmdId, pCmdName, pCmdLiteral )
+		: CBaseImageItem( index, cmdId, pCmdName, pCmdLiteral )
 		, m_pImages( pImages )
 	{
 		ASSERT_PTR( m_pImages );
@@ -177,10 +177,10 @@ private:
 
 // CIconImageItem class
 
-struct CIconImageItem : public CImageItem
+struct CIconImageItem : public CBaseImageItem
 {
 	CIconImageItem( const CIcon* pIcon, int index, UINT cmdId, const std::tstring* pCmdName = nullptr, const std::tstring* pCmdLiteral = nullptr )
-		: CImageItem( index, cmdId, pCmdName, pCmdLiteral )
+		: CBaseImageItem( index, cmdId, pCmdName, pCmdLiteral )
 		, m_pIcon( pIcon )
 	{
 		ASSERT_PTR( m_pIcon );
@@ -260,7 +260,7 @@ void CBaseImagesPage::OutputList( void )
 
 	for ( UINT i = 0; i != m_imageItems.size(); ++i )
 	{
-		CImageItem* pImageItem = m_imageItems[ i ];
+		CBaseImageItem* pImageItem = m_imageItems[ i ];
 
 		m_imageListCtrl.InsertObjectItem( i, pImageItem );
 		m_imageListCtrl.SetSubItemText( i, Index, num::FormatNumber( pImageItem->m_index ) );
@@ -298,7 +298,7 @@ bool CBaseImagesPage::SetItemImageSize( const CSize& imageBoundsSize ) implement
 
 bool CBaseImagesPage::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect ) implements(ui::ICustomImageDraw)
 {
-	const CImageItem* pImageItem = checked_static_cast<const CImageItem*>( pSubject );
+	const CBaseImageItem* pImageItem = checked_static_cast<const CBaseImageItem*>( pSubject );
 
 	return pImageItem->Draw( pDC, itemImageRect, m_drawDisabled, m_alphaSrc );
 }
@@ -307,7 +307,7 @@ bool CBaseImagesPage::RenderSample( CDC* pDC, const CRect& boundsRect ) implemen
 {
 	GetGlobalData()->DrawParentBackground( m_pSampleView.get(), pDC, const_cast<CRect*>( &boundsRect ) );
 
-	if ( CImageItem* pImageItem = m_imageListCtrl.GetCaretAs<CImageItem>() )
+	if ( CBaseImageItem* pImageItem = m_imageListCtrl.GetCaretAs<CBaseImageItem>() )
 	{
 		enum { NormalEdge = 10 };
 
@@ -318,7 +318,8 @@ bool CBaseImagesPage::RenderSample( CDC* pDC, const CRect& boundsRect ) implemen
 
 		int zoomSize = std::min( largeBoundsRect.Width(), largeBoundsRect.Height() );
 
-		CRect normalRect( 0, 0, pImageItem->m_imageSize.cx, pImageItem->m_imageSize.cy ), largeRect( 0, 0, zoomSize, zoomSize );
+		CRect normalRect( 0, 0, pImageItem->m_imageSize.cx, pImageItem->m_imageSize.cy );
+		CRect largeRect( 0, 0, zoomSize, zoomSize );
 
 		ui::CenterRect( normalRect, normalBoundsRect );
 		ui::CenterRect( largeRect, largeBoundsRect );

@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "LayoutBasePropertySheet.h"
 #include "LayoutPropertyPage.h"
-#include "CmdInfoStore.h"
+#include "CmdTagStore.h"
 #include "Command.h"
 #include "CommandModel.h"
 #include "WndUtils.h"
@@ -139,9 +139,9 @@ void CLayoutBasePropertySheet::QueryTooltipText( OUT std::tstring& rText, UINT c
 
 			if ( rText.empty() )
 			{
-				ui::CCmdInfo cmdInfo( pPage->GetTemplateId() );		// use the page template resource string
-				if ( cmdInfo.IsValid() )
-					rText = cmdInfo.m_tooltipText;
+				ui::CCmdTag cmdTag( pPage->GetTemplateId() );		// use the page template resource string
+				if ( cmdTag.IsValid() )
+					rText = cmdTag.m_tooltipText;
 			}
 		}
 	}
@@ -414,7 +414,7 @@ void CLayoutBasePropertySheet::OnSize( UINT sizeType, int cx, int cy )
 BOOL CLayoutBasePropertySheet::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pResult )
 {
 	cmdId;
-	if ( ui::CCmdInfoStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
+	if ( ui::CCmdTagStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
 		return TRUE;		// handled
 
 	return Default() != 0;

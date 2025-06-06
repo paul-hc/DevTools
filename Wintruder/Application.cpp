@@ -4,7 +4,7 @@
 #include "AppService.h"
 #include "MainDialog.h"
 #include "resource.h"
-#include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/CmdTagStore.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ProcessUtils.h"
 #include "utl/UI/WndUtils.h"
@@ -61,7 +61,7 @@ BOOL CApplication::InitInstance( void )
 		GetLogger().Log( _T("* RUN ELEVATED (ADMIN) *") );
 
 	app::GetOptions()->LoadAll();
-	ui::CCmdInfoStore::s_autoPopDuration = 30000;			// 30 sec popup display time for MFC tooltips
+	ui::CCmdTagStore::s_autoPopDuration = 30000;			// 30 sec popup display time for MFC tooltips
 
 	CAboutBox::s_appIconId = IDD_MAIN_DIALOG;
 	m_sharedAccel.Load( IDR_MAIN_SHARED_ACCEL );

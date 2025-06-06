@@ -3,7 +3,7 @@
 #include "LayoutPropertyPage.h"
 #include "LayoutBasePropertySheet.h"
 #include "LayoutEngine.h"
-#include "CmdInfoStore.h"
+#include "CmdTagStore.h"
 #include "CmdUpdate.h"
 #include "PostCall.h"
 #include "WndUtils.h"
@@ -239,7 +239,7 @@ LRESULT CLayoutPropertyPage::OnKickIdle( WPARAM, LPARAM )
 BOOL CLayoutPropertyPage::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pResult )
 {
 	cmdId;
-	if ( ui::CCmdInfoStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
+	if ( ui::CCmdTagStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
 		return TRUE;		// handled
 
 	return Default() != 0;

@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "LayoutFormView.h"
 #include "LayoutEngine.h"
-#include "CmdInfoStore.h"
+#include "CmdTagStore.h"
 #include "CmdUpdate.h"
 #include "ui_fwd.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
@@ -128,7 +128,7 @@ BOOL CLayoutFormView::OnEraseBkgnd( CDC* pDC )
 BOOL CLayoutFormView::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pResult )
 {
 	cmdId;
-	if ( ui::CCmdInfoStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
+	if ( ui::CCmdTagStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
 		return TRUE;		// handled
 
 	return Default() != 0;

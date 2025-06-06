@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "LayoutPaneDialog.h"
 #include "LayoutEngine.h"
-#include "CmdInfoStore.h"
+#include "CmdTagStore.h"
 #include "CmdUpdate.h"
 #include "ui_fwd.h"
 #include "utl/SerializeStdTypes.h"
@@ -130,7 +130,7 @@ BOOL CLayoutPaneDialog::OnEraseBkgnd( CDC* pDC )
 BOOL CLayoutPaneDialog::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pResult )
 {
 	cmdId;
-	if ( ui::CCmdInfoStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
+	if ( ui::CCmdTagStore::Instance().HandleTooltipNeedText( pNmHdr, pResult, this ) )
 		return TRUE;		// handled
 
 	return Default() != 0;
