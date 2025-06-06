@@ -90,7 +90,7 @@ void CBaseRenameListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMes
 
 void CBaseRenameListPage::EnsureVisibleItem( const CRenameItem* pRenameItem ) override
 {
-	if ( pRenameItem != NULL )
+	if ( pRenameItem != nullptr )
 		m_fileListCtrl.EnsureVisibleObject( pRenameItem );
 
 	InvalidateFiles();				// trigger some highlighting
@@ -114,16 +114,16 @@ void CBaseRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPA
 
 void CBaseRenameListPage::DoDataExchange( CDataExchange* pDX ) override
 {
-	bool firstInit = NULL == m_fileListCtrl.m_hWnd;
+	bool firstInit = nullptr == m_fileListCtrl.m_hWnd;
 
 	DDX_Control( pDX, IDC_FILE_RENAME_LIST, m_fileListCtrl );
 
 	if ( firstInit )
 		if ( m_pParentDlg->IsInitialized() )						// not first time sheet creation? - prevent double init if this was the last active page
 		{
-			OnUpdate( m_pParentDlg->GetFileModel(), NULL );			// initialize the page
+			OnUpdate( m_pParentDlg->GetFileModel(), nullptr );			// initialize the page
 
-			if ( COnRenameListSelChangedCmd::s_pSelItem != NULL && NULL == m_pParentDlg->GetFirstErrorItem<CRenameItem>() )
+			if ( COnRenameListSelChangedCmd::s_pSelItem != nullptr && nullptr == m_pParentDlg->GetFirstErrorItem<CRenameItem>() )
 			{
 				CScopedInternalChange listChange( &m_fileListCtrl );
 				m_fileListCtrl.Select( COnRenameListSelChangedCmd::s_pSelItem );		// initial shared selection
@@ -358,7 +358,7 @@ void CRenameEditPage::SetupFileEdits( void )
 	m_srcEdit.SetText( str::Join( srcPaths, CTextEdit::s_lineEnd ) );
 	m_destEditor.SetText( str::Join( destPaths, CTextEdit::s_lineEnd ) );
 
-	if ( const CRenameItem* pRenameItem = COnRenameListSelChangedCmd::s_pSelItem != NULL ? COnRenameListSelChangedCmd::s_pSelItem : m_pParentDlg->GetFirstErrorItem<CRenameItem>() )
+	if ( const CRenameItem* pRenameItem = COnRenameListSelChangedCmd::s_pSelItem != nullptr ? COnRenameListSelChangedCmd::s_pSelItem : m_pParentDlg->GetFirstErrorItem<CRenameItem>() )
 		SelectItem( pRenameItem );
 
 	m_syncScrolling.Synchronize( &m_destEditor );			// sync v-scroll pos
@@ -416,7 +416,7 @@ bool CRenameEditPage::AnyChanges( void ) const
 
 bool CRenameEditPage::SelectItem( const CRenameItem* pRenameItem )
 {
-	return pRenameItem != NULL && SelectItemLine( static_cast<int>( utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem ) ) );
+	return pRenameItem != nullptr && SelectItemLine( static_cast<int>( utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem ) ) );
 }
 
 bool CRenameEditPage::SelectItemLine( int linePos )
@@ -438,13 +438,13 @@ bool CRenameEditPage::SelectItemLine( int linePos )
 
 void CRenameEditPage::EnsureVisibleItem( const CRenameItem* pRenameItem ) override
 {
-	if ( pRenameItem != NULL )
+	if ( pRenameItem != nullptr )
 		SelectItemLine( static_cast<int>( utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem ) ) );
 }
 
 void CRenameEditPage::CommitLocalEdits( void )
 {
-	if ( m_hWnd != NULL && m_destEditor.GetModify() )
+	if ( m_hWnd != nullptr && m_destEditor.GetModify() )
 		if ( InputDestPaths() && AnyChanges() )
 			m_pParentDlg->SafeExecuteCmd( new CChangeDestPathsCmd( m_pParentDlg->GetFileModel(), m_newDestPaths, _T("Edit destination filenames manually") ) );
 }
@@ -491,7 +491,7 @@ void CRenameEditPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage
 
 void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override
 {
-	bool firstInit = NULL == m_srcEdit.m_hWnd;
+	bool firstInit = nullptr == m_srcEdit.m_hWnd;
 
 	DDX_Control( pDX, IDC_RENAME_SRC_FILES_STATIC, m_srcStatic );
 	DDX_Control( pDX, IDC_RENAME_DEST_FILES_STATIC, m_destStatic );
@@ -509,7 +509,7 @@ void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override
 			if ( !m_pParentDlg->HasDestPaths() )
 				CResetDestinationsCmd( m_pParentDlg->GetFileModel() ).Execute();	// this will call OnUpdate() for all observers
 			else
-				OnUpdate( m_pParentDlg->GetFileModel(), NULL );		// initialize the page
+				OnUpdate( m_pParentDlg->GetFileModel(), nullptr );		// initialize the page
 		}
 
 		m_destEditor.EnsureCaretVisible();

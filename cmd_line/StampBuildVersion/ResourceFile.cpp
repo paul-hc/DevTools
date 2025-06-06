@@ -44,7 +44,7 @@ namespace rc
 		return SkipTrivial( rIt );		// trailing whitespace
 	}
 
-	
+
 	class CVersionInfoParser : public io::ILineParserCallback<std::string>
 	{
 	public:
@@ -238,7 +238,7 @@ namespace rc
 
 						if ( it.ExtractEnclosedText( text, s_doubleQuote, &tokenRange ) )
 						{
-							if ( pName != NULL )
+							if ( pName != nullptr )
 								it.ReplaceToken( tokenRange, pName );
 
 							if ( rc::SkipDelimsAndTrivial( it, "," ) )		// on 2nd quoted token: value content
@@ -265,7 +265,7 @@ namespace rc
 		if ( time_utl::IsValid( buildTimestamp ) )
 			tsText = str::AsNarrow( time_utl::FormatTimestamp( buildTimestamp ) );
 
-		return ReplaceEntry_VALUE( rValueLine, NULL, tsText.c_str() );
+		return ReplaceEntry_VALUE( rValueLine, nullptr, tsText.c_str() );
 	}
 
 }	// namespace rc

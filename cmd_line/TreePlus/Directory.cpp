@@ -78,7 +78,7 @@ fs::CPath CDirectory::s_nullPath;
 CDirectory::CDirectory( const CCmdLineOptions& options )
 	: m_options( options )
 	, m_dirPath( m_options.m_dirPath )
-	, m_pTableFolder( m_options.GetTable() != NULL ? m_options.GetTable()->GetRoot() : NULL )
+	, m_pTableFolder( m_options.GetTable() != nullptr ? m_options.GetTable()->GetRoot() : nullptr )
 	, m_depth( 0 )
 {
 	s_totalElapsedEnum = 0.0;
@@ -87,7 +87,7 @@ CDirectory::CDirectory( const CCmdLineOptions& options )
 CDirectory::CDirectory( const CDirectory* pParent, const fs::CPath& subDirPath )
 	: m_options( pParent->m_options )
 	, m_dirPath( subDirPath )
-	, m_pTableFolder( NULL )
+	, m_pTableFolder( nullptr )
 	, m_depth( pParent->m_depth + 1 )
 {
 }

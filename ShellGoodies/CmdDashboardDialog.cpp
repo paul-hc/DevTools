@@ -142,7 +142,7 @@ const CCommandItem* CCmdDashboardDialog::GetSelCaretCmdItem( void ) const
 	int selIndex = m_commandsList.GetSelCaretIndex();
 	if ( selIndex != -1 )
 		return m_commandsList.GetObjectAt< CCommandItem >( selIndex );
-	return NULL;
+	return nullptr;
 }
 
 void CCmdDashboardDialog::QuerySelectedCmds( std::vector< utl::ICommand* >& rSelCommands ) const
@@ -178,11 +178,11 @@ bool CCmdDashboardDialog::SelectCommandList( int selIndex )
 void CCmdDashboardDialog::UpdateSelCommand( void )
 {
 	const CCommandItem* pSelCmdItem = GetSelCaretCmdItem();
-	const utl::ICommand* pSelectedCmd = pSelCmdItem != NULL ? pSelCmdItem->GetCmd() : NULL;
+	const utl::ICommand* pSelectedCmd = pSelCmdItem != nullptr ? pSelCmdItem->GetCmd() : nullptr;
 	std::tstring headerText, detailsText;
 
 	// action info acts on selected caret
-	if ( pSelectedCmd != NULL )
+	if ( pSelectedCmd != nullptr )
 	{
 		std::vector< std::tstring > fields;
 		cmd::QueryCmdFields( fields, pSelectedCmd );
@@ -200,11 +200,11 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 	}
 
 	m_cmdHeaderEdit.SetText( headerText );
-	m_cmdHeaderEdit.SetImageIndex( pSelCmdItem != NULL ? pSelCmdItem->GetImageIndex() : -1 );
+	m_cmdHeaderEdit.SetImageIndex( pSelCmdItem != nullptr ? pSelCmdItem->GetImageIndex() : -1 );
 	m_cmdDetailsEdit.SetText( detailsText );
 
 	static const UINT ctrlIds[] = { IDC_CMD_HEADER_STATIC, IDC_CMD_HEADER_EDIT, IDC_CMD_DETAILS_STATIC, IDC_CMD_DETAILS_EDIT };
-	ui::EnableControls( *this, ARRAY_SPAN( ctrlIds ), pSelectedCmd != NULL );
+	ui::EnableControls( *this, ARRAY_SPAN( ctrlIds ), pSelectedCmd != nullptr );
 
 	std::vector< int > selIndexes;
 	m_commandsList.GetSelection( selIndexes );
@@ -230,7 +230,7 @@ void CCmdDashboardDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPA
 	static const ui::CTextEffect s_editorCmd( ui::Regular, color::Gray40, CLR_NONE );
 	const cmd::IPersistentCmd* pPersistCmd = CReportListControl::AsPtr<CCommandItem>( rowKey )->GetCmdAs<cmd::IPersistentCmd>();
 
-	if ( NULL == pPersistCmd )
+	if ( nullptr == pPersistCmd )
 		rTextEffect.Combine( s_editorCmd );
 }
 
@@ -243,7 +243,7 @@ BOOL CCmdDashboardDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHAND
 
 void CCmdDashboardDialog::DoDataExchange( CDataExchange* pDX )
 {
-	const bool firstInit = NULL == m_actionHistoryStatic.m_hWnd;
+	const bool firstInit = nullptr == m_actionHistoryStatic.m_hWnd;
 
 	DDX_Control( pDX, IDC_ACTION_HISTORY_STATIC, m_actionHistoryStatic );
 	DDX_Control( pDX, IDC_COMMANDS_LIST, m_commandsList );
@@ -256,7 +256,7 @@ void CCmdDashboardDialog::DoDataExchange( CDataExchange* pDX )
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
 		if ( firstInit )
-			m_enableProperties = NULL == ui::FindAncestorAs<COptionsSheet>( this );		// prevent recursion
+			m_enableProperties = nullptr == ui::FindAncestorAs<COptionsSheet>( this );		// prevent recursion
 
 		SetupCommandList();
 		SelectCommandList( 0 );
@@ -389,7 +389,7 @@ void CCmdDashboardDialog::OnCmdList_SelectToTop( void )
 	GotoDlgCtrl( &m_commandsList );
 
 	int maxSelIndex;
-	if ( m_commandsList.GetSelIndexBounds( NULL, &maxSelIndex ) )
+	if ( m_commandsList.GetSelIndexBounds( nullptr, &maxSelIndex ) )
 	{
 		std::vector< int > selIndexes( maxSelIndex + 1 );
 		for ( UINT i = 0; i != selIndexes.size(); ++i )
@@ -413,7 +413,7 @@ void CCmdDashboardDialog::OnCmdList_Delete( void )
 {
 	int minSelIndex;
 
-	if ( m_commandsList.GetSelIndexBounds( &minSelIndex, NULL ) )
+	if ( m_commandsList.GetSelIndexBounds( &minSelIndex, nullptr ) )
 	{
 		std::vector< utl::ICommand* > selCommands;
 		QuerySelectedCmds( selCommands );

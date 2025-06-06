@@ -121,13 +121,13 @@ const CCommandModel* CApplication::GetCommandModel( void ) const
 
 CTrayIcon* CApplication::GetMessageTrayIcon( void )
 {
-	if ( NULL == CSystemTray::Instance() && NULL == m_pSystemTray.get() )		// no system tray created by another UI component and no shared application message tray icon?
+	if ( nullptr == CSystemTray::Instance() && nullptr == m_pSystemTray.get() )		// no system tray created by another UI component and no shared application message tray icon?
 	{	// create once the system-tray message icon
 		m_pSystemTray.reset( new CSystemTrayWnd() );							// hidden popup tray icon host
 		return m_pSystemTray->CreateTrayIcon( IDR_MESSAGE_TRAY_ICON, false );	// auto-hide message tray icon
 	}
 
-	return CSystemTray::Instance() != NULL ? CSystemTray::Instance()->FindIcon( IDR_MESSAGE_TRAY_ICON ) : NULL;
+	return CSystemTray::Instance() != nullptr ? CSystemTray::Instance()->FindIcon( IDR_MESSAGE_TRAY_ICON ) : nullptr;
 }
 
 BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
@@ -136,28 +136,28 @@ END_MESSAGE_MAP()
 
 // CScopedMainWnd implementation
 
-CWnd* CScopedMainWnd::s_pParentOwner = NULL;
+CWnd* CScopedMainWnd::s_pParentOwner = nullptr;
 
 CScopedMainWnd::CScopedMainWnd( HWND hWnd )
-	: m_pOldMainWnd( NULL )
+	: m_pOldMainWnd( nullptr )
 	, m_inEffect( false )
 {
-	if ( NULL == s_pParentOwner )
+	if ( nullptr == s_pParentOwner )
 	{
 		m_inEffect = true;
 
 		CWnd* pMainWnd = AfxGetMainWnd();
 		bool fromThisModule = ui::IsPermanentWnd( pMainWnd->GetSafeHwnd() );
 
-		if ( hWnd != NULL && ::IsWindow( hWnd ) )
+		if ( hWnd != nullptr && ::IsWindow( hWnd ) )
 			if ( fromThisModule )
 				s_pParentOwner = CWnd::FromHandlePermanent( ui::GetTopLevelParent( hWnd ) );
 			else
 				s_pParentOwner = CWnd::FromHandle( hWnd )->GetTopLevelParent();
 
 		if ( ::IsWindow( s_pParentOwner->GetSafeHwnd() ) )
-			if ( pMainWnd != NULL )
-				if ( NULL == pMainWnd->m_hWnd )							// it happens sometimes, kind of transitory state when invoking from Explorer.exe
+			if ( pMainWnd != nullptr )
+				if ( nullptr == pMainWnd->m_hWnd )							// it happens sometimes, kind of transitory state when invoking from Explorer.exe
 					if ( CWinThread* pCurrThread = AfxGetThread() )
 					{
 						m_pOldMainWnd = pMainWnd;
@@ -172,10 +172,10 @@ CScopedMainWnd::~CScopedMainWnd()
 {
 	if ( m_inEffect )
 	{
-		if ( m_pOldMainWnd != NULL )
+		if ( m_pOldMainWnd != nullptr )
 			if ( CWinThread* pCurrThread = AfxGetThread() )
 				pCurrThread->m_pMainWnd = m_pOldMainWnd;				// restore original main window
 
-		s_pParentOwner = NULL;
+		s_pParentOwner = nullptr;
 	}
 }

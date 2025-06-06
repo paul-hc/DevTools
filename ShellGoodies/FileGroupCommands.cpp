@@ -62,7 +62,7 @@ namespace cmd
 	{
 		__super::SetOriginCmd( pOriginCmd );
 
-		if ( pOriginCmd != NULL )
+		if ( pOriginCmd != nullptr )
 			m_timestamp = pOriginCmd->GetTimestamp();		// copy the origin's timestamp
 	}
 
@@ -112,7 +112,7 @@ namespace cmd
 
 	bool CBaseFileGroupCmd::HandleExecuteResult( const CWorkingSet& workingSet )
 	{
-		if ( s_pErrorObserver != NULL )
+		if ( s_pErrorObserver != nullptr )
 			for ( std::vector< fs::CPath >::const_iterator itBadFilePath = workingSet.m_badFilePaths.begin(); itBadFilePath != workingSet.m_badFilePaths.end(); ++itBadFilePath )
 				s_pErrorObserver->OnFileError( *itBadFilePath, str::Format( _T("Cannot access file: %s"), itBadFilePath->GetPtr() ) );
 
@@ -303,11 +303,11 @@ namespace cmd
 	// CBaseShallowTransferFilesCmd implementation
 
 	CBaseShallowTransferFilesCmd::CBaseShallowTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath,
-																const std::vector< fs::CPath >* pDestFilePaths /*= NULL*/ )
+																const std::vector< fs::CPath >* pDestFilePaths /*= nullptr*/ )
 		: cmd::CBaseFileGroupCmd( cmdType, srcFilePaths )
 		, m_destDirPath( destDirPath )
 	{
-		if ( pDestFilePaths != NULL )
+		if ( pDestFilePaths != nullptr )
 			m_destFilePaths = *pDestFilePaths;		// explicit DEST only for unexecuting
 	}
 

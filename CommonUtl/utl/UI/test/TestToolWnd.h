@@ -57,7 +57,7 @@ namespace ut
 	};
 
 
-	// use this to access test tool's client DC; null pattern: if NULL == pToolWnd -> no test output done.
+	// use this to access test tool's client DC; null pattern: if nullptr == pToolWnd -> no test output done.
 	// structured in strips containing tiles
 	//
 	class CTestDevice

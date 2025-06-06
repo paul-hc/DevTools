@@ -187,7 +187,7 @@ bool CDropFilesModel::CreateFolders( const std::vector< fs::CPath >& srcFolderPa
 
 bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner )
 {
-	cmd::CBaseDeepTransferFilesCmd* pCmd = NULL;
+	cmd::CBaseDeepTransferFilesCmd* pCmd = nullptr;
 
 	switch ( GetPasteOperation() )
 	{
@@ -216,7 +216,7 @@ bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOw
 
 bool CDropFilesModel::PasteBackup( CWnd* pParentOwner )
 {
-	cmd::CBaseShallowTransferFilesCmd* pCmd = NULL;
+	cmd::CBaseShallowTransferFilesCmd* pCmd = nullptr;
 
 	switch ( GetPasteOperation() )
 	{

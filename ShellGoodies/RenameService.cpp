@@ -47,7 +47,7 @@ UINT CRenameService::FindNextAvailSeqCount( const CPathFormatter& formatter ) co
 
 bool CRenameService::CheckPathCollisions( cmd::IErrorObserver* pErrorObserver )
 {
-	if ( pErrorObserver != NULL )
+	if ( pErrorObserver != nullptr )
 		pErrorObserver->ClearFileErrors();
 
 	fs::TPathSet destPaths;
@@ -60,7 +60,7 @@ bool CRenameService::CheckPathCollisions( cmd::IErrorObserver* pErrorObserver )
 				  FileExistOutsideWorkingSet( itPair->second ) )		// collides with an existing file/dir outside of the working set
 		{
 			static const std::tstring s_errMsg = _T("Destination file collision");
-			if ( pErrorObserver != NULL )
+			if ( pErrorObserver != nullptr )
 				pErrorObserver->OnFileError( itPair->first, s_errMsg );
 			++dupCount;
 		}
@@ -232,7 +232,7 @@ bool CPickDataset::AllHavePrefix( size_t prefixLen ) const
 	return true;		// all strings match the prefix
 }
 
-void CPickDataset::MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname /*= NULL*/ ) const
+void CPickDataset::MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname /*= nullptr*/ ) const
 {
 	REQUIRE( !m_destFnames.empty() );
 
@@ -253,7 +253,7 @@ void CPickDataset::MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname 
 		pPopupMenu->AppendMenu( MF_STRING, cmdId, EscapeAmpersand( *itFname ) );
 
 		if ( 0 == selId )
-			if ( pSelFname != NULL && str::Matches( itFname->c_str(), pSelFname, false, false ) )
+			if ( pSelFname != nullptr && str::Matches( itFname->c_str(), pSelFname, false, false ) )
 				selId = cmdId;
 	}
 

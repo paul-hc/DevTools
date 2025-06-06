@@ -146,7 +146,7 @@ bool CRenameFilesDialog::RenameFiles( void )
 {
 	CFileService svc;
 	std::auto_ptr<CMacroCommand> pRenameMacroCmd = svc.MakeRenameCmds( m_rRenameItems );
-	if ( pRenameMacroCmd.get() != NULL )
+	if ( pRenameMacroCmd.get() != nullptr )
 		if ( !pRenameMacroCmd->IsEmpty() )
 		{
 			m_errorItems.clear();
@@ -168,7 +168,7 @@ bool CRenameFilesDialog::HasDestPaths( void ) const
 void CRenameFilesDialog::SwitchMode( Mode mode ) override
 {
 	m_mode = mode;
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return;
 
 	static const CEnumTags modeTags( _T("&Make Names|Rena&me|Roll &Back|Roll &Fwd") );
@@ -238,18 +238,18 @@ void CRenameFilesDialog::PopStackTop( svc::StackType stackType ) override
 
 void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 	{
 		if ( m_pFileModel == pSubject )
 		{
-			if ( NULL == m_pRenSvc.get() )
+			if ( nullptr == m_pRenSvc.get() )
 				m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
 			else
 				m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
 
 			if ( CSortRenameItemsCmd* pSortCmd = dynamic_cast<CSortRenameItemsCmd*>( pMessage ) )
 			{
-				//if ( pSortCmd->m_pPage != NULL )					// triggered by a list-ctrl, not internally?
+				//if ( pSortCmd->m_pPage != nullptr )					// triggered by a list-ctrl, not internally?
 				//	m_sortOrderCombo.SetValue( ren::ui::FromSortingPair( pSortCmd->m_sorting ) );
 
 				UpdateSortOrderCombo( pSortCmd->m_sorting );
@@ -444,7 +444,7 @@ bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter,
 	ren::AssignPairsToItems( m_rRenameItems, renamePairs );
 	*pSeqCount = generator.GetSeqCount();
 
-	m_pFileModel->UpdateAllObservers( NULL );
+	m_pFileModel->UpdateAllObservers( nullptr );
 	return true;
 }
 
@@ -480,7 +480,7 @@ void CRenameFilesDialog::ReplaceFormatEditText( const std::tstring& text )
 
 void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 {
-	const bool firstInit = NULL == m_filesSheet.m_hWnd;
+	const bool firstInit = nullptr == m_filesSheet.m_hWnd;
 
 	m_filesSheet.DDX_DetailSheet( pDX, IDC_FILES_SHEET );
 
@@ -521,7 +521,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 		if ( !HasDestPaths() && EditPage == m_filesSheet.GetActiveIndex() )
 			CResetDestinationsCmd( m_pFileModel ).Execute();	// this will call OnUpdate() for all observers
 		else
-			OnUpdate( m_pFileModel, NULL );			// initialize the dialog
+			OnUpdate( m_pFileModel, nullptr );			// initialize the dialog
 	}
 
 	__super::DoDataExchange( pDX );
@@ -655,7 +655,7 @@ HBRUSH CRenameFilesDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColorType )
 {
 	HBRUSH hBrushFill = __super::OnCtlColor( pDC, pWnd, ctlColorType );
 
-	if ( pWnd != NULL )
+	if ( pWnd != nullptr )
 		switch ( pWnd->GetDlgCtrlID() )
 		{
 			case IDC_FORMAT_LABEL:
@@ -740,7 +740,7 @@ void CRenameFilesDialog::OnToggle_ShowExtension( void )
 	UpdateFormatLabel();
 	m_showExtButton.SetFrameColor( IsFormatExtConsistent() ? CLR_NONE : app::ColorWarningText );
 
-	OnUpdate( m_pFileModel, NULL );
+	OnUpdate( m_pFileModel, nullptr );
 }
 
 void CRenameFilesDialog::OnCbnSelChange_SortOrder( void )
@@ -748,7 +748,7 @@ void CRenameFilesDialog::OnCbnSelChange_SortOrder( void )
 	ren::TSortingPair sorting = ren::ui::ToSortingPair( m_sortOrderCombo.GetEnum<ren::ui::UiSortBy>() );
 
 	if ( sorting != m_pFileModel->GetRenameSorting() )
-		CSortRenameItemsCmd( m_pFileModel, NULL, sorting ).Execute();
+		CSortRenameItemsCmd( m_pFileModel, nullptr, sorting ).Execute();
 }
 
 void CRenameFilesDialog::OnBnClicked_CopySourceFiles( void )
@@ -837,7 +837,7 @@ void CRenameFilesDialog::OnFieldChanged( void )
 
 void CRenameFilesDialog::OnPickFormatToken( void )
 {
-//DBG: OnUpdate(NULL, NULL);
+//DBG: OnUpdate(nullptr, nullptr);
 	CMenu popupMenu;
 	ui::LoadPopupMenu( &popupMenu, IDR_CONTEXT_MENU, popup::FormatPicker );
 
@@ -919,7 +919,7 @@ void CRenameFilesDialog::OnUpdate_AutoGenerate( CCmdUI* pCmdUI )
 
 void CRenameFilesDialog::OnNumericSequence( UINT cmdId )
 {
-	const TCHAR* pInsertFmt = NULL;
+	const TCHAR* pInsertFmt = nullptr;
 
 	switch ( cmdId )
 	{
@@ -954,7 +954,7 @@ void CRenameFilesDialog::OnChangeDestPathsTool( UINT menuId )
 {
 	CommitLocalEdits();
 
-	utl::ICommand* pCmd = NULL;
+	utl::ICommand* pCmd = nullptr;
 	std::tstring cmdTag = str::Load( menuId );
 
 	switch ( menuId )

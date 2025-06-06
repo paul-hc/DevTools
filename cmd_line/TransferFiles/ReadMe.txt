@@ -38,7 +38,7 @@ void fpath( void )
       if( std::tstring( part ) == _T(" ") )
          break;
 
-      if( _fullpath( full, part, _MAX_PATH ) != NULL )
+      if( _fullpath( full, part, _MAX_PATH ) != nullptr )
          printf( "Full path is: %s\n", full );
       else
          printf( "Invalid path\n" );
@@ -51,7 +51,7 @@ void fpath( void )
 ========================================================================
 
 
-AppWizard has created this TransferFiles application for you.  
+AppWizard has created this TransferFiles application for you.
 
 This file contains a summary of what you will find in each of the files that
 make up your TransferFiles application.

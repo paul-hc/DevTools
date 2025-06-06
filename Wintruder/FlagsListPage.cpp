@@ -20,14 +20,14 @@ namespace layout
 }
 
 
-CFlagsListPage::CFlagsListPage( ui::IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle /*= NULL*/ )
+CFlagsListPage::CFlagsListPage( ui::IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle /*= nullptr*/ )
 	: CLayoutPropertyPage( IDD_FLAG_LIST_PAGE )
 	, m_pParentCallback( pParentCallback )
 	, m_pFlagsListCtrl( new CFlagsListCtrl() )
 {
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
-	if ( pTitle != NULL )
+	if ( pTitle != nullptr )
 		SetTitle( pTitle );
 }
 
@@ -62,6 +62,6 @@ END_MESSAGE_MAP()
 
 void CFlagsListPage::OnFnFlagsChanged_FlagsList( void )
 {
-	if ( m_pParentCallback != NULL )
+	if ( m_pParentCallback != nullptr )
 		m_pParentCallback->OnChildPageNotify( this, m_pFlagsListCtrl.get(), CBaseFlagsCtrl::FN_FLAGSCHANGED );
 }

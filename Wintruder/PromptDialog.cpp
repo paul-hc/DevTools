@@ -23,7 +23,7 @@ bool CPromptDialog::m_useSetWindowPos = true;
 UINT CPromptDialog::m_swpFlags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_ASYNCWINDOWPOS | SWP_DRAWFRAME | SWP_FRAMECHANGED | SWP_NOACTIVATE;
 
 
-CPromptDialog::CPromptDialog( HWND hWndTarget, const std::tstring& changedFields, CWnd* pParent /*= NULL*/ )
+CPromptDialog::CPromptDialog( HWND hWndTarget, const std::tstring& changedFields, CWnd* pParent /*= nullptr*/ )
 	: CLayoutDialog( IDD_APPLY_CHANGES_DIALOG, pParent )
 	, m_hWndTarget( hWndTarget )
 	, m_changedFields( !changedFields.empty() ? changedFields : _T("<NONE>") )
@@ -47,8 +47,8 @@ bool CPromptDialog::CallSetWindowPos( void )
 	CRect rect;
 	CSize size;
 	bool isChild = HasFlag( ui::GetStyle( m_hWndTarget ), WS_CHILD );
-	HWND hWndParent = isChild ? ::GetParent( m_hWndTarget ) : NULL;
-	HWND hWndInsertAfter = NULL;
+	HWND hWndParent = isChild ? ::GetParent( m_hWndTarget ) : nullptr;
+	HWND hWndInsertAfter = nullptr;
 
 	::GetWindowRect( m_hWndTarget, rect );
 	size = rect.Size();
@@ -59,11 +59,11 @@ bool CPromptDialog::CallSetWindowPos( void )
 
 	if ( !HasFlag( m_swpFlags, SWP_NOREDRAW ) )
 	{
-		::InvalidateRect( m_hWndTarget, NULL, TRUE );
+		::InvalidateRect( m_hWndTarget, nullptr, TRUE );
 		::UpdateWindow( m_hWndTarget );
-		if ( hWndParent != NULL )
+		if ( hWndParent != nullptr )
 		{
-			::InvalidateRect( hWndParent, NULL, TRUE );
+			::InvalidateRect( hWndParent, nullptr, TRUE );
 			::UpdateWindow( hWndParent );
 		}
 	}
@@ -82,7 +82,7 @@ void CPromptDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
-		ui::GetDlgItemAs<CStatic>( this, IDC_QUESTION_ICON )->SetIcon( ::LoadIcon( NULL, IDI_QUESTION ) );
+		ui::GetDlgItemAs<CStatic>( this, IDC_QUESTION_ICON )->SetIcon( ::LoadIcon( nullptr, IDI_QUESTION ) );
 
 		ui::SetDlgItemText( this, IDC_PROMPT_STATIC, wnd::FormatBriefWndInfo( m_hWndTarget ) );
 		ui::SetDlgItemText( this, IDC_CHANGED_FIELDS_STATIC, m_changedFields );
@@ -118,7 +118,7 @@ void CPromptDialog::CkUseSetWindowPos( void )
 HBRUSH CPromptDialog::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType )
 {
 	HBRUSH hBkBrush = CLayoutDialog::OnCtlColor( pDC, pWnd, ctlType );
-	if ( ctlType == CTLCOLOR_STATIC && pWnd != NULL )
+	if ( ctlType == CTLCOLOR_STATIC && pWnd != nullptr )
 		switch ( pWnd->GetDlgCtrlID() )
 		{
 			case IDC_PROMPT_STATIC:

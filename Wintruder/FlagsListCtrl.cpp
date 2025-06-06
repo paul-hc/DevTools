@@ -24,7 +24,7 @@ namespace pred
 	{
 		bool operator()( const CFlagGroup* pGroup ) const
 		{
-			return pGroup != NULL && pGroup->IsValueGroup();
+			return pGroup != nullptr && pGroup->IsValueGroup();
 		}
 	};
 }
@@ -53,7 +53,7 @@ CMenu* CFlagsListCtrl::GetPopupMenu( ListPopup popupType )
 
 void CFlagsListCtrl::InitControl( void )
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return;
 
 	CScopedLockRedraw freeze( this );
@@ -64,10 +64,10 @@ void CFlagsListCtrl::InitControl( void )
 
 	const CFlagStore* pFlagStore = GetFlagStore();
 
-	EnableWindow( pFlagStore != NULL );
-	EnableGroupView( pFlagStore != NULL && pFlagStore->HasGroups() );
+	EnableWindow( pFlagStore != nullptr );
+	EnableGroupView( pFlagStore != nullptr && pFlagStore->HasGroups() );
 
-	if ( NULL == pFlagStore )
+	if ( nullptr == pFlagStore )
 		return;
 
 	bool useGroups = IsGroupViewEnabled() != FALSE;
@@ -142,13 +142,13 @@ CFlagGroup* CFlagsListCtrl::GetFlagGroup( int groupId ) const
 		if ( groupId >= 0 && groupId < static_cast<int>( pFlagStore->m_groups.size() ) )
 			return pFlagStore->m_groups[ groupId ];
 
-	return NULL;
+	return nullptr;
 }
 
 int CFlagsListCtrl::FindGroupIdWithFlag( const CFlagInfo* pFlag ) const
 {
 	ASSERT_PTR( pFlag );
-	if ( pFlag->m_pGroup != NULL )
+	if ( pFlag->m_pGroup != nullptr )
 		if ( const CFlagStore* pFlagStore = GetFlagStore() )
 		{
 			const std::vector< CFlagGroup* >& groups = pFlagStore->m_groups;
@@ -178,7 +178,7 @@ bool CFlagsListCtrl::AnyFlagCheckConflict( const std::vector< const CFlagInfo* >
 		{
 			utl::AddUnique( flagGroups, ( *itFlag )->m_pGroup );
 
-			if ( ( *itFlag )->m_pGroup != NULL && ( *itFlag )->m_pGroup->IsValueGroup() )
+			if ( ( *itFlag )->m_pGroup != nullptr && ( *itFlag )->m_pGroup->IsValueGroup() )
 				if ( !checked )
 					return true;		// can't uncheck a radio button
 		}
@@ -208,7 +208,7 @@ bool CFlagsListCtrl::SetFlagsChecked( const std::vector< const CFlagInfo* >& fla
 
 void CFlagsListCtrl::OutputFlags( void )
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return;
 
 	CScopedInternalChange change( this );
@@ -222,7 +222,7 @@ void CFlagsListCtrl::OutputFlags( void )
 
 DWORD CFlagsListCtrl::InputFlags( void ) const
 {
-	ASSERT( m_hWnd != NULL && HasValidMask() );
+	ASSERT( m_hWnd != nullptr && HasValidMask() );
 	DWORD flags = 0;
 
 	for ( int i = 0, count = GetItemCount(); i != count; ++i )
@@ -335,7 +335,7 @@ BOOL CFlagsListCtrl::OnLvnLinkClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 		}
 		else
 		{
-			bool checkAll = NULL == pFlagGroup->FindOnFlag( flags );
+			bool checkAll = nullptr == pFlagGroup->FindOnFlag( flags );
 			for ( std::vector< const CFlagInfo* >::const_iterator itFlag = pFlagGroup->GetFlags().begin(); itFlag != pFlagGroup->GetFlags().end(); ++itFlag )
 				( *itFlag )->SetTo( &flags, checkAll );
 		}

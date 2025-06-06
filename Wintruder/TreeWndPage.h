@@ -100,7 +100,7 @@ namespace wt
 	class CWndTreeBuilder : public CWndEnumBase
 	{
 	public:
-		CWndTreeBuilder( CTreeControl* pTreeCtrl, CLogger* pLogger = NULL );
+		CWndTreeBuilder( CTreeControl* pTreeCtrl, CLogger* pLogger = nullptr );
 
 		size_t GetCount( void ) const { return m_wndToItemMap.size(); }
 		void SetInsertedEffect( const ui::CTextEffect& insertedEffect ) { m_insertedEffect = insertedEffect; }

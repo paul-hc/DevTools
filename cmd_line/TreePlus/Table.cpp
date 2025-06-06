@@ -43,10 +43,10 @@ CTextCell* CTextCell::AddChild( const std::tstring& name )
 {
 	CTextCell* pChild = FindCell( name );
 
-	if ( NULL == pChild )
+	if ( nullptr == pChild )
 		m_children.push_back( pChild = new CTextCell( this, name ) );
 
-	ENSURE( pChild != NULL );
+	ENSURE( pChild != nullptr );
 	return pChild;
 }
 
@@ -56,10 +56,10 @@ CTextCell* CTextCell::FindCell( const std::tstring& name ) const
 		if ( name == (*itChild)->GetName() )
 			return *itChild;
 
-	return NULL;
+	return nullptr;
 }
 
-std::tstring CTextCell::MakePath( const CTextCell* pRoot /*= NULL*/ ) const
+std::tstring CTextCell::MakePath( const CTextCell* pRoot /*= nullptr*/ ) const
 {
 	std::deque< TCHAR > path( m_name.begin(), m_name.end() );
 	static std::tstring s_strColumnSep = s_columnSep;
@@ -80,7 +80,7 @@ CTextCell* CTextCell::DeepFindCell( const TCHAR* pCellPath ) const
 
 	CTextCell* pCell = const_cast<CTextCell*>( this );
 
-	for ( std::vector< std::tstring >::const_iterator itCellName = cellNames.begin(); itCellName != cellNames.end() && pCell != NULL; ++itCellName )
+	for ( std::vector< std::tstring >::const_iterator itCellName = cellNames.begin(); itCellName != cellNames.end() && pCell != nullptr; ++itCellName )
 		pCell = pCell->FindCell( *itCellName );
 
 	return pCell;
@@ -100,7 +100,7 @@ void CTextCell::QueryLeafs( std::vector< CTextCell* >& rLeafs ) const
 // CTable implementation
 
 CTable::CTable( void )
-	: m_root( NULL, _T("<root>") )
+	: m_root( nullptr, _T("<root>") )
 {
 }
 

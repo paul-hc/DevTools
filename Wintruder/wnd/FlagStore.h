@@ -54,14 +54,14 @@ public:
 
 struct CFlagGroup
 {
-	CFlagGroup( void ) : m_pSeparator( NULL ) {}
+	CFlagGroup( void ) : m_pSeparator( nullptr ) {}
 	CFlagGroup( CFlagInfo* pSeparator ) : m_pSeparator( pSeparator ) { m_pSeparator->m_pGroup = this; }
 
 	DWORD GetMask( void ) const { return m_flagInfos.front()->m_mask; }
 
 	const std::tstring& GetName( const std::tstring& anonymousName ) const
 	{
-		return m_pSeparator != NULL && !m_pSeparator->GetName().empty() ? m_pSeparator->GetName() : anonymousName;
+		return m_pSeparator != nullptr && !m_pSeparator->GetName().empty() ? m_pSeparator->GetName() : anonymousName;
 	}
 
 	const std::vector< const CFlagInfo* >& GetFlags( void ) const { return m_flagInfos; }

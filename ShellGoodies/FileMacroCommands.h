@@ -48,7 +48,7 @@ namespace cmd
 
 		struct CExecMessage		// executes the leaf command (ExecuteMode) or reverse command (UnexecuteMode), and stores the aggregate balloon message
 		{
-			CExecMessage( void ) : m_msgType( app::Info ), m_pLeafCmd( NULL ), m_cmdPos( 0 ) { m_message.reserve( 512 ); }
+			CExecMessage( void ) : m_msgType( app::Info ), m_pLeafCmd( nullptr ), m_cmdPos( 0 ) { m_message.reserve( 512 ); }
 
 			CBaseFileCmd* StoreLeafCmd( CBaseFileCmd* pLeafCmd, CmdMode cmdMode );		// returns the target command
 			void AppendLeafMessage( void );

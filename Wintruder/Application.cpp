@@ -75,7 +75,7 @@ BOOL CApplication::InitInstance( void )
 	m_pMainWnd = &mainDialog;
 
 	mainDialog.DoModal();
-	m_pMainWnd = NULL;
+	m_pMainWnd = nullptr;
 
 	app::GetOptions()->SaveAll();
 	return FALSE;
@@ -98,7 +98,7 @@ void CApplication::ShowAppPopups( bool show )
 
 CToolTipCtrl* CApplication::GetMainTooltip( void )
 {
-	if ( NULL == m_mainTooltip.m_hWnd )
+	if ( nullptr == m_mainTooltip.m_hWnd )
 	{
 		ASSERT_PTR( AfxGetMainWnd()->GetSafeHwnd() );
 
@@ -158,7 +158,7 @@ BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 	if ( HWND hMainDlg = AfxGetMainWnd()->GetSafeHwnd() )
 		if ( pMsg->hwnd == hMainDlg || ::IsChild( hMainDlg, pMsg->hwnd ) )
 		{
-			if ( m_mainTooltip.m_hWnd != NULL )
+			if ( m_mainTooltip.m_hWnd != nullptr )
 				RelayTooltipEvent( pMsg );
 
 			if ( m_sharedAccel.Translate( pMsg, hMainDlg ) )
@@ -291,7 +291,7 @@ void CApplication::OnUpdateEnableWindow( CCmdUI* pCmdUI )
 	pCmdUI->Enable( enable );
 	//pCmdUI->SetCheck( enable && isEnabled );		/* just a toggle button */
 
-	if ( pCmdUI->m_pMenu != NULL )
+	if ( pCmdUI->m_pMenu != nullptr )
 	{
 		enum Part { Enable, Disable, Suffix };
 		static std::vector< std::tstring > parts;

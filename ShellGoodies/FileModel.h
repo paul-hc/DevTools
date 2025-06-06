@@ -68,7 +68,7 @@ public:
 	template< typename FuncType >
 	utl::ICommand* MakeChangeDestPathsCmd( const FuncType& func, const std::tstring& cmdTag );
 
-	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter = NULL ) const;
+	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter = nullptr ) const;
 	utl::ICommand* MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter ) throws_( CRuntimeException );
 
 	bool PromptExtensionChanges( const std::vector< fs::CPath >& destPaths ) const;
@@ -95,7 +95,7 @@ private:
 			: m_pFileModel( pFileModel )
 			, m_stackType( stackType )
 		{
-			ASSERT( m_pFileModel != NULL && m_pFileModel->m_sourcePaths.empty() );
+			ASSERT( m_pFileModel != nullptr && m_pFileModel->m_sourcePaths.empty() );
 		}
 
 		void operator()( const utl::ICommand* pCmd );
@@ -110,7 +110,7 @@ private:
 			: m_pFileModel( pFileModel )
 			, m_stackType( stackType )
 		{
-			ASSERT( m_pFileModel != NULL && m_pFileModel->m_sourcePaths.empty() );
+			ASSERT( m_pFileModel != nullptr && m_pFileModel->m_sourcePaths.empty() );
 		}
 
 		void operator()( const utl::ICommand* pCmd );
@@ -166,7 +166,7 @@ utl::ICommand* CFileModel::MakeChangeDestPathsCmd( const FuncType& func, const s
 	if ( anyChanges )
 		return new CChangeDestPathsCmd( this, destPaths, cmdTag );
 
-	return NULL;
+	return nullptr;
 }
 
 

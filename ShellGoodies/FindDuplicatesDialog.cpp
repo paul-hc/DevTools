@@ -94,7 +94,7 @@ namespace hlp
 			if ( HasFolderPath( *itItem, dirPath, depth ) )
 				return *itItem;
 
-		return NULL;
+		return nullptr;
 	}
 
 	CDuplicateFileItem* FindFirstItemNotWithFolderPath( const CDuplicateFilesGroup* pGroup, const fs::CPath& dirPath, RecursionDepth depth = Shallow )
@@ -103,7 +103,7 @@ namespace hlp
 			if ( !HasFolderPath( *itItem, dirPath, depth ) )
 				return *itItem;
 
-		return NULL;
+		return nullptr;
 	}
 
 	void QueryGroupsOfDupItems( std::vector< CDuplicateFilesGroup* >& rDupGroups, const std::vector< CDuplicateFileItem* >& dupItems )
@@ -131,7 +131,7 @@ namespace hlp
 
 			CScopedInternalChange change( m_pListCtrl );
 			m_pListCtrl->SetObjectsCheckedState( &m_checkedDupItems, CheckDup::CheckedItem, false );		// restore original checked state (except new originals)
-			m_pListCtrl = NULL;			// mark as comitted
+			m_pListCtrl = nullptr;			// mark as comitted
 		}
 	private:
 		void AugmentCheckedItems( void )
@@ -192,7 +192,7 @@ namespace layout
 }
 
 
-const ui::CItemContent CFindDuplicatesDialog::s_pathItemsContent( ui::MixedPath, NULL, ui::CItemContent::All | ui::CItemContent::EnsurePathExist );
+const ui::CItemContent CFindDuplicatesDialog::s_pathItemsContent( ui::MixedPath, nullptr, ui::CItemContent::All | ui::CItemContent::EnsurePathExist );
 
 CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CFileEditorBaseDialog( pFileModel, cmd::FindDuplicates, IDD_FIND_DUPLICATES_DIALOG, pParent )
@@ -241,7 +241,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 
 	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewPropertyComparator<CDuplicateFileItem, pred::TCompareNameExt>( CDuplicateFileItem::ToNameExt() ) );
 	m_dupsListCtrl.AddColumnCompare( DateModified, pred::NewPropertyComparator<CDuplicateFileItem>( func::AsModifyTime() ), false );		// order date-time descending by default
-	m_dupsListCtrl.AddColumnCompare( DuplicateCount, NULL, false );		// order by duplicate count descending by default; NULL comparator since uses only group ordering
+	m_dupsListCtrl.AddColumnCompare( DuplicateCount, nullptr, false );		// order by duplicate count descending by default; NULL comparator since uses only group ordering
 
 	m_dupsListCtrl.GetMateToolbar()->GetStrip()
 		.AddButton( ID_CHECK_ALL_DUPLICATES )
@@ -286,7 +286,7 @@ CMenu& CFindDuplicatesDialog::GetDupListPopupMenu( CReportListControl::ListPopup
 
 	static CMenu s_popupMenu[ CReportListControl::_ListPopupCount ];
 	CMenu& rMenu = s_popupMenu[ popupType ];
-	if ( NULL == rMenu.GetSafeHmenu() )
+	if ( nullptr == rMenu.GetSafeHmenu() )
 	{
 		CMenu popupMenu;
 		ui::LoadPopupMenu( &rMenu, IDR_CONTEXT_MENU, ui::CPopupIndexPath( popup::DuplicatesList, CReportListControl::OnSelection == popupType ? DupListOnSelection : DupListNowhere ) );
@@ -380,7 +380,7 @@ bool CFindDuplicatesDialog::ExecuteDuplicatesCmd( utl::ICommand* pDupsCmd )
 void CFindDuplicatesDialog::SwitchMode( Mode mode )
 {
 	m_mode = mode;
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return;
 
 	static const UINT s_okIconId[] = { ID_FIND_DUPLICATE_FILES, ID_DELETE_DUPLICATES, 0, 0 };
@@ -504,7 +504,7 @@ void CFindDuplicatesDialog::PushNewPathsListItems( CPathItemListCtrl* pPathsList
 	std::vector< CPathItem* > newPathItems;
 
 	for ( std::vector< fs::CPath >::const_iterator itFilePath = newPaths.begin(); itFilePath != newPaths.end(); ++itFilePath )
-		if ( NULL == func::FindItemWithPath( rPathItems, *itFilePath ) )			// unique path?
+		if ( nullptr == func::FindItemWithPath( rPathItems, *itFilePath ) )			// unique path?
 			newPathItems.push_back( new CPathItem( *itFilePath ) );
 
 	rPathItems.insert( rPathItems.begin() + utl::min( atPos, rPathItems.size() ), newPathItems.begin(), newPathItems.end() );
@@ -621,7 +621,7 @@ void CFindDuplicatesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pM
 {
 	pMessage;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		if ( m_pFileModel == pSubject )
 		{
 			SetupDialog();
@@ -645,7 +645,7 @@ void CFindDuplicatesDialog::ClearFileErrors( void )
 {
 	m_errorItems.clear();
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		m_dupsListCtrl.Invalidate();
 }
 
@@ -699,7 +699,7 @@ CDuplicateFileItem* CFindDuplicatesDialog::FindItemWithKey( const fs::CPath& key
 		if ( CDuplicateFileItem* pFoundItem = ( *itGroup )->FindItem( keyPath ) )
 			return pFoundItem;
 
-	return NULL;
+	return nullptr;
 }
 
 void CFindDuplicatesDialog::MarkInvalidSrcItems( void )
@@ -807,7 +807,7 @@ BOOL CFindDuplicatesDialog::PreTranslateMessage( MSG* pMsg )
 
 void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 {
-	const bool firstInit = NULL == m_searchPathsListCtrl.m_hWnd;
+	const bool firstInit = nullptr == m_searchPathsListCtrl.m_hWnd;
 
 	DDX_Control( pDX, IDC_SEARCH_PATHS_LIST, m_searchPathsListCtrl );
 	DDX_Control( pDX, IDC_IGNORE_PATHS_LIST, m_ignorePathsListCtrl );
@@ -828,7 +828,7 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 
 		m_dupsListCtrl.GetStateImageList()->Add( ui::GetImageStoresSvc()->RetrieveIcon( ID_ORIGINAL_FILE )->GetHandle() );		// OriginalItem
 
-		OnUpdate( m_pFileModel, NULL );
+		OnUpdate( m_pFileModel, nullptr );
 	}
 
 	__super::DoDataExchange( pDX );
@@ -1214,11 +1214,11 @@ void CFindDuplicatesDialog::OnLvnEndLabelEdit_PathsList( NMHDR* pNmHdr, LRESULT*
 	NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNmHdr;
 	*pResult = 0;		// rollback input
 
-	if ( pDispInfo->item.pszText != NULL )
+	if ( pDispInfo->item.pszText != nullptr )
 	{
 		CPathItem* pTargetItem = CListLikeCtrlBase::AsPtr<CPathItem>( pDispInfo->item.lParam );
 		fs::CPath newPath( pDispInfo->item.pszText );
-		std::vector< CPathItem* >* pPathItems = NULL;
+		std::vector< CPathItem* >* pPathItems = nullptr;
 
 		switch ( pNmHdr->idFrom )
 		{
@@ -1226,7 +1226,7 @@ void CFindDuplicatesDialog::OnLvnEndLabelEdit_PathsList( NMHDR* pNmHdr, LRESULT*
 			case IDC_IGNORE_PATHS_LIST:	pPathItems = &m_ignorePathItems; break;
 		}
 
-		if ( pPathItems != NULL )
+		if ( pPathItems != nullptr )
 			if ( InputNewPath( *pPathItems, pTargetItem, newPath ) )
 				*pResult = TRUE;		// signal valid input so it will commit the changes
 			else

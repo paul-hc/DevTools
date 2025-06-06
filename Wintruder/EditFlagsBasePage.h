@@ -30,7 +30,7 @@ protected:
 
 	enum FlagsPage { GeneralPage, SpecificPage, PageCount };
 
-	bool UseSpecificFlags( void ) const { return m_pSpecificFlags.get() != NULL; }
+	bool UseSpecificFlags( void ) const { return m_pSpecificFlags.get() != nullptr; }
 	void SetSpecificFlags( DWORD specificFlags );
 
 	virtual void StoreFlagStores( HWND hTargetWnd ) = 0;
@@ -38,7 +38,7 @@ protected:
 	void LoadPageInfo( UINT id );
 	void QueryAllFlagStores( std::vector< const CFlagStore* >& rFlagStores ) const;
 	DWORD EvalUnknownFlags( DWORD flags ) const;
-	void InputFlags( DWORD* pFlags, DWORD* pSpecificFlags = NULL ) const;
+	void InputFlags( DWORD* pFlags, DWORD* pSpecificFlags = nullptr ) const;
 protected:
 	std::tstring m_wndClass;
 	const CFlagStore* m_pGeneralStore;

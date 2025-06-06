@@ -10,7 +10,7 @@
 
 
 COptions::COptions( void )
-	: m_pArg( NULL )
+	: m_pArg( nullptr )
 	, m_helpMode( false )
 {
 }

@@ -38,7 +38,7 @@ COptionsSheet::COptionsSheet( CFileModel* pFileModel, CWnd* pParent, UINT initia
 
 void COptionsSheet::OnChangesApplied( void )
 {
-	if ( m_pApplyMacroCmd.get() != NULL && !m_pApplyMacroCmd->IsEmpty() )
+	if ( m_pApplyMacroCmd.get() != nullptr && !m_pApplyMacroCmd->IsEmpty() )
 		m_pFileModel->SafeExecuteCmd( m_pFileEditor, m_pApplyMacroCmd.release() );
 
 	if ( !CGeneralOptions::Instance().m_undoEditingCmds )
@@ -73,7 +73,7 @@ CGeneralOptionsPage::~CGeneralOptionsPage()
 
 const CEnumTags& CGeneralOptionsPage::GetTags_IconDim( void )
 {
-	static const CEnumTags s_tags( _T("16 x 16|24 x 24|32 x 32|48 x 48|96 x 96|128 x 128|256 x 256"), NULL, -1, SmallIcon );		// matches IconStdSize starting from SmallIcon
+	static const CEnumTags s_tags( _T("16 x 16|24 x 24|32 x 32|48 x 48|96 x 96|128 x 128|256 x 256"), nullptr, -1, SmallIcon );		// matches IconStdSize starting from SmallIcon
 	return s_tags;
 }
 
@@ -93,7 +93,7 @@ void CGeneralOptionsPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 
 void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 {
-	const bool firstInit = NULL == m_smallIconDimCombo.m_hWnd;
+	const bool firstInit = nullptr == m_smallIconDimCombo.m_hWnd;
 
 	ui::DDX_ButtonIcon( pDX, IDC_SET_DEFAULT_ALL, ID_RESET_DEFAULT );
 
@@ -109,7 +109,7 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		bool enableProperties = NULL == ui::FindAncestorAs<CCmdDashboardDialog>( this );		// prevent recursion
+		bool enableProperties = nullptr == ui::FindAncestorAs<CCmdDashboardDialog>( this );		// prevent recursion
 		ui::EnableControl( m_hWnd, ID_OPEN_CMD_DASHBOARD, enableProperties );
 		ui::ShowControl( m_hWnd, ID_OPEN_CMD_DASHBOARD, enableProperties );
 	}

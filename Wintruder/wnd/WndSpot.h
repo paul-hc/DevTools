@@ -21,9 +21,9 @@ public:
 	CWnd* GetWnd( void ) { return this; }
 	void SetWnd( HWND hWnd, const CPoint& screenPoint = m_nullPos );
 
-	bool IsNull( void ) const { return NULL == m_hWnd; }
-	bool IsValid( void ) const { return m_hWnd != NULL && ::IsWindow( m_hWnd ); }
-	bool IsDesktopWnd( void ) const { return m_hWnd != NULL && ::GetDesktopWindow() == m_hWnd; }
+	bool IsNull( void ) const { return nullptr == m_hWnd; }
+	bool IsValid( void ) const { return m_hWnd != nullptr && ::IsWindow( m_hWnd ); }
+	bool IsDesktopWnd( void ) const { return m_hWnd != nullptr && ::GetDesktopWindow() == m_hWnd; }
 	bool HasValidPoint( void ) const { return !( m_screenPoint == m_nullPos ); }
 
 	bool Equals( const CWndSpot& right ) const;

@@ -27,9 +27,9 @@ CColorPopupDialog::CColorPopupDialog( CWnd* pParentWnd, COLORREF color, DWORD dw
 COLORREF CColorPopupDialog::GetCurrentColor( void ) const overrides(CBasePopupColorDialog)
 {
 	return RGB(
-		GetDlgItemInt( COLOR_RED, NULL, FALSE ),
-		GetDlgItemInt( COLOR_GREEN, NULL, FALSE ),
-		GetDlgItemInt( COLOR_BLUE, NULL, FALSE )
+		GetDlgItemInt( COLOR_RED, nullptr, FALSE ),
+		GetDlgItemInt( COLOR_GREEN, nullptr, FALSE ),
+		GetDlgItemInt( COLOR_BLUE, nullptr, FALSE )
 	);
 }
 
@@ -76,7 +76,7 @@ void CColorPopupDialog::AdjustDlgWindowRect( CRect& rWindowRect ) overrides(CBas
 
 void CColorPopupDialog::CreateSpin( UINT editId, CSpinButtonCtrl& rSpinButton, UINT spinId, int maxValue )
 {
-	int editPos = (int)GetDlgItemInt( editId, NULL, FALSE );
+	int editPos = (int)GetDlgItemInt( editId, nullptr, FALSE );
 	CEdit* pEditBuddy = (CEdit*)GetDlgItem( editId );
 	ASSERT_PTR( pEditBuddy );
 

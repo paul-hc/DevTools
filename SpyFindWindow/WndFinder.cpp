@@ -19,7 +19,7 @@ CWndFinder::CWndFinder( void )
 
 bool CWndFinder::IsValidMatch( HWND hWnd ) const
 {	// ignore windows belonging to this app's process
-	if ( hWnd != NULL && IsWindow( hWnd ) )
+	if ( hWnd != nullptr && IsWindow( hWnd ) )
 	{
 		DWORD processId = 0;
 		::GetWindowThreadProcessId( hWnd, &processId );
@@ -33,7 +33,7 @@ CWndSpot CWndFinder::WindowFromPoint( const CPoint& screenPos ) const
 {
 	CWndSpot wndSpot( ::WindowFromPoint( screenPos ), screenPos );
 	if ( !wndSpot.IsValid() || !IsValidMatch( wndSpot.m_hWnd ) )
-		return CWndSpot( NULL, screenPos );
+		return CWndSpot( nullptr, screenPos );
 
 	HWND hParentWnd = ::GetParent( wndSpot.m_hWnd );
 	CRect hitRect = wndSpot.GetWindowRect();
@@ -67,7 +67,7 @@ HWND CWndFinder::FindBestFitSibling( HWND hWnd, const CRect& hitRect, const CPoi
 	ASSERT_PTR( hWnd );
 	bool foundAny = false;
 
-	for ( HWND hSibling = ::GetWindow( hWnd, GW_HWNDFIRST ); hSibling != NULL; hSibling = ::GetWindow( hSibling, GW_HWNDNEXT ) )
+	for ( HWND hSibling = ::GetWindow( hWnd, GW_HWNDFIRST ); hSibling != nullptr; hSibling = ::GetWindow( hSibling, GW_HWNDNEXT ) )
 		if ( ContainsPoint( hSibling, screenPos ) )
 		{
 			CRect siblingRect;
@@ -94,7 +94,7 @@ HWND CWndFinder::FindChildWindow( HWND hWndParent, const CRect& hitRect, const C
 	if ( HWND hChild = ::GetWindow( hWndParent, GW_CHILD ) )
 	{
 		hChild = FindBestFitSibling( hChild, hitRect, screenPos );
-		if ( hChild != NULL )
+		if ( hChild != nullptr )
 			if ( ContainsPoint( hChild, screenPos ) )
 				return hChild;
 	}
@@ -112,7 +112,7 @@ bool CWndFinder::ContainsPoint( HWND hWnd, const CPoint& screenPos ) const
 	if ( app::GetOptions()->m_ignoreHidden && !::IsWindowVisible( hWnd ) )
 		return false;
 	else if ( !app::GetOptions()->m_ignoreHidden && HasFlag( ui::GetStyle( hWnd ), WS_CHILD ) )
-		if ( !::IsWindowVisible( ::GetParent( hWnd ) ) )		// allow hidden child windows only if parent is visible 
+		if ( !::IsWindowVisible( ::GetParent( hWnd ) ) )		// allow hidden child windows only if parent is visible
 			return false;
 
 	CRect windowRect;

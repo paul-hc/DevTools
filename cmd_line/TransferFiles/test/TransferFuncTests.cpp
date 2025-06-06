@@ -186,7 +186,7 @@ void CTransferFuncTests::TestBackup( void )
 	}
 
 	// backup with changed SRC content (same timestamp)
-	ut::ModifyFileText( b1_mp3Path, NULL, true );			// add another line but retain timestamp, so that will check for the file size change
+	ut::ModifyFileText( b1_mp3Path, nullptr, true );		// add another line but retain timestamp, so that will check for the file size change
 
 	{	// build command line as: <exe_folder>\xFer.exe "<pool_dir>\SRC\*.mp3;*.m4?;*.mp4" "<pool_dir>\TARGET"
 		utl::CProcessCmd copyBackup( __targv[ 0 ] );
@@ -208,8 +208,8 @@ void CTransferFuncTests::TestBackup( void )
 			_T("C\\c2.m4a")
 			, ut::EnumJoinFiles( targetDirPath ) );
 
-		// backup with changed SRC content (same timestamp) -> second time it should create a new backup 
-		ut::ModifyFileText( b1_mp3Path, NULL, true );								// one more content change to trigger a new backup "b1.mp3" -> "b1-[3].mp3"
+		// backup with changed SRC content (same timestamp) -> second time it should create a new backup
+		ut::ModifyFileText( b1_mp3Path, nullptr, true );				// one more content change to trigger a new backup "b1.mp3" -> "b1-[3].mp3"
 		ut::ModifyFileText( poolDirPath / _T("SRC\\C\\c2.m4a") );		// trigger a backup "c2.m4a" -> "c2-[2].m4a"
 
 		ASSERT_EQUAL( 0, ExecuteProcess( copyBackup ) );

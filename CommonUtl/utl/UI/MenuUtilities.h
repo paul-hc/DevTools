@@ -32,7 +32,7 @@ namespace ui
 
 	// new MFC style popup menus:
 
-	inline bool UseMfcMenuManager( void ) { return afxContextMenuManager != NULL; }
+	inline bool UseMfcMenuManager( void ) { return afxContextMenuManager != nullptr; }
 
 	inline bool LoadMfcPopupMenu( CMenu* pContextMenu, UINT menuResId, const CPopupIndexPath& popupIndexPath, OUT std::tstring* pOutPopupText = nullptr )
 	{

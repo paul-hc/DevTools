@@ -99,7 +99,7 @@ namespace multi
 			if ( itState->m_ctrlId == ctrlId )
 				return &*itState;
 
-		return NULL;
+		return nullptr;
 	}
 
 	BYTE EvalWouldBeAttributes( const std::vector< multi::CAttribCheckState >& attribCheckStates, const CTouchItem* pTouchItem );

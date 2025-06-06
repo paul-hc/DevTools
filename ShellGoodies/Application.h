@@ -47,7 +47,7 @@ struct CScopedMainWnd
 	bool InEffect( void ) const { return m_inEffect; }
 
 	static bool HasValidParentOwner( void ) { return ::IsWindow( s_pParentOwner->GetSafeHwnd() ) != FALSE; }
-	static CWnd* GetParentOwnerWnd( void ) { return s_pParentOwner != NULL ? s_pParentOwner : AfxGetMainWnd(); }		// during DLL registration there is no parent owner
+	static CWnd* GetParentOwnerWnd( void ) { return s_pParentOwner != nullptr ? s_pParentOwner : AfxGetMainWnd(); }		// during DLL registration there is no parent owner
 private:
 	CWnd* m_pOldMainWnd;
 	bool m_inEffect;

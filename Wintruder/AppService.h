@@ -37,12 +37,12 @@ public:
 	COptions* GetOptions( void ) { return &m_options; }
 
 	CWndSpot& GetTargetWnd( void ) { return m_targetWnd; }
-	void SetTargetWnd( const CWndSpot& targetWnd, IWndObserver* pSender = NULL );
+	void SetTargetWnd( const CWndSpot& targetWnd, IWndObserver* pSender = nullptr );
 
 	void AddObserver( CWnd* pObserver );
 	void RemoveObserver( CWnd* pObserver );
 
-	void PublishEvent( app::Event appEvent, IEventObserver* pSender = NULL );
+	void PublishEvent( app::Event appEvent, IEventObserver* pSender = nullptr );
 
 	bool HasDirtyDetails( void ) const { return m_dirtyDetails; }
 	bool SetDirtyDetails( bool dirtyDetails = true );
@@ -67,7 +67,7 @@ namespace app
 	enum Feedback { Silent, Beep, Report };
 
 	bool CheckValidTargetWnd( Feedback feedback = Report );
-	inline CWndSpot* GetValidTargetWnd( Feedback feedback = Silent ) { return CheckValidTargetWnd( feedback ) ? &GetTargetWnd() : NULL; }
+	inline CWndSpot* GetValidTargetWnd( Feedback feedback = Silent ) { return CheckValidTargetWnd( feedback ) ? &GetTargetWnd() : nullptr; }
 }
 
 

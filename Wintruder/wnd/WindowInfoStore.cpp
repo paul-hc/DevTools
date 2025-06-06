@@ -36,13 +36,13 @@ const CWindowInfoStore::CWindowInfo* CWindowInfoStore::FindInfo( HWND hWnd ) con
 {
 	ASSERT_PTR( hWnd );
 	std::unordered_map<HWND, CWindowInfo>::const_iterator itCached = m_slowCache.find( hWnd );
-	return itCached != m_slowCache.end() ? &itCached->second : NULL;
+	return itCached != m_slowCache.end() ? &itCached->second : nullptr;
 }
 
 std::tstring CWindowInfoStore::LookupCaption( HWND hWnd )
 {
 	if ( !ui::IsValidWindow( hWnd ) )
-		return NULL;
+		return nullptr;
 
 	if ( const CWindowInfo* pCached = FindInfo( hWnd ) )
 		return pCached->m_caption;
@@ -64,7 +64,7 @@ std::tstring CWindowInfoStore::LookupCaption( HWND hWnd )
 HICON CWindowInfoStore::LookupIcon( HWND hWnd )
 {
 	if ( !ui::IsValidWindow( hWnd ) )
-		return NULL;
+		return nullptr;
 
 	if ( const CWindowInfo* pCached = FindInfo( hWnd ) )
 		return pCached->m_hIcon;
@@ -115,7 +115,7 @@ bool CWindowInfoStore::MustCacheIcon( HWND hWnd )
 HICON CWindowInfoStore::QueryWndIcon( HWND hWnd )
 {
 	if ( !MustCacheIcon( hWnd ) )
-		return NULL;
+		return nullptr;
 
 	return GetIcon( hWnd );
 }
@@ -126,14 +126,14 @@ HICON CWindowInfoStore::GetIcon( HWND hWnd )
 
 	// icon access can deadlock on Windows 10 due to UIPI, for windows of processes having different elevation
 	HICON hIcon = (HICON)::SendMessage( hWnd, WM_GETICON, ICON_SMALL, 0 );
-	if ( NULL == hIcon )
+	if ( nullptr == hIcon )
 		hIcon = (HICON)::SendMessage( hWnd, WM_GETICON, ICON_SMALL2, 0 );
-	if ( NULL == hIcon )
+	if ( nullptr == hIcon )
 		hIcon = (HICON)::SendMessage( hWnd, WM_GETICON, ICON_BIG, 0 );
 
-	if ( NULL == hIcon )
+	if ( nullptr == hIcon )
 		hIcon = (HICON)::GetClassLongPtr( hWnd, GCLP_HICONSM );
-	if ( NULL == hIcon )
+	if ( nullptr == hIcon )
 		hIcon = (HICON)::GetClassLongPtr( hWnd, GCLP_HICON );
 
 	return hIcon;

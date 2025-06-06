@@ -2,6 +2,8 @@
 #define StdHashValue_h
 #pragma once
 
+#include <type_traits>		// for std::hash<T>()
+
 
 namespace utl
 {

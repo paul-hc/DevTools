@@ -63,7 +63,7 @@ namespace cmd
 		if ( const CMacroCommand* pMacroCmd = dynamic_cast<const CMacroCommand*>( pCmd ) )
 			return pMacroCmd->IsEmpty();
 
-		return NULL == pCmd;
+		return nullptr == pCmd;
 	}
 
 
@@ -122,7 +122,7 @@ namespace cmd
 	void PrefixMsgTypeLine( std::tstring* pOutput, const std::tstring& coreMessage, app::MsgType msgType )
 	{
 		ASSERT_PTR( pOutput );
-		stream::Tag( *pOutput, app::GetTags_MsgType().FormatKey( msgType ), NULL );
+		stream::Tag( *pOutput, app::GetTags_MsgType().FormatKey( msgType ), nullptr );
 		stream::Tag( *pOutput, coreMessage, _T("\n") );
 	}
 
@@ -150,11 +150,11 @@ namespace cmd
 
 	IMPLEMENT_DYNAMIC( CBaseSerialCmd, CObject )
 
-	IErrorObserver* CBaseSerialCmd::s_pErrorObserver = NULL;
+	IErrorObserver* CBaseSerialCmd::s_pErrorObserver = nullptr;
 	CLogger* CBaseSerialCmd::s_pLogger = (CLogger*)-1;
 
 	CBaseSerialCmd::CBaseSerialCmd( CommandType cmdType /*= CommandType()*/ )
-		: CCommand( cmdType, NULL, &GetTags_CommandType() )
+		: CCommand( cmdType, nullptr, &GetTags_CommandType() )
 	{
 		if ( (CLogger*)-1 == s_pLogger )
 			s_pLogger = app::GetLogger();
@@ -165,9 +165,9 @@ namespace cmd
 		CCommand::Serialize( archive );		// dis-ambiguate from CObject::Serialize()
 	}
 
-	std::tstring CBaseSerialCmd::FormatLogMessage( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle /*= NULL*/ ) const
+	std::tstring CBaseSerialCmd::FormatLogMessage( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle /*= nullptr*/ ) const
 	{
-		std::tstring message = pTitle != NULL ? pTitle : FormatExecTitle().c_str();
+		std::tstring message = pTitle != nullptr ? pTitle : FormatExecTitle().c_str();
 
 		if ( utl::Contains( coreMessage, _T('\n') ) )		// multi-line?
 			cmd::PrefixMsgTypeLine( &message, coreMessage, msgType );
@@ -186,14 +186,14 @@ namespace cmd
 	}
 
 
-	bool CBaseSerialCmd::ShowBalloon( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle /*= NULL*/ ) const
+	bool CBaseSerialCmd::ShowBalloon( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle /*= nullptr*/ ) const
 	{
-		return sys_tray::ShowBalloonMessage( coreMessage, pTitle != NULL ? pTitle : FormatExecTitle().c_str(), msgType );
+		return sys_tray::ShowBalloonMessage( coreMessage, pTitle != nullptr ? pTitle : FormatExecTitle().c_str(), msgType );
 	}
 
 	void CBaseSerialCmd::LogOutput( const std::tstring& message )
 	{
-		if ( s_pLogger != NULL )
+		if ( s_pLogger != nullptr )
 			s_pLogger->LogString( message );
 	}
 }

@@ -340,7 +340,7 @@ void CGeneralPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 
 void CGeneralPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_pInfoEdit->m_hWnd;
+	bool firstInit = nullptr == m_pInfoEdit->m_hWnd;
 	DDX_Control( pDX, IDC_GENERAL_INFO_EDIT, *m_pInfoEdit );
 	DDX_Control( pDX, IDC_FIELD_EDIT_BUTTON, m_drillButton );
 

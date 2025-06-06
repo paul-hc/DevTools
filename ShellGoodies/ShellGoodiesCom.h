@@ -20,7 +20,7 @@ public:
 	CShellGoodiesCom( void );
 	~CShellGoodiesCom();
 private:
-	bool IsInit( void ) const { return m_pController.get() != NULL; }
+	bool IsInit( void ) const { return m_pController.get() != nullptr; }
 	size_t ExtractDropInfo( IDataObject* pSelFileObjects );
 private:
 	std::auto_ptr<CShellMenuController> m_pController;	// controller for handling the selected files in Explorer

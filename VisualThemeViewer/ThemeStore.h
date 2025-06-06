@@ -53,7 +53,7 @@ interface IThemeNode : public utl::ISubject
 abstract class CBaseNode : public CSubjectImpl<IThemeNode>
 {
 protected:
-	CBaseNode( Relevance relevance, int flags ) : m_relevance( relevance ), m_pParentNode( NULL ), m_flags( flags ) {}
+	CBaseNode( Relevance relevance, int flags ) : m_relevance( relevance ), m_pParentNode( nullptr ), m_flags( flags ) {}
 public:
 	virtual Relevance GetRelevance( void ) const { return m_relevance; }
 	virtual int GetFlags( void ) const { return m_flags; }
@@ -91,7 +91,7 @@ public:
 struct CThemePart : public CBaseNode
 {
 	CThemePart( int partId, const std::wstring& partName, Relevance relevance, int flags )
-		: CBaseNode( relevance, flags ), m_partId( partId ), m_partName( partName ), m_pPreviewState( NULL ) {}
+		: CBaseNode( relevance, flags ), m_partId( partId ), m_partName( partName ), m_pPreviewState( nullptr ) {}
 
 	~CThemePart();
 
@@ -117,7 +117,7 @@ private:
 
 struct CThemeClass : public CBaseNode
 {
-	CThemeClass( const std::wstring& className, Relevance relevance ) : CBaseNode( relevance, 0 ), m_className( className ), m_pPreviewPart( NULL ) {}
+	CThemeClass( const std::wstring& className, Relevance relevance ) : CBaseNode( relevance, 0 ), m_className( className ), m_pPreviewPart( nullptr ) {}
 	~CThemeClass();
 
 	virtual const std::tstring& GetCode( void ) const { return m_className; }

@@ -34,7 +34,7 @@ namespace mfc
 	template< typename CListT, typename ObjectT >
 	bool CList_Remove( CListT& rObjectList, ObjectT* pTargetObject )
 	{
-		for ( POSITION pos = rObjectList.GetHeadPosition(); pos != NULL; )
+		for ( POSITION pos = rObjectList.GetHeadPosition(); pos != nullptr; )
 		{
 			POSITION removePos = pos;
 			ObjectT* pObject = checked_static_cast<ObjectT*>( rObjectList.GetNext( pos ) );
@@ -168,7 +168,7 @@ namespace mfc
 		CObList buttonList;
 		CMFCToolBar::GetCommandButtons( btnId, buttonList );
 
-		for ( POSITION pos = buttonList.GetHeadPosition(); pos != NULL; )
+		for ( POSITION pos = buttonList.GetHeadPosition(); pos != nullptr; )
 		{
 			ButtonT* pButton = checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) );
 
@@ -185,7 +185,7 @@ namespace mfc
 		CObList buttonList;
 		CMFCToolBar::GetCommandButtons( btnId, buttonList );
 
-		for ( POSITION pos = buttonList.GetHeadPosition(); pos != NULL; )
+		for ( POSITION pos = buttonList.GetHeadPosition(); pos != nullptr; )
 		{
 			ButtonT* pButton = checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) );
 			if ( pred( pButton ) )
@@ -203,7 +203,7 @@ namespace mfc
 		CMFCToolBar::GetCommandButtons( btnId, buttonList );
 		rButtons.reserve( buttonList.GetSize() );
 
-		for ( POSITION pos = buttonList.GetHeadPosition(); pos != NULL; )
+		for ( POSITION pos = buttonList.GetHeadPosition(); pos != nullptr; )
 			rButtons.push_back( checked_static_cast<ButtonT*>( buttonList.GetNext( pos ) ) );
 	}
 

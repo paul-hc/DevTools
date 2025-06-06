@@ -13,7 +13,7 @@
 
 CThemeSampleStatic::CThemeSampleStatic( void )
 	: CBufferedStatic()
-	, m_pOptions( NULL )
+	, m_pOptions( nullptr )
 	, m_margins( Margin, Margin )
 	, m_coreSize( 0, 0 )
 	, m_stcInfoId( 0 )
@@ -27,7 +27,7 @@ CThemeSampleStatic::~CThemeSampleStatic()
 void CThemeSampleStatic::SetThemeItem( const CThemeItem& themeItem )
 {
 	m_themeItem = themeItem;
-	RedrawWindow( NULL, NULL );
+	RedrawWindow( nullptr, nullptr );
 }
 
 CRect CThemeSampleStatic::GetCoreRect( const CRect& clientRect ) const

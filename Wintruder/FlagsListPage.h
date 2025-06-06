@@ -13,7 +13,7 @@ class CFlagsListCtrl;
 class CFlagsListPage : public CLayoutPropertyPage
 {
 public:
-	CFlagsListPage( ui::IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle = NULL );
+	CFlagsListPage( ui::IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle = nullptr );
 	virtual ~CFlagsListPage();
 
 	CBaseFlagsCtrl* GetFlagsCtrl( void );

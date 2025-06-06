@@ -19,7 +19,7 @@ namespace app
 }
 
 CCmdLineOptions::CCmdLineOptions( void )
-	: m_pArg( NULL )
+	: m_pArg( nullptr )
 	, m_optionFlags()
 	, m_guidesProfileType( _ProfileCount )
 	, m_maxDepthLevel( utl::npos )

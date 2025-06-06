@@ -14,7 +14,7 @@
 class CMainDialog : public CBaseMainDialog
 {
 public:
-	CMainDialog( CWnd* pParent = NULL );
+	CMainDialog( CWnd* pParent = nullptr );
 
 	// base overrides
 	virtual void SaveToRegistry( void );
@@ -24,7 +24,7 @@ private:
 	void SetResultsText( const std::tstring& outputText );
 
 	enum PickerFormat { FmtDateTime, FmtDuration, FmtEmpty };
-	bool SetFormatCurrLinePicker( PickerFormat pickerFormat, const CTimeSpan* pDuration = NULL );
+	bool SetFormatCurrLinePicker( PickerFormat pickerFormat, const CTimeSpan* pDuration = nullptr );
 	void EnableApplyButton( void );
 
 	static const std::tstring GetDefaultInputText( const CTime& dateTime = CTime::GetCurrentTime() );		// CTime( 1446294619 ): "Oct 31, 2015 - 12:30:19"

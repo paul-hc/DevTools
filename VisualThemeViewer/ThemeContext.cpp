@@ -15,12 +15,12 @@ CThemeItem CThemeContext::GetThemeItem( void ) const
 	if ( !IsValid() )
 		return CThemeItem::s_null;
 
-	return CThemeItem( m_pClass->m_className.c_str(), m_pPart->m_partId, m_pState != NULL ? m_pState->m_stateId : 0 );
+	return CThemeItem( m_pClass->m_className.c_str(), m_pPart->m_partId, m_pState != nullptr ? m_pState->m_stateId : 0 );
 }
 
 std::tstring CThemeContext::FormatClass( void ) const
 {
-	if ( m_pClass != NULL )
+	if ( m_pClass != nullptr )
 		return str::Format( _T("L\"%s\""), m_pClass->m_className.c_str() );
 
 	return std::tstring();
@@ -28,7 +28,7 @@ std::tstring CThemeContext::FormatClass( void ) const
 
 std::tstring CThemeContext::FormatPart( bool asNumber /*= false*/ ) const
 {
-	if ( m_pPart != NULL )
+	if ( m_pPart != nullptr )
 		if ( asNumber )
 			return str::Format( _T("%d"), m_pPart->m_partId );
 		else
@@ -39,12 +39,12 @@ std::tstring CThemeContext::FormatPart( bool asNumber /*= false*/ ) const
 
 std::tstring CThemeContext::FormatState( bool asNumber /*= false*/ ) const
 {
-	if ( m_pState != NULL )
+	if ( m_pState != nullptr )
 		if ( asNumber )
 			return str::Format( _T("%d"), m_pState->m_stateId );
 		else
 			return m_pState->m_stateName;
-	else if ( asNumber && m_pPart != NULL )
+	else if ( asNumber && m_pPart != nullptr )
 		return _T("0");
 
 	return std::tstring();

@@ -357,7 +357,7 @@ namespace mfc
 		m_bText = TRUE;
 		m_bUserButton = FALSE;
 
-		if ( m_pWndParent != NULL )
+		if ( m_pWndParent != nullptr )
 		{
 			CRect rectImage;
 			GetImageRect( rectImage );
@@ -1015,7 +1015,7 @@ namespace mfc
 			SetCapture();			// note: should not be called in menu popup tracking, since it freezes other sibling popups that need expanding
 		}
 
-		if ( m_pParentPickerButton != NULL )
+		if ( m_pParentPickerButton != nullptr )
 			mfc::MfcButton_SetCaptured( m_pParentPickerButton, false );
 
 		return 0;

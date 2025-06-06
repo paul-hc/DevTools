@@ -18,7 +18,7 @@ void CCommandItem::SetCmd( utl::ICommand* pCmd )
 	m_imageIndex = LookupImageIndex( m_pCmd );
 	m_code.clear();
 
-	if ( m_pCmd != NULL )
+	if ( m_pCmd != nullptr )
 	{
 		std::vector< std::tstring > fields;
 		cmd::QueryCmdFields( fields, m_pCmd );
@@ -78,14 +78,14 @@ int CCommandItem::LookupImageIndex( utl::ICommand* pCmd )
 
 UINT CCommandItem::ExtractCmdID( utl::ICommand* pCmd )
 {
-	if ( NULL == pCmd )
+	if ( nullptr == pCmd )
 		return UINT_MAX;
 
 	if ( CMacroCommand::MacroCmdId == pCmd->GetTypeID() )		// macro ID with undefined image?
 	{
 		const CMacroCommand* pMacroCmd = checked_static_cast<const CMacroCommand*>( pCmd );
 
-		if ( pMacroCmd->GetMainCmd() != NULL )
+		if ( pMacroCmd->GetMainCmd() != nullptr )
 			pCmd = pMacroCmd->GetMainCmd();						// use the main command's image
 		else if ( !pMacroCmd->IsEmpty() )
 			pCmd = pMacroCmd->GetSubCommands().front();			// use the first command's image

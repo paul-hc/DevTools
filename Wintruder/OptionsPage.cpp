@@ -31,7 +31,7 @@ COptionsPage::~COptionsPage()
 
 void COptionsPage::OnAppEvent( app::Event appEvent )
 {
-	if ( m_hWnd != NULL )		// page created?
+	if ( m_hWnd != nullptr )		// page created?
 		switch ( appEvent )
 		{
 			case app::OptionChanged:
@@ -42,7 +42,7 @@ void COptionsPage::OnAppEvent( app::Event appEvent )
 
 void COptionsPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_auTargetCombo.m_hWnd;
+	bool firstInit = nullptr == m_auTargetCombo.m_hWnd;
 
 	DDX_Control( pDX, ID_FRAME_STYLE_COMBO, m_frameStyleCombo );
 	DDX_Control( pDX, ID_FRAME_SIZE_EDIT, m_frameSizeEdit );

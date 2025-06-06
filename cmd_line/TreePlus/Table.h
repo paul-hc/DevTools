@@ -13,7 +13,7 @@ public:
 	CTextCell( const CTextCell* pParent, const std::tstring& name );
 	~CTextCell();
 
-	bool IsRoot( void ) const { return NULL == m_pParent; }
+	bool IsRoot( void ) const { return nullptr == m_pParent; }
 	bool IsFolder( void ) const { return !IsLeaf(); }
 	bool IsLeaf( void ) const { return m_children.empty(); }
 
@@ -23,7 +23,7 @@ public:
 	const std::tstring& GetName( void ) const { return m_name; }
 	CTextCell* FindCell( const std::tstring& name ) const;
 
-	std::tstring MakePath( const CTextCell* pRoot = NULL ) const;
+	std::tstring MakePath( const CTextCell* pRoot = nullptr ) const;
 	CTextCell* DeepFindCell( const TCHAR* pCellPath ) const;		// path names are separated by s_columnSep ('\t')
 
 	const std::vector< CTextCell* >& GetChildren( void ) const { return m_children; }

@@ -70,8 +70,8 @@ CMainDialog::CMainDialog( COptions* pOptions, const CThemeStore* pThemeStore )
 	: CBaseMainDialog( IDD_MAIN_DIALOG )
 	, m_pOptions( pOptions )
 	, m_pThemeStore( pThemeStore )
-	, m_pSelClass( NULL )
-	, m_pSelNode( NULL )
+	, m_pSelClass( nullptr )
+	, m_pSelNode( nullptr )
 	, m_classList( IDC_THEME_CLASS_LIST )
 {
 	m_regSection = _T("MainDialog");
@@ -122,7 +122,7 @@ CWnd* CMainDialog::GetWnd( void )
 void CMainDialog::RedrawSamples( void )
 {
 	for ( int i = 0; i != SampleCount; ++i )
-		m_samples[ i ].RedrawWindow( NULL, NULL );
+		m_samples[ i ].RedrawWindow( nullptr, nullptr );
 
 	m_classList.Invalidate();
 	m_partStateTree.Invalidate();
@@ -130,8 +130,8 @@ void CMainDialog::RedrawSamples( void )
 
 void CMainDialog::UpdateGlyphPreview( void )
 {
-	m_classList.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pListCustomDraw.get() : NULL );
-	m_partStateTree.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : NULL );
+	m_classList.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pListCustomDraw.get() : nullptr );
+	m_partStateTree.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : nullptr );
 }
 
 void CMainDialog::UpdateExplorerTheme( void )
@@ -142,7 +142,7 @@ void CMainDialog::UpdateExplorerTheme( void )
 
 void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
-	const IThemeNode* pThemeNode = NULL;
+	const IThemeNode* pThemeNode = nullptr;
 
 	if ( &m_classList == pCtrl )
 	{
@@ -188,7 +188,7 @@ void CMainDialog::SetupClassesList( void )
 		m_classList.InitialSortList();		// store original order and sort by current criteria
 	}
 
-	if ( NULL == m_pSelClass || !m_classList.Select( m_pSelClass ) )
+	if ( nullptr == m_pSelClass || !m_classList.Select( m_pSelClass ) )
 		m_classList.Select( m_pSelClass = m_classList.GetObjectAt<CThemeClass>( 0 ) );
 
 	ui::SetDlgItemText( this, IDC_CLASS_LABEL,
@@ -229,7 +229,7 @@ void CMainDialog::SetupPartsAndStatesTree( void )
 		ui::SortCompareTreeChildren( pred::TCompareRelevance(), m_partStateTree, TVI_ROOT, Deep );
 	}
 
-	if ( NULL == m_pSelNode || !m_partStateTree.SetSelected( m_pSelNode ) )
+	if ( nullptr == m_pSelNode || !m_partStateTree.SetSelected( m_pSelNode ) )
 		m_partStateTree.SetSelected( m_pSelNode = m_partStateTree.GetItemObject<IThemeNode>( m_partStateTree.GetChildItem( TVI_ROOT ) ) );
 
 	ui::SetDlgItemText( this, IDC_PARTS_AND_STATES_LABEL,
@@ -261,7 +261,7 @@ CThemeContext CMainDialog::GetSelThemeContext( void ) const
 	CThemeContext selTheme;
 	selTheme.m_pClass = m_pSelClass;
 
-	if ( m_pSelNode != NULL )
+	if ( m_pSelNode != nullptr )
 		switch ( m_pSelNode->GetNodeType() )
 		{
 			case IThemeNode::State:
@@ -282,7 +282,7 @@ void CMainDialog::LoadSelItems( void )
 	if ( !selText.empty() )
 	{
 		m_pSelClass = m_pThemeStore->FindClass( selText );
-		if ( m_pSelClass != NULL )
+		if ( m_pSelClass != nullptr )
 		{
 			selText = AfxGetApp()->GetProfileString( reg::section_settings, reg::entry_selTreeItem ).GetString();
 			if ( !selText.empty() )
@@ -293,7 +293,7 @@ void CMainDialog::LoadSelItems( void )
 
 void CMainDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_classList.m_hWnd;
+	bool firstInit = nullptr == m_classList.m_hWnd;
 
 	DDX_Control( pDX, IDC_THEME_CLASS_LIST, m_classList );
 	DDX_Control( pDX, IDC_PARTS_AND_STATES_TREE, m_partStateTree );
@@ -313,7 +313,7 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 
 		m_classFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_settings, reg::entry_classFilter, ObscureRelevance ) );
 		m_partsFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_settings, reg::entry_partsFilter, ObscureRelevance ) );
-		ui::LoadHistoryCombo( m_bkColorCombo, reg::section_settings, reg::entry_bkColorHistory, NULL );
+		ui::LoadHistoryCombo( m_bkColorCombo, reg::section_settings, reg::entry_bkColorHistory, nullptr );
 		ui::SetDlgItemText( this, IDC_BK_COLOR_COMBO, m_pOptions->m_bkColorText );
 
 		m_pOptions->UpdateControls( this );			// update check-box buttons
@@ -322,7 +322,7 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 		SetupClassesList();
 		SetupPartsAndStatesTree();
 
-		std::tstring selText = AfxGetApp()->GetProfileString( reg::section_settings, reg::entry_selTreeItem, NULL );
+		std::tstring selText = AfxGetApp()->GetProfileString( reg::section_settings, reg::entry_selTreeItem, nullptr );
 		if ( HTREEITEM hSelItem = ui::FindTreeItem( m_partStateTree, selText ) )
 		{
 			m_partStateTree.SelectItem( hSelItem );
@@ -411,7 +411,7 @@ void CMainDialog::OnEditCopy( void )
 
 void CMainDialog::OnUpdateEditCopy( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_pSelNode != NULL );
+	pCmdUI->Enable( m_pSelNode != nullptr );
 }
 
 void CMainDialog::OnCopyTheme( UINT cmdId )

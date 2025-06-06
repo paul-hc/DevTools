@@ -232,7 +232,7 @@ void CBasePopupColorDialog<BaseDlg>::LayoutDialog( void )
 		AdjustDlgWindowRect( windowRect );
 	}
 
-	this->SetWindowPos( NULL, windowRect.left, windowRect.top, windowRect.Width(), windowRect.Height(),
+	this->SetWindowPos( nullptr, windowRect.left, windowRect.top, windowRect.Width(), windowRect.Height(),
 						SWP_DRAWFRAME | SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_NOZORDER /*| SWP_SHOWWINDOW*/ );
 }
 

@@ -68,7 +68,7 @@ namespace layout
 const TCHAR* CMainDialog::m_format[] = { _T("HH:mm:ss  ddd dd MMM yyy"), _T("HH:mm:ss"), _T(" ") };
 const CTime CMainDialog::m_midnight( 2016, 1, 1, 0, 0, 0 );						// "Jan 1, 2016 - 00:00:00"
 
-CMainDialog::CMainDialog( CWnd* pParent /*= NULL*/ )
+CMainDialog::CMainDialog( CWnd* pParent /*= nullptr*/ )
 	: CBaseMainDialog( IDD_MAIN_DIALOG, pParent )
 	, m_inputText( (LPCTSTR)AfxGetApp()->GetProfileString( reg::section, reg::entry_inputText, GetDefaultInputText().c_str() ) )
 	, m_inputSel( 0, -1 )
@@ -112,13 +112,13 @@ void CMainDialog::ParseInput( void )
 	std::vector< std::tstring > outputLines;
 	outputLines.reserve( m_infos.size() );
 
-	const CDateTimeInfo* pPrevInfo = NULL;
+	const CDateTimeInfo* pPrevInfo = nullptr;
 
 	for ( std::vector< CDateTimeInfo >::const_iterator itInfo = m_infos.begin(); itInfo != m_infos.end(); ++itInfo )
 	{
 		std::tstring text = itInfo->Format();
 
-		if ( pPrevInfo != NULL )
+		if ( pPrevInfo != nullptr )
 		{
 			CDurationInfo durationInfo( *pPrevInfo, *itInfo );
 			if ( durationInfo.m_isValid )
@@ -140,7 +140,7 @@ void CMainDialog::ReadInputSelLine( void )
 
 	m_inputCaretLineText = caretLineText;
 
-	static const CTime* pNullTime = NULL;
+	static const CTime* pNullTime = nullptr;
 	CDateTimeInfo lineInfo( m_inputCaretLineText );
 
 	CScopedInternalChange internalChange( &m_lineChange );
@@ -165,10 +165,10 @@ void CMainDialog::ReadInputSelLine( void )
 	ui::EnableControl( m_hWnd, IDC_CURRLINE_APPLY_BUTTON, false );
 }
 
-bool CMainDialog::SetFormatCurrLinePicker( PickerFormat pickerFormat, const CTimeSpan* pDuration /*= NULL*/ )
+bool CMainDialog::SetFormatCurrLinePicker( PickerFormat pickerFormat, const CTimeSpan* pDuration /*= nullptr*/ )
 {
 	std::tstring format = m_format[ pickerFormat ];
-	if ( FmtDuration == pickerFormat && pDuration != NULL && pDuration->GetDays() != 0 )
+	if ( FmtDuration == pickerFormat && pDuration != nullptr && pDuration->GetDays() != 0 )
 		format += str::Format( _T(" '(+ %d days)'"), pDuration->GetDays() );			// add total days suffix
 
 	if ( format == m_currFormat )
@@ -198,7 +198,7 @@ void CMainDialog::SetResultsText( const std::tstring& outputText )
 
 void CMainDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_inputEdit.m_hWnd;
+	bool firstInit = nullptr == m_inputEdit.m_hWnd;
 
 	DDX_Control( pDX, IDC_SOURCE_TEXT_EDIT, m_inputEdit );
 	DDX_Control( pDX, IDC_DATE_TIME_RESULTS_EDIT, m_resultsEdit );

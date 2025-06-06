@@ -10,14 +10,14 @@
 #endif
 
 
-CFileItemInfo::CFileItemInfo( const std::tstring& fullPath, const CFileFind* pFoundFile, const TCHAR* pFilename /*= NULL*/ )
+CFileItemInfo::CFileItemInfo( const std::tstring& fullPath, const CFileFind* pFoundFile, const TCHAR* pFilename /*= nullptr*/ )
 	: m_fullPath( fullPath )
 	, m_fileAttributes( UINT_MAX )
 	, m_fileSize( 0 )
 {
 	StoreFilename( pFilename, pFoundFile );
 
-	if ( pFoundFile != NULL )
+	if ( pFoundFile != nullptr )
 	{
 		m_fileAttributes = fs::GetFindData( *pFoundFile )->dwFileAttributes;
 		m_fileSize = pFoundFile->GetLength();
@@ -29,7 +29,7 @@ void CFileItemInfo::StoreFilename( const TCHAR* pFilename, const CFileFind* pFou
 {
 	if ( !str::IsEmpty( pFilename ) )
 		m_filename = pFilename;
-	else if ( pFoundFile != NULL )
+	else if ( pFoundFile != nullptr )
 		m_filename = pFoundFile->GetFileName().GetString();
 	else
 		m_filename = path::FindFilename( m_fullPath.c_str() );
@@ -39,7 +39,7 @@ CFileItemInfo* CFileItemInfo::MakeItem( const std::tstring& filePath )
 {
 	if ( path::IsRoot( filePath.c_str() ) )
 	{	// CFileFind doesn't work for root directories!
-		CFileItemInfo* pRootItem = new CFileItemInfo( filePath, NULL );
+		CFileItemInfo* pRootItem = new CFileItemInfo( filePath, nullptr );
 		pRootItem->m_fileAttributes = FILE_ATTRIBUTE_DIRECTORY;
 		pRootItem->m_filename = _T(".");
 		return pRootItem;
@@ -47,7 +47,7 @@ CFileItemInfo* CFileItemInfo::MakeItem( const std::tstring& filePath )
 
 	CFileFind finder;
 	if ( !finder.FindFile( filePath.c_str() ) )
-		return NULL;				// error accessing the file
+		return nullptr;				// error accessing the file
 
 	finder.FindNextFile();
 	return MakeItem( finder );
@@ -61,7 +61,7 @@ CFileItemInfo* CFileItemInfo::MakeItem( const CFileFind& foundFile )
 CFileItemInfo* CFileItemInfo::MakeParentDirItem( const std::tstring& dirPath )
 {
 	if ( path::IsRoot( dirPath.c_str() ) )
-		return NULL;			// no parent directory
+		return nullptr;			// no parent directory
 
 	std::tstring parentDirPath = path::GetParentPath( dirPath.c_str(), path::RemoveSlash );
 	CFileItemInfo* pParentDirItem = MakeItem( parentDirPath );
@@ -82,7 +82,7 @@ void CFileItemInfo::CDetails::LazyInit( const CFileItemInfo* pItem )
 		return;
 
 	SHFILEINFO fileInfo;
-	::SHGetFileInfo( pItem->m_fullPath.c_str(), NULL, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX | SHGFI_TYPENAME );
+	::SHGetFileInfo( pItem->m_fullPath.c_str(), nullptr, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX | SHGFI_TYPENAME );
 
 	m_iconIndex = fileInfo.iIcon;
 	m_typeName = fileInfo.szTypeName;

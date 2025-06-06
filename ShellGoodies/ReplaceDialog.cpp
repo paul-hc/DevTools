@@ -204,7 +204,7 @@ void CReplaceDialog::OutputFindWhat( void )
 
 void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 {
-	const bool firstInit = NULL == m_findWhatCombo.m_hWnd;
+	const bool firstInit = nullptr == m_findWhatCombo.m_hWnd;
 
 	DDX_Control( pDX, IDC_FIND_WHAT_COMBO, m_findWhatCombo );
 	DDX_Control( pDX, IDC_REPLACE_WITH_COMBO, m_replaceWithCombo );

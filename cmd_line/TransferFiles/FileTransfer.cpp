@@ -40,7 +40,7 @@ int CFileTransfer::Transfer( void )
 	m_fileCount = 0;
 
 	std::auto_ptr<CBackupInfo> pBackupInfo;
-	if ( m_pOptions->m_pBackupDirPath.get() != NULL )
+	if ( m_pOptions->m_pBackupDirPath.get() != nullptr )
 		pBackupInfo.reset( new CBackupInfo( m_pOptions ) );
 
 	for ( TTransferItemMap::const_iterator itItem = m_transferItems.begin(); itItem != m_transferItems.end(); ++itItem )

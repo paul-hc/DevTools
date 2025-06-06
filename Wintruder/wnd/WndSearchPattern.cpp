@@ -31,7 +31,7 @@ CWndSearchPattern::CWndSearchPattern( void )
 	, m_matchWhole( false )
 	, m_refreshNow( false )
 	, m_id( INT_MAX )
-	, m_handle( NULL )
+	, m_handle( nullptr )
 {
 }
 
@@ -92,7 +92,7 @@ std::tstring CWndSearchPattern::FormatNotFound( void ) const
 	std::tstring message; message.reserve( 128 );
 	static const TCHAR sep[] = _T("\n");
 
-	if ( m_handle != NULL )
+	if ( m_handle != nullptr )
 		stream::Tag( message, str::Format( _T("Handle: %08X"), m_handle ), sep );
 	if ( !m_wndClass.empty() )
 		stream::Tag( message, str::Format( _T("Window Class: %s"), wc::FormatClassName( m_wndClass.c_str() ).c_str() ), sep );

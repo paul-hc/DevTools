@@ -8,8 +8,8 @@
 #endif
 
 
-#define VALUE_INFO( value ) { static_cast<short>( value ), _T(#value), NULL }
-#define MFC_VALUE_INFO( value ) { (short)static_cast<unsigned short>( value ), _T(#value), NULL }
+#define VALUE_INFO( value ) { static_cast<short>( value ), _T(#value), nullptr }
+#define MFC_VALUE_INFO( value ) { (short)static_cast<unsigned short>( value ), _T(#value), nullptr }
 
 
 // IDENTIFIER DEFINITIONS
@@ -683,5 +683,5 @@ const CValueInfo* CIdentRepository::FindValue( int value ) const
 				m_idToValuesMap[ ( *itValueInfo )->m_value ] = *itValueInfo;
 
 	std::unordered_map< int, const CValueInfo* >::const_iterator itFound = m_idToValuesMap.find( value );
-	return itFound != m_idToValuesMap.end() ? itFound->second : NULL;
+	return itFound != m_idToValuesMap.end() ? itFound->second : nullptr;
 }

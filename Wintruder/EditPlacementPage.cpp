@@ -25,7 +25,7 @@ CEditPlacementPage::CEditPlacementPage( void )
 	: CDetailBasePage( IDD_EDIT_PLACEMENT_PAGE )
 	, m_wndRect( 0, 0, 0, 0 )
 	, m_oldRect( m_wndRect )
-	, m_hWndLastTarget( NULL )
+	, m_hWndLastTarget( nullptr )
 {
 	m_moveTracker.SetToolIconId( ID_MOVE_TOOL );
 	m_sizeTracker.SetToolIconId( ID_SIZE_TOOL );
@@ -128,7 +128,7 @@ void CEditPlacementPage::OutputEdits( void )
 bool CEditPlacementPage::RepositionWnd( void )
 {
 	CWndSpot* pTargetWnd = app::GetValidTargetWnd( app::Beep );
-	if ( NULL == pTargetWnd )
+	if ( nullptr == pTargetWnd )
 		return false;
 
 	CRect wndRect = m_wndRect;
@@ -140,7 +140,7 @@ bool CEditPlacementPage::RepositionWnd( void )
 
 	if ( IsAutoApply() && IsDirty() )
 	{
-		m_hWndLastTarget = NULL;
+		m_hWndLastTarget = nullptr;
 		OutputTargetWnd();
 	}
 	return changed;
@@ -173,7 +173,7 @@ bool CEditPlacementPage::IsAutoApply( void ) const
 
 void CEditPlacementPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_moveTracker.m_hWnd;
+	bool firstInit = nullptr == m_moveTracker.m_hWnd;
 
 	DDX_Control( pDX, ID_MOVE_TOOL, m_moveTracker );
 	DDX_Control( pDX, ID_SIZE_TOOL, m_sizeTracker );
@@ -208,7 +208,7 @@ END_MESSAGE_MAP()
 
 void CEditPlacementPage::OnTsnBeginTracking( UINT toolId )
 {
-	if ( NULL == app::GetValidTargetWnd() )
+	if ( nullptr == app::GetValidTargetWnd() )
 	{
 		ui::BeepSignal( MB_ICONWARNING );
 		static_cast<CTrackStatic*>( GetDlgItem( toolId ) )->CancelTracking();
@@ -277,7 +277,7 @@ void CEditPlacementPage::OnTsnTrack_BottomRight( void )
 
 void CEditPlacementPage::OnEnChange_Edit( UINT editId )
 {
-	if ( m_moveTracker.m_hWnd != NULL )			// subclassed?
+	if ( m_moveTracker.m_hWnd != nullptr )			// subclassed?
 		if ( !IsInternalChange() )
 		{
 			int newValue = ui::GetDlgItemInt( m_hWnd, editId );

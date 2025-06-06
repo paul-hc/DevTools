@@ -21,7 +21,7 @@ namespace reg
 
 COptions::COptions( void )
 	: CRegistryOptions( reg::section, SaveOnModify )
-	, m_pCallback( NULL )
+	, m_pCallback( nullptr )
 	, m_useBorder( false )
 	, m_preBkGuides( false )
 	, m_postBkGuides( false )

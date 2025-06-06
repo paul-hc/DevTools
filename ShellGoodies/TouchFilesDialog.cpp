@@ -72,7 +72,7 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
-	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
+	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, nullptr );				// let us track a custom menu
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
@@ -113,7 +113,7 @@ bool CTouchFilesDialog::TouchFiles( void )
 {
 	CFileService svc;
 	std::auto_ptr<CMacroCommand> pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems );
-	if ( pTouchMacroCmd.get() != NULL )
+	if ( pTouchMacroCmd.get() != nullptr )
 		if ( !pTouchMacroCmd->IsEmpty() )
 		{
 			ClearFileErrors();
@@ -130,7 +130,7 @@ bool CTouchFilesDialog::TouchFiles( void )
 void CTouchFilesDialog::SwitchMode( Mode mode )
 {
 	m_mode = mode;
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return;
 
 	static const CEnumTags modeTags( _T("&Store|&Touch|Roll &Back|Roll &Fwd") );
@@ -322,7 +322,7 @@ utl::ICommand* CTouchFilesDialog::MakeChangeDestFileStatesCmd( void )
 		destFileStates.push_back( newFileState );
 	}
 
-	return anyChanges ? new CChangeDestFileStatesCmd( m_pFileModel, destFileStates ) : NULL;
+	return anyChanges ? new CChangeDestFileStatesCmd( m_pFileModel, destFileStates ) : nullptr;
 }
 
 bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const
@@ -338,7 +338,7 @@ void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 {
 	pMessage;
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		if ( m_pFileModel == pSubject )
 		{
 			SetupDialog();
@@ -358,7 +358,7 @@ void CTouchFilesDialog::ClearFileErrors( void )
 {
 	m_errorItems.clear();
 
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		m_fileListCtrl.Invalidate();
 }
 
@@ -381,7 +381,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
 	const CTouchItem* pTouchItem = CReportListControl::AsPtr<CTouchItem>( rowKey );
-	const ui::CTextEffect* pTextEffect = NULL;
+	const ui::CTextEffect* pTextEffect = nullptr;
 	bool isModified = false, isSrc = false;
 
 	switch ( subItem )
@@ -416,7 +416,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	if ( utl::Contains( m_errorItems, pTouchItem ) )
 		rTextEffect |= s_errorBk;							// highlight error row background
 
-	if ( pTextEffect != NULL )
+	if ( pTextEffect != nullptr )
 		rTextEffect |= *pTextEffect;
 	else if ( isModified )
 		rTextEffect |= isSrc ? s_modSrc : s_modDest;
@@ -465,7 +465,7 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPA
 CTouchItem* CTouchFilesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
 {
 	std::vector< CTouchItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rTouchItems, keyPath, CPathItemBase::ToFilePath() );
-	return itFoundItem != m_rTouchItems.end() ? *itFoundItem : NULL;
+	return itFoundItem != m_rTouchItems.end() ? *itFoundItem : nullptr;
 }
 
 void CTouchFilesDialog::MarkInvalidSrcItems( void )
@@ -503,7 +503,7 @@ BOOL CTouchFilesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLE
 
 void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 {
-	const bool firstInit = NULL == m_fileListCtrl.m_hWnd;
+	const bool firstInit = nullptr == m_fileListCtrl.m_hWnd;
 
 	DDX_Control( pDX, IDC_FILE_TOUCH_LIST, m_fileListCtrl );
 	DDX_Control( pDX, IDC_MODIFIED_DATE, m_modifiedDateCtrl );
@@ -516,7 +516,7 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		OnUpdate( m_pFileModel, NULL );
+		OnUpdate( m_pFileModel, nullptr );
 		CheckDlgButton( IDC_SHOW_SOURCE_INFO_CHECK, VisibleAllSrcColumns() );
 	}
 

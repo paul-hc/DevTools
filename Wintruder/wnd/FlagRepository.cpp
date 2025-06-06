@@ -104,7 +104,7 @@ namespace style
 			FLAG( DS_SETFONT, 0 ),
 			FLAG( DS_FIXEDSYS, 0 ),
 			FLAG( DS_MODALFRAME, 0 ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( DS_CONTROL, 0 ),
 			FLAG_READONLY( DS_SYSMODAL, 0 ),
 			GROUP_SEPARATOR( _T("Alignment") ),
@@ -164,11 +164,11 @@ namespace style
 			FLAG( ES_LEFT, ES_CENTER | ES_RIGHT ),
 			FLAG( ES_CENTER, ES_CENTER | ES_RIGHT ),
 			FLAG( ES_RIGHT, ES_CENTER | ES_RIGHT ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( ES_MULTILINE, 0 ),
 			FLAG( ES_NUMBER, 0 ),
 			FLAG( ES_READONLY, 0 ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( ES_AUTOVSCROLL, 0 ),
 			FLAG( ES_AUTOHSCROLL, 0 ),
 			FLAG( ES_NOHIDESEL, 0 ),
@@ -185,10 +185,10 @@ namespace style
 			FLAG( ES_LEFT, ES_CENTER | ES_RIGHT ),
 			FLAG( ES_CENTER, ES_CENTER | ES_RIGHT ),
 			FLAG( ES_RIGHT, ES_CENTER | ES_RIGHT ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( ES_MULTILINE, 0 ),
 			FLAG( ES_READONLY, 0 ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( ES_AUTOVSCROLL, 0 ),
 			FLAG( ES_AUTOHSCROLL, 0 ),
 			FLAG( ES_NOHIDESEL, 0 ),
@@ -273,7 +273,7 @@ namespace style
 			FLAG( LBS_MULTIPLESEL, 0 ),
 			FLAG( LBS_EXTENDEDSEL, 0 ),
 			FLAG( LBS_NOSEL, 0 ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( LBS_NOTIFY, 0 ),
 			FLAG( LBS_SORT, 0 ),
 			FLAG( LBS_NOREDRAW, 0 ),
@@ -365,7 +365,7 @@ namespace style
 			GROUP_SEPARATOR( _T("Align") ),
 			FLAG( LVS_ALIGNTOP, LVS_ALIGNMASK ),
 			FLAG( LVS_ALIGNLEFT, LVS_ALIGNMASK ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( LVS_SINGLESEL, 0 ),
 			FLAG( LVS_SHOWSELALWAYS, 0 ),
 			FLAG( LVS_SHAREIMAGELISTS, 0 ),
@@ -409,7 +409,7 @@ namespace style
 			GROUP_SEPARATOR( _T("Style") ),
 			FLAG( TCS_TABS, TCS_BUTTONS ),
 			FLAG( TCS_BUTTONS, TCS_BUTTONS ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( TCS_SCROLLOPPOSITE, 0 ),
 			FLAG_ALIASES( TCS_RIGHT, 0, TCS_BOTTOM ),
 			FLAG( TCS_MULTISELECT, 0 ),
@@ -420,7 +420,7 @@ namespace style
 			FLAG( TCS_MULTILINE, 0 ),
 			FLAG( TCS_FIXEDWIDTH, 0 ),
 			FLAG( TCS_RAGGEDRIGHT, 0 ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( TCS_OWNERDRAWFIXED, 0 ),
 			FLAG( TCS_TOOLTIPS, 0 ),
 			GROUP_SEPARATOR( _T("Internet Explorer 4+") ),
@@ -441,7 +441,7 @@ namespace style
 			// [PC]: Strange DTS_UPDOWN and DTS_TIMEFORMAT styles overlap
 			FLAG( DTS_UPDOWN, DTS_UPDOWN | DTS_TIMEFORMAT ),
 			FLAG( DTS_TIMEFORMAT, DTS_UPDOWN | DTS_TIMEFORMAT ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( DTS_SHOWNONE, 0 ),
 			FLAG( DTS_SHORTDATEFORMAT, 0 ),
 			FLAG( DTS_LONGDATEFORMAT, 0 ),
@@ -500,7 +500,7 @@ namespace style
 			FLAG( RBS_AUTOSIZE, 0 ),
 			FLAG( RBS_VERTICALGRIPPER, 0 ),
 			FLAG( RBS_DBLCLKTOGGLE, 0 ),
-			GROUP_SEPARATOR( NULL ),
+			GROUP_SEPARATOR( nullptr ),
 			FLAG( RBS_TOOLTIPS, 0 ),
 			FLAG( RBS_VARHEIGHT, 0 ),
 			FLAG( RBS_BANDBORDERS, 0 ),
@@ -531,24 +531,24 @@ namespace style_ex
 		FLAG( WS_EX_STATICEDGE, 0 ),
 		FLAG( WS_EX_CLIENTEDGE, 0 ),
 		FLAG( WS_EX_DLGMODALFRAME, 0 ),
-		GROUP_SEPARATOR( NULL ),
+		GROUP_SEPARATOR( nullptr ),
 		FLAG( WS_EX_TOPMOST, 0 ),
 		FLAG( WS_EX_APPWINDOW, 0 ),
 		FLAG( WS_EX_ACCEPTFILES, 0 ),
 		FLAG( WS_EX_TRANSPARENT, 0 ),
 		FLAG( WS_EX_NOPARENTNOTIFY, 0 ),
-		GROUP_SEPARATOR( NULL ),
+		GROUP_SEPARATOR( nullptr ),
 		FLAG( WS_EX_CONTROLPARENT, 0 ),
 		FLAG( WS_EX_MDICHILD, 0 ),
 		FLAG( WS_EX_TOOLWINDOW, 0 ),
 		FLAG( WS_EX_CONTEXTHELP, 0 ),
-		GROUP_SEPARATOR( NULL ),
+		GROUP_SEPARATOR( nullptr ),
 		FLAG( WS_EX_LEFT, WS_EX_RIGHT ),
 		FLAG( WS_EX_RIGHT, WS_EX_RIGHT ),
-		GROUP_SEPARATOR( NULL ),
+		GROUP_SEPARATOR( nullptr ),
 		FLAG( WS_EX_LTRREADING, WS_EX_RTLREADING ),
 		FLAG( WS_EX_RTLREADING, WS_EX_RTLREADING ),
-		GROUP_SEPARATOR( NULL ),
+		GROUP_SEPARATOR( nullptr ),
 		FLAG( WS_EX_RIGHTSCROLLBAR, WS_EX_LEFTSCROLLBAR ),
 		FLAG( WS_EX_LEFTSCROLLBAR, WS_EX_LEFTSCROLLBAR )
 	};
@@ -572,7 +572,7 @@ namespace style_ex
 		FLAG( LVS_EX_FULLROWSELECT, 0 ),
 		FLAG( LVS_EX_ONECLICKACTIVATE, 0 ),
 		FLAG( LVS_EX_TWOCLICKACTIVATE, 0 ),
-		GROUP_SEPARATOR( NULL ),
+		GROUP_SEPARATOR( nullptr ),
 		FLAG_READONLY( LVS_EX_FLATSB, 0 ),
 		FLAG( LVS_EX_REGIONAL, 0 ),
 		FLAG( LVS_EX_INFOTIP, 0 ),
@@ -630,10 +630,10 @@ namespace style_ex
 		FLAG( TBSTYLE_EX_DRAWDDARROWS, 0 ),
 		FLAG_ALIASES( TBSTYLE_WRAPABLE, 0, TBSTYLE_EX_MULTICOLUMN ),
 		FLAG( TBSTYLE_EX_VERTICAL, 0 ),
-		GROUP_SEPARATOR( NULL ),
+		GROUP_SEPARATOR( nullptr ),
 		FLAG( TBSTYLE_EX_MIXEDBUTTONS, 0 ),
 		FLAG( TBSTYLE_EX_HIDECLIPPEDBUTTONS, 0 ),
-		GROUP_SEPARATOR( NULL ),
+		GROUP_SEPARATOR( nullptr ),
 		FLAG( TBSTYLE_EX_DOUBLEBUFFER, 0 )
 	};
 
@@ -700,7 +700,7 @@ const CFlagStore* CStyleRepository::FindSpecificStore( const std::tstring& wndCl
 
 	std::unordered_map< std::tstring, CFlagStore* >::const_iterator itFound = classToStoreMap.find( str::MakeUpper( wndClass ) );
 
-	return itFound != classToStoreMap.end() ? itFound->second : NULL;
+	return itFound != classToStoreMap.end() ? itFound->second : nullptr;
 }
 
 std::tstring& CStyleRepository::StreamStyle( std::tstring& rOutput, DWORD style, const std::tstring& wndClass, const TCHAR* pSep /*= stream::flagSep*/ ) const
@@ -758,7 +758,7 @@ const CFlagStore* CStyleExRepository::FindStore( const std::tstring& wndClass /*
 
 	std::unordered_map< std::tstring, CFlagStore* >::const_iterator itFound = classToStoreMap.find( str::MakeUpper( wndClass ) );
 
-	return itFound != classToStoreMap.end() ? itFound->second : NULL;
+	return itFound != classToStoreMap.end() ? itFound->second : nullptr;
 }
 
 std::tstring& CStyleExRepository::StreamStyleEx( std::tstring& rOutput, DWORD styleEx, const std::tstring& wndClass /*= std::tstring()*/, const TCHAR* pSep /*= stream::flagSep*/ ) const

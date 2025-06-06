@@ -43,7 +43,7 @@ CFindWndDialog::~CFindWndDialog()
 
 void CFindWndDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_trackWndPicker.m_hWnd;
+	bool firstInit = nullptr == m_trackWndPicker.m_hWnd;
 
 	DDX_Control( pDX, IDC_TRACK_TOOL_ICON, m_trackWndPicker );
 	DDX_Control( pDX, IDC_WCLASS_COMBO, m_wndClassCombo );
@@ -64,7 +64,7 @@ void CFindWndDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_Bool( pDX, IDC_MATCH_WHOLE_CHECK, m_pPattern->m_matchWhole );
 	ui::DDX_Bool( pDX, IDC_REFRESH_NOW, m_pPattern->m_refreshNow );
 
-	static const HWND nullHandle = NULL;
+	static const HWND nullHandle = nullptr;
 	ui::DDX_Handle( pDX, IDC_HANDLE_EDIT, m_pPattern->m_handle, &nullHandle );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -142,7 +142,7 @@ void CFindWndDialog::OnUpdateCopyTargetWndHandle( CCmdUI* pCmdUI )
 	pCmdUI->Enable( enable );
 	pCmdUI->SetCheck( enable && m_pPattern->m_handle == targetWnd.m_hWnd );
 
-	if ( pCmdUI->m_pMenu != NULL )
+	if ( pCmdUI->m_pMenu != nullptr )
 	{
 		static const std::tstring baseItemText = ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 		std::tostringstream itemText;
@@ -168,7 +168,7 @@ void CFindWndDialog::OnUpdateCopyWndClass( CCmdUI* pCmdUI )
 
 	pCmdUI->Enable( enable );
 
-	if ( pCmdUI->m_pMenu != NULL )
+	if ( pCmdUI->m_pMenu != nullptr )
 	{
 		static const std::tstring baseItemText = ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 		std::tostringstream itemText;
@@ -198,7 +198,7 @@ void CFindWndDialog::OnUpdateCopyWndCaption( CCmdUI* pCmdUI )
 
 	pCmdUI->Enable( enable );
 
-	if ( pCmdUI->m_pMenu != NULL )
+	if ( pCmdUI->m_pMenu != nullptr )
 	{
 		static const std::tstring baseItemText = ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 		std::tostringstream itemText;
@@ -228,7 +228,7 @@ void CFindWndDialog::OnUpdateCopyWndIdent( CCmdUI* pCmdUI )
 
 	pCmdUI->Enable( enable );
 
-	if ( pCmdUI->m_pMenu != NULL )
+	if ( pCmdUI->m_pMenu != nullptr )
 	{
 		static const std::tstring baseItemText = ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID );
 		std::tostringstream itemText;

@@ -22,7 +22,7 @@ void CBaseFlagsCtrl::SetFlagStore( const CFlagStore* pFlagStore )
 	m_flagsMask = 0;
 
 	std::vector< const CFlagStore* > flagStores;
-	if ( pFlagStore != NULL )
+	if ( pFlagStore != nullptr )
 	{
 		flagStores.push_back( pFlagStore );
 		m_flagsMask = pFlagStore->GetMask();
@@ -75,7 +75,7 @@ bool CBaseFlagsCtrl::UserSetFlags( DWORD flags )
 
 	SetFlags( flags );
 
-	if ( m_pCtrl->GetSafeHwnd() != NULL )
+	if ( m_pCtrl->GetSafeHwnd() != nullptr )
 		ui::SendCommandToParent( m_pCtrl->m_hWnd, FN_FLAGSCHANGED );
 	return true;
 }
@@ -84,7 +84,7 @@ std::tstring CBaseFlagsCtrl::Format( void ) const
 {
 	std::tstring text; text.reserve( 256 );
 
-	stream::Tag( text, str::Format( _T("0x%08X"), m_flags ), NULL );
+	stream::Tag( text, str::Format( _T("0x%08X"), m_flags ), nullptr );
 	stream::Tag( text, FormatTooltip(), _T(": ") );
 	return text;
 }

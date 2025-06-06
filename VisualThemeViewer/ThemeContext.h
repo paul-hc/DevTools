@@ -8,9 +8,9 @@
 
 struct CThemeContext
 {
-	CThemeContext( void ) : m_pClass( NULL ), m_pPart( NULL ), m_pState( NULL ) {}
+	CThemeContext( void ) : m_pClass( nullptr ), m_pPart( nullptr ), m_pState( nullptr ) {}
 
-	bool IsValid( void ) const { return m_pClass != NULL && m_pPart != NULL; }
+	bool IsValid( void ) const { return m_pClass != nullptr && m_pPart != nullptr; }
 
 	CThemeItem GetThemeItem( void ) const;
 

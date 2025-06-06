@@ -214,7 +214,7 @@ void CMainDialog::DrillDownDetail( DetailPage detailPage )
 
 void CMainDialog::FlashTargetWnd( int flashCount )
 {
-	if ( m_pFlashHighlighter.get() != NULL || m_trackWndPicker.IsTracking() || IsInternalChange() )
+	if ( m_pFlashHighlighter.get() != nullptr || m_trackWndPicker.IsTracking() || IsInternalChange() )
 		return;
 
 	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd( app::Beep ) )
@@ -280,7 +280,7 @@ void CMainDialog::SearchWindow( void )
 	m_mainSheet.SetActivePage( WindowsTopPage );
 
 	CWndFinder finder;
-	if ( HWND hFoundWnd = finder.FindWindow( m_searchPattern, m_searchPattern.m_fromBeginning ? NULL : app::GetValidTargetWnd()->GetSafeHwnd() ) )
+	if ( HWND hFoundWnd = finder.FindWindow( m_searchPattern, m_searchPattern.m_fromBeginning ? nullptr : app::GetValidTargetWnd()->GetSafeHwnd() ) )
 		app::GetSvc().SetTargetWnd( hFoundWnd );
 	else
 		AfxMessageBox( str::Format( _T("%s\n\n%s"), str::Load( IDS_WND_NOT_FOUND ).c_str(), m_searchPattern.FormatNotFound().c_str() ).c_str() );
@@ -296,7 +296,7 @@ void CMainDialog::SearchNextWindow( bool forward /*= true*/ )
 
 void CMainDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_trackWndPicker.m_hWnd;
+	bool firstInit = nullptr == m_trackWndPicker.m_hWnd;
 
 	CScopedInternalChange internalChange( this );
 

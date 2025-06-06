@@ -348,7 +348,7 @@ namespace dbg
 	{
 		std::map<int, UINT> cmdIds;
 
-		for ( const CMap<UINT, UINT, int, int>::CPair* pPair = cmdToIndexMap.PGetFirstAssoc(); pPair != NULL; pPair = cmdToIndexMap.PGetNextAssoc( pPair ) )
+		for ( const CMap<UINT, UINT, int, int>::CPair* pPair = cmdToIndexMap.PGetFirstAssoc(); pPair != nullptr; pPair = cmdToIndexMap.PGetNextAssoc( pPair ) )
 			cmdIds[pPair->value] = pPair->key;
 
 		std::ostringstream oss;

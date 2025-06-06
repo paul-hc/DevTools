@@ -12,7 +12,7 @@ class CToolStrip;
 class CCommandItem : public TSubject		// proxy items to be inserted into the list control
 {
 public:
-	CCommandItem( utl::ICommand* pCmd = NULL ) { SetCmd( pCmd ); }
+	CCommandItem( utl::ICommand* pCmd = nullptr ) { SetCmd( pCmd ); }
 
 	utl::ICommand* GetCmd( void ) const { return m_pCmd; }
 	void SetCmd( utl::ICommand* pCmd );

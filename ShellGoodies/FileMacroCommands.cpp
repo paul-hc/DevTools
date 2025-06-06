@@ -179,7 +179,7 @@ namespace cmd
 	{
 		ASSERT_PTR( m_pLeafCmd );
 
-		if ( m_pReverseLeafCmd.get() != NULL )		// a reverse command?
+		if ( m_pReverseLeafCmd.get() != nullptr )		// a reverse command?
 			m_pLeafCmd->SetExecMessage( m_pReverseLeafCmd->GetExecMessage() );	// store the message in the original command
 
 		if ( m_cmdPos++ != 0 )
@@ -191,7 +191,7 @@ namespace cmd
 		m_msgType = std::min( m_msgType, execMessage.second );		// Error wins over Warning or Info
 
 		// reset the handled commands data-members as they go out-of-scope
-		m_pLeafCmd = NULL;
+		m_pLeafCmd = nullptr;
 		m_pReverseLeafCmd.reset();
 	}
 
@@ -233,14 +233,14 @@ namespace cmd
 	{
 		std::auto_ptr<CBaseFileCmd> pUndoCmd( MakeUnexecuteCmd() );
 
-		return pUndoCmd.get() != NULL && pUndoCmd->Execute();
+		return pUndoCmd.get() != nullptr && pUndoCmd->Execute();
 	}
 
 	UserFeedback CBaseFileCmd::HandleFileError( CException* pExc, const fs::CPath& srcPath )
 	{
 		std::tstring errMsg = ExtractMessage( pExc, srcPath );
 
-		if ( s_pErrorObserver != NULL )
+		if ( s_pErrorObserver != nullptr )
 			s_pErrorObserver->OnFileError( srcPath, errMsg );
 
 		UserFeedback feedback;

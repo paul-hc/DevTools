@@ -107,7 +107,7 @@ void CMainDialog::QueryDirectoryItems( std::vector<CFileItemInfo*>& rItems, cons
 
 void CMainDialog::QuerySelectedFilePaths( std::vector<std::tstring>& rSelFilePaths ) const
 {
-	for ( POSITION pos = m_fileListCtrl.GetFirstSelectedItemPosition(); pos != NULL; )
+	for ( POSITION pos = m_fileListCtrl.GetFirstSelectedItemPosition(); pos != nullptr; )
 	{
 		int itemIndex = m_fileListCtrl.GetNextSelectedItem( pos );
 		rSelFilePaths.push_back( m_items[ itemIndex ]->m_fullPath );
@@ -167,14 +167,14 @@ BOOL CMainDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO*
 
 void CMainDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_fileListCtrl.m_hWnd;
+	bool firstInit = nullptr == m_fileListCtrl.m_hWnd;
 
 	DDX_Control( pDX, IDC_FILE_LIST, m_fileListCtrl );
 	DDX_Control( pDX, IDC_DIR_PATH_EDIT, m_dirPathEdit );
 
 	if ( firstInit )
 	{
-		::SetWindowTheme( m_fileListCtrl, L"Explorer", NULL );		// enable Explorer theme
+		::SetWindowTheme( m_fileListCtrl, L"Explorer", nullptr );		// enable Explorer theme
 
 		m_fileListCtrl.SetImageList( shell::GetSysImageList( ui::SmallGlyph ), LVSIL_SMALL );
 		m_fileListCtrl.SetImageList( shell::GetSysImageList( ui::LargeGlyph ), LVSIL_NORMAL );

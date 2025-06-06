@@ -21,7 +21,7 @@ public:
 
 	bool HasValidMask( void ) const { return !m_flagStores.empty() || m_flagsMask != 0; }
 
-	const CFlagStore* GetFlagStore( void ) const { return 1 == m_flagStores.size() ? m_flagStores.front() : NULL; }
+	const CFlagStore* GetFlagStore( void ) const { return 1 == m_flagStores.size() ? m_flagStores.front() : nullptr; }
 	void SetFlagStore( const CFlagStore* pFlagsStore );
 
 	// total edit: multiple stores combined

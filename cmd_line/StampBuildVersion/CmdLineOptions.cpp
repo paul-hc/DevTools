@@ -9,7 +9,7 @@
 
 
 CCmdLineOptions::CCmdLineOptions( void )
-	: m_pArg( NULL )
+	: m_pArg( nullptr )
 	, m_optionFlags( 0 )
 {
 }

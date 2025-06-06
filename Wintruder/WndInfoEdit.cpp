@@ -13,7 +13,7 @@
 
 CWndInfoEdit::CWndInfoEdit( void )
 	: CImageEdit()
-	, m_hCurrentWnd( NULL )
+	, m_hCurrentWnd( nullptr )
 {
 	SetImageList( CWndImageRepository::Instance().GetImageList() );
 }
@@ -33,7 +33,7 @@ void CWndInfoEdit::SetCurrentWnd( HWND hCurrentWnd )
 	if ( ui::IsValidWindow( m_hCurrentWnd ) )
 	{
 		briefInfo = wnd::FormatBriefWndInfo( m_hCurrentWnd );
-		if ( NULL == wnd::GetWindowIcon( m_hCurrentWnd ) )			// otherwise the custom icon will be drawn over transparent
+		if ( nullptr == wnd::GetWindowIcon( m_hCurrentWnd ) )			// otherwise the custom icon will be drawn over transparent
 			imageIndex = CWndImageRepository::Instance().LookupImage( m_hCurrentWnd );
 	}
 	else
@@ -50,5 +50,5 @@ void CWndInfoEdit::DrawImage( CDC* pDC, const CRect& imageRect )
 	if ( Image_Transparent == GetImageIndex() )
 		if ( ui::IsValidWindow( m_hCurrentWnd ) )
 			if ( HICON hIcon = wnd::GetWindowIcon( m_hCurrentWnd ) )
-				::DrawIconEx( *pDC, imageRect.left, imageRect.top, hIcon, imageRect.Width(), imageRect.Height(), 0, NULL, DI_NORMAL | DI_COMPAT );
+				::DrawIconEx( *pDC, imageRect.left, imageRect.top, hIcon, imageRect.Width(), imageRect.Height(), 0, nullptr, DI_NORMAL | DI_COMPAT );
 }

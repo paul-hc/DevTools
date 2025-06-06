@@ -29,7 +29,7 @@ BOOL CApplication::InitInstance()
 
 	m_pMainWnd = &mainDialog;
 	mainDialog.DoModal();
-	m_pMainWnd = NULL;
+	m_pMainWnd = nullptr;
 
 	return FALSE;
 }

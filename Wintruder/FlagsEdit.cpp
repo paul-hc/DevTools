@@ -23,13 +23,13 @@ CFlagsEdit::~CFlagsEdit()
 
 void CFlagsEdit::InitControl( void )
 {
-	if ( m_hWnd != NULL )
+	if ( m_hWnd != nullptr )
 		SetReadOnly( !HasValidMask() );
 }
 
 void CFlagsEdit::OutputFlags( void )
 {
-	if ( NULL == m_hWnd )
+	if ( nullptr == m_hWnd )
 		return;
 
 	CScopedInternalChange change( this );
@@ -37,7 +37,7 @@ void CFlagsEdit::OutputFlags( void )
 	ui::SetWindowText( m_hWnd, str::Format( _T("0x%08X"), GetFlags() ) );
 }
 
-DWORD CFlagsEdit::InputFlags( bool* pValid /*= NULL*/ ) const
+DWORD CFlagsEdit::InputFlags( bool* pValid /*= nullptr*/ ) const
 {
 	ASSERT( HasValidMask() );
 	std::tstring text = ui::GetWindowText( this );
@@ -45,7 +45,7 @@ DWORD CFlagsEdit::InputFlags( bool* pValid /*= NULL*/ ) const
 
 	DWORD flags = GetFlags();
 	bool valid = 1 == _stscanf( text.c_str(), _T(" 0x %x"), &flags );
-	if ( pValid != NULL )
+	if ( pValid != nullptr )
 		*pValid = valid;
 	return flags;
 }
@@ -62,7 +62,7 @@ bool CFlagsEdit::HandleTextChange( void )
 
 	if ( ( newFlags & flagsMask ) != newFlags )
 	{
-		ui::BeepSignal();		// error: attempt to enter flags outside of mask 
+		ui::BeepSignal();		// error: attempt to enter flags outside of mask
 		TRACE( _T(" -CFlagsEdit::HandleTextChange(): newFlags=0x%08X are outside of mask=0x%08X\n"), newFlags & flagsMask, flagsMask );
 	}
 

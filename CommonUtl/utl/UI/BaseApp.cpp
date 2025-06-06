@@ -301,7 +301,7 @@ namespace app
 		TRACE( _T("* Initializing MFC Ribbon resources for application '%s'\n"), pWinAppEx->m_pszAppName );
 
 		// superseeds CWinAppEx::InitContextMenuManager()
-		if ( afxContextMenuManager != NULL )
+		if ( afxContextMenuManager != nullptr )
 		{
 			ASSERT( false );		// already initialized
 			return false;

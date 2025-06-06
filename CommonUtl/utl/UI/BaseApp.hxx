@@ -116,11 +116,14 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	//GetLogger().LogLine( _T(""), false );					// new-line as session separator
 
 	// register stock images
-	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_STATUS_STRIP );
-	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_BUTTONS_STRIP );
-	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_EDITOR_STRIP );
-	// note: loading ID_TRANSPARENT icon via a toolbar button (formerly IDR_STD_STATUS_STRIP) fails due to ExtractIcon error (missing mask?) - the icon is all black!
-	GetSharedImageStore()->RegisterLoadIcon( CIconId( ID_TRANSPARENT, SmallIcon ) );
+	if ( CImageStore* pSharedImageStore = GetSharedImageStore() )
+	{
+		pSharedImageStore->RegisterToolbarImages( IDR_STD_STATUS_STRIP );
+		pSharedImageStore->RegisterToolbarImages( IDR_STD_BUTTONS_STRIP );
+		pSharedImageStore->RegisterToolbarImages( IDR_LIST_EDITOR_STRIP );
+		// note: loading ID_TRANSPARENT icon via a toolbar button (formerly IDR_STD_STATUS_STRIP) fails due to ExtractIcon error (missing mask?) - the icon is all black!
+		pSharedImageStore->RegisterLoadIcon( CIconId( ID_TRANSPARENT, SmallIcon ) );
+	}
 
 #ifdef USE_UT
 	ut::RegisterUtlConsoleTests();

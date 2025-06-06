@@ -160,7 +160,7 @@ bool CTransferItem::Transfer( FileAction fileAction, const CBackupInfo* pBackupI
 			if ( m_target.IsReadOnly() )
 				fs::thr::MakeFileWritable( m_target.m_fullPath.GetPtr() );
 
-			if ( pBackupInfo != NULL )
+			if ( pBackupInfo != nullptr )
 				BackupExistingTarget( *pBackupInfo );
 
 			switch ( fileAction )

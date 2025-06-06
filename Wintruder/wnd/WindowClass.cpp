@@ -14,10 +14,10 @@ namespace wc
 {
 	std::tstring GetClassName( HWND hWnd )
 	{
-		ASSERT( NULL == hWnd || ::IsWindow( hWnd ) );		// null or valid, not stale
+		ASSERT( nullptr == hWnd || ::IsWindow( hWnd ) );		// null or valid, not stale
 
 		std::tstring className;
-		if ( hWnd != NULL )
+		if ( hWnd != nullptr )
 		{
 			TCHAR text[ 256 ] = _T("");
 			::GetClassName( hWnd, text, COUNT_OF( text ) );
@@ -259,7 +259,7 @@ namespace wc
 	/*
 		HWND hWndParent = ::GetParent( headerCtrl.m_hWnd );
 
-		if ( hWndParent != NULL )
+		if ( hWndParent != nullptr )
 		{
 			DWORD parentStyle = ::GetWindowLong( hWndParent, GWL_STYLE );
 
@@ -314,7 +314,7 @@ namespace wc
 		HWND hWndHeader = ListView_GetHeader( listCtrl );
 		int subItemCount = 1;
 
-		if ( hWndHeader != NULL )
+		if ( hWndHeader != nullptr )
 			subItemCount = 1;//TabCtrl_GetItemCount( hWndHeader );
 		for ( int i = 0, count = listCtrl.GetItemCount(); i < count; ++i )
 		{

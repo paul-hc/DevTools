@@ -56,7 +56,7 @@ bool CFlagInfo::SetTo( DWORD* pFlags, bool on /*= true*/ ) const
 
 void CFlagInfo::LazyInit( void ) const
 {
-	if ( m_name.empty() && m_pRawTag != NULL )
+	if ( m_name.empty() && m_pRawTag != nullptr )
 	{
 		m_name = m_pRawTag;
 		size_t sepPos = m_name.find( _T('/') );
@@ -103,7 +103,7 @@ const CFlagInfo* CFlagGroup::FindOnFlag( DWORD flags ) const
 		if ( ( *itFlagInfo )->IsOn( flags ) )
 			return *itFlagInfo;
 
-	return NULL;
+	return nullptr;
 }
 
 bool CFlagGroup::IsReadOnlyGroup( void ) const
@@ -138,7 +138,7 @@ CFlagStore::CFlagStore( const TCHAR* pWndClassAliases, CFlagInfo flagInfos[], un
 	for ( unsigned int i = 0; i != count; ++i )
 	{
 		CFlagInfo* pFlagInfo = &flagInfos[ i ];
-		pFlagInfo->m_pGroup = NULL;
+		pFlagInfo->m_pGroup = nullptr;
 
 		DWORD field = pFlagInfo->IsBitFlag() ? pFlagInfo->m_value : pFlagInfo->m_mask;
 		m_mask |= field;
@@ -167,7 +167,7 @@ CFlagStore::~CFlagStore()
 
 bool CFlagStore::NeedsGroups( const CFlagInfo flagInfos[], unsigned int count ) const
 {
-	const CFlagInfo* pPrevFlag = NULL;
+	const CFlagInfo* pPrevFlag = nullptr;
 	for ( unsigned int i = 0; i != count; ++i )
 	{
 		const CFlagInfo* pFlagInfo = &flagInfos[ i ];
@@ -175,7 +175,7 @@ bool CFlagStore::NeedsGroups( const CFlagInfo flagInfos[], unsigned int count ) 
 			return true;
 		else
 		{
-			if ( pPrevFlag != NULL && pFlagInfo->m_mask != pPrevFlag->m_mask )
+			if ( pPrevFlag != nullptr && pFlagInfo->m_mask != pPrevFlag->m_mask )
 				return true;				// different mask requires new group
 
 			pPrevFlag = pFlagInfo;
@@ -223,7 +223,7 @@ int CFlagStore::CheckFlagsTransition( DWORD newFlags, DWORD oldFlags ) const
 			if ( ( *itFlag )->IsOn( roMismatch ) )
 				return i;
 
-		return 0;		// for some reason error index couldn't be detected 
+		return 0;		// for some reason error index couldn't be detected
 	}
 
 	// second check for mutual exclusive fields mismatch
@@ -244,7 +244,7 @@ int CFlagStore::CheckFlagsTransition( DWORD newFlags, DWORD oldFlags ) const
 				++itFlag;
 			}
 			if ( !foundMatchExclusive )
-				return i;							// error: none of mutual exclusive group is active 
+				return i;							// error: none of mutual exclusive group is active
 
 			i = utl::Distance< int >( m_flagInfos.begin(), --itFlag );					// restore increment context
 		}

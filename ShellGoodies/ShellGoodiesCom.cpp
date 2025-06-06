@@ -35,7 +35,7 @@ size_t CShellGoodiesCom::ExtractDropInfo( IDataObject* pSelFileObjects )
 {
 	ASSERT_PTR( pSelFileObjects );
 
-	FORMATETC format = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+	FORMATETC format = { CF_HDROP, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 	STGMEDIUM stgMedium = { 0 };	// defend against buggy data object
 
 	if ( HR_OK( pSelFileObjects->GetData( &format, &stgMedium ) ) )		// make the data transfer
@@ -70,7 +70,7 @@ STDMETHODIMP CShellGoodiesCom::Initialize( LPCITEMIDLIST folderPidl, IDataObject
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
 	//TRACE( _T("CShellGoodiesCom::Initialize()\n") );
-	if ( pSelFileObjects != NULL )
+	if ( pSelFileObjects != nullptr )
 	{
 		//utl::CSectionGuard section( _T("CShellGoodiesCom::Initialize()") );
 

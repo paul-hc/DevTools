@@ -41,13 +41,13 @@ CBrowseThemesDialog::CBrowseThemesDialog( const COptions* pOptions, const CTheme
 	, m_pThemeStore( pThemeStore )
 	, m_relevanceFilter( relevanceFilter )
 	, m_pTreeCustomDraw( CThemeCustomDraw::MakeTreeCustomDraw( m_pOptions ) )
-	, m_pSelNode( NULL )
+	, m_pSelNode( nullptr )
 {
 	m_regSection = _T("BrowseThemesDialog");
 	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 
 	m_themesTree.SetTextEffectCallback( this );
-	m_themesTree.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : NULL );
+	m_themesTree.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : nullptr );
 	m_themesTree.SetUseExplorerTheme( m_pOptions->m_useExplorerTheme );
 }
 
@@ -57,8 +57,8 @@ CBrowseThemesDialog::~CBrowseThemesDialog()
 
 CThemeClass* CBrowseThemesDialog::GetSelectedClass( void ) const
 {
-	if ( NULL == m_pSelNode )
-		return NULL;
+	if ( nullptr == m_pSelNode )
+		return nullptr;
 
 	if ( CThemeClass* pSelClass = dynamic_cast<CThemeClass*>( m_pSelNode ) )
 		return pSelClass;
@@ -121,17 +121,17 @@ void CBrowseThemesDialog::SetupTree( void )
 		ui::SortCompareTreeChildren( pred::TCompareRelevance(), m_themesTree, TVI_ROOT, Deep );
 	}
 
-	if ( NULL == m_pSelNode || !m_themesTree.SetSelected( m_pSelNode ) )
+	if ( nullptr == m_pSelNode || !m_themesTree.SetSelected( m_pSelNode ) )
 	{
 		HTREEITEM hFirstItem = m_themesTree.GetChildItem( TVI_ROOT );
 		m_pSelNode = m_themesTree.GetItemObject<IThemeNode>( hFirstItem );
 		m_themesTree.SelectItem( hFirstItem );
 	}
 
-	HTREEITEM hSelItem = NULL;
-	if ( m_pSelNode != NULL )
+	HTREEITEM hSelItem = nullptr;
+	if ( m_pSelNode != nullptr )
 		hSelItem = m_themesTree.FindItemWithObject( m_pSelNode );
-	if ( NULL == hSelItem )
+	if ( nullptr == hSelItem )
 		hSelItem = m_themesTree.GetChildItem( TVI_ROOT );
 
 	m_themesTree.SelectItem( hSelItem );
@@ -142,7 +142,7 @@ void CBrowseThemesDialog::SetupTree( void )
 
 void CBrowseThemesDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_filterCombo.m_hWnd;
+	bool firstInit = nullptr == m_filterCombo.m_hWnd;
 
 	DDX_Control( pDX, IDC_PARTS_FILTER_COMBO, m_filterCombo );
 	DDX_Control( pDX, IDC_PARTS_AND_STATES_TREE, m_themesTree );

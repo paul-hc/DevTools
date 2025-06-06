@@ -5,7 +5,7 @@
 
 struct CFileItemInfo
 {
-	CFileItemInfo( const std::tstring& fullPath, const CFileFind* pFoundFile, const TCHAR* pFilename = NULL );
+	CFileItemInfo( const std::tstring& fullPath, const CFileFind* pFoundFile, const TCHAR* pFilename = nullptr );
 
 	// factory methods
 	static CFileItemInfo* MakeItem( const std::tstring& filePath );			// uses CFileFind to access file info

@@ -40,7 +40,7 @@ CMainDialog::~CMainDialog()
 
 void CMainDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_wndPickerTool.m_hWnd;
+	bool firstInit = nullptr == m_wndPickerTool.m_hWnd;
 	COptions* pOptions = app::GetOptions();
 
 	DDX_Control( pDX, IDC_TRACK_TOOL_ICON, m_wndPickerTool );
@@ -154,6 +154,6 @@ LRESULT CMainDialog::OnEndHighlight( WPARAM, LPARAM )
 
 void CMainDialog::OnOptionChanged( void )
 {
-	if ( m_frameStyleCombo.m_hWnd != NULL )			// subclassed?
+	if ( m_frameStyleCombo.m_hWnd != nullptr )		// subclassed?
 		UpdateData( TRUE );		// save
 }

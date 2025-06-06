@@ -23,7 +23,7 @@ const CWndSpot& CTrackWndPickerStatic::GetSelectedWnd( void ) const
 {
 	ASSERT( IsTracking() );
 	static const CWndSpot nullWnd;
-	return m_pWndHighlighter.get() != NULL ? m_pWndHighlighter->GetSelected() : nullWnd;
+	return m_pWndHighlighter.get() != nullptr ? m_pWndHighlighter->GetSelected() : nullWnd;
 }
 
 void CTrackWndPickerStatic::EndTracking( void )
@@ -41,7 +41,7 @@ void CTrackWndPickerStatic::OnTrack( void )
 		CWndFinder finder;
 		CWndSpot wndFound = finder.WindowFromPoint( GetCursorPos() );
 
-		if ( NULL == m_pWndHighlighter.get() )
+		if ( nullptr == m_pWndHighlighter.get() )
 			m_pWndHighlighter.reset( new CWndHighlighter() );
 
 		if ( m_pWndHighlighter->SetSelected( wndFound ) )		// highlighter refreshes the OLD window and highlights the NEW window

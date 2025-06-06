@@ -13,7 +13,7 @@ const CWndSpot CWndSpot::m_nullWnd;
 
 CWndSpot::~CWndSpot()
 {
-	m_hWnd = NULL;
+	m_hWnd = nullptr;
 }
 
 CWndSpot& CWndSpot::operator=( const CWndSpot& right )

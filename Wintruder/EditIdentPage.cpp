@@ -36,7 +36,7 @@ CEditIdentPage::~CEditIdentPage()
 bool CEditIdentPage::UseWndId( void ) const
 {
 	CWndSpot* pTargetWnd = app::GetValidTargetWnd();
-	return pTargetWnd != NULL && HasFlag( pTargetWnd->GetStyle(), WS_CHILD );
+	return pTargetWnd != nullptr && HasFlag( pTargetWnd->GetStyle(), WS_CHILD );
 }
 
 bool CEditIdentPage::IsDirty( void ) const
@@ -99,7 +99,7 @@ int CEditIdentPage::FindLiteralPos( int id ) const
 
 void CEditIdentPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_literalCombo.m_hWnd;
+	bool firstInit = nullptr == m_literalCombo.m_hWnd;
 	DDX_Control( pDX, IDC_IDENT_DEC_EDIT, m_decIdentEdit );
 	DDX_Control( pDX, IDC_IDENT_HEX_EDIT, m_hexIdentEdit );
 	DDX_Control( pDX, IDC_IDENT_LITERAL_COMBO, m_literalCombo );
@@ -135,8 +135,8 @@ END_MESSAGE_MAP()
 
 void CEditIdentPage::OnEnChange_DecimalEdit( void )
 {
-	if ( m_decIdentEdit.m_hWnd != NULL )			// subclassed
-		if ( app::GetValidTargetWnd() != NULL )
+	if ( m_decIdentEdit.m_hWnd != nullptr )			// subclassed
+		if ( app::GetValidTargetWnd() != nullptr )
 			if ( UseWndId() )
 				if ( m_decIdentEdit.GetValue( &m_id ) )
 				{
@@ -149,7 +149,7 @@ void CEditIdentPage::OnEnChange_DecimalEdit( void )
 
 void CEditIdentPage::OnEnChange_HexEdit( void )
 {
-	if ( app::GetValidTargetWnd() != NULL )
+	if ( app::GetValidTargetWnd() != nullptr )
 		if ( UseWndId() )
 		{
 			unsigned short id;
@@ -166,7 +166,7 @@ void CEditIdentPage::OnEnChange_HexEdit( void )
 
 void CEditIdentPage::OnCbnSelChange_Literal( void )
 {
-	if ( app::GetValidTargetWnd() != NULL )
+	if ( app::GetValidTargetWnd() != nullptr )
 		if ( UseWndId() )
 		{
 			int selIndex = m_literalCombo.GetCurSel();

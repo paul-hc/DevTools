@@ -100,7 +100,7 @@ bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 
 const CThemeState* CThemePart::GetPreviewState( void ) const
 {
-	if ( NULL == m_pPreviewState && !m_states.empty() )
+	if ( nullptr == m_pPreviewState && !m_states.empty() )
 		m_pPreviewState = *std::min_element( m_states.begin(), m_states.end(), pred::LessValue<pred::TCompareRelevance>() );
 
 	return m_pPreviewState;
@@ -133,7 +133,7 @@ IThemeNode* CThemeClass::FindNode( const std::wstring& code ) const
 				if ( pState->m_stateName == code )
 					return pState;
 
-	return NULL;
+	return nullptr;
 }
 
 CThemePart* CThemeClass::AddPart( int partId, const std::wstring& partName, int flags /*= 0*/, Relevance relevance /*= HighRelevance*/ )
@@ -177,7 +177,7 @@ bool CThemeClass::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 
 const CThemePart* CThemeClass::GetPreviewPart( void ) const
 {
-	if ( NULL == m_pPreviewPart && !m_parts.empty() )
+	if ( nullptr == m_pPreviewPart && !m_parts.empty() )
 		m_pPreviewPart = *std::min_element( m_parts.begin(), m_parts.end(), pred::LessValue<pred::TCompareRelevance>() );
 
 	return m_pPreviewPart;
@@ -197,7 +197,7 @@ CThemeClass* CThemeStore::FindClass( const std::wstring& className ) const
 		if ( pClass->m_className == className )
 			return pClass;
 
-	return NULL;
+	return nullptr;
 }
 
 IThemeNode* CThemeStore::FindNode( const std::wstring& code ) const
@@ -209,13 +209,13 @@ IThemeNode* CThemeStore::FindNode( const std::wstring& code ) const
 			if ( IThemeNode* pFoundNode = pClass->FindNode( code ) )
 				return pFoundNode;
 
-	return NULL;
+	return nullptr;
 }
 
 bool CThemeStore::SetupNotImplementedThemes( void )
 {
     CDC memoryDC;
-	memoryDC.CreateCompatibleDC( NULL );
+	memoryDC.CreateCompatibleDC( nullptr );
 
 	CScopedValue<bool> scopedThemesEnabled( CVisualTheme::GetEnabledPtr(), true );
 	CScopedValue<bool> scopedThemeFallbackEnabled( CVisualTheme::GetFallbackEnabledPtr(), false );

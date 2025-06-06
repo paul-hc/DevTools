@@ -67,7 +67,7 @@ public:
 	const std::vector< std::tstring >& GetDestFnames( void ) const { ASSERT( !m_destFnames.empty() ); return m_destFnames; }
 	const std::tstring& GetCommonSequence( void ) const { return m_commonSequence; }
 
-	void MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname = NULL ) const;
+	void MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname = nullptr ) const;
 	std::tstring GetPickedFname( UINT cmdId ) const;
 
 	// parent subdirs

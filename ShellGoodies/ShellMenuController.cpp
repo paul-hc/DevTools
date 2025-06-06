@@ -78,7 +78,7 @@ CShellMenuController::~CShellMenuController()
 bool CShellMenuController::EnsureCopyDropFilesAsPaths( void )
 {
 	CWnd* pParent = AfxGetMainWnd();
-	return pParent != NULL && CClipboard::AlsoCopyDropFilesAsPaths( pParent );		// true if files are Copied or Cut on clipboard, and their paths is cached as text
+	return pParent != nullptr && CClipboard::AlsoCopyDropFilesAsPaths( pParent );		// true if files are Copied or Cut on clipboard, and their paths is cached as text
 }
 
 UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd )
@@ -115,7 +115,7 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
 						break;
 					case Cmd_PasteAsBackup:
-						if ( m_pDropFilesModel.get() != NULL && m_pDropFilesModel->HasDropFilesOnly() )		// cant't do versioned backup of directories
+						if ( m_pDropFilesModel.get() != nullptr && m_pDropFilesModel->HasDropFilesOnly() )		// cant't do versioned backup of directories
 						{
 							itemText += str::Format( _T(" (%s)"), m_pDropFilesModel->FormatDropCounts().c_str() );
 							// fall-through
@@ -133,7 +133,7 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 
 HMENU CShellMenuController::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder )
 {
-	if ( m_pDropFilesModel.get() != NULL )
+	if ( m_pDropFilesModel.get() != nullptr )
 		if ( m_pDropFilesModel->HasDropPaths() && m_pDropFilesModel->HasRelFolderPathSeq() )
 		{
 			CSubMenuBuilder subMenuBuilder( pParentBuilder );
@@ -149,12 +149,12 @@ HMENU CShellMenuController::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuil
 			return subMenuBuilder.GetPopupMenu()->Detach();
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 HMENU CShellMenuController::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder )
 {
-	if ( m_pDropFilesModel.get() != NULL )
+	if ( m_pDropFilesModel.get() != nullptr )
 		if ( m_pDropFilesModel->HasSrcFolderPaths() )
 		{
 			CSubMenuBuilder subMenuBuilder( pParentBuilder );
@@ -167,7 +167,7 @@ HMENU CShellMenuController::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParent
 			return subMenuBuilder.GetPopupMenu()->Detach();
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 HMENU CShellMenuController::BuildMoreGoodiesSubmenu( CBaseMenuBuilder* pParentBuilder )
@@ -217,7 +217,7 @@ CBitmap* CShellMenuController::MakeCmdInfo( std::tstring& rItemText, const CMenu
 	if ( cmdInfo.m_iconId != 0 )
 		return ui::GetImageStoresSvc()->RetrieveMenuBitmap( cmdInfo.m_iconId );
 
-	return NULL;
+	return nullptr;
 }
 
 bool CShellMenuController::FindStatusBarInfo( std::tstring& rInfoText, UINT_PTR cmdId ) const
@@ -306,7 +306,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 			if ( editorPair.second )				// command handled?
 				return true;
 
-			if ( editorPair.first != NULL )			// we've got an editor to undo/redo?
+			if ( editorPair.first != nullptr )			// we've got an editor to undo/redo?
 			{
 				pFileEditor.reset( editorPair.first );
 				pFileEditor->PopStackTop( stackType );
@@ -332,7 +332,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 			return true;
 		}
 		case Cmd_PasteAsBackup:
-			if ( m_pDropFilesModel.get() != NULL && m_pDropFilesModel->HasDropFilesOnly() )
+			if ( m_pDropFilesModel.get() != nullptr && m_pDropFilesModel->HasDropFilesOnly() )
 			{
 				if ( !m_pDropFilesModel->PasteBackup( pParentOwner ) )
 					ui::BeepSignal();		// a file transfer error occured
@@ -342,7 +342,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 			break;
 		case Cmd_CreateFolders:
 		case Cmd_CreateDeepFolderStruct:
-			if ( m_pDropFilesModel.get() != NULL )
+			if ( m_pDropFilesModel.get() != nullptr )
 			{
 				m_pDropFilesModel->CreateFolders( Cmd_CreateFolders == menuCmd ? Shallow : Deep );
 				return true;
@@ -352,7 +352,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 			return HandlePasteDeepCmd( menuCmd, pParentOwner );
 	}
 
-	if ( pFileEditor.get() != NULL )
+	if ( pFileEditor.get() != nullptr )
 	{
 		// Note: CPathItemListCtrl::ResetShellContextMenu() that releases the hosted context menu (and this instance), leaving the UI with dangling pointers into m_pFileModel.
 		CComPtr<IContextMenu> pThisAlive( m_pContextMenu );		// keep this shell extension COM object alive to make the UI code re-entrant
@@ -367,7 +367,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 
 bool CShellMenuController::HandlePasteDeepCmd( MenuCommand menuCmd, CWnd* pParentOwner )
 {
-	if ( menuCmd >= Cmd_PasteDeepBase && m_pDropFilesModel.get() != NULL )
+	if ( menuCmd >= Cmd_PasteDeepBase && m_pDropFilesModel.get() != nullptr )
 	{
 		UINT relFldPos = menuCmd - Cmd_PasteDeepBase;
 		if ( relFldPos < m_pDropFilesModel->GetRelFolderPathSeq().size() )
@@ -395,7 +395,7 @@ const CShellMenuController::CMenuCmdInfo* CShellMenuController::FindCmd( MenuCom
 		if ( cmd == cmds[ i ].m_cmd )
 			return &cmds[ i ];
 
-	return NULL;
+	return nullptr;
 }
 
 

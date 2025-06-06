@@ -13,7 +13,7 @@ const TCHAR CXferOptions::m_specDelims[] = _T(";,");
 
 
 CXferOptions::CXferOptions( void )
-	: m_pArg( NULL )
+	: m_pArg( nullptr )
 	, m_helpMode( false )
 	, m_recurseSubDirectories( true )
 	, m_mustHaveFileAttr( 0 )

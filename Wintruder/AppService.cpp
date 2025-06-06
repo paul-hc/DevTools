@@ -94,14 +94,14 @@ void CAppService::RemoveObserver( CWnd* pObserver )
 		utl::RemoveExisting( m_eventObservers, pEventObserver );
 }
 
-void CAppService::PublishEvent( app::Event appEvent, IEventObserver* pSender /*= NULL*/ )
+void CAppService::PublishEvent( app::Event appEvent, IEventObserver* pSender /*= nullptr*/ )
 {
 	for ( std::deque< IEventObserver* >::const_iterator itObserver = m_eventObservers.begin(); itObserver != m_eventObservers.end(); ++itObserver )
 		if ( pSender != *itObserver && ( *itObserver )->CanNotify() )
 			( *itObserver )->OnAppEvent( appEvent );
 }
 
-void CAppService::SetTargetWnd( const CWndSpot& targetWnd, IWndObserver* pSender /*= NULL*/ )
+void CAppService::SetTargetWnd( const CWndSpot& targetWnd, IWndObserver* pSender /*= nullptr*/ )
 {
 	m_targetWnd = targetWnd;
 

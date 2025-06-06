@@ -13,7 +13,7 @@ public:
 	static CWindowInfoStore& Instance( void );
 
 	bool IsEmpty( void ) const { return m_slowCache.empty(); }
-	bool IsSlowWindow( HWND hWnd ) const { return FindInfo( hWnd ) != NULL; }
+	bool IsSlowWindow( HWND hWnd ) const { return FindInfo( hWnd ) != nullptr; }
 
 	std::tstring LookupCaption( HWND hWnd );
 	HICON LookupIcon( HWND hWnd );
@@ -21,7 +21,7 @@ public:
 private:
 	struct CWindowInfo
 	{
-		CWindowInfo( void ) : m_hIcon( NULL ) {}
+		CWindowInfo( void ) : m_hIcon( nullptr ) {}
 		CWindowInfo( const std::tstring& caption, HWND hWnd, HICON hIcon );
 	public:
 		std::tstring m_caption;

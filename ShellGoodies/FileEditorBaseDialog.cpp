@@ -88,7 +88,7 @@ bool CFileEditorBaseDialog::SafeExecuteCmd( utl::ICommand* pCmd )
 
 void CFileEditorBaseDialog::UpdateOkButton( const std::tstring& caption, UINT iconId /*= 0*/ )
 {
-	if ( NULL == m_okButton.m_hWnd )
+	if ( nullptr == m_okButton.m_hWnd )
 		return;				// avoid button update if not yet sub-classed (CFileEditorBaseDialog::DoDataExchange not yet called)
 
 	if ( 0 == iconId && IsRollMode() )
@@ -108,7 +108,7 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 	CWnd* pParent = GetParent();
 
 	std::pair<IFileEditor*, bool> editorPair = m_pFileModel->HandleUndoRedo( stackType, pParent );
-	if ( NULL == editorPair.first )				// we've got no editor to undo/redo?
+	if ( nullptr == editorPair.first )				// we've got no editor to undo/redo?
 	{
 		if ( editorPair.second )				// command handled?
 			SwitchMode( EditMode );				// signal the dirty state of this editor
@@ -151,7 +151,7 @@ utl::ICommand* CFileEditorBaseDialog::PeekCmdForDialog( svc::StackType stackType
 			if ( m_pCmdSvc->CanUndoRedo( stackType ) )
 				return pTopCmd;
 
-	return NULL;
+	return nullptr;
 }
 
 bool CFileEditorBaseDialog::PromptCloseDialog( Prompt prompt /*= PromptNoFileChanges*/ )
@@ -172,7 +172,7 @@ bool CFileEditorBaseDialog::IsErrorItem( const CPathItemBase* pItem ) const
 
 void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX ) override
 {
-	const bool firstInit = NULL == m_okButton.m_hWnd;
+	const bool firstInit = nullptr == m_okButton.m_hWnd;
 
 	DDX_Control( pDX, IDOK, m_okButton );
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );

@@ -139,7 +139,7 @@ namespace cmd
 	{
 	protected:
 		CBaseShallowTransferFilesCmd( void ) {}
-		CBaseShallowTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath, const std::vector< fs::CPath >* pDestFilePaths = NULL );
+		CBaseShallowTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::TDirPath& destDirPath, const std::vector< fs::CPath >* pDestFilePaths = nullptr );
 	public:
 		const std::vector< fs::CPath >& GetSrcFilePaths( void ) const { return GetFilePaths(); }
 		const std::vector< fs::CPath >& GetDestFilePaths( void ) const { return m_destFilePaths; }

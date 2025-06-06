@@ -9,7 +9,7 @@
 class CPromptDialog : public CLayoutDialog
 {
 public:
-	CPromptDialog( HWND hWndTarget, const std::tstring& changedFields, CWnd* pParent = NULL );
+	CPromptDialog( HWND hWndTarget, const std::tstring& changedFields, CWnd* pParent = nullptr );
 	virtual ~CPromptDialog();
 
 	bool CallSetWindowPos( void );

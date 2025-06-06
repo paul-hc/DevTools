@@ -120,10 +120,10 @@ namespace wnd
 	{
 		ASSERT( ::IsWindow( hWnd ) );
 		HWND hTopLevelWnd = hWnd, hDesktopWnd = ::GetDesktopWindow();
-		while ( hTopLevelWnd != NULL && ui::IsChild( hTopLevelWnd ) )
+		while ( hTopLevelWnd != nullptr && ui::IsChild( hTopLevelWnd ) )
 		{
 			HWND hParent = ::GetParent( hTopLevelWnd );
-			if ( NULL == hParent || hDesktopWnd == hParent )
+			if ( nullptr == hParent || hDesktopWnd == hParent )
 				break;
 			else
 				hTopLevelWnd = hParent;

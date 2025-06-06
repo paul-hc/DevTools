@@ -65,7 +65,7 @@ void CWndHighlighter::DrawWindowFrame( void )
 		return;
 
 	// create screen DC on first draw
-	if ( NULL == m_pScreenDC.get() || !m_cacheDesktopDC )
+	if ( nullptr == m_pScreenDC.get() || !m_cacheDesktopDC )
 		m_pScreenDC.reset( new CDesktopDC() );
 
 	DrawWindowFrame( m_pScreenDC.get(), m_wndSpot );
@@ -78,7 +78,7 @@ void CWndHighlighter::DrawWindowFrame( void )
 
 void CWndHighlighter::DrawWindowFrame( CDC* pDC, const CWndSpot& wndSpot )
 {
-	ASSERT( pDC != NULL && wndSpot.IsValid() );
+	ASSERT( pDC != nullptr && wndSpot.IsValid() );
 
 	CRect windowRect = wndSpot.GetWindowRect();
 	CRect clientRect;

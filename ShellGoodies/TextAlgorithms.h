@@ -106,7 +106,7 @@ namespace func
 		ReplaceMultiDelimiterSets( const std::vector< std::pair<std::tstring, std::tstring> >* pDelimsToNewPairs )
 			: m_pDelimsToNewPairs( pDelimsToNewPairs )
 		{
-			ASSERT( m_pDelimsToNewPairs != NULL && !m_pDelimsToNewPairs->empty() );
+			ASSERT( m_pDelimsToNewPairs != nullptr && !m_pDelimsToNewPairs->empty() );
 		}
 
 		void operator()( std::tstring& rDestText ) const;

@@ -103,7 +103,7 @@ bool CFileModel::IsSourceSingleFolder( void ) const
 
 bool CFileModel::SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd )
 {
-	return m_pCmdSvc->SafeExecuteCmd( pCmd, pEditor != NULL && pEditor->IsRollMode() );
+	return m_pCmdSvc->SafeExecuteCmd( pCmd, pEditor != nullptr && pEditor->IsRollMode() );
 }
 
 void CFileModel::FetchFromStack( svc::StackType stackType )
@@ -125,7 +125,7 @@ void CFileModel::FetchFromStack( svc::StackType stackType )
 		//utl::for_each( m_renameItems, func::StripDisplayCode( m_commonParentPath ) );		// use always filename.ext for path diffs
 		utl::for_each( m_touchItems, func::StripDisplayCode( m_commonParentPath ) );
 
-		UpdateAllObservers( NULL );				// items changed
+		UpdateAllObservers( nullptr );				// items changed
 	}
 	else
 		m_pCmdSvc->UndoRedo( stackType );
@@ -186,12 +186,12 @@ void CFileModel::ResetDestinations( void )
 	utl::for_each( m_renameItems, func::ResetItem() );
 	utl::for_each( m_touchItems, func::ResetItem() );
 
-	UpdateAllObservers( NULL );				// path items changed
+	UpdateAllObservers( nullptr );				// path items changed
 }
 
 std::tstring CFileModel::FormatPath( const fs::CPath& filePath, fmt::PathFormat format, const CDisplayFilenameAdapter* pDisplayAdapter )
 {
-	return pDisplayAdapter != NULL
+	return pDisplayAdapter != nullptr
 		? pDisplayAdapter->FormatPath( format, filePath )
 		: fmt::FormatPath( filePath, format );
 }
@@ -199,7 +199,7 @@ std::tstring CFileModel::FormatPath( const fs::CPath& filePath, fmt::PathFormat 
 
 // RENAME
 
-bool CFileModel::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter /*= NULL*/ ) const
+bool CFileModel::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter /*= nullptr*/ ) const
 {
 	std::vector< std::tstring > sourcePaths;
 	for ( std::vector< fs::CPath >::const_iterator itSrcPath = m_sourcePaths.begin(); itSrcPath != m_sourcePaths.end(); ++itSrcPath )
@@ -250,10 +250,10 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 	}
 
 	if ( !anyChanges )
-		return NULL;
+		return nullptr;
 
 	if ( !PromptExtensionChanges( destPaths ) )
-		return NULL;
+		return nullptr;
 
 	return new CChangeDestPathsCmd( this, destPaths, _T("Paste destination file paths from clipboard") );
 }
@@ -357,7 +357,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_(
 		destFileStates.push_back( newFileState );
 	}
 
-	return anyChanges ? new CChangeDestFileStatesCmd( this, destFileStates, _T("Paste destination file attribute states from clipboard") ) : NULL;
+	return anyChanges ? new CChangeDestFileStatesCmd( this, destFileStates, _T("Paste destination file attribute states from clipboard") ) : nullptr;
 }
 
 
@@ -424,12 +424,12 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 
 	// files group commands may be editor-less
 	//ASSERT( false );
-	return NULL;			// assume is a persistent command
+	return nullptr;			// assume is a persistent command
 }
 
 std::pair<IFileEditor*, bool> CFileModel::HandleUndoRedo( svc::StackType stackType, CWnd* pParent )
 {
-	std::pair<IFileEditor*, bool> resultPair( NULL, false );
+	std::pair<IFileEditor*, bool> resultPair( nullptr, false );
 
 	if ( utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType ) )
 	{

@@ -27,12 +27,12 @@ namespace layout
 
 CEditFlagsBasePage::CEditFlagsBasePage( const std::tstring& section, UINT templateId /*= 0*/ )
 	: CDetailBasePage( templateId != 0 ? templateId : IDD_EDIT_FLAGS_PAGE )
-	, m_pGeneralStore( NULL )
-	, m_pSpecificStore( NULL )
+	, m_pGeneralStore( nullptr )
+	, m_pSpecificStore( nullptr )
 	, m_flags( 0 )
-	, m_hWndLastTarget( NULL )
-	, m_pGeneralList( NULL )
-	, m_pSpecificList( NULL )
+	, m_hWndLastTarget( nullptr )
+	, m_pGeneralList( nullptr )
+	, m_pSpecificList( nullptr )
 {
 	if ( 0 == templateId )
 		RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
@@ -79,7 +79,7 @@ bool CEditFlagsBasePage::IsDirty( void ) const
 		if ( flags != m_flags )
 			return true;
 
-		if ( UseSpecificFlags() && m_pSpecificStore != NULL )
+		if ( UseSpecificFlags() && m_pSpecificStore != nullptr )
 			if ( *m_pSpecificFlags != m_pSpecificStore->GetWindowField( hTargetWnd ) )
 				return true;
 	}
@@ -89,7 +89,7 @@ bool CEditFlagsBasePage::IsDirty( void ) const
 void CEditFlagsBasePage::OnTargetWndChanged( const CWndSpot& targetWnd )
 {
 	m_wndClass.clear();
-	m_pGeneralStore = m_pSpecificStore = NULL;
+	m_pGeneralStore = m_pSpecificStore = nullptr;
 	m_flags = 0;
 	SetSpecificFlags( 0 );
 
@@ -101,17 +101,17 @@ void CEditFlagsBasePage::OnTargetWndChanged( const CWndSpot& targetWnd )
 		m_wndClass = wc::GetClassName( targetWnd );
 		StoreFlagStores( targetWnd );
 
-		if ( m_pGeneralStore != NULL )
+		if ( m_pGeneralStore != nullptr )
 			m_flags = m_pGeneralStore->GetWindowField( targetWnd );
 
-		if ( m_pSpecificStore != NULL )
+		if ( m_pSpecificStore != nullptr )
 			SetSpecificFlags( m_pSpecificStore->GetWindowField( targetWnd ) );
 	}
 
 	UINT unknownMask = 0;
-	if ( m_pGeneralStore != NULL )
+	if ( m_pGeneralStore != nullptr )
 		unknownMask = UINT_MAX & ~m_pGeneralStore->GetMask();
-	if ( m_pSpecificStore != NULL && !UseSpecificFlags() )			// single m_flags
+	if ( m_pSpecificStore != nullptr && !UseSpecificFlags() )			// single m_flags
 		unknownMask &= ~m_pSpecificStore->GetMask();
 
 	std::vector< const CFlagStore* > flagStores;
@@ -127,7 +127,7 @@ void CEditFlagsBasePage::OnTargetWndChanged( const CWndSpot& targetWnd )
 	m_pGeneralList->SetFlags( m_flags );
 	m_pSpecificList->SetFlags( UseSpecificFlags() ? *m_pSpecificFlags : m_flags );
 
-	if ( m_pSpecificStore != NULL )
+	if ( m_pSpecificStore != nullptr )
 		m_listSheet.SetPageTitle( SpecificPage, wc::FormatClassName( targetWnd ) );
 	else
 		m_listSheet.SetPageTitle( SpecificPage, _T("N/A") );
@@ -139,9 +139,9 @@ void CEditFlagsBasePage::OnTargetWndChanged( const CWndSpot& targetWnd )
 
 void CEditFlagsBasePage::QueryAllFlagStores( std::vector< const CFlagStore* >& rFlagStores ) const
 {
-	if ( m_pGeneralStore != NULL )
+	if ( m_pGeneralStore != nullptr )
 		rFlagStores.push_back( m_pGeneralStore );
-	if ( m_pSpecificStore != NULL )
+	if ( m_pSpecificStore != nullptr )
 		rFlagStores.push_back( m_pSpecificStore );
 }
 
@@ -149,24 +149,24 @@ DWORD CEditFlagsBasePage::EvalUnknownFlags( DWORD flags ) const
 {
 	DWORD unknownFlags = flags;
 
-	if ( m_pGeneralStore != NULL )
+	if ( m_pGeneralStore != nullptr )
 		m_pGeneralList->StripUsedFlags( &unknownFlags );
 
-	if ( m_pSpecificStore != NULL && !UseSpecificFlags() )
+	if ( m_pSpecificStore != nullptr && !UseSpecificFlags() )
 		m_pSpecificList->StripUsedFlags( &unknownFlags );
 
 	return unknownFlags;
 }
 
-void CEditFlagsBasePage::InputFlags( DWORD* pFlags, DWORD* pSpecificFlags /*= NULL*/ ) const
+void CEditFlagsBasePage::InputFlags( DWORD* pFlags, DWORD* pSpecificFlags /*= nullptr*/ ) const
 {
 	DWORD flags = m_pGeneralList->GetFlags() | m_unknownEdit.GetFlags(), specificFlags = m_pSpecificList->GetFlags();
 	if ( !UseSpecificFlags() )
 		flags |= specificFlags;
 
-	if ( pFlags != NULL )
+	if ( pFlags != nullptr )
 		*pFlags = flags;
-	if ( pSpecificFlags != NULL )
+	if ( pSpecificFlags != nullptr )
 		*pSpecificFlags = specificFlags;
 }
 
@@ -193,7 +193,7 @@ void CEditFlagsBasePage::ApplyPageChanges( void ) throws_( CRuntimeException )
 		if ( m_flags != m_pGeneralStore->GetWindowField( hTargetWnd ) )
 			m_pGeneralStore->SetWindowField( hTargetWnd, m_flags );
 
-		if ( m_pSpecificStore != NULL && UseSpecificFlags() )
+		if ( m_pSpecificStore != nullptr && UseSpecificFlags() )
 			if ( *m_pSpecificFlags != m_pSpecificStore->GetWindowField( hTargetWnd ) )
 				m_pSpecificStore->SetWindowField( hTargetWnd, *m_pSpecificFlags );
 	}
@@ -201,7 +201,7 @@ void CEditFlagsBasePage::ApplyPageChanges( void ) throws_( CRuntimeException )
 
 void CEditFlagsBasePage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_totalEdit.m_hWnd;
+	bool firstInit = nullptr == m_totalEdit.m_hWnd;
 
 	DDX_Control( pDX, IDC_TOTAL_FLAGS_EDIT, m_totalEdit );
 	DDX_Control( pDX, IDC_UNKNOWN_FLAGS_EDIT, m_unknownEdit );
@@ -232,10 +232,10 @@ void CEditFlagsBasePage::OnFnFlagsChanged_TotalEdit( void )
 
 	int errorIndex = m_pGeneralStore->CheckFlagsTransition( newFlags, m_flags );
 	if ( -1 == errorIndex )
-		if ( m_pSpecificStore != NULL && !UseSpecificFlags() )
+		if ( m_pSpecificStore != nullptr && !UseSpecificFlags() )
 			errorIndex = m_pSpecificStore->CheckFlagsTransition( newFlags, m_flags );
 
-	if ( errorIndex != -1 )						// error detected -> restore previous style 
+	if ( errorIndex != -1 )						// error detected -> restore previous style
 	{
 		ui::BeepSignal();
 		m_totalEdit.SetFlags( m_flags );		// rollback user's change

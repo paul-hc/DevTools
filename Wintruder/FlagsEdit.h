@@ -18,7 +18,7 @@ protected:
 	virtual void OutputFlags( void );
 	virtual void InitControl( void );
 
-	DWORD InputFlags( bool* pValid = NULL ) const;
+	DWORD InputFlags( bool* pValid = nullptr ) const;
 	bool HandleTextChange( void );
 public:
 	public:

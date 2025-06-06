@@ -46,11 +46,11 @@ namespace cmd
 
 		static void LogOutput( const std::tstring& message );
 	protected:
-		std::tstring FormatLogMessage( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle = NULL ) const;
+		std::tstring FormatLogMessage( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle = nullptr ) const;
 
 		virtual void RecordMessage( const std::tstring& coreMessage, app::MsgType msgType );
 
-		bool ShowBalloon( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle = NULL ) const;
+		bool ShowBalloon( const std::tstring& coreMessage, app::MsgType msgType, const TCHAR* pTitle = nullptr ) const;
 	private:
 		static CLogger* s_pLogger;
 	public:
