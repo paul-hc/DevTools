@@ -36,23 +36,25 @@ BOOL CApplication::InitInstance( void )
 		return FALSE;
 
 	std::auto_ptr<CShellManager> pShellManager;		// no longer needed with inheritance from CWinAppEx
-	//std::auto_ptr<CShellManager> pShellManager( new CShellManager() );					// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
+
+	if ( !is_a<CWinAppEx>( ::AfxGetApp() ) )		// note: CWinAppEx already creates a CShellManager in afxShellManager global variable
+		pShellManager.reset( new CShellManager() );	// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
 
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );		// activate "Windows Native" visual manager for enabling themes in MFC controls
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );		// register stock images
 
 	COptions options;
 	CThemeStore themeStore;
-	themeStore.SetupNotImplementedThemes();				// mark not implemented themes as NotImplemented
+	themeStore.SetupNotImplementedThemes();			// mark not implemented themes as NotImplemented
 
-	CMainDialog dlg( &options, &themeStore );
-	m_pMainWnd = &dlg;
-	dlg.DoModal();
+	CMainDialog mainDlg( &options, &themeStore );
+	m_pMainWnd = &mainDlg;
+	mainDlg.DoModal();
 
 	pShellManager.reset();
 
 #if !defined(_AFXDLL) && !defined(_AFX_NO_MFC_CONTROLS_IN_DIALOGS)
-	ControlBarCleanUp();
+	::ControlBarCleanUp();
 #endif
 
 	return FALSE;		// we exit the application, rather than start the application's message pump

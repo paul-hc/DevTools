@@ -11,7 +11,7 @@ namespace app
 {
 	enum Popup { ListTreePopup };
 
-	typedef CBaseApp<CWinAppEx> TBaseApp;	// originally <CWinApp>, use CWinAppEx for enabling CToolbarImagesDialog image inspection
+	typedef CBaseApp<CWinApp> TBaseApp;		// originally <CWinApp>, use CWinAppEx for enabling CToolbarImagesDialog image inspection
 }
 
 
