@@ -138,22 +138,24 @@ CSize CIcon::ComputeSize( HICON hIcon )
 
 void CIcon::Draw( HDC hDC, const CPoint& pos, bool enabled /*= true*/ ) const
 {
-	ASSERT_PTR( m_hIcon );
-	ASSERT_PTR( hDC );
-
-	if ( enabled )
-		::DrawIconEx( hDC, pos.x, pos.y, m_hIcon, GetSize().cx, GetSize().cy, 0, nullptr, DI_NORMAL | DI_COMPAT );
-	else
-		DrawDisabled( hDC, pos );
+	DrawStretch( hDC, CRect( pos, GetSize() ), enabled );
 }
 
 void CIcon::DrawDisabled( HDC hDC, const CPoint& pos ) const
 {
+	DrawStretch( hDC, CRect( pos, GetSize() ), false );
+}
+
+void CIcon::DrawStretch( HDC hDC, const CRect& destRect, bool enabled /*= true*/ ) const
+{
 	ASSERT_PTR( m_hIcon );
 	ASSERT_PTR( hDC );
 
-	::DrawState( hDC, GetSysColorBrush( COLOR_3DSHADOW ), nullptr, (LPARAM)m_hIcon, 0,
-		pos.x, pos.y, GetSize().cx, GetSize().cy, DST_ICON | DSS_UNION );				// DSS_DISABLED looks uglier
+	if ( enabled )
+		::DrawIconEx( hDC, destRect.left, destRect.top, m_hIcon, destRect.Width(), destRect.Height(), 0, nullptr, DI_NORMAL | DI_COMPAT );
+	else
+		::DrawState( hDC, ::GetSysColorBrush( COLOR_3DSHADOW ), nullptr, (LPARAM)m_hIcon, 0,
+			destRect.left, destRect.top, destRect.Width(), destRect.Height(), DST_ICON | DSS_UNION );				// DSS_DISABLED looks uglier
 }
 
 const CIcon& CIcon::GetUnknownIcon( void )

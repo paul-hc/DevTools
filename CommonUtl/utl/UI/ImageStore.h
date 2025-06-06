@@ -33,6 +33,7 @@ public:
 	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize = nullptr );
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );		// takes ownership of pIcon
 	void RegisterIcon( UINT cmdId, HICON hIcon ) { return RegisterIcon( cmdId, CIcon::NewIcon( hIcon ) ); }
+	void RegisterLoadIcon( const CIconId& iconId );		// load icon from resources
 
 	// aliases are registered in this store, as well as in afxCommandManager (for MFC control-bars)
 	void RegisterAlias( UINT cmdId, UINT iconId );

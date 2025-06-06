@@ -9,6 +9,7 @@
 #include "WndUtils.h"
 #include "PostCall.h"
 #include "resource.h"
+#include <afxwinappex.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -108,7 +109,11 @@ END_MESSAGE_MAP()
 
 BOOL CBaseMainDialog::OnInitDialog( void ) override
 {
-	const std::tstring& appNameSuffix = checked_static_cast< CBaseApp<CWinApp>* >( AfxGetApp() )->GetAppNameSuffix();
+	CWinApp* pApp = AfxGetApp();
+	const std::tstring& appNameSuffix = is_a<CWinAppEx>( pApp )
+		? checked_static_cast< CBaseApp<CWinAppEx>* >( pApp )->GetAppNameSuffix()
+		: checked_static_cast< CBaseApp<CWinApp>* >( pApp )->GetAppNameSuffix();
+
 	if ( !appNameSuffix.empty() )
 		ui::SetWindowText( m_hWnd, ui::GetWindowText( m_hWnd ) + appNameSuffix );
 

@@ -229,6 +229,11 @@ void CImageStore::RegisterIcon( UINT cmdId, CIcon* pIcon )
 	rpIcon = pIcon;
 }
 
+void CImageStore::RegisterLoadIcon( const CIconId& iconId )
+{	// load icon from resources
+	RegisterIcon( iconId.m_id, CIcon::NewIcon( iconId ) );
+}
+
 
 // CImageStoresSvc implementation
 

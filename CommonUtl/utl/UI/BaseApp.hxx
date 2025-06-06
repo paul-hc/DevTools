@@ -119,6 +119,8 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_STATUS_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_BUTTONS_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_EDITOR_STRIP );
+	// note: loading ID_TRANSPARENT icon via a toolbar button (formerly IDR_STD_STATUS_STRIP) fails due to ExtractIcon error (missing mask?) - the icon is all black!
+	GetSharedImageStore()->RegisterLoadIcon( CIconId( ID_TRANSPARENT, SmallIcon ) );
 
 #ifdef USE_UT
 	ut::RegisterUtlConsoleTests();

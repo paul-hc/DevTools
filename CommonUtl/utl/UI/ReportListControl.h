@@ -221,7 +221,7 @@ public:
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
 
 	const TCHAR* GetTabularTextSep( void ) const { return m_pTabularSep; }
-	void SetTabularTextSep( const TCHAR* pTabularSep ) { m_pTabularSep = pTabularSep; }
+	void SetTabularTextSep( const TCHAR* pTabularSep = _T("\t") ) { m_pTabularSep = pTabularSep; }
 
 	COLORREF GetActualTextColor( void ) const;
 public:

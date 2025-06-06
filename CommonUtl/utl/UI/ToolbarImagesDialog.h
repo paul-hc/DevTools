@@ -21,7 +21,7 @@ public:
 
 	static mfc::TRuntimeClassList* GetCustomPages( void );		// additional pages to add to CMFCToolBarsCustomizeDialog
 private:
-	// enum { IDD = IDD_TOOLBAR_IMAGES_DIALOG };
+	// enum { IDD = IDD_IMAGES_TOOLBAR_DIALOG };
 	CLayoutChildPropertySheet m_childSheet;
 
 	enum Page { MfcToolBarImagesPage };
@@ -48,17 +48,17 @@ class CResizeFrameStatic;
 class CLayoutStatic;
 
 
-class CToolbarImagesPage : public CLayoutPropertyPage
+class CBaseImagesPage : public CLayoutPropertyPage
 	, private ui::ICustomImageDraw
 	, public ui::ISampleCallback
 {
-	DECLARE_DYNCREATE( CToolbarImagesPage )
-public:
-	CToolbarImagesPage( CMFCToolBarImages* pImages = nullptr );
-	virtual ~CToolbarImagesPage();
-private:
-	void OutputList( void );
+	DECLARE_DYNAMIC( CBaseImagesPage )
+protected:
+	CBaseImagesPage( UINT templateId, const CLayoutStyle layoutStyles[], unsigned int count );
+	virtual ~CBaseImagesPage();
 
+	void OutputList( void );
+private:
 	// ui::ICustomImageDraw interface
 	virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const implements(ui::ICustomImageDraw);
 	virtual bool SetItemImageSize( const CSize& imageBoundsSize ) implements(ui::ICustomImageDraw);
@@ -66,12 +66,9 @@ private:
 
 	// ui::ISampleCallback interface
 	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
-private:
-	// enum { IDD = IDD_TOOLBAR_IMAGES_PAGE };
-	CMFCToolBarImages* m_pImages;
-	CSize m_imageSize;
-	CSize m_imageBoundsSize;
+protected:
 	std::vector<CImageItem*> m_imageItems;
+	CSize m_imageBoundsSize;
 
 	persist int m_selItemIndex;
 	persist bool m_drawDisabled;
@@ -94,6 +91,49 @@ protected:
 	afx_msg void OnUpdateCopyItems( CCmdUI* pCmdUI );
 	afx_msg void OnLvnItemChanged_ImageListCtrl( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnRedrawImagesList( void );
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+class CToolbarImagesPage : public CBaseImagesPage
+{
+	DECLARE_DYNCREATE( CToolbarImagesPage )
+public:
+	CToolbarImagesPage( CMFCToolBarImages* pImages = nullptr );
+	virtual ~CToolbarImagesPage();
+private:
+	// enum { IDD = IDD_IMAGES_TOOLBAR_PAGE };
+	CMFCToolBarImages* m_pImages;
+
+	// generated stuff
+protected:
+	virtual void DoDataExchange( CDataExchange* pDX );
+protected:
+	afx_msg void OnDestroy( void );
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+namespace ui { interface IImageStore; }
+
+
+class CIconImagesPage : public CBaseImagesPage
+{
+	DECLARE_DYNCREATE( CIconImagesPage )
+public:
+	CIconImagesPage( ui::IImageStore* pImageStore = nullptr );
+	virtual ~CIconImagesPage();
+private:
+	// enum { IDD = IDD_IMAGES_ICONS_PAGE };
+	ui::IImageStore* m_pImageStore;
+
+	// generated stuff
+protected:
+	virtual void DoDataExchange( CDataExchange* pDX );
+protected:
+	afx_msg void OnDestroy( void );
 
 	DECLARE_MESSAGE_MAP()
 };

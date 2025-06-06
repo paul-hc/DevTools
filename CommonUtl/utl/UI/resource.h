@@ -27,13 +27,14 @@
 #define IDD_PASSWORD_DIALOG             28022
 #define IDB_RESIZE_DOWN_UP_BITMAP       28023
 #define IDB_RESIZE_RIGHT_LEFT_BITMAP    28024
-#define IDD_TOOLBAR_IMAGES_PAGE         28025
 #define IDC_RESIZE_SPLITTER_NS_CURSOR   28025
-#define IDD_TOOLBAR_IMAGES_DIALOG       28026
 #define IDC_RESIZE_SPLITTER_WE_CURSOR   28026
 #define IDI_UNKNOWN                     28027
 #define IDR_EDIT_ACCEL                  28028
 #define IDR_STD_UTL_UI_MENU             28029
+#define IDD_IMAGES_TOOLBAR_DIALOG       28030
+#define IDD_IMAGES_TOOLBAR_PAGE         28031
+#define IDD_IMAGES_ICONS_PAGE           28032
 #define UTL_MIN_COMMAND_VALUE           28100
 #define ID_WINDOW_MANAGER               28101
 #define ID_VIEW_CUSTOMIZE               28102
@@ -152,7 +153,7 @@
 #define IDC_SHOW_PASSWORD_CHECK         28535
 #define IDC_TOOLBAR_IMAGES_LIST         28536
 #define IDC_DRAW_DISABLED_CHECK         28537
-#define IDC_TOOLBAR_IMAGES_STATIC       28538
+#define IDC_IMAGE_COUNT_STATIC          28538
 #define IDC_ALPHA_SRC_LABEL             28539
 #define IDC_ALPHA_SRC_EDIT              28540
 #define IDC_ALPHA_SRC_SPIN              28541
@@ -167,7 +168,7 @@
 #define IDS_COLOR_PICKER_BUTTON_HELP    28801
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        28027

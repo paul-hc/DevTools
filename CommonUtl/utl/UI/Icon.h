@@ -41,6 +41,8 @@ public:
 	void Draw( HDC hDC, const CPoint& pos, bool enabled = true ) const;
 	void DrawDisabled( HDC hDC, const CPoint& pos ) const;
 
+	void DrawStretch( HDC hDC, const CRect& destRect, bool enabled = true ) const;
+
 	// icon to bitmap
 	bool MakeBitmap( CBitmap& rBitmap, COLORREF transpColor ) const;
 
