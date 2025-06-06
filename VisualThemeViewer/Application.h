@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utl/UI/BaseApp.h"
+#include <afxwinappex.h>
 
 
 class CScopedGdiPlusInit;
@@ -9,10 +10,12 @@ class CScopedGdiPlusInit;
 namespace app
 {
 	enum Popup { ListTreePopup };
+
+	typedef CBaseApp<CWinAppEx> TBaseApp;	// originally <CWinApp>, use CWinAppEx for enabling CToolbarImagesDialog image inspection
 }
 
 
-class CApplication : public CBaseApp<CWinApp>
+class CApplication : public app::TBaseApp
 {
 public:
 	CApplication();
