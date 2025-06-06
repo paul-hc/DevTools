@@ -521,9 +521,6 @@
     <ClInclude Include="WicImageCache.h">
       <Filter>UI\Imaging</Filter>
     </ClInclude>
-    <ClInclude Include="BaseMainDialog.h">
-      <Filter>UI\Layout</Filter>
-    </ClInclude>
     <ClInclude Include="LayoutBasePropertySheet.h">
       <Filter>UI\Layout</Filter>
     </ClInclude>
@@ -706,6 +703,9 @@
     </ClInclude>
     <ClInclude Include="SampleView.h">
       <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseMainDialog.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1048,9 +1048,6 @@
     <ClCompile Include="WicImageCache.cpp">
       <Filter>UI\Imaging</Filter>
     </ClCompile>
-    <ClCompile Include="BaseMainDialog.cpp">
-      <Filter>UI\Layout</Filter>
-    </ClCompile>
     <ClCompile Include="LayoutBasePropertySheet.cpp">
       <Filter>UI\Layout</Filter>
     </ClCompile>
@@ -1206,6 +1203,9 @@
     </ClCompile>
     <ClCompile Include="SampleView.cpp">
       <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseMainDialog.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
