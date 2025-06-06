@@ -16,6 +16,17 @@
 //DECLARE_AFX_TRACE_CATEGORY( traceThumbs )
 
 
+// CBaseApp<MfcAppBaseT> dynamic method or data-member accessor.
+//	Usage:
+//		"const std::tstring& appNameSuffix = CAST_BASE_APP( GetAppNameSuffix() );" - method
+//		"HINSTANCE hInstance = CAST_BASE_APP( m_hInstance );" - data-member
+//
+#define DYNAMIC_CAST_BASE_APP( field ) \
+	is_a<CWinAppEx>( AfxGetApp() ) \
+		? checked_static_cast< CBaseApp<CWinAppEx>* >( AfxGetApp() )->field \
+		: checked_static_cast< CBaseApp<CWinApp>* >( AfxGetApp() )->field
+
+
 namespace app
 {
 	enum AppLook { Windows_2000, Office_XP, Windows_XP, Office_2003, VS_2005, VS_2008, Office_2007_Blue, Office_2007_Black, Office_2007_Silver, Office_2007_Aqua, Windows_7 };

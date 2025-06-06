@@ -109,10 +109,7 @@ END_MESSAGE_MAP()
 
 BOOL CBaseMainDialog::OnInitDialog( void ) override
 {
-	CWinApp* pApp = AfxGetApp();
-	const std::tstring& appNameSuffix = is_a<CWinAppEx>( pApp )
-		? checked_static_cast< CBaseApp<CWinAppEx>* >( pApp )->GetAppNameSuffix()
-		: checked_static_cast< CBaseApp<CWinApp>* >( pApp )->GetAppNameSuffix();
+	const std::tstring& appNameSuffix = DYNAMIC_CAST_BASE_APP( GetAppNameSuffix() );
 
 	if ( !appNameSuffix.empty() )
 		ui::SetWindowText( m_hWnd, ui::GetWindowText( m_hWnd ) + appNameSuffix );
