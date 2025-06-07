@@ -495,6 +495,8 @@ namespace ui
 		for ( size_t i = 0; i != count; ++i )
 			if ( HWND hCtrl = ::GetDlgItem( hDlg, ctrlIds[ i ] ) )
 				EnableWindow( hCtrl, enable );
+			else
+				ASSERT( false );		// missing control?
 	}
 
 	bool ShowWindow( HWND hWnd, bool show /*= true*/ )

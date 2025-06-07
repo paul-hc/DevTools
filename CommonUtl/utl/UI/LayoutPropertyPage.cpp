@@ -67,6 +67,20 @@ CMacroCommand* CLayoutPropertyPage::GetApplyMacroCmd( void ) const
 	return GetParentSheet()->GetApplyMacroCmd();
 }
 
+std::tstring CLayoutPropertyPage::GetTitle( void ) const
+{
+	std::tstring pageTitle;
+
+	if ( HasFlag( m_psp.dwFlags, PSP_USETITLE ) && !str::IsEmpty( m_psp.pszTitle ) )
+		pageTitle = m_psp.pszTitle;
+	else if ( !m_strCaption.IsEmpty() )
+		pageTitle = m_strCaption.GetString();
+	else if ( m_hWnd != nullptr )
+		pageTitle = ui::GetWindowText( m_hWnd );
+
+	return pageTitle;
+}
+
 void CLayoutPropertyPage::SetTitle( const std::tstring& pageTitle )
 {
 	if ( m_hWnd != nullptr )

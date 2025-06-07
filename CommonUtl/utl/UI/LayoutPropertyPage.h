@@ -33,6 +33,8 @@ public:
 	UINT GetTemplateId( void ) const { return m_templateId; }
 
 	void SetPremature( void ) { m_psp.dwFlags |= PSP_PREMATURE; }		// create page when sheet is created
+
+	std::tstring GetTitle( void ) const;
 	void SetTitle( const std::tstring& pageTitle );
 
 	// ui::ILayoutEngine interface

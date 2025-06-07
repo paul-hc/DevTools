@@ -68,7 +68,9 @@ enum IconStdSize
 	HugeIcon_48,	// 48x48
 	HugeIcon_96,	// 96x96
 	HugeIcon_128,	// 128x128
-	HugeIcon_256	// 256x256
+	HugeIcon_256,	// 256x256
+
+	AnyIconSize		// for filtering
 };
 
 
@@ -129,7 +131,7 @@ public:
 class CScopedResInst
 {
 public:
-	CScopedResInst( void ) : m_hOldResInst( AfxGetResourceHandle() ) { AfxSetResourceHandle( (HINSTANCE)WinResource ); }	// resource located in Windows - LoadIcon( IDI_WINLOGO, NULL )
+	CScopedResInst( void ) : m_hOldResInst( AfxGetResourceHandle() ) { AfxSetResourceHandle( (HINSTANCE)WinResource ); }	// resource located in Windows - LoadIcon( IDI_WINLOGO, nullptr )
 	CScopedResInst( HINSTANCE hResInst ) : m_hOldResInst( AfxGetResourceHandle() ) { AfxSetResourceHandle( hResInst ); }	// resource located in an existing module
 	~CScopedResInst() { AfxSetResourceHandle( m_hOldResInst ); }
 
@@ -184,8 +186,13 @@ class CIcon;
 
 namespace ui
 {
+	class CToolbarDescr;
+
+
 	interface IImageStore
 	{
+		typedef std::pair<UINT, IconStdSize> TIconKey;			// <iconId, IconStdSize> - synonym with CIconId with hash value convenience
+
 		virtual CIcon* FindIcon( UINT cmdId, IconStdSize iconStdSize = SmallIcon ) const = 0;
 		virtual const CIcon* RetrieveIcon( const CIconId& cmdId ) = 0;
 		virtual CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor ) = 0;
@@ -194,6 +201,10 @@ namespace ui
 
 		virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId ) = 0;
 		virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps ) = 0;
+
+		virtual void QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const = 0;
+		virtual void QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const = 0;
+		virtual void QueryIconKeys( std::vector<TIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const = 0;
 
 		// utils
 		const CIcon* RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize = HugeIcon_48 );

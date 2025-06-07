@@ -250,6 +250,7 @@
     <ClInclude Include="ImagePathKey.h" />
     <ClInclude Include="ImageProxy.h" />
     <ClInclude Include="ImageStore.h" />
+    <ClInclude Include="ImageStore_fwd.h" />
     <ClInclude Include="ImageZoomViewD2D.h" />
     <ClInclude Include="Image_fwd.h" />
     <ClInclude Include="Image_fwd.hxx" />

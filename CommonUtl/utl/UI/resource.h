@@ -33,8 +33,8 @@
 #define IDR_EDIT_ACCEL                  28028
 #define IDR_STD_UTL_UI_MENU             28029
 #define IDD_IMAGES_TOOLBAR_DIALOG       28030
-#define IDD_IMAGES_TOOLBAR_PAGE         28031
-#define IDD_IMAGES_ICONS_PAGE           28032
+#define IDD_IMAGES_MFC_TOOLBAR_PAGE     28031
+#define IDD_IMAGES_STORE_PAGE           28032
 #define UTL_MIN_COMMAND_VALUE           28100
 #define ID_WINDOW_MANAGER               28101
 #define ID_VIEW_CUSTOMIZE               28102

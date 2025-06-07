@@ -30,6 +30,50 @@ namespace func
 }
 
 
+namespace utl
+{
+	// CStripBtnInfoHasher implementation
+
+	size_t CStripBtnInfoHasher::operator()( const ui::CStripBtnInfo& stripBtnInfo ) const
+	{
+		return utl::GetHashCombine( stripBtnInfo.m_cmdId, stripBtnInfo.m_imagePos );
+	}
+}
+
+
+namespace ui
+{
+	// CToolbarDescr implementation
+
+	CToolbarDescr::CToolbarDescr( UINT toolbarId, const UINT buttonIds[] /*= nullptr*/, size_t buttonCount /*= 0*/ )
+		: m_toolbarId( toolbarId )
+		, m_toolbarTitle( str::Load( toolbarId ) )
+	{
+		REQUIRE( m_toolbarId != 0 );
+		StoreBtnInfos( buttonIds, buttonCount );
+	}
+
+	void CToolbarDescr::StoreBtnInfos( const UINT buttonIds[], size_t buttonCount )
+	{
+		m_btnInfos.clear();
+		m_btnInfos.reserve( buttonCount );
+
+		for ( UINT imagePos = 0; imagePos != buttonCount; ++imagePos )
+			if ( buttonIds[ imagePos ] != ID_SEPARATOR )			// skip separators
+				m_btnInfos.push_back( ui::CStripBtnInfo( buttonIds[ imagePos ], imagePos ) );
+	}
+
+	const ui::CStripBtnInfo* CToolbarDescr::FindBtnInfo( UINT cmdId ) const
+	{
+		typename std::vector<ui::CStripBtnInfo>::const_iterator itFound = std::find_if( m_btnInfos.begin(), m_btnInfos.end(), pred::HasCmdId( cmdId ) );
+		if ( itFound == m_btnInfos.end() )
+			return nullptr;
+
+		return &*itFound;
+	}
+}
+
+
 // CImageStore implementation
 
 CImageStore::CImageStore( void )
@@ -47,6 +91,7 @@ CImageStore::~CImageStore()
 
 void CImageStore::Clear( void )
 {
+	utl::ClearOwningContainer( m_toolbarDescriptors );
 	utl::ClearOwningMapValues( m_iconMap );
 	utl::ClearOwningMapValues( m_bitmapMap );
 	utl::ClearOwningContainer( m_menuBitmapMap, func::DeleteMenuBitmaps() );
@@ -84,7 +129,7 @@ const CIcon* CImageStore::RetrieveIcon( const CIconId& cmdId )
 	const TIconKey iconKey( FindAliasIconId( cmdId.m_id ), cmdId.m_stdSize );		// try loading iconId always (not the command alias)
 	if ( CIcon* pIcon = CIcon::NewExactIcon( CIconId( iconKey.first, cmdId.m_stdSize ) ) )
 	{
-		m_iconMap[ iconKey ] = pIcon;
+		MapIcon( iconKey, pIcon );
 		return pIcon;
 	}
 
@@ -140,6 +185,23 @@ ui::IImageStore::TBitmapPair CImageStore::RetrieveMenuBitmaps( const CIconId& cm
 	}
 }
 
+void CImageStore::QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const
+{
+	rToolbarDescrs.insert( rToolbarDescrs.end(), m_toolbarDescriptors.begin(), m_toolbarDescriptors.end() );
+}
+
+void CImageStore::QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const
+{
+	utl::QueryThat( rToolbarDescrs, m_toolbarDescriptors, pred::HasCmdId( cmdId ) );
+}
+
+void CImageStore::QueryIconKeys( std::vector<TIconKey>& rIconKeys, IconStdSize iconStdSize /*= AnyIconSize*/ ) const
+{
+	for ( TIconMap::const_iterator itIcon = m_iconMap.begin(); itIcon != m_iconMap.end(); ++itIcon )
+		if ( AnyIconSize == iconStdSize || iconStdSize == itIcon->first.second )
+			rIconKeys.push_back( itIcon->first );
+}
+
 CBitmap* CImageStore::RenderMenuBitmap( const CIcon& icon, bool checked ) const
 {
 	enum { Edge = 2 };
@@ -170,15 +232,46 @@ CBitmap* CImageStore::RenderMenuBitmap( const CIcon& icon, bool checked ) const
 	return nullptr;
 }
 
-void CImageStore::RegisterToolbarImages( UINT toolBarId, COLORREF transpColor /*= color::Auto*/ )
+UINT CImageStore::FindAliasIconId( UINT cmdId ) const
+{
+	std::unordered_map<UINT, UINT>::const_iterator itFound = m_cmdAliasMap.find( cmdId );
+
+	if ( itFound != m_cmdAliasMap.end() )
+		return itFound->second;					// found icon alias for the command
+	return cmdId;
+}
+
+CIcon*& CImageStore::MapIcon( TIconKey iconKey, CIcon* pIcon )
+{
+	CIcon*& rpIcon = m_iconMap[ iconKey ];
+
+	if ( pIcon != rpIcon )		// a new icon object?
+	{
+		delete rpIcon;
+		rpIcon = pIcon;
+
+		std::vector<TIconKey>::iterator itFoundKey = std::find( m_iconKeys.begin(), m_iconKeys.end(), iconKey );
+
+		if ( itFoundKey != m_iconKeys.end() )
+			*itFoundKey = iconKey;				// replace existing key entry
+		else
+			m_iconKeys.push_back( iconKey );
+	}
+
+	ENSURE( m_iconMap.size() == m_iconKeys.size() );
+	return rpIcon;
+}
+
+void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*= color::Auto*/ )
 {
 	CToolImageList strip;
 
-	VERIFY( strip.LoadToolbar( toolBarId, transpColor ) );
+	VERIFY( strip.LoadToolbar( toolbarId, transpColor ) );
 	RegisterButtonImages( strip );
+	m_toolbarDescriptors.push_back( new ui::CToolbarDescr( toolbarId, ARRAY_SPAN_V( strip.GetButtonIds() ) ) );
 
 	if ( afxContextMenuManager != nullptr )
-		CMFCToolBar::AddToolBarForImageCollection( toolBarId );		// also load the MFC control bar images for the toolbar
+		CMFCToolBar::AddToolBarForImageCollection( toolbarId );		// also load the MFC control bar images for the toolbar
 }
 
 void CImageStore::RegisterButtonImages( const CToolImageList& toolImageList )
@@ -199,19 +292,19 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 	ENSURE( iconKey.second != DefaultSize );
 
 	for ( UINT i = 0, imagePos = 0; i != buttonCount; ++i )
-		if ( buttonIds[ i ] != ID_SEPARATOR )			// skip separators
+		if ( buttonIds[ i ] != ID_SEPARATOR )		// skip separators
 		{
 			iconKey.first = buttonIds[ i ];
 
 			TIconMap::const_iterator itFound = m_iconMap.find( iconKey );
-			if ( itFound == m_iconMap.end() )
+			if ( itFound == m_iconMap.end() )		// not already loaded?
 			{
 				HICON hIcon = const_cast<CImageList&>( imageList ).ExtractIcon( imagePos );
 				ASSERT_PTR( hIcon );
 				CIcon* pIcon = new CIcon( hIcon, imageSize );
 				pIcon->SetHasAlpha( hasAlpha );
 
-				m_iconMap[ iconKey ] = pIcon;
+				MapIcon( iconKey, pIcon );
 			}
 			++imagePos;
 		}
@@ -224,9 +317,7 @@ void CImageStore::RegisterIcon( UINT cmdId, CIcon* pIcon )
 
 	TIconKey iconKey( cmdId, ui::LookupIconStdSize( pIcon->GetSize().cx ) );
 
-	CIcon*& rpIcon = m_iconMap[ iconKey ];
-	delete rpIcon;
-	rpIcon = pIcon;
+	MapIcon( iconKey, pIcon );
 }
 
 void CImageStore::RegisterLoadIcon( const CIconId& iconId )
@@ -315,4 +406,22 @@ ui::IImageStore::TBitmapPair CImageStoresSvc::RetrieveMenuBitmaps( const CIconId
 	}
 
 	return foundPair;
+}
+
+void CImageStoresSvc::QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const
+{
+	for ( std::vector<ui::IImageStore*>::const_iterator itStore = m_imageStores.begin(); itStore != m_imageStores.end(); ++itStore )
+		(*itStore)->QueryToolbarDescriptors( rToolbarDescrs );
+}
+
+void CImageStoresSvc::QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const
+{
+	for ( std::vector<ui::IImageStore*>::const_iterator itStore = m_imageStores.begin(); itStore != m_imageStores.end(); ++itStore )
+		(*itStore)->QueryToolbarsWithButton( rToolbarDescrs, cmdId );
+}
+
+void CImageStoresSvc::QueryIconKeys( std::vector<TIconKey>& rIconKeys, IconStdSize iconStdSize /*= AnyIconSize*/ ) const
+{
+	for ( std::vector<ui::IImageStore*>::const_iterator itStore = m_imageStores.begin(); itStore != m_imageStores.end(); ++itStore )
+		(*itStore)->QueryIconKeys( rIconKeys, iconStdSize );
 }

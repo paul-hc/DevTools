@@ -23,6 +23,10 @@ namespace nosy
 		// public access
 		using CMFCToolBarImages::m_sizeImageDest;
 		using CMFCToolBarImages::m_bStretch;
+
+		// static public access
+		using CMFCToolBarImages::m_nDisabledImageAlpha;
+		using CMFCToolBarImages::m_nFadedImageAlpha;
 	};
 
 
@@ -198,6 +202,17 @@ namespace mfc
 namespace mfc
 {
 	// CMFCToolBarImages protected access:
+
+	BYTE& ToolBarImages_RefDisabledImageAlpha( void )
+	{
+		return mfc::nosy_cast<nosy::CToolBarImages_>( CMFCToolBar::GetImages() )->m_nDisabledImageAlpha;
+	}
+
+	BYTE& ToolBarImages_RefFadedImageAlpha( void )
+	{
+		return mfc::nosy_cast<nosy::CToolBarImages_>( CMFCToolBar::GetImages() )->m_nFadedImageAlpha;
+	}
+
 	bool ToolBarImages_DrawStretch( CMFCToolBarImages* pImages, CDC* pDC, const CRect& destRect, int imageIndex,
 									bool hilite /*= false*/, bool disabled /*= false*/, bool indeterminate /*= false*/, bool shadow /*= false*/, bool inactive /*= false*/,
 									BYTE alphaSrc /*= 255*/ )

@@ -17,6 +17,8 @@ namespace ui
 
 		bool IsValid( void ) const { return !m_statusText.empty() || !m_tooltipText.empty(); }
 		void Setup( const std::tstring& cmdSpec );			// "<statusbar-text>\n<tooltip-text>"
+
+		const std::tstring& GetTooltipText( bool smart = false ) const { return smart && m_tooltipText.empty() ? m_statusText : m_tooltipText; }
 	public:
 		std::tstring m_statusText;
 		std::tstring m_tooltipText;

@@ -155,7 +155,7 @@ void CIcon::DrawStretch( HDC hDC, const CRect& destRect, bool enabled /*= true*/
 		::DrawIconEx( hDC, destRect.left, destRect.top, m_hIcon, destRect.Width(), destRect.Height(), 0, nullptr, DI_NORMAL | DI_COMPAT );
 	else
 		::DrawState( hDC, ::GetSysColorBrush( COLOR_3DSHADOW ), nullptr, (LPARAM)m_hIcon, 0,
-			destRect.left, destRect.top, destRect.Width(), destRect.Height(), DST_ICON | DSS_UNION );				// DSS_DISABLED looks uglier
+			destRect.left, destRect.top, destRect.Width(), destRect.Height(), DST_ICON | DSS_DISABLED /*DSS_UNION*/ );
 }
 
 const CIcon& CIcon::GetUnknownIcon( void )

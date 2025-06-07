@@ -94,8 +94,10 @@ namespace mfc
 			if ( nullptr == FindCommandName( it->second ) )		// not registered yet?
 			{
 				ui::CCmdTag cmdTag( it->second );
+				const std::tstring& cmdName = cmdTag.GetTooltipText();
 
-				m_cmdToName[ it->second ] = cmdTag.m_tooltipText;
+				if ( !cmdName.empty() )
+					m_cmdToName[ it->second ] = cmdTag.m_tooltipText;
 			}
 
 		RegisterCmdLiterals();
@@ -171,7 +173,7 @@ namespace mfc
 				else if ( nullptr == FindCommandName( cmdId ) )		// not registered yet?
 				{
 					ASSERT( !itemText.empty() );
-					m_cmdToName[cmdId] = itemText;
+					m_cmdToName[ cmdId ] = itemText;
 				}
 			}
 		}

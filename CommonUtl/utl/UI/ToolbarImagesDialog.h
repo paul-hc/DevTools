@@ -57,8 +57,10 @@ protected:
 	CBaseImagesPage( UINT templateId, const CLayoutStyle layoutStyles[], unsigned int count );
 	virtual ~CBaseImagesPage();
 
-	void OutputList( void );
+	virtual void AddListItems( void );
 private:
+	void OutputList( void );
+
 	// ui::ICustomImageDraw interface
 	virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const implements(ui::ICustomImageDraw);
 	virtual bool SetItemImageSize( const CSize& imageBoundsSize ) implements(ui::ICustomImageDraw);
@@ -69,6 +71,7 @@ private:
 protected:
 	std::vector<CBaseImageItem*> m_imageItems;
 	CSize m_imageBoundsSize;
+	std::tstring m_imageCountText;		// for label output
 
 	persist int m_selItemIndex;
 	persist bool m_drawDisabled;
@@ -96,14 +99,14 @@ protected:
 };
 
 
-class CToolbarImagesPage : public CBaseImagesPage
+class CMfcToolbarImagesPage : public CBaseImagesPage
 {
-	DECLARE_DYNCREATE( CToolbarImagesPage )
+	DECLARE_DYNCREATE( CMfcToolbarImagesPage )
 public:
-	CToolbarImagesPage( CMFCToolBarImages* pImages = nullptr );
-	virtual ~CToolbarImagesPage();
+	CMfcToolbarImagesPage( CMFCToolBarImages* pImages = nullptr );
+	virtual ~CMfcToolbarImagesPage();
 private:
-	// enum { IDD = IDD_IMAGES_TOOLBAR_PAGE };
+	// enum { IDD = IDD_IMAGES_MFC_TOOLBAR_PAGE };
 	CMFCToolBarImages* m_pImages;
 
 	// generated stuff
@@ -116,25 +119,55 @@ protected:
 };
 
 
-namespace ui { interface IImageStore; }
+namespace ui
+{
+	interface IImageStore;
+	class CToolbarDescr;
+}
 
 
-class CIconImagesPage : public CBaseImagesPage
+class CBaseStoreImagesPage : public CBaseImagesPage
+{
+	DECLARE_DYNAMIC( CBaseStoreImagesPage )
+protected:
+	CBaseStoreImagesPage( ui::IImageStore* pImageStore = nullptr );
+	virtual ~CBaseStoreImagesPage();
+protected:
+	// enum { IDD = IDD_IMAGES_STORE_PAGE };
+	ui::IImageStore* m_pImageStore;
+
+	// generated stuff
+protected:
+	afx_msg void OnDestroy( void );
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+class CStoreToolbarImagesPage : public CBaseStoreImagesPage
+{
+	DECLARE_DYNCREATE( CStoreToolbarImagesPage )
+public:
+	CStoreToolbarImagesPage( ui::IImageStore* pImageStore = nullptr );
+	virtual ~CStoreToolbarImagesPage();
+protected:
+	virtual void AddListItems( void ) override;
+
+	// generated stuff
+protected:
+	DECLARE_MESSAGE_MAP()
+};
+
+
+class CIconImagesPage : public CBaseStoreImagesPage
 {
 	DECLARE_DYNCREATE( CIconImagesPage )
 public:
 	CIconImagesPage( ui::IImageStore* pImageStore = nullptr );
 	virtual ~CIconImagesPage();
-private:
-	// enum { IDD = IDD_IMAGES_ICONS_PAGE };
-	ui::IImageStore* m_pImageStore;
 
 	// generated stuff
 protected:
-	virtual void DoDataExchange( CDataExchange* pDX );
-protected:
-	afx_msg void OnDestroy( void );
-
 	DECLARE_MESSAGE_MAP()
 };
 

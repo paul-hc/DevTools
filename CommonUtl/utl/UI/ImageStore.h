@@ -3,7 +3,8 @@
 #pragma once
 
 #include <unordered_map>
-#include "utl/StdHashValue.h"
+#include "utl/StdHashValue.h"		// for utl::CPairHasher
+#include "ImageStore_fwd.h"
 #include "Icon.h"
 
 
@@ -27,8 +28,12 @@ public:
 
 	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId );
 	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
+
+	virtual void QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const;
+	virtual void QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const;
+	virtual void QueryIconKeys( std::vector<TIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const;
 public:
-	void RegisterToolbarImages( UINT toolBarId, COLORREF transpColor = color::Auto );
+	void RegisterToolbarImages( UINT toolbarId, COLORREF transpColor = color::Auto );
 	void RegisterButtonImages( const CToolImageList& toolImageList );
 	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize = nullptr );
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );		// takes ownership of pIcon
@@ -39,23 +44,19 @@ public:
 	void RegisterAlias( UINT cmdId, UINT iconId );
 	void RegisterAliases( const ui::CCmdAlias iconAliases[], size_t count );
 private:
+	UINT FindAliasIconId( UINT cmdId ) const;
+	CIcon*& MapIcon( TIconKey iconKey, CIcon* pIcon );
+
 	CBitmap* RenderMenuBitmap( const CIcon& icon, bool checked ) const;
 private:
-	UINT FindAliasIconId( UINT cmdId ) const
-	{
-		std::unordered_map<UINT, UINT>::const_iterator itFound = m_cmdAliasMap.find( cmdId );
-		if ( itFound != m_cmdAliasMap.end() )
-			return itFound->second;					// found icon alias for the command
-		return cmdId;
-	}
-private:
-	std::unordered_map<UINT, UINT> m_cmdAliasMap;		// cmdId -> iconId: multiple commands sharing the same icon
+	std::unordered_map<UINT, UINT> m_cmdAliasMap;			// cmdId -> iconId: multiple commands sharing the same icon
+	std::vector<ui::CToolbarDescr*> m_toolbarDescriptors;	// buttons of the loaded toolbars (and corresponding icons)
 
-	typedef std::pair<UINT, IconStdSize> TIconKey;		// <iconId, IconStdSize> - synonym with CIconId with hash value convenience
 	typedef std::unordered_map<TIconKey, CIcon*, utl::CPairHasher> TIconMap;
 	TIconMap m_iconMap;
+	std::vector<TIconKey> m_iconKeys;						// in registering order
 
-	typedef std::pair<UINT, COLORREF> TBitmapKey;		// <iconId, transpColor>
+	typedef std::pair<UINT, COLORREF> TBitmapKey;			// <iconId, transpColor>
 	typedef std::unordered_map<TBitmapKey, CBitmap*, utl::CPairHasher> TBitmapMap;
 	TBitmapMap m_bitmapMap;				// regular bitmaps look better than menu bitmaps because they retain the alpha channel
 
@@ -88,6 +89,10 @@ public:
 
 	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId );
 	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
+
+	virtual void QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const;
+	virtual void QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const;
+	virtual void QueryIconKeys( std::vector<TIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const;
 private:
 	std::vector<ui::IImageStore*> m_imageStores;		// no ownership
 };

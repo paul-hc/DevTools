@@ -3,12 +3,13 @@
 #include "ToolbarImagesDialog.h"
 #include "ImageCommandLookup.h"
 #include "Image_fwd.h"
-#include "ImageStore.h"
+#include "ImageStore_fwd.h"
 #include "Icon.h"
 #include "ControlBar_fwd.h"
+#include "CmdTagStore.h"
 #include "ResizeFrameStatic.h"
 #include "SampleView.h"
-#include "WndUtils.h"
+#include "WndUtilsEx.h"
 #include "resource.h"
 #include "utl/AppTools.h"
 #include "utl/ContainerOwnership.h"
@@ -50,7 +51,8 @@ CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParentWnd )
 	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	LoadDlgIcon( ID_EDIT_LIST_ITEMS );
 
-	m_childSheet.AddPage( new CToolbarImagesPage( CMFCToolBar::GetImages() ) );
+	m_childSheet.AddPage( new CMfcToolbarImagesPage( CMFCToolBar::GetImages() ) );
+	m_childSheet.AddPage( new CStoreToolbarImagesPage() );
 	m_childSheet.AddPage( new CIconImagesPage() );
 }
 
@@ -64,7 +66,7 @@ mfc::TRuntimeClassList* CToolbarImagesDialog::GetCustomPages( void )
 
 	if ( s_pagesList.IsEmpty() )
 	{
-		s_pagesList.AddTail( RUNTIME_CLASS( CToolbarImagesPage ) );
+		s_pagesList.AddTail( RUNTIME_CLASS( CMfcToolbarImagesPage ) );
 		s_pagesList.AddTail( RUNTIME_CLASS( CIconImagesPage ) );
 	}
 
@@ -94,7 +96,7 @@ BEGIN_MESSAGE_MAP( CToolbarImagesDialog, CLayoutDialog )
 END_MESSAGE_MAP()
 
 
-// CToolbarImagesPage class
+// CMfcToolbarImagesPage class
 
 struct CBaseImageItem : public TBasicSubject
 {
@@ -102,6 +104,7 @@ struct CBaseImageItem : public TBasicSubject
 		: m_index( index )
 		, m_cmdId( cmdId )
 		, m_imageSize( 0, 0 )
+		, m_indexText( num::FormatNumber( m_index ) )
 	{
 		if ( pCmdName != nullptr )
 			m_cmdName = *pCmdName;
@@ -122,6 +125,7 @@ public:
 	std::tstring m_cmdLiteral;
 
 	CSize m_imageSize;
+	std::tstring m_indexText;
 };
 
 
@@ -214,7 +218,7 @@ private:
 };
 
 
-// CToolbarImagesPage implementation
+// CMfcToolbarImagesPage implementation
 
 IMPLEMENT_DYNAMIC( CBaseImagesPage, CPropertyPage )
 
@@ -228,7 +232,6 @@ CBaseImagesPage::CBaseImagesPage( UINT templateId, const CLayoutStyle layoutStyl
 {
 	SetUseLazyUpdateData();			// call UpdateData on page activation change
 
-	m_imageListCtrl.SetSection( reg::section_MfcPage );
 	m_imageListCtrl.SetCustomIconDraw( this );
 	m_imageListCtrl.SetUseAlternateRowColoring();
 	m_imageListCtrl.SetCommandFrame();			// handle ID_EDIT_COPY in this page
@@ -257,23 +260,26 @@ void CBaseImagesPage::OutputList( void )
 	CScopedInternalChange internalChange( &m_imageListCtrl );
 
 	m_imageListCtrl.DeleteAllItems();
-
-	for ( UINT i = 0; i != m_imageItems.size(); ++i )
-	{
-		CBaseImageItem* pImageItem = m_imageItems[ i ];
-
-		m_imageListCtrl.InsertObjectItem( i, pImageItem );
-		m_imageListCtrl.SetSubItemText( i, Index, num::FormatNumber( pImageItem->m_index ) );
-		m_imageListCtrl.SetSubItemText( i, CmdId, pImageItem->m_cmdId != 0 ? str::Format( _T("%d, 0x%04X"), pImageItem->m_cmdId, pImageItem->m_cmdId ) : num::FormatNumber( pImageItem->m_cmdId ) );
-		m_imageListCtrl.SetSubItemText( i, CmdLiteral, pImageItem->m_cmdLiteral );
-	}
-
+	AddListItems();
 	m_imageListCtrl.InitialSortList();		// store original order and sort by current criteria
 
 	if ( m_selItemIndex != -1 )
 	{
 		m_imageListCtrl.SetCurSel( m_selItemIndex );
 		m_imageListCtrl.EnsureVisible( m_selItemIndex, false );
+	}
+}
+
+void CBaseImagesPage::AddListItems( void )
+{
+	for ( UINT i = 0; i != m_imageItems.size(); ++i )
+	{
+		CBaseImageItem* pImageItem = m_imageItems[ i ];
+
+		m_imageListCtrl.InsertObjectItem( i, pImageItem );
+		m_imageListCtrl.SetSubItemText( i, Index, pImageItem->m_indexText );
+		m_imageListCtrl.SetSubItemText( i, CmdId, pImageItem->m_cmdId != 0 ? str::Format( _T("%d, 0x%04X"), pImageItem->m_cmdId, pImageItem->m_cmdId ) : num::FormatNumber( pImageItem->m_cmdId ) );
+		m_imageListCtrl.SetSubItemText( i, CmdLiteral, pImageItem->m_cmdLiteral );
 	}
 }
 
@@ -333,7 +339,10 @@ bool CBaseImagesPage::RenderSample( CDC* pDC, const CRect& boundsRect ) implemen
 
 void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 {
-	//bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
+	bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
+
+	if ( firstInit )
+		m_imageListCtrl.SetSection( path::Combine( reg::section_MfcPage, GetTitle().c_str() ) );	// page-specific sub-section
 
 	DDX_Control( pDX, IDC_TOOLBAR_IMAGES_LIST, m_imageListCtrl );
 	m_pSampleView->DDX_Placeholder( pDX, IDC_TOOLBAR_IMAGE_SAMPLE );
@@ -341,6 +350,18 @@ void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_Bool( pDX, IDC_DRAW_DISABLED_CHECK, m_drawDisabled );
 	DDX_Control( pDX, IDC_LAYOUT_FRAME_1_STATIC, *m_pBottomLayoutStatic );
 	DDX_Control( pDX, IDC_HORIZ_SPLITTER_STATIC, *m_pHorizSplitterFrame );
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	{
+		if ( firstInit )
+		{
+			ui::SetDlgItemText( this, IDC_IMAGE_COUNT_STATIC, m_imageCountText );
+			OutputList();
+		}
+	}
+
+	m_imageListCtrl.Invalidate();
+	m_pSampleView->Invalidate();
 
 	__super::DoDataExchange( pDX );
 }
@@ -390,22 +411,17 @@ void CBaseImagesPage::OnRedrawImagesList( void )
 		return;		// dialog not initialized
 
 	UpdateData( DialogSaveChanges );
-
-	m_imageListCtrl.Invalidate();
-	m_pSampleView->Invalidate();
 }
 
 
-// CToolbarImagesPage implementation
+// CMfcToolbarImagesPage implementation
 
 namespace layout
 {
 	static CLayoutStyle s_mfcPageStyles[] =
 	{
 		{ IDC_IMAGE_COUNT_STATIC, SizeX },
-		{ IDC_HORIZ_SPLITTER_STATIC, Size },
-		//{ IDC_TOOLBAR_IMAGES_LIST, Size },
-
+		{ IDC_HORIZ_SPLITTER_STATIC, Size }
 	};
 
 	static CLayoutStyle s_bottomFrameStyles[] =
@@ -419,10 +435,10 @@ namespace layout
 	};
 }
 
-IMPLEMENT_DYNCREATE( CToolbarImagesPage, CBaseImagesPage )
+IMPLEMENT_DYNCREATE( CMfcToolbarImagesPage, CBaseImagesPage )
 
-CToolbarImagesPage::CToolbarImagesPage( CMFCToolBarImages* pImages /*= nullptr*/ )
-	: CBaseImagesPage( IDD_IMAGES_TOOLBAR_PAGE, ARRAY_SPAN( layout::s_bottomFrameStyles ) )
+CMfcToolbarImagesPage::CMfcToolbarImagesPage( CMFCToolBarImages* pImages /*= nullptr*/ )
+	: CBaseImagesPage( IDD_IMAGES_MFC_TOOLBAR_PAGE, ARRAY_SPAN( layout::s_bottomFrameStyles ) )
 	, m_pImages( pImages != nullptr ? pImages : CMFCToolBar::GetImages() )
 {
 	RegisterCtrlLayout( ARRAY_SPAN( layout::s_mfcPageStyles ) );
@@ -437,21 +453,23 @@ CToolbarImagesPage::CToolbarImagesPage( CMFCToolBarImages* pImages /*= nullptr*/
 	for ( UINT index = 0; index != imageCount; ++index )
 	{
 		UINT cmdId = pImageCmds->FindCommand( index );
+
 		const std::tstring* pCmdName = pImageCmds->FindCommandName( cmdId );
 		const std::tstring* pCmdLiteral = pImageCmds->FindCommandLiteral( cmdId );
 
 		m_imageItems.push_back( new CToolbarImageItem( m_pImages, index, cmdId, pCmdName, pCmdLiteral ) );
 	}
+
+	m_imageCountText = str::Format( _T("MFC Toolbars: total %d images"), m_imageItems.size() );
 }
 
-CToolbarImagesPage::~CToolbarImagesPage()
+CMfcToolbarImagesPage::~CMfcToolbarImagesPage()
 {
 }
 
-void CToolbarImagesPage::DoDataExchange( CDataExchange* pDX )
+void CMfcToolbarImagesPage::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
-	static std::tstring s_imageCountFmt = ui::GetDlgItemText( this, IDC_IMAGE_COUNT_STATIC );
 
 	ui::DDX_Number( pDX, IDC_ALPHA_SRC_EDIT, m_alphaSrc );
 
@@ -463,23 +481,17 @@ void CToolbarImagesPage::DoDataExchange( CDataExchange* pDX )
 		pAlphaSrcSpinBtn->SetRange32( 0, 255 );
 	}
 
-	__super::DoDataExchange( pDX );
-
 	static const UINT s_alphaCtrls[] = { IDC_ALPHA_SRC_LABEL, IDC_ALPHA_SRC_EDIT };
 	ui::EnableControls( m_hWnd, ARRAY_SPAN( s_alphaCtrls ), !m_drawDisabled );
 
-	if ( DialogOutput == pDX->m_bSaveAndValidate )
-	{
-		ui::SetDlgItemText( this, IDC_IMAGE_COUNT_STATIC, str::Format( s_imageCountFmt.c_str(), m_pImages->GetCount() ) );
-		OutputList();
-	}
+	__super::DoDataExchange( pDX );
 }
 
-BEGIN_MESSAGE_MAP( CToolbarImagesPage, CBaseImagesPage )
+BEGIN_MESSAGE_MAP( CMfcToolbarImagesPage, CBaseImagesPage )
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
-void CToolbarImagesPage::OnDestroy( void )
+void CMfcToolbarImagesPage::OnDestroy( void )
 {
 	AfxGetApp()->WriteProfileInt( reg::section_MfcPage, reg::entry_AlphaSrc, m_alphaSrc );
 
@@ -487,11 +499,11 @@ void CToolbarImagesPage::OnDestroy( void )
 }
 
 
-// CIconImagesPage implementation
+// CBaseStoreImagesPage implementation
 
 namespace layout
 {
-	static CLayoutStyle s_iconPageStyles[] =
+	static CLayoutStyle s_storePageStyles[] =
 	{
 		{ IDC_IMAGE_COUNT_STATIC, SizeX },
 		{ IDC_HORIZ_SPLITTER_STATIC, Size },
@@ -507,60 +519,158 @@ namespace layout
 	};
 }
 
-IMPLEMENT_DYNCREATE( CIconImagesPage, CBaseImagesPage )
+IMPLEMENT_DYNAMIC( CBaseStoreImagesPage, CBaseImagesPage )
+
+CBaseStoreImagesPage::CBaseStoreImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
+	: CBaseImagesPage( IDD_IMAGES_STORE_PAGE, ARRAY_SPAN( layout::s_iconBottomFrameStyles ) )
+	, m_pImageStore( pImageStore != nullptr ? pImageStore : ui::GetImageStoresSvc() )
+{
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_storePageStyles ) );
+	ASSERT_PTR( m_pImageStore );
+}
+
+CBaseStoreImagesPage::~CBaseStoreImagesPage()
+{
+}
+
+BEGIN_MESSAGE_MAP( CBaseStoreImagesPage, CBaseImagesPage )
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
+
+void CBaseStoreImagesPage::OnDestroy( void )
+{
+	__super::OnDestroy();
+}
+
+
+// CStoreToolbarImagesPage implementation
+
+IMPLEMENT_DYNCREATE( CStoreToolbarImagesPage, CBaseStoreImagesPage )
+
+CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
+	: CBaseStoreImagesPage( pImageStore != nullptr ? pImageStore : ui::GetImageStoresSvc() )
+{
+	SetTitle( _T("Store Toolbar Images") );		// override resource-based page title
+
+	std::vector<ui::CToolbarDescr*> toolbarDescrs;
+	m_pImageStore->QueryToolbarDescriptors( toolbarDescrs );
+
+	CMFCToolBarImages* pImages = CMFCToolBar::GetImages();
+	bool hasMfcImageStore = GetCmdMgr() != nullptr && pImages != nullptr && pImages->GetCount() != 0;
+	const mfc::CImageCommandLookup* pImageCmds = mfc::CImageCommandLookup::Instance();
+	std::tstring customNameText;
+	UINT totalImageCount = 0;
+
+	for ( size_t toolbarPos = 0; toolbarPos != toolbarDescrs.size(); ++toolbarPos )
+	{
+		const ui::CToolbarDescr* pToolbarDescr = toolbarDescrs[ toolbarPos ];
+		UINT toolbarId = pToolbarDescr->GetToolbarId();
+		const std::tstring& toolbarTitle = pToolbarDescr->GetToolbarTitle();
+		const std::vector<ui::CStripBtnInfo>& btnInfos = pToolbarDescr->GetBtnInfos();
+
+		for ( std::vector<ui::CStripBtnInfo>::const_iterator itBtnInfo = btnInfos.begin(); itBtnInfo != btnInfos.end(); ++itBtnInfo )
+		{
+			UINT cmdId = itBtnInfo->m_cmdId;
+			const std::tstring* pCmdName = pImageCmds->FindCommandName( cmdId );
+			const std::tstring* pCmdLiteral = pImageCmds->FindCommandLiteral( cmdId );
+
+			if ( nullptr == pCmdName || pCmdName->empty() )
+			{
+				customNameText = str::Format( _T("Toolbar: %d, 0x%04X"), toolbarId, toolbarId );
+				if ( !toolbarTitle.empty() )
+					customNameText += str::Format( _T(" \"%s\""), toolbarTitle.c_str() );
+
+				pCmdName = &customNameText;
+			}
+
+			int mfcImageIndex = hasMfcImageStore ? mfc::FindButtonImageIndex( itBtnInfo->m_cmdId ) : -1;
+
+			CBaseImageItem* pImageItem = nullptr;
+
+			if ( mfcImageIndex != -1 )
+				pImageItem = new CToolbarImageItem( pImages, mfcImageIndex, cmdId, pCmdName, pCmdLiteral );			// use CMFCToolBarImages drawing
+			else
+				if ( const CIcon* pIcon = m_pImageStore->RetrieveIcon( CIconId( cmdId, SmallIcon ) ) )
+					pImageItem = new CIconImageItem( pIcon, itBtnInfo->m_imagePos, cmdId, pCmdName, pCmdLiteral );	// use CIcon drawing
+
+			if ( pImageItem != nullptr )
+			{
+				pImageItem->m_indexText = str::Format( _T("B%d/T%d"), itBtnInfo->m_imagePos + 1, toolbarPos + 1 );
+				if ( mfcImageIndex != -1 )
+					pImageItem->m_indexText += str::Format( _T(" [M%d]"), mfcImageIndex );		// append CMFCToolBarImages image index
+
+				m_imageItems.push_back( pImageItem );
+			}
+		}
+
+		totalImageCount += static_cast<UINT>( btnInfos.size() );
+	}
+
+	m_imageCountText = str::Format( _T("Total: %d toolbars with %d buttons"), toolbarDescrs.size(), m_imageItems.size() );
+}
+
+CStoreToolbarImagesPage::~CStoreToolbarImagesPage()
+{
+}
+
+void CStoreToolbarImagesPage::AddListItems( void ) override
+{
+	__super::AddListItems();
+	return;
+
+	CScopedLockRedraw freeze( &m_imageListCtrl );
+
+	m_imageListCtrl.RemoveAllGroups();
+
+	m_imageListCtrl.EnableGroupView( TRUE );
+}
+
+BEGIN_MESSAGE_MAP( CStoreToolbarImagesPage, CBaseStoreImagesPage )
+END_MESSAGE_MAP()
+
+
+// CIconImagesPage implementation
+
+IMPLEMENT_DYNCREATE( CIconImagesPage, CBaseStoreImagesPage )
 
 CIconImagesPage::CIconImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
-	: CBaseImagesPage( IDD_IMAGES_ICONS_PAGE, ARRAY_SPAN( layout::s_iconBottomFrameStyles ) )
-	, m_pImageStore( pImageStore != nullptr ? pImageStore : app::GetSharedImageStore() )
+	: CBaseStoreImagesPage( pImageStore )
 {
-	RegisterCtrlLayout( ARRAY_SPAN( layout::s_iconPageStyles ) );
-	ASSERT_PTR( m_pImageStore );
+	std::vector<ui::IImageStore::TIconKey> iconKeys;
+	m_pImageStore->QueryIconKeys( iconKeys, AnyIconSize );
 
-	UINT imageCount = CMFCToolBar::GetImages()->GetCount();
 	const mfc::CImageCommandLookup* pImageCmds = mfc::CImageCommandLookup::Instance();
+	std::tstring customNameText;
 
-	m_imageItems.reserve( imageCount );
-	for ( UINT index = 0; index != imageCount; ++index )
+	m_imageItems.reserve( iconKeys.size() );
+	for ( UINT index = 0; index != iconKeys.size(); ++index )
 	{
-		UINT cmdId = pImageCmds->FindCommand( index );
+		const ui::IImageStore::TIconKey& iconKey = iconKeys[ index ];
+		UINT cmdId = iconKey.first;
+
 		if ( const CIcon* pIcon = m_pImageStore->RetrieveIcon( CIconId( cmdId, SmallIcon ) ) )
 		{
 			const std::tstring* pCmdName = pImageCmds->FindCommandName( cmdId );
 			const std::tstring* pCmdLiteral = pImageCmds->FindCommandLiteral( cmdId );
 
+			if ( nullptr == pCmdName || pCmdName->empty() )
+				if ( const ui::CCmdTag* pIconTag = ui::CCmdTagStore::Instance().RetrieveTag( cmdId ) )
+				{
+					customNameText = pIconTag->GetTooltipText( true );
+					if ( !customNameText.empty() )
+						pCmdName = &customNameText;
+				}
+
 			m_imageItems.push_back( new CIconImageItem( pIcon, index, cmdId, pCmdName, pCmdLiteral ) );
 		}
 	}
+
+	m_imageCountText = str::Format( _T("Total: %d store icons"), m_imageItems.size() );
 }
 
 CIconImagesPage::~CIconImagesPage()
 {
 }
 
-void CIconImagesPage::DoDataExchange( CDataExchange* pDX )
-{
-	//bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
-	static std::tstring s_imageCountFmt = ui::GetDlgItemText( this, IDC_IMAGE_COUNT_STATIC );
-
-	__super::DoDataExchange( pDX );
-
-	static const UINT s_alphaCtrls[] = { IDC_ALPHA_SRC_LABEL, IDC_ALPHA_SRC_EDIT };
-	ui::EnableControls( m_hWnd, ARRAY_SPAN( s_alphaCtrls ), !m_drawDisabled );
-
-	if ( DialogOutput == pDX->m_bSaveAndValidate )
-	{
-		ui::SetDlgItemText( this, IDC_IMAGE_COUNT_STATIC, str::Format( s_imageCountFmt.c_str(), m_imageItems.size() ) );
-		OutputList();
-	}
-}
-
-BEGIN_MESSAGE_MAP( CIconImagesPage, CBaseImagesPage )
-	ON_WM_DESTROY()
+BEGIN_MESSAGE_MAP( CIconImagesPage, CBaseStoreImagesPage )
 END_MESSAGE_MAP()
-
-void CIconImagesPage::OnDestroy( void )
-{
-	//AfxGetApp()->WriteProfileInt( reg::section_MfcPage, reg::entry_AlphaSrc, m_alphaSrc );
-
-	__super::OnDestroy();
-}

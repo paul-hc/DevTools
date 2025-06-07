@@ -707,6 +707,9 @@
     <ClInclude Include="BaseMainDialog.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="ImageStore_fwd.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
