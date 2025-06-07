@@ -23,6 +23,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -168,14 +169,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "30-05-2025 21:01:29"
+            VALUE "BuildTimestamp", "07-06-2025 17:56:45"
             VALUE "Comments", "Ported to VC 2022|Split UTL_BASE/UTL_UI projects|Ported to UTL v2018-11"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Display known Windows themes structured in classes, parts and states"
             VALUE "FileVersion", "3.1.0.2"
             VALUE "InternalName", "VisualThemeViewer"
-            VALUE "LegalCopyright", "Copyright Â© 2001-2023"
+            VALUE "LegalCopyright", "Copyright © 2001-2023"
             VALUE "OriginalFilename", "VisualThemeViewer.exe"
             VALUE "ProductName", "Visual Theme Viewer development tool"
             VALUE "ProductVersion", "3.1.0.2"
