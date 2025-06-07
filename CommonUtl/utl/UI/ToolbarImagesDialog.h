@@ -58,6 +58,7 @@ protected:
 	virtual ~CBaseImagesPage();
 
 	virtual void AddListItems( void );
+	void AddListItem( int itemPos, const CBaseImageItem* pImageItem );
 private:
 	void OutputList( void );
 
@@ -152,6 +153,10 @@ public:
 	virtual ~CStoreToolbarImagesPage();
 protected:
 	virtual void AddListItems( void ) override;
+private:
+	typedef std::pair< std::tstring, std::vector<CBaseImageItem*> > TToolbarGroupPair;		// <groupName, imageItems>
+
+	std::vector<TToolbarGroupPair> m_toolbarGroups;
 
 	// generated stuff
 protected:

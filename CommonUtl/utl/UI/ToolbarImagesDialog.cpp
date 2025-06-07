@@ -273,14 +273,16 @@ void CBaseImagesPage::OutputList( void )
 void CBaseImagesPage::AddListItems( void )
 {
 	for ( UINT i = 0; i != m_imageItems.size(); ++i )
-	{
-		CBaseImageItem* pImageItem = m_imageItems[ i ];
+		AddListItem( i, m_imageItems[ i ] );
+}
 
-		m_imageListCtrl.InsertObjectItem( i, pImageItem );
-		m_imageListCtrl.SetSubItemText( i, Index, pImageItem->m_indexText );
-		m_imageListCtrl.SetSubItemText( i, CmdId, pImageItem->m_cmdId != 0 ? str::Format( _T("%d, 0x%04X"), pImageItem->m_cmdId, pImageItem->m_cmdId ) : num::FormatNumber( pImageItem->m_cmdId ) );
-		m_imageListCtrl.SetSubItemText( i, CmdLiteral, pImageItem->m_cmdLiteral );
-	}
+void CBaseImagesPage::AddListItem( int itemPos, const CBaseImageItem* pImageItem )
+{
+	ASSERT_PTR( pImageItem );
+	m_imageListCtrl.InsertObjectItem( itemPos, pImageItem );
+	m_imageListCtrl.SetSubItemText( itemPos, Index, pImageItem->m_indexText );
+	m_imageListCtrl.SetSubItemText( itemPos, CmdId, pImageItem->m_cmdId != 0 ? str::Format( _T("%d, 0x%04X"), pImageItem->m_cmdId, pImageItem->m_cmdId ) : num::FormatNumber( pImageItem->m_cmdId ) );
+	m_imageListCtrl.SetSubItemText( itemPos, CmdLiteral, pImageItem->m_cmdLiteral );
 }
 
 CSize CBaseImagesPage::GetItemImageSize( ui::GlyphGauge glyphGauge ) const implements(ui::ICustomImageDraw)
@@ -558,7 +560,6 @@ CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /
 	CMFCToolBarImages* pImages = CMFCToolBar::GetImages();
 	bool hasMfcImageStore = GetCmdMgr() != nullptr && pImages != nullptr && pImages->GetCount() != 0;
 	const mfc::CImageCommandLookup* pImageCmds = mfc::CImageCommandLookup::Instance();
-	std::tstring customNameText;
 	UINT totalImageCount = 0;
 
 	for ( size_t toolbarPos = 0; toolbarPos != toolbarDescrs.size(); ++toolbarPos )
@@ -568,20 +569,18 @@ CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /
 		const std::tstring& toolbarTitle = pToolbarDescr->GetToolbarTitle();
 		const std::vector<ui::CStripBtnInfo>& btnInfos = pToolbarDescr->GetBtnInfos();
 
+		m_toolbarGroups.push_back( TToolbarGroupPair() );
+		TToolbarGroupPair* pToolbarGroup = &m_toolbarGroups.back();
+
+		pToolbarGroup->first = str::Format( _T("Toolbar %d: %d, 0x%04X"), toolbarPos + 1, toolbarId, toolbarId );
+		if ( !toolbarTitle.empty() )
+			pToolbarGroup->first += str::Format( _T(" \"%s\""), toolbarTitle.c_str() );
+
 		for ( std::vector<ui::CStripBtnInfo>::const_iterator itBtnInfo = btnInfos.begin(); itBtnInfo != btnInfos.end(); ++itBtnInfo )
 		{
 			UINT cmdId = itBtnInfo->m_cmdId;
 			const std::tstring* pCmdName = pImageCmds->FindCommandName( cmdId );
 			const std::tstring* pCmdLiteral = pImageCmds->FindCommandLiteral( cmdId );
-
-			if ( nullptr == pCmdName || pCmdName->empty() )
-			{
-				customNameText = str::Format( _T("Toolbar: %d, 0x%04X"), toolbarId, toolbarId );
-				if ( !toolbarTitle.empty() )
-					customNameText += str::Format( _T(" \"%s\""), toolbarTitle.c_str() );
-
-				pCmdName = &customNameText;
-			}
 
 			int mfcImageIndex = hasMfcImageStore ? mfc::FindButtonImageIndex( itBtnInfo->m_cmdId ) : -1;
 
@@ -600,6 +599,7 @@ CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /
 					pImageItem->m_indexText += str::Format( _T(" [M%d]"), mfcImageIndex );		// append CMFCToolBarImages image index
 
 				m_imageItems.push_back( pImageItem );
+				pToolbarGroup->second.push_back( pImageItem );
 			}
 		}
 
@@ -615,14 +615,23 @@ CStoreToolbarImagesPage::~CStoreToolbarImagesPage()
 
 void CStoreToolbarImagesPage::AddListItems( void ) override
 {
-	__super::AddListItems();
-	return;
-
 	CScopedLockRedraw freeze( &m_imageListCtrl );
 
 	m_imageListCtrl.RemoveAllGroups();
+	m_imageListCtrl.EnableGroupView( !m_toolbarGroups.empty() );
 
-	m_imageListCtrl.EnableGroupView( TRUE );
+	for ( UINT groupId = 0, itemPos = 0; groupId != m_toolbarGroups.size(); ++groupId )
+	{
+		const TToolbarGroupPair* pToolbarGroup = &m_toolbarGroups[ groupId ];
+
+		m_imageListCtrl.InsertGroupHeader( groupId, groupId, pToolbarGroup->first, LVGS_NORMAL | LVGS_COLLAPSIBLE );
+
+		for ( std::vector<CBaseImageItem*>::const_iterator itImageItem = pToolbarGroup->second.begin(); itImageItem != pToolbarGroup->second.end(); ++itImageItem, ++itemPos )
+		{
+			AddListItem( itemPos, *itImageItem );
+			VERIFY( m_imageListCtrl.SetItemGroupId( itemPos, groupId ) );
+		}
+	}
 }
 
 BEGIN_MESSAGE_MAP( CStoreToolbarImagesPage, CBaseStoreImagesPage )
