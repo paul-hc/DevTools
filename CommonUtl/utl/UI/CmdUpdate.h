@@ -28,4 +28,21 @@ namespace ui
 }
 
 
+namespace ui
+{
+	class CSmartCmdUI : public ::CCmdUI		// does incremental updates: only if the state actually changes
+	{
+	public:
+		CSmartCmdUI( void ) {}
+
+		virtual void Enable( BOOL on = TRUE );
+		virtual void SetCheck( int check = 1 );		// 0, 1 or 2 (indeterminate)
+		virtual void SetRadio( BOOL on = TRUE );
+		virtual void SetText( LPCTSTR pText );
+
+		bool IsCtrlUpdate( void ) const { return nullptr == m_pMenu && m_pOther != nullptr; }
+	};
+}
+
+
 #endif // CmdUpdate_h

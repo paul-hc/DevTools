@@ -4,6 +4,7 @@
 #include "MenuUtilities.h"
 #include "WndUtils.h"
 #include "VersionInfo.h"
+#include <windowsx.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -90,7 +91,7 @@ namespace ui
 			// when WM_INITMENUPOPUP is not sent for pMenu or it's sub-menus.
 			ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
 
-			CCmdUI itemState;
+			CSmartCmdUI itemState;
 
 			itemState.m_pMenu = pMenu;
 			itemState.m_pParentMenu = pParentMenu;
@@ -201,7 +202,7 @@ namespace ui
 	{	// inspired from CWnd::UpdateDialogControls() MFC implementation
 		ui::ResolveCtrlTarget( pTarget, hCtrl );
 
-		CCmdUI ctrlState;
+		CSmartCmdUI ctrlState;
 		CWnd tempWnd;		// temporary window just for CmdUI update
 
 		// send to buttons
@@ -251,7 +252,7 @@ namespace ui
 		ASSERT_PTR( pCtrl->GetSafeHwnd() );
 		ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
 
-		CCmdUI ctrlState;
+		CSmartCmdUI ctrlState;
 
 		ctrlState.m_nID = pCtrl->GetDlgCtrlID();
 		if ( -1 == ui::ToIntCmdId( ctrlState.m_nID ) )
@@ -273,5 +274,40 @@ namespace ui
 
 		if ( isUserMenu )
 			ui::UpdateMenuUI( pTargetWnd, pPopupMenu );
+	}
+}
+
+
+namespace ui
+{
+	// CSmartCmdUI class
+
+	void CSmartCmdUI::Enable( BOOL on /*= TRUE*/ )
+	{
+		if ( IsCtrlUpdate() && !on == ui::IsDisabled( m_pOther->m_hWnd ) )
+			return;		// no state change
+
+		__super::Enable( on );
+	}
+
+	void CSmartCmdUI::SetCheck( int check /*= 1*/ )		// 0, 1 or 2 (indeterminate)
+	{
+		if ( IsCtrlUpdate() && HasFlag( m_pOther->SendMessage( WM_GETDLGCODE ), DLGC_BUTTON ) )
+			if ( check == Button_GetCheck( m_pOther->m_hWnd ) )
+				return;		// no state change
+
+		__super::SetCheck( check );
+	}
+
+	void CSmartCmdUI::SetRadio( BOOL on /*= TRUE*/ )
+	{
+		// implemented in terms of SetCheck( on ) for control updates
+		__super::SetRadio( on );
+	}
+
+	void CSmartCmdUI::SetText( LPCTSTR pText )
+	{
+		// implemented in terms of AfxSetWindowText( pText ) for control updates, which is already flicker-optimized
+		__super::SetText( pText );
 	}
 }
