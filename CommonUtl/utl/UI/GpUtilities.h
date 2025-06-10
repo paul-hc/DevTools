@@ -98,6 +98,7 @@ namespace gp
 	{
 		Graphics graphics( *pDC );
 		Pen pen( gp::MakeOpaqueColor( frameRgb, opacityPct ) );
+
 		gp::FrameRectangle( graphics, gp::ToRect( rect ), &pen );
 	}
 }

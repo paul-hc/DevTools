@@ -15,14 +15,17 @@ public:
 
 	enum Flags
 	{
-		SmoothGroups		= BIT_FLAG( 0 ),		// draw groups smoothly on WM_ERASEBKGND, clipping other controls
+		SmoothGroups		= BIT_FLAG( 0 ),		// draw groups smoothly on WM_ERASEBKGND, clipping other controls; parent dialog uses WS_CLIPCHILDREN style.
 		GroupsTransparent	= BIT_FLAG( 1 ),		// receive WM_PAINT messages only after all sibling windows beneath it have been updated
 		GroupsRepaint		= BIT_FLAG( 2 ),		// prevents clipping issues in property pages
+		GroupsTransparentEx	= BIT_FLAG( 3 ),		// force groups to use WS_EX_TRANSPARENT styleEx; should also use SmoothGroups style drawing; prevents groups clipping issues in CDialog splitters, but not required in property pages.
+			GroupsMask		= 0x0F,					// first 8 bits are reserved for group flags
 
 		UseDoubleBuffer		= BIT_FLAG( 8 ),		// use double buffering when erasing background for smooth groups; some themed controls don't erase corner pixels as expected
 
 		Smooth = SmoothGroups,
 		Normal = GroupsTransparent | GroupsRepaint,
+		SmoothTransparentGroups = SmoothGroups | GroupsTransparentEx,
 	};
 public:
 	CLayoutEngine( int flags = s_defaultFlags );
@@ -30,6 +33,7 @@ public:
 
 	int GetFlags( void ) const { return m_flags; }
 	void SetFlags( int flags ) { m_flags = flags; }
+	bool ModifyFlags( int clearFlags, int setFlags ) { return ::ModifyFlags( m_flags, clearFlags, setFlags ); }
 
 	bool HasCtrlLayout( void ) const { return !m_controlStates.empty(); }
 	void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], UINT count );
@@ -89,7 +93,7 @@ protected:
 	// overridables
 	virtual void GetClientRectangle( OUT CRect* pClientRect ) const;
 private:
-	void SetupCollapsedState( UINT ctrlId, layout::TStyle style );
+	void SetupCollapsedState( UINT ctrlId, layout::TStyle layoutStyle );
 	void SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pCtrlState );
 	bool AnyRepaintCtrl( void ) const;
 
@@ -125,13 +129,15 @@ public:
 };
 
 
-class CPaneLayoutEngine : public CLayoutEngine		// nested layout engine, use by panes implementing ui::ILayoutFrame interface
+// Nested layout engine, use by panes implementing ui::ILayoutFrame interface
+//
+class CPaneLayoutEngine : public CLayoutEngine
 {
 public:
 	CPaneLayoutEngine( int flags = s_defaultFlags );
 	~CPaneLayoutEngine();
 
-	void InitializePane( ui::ILayoutFrame* pLayoutFrame );
+	void InitializePane( ui::ILayoutFrame* pPaneLayoutFrame );
 
 	bool ShowPaneControls( bool show = true );
 

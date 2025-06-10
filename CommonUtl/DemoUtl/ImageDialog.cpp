@@ -383,10 +383,11 @@ CSize CImageDialog::ComputeContentSize( void )
 	return CSize( 0, 0 );			// not scrollable
 }
 
-void CImageDialog::RenderBackground( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
+bool CImageDialog::RenderBackground( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
 {
 	CBrush bkBrush( GetBkColor() );
 	pDC->FillRect( &boundsRect, &bkBrush );
+	return true;
 }
 
 bool CImageDialog::RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)

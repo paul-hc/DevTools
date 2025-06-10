@@ -26,6 +26,8 @@ namespace layout
 }
 
 
+// CResizeGripBar class
+
 HCURSOR CResizeGripBar::s_hCursors[ 2 ] = { nullptr, nullptr };
 
 
@@ -48,11 +50,33 @@ CResizeGripBar::CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Ori
 		s_hCursors[ resize::NorthSouth ] = AfxGetApp()->LoadCursor( IDC_RESIZE_SPLITTER_NS_CURSOR );
 		s_hCursors[ resize::WestEast ] = AfxGetApp()->LoadCursor( IDC_RESIZE_SPLITTER_WE_CURSOR );
 	}
+
+	StoreSplitterGripBar( m_panelCtrls.first );
+	StoreSplitterGripBar( m_panelCtrls.second );
 }
 
 CResizeGripBar::~CResizeGripBar()
 {
 	delete m_pTrackingInfo;
+}
+
+void CResizeGripBar::StoreSplitterGripBar( CWnd* pPaneWnd )
+{
+	if ( ui::ILayoutFrame* pPaneLayoutFrame = dynamic_cast<ui::ILayoutFrame*>( pPaneWnd ) )
+		pPaneLayoutFrame->SetSplitterGripBar( this );		// will be used for initial hidden state of pane's layout controls
+}
+
+CWnd* CResizeGripBar::GetCollapsiblePane( void ) const
+{
+	switch ( m_toggleStyle )
+	{
+		case resize::ToggleFirst:
+			return m_panelCtrls.first;
+		case resize::ToggleSecond:
+			return m_panelCtrls.second;
+	}
+
+	return nullptr;
 }
 
 CResizeGripBar& CResizeGripBar::SetMinExtents( TValueOrPct firstMinExtent, TValueOrPct secondMinExtent )
@@ -169,10 +193,10 @@ CResizeGripBar& CResizeGripBar::SetFirstExtentPercentage( TPercent firstExtentPe
 		CFrameLayoutInfo info;
 		ReadLayoutInfo( info );
 
-		int firstExtent = ui::ScaleValue( info.m_maxExtent, firstExtentPercentage );		// convert to absolute extent
+		int firstExtent = ui::ScaleValue( info.m_maxExtent, firstExtentPercentage );				// convert to absolute extent
 
 		LimitFirstExtentToBounds( firstExtent, info.m_maxExtent );
-		m_layout.m_firstExtentPercentage = ui::GetPercentageOf( firstExtent, info.m_maxExtent );		// convert back to percentage
+		m_layout.m_firstExtentPercentage = ui::GetPercentageOf( firstExtent, info.m_maxExtent );	// convert back to percentage
 
 		LayoutProportionally();
 	}
@@ -183,13 +207,18 @@ CResizeGripBar& CResizeGripBar::SetFirstExtentPercentage( TPercent firstExtentPe
 }
 
 CResizeGripBar& CResizeGripBar::SetCollapsed( bool collapsed )
-{
+ {
 	REQUIRE( m_toggleStyle != resize::NoToggle );
 
 	m_layout.m_isCollapsed = collapsed;
 
 	if ( m_hWnd != nullptr )
+	{
 		LayoutProportionally();
+
+		if ( !m_layout.m_isCollapsed )
+			ui::RedrawDialog( GetParent()->GetSafeHwnd() );		// prevent clipping issues when expanding a frame control that contains (overlaps) group-boxes
+	}
 
 	return *this;
 }
@@ -302,21 +331,23 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 
 	rGripperRect = rFirstRect = rSecondRect = info.m_frameRect;		// start with all rects to frame
 
-	CWnd* pHiddenWnd = nullptr;
+	CWnd* pHiddenPane = nullptr;			// collapsed pane
 
 	if ( m_layout.m_isCollapsed )
-		pHiddenWnd = resize::ToggleFirst == m_toggleStyle ? m_panelCtrls.first : m_panelCtrls.second;
+		pHiddenPane = resize::ToggleFirst == m_toggleStyle ? m_panelCtrls.first : m_panelCtrls.second;
+
+	int paneSpacing = 0;	// TODO...
 
 	if ( resize::NorthSouth == m_layout.m_orientation )
 	{
-		if ( pHiddenWnd == m_panelCtrls.first )
+		if ( pHiddenPane == m_panelCtrls.first )
 		{	// first collapsed  - gripper at top
 			rFirstRect.bottom = rFirstRect.top + firstExtent;
 			rGripperRect.bottom = rGripperRect.top + m_windowDepth;
 			rSecondRect.top = rGripperRect.bottom;
 		}
-		else if ( pHiddenWnd == m_panelCtrls.second )
-		{	// second collapsed  - gripper at bottom
+		else if ( pHiddenPane == m_panelCtrls.second )
+		{	// second collapsed - gripper at bottom
 			int secondExtent = info.m_maxExtent - firstExtent;
 
 			rFirstRect.bottom -= m_windowDepth;
@@ -329,17 +360,24 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 			rGripperRect.top = rFirstRect.bottom;
 			rGripperRect.bottom = rGripperRect.top + m_windowDepth;
 			rSecondRect.top = rGripperRect.bottom;
+
+			// ensure panes spacing around the gripper bar
+			rFirstRect.bottom -= paneSpacing;
+			rSecondRect.top += paneSpacing;
 		}
+
+		//rFirstRect.bottom = std::max( rFirstRect.top, rFirstRect.bottom );		// limit to top to keep it normalized
+		//rSecondRect.top = std::min( rSecondRect.bottom, rSecondRect.top );		// limit to bottom to keep it normalized
 	}
 	else
 	{
-		if ( pHiddenWnd == m_panelCtrls.first )
+		if ( pHiddenPane == m_panelCtrls.first )
 		{	// first collapsed  - gripper at left
 			rFirstRect.right = rFirstRect.left + firstExtent;
 			rGripperRect.right = rGripperRect.left + m_windowDepth;
 			rSecondRect.left = rGripperRect.right;
 		}
-		else if ( pHiddenWnd == m_panelCtrls.second )
+		else if ( pHiddenPane == m_panelCtrls.second )
 		{	// second collapsed  - gripper at right
 			int secondExtent = info.m_maxExtent - firstExtent;
 
@@ -547,6 +585,8 @@ void CResizeGripBar::PreSubclassWindow( void )
 }
 
 
+// CResizeGripBar messages
+
 BEGIN_MESSAGE_MAP( CResizeGripBar, CStatic )
 	ON_WM_SETCURSOR()
 	ON_WM_LBUTTONDOWN()
@@ -574,7 +614,7 @@ void CResizeGripBar::OnPaint( void )
 	CRect clientRect;
 	GetClientRect( &clientRect );
 
-	Draw( pDC, clientRect );
+	Draw( pDC, clientRect );	// background + content
 }
 
 BOOL CResizeGripBar::OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message )

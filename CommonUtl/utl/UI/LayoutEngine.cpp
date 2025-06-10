@@ -127,6 +127,7 @@ void CLayoutEngine::SetupControlStates( void )
 
 	bool anyRepaintCtrl = false;
 
+	// for each control state:
 	for ( std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
 	{
 		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::DoRepaint ) )
@@ -137,49 +138,32 @@ void CLayoutEngine::SetupControlStates( void )
 	}
 
 	if ( anyRepaintCtrl )
-	{
-		ModifyFlags( m_flags, SmoothGroups, GroupsTransparent | GroupsRepaint );	// disable SmoothGroups and WS_CLIPCHILDREN when one control requires repaint (layout::DoRepaint)
+	{	// disable SmoothGroups and WS_CLIPCHILDREN when one control requires repaint (layout::DoRepaint)
+		ModifyFlags( SmoothGroups, GroupsTransparent | GroupsRepaint );
 		m_pDialog->ModifyStyle( WS_CLIPCHILDREN, 0 );
 	}
 
 	if ( HasFlag( m_flags, SmoothGroups ) )
-		m_pDialog->ModifyStyle( 0, WS_CLIPCHILDREN );								// force WS_CLIPCHILDREN on dialog
+		m_pDialog->ModifyStyle( 0, WS_CLIPCHILDREN );		// add the WS_CLIPCHILDREN on dialog for smooth repainting
 
-	HWND hCtrl = ::GetWindow( m_pDialog->GetSafeHwnd(), GW_CHILD );
-	ASSERT_PTR( hCtrl );		// controls created from dialog template?
-
-	for ( ; hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
-		if ( UINT ctrlId = ::GetDlgCtrlID( hCtrl ) )								// ignore child dialogs in a property sheet
-		{
-			layout::CControlState* pCtrlState = LookupControlState( ctrlId );
-
-			if ( DialogLayout == m_layoutType )
+	// for each control: setup controls' state, and handle group boxes
+	for ( HWND hCtrl = ::GetWindow( m_pDialog->GetSafeHwnd(), GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
+		if ( UINT ctrlId = ::GetDlgCtrlID( hCtrl ) )		// ignore child dialogs in a property sheet
+			if ( layout::CControlState* pCtrlState = LookupControlState( ctrlId ) )		// only touch controls with layout defined
+			{
+				//if ( DialogLayout == m_layoutType )		// commented-out: avoid clipping errors on group controls (e.g. in CToolbarImagesDialog)
 				if ( ui::IsGroupBox( hCtrl ) )
 					SetupGroupBoxState( hCtrl, pCtrlState );
 
-			if ( pCtrlState != nullptr )
 				pCtrlState->ResetCtrl( hCtrl );
-		}
-}
-
-void CLayoutEngine::SetupCollapsedState( UINT ctrlId, layout::TStyle style )
-{
-	CRect clientRect;
-	m_pDialog->GetClientRect( &clientRect );
-
-	CRect anchorRect = ui::GetControlRect( ::GetDlgItem( m_pDialog->m_hWnd, ctrlId ) );
-
-	ASSERT( 0 == m_collapsedDelta.cx && 0 == m_collapsedDelta.cy );					// initialize once
-	if ( HasFlag( style, layout::CollapsedLeft ) )
-		m_collapsedDelta.cx = clientRect.right - anchorRect.left;
-
-	if ( HasFlag( style, layout::CollapsedTop ) )
-		m_collapsedDelta.cy = clientRect.bottom - anchorRect.top;
+			}
 }
 
 void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pCtrlState )
 {
-	if ( HasFlag( m_flags, SmoothGroups ) )
+	//TRACE( _T(" CLayoutEngine::SetupGroupBoxState() - GroupBox='%s'\n"), ui::GetWindowText( hGroupBox ).c_str() );
+
+	if ( HasFlag( m_flags, SmoothGroups ) && !HasFlag( m_flags, GroupsTransparentEx ) )
 	{
 		// hide group boxes and clear transparent ex-style; will be rendered on WM_ERASEBKGND
 		CWnd::ModifyStyle( hGroupBox, WS_VISIBLE, 0, 0 );
@@ -191,15 +175,34 @@ void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* p
 		if ( HasFlag( m_flags, GroupsRepaint ) && pCtrlState != nullptr )
 			pCtrlState->ModifyLayoutStyle( 0, layout::DoRepaint );		// force groups repaint
 
-		if ( HasFlag( m_flags, GroupsTransparent ) )
+		if ( HasFlag( m_flags, GroupsTransparent | GroupsTransparentEx ) )
 		{
+			REQUIRE( HasFlag( m_flags, GroupsTransparentEx ) || HasFlag( m_pDialog->GetStyle(), WS_CLIPCHILDREN ) );	// GroupsTransparentEx mode requires WS_CLIPCHILDREN for parent dialog!
+
 			// make group boxes transparent (z-order fix for proxy controls);
 			// prevents the WS_CLIPCHILDREN styled parent window from excluding the groupbox's background region, allowing the background to paint;
 			// while this works, it creates annoying flicker on resize.
 			if ( !HasFlag( ui::GetStyleEx( hGroupBox ), WS_EX_TRANSPARENT ) )
+			{
 				CWnd::ModifyStyleEx( hGroupBox, 0, WS_EX_TRANSPARENT, 0 );
+			}
 		}
 	}
+}
+
+void CLayoutEngine::SetupCollapsedState( UINT ctrlId, layout::TStyle layoutStyle )
+{
+	CRect clientRect;
+	m_pDialog->GetClientRect( &clientRect );
+
+	CRect anchorRect = ui::GetControlRect( ::GetDlgItem( m_pDialog->m_hWnd, ctrlId ) );
+
+	ASSERT( 0 == m_collapsedDelta.cx && 0 == m_collapsedDelta.cy );					// initialize once
+	if ( HasFlag( layoutStyle, layout::CollapsedLeft ) )
+		m_collapsedDelta.cx = clientRect.right - anchorRect.left;
+
+	if ( HasFlag( layoutStyle, layout::CollapsedTop ) )
+		m_collapsedDelta.cy = clientRect.bottom - anchorRect.top;
 }
 
 bool CLayoutEngine::AnyRepaintCtrl( void ) const
@@ -457,10 +460,10 @@ ui::ILayoutFrame* CLayoutEngine::FindControlLayoutFrame( HWND hCtrl ) const
 		return pControlLayoutFrame;
 
 	std::unordered_map<UINT, ui::ILayoutFrame*>::const_iterator itFound = m_buddyCallbacks.find( ::GetDlgCtrlID( hCtrl ) );
-	if ( itFound != m_buddyCallbacks.end() )
-		return itFound->second;
+	if ( itFound == m_buddyCallbacks.end() )
+		return nullptr;
 
-	return nullptr;
+	return itFound->second;
 }
 
 void CLayoutEngine::HandleGetMinMaxInfo( MINMAXINFO* pMinMaxInfo ) const
@@ -628,13 +631,13 @@ void CPaneLayoutEngine::GetClientRectangle( OUT CRect* pClientRect ) const overr
 		ASSERT( false );
 }
 
-void CPaneLayoutEngine::InitializePane( ui::ILayoutFrame* pLayoutFrame )
+void CPaneLayoutEngine::InitializePane( ui::ILayoutFrame* pPaneLayoutFrame )
 {
 	REQUIRE( !IsInitialized() );
-	ASSERT_PTR( pLayoutFrame );
+	ASSERT_PTR( pPaneLayoutFrame );
 
-	m_pLayoutFrame = pLayoutFrame;
-	__super::m_pDialog = pLayoutFrame->GetDialog();
+	m_pLayoutFrame = pPaneLayoutFrame;
+	__super::m_pDialog = pPaneLayoutFrame->GetDialog();
 
 	if ( ui::ILayoutEngine* pMasterLayout = dynamic_cast<ui::ILayoutEngine*>( m_pDialog ) )
 		m_pMasterLayout = &pMasterLayout->GetLayoutEngine();
@@ -645,17 +648,19 @@ void CPaneLayoutEngine::InitializePane( ui::ILayoutFrame* pLayoutFrame )
 	if ( !HasInitialSize() )
 		StoreInitialPaneSize();
 
-	ENSURE( HasInitialSize() );		// should have a size by this time
+	ENSURE( HasInitialSize() );				// should have a size by this time
 
 	SetupControlStates();
 }
 
 bool CPaneLayoutEngine::ShowPaneControls( bool show /*= true*/ )
 {
-	if ( !IsInitialized()										// called too early, defer for after initialization?
-		 || HasFlag( m_flags, InLayout )						// avoid changing control visibility while the dialog is in SetRedraw( FALSE ) mode!
+	if ( !IsInitialized()
+		 || HasFlag( m_flags, InLayout )			// avoid changing control visibility while the dialog is in SetRedraw( FALSE ) mode!
 		 || ( m_pMasterLayout != nullptr && HasFlag( m_pMasterLayout->GetFlags(), InLayout ) ) )
+	{
 		return false;				// called too early, defer for after initialization
+	}
 
 	UINT changeCount = 0;
 

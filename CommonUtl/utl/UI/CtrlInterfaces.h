@@ -3,6 +3,9 @@
 #pragma once
 
 
+class CResizeGripBar;
+
+
 namespace ui
 {
 	// implemented by controls that act as a layout frame, having custom internal layout rules
@@ -13,6 +16,10 @@ namespace ui
 		virtual CWnd* GetDialog( void ) const = 0;
 		virtual void OnControlResized( void ) = 0;
 		virtual bool ShowPane( bool show ) = 0;
+
+		// optional layout pane methods:
+		virtual CResizeGripBar* GetSplitterGripBar( void ) const { return nullptr; }
+		virtual void SetSplitterGripBar( CResizeGripBar* pResizeGripBar ) { pResizeGripBar; }
 	};
 
 

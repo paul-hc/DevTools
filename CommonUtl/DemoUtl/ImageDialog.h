@@ -60,7 +60,7 @@ private:
 	static std::tstring FormatDibInfo( const CDibSection& dib );
 
 	// ui::ISampleCallback interface
-	virtual void RenderBackground( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
+	virtual bool RenderBackground( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
 	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
 	virtual void ShowPixelInfo( const CPoint& pos, COLORREF color ) implements(ui::ISampleCallback);
 

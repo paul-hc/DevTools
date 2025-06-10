@@ -266,7 +266,7 @@ bool CSystemTray::HandleTrayIconNotify( WPARAM wParam, LPARAM lParam )
 	UINT trayIconId = HIWORD( lParam );
 	CPoint screenPos( GET_X_LPARAM( wParam ), GET_Y_LPARAM( wParam ) );
 
-	dbg::TraceTrayNotifyCode( msgNotifyCode );
+	dbg::TraceTrayNotifyCode( msgNotifyCode, trayIconId, screenPos );
 
 	if ( m_pOwnerCallback != nullptr )
 		if ( m_pOwnerCallback->OnTrayIconNotify( msgNotifyCode, trayIconId, screenPos ) )

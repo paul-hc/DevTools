@@ -207,7 +207,7 @@ namespace ui
 	inline bool EnableControl( HWND hDlg, UINT ctrlId, bool enable = true ) { return EnableWindow( ::GetDlgItem( hDlg, ctrlId ), enable ); }
 	void EnableControls( HWND hDlg, const UINT ctrlIds[], size_t count, bool enable = true );
 
-	bool ShowWindow( HWND hWnd, bool show = true );
+	bool ShowWindow( HWND hWnd, bool show = true, int showCmd = SW_SHOWNA );
 	inline bool ShowControl( HWND hDlg, UINT ctrlId, bool show = true ) { return ShowWindow( ::GetDlgItem( hDlg, ctrlId ), show ); }
 	void ShowControls( HWND hDlg, const UINT ctrlIds[], size_t count, bool show = true );
 

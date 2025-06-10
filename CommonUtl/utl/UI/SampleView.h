@@ -35,7 +35,7 @@ public:
 	CRect MakeDisplayRect( const CRect& clientRect, const CSize& displaySize ) const;
 
 	void SafeRedraw( void );
-	bool DrawContentFrame( CDC* pDC, const CRect& contentRect, COLORREF scrollableColor, BYTE alpha = 100 );
+	bool DrawContentFrame( CDC* pDC, const CRect& contentRect, COLORREF scrollableColor = CLR_NONE, BYTE alpha = 100 );
 	void DrawError( CDC* pDC, const CRect& rect );
 	void DrawCross( CDC* pDC, const CRect& rect, COLORREF color, BYTE alpha = 127 );
 	void DrawDiagonalCross( CDC* pDC, const CRect& rect, COLORREF color, BYTE alpha = 127 );
@@ -46,7 +46,7 @@ private:
 	bool TrackingScroll( const CPoint& mouseAnchor, const CPoint& scrollAnchor );
 
 	void Draw( CDC* pDC, IN OUT CRect& rBoundsRect, const CRect& clipRect );
-	void FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect );
+	bool FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect );
 private:
 	ui::ISampleCallback* m_pSampleCallback;
 	bool m_useDoubleBuffering;

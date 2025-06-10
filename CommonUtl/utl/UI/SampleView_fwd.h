@@ -13,7 +13,7 @@ namespace ui
 		virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) = 0;
 
 		// optional methods
-		virtual void RenderBackground( CDC* pDC, const CRect& boundsRect ) { pDC, boundsRect; }
+		virtual bool RenderBackground( CDC* pDC, const CRect& boundsRect ) { pDC, boundsRect; return false; }
 		virtual void ShowPixelInfo( const CPoint& pos, COLORREF color ) { pos, color; }
 	};
 }

@@ -7,6 +7,7 @@
 #include "Icon.h"
 #include "ControlBar_fwd.h"
 #include "CmdTagStore.h"
+#include "CmdUpdate.h"
 #include "ResizeFrameStatic.h"
 #include "SampleView.h"
 #include "WndUtilsEx.h"
@@ -26,21 +27,35 @@
 
 namespace reg
 {
+	static const TCHAR* s_pageTitle[] = { _T("ToolBar Images"), _T("Store Toolbar Images"), _T("Icons") };
+
 	static const TCHAR section_dialog[] = _T("utl\\ToolbarImagesDialog");
-	static const TCHAR section_MfcPage[] = _T("utl\\ToolbarImagesDialog\\MFC Page");
-	static const TCHAR section_MfcPageSplitterH[] = _T("utl\\ToolbarImagesDialog\\MFC Page\\SplitterH");
+	static const TCHAR section_dialogSplitterH[] = _T("utl\\ToolbarImagesDialog\\SplitterH");
 	static const TCHAR entry_SelItemIndex[] = _T("SelItemIndex");
 	static const TCHAR entry_DrawDisabled[] = _T("DrawDisabled");
-	static const TCHAR entry_AlphaSrc[] = _T("AlphaSrc");
+	static const TCHAR entry_SrcAlpha[] = _T("SrcAlpha");
 }
 
 namespace layout
 {
 	static CLayoutStyle s_styles[] =
 	{
-		{ IDC_ITEMS_SHEET, Size },
+		{ IDC_HORIZ_SPLITTER_STATIC, Size },			// frame of the splitter (containing all controls, except dialog button)
 		{ IDOK, Move },
 		{ IDCANCEL, Move }
+	};
+
+	static CLayoutStyle s_splitBottomFrameStyles[] =
+	{
+		{ IDC_GROUP_BOX_1, SizeY },
+		{ IDC_DRAW_DISABLED_CHECK, OffsetOrigin },
+		{ IDC_ALPHA_SRC_LABEL, OffsetOrigin },			// use to offset controls in frame layout (non-master layout)
+		{ IDC_ALPHA_SRC_EDIT, OffsetOrigin },
+		{ IDC_ALPHA_SRC_SPIN, OffsetOrigin },
+		{ IDC_ALPHA_DISABLED_LABEL, OffsetOrigin },
+		{ IDC_ALPHA_DISABLED_EDIT, OffsetOrigin },
+		{ IDC_ALPHA_DISABLED_SPIN, OffsetOrigin },
+		{ IDC_TOOLBAR_IMAGE_SAMPLE, Size }
 	};
 }
 
@@ -54,6 +69,27 @@ CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParentWnd )
 	m_childSheet.AddPage( new CMfcToolbarImagesPage( CMFCToolBar::GetImages() ) );
 	m_childSheet.AddPage( new CStoreToolbarImagesPage() );
 	m_childSheet.AddPage( new CIconImagesPage() );
+
+	m_pSampleView.reset( new CSampleView( this ) );
+	//m_pSampleView->SetBorderColor( color::Red );		// for debugging
+	m_pSampleView->SetBkColor( ::GetSysColor( COLOR_BTNFACE ) );
+
+	// IDC_LAYOUT_FRAME_1_STATIC:
+	m_pSplitBottomLayoutStatic.reset( new CLayoutStatic() );
+	m_pSplitBottomLayoutStatic->RegisterCtrlLayout( ARRAY_SPAN( layout::s_splitBottomFrameStyles ) );
+	m_pSplitBottomLayoutStatic->SetUseSmoothTransparentGroups();
+
+	// IDC_HORIZ_SPLITTER_STATIC:
+	m_pUpDownSplitterFrame.reset( new CResizeFrameStatic( &m_childSheet, m_pSplitBottomLayoutStatic.get(), resize::NorthSouth ) );
+	m_pUpDownSplitterFrame->SetSection( reg::section_dialogSplitterH );
+	m_pUpDownSplitterFrame->GetGripBar()
+		.SetMinExtents( 100, 90 )			// correlate with dialog minimum heights from the resource template
+		.SetFirstExtentPercentage( 75 );
+
+	m_sharedData.m_drawDisabled = AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_DrawDisabled, false ) != FALSE;
+	m_sharedData.m_srcAlpha = static_cast<BYTE>( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_SrcAlpha, 255u ) );
+	m_sharedData.m_disabledAlpha = mfc::ToolBarImages_RefDisabledImageAlpha();
+	m_sharedData.m_pSampleView = m_pSampleView.get();
 }
 
 CToolbarImagesDialog::~CToolbarImagesDialog()
@@ -73,30 +109,97 @@ mfc::TRuntimeClassList* CToolbarImagesDialog::GetCustomPages( void )
 	return &s_pagesList;
 }
 
+CBaseImagesPage* CToolbarImagesDialog::GetActiveChildPage( void ) const
+{
+	return checked_static_cast<CBaseImagesPage*>( m_childSheet.GetActivePage() );
+}
+
+bool CToolbarImagesDialog::RenderSample( CDC* pDC, const CRect& boundsRect ) implements( ui::ISampleCallback )
+{
+	//GetGlobalData()->DrawParentBackground( m_pSampleView.get(), pDC, const_cast<CRect*>( &boundsRect ));		/* doesn't work, leaves background black */
+
+	return GetActiveChildPage()->RenderImageSample( pDC, boundsRect );
+}
+
+void CToolbarImagesDialog::OnIdleUpdateControls( void ) overrides(CLayoutDialog)
+{
+	__super::OnIdleUpdateControls();
+
+	static const UINT s_ctrlIds[] = { IDC_ALPHA_SRC_LABEL, IDC_ALPHA_SRC_EDIT, IDC_ALPHA_DISABLED_LABEL, IDC_ALPHA_DISABLED_EDIT };
+	ui::UpdateDlgControlsUI( m_hWnd, ARRAY_SPAN( s_ctrlIds ), this );
+}
+
 void CToolbarImagesDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_childSheet.m_hWnd;
 
 	if ( firstInit )
 	{
+		ui::SetSpinRange( this, IDC_ALPHA_SRC_SPIN, 0, 255 );
+		ui::SetSpinRange( this, IDC_ALPHA_DISABLED_SPIN, 0, 255 );
 	}
 
+	m_pSampleView->DDX_Placeholder( pDX, IDC_TOOLBAR_IMAGE_SAMPLE );
 	m_childSheet.DDX_DetailSheet( pDX, IDC_ITEMS_SHEET );
+
+	ui::DDX_Bool( pDX, IDC_DRAW_DISABLED_CHECK, m_sharedData.m_drawDisabled );
+	ui::DDX_Number( pDX, IDC_ALPHA_SRC_EDIT, m_sharedData.m_srcAlpha );
+	ui::DDX_Number( pDX, IDC_ALPHA_DISABLED_EDIT, m_sharedData.m_disabledAlpha );
+
+	DDX_Control( pDX, IDC_LAYOUT_FRAME_1_STATIC, *m_pSplitBottomLayoutStatic );
+	DDX_Control( pDX, IDC_HORIZ_SPLITTER_STATIC, *m_pUpDownSplitterFrame );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		m_childSheet.OutputPages();
+	else
+		mfc::ToolBarImages_RefDisabledImageAlpha() = m_sharedData.m_disabledAlpha;		// modify the global field!
 
-	CLayoutDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
 // message handlers
 
 BEGIN_MESSAGE_MAP( CToolbarImagesDialog, CLayoutDialog )
+	ON_WM_DESTROY()
+	ON_BN_CLICKED( IDC_DRAW_DISABLED_CHECK, OnRedrawImagesList )
+	ON_EN_CHANGE( IDC_ALPHA_SRC_EDIT, OnRedrawImagesList )
+	ON_EN_CHANGE( IDC_ALPHA_DISABLED_SPIN, OnRedrawImagesList )
+	ON_UPDATE_COMMAND_UI_RANGE( IDC_ALPHA_SRC_LABEL, IDC_ALPHA_DISABLED_SPIN, OnUpdateUseAlpha )
 END_MESSAGE_MAP()
 
+void CToolbarImagesDialog::OnDestroy( void )
+{
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_DrawDisabled, m_sharedData.m_drawDisabled );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_SrcAlpha, m_sharedData.m_srcAlpha );
 
-// CMfcToolbarImagesPage class
+	__super::OnDestroy();
+}
+
+void CToolbarImagesDialog::OnRedrawImagesList( void )
+{
+	if ( m_childSheet.m_hWnd != nullptr )		// dialog initialized?
+	{
+		UpdateData( DialogSaveChanges );
+		GetActiveChildPage()->UpdateData( DialogSaveChanges );
+	}
+}
+
+void CToolbarImagesDialog::OnUpdateUseAlpha( CCmdUI* pCmdUI )
+{
+	switch ( m_childSheet.GetActiveIndex() )
+	{
+		case MfcToolBarImagesPage:
+		case StoreToolbarImagesPage:
+			pCmdUI->Enable( CMFCToolBar::GetImages()->GetCount() != 0 );
+			break;
+		default:
+			pCmdUI->Enable( false );
+	}
+}
+
+
+// CBaseImageItem class
 
 struct CBaseImageItem : public TBasicSubject
 {
@@ -218,36 +321,26 @@ private:
 };
 
 
-// CMfcToolbarImagesPage implementation
+// CBaseImagesPage implementation
 
 IMPLEMENT_DYNAMIC( CBaseImagesPage, CPropertyPage )
 
-CBaseImagesPage::CBaseImagesPage( UINT templateId, const CLayoutStyle layoutStyles[], unsigned int count )
+CBaseImagesPage::CBaseImagesPage( UINT templateId, const TCHAR* pTitle )
 	: CLayoutPropertyPage( templateId )
+	, m_pDlgData( nullptr )
+	, m_regSection( path::Combine( reg::section_dialog, pTitle ) )
 	, m_imageBoundsSize( CIconSize::GetSizeOf( SmallIcon ) )
-	, m_selItemIndex( AfxGetApp()->GetProfileInt( reg::section_MfcPage, reg::entry_SelItemIndex, 0 ) )
-	, m_drawDisabled( AfxGetApp()->GetProfileInt( reg::section_MfcPage, reg::entry_DrawDisabled, false ) != FALSE )
-	, m_alphaSrc( 255u )
+	, m_selItemIndex( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_SelItemIndex, 0 ) )
 	, m_imageListCtrl( IDC_TOOLBAR_IMAGES_LIST )
 {
-	SetUseLazyUpdateData();			// call UpdateData on page activation change
+	SetUseLazyUpdateData();		// call UpdateData on page activation change
+	SetTitle( pTitle );			// override resource-based page title
 
+	m_imageListCtrl.SetSection( path::Combine( m_regSection.c_str(), _T("ImageList") ) );	// page-specific sub-section
 	m_imageListCtrl.SetCustomIconDraw( this );
 	m_imageListCtrl.SetUseAlternateRowColoring();
 	m_imageListCtrl.SetCommandFrame();			// handle ID_EDIT_COPY in this page
 	m_imageListCtrl.SetTabularTextSep();		// tab-separated multi-column copy
-
-	m_pSampleView.reset( new CSampleView( this ) );
-	m_pSampleView->SetBorderColor( CLR_DEFAULT );
-
-	m_pBottomLayoutStatic.reset( new CLayoutStatic() );
-	m_pBottomLayoutStatic->RegisterCtrlLayout( layoutStyles, count );
-
-	m_pHorizSplitterFrame.reset( new CResizeFrameStatic( &m_imageListCtrl, m_pBottomLayoutStatic.get(), resize::NorthSouth ) );
-	m_pHorizSplitterFrame->SetSection( reg::section_MfcPageSplitterH );
-	m_pHorizSplitterFrame->GetGripBar()
-		.SetMinExtents( 50, 16 )
-		.SetFirstExtentPercentage( 75 );
 }
 
 CBaseImagesPage::~CBaseImagesPage()
@@ -308,13 +401,11 @@ bool CBaseImagesPage::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, co
 {
 	const CBaseImageItem* pImageItem = checked_static_cast<const CBaseImageItem*>( pSubject );
 
-	return pImageItem->Draw( pDC, itemImageRect, m_drawDisabled, m_alphaSrc );
+	return pImageItem->Draw( pDC, itemImageRect, m_pDlgData->m_drawDisabled, m_pDlgData->m_srcAlpha );
 }
 
-bool CBaseImagesPage::RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
+bool CBaseImagesPage::RenderImageSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
 {
-	GetGlobalData()->DrawParentBackground( m_pSampleView.get(), pDC, const_cast<CRect*>( &boundsRect ) );
-
 	if ( CBaseImageItem* pImageItem = m_imageListCtrl.GetCaretAs<CBaseImageItem>() )
 	{
 		enum { NormalEdge = 10 };
@@ -322,7 +413,7 @@ bool CBaseImagesPage::RenderSample( CDC* pDC, const CRect& boundsRect ) implemen
 		CRect normalBoundsRect = boundsRect, largeBoundsRect = boundsRect;
 
 		normalBoundsRect.right = normalBoundsRect.left + pImageItem->m_imageSize.cx + NormalEdge * 2;
-		largeBoundsRect.left = normalBoundsRect.right;
+		largeBoundsRect.left = normalBoundsRect.right + NormalEdge * 2;
 
 		int zoomSize = std::min( largeBoundsRect.Width(), largeBoundsRect.Height() );
 
@@ -332,7 +423,7 @@ bool CBaseImagesPage::RenderSample( CDC* pDC, const CRect& boundsRect ) implemen
 		ui::CenterRect( normalRect, normalBoundsRect );
 		ui::CenterRect( largeRect, largeBoundsRect );
 
-		if ( !pImageItem->RenderSample( pDC, normalRect, largeRect, m_drawDisabled, m_alphaSrc ) )
+		if ( !pImageItem->RenderSample( pDC, normalRect, largeRect, m_pDlgData->m_drawDisabled, m_pDlgData->m_srcAlpha ) )
 			return false;
 	}
 
@@ -344,14 +435,9 @@ void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
 
 	if ( firstInit )
-		m_imageListCtrl.SetSection( path::Combine( reg::section_MfcPage, GetTitle().c_str() ) );	// page-specific sub-section
+		m_pDlgData = &checked_static_cast<CToolbarImagesDialog*>( GetParent()->GetParent() )->m_sharedData;
 
 	DDX_Control( pDX, IDC_TOOLBAR_IMAGES_LIST, m_imageListCtrl );
-	m_pSampleView->DDX_Placeholder( pDX, IDC_TOOLBAR_IMAGE_SAMPLE );
-
-	ui::DDX_Bool( pDX, IDC_DRAW_DISABLED_CHECK, m_drawDisabled );
-	DDX_Control( pDX, IDC_LAYOUT_FRAME_1_STATIC, *m_pBottomLayoutStatic );
-	DDX_Control( pDX, IDC_HORIZ_SPLITTER_STATIC, *m_pHorizSplitterFrame );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -363,7 +449,7 @@ void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 	}
 
 	m_imageListCtrl.Invalidate();
-	m_pSampleView->Invalidate();
+	m_pDlgData->m_pSampleView->SafeRedraw();
 
 	__super::DoDataExchange( pDX );
 }
@@ -371,16 +457,13 @@ void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 BEGIN_MESSAGE_MAP( CBaseImagesPage, CLayoutPropertyPage )
 	ON_WM_DESTROY()
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_TOOLBAR_IMAGES_LIST, OnLvnItemChanged_ImageListCtrl )
-	ON_BN_CLICKED( IDC_DRAW_DISABLED_CHECK, OnRedrawImagesList )
-	ON_EN_CHANGE( IDC_ALPHA_SRC_EDIT, OnRedrawImagesList )
 	ON_COMMAND( ID_EDIT_COPY, OnCopyItems )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateCopyItems )
 END_MESSAGE_MAP()
 
 void CBaseImagesPage::OnDestroy( void )
 {
-	AfxGetApp()->WriteProfileInt( reg::section_MfcPage, reg::entry_SelItemIndex, m_selItemIndex );
-	AfxGetApp()->WriteProfileInt( reg::section_MfcPage, reg::entry_DrawDisabled, m_drawDisabled );
+	AfxGetApp()->WriteProfileInt( m_regSection.c_str(), reg::entry_SelItemIndex, m_selItemIndex );
 
 	__super::OnDestroy();
 }
@@ -403,16 +486,8 @@ void CBaseImagesPage::OnLvnItemChanged_ImageListCtrl( NMHDR* pNmHdr, LRESULT* pR
 	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
 	{
 		m_selItemIndex = m_imageListCtrl.GetCurSel();
-		m_pSampleView->Invalidate();
+		m_pDlgData->m_pSampleView->Invalidate();
 	}
-}
-
-void CBaseImagesPage::OnRedrawImagesList( void )
-{
-	if ( nullptr == m_imageListCtrl.m_hWnd )
-		return;		// dialog not initialized
-
-	UpdateData( DialogSaveChanges );
 }
 
 
@@ -420,33 +495,21 @@ void CBaseImagesPage::OnRedrawImagesList( void )
 
 namespace layout
 {
-	static CLayoutStyle s_mfcPageStyles[] =
+	static CLayoutStyle s_basePageStyles[] =
 	{
 		{ IDC_IMAGE_COUNT_STATIC, SizeX },
-		{ IDC_HORIZ_SPLITTER_STATIC, Size }
-	};
-
-	static CLayoutStyle s_bottomFrameStyles[] =
-	{
-		{ IDC_TOOLBAR_IMAGE_SAMPLE, Size },
-		{ IDC_GROUP_BOX_1, SizeY },
-		{ IDC_ALPHA_SRC_LABEL, OffsetOrigin },			// use to offset controls in frame layout (non-master layout)
-		{ IDC_DRAW_DISABLED_CHECK, OffsetOrigin },
-		{ IDC_ALPHA_SRC_EDIT, OffsetOrigin },
-		{ IDC_ALPHA_SRC_SPIN, OffsetOrigin }
+		{ IDC_TOOLBAR_IMAGES_LIST, Size }
 	};
 }
 
 IMPLEMENT_DYNCREATE( CMfcToolbarImagesPage, CBaseImagesPage )
 
 CMfcToolbarImagesPage::CMfcToolbarImagesPage( CMFCToolBarImages* pImages /*= nullptr*/ )
-	: CBaseImagesPage( IDD_IMAGES_MFC_TOOLBAR_PAGE, ARRAY_SPAN( layout::s_bottomFrameStyles ) )
+	: CBaseImagesPage( IDD_IMAGES_MFC_TOOLBAR_PAGE, reg::s_pageTitle[ CToolbarImagesDialog::MfcToolBarImagesPage ] )
 	, m_pImages( pImages != nullptr ? pImages : CMFCToolBar::GetImages() )
 {
-	RegisterCtrlLayout( ARRAY_SPAN( layout::s_mfcPageStyles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_basePageStyles ) );
 	ASSERT_PTR( m_pImages );
-
-	m_alphaSrc = static_cast<BYTE>( AfxGetApp()->GetProfileInt( reg::section_MfcPage, reg::entry_AlphaSrc, 255u ) );
 
 	UINT imageCount = m_pImages->GetCount();
 	const mfc::CImageCommandLookup* pImageCmds = mfc::CImageCommandLookup::Instance();
@@ -469,79 +532,21 @@ CMfcToolbarImagesPage::~CMfcToolbarImagesPage()
 {
 }
 
-void CMfcToolbarImagesPage::DoDataExchange( CDataExchange* pDX )
-{
-	bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
-
-	ui::DDX_Number( pDX, IDC_ALPHA_SRC_EDIT, m_alphaSrc );
-
-	if ( firstInit )
-	{
-		CSpinButtonCtrl* pAlphaSrcSpinBtn = ui::GetDlgItemAs<CSpinButtonCtrl>( this, IDC_ALPHA_SRC_SPIN );
-
-		ASSERT_PTR( pAlphaSrcSpinBtn->GetSafeHwnd() );
-		pAlphaSrcSpinBtn->SetRange32( 0, 255 );
-	}
-
-	static const UINT s_alphaCtrls[] = { IDC_ALPHA_SRC_LABEL, IDC_ALPHA_SRC_EDIT };
-	ui::EnableControls( m_hWnd, ARRAY_SPAN( s_alphaCtrls ), !m_drawDisabled );
-
-	__super::DoDataExchange( pDX );
-}
-
-BEGIN_MESSAGE_MAP( CMfcToolbarImagesPage, CBaseImagesPage )
-	ON_WM_DESTROY()
-END_MESSAGE_MAP()
-
-void CMfcToolbarImagesPage::OnDestroy( void )
-{
-	AfxGetApp()->WriteProfileInt( reg::section_MfcPage, reg::entry_AlphaSrc, m_alphaSrc );
-
-	__super::OnDestroy();
-}
-
 
 // CBaseStoreImagesPage implementation
 
-namespace layout
-{
-	static CLayoutStyle s_storePageStyles[] =
-	{
-		{ IDC_IMAGE_COUNT_STATIC, SizeX },
-		{ IDC_HORIZ_SPLITTER_STATIC, Size },
-		//{ IDC_TOOLBAR_IMAGES_LIST, Size },
-
-	};
-
-	static CLayoutStyle s_iconBottomFrameStyles[] =
-	{
-		{ IDC_TOOLBAR_IMAGE_SAMPLE, Size },
-		{ IDC_GROUP_BOX_1, SizeY },
-		{ IDC_DRAW_DISABLED_CHECK, OffsetOrigin }
-	};
-}
-
 IMPLEMENT_DYNAMIC( CBaseStoreImagesPage, CBaseImagesPage )
 
-CBaseStoreImagesPage::CBaseStoreImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
-	: CBaseImagesPage( IDD_IMAGES_STORE_PAGE, ARRAY_SPAN( layout::s_iconBottomFrameStyles ) )
+CBaseStoreImagesPage::CBaseStoreImagesPage( const TCHAR* pTitle, ui::IImageStore* pImageStore )
+	: CBaseImagesPage( IDD_IMAGES_STORE_PAGE, pTitle )
 	, m_pImageStore( pImageStore != nullptr ? pImageStore : ui::GetImageStoresSvc() )
 {
-	RegisterCtrlLayout( ARRAY_SPAN( layout::s_storePageStyles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_basePageStyles ) );
 	ASSERT_PTR( m_pImageStore );
 }
 
 CBaseStoreImagesPage::~CBaseStoreImagesPage()
 {
-}
-
-BEGIN_MESSAGE_MAP( CBaseStoreImagesPage, CBaseImagesPage )
-	ON_WM_DESTROY()
-END_MESSAGE_MAP()
-
-void CBaseStoreImagesPage::OnDestroy( void )
-{
-	__super::OnDestroy();
 }
 
 
@@ -550,10 +555,8 @@ void CBaseStoreImagesPage::OnDestroy( void )
 IMPLEMENT_DYNCREATE( CStoreToolbarImagesPage, CBaseStoreImagesPage )
 
 CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
-	: CBaseStoreImagesPage( pImageStore != nullptr ? pImageStore : ui::GetImageStoresSvc() )
+	: CBaseStoreImagesPage( reg::s_pageTitle[ CToolbarImagesDialog::StoreToolbarImagesPage ], pImageStore != nullptr ? pImageStore : ui::GetImageStoresSvc() )
 {
-	SetTitle( _T("Store Toolbar Images") );		// override resource-based page title
-
 	std::vector<ui::CToolbarDescr*> toolbarDescrs;
 	m_pImageStore->QueryToolbarDescriptors( toolbarDescrs );
 
@@ -594,7 +597,7 @@ CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /
 
 			if ( pImageItem != nullptr )
 			{
-				pImageItem->m_indexText = str::Format( _T("B%d/T%d"), itBtnInfo->m_imagePos + 1, toolbarPos + 1 );
+				pImageItem->m_indexText = num::FormatNumber( itBtnInfo->m_imagePos );
 				if ( mfcImageIndex != -1 )
 					pImageItem->m_indexText += str::Format( _T(" [M%d]"), mfcImageIndex );		// append CMFCToolBarImages image index
 
@@ -634,16 +637,13 @@ void CStoreToolbarImagesPage::AddListItems( void ) override
 	}
 }
 
-BEGIN_MESSAGE_MAP( CStoreToolbarImagesPage, CBaseStoreImagesPage )
-END_MESSAGE_MAP()
-
 
 // CIconImagesPage implementation
 
 IMPLEMENT_DYNCREATE( CIconImagesPage, CBaseStoreImagesPage )
 
 CIconImagesPage::CIconImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
-	: CBaseStoreImagesPage( pImageStore )
+	: CBaseStoreImagesPage( reg::s_pageTitle[ CToolbarImagesDialog::IconImagesPage ], pImageStore )
 {
 	std::vector<ui::IImageStore::TIconKey> iconKeys;
 	m_pImageStore->QueryIconKeys( iconKeys, AnyIconSize );
@@ -680,6 +680,3 @@ CIconImagesPage::CIconImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
 CIconImagesPage::~CIconImagesPage()
 {
 }
-
-BEGIN_MESSAGE_MAP( CIconImagesPage, CBaseStoreImagesPage )
-END_MESSAGE_MAP()

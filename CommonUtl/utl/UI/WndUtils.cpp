@@ -499,13 +499,13 @@ namespace ui
 				ASSERT( false );		// missing control?
 	}
 
-	bool ShowWindow( HWND hWnd, bool show /*= true*/ )
+	bool ShowWindow( HWND hWnd, bool show /*= true*/, int showCmd /*= SW_SHOWNA*/ )
 	{
 		ASSERT_PTR( hWnd );
 		if ( show == HasFlag( GetStyle( hWnd ), WS_VISIBLE ) )
 			return false;
 
-		ShowWindow( hWnd, show ? SW_SHOWNA : SW_HIDE );
+		::ShowWindow( hWnd, show ? showCmd : SW_HIDE );
 		return true;		// state changed
 	}
 
@@ -1229,7 +1229,7 @@ namespace ui
 
 	void SetSpinRange( CWnd* pDlg, int ctrlId, int minValue, int maxValue )
 	{
-		if ( CSpinButtonCtrl* pSpinButton = static_cast<CSpinButtonCtrl*>( pDlg->GetDlgItem( ctrlId ) ) )
+		if ( CSpinButtonCtrl* pSpinButton = ui::GetDlgItemAs<CSpinButtonCtrl>( pDlg, ctrlId ) )
 			pSpinButton->SetRange32( minValue, maxValue );
 		else
 			ASSERT( false );		// spin button not found

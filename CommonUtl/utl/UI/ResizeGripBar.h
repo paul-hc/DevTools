@@ -20,6 +20,8 @@ namespace resize
 class CResizeFrameStatic;
 
 
+// This is the grip bar that user can track to resize the panes of a spliier.
+//
 class CResizeGripBar : public CStatic
 {
 public:
@@ -36,6 +38,8 @@ public:
 
 	bool IsCollapsed( void ) const { return m_layout.m_isCollapsed; }
 	CResizeGripBar& SetCollapsed( bool collapsed );
+
+	CWnd* GetCollapsiblePane( void ) const;
 
 	bool IsTracking( void ) const { return m_pTrackingInfo != nullptr; }
 
@@ -74,6 +78,7 @@ public:
 
 	const CLayout& GetLayout( void ) const { return m_layout; }
 private:
+	void StoreSplitterGripBar( CWnd* pPaneWnd );
 	void CreateArrowsImageList( void );
 	static CSize LoadArrowsBitmap( CBitmap* pBitmap, UINT bitmapResId, COLORREF arrowColor );	// returns the size of ONE arrow
 
@@ -152,7 +157,7 @@ private:
 	const resize::ToggleStyle m_toggleStyle;
 	TPanelCtrls m_panelCtrls;
 
-	CResizeFrameStatic* m_pResizeFrame;		// sibling of this bar
+	CResizeFrameStatic* m_pResizeFrame;		// sibling of this bar that surrounds both panes + this gripper bar
 	int m_windowDepth;
 	CSize m_arrowSize;
 	CImageList m_arrowImageList;
@@ -160,7 +165,7 @@ private:
 	HitTest m_hitOn;
 	CTrackingInfo* m_pTrackingInfo;
 
-	static HCURSOR s_hCursors[ 2 ];		// indexed by orientation
+	static HCURSOR s_hCursors[ 2 ];			// indexed by orientation
 
 	enum Colors { HotCyan = RGB( 169, 219, 246 ), HotDeepCyan = RGB( 189, 237, 255 ), MildGray = RGB( 192, 192, 192 ), MildDarkerGray = RGB( 173, 178, 181 ) };
 

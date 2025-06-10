@@ -71,7 +71,7 @@ void CSampleView::SafeRedraw( void )
 	}
 }
 
-bool CSampleView::DrawContentFrame( CDC* pDC, const CRect& contentRect, COLORREF scrollableColor, BYTE alpha /*= 100*/ )
+bool CSampleView::DrawContentFrame( CDC* pDC, const CRect& contentRect, COLORREF scrollableColor /*= CLR_NONE*/, BYTE alpha /*= 100*/ )
 {
 	CRect clientRect;
 	GetClientRect( &clientRect );
@@ -79,7 +79,8 @@ bool CSampleView::DrawContentFrame( CDC* pDC, const CRect& contentRect, COLORREF
 
 	Graphics graphics( *pDC );
 	Rect rect = gp::ToRect( contentRect );
-	Pen pen( gp::MakeColor( scrollable ? scrollableColor : GetSysColor( COLOR_BTNSHADOW ), alpha ) );
+	Pen pen( gp::MakeColor( scrollable && ui::IsRealColor( scrollableColor ) ? scrollableColor : ::GetSysColor( COLOR_BTNSHADOW ), alpha ) );
+
 	gp::FrameRectangle( graphics, rect, &pen );
 	return scrollable;
 }
@@ -199,7 +200,7 @@ void CSampleView::Draw( CDC* pDC, IN OUT CRect& rBoundsRect, const CRect& clipRe
 	DrawError( pDC, rBoundsRect );
 }
 
-void CSampleView::FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect )
+bool CSampleView::FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect )
 {
 	if ( m_borderColor != CLR_NONE )
 	{
@@ -207,7 +208,13 @@ void CSampleView::FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect )
 		rBoundsRect.DeflateRect( 1, 1 );
 	}
 
-	m_pSampleCallback->RenderBackground( pDC, rBoundsRect );
+	if ( m_bkColor != CLR_NONE )
+	{
+		ui::FillRect( *pDC, rBoundsRect, m_bkColor );
+		return true;
+	}
+
+	return m_pSampleCallback->RenderBackground( pDC, rBoundsRect );
 }
 
 
@@ -260,8 +267,7 @@ BOOL CSampleView::OnEraseBkgnd( CDC* pDC )
 	CRect clientRect;
 
 	GetClientRect( &clientRect );
-	FillBackground( pDC, clientRect );
-	return TRUE;			// erased
+	return FillBackground( pDC, clientRect );		// TRUE if erased
 }
 
 BOOL CSampleView::OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message )

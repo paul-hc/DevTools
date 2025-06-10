@@ -4,6 +4,7 @@
 
 #include "LayoutDialog.h"
 #include "LayoutChildPropertySheet.h"
+#include "SampleView_fwd.h"
 #include <afxtempl.h>
 
 
@@ -12,8 +13,13 @@ namespace mfc
 	typedef CList<CRuntimeClass*, CRuntimeClass*> TRuntimeClassList;
 }
 
+class CResizeFrameStatic;
+class CLayoutStatic;
+class CBaseImagesPage;
+
 
 class CToolbarImagesDialog : public CLayoutDialog
+	, private ui::ISampleCallback
 {
 public:
 	CToolbarImagesDialog( CWnd* pParentWnd );
@@ -21,15 +27,39 @@ public:
 
 	static mfc::TRuntimeClassList* GetCustomPages( void );		// additional pages to add to CMFCToolBarsCustomizeDialog
 private:
+	CBaseImagesPage* GetActiveChildPage( void ) const;
+
+	// ui::ISampleCallback interface
+	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
+private:
 	// enum { IDD = IDD_IMAGES_TOOLBAR_DIALOG };
 	CLayoutChildPropertySheet m_childSheet;
+	std::auto_ptr<CSampleView> m_pSampleView;
 
-	enum Page { MfcToolBarImagesPage };
+	std::auto_ptr<CLayoutStatic> m_pSplitBottomLayoutStatic;
+	std::auto_ptr<CResizeFrameStatic> m_pUpDownSplitterFrame;		// embedded inside of vertical splitter
+public:
+	enum Page { MfcToolBarImagesPage, StoreToolbarImagesPage, IconImagesPage };
+
+	struct CData
+	{
+		persist bool m_drawDisabled;
+		persist BYTE m_srcAlpha;
+		persist BYTE m_disabledAlpha;
+		CSampleView* m_pSampleView;
+	};
+
+	CData m_sharedData;
 
 	// generated stuff
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
+	virtual void OnIdleUpdateControls( void ) overrides(CLayoutDialog);			// override to update specific controls
 protected:
+	afx_msg void OnDestroy( void );
+	afx_msg void OnRedrawImagesList( void );
+	afx_msg void OnUpdateUseAlpha( CCmdUI* pCmdUI );
+
 	DECLARE_MESSAGE_MAP()
 };
 
@@ -40,25 +70,21 @@ struct CBaseImageItem;
 
 #include "LayoutPropertyPage.h"
 #include "ReportListControl.h"
-#include "SampleView_fwd.h"
 #include "Image_fwd.h"
-
-
-class CResizeFrameStatic;
-class CLayoutStatic;
 
 
 class CBaseImagesPage : public CLayoutPropertyPage
 	, private ui::ICustomImageDraw
-	, public ui::ISampleCallback
 {
 	DECLARE_DYNAMIC( CBaseImagesPage )
 protected:
-	CBaseImagesPage( UINT templateId, const CLayoutStyle layoutStyles[], unsigned int count );
+	CBaseImagesPage( UINT templateId, const TCHAR* pTitle );
 	virtual ~CBaseImagesPage();
 
 	virtual void AddListItems( void );
 	void AddListItem( int itemPos, const CBaseImageItem* pImageItem );
+public:
+	virtual bool RenderImageSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
 private:
 	void OutputList( void );
 
@@ -66,23 +92,17 @@ private:
 	virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const implements(ui::ICustomImageDraw);
 	virtual bool SetItemImageSize( const CSize& imageBoundsSize ) implements(ui::ICustomImageDraw);
 	virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect ) implements(ui::ICustomImageDraw);
-
-	// ui::ISampleCallback interface
-	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
 protected:
+	const CToolbarImagesDialog::CData* m_pDlgData;	// from parent dialog
+	std::tstring m_regSection;
+
 	std::vector<CBaseImageItem*> m_imageItems;
 	CSize m_imageBoundsSize;
-	std::tstring m_imageCountText;		// for label output
+	std::tstring m_imageCountText;					// for label output
 
 	persist int m_selItemIndex;
-	persist bool m_drawDisabled;
-	persist BYTE m_alphaSrc;
 
 	CReportListControl m_imageListCtrl;
-	std::auto_ptr<CSampleView> m_pSampleView;
-
-	std::auto_ptr<CLayoutStatic> m_pBottomLayoutStatic;
-	std::auto_ptr<CResizeFrameStatic> m_pHorizSplitterFrame;		// embedded inside of vertical splitter
 
 	enum Column { CommandName, Index, CmdId, CmdLiteral };
 
@@ -94,7 +114,6 @@ protected:
 	afx_msg void OnCopyItems( void );
 	afx_msg void OnUpdateCopyItems( CCmdUI* pCmdUI );
 	afx_msg void OnLvnItemChanged_ImageListCtrl( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnRedrawImagesList( void );
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -109,14 +128,6 @@ public:
 private:
 	// enum { IDD = IDD_IMAGES_MFC_TOOLBAR_PAGE };
 	CMFCToolBarImages* m_pImages;
-
-	// generated stuff
-protected:
-	virtual void DoDataExchange( CDataExchange* pDX );
-protected:
-	afx_msg void OnDestroy( void );
-
-	DECLARE_MESSAGE_MAP()
 };
 
 
@@ -131,17 +142,11 @@ class CBaseStoreImagesPage : public CBaseImagesPage
 {
 	DECLARE_DYNAMIC( CBaseStoreImagesPage )
 protected:
-	CBaseStoreImagesPage( ui::IImageStore* pImageStore = nullptr );
+	CBaseStoreImagesPage( const TCHAR* pTitle, ui::IImageStore* pImageStore );
 	virtual ~CBaseStoreImagesPage();
 protected:
 	// enum { IDD = IDD_IMAGES_STORE_PAGE };
 	ui::IImageStore* m_pImageStore;
-
-	// generated stuff
-protected:
-	afx_msg void OnDestroy( void );
-
-	DECLARE_MESSAGE_MAP()
 };
 
 
@@ -157,10 +162,6 @@ private:
 	typedef std::pair< std::tstring, std::vector<CBaseImageItem*> > TToolbarGroupPair;		// <groupName, imageItems>
 
 	std::vector<TToolbarGroupPair> m_toolbarGroups;
-
-	// generated stuff
-protected:
-	DECLARE_MESSAGE_MAP()
 };
 
 
@@ -170,10 +171,6 @@ class CIconImagesPage : public CBaseStoreImagesPage
 public:
 	CIconImagesPage( ui::IImageStore* pImageStore = nullptr );
 	virtual ~CIconImagesPage();
-
-	// generated stuff
-protected:
-	DECLARE_MESSAGE_MAP()
 };
 
 

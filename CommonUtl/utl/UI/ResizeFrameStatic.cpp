@@ -95,11 +95,20 @@ void CResizeFrameStatic::OnDestroy( void )
 CLayoutStatic::CLayoutStatic( void )
 	: CStatic()
 	, m_pPaneLayoutEngine( new CPaneLayoutEngine() )
+	, m_pResizeGripBar( nullptr )
 {
 }
 
 CLayoutStatic::~CLayoutStatic()
 {
+}
+
+void CLayoutStatic::SetUseSmoothTransparentGroups( bool useSmoothTransparentGroups /*= true*/ )
+{
+	if ( useSmoothTransparentGroups )
+		m_pPaneLayoutEngine->ModifyFlags( 0, CLayoutEngine::SmoothTransparentGroups );	// groups will use WS_EX_TRANSPARENT styleEx, parent dialog uses WS_CLIPCHILDREN style
+	else
+		m_pPaneLayoutEngine->ModifyFlags( CLayoutEngine::GroupsTransparentEx, 0 );
 }
 
 CLayoutEngine& CLayoutStatic::GetLayoutEngine( void ) implements(ui::ILayoutEngine)
@@ -130,7 +139,13 @@ CWnd* CLayoutStatic::GetDialog( void ) const implements(ui::ILayoutFrame)
 void CLayoutStatic::OnControlResized( void ) implements(ui::ILayoutFrame)
 {
 	if ( !m_pPaneLayoutEngine->IsInitialized() )
+	{
 		m_pPaneLayoutEngine->InitializePane( this );
+
+		if ( m_pResizeGripBar != nullptr )
+			if ( m_pResizeGripBar->IsCollapsed() )
+				ShowPane( false );					// initially hide this collapsed pane's controls
+	}
 
 	ENSURE( m_pPaneLayoutEngine->IsInitialized() );
 	m_pPaneLayoutEngine->LayoutControls();
@@ -139,6 +154,16 @@ void CLayoutStatic::OnControlResized( void ) implements(ui::ILayoutFrame)
 bool CLayoutStatic::ShowPane( bool show ) implements(ui::ILayoutFrame)
 {
 	return m_pPaneLayoutEngine->ShowPaneControls( show );
+}
+
+CResizeGripBar* CLayoutStatic::GetSplitterGripBar( void ) const implements( ui::ILayoutFrame )
+{
+	return m_pResizeGripBar;
+}
+
+void CLayoutStatic::SetSplitterGripBar( CResizeGripBar* pResizeGripBar ) implements( ui::ILayoutFrame )
+{
+	m_pResizeGripBar = pResizeGripBar;
 }
 
 

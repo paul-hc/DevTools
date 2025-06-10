@@ -6,6 +6,8 @@
 #include "ResizeGripBar.h"
 
 
+// Static frame that surrounds the splitter panes (1st and 2nd) + the inner gripper bar.  This frame is usually hidden.
+//
 class CResizeFrameStatic : public CStatic
 	, public ui::ILayoutFrame
 {
@@ -22,6 +24,7 @@ public:
 	virtual CWnd* GetDialog( void ) const implements(ui::ILayoutFrame);
 	virtual void OnControlResized( void ) implements(ui::ILayoutFrame);
 	virtual bool ShowPane( bool show ) implements(ui::ILayoutFrame);
+	virtual CResizeGripBar* GetSplitterGripBar( void ) const implements(ui::ILayoutFrame) { return &GetGripBar(); }
 
 	enum Notification { RF_GRIPPER_TOGGLE = 1, RF_GRIPPER_RESIZING, RF_GRIPPER_RESIZED };
 
@@ -43,6 +46,8 @@ protected:
 #include "LayoutMetrics.h"
 
 
+// Static frame for one of the splitter panes that contains embedded controls with layout support.  This frame is usually hidden.
+//
 class CLayoutStatic : public CStatic
 	, public ui::ILayoutEngine
 	, public ui::ILayoutFrame
@@ -50,6 +55,8 @@ class CLayoutStatic : public CStatic
 public:
 	CLayoutStatic( void );
 	virtual ~CLayoutStatic();
+
+	void SetUseSmoothTransparentGroups( bool useSmoothTransparentGroups = true );		// prevents groups clipping issues (in dialogs)
 
 	// ui::ILayoutEngine interface
 	virtual CLayoutEngine& GetLayoutEngine( void ) implements(ui::ILayoutEngine);
@@ -61,8 +68,11 @@ public:
 	virtual CWnd* GetDialog( void ) const implements(ui::ILayoutFrame);
 	virtual void OnControlResized( void ) implements(ui::ILayoutFrame);
 	virtual bool ShowPane( bool show ) implements(ui::ILayoutFrame);
+	virtual CResizeGripBar* GetSplitterGripBar( void ) const implements(ui::ILayoutFrame);
+	virtual void SetSplitterGripBar( CResizeGripBar* pResizeGripBar ) implements(ui::ILayoutFrame);
 private:
 	std::auto_ptr<CPaneLayoutEngine> m_pPaneLayoutEngine;
+	CResizeGripBar* m_pResizeGripBar;		// typically assigned by the sibling CResizeGripBar
 
 	// generated stuff
 protected:
