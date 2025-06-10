@@ -116,7 +116,7 @@ CBaseImagesPage* CToolbarImagesDialog::GetActiveChildPage( void ) const
 
 bool CToolbarImagesDialog::RenderSample( CDC* pDC, const CRect& boundsRect ) implements( ui::ISampleCallback )
 {
-	//GetGlobalData()->DrawParentBackground( m_pSampleView.get(), pDC, const_cast<CRect*>( &boundsRect ));		/* doesn't work, leaves background black */
+	//GetGlobalData()->DrawParentBackground( m_pSampleView.get(), pDC, const_cast<CRect*>( &boundsRect ));		/* doesn't work with double buffering, leaves background black */
 
 	return GetActiveChildPage()->RenderImageSample( pDC, boundsRect );
 }
@@ -164,7 +164,7 @@ BEGIN_MESSAGE_MAP( CToolbarImagesDialog, CLayoutDialog )
 	ON_WM_DESTROY()
 	ON_BN_CLICKED( IDC_DRAW_DISABLED_CHECK, OnRedrawImagesList )
 	ON_EN_CHANGE( IDC_ALPHA_SRC_EDIT, OnRedrawImagesList )
-	ON_EN_CHANGE( IDC_ALPHA_DISABLED_SPIN, OnRedrawImagesList )
+	ON_EN_CHANGE( IDC_ALPHA_DISABLED_EDIT, OnRedrawImagesList )
 	ON_UPDATE_COMMAND_UI_RANGE( IDC_ALPHA_SRC_LABEL, IDC_ALPHA_DISABLED_SPIN, OnUpdateUseAlpha )
 END_MESSAGE_MAP()
 
@@ -522,7 +522,10 @@ CMfcToolbarImagesPage::CMfcToolbarImagesPage( CMFCToolBarImages* pImages /*= nul
 		const std::tstring* pCmdName = pImageCmds->FindCommandName( cmdId );
 		const std::tstring* pCmdLiteral = pImageCmds->FindCommandLiteral( cmdId );
 
-		m_imageItems.push_back( new CToolbarImageItem( m_pImages, index, cmdId, pCmdName, pCmdLiteral ) );
+		CBaseImageItem* pImageItem = new CToolbarImageItem( m_pImages, index, cmdId, pCmdName, pCmdLiteral );
+		pImageItem->m_indexText = str::Format( _T("M-%d"), index );
+
+		m_imageItems.push_back( pImageItem );
 	}
 
 	m_imageCountText = str::Format( _T("MFC Toolbars: total %d images"), m_imageItems.size() );
@@ -575,7 +578,7 @@ CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /
 		m_toolbarGroups.push_back( TToolbarGroupPair() );
 		TToolbarGroupPair* pToolbarGroup = &m_toolbarGroups.back();
 
-		pToolbarGroup->first = str::Format( _T("Toolbar %d: %d, 0x%04X"), toolbarPos + 1, toolbarId, toolbarId );
+		pToolbarGroup->first = str::Format( _T("Toolbar #%d: %d, 0x%04X"), toolbarPos + 1, toolbarId, toolbarId );
 		if ( !toolbarTitle.empty() )
 			pToolbarGroup->first += str::Format( _T(" \"%s\""), toolbarTitle.c_str() );
 
@@ -597,9 +600,9 @@ CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /
 
 			if ( pImageItem != nullptr )
 			{
-				pImageItem->m_indexText = num::FormatNumber( itBtnInfo->m_imagePos );
+				pImageItem->m_indexText = str::Format( _T("B-%d"), itBtnInfo->m_imagePos );
 				if ( mfcImageIndex != -1 )
-					pImageItem->m_indexText += str::Format( _T(" [M%d]"), mfcImageIndex );		// append CMFCToolBarImages image index
+					pImageItem->m_indexText += str::Format( _T(" [M-%d]"), mfcImageIndex );		// append CMFCToolBarImages image index
 
 				m_imageItems.push_back( pImageItem );
 				pToolbarGroup->second.push_back( pImageItem );
@@ -609,7 +612,7 @@ CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /
 		totalImageCount += static_cast<UINT>( btnInfos.size() );
 	}
 
-	m_imageCountText = str::Format( _T("Total: %d toolbars with %d buttons"), toolbarDescrs.size(), m_imageItems.size() );
+	m_imageCountText = str::Format( _T("Total: %d buttons grouped in %d toolbars"), m_imageItems.size(), toolbarDescrs.size() );
 }
 
 CStoreToolbarImagesPage::~CStoreToolbarImagesPage()
@@ -670,7 +673,10 @@ CIconImagesPage::CIconImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
 						pCmdName = &customNameText;
 				}
 
-			m_imageItems.push_back( new CIconImageItem( pIcon, index, cmdId, pCmdName, pCmdLiteral ) );
+			CBaseImageItem* pImageItem = new CIconImageItem( pIcon, index, cmdId, pCmdName, pCmdLiteral );
+			pImageItem->m_indexText = str::Format( _T("I-%d"), index );
+
+			m_imageItems.push_back( pImageItem );
 		}
 	}
 
