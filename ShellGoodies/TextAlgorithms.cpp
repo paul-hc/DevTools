@@ -170,7 +170,7 @@ namespace func
 
 	bool ReplaceCharacters::IsOneOfFindCharSet( TCHAR ch ) const
 	{
-		for ( const TCHAR* pCursor = m_findCharSet.c_str(); *pCursor != nullptr; ++pCursor )
+		for ( const TCHAR* pCursor = m_findCharSet.c_str(); *pCursor != '\0'; ++pCursor )
 			if ( m_matchCase ? ( *pCursor == ch ) : ( _totlower( *pCursor ) == _totlower( ch ) ) )
 				return true;
 
