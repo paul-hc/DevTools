@@ -735,7 +735,7 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "BuildTimestamp", "31-01-2023 12:37:57"
+            VALUE "BuildTimestamp", "10-06-2025 02:15:33"
             VALUE "Comments", "VC++ 2022|CTrayIcon|NewSysTray|Split UTL_BASE/UTL_UI projects"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"

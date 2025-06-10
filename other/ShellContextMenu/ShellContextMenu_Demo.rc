@@ -173,7 +173,7 @@ BEGIN
     BEGIN
         BLOCK "040704B0"
         BEGIN
-            VALUE "BuildTimestamp", "30-05-2025 20:45:17"
+            VALUE "BuildTimestamp", "10-06-2025 02:15:33"
             VALUE "FileDescription", "MFC-Anwendung ShellContextMenu_Demo"
             VALUE "FileVersion", "1, 0, 0, 1"
             VALUE "InternalName", "ShellContextMenu_Demo"

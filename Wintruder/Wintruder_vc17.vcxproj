@@ -85,11 +85,13 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
     <IntDir>$(OutDir)</IntDir>
+    <TargetName>$(ProjectName)32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\vc17\$(PlatformName)_$(Configuration)\</OutDir>
     <IntDir>$(OutDir)</IntDir>
+    <TargetName>$(ProjectName)32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
     <LinkIncremental>false</LinkIncremental>
