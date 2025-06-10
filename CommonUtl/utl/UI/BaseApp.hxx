@@ -118,11 +118,12 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	// register stock images
 	if ( CImageStore* pSharedImageStore = GetSharedImageStore() )
 	{
+		// note: loading ID_TRANSPARENT icon via a toolbar button (formerly IDR_STD_STATUS_STRIP) fails due to ExtractIcon error (missing mask?) - the icon is all black!
+		pSharedImageStore->RegisterLoadIcon( CIconId( ID_TRANSPARENT, SmallIcon ) );
+
 		pSharedImageStore->RegisterToolbarImages( IDR_STD_STATUS_STRIP );
 		pSharedImageStore->RegisterToolbarImages( IDR_STD_BUTTONS_STRIP );
 		pSharedImageStore->RegisterToolbarImages( IDR_LIST_EDITOR_STRIP );
-		// note: loading ID_TRANSPARENT icon via a toolbar button (formerly IDR_STD_STATUS_STRIP) fails due to ExtractIcon error (missing mask?) - the icon is all black!
-		pSharedImageStore->RegisterLoadIcon( CIconId( ID_TRANSPARENT, SmallIcon ) );
 	}
 
 #ifdef USE_UT
