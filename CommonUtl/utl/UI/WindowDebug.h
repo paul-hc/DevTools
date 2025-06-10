@@ -10,7 +10,7 @@ namespace dbg
 {
 	void TraceWindow( HWND hWnd, const TCHAR tag[] );
 
-	void TraceTrayNotifyCode( UINT msgNotifyCode );
+	void TraceTrayNotifyCode( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos );
 
 
 	class CScopedTrayIconDiagnostics

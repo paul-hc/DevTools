@@ -84,7 +84,7 @@ namespace dbg
 	}
 
 
-	void TraceTrayNotifyCode( UINT msgNotifyCode )
+	void TraceTrayNotifyCode( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos )
 	{
 	#ifdef _DEBUG
 		const TCHAR* pNotifyCode = nullptr;
@@ -98,6 +98,7 @@ namespace dbg
 			case WM_RBUTTONDOWN: pNotifyCode = _T("WM_RBUTTONDOWN"); break;
 			case WM_RBUTTONUP: pNotifyCode = _T("WM_RBUTTONUP"); break;
 			case WM_RBUTTONDBLCLK: pNotifyCode = _T("WM_RBUTTONDBLCLK"); break;
+
 			case NIN_SELECT: pNotifyCode = _T("NIN_SELECT"); break;
 			case NINF_KEY: pNotifyCode = _T("NINF_KEY"); break;
 			case NIN_KEYSELECT: pNotifyCode = _T("NIN_KEYSELECT"); break;
@@ -107,8 +108,9 @@ namespace dbg
 			case NIN_BALLOONUSERCLICK: pNotifyCode = _T("NIN_BALLOONUSERCLICK"); break;
 			case NIN_POPUPOPEN: pNotifyCode = _T("NIN_POPUPOPEN"); break;
 			case NIN_POPUPCLOSE: pNotifyCode = _T("NIN_POPUPCLOSE"); break;
+
 			case WM_MOUSEMOVE:
-				return;		// avoid noisy output
+				return;				// avoid noisy output
 			default:
 			{
 				static TCHAR s_buffer[ 64 ];
@@ -116,11 +118,12 @@ namespace dbg
 				pNotifyCode = s_buffer;
 			}
 		}
+
 		static int count = 0;
-		TRACE( _T(" OnTrayIconNotify(%d): NotifCode=%s\n"), count++, pNotifyCode );
+		return TRACE( _T(" OnTrayIconNotify(%d): NotifCode=%s  trayIconId=%d  screenPos=(%d, %d)\n"), count++, pNotifyCode, trayIconId, screenPos.x, screenPos.y );
 	#else
-		msgNotifyCode;
-	#endif //_DEBUG
+		msgNotifyCode, trayIconId, screenPos;
+	#endif
 	}
 
 

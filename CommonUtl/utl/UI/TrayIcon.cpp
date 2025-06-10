@@ -398,9 +398,10 @@ bool CTrayIcon::HandleTrayIconNotify( UINT msgNotifyCode, const CPoint& screenPo
 		case NIN_SELECT:
 			if ( m_isMainIcon && m_pOwnerCallback != nullptr )
 				if ( CWnd* pOwnerWnd = m_pOwnerCallback->GetOwnerWnd() )
-					if ( CSystemTray::IsMinimizedToTray( pOwnerWnd ) )
+					//if ( CSystemTray::IsMinimizedToTray( pOwnerWnd ) )		/* also activate the main window in case it's in background! */
 					{	// Restore on L-Click
 						pOwnerWnd->SetForegroundWindow();
+						//pOwnerWnd->FlashWindow( TRUE );		/* let's not overdo it... */
 						m_pTray->RestoreOwnerWnd();
 						m_ignoreNextLDblClc = true;		// prevent minimizing again if WM_LBUTTONDBLCLK gets received next
 						return true;
