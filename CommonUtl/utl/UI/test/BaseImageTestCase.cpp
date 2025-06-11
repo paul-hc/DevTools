@@ -12,7 +12,7 @@
 
 const TCHAR* CBaseImageTestCase::GetImageFilename( SrcImage srcImage )
 {
-	static const TCHAR* s_imagePaths[ _ImageCount ] = { _T("Flamingos.jpg"), _T("Dice.png"), _T("Animated.gif"), _T("Scissors.ico") };
+	static const TCHAR* s_imagePaths[ _ImageCount ] = { _T("Flamingos.jpg"), _T("Dice.png"), _T("Animated.gif"), _T("Scissors.ico"), _T("Red Bubbles.ico") };
 
 	ASSERT( srcImage < _ImageCount );
 	return s_imagePaths[ srcImage ];

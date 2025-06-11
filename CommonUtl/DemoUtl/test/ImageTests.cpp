@@ -131,7 +131,7 @@ void CImageTests::TestImageList( void )
 	}
 
 	// drawing
-	ut::CTestDevice testDev( 5 );
+	ut::CTestDevice testDev( 10 );
 	testDev.SetSubTitle( _T("CImageTests::TestImageList") );
 
 	testDev.DrawImage( &imageList, Image_Fill );
@@ -181,7 +181,7 @@ void CImageTests::TestImageList( void )
 	testDev.DrawImageList( &imageList, true );
 	testDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
 
-	testDev.Await();
+	testDev.Await( 5000 );
 }
 
 

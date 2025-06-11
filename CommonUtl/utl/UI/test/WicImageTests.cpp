@@ -26,14 +26,8 @@ CWicImageTests& CWicImageTests::Instance( void )
 	return s_testCase;
 }
 
-void CWicImageTests::TestImage( ut::CTestDevice* pTestDev )
+void CWicImageTests::DisplayMultiFrameImageStrip( ut::CTestDevice* pTestDev, const fs::CFlexPath& imagePath )
 {
-	fs::CFlexPath imagePath = MakeTestImageFilePath( Scissors_ico );
-	if ( imagePath.IsEmpty() )
-		return;
-
-	pTestDev->SetSubTitle( _T("CWicImageTests::TestImage") );
-
 	CWicImage image;
 	UINT framePos = 0;
 	ASSERT( image.LoadFromFile( imagePath, framePos ) );
@@ -48,6 +42,26 @@ void CWicImageTests::TestImage( ut::CTestDevice* pTestDev )
 
 	pTestDev->Await();
 	pTestDev->GotoNextStrip();
+}
+
+void CWicImageTests::TestIconMultiFrame_Scissors( ut::CTestDevice* pTestDev )
+{
+	fs::CFlexPath imagePath = MakeTestImageFilePath( Scissors_ico );
+	if ( imagePath.IsEmpty() )
+		return;
+
+	pTestDev->SetSubTitle( _T("CWicImageTests::TestIconMultiFrame_Scissors") );
+	DisplayMultiFrameImageStrip( pTestDev, imagePath );
+}
+
+void CWicImageTests::TestIconMultiFrame_RedBubbles( ut::CTestDevice* pTestDev )
+{
+	fs::CFlexPath imagePath = MakeTestImageFilePath( RedBubbles_ico );
+	if ( imagePath.IsEmpty() )
+		return;
+
+	pTestDev->SetSubTitle( _T("CWicImageTests::TestIconMultiFrame_RedBubbles") );
+	DisplayMultiFrameImageStrip( pTestDev, imagePath );
 }
 
 void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
@@ -113,7 +127,8 @@ void CWicImageTests::Run( void )
 {
 	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
 
-	RUN_TEST1( TestImage, &testDev );
+	RUN_TEST1( TestIconMultiFrame_Scissors, &testDev );
+	RUN_TEST1( TestIconMultiFrame_RedBubbles, &testDev );
 	RUN_TEST1( TestImageCache, &testDev );
 }
 

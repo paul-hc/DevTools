@@ -14,7 +14,7 @@ class CBaseImageTestCase : public ut::CGraphicTestCase
 protected:
 	CBaseImageTestCase( void ) {}
 public:
-	enum SrcImage { Flamingos_jpg, Dice_png, Animated_gif, Scissors_ico, _ImageCount };
+	enum SrcImage { Flamingos_jpg, Dice_png, Animated_gif, Scissors_ico, RedBubbles_ico, _ImageCount };
 
 	static fs::CFlexPath MakeTestImageFilePath( SrcImage srcImage );
 	static const TCHAR* GetImageFilename( SrcImage srcImage );

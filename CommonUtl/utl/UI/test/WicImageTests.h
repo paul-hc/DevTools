@@ -8,19 +8,23 @@
 #include "UI/test/BaseImageTestCase.h"
 
 
+namespace fs { class CFlexPath; }
 namespace ut { class CTestDevice; }
 
 
 class CWicImageTests : public CBaseImageTestCase
 {
 	CWicImageTests( void );
+
+	static void DisplayMultiFrameImageStrip( ut::CTestDevice* pTestDev, const fs::CFlexPath& imagePath );
 public:
 	static CWicImageTests& Instance( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestImage( ut::CTestDevice* pTestDev );
+	void TestIconMultiFrame_Scissors( ut::CTestDevice* pTestDev );
+	void TestIconMultiFrame_RedBubbles( ut::CTestDevice* pTestDev );
 	void TestImageCache( ut::CTestDevice* pTestDev );
 };
 

@@ -10,11 +10,14 @@
 #include "FileChecksumsDialog.h"
 #include "BuddyControlsDialog.h"
 #include "TestColorsDialog.h"
-#include "test/ImageTests.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/WndUtils.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
+
+#include "test/ImageTests.h"
+#include "utl/UI/test/ToolBarImagesTests.h"
+#include "utl/UI/test/WicImageTests.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -117,7 +120,12 @@ END_MESSAGE_MAP()
 void CTestFormView::OnRunImageUnitTests( void )
 {
 #ifdef _DEBUG
+	// DemoUtl tests:
 	CImageTests::Instance().Run();
+
+	// UTL_UI tests:
+	CToolBarImagesTests::Instance().Run();
+	CWicImageTests::Instance().Run();
 #endif
 }
 
