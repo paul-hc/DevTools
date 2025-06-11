@@ -141,10 +141,6 @@ void CLayoutStatic::OnControlResized( void ) implements(ui::ILayoutFrame)
 	if ( !m_pPaneLayoutEngine->IsInitialized() )
 	{
 		m_pPaneLayoutEngine->InitializePane( this );
-
-		if ( m_pResizeGripBar != nullptr )
-			if ( m_pResizeGripBar->IsCollapsed() )
-				ShowPane( false );					// initially hide this collapsed pane's controls
 	}
 
 	ENSURE( m_pPaneLayoutEngine->IsInitialized() );

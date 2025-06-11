@@ -29,6 +29,7 @@ public:
 	virtual ~CResizeGripBar();
 
 	CResizeGripBar& SetMinExtents( TValueOrPct firstMinExtent, TValueOrPct secondMinExtent );
+	CResizeGripBar& SetPaneSpacing( unsigned int spacingFirst, unsigned int spacingSecond ) { m_paneSpacing.first = spacingFirst; m_paneSpacing.second = spacingSecond; return *this; }
 
 	bool HasBorder( void ) const { return m_layout.m_hasBorder; }
 	bool SetBorder( bool hasBorder = true ) { return m_layout.m_hasBorder = hasBorder; }
@@ -152,10 +153,12 @@ private:
 	void DrawArrow( CDC* pDC, const CRect& rect, ArrowPart part, ArrowState state );
 private:
 	typedef std::pair<CWnd*, CWnd*> TPanelCtrls;
+	typedef std::pair<int, int> TPaneSpacing;
 
 	CLayout m_layout;
 	const resize::ToggleStyle m_toggleStyle;
 	TPanelCtrls m_panelCtrls;
+	TPaneSpacing m_paneSpacing;				// extra spacing between the gripper and the panes
 
 	CResizeFrameStatic* m_pResizeFrame;		// sibling of this bar that surrounds both panes + this gripper bar
 	int m_windowDepth;

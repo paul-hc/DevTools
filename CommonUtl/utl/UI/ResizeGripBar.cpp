@@ -36,6 +36,7 @@ CResizeGripBar::CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Ori
 	, m_layout( orientation )
 	, m_toggleStyle( toggleStyle )
 	, m_panelCtrls( pFirstCtrl, pSecondCtrl )
+	, m_paneSpacing( 0, 0 )
 
 	, m_pResizeFrame( nullptr )
 	, m_windowDepth( 0 )
@@ -216,8 +217,7 @@ CResizeGripBar& CResizeGripBar::SetCollapsed( bool collapsed )
 	{
 		LayoutProportionally();
 
-		if ( !m_layout.m_isCollapsed )
-			ui::RedrawDialog( GetParent()->GetSafeHwnd() );		// prevent clipping issues when expanding a frame control that contains (overlaps) group-boxes
+		ui::RedrawDialog( GetParent()->GetSafeHwnd() );		// prevent clipping issues when toggling a frame control that contains (overlaps) group-boxes
 	}
 
 	return *this;
@@ -280,10 +280,10 @@ bool CResizeGripBar::TrackToPos( CPoint screenTrackPos )
 	CFrameLayoutInfo info;
 	ReadLayoutInfo( info );
 
-	CRect rectFirst;
-	m_panelCtrls.first->GetWindowRect( &rectFirst );
+	CRect rectFirstPane;
+	m_panelCtrls.first->GetWindowRect( &rectFirstPane );
 
-	int firstExtent = GetRectExtent( rectFirst );
+	int firstExtent = GetRectExtent( rectFirstPane ) + m_paneSpacing.first;
 
 	// advance to track position
 	firstExtent += trackDelta;
@@ -336,8 +336,6 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 	if ( m_layout.m_isCollapsed )
 		pHiddenPane = resize::ToggleFirst == m_toggleStyle ? m_panelCtrls.first : m_panelCtrls.second;
 
-	int paneSpacing = 0;	// TODO...
-
 	if ( resize::NorthSouth == m_layout.m_orientation )
 	{
 		if ( pHiddenPane == m_panelCtrls.first )
@@ -360,14 +358,14 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 			rGripperRect.top = rFirstRect.bottom;
 			rGripperRect.bottom = rGripperRect.top + m_windowDepth;
 			rSecondRect.top = rGripperRect.bottom;
-
-			// ensure panes spacing around the gripper bar
-			rFirstRect.bottom -= paneSpacing;
-			rSecondRect.top += paneSpacing;
 		}
 
-		//rFirstRect.bottom = std::max( rFirstRect.top, rFirstRect.bottom );		// limit to top to keep it normalized
-		//rSecondRect.top = std::min( rSecondRect.bottom, rSecondRect.top );		// limit to bottom to keep it normalized
+		// ensure panes spacing around the gripper bar
+		rFirstRect.bottom -= m_paneSpacing.first;
+		rSecondRect.top += m_paneSpacing.second;
+
+		rFirstRect.bottom = std::max( rFirstRect.top, rFirstRect.bottom );		// limit to top to keep it normalized
+		rSecondRect.top = std::min( rSecondRect.bottom, rSecondRect.top );		// limit to bottom to keep it normalized
 	}
 	else
 	{

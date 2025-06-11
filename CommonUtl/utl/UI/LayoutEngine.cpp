@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "LayoutEngine.h"
+#include "ResizeGripBar.h"
 #include "MemoryDC.h"
 #include "ScopedValue.h"
 #include "WndUtils.h"
@@ -177,7 +178,7 @@ void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* p
 
 		if ( HasFlag( m_flags, GroupsTransparent | GroupsTransparentEx ) )
 		{
-			REQUIRE( HasFlag( m_flags, GroupsTransparentEx ) || HasFlag( m_pDialog->GetStyle(), WS_CLIPCHILDREN ) );	// GroupsTransparentEx mode requires WS_CLIPCHILDREN for parent dialog!
+			REQUIRE( !HasFlag( m_flags, GroupsTransparentEx ) || HasFlag( m_pDialog->GetStyle(), WS_CLIPCHILDREN ) );	// GroupsTransparentEx mode requires WS_CLIPCHILDREN for parent dialog!
 
 			// make group boxes transparent (z-order fix for proxy controls);
 			// prevents the WS_CLIPCHILDREN styled parent window from excluding the groupbox's background region, allowing the background to paint;
@@ -648,9 +649,15 @@ void CPaneLayoutEngine::InitializePane( ui::ILayoutFrame* pPaneLayoutFrame )
 	if ( !HasInitialSize() )
 		StoreInitialPaneSize();
 
-	ENSURE( HasInitialSize() );				// should have a size by this time
+	ENSURE( HasInitialSize() );						// should have a size by this time
 
 	SetupControlStates();
+
+	// initially hide this collapsed pane's controls:  (this is the earliest time to initialize pane controls' hidden state)
+	if ( CResizeGripBar* pResizeGripBar = pPaneLayoutFrame->GetSplitterGripBar() )
+		if ( pPaneLayoutFrame->GetControl() == pResizeGripBar->GetCollapsiblePane() )		// is this the collapsible pane?
+			if ( pResizeGripBar->IsCollapsed() )
+				ShowPaneControls( false );
 }
 
 bool CPaneLayoutEngine::ShowPaneControls( bool show /*= true*/ )

@@ -39,6 +39,7 @@ void CLayoutChildPropertySheet::DDX_DetailSheet( CDataExchange* pDX, UINT frameS
 		CreateChildSheet( pDX->m_pDlgWnd );
 		if ( singleLineTab )
 			GetTabControl()->ModifyStyle( TCS_MULTILINE, 0 );
+
 		ui::AlignToPlaceholder( this, frameStaticId )->DestroyWindow();
 		SetDlgCtrlID( frameStaticId );
 		SetSheetModified( false );			// initially not modified

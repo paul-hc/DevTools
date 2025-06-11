@@ -80,11 +80,12 @@ CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParentWnd )
 	m_pSplitBottomLayoutStatic->SetUseSmoothTransparentGroups();
 
 	// IDC_HORIZ_SPLITTER_STATIC:
-	m_pUpDownSplitterFrame.reset( new CResizeFrameStatic( &m_childSheet, m_pSplitBottomLayoutStatic.get(), resize::NorthSouth ) );
+	m_pUpDownSplitterFrame.reset( new CResizeFrameStatic( &m_childSheet, m_pSplitBottomLayoutStatic.get(), resize::NorthSouth /*, resize::ToggleFirst*/ ) );
 	m_pUpDownSplitterFrame->SetSection( reg::section_dialogSplitterH );
 	m_pUpDownSplitterFrame->GetGripBar()
 		.SetMinExtents( 100, 90 )			// correlate with dialog minimum heights from the resource template
-		.SetFirstExtentPercentage( 75 );
+		.SetFirstExtentPercentage( 75 )
+		.SetPaneSpacing( 5, 5 );
 
 	m_sharedData.m_drawDisabled = AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_DrawDisabled, false ) != FALSE;
 	m_sharedData.m_srcAlpha = static_cast<BYTE>( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_SrcAlpha, 255u ) );
@@ -150,7 +151,10 @@ void CToolbarImagesDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_HORIZ_SPLITTER_STATIC, *m_pUpDownSplitterFrame );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	{
+//m_childSheet.ModifyStyle( 0, WS_BORDER );		// dbg
 		m_childSheet.OutputPages();
+	}
 	else
 		mfc::ToolBarImages_RefDisabledImageAlpha() = m_sharedData.m_disabledAlpha;		// modify the global field!
 
@@ -374,6 +378,7 @@ void CBaseImagesPage::AddListItem( int itemPos, const CBaseImageItem* pImageItem
 	ASSERT_PTR( pImageItem );
 	m_imageListCtrl.InsertObjectItem( itemPos, pImageItem );
 	m_imageListCtrl.SetSubItemText( itemPos, Index, pImageItem->m_indexText );
+	m_imageListCtrl.SetSubItemText( itemPos, Size, str::Format( _T("%d x %d"), pImageItem->m_imageSize.cx, pImageItem->m_imageSize.cy ) );
 	m_imageListCtrl.SetSubItemText( itemPos, CmdId, pImageItem->m_cmdId != 0 ? str::Format( _T("%d, 0x%04X"), pImageItem->m_cmdId, pImageItem->m_cmdId ) : num::FormatNumber( pImageItem->m_cmdId ) );
 	m_imageListCtrl.SetSubItemText( itemPos, CmdLiteral, pImageItem->m_cmdLiteral );
 }
