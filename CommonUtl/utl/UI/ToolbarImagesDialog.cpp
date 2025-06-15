@@ -249,7 +249,7 @@ struct CToolbarImageItem : public CBaseImageItem
 		ASSERT_PTR( m_pImages );
 
 		m_imageSize = m_pImages->GetImageSize();
-		m_bitsPerPixel = static_cast<TBitsPerPixel>( m_pImages->GetBitsPerPixel() );
+		m_bitsPerPixel = static_cast<TBitsPerPixel>( mfc::ToolBarImages_GetBitsPerPixel( m_pImages ) );
 	}
 
 

@@ -81,6 +81,7 @@ namespace mfc
 namespace mfc
 {
 	// CMFCToolBarImages protected access:
+	int ToolBarImages_GetBitsPerPixel( CMFCToolBarImages* pImages = CMFCToolBar::GetImages() );
 	BYTE& ToolBarImages_RefDisabledImageAlpha( void );
 	BYTE& ToolBarImages_RefFadedImageAlpha( void );
 	bool ToolBarImages_DrawStretch( CMFCToolBarImages* pImages, CDC* pDC, const CRect& destRect, int imageIndex,

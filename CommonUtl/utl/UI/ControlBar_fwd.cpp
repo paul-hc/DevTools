@@ -21,6 +21,7 @@ namespace nosy
 	struct CToolBarImages_ : public CMFCToolBarImages
 	{
 		// public access
+		using CMFCToolBarImages::m_nBitsPerPixel;
 		using CMFCToolBarImages::m_sizeImageDest;
 		using CMFCToolBarImages::m_bStretch;
 
@@ -202,6 +203,17 @@ namespace mfc
 namespace mfc
 {
 	// CMFCToolBarImages protected access:
+
+	int ToolBarImages_GetBitsPerPixel( CMFCToolBarImages* pImages /*= CMFCToolBar::GetImages()*/ )
+	{
+		ASSERT_PTR( pImages );
+
+	#if _MFC_VER <= 0x0900		// MFC version 9.00
+		return mfc::nosy_cast<nosy::CToolBarImages_>( pImages )->m_nBitsPerPixel;		// GetBitsPerPixel() missing in older MFC
+	#else
+		return pImages->GetBitsPerPixel();
+	#endif
+	}
 
 	BYTE& ToolBarImages_RefDisabledImageAlpha( void )
 	{
