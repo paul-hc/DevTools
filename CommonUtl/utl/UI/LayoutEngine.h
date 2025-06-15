@@ -60,7 +60,8 @@ public:
 	void ToggleCollapsed( void ) { SetCollapsed( !IsCollapsed() ); }
 
 	bool LayoutControls( void );
-
+public:
+	// message handlers:
 	void HandleGetMinMaxInfo( MINMAXINFO* pMinMaxInfo ) const;
 	LRESULT HandleHitTest( LRESULT hitTest, const CPoint& screenPoint ) const;
 	bool HandleEraseBkgnd( CDC* pDC );

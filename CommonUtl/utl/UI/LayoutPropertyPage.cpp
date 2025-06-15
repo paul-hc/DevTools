@@ -233,9 +233,10 @@ void CLayoutPropertyPage::OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo )
 
 BOOL CLayoutPropertyPage::OnEraseBkgnd( CDC* pDC )
 {
-	return
-		m_pLayoutEngine->HandleEraseBkgnd( pDC ) ||
-		__super::OnEraseBkgnd( pDC );
+	if ( m_pLayoutEngine->HandleEraseBkgnd( pDC ) )
+		return true;
+
+	return __super::OnEraseBkgnd( pDC );
 }
 
 void CLayoutPropertyPage::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )

@@ -124,6 +124,10 @@ void CLayoutEngine::Initialize( CWnd* pDialog )
 void CLayoutEngine::SetupControlStates( void )
 {
 	ASSERT( IsInitialized() );
+
+	if ( !HasCtrlLayout() )
+		return;
+
 	ASSERT( m_controlStates.empty() || !m_controlStates.begin()->second.IsCtrlInit() );		// initialize once
 
 	bool anyRepaintCtrl = false;
@@ -521,6 +525,9 @@ LRESULT CLayoutEngine::HandleHitTest( LRESULT hitTest, const CPoint& screenPoint
 
 bool CLayoutEngine::HandleEraseBkgnd( CDC* pDC )
 {
+	if ( !HasCtrlLayout() )
+		return false;			// ignore for dialogs with no custom layout
+
 	if ( !HasFlag( m_flags, SmoothGroups ) || !IsInitialized() || HasFlag( m_flags, Erasing ) )
 		return false;
 
@@ -544,6 +551,9 @@ bool CLayoutEngine::HandleEraseBkgnd( CDC* pDC )
 
 void CLayoutEngine::HandlePostPaint( void )
 {
+	if ( !HasCtrlLayout() )
+		return;			// ignore for dialogs with no custom layout
+
 	if ( !HasFlag( m_flags, SmoothGroups ) && IsInitialized() )
 		if ( layout::CResizeGripper* pGripper = GetResizeGripper() )
 		{
