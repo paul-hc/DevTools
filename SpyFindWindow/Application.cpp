@@ -70,7 +70,11 @@ CApplication theApp;		// the one and only CApplication object
 // CApplication
 
 CApplication::CApplication( void )
+	: CBaseApp<CWinApp>()
 {
+	m_appRegistryKeyName += _T("\\other");
+
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
 }
 
 BOOL CApplication::InitInstance( void )

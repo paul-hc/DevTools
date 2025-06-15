@@ -71,7 +71,10 @@ namespace hlp
 CApplication g_theApp;	// the one and only CApplication object
 
 CApplication::CApplication( void )
+	: CBaseApp<CWinAppEx>()
 {
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
+
 	SetInteractive( false );		// using an app message loop
 }
 
@@ -115,7 +118,7 @@ BOOL CApplication::InitInstance( void )
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame();
 	m_pMainWnd = pMainFrame;
-	if ( !static_cast<CMainFrame*>( m_pMainWnd )->LoadFrame( IDR_MAINFRAME ) )
+	if ( !pMainFrame->LoadFrame( IDR_MAINFRAME ) )
 	{
 		delete m_pMainWnd;
 		return FALSE;

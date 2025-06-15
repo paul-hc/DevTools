@@ -3,17 +3,19 @@
 #pragma once
 
 
-template< typename BaseFrameWnd >
-abstract class CBaseMainFrameWndEx : public BaseFrameWnd		// abstract base for main windows that customize application look, control bars, etc - e.g. BaseFrameWnd is CMDIFrameWndEx
+template< typename BaseFrameWndT >
+abstract class CBaseMainFrameWndEx : public BaseFrameWndT		// abstract base for main windows that customize application look, control bars, etc - e.g. BaseFrameWndT is CMDIFrameWndEx
 {
-	typedef BaseFrameWnd TBaseClass;
+	typedef BaseFrameWndT TBaseClass;
 protected:
-	CBaseMainFrameWndEx( void ) : BaseFrameWnd() {}
+	CBaseMainFrameWndEx( void ) : BaseFrameWndT() {}
 	virtual ~CBaseMainFrameWndEx();
 public:
 	enum { MaxUserToolbars = 10, FirstUserToolBarId = AFX_IDW_CONTROLBAR_FIRST + 40, LastUserToolBarId = FirstUserToolBarId + MaxUserToolbars - 1 };
 
 	// generated stuff
+protected:
+	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
 protected:
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 	afx_msg void OnWindowManager( void );

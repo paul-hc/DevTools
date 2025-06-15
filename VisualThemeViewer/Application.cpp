@@ -20,12 +20,12 @@ CApplication theApp;		// the one and only CApplication object
 
 
 CApplication::CApplication()
+	: app::TBaseApp()
 {
 	// support Restart Manager
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
 
-	// TODO: add construction code here,
-	// Place all significant initialization in InitInstance
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
 }
 
 BOOL CApplication::InitInstance( void )

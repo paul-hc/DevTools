@@ -127,6 +127,8 @@ CApplication::CApplication( void )
 	// Extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe.
 	// Will initialize application resources later, when any automation object based on app::CLazyInitAppResources gets instantiated.
 	SetLazyInitAppResources();
+
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
 }
 
 CApplication::~CApplication()

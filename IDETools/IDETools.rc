@@ -29,12 +29,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "#ifndef APSTUDIO_INVOKED\r\n"
@@ -44,7 +44,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\IDETools.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -84,7 +84,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "10-06-2025 02:14:43"
+            VALUE "BuildTimestamp", "16-06-2025 00:33:53"
             VALUE "Comments", "Fixes VC++ 2022|newWiz vcproj|MethodUT|bugFix:TemplInst|VC++ 2022|LazyInitAppResources|TableToTreeAction|Natural sort macro|Split UTL_BASE/UTL_UI|V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page."
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
@@ -835,7 +835,7 @@ STRINGTABLE
 BEGIN
     CM_EDIT_BSC_DIR_PATH    "Modify the selected browse files folder\nModify Browse Folder"
     CM_MOVE_UP_BSC_DIR_PATH "Moves the selected folder up one position\nMove Folder Up"
-    CM_MOVE_DOWN_BSC_DIR_PATH 
+    CM_MOVE_DOWN_BSC_DIR_PATH
                             "Moves the selected folder down one position\nMove Folder Down"
 END
 
@@ -861,6 +861,11 @@ STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "Clear\nClear selected text (Del)"
     ID_EDIT_CLEAR_ALL       "Clear All\nClear all text"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_APP_TITLE       "IDETools"
 END
 
 #endif    // English (United States) resources

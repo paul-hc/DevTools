@@ -8,6 +8,7 @@
 #include "utl/UI/SystemTray.h"
 #include "utl/UI/TrayIcon.h"
 #include "utl/UI/resource.h"
+#include <afxwinappex.h>
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG
@@ -35,7 +36,7 @@ static UINT s_sbIndicators[] =
 IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWnd )
 
 CMainFrame::CMainFrame( void )
-	: TBaseFrameWnd()
+	: TMDIFrameWnd()
 {
 	m_regSection = reg::section_MainFrame;
 	ui::LoadPopupMenu( &m_trayPopupMenu, IDR_STD_CONTEXT_MENU, ui::AppSysTray );
@@ -63,11 +64,8 @@ void CMainFrame::InitSystemTray( void )
 
 BOOL CMainFrame::PreCreateWindow( CREATESTRUCT& cs )
 {
-	if ( !__super::PreCreateWindow( cs ) )
-		return FALSE;
-
 	// TODO: Modify the Window class or styles here by modifying the CREATESTRUCT cs
-	return TRUE;
+	return __super::PreCreateWindow( cs );
 }
 
 BOOL CMainFrame::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
@@ -82,7 +80,7 @@ BOOL CMainFrame::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CMainFrame, TBaseFrameWnd )
+BEGIN_MESSAGE_MAP( CMainFrame, TMDIFrameWnd )
 	ON_WM_CREATE()
 	ON_MESSAGE( WM_IDLEUPDATECMDUI, OnIdleUpdateCmdUI )
 END_MESSAGE_MAP()

@@ -17,7 +17,7 @@ CApplication theApp;		// the one and only CApplication object
 CApplication::CApplication( void )
 	: CBaseApp<CWinApp>()
 {
-	// TODO: add construction code here, place all significant initialization in InitInstance
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
 }
 
 BOOL CApplication::InitInstance( void )

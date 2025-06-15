@@ -54,8 +54,7 @@ CApplication::CApplication( void )
 	// Will initialize application resources later, when CShellGoodiesCom COM object gets instantiated.
 	SetLazyInitAppResources();
 
-	// use AFX_IDS_APP_TITLE="ShellGoodies" - same app registry key for 32/64 bit executables
-	StoreAppNameSuffix( str::Format( _T(" [%d-bit]"), utl::GetPlatformBits() ) );		// identify the primary target platform
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
 }
 
 CApplication::~CApplication()

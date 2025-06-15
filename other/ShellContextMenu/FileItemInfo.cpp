@@ -82,7 +82,7 @@ void CFileItemInfo::CDetails::LazyInit( const CFileItemInfo* pItem )
 		return;
 
 	SHFILEINFO fileInfo;
-	::SHGetFileInfo( pItem->m_fullPath.c_str(), nullptr, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX | SHGFI_TYPENAME );
+	::SHGetFileInfo( pItem->m_fullPath.c_str(), 0, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX | SHGFI_TYPENAME );
 
 	m_iconIndex = fileInfo.iIcon;
 	m_typeName = fileInfo.szTypeName;

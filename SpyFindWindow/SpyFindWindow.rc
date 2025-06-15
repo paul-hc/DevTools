@@ -14,13 +14,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -30,8 +28,11 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDD_MAIN_DIALOG         ICON                    "res\\SpyFindWindow.ico"
+
 IDI_TRACK_ICON          ICON                    "res\\Track.ico"
+
 IDI_TRACKING_ICON       ICON                    "res\\Tracking.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -111,7 +112,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_MAIN_DIALOG, DIALOG
     BEGIN
@@ -131,12 +132,13 @@ END
 
 IDR_TRACKING_CURSOR     CURSOR                  "res\\FindWindow.cur"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
 //
 
-IDD_MAIN_DIALOG ACCELERATORS 
+IDD_MAIN_DIALOG ACCELERATORS
 BEGIN
     VK_F4,          ID_HIGHLIGHT_WINDOW,    VIRTKEY, NOINVERT
 END
@@ -193,7 +195,18 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (U.S.) resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_APP_TITLE       "SpyFindWindow"
+END
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

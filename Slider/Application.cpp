@@ -218,6 +218,8 @@ CApplication::CApplication( void )
 	, m_forceFlags( 0 )
 	, m_pEventLogger( new CLogger( _T("%s-events") ) )
 {
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
+
 	SetInteractive( false );		// using an app message loop
 
 	COLORREF* pCustomColors = CColorDialog::GetSavedCustomColors();

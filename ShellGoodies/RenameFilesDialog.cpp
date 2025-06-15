@@ -521,7 +521,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 		if ( !HasDestPaths() && EditPage == m_filesSheet.GetActiveIndex() )
 			CResetDestinationsCmd( m_pFileModel ).Execute();	// this will call OnUpdate() for all observers
 		else
-			OnUpdate( m_pFileModel, nullptr );			// initialize the dialog
+			OnUpdate( m_pFileModel, nullptr );					// initialize the dialog
 	}
 
 	__super::DoDataExchange( pDX );

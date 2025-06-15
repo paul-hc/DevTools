@@ -36,9 +36,9 @@ namespace app
 class CAppLook;
 
 
-template< typename BaseClass = CWinApp >		// could use CWinAppEx base for new MFC app support (ribbons, etc)
+template< typename BaseClassT = CWinApp >		// could use CWinAppEx base for new MFC app support (ribbons, etc)
 class CBaseApp
-	: public BaseClass
+	: public BaseClassT
 	, public CAppTools
 {
 protected:

@@ -25,18 +25,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "#include ""afxres.h""\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\Slider.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -978,7 +978,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "10-06-2025 02:12:25"
+            VALUE "BuildTimestamp", "16-06-2025 00:41:55"
             VALUE "Comments", "NewBars|MFC FeaturePack|Slider_vc17.sln|RegErrorTrace|VC++ 2022|[5.8.2] UseThemedThumbListDraw|[5.7] FullScreen perspective|[5.7] Album smooth mode|[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
@@ -1083,10 +1083,10 @@ END
 IDD_LOGGER_DIALOG DLGINIT
 BEGIN
     IDC_LOGGER_COMBO, 0x403, 18, 0
-0x6d49, 0x6761, 0x2065, 0x6966, 0x656c, 0x6c20, 0x676f, 0x6567, 0x0072, 
+0x6d49, 0x6761, 0x2065, 0x6966, 0x656c, 0x6c20, 0x676f, 0x6567, 0x0072,
 
     IDC_LOGGER_COMBO, 0x403, 13, 0
-0x7645, 0x6e65, 0x2074, 0x6f6c, 0x6767, 0x7265, "\000" 
+0x7645, 0x6e65, 0x2074, 0x6f6c, 0x6767, 0x7265, "\000"
     0
 END
 
@@ -1217,14 +1217,14 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_VIEW_ALBUM_DIALOG_BAR 
+    ID_VIEW_ALBUM_DIALOG_BAR
                             "Show or hide album information bar\nToggle Album Info Bar"
     IDW_SB_PROGRESS_CAPTION "<progress caption>"
     IDW_SB_PROGRESS_BAR     "<progress bar>"
     IDW_IMAGE_SCALING_COMBO "Edit the auto image size mode\nAuto Image Size"
     IDW_ZOOM_COMBO          "Zoom\nZoom (Ctrl+Z)"
     IDW_NAVIG_SLIDER_CTRL   "Navigation slider\nNavigation Slider"
-    IDW_SMOOTHING_MODE_CHECK 
+    IDW_SMOOTHING_MODE_CHECK
                             "Toggle the smoothing effect when scaling up an image\nSmooth Mode (toggle off for icons and glyps)"
 END
 
@@ -1235,17 +1235,17 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_TOGGLE_SCALING_AUTO_FIT_LARGE 
+    ID_TOGGLE_SCALING_AUTO_FIT_LARGE
                             "Shrink large images to best fit the view\nBest Fit (Large Only)"
-    ID_TOGGLE_SCALING_AUTO_FIT_ALL 
+    ID_TOGGLE_SCALING_AUTO_FIT_ALL
                             "Scale image for best fit in the view\nBest Fit (All)"
-    ID_TOGGLE_SCALING_FIT_WIDTH 
+    ID_TOGGLE_SCALING_FIT_WIDTH
                             "Scale image to fit the entire width in the view\nFit Width"
-    ID_TOGGLE_SCALING_FIT_HEIGHT 
+    ID_TOGGLE_SCALING_FIT_HEIGHT
                             "Scale image to fit the entire heigh in the view\nFit Height"
-    ID_TOGGLE_SCALING_ACTUAL_SIZE 
+    ID_TOGGLE_SCALING_ACTUAL_SIZE
                             "Display the image with the actual dimensions (using scroll bars)\nActual Size"
-    ID_TOGGLE_SCALING_USE_ZOOM_PCT 
+    ID_TOGGLE_SCALING_USE_ZOOM_PCT
                             "Scale the image with the current zoom level (using scroll bars)\nUse Zoom Level"
     ID_ZOOM_NORMAL_100      "Zoom to actual image dimension (100%)\nZoom to 100%"
     ID_ZOOM_IN              "Increase zoom factor\nZoom In"
@@ -1259,7 +1259,7 @@ BEGIN
     ID_TOGGLE_NAVIG_PLAY    "Toggle auto sliding\nToggle Play (Space)"
     ID_TOGGLE_NAVIG_DIR_FWD "Play in forward direction\nForward Direction"
     ID_TOGGLE_NAVIG_DIR_REV "Play in reverse direction\nReverse Direction"
-    ID_TOGGLE_NAVIG_WRAP_MODE 
+    ID_TOGGLE_NAVIG_WRAP_MODE
                             "Toggle wrap navigation mode (circular play)\nToggle Wrap Mode"
     ID_NAVIG_SEEK_PREV      "Move to previous image\nPrevious Image (Up/Left Arrow)"
     ID_NAVIG_SEEK_NEXT      "Move to next image\nNext Image (Down/Right Arrow)"
@@ -1293,7 +1293,7 @@ BEGIN
     CM_AUTO_DROP_DEFRAGMENT "Renames files in an auto-drop recipient to ensure contiguos numeric filename\nDefragment Image Files"
     CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
     CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
-    CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS 
+    CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS
                             "Clear the Undo and Redo buffer\nClear Undo/Redo Buffer"
     CM_REGENERATE_ALBUM     "Regenerates the files in the current album using the search specifiers' criteria\nRegenerate Album"
 END
@@ -1304,18 +1304,18 @@ BEGIN
     CM_ARCHIVE_IMAGES       "Archive the image files in an album\nArchive Images"
     CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
     CM_CUSTOM_ORDER_REDO    "Redo the last drop reorder operation\nRedo Custom Order Operation"
-    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS 
+    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS
                             "Clear the file operation undo and redo buffer\nClear File Operation Undo Buffer"
-    CK_SAVE_CU_UNDO_REDO_BUFFER 
+    CK_SAVE_CU_UNDO_REDO_BUFFER
                             "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
-    ID_FILE_OPEN_ALBUM_FOLDER 
+    ID_FILE_OPEN_ALBUM_FOLDER
                             "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+D)"
-    ID_EDIT_ARCHIVE_PASSWORD 
+    ID_EDIT_ARCHIVE_PASSWORD
                             "Edit password in image archive storage\nEdit Password"
     ID_ORDER_ORIGINAL       "Original Search Order"
     ID_ORDER_CUSTOM         "Custom Order"
     ID_ORDER_RANDOM_SHUFFLE "Shuffle images in random order\nRandom Shuffle"
-    ID_ORDER_RANDOM_SHUFFLE_SAME_SEED 
+    ID_ORDER_RANDOM_SHUFFLE_SAME_SEED
                             "Shuffle images in the same random order\nRandom Shuffle (same seed)"
     ID_ORDER_BY_FULL_PATH_ASC "Order by Image Path Ascending"
     ID_ORDER_BY_FULL_PATH_DESC "Order by Image Path Descending"
@@ -1326,29 +1326,29 @@ BEGIN
     IDS_ERROR_CANNOTEXPLORE "Cannot explore the selected file '%s'!\n\nFile does not exist."
     IDS_ERROR_NOSELECTION   "No file currently selected!"
     IDS_DROPONLYONEFOLDER   "You can only drop one destination folder into this dialog!"
-    IDS_PROMPT_KEEPTHUMBFILE 
+    IDS_PROMPT_KEEPTHUMBFILE
                             "The image folder no longer exist:\n%s\n\nDelete the associated folder thumbnail file?\n%s"
-    IDS_PROMPT_CORRUPTTHUMBFILE 
+    IDS_PROMPT_CORRUPTTHUMBFILE
                             "The thumbnail file ""%1"" is corrupt!\n\nDo you want to delete the thumbnail file?"
     IDS_ERROR_INVALID_DEST_DIR "Invalid destination directory!"
-    IDS_PROMPT_SWITCHTOCUSTOMORDER 
+    IDS_PROMPT_SWITCHTOCUSTOMORDER
                             "Switch to custom order for drop re-ordering?"
     IDS_ERROR_FILE_COMMIT   "An error occured while %s files:\nfrom:\n%s\n\nto:\n%s\n\n\n""%s"""
-    IDS_PROMPT_INVALID_FOLDER 
+    IDS_PROMPT_INVALID_FOLDER
                             "Folder %s does not exist!\n\nDo you want to create it?"
     IDS_PROMPT_REGENERATE_ALBUM "Do you want to regenerate the album?"
-    IDS_PROMPT_CANT_CREATE_DEST_FOLDER 
+    IDS_PROMPT_CANT_CREATE_DEST_FOLDER
                             "Cannot create destination folder:\n\n%s"
 END
 
 STRINGTABLE
 BEGIN
-    IDS_PROMPT_CREATED_DEST_FOLDER 
+    IDS_PROMPT_CREATED_DEST_FOLDER
                             "Destination folder successfully created!\n\n%s"
     IDS_PROMPT_COPYMOVEFILEOP "Do you want to %s the file %s operation?"
-    IDS_FORMAT_PARSING_ERROR 
+    IDS_FORMAT_PARSING_ERROR
                             "An error occured while parsing the format: %s!\n\n%s"
-    IDS_UNDOREDO_INVALID_FILE_PAIRS 
+    IDS_UNDOREDO_INVALID_FILE_PAIRS
                             "Unable to %s the %d %s operations out of %d due to file inconsistencies!\n\nDo you still want to perform the operation?"
     IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
     IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
@@ -1364,16 +1364,16 @@ END
 STRINGTABLE
 BEGIN
     IDW_PLAY_DELAY_COMBO    "Set the delay in seconds for animated album play\nPlay Animation Delay (seconds)"
-    IDW_SEEK_CURR_POS_SPINEDIT 
+    IDW_SEEK_CURR_POS_SPINEDIT
                             "Position of the current slide image\nSlide Image Position"
 END
 
 STRINGTABLE
 BEGIN
-    IDW_AUTO_SEEK_IMAGE_POS_CHECK 
+    IDW_AUTO_SEEK_IMAGE_POS_CHECK
                             "Automatically seek to the new image position, selected in the spin edit\nAuto Seek Image"
     IDW_NAV_COUNT_LABEL     "The total number of images in this album\nTotal Image Count"
-    IDW_CURR_IMAGE_PATH_LABEL 
+    IDW_CURR_IMAGE_PATH_LABEL
                             "Copy file path of the current image file\nImage File Path"
 END
 
@@ -1384,7 +1384,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDC_FOUND_IMAGES_LISTVIEW 
+    IDC_FOUND_IMAGES_LISTVIEW
                             "File Name=-1|In Folder=200|Dimensions=75|Size=55|Date=120"
     IDC_SEARCH_FOR_FILES    "Search for Images (F5)"
 END
@@ -1404,9 +1404,9 @@ STRINGTABLE
 BEGIN
     IDS_DELETE_ATTR_PROMPT  "Are you sure you want to delete the path below ?\n\n%s"
     IDS_NO_DIR_SEARCH_SPEC  "In order to enable the ""Auto Drop Recipient"" feature, you must have one valid directory search path specifier ""Auto-drop numeric filenames"" option selected!"
-    ID_SKIP_IMAGE_DIM_EVALUATION_CMDLINK 
+    ID_SKIP_IMAGE_DIM_EVALUATION_CMDLINK
                             "Speed-up saving (skip image dimension evaluation)"
-    ID_KEEP_IMAGE_DIM_EVALUATION_CMDLINK 
+    ID_KEEP_IMAGE_DIM_EVALUATION_CMDLINK
                             "Continue saving full image information"
 END
 

@@ -171,7 +171,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "10-06-2025 02:12:25"
+            VALUE "BuildTimestamp", "16-06-2025 00:41:55"
             VALUE "Comments", "Ported to VC 2022|Split UTL_BASE/UTL_UI projects|Ported to UTL v2018-11"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
@@ -336,6 +336,11 @@ STRINGTABLE
 BEGIN
     IDC_THEME_CLASS_LIST    "Theme Class=-1|Relevance=65"
     IDC_BROWSE_THEMES_BUTTON "Browse all available theme items"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_APP_TITLE       "VisualThemeViewer"
 END
 
 #endif    // English (United States) resources

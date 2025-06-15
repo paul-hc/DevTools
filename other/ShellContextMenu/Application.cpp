@@ -17,7 +17,8 @@ CApplication::CApplication( void )
 	: CBaseApp<CWinApp>()
 {
 	m_appRegistryKeyName += _T("\\other");
-	StoreAppNameSuffix( str::Format( _T(" [%d-bit]"), utl::GetPlatformBits() ) );		// identify the primary target platform
+
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
 }
 
 BOOL CApplication::InitInstance()

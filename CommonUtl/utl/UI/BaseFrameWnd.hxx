@@ -1,6 +1,7 @@
 #ifndef BaseFrameWnd_hxx
 #define BaseFrameWnd_hxx
 
+#include "BaseApp.h"
 #include "SystemTray.h"
 #include "WindowPlacement.h"
 #include "resource.h"
@@ -8,26 +9,26 @@
 
 // CBaseFrameWnd template code
 
-template< typename BaseWnd >
-CBaseFrameWnd<BaseWnd>::~CBaseFrameWnd()
+template< typename BaseWndT >
+CBaseFrameWnd<BaseWndT>::~CBaseFrameWnd()
 {
 }
 
-template< typename BaseWnd >
-CMenu* CBaseFrameWnd<BaseWnd>::GetTrayIconContextMenu( void ) override
+template< typename BaseWndT >
+CMenu* CBaseFrameWnd<BaseWndT>::GetTrayIconContextMenu( void ) override
 {
 	return UseSysTrayMinimize() ? &m_trayPopupMenu : nullptr;
 }
 
-template< typename BaseWnd >
-bool CBaseFrameWnd<BaseWnd>::OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override
+template< typename BaseWndT >
+bool CBaseFrameWnd<BaseWndT>::OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override
 {
 	msgNotifyCode, trayIconId, screenPos;
 	return false;
 }
 
-template< typename BaseWnd >
-void CBaseFrameWnd<BaseWnd>::SaveWindowPlacement( void )
+template< typename BaseWndT >
+void CBaseFrameWnd<BaseWndT>::SaveWindowPlacement( void )
 {
 	if ( m_regSection.empty() )
 		return;
@@ -38,8 +39,8 @@ void CBaseFrameWnd<BaseWnd>::SaveWindowPlacement( void )
 		wp.RegSave( m_regSection.c_str() );
 }
 
-template< typename BaseWnd >
-bool CBaseFrameWnd<BaseWnd>::LoadWindowPlacement( CREATESTRUCT* pCreateStruct )
+template< typename BaseWndT >
+bool CBaseFrameWnd<BaseWndT>::LoadWindowPlacement( CREATESTRUCT* pCreateStruct )
 {
 	if ( !m_regSection.empty() )
 	{
@@ -56,8 +57,8 @@ bool CBaseFrameWnd<BaseWnd>::LoadWindowPlacement( CREATESTRUCT* pCreateStruct )
 	return false;
 }
 
-template< typename BaseWnd >
-bool CBaseFrameWnd<BaseWnd>::ShowAppWindow( int cmdShow )
+template< typename BaseWndT >
+bool CBaseFrameWnd<BaseWndT>::ShowAppWindow( int cmdShow )
 {
 	if ( UseSysTrayMinimize() )
 		if ( SW_SHOWMINIMIZED == cmdShow )
@@ -69,20 +70,30 @@ bool CBaseFrameWnd<BaseWnd>::ShowAppWindow( int cmdShow )
 	return this->ShowWindow( cmdShow ) != FALSE;
 }
 
-template< typename BaseWnd >
-BOOL CBaseFrameWnd<BaseWnd>::PreCreateWindow( CREATESTRUCT& rCreateStruct ) override
+template< typename BaseWndT >
+BOOL CBaseFrameWnd<BaseWndT>::PreCreateWindow( CREATESTRUCT& cs ) override
 {
-	if ( !str::IsEmpty( rCreateStruct.lpszClass ) )		// called twice during frame creation: skip fist time when lpszClass is NULL
-		if ( PersistPlacement() )
-			LoadWindowPlacement( &rCreateStruct );
+	if ( !str::IsEmpty( cs.lpszName ) )		// called twice during frame creation: skip fist time when cs.lpszName is nullptr
+	{
+		const std::tstring& appNameSuffix = DYNAMIC_CAST_BASE_APP( GetAppNameSuffix() );
 
-	return __super::PreCreateWindow( rCreateStruct );
+		if ( !appNameSuffix.empty() && -1 == m_strTitle.Find( appNameSuffix.c_str() ) )
+		{
+			m_strTitle += appNameSuffix.c_str();		// append ' [NN-bit]' suffix
+			cs.lpszName = m_strTitle.GetString();
+		}
+
+		if ( PersistPlacement() )
+			LoadWindowPlacement( &cs );
+	}
+
+	return __super::PreCreateWindow( cs );
 }
 
 
 // message handlers
 
-BEGIN_TEMPLATE_MESSAGE_MAP( CBaseFrameWnd, BaseWnd, TBaseClass )
+BEGIN_TEMPLATE_MESSAGE_MAP( CBaseFrameWnd, BaseWndT, TBaseClass )
 	ON_WM_CLOSE()
 	ON_COMMAND( ID_APP_RESTORE, OnAppRestore )
 	ON_UPDATE_COMMAND_UI( ID_APP_RESTORE, OnUpdateAppRestore )
@@ -90,8 +101,8 @@ BEGIN_TEMPLATE_MESSAGE_MAP( CBaseFrameWnd, BaseWnd, TBaseClass )
 	ON_UPDATE_COMMAND_UI( ID_APP_MINIMIZE, OnUpdateAppMinimize )
 END_MESSAGE_MAP()
 
-template< typename BaseWnd >
-void CBaseFrameWnd<BaseWnd>::OnClose( void )
+template< typename BaseWndT >
+void CBaseFrameWnd<BaseWndT>::OnClose( void )
 {
 	if ( PersistPlacement() )
 		SaveWindowPlacement();		// avoid saving placement on WM_DESTROY, since MFC hides the frame before destroying the window
@@ -99,26 +110,26 @@ void CBaseFrameWnd<BaseWnd>::OnClose( void )
 	__super::OnClose();
 }
 
-template< typename BaseWnd >
-void CBaseFrameWnd<BaseWnd>::OnAppRestore( void )
+template< typename BaseWndT >
+void CBaseFrameWnd<BaseWndT>::OnAppRestore( void )
 {
 	this->SendMessage( WM_SYSCOMMAND, SC_RESTORE );
 }
 
-template< typename BaseWnd >
-void CBaseFrameWnd<BaseWnd>::OnUpdateAppRestore( CCmdUI* pCmdUI )
+template< typename BaseWndT >
+void CBaseFrameWnd<BaseWndT>::OnUpdateAppRestore( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( CSystemTray::IsMinimizedToTray( this ) );
 }
 
-template< typename BaseWnd >
-void CBaseFrameWnd<BaseWnd>::OnAppMinimize( void )
+template< typename BaseWndT >
+void CBaseFrameWnd<BaseWndT>::OnAppMinimize( void )
 {
 	this->SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
 }
 
-template< typename BaseWnd >
-void CBaseFrameWnd<BaseWnd>::OnUpdateAppMinimize( CCmdUI* pCmdUI )
+template< typename BaseWndT >
+void CBaseFrameWnd<BaseWndT>::OnUpdateAppMinimize( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( !CSystemTray::IsMinimizedToTray( AfxGetMainWnd() ) );
 }

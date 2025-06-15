@@ -8,13 +8,13 @@
 class CSystemTray;
 
 
-template< typename BaseWnd >
-abstract class CBaseFrameWnd : public BaseWnd		// abstract base for main windows that can host a system tray icon
+template< typename BaseWndT >
+abstract class CBaseFrameWnd : public BaseWndT		// abstract base for main windows that can host a system tray icon
 	, protected ui::ISystemTrayCallback
 {
-	typedef BaseWnd TBaseClass;
+	typedef BaseWndT TBaseClass;
 protected:
-	CBaseFrameWnd( void ) : BaseWnd(), m_restoreToMaximized( false ) {}
+	CBaseFrameWnd( void ) : BaseWndT(), m_restoreToMaximized( false ) {}
 public:
 	virtual ~CBaseFrameWnd();
 
