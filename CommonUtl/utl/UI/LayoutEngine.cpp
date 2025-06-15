@@ -126,7 +126,10 @@ void CLayoutEngine::SetupControlStates( void )
 	ASSERT( IsInitialized() );
 
 	if ( !HasCtrlLayout() )
+	{
+		ModifyFlags( CLayoutEngine::SmoothGroups, 0 );		// there is no point in smoothing group-boxes drawing
 		return;
+	}
 
 	ASSERT( m_controlStates.empty() || !m_controlStates.begin()->second.IsCtrlInit() );		// initialize once
 
@@ -154,14 +157,20 @@ void CLayoutEngine::SetupControlStates( void )
 	// for each control: setup controls' state, and handle group boxes
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->GetSafeHwnd(), GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 		if ( UINT ctrlId = ::GetDlgCtrlID( hCtrl ) )		// ignore child dialogs in a property sheet
+		{
+			bool isGroupBox = ui::IsGroupBox( hCtrl );
+
 			if ( layout::CControlState* pCtrlState = LookupControlState( ctrlId ) )		// only touch controls with layout defined
 			{
 				//if ( DialogLayout == m_layoutType )		// commented-out: avoid clipping errors on group controls (e.g. in CToolbarImagesDialog)
-				if ( ui::IsGroupBox( hCtrl ) )
+				if ( isGroupBox )
 					SetupGroupBoxState( hCtrl, pCtrlState );
 
 				pCtrlState->ResetCtrl( hCtrl );
 			}
+			else if ( isGroupBox )
+				ui::SetTransparent( hCtrl );				// add the WS_EX_TRANSPARENT styleEx - prevent group-box clipping issues for non-layout groups
+		}
 }
 
 void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pCtrlState )
@@ -187,10 +196,8 @@ void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* p
 			// make group boxes transparent (z-order fix for proxy controls);
 			// prevents the WS_CLIPCHILDREN styled parent window from excluding the groupbox's background region, allowing the background to paint;
 			// while this works, it creates annoying flicker on resize.
-			if ( !HasFlag( ui::GetStyleEx( hGroupBox ), WS_EX_TRANSPARENT ) )
-			{
-				CWnd::ModifyStyleEx( hGroupBox, 0, WS_EX_TRANSPARENT, 0 );
-			}
+			//
+			ui::SetTransparent( hGroupBox );		// add the WS_EX_TRANSPARENT styleEx
 		}
 	}
 }

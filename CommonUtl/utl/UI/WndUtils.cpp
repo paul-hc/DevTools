@@ -412,6 +412,14 @@ namespace ui
 		return processId;
 	}
 
+	bool SetTransparent( HWND hWnd, bool transparent /*= true*/ )
+	{
+		if ( transparent )
+			return CWnd::ModifyStyleEx( hWnd, 0, WS_EX_TRANSPARENT, 0 ) != FALSE;		// add the WS_EX_TRANSPARENT styleEx
+		else
+			return CWnd::ModifyStyleEx( hWnd, WS_EX_TRANSPARENT, 0, 0 ) != FALSE;		// add the WS_EX_TRANSPARENT styleEx
+	}
+
 	void _GetWindowText( std::tstring& rText, HWND hWnd )
 	{
 		int length = ::GetWindowTextLength( hWnd );

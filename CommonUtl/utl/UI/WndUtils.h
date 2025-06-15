@@ -164,7 +164,9 @@ namespace ui
 	inline bool IsDisabled( HWND hWnd ) { ASSERT_PTR( hWnd ); return HasFlag( GetStyle( hWnd ), WS_DISABLED ); }
 	inline bool IsVisible( HWND hWnd ) { ASSERT_PTR( hWnd ); return HasFlag( GetStyle( hWnd ), WS_VISIBLE ); }
 	inline bool IsWindowVisible( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::IsWindowVisible( hWnd ) != FALSE; }
+
 	inline bool IsTransparent( HWND hWnd ) { ASSERT_PTR( hWnd ); return HasFlag( GetStyleEx( hWnd ), WS_EX_TRANSPARENT ); }
+	bool SetTransparent( HWND hWnd, bool transparent = true );
 
 	inline bool IsChild( HWND hWnd ) { return HasFlag( GetStyle( hWnd ), WS_CHILD ); }
 	inline bool IsTopLevel( HWND hWnd ) { return !IsChild( hWnd ); }
