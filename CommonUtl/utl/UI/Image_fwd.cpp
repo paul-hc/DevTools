@@ -174,6 +174,8 @@ namespace res
 
 		if ( stripIcon.IsValid() )
 		{
+			stripIcon.SetHasAlpha( hasAlpha );
+
 			CIconInfo info( stripIcon.GetHandle() );
 
 			imageSize = stripIcon.GetSize();
