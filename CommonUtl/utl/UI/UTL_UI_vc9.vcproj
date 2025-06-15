@@ -603,11 +603,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CmdInfoStore.cpp"
+				RelativePath=".\CmdTagStore.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CmdInfoStore.h"
+				RelativePath=".\CmdTagStore.h"
 				>
 			</File>
 			<File
@@ -648,14 +648,6 @@
 			</File>
 			<File
 				RelativePath=".\GpUtilities.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GroupIcon.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GroupIcon.h"
 				>
 			</File>
 			<File
@@ -914,11 +906,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GroupIconRes.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GroupIconRes.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Icon.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\Icon.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IconGroup.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IconGroup.h"
 					>
 				</File>
 				<File
@@ -955,6 +963,10 @@
 				</File>
 				<File
 					RelativePath=".\ImageStore.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageStore_fwd.h"
 					>
 				</File>
 				<File

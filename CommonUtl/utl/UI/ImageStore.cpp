@@ -66,7 +66,7 @@ namespace ui
 
 	const ui::CStripBtnInfo* CToolbarDescr::FindBtnInfo( UINT cmdId ) const
 	{
-		typename std::vector<ui::CStripBtnInfo>::const_iterator itFound = std::find_if( m_btnInfos.begin(), m_btnInfos.end(), pred::HasCmdId( cmdId ) );
+		std::vector<ui::CStripBtnInfo>::const_iterator itFound = std::find_if( m_btnInfos.begin(), m_btnInfos.end(), pred::HasCmdId( cmdId ) );
 		if ( itFound == m_btnInfos.end() )
 			return nullptr;
 
