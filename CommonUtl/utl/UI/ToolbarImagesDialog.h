@@ -43,6 +43,8 @@ public:
 
 	struct CData
 	{
+		CData( void ) : m_drawDisabled( false ), m_srcAlpha( 255 ), m_disabledAlpha( 127 ), m_pSampleView( nullptr ) {}
+	public:
 		persist bool m_drawDisabled;
 		persist BYTE m_srcAlpha;
 		persist BYTE m_disabledAlpha;
@@ -105,6 +107,8 @@ protected:
 	CReportListControl m_imageListCtrl;
 
 	enum Column { CommandName, Index, Format, CmdId, CmdLiteral };
+private:
+	static CToolbarImagesDialog::CData s_defaultDlgData;	// use when pages are added in Tools > Customize dialog
 
 	// generated stuff
 protected:

@@ -102,8 +102,9 @@ mfc::TRuntimeClassList* CToolbarImagesDialog::GetCustomPages( void )
 	static mfc::TRuntimeClassList s_pagesList;
 
 	if ( s_pagesList.IsEmpty() )
-	{
+	{	// pages are added to Tools > Customize dialog
 		s_pagesList.AddTail( RUNTIME_CLASS( CMfcToolbarImagesPage ) );
+		s_pagesList.AddTail( RUNTIME_CLASS( CStoreToolbarImagesPage ) );
 		s_pagesList.AddTail( RUNTIME_CLASS( CIconImagesPage ) );
 	}
 
@@ -335,9 +336,11 @@ private:
 
 IMPLEMENT_DYNAMIC( CBaseImagesPage, CPropertyPage )
 
+CToolbarImagesDialog::CData CBaseImagesPage::s_defaultDlgData;
+
 CBaseImagesPage::CBaseImagesPage( UINT templateId, const TCHAR* pTitle )
 	: CLayoutPropertyPage( templateId )
-	, m_pDlgData( nullptr )
+	, m_pDlgData( &s_defaultDlgData )
 	, m_regSection( path::Combine( reg::section_dialog, pTitle ) )
 	, m_imageBoundsSize( CIconSize::GetSizeOf( SmallIcon ) )
 	, m_selItemIndex( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_SelItemIndex, 0 ) )
@@ -447,7 +450,8 @@ void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
 
 	if ( firstInit )
-		m_pDlgData = &checked_static_cast<CToolbarImagesDialog*>( GetParent()->GetParent() )->m_sharedData;
+		if ( CToolbarImagesDialog* pParentDialog = dynamic_cast<CToolbarImagesDialog*>( GetParent()->GetParent() ) )
+			m_pDlgData = &pParentDialog->m_sharedData;
 
 	DDX_Control( pDX, IDC_TOOLBAR_IMAGES_LIST, m_imageListCtrl );
 
@@ -461,7 +465,9 @@ void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 	}
 
 	m_imageListCtrl.Invalidate();
-	m_pDlgData->m_pSampleView->SafeRedraw();
+
+	if ( m_pDlgData->m_pSampleView != nullptr )
+		m_pDlgData->m_pSampleView->SafeRedraw();
 
 	__super::DoDataExchange( pDX );
 }
@@ -498,7 +504,9 @@ void CBaseImagesPage::OnLvnItemChanged_ImageListCtrl( NMHDR* pNmHdr, LRESULT* pR
 	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
 	{
 		m_selItemIndex = m_imageListCtrl.GetCurSel();
-		m_pDlgData->m_pSampleView->Invalidate();
+
+		if ( m_pDlgData->m_pSampleView != nullptr )
+			m_pDlgData->m_pSampleView->Invalidate();
 	}
 }
 
