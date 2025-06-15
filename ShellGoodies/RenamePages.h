@@ -126,7 +126,7 @@ private:
 	bool SelectItemLine( int linePos );
 	bool SyncSelectItemLine( const CTextEdit& fromEdit, CTextEdit* pToEdit );
 private:
-	std::vector< fs::CPath > m_newDestPaths;
+	std::vector<fs::CPath> m_newDestPaths;
 private:
 	// enum { IDD = IDD_REN_EDIT_PAGE };
 

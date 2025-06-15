@@ -36,7 +36,7 @@ namespace cap
 
 		bool operator==( const CWordList& right ) const { return m_words == right.m_words; }
 	public:
-		std::vector< std::tstring > m_words;
+		std::vector<std::tstring> m_words;
 		static const TCHAR s_listSep[];
 	};
 

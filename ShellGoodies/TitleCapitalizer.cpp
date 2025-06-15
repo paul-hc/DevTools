@@ -49,7 +49,7 @@ namespace cap
 	bool CWordCaseRule::RegLoad( const TCHAR* pSection, const TCHAR* pEntry )
 	{
 		enum Tokens { CaseChange, Words, TokenCount };
-		std::vector< std::tstring > tokens;
+		std::vector<std::tstring> tokens;
 		str::Split( tokens, (LPCTSTR)AfxGetApp()->GetProfileString( pSection, pEntry ), _T(":") );
 
 		if ( TokenCount == tokens.size() )

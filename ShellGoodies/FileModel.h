@@ -42,7 +42,7 @@ public:
 	void Clear( void );
 	size_t SetupFromDropInfo( HDROP hDropInfo );
 
-	const std::vector< fs::CPath >& GetSourcePaths( void ) const { return m_sourcePaths; }
+	const std::vector<fs::CPath>& GetSourcePaths( void ) const { return m_sourcePaths; }
 	bool IsSourceSingleFolder( void ) const;						// single selected directory as paste target?
 
 	bool SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd );
@@ -52,11 +52,11 @@ public:
 	virtual const std::tstring& GetCode( void ) const;
 	virtual void UpdateAllObservers( utl::IMessage* pMessage );
 
-	std::vector< CRenameItem* >& LazyInitRenameItems( void );
-	std::vector< CTouchItem* >& LazyInitTouchItems( void );
+	std::vector<CRenameItem*>& LazyInitRenameItems( void );
+	std::vector<CTouchItem*>& LazyInitTouchItems( void );
 
-	const std::vector< CRenameItem* >& GetRenameItems( void ) const { return m_renameItems; }
-	const std::vector< CTouchItem* >& GetTouchItems( void ) const { return m_touchItems; }
+	const std::vector<CRenameItem*>& GetRenameItems( void ) const { return m_renameItems; }
+	const std::vector<CTouchItem*>& GetTouchItems( void ) const { return m_touchItems; }
 
 	void ResetDestinations( void );
 
@@ -71,11 +71,11 @@ public:
 	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter = nullptr ) const;
 	utl::ICommand* MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter ) throws_( CRuntimeException );
 
-	bool PromptExtensionChanges( const std::vector< fs::CPath >& destPaths ) const;
+	bool PromptExtensionChanges( const std::vector<fs::CPath>& destPaths ) const;
 
 	const ren::TSortingPair& GetRenameSorting( void ) const { return m_renameSorting; }
 	void SetRenameSorting( const ren::TSortingPair& renameSorting );
-	void SwapRenameSequence( std::vector< CRenameItem* >& rListSequence, const ren::TSortingPair& renameSorting );
+	void SwapRenameSequence( std::vector<CRenameItem*>& rListSequence, const ren::TSortingPair& renameSorting );
 
 	// TOUCH
 	bool CopyClipSourceFileStates( CWnd* pWnd ) const;
@@ -123,14 +123,14 @@ private:
 	friend struct AddTouchItemFromCmd;
 private:
 	svc::ICommandService* m_pCmdSvc;
-	std::vector< fs::CPath > m_sourcePaths;
+	std::vector<fs::CPath> m_sourcePaths;
 	fs::CPath m_commonParentPath;						// for paths in multiple directories
 
 	persist ren::TSortingPair m_renameSorting;
 
 	// lazy init
-	std::vector< CRenameItem* > m_renameItems;
-	std::vector< CTouchItem* > m_touchItems;
+	std::vector<CRenameItem*> m_renameItems;
+	std::vector<CTouchItem*> m_touchItems;
 public:
 	static const std::tstring section_filesSheet;
 
@@ -148,9 +148,9 @@ utl::ICommand* CFileModel::MakeChangeDestPathsCmd( const FuncType& func, const s
 	REQUIRE( !m_renameItems.empty() );		// initialized?
 
 	bool anyChanges = false;
-	std::vector< fs::CPath > destPaths; destPaths.reserve( m_renameItems.size() );
+	std::vector<fs::CPath> destPaths; destPaths.reserve( m_renameItems.size() );
 
-	for ( std::vector< CRenameItem* >::const_iterator itItem = m_renameItems.begin(); itItem != m_renameItems.end(); ++itItem )
+	for ( std::vector<CRenameItem*>::const_iterator itItem = m_renameItems.begin(); itItem != m_renameItems.end(); ++itItem )
 	{
 		fs::CPathParts destParts;
 		( *itItem )->SplitSafeDestPath( &destParts );							// for directories treat extension as part of the fname

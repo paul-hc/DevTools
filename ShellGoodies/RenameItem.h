@@ -11,10 +11,10 @@ class CRenameItem;
 
 namespace ren
 {
-	bool MakePairsFromItems( CPathRenamePairs* pOutRenamePairs, const std::vector< CRenameItem* >& renameItems );
-	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const CPathRenamePairs& renamePairs );
-	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const CPathRenamePairs& renamePairs );
-	void QueryDestFnames( std::vector< std::tstring >& rDestFnames, const std::vector< CRenameItem* >& items );
+	bool MakePairsFromItems( CPathRenamePairs* pOutRenamePairs, const std::vector<CRenameItem*>& renameItems );
+	void MakePairsToItems( std::vector<CRenameItem*>& rOutRenameItems, const CPathRenamePairs& renamePairs );
+	void AssignPairsToItems( const std::vector<CRenameItem*>& items, const CPathRenamePairs& renamePairs );
+	void QueryDestFnames( std::vector<std::tstring>& rDestFnames, const std::vector<CRenameItem*>& items );
 
 	// special directory handling: treat ext as part of fname (no file type by extension)
 	bool SplitPath( fs::CPathParts* pOutParts, const fs::CPath* pSrcFilePath, const fs::CPath& filePath );

@@ -35,7 +35,7 @@ namespace cmd
 	interface IFileDetailsCmd
 	{
 		virtual size_t GetFileCount( void ) const = 0;
-		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const = 0;
+		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const = 0;
 	};
 
 	interface IPersistentCmd : public IFileDetailsCmd

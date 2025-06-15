@@ -68,10 +68,10 @@ int CheckDup::Toggle( int checkState ) const
 
 namespace hlp
 {
-	bool HasUniqueGroups( const std::vector< CDuplicateFileItem* >& dupItems )
+	bool HasUniqueGroups( const std::vector<CDuplicateFileItem*>& dupItems )
 	{
-		std::set< CDuplicateFilesGroup* > groups;
-		for ( std::vector< CDuplicateFileItem* >::const_iterator itDupItem = dupItems.begin(); itDupItem != dupItems.end(); ++itDupItem )
+		std::set<CDuplicateFilesGroup*> groups;
+		for ( std::vector<CDuplicateFileItem*>::const_iterator itDupItem = dupItems.begin(); itDupItem != dupItems.end(); ++itDupItem )
 			if ( !groups.insert( ( *itDupItem )->GetParentGroup() ).second )
 				return false;
 
@@ -90,7 +90,7 @@ namespace hlp
 
 	CDuplicateFileItem* FindFirstItemWithFolderPath( const CDuplicateFilesGroup* pGroup, const fs::CPath& dirPath, RecursionDepth depth = Shallow )
 	{
-		for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pGroup->GetItems().begin(); itItem != pGroup->GetItems().end(); ++itItem )
+		for ( std::vector<CDuplicateFileItem*>::const_iterator itItem = pGroup->GetItems().begin(); itItem != pGroup->GetItems().end(); ++itItem )
 			if ( HasFolderPath( *itItem, dirPath, depth ) )
 				return *itItem;
 
@@ -99,16 +99,16 @@ namespace hlp
 
 	CDuplicateFileItem* FindFirstItemNotWithFolderPath( const CDuplicateFilesGroup* pGroup, const fs::CPath& dirPath, RecursionDepth depth = Shallow )
 	{
-		for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pGroup->GetItems().begin(); itItem != pGroup->GetItems().end(); ++itItem )
+		for ( std::vector<CDuplicateFileItem*>::const_iterator itItem = pGroup->GetItems().begin(); itItem != pGroup->GetItems().end(); ++itItem )
 			if ( !HasFolderPath( *itItem, dirPath, depth ) )
 				return *itItem;
 
 		return nullptr;
 	}
 
-	void QueryGroupsOfDupItems( std::vector< CDuplicateFilesGroup* >& rDupGroups, const std::vector< CDuplicateFileItem* >& dupItems )
+	void QueryGroupsOfDupItems( std::vector<CDuplicateFilesGroup*>& rDupGroups, const std::vector<CDuplicateFileItem*>& dupItems )
 	{
-		for ( std::vector< CDuplicateFileItem* >::const_iterator itDupItem = dupItems.begin(); itDupItem != dupItems.end(); ++itDupItem )
+		for ( std::vector<CDuplicateFileItem*>::const_iterator itDupItem = dupItems.begin(); itDupItem != dupItems.end(); ++itDupItem )
 			utl::AddUnique( rDupGroups, ( *itDupItem )->GetParentGroup() );
 	}
 
@@ -138,13 +138,13 @@ namespace hlp
 		{
 			utl::RemoveIf( m_checkedDupItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );		// remove any new original items from the checked items
 
-			for ( std::vector< CDuplicateFilesGroup* >::const_iterator itCheckedGroup = m_fullyCheckedGroups.begin(); itCheckedGroup != m_fullyCheckedGroups.end(); ++itCheckedGroup )
+			for ( std::vector<CDuplicateFilesGroup*>::const_iterator itCheckedGroup = m_fullyCheckedGroups.begin(); itCheckedGroup != m_fullyCheckedGroups.end(); ++itCheckedGroup )
 				utl::JoinUnique( m_checkedDupItems, ( *itCheckedGroup )->GetItems().begin() + 1, ( *itCheckedGroup )->GetItems().end() );		// append duplicate items to check
 		}
 	private:
 		CReportListControl* m_pListCtrl;
-		std::vector< CDuplicateFileItem* > m_checkedDupItems;
-		std::vector< CDuplicateFilesGroup* > m_fullyCheckedGroups;		// to restore later groups with fully-checked state
+		std::vector<CDuplicateFileItem*> m_checkedDupItems;
+		std::vector<CDuplicateFilesGroup*> m_fullyCheckedGroups;		// to restore later groups with fully-checked state
 	};
 }
 
@@ -335,11 +335,11 @@ bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 	}
 }
 
-bool CFindDuplicatesDialog::QueryCheckedDupFilePaths( std::vector< fs::CPath >& rDupFilePaths ) const
+bool CFindDuplicatesDialog::QueryCheckedDupFilePaths( std::vector<fs::CPath>& rDupFilePaths ) const
 {
 	rDupFilePaths.clear();
 
-	std::vector< CDuplicateFileItem* > checkedDupItems;
+	std::vector<CDuplicateFileItem*> checkedDupItems;
 	if ( m_dupsListCtrl.QueryObjectsWithCheckedState( checkedDupItems, CheckDup::CheckedItem ) )
 		func::QueryItemsPaths( rDupFilePaths, checkedDupItems );
 
@@ -348,7 +348,7 @@ bool CFindDuplicatesDialog::QueryCheckedDupFilePaths( std::vector< fs::CPath >& 
 
 bool CFindDuplicatesDialog::DeleteDuplicateFiles( void )
 {
-	std::vector< fs::CPath > dupFilePaths;
+	std::vector<fs::CPath> dupFilePaths;
 	if ( QueryCheckedDupFilePaths( dupFilePaths ) )
 		return ExecuteDuplicatesCmd( new CDeleteFilesCmd( dupFilePaths ) );
 
@@ -357,7 +357,7 @@ bool CFindDuplicatesDialog::DeleteDuplicateFiles( void )
 
 bool CFindDuplicatesDialog::MoveDuplicateFiles( void )
 {
-	std::vector< fs::CPath > dupFilePaths;
+	std::vector<fs::CPath> dupFilePaths;
 	if ( QueryCheckedDupFilePaths( dupFilePaths ) )
 	{
 		static fs::CPath s_destFolderPath;
@@ -444,7 +444,7 @@ void CFindDuplicatesDialog::SetupDialog( void )
 }
 
 
-void CFindDuplicatesDialog::SetupPathsListItems( CPathItemListCtrl* pPathsListCtrl, const std::vector< CPathItem* >& pathItems )
+void CFindDuplicatesDialog::SetupPathsListItems( CPathItemListCtrl* pPathsListCtrl, const std::vector<CPathItem*>& pathItems )
 {
 	CScopedInternalChange internalChange( pPathsListCtrl );
 	lv::TScopedStatus_ByText sel( pPathsListCtrl );
@@ -456,7 +456,7 @@ void CFindDuplicatesDialog::SetupPathsListItems( CPathItemListCtrl* pPathsListCt
 		pPathsListCtrl->InsertObjectItem( index, pathItems[ index ] );
 }
 
-bool CFindDuplicatesDialog::InputNewPath( std::vector< CPathItem* >& rPathItems, CPathItem* pTargetItem, const fs::CPath& newPath )
+bool CFindDuplicatesDialog::InputNewPath( std::vector<CPathItem*>& rPathItems, CPathItem* pTargetItem, const fs::CPath& newPath )
 {
 	ASSERT( utl::Contains( rPathItems, pTargetItem ) );
 
@@ -478,12 +478,12 @@ bool CFindDuplicatesDialog::InputNewPath( std::vector< CPathItem* >& rPathItems,
 	return true;
 }
 
-bool CFindDuplicatesDialog::EditPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector< CPathItem* >& rPathItems )
+bool CFindDuplicatesDialog::EditPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector<CPathItem*>& rPathItems )
 {
 	CItemListDialog dlg( this, s_pathItemsContent );
 
 	dlg.m_items.reserve( rPathItems.size() );
-	for ( std::vector< CPathItem* >::const_iterator itSearchPathItem = rPathItems.begin(); itSearchPathItem != rPathItems.end(); ++itSearchPathItem )
+	for ( std::vector<CPathItem*>::const_iterator itSearchPathItem = rPathItems.begin(); itSearchPathItem != rPathItems.end(); ++itSearchPathItem )
 		dlg.m_items.push_back( ( *itSearchPathItem )->GetFilePath().Get() );
 
 	if ( dlg.DoModal() != IDOK )
@@ -498,12 +498,12 @@ bool CFindDuplicatesDialog::EditPathsListItems( CPathItemListCtrl* pPathsListCtr
 	return true;
 }
 
-void CFindDuplicatesDialog::PushNewPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector< CPathItem* >& rPathItems,
-												   const std::vector< fs::CPath >& newPaths, size_t atPos /*= utl::npos*/ )
+void CFindDuplicatesDialog::PushNewPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector<CPathItem*>& rPathItems,
+												   const std::vector<fs::CPath>& newPaths, size_t atPos /*= utl::npos*/ )
 {
-	std::vector< CPathItem* > newPathItems;
+	std::vector<CPathItem*> newPathItems;
 
-	for ( std::vector< fs::CPath >::const_iterator itFilePath = newPaths.begin(); itFilePath != newPaths.end(); ++itFilePath )
+	for ( std::vector<fs::CPath>::const_iterator itFilePath = newPaths.begin(); itFilePath != newPaths.end(); ++itFilePath )
 		if ( nullptr == func::FindItemWithPath( rPathItems, *itFilePath ) )			// unique path?
 			newPathItems.push_back( new CPathItem( *itFilePath ) );
 
@@ -586,14 +586,14 @@ void CFindDuplicatesDialog::DisplayCheckedGroupsInfo( void )
 {
 	std::tstring text;
 
-	std::vector< CDuplicateFileItem* > checkedDupItems;
+	std::vector<CDuplicateFileItem*> checkedDupItems;
 	if ( m_dupsListCtrl.QueryObjectsWithCheckedState( checkedDupItems, CheckDup::CheckedItem ) )
 	{
-		std::set< CDuplicateFilesGroup* > dupGroups;
-		std::set< fs::CPath > dirPaths;
+		std::set<CDuplicateFilesGroup*> dupGroups;
+		std::set<fs::CPath> dirPaths;
 		UINT64 totalFileSize = 0;
 
-		for ( std::vector< CDuplicateFileItem* >::const_iterator itDupItem = checkedDupItems.begin(); itDupItem != checkedDupItems.end(); ++itDupItem )
+		for ( std::vector<CDuplicateFileItem*>::const_iterator itDupItem = checkedDupItems.begin(); itDupItem != checkedDupItems.end(); ++itDupItem )
 		{
 			CDuplicateFilesGroup* pParentGroup = ( *itDupItem )->GetParentGroup();
 
@@ -672,7 +672,7 @@ void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, L
 	static const ui::CTextEffect s_duplicate( ui::Regular, DuplicateRed );
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
-	const CDuplicateFileItem* pFileItem = CReportListControl::AsPtr< CDuplicateFileItem >( rowKey );
+	const CDuplicateFileItem* pFileItem = CReportListControl::AsPtr<CDuplicateFileItem>( rowKey );
 	const ui::CTextEffect* pTextEffect = pFileItem->IsOriginalItem() ? &s_original : &s_duplicate;
 
 	if ( utl::Contains( m_errorItems, pFileItem ) )
@@ -695,7 +695,7 @@ void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, L
 
 CDuplicateFileItem* CFindDuplicatesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
 {
-	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
+	for ( std::vector<CDuplicateFilesGroup*>::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
 		if ( CDuplicateFileItem* pFoundItem = ( *itGroup )->FindItem( keyPath ) )
 			return pFoundItem;
 
@@ -704,15 +704,15 @@ CDuplicateFileItem* CFindDuplicatesDialog::FindItemWithKey( const fs::CPath& key
 
 void CFindDuplicatesDialog::MarkInvalidSrcItems( void )
 {
-	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
-		for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = ( *itGroup )->GetItems().begin(); itItem != ( *itGroup )->GetItems().end(); ++itItem )
+	for ( std::vector<CDuplicateFilesGroup*>::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
+		for ( std::vector<CDuplicateFileItem*>::const_iterator itItem = ( *itGroup )->GetItems().begin(); itItem != ( *itGroup )->GetItems().end(); ++itItem )
 			if ( !( *itItem )->GetFilePath().FileExist() )
 				utl::AddUnique( m_errorItems, *itItem );
 }
 
 void CFindDuplicatesDialog::EnsureVisibleFirstError( void )
 {
-	if ( const CDuplicateFileItem* pFirstErrorItem = GetFirstErrorItem< CDuplicateFileItem >() )
+	if ( const CDuplicateFileItem* pFirstErrorItem = GetFirstErrorItem<CDuplicateFileItem>() )
 		m_dupsListCtrl.EnsureVisibleObject( pFirstErrorItem );
 
 	m_dupsListCtrl.Invalidate();				// trigger some highlighting
@@ -723,7 +723,7 @@ bool CFindDuplicatesDialog::IsGroupFullyChecked( const CDuplicateFilesGroup* pGr
 	ASSERT( pGroup->GetItems().front()->IsOriginalItem() );
 	size_t checkedDupsCount = 0;
 
-	for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pGroup->GetItems().begin() + 1; itItem != pGroup->GetItems().end(); ++itItem )
+	for ( std::vector<CDuplicateFileItem*>::const_iterator itItem = pGroup->GetItems().begin() + 1; itItem != pGroup->GetItems().end(); ++itItem )
 		if ( CheckDup::CheckedItem == m_dupsListCtrl.GetObjectCheckState( *itItem ) )
 			++checkedDupsCount;
 
@@ -739,7 +739,7 @@ void CFindDuplicatesDialog::ToggleCheckGroupDuplicates( unsigned int groupId )
 
 	CScopedInternalChange change( &m_dupsListCtrl );		// prevent selection block check-state changes
 
-	for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pCurrGroup->GetItems().begin() + 1; itItem != pCurrGroup->GetItems().end(); ++itItem )
+	for ( std::vector<CDuplicateFileItem*>::const_iterator itItem = pCurrGroup->GetItems().begin() + 1; itItem != pCurrGroup->GetItems().end(); ++itItem )
 		m_dupsListCtrl.ModifyObjectCheckState( *itItem, checkState );
 }
 
@@ -989,7 +989,7 @@ void CFindDuplicatesDialog::On_CheckAllDuplicates( UINT cmdId )
 
 	for ( UINT i = 0, count = m_dupsListCtrl.GetItemCount(); i != count; ++i )
 	{
-		const CDuplicateFileItem* pItem = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( i );
+		const CDuplicateFileItem* pItem = m_dupsListCtrl.GetPtrAt<CDuplicateFileItem>( i );
 
 		m_dupsListCtrl.ModifyCheckState( i, pItem->IsOriginalItem() ? CheckDup::OriginalItem : toCheckState );
 	}
@@ -1013,17 +1013,17 @@ void CFindDuplicatesDialog::OnUpdate_ToggleCheckGroupDups( CCmdUI* pCmdUI )
 
 void CFindDuplicatesDialog::On_KeepAsOriginalFile( void )
 {
-	std::vector< CDuplicateFileItem* > selItems;
+	std::vector<CDuplicateFileItem*> selItems;
 	if ( m_dupsListCtrl.QuerySelectionAs( selItems ) )
 	{
 		hlp::CCheckedStateDupItems checkedState( &m_dupsListCtrl );
 
 		utl::RemoveIf( selItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );
 		{
-			std::vector< CDuplicateFilesGroup* > dupGroups;
+			std::vector<CDuplicateFilesGroup*> dupGroups;
 			hlp::QueryGroupsOfDupItems( dupGroups, selItems );
 
-			for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = dupGroups.begin(); itGroup != dupGroups.end(); ++itGroup )
+			for ( std::vector<CDuplicateFilesGroup*>::const_iterator itGroup = dupGroups.begin(); itGroup != dupGroups.end(); ++itGroup )
 				if ( IsGroupFullyChecked( *itGroup ) )
 					checkedState.RegisterFullyCheckedGroup( *itGroup );		// to restore later group fully-checked state
 		}
@@ -1044,7 +1044,7 @@ void CFindDuplicatesDialog::OnUpdate_KeepAsOriginalFile( CCmdUI* pCmdUI )
 	bool enable = false;
 	if ( m_dupsListCtrl.AnySelected() )
 	{
-		std::vector< CDuplicateFileItem* > selItems;
+		std::vector<CDuplicateFileItem*> selItems;
 		if ( m_dupsListCtrl.QuerySelectionAs( selItems ) )
 			if ( utl::Any( selItems, std::mem_fun( &CDuplicateFileItem::IsDuplicateItem ) ) )
 				enable = hlp::HasUniqueGroups( selItems );
@@ -1059,13 +1059,13 @@ void CFindDuplicatesDialog::On_PickAsOriginalFolder( void )
 	if ( -1 == selIndex )
 		return;
 
-	fs::CPath dirPath = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( selIndex )->GetFilePath().GetParentPath();
+	fs::CPath dirPath = m_dupsListCtrl.GetPtrAt<CDuplicateFileItem>( selIndex )->GetFilePath().GetParentPath();
 	RecursionDepth depth = ui::IsKeyPressed( VK_SHIFT ) ? Deep : Shallow;
 
 	hlp::CCheckedStateDupItems checkedState( &m_dupsListCtrl );
-	std::vector< CDuplicateFileItem* > originalItems;
+	std::vector<CDuplicateFileItem*> originalItems;
 
-	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
+	for ( std::vector<CDuplicateFilesGroup*>::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
 		if ( CDuplicateFileItem* pItem = hlp::FindFirstItemWithFolderPath( *itGroup, dirPath, depth ) )
 			if ( !pItem->IsOriginalItem() )
 			{
@@ -1093,13 +1093,13 @@ void CFindDuplicatesDialog::On_DemoteAsDuplicateFolder( void )
 	if ( -1 == selIndex )
 		return;
 
-	fs::CPath dirPath = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( selIndex )->GetFilePath().GetParentPath();
+	fs::CPath dirPath = m_dupsListCtrl.GetPtrAt<CDuplicateFileItem>( selIndex )->GetFilePath().GetParentPath();
 	RecursionDepth depth = ui::IsKeyPressed( VK_SHIFT ) ? Deep : Shallow;
 
 	hlp::CCheckedStateDupItems checkedState( &m_dupsListCtrl );
-	std::vector< CDuplicateFileItem* > dupItems;
+	std::vector<CDuplicateFileItem*> dupItems;
 
-	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
+	for ( std::vector<CDuplicateFilesGroup*>::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
 	{
 		CDuplicateFileItem* pOriginalItem = ( *itGroup )->GetOriginalItem();
 
@@ -1127,7 +1127,7 @@ void CFindDuplicatesDialog::OnUpdate_DemoteAsDuplicateFolder( CCmdUI* pCmdUI )
 
 void CFindDuplicatesDialog::On_PushIgnoreFile( void )
 {
-	std::vector< fs::CPath > selFilePaths;
+	std::vector<fs::CPath> selFilePaths;
 	if ( m_dupsListCtrl.QuerySelectedItemPaths( selFilePaths ) )
 		PushNewPathsListItems( &m_ignorePathsListCtrl, m_ignorePathItems, selFilePaths );
 }
@@ -1139,11 +1139,11 @@ void CFindDuplicatesDialog::OnUpdate_PushIgnoreFile( CCmdUI* pCmdUI )
 
 void CFindDuplicatesDialog::On_PushIgnoreFolder( void )
 {
-	std::vector< fs::CPath > selFilePaths;
+	std::vector<fs::CPath> selFilePaths;
 	if ( m_dupsListCtrl.QuerySelectedItemPaths( selFilePaths ) )
 	{
-		std::vector< fs::CPath > dirPaths;
-		for ( std::vector< fs::CPath >::const_iterator itSelFilePath = selFilePaths.begin(); itSelFilePath != selFilePaths.end(); ++itSelFilePath )
+		std::vector<fs::CPath> dirPaths;
+		for ( std::vector<fs::CPath>::const_iterator itSelFilePath = selFilePaths.begin(); itSelFilePath != selFilePaths.end(); ++itSelFilePath )
 			utl::AddUnique( dirPaths, ( *itSelFilePath ).GetParentPath() );
 
 		PushNewPathsListItems( &m_ignorePathsListCtrl, m_ignorePathItems, dirPaths );
@@ -1218,7 +1218,7 @@ void CFindDuplicatesDialog::OnLvnEndLabelEdit_PathsList( NMHDR* pNmHdr, LRESULT*
 	{
 		CPathItem* pTargetItem = CListLikeCtrlBase::AsPtr<CPathItem>( pDispInfo->item.lParam );
 		fs::CPath newPath( pDispInfo->item.pszText );
-		std::vector< CPathItem* >* pPathItems = nullptr;
+		std::vector<CPathItem*>* pPathItems = nullptr;
 
 		switch ( pNmHdr->idFrom )
 		{

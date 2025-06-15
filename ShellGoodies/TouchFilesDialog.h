@@ -70,12 +70,12 @@ private:
 
 	static fs::TimeField GetTimeField( UINT dtId );
 private:
-	const std::vector< CTouchItem* >& m_rTouchItems;
+	const std::vector<CTouchItem*>& m_rTouchItems;
 	bool m_anyChanges;
 
 	// multiple states accumulators for edit fields
-	std::vector< multi::CDateTimeState > m_dateTimeStates;
-	std::vector< multi::CAttribCheckState > m_attribCheckStates;
+	std::vector<multi::CDateTimeState> m_dateTimeStates;
+	std::vector<multi::CAttribCheckState> m_attribCheckStates;
 private:
 	// enum { IDD = IDD_TOUCH_FILES_DIALOG };
 	enum Column

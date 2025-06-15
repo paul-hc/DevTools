@@ -31,7 +31,7 @@ public:
 	CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CRenameFilesDialog();
 
-	const std::vector< CRenameItem* >& GetRenameItems( void ) const { return m_rRenameItems; }
+	const std::vector<CRenameItem*>& GetRenameItems( void ) const { return m_rRenameItems; }
 
 	bool IsInitialized( void ) const { return m_isInitialized; }
 	bool HasDestPaths( void ) const;
@@ -75,7 +75,7 @@ private:
 	bool GenerateDestPaths( const CPathFormatter& pathFormatter, UINT* pSeqCount );
 	void ReplaceFormatEditText( const std::tstring& text );
 private:
-	const std::vector< CRenameItem* >& m_rRenameItems;
+	const std::vector<CRenameItem*>& m_rRenameItems;
 	std::auto_ptr<CRenameService> m_pRenSvc;
 	bool m_isInitialized;
 

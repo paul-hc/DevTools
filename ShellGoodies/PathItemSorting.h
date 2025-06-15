@@ -47,7 +47,7 @@ namespace ren
 			return GetAtPos( static_cast<size_t>( sortBy + 1 ) );	// offset by 1 to account for -1 position of RecordDefault
 		}
 	private:
-		std::vector< pred::IComparator* > m_comparators;
+		std::vector<pred::IComparator*> m_comparators;
 	};
 
 

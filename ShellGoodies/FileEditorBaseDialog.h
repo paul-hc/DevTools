@@ -57,10 +57,10 @@ protected:
 protected:
 	CFileModel* m_pFileModel;
 	svc::ICommandService* m_pCmdSvc;
-	std::vector< cmd::CommandType > m_nativeCmdTypes;		// the first one always identifies the editor
+	std::vector<cmd::CommandType> m_nativeCmdTypes;		// the first one always identifies the editor
 	Mode m_mode;
 
-	std::vector< CPathItemBase* > m_errorItems;
+	std::vector<CPathItemBase*> m_errorItems;
 
 	// controls
 	CIconButton m_okButton;				// overloaded, does various things depending of the mode

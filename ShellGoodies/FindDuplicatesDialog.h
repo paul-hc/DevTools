@@ -52,13 +52,13 @@ private:
 	void SetupDialog( void );
 
 	// data
-	bool QueryCheckedDupFilePaths( std::vector< fs::CPath >& rDupFilePaths ) const;
+	bool QueryCheckedDupFilePaths( std::vector<fs::CPath>& rDupFilePaths ) const;
 
 	// output
-	static void SetupPathsListItems( CPathItemListCtrl* pPathsListCtrl, const std::vector< CPathItem* >& pathItems );
-	static bool InputNewPath( std::vector< CPathItem* >& rPathItems, CPathItem* pTargetItem, const fs::CPath& newPath );
-	bool EditPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector< CPathItem* >& rPathItems );
-	void PushNewPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector< CPathItem* >& rPathItems, const std::vector< fs::CPath >& newPaths, size_t atPos = utl::npos );
+	static void SetupPathsListItems( CPathItemListCtrl* pPathsListCtrl, const std::vector<CPathItem*>& pathItems );
+	static bool InputNewPath( std::vector<CPathItem*>& rPathItems, CPathItem* pTargetItem, const fs::CPath& newPath );
+	bool EditPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector<CPathItem*>& rPathItems );
+	void PushNewPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector<CPathItem*>& rPathItems, const std::vector<fs::CPath>& newPaths, size_t atPos = utl::npos );
 
 	void SetupDuplicateFileList( void );
 
@@ -94,10 +94,10 @@ private:
 	template< typename CompareItemPtr >
 	pred::CompareResult CompareGroupsByItemField( int leftGroupId, int rightGroupId, CompareItemPtr compareItem ) const;
 private:
-	std::vector< CPathItem* > m_searchPathItems;
-	std::vector< CPathItem* > m_ignorePathItems;
-	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
-	persist std::vector< std::tstring > m_fileTypeSpecs;
+	std::vector<CPathItem*> m_searchPathItems;
+	std::vector<CPathItem*> m_ignorePathItems;
+	std::vector<CDuplicateFilesGroup*> m_duplicateGroups;
+	persist std::vector<std::tstring> m_fileTypeSpecs;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
 	enum DupFileColumn { FileName, FolderPath, Size, Crc32, DateModified, DuplicateCount };

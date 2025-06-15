@@ -15,7 +15,7 @@ CFileService::CFileService( void )
 {
 }
 
-std::auto_ptr<CMacroCommand> CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& renameItems ) const
+std::auto_ptr<CMacroCommand> CFileService::MakeRenameCmds( const std::vector<CRenameItem*>& renameItems ) const
 {
 	std::auto_ptr<CMacroCommand> pBatchMacro;
 	if ( !IsDistinctWorkingSet( renameItems ) )			// all SRC and DEST paths must be a distinct working set (pre-validated)?
@@ -23,10 +23,10 @@ std::auto_ptr<CMacroCommand> CFileService::MakeRenameCmds( const std::vector< CR
 
 	pBatchMacro.reset( new cmd::CFileMacroCmd( cmd::RenameFile ) );
 
-	std::vector< utl::ICommand* > finalCmds;
-	std::set< fs::CPath > destToBeSet;
+	std::vector<utl::ICommand*> finalCmds;
+	std::set<fs::CPath> destToBeSet;
 
-	for ( std::vector< CRenameItem* >::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
+	for ( std::vector<CRenameItem*>::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
 		if ( ( *itItem )->IsModified() )
 		{
 			const fs::CPath& srcPath = ( *itItem )->GetSrcPath();
@@ -50,17 +50,17 @@ std::auto_ptr<CMacroCommand> CFileService::MakeRenameCmds( const std::vector< CR
 		}
 
 	// add final commands: INTERM -> DEST
-	for ( std::vector< utl::ICommand* >::const_iterator itLateCmd = finalCmds.begin(); itLateCmd != finalCmds.end(); ++itLateCmd )
+	for ( std::vector<utl::ICommand*>::const_iterator itLateCmd = finalCmds.begin(); itLateCmd != finalCmds.end(); ++itLateCmd )
 		pBatchMacro->AddCmd( *itLateCmd );
 
 	return pBatchMacro;
 }
 
-std::auto_ptr<CMacroCommand> CFileService::MakeTouchCmds( const std::vector< CTouchItem* >& touchItems ) const
+std::auto_ptr<CMacroCommand> CFileService::MakeTouchCmds( const std::vector<CTouchItem*>& touchItems ) const
 {
 	std::auto_ptr<CMacroCommand> pBatchMacro( new cmd::CFileMacroCmd( cmd::TouchFile ) );
 
-	for ( std::vector< CTouchItem* >::const_iterator itItem = touchItems.begin(); itItem != touchItems.end(); ++itItem )
+	for ( std::vector<CTouchItem*>::const_iterator itItem = touchItems.begin(); itItem != touchItems.end(); ++itItem )
 		if ( ( *itItem )->IsModified() )
 			pBatchMacro->AddCmd( new CTouchFileCmd( ( *itItem )->GetSrcState(), ( *itItem )->GetDestState() ) );
 
@@ -68,11 +68,11 @@ std::auto_ptr<CMacroCommand> CFileService::MakeTouchCmds( const std::vector< CTo
 }
 
 
-bool CFileService::IsDistinctWorkingSet( const std::vector< CRenameItem* >& renameItems )
+bool CFileService::IsDistinctWorkingSet( const std::vector<CRenameItem*>& renameItems )
 {
-	std::set< fs::CPath > srcPaths, destPaths;
+	std::set<fs::CPath> srcPaths, destPaths;
 
-	for ( std::vector< CRenameItem* >::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
+	for ( std::vector<CRenameItem*>::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
 		if ( !srcPaths.insert( ( *itItem )->GetSrcPath() ).second || !destPaths.insert( ( *itItem )->GetDestPath() ).second )
 			return false;		// SRC or DEST not unique in the working set
 
@@ -81,7 +81,7 @@ bool CFileService::IsDistinctWorkingSet( const std::vector< CRenameItem* >& rena
 	return true;
 }
 
-fs::CPath CFileService::MakeUniqueIntermPath( const fs::CPath& destPath, const std::set< fs::CPath >& destToBeSet )
+fs::CPath CFileService::MakeUniqueIntermPath( const fs::CPath& destPath, const std::set<fs::CPath>& destToBeSet )
 {
 	static const CPathFormatter s_formatter( _T("*-[#]"), true );
 

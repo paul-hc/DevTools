@@ -246,17 +246,17 @@ void CTouchFilesDialog::AccumulateItemStates( const CTouchItem* pTouchItem )
 	m_dateTimeStates[ fs::ModifiedDate ].Accumulate( pTouchItem->GetDestState().m_modifTime );
 	m_dateTimeStates[ fs::AccessedDate ].Accumulate( pTouchItem->GetDestState().m_accessTime );
 
-	for ( std::vector< multi::CAttribCheckState >::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
+	for ( std::vector<multi::CAttribCheckState>::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
 		itAttribState->Accumulate( pTouchItem->GetDestState().m_attributes );
 }
 
 void CTouchFilesDialog::UpdateFieldControls( void )
 {
 	// commit common values to field controls
-	for ( std::vector< multi::CDateTimeState >::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
+	for ( std::vector<multi::CDateTimeState>::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
 		itDateTimeState->UpdateCtrl( this );
 
-	for ( std::vector< multi::CAttribCheckState >::const_iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
+	for ( std::vector<multi::CAttribCheckState>::const_iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
 		itAttribState->UpdateCtrl( this );
 }
 
@@ -280,10 +280,10 @@ void CTouchFilesDialog::UpdateFieldsFromSel( int selIndex )
 
 void CTouchFilesDialog::InputFields( void )
 {
-	for ( std::vector< multi::CDateTimeState >::iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
+	for ( std::vector<multi::CDateTimeState>::iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
 		itDateTimeState->InputCtrl( this );
 
-	for ( std::vector< multi::CAttribCheckState >::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
+	for ( std::vector<multi::CAttribCheckState>::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
 		itAttribState->InputCtrl( this );
 }
 
@@ -298,7 +298,7 @@ void CTouchFilesDialog::ApplyFields( void )
 
 utl::ICommand* CTouchFilesDialog::MakeChangeDestFileStatesCmd( void )
 {
-	std::vector< fs::CFileState > destFileStates; destFileStates.reserve( m_rTouchItems.size() );
+	std::vector<fs::CFileState> destFileStates; destFileStates.reserve( m_rTouchItems.size() );
 	bool anyChanges = false;
 
 	// apply valid edits, i.e. if not null
@@ -308,11 +308,11 @@ utl::ICommand* CTouchFilesDialog::MakeChangeDestFileStatesCmd( void )
 
 		fs::CFileState newFileState = pTouchItem->GetDestState();
 
-		for ( std::vector< multi::CDateTimeState >::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
+		for ( std::vector<multi::CDateTimeState>::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
 			if ( itDateTimeState->CanApply() )
 				itDateTimeState->Apply( newFileState );
 
-		for ( std::vector< multi::CAttribCheckState >::const_iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
+		for ( std::vector<multi::CAttribCheckState>::const_iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
 			if ( itAttribState->CanApply() )
 				itAttribState->Apply( newFileState );
 
@@ -464,13 +464,13 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPA
 
 CTouchItem* CTouchFilesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
 {
-	std::vector< CTouchItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rTouchItems, keyPath, CPathItemBase::ToFilePath() );
+	std::vector<CTouchItem*>::const_iterator itFoundItem = utl::BinaryFind( m_rTouchItems, keyPath, CPathItemBase::ToFilePath() );
 	return itFoundItem != m_rTouchItems.end() ? *itFoundItem : nullptr;
 }
 
 void CTouchFilesDialog::MarkInvalidSrcItems( void )
 {
-	for ( std::vector< CTouchItem* >::const_iterator itTouchItem = m_rTouchItems.begin(); itTouchItem != m_rTouchItems.end(); ++itTouchItem )
+	for ( std::vector<CTouchItem*>::const_iterator itTouchItem = m_rTouchItems.begin(); itTouchItem != m_rTouchItems.end(); ++itTouchItem )
 		if ( !( *itTouchItem )->GetFilePath().FileExist() )
 			utl::AddUnique( m_errorItems, *itTouchItem );
 }
@@ -664,7 +664,7 @@ void CTouchFilesDialog::OnPushToAttributeFields( void )
 	BYTE attributes = m_fileListCtrl.GetPtrAt<CTouchItem>( m_fileListCtrl.GetCurSel() )->GetSrcState().m_attributes;
 
 	multi::SetInvalidAll( m_attribCheckStates );
-	for ( std::vector< multi::CAttribCheckState >::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
+	for ( std::vector<multi::CAttribCheckState>::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
 	{
 		itAttribState->Accumulate( attributes );
 		itAttribState->UpdateCtrl( this );

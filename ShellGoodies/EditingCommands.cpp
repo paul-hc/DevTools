@@ -53,14 +53,14 @@ bool CBaseChangeDestCmd::IsUndoable( void ) const override
 
 // CChangeDestPathsCmd implementation
 
-CChangeDestPathsCmd::CChangeDestPathsCmd( CFileModel* pFileModel, std::vector< fs::CPath >& rNewDestPaths, const std::tstring& cmdTag /*= std::tstring()*/ )
+CChangeDestPathsCmd::CChangeDestPathsCmd( CFileModel* pFileModel, std::vector<fs::CPath>& rNewDestPaths, const std::tstring& cmdTag /*= std::tstring()*/ )
 	: CBaseChangeDestCmd( cmd::ChangeDestPaths, pFileModel, cmdTag )
 {
 	REQUIRE( !m_pFileModel->GetRenameItems().empty() );		// should be initialized
 	REQUIRE( m_pFileModel->GetRenameItems().size() == rNewDestPaths.size() );
 
 	m_srcPaths.reserve( m_pFileModel->GetRenameItems().size() );
-	for ( std::vector< CRenameItem* >::const_iterator itItem = m_pFileModel->GetRenameItems().begin(); itItem != m_pFileModel->GetRenameItems().end(); ++itItem )
+	for ( std::vector<CRenameItem*>::const_iterator itItem = m_pFileModel->GetRenameItems().begin(); itItem != m_pFileModel->GetRenameItems().end(); ++itItem )
 		m_srcPaths.push_back( ( *itItem )->GetSrcPath() );
 
 	m_destPaths.swap( rNewDestPaths );
@@ -116,7 +116,7 @@ size_t CChangeDestPathsCmd::GetFileCount( void ) const
 	return m_srcPaths.size();
 }
 
-void CChangeDestPathsCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+void CChangeDestPathsCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const
 {
 	ASSERT( m_srcPaths.size() == m_destPaths.size() );
 
@@ -130,14 +130,14 @@ void CChangeDestPathsCmd::QueryDetailLines( std::vector< std::tstring >& rLines 
 
 // CChangeDestFileStatesCmd implementation
 
-CChangeDestFileStatesCmd::CChangeDestFileStatesCmd( CFileModel* pFileModel, std::vector< fs::CFileState >& rNewDestStates, const std::tstring& cmdTag /*= std::tstring()*/ )
+CChangeDestFileStatesCmd::CChangeDestFileStatesCmd( CFileModel* pFileModel, std::vector<fs::CFileState>& rNewDestStates, const std::tstring& cmdTag /*= std::tstring()*/ )
 	: CBaseChangeDestCmd( cmd::ChangeDestFileStates, pFileModel, cmdTag )
 {
 	REQUIRE( !m_pFileModel->GetTouchItems().empty() );		// should be initialized
 	REQUIRE( m_pFileModel->GetTouchItems().size() == rNewDestStates.size() );
 
 	m_srcStates.reserve( m_pFileModel->GetTouchItems().size() );
-	for ( std::vector< CTouchItem* >::const_iterator itItem = m_pFileModel->GetTouchItems().begin(); itItem != m_pFileModel->GetTouchItems().end(); ++itItem )
+	for ( std::vector<CTouchItem*>::const_iterator itItem = m_pFileModel->GetTouchItems().begin(); itItem != m_pFileModel->GetTouchItems().end(); ++itItem )
 		m_srcStates.push_back( ( *itItem )->GetSrcState() );
 
 	m_destStates.swap( rNewDestStates );
@@ -193,7 +193,7 @@ size_t CChangeDestFileStatesCmd::GetFileCount( void ) const
 	return m_srcStates.size();
 }
 
-void CChangeDestFileStatesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+void CChangeDestFileStatesCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const
 {
 	ASSERT( m_srcStates.size() == m_destStates.size() );
 
@@ -212,8 +212,8 @@ CResetDestinationsCmd::CResetDestinationsCmd( CFileModel* pFileModel )
 {
 	if ( !pFileModel->GetRenameItems().empty() )		// lazy initialized?
 	{
-		std::vector< fs::CPath > destPaths; destPaths.reserve( pFileModel->GetRenameItems().size() );
-		for ( std::vector< CRenameItem* >::const_iterator itRenameItem = pFileModel->GetRenameItems().begin(); itRenameItem != pFileModel->GetRenameItems().end(); ++itRenameItem )
+		std::vector<fs::CPath> destPaths; destPaths.reserve( pFileModel->GetRenameItems().size() );
+		for ( std::vector<CRenameItem*>::const_iterator itRenameItem = pFileModel->GetRenameItems().begin(); itRenameItem != pFileModel->GetRenameItems().end(); ++itRenameItem )
 			destPaths.push_back( ( *itRenameItem )->GetSrcPath() );		// DEST = SRC
 
 		AddCmd( new CChangeDestPathsCmd( pFileModel, destPaths, m_userInfo ) );
@@ -221,8 +221,8 @@ CResetDestinationsCmd::CResetDestinationsCmd( CFileModel* pFileModel )
 
 	if ( !pFileModel->GetTouchItems().empty() )			// lazy initialized?
 	{
-		std::vector< fs::CFileState > destStates; destStates.reserve( pFileModel->GetTouchItems().size() );
-		for ( std::vector< CTouchItem* >::const_iterator itTouchItem = pFileModel->GetTouchItems().begin(); itTouchItem != pFileModel->GetTouchItems().end(); ++itTouchItem )
+		std::vector<fs::CFileState> destStates; destStates.reserve( pFileModel->GetTouchItems().size() );
+		for ( std::vector<CTouchItem*>::const_iterator itTouchItem = pFileModel->GetTouchItems().begin(); itTouchItem != pFileModel->GetTouchItems().end(); ++itTouchItem )
 			destStates.push_back( ( *itTouchItem )->GetSrcState() );
 
 		AddCmd( new CChangeDestFileStatesCmd( pFileModel, destStates, m_userInfo ) );
@@ -251,7 +251,7 @@ bool CSortRenameItemsCmd::DoExecute( void ) override
 {
 	if ( m_pFileListCtrl != nullptr )		// invoked by sorted list?
 	{	// fetch new rename items order
-		std::vector< CRenameItem* > renameItems;
+		std::vector<CRenameItem*> renameItems;
 		m_pFileListCtrl->QueryObjectsSequence( renameItems );
 
 		m_pObject->SwapRenameSequence( renameItems, m_sorting );

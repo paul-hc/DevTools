@@ -342,14 +342,14 @@ void CRenameEditPage::SetupFileEdits( void )
 {
 	CScopedInternalChange pageChange( this );
 
-	const std::vector< CRenameItem* >& renameItems = m_pParentDlg->GetRenameItems();
+	const std::vector<CRenameItem*>& renameItems = m_pParentDlg->GetRenameItems();
 	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
 
-	std::vector< std::tstring > srcPaths, destPaths;
+	std::vector<std::tstring> srcPaths, destPaths;
 	srcPaths.reserve( renameItems.size() );
 	destPaths.reserve( renameItems.size() );
 
-	for ( std::vector< CRenameItem* >::const_iterator itRenameItem = renameItems.begin(); itRenameItem != renameItems.end(); ++itRenameItem )
+	for ( std::vector<CRenameItem*>::const_iterator itRenameItem = renameItems.begin(); itRenameItem != renameItems.end(); ++itRenameItem )
 	{
 		srcPaths.push_back( pDisplayAdapter->FormatFilename( ( *itRenameItem )->GetSrcPath() ) );
 		destPaths.push_back( pDisplayAdapter->FormatFilename( ( *itRenameItem )->GetDestPath() ) );
@@ -368,10 +368,10 @@ bool CRenameEditPage::InputDestPaths( void )
 {
 	m_newDestPaths.clear();
 
-	std::vector< std::tstring > filenames;
+	std::vector<std::tstring> filenames;
 	str::Split( filenames, m_destEditor.GetText().c_str(), CTextEdit::s_lineEnd );
 
-	for ( std::vector< std::tstring >::const_iterator itFilename = filenames.begin(); itFilename != filenames.end(); ++itFilename )
+	for ( std::vector<std::tstring>::const_iterator itFilename = filenames.begin(); itFilename != filenames.end(); ++itFilename )
 	{
 		std::tstring coreFilename = *itFilename;
 		str::Trim( coreFilename );
@@ -382,12 +382,12 @@ bool CRenameEditPage::InputDestPaths( void )
 
 	if ( !filenames.empty() )			// an extra line end?
 	{
-		std::vector< std::tstring >::iterator itLastPath = filenames.end() - 1;
+		std::vector<std::tstring>::iterator itLastPath = filenames.end() - 1;
 		if ( itLastPath->empty() )
 			filenames.erase( itLastPath );
 	}
 
-	const std::vector< CRenameItem* >& renameItems = m_pParentDlg->GetRenameItems();
+	const std::vector<CRenameItem*>& renameItems = m_pParentDlg->GetRenameItems();
 
 	if ( filenames.size() != renameItems.size() )
 		return false;
@@ -404,7 +404,7 @@ bool CRenameEditPage::InputDestPaths( void )
 
 bool CRenameEditPage::AnyChanges( void ) const
 {
-	const std::vector< CRenameItem* >& renameItems = m_pParentDlg->GetRenameItems();
+	const std::vector<CRenameItem*>& renameItems = m_pParentDlg->GetRenameItems();
 	ASSERT( m_newDestPaths.size() == renameItems.size() );
 
 	for ( size_t i = 0; i != renameItems.size(); ++i )

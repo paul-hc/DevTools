@@ -102,7 +102,7 @@ namespace multi
 		return nullptr;
 	}
 
-	BYTE EvalWouldBeAttributes( const std::vector< multi::CAttribCheckState >& attribCheckStates, const CTouchItem* pTouchItem );
+	BYTE EvalWouldBeAttributes( const std::vector<multi::CAttribCheckState>& attribCheckStates, const CTouchItem* pTouchItem );
 }
 
 

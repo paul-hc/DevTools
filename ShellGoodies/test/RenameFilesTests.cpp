@@ -25,9 +25,9 @@ namespace ut
 	}
 
 	template< typename FuncType >
-	void ForEachDestination( std::vector< CRenameItem* >& rRenameItems, const FuncType& func )
+	void ForEachDestination( std::vector<CRenameItem*>& rRenameItems, const FuncType& func )
 	{
-		for ( std::vector< CRenameItem* >::const_iterator itItem = rRenameItems.begin(); itItem != rRenameItems.end(); ++itItem )
+		for ( std::vector<CRenameItem*>::const_iterator itItem = rRenameItems.begin(); itItem != rRenameItems.end(); ++itItem )
 		{
 			fs::CPathParts destParts;
 			(*itItem)->SplitSafeDestPath( &destParts );
@@ -68,7 +68,7 @@ void CRenameFilesTests::TestRenameSimple( void )
 
 	ASSERT( ut::FormatDestinations( &pool, CPathFormatter( _T("foo #.txt"), false ) ) );
 
-	std::vector< CRenameItem* > renameItems;
+	std::vector<CRenameItem*> renameItems;
 	ren::MakePairsToItems( renameItems, pool.m_pathPairs );
 
 	CFileService svc;
@@ -96,7 +96,7 @@ void CRenameFilesTests::TestRenameCollisionExisting( void )
 
 	ASSERT( ut::FormatDestinations( &pool, CPathFormatter( _T("foo #.txt"), false ), 2 ) );
 
-	std::vector< CRenameItem* > renameItems;
+	std::vector<CRenameItem*> renameItems;
 	ren::MakePairsToItems( renameItems, pool.m_pathPairs );
 
 	CFileService svc;
@@ -116,7 +116,7 @@ void CRenameFilesTests::TestRenameChangeCase( void )
 
 	ut::CTempFilePairPool pool( _T("foo a.txt|foo b.txt|foo c.txt") );
 
-	std::vector< CRenameItem* > renameItems;
+	std::vector<CRenameItem*> renameItems;
 	ren::MakePairsToItems( renameItems, pool.m_pathPairs );
 
 	ut::ForEachDestination( renameItems, func::MakeCase( UpperCase ) );

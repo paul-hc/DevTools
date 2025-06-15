@@ -61,7 +61,7 @@ bool CAppCmdService::SafeExecuteCmd( utl::ICommand* pCmd, bool execInline /*= fa
 
 bool CAppCmdService::UndoAt( size_t topPos )
 {
-	std::deque< utl::ICommand* >& rUndoStack = RefUndoStack();
+	std::deque<utl::ICommand*>& rUndoStack = RefUndoStack();
 
 	size_t pos = rUndoStack.size() - topPos - 1;		// position from the begining
 	if ( pos >= rUndoStack.size() )
@@ -72,7 +72,7 @@ bool CAppCmdService::UndoAt( size_t topPos )
 
 	CScopedExecMode scopedExec( utl::ExecUndo );
 
-	std::deque< utl::ICommand* >::iterator itCmd = rUndoStack.begin() + pos;
+	std::deque<utl::ICommand*>::iterator itCmd = rUndoStack.begin() + pos;
 	std::auto_ptr<utl::ICommand> pCmd( *itCmd );
 	itCmd = rUndoStack.erase( itCmd );
 
@@ -80,7 +80,7 @@ bool CAppCmdService::UndoAt( size_t topPos )
 	{
 		if ( pCmd->IsUndoable() && pCmd->Unexecute() )
 		{
-			std::deque< utl::ICommand* >& rRedoStack = RefRedoStack();
+			std::deque<utl::ICommand*>& rRedoStack = RefRedoStack();
 			rRedoStack.push_back( pCmd.release() );
 			return true;
 		}
@@ -97,7 +97,7 @@ bool CAppCmdService::UndoAt( size_t topPos )
 
 bool CAppCmdService::RedoAt( size_t topPos )
 {
-	std::deque< utl::ICommand* >& rRedoStack = RefRedoStack();
+	std::deque<utl::ICommand*>& rRedoStack = RefRedoStack();
 
 	size_t pos = rRedoStack.size() - topPos - 1;		// position from the begining
 	if ( pos >= rRedoStack.size() )
@@ -108,7 +108,7 @@ bool CAppCmdService::RedoAt( size_t topPos )
 
 	CScopedExecMode scopedExec( utl::ExecUndo );
 
-	std::deque< utl::ICommand* >::iterator itCmd = rRedoStack.begin() + pos;
+	std::deque<utl::ICommand*>::iterator itCmd = rRedoStack.begin() + pos;
 	std::auto_ptr<utl::ICommand> pCmd( *itCmd );
 	itCmd = rRedoStack.erase( itCmd );
 
@@ -116,7 +116,7 @@ bool CAppCmdService::RedoAt( size_t topPos )
 	{
 		if ( pCmd->Execute() )
 		{
-			std::deque< utl::ICommand* >& rUndoStack = RefUndoStack();
+			std::deque<utl::ICommand*>& rUndoStack = RefUndoStack();
 			rUndoStack.push_back( pCmd.release() );
 			return true;
 		}

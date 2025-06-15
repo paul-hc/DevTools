@@ -110,7 +110,7 @@ namespace cmd
 		return text;
 	}
 
-	void QueryCmdFields( std::vector< std::tstring >& rFields, const utl::ICommand* pCmd )
+	void QueryCmdFields( std::vector<std::tstring>& rFields, const utl::ICommand* pCmd )
 	{
 		str::Split( rFields, pCmd->Format( utl::DetailFields ).c_str(), GetSeparator( utl::DetailFields ) );
 	}

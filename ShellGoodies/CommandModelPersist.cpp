@@ -80,7 +80,7 @@ namespace cmd
 
 	void CBinaryLogSerializer::Load( CArchive& archive ) override throws_( CException* )
 	{
-		std::deque< utl::ICommand* > undoStack, redoStack;
+		std::deque<utl::ICommand*> undoStack, redoStack;
 		LoadStack( archive, undoStack );
 		LoadStack( archive, redoStack );
 
@@ -88,14 +88,14 @@ namespace cmd
 		m_pCommandModel->SwapRedoStack( redoStack );
 	}
 
-	void CBinaryLogSerializer::SaveStack( CArchive& archive, svc::StackType section, const std::deque< utl::ICommand* >& cmdStack )
+	void CBinaryLogSerializer::SaveStack( CArchive& archive, svc::StackType section, const std::deque<utl::ICommand*>& cmdStack )
 	{
 		archive << &GetTags_Section().FormatUi( section );			// as Utf8; just for inspection
 
 		serial::Save_CObjects_Mixed( archive, cmdStack );
 	}
 
-	void CBinaryLogSerializer::LoadStack( CArchive& archive, std::deque< utl::ICommand* >& rCmdStack )
+	void CBinaryLogSerializer::LoadStack( CArchive& archive, std::deque<utl::ICommand*>& rCmdStack )
 	{
 		std::tstring sectionTag; sectionTag;
 		archive >> &sectionTag;			// as Utf8; just discard it

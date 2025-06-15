@@ -24,7 +24,7 @@ namespace cmd
 	bool AppendTimestamp( std::tstring* pOutput, utl::Verbosity verbosity, const CTime& timestamp );
 
 	std::tstring FormatCmdLine( const utl::ICommand* pCmd, utl::Verbosity verbosity );
-	void QueryCmdFields( std::vector< std::tstring >& rFields, const utl::ICommand* pCmd );
+	void QueryCmdFields( std::vector<std::tstring>& rFields, const utl::ICommand* pCmd );
 }
 
 

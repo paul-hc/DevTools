@@ -20,7 +20,7 @@ void CCommandItem::SetCmd( utl::ICommand* pCmd )
 
 	if ( m_pCmd != nullptr )
 	{
-		std::vector< std::tstring > fields;
+		std::vector<std::tstring> fields;
 		cmd::QueryCmdFields( fields, m_pCmd );
 		if ( !fields.empty() )
 			m_code = fields.front();

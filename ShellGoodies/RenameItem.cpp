@@ -11,17 +11,17 @@
 
 namespace ren
 {
-	bool MakePairsFromItems( CPathRenamePairs* pOutRenamePairs, const std::vector< CRenameItem* >& renameItems )
+	bool MakePairsFromItems( CPathRenamePairs* pOutRenamePairs, const std::vector<CRenameItem*>& renameItems )
 	{
 		pOutRenamePairs->Clear();
 
-		for ( std::vector< CRenameItem* >::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
+		for ( std::vector<CRenameItem*>::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
 			pOutRenamePairs->AddPair( (*itItem)->GetSrcPath(), (*itItem)->GetDestPath() );
 
 		return pOutRenamePairs->GetPairs().size() == renameItems.size();			// all SRC keys unique?
 	}
 
-	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const CPathRenamePairs& renamePairs )
+	void MakePairsToItems( std::vector<CRenameItem*>& rOutRenameItems, const CPathRenamePairs& renamePairs )
 	{
 		REQUIRE( rOutRenameItems.empty() );
 
@@ -34,7 +34,7 @@ namespace ren
 		}
 	}
 
-	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const CPathRenamePairs& renamePairs )
+	void AssignPairsToItems( const std::vector<CRenameItem*>& items, const CPathRenamePairs& renamePairs )
 	{
 		REQUIRE( items.size() == renamePairs.GetPairs().size() );
 
@@ -53,12 +53,12 @@ namespace ren
 		}
 	}
 
-	void QueryDestFnames( std::vector< std::tstring >& rDestFnames, const std::vector< CRenameItem* >& items )
+	void QueryDestFnames( std::vector<std::tstring>& rDestFnames, const std::vector<CRenameItem*>& items )
 	{
 		rDestFnames.clear();
 		rDestFnames.reserve( items.size() );
 
-		for ( std::vector< CRenameItem* >::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( std::vector<CRenameItem*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 		{
 			fs::CPathParts destParts;
 			( *itItem )->SplitSafeDestPath( &destParts );

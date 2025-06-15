@@ -79,8 +79,8 @@ void CTextAlgorithmsTests::Run( void )
 {
 	// temporary store the filename adjustments defaults
 	CGeneralOptions* pOptions = &CGeneralOptions::Instance();
-	CScopedValue< bool > scopedTrimFname( &pOptions->m_trimFname, true );
-	CScopedValue< bool > scopedNormalizeWhitespace( &pOptions->m_normalizeWhitespace, true );
+	CScopedValue<bool> scopedTrimFname( &pOptions->m_trimFname, true );
+	CScopedValue<bool> scopedNormalizeWhitespace( &pOptions->m_normalizeWhitespace, true );
 
 	RUN_TEST( TestMakeCase );
 	RUN_TEST( TestCapitalizeWords );

@@ -25,7 +25,7 @@ public:
 	~CCmdDashboardDialog();
 private:
 	static CCommandModel* GetCommandModel( void );
-	const std::deque< utl::ICommand* >& GetStack( void ) const;
+	const std::deque<utl::ICommand*>& GetStack( void ) const;
 	void BuildCmdItems( void );
 
 	void SetupCommandList( void );
@@ -33,8 +33,8 @@ private:
 	void UpdateSelCommand( void );
 
 	const CCommandItem* GetSelCaretCmdItem( void ) const;
-	void QuerySelectedCmds( std::vector< utl::ICommand* >& rSelCommands ) const;
-	static bool IsSelContiguousToTop( const std::vector< int >& selIndexes );
+	void QuerySelectedCmds( std::vector<utl::ICommand*>& rSelCommands ) const;
+	static bool IsSelContiguousToTop( const std::vector<int>& selIndexes );
 
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
@@ -46,7 +46,7 @@ private:
 	svc::ICommandService* m_pCmdSvc;
 	svc::StackType m_stackType;
 
-	std::vector< CCommandItem > m_cmdItems;			// proxy items inserted into the list control
+	std::vector<CCommandItem> m_cmdItems;			// proxy items inserted into the list control
 	bool m_enableProperties;
 private:
 	// enum { IDD = IDD_CMD_DASHBOARD_DIALOG };

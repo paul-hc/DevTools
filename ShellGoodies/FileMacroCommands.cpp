@@ -72,12 +72,12 @@ namespace cmd
 		archive & m_timestamp;
 	}
 
-	void CFileMacroCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const override
+	void CFileMacroCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override
 	{
 		rLines.clear();
 		rLines.reserve( m_subCommands.size() );
 
-		for ( std::vector< utl::ICommand* >::const_iterator itCmd = m_subCommands.begin(); itCmd != m_subCommands.end(); ++itCmd )
+		for ( std::vector<utl::ICommand*>::const_iterator itCmd = m_subCommands.begin(); itCmd != m_subCommands.end(); ++itCmd )
 		{
 			CBaseFileCmd* pCmd = checked_static_cast<CBaseFileCmd*>( *itCmd );
 			rLines.push_back( pCmd->Format( utl::Detailed ) );
@@ -113,7 +113,7 @@ namespace cmd
 	{
 		CExecMessage macroMessage;
 
-		for ( std::vector< utl::ICommand* >::iterator itCmd = m_subCommands.begin(); itCmd != m_subCommands.end(); )
+		for ( std::vector<utl::ICommand*>::iterator itCmd = m_subCommands.begin(); itCmd != m_subCommands.end(); )
 		{
 			CBaseFileCmd* pCmd = checked_static_cast<CBaseFileCmd*>( *itCmd );
 

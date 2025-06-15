@@ -38,7 +38,7 @@ namespace cmd
 
 		// cmd::IFileDetailsCmd
 		virtual size_t GetFileCount( void ) const override;
-		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const override;
+		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
 
 		virtual void Serialize( CArchive& archive ) override;
 	private:

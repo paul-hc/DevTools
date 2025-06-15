@@ -37,18 +37,18 @@ protected:
 class CChangeDestPathsCmd : public CBaseChangeDestCmd
 {
 public:
-	CChangeDestPathsCmd( CFileModel* pFileModel, std::vector< fs::CPath >& rNewDestPaths, const std::tstring& cmdTag = std::tstring() );
+	CChangeDestPathsCmd( CFileModel* pFileModel, std::vector<fs::CPath>& rNewDestPaths, const std::tstring& cmdTag = std::tstring() );
 
 	// cmd::IFileDetailsCmd
 	virtual size_t GetFileCount( void ) const;
-	virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
+	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
 private:
 	// base overrides
 	virtual ChangeType EvalChange( void ) const override;
 	virtual bool ToggleExecute( void ) override;
 private:
-	std::vector< fs::CPath > m_srcPaths;
-	std::vector< fs::CPath > m_destPaths;
+	std::vector<fs::CPath> m_srcPaths;
+	std::vector<fs::CPath> m_destPaths;
 };
 
 
@@ -58,18 +58,18 @@ private:
 class CChangeDestFileStatesCmd : public CBaseChangeDestCmd
 {
 public:
-	CChangeDestFileStatesCmd( CFileModel* pFileModel, std::vector< fs::CFileState >& rNewDestStates, const std::tstring& cmdTag = std::tstring() );
+	CChangeDestFileStatesCmd( CFileModel* pFileModel, std::vector<fs::CFileState>& rNewDestStates, const std::tstring& cmdTag = std::tstring() );
 
 	// cmd::IFileDetailsCmd
 	virtual size_t GetFileCount( void ) const;
-	virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
+	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
 private:
 	// base overrides
 	virtual ChangeType EvalChange( void ) const override;
 	virtual bool ToggleExecute( void ) override;
 private:
-	std::vector< fs::CFileState > m_srcStates;
-	std::vector< fs::CFileState > m_destStates;
+	std::vector<fs::CFileState> m_srcStates;
+	std::vector<fs::CFileState> m_destStates;
 };
 
 

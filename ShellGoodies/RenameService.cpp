@@ -29,7 +29,7 @@ namespace pred
 }
 
 
-void CRenameService::StoreRenameItems( const std::vector< CRenameItem* >& renameItems )
+void CRenameService::StoreRenameItems( const std::vector<CRenameItem*>& renameItems )
 {
 	REQUIRE( !renameItems.empty() );
 
@@ -75,7 +75,7 @@ bool CRenameService::FileExistOutsideWorkingSet( const fs::CPath& filePath ) con
 		filePath.FileExist();
 }
 
-void CRenameService::QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const
+void CRenameService::QueryDestFilenames( std::vector<std::tstring>& rDestFnames ) const
 {
 	rDestFnames.clear();
 	rDestFnames.reserve( m_renamePairs.GetPairs().size() );
@@ -91,7 +91,7 @@ void CRenameService::QueryDestFilenames( std::vector< std::tstring >& rDestFname
 
 std::auto_ptr<CPickDataset> CRenameService::MakeFnamePickDataset( void ) const
 {
-	std::vector< std::tstring > destFnames;
+	std::vector<std::tstring> destFnames;
 	QueryDestFilenames( destFnames );
 
 	return std::auto_ptr<CPickDataset>( new CPickDataset( &destFnames ) );
@@ -165,7 +165,7 @@ std::tstring CRenameService::ApplyTextTool( UINT menuId, const std::tstring& tex
 
 // CPickDataset implementation
 
-CPickDataset::CPickDataset( std::vector< std::tstring >* pDestFnames )
+CPickDataset::CPickDataset( std::vector<std::tstring>* pDestFnames )
 	: m_bestMatch( Empty )
 {
 	ASSERT_PTR( pDestFnames );
@@ -208,7 +208,7 @@ std::tstring CPickDataset::ExtractLongestCommonPrefix( void ) const
 {
 	REQUIRE( m_destFnames.size() > 1 );
 
-	size_t maxLen = std::max_element( m_destFnames.begin(), m_destFnames.end(), pred::LessValue< pred::CompareLength >() )->length();
+	size_t maxLen = std::max_element( m_destFnames.begin(), m_destFnames.end(), pred::LessValue<pred::CompareLength>() )->length();
 
 	for ( size_t prefixLen = 1; prefixLen <= maxLen; ++prefixLen )
 		if ( !AllHavePrefix( prefixLen ) )
@@ -222,10 +222,10 @@ bool CPickDataset::AllHavePrefix( size_t prefixLen ) const
 	REQUIRE( prefixLen != 0 );
 	REQUIRE( m_destFnames.size() > 1 );
 
-	std::vector< std::tstring >::const_iterator itFirstFname = m_destFnames.begin();
+	std::vector<std::tstring>::const_iterator itFirstFname = m_destFnames.begin();
 
 	if ( m_destFnames.size() > 1 )
-		for ( std::vector< std::tstring >::const_iterator itFname = itFirstFname + 1; itFname != m_destFnames.end(); ++itFname )
+		for ( std::vector<std::tstring>::const_iterator itFname = itFirstFname + 1; itFname != m_destFnames.end(); ++itFname )
 			if ( !str::EqualsIN( itFname->c_str(), itFirstFname->c_str(), prefixLen ) )
 				return false;
 
@@ -248,7 +248,7 @@ void CPickDataset::MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname 
 		pPopupMenu->AppendMenu( MF_SEPARATOR );
 	}
 
-	for ( std::vector< std::tstring >::const_iterator itFname = m_destFnames.begin(); itFname != m_destFnames.end(); ++itFname, ++cmdId )
+	for ( std::vector<std::tstring>::const_iterator itFname = m_destFnames.begin(); itFname != m_destFnames.end(); ++itFname, ++cmdId )
 	{
 		pPopupMenu->AppendMenu( MF_STRING, cmdId, EscapeAmpersand( *itFname ) );
 
@@ -290,7 +290,7 @@ void CPickDataset::MakePickDirMenu( CMenu* pPopupMenu ) const
 	pPopupMenu->CreatePopupMenu();
 	UINT cmdId = IDC_PICK_DIR_PATH_BASE;
 
-	for ( std::vector< std::tstring >::const_iterator itSubDir = m_subDirs.begin(), itLast = m_subDirs.end() - 1; itSubDir != m_subDirs.end(); ++itSubDir, ++cmdId )
+	for ( std::vector<std::tstring>::const_iterator itSubDir = m_subDirs.begin(), itLast = m_subDirs.end() - 1; itSubDir != m_subDirs.end(); ++itSubDir, ++cmdId )
 	{
 		pPopupMenu->AppendMenu( MF_STRING, cmdId, EscapeAmpersand( *itSubDir ) );
 		ui::SetMenuItemImage( pPopupMenu, cmdId, itSubDir != itLast ? ID_BROWSE_FILE : ID_PARENT_FOLDER );

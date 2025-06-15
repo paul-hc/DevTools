@@ -198,7 +198,7 @@ void CRenameFilesDialog::PostMakeDest( bool silent /*= false*/ ) override
 		SwitchMode( CommitFilesMode );
 	else
 	{
-		if ( const CRenameItem* pFirstErrorItem = GetFirstErrorItem< CRenameItem >() )
+		if ( const CRenameItem* pFirstErrorItem = GetFirstErrorItem<CRenameItem>() )
 			for ( int i = 0; i != m_filesSheet.GetPageCount(); ++i )
 				if ( IRenamePage* pPage = m_filesSheet.GetCreatedPageAs<IRenamePage>( i ) )
 					pPage->EnsureVisibleItem( pFirstErrorItem );
@@ -301,7 +301,7 @@ void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, 
 			break;
 		case IDC_CHANGE_CASE_BUTTON:
 		{
-			static const std::vector< std::tstring > tooltips = str::LoadStrings( IDC_CHANGE_CASE_BUTTON );
+			static const std::vector<std::tstring> tooltips = str::LoadStrings( IDC_CHANGE_CASE_BUTTON );
 			ChangeCase changeCase = m_changeCaseButton.GetSelEnum<ChangeCase>();
 			rText = tooltips.at( changeCase );
 			break;
@@ -378,16 +378,16 @@ CRenameItem* CRenameFilesDialog::FindItemWithKey( const fs::CPath& srcPath ) con
 
 void CRenameFilesDialog::MarkInvalidSrcItems( void )
 {
-	for ( std::vector< CRenameItem* >::const_iterator itRenameItem = m_rRenameItems.begin(); itRenameItem != m_rRenameItems.end(); ++itRenameItem )
+	for ( std::vector<CRenameItem*>::const_iterator itRenameItem = m_rRenameItems.begin(); itRenameItem != m_rRenameItems.end(); ++itRenameItem )
 		if ( !( *itRenameItem )->GetSrcPath().FileExist() )
 			utl::AddUnique( m_errorItems, *itRenameItem );
 }
 
 std::tstring CRenameFilesDialog::JoinErrorDestPaths( void ) const
 {
-	std::vector< fs::CPath > destPaths; destPaths.reserve( m_errorItems.size() );
+	std::vector<fs::CPath> destPaths; destPaths.reserve( m_errorItems.size() );
 
-	for ( std::vector< CPathItemBase* >::const_iterator itErrorItem = m_errorItems.begin(); itErrorItem != m_errorItems.end(); ++itErrorItem )
+	for ( std::vector<CPathItemBase*>::const_iterator itErrorItem = m_errorItems.begin(); itErrorItem != m_errorItems.end(); ++itErrorItem )
 		destPaths.push_back( checked_static_cast<const CRenameItem*>( *itErrorItem )->GetDestPath() );
 
 	return str::Join( destPaths, _T("\r\n") );
@@ -994,7 +994,7 @@ void CRenameFilesDialog::OnEnsureUniformNumPadding( void )
 {
 	CommitLocalEdits();
 
-	std::vector< std::tstring > destFnames;
+	std::vector<std::tstring> destFnames;
 	ren::QueryDestFnames( destFnames, m_rRenameItems );
 
 	num::EnsureUniformZeroPadding( destFnames );
@@ -1006,7 +1006,7 @@ void CRenameFilesDialog::OnGenerateNumericSequence( void )
 {
 	CommitLocalEdits();
 
-	std::vector< std::tstring > destFnames;
+	std::vector<std::tstring> destFnames;
 	ren::QueryDestFnames( destFnames, m_rRenameItems );
 
 	try
