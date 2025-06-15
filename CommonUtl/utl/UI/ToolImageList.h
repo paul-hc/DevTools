@@ -31,6 +31,8 @@ public:
 
 	bool HasButtons( void ) const { return !m_buttonIds.empty(); }
 	bool HasImages( void ) const { return m_pImageList.get() != nullptr; }
+	bool HasAlpha( void ) const { return m_hasAlpha; }
+
 	bool IsValid( void ) const { return HasButtons() && HasImages(); }
 
 	IconStdSize GetIconStdSize( void ) const { return m_imageSize.GetStdSize(); }
@@ -54,10 +56,11 @@ public:
 	size_t FindButtonPos( UINT buttonId ) const;
 
 	bool LoadToolbar( UINT toolBarId, COLORREF transpColor = color::Auto );					// loads imagelist and button IDs from toolbar resource
-	bool LoadIconStrip( UINT iconStripId, const UINT buttonIds[], size_t count );			// creates imagelist from icon strip (custom size multi-images) and stores button IDs
+	bool _LoadIconStrip( UINT iconStripId, const UINT buttonIds[], size_t count );			// creates imagelist from icon strip (custom size multi-images) and stores button IDs - not used!
 	bool LoadButtonImages( ui::IImageStore* pSrcImageStore = ui::GetImageStoresSvc() );		// creates imagelist from button IDs
 private:
 	CIconSize m_imageSize;
+	bool m_hasAlpha;
 protected:
 	std::vector<UINT> m_buttonIds;
 	std::auto_ptr<CImageList> m_pImageList;

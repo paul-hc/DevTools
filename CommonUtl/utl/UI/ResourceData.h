@@ -8,14 +8,18 @@
 class CResourceData
 {
 public:
-	CResourceData( const TCHAR* pResId, const TCHAR* pResType );
+	CResourceData( const TCHAR* pResName = nullptr, const TCHAR* pResType = nullptr );
 	~CResourceData();
+
+	bool LoadResource( const TCHAR* pResName, const TCHAR* pResType );
+	bool LoadResource( UINT resId, const TCHAR* pResType ) { return LoadResource( MAKEINTRESOURCE( resId ), pResType ); }
+	void Clear( void );
 
 	bool IsValid( void ) const { return m_pResource != nullptr; }
 	DWORD GetSize( void ) const { return m_pResource != nullptr ? ::SizeofResource( m_hInst, m_hResource ) : 0; }
 
 	template< typename ResourceType >
-	const ResourceType* GetResource( void ) const { return static_cast<const ResourceType*>( m_pResource ); }
+	ResourceType* GetResource( void ) const { return static_cast<ResourceType*>( m_pResource ); }
 
 	CComPtr<IStream> CreateStreamCopy( void ) const;		// delete on Release()
 private:

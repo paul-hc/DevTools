@@ -2,14 +2,17 @@
 #include "pch.h"
 #include "Image_fwd.h"
 #include "ImageStore.h"
+#include "GroupIconRes.h"
 #include "DibSection.h"
 #include "DibPixels.h"
 #include "Pixel.h"
 #include "ScopedGdi.h"
 #include "ToolImageList.h"
 #include "utl/Algorithms.h"
+#include "utl/ContainerOwnership.h"
 #include "utl/EnumTags.h"
 #include "utl/Path.h"
+#include "utl/StdHashValue.h"
 #include "utl/StreamStdTypes.h"
 #include <commoncontrols.h>						// IImageList
 
@@ -117,21 +120,24 @@ namespace gdi
 
 namespace res
 {
-	HICON LoadIcon( const CIconId& iconId )
+	HICON LoadIcon( const CIconId& iconId, UINT fuLoad /*= LR_DEFAULTCOLOR*/ )
 	{
-		const CSize iconSize = iconId.GetStdSize();
-		return (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, LR_DEFAULTCOLOR );
+		const CSize iconSize = iconId.GetSize();
+
+		// if the icon doesn't contain the exact size, it loads a scaled icon to the desired size
+		return (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, fuLoad );
 	}
 
-	int LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor /*= color::Auto*/,
-						  int imageCount /*= -1*/, bool disabledEffect /*= false*/ )
+	TImageCountHasAlphaPair LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor /*= color::Auto*/,
+											  int imageCount /*= -1*/, bool disabledEffect /*= false*/ )
 	{
 		// Use PNG only with 32bpp (alpha channel). PNG 24bpp breaks image list transparency (DIB issues?).
 		// Use BMP for 24bpp and lower.
 
 		CDibSection dibSection;
+
 		if ( !dibSection.LoadImage( bitmapId ) )		// PNG or BMP
-			return 0;
+			return TImageCountHasAlphaPair( 0, false );
 
 		if ( color::Auto == transpColor )
 			dibSection.SetAutoTranspColor();
@@ -148,16 +154,21 @@ namespace res
 			imageCount = dibSection.GetSize().cx / dibSection.GetSize().cy;		// assume nearly square images
 
 		CSize buttonSize = dibSection.MakeImageList( rOutImageList, imageCount );
-		return imageCount;
+
+		return TImageCountHasAlphaPair( imageCount, dibSection.HasAlpha() );
 	}
 
-	int LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
+	TImageCountHasAlphaPair _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId )
 	{
 		// load a strip from a custom size icon with multiple images; image count is inferred by strip_width/strip_height ratio.
 		ASSERT_PTR( pOutImageList );
 		ASSERT_PTR( pOutImageSize );
 
+		CGroupIconRes groupIcon( iconStripId );
+		bool hasAlpha = groupIcon.ContainsBpp( ILC_COLOR32 );
+
 		CIcon stripIcon( (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconStripId ), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_CREATEDIBSECTION ) );
+
 		CSize imageSize( 0, 0 );
 		int imageCount = 0;
 
@@ -170,14 +181,19 @@ namespace res
 			imageSize.cx /= imageCount;
 
 			if ( nullptr == pOutImageList->GetSafeHandle() )
+			{
+				UINT ilFlags = ILC_COLOR32;
+
+				SetFlag( ilFlags, ILC_MASK, !hasAlpha );
 				pOutImageList->Create( imageSize.cx, imageSize.cy, ilFlags, imageCount, 0 );		// note: if icon has alpha channel, then no ILC_MASK required (in practice it makes little difference)
+			}
 
 			VERIFY( pOutImageList->Add( &info.m_bitmapColor, &info.m_bitmapMask ) != -1 );			// add the strip bitmaps, which will amount to imageCount images
 		}
 
 		utl::AssignPtr( pOutImageSize, imageSize );
 
-		return imageCount;
+		return TImageCountHasAlphaPair( imageCount, hasAlpha );
 	}
 
 	void LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
@@ -198,7 +214,7 @@ namespace res
 
 				if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( iconId ) )		// try exact icon size
 					rOutImageList.Add( pIcon->GetHandle() );
-				else if ( HICON hIcon = LoadIcon( iconId ) )								// try to load a scaled icon
+				else if ( HICON hIcon = LoadIcon( iconId ) )									// try to load a scaled icon
 				{
 					rOutImageList.Add( hIcon );
 					::DestroyIcon( hIcon );
@@ -213,6 +229,40 @@ namespace res
 
 namespace ui
 {
+	// CIconKey implementation
+
+	bool CIconEntry::operator==( const CIconEntry& right ) const
+	{
+		if ( this == &right )
+			return true;
+
+		return
+			m_bitsPerPixel == right.m_bitsPerPixel &&
+			m_dimension == right.m_dimension;
+	}
+}
+
+
+namespace ui
+{
+	// IImageStore implementation
+
+	CIcon* IImageStore::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*/, TBitsPerPixel bitsPerPixel /*= ILC_COLOR*/ ) const
+	{
+		enum { ILC_COLOR_MASK = ILC_MASK | ILC_COLOR4 | ILC_COLOR8 | ILC_COLOR16 | ILC_COLOR24 | ILC_COLOR32 };
+
+		REQUIRE( EqMaskedValue( bitsPerPixel, ILC_COLOR_MASK, bitsPerPixel ) );		// only the valid BPP values are passed?
+		CIcon* pFoundIcon = nullptr;
+
+		if ( const CIconGroup* pIconGroup = FindIconGroup( cmdId ) )
+			if ( ILC_COLOR == bitsPerPixel )
+				pFoundIcon = pIconGroup->FindBestMatchingIcon( iconStdSize );						// best match, i.e. highest color
+			else
+				pFoundIcon = pIconGroup->FindIcon( ui::CIconEntry( bitsPerPixel, iconStdSize ) );	// exact match
+
+		return pFoundIcon;
+	}
+
 	const CIcon* IImageStore::RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize /*= HugeIcon_48*/ )
 	{
 		for ( ; maxIconStdSize >= DefaultSize; --(int&)maxIconStdSize )
@@ -272,8 +322,10 @@ namespace gdi
 	{
 		ASSERT_PTR( hBitmap );
 		BITMAP bmp;
+
 		if ( ::GetObject( hBitmap, sizeof( BITMAP ), &bmp ) != 0 )
 			return CSize( bmp.bmWidth, bmp.bmHeight );
+
 		ASSERT( false );								// invalid bitmap
 		return CSize( 0, 0 );
 	}
@@ -282,6 +334,7 @@ namespace gdi
 	{
 		ASSERT_PTR( imageList.GetSafeHandle() );
 		int cx, cy;
+
 		VERIFY( ::ImageList_GetIconSize( imageList, &cx, &cy ) );
 		return CSize( cx, cy );
 	}
@@ -290,6 +343,7 @@ namespace gdi
 	{
 		ASSERT_PTR( hBitmap );
 		DIBSECTION dibSection;
+
 		int size = ::GetObject( hBitmap, sizeof( DIBSECTION ), &dibSection );
 		ASSERT( size != 0 );									// valid DIB or DDB bitmap
 
@@ -302,7 +356,8 @@ namespace gdi
 	bool Is32BitBitmap( HBITMAP hBitmap )
 	{
 		BITMAP bmp;
-		if ( sizeof( BITMAP ) == ::GetObject( hBitmap, sizeof( BITMAP ), &bmp ) )					// valid bitmap?
+
+		if ( sizeof( BITMAP ) == ::GetObject( hBitmap, sizeof( BITMAP ), &bmp ) )			// valid bitmap?
 			return 32 == bmp.bmBitsPixel;
 		return false;
 	}
@@ -310,6 +365,7 @@ namespace gdi
 	bool HasAlphaTransparency( HBITMAP hBitmap )
 	{
 		bool isDibSection;
+
 		return GetBitsPerPixel( hBitmap, &isDibSection ) >= 32 && isDibSection;				// DIB section with alpha channel?
 	}
 
@@ -317,7 +373,8 @@ namespace gdi
 	{
 		ASSERT_PTR( imageList.GetSafeHandle() );
 		CComPtr<IImageList> ipImageList;
-		if ( HR_OK( HIMAGELIST_QueryInterface( imageList.GetSafeHandle(), IID_PPV_ARGS( &ipImageList ) ) ) )
+
+		if ( HR_OK( ::HIMAGELIST_QueryInterface( imageList.GetSafeHandle(), IID_PPV_ARGS( &ipImageList ) ) ) )
 		{
 			DWORD dwFlags;
 			if ( HR_OK( ipImageList->GetItemFlags( imagePos, &dwFlags ) ) )
@@ -329,6 +386,7 @@ namespace gdi
 	bool HasMask( const CImageList& imageList, int imagePos /*= 0*/ )
 	{
 		IMAGEINFO info;
+
 		if ( imageList.GetImageInfo( imagePos, &info ) )
 			return info.hbmMask != nullptr;
 		return false;
@@ -342,7 +400,7 @@ namespace gdi
 		if ( !memDC.CreateCompatibleDC( nullptr ) || !maskDC.CreateCompatibleDC( nullptr ) )
 			return false;
 
-		CSize bitmapSize = GetBitmapSize( hSrcBitmap );
+		CSize bitmapSize = gdi::GetBitmapSize( hSrcBitmap );
 
 		rMaskBitmap.CreateBitmap( bitmapSize.cx, bitmapSize.cy, 1, 1, nullptr );		// create monochrome (1 bit) mask bitmap
 
@@ -364,17 +422,19 @@ namespace gdi
 	{
 		// imageBitmap and maskBitmap should have the same size, maskBitmap should be monochrome
 		ICONINFO iconInfo;
+
 		iconInfo.fIcon = TRUE;
 		iconInfo.hbmMask = hMaskBitmap;
 		iconInfo.hbmColor = hImageBitmap;
 
-		return CreateIconIndirect( &iconInfo );
+		return ::CreateIconIndirect( &iconInfo );
 	}
 
 	HICON CreateIcon( HBITMAP hImageBitmap, COLORREF transpColor )
 	{
 		CBitmap maskBitmap;
-		if ( !CreateBitmapMask( maskBitmap, hImageBitmap, transpColor ) )
+
+		if ( !gdi::CreateBitmapMask( maskBitmap, hImageBitmap, transpColor ) )
 			return nullptr;
 
 		return gdi::CreateIcon( hImageBitmap, maskBitmap );
@@ -408,7 +468,7 @@ namespace gdi
 	bool DrawBitmap( CDC* pDC, HBITMAP hBitmap, const CPoint& pos, DWORD rop /*= SRCCOPY*/ )
 	{
 		CRect destRect( pos, gdi::GetBitmapSize( hBitmap ) );
-		return DrawBitmap( pDC, hBitmap, destRect, rop );
+		return gdi::DrawBitmap( pDC, hBitmap, destRect, rop );
 	}
 
 	bool DrawBitmap( CDC* pDC, HBITMAP hBitmap, const CRect& destRect, DWORD rop /*= SRCCOPY*/ )
@@ -424,7 +484,7 @@ namespace gdi
 			CRect srcRect( CPoint( 0, 0 ), gdi::GetBitmapSize( hBitmap ) );
 			int oldStretchMode = pDC->SetStretchBltMode( COLORONCOLOR );
 
-			succeeded = detail::Blit( pDC, destRect, &memDC, srcRect, rop );
+			succeeded = gdi::detail::Blit( pDC, destRect, &memDC, srcRect, rop );
 			pDC->SetStretchBltMode( oldStretchMode );
 		}
 		return false;
@@ -438,6 +498,7 @@ bool CDibMeta::StorePixelFormat( void )
 {
 	DIBSECTION dibSection;
 	int size = ::GetObject( m_hDib, sizeof( DIBSECTION ), &dibSection );
+
 	if ( 0 == size )			// not a valid bitmap
 	{
 		m_bitsPerPixel = 0;
@@ -599,11 +660,13 @@ CPalette* CDibSectionInfo::MakeColorPalette( const CDC* pDC )
 BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPerPixel, const bmp::CSharedAccess* pSrcDib /*= nullptr*/ )
 {
 	std::vector<RGBQUAD> rgbTable;
+
 	if ( bitsPerPixel <= 8 )			// got to build a color table
 	{
 		if ( pSrcDib != nullptr && pSrcDib->GetHandle() != nullptr )
 		{
 			CDibSectionInfo srcInfo( pSrcDib->GetHandle() );
+
 			if ( srcInfo.GetBitsPerPixel() == bitsPerPixel )							// same color table size
 			{
 				CScopedBitmapMemDC scopedSrcBitmap( pSrcDib );
@@ -636,5 +699,6 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPe
 BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( UINT bitsPerPixel, const bmp::CSharedAccess& sourceDib )
 {
 	CSize srcBitmapSize = gdi::GetBitmapSize( sourceDib.GetHandle() );
+
 	return CreateDibInfo( srcBitmapSize.cx, srcBitmapSize.cy, bitsPerPixel, &sourceDib );
 }

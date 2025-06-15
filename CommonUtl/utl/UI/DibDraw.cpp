@@ -58,7 +58,7 @@ namespace gdi
 	}
 
 	void DrawDisabledImage( CDC* pDC, CImageList& rImageList, const CSize& imageSize, int index, const CPoint& pos, const CSize& size,
-							UINT style /*= ILD_TRANSPARENT*/, COLORREF blendToColor /*= GetSysColor( COLOR_BTNFACE )*/, BYTE toAlpha /*= 64*/ )
+							UINT style /*= ILD_TRANSPARENT*/, COLORREF blendToColor /*= ::GetSysColor( COLOR_BTNFACE )*/, BYTE toAlpha /*= 64*/ )
 	{
 		CDibSection dib;
 		CDibPixels pixels;
@@ -90,7 +90,7 @@ namespace gdi
 	// use the standard embossing
 	//
 	bool DrawEmbossedImage( CDC* pDC, CImageList& rImageList, const CSize& imageSize, int index, const CPoint& pos, const CSize& size,
-							UINT style /*= ILD_TRANSPARENT*/, COLORREF blendToColor /*= GetSysColor( COLOR_BTNFACE )*/, bool scaleHighlight /*= true*/ )
+							UINT style /*= ILD_TRANSPARENT*/, COLORREF blendToColor /*= ::GetSysColor( COLOR_BTNFACE )*/, bool scaleHighlight /*= true*/ )
 	{
 		//	black: pattern
 		//	white: destintation (transparent)
@@ -115,11 +115,11 @@ namespace gdi
 		if ( scaleHighlight )
 			delta = ui::ScaleSize( delta, size.cx, imageSize.cx );
 
-		CScopedGdiObj scopedBrush( pDC, GetSysColorBrush( COLOR_3DHIGHLIGHT ) );
+		CScopedGdiObj scopedBrush( pDC, ::GetSysColorBrush( COLOR_3DHIGHLIGHT ) );
 		pDC->StretchBlt( pos.x + delta.cx, pos.y + delta.cy, size.cx, size.cy, &memDC, 0, 0, imageSize.cx, imageSize.cy, ROP_PSDPxax );
 
 		// draw with shadow color
-		scopedBrush.SelectObject( GetSysColorBrush( COLOR_3DSHADOW ) );
+		scopedBrush.SelectObject( ::GetSysColorBrush( COLOR_3DSHADOW ) );
 		pDC->StretchBlt( pos.x, pos.y, size.cx, size.cy, &memDC, 0, 0, imageSize.cx, imageSize.cy, ROP_PSDPxax );
 		pDC->SetBkColor( oldBkColor );
 
@@ -128,7 +128,7 @@ namespace gdi
 	}
 
 	void DrawImageEffect( CDC* pDC, CImageList& rImageList, const CSize& imageSize, int index, const CPoint& pos, const CSize& size,
-						  Effect effect, UINT style /*= ILD_TRANSPARENT*/, COLORREF blendToColor /*= GetSysColor( COLOR_BTNFACE )*/ )
+						  Effect effect, UINT style /*= ILD_TRANSPARENT*/, COLORREF blendToColor /*= ::GetSysColor( COLOR_BTNFACE )*/ )
 	{
 		switch ( effect )
 		{
@@ -155,7 +155,7 @@ namespace gdi
 
 
 	bool MakeDisabledImageList( CImageList& rDestImageList, const CImageList& srcImageList, DisabledStyle style /*= gdi::DisabledBlendColor*/,
-								COLORREF blendToColor /*= GetSysColor( COLOR_BTNFACE )*/, BYTE toAlpha /*= 128*/ )
+								COLORREF blendToColor /*= ::GetSysColor( COLOR_BTNFACE )*/, BYTE toAlpha /*= 128*/ )
 	{
 		ASSERT_PTR( srcImageList.GetSafeHandle() );
 		ASSERT( gdi::HasAlphaTransparency( srcImageList ) );		// not implemented for other DIBs

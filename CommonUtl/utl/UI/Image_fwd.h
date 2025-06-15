@@ -4,6 +4,7 @@
 
 #include "ISubject.h"
 #include "ScopedGdi.h"
+#include "ComparePredicates.h"
 
 
 class CEnumTags;
@@ -74,9 +75,14 @@ enum IconStdSize
 };
 
 
+typedef WORD TBitsPerPixel;
+typedef std::pair<int, bool> TImageCountHasAlphaPair;
+
+
 namespace ui
 {
 	int GetIconDimension( IconStdSize iconStdSize );
+	inline int GetIconDimension( const CSize& imageSize ) { return std::max( imageSize.cx, imageSize.cy ); }
 	IconStdSize LookupIconStdSize( int iconDimension, IconStdSize defaultStdSize = DefaultSize );
 }
 
@@ -119,7 +125,7 @@ struct CIconId
 
 	bool IsValid( void ) const { return m_id != 0; }
 
-	CSize GetStdSize( void ) const { return CIconSize::GetSizeOf( m_stdSize ); }
+	CSize GetSize( void ) const { return CIconSize::GetSizeOf( m_stdSize ); }
 public:
 	UINT m_id;
 	IconStdSize m_stdSize;
@@ -166,14 +172,15 @@ namespace gdi
 
 namespace res
 {
-	HICON LoadIcon( const CIconId& iconId );
+	HICON LoadIcon( const CIconId& iconId, UINT fuLoad = LR_DEFAULTCOLOR );
 
 	// image-list from bitmap: loads strip from whichever comes first - PNG:32bpp with alpha (if found), or BMP:4/8/24bpp
-	int LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor = color::Auto,
-						  int imageCount = -1, bool disabledEffect = false );
+	TImageCountHasAlphaPair LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor = color::Auto,
+											  int imageCount = -1, bool disabledEffect = false );
 
-	// image-list from an icon-strip of custom size and multiple images
-	int LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags = ILC_COLOR32 | ILC_MASK );
+	// image-list from an icon-strip of custom size and multiple images.
+	//	- just for illustration, so not really used since non-square icons ar non standard!
+	TImageCountHasAlphaPair _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId );
 
 	// image-list from individual icons
 	void LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize = SmallIcon,
@@ -181,7 +188,55 @@ namespace res
 }
 
 
+namespace ui
+{
+	struct CIconEntry
+	{
+		CIconEntry( void ) : m_bitsPerPixel( 0 ), m_dimension( 0 ), m_stdSize( DefaultSize ) {}
+
+		CIconEntry( TBitsPerPixel bitsPerPixel, IconStdSize stdSize )
+			: m_bitsPerPixel( bitsPerPixel )
+			, m_dimension( ui::GetIconDimension( stdSize ) )
+			, m_stdSize( stdSize )
+		{
+		}
+
+		CIconEntry( TBitsPerPixel bitsPerPixel, int dimension )
+			: m_bitsPerPixel( bitsPerPixel )
+			, m_dimension( dimension )
+			, m_stdSize( ui::LookupIconStdSize( m_dimension ) )
+		{
+		}
+
+		CIconEntry( TBitsPerPixel bitsPerPixel, const CSize& imageSize )
+			: m_bitsPerPixel( bitsPerPixel )
+			, m_dimension( ui::GetIconDimension( imageSize ) )
+			, m_stdSize( ui::LookupIconStdSize( m_dimension ) )
+		{
+		}
+
+		bool operator==( const CIconEntry& right ) const;
+
+		CSize GetSize( void ) const { return CSize( m_dimension, m_dimension ); }
+	public:
+		TBitsPerPixel m_bitsPerPixel;		// ILC_COLOR32/ILC_COLOR24/ILC_COLOR16/ILC_COLOR8/ILC_COLOR4/ILC_MASK
+		int m_dimension;					// 16(x16), 24(x24), 32(x32), etc
+		IconStdSize m_stdSize;				// SmallIcon/MediumIcon/LargeIcon/...
+	};
+
+
+	struct CIconKey : public CIconEntry
+	{
+		CIconKey( void ) : CIconEntry(), m_iconResId( 0 ) {}
+		CIconKey( UINT iconResId, const CIconEntry& iconEntry ) : CIconEntry( iconEntry ), m_iconResId( iconResId ) {}
+	public:
+		UINT m_iconResId;
+	};
+}
+
+
 class CIcon;
+class CIconGroup;
 
 
 namespace ui
@@ -191,9 +246,7 @@ namespace ui
 
 	interface IImageStore
 	{
-		typedef std::pair<UINT, IconStdSize> TIconKey;			// <iconId, IconStdSize> - synonym with CIconId with hash value convenience
-
-		virtual CIcon* FindIcon( UINT cmdId, IconStdSize iconStdSize = SmallIcon ) const = 0;
+		virtual CIconGroup* FindIconGroup( UINT cmdId ) const = 0;
 		virtual const CIcon* RetrieveIcon( const CIconId& cmdId ) = 0;
 		virtual CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor ) = 0;
 
@@ -204,9 +257,10 @@ namespace ui
 
 		virtual void QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const = 0;
 		virtual void QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const = 0;
-		virtual void QueryIconKeys( std::vector<TIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const = 0;
+		virtual void QueryIconKeys( std::vector<ui::CIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const = 0;
 
 		// utils
+		CIcon* FindIcon( UINT cmdId, IconStdSize iconStdSize = SmallIcon, TBitsPerPixel bitsPerPixel = ILC_COLOR ) const;		// ILC_COLOR means best match, i.e. highest color
 		const CIcon* RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize = HugeIcon_48 );
 		CBitmap* RetrieveMenuBitmap( const CIconId& cmdId ) { return RetrieveBitmap( cmdId, ::GetSysColor( COLOR_MENU ) ); }
 		int BuildImageList( CImageList* pDestImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize );

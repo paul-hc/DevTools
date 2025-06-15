@@ -104,7 +104,7 @@ protected:
 
 	CReportListControl m_imageListCtrl;
 
-	enum Column { CommandName, Index, Size, CmdId, CmdLiteral };
+	enum Column { CommandName, Index, Format, CmdId, CmdLiteral };
 
 	// generated stuff
 protected:

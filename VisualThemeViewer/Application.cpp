@@ -42,6 +42,7 @@ BOOL CApplication::InitInstance( void )
 
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );		// activate "Windows Native" visual manager for enabling themes in MFC controls
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );		// register stock images
+	GetSharedImageStore()->RegisterLoadIconGroup( IDI_MULTI_FRAME_TEST_ICON );
 
 	COptions options;
 	CThemeStore themeStore;

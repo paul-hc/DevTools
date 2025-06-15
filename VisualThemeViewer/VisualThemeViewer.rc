@@ -31,12 +31,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "\r\n"
@@ -48,7 +48,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\VisualThemeViewer.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -81,6 +81,8 @@ END
 IDD_MAIN_DIALOG         ICON                    "res\\VisualThemeViewer.ico"
 
 IDD_BROWSE_THEMES_DIALOG ICON                    "res\\BrowseThemes.ico"
+
+IDI_MULTI_FRAME_TEST_ICON ICON                    "res\\Favorites.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -225,21 +227,21 @@ END
 IDD_MAIN_DIALOG DLGINIT
 BEGIN
     IDC_BK_COLOR_COMBO, 0x403, 16, 0
-0x4623, 0x4646, 0x4646, 0x2046, 0x5728, 0x6968, 0x6574, 0x0029, 
+0x4623, 0x4646, 0x4646, 0x2046, 0x5728, 0x6968, 0x6574, 0x0029,
     IDC_BK_COLOR_COMBO, 0x403, 16, 0
-0x4623, 0x4546, 0x4235, 0x2034, 0x5028, 0x6165, 0x6863, 0x0029, 
+0x4623, 0x4546, 0x4235, 0x2034, 0x5028, 0x6165, 0x6863, 0x0029,
     IDC_BK_COLOR_COMBO, 0x403, 18, 0
-0x4123, 0x4543, 0x4131, 0x2046, 0x4328, 0x6c65, 0x6461, 0x6e6f, 0x0029, 
+0x4123, 0x4543, 0x4131, 0x2046, 0x4328, 0x6c65, 0x6461, 0x6e6f, 0x0029,
 
     IDC_BK_COLOR_COMBO, 0x403, 15, 0
-0x4423, 0x4531, 0x3332, 0x2031, 0x5028, 0x6165, 0x2972, "\000" 
+0x4423, 0x4531, 0x3332, 0x2031, 0x5028, 0x6165, 0x2972, "\000"
     IDC_BK_COLOR_COMBO, 0x403, 16, 0
-0x4623, 0x4435, 0x4245, 0x2033, 0x5728, 0x6568, 0x7461, 0x0029, 
+0x4623, 0x4435, 0x4245, 0x2033, 0x5728, 0x6568, 0x7461, 0x0029,
     IDC_BK_COLOR_COMBO, 0x403, 15, 0
-0x4323, 0x3931, 0x3641, 0x2042, 0x4c28, 0x6f69, 0x296e, "\000" 
+0x4323, 0x3931, 0x3641, 0x2042, 0x4c28, 0x6f69, 0x296e, "\000"
     IDC_BK_COLOR_COMBO, 0x403, 22, 0
-0x4623, 0x4134, 0x3634, 0x2030, 0x5328, 0x6e61, 0x7964, 0x4220, 0x6f72, 
-0x6e77, 0x0029, 
+0x4623, 0x4134, 0x3634, 0x2030, 0x5328, 0x6e61, 0x7964, 0x4220, 0x6f72,
+0x6e77, 0x0029,
     0
 END
 
@@ -324,7 +326,7 @@ END
 STRINGTABLE
 BEGIN
     ID_COPY_THEME           "Copy the selected theme class, part and state (Ctrl+Shift+T)"
-    ID_COPY_THEME_PART_AND_STATE 
+    ID_COPY_THEME_PART_AND_STATE
                             "Copy the selected theme part and state (Ctrl+Shift+P)"
     ID_PREVIEW_THEME_GLYPHS_CHECK "Preview images of theme"
     ID_USE_EXPLORER_THEME_CHECK "Use the 'Explorer' theme"

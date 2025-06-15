@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "Icon.h"
 #include "Imaging.h"
-#include "GroupIcon.h"
+#include "GroupIconRes.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -15,60 +15,117 @@ CIcon::CIcon( void )
 	, m_hasAlpha( false )
 	, m_pShared( nullptr )
 	, m_size( 0, 0 )
+	, m_bitsPerPixel( 0 )
+	, m_pIconGroup( nullptr )
+	, m_groupFramePos( utl::npos )
 {
 }
 
-CIcon::CIcon( HICON hIcon, const CSize& iconSize /*= CSize( 0, 0 )*/ )
+CIcon::CIcon( HICON hIcon, const CSize& iconSize /*= CSize( 0, 0 )*/, TBitsPerPixel bitsPerPixel /*= 0*/ )
 	: m_hIcon( hIcon )
-	, m_hasAlpha( false )
 	, m_pShared( nullptr )
+	, m_hasAlpha( false )
 	, m_size( iconSize )
+	, m_bitsPerPixel( bitsPerPixel )
+	, m_pIconGroup( nullptr )
+	, m_groupFramePos( utl::npos )
+{
+}
+
+CIcon::CIcon( HICON hIcon, const res::CGroupIconEntry& groupIconEntry )
+	: m_hIcon( hIcon )
+	, m_pShared( nullptr )
+	, m_hasAlpha( ILC_COLOR32 == m_bitsPerPixel )
+	, m_size( groupIconEntry.GetSize() )
+	, m_bitsPerPixel( groupIconEntry.GetBitsPerPixel() )
+	, m_pIconGroup( nullptr )
+	, m_groupFramePos( utl::npos )
 {
 }
 
 CIcon::CIcon( const CIcon& shared )
 	: m_hIcon( shared.m_hIcon )
-	, m_hasAlpha( shared.m_hasAlpha )
 	, m_pShared( &shared )
+	, m_hasAlpha( shared.m_hasAlpha )
 	, m_size( shared.m_size )
+	, m_bitsPerPixel( shared.m_bitsPerPixel )
+	, m_pIconGroup( nullptr )
+	, m_groupFramePos( utl::npos )
 {
 }
 
 CIcon::~CIcon()
 {
-	Release();
+	Clear();
 }
 
-// scales to nearest size if the icon doesn't contain the exact size
+bool CIcon::LazyComputeInfo( void ) const
+{
+	ASSERT_PTR( m_hIcon );
 
-CIcon* CIcon::NewIcon( HICON hIcon )
+	if ( m_size.cx != 0 || m_size.cy != 0 )
+		return false;		// already evaluated
+
+	CIconInfo iconInfo( m_hIcon );
+
+	if ( !iconInfo.IsValid() )
+		 return false;
+
+	m_size = iconInfo.m_size;
+
+	ENSURE( m_size.cx > 0 && m_size.cy > 0 );
+	ENSURE( m_bitsPerPixel >= ILC_MASK && m_bitsPerPixel <= ILC_COLOR32 );
+
+	if ( m_hasAlpha != iconInfo.HasAlpha() )	// sometimes it could happen for unusual icon formats, e.g. 256x256 - iconInfo.HasAlpha() is less reliable since the 32bpp icon could still have a mask
+		TRACE( _T("CIcon::LazyComputeInfo() - conflicting states: m_hasAlpha=%d vs. iconInfo.HasAlpha()=%d\n"), m_hasAlpha, iconInfo.HasAlpha() );
+
+	return true;			// lazy evaluated
+}
+
+CIcon* CIcon::LoadNewIcon( HICON hIcon )
 {
 	ASSERT_PTR( hIcon );
 
 	CIconInfo iconInfo( hIcon );
 	CIcon* pIcon = new CIcon( hIcon, iconInfo.m_size );
+
 	pIcon->SetHasAlpha( iconInfo.HasAlpha() );
 
 	return pIcon;
 }
 
-CIcon* CIcon::NewIcon( const CIconId& iconId )
+CIcon* CIcon::LoadNewIcon( const CIconId& iconId )
 {
-	bool hasAlpha = CGroupIcon( iconId.m_id ).Contains( ILC_COLOR32, iconId.m_stdSize );
+	CGroupIconRes groupIcon( iconId.m_id );
 
-	if ( HICON hIcon = res::LoadIcon( iconId ) )
-		return SetHasAlpha( new CIcon( hIcon, iconId.GetStdSize() ), hasAlpha );
+	if ( const res::CGroupIconEntry* pGroupIconEntry = groupIcon.FindMatch( iconId.m_stdSize ) )		// highest BPP
+		return LoadNewIcon( *pGroupIconEntry );
+
+	if ( HICON hIcon = res::LoadIcon( iconId ) )			// scales to nearest size if the icon doesn't contain the exact size
+		return new CIcon( hIcon, iconId.GetSize() );
+
 	return nullptr;
 }
 
-// loads only if the icon contains the exact size
+CIcon* CIcon::LoadNewIcon( const res::CGroupIconEntry& groupIconEntry )
+{	// load from resources the exact icon frame
+	bool hasAlpha = ILC_COLOR32 == groupIconEntry.GetBitsPerPixel();
 
-CIcon* CIcon::NewExactIcon( const CIconId& iconId )
-{
+	if ( HICON hIcon = CGroupIconRes::LoadIconEntry( groupIconEntry ) )
+		return SetHasAlpha( new CIcon( hIcon, groupIconEntry.GetSize(), groupIconEntry.GetBitsPerPixel() ), hasAlpha );
+
+	return nullptr;
+}
+
+CIcon* CIcon::LoadNewExactIcon( const CIconId& iconId )
+{	// loads only if the icon contains the exact size
 	TBitsPerPixel bitsPerPixel;
-	if ( CGroupIcon( iconId.m_id ).ContainsSize( iconId.m_stdSize, &bitsPerPixel ) )
+
+	if ( CGroupIconRes( iconId.m_id ).ContainsSize( iconId.m_stdSize, &bitsPerPixel ) )
 		if ( HICON hIcon = res::LoadIcon( iconId ) )
-			return SetHasAlpha( new CIcon( hIcon, iconId.GetStdSize() ), 32 == bitsPerPixel );
+		{
+			return SetHasAlpha( new CIcon( hIcon, iconId.GetSize(), bitsPerPixel ), 32 == bitsPerPixel );
+		}
 
 	return nullptr;
 }
@@ -78,13 +135,15 @@ HICON CIcon::Detach( void )
 	HICON hIcon = m_hIcon;
 
 	m_hIcon = nullptr;
-	m_hasAlpha = false;
 	m_pShared = nullptr;
-	m_size = CSize( 0, 0 );
+	m_hasAlpha = false;
+	m_size.cx = m_size.cy = 0;
+	m_bitsPerPixel = 0;
+
 	return hIcon;
 }
 
-void CIcon::Release( void )
+void CIcon::Clear( void )
 {
 	bool shared = IsShared();
 
@@ -95,10 +154,19 @@ void CIcon::Release( void )
 
 CIcon& CIcon::SetHandle( HICON hIcon, bool hasAlpha /*= true*/ )
 {
-	Release();
+	Clear();
+
 	m_hIcon = hIcon;
 	SetHasAlpha( hasAlpha );
 	return *this;
+}
+
+void CIcon::SetHasAlpha( bool hasAlpha )
+{
+	m_hasAlpha = hasAlpha;
+
+	if ( m_hasAlpha )
+		m_bitsPerPixel = ILC_COLOR32;
 }
 
 CIcon* CIcon::SetHasAlpha( CIcon* pIcon, bool hasAlpha )
@@ -111,7 +179,7 @@ CIcon* CIcon::SetHasAlpha( CIcon* pIcon, bool hasAlpha )
 
 void CIcon::SetShared( const CIcon& shared )
 {
-	Release();
+	Clear();
 	m_hIcon = shared.m_hIcon;
 	m_hasAlpha = shared.m_hasAlpha;
 }
@@ -122,19 +190,10 @@ const CSize& CIcon::GetSize( void ) const
 	if ( IsShared() )
 		return m_pShared->GetSize();
 
-	if ( 0 == m_size.cx || 0 == m_size.cy )
-		m_size = ComputeSize( m_hIcon );
-
-	ASSERT( m_size.cx > 0 && m_size.cy > 0 );
+	LazyComputeInfo();
 	return m_size;
 }
 
-CSize CIcon::ComputeSize( HICON hIcon )
-{
-	ASSERT_PTR( hIcon );
-	CIconInfo info( hIcon );
-	return info.m_size;
-}
 
 void CIcon::Draw( HDC hDC, const CPoint& pos, bool enabled /*= true*/ ) const
 {
@@ -164,6 +223,23 @@ const CIcon& CIcon::GetUnknownIcon( void )
 
 	return s_unknownIcon;
 }
+
+ui::CIconEntry CIcon::GetGroupIconEntry( void ) const
+{
+	if ( HasIconGroup() )
+		return m_pIconGroup->GetAt( m_groupFramePos ).first;
+
+	return ui::CIconEntry( GetBitsPerPixel(), GetSize() );
+}
+
+void CIcon::ResetIconGroup( CIconGroup* pIconGroup /*= nullptr*/, size_t groupFramePos /*= utl::npos*/ )
+{
+	m_pIconGroup = pIconGroup;
+	m_groupFramePos = groupFramePos;
+
+	ENSURE( ( m_pIconGroup != nullptr ) == ( m_groupFramePos != utl::npos ) );		// consistent?
+}
+
 bool CIcon::MakeBitmap( CBitmap& rBitmap, COLORREF transpColor ) const
 {
 	rBitmap.DeleteObject();
@@ -202,7 +278,7 @@ bool CIcon::MakeBitmap( CBitmap& rBitmap, COLORREF transpColor ) const
 
 void CIcon::CreateFromBitmap( HBITMAP hImageBitmap, HBITMAP hMaskBitmap )
 {
-	Release();
+	Clear();
 
 	m_hIcon = gdi::CreateIcon( hImageBitmap, hMaskBitmap );
 	m_size = gdi::GetBitmapSize( hImageBitmap );
@@ -210,7 +286,7 @@ void CIcon::CreateFromBitmap( HBITMAP hImageBitmap, HBITMAP hMaskBitmap )
 
 void CIcon::CreateFromBitmap( HBITMAP hImageBitmap, COLORREF transpColor )
 {
-	Release();
+	Clear();
 
 	m_hIcon = gdi::CreateIcon( hImageBitmap, transpColor );
 	m_size = gdi::GetBitmapSize( hImageBitmap );
@@ -247,7 +323,9 @@ void CIconInfo::Init( HICON hIcon, bool isCursor )
 		m_bitmapMask.Attach( m_info.hbmMask );
 	}
 	else
+	{
 		m_size.cx = m_size.cy = 0;
+	}
 }
 
 bool CIconInfo::MakeDibSection( CBitmap& rDibSection ) const

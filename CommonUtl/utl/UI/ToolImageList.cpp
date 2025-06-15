@@ -29,11 +29,13 @@ namespace res
 
 CToolImageList::CToolImageList( IconStdSize iconStdSize /*= SmallIcon*/ )
 	: m_imageSize( iconStdSize )
+	, m_hasAlpha( false )
 {
 }
 
 CToolImageList::CToolImageList( const UINT buttonIds[], size_t count, IconStdSize iconStdSize /*= SmallIcon*/ )
 	: m_imageSize( iconStdSize )
+	, m_hasAlpha( false )
 	, m_buttonIds( buttonIds, buttonIds + count )
 {
 }
@@ -44,6 +46,7 @@ CToolImageList::~CToolImageList()
 
 void CToolImageList::Clear( void )
 {
+	m_hasAlpha = false;
 	m_imageSize.Reset();
 	m_buttonIds.clear();
 	m_pImageList.reset();
@@ -96,6 +99,7 @@ bool CToolImageList::LoadToolbar( UINT toolBarId, COLORREF transpColor /*= color
 	ASSERT( toolBarId != 0 );
 
 	CResourceData toolbarData( MAKEINTRESOURCE( toolBarId ), RT_TOOLBAR );
+
 	if ( !toolbarData.IsValid() )
 		return false;
 
@@ -109,22 +113,30 @@ bool CToolImageList::LoadToolbar( UINT toolBarId, COLORREF transpColor /*= color
 	if ( imageCount != 0 )
 	{
 		m_pImageList.reset( new CImageList() );
-		VERIFY( imageCount == res::LoadImageListDIB( *m_pImageList, toolBarId, transpColor ) );
+
+		TImageCountHasAlphaPair resultPair = res::LoadImageListDIB( *m_pImageList, toolBarId, transpColor );
+
+		VERIFY( imageCount == resultPair.first );
+		m_hasAlpha = resultPair.second;
 		ASSERT( m_imageSize.GetSize() == gdi::GetImageIconSize( *m_pImageList ) );
 	}
+
 	return imageCount != 0;
 }
 
-bool CToolImageList::LoadIconStrip( UINT iconStripId, const UINT buttonIds[], size_t count )		// create imagelist from icon strip (custom size multi-images) and initialize button IDs
+bool CToolImageList::_LoadIconStrip( UINT iconStripId, const UINT buttonIds[], size_t count )		// create imagelist from icon strip (custom size multi-images) and initialize button IDs
 {
 	CSize imageSize;
 
 	StoreButtonIds( buttonIds, count );
 	m_pImageList.reset( new CImageList() );
 
-	int imageCount = res::LoadImageListIconStrip( m_pImageList.get(), &imageSize, iconStripId );
+	TImageCountHasAlphaPair resultPair = res::_LoadImageListIconStrip( m_pImageList.get(), &imageSize, iconStripId );
+
 	m_imageSize.Reset( imageSize );
-	return imageCount == GetImageCount();		// all buttons images found?
+	m_hasAlpha = resultPair.second;
+
+	return resultPair.first == GetImageCount();		// all buttons images found?
 }
 
 bool CToolImageList::LoadButtonImages( ui::IImageStore* pSrcImageStore /*= ui::GetImageStoresSvc()*/ )

@@ -7,7 +7,7 @@
 #include "utl/UI/DibDraw.h"
 #include "utl/UI/DibSection.h"
 #include "utl/UI/DibPixels.h"
-#include "utl/UI/GroupIcon.h"
+#include "utl/UI/GroupIconRes.h"
 #include "utl/UI/Icon.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/WndUtils.h"
@@ -31,10 +31,10 @@ CImageTests& CImageTests::Instance( void )
 	return s_testCase;
 }
 
-void CImageTests::TestGroupIcon( void )
+void CImageTests::TestGroupIconRes( void )
 {
 	{
-		const CGroupIcon groupIcon( IDR_IMAGE_STRIP );
+		const CGroupIconRes groupIcon( IDR_IMAGE_STRIP );
 		ASSERT( !groupIcon.IsValid() );						// no such icon
 	}
 
@@ -50,7 +50,7 @@ void CImageTests::TestGroupIcon( void )
 			m_images[7]: m_id=8, 32 bpp, 16x16
 		*/
 
-		const CGroupIcon groupIcon( IDR_MAINFRAME );
+		const CGroupIconRes groupIcon( IDR_MAINFRAME );
 
 		ASSERT( groupIcon.ContainsSize( DefaultSize ) );
 		ASSERT( groupIcon.ContainsSize( SmallIcon ) );
@@ -72,7 +72,7 @@ void CImageTests::TestGroupIcon( void )
 	}
 
 	{
-		const CGroupIcon groupIcon( IDR_TEST_DOC_TYPE );
+		const CGroupIconRes groupIcon( IDR_TEST_DOC_TYPE );
 
 		ASSERT( groupIcon.ContainsSize( SmallIcon ) );
 		ASSERT( !groupIcon.ContainsSize( MediumIcon ) );
@@ -98,14 +98,14 @@ void CImageTests::TestImageList( void )
 
 	CImageList imageList;
 
-	VERIFY( res::LoadImageListDIB( imageList, IDR_IMAGE_STRIP ) );		// use default image count, implied from the width/height ratio
+	VERIFY( res::LoadImageListDIB( imageList, IDR_IMAGE_STRIP ).first != 0 );		// use default image count, implied from the width/height ratio
 	CSize imageSize = gdi::GetImageIconSize( imageList );
 	ASSERT_EQUAL( ImageCount, imageList.GetImageCount() );
 	ASSERT( CIconSize::GetSizeOf( SmallIcon ) == imageSize );
 
 	{	// reload with explicit image count
 		CImageList imageList2;
-		VERIFY( res::LoadImageListDIB( imageList2, IDR_IMAGE_STRIP, color::Auto, ImageCount ) );
+		VERIFY( res::LoadImageListDIB( imageList2, IDR_IMAGE_STRIP, color::Auto, ImageCount ).first != 0 );
 		ASSERT_EQUAL( imageList.GetImageCount(), imageList2.GetImageCount() );
 		ASSERT( imageSize == gdi::GetImageIconSize( imageList2 ) );
 	}
@@ -187,7 +187,7 @@ void CImageTests::TestImageList( void )
 
 void CImageTests::Run( void )
 {
-	RUN_TEST( TestGroupIcon );
+	RUN_TEST( TestGroupIconRes );
 	RUN_TEST( TestIcon );
 	RUN_TEST( TestImageList );
 }

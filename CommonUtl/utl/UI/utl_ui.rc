@@ -943,7 +943,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDC_TOOLBAR_IMAGES_LIST "Command Name=-1|Pos=50|Size=55|ID Decimal, Hex=90|ID Literal=110"
+    IDC_TOOLBAR_IMAGES_LIST "Command Name=-1|Pos=50|Format=80|ID Decimal, Hex=90|ID Literal=110"
 END
 
 STRINGTABLE

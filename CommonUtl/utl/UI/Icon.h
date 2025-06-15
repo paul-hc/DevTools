@@ -6,17 +6,24 @@
 #include "Color.h"
 
 
+namespace res { struct CGroupIconEntry; }
+
+class CIconGroup;
+
+
 class CIcon : private utl::noncopyable
 {
 public:
 	CIcon( void );
-	CIcon( HICON hIcon, const CSize& iconSize = CSize( 0, 0 ) );
+	CIcon( HICON hIcon, const CSize& iconSize = CSize( 0, 0 ), TBitsPerPixel bitsPerPixel = 0 );
+	CIcon( HICON hIcon, const res::CGroupIconEntry& groupIconEntry );
 	CIcon( const CIcon& shared );
 	~CIcon();
 
-	static CIcon* NewIcon( HICON hIcon );
-	static CIcon* NewIcon( const CIconId& iconId );
-	static CIcon* NewExactIcon( const CIconId& iconId );					// loads only if size exists (no scaling)
+	static CIcon* LoadNewIcon( HICON hIcon );
+	static CIcon* LoadNewIcon( const CIconId& iconId );
+	static CIcon* LoadNewIcon( const res::CGroupIconEntry& groupIconEntry );	// load from resources the exact icon frame
+	static CIcon* LoadNewExactIcon( const CIconId& iconId );					// loads only if size exists (no scaling)
 
 	bool IsValid( void ) const { return m_hIcon != nullptr; }
 
@@ -26,17 +33,19 @@ public:
 	CIcon& SetHandle( HICON hIcon, bool hasAlpha );
 
 	bool HasAlpha( void ) const { return IsValid() && m_hasAlpha; }			// based on a 32 bit per pixel image
-	void SetHasAlpha( bool hasAlpha ) { m_hasAlpha = hasAlpha; }
-	static CIcon* SetHasAlpha( CIcon* pIcon, bool hasAlpha );				// safe if NULL pIcon
+	void SetHasAlpha( bool hasAlpha );
+	static CIcon* SetHasAlpha( CIcon* pIcon, bool hasAlpha );				// safe if nullptr pIcon
 
 	bool IsShared( void ) const { return m_pShared != nullptr; }
 	CIcon* Clone( void ) const { return new CIcon( *this ); }
 	void SetShared( const CIcon& shared );
 
 	HICON Detach( void );
-	void Release( void );
+	void Clear( void );
 
 	const CSize& GetSize( void ) const;
+	int GetDimension( void ) const { GetSize(); return std::max( m_size.cx, m_size.cy ); }
+	TBitsPerPixel GetBitsPerPixel( void ) const { return m_bitsPerPixel; }
 
 	void Draw( HDC hDC, const CPoint& pos, bool enabled = true ) const;
 	void DrawDisabled( HDC hDC, const CPoint& pos ) const;
@@ -50,13 +59,26 @@ public:
 	void CreateFromBitmap( HBITMAP hImageBitmap, HBITMAP hMaskBitmap );
 	void CreateFromBitmap( HBITMAP hImageBitmap, COLORREF transpColor );
 
-	static CSize ComputeSize( HICON hIcon );
 	static const CIcon& GetUnknownIcon( void );		// IDI_UNKNOWN missing icon placeholder
+public:
+	void ResetIconGroup( CIconGroup* pIconGroup = nullptr, size_t groupFramePos = utl::npos );
+
+	bool HasIconGroup( void ) const { return m_pIconGroup != nullptr; }
+	CIconGroup* GetIconGroup( void ) const { return m_pIconGroup; }
+	size_t GetGroupFramePos( void ) const { return m_groupFramePos; }
+	ui::CIconEntry GetGroupIconEntry( void ) const;
+private:
+	bool LazyComputeInfo( void ) const;
 private:
 	HICON m_hIcon;
-	bool m_hasAlpha;				// based on a 32 bit per pixel image; need to store this since both colour and mask bitmaps are DDBs
 	const CIcon* m_pShared;			// if shared it has no ownership (no ref counting, m_pShared must be kept alive - usually in the shared image store)
+	bool m_hasAlpha;				// based on a 32 bit per pixel image; need to store this since both colour and mask bitmaps are DDBs
+
 	mutable CSize m_size;
+	TBitsPerPixel m_bitsPerPixel;
+
+	CIconGroup* m_pIconGroup;
+	size_t m_groupFramePos;
 };
 
 

@@ -28,6 +28,11 @@ namespace pred
 	}
 
 
+	inline CompareResult GetInvertedResult( CompareResult result )
+	{	// reverses the direction of the compare result (for descending sorting)
+		return static_cast<CompareResult>( -(int)result );
+	}
+
 	inline CompareResult GetResultInOrder( CompareResult result, bool ascendingOrder )
 	{	// controls the direction of the compare result (for ascending/descending sorting)
 		return ascendingOrder ? result : static_cast<CompareResult>( -(int)result );

@@ -140,9 +140,6 @@
     <ClInclude Include="GpUtilities.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="GroupIcon.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="ISystemTrayCallback.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -710,6 +707,12 @@
     <ClInclude Include="ImageStore_fwd.h">
       <Filter>UI\Imaging</Filter>
     </ClInclude>
+    <ClInclude Include="GroupIconRes.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="IconGroup.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -755,9 +758,6 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="GdiCoords.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="GroupIcon.cpp">
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="IZoomBar.cpp">
@@ -1209,6 +1209,12 @@
     </ClCompile>
     <ClCompile Include="BaseMainDialog.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupIconRes.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="IconGroup.cpp">
+      <Filter>UI\Imaging</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

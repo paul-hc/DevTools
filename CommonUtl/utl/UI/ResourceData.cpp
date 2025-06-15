@@ -8,22 +8,47 @@
 #endif
 
 
-CResourceData::CResourceData( const TCHAR* pResId, const TCHAR* pResType )
-	: m_hInst( CScopedResInst::Find( pResId, pResType ) )				// determine location of the resource
-	, m_hResource( m_hInst != nullptr ? ::FindResource( m_hInst, pResId, pResType ) : nullptr )
-	, m_hGlobal( m_hResource != nullptr ? ::LoadResource( m_hInst, m_hResource ) : nullptr )
-	, m_pResource( m_hGlobal != nullptr ? ::LockResource( m_hGlobal ) : nullptr )
+CResourceData::CResourceData( const TCHAR* pResName /*= nullptr*/, const TCHAR* pResType /*= nullptr*/ )
+	: m_hInst( nullptr )				// determine location of the resource
+	, m_hResource( nullptr )
+	, m_hGlobal( nullptr )
+	, m_pResource( nullptr )
 {
+	if ( pResName != nullptr )
+		LoadResource( pResName, pResType );
 }
 
 CResourceData::~CResourceData()
+{
+	Clear();
+}
+
+void CResourceData::Clear( void )
 {
 	if ( IsValid() )
 	{
 		ASSERT_PTR( m_hGlobal );
 		::UnlockResource( m_hGlobal );
 		::FreeResource( m_hGlobal );
+
+		m_hInst = nullptr;
+		m_hResource = nullptr;
+		m_hGlobal = nullptr;
+		m_pResource = nullptr;
 	}
+}
+
+bool CResourceData::LoadResource( const TCHAR* pResName, const TCHAR* pResType )
+{
+	Clear();
+
+	if ( ( m_hInst = CScopedResInst::Find( pResName, pResType ) ) != nullptr )				// determine location of the resource
+		if ( ( m_hResource = ::FindResource( m_hInst, pResName, pResType ) ) != nullptr )
+			if ( ( m_hGlobal = ::LoadResource( m_hInst, m_hResource ) ) != nullptr )
+				if ( ( m_pResource = ::LockResource( m_hGlobal ) ) != nullptr )
+					return true;
+
+	return false;
 }
 
 CComPtr<IStream> CResourceData::CreateStreamCopy( void ) const

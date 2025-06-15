@@ -16,7 +16,7 @@ CWndImageRepository::CWndImageRepository( void )
 {
 	// Avoid using PNG with alpha channel - it brakes rendering other windows' icons without alpha by drawing a black background;
 	// Use BMP 24bpp, otherwise PNG breaks image list transparency in 24bpp.
-	VERIFY( Image_Count == res::LoadImageListDIB( m_imageList, IDR_WND_TYPES_STRIP, color::ToolStripPink ) );
+	VERIFY( Image_Count == res::LoadImageListDIB( m_imageList, IDR_WND_TYPES_STRIP, color::ToolStripPink ).first );
 
 	RegisterClasses( _T("#32769"), Image_Desktop );
 	RegisterClasses( _T("#32770"), Image_Dialog );

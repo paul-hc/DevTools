@@ -17,7 +17,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestGroupIcon( void );
+	void TestGroupIconRes( void );
 	void TestIcon( void );
 	void TestImageList( void );
 };

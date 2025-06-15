@@ -239,10 +239,11 @@
     <ClInclude Include="GdiCoords.h" />
     <ClInclude Include="GdiPlus_fwd.h" />
     <ClInclude Include="GpUtilities.h" />
-    <ClInclude Include="GroupIcon.h" />
+    <ClInclude Include="GroupIconRes.h" />
     <ClInclude Include="HistoryComboBox.h" />
     <ClInclude Include="Icon.h" />
     <ClInclude Include="IconButton.h" />
+    <ClInclude Include="IconGroup.h" />
     <ClInclude Include="IImageZoomView.h" />
     <ClInclude Include="ImageCommandLookup.h" />
     <ClInclude Include="ImageEdit.h" />
@@ -434,10 +435,11 @@
     <ClCompile Include="EnumSplitButton.cpp" />
     <ClCompile Include="FilterStore.cpp" />
     <ClCompile Include="GdiCoords.cpp" />
-    <ClCompile Include="GroupIcon.cpp" />
+    <ClCompile Include="GroupIconRes.cpp" />
     <ClCompile Include="HistoryComboBox.cpp" />
     <ClCompile Include="Icon.cpp" />
     <ClCompile Include="IconButton.cpp" />
+    <ClCompile Include="IconGroup.cpp" />
     <ClCompile Include="ImageCommandLookup.cpp" />
     <ClCompile Include="ImageEdit.cpp" />
     <ClCompile Include="ImageInfoGadget.cpp" />

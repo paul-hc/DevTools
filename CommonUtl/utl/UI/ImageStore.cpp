@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "ImageStore.h"
+#include "IconGroup.h"
 #include "Imaging.h"
 #include "Dialog_fwd.h"
 #include "ThemeItem.h"
@@ -92,16 +93,17 @@ CImageStore::~CImageStore()
 void CImageStore::Clear( void )
 {
 	utl::ClearOwningContainer( m_toolbarDescriptors );
-	utl::ClearOwningMapValues( m_iconMap );
+	utl::ClearOwningMapValues( m_iconFramesMap );
 	utl::ClearOwningMapValues( m_bitmapMap );
 	utl::ClearOwningContainer( m_menuBitmapMap, func::DeleteMenuBitmaps() );
 }
 
-CIcon* CImageStore::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*/ ) const
+CIconGroup* CImageStore::FindIconGroup( UINT cmdId ) const
 {
-	const TIconKey key( FindAliasIconId( cmdId ), iconStdSize );
-	TIconMap::const_iterator itFound = m_iconMap.find( key );
-	if ( itFound == m_iconMap.end() )
+	UINT iconResId = FindAliasIconId( cmdId );
+	TIconGroupMap::const_iterator itFound = m_iconFramesMap.find( iconResId );
+
+	if ( itFound == m_iconFramesMap.end() )
 		return nullptr;
 
 	return itFound->second;
@@ -123,12 +125,15 @@ void CImageStore::RegisterAliases( const ui::CCmdAlias iconAliases[], size_t cou
 
 const CIcon* CImageStore::RetrieveIcon( const CIconId& cmdId )
 {
-	if ( CIcon* pFoundIcon = FindIcon( cmdId.m_id, cmdId.m_stdSize ) )
+	UINT iconResId = FindAliasIconId( cmdId.m_id );
+
+	if ( CIcon* pFoundIcon = FindIcon( iconResId, cmdId.m_stdSize ) )
 		return pFoundIcon;
 
-	const TIconKey iconKey( FindAliasIconId( cmdId.m_id ), cmdId.m_stdSize );		// try loading iconId always (not the command alias)
-	if ( CIcon* pIcon = CIcon::NewExactIcon( CIconId( iconKey.first, cmdId.m_stdSize ) ) )
+	if ( CIcon* pIcon = CIcon::LoadNewExactIcon( CIconId( iconResId, cmdId.m_stdSize ) ) )
 	{
+		const ui::CIconKey iconKey( iconResId, ui::CIconEntry( pIcon->GetBitsPerPixel(), cmdId.m_stdSize ) );
+
 		MapIcon( iconKey, pIcon );
 		return pIcon;
 	}
@@ -195,11 +200,11 @@ void CImageStore::QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToo
 	utl::QueryThat( rToolbarDescrs, m_toolbarDescriptors, pred::HasCmdId( cmdId ) );
 }
 
-void CImageStore::QueryIconKeys( std::vector<TIconKey>& rIconKeys, IconStdSize iconStdSize /*= AnyIconSize*/ ) const
+void CImageStore::QueryIconKeys( std::vector<ui::CIconKey>& rIconKeys, IconStdSize iconStdSize /*= AnyIconSize*/ ) const
 {
-	for ( TIconMap::const_iterator itIcon = m_iconMap.begin(); itIcon != m_iconMap.end(); ++itIcon )
-		if ( AnyIconSize == iconStdSize || iconStdSize == itIcon->first.second )
-			rIconKeys.push_back( itIcon->first );
+	for ( std::vector<ui::CIconKey>::const_iterator itIconKey = m_iconKeys.begin(); itIconKey != m_iconKeys.end(); ++itIconKey )
+		if ( AnyIconSize == iconStdSize || iconStdSize == itIconKey->m_stdSize )
+			rIconKeys.push_back( *itIconKey );
 }
 
 CBitmap* CImageStore::RenderMenuBitmap( const CIcon& icon, bool checked ) const
@@ -241,25 +246,64 @@ UINT CImageStore::FindAliasIconId( UINT cmdId ) const
 	return cmdId;
 }
 
-CIcon*& CImageStore::MapIcon( TIconKey iconKey, CIcon* pIcon )
+CIconGroup*& CImageStore::MapIconGroup( CIconGroup* pIconGroup )
 {
-	CIcon*& rpIcon = m_iconMap[ iconKey ];
+	ASSERT_PTR( pIconGroup );
 
-	if ( pIcon != rpIcon )		// a new icon object?
+	CIconGroup*& rpIconGroup = m_iconFramesMap[ pIconGroup->GetIconResId() ];
+
+	if ( pIconGroup != rpIconGroup )		// a new object?
 	{
-		delete rpIcon;
-		rpIcon = pIcon;
+		if ( rpIconGroup != nullptr )		// replace existing IconGroup?
+		{
+			for ( size_t pos = 0, frameCount = rpIconGroup->GetSize(); pos != frameCount; ++pos )
+			{
+				ui::CIconKey iconKey = rpIconGroup->GetIconKeyAt( pos );
+				std::vector<ui::CIconKey>::const_iterator itFoundKey = std::find( m_iconKeys.begin(), m_iconKeys.end(), iconKey );
 
-		std::vector<TIconKey>::iterator itFoundKey = std::find( m_iconKeys.begin(), m_iconKeys.end(), iconKey );
+				if ( itFoundKey != m_iconKeys.end() )
+				{
+					m_iconKeys.erase( itFoundKey );		// remove existing key
+					ASSERT( 0 == std::count( m_iconKeys.begin(), m_iconKeys.end(), iconKey ) );		// we shouldn't have any duplicates leftover
+				}
+			}
 
-		if ( itFoundKey != m_iconKeys.end() )
-			*itFoundKey = iconKey;				// replace existing key entry
-		else
-			m_iconKeys.push_back( iconKey );
+			delete rpIconGroup;
+		}
+
+		rpIconGroup = pIconGroup;
+
+		for ( size_t pos = 0, frameCount = rpIconGroup->GetSize(); pos != frameCount; ++pos )
+			m_iconKeys.push_back( rpIconGroup->GetIconKeyAt( pos ) );
 	}
 
-	ENSURE( m_iconMap.size() == m_iconKeys.size() );
-	return rpIcon;
+	return rpIconGroup;
+}
+
+bool CImageStore::MapIcon( const ui::CIconKey& iconKey, CIcon* pIcon )
+{
+	if ( CIconGroup* pIconGroup = FindIconGroup( iconKey.m_iconResId ) )
+		if ( pIconGroup->AugmentIcon( iconKey, pIcon ) )
+			m_iconKeys.push_back( iconKey );
+		else
+		{
+			std::vector<ui::CIconKey>::iterator itFoundKey = std::find( m_iconKeys.begin(), m_iconKeys.end(), iconKey );
+
+			ASSERT( itFoundKey != m_iconKeys.end() );						// ensure vector consistent with the hash map
+			std::rotate( itFoundKey, itFoundKey + 1, m_iconKeys.end() );	// move it at the back (as most recent)
+			return false;			// icon replaced
+		}
+	else
+	{	// add new icon group
+		pIconGroup = new CIconGroup();
+
+		pIconGroup->SetIconResId( iconKey.m_iconResId );
+		pIconGroup->AddIcon( iconKey, pIcon );
+
+		MapIconGroup( pIconGroup );
+	}
+
+	return true;	// icon added
 }
 
 void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*= color::Auto*/ )
@@ -277,30 +321,32 @@ void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*
 void CImageStore::RegisterButtonImages( const CToolImageList& toolImageList )
 {
 	REQUIRE( toolImageList.IsValid() );
-	RegisterButtonImages( *toolImageList.GetImageList(), ARRAY_SPAN_V( toolImageList.GetButtonIds() ), &toolImageList.GetImageSize() );
+	RegisterButtonImages( *toolImageList.GetImageList(), ARRAY_SPAN_V( toolImageList.GetButtonIds() ), toolImageList.HasAlpha(), &toolImageList.GetImageSize() );
 }
 
-void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize /*= nullptr*/ )
+void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, bool hasAlpha, const CSize* pImageSize /*= nullptr*/ )
 {
 	ASSERT_PTR( imageList.GetSafeHandle() );
-	ASSERT( imageList.GetImageCount() <= (int)buttonCount );		// give or take the separators
+	ASSERT( imageList.GetImageCount() <= (int)buttonCount );			// give or take the separators
 
-	const bool hasAlpha = !gdi::HasMask( imageList, 0 );			// could also use ui::HasAlphaTransparency() - assume all images are the same
+	//const bool hasAlpha = hasAlpha || !gdi::HasMask( imageList, 0 );	// could also use ui::HasAlphaTransparency() - assume all images are the same
 	CSize imageSize = pImageSize != nullptr ? *pImageSize : gdi::GetImageIconSize( imageList );
-	TIconKey iconKey( 0, ui::LookupIconStdSize( imageSize.cy ) );
+	ui::CIconKey iconKey( 0, ui::CIconEntry( ILC_COLOR32, imageSize ) );
 
-	ENSURE( iconKey.second != DefaultSize );
+	ENSURE( iconKey.m_stdSize != DefaultSize );
 
 	for ( UINT i = 0, imagePos = 0; i != buttonCount; ++i )
-		if ( buttonIds[ i ] != ID_SEPARATOR )		// skip separators
+		if ( buttonIds[ i ] != ID_SEPARATOR )			// skip separators
 		{
-			iconKey.first = buttonIds[ i ];
+			iconKey.m_iconResId = buttonIds[ i ];
 
-			TIconMap::const_iterator itFound = m_iconMap.find( iconKey );
-			if ( itFound == m_iconMap.end() )		// not already loaded?
+			CIcon* pExistingIcon = FindIcon( iconKey.m_iconResId, iconKey.m_stdSize, iconKey.m_bitsPerPixel );		// find exact matching icon
+
+			if ( nullptr == pExistingIcon )		// not already loaded?
 			{
 				HICON hIcon = const_cast<CImageList&>( imageList ).ExtractIcon( imagePos );
 				ASSERT_PTR( hIcon );
+
 				CIcon* pIcon = new CIcon( hIcon, imageSize );
 				pIcon->SetHasAlpha( hasAlpha );
 
@@ -315,14 +361,25 @@ void CImageStore::RegisterIcon( UINT cmdId, CIcon* pIcon )
 	ASSERT( cmdId != 0 );
 	ASSERT( pIcon != nullptr && pIcon->IsValid() );
 
-	TIconKey iconKey( cmdId, ui::LookupIconStdSize( pIcon->GetSize().cx ) );
+	// TODO: refine by getting the exact BPP
+	ui::CIconKey iconKey( cmdId, ui::CIconEntry( pIcon->HasAlpha() ? ILC_COLOR32 : ILC_COLOR24, pIcon->GetSize() ) );
 
 	MapIcon( iconKey, pIcon );
 }
 
 void CImageStore::RegisterLoadIcon( const CIconId& iconId )
 {	// load icon from resources
-	RegisterIcon( iconId.m_id, CIcon::NewIcon( iconId ) );
+	RegisterIcon( iconId.m_id, CIcon::LoadNewIcon( iconId ) );
+}
+
+CIconGroup* CImageStore::RegisterLoadIconGroup( UINT iconId )
+{
+	std::auto_ptr<CIconGroup> pIconGroupRes( new CIconGroup() );
+
+	if ( pIconGroupRes->LoadAllIcons( iconId ) != 0 )
+		return MapIconGroup( pIconGroupRes.release() );		// pass the ownership
+
+	return nullptr;
 }
 
 
@@ -352,12 +409,12 @@ void CImageStoresSvc::PopStore( ui::IImageStore* pImageStore )
 	m_imageStores.erase( itFound );
 }
 
-CIcon* CImageStoresSvc::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*/ ) const
+CIconGroup* CImageStoresSvc::FindIconGroup( UINT cmdId ) const
 {
 	// reverse iterate so the most recent store has priority (stack top, at the back)
 	for ( std::vector<ui::IImageStore*>::const_reverse_iterator itStore = m_imageStores.rbegin(); itStore != m_imageStores.rend(); ++itStore )
-		if ( CIcon* pFoundIcon = (*itStore)->FindIcon( cmdId, iconStdSize ) )
-			return pFoundIcon;
+		if ( CIconGroup* pFoundIconGroup = (*itStore)->FindIconGroup( cmdId ) )
+			return pFoundIconGroup;
 
 	return nullptr;
 }
@@ -420,7 +477,7 @@ void CImageStoresSvc::QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& 
 		(*itStore)->QueryToolbarsWithButton( rToolbarDescrs, cmdId );
 }
 
-void CImageStoresSvc::QueryIconKeys( std::vector<TIconKey>& rIconKeys, IconStdSize iconStdSize /*= AnyIconSize*/ ) const
+void CImageStoresSvc::QueryIconKeys( std::vector<ui::CIconKey>& rIconKeys, IconStdSize iconStdSize /*= AnyIconSize*/ ) const
 {
 	for ( std::vector<ui::IImageStore*>::const_iterator itStore = m_imageStores.begin(); itStore != m_imageStores.end(); ++itStore )
 		(*itStore)->QueryIconKeys( rIconKeys, iconStdSize );

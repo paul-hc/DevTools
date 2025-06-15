@@ -152,7 +152,7 @@ bool CThemeItem::MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& im
 bool CThemeItem::MakeIcon( CIcon& rIcon, const CSize& imageSize, TAlignment alignment /*= NoAlign*/, Status status /*= Normal*/ ) const
 {
 	enum { TranspBkColor = RGB( 255, 255, 254 ) };	// almost white: so that themes that render with alpha blending don't show weird colours (such as radio button)
-	rIcon.Release();
+	rIcon.Clear();
 
 	CBitmap imageBitmap;
 	if ( !MakeBitmap( imageBitmap, TranspBkColor, imageSize, alignment, status ) )

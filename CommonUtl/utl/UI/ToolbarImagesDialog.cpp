@@ -211,6 +211,7 @@ struct CBaseImageItem : public TBasicSubject
 		: m_index( index )
 		, m_cmdId( cmdId )
 		, m_imageSize( 0, 0 )
+		, m_bitsPerPixel( ILC_COLOR32 )
 		, m_indexText( num::FormatNumber( m_index ) )
 	{
 		if ( pCmdName != nullptr )
@@ -232,6 +233,7 @@ public:
 	std::tstring m_cmdLiteral;
 
 	CSize m_imageSize;
+	TBitsPerPixel m_bitsPerPixel;
 	std::tstring m_indexText;
 };
 
@@ -247,6 +249,7 @@ struct CToolbarImageItem : public CBaseImageItem
 		ASSERT_PTR( m_pImages );
 
 		m_imageSize = m_pImages->GetImageSize();
+		m_bitsPerPixel = static_cast<TBitsPerPixel>( m_pImages->GetBitsPerPixel() );
 	}
 
 
@@ -296,7 +299,10 @@ struct CIconImageItem : public CBaseImageItem
 	{
 		ASSERT_PTR( m_pIcon );
 
-		m_imageSize = m_pIcon->GetSize();
+		ui::CIconEntry iconEntry = pIcon->GetGroupIconEntry();
+
+		m_imageSize = iconEntry.GetSize();
+		m_bitsPerPixel = iconEntry.m_bitsPerPixel;
 	}
 
 
@@ -376,9 +382,10 @@ void CBaseImagesPage::AddListItems( void )
 void CBaseImagesPage::AddListItem( int itemPos, const CBaseImageItem* pImageItem )
 {
 	ASSERT_PTR( pImageItem );
+
 	m_imageListCtrl.InsertObjectItem( itemPos, pImageItem );
 	m_imageListCtrl.SetSubItemText( itemPos, Index, pImageItem->m_indexText );
-	m_imageListCtrl.SetSubItemText( itemPos, Size, str::Format( _T("%d x %d"), pImageItem->m_imageSize.cx, pImageItem->m_imageSize.cy ) );
+	m_imageListCtrl.SetSubItemText( itemPos, Format, str::Format( _T("%dx%d, %d-bit"), pImageItem->m_imageSize.cx, pImageItem->m_imageSize.cy, pImageItem->m_bitsPerPixel ) );
 	m_imageListCtrl.SetSubItemText( itemPos, CmdId, pImageItem->m_cmdId != 0 ? str::Format( _T("%d, 0x%04X"), pImageItem->m_cmdId, pImageItem->m_cmdId ) : num::FormatNumber( pImageItem->m_cmdId ) );
 	m_imageListCtrl.SetSubItemText( itemPos, CmdLiteral, pImageItem->m_cmdLiteral );
 }
@@ -583,7 +590,7 @@ CStoreToolbarImagesPage::CStoreToolbarImagesPage( ui::IImageStore* pImageStore /
 		m_toolbarGroups.push_back( TToolbarGroupPair() );
 		TToolbarGroupPair* pToolbarGroup = &m_toolbarGroups.back();
 
-		pToolbarGroup->first = str::Format( _T("Toolbar #%d: %d, 0x%04X"), toolbarPos + 1, toolbarId, toolbarId );
+		pToolbarGroup->first = str::Format( _T("Toolbar #%d: ID=%d, 0x%04X"), toolbarPos + 1, toolbarId, toolbarId );
 		if ( !toolbarTitle.empty() )
 			pToolbarGroup->first += str::Format( _T(" \"%s\""), toolbarTitle.c_str() );
 
@@ -653,7 +660,7 @@ IMPLEMENT_DYNCREATE( CIconImagesPage, CBaseStoreImagesPage )
 CIconImagesPage::CIconImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
 	: CBaseStoreImagesPage( reg::s_pageTitle[ CToolbarImagesDialog::IconImagesPage ], pImageStore )
 {
-	std::vector<ui::IImageStore::TIconKey> iconKeys;
+	std::vector<ui::CIconKey> iconKeys;
 	m_pImageStore->QueryIconKeys( iconKeys, AnyIconSize );
 
 	const mfc::CImageCommandLookup* pImageCmds = mfc::CImageCommandLookup::Instance();
@@ -662,10 +669,10 @@ CIconImagesPage::CIconImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
 	m_imageItems.reserve( iconKeys.size() );
 	for ( UINT index = 0; index != iconKeys.size(); ++index )
 	{
-		const ui::IImageStore::TIconKey& iconKey = iconKeys[ index ];
-		UINT cmdId = iconKey.first;
+		const ui::CIconKey& iconKey = iconKeys[ index ];
+		UINT cmdId = iconKey.m_iconResId;
 
-		if ( const CIcon* pIcon = m_pImageStore->RetrieveIcon( CIconId( cmdId, SmallIcon ) ) )
+		if ( const CIcon* pIcon = m_pImageStore->RetrieveIcon( CIconId( cmdId, iconKey.m_stdSize ) ) )
 		{
 			const std::tstring* pCmdName = pImageCmds->FindCommandName( cmdId );
 			const std::tstring* pCmdLiteral = pImageCmds->FindCommandLiteral( cmdId );
