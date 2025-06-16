@@ -20,7 +20,7 @@ public:
 	void SetSampleCallback( ui::ISampleCallback* pSampleCallback ) { m_pSampleCallback = pSampleCallback; SafeRedraw(); }
 
 	void SetUseDoubleBuffering( bool useDoubleBuffering = true ) { m_useDoubleBuffering = useDoubleBuffering; }
-	void SetBorderColor( COLORREF borderColor = CLR_DEFAULT ) { m_borderColor = borderColor; SafeRedraw(); }
+	void SetBorderColor( COLORREF borderColor = CLR_DEFAULT ) { m_borderColor = borderColor; SafeRedraw(); }		// doesn't work well with scrollable views
 	void SetBkColor( COLORREF bkColor ) { m_bkColor = bkColor; SafeRedraw(); }
 
 	enum ContentUnits { Logical, Device };								// device units are compatible with client rect

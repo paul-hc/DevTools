@@ -136,6 +136,8 @@ CImageDialog::CImageDialog( CWnd* pParent )
 		.AddButton( ID_SET_AUTO_TRANSP_COLOR, ID_AUTO_TRANSP_TOOL )
 		.AddButton( ID_RESET_TRANSP_COLOR, ID_REMOVE_ITEM );
 
+	//m_sampleView.SetBorderColor( color::LightBlue );		// for debugging
+
 	enum { GrayScaleZones = 2, AlphaBlendZones = 3, BlendColorZones = 2, DisabledZones = 4 };
 
 	m_modeData.resize( _ModeCount );

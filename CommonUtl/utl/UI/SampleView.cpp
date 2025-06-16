@@ -191,7 +191,10 @@ void CSampleView::Draw( CDC* pDC, IN OUT CRect& rBoundsRect, const CRect& clipRe
 	if ( m_pSampleCallback != nullptr )
 	{
 		if ( m_useDoubleBuffering )
+		{
+			rBoundsRect |= clipRect;				// fix issues with background not getting erased on scrolling
 			FillBackground( pDC, rBoundsRect );
+		}
 
 		if ( m_pSampleCallback->RenderSample( pDC, rBoundsRect ) )
 			return;
@@ -217,6 +220,24 @@ bool CSampleView::FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect )
 	return m_pSampleCallback->RenderBackground( pDC, rBoundsRect );
 }
 
+void CSampleView::OnDraw( CDC* pPaintDC )
+{
+	CRect clientRect, clipRect;
+
+	GetClientRect( &clientRect );
+	pPaintDC->GetClipBox( &clipRect );
+
+	if ( m_useDoubleBuffering )
+	{
+		CMemDC memDC( *pPaintDC, this );
+		CDC* pDC = &memDC.GetDC();
+
+		Draw( pDC, clientRect, clipRect );
+	}
+	else
+		Draw( pPaintDC, clientRect, clipRect );
+}
+
 
 // message handlers
 
@@ -238,31 +259,13 @@ void CSampleView::OnInitialUpdate( void )
 	SetNotScrollable();
 }
 
-void CSampleView::OnDraw( CDC* pPaintDC )
-{
-	CRect clientRect, clipRect;
-
-	GetClientRect( &clientRect );
-	pPaintDC->GetClipBox( &clipRect );
-
-	if ( m_useDoubleBuffering )
-	{
-		CMemDC memDC( *pPaintDC, this );
-		CDC* pDC = &memDC.GetDC();
-
-		Draw( pDC, clientRect, clipRect );
-	}
-	else
-		Draw( pPaintDC, clientRect, clipRect );
-}
-
 BOOL CSampleView::OnEraseBkgnd( CDC* pDC )
 {
 	if ( m_useDoubleBuffering )
 		return TRUE;		// simulate that we erased the background to prevent default erasing
 
 	if ( nullptr == m_pSampleCallback )
-		return CScrollView::OnEraseBkgnd( pDC );
+		return __super::OnEraseBkgnd( pDC );
 
 	CRect clientRect;
 
@@ -277,12 +280,12 @@ BOOL CSampleView::OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message )
 		::SetCursor( m_hScrollableCursor );
 		return TRUE;
 	}
-	return CScrollView::OnSetCursor( pWnd, hitTest, message );
+	return __super::OnSetCursor( pWnd, hitTest, message );
 }
 
 void CSampleView::OnLButtonDown( UINT flags, CPoint point )
 {
-	CScrollView::OnLButtonDown( flags, point );
+	__super::OnLButtonDown( flags, point );
 
 	if ( IsScrollable() )
 		RunTrackScroll( point );
@@ -290,7 +293,7 @@ void CSampleView::OnLButtonDown( UINT flags, CPoint point )
 
 void CSampleView::OnMouseMove( UINT flags, CPoint point )
 {
-	CScrollView::OnMouseMove( flags, point );
+	__super::OnMouseMove( flags, point );
 
 	if ( m_pSampleCallback != nullptr )
 	{

@@ -193,5 +193,6 @@
     <None Include="res\DemoUtl.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

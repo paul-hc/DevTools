@@ -290,6 +290,7 @@
     <Image Include="res\Toolbar.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="res\DemoUtl.rc2" />
   </ItemGroup>
   <ItemGroup>
