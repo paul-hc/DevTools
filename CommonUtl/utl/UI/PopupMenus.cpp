@@ -891,7 +891,8 @@ namespace mfc
 
 		if ( isSelTable && !ui::IsUndefinedColor( m_pEditorHost->GetAutoColor() ) )
 		{
-			InsertButton( pColorButton = new CToolBarColorButton( AutoId, m_pEditorHost->GetAutoColor(), mfc::CColorLabels::s_autoLabel ) );
+			pColorButton = new CToolBarColorButton( AutoId, m_pEditorHost->GetAutoColor(), mfc::CColorLabels::s_autoLabel );
+			InsertButton( pColorButton );
 			pColorButton->SetChecked( CLR_NONE == selColor );
 			InsertSeparator();
 		}

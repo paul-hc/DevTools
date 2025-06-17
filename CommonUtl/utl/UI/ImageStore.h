@@ -33,12 +33,13 @@ public:
 	virtual void QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const;
 	virtual void QueryIconKeys( std::vector<ui::CIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const;
 public:
-	void RegisterToolbarImages( UINT toolbarId, COLORREF transpColor = color::Auto );
+	void RegisterToolbarImages( UINT toolbarId, COLORREF transpColor = color::Auto, bool addMfcToolBarImages = false );
 	void RegisterButtonImages( const CToolImageList& toolImageList );
 	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, bool hasAlpha, const CSize* pImageSize = nullptr );
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );			// takes ownership of pIcon
 	void RegisterIcon( UINT cmdId, HICON hIcon ) { return RegisterIcon( cmdId, CIcon::LoadNewIcon( hIcon ) ); }
-	void RegisterLoadIcon( const CIconId& iconId );			// load icon from resources
+
+	CIcon* RegisterLoadIcon( const CIconId& iconId );		// load icon from resources
 	CIconGroup* RegisterLoadIconGroup( UINT iconId );		// load all frames (formats) of an icon from resources - a frame is a group icon directory entry with BPP and size.
 
 	// aliases are registered in this store, as well as in afxCommandManager (for MFC control-bars)

@@ -306,7 +306,7 @@ bool CImageStore::MapIcon( const ui::CIconKey& iconKey, CIcon* pIcon )
 	return true;	// icon added
 }
 
-void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*= color::Auto*/ )
+void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*= color::Auto*/, bool addMfcToolBarImages /*= false*/ )
 {
 	CToolImageList strip;
 
@@ -314,7 +314,7 @@ void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*
 	RegisterButtonImages( strip );
 	m_toolbarDescriptors.push_back( new ui::CToolbarDescr( toolbarId, ARRAY_SPAN_V( strip.GetButtonIds() ) ) );
 
-	if ( afxContextMenuManager != nullptr )
+	if ( afxContextMenuManager != nullptr || addMfcToolBarImages )
 		CMFCToolBar::AddToolBarForImageCollection( toolbarId );		// also load the MFC control bar images for the toolbar
 }
 
@@ -367,9 +367,14 @@ void CImageStore::RegisterIcon( UINT cmdId, CIcon* pIcon )
 	MapIcon( iconKey, pIcon );
 }
 
-void CImageStore::RegisterLoadIcon( const CIconId& iconId )
+CIcon* CImageStore::RegisterLoadIcon( const CIconId& iconId )
 {	// load icon from resources
-	RegisterIcon( iconId.m_id, CIcon::LoadNewIcon( iconId ) );
+	CIcon* pIcon = CIcon::LoadNewIcon( iconId );
+
+	if ( pIcon != nullptr )
+		RegisterIcon( iconId.m_id, pIcon );
+
+	return pIcon;
 }
 
 CIconGroup* CImageStore::RegisterLoadIconGroup( UINT iconId )
