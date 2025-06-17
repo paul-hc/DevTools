@@ -166,7 +166,7 @@ void CImageDialog::Render_ImageList( CDC* pDC, CMultiZoneIterator* pMultiZone )
 {
 	enum Effect { Original, Disabled, Embossed, Blended25, Blended50, Blended75 };
 
-	COLORREF blendToColor = GetSysColor( COLOR_BTNFACE );			// GetBkColor()
+	COLORREF blendToColor = ::GetSysColor( COLOR_BTNFACE );			// GetBkColor()
 
 	DrawImageListEffect( pDC, gdi::Normal, blendToColor, pMultiZone->GetNextZone() );
 	DrawImageListEffect( pDC, gdi::Disabled, blendToColor, pMultiZone->GetNextZone() );

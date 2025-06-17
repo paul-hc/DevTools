@@ -2,6 +2,7 @@
 #define ImageDialog_h
 #pragma once
 
+#include "utl/UI/ColorValue.h"
 #include "utl/UI/DibSection.h"
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/HistoryComboBox.h"
@@ -19,6 +20,7 @@ class CEnumTags;
 class CPixelInfoSample;
 class CColorBoardSample;
 class CDialogToolBar;
+class CColorPickerButton;
 namespace gdi { enum Effect; }
 
 
@@ -90,7 +92,6 @@ private:
 	Zoom m_zoom;
 	BYTE m_statusAlpha;
 	std::tstring m_imagePath;
-	std::tstring m_bkColorText;
 	std::auto_ptr<CDibSection> m_pDibSection;
 	CColorBoard m_colorBoard;
 	CImageTranspColors m_transpColorCache;
@@ -102,7 +103,7 @@ private:
 
 	//enum { IDD = IDD_IMAGE_DIALOG };
 	CItemContentHistoryCombo m_imagePathCombo;
-	CItemContentHistoryCombo m_bkColorCombo;
+	std::auto_ptr<CColorPickerButton> m_pBkColorPicker;
 	CSpinEdit m_framePosEdit;
 	CEnumComboBox m_imagingApiCombo;
 	CEnumComboBox m_forceResolutionCombo;
@@ -125,9 +126,10 @@ public:
 	BYTE m_blendColor;
 	BYTE m_disabledAlpha;
 protected:
-	virtual void DoDataExchange( CDataExchange* pDX );
-	virtual void OnOK( void );
-	virtual void OnCancel( void ) { OnOK(); }
+	virtual void DoDataExchange( CDataExchange* pDX ) override;
+	virtual void OnOK( void ) override;
+	virtual void OnCancel( void ) override { OnOK(); }
+	virtual void OnDestroy( void ) override;
 protected:
 	// message map functions
 	afx_msg void OnDropFiles( HDROP hDropInfo );

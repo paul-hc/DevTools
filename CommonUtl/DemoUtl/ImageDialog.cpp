@@ -9,6 +9,7 @@
 #include "utl/FileSystem.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/Color.h"
+#include "utl/UI/ColorPickerButton.h"
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/Imaging.h"
 #include "utl/UI/ImagingGdiPlus.h"
@@ -27,7 +28,7 @@
 
 namespace reg
 {
-	static const TCHAR section[] = _T("ImageDialog");
+	static const TCHAR section_dlg[] = _T("ImageDialog");
 	static const TCHAR entry_sampleMode[] = _T("SampleMode");
 	static const TCHAR entry_imagingApi[] = _T("ImagingApi");
 	static const TCHAR entry_framePos[] = _T("FramePos");
@@ -37,7 +38,7 @@ namespace reg
 	static const TCHAR entry_imagePathHistory[] = _T("ImagePathHistory");
 	static const TCHAR entry_imagePath[] = _T("ImagePath");
 	static const TCHAR entry_bkColor[] = _T("BkColor");
-	static const TCHAR entry_bkColorHistory[] = _T("BkColorHistory");
+	//static const TCHAR entry_bkColorHistory[] = _T("BkColorHistory");
 	static const TCHAR entry_stacking[] = _T("Stacking");
 	static const TCHAR entry_spacing[] = _T("Spacing");
 	static const TCHAR entry_statusAlpha[] = _T("StatusAlpha");
@@ -87,19 +88,19 @@ namespace layout
 
 CImageDialog::CImageDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_IMAGE_DIALOG, pParent )
-	, m_sampleMode( (SampleMode)AfxGetApp()->GetProfileInt( reg::section, reg::entry_sampleMode, ShowImage ) )
-	, m_imagingApi( (ui::ImagingApi)AfxGetApp()->GetProfileInt( reg::section, reg::entry_imagingApi, ui::WicApi ) )
-	, m_framePos( AfxGetApp()->GetProfileInt( reg::section, reg::entry_framePos, 1 ) )
+	, m_sampleMode( (SampleMode)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_sampleMode, ShowImage ) )
+	, m_imagingApi( (ui::ImagingApi)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_imagingApi, ui::WicApi ) )
+	, m_framePos( AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_framePos, 1 ) )
 	, m_frameCount( 1 )
-	, m_forceResolution( (Resolution)AfxGetApp()->GetProfileInt( reg::section, reg::entry_forceResolution, Auto ) )
-	, m_showFlags( AfxGetApp()->GetProfileInt( reg::section, reg::entry_showFlags, ShowGuides | ShowLabels ) )
-	, m_zoom( (Zoom)AfxGetApp()->GetProfileInt( reg::section, reg::entry_zoom, Zoom100 ) )
-	, m_statusAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section, reg::entry_statusAlpha, 127 ) )
-	, m_multiZone( (CMultiZone::Stacking)AfxGetApp()->GetProfileInt( reg::section, reg::entry_stacking, CMultiZone::Auto ) )
-	, m_imagePath( AfxGetApp()->GetProfileString( reg::section, reg::entry_imagePath ) )
-	, m_bkColorText( AfxGetApp()->GetProfileString( reg::section, reg::entry_bkColor ) )
+	, m_forceResolution( (Resolution)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_forceResolution, Auto ) )
+	, m_showFlags( AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_showFlags, ShowGuides | ShowLabels ) )
+	, m_zoom( (Zoom)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_zoom, Zoom100 ) )
+	, m_statusAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_statusAlpha, 127 ) )
+	, m_multiZone( (CMultiZone::Stacking)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_stacking, CMultiZone::Auto ) )
+	, m_imagePath( AfxGetApp()->GetProfileString( reg::section_dlg, reg::entry_imagePath ) )
 
 	, m_imagePathCombo( ui::FilePath, gdi::g_imageFileFilter )
+	, m_pBkColorPicker( new CColorPickerButton() )
 	, m_imagingApiCombo( &ui::GetTags_ImagingApi() )
 	, m_forceResolutionCombo( &GetTags_Resolution() )
 	, m_zoomCombo( &GetTags_Zoom() )
@@ -114,23 +115,25 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	, m_statusAlphaEdit( IDC_STATUS_ALPHA_EDIT, &m_statusAlpha )
 	, m_modeSheet( m_sampleMode )
 
-	, m_convertFlags( (BYTE)AfxGetApp()->GetProfileInt( reg::section, reg::entry_convertFlags, 127 ) )
-	, m_sourceAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section, reg::entry_sourceAlpha, 127 ) )
-	, m_pixelAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section, reg::entry_pixelAlpha, 127 ) )
-	, m_disabledAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section, reg::entry_disabledAlpha, 127 ) )
+	, m_convertFlags( (BYTE)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_convertFlags, 127 ) )
+	, m_sourceAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_sourceAlpha, 127 ) )
+	, m_pixelAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_pixelAlpha, 127 ) )
+	, m_disabledAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_disabledAlpha, 127 ) )
 {
-	m_regSection = reg::section;
+	m_regSection = reg::section_dlg;
 	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_SPAN( layout::s_dualStyles ) );
 	LoadDlgIcon( ID_STUDY_IMAGE );
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_IMAGE_DIALOG ) );
 	m_initCentered = false;			// so that it uses WINDOWPLACEMENT
 	ui::LoadPopupMenu( &m_contextMenu, IDR_CONTEXT_MENU, app::ImageDialogPopup );
 
-	m_multiZone.m_zoneSpacing = AfxGetApp()->GetProfileInt( reg::section, reg::entry_spacing, m_multiZone.m_zoneSpacing );
-	m_colorBoard.Load( reg::section );
-	m_transpColorCache.Load( reg::section );
+	m_multiZone.m_zoneSpacing = AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_spacing, m_multiZone.m_zoneSpacing );
+	m_colorBoard.Load( reg::section_dlg );
+	m_transpColorCache.Load( reg::section_dlg );
 
 	m_imagePathCombo.SetEnsurePathExist();
+	m_pBkColorPicker->SetColor( (COLORREF)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_bkColor, CLR_NONE ) );
+	m_pBkColorPicker->SetAutoColor( ui::MakeSysColor( COLOR_BTNFACE ) );
 	m_spacingEdit.SetValidRange( Range<int>( 0, 500 ) );
 	m_pImageToolbar->GetStrip()
 		.AddButton( ID_SET_AUTO_TRANSP_COLOR, ID_AUTO_TRANSP_TOOL )
@@ -167,23 +170,22 @@ CImageDialog::CImageDialog( CWnd* pParent )
 
 CImageDialog::~CImageDialog()
 {
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_sampleMode, m_sampleMode );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_imagingApi, m_imagingApi );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_showFlags, m_showFlags );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_zoom, m_zoom );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_framePos, m_framePos );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_forceResolution, m_forceResolution );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_statusAlpha, m_statusAlpha );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_stacking, m_multiZone.GetStacking() );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_spacing, m_multiZone.m_zoneSpacing );
-	AfxGetApp()->WriteProfileString( reg::section, reg::entry_imagePath, m_imagePath.c_str() );
-	AfxGetApp()->WriteProfileString( reg::section, reg::entry_bkColor, m_bkColorText.c_str() );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_convertFlags, m_convertFlags );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_sourceAlpha, m_sourceAlpha );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_pixelAlpha, m_pixelAlpha );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_disabledAlpha, m_disabledAlpha );
-	m_colorBoard.Save( reg::section );
-	m_transpColorCache.Save( reg::section );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_sampleMode, m_sampleMode );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_imagingApi, m_imagingApi );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_showFlags, m_showFlags );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_zoom, m_zoom );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_framePos, m_framePos );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_forceResolution, m_forceResolution );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_statusAlpha, m_statusAlpha );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_stacking, m_multiZone.GetStacking() );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_spacing, m_multiZone.m_zoneSpacing );
+	AfxGetApp()->WriteProfileString( reg::section_dlg, reg::entry_imagePath, m_imagePath.c_str() );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_convertFlags, m_convertFlags );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_sourceAlpha, m_sourceAlpha );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_pixelAlpha, m_pixelAlpha );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_disabledAlpha, m_disabledAlpha );
+	m_colorBoard.Save( reg::section_dlg );
+	m_transpColorCache.Save( reg::section_dlg );
 
 	utl::ClearOwningContainer( m_modeData );
 }
@@ -208,18 +210,15 @@ const CEnumTags& CImageDialog::GetTags_Zoom( void )
 
 WORD CImageDialog::GetForceBpp( void ) const
 {
-	static const WORD bpp[] = { 0, 1, 4, 8, 16, 24, 32 };		// indexed by Resolution
-	ASSERT( m_forceResolution < COUNT_OF( bpp ) );
-	return bpp[ m_forceResolution ];
+	static const WORD s_bpp[] = { 0, 1, 4, 8, 16, 24, 32 };		// indexed by Resolution
+
+	ASSERT( m_forceResolution < COUNT_OF( s_bpp ) );
+	return s_bpp[ m_forceResolution ];
 }
 
 COLORREF CImageDialog::GetBkColor( void ) const
 {
-	if ( m_bkColorText.empty() )
-		return GetSysColor( COLOR_BTNFACE );
-
-	COLORREF bkColor;
-	return ui::ParseColor( &bkColor, m_bkColorText.c_str() ) ? bkColor : color::Salmon;
+	return m_pBkColorPicker->GetDisplayColor();
 }
 
 int CImageDialog::GetZoomPct( void ) const
@@ -388,6 +387,7 @@ CSize CImageDialog::ComputeContentSize( void )
 bool CImageDialog::RenderBackground( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
 {
 	CBrush bkBrush( GetBkColor() );
+
 	pDC->FillRect( &boundsRect, &bkBrush );
 	return true;
 }
@@ -479,7 +479,7 @@ void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color ) implements
 	ui::SetDlgItemText( m_hWnd, IDC_PIXEL_INFO_STATIC, text );
 }
 
-void CImageDialog::DoDataExchange( CDataExchange* pDX )
+void CImageDialog::DoDataExchange( CDataExchange* pDX ) override
 {
 	bool firstInit = nullptr == m_imagePathCombo.m_hWnd;
 
@@ -491,7 +491,7 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_IMAGE_PATH_COMBO, m_imagePathCombo );
 	DDX_Control( pDX, IDC_FRAME_POS_EDIT, m_framePosEdit );
-	DDX_Control( pDX, IDC_BK_COLOR_COMBO, m_bkColorCombo );
+	ui::DDX_ColorEditor( pDX, IDC_BK_COLOR_PICKER_BUTTON, m_pBkColorPicker.get(), nullptr );
 	ui::DDX_Flag( pDX, IDC_FORCE_CVT_EQUAL_BPP_CHECK, m_convertFlags, CDibSection::ForceCvtEqualBpp );
 	ui::DDX_Flag( pDX, IDC_SHOW_GUIDES_CHECK, m_showFlags, ShowGuides );
 	ui::DDX_Flag( pDX, IDC_SHOW_LABELS_CHECK, m_showFlags, ShowLabels );
@@ -503,8 +503,7 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 	if ( firstInit )
 	{
 		DragAcceptFiles();
-		m_imagePathCombo.LoadHistory( reg::section, reg::entry_imagePathHistory );
-		m_bkColorCombo.LoadHistory( reg::section, reg::entry_bkColorHistory, bkColorSet );
+		m_imagePathCombo.LoadHistory( reg::section_dlg, reg::entry_imagePathHistory );
 
 		m_framePosEdit.SetWrap();
 
@@ -514,7 +513,6 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 	}
 
 	ui::DDX_Text( pDX, IDC_IMAGE_PATH_COMBO, m_imagePath );
-	ui::DDX_Text( pDX, IDC_BK_COLOR_COMBO, m_bkColorText );
 	m_imagingApiCombo.DDX_EnumValue( pDX, IDC_IMAGE_API_COMBO, m_imagingApi );
 	m_forceResolutionCombo.DDX_EnumValue( pDX, IDC_FORCE_RESOLUTION_COMBO, m_forceResolution );
 	m_zoomCombo.DDX_EnumValue( pDX, IDC_ZOOM_COMBO, m_zoom );
@@ -550,8 +548,7 @@ BEGIN_MESSAGE_MAP( CImageDialog, CLayoutDialog )
 	ON_CBN_EDITCHANGE( IDC_IMAGE_PATH_COMBO, OnChange_ImageFile )
 	ON_CBN_SELCHANGE( IDC_IMAGE_PATH_COMBO, OnChange_ImageFile )
 	ON_EN_CHANGE( IDC_FRAME_POS_EDIT, OnChange_FramePos )
-	ON_CBN_EDITCHANGE( IDC_BK_COLOR_COMBO, OnChange_BkColor )
-	ON_CBN_SELCHANGE( IDC_BK_COLOR_COMBO, OnChange_BkColor )
+	ON_BN_CLICKED( IDC_BK_COLOR_PICKER_BUTTON, OnChange_BkColor )
 	ON_CBN_SELCHANGE( IDC_IMAGE_API_COMBO, OnChange_ImagingApi )
 	ON_CBN_SELCHANGE( IDC_FORCE_RESOLUTION_COMBO, OnChange_ForceResolution )
 	ON_BN_CLICKED( ID_RESOLUTION_TOGGLE, OnToggle_ForceResolution )
@@ -573,14 +570,20 @@ BEGIN_MESSAGE_MAP( CImageDialog, CLayoutDialog )
 	ON_BN_CLICKED( ID_REFRESH, OnRedrawSample )
 END_MESSAGE_MAP()
 
-void CImageDialog::OnOK( void )
+void CImageDialog::OnOK( void ) override
 {
 	// Notifications are disabled for the focused control during UpdateData() by MFC.
 	// Save history combos just before UpdateData( DialogSaveChanges ), so that HCN_VALIDATEITEMS notifications are received.
-	m_imagePathCombo.SaveHistory( reg::section, reg::entry_imagePathHistory );
-	m_bkColorCombo.SaveHistory( reg::section, reg::entry_bkColorHistory );
+	m_imagePathCombo.SaveHistory( reg::section_dlg, reg::entry_imagePathHistory );
 
 	__super::OnOK();
+}
+
+void CImageDialog::OnDestroy( void )  override
+{
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_bkColor, m_pBkColorPicker->GetColor() );
+
+	__super::OnDestroy();
 }
 
 void CImageDialog::OnDropFiles( HDROP hDropInfo )
@@ -648,17 +651,7 @@ void CImageDialog::OnChange_FramePos( void )
 
 void CImageDialog::OnChange_BkColor( void )
 {
-	std::tstring bkColorText = ui::GetComboSelText( m_bkColorCombo );
-
-	COLORREF bkColor;
-	if ( bkColorText.empty() || ui::ParseColor( &bkColor, bkColorText.c_str() ) )
-	{
-		m_bkColorText = bkColorText;
-		RedrawSample();
-		m_bkColorCombo.SetFrameColor( CLR_NONE );
-	}
-	else
-		m_bkColorCombo.SetFrameColor( color::Red );
+	RedrawSample();
 }
 
 void CImageDialog::OnChange_SampleMode( void )
@@ -948,9 +941,9 @@ CAlphaBlendModePage::CAlphaBlendModePage( CImageDialog* pDialog )
 void CAlphaBlendModePage::DoDataExchange( CDataExchange* pDX )
 {
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
-		CheckDlgButton( IDC_KEEP_EQUAL_CHECK, AfxGetApp()->GetProfileInt( reg::section, reg::entry_alphaPageKeepEqual, FALSE ) );
+		CheckDlgButton( IDC_KEEP_EQUAL_CHECK, AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_alphaPageKeepEqual, FALSE ) );
 	else
-		AfxGetApp()->WriteProfileInt( reg::section, reg::entry_alphaPageKeepEqual, IsDlgButtonChecked( IDC_KEEP_EQUAL_CHECK ) );
+		AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_alphaPageKeepEqual, IsDlgButtonChecked( IDC_KEEP_EQUAL_CHECK ) );
 
 	CModePage::DoDataExchange( pDX );
 }

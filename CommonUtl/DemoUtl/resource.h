@@ -80,7 +80,7 @@
 #define IDC_IMAGE_API_COMBO             1049
 #define IDC_FORCE_RESOLUTION_LABEL      1050
 #define IDC_FORCE_RESOLUTION_COMBO      1051
-#define IDC_BK_COLOR_COMBO              1052
+#define IDC_BK_COLOR_PICKER_BUTTON      1052
 #define IDC_ZOOM_COMBO                  1053
 #define IDC_STACKING_COMBO              1054
 #define IDC_SPACING_EDIT                1055

@@ -21,6 +21,7 @@ class CColorTable;
 namespace ui
 {
 	bool IsUndefinedColor( COLORREF rawColor );		// defined in Color.h
+	TDisplayColor EvalColor( COLORREF rawColor );	// defined in Color.h
 
 
 	interface ICustomPopupMenu
@@ -46,8 +47,14 @@ namespace ui
 
 		COLORREF GetActualColor( void ) const
 		{
-			return GetFallbackColor( GetColor() );		// the color current selection amounts to
+			return GetFallbackColor( GetColor() );			// the color current selection amounts to
 		}
+
+		COLORREF GetDisplayColor( void ) const
+		{
+			return ui::EvalColor( GetActualColor() );		// evaluated actual color
+		}
+
 
 		bool IsForeignColor( void ) const;
 		COLORREF GetForeignColor( void ) const { return IsForeignColor() ? GetColor() : CLR_NONE; }
