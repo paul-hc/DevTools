@@ -116,11 +116,11 @@ CBaseImagesPage* CToolbarImagesDialog::GetActiveChildPage( void ) const
 	return checked_static_cast<CBaseImagesPage*>( m_childSheet.GetActivePage() );
 }
 
-bool CToolbarImagesDialog::RenderSample( CDC* pDC, const CRect& boundsRect ) implements( ui::ISampleCallback )
+bool CToolbarImagesDialog::RenderSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements( ui::ISampleCallback )
 {
 	//GetGlobalData()->DrawParentBackground( m_pSampleView.get(), pDC, const_cast<CRect*>( &boundsRect ));		/* doesn't work with double buffering, leaves background black */
 
-	return GetActiveChildPage()->RenderImageSample( pDC, boundsRect );
+	return GetActiveChildPage()->RenderImageSample( pDC, boundsRect, pCtrl );
 }
 
 void CToolbarImagesDialog::OnIdleUpdateControls( void ) overrides(CLayoutDialog)
@@ -419,8 +419,9 @@ bool CBaseImagesPage::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, co
 	return pImageItem->Draw( pDC, itemImageRect, m_pDlgData->m_drawDisabled, m_pDlgData->m_srcAlpha );
 }
 
-bool CBaseImagesPage::RenderImageSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
+bool CBaseImagesPage::RenderImageSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements(ui::ISampleCallback)
 {
+	pCtrl;
 	if ( CBaseImageItem* pImageItem = m_imageListCtrl.GetCaretAs<CBaseImageItem>() )
 	{
 		enum { NormalEdge = 10 };

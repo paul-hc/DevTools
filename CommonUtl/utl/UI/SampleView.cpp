@@ -196,7 +196,7 @@ void CSampleView::Draw( CDC* pDC, IN OUT CRect& rBoundsRect, const CRect& clipRe
 			FillBackground( pDC, rBoundsRect );
 		}
 
-		if ( m_pSampleCallback->RenderSample( pDC, rBoundsRect ) )
+		if ( m_pSampleCallback->RenderSample( pDC, rBoundsRect, this ) )
 			return;
 	}
 
@@ -217,7 +217,7 @@ bool CSampleView::FillBackground( CDC* pDC, IN OUT CRect& rBoundsRect )
 		return true;
 	}
 
-	return m_pSampleCallback->RenderBackground( pDC, rBoundsRect );
+	return m_pSampleCallback->RenderBackground( pDC, rBoundsRect, this );
 }
 
 void CSampleView::OnDraw( CDC* pPaintDC )
@@ -298,7 +298,7 @@ void CSampleView::OnMouseMove( UINT flags, CPoint point )
 	if ( m_pSampleCallback != nullptr )
 	{
 		CClientDC dc( this );
-		m_pSampleCallback->ShowPixelInfo( point, dc.GetPixel( point ) );
+		m_pSampleCallback->ShowPixelInfo( point, dc.GetPixel( point ), this );
 	}
 }
 

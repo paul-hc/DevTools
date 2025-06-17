@@ -159,7 +159,7 @@ class CColorSample : public CSampleView
 	, public ui::ISampleCallback
 {
 public:
-	CColorSample( ui::ISampleCallback* pRoutePixelInfo = nullptr ) : CSampleView( this ), m_color( CLR_NONE ), m_pRoutePixelInfo( pRoutePixelInfo ) {}
+	CColorSample( ui::ISampleCallback* pRoutePixelInfo = nullptr );
 
 	COLORREF GetColor( void ) const { return m_color; }
 	void SetColor( COLORREF color ) { m_color = color; SafeRedraw(); }
@@ -167,8 +167,8 @@ public:
 	void Reset( void ) { SetColor( CLR_NONE ); }
 protected:
 	// ui::ui::ISampleCallback interface
-	virtual bool RenderSample( CDC* pDC, const CRect& clientRect ) implements(ui::ISampleCallback);
-	virtual void ShowPixelInfo( const CPoint& pos, COLORREF color ) implements(ui::ISampleCallback);
+	virtual bool RenderSample( CDC* pDC, const CRect& clientRect, CWnd* pCtrl ) implements(ui::ISampleCallback);
+	virtual void ShowPixelInfo( const CPoint& pos, COLORREF color, CWnd* pCtrl ) implements(ui::ISampleCallback);
 private:
 	COLORREF m_color;
 	ui::ISampleCallback* m_pRoutePixelInfo;			// multiple samples sharing same info target

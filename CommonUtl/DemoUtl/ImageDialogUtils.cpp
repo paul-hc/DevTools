@@ -416,8 +416,16 @@ void CModeData::Clear( void )
 
 // CColorSample implementation
 
-bool CColorSample::RenderSample( CDC* pDC, const CRect& clientRect ) implements(ui::ISampleCallback)
+CColorSample::CColorSample( ui::ISampleCallback* pRoutePixelInfo /*= nullptr*/ )
+	: CSampleView( this )
+	, m_color( CLR_NONE )
+	, m_pRoutePixelInfo( pRoutePixelInfo )
 {
+}
+
+bool CColorSample::RenderSample( CDC* pDC, const CRect& clientRect, CWnd* pCtrl ) implements(ui::ISampleCallback)
+{
+	pCtrl;
 	if ( m_color != CLR_NONE )
 	{
 		CBrush brush( m_color );
@@ -433,8 +441,9 @@ bool CColorSample::RenderSample( CDC* pDC, const CRect& clientRect ) implements(
 	return true;
 }
 
-void CColorSample::ShowPixelInfo( const CPoint& pos, COLORREF color ) implements(ui::ISampleCallback)
+void CColorSample::ShowPixelInfo( const CPoint& pos, COLORREF color, CWnd* pCtrl ) implements(ui::ISampleCallback)
 {
+	pCtrl;
 	if ( m_pRoutePixelInfo != nullptr )
-		m_pRoutePixelInfo->ShowPixelInfo( pos, color );
+		m_pRoutePixelInfo->ShowPixelInfo( pos, color, pCtrl );
 }

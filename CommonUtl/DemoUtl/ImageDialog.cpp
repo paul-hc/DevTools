@@ -384,16 +384,18 @@ CSize CImageDialog::ComputeContentSize( void )
 	return CSize( 0, 0 );			// not scrollable
 }
 
-bool CImageDialog::RenderBackground( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
+bool CImageDialog::RenderBackground( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements(ui::ISampleCallback)
 {
+	pCtrl;
 	CBrush bkBrush( GetBkColor() );
 
 	pDC->FillRect( &boundsRect, &bkBrush );
 	return true;
 }
 
-bool CImageDialog::RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback)
+bool CImageDialog::RenderSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements(ui::ISampleCallback)
 {
+	pCtrl;
 	if ( RectsAlphaBlend == m_sampleMode )
 		return Render_RectsAlphaBlend( pDC, boundsRect );
 
@@ -456,12 +458,13 @@ CRect CImageDialog::MakeContentRect( const CRect& clientRect ) const
 		: m_sampleView.MakeDisplayRect( clientRect, m_multiZone.GetTotalSize() );
 }
 
-void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color ) implements(ui::ISampleCallback)
+void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color, CWnd* pCtrl ) implements(ui::ISampleCallback)
 {
+	pCtrl;
 	std::tstring text;
 	if ( m_pDibSection.get() != nullptr || RectsAlphaBlend == m_sampleMode )
 	{
-		m_pPixelInfoSample->SetPixelInfo( color, pos );
+		m_pPixelInfoSample->SetPixelInfo( color, pos, this );
 
 		if ( color != CLR_NONE )
 		{
@@ -782,8 +785,9 @@ void CImageDialog::OnRedrawSample( void )
 
 // CColorBoardSample implementation
 
-bool CColorBoardSample::RenderSample( CDC* pDC, const CRect& boundsRect )
+bool CColorBoardSample::RenderSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl )
 {
+	pCtrl;
 	CScopedDrawText scopedDrawText( pDC, this, GetParent()->GetFont() );
 	m_pColorBoard->Draw( pDC, boundsRect );
 	return true;

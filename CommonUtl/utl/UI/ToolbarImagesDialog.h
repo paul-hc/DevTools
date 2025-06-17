@@ -30,7 +30,7 @@ private:
 	CBaseImagesPage* GetActiveChildPage( void ) const;
 
 	// ui::ISampleCallback interface
-	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
+	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements(ui::ISampleCallback);
 private:
 	// enum { IDD = IDD_IMAGES_TOOLBAR_DIALOG };
 	CLayoutChildPropertySheet m_childSheet;
@@ -86,7 +86,7 @@ protected:
 	virtual void AddListItems( void );
 	void AddListItem( int itemPos, const CBaseImageItem* pImageItem );
 public:
-	virtual bool RenderImageSample( CDC* pDC, const CRect& boundsRect ) implements(ui::ISampleCallback);
+	virtual bool RenderImageSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements(ui::ISampleCallback);
 private:
 	void OutputList( void );
 
