@@ -55,7 +55,8 @@ namespace layout
 		{ IDC_ALPHA_DISABLED_LABEL, OffsetOrigin },
 		{ IDC_ALPHA_DISABLED_EDIT, OffsetOrigin },
 		{ IDC_ALPHA_DISABLED_SPIN, OffsetOrigin },
-		{ IDC_TOOLBAR_IMAGE_SAMPLE, Size }
+		{ IDC_TOOLBAR_IMAGE_SAMPLE, pctSizeX( 50 ) | SizeY },
+		{ IDC_TOOLBAR_STRETCH_IMAGE_SAMPLE, pctMoveX( 50 ) | pctSizeX( 50 ) | SizeY }
 	};
 }
 
@@ -70,9 +71,10 @@ CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParentWnd )
 	m_childSheet.AddPage( new CStoreToolbarImagesPage() );
 	m_childSheet.AddPage( new CIconImagesPage() );
 
-	m_pSampleView.reset( new CSampleView( this ) );
-	//m_pSampleView->SetBorderColor( color::Red );		// for debugging
-	m_pSampleView->SetBkColor( ::GetSysColor( COLOR_BTNFACE ) );
+	m_pImageSample.reset( new CSampleView( this ) );
+	m_pImageSample->SetBkColor( ::GetSysColor( COLOR_BTNFACE ) );
+	m_pStretchImageSample.reset( new CSampleView( this ) );
+	m_pStretchImageSample->SetBkColor( ::GetSysColor( COLOR_BTNFACE ) );
 
 	// IDC_LAYOUT_FRAME_1_STATIC:
 	m_pSplitBottomLayoutStatic.reset( new CLayoutStatic() );
@@ -90,7 +92,6 @@ CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParentWnd )
 	m_sharedData.m_drawDisabled = AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_DrawDisabled, false ) != FALSE;
 	m_sharedData.m_srcAlpha = static_cast<BYTE>( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_SrcAlpha, 255u ) );
 	m_sharedData.m_disabledAlpha = mfc::ToolBarImages_RefDisabledImageAlpha();
-	m_sharedData.m_pSampleView = m_pSampleView.get();
 }
 
 CToolbarImagesDialog::~CToolbarImagesDialog()
@@ -116,11 +117,19 @@ CBaseImagesPage* CToolbarImagesDialog::GetActiveChildPage( void ) const
 	return checked_static_cast<CBaseImagesPage*>( m_childSheet.GetActivePage() );
 }
 
+void CToolbarImagesDialog::RedrawImageSample( void )
+{
+	if ( CBaseImagesPage* pActivePage = GetActiveChildPage() )
+	{
+		m_pImageSample->SetContentSize( GetActiveChildPage()->GetSelImageSize() );
+		m_pImageSample->Invalidate();
+		m_pStretchImageSample->Invalidate();
+	}
+}
+
 bool CToolbarImagesDialog::RenderSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements( ui::ISampleCallback )
 {
-	//GetGlobalData()->DrawParentBackground( m_pSampleView.get(), pDC, const_cast<CRect*>( &boundsRect ));		/* doesn't work with double buffering, leaves background black */
-
-	return GetActiveChildPage()->RenderImageSample( pDC, boundsRect, pCtrl );
+	return GetActiveChildPage()->RenderImageSample( pDC, boundsRect, checked_static_cast<CSampleView*>( pCtrl ), pCtrl == m_pStretchImageSample.get());
 }
 
 void CToolbarImagesDialog::OnIdleUpdateControls( void ) overrides(CLayoutDialog)
@@ -141,7 +150,8 @@ void CToolbarImagesDialog::DoDataExchange( CDataExchange* pDX )
 		ui::SetSpinRange( this, IDC_ALPHA_DISABLED_SPIN, 0, 255 );
 	}
 
-	m_pSampleView->DDX_Placeholder( pDX, IDC_TOOLBAR_IMAGE_SAMPLE );
+	m_pImageSample->DDX_Placeholder( pDX, IDC_TOOLBAR_IMAGE_SAMPLE );
+	m_pStretchImageSample->DDX_Placeholder( pDX, IDC_TOOLBAR_STRETCH_IMAGE_SAMPLE );
 	m_childSheet.DDX_DetailSheet( pDX, IDC_ITEMS_SHEET );
 
 	ui::DDX_Bool( pDX, IDC_DRAW_DISABLED_CHECK, m_sharedData.m_drawDisabled );
@@ -152,10 +162,7 @@ void CToolbarImagesDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_HORIZ_SPLITTER_STATIC, *m_pUpDownSplitterFrame );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
-	{
-//m_childSheet.ModifyStyle( 0, WS_BORDER );		// dbg
 		m_childSheet.OutputPages();
-	}
 	else
 		mfc::ToolBarImages_RefDisabledImageAlpha() = m_sharedData.m_disabledAlpha;		// modify the global field!
 
@@ -226,7 +233,7 @@ struct CBaseImageItem : public TBasicSubject
 	virtual std::tstring GetDisplayCode( void ) const { return GetCode(); }
 
 	virtual bool Draw( CDC* pDC, const CRect& itemImageRect, bool drawDisabled = false, BYTE alphaSrc = 255 ) const = 0;
-	virtual bool RenderSample( CDC* pDC, const CRect& normalRect, const CRect& largeRect, bool drawDisabled = false, BYTE alphaSrc = 255 ) const = 0;
+	virtual bool RenderSample( CDC* pDC, const CRect& rect, bool stretch, bool drawDisabled = false, BYTE alphaSrc = 255 ) const = 0;
 public:
 	int m_index;
 	UINT m_cmdId;
@@ -272,15 +279,17 @@ struct CToolbarImageItem : public CBaseImageItem
 		return true;
 	}
 
-	virtual bool RenderSample( CDC* pDC, const CRect& normalRect, const CRect& largeRect, bool drawDisabled = false, BYTE alphaSrc = 255 ) const
+	virtual bool RenderSample( CDC* pDC, const CRect& rect, bool stretch, bool drawDisabled = false, BYTE alphaSrc = 255 ) const override
 	{
 		CAfxDrawState drawState;
 
 		if ( !m_pImages->PrepareDrawImage( drawState ) )
 			return false;
 
-		m_pImages->Draw( pDC, normalRect.left, normalRect.top, m_index, FALSE, drawDisabled, FALSE, FALSE, FALSE, alphaSrc );
-		mfc::ToolBarImages_DrawStretch( m_pImages, pDC, largeRect, m_index, false, drawDisabled, false, false, false, alphaSrc );
+		if ( stretch )
+			mfc::ToolBarImages_DrawStretch( m_pImages, pDC, rect, m_index, false, drawDisabled, false, false, false, alphaSrc );
+		else
+			m_pImages->Draw( pDC, rect.left, rect.top, m_index, FALSE, drawDisabled, FALSE, FALSE, FALSE, alphaSrc );
 
 		m_pImages->EndDrawImage( drawState );
 		return true;
@@ -320,11 +329,10 @@ struct CIconImageItem : public CBaseImageItem
 		return true;
 	}
 
-	virtual bool RenderSample( CDC* pDC, const CRect& normalRect, const CRect& largeRect, bool drawDisabled = false, BYTE alphaSrc = 255 ) const
+	virtual bool RenderSample( CDC* pDC, const CRect& rect, bool stretch, bool drawDisabled = false, BYTE alphaSrc = 255 ) const override
 	{
-		alphaSrc;
-		m_pIcon->DrawStretch( *pDC, normalRect, !drawDisabled );
-		m_pIcon->DrawStretch( *pDC, largeRect, !drawDisabled );
+		stretch, alphaSrc;
+		m_pIcon->DrawStretch( *pDC, rect, !drawDisabled );
 		return true;
 	}
 private:
@@ -340,6 +348,7 @@ CToolbarImagesDialog::CData CBaseImagesPage::s_defaultDlgData;
 
 CBaseImagesPage::CBaseImagesPage( UINT templateId, const TCHAR* pTitle )
 	: CLayoutPropertyPage( templateId )
+	, m_pParentDlg( nullptr )
 	, m_pDlgData( &s_defaultDlgData )
 	, m_regSection( path::Combine( reg::section_dialog, pTitle ) )
 	, m_imageBoundsSize( CIconSize::GetSizeOf( SmallIcon ) )
@@ -393,6 +402,14 @@ void CBaseImagesPage::AddListItem( int itemPos, const CBaseImageItem* pImageItem
 	m_imageListCtrl.SetSubItemText( itemPos, CmdLiteral, pImageItem->m_cmdLiteral );
 }
 
+CSize CBaseImagesPage::GetSelImageSize( void ) const
+{
+	if ( CBaseImageItem* pImageItem = m_imageListCtrl.GetCaretAs<CBaseImageItem>() )
+		return pImageItem->m_imageSize;
+
+	return CSize( 0, 0 );
+}
+
 CSize CBaseImagesPage::GetItemImageSize( ui::GlyphGauge glyphGauge ) const implements(ui::ICustomImageDraw)
 {
 	switch ( glyphGauge )
@@ -419,27 +436,18 @@ bool CBaseImagesPage::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, co
 	return pImageItem->Draw( pDC, itemImageRect, m_pDlgData->m_drawDisabled, m_pDlgData->m_srcAlpha );
 }
 
-bool CBaseImagesPage::RenderImageSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements(ui::ISampleCallback)
+bool CBaseImagesPage::RenderImageSample( CDC* pDC, const CRect& boundsRect, const CSampleView* pImageSample, bool stretch )
 {
-	pCtrl;
-	if ( CBaseImageItem* pImageItem = m_imageListCtrl.GetCaretAs<CBaseImageItem>() )
+	if ( CBaseImageItem* pSelImageItem = m_imageListCtrl.GetCaretAs<CBaseImageItem>() )
 	{
-		enum { NormalEdge = 10 };
+		CRect rect( 0, 0, pSelImageItem->m_imageSize.cx, pSelImageItem->m_imageSize.cy );
 
-		CRect normalBoundsRect = boundsRect, largeBoundsRect = boundsRect;
+		if ( stretch )
+			rect = ui::StretchToFit( boundsRect, pSelImageItem->m_imageSize );		// scale to stretched proportional size
+		else
+			rect = pImageSample->MakeDisplayRect( boundsRect, pSelImageItem->m_imageSize );
 
-		normalBoundsRect.right = normalBoundsRect.left + pImageItem->m_imageSize.cx + NormalEdge * 2;
-		largeBoundsRect.left = normalBoundsRect.right + NormalEdge * 2;
-
-		int zoomSize = std::min( largeBoundsRect.Width(), largeBoundsRect.Height() );
-
-		CRect normalRect( 0, 0, pImageItem->m_imageSize.cx, pImageItem->m_imageSize.cy );
-		CRect largeRect( 0, 0, zoomSize, zoomSize );
-
-		ui::CenterRect( normalRect, normalBoundsRect );
-		ui::CenterRect( largeRect, largeBoundsRect );
-
-		if ( !pImageItem->RenderSample( pDC, normalRect, largeRect, m_pDlgData->m_drawDisabled, m_pDlgData->m_srcAlpha ) )
+		if ( !pSelImageItem->RenderSample( pDC, rect, stretch, m_pDlgData->m_drawDisabled, m_pDlgData->m_srcAlpha ) )
 			return false;
 	}
 
@@ -451,8 +459,8 @@ void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = nullptr == m_imageListCtrl.m_hWnd;
 
 	if ( firstInit )
-		if ( CToolbarImagesDialog* pParentDialog = dynamic_cast<CToolbarImagesDialog*>( GetParent()->GetParent() ) )
-			m_pDlgData = &pParentDialog->m_sharedData;
+		if ( ( m_pParentDlg = dynamic_cast<CToolbarImagesDialog*>( GetParent()->GetParent() ) ) != nullptr )
+			m_pDlgData = &m_pParentDlg->m_sharedData;
 
 	DDX_Control( pDX, IDC_TOOLBAR_IMAGES_LIST, m_imageListCtrl );
 
@@ -467,8 +475,8 @@ void CBaseImagesPage::DoDataExchange( CDataExchange* pDX )
 
 	m_imageListCtrl.Invalidate();
 
-	if ( m_pDlgData->m_pSampleView != nullptr )
-		m_pDlgData->m_pSampleView->SafeRedraw();
+	if ( m_pParentDlg != nullptr )
+		m_pParentDlg->RedrawImageSample();
 
 	__super::DoDataExchange( pDX );
 }
@@ -506,8 +514,8 @@ void CBaseImagesPage::OnLvnItemChanged_ImageListCtrl( NMHDR* pNmHdr, LRESULT* pR
 	{
 		m_selItemIndex = m_imageListCtrl.GetCurSel();
 
-		if ( m_pDlgData->m_pSampleView != nullptr )
-			m_pDlgData->m_pSampleView->Invalidate();
+		if ( m_pParentDlg != nullptr )
+			m_pParentDlg->RedrawImageSample();
 	}
 }
 

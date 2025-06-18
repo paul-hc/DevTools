@@ -25,6 +25,8 @@ public:
 	CToolbarImagesDialog( CWnd* pParentWnd );
 	virtual ~CToolbarImagesDialog();
 
+	void RedrawImageSample( void );
+
 	static mfc::TRuntimeClassList* GetCustomPages( void );		// additional pages to add to CMFCToolBarsCustomizeDialog
 private:
 	CBaseImagesPage* GetActiveChildPage( void ) const;
@@ -34,7 +36,8 @@ private:
 private:
 	// enum { IDD = IDD_IMAGES_TOOLBAR_DIALOG };
 	CLayoutChildPropertySheet m_childSheet;
-	std::auto_ptr<CSampleView> m_pSampleView;
+	std::auto_ptr<CSampleView> m_pImageSample;					// scrollable, zoom 100%
+	std::auto_ptr<CSampleView> m_pStretchImageSample;			// stretched
 
 	std::auto_ptr<CLayoutStatic> m_pSplitBottomLayoutStatic;
 	std::auto_ptr<CResizeFrameStatic> m_pUpDownSplitterFrame;		// embedded inside of vertical splitter
@@ -43,12 +46,11 @@ public:
 
 	struct CData
 	{
-		CData( void ) : m_drawDisabled( false ), m_srcAlpha( 255 ), m_disabledAlpha( 127 ), m_pSampleView( nullptr ) {}
+		CData( void ) : m_drawDisabled( false ), m_srcAlpha( 255 ), m_disabledAlpha( 127 ) {}
 	public:
 		persist bool m_drawDisabled;
 		persist BYTE m_srcAlpha;
 		persist BYTE m_disabledAlpha;
-		CSampleView* m_pSampleView;
 	};
 
 	CData m_sharedData;
@@ -86,7 +88,9 @@ protected:
 	virtual void AddListItems( void );
 	void AddListItem( int itemPos, const CBaseImageItem* pImageItem );
 public:
-	virtual bool RenderImageSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) implements(ui::ISampleCallback);
+	CSize GetSelImageSize( void ) const;
+
+	bool RenderImageSample( CDC* pDC, const CRect& boundsRect, const CSampleView* pImageSample, bool stretch );
 private:
 	void OutputList( void );
 
@@ -95,6 +99,7 @@ private:
 	virtual bool SetItemImageSize( const CSize& imageBoundsSize ) implements(ui::ICustomImageDraw);
 	virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect ) implements(ui::ICustomImageDraw);
 protected:
+	CToolbarImagesDialog* m_pParentDlg;
 	const CToolbarImagesDialog::CData* m_pDlgData;	// from parent dialog
 	std::tstring m_regSection;
 
