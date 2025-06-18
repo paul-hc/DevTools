@@ -120,6 +120,7 @@ protected:
 	};
 protected:
 	int GetRectExtent( const CRect& rect ) const { return resize::NorthSouth == m_layout.m_orientation ? rect.Height() : rect.Width(); }
+	void RedrawGripper( void );
 
 	void ReadLayoutInfo( CFrameLayoutInfo& rInfo ) const;
 	bool LimitFirstExtentToBounds( int& rFirstExtent, int maxExtent ) const;

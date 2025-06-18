@@ -209,7 +209,7 @@ namespace ui
 	}
 
 	CRect GetControlRect( HWND hCtrl )
-	{
+	{	// in parent's client coords
 		ASSERT_PTR( hCtrl );
 		CRect controlRect;
 		::GetWindowRect( hCtrl, &controlRect );

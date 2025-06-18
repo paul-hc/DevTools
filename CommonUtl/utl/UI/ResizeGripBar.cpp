@@ -261,7 +261,13 @@ void CResizeGripBar::LayoutGripperTo( const CFrameLayoutInfo& info, const int fi
 	this->MoveWindow( &gripperRect, false );
 
 	if ( repaint )
-		ui::RedrawControl( m_hWnd );
+		RedrawGripper();
+}
+
+void CResizeGripBar::RedrawGripper( void )
+{
+	ui::RedrawDialog( GetParent()->GetSafeHwnd(), 0 );		// RDW_ALLCHILDREN - this prevents erasing issues in the area around the gripper (with spacing or not)
+	//ui::RedrawControl( m_hWnd );
 }
 
 bool CResizeGripBar::TrackToPos( CPoint screenTrackPos )

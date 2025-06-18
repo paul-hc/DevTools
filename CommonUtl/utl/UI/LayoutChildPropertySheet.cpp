@@ -37,6 +37,7 @@ void CLayoutChildPropertySheet::DDX_DetailSheet( CDataExchange* pDX, UINT frameS
 	if ( nullptr == m_hWnd )
 	{
 		CreateChildSheet( pDX->m_pDlgWnd );
+
 		if ( singleLineTab )
 			GetTabControl()->ModifyStyle( TCS_MULTILINE, 0 );
 
