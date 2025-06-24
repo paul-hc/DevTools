@@ -152,6 +152,29 @@ private:
 };
 
 
+class CPercentEdit : public CSpinEdit
+{
+public:
+	CPercentEdit( UINT editId, TPercent* pPercentage )
+		: m_editId( editId ), m_pPercentage( pPercentage ) { ASSERT_PTR( m_pPercentage ); SetValidRange( Range<TPercent>( -100, 100 ) ); }
+
+	void DDX_Percent( CDataExchange* pDX ) { DDX_Number( pDX, *m_pPercentage, m_editId ); }
+
+	void SyncValueWith( const CColorChannelEdit* pRefEdit )
+	{
+		ASSERT_PTR( pRefEdit );
+		CScopedInternalChange scopedUserChange( &m_userChange );
+		SetNumber<TPercent>( pRefEdit->GetNumber<TPercent>() );
+	}
+protected:
+	// base overrides
+	virtual void OnValueChanged( void ) { *m_pPercentage = GetNumber<TPercent>(); }
+private:
+	UINT m_editId;
+	TPercent* m_pPercentage;
+};
+
+
 #include "utl/UI/SampleView.h"
 
 

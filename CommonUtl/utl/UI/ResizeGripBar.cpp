@@ -185,7 +185,7 @@ void CResizeGripBar::ComputeInitialMetrics( void )
 	}
 }
 
-CResizeGripBar& CResizeGripBar::SetFirstExtentPercentage( TPercent firstExtentPercentage )
+CResizeGripBar& CResizeGripBar::SetFirstExtentPercentage( TUPercent firstExtentPercentage )
 {
 	REQUIRE( ui::IsPercentage_0_100( firstExtentPercentage ) );
 

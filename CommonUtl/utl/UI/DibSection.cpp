@@ -16,7 +16,7 @@
 
 
 CBitmap* CDibSection::s_pNullMask = nullptr;
-int CDibSection::m_testFlags = 0;
+int CDibSection::s_testFlags = 0;
 
 CDibSection::CDibSection( HBITMAP hDib /*= nullptr*/, bool ownsDib /*= false*/ )
 	: CBitmap()
@@ -32,6 +32,17 @@ CDibSection::CDibSection( HBITMAP hDib /*= nullptr*/, bool ownsDib /*= false*/ )
 		AttachDib( dibMeta );
 		SetFlag( m_flags, F_NoAutoDelete, ownsDib );
 	}
+}
+
+CDibSection::CDibSection( const CDibSection* pSrcDib )
+	: CBitmap()
+	, m_flags( 0 )
+	, m_bitsPerPixel( 0 )
+	, m_bitmapSize( 0, 0 )
+	, m_transpColor( CLR_NONE )
+{
+	ASSERT_PTR( pSrcDib );
+	Copy( pSrcDib );
 }
 
 CDibSection::~CDibSection()
@@ -85,8 +96,10 @@ bool CDibSection::Copy( HBITMAP hSrcBitmap )
 {
 	ASSERT_PTR( hSrcBitmap );
 	CSize bitmapSize = gdi::GetBitmapSize( hSrcBitmap );
+
 	// converts to a bottom-up bitmap even if source is top-down
 	CDibMeta dibMeta( (HBITMAP)::CopyImage( hSrcBitmap, IMAGE_BITMAP, bitmapSize.cx, bitmapSize.cy, LR_CREATEDIBSECTION ) );
+
 	dibMeta.StorePixelFormat();
 	m_transpColor = CLR_NONE;
 	return AttachDib( dibMeta );
@@ -97,8 +110,10 @@ bool CDibSection::Copy( const CDibSection* pSrcDib )
 	ASSERT_PTR( pSrcDib );
 
 	CSize bitmapSize = pSrcDib->GetSize();
+
 	// converts to a bottom-up bitmap even if source is top-down
 	CDibMeta dibMeta( (HBITMAP)::CopyImage( pSrcDib->GetHandle(), IMAGE_BITMAP, bitmapSize.cx, bitmapSize.cy, LR_CREATEDIBSECTION ) );
+
 	dibMeta.CopyPixelFormat( pSrcDib->m_srcDibMeta );
 	ModifyFlags( m_flags, _CopyMask, pSrcDib->m_flags );
 	m_transpColor = pSrcDib->m_transpColor;
@@ -112,7 +127,7 @@ bool CDibSection::Convert( const CDibSection& srcDib, UINT destBitsPerPixel )
 	ASSERT( srcDib.IsValid() );
 
 	if ( srcDib.m_bitsPerPixel == destBitsPerPixel )
-		if ( !HasFlag( m_testFlags, ForceCvtEqualBpp | ForceCvtCopyPixels ) )
+		if ( !HasFlag( s_testFlags, ForceCvtEqualBpp | ForceCvtCopyPixels ) )
 			return Copy( &srcDib );						// straight CopyImage (no format conversion)
 
 	CSize bitmapSize = srcDib.GetSize();
@@ -128,7 +143,7 @@ bool CDibSection::Convert( const CDibSection& srcDib, UINT destBitsPerPixel )
 	SetMaskedValue( m_flags, F_IsPng | F_AutoTranspColor, srcDib.m_flags );
 	m_transpColor = CLR_NONE;
 
-	if ( !HasFlag( m_testFlags, ForceCvtCopyPixels ) )
+	if ( !HasFlag( s_testFlags, ForceCvtCopyPixels ) )
 	{
 		CScopedBitmapMemDC scopedDestBitmap( this );
 		CDC* pDestMemDC = GetBitmapMemDC();
@@ -283,60 +298,53 @@ bool CDibSection::LoadBitmap( UINT bitmapId )
 
 bool CDibSection::LoadImage( UINT imageId, ui::ImagingApi api /*= ui::WicApi*/ )
 {
-	return
-		LoadPng( imageId, api ) ||		// try to load PNG image first
-		LoadBitmap( imageId );
+	if ( LoadPng( imageId, api ) )		// first try to load PNG image from resources
+		return true;
+
+	return LoadBitmap( imageId );
 }
 
-CSize CDibSection::MakeImageList( CImageList& rDestImageList, int imageCount )
+ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int imageCount ) const
 {
 	REQUIRE( IsValid() );
-	REQUIRE( 0 == ( m_bitmapSize.cx % imageCount ) );		// imageCount lines-up with bitmap width consistently?
+	REQUIRE( 0 == ( m_bitmapSize.cx % imageCount ) );	// imageCount lines-up with bitmap width consistently?
 
 	// imply image size from bitmap width and image count
-	CSize imageSize = m_bitmapSize;
-	imageSize.cx /= imageCount;
-	ENSURE( m_bitmapSize.cx == imageSize.cx * imageCount );		// whole division (no remainder)?
+	ui::CImageListInfo imageListInfo( imageCount, m_bitmapSize, GetImageListFlags() );
+	imageListInfo.m_imageSize.cx /= imageCount;
+	ENSURE( m_bitmapSize.cx == imageListInfo.m_imageSize.cx * imageCount );		// whole division (no remainder)?
 
-	CreateEmptyImageList( rDestImageList, imageSize, imageCount );
+	CreateEmptyImageList( rDestImageList, imageListInfo.m_imageSize, imageCount );
+
+	CDibSection* pThis = const_cast<CDibSection*>( this );	// mutable this, to overcome the const-ness of the method
 
 	if ( HasAlpha() )
-		rDestImageList.Add( this, s_pNullMask );		// use alpha channel (no ILC_MASK required)
+		rDestImageList.Add( pThis, s_pNullMask );			// use alpha channel (no ILC_MASK required)
 	else
 	{
-		// NOTE: this DIB will get altered, i.e. transparent background gets converted to black (due to image list internals).
-		//	Work on a copy if you want this to be preserved.
 		if ( HasTranspColor() )
-			rDestImageList.Add( this, m_transpColor );
+		{
+			// NOTE: this DIB will get altered, i.e. transparent background gets converted to black (due to image list internals).
+			//	We work on a copy so that we preserve this.
+			CDibSection dupDibBitmap( this );
+
+			rDestImageList.Add( &dupDibBitmap, m_transpColor );
+		}
 		else
-			rDestImageList.Add( this, s_pNullMask );
+			rDestImageList.Add( pThis, s_pNullMask );
 	}
 
-	return imageSize;
+	return imageListInfo;
 }
 
-void CDibSection::CreateEmptyImageList( CImageList& rDestImageList, const CSize& imageSize, int imageCount ) const
+TImageListFlags CDibSection::CreateEmptyImageList( CImageList& rDestImageList, const CSize& imageSize, int imageCount ) const
 {
 	REQUIRE( IsValid() );
 
-	if ( HasAlpha() )
-		rDestImageList.Create( imageSize.cx, imageSize.cy, ILC_COLOR32, imageCount, 0 );			// use alpha channel, no ILC_MASK required
-	else
-	{
-		UINT ilFlags = 0;
-		switch ( m_bitsPerPixel )
-		{
-			default:	ASSERT( false );
-			case 1:		ilFlags |= ILC_MASK; break;
-			case 4:		ilFlags |= ILC_COLOR4; break;
-			case 8:		ilFlags |= ILC_COLOR24 /*ILC_COLOR8*/; break;	// issues with image-list transparency not working [PHC 2022-06-18]
-			case 16:	ilFlags |= ILC_COLOR16; break;
-			case 24:	ilFlags |= ILC_COLOR24; break;
-			case 32:	ilFlags |= ILC_COLOR32; break;
-		}
+	TImageListFlags ilFlags = GetImageListFlags();
 
-		rDestImageList.Create( imageSize.cx, imageSize.cy, ilFlags | ILC_MASK, imageCount, 0 );		// masked image list
-	}
+	rDestImageList.Create( imageSize.cx, imageSize.cy, ilFlags, imageCount, 0 );
+	return ilFlags;
 }
 
 bool CDibSection::CreateDIBSection( CDibPixels& rPixels, const BITMAPINFO& dibInfo )

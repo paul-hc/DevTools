@@ -83,11 +83,13 @@ IDI_MY_TOOL_STRIP_ALPHA_ICON ICON                    "res\\MyToolStrip_alpha.ico
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 
-IDR_LOW_COLOR_STRIP     BITMAP                  "res\\LowColorStrip.bmp"
+IDR_LOW_COLOR_STRIP     BITMAP                  "res\\LowColorStrip_4-bit.bmp"
 
 IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
 
 IDB_SEARCH_FILES_ANIM_STRIP BITMAP                  "res\\SearchFilesAnimStrip.bmp"
+
+IDR_MONOCHROME_STRIP    BITMAP                  "res\\MonochromeStrip_1-bit.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -124,8 +126,10 @@ END
 
 IDR_LOW_COLOR_STRIP TOOLBAR 16, 16
 BEGIN
-    BUTTON      ID_RECORD_NEXT
     BUTTON      ID_RECORD_PREV
+    BUTTON      ID_RECORD_NEXT
+    BUTTON      ID_RECORD_FIRST
+    BUTTON      ID_RECORD_LAST
 END
 
 IDR_IMAGE_STRIP TOOLBAR 16, 16
@@ -137,6 +141,12 @@ BEGIN
     BUTTON      ID_NUMERIC_SEQUENCE
     SEPARATOR
     BUTTON      ID_AUTO_TRANSP_TOOL
+END
+
+IDR_MONOCHROME_STRIP TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_PREV_PANE
+    BUTTON      ID_NEXT_PANE
 END
 
 
@@ -711,6 +721,15 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,269,7,50,14,NOT WS_TABSTOP
 END
 
+IDD_IMAGE_PAGE_CONTRAST DIALOGEX 0, 0, 196, 18
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Contrast"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    RTEXT           "Contrast Percentage [-100%, 100%]:",IDC_STATIC,3,5,124,8
+    EDITTEXT        IDC_CONTRAST_PCT_EDIT,132,3,40,12,ES_AUTOHSCROLL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -906,6 +925,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 132
     END
+
+    IDD_IMAGE_PAGE_CONTRAST, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 193
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 15
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -921,6 +948,11 @@ BEGIN
 END
 
 IDD_IMAGE_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_IMAGE_PAGE_CONTRAST AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

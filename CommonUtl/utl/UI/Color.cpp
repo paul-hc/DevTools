@@ -316,7 +316,6 @@ namespace ui
 namespace ui
 {
 	inline double Square( UINT comp ) { ASSERT( comp >= 0 && comp <= 255 ); return static_cast<double>( comp * comp ); }
-	inline TFactor PercentToFactor( TPercent pct ) { ASSERT( pct >= 0 && pct <= 100 ); return static_cast<TFactor>( pct ) / 100.0; }
 	inline BYTE AsComponent( double component ) { ASSERT( component >= 0.0 && component < 256.0 ); return static_cast<BYTE>( component ); }
 
 
@@ -388,6 +387,31 @@ namespace ui
 		);
 	}
 
+
+	COLORREF GetAdjustContrast( COLORREF color, TPercent byPct )
+	{
+		double constrastFactor = GetContrastFactor( byPct );
+
+		return RGB(
+			ui::GetTruncatedChannel( (int)( constrastFactor * ( GetRValue( color ) - 128 ) + 128 ) ),
+			ui::GetTruncatedChannel( (int)( constrastFactor * ( GetGValue( color ) - 128 ) + 128 ) ),
+			ui::GetTruncatedChannel( (int)( constrastFactor * ( GetBValue( color ) - 128 ) + 128 ) )
+		);
+	}
+
+	double GetContrastFactor( TPercent contrastPct )
+	{
+		// The value of byContrastPct is in the range of -100 to +100.
+		// Negative values will decrease the amount of contrast and positive values will increase the amount of contrast.
+		//	https://stackoverflow.com/questions/2976274/adjust-bitmap-image-brightness-contrast-using-c
+		//
+		REQUIRE( ui::IsPercentage_m100_p100( contrastPct ) );
+
+		int contrast = ui::ScaleValue( 255, contrastPct );		// [-255, 255] - the value of contrast is in the range of -255 to +255
+
+		double constrastFactor = ( 259.0 * ( contrast + 255.0 ) ) / ( 255.0 * ( 259.0 - contrast ) );
+		return constrastFactor;
+	}
 
 	COLORREF GetAdjustLuminance( COLORREF color, TPercent byPct )
 	{

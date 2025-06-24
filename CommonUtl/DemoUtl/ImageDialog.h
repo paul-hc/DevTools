@@ -29,7 +29,7 @@ class CImageDialog : public CLayoutDialog
 {
 	friend class CModePage;
 public:
-	enum SampleMode { ShowImage, ConvertImage, GrayScale, AlphaBlend, BlendColor, Disabled, ImageList, RectsAlphaBlend, _ModeCount };
+	enum SampleMode { ShowImage, ConvertImage, ContrastImage, GrayScale, AlphaBlend, BlendColor, Disabled, ImageList, RectsAlphaBlend, _ModeCount };
 	static const CEnumTags& GetTags_SampleMode( void );
 
 	CImageDialog( CWnd* pParent );
@@ -120,11 +120,12 @@ private:
 	CLayoutChildPropertySheet m_modeSheet;
 public:
 	// sample details
-	int m_convertFlags;				// overides CDibSection::m_testFlags during conversion
+	int m_convertFlags;				// overides CDibSection::s_testFlags during conversion
 	BYTE m_sourceAlpha;
 	BYTE m_pixelAlpha;
 	BYTE m_blendColor;
 	BYTE m_disabledAlpha;
+	TPercent m_contrastPct;
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX ) override;
 	virtual void OnOK( void ) override;
@@ -232,6 +233,23 @@ public:
 	CConvertModePage( CImageDialog* pDialog );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+class CContrastModePage : public CModePage
+{
+public:
+	CContrastModePage( CImageDialog* pDialog );
+private:
+	CPercentEdit m_contrastPctEdit;
+
+	// generated stuff
+protected:
+	virtual void DoDataExchange( CDataExchange* pDX );
+protected:
+	afx_msg void OnChange_ContrastPct( void );
 
 	DECLARE_MESSAGE_MAP()
 };

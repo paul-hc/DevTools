@@ -14,11 +14,16 @@
 #include "utl/Path.h"
 #include "utl/StdHashValue.h"
 #include "utl/StreamStdTypes.h"
-#include <commoncontrols.h>						// IImageList
+#include <commoncontrols.h>			// IImageList
+#include <afxglobals.h>				// GetGlobalData()
+#include <afxdrawmanager.h>
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "Image_fwd.hxx"
 
 
 const CIconSize CIconSize::s_small( SmallIcon );
@@ -102,9 +107,43 @@ namespace ui
 }
 
 
+namespace ui
+{
+	// CImageListInfo implementation
+
+	TImageListFlags CImageListInfo::GetImageListFlags( TBitsPerPixel bitsPerPixel, bool hasAlpha )
+	{
+		TImageListFlags ilFlags = 0;
+
+		if ( hasAlpha )
+		{
+			ASSERT( ILC_COLOR32 == bitsPerPixel );
+			ilFlags = ILC_COLOR32;		// alpha-channel image list (no mask)
+		}
+		else
+		{
+			switch ( bitsPerPixel )
+			{
+				default:	ASSERT( false );
+				case 1:		ilFlags = ILC_MASK; break;			// monochrome means mask only, no color bitmap
+				case 4:		ilFlags = ILC_COLOR4; break;
+				case 8:		ilFlags = ILC_COLOR24 /*ILC_COLOR8*/; break;		// issues with image-list transparency not working [PHC 2022-06-18]
+				case 16:	ilFlags = ILC_COLOR16; break;
+				case 24:	ilFlags = ILC_COLOR24; break;
+				case 32:	ilFlags = ILC_COLOR32; break;
+			}
+
+			ilFlags |= ILC_MASK;		// masked image list (icon-like)
+		}
+
+		return ilFlags;
+	}
+}
+
+
 namespace gdi
 {
-	void CreateImageList( CImageList& rOutImageList, const CIconSize& imageSize, int countOrGrowBy, UINT flags /*= ILC_COLOR32 | ILC_MASK*/ )
+	ui::CImageListInfo CreateImageList( CImageList& rOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
 	{
 		int imageCount = 0, growBy = 0;
 
@@ -113,7 +152,8 @@ namespace gdi
 		else
 			growBy = -countOrGrowBy;
 
-		VERIFY( rOutImageList.Create( imageSize.GetSize().cx, imageSize.GetSize().cy, flags, imageCount, growBy ) );
+		VERIFY( rOutImageList.Create( imageSize.GetSize().cx, imageSize.GetSize().cy, ilFlags, imageCount, growBy ) );
+		return ui::CImageListInfo( imageCount, imageSize.GetSize(), ilFlags );
 	}
 }
 
@@ -128,16 +168,17 @@ namespace res
 		return (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, fuLoad );
 	}
 
-	TImageCountHasAlphaPair LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor /*= color::Auto*/,
-											  int imageCount /*= -1*/, bool disabledEffect /*= false*/ )
+	ui::CImageListInfo LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor /*= color::Auto*/,
+										 int imageCount /*= -1*/, bool disabledEffect /*= false*/ )
 	{
 		// Use PNG only with 32bpp (alpha channel). PNG 24bpp breaks image list transparency (DIB issues?).
 		// Use BMP for 24bpp and lower.
 
 		CDibSection dibSection;
+		ui::CImageListInfo imageListInfo;
 
 		if ( !dibSection.LoadImage( bitmapId ) )		// PNG or BMP
-			return TImageCountHasAlphaPair( 0, false );
+			return imageListInfo;
 
 		if ( color::Auto == transpColor )
 			dibSection.SetAutoTranspColor();
@@ -147,25 +188,29 @@ namespace res
 		if ( disabledEffect )
 		{
 			CDibPixels pixels( &dibSection );
-			pixels.ApplyDisabledGrayOut( ::GetSysColor( COLOR_BTNFACE ), 64 );
+			pixels.ApplyDisableFadeGray( pixel::AlphaFadeMore, false /*?*/ /*, ::GetSysColor( COLOR_BTNFACE )*/ );
+			//pixels.ApplyDisabledGrayOut( ::GetSysColor( COLOR_BTNFACE ), 64 );
 		}
 
 		if ( -1 == imageCount )
 			imageCount = dibSection.GetSize().cx / dibSection.GetSize().cy;		// assume nearly square images
 
-		CSize buttonSize = dibSection.MakeImageList( rOutImageList, imageCount );
+		imageListInfo = dibSection.MakeImageList( rOutImageList, imageCount );
 
-		return TImageCountHasAlphaPair( imageCount, dibSection.HasAlpha() );
+		return imageListInfo;
 	}
 
-	TImageCountHasAlphaPair _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId )
+	ui::CImageListInfo _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId )
 	{
 		// load a strip from a custom size icon with multiple images; image count is inferred by strip_width/strip_height ratio.
 		ASSERT_PTR( pOutImageList );
 		ASSERT_PTR( pOutImageSize );
 
 		CGroupIconRes groupIcon( iconStripId );
-		bool hasAlpha = groupIcon.ContainsBpp( ILC_COLOR32 );
+		std::pair<TBitsPerPixel, IconStdSize> topIconPair = groupIcon.Front();		// highest color and size
+
+		bool hasAlpha = topIconPair.first == ILC_COLOR32;
+		TImageListFlags imageListFlags = ui::CImageListInfo::GetImageListFlags( topIconPair.first, hasAlpha );
 
 		CIcon stripIcon( (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconStripId ), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_CREATEDIBSECTION ) );
 
@@ -183,11 +228,8 @@ namespace res
 			imageSize.cx /= imageCount;
 
 			if ( nullptr == pOutImageList->GetSafeHandle() )
-			{
-				UINT ilFlags = ILC_COLOR32;
-
-				SetFlag( ilFlags, ILC_MASK, !hasAlpha );
-				pOutImageList->Create( imageSize.cx, imageSize.cy, ilFlags, imageCount, 0 );		// note: if icon has alpha channel, then no ILC_MASK required (in practice it makes little difference)
+			{	// note: if icon has alpha channel, then no ILC_MASK required (in practice it makes little difference)
+				pOutImageList->Create( imageSize.cx, imageSize.cy, imageListFlags, imageCount, 0 );
 			}
 
 			VERIFY( pOutImageList->Add( &info.m_bitmapColor, &info.m_bitmapMask ) != -1 );			// add the strip bitmaps, which will amount to imageCount images
@@ -195,19 +237,17 @@ namespace res
 
 		utl::AssignPtr( pOutImageSize, imageSize );
 
-		return TImageCountHasAlphaPair( imageCount, hasAlpha );
+		return ui::CImageListInfo( imageCount, imageSize, imageListFlags );
 	}
 
-	void LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
-							 UINT ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
+	ui::CImageListInfo LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
+										   TImageListFlags ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
 	{
 		ASSERT_PTR( iconIds );
+		const CSize iconSize = CIconSize::GetSizeOf( iconStdSize );
 
 		if ( nullptr == rOutImageList.GetSafeHandle() )
-		{
-			const CSize iconSize = CIconSize::GetSizeOf( iconStdSize );
 			VERIFY( rOutImageList.Create( iconSize.cx, iconSize.cy, ilFlags, 0, (int)iconCount ) );
-		}
 
 		for ( unsigned int i = 0; i != iconCount; ++i )
 			if ( iconIds[ i ] != 0 )			// skip separator ids
@@ -224,6 +264,8 @@ namespace res
 				else
 					ASSERT( false );		// no image found
 			}
+
+		return ui::CImageListInfo( rOutImageList.GetImageCount(), iconSize, ilFlags );
 	}
 
 } //namespace res
@@ -251,9 +293,7 @@ namespace ui
 
 	CIcon* IImageStore::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*/, TBitsPerPixel bitsPerPixel /*= ILC_COLOR*/ ) const
 	{
-		enum { ILC_COLOR_MASK = ILC_MASK | ILC_COLOR4 | ILC_COLOR8 | ILC_COLOR16 | ILC_COLOR24 | ILC_COLOR32 };
-
-		REQUIRE( EqMaskedValue( bitsPerPixel, ILC_COLOR_MASK, bitsPerPixel ) );		// only the valid BPP values are passed?
+		REQUIRE( EqMaskedValue( bitsPerPixel, ILC_ALL_COLORS_MASK, bitsPerPixel ) );		// only the valid BPP values are passed?
 		CIcon* pFoundIcon = nullptr;
 
 		if ( const CIconGroup* pIconGroup = FindIconGroup( cmdId ) )
@@ -276,11 +316,8 @@ namespace ui
 
 	int IImageStore::BuildImageList( CImageList* pDestImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize )
 	{
-		ASSERT_PTR( pDestImageList );
+		ASSERT_PTR( pDestImageList->GetSafeHandle() );
 		ASSERT( buttonIds != nullptr && buttonCount != 0 );
-
-		if ( nullptr == pDestImageList->GetSafeHandle() )
-			gdi::CreateImageList( *pDestImageList, imageSize, CToolImageList::EvalButtonCount( buttonIds, buttonCount ) );
 
 		IconStdSize iconStdSize = CIconSize::FindStdSize( imageSize );
 		int imageCount = 0;
@@ -440,6 +477,107 @@ namespace gdi
 			return nullptr;
 
 		return gdi::CreateIcon( hImageBitmap, maskBitmap );
+	}
+
+	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct /*= 0*/, COLORREF transpColor /*= color::Null*/, TBitsPerPixel bitsPerPixel /*= 0*/ )
+	{	// creates a bitmap with disabled gray look - inspired by CMFCToolBarImages::GrayImages()
+		if ( nullptr == hBitmapSrc )
+			return nullptr;
+
+		if ( GetGlobalData()->m_nBitsPerPixel <= 8 )
+			return nullptr;
+
+		// Create memory source DC and select an original bitmap:
+		CDC srcMemDC;
+		srcMemDC.CreateCompatibleDC( nullptr );
+
+		BITMAP bmpInfoSrc;
+		if ( 0 == ::GetObject( hBitmapSrc, sizeof( BITMAP ), &bmpInfoSrc ) )
+			return nullptr;
+
+		CSize bitmapSize( bmpInfoSrc.bmWidth, bmpInfoSrc.bmHeight );
+
+		if ( 0 == bitsPerPixel )						// not specified?
+			bitsPerPixel = bmpInfoSrc.bmBitsPixel;		// inherit form SRC bitmap (not reliable since it may be a DDB)
+
+		HBITMAP hOldSrcBitmap = (HBITMAP)srcMemDC.SelectObject( hBitmapSrc );
+
+		if ( nullptr == hOldSrcBitmap )
+			return nullptr;
+
+		// Create memory destination DC and select a new biHeaderHeadertmap:
+		CDC destMemDC;
+		destMemDC.CreateCompatibleDC( &srcMemDC );
+
+		BITMAPINFO biHeader;
+
+		// fill in the BITMAPINFOHEADER
+		biHeader.bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
+		biHeader.bmiHeader.biWidth = bitmapSize.cx;
+		biHeader.bmiHeader.biHeight = bitmapSize.cy;
+		biHeader.bmiHeader.biPlanes = 1;
+		biHeader.bmiHeader.biBitCount = 32;
+		biHeader.bmiHeader.biCompression = BI_RGB;
+		biHeader.bmiHeader.biSizeImage = bitmapSize.cx * bitmapSize.cy;
+		biHeader.bmiHeader.biXPelsPerMeter = 0;
+		biHeader.bmiHeader.biYPelsPerMeter = 0;
+		biHeader.bmiHeader.biClrUsed = 0;
+		biHeader.bmiHeader.biClrImportant = 0;
+
+		COLORREF* pBits = nullptr;
+		HBITMAP hGrayDib = ::CreateDIBSection( destMemDC.m_hDC, &biHeader, DIB_RGB_COLORS, (void**)&pBits, nullptr, 0 );
+		CBitmap grayDibBitmap;
+
+		if ( hGrayDib != nullptr )
+			grayDibBitmap.Attach( hGrayDib );			// for temporary ownership for convenient error handling
+		else
+		{
+			srcMemDC.SelectObject( hOldSrcBitmap );
+			return nullptr;
+		}
+
+		HBITMAP hOldDestBitmap = (HBITMAP)destMemDC.SelectObject( hGrayDib );
+
+		if ( nullptr == hOldDestBitmap )
+		{
+			srcMemDC.SelectObject( hOldSrcBitmap );
+			return nullptr;
+		}
+
+		// Copy original bitmap to new:
+		destMemDC.BitBlt( 0, 0, bitmapSize.cx, bitmapSize.cy, &srcMemDC, 0, 0, SRCCOPY );
+
+		if ( ILC_COLOR32 == bitsPerPixel )
+		{
+			DIBSECTION ds;
+
+			if ( 0 == ::GetObject( hGrayDib, sizeof( DIBSECTION ), &ds ) || ds.dsBm.bmBitsPixel != ILC_COLOR32 || nullptr == ds.dsBm.bmBits )
+			{
+				ASSERT( FALSE );
+				return nullptr;
+			}
+
+			// apply disabled effects to each pixel - fade and convert to gray-scale:
+			typedef CPixelBGRA* TPixelIterator;
+			func::DisableFadeGray disableFunc( pixel::AlphaFadeMore, false );		// IMP: skip pre-multiply alpha so that it doesn't blend to gray - we just want to fade
+
+			for ( TPixelIterator pPixels = (CPixelBGRA*)ds.dsBm.bmBits, pPixelsEnd = pPixels + ds.dsBm.bmWidth * ds.dsBm.bmHeight; pPixels != pPixelsEnd; ++pPixels )
+				disableFunc( *pPixels );
+		}
+		else
+		{
+			CDrawingManager drawMgr( destMemDC );
+			int percentage = grayImageLuminancePct <= 0 ? 130 : grayImageLuminancePct;
+
+			drawMgr.GrayRect( CRect( 0, 0, bitmapSize.cx, bitmapSize.cy ), percentage, color::Null == transpColor ? GetGlobalData()->clrBtnFace : transpColor );
+			 // Note: for monochrome bitmaps (mask only) it generates a doubled image, perhaps due to a bug in DIB bits iteration.
+		}
+
+		destMemDC.SelectObject( hOldDestBitmap );
+		srcMemDC.SelectObject( hOldSrcBitmap );
+
+		grayDibBitmap.Detach();			// success, release temporary ownership
+		return hGrayDib;
 	}
 
 } //namespace gdi

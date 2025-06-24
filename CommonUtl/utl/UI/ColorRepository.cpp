@@ -380,11 +380,11 @@ size_t CColorTable::SetupShadesTable( COLORREF selColor, size_t columnCount )
 
 	selColor = ui::EvalColor( selColor );
 
-	static const Range<ui::TPercent> s_pctRange( 10, 100 );			// [10% to 100%]
-	const ui::TPercent pctStep = s_pctRange.GetSpan<ui::TPercent>() / ( (int)columnCount - 1 );
-	std::vector<ui::TPercent> percentages;
+	static const Range<TPercent> s_pctRange( 10, 100 );			// [10% to 100%]
+	const TPercent pctStep = s_pctRange.GetSpan<TPercent>() / ( (unsigned int)columnCount - 1 );
+	std::vector<TPercent> percentages;
 
-	std::generate_n( std::back_inserter( percentages ), columnCount, func::AddSequence<ui::TPercent>( s_pctRange.m_start, pctStep ) );
+	std::generate_n( std::back_inserter( percentages ), columnCount, func::AddSequence<TPercent>( s_pctRange.m_start, pctStep ) );
 
 	static const TCHAR* s_pShadeTags[] = { _T("Lighter by"), _T("Darker by"), _T("Desaturated by") };
 	enum ShadeTag { Lighter, Darker, Desaturated };

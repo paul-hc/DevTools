@@ -75,8 +75,8 @@ namespace utl
 {
 	// linear search
 
-	template< typename ContainerT, typename UnaryPred >
-	inline typename ContainerT::value_type Find( const ContainerT& objects, UnaryPred pred )
+	template< typename ContainerT, typename UnaryPredT >
+	inline typename ContainerT::value_type Find( const ContainerT& objects, UnaryPredT pred )
 	{
 		typename ContainerT::const_iterator itFound = std::find_if( objects.begin(), objects.end(), pred );
 		if ( itFound == objects.end() )
@@ -84,9 +84,16 @@ namespace utl
 		return *itFound;
 	}
 
+	template< typename ContainerT, typename UnaryPredT >
+	inline bool ContainsPred( const ContainerT& container, UnaryPredT pred )
+	{
+		typename ContainerT::const_iterator itFound = std::find_if( container.begin(), container.end(), pred );
+		return itFound != container.end();
+	}
 
-	template< typename IteratorT, typename UnaryPred >
-	IteratorT FindIfNot( IteratorT itFirst, IteratorT itEnd, UnaryPred pred )
+
+	template< typename IteratorT, typename UnaryPredT >
+	IteratorT FindIfNot( IteratorT itFirst, IteratorT itEnd, UnaryPredT pred )
 	{	// std::find_if_not() is missing on most Unix platforms
 		for ( ; itFirst != itEnd; ++itFirst )
 			if ( !pred( *itFirst ) )
@@ -95,14 +102,14 @@ namespace utl
 	}
 
 
-	template< typename ContainerT, typename UnaryPred >
-	inline bool Any( const ContainerT& objects, UnaryPred pred )
+	template< typename ContainerT, typename UnaryPredT >
+	inline bool Any( const ContainerT& objects, UnaryPredT pred )
 	{
 		return std::find_if( objects.begin(), objects.end(), pred ) != objects.end();
 	}
 
-	template< typename ContainerT, typename UnaryPred >
-	inline bool All( const ContainerT& objects, UnaryPred pred )
+	template< typename ContainerT, typename UnaryPredT >
+	inline bool All( const ContainerT& objects, UnaryPredT pred )
 	{
 		return !objects.empty() && FindIfNot( objects.begin(), objects.end(), pred ) == objects.end();
 	}
@@ -390,8 +397,8 @@ namespace utl
 		return count;
 	}
 
-	template< typename ContainerT, typename UnaryPred >
-	size_t RemoveIf( IN OUT ContainerT& rItems, UnaryPred pred )
+	template< typename ContainerT, typename UnaryPredT >
+	size_t RemoveIf( IN OUT ContainerT& rItems, UnaryPredT pred )
 	{
 		typename ContainerT::iterator itRemove = std::remove_if( rItems.begin(), rItems.end(), pred );	// doesn't actually remove, just move items to be removed at the end
 		size_t count = std::distance( itRemove, rItems.end() );
@@ -708,8 +715,8 @@ namespace utl
 		return pos;
 	}
 
-	template< typename IteratorT, typename Value, typename UnaryPred >
-	Value CircularFind( IteratorT itFirst, IteratorT itLast, Value startValue, UnaryPred pred )
+	template< typename IteratorT, typename Value, typename UnaryPredT >
+	Value CircularFind( IteratorT itFirst, IteratorT itLast, Value startValue, UnaryPredT pred )
 	{
 		IteratorT itStart = std::find( itFirst, itLast, startValue );
 		if ( itStart != itLast )

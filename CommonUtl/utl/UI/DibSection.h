@@ -25,6 +25,7 @@ class CDibSection : public CBitmap
 	};
 public:
 	CDibSection( HBITMAP hDib = nullptr, bool ownsDib = false );
+	CDibSection( const CDibSection* pSrcDib );
 	virtual ~CDibSection();
 
 	// base overrides
@@ -35,10 +36,10 @@ public:
 
 	// the preffered copy methods
 	bool Copy( HBITMAP hSrcBitmap );
-	bool Copy( const CDibSection* pSrcDib );															// preserve transparent color
+	bool Copy( const CDibSection* pSrcDib );								// preserve transparent color
 
 	bool Convert( const CDibSection& srcDib, UINT destBitsPerPixel );
-	bool CopyPixels( const CDibSection& srcDib, bool keepOrientation = false );							// via CDibPixels; pretty unreliable
+	bool CopyPixels( const CDibSection& srcDib, bool keepOrientation = false );		// via CDibPixels; pretty unreliable
 
 	bool IsValid( void ) const { return GetSafeHandle() != nullptr; }
 	bool IsDibSection( void ) const;
@@ -67,8 +68,9 @@ public:
 	bool LoadBitmap( UINT bitmapId );
 	bool LoadImage( UINT imageId, ui::ImagingApi api = ui::WicApi );		// PNG or BMP
 
-	CSize MakeImageList( CImageList& rDestImageList, int imageCount );
-	void CreateEmptyImageList( CImageList& rDestImageList, const CSize& imageSize, int imageCount ) const;		// bpp compatible with this DIB
+	ui::CImageListInfo MakeImageList( CImageList& rDestImageList, int imageCount ) const;
+	TImageListFlags CreateEmptyImageList( CImageList& rDestImageList, const CSize& imageSize, int imageCount ) const;		// bpp compatible with this DIB
+	TImageListFlags GetImageListFlags( void ) const { return m_srcDibMeta.GetImageListFlags(); }
 
 	// negative height for a top-down DIB (positive for bottpm-up DIB)
 	bool CreateDIBSection( CDibPixels& rPixels, const BITMAPINFO& dibInfo );
@@ -105,7 +107,7 @@ public:
 	enum { ForceCvtEqualBpp = 1 << 0, ForceCvtCopyPixels = 1 << 1 };
 
 	static CBitmap* s_pNullMask;
-	static int m_testFlags;
+	static int s_testFlags;
 };
 
 

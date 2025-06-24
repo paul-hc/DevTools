@@ -15,6 +15,28 @@ namespace pred
 }
 
 
+namespace func
+{
+	struct GetFirst
+	{
+		template< typename T, typename U >
+		inline const T& operator()( const std::pair<T, U>& p ) const
+		{
+			return p.first;
+		}
+	};
+
+	struct GetSecond
+	{
+		template< typename T, typename U >
+		inline const U& operator()( const std::pair<T, U>& p ) const
+		{
+			return p.second;
+		}
+	};
+}
+
+
 namespace utl
 {
 	// va_list algorithms

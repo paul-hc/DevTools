@@ -281,7 +281,8 @@
     <Image Include="res\FlagStrip.png" />
     <Image Include="res\ImageStrip.bmp" />
     <Image Include="res\ImageStrip.png" />
-    <Image Include="res\LowColorStrip.bmp" />
+    <Image Include="res\LowColorStrip_4-bit.bmp" />
+    <Image Include="res\MonochromeStrip_1-bit.bmp" />
     <Image Include="res\MyToolStrip.ico" />
     <Image Include="res\MyToolStrip_alpha.ico" />
     <Image Include="res\SearchFilesAnimStrip.bmp" />

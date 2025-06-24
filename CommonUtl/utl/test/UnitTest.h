@@ -10,14 +10,6 @@
 #ifdef USE_UT		// no UT code in release builds
 
 
-namespace numeric
-{
-	const double dEpsilon = 0.000001;
-
-	bool DoublesEqual( double left, double right );
-}
-
-
 namespace ut
 {
 	template< typename T >
@@ -37,7 +29,7 @@ namespace ut
 	template<>
 	inline bool Equals<double>( const double& x, const double& y )
 	{
-		return numeric::DoublesEqual( x, y );
+		return num::DoublesEqual( x, y );
 	}
 
 

@@ -713,6 +713,9 @@
     <ClInclude Include="IconGroup.h">
       <Filter>UI\Imaging</Filter>
     </ClInclude>
+    <ClInclude Include="ui_types.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">

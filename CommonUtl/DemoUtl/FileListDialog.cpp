@@ -148,7 +148,7 @@ CFileListDialog::CFileListDialog( CWnd* pParent )
 	m_fileListCtrl.m_ctrlTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;	// list global text effects
 	SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, m_useDoubleBuffer );
 
-	VERIFY( _FlagStripCount == res::LoadImageListDIB( m_imageList, IDR_FLAG_STRIP_PNG ).first );
+	VERIFY( _FlagStripCount == res::LoadImageListDIB( m_imageList, IDR_FLAG_STRIP_PNG ).m_imageCount );
 	m_fileListCtrl.StoreImageLists( &m_imageList );
 }
 

@@ -29,16 +29,20 @@ public:
 
 	void Clear( void );
 
+	bool IsValid( void ) const { return HasButtons() && HasImages(); }
+
 	bool HasButtons( void ) const { return !m_buttonIds.empty(); }
 	bool HasImages( void ) const { return m_pImageList.get() != nullptr; }
 	bool HasAlpha( void ) const { return m_hasAlpha; }
-
-	bool IsValid( void ) const { return HasButtons() && HasImages(); }
 
 	IconStdSize GetIconStdSize( void ) const { return m_imageSize.GetStdSize(); }
 
 	const CSize& GetImageSize( void ) const { return m_imageSize.GetSize(); }
 	void SetImageSize( const CIconSize& glyphSize ) { m_imageSize = glyphSize; }
+
+	TImageListFlags GetImageListFlags( void ) const { return m_imageListFlags; }
+	TBitsPerPixel GetBitsPerPixel( void ) const { return ui::CImageListInfo::GetBitsPerPixel( m_imageListFlags ); }	// exclude ILC_MASK if not monochrome
+	ui::CImageListInfo GetImageListInfo( void ) const;
 
 	CImageList* GetImageList( void ) const { return m_pImageList.get(); }
 	CImageList* CreateImageList( int countOrGrowBy = -5 );
@@ -60,6 +64,7 @@ public:
 	bool LoadButtonImages( ui::IImageStore* pSrcImageStore = ui::GetImageStoresSvc() );		// creates imagelist from button IDs
 private:
 	CIconSize m_imageSize;
+	TImageListFlags m_imageListFlags;
 	bool m_hasAlpha;
 protected:
 	std::vector<UINT> m_buttonIds;

@@ -47,6 +47,9 @@ public:
 	int GetDimension( void ) const { GetSize(); return std::max( m_size.cx, m_size.cy ); }
 	TBitsPerPixel GetBitsPerPixel( void ) const { return m_bitsPerPixel; }
 
+	bool HasDisabledIcon( void ) const { return m_hDisabledIcon != nullptr; }
+	HICON GetDisabledIcon( void ) const;	// create on-demand
+
 	void Draw( HDC hDC, const CPoint& pos, bool enabled = true ) const;
 	void DrawDisabled( HDC hDC, const CPoint& pos ) const;
 
@@ -71,6 +74,7 @@ private:
 	bool LazyComputeInfo( void ) const;
 private:
 	HICON m_hIcon;
+	mutable HICON m_hDisabledIcon;	// created on-demand
 	const CIcon* m_pShared;			// if shared it has no ownership (no ref counting, m_pShared must be kept alive - usually in the shared image store)
 	bool m_hasAlpha;				// based on a 32 bit per pixel image; need to store this since both colour and mask bitmaps are DDBs
 
@@ -92,6 +96,8 @@ struct CIconInfo : private utl::noncopyable
 	bool HasAlpha( void ) const { return IsValid() && nullptr == m_info.hbmMask; }
 
 	CPoint GetHotSpot( void ) const { return CPoint( m_info.xHotspot, m_info.yHotspot ); }
+	CBitmap& GetColorBitmap( void ) { ASSERT( IsValid() ); return m_info.hbmColor != nullptr ? m_bitmapColor : m_bitmapMask; }
+
 	bool MakeDibSection( CBitmap& rDibSection ) const;			// uses hbmColor (ignores hbmMask)
 private:
 	void Init( HICON hIcon, bool isCursor );

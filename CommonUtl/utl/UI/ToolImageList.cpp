@@ -29,12 +29,14 @@ namespace res
 
 CToolImageList::CToolImageList( IconStdSize iconStdSize /*= SmallIcon*/ )
 	: m_imageSize( iconStdSize )
+	, m_imageListFlags( 0 )
 	, m_hasAlpha( false )
 {
 }
 
 CToolImageList::CToolImageList( const UINT buttonIds[], size_t count, IconStdSize iconStdSize /*= SmallIcon*/ )
 	: m_imageSize( iconStdSize )
+	, m_imageListFlags( 0 )
 	, m_hasAlpha( false )
 	, m_buttonIds( buttonIds, buttonIds + count )
 {
@@ -46,16 +48,26 @@ CToolImageList::~CToolImageList()
 
 void CToolImageList::Clear( void )
 {
+	m_imageListFlags = 0;
 	m_hasAlpha = false;
 	m_imageSize.Reset();
 	m_buttonIds.clear();
 	m_pImageList.reset();
 }
 
+ui::CImageListInfo CToolImageList::GetImageListInfo( void ) const
+{
+	ui::CImageListInfo imageListInfo( GetImageCount(), GetImageSize(), m_imageListFlags );
+
+	ENSURE( HasAlpha() == imageListInfo.HasAlpha() );		// IMP: consistency check that m_hasAlpha doesn't get lost
+	return imageListInfo;
+}
+
 CImageList* CToolImageList::CreateImageList( int countOrGrowBy /*= -5*/ )
 {
 	m_pImageList.reset( new CImageList() );
-	gdi::CreateImageList( *m_pImageList, GetImageSize(), countOrGrowBy );
+	m_imageListFlags = ILC_COLOR32 | ILC_MASK;
+	gdi::CreateImageList( *m_pImageList, GetImageSize(), countOrGrowBy, m_imageListFlags );
 	return m_pImageList.get();
 }
 
@@ -114,11 +126,14 @@ bool CToolImageList::LoadToolbar( UINT toolBarId, COLORREF transpColor /*= color
 	{
 		m_pImageList.reset( new CImageList() );
 
-		TImageCountHasAlphaPair resultPair = res::LoadImageListDIB( *m_pImageList, toolBarId, transpColor );
+		ui::CImageListInfo imageListInfo = res::LoadImageListDIB( *m_pImageList, toolBarId, transpColor );
 
-		VERIFY( imageCount == resultPair.first );
-		m_hasAlpha = resultPair.second;
-		ASSERT( m_imageSize.GetSize() == gdi::GetImageIconSize( *m_pImageList ) );
+		m_imageListFlags = imageListInfo.m_ilFlags;
+		m_hasAlpha = imageListInfo.HasAlpha();
+
+		ENSURE( imageCount == imageListInfo.m_imageCount );
+		ENSURE( m_imageSize.GetSize() == imageListInfo.m_imageSize );
+		ENSURE( m_imageSize.GetSize() == gdi::GetImageIconSize( *m_pImageList ) );
 	}
 
 	return imageCount != 0;
@@ -131,12 +146,13 @@ bool CToolImageList::_LoadIconStrip( UINT iconStripId, const UINT buttonIds[], s
 	StoreButtonIds( buttonIds, count );
 	m_pImageList.reset( new CImageList() );
 
-	TImageCountHasAlphaPair resultPair = res::_LoadImageListIconStrip( m_pImageList.get(), &imageSize, iconStripId );
+	ui::CImageListInfo imageListInfo = res::_LoadImageListIconStrip( m_pImageList.get(), &imageSize, iconStripId );
 
 	m_imageSize.Reset( imageSize );
-	m_hasAlpha = resultPair.second;
+	m_imageListFlags = imageListInfo.m_ilFlags;
+	m_hasAlpha = imageListInfo.HasAlpha();
 
-	return resultPair.first == GetImageCount();		// all buttons images found?
+	return imageListInfo.m_imageCount == GetImageCount();		// all buttons images found?
 }
 
 bool CToolImageList::LoadButtonImages( ui::IImageStore* pSrcImageStore /*= ui::GetImageStoresSvc()*/ )
@@ -145,7 +161,13 @@ bool CToolImageList::LoadButtonImages( ui::IImageStore* pSrcImageStore /*= ui::G
 	REQUIRE( HasButtons() );
 
 	m_pImageList.reset( new CImageList() );
+
+	ui::CImageListInfo imageListInfo = gdi::CreateImageList( *m_pImageList, GetImageSize(), CToolImageList::EvalButtonCount( ARRAY_SPAN_V( m_buttonIds ) ) );
 	int imageCount = pSrcImageStore->BuildImageList( m_pImageList.get(), ARRAY_SPAN_V( m_buttonIds ), GetImageSize() );
+
+	m_imageListFlags = imageListInfo.m_ilFlags;
+	m_hasAlpha = imageListInfo.HasAlpha();		// it shouldn't have alpha since it was created with ILC_MASK
+	ENSURE( imageCount == imageListInfo.m_imageCount );
 
 	return imageCount == GetImageCount();		// all buttons images found?
 }

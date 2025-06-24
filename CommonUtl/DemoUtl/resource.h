@@ -31,6 +31,8 @@
 #define IDD_BUDDY_CONTROLS_DIALOG       152
 #define IDB_SEARCH_FILES_ANIM_STRIP     152
 #define IDD_TEST_COLORS_DIALOG          153
+#define IDD_IMAGE_PAGE_CONTRAST         154
+#define IDR_MONOCHROME_STRIP            155
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_MODELESS_PROPERTIES_BUTTON  1002
@@ -137,6 +139,7 @@
 #define IDC_MENU_PICKER_BUTTON          1109
 #define IDC_EDIT_COLOR_BUTTON           1110
 #define IDC_PICKER_USER_COLORS_TOGGLE   1112
+#define IDC_CONTRAST_PCT_EDIT           1113
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -178,12 +181,12 @@
 #define ID_APP_TRAY_ANIMATE             32804
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        154
+#define _APS_NEXT_RESOURCE_VALUE        157
 #define _APS_NEXT_COMMAND_VALUE         32813
-#define _APS_NEXT_CONTROL_VALUE         1113
+#define _APS_NEXT_CONTROL_VALUE         1114
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

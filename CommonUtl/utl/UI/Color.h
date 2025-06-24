@@ -2,6 +2,7 @@
 #define Color_h
 #pragma once
 
+#include "ui_types.h"
 #include "StdColors.h"
 #include "Range.h"
 
@@ -9,8 +10,6 @@
 namespace ui
 {
 	typedef int TSysColorIndex;		// [COLOR_SCROLLBAR, COLOR_MENUBAR]
-	typedef int TPercent;			// [0, 100] or [-100, 100]
-	typedef double TFactor;			// [0.0, 1.0] or [-1.0, 1.0]
 
 
 	inline bool IsNullColor( COLORREF rawColor ) { return CLR_NONE == rawColor; }
@@ -113,6 +112,17 @@ namespace ui
 		pDC->SetPixel( 0, 0, originColor );						// restore pixel at origin
 		return mappedColor;
 	}
+
+	inline BYTE GetTruncatedChannel( int channel )
+	{
+		if ( channel < 0 )
+			return 0;
+
+		if ( channel > 255 )
+			return 255;
+
+		return static_cast<BYTE>( channel );
+	}
 }
 
 
@@ -130,6 +140,10 @@ namespace ui
 
 	inline COLORREF& BlendWithColor( COLORREF& rColor1, COLORREF color2 ) { return rColor1 = GetBlendedColor( rColor1, color2 ); }
 	inline COLORREF& WeightedMixWithColor( COLORREF& rColor1, COLORREF color2, TPercent pct1 ) { return rColor1 = GetWeightedMixColor( rColor1, color2, pct1 ); }
+
+
+	COLORREF GetAdjustContrast( COLORREF color, TPercent byPct );
+	double GetContrastFactor( TPercent contrastPct );
 
 
 	// HSL adjustments

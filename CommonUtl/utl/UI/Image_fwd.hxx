@@ -14,7 +14,7 @@ bool CDibSectionInfo::ForEachInColorTable( const bmp::CSharedAccess& dib, PixelF
 	CDC* pDC = dib.GetBitmapMemDC();
 	GetColorTable( pDC );
 
-	for ( std::vector< RGBQUAD >::iterator itRgb = m_colorTable.begin(); itRgb != m_colorTable.end(); ++itRgb )
+	for ( std::vector<RGBQUAD>::iterator itRgb = m_colorTable.begin(); itRgb != m_colorTable.end(); ++itRgb )
 	{
 		CPixelBGR pixel( *itRgb );
 		func( pixel );

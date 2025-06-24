@@ -25,7 +25,7 @@ void CImageDialog::CreateEffectDibs( void )
 
 	CWaitCursor wait;
 	CModeData* pModeData = m_modeData[ m_sampleMode ];
-	CScopedFlag<int> scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
+	CScopedFlag<int> scopedSkipCopyImage( &CDibSection::s_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
 	WORD bitsPerPixel = m_pDibSection->GetBitsPerPixel();
 	COLORREF bkColor = GetBkColor();
 	std::auto_ptr<CDibSection> pNewDib;
@@ -35,7 +35,7 @@ void CImageDialog::CreateEffectDibs( void )
 	{
 		case ConvertImage:				// enum EffectDib {  };
 		{
-			CScopedFlag<int> scopedCopyPixels( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtCopyPixels );
+			CScopedFlag<int> scopedCopyPixels( &CDibSection::s_testFlags, m_convertFlags & CDibSection::ForceCvtCopyPixels );
 			static const WORD bpp[] = { 1, 4, 8, 16, 24, 32 };
 			ASSERT( COUNT_OF( bpp ) == pModeData->GetZoneCount() - 1 );
 			for ( unsigned int i = 0; i != COUNT_OF( bpp ); ++i )
@@ -48,6 +48,15 @@ void CImageDialog::CreateEffectDibs( void )
 			}
 			break;
 		}
+		case ContrastImage:					// enum EffectDib { GrayScale };
+			if ( utl::ResetPtr( pNewDib, CloneSourceDib() ) )
+			{
+				CDibPixels grayedPixels( pNewDib.get() );
+				if ( !grayedPixels.ForEach( func::AdjustContrast( m_contrastPct ) ) )			// use bkColor as transparent for bpp<32
+					utl::ResetPtr( pNewDib );
+			}
+			pModeData->PushDib( pNewDib );
+			break;
 		case GrayScale:					// enum EffectDib { GrayScale };
 			if ( utl::ResetPtr( pNewDib, CloneSourceDib() ) )
 			{
@@ -113,6 +122,14 @@ void CImageDialog::CreateEffectDibs( void )
 			{
 				CDibPixels disabledPixels( pNewDib.get() );
 				if ( !disabledPixels.ApplyDisabledGrayOut( bkColor, m_disabledAlpha ) )
+					utl::ResetPtr( pNewDib );
+			}
+			pModeData->PushDib( pNewDib );
+
+			if ( utl::ResetPtr( pNewDib, CloneSourceDib() ) )
+			{
+				CDibPixels disabledPixels( pNewDib.get() );
+				if ( !disabledPixels.ApplyDisableFadeGray( m_disabledAlpha ) )
 					utl::ResetPtr( pNewDib );
 			}
 			pModeData->PushDib( pNewDib );

@@ -20,6 +20,15 @@ namespace utl
 }
 
 
+namespace num
+{
+	bool DoublesEqual( double left, double right )
+	{
+		return fabs( left - right ) < dEpsilon;
+	}
+}
+
+
 std::ostream& operator<<( std::ostream& os, const wchar_t* pWide )
 {
 	if ( nullptr == pWide )

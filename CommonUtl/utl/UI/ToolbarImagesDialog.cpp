@@ -5,6 +5,7 @@
 #include "Image_fwd.h"
 #include "ImageStore_fwd.h"
 #include "Icon.h"
+#include "IconGroup.h"
 #include "ControlBar_fwd.h"
 #include "CmdTagStore.h"
 #include "CmdUpdate.h"
@@ -677,20 +678,20 @@ IMPLEMENT_DYNCREATE( CIconImagesPage, CBaseStoreImagesPage )
 CIconImagesPage::CIconImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
 	: CBaseStoreImagesPage( reg::s_pageTitle[ CToolbarImagesDialog::IconImagesPage ], pImageStore )
 {
-	std::vector<ui::CIconKey> iconKeys;
-	m_pImageStore->QueryIconKeys( iconKeys, AnyIconSize );
+	std::vector<CIconGroup*> iconGroups;
+	m_pImageStore->QueryIconGroups( iconGroups );
 
 	const mfc::CImageCommandLookup* pImageCmds = mfc::CImageCommandLookup::Instance();
 	std::tstring customNameText;
+	UINT index = 0;
 
-	m_imageItems.reserve( iconKeys.size() );
-	for ( UINT index = 0; index != iconKeys.size(); ++index )
-	{
-		const ui::CIconKey& iconKey = iconKeys[ index ];
-		UINT cmdId = iconKey.m_iconResId;
-
-		if ( const CIcon* pIcon = m_pImageStore->RetrieveIcon( CIconId( cmdId, iconKey.m_stdSize ) ) )
+	for ( std::vector<CIconGroup*>::const_iterator itIconGroup = iconGroups.begin(); itIconGroup != iconGroups.end(); ++itIconGroup )
+		for ( size_t framePos = 0, groupSize = (*itIconGroup)->GetSize(); framePos != groupSize; ++framePos, ++index )
 		{
+			ui::CIconKey iconKey = (*itIconGroup)->GetIconKeyAt( framePos );
+			UINT cmdId = iconKey.m_iconResId;
+			const CIcon* pIcon = (*itIconGroup)->GetIconAt( framePos );
+
 			const std::tstring* pCmdName = pImageCmds->FindCommandName( cmdId );
 			const std::tstring* pCmdLiteral = pImageCmds->FindCommandLiteral( cmdId );
 
@@ -707,7 +708,6 @@ CIconImagesPage::CIconImagesPage( ui::IImageStore* pImageStore /*= nullptr*/ )
 
 			m_imageItems.push_back( pImageItem );
 		}
-	}
 
 	m_imageCountText = str::Format( _T("Total: %d store icons"), m_imageItems.size() );
 }

@@ -2,7 +2,7 @@
 #define ResizeGripBar_h
 #pragma once
 
-#include "ui_fwd.h"
+#include "ui_types.h"
 
 
 namespace resize
@@ -34,8 +34,8 @@ public:
 	bool HasBorder( void ) const { return m_layout.m_hasBorder; }
 	bool SetBorder( bool hasBorder = true ) { return m_layout.m_hasBorder = hasBorder; }
 
-	TPercent GetFirstExtentPercentage( void ) const { return m_layout.m_firstExtentPercentage; }
-	CResizeGripBar& SetFirstExtentPercentage( TPercent firstExtentPercentage );
+	TUPercent GetFirstExtentPercentage( void ) const { return m_layout.m_firstExtentPercentage; }
+	CResizeGripBar& SetFirstExtentPercentage( TUPercent firstExtentPercentage );
 
 	bool IsCollapsed( void ) const { return m_layout.m_isCollapsed; }
 	CResizeGripBar& SetCollapsed( bool collapsed );
@@ -63,7 +63,7 @@ public:
 		CLayout( resize::Orientation orientation )
 			: m_orientation( orientation )
 			, m_minExtents( utl::make_pair_single( 2 * ::GetSystemMetrics( resize::NorthSouth == m_orientation ? SM_CYHSCROLL : SM_CXVSCROLL ) ) )
-			, m_firstExtentPercentage( -1 )
+			, m_firstExtentPercentage( UINT_MAX )
 			, m_isCollapsed( false )
 			, m_hasBorder( false )
 		{
@@ -71,7 +71,7 @@ public:
 	public:
 		const resize::Orientation m_orientation;
 		TPanelMinExtents m_minExtents;		// if negative, is percentage of the initial extent
-		TPercent m_firstExtentPercentage;	// when not collapsed
+		TUPercent m_firstExtentPercentage;	// when not collapsed
 		bool m_isCollapsed;
 		bool m_hasBorder;					// for non-collapsed state
 	};

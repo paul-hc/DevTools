@@ -98,14 +98,14 @@ void CImageTests::TestImageList( void )
 
 	CImageList imageList;
 
-	VERIFY( res::LoadImageListDIB( imageList, IDR_IMAGE_STRIP ).first != 0 );		// use default image count, implied from the width/height ratio
+	VERIFY( res::LoadImageListDIB( imageList, IDR_IMAGE_STRIP ).m_imageCount != 0 );		// use default image count, implied from the width/height ratio
 	CSize imageSize = gdi::GetImageIconSize( imageList );
 	ASSERT_EQUAL( ImageCount, imageList.GetImageCount() );
 	ASSERT( CIconSize::GetSizeOf( SmallIcon ) == imageSize );
 
 	{	// reload with explicit image count
 		CImageList imageList2;
-		VERIFY( res::LoadImageListDIB( imageList2, IDR_IMAGE_STRIP, color::Auto, ImageCount ).first != 0 );
+		VERIFY( res::LoadImageListDIB( imageList2, IDR_IMAGE_STRIP, color::Auto, ImageCount ).m_imageCount != 0 );
 		ASSERT_EQUAL( imageList.GetImageCount(), imageList2.GetImageCount() );
 		ASSERT( imageSize == gdi::GetImageIconSize( imageList2 ) );
 	}

@@ -31,11 +31,12 @@ public:
 
 	virtual void QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const;
 	virtual void QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const;
+	virtual void QueryIconGroups( std::vector<CIconGroup*>& rIconGroups ) const;
 	virtual void QueryIconKeys( std::vector<ui::CIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const;
 public:
 	void RegisterToolbarImages( UINT toolbarId, COLORREF transpColor = color::Auto, bool addMfcToolBarImages = false );
 	void RegisterButtonImages( const CToolImageList& toolImageList );
-	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, bool hasAlpha, const CSize* pImageSize = nullptr );
+	void RegisterButtonImages( const CImageList& imageList, const ui::CImageListInfo& imageListInfo, const UINT buttonIds[], size_t buttonCount );
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );			// takes ownership of pIcon
 	void RegisterIcon( UINT cmdId, HICON hIcon ) { return RegisterIcon( cmdId, CIcon::LoadNewIcon( hIcon ) ); }
 
@@ -56,7 +57,8 @@ private:
 	std::vector<ui::CToolbarDescr*> m_toolbarDescriptors;	// buttons of the loaded toolbars (and corresponding icons)
 
 	typedef std::unordered_map<UINT, CIconGroup*> TIconGroupMap;	// <iconResId, iconGroup>
-	TIconGroupMap m_iconFramesMap;
+	TIconGroupMap m_iconGroupMap;
+	std::vector<CIconGroup*> m_iconGroups;					// in registering order
 	std::vector<ui::CIconKey> m_iconKeys;					// in registering order
 
 	typedef std::pair<UINT, COLORREF> TBitmapKey;			// <iconId, transpColor>
@@ -95,6 +97,7 @@ public:
 
 	virtual void QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const;
 	virtual void QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const;
+	virtual void QueryIconGroups( std::vector<CIconGroup*>& rIconGroups ) const;
 	virtual void QueryIconKeys( std::vector<ui::CIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const;
 private:
 	std::vector<ui::IImageStore*> m_imageStores;		// no ownership

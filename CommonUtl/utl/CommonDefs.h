@@ -304,6 +304,14 @@ namespace utl
 }
 
 
+namespace num
+{
+	const double dEpsilon = 0.000001;
+
+	bool DoublesEqual( double left, double right );
+}
+
+
 namespace utl
 {
 	__declspec( selectany ) extern const size_t npos = std::tstring::npos;

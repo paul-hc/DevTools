@@ -92,7 +92,8 @@ BOOL CApplication::InitInstance( void )
 	SetRegistryBase( _T("Settings") );
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
-	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images
+	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images: 4-bit
+	GetSharedImageStore()->RegisterToolbarImages( IDR_MONOCHROME_STRIP, color::Null );			// low color images: 1-bit
 	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
 
 	GetSharedImageStore()->RegisterAlias( ID_EDIT_ITEM, ID_NUMERIC_SEQUENCE );		// for tracking context menu example in CTestColorsDialog::m_pMenuPicker drop-down

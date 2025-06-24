@@ -87,6 +87,19 @@ namespace pred
 
 	typedef Descending<CompareBitsPerPixel> TCompareBitsPerPixel_Desc;
 	typedef JoinCompare<TCompareBitsPerPixel_Desc, CompareWidth> TCompareIconEntry;		// BitsPerPixel (Desc) | Width
+
+
+	struct HasIconResId
+	{
+		HasIconResId( UINT iconResId ) : m_iconResId( iconResId ) {}
+
+		bool operator()( const CIconGroup* pIconGroup ) const
+		{
+			return pIconGroup->GetIconResId() == m_iconResId;
+		}
+	private:
+		UINT m_iconResId;
+	};
 }
 
 

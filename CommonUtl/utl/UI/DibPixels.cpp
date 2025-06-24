@@ -25,6 +25,7 @@ CDibPixels::CDibPixels( HBITMAP hDib, gdi::Orientation orientation /*= gdi::Bott
 	, m_orientation( orientation )							// a top-down DIB if height is negative
 {
 	CDibSectionInfo dibInfo( hDib );
+
 	if ( m_pDibSection != nullptr && dibInfo.IsValid() )
 	{
 		REQUIRE( dibInfo.GetHeight() > 0 );					// GetObject should always returns positive

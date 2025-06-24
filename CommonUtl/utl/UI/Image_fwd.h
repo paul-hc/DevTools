@@ -75,10 +75,6 @@ enum IconStdSize
 };
 
 
-typedef WORD TBitsPerPixel;
-typedef std::pair<int, bool> TImageCountHasAlphaPair;
-
-
 namespace ui
 {
 	int GetIconDimension( IconStdSize iconStdSize );
@@ -157,13 +153,48 @@ private:
 };
 
 
+typedef UINT TBitsPerPixel;
+typedef UINT TImageListFlags;		// DIB image list color flags
+
+enum
+{
+	ILC_ONLY_COLORS_MASK = ILC_COLOR4 | ILC_COLOR8 | ILC_COLOR16 | ILC_COLOR24 | ILC_COLOR32,
+	ILC_ALL_COLORS_MASK = ILC_MASK | ILC_ONLY_COLORS_MASK
+};
+
+
+namespace ui
+{
+	struct CImageListInfo
+	{
+		CImageListInfo( void )
+			: m_imageCount( 0 ), m_imageSize( 0, 0 ), m_ilFlags( 0 ) {}
+
+		CImageListInfo( int imageCount, const CSize& imageSize, TImageListFlags ilFlags )
+			: m_imageCount( imageCount ), m_imageSize( imageSize ), m_ilFlags( ilFlags ) {}
+
+		bool IsValid( void ) const { return m_ilFlags != 0; }
+		bool HasAlpha( void ) const { REQUIRE( IsValid() ); return ILC_COLOR32 == GetBitsPerPixel() && !HasFlag( m_ilFlags, ILC_MASK ); }
+
+		TBitsPerPixel GetBitsPerPixel( void ) const { return GetBitsPerPixel( m_ilFlags ); }
+
+		static TImageListFlags GetImageListFlags( TBitsPerPixel bitsPerPixel, bool hasAlpha );		// ILC_COLOR... + ILC_MASK flags
+		static TBitsPerPixel GetBitsPerPixel( TImageListFlags ilFlags ) { return ILC_MASK == ilFlags ? 1 : ilFlags & ILC_ONLY_COLORS_MASK; }	// exclude ILC_MASK if not monochrome
+	public:
+		int m_imageCount;
+		CSize m_imageSize;
+		TImageListFlags m_ilFlags;
+	};
+}
+
+
 namespace gdi
 {
-	void CreateImageList( CImageList& rOutImageList, const CIconSize& imageSize, int countOrGrowBy, UINT flags = ILC_COLOR32 | ILC_MASK );	// if positive: actual count, if negative: growBy
+	ui::CImageListInfo CreateImageList( CImageList& rOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK );	// countOrGrowBy - if positive: actual count, if negative: growBy
 
-	inline void CreateEmptyImageList( CImageList& rOutImageList, const CIconSize& imageSize, int growBy = 5, UINT flags = ILC_COLOR32 | ILC_MASK )
+	inline ui::CImageListInfo CreateEmptyImageList( CImageList& rOutImageList, const CIconSize& imageSize, int growBy = 5, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK )
 	{
-		CreateImageList( rOutImageList, imageSize, -growBy, flags );
+		return CreateImageList( rOutImageList, imageSize, -growBy, ilFlags );
 	}
 
 	inline HICON ExtractIcon( const CImageList& imageList, size_t imagePos ) { return const_cast<CImageList&>( imageList ).ExtractIcon( static_cast<int>( imagePos ) ); }
@@ -175,16 +206,16 @@ namespace res
 	HICON LoadIcon( const CIconId& iconId, UINT fuLoad = LR_DEFAULTCOLOR );
 
 	// image-list from bitmap: loads strip from whichever comes first - PNG:32bpp with alpha (if found), or BMP:4/8/24bpp
-	TImageCountHasAlphaPair LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor = color::Auto,
-											  int imageCount = -1, bool disabledEffect = false );
+	ui::CImageListInfo LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor = color::Auto,
+										 int imageCount = -1, bool disabledEffect = false );
 
 	// image-list from an icon-strip of custom size and multiple images.
 	//	- just for illustration, so not really used since non-square icons ar non standard!
-	TImageCountHasAlphaPair _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId );
+	ui::CImageListInfo _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId );
 
 	// image-list from individual icons
-	void LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize = SmallIcon,
-							 UINT ilFlags = ILC_COLOR32 | ILC_MASK );
+	ui::CImageListInfo LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize = SmallIcon,
+										   TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK );
 }
 
 
@@ -257,6 +288,7 @@ namespace ui
 
 		virtual void QueryToolbarDescriptors( std::vector<ui::CToolbarDescr*>& rToolbarDescrs ) const = 0;
 		virtual void QueryToolbarsWithButton( std::vector<ui::CToolbarDescr*>& rToolbarDescrs, UINT cmdId ) const = 0;
+		virtual void QueryIconGroups( std::vector<CIconGroup*>& rIconGroups ) const = 0;
 		virtual void QueryIconKeys( std::vector<ui::CIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const = 0;
 
 		// utils
@@ -307,6 +339,8 @@ namespace gdi
 	HICON CreateIcon( HBITMAP hImageBitmap, HBITMAP hMaskBitmap );
 	HICON CreateIcon( HBITMAP hImageBitmap, COLORREF transpColor );
 
+	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct = 0, COLORREF transpColor = color::Null, TBitsPerPixel bitsPerPixel = 0 );		// disabled gray look
+
 
 	inline RGBQUAD ToRgbQuad( const PALETTEENTRY& palEntry )
 	{
@@ -339,6 +373,8 @@ struct CDibMeta		// contains information that must be passed from creation
 	bool IsValid( void ) const { return m_hDib != nullptr; }
 	bool HasAlpha( void ) const { return 32 == m_bitsPerPixel && 4 == m_channelCount; }
 
+	TImageListFlags GetImageListFlags( void ) const { REQUIRE( IsValid() ); return ui::CImageListInfo::GetImageListFlags( m_bitsPerPixel, HasAlpha() ); }
+
 	bool StorePixelFormat( void );
 	void StorePixelFormat( const BITMAPINFO& dibInfo );
 	void CopyPixelFormat( const CDibMeta& right );
@@ -347,7 +383,7 @@ private:
 public:
 	HBITMAP m_hDib;
 	gdi::Orientation m_orientation;		// known at creation time in BITMAPINFO, must be passed from creation (can't be retrofitted)
-	UINT m_bitsPerPixel;
+	TBitsPerPixel m_bitsPerPixel;
 	UINT m_channelCount;
 };
 
@@ -416,7 +452,7 @@ private:
 	using CBitmapInfo::IsDibSection;
 	using CBitmapInfo::IsDDB;
 private:
-	HBITMAP m_hDib;								// no ownership
+	HBITMAP m_hDib;							// no ownership
 	std::vector<RGBQUAD> m_colorTable;		// self-encapsulated
 	std::auto_ptr<CPalette> m_pPalette;		// self-encapsulated, owned
 };

@@ -170,7 +170,7 @@
     <Image Include="res\ImageStrip.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\LowColorStrip.bmp">
+    <Image Include="res\LowColorStrip_4-bit.bmp">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\MyToolStrip.ico">
@@ -186,6 +186,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Toolbar.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\MonochromeStrip_1-bit.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

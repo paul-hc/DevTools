@@ -47,6 +47,7 @@ namespace reg
 	static const TCHAR entry_pixelAlpha[] = _T("PixelAlpha");
 	static const TCHAR entry_disabledAlpha[] = _T("DisabledAlpha");
 	static const TCHAR entry_alphaPageKeepEqual[] = _T("AlphaPageKeepEqual");
+	static const TCHAR entry_contrastPct[] = _T("contrastPercentage");
 }
 
 
@@ -119,6 +120,7 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	, m_sourceAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_sourceAlpha, 127 ) )
 	, m_pixelAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_pixelAlpha, 127 ) )
 	, m_disabledAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_disabledAlpha, 127 ) )
+	, m_contrastPct( (TPercent)AfxGetApp()->GetProfileInt( reg::section_dlg, reg::entry_contrastPct, 30 ) )
 {
 	m_regSection = reg::section_dlg;
 	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_SPAN( layout::s_dualStyles ) );
@@ -141,20 +143,20 @@ CImageDialog::CImageDialog( CWnd* pParent )
 
 	//m_sampleView.SetBorderColor( color::LightBlue );		// for debugging
 
-	enum { GrayScaleZones = 2, AlphaBlendZones = 3, BlendColorZones = 2, DisabledZones = 4 };
-
 	m_modeData.resize( _ModeCount );
 	m_modeData[ ShowImage ] = new CModeData( _T("Original") );
 	m_modeData[ ConvertImage ] = new CModeData( _T("Original|To 1 bit (monochrome)|To 4 bit (16 colors)|To 8 bit (256 colors)|To 16 bit (64K colors)|To 24 bit (True Color)|To 32 bit (True Color w. Alpha)") );
+	m_modeData[ ContrastImage ] = new CModeData( _T("Original|Contrast Adjusted") );
 	m_modeData[ GrayScale ] = new CModeData( _T("Original|Gray scale") );
 	m_modeData[ AlphaBlend ] = new CModeData( _T("Original|Alpha-blend with source alpha|Pixel alpha-blended|Pixel gradient") );
 	m_modeData[ BlendColor ] = new CModeData( _T("Original|Blended with background") );
-	m_modeData[ Disabled ] = new CModeData( _T("Original|Gray scale|Blended with background|Disabled|Disabled Gray") );
+	m_modeData[ Disabled ] = new CModeData( _T("Original|Gray scale|Blended with background|Disabled Faded|Disabled Gray|Disable Fade Gray (smooth)") );
 	m_modeData[ ImageList ] = new CModeData( _T("Original|Disabled|Embossed|Blended 25%|Blended 50%|Blended 75%") );
 	m_modeData[ RectsAlphaBlend ] = new CModeData( _T("") );
 
 	m_modeSheet.AddPage( new CShowImagePage( this ) );
 	m_modeSheet.AddPage( new CConvertModePage( this ) );
+	m_modeSheet.AddPage( new CContrastModePage( this ) );
 	m_modeSheet.AddPage( CModePage::NewEmptyPage( this, GrayScale ) );
 	m_modeSheet.AddPage( new CAlphaBlendModePage( this ) );
 	m_modeSheet.AddPage( new CBlendColorModePage( this ) );
@@ -164,7 +166,7 @@ CImageDialog::CImageDialog( CWnd* pParent )
 
 #ifdef _DEBUG
 	// test mode flags
-//	SetFlag( CDibSection::m_testFlags, CDibSection::ForceCvtEqualBpp );
+//	SetFlag( CDibSection::s_testFlags, CDibSection::ForceCvtEqualBpp );
 #endif
 }
 
@@ -184,6 +186,8 @@ CImageDialog::~CImageDialog()
 	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_sourceAlpha, m_sourceAlpha );
 	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_pixelAlpha, m_pixelAlpha );
 	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_disabledAlpha, m_disabledAlpha );
+	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_contrastPct, m_contrastPct );
+
 	m_colorBoard.Save( reg::section_dlg );
 	m_transpColorCache.Save( reg::section_dlg );
 
@@ -192,20 +196,20 @@ CImageDialog::~CImageDialog()
 
 const CEnumTags& CImageDialog::GetTags_SampleMode( void )
 {
-	static const CEnumTags tags( _T("Show Image|Convert Image|Gray Scale|Alpha Blend|Blend Color|Disabled|Image List|Blend Rects") );
-	return tags;
+	static const CEnumTags s_tags( _T("Show Image|Convert Image|Contrast|Gray Scale|Alpha Blend|Blend Color|Disabled|Image List|Blend Rects") );
+	return s_tags;
 }
 
 const CEnumTags& CImageDialog::GetTags_Resolution( void )
 {
-	static const CEnumTags tags( _T("Do Not Change|1 bit (monochrome)|4 bit (16 colors)|8 bit (256 colors)|16 bit (64K colors)|24 bit (True Color)|32 bit (True Color w. Alpha)") );
-	return tags;
+	static const CEnumTags s_tags( _T("Do Not Change|1 bit (monochrome)|4 bit (16 colors)|8 bit (256 colors)|16 bit (64K colors)|24 bit (True Color)|32 bit (True Color w. Alpha)") );
+	return s_tags;
 }
 
 const CEnumTags& CImageDialog::GetTags_Zoom( void )
 {
-	static const CEnumTags tags( _T("25%|50%|100%|200%|400%|800%|1600%|3200%|Stretch to Fit") );
-	return tags;
+	static const CEnumTags s_tags( _T("25%|50%|100%|200%|400%|800%|1600%|3200%|Stretch to Fit") );
+	return s_tags;
 }
 
 WORD CImageDialog::GetForceBpp( void ) const
@@ -261,7 +265,7 @@ void CImageDialog::LoadSampleImage( void )
 				if ( forceBpp != m_pDibSection->GetBitsPerPixel() ||
 					 HasFlag( m_convertFlags, CDibSection::ForceCvtEqualBpp ) )
 				{
-					CScopedFlag<int> scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
+					CScopedFlag<int> scopedSkipCopyImage( &CDibSection::s_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
 					std::auto_ptr<CDibSection> pCvtDib( new CDibSection() );
 					pCvtDib->Convert( *m_pDibSection, forceBpp );
 					m_pDibSection.reset( pCvtDib.release() );
@@ -409,6 +413,7 @@ bool CImageDialog::RenderSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl 
 	{
 		case ShowImage:
 		case ConvertImage:
+		case ContrastImage:
 		case GrayScale:
 		case BlendColor:
 		case Disabled:
@@ -841,13 +846,13 @@ void CModePage::DoDataExchange( CDataExchange* pDX )
 	for ( std::vector<CColorChannelEdit*>::const_iterator itChannelEdit = m_channelEdits.begin(); itChannelEdit != m_channelEdits.end(); ++itChannelEdit )
 		( *itChannelEdit )->DDX_Channel( pDX );
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BOOL CModePage::OnSetActive( void )
 {
 	m_pDialog->OnChange_SampleMode();
-	return CLayoutPropertyPage::OnSetActive();
+	return __super::OnSetActive();
 }
 
 BEGIN_MESSAGE_MAP( CModePage, CLayoutPropertyPage )
@@ -906,7 +911,7 @@ void CShowImagePage::DoDataExchange( CDataExchange* pDX )
 		ui::SetDlgItemText( this, IDC_TRANSP_COLOR_INFO, info );
 	}
 
-	CModePage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -924,11 +929,37 @@ void CConvertModePage::DoDataExchange( CDataExchange* pDX )
 	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
 		m_pDialog->ConvertImages();
 
-	CModePage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BEGIN_MESSAGE_MAP( CConvertModePage, CModePage )
 	ON_CONTROL_RANGE( BN_CLICKED, IDC_FORCE_CVT_EQUAL_BPP_CHECK, IDC_FORCE_CVT_COPY_PIXELS_CHECK, OnPageInput )
+END_MESSAGE_MAP()
+
+
+// CContrastModePage implementation
+
+CContrastModePage::CContrastModePage( CImageDialog* pDialog )
+	: CModePage( pDialog, CImageDialog::ContrastImage, IDD_IMAGE_PAGE_CONTRAST )
+	, m_contrastPctEdit( IDC_CONTRAST_PCT_EDIT, &m_pDialog->m_contrastPct )
+{
+}
+
+void CContrastModePage::DoDataExchange( CDataExchange* pDX )
+{
+	m_contrastPctEdit.DDX_Percent( pDX );
+
+	__super::DoDataExchange( pDX );
+}
+
+void CContrastModePage::OnChange_ContrastPct( void )
+{
+	// input is done by the edit
+	m_pDialog->ConvertImages();		// recreated the DIBs
+}
+
+BEGIN_MESSAGE_MAP( CContrastModePage, CModePage )
+	ON_EN_CHANGE( IDC_CONTRAST_PCT_EDIT, OnChange_ContrastPct )
 END_MESSAGE_MAP()
 
 
@@ -949,7 +980,7 @@ void CAlphaBlendModePage::DoDataExchange( CDataExchange* pDX )
 	else
 		AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_alphaPageKeepEqual, IsDlgButtonChecked( IDC_KEEP_EQUAL_CHECK ) );
 
-	CModePage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 

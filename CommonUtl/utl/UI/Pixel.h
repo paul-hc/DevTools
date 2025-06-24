@@ -17,6 +17,8 @@ struct CPixelBGR				// the pixel color format for ILC_COLOR24: 0xrrggbb
 	CPixelBGR( const PALETTEENTRY& palEntry ) : m_blue( palEntry.peBlue ), m_green( palEntry.peGreen ), m_red( palEntry.peRed ) {}
 
 	COLORREF GetColor( void ) const { return RGB( m_red, m_green, m_blue ); }
+
+	void PreMultiplyAlpha( void ) {}		// NO-OP
 public:
 	BYTE m_blue, m_green, m_red;
 };
@@ -34,7 +36,7 @@ struct CPixelBGRA				// the pixel color format for ILC_COLOR32: 0xaarrggbb
 
 	// pre-multiplied alpha (PMA) effect: ignore source RBG when A=0 (fully transparent);
 	// this will get rid of the whiteness of transparent bk when ( 255, 255, 255, 0 )
-	void PreMultiplyAlpha( void )
+	inline void PreMultiplyAlpha( void )
 	{
 		// premultiply the B, G, R values with the Alpha channel values
 		PreMultiplyAlpha( m_blue );
@@ -42,7 +44,7 @@ struct CPixelBGRA				// the pixel color format for ILC_COLOR32: 0xaarrggbb
 		PreMultiplyAlpha( m_red );
 	}
 
-	void PreMultiplyAlpha( BYTE& rChannel ) const
+	inline void PreMultiplyAlpha( BYTE& rChannel ) const
 	{
 		rChannel = static_cast<BYTE>( rChannel * m_alpha / 255 );
 	}
@@ -57,6 +59,9 @@ public:
 
 namespace pixel
 {
+	enum AlphaFading { AlphaFadeStd = 128, AlphaFadeMore = 112, AlphaFadeMost = 96 };
+
+
 	// color channel algorithms
 
 	inline void FactorMultiplyChannel( BYTE& rChannel, double factor )
@@ -88,28 +93,28 @@ namespace pixel
 
 	// pixel algorithms
 
-	template< typename PixelType >
-	void SetColor( PixelType& rPixel, COLORREF color )
+	template< typename PixelT >
+	void SetColor( PixelT& rPixel, COLORREF color )
 	{
 		rPixel.m_blue = GetBValue( color );
 		rPixel.m_green = GetGValue( color );
 		rPixel.m_red = GetRValue( color );
 	}
 
-	template< typename PixelType >
-	inline BYTE GetLuminance( const PixelType& rPixel )
+	template< typename PixelT >
+	inline BYTE GetLuminance( const PixelT& rPixel )
 	{
 		return ui::GetLuminance( rPixel.m_red, rPixel.m_green, rPixel.m_blue );
 	}
 
-	template< typename PixelType >
-	inline void ToGrayScale( PixelType& rPixel )
+	template< typename PixelT >
+	inline void ToGrayScale( PixelT& rPixel )
 	{
 		rPixel.m_blue = rPixel.m_green = rPixel.m_red = GetLuminance( rPixel );
 	}
 
-	template< typename PixelType >
-	inline void BlendColor( PixelType& rPixel, const CPixelBGRA& toPixel )			// shifts the color towards toPixel using toPixel's alpha
+	template< typename PixelT >
+	inline void BlendColor( PixelT& rPixel, const CPixelBGRA& toPixel )			// shifts the color towards toPixel using toPixel's alpha
 	{
 		BlendChannel( rPixel.m_blue, toPixel.m_blue, toPixel.m_alpha );
 		BlendChannel( rPixel.m_green, toPixel.m_green, toPixel.m_alpha );
@@ -133,12 +138,15 @@ namespace pixel
 		rPixel.m_alpha = rPixel.m_alpha * alpha / 255;								// reduce only alpha (increase transparency)
 	}
 
-	template< typename PixelType >
-	inline void MultiplyColors( PixelType& rPixel, double factor )
+	template< typename PixelT >
+	inline void MultiplyColors( PixelT& rPixel, double factor )
 	{
-		FactorMultiplyChannel( rPixel.m_blue, factor );
-		FactorMultiplyChannel( rPixel.m_green, factor );
-		FactorMultiplyChannel( rPixel.m_red, factor );
+		if ( !num::DoublesEqual( factor, 1 ) )
+		{
+			FactorMultiplyChannel( rPixel.m_blue, factor );
+			FactorMultiplyChannel( rPixel.m_green, factor );
+			FactorMultiplyChannel( rPixel.m_red, factor );
+		}
 	}
 
 	inline void MultiplyAlpha( CPixelBGRA& rPixel, BYTE alpha, double alphaFactor )
@@ -197,8 +205,8 @@ namespace func
 			rColor = ui::GetMappedColor( rColor, pDC );
 		}
 
-		template< typename PixelType >
-		void AdjustPixel( PixelType& rPixel, CDC* pDC )
+		template< typename PixelT >
+		void AdjustPixel( PixelT& rPixel, CDC* pDC )
 		{
 			pixel::SetColor( rPixel, ui::GetMappedColor( rPixel.GetColor(), pDC ) );
 		}
@@ -270,6 +278,29 @@ namespace func
 	};
 
 
+	struct FadeColor : public CBasePixelFunc
+	{
+		FadeColor( BYTE alpha, double alphaFactor = 1.0 )				// for best fading effect keep alphaFactor to 1.0
+			: m_alpha( alpha ), m_alphaFactor( alphaFactor ) {}
+
+		void operator()( CPixelBGR& rPixel ) const
+		{
+			rPixel;
+			//pixel::MultiplyColors( rPixel, m_alphaFactor );			// this doesn't work on 24 bit: it darkens the colors to black
+		}
+
+		void operator()( CPixelBGRA& rPixel ) const
+		{
+			pixel::MultiplyAlpha( rPixel, m_alpha, m_alphaFactor );		// this is the effect identical to alpha-blending in 32 bpp
+		}
+
+		void AdjustColors( CDC* pDC ) { pDC; }
+	private:
+		BYTE m_alpha;
+		double m_alphaFactor;
+	};
+
+
 	/* Note 24 Nov, 2018:
 		Something odd is happening with AlphaBlend, at least for 32bpp bitmaps - blending looks too "opaque" for my expectations.
 		Because of that AlphaBlend doesn't seem very reliable.
@@ -302,8 +333,8 @@ namespace func
 	{
 		BlendColor( COLORREF toColor24, BYTE toAlpha ) : m_toPixel( toColor24, toAlpha ) {}
 
-		template< typename PixelType >
-		void operator()( PixelType& rPixel ) const
+		template< typename PixelT >
+		void operator()( PixelT& rPixel ) const
 		{
 			pixel::BlendColor( rPixel, m_toPixel );
 		}
@@ -335,12 +366,71 @@ namespace func
 	};
 
 
+	struct AdjustContrast : public CBasePixelFunc
+	{
+		AdjustContrast( TPercent byContrastPct, bool preMultiplyAlpha = true )		// byContrastPct: [-100, 100]
+			: m_factor( ui::GetContrastFactor( byContrastPct ) ), m_preMultiplyAlpha( preMultiplyAlpha ) {}
+
+		void operator()( CPixelBGR& rPixel ) const
+		{
+			rPixel.m_red = ui::GetTruncatedChannel( (int)( m_factor * ( rPixel.m_red - 128 ) + 128 ) );
+			rPixel.m_green = ui::GetTruncatedChannel( (int)( m_factor * ( rPixel.m_green - 128 ) + 128 ) );
+			rPixel.m_blue = ui::GetTruncatedChannel( (int)( m_factor * ( rPixel.m_blue - 128 ) + 128 ) );
+		}
+
+		void operator()( CPixelBGRA& rPixel ) const
+		{
+			rPixel.m_red = ui::GetTruncatedChannel( (int)( m_factor * ( rPixel.m_red - 128 ) + 128 ) );
+			rPixel.m_green = ui::GetTruncatedChannel( (int)( m_factor * ( rPixel.m_green - 128 ) + 128 ) );
+			rPixel.m_blue = ui::GetTruncatedChannel( (int)( m_factor * ( rPixel.m_blue - 128 ) + 128 ) );
+
+			if ( m_preMultiplyAlpha )
+				rPixel.PreMultiplyAlpha();		// avoid alpha-blending errors
+		}
+
+		void AdjustColors( CDC* pDC ) { pDC; }
+	private:
+		double m_factor;
+		bool m_preMultiplyAlpha;		// need to pre-multiply alpha for 32-bit bitmaps with alpha channel (usually file-based)
+	};
+
+
+	struct DisableFadeGray : public CBasePixelFunc		// fade colors and make gray-scale (no blending) -> BEST LOOKING, better than DisabledGrayOut
+	{
+		DisableFadeGray( BYTE fadeAlpha = pixel::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF grayScaleTranspColor24 = CLR_NONE )
+			: m_fadeAlpha( fadeAlpha ), m_preMultiplyAlpha( preMultiplyAlpha ), m_grayScaleFunc(grayScaleTranspColor24) {}
+
+		void operator()( CPixelBGR& rPixel ) const
+		{
+			m_grayScaleFunc( rPixel );
+		}
+
+		void operator()( CPixelBGRA& rPixel ) const
+		{
+			pixel::MultiplyChannel( rPixel.m_alpha, m_fadeAlpha );
+			m_grayScaleFunc( rPixel );
+
+			if ( m_preMultiplyAlpha )
+				rPixel.PreMultiplyAlpha();		// avoid alpha-blending errors
+		}
+
+		void AdjustColors( CDC* pDC )
+		{
+			m_grayScaleFunc.AdjustColors( pDC );
+		}
+	private:
+		BYTE m_fadeAlpha;
+		bool m_preMultiplyAlpha;		// need to pre-multiply alpha for 32-bit bitmaps with alpha channel (usually file-based)
+		ToGrayScale m_grayScaleFunc;
+	};
+
+
 	struct DisabledGrayOut : public CBasePixelFunc		// dim colors and make gray-scale
 	{
 		DisabledGrayOut( COLORREF toColor24, BYTE toAlpha ) : m_blendFunc( toColor24, toAlpha ), m_grayScaleFunc( CLR_NONE /*toColor24*/ ) {}
 
-		template< typename PixelType >
-		void operator()( PixelType& rPixel ) const
+		template< typename PixelT >
+		void operator()( PixelT& rPixel ) const
 		{
 			m_blendFunc( rPixel );
 			m_grayScaleFunc( rPixel );
@@ -361,8 +451,8 @@ namespace func
 	{
 		DisabledEffect( COLORREF toColor24, BYTE toAlpha ) : m_alphaBlendFunc( toAlpha, toColor24 ) {}
 
-		template< typename PixelType >
-		void operator()( PixelType& rPixel ) const
+		template< typename PixelT >
+		void operator()( PixelT& rPixel ) const
 		{
 			m_alphaBlendFunc( rPixel );
 		}
@@ -377,8 +467,8 @@ namespace func
 	{
 		_DisabledGrayEffect( COLORREF toColor24, BYTE toAlpha ) : m_alphaBlendFunc( toAlpha, toColor24 ), m_grayScaleFunc( CLR_NONE /*toColor24*/ ) {}
 
-		template< typename PixelType >
-		void operator()( PixelType& rPixel ) const
+		template< typename PixelT >
+		void operator()( PixelT& rPixel ) const
 		{
 			m_grayScaleFunc( rPixel );
 			m_alphaBlendFunc( rPixel );

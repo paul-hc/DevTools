@@ -372,6 +372,7 @@
     <ClInclude Include="TreeControlCustomDraw.h" />
     <ClInclude Include="UiCommands.h" />
     <ClInclude Include="ui_fwd.h" />
+    <ClInclude Include="ui_types.h" />
     <ClInclude Include="UserReport.h" />
     <ClInclude Include="utl_ui.h" />
     <ClInclude Include="VersionInfo.h" />

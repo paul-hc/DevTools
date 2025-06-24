@@ -12,6 +12,7 @@
 
 CIcon::CIcon( void )
 	: m_hIcon( nullptr )
+	, m_hDisabledIcon( nullptr )
 	, m_hasAlpha( false )
 	, m_pShared( nullptr )
 	, m_size( 0, 0 )
@@ -23,6 +24,7 @@ CIcon::CIcon( void )
 
 CIcon::CIcon( HICON hIcon, const CSize& iconSize /*= CSize( 0, 0 )*/, TBitsPerPixel bitsPerPixel /*= 0*/ )
 	: m_hIcon( hIcon )
+	, m_hDisabledIcon( nullptr )
 	, m_pShared( nullptr )
 	, m_hasAlpha( false )
 	, m_size( iconSize )
@@ -34,6 +36,7 @@ CIcon::CIcon( HICON hIcon, const CSize& iconSize /*= CSize( 0, 0 )*/, TBitsPerPi
 
 CIcon::CIcon( HICON hIcon, const res::CGroupIconEntry& groupIconEntry )
 	: m_hIcon( hIcon )
+	, m_hDisabledIcon( nullptr )
 	, m_pShared( nullptr )
 	, m_hasAlpha( ILC_COLOR32 == m_bitsPerPixel )
 	, m_size( groupIconEntry.GetSize() )
@@ -45,6 +48,7 @@ CIcon::CIcon( HICON hIcon, const res::CGroupIconEntry& groupIconEntry )
 
 CIcon::CIcon( const CIcon& shared )
 	: m_hIcon( shared.m_hIcon )
+	, m_hDisabledIcon( shared.m_hDisabledIcon )
 	, m_pShared( &shared )
 	, m_hasAlpha( shared.m_hasAlpha )
 	, m_size( shared.m_size )
@@ -134,7 +138,11 @@ HICON CIcon::Detach( void )
 {
 	HICON hIcon = m_hIcon;
 
+	if ( !IsShared() && m_hDisabledIcon != nullptr )
+		::DestroyIcon( m_hDisabledIcon );
+
 	m_hIcon = nullptr;
+	m_hDisabledIcon = nullptr;
 	m_pShared = nullptr;
 	m_hasAlpha = false;
 	m_size.cx = m_size.cy = 0;
@@ -194,6 +202,25 @@ const CSize& CIcon::GetSize( void ) const
 	return m_size;
 }
 
+HICON CIcon::GetDisabledIcon( void ) const
+{
+	if ( nullptr == m_hDisabledIcon )
+	{
+		CIconInfo iconInfo( m_hIcon );
+
+		if ( iconInfo.IsValid() )
+			if ( HBITMAP hGrayBitmap = gdi::CreateGrayBitmap( iconInfo.GetColorBitmap(), 0, color::Black, m_bitsPerPixel ) )
+			{
+				CBitmap grayBitmap;
+
+				grayBitmap.Attach( hGrayBitmap );
+				m_hDisabledIcon = gdi::CreateIcon( hGrayBitmap, iconInfo.m_bitmapMask );
+			}
+	}
+
+	return m_hDisabledIcon;
+}
+
 
 void CIcon::Draw( HDC hDC, const CPoint& pos, bool enabled /*= true*/ ) const
 {
@@ -213,8 +240,13 @@ void CIcon::DrawStretch( HDC hDC, const CRect& destRect, bool enabled /*= true*/
 	if ( enabled )
 		::DrawIconEx( hDC, destRect.left, destRect.top, m_hIcon, destRect.Width(), destRect.Height(), 0, nullptr, DI_NORMAL | DI_COMPAT );
 	else
-		::DrawState( hDC, ::GetSysColorBrush( COLOR_3DSHADOW ), nullptr, (LPARAM)m_hIcon, 0,
-			destRect.left, destRect.top, destRect.Width(), destRect.Height(), DST_ICON | DSS_DISABLED /*DSS_UNION*/ );
+	{
+		if ( GetDisabledIcon() != nullptr )
+			::DrawIconEx( hDC, destRect.left, destRect.top, m_hDisabledIcon, destRect.Width(), destRect.Height(), 0, nullptr, DI_NORMAL | DI_COMPAT);
+		else
+			::DrawState( hDC, ::GetSysColorBrush( COLOR_3DSHADOW ), nullptr, (LPARAM)m_hIcon, 0,
+						 destRect.left, destRect.top, destRect.Width(), destRect.Height(), DST_ICON | DSS_DISABLED /*DSS_UNION*/ );
+	}
 }
 
 const CIcon& CIcon::GetUnknownIcon( void )
@@ -315,6 +347,7 @@ void CIconInfo::Init( HICON hIcon, bool isCursor )
 
 		BITMAP bmp;
 		VERIFY( ::GetObject( m_info.hbmColor != nullptr ? m_info.hbmColor : m_info.hbmMask, sizeof( bmp ), &bmp ) != 0 );
+
 		m_size.cx = bmp.bmWidth;
 		m_size.cy = bmp.bmHeight;
 

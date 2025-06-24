@@ -23,15 +23,6 @@
 #endif
 
 
-namespace numeric
-{
-	bool DoublesEqual( double left, double right )
-	{
-		return fabs( left - right ) < dEpsilon;
-	}
-}
-
-
 namespace ut
 {
 	// UT assertions:

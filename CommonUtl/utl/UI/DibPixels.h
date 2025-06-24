@@ -38,22 +38,22 @@ public:
 
 	// 32/24 bpp style iteration (BGRA, BGR and BYTE)
 
-	template< typename PixelType > PixelType* Begin( void ) { ASSERT( ValidType<PixelType>() ); return reinterpret_cast<PixelType*>( m_pPixels ); }
-	template< typename PixelType > PixelType* End( void ) { ASSERT( ValidLinearIteration<PixelType>() ); return reinterpret_cast<PixelType*>( m_pPixels + m_bufferSize ); }
+	template< typename PixelT > PixelT* Begin( void ) { ASSERT( ValidType<PixelT>() ); return reinterpret_cast<PixelT*>( m_pPixels ); }
+	template< typename PixelT > PixelT* End( void ) { ASSERT( ValidLinearIteration<PixelT>() ); return reinterpret_cast<PixelT*>( m_pPixels + m_bufferSize ); }
 
-	template< typename PixelType > const PixelType* Begin( void ) const { return const_cast<CDibPixels*>( this )->Begin<PixelType>(); }
-	template< typename PixelType > const PixelType* End( void ) const { return const_cast<CDibPixels*>( this )->End<PixelType>(); }
+	template< typename PixelT > const PixelT* Begin( void ) const { return const_cast<CDibPixels*>( this )->Begin<PixelT>(); }
+	template< typename PixelT > const PixelT* End( void ) const { return const_cast<CDibPixels*>( this )->End<PixelT>(); }
 
-	template< typename PixelType >
-	PixelType& GetPixel( UINT x, UINT y )
+	template< typename PixelT >
+	PixelT& GetPixel( UINT x, UINT y )
 	{
-		ASSERT( sizeof( PixelType ) == ( m_bitsPerPixel / 8 ) || sizeof( PixelType ) == sizeof( BYTE ) );
-		return *static_cast<PixelType*>( GetPixelPtr( x, y ) );
+		ASSERT( sizeof( PixelT ) == ( m_bitsPerPixel / 8 ) || sizeof( PixelT ) == sizeof( BYTE ) );
+		return *static_cast<PixelT*>( GetPixelPtr( x, y ) );
 	}
 
-	template< typename PixelType > const PixelType& GetPixel( UINT x, UINT y ) const { return const_cast<CDibPixels*>( this )->GetPixel<PixelType>( x, y ); }
+	template< typename PixelT > const PixelT& GetPixel( UINT x, UINT y ) const { return const_cast<CDibPixels*>( this )->GetPixel<PixelT>( x, y ); }
 
-	template< typename PixelType, typename PixelFunc > void ForEach( PixelFunc func );
+	template< typename PixelT, typename PixelFunc > void ForEach( PixelFunc func );
 	template< typename PixelFunc > bool ForEach( PixelFunc func );
 
 	template< typename PixelFunc > void MapTranspColor( PixelFunc func );
@@ -80,7 +80,7 @@ public:
 	bool CopyPixels( const CDibPixels& srcPixels );				// mixed results
 	void CopyBuffer( const CDibPixels& srcPixels );				// for identical formats
 
-	template< typename DestPixelType, typename SrcPixelType >
+	template< typename DestPixelT, typename SrcPixelT >
 	void CopyRect( const CDibPixels& srcPixels, const CRect& rect, const CPoint& srcPos );
 
 	void SetAlpha( BYTE alpha ) { ForEach<CPixelBGRA>( func::SetAlpha( alpha ) ); }
@@ -91,6 +91,9 @@ public:
 	bool ApplyGrayScale( COLORREF transpColor24 = CLR_NONE ) { return ForEach( func::ToGrayScale( transpColor24 ) ); }
 	bool ApplyAlphaBlend( BYTE alpha, COLORREF blendColor24 = color::AzureBlue ) { return ForEach( func::AlphaBlend( alpha, blendColor24 ) ); }
 	bool ApplyBlendColor( COLORREF toColor24, BYTE toAlpha ) { return ForEach( func::BlendColor( toColor24, toAlpha ) ); }
+
+	bool ApplyDisableFadeGray( BYTE fadeAlpha = pixel::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF grayScaleTranspColor24 = CLR_NONE )	// best looking!
+	{ return ForEach( func::DisableFadeGray( fadeAlpha, preMultiplyAlpha, grayScaleTranspColor24 ) ); }
 
 	bool ApplyDisabledGrayOut( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledGrayOut( toColor24, toAlpha ) ); }
 	bool ApplyDisabledEffect( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledEffect( toColor24, toAlpha ) ); }
@@ -106,10 +109,10 @@ private:
 	UINT GetPixelY( UINT y ) const { return gdi::BottomUp == m_orientation ? y : ( m_height - y - 1 ); }		// aware of top-down-ness
 	bool FlipBottomUp( void );		// not used, verbatim from CImage::UpdateBitmapInfo()
 
-	template< typename PixelType > bool ValidType( void ) const { return IsValid() && sizeof( PixelType ) == ( m_bitsPerPixel / 8 ); }
+	template< typename PixelT > bool ValidType( void ) const { return IsValid() && sizeof( PixelT ) == ( m_bitsPerPixel / 8 ); }
 	template<> bool ValidType<BYTE>( void ) const { return IsValid(); }
 
-	template< typename PixelType > bool ValidLinearIteration( void ) const { return 32 == m_bitsPerPixel && ValidType<PixelType>(); }
+	template< typename PixelT > bool ValidLinearIteration( void ) const { return 32 == m_bitsPerPixel && ValidType<PixelT>(); }
 	template<> bool ValidLinearIteration<BYTE>( void ) const { return ValidType<BYTE>(); }		// BYTE arithmetic works for 24bpp
 
 	void* GetPixelPtr( UINT x, UINT y )
@@ -119,13 +122,13 @@ private:
 		return m_pPixels + GetPixelY( y ) * m_stride + ( x * m_bitsPerPixel ) / 8;				// aware of top-down-ness
 	}
 
-	template< typename PixelType, typename PixelFunc > void ForEachXY( PixelFunc func );		// safe x,y iteration for 24bpp, aware of top-down-ness
+	template< typename PixelT, typename PixelFunc > void ForEachXY( PixelFunc func );		// safe x,y iteration for 24bpp, aware of top-down-ness
 	template< typename PixelFunc > void ForEachRGB( PixelFunc func );							// for 1/4/8/16 bpp; func takes CPixelBGR
 
 	// aware of src/dest top-down-ness
-	template< typename DestPixelType, typename SrcPixelType, typename AssignFunc > void Assign( const CDibPixels& srcPixels, AssignFunc func );
-	template< typename DestPixelType, typename AssignFunc > void AssignSrcColor( const CDibPixels& srcPixels, AssignFunc func );
-	template< typename SrcPixelType > void AssignDestColor( const CDibPixels& srcPixels );
+	template< typename DestPixelT, typename SrcPixelT, typename AssignFunc > void Assign( const CDibPixels& srcPixels, AssignFunc func );
+	template< typename DestPixelT, typename AssignFunc > void AssignSrcColor( const CDibPixels& srcPixels, AssignFunc func );
+	template< typename SrcPixelT > void AssignDestColor( const CDibPixels& srcPixels );
 private:
 	CDibSection* m_pDibSection;
 	bool m_ownsDib;						// owns temporary object when built on a HBITMAP
@@ -153,14 +156,14 @@ void CDibPixels::MapTranspColor( PixelFunc func )
 	}
 }
 
-template< typename PixelType, typename PixelFunc >
+template< typename PixelT, typename PixelFunc >
 void CDibPixels::ForEachXY( PixelFunc func )			// safer iteration
 {
-	ASSERT( ValidType<PixelType>() );
+	ASSERT( ValidType<PixelT>() );
 
 	for ( UINT y = 0; y != m_height; ++y )
 		for ( UINT x = 0; x != m_width; ++x )
-			func( GetPixel<PixelType>( x, y ) );
+			func( GetPixel<PixelT>( x, y ) );
 
 	MapTranspColor( func );
 }
@@ -183,12 +186,12 @@ void CDibPixels::ForEachRGB( PixelFunc func )
 	MapTranspColor( func );
 }
 
-template< typename PixelType, typename PixelFunc >
+template< typename PixelT, typename PixelFunc >
 void CDibPixels::ForEach( PixelFunc func )
 {
-	if ( !ValidLinearIteration<PixelType>() )
+	if ( !ValidLinearIteration<PixelT>() )
 	{
-		ForEachXY<PixelType>( func );		// requires x,y iteration
+		ForEachXY<PixelT>( func );		// requires x,y iteration
 		return;
 	}
 
@@ -196,8 +199,9 @@ void CDibPixels::ForEach( PixelFunc func )
 
 	try
 	{	// faster linear iteration
-		typedef PixelType* iterator;
-		for ( iterator pPixel = Begin<PixelType>(), pPixelEnd = End<PixelType>(); pPixel != pPixelEnd; ++pPixel, ++pos )
+		typedef PixelT* TPixelIterator;
+
+		for ( TPixelIterator pPixel = Begin<PixelT>(), pPixelEnd = End<PixelT>(); pPixel != pPixelEnd; ++pPixel, ++pos )
 			func( *pPixel );
 
 		return;
@@ -231,59 +235,60 @@ bool CDibPixels::ForEach( PixelFunc func )
 	}
 	else
 		ForEachRGB( func );										// 16 bit: apply CPixelBGR algorithms to RGB bitmaps
+
 	return true;
 }
 
-template< typename DestPixelType, typename SrcPixelType, typename AssignFunc >
+template< typename DestPixelT, typename SrcPixelT, typename AssignFunc >
 void CDibPixels::Assign( const CDibPixels& srcPixels, AssignFunc func )
 {
 	ASSERT( GetBitmapSize() == srcPixels.GetBitmapSize() );
-	ASSERT( ValidType<DestPixelType>() );
-	ASSERT( srcPixels.ValidType<SrcPixelType>() );
+	ASSERT( ValidType<DestPixelT>() );
+	ASSERT( srcPixels.ValidType<SrcPixelT>() );
 
 	for ( UINT y = 0; y != m_height; ++y )
 		for ( UINT x = 0; x != m_width; ++x )
-			func( GetPixel<DestPixelType>( x, y ), srcPixels.GetPixel<SrcPixelType>( x, y ) );
+			func( GetPixel<DestPixelT>( x, y ), srcPixels.GetPixel<SrcPixelT>( x, y ) );
 }
 
-template< typename DestPixelType, typename AssignFunc >
+template< typename DestPixelT, typename AssignFunc >
 void CDibPixels::AssignSrcColor( const CDibPixels& srcPixels, AssignFunc func )
 {
 	ASSERT( GetBitmapSize() == srcPixels.GetBitmapSize() );
-	ASSERT( ValidType<DestPixelType>() );
+	ASSERT( ValidType<DestPixelT>() );
 
 	CScopedBitmapMemDC scopedSrcBitmap( &srcPixels );
 
 	for ( UINT y = 0; y != m_height; ++y )
 		for ( UINT x = 0; x != m_width; ++x )
-			func( GetPixel<DestPixelType>( x, y ), CPixelBGR( srcPixels.GetPixelColor( x, y ) ) );
+			func( GetPixel<DestPixelT>( x, y ), CPixelBGR( srcPixels.GetPixelColor( x, y ) ) );
 }
 
-template< typename SrcPixelType >
+template< typename SrcPixelT >
 void CDibPixels::AssignDestColor( const CDibPixels& srcPixels )
 {
 	ASSERT( GetBitmapSize() == srcPixels.GetBitmapSize() );
-	ASSERT( srcPixels.ValidType<SrcPixelType>() );
+	ASSERT( srcPixels.ValidType<SrcPixelT>() );
 
 	CScopedBitmapMemDC scopedBitmap( this );
 
 	for ( UINT y = 0; y != m_height; ++y )
 		for ( UINT x = 0; x != m_width; ++x )
-			SetPixelColor( x, y, srcPixels.GetPixel<SrcPixelType>( x, y ).GetColor() );
+			SetPixelColor( x, y, srcPixels.GetPixel<SrcPixelT>( x, y ).GetColor() );
 }
 
-template< typename DestPixelType, typename SrcPixelType >
+template< typename DestPixelT, typename SrcPixelT >
 void CDibPixels::CopyRect( const CDibPixels& srcPixels, const CRect& rect, const CPoint& srcPos )
 {
-	ASSERT( ValidType<DestPixelType>() );
-	ASSERT( srcPixels.ValidType<SrcPixelType>() );
+	ASSERT( ValidType<DestPixelT>() );
+	ASSERT( srcPixels.ValidType<SrcPixelT>() );
 
 	func::CopyPixel copyFunc;
 	UINT width = rect.Width(), height = rect.Height();
 
 	for ( UINT y = 0; y != height; ++y )
 		for ( UINT x = 0; x != width; ++x )
-			copyFunc( GetPixel<DestPixelType>( rect.left + x, rect.top + y ), srcPixels.GetPixel<SrcPixelType>( srcPos.x + x, srcPos.y + y ) );
+			copyFunc( GetPixel<DestPixelT>( rect.left + x, rect.top + y ), srcPixels.GetPixel<SrcPixelT>( srcPos.x + x, srcPos.y + y ) );
 }
 
 
