@@ -434,6 +434,7 @@ namespace wic
 		{
 			// load the desired frame as WIC bitmap
 			CComPtr<IWICBitmapSource> pBitmap = ExtractFrameBitmap( dibMeta, pDecoder, framePos );
+
 			if ( pBitmap != nullptr )
 				CreateDibSection( dibMeta, pBitmap );			// create a top-down DIB section containing the image
 		}
@@ -445,15 +446,18 @@ namespace wic
 	{
 		UINT frameCount = 0;
 		CComPtr<IWICBitmapDecoder> pDecoder;		// create a decoder for the given image file
+
 		if ( HR_OK( CImagingFactory::Factory()->CreateDecoderFromFilename( pFilePath, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pDecoder ) ) )
 			frameCount = GetFrameCount( pDecoder );
+
 		return frameCount;
 	}
 
 
-	CDibMeta LoadPng( const TCHAR* pResPngName, bool mapTo3DColors /*= false*/ )
+	CDibMeta LoadPngResource( const TCHAR* pResPngName, bool mapTo3DColors /*= false*/ )
 	{
-		CDibMeta dibMeta = LoadImageWithType( pResPngName, _T("PNG") );
+		CDibMeta dibMeta = wic::LoadImageResourceWithType( pResPngName, RT_PNG );
+
 		if ( dibMeta.IsValid() )
 			if ( mapTo3DColors )
 				gdi::MapBmpTo3dColors( dibMeta.m_hDib );
@@ -462,15 +466,17 @@ namespace wic
 	}
 
 
-	CDibMeta LoadPngOrBitmap( const TCHAR* pResImageName, bool mapTo3DColors /*= false*/ )
+	CDibMeta LoadPngOrBitmapResource( const TCHAR* pResImageName, bool mapTo3DColors /*= false*/ )
 	{
-		CDibMeta dibMeta = LoadPng( pResImageName, mapTo3DColors );		// try to load PNG image first
+		CDibMeta dibMeta = wic::LoadPngResource( pResImageName, mapTo3DColors );		// try to load PNG image first
+
 		if ( !dibMeta.IsValid() )
 			dibMeta = gdi::LoadBitmapAsDib( pResImageName, mapTo3DColors );
+
 		return dibMeta;
 	}
 
-	CDibMeta LoadImageWithType( const TCHAR* pResImageName, const TCHAR* pResType )
+	CDibMeta LoadImageResourceWithType( const TCHAR* pResImageName, const TCHAR* pResType )
 	{
 		CDibMeta dibMeta;
 
@@ -536,15 +542,15 @@ namespace wic
 		else if ( RT_BITMAP == pResType )
 			return BmpFormat;
 		else if ( !IS_INTRESOURCE( pResType ) )
-			if ( str::Equals<str::IgnoreCase>( pResType, _T("PNG") ) )
+			if ( str::Equals<str::IgnoreCase>( pResType, RT_PNG ) )
 				return PngFormat;
-			else if ( str::Equals<str::IgnoreCase>( pResType, _T("GIF") ) )
+			else if ( str::Equals<str::IgnoreCase>( pResType, RT_GIF ) )
 				return GifFormat;
-			else if ( str::Equals<str::IgnoreCase>( pResType, _T("TIFF") ) )
+			else if ( str::Equals<str::IgnoreCase>( pResType, RT_TIFF ) )
 				return TiffFormat;
-			else if ( str::Equals<str::IgnoreCase>( pResType, _T("JPG") ) )
+			else if ( str::Equals<str::IgnoreCase>( pResType, RT_JPG ) )
 				return JpegFormat;
-			else if ( str::Equals<str::IgnoreCase>( pResType, _T("WMP") ) )
+			else if ( str::Equals<str::IgnoreCase>( pResType, RT_WMP ) )
 				return WmpFormat;
 
 		return UnknownImageFormat;

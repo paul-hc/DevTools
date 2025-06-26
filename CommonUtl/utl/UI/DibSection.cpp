@@ -278,16 +278,16 @@ bool CDibSection::LoadFromFile( const TCHAR* pFilePath, ui::ImagingApi api /*= u
 	return true;
 }
 
-bool CDibSection::LoadPng( UINT pngId, ui::ImagingApi api /*= ui::WicApi*/ )
+bool CDibSection::LoadPngResource( UINT pngId, ui::ImagingApi api /*= ui::WicApi*/ )
 {
-	if ( !AttachDib( ui::LoadPng( pngId, api ) ) )
+	if ( !AttachDib( ui::LoadPngResource( pngId, api ) ) )
 		return false;
 
 	SetFlag( m_flags, F_IsPng );
 	return true;
 }
 
-bool CDibSection::LoadBitmap( UINT bitmapId )
+bool CDibSection::LoadBitmapResource( UINT bitmapId )
 {
 	if ( !AttachDib( gdi::LoadBitmapAsDib( MAKEINTRESOURCE( bitmapId ) ) ) )
 		return false;
@@ -296,12 +296,12 @@ bool CDibSection::LoadBitmap( UINT bitmapId )
 	return true;
 }
 
-bool CDibSection::LoadImage( UINT imageId, ui::ImagingApi api /*= ui::WicApi*/ )
+bool CDibSection::LoadImageResource( UINT imageId, ui::ImagingApi api /*= ui::WicApi*/ )
 {
-	if ( LoadPng( imageId, api ) )		// first try to load PNG image from resources
+	if ( LoadPngResource( imageId, api ) )		// first try to load PNG image from resources
 		return true;
 
-	return LoadBitmap( imageId );
+	return LoadBitmapResource( imageId );
 }
 
 ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int imageCount, bool preserveThis /*= false*/ )

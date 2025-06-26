@@ -147,9 +147,9 @@ namespace wic
 	CDibMeta LoadImageFromFile( const TCHAR* pFilePath, UINT framePos = 0 );
 	UINT QueryImageFrameCount( const TCHAR* pFilePath );
 
-	CDibMeta LoadPng( const TCHAR* pResPngName, bool mapTo3DColors = false );
-	CDibMeta LoadPngOrBitmap( const TCHAR* pResImageName, bool mapTo3DColors = false );		// PNG or BMP images
-	CDibMeta LoadImageWithType( const TCHAR* pResImageName, const TCHAR* pResType );
+	CDibMeta LoadPngResource( const TCHAR* pResPngName, bool mapTo3DColors = false );
+	CDibMeta LoadPngOrBitmapResource( const TCHAR* pResImageName, bool mapTo3DColors = false );		// PNG or BMP images
+	CDibMeta LoadImageResourceWithType( const TCHAR* pResImageName, const TCHAR* pResType );
 
 	CComPtr<IWICBitmapSource> LoadBitmapFromStream( IStream* pImageStream, UINT framePos = 0 );				// using auto-decoder
 

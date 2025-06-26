@@ -27,15 +27,42 @@ namespace ui
 		}
 	}
 
-	CDibMeta LoadPng( UINT pngId, ui::ImagingApi api /*= ui::WicApi*/, bool mapTo3DColors /*= false*/ )
+	CDibMeta LoadImageResource( UINT resImageId, const TCHAR* pImageResType /*= RT_BITMAP*/, ui::ImagingApi api /*= ui::WicApi*/, bool mapTo3DColors /*= false*/ )
+	{
+		CDibMeta dibMeta;
+
+		switch ( api )
+		{
+			default: ASSERT( false );
+			case ui::WicApi:
+				dibMeta = wic::LoadImageResourceWithType( MAKEINTRESOURCE( resImageId ), pImageResType );
+				break;
+			case ui::GpApi:
+				dibMeta = gp::LoadImageResource( MAKEINTRESOURCE( resImageId ), pImageResType );
+				break;
+		}
+
+		if ( dibMeta.IsValid() )
+		{
+			if ( mapTo3DColors )
+				gdi::MapBmpTo3dColors( dibMeta.m_hDib );
+
+			dibMeta.StorePixelFormat();
+		}
+
+		return dibMeta;
+	}
+
+
+	CDibMeta LoadPngResource( UINT pngId, ui::ImagingApi api /*= ui::WicApi*/, bool mapTo3DColors /*= false*/ )
 	{
 		switch ( api )
 		{
 			default: ASSERT( false );
 			case ui::WicApi:
-				return wic::LoadPng( MAKEINTRESOURCE( pngId ), mapTo3DColors );
+				return wic::LoadPngResource( MAKEINTRESOURCE( pngId ), mapTo3DColors );
 			case ui::GpApi:
-				return gp::LoadPng( MAKEINTRESOURCE( pngId ), mapTo3DColors );
+				return gp::LoadPngResource( MAKEINTRESOURCE( pngId ), mapTo3DColors );
 		}
 	}
 
@@ -79,6 +106,10 @@ namespace gdi
 				MapBmpTo3dColors( dibMeta.m_hDib );				// LR_LOADMAP3DCOLORS doesn't work for images > 8bpp, we need to do the post-conversion
 
 			dibMeta.StorePixelFormat();
+
+			if ( 0 )
+				if ( 1 == dibMeta.m_bitsPerPixel )		// monochrome bitmap?
+					dibMeta = wic::LoadImageResourceWithType( pBmpName, RT_BITMAP );		// try loading via WIC or GDI+ - it fails either way...
 		}
 
 		return dibMeta;
@@ -171,7 +202,7 @@ namespace gdi
 			DWORD rgbqFrom;			// use DWORD instead of RGBQUAD so we can compare two RGBQUADs easily
 			int toSysColor;
 		};
-		static const COLORMAP sysColorMap[] =
+		static const COLORMAP s_sysColorMap[] =
 		{
 			// mapping from color in DIB to system color
 			{ AFX_RGB_TO_RGBQUAD( 0x00, 0x00, 0x00 ),  COLOR_BTNTEXT },			// black
@@ -181,11 +212,11 @@ namespace gdi
 		};
 
 		// look for matching RGBQUAD color in original
-		for ( int i = 0; i != COUNT_OF( sysColorMap ); ++i )
-			if ( color == sysColorMap[ i ].rgbqFrom )
+		for ( int i = 0; i != COUNT_OF( s_sysColorMap ); ++i )
+			if ( color == s_sysColorMap[ i ].rgbqFrom )
 				return useRGBQUAD
-					? AFX_CLR_TO_RGBQUAD( afxGlobalData.GetColor( sysColorMap[ i ].toSysColor ) )
-					: afxGlobalData.GetColor( sysColorMap[ i ].toSysColor );
+					? AFX_CLR_TO_RGBQUAD( afxGlobalData.GetColor( s_sysColorMap[ i ].toSysColor ) )
+					: afxGlobalData.GetColor( s_sysColorMap[ i ].toSysColor );
 
 		return color;
 	}

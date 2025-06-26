@@ -8,7 +8,9 @@
 namespace ui
 {
 	CDibMeta LoadImageFromFile( const TCHAR* pFilePath, ui::ImagingApi api = ui::WicApi, UINT framePos = 0 );
-	CDibMeta LoadPng( UINT pngId, ui::ImagingApi api = ui::WicApi, bool mapTo3DColors = false );
+
+	CDibMeta LoadImageResource( UINT resImageId, const TCHAR* pImageResType = RT_BITMAP, ui::ImagingApi api = ui::WicApi, bool mapTo3DColors = false );
+	CDibMeta LoadPngResource( UINT pngId, ui::ImagingApi api = ui::WicApi, bool mapTo3DColors = false );
 }
 
 

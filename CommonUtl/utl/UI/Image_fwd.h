@@ -7,6 +7,13 @@
 #include "ComparePredicates.h"
 
 
+#define RT_PNG	_T("PNG")
+#define RT_GIF	_T("GIF")
+#define RT_TIFF	_T("TIFF")
+#define RT_JPG	_T("JPG")
+#define RT_WMP	_T("WMP")
+
+
 class CEnumTags;
 
 

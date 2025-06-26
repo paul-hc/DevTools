@@ -177,7 +177,7 @@ namespace res
 		CDibSection dibSection;
 		ui::CImageListInfo imageListInfo;
 
-		if ( !dibSection.LoadImage( bitmapId ) )		// PNG or BMP
+		if ( !dibSection.LoadImageResource( bitmapId ) )		// PNG or BMP
 			return imageListInfo;
 
 		if ( color::Auto == transpColor )

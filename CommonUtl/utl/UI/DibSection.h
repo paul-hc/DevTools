@@ -64,9 +64,9 @@ public:
 
 	bool LoadFromFile( const TCHAR* pFilePath, ui::ImagingApi api = ui::WicApi, UINT framePos = 0 );		// framePos works only for WicApi
 
-	bool LoadPng( UINT pngId, ui::ImagingApi api = ui::WicApi );
-	bool LoadBitmap( UINT bitmapId );
-	bool LoadImage( UINT imageId, ui::ImagingApi api = ui::WicApi );		// PNG or BMP
+	bool LoadPngResource( UINT pngId, ui::ImagingApi api = ui::WicApi );
+	bool LoadBitmapResource( UINT bitmapId );
+	bool LoadImageResource( UINT imageId, ui::ImagingApi api = ui::WicApi );		// PNG or BMP
 
 	ui::CImageListInfo MakeImageList( CImageList& rDestImageList, int imageCount, bool preserveThis = false );
 	TImageListFlags CreateEmptyImageList( CImageList& rDestImageList, const CSize& imageSize, int imageCount ) const;		// bpp compatible with this DIB
