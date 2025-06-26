@@ -14,7 +14,7 @@ desktop.ini
 
 # PHC: DevTools Ignore:
 [Gg]en/
-TestDataUtl/images/thumbnails/myThumbs.stg
+TestDataUtl/images/thumbnails/*.*
 TestDataUtl/temp_ut/
 
 # PHC: Visual Studio 2022 temporary debugging source editing backups
