@@ -285,6 +285,19 @@ void CAppLook::OnUpdate_Enable( CCmdUI* /*pCmdUI*/ )
 
 namespace app
 {
+	bool IsMainThread( void )
+	{
+		if ( CWinApp* pApp = AfxGetApp() )
+		{
+			if ( pApp->m_nThreadID == ::GetCurrentThreadId() )
+				return true;
+		}
+		else
+			ASSERT( false );		// not using a CWinApp signeton?
+
+		return false;
+	}
+
 	void InitUtlBase( void )
 	{
 		// inject UTL_UI.lib code into UTL_BASE.lib:

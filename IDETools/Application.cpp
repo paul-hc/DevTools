@@ -129,6 +129,10 @@ CApplication::CApplication( void )
 	SetLazyInitAppResources();
 
 	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
+
+	// Prevent deadlocks on GDI+ initialization caused by usage of ATL::CImage class.
+	// This is because GDI+ is not thread-safe, and must only be initialized by the main thread of the Visual C++ IDE host.
+	CImageStore::SetSkipMfcToolBarImages();
 }
 
 CApplication::~CApplication()

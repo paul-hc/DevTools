@@ -9,7 +9,9 @@
 #pragma pack( 1 )				// 1 byte alignment for pixel structures
 
 
-struct CPixelBGR				// the pixel color format for ILC_COLOR24: 0xrrggbb
+// The pixel color format for ILC_COLOR24: 0xrrggbb.
+//
+struct CPixelBGR
 {
 	CPixelBGR( BYTE red, BYTE green, BYTE blue ) : m_blue( blue ), m_green( green ), m_red( red ) {}
 	CPixelBGR( COLORREF color ) : m_blue( GetBValue( color ) ), m_green( GetGValue( color ) ), m_red( GetRValue( color ) ) {}
@@ -24,7 +26,10 @@ public:
 };
 
 
-struct CPixelBGRA				// the pixel color format for ILC_COLOR32: 0xaarrggbb
+// The pixel color format for ILC_COLOR32: 0xaarrggbb.
+// Same layout as RGBQUAD, where RGBQUAD::rgbReserved is CPixelBGRA::m_alpha.
+//
+struct CPixelBGRA
 {
 	CPixelBGRA( BYTE red, BYTE green, BYTE blue, BYTE alpha ) : m_blue( blue ), m_green( green ), m_red( red ), m_alpha( alpha ) {}
 	CPixelBGRA( COLORREF color, BYTE alpha = 255 ) : m_blue( GetBValue( color ) ), m_green( GetGValue( color ) ), m_red( GetRValue( color ) ), m_alpha( alpha ) {}

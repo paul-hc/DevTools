@@ -68,7 +68,7 @@ public:
 	bool LoadBitmap( UINT bitmapId );
 	bool LoadImage( UINT imageId, ui::ImagingApi api = ui::WicApi );		// PNG or BMP
 
-	ui::CImageListInfo MakeImageList( CImageList& rDestImageList, int imageCount ) const;
+	ui::CImageListInfo MakeImageList( CImageList& rDestImageList, int imageCount, bool preserveThis = false );
 	TImageListFlags CreateEmptyImageList( CImageList& rDestImageList, const CSize& imageSize, int imageCount ) const;		// bpp compatible with this DIB
 	TImageListFlags GetImageListFlags( void ) const { return m_srcDibMeta.GetImageListFlags(); }
 

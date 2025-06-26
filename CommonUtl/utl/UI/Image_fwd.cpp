@@ -188,7 +188,7 @@ namespace res
 		if ( disabledEffect )
 		{
 			CDibPixels pixels( &dibSection );
-			pixels.ApplyDisableFadeGray( pixel::AlphaFadeMore, false /*?*/ /*, ::GetSysColor( COLOR_BTNFACE )*/ );
+			pixels.ApplyDisableFadeGray( pixel::AlphaFadeMore, false /*, ::GetSysColor( COLOR_BTNFACE )*/ );
 			//pixels.ApplyDisabledGrayOut( ::GetSysColor( COLOR_BTNFACE ), 64 );
 		}
 

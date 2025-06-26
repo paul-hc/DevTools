@@ -304,7 +304,7 @@ bool CDibSection::LoadImage( UINT imageId, ui::ImagingApi api /*= ui::WicApi*/ )
 	return LoadBitmap( imageId );
 }
 
-ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int imageCount ) const
+ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int imageCount, bool preserveThis /*= false*/ )
 {
 	REQUIRE( IsValid() );
 	REQUIRE( 0 == ( m_bitmapSize.cx % imageCount ) );	// imageCount lines-up with bitmap width consistently?
@@ -324,11 +324,15 @@ ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int i
 	{
 		if ( HasTranspColor() )
 		{
-			// NOTE: this DIB will get altered, i.e. transparent background gets converted to black (due to image list internals).
-			//	We work on a copy so that we preserve this.
-			CDibSection dupDibBitmap( this );
-
-			rDestImageList.Add( &dupDibBitmap, m_transpColor );
+			if ( preserveThis )
+			{
+				// NOTE: this DIB will get altered, i.e. transparent background gets converted to black (due to image list internals).
+				//	We work on a copy so that we preserve this.
+				CDibSection dupDibBitmap( this );
+				rDestImageList.Add( &dupDibBitmap, m_transpColor );
+			}
+			else
+				rDestImageList.Add( this, m_transpColor );		// we don't care if this temporary DIB bitmap gets modified
 		}
 		else
 			rDestImageList.Add( pThis, s_pNullMask );

@@ -145,6 +145,8 @@ protected:
 
 namespace app
 {
+	bool IsMainThread( void );				// called from the same thread as the main app UI thread?
+
 	void InitUtlBase( void );
 	bool InitMfcControlBars( CWinApp* pWinApp );		// init MFC control bars: singletons and load standard UTL_UI images
 

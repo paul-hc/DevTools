@@ -77,6 +77,8 @@ namespace ui
 
 // CImageStore implementation
 
+bool CImageStore::s_skipMfcToolBarImages = false;		// a global turn-off of registering images in CMFCToolBarImages - used in IDETools.dll to avoid deadlock in ATL::CImage::CInitGDIPlus::ReleaseGDIPlus()
+
 CImageStore::CImageStore( void )
 	: m_pMenuItemBkTheme( new CThemeItem( _T("MENU"), MENU_POPUPBACKGROUND, 0 ) )							// item background (opaque)
 	, m_pCheckedMenuItemBkTheme( new CThemeItem( _T("MENU"), MENU_POPUPCHECKBACKGROUND, MCB_BITMAP ) )		// checked button background (semi-transparent)
@@ -96,6 +98,11 @@ void CImageStore::Clear( void )
 	utl::ClearOwningContainer( m_iconGroups );
 	utl::ClearOwningMapValues( m_bitmapMap );
 	utl::ClearOwningContainer( m_menuBitmapMap, func::DeleteMenuBitmaps() );
+}
+
+void CImageStore::SetSkipMfcToolBarImages( bool skipMfcToolBarImages /*= true*/ )
+{
+	s_skipMfcToolBarImages = skipMfcToolBarImages;
 }
 
 CIconGroup* CImageStore::FindIconGroup( UINT cmdId ) const
@@ -328,8 +335,9 @@ void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*
 	RegisterButtonImages( strip );
 	m_toolbarDescriptors.push_back( new ui::CToolbarDescr( toolbarId, ARRAY_SPAN_V( strip.GetButtonIds() ) ) );
 
-	if ( afxContextMenuManager != nullptr || addMfcToolBarImages )
-		CMFCToolBar::AddToolBarForImageCollection( toolbarId );		// also load the MFC control bar images for the toolbar
+	if ( !s_skipMfcToolBarImages )			// GDI+ initialization via ATL::CImage not turned-off globally?
+		if ( afxContextMenuManager != nullptr || addMfcToolBarImages )
+			CMFCToolBar::AddToolBarForImageCollection( toolbarId );		// also load the MFC control bar images for the toolbar
 }
 
 void CImageStore::RegisterButtonImages( const CToolImageList& toolImageList )

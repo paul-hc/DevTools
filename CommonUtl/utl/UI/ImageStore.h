@@ -20,6 +20,9 @@ public:
 	~CImageStore();
 
 	void Clear( void );
+
+	static bool GetSkipMfcToolBarImages( void ) { return s_skipMfcToolBarImages; }
+	static void SetSkipMfcToolBarImages( bool skipMfcToolBarImages = true );
 public:
 	// ui::IImageStore interface
 	virtual CIconGroup* FindIconGroup( UINT cmdId ) const;
@@ -63,12 +66,14 @@ private:
 
 	typedef std::pair<UINT, COLORREF> TBitmapKey;			// <iconId, transpColor>
 	typedef std::unordered_map<TBitmapKey, CBitmap*, utl::CPairHasher> TBitmapMap;
-	TBitmapMap m_bitmapMap;				// regular bitmaps look better than menu bitmaps because they retain the alpha channel
+	TBitmapMap m_bitmapMap;						// regular bitmaps look better than menu bitmaps because they retain the alpha channel
 
 	std::unordered_map<UINT, TBitmapPair> m_menuBitmapMap;	// <iconId, <unchecked, checked> >
 
 	std::auto_ptr<CThemeItem> m_pMenuItemBkTheme;
 	std::auto_ptr<CThemeItem> m_pCheckedMenuItemBkTheme;
+
+	static bool s_skipMfcToolBarImages;		// a global turn-off of registering images in CMFCToolBarImages - used in IDETools.dll to avoid deadlock in ATL::CImage::CInitGDIPlus::ReleaseGDIPlus()
 };
 
 
