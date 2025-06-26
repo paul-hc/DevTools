@@ -17,7 +17,7 @@ namespace gp
 	//
 
 	CDibMeta LoadImageFromFile( const TCHAR* pFilePath );
-	CDibMeta LoadImageResource( const TCHAR* pResBmpName, const TCHAR* pImageResType = RT_BITMAP );
+	CDibMeta LoadImageResource( const TCHAR* pResBmpName, const TCHAR* pResType = RT_BITMAP );
 
 	CDibMeta LoadPngResource( const TCHAR* pResPngName, bool mapTo3DColors = false );
 	CDibMeta LoadPngOrBitmapResource( const TCHAR* pResImageName, bool mapTo3DColors = false );		// PNG or BMP images

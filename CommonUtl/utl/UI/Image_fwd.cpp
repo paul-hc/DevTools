@@ -634,10 +634,29 @@ namespace gdi
 
 // CDibMeta implementation
 
+bool CDibMeta::Reset( HBITMAP hDib /*= nullptr*/ )
+{
+	if ( m_hDib != nullptr && hDib != m_hDib )
+		::DeleteObject( m_hDib );
+
+	m_hDib = hDib;
+
+	return StorePixelFormat();		// works with NULL m_hDib
+}
+
+bool CDibMeta::AssignIfValid( const CDibMeta& srcDib )
+{
+	if ( !srcDib.IsValid() )
+		return false;
+
+	Reset( srcDib.m_hDib );
+	return true;
+}
+
 bool CDibMeta::StorePixelFormat( void )
 {
 	DIBSECTION dibSection;
-	int size = ::GetObject( m_hDib, sizeof( DIBSECTION ), &dibSection );
+	int size = m_hDib != nullptr ? ::GetObject( m_hDib, sizeof( DIBSECTION ), &dibSection ) : 0;
 
 	if ( 0 == size )			// not a valid bitmap
 	{

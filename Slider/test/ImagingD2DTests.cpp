@@ -5,7 +5,7 @@
 #include "ImagingD2DTests.h"
 #include "utl/UI/ImagingWic.h"
 #include "utl/UI/ImagingDirect2D.h"
-#include "utl/UI/WndUtils.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/WindowTimer.h"
 #include "utl/UI/test/TestToolWnd.h"
 
@@ -89,15 +89,15 @@ void CImagingD2DTests::TestImageAnimation( ut::CTestDevice* pTestDev, d2d::CDCRe
 
 	wic::CBitmapDecoder decoder( imagePath );
 	d2d::CDrawBitmapTraits traits;
+	CScopedDrawTextColor scopedDrawTextColor( pTestDev->GetDC(), nullptr, color::White, color::DarkGray );
 
-	for ( UINT count = 0; count != 3; ++count )
-		for ( UINT framePos = 0; framePos != decoder.GetFrameCount(); ++framePos, pTestDev->Await( 20 ) )
+	for ( UINT count = 0; count != 5; ++count )
+		for ( UINT framePos = 0, frameCount = decoder.GetFrameCount(); framePos != frameCount; ++framePos, pTestDev->Await( 20 ) )
 		{
 			pRenderTarget->SetWicBitmap( decoder.ConvertFrameAt( framePos ) );
 			pTestDev->DrawBitmap( pRenderTarget, traits, CSize( 300, 300 ) );
 
-			if ( 0 == count && 0 == framePos )
-				pTestDev->DrawTileCaption( imagePath.GetFilename() );		// draw caption once for the first frame
+			pTestDev->DrawTileCaption( str::Format( _T("%s : %d/%d"), imagePath.GetFilenamePtr(), framePos + 1, frameCount ) );		// draw caption once for each frame
 		}
 
 	++*pTestDev;

@@ -35,7 +35,7 @@ namespace ui
 		{
 			default: ASSERT( false );
 			case ui::WicApi:
-				dibMeta = wic::LoadImageResourceWithType( MAKEINTRESOURCE( resImageId ), pImageResType );
+				dibMeta = wic::LoadImageResource( MAKEINTRESOURCE( resImageId ), pImageResType );
 				break;
 			case ui::GpApi:
 				dibMeta = gp::LoadImageResource( MAKEINTRESOURCE( resImageId ), pImageResType );
@@ -99,17 +99,16 @@ namespace gdi
 		if ( mapTo3DColors )
 			SetFlag( flags, LR_LOADMAP3DCOLORS );
 
-		CDibMeta dibMeta( (HBITMAP)::LoadImage( hResInst, pBmpName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | flags ) );
-		if ( dibMeta.IsValid() )
+		CDibMeta dibMeta;
+
+		if ( dibMeta.Reset( (HBITMAP)::LoadImage( hResInst, pBmpName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | flags ) ) )
 		{
 			if ( mapTo3DColors )
-				MapBmpTo3dColors( dibMeta.m_hDib );				// LR_LOADMAP3DCOLORS doesn't work for images > 8bpp, we need to do the post-conversion
-
-			dibMeta.StorePixelFormat();
+				MapBmpTo3dColors( dibMeta.m_hDib );			// LR_LOADMAP3DCOLORS doesn't work for images > 8bpp, we need to do the post-conversion
 
 			if ( 0 )
-				if ( 1 == dibMeta.m_bitsPerPixel )		// monochrome bitmap?
-					dibMeta = wic::LoadImageResourceWithType( pBmpName, RT_BITMAP );		// try loading via WIC or GDI+ - it fails either way...
+				if ( 1 == dibMeta.m_bitsPerPixel )			// monochrome bitmap?  read: https://stackoverflow.com/questions/49215933/reading-a-monochrome-bitmap-in-c-requires-reading-every-other-line
+					dibMeta.AssignIfValid( wic::LoadImageResource( pBmpName, RT_BITMAP ) );		// try loading via WIC or GDI+ - it fails either way...
 		}
 
 		return dibMeta;

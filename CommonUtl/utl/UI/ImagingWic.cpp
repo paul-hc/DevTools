@@ -33,8 +33,8 @@ namespace wic
 
 	CImagingFactory& CImagingFactory::Instance( void )
 	{
-		static CImagingFactory factory;
-		return factory;
+		static CImagingFactory s_factory;
+		return s_factory;
 	}
 
 
@@ -456,7 +456,7 @@ namespace wic
 
 	CDibMeta LoadPngResource( const TCHAR* pResPngName, bool mapTo3DColors /*= false*/ )
 	{
-		CDibMeta dibMeta = wic::LoadImageResourceWithType( pResPngName, RT_PNG );
+		CDibMeta dibMeta = wic::LoadImageResource( pResPngName, RT_PNG );
 
 		if ( dibMeta.IsValid() )
 			if ( mapTo3DColors )
@@ -476,7 +476,7 @@ namespace wic
 		return dibMeta;
 	}
 
-	CDibMeta LoadImageResourceWithType( const TCHAR* pResImageName, const TCHAR* pResType )
+	CDibMeta LoadImageResource( const TCHAR* pResImageName, const TCHAR* pResType )
 	{
 		CDibMeta dibMeta;
 
@@ -818,6 +818,7 @@ namespace wic
 		rDibMeta.m_hDib = CreateDibSection( pBitmap );
 		if ( nullptr == rDibMeta.m_hDib )
 			return false;
+
 		rDibMeta.m_orientation = gdi::TopDown;
 		return true;
 	}

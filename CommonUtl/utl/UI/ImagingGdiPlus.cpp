@@ -44,9 +44,9 @@ namespace gp
 		return dibMeta;
 	}
 
-	CDibMeta LoadImageResource( const TCHAR* pResBmpName, const TCHAR* pImageResType /*= RT_BITMAP*/ )
+	CDibMeta LoadImageResource( const TCHAR* pResBmpName, const TCHAR* pResType /*= RT_BITMAP*/ )
 	{
-		CResourceData imageResource( pResBmpName, pImageResType );
+		CResourceData imageResource( pResBmpName, pResType );
 		CComPtr<IStream> pImageStream = imageResource.CreateStreamCopy();
 		CDibMeta dibMeta;
 

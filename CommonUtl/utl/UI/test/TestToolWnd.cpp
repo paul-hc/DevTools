@@ -660,17 +660,24 @@ namespace ut
 		enum { TextEdge = 3, DtFormat = DT_NOPREFIX | DT_SINGLELINE };
 
 		CDC* pDC = GetDC();
-		CSize textSize = ui::GetTextSize( pDC, text.c_str(), DtFormat );
+
+		static const std::tstring s_spacing = _T(" ");
+		std::tstring displayText = text;
+
+		if ( OPAQUE == pDC->GetBkMode() )
+			displayText = s_spacing + text + s_spacing;		// draw background around the text label
+
+		CSize textSize = ui::GetTextSize( pDC, displayText.c_str(), DtFormat );
 
 		textSize.cx = std::min( (long)m_tileRect.Width(), textSize.cx );
-		textSize.cy = std::max( pDC->GetTextExtent( text.c_str(), (int)text.length() ).cy, textSize.cy );	// compensate since ui::GetTextSize() not acurate with vertical size
+		textSize.cy = std::max( pDC->GetTextExtent( displayText.c_str(), (int)displayText.length() ).cy, textSize.cy );	// compensate since ui::GetTextSize() not acurate with vertical size
 
 		CRect textRect( CPoint( 0, 0 ), textSize );
 
 		ui::AlignRectOutside( textRect, m_tileRect, H_AlignCenter | V_AlignBottom, CSize( 0, TextEdge ) );
 		m_stripRect.bottom = std::max( textRect.bottom, m_stripRect.bottom );
 
-		GetDC()->DrawText( text.c_str(), (int)text.length(), &textRect, DT_END_ELLIPSIS | DtFormat );
+		pDC->DrawText( displayText.c_str(), (int)displayText.length(), &textRect, DT_END_ELLIPSIS | DtFormat );
 	}
 
 

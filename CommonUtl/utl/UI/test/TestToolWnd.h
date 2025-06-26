@@ -69,6 +69,7 @@ namespace ut
 
 		bool IsEnabled( void ) const { return m_pToolWnd != nullptr; }
 		CDC* GetDC( void ) const { ASSERT_PTR( m_pTestDC.get() ); return m_pTestDC.get(); }
+		CTestToolWnd* GetToolWnd( void ) const { ASSERT_PTR( m_pToolWnd ); return m_pToolWnd; }
 
 		void SetSubTitle( const TCHAR* pSubTitle );		// augment test window title with the sub-title
 

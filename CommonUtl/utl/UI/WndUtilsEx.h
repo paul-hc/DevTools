@@ -205,31 +205,49 @@ struct CScopedDisableBeep : private CScopedValue<bool>
 };
 
 
-struct CScopedDrawText
+class CScopedDrawTextColor
 {
-	CScopedDrawText( CDC* pDC, const CWnd* pCtrl, CFont* pFont, COLORREF textColor = color::Auto, COLORREF bkColor = CLR_NONE )
+public:
+	CScopedDrawTextColor( CDC* pDC, const CWnd* pCtrl, COLORREF textColor = color::Auto, COLORREF bkColor = CLR_NONE )
 		: m_pDC( pDC )
-		, m_pOldFont( m_pDC->SelectObject( pFont != nullptr ? pFont : pCtrl->GetFont() ) )
-		, m_oldTextColor( m_pDC->SetTextColor( textColor != color::Auto ? textColor : GetSysColor( pCtrl->IsWindowEnabled() ? COLOR_BTNTEXT : COLOR_GRAYTEXT ) ) )
+		, m_oldTextColor( m_pDC->SetTextColor( textColor != color::Auto ? textColor : GetSysColor( nullptr == pCtrl || pCtrl->IsWindowEnabled() ? COLOR_BTNTEXT : COLOR_GRAYTEXT ) ) )
 		, m_oldBkColor( bkColor != CLR_NONE ? m_pDC->SetBkColor( bkColor ) : bkColor )
 		, m_oldBkMode( m_pDC->SetBkMode( CLR_NONE == bkColor ? TRANSPARENT : OPAQUE ) )
+	{
+	}
+
+	~CScopedDrawTextColor()
+	{
+		m_pDC->SetTextColor( m_oldTextColor );
+		m_pDC->SetBkMode( m_oldBkMode );
+
+		if ( m_oldBkColor != CLR_NONE )
+			m_pDC->SetBkColor( m_oldBkColor );
+	}
+protected:
+	CDC* m_pDC;
+private:
+	COLORREF m_oldTextColor;
+	COLORREF m_oldBkColor;
+	int m_oldBkMode;
+};
+
+
+class CScopedDrawText : public CScopedDrawTextColor
+{
+public:
+	CScopedDrawText( CDC* pDC, const CWnd* pCtrl, CFont* pFont, COLORREF textColor = color::Auto, COLORREF bkColor = CLR_NONE )
+		: CScopedDrawTextColor( pDC, pCtrl, textColor, bkColor )
+		, m_pOldFont( m_pDC->SelectObject( pFont != nullptr ? pFont : pCtrl->GetFont() ) )
 	{
 	}
 
 	~CScopedDrawText()
 	{
 		m_pDC->SelectObject( m_pOldFont );
-		m_pDC->SetTextColor( m_oldTextColor );
-		m_pDC->SetBkMode( m_oldBkMode );
-		if ( m_oldBkColor != CLR_NONE )
-			m_pDC->SetBkColor( m_oldBkColor );
 	}
 private:
-	CDC* m_pDC;
 	CFont* m_pOldFont;
-	COLORREF m_oldTextColor;
-	COLORREF m_oldBkColor;
-	int m_oldBkMode;
 };
 
 

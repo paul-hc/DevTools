@@ -57,7 +57,7 @@ namespace wic
         bool GetPixelFormatIds( std::vector<GUID*>& rPixelFormatIds ) const;
 
 		// metadata
-		CComPtr<IWICMetadataQueryReader> GetDecoderMetadata( void ) const;				// global
+		CComPtr<IWICMetadataQueryReader> GetDecoderMetadata( void ) const;				// for all frames
 		CComPtr<IWICMetadataQueryReader> GetFrameMetadataAt( UINT framePos ) const;		// per frame
 
 		enum DecoderFlag
@@ -149,7 +149,7 @@ namespace wic
 
 	CDibMeta LoadPngResource( const TCHAR* pResPngName, bool mapTo3DColors = false );
 	CDibMeta LoadPngOrBitmapResource( const TCHAR* pResImageName, bool mapTo3DColors = false );		// PNG or BMP images
-	CDibMeta LoadImageResourceWithType( const TCHAR* pResImageName, const TCHAR* pResType );
+	CDibMeta LoadImageResource( const TCHAR* pResImageName, const TCHAR* pResType );
 
 	CComPtr<IWICBitmapSource> LoadBitmapFromStream( IStream* pImageStream, UINT framePos = 0 );				// using auto-decoder
 

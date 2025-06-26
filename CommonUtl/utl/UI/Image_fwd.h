@@ -377,6 +377,9 @@ struct CDibMeta		// contains information that must be passed from creation
 	CDibMeta( HBITMAP hDib = nullptr )
 		: m_hDib( hDib ), m_orientation( gdi::BottomUp ), m_bitsPerPixel( 0 ), m_channelCount( 0 ) {}
 
+	bool Reset( HBITMAP hDib = nullptr );				// deletes (replaces) existing DIB
+	bool AssignIfValid( const CDibMeta& srcDib );		// deletes (replaces) existing DIB
+
 	bool IsValid( void ) const { return m_hDib != nullptr; }
 	bool HasAlpha( void ) const { return 32 == m_bitsPerPixel && 4 == m_channelCount; }
 
