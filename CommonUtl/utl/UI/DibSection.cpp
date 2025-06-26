@@ -311,15 +311,14 @@ ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int i
 
 	// imply image size from bitmap width and image count
 	ui::CImageListInfo imageListInfo( imageCount, m_bitmapSize, GetImageListFlags() );
+
 	imageListInfo.m_imageSize.cx /= imageCount;
 	ENSURE( m_bitmapSize.cx == imageListInfo.m_imageSize.cx * imageCount );		// whole division (no remainder)?
 
 	CreateEmptyImageList( rDestImageList, imageListInfo.m_imageSize, imageCount );
 
-	CDibSection* pThis = const_cast<CDibSection*>( this );	// mutable this, to overcome the const-ness of the method
-
 	if ( HasAlpha() )
-		rDestImageList.Add( pThis, s_pNullMask );			// use alpha channel (no ILC_MASK required)
+		rDestImageList.Add( this, s_pNullMask );		// use alpha channel (no ILC_MASK required)
 	else
 	{
 		if ( HasTranspColor() )
@@ -334,8 +333,10 @@ ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int i
 			else
 				rDestImageList.Add( this, m_transpColor );		// we don't care if this temporary DIB bitmap gets modified
 		}
+		else if ( imageListInfo.IsMonochrome() )
+			rDestImageList.Add( this, this );		// format compatibility: must be saved in MS Paint as monochrome bitmap!
 		else
-			rDestImageList.Add( pThis, s_pNullMask );
+			rDestImageList.Add( this, s_pNullMask );
 	}
 
 	return imageListInfo;
