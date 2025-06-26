@@ -775,6 +775,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ui_types.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UserReport.cpp"
 				>
 			</File>

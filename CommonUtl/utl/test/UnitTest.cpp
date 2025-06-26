@@ -12,7 +12,6 @@
 #include "RuntimeException.h"
 #include "AppTools.h"
 #include "StringUtilities.h"
-#include <math.h>			// fabs()
 #include <unordered_set>
 #include <fstream>
 #include <iostream>
