@@ -345,7 +345,7 @@ void CIconInfo::Init( HICON hIcon, bool isCursor )
 	{
 		VERIFY( ::GetIconInfo( hIcon, &m_info ) );
 
-		BITMAP bmp;
+		BITMAP bmp;		// Note: m_info.hbmColor and m_info.hbmMask are DDBs.
 		VERIFY( ::GetObject( m_info.hbmColor != nullptr ? m_info.hbmColor : m_info.hbmMask, sizeof( bmp ), &bmp ) != 0 );
 
 		m_size.cx = bmp.bmWidth;

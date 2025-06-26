@@ -14,7 +14,6 @@
 #include "utl/Path.h"
 #include "utl/StdHashValue.h"
 #include "utl/StreamStdTypes.h"
-#include <commoncontrols.h>			// IImageList
 #include <afxglobals.h>				// GetGlobalData()
 #include <afxdrawmanager.h>
 
@@ -189,7 +188,6 @@ namespace res
 		{
 			CDibPixels pixels( &dibSection );
 			pixels.ApplyDisableFadeGray( pixel::AlphaFadeMore, false /*, ::GetSysColor( COLOR_BTNFACE )*/ );
-			//pixels.ApplyDisabledGrayOut( ::GetSysColor( COLOR_BTNFACE ), 64 );
 		}
 
 		if ( -1 == imageCount )
@@ -369,15 +367,6 @@ namespace gdi
 		return CSize( 0, 0 );
 	}
 
-	CSize GetImageIconSize( const CImageList& imageList )
-	{
-		ASSERT_PTR( imageList.GetSafeHandle() );
-		int cx, cy;
-
-		VERIFY( ::ImageList_GetIconSize( imageList, &cx, &cy ) );
-		return CSize( cx, cy );
-	}
-
 	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection /*= nullptr*/ )
 	{
 		ASSERT_PTR( hBitmap );
@@ -408,29 +397,6 @@ namespace gdi
 		return GetBitsPerPixel( hBitmap, &isDibSection ) >= 32 && isDibSection;				// DIB section with alpha channel?
 	}
 
-	bool HasAlphaTransparency( const CImageList& imageList, int imagePos /*= 0*/ )
-	{
-		ASSERT_PTR( imageList.GetSafeHandle() );
-		CComPtr<IImageList> ipImageList;
-
-		if ( HR_OK( ::HIMAGELIST_QueryInterface( imageList.GetSafeHandle(), IID_PPV_ARGS( &ipImageList ) ) ) )
-		{
-			DWORD dwFlags;
-			if ( HR_OK( ipImageList->GetItemFlags( imagePos, &dwFlags ) ) )
-				return HasFlag( dwFlags, ILIF_ALPHA );
-		}
-		return false;
-	}
-
-	bool HasMask( const CImageList& imageList, int imagePos /*= 0*/ )
-	{
-		IMAGEINFO info;
-
-		if ( imageList.GetImageInfo( imagePos, &info ) )
-			return info.hbmMask != nullptr;
-		return false;
-	}
-
 	bool CreateBitmapMask( CBitmap& rMaskBitmap, HBITMAP hSrcBitmap, COLORREF transpColor )
 	{
 		rMaskBitmap.DeleteObject();
@@ -454,29 +420,6 @@ namespace gdi
 		// take the new mask and use it to turn the transparent colour in our original colour image to black so the transparency effect will work right
 		memDC.BitBlt( 0, 0, bitmapSize.cx, bitmapSize.cy, &maskDC, 0, 0, SRCINVERT );
 		return true;
-	}
-
-
-	HICON CreateIcon( HBITMAP hImageBitmap, HBITMAP hMaskBitmap )
-	{
-		// imageBitmap and maskBitmap should have the same size, maskBitmap should be monochrome
-		ICONINFO iconInfo;
-
-		iconInfo.fIcon = TRUE;
-		iconInfo.hbmMask = hMaskBitmap;
-		iconInfo.hbmColor = hImageBitmap;
-
-		return ::CreateIconIndirect( &iconInfo );
-	}
-
-	HICON CreateIcon( HBITMAP hImageBitmap, COLORREF transpColor )
-	{
-		CBitmap maskBitmap;
-
-		if ( !gdi::CreateBitmapMask( maskBitmap, hImageBitmap, transpColor ) )
-			return nullptr;
-
-		return gdi::CreateIcon( hImageBitmap, maskBitmap );
 	}
 
 	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct /*= 0*/, COLORREF transpColor /*= color::Null*/, TBitsPerPixel bitsPerPixel /*= 0*/ )
@@ -570,7 +513,7 @@ namespace gdi
 			int percentage = grayImageLuminancePct <= 0 ? 130 : grayImageLuminancePct;
 
 			drawMgr.GrayRect( CRect( 0, 0, bitmapSize.cx, bitmapSize.cy ), percentage, color::Null == transpColor ? GetGlobalData()->clrBtnFace : transpColor );
-			 // Note: for monochrome bitmaps (mask only) it generates a doubled image, perhaps due to a bug in DIB bits iteration.
+			// Note: for monochrome bitmaps (mask only) it generates a doubled image, perhaps due to a bug in DIB bits iteration.
 		}
 
 		destMemDC.SelectObject( hOldDestBitmap );
@@ -578,6 +521,90 @@ namespace gdi
 
 		grayDibBitmap.Detach();			// success, release temporary ownership
 		return hGrayDib;
+	}
+
+
+	/// image list properties:
+
+	CComPtr<IImageList> QueryImageListItf( HIMAGELIST hImageList )
+	{
+		ASSERT_PTR( hImageList );
+		CComPtr<IImageList> pImageList;
+
+		HR_OK( ::HIMAGELIST_QueryInterface( hImageList, IID_PPV_ARGS( &pImageList ) ) );
+		return pImageList;
+	}
+
+	CComPtr<IImageList2> QueryImageList2Itf( HIMAGELIST hImageList )
+	{
+		ASSERT_PTR( hImageList );
+		CComPtr<IImageList2> pImageList2;
+
+		HR_OK( ::HIMAGELIST_QueryInterface( hImageList, IID_PPV_ARGS( &pImageList2 ) ) );
+		return pImageList2;
+	}
+
+	DWORD GetImageIconFlags( HIMAGELIST hImageList, int imagePos /*= 0*/ )
+	{
+		if ( CComPtr<IImageList> pImageList = gdi::QueryImageListItf( hImageList ) )
+		{
+			DWORD dwFlags;
+			if ( HR_OK( pImageList->GetItemFlags( imagePos, &dwFlags ) ) )
+				return dwFlags;
+		}
+		return 0;
+	}
+
+	bool HasAlphaTransparency( HIMAGELIST hImageList, int imagePos /*= 0*/ )
+	{
+		DWORD dwFlags = gdi::GetImageIconFlags( hImageList, imagePos );
+
+		return HasFlag( dwFlags, ILIF_ALPHA );
+	}
+
+	bool HasMask( HIMAGELIST hImageList, int imagePos /*= 0*/ )
+	{
+		ASSERT_PTR( hImageList );
+		IMAGEINFO info;
+
+		if ( ImageList_GetImageInfo( hImageList, imagePos, &info ) )
+			return info.hbmMask != nullptr;
+
+		return false;
+	}
+
+	CSize GetImageIconSize( HIMAGELIST hImageList )
+	{
+		ASSERT_PTR( hImageList );
+		int cx, cy;
+
+		VERIFY( ::ImageList_GetIconSize( hImageList, &cx, &cy ) );
+		return CSize( cx, cy );
+	}
+
+
+	/// icon from bitmap(s):
+
+	HICON CreateIcon( HBITMAP hImageBitmap, HBITMAP hMaskBitmap )
+	{
+		// imageBitmap and maskBitmap should have the same size, maskBitmap should be monochrome
+		ICONINFO iconInfo;
+
+		iconInfo.fIcon = TRUE;
+		iconInfo.hbmMask = hMaskBitmap;
+		iconInfo.hbmColor = hImageBitmap;
+
+		return ::CreateIconIndirect( &iconInfo );
+	}
+
+	HICON CreateIcon( HBITMAP hImageBitmap, COLORREF transpColor )
+	{
+		CBitmap maskBitmap;
+
+		if ( !gdi::CreateBitmapMask( maskBitmap, hImageBitmap, transpColor ) )
+			return nullptr;
+
+		return gdi::CreateIcon( hImageBitmap, maskBitmap );
 	}
 
 } //namespace gdi
@@ -656,7 +683,10 @@ bool CDibMeta::AssignIfValid( const CDibMeta& srcDib )
 bool CDibMeta::StorePixelFormat( void )
 {
 	DIBSECTION dibSection;
-	int size = m_hDib != nullptr ? ::GetObject( m_hDib, sizeof( DIBSECTION ), &dibSection ) : 0;
+	utl::ZeroStruct( &dibSection );
+
+	int size = ::GetObject( m_hDib, sizeof( DIBSECTION ), &dibSection );
+	bool isDibSection = size == sizeof( DIBSECTION );
 
 	if ( 0 == size )			// not a valid bitmap
 	{
@@ -665,8 +695,12 @@ bool CDibMeta::StorePixelFormat( void )
 		return false;
 	}
 
-	m_bitsPerPixel = dibSection.dsBmih.biBitCount;
-	StoreChannelCount( size == sizeof( DIBSECTION ) );
+	if ( isDibSection )
+		m_bitsPerPixel = dibSection.dsBmih.biBitCount;
+	else
+		m_bitsPerPixel = dibSection.dsBm.bmBitsPixel;
+
+	StoreChannelCount( isDibSection );
 	return true;
 }
 

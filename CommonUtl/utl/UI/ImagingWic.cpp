@@ -815,7 +815,7 @@ namespace wic
 
 	bool CreateDibSection( CDibMeta& rDibMeta, IWICBitmapSource* pBitmap )
 	{
-		rDibMeta.m_hDib = CreateDibSection( pBitmap );
+		rDibMeta.Reset( CreateDibSection( pBitmap ) );
 		if ( nullptr == rDibMeta.m_hDib )
 			return false;
 

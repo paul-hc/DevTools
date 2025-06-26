@@ -119,7 +119,7 @@ namespace gdi
 	bool MapBmpTo3dColorsImpl( HBITMAP& rhBitmap, const BITMAP* pBmp, bool useRGBQUAD = false, COLORREF clrSrc = CLR_NONE, COLORREF clrDest = CLR_NONE );
 
 	bool MapBmpTo3dColors( HBITMAP& rhBitmap, bool useRGBQUAD /*= false*/, COLORREF clrSrc /*= CLR_NONE*/, COLORREF clrDest /*= CLR_NONE*/ )
-	{
+	{	// inspired by CMFCToolBarImages::MapBmpTo3dColors().
 		BITMAP bmp;
 		if ( rhBitmap != nullptr && ::GetObject( rhBitmap, sizeof( BITMAP ), &bmp ) != 0 )
 			if ( bmp.bmBitsPixel > 8 )								// LR_LOADMAP3DCOLORS doesn't work for images > 8bpp, we should convert it now

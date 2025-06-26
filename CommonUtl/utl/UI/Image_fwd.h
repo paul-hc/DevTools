@@ -5,6 +5,7 @@
 #include "ISubject.h"
 #include "ScopedGdi.h"
 #include "ComparePredicates.h"
+#include <commoncontrols.h>			// IImageList, IImageList2
 
 
 #define RT_PNG	_T("PNG")
@@ -184,9 +185,10 @@ namespace ui
 		bool HasAlpha( void ) const { REQUIRE( IsValid() ); return ILC_COLOR32 == GetBitsPerPixel() && !HasFlag( m_ilFlags, ILC_MASK ); }
 
 		TBitsPerPixel GetBitsPerPixel( void ) const { return GetBitsPerPixel( m_ilFlags ); }
+		bool IsMonochrome( void ) const { return 1 == GetBitsPerPixel(); }
 
 		static TImageListFlags GetImageListFlags( TBitsPerPixel bitsPerPixel, bool hasAlpha );		// ILC_COLOR... + ILC_MASK flags
-		static TBitsPerPixel GetBitsPerPixel( TImageListFlags ilFlags ) { return ILC_MASK == ilFlags ? 1 : ilFlags & ILC_ONLY_COLORS_MASK; }	// exclude ILC_MASK if not monochrome
+		static TBitsPerPixel GetBitsPerPixel( TImageListFlags ilFlags ) { return ILC_MASK == ilFlags ? 1 : ( ilFlags & ILC_ONLY_COLORS_MASK ); }	// exclude ILC_MASK if not monochrome
 	public:
 		int m_imageCount;
 		CSize m_imageSize;
@@ -325,7 +327,6 @@ namespace gdi
 	bool IsDibSection( HBITMAP hBitmap );
 
 	CSize GetBitmapSize( HBITMAP hBitmap );
-	CSize GetImageIconSize( const CImageList& imageList );
 
 	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection = nullptr );
 	bool Is32BitBitmap( HBITMAP hBitmap );					// DIB/DDB
@@ -337,16 +338,24 @@ namespace gdi
 	inline UINT GetDibBufferSize( UINT height, UINT stride ) { return height * stride; }
 
 	bool HasAlphaTransparency( HBITMAP hBitmap );			// DIB section with alpha channel?
-	bool HasAlphaTransparency( const CImageList& imageList, int imagePos = 0 );
-	bool HasMask( const CImageList& imageList, int imagePos = 0 );
 
 	bool CreateBitmapMask( CBitmap& rMaskBitmap, HBITMAP hSrcBitmap, COLORREF transpColor );
+	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct = 0, COLORREF transpColor = color::Null, TBitsPerPixel bitsPerPixel = 0 );		// disabled gray look
 
-	// icon from bitmap(s)
+
+	/// image list properties:
+
+	CComPtr<IImageList> QueryImageListItf( HIMAGELIST hImageList );
+	CComPtr<IImageList2> QueryImageList2Itf( HIMAGELIST hImageList );
+	DWORD GetImageIconFlags( HIMAGELIST hImageList, int imagePos = 0 );
+	bool HasAlphaTransparency( HIMAGELIST hImageList, int imagePos = 0 );
+	bool HasMask( HIMAGELIST hImageList, int imagePos = 0 );
+	CSize GetImageIconSize( HIMAGELIST hImageList );
+
+	/// icon from bitmap(s):
+
 	HICON CreateIcon( HBITMAP hImageBitmap, HBITMAP hMaskBitmap );
 	HICON CreateIcon( HBITMAP hImageBitmap, COLORREF transpColor );
-
-	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct = 0, COLORREF transpColor = color::Null, TBitsPerPixel bitsPerPixel = 0 );		// disabled gray look
 
 
 	inline RGBQUAD ToRgbQuad( const PALETTEENTRY& palEntry )

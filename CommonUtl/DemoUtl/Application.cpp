@@ -93,7 +93,7 @@ BOOL CApplication::InitInstance( void )
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
 	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images: 4-bit
-	GetSharedImageStore()->RegisterToolbarImages( IDR_MONOCHROME_STRIP, color::Null );			// low color images: 1-bit
+	GetSharedImageStore()->RegisterToolbarImages( IDR_MONOCHROME_STRIP, color::Null );			// low color images: 1-bit (format compatibility: must be saved in MS Paint as monochrome bitmap!)
 	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
 
 	GetSharedImageStore()->RegisterAlias( ID_EDIT_ITEM, ID_NUMERIC_SEQUENCE );		// for tracking context menu example in CTestColorsDialog::m_pMenuPicker drop-down
@@ -106,7 +106,7 @@ BOOL CApplication::InitInstance( void )
 	if ( HasCommandLineOptions() )
 		return FALSE;				// no app loop
 
-	LoadStdProfileSettings( 10 );  // Load standard INI file options (including MRU)
+	LoadStdProfileSettings( 10 );	// Load standard INI file options (including MRU)
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
 	AddDocTemplate( new CMultiDocTemplate( IDR_TEST_DOC_TYPE,
