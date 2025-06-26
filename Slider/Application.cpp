@@ -243,6 +243,7 @@ BOOL CApplication::InitInstance( void )
 	if ( !__super::InitInstance() )
 		return FALSE;
 
+	SetUseAppLook( app::Office_2007_Blue );
 	InitGlobals();
 
 	CWorkspace* pWorkspace = &CWorkspace::Instance();

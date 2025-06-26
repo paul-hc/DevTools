@@ -50,7 +50,7 @@ BEGIN
     "#include ""afxres.rc""         // Standard components\r\n"
     "\r\n"
     "#ifndef _AFXDLL\r\n"
-    "#include ""afxribbon.rc""      // Ribbon and control bars\r\n"
+    "//#include ""afxribbon.rc""      // Ribbon and control bars\r\n"
     "#endif\r\n"
     "\0"
 END
@@ -1206,7 +1206,7 @@ END
 #include "afxres.rc"         // Standard components
 
 #ifndef _AFXDLL
-#include "afxribbon.rc"      // Ribbon and control bars
+//#include "afxribbon.rc"      // Ribbon and control bars
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

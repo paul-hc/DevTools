@@ -83,7 +83,7 @@ BOOL CBaseApp<BaseClassT>::InitInstance( void )
 	if ( !m_lazyInitAppResources )
 		OnInitAppResources();
 
-	return BaseClassT::InitInstance();
+	return __super::InitInstance();
 }
 
 template< typename BaseClassT >
@@ -94,7 +94,7 @@ int CBaseApp<BaseClassT>::ExitInstance( void )
 	if ( m_pAppLook.get() != nullptr )
 		m_pAppLook->Save();
 
-	return BaseClassT::ExitInstance();
+	return __super::ExitInstance();
 }
 
 template< typename BaseClassT >
@@ -104,8 +104,13 @@ void CBaseApp<BaseClassT>::OnInitAppResources( void )
 
 	// init MFC control bars:
 	if ( app::InitMfcControlBars( this ) )
-		if ( nullptr == m_pAppLook.get() )			// not yet explicitly set up?
-			m_pAppLook.reset( new CAppLook( app::Office_2007_Blue ) );
+	{
+		// App Look support requires inclusion of afxribbon.rc (ribbon and control bars) in project's RC file.
+		// It's best to call explicitly SetUseAppLook() in concrete application OnInitAppResources(), where visual managers are actually used.
+		if ( false )
+			if ( nullptr == m_pAppLook.get() )			// not yet explicitly set up?
+				m_pAppLook.reset( new CAppLook( app::Office_2007_Blue ) );
+	}
 
 	m_pSharedResources.reset( new utl::CResourcePool() );
 	m_pLogger.reset( new CLogger() );
@@ -216,7 +221,7 @@ BOOL CBaseApp<BaseClassT>::PreTranslateMessage( MSG* pMsg )
 			if ( m_appAccel.Translate( pMsg, pActiveWnd->GetSafeHwnd() ) )
 				return TRUE;
 
-	return BaseClassT::PreTranslateMessage( pMsg );
+	return __super::PreTranslateMessage( pMsg );
 }
 
 template< typename BaseClassT >
@@ -226,7 +231,7 @@ BOOL CBaseApp<BaseClassT>::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMD
 		if ( m_pAppLook->OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) )
 			return TRUE;
 
-	return BaseClassT::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo );
+	return __super::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo );
 }
 
 template< typename BaseClassT >

@@ -61,9 +61,12 @@ BEGIN
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
     "LANGUAGE 9, 1\r\n"
     "#include ""afxres.rc""      // Standard components\r\n"
+    "\r\n"
     "#if !defined(_AFXDLL)\r\n"
-    "#include ""afxribbon.rc""   // MFC ribbon and control bar resources\r\n"
+    "// PHC: not used in this application:\r\n"
+    "//#include ""afxribbon.rc""   // MFC ribbon and control bar resources\r\n"
     "#endif\r\n"
+    "\r\n"
     "#endif\r\n"
     "\0"
 END
@@ -364,9 +367,12 @@ END
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE 9, 1
 #include "afxres.rc"      // Standard components
+
 #if !defined(_AFXDLL)
-#include "afxribbon.rc"   // MFC ribbon and control bar resources
+// PHC: not used in this application:
+//#include "afxribbon.rc"   // MFC ribbon and control bar resources
 #endif
+
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

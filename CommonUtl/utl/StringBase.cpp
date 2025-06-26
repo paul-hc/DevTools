@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "StringBase.h"
 #include <comdef.h>			// _com_error
+#include <math.h>			// fabs()
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
