@@ -22,7 +22,7 @@ namespace ui
 			if ( IsSysColor( rawColor ) )
 				return ::GetSysColor( GetSysColorIndex( rawColor ) );
 			else
-				ASSERT( IsRealColor( rawColor ) );		// physical color?
+				ENSURE( IsRealColor( rawColor ) );		// physical color?
 
 		return rawColor;
 	}

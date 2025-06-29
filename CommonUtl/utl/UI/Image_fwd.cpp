@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Image_fwd.h"
 #include "ImageStore.h"
+#include "ImageProxy.h"
 #include "GroupIconRes.h"
 #include "DibSection.h"
 #include "DibPixels.h"
@@ -367,7 +368,7 @@ namespace gdi
 		return CSize( 0, 0 );
 	}
 
-	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection /*= nullptr*/ )
+	TBitsPerPixel GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection /*= nullptr*/ )
 	{
 		ASSERT_PTR( hBitmap );
 		DIBSECTION dibSection;
@@ -423,121 +424,101 @@ namespace gdi
 	}
 
 
-	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct /*= 0*/, COLORREF transpColor /*= color::Null*/, TBitsPerPixel srcBitsPerPixel /*= 0*/ )
+	HBITMAP CreateFadedGrayDIBitmap( const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP, COLORREF transpColor /*= CLR_NONE*/ )
 	{	// creates a bitmap with disabled gray look - inspired by CMFCToolBarImages::GrayImages()
-		if ( nullptr == hBitmapSrc )
-			return nullptr;
+		ASSERT( pImageProxy != nullptr && !pImageProxy->IsEmpty() );
 
 		if ( GetGlobalData()->m_nBitsPerPixel <= 8 )
 			return nullptr;
 
-		// Create memory source DC and select an original bitmap:
-		CDC srcMemDC;
-		srcMemDC.CreateCompatibleDC( nullptr );
-
-		BITMAP bmpInfoSrc;
-		if ( 0 == ::GetObject( hBitmapSrc, sizeof( BITMAP ), &bmpInfoSrc ) )
-			return nullptr;
-
-		CSize bitmapSize( bmpInfoSrc.bmWidth, bmpInfoSrc.bmHeight );
-
-		if ( 0 == srcBitsPerPixel )						// not specified?
-			srcBitsPerPixel = bmpInfoSrc.bmBitsPixel;	// inherit form SRC bitmap (not reliable since it may be a DDB)
-
-		HBITMAP hOldSrcBitmap = (HBITMAP)srcMemDC.SelectObject( hBitmapSrc );
-
-		if ( nullptr == hOldSrcBitmap )
-			return nullptr;
-
-		// Create memory destination DC and select a new biHeaderHeadertmap:
+		const CSize& srcImageSize = pImageProxy->GetSize();
 		CDC destMemDC;
-		destMemDC.CreateCompatibleDC( &srcMemDC );
 
-		BITMAPINFO biHeader;
+		destMemDC.CreateCompatibleDC( nullptr );		// make DEST memory DC compatible with the Screen DC, to select a new hGrayDib
 
-		// fill in the BITMAPINFOHEADER
-		biHeader.bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
-		biHeader.bmiHeader.biWidth = bitmapSize.cx;
-		biHeader.bmiHeader.biHeight = bitmapSize.cy;
-		biHeader.bmiHeader.biPlanes = 1;
-		biHeader.bmiHeader.biBitCount = 32;
-		biHeader.bmiHeader.biCompression = BI_RGB;
-		biHeader.bmiHeader.biSizeImage = bitmapSize.cx * bitmapSize.cy;
-		biHeader.bmiHeader.biXPelsPerMeter = 0;
-		biHeader.bmiHeader.biYPelsPerMeter = 0;
-		biHeader.bmiHeader.biClrUsed = 0;
-		biHeader.bmiHeader.biClrImportant = 0;
+		BITMAPINFO grayBmpInfo;
+
+		// fill in the BITMAPINFOHEADER:
+		grayBmpInfo.bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
+		grayBmpInfo.bmiHeader.biWidth = srcImageSize.cx;
+		grayBmpInfo.bmiHeader.biHeight = srcImageSize.cy;
+		grayBmpInfo.bmiHeader.biPlanes = 1;
+		grayBmpInfo.bmiHeader.biBitCount = 32;
+		grayBmpInfo.bmiHeader.biCompression = BI_RGB;
+		grayBmpInfo.bmiHeader.biSizeImage = srcImageSize.cx * srcImageSize.cy;
+		grayBmpInfo.bmiHeader.biXPelsPerMeter = 0;
+		grayBmpInfo.bmiHeader.biYPelsPerMeter = 0;
+		grayBmpInfo.bmiHeader.biClrUsed = 0;
+		grayBmpInfo.bmiHeader.biClrImportant = 0;
 
 		COLORREF* pBits = nullptr;
-		HBITMAP hGrayDib = ::CreateDIBSection( destMemDC.m_hDC, &biHeader, DIB_RGB_COLORS, (void**)&pBits, nullptr, 0 );
+		HBITMAP hGrayDib = ::CreateDIBSection( destMemDC.m_hDC, &grayBmpInfo, DIB_RGB_COLORS, (void**)&pBits, nullptr, 0 );
 		CBitmap grayDibBitmap;
 
 		if ( hGrayDib != nullptr )
 			grayDibBitmap.Attach( hGrayDib );			// for temporary ownership for convenient error handling
 		else
-		{
-			srcMemDC.SelectObject( hOldSrcBitmap );
 			return nullptr;
-		}
 
 		HBITMAP hOldDestBitmap = (HBITMAP)destMemDC.SelectObject( hGrayDib );
 
 		if ( nullptr == hOldDestBitmap )
+			return nullptr;
+
+		if ( srcBPP <= 8 && pImageProxy->HasTransparency() )
 		{
-			srcMemDC.SelectObject( hOldSrcBitmap );
+			enum { TransparentBlack = RGB( 1, 1, 1 ) };
+
+			ASSERT( CLR_NONE == transpColor );
+			transpColor = TransparentBlack;
+
+			// fill background with a non color::Black color to protect background from fading, which is undesirable - we just want to fade the foreground colors
+			pImageProxy->FillBackground( &destMemDC, CPoint( 0, 0 ), transpColor );
+		}
+
+		// draw the original image:
+		pImageProxy->Draw( &destMemDC, CPoint( 0, 0 ), transpColor );
+
+		// direct BGRA (RGBQUAD) pixel modification:
+		DIBSECTION ds;
+
+		if ( 0 == ::GetObject( hGrayDib, sizeof( DIBSECTION ), &ds ) || ds.dsBm.bmBitsPixel != 32 || nullptr == ds.dsBm.bmBits )
+		{
+			ASSERT( FALSE );
 			return nullptr;
 		}
 
-		// Copy original bitmap to new:
-		if ( srcBitsPerPixel != 1 )
-			destMemDC.BitBlt( 0, 0, bitmapSize.cx, bitmapSize.cy, &srcMemDC, 0, 0, SRCCOPY );
-		else
-			destMemDC.BitBlt( 0, 0, bitmapSize.cx, bitmapSize.cy, &srcMemDC, 0, 0, BLACKNESS );
+		// apply disabled effects to each pixel - fade and convert to gray-scale:
+		size_t rgbQuadCount = ds.dsBm.bmWidth * ds.dsBm.bmHeight;
+		func::DisableFadeGray disableFunc( pixel::AlphaFadeMore, false, transpColor );		// IMP: skip pre-multiply alpha so that it doesn't blend to gray - we just want to fade
+		typedef CPixelBGRA* TPixelIterator;
 
-		if (true|| ILC_COLOR32 == srcBitsPerPixel )
-		{	// direct BGRA (RGBQUAD) pixel access:
-			DIBSECTION ds;
-
-			if ( 0 == ::GetObject( hGrayDib, sizeof( DIBSECTION ), &ds ) || ds.dsBm.bmBitsPixel != ILC_COLOR32 || nullptr == ds.dsBm.bmBits )
-			{
-				ASSERT( FALSE );
-				return nullptr;
-			}
-
-			// apply disabled effects to each pixel - fade and convert to gray-scale:
-			func::DisableFadeGray disableFunc( pixel::AlphaFadeMore, false );		// IMP: skip pre-multiply alpha so that it doesn't blend to gray - we just want to fade
-			typedef CPixelBGRA* TPixelIterator;
-
-			for ( TPixelIterator pPixels = (CPixelBGRA*)ds.dsBm.bmBits, pPixelsEnd = pPixels + ds.dsBm.bmWidth * ds.dsBm.bmHeight; pPixels != pPixelsEnd; ++pPixels )
-			{
-				if ( srcBitsPerPixel <= 8 && pPixels->GetColor() != transpColor )
-					pPixels->m_alpha = 255;		// fake alpha transparency for transparent (non-background) color, in order to allow color fading
-
-				if ( pPixels->GetColor() != 0 )
-				{int g=0;}
-
-				disableFunc( *pPixels );
-			}
-		}
-		else
+		for ( TPixelIterator pPixel = (CPixelBGRA*)ds.dsBm.bmBits, pPixelEnd = pPixel + rgbQuadCount; pPixel != pPixelEnd; ++pPixel )
 		{
-			CDibPixels grayedPixels( hGrayDib );
+			if ( srcBPP <= 8 )
+				if ( transpColor != CLR_NONE && pPixel->GetColor() != transpColor )
+					pPixel->m_alpha = 128;		// allow color fading: use fake alpha transparency for transparent (non-background) pixels
 
-			if ( !grayedPixels.ApplyDisableFadeGray( pixel::AlphaFadeMore, false, transpColor ) )
-			{
-				CDrawingManager drawMgr( destMemDC );
-				int percentage = grayImageLuminancePct <= 0 ? 130 : grayImageLuminancePct;
-
-				drawMgr.GrayRect( CRect( 0, 0, bitmapSize.cx, bitmapSize.cy ), percentage, color::Null == transpColor ? GetGlobalData()->clrBtnFace : transpColor );
-				// Note: for monochrome bitmaps (mask only) it generates a doubled image, perhaps due to a bug in DIB bits iteration.
-			}
+			disableFunc( *pPixel );
 		}
 
 		destMemDC.SelectObject( hOldDestBitmap );
-		srcMemDC.SelectObject( hOldSrcBitmap );
 
 		grayDibBitmap.Detach();			// success, release temporary ownership
-		return hGrayDib;
+		return hGrayDib;				// caller owns the gray bitmap
+	}
+
+	HBITMAP CreateFadedGrayDIBitmap( HBITMAP hBitmapSrc, TBitsPerPixel srcBPP /*= 0*/, COLORREF transpColor /*= CLR_NONE*/ )
+	{
+		CBitmapProxy bitmapProxy( hBitmapSrc );
+
+		if ( bitmapProxy.IsEmpty() )
+			return nullptr;
+
+		if ( 0 == srcBPP )
+			srcBPP = gdi::GetBitsPerPixel( hBitmapSrc );
+
+		return CreateFadedGrayDIBitmap( &bitmapProxy, srcBPP, transpColor );
 	}
 
 

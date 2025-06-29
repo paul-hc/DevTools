@@ -405,7 +405,7 @@ namespace func
 	struct DisableFadeGray : public CBasePixelFunc		// fade colors and make gray-scale (no blending) -> BEST LOOKING, better than DisabledGrayOut
 	{
 		DisableFadeGray( BYTE fadeAlpha = pixel::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF grayScaleTranspColor24 = CLR_NONE )
-			: m_fadeAlpha( fadeAlpha ), m_preMultiplyAlpha( preMultiplyAlpha ), m_grayScaleFunc(grayScaleTranspColor24) {}
+			: m_fadeAlpha( fadeAlpha ), m_preMultiplyAlpha( preMultiplyAlpha ), m_grayScaleFunc( grayScaleTranspColor24 ) {}
 
 		void operator()( CPixelBGR& rPixel ) const
 		{

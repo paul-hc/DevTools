@@ -62,7 +62,8 @@ namespace gdi
 	{
 		CDibSection dib;
 		CDibPixels pixels;
-		if ( dib.CreateDIBSection( pixels, imageSize.cx, imageSize.cy, 32 ) )		// 32 bpp
+
+		if ( dib.CreateDIBSection( pixels, imageSize.cx, imageSize.cy, 32 ) )		// 32 BPP
 		{
 			bool hasAlpha = gdi::HasAlphaTransparency( rImageList, index );
 			if ( !hasAlpha )

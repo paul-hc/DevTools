@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Icon.h"
 #include "Imaging.h"
+#include "ImageProxy.h"
 #include "GroupIconRes.h"
 #include "resource.h"
 
@@ -204,18 +205,19 @@ const CSize& CIcon::GetSize( void ) const
 
 HICON CIcon::GetDisabledIcon( void ) const
 {
-	if ( nullptr == m_hDisabledIcon )
+	if ( IsValid() && nullptr == m_hDisabledIcon )
 	{
-		CIconInfo iconInfo( m_hIcon );
+		CIconProxy iconProxy( this );
 
-		if ( iconInfo.IsValid() )
-			if ( HBITMAP hGrayBitmap = gdi::CreateGrayBitmap( iconInfo.GetColorBitmap(), 0, color::Black, m_bitsPerPixel ) )
-			{
-				CBitmap grayBitmap;
+		if ( HBITMAP hGrayBitmap = gdi::CreateFadedGrayDIBitmap( &iconProxy, m_bitsPerPixel ) )
+		{
+			CBitmap grayBitmap;
+			grayBitmap.Attach( hGrayBitmap );
 
-				grayBitmap.Attach( hGrayBitmap );
-				m_hDisabledIcon = gdi::CreateIcon( hGrayBitmap, iconInfo.m_bitmapMask );
-			}
+			CIconInfo iconInfo( m_hIcon );
+
+			m_hDisabledIcon = gdi::CreateIcon( hGrayBitmap, iconInfo.m_bitmapMask );
+		}
 	}
 
 	return m_hDisabledIcon;

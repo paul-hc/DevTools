@@ -312,7 +312,9 @@ namespace ui
 }
 
 
-// DIB & DDB bitmap info
+/// DIB & DDB bitmap info
+
+namespace ui { interface IImageProxy; }
 
 
 namespace gdi
@@ -328,7 +330,7 @@ namespace gdi
 
 	CSize GetBitmapSize( HBITMAP hBitmap );
 
-	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection = nullptr );
+	TBitsPerPixel GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection = nullptr );
 	bool Is32BitBitmap( HBITMAP hBitmap );					// DIB/DDB
 
 	// stride: number of bytes per scan line (aka pitch)
@@ -340,7 +342,10 @@ namespace gdi
 	bool HasAlphaTransparency( HBITMAP hBitmap );			// DIB section with alpha channel?
 
 	bool CreateBitmapMask( CBitmap& rMaskBitmap, HBITMAP hSrcBitmap, COLORREF transpColor );
-	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct = 0, COLORREF transpColor = color::Null, TBitsPerPixel srcBitsPerPixel = 0 );		// disabled gray look
+
+	/// disabled gray look for icons, bitmaps, imagelists (good-looking, faded) - caller owns the gray bitmap:
+	HBITMAP CreateFadedGrayDIBitmap( const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP, COLORREF transpColor = CLR_NONE );
+	HBITMAP CreateFadedGrayDIBitmap( HBITMAP hBitmapSrc, TBitsPerPixel srcBPP = 0, COLORREF transpColor = CLR_NONE );
 
 
 	/// image list properties:
