@@ -26,7 +26,7 @@ CWicImageTests& CWicImageTests::Instance( void )
 	return s_testCase;
 }
 
-void CWicImageTests::DisplayMultiFrameImageStrip( ut::CTestDevice* pTestDev, const fs::CFlexPath& imagePath )
+void CWicImageTests::DisplayMultiFrameImageStrip( ut::CTestDevice& rTestDev, const fs::CFlexPath& imagePath )
 {
 	CWicImage image;
 	UINT framePos = 0;
@@ -34,43 +34,38 @@ void CWicImageTests::DisplayMultiFrameImageStrip( ut::CTestDevice* pTestDev, con
 
 	do
 	{
-		pTestDev->DrawBitmap( image.GetWicBitmap(), image.GetBmpFmt().m_size );
-		pTestDev->DrawTileCaption( str::Format( _T("%d:%s"), framePos + 1, imagePath.GetFilenamePtr() ) );
-		++*pTestDev;
+		rTestDev.DrawBitmap( image.GetWicBitmap(), image.GetBmpFmt().m_size );
+		rTestDev.DrawTileCaption( str::Format( _T("%d:%s"), framePos + 1, imagePath.GetFilenamePtr() ) );
+		++rTestDev;
 	}
 	while ( image.IsValidFramePos( ++framePos ) && image.LoadFrame( framePos ) );
-
-	pTestDev->Await();
-	pTestDev->GotoNextStrip();
 }
 
-void CWicImageTests::TestIconMultiFrame_Scissors( ut::CTestDevice* pTestDev )
+void CWicImageTests::TestIconMultiFrame_Scissors( ut::CTestDevice& rTestDev )
 {
 	fs::CFlexPath imagePath = MakeTestImageFilePath( Scissors_ico );
 	if ( imagePath.IsEmpty() )
 		return;
 
-	pTestDev->SetSubTitle( _T("CWicImageTests::TestIconMultiFrame_Scissors") );
-	DisplayMultiFrameImageStrip( pTestDev, imagePath );
+	DisplayMultiFrameImageStrip( rTestDev, imagePath );
 }
 
-void CWicImageTests::TestIconMultiFrame_RedBubbles( ut::CTestDevice* pTestDev )
+void CWicImageTests::TestIconMultiFrame_RedBubbles( ut::CTestDevice& rTestDev )
 {
 	fs::CFlexPath imagePath = MakeTestImageFilePath( RedBubbles_ico );
 	if ( imagePath.IsEmpty() )
 		return;
 
-	pTestDev->SetSubTitle( _T("CWicImageTests::TestIconMultiFrame_RedBubbles") );
-	DisplayMultiFrameImageStrip( pTestDev, imagePath );
+	DisplayMultiFrameImageStrip( rTestDev, imagePath );
 }
 
-void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
+void CWicImageTests::TestImageCache( ut::CTestDevice& rTestDev )
 {
 	const fs::TDirPath& imageSrcPath = ut::GetImageSourceDirPath();
 	if ( imageSrcPath.IsEmpty() )
 		return;
 
-	pTestDev->SetSubTitle( _T("CWicImageTests::TestImageCache") );
+	rTestDev.SetSubTitle( _T("CWicImageTests::TestImageCache") );
 
 	fs::CPathEnumerator imageEnum;
 	fs::EnumFiles( &imageEnum, imageSrcPath, _T("*.*") );
@@ -100,9 +95,9 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 		imagePair = cache.Acquire( imagePaths[ i ] );
 		ASSERT_PTR( imagePair.first );
 		ASSERT_EQUAL( fs::cache::CacheHit, imagePair.second );
-		pTestDev->DrawBitmap( imagePair.first->GetWicBitmap(), CSize( 150, 150 ) );
-		pTestDev->DrawTileCaption( imagePair.first->GetImagePath().GetFilename() );
-		++*pTestDev;
+		rTestDev.DrawBitmap( imagePair.first->GetWicBitmap(), CSize( 150, 150 ) );
+		rTestDev.DrawTileCaption( imagePair.first->GetImagePath().GetFilename() );
+		++rTestDev;
 	}
 
 	// acquire 1 more image file
@@ -118,18 +113,16 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 	cache.GetCache()->WaitPendingQueue();
 
 	ASSERT( cache.GetCount() <= MaxSize );			// ensure it doesn't overflow MaxSize
-
-	pTestDev->Await();
-	pTestDev->GotoNextStrip();
 }
 
 void CWicImageTests::Run( void )
 {
 	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
+	testDev.SetSubTitle( _T("CWicImageTests") );
 
-	RUN_TEST1( TestIconMultiFrame_Scissors, &testDev );
-	RUN_TEST1( TestIconMultiFrame_RedBubbles, &testDev );
-	RUN_TEST1( TestImageCache, &testDev );
+	RUN_TESTDEV_1( TestIconMultiFrame_Scissors, testDev );
+	RUN_TESTDEV_1( TestIconMultiFrame_RedBubbles, testDev );
+	RUN_TESTDEV_1( TestImageCache, testDev );
 }
 
 

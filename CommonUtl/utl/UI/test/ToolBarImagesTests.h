@@ -20,8 +20,8 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestToolBarImagesBitmap( ut::CTestDevice* pTestDev );
-	void TestToolBarImagesDetails( ut::CTestDevice* pTestDev );
+	void TestToolBarImagesBitmap( ut::CTestDevice& rTestDev );
+	void TestToolBarImagesDetails( ut::CTestDevice& rTestDev );
 };
 
 

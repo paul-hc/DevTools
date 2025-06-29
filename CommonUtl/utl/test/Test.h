@@ -77,6 +77,8 @@ namespace ut
 		static size_t GetFailedTestCount( void ) { return s_failedTestCount; }
 		static size_t GetPassedTestCount( void ) { return s_testCount - s_failedTestCount; }
 		static size_t GetSkippedTestCount( void ) { return s_skippedTestCount; }
+	protected:
+		std::tstring m_testMethod;			// "<TestCase>::<TestMethod>" qualified method
 	private:
 		int m_oldErrorCount;
 		bool m_skipped;						// controls test result for conditional tests

@@ -10,6 +10,7 @@
 
 interface IWICBitmapSource;
 class CMFCToolBarImages;
+class CIcon;
 
 namespace d2d
 {
@@ -93,6 +94,7 @@ namespace ut
 		void DrawBitmap( IWICBitmapSource* pWicBitmap, const CSize& boundsSize );
 		void DrawBitmap( d2d::CRenderTarget* pBitmapRT, const d2d::CDrawBitmapTraits& traits, const CSize& boundsSize );
 		void DrawIcon( HICON hIcon, const CSize& boundsSize, UINT flags = DI_NORMAL );
+		void DrawIcon( const CIcon* pIcon, bool enabled = true );
 		void DrawImage( CImageList* pImageList, int index, UINT style = ILD_TRANSPARENT );
 		void DrawImageList( CImageList* pImageList, bool putTags = false, UINT style = ILD_TRANSPARENT );
 
@@ -135,6 +137,39 @@ namespace ut
 {
 	std::tostream& operator<<( std::tostream& os, const CBitmapInfo& bmpInfo );
 }
+
+
+#include "test/Test.h"
+
+
+namespace ut
+{
+	class CScopedTestDeviceMethod : public CScopedTestMethod
+	{
+	public:
+		CScopedTestDeviceMethod( const ut::ITestCase* pTestCase, const char* pTestMethod, ut::CTestDevice& rTestDev )
+			: CScopedTestMethod( pTestCase, pTestMethod )
+			, m_rTestDev( rTestDev )
+		{
+			m_rTestDev.DrawHeadline( m_testMethod.c_str() );
+		}
+
+		~CScopedTestDeviceMethod()
+		{
+			m_rTestDev.Await( 1500 );
+			m_rTestDev.GotoNextStrip();
+		}
+	protected:
+		ut::CTestDevice& m_rTestDev;
+	};
+}
+
+
+#define RUN_TESTDEV_1( testMethod, rTestDevArg1 )\
+	do { ut::CScopedTestDeviceMethod test( this, #testMethod, rTestDevArg1 ); (testMethod)( (rTestDevArg1) ); } while ( false )
+
+#define RUN_TESTDEV_2( testMethod, rTestDevArg1, arg2 )\
+	do { ut::CScopedTestDeviceMethod test( this, #testMethod, rTestDevArg1 ); (testMethod)( (rTestDevArg1), (arg2) ); } while ( false )
 
 
 #endif //USE_UT

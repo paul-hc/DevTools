@@ -507,14 +507,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\ToolBarImagesTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\ToolBarImagesTests.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\UtlUserInterfaceTests.cpp"
 				>
 			</File>
@@ -522,14 +514,26 @@
 				RelativePath=".\test\UtlUserInterfaceTests.h"
 				>
 			</File>
-			<File
-				RelativePath=".\test\WicImageTests.cpp"
+			<Filter
+				Name="UI TestDevice"
 				>
-			</File>
-			<File
-				RelativePath=".\test\WicImageTests.h"
-				>
-			</File>
+				<File
+					RelativePath=".\test\ToolBarImagesTests.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\test\ToolBarImagesTests.h"
+					>
+				</File>
+				<File
+					RelativePath=".\test\WicImageTests.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\test\WicImageTests.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="UI"

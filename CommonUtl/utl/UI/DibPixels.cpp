@@ -24,18 +24,18 @@ CDibPixels::CDibPixels( HBITMAP hDib, gdi::Orientation orientation /*= gdi::Bott
 	, m_pPixels( nullptr )
 	, m_orientation( orientation )							// a top-down DIB if height is negative
 {
-	CDibSectionInfo dibInfo( hDib );
+	CDibSectionTraits dibTraits( hDib );
 
-	if ( m_pDibSection != nullptr && dibInfo.IsValid() )
+	if ( m_pDibSection != nullptr && dibTraits.IsValid() )
 	{
-		REQUIRE( dibInfo.GetHeight() > 0 );					// GetObject should always returns positive
+		REQUIRE( dibTraits.GetHeight() > 0 );				// GetObject should always returns positive
 
-		m_pPixels = dibInfo.GetPixelBuffer();
-		m_bufferSize = dibInfo.GetBufferSize();
-		m_width = dibInfo.GetWidth();
-		m_height = dibInfo.GetHeight();
-		m_bitsPerPixel = dibInfo.GetBitsPerPixel();
-		m_stride = dibInfo.GetStride();
+		m_pPixels = dibTraits.GetPixelBuffer();
+		m_bufferSize = dibTraits.GetBufferSize();
+		m_width = dibTraits.GetWidth();
+		m_height = dibTraits.GetHeight();
+		m_bitsPerPixel = dibTraits.GetBitsPerPixel();
+		m_stride = dibTraits.GetStride();
 		ENSURE( IsValid() );
 	}
 	else
@@ -65,16 +65,16 @@ void CDibPixels::Init( const CDibSection& dibSection )
 	m_pDibSection = const_cast<CDibSection*>( &dibSection );
 	m_ownsDib = false;
 
-	CDibSectionInfo dibInfo( dibSection.GetHandle() );
-	ASSERT( dibInfo.IsValid() );
+	CDibSectionTraits dibTraits( dibSection.GetBitmapHandle() );
+	ASSERT( dibTraits.IsValid() );
 
-	m_pPixels = dibInfo.GetPixelBuffer();
-	m_bufferSize = dibInfo.GetBufferSize();
+	m_pPixels = dibTraits.GetPixelBuffer();
+	m_bufferSize = dibTraits.GetBufferSize();
 	m_orientation = dibSection.GetSrcMeta().m_orientation;
-	m_width = dibInfo.GetWidth();
-	m_height = dibInfo.GetHeight();
-	m_bitsPerPixel = dibInfo.GetBitsPerPixel();
-	m_stride = dibInfo.GetStride();
+	m_width = dibTraits.GetWidth();
+	m_height = dibTraits.GetHeight();
+	m_bitsPerPixel = dibTraits.GetBitsPerPixel();
+	m_stride = dibTraits.GetStride();
 }
 
 void CDibPixels::Reset( void )
@@ -99,9 +99,9 @@ void CDibPixels::Reset( void )
 	m_stride = 0;
 }
 
-HBITMAP CDibPixels::GetHandle( void ) const
+HBITMAP CDibPixels::GetBitmapHandle( void ) const implement
 {
-	return m_pDibSection != nullptr ? m_pDibSection->GetHandle() : nullptr;
+	return m_pDibSection != nullptr ? m_pDibSection->GetBitmapHandle() : nullptr;
 }
 
 bmp::CSharedAccess* CDibPixels::GetTarget( void ) const

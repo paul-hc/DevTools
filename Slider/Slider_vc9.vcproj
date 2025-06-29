@@ -832,22 +832,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\ImagingD2DTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\ImagingD2DTests.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\ThumbnailTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\ThumbnailTests.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\UiTestUtils.cpp"
 				>
 			</File>
@@ -855,6 +839,26 @@
 				RelativePath=".\test\UiTestUtils.h"
 				>
 			</File>
+			<Filter
+				Name="UI TestDevice"
+				>
+				<File
+					RelativePath=".\test\ImagingD2DTests.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\test\ImagingD2DTests.h"
+					>
+				</File>
+				<File
+					RelativePath=".\test\ThumbnailTests.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\test\ThumbnailTests.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"

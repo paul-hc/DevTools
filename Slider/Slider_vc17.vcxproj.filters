@@ -18,6 +18,9 @@
     <Filter Include="Source Files\service">
       <UniqueIdentifier>{dc3602e7-21f1-4119-8df6-10cb522e7be2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\UI TestDevice">
+      <UniqueIdentifier>{9c6af51b-5c0d-4bf5-8c79-881c0151523b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrame.h">
@@ -33,12 +36,6 @@
       <Filter>Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="test\CatalogStorageTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\ImagingD2DTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\ThumbnailTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="Album_fwd.h">
@@ -185,6 +182,12 @@
     <ClInclude Include="test\UiTestUtils.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="test\ImagingD2DTests.h">
+      <Filter>Tests\UI TestDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ThumbnailTests.h">
+      <Filter>Tests\UI TestDevice</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainFrame.cpp">
@@ -197,12 +200,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="test\CatalogStorageTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="test\ImagingD2DTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="test\ThumbnailTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="AlbumChildFrame.cpp">
@@ -327,6 +324,12 @@
     </ClCompile>
     <ClCompile Include="test\UiTestUtils.cpp">
       <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ImagingD2DTests.cpp">
+      <Filter>Tests\UI TestDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ThumbnailTests.cpp">
+      <Filter>Tests\UI TestDevice</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

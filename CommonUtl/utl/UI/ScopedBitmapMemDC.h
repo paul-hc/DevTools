@@ -9,7 +9,7 @@ namespace bmp
 
 
 	// base for objects that have a bitmap handle and require a shared source mem DC with bitmap selected into it
-
+	//
 	abstract class CSharedAccess
 	{
 		friend class CMemDC;
@@ -18,7 +18,7 @@ namespace bmp
 
 		virtual CSharedAccess* GetTarget( void ) const { return const_cast<CSharedAccess*>( this ); }		// overridden for proxy access redirection
 	public:
-		virtual HBITMAP GetHandle( void ) const = 0;
+		virtual HBITMAP GetBitmapHandle( void ) const = 0;
 
 		CDC* GetBitmapMemDC( void ) const { return (CDC*)GetTarget()->m_pMemDC; }
 		bool HasBitmapMemDC( void ) const { return GetBitmapMemDC() != nullptr; }
@@ -29,7 +29,7 @@ namespace bmp
 
 
 	// DC compatible with screen DC that keeps the bitmap selected into it
-
+	//
 	class CMemDC : public CDC
 	{
 	public:
@@ -38,13 +38,13 @@ namespace bmp
 			, m_hOldBitmap( nullptr )
 		{
 			ASSERT_PTR( m_pTarget );
-			ASSERT_PTR( m_pTarget->GetHandle() );
+			ASSERT_PTR( m_pTarget->GetBitmapHandle() );
 			ASSERT_NULL( m_pTarget->m_pMemDC );
 
 			if ( CreateCompatibleDC( pTemplateDC ) )			// compatible with screen DC if pTemplateDC is NULL
 			{
 				m_pTarget->m_pMemDC = this;
-				m_hOldBitmap = SelectObject( m_pTarget->GetHandle() );
+				m_hOldBitmap = SelectObject( m_pTarget->GetBitmapHandle() );
 			}
 		}
 
@@ -54,6 +54,7 @@ namespace bmp
 			if ( GetSafeHdc() != nullptr )
 			{
 				m_pTarget->m_pMemDC = nullptr;
+
 				if ( m_hOldBitmap != nullptr )
 					SelectObject( m_hOldBitmap );
 			}

@@ -340,7 +340,7 @@ namespace gdi
 	bool HasAlphaTransparency( HBITMAP hBitmap );			// DIB section with alpha channel?
 
 	bool CreateBitmapMask( CBitmap& rMaskBitmap, HBITMAP hSrcBitmap, COLORREF transpColor );
-	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct = 0, COLORREF transpColor = color::Null, TBitsPerPixel bitsPerPixel = 0 );		// disabled gray look
+	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct = 0, COLORREF transpColor = color::Null, TBitsPerPixel srcBitsPerPixel = 0 );		// disabled gray look
 
 
 	/// image list properties:
@@ -443,11 +443,11 @@ private:
 namespace bmp { class CSharedAccess; }
 
 
-class CDibSectionInfo : public CBitmapInfo		// DIB only
+class CDibSectionTraits : public CBitmapInfo		// DIB only
 {
 public:
-	CDibSectionInfo( HBITMAP hDib );
-	~CDibSectionInfo();
+	CDibSectionTraits( HBITMAP hDib );
+	~CDibSectionTraits();
 
 	void Build( HBITMAP hDib );
 
@@ -462,7 +462,9 @@ public:
 	// the DIB must be selected into pDC
 	COLORREF GetColorAt( const CDC* pDC, int index ) const;
 	const std::vector<RGBQUAD>& GetColorTable( const CDC* pDC );
-	CPalette* MakeColorPalette( const CDC* pDC );		// palette is owned
+
+	CPalette* MakeColorPalette( const CDC* pDC );			// palette is owned - created only for BPP <= 256
+	CPalette* MakeColorPaletteFallback( const CDC* pDC );	// palette is owned - creates a fallback halftone palette for hi-color DIBs
 
 	template< typename PixelFunc >
 	bool ForEachInColorTable( const bmp::CSharedAccess& dib, PixelFunc func );

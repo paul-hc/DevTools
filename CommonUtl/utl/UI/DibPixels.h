@@ -20,7 +20,7 @@ public:
 	void Init( const CDibSection& dibSection );
 
 	const CDibSection* GetDib( void ) const { return m_pDibSection; }
-	virtual HBITMAP GetHandle( void ) const;
+	virtual HBITMAP GetBitmapHandle( void ) const implement;
 
 	bool IsValid( void ) const { ASSERT( ( m_pDibSection == nullptr ) == ( m_pPixels == nullptr ) ); return m_pPixels != nullptr; }
 	bool IsIndexed( void ) const { ASSERT( IsValid() ); return m_bitsPerPixel <= 8; }
@@ -151,6 +151,7 @@ void CDibPixels::MapTranspColor( PixelFunc func )
 	if ( COLORREF* pTranspColor = GetTranspColorPtr() )
 	{
 		CPixelBGR pixel( *pTranspColor );
+
 		func( pixel );
 		*pTranspColor = pixel.GetColor();
 	}
@@ -179,6 +180,7 @@ void CDibPixels::ForEachRGB( PixelFunc func )
 		for ( UINT x = 0; x != m_width; ++x )
 		{	// translate COLORREF to CPixelBGR and back
 			CPixelBGR pixel( GetPixelColor( x, y ) );
+
 			func( pixel );
 			SetPixelColor( x, y, pixel.GetColor() );
 		}
@@ -223,6 +225,7 @@ bool CDibPixels::ForEach( PixelFunc func )
 	}
 
 	CScopedBitmapMemDC scopedPixelAccess( this );
+
 	if ( !HasValidBitmapMemDC() )
 		return false;
 
@@ -230,8 +233,8 @@ bool CDibPixels::ForEach( PixelFunc func )
 	{
 		MapTranspColor( func );
 
-		CDibSectionInfo dibInfo( GetHandle() );
-		return dibInfo.ForEachInColorTable( *GetTarget(), func );		// just modify the color table
+		CDibSectionTraits dibTraits( GetBitmapHandle() );
+		return dibTraits.ForEachInColorTable( *GetTarget(), func );		// just modify the color table
 	}
 	else
 		ForEachRGB( func );										// 16 bit: apply CPixelBGR algorithms to RGB bitmaps

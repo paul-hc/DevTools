@@ -26,11 +26,11 @@ private:
 
 	typedef std::pair<CBitmap*, std::tstring> TBitmapPathPair;
 
-	static void DrawThumbs( ut::CTestDevice* pTestDev, const std::vector<TBitmapPathPair>& thumbs );
+	static void DrawThumbs( ut::CTestDevice& rTestDev, const std::vector<TBitmapPathPair>& thumbs );
 private:
 	void TestThumbConversion( void );
-	void TestImageThumbs( ut::CTestDevice* pTestDev );
-	void TestThumbnailCache( ut::CTestDevice* pTestDev );
+	void TestImageThumbs( ut::CTestDevice& rTestDev );
+	void TestThumbnailCache( ut::CTestDevice& rTestDev );
 };
 
 

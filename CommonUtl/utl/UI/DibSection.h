@@ -29,7 +29,7 @@ public:
 	virtual ~CDibSection();
 
 	// base overrides
-	virtual HBITMAP GetHandle( void ) const { return *this; }
+	virtual HBITMAP GetBitmapHandle( void ) const implement { return *this; }
 
 	void Clear( void );
 	bool AttachDib( const CDibMeta& dibMeta );
@@ -47,7 +47,7 @@ public:
 	const CDibMeta& GetSrcMeta( void ) const { return m_srcDibMeta; }		// source image information preserved
 
 	WORD GetBitsPerPixel( void ) const { return m_bitsPerPixel; }
-	const CSize& GetSize( void ) const { ASSERT( IsValid() && m_bitmapSize == gdi::GetBitmapSize( GetHandle() ) ); return m_bitmapSize; }
+	const CSize& GetSize( void ) const { ASSERT( IsValid() && m_bitmapSize == gdi::GetBitmapSize( GetBitmapHandle() ) ); return m_bitmapSize; }
 
 	bool IsPng( void ) const { return HasFlag( m_flags, F_IsPng ); }
 	bool HasAlpha( void ) const { ASSERT( !HasFlag( m_flags, F_HasAlpha ) || m_bitsPerPixel >= 32 ); return HasFlag( m_flags, F_HasAlpha ); }

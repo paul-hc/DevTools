@@ -54,6 +54,9 @@
     <Filter Include="UI\Color">
       <UniqueIdentifier>{64c70437-b3d5-4c5b-a1ae-a1d0c9d732fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\UI TestDevice">
+      <UniqueIdentifier>{c40f920d-fdb8-4143-ac0c-5ef2f3bfb5c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -72,9 +75,6 @@
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="test\UtlUserInterfaceTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\WicImageTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="StdColors.h">
@@ -686,9 +686,6 @@
     <ClInclude Include="LayoutPaneDialog.h">
       <Filter>UI\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="test\ToolBarImagesTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
     <ClInclude Include="ImageCommandLookup.h">
       <Filter>UI\MFC+</Filter>
     </ClInclude>
@@ -716,6 +713,12 @@
     <ClInclude Include="ui_types.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="test\WicImageTests.h">
+      <Filter>Tests\UI TestDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ToolBarImagesTests.h">
+      <Filter>Tests\UI TestDevice</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -731,9 +734,6 @@
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="test\UtlUserInterfaceTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="test\WicImageTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="AccelTable.cpp">
@@ -1198,9 +1198,6 @@
     <ClCompile Include="LayoutPaneDialog.cpp">
       <Filter>UI\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="test\ToolBarImagesTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
     <ClCompile Include="ImageCommandLookup.cpp">
       <Filter>UI\MFC+</Filter>
     </ClCompile>
@@ -1218,6 +1215,12 @@
     </ClCompile>
     <ClCompile Include="IconGroup.cpp">
       <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="test\WicImageTests.cpp">
+      <Filter>Tests\UI TestDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ToolBarImagesTests.cpp">
+      <Filter>Tests\UI TestDevice</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

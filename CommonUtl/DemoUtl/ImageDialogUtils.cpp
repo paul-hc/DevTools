@@ -8,7 +8,6 @@
 #include "utl/UI/Color.h"
 #include "utl/UI/DibSection.h"
 #include "utl/UI/DibPixels.h"
-#include "utl/UI/ImageProxy.h"
 #include "utl/UI/Pixel.h"
 #include "utl/UI/WndUtilsEx.h"
 #include <set>
@@ -134,9 +133,10 @@ void CColorBoard::Build( CDibSection* pDib )
 		case ImageColorBoard:
 			if ( pDib != nullptr && pDib->IsIndexed() )
 			{
-				CDibSectionInfo info( pDib->GetHandle() );
+				CDibSectionTraits dibTraits( pDib->GetBitmapHandle() );
 				CScopedBitmapMemDC scopedBitmap( pDib );
-				const std::vector<RGBQUAD>& colorTable = info.GetColorTable( pDib->GetBitmapMemDC() );
+
+				const std::vector<RGBQUAD>& colorTable = dibTraits.GetColorTable( pDib->GetBitmapMemDC() );
 
 				m_colors.reserve( m_totalColors = colorTable.size() );
 				for ( std::vector<RGBQUAD>::const_iterator itRgb = colorTable.begin(); itRgb != colorTable.end(); ++itRgb )

@@ -422,7 +422,8 @@ namespace gdi
 		return true;
 	}
 
-	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct /*= 0*/, COLORREF transpColor /*= color::Null*/, TBitsPerPixel bitsPerPixel /*= 0*/ )
+
+	HBITMAP CreateGrayBitmap( HBITMAP hBitmapSrc, int grayImageLuminancePct /*= 0*/, COLORREF transpColor /*= color::Null*/, TBitsPerPixel srcBitsPerPixel /*= 0*/ )
 	{	// creates a bitmap with disabled gray look - inspired by CMFCToolBarImages::GrayImages()
 		if ( nullptr == hBitmapSrc )
 			return nullptr;
@@ -440,8 +441,8 @@ namespace gdi
 
 		CSize bitmapSize( bmpInfoSrc.bmWidth, bmpInfoSrc.bmHeight );
 
-		if ( 0 == bitsPerPixel )						// not specified?
-			bitsPerPixel = bmpInfoSrc.bmBitsPixel;		// inherit form SRC bitmap (not reliable since it may be a DDB)
+		if ( 0 == srcBitsPerPixel )						// not specified?
+			srcBitsPerPixel = bmpInfoSrc.bmBitsPixel;	// inherit form SRC bitmap (not reliable since it may be a DDB)
 
 		HBITMAP hOldSrcBitmap = (HBITMAP)srcMemDC.SelectObject( hBitmapSrc );
 
@@ -488,10 +489,13 @@ namespace gdi
 		}
 
 		// Copy original bitmap to new:
-		destMemDC.BitBlt( 0, 0, bitmapSize.cx, bitmapSize.cy, &srcMemDC, 0, 0, SRCCOPY );
+		if ( srcBitsPerPixel != 1 )
+			destMemDC.BitBlt( 0, 0, bitmapSize.cx, bitmapSize.cy, &srcMemDC, 0, 0, SRCCOPY );
+		else
+			destMemDC.BitBlt( 0, 0, bitmapSize.cx, bitmapSize.cy, &srcMemDC, 0, 0, BLACKNESS );
 
-		if ( ILC_COLOR32 == bitsPerPixel )
-		{
+		if (true|| ILC_COLOR32 == srcBitsPerPixel )
+		{	// direct BGRA (RGBQUAD) pixel access:
 			DIBSECTION ds;
 
 			if ( 0 == ::GetObject( hGrayDib, sizeof( DIBSECTION ), &ds ) || ds.dsBm.bmBitsPixel != ILC_COLOR32 || nullptr == ds.dsBm.bmBits )
@@ -501,19 +505,32 @@ namespace gdi
 			}
 
 			// apply disabled effects to each pixel - fade and convert to gray-scale:
-			typedef CPixelBGRA* TPixelIterator;
 			func::DisableFadeGray disableFunc( pixel::AlphaFadeMore, false );		// IMP: skip pre-multiply alpha so that it doesn't blend to gray - we just want to fade
+			typedef CPixelBGRA* TPixelIterator;
 
 			for ( TPixelIterator pPixels = (CPixelBGRA*)ds.dsBm.bmBits, pPixelsEnd = pPixels + ds.dsBm.bmWidth * ds.dsBm.bmHeight; pPixels != pPixelsEnd; ++pPixels )
+			{
+				if ( srcBitsPerPixel <= 8 && pPixels->GetColor() != transpColor )
+					pPixels->m_alpha = 255;		// fake alpha transparency for transparent (non-background) color, in order to allow color fading
+
+				if ( pPixels->GetColor() != 0 )
+				{int g=0;}
+
 				disableFunc( *pPixels );
+			}
 		}
 		else
 		{
-			CDrawingManager drawMgr( destMemDC );
-			int percentage = grayImageLuminancePct <= 0 ? 130 : grayImageLuminancePct;
+			CDibPixels grayedPixels( hGrayDib );
 
-			drawMgr.GrayRect( CRect( 0, 0, bitmapSize.cx, bitmapSize.cy ), percentage, color::Null == transpColor ? GetGlobalData()->clrBtnFace : transpColor );
-			// Note: for monochrome bitmaps (mask only) it generates a doubled image, perhaps due to a bug in DIB bits iteration.
+			if ( !grayedPixels.ApplyDisableFadeGray( pixel::AlphaFadeMore, false, transpColor ) )
+			{
+				CDrawingManager drawMgr( destMemDC );
+				int percentage = grayImageLuminancePct <= 0 ? 130 : grayImageLuminancePct;
+
+				drawMgr.GrayRect( CRect( 0, 0, bitmapSize.cx, bitmapSize.cy ), percentage, color::Null == transpColor ? GetGlobalData()->clrBtnFace : transpColor );
+				// Note: for monochrome bitmaps (mask only) it generates a doubled image, perhaps due to a bug in DIB bits iteration.
+			}
 		}
 
 		destMemDC.SelectObject( hOldDestBitmap );
@@ -774,26 +791,26 @@ std::tstring CBitmapInfo::FormatDbg( void ) const
 #endif // _DEBUG
 
 
-// CDibSectionInfo implementation
+// CDibSectionTraits implementation
 
-CDibSectionInfo::CDibSectionInfo( HBITMAP hDib )
+CDibSectionTraits::CDibSectionTraits( HBITMAP hDib )
 	: CBitmapInfo( hDib )
 	, m_hDib( hDib )
 {
 	Build( hDib );
 }
 
-CDibSectionInfo::~CDibSectionInfo()
+CDibSectionTraits::~CDibSectionTraits()
 {
 }
 
-void CDibSectionInfo::Build( HBITMAP hDib )
+void CDibSectionTraits::Build( HBITMAP hDib )
 {
 	CBitmapInfo::Build( hDib );
 	ASSERT( !CBitmapInfo::IsValid() || IsDibSection() );		// must be used only for DIB sections
 }
 
-COLORREF CDibSectionInfo::GetColorAt( const CDC* pDC, int index ) const
+COLORREF CDibSectionTraits::GetColorAt( const CDC* pDC, int index ) const
 {
 	ASSERT( HasColorTable() );
 	ASSERT_PTR( pDC->GetSafeHdc() );
@@ -804,7 +821,7 @@ COLORREF CDibSectionInfo::GetColorAt( const CDC* pDC, int index ) const
 	return RGB( rgb.rgbRed, rgb.rgbGreen, rgb.rgbBlue );
 }
 
-const std::vector<RGBQUAD>& CDibSectionInfo::GetColorTable( const CDC* pDC )
+const std::vector<RGBQUAD>& CDibSectionTraits::GetColorTable( const CDC* pDC )
 {
 	ASSERT_PTR( pDC->GetSafeHdc() );
 	ASSERT( m_hDib == pDC->GetCurrentBitmap()->GetSafeHandle() );				// the DIB must be selected into pDC
@@ -819,30 +836,38 @@ const std::vector<RGBQUAD>& CDibSectionInfo::GetColorTable( const CDC* pDC )
 	return m_colorTable;
 }
 
-CPalette* CDibSectionInfo::MakeColorPalette( const CDC* pDC )
+CPalette* CDibSectionTraits::MakeColorPalette( const CDC* pDC )
 {
-	ASSERT( !GetColorTable( pDC ).empty() );
-
-	if ( nullptr == m_pPalette.get() )
+	if ( nullptr == m_pPalette.get() && IsIndexed() )
 	{
+		GetColorTable( pDC );		// ensure the color table is initialized
+		REQUIRE( m_colorTable.size() <= 256 );
+
 		m_pPalette.reset( new CPalette() );
-		if ( m_colorTable.size() > 256 )
-			m_pPalette->CreateHalftonePalette( const_cast<CDC*>( pDC ) );
-		else
-		{
-			std::vector<BYTE> buffer( sizeof( LOGPALETTE ) + ( sizeof( PALETTEENTRY ) * m_colorTable.size() ) );
-			LOGPALETTE* pLogPalette = reinterpret_cast<LOGPALETTE*>(  &buffer.front() );
 
-			pLogPalette->palVersion = 0x300;
-			pLogPalette->palNumEntries = static_cast<WORD>( m_colorTable.size() );
+		std::vector<BYTE> buffer( sizeof( LOGPALETTE ) + ( sizeof( PALETTEENTRY ) * m_colorTable.size() ) );
+		LOGPALETTE* pLogPalette = reinterpret_cast<LOGPALETTE*>(  &buffer.front() );
 
-			for( size_t i = 0; i != m_colorTable.size(); ++i )
-				pLogPalette->palPalEntry[ i ] = gdi::ToPaletteEntry( m_colorTable[ i ] );
+		pLogPalette->palVersion = 0x300;
+		pLogPalette->palNumEntries = static_cast<WORD>( m_colorTable.size() );
 
-			if ( !m_pPalette->CreatePalette( pLogPalette ) )
-				m_pPalette.reset();
-		}
+		for( size_t i = 0; i != m_colorTable.size(); ++i )
+			pLogPalette->palPalEntry[ i ] = gdi::ToPaletteEntry( m_colorTable[ i ] );
+
+		if ( !m_pPalette->CreatePalette( pLogPalette ) )
+			m_pPalette.reset();
 	}
+
+	return m_pPalette.get();
+}
+
+CPalette* CDibSectionTraits::MakeColorPaletteFallback( const CDC* pDC )
+{
+	if ( IsIndexed() )
+		return MakeColorPalette( pDC );
+
+	m_pPalette.reset( new CPalette() );
+	m_pPalette->CreateHalftonePalette( const_cast<CDC*>( pDC ) );
 
 	return m_pPalette.get();
 }
@@ -856,14 +881,14 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPe
 
 	if ( bitsPerPixel <= 8 )			// got to build a color table
 	{
-		if ( pSrcDib != nullptr && pSrcDib->GetHandle() != nullptr )
+		if ( pSrcDib != nullptr && pSrcDib->GetBitmapHandle() != nullptr )
 		{
-			CDibSectionInfo srcInfo( pSrcDib->GetHandle() );
+			CDibSectionTraits srcTraits( pSrcDib->GetBitmapHandle() );
 
-			if ( srcInfo.GetBitsPerPixel() == bitsPerPixel )							// same color table size
+			if ( srcTraits.GetBitsPerPixel() == bitsPerPixel )							// same color table size
 			{
 				CScopedBitmapMemDC scopedSrcBitmap( pSrcDib );
-				rgbTable = srcInfo.GetColorTable( pSrcDib->GetBitmapMemDC() );		// use source color table
+				rgbTable = srcTraits.GetColorTable( pSrcDib->GetBitmapMemDC() );		// use source color table
 			}
 		}
 
@@ -891,7 +916,7 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPe
 
 BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( UINT bitsPerPixel, const bmp::CSharedAccess& sourceDib )
 {
-	CSize srcBitmapSize = gdi::GetBitmapSize( sourceDib.GetHandle() );
+	CSize srcBitmapSize = gdi::GetBitmapSize( sourceDib.GetBitmapHandle() );
 
 	return CreateDibInfo( srcBitmapSize.cx, srcBitmapSize.cy, bitsPerPixel, &sourceDib );
 }

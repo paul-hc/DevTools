@@ -10,6 +10,8 @@
 #include "ImagingWic.h"
 #include "ImageCommandLookup.h"
 #include "WicDibSection.h"
+#include "Icon.h"
+#include "IconGroup.h"
 #include "ScopedGdi.h"
 #include "WndUtilsEx.h"
 #include <afxtoolbarimages.h>
@@ -102,7 +104,7 @@ namespace ut
 		ASSERT_NULL( s_pWndTool );
 		s_pWndTool = this;
 
-		ui::MakeStandardControlFont( m_headlineFont, ui::CFontInfo( ui::Bold, 110 ) );
+		ui::MakeStandardControlFont( m_headlineFont, ui::CFontInfo( ui::Bold, 130 ) );
 	}
 
 	CTestToolWnd::~CTestToolWnd()
@@ -427,6 +429,20 @@ namespace ut
 			ASSERT( false );
 
 		DrawTileFrame( iconRect );
+	}
+
+	void CTestDevice::DrawIcon( const CIcon* pIcon, bool enabled /*= true*/ )
+	{
+		ASSERT_PTR( pIcon );
+		if ( !IsEnabled() )
+			return;
+
+		CRect iconRect = CRect( m_pToolWnd->m_drawPos, pIcon->GetSize() );
+
+		pIcon->Draw( *GetDC(), iconRect.TopLeft(), enabled );
+		DrawTileFrame( iconRect );
+		DrawTileCaption( str::Format( _T("%dx%d, %d-bit%s"), iconRect.Width(), iconRect.Height(), pIcon->GetBitsPerPixel(),
+									  pIcon->HasAlpha() ? _T(" A") : str::GetEmpty().c_str() ) );
 	}
 
 	void CTestDevice::DrawImage( CImageList* pImageList, int index, UINT style /*= ILD_TRANSPARENT*/ )

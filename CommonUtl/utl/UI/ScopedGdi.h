@@ -88,21 +88,22 @@ class CScopedPalette : private utl::noncopyable
 {
 public:
 	CScopedPalette( CDC* pDC, CPalette* pPalette, bool realize = true, bool forceBackground = false )
-		: m_pDC( pPalette != nullptr && HasFlag( pDC->GetDeviceCaps( RASTERCAPS ), RC_PALETTE ) ? pDC : nullptr )
-		, m_pOldPalette( m_pDC != nullptr ? m_pDC->SelectPalette( pPalette, forceBackground ) : nullptr )
+		: m_pPaletteDC( pPalette != nullptr && HasFlag( pDC->GetDeviceCaps( RASTERCAPS ), RC_PALETTE ) ? pDC : nullptr )
+		, m_pOldPalette( m_pPaletteDC != nullptr ? m_pPaletteDC->SelectPalette( pPalette, forceBackground ) : nullptr )
 		, m_forceBackground( forceBackground )
 	{
-		if ( realize && m_pDC != nullptr )
-			m_pDC->RealizePalette();
+		if ( realize && m_pPaletteDC != nullptr )
+			if ( GDI_ERROR == m_pPaletteDC->RealizePalette() )
+				TRACE( "GDI_ERROR on RealizePalette() containing %d colors!\n", pPalette->GetEntryCount() );
 	}
 
 	~CScopedPalette()
 	{
-		if ( m_pDC != nullptr )
-			m_pDC->SelectPalette( m_pOldPalette, m_forceBackground );
+		if ( m_pPaletteDC != nullptr )
+			m_pPaletteDC->SelectPalette( m_pOldPalette, m_forceBackground );
 	}
 private:
-	CDC* m_pDC;
+	CDC* m_pPaletteDC;
 	CPalette* m_pOldPalette;
 	bool m_forceBackground;
 };

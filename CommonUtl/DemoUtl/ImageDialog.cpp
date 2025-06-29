@@ -309,7 +309,7 @@ void CImageDialog::UpdateImage( void )
 
 std::tstring CImageDialog::FormatDibInfo( const CDibSection& dib )
 {
-	CBitmapInfo info( dib.GetHandle() );
+	CBitmapInfo info( dib.GetBitmapHandle() );
 	std::tstring text = str::Format( _T("%d x %d | Source: %d bit%s | DIB: %d bit - %s KB (%s bytes)"),
 		info.dsBmih.biWidth,
 		info.dsBmih.biHeight,

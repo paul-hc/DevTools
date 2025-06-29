@@ -19,6 +19,7 @@ struct CPixelBGR
 	CPixelBGR( const PALETTEENTRY& palEntry ) : m_blue( palEntry.peBlue ), m_green( palEntry.peGreen ), m_red( palEntry.peRed ) {}
 
 	COLORREF GetColor( void ) const { return RGB( m_red, m_green, m_blue ); }
+	void ToRGBQUAD( RGBQUAD& rRgbQuad ) const { rRgbQuad.rgbBlue = m_blue; rRgbQuad.rgbGreen = m_green; rRgbQuad.rgbRed = m_red; }
 
 	void PreMultiplyAlpha( void ) {}		// NO-OP
 public:
@@ -36,6 +37,7 @@ struct CPixelBGRA
 	CPixelBGRA( RGBQUAD rgbQuad ) : m_blue( rgbQuad.rgbBlue ), m_green( rgbQuad.rgbGreen ), m_red( rgbQuad.rgbRed ), m_alpha( rgbQuad.rgbReserved ) {}
 
 	COLORREF GetColor( void ) const { return RGB( m_red, m_green, m_blue ); }
+	void ToRGBQUAD( RGBQUAD& rRgbQuad ) const { rRgbQuad.rgbBlue = m_blue; rRgbQuad.rgbGreen = m_green; rRgbQuad.rgbRed = m_red; rRgbQuad.rgbReserved = m_alpha; }
 
 	bool NeedsPreMultiplyAlpha( void ) const { return m_blue > m_alpha || m_green > m_alpha || m_red > m_alpha; }
 

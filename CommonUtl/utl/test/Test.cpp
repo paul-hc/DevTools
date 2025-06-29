@@ -139,16 +139,16 @@ namespace ut
 
 		const char* pTestCaseName = str::GetTypeNamePtr( *pTestCase );
 
-		std::ostringstream os;
+		std::tostringstream os;
 		os << pTestCaseName << "::" << pTestMethod << " : ";
 
 		if ( is_a<CGraphicTestCase>( pTestCase ) )
 			os << " (graphic test case)";
 
-		std::string text = os.str();
+		m_testMethod = os.str();
 
-		OutputDebugStringA( text.c_str() );		// don't use TRACE to avoid the ATL overhead
-		std::clog << text;
+		OutputDebugString( m_testMethod.c_str() );		// don't use TRACE to avoid the ATL overhead
+		std::clog << m_testMethod;
 
 		++s_testCount;
 	}

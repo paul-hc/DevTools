@@ -8,6 +8,9 @@
 #include "utl/test/UnitTest.h"
 
 
+namespace ut { class CTestDevice; }
+
+
 class CImageTests : public ut::CGraphicTestCase
 {
 	CImageTests( void );
@@ -18,8 +21,9 @@ public:
 	virtual void Run( void );
 private:
 	void TestGroupIconRes( void );
-	void TestIcon( void );
-	void TestImageList( void );
+	void TestIcon( ut::CTestDevice& rTestDev );
+	void TestIconGroup( ut::CTestDevice& rTestDev );
+	void TestImageList( ut::CTestDevice& rTestDev );
 };
 
 

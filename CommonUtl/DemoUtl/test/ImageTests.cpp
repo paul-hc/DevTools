@@ -85,14 +85,20 @@ void CImageTests::TestGroupIconRes( void )
 	}
 }
 
-void CImageTests::TestIcon( void )
+void CImageTests::TestIcon( ut::CTestDevice& rTestDev )
 {
 	const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_AUTO_TRANSP_TOOL );
 	ASSERT_PTR( pIcon );
 	CIconInfo info( pIcon->GetHandle() );
+
+	rTestDev.DrawIcon( pIcon );
 }
 
-void CImageTests::TestImageList( void )
+void CImageTests::TestIconGroup( ut::CTestDevice& rTestDev )
+{
+}
+
+void CImageTests::TestImageList( ut::CTestDevice& rTestDev )
 {
 	enum { Image_Fill = 4, ImageCount };
 
@@ -131,23 +137,20 @@ void CImageTests::TestImageList( void )
 	}
 
 	// drawing
-	ut::CTestDevice testDev( 10 );
-	testDev.SetSubTitle( _T("CImageTests::TestImageList") );
-
-	testDev.DrawImage( &imageList, Image_Fill );
-	testDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
-	++testDev;
+	rTestDev.DrawImage( &imageList, Image_Fill );
+	rTestDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
+	++rTestDev;
 
 	// NB: for some reason imageInfo.hbmImage cannot be selected into a DC - most likely is kept selected into a cached DC by the system...
 	CDibSection dupDib;
 	dupDib.Copy( imageInfo.hbmImage );
 
-	CRect rect( testDev.GetDrawPos(), dupDib.GetSize() );
-	dupDib.Draw( testDev.GetDC(), rect );
-	testDev.StoreTileRect( rect );
-	testDev.DrawTileFrame( color::AzureBlue );
-	testDev.DrawTileCaption( _T("dupDib IDR_IMAGE_STRIP") );
-	++testDev;
+	CRect rect( rTestDev.GetDrawPos(), dupDib.GetSize() );
+	dupDib.Draw( rTestDev.GetDC(), rect );
+	rTestDev.StoreTileRect( rect );
+	rTestDev.DrawTileFrame( color::AzureBlue );
+	rTestDev.DrawTileCaption( _T("dupDib IDR_IMAGE_STRIP") );
+	++rTestDev;
 
 
 	CImageList disabledImageList;
@@ -156,40 +159,42 @@ void CImageTests::TestImageList( void )
 	VERIFY( disabledImageList.GetImageInfo( Image_Fill, &imageInfo ) );
 	dupDib.Copy( imageInfo.hbmImage );
 
-	rect = CRect( testDev.GetDrawPos(), dupDib.GetSize() );
-	dupDib.Draw( testDev.GetDC(), rect );
-	testDev.StoreTileRect( rect );
-	testDev.DrawTileFrame( color::AzureBlue );
-	testDev.DrawTileCaption( _T("imageInfo.hbmImage IDR_IMAGE_STRIP") );
-	++testDev;
+	rect = CRect( rTestDev.GetDrawPos(), dupDib.GetSize() );
+	dupDib.Draw( rTestDev.GetDC(), rect );
+	rTestDev.StoreTileRect( rect );
+	rTestDev.DrawTileFrame( color::AzureBlue );
+	rTestDev.DrawTileCaption( _T("imageInfo.hbmImage IDR_IMAGE_STRIP") );
+	++rTestDev;
 
-	testDev.DrawImageList( &disabledImageList, true );
-	testDev.DrawTileCaption( _T("disabledImageList IDR_IMAGE_STRIP") );
-	++testDev;
+	rTestDev.DrawImageList( &disabledImageList, true );
+	rTestDev.DrawTileCaption( _T("disabledImageList IDR_IMAGE_STRIP") );
+	++rTestDev;
 
 	// transparent icon
 	const CIcon* pTranspIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_TRANSPARENT );
-	testDev.DrawIcon( pTranspIcon->GetHandle(), pTranspIcon->GetSize() );		// there is one white pixel at right-bottom so that the icon is not completely black (GDI bug?)
-	testDev.DrawTileCaption( _T("icon IDR_IMAGE_STRIP") );
-	++testDev;
+	rTestDev.DrawIcon( pTranspIcon->GetHandle(), pTranspIcon->GetSize() );		// there is one white pixel at right-bottom so that the icon is not completely black (GDI bug?)
+	rTestDev.DrawTileCaption( _T("icon IDR_IMAGE_STRIP") );
+	++rTestDev;
 
 	// image list transparent image
 	imageList.DeleteImageList();
 	imageList.Create( imageSize.cx, imageSize.cy, ILC_COLOR32 | ILC_MASK, 0, 2 );
 	imageList.Add( pTranspIcon->GetHandle() );				// one white pixel at right-bottom
 	imageList.Add( nullptr, CLR_NONE );						// another was to add an empty icon
-	testDev.DrawImageList( &imageList, true );
-	testDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
-
-	testDev.Await( 5000 );
+	rTestDev.DrawImageList( &imageList, true );
+	rTestDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
 }
 
 
 void CImageTests::Run( void )
 {
+	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
+	testDev.SetSubTitle( _T("CImageTests") );
+
 	RUN_TEST( TestGroupIconRes );
-	RUN_TEST( TestIcon );
-	RUN_TEST( TestImageList );
+	RUN_TESTDEV_1( TestIcon, testDev );
+	RUN_TESTDEV_1( TestIconGroup, testDev );
+	RUN_TESTDEV_1( TestImageList, testDev );
 }
 
 

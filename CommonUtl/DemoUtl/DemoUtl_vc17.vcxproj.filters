@@ -12,6 +12,9 @@
     <Filter Include="Tests">
       <UniqueIdentifier>{004216cd-77f4-4cd0-907c-9e2231f5867b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\UI TestDevice">
+      <UniqueIdentifier>{342f22f1-69af-421d-b76b-57b3e8749013}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -77,11 +80,11 @@
     <ClInclude Include="TestTaskDialog.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="test\ImageTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
     <ClInclude Include="TestColorsDialog.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ImageTests.h">
+      <Filter>Tests\UI TestDevice</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -139,11 +142,11 @@
     <ClCompile Include="TestTaskDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test\ImageTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
     <ClCompile Include="TestColorsDialog.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ImageTests.cpp">
+      <Filter>Tests\UI TestDevice</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

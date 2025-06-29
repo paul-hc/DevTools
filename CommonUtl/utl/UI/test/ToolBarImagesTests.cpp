@@ -23,45 +23,38 @@ CToolBarImagesTests& CToolBarImagesTests::Instance( void )
 	return s_testCase;
 }
 
-void CToolBarImagesTests::TestToolBarImagesBitmap( ut::CTestDevice* pTestDev )
+void CToolBarImagesTests::TestToolBarImagesBitmap( ut::CTestDevice& rTestDev )
 {
 	fs::CFlexPath imagePath = MakeTestImageFilePath( Scissors_ico );
 	if ( imagePath.IsEmpty() )
 		return;
 
-	pTestDev->SetSubTitle( _T("CToolBarImagesTests::TestToolBarImagesBitmap") );
-	pTestDev->DrawHeadline( _T("CMFCToolBar::GetImages()") );
-
-	pTestDev->DrawImages( CMFCToolBar::GetImages() );
-
-	pTestDev->Await( 1000 );
+	rTestDev.DrawImages( CMFCToolBar::GetImages() );
 }
 
-void CToolBarImagesTests::TestToolBarImagesDetails( ut::CTestDevice* pTestDev )
+void CToolBarImagesTests::TestToolBarImagesDetails( ut::CTestDevice& rTestDev )
 {
 	fs::CFlexPath imagePath = MakeTestImageFilePath( Scissors_ico );
 	if ( imagePath.IsEmpty() )
 		return;
 
-	pTestDev->SetSubTitle( _T("CToolBarImagesTests::TestToolBarImagesDetails") );
+	rTestDev.SetSubTitle( _T("CToolBarImagesTests::TestToolBarImagesDetails") );
 
 	CMFCToolBarImages* pImages = CMFCToolBar::GetImages();
 	int imageCount = pImages->GetCount();
 
-	pTestDev->DrawImagesDetails( pImages );
+	rTestDev.DrawImagesDetails( pImages );
 
-	pTestDev->DrawTileCaption( str::Format( _T("%d total images"), imageCount ) );
-
-	pTestDev->Await( 1000 );
-	pTestDev->GotoNextStrip();
+	rTestDev.DrawTileCaption( str::Format( _T("%d total images"), imageCount ) );
 }
 
 void CToolBarImagesTests::Run( void )
 {
 	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
+	testDev.SetSubTitle( _T("CToolBarImagesTests") );
 
-	RUN_TEST1( TestToolBarImagesBitmap, &testDev );
-	RUN_TEST1( TestToolBarImagesDetails, &testDev );
+	RUN_TESTDEV_1( TestToolBarImagesBitmap, testDev );
+	RUN_TESTDEV_1( TestToolBarImagesDetails, testDev );
 }
 
 

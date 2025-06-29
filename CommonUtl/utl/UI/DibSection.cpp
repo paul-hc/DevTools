@@ -53,7 +53,7 @@ CDibSection::~CDibSection()
 
 bool CDibSection::IsDibSection( void ) const
 {
-	return IsValid() && gdi::IsDibSection( GetHandle() );
+	return IsValid() && gdi::IsDibSection( GetBitmapHandle() );
 }
 
 void CDibSection::Clear( void )
@@ -112,7 +112,7 @@ bool CDibSection::Copy( const CDibSection* pSrcDib )
 	CSize bitmapSize = pSrcDib->GetSize();
 
 	// converts to a bottom-up bitmap even if source is top-down
-	CDibMeta dibMeta( (HBITMAP)::CopyImage( pSrcDib->GetHandle(), IMAGE_BITMAP, bitmapSize.cx, bitmapSize.cy, LR_CREATEDIBSECTION ) );
+	CDibMeta dibMeta( (HBITMAP)::CopyImage( pSrcDib->GetBitmapHandle(), IMAGE_BITMAP, bitmapSize.cx, bitmapSize.cy, LR_CREATEDIBSECTION ) );
 
 	dibMeta.CopyPixelFormat( pSrcDib->m_srcDibMeta );
 	ModifyFlags( m_flags, _CopyMask, pSrcDib->m_flags );

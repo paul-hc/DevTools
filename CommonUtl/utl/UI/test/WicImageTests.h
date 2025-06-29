@@ -16,16 +16,16 @@ class CWicImageTests : public CBaseImageTestCase
 {
 	CWicImageTests( void );
 
-	static void DisplayMultiFrameImageStrip( ut::CTestDevice* pTestDev, const fs::CFlexPath& imagePath );
+	static void DisplayMultiFrameImageStrip( ut::CTestDevice& rTestDev, const fs::CFlexPath& imagePath );
 public:
 	static CWicImageTests& Instance( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestIconMultiFrame_Scissors( ut::CTestDevice* pTestDev );
-	void TestIconMultiFrame_RedBubbles( ut::CTestDevice* pTestDev );
-	void TestImageCache( ut::CTestDevice* pTestDev );
+	void TestIconMultiFrame_Scissors( ut::CTestDevice& rTestDev );
+	void TestIconMultiFrame_RedBubbles( ut::CTestDevice& rTestDev );
+	void TestImageCache( ut::CTestDevice& rTestDev );
 };
 
 
