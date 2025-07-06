@@ -125,7 +125,7 @@ namespace wt
 		CTreeControl* m_pTreeCtrl;
 		CLogger* m_pLogger;
 		ui::CTextEffect m_insertedEffect;
-		std::unordered_map< HWND, TTreeItemIndent > m_wndToItemMap;		// HWND -> [item, indent]
+		std::unordered_map<HWND, TTreeItemIndent> m_wndToItemMap;		// HWND -> [item, indent]
 	};
 }
 

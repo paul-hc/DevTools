@@ -114,7 +114,7 @@ void CEditFlagsBasePage::OnTargetWndChanged( const CWndSpot& targetWnd )
 	if ( m_pSpecificStore != nullptr && !UseSpecificFlags() )			// single m_flags
 		unknownMask &= ~m_pSpecificStore->GetMask();
 
-	std::vector< const CFlagStore* > flagStores;
+	std::vector<const CFlagStore*> flagStores;
 	QueryAllFlagStores( flagStores );
 
 	m_totalEdit.SetMultiFlagStores( flagStores, UINT_MAX );
@@ -137,7 +137,7 @@ void CEditFlagsBasePage::OnTargetWndChanged( const CWndSpot& targetWnd )
 	SetModified( false );
 }
 
-void CEditFlagsBasePage::QueryAllFlagStores( std::vector< const CFlagStore* >& rFlagStores ) const
+void CEditFlagsBasePage::QueryAllFlagStores( std::vector<const CFlagStore*>& rFlagStores ) const
 {
 	if ( m_pGeneralStore != nullptr )
 		rFlagStores.push_back( m_pGeneralStore );

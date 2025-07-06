@@ -163,7 +163,7 @@ HWND CWndFinder::FindWindow( const CWndSearchPattern& pattern, HWND hStartWnd /*
 	CWndEnumerator enumerator;
 	enumerator.Build( ::GetDesktopWindow() );
 
-	const std::vector< HWND >& windows = enumerator.GetWindows();
+	const std::vector<HWND>& windows = enumerator.GetWindows();
 
 	if ( pattern.m_fromBeginning )
 		hStartWnd = nullptr;

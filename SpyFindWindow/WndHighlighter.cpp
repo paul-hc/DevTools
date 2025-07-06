@@ -26,7 +26,7 @@ CWndHighlighter::~CWndHighlighter()
 
 void CWndHighlighter::RedrawDirtyWindows( void )
 {
-	for ( std::vector< HWND >::const_iterator itWnd = m_dirtyWnds.begin(); itWnd != m_dirtyWnds.end(); ++itWnd )
+	for ( std::vector<HWND>::const_iterator itWnd = m_dirtyWnds.begin(); itWnd != m_dirtyWnds.end(); ++itWnd )
 		ui::RedrawWnd( *itWnd );
 }
 
@@ -89,8 +89,8 @@ void CWndHighlighter::DrawWindowFrame( CDC* pDC, const CWndSpot& wndSpot )
 	windowRect &= monitorRect;							// constrain to monitor rect
 	clientRect &= monitorRect;
 
-	int frameSize = std::min< int >( clientRect.Width() / 2, app::GetOptions()->m_frameSize );
-	frameSize = std::max< int >( 1, frameSize );
+	int frameSize = std::min<int>( clientRect.Width() / 2, app::GetOptions()->m_frameSize );
+	frameSize = std::max<int>( 1, frameSize );
 
 	switch ( app::GetOptions()->m_frameStyle )
 	{

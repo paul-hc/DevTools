@@ -14,7 +14,7 @@ public:
 
 	const CFlagStore* GetGeneralStore( bool isChild ) const { return isChild ? &m_generalChildStore : &m_generalTopLevelStore; }
 
-	const std::vector< CFlagStore* >& GetSpecificStores( void ) const { return m_specificStores; }
+	const std::vector<CFlagStore*>& GetSpecificStores( void ) const { return m_specificStores; }
 	const CFlagStore* FindSpecificStore( const std::tstring& wndClass ) const;
 
 	std::tstring& StreamStyle( std::tstring& rOutput, DWORD style, const std::tstring& wndClass, const TCHAR* pSep = stream::flagSep ) const;
@@ -27,7 +27,7 @@ private:
 private:
 	CFlagStore m_generalTopLevelStore;
 	CFlagStore m_generalChildStore;
-	std::vector< CFlagStore* > m_specificStores;
+	std::vector<CFlagStore*> m_specificStores;
 };
 
 
@@ -38,7 +38,7 @@ class CStyleExRepository
 public:
 	static CStyleExRepository& Instance( void );
 
-	const std::vector< CFlagStore* >& GetStores( void ) const { return m_stores; }
+	const std::vector<CFlagStore*>& GetStores( void ) const { return m_stores; }
 	const CFlagStore* FindStore( const std::tstring& wndClass = std::tstring() ) const;
 
 	std::tstring& StreamStyleEx( std::tstring& rOutput, DWORD styleEx, const std::tstring& wndClass = std::tstring(), const TCHAR* pSep = stream::flagSep ) const;
@@ -57,7 +57,7 @@ private:
 	static DWORD GetToolbarStyleEx( HWND hSrc );
 	static DWORD SetToolbarStyleEx( HWND hDest, DWORD styleExClass );
 private:
-	std::vector< CFlagStore* > m_stores;
+	std::vector<CFlagStore*> m_stores;
 };
 
 

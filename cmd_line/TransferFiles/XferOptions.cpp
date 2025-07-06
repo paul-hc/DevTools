@@ -73,7 +73,7 @@ bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 			return false;
 
 	if ( !m_excludeFindSpecs.empty() )
-		for ( std::vector< std::tstring >::const_iterator itSubstrSpec = m_excludeFindSpecs.begin(); itSubstrSpec != m_excludeFindSpecs.end(); ++itSubstrSpec )
+		for ( std::vector<std::tstring>::const_iterator itSubstrSpec = m_excludeFindSpecs.begin(); itSubstrSpec != m_excludeFindSpecs.end(); ++itSubstrSpec )
 			if ( *path::Find( transferNode.m_source.m_fullPath.GetPtr(), itSubstrSpec->c_str() ) != _T('\0') )
 				return false;
 

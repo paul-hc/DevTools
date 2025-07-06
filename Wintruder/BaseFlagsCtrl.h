@@ -25,8 +25,8 @@ public:
 	void SetFlagStore( const CFlagStore* pFlagsStore );
 
 	// total edit: multiple stores combined
-	const std::vector< const CFlagStore* >& GetMultiFlagStores( void ) const { return m_flagStores; }
-	void SetMultiFlagStores( const std::vector< const CFlagStore* >& flagStores, DWORD flagsMask = UINT_MAX );
+	const std::vector<const CFlagStore*>& GetMultiFlagStores( void ) const { return m_flagStores; }
+	void SetMultiFlagStores( const std::vector<const CFlagStore*>& flagStores, DWORD flagsMask = UINT_MAX );
 
 	DWORD GetFlagsMask( void ) const { return m_flagsMask; }
 	void SetFlagsMask( DWORD flagsMask );
@@ -41,7 +41,7 @@ public:
 	std::tstring FormatTooltip( void ) const;
 private:
 	CWnd* m_pCtrl;
-	std::vector< const CFlagStore* > m_flagStores;
+	std::vector<const CFlagStore*> m_flagStores;
 	DWORD m_flagsMask;
 	DWORD m_flags;
 protected:

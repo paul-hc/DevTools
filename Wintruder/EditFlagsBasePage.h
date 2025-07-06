@@ -36,7 +36,7 @@ protected:
 	virtual void StoreFlagStores( HWND hTargetWnd ) = 0;
 
 	void LoadPageInfo( UINT id );
-	void QueryAllFlagStores( std::vector< const CFlagStore* >& rFlagStores ) const;
+	void QueryAllFlagStores( std::vector<const CFlagStore*>& rFlagStores ) const;
 	DWORD EvalUnknownFlags( DWORD flags ) const;
 	void InputFlags( DWORD* pFlags, DWORD* pSpecificFlags = nullptr ) const;
 protected:

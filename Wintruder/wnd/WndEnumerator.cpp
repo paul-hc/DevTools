@@ -11,7 +11,7 @@
 
 namespace wnd
 {
-	void QueryAncestorBranchPath( std::vector< HWND >& rBranchPath, HWND hWnd, HWND hWndAncestor /*= ::GetDesktopWindow()*/ )	// bottom-up ancestor path order from [hWnd, ..., hWndAncestor]
+	void QueryAncestorBranchPath( std::vector<HWND>& rBranchPath, HWND hWnd, HWND hWndAncestor /*= ::GetDesktopWindow()*/ )		// bottom-up ancestor path order from [hWnd, ..., hWndAncestor]
 	{
 		for ( ; hWnd != nullptr; hWnd = ::GetAncestor( hWnd, GA_PARENT ) )		// real parent, NULL if desktop - GetParent( hWnd ) may return the owner
 		{

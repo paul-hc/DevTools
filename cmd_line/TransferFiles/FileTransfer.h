@@ -38,7 +38,7 @@ private:
 
 	bool AddTransferItem( CTransferItem* pTransferItem );
 
-	typedef std::map< fs::CPath, CTransferItem* > TTransferItemMap;		// uses pred::TLess_NaturalPath
+	typedef std::map<fs::CPath, CTransferItem*> TTransferItemMap;		// uses pred::TLess_NaturalPath
 private:
 	const CXferOptions* m_pOptions;
 	TTransferItemMap m_transferItems;

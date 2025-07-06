@@ -51,8 +51,8 @@ private:
 	CWndSpot m_targetWnd;			// no subclassing, no ownership
 	bool m_dirtyDetails;
 
-	std::deque< IWndObserver* > m_wndObservers;
-	std::deque< IEventObserver* > m_eventObservers;
+	std::deque<IWndObserver*> m_wndObservers;
+	std::deque<IEventObserver*> m_eventObservers;
 };
 
 

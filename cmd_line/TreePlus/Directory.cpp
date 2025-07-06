@@ -157,12 +157,12 @@ void CDirectory::ListTableFolder( std::wostream& os, const CTreeGuides& guidePar
 {
 	ASSERT_PTR( m_pTableFolder );
 
-	std::vector< CTextCell* > subFolders;
+	std::vector<CTextCell*> subFolders;
 	m_pTableFolder->QuerySubFolders( subFolders );
 
 	if ( m_options.HasOptionFlag( app::DisplayFiles ) && !m_options.HasOptionFlag( app::NoOutput ) )
 	{
-		std::vector< CTextCell* > leafs;
+		std::vector<CTextCell*> leafs;
 		m_pTableFolder->QueryLeafs( leafs );
 
 		if ( !leafs.empty() )

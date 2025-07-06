@@ -100,21 +100,21 @@ void CMainDialog::SaveToRegistry( void )
 
 void CMainDialog::ParseInput( void )
 {
-	std::vector< std::tstring > lines;
+	std::vector<std::tstring> lines;
 	str::Split( lines, m_inputText.c_str(), lineEnd );
 
 	m_infos.clear();
 	m_infos.reserve( lines.size() );
 
-	for ( std::vector< std::tstring >::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
+	for ( std::vector<std::tstring>::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
 		m_infos.push_back( CDateTimeInfo( *itLine ) );
 
-	std::vector< std::tstring > outputLines;
+	std::vector<std::tstring> outputLines;
 	outputLines.reserve( m_infos.size() );
 
 	const CDateTimeInfo* pPrevInfo = nullptr;
 
-	for ( std::vector< CDateTimeInfo >::const_iterator itInfo = m_infos.begin(); itInfo != m_infos.end(); ++itInfo )
+	for ( std::vector<CDateTimeInfo>::const_iterator itInfo = m_infos.begin(); itInfo != m_infos.end(); ++itInfo )
 	{
 		std::tstring text = itInfo->Format();
 
@@ -282,7 +282,7 @@ void CMainDialog::OnCurrLineApply( void )
 	CTime time;
 
 	if ( GDT_VALID == m_currPicker.GetTime( time ) )
-		switch ( m_currTypeCombo.GetEnum< CDateTimeInfo::Type >() )
+		switch ( m_currTypeCombo.GetEnum<CDateTimeInfo::Type>() )
 		{
 			case CDateTimeInfo::Null: break;
 			case CDateTimeInfo::Time: lineText = num::FormatNumber( time.GetTime() ); break;

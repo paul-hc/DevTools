@@ -25,15 +25,15 @@ protected:
 private:
 	void AddFlagItem( int itemIndex, const CFlagInfo* pFlag );
 
-	const CFlagInfo* GetFlagInfoAt( int pos ) const { return GetPtrAt< CFlagInfo >( pos ); }
+	const CFlagInfo* GetFlagInfoAt( int pos ) const { return GetPtrAt<CFlagInfo>( pos ); }
 	void SetFlagInfoAt( int pos, const CFlagInfo* pFlagInfo ) { VERIFY( SetPtrAt( pos, const_cast<CFlagInfo*>( pFlagInfo ) ) ); }
 
 	CFlagGroup* GetFlagGroup( int groupId ) const;
 	int FindGroupIdWithFlag( const CFlagInfo* pFlag ) const;
 
-	void QueryCheckedFlagWorkingSet( std::vector< const CFlagInfo* >& rFlagSet, int index ) const;
-	bool AnyFlagCheckConflict( const std::vector< const CFlagInfo* >& flagSet, bool checked ) const;
-	bool SetFlagsChecked( const std::vector< const CFlagInfo* >& flagSet, bool checked );
+	void QueryCheckedFlagWorkingSet( std::vector<const CFlagInfo*>& rFlagSet, int index ) const;
+	bool AnyFlagCheckConflict( const std::vector<const CFlagInfo*>& flagSet, bool checked ) const;
+	bool SetFlagsChecked( const std::vector<const CFlagInfo*>& flagSet, bool checked );
 private:
 	CMenu m_contextMenu;
 public:

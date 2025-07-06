@@ -27,11 +27,11 @@ class CWndEnumerator : public CWndEnumBase
 public:
 	CWndEnumerator( void ) {}
 
-	const std::vector< HWND >& GetWindows( void ) const { return m_windows; }
+	const std::vector<HWND>& GetWindows( void ) const { return m_windows; }
 protected:
 	virtual void AddWndItem( HWND hWnd );
 private:
-	std::vector< HWND > m_windows;
+	std::vector<HWND> m_windows;
 };
 
 

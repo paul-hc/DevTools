@@ -64,7 +64,7 @@ struct CFlagGroup
 		return m_pSeparator != nullptr && !m_pSeparator->GetName().empty() ? m_pSeparator->GetName() : anonymousName;
 	}
 
-	const std::vector< const CFlagInfo* >& GetFlags( void ) const { return m_flagInfos; }
+	const std::vector<const CFlagInfo*>& GetFlags( void ) const { return m_flagInfos; }
 
 	bool CanGroup( const CFlagInfo* pFlagInfo ) const;
 	void AddToGroup( CFlagInfo* pFlagInfo );
@@ -78,7 +78,7 @@ struct CFlagGroup
 public:
 	CFlagInfo* m_pSeparator;
 private:
-	std::vector< const CFlagInfo* > m_flagInfos;
+	std::vector<const CFlagInfo*> m_flagInfos;
 };
 
 
@@ -118,9 +118,9 @@ struct CFlagStore
 private:
 	bool NeedsGroups( const CFlagInfo flagInfos[], unsigned int count ) const;
 public:
-	std::vector< std::tstring > m_wndClasses;			// class aliases: family of window classes that share the same flag definitions
-	std::vector< CFlagInfo* > m_flagInfos;
-	std::vector< CFlagGroup* > m_groups;
+	std::vector<std::tstring> m_wndClasses;			// class aliases: family of window classes that share the same flag definitions
+	std::vector<CFlagInfo*> m_flagInfos;
+	std::vector<CFlagGroup*> m_groups;
 private:
 	DWORD m_mask;
 	DWORD m_editableMask;

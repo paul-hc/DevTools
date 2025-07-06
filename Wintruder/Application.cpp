@@ -292,7 +292,7 @@ void CApplication::OnUpdateEnableWindow( CCmdUI* pCmdUI )
 	if ( pCmdUI->m_pMenu != nullptr )
 	{
 		enum Part { Enable, Disable, Suffix };
-		static std::vector< std::tstring > parts;
+		static std::vector<std::tstring> parts;
 		if ( parts.empty() )
 			str::Split( parts, ui::GetMenuItemText( pCmdUI->m_pMenu, pCmdUI->m_nID ).c_str(), _T("|") );
 

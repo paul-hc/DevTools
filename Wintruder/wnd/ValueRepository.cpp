@@ -677,11 +677,11 @@ const CIdentRepository& CIdentRepository::Instance( void )
 const CValueInfo* CIdentRepository::FindValue( int value ) const
 {
 	if ( m_idToValuesMap.empty() )
-		for ( std::vector< CValueStore* >::const_iterator itStore = m_stores.begin(); itStore != m_stores.end(); ++itStore )
-			for ( std::vector< const CValueInfo* >::const_iterator itValueInfo = ( *itStore )->GetValues().begin();
+		for ( std::vector<CValueStore*>::const_iterator itStore = m_stores.begin(); itStore != m_stores.end(); ++itStore )
+			for ( std::vector<const CValueInfo*>::const_iterator itValueInfo = ( *itStore )->GetValues().begin();
 				  itValueInfo != ( *itStore )->GetValues().end(); ++itValueInfo )
 				m_idToValuesMap[ ( *itValueInfo )->m_value ] = *itValueInfo;
 
-	std::unordered_map< int, const CValueInfo* >::const_iterator itFound = m_idToValuesMap.find( value );
+	std::unordered_map<int, const CValueInfo*>::const_iterator itFound = m_idToValuesMap.find( value );
 	return itFound != m_idToValuesMap.end() ? itFound->second : nullptr;
 }

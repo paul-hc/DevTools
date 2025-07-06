@@ -248,8 +248,8 @@ void CEditPlacementPage::OnTsnTrack_Size( void )
 	if ( delta != m_none )
 	{
 		CSize newSize = m_wndRect.Size() + delta;
-		newSize.cx = std::max< long >( newSize.cx, 0 );
-		newSize.cy = std::max< long >( newSize.cy, 0 );
+		newSize.cx = std::max<long>( newSize.cx, 0 );
+		newSize.cy = std::max<long>( newSize.cy, 0 );
 		m_wndRect.BottomRight() = m_wndRect.TopLeft() + newSize;
 		HandleInput();
 	}
@@ -285,8 +285,8 @@ void CEditPlacementPage::OnEnChange_Edit( UINT editId )
 			{
 				case IDC_ORG_X_EDIT:	m_wndRect.OffsetRect( newValue - m_wndRect.left, 0 ); break;
 				case IDC_ORG_Y_EDIT:	m_wndRect.OffsetRect( 0, newValue - m_wndRect.top ); break;
-				case IDC_WIDTH_EDIT:	m_wndRect.right = m_wndRect.left + std::max< long >( newValue, 0 ); break;
-				case IDC_HEIGHT_EDIT:	m_wndRect.bottom = m_wndRect.top + std::max< long >( newValue, 0 ); break;
+				case IDC_WIDTH_EDIT:	m_wndRect.right = m_wndRect.left + std::max<long>( newValue, 0 ); break;
+				case IDC_HEIGHT_EDIT:	m_wndRect.bottom = m_wndRect.top + std::max<long>( newValue, 0 ); break;
 				case IDC_LEFT_EDIT:		m_wndRect.left = newValue; break;
 				case IDC_TOP_EDIT:		m_wndRect.top = newValue; break;
 				case IDC_RIGHT_EDIT:	m_wndRect.right = newValue; break;

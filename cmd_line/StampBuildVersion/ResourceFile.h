@@ -56,7 +56,7 @@ private:
 	fs::CFileState m_origFileState;
 
 	fs::Encoding m_encoding;
-	std::vector< std::string > m_lines;
+	std::vector<std::string> m_lines;
 	CParsePos m_pos;							// index in m_lines where the BuildTimestamp value is located
 	CTime m_origBuildTimestamp;					// IN
 	CTime m_newBuildTimestamp;					// OUT

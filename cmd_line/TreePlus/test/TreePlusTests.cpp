@@ -69,7 +69,7 @@ World\tFranz Zăicescu\tCântice\n\
 	};
 
 
-	void ParseResultStream( std::vector< std::wstring >& rLines, std::wistream& is )
+	void ParseResultStream( std::vector<std::wstring>& rLines, std::wistream& is )
 	{
 		rLines.clear();
 
@@ -92,7 +92,7 @@ World\tFranz Zăicescu\tCântice\n\
 		std::wstringstream stream;
 		app::RunMain( stream, options );
 
-		std::vector< std::wstring > lines;
+		std::vector<std::wstring> lines;
 		ParseResultStream( lines, stream );
 		return str::Join( lines, L"|" );
 	}
@@ -419,7 +419,7 @@ void CTreePlusTests::testTable( const CTextCell* pTableRoot )
 	ASSERT_EQUAL( _T("Soundtrack"), pTableRoot->GetChildren()[ 2 ]->GetName() );
 	ASSERT_EQUAL( _T("World"), pTableRoot->GetChildren()[ 3 ]->GetName() );
 
-	std::vector< CTextCell* > children;
+	std::vector<CTextCell*> children;
 
 	const CTextCell* pCell = pTableRoot->DeepFindCell( _T("Soundtrack\tGoran Bregovic") );
 	ASSERT_PTR( pCell );

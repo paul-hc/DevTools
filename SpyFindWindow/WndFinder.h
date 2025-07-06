@@ -13,7 +13,7 @@ public:
 	CWndSpot WindowFromPoint( const CPoint& screenPos ) const;
 	bool IsValidMatch( HWND hWnd ) const;
 
-	static inline int GetRectArea( const CRect& rect, int minExtent = 1 ) { return std::max< int >( rect.Width(), minExtent ) * std::max< int >( rect.Height(), minExtent ); }
+	static inline int GetRectArea( const CRect& rect, int minExtent = 1 ) { return std::max<int>( rect.Width(), minExtent ) * std::max<int>( rect.Height(), minExtent ); }
 private:
 	HWND FindBestFitSibling( HWND hWnd, const CRect& hitRect, const CPoint& screenPos ) const;
 	HWND FindChildWindow( HWND hWndParent, const CRect& hitRect, const CPoint& screenPos ) const;

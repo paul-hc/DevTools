@@ -51,9 +51,9 @@ void CFindWndDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		const std::vector< CFlagStore* >& specificStores = CStyleRepository::Instance().GetSpecificStores();
-		for ( std::vector< CFlagStore* >::const_iterator itStore = specificStores.begin(); itStore != specificStores.end(); ++itStore )
-			for ( std::vector< std::tstring >::const_iterator itWndClass = ( *itStore )->m_wndClasses.begin(); itWndClass != ( *itStore )->m_wndClasses.end(); ++itWndClass )
+		const std::vector<CFlagStore*>& specificStores = CStyleRepository::Instance().GetSpecificStores();
+		for ( std::vector<CFlagStore*>::const_iterator itStore = specificStores.begin(); itStore != specificStores.end(); ++itStore )
+			for ( std::vector<std::tstring>::const_iterator itWndClass = ( *itStore )->m_wndClasses.begin(); itWndClass != ( *itStore )->m_wndClasses.end(); ++itWndClass )
 				m_wndClassCombo.AddString( itWndClass->c_str() );
 	}
 

@@ -96,7 +96,7 @@ void CAppService::RemoveObserver( CWnd* pObserver )
 
 void CAppService::PublishEvent( app::Event appEvent, IEventObserver* pSender /*= nullptr*/ )
 {
-	for ( std::deque< IEventObserver* >::const_iterator itObserver = m_eventObservers.begin(); itObserver != m_eventObservers.end(); ++itObserver )
+	for ( std::deque<IEventObserver*>::const_iterator itObserver = m_eventObservers.begin(); itObserver != m_eventObservers.end(); ++itObserver )
 		if ( pSender != *itObserver && ( *itObserver )->CanNotify() )
 			( *itObserver )->OnAppEvent( appEvent );
 }
@@ -106,7 +106,7 @@ void CAppService::SetTargetWnd( const CWndSpot& targetWnd, IWndObserver* pSender
 	m_targetWnd = targetWnd;
 
 	// notify observers
-	for ( std::deque< IWndObserver* >::const_iterator itObserver = m_wndObservers.begin(); itObserver != m_wndObservers.end(); ++itObserver )
+	for ( std::deque<IWndObserver*>::const_iterator itObserver = m_wndObservers.begin(); itObserver != m_wndObservers.end(); ++itObserver )
 		if ( pSender != *itObserver && ( *itObserver )->CanNotify() )
 			( *itObserver )->OnTargetWndChanged( m_targetWnd );
 

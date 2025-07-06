@@ -72,7 +72,7 @@ namespace rc
 		CResourceFile* m_pOwner;
 		size_t m_lineNo;
 		TVersionInfoFlags m_viFlags;
-		std::vector< std::string > m_viBlocksStack;
+		std::vector<std::string> m_viBlocksStack;
 
 		static const char s_doubleQuote[];
 	};

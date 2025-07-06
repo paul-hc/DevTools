@@ -34,7 +34,7 @@ public:
 
 	WndImage LookupImage( HWND hWnd ) const;
 private:
-	std::unordered_map< std::tstring, WndImage > m_classToImageMap;
+	std::unordered_map<std::tstring, WndImage> m_classToImageMap;
 	CImageList m_imageList;
 };
 

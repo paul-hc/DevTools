@@ -108,9 +108,9 @@ void CEditIdentPage::DoDataExchange( CDataExchange* pDX )
 	{
 		ui::SetSpinRange( this, IDC_IDENT_DEC_SPIN, SHRT_MIN, SHRT_MAX );
 
-		const std::vector< CValueStore* >& idStores = CIdentRepository::Instance().m_stores;
-		for ( std::vector< CValueStore* >::const_iterator itStore = idStores.begin(); itStore != idStores.end(); ++itStore )
-			for ( std::vector< const CValueInfo* >::const_iterator itValue = ( *itStore )->GetValues().begin();
+		const std::vector<CValueStore*>& idStores = CIdentRepository::Instance().m_stores;
+		for ( std::vector<CValueStore*>::const_iterator itStore = idStores.begin(); itStore != idStores.end(); ++itStore )
+			for ( std::vector<const CValueInfo*>::const_iterator itValue = ( *itStore )->GetValues().begin();
 				  itValue != ( *itStore )->GetValues().end(); ++itValue )
 			{
 				int pos = m_literalCombo.AddString( ( *itValue )->Format().c_str() );

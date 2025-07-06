@@ -82,7 +82,7 @@ namespace ft
 
 		if ( nullptr == s_imageListType.GetSafeHandle() )
 		{
-			VERIFY( ft::_ImageCount == res::LoadImageListDIB( s_imageListType, IDB_FILE_TYPE_STRIP, color::ToolStripPink ).m_imageCount );
+			VERIFY( ft::_ImageCount == res::LoadImageListDIB( &s_imageListType, IDB_FILE_TYPE_STRIP, color::ToolStripPink ).m_imageCount );
 			ASSERT( CIconSize::GetSizeOf( SmallIcon ) == gdi::GetImageIconSize( s_imageListType ) );
 		}
 

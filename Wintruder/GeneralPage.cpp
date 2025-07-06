@@ -24,7 +24,7 @@ public:
 	CInfoEditBox( CGeneralPage* pOwner ) : m_pOwner( pOwner ), m_lastSel( 0 ), m_lastCaretLine( -1 ), m_lineHeight( -1 ) { ASSERT_PTR( m_pOwner ); }
 
 	void SetupWindow( void );
-	bool UpdateTooltipInfo( const std::vector< std::tstring >& toolInfos );
+	bool UpdateTooltipInfo( const std::vector<std::tstring>& toolInfos );
 
 	CRect GetLineRect( int lineIndex );
 	void MoveButtonToLine( int lineIndex );
@@ -59,7 +59,7 @@ void CInfoEditBox::SetupWindow( void )
 	pMainTooltip->AddTool( m_pOwner->GetButton(), _T("") );
 }
 
-bool CInfoEditBox::UpdateTooltipInfo( const std::vector< std::tstring >& toolInfos )
+bool CInfoEditBox::UpdateTooltipInfo( const std::vector<std::tstring>& toolInfos )
 {
 	bool valid = toolInfos.size() == COUNT_OF( m_toolLine );
 	CToolTipCtrl* pMainTooltip = app::GetMainTooltip();
@@ -306,7 +306,7 @@ void CGeneralPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 	m_pInfoEdit->SetSel( lineStart, lineStart );
 	OnCaretLineChanged( caretLine );
 
-	std::vector< std::tstring > toolInfos;
+	std::vector<std::tstring> toolInfos;
 
 	if ( targetWnd.IsValid() )
 	{	// build tooltip text array

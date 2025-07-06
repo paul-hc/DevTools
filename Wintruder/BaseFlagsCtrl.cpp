@@ -21,7 +21,7 @@ void CBaseFlagsCtrl::SetFlagStore( const CFlagStore* pFlagStore )
 {
 	m_flagsMask = 0;
 
-	std::vector< const CFlagStore* > flagStores;
+	std::vector<const CFlagStore*> flagStores;
 	if ( pFlagStore != nullptr )
 	{
 		flagStores.push_back( pFlagStore );
@@ -37,12 +37,12 @@ void CBaseFlagsCtrl::SetFlagStore( const CFlagStore* pFlagStore )
 	}
 }
 
-void CBaseFlagsCtrl::SetMultiFlagStores( const std::vector< const CFlagStore* >& flagStores, DWORD flagsMask /*= UINT_MAX*/ )
+void CBaseFlagsCtrl::SetMultiFlagStores( const std::vector<const CFlagStore*>& flagStores, DWORD flagsMask /*= UINT_MAX*/ )
 {
 	m_flagsMask = flagsMask;
 
 	if ( 0 == m_flagsMask )
-		for ( std::vector< const CFlagStore* >::const_iterator itFlagStore = flagStores.begin(); itFlagStore != flagStores.end(); ++itFlagStore )
+		for ( std::vector<const CFlagStore*>::const_iterator itFlagStore = flagStores.begin(); itFlagStore != flagStores.end(); ++itFlagStore )
 			m_flagsMask |= ( *itFlagStore )->GetMask();
 
 	m_flags = 0;
@@ -103,7 +103,7 @@ std::tstring CBaseFlagsCtrl::FormatTooltip( void ) const
 			m_flagStores.front()->StreamFormatMask( text );
 			break;
 		default:
-			for ( std::vector< const CFlagStore* >::const_iterator itFlagStore = m_flagStores.begin(); itFlagStore != m_flagStores.end(); ++itFlagStore )
+			for ( std::vector<const CFlagStore*>::const_iterator itFlagStore = m_flagStores.begin(); itFlagStore != m_flagStores.end(); ++itFlagStore )
 				( *itFlagStore )->StreamFormatFlags( text, m_flags );
 
 			CFlagStore::StreamMask( text, m_flagsMask );

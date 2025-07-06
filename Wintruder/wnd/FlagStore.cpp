@@ -98,7 +98,7 @@ void CFlagGroup::AddToGroup( CFlagInfo* pFlagInfo )
 
 const CFlagInfo* CFlagGroup::FindOnFlag( DWORD flags ) const
 {
-	for ( std::vector< const CFlagInfo* >::const_iterator itFlagInfo = m_flagInfos.begin();
+	for ( std::vector<const CFlagInfo*>::const_iterator itFlagInfo = m_flagInfos.begin();
 		  itFlagInfo != m_flagInfos.end(); ++itFlagInfo )
 		if ( ( *itFlagInfo )->IsOn( flags ) )
 			return *itFlagInfo;
@@ -108,7 +108,7 @@ const CFlagInfo* CFlagGroup::FindOnFlag( DWORD flags ) const
 
 bool CFlagGroup::IsReadOnlyGroup( void ) const
 {
-	for ( std::vector< const CFlagInfo* >::const_iterator itFlagInfo = m_flagInfos.begin();
+	for ( std::vector<const CFlagInfo*>::const_iterator itFlagInfo = m_flagInfos.begin();
 		  itFlagInfo != m_flagInfos.end(); ++itFlagInfo )
 		if ( !( *itFlagInfo )->IsReadOnly() )
 			return false;
@@ -187,7 +187,7 @@ bool CFlagStore::NeedsGroups( const CFlagInfo flagInfos[], unsigned int count ) 
 
 void CFlagStore::StreamFormatFlags( std::tstring& rOutput, DWORD flags, const TCHAR* pSep /*= stream::flagSep*/ ) const
 {
-	for ( std::vector< CFlagInfo* >::const_iterator itFlag = m_flagInfos.begin(); itFlag != m_flagInfos.end(); ++itFlag )
+	for ( std::vector<CFlagInfo*>::const_iterator itFlag = m_flagInfos.begin(); itFlag != m_flagInfos.end(); ++itFlag )
 		( *itFlag )->StreamFlagName( rOutput, flags, pSep );		// conditional if flags are on
 }
 
@@ -211,7 +211,7 @@ int CFlagStore::CheckFlagsTransition( DWORD newFlags, DWORD oldFlags ) const
 // returns -1 if no error detected, else the index of element that generates the error
 {
 	const int count = static_cast<int>( m_flagInfos.size() );
-	std::vector< CFlagInfo* >::const_iterator itFlag = m_flagInfos.begin();
+	std::vector<CFlagInfo*>::const_iterator itFlag = m_flagInfos.begin();
 
 	DWORD roMask = GetReadOnlyMask();
 	DWORD roMismatch = ( newFlags & roMask ) ^ ( oldFlags & roMask );
@@ -239,14 +239,14 @@ int CFlagStore::CheckFlagsTransition( DWORD newFlags, DWORD oldFlags ) const
 					if ( !foundMatchExclusive )
 						foundMatchExclusive = true;
 					else
-						return utl::Distance< int >( m_flagInfos.begin(), itFlag );		// error: many mutual exclusive fields active?
+						return utl::Distance<int>( m_flagInfos.begin(), itFlag );		// error: many mutual exclusive fields active?
 
 				++itFlag;
 			}
 			if ( !foundMatchExclusive )
 				return i;							// error: none of mutual exclusive group is active
 
-			i = utl::Distance< int >( m_flagInfos.begin(), --itFlag );					// restore increment context
+			i = utl::Distance<int>( m_flagInfos.begin(), --itFlag );					// restore increment context
 		}
 
 	return -1;

@@ -165,7 +165,7 @@ namespace wt
 
 	const TTreeItemIndent* CWndTreeBuilder::FindWndItem( HWND hWnd ) const
 	{
-		std::unordered_map< HWND, TTreeItemIndent >::const_iterator itFound = m_wndToItemMap.find( hWnd );
+		std::unordered_map<HWND, TTreeItemIndent>::const_iterator itFound = m_wndToItemMap.find( hWnd );
 		return itFound != m_wndToItemMap.end() ? &itFound->second : nullptr;
 	}
 
@@ -625,7 +625,7 @@ void CTreeWndPage::CmColapseBranch( void )
 
 void CTreeWndPage::OnCopyTreeAncestors( void )
 {
-	std::deque< HTREEITEM > ancestors;
+	std::deque<HTREEITEM> ancestors;
 	for ( HTREEITEM hItem = m_treeCtrl.GetSelectedItem(); hItem != nullptr; hItem = m_treeCtrl.GetParentItem( hItem ) )
 		ancestors.push_front( hItem );
 

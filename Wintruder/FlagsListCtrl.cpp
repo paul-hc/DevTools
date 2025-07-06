@@ -151,27 +151,27 @@ int CFlagsListCtrl::FindGroupIdWithFlag( const CFlagInfo* pFlag ) const
 	if ( pFlag->m_pGroup != nullptr )
 		if ( const CFlagStore* pFlagStore = GetFlagStore() )
 		{
-			const std::vector< CFlagGroup* >& groups = pFlagStore->m_groups;
-			std::vector< CFlagGroup* >::const_iterator itGroup = std::find( groups.begin(), groups.end(), pFlag->m_pGroup );
+			const std::vector<CFlagGroup*>& groups = pFlagStore->m_groups;
+			std::vector<CFlagGroup*>::const_iterator itGroup = std::find( groups.begin(), groups.end(), pFlag->m_pGroup );
 			if ( itGroup != groups.end() )
 				return static_cast<int>( std::distance( groups.begin(), itGroup ) );
 		}
 	return -1;
 }
 
-void CFlagsListCtrl::QueryCheckedFlagWorkingSet( std::vector< const CFlagInfo* >& rFlagSet, int index ) const
+void CFlagsListCtrl::QueryCheckedFlagWorkingSet( std::vector<const CFlagInfo*>& rFlagSet, int index ) const
 {
 	if ( IsSelected( index ) )
 		QuerySelectionAs( rFlagSet );
 	else
-		rFlagSet.push_back( GetPtrAt< CFlagInfo >( index ) );
+		rFlagSet.push_back( GetPtrAt<CFlagInfo>( index ) );
 }
 
-bool CFlagsListCtrl::AnyFlagCheckConflict( const std::vector< const CFlagInfo* >& flagSet, bool checked ) const
+bool CFlagsListCtrl::AnyFlagCheckConflict( const std::vector<const CFlagInfo*>& flagSet, bool checked ) const
 {
-	std::vector< CFlagGroup* > flagGroups;		// includes radio, check-box or NULL (groupless)
+	std::vector<CFlagGroup*> flagGroups;		// includes radio, check-box or NULL (groupless)
 
-	for ( std::vector< const CFlagInfo* >::const_iterator itFlag = flagSet.begin(); itFlag != flagSet.end(); ++itFlag )
+	for ( std::vector<const CFlagInfo*>::const_iterator itFlag = flagSet.begin(); itFlag != flagSet.end(); ++itFlag )
 		if ( ( *itFlag )->IsReadOnly() )
 			return true;				// can't modify read-only flags
 		else
@@ -183,7 +183,7 @@ bool CFlagsListCtrl::AnyFlagCheckConflict( const std::vector< const CFlagInfo* >
 					return true;		// can't uncheck a radio button
 		}
 
-	std::vector< CFlagGroup* >::iterator itCheckGroup = std::partition( flagGroups.begin(), flagGroups.end(), pred::IsRadioGroup() );
+	std::vector<CFlagGroup*>::iterator itCheckGroup = std::partition( flagGroups.begin(), flagGroups.end(), pred::IsRadioGroup() );
 	size_t radioGroupCount = std::distance( flagGroups.begin(), itCheckGroup );
 	size_t checkGroupCount = std::distance( itCheckGroup, flagGroups.end() );
 
@@ -195,11 +195,11 @@ bool CFlagsListCtrl::AnyFlagCheckConflict( const std::vector< const CFlagInfo* >
 	return false;						// no conflicts
 }
 
-bool CFlagsListCtrl::SetFlagsChecked( const std::vector< const CFlagInfo* >& flagSet, bool checked )
+bool CFlagsListCtrl::SetFlagsChecked( const std::vector<const CFlagInfo*>& flagSet, bool checked )
 {
 	DWORD flags = GetFlags();
 
-	for ( std::vector< const CFlagInfo* >::const_iterator itFlag = flagSet.begin(); itFlag != flagSet.end(); ++itFlag )
+	for ( std::vector<const CFlagInfo*>::const_iterator itFlag = flagSet.begin(); itFlag != flagSet.end(); ++itFlag )
 		( *itFlag )->SetTo( &flags, checked );
 
 	UserSetFlags( flags );
@@ -279,7 +279,7 @@ BOOL CFlagsListCtrl::OnLvnToggleCheckState_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 	ASSERT( !IsInternalChange() );
 	*pResult = 0;
 
-	std::vector< const CFlagInfo* > flagSet;
+	std::vector<const CFlagInfo*> flagSet;
 	QueryCheckedFlagWorkingSet( flagSet, pToggleInfo->m_pListView->iItem );
 
 	if ( AnyFlagCheckConflict( flagSet, GetCheckStatePolicy()->IsCheckedState( pToggleInfo->m_newCheckState ) ) )
@@ -300,7 +300,7 @@ BOOL CFlagsListCtrl::OnLvnCheckStatesChanged_Reflect( NMHDR* pNmHdr, LRESULT* pR
 	*pResult = 0;
 
 	// user has just toggled the check-state
-	std::vector< const CFlagInfo* > flagSet;
+	std::vector<const CFlagInfo*> flagSet;
 	QueryObjectsByIndex( flagSet, pInfo->m_itemIndexes );		// get all flags impacted by the toggle
 
 	if ( AnyFlagCheckConflict( flagSet, IsChecked( pInfo->m_itemIndexes.front() ) ) )		// first index is the toggled reference
@@ -336,7 +336,7 @@ BOOL CFlagsListCtrl::OnLvnLinkClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 		else
 		{
 			bool checkAll = nullptr == pFlagGroup->FindOnFlag( flags );
-			for ( std::vector< const CFlagInfo* >::const_iterator itFlag = pFlagGroup->GetFlags().begin(); itFlag != pFlagGroup->GetFlags().end(); ++itFlag )
+			for ( std::vector<const CFlagInfo*>::const_iterator itFlag = pFlagGroup->GetFlags().begin(); itFlag != pFlagGroup->GetFlags().end(); ++itFlag )
 				( *itFlag )->SetTo( &flags, checkAll );
 		}
 
@@ -359,14 +359,14 @@ void CFlagsListCtrl::OnUpdateCopy( CCmdUI* pCmdUI )
 
 void CFlagsListCtrl::OnCopySelected( void )
 {
-	std::vector< CFlagInfo* > selFlags;
+	std::vector<CFlagInfo*> selFlags;
 	QuerySelectionAs( selFlags );
 
 	if ( !selFlags.empty() )
 	{
-		std::vector< std::tstring > lines;
+		std::vector<std::tstring> lines;
 
-		for ( std::vector< CFlagInfo* >::const_iterator itSelFlag = selFlags.begin(); itSelFlag != selFlags.end(); ++itSelFlag )
+		for ( std::vector<CFlagInfo*>::const_iterator itSelFlag = selFlags.begin(); itSelFlag != selFlags.end(); ++itSelFlag )
 			lines.push_back( ( *itSelFlag )->GetName() );
 
 		CTextClipboard::CopyToLines( lines, m_hWnd );

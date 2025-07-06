@@ -43,7 +43,7 @@ public:
 	fs::TDirPath m_targetDirPath;
 	std::tstring m_searchSpecs;
 	std::tstring m_excludeWildSpec;						// multiple list separated by ';' or ','
-	std::vector< std::tstring > m_excludeFindSpecs;
+	std::vector<std::tstring> m_excludeFindSpecs;
 	std::auto_ptr<fs::TDirPath> m_pBackupDirPath;
 
 	BYTE m_mustHaveFileAttr;

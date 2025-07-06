@@ -77,122 +77,122 @@ namespace wc
 
 	bool IsDialogBox( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("#32770") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("#32770") );
 	}
 
 	bool IsPopupMenu( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("#32768") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("#32768") );
 	}
 
 	bool IsButton( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("Button") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("Button") );
 	}
 
 	bool IsEdit( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("Edit") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("Edit") );
 	}
 
 	bool IsStatic( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("Static") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("Static") );
 	}
 
 	bool IsScrollBar( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("ScrollBar") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("ScrollBar") );
 	}
 
 	bool IsComboBox( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("ComboBox") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("ComboBox") );
 	}
 
 	bool IsComboBoxEx( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("ComboBoxEx32") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("ComboBoxEx32") );
 	}
 
 	bool IsListBox( const TCHAR* pClassName )
 	{
-		return str::Equals< str::IgnoreCase >( pClassName, _T("ListBox") );
+		return str::Equals<str::IgnoreCase>( pClassName, _T("ListBox") );
 	}
 
 	bool IsHeaderCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("SysHeader") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("SysHeader") ) != std::tstring::npos;
 	}
 
 	bool IsListCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("SysListView") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("SysListView") ) != std::tstring::npos;
 	}
 
 	bool IsTreeCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("SysTreeView") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("SysTreeView") ) != std::tstring::npos;
 	}
 
 	bool IsTabCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("SysTabControl") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("SysTabControl") ) != std::tstring::npos;
 	}
 
 	bool IsRichEdit( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("RichEdit") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("RichEdit") ) != std::tstring::npos;
 	}
 
 	bool IsMonthCalCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("SysMonthCal") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("SysMonthCal") ) != std::tstring::npos;
 	}
 
 	bool IsDateTimePickerCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("SysDateTimePick") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("SysDateTimePick") ) != std::tstring::npos;
 	}
 
 	bool IsToolbarCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("ToolbarWindow") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("ToolbarWindow") ) != std::tstring::npos;
 	}
 
 	bool IsStatusBarCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("msctls_statusbar") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("msctls_statusbar") ) != std::tstring::npos;
 	}
 
 	bool IsReBarCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("ReBarWindow") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("ReBarWindow") ) != std::tstring::npos;
 	}
 
 	bool IsSpinButton( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("MSCtls_UpDown") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("MSCtls_UpDown") ) != std::tstring::npos;
 	}
 
 	bool IsTrackBar( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("MSCtls_TrackBar") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("MSCtls_TrackBar") ) != std::tstring::npos;
 	}
 
 	bool IsProgress( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("msctls_progress") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("msctls_progress") ) != std::tstring::npos;
 	}
 
 	bool IsToolTipCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("tooltips_class") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("tooltips_class") ) != std::tstring::npos;
 	}
 
 	bool IsAnimateCtrl( const TCHAR* pClassName )
 	{
-		return str::Find< str::IgnoreCase >( pClassName, _T("SysAnimate") ) != std::tstring::npos;
+		return str::Find<str::IgnoreCase>( pClassName, _T("SysAnimate") ) != std::tstring::npos;
 	}
 
 

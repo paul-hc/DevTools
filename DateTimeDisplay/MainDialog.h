@@ -31,7 +31,7 @@ private:
 private:
 	std::tstring m_inputText;
 	Range<int> m_inputSel;
-	std::vector< CDateTimeInfo > m_infos;
+	std::vector<CDateTimeInfo> m_infos;
 
 	std::tstring m_inputCaretLineText;
 	std::tstring m_currFormat;

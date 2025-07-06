@@ -23,10 +23,10 @@ struct CValueStore
 	CValueStore( const TCHAR* pName, CValueInfo valueInfos[], unsigned int count );
 
 	const std::tstring& GetName( void ) const { return m_name; }
-	const std::vector< const CValueInfo* >& GetValues( void ) const { return m_valueInfos; }
+	const std::vector<const CValueInfo*>& GetValues( void ) const { return m_valueInfos; }
 private:
 	std::tstring m_name;
-	std::vector< const CValueInfo* > m_valueInfos;
+	std::vector<const CValueInfo*> m_valueInfos;
 };
 
 
@@ -39,8 +39,8 @@ public:
 
 	const CValueInfo* FindValue( int value ) const;
 public:
-	std::vector< CValueStore* > m_stores;
-	mutable std::unordered_map< int, const CValueInfo* > m_idToValuesMap;
+	std::vector<CValueStore*> m_stores;
+	mutable std::unordered_map<int, const CValueInfo*> m_idToValuesMap;
 };
 
 

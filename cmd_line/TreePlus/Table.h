@@ -26,13 +26,13 @@ public:
 	std::tstring MakePath( const CTextCell* pRoot = nullptr ) const;
 	CTextCell* DeepFindCell( const TCHAR* pCellPath ) const;		// path names are separated by s_columnSep ('\t')
 
-	const std::vector< CTextCell* >& GetChildren( void ) const { return m_children; }
-	void QuerySubFolders( std::vector< CTextCell* >& rSubFolders ) const;
-	void QueryLeafs( std::vector< CTextCell* >& rLeafs ) const;
+	const std::vector<CTextCell*>& GetChildren( void ) const { return m_children; }
+	void QuerySubFolders( std::vector<CTextCell*>& rSubFolders ) const;
+	void QueryLeafs( std::vector<CTextCell*>& rLeafs ) const;
 private:
 	std::tstring m_name;
 	const CTextCell* m_pParent;
-	std::vector< CTextCell* > m_children;
+	std::vector<CTextCell*> m_children;
 public:
 	static TCHAR s_columnSep[];
 };
@@ -50,7 +50,7 @@ public:
 
 	fs::Encoding ParseTextFile( const fs::CPath& textFilePath, bool sortRows ) throws_( CRuntimeException );
 
-	void ParseRows( std::vector< std::tstring >& rRows, bool sortRows );
+	void ParseRows( std::vector<std::tstring>& rRows, bool sortRows );
 	void ParseColumns( const std::tstring& row );
 private:
 	CTextCell m_root;		// table root

@@ -288,8 +288,8 @@ void CMainDialog::SearchWindow( void )
 
 void CMainDialog::SearchNextWindow( bool forward /*= true*/ )
 {
-	CScopedValue< bool > scopedForward( &m_searchPattern.m_forward, forward );
-	CScopedValue< bool > scopedFromSel( &m_searchPattern.m_fromBeginning, false );
+	CScopedValue<bool> scopedForward( &m_searchPattern.m_forward, forward );
+	CScopedValue<bool> scopedFromSel( &m_searchPattern.m_fromBeginning, false );
 
 	SearchWindow();
 }
