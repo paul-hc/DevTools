@@ -5,9 +5,11 @@
 #include "ScopedBitmapMemDC.h"
 #include "Color.h"
 #include "Image_fwd.h"
+#include "DibDraw_fwd.h"
 
 
 class CDibPixels;
+namespace ui { interface IImageProxy; }
 
 
 // works with PNGs or DIB-BMPp 4/8/24/32bpp loaded from file or resource
@@ -46,7 +48,7 @@ public:
 	bool IsIndexed( void ) const { ASSERT( IsDibSection() ); return m_bitsPerPixel <= 8; }
 	const CDibMeta& GetSrcMeta( void ) const { return m_srcDibMeta; }		// source image information preserved
 
-	WORD GetBitsPerPixel( void ) const { return m_bitsPerPixel; }
+	TBitsPerPixel GetBitsPerPixel( void ) const { return m_bitsPerPixel; }
 	const CSize& GetSize( void ) const { ASSERT( IsValid() && m_bitmapSize == gdi::GetBitmapSize( GetBitmapHandle() ) ); return m_bitmapSize; }
 
 	bool IsPng( void ) const { return HasFlag( m_flags, F_IsPng ); }
@@ -68,13 +70,20 @@ public:
 	bool LoadBitmapResource( UINT bitmapId );
 	bool LoadImageResource( UINT imageId, ui::ImagingApi api = ui::WicApi );		// PNG or BMP
 
-	ui::CImageListInfo MakeImageList( CImageList& rDestImageList, int imageCount, bool preserveThis = false );
-	TImageListFlags CreateEmptyImageList( CImageList& rDestImageList, const CSize& imageSize, int imageCount ) const;		// bpp compatible with this DIB
+	ui::CImageListInfo MakeImageList( CImageList* pDestImageList, int imageCount, bool preserveThis = false );
+	TImageListFlags CreateEmptyImageList( CImageList* pDestImageList, const CSize& imageSize, int imageCount ) const;		// bpp compatible with this DIB
 	TImageListFlags GetImageListFlags( void ) const { return m_srcDibMeta.GetImageListFlags(); }
 
 	// negative height for a top-down DIB (positive for bottpm-up DIB)
-	bool CreateDIBSection( CDibPixels& rPixels, const BITMAPINFO& dibInfo );
-	bool CreateDIBSection( CDibPixels& rPixels, int width, int height, UINT bitsPerPixel );
+	bool CreateDIBSection( CDibPixels* pOutPixels, const BITMAPINFO& dibInfo, HDC hDC = nullptr );
+	bool CreateDIBSection( CDibPixels* pOutPixels, int width, int height, TBitsPerPixel bitsPerPixel, HDC hDC = nullptr );
+
+	bool CreateDIB32Copy( const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP, COLORREF transpColor = CLR_NONE );
+	bool CreateDIB32Copy( HBITMAP hBitmapSrc, TBitsPerPixel srcBPP = 0, COLORREF transpColor = CLR_NONE );
+
+	// disabled gray look for icons, bitmaps, imagelists (good-looking, faded) - caller owns the gray bitmap:
+	bool CreateDisabledEffectDIB32( const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP, gdi::DisabledStyle style = gdi::Dis_FadeGray, COLORREF transpColor = CLR_NONE );
+	void ApplyDisabledEffect( TBitsPerPixel srcBPP, COLORREF transpColor = CLR_NONE, gdi::DisabledStyle style = gdi::Dis_FadeGray );
 
 	// DIB/DDB drawing - caller must use a CScopedPalette if the DIB has got a palette
 	// draws transparently if it's got an alpha channel or transparent color
@@ -89,6 +98,8 @@ private:
 
 	bool DoAlphaBlend( CDC* pDC, const CRect& rect, BYTE srcAlpha = 255, BYTE blendOp = AC_SRC_OVER ) const;
 	bool DoBlit( CDC* pDC, const CRect& rect, DWORD rop = SRCCOPY ) const;
+
+	bool AlterProxyTransparentColor( COLORREF* pTranspColor, const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP );
 private:
 	// hidden base members
 	using CBitmap::Attach;

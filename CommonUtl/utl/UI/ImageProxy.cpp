@@ -23,6 +23,7 @@ void ui::IImageProxy::FillBackground( CDC* pDC, const CPoint& pos, COLORREF bkCo
 	::SelectObject( *pDC, hOldBrush );
 }
 
+
 // CBitmapProxy implementation
 
 CBitmapProxy::CBitmapProxy( HBITMAP hBitmap /*= nullptr*/ )
@@ -61,7 +62,7 @@ bool CBitmapProxy::HasTransparency( void ) const override
 	return m_pDibTraits.get() != nullptr &&m_pDibTraits->HasAlphaChannel();
 }
 
-void CBitmapProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= color::Null*/ ) const override
+void CBitmapProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= CLR_NONE*/ ) const override
 {
 	ASSERT( !IsEmpty() );
 
@@ -87,7 +88,7 @@ void CBitmapProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= c
 	}
 }
 
-void CBitmapProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= color::Null*/ ) const override
+void CBitmapProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= CLR_NONE*/ ) const override
 {
 	transpColor;
 	ASSERT( !IsEmpty() );
@@ -152,13 +153,13 @@ const CSize& CIconProxy::GetSize( void ) const override
 	return m_pIcon->GetSize();
 }
 
-void CIconProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = color::Null*/ ) const override
+void CIconProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
 {
 	if ( m_pIcon != nullptr )
 		m_pIcon->Draw( *pDC, pos );
 }
 
-void CIconProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = color::Null*/ ) const override
+void CIconProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
 {
 	if ( m_pIcon != nullptr )
 		m_pIcon->Draw( *pDC, pos, false );
@@ -172,35 +173,20 @@ CImageListProxy::CImageListProxy( CImageList* pImageList /*= nullptr*/, int inde
 	, m_index( index )
 	, m_overlayMask( NoOverlayMask )
 	, m_pExternalOverlay( nullptr )
-	, m_size( 0, 0 )
+	, m_imageSize( 0, 0 )
 {
 	SetOverlayMask( overlayMask );		// do some validation
 }
 
-const CSize& CImageListProxy::GetSize( void ) const override
-{
-	if ( 0 == m_size.cx && 0 == m_size.cy )
-		if ( !IsEmpty() )
-		{
-			int cx, cy;
-			VERIFY( ::ImageList_GetIconSize( m_pImageList->GetSafeHandle(), &cx, &cy ) );
-			m_size.cx = cx;
-			m_size.cy = cy;
-		}
-
-	return m_size;
-}
-
-void CImageListProxy::Set( CImageList* pImageList, int index )
+void CImageListProxy::Reset( CImageList* pImageList, int index )
 {
 	m_pImageList = pImageList;
 	m_index = index;
-	m_size.cx = m_size.cy = 0;
+	m_imageSize = gdi::GetImageIconSize( m_pImageList->GetSafeHandle() );
 }
 
-void CImageListProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= color::Null*/ ) const override
+void CImageListProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
 {
-	transpColor;
 	ASSERT( !IsEmpty() );
 
 	VERIFY( const_cast<CImageList*>( m_pImageList )->Draw( pDC, m_index, pos, ILD_TRANSPARENT | INDEXTOOVERLAYMASK( m_overlayMask ) ) );
@@ -209,9 +195,10 @@ void CImageListProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor /*
 		m_pExternalOverlay->Draw( pDC, pos, ILD_TRANSPARENT );
 }
 
-void CImageListProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= color::Null*/ ) const override
+void CImageListProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
 {
-	transpColor;
+	ASSERT( !IsEmpty() );
+
 	DrawDisabledImpl( pDC, pos, ILD_TRANSPARENT | INDEXTOOVERLAYMASK( m_overlayMask ) );
 
 	if ( HasExternalOverlay() )
@@ -221,19 +208,17 @@ void CImageListProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transp
 void CImageListProxy::DrawDisabledImpl( CDC* pDC, const CPoint& pos, UINT style ) const
 {
 	ASSERT( !IsEmpty() );
-	GetSize();
-	gdi::DrawDisabledImage( pDC, *m_pImageList, m_size, m_index, pos, m_size, style );
+	gdi::DrawDisabledImage( pDC, *m_pImageList, m_imageSize, m_index, pos, m_imageSize, style );
 }
 
 void CImageListProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT style ) const
 {
 	ASSERT( !IsEmpty() );
-	GetSize();
 
 	CDC memDC;
 	if ( !memDC.CreateCompatibleDC( pDC ) )
 	{
-		CIcon icon( m_pImageList->ExtractIcon( m_index ), m_size );
+		CIcon icon( m_pImageList->ExtractIcon( m_index ), m_imageSize );
 		icon.DrawDisabled( *pDC, pos );
 		return;
 	}
@@ -242,8 +227,8 @@ void CImageListProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT st
 	ZeroMemory( &bmpInfo, sizeof( BITMAPINFO ) );
 
 	bmpInfo.bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
-	bmpInfo.bmiHeader.biWidth = m_size.cx;
-	bmpInfo.bmiHeader.biHeight = m_size.cy;
+	bmpInfo.bmiHeader.biWidth = m_imageSize.cx;
+	bmpInfo.bmiHeader.biHeight = m_imageSize.cy;
 	bmpInfo.bmiHeader.biPlanes = 1;
 	bmpInfo.bmiHeader.biBitCount = 32;
 	bmpInfo.bmiHeader.biCompression = BI_RGB;
@@ -280,7 +265,7 @@ void CImageListProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT st
 			blendFunction.SourceConstantAlpha = transparent50;
 			blendFunction.AlphaFormat = AC_SRC_ALPHA;  // use bitmap alpha
 
-			if ( !pDC->AlphaBlend( pos.x, pos.y, m_size.cx, m_size.cy, &memDC, 0, 0, m_size.cx, m_size.cy, blendFunction ) )
+			if ( !pDC->AlphaBlend( pos.x, pos.y, m_imageSize.cx, m_imageSize.cy, &memDC, 0, 0, m_imageSize.cx, m_imageSize.cy, blendFunction ) )
 				hasAlphaChannel = false;
 		}
 	}
@@ -291,12 +276,12 @@ void CImageListProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT st
 		// white: destintation (transparent)
 
 		CBitmap monochromeBitmap;
-		monochromeBitmap.CreateBitmap( m_size.cx, m_size.cy, 1, 1, nullptr );		// for color: monochromeBitmap.CreateCompatibleBitmap( pDC, cx, cy );
+		monochromeBitmap.CreateBitmap( m_imageSize.cx, m_imageSize.cy, 1, 1, nullptr );		// for color: monochromeBitmap.CreateCompatibleBitmap( pDC, cx, cy );
 
 		CScopedGdi<CBitmap> scopedBitmap( &memDC, &monochromeBitmap );
 		CPoint posMem( 0, 0 );
 
-		memDC.PatBlt( posMem.x, posMem.y, m_size.cx, m_size.cy, WHITENESS );	// fill background white first
+		memDC.PatBlt( posMem.x, posMem.y, m_imageSize.cx, m_imageSize.cy, WHITENESS );		// fill background white first
 		Draw( &memDC, posMem, style );
 
 		COLORREF oldBkColor = pDC->SetBkColor( RGB( 255, 255, 255 ) );
@@ -304,14 +289,48 @@ void CImageListProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT st
 		CBrush* pOldBrush = pDC->SelectObject( &brushHighlight );
 
 		// draw with highlight color at offset (1, 1) - this will not be visible on white background
-		pDC->BitBlt( pos.x + 1, pos.y + 1, m_size.cx, m_size.cy, &memDC, 0, 0, ROP_PSDPxax );
+		pDC->BitBlt( pos.x + 1, pos.y + 1, m_imageSize.cx, m_imageSize.cy, &memDC, 0, 0, ROP_PSDPxax );
 
 		CBrush brushShadow( GetSysColor( COLOR_3DSHADOW ) );
 		pDC->SelectObject( &brushShadow );
-		pDC->BitBlt( pos.x, pos.y, m_size.cx, m_size.cy, &memDC, 0, 0, ROP_PSDPxax ); // draw with shadow color
+		pDC->BitBlt( pos.x, pos.y, m_imageSize.cx, m_imageSize.cy, &memDC, 0, 0, ROP_PSDPxax ); // draw with shadow color
 		pDC->SelectObject( pOldBrush );
 		pDC->SetBkColor( oldBkColor );
 	}
+}
+
+
+// CImageListStripProxy implementation
+
+CImageListStripProxy::CImageListStripProxy( const CImageList* pImageList )
+	: m_pImageList( const_cast<CImageList*>( pImageList ) )
+	, m_imageCount( m_pImageList->GetImageCount() )
+	, m_imageSize( gdi::GetImageIconSize( m_pImageList->GetSafeHandle() ) )
+	, m_stripSize( m_imageSize.cx * m_imageCount, m_imageSize.cy )
+{
+	ASSERT_PTR( m_pImageList );
+}
+
+void CImageListStripProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+{
+	ASSERT( !IsEmpty() );
+
+	CImageList* pImageList = const_cast<CImageList*>( m_pImageList );
+	CPoint imagePos = pos;
+
+	for ( int i = 0; i != m_imageCount; ++i, imagePos.x += m_imageSize.cx )
+		VERIFY( pImageList->Draw( pDC, i, imagePos, ILD_TRANSPARENT ) );
+}
+
+void CImageListStripProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+{
+	ASSERT( !IsEmpty() );
+
+	CImageList* pImageList = const_cast<CImageList*>( m_pImageList );
+	CPoint imagePos = pos;
+
+	for ( int i = 0; i != m_imageCount; ++i, imagePos.x += m_imageSize.cx )
+		gdi::DrawDisabledImage( pDC, *pImageList, m_imageSize, i, imagePos, m_imageSize, ILD_TRANSPARENT );
 }
 
 
@@ -341,12 +360,12 @@ void CColorBoxImage::SizeToText( CDC* pDC ) override
 	}
 }
 
-void CColorBoxImage::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = color::Null*/ ) const override
+void CColorBoxImage::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
 {
 	DrawImpl( pDC, pos, true );
 }
 
-void CColorBoxImage::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = color::Null*/ ) const override
+void CColorBoxImage::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
 {
 	DrawImpl( pDC, pos, false );
 }

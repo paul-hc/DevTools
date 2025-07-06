@@ -4,6 +4,7 @@
 #include "Imaging.h"
 #include "ImageProxy.h"
 #include "GroupIconRes.h"
+#include "DibSection.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -208,15 +209,13 @@ HICON CIcon::GetDisabledIcon( void ) const
 	if ( IsValid() && nullptr == m_hDisabledIcon )
 	{
 		CIconProxy iconProxy( this );
+		CDibSection disabledBitmap;
 
-		if ( HBITMAP hGrayBitmap = gdi::CreateFadedGrayDIBitmap( &iconProxy, m_bitsPerPixel ) )
+		if ( disabledBitmap.CreateDisabledEffectDIB32( &iconProxy, m_bitsPerPixel, gdi::Dis_FadeGray ) )
 		{
-			CBitmap grayBitmap;
-			grayBitmap.Attach( hGrayBitmap );
-
 			CIconInfo iconInfo( m_hIcon );
 
-			m_hDisabledIcon = gdi::CreateIcon( hGrayBitmap, iconInfo.m_bitmapMask );
+			m_hDisabledIcon = gdi::CreateIcon( disabledBitmap, iconInfo.m_bitmapMask );
 		}
 	}
 

@@ -91,6 +91,25 @@ namespace ut
 
 namespace ut
 {
+	std::tstring FormatTestMethod( const ITestCase* pTestCase, const char* pTestMethod, bool qualifyGraphicTest )
+	{
+		ASSERT_PTR( pTestCase );
+
+		const char* pTestCaseName = str::GetTypeNamePtr( *pTestCase );
+
+		std::tostringstream oss;
+		oss << pTestCaseName << "::" << pTestMethod;
+
+		if ( qualifyGraphicTest && is_a<CGraphicTestCase>( pTestCase ) )
+			oss << " (graphic) : ";
+
+		return oss.str();
+	}
+}
+
+
+namespace ut
+{
 	// CTestRunnerReport implementation
 
 	CTestRunnerReport::CTestRunnerReport()
@@ -135,20 +154,14 @@ namespace ut
 		: m_oldErrorCount( CAppTools::GetMainResultCode() )
 		, m_skipped( false )
 	{
-		ASSERT_PTR( pTestCase );
+		m_testMethod = ut::FormatTestMethod( pTestCase, pTestMethod, false );
 
-		const char* pTestCaseName = str::GetTypeNamePtr( *pTestCase );
+		{
+			std::tstring qualifTestName = ut::FormatTestMethod( pTestCase, pTestMethod, true );
 
-		std::tostringstream os;
-		os << pTestCaseName << "::" << pTestMethod << " : ";
-
-		if ( is_a<CGraphicTestCase>( pTestCase ) )
-			os << " (graphic test case)";
-
-		m_testMethod = os.str();
-
-		OutputDebugString( m_testMethod.c_str() );		// don't use TRACE to avoid the ATL overhead
-		std::clog << m_testMethod;
+			OutputDebugString( qualifTestName.c_str() );		// don't use TRACE to avoid the ATL overhead
+			std::clog << qualifTestName;
+		}
 
 		++s_testCount;
 	}

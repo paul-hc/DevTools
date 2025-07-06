@@ -37,6 +37,7 @@ private:
 	CWnd* m_pOwner;
 	ui::ILayoutEngine* m_pLayoutEngine;
 	UINT m_selRadio;
+	bool m_toolbarBtnsEnabled;
 public:
 	CHostToolbarCtrl<CStatic> m_seqCounterLabel;
 	CEnumSplitButton m_dialogButton;
@@ -71,6 +72,9 @@ private:
 	afx_msg void OnUpdateClipboardCopy( CCmdUI* pCmdUI );
 	afx_msg void OnClipboardPaste( void );
 	afx_msg void OnUpdateClipboardPaste( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_EnableButtons( void );
+	afx_msg void OnUpdate_EnableButtons( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_ToolbarButtons( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

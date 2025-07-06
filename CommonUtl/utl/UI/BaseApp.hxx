@@ -108,8 +108,8 @@ void CBaseApp<BaseClassT>::OnInitAppResources( void )
 		// App Look support requires inclusion of afxribbon.rc (ribbon and control bars) in project's RC file.
 		// It's best to call explicitly SetUseAppLook() in concrete application OnInitAppResources(), where visual managers are actually used.
 		if ( false )
-			if ( nullptr == m_pAppLook.get() )			// not yet explicitly set up?
-				m_pAppLook.reset( new CAppLook( app::Office_2007_Blue ) );
+			if ( nullptr == m_pAppLook.get() )		// not yet explicitly set up?
+				SetUseAppLook( app::Office_2007_Blue );
 	}
 
 	m_pSharedResources.reset( new utl::CResourcePool() );

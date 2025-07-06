@@ -18,10 +18,11 @@ private:
 	CDialogToolBar m_toolbarStdEnabled;
 	CDialogToolBar m_toolbarStdDisabled;
 
-	CDialogToolBar m_toolbarDisabledGrayScale;
-	CDialogToolBar m_toolbarDisabledGray;
-	CDialogToolBar m_toolbarDisabledEffect;
-	CDialogToolBar m_toolbarDisabledBlendColor;
+	CDialogToolBar m_toolbarDis_FadeGray;
+	CDialogToolBar m_toolbarDis_GrayScale;
+	CDialogToolBar m_toolbarDis_GrayOut;
+	CDialogToolBar m_toolbarDis_Effect;
+	CDialogToolBar m_toolbarDis_BlendColor;
 
 	// generated overrides
 protected:

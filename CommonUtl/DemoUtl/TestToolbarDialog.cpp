@@ -28,10 +28,11 @@ namespace layout
 
 CTestToolbarDialog::CTestToolbarDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_TEST_TOOLBAR_DIALOG, pParent )
-	, m_toolbarDisabledGrayScale( gdi::DisabledGrayScale )
-	, m_toolbarDisabledGray( gdi::DisabledGrayOut )
-	, m_toolbarDisabledEffect( gdi::DisabledEffect )
-	, m_toolbarDisabledBlendColor( gdi::DisabledBlendColor )
+	, m_toolbarDis_FadeGray( gdi::Dis_FadeGray )
+	, m_toolbarDis_GrayScale( gdi::Dis_GrayScale )
+	, m_toolbarDis_GrayOut( gdi::Dis_GrayOut )
+	, m_toolbarDis_Effect( gdi::Dis_DisabledEffect )
+	, m_toolbarDis_BlendColor( gdi::Dis_BlendColor )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
@@ -39,13 +40,15 @@ CTestToolbarDialog::CTestToolbarDialog( CWnd* pParent )
 	RegisterOwnCmds();
 
 	static const UINT s_stdButtons[] = { IdFileNew, IdFileOpen, IdFileSave, 0, IdEditCut, IdEditCopy, IdEditPaste, 0, IdFilePrint, 0, IdAppAbout };
+
 	m_toolbarStdEnabled.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
 	m_toolbarStdDisabled.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
 
-	m_toolbarDisabledGrayScale.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
-	m_toolbarDisabledGray.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
-	m_toolbarDisabledEffect.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
-	m_toolbarDisabledBlendColor.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarDis_FadeGray.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarDis_GrayScale.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarDis_GrayOut.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarDis_Effect.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
+	m_toolbarDis_BlendColor.GetStrip().AddButtons( ARRAY_SPAN( s_stdButtons ) );
 }
 
 CTestToolbarDialog::~CTestToolbarDialog()
@@ -81,10 +84,11 @@ void CTestToolbarDialog::DoDataExchange( CDataExchange* pDX )
 	m_toolbarStdEnabled.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, BarAlign );
 	m_toolbarStdDisabled.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, BarAlign );
 
-	m_toolbarDisabledGrayScale.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, BarAlign );
-	m_toolbarDisabledGray.DDX_Placeholder( pDX, IDC_STRIP_BAR_3, BarAlign );
-	m_toolbarDisabledEffect.DDX_Placeholder( pDX, IDC_STRIP_BAR_4, BarAlign );
-	m_toolbarDisabledBlendColor.DDX_Placeholder( pDX, IDC_STRIP_BAR_5, BarAlign );
+	m_toolbarDis_FadeGray.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, BarAlign );
+	m_toolbarDis_GrayScale.DDX_Placeholder( pDX, IDC_STRIP_BAR_3, BarAlign );
+	m_toolbarDis_GrayOut.DDX_Placeholder( pDX, IDC_STRIP_BAR_4, BarAlign );
+	m_toolbarDis_Effect.DDX_Placeholder( pDX, IDC_STRIP_BAR_5, BarAlign );
+	m_toolbarDis_BlendColor.DDX_Placeholder( pDX, IDC_STRIP_BAR_6, BarAlign );
 
 	CLayoutDialog::DoDataExchange( pDX );
 }

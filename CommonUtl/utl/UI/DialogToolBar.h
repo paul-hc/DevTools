@@ -9,7 +9,7 @@
 class CDialogToolBar : public CToolbarStrip
 {
 public:
-	CDialogToolBar( gdi::DisabledStyle disabledStyle = gdi::DisabledGrayOut ) : CToolbarStrip( disabledStyle ) {}
+	CDialogToolBar( gdi::DisabledStyle disabledStyle = gdi::Dis_FadeGray ) : CToolbarStrip( disabledStyle ) {}
 	virtual ~CDialogToolBar();
 
 	// use a placeholder static (with the same id)

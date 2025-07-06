@@ -21,6 +21,13 @@
 #include "utl/UI/TandemControls.hxx"
 
 
+namespace reg
+{
+	static const TCHAR section_demo[] = _T("DemoTemplate");
+	static const TCHAR entry_toolbarBtnsEnabled[] = _T("ToolbarBtnsEnabled");
+}
+
+
 namespace layout
 {
 	CLayoutStyle templateStyles[] =
@@ -62,6 +69,7 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	, m_pOwner( pOwner )
 	, m_pLayoutEngine( dynamic_cast<ui::ILayoutEngine*>( m_pOwner ) )
 	, m_selRadio( 0 )
+	, m_toolbarBtnsEnabled( AfxGetApp()->GetProfileInt( reg::section_demo, reg::entry_toolbarBtnsEnabled, false ) != FALSE )
 	, m_seqCounterLabel( H_AlignLeft | V_AlignBottom | ui::V_TileMate )
 	, m_dialogButton( &GetTags_ResizeStyle() )
 	, m_pickFormatCheckedStatic( ui::DropDown )
@@ -72,8 +80,18 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	ASSERT_PTR( m_pLayoutEngine );
 	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_SPAN( layout::templateStyles ) );
 
-	const UINT buttonIds[] = { IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON };
+	const UINT buttonIds[] =
+	{
+		IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON,
+		ID_SEPARATOR,
+		ID_TOGGLE_ENABLED_BTNS,		// toggle enabled/disabled
+		ID_SEPARATOR,
+		ID_OPTIONS, ID_NUMERIC_SEQUENCE, ID_AUTO_TRANSP_TOOL,
+		ID_SEPARATOR,
+		ID_RECORD_FIRST, ID_RECORD_LAST, ID_PREV_PANE, ID_NEXT_PANE
+	};
 	m_seqCounterLabel.GetMateToolbar()->GetStrip().StoreButtonIds( ARRAY_SPAN( buttonIds ) );
+	m_seqCounterLabel.RefTandemLayout().RefSpacing().cy = 7;	// extra spacing so the toolbar doesn't overlap with the drop down combo
 
 	m_pickFormatCheckedStatic.m_useText = true;
 	m_changeCaseButton.SetSelValue( ExtLowerCase );
@@ -195,6 +213,15 @@ BEGIN_MESSAGE_MAP( CDemoTemplate, CCmdTarget )
 	ON_UPDATE_COMMAND_UI( IDC_COPY_SOURCE_PATHS_BUTTON, OnUpdateClipboardCopy )
 	ON_COMMAND( IDC_PASTE_FILES_BUTTON, OnClipboardPaste )
 	ON_UPDATE_COMMAND_UI( IDC_PASTE_FILES_BUTTON, OnUpdateClipboardPaste )
+	ON_COMMAND( ID_TOGGLE_ENABLED_BTNS, OnToggle_EnableButtons )
+	ON_UPDATE_COMMAND_UI( ID_TOGGLE_ENABLED_BTNS, OnUpdate_EnableButtons )
+	ON_UPDATE_COMMAND_UI( ID_OPTIONS, OnUpdate_ToolbarButtons )
+	ON_UPDATE_COMMAND_UI( ID_NUMERIC_SEQUENCE, OnUpdate_ToolbarButtons )
+	ON_UPDATE_COMMAND_UI( ID_AUTO_TRANSP_TOOL, OnUpdate_ToolbarButtons )
+	ON_UPDATE_COMMAND_UI( ID_RECORD_FIRST, OnUpdate_ToolbarButtons )
+	ON_UPDATE_COMMAND_UI( ID_RECORD_LAST, OnUpdate_ToolbarButtons )
+	ON_UPDATE_COMMAND_UI( ID_PREV_PANE, OnUpdate_ToolbarButtons )
+	ON_UPDATE_COMMAND_UI( ID_NEXT_PANE, OnUpdate_ToolbarButtons )
 END_MESSAGE_MAP()
 
 void CDemoTemplate::OnToggle_DisableSmoothResize( void )
@@ -319,6 +346,23 @@ void CDemoTemplate::OnClipboardPaste( void )
 void CDemoTemplate::OnUpdateClipboardPaste( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( CTextClipboard::CanPasteText() );
+}
+
+void CDemoTemplate::OnToggle_EnableButtons( void )
+{
+	// toggle enabled state so that we can see the grayed-out images of toolbar buttons
+	m_toolbarBtnsEnabled = !m_toolbarBtnsEnabled;
+	AfxGetApp()->WriteProfileInt( reg::section_demo, reg::entry_toolbarBtnsEnabled, m_toolbarBtnsEnabled );
+}
+
+void CDemoTemplate::OnUpdate_EnableButtons( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( m_toolbarBtnsEnabled );
+}
+
+void CDemoTemplate::OnUpdate_ToolbarButtons( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_toolbarBtnsEnabled );
 }
 
 

@@ -206,6 +206,7 @@ namespace ut
 	CTestDevice::CTestDevice( CTestToolWnd* pToolWnd, TileAlign tileAlign /*= ut::TileRight*/ )
 		: m_tileAlign( tileAlign )
 		, m_stripRect( 0, 0, 0, 0 )
+		, m_scatterCaption( false )
 	{
 		Construct( pToolWnd );
 	}
@@ -213,6 +214,7 @@ namespace ut
 	CTestDevice::CTestDevice( UINT selfDestroySecs, TileAlign tileAlign /*= TileRight*/ )
 		: m_tileAlign( tileAlign )
 		, m_stripRect( 0, 0, 0, 0 )
+		, m_scatterCaption( false )
 	{
 		Construct( selfDestroySecs != 0 ? CTestToolWnd::AcquireWnd( selfDestroySecs ) : nullptr );
 	}
@@ -241,6 +243,26 @@ namespace ut
 		{
 			m_pToolWnd->ResetDrawPos();
 			m_stripRect.TopLeft() = m_stripRect.BottomRight() = m_pToolWnd->m_drawPos;
+			m_scatterCaption = false;
+		}
+	}
+
+	CRect CTestDevice::GetStripTotalRect( void ) const
+	{
+		CRect stripRect;
+
+		stripRect.UnionRect( &m_stripRect, m_tileRect );
+		return stripRect;
+	}
+
+	void CTestDevice::SetTileAlign( TileAlign tileAlign )
+	{
+		if ( tileAlign != m_tileAlign )
+		{
+			m_tileAlign = tileAlign;
+
+			if ( !m_stripRect.IsRectEmpty() )
+				GotoNextStrip();
 		}
 	}
 
@@ -261,13 +283,19 @@ namespace ut
 		if ( !IsEnabled() )
 			return false;
 
+		m_scatterCaption = !m_scatterCaption;
+
+		CRect tileTotalRect = m_tileRect;
+
+		tileTotalRect.bottom = std::max( m_stripRect.bottom, tileTotalRect.bottom );
+
 		switch ( m_tileAlign )
 		{
 			case TileRight:
-				m_pToolWnd->m_drawPos.x += m_tileRect.Width() + m_edgeSize.cx;
+				m_pToolWnd->m_drawPos.x += tileTotalRect.Width() + m_edgeSize.cx;
 				break;
 			case TileDown:
-				m_pToolWnd->m_drawPos.y += m_tileRect.Height() + m_edgeSize.cy;
+				m_pToolWnd->m_drawPos.y += tileTotalRect.Height() + m_edgeSize.cy;
 				break;
 		}
 		if ( !m_workAreaRect.PtInRect( m_pToolWnd->m_drawPos ) )				// right pos overflows?
@@ -299,21 +327,21 @@ namespace ut
 
 	bool CTestDevice::GotoNextStrip( void )
 	{
+		m_scatterCaption = false;
+
 		if ( !IsEnabled() )
 			return false;
 
 		switch ( m_tileAlign )
 		{
 			case TileRight:
-				m_pToolWnd->m_drawPos.x = m_edgeSize.cx;
-				m_pToolWnd->m_drawPos.y += m_stripRect.Height() + m_edgeSize.cy;
-				break;
 			case TileDown:
-				m_pToolWnd->m_drawPos.y = m_edgeSize.cy;
-				m_pToolWnd->m_drawPos.x += m_stripRect.Width() + m_edgeSize.cx;
+				m_pToolWnd->m_drawPos.x = m_edgeSize.cx;
+				m_pToolWnd->m_drawPos.y = m_stripRect.bottom + m_edgeSize.cy;
 				break;
 			default: ASSERT( false );
 		}
+
 		m_stripRect.TopLeft() = m_stripRect.BottomRight() = m_pToolWnd->m_drawPos;
 		return m_workAreaRect.PtInRect( m_pToolWnd->m_drawPos ) != FALSE;		// false if out of visible area: done
 	}
@@ -442,7 +470,7 @@ namespace ut
 		pIcon->Draw( *GetDC(), iconRect.TopLeft(), enabled );
 		DrawTileFrame( iconRect );
 		DrawTileCaption( str::Format( _T("%dx%d, %d-bit%s"), iconRect.Width(), iconRect.Height(), pIcon->GetBitsPerPixel(),
-									  pIcon->HasAlpha() ? _T(" A") : str::GetEmpty().c_str() ) );
+									  pIcon->HasAlpha() ? _T("+A") : str::GetEmpty().c_str() ) );
 	}
 
 	void CTestDevice::DrawImage( CImageList* pImageList, int index, UINT style /*= ILD_TRANSPARENT*/ )
@@ -469,24 +497,31 @@ namespace ut
 		CRect imageRect = CRect( m_pToolWnd->m_drawPos, imageSize );
 		CRect boundsRect = imageRect;			// bounds drawn
 
+		CDC* pDC = GetDC();
+		int oldBkMode = pDC->SetBkMode( TRANSPARENT );
+
 		for ( UINT i = 0; i != imageCount; ++i, imageRect.OffsetRect( 0, imageSize.cy ) )
 		{
-			pImageList->Draw( GetDC(), i, imageRect.TopLeft(), style );
+			pImageList->Draw( pDC, i, imageRect.TopLeft(), style );
 			boundsRect |= imageRect;
 
 			if ( putTags )
 			{
 				std::tstring tag = str::Format( _T("[%d]"), i );
-				int width = ui::GetTextSize( GetDC(), tag.c_str() ).cx + 5;
+				int width = ui::GetTextSize( pDC, tag.c_str() ).cx + 5;
 
 				CRect textRect = imageRect;
 				textRect.left = imageRect.right + 5;
 				textRect.right = textRect.left + width;
-				GetDC()->DrawText( tag.c_str(), -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE );
+
+				pDC->DrawText( tag.c_str(), -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE );
 
 				boundsRect |= textRect;
 			}
 		}
+
+		pDC->SetBkMode( oldBkMode );
+
 		DrawTileFrame( boundsRect );
 	}
 
@@ -566,6 +601,7 @@ namespace ut
 		CSize imageSize = pImages->GetImageSize();
 		CSize itemSize = ui::InflateSize( imageSize, frameSize );
 
+		const int topDrawArea = m_pToolWnd->m_drawPos.y;
 		CRect itemRect = CRect( m_pToolWnd->m_drawPos, itemSize );
 		CRect boundsRect = itemRect;			// bounds drawn
 
@@ -608,7 +644,7 @@ namespace ut
 
 			if ( itemRect.bottom >= m_workAreaRect.bottom )		// bottom overflow?
 			{	// start a new column
-				m_pToolWnd->m_drawPos = CPoint( boundsRect.right, m_workAreaRect.top );
+				m_pToolWnd->m_drawPos = CPoint( boundsRect.right, topDrawArea /*m_workAreaRect.top*/ );
 				itemRect = CRect( m_pToolWnd->m_drawPos, itemSize );
 			}
 		}
@@ -653,47 +689,63 @@ namespace ut
 		CDC* pDC = GetDC();
 		CScopedGdi<CFont> scFont( pDC, &m_pToolWnd->m_headlineFont );
 		COLORREF oldTextColor = pDC->SetTextColor( textColor );
+		int oldBkMode = pDC->SetBkMode( TRANSPARENT );
 		int textHeight = ui::GetTextSize( pDC, text.c_str() ).cy;
 
-		//textHeight = utl::max( pDC->GetTextExtent( text.c_str(), (int)text.length() ).cy, textHeight );		// compensate since ui::GetTextSize() not acurate with vertical size
+		textHeight = utl::max( pDC->GetTextExtent( text.c_str(), (int)text.length() ).cy, textHeight );		// compensate since ui::GetTextSize() not acurate with vertical size
 		m_stripRect.bottom += textHeight;
 
 		GetDC()->DrawText( text.c_str(), (int)text.length(), &m_stripRect, DT_END_ELLIPSIS | DtFormat );
 		//gp::FrameRect( pDC, m_stripRect, color::LightGray, 50 );
 		pDC->SetTextColor( oldTextColor );
+		pDC->SetBkMode( oldBkMode );
 
 		m_pToolWnd->m_drawPos.y += m_stripRect.Height() + TitleSpacingY;
 		m_stripRect.TopLeft() = m_stripRect.BottomRight() = m_pToolWnd->m_drawPos;
 	}
 
-	void CTestDevice::DrawTileCaption( const std::tstring& text )
+	void CTestDevice::DrawTileCaption( const std::tstring& text, bool ellipsys /*= false*/ )
 	{
 		if ( !IsEnabled() || text.empty() )
 			return;
 
 		ASSERT( !m_tileRect.IsRectEmpty() );
 
-		enum { TextEdge = 3, DtFormat = DT_NOPREFIX | DT_SINGLELINE };
+		enum { TextEdge = 5, ScatterSpacing = 2 };
 
 		CDC* pDC = GetDC();
 
 		static const std::tstring s_spacing = _T(" ");
 		std::tstring displayText = text;
+		DWORD dtFormat = DT_NOPREFIX | DT_SINGLELINE;
 
 		if ( OPAQUE == pDC->GetBkMode() )
 			displayText = s_spacing + text + s_spacing;		// draw background around the text label
 
-		CSize textSize = ui::GetTextSize( pDC, displayText.c_str(), DtFormat );
+		CSize textSize = ui::GetTextSize( pDC, displayText.c_str(), dtFormat );
 
-		textSize.cx = std::min( (long)m_tileRect.Width(), textSize.cx );
+		//textSize.cx = std::min( (long)m_tileRect.Width(), textSize.cx );
 		textSize.cy = std::max( pDC->GetTextExtent( displayText.c_str(), (int)displayText.length() ).cy, textSize.cy );	// compensate since ui::GetTextSize() not acurate with vertical size
 
 		CRect textRect( CPoint( 0, 0 ), textSize );
 
-		ui::AlignRectOutside( textRect, m_tileRect, H_AlignCenter | V_AlignBottom, CSize( 0, TextEdge ) );
-		m_stripRect.bottom = std::max( textRect.bottom, m_stripRect.bottom );
+		if ( ut::TileRight == m_tileAlign )
+		{
+			ui::AlignRectOutside( textRect, m_tileRect, H_AlignCenter | V_AlignBottom, CSize( 0, TextEdge ) );
 
-		pDC->DrawText( displayText.c_str(), (int)displayText.length(), &textRect, DT_END_ELLIPSIS | DtFormat );
+			if ( m_scatterCaption )
+				textRect.OffsetRect( 0, textRect.Height() + ScatterSpacing );
+
+			m_stripRect.bottom = std::max( textRect.bottom, m_stripRect.bottom );
+			SetFlag( dtFormat, DT_END_ELLIPSIS, ellipsys );
+		}
+		else
+		{
+			ui::AlignRectOutside( textRect, m_tileRect, H_AlignRight | V_AlignCenter, CSize( TextEdge, 0 ) );
+			m_stripRect.right = std::max( textRect.right, m_stripRect.right );
+		}
+
+		pDC->DrawText( displayText.c_str(), (int)displayText.length(), &textRect, dtFormat );
 	}
 
 

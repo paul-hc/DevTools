@@ -26,7 +26,7 @@ void CImageDialog::CreateEffectDibs( void )
 	CWaitCursor wait;
 	CModeData* pModeData = m_modeData[ m_sampleMode ];
 	CScopedFlag<int> scopedSkipCopyImage( &CDibSection::s_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
-	WORD bitsPerPixel = m_pDibSection->GetBitsPerPixel();
+	TBitsPerPixel bitsPerPixel = m_pDibSection->GetBitsPerPixel();
 	COLORREF bkColor = GetBkColor();
 	std::auto_ptr<CDibSection> pNewDib;
 
@@ -129,7 +129,7 @@ void CImageDialog::CreateEffectDibs( void )
 			if ( utl::ResetPtr( pNewDib, CloneSourceDib() ) )
 			{
 				CDibPixels disabledPixels( pNewDib.get() );
-				if ( !disabledPixels.ApplyDisableFadeGray( m_disabledAlpha ) )
+				if ( !disabledPixels.ApplyDisableFadeGray( m_pDibSection->GetBitsPerPixel(), m_disabledAlpha ) )
 					utl::ResetPtr( pNewDib );
 			}
 			pModeData->PushDib( pNewDib );
@@ -154,7 +154,7 @@ void CImageDialog::CreateEffectDibs( void )
 				}
 
 				m_pImageList.reset( new CImageList() );
-				pNewDib->MakeImageList( *m_pImageList, imageCount );
+				pNewDib->MakeImageList( m_pImageList.get(), imageCount );
 			}
 			break;
 	}
@@ -234,7 +234,8 @@ bool CImageDialog::Render_RectsAlphaBlend( CDC* pDC, const CRect& clientRect )
 
 	CDibSection dibSection;
 	CDibPixels dibPixels;
-	if ( !dibSection.CreateDIBSection( dibPixels, bitmapSize.cx, bitmapSize.cy, ILC_COLOR32 ) )		// create the DIB section and select the bitmap into the dc
+
+	if ( !dibSection.CreateDIBSection( &dibPixels, bitmapSize.cx, bitmapSize.cy, ILC_COLOR32 ) )		// create the DIB section and select the bitmap into the dc
 		return false;
 
 	CScopedBitmapMemDC scopedBitmap( &dibSection, pDC );
@@ -329,8 +330,10 @@ bool CImageDialog::Render_RectsAlphaBlend( CDC* pDC, const CRect& clientRect )
 CDibSection* CImageDialog::CloneSourceDib( void ) const
 {
 	std::auto_ptr<CDibSection> pNewDib( new CDibSection() );
+
 	if ( !pNewDib->Copy( m_pDibSection.get() ) )
 		pNewDib.reset();
+
 	return pNewDib.release();
 }
 

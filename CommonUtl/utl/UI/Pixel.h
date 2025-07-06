@@ -3,6 +3,8 @@
 #pragma once
 
 #include "Color.h"
+#include "Image_fwd.h"
+#include "DibDraw_fwd.h"
 
 
 #pragma pack( push )
@@ -66,9 +68,6 @@ public:
 
 namespace pixel
 {
-	enum AlphaFading { AlphaFadeStd = 128, AlphaFadeMore = 112, AlphaFadeMost = 96 };
-
-
 	// color channel algorithms
 
 	inline void FactorMultiplyChannel( BYTE& rChannel, double factor )
@@ -233,8 +232,28 @@ namespace func
 		{
 			rPixel.m_alpha = m_alpha;
 		}
-	private:
+	protected:
 		BYTE m_alpha;
+	};
+
+
+	struct FadeForegroundLowColor : public SetAlpha		// Lower opacity for low-color source images: 8/4/1 BPP colors
+	{
+		FadeForegroundLowColor( BYTE alpha, TBitsPerPixel srcBPP, COLORREF transpColor )
+			: SetAlpha( alpha ), m_srcBPP( srcBPP ), m_transpColor( transpColor )
+		{
+			ASSERT( m_srcBPP >= 0 && m_srcBPP <= 32 );
+		}
+
+		void operator()( CPixelBGRA& rPixel ) const
+		{
+			if ( m_srcBPP < 32 && m_transpColor != CLR_NONE )	// Is SRC low color?  Do we have a background color?
+				if ( rPixel.GetColor() != m_transpColor )		// Foreground pixel?
+					rPixel.m_alpha = m_alpha;					// allow color fading: use fake alpha transparency for transparent (non-background) pixels
+		}
+	private:
+		TBitsPerPixel m_srcBPP;			// threshold BPP for applying this low-color pre-fading effect (makes sense for 8/4/1 BPP colors)
+		COLORREF m_transpColor;
 	};
 
 
@@ -404,8 +423,12 @@ namespace func
 
 	struct DisableFadeGray : public CBasePixelFunc		// fade colors and make gray-scale (no blending) -> BEST LOOKING, better than DisabledGrayOut
 	{
-		DisableFadeGray( BYTE fadeAlpha = pixel::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF grayScaleTranspColor24 = CLR_NONE )
-			: m_fadeAlpha( fadeAlpha ), m_preMultiplyAlpha( preMultiplyAlpha ), m_grayScaleFunc( grayScaleTranspColor24 ) {}
+		enum { PreFadeAlpha = 128 };
+
+		DisableFadeGray( TBitsPerPixel srcBPP, BYTE fadeAlpha = gdi::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF transpColor = CLR_NONE )
+			: m_fadeLowColor( PreFadeAlpha, srcBPP, transpColor ), m_fadeAlpha( fadeAlpha ), m_preMultiplyAlpha( preMultiplyAlpha ), m_grayScaleFunc( transpColor )
+		{
+		}
 
 		void operator()( CPixelBGR& rPixel ) const
 		{
@@ -414,10 +437,11 @@ namespace func
 
 		void operator()( CPixelBGRA& rPixel ) const
 		{
+			m_fadeLowColor( rPixel );
 			pixel::MultiplyChannel( rPixel.m_alpha, m_fadeAlpha );
 			m_grayScaleFunc( rPixel );
 
-			if ( m_preMultiplyAlpha )
+			if ( m_preMultiplyAlpha )			// not already PMA?
 				rPixel.PreMultiplyAlpha();		// avoid alpha-blending errors
 		}
 
@@ -426,6 +450,7 @@ namespace func
 			m_grayScaleFunc.AdjustColors( pDC );
 		}
 	private:
+		FadeForegroundLowColor m_fadeLowColor;
 		BYTE m_fadeAlpha;
 		bool m_preMultiplyAlpha;		// need to pre-multiply alpha for 32-bit bitmaps with alpha channel (usually file-based)
 		ToGrayScale m_grayScaleFunc;

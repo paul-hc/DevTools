@@ -41,6 +41,7 @@ static const ui::CCmdAlias s_cmdAliases[] =
 	{ IDC_CLEAR_FILES_BUTTON, ID_REMOVE_ALL_ITEMS },
 	{ IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY },
 	{ IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE },
+	{ ID_TOGGLE_ENABLED_BTNS, ID_SEND_TO_CLIPBOARD },
 	{ ID_NUMERIC_SEQUENCE_2DIGITS, ID_SHUTTLE_TOP },
 	{ ID_NUMERIC_SEQUENCE_3DIGITS, ID_SHUTTLE_BOTTOM },
 	{ ID_NUMERIC_SEQUENCE_4DIGITS, ID_RECORD_NEXT },
@@ -49,14 +50,14 @@ static const ui::CCmdAlias s_cmdAliases[] =
 
 const CEnumTags& GetTags_ResizeStyle( void )
 {
-	static const CEnumTags tags( _T("&Dialog...|H-&Dialog...|V-&Dialog...|Max &Dialog...") );
-	return tags;
+	static const CEnumTags s_tags( _T("&Dialog...|H-&Dialog...|V-&Dialog...|Max &Dialog...") );
+	return s_tags;
 }
 
 const CEnumTags& GetTags_ChangeCase( void )
 {
-	static const CEnumTags tags( str::Load( IDS_CHANGE_CASE_TAGS ) );
-	return tags;
+	static const CEnumTags s_tags( str::Load( IDS_CHANGE_CASE_TAGS ) );
+	return s_tags;
 }
 
 
@@ -155,6 +156,10 @@ int CApplication::ExitInstance( void )
 
 void CApplication::OnInitAppResources( void )
 {
+	// Need a CMFCVisualManager set up for color picker controls to function (for both CMFCColorButton and my CColorPickerButton).
+	// This also requires to include "afxribbon.rc" in DemoUtl.rc.
+	SetUseAppLook( app::Office_2007_Blue );
+
 	__super::OnInitAppResources();
 
 	//CMFCToolBar::AddToolBarForImageCollection( IDR_IMAGE_STRIP );

@@ -9,9 +9,17 @@ enum RopCodes
 };
 
 
+class CEnumTags;
+
+
 namespace gdi
 {
-	enum DisabledStyle { DisabledGrayScale, DisabledGrayOut, DisabledEffect, DisabledBlendColor, DisabledStd };		// for image list conversion
+	enum AlphaFading { AlphaFadeStd = 128, AlphaFadeMore = 112, AlphaFadeMost = 96 };
+
+
+	enum DisabledStyle { Dis_FadeGray, Dis_GrayScale, Dis_GrayOut, Dis_DisabledEffect, Dis_BlendColor, Dis_MfcStd };		// for image list conversion
+
+	const CEnumTags& GetTags_DisabledStyle( void );
 }
 
 

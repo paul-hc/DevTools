@@ -72,6 +72,8 @@ namespace ut
 		CDC* GetDC( void ) const { ASSERT_PTR( m_pTestDC.get() ); return m_pTestDC.get(); }
 		CTestToolWnd* GetToolWnd( void ) const { ASSERT_PTR( m_pToolWnd ); return m_pToolWnd; }
 
+		void SetTileAlign( TileAlign tileAlign );
+
 		void SetSubTitle( const TCHAR* pSubTitle );		// augment test window title with the sub-title
 
 		// drawing cursor
@@ -106,15 +108,16 @@ namespace ut
 		void DrawBitmapInfo( HBITMAP hBitmap );
 
 		void DrawHeadline( const TCHAR* pHeadline, COLORREF textColor = color::Blue );	// draw headline title on a new strip, under the last drawn tile rect
-		void DrawTileCaption( const std::tstring& text );		// draw text under the last drawn tile rect
+		void DrawTileCaption( const std::tstring& text, bool ellipsys = false );		// draw text under the last drawn tile rect
 
 		enum { PauseTime = 500 };
 
 		void Await( DWORD milliseconds = PauseTime ) { ::Sleep( milliseconds ); }
 	private:
-		static COLORREF GetBitmapFrameColor( const CSize& bmpSize, const CSize& scaledBmpSize );
-	private:
 		void Construct( CTestToolWnd* pToolWnd );
+		CRect GetStripTotalRect( void ) const;
+
+		static COLORREF GetBitmapFrameColor( const CSize& bmpSize, const CSize& scaledBmpSize );
 	private:
 		TileAlign m_tileAlign;
 		CTestToolWnd* m_pToolWnd;
@@ -123,6 +126,7 @@ namespace ut
 		CRect m_workAreaRect;					// client rect shrunk by edge
 		CRect m_stripRect;						// row of tiles
 		CRect m_tileRect;						// last drawn cursor rect, set by current draw method
+		bool m_scatterCaption;					// alternate internal state to avoid overlapping text between subsequent calls to DrawTileCaption()
 	public:
 		static const CSize m_edgeSize;			// edge from the client rect
 	};
@@ -156,8 +160,8 @@ namespace ut
 
 		~CScopedTestDeviceMethod()
 		{
-			m_rTestDev.Await( 1500 );
 			m_rTestDev.GotoNextStrip();
+			m_rTestDev.Await( 1500 );
 		}
 	protected:
 		ut::CTestDevice& m_rTestDev;

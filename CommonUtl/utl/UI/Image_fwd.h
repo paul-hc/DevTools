@@ -199,11 +199,11 @@ namespace ui
 
 namespace gdi
 {
-	ui::CImageListInfo CreateImageList( CImageList& rOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK );	// countOrGrowBy - if positive: actual count, if negative: growBy
+	ui::CImageListInfo CreateImageList( CImageList* pOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK );	// countOrGrowBy - if positive: actual count, if negative: growBy
 
-	inline ui::CImageListInfo CreateEmptyImageList( CImageList& rOutImageList, const CIconSize& imageSize, int growBy = 5, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK )
+	inline ui::CImageListInfo CreateEmptyImageList( CImageList* pOutImageList, const CIconSize& imageSize, int growBy = 5, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK )
 	{
-		return CreateImageList( rOutImageList, imageSize, -growBy, ilFlags );
+		return CreateImageList( pOutImageList, imageSize, -growBy, ilFlags );
 	}
 
 	inline HICON ExtractIcon( const CImageList& imageList, size_t imagePos ) { return const_cast<CImageList&>( imageList ).ExtractIcon( static_cast<int>( imagePos ) ); }
@@ -215,7 +215,7 @@ namespace res
 	HICON LoadIcon( const CIconId& iconId, UINT fuLoad = LR_DEFAULTCOLOR );
 
 	// image-list from bitmap: loads strip from whichever comes first - PNG:32bpp with alpha (if found), or BMP:4/8/24bpp
-	ui::CImageListInfo LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor = color::Auto,
+	ui::CImageListInfo LoadImageListDIB( CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor = color::Auto,
 										 int imageCount = -1, bool disabledEffect = false );
 
 	// image-list from an icon-strip of custom size and multiple images.
@@ -223,7 +223,7 @@ namespace res
 	ui::CImageListInfo _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId );
 
 	// image-list from individual icons
-	ui::CImageListInfo LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize = SmallIcon,
+	ui::CImageListInfo LoadImageListIcons( CImageList* pOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize = SmallIcon,
 										   TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK );
 }
 
@@ -314,8 +314,6 @@ namespace ui
 
 /// DIB & DDB bitmap info
 
-namespace ui { interface IImageProxy; }
-
 
 namespace gdi
 {
@@ -343,19 +341,6 @@ namespace gdi
 
 	bool CreateBitmapMask( CBitmap& rMaskBitmap, HBITMAP hSrcBitmap, COLORREF transpColor );
 
-	/// disabled gray look for icons, bitmaps, imagelists (good-looking, faded) - caller owns the gray bitmap:
-	HBITMAP CreateFadedGrayDIBitmap( const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP, COLORREF transpColor = CLR_NONE );
-	HBITMAP CreateFadedGrayDIBitmap( HBITMAP hBitmapSrc, TBitsPerPixel srcBPP = 0, COLORREF transpColor = CLR_NONE );
-
-
-	/// image list properties:
-
-	CComPtr<IImageList> QueryImageListItf( HIMAGELIST hImageList );
-	CComPtr<IImageList2> QueryImageList2Itf( HIMAGELIST hImageList );
-	DWORD GetImageIconFlags( HIMAGELIST hImageList, int imagePos = 0 );
-	bool HasAlphaTransparency( HIMAGELIST hImageList, int imagePos = 0 );
-	bool HasMask( HIMAGELIST hImageList, int imagePos = 0 );
-	CSize GetImageIconSize( HIMAGELIST hImageList );
 
 	/// icon from bitmap(s):
 
@@ -379,6 +364,49 @@ namespace gdi
 
 namespace gdi
 {
+	/// image list properties:
+
+	CComPtr<IImageList> QueryImageListItf( HIMAGELIST hImageList );
+	CComPtr<IImageList2> QueryImageList2Itf( HIMAGELIST hImageList );
+	DWORD GetImageIconFlags( HIMAGELIST hImageList, int imagePos = 0 );
+	bool HasAlphaTransparency( HIMAGELIST hImageList, int imagePos = 0 );
+	bool HasMask( HIMAGELIST hImageList, int imagePos = 0 );
+	TBitsPerPixel GetImageListBPP( HIMAGELIST hImageList, int imagePos = 0 );
+	TImageListFlags GetImageListFlags( HIMAGELIST hImageList, int imagePos = 0 );		// ILC_COLOR... + ILC_MASK flags
+	CSize GetImageIconSize( HIMAGELIST hImageList );
+	inline HBITMAP GetColorDib( const IMAGEINFO& imgInfo ) { return imgInfo.hbmImage != nullptr ? imgInfo.hbmImage : imgInfo.hbmMask; }
+
+
+	struct CImageInfo : public _IMAGEINFO
+	{
+		CImageInfo( const CImageList* pImageList, int imagePos = 0 );
+
+		void StoreImageAt( int imagePos ) { VERIFY( m_pImageList->GetImageInfo( m_imagePos = imagePos, this ) ); }
+
+		const CRect& GetImageRect( void ) const { return (const CRect&)rcImage; }
+
+		HBITMAP GetColorDib( void ) const { return hbmImage != nullptr ? hbmImage : hbmMask; }
+
+		// src DIB hbmImage is orientated vertically
+		CRect MapSrcDibRect( int index );
+
+		// dest DIB rect is orientated horizontally
+		CRect GetDestRect( int index ) const { return CRect( CPoint( index * m_imageSize.cx, 0 ), m_imageSize ); }
+	private:
+		const CImageList* m_pImageList;
+		int m_imagePos;
+	public:
+		UINT m_imageCount;
+		CSize m_imageSize;
+		CSize m_srcDibSize;
+		TBitsPerPixel m_bitsPerPixel;
+		bool m_hasAlpha;
+	};
+}
+
+
+namespace gdi
+{
 	// drawing - transparent bitmaps are drawn transparently (only for SRCCOPY)
 
 	bool DrawBitmap( CDC* pDC, HBITMAP hBitmap, const CPoint& pos, DWORD rop = SRCCOPY );
@@ -388,8 +416,7 @@ namespace gdi
 
 struct CDibMeta		// contains information that must be passed from creation
 {
-	CDibMeta( HBITMAP hDib = nullptr )
-		: m_hDib( hDib ), m_orientation( gdi::BottomUp ), m_bitsPerPixel( 0 ), m_channelCount( 0 ) {}
+	CDibMeta( HBITMAP hDib = nullptr );
 
 	bool Reset( HBITMAP hDib = nullptr );				// deletes (replaces) existing DIB
 	bool AssignIfValid( const CDibMeta& srcDib );		// deletes (replaces) existing DIB
@@ -406,28 +433,30 @@ private:
 	void StoreChannelCount( bool isDibSection );		// based on m_bitsPerPixel
 public:
 	HBITMAP m_hDib;
-	gdi::Orientation m_orientation;		// known at creation time in BITMAPINFO, must be passed from creation (can't be retrofitted)
+	gdi::Orientation m_orientation;				// known at creation time in BITMAPINFO, must be passed from creation (can't be retrofitted)
 	TBitsPerPixel m_bitsPerPixel;
 	UINT m_channelCount;
 };
 
 
-struct CBitmapInfo : public tagDIBSECTION		// DIB & DDB bitmap info
+// DIB & DDB bitmap info
+//
+struct CBitmapInfo : public tagDIBSECTION
 {
-	CBitmapInfo( HBITMAP hBitmap ) : m_structSize( 0 ) { Build( hBitmap ); }
+	CBitmapInfo( HBITMAP hBitmap );
 
-	void Build( HBITMAP hBitmap ) { m_structSize = ::GetObject( hBitmap, sizeof( DIBSECTION ), this ); }
+	void Build( HBITMAP hBitmap );
 
 	bool IsValid( void ) const { return m_structSize != 0; }
 	bool IsDibSection( void ) const { return sizeof( DIBSECTION ) == m_structSize; }
 	bool IsDDB( void ) const { return sizeof( BITMAP ) == m_structSize; }				// tagDIBSECTION::dsBm (BITMAP)
 
-	// DIB
+	// DIB:
 	bool IsIndexed( void ) const { ASSERT( IsDibSection() ); return dsBmih.biBitCount <= 8; }
 	bool HasColorTable( void ) const { return IsIndexed(); }
 	bool HasAlphaChannel( void ) const { return IsDibSection() && dsBmih.biBitCount >= 32; }
 
-	// DIB/DDB
+	// DIB/DDB:
 	bool IsMonochrome( void ) const { ASSERT( IsValid() ); return 1 == dsBm.bmBitsPixel; }
 	bool IsTrueColor( void ) const { ASSERT( IsValid() ); return dsBm.bmBitsPixel >= 24; }
 	bool Is32Bit( void ) const { ASSERT( IsValid() ); return dsBm.bmBitsPixel >= 32; }
@@ -436,7 +465,7 @@ struct CBitmapInfo : public tagDIBSECTION		// DIB & DDB bitmap info
 	int GetHeight( void ) const { return dsBm.bmHeight; }
 	CSize GetBitmapSize( void ) const { return CSize( dsBm.bmWidth, dsBm.bmHeight ); }
 
-	WORD GetBitsPerPixel( void ) const { return dsBm.bmBitsPixel; }
+	TBitsPerPixel GetBitsPerPixel( void ) const { return dsBm.bmBitsPixel; }
 	BYTE* GetPixelBuffer( void ) const { return static_cast<BYTE*>( dsBm.bmBits ); }
 
 	std::tstring FormatDbg( void ) const;
@@ -448,7 +477,9 @@ private:
 namespace bmp { class CSharedAccess; }
 
 
-class CDibSectionTraits : public CBitmapInfo		// DIB only
+// DIB only
+//
+class CDibSectionTraits : public CBitmapInfo
 {
 public:
 	CDibSectionTraits( HBITMAP hDib );

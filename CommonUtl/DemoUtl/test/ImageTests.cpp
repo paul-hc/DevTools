@@ -10,14 +10,37 @@
 #include "utl/UI/GroupIconRes.h"
 #include "utl/UI/Icon.h"
 #include "utl/UI/ImageStore.h"
-#include "utl/UI/WndUtils.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/resource.h"
 #include "utl/UI/test/TestToolWnd.h"
+#include "utl/EnumTags.h"
 #include <sstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace ut
+{
+	std::tstring FormatImageListColorDepth( const TCHAR* pPrefix, HIMAGELIST hImageList, int imagePos = 0 )
+	{
+		ASSERT_PTR( pPrefix );
+
+		std::tstring text = pPrefix;
+		const TCHAR s_space[] = _T(" ");
+
+		stream::Tag( text, str::Format( _T("%d-bit"), gdi::GetImageListBPP( hImageList, imagePos ) ), s_space );
+
+		if ( gdi::HasAlphaTransparency( hImageList, imagePos ) )
+			stream::Tag( text, _T("A"), s_space );
+
+		if ( gdi::HasMask( hImageList, imagePos ) )
+			stream::Tag( text, _T("+M"), nullptr );
+
+		return text;
+	}
+}
 
 
 CImageTests::CImageTests( void )
@@ -89,40 +112,53 @@ void CImageTests::TestIcon( ut::CTestDevice& rTestDev )
 {
 	const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_AUTO_TRANSP_TOOL );
 	ASSERT_PTR( pIcon );
-	CIconInfo info( pIcon->GetHandle() );
 
 	rTestDev.DrawIcon( pIcon );
 }
 
 void CImageTests::TestIconGroup( ut::CTestDevice& rTestDev )
 {
+	CIconGroup iconGroup;
+	ASSERT( iconGroup.LoadAllIcons( IDR_MAINFRAME ) != 0 );
+
+	for ( size_t i = 0; i != iconGroup.GetSize(); ++i )
+	{
+		const CIcon* pIcon = iconGroup.GetIconAt( i );
+
+		rTestDev.DrawIcon( pIcon );
+		++rTestDev;
+	}
 }
 
-void CImageTests::TestImageList( ut::CTestDevice& rTestDev )
+void CImageTests::TestImageListGuts( ut::CTestDevice& rTestDev )
 {
 	enum { Image_Fill = 4, ImageCount };
 
 	CImageList imageList;
 
-	VERIFY( res::LoadImageListDIB( imageList, IDR_IMAGE_STRIP ).m_imageCount != 0 );		// use default image count, implied from the width/height ratio
+	VERIFY( res::LoadImageListDIB( &imageList, IDR_IMAGE_STRIP ).m_imageCount != 0 );		// use default image count, implied from the width/height ratio
+
 	CSize imageSize = gdi::GetImageIconSize( imageList );
+
 	ASSERT_EQUAL( ImageCount, imageList.GetImageCount() );
 	ASSERT( CIconSize::GetSizeOf( SmallIcon ) == imageSize );
 
 	{	// reload with explicit image count
 		CImageList imageList2;
-		VERIFY( res::LoadImageListDIB( imageList2, IDR_IMAGE_STRIP, color::Auto, ImageCount ).m_imageCount != 0 );
+		VERIFY( res::LoadImageListDIB( &imageList2, IDR_IMAGE_STRIP, color::Auto, ImageCount ).m_imageCount != 0 );
 		ASSERT_EQUAL( imageList.GetImageCount(), imageList2.GetImageCount() );
 		ASSERT( imageSize == gdi::GetImageIconSize( imageList2 ) );
 	}
 
 	IMAGEINFO imageInfo;
+
 	VERIFY( imageList.GetImageInfo( Image_Fill, &imageInfo ) );
 	ASSERT( !gdi::HasMask( imageList, Image_Fill ) );
 	ASSERT( gdi::HasAlphaTransparency( imageList, Image_Fill ) );
 	ASSERT_NULL( imageInfo.hbmMask );
 
 	CBitmapInfo bmpInfo( imageInfo.hbmImage );
+
 	ASSERT( bmpInfo.IsDibSection() );
 	ASSERT( bmpInfo.HasAlphaChannel() );
 	ASSERT( bmpInfo.Is32Bit() );
@@ -132,13 +168,16 @@ void CImageTests::TestImageList( ut::CTestDevice& rTestDev )
 		CIcon icon( imageList.ExtractIcon( Image_Fill ) );
 		CIconInfo iconInfo( icon.GetHandle() );
 		CBitmapInfo iconBmpInfo( iconInfo.m_info.hbmColor );
+
 		ASSERT( iconBmpInfo.IsValid() );
 		ASSERT( !iconBmpInfo.IsDibSection() );
 	}
 
 	// drawing
+	rTestDev.SetTileAlign( ut::TileRight );		// switch direction to fit content
+
 	rTestDev.DrawImage( &imageList, Image_Fill );
-	rTestDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
+	rTestDev.DrawTileCaption( _T("image-list") );
 	++rTestDev;
 
 	// NB: for some reason imageInfo.hbmImage cannot be selected into a DC - most likely is kept selected into a cached DC by the system...
@@ -149,12 +188,12 @@ void CImageTests::TestImageList( ut::CTestDevice& rTestDev )
 	dupDib.Draw( rTestDev.GetDC(), rect );
 	rTestDev.StoreTileRect( rect );
 	rTestDev.DrawTileFrame( color::AzureBlue );
-	rTestDev.DrawTileCaption( _T("dupDib IDR_IMAGE_STRIP") );
+	rTestDev.DrawTileCaption( _T("dupDib") );
 	++rTestDev;
 
 
 	CImageList disabledImageList;
-	gdi::MakeDisabledImageList( disabledImageList, imageList );
+	gdi::MakeDisabledImageList( &disabledImageList, imageList );
 
 	VERIFY( disabledImageList.GetImageInfo( Image_Fill, &imageInfo ) );
 	dupDib.Copy( imageInfo.hbmImage );
@@ -163,17 +202,17 @@ void CImageTests::TestImageList( ut::CTestDevice& rTestDev )
 	dupDib.Draw( rTestDev.GetDC(), rect );
 	rTestDev.StoreTileRect( rect );
 	rTestDev.DrawTileFrame( color::AzureBlue );
-	rTestDev.DrawTileCaption( _T("imageInfo.hbmImage IDR_IMAGE_STRIP") );
+	rTestDev.DrawTileCaption( _T("imageInfo.hbmImage") );
 	++rTestDev;
 
 	rTestDev.DrawImageList( &disabledImageList, true );
-	rTestDev.DrawTileCaption( _T("disabledImageList IDR_IMAGE_STRIP") );
+	rTestDev.DrawTileCaption( _T("disabledImageList") );
 	++rTestDev;
 
 	// transparent icon
 	const CIcon* pTranspIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_TRANSPARENT );
 	rTestDev.DrawIcon( pTranspIcon->GetHandle(), pTranspIcon->GetSize() );		// there is one white pixel at right-bottom so that the icon is not completely black (GDI bug?)
-	rTestDev.DrawTileCaption( _T("icon IDR_IMAGE_STRIP") );
+	rTestDev.DrawTileCaption( _T("transparent icon") );
 	++rTestDev;
 
 	// image list transparent image
@@ -182,19 +221,52 @@ void CImageTests::TestImageList( ut::CTestDevice& rTestDev )
 	imageList.Add( pTranspIcon->GetHandle() );				// one white pixel at right-bottom
 	imageList.Add( nullptr, CLR_NONE );						// another was to add an empty icon
 	rTestDev.DrawImageList( &imageList, true );
-	rTestDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
+	rTestDev.DrawTileCaption( _T("transparent image-list") );
+}
+
+void CImageTests::TestImageListDisabled( ut::CTestDevice& rTestDev )
+{
+	const UINT toolbarStripIds[] = { IDR_IMAGE_STRIP, IDR_LOW_COLOR_STRIP, IDR_MONOCHROME_STRIP };		// PNG: 32bpp + Alpha | 4-bit | 1-bit
+	const gdi::DisabledStyle disStyles[] = { gdi::Dis_FadeGray, gdi::Dis_GrayScale, gdi::Dis_GrayOut, gdi::Dis_DisabledEffect, gdi::Dis_BlendColor, gdi::Dis_MfcStd };
+
+	CImageList srcImageList;
+
+	for ( size_t t = 0; t != COUNT_OF( toolbarStripIds ); ++t )
+	{
+		res::LoadImageListDIB( &srcImageList, toolbarStripIds[t] );			// use default image count, implied from the width/height ratio
+
+		rTestDev.DrawImageList( &srcImageList, true );
+		rTestDev.DrawTileCaption( ut::FormatImageListColorDepth( _T("SRC"), srcImageList ) );
+		++rTestDev;
+
+		for ( size_t i = 0; i != COUNT_OF( disStyles ); ++i )
+		{
+			CImageList disabledImageList;
+
+			gdi::MakeDisabledImageList( &disabledImageList, srcImageList, disStyles[i] );
+
+			rTestDev.DrawImageList( &disabledImageList, true );
+			rTestDev.DrawTileCaption( gdi::GetTags_DisabledStyle().FormatUi( disStyles[i] ) );
+			++rTestDev;
+		}
+
+		rTestDev.GotoNextStrip();
+	}
 }
 
 
 void CImageTests::Run( void )
 {
-	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
+	ut::CTestDevice testDev( 10/*, ut::TileDown*/ );
+	CScopedDrawTextColor scopedDrawTextColor( testDev.GetDC(), nullptr, color::Black, color::Gray25 );
+
 	testDev.SetSubTitle( _T("CImageTests") );
 
 	RUN_TEST( TestGroupIconRes );
 	RUN_TESTDEV_1( TestIcon, testDev );
 	RUN_TESTDEV_1( TestIconGroup, testDev );
-	RUN_TESTDEV_1( TestImageList, testDev );
+	RUN_TESTDEV_1( TestImageListGuts, testDev );
+	RUN_TESTDEV_1( TestImageListDisabled, testDev );
 }
 
 

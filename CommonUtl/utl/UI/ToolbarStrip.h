@@ -11,7 +11,7 @@
 class CToolbarStrip : public CToolBar
 {
 public:
-	CToolbarStrip( gdi::DisabledStyle disabledStyle = gdi::DisabledGrayOut );
+	CToolbarStrip( gdi::DisabledStyle disabledStyle = gdi::Dis_FadeGray );
 	virtual ~CToolbarStrip();
 
 	// button initialization (before DDX_ creation)

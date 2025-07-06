@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "Image_fwd.h"
 #include "ImageStore.h"
-#include "ImageProxy.h"
 #include "GroupIconRes.h"
 #include "DibSection.h"
 #include "DibPixels.h"
@@ -15,8 +14,6 @@
 #include "utl/Path.h"
 #include "utl/StdHashValue.h"
 #include "utl/StreamStdTypes.h"
-#include <afxglobals.h>				// GetGlobalData()
-#include <afxdrawmanager.h>
 
 
 #ifdef _DEBUG
@@ -125,7 +122,7 @@ namespace ui
 			switch ( bitsPerPixel )
 			{
 				default:	ASSERT( false );
-				case 1:		ilFlags = ILC_MASK; break;			// monochrome means mask only, no color bitmap
+				case 1:		return ILC_MASK;					// monochrome means mask only, no color bitmap
 				case 4:		ilFlags = ILC_COLOR4; break;
 				case 8:		ilFlags = ILC_COLOR24 /*ILC_COLOR8*/; break;		// issues with image-list transparency not working [PHC 2022-06-18]
 				case 16:	ilFlags = ILC_COLOR16; break;
@@ -143,7 +140,7 @@ namespace ui
 
 namespace gdi
 {
-	ui::CImageListInfo CreateImageList( CImageList& rOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
+	ui::CImageListInfo CreateImageList( CImageList* pOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
 	{
 		int imageCount = 0, growBy = 0;
 
@@ -152,7 +149,7 @@ namespace gdi
 		else
 			growBy = -countOrGrowBy;
 
-		VERIFY( rOutImageList.Create( imageSize.GetSize().cx, imageSize.GetSize().cy, ilFlags, imageCount, growBy ) );
+		VERIFY( pOutImageList->Create( imageSize.GetSize().cx, imageSize.GetSize().cy, ilFlags, imageCount, growBy ) );
 		return ui::CImageListInfo( imageCount, imageSize.GetSize(), ilFlags );
 	}
 }
@@ -168,7 +165,7 @@ namespace res
 		return (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, fuLoad );
 	}
 
-	ui::CImageListInfo LoadImageListDIB( CImageList& rOutImageList, UINT bitmapId, COLORREF transpColor /*= color::Auto*/,
+	ui::CImageListInfo LoadImageListDIB( CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor /*= color::Auto*/,
 										 int imageCount /*= -1*/, bool disabledEffect /*= false*/ )
 	{
 		// Use PNG only with 32bpp (alpha channel). PNG 24bpp breaks image list transparency (DIB issues?).
@@ -188,13 +185,13 @@ namespace res
 		if ( disabledEffect )
 		{
 			CDibPixels pixels( &dibSection );
-			pixels.ApplyDisableFadeGray( pixel::AlphaFadeMore, false /*, ::GetSysColor( COLOR_BTNFACE )*/ );
+			pixels.ApplyDisableFadeGray( dibSection.GetBitsPerPixel(), gdi::AlphaFadeMore, false /*, ::GetSysColor( COLOR_BTNFACE )*/);
 		}
 
 		if ( -1 == imageCount )
 			imageCount = dibSection.GetSize().cx / dibSection.GetSize().cy;		// assume nearly square images
 
-		imageListInfo = dibSection.MakeImageList( rOutImageList, imageCount );
+		imageListInfo = dibSection.MakeImageList( pOutImageList, imageCount );
 
 		return imageListInfo;
 	}
@@ -239,14 +236,14 @@ namespace res
 		return ui::CImageListInfo( imageCount, imageSize, imageListFlags );
 	}
 
-	ui::CImageListInfo LoadImageListIcons( CImageList& rOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
+	ui::CImageListInfo LoadImageListIcons( CImageList* pOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
 										   TImageListFlags ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
 	{
 		ASSERT_PTR( iconIds );
 		const CSize iconSize = CIconSize::GetSizeOf( iconStdSize );
 
-		if ( nullptr == rOutImageList.GetSafeHandle() )
-			VERIFY( rOutImageList.Create( iconSize.cx, iconSize.cy, ilFlags, 0, (int)iconCount ) );
+		if ( nullptr == pOutImageList->GetSafeHandle() )
+			VERIFY( pOutImageList->Create( iconSize.cx, iconSize.cy, ilFlags, 0, (int)iconCount ) );
 
 		for ( unsigned int i = 0; i != iconCount; ++i )
 			if ( iconIds[ i ] != 0 )			// skip separator ids
@@ -254,17 +251,17 @@ namespace res
 				CIconId iconId( iconIds[ i ], iconStdSize );
 
 				if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( iconId ) )		// try exact icon size
-					rOutImageList.Add( pIcon->GetHandle() );
+					pOutImageList->Add( pIcon->GetHandle() );
 				else if ( HICON hIcon = LoadIcon( iconId ) )									// try to load a scaled icon
 				{
-					rOutImageList.Add( hIcon );
+					pOutImageList->Add( hIcon );
 					::DestroyIcon( hIcon );
 				}
 				else
 					ASSERT( false );		// no image found
 			}
 
-		return ui::CImageListInfo( rOutImageList.GetImageCount(), iconSize, ilFlags );
+		return ui::CImageListInfo( pOutImageList->GetImageCount(), iconSize, ilFlags );
 	}
 
 } //namespace res
@@ -373,13 +370,17 @@ namespace gdi
 		ASSERT_PTR( hBitmap );
 		DIBSECTION dibSection;
 
-		int size = ::GetObject( hBitmap, sizeof( DIBSECTION ), &dibSection );
-		ASSERT( size != 0 );									// valid DIB or DDB bitmap
-
-		if ( pIsDibSection != nullptr )
-			*pIsDibSection = sizeof( DIBSECTION ) == size;		// bitmap is a DIB section?
-
-		return dibSection.dsBm.bmBitsPixel;
+		switch ( ::GetObject( hBitmap, sizeof( DIBSECTION ), &dibSection ) )
+		{
+			case sizeof( DIBSECTION ):		// hBitmap is a DIB bitmap
+				utl::AssignPtr( pIsDibSection, true );
+				return dibSection.dsBmih.biBitCount;
+			case sizeof( BITMAP ):			// hBitmap is a DDB bitmap
+				utl::AssignPtr( pIsDibSection, false );
+				return dibSection.dsBm.bmBitsPixel;
+		}
+		ASSERT( false );
+		return 0;
 	}
 
 	bool Is32BitBitmap( HBITMAP hBitmap )
@@ -421,104 +422,6 @@ namespace gdi
 		// take the new mask and use it to turn the transparent colour in our original colour image to black so the transparency effect will work right
 		memDC.BitBlt( 0, 0, bitmapSize.cx, bitmapSize.cy, &maskDC, 0, 0, SRCINVERT );
 		return true;
-	}
-
-
-	HBITMAP CreateFadedGrayDIBitmap( const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP, COLORREF transpColor /*= CLR_NONE*/ )
-	{	// creates a bitmap with disabled gray look - inspired by CMFCToolBarImages::GrayImages()
-		ASSERT( pImageProxy != nullptr && !pImageProxy->IsEmpty() );
-
-		if ( GetGlobalData()->m_nBitsPerPixel <= 8 )
-			return nullptr;
-
-		const CSize& srcImageSize = pImageProxy->GetSize();
-		CDC destMemDC;
-
-		destMemDC.CreateCompatibleDC( nullptr );		// make DEST memory DC compatible with the Screen DC, to select a new hGrayDib
-
-		BITMAPINFO grayBmpInfo;
-
-		// fill in the BITMAPINFOHEADER:
-		grayBmpInfo.bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
-		grayBmpInfo.bmiHeader.biWidth = srcImageSize.cx;
-		grayBmpInfo.bmiHeader.biHeight = srcImageSize.cy;
-		grayBmpInfo.bmiHeader.biPlanes = 1;
-		grayBmpInfo.bmiHeader.biBitCount = 32;
-		grayBmpInfo.bmiHeader.biCompression = BI_RGB;
-		grayBmpInfo.bmiHeader.biSizeImage = srcImageSize.cx * srcImageSize.cy;
-		grayBmpInfo.bmiHeader.biXPelsPerMeter = 0;
-		grayBmpInfo.bmiHeader.biYPelsPerMeter = 0;
-		grayBmpInfo.bmiHeader.biClrUsed = 0;
-		grayBmpInfo.bmiHeader.biClrImportant = 0;
-
-		COLORREF* pBits = nullptr;
-		HBITMAP hGrayDib = ::CreateDIBSection( destMemDC.m_hDC, &grayBmpInfo, DIB_RGB_COLORS, (void**)&pBits, nullptr, 0 );
-		CBitmap grayDibBitmap;
-
-		if ( hGrayDib != nullptr )
-			grayDibBitmap.Attach( hGrayDib );			// for temporary ownership for convenient error handling
-		else
-			return nullptr;
-
-		HBITMAP hOldDestBitmap = (HBITMAP)destMemDC.SelectObject( hGrayDib );
-
-		if ( nullptr == hOldDestBitmap )
-			return nullptr;
-
-		if ( srcBPP <= 8 && pImageProxy->HasTransparency() )
-		{
-			enum { TransparentBlack = RGB( 1, 1, 1 ) };
-
-			ASSERT( CLR_NONE == transpColor );
-			transpColor = TransparentBlack;
-
-			// fill background with a non color::Black color to protect background from fading, which is undesirable - we just want to fade the foreground colors
-			pImageProxy->FillBackground( &destMemDC, CPoint( 0, 0 ), transpColor );
-		}
-
-		// draw the original image:
-		pImageProxy->Draw( &destMemDC, CPoint( 0, 0 ), transpColor );
-
-		// direct BGRA (RGBQUAD) pixel modification:
-		DIBSECTION ds;
-
-		if ( 0 == ::GetObject( hGrayDib, sizeof( DIBSECTION ), &ds ) || ds.dsBm.bmBitsPixel != 32 || nullptr == ds.dsBm.bmBits )
-		{
-			ASSERT( FALSE );
-			return nullptr;
-		}
-
-		// apply disabled effects to each pixel - fade and convert to gray-scale:
-		size_t rgbQuadCount = ds.dsBm.bmWidth * ds.dsBm.bmHeight;
-		func::DisableFadeGray disableFunc( pixel::AlphaFadeMore, false, transpColor );		// IMP: skip pre-multiply alpha so that it doesn't blend to gray - we just want to fade
-		typedef CPixelBGRA* TPixelIterator;
-
-		for ( TPixelIterator pPixel = (CPixelBGRA*)ds.dsBm.bmBits, pPixelEnd = pPixel + rgbQuadCount; pPixel != pPixelEnd; ++pPixel )
-		{
-			if ( srcBPP <= 8 )
-				if ( transpColor != CLR_NONE && pPixel->GetColor() != transpColor )
-					pPixel->m_alpha = 128;		// allow color fading: use fake alpha transparency for transparent (non-background) pixels
-
-			disableFunc( *pPixel );
-		}
-
-		destMemDC.SelectObject( hOldDestBitmap );
-
-		grayDibBitmap.Detach();			// success, release temporary ownership
-		return hGrayDib;				// caller owns the gray bitmap
-	}
-
-	HBITMAP CreateFadedGrayDIBitmap( HBITMAP hBitmapSrc, TBitsPerPixel srcBPP /*= 0*/, COLORREF transpColor /*= CLR_NONE*/ )
-	{
-		CBitmapProxy bitmapProxy( hBitmapSrc );
-
-		if ( bitmapProxy.IsEmpty() )
-			return nullptr;
-
-		if ( 0 == srcBPP )
-			srcBPP = gdi::GetBitsPerPixel( hBitmapSrc );
-
-		return CreateFadedGrayDIBitmap( &bitmapProxy, srcBPP, transpColor );
 	}
 
 
@@ -571,6 +474,33 @@ namespace gdi
 		return false;
 	}
 
+	TBitsPerPixel GetImageListBPP( HIMAGELIST hImageList, int imagePos /*= 0*/ )
+	{
+		ASSERT_PTR( hImageList );
+		IMAGEINFO imgInfo;
+
+		if ( ImageList_GetImageInfo( hImageList, imagePos, &imgInfo ) )
+			return gdi::GetBitsPerPixel( gdi::GetColorDib( imgInfo ) );
+
+		return false;
+	}
+
+	TImageListFlags GetImageListFlags( HIMAGELIST hImageList, int imagePos /*= 0*/ )
+	{
+		ASSERT_PTR( hImageList );
+		IMAGEINFO imgInfo;
+
+		if ( ImageList_GetImageInfo( hImageList, imagePos, &imgInfo ) )
+		{
+			TImageListFlags ilFlags = static_cast<TImageListFlags>( gdi::GetBitsPerPixel( gdi::GetColorDib( imgInfo ) ) );		// e.g. 32 => ILC_COLOR32, 8 => ILC_COLOR8, etc
+
+			SetFlag( ilFlags, ILC_MASK, imgInfo.hbmMask != nullptr );
+			return ilFlags;
+		}
+
+		return false;
+	}
+
 	CSize GetImageIconSize( HIMAGELIST hImageList )
 	{
 		ASSERT_PTR( hImageList );
@@ -578,6 +508,37 @@ namespace gdi
 
 		VERIFY( ::ImageList_GetIconSize( hImageList, &cx, &cy ) );
 		return CSize( cx, cy );
+	}
+
+
+	// CImageInfo implementation
+
+	CImageInfo::CImageInfo( const CImageList* pImageList, int imagePos /*= 0*/ )
+		: m_pImageList( pImageList )
+		, m_imagePos( imagePos )
+		, m_imageCount( m_pImageList->GetImageCount() )
+		, m_bitsPerPixel( 0 )
+		, m_hasAlpha( false )
+	{
+		StoreImageAt( imagePos );
+
+		m_imageSize = GetImageRect().Size();
+		m_srcDibSize = gdi::GetBitmapSize( GetColorDib() );
+
+		CDibMeta dibMeta( GetColorDib() );
+		m_bitsPerPixel = dibMeta.m_bitsPerPixel;
+		m_hasAlpha = dibMeta.HasAlpha();
+	}
+
+	CRect CImageInfo::MapSrcDibRect( int index )
+	{
+		int extraHeight = m_srcDibSize.cy - m_imageSize.cy * m_imageCount;
+
+		StoreImageAt( m_imageCount - 1 - index );		// mirror the index (the DIB is bottom-up)
+
+		CRect srcRect = rcImage;
+		srcRect.OffsetRect( 0, extraHeight );			// offset up by empty extra space
+		return srcRect;
 	}
 
 
@@ -658,6 +619,15 @@ namespace gdi
 
 
 // CDibMeta implementation
+
+CDibMeta::CDibMeta( HBITMAP hDib /*= nullptr*/ )
+	: m_hDib( nullptr )
+	, m_orientation( gdi::BottomUp )
+	, m_bitsPerPixel( 0 )
+	, m_channelCount( 0 )
+{
+	Reset( hDib );
+}
 
 bool CDibMeta::Reset( HBITMAP hDib /*= nullptr*/ )
 {
@@ -740,8 +710,21 @@ void CDibMeta::StoreChannelCount( bool isDibSection )
 
 // CBitmapInfo implementation
 
-#ifdef _DEBUG
+CBitmapInfo::CBitmapInfo( HBITMAP hBitmap )
+	: m_structSize( 0 )
+{
+	if ( hBitmap != nullptr )
+		Build( hBitmap );
+}
 
+void CBitmapInfo::Build( HBITMAP hBitmap )
+{
+	ASSERT_PTR( hBitmap );
+	m_structSize = ::GetObject( hBitmap, sizeof( DIBSECTION ), this );
+}
+
+
+#ifdef _DEBUG
 
 std::tstring CBitmapInfo::FormatDbg( void ) const
 {
@@ -768,15 +751,14 @@ std::tstring CBitmapInfo::FormatDbg( void ) const
 	return oss.str();
 }
 
-
 #endif // _DEBUG
 
 
 // CDibSectionTraits implementation
 
 CDibSectionTraits::CDibSectionTraits( HBITMAP hDib )
-	: CBitmapInfo( hDib )
-	, m_hDib( hDib )
+	: CBitmapInfo( nullptr )
+	, m_hDib( nullptr )
 {
 	Build( hDib );
 }
@@ -787,8 +769,10 @@ CDibSectionTraits::~CDibSectionTraits()
 
 void CDibSectionTraits::Build( HBITMAP hDib )
 {
-	CBitmapInfo::Build( hDib );
-	ASSERT( !CBitmapInfo::IsValid() || IsDibSection() );		// must be used only for DIB sections
+	m_hDib = hDib;
+	__super::Build( hDib );
+
+	ENSURE( !__super::IsValid() || IsDibSection() );		// must be used only for DIB sections
 }
 
 COLORREF CDibSectionTraits::GetColorAt( const CDC* pDC, int index ) const

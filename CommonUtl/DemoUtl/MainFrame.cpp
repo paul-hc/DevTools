@@ -54,10 +54,10 @@ void CMainFrame::InitSystemTray( void )
 	m_pSystemTray->SetOwnerCallback( this );
 
 	CTrayIcon* pTrayIcon = m_pSystemTray->CreateTrayIcon( IDR_MESSAGE_TRAY_ICON, false );
-	res::LoadImageListDIB( pTrayIcon->RefAnimImageList(), IDB_SEARCH_FILES_ANIM_STRIP, color::ToolStripPink );
+	res::LoadImageListDIB( &pTrayIcon->RefAnimImageList(), IDB_SEARCH_FILES_ANIM_STRIP, color::ToolStripPink );
 
 	pTrayIcon = m_pSystemTray->CreateTrayIcon( IDR_MAINFRAME );
-	res::LoadImageListDIB( pTrayIcon->RefAnimImageList(), IDR_FLAG_STRIP_PNG );
+	res::LoadImageListDIB( &pTrayIcon->RefAnimImageList(), IDR_FLAG_STRIP_PNG );
 
 	m_pDemoSysTray.reset( new CDemoSysTray( this ) );
 }

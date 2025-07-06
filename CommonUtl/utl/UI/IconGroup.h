@@ -15,12 +15,11 @@ public:
 	CIconGroup( void ) : m_iconResId( 0 ) {}
 	~CIconGroup() { Clear(); }
 
+	size_t LoadAllIcons( UINT iconResId );
 	void Clear( void );
 
 	UINT GetIconResId( void ) const { return m_iconResId; }
 	void SetIconResId( UINT iconResId ) { m_iconResId = iconResId; Clear(); }
-
-	size_t LoadAllIcons( UINT iconResId );
 
 	bool IsEmpty( void ) const { return m_frames.empty(); }
 	size_t GetSize( void ) const { return m_frames.size(); }

@@ -5,8 +5,10 @@
 #include "ImagingGdiPlus.h"
 #include "ImagingWic.h"
 #include "Imaging.h"
+#include "ImageProxy.h"
 #include "Path.h"
 #include "WndUtils.h"
+#include <afxglobals.h>				// GetGlobalData()
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -135,7 +137,8 @@ bool CDibSection::Convert( const CDibSection& srcDib, UINT destBitsPerPixel )
 	bitmapInfo.CreateDibInfo( bitmapSize.cx, bitmapSize.cy, destBitsPerPixel, &srcDib );
 
 	CDibPixels destPixels;
-	if ( !CreateDIBSection( destPixels, *bitmapInfo.GetBitmapInfo() ) )
+
+	if ( !CreateDIBSection( &destPixels, *bitmapInfo.GetBitmapInfo() ) )
 		return false;
 
 	// retain original source information
@@ -210,7 +213,7 @@ bool CDibSection::CopyPixels( const CDibSection& srcDib, bool keepOrientation /*
 	bitmapInfo.CreateDibInfo( bitmapSize.cx, bitmapSize.cy, srcDib.m_bitsPerPixel, &srcDib );
 
 	CDibPixels pixels;
-	if ( !CreateDIBSection( pixels, *bitmapInfo.GetBitmapInfo() ) )
+	if ( !CreateDIBSection( &pixels, *bitmapInfo.GetBitmapInfo() ) )
 		return false;
 
 	CScopedBitmapMemDC scopedDestBitmap( this, nullptr, m_bitsPerPixel < 24 );		// we need a mem DC only for 1/4/8/16 bpp
@@ -304,7 +307,7 @@ bool CDibSection::LoadImageResource( UINT imageId, ui::ImagingApi api /*= ui::Wi
 	return LoadBitmapResource( imageId );
 }
 
-ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int imageCount, bool preserveThis /*= false*/ )
+ui::CImageListInfo CDibSection::MakeImageList( CImageList* pDestImageList, int imageCount, bool preserveThis /*= false*/ )
 {
 	REQUIRE( IsValid() );
 	REQUIRE( 0 == ( m_bitmapSize.cx % imageCount ) );	// imageCount lines-up with bitmap width consistently?
@@ -315,10 +318,10 @@ ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int i
 	imageListInfo.m_imageSize.cx /= imageCount;
 	ENSURE( m_bitmapSize.cx == imageListInfo.m_imageSize.cx * imageCount );		// whole division (no remainder)?
 
-	CreateEmptyImageList( rDestImageList, imageListInfo.m_imageSize, imageCount );
+	CreateEmptyImageList( pDestImageList, imageListInfo.m_imageSize, imageCount );
 
 	if ( HasAlpha() )
-		rDestImageList.Add( this, s_pNullMask );		// use alpha channel (no ILC_MASK required)
+		pDestImageList->Add( this, s_pNullMask );		// use alpha channel (no ILC_MASK required)
 	else
 	{
 		if ( HasTranspColor() )
@@ -328,57 +331,70 @@ ui::CImageListInfo CDibSection::MakeImageList( CImageList& rDestImageList, int i
 				// NOTE: this DIB will get altered, i.e. transparent background gets converted to black (due to image list internals).
 				//	We work on a copy so that we preserve this.
 				CDibSection dupDibBitmap( this );
-				rDestImageList.Add( &dupDibBitmap, m_transpColor );
+				pDestImageList->Add( &dupDibBitmap, m_transpColor );
 			}
 			else
-				rDestImageList.Add( this, m_transpColor );		// we don't care if this temporary DIB bitmap gets modified
+				pDestImageList->Add( this, m_transpColor );		// we don't care if this temporary DIB bitmap gets modified
 		}
 		else if ( imageListInfo.IsMonochrome() )
-			rDestImageList.Add( this, this );		// format compatibility: must be saved in MS Paint as monochrome bitmap!
+			pDestImageList->Add( this, this );		// format compatibility: must be saved in MS Paint as monochrome bitmap!
 		else
-			rDestImageList.Add( this, s_pNullMask );
+			pDestImageList->Add( this, s_pNullMask );
 	}
 
 	return imageListInfo;
 }
 
-TImageListFlags CDibSection::CreateEmptyImageList( CImageList& rDestImageList, const CSize& imageSize, int imageCount ) const
+TImageListFlags CDibSection::CreateEmptyImageList( CImageList* pDestImageList, const CSize& imageSize, int imageCount ) const
 {
 	REQUIRE( IsValid() );
+	ASSERT_PTR( pDestImageList );
 
 	TImageListFlags ilFlags = GetImageListFlags();
 
-	rDestImageList.Create( imageSize.cx, imageSize.cy, ilFlags, imageCount, 0 );
+	pDestImageList->DeleteImageList();
+	pDestImageList->Create( imageSize.cx, imageSize.cy, ilFlags, imageCount, 0 );
 	return ilFlags;
 }
 
-bool CDibSection::CreateDIBSection( CDibPixels& rPixels, const BITMAPINFO& dibInfo )
-{
+bool CDibSection::CreateDIBSection( CDibPixels* pOutPixels, const BITMAPINFO& dibInfo, HDC hDC /*= nullptr*/ )
+{	// Optionally: caller could select this DIB into hDC right after.
+	//	If usage==DIB_PAL_COLORS, the function uses this device context's logical palette to initialize the DIB colors.
+	//	But with just direct pixel access in 32-bpp, hDC can be nullptr.
 	DeleteObject();
 
 	// if pSrcDC not null and has the source bitmap selected, it will copy the source colour table
 	void* pPixels;
-	if ( HBITMAP hDib = ::CreateDIBSection( nullptr, &dibInfo, DIB_RGB_COLORS, &pPixels, nullptr, 0 ) )
+
+	if ( HBITMAP hDib = ::CreateDIBSection( hDC, &dibInfo, DIB_RGB_COLORS, &pPixels, nullptr, 0 ) )
 	{
 		CDibMeta dibMeta( hDib );
+
 		dibMeta.StorePixelFormat( dibInfo );
 		AttachDib( dibMeta );
 
-		rPixels.Init( *this );
-		ENSURE( m_srcDibMeta.m_orientation == rPixels.GetOrientation() );
-		ENSURE( pPixels == rPixels.Begin<BYTE>() );
+		if ( pOutPixels != nullptr )
+		{
+			pOutPixels->Init( *this );
+
+			ENSURE( pPixels == pOutPixels->Begin<BYTE>() );
+			ENSURE( m_srcDibMeta.m_orientation == pOutPixels->GetOrientation() );
+		}
+
 		return true;
 	}
 
-	return GetSafeHandle() != nullptr;
+	return false;
 }
 
-bool CDibSection::CreateDIBSection( CDibPixels& rPixels, int width, int height, UINT bitsPerPixel )
+bool CDibSection::CreateDIBSection( CDibPixels* pOutPixels, int width, int height, TBitsPerPixel bitsPerPixel, HDC hDC /*= nullptr*/ )
 {
 	ASSERT( bitsPerPixel > 8 );			// this shan't be used for DIBs with color table, which require full BITMAPINFO with colour table
 
-	BITMAPINFO dibInfo; ZeroMemory( &dibInfo, sizeof( dibInfo ) );
+	BITMAPINFO dibInfo;
+	ZeroMemory( &dibInfo, sizeof( dibInfo ) );
 
+	// fill in the BITMAPINFOHEADER data-member in BITMAPINFO:
 	dibInfo.bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
 	dibInfo.bmiHeader.biWidth = width;
 	dibInfo.bmiHeader.biHeight = height;			// negative height will create a top-down DIB
@@ -386,8 +402,117 @@ bool CDibSection::CreateDIBSection( CDibPixels& rPixels, int width, int height, 
 	dibInfo.bmiHeader.biBitCount = static_cast<WORD>( bitsPerPixel );
 	dibInfo.bmiHeader.biCompression = BI_RGB;
 
-	return CreateDIBSection( rPixels, dibInfo );
+	return CreateDIBSection( pOutPixels, dibInfo, hDC );
 }
+
+
+bool CDibSection::CreateDIB32Copy( const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP, COLORREF transpColor /*= CLR_NONE*/ )
+{
+	ASSERT( pImageProxy != nullptr && !pImageProxy->IsEmpty() );
+
+	if ( GetGlobalData()->m_nBitsPerPixel <= 8 )
+		return false;
+
+	const CSize& srcImageSize = pImageProxy->GetSize();
+
+	if ( !CreateDIBSection( nullptr, srcImageSize.cx, srcImageSize.cy, 32 ) )
+		return false;
+
+	CDC destMemDC;
+	destMemDC.CreateCompatibleDC( nullptr );		// make DEST memory DC compatible with the Screen DC, to select a new DIB
+
+	HBITMAP hOldDestBitmap = (HBITMAP)destMemDC.SelectObject( GetBitmapHandle() );
+
+	if ( AlterProxyTransparentColor( &transpColor, pImageProxy, srcBPP ) )
+	{
+		// Protect background from fading or blending:
+		//	- fill background with a color != color::Black, which is undesirable - we just want to fade the foreground colors
+		pImageProxy->FillBackground( &destMemDC, CPoint( 0, 0 ), transpColor );
+	}
+
+	// draw the original image over the created and selected DIB:
+	pImageProxy->Draw( &destMemDC, CPoint( 0, 0 ), transpColor );
+
+	destMemDC.SelectObject( hOldDestBitmap );
+	return true;
+}
+
+bool CDibSection::CreateDIB32Copy( HBITMAP hBitmapSrc, TBitsPerPixel srcBPP /*= 0*/, COLORREF transpColor /*= CLR_NONE*/ )
+{
+	if ( 0 == srcBPP )
+		srcBPP = gdi::GetBitsPerPixel( hBitmapSrc );
+
+	CBitmapProxy bitmapProxy( hBitmapSrc );
+
+	if ( !bitmapProxy.IsEmpty() )
+		return CreateDIB32Copy( &bitmapProxy, srcBPP, transpColor );
+
+	return false;
+}
+
+
+bool CDibSection::CreateDisabledEffectDIB32( const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP, gdi::DisabledStyle style /*= gdi::Dis_FadeGray*/,
+											 COLORREF transpColor /*= CLR_NONE*/ )
+{
+	if ( !CreateDIB32Copy( pImageProxy, srcBPP, transpColor ) )
+		return false;
+
+	AlterProxyTransparentColor( &transpColor, pImageProxy, srcBPP );
+	ApplyDisabledEffect( srcBPP, transpColor, style );
+	return true;
+}
+
+void CDibSection::ApplyDisabledEffect( TBitsPerPixel srcBPP, COLORREF transpColor /*= CLR_NONE*/, gdi::DisabledStyle style /*= gdi::Dis_FadeGray*/ )
+{
+	REQUIRE( IsDibSection() && 32 == m_bitsPerPixel );		// should have been created by calling CreateDIB32Copy() method
+
+	COLORREF blendToColor = ::GetSysColor( COLOR_BTNFACE );
+	BYTE toAlpha = 192;			// was 128; 192 looks better, more washed-out (hence disabled)
+
+	// direct BGRA (RGBQUAD) pixel modification - apply disabled effect to each pixel:
+	CDibPixels pixels( this );
+
+	switch ( style )
+	{
+		default: ASSERT( false );
+		case gdi::Dis_FadeGray:
+			pixels.ApplyDisableFadeGray( srcBPP, gdi::AlphaFadeMore, false, transpColor );
+			break;
+		case gdi::Dis_GrayScale:
+			pixels.ApplyGrayScale();
+			break;
+		case gdi::Dis_GrayOut:
+			pixels.ApplyDisabledGrayOut( blendToColor, toAlpha );
+			break;
+		case gdi::Dis_DisabledEffect:
+			pixels.ApplyDisabledEffect( blendToColor, toAlpha );
+			break;
+		case gdi::Dis_BlendColor:
+			pixels.ApplyBlendColor( blendToColor, toAlpha );
+			break;
+		case gdi::Dis_MfcStd:
+			pixels.ForEach( func::FadeColor( 128 ) );		// MFC standard: fade colors to alpha=128
+			break;
+	}
+}
+
+bool CDibSection::AlterProxyTransparentColor( COLORREF* pTranspColor, const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP )
+{
+	ASSERT_PTR( pTranspColor );
+
+	if ( srcBPP < 32 && pImageProxy->HasTransparency() )
+	{
+		enum { TransparentBlack = RGB( 1, 1, 1 ) };		// a color != color::Black, which will be translated as transparent
+
+		ASSERT( CLR_NONE == *pTranspColor );
+		*pTranspColor = TransparentBlack;
+
+		return true;
+	}
+
+	return false;
+}
+
 
 bool CDibSection::Blit( CDC* pDC, const CRect& rect, DWORD rop /*= SRCCOPY*/ ) const
 {

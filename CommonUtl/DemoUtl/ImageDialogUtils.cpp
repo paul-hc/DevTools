@@ -50,7 +50,7 @@ namespace utl
 	void HorizGradientAlphaBlend( CDibPixels& rPixels, COLORREF bkColor )
 	{
 		CSize bitmapSize = rPixels.GetBitmapSize();
-		UINT bitsPerPixel = rPixels.GetBitsPerPixel();
+		TBitsPerPixel bitsPerPixel = rPixels.GetBitsPerPixel();
 		ASSERT( bitsPerPixel >= 24 );
 
 		for ( int y = 0; y != bitmapSize.cy; ++y )

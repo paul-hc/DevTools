@@ -27,7 +27,7 @@ public:
 	gdi::Orientation GetOrientation( void ) const { ASSERT( IsValid() ); return m_orientation; }
 	bool HasAlpha( void ) const { return 32 == m_bitsPerPixel; }
 
-	WORD GetBitsPerPixel( void ) const { return m_bitsPerPixel; }
+	TBitsPerPixel GetBitsPerPixel( void ) const { return m_bitsPerPixel; }
 
 	UINT GetWidth( void ) const { return m_width; }
 	UINT GetHeight( void ) const { return m_height; }
@@ -92,8 +92,8 @@ public:
 	bool ApplyAlphaBlend( BYTE alpha, COLORREF blendColor24 = color::AzureBlue ) { return ForEach( func::AlphaBlend( alpha, blendColor24 ) ); }
 	bool ApplyBlendColor( COLORREF toColor24, BYTE toAlpha ) { return ForEach( func::BlendColor( toColor24, toAlpha ) ); }
 
-	bool ApplyDisableFadeGray( BYTE fadeAlpha = pixel::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF grayScaleTranspColor24 = CLR_NONE )	// best looking!
-	{ return ForEach( func::DisableFadeGray( fadeAlpha, preMultiplyAlpha, grayScaleTranspColor24 ) ); }
+	bool ApplyDisableFadeGray( TBitsPerPixel srcBPP, BYTE fadeAlpha = gdi::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF transpColor = CLR_NONE )	// best looking!
+	{ return ForEach( func::DisableFadeGray( srcBPP, fadeAlpha, preMultiplyAlpha, transpColor ) ); }
 
 	bool ApplyDisabledGrayOut( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledGrayOut( toColor24, toAlpha ) ); }
 	bool ApplyDisabledEffect( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledEffect( toColor24, toAlpha ) ); }
@@ -138,7 +138,7 @@ private:
 	gdi::Orientation m_orientation;		// known at creation time in BITMAPINFO, must be passed from creation (can't be retrofitted)
 	UINT m_width;
 	UINT m_height;
-	WORD m_bitsPerPixel;
+	TBitsPerPixel m_bitsPerPixel;
 	int m_stride;						// number of bytes per scan line (aka pitch)
 };
 

@@ -38,8 +38,6 @@ void CToolBarImagesTests::TestToolBarImagesDetails( ut::CTestDevice& rTestDev )
 	if ( imagePath.IsEmpty() )
 		return;
 
-	rTestDev.SetSubTitle( _T("CToolBarImagesTests::TestToolBarImagesDetails") );
-
 	CMFCToolBarImages* pImages = CMFCToolBar::GetImages();
 	int imageCount = pImages->GetCount();
 

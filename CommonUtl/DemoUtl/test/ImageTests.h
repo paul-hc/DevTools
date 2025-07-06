@@ -23,7 +23,8 @@ private:
 	void TestGroupIconRes( void );
 	void TestIcon( ut::CTestDevice& rTestDev );
 	void TestIconGroup( ut::CTestDevice& rTestDev );
-	void TestImageList( ut::CTestDevice& rTestDev );
+	void TestImageListGuts( ut::CTestDevice& rTestDev );
+	void TestImageListDisabled( ut::CTestDevice& rTestDev );
 };
 
 

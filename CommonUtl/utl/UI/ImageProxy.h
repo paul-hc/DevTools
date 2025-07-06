@@ -20,8 +20,8 @@ namespace ui
 		virtual const CSize& GetSize( void ) const = 0;
 		virtual void SizeToText( CDC* /*pDC*/ ) {}
 
-		virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const = 0;
-		virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const = 0;
+		virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const = 0;
+		virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const = 0;
 
 		// implemented methods
 		virtual bool HasTransparency( void ) const { return false; }
@@ -45,8 +45,8 @@ public:
 	virtual bool IsEmpty( void ) const override { return nullptr == m_hBitmapList || m_index < 0; }
 	virtual const CSize& GetSize( void ) const override { return m_size; }
 	virtual bool HasTransparency( void ) const override;
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const override;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const override;
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
 private:
 	void Init( void );
 	void CreateMonochromeMask( CDC* pMemoryDC, CDC* pMonoDC ) const;
@@ -70,8 +70,8 @@ public:
 	virtual bool IsEmpty( void ) const override { return nullptr == m_pIcon; }
 	virtual const CSize& GetSize( void ) const override;
 	virtual bool HasTransparency( void ) const override { return true; }
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const override;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const override;
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
 private:
 	void CreateMonochromeMask( CDC* pMemoryDC, CDC* pMonoDC ) const;
 private:
@@ -79,11 +79,13 @@ private:
 };
 
 
+// Proxy for drawing 1 image in the image list.
+//
 struct CImageListProxy : public ui::IImageProxy
 {
 	CImageListProxy( CImageList* pImageList = nullptr, int index = NoImage, int overlayMask = NoOverlayMask );
 
-	void Set( CImageList* pImageList, int index );
+	void Reset( CImageList* pImageList, int index );
 
 	// overlay
 	bool HasOverlayMask( void ) const { return m_overlayMask > NoOverlayMask; }
@@ -95,10 +97,10 @@ struct CImageListProxy : public ui::IImageProxy
 
 	// ui::IImageProxy interface
 	virtual bool IsEmpty( void ) const  override { return nullptr == m_pImageList || m_index < 0; }
-	virtual const CSize& GetSize( void ) const override;
+	virtual const CSize& GetSize( void ) const override { return m_imageSize; }
 	virtual bool HasTransparency( void ) const override { return true; }
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const override;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const override;
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
 private:
 	void DrawDisabledImpl( CDC* pDC, const CPoint& pos, UINT style ) const;
 	void DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT style ) const;
@@ -108,7 +110,30 @@ public:
 private:
 	int m_overlayMask;							// one-based index of the overlay mask (1->4 in the same image list)
 	const CImageListProxy* m_pExternalOverlay;	// external overlay, could belong to a different image list
-	mutable CSize m_size;						// lazy self-encapsulated
+	CSize m_imageSize;
+};
+
+
+// Proxy for drawing all images in the image list.
+//
+class CImageListStripProxy : public ui::IImageProxy
+{
+public:
+	CImageListStripProxy( const CImageList* pImageList );
+
+	const CSize& GetImageSize( void ) const { return m_imageSize; }
+
+	// ui::IImageProxy interface
+	virtual bool IsEmpty( void ) const  override { return nullptr == m_pImageList; }
+	virtual const CSize& GetSize( void ) const override { return m_stripSize; }
+	virtual bool HasTransparency( void ) const override { return true; }
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+private:
+	CImageList* m_pImageList;
+	int m_imageCount;
+	CSize m_imageSize;
+	CSize m_stripSize;
 };
 
 
@@ -124,8 +149,8 @@ public:
 	virtual bool IsEmpty( void ) const override { return false; }
 	virtual const CSize& GetSize( void ) const override { return m_size; }
 	virtual void SizeToText( CDC* pDC ) override;
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = color::Null ) const;
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const;
 private:
 	void DrawImpl( CDC* pDC, const CPoint& pos, bool enabled ) const;
 private:

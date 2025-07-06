@@ -67,7 +67,8 @@ CImageList* CToolImageList::CreateImageList( int countOrGrowBy /*= -5*/ )
 {
 	m_pImageList.reset( new CImageList() );
 	m_imageListFlags = ILC_COLOR32 | ILC_MASK;
-	gdi::CreateImageList( *m_pImageList, GetImageSize(), countOrGrowBy, m_imageListFlags );
+	gdi::CreateImageList( m_pImageList.get(), GetImageSize(), countOrGrowBy, m_imageListFlags );
+
 	return m_pImageList.get();
 }
 
@@ -126,7 +127,7 @@ bool CToolImageList::LoadToolbar( UINT toolBarId, COLORREF transpColor /*= color
 	{
 		m_pImageList.reset( new CImageList() );
 
-		ui::CImageListInfo imageListInfo = res::LoadImageListDIB( *m_pImageList, toolBarId, transpColor );
+		ui::CImageListInfo imageListInfo = res::LoadImageListDIB( m_pImageList.get(), toolBarId, transpColor );
 
 		m_imageListFlags = imageListInfo.m_ilFlags;
 		m_hasAlpha = imageListInfo.HasAlpha();
@@ -162,7 +163,7 @@ bool CToolImageList::LoadButtonImages( ui::IImageStore* pSrcImageStore /*= ui::G
 
 	m_pImageList.reset( new CImageList() );
 
-	ui::CImageListInfo imageListInfo = gdi::CreateImageList( *m_pImageList, GetImageSize(), CToolImageList::EvalButtonCount( ARRAY_SPAN_V( m_buttonIds ) ) );
+	ui::CImageListInfo imageListInfo = gdi::CreateImageList( m_pImageList.get(), GetImageSize(), CToolImageList::EvalButtonCount(ARRAY_SPAN_V(m_buttonIds)));
 	int imageCount = pSrcImageStore->BuildImageList( m_pImageList.get(), ARRAY_SPAN_V( m_buttonIds ), GetImageSize() );
 
 	m_imageListFlags = imageListInfo.m_ilFlags;

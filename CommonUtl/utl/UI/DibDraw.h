@@ -2,6 +2,7 @@
 #define DibDraw_h
 #pragma once
 
+#include "Image_fwd.h"
 #include "DibDraw_fwd.h"
 
 
@@ -28,27 +29,7 @@ namespace gdi
 
 	// image list conversion
 
-	bool MakeDisabledImageList( CImageList& rDestImageList, const CImageList& srcImageList, DisabledStyle style = gdi::DisabledBlendColor,
-								COLORREF blendToColor = ::GetSysColor( COLOR_BTNFACE ), BYTE toAlpha = 128 );
-
-
-	struct CImageInfo : public _IMAGEINFO
-	{
-		CImageInfo( const CImageList* pImageList, int index );
-
-		void GetImageAt( int index ) { VERIFY( m_pImageList->GetImageInfo( index, this ) ); }
-
-		// src DIB hbmImage is orientated vertically
-		CRect MapSrcDibRect( int index );
-
-		// dest DIB rect is orientated horizontally
-		CRect GetDestRect( int index ) const { return CRect( CPoint( index * m_imageSize.cx, 0 ), m_imageSize ); }
-	public:
-		const CImageList* m_pImageList;
-		UINT m_imageCount;
-		CSize m_imageSize;
-		CSize m_srcDibSize;
-	};
+	bool MakeDisabledImageList( CImageList* pDestImageList, const CImageList& srcImageList, DisabledStyle style = gdi::Dis_FadeGray );
 }
 
 

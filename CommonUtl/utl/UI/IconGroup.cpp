@@ -29,7 +29,7 @@ size_t CIconGroup::LoadAllIcons( UINT iconResId )
 
 	const CGroupIconRes groupIcon( m_iconResId );
 
-	TRACE( _T("CIconGroup::LoadAllIcons( m_iconResId=%d ): %d frames\n"), m_iconResId, groupIcon.GetSize() );
+	//TRACE( _T("CIconGroup::LoadAllIcons( m_iconResId=%d ): %d frames\n"), m_iconResId, groupIcon.GetSize() );
 
 	if ( groupIcon.IsValid() )
 	{
@@ -39,7 +39,7 @@ size_t CIconGroup::LoadAllIcons( UINT iconResId )
 		{
 			const res::CGroupIconEntry& srcEntry = groupIcon.GetIconEntryAt( framePos );
 
-			TRACE( _T("\tEntry: framePos=%d,\t%s\n"), framePos, dbg::FormatGroupIconEntry( srcEntry ).c_str() );
+			//TRACE( _T("\tEntry: framePos=%d,\t%s\n"), framePos, dbg::FormatGroupIconEntry( srcEntry ).c_str() );
 
 			if ( srcEntry.GetBitsPerPixel() <= ILC_COLOR32 )			// not a weird entry?
 				if ( CIcon* pIcon = CIcon::LoadNewIcon( srcEntry ) )	// load from resources this exact icon frame

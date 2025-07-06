@@ -147,10 +147,12 @@
 #define IDS_OLE_INIT_FAILED             5000
 #define IDS_CHANGE_CASE_TAGS            5001
 #define IDC_STRIP_BAR_5                 28510
+#define IDC_STRIP_BAR_6                 28511
 #define ID_STUDY_IMAGE                  32772
 #define ID_CHANGE_CASE                  32773
 #define ID_SEND_TO_CLIPBOARD            32774
 #define ID_STUDY_LIST_DIFFS             32775
+#define ID_TOGGLE_ENABLED_BTNS          32775
 #define ID_NUMERIC_SEQUENCE             32776
 #define ID_NUMERIC_SEQUENCE_2DIGITS     32777
 #define ID_NUMERIC_SEQUENCE_3DIGITS     32778
@@ -184,7 +186,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        157
+#define _APS_NEXT_RESOURCE_VALUE        158
 #define _APS_NEXT_COMMAND_VALUE         32813
 #define _APS_NEXT_CONTROL_VALUE         1114
 #define _APS_NEXT_SYMED_VALUE           5002

@@ -16,7 +16,7 @@ CWndImageRepository::CWndImageRepository( void )
 {
 	// Avoid using PNG with alpha channel - it brakes rendering other windows' icons without alpha by drawing a black background;
 	// Use BMP 24bpp, otherwise PNG breaks image list transparency in 24bpp.
-	VERIFY( Image_Count == res::LoadImageListDIB( m_imageList, IDR_WND_TYPES_STRIP, color::ToolStripPink ).m_imageCount );
+	VERIFY( Image_Count == res::LoadImageListDIB( &m_imageList, IDR_WND_TYPES_STRIP, color::ToolStripPink ).m_imageCount );
 
 	RegisterClasses( _T("#32769"), Image_Desktop );
 	RegisterClasses( _T("#32770"), Image_Dialog );
@@ -59,10 +59,10 @@ CWndImageRepository& CWndImageRepository::Instance( void )
 
 void CWndImageRepository::RegisterClasses( const TCHAR* pWndClasses, WndImage image )
 {
-	std::vector< std::tstring > wndClasses;
+	std::vector<std::tstring> wndClasses;
 	str::Split( wndClasses, pWndClasses, _T("|") );
 
-	for ( std::vector< std::tstring >::const_iterator itWndClass = wndClasses.begin(); itWndClass != wndClasses.end(); ++itWndClass )
+	for ( std::vector<std::tstring>::const_iterator itWndClass = wndClasses.begin(); itWndClass != wndClasses.end(); ++itWndClass )
 		m_classToImageMap[ str::MakeUpper( *itWndClass ) ] = image;		// class name key in upper case
 }
 
@@ -76,7 +76,7 @@ WndImage CWndImageRepository::LookupImage( HWND hWnd ) const
 	std::tstring wndClass = wc::GetClassName( hWnd );
 	str::ToUpper( wndClass );
 
-	std::unordered_map< std::tstring, WndImage >::const_iterator itFound = m_classToImageMap.find( wndClass );
+	std::unordered_map<std::tstring, WndImage>::const_iterator itFound = m_classToImageMap.find( wndClass );
 	if ( itFound != m_classToImageMap.end() )
 	{
 		switch ( itFound->second )
