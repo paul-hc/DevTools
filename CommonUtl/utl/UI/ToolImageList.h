@@ -59,7 +59,7 @@ public:
 	bool ContainsButton( UINT buttonId ) const { return FindButtonPos( buttonId ) != utl::npos; }
 	size_t FindButtonPos( UINT buttonId ) const;
 
-	bool LoadToolbar( UINT toolBarId, COLORREF transpColor = color::Auto );					// loads imagelist and button IDs from toolbar resource
+	bool LoadToolbar( UINT toolBarId, COLORREF transpColor = CLR_NONE );					// loads imagelist and button IDs from toolbar resource
 	bool _LoadIconStrip( UINT iconStripId, const UINT buttonIds[], size_t count );			// creates imagelist from icon strip (custom size multi-images) and stores button IDs - not used!
 	bool LoadButtonImages( ui::IImageStore* pSrcImageStore = ui::GetImageStoresSvc() );		// creates imagelist from button IDs
 private:

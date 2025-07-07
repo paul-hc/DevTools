@@ -107,7 +107,7 @@ size_t CToolImageList::FindButtonPos( UINT buttonId ) const
 	return utl::FindPos( m_buttonIds, buttonId );
 }
 
-bool CToolImageList::LoadToolbar( UINT toolBarId, COLORREF transpColor /*= color::Auto*/ )
+bool CToolImageList::LoadToolbar( UINT toolBarId, COLORREF transpColor /*= CLR_NONE*/ )
 {
 	ASSERT( toolBarId != 0 );
 

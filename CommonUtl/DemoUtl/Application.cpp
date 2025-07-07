@@ -93,11 +93,11 @@ BOOL CApplication::InitInstance( void )
 	SetRegistryBase( _T("Settings") );
 
 	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
-	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images: 4-bit
-	GetSharedImageStore()->RegisterToolbarImages( IDR_MONOCHROME_STRIP, color::Null );			// low color images: 1-bit (format compatibility: must be saved in MS Paint as monochrome bitmap!)
+	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );	// low color images: 4-bit
+	GetSharedImageStore()->RegisterToolbarImages( IDR_MONOCHROME_STRIP );					// low color images: 1-bit (format compatibility: must be saved in MS Paint as monochrome bitmap!)
 	GetSharedImageStore()->RegisterAliases( ARRAY_SPAN( s_cmdAliases ) );
 
-	GetSharedImageStore()->RegisterAlias( ID_EDIT_ITEM, ID_NUMERIC_SEQUENCE );		// for tracking context menu example in CTestColorsDialog::m_pMenuPicker drop-down
+	GetSharedImageStore()->RegisterAlias( ID_EDIT_ITEM, ID_NUMERIC_SEQUENCE );				// for tracking context menu example in CTestColorsDialog::m_pMenuPicker drop-down
 
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	CLayoutEngine::s_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;

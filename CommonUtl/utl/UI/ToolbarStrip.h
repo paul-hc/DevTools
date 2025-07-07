@@ -18,7 +18,7 @@ public:
 	const CToolStrip& GetStrip( void ) const { return m_strip; }
 	CToolStrip& GetStrip( void ) { return m_strip; }
 
-	bool LoadToolStrip( UINT toolStripId, COLORREF transpColor = color::Auto );
+	bool LoadToolStrip( UINT toolStripId, COLORREF transpColor = CLR_NONE );
 	bool InitToolbarButtons( void );						// use already set up strip buttons to initialize bar buttons and imagelist
 
 	gdi::DisabledStyle GetDisabledStyle( void ) const { return m_disabledStyle; }

@@ -165,7 +165,7 @@ namespace res
 		return (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, fuLoad );
 	}
 
-	ui::CImageListInfo LoadImageListDIB( CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor /*= color::Auto*/,
+	ui::CImageListInfo LoadImageListDIB( CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor /*= CLR_NONE*/,
 										 int imageCount /*= -1*/, bool disabledEffect /*= false*/ )
 	{
 		// Use PNG only with 32bpp (alpha channel). PNG 24bpp breaks image list transparency (DIB issues?).
@@ -185,7 +185,7 @@ namespace res
 		if ( disabledEffect )
 		{
 			CDibPixels pixels( &dibSection );
-			pixels.ApplyDisableFadeGray( dibSection.GetBitsPerPixel(), gdi::AlphaFadeMore, false /*, ::GetSysColor( COLOR_BTNFACE )*/);
+			pixels.ApplyDisableFadeGray( gdi::AlphaFadeMore, false /*, ::GetSysColor( COLOR_BTNFACE )*/);
 		}
 
 		if ( -1 == imageCount )

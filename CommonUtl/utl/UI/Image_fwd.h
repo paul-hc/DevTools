@@ -215,7 +215,7 @@ namespace res
 	HICON LoadIcon( const CIconId& iconId, UINT fuLoad = LR_DEFAULTCOLOR );
 
 	// image-list from bitmap: loads strip from whichever comes first - PNG:32bpp with alpha (if found), or BMP:4/8/24bpp
-	ui::CImageListInfo LoadImageListDIB( CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor = color::Auto,
+	ui::CImageListInfo LoadImageListDIB( CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor = CLR_NONE,
 										 int imageCount = -1, bool disabledEffect = false );
 
 	// image-list from an icon-strip of custom size and multiple images.

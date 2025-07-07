@@ -327,7 +327,7 @@ bool CImageStore::MapIcon( const ui::CIconKey& iconKey, CIcon* pIcon )
 	return true;	// icon added
 }
 
-void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*= color::Auto*/, bool addMfcToolBarImages /*= false*/ )
+void CImageStore::RegisterToolbarImages( UINT toolbarId, COLORREF transpColor /*= CLR_NONE*/, bool addMfcToolBarImages /*= false*/ )
 {
 	CToolImageList strip;
 

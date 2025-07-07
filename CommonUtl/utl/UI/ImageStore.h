@@ -37,7 +37,7 @@ public:
 	virtual void QueryIconGroups( std::vector<CIconGroup*>& rIconGroups ) const;
 	virtual void QueryIconKeys( std::vector<ui::CIconKey>& rIconKeys, IconStdSize iconStdSize = AnyIconSize ) const;
 public:
-	void RegisterToolbarImages( UINT toolbarId, COLORREF transpColor = color::Auto, bool addMfcToolBarImages = false );
+	void RegisterToolbarImages( UINT toolbarId, COLORREF transpColor = CLR_NONE, bool addMfcToolBarImages = false );
 	void RegisterButtonImages( const CToolImageList& toolImageList );
 	void RegisterButtonImages( const CImageList& imageList, const ui::CImageListInfo& imageListInfo, const UINT buttonIds[], size_t buttonCount );
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );			// takes ownership of pIcon

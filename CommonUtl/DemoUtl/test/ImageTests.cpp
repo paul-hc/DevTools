@@ -145,7 +145,7 @@ void CImageTests::TestImageListGuts( ut::CTestDevice& rTestDev )
 
 	{	// reload with explicit image count
 		CImageList imageList2;
-		VERIFY( res::LoadImageListDIB( &imageList2, IDR_IMAGE_STRIP, color::Auto, ImageCount ).m_imageCount != 0 );
+		VERIFY( res::LoadImageListDIB( &imageList2, IDR_IMAGE_STRIP, CLR_NONE, ImageCount ).m_imageCount != 0 );
 		ASSERT_EQUAL( imageList.GetImageCount(), imageList2.GetImageCount() );
 		ASSERT( imageSize == gdi::GetImageIconSize( imageList2 ) );
 	}
@@ -226,14 +226,19 @@ void CImageTests::TestImageListGuts( ut::CTestDevice& rTestDev )
 
 void CImageTests::TestImageListDisabled( ut::CTestDevice& rTestDev )
 {
-	const UINT toolbarStripIds[] = { IDR_IMAGE_STRIP, IDR_LOW_COLOR_STRIP, IDR_MONOCHROME_STRIP };		// PNG: 32bpp + Alpha | 4-bit | 1-bit
-	const gdi::DisabledStyle disStyles[] = { gdi::Dis_FadeGray, gdi::Dis_GrayScale, gdi::Dis_GrayOut, gdi::Dis_DisabledEffect, gdi::Dis_BlendColor, gdi::Dis_MfcStd };
+	const struct { UINT m_bitmapId; COLORREF m_transpColor; } toolbars[] =
+	{
+		{ IDR_IMAGE_STRIP, CLR_NONE },
+		{ IDR_LOW_COLOR_STRIP, color::Magenta },
+		{ IDR_MONOCHROME_STRIP, CLR_NONE }
+	};
+	const gdi::DisabledStyle disStyles[] = { gdi::Dis_FadeGray, gdi::Dis_GrayScale, gdi::Dis_GrayOut, gdi::Dis_DisabledEffect, gdi::Dis_BlendColor /*, gdi::Dis_MfcStd*/ };
 
 	CImageList srcImageList;
 
-	for ( size_t t = 0; t != COUNT_OF( toolbarStripIds ); ++t )
+	for ( size_t t = 0; t != COUNT_OF( toolbars ); ++t )
 	{
-		res::LoadImageListDIB( &srcImageList, toolbarStripIds[t] );			// use default image count, implied from the width/height ratio
+		res::LoadImageListDIB( &srcImageList, toolbars[t].m_bitmapId, toolbars[t].m_transpColor );		// use default image count, implied from the width/height ratio
 
 		rTestDev.DrawImageList( &srcImageList, true );
 		rTestDev.DrawTileCaption( ut::FormatImageListColorDepth( _T("SRC"), srcImageList ) );

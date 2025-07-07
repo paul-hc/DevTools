@@ -21,7 +21,7 @@ CToolbarStrip::~CToolbarStrip()
 {
 }
 
-bool CToolbarStrip::LoadToolStrip( UINT toolStripId, COLORREF transpColor /*= color::Auto*/ )
+bool CToolbarStrip::LoadToolStrip( UINT toolStripId, COLORREF transpColor /*= CLR_NONE*/ )
 {
 	ASSERT_PTR( m_hWnd );
 
