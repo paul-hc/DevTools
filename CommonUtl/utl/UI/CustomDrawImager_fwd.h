@@ -2,7 +2,7 @@
 #define CustomDrawImager_fwd_h
 #pragma once
 
-#include "Image_fwd.h"
+#include "Image_fwd.h"		// for ui::ICustomImageDraw
 
 
 class CBaseCustomDrawImager;

@@ -2,7 +2,7 @@
 #define IconGroup_h
 #pragma once
 
-#include "Image_fwd.h"
+#include "ImageStore_fwd.h"
 
 
 // Owns multiple CIcon objects loaded from the same resource ID, typically corresponding to a structure of res::CGroupIconDir and res::CGroupIconEntry.

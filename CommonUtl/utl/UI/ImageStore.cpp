@@ -72,6 +72,77 @@ namespace ui
 
 		return &*itFound;
 	}
+
+
+	// CIconKey implementation
+
+	bool CIconEntry::operator==( const CIconEntry& right ) const
+	{
+		if ( this == &right )
+			return true;
+
+		return
+			m_bitsPerPixel == right.m_bitsPerPixel &&
+			m_dimension == right.m_dimension;
+	}
+
+
+	// IImageStore implementation
+
+	CIcon* IImageStore::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*/, TBitsPerPixel bitsPerPixel /*= ILC_COLOR*/ ) const
+	{
+		REQUIRE( EqMaskedValue( bitsPerPixel, ILC_ALL_COLORS_MASK, bitsPerPixel ) );		// only the valid BPP values are passed?
+		CIcon* pFoundIcon = nullptr;
+
+		if ( const CIconGroup* pIconGroup = FindIconGroup( cmdId ) )
+			if ( ILC_COLOR == bitsPerPixel )
+				pFoundIcon = pIconGroup->FindBestMatchingIcon( iconStdSize );						// best match, i.e. highest color
+			else
+				pFoundIcon = pIconGroup->FindIcon( ui::CIconEntry( bitsPerPixel, iconStdSize ) );	// exact match
+
+		return pFoundIcon;
+	}
+
+	const CIcon* IImageStore::RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize /*= HugeIcon_48*/ )
+	{
+		for ( ; maxIconStdSize >= DefaultSize; --(int&)maxIconStdSize )
+			if ( const CIcon* pIcon = RetrieveIcon( CIconId( cmdId, maxIconStdSize ) ) )
+				return pIcon;
+
+		return nullptr;
+	}
+
+	int IImageStore::BuildImageList( CImageList* pDestImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize )
+	{
+		ASSERT_PTR( pDestImageList->GetSafeHandle() );
+		ASSERT( buttonIds != nullptr && buttonCount != 0 );
+
+		IconStdSize iconStdSize = CIconSize::FindStdSize( imageSize );
+		int imageCount = 0;
+
+		for ( size_t i = 0; i != buttonCount; ++i )
+			if ( buttonIds[ i ] != 0 )			// skip separators
+			{
+				const CIcon* pIcon = RetrieveIcon( CIconId( buttonIds[ i ], iconStdSize ) );
+
+				if ( nullptr == pIcon )
+					pIcon = &CIcon::GetUnknownIcon();
+
+				pDestImageList->Add( pIcon->GetHandle() );
+				++imageCount;
+			}
+
+		if ( imageCount != pDestImageList->GetImageCount() )
+			TRACE( " IImageStore::BuildImageList(): buttonCount=%d  imageListCount=%d\n", buttonCount, pDestImageList->GetImageCount() );
+
+		return imageCount;
+	}
+
+
+	ui::IImageStore* GetImageStoresSvc( void )
+	{
+		return CImageStoresSvc::Instance();
+	}
 }
 
 

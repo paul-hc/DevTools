@@ -2,7 +2,7 @@
 #define Icon_h
 #pragma once
 
-#include "Image_fwd.h"
+#include "ImageStore_fwd.h"
 #include "Color.h"
 
 

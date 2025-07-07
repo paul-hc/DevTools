@@ -57,6 +57,9 @@ namespace res
 #pragma pack( pop )
 
 
+class CIcon;
+
+
 // RT_GROUP_ICON resource info
 //
 class CGroupIconRes
