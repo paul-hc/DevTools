@@ -100,6 +100,12 @@ private:
 	bool DoBlit( CDC* pDC, const CRect& rect, DWORD rop = SRCCOPY ) const;
 
 	bool AlterProxyTransparentColor( COLORREF* pTranspColor, const ui::IImageProxy* pImageProxy, TBitsPerPixel srcBPP );
+
+	enum
+	{
+		TransparentBlack = RGB( 1, 1, 1 ),		// a color != color::Black, which will be translated as transparent
+		PreFadeAlpha = 128						// used in ApplyDisabledEffect() for pre-fading for low color sources (compensate for too much contrast in the source)
+	};
 private:
 	// hidden base members
 	using CBitmap::Attach;

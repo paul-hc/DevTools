@@ -90,7 +90,7 @@ void CTestToolbarDialog::DoDataExchange( CDataExchange* pDX )
 	m_toolbarDis_Effect.DDX_Placeholder( pDX, IDC_STRIP_BAR_5, BarAlign );
 	m_toolbarDis_BlendColor.DDX_Placeholder( pDX, IDC_STRIP_BAR_6, BarAlign );
 
-	CLayoutDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BEGIN_MESSAGE_MAP( CTestToolbarDialog, CLayoutDialog )
@@ -107,5 +107,5 @@ void CTestToolbarDialog::OnDestroy( void )
 
 void CTestToolbarDialog::OnUpdateButton( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( &m_toolbarStdEnabled == pCmdUI->m_pOther );
+	pCmdUI->Enable( &m_toolbarStdEnabled == pCmdUI->m_pOther );		// enable all buttons in only StdEnabled toolbar
 }

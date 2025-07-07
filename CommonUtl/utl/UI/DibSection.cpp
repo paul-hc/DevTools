@@ -258,8 +258,10 @@ COLORREF CDibSection::FindAutoTranspColor( void ) const
 	};
 
 	size_t maxOccurPos = std::distance( counts, std::max_element( counts, END_OF( counts ) ) );
+
 	if ( 1 == counts[ maxOccurPos ] )
 		maxOccurPos = 0;					// if ambiguous, pick the color at origin
+
 	COLORREF autoTranspColor = cornerColors[ maxOccurPos ];			// transparent color is likely the one with most occurences in corners
 	TRACE( _T(" - CDibSection::FindAutoTranspColor(): 0x%06X\n"), autoTranspColor );
 	return autoTranspColor;
@@ -434,11 +436,13 @@ bool CDibSection::CreateDIB32Copy( const ui::IImageProxy* pImageProxy, TBitsPerP
 	pImageProxy->Draw( &destMemDC, CPoint( 0, 0 ), transpColor );
 
 	destMemDC.SelectObject( hOldDestBitmap );
+
+	// Note: caller can alter the DIB via direct BGRA (RGBQUAD) pixel modification - see CDibSection::ApplyDisabledEffect() as an example.
 	return true;
 }
 
 bool CDibSection::CreateDIB32Copy( HBITMAP hBitmapSrc, TBitsPerPixel srcBPP /*= 0*/, COLORREF transpColor /*= CLR_NONE*/ )
-{
+{	// A simple example on using a CBitmapProxy to create the DIB copy; it can be used similarly for any other image source.
 	if ( 0 == srcBPP )
 		srcBPP = gdi::GetBitsPerPixel( hBitmapSrc );
 
@@ -466,17 +470,25 @@ void CDibSection::ApplyDisabledEffect( TBitsPerPixel srcBPP, COLORREF transpColo
 {
 	REQUIRE( IsDibSection() && 32 == m_bitsPerPixel );		// should have been created by calling CreateDIB32Copy() method
 
-	COLORREF blendToColor = ::GetSysColor( COLOR_BTNFACE );
-	BYTE toAlpha = 192;			// was 128; 192 looks better, more washed-out (hence disabled)
-
 	// direct BGRA (RGBQUAD) pixel modification - apply disabled effect to each pixel:
 	CDibPixels pixels( this );
 
+	if ( srcBPP <= 8 && transpColor != CLR_NONE )			// is SRC low color?
+	{
+		pixels.ForEach( func::FadeAlphaForegroundColor( PreFadeAlpha, transpColor ) );		// pre-fade alpha to lower the contrast of low color sources (8/4/1 BPP have too much contrast)
+	}
+
+	COLORREF blendToColor = ::GetSysColor( COLOR_BTNFACE );
+	BYTE toAlpha = 192;			// was 128; 192 looks better, more washed-out (hence disabled)
+
 	switch ( style )
 	{
-		default: ASSERT( false );
+		default:
+		case gdi::Dis_MfcStd:
+			//pixels.ForEach( func::FadeColor( 128 ) );		// just for illustration
+			ASSERT( false );
 		case gdi::Dis_FadeGray:
-			pixels.ApplyDisableFadeGray( srcBPP, gdi::AlphaFadeMore, false, transpColor );
+			pixels.ApplyDisableFadeGray( gdi::AlphaFadeMore, false, transpColor );
 			break;
 		case gdi::Dis_GrayScale:
 			pixels.ApplyGrayScale();
@@ -490,9 +502,6 @@ void CDibSection::ApplyDisabledEffect( TBitsPerPixel srcBPP, COLORREF transpColo
 		case gdi::Dis_BlendColor:
 			pixels.ApplyBlendColor( blendToColor, toAlpha );
 			break;
-		case gdi::Dis_MfcStd:
-			pixels.ForEach( func::FadeColor( 128 ) );		// MFC standard: fade colors to alpha=128
-			break;
 	}
 }
 
@@ -500,10 +509,8 @@ bool CDibSection::AlterProxyTransparentColor( COLORREF* pTranspColor, const ui::
 {
 	ASSERT_PTR( pTranspColor );
 
-	if ( srcBPP < 32 && pImageProxy->HasTransparency() )
+	if ( srcBPP <= 8 && pImageProxy->HasTransparency() )
 	{
-		enum { TransparentBlack = RGB( 1, 1, 1 ) };		// a color != color::Black, which will be translated as transparent
-
 		ASSERT( CLR_NONE == *pTranspColor );
 		*pTranspColor = TransparentBlack;
 

@@ -129,7 +129,7 @@ void CImageDialog::CreateEffectDibs( void )
 			if ( utl::ResetPtr( pNewDib, CloneSourceDib() ) )
 			{
 				CDibPixels disabledPixels( pNewDib.get() );
-				if ( !disabledPixels.ApplyDisableFadeGray( m_pDibSection->GetBitsPerPixel(), m_disabledAlpha ) )
+				if ( !disabledPixels.ApplyDisableFadeGray( m_disabledAlpha ) )
 					utl::ResetPtr( pNewDib );
 			}
 			pModeData->PushDib( pNewDib );

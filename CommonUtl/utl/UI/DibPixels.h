@@ -92,8 +92,10 @@ public:
 	bool ApplyAlphaBlend( BYTE alpha, COLORREF blendColor24 = color::AzureBlue ) { return ForEach( func::AlphaBlend( alpha, blendColor24 ) ); }
 	bool ApplyBlendColor( COLORREF toColor24, BYTE toAlpha ) { return ForEach( func::BlendColor( toColor24, toAlpha ) ); }
 
-	bool ApplyDisableFadeGray( TBitsPerPixel srcBPP, BYTE fadeAlpha = gdi::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF transpColor = CLR_NONE )	// best looking!
-	{ return ForEach( func::DisableFadeGray( srcBPP, fadeAlpha, preMultiplyAlpha, transpColor ) ); }
+	bool ApplyDisableFadeGray( BYTE fadeAlpha = gdi::AlphaFadeMore, bool preMultiplyAlpha = true, COLORREF transpColor = CLR_NONE )		// best looking!
+	{
+		return ForEach( func::DisableFadeGray( fadeAlpha, preMultiplyAlpha, transpColor ) );
+	}
 
 	bool ApplyDisabledGrayOut( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledGrayOut( toColor24, toAlpha ) ); }
 	bool ApplyDisabledEffect( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledEffect( toColor24, toAlpha ) ); }
