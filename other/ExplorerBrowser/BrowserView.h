@@ -14,16 +14,16 @@ protected:
 	virtual ~CBrowserView();
 public:
 	CBrowserDoc* GetDocument( void ) const { return reinterpret_cast<CBrowserDoc*>( m_pDocument ); }
-private:
+
 	// event callbacks
 	HRESULT OnNavigationPending( PCIDLIST_ABSOLUTE pidlFolder );
 	void OnNavigationComplete( PCIDLIST_ABSOLUTE pidlFolder );
 	void OnViewCreated( IShellView* pShellView );
 	void OnNavigationFailed( PCIDLIST_ABSOLUTE pidlFolder );
-
+private:
 	static FOLDERVIEWMODE CmdToViewMode( UINT cmdId );
 
-	friend class CExplorerBrowserEvents;
+	//friend class CExplorerBrowserEvents;
 private:
 	std::auto_ptr<shell::CExplorerBrowser> m_pBrowser;
 	bool m_showFrames;
@@ -31,10 +31,10 @@ private:
 protected:
 
 	// generated stuff
-	public:
+public:
 	virtual void OnInitialUpdate( void );
 	virtual void OnDraw( CDC* pDC );
-	protected:
+protected:
 	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );

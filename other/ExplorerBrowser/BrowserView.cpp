@@ -152,6 +152,7 @@ void CBrowserView::OnInitialUpdate( void )
 		if ( m_pBrowser->NavigateTo( dirPath ) )			// navigate to document's directory
 		{
 			std::vector<std::tstring> selItems;
+
 			if ( pDoc->QuerySelItems( selItems ) )
 				m_pBrowser->SelectItems( selItems );
 

@@ -8,7 +8,7 @@ public:
 	CChildFrame( void );
 	virtual ~CChildFrame();
 public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
 protected:
 	DECLARE_MESSAGE_MAP()
 };

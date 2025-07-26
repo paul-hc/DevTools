@@ -195,6 +195,7 @@ namespace shell
 	bool CExplorerBrowser::NavigateTo( const TCHAR dirPath[] )
 	{
 		CPidl dirPathPidl;
+
 		if ( HR_OK( ::SHParseDisplayName( dirPath, NULL, &dirPathPidl, 0, NULL ) ) )
 			return HR_OK( m_pExplorerBrowser->BrowseToIDList( dirPathPidl.Get(), 0 ) );
 
