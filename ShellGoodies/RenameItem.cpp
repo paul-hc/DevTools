@@ -117,7 +117,8 @@ std::tstring CDisplayFilenameAdapter::FormatFilename( const fs::CPath& filePath 
 	std::tstring filename = filePath.GetFilename();
 
 	if ( m_ignoreExtension )
-		return StripExtension( filename.c_str() );
+		if ( fs::IsValidFile( filename.c_str() ) )			// (!) avoid stripping extension for directory paths, do it only for regular files
+			return StripExtension( filename.c_str() );
 
 	return filename;
 }
@@ -135,7 +136,8 @@ std::tstring CDisplayFilenameAdapter::FormatPath( fmt::PathFormat format, const 
 	std::tstring displayPath = fmt::FormatPath( filePath, format );
 
 	if ( m_ignoreExtension )
-		displayPath = StripExtension( displayPath.c_str() );
+		if ( fs::IsValidFile( filePath.GetPtr() ) )			// (!) avoid stripping extension for directory paths, do it only for regular files
+			displayPath = StripExtension( displayPath.c_str() );
 
 	return displayPath;
 }
