@@ -1,3 +1,7 @@
+// Host Windows Explorer in your applications using the new Vista hosting APIs:
+// Rama Krishna Vavilala, Feb 2007:
+//	https://www.codeproject.com/Articles/17809/Host-Windows-Explorer-in-your-applications-using-t
+
 #ifndef ExplorerBrowser_h
 #define ExplorerBrowser_h
 #pragma once
@@ -36,6 +40,7 @@ namespace shell
 		bool NavigateTo( const TCHAR dirPath[] );
 		bool NavigateBack( void ) { return SUCCEEDED( m_pExplorerBrowser->BrowseToIDList( NULL, SBSP_NAVIGATEBACK ) ); }
 		bool NavigateForward( void ) { return SUCCEEDED( m_pExplorerBrowser->BrowseToIDList( NULL, SBSP_NAVIGATEFORWARD ) ); }
+		bool NavigateUp( void );
 
 		bool RenameFile( void );
 	private:

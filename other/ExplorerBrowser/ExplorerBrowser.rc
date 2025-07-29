@@ -12,13 +12,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -66,7 +64,9 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\ExplorerBrowser.ico"
+
 IDR_XBrowserTYPE        ICON                    "res\\BrowserDoc.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -75,13 +75,21 @@ IDR_XBrowserTYPE        ICON                    "res\\BrowserDoc.ico"
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR  16, 15
+IDR_MAINFRAME TOOLBAR 16, 16
 BEGIN
+    BUTTON      ID_FOLDER_BACK
+    BUTTON      ID_FOLDER_FORWARD
+    SEPARATOR
+    BUTTON      ID_FOLDER_UP
+    SEPARATOR
+    BUTTON      ID_FOLDER_USER
+    SEPARATOR
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
     BUTTON      ID_FILE_SAVE
@@ -100,7 +108,7 @@ END
 // Menu
 //
 
-IDR_MAINFRAME MENU 
+IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -125,7 +133,7 @@ BEGIN
     END
 END
 
-IDR_XBrowserTYPE MENU 
+IDR_XBrowserTYPE MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -166,13 +174,15 @@ BEGIN
             MENUITEM "Thumb Strip\t(goes to Large Icons)", ID_VIEW_THUMBSTRIP
         END
         MENUITEM SEPARATOR
-        MENUITEM "Back",                        ID_VIEW_BACK
-        MENUITEM "Forward",                     ID_VIEW_FORWARD
+        MENUITEM "Back",                        ID_FOLDER_BACK
+        MENUITEM "Forward",                     ID_FOLDER_FORWARD
+        MENUITEM SEPARATOR
+        MENUITEM "Up",                          ID_FOLDER_UP
         MENUITEM SEPARATOR
         MENUITEM "Frames (crashes)",            ID_VIEW_FRAMES
         MENUITEM SEPARATOR
         MENUITEM "Show Selected Files...",      ID_VIEW_SHOWSELECTION
-        MENUITEM "Browse User Folder",          ID_VIEW_GOTOUSERPROFILE
+        MENUITEM "Browse User Folder",          ID_FOLDER_USER
     END
     POPUP "&Window"
     BEGIN
@@ -193,7 +203,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS 
+IDR_MAINFRAME ACCELERATORS
 BEGIN
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
@@ -212,9 +222,12 @@ BEGIN
     VK_ESCAPE,      ID_ESCAPE_EXIT,         VIRTKEY, NOINVERT
 END
 
-IDR_XBrowserTYPE ACCELERATORS 
+IDR_XBrowserTYPE ACCELERATORS
 BEGIN
     VK_F2,          ID_FILE_RENAME,         VIRTKEY, NOINVERT
+    VK_LEFT,        ID_FOLDER_BACK,         VIRTKEY, ALT, NOINVERT
+    VK_RIGHT,       ID_FOLDER_FORWARD,      VIRTKEY, ALT, NOINVERT
+    VK_BACK,        ID_FOLDER_UP,           VIRTKEY, NOINVERT
 END
 
 
@@ -264,13 +277,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "TODO: <File description>"
+            VALUE "CompanyName", "www.codeproject.com"
+            VALUE "FileDescription", "ExplorerBrowser.exe - Rama Krishna Vavilala (Feb 2007)"
             VALUE "FileVersion", "1.0.0.1"
             VALUE "InternalName", "ExplorerBrowser.exe"
-            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "LegalCopyright", "Adapted by PHC.  Original by Rama Krishna Vavilala, Feb 2007 (www.codeproject.com)."
             VALUE "OriginalFilename", "ExplorerBrowser.exe"
-            VALUE "ProductName", "TODO: <Product name>"
+            VALUE "ProductName", "ExplorerBrowser"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END
@@ -287,7 +300,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -307,24 +320,25 @@ END
 
 IDR_EXPLORERBROWSER_REGISTRY REGISTRY                "res\\ExplorerBrowser.rgs"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "Explorer Browser"
     IDR_XBrowserTYPE        "\nBrowser\nXBrowser\n\n\nXBrowser.Document\nXBrowser.Document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "ExplorerBrowser"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_INDICATOR_EXT        "EXT"
     ID_INDICATOR_CAPS       "CAP"
@@ -334,7 +348,7 @@ BEGIN
     ID_INDICATOR_REC        "REC"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_NEW             "Create a new document\nNew"
     ID_FILE_OPEN            "Open an existing document\nOpen"
@@ -347,13 +361,13 @@ BEGIN
     ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -373,13 +387,13 @@ BEGIN
     ID_FILE_MRU_FILE16      "Open this document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
     ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
     ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
@@ -389,7 +403,7 @@ BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -404,13 +418,13 @@ BEGIN
     ID_EDIT_REDO            "Redo the previously undone action\nRedo"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -421,24 +435,32 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
     AFX_IDS_MDICHILD        "Activate this window"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_RENAME          "Rename selected file\nRename"
 END
 
-#endif    // English (U.S.) resources
+STRINGTABLE
+BEGIN
+    ID_FOLDER_BACK          "Navigate back to previous folder\nNavigate Back (Alt+Left)"
+    ID_FOLDER_FORWARD       "Navigate forward to next folder\nNavigate Forward (Alt+Right)"
+    ID_FOLDER_UP            "Navigate up to parent folder\nNavigate Up (Backspace)"
+    ID_FOLDER_USER          "Navigate to user folder\nNavigate to User Folder"
+END
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

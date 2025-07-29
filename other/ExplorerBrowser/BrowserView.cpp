@@ -83,16 +83,18 @@ BEGIN_MESSAGE_MAP( CBrowserView, CView )
 	ON_WM_SIZE()
 	ON_COMMAND( ID_FILE_RENAME, OnFileRename )
 
-	ON_COMMAND( ID_VIEW_GOTOUSERPROFILE, OnBrowseToProfileFolder )
 	ON_COMMAND_RANGE( ID_VIEW_SMALLICON, ID_VIEW_DETAILS, OnViewMode )
 	ON_COMMAND_RANGE( ID_VIEW_TILES, ID_VIEW_THUMBSTRIP, OnViewMode )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_VIEW_SMALLICON, ID_VIEW_DETAILS, OnUpdateViewMode )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_VIEW_TILES, ID_VIEW_THUMBSTRIP, OnUpdateViewMode )
-	ON_COMMAND( ID_VIEW_BACK, OnViewBack )
-	ON_COMMAND( ID_VIEW_FORWARD, OnViewForward )
 	ON_COMMAND( ID_VIEW_FRAMES, OnViewFrames )
 	ON_UPDATE_COMMAND_UI( ID_VIEW_FRAMES, OnUpdateViewFrames )
 	ON_COMMAND( ID_VIEW_SHOWSELECTION, OnViewShowselection )
+
+	ON_COMMAND( ID_FOLDER_BACK, OnFolderBack )
+	ON_COMMAND( ID_FOLDER_FORWARD, OnFolderForward )
+	ON_COMMAND( ID_FOLDER_UP, OnFolderUp )
+	ON_COMMAND( ID_FOLDER_USER, OnFolderUser )
 END_MESSAGE_MAP()
 
 int CBrowserView::OnCreate( CREATESTRUCT* pCreateStruct )
@@ -159,7 +161,7 @@ void CBrowserView::OnInitialUpdate( void )
 			return;
 		}
 
-	OnBrowseToProfileFolder();
+	OnFolderUser();
 }
 
 void CBrowserView::OnSize( UINT sizeType, int cx, int cy )
@@ -180,24 +182,6 @@ void CBrowserView::OnFileRename( void )
 	m_pBrowser->RenameFile();
 }
 
-void CBrowserView::OnBrowseToProfileFolder( void )
-{
-	HRESULT hr = S_OK;
-	LPITEMIDLIST pidlBrowse = NULL;
-	if ( SUCCEEDED( hr = ::SHGetFolderLocation( NULL, CSIDL_PROFILE, NULL, 0, &pidlBrowse ) ) )
-	{
-		if ( FAILED( hr = m_pBrowser->Get()->BrowseToIDList( pidlBrowse, 0 ) ) )
-			TRACE( "BrowseToIDList Failed! hr = %d\n", hr );
-
-		::ILFree( pidlBrowse );
-	}
-	else
-		TRACE("SHGetFolderLocation Failed! hr = %d\n", hr);
-
-	if ( FAILED( hr ) )
-		AfxMessageBox( _T("Navigation failed!") );
-}
-
 void CBrowserView::OnViewMode( UINT cmdId )
 {
 	if ( !m_pBrowser->SetFilePaneViewMode( CmdToViewMode( cmdId ) ) )
@@ -210,16 +194,6 @@ void CBrowserView::OnUpdateViewMode( CCmdUI* pCmdUI )
 	FOLDERVIEWMODE selViewMode = m_pBrowser->GetFilePaneViewMode( &folderFlags );
 
 	ui::SetRadio( pCmdUI, selViewMode == CmdToViewMode( pCmdUI->m_nID ) );
-}
-
-void CBrowserView::OnViewBack( void )
-{
-	m_pBrowser->NavigateBack();
-}
-
-void CBrowserView::OnViewForward( void )
-{
-	m_pBrowser->NavigateForward();
 }
 
 void CBrowserView::OnViewFrames( void )
@@ -245,4 +219,38 @@ void CBrowserView::OnViewShowselection( void )
 	message.Format( _T("Selected %d files:\n%s"), selPaths.size(), str::Join( selPaths, _T("\n") ).c_str() );
 
 	AfxMessageBox( message );
+}
+
+
+void CBrowserView::OnFolderBack( void )
+{
+	m_pBrowser->NavigateBack();
+}
+
+void CBrowserView::OnFolderForward( void )
+{
+	m_pBrowser->NavigateForward();
+}
+
+void CBrowserView::OnFolderUp( void )
+{
+	m_pBrowser->NavigateUp();
+}
+
+void CBrowserView::OnFolderUser( void )
+{
+	HRESULT hr = S_OK;
+	LPITEMIDLIST pidlBrowse = NULL;
+	if ( SUCCEEDED( hr = ::SHGetFolderLocation( NULL, CSIDL_PROFILE, NULL, 0, &pidlBrowse ) ) )
+	{
+		if ( FAILED( hr = m_pBrowser->Get()->BrowseToIDList( pidlBrowse, 0 ) ) )
+			TRACE( "BrowseToIDList Failed! hr = %d\n", hr );
+
+		::ILFree( pidlBrowse );
+	}
+	else
+		TRACE("SHGetFolderLocation Failed! hr = %d\n", hr);
+
+	if ( FAILED( hr ) )
+		AfxMessageBox( _T("Navigation failed!") );
 }

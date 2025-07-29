@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "ExplorerBrowser.h"
+#include <afxshellmanager.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,7 +47,7 @@ namespace shell
 		if ( HR_OK( ::SHCoCreateInstance( NULL, &CLSID_ExplorerBrowser, NULL, IID_PPV_ARGS( &m_pExplorerBrowser ) ) ) )
 		{
 			if ( showFolders )
-				m_pExplorerBrowser->SetOptions( EBO_SHOWFRAMES );
+				m_pExplorerBrowser->SetOptions( EBO_SHOWFRAMES | EBO_ALWAYSNAVIGATE );
 
 			FOLDERSETTINGS settings = { static_cast<UINT>( filePaneViewMode ), FWF_NONE };
 			if ( HR_OK( m_pExplorerBrowser->Initialize( pParent->GetSafeHwnd(), &browserRect, &settings ) ) )
@@ -198,6 +199,28 @@ namespace shell
 
 		if ( HR_OK( ::SHParseDisplayName( dirPath, NULL, &dirPathPidl, 0, NULL ) ) )
 			return HR_OK( m_pExplorerBrowser->BrowseToIDList( dirPathPidl.Get(), 0 ) );
+
+		return false;
+	}
+
+	bool CExplorerBrowser::NavigateUp( void )
+	{
+		CPidl currDirPidl;
+		if ( GetCurrentDirPidl( currDirPidl ) )
+		{
+			CShellManager shellManager;
+			LPITEMIDLIST pParentDirPidl;
+
+			int level = shellManager.GetParentItem( currDirPidl.Get(), pParentDirPidl );
+
+			if ( level >= 0 )
+			{
+				CPidl parentDirPidl( pParentDirPidl );
+
+				if ( HR_OK( m_pExplorerBrowser->BrowseToIDList( parentDirPidl.Get(), 0 ) ) )
+					return true;
+			}
+		}
 
 		return false;
 	}

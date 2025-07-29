@@ -1,3 +1,7 @@
+// Host Windows Explorer in your applications using the new Vista hosting APIs:
+// Rama Krishna Vavilala, Feb 2007:
+//	https://www.codeproject.com/Articles/17809/Host-Windows-Explorer-in-your-applications-using-t
+
 #pragma once
 
 #include "ExplorerBrowser.h"
@@ -22,8 +26,6 @@ public:
 	void OnNavigationFailed( PCIDLIST_ABSOLUTE pidlFolder );
 private:
 	static FOLDERVIEWMODE CmdToViewMode( UINT cmdId );
-
-	//friend class CExplorerBrowserEvents;
 private:
 	std::auto_ptr<shell::CExplorerBrowser> m_pBrowser;
 	bool m_showFrames;
@@ -41,14 +43,15 @@ protected:
 	afx_msg void OnDestroy( void );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg void OnFileRename( void );
-	afx_msg void OnBrowseToProfileFolder( void );
 	afx_msg void OnViewMode( UINT cmdId );
 	afx_msg void OnUpdateViewMode( CCmdUI* pCmdUI );
-	afx_msg void OnViewBack( void );
-	afx_msg void OnViewForward( void );
 	afx_msg void OnViewFrames( void );
 	afx_msg void OnUpdateViewFrames( CCmdUI* pCmdUI );
 	afx_msg void OnViewShowselection( void );
+	afx_msg void OnFolderBack( void );
+	afx_msg void OnFolderForward( void );
+	afx_msg void OnFolderUp( void );
+	afx_msg void OnFolderUser( void );
 
 	DECLARE_MESSAGE_MAP()
 };
