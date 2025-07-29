@@ -61,11 +61,8 @@ namespace ui
 		::FrameRect( hDC, &rect, brush );
 	}
 
-	inline void FillRect( HDC hDC, const RECT& rect, COLORREF color )
-	{
-		CBrush brush( color );
-		::FillRect( hDC, &rect, brush );
-	}
+	void FillRect( HDC hDC, const RECT& rect, COLORREF color );
+	void FillRect( HDC hDC, const RECT& rect, HBRUSH hBrush );
 }
 
 

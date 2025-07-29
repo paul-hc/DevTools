@@ -151,6 +151,26 @@ namespace ui
 
 namespace ui
 {
+	void FillRect( HDC hDC, const RECT& rect, COLORREF color )
+	{
+		CBrush brush( color );
+
+		ui::FillRect( hDC, rect, brush );
+			//::FillRect( hDC, &rect, brush );
+	}
+
+	void FillRect( HDC hDC, const RECT& rect, HBRUSH hBrush )
+	{
+		HGDIOBJ hOldBrush = ::SelectObject( hDC, hBrush );
+
+		::PatBlt( hDC, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, PATCOPY );
+		::SelectObject( hDC, hOldBrush );
+	}
+}
+
+
+namespace ui
+{
 	CPoint GetCursorPos( HWND hWnd /*= nullptr*/ )
 	{
 		CPoint mousePos;
@@ -846,7 +866,7 @@ namespace ui
 		if ( CEdit* pEdit = dynamic_cast<CEdit*>( CWnd::FromHandlePermanent( hCtrl ) ) )
 			return true;
 
-		std::tstring className = GetClassName( hCtrl );
+		std::tstring className = ui::GetClassName( hCtrl );
 
 		if ( className == WC_EDITW || className == _T( WC_EDITA ) )
 			return true;
@@ -878,7 +898,7 @@ namespace ui
 			comboStyle = pComboBox->GetStyle();
 		else
 		{
-			std::tstring className = GetClassName( hCtrl );
+			std::tstring className = ui::GetClassName( hCtrl );
 
 			if ( className == WC_COMBOBOXEXW || className == _T( WC_COMBOBOXEXA ) )
 				comboStyle = GetStyle( hCtrl );
@@ -897,7 +917,7 @@ namespace ui
 	bool IsGroupBox( HWND hWnd )
 	{
 		if ( EqMaskedValue( GetStyle( hWnd ), BS_TYPEMASK, BS_GROUPBOX ) )
-			return GetClassName( hWnd ) == WC_BUTTON;
+			return ui::GetClassName( hWnd ) == WC_BUTTON;
 
 		return false;
 	}
@@ -905,13 +925,14 @@ namespace ui
 	bool IsDialogBox( HWND hWnd )
 	{
 		TCHAR className[ 128 ];
+
 		::GetClassName( hWnd, className, COUNT_OF( className ) );
 		return _T('#') == className[ 0 ] && WC_DIALOG == (LPCTSTR)::GlobalFindAtom( className );
 	}
 
 	bool IsMenuWnd( HWND hWnd )
 	{
-		return GetClassName( hWnd ) == _T("#32768");
+		return ui::GetClassName( hWnd ) == _T("#32768");
 	}
 
 
