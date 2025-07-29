@@ -72,7 +72,7 @@ private:
 	CPathFormatter InputRenameFormatter( bool checkConsistent ) const;
 	bool IsFormatExtConsistent( void ) const;
 
-	bool GenerateDestPaths( const CPathFormatter& pathFormatter, UINT* pSeqCount );
+	bool GenerateDestPaths( const CPathFormatter& pathFormatter, IN OUT UINT* pSeqCount );
 	void ReplaceFormatEditText( const std::tstring& text );
 private:
 	const std::vector<CRenameItem*>& m_rRenameItems;

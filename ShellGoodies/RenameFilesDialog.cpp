@@ -427,7 +427,7 @@ bool CRenameFilesDialog::IsFormatExtConsistent( void ) const
 	return m_ignoreExtension == !fs::CPath( m_formatCombo.GetCurrentText() ).HasExt();
 }
 
-bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter, UINT* pSeqCount )
+bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter, IN OUT UINT* pSeqCount )
 {
 	ASSERT_PTR( pSeqCount );
 	ASSERT_PTR( m_pRenSvc.get() );
@@ -689,7 +689,9 @@ void CRenameFilesDialog::OnChanged_Format( void )
 	OnFieldChanged();
 
 	CPathFormatter pathFormatter = InputRenameFormatter( false );
-	m_formatCombo.SetFrameColor( pathFormatter.IsValidFormat() ? CLR_NONE : color::Error );
+	bool validFormat = ren::FormatHasValidEffect( pathFormatter, m_rRenameItems );
+
+	m_formatCombo.SetFrameColor( validFormat ? CLR_NONE : color::Error );
 	m_showExtButton.SetFrameColor( IsFormatExtConsistent() ? CLR_NONE : app::ColorWarningText );
 
 	if ( m_autoGenerate )
@@ -899,7 +901,8 @@ void CRenameFilesDialog::OnUpdateGenerateNow( CCmdUI* pCmdUI )
 	if ( !IsRollMode() )
 	{
 		CPathFormatter pathFormatter = InputRenameFormatter( false );
-		enable = pathFormatter.IsValidFormat();
+		enable = ren::FormatHasValidEffect( pathFormatter, m_rRenameItems );
+			//dbg: //enable = pathFormatter.IsValidFormat();
 	}
 	pCmdUI->Enable( enable );
 }

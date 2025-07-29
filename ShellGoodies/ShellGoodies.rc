@@ -14,13 +14,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -242,7 +240,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_RENAME_FILES_DIALOG, DIALOG
     BEGIN
@@ -353,8 +351,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,7,1,0
- PRODUCTVERSION 9,7,1,0
+ FILEVERSION 9,7,2,0
+ PRODUCTVERSION 9,7,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -369,21 +367,17 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "10-06-2025 02:16:46"
+            VALUE "BuildTimestamp", "29-07-2025 20:16:12"
             VALUE "Comments", "VC17.sln ATL wiz|reg_Directory|VC17 fixes|NewCmds+BinLog|CTrayIcon|Paste as Backup|Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
-            VALUE "FileVersion", "9, 7, 1, 0"
+            VALUE "FileVersion", "9.7.2.0"
             VALUE "InternalName", "Shell Goodies"
             VALUE "LegalCopyright", "Copyfright © 2001-2025"
-#ifdef MY_RC_WIN64
-            VALUE "OriginalFilename", "ShellGoodies64.dll"
-#else
             VALUE "OriginalFilename", "ShellGoodies32.dll"
-#endif
             VALUE "ProductName", "ShellGoodies Shell Extension DLL"
-            VALUE "ProductVersion", "9, 7, 1, 0"
+            VALUE "ProductVersion", "9.7.2.0"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -401,6 +395,7 @@ END
 
 IDR_SHELL_GOODIES_APP   REGISTRY                "ShellGoodies.rgs"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Icon
@@ -409,14 +404,16 @@ IDR_SHELL_GOODIES_APP   REGISTRY                "ShellGoodies.rgs"
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_SHELL_GOODIES_APP   ICON                    "res\\ShellGoodies.ico"
+
 IDR_MESSAGE_TRAY_ICON   ICON                    "res\\MessageTray.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_CONTEXT_MENU MENU 
+IDR_CONTEXT_MENU MENU
 BEGIN
     POPUP "<format picker>"
     BEGIN
@@ -506,7 +503,7 @@ END
 // Toolbar
 //
 
-IDR_IMAGE_STRIP TOOLBAR  16, 16
+IDR_IMAGE_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_SEND_TO_CLIP
     BUTTON      ID_TOUCH_FILES
@@ -552,7 +549,7 @@ BEGIN
     BUTTON      ID_MOVE_DUPLICATES
 END
 
-IDR_TOOL_STRIP TOOLBAR  16, 16
+IDR_TOOL_STRIP TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_OPEN_CMD_DASHBOARD
     BUTTON      ID_CMD_COPY_FILES
@@ -575,7 +572,9 @@ END
 //
 
 IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+
 IDR_TOOL_STRIP          BITMAP                  "res\\ToolStrip.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -583,19 +582,21 @@ IDR_TOOL_STRIP          BITMAP                  "res\\ToolStrip.bmp"
 //
 
 IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
+
 IDR_TOOL_STRIP          PNG                     "res\\ToolStrip.png"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
 //
 
-IDD_RENAME_FILES_DIALOG ACCELERATORS 
+IDD_RENAME_FILES_DIALOG ACCELERATORS
 BEGIN
     "H",            IDC_REPLACE_FILES_BUTTON, VIRTKEY, CONTROL, NOINVERT
 END
 
-IDC_DUPLICATE_FILES_LIST ACCELERATORS 
+IDC_DUPLICATE_FILES_LIST ACCELERATORS
 BEGIN
     "G",            ID_TOGGLE_CHECK_GROUP_DUPLICATES, VIRTKEY, CONTROL, NOINVERT
 END
@@ -606,7 +607,7 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_INVALID_FORMAT      "Invalid rename format: %s\n\nIt should contain *, ? or %% formatting characters\nin order to generate a sequence of unique filenames."
     IDS_NO_DELIMITER_SET    "Please enter the delimiters to replace!"
@@ -618,35 +619,35 @@ BEGIN
                             "Source files=-50|Size|Date Modified|Destination files=-50"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_CAPITALIZE_BUTTON   "Capitalize filename using sentence case, make extension lower case"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_RESET_FILES_BUTTON  "Reset destination filenames to source filenames"
     IDC_REPLACE_USER_DELIMS_BUTTON "Replace delimiters selected by user"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_EDITION_STATIC      "%d Edition%s%s"
     IDC_CHANGE_CASE_BUTTON  "Make lower case|Make upper case|Make filename lower case|Make filename upper case|Make extension lower case|Make extension upper case|Remove extension"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDI_DETAILS             "Edit details"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_PICK_RENAME_ACTIONS "More Rename Actions"
     IDC_FILE_TOUCH_LIST     "File name=-1/150|Attributes|Last Modified Date=125|Created Date=125|Accessed Date=125|SRC Attributes|SRC Last Modified Date=125|SRC Created Date=125|SRC Accessed Date=125"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PICK_FILENAME        "Pick common pattern among selected filenames (Ctrl+Click to pick the first filename)"
     ID_PICK_DIR_PATH        "Pick a directory of the first file path (Ctrl+Click to pick the parent directory)"
@@ -663,22 +664,22 @@ BEGIN
                             "Retain global sequence: advance numeric sequence after each filename generation"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "Clear"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "ShellGoodies"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_OPTIONS              "Open the options property sheet dialog\nOptions"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_AUTO_FILL_COMMON_SEQ_CK 
                             "Auto-fill pattern with the common sequence of the file names (common prefix or sub-string)"
@@ -692,7 +693,7 @@ BEGIN
     ID_HIGHLIGHT_DUPLICATES "Highlight original and duplicate files"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_CLEAR_CRC32_CACHE    "Clear all CRC32 checksums computed in previous searches"
     ID_DELETE_DUPLICATES    "Delete checked duplicate files to Recycle Bin"
@@ -701,7 +702,7 @@ BEGIN
     ID_OPEN_CMD_DASHBOARD   "Open the command dashboard dialog"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_SELECT_TO_TOP        "Select all actions up to the top, starting with the current action"
     ID_EDIT_SEARCH_PATHS_LIST "Edit search paths\nEdit Search Paths"
@@ -709,12 +710,12 @@ BEGIN
     ID_PASTE_AS_BACKUP      "Paste copied/cut files as a versioned backup file(s) in target folder"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_REPLACE_ALL_DELIMS   "Replace all delimiters with space"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_REPLACE_UNICODE_SYMBOLS "Replace special Unicode with ANSI symbols"
     ID_SINGLE_WHITESPACE    "Single whitespace"
@@ -725,7 +726,7 @@ BEGIN
     ID_SPACE_TO_UNDERBAR    "Replace spaces with underbar"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_DUPLICATE_FILES_LIST 
                             "File Name=120|Folder=-1/150|Size=90|CRC32=85|DateModified=125|#"
@@ -733,23 +734,23 @@ BEGIN
     IDC_IGNORE_PATHS_LIST   "Ignore Path=-1"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_COMMANDS_LIST       "Name=180|Files|Timestamp"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_SHOW_EXTENSION_CHECK 
                             "Toggle file extension in the file list.  Note: the template format string should be consistent with extension visibility!"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_MESSAGE_TRAY_ICON   "Shell Goodies"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

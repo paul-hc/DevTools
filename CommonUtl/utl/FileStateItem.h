@@ -15,6 +15,8 @@ public:
 	const fs::CFileState& GetState( void ) const { return m_fileState; }
 	fs::CFileState& RefState( void ) { return m_fileState; }
 
+	bool IsDirectory( void ) const { return m_fileState.IsDirectory(); }
+
 	// base overrides
 	virtual void SetFilePath( const fs::CPath& filePath );		// also update m_fileState
 protected:

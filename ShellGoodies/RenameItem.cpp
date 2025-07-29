@@ -3,6 +3,7 @@
 #include "RenameItem.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
+#include "utl/PathGenerator.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -13,6 +14,7 @@ namespace ren
 {
 	bool MakePairsFromItems( CPathRenamePairs* pOutRenamePairs, const std::vector<CRenameItem*>& renameItems )
 	{
+		ASSERT_PTR( pOutRenamePairs );
 		pOutRenamePairs->Clear();
 
 		for ( std::vector<CRenameItem*>::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
@@ -83,11 +85,29 @@ namespace ren
 		return false;
 	}
 
+
 	bool SplitPath( fs::CPathParts* pOutParts, const fs::CPath* pSrcFilePath, const fs::CPath& filePath )
 	{
 		ASSERT_PTR( pOutParts );
 		pOutParts->SplitPath( filePath.Get() );
 		return AdjustDirectoryFilename( pOutParts, pSrcFilePath );
+	}
+
+
+	bool FormatHasValidEffect( const CPathFormatter& pathFormatter, const std::vector<CRenameItem*>& renameItems, bool avoidDups /*= false*/ )
+	{
+		if ( pathFormatter.IsValidFormat() )
+			return true;
+
+		CPathRenamePairs renamePairs;
+		ren::MakePairsFromItems( &renamePairs, renameItems );
+
+		CPathGenerator generator( &renamePairs, pathFormatter, 1, avoidDups );
+		if ( generator.GeneratePairs() )
+			if ( renamePairs.AnyChanges() )
+				return true;		// applying the format leads to some changes
+
+		return false;
 	}
 }
 
@@ -109,15 +129,15 @@ CRenameItem::~CRenameItem()
 std::tstring CDisplayFilenameAdapter::FormatCode( const utl::ISubject* pSubject ) const
 {
 	ASSERT_PTR( pSubject );
-	return FormatFilename( pSubject->GetDisplayCode() );
+	return FormatFilename( pSubject->GetDisplayCode(), CDisplayFilenameAdapter::IsDirectoryItem( pSubject ) );
 }
 
-std::tstring CDisplayFilenameAdapter::FormatFilename( const fs::CPath& filePath ) const
+std::tstring CDisplayFilenameAdapter::FormatFilename( const fs::CPath& filePath, bool isDirectory ) const
 {
 	std::tstring filename = filePath.GetFilename();
 
 	if ( m_ignoreExtension )
-		if ( fs::IsValidFile( filename.c_str() ) )			// (!) avoid stripping extension for directory paths, do it only for regular files
+		if ( !isDirectory )				// (!) avoid stripping extension for directory paths, do it only for regular files
 			return StripExtension( filename.c_str() );
 
 	return filename;
@@ -165,6 +185,14 @@ bool CDisplayFilenameAdapter::IsExtensionChange( const fs::CPath& referencePath,
 	}
 
 	return false;		// case change is not a major extension change
+}
+
+bool CDisplayFilenameAdapter::IsDirectoryItem( const utl::ISubject* pSubject )
+{
+	if ( const CFileStateItem* pFileStateItem = dynamic_cast<const CFileStateItem*>( pSubject ) )
+		return pFileStateItem->IsDirectory();
+
+	return false;
 }
 
 std::tstring CDisplayFilenameAdapter::StripExtension( const TCHAR* pFilePath )

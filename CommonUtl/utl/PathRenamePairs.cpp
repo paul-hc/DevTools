@@ -26,6 +26,11 @@ void CPathRenamePairs::AddPair( const fs::CPath& srcPath, const fs::CPath& destP
 	ENSURE( IsConsistent() );
 }
 
+bool CPathRenamePairs::AnyChanges( void ) const
+{
+	return utl::Any( m_pairs, pred::IsPathChanged() );
+}
+
 fs::CPath& CPathRenamePairs::operator[]( const fs::CPath& srcPath )
 {
 	fs::CPath* pDestPath = FindDestPath( srcPath );

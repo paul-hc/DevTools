@@ -187,7 +187,7 @@ void CRenameSimpleListPage::DoSetupFileListView( void ) override
 		CRenameItem* pRenameItem = m_pParentDlg->GetRenameItems()[ pos ];
 
 		m_fileListCtrl.InsertObjectItem( pos, pRenameItem );		// SrcPath
-		m_fileListCtrl.SetSubItemText( pos, DestPath, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath() ) );
+		m_fileListCtrl.SetSubItemText( pos, DestPath, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath(), pRenameItem->IsDirectory() ) );
 	}
 
 	m_fileListCtrl.SetupDiffColumnPair( SrcPath, DestPath, path::TGetMatch() );
@@ -273,7 +273,7 @@ void CRenameDetailsListPage::DoSetupFileListView( void ) override
 		m_fileListCtrl.InsertObjectItem( pos, pRenameItem );		// ren::SrcPath
 		m_fileListCtrl.SetSubItemText( pos, ren::SrcSize, num::FormatFileSize( pRenameItem->GetState().m_fileSize ) );
 		m_fileListCtrl.SetSubItemText( pos, ren::SrcDateModify, time_utl::FormatTimestamp( pRenameItem->GetState().m_modifTime ) );
-		m_fileListCtrl.SetSubItemText( pos, ren::DestPath, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath() ) );
+		m_fileListCtrl.SetSubItemText( pos, ren::DestPath, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath(), pRenameItem->IsDirectory() ) );
 	}
 
 	m_fileListCtrl.SetupDiffColumnPair( ren::SrcPath, ren::DestPath, path::TGetMatch() );
@@ -351,8 +351,8 @@ void CRenameEditPage::SetupFileEdits( void )
 
 	for ( std::vector<CRenameItem*>::const_iterator itRenameItem = renameItems.begin(); itRenameItem != renameItems.end(); ++itRenameItem )
 	{
-		srcPaths.push_back( pDisplayAdapter->FormatFilename( ( *itRenameItem )->GetSrcPath() ) );
-		destPaths.push_back( pDisplayAdapter->FormatFilename( ( *itRenameItem )->GetDestPath() ) );
+		srcPaths.push_back( pDisplayAdapter->FormatFilename( (*itRenameItem)->GetSrcPath(), (*itRenameItem)->IsDirectory() ) );
+		destPaths.push_back( pDisplayAdapter->FormatFilename( (*itRenameItem)->GetDestPath(), (*itRenameItem)->IsDirectory() ) );
 	}
 
 	m_srcEdit.SetText( str::Join( srcPaths, CTextEdit::s_lineEnd ) );

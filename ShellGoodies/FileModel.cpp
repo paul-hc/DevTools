@@ -76,8 +76,17 @@ size_t CFileModel::SetupFromDropInfo( HDROP hDropInfo )
 	std::vector<fs::CPath> sourcePaths;
 	shell::QueryDroppedFiles( sourcePaths, hDropInfo );
 
-// to test multiple paths:
-//str::Split( sourcePaths, _T("C:\\dev\\DevTools\\CommonUtl\\DemoUtl\\DemoUtl.rc|C:\\dev\\DevTools\\CommonUtl\\utl\\utl_ui.rc|C:\\dev\\DevTools\\ShellGoodies\\ShellGoodies.rc"), _T("|") );
+	if ( false )
+	{
+		if ( 1 == sourcePaths.size() )
+			if ( sourcePaths.front() == fs::CPath( _T( "C:\\download\\#\\images\\flowers\\1980 - Blizzard of Ozz\\cover.jpg" ) ) )
+			{	// DBG: simulate search results view with files in multiple folders: use test format="fld" to test duplicates (it depends on existing physical files):
+				str::Split( sourcePaths, _T("C:\\download\\#\\images\\flowers\\1981 - Diary of a Madman\\cover.jpg|C:\\download\\#\\images\\flowers\\1986 - The Ultimate Sin\\cover.jpg"), _T("|"), false );
+			}
+
+		// to test multiple paths:
+		//str::Split( sourcePaths, _T("C:\\dev\\DevTools\\CommonUtl\\DemoUtl\\DemoUtl.rc|C:\\dev\\DevTools\\CommonUtl\\utl\\utl_ui.rc|C:\\dev\\DevTools\\ShellGoodies\\ShellGoodies.rc"), _T("|") );
+	}
 
 	StoreSourcePaths( sourcePaths );
 	return m_sourcePaths.size();

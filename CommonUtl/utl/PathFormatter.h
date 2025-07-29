@@ -12,7 +12,7 @@ public:
 	CPathFormatter( void );			// "*" format, ignoring extension
 	CPathFormatter( const std::tstring& format, bool ignoreExtension );
 
-	bool IsValidFormat( void ) const { return m_isNumericFormat || m_isWildcardFormat; }
+	bool IsValidFormat( void ) const;
 	bool IsNumericFormat( void ) const { return m_isNumericFormat; }
 	bool IsWildcardFormat( void ) const { return m_isWildcardFormat; }
 	const fs::CPath& GetFormat( void ) const { return m_format; }

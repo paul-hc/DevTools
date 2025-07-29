@@ -7,6 +7,7 @@
 
 
 class CRenameItem;
+class CPathFormatter;
 
 
 namespace ren
@@ -18,6 +19,9 @@ namespace ren
 
 	// special directory handling: treat ext as part of fname (no file type by extension)
 	bool SplitPath( fs::CPathParts* pOutParts, const fs::CPath* pSrcFilePath, const fs::CPath& filePath );
+
+
+	bool FormatHasValidEffect( const CPathFormatter& pathFormatter, const std::vector<CRenameItem*>& renameItems, bool avoidDups = false );		// valid format considering the rename effects?
 }
 
 
@@ -61,7 +65,7 @@ public:
 	// ui::ISubjectAdapter interface
 	virtual std::tstring FormatCode( const utl::ISubject* pSubject ) const;
 
-	std::tstring FormatFilename( const fs::CPath& filePath ) const;
+	std::tstring FormatFilename( const fs::CPath& filePath, bool isDirectory ) const;
 	fs::CPath ParseFilename( const std::tstring& displayFilename, const fs::CPath& referencePath ) const;
 
 	std::tstring FormatPath( fmt::PathFormat format, const fs::CPath& filePath ) const;
@@ -69,6 +73,7 @@ public:
 
 	static bool IsExtensionChange( const fs::CPath& referencePath, const fs::CPath& destPath );			// ignore case changes
 private:
+	static bool IsDirectoryItem( const utl::ISubject* pSubject );
 	static std::tstring StripExtension( const TCHAR* pFilePath );
 private:
 	bool m_ignoreExtension;

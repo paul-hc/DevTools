@@ -122,7 +122,7 @@ bool CPathGenerator::GeneratePath( fs::CPath& rNewPath, const fs::CPath& srcPath
 			}
 			else
 			{
-				ASSERT( m_formatter.IsWildcardFormat() );
+				ASSERT( m_formatter.IsValidFormat() );
 				++dupCount;							// wildcard format: increment dup count suffix
 				if ( dupCount > MaxDupCount )
 					return false;					// too many colisions with existing duplicates

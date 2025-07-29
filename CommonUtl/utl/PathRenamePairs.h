@@ -6,6 +6,18 @@
 #include <unordered_map>
 
 
+namespace pred
+{
+	struct IsPathChanged : public std::unary_function<fs::TPathPair, bool>
+	{
+		bool operator()( const fs::TPathPair& pathPair ) const
+		{
+			return pathPair.first.Get() != pathPair.second.Get();
+		}
+	};
+}
+
+
 class CPathRenamePairs
 {
 public:
@@ -15,6 +27,7 @@ public:
 	CPathRenamePairs( void ) {}
 
 	bool IsEmpty( void ) const { return m_pairs.empty(); }
+	bool AnyChanges( void ) const;
 
 	const TPairVector& GetPairs( void ) const { return m_pairs; }
 	TPairVector& RefPairs( void ) { return m_pairs; }		// careful never to change the pair.first SRC key!
@@ -58,7 +71,7 @@ private:
 	bool IsConsistent( void ) const { return m_pairs.size() == m_pathToIndexMap.size(); }
 private:
 	TPairVector m_pairs;										// maintains the order for sequence generation
-	std::unordered_map<fs::CPath, size_t> m_pathToIndexMap;	// map src -> m_pairs.index
+	std::unordered_map<fs::CPath, size_t> m_pathToIndexMap;		// map src -> m_pairs.index
 };
 
 

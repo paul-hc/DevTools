@@ -98,6 +98,7 @@ namespace utl
 		for ( ; itFirst != itEnd; ++itFirst )
 			if ( !pred( *itFirst ) )
 				break;
+
 		return itFirst;
 	}
 

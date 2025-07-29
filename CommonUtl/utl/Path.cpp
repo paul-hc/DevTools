@@ -274,7 +274,10 @@ namespace path
 
 	bool IsValid( const std::tstring& path )
 	{
-		return !path.empty() && std::tstring::npos == path.find_first_of( GetInvalidChars() );
+		return
+			!path.empty()
+			&& std::tstring::npos == path.find_first_of( GetInvalidChars() )
+			&& path.find_first_not_of( str::StdWhitespace<TCHAR>() ) != std::tstring::npos;
 	}
 
 	const TCHAR* GetInvalidChars( void )
