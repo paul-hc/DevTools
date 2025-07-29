@@ -520,6 +520,7 @@ void CEditPage::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipC
 void CEditPage::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = nullptr == m_sourceEdit.m_hWnd;
+
 	DDX_Control( pDX, IDC_SOURCE_EDIT, m_sourceEdit );
 	DDX_Control( pDX, IDC_SOURCE_COMBO, m_sourceCombo );
 	DDX_Control( pDX, IDC_DEST_EDIT, m_destEdit );
