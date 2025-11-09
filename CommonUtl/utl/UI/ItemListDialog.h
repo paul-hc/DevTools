@@ -100,7 +100,7 @@ private:
 	void OutputList( void );
 private:
 	CItemListDialog* m_pDialog;
-	const ui::CItemContent& m_rContent;
+	const ui::CItemContent* m_pContent;
 	bool m_inEdit;
 
 	std::vector<CPathItem*> m_pathItems;
@@ -141,7 +141,7 @@ private:
 	void OnSelectedLinesChanged( void );
 private:
 	CItemListDialog* m_pDialog;
-	const ui::CItemContent& m_rContent;
+	const ui::CItemContent* m_pContent;
 	Range<int> m_selLineRange;
 	static const TCHAR s_lineEnd[];
 private:

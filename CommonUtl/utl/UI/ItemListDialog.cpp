@@ -319,7 +319,7 @@ namespace layout
 CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
 	: CLayoutPropertyPage( IDD_ITEMS_LIST_PAGE )
 	, m_pDialog( pDialog )
-	, m_rContent( m_pDialog->GetContent() )
+	, m_pContent( &m_pDialog->GetContent() )
 	, m_listCtrl( IDC_ITEMS_LIST )
 	, m_accel( IDR_LIST_EDITOR_ACCEL )
 {
@@ -328,6 +328,9 @@ CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
 
 	m_listCtrl.SetSection( reg::section_list );
 	m_listCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );			// display full paths
+
+	if ( ui::String == m_pContent->m_type )
+		m_listCtrl.SetCustomFileGlyphDraw( false );		// hide images
 }
 
 CItemsListPage::~CItemsListPage()
@@ -345,7 +348,7 @@ bool CItemsListPage::EditSelItem( void )
 	int selIndex = m_pDialog->GetSelItemIndex();
 	std::tstring newItem;
 
-	if ( ui::String == m_rContent.m_type )
+	if ( ui::String == m_pContent->m_type )
 	{
 		if ( const CReportListControl::CLabelEdit* pLabelEdit = m_listCtrl.EditLabelModal( selIndex ) )
 			newItem = pLabelEdit->m_newLabel;
@@ -354,7 +357,7 @@ bool CItemsListPage::EditSelItem( void )
 	}
 	else
 	{
-		newItem = m_rContent.EditItem( GetListItemText( selIndex ).c_str(), this, 0 );
+		newItem = m_pContent->EditItem( GetListItemText( selIndex ).c_str(), this, 0 );
 		if ( !newItem.empty() )
 			m_listCtrl.SetItemText( selIndex, Item, newItem.c_str() );
 		else
@@ -366,8 +369,8 @@ bool CItemsListPage::EditSelItem( void )
 
 std::tstring CItemsListPage::GetListItemText( int index ) const
 {
-	if ( ui::String == m_rContent.m_type )
-		return m_listCtrl.GetItemText( index, CPathItemListCtrl::Code ).GetString();
+	if ( ui::String == m_pContent->m_type )
+		return m_listCtrl.GetItemText( index, CReportListControl::Code ).GetString();
 
 	return m_listCtrl.FormatCode( m_listCtrl.GetSubjectAt( index ) );
 }
@@ -392,7 +395,7 @@ void CItemsListPage::OutputList( void )
 	{
 		m_listCtrl.DeleteAllItems();
 
-		if ( ui::String == m_rContent.m_type )
+		if ( ui::String == m_pContent->m_type )
 		{
 			for ( unsigned int i = 0; i != m_pDialog->m_items.size(); ++i )
 				m_listCtrl.InsertItem( i, m_pDialog->m_items[ i ].c_str() );
@@ -422,7 +425,7 @@ void CItemsListPage::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		switch ( m_rContent.m_type )
+		switch ( m_pContent->m_type )
 		{
 			case ui::String:
 				m_listCtrl.SetFont( CTextEdit::GetFixedFont( CTextEdit::Large ) );
@@ -492,7 +495,7 @@ const TCHAR CItemsEditPage::s_lineEnd[] = _T("\r\n");
 CItemsEditPage::CItemsEditPage( CItemListDialog* pDialog )
 	: CLayoutPropertyPage( IDD_ITEMS_EDIT_PAGE )
 	, m_pDialog( pDialog )
-	, m_rContent( m_pDialog->GetContent() )
+	, m_pContent( &m_pDialog->GetContent() )
 	, m_selLineRange( -1 )
 	, m_accel( IDD_ITEMS_EDIT_PAGE )
 {
@@ -516,10 +519,10 @@ bool CItemsEditPage::EditSelItem( void )
 	int selIndex = m_pDialog->GetSelItemIndex();
 	std::tstring newItem;
 
-	if ( ui::String == m_rContent.m_type )
+	if ( ui::String == m_pContent->m_type )
 		return true;
 
-	newItem = m_rContent.EditItem( currLine.c_str(), this, 0 );
+	newItem = m_pContent->EditItem( currLine.c_str(), this, 0 );
 	if ( newItem.empty() )
 		return false;			// canceled by user
 
