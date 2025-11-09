@@ -79,7 +79,7 @@ CCapitalizeOptions::CCapitalizeOptions( void )
 	, m_alwaysLowercaseWords( _T("w,with,feat,featuring,aka,vs,instrumental"), cap::LowerCase )
 	, m_articles( _T("the,a,an"), cap::LowerCase )
 	, m_conjunctions( _T("so,or,nor,and,but,yet"), cap::LowerCase )
-	, m_prepositions( _T("on,in,to,by,for,at,of,as"), cap::LowerCase )
+	, m_prepositions( _T("on,in,to,by,for,from,at,of,as"), cap::LowerCase )
 	, m_skipNumericPrefix( true )
 {
 }
