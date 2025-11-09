@@ -83,14 +83,15 @@ void CPathItemListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 {
 	ASSERT( this == pCtrl );
 
-	if ( 0 == subItem && m_missingFileColor != CLR_NONE )
-		if ( const utl::ISubject* pObject = AsPtr<utl::ISubject>( rowKey ) )
-		{
-			const fs::CPath filePath = AsPath( pObject );
+	if ( 0 == subItem && IsObjectBased() )
+		if ( m_missingFileColor != CLR_NONE )
+			if ( const utl::ISubject* pObject = AsPtr<utl::ISubject>( rowKey ) )
+			{
+				const fs::CPath filePath = AsPath( pObject );
 
-			if ( !filePath.FileExist() )
-				rTextEffect.m_textColor = m_missingFileColor;		// highlight in red text the missing file/directory
-		}
+				if ( !filePath.FileExist() )
+					rTextEffect.m_textColor = m_missingFileColor;		// highlight in red text the missing file/directory
+			}
 
 	__super::CombineTextEffectAt( rTextEffect, rowKey, subItem, pCtrl );
 }
