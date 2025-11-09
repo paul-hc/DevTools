@@ -53,7 +53,7 @@ void CTextAlgorithmsTests::TestCapitalizeWords( void )
 	ASSERT_EQUAL( _T("At McDonald's vs O'Connor w. ABBA feat. AC-DC in 3D-Studio.txt"), ut::Transform( _T("at mcdonald's VS o'connor W. abba FEAT. ac-dc IN 3d-studio.TXT"), func::CapitalizeWords( &capitalizer ) ) );
 
 	ASSERT_EQUAL( _T("W,w,with,feat,featuring,aka,vs.txt"), ut::Transform( _T(" w,W,WITH,FEAT,FEATURING,AKA,VS .TXT"), func::CapitalizeWords( &capitalizer ) ) );
-	ASSERT_EQUAL( _T("This Is(Some)[Version]{Upon}.txt"), ut::Transform( _T(" this\tis(some)[version]{upon} .TXT"), func::CapitalizeWords( &capitalizer ) ) );
+	ASSERT_EQUAL( _T("This Is(Some)[version]{Upon}.txt"), ut::Transform( _T(" this\tis(some)[version]{upon} .TXT"), func::CapitalizeWords( &capitalizer ) ) );
 }
 
 void CTextAlgorithmsTests::TestReplaceText( void )
