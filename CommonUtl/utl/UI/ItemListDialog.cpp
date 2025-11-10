@@ -587,7 +587,9 @@ void CItemsEditPage::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_ITEMS_EDIT, m_mlEdit );
 	if ( firstInit )
-		m_mlEdit.SetLimitText( 100 * MAX_PATH );		// 100 lines
+	{
+		m_mlEdit.SetLimitText( 0 );		// INT_MAX
+	}
 
 	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
 	{
