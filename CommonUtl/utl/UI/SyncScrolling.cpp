@@ -22,7 +22,8 @@ private:
 
 LRESULT CThumbTrackScrollHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
 {
-	LRESULT result = CWindowHook::WindowProc( message, wParam, lParam );
+	LRESULT result = __super::WindowProc( message, wParam, lParam );
+
 	if ( WM_VSCROLL == message || WM_HSCROLL == message )
 		if ( SB_THUMBTRACK == LOWORD( wParam ) )
 			m_pOwner->Synchronize( CWnd::FromHandle( GetHwnd() ) );
@@ -95,6 +96,7 @@ bool CSyncScrolling::Synchronize( CWnd* pRefCtrl )
 
 	std::vector< std::pair<UINT, int> > scrollPoses;
 	scrollPoses.reserve( m_scrollTypes.size() );
+
 	for ( std::vector<int>::const_iterator itScrollType = m_scrollTypes.begin(); itScrollType != m_scrollTypes.end(); ++itScrollType )
 		scrollPoses.push_back( std::make_pair( SB_VERT == *itScrollType ? WM_VSCROLL : WM_HSCROLL, pRefCtrl->GetScrollPos( *itScrollType ) ) );
 

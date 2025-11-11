@@ -503,6 +503,10 @@ void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override
 		m_srcEdit.AddToSyncScrolling( &m_syncScrolling );
 		m_destEditor.AddToSyncScrolling( &m_syncScrolling );
 
+		// increase the editing buffer to maximum (potentially very large text with large selection, deep search, etc.):
+		m_srcEdit.SetLimitText( 0 );		// INT_MAX characters limit
+		m_destEditor.SetLimitText( 0 );		// INT_MAX characters limit
+
 		if ( m_pParentDlg->IsInitialized() )						// not first time sheet creation? - prevent double init if this was the last active page
 		{
 			// page lazy initialization on activation

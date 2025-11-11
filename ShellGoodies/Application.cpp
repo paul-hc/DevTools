@@ -65,6 +65,7 @@ BOOL CApplication::InitInstance( void ) override
 {
 	// called once when the user right-clicks on selected files in Explorer for the first time.
 	AfxSetResourceHandle( m_hInstance );
+	CImageStore::SetSkipMfcToolBarImages( true );		// avoid deadlock in ATL::CImage::CInitGDIPlus::ReleaseGDIPlus() [11-Nov-2025]
 
 	return __super::InitInstance();
 }
