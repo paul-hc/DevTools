@@ -82,6 +82,7 @@ private:
 	persist bool m_autoGenerate;
 	persist bool m_seqCountAutoAdvance;
 	persist bool m_ignoreExtension;				// "Show Extension" checkbox has inverted logic
+	persist bool m_listMultiSelMode;			// false: run file commands on all file list - true: run file commands on selected files
 	persist UINT m_prevGenSeqCount;				// used in certain cases to roll-back sequence advance on generation
 
 	std::auto_ptr<CDisplayFilenameAdapter> m_pDisplayFilenameAdapter;
@@ -95,6 +96,7 @@ private:
 	persist CHostToolbarCtrl<CHistoryComboBox> m_formatCombo;
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
+	CDialogToolBar m_fileListToolbar;
 	CFrameHostCtrl<CButton> m_showExtButton;
 	CFrameHostCtrl<CEnumComboBox> m_sortOrderCombo;
 	CSplitPushButton m_capitalizeButton;
@@ -122,8 +124,12 @@ protected:
 	afx_msg void OnUpdateSeqCountFindNext( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_SeqCountAutoAdvance( void );
 	afx_msg void OnUpdate_SeqCountAutoAdvance( CCmdUI* pCmdUI );
-	afx_msg void OnBnClicked_CopySourceFiles( void );
+	afx_msg void OnToggle_ListSelectionMode( void );
+	afx_msg void OnUpdate_ListSelectionMode( CCmdUI* pCmdUI );
+	afx_msg void On_ResetListSelection( void );
+	afx_msg void OnUpdate_ResetListSelection( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_ShowExtension( void );
+	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnCbnSelChange_SortOrder( void );
 	afx_msg void OnBnClicked_PasteDestFiles( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );

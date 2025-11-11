@@ -44,6 +44,7 @@ namespace reg
 	static const TCHAR entry_seqCount[] = _T("Sequence Count");
 	static const TCHAR entry_seqCountAutoAdvance[] = _T("Sequence Count Auto Advance");
 	static const TCHAR entry_ignoreExtension[] = _T("Ignore Extension");
+	static const TCHAR entry_listMultiSelMode[] = _T("File List Multi-Selection Mode");
 	static const TCHAR entry_changeCase[] = _T("Change Case");
 	static const TCHAR entry_delimiterSetHistory[] = _T("Delimiter Set History");
 	static const TCHAR entry_newDelimiterHistory[] = _T("New Delimiter History");
@@ -58,7 +59,7 @@ namespace layout
 	static CLayoutStyle styles[] =
 	{
 		{ IDC_FORMAT_COMBO, SizeX },
-		{ IDC_STRIP_BAR_1, MoveX },
+		{ IDC_STRIP_BAR_2, MoveX },
 
 		{ IDC_FILES_SHEET, Size },
 
@@ -92,6 +93,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
 	, m_ignoreExtension( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, true ) != FALSE )
+	, m_listMultiSelMode( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_listMultiSelMode, false ) != FALSE )
 	, m_prevGenSeqCount( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCount, 1 ) )
 	, m_pDisplayFilenameAdapter( new CDisplayFilenameAdapter( m_ignoreExtension ) )
 	, m_formatCombo( ui::EditShinkHost_MateOnRight )
@@ -133,6 +135,10 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 		.AddButton( ID_SEQ_COUNT_FIND_NEXT )
 		.AddSeparator()
 		.AddButton( ID_SEQ_COUNT_AUTO_ADVANCE );
+	m_fileListToolbar.GetStrip()
+		.AddButton( ID_TOGGLE_LIST_SELECTION_MODE )
+		.AddSeparator()
+		.AddButton( ID_RESET_LIST_SELECTION );
 
 	m_sortOrderCombo.SetTags( &ren::ui::GetTags_UiSortBy() );
 	m_showExtButton.SetFrameMargins( -2, -2 );		// draw the frame outside of the button, in the dialog area
@@ -176,7 +182,7 @@ void CRenameFilesDialog::SwitchMode( Mode mode ) override
 
 	static const UINT ctrlIds[] =
 	{
-		IDC_FORMAT_COMBO, IDC_STRIP_BAR_2, IDC_COPY_SOURCE_PATHS_BUTTON,
+		IDC_FORMAT_COMBO, IDC_STRIP_BAR_1, IDC_COPY_SOURCE_PATHS_BUTTON,
 		IDC_PASTE_FILES_BUTTON, IDC_RESET_FILES_BUTTON, IDC_CAPITALIZE_BUTTON, IDC_CHANGE_CASE_BUTTON,
 		IDC_REPLACE_FILES_BUTTON, IDC_REPLACE_USER_DELIMS_BUTTON, IDC_DELIMITER_SET_COMBO, IDC_NEW_DELIMITER_EDIT
 	};
@@ -486,7 +492,8 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
 	DDX_Control( pDX, IDC_SEQ_COUNT_EDIT, m_seqCountEdit );
-	m_seqCountToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignLeft | V_AlignCenter );
+	m_seqCountToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
+	m_fileListToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignRight | V_AlignBottom );
 	DDX_Control( pDX, IDC_SHOW_EXTENSION_CHECK, m_showExtButton );
 	DDX_Control( pDX, IDC_SORT_ORDER_COMBO, m_sortOrderCombo );
 	DDX_Control( pDX, IDC_CAPITALIZE_BUTTON, m_capitalizeButton );
@@ -553,6 +560,10 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_FIND_NEXT, OnUpdateSeqCountFindNext )
 	ON_COMMAND( ID_SEQ_COUNT_AUTO_ADVANCE, OnToggle_SeqCountAutoAdvance )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_AUTO_ADVANCE, OnUpdate_SeqCountAutoAdvance )
+	ON_COMMAND( ID_TOGGLE_LIST_SELECTION_MODE, OnToggle_ListSelectionMode )
+	ON_UPDATE_COMMAND_UI( ID_TOGGLE_LIST_SELECTION_MODE, OnUpdate_ListSelectionMode )
+	ON_COMMAND( ID_RESET_LIST_SELECTION, On_ResetListSelection )
+	ON_UPDATE_COMMAND_UI( ID_RESET_LIST_SELECTION, OnUpdate_ResetListSelection )
 	ON_BN_CLICKED( IDC_SHOW_EXTENSION_CHECK, OnToggle_ShowExtension )
 	ON_CBN_SELCHANGE( IDC_SORT_ORDER_COMBO, OnCbnSelChange_SortOrder )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
@@ -647,6 +658,7 @@ void CRenameFilesDialog::OnDestroy( void )
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, m_seqCountAutoAdvance );
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_changeCase, m_changeCaseButton.GetSelValue() );
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, m_ignoreExtension );
+	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_listMultiSelMode, m_listMultiSelMode );
 
 	__super::OnDestroy();
 }
@@ -732,6 +744,22 @@ void CRenameFilesDialog::OnToggle_SeqCountAutoAdvance( void )
 void CRenameFilesDialog::OnUpdate_SeqCountAutoAdvance( CCmdUI* pCmdUI )
 {
 	pCmdUI->SetCheck( m_seqCountAutoAdvance );
+}
+
+void CRenameFilesDialog::OnToggle_ListSelectionMode( void )
+{
+}
+
+void CRenameFilesDialog::OnUpdate_ListSelectionMode( CCmdUI* pCmdUI )
+{
+}
+
+void CRenameFilesDialog::On_ResetListSelection( void )
+{
+}
+
+void CRenameFilesDialog::OnUpdate_ResetListSelection( CCmdUI* pCmdUI )
+{
 }
 
 void CRenameFilesDialog::OnToggle_ShowExtension( void )

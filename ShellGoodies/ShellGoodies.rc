@@ -34,11 +34,12 @@ BEGIN
     COMBOBOX        IDC_FORMAT_COMBO,90,6,155,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     RTEXT           "&Sequence counter:",IDC_COUNTER_LABEL,17,25,62,8
     EDITTEXT        IDC_SEQ_COUNT_EDIT,90,24,53,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
-    LTEXT           "<strip2>",IDC_STRIP_BAR_2,145,24,46,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    LTEXT           "<strip1_seqCount>",IDC_STRIP_BAR_1,145,24,46,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
     CONTROL         "Show &Extension",IDC_SHOW_EXTENSION_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,80,41,71,10
     LTEXT           "Sort &Order:",IDC_SORT_ORDER_STATIC,158,42,38,8
     COMBOBOX        IDC_SORT_ORDER_COMBO,197,40,77,158,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Files to rename:",IDC_STATIC,5,45,52,8
+    LTEXT           "<strip2_fileList>",IDC_STRIP_BAR_2,308,135,30,13,WS_BORDER
     LTEXT           "<files-sheet>",IDC_FILES_SHEET,5,56,329,124,WS_BORDER
     GROUPBOX        "Source files",IDC_SOURCE_FILES_GROUP,5,183,63,31,BS_LEFT | WS_GROUP
     PUSHBUTTON      "&Copy",IDC_COPY_SOURCE_PATHS_BUTTON,11,194,50,14,WS_GROUP
@@ -323,19 +324,19 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "#include ""afxres.rc""         // standard components: need it for CFileException::GetErrorMessage()\r\n"
     "#include ""utl/UI/utl_ui.rc""\r\n"
@@ -367,7 +368,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "29-07-2025 20:16:12"
+            VALUE "BuildTimestamp", "09-11-2025 13:16:05"
             VALUE "Comments", "VC17.sln ATL wiz|reg_Directory|VC17 fixes|NewCmds+BinLog|CTrayIcon|Paste as Backup|Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
@@ -611,11 +612,11 @@ STRINGTABLE
 BEGIN
     IDS_INVALID_FORMAT      "Invalid rename format: %s\n\nIt should contain *, ? or %% formatting characters\nin order to generate a sequence of unique filenames."
     IDS_NO_DELIMITER_SET    "Please enter the delimiters to replace!"
-    IDS_REPLACE_FILES_TIP_FORMAT 
+    IDS_REPLACE_FILES_TIP_FORMAT
                             "Ctrl+Click to replace ""%s"" with ""%s"" (Ctrl+H)"
-    IDS_FILE_RENAME_SIMPLE_LIST_LAYOUT 
+    IDS_FILE_RENAME_SIMPLE_LIST_LAYOUT
                             "Source files=-50|Destination files=-50"
-    IDS_FILE_RENAME_DETAILS_LIST_LAYOUT 
+    IDS_FILE_RENAME_DETAILS_LIST_LAYOUT
                             "Source files=-50|Size|Date Modified|Destination files=-50"
 END
 
@@ -660,7 +661,7 @@ BEGIN
     ID_GENERATE_NUMERIC_SEQUENCE "Generate numeric sequence"
     ID_SEQ_COUNT_RESET      "Reset numeric sequence to 1"
     ID_SEQ_COUNT_FIND_NEXT  "Find next available numeric sequence start"
-    ID_SEQ_COUNT_AUTO_ADVANCE 
+    ID_SEQ_COUNT_AUTO_ADVANCE
                             "Retain global sequence: advance numeric sequence after each filename generation"
 END
 
@@ -681,14 +682,14 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_AUTO_FILL_COMMON_SEQ_CK 
+    ID_AUTO_FILL_COMMON_SEQ_CK
                             "Auto-fill pattern with the common sequence of the file names (common prefix or sub-string)"
     ID_FIND_DUPLICATE_FILES "Search selected folders for duplicate files"
     ID_CHECK_ALL_DUPLICATES "Check select duplicate files in all groups (to be deleted)\nCheck Select All Duplicates"
     ID_UNCHECK_ALL_DUPLICATES "Uncheck all files\nUncheck All"
-    ID_KEEP_AS_ORIGINAL_FILE 
+    ID_KEEP_AS_ORIGINAL_FILE
                             "Retain the file as the original (not to be deleted)"
-    ID_PICK_AS_ORIGINAL_FOLDER 
+    ID_PICK_AS_ORIGINAL_FOLDER
                             "Select all files in the parent folder as original files"
     ID_HIGHLIGHT_DUPLICATES "Highlight original and duplicate files"
 END
@@ -728,7 +729,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDC_DUPLICATE_FILES_LIST 
+    IDC_DUPLICATE_FILES_LIST
                             "File Name=120|Folder=-1/150|Size=90|CRC32=85|DateModified=125|#"
     IDC_SEARCH_PATHS_LIST   "Search Path=-1"
     IDC_IGNORE_PATHS_LIST   "Ignore Path=-1"
@@ -741,7 +742,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDC_SHOW_EXTENSION_CHECK 
+    IDC_SHOW_EXTENSION_CHECK
                             "Toggle file extension in the file list.  Note: the template format string should be consistent with extension visibility!"
 END
 
