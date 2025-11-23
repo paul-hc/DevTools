@@ -200,6 +200,15 @@ namespace layout
 	{
 		static CThemeItem s_resizeBoxItem( L"SCROLLBAR", SBP_SIZEBOX, SZB_RIGHTALIGN );
 
+		if ( m_pDialog != nullptr )
+		{	// Raymond Chen: https://devblogs.microsoft.com/oldnewthing/20181005-00/?p=99905
+			// Erase the background under the gripper.
+			if ( HBRUSH hBkBrush = ui::SendCtlColor( m_pDialog->GetSafeHwnd(), hDC, WM_CTLCOLORSTATIC ) )
+				ui::FillRect( hDC, m_gripperRect, hBkBrush );
+			else
+				m_pDialog->SendMessage( WM_ERASEBKGND, (WPARAM)hDC );		// use brute force
+		}
+
 		s_resizeBoxItem.DrawBackground( hDC, m_gripperRect );
 	}
 
