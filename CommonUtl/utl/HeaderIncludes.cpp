@@ -9,6 +9,7 @@
 #endif
 
 #include "Algorithms.hxx"
+#include "Path.hxx"
 #include "Resequence.hxx"
 
 

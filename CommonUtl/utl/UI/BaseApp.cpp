@@ -142,11 +142,11 @@ void CAppLook::SetAppLook( app::AppLook appLook )
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerOffice2003 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
 			break;
-		case app::VS_2005:
+		case app::VisualStudio_2005:
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerVS2005 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
 			break;
-		case app::VS_2008:
+		case app::VisualStudio_2008:
 		#if _MFC_VER > 0x0900		// newer MFC version?
 			CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerVS2008 ) );
 			CDockingManager::SetDockingMode( DT_SMART );
@@ -193,8 +193,8 @@ app::AppLook CAppLook::GetCompatibleTheme( app::AppLook appLook )
 	// substitute themes not available in older MFC
 	switch ( appLook )
 	{
-		case app::VS_2008:		appLook = app::VS_2005; break;
-		case app::Windows_7:	appLook = app::Windows_XP; break;
+		case app::VisualStudio_2008:	appLook = app::VisualStudio_2005; break;
+		case app::Windows_7:			appLook = app::Windows_XP; break;
 	}
 #endif
 	return appLook;
@@ -208,8 +208,8 @@ app::AppLook CAppLook::FromId( UINT cmdId )
 		case ID_APPLOOK_OFFICE_XP:			return app::Office_XP;
 		case ID_APPLOOK_WINDOWS_XP:			return app::Windows_XP;
 		case ID_APPLOOK_OFFICE_2003:		return app::Office_2003;
-		case ID_APPLOOK_VS_2005:			return app::VS_2005;
-		case ID_APPLOOK_VS_2008:			return app::VS_2008;
+		case ID_APPLOOK_VS_2005:			return app::VisualStudio_2005;
+		case ID_APPLOOK_VS_2008:			return app::VisualStudio_2008;
 		case ID_APPLOOK_WINDOWS_7:			return app::Windows_7;
 		default:
 			ASSERT( false );
@@ -247,7 +247,7 @@ void CAppLook::OnUpdateApplicationLook( CCmdUI* pCmdUI )
 	bool enable = true;
 
 #if _MFC_VER <= 0x0900		// MFC version 9.00 or less
-	if ( app::VS_2008 == appLook || app::Windows_7 == appLook )
+	if ( app::VisualStudio_2008 == appLook || app::Windows_7 == appLook )
 		enable = false;		// visual managers not available in MFC 9.0
 #endif
 

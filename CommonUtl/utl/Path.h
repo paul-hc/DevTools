@@ -5,7 +5,6 @@
 #include "Path_fwd.h"
 #include "ComparePredicates.h"
 #include "StringCompare.h"
-#include <unordered_set>
 
 
 namespace path
@@ -548,65 +547,15 @@ namespace fs
 }
 
 
-namespace utl
-{
-	// FWD:
-
-	template< typename ContainerT, typename IteratorT >
-	size_t JoinUnique( ContainerT& rDest, IteratorT itStart, IteratorT itEnd );
-}
-
-
 namespace path
 {
 	fs::CPath StripWildcards( const fs::TPatternPath& patternPath );
 
 	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::TDirPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
 
-
-	template< typename ContainerT, typename SetT >
-	size_t UniquifyPaths( ContainerT& rPaths, SetT& rUniquePathIndex )
-	{
-		ContainerT tempPaths;
-		tempPaths.reserve( rPaths.size() );
-
-		size_t duplicateCount = 0;
-
-		for ( typename ContainerT::const_iterator itPath = rPaths.begin(); itPath != rPaths.end(); ++itPath )
-			if ( rUniquePathIndex.insert( func::PathOf( *itPath ) ).second )		// path is unique?
-				tempPaths.push_back( *itPath );
-			else
-				++duplicateCount;
-
-		rPaths.swap( tempPaths );
-		return duplicateCount;
-	}
-
-
-	template< typename ContainerT >
-	size_t UniquifyPaths( ContainerT& rPaths )
-	{
-		std::unordered_set<typename ContainerT::value_type> uniquePathIndex;
-		return UniquifyPaths( rPaths, uniquePathIndex );
-	}
-
-
 	template< typename ContainerT, typename SrcContainerT >
-	size_t JoinUniquePaths( ContainerT& rDestPaths, const SrcContainerT& newPaths )
-	{
-		size_t oldCount = rDestPaths.size();
-
-		if ( oldCount + newPaths.size() < 100 )											// small total number?
-			return utl::JoinUnique( rDestPaths, newPaths.begin(), newPaths.end() );		// use linear unquifying
-
-		// many items optimization: add all and use hash unquifying
-		rDestPaths.insert( rDestPaths.end(), newPaths.begin(), newPaths.end() );
-		UniquifyPaths( rDestPaths );
-
-		return rDestPaths.size() - oldCount;		// added count
-	}
-
-} // namespace path
+	size_t JoinUniquePaths( ContainerT& rDestPaths, const SrcContainerT& newPaths );
+}
 
 
 namespace fs

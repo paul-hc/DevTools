@@ -1,3 +1,6 @@
+#ifndef Algorithms_hxx
+#define Algorithms_hxx
+#pragma once
 
 #include "Algorithms.h"
 #include "StdHashValue.h"
@@ -50,3 +53,6 @@ namespace utl
 		return Uniquify( rItems, uniqueSet, pRemovedDups );
 	}
 }
+
+
+#endif // Algorithms_hxx

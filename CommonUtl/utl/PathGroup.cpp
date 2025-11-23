@@ -8,6 +8,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/Algorithms.hxx"
+
 
 namespace fs
 {

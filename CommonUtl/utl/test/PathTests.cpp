@@ -9,6 +9,7 @@
 #include "ContainerOwnership.h"
 #include "StringUtilities.h"
 #include "StdHashValue.h"
+#include <unordered_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

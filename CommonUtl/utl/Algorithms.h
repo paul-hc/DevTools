@@ -329,6 +329,15 @@ namespace utl
 		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );
 	}
 
+	template< typename DestContainerT, typename SrcContainerT >
+	inline size_t Append( IN OUT DestContainerT& rDestItems, const SrcContainerT& srcItems )
+	{	// straight conversion from SRC to DEST items:
+		size_t origCount = rDestItems.size();
+
+		rDestItems.insert( rDestItems.end(), srcItems.begin(), srcItems.end() );
+		return rDestItems.size() - origCount;
+	}
+
 	template< typename DestContainerT, typename SrcContainerT, typename CvtUnaryFunc >
 	inline void Append( IN OUT DestContainerT& rDestItems, const SrcContainerT& srcItems, CvtUnaryFunc cvtFunc )
 	{

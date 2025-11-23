@@ -29,7 +29,7 @@
 
 namespace app
 {
-	enum AppLook { Windows_2000, Office_XP, Windows_XP, Office_2003, VS_2005, VS_2008, Office_2007_Blue, Office_2007_Black, Office_2007_Silver, Office_2007_Aqua, Windows_7 };
+	enum AppLook { Windows_2000, Office_XP, Windows_XP, Office_2003, VisualStudio_2005, VisualStudio_2008, Office_2007_Blue, Office_2007_Black, Office_2007_Silver, Office_2007_Aqua, Windows_7 };
 }
 
 

@@ -21,6 +21,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Path.hxx"
+
 
 namespace ut
 {
