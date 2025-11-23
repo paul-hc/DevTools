@@ -11,6 +11,7 @@
 *.tlog/
 desktop.ini
 *-noGit/
+**/res/bk_img/*_.*
 
 # PHC: DevTools Ignore:
 [Gg]en/
