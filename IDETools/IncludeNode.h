@@ -43,23 +43,27 @@ private:
 };
 
 
-#include "ComparePredicates.h"
+// hash specializations for utl::Uniquify():
 
-
-namespace pred
+template<>
+struct std::hash<const CIncludeNode*>
 {
-	struct ToTreeItemPath
+	inline std::size_t operator()( const CIncludeNode* pTreeItem ) const /*noexcept*/
 	{
-		const fs::CPath operator()( const CIncludeNode* pTreeItem ) const
-		{
-			ASSERT_PTR( pTreeItem );
-			return pTreeItem->m_path;
-		}
-	};
+		return pTreeItem->m_path.GetHashValue();
+	}
+};
 
-	typedef CompareAdapter<CompareNaturalPath, ToTreeItemPath> TCompareTreeItemPath;
-	typedef LessPtr<TCompareTreeItemPath> TLess_TreeItemPath;
-}
+
+template<>
+struct std::equal_to<const CIncludeNode*>
+{
+	template< typename LeftPathT, typename RightPathT >
+	bool operator()( const CIncludeNode* pLeft, const CIncludeNode* pRight ) const /*noexcept*/
+	{
+		return pred::EquivalentPath()( pLeft->m_path, pRight->m_path );
+	}
+};
 
 
 #endif // IncludeNode_h

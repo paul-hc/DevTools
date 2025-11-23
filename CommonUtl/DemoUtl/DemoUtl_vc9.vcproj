@@ -603,6 +603,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\LowColorStrip_4-bit.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\MonochromeStrip_1-bit.bmp"
+				>
+			</File>
+			<File
 				RelativePath=".\res\MyToolStrip.ico"
 				>
 			</File>

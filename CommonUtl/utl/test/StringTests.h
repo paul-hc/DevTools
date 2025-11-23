@@ -24,6 +24,10 @@ private:
 	void TestStringClamp( void );
 	void TestEnquote( void );
 
+	void TestStringHashing( void );
+	void TestStringEqualTo( void );
+	void TestStringSet( void );
+
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
 	void TestStringPrefixSuffix( void );

@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "ItemContent.h"
 #include "ShellDialogs.h"
+#include "StringCompare.h"
 #include "StringUtilities.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
@@ -11,6 +12,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/Algorithms.hxx"
 
 
 namespace ui
@@ -78,9 +81,9 @@ namespace ui
 
 		if ( HasFlag( m_itemsFlags, EnsureUnique ) )
 			if ( ui::String == m_type )
-				utl::Uniquify<pred::TLess_StringyIntuitive>( rItems );
+				utl::Uniquify<str::ignore_case::Hash, str::ignore_case::EqualTo>( rItems );
 			else
-				utl::Uniquify<pred::TLess_NaturalPath>( rItems );
+				utl::Uniquify<str::ignore_case::Hash, str::ignore_case::EqualTo>( rItems );
 	}
 
 	std::tstring CItemContent::EditItem( const TCHAR* pItem, CWnd* pParent, UINT cmdId /*= 0*/ ) const

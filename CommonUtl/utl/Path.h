@@ -230,6 +230,8 @@ namespace fs
 	class CPath
 	{
 	public:
+		typedef std::tstring::value_type value_type;			// i.e. TCHAR: for compatibility with string/collections algorithms
+
 		CPath( void ) {}
 		CPath( const std::tstring& filePath ) { Set( filePath ); }
 		CPath( const CPath* pFilePath ) : m_filePath( safe_ptr( pFilePath )->Get() ) { Canonicalize(); }		// canonic conversion ctor
@@ -329,12 +331,39 @@ namespace fs
 }
 
 
-template<>
-struct std::hash<fs::CPath>
+namespace pred
 {
-	inline std::size_t operator()( const fs::CPath& filePath ) const /*noexcept*/
+	struct EquivalentPath
 	{
-		return filePath.GetHashValue();
+		template< typename LeftPathT, typename RightPathT >
+		bool operator()( const LeftPathT& left, const RightPathT& right ) const
+		{
+			return m_pred( str::traits::GetCharPtr( left ), str::traits::GetCharPtr( right ) );
+		}
+	public:
+		pred::TEquivalentPath m_pred;
+	};
+}
+
+
+template<>
+struct std::hash<fs::CPath>			// used as 2nd template argument in e.g. template unordered_set<>
+{
+	template< typename PathT >
+	inline std::size_t operator()( const PathT& filePath ) const /*noexcept*/
+	{
+		return path::GetHashValue( func::StringOf( filePath ) );
+	}
+};
+
+
+template<>
+struct std::equal_to<fs::CPath>		// used as 3rd template argument in e.g. template unordered_set<>
+{
+	template< typename LeftPathT, typename RightPathT >
+	bool operator()( const LeftPathT& left, const RightPathT& right ) const /*noexcept*/
+	{
+		return pred::EquivalentPath()( left, right );
 	}
 };
 
@@ -598,7 +627,7 @@ namespace str
 {
 	namespace traits
 	{
-		inline const TCHAR* GetCharPtr( const fs::CPath& filePath ) { return filePath.Get().c_str(); }
+		inline const TCHAR* GetCharPtr( const fs::CPath& filePath ) { return filePath.GetPtr(); }
 		inline size_t GetLength( const fs::CPath& filePath ) { return filePath.Get().length(); }
 	}
 }

@@ -3,6 +3,35 @@
 #pragma once
 
 
+// _MSC_VER to Visual Studio editions
+#define VS_6		1200
+#define VS_2002		1300
+#define VS_2003		1310
+#define VS_2005		1400
+#define VS_2008		1500
+#define VS_2010		1600
+#define VS_2012		1700
+#define VS_2013		1800
+#define VS_2015		1900
+#define VS_2017		1910
+#define VS_2019		1920
+#define VS_2022		1930
+
+// _MSC_VER to Visual C++ versions
+#define VC_VER_6_0		VS_6
+#define VC_VER_7_0		VS_2002
+#define VC_VER_7_1		VS_2003
+#define VC_VER_8_0		VS_2005
+#define VC_VER_9_0		VS_2008
+#define VC_VER_10		VS_2010
+#define VC_VER_11		VS_2012
+#define VC_VER_12		VS_2013
+#define VC_VER_14		VS_2015
+#define VC_VER_15		VS_2017
+#define VC_VER_16 		VS_2019
+#define VC_VER_17 		VS_2022
+
+
 /*
 	Can't rely on __cplusplus since Visual C++ compiler uses the old 199711L value to prevent breaking legacy code.
 	So we are using _MSVC_LANG instead.

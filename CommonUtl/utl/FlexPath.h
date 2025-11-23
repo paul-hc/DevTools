@@ -98,6 +98,17 @@ struct std::hash<fs::CFlexPath>
 };
 
 
+template<>
+struct std::equal_to<fs::CFlexPath>
+{
+	template< typename LeftPathT, typename RightPathT >
+	inline bool operator()( const LeftPathT& left, const RightPathT& right ) const /*noexcept*/
+	{
+		return pred::EquivalentPath()( left, right );
+	}
+};
+
+
 namespace pred
 {
 	struct FlexFileExist

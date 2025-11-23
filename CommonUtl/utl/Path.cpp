@@ -5,6 +5,7 @@
 #include "FileSystem.h"
 #include "Crc32.h"
 #include "Algorithms.h"
+#include "StdHashValue.h"
 #include "StringUtilities.h"
 #include "StringIntuitiveCompare.h"
 #include <io.h>
@@ -49,21 +50,7 @@ namespace path
 	size_t GetHashValuePtr( const TCHAR* pPath, size_t count /*= utl::npos*/ )
 	{
 		// compute hash value based on lower-case and normalized backslashes
-
-		// inspired from template class instantiation 'template<> class hash<std::wstring>' from <functional> - hashing mechanism for std::unordered_map, std::unordered_set, etc.
-		size_t hashValue = 2166136261u;
-		size_t pos = 0;
-		size_t lastPos = count != utl::npos ? count : str::GetLength( pPath );
-		size_t stridePos = 1 + lastPos / 10;
-		const func::ToEquivalentPathChar toEquivalentPathChar;
-
-		if ( stridePos < lastPos )
-			lastPos -= stridePos;
-
-		for ( ; pos < lastPos; pos += stridePos )
-			hashValue = 16777619u * hashValue ^ static_cast<size_t>( toEquivalentPathChar( pPath[ pos ] ) );
-
-		return hashValue;
+		return utl::HashArray( pPath, count != utl::npos ? count : str::GetLength( pPath ), func::ToEquivalentPathChar() );
 	}
 }
 

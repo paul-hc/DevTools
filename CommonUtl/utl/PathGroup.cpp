@@ -48,7 +48,7 @@ namespace fs
 		str::Tokenize( m_specs, flat, delims );			// discard empty entries
 
 		std::for_each( m_specs.begin(), m_specs.end(), path::Normalize );
-		utl::Uniquify<pred::TLess_NaturalPath>( m_specs );
+		utl::Uniquify< std::hash<fs::CPath>, std::equal_to<fs::CPath> >( m_specs );
 		ExpandPaths();
 	}
 

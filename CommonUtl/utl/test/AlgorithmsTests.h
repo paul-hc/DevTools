@@ -24,6 +24,8 @@ private:
 	void TestSetLookup( void );
 	void TestMapLookup( void );
 	void TestBinaryLookup( void );
+	void TestUniquifyStrings( void );
+	void TestUniquifyPaths( void );
 	void TestIsOrdered( void );
 	void TestQuery( void );
 	void TestAssignment( void );

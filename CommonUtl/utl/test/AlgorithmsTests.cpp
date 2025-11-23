@@ -5,7 +5,9 @@
 #include "test/AlgorithmsTests.h"
 #include "test/MockObject.h"
 #include "ContainerOwnership.h"
+#include "FlexPath.h"
 #include "StringUtilities.h"
+#include "StdHashValue.h"
 #include "vector_map.h"
 #include <deque>
 
@@ -13,6 +15,7 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Algorithms.hxx"
 #include "Resequence.hxx"
 
 
@@ -170,6 +173,83 @@ void CAlgorithmsTests::TestMapLookup( void )
 void CAlgorithmsTests::TestBinaryLookup( void )
 {
 	UT_TRACE( "(TODO: implement...)  " );
+}
+
+void CAlgorithmsTests::TestUniquifyStrings( void )
+{
+	// case sensitive:
+	{
+		std::vector<std::string> items, dups;
+		str::Split( items, "a,b,c,B,A,A,B", "," );
+
+		utl::Uniquify( items, &dups );
+		ASSERT_EQUAL( "a,b,c,B,A", str::Join( items, "," ) );
+		ASSERT_EQUAL( "A,B", str::Join( dups, "," ) );
+	}
+
+	{
+		std::vector<std::wstring> wItems, dups;
+		str::Split( wItems, L"a,b,c,B,A,A,B", L"," );
+
+		utl::Uniquify( wItems, &dups );
+		ASSERT_EQUAL( L"a,b,c,B,A", str::Join( wItems, L"," ) );
+		ASSERT_EQUAL( L"A,B", str::Join( dups, L"," ) );
+	}
+
+	// case insensitive:
+	{
+		std::vector<std::string> items, dups;
+		str::Split( items, "a,b,c,B,A,A,B", "," );
+
+		std::unordered_set<std::string, str::ignore_case::Hash, str::ignore_case::EqualTo> uniqueSetAI;		// using a case-insensitive hash set
+
+		utl::Uniquify( items, uniqueSetAI, &dups );
+		ASSERT_EQUAL( "a,b,c", str::Join( items, "," ) );
+		ASSERT_EQUAL( "B,A,A,B", str::Join( dups, "," ) );
+	}
+
+	{
+		using namespace str::ignore_case;
+
+		std::vector<std::wstring> wItems, dups;
+		str::Split( wItems, L"a,b,c,B,A,A,B", L"," );
+
+		std::unordered_set<std::wstring, str::ignore_case::Hash, str::ignore_case::EqualTo> uniqueSetWI;		// using a case-insensitive hash set
+
+		utl::Uniquify( wItems, uniqueSetWI, &dups );
+		ASSERT_EQUAL( L"a,b,c", str::Join( wItems, L"," ) );
+		ASSERT_EQUAL( L"B,A,A,B", str::Join( dups, L"," ) );
+	}
+}
+
+void CAlgorithmsTests::TestUniquifyPaths( void )
+{
+	{
+		std::vector<fs::CPath> paths, dups;
+		str::Split( paths, _T("a,b,c,B,A,A,B"), s_sep );
+
+		utl::Uniquify( paths, &dups );
+		ASSERT_EQUAL( "a,b,c", str::Join( paths, "," ) );
+		ASSERT_EQUAL( "B,A,A,B", str::Join( dups, "," ) );
+	}
+
+	{
+		std::vector<fs::CPath> paths, dups;
+		str::Split( paths, _T("ole.h,ole2.h,C:\\Win\\commdlg.h,c:\\win\\commdlg.h,c:/Win/CommDlg.h,OLE2.H,OLE2.h,winsvc.h,imm.h,Ole2.h"), s_sep );
+
+		utl::Uniquify( paths, &dups );
+		ASSERT_EQUAL( "ole.h,ole2.h,C:\\Win\\commdlg.h,winsvc.h,imm.h", str::Join( paths, "," ) );
+		ASSERT_EQUAL( "c:\\win\\commdlg.h,c:/Win/CommDlg.h,OLE2.H,OLE2.h,Ole2.h", str::Join( dups, "," ) );
+	}
+
+	{
+		std::vector<fs::CFlexPath> flexPaths, dups;
+		str::Split( flexPaths, _T("ole.h,ole2.h,C:\\Win\\commdlg.h,c:\\win\\commdlg.h,c:/Win/CommDlg.h,OLE2.H,OLE2.h,winsvc.h,imm.h,Ole2.h"), s_sep );
+
+		utl::Uniquify( flexPaths, &dups );
+		ASSERT_EQUAL( "ole.h,ole2.h,C:\\Win\\commdlg.h,winsvc.h,imm.h", str::Join( flexPaths, "," ) );
+		ASSERT_EQUAL( "c:\\win\\commdlg.h,c:/Win/CommDlg.h,OLE2.H,OLE2.h,Ole2.h", str::Join( dups, "," ) );
+	}
 }
 
 void CAlgorithmsTests::TestIsOrdered( void )
@@ -358,24 +438,6 @@ void CAlgorithmsTests::TestInsert( void )
 
 		utl::ClearOwningContainer( numbers );
 		ASSERT( !ut::CMockObject::HasInstances() );
-	}
-
-	{
-		std::vector<fs::CPath> paths, dups;
-		str::Split( paths, _T("a,b,c,B,A,A,B"), s_sep );
-
-		utl::Uniquify<pred::TLess_NaturalPath>( paths, &dups );
-		ASSERT_EQUAL( "a,b,c", str::Join( paths, "," ) );
-		ASSERT_EQUAL( "B,A,A,B", str::Join( dups, "," ) );
-	}
-
-	{
-		std::vector<fs::CPath> paths, dups;
-		str::Split( paths, _T("ole.h,ole2.h,commdlg.h,OLE2.H,OLE2.h,winsvc.h,imm.h,Ole2.h"), s_sep );
-
-		utl::Uniquify<pred::TLess_NaturalPath>( paths, &dups );
-		ASSERT_EQUAL( "ole.h,ole2.h,commdlg.h,winsvc.h,imm.h", str::Join( paths, "," ) );
-		ASSERT_EQUAL( "OLE2.H,OLE2.h,Ole2.h", str::Join( dups, "," ) );
 	}
 }
 
@@ -590,6 +652,8 @@ void CAlgorithmsTests::Run( void )
 	RUN_TEST( TestSetLookup );
 	RUN_TEST( TestMapLookup );
 	RUN_TEST( TestBinaryLookup );
+	RUN_TEST( TestUniquifyStrings );
+	RUN_TEST( TestUniquifyPaths );
 	RUN_TEST( TestIsOrdered );
 	RUN_TEST( TestQuery );
 	RUN_TEST( TestAssignment );

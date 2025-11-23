@@ -30,6 +30,10 @@ private:
 	void TestCommonSubpath( void );
 	void TestComplexPath( void );
 	void TestFlexPath( void );
+
+	void TestPathHashing( void );
+	void TestPathEqualTo( void );
+	void TestPathSet( void );
 	void TestPathHashValue( void );
 };
 

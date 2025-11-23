@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <set>
 #include "Algorithms_fwd.h"
 
 
@@ -250,6 +249,12 @@ namespace utl
 		typename MapType::iterator itFound = rObjectMap.find( key );
 		return itFound != rObjectMap.end() ? &itFound->second : nullptr;
 	}
+
+	template< typename MapType >
+	inline bool ContainsValue( const MapType& objectMap, const typename MapType::key_type& key )
+	{
+		return objectMap.find( key ) != objectMap.end();
+	}
 }
 
 
@@ -430,7 +435,7 @@ namespace utl
 
 
 	template< typename ContainerT >
-	size_t Uniquify( IN OUT ContainerT& rItems )
+	size_t UniquifyLinear( IN OUT ContainerT& rItems )		// slow, don't use - use the Uniquify() below
 	{
 		size_t removedCount = 0;
 
@@ -450,32 +455,18 @@ namespace utl
 	}
 
 
-	template< typename PredT, typename ContainerT >
-	size_t Uniquify( IN OUT ContainerT& rItems, ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) )
-	{
-		REQUIRE( PredT::IsBoolPred() );
+	template< typename ContainerT, typename SetT >
+	size_t Uniquify( IN OUT ContainerT& rItems, IN OUT SetT& rUniqueSet, OUT ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) );
 
-		typedef typename ContainerT::value_type TValue;
+	// using a standard hash set std::unordered_set<typename ContainerT::value_type>
+	//
+	template< typename ContainerT >
+	size_t Uniquify( IN OUT ContainerT& rItems, OUT ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) );
 
-		std::set<TValue, PredT> uniqueIndex;
-		ContainerT tempItems;
-		size_t duplicateCount = 0;
-
-		tempItems.reserve( rItems.size() );
-		for ( typename ContainerT::const_iterator itItem = rItems.begin(), itEnd = rItems.end(); itItem != itEnd; ++itItem )
-			if ( uniqueIndex.insert( *itItem ).second )		// item is unique?
-				tempItems.push_back( *itItem );
-			else
-			{
-				++duplicateCount;
-
-				if ( pRemovedDups != nullptr )
-					pRemovedDups->insert( pRemovedDups->end(), *itItem );	// for owning container of pointers: allow client to delete the removed duplicates
-			}
-
-		rItems.swap( tempItems );
-		return duplicateCount;
-	}
+	// using custom hash and equal_to functors
+	//
+	template< typename HasherT, typename KeyEqualT, typename ContainerT >
+	size_t Uniquify( IN OUT ContainerT& rItems, OUT ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) );
 }
 
 

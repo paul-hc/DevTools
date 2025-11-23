@@ -936,6 +936,77 @@ void CPathTests::TestFlexPath( void )
 	}
 }
 
+
+void CPathTests::TestPathHashing( void )
+{
+	// std::hash hashing:
+	const std::hash<fs::CPath> hasherP;
+	const std::hash<fs::CFlexPath> hasherFP;
+
+	ASSERT_EQUAL( hasherFP( fs::CFlexPath( _T("") ) ), hasherP( fs::CPath( _T("") ) ) );
+	ASSERT_EQUAL( hasherFP( fs::CFlexPath( _T("abcDEF") ) ), hasherP( fs::CPath( _T("abcDEF") ) ) );
+
+	ASSERT_EQUAL( hasherP( fs::CFlexPath( _T("C:\\my\\file-1.h") ) ), hasherP( fs::CPath( _T("c:\\MY\\FILE-1.h") ) ) );
+	ASSERT_EQUAL( hasherP( fs::CFlexPath( _T("C:\\my\\file-1.h") ) ), hasherP( fs::CPath( _T("c:/MY/FILE-1.h") ) ) );
+
+	ASSERT_EQUAL( hasherFP( fs::CFlexPath( _T("C:\\my\\file-1.h") ) ), hasherP( fs::CPath( _T("c:\\MY\\FILE-1.h") ) ) );
+	ASSERT_EQUAL( hasherFP( fs::CFlexPath( _T("C:\\my\\file-1.h") ) ), hasherP( fs::CPath( _T("c:/MY/FILE-1.h") ) ) );
+}
+
+void CPathTests::TestPathEqualTo( void )
+{
+	// std::equal_to comparison:
+
+	const std::equal_to<fs::CPath> eqPath;
+
+	ASSERT( eqPath( fs::CPath( _T("C:\\my\\file-1.h") ), fs::CPath( _T("c:\\MY\\FILE-1.h") ) ) );
+	ASSERT( eqPath( fs::CPath( _T("C:\\my\\file-1.h") ), fs::CPath( _T("c:/MY/FILE-1.h") ) ) );
+
+	ASSERT( eqPath( fs::CPath( _T("C:\\my\\file-1.h") ), fs::CFlexPath( _T("c:\\MY\\FILE-1.h") ) ) );
+	ASSERT( eqPath( fs::CPath( _T("C:\\my\\file-1.h") ), fs::CFlexPath( _T("c:/MY/FILE-1.h") ) ) );
+
+	ASSERT( eqPath( fs::CPath( _T("C:\\my\\file-1.h") ), _T("c:/MY/FILE-1.h") ) );
+	ASSERT( eqPath( _T("c:/MY/FILE-1.h"), fs::CPath( _T("C:\\my\\file-1.h") ) ) );
+	ASSERT( eqPath( "c:/MY/FILE-1.h", fs::CPath( _T("C:\\my\\file-1.h") ) ) );
+
+	const std::equal_to<fs::CFlexPath> eqFlexPath;
+
+	ASSERT( eqFlexPath( fs::CPath( _T("C:\\my\\file-1.h") ), fs::CFlexPath( _T("c:\\MY\\FILE-1.h") ) ) );
+	ASSERT( eqFlexPath( fs::CPath( _T("C:\\my\\file-1.h") ), fs::CFlexPath( _T("c:/MY/FILE-1.h") ) ) );
+
+	ASSERT( eqFlexPath( fs::CPath( _T("C:\\my\\file-1.h") ), _T("c:/MY/FILE-1.h") ) );
+	ASSERT( eqFlexPath( _T("c:/MY/FILE-1.h"), fs::CPath( _T("C:\\my\\file-1.h") ) ) );
+}
+
+void CPathTests::TestPathSet( void )
+{
+	{
+		std::unordered_set<fs::CPath> hashSet;
+
+		ASSERT( hashSet.insert( fs::CPath( _T("") ) ).second );
+		ASSERT( hashSet.insert( fs::CPath( _T("C:\\") ) ).second );
+		ASSERT( hashSet.insert( fs::CPath( _T("C:\\my\\file-1.h") ) ).second );
+
+		// avoid duplicates
+		ASSERT( !hashSet.insert( fs::CPath( _T("C:\\") ) ).second );
+		ASSERT( !hashSet.insert( fs::CPath( _T("c:\\") ) ).second );
+		ASSERT( !hashSet.insert( fs::CPath( _T("c:/") ) ).second );
+		ASSERT( !hashSet.insert( fs::CPath( _T("C:\\my\\file-1.h") ) ).second );
+		ASSERT( !hashSet.insert( fs::CPath( _T("c:\\MY\\FILE-1.H") ) ).second );
+		ASSERT( !hashSet.insert( fs::CPath( _T("C:/my/file-1.h") ) ).second );
+		ASSERT( !hashSet.insert( fs::CPath( _T("c:/MY/FILE-1.H") ) ).second );
+
+		ASSERT_EQUAL( 3, hashSet.size() );
+		ASSERT_EQUAL( _T(""), *hashSet.find( fs::CPath( _T("") ) ) );
+		ASSERT_EQUAL( _T("C:\\"), *hashSet.find( fs::CPath( _T("C:\\") ) ) );
+		ASSERT_EQUAL( _T("C:\\"), *hashSet.find( fs::CPath( _T("c:\\") ) ) );
+		ASSERT_EQUAL( _T("C:\\"), *hashSet.find( fs::CPath( _T("C:/") ) ) );
+		ASSERT_EQUAL( _T("C:\\my\\file-1.h"), *hashSet.find( fs::CPath( _T("C:\\my\\file-1.h") ) ) );
+		ASSERT_EQUAL( _T("C:\\my\\file-1.h"), *hashSet.find( fs::CPath( _T("c:\\MY\\FILE-1.H") ) ) );
+		ASSERT_EQUAL( _T("C:\\my\\file-1.h"), *hashSet.find( fs::CPath( _T("c:/MY/FILE-1.H") ) ) );
+	}
+}
+
 void CPathTests::TestPathHashValue( void )
 {
 	static const fs::CPath s_path( _T("C:\\Images/fruit.stg>Europe/apple.jpg") );
@@ -970,6 +1041,10 @@ void CPathTests::Run( void )
 	RUN_TEST( TestCommonSubpath );
 	RUN_TEST( TestComplexPath );
 	RUN_TEST( TestFlexPath );
+
+	RUN_TEST( TestPathHashing );
+	RUN_TEST( TestPathEqualTo );
+	RUN_TEST( TestPathSet );
 	RUN_TEST( TestPathHashValue );
 }
 

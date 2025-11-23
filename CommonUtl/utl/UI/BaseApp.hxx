@@ -29,7 +29,7 @@ CBaseApp<BaseClassT>::CBaseApp( void )
 	, m_lazyInitAppResources( false )
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
 {
-#if _MSC_VER >= 1800	// Visual C++ 2013
+#if _MSC_VER >= VS_2013	// Visual C++ 2013
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;			// support Restart Manager
 #endif
 }

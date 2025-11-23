@@ -35,12 +35,27 @@ DEBUG the REGISTRATION of shell extension (through regsvr32.exe):
 =========================================
 	Command=regsvr32.exe
 	Command Arguments=-s $(TargetPath)
+		- Set an "ASSERT( false );" in the startup code.
+		- Run the program (Start Without Debugging): Ctrl+F5.
+		- When ASSERT fails, attach to the executable, press Retry in assertion dialog, and continue debugging the code.
+
 Normal dll debug:
 	Command=C:\my\Tools\mine\ExplorerBrowser64.exe
 	Command Arguments=
 
-Note:
-	On Windows 10, you need to run Visual Studio as Administrator for the regsvr32.exe to succeed!
+
+Command line shell extension registration:
+	Register server (32/64-bit):
+		regsvr32 ShellGoodies32.dll
+		regsvr32 ShellGoodies64.dll
+
+	Unregister server (32/64-bit):
+		regsvr32 -u ShellGoodies32.dll
+		regsvr32 -u ShellGoodies64.dll
+
+Notes:
+	On Windows 10+, you need to run Visual Studio as Administrator for the regsvr32.exe to succeed!
+	To override ShellGoodies32.dll and ShellGoodies64.dll at C:\my\Tools\mine\ without restarting Windows Explorer, you need to unregister the dll. This will unload it from Explorer.
 
 
 Customize for dual VC9/VC17 projects:
@@ -159,7 +174,7 @@ BUGS:
 1) Deadlock on loading ShellGoodies*.dll (64/32 bit, RELEASE/DEBUG):
 When ShellGoodies64.dll (or 32) is registered and enabled (ShellExView), sometimes when right clicking on a FOLDER *first time* in Explorer.exe (or ExplorerBrowser64.exe), a deadlock occurs.
 This happens in global/static variables initialization, during initialization of "AFX_GLOBAL_DATA afxGlobalData;", when calling SHAppBarMessage():
-	shell32.dll!SHAppBarMessage()  + 0xf7 bytes	
+	shell32.dll!SHAppBarMessage()  + 0xf7 bytes
 >	ShellGoodies64.dll!AFX_GLOBAL_DATA::OnSettingChange()  Line 546 + 0x10 bytes	C++
 	ShellGoodies64.dll!AFX_GLOBAL_DATA::AFX_GLOBAL_DATA()  Line 254	C++
 	ShellGoodies64.dll!`dynamic initializer for 'afxGlobalData''()  Line 149 + 0x10 bytes	C++

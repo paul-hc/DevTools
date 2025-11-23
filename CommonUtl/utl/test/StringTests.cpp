@@ -8,7 +8,9 @@
 #include "FlagTags.h"
 #include "StringUtilities.h"
 #include "StringParsing.h"
+#include "StdHashValue.h"
 #include "TimeUtils.h"
+#include <unordered_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -375,6 +377,130 @@ void CStringTests::TestEnquote( void )
 		ASSERT_EQUAL( L"", str::sq::EnquoteStr( fs::CPath(), true ) );
 		ASSERT_EQUAL( L"'abc'", str::sq::EnquoteStr( fs::CPath( _T("abc") ) ) );
 		ASSERT_EQUAL( L"'abc'", str::sq::EnquoteStr( fs::CPath( _T("abc") ), true ) );
+	}
+}
+
+void CStringTests::TestStringHashing( void )
+{
+	// case sensitive
+	{
+		{
+			const std::hash<std::string> hasherA;
+			const std::hash<std::wstring> hasherW;
+
+			ASSERT_EQUAL( hasherA( "" ), hasherW( L"" ) );
+
+		#if _MSC_VER >= VS_2022
+			ASSERT( hasherA( "abcDEF" ) != hasherW( L"abcDEF" ) );
+		#endif // VS_2008
+
+			ASSERT( hasherA( "abcDEF" ) != hasherW( L"ABCdef" ) );
+		}
+
+		{
+			const str::Hash hasher;		// uniform hasher for ANSI/WIDE strings
+
+			ASSERT_EQUAL( hasher( "" ), hasher( L"" ) );
+			ASSERT_EQUAL( hasher( "abcDEF" ), hasher( L"abcDEF" ) );	// same hash for ANSI/WIDE
+			ASSERT( hasher( "abcDEF" ) != hasher( L"ABCdef" ) );		// different case
+		}
+	}
+
+	// case insensitive
+	{
+		const str::ignore_case::Hash hasher;
+
+		ASSERT_EQUAL( hasher( "" ), hasher( L"" ) );
+		ASSERT_EQUAL( hasher( "abcDEF" ), hasher( L"abcDEF" ) );
+		ASSERT_EQUAL( hasher( "abcDEF" ), hasher( L"ABCdef" ) );
+	}
+}
+
+void CStringTests::TestStringEqualTo( void )
+{
+	// std::equal_to comparison:
+	{
+		{
+			std::equal_to<std::string> equalA;
+
+			ASSERT( equalA( "", "" ) );
+			ASSERT( !equalA( "", "abc" ) );
+			ASSERT( equalA( "abcDEF", "abcDEF" ) );
+			ASSERT( !equalA( "abcDEF", "ABCdef" ) );
+		}
+
+		{
+			std::equal_to<std::wstring> equalW;
+
+			ASSERT( equalW( L"", L"" ) );
+			ASSERT( !equalW( L"", L"abc" ) );
+			ASSERT( equalW( L"abcDEF", L"abcDEF" ) );
+			ASSERT( !equalW( L"abcDEF", L"ABCdef" ) );
+		}
+	}
+
+	// str::EqualTo comparison:
+	{
+		const str::EqualTo equalTo;
+
+		ASSERT( equalTo( "", L"" ) );
+		ASSERT( !equalTo( "", L"abc" ) );
+		ASSERT( equalTo( "abcDEF", L"abcDEF" ) );
+		ASSERT( !equalTo( "abcDEF", L"ABCdef" ) );
+	}
+
+	// str::ignore_case::EqualTo comparison:
+	{
+		const str::ignore_case::EqualTo equalToI;
+
+		ASSERT( equalToI( "", L"" ) );
+		ASSERT( !equalToI( "", L"abc" ) );
+		ASSERT( equalToI( "abcDEF", L"abcDEF" ) );
+		ASSERT( equalToI( "abcDEF", L"ABCdef" ) );
+		ASSERT( !equalToI( "abcDEF", L"mnkXY" ) );
+	}
+}
+
+void CStringTests::TestStringSet( void )
+{
+	{
+		std::unordered_set<std::string> hashSet;
+
+		ASSERT( hashSet.insert( "" ).second );
+		ASSERT( hashSet.insert( "abc" ).second );
+		ASSERT( hashSet.insert( "ABC" ).second );
+		ASSERT_EQUAL( 3, hashSet.size() );
+		ASSERT_EQUAL( "", *hashSet.find( "" ) );
+		ASSERT_EQUAL( "abc", *hashSet.find( "abc" ) );
+		ASSERT_EQUAL( "ABC", *hashSet.find( "ABC" ) );
+
+		// avoid duplicates
+		ASSERT( !hashSet.insert( "" ).second );
+		ASSERT( !hashSet.insert( "abc" ).second );
+		ASSERT( !hashSet.insert( "ABC" ).second );
+
+		ASSERT_EQUAL( 3, hashSet.size() );
+		ASSERT_EQUAL( "", *hashSet.find( "" ) );
+		ASSERT_EQUAL( "abc", *hashSet.find( "abc" ) );
+		ASSERT_EQUAL( "ABC", *hashSet.find( "ABC" ) );
+	}
+
+	{
+		std::unordered_set<std::string, str::ignore_case::Hash, str::ignore_case::EqualTo> hashSetI;		// AKA str::ignore_case::TUnorderedSet_String
+
+		ASSERT( hashSetI.insert( "" ).second );
+		ASSERT( hashSetI.insert( "abc" ).second );
+		ASSERT( hashSetI.insert( "abcDEF" ).second );
+
+		// avoid duplicates
+		ASSERT( !hashSetI.insert( "abc" ).second );
+		ASSERT( !hashSetI.insert( "ABC" ).second );		// duplicate with different case
+		ASSERT( !hashSetI.insert( "ABCdef" ).second );	// duplicate with different case
+
+		ASSERT_EQUAL( 3, hashSetI.size() );
+		ASSERT_EQUAL( "", *hashSetI.find( "" ) );
+		ASSERT_EQUAL( "abc", *hashSetI.find( "abc" ) );
+		ASSERT_EQUAL( "abcDEF", *hashSetI.find( "abcDEF" ) );
 	}
 }
 
@@ -1042,6 +1168,10 @@ void CStringTests::Run( void )
 	RUN_TEST( TestTrim );
 	RUN_TEST( TestStringClamp );
 	RUN_TEST( TestEnquote );
+
+	RUN_TEST( TestStringHashing );
+	RUN_TEST( TestStringEqualTo );
+	RUN_TEST( TestStringSet );
 
 	RUN_TEST( TestStringSplit );
 	RUN_TEST( TestStringTokenize );

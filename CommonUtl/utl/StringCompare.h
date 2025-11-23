@@ -592,8 +592,37 @@ namespace str
 }
 
 
+namespace utl
+{
+	// FWD - must include "utl/StdHashValue.h" to prevent link error:
+
+	template< typename ValueT, typename ToValueFuncT >
+	size_t HashArray( const ValueT* pFirst, size_t count, ToValueFuncT toValueFuncT );
+}
+
+
 namespace str
 {
+	struct Hash			// used as 2nd template argument in e.g. template unordered_set<std::string>
+	{
+		template< typename StringyT >
+		inline size_t operator()( const StringyT& text ) const		// same hash value for ANSI/WIDE strings
+		{
+			return utl::HashArray( str::traits::GetCharPtr( text ), str::traits::GetLength( text ), func::ToSelf() );
+		}
+	};
+
+
+	struct EqualTo		// used as 3rd template argument in e.g. template unordered_set<>
+	{
+		template< typename LeftStringT, typename RightStringT >
+		bool operator()( const LeftStringT& left, const RightStringT& right ) const /*noexcept*/
+		{
+			return pred::TStrEqualsCase()( str::traits::GetCharPtr( left ), str::traits::GetCharPtr( right ) );		// case sensitive
+		}
+	};
+
+
 	namespace ignore_case
 	{
 		template< typename CharT >
@@ -616,6 +645,26 @@ namespace str
 		inline bool operator!=( const std::basic_string<CharT>& left, const CharT* pRight ) { return !operator==( left, pRight ); }
 
 		// don't bother defining operator<, it's not picked up by sorting algorithms due to Koenig lookup
+
+
+		struct Hash			// used as 2nd template argument in e.g. template unordered_set<std::string>
+		{
+			template< typename StringyT >
+			inline size_t operator()( const StringyT& text ) const
+			{
+				return utl::HashArray( str::traits::GetCharPtr( text ), str::traits::GetLength( text ), func::ToLower() );
+			}
+		};
+
+
+		struct EqualTo		// used as 3rd template argument in e.g. template unordered_set<>
+		{
+			template< typename LeftStringT, typename RightStringT >
+			bool operator()( const LeftStringT& left, const RightStringT& right ) const /*noexcept*/
+			{
+				return pred::TStrEqualsIgnoreCase()( str::traits::GetCharPtr( left ), str::traits::GetCharPtr( right ) );		// case insensitive
+			}
+		};
 	}
 }
 

@@ -48,7 +48,7 @@ int _tmain( int argc, TCHAR* argv[] )
 			CThreadingTests::Instance();			// special case: in this demo project we include the threading tests, with their dependency on Boos Threads library
 			ut::RunAllTests();
 		#else //USE_UT
-			std::clog << "Heya! Do what in Release build?" << std::endl;
+			std::clog << "Heya! No unit tests available in Release build!" << std::endl;
 		#endif //USE_UT
 		}
 	}

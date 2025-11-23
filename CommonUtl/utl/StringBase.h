@@ -118,7 +118,7 @@ namespace str
 		inline const wchar_t* GetCharPtr( const wchar_t* pText ) { return pText; }
 		inline const char* GetCharPtr( const std::string& text ) { return text.c_str(); }
 		inline const wchar_t* GetCharPtr( const std::wstring& text ) { return text.c_str(); }
-		const TCHAR* GetCharPtr( const fs::CPath& filePath );
+		const TCHAR* GetCharPtr( const fs::CPath& filePath );		// FWD
 
 		inline size_t GetLength( const char* pText ) { return CharTraits::GetLength( pText ); }
 		inline size_t GetLength( const wchar_t* pText ) { return CharTraits::GetLength( pText ); }
@@ -264,6 +264,13 @@ namespace str
 
 	inline char* Copy( OUT char* pBuffer, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
 	inline wchar_t* Copy( OUT wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
+
+
+	template< typename CharT >
+	std::basic_string<CharT>& AppendAnsi( std::basic_string<CharT>& rOutText, const char* pAnsiText )
+	{	// fast conversion without special local character that require encoding conversion
+		return rOutText.append( pAnsiText, str::end( pAnsiText ) );
+	}
 
 
 	template< typename StringT, typename ValueT >
@@ -1035,7 +1042,7 @@ namespace stream
 {
 	bool Tag( IN OUT std::tstring& rOutput, const std::tstring& tag, const TCHAR* pPrefixSep );
 
-	bool InputLine( std::istream& is, OUT std::tstring& rLine );
+	bool InputLine( std::istream& is, OUT std::tstring& rLine );		// converts UTF8 text to wide string
 }
 
 

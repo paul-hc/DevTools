@@ -604,7 +604,7 @@ namespace ident
 			VALUE_INFO( AFX_IDC_COLORPROP ),
 			VALUE_INFO( AFX_IDC_SYSTEMCOLORS ),
 
-			// picture porperty page
+			// picture property page
 			VALUE_INFO( AFX_IDC_PROPNAME ),
 			VALUE_INFO( AFX_IDC_PICTURE ),
 			VALUE_INFO( AFX_IDC_BROWSE ),
@@ -614,7 +614,7 @@ namespace ident
 			VALUE_INFO( AFX_IDD_PROPPAGE_COLOR ),
 			VALUE_INFO( AFX_IDD_PROPPAGE_FONT ),
 			VALUE_INFO( AFX_IDD_PROPPAGE_PICTURE )
-		#if _MSC_VER <= 1500	// MSVC++ 9.0 (Visual Studio 2008)
+		#if _MSC_VER <= VS_2008		// MSVC++ 9.0 (Visual Studio 2008)
 			, VALUE_INFO( AFX_IDB_TRUETYPE )
 		#endif
 		};

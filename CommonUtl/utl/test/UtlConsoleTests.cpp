@@ -22,6 +22,7 @@
 #include "TextFileIoTests.h"
 #include "StructuredStorageTest.h"
 #include "DuplicateFilesTests.h"
+#include "TraceTests.h"
 //#include "ThreadingTests.hxx"		// include only in test projects to avoid the link dependency on Boost libraries in regular projects
 
 #ifdef _DEBUG
@@ -34,8 +35,10 @@ namespace ut
 	void RegisterUtlConsoleTests( void )
 	{
 		// register UTL tests
-		CAlgorithmsTests::Instance();
 		CStringTests::Instance();
+		CPathTests::Instance();
+
+		CAlgorithmsTests::Instance();
 		CStringCompareTests::Instance();
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();
@@ -48,12 +51,13 @@ namespace ut
 		CGridLayoutTests::Instance();
 		CFmtUtilsTests::Instance();
 
-		CPathTests::Instance();
 		CPathGeneratorTests::Instance();
 		CFileSystemTests::Instance();
 		CTextFileIoTests::Instance();
 		CStructuredStorageTest::Instance();
 		CDuplicateFilesTests::Instance();
+
+		CTraceTests::Instance();
 
 		// Threading tests are explicitly included only in the test projects DemoUtl and TesterUtlBase.
 		// This is to avoid the link dependency on Boost libraries in regular projects.

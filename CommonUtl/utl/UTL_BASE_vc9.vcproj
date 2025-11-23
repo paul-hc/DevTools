@@ -309,6 +309,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\HeaderIncludes.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
@@ -381,6 +385,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Algorithms.hxx"
+				>
+			</File>
+			<File
 				RelativePath=".\Algorithms_fwd.h"
 				>
 			</File>
@@ -418,6 +426,14 @@
 			</File>
 			<File
 				RelativePath=".\ContainerOwnership.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DebugTrace.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DebugTrace.h"
 				>
 			</File>
 			<File
@@ -582,6 +598,10 @@
 			</File>
 			<File
 				RelativePath=".\StringCompare.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StringCompare.hxx"
 				>
 			</File>
 			<File
@@ -1230,6 +1250,14 @@
 			</File>
 			<File
 				RelativePath=".\test\ThreadingTests.hxx"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TraceTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TraceTests.h"
 				>
 			</File>
 			<File

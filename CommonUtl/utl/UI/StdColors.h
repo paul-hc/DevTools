@@ -8,8 +8,8 @@ namespace color
 	enum GetType { Evaluate, Raw };
 
 
-	__declspec( selectany ) extern const COLORREF Null = CLR_NONE;
-	__declspec( selectany ) extern const COLORREF Auto = CLR_DEFAULT;
+	__declspec(selectany) extern const COLORREF Null = CLR_NONE;
+	__declspec(selectany) extern const COLORREF Auto = CLR_DEFAULT;
 }
 
 

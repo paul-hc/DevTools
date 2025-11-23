@@ -8,6 +8,7 @@
 
 #include "utl/CommonDefs.h"
 #include "utl/StringBase.h"
+#include "utl/DebugTrace.h"
 
 
 #endif // utl_base_h

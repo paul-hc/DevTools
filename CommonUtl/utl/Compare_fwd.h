@@ -11,7 +11,7 @@ namespace func
 	struct ToSelf
 	{
 		template< typename ValueT >
-		const ValueT& operator()( const ValueT& value ) const { return value; }
+		inline const ValueT& operator()( const ValueT& value ) const { return value; }
 	};
 }
 

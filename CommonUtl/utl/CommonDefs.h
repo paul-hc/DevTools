@@ -91,6 +91,44 @@
 #define DEBUG_BREAK_IF( cond ) ASSERT( !cond )
 
 
+#ifdef _DEBUG
+	namespace debug { class CTraceFileLine; }
+
+	#define TRACE_		debug::Trace										// "Message"
+	#define TRACE_FL	debug::CTraceFileLine( __FILE__, __LINE__ )			// e.g. "C:\dev\code\DevTools\CommonUtl\utl\Algorithms.h(35):  Message"
+	#define TRACE_FL2	debug::CTraceFileLine( __FILE__, __LINE__, 2 )		// e.g. "utl\Algorithms.h(35):  Message"
+	#define TRACE_FL3	debug::CTraceFileLine( __FILE__, __LINE__, 3 )		// e.g. "CommonUtl\utl\Algorithms.h(35):  Message"
+	#define TRACE_ITEMS debug::TraceStrings
+
+	#if _MSC_VER >= VS_2015
+		#ifdef TRACE
+			#undef TRACE	// originally defined as ATLTRACE
+		#endif
+
+		#define TRACE	TRACE_FL	// bypass displaying the ATLTRACE overhead "atlTraceGeneral - "
+	#endif // VS_2008
+#else
+	#define TRACE_ __noop
+	#define TRACE_FL __noop
+	#define TRACE_FL2 __noop
+	#define TRACE_FL3 __noop
+	#define TRACE_ITEMS __noop
+#endif
+
+
+namespace utl
+{
+	class CScopedLastError
+	{
+	public:
+		CScopedLastError( void ) : m_dwLastError( GetLastError() ) {}
+		~CScopedLastError() { SetLastError( m_dwLastError ); }
+	private:
+		DWORD m_dwLastError;
+	};
+}
+
+
 #include <unknwn.h>
 
 #ifdef _DEBUG
@@ -130,7 +168,7 @@
 	template< typename CComPtr_T >
 	void TRACE_COM_PTR( const CComPtr_T& ptr, const char* pSuffix ) { TRACE_COM_ITF( ptr.p, pSuffix ); }
 
-#else
+#else // !_DEBUG
 
 	#define HR_AUDIT( expr ) utl::Audit( (expr), nullptr )
 	#define HR_OK( expr ) utl::Check( (expr), nullptr )
@@ -138,7 +176,7 @@
 	#define TRACE_COM_ITF( pInterface, pSuffix ) __noop
 	#define TRACE_COM_PTR( ptr, pSuffix ) __noop
 
-#endif
+#endif // _DEBUG
 
 
 #define HR_VERIFY( expr )	VERIFY( HR_OK( (expr) ) )
@@ -314,7 +352,7 @@ namespace num
 
 namespace utl
 {
-	__declspec( selectany ) extern const size_t npos = std::tstring::npos;
+	__declspec(selectany) extern const size_t npos = std::tstring::npos;
 
 
 	template< typename ContainerT >

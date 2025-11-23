@@ -1827,7 +1827,7 @@ std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::v
 			pDragImage->Create( shDragImage.sizeDragImage.cx, shDragImage.sizeDragImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1 );		// 1 image with all items
 
 			// API level call to skip attaching a temp CBitmap; note that shell drag images owns the bitmap.
-		#if _MSC_VER > 1500		// >MSVC++ 9.0 (Visual Studio 2008)
+		#if _MSC_VER > VS_2008		// >MSVC++ 9.0 (Visual Studio 2008)
 			ImageList_AddMasked( pDragImage->GetSafeHandle(), shDragImage.hbmpDragImage, shDragImage.crColorKey );
 		#else
 			AfxImageList_AddMasked( pDragImage->GetSafeHandle(), shDragImage.hbmpDragImage, shDragImage.crColorKey );

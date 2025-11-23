@@ -177,6 +177,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
+    <ClInclude Include="Algorithms.hxx" />
     <ClInclude Include="Algorithms_fwd.h" />
     <ClInclude Include="AppTools.h" />
     <ClInclude Include="CacheLoader.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="CodeAlgorithms.h" />
     <ClInclude Include="Code_fwd.h" />
     <ClInclude Include="CppVer.h" />
+    <ClInclude Include="DebugTrace.h" />
     <ClInclude Include="Functional.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="Command.h" />
@@ -201,6 +203,7 @@
     <ClInclude Include="Language.hxx" />
     <ClInclude Include="RegAutomationSvr.h" />
     <ClInclude Include="StdThread.h" />
+    <ClInclude Include="StringCompare.hxx" />
     <ClInclude Include="StringParsing.h" />
     <ClInclude Include="EncodedFileBuffer.h" />
     <ClInclude Include="Encoding.h" />
@@ -305,6 +308,7 @@
     <ClInclude Include="test\Test.h" />
     <ClInclude Include="test\TextFileIoTests.h" />
     <ClInclude Include="test\ThreadingTests.hxx" />
+    <ClInclude Include="test\TraceTests.h" />
     <ClInclude Include="test\UnitTest.h" />
     <ClInclude Include="test\UtlConsoleTests.h" />
     <ClInclude Include="TextClipboard.h" />
@@ -321,6 +325,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppTools.cpp" />
+    <ClCompile Include="DebugTrace.cpp" />
+    <ClCompile Include="HeaderIncludes.cpp" />
     <ClCompile Include="Language.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandModel.cpp" />
@@ -401,6 +407,7 @@
     <ClCompile Include="test\TempFilePairPool.cpp" />
     <ClCompile Include="test\Test.cpp" />
     <ClCompile Include="test\TextFileIoTests.cpp" />
+    <ClCompile Include="test\TraceTests.cpp" />
     <ClCompile Include="test\UnitTest.cpp" />
     <ClCompile Include="test\UtlConsoleTests.cpp" />
     <ClCompile Include="TextClipboard.cpp" />

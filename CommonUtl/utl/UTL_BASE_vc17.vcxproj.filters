@@ -463,6 +463,18 @@
     <ClInclude Include="Functional.h">
       <Filter>utl</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithms.hxx">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringCompare.hxx">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugTrace.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TraceTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -709,6 +721,15 @@
       <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="test\GridLayoutTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="HeaderIncludes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugTrace.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TraceTests.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>

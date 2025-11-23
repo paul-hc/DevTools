@@ -11,6 +11,7 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/Algorithms.hxx"
 #include "utl/TextFileIo.hxx"
 
 
@@ -41,7 +42,7 @@ void CSourceFileParser::AddSourceFile( const fs::CPath& sourceFilePath )
 void CSourceFileParser::RemoveDuplicates( void )
 {
 	std::vector<CIncludeNode*> duplicates;
-	utl::Uniquify<pred::TLess_TreeItemPath>( m_includeNodes, &duplicates );
+	utl::Uniquify( m_includeNodes, &duplicates );
 	utl::ClearOwningContainer( duplicates );
 }
 

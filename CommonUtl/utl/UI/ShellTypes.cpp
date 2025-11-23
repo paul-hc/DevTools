@@ -403,7 +403,7 @@ namespace shell
 
 		const BYTE* pBytes = GetBuffer();
 
-		return utl::HashValue( pBytes, GetByteSize() );
+		return utl::HashBytes( pBytes, GetByteSize() );
 	}
 
 	void CPidl::Concatenate( LPCITEMIDLIST rightPidl )

@@ -111,9 +111,16 @@ void CStructuredStorageTest::TestLongFilenames( void )
 	ASSERT_EQUAL( _T("Not a long filename ABCDEFG.txt"), fs::CStructuredStorage::MakeShortFilename( _T("Not a long filename ABCDEFG.txt") ) );		// 31 chars
 
 	// fs::CStructuredStorage::MaxFilenameLen overflow
-	ASSERT_EQUAL( _T("This is a long fil_502A1267.txt"), fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCD.txt") ) );		// 32 chars
-	ASSERT_EQUAL( _T("ThisIsASuperLongFi_A58DA54A.jpg"), fs::CStructuredStorage::MakeShortFilename( _T("ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.jpg") ) );	// 62 chars
-	ASSERT_EQUAL( _T("thisisasuperlongfi_A58DA54A.JPG"), fs::CStructuredStorage::MakeShortFilename( _T("thisisasuperlongfilenameofanunknownimagefilethatkeepsgoing.JPG") ) );	// 62 chars
+#if defined(_WIN64)
+	// different hashing for 32/64-bit:
+	ASSERT_EQUAL( _T("This is a long fil_AE02E38F.txt"), fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCD.txt") ) );		// 32 chars
+	ASSERT_EQUAL( _T("ThisIsASuperLongFi_46549567.jpg"), fs::CStructuredStorage::MakeShortFilename( _T("ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.jpg") ) );	// 62 chars
+	ASSERT_EQUAL( _T("thisisasuperlongfi_46549567.JPG"), fs::CStructuredStorage::MakeShortFilename( _T("thisisasuperlongfilenameofanunknownimagefilethatkeepsgoing.JPG") ) );	// 62 chars
+#else
+	ASSERT_EQUAL( _T("This is a long fil_F849F4CF.txt"), fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCD.txt") ) );		// 32 chars
+	ASSERT_EQUAL( _T("ThisIsASuperLongFi_BCA3F547.jpg"), fs::CStructuredStorage::MakeShortFilename( _T("ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.jpg") ) );	// 62 chars
+	ASSERT_EQUAL( _T("thisisasuperlongfi_BCA3F547.JPG"), fs::CStructuredStorage::MakeShortFilename( _T("thisisasuperlongfilenameofanunknownimagefilethatkeepsgoing.JPG") ) );	// 62 chars
+#endif
 
 	// sub-paths
 	ASSERT( fs::CStructuredStorage::MakeShortFilename( _T("my|docs|This is a long filename ABCDxy.txt") ) != fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCDxy.txt") ) );	// 34 chars
@@ -199,7 +206,12 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 	{
 		fs::CPathEnumerator foundEnum;
 		pDocStorage->EnumElements( &foundEnum, Deep );
-		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( foundEnum ) );
+	#if defined(_WIN64)
+		// different hashing for 32/64-bit:
+		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_D9943B58.txt"), ut::JoinFiles( foundEnum ) );
+	#else
+		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_4E5ACAD8.txt"), ut::JoinFiles( foundEnum ) );
+	#endif
 	}
 
 	// enumerate a sub-storage
@@ -208,23 +220,43 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 		pDocStorage->ChangeCurrentDir( _T("B1") );
 
 		pDocStorage->EnumElements( &foundEnum, Deep );
-		ASSERT_EQUAL( _T("B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( foundEnum ) );
+	#if defined(_WIN64)
+		// different hashing for 32/64-bit:
+		ASSERT_EQUAL( _T("B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_D9943B58.txt"), ut::JoinFiles( foundEnum ) );
+	#else
+		ASSERT_EQUAL( _T("B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_4E5ACAD8.txt"), ut::JoinFiles( foundEnum ) );
+	#endif
 
 		{
 			fs::CRelativePathEnumerator relEnum( pDocStorage->GetCurrentDirPath() );		// relative to "B1"
 			pDocStorage->EnumElements( &relEnum, Deep );
-			ASSERT_EQUAL( _T("b1.txt|b2.txt|SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( relEnum ) );
+		#if defined(_WIN64)
+			// different hashing for 32/64-bit:
+			ASSERT_EQUAL( _T("b1.txt|b2.txt|SD\\ThisIsASuperLongFi_D9943B58.txt"), ut::JoinFiles( relEnum ) );
+		#else
+			ASSERT_EQUAL( _T("b1.txt|b2.txt|SD\\ThisIsASuperLongFi_4E5ACAD8.txt"), ut::JoinFiles( relEnum ) );
+		#endif
 		}
 
 		pDocStorage->ChangeCurrentDir( _T("SD") );		// go deeper to "SD"
 		foundEnum.Clear();
 		pDocStorage->EnumElements( &foundEnum, Deep );
-		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( foundEnum ) );
+	#if defined(_WIN64)
+		// different hashing for 32/64-bit:
+		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_D9943B58.txt"), ut::JoinFiles( foundEnum ) );
+	#else
+		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_4E5ACAD8.txt"), ut::JoinFiles( foundEnum ) );
+	#endif
 
 		{
 			fs::CRelativePathEnumerator relEnum( pDocStorage->GetCurrentDirPath() );		// relative to "B1\\SD"
 			pDocStorage->EnumElements( &relEnum, Deep );
-			ASSERT_EQUAL( _T("ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( relEnum ) );
+		#if defined(_WIN64)
+			// different hashing for 32/64-bit:
+			ASSERT_EQUAL( _T("ThisIsASuperLongFi_D9943B58.txt"), ut::JoinFiles( relEnum ) );
+		#else
+			ASSERT_EQUAL( _T("ThisIsASuperLongFi_4E5ACAD8.txt"), ut::JoinFiles( relEnum ) );
+		#endif
 		}
 	}
 
@@ -235,7 +267,12 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 
 		fs::CPathEnumerator foundEnum;
 		pDocStorage->EnumElements( &foundEnum, Deep );
-		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_A58DA54A.txt"), ut::JoinFiles( foundEnum ) );
+	#if defined(_WIN64)
+		// different hashing for 32/64-bit:
+		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_D9943B58.txt"), ut::JoinFiles( foundEnum ) );
+	#else
+		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_4E5ACAD8.txt"), ut::JoinFiles( foundEnum ) );
+	#endif
 	}
 }
 

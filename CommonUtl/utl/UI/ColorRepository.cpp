@@ -17,6 +17,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/Algorithms.hxx"		// for utl::Uniquify
+
 
 namespace ui
 {

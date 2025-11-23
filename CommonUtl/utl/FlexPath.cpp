@@ -9,6 +9,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Algorithms.hxx"
+
 
 namespace path
 {
@@ -123,6 +125,6 @@ namespace path
 			if ( itFlexPath->IsComplexPath() )
 				itFlexPath->Set( itFlexPath->GetPhysicalPath().Get() );
 
-		utl::Uniquify<pred::TLess_NaturalPath>( rFlexPaths );		// remove duplicates that may have been created (multiple embedded patch with same storage path)
+		utl::Uniquify( rFlexPaths );		// remove duplicates that may have been created (multiple embedded path with same storage path)
 	}
 }

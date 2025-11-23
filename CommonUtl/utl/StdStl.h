@@ -3,9 +3,9 @@
 #pragma once
 
 
-#if _MSC_VER >= 1900		// MSVC++ 14.0+ (Visual Studio 2015)
+#if _MSC_VER >= VS_2015		// MSVC++ 14.0+ (Visual Studio 2015)
 	#define _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING		// suppress warning - error C4996: 'std::tr1': warning STL4002: The non-Standard std::tr1 namespace and TR1-only machinery are deprecated and will be REMOVED.
-#endif	//_MSC_VER
+#endif
 
 
 #define OEMRESOURCE			// load OCR_NORMAL cursor values from winuser.h
@@ -102,6 +102,17 @@ namespace std
 	#define tcerr cerr
 	#define tcin cin
 #endif
+
+
+#if _MSC_VER <= VS_2008		// MSVC++ 9.0 (Visual Studio 2008)
+
+template< typename BidItT >
+inline reverse_iterator<BidItT> make_reverse_iterator( BidItT it )
+{	// missing in VC9
+	return reverse_iterator<BidItT>( it );
+}
+
+#endif // VS_2008
 }
 
 

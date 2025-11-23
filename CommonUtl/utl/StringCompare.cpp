@@ -3,6 +3,12 @@
 #include "StringCompare.h"
 #include "StringIntuitiveCompare.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+#include "StringCompare.hxx"
+
 
 namespace str
 {

@@ -71,10 +71,11 @@ namespace shell
 
 		for ( UINT i = 0; i != fileCount; ++i )
 		{
-			TCHAR filePath[ MAX_PATH ];
-			::DragQueryFile( hDropInfo, i, filePath, MAX_PATH );
-
-			rFilePaths.push_back( std::tstring( filePath ) );
+			TCHAR filePath[ MAX_PATH * 2 ];
+			if ( ::DragQueryFile( hDropInfo, i, filePath, COUNT_OF( filePath ) ) )
+				rFilePaths.push_back( std::tstring( filePath ) );
+			else
+				TRACE( "* Error: QueryDroppedFiles() failed to retrieve the file path at index=%d\n", i );
 		}
 
 		::DragFinish( hDropInfo );
