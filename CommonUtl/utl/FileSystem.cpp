@@ -5,7 +5,7 @@
 #include "EnumTags.h"
 #include "FlexPath.h"
 #include "RuntimeException.h"
-#include "Algorithms.h"
+#include "Unique.h"
 #include "TimeUtils.h"
 #include <sys/stat.h>
 #include <stdexcept>
@@ -59,23 +59,18 @@ namespace fs
 	}
 
 
-	void QueryFolderPaths( OUT std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly /*= true*/ )
-	{
+	void QueryFolderPaths( OUT std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths )
+	{	// rFolderPaths is guaranteed unique on return
+		utl::CUniqueIndex<fs::CPath> folderUIndex;
+
+		folderUIndex.Uniquify( &rFolderPaths );
+
 		for ( std::vector<fs::CPath>::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 		{
-			fs::TDirPath folderPath;
-
 			if ( fs::IsValidDirectory( itFilePath->GetPtr() ) )
-				folderPath = *itFilePath;
+				folderUIndex.Augment( &rFolderPaths, *itFilePath );
 			else if ( fs::IsValidFile( itFilePath->GetPtr() ) )
-				folderPath = itFilePath->GetParentPath();
-			else
-				continue;
-
-			if ( uniqueOnly )
-				utl::AddUnique( rFolderPaths, folderPath );
-			else
-				rFolderPaths.push_back( folderPath );
+				folderUIndex.Augment( &rFolderPaths, itFilePath->GetParentPath() );
 		}
 	}
 

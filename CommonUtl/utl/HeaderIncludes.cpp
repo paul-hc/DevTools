@@ -3,13 +3,12 @@
 #include "Algorithms.h"
 #include "Resequence.h"
 #include "StdThread.h"
+#include "Unique.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "Algorithms.hxx"
-#include "Path.hxx"
 #include "Resequence.hxx"
 
 

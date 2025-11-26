@@ -5,15 +5,13 @@
 #include "StringCompare.h"
 #include "StringUtilities.h"
 #include "resource.h"
-#include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
+#include "utl/Unique.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-#include "utl/Algorithms.hxx"
 
 
 namespace ui

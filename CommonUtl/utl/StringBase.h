@@ -458,6 +458,7 @@ namespace str
 namespace func
 {
 	inline const std::tstring& StringOf( const std::tstring& filePath ) { return filePath; }		// for uniform string algorithms
+	inline const std::string& StringOf( const std::string& filePath ) { return filePath; }			// for uniform string algorithms
 	const std::tstring& StringOf( const fs::CPath& filePath );		// FWD
 
 	namespace tor

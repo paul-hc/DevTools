@@ -35,7 +35,7 @@ private:
 class CDuplicateFilesGroup
 {
 public:
-	CDuplicateFilesGroup( const fs::CFileContentKey& contentKey ) : m_contentKey( contentKey ) {}
+	CDuplicateFilesGroup( const fs::CFileContentKey& contentKey );
 	~CDuplicateFilesGroup();
 
 	fs::CFileContentKey GetContentKey( void ) const { return m_contentKey; }

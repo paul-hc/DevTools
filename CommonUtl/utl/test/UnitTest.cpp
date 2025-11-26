@@ -3,7 +3,6 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/UnitTest.h"
-#include "Algorithms.h"
 #include "TextFileIo.h"
 #include "FileEnumerator.h"
 #include "IoBin.h"
@@ -12,6 +11,7 @@
 #include "RuntimeException.h"
 #include "AppTools.h"
 #include "StringUtilities.h"
+#include "Unique.h"
 #include <unordered_set>
 #include <fstream>
 #include <iostream>
@@ -20,8 +20,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-#include "Path.hxx"
 
 
 namespace ut
@@ -367,7 +365,8 @@ namespace ut
 		fs::CRelativePathEnumerator found( dirPath, flags );
 		fs::EnumFiles( &found, dirPath, pWildSpec );
 
-		size_t addedCount = path::JoinUniquePaths( rFilePaths, found.m_filePaths );
+		utl::CUniqueIndex<fs::CPath> index;
+		size_t addedCount = index.AugmentItems( &rFilePaths, found.m_filePaths );
 
 		if ( sortType != NoSort )
 			fs::SortPaths( rFilePaths, SortAscending == sortType );
@@ -381,7 +380,8 @@ namespace ut
 		fs::CRelativePathEnumerator found( dirPath, flags );
 		fs::EnumFiles( &found, dirPath, _T("*") );
 
-		size_t addedCount = path::JoinUniquePaths( rSubDirPaths, found.m_subDirPaths );
+		utl::CUniqueIndex<fs::CPath> index;
+		size_t addedCount = index.AugmentItems( &rSubDirPaths, found.m_subDirPaths );
 
 		if ( sortType != NoSort )
 			fs::SortPaths( rSubDirPaths, SortAscending == sortType );

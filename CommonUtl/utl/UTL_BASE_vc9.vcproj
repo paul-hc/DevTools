@@ -385,10 +385,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Algorithms.hxx"
-				>
-			</File>
-			<File
 				RelativePath=".\Algorithms_fwd.h"
 				>
 			</File>
@@ -662,6 +658,10 @@
 			</File>
 			<File
 				RelativePath=".\TokenIterator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Unique.h"
 				>
 			</File>
 			<File

@@ -90,8 +90,11 @@ namespace path
 
 	inline bool IsSlash( TCHAR ch ) { return '\\' == ch || '/' == ch; }
 
-	size_t GetHashValuePtr( const TCHAR* pPath, size_t count = utl::npos );
-	inline size_t GetHashValue( const std::tstring& filePath ) { return GetHashValuePtr( filePath.c_str(), filePath.length() ); }
+	size_t GetHashValuePtr( const char* pPath, size_t count = utl::npos );
+	size_t GetHashValuePtr( const wchar_t* pPath, size_t count = utl::npos );
+
+	template< typename CharT >
+	inline size_t GetHashValue( const std::basic_string<CharT>& filePath ) { return GetHashValuePtr( filePath.c_str(), filePath.length() ); }
 
 
 	// path breaks and segment matching
@@ -552,9 +555,6 @@ namespace path
 	fs::CPath StripWildcards( const fs::TPatternPath& patternPath );
 
 	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::TDirPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
-
-	template< typename ContainerT, typename SrcContainerT >
-	size_t JoinUniquePaths( ContainerT& rDestPaths, const SrcContainerT& newPaths );
 }
 
 
@@ -696,7 +696,7 @@ namespace func
 
 namespace path
 {
-	void QueryParentPaths( std::vector<fs::CPath>& rParentPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly = true );
+	void QueryParentPaths( std::vector<fs::CPath>& rParentPaths, const std::vector<fs::CPath>& filePaths );
 
 
 	template< typename ContainerT >

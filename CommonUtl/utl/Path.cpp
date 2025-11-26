@@ -8,9 +8,14 @@
 #include "StdHashValue.h"
 #include "StringUtilities.h"
 #include "StringIntuitiveCompare.h"
+#include "Unique.h"
 #include <io.h>
 #include <unordered_map>
 #include <shlwapi.h>				// for PathCombine
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
 
 namespace func
@@ -47,7 +52,13 @@ namespace path
 	}
 
 
-	size_t GetHashValuePtr( const TCHAR* pPath, size_t count /*= utl::npos*/ )
+	size_t GetHashValuePtr( const char* pPath, size_t count /*= utl::npos*/ )
+	{
+		// compute hash value based on lower-case and normalized backslashes
+		return utl::HashArray( pPath, count != utl::npos ? count : str::GetLength( pPath ), func::ToEquivalentPathChar() );
+	}
+
+	size_t GetHashValuePtr( const wchar_t* pPath, size_t count /*= utl::npos*/ )
 	{
 		// compute hash value based on lower-case and normalized backslashes
 		return utl::HashArray( pPath, count != utl::npos ? count : str::GetLength( pPath ), func::ToEquivalentPathChar() );
@@ -1067,16 +1078,18 @@ namespace fs
 
 namespace path
 {
-	void QueryParentPaths( std::vector<fs::CPath>& rParentPaths, const std::vector<fs::CPath>& filePaths, bool uniqueOnly /*= true*/ )
+	void QueryParentPaths( std::vector<fs::CPath>& rParentPaths, const std::vector<fs::CPath>& filePaths )
 	{
+		utl::CUniqueIndex<fs::CPath> uniqueIndex;
+
+		uniqueIndex.Uniquify( &rParentPaths );
+
 		for ( std::vector<fs::CPath>::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 		{
 			fs::CPath parentPath = itFilePath->GetParentPath();
+
 			if ( !parentPath.IsEmpty() )
-				if ( uniqueOnly )
-					utl::AddUnique( rParentPaths, parentPath );
-				else
-					rParentPaths.push_back( parentPath );
+				uniqueIndex.Augment( &rParentPaths, parentPath );
 		}
 	}
 }

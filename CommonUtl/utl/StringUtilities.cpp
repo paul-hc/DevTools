@@ -5,7 +5,7 @@
 #include "TokenIterator.h"
 #include "EnumTags.h"
 #include "Path.h"
-#include "Algorithms.h"
+#include "Unique.h"
 #include "Language.h"
 #include <iomanip>
 
@@ -145,7 +145,9 @@ namespace env
 		std::vector<fs::CPath> evalPaths;
 		str::Split( evalPaths, expandedPaths.c_str(), delim );
 
-		return utl::JoinUnique( rEvalPaths, evalPaths.begin(), evalPaths.end() );
+		utl::CUniqueIndex<fs::CPath> uniqueIndex;
+
+		return uniqueIndex.AugmentItems( &rEvalPaths, evalPaths );			// added count
 	}
 
 	namespace impl

@@ -43,6 +43,11 @@ bool CDuplicateFileItem::MakeDuplicateItem( void )
 
 // CDuplicateFilesGroup implementation
 
+CDuplicateFilesGroup::CDuplicateFilesGroup( const fs::CFileContentKey& contentKey )
+	: m_contentKey( contentKey )
+{
+}
+
 CDuplicateFilesGroup::~CDuplicateFilesGroup()
 {
 	utl::ClearOwningContainer( m_items );

@@ -3,14 +3,12 @@
 #include "FileEnumerator.h"
 #include "FileState.h"
 #include "RuntimeException.h"
-#include "Algorithms.h"
+#include "Unique.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-#include "Path.hxx"
 
 
 namespace fs
@@ -33,7 +31,7 @@ namespace fs
 
 namespace fs
 {
-	void EnumFiles( IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/ )
+	void EnumFiles( OUT IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/ )
 	{
 		ASSERT_PTR( pEnumerator );
 
@@ -92,7 +90,7 @@ namespace fs
 					EnumFiles( pEnumerator, *itSubDirPath, pWildSpec );
 	}
 
-	fs::PatternResult SearchEnumFiles( IEnumerator* pEnumerator, const fs::TPatternPath& searchPath )
+	fs::PatternResult SearchEnumFiles( OUT IEnumerator* pEnumerator, const fs::TPatternPath& searchPath )
 	{
 		fs::TDirPath dirPath;
 		std::tstring wildSpec = _T("*");
@@ -120,20 +118,24 @@ namespace fs
 	}
 
 
-	size_t EnumFilePaths( std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
+	size_t EnumFilePaths( OUT std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CPathEnumerator found( flags );
 		EnumFiles( &found, dirPath, pWildSpec );
 
-		return path::JoinUniquePaths( rFilePaths, found.m_filePaths );		// added count
+		utl::CUniqueIndex<fs::CPath> fileUIndex;
+
+		return fileUIndex.AugmentItems( &rFilePaths, found.m_filePaths );			// added count
 	}
 
-	size_t EnumSubDirPaths( std::vector<fs::TDirPath>& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
+	size_t EnumSubDirPaths( OUT std::vector<fs::TDirPath>& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CPathEnumerator found( flags );
 		EnumFiles( &found, dirPath, pWildSpec );
 
-		return path::JoinUniquePaths( rSubDirPaths, found.m_subDirPaths );	// added count
+		utl::CUniqueIndex<fs::CPath> folderUIndex;
+
+		return folderUIndex.AugmentItems( &rSubDirPaths, found.m_subDirPaths );		// added count
 	}
 
 

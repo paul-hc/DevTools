@@ -5,7 +5,6 @@
 #include "FileGroupCommands.h"
 #include "GeneralOptions.h"
 #include "Application.h"
-#include "resource.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/Crc32.h"
 #include "utl/DuplicateFileItem.h"
@@ -16,6 +15,7 @@
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
+#include "utl/Unique.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/Clipboard.h"
 #include "utl/UI/Color.h"
@@ -109,19 +109,25 @@ namespace hlp
 	void QueryGroupsOfDupItems( std::vector<CDuplicateFilesGroup*>& rDupGroups, const std::vector<CDuplicateFileItem*>& dupItems )
 	{
 		for ( std::vector<CDuplicateFileItem*>::const_iterator itDupItem = dupItems.begin(); itDupItem != dupItems.end(); ++itDupItem )
-			utl::AddUnique( rDupGroups, ( *itDupItem )->GetParentGroup() );
+			rDupGroups.push_back( (*itDupItem)->GetParentGroup() );
+
+		utl::Uniquify( rDupGroups );
 	}
 
 
 	class CCheckedStateDupItems
 	{
 	public:
-		CCheckedStateDupItems( CReportListControl* pListCtrl ) : m_pListCtrl( pListCtrl ) { m_pListCtrl->QueryObjectsWithCheckedState( m_checkedDupItems, CheckDup::CheckedItem ); }
+		CCheckedStateDupItems( CReportListControl* pListCtrl )
+			: m_pListCtrl( pListCtrl )
+		{
+			m_pListCtrl->QueryObjectsWithCheckedState( m_checkedDupItems, CheckDup::CheckedItem );
+		}
 
 		bool RegisterFullyCheckedGroup( CDuplicateFilesGroup* pGroup )
 		{
 			ASSERT_PTR( pGroup );
-			return utl::AddUnique( m_fullyCheckedGroups, pGroup );
+			return m_fullyCheckedGroupsUIndex.Augment( &m_fullyCheckedGroups, pGroup );
 		}
 
 		void Commit( void )
@@ -139,12 +145,17 @@ namespace hlp
 			utl::RemoveIf( m_checkedDupItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );		// remove any new original items from the checked items
 
 			for ( std::vector<CDuplicateFilesGroup*>::const_iterator itCheckedGroup = m_fullyCheckedGroups.begin(); itCheckedGroup != m_fullyCheckedGroups.end(); ++itCheckedGroup )
-				utl::JoinUnique( m_checkedDupItems, ( *itCheckedGroup )->GetItems().begin() + 1, ( *itCheckedGroup )->GetItems().end() );		// append duplicate items to check
+			{
+				m_checkedDupItemsUIndex.AugmentItems( &m_checkedDupItems, (*itCheckedGroup)->GetItems().begin() + 1, (*itCheckedGroup)->GetItems().end() );		// append duplicate items to check
+			}
 		}
 	private:
 		CReportListControl* m_pListCtrl;
 		std::vector<CDuplicateFileItem*> m_checkedDupItems;
 		std::vector<CDuplicateFilesGroup*> m_fullyCheckedGroups;		// to restore later groups with fully-checked state
+
+		utl::CUniqueIndex<CDuplicateFileItem*> m_checkedDupItemsUIndex;
+		utl::CUniqueIndex<CDuplicateFilesGroup*> m_fullyCheckedGroupsUIndex;
 	};
 }
 
@@ -1143,8 +1154,7 @@ void CFindDuplicatesDialog::On_PushIgnoreFolder( void )
 	if ( m_dupsListCtrl.QuerySelectedItemPaths( selFilePaths ) )
 	{
 		std::vector<fs::CPath> dirPaths;
-		for ( std::vector<fs::CPath>::const_iterator itSelFilePath = selFilePaths.begin(); itSelFilePath != selFilePaths.end(); ++itSelFilePath )
-			utl::AddUnique( dirPaths, ( *itSelFilePath ).GetParentPath() );
+		path::QueryParentPaths( dirPaths, selFilePaths );
 
 		PushNewPathsListItems( &m_ignorePathsListCtrl, m_ignorePathItems, dirPaths );
 	}

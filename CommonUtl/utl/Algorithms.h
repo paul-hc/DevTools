@@ -444,7 +444,7 @@ namespace utl
 
 
 	template< typename ContainerT >
-	size_t UniquifyLinear( IN OUT ContainerT& rItems )		// slow, don't use - use the Uniquify() below
+	size_t UniquifyLinear( IN OUT ContainerT& rItems )		// slow, don't use - use the utl::Uniquify()
 	{
 		size_t removedCount = 0;
 
@@ -462,20 +462,6 @@ namespace utl
 
 		return removedCount;
 	}
-
-
-	template< typename ContainerT, typename SetT >
-	size_t Uniquify( IN OUT ContainerT& rItems, IN OUT SetT& rUniqueSet, OUT ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) );
-
-	// using a standard hash set std::unordered_set<typename ContainerT::value_type>
-	//
-	template< typename ContainerT >
-	size_t Uniquify( IN OUT ContainerT& rItems, OUT ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) );
-
-	// using custom hash and equal_to functors
-	//
-	template< typename HasherT, typename KeyEqualT, typename ContainerT >
-	size_t Uniquify( IN OUT ContainerT& rItems, OUT ContainerT* pRemovedDups = static_cast<ContainerT*>( nullptr ) );
 }
 
 

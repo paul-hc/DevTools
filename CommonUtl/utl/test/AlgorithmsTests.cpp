@@ -8,6 +8,7 @@
 #include "FlexPath.h"
 #include "StringUtilities.h"
 #include "StdHashValue.h"
+#include "Unique.h"
 #include "vector_map.h"
 #include <deque>
 
@@ -15,7 +16,6 @@
 #define new DEBUG_NEW
 #endif
 
-#include "Algorithms.hxx"
 #include "Resequence.hxx"
 
 
@@ -69,10 +69,55 @@ void CAlgorithmsTests::TestAssertions( void )
 		UT_TRACE( "(skipped)  " );
 }
 
+void CAlgorithmsTests::TestStdAlgorithms( void )
+{
+	{
+		const char srcDigits[] = { '0', '1', '2', '3' };
+		const char srcLetters[] = { 'a', 'b', 'c' };
+		std::vector<char> dest;
+
+		std::copy( srcDigits, END_OF( srcDigits ), std::inserter( dest, dest.end() ) );
+		ASSERT_EQUAL( "0123", ut::FormatValues( dest ) );
+
+		std::copy( srcLetters, END_OF( srcLetters ), std::inserter( dest, dest.begin() ) );
+		ASSERT_EQUAL( "abc0123", ut::FormatValues( dest ) );
+
+		std::copy( srcLetters, END_OF( srcLetters ), std::back_inserter( dest ) );
+		ASSERT_EQUAL( "abc0123abc", ut::FormatValues( dest ) );
+	}
+}
+
 
 void CAlgorithmsTests::TestBasicUtils( void )
 {
-	{	// REVERSE iteration
+	// REVERSE iteration - char[]
+	{
+		const char filePath[] = "C:\\my\\Tools/mine/ShellGoodies64.dll";
+		const char pathSlash[] = "\\/";
+
+		typedef std::reverse_iterator<const char*> Tconst_reverse_iterator;
+
+		Tconst_reverse_iterator pStartR = std::make_reverse_iterator( str::end( filePath ) );
+		Tconst_reverse_iterator pEndR = std::make_reverse_iterator( filePath );
+
+		Tconst_reverse_iterator pFoundR = std::find_first_of( pStartR, pEndR, pathSlash, END_OF( pathSlash ) );
+		ASSERT_EQUAL_STR( "/ShellGoodies64.dll", &*pFoundR );
+
+		pFoundR = std::find_first_of( ++pFoundR, pEndR, pathSlash, END_OF( pathSlash ) );
+		ASSERT_EQUAL_STR( "/mine/ShellGoodies64.dll", &*pFoundR );
+
+		pFoundR = std::find_first_of( ++pFoundR, pEndR, pathSlash, END_OF( pathSlash ) );
+		ASSERT_EQUAL_STR( "\\Tools/mine/ShellGoodies64.dll", &*pFoundR );
+
+		pFoundR = std::find_first_of( ++pFoundR, pEndR, pathSlash, END_OF( pathSlash ) );
+		ASSERT_EQUAL_STR( "\\my\\Tools/mine/ShellGoodies64.dll", &*pFoundR );
+
+		pFoundR = std::find_first_of( ++pFoundR, pEndR, pathSlash, END_OF( pathSlash ) );
+		ASSERT( pFoundR == pEndR );
+	}
+
+	// REVERSE iteration - std::string
+	{
 		{
 			const std::string text = "0123456789";
 			ASSERT_EQUAL( '9', *text.rbegin() );
@@ -250,6 +295,54 @@ void CAlgorithmsTests::TestUniquifyPaths( void )
 		ASSERT_EQUAL( "ole.h,ole2.h,C:\\Win\\commdlg.h,winsvc.h,imm.h", str::Join( flexPaths, "," ) );
 		ASSERT_EQUAL( "c:\\win\\commdlg.h,c:/Win/CommDlg.h,OLE2.H,OLE2.h,Ole2.h", str::Join( dups, "," ) );
 	}
+
+	// strings handled as paths:
+	{
+		std::vector<std::string> strPaths, dups;
+		str::Split( strPaths, "ole.h,ole2.h,C:\\Win\\commdlg.h,c:\\win\\commdlg.h,c:/Win/CommDlg.h,OLE2.H,OLE2.h,winsvc.h,imm.h,Ole2.h", "," );
+
+		path::Uniquify( strPaths, &dups );
+		ASSERT_EQUAL( "ole.h,ole2.h,C:\\Win\\commdlg.h,winsvc.h,imm.h", str::Join( strPaths, "," ) );
+		ASSERT_EQUAL( "c:\\win\\commdlg.h,c:/Win/CommDlg.h,OLE2.H,OLE2.h,Ole2.h", str::Join( dups, "," ) );
+	}
+}
+
+void CAlgorithmsTests::TestUniqueIndex( void )
+{
+	std::vector<std::string> srcItems;
+	str::Split( srcItems, "a,b,c,B,A,A,B", "," );
+
+	// case sensitive:
+	{
+		std::vector<std::string> caseItems = srcItems;
+		utl::CUniqueIndex<std::string> uniqueIndex;
+
+		uniqueIndex.Uniquify( &caseItems );
+		ASSERT_EQUAL( "a,b,c,B,A", str::Join( caseItems, "," ) );
+		ASSERT_EQUAL( "A,B", str::Join( uniqueIndex.GetDuplicates(), "," ) );
+
+		std::vector<std::string> yzItems;
+		str::Split( yzItems, "Y,Z", "," );
+
+		uniqueIndex.Augment( &caseItems, "x" );
+		uniqueIndex.Augment( &caseItems, "x" );										// double-down
+		uniqueIndex.AugmentItems( &caseItems, yzItems.begin(), yzItems.end() );
+		uniqueIndex.AugmentItems( &caseItems, yzItems.begin(), yzItems.end() );		// double-down
+
+		ASSERT_EQUAL( "a,b,c,B,A,x,Y,Z", str::Join( caseItems, "," ) );
+		ASSERT_EQUAL( "A,B,x,Y,Z", str::Join( uniqueIndex.GetDuplicates(), "," ) );
+	}
+
+	// case insensitive:
+	{
+		std::vector<std::string> icItems = srcItems;
+		utl::CUniqueIndex<std::string, str::ignore_case::Hash, str::ignore_case::EqualTo> ciUniqueIndex;
+
+		ciUniqueIndex.Uniquify( &icItems );
+
+		ASSERT_EQUAL( "a,b,c", str::Join( icItems, "," ) );
+		ASSERT_EQUAL( "B,A,A,B", str::Join( ciUniqueIndex.GetDuplicates(), "," ) );
+	}
 }
 
 void CAlgorithmsTests::TestIsOrdered( void )
@@ -423,18 +516,18 @@ void CAlgorithmsTests::TestInsert( void )
 		pred::LessPtr<pred::TCompareMockItemPtr> lessPtr;
 
 		utl::AddSorted( numbers, new ut::TMockInt( 5 ), lessPtr );
-			ASSERT_EQUAL( "5", ut::JoinPtrs( numbers, s_sep ) );
+			ASSERT_EQUAL( "5", ut::FormatPtrs( numbers, "," ) );
 		utl::AddSorted( numbers, new ut::TMockInt( 9 ), lessPtr );
-			ASSERT_EQUAL( "5,9", ut::JoinPtrs( numbers, s_sep ) );
+			ASSERT_EQUAL( "5,9", ut::FormatPtrs( numbers, "," ) );
 		utl::AddSorted( numbers, new ut::TMockInt( 1 ), lessPtr );
-			ASSERT_EQUAL( "1,5,9", ut::JoinPtrs( numbers, s_sep ) );
+			ASSERT_EQUAL( "1,5,9", ut::FormatPtrs( numbers, "," ) );
 
 		std::vector<ut::TMockInt*> evenNumbers;
 		evenNumbers.push_back( new ut::TMockInt( 6 ) );
 		evenNumbers.push_back( new ut::TMockInt( 4 ) );
 		evenNumbers.push_back( new ut::TMockInt( 8 ) );
 
-		utl::AddSorted( numbers, evenNumbers.begin(), evenNumbers.end(), lessPtr ); ASSERT_EQUAL( "1,4,5,6,8,9", ut::JoinPtrs( numbers, s_sep ) );
+		utl::AddSorted( numbers, evenNumbers.begin(), evenNumbers.end(), lessPtr ); ASSERT_EQUAL( "1,4,5,6,8,9", ut::FormatPtrs( numbers, "," ) );
 
 		utl::ClearOwningContainer( numbers );
 		ASSERT( !ut::CMockObject::HasInstances() );
@@ -512,44 +605,44 @@ void CAlgorithmsTests::TestMixedTypes( void )
 	std::vector<ut::CMockObject*> mixedNumbers;
 
 	utl::GenerateN( mixedNumbers, 3, func::GenNewMockSeq<int>( 1, 2 ) );				// 3 ut::CMockValue<int>, starting at 1 step 2
-	ASSERT_EQUAL( "1,3,5", ut::JoinPtrs( mixedNumbers, s_sep ) );
+	ASSERT_EQUAL( "1,3,5", ut::FormatPtrs( mixedNumbers, "," ) );
 
 	utl::GenerateN( mixedNumbers, 2, func::GenNewMockSeq<double>( 2.5, 2 ) );			// 2 ut::CMockValue<double>, starting at 2.5 step 2
-	ASSERT_EQUAL( "1,3,5,2.5,4.5", ut::JoinPtrs( mixedNumbers, s_sep ) );
+	ASSERT_EQUAL( "1,3,5,2.5,4.5", ut::FormatPtrs( mixedNumbers, "," ) );
 
 	utl::GenerateN( mixedNumbers, 2, func::GenNewMockSeq<double>( 0.5, 0.2 ), 0 );	// prepend 2 ut::CMockValue<double>, starting at 0.5 step 0.2
-	ASSERT_EQUAL( "0.5,0.7,1,3,5,2.5,4.5", ut::JoinPtrs( mixedNumbers, s_sep ) );
+	ASSERT_EQUAL( "0.5,0.7,1,3,5,2.5,4.5", ut::FormatPtrs( mixedNumbers, "," ) );
 
 	std::vector< ut::CMockValue<int>* > integers;
 	utl::QueryWithType< ut::CMockValue<int> >( integers, mixedNumbers );
-	ASSERT_EQUAL( "1,3,5", ut::JoinPtrs( integers, s_sep ) );
+	ASSERT_EQUAL( "1,3,5", ut::FormatPtrs( integers, "," ) );
 
 	std::vector< ut::CMockValue<double>* > doubles;
 	utl::QueryWithType< ut::CMockValue<double> >( doubles, mixedNumbers );
-	ASSERT_EQUAL( "0.5,0.7,2.5,4.5", ut::JoinPtrs( doubles, s_sep ) );
+	ASSERT_EQUAL( "0.5,0.7,2.5,4.5", ut::FormatPtrs( doubles, "," ) );
 
 	{
 		std::vector< ut::CMockValue<int>* > otherIntegers;
 		utl::AddWithType< ut::CMockValue<int> >( otherIntegers, mixedNumbers );
-		ASSERT_EQUAL( "1,3,5", ut::JoinPtrs( otherIntegers, s_sep ) );
+		ASSERT_EQUAL( "1,3,5", ut::FormatPtrs( otherIntegers, "," ) );
 	}
 
 	{
 		std::vector< ut::CMockValue<double>* > otherDoubles;
 		utl::AddWithoutType< ut::CMockValue<int> >( otherDoubles, mixedNumbers );
-		ASSERT_EQUAL( "0.5,0.7,2.5,4.5", ut::JoinPtrs( otherDoubles, s_sep ) );
+		ASSERT_EQUAL( "0.5,0.7,2.5,4.5", ut::FormatPtrs( otherDoubles, "," ) );
 	}
 
 	{
 		std::vector<ut::CMockObject*> otherMix = mixedNumbers;
 		ASSERT_EQUAL( 0, utl::RemoveWithType< ut::CMockValue<short> >( otherMix ) );
-		ASSERT_EQUAL( "0.5,0.7,1,3,5,2.5,4.5", ut::JoinPtrs( otherMix, s_sep ) );
+		ASSERT_EQUAL( "0.5,0.7,1,3,5,2.5,4.5", ut::FormatPtrs( otherMix, "," ) );
 
 		ASSERT_EQUAL( 4, utl::RemoveWithType< ut::CMockValue<double> >( otherMix ) );
-		ASSERT_EQUAL( "1,3,5", ut::JoinPtrs( otherMix, s_sep ) );
+		ASSERT_EQUAL( "1,3,5", ut::FormatPtrs( otherMix, "," ) );
 
 		ASSERT_EQUAL( 3, utl::RemoveWithoutType< ut::CMockValue<double> >( otherMix ) );
-		ASSERT_EQUAL( "", ut::JoinPtrs( otherMix, s_sep ) );
+		ASSERT_EQUAL( "", ut::FormatPtrs( otherMix, "," ) );
 	}
 
 	utl::ClearOwningContainer( mixedNumbers );
@@ -624,8 +717,8 @@ void CAlgorithmsTests::Test_vector_map( void )
 	items[ 9 ] = _T("i9");
 	items[ 3 ] = _T("i3");
 	items[ 1 ] = _T("i1");
-	ASSERT_EQUAL( "1 3 7 9", ut::JoinKeys( items, _T(" ") ) );
-	ASSERT_EQUAL( "i1,i3,i7,i9", ut::JoinValues( items, _T(",") ) );
+	ASSERT_EQUAL( "1 3 7 9", ut::FormatMapKeys( items, " " ) );
+	ASSERT_EQUAL( "i1,i3,i7,i9", ut::FormatMapValues( items, "," ) );
 
 	ASSERT( items.find( 3 ) != items.end() );
 	ASSERT_EQUAL( _T("i3"), items.find( 3 )->second );
@@ -633,7 +726,7 @@ void CAlgorithmsTests::Test_vector_map( void )
 	ASSERT( items.find( 4 ) == items.end() );
 
 	items.EraseKey( 3 );
-	ASSERT_EQUAL( "1 7 9", ut::JoinKeys( items, _T(" ") ) );
+	ASSERT_EQUAL( "1 7 9", ut::FormatMapKeys( items, " " ) );
 
 	items[ 7 ] = _T("i7 B");
 	ASSERT_EQUAL( _T("i7 B"), items.find( 7 )->second );
@@ -646,6 +739,7 @@ void CAlgorithmsTests::Test_vector_map( void )
 void CAlgorithmsTests::Run( void )
 {
 	RUN_TEST( TestAssertions );
+	RUN_TEST( TestStdAlgorithms );
 
 	RUN_TEST( TestBasicUtils );
 	RUN_TEST( TestBuffer );
@@ -654,6 +748,7 @@ void CAlgorithmsTests::Run( void )
 	RUN_TEST( TestBinaryLookup );
 	RUN_TEST( TestUniquifyStrings );
 	RUN_TEST( TestUniquifyPaths );
+	RUN_TEST( TestUniqueIndex );
 	RUN_TEST( TestIsOrdered );
 	RUN_TEST( TestQuery );
 	RUN_TEST( TestAssignment );

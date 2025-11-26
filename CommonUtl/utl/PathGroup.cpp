@@ -3,12 +3,11 @@
 #include "PathGroup.h"
 #include "Algorithms.h"
 #include "StringUtilities.h"
+#include "Unique.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-#include "utl/Algorithms.hxx"
 
 
 namespace fs
@@ -50,7 +49,7 @@ namespace fs
 		str::Tokenize( m_specs, flat, delims );			// discard empty entries
 
 		std::for_each( m_specs.begin(), m_specs.end(), path::Normalize );
-		utl::Uniquify< std::hash<fs::CPath>, std::equal_to<fs::CPath> >( m_specs );
+		path::Uniquify( m_specs );		// apply fs::CPath hashing to std::tstring
 		ExpandPaths();
 	}
 

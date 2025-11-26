@@ -465,7 +465,7 @@ bool CCopyFilesCmd::Unexecute( void ) override
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
 
 	std::vector<fs::TDirPath> destFolderPaths;
-	fs::QueryFolderPaths( destFolderPaths, destFilePaths, true );		// store all dest folders for post-delete cleanup
+	fs::QueryFolderPaths( destFolderPaths, destFilePaths );		// store all dest folders for post-delete cleanup
 
 	CDeleteFilesCmd undoCmd( destFilePaths );		// delete destination files
 	undoCmd.SetOriginCmd( this );
@@ -528,7 +528,7 @@ bool CMoveFilesCmd::Unexecute( void ) override
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
 
 	std::vector<fs::CPath> destFolderPaths;
-	fs::QueryFolderPaths( destFolderPaths, destFilePaths, true );		// store all dest folders for post-delete cleanup
+	fs::QueryFolderPaths( destFolderPaths, destFilePaths );				// store all dest folders for post-delete cleanup
 
 	CMoveFilesCmd undoCmd( destFilePaths, GetSrcCommonDirPath() );		// move back destination files to source common directory
 

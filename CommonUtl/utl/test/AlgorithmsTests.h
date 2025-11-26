@@ -18,6 +18,7 @@ public:
 	virtual void Run( void );
 private:
 	void TestAssertions( void );		// deliberate assertion failures to test reporting interactively (enable on demand)
+	void TestStdAlgorithms( void );
 
 	void TestBasicUtils( void );
 	void TestBuffer( void );
@@ -26,6 +27,7 @@ private:
 	void TestBinaryLookup( void );
 	void TestUniquifyStrings( void );
 	void TestUniquifyPaths( void );
+	void TestUniqueIndex( void );
 	void TestIsOrdered( void );
 	void TestQuery( void );
 	void TestAssignment( void );
@@ -37,7 +39,7 @@ private:
 	void TestOwningContainer( void );
 	void Test_vector_map( void );
 private:
-	static const TCHAR s_sep[];
+	static const TCHAR s_sep[];		// ","
 };
 
 

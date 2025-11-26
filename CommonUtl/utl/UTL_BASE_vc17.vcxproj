@@ -177,7 +177,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
-    <ClInclude Include="Algorithms.hxx" />
     <ClInclude Include="Algorithms_fwd.h" />
     <ClInclude Include="AppTools.h" />
     <ClInclude Include="CacheLoader.h" />
@@ -319,6 +318,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimeUtils.h" />
     <ClInclude Include="TokenIterator.h" />
+    <ClInclude Include="Unique.h" />
     <ClInclude Include="UnitTest_fwd.h" />
     <ClInclude Include="utl_base.h" />
     <ClInclude Include="vector_map.h" />

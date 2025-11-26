@@ -148,50 +148,71 @@ namespace str
 
 namespace ut
 {
+	template< typename ContainerT >
+	std::string FormatValues( const ContainerT& items, const char* pSep = nullptr )
+	{
+		std::ostringstream oss;
+		size_t count = 0;
+		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		{
+			if ( count++ != 0 )
+				if ( !str::IsEmpty( pSep ) )
+					oss << pSep;
+
+			oss << *itItem;
+		}
+		return oss.str();
+	}
+
 	template< typename PtrContainerT >
-	std::string JoinPtrs( const PtrContainerT& itemPtrs, const TCHAR sep[] )
+	std::string FormatPtrs( const PtrContainerT& itemPtrs, const char* pSep )
 	{
 		std::ostringstream oss;
 		size_t count = 0;
 		for ( typename PtrContainerT::const_iterator itItem = itemPtrs.begin(); itItem != itemPtrs.end(); ++itItem )
 		{
 			if ( count++ != 0 )
-				oss << sep;
+				if ( !str::IsEmpty( pSep ) )
+					oss << pSep;
 
 			oss << **itItem;
 		}
 		return oss.str();
 	}
 
-	template< typename ContainerT >
-	std::string JoinKeys( const ContainerT& items, const TCHAR sep[] )
+
+	template< typename MapT >
+	std::string FormatMapKeys( const MapT& items, const char* pSep )
 	{
 		std::ostringstream oss;
 		size_t count = 0;
-		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( typename MapT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 		{
 			if ( count++ != 0 )
-				oss << sep;
+				if ( !str::IsEmpty( pSep ) )
+					oss << pSep;
 
 			oss << itItem->first;
 		}
 		return oss.str();
 	}
 
-	template< typename ContainerT >
-	std::string JoinValues( const ContainerT& items, const TCHAR sep[] )
+	template< typename MapT >
+	std::string FormatMapValues( const MapT& items, const char* pSep = nullptr )
 	{
 		std::ostringstream oss;
 		size_t count = 0;
-		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( typename MapT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 		{
 			if ( count++ != 0 )
-				oss << sep;
+				if ( !str::IsEmpty( pSep ) )
+					oss << pSep;
 
 			oss << itItem->second;
 		}
 		return oss.str();
 	}
+
 
 	template< typename CharType, typename StringT, typename LessPred >
 	std::basic_string<CharType> ShuffleSortJoin( std::vector<StringT>& rItems, const CharType* pSep, LessPred lessPred )

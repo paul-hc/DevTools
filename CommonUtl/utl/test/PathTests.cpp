@@ -319,6 +319,22 @@ void CPathTests::TestPathUtilities( void )
 	}
 }
 
+void CPathTests::TestQueryParentPaths( void )
+{
+	std::vector<fs::CPath> mixedPaths;
+	str::Split( mixedPaths, _T("ole.h,ole2.h,C:\\Win\\commdlg.h,c:\\win\\commdlg.h,c:/Win/CommDlg.h,OLE2.H,OLE2.h,winsvc.h,imm.h,Ole2.h"), _T(",") );
+
+	std::vector<fs::CPath> folderPaths;
+	path::QueryParentPaths( folderPaths, mixedPaths );
+	ASSERT_EQUAL( "C:\\Win", ut::FormatValues( folderPaths, "," ) );
+
+	std::vector<fs::CPath> moreMixedPaths;
+	str::Split( moreMixedPaths, _T("C:/WIN/COMMDLG.H,C:\\my\\Tools/mine/ShellGoodies64.dll,OLE2.H"), _T(",") );
+
+	path::QueryParentPaths( folderPaths, moreMixedPaths );
+	ASSERT_EQUAL( "C:\\Win,C:\\my\\Tools/mine", ut::FormatValues( folderPaths, "," ) );
+}
+
 void CPathTests::TestPathSort( void )
 {
 	std::vector<std::tstring> srcPaths;
@@ -1033,6 +1049,7 @@ void CPathTests::Run( void )
 	RUN_TEST( TestPathIs );
 	RUN_TEST( TestPathConversion );
 	RUN_TEST( TestPathUtilities );
+	RUN_TEST( TestQueryParentPaths );
 	RUN_TEST( TestPathSort );
 	RUN_TEST( TestPathSortExisting );
 	RUN_TEST( TestPathNaturalSort );

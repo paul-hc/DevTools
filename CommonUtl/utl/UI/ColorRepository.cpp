@@ -11,13 +11,12 @@
 #include "utl/EnumTags.h"
 #include "utl/Range.h"
 #include "utl/StringUtilities.h"
+#include "utl/Unique.h"
 #include <unordered_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-#include "utl/Algorithms.hxx"		// for utl::Uniquify
 
 
 namespace ui

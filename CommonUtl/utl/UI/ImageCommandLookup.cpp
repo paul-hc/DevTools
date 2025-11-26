@@ -9,6 +9,7 @@
 #include <afxcommandmanager.h>
 #include <afxmdiframewndex.h>
 #include <afxframewndex.h>
+#include <map>
 
 #ifdef _DEBUG
 namespace dbg { std::string MapToString( const CMap<UINT, UINT, int, int>& cmdToIndexMap ); }
@@ -341,8 +342,6 @@ namespace mfc
 
 
 #ifdef _DEBUG
-
-#include <map>
 
 namespace dbg
 {

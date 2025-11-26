@@ -13,11 +13,11 @@ namespace fs
 {
 	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
 
-	void EnumFiles( IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*") );
-	fs::PatternResult SearchEnumFiles( IEnumerator* pEnumerator, const fs::TPatternPath& searchPath );
+	void EnumFiles( OUT IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*") );
+	fs::PatternResult SearchEnumFiles( OUT IEnumerator* pEnumerator, const fs::TPatternPath& searchPath );
 
-	size_t EnumFilePaths( std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
-	size_t EnumSubDirPaths( std::vector<fs::TDirPath>& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	size_t EnumFilePaths( OUT std::vector<fs::CPath>& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	size_t EnumSubDirPaths( OUT std::vector<fs::TDirPath>& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
 
 	fs::CPath FindFirstFile( const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
 

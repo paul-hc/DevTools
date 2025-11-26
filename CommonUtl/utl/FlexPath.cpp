@@ -2,14 +2,12 @@
 #include "pch.h"
 #include "FlexPath.h"
 #include "StructuredStorage.h"
-#include "Algorithms.h"
+#include "Unique.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-#include "Algorithms.hxx"
 
 
 namespace path
@@ -113,13 +111,18 @@ namespace path
 
 	bool QueryStorageDocPaths( OUT std::vector<fs::CPath>& rDocStgPaths, const std::vector<fs::CFlexPath>& flexPaths )
 	{
-		for ( std::vector<fs::CFlexPath>::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
-			utl::AddUnique( rDocStgPaths, itFlexPath->IsComplexPath() ? itFlexPath->GetPhysicalPath() : itFlexPath->Get() );
+		utl::CUniqueIndex<fs::CPath> uniqueIndex;
 
+		uniqueIndex.Uniquify( &rDocStgPaths );
+
+		for ( std::vector<fs::CFlexPath>::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
+			uniqueIndex.Augment( &rDocStgPaths, itFlexPath->IsComplexPath() ? itFlexPath->GetPhysicalPath() : itFlexPath->Get() );
+
+		// rDocStgPaths is guaranteed unique on return
 		return !rDocStgPaths.empty();
 	}
 
-	void ConvertToPhysicalPaths( std::vector<fs::CFlexPath>& rFlexPaths )
+	void ConvertToPhysicalPaths( IN OUT std::vector<fs::CFlexPath>& rFlexPaths )
 	{
 		for ( std::vector<fs::CFlexPath>::iterator itFlexPath = rFlexPaths.begin(); itFlexPath != rFlexPaths.end(); ++itFlexPath )
 			if ( itFlexPath->IsComplexPath() )

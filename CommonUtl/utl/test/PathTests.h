@@ -21,6 +21,7 @@ private:
 	void TestPathIs( void );
 	void TestPathConversion( void );
 	void TestPathUtilities( void );
+	void TestQueryParentPaths( void );
 	void TestPathSort( void );
 	void TestPathSortExisting( void );
 	void TestPathNaturalSort( void );

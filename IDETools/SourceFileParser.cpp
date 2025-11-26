@@ -3,15 +3,14 @@
 #include "SourceFileParser.h"
 #include "IncludeNode.h"
 #include "SearchPathEngine.h"
-#include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/TokenIterator.h"
+#include "utl/Unique.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/Algorithms.hxx"
 #include "utl/TextFileIo.hxx"
 
 
