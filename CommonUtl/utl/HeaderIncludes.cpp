@@ -3,6 +3,7 @@
 #include "Algorithms.h"
 #include "Resequence.h"
 #include "StdThread.h"
+#include "StringCvt.h"
 #include "Unique.h"
 
 #ifdef _DEBUG

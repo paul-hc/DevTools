@@ -7,8 +7,6 @@
 #define new DEBUG_NEW
 #endif
 
-#include "StringCompare.hxx"
-
 
 namespace str
 {

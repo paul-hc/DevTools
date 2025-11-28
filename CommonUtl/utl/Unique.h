@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <type_traits>		// for std::hash
 #include "StdHashValue.h"
+#include "StringCompare.h"
 
 
 namespace utl
@@ -134,6 +135,17 @@ namespace utl
 
 		std::unordered_set<TValue, HasherT, KeyEqualT> uniqueSet;		// using a custom hash set
 		return Uniquify( rItems, uniqueSet, pRemovedDups );
+	}
+}
+
+
+namespace str
+{
+	namespace ignore_case
+	{
+		// case-insensitive hashing
+		typedef std::unordered_set<std::string, Hash, EqualTo> TUnorderedSet_String;
+		typedef std::unordered_set<std::wstring, Hash, EqualTo> TUnorderedSet_WString;
 	}
 }
 
