@@ -59,6 +59,29 @@ void CTraceTests::TestTracing( void )
 		TRACE_ITEMS( wItems, "Wide Items", 2 );
 		TRACE_ITEMS( wItems, "Wide Items", wItems.size() );
 	}
+
+	// TRACE with preprocessor operators: stringify and token-pasting:
+	{
+		TRACE_( "\nSTRINGIFY(Message): " );
+		TRACE_( STRINGIFY( Message ) );
+
+		TRACE_( "\nT_STRINGIFY(Message): " );
+		TRACE_( T_STRINGIFY( Message ) );
+
+		TRACE_( "\nT_CAT2(Left, Right): " );
+		TRACE_( T_CAT2( STRINGIFY( Left ), STRINGIFY( Right ) ) );
+
+		TRACE_( "\nT_CAT3(Left, Mid, Right): " );
+		TRACE_( T_CAT3( STRINGIFY( Left ), STRINGIFY( Mid ), STRINGIFY( Right ) ) );
+
+		TRACE_( "\nT_CAT2(\"Left\", \"Right\"): " );
+		TRACE_( T_CAT2( "Left", "Right" ) );
+
+		TRACE_( "\nT_CAT3(\"Left\", \"Mid\", \"Right\"): " );
+		TRACE_( T_CAT3( "Left", "Mid", "Right" ) );
+
+		TRACE_( "\n" );
+	}
 }
 
 

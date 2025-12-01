@@ -56,7 +56,7 @@ public:
 	CLayoutStatic( void );
 	virtual ~CLayoutStatic();
 
-	void SetUseSmoothTransparentGroups( bool useSmoothTransparentGroups = true );		// prevents groups clipping issues (in dialogs)
+	void SetUseSmoothVisibleGroups( bool useSmoothVisibleGroups = true );		// prevents groups clipping issues (in dialogs)
 
 	// ui::ILayoutEngine interface
 	virtual CLayoutEngine& GetLayoutEngine( void ) implements(ui::ILayoutEngine);

@@ -202,7 +202,6 @@
     <ClInclude Include="Language.hxx" />
     <ClInclude Include="RegAutomationSvr.h" />
     <ClInclude Include="StdThread.h" />
-    <ClInclude Include="StringCompare.hxx" />
     <ClInclude Include="StringParsing.h" />
     <ClInclude Include="EncodedFileBuffer.h" />
     <ClInclude Include="Encoding.h" />

@@ -32,11 +32,15 @@ namespace layout
 {
 	CLayoutStyle templateStyles[] =
 	{
+		{ IDC_GROUP_BOX_1, SizeX },
+		{ IDC_GROUP_BOX_2, SizeX },
+		{ IDC_USE_PINK_DLG_BK_TOGGLE, None },
+		{ IDC_USE_PINK_DLG_BK_TOGGLE, pctMoveX( 33 ) },
+		{ IDC_DISABLE_THEMES_TOGGLE, pctMoveX( 66 ) },
+
 		{ IDC_OPEN_DIALOG_BUTTON, MoveX },
 		{ IDC_OPEN_PROPERTIES_BUTTON, MoveX },
 		{ IDC_MODELESS_PROPERTIES_BUTTON, MoveX },
-		{ IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, MoveX },
-		{ IDC_DISABLE_THEMES_TOGGLE, MoveX },
 
 		{ IDC_FORMAT_COMBO, SizeX },
 		{ IDC_DROP_RIGHT_ARROW_STATIC, MoveX },
@@ -57,8 +61,7 @@ namespace layout
 		{ IDC_REPLACE_DELIMS_BUTTON, Move },
 		{ IDC_DELIMITER_SET_COMBO, Move },
 		{ IDC_DELIMITER_STATIC, Move },
-		{ IDC_NEW_DELIMITER_EDIT, Move },
-		{ IDC_GROUP_BOX_1, SizeX }
+		{ IDC_NEW_DELIMITER_EDIT, Move }
 	};
 }
 
@@ -70,6 +73,8 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	, m_pLayoutEngine( dynamic_cast<ui::ILayoutEngine*>( m_pOwner ) )
 	, m_selRadio( 0 )
 	, m_toolbarBtnsEnabled( AfxGetApp()->GetProfileInt( reg::section_demo, reg::entry_toolbarBtnsEnabled, false ) != FALSE )
+
+	, m_layoutModeCombo( &layout::GetTags_GlobalMode() )
 	, m_seqCounterLabel( H_AlignLeft | V_AlignBottom | ui::V_TileMate )
 	, m_dialogButton( &GetTags_ResizeStyle() )
 	, m_pickFormatCheckedStatic( ui::DropDown )
@@ -125,6 +130,12 @@ const std::vector<std::tstring>& CDemoTemplate::GetTextItems( void )
 	return items;
 }
 
+void CDemoTemplate::RedrawAppWindows( void )
+{
+	AfxGetMainWnd()->RedrawWindow( nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN );
+	m_pOwner->RedrawWindow( nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN );
+}
+
 void CDemoTemplate::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	pTooltip;
@@ -161,6 +172,9 @@ void CDemoTemplate::DoDataExchange( CDataExchange* pDX )
 		if ( GetMarkupDepth( dynamic_cast<CDemoPage*>( m_pOwner ) ) <= MaxDemoDepth )
 			m_detailSheet.AddPage( new CDemoPage() );
 
+	if ( ::GetDlgItem( *m_pOwner, IDC_DIALOG_LAYOUT_MODE_COMBO ) != nullptr )		// some shared dialog templates don't have this combo
+		m_layoutModeCombo.DDX_EnumValue( pDX, IDC_DIALOG_LAYOUT_MODE_COMBO, layout::CDiagnostics::s_globalMode );
+
 	DDX_Control( pDX, IDC_SEQ_COUNTER_LABEL, m_seqCounterLabel );
 	DDX_Control( pDX, IDC_OPEN_DIALOG_BUTTON, m_dialogButton );
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
@@ -185,22 +199,24 @@ void CDemoTemplate::DoDataExchange( CDataExchange* pDX )
 			ui::StretchWindow( m_pickFormatStatic, m_formatCombo, ui::Height, CSize( 0, 1 ) );
 
 		m_dialogButton.SetSelValue( m_dialogResizeStyle );
-		m_pOwner->CheckDlgButton( IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, CLayoutEngine::Normal == CLayoutEngine::s_defaultFlags );
+		m_pOwner->CheckDlgButton( IDC_USE_PINK_DLG_BK_TOGGLE, layout::CDiagnostics::s_usePinkBkgnd );
 		m_pOwner->CheckDlgButton( IDC_DISABLE_THEMES_TOGGLE, CVisualTheme::IsDisabled() );
 	}
 }
 
 BOOL CDemoTemplate::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
-	return CCmdTarget::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 BEGIN_MESSAGE_MAP( CDemoTemplate, CCmdTarget )
+	ON_CBN_SELCHANGE( IDC_DIALOG_LAYOUT_MODE_COMBO, OnSelChange_LayoutGlobalMode )
+	ON_BN_CLICKED( IDC_USE_PINK_DLG_BK_TOGGLE, OnToggle_UsePinkDlgBackground )
+	ON_BN_CLICKED( IDC_DISABLE_THEMES_TOGGLE, OnToggle_DisableThemes )
+
 	ON_BN_CLICKED( IDC_OPEN_DIALOG_BUTTON, OnBnClicked_OpenDialog )
 	ON_BN_CLICKED( IDC_OPEN_PROPERTIES_BUTTON, OnBnClicked_OpenPropertySheet )
 	ON_BN_CLICKED( IDC_MODELESS_PROPERTIES_BUTTON, OnBnClicked_ModelessPropertySheet )
-	ON_BN_CLICKED( IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, OnToggle_DisableSmoothResize )
-	ON_BN_CLICKED( IDC_DISABLE_THEMES_TOGGLE, OnToggle_DisableThemes )
 	ON_BN_CLICKED( IDC_DROP_RIGHT_ARROW_STATIC, OnBnClicked_DropFormat )
 	ON_BN_CLICKED( IDC_DROP_DOWN_STATIC, OnBnClicked_DropDownFormat )
 	ON_BN_CLICKED( IDC_CAPITALIZE_BUTTON, OnBnClicked_CapitalizeDestFiles )
@@ -224,20 +240,24 @@ BEGIN_MESSAGE_MAP( CDemoTemplate, CCmdTarget )
 	ON_UPDATE_COMMAND_UI( ID_NEXT_PANE, OnUpdate_ToolbarButtons )
 END_MESSAGE_MAP()
 
-void CDemoTemplate::OnToggle_DisableSmoothResize( void )
+void CDemoTemplate::OnSelChange_LayoutGlobalMode( void )
 {
-	CLayoutEngine::s_defaultFlags = m_pOwner->IsDlgButtonChecked( IDC_DISABLE_SMOOTH_RESIZE_TOGGLE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
+	layout::CDiagnostics::s_globalMode = m_layoutModeCombo.GetEnum<layout::GlobalMode>();
 
 	ui::SendCommand( *AfxGetMainWnd(), ID_FILE_CLOSE );
 	ui::SendCommand( *AfxGetMainWnd(), ID_FILE_NEW );
 }
 
+void CDemoTemplate::OnToggle_UsePinkDlgBackground( void )
+{
+	layout::CDiagnostics::s_usePinkBkgnd = m_pOwner->IsDlgButtonChecked( IDC_USE_PINK_DLG_BK_TOGGLE ) != FALSE;
+	RedrawAppWindows();
+}
+
 void CDemoTemplate::OnToggle_DisableThemes( void )
 {
 	CVisualTheme::SetEnabled( !m_pOwner->IsDlgButtonChecked( IDC_DISABLE_THEMES_TOGGLE ) );
-
-	AfxGetMainWnd()->RedrawWindow( nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN );
-	m_pOwner->RedrawWindow( nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN );
+	RedrawAppWindows();
 }
 
 void CDemoTemplate::OnBnClicked_OpenDialog( void )
@@ -427,7 +447,7 @@ void CListPage::DoDataExchange( CDataExchange* pDX )
 		OnToggle_UseTextEffects();
 	}
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BEGIN_MESSAGE_MAP( CListPage, CLayoutPropertyPage )
@@ -485,12 +505,12 @@ namespace layout
 		{ IDC_SOURCE_GROUP, pctSizeX( 50 ) | pctSizeY( 70 ) },
 		{ IDC_SOURCE_LABEL, pctSizeX( 50 ) },
 		{ IDC_SOURCE_EDIT, pctSizeX( 50 ) | pctSizeY( 35 ) },
-		{ IDC_SOURCE_COMBO, pctSizeX( 50 ) | pctMoveY( 35 ) | pctSizeY( 35 ) | DoRepaint },
+		{ IDC_SOURCE_COMBO, pctSizeX( 50 ) | pctMoveY( 35 ) | pctSizeY( 35 ) },
 
 		{ IDC_DEST_GROUP, pctMoveX( 50 ) | pctSizeX( 50 ) | pctSizeY( 70 ) },
 		{ IDC_DEST_LABEL, pctMoveX( 50 ) | pctSizeX( 50 ) },
 		{ IDC_DEST_EDIT, pctMoveX( 50 ) | pctSizeX( 50 ) | pctSizeY( 35 ) },
-		{ IDC_DEST_COMBO, pctMoveX( 50 ) | pctSizeX( 50 ) | pctMoveY( 35 ) | pctSizeY( 35 ) | DoRepaint },
+		{ IDC_DEST_COMBO, pctMoveX( 50 ) | pctSizeX( 50 ) | pctMoveY( 35 ) | pctSizeY( 35 ) },
 
 		{ IDC_A_GROUP, SizeX | pctMoveY( 70 ) | pctSizeY( 15 ) },
 		{ IDC_BUTTON1, pctMoveX( 0 ) | pctMoveY( 70 ) | pctSizeX( 25 ) | pctSizeY( 15 ) },
@@ -557,7 +577,8 @@ void CEditPage::DoDataExchange( CDataExchange* pDX )
 		m_sourceCombo.SetCurSel( 0 );
 		m_destCombo.SetCurSel( 5 );
 	}
-	CLayoutPropertyPage::DoDataExchange( pDX );
+
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -576,14 +597,14 @@ CDemoPage::~CDemoPage()
 void CDemoPage::DoDataExchange( CDataExchange* pDX )
 {
 	m_pDemo->DoDataExchange( pDX );
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BOOL CDemoPage::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
 		m_pDemo->OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		CLayoutPropertyPage::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 
@@ -617,5 +638,6 @@ void CDetailsPage::DoDataExchange( CDataExchange* pDX )
 			m_detailSheet.AddPage( new CDetailsPage() );
 
 	m_detailSheet.DDX_DetailSheet( pDX, IDC_DETAIL_SHEET_STATIC );
-	CLayoutPropertyPage::DoDataExchange( pDX );
+
+	__super::DoDataExchange( pDX );
 }

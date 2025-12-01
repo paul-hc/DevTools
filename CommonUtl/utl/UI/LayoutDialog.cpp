@@ -326,7 +326,7 @@ void CLayoutDialog::DoDataExchange( CDataExchange* pDX ) override
 			if ( !HasFlag( GetStyle(), WS_CHILD ) )
 			{
 				if ( m_pLayoutEngine->HasCtrlLayout() )
-					m_pLayoutEngine->CreateResizeGripper();
+					m_pLayoutEngine->CreateResizeGripperBox();
 
 				EnableToolTips( TRUE );
 			}

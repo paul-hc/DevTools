@@ -3,6 +3,7 @@
 #pragma once
 
 
+class CEnumTags;
 namespace layout { typedef int TStyle; }
 
 
@@ -88,8 +89,7 @@ namespace layout
 			Mask_SizeX		= MaskPercentage << Shift_SizeX,
 			Mask_SizeY		= MaskPercentage << Shift_SizeY,
 
-			DoRepaint		= 1 << ( 4 * PercentBitCount ),
-			CollapsedLeft	= DoRepaint << 1,
+			CollapsedLeft	= 1 << ( 4 * PercentBitCount ),
 			CollapsedTop	= CollapsedLeft << 1,
 		};
 	public:
@@ -123,8 +123,6 @@ namespace layout
 
 		Move		= MoveX | MoveY,
 		Size		= SizeX | SizeY,
-
-		DoRepaint	= Metrics::DoRepaint,		// repaint on resize
 
 		CollapsedLeft = Metrics::CollapsedLeft,
 		CollapsedTop = Metrics::CollapsedTop,
@@ -221,6 +219,17 @@ namespace layout
 		CWnd* m_pDialog;
 		CSize m_offset;
 		CRect m_gripperRect;			// in dialog client coords
+	};
+
+
+	enum GlobalMode { AutoMode, NormalMode, SmoothMode };
+
+	const CEnumTags& GetTags_GlobalMode( void );
+
+	struct CDiagnostics
+	{
+		static layout::GlobalMode s_globalMode;		// override in diagnostics mode
+		static bool s_usePinkBkgnd;					// diagnostics mode: use a pink color to erase dialog background (SmoothGroups only)
 	};
 }
 

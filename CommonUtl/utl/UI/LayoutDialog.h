@@ -7,7 +7,7 @@
 #include "PopupDlgBase.h"
 #include "LayoutMetrics.h"
 
-#if _MSC_VER >= 1500	// MSVC++ 9.0 (Visual Studio 2008)
+#if _MSC_VER >= VS_2008		// MSVC++ 9.0 (Visual Studio 2008)
 	#include <afxdialogex.h>
 	typedef CDialogEx TMfcBaseDialog;
 #else

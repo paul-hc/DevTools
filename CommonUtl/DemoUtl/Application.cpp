@@ -31,7 +31,8 @@
 namespace reg
 {
 	static const TCHAR section[] = _T("Settings");
-	static const TCHAR entry_disableSmooth[] = _T("DisableSmooth");
+	static const TCHAR entry_globalLayoutMode[] = _T("GlobalLayoutMode");
+	static const TCHAR entry_usePinkBkgnd[] = _T("UsePinkBkgnd");
 	static const TCHAR entry_disableThemes[] = _T("DisableThemes");
 }
 
@@ -100,7 +101,9 @@ BOOL CApplication::InitInstance( void )
 	GetSharedImageStore()->RegisterAlias( ID_EDIT_ITEM, ID_NUMERIC_SEQUENCE );				// for tracking context menu example in CTestColorsDialog::m_pMenuPicker drop-down
 
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
-	CLayoutEngine::s_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
+
+	layout::CDiagnostics::s_globalMode = (layout::GlobalMode)GetProfileInt( reg::section, reg::entry_globalLayoutMode, layout::CDiagnostics::s_globalMode );
+	layout::CDiagnostics::s_usePinkBkgnd = GetProfileInt( reg::section, reg::entry_usePinkBkgnd, layout::CDiagnostics::s_usePinkBkgnd ) != FALSE;
 	CVisualTheme::SetEnabled( !GetProfileInt( reg::section, reg::entry_disableThemes, FALSE ) );
 
 	//hlp::CheckScalarTypes();
@@ -148,7 +151,8 @@ BOOL CApplication::InitInstance( void )
 
 int CApplication::ExitInstance( void )
 {
-	WriteProfileInt( reg::section, reg::entry_disableSmooth, !HasFlag( CLayoutEngine::s_defaultFlags, CLayoutEngine::SmoothGroups ) );
+	WriteProfileInt( reg::section, reg::entry_globalLayoutMode, layout::CDiagnostics::s_globalMode );
+	WriteProfileInt( reg::section, reg::entry_usePinkBkgnd, layout::CDiagnostics::s_usePinkBkgnd );
 	WriteProfileInt( reg::section, reg::entry_disableThemes, CVisualTheme::IsDisabled() );
 
 	return __super::ExitInstance();

@@ -5,6 +5,7 @@
 #include <vector>
 #include "utl/UI/LayoutChildPropertySheet.h"
 #include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/ReportListControl.h"
 #include "utl/UI/SplitPushButton.h"
 #include "utl/UI/SpinEdit.h"
@@ -39,6 +40,8 @@ private:
 	UINT m_selRadio;
 	bool m_toolbarBtnsEnabled;
 public:
+	CEnumComboBox m_layoutModeCombo;
+
 	CHostToolbarCtrl<CStatic> m_seqCounterLabel;
 	CEnumSplitButton m_dialogButton;
 
@@ -54,12 +57,16 @@ public:
 	CEdit m_newDelimiterEdit;
 	CThemeStatic m_delimStatic;
 private:
+	void RedrawAppWindows( void );
+
 	// message map functions
+	afx_msg void OnSelChange_LayoutGlobalMode( void );
+	afx_msg void OnToggle_UsePinkDlgBackground( void );
+	afx_msg void OnToggle_DisableThemes( void );
+
 	afx_msg void OnBnClicked_OpenDialog( void );
 	afx_msg void OnBnClicked_OpenPropertySheet( void );
 	afx_msg void OnBnClicked_ModelessPropertySheet( void );
-	afx_msg void OnToggle_DisableSmoothResize( void );
-	afx_msg void OnToggle_DisableThemes( void );
 	afx_msg void OnBnClicked_DropFormat( void );
 	afx_msg void OnBnClicked_DropDownFormat( void );
 	afx_msg void OnBnClicked_CapitalizeDestFiles( void );

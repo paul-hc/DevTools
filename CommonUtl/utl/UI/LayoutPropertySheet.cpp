@@ -38,7 +38,7 @@ namespace layout
 
 CLayoutPropertySheet::CLayoutPropertySheet( const std::tstring& title, CWnd* pParent, UINT selPageIndex /*= 0*/ )
 	: CLayoutBasePropertySheet( title.c_str(), pParent, selPageIndex )
-	, m_pLayoutEngine( new CLayoutEngine( CLayoutEngine::Normal ) )		// no groups used -> no smoothing required
+	, m_pLayoutEngine( new CLayoutEngine() )
 	, m_restorePos( PosNoRestore )
 	, m_restoreSize( true )
 	, m_singleTransactionButtons( ShowOkCancel )
@@ -46,6 +46,8 @@ CLayoutPropertySheet::CLayoutPropertySheet( const std::tstring& title, CWnd* pPa
 	, m_alwaysModified( false )
 {
 	m_psh.dwFlags &= ~PSH_HASHELP;				// don't show the help button by default
+	m_pLayoutEngine->ModifyFlags( CLayoutEngine::GroupsMask, CLayoutEngine::Normal );		// no groups used -> no smoothing required
+
 	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	m_resizable = false;						// auto: will be flipped to true if any page is resizable
 	m_initCentered = false;
@@ -388,7 +390,7 @@ BOOL CLayoutPropertySheet::OnInitDialog( void ) override
 	m_pLayoutEngine->Initialize( this );
 
 	if ( m_resizable && m_pLayoutEngine->HasCtrlLayout() )
-		m_pLayoutEngine->CreateResizeGripper( CSize( 2, 1 ) );		// push it further out of the way of Apply button
+		m_pLayoutEngine->CreateResizeGripperBox( CSize( 2, 1 ) );		// push it further out of the way of Apply button
 
 	RestoreSheetPlacement();
 	ModifySystemMenu();
@@ -441,12 +443,12 @@ LRESULT CLayoutPropertySheet::OnNcHitTest( CPoint point )
 	LRESULT hitTest = __super::OnNcHitTest( point );
 
 	if ( HTCLIENT == hitTest )
-		if ( layout::CResizeGripper* pResizeGripper = m_pLayoutEngine->GetResizeGripper() )
+		if ( layout::CResizeGripper* pResizeGripperBox = m_pLayoutEngine->GetResizeGripperBox() )
 		{
 			CPoint clientPoint = point;
 			ScreenToClient( &clientPoint );
 
-			if ( pResizeGripper->GetRect().PtInRect( clientPoint ) )
+			if ( pResizeGripperBox->GetRect().PtInRect( clientPoint ) )
 				return HTBOTTOMRIGHT;
 		}
 

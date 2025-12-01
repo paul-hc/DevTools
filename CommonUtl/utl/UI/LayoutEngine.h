@@ -15,25 +15,30 @@ public:
 
 	enum Flags
 	{
-		SmoothGroups		= BIT_FLAG( 0 ),		// draw groups smoothly on WM_ERASEBKGND, clipping other controls; parent dialog uses WS_CLIPCHILDREN style.
-		GroupsTransparent	= BIT_FLAG( 1 ),		// receive WM_PAINT messages only after all sibling windows beneath it have been updated
-		GroupsRepaint		= BIT_FLAG( 2 ),		// prevents clipping issues in property pages
-		GroupsTransparentEx	= BIT_FLAG( 3 ),		// force groups to use WS_EX_TRANSPARENT styleEx; should also use SmoothGroups style drawing; prevents groups clipping issues in CDialog splitters, but not required in property pages.
+		Auto				= BIT_FLAG( 0 ),		// adapt to dialog type default (Dialog, FormView, PropertyPage).
+		Normal				= BIT_FLAG( 1 ),		// draw normal via DeferWindowPos - parent dialog uses WS_CLIPCHILDREN, group-boxes use WS_EX_TRANSPARENT.
+		SmoothGroups		= BIT_FLAG( 2 ),		// draw group-boxes smoothly on WM_ERASEBKGND, clipping other controls; parent dialog uses WS_CLIPCHILDREN style.
+		GroupsVisible		= BIT_FLAG( 3 ),		// visible group-boxes using WS_EX_TRANSPARENT; should also use SmoothGroups style drawing; prevents groups clipping issues in CDialog splitters, but not required in property pages.
 			GroupsMask		= 0x0F,					// first 8 bits are reserved for group flags
 
 		UseDoubleBuffer		= BIT_FLAG( 8 ),		// use double buffering when erasing background for smooth groups; some themed controls don't erase corner pixels as expected
 
 		Smooth = SmoothGroups,
-		Normal = GroupsTransparent | GroupsRepaint,
-		SmoothTransparentGroups = SmoothGroups | GroupsTransparentEx,
+		SmoothVisibleGroups = SmoothGroups | GroupsVisible,
+	};
+protected:
+	enum InternalFlags
+	{
+		InLayout = BIT_FLAG( 15 ),
+		Erasing = BIT_FLAG( 16 )
 	};
 public:
-	CLayoutEngine( int flags = s_defaultFlags );
+	CLayoutEngine( void );
 	~CLayoutEngine();
 
 	int GetFlags( void ) const { return m_flags; }
-	void SetFlags( int flags ) { m_flags = flags; }
-	bool ModifyFlags( int clearFlags, int setFlags ) { return ::ModifyFlags( m_flags, clearFlags, setFlags ); }
+	void SetFlags( int flags );
+	bool ModifyFlags( int clearFlags, int setFlags );
 
 	bool HasCtrlLayout( void ) const { return !m_controlStates.empty(); }
 	void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], UINT count );
@@ -48,8 +53,8 @@ public:
 	void Initialize( CWnd* pDialog );
 	virtual void Reset( void );					// un-initialize: for form view recreation
 
-	layout::CResizeGripper* GetResizeGripper( void ) const;
-	void CreateResizeGripper( const CSize& offset = CSize( 1, 0 ) );
+	layout::CResizeGripper* GetResizeGripperBox( void ) const;
+	void CreateResizeGripperBox( const CSize& offset = CSize( 1, 0 ) );
 
 	bool IsLayoutEnabled( void ) const { return m_layoutEnabled; }
 	void SetLayoutEnabled( bool layoutEnabled = true );
@@ -85,6 +90,7 @@ public:
 
 	// advanced control layout: use with care
 	layout::CControlState* LookupControlState( UINT ctrlId );
+	layout::CControlState* LookupControlState( HWND hCtrl );
 	bool HasControlState( UINT ctrlId ) const { return m_controlStates.find( ctrlId ) != m_controlStates.end(); }
 	bool RefreshControlHandle( UINT ctrlId );			// call after control with same ID gets recreated
 	void AdjustControlInitialPosition( UINT ctrlId, const CSize& deltaOrigin, const CSize& deltaSize );		// when stretching content to fit: to retain original layout behaviour
@@ -94,19 +100,20 @@ protected:
 	// overridables
 	virtual void GetClientRectangle( OUT CRect* pClientRect ) const;
 private:
-	void SetupCollapsedState( UINT ctrlId, layout::TStyle layoutStyle );
-	void SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pCtrlState );
-	bool AnyRepaintCtrl( void ) const;
+	void SetupCollapsedState( HWND hCtrl, layout::TStyle layoutStyle );
+	void SetupGroupBoxState( HWND hGroupBox );
+	size_t MakeGroupBoxesTransparent( void );
 
 	bool LayoutControls( const CRect& clientRect );
 	bool LayoutSmoothly( const layout::CDelta& delta );
 	bool LayoutNormal( const layout::CDelta& delta );
+	bool _LayoutNormal_Old( const layout::CDelta& delta );
 
 	void DrawBackground( CDC* pDC, const CRect& clientRect );
 	bool CanClip( HWND hCtrl ) const;
-protected:
-	enum InternalFlags { InLayout = BIT_FLAG( 15 ), Erasing = BIT_FLAG( 16 ) };
 
+	void _DbgBreak( const char* pDlgClassName ) const;
+protected:
 	LayoutType m_layoutType;
 	int m_flags;
 	bool m_layoutEnabled;
@@ -123,10 +130,8 @@ protected:
 	CSize m_collapsedDelta;
 	bool m_collapsed;
 
-	std::auto_ptr<layout::CResizeGripper> m_pGripper;	// bottom-right resize box
+	std::auto_ptr<layout::CResizeGripper> m_pGripperBox;	// bottom-right resize box
 	std::vector<HWND> m_hiddenGroups;	// hidden groups, drawn smoothly on WM_ERASEBKGND
-public:
-	static int s_defaultFlags;			// for debugging, testing
 };
 
 
@@ -135,7 +140,7 @@ public:
 class CPaneLayoutEngine : public CLayoutEngine
 {
 public:
-	CPaneLayoutEngine( int flags = s_defaultFlags );
+	CPaneLayoutEngine( void );
 	~CPaneLayoutEngine();
 
 	void InitializePane( ui::ILayoutFrame* pPaneLayoutFrame );

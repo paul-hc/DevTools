@@ -12,30 +12,74 @@
 #endif
 
 
+#ifdef _DEBUG
+
 namespace dbg
 {
-#ifdef _DEBUG
-	const CFlagTags& GetStyleTags( void )
+	const CFlagTags& GetTags_WndStyle( void )
 	{
 		static const CFlagTags::FlagDef s_styleFlags[] =
 		{
+			FLAG_TAG( WS_POPUP ),
 			FLAG_TAG( WS_CHILD ),
+			FLAG_TAG( WS_MINIMIZE ),
 			FLAG_TAG( WS_VISIBLE ),
 			FLAG_TAG( WS_DISABLED ),
+			FLAG_TAG( WS_CLIPSIBLINGS ),
+			FLAG_TAG( WS_CLIPCHILDREN ),
+			FLAG_TAG( WS_MAXIMIZE ),
 			FLAG_TAG( WS_BORDER ),
 			FLAG_TAG( WS_DLGFRAME ),
-			FLAG_TAG( WS_THICKFRAME ),
 			FLAG_TAG( WS_VSCROLL ),
 			FLAG_TAG( WS_HSCROLL ),
 			FLAG_TAG( WS_SYSMENU ),
-			FLAG_TAG( WS_MINIMIZE ),
-			FLAG_TAG( WS_MAXIMIZE )
+			FLAG_TAG( WS_THICKFRAME ),
+			FLAG_TAG( WS_GROUP ),
+			FLAG_TAG( WS_TABSTOP )
 		};
 		static const CFlagTags s_styleTags( s_styleFlags, COUNT_OF( s_styleFlags ) );
 		return s_styleTags;
 	}
-#endif
 
+	const CFlagTags& GetTags_WndStyleEx( void )
+	{
+		static const CFlagTags::FlagDef s_stleExFlags[] =
+		{
+			FLAG_TAG( WS_EX_DLGMODALFRAME ),
+			FLAG_TAG( WS_EX_NOPARENTNOTIFY ),
+			FLAG_TAG( WS_EX_TOPMOST ),
+			FLAG_TAG( WS_EX_ACCEPTFILES ),
+			FLAG_TAG( WS_EX_TRANSPARENT ),
+			FLAG_TAG( WS_EX_MDICHILD ),
+			FLAG_TAG( WS_EX_TOOLWINDOW ),
+			FLAG_TAG( WS_EX_WINDOWEDGE ),
+			FLAG_TAG( WS_EX_CLIENTEDGE ),
+			FLAG_TAG( WS_EX_CONTEXTHELP ),
+			FLAG_TAG( WS_EX_RIGHT ),
+			FLAG_TAG( WS_EX_RTLREADING ),
+			FLAG_TAG( WS_EX_LEFTSCROLLBAR ),
+			FLAG_TAG( WS_EX_CONTROLPARENT ),
+			FLAG_TAG( WS_EX_STATICEDGE ),
+			FLAG_TAG( WS_EX_APPWINDOW ),
+			FLAG_TAG( WS_EX_LAYERED ),
+			FLAG_TAG( WS_EX_NOINHERITLAYOUT ),
+		#ifdef WS_EX_NOREDIRECTIONBITMAP
+			FLAG_TAG( WS_EX_NOREDIRECTIONBITMAP ),
+		#endif
+			FLAG_TAG( WS_EX_LAYOUTRTL ),
+			FLAG_TAG( WS_EX_COMPOSITED ),
+			FLAG_TAG( WS_EX_NOACTIVATE )
+		};
+		static const CFlagTags s_stleExTags( s_stleExFlags, COUNT_OF( s_stleExFlags ) );
+		return s_stleExTags;
+	}
+}
+
+#endif //_DEBUG
+
+
+namespace dbg
+{
 	void TraceWindow( HWND hWnd, const TCHAR tag[] )
 	{
 		hWnd, tag;
@@ -64,7 +108,7 @@ namespace dbg
 			os << s_indent << str::Format( _T("ID=%d (0x%X)"), ctrlId, ctrlId ) << std::endl;
 
 			DWORD style = ui::GetStyle( hWnd );
-			os << s_indent << str::Format( _T("Style=0x%08X  "), style ) << GetStyleTags().FormatUi( style ) << std::endl;
+			os << s_indent << str::Format( _T("Style=0x%08X  "), style ) << GetTags_WndStyle().FormatUi( style ) << std::endl;
 
 			DWORD wndThreadId = ::GetWindowThreadProcessId( hWnd, nullptr ), currThreadId = ::GetCurrentThreadId();
 			os << s_indent << str::Format( _T("WndThreadId=0x%X  CurrentThreadId=0x%X  "), wndThreadId, currThreadId ) << ( wndThreadId == currThreadId ? _T("(in current thread)") : _T("(in different thread)") ) << std::endl;

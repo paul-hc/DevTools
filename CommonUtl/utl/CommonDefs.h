@@ -8,8 +8,25 @@
 #pragma warning( disable: 4355 )	// 'this' : used in base member initializer list
 
 
-#define _INDIRECT_LINE_NAME_( t ) #t
-#define _LINE_NAME_( t ) _INDIRECT_LINE_NAME_( t )
+// stringify to Narrow/Wide:
+//
+#define STRINGIFY( token ) #token
+#define T_STRINGIFY( token ) _T(#token)
+
+// token pasting concatenate narrow strings to Unicode (wide)
+//
+#ifdef IS_CPP_11
+	// C++ 11: token-pasting works with mixed narrow and wide strings
+	#define T_CAT2( leftStr, rightStr ) _T(leftStr##rightStr)
+	#define T_CAT3( leftStr, midStr, rightStr ) _T(leftStr##midStr##rightStr)
+#else	// _MSC_VER < VS_2015
+	// C++ 03: cannot token-paste narrow and wide strings
+	#define T_CAT2( leftStr, rightStr ) _T(leftStr)##_T(rightStr)
+	#define T_CAT3( leftStr, midStr, rightStr ) _T(leftStr)##_T(midStr)##_T(rightStr)
+#endif
+
+
+#define _LINE_NAME_( t ) STRINGIFY( t )
 #define __LINE__STR__ _LINE_NAME_( __LINE__ )
 #define __FILE_LINE__ __FILE__ "(" __LINE__STR__ "): "
 

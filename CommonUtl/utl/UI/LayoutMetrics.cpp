@@ -212,6 +212,19 @@ namespace layout
 		s_resizeBoxItem.DrawBackground( hDC, m_gripperRect );
 	}
 
+
+	const CEnumTags& GetTags_GlobalMode( void )
+	{
+		static const CEnumTags s_tags( _T("Auto|Normal|Smooth") );
+		return s_tags;
+	}
+
+
+	// CDiagnostics implementation
+
+	layout::GlobalMode CDiagnostics::s_globalMode = layout::AutoMode;
+	bool CDiagnostics::s_usePinkBkgnd = false;
+
 } // namespace layout
 
 

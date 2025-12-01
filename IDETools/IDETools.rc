@@ -29,12 +29,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/resource.h""\r\n"
     "#ifndef APSTUDIO_INVOKED\r\n"
@@ -44,7 +44,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\IDETools.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -68,8 +68,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,4,0,1
- PRODUCTVERSION 7,4,0,1
+ FILEVERSION 7,4,1,0
+ PRODUCTVERSION 7,4,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -84,17 +84,17 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "16-06-2025 00:33:53"
-            VALUE "Comments", "Fixes VC++ 2022|newWiz vcproj|MethodUT|bugFix:TemplInst|VC++ 2022|LazyInitAppResources|TableToTreeAction|Natural sort macro|Split UTL_BASE/UTL_UI|V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page."
+            VALUE "BuildTimestamp", "01-12-2025 01:49:46"
+            VALUE "Comments", "NewLayoutEngine|Fixes VC++ 2022|newWiz vcproj|MethodUT|bugFix:TemplInst|VC++ 2022|LazyInitAppResources|TableToTreeAction|Natural sort macro|Split UTL_BASE/UTL_UI|V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page."
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "IDETools DLL"
-            VALUE "FileVersion", "7.4.0.1"
+            VALUE "FileVersion", "7.4.1.0"
             VALUE "InternalName", "IDETools"
             VALUE "LegalCopyright", "Copyright © 1998-2025"
             VALUE "OriginalFilename", "IDETools.dll"
             VALUE "ProductName", "IDETools Automation DLL"
-            VALUE "ProductVersion", "7.4.0.1"
+            VALUE "ProductVersion", "7.4.1.0"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -215,7 +215,7 @@ BEGIN
     COMBOBOX        IDC_INPUT_INCLUDE_TAG_COMBO,34,3,100,68,CBS_SIMPLE | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     CONTROL         "#include <...>",IDC_SYSTEM_TAG_RADIO,"Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP | WS_TABSTOP,143,6,63,10
     CONTROL         "#include ""...""",IDC_LOCAL_TAG_RADIO,"Button",BS_AUTORADIOBUTTON | BS_MULTILINE,211,6,58,10
-    GROUPBOX        "Search in path",IDC_SEARCH_IN_STATIC,143,19,126,47,WS_GROUP
+    GROUPBOX        "Search in path",IDC_SEARCH_IN_PATH_GROUP,143,19,126,47,WS_GROUP
     CONTROL         "I&nclude",IDC_SEARCH_INCLUDE_PATH_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,149,30,39,10
     CONTROL         "L&ocal include",IDC_SEARCH_LOCAL_PATH_CHECK,"Button",BS_AUTOCHECKBOX,149,41,58,10
     CONTROL         "&Additional include",IDC_SEARCH_ADDITIONAL_PATH_CHECK,
@@ -793,6 +793,11 @@ BEGIN
     0
 END
 
+IDD_FILE_LOCATOR_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -835,7 +840,7 @@ STRINGTABLE
 BEGIN
     CM_EDIT_BSC_DIR_PATH    "Modify the selected browse files folder\nModify Browse Folder"
     CM_MOVE_UP_BSC_DIR_PATH "Moves the selected folder up one position\nMove Folder Up"
-    CM_MOVE_DOWN_BSC_DIR_PATH
+    CM_MOVE_DOWN_BSC_DIR_PATH 
                             "Moves the selected folder down one position\nMove Folder Down"
 END
 

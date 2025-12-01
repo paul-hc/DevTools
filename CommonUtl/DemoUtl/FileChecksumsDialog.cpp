@@ -170,14 +170,16 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
+		{ IDC_GROUP_BOX_1, pctSizeX( 50 ) },
+		{ IDC_GROUP_BOX_2, pctMoveX( 50 ) | pctSizeX( 50 ) },
 		{ IDC_SEARCH_PATH_COMBO, pctSizeX( 50 ) },
-		{ IDC_TOOLBAR_PLACEHOLDER, MoveX },
+		{ IDC_GROUP_BOX_3, Size },
+		{ IDC_FILE_CHECKSUMS_LIST, Size },
+
 		{ IDC_FIND_FILES_BUTTON, MoveX },
 		{ IDC_CALC_CHECKSUMS_BUTTON, MoveX },
 		{ IDOK, MoveX },
-		{ IDCANCEL, MoveX },
-
-		{ IDC_FILE_CHECKSUMS_LIST, Size }
+		{ IDCANCEL, MoveX }
 	};
 }
 

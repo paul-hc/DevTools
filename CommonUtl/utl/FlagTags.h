@@ -14,7 +14,7 @@ class CFlagTags
 public:
 	struct FlagDef
 	{
-		int m_flag;
+		unsigned long m_flag;
 		const TCHAR* m_pKeyTag;
 	};
 

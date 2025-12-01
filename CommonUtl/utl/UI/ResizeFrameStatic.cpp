@@ -103,12 +103,12 @@ CLayoutStatic::~CLayoutStatic()
 {
 }
 
-void CLayoutStatic::SetUseSmoothTransparentGroups( bool useSmoothTransparentGroups /*= true*/ )
+void CLayoutStatic::SetUseSmoothVisibleGroups( bool useSmoothVisibleGroups /*= true*/ )
 {
-	if ( useSmoothTransparentGroups )
-		m_pPaneLayoutEngine->ModifyFlags( 0, CLayoutEngine::SmoothTransparentGroups );	// groups will use WS_EX_TRANSPARENT styleEx, parent dialog uses WS_CLIPCHILDREN style
+	if ( useSmoothVisibleGroups )
+		m_pPaneLayoutEngine->ModifyFlags( CLayoutEngine::GroupsMask, CLayoutEngine::SmoothVisibleGroups );	// groups will use WS_EX_TRANSPARENT styleEx, parent dialog uses WS_CLIPCHILDREN style
 	else
-		m_pPaneLayoutEngine->ModifyFlags( CLayoutEngine::GroupsTransparentEx, 0 );
+		m_pPaneLayoutEngine->ModifyFlags( CLayoutEngine::GroupsMask, CLayoutEngine::Normal );
 }
 
 CLayoutEngine& CLayoutStatic::GetLayoutEngine( void ) implements(ui::ILayoutEngine)

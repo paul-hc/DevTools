@@ -33,7 +33,7 @@ namespace layout
 		{ IDC_CREATE_DEST_FOLDER, MoveX },
 		{ ID_EDIT_ARCHIVE_PASSWORD, MoveX },
 		{ IDC_FILE_PATHS_LIST, Size },
-		{ IDC_TARGET_GROUP, SizeX | DoRepaint },
+		{ IDC_TARGET_GROUP, SizeX },
 		{ IDC_TARGET_FILE_COUNT_STATIC, SizeX },
 		{ IDOK, MoveX },
 		{ IDCANCEL, MoveX }

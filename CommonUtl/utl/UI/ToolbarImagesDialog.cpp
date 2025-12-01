@@ -80,7 +80,7 @@ CToolbarImagesDialog::CToolbarImagesDialog( CWnd* pParentWnd )
 	// IDC_LAYOUT_FRAME_1_STATIC:
 	m_pSplitBottomLayoutStatic.reset( new CLayoutStatic() );
 	m_pSplitBottomLayoutStatic->RegisterCtrlLayout( ARRAY_SPAN( layout::s_splitBottomFrameStyles ) );
-	m_pSplitBottomLayoutStatic->SetUseSmoothTransparentGroups();
+	m_pSplitBottomLayoutStatic->SetUseSmoothVisibleGroups();
 
 	// IDC_HORIZ_SPLITTER_STATIC:
 	m_pUpDownSplitterFrame.reset( new CResizeFrameStatic( &m_childSheet, m_pSplitBottomLayoutStatic.get(), resize::NorthSouth /*, resize::ToggleFirst*/ ) );

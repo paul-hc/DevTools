@@ -51,11 +51,13 @@
 #define IDC_PASTE_FILES_BUTTON          1015
 #define IDC_CLEAR_FILES_BUTTON          1016
 #define IDC_CAPITALIZE_BUTTON           1017
+#define IDC_USE_PINK_DLG_BK_TOGGLE      1018
 #define IDC_REPLACE_FILES_BUTTON        1019
 #define IDC_REPLACE_DELIMS_BUTTON       1020
 #define IDC_DELIMITER_SET_COMBO         1021
 #define IDC_DELIMITER_STATIC            1022
 #define IDC_NEW_DELIMITER_EDIT          1023
+#define IDC_DIALOG_LAYOUT_MODE_COMBO    1024
 #define IDC_FILE_RENAME_LIST            1025
 #define IDC_ALBUMS_GROUP                1026
 #define IDC_SOURCE_GROUP                1027
@@ -188,7 +190,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
 #define _APS_NEXT_COMMAND_VALUE         32805
-#define _APS_NEXT_CONTROL_VALUE         1114
+#define _APS_NEXT_CONTROL_VALUE         1115
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

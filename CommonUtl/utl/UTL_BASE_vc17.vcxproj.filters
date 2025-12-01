@@ -463,9 +463,6 @@
     <ClInclude Include="Functional.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="StringCompare.hxx">
-      <Filter>utl</Filter>
-    </ClInclude>
     <ClInclude Include="DebugTrace.h">
       <Filter>utl</Filter>
     </ClInclude>

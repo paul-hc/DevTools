@@ -3,6 +3,20 @@
 #pragma once
 
 
+class CFlagTags;
+
+
+#ifdef _DEBUG
+
+namespace dbg
+{
+	const CFlagTags& GetTags_WndStyle( void );
+	const CFlagTags& GetTags_WndStyleEx( void );
+}
+
+#endif //_DEBUG
+
+
 class CTrayIcon;
 
 

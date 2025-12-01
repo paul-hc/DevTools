@@ -6,6 +6,8 @@
 #include "ScopedValue.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
+#include "utl/FlagTags.h"
+#include "utl/UI/WindowDebug.h"
 #include <afxext.h>				// for CFormView
 
 #ifdef _DEBUG
@@ -13,14 +15,53 @@
 #endif
 
 
+#ifdef _DEBUG
+
+namespace dbg
+{
+	const CFlagTags& GetTags_LayoutFlags( void )
+	{
+		static const CFlagTags::FlagDef flagDefs[] =
+		{
+			{ CLayoutEngine::SmoothGroups, _T("SmoothGroups") },
+			{ CLayoutEngine::GroupsVisible, _T("GroupsVisible") },
+			{ CLayoutEngine::UseDoubleBuffer, _T("UseDoubleBuffer") }
+		};
+		static const CFlagTags s_tags( ARRAY_SPAN( flagDefs ) );
+		return s_tags;
+	}
+}
+
+	#define TRACE_LAYOUT( methodName )\
+		TRACE_( T_CAT3("- CLayoutEngine::", methodName, "(%s - '%s'):  layCtrls=%d  m_flags=%02X {%s}  style={%s}\n"),\
+			str::GetTypeName( typeid( *m_pDialog ) ).c_str(), ui::GetWindowText( m_pDialog ).c_str(),\
+			m_controlStates.size(),\
+			m_flags, dbg::GetTags_LayoutFlags().FormatKey( m_flags ).c_str(),\
+			dbg::GetTags_WndStyle().FormatKey( ui::GetStyle( *m_pDialog ) ).c_str()\
+		)
+#else
+	#define TRACE_LAYOUT __noop
+#endif //_DEBUG
+
+
+namespace func
+{
+	struct OnControlResized
+	{
+		void operator()( ui::ILayoutFrame* pCtrlLayoutFrame ) const
+		{
+			ASSERT_PTR( pCtrlLayoutFrame->GetControl()->GetSafeHwnd() );
+			pCtrlLayoutFrame->OnControlResized();
+		}
+	};
+}
+
+
 // CLayoutEngine implementation
 
-int CLayoutEngine::s_defaultFlags = Smooth;
-
-
-CLayoutEngine::CLayoutEngine( int flags /*= s_defaultFlags*/ )
+CLayoutEngine::CLayoutEngine( void )
 	: m_layoutType( DialogLayout )
-	, m_flags( flags )
+	, m_flags( Auto )
 	, m_layoutEnabled( true )
 	, m_pDialog( nullptr )
 	, m_dlgTemplClientRect( 0, 0, 0, 0 )
@@ -30,10 +71,29 @@ CLayoutEngine::CLayoutEngine( int flags /*= s_defaultFlags*/ )
 	, m_collapsedDelta( 0, 0 )
 	, m_collapsed( false )
 {
+	switch ( layout::CDiagnostics::s_globalMode )
+	{
+		case layout::NormalMode:
+			ModifyFlags( GroupsMask, Normal );
+			break;
+		case layout::SmoothMode:
+			ModifyFlags( GroupsMask, SmoothGroups );
+			break;
+	}
 }
 
 CLayoutEngine::~CLayoutEngine()
 {
+}
+
+void CLayoutEngine::SetFlags( int flags )
+{
+	m_flags = flags;
+}
+
+bool CLayoutEngine::ModifyFlags( int clearFlags, int setFlags )
+{
+	return ::ModifyFlags( m_flags, clearFlags, setFlags );
 }
 
 void CLayoutEngine::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], UINT count )
@@ -75,15 +135,15 @@ void CLayoutEngine::Reset( void )
 	m_hiddenGroups.clear();
 }
 
-void CLayoutEngine::CreateResizeGripper( const CSize& offset /*= CSize( 1, 0 )*/ )
+void CLayoutEngine::CreateResizeGripperBox( const CSize& offset /*= CSize( 1, 0 )*/ )
 {
-	ASSERT_NULL( m_pGripper.get() );		// create once
-	m_pGripper.reset( new layout::CResizeGripper( m_pDialog, offset ) );
+	ASSERT_NULL( m_pGripperBox.get() );		// create once
+	m_pGripperBox.reset( new layout::CResizeGripper( m_pDialog, offset ) );
 }
 
-layout::CResizeGripper* CLayoutEngine::GetResizeGripper( void ) const
+layout::CResizeGripper* CLayoutEngine::GetResizeGripperBox( void ) const
 {
-	return IsInitialized() && !m_pDialog->IsZoomed() ? m_pGripper.get() : nullptr;
+	return IsInitialized() && !m_pDialog->IsZoomed() ? m_pGripperBox.get() : nullptr;
 }
 
 void CLayoutEngine::StoreInitialSize( CWnd* pDialog )
@@ -125,89 +185,98 @@ void CLayoutEngine::SetupControlStates( void )
 {
 	ASSERT( IsInitialized() );
 
+	// NEW [2025-11]:		Dr Dobbs article "Resizable Dialogs Revisited" - http://www.drdobbs.com/184416395
+	// Always make group boxes transparent, even when not implementing control layout!
+	// This guarantees that group boxes don't cover toolbars underneath, or other controls.
+	//
+	MakeGroupBoxesTransparent();			// if any group-box: add the WS_CLIPCHILDREN on dialog for flicker-free repainting
+
 	if ( !HasCtrlLayout() )
 	{
-		ModifyFlags( CLayoutEngine::SmoothGroups, 0 );		// there is no point in smoothing group-boxes drawing
+		ModifyFlags( SmoothGroups, 0 );		// there is no point in smoothing group-boxes drawing
 		return;
 	}
 
-	ASSERT( m_controlStates.empty() || !m_controlStates.begin()->second.IsCtrlInit() );		// initialize once
-
-	bool anyRepaintCtrl = false;
-
-	// for each control state:
-	for ( std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
-	{
-		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::DoRepaint ) )
-			anyRepaintCtrl = true;
-
-		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::CollapsedMask ) )
-			SetupCollapsedState( itCtrlState->first, itCtrlState->second.GetLayoutStyle( false ) );
-	}
-
-	if ( anyRepaintCtrl )
-	{	// disable SmoothGroups and WS_CLIPCHILDREN when one control requires repaint (layout::DoRepaint)
-		ModifyFlags( SmoothGroups, GroupsTransparent | GroupsRepaint );
-		m_pDialog->ModifyStyle( WS_CLIPCHILDREN, 0 );
+	if ( HasFlag( m_flags, Auto ) )
+	{	// (!) NEW [2025-11]:
+		if ( is_a<CFormView>( m_pDialog ) || is_a<CPropertyPage>( m_pDialog ) )
+			ModifyFlags( Auto, SmoothGroups );		// minimize flickering in form views and property pages; NOT required in top-level dialog boxes (undesirable actually).
+		else if ( is_a<CDialog>( m_pDialog ) && !ui::IsChild( *m_pDialog ) )		// top-level dialog?
+			ModifyFlags( Auto, Normal );			// no flickering issues in top-level dialogs.
 	}
 
 	if ( HasFlag( m_flags, SmoothGroups ) )
 		m_pDialog->ModifyStyle( 0, WS_CLIPCHILDREN );		// add the WS_CLIPCHILDREN on dialog for smooth repainting
 
-	// for each control: setup controls' state, and handle group boxes
-	for ( HWND hCtrl = ::GetWindow( m_pDialog->GetSafeHwnd(), GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
-		if ( UINT ctrlId = ::GetDlgCtrlID( hCtrl ) )		// ignore child dialogs in a property sheet
+	//TRACE_LAYOUT( "SetupControlStates" );
+	//_DbgBreak( "CToolbarImagesDialog" );
+
+	ASSERT( m_controlStates.empty() || !m_controlStates.begin()->second.IsCtrlInit() );		// initialize once
+
+	// for each control state:
+	for ( std::unordered_map<UINT, layout::CControlState>::iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
+		if ( HWND hCtrl = ::GetDlgItem( m_pDialog->m_hWnd, itCtrlState->first ) )
 		{
 			bool isGroupBox = ui::IsGroupBox( hCtrl );
+			layout::CControlState* pCtrlState = &itCtrlState->second;
 
-			if ( layout::CControlState* pCtrlState = LookupControlState( ctrlId ) )		// only touch controls with layout defined
-			{
-				//if ( DialogLayout == m_layoutType )		// commented-out: avoid clipping errors on group controls (e.g. in CToolbarImagesDialog)
-				if ( isGroupBox )
-					SetupGroupBoxState( hCtrl, pCtrlState );
+			if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::CollapsedMask ) )	// a collapsible control?
+				SetupCollapsedState( hCtrl, pCtrlState->GetLayoutStyle( false ) );					// store the collapsed state position
 
-				pCtrlState->ResetCtrl( hCtrl );
-			}
-			else if ( isGroupBox )
-				ui::SetTransparent( hCtrl );				// add the WS_EX_TRANSPARENT styleEx - prevent group-box clipping issues for non-layout groups
+			if ( isGroupBox )
+				SetupGroupBoxState( hCtrl );
+
+			pCtrlState->ResetCtrl( hCtrl );
 		}
+
+	if ( !m_hiddenGroups.empty() )
+		TRACE_( "\tm_hiddenGroups count=%d\n", m_hiddenGroups.size() );
 }
 
-void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pCtrlState )
+void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox )
 {
 	//TRACE( _T(" CLayoutEngine::SetupGroupBoxState() - GroupBox='%s'\n"), ui::GetWindowText( hGroupBox ).c_str() );
 
-	if ( HasFlag( m_flags, SmoothGroups ) && !HasFlag( m_flags, GroupsTransparentEx ) )
+	if ( HasFlag( m_flags, SmoothGroups ) && !HasFlag( m_flags, GroupsVisible ) )
 	{
 		// hide group boxes and clear transparent ex-style; will be rendered on WM_ERASEBKGND
 		CWnd::ModifyStyle( hGroupBox, WS_VISIBLE, 0, 0 );
 		CWnd::ModifyStyleEx( hGroupBox, WS_EX_TRANSPARENT, 0, 0 );
+
 		m_hiddenGroups.push_back( hGroupBox );
-	}
-	else
-	{
-		if ( HasFlag( m_flags, GroupsRepaint ) && pCtrlState != nullptr )
-			pCtrlState->ModifyLayoutStyle( 0, layout::DoRepaint );		// force groups repaint
-
-		if ( HasFlag( m_flags, GroupsTransparent | GroupsTransparentEx ) )
-		{
-			REQUIRE( !HasFlag( m_flags, GroupsTransparentEx ) || HasFlag( m_pDialog->GetStyle(), WS_CLIPCHILDREN ) );	// GroupsTransparentEx mode requires WS_CLIPCHILDREN for parent dialog!
-
-			// make group boxes transparent (z-order fix for proxy controls);
-			// prevents the WS_CLIPCHILDREN styled parent window from excluding the groupbox's background region, allowing the background to paint;
-			// while this works, it creates annoying flicker on resize.
-			//
-			ui::SetTransparent( hGroupBox );		// add the WS_EX_TRANSPARENT styleEx
-		}
 	}
 }
 
-void CLayoutEngine::SetupCollapsedState( UINT ctrlId, layout::TStyle layoutStyle )
+size_t CLayoutEngine::MakeGroupBoxesTransparent( void )
+{
+	// Dr Dobbs article "Resizable Dialogs Revisited" - http://www.drdobbs.com/184416395
+	//	- add to all Group-Boxes with styleEx WS_EX_TRANSPARENT.
+	//	- add to Dialog style WS_CLIPCHILDREN.
+	//
+	size_t groupBoxCount = 0;
+
+	for ( HWND hCtrl = ::GetWindow( m_pDialog->GetSafeHwnd(), GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
+		if ( ui::IsGroupBox( hCtrl ) )
+		{
+			ui::SetTransparent( hCtrl );					// add the WS_EX_TRANSPARENT styleEx - prevent group-box clipping issues for non-layout groups
+			++groupBoxCount;
+		}
+
+	// Note: if parent dialog has the WS_CLIPCHILDREN style:
+	//	- Resizing of groups is very smooth.
+	//	- The redrawing erasing issues (resizing trails) of the resize triangle (bottom-right) are fixed!
+	if ( groupBoxCount != 0 )
+		m_pDialog->ModifyStyle( 0, WS_CLIPCHILDREN );		// add the WS_CLIPCHILDREN on dialog for smooth repainting - this works well with WS_EX_TRANSPARENT group-boxes
+
+	return groupBoxCount;
+}
+
+void CLayoutEngine::SetupCollapsedState( HWND hCtrl, layout::TStyle layoutStyle )
 {
 	CRect clientRect;
 	m_pDialog->GetClientRect( &clientRect );
 
-	CRect anchorRect = ui::GetControlRect( ::GetDlgItem( m_pDialog->m_hWnd, ctrlId ) );
+	CRect anchorRect = ui::GetControlRect( hCtrl );
 
 	ASSERT( 0 == m_collapsedDelta.cx && 0 == m_collapsedDelta.cy );					// initialize once
 	if ( HasFlag( layoutStyle, layout::CollapsedLeft ) )
@@ -215,15 +284,6 @@ void CLayoutEngine::SetupCollapsedState( UINT ctrlId, layout::TStyle layoutStyle
 
 	if ( HasFlag( layoutStyle, layout::CollapsedTop ) )
 		m_collapsedDelta.cy = clientRect.bottom - anchorRect.top;
-}
-
-bool CLayoutEngine::AnyRepaintCtrl( void ) const
-{
-	for ( std::unordered_map<UINT, layout::CControlState>::const_iterator itCtrlState = m_controlStates.begin(); itCtrlState != m_controlStates.end(); ++itCtrlState )
-		if ( HasFlag( itCtrlState->second.GetLayoutStyle( false ), layout::DoRepaint ) )
-			return true;
-
-	return false;
 }
 
 void CLayoutEngine::SetLayoutEnabled( bool layoutEnabled /*= true*/ )
@@ -333,13 +393,16 @@ bool CLayoutEngine::LayoutControls( const CRect& clientRect )
 	if ( m_prevClientRect == clientRect )
 		return false;								// skip when the same origin & size is already layed-out
 
-	if ( GetResizeGripper() != nullptr )
-		m_pGripper->Layout();
+	if ( GetResizeGripperBox() != nullptr )
+		m_pGripperBox->Layout();
 
 	layout::CDelta delta( clientRect.TopLeft() - m_dlgTemplClientRect.TopLeft(), clientRect.Size() - GetMinClientSize() );
-	CScopedFlag<int> scopedErasing( &m_flags, InLayout );
+	CScopedFlag<int> scopedInLayout( &m_flags, InLayout );
 
 	m_prevClientRect = clientRect;
+
+	//TRACE_LAYOUT( "LayoutControls" );
+	//_DbgBreak( "CToolbarImagesDialog" );
 
 	if ( HasFlag( m_flags, SmoothGroups ) )
 		return LayoutSmoothly( delta );
@@ -353,7 +416,8 @@ bool CLayoutEngine::LayoutSmoothly( const layout::CDelta& delta )
 	if ( visible )
 		m_pDialog->SetRedraw( FALSE );
 
-	int changedCount = 0;
+	size_t changedCount = 0;
+
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
 		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
@@ -383,6 +447,43 @@ bool CLayoutEngine::LayoutNormal( const layout::CDelta& delta )
 	CRect clientRect;
 	m_pDialog->GetClientRect( &clientRect );
 
+	HDWP hDWP = ::BeginDeferWindowPos( (int)m_controlStates.size() );
+
+	size_t changedCount = 0;
+	std::vector<ui::ILayoutFrame*> ctrlLayoutFrames;
+
+	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
+	{
+		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
+		if ( const layout::CControlState* pCtrlState = LookupControlState( ctrlId ) )
+		{
+			CRect ctrlRect;
+			UINT swpFlags = 0;
+
+			if ( pCtrlState->ComputeLayout( ctrlRect, swpFlags, delta, m_collapsed ) )		// size or position changed?
+			{
+				::DeferWindowPos( hDWP, hCtrl, HWND_TOP, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(),
+								  swpFlags | SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE | SWP_NOCOPYBITS );
+
+				if ( ui::ILayoutFrame* pCtrlFrame = FindControlLayoutFrame( hCtrl ) )
+					ctrlLayoutFrames.push_back( pCtrlFrame );
+			}
+		}
+	}
+
+	::EndDeferWindowPos( hDWP );
+
+	// after repositioning of all controls, notify the ones with dependent layout that their positions have changed
+	utl::for_each( ctrlLayoutFrames, func::OnControlResized() );
+
+	return changedCount != 0;
+}
+
+bool CLayoutEngine::_LayoutNormal_Old( const layout::CDelta& delta )
+{
+	CRect clientRect;
+	m_pDialog->GetClientRect( &clientRect );
+
 	CRgn clientRegion;
 	clientRegion.CreateRectRgnIndirect( &clientRect );
 
@@ -390,15 +491,14 @@ bool CLayoutEngine::LayoutNormal( const layout::CDelta& delta )
 
 	for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != nullptr; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 	{
-		UINT ctrlId = ::GetDlgCtrlID( hCtrl );
-		const layout::CControlState* pCtrlState = LookupControlState( ctrlId );
+		const layout::CControlState* pCtrlState = LookupControlState( hCtrl );
 
 		if ( pCtrlState != nullptr )
 			if ( pCtrlState->RepositionCtrl( delta, m_collapsed ) )
 				changedCtrls.push_back( hCtrl );
 
 		// clip control out of background erase region (except the ones to be repainted)
-		if ( nullptr == pCtrlState || !HasFlag( pCtrlState->GetLayoutStyle( false ), layout::DoRepaint ) )
+		if ( nullptr == pCtrlState )
 			if ( ui::IsVisible( hCtrl ) )
 			{
 				CRect ctrlRect;
@@ -432,6 +532,11 @@ layout::CControlState* CLayoutEngine::LookupControlState( UINT ctrlId )
 	return utl::FindValuePtr( m_controlStates, ctrlId );
 }
 
+layout::CControlState* CLayoutEngine::LookupControlState( HWND hCtrl )
+{
+	return LookupControlState( ::GetDlgCtrlID( hCtrl ) );
+}
+
 bool CLayoutEngine::RefreshControlHandle( UINT ctrlId )
 {
 	if ( m_pDialog != nullptr )
@@ -458,6 +563,7 @@ void CLayoutEngine::AdjustControlInitialPosition( UINT ctrlId, const CSize& delt
 
 void CLayoutEngine::RegisterBuddyCallback( UINT buddyId, ui::ILayoutFrame* pCallback )
 {
+	buddyId;
 	ASSERT_PTR( pCallback );
 	ASSERT( m_buddyCallbacks.find( buddyId ) == m_buddyCallbacks.end() );
 
@@ -497,10 +603,10 @@ void CLayoutEngine::HandleGetMinMaxInfo( MINMAXINFO* pMinMaxInfo ) const
 LRESULT CLayoutEngine::HandleHitTest( LRESULT hitTest, const CPoint& screenPoint ) const
 {
 	if ( HTCLIENT == hitTest )
-		if ( GetResizeGripper() != nullptr )
+		if ( GetResizeGripperBox() != nullptr )
 		{
 			CPoint point = screenPoint; m_pDialog->ScreenToClient( &point );
-			if ( m_pGripper->GetRect().PtInRect( point ) )
+			if ( m_pGripperBox->GetRect().PtInRect( point ) )
 				return HandleHitTest( HTBOTTOMRIGHT, screenPoint );
 		}
 
@@ -532,11 +638,15 @@ LRESULT CLayoutEngine::HandleHitTest( LRESULT hitTest, const CPoint& screenPoint
 
 bool CLayoutEngine::HandleEraseBkgnd( CDC* pDC )
 {
-	if ( !HasCtrlLayout() )
+	if ( !HasCtrlLayout() || !IsInitialized() )
 		return false;			// ignore for dialogs with no custom layout
 
-	if ( !HasFlag( m_flags, SmoothGroups ) || !IsInitialized() || HasFlag( m_flags, Erasing ) )
+	//_DbgBreak( "CToolbarImagesDialog" );
+
+	if ( !HasFlag( m_flags, SmoothGroups ) || HasFlag( m_flags, Erasing ) )
 		return false;
+
+	//TRACE_LAYOUT( "HandleEraseBkgnd" );
 
 	CScopedFlag<int> scopedErasing( &m_flags, Erasing );
 	CRect clientRect;
@@ -562,10 +672,10 @@ void CLayoutEngine::HandlePostPaint( void )
 		return;			// ignore for dialogs with no custom layout
 
 	if ( !HasFlag( m_flags, SmoothGroups ) && IsInitialized() )
-		if ( layout::CResizeGripper* pGripper = GetResizeGripper() )
+		if ( GetResizeGripperBox() != nullptr )
 		{
 			CClientDC dc( m_pDialog );
-			m_pGripper->Draw( dc );
+			m_pGripperBox->Draw( dc );
 		}
 }
 
@@ -583,17 +693,20 @@ void CLayoutEngine::DrawBackground( CDC* pDC, const CRect& clientRect )
 				{
 					CRect ctrlRect;
 					::GetWindowRect( hCtrl, &ctrlRect );
-					ctrlRect.DeflateRect( 1, 1 );				// shring by one to fill corner pixels not covered by themed background (combos, edits)
+					ctrlRect.DeflateRect( 1, 1 );				// shrink by one to fill corner pixels not covered by themed background (combos, edits)
 					m_pDialog->ScreenToClient( &ctrlRect );
 					ui::CombineWithRegion( &clientRegion, ctrlRect, RGN_XOR );
 				}
 
-		//CBrush debugBrush( color::PastelPink ); hBkBrush = debugBrush;
+		static CBrush s_debugBrush( color::PastelPink );
+		if ( layout::CDiagnostics::s_usePinkBkgnd )
+			hBkBrush = s_debugBrush;
+
 		::FillRgn( *pDC, clientRegion, hBkBrush );
 	}
 
-	if ( layout::CResizeGripper* pGripper = GetResizeGripper() )
-		m_pGripper->Draw( *pDC );
+	if ( GetResizeGripperBox() != nullptr )
+		m_pGripperBox->Draw( *pDC );
 
 	// draw hidden group boxes smoothly
 	for ( std::vector<HWND>::iterator itGroup = m_hiddenGroups.begin(); itGroup != m_hiddenGroups.end(); ++itGroup )
@@ -613,14 +726,27 @@ bool CLayoutEngine::CanClip( HWND hCtrl ) const
 	if ( !ui::IsVisible( hCtrl ) || ui::IsTransparent( hCtrl ) || utl::Contains( m_hiddenGroups, hCtrl ) )
 		return false;
 
-	return !HasFlag( FindLayoutStyle( hCtrl ), layout::DoRepaint );
+	return true;
+}
+
+void CLayoutEngine::_DbgBreak( const char* pDlgClassName ) const
+{
+	std::string className;
+
+	if ( m_pDialog != nullptr )
+		className = str::GetTypeNamePtr( *m_pDialog );
+
+	if ( className == pDlgClassName )
+	{
+		int j = 0; j;
+	}
 }
 
 
 // CPaneLayoutEngine implementation
 
-CPaneLayoutEngine::CPaneLayoutEngine( int flags /*= s_defaultFlags*/ )
-	: CLayoutEngine( flags )
+CPaneLayoutEngine::CPaneLayoutEngine( void )
+	: CLayoutEngine()
 	, m_pLayoutFrame( nullptr )
 	, m_pMasterLayout( nullptr )
 {
