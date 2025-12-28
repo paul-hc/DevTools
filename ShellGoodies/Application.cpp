@@ -8,6 +8,7 @@
 #include "utl/EnumTags.h"
 #include "utl/UI/SystemTray.h"
 #include "resource.h"
+#include <fstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,6 +19,12 @@
 
 CApplication g_mfcApp;				// the global singleton MFC CWinApp
 
+
+namespace reg
+{
+	static const TCHAR section_Settings[] = _T("Settings");
+	static const TCHAR entry_useInputFileListPath[] = _T("UseInputFileListPath");
+}
 
 namespace ut
 {
@@ -54,7 +61,8 @@ CApplication::CApplication( void )
 	// Will initialize application resources later, when CShellGoodiesCom COM object gets instantiated.
 	SetLazyInitAppResources();
 
-	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
+	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables.
+	//	CWinApp::m_pszAppName = "ShellGoodies"
 }
 
 CApplication::~CApplication()
@@ -105,6 +113,8 @@ void CApplication::OnInitAppResources( void ) override
 
 	m_pCmdSvc.reset( new CAppCmdService() );
 	m_pCmdSvc->LoadCommandModel();
+
+	LoadInputFileListPaths();		// load the specified file list to replace the HDROP selected files from Explorer
 }
 
 svc::ICommandService* CApplication::GetCommandService( void ) const
@@ -128,6 +138,57 @@ CTrayIcon* CApplication::GetMessageTrayIcon( void )
 	}
 
 	return CSystemTray::Instance() != nullptr ? CSystemTray::Instance()->FindIcon( IDR_MESSAGE_TRAY_ICON ) : nullptr;
+}
+
+bool CApplication::CheckReplaceSourcePaths( std::vector<fs::CPath>& rOutSourcePaths, const TCHAR* pClientTag )
+{
+	if ( !UseInputSourcePaths() )
+		return false;
+
+	TRACE_( _T("# %s - Warning: Replacing %d Explorer source paths with %d file paths form the debug input file: '%s'\n"), pClientTag,
+			rOutSourcePaths.size(), m_inputSourcePaths.size(), m_inputFileListPath.GetFilenamePtr() );
+
+	rOutSourcePaths = m_inputSourcePaths;		// DBG: override input files
+	return true;
+}
+
+bool CApplication::LoadInputFileListPaths( void )
+{	// load the specified file list to replace the HDROP selected files from Explorer
+	REQUIRE( m_inputSourcePaths.empty() );
+
+	m_inputFileListPath.Set( GetProfileString( reg::section_Settings, reg::entry_useInputFileListPath ).GetString() );
+
+	if ( !m_inputFileListPath.IsEmpty() && m_inputFileListPath.FileExist( fs::Read ) )
+	{
+		std::ifstream input( m_inputFileListPath.GetPtr() );
+
+		if ( input.is_open() )
+		{
+			size_t linePos = 0;
+			for ( std::tstring line; stream::InputLine( input, line ); ++linePos )
+			{
+				str::Trim( line );
+				if ( !line.empty() && !str::HasPrefix( line.c_str(), _T( "//" ) ) )		// not empty nor a comment?
+				{
+					fs::CPath sourcePath( line );
+
+					if ( sourcePath.FileExist() )
+						m_inputSourcePaths.push_back( sourcePath );
+					else
+						TRACE_( _T(" Warning: ignoring non-existent input file path: '%s' at line %d\n"), sourcePath.GetPtr(), linePos + 1 );
+				}
+			}
+		}
+
+		input.close();
+	}
+
+	if ( UseInputSourcePaths() )
+		TRACE_( _T(" Warning: replacing Explorer selected files with input file list '%s' with fileCount=%d\n"), m_inputFileListPath.GetPtr(), m_inputSourcePaths.size() );
+	else
+		m_inputFileListPath.Clear();
+
+	return false;
 }
 
 BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )

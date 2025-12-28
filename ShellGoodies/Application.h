@@ -24,10 +24,21 @@ public:
 	const CCommandModel* GetCommandModel( void ) const;
 	CTrayIcon* GetMessageTrayIcon( void );				// lazy initialization
 
+	// advanced debugging:
+	bool UseInputSourcePaths( void ) const { return !m_inputSourcePaths.empty(); }
+	const std::vector<fs::CPath>& GetInputSourcePaths( void ) const { return m_inputSourcePaths; }
+	bool CheckReplaceSourcePaths( std::vector<fs::CPath>& rOutSourcePaths, const TCHAR* pClientTag );
+
 	using CBaseApp<CWinApp>::IsInitAppResources;		// make it public for debugging
+private:
+	bool LoadInputFileListPaths( void );
 private:
 	std::auto_ptr<CAppCmdService> m_pCmdSvc;
 	std::auto_ptr<CSystemTray> m_pSystemTray;			// system-tray shared popup window: hidden by default, used to display balloon notifications
+
+	// advanced debugging:
+	fs::CPath m_inputFileListPath;						// stored manually in registry
+	std::vector<fs::CPath> m_inputSourcePaths;			// forces this DLL to use filepaths from the input file list (replacing the HDROP selection source from Explorer)
 
 	// generated stuff
 public:
