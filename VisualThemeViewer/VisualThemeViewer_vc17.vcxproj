@@ -260,6 +260,7 @@
     <ResourceCompile Include="VisualThemeViewer.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CommonUtl\utl\cpp.hint" />
     <None Include="res\VisualThemeViewer.rc2" />
   </ItemGroup>
   <ItemGroup>

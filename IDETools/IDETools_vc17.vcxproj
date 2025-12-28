@@ -321,6 +321,7 @@
     <ClCompile Include="WorkspaceProfile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CommonUtl\utl\cpp.hint" />
     <None Include="IDETools.def" />
     <None Include="res\IDETools.rc2" />
     <None Include="RunUnitTests.vbs" />

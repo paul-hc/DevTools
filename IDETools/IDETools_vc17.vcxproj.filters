@@ -221,6 +221,7 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="RunUnitTests.vbs" />
+    <None Include="..\CommonUtl\utl\cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">

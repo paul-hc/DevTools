@@ -299,6 +299,7 @@
     <ResourceCompile Include="TransferFiles.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\CommonUtl\utl\cpp.hint" />
     <None Include="ReadMe.txt" />
     <None Include="test\test.bat" />
   </ItemGroup>

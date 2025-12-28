@@ -83,6 +83,7 @@
     <None Include="res\VisualThemeViewer.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\CommonUtl\utl\cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\VisualThemeViewer.ico">

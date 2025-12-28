@@ -338,6 +338,7 @@
     <Image Include="res\ToolstripMenu.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CommonUtl\utl\cpp.hint" />
     <None Include="res\Slider.rc2" />
     <None Include="Slider.reg" />
   </ItemGroup>

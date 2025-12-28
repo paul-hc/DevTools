@@ -306,6 +306,7 @@
     <Image Include="res\WndTypesStrip.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CommonUtl\utl\cpp.hint" />
     <None Include="res\Move.cur" />
     <None Include="res\SizeBottomRight.cur" />
     <None Include="res\SizeTopLeft.cur" />

@@ -34,4 +34,7 @@
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\utl\cpp.hint" />
+  </ItemGroup>
 </Project>

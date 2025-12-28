@@ -61,6 +61,7 @@
     </None>
     <None Include="_scratch.txt" />
     <None Include="ProjectNotes.txt" />
+    <None Include="..\CommonUtl\utl\cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">

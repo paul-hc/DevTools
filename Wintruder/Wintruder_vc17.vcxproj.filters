@@ -283,5 +283,6 @@
     <None Include="res\WindowPointer.cur">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\CommonUtl\utl\cpp.hint" />
   </ItemGroup>
 </Project>

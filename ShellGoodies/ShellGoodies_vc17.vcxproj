@@ -294,6 +294,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="..\CommonUtl\utl\cpp.hint" />
     <None Include="ProjectNotes.txt" />
     <None Include="res\ImageStrip.bmp" />
     <None Include="res\ImageStrip.png" />

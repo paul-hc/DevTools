@@ -236,6 +236,7 @@
     <Image Include="res\DateTimeDisplay.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CommonUtl\utl\cpp.hint" />
     <None Include="res\DateTimeDisplay.rc2" />
   </ItemGroup>
   <ItemGroup>

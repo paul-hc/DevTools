@@ -199,6 +199,6 @@
     <None Include="res\DemoUtl.rc2">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="cpp.hint" />
+    <None Include="..\utl\cpp.hint" />
   </ItemGroup>
 </Project>

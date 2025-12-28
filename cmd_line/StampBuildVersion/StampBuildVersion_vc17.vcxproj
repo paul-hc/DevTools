@@ -291,6 +291,7 @@
     <ClInclude Include="test\ResourceFileTests.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\CommonUtl\utl\cpp.hint" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>

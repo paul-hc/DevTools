@@ -63,5 +63,6 @@
       <Filter>Tests</Filter>
     </None>
     <None Include="ReadMe.txt" />
+    <None Include="..\..\CommonUtl\utl\cpp.hint" />
   </ItemGroup>
 </Project>
