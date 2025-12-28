@@ -315,7 +315,7 @@ bool CRenameFileCmd::IsUndoable( void ) const override
 
 void CRenameFileCmd::Serialize( CArchive& archive ) override
 {
-	cmd::CBaseFileCmd::Serialize( archive );
+	__super::Serialize( archive );
 
 	archive & m_srcPath;
 	archive & m_destPath;
@@ -374,7 +374,7 @@ bool CTouchFileCmd::IsUndoable( void ) const override
 
 void CTouchFileCmd::Serialize( CArchive& archive ) override
 {
-	cmd::CBaseFileCmd::Serialize( archive );
+	__super::Serialize( archive );
 
 	if ( archive.IsStoring() )
 	{

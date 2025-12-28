@@ -318,6 +318,8 @@
     <ClInclude Include="SampleView_fwd.h" />
     <ClInclude Include="ScopedBitmapMemDC.h" />
     <ClInclude Include="ScopedGdi.h" />
+    <ClInclude Include="SelectionData.h" />
+    <ClInclude Include="SelectionData.hxx" />
     <ClInclude Include="ShellContextMenuBuilder.h" />
     <ClInclude Include="ShellContextMenuHost.h" />
     <ClInclude Include="ShellDialogs.h" />
@@ -354,7 +356,9 @@
     <ClInclude Include="test\WicImageTests.h" />
     <ClInclude Include="TextEdit.h" />
     <ClInclude Include="TextEditor.h" />
+    <ClInclude Include="TextEdit_fwd.h" />
     <ClInclude Include="TextEffect.h" />
+    <ClInclude Include="TextListEditor.h" />
     <ClInclude Include="ThemeItem.h" />
     <ClInclude Include="ThemeStatic.h" />
     <ClInclude Include="Thumbnailer.h" />
@@ -437,6 +441,7 @@
     <ClCompile Include="FilterStore.cpp" />
     <ClCompile Include="GdiCoords.cpp" />
     <ClCompile Include="GroupIconRes.cpp" />
+    <ClCompile Include="HeaderIncludes.cpp" />
     <ClCompile Include="HistoryComboBox.cpp" />
     <ClCompile Include="Icon.cpp" />
     <ClCompile Include="IconButton.cpp" />
@@ -536,6 +541,7 @@
     <ClCompile Include="TextEdit.cpp" />
     <ClCompile Include="TextEditor.cpp" />
     <ClCompile Include="TextEffect.cpp" />
+    <ClCompile Include="TextListEditor.cpp" />
     <ClCompile Include="ThemeItem.cpp" />
     <ClCompile Include="ThemeStatic.cpp" />
     <ClCompile Include="Thumbnailer.cpp" />
@@ -583,7 +589,7 @@
     <Image Include="res\Unknown.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
+    <None Include="..\cpp.hint" />
     <None Include="res\DragDrop-Copy.cur" />
     <None Include="res\DragDrop-Move.cur" />
     <None Include="res\DragDrop-None.cur" />

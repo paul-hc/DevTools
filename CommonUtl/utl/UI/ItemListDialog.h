@@ -133,9 +133,6 @@ public:
 	virtual bool InEditMode( void ) const;
 	virtual bool EditSelItem( void );
 private:
-	Range<int> GetLineRange( int linePos ) const;
-	Range<int> SelectLine( int linePos );
-
 	void QueryEditItems( std::vector<std::tstring>& rItems ) const;
 	void OutputEdit( void );
 	void OnSelectedLinesChanged( void );

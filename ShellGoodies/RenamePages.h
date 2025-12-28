@@ -5,8 +5,8 @@
 #include "utl/ISubject.h"
 #include "utl/UI/LayoutPropertyPage.h"
 #include "utl/UI/ReportListControl.h"
+#include "utl/UI/SelectionData.h"
 #include "utl/UI/SyncScrolling.h"
-#include "utl/UI/TextEditor.h"
 #include "utl/UI/ThemeStatic.h"
 #include "Application_fwd.h"
 
@@ -18,7 +18,6 @@ class CRenameItem;
 
 interface IRenamePage : public utl::IObserver
 {
-	virtual void EnsureVisibleItem( const CRenameItem* pRenameItem ) = 0;
 	virtual void InvalidateFiles( void ) {}
 };
 
@@ -49,18 +48,19 @@ protected:
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 
 	virtual void DoSetupFileListView( void ) = 0;
+	virtual void DoUpdateFileListViewItems( const std::vector<CRenameItem*>& selItems ) = 0;
 	virtual ren::TSortingPair GetListSorting( void ) const = 0;
 public:
 	virtual ~CBaseRenameListPage();
 private:
 	// IRenamePage interface
-	virtual void EnsureVisibleItem( const CRenameItem* pRenameItem ) override;
 	virtual void InvalidateFiles( void ) override;
 
 	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override;
 
 	void SetupFileListView( void );
+	void UpdateFileListViewItems( const std::vector<CRenameItem*>& selItems );
 protected:
 	// enum { IDD = IDD_REN_LIST_PAGE };
 
@@ -83,6 +83,7 @@ public:
 	CRenameSimpleListPage( CRenameFilesDialog* pParentDlg );
 protected:
 	virtual void DoSetupFileListView( void ) override;
+	virtual void DoUpdateFileListViewItems( const std::vector<CRenameItem*>& selItems ) override;
 	virtual ren::TSortingPair GetListSorting( void ) const override;
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 private:
@@ -99,12 +100,20 @@ public:
 	CRenameDetailsListPage( CRenameFilesDialog* pParentDlg );
 protected:
 	virtual void DoSetupFileListView( void ) override;
+	virtual void DoUpdateFileListViewItems( const std::vector<CRenameItem*>& selItems ) override;
 	virtual ren::TSortingPair GetListSorting( void ) const override;
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 };
 
 
+#include "utl/UI/TextListEditor.h"
+
+
+class CDestFilenameAdapter;
+
+
 class CRenameEditPage : public CBaseRenamePage
+	, private ui::ITextInput
 {
 public:
 	CRenameEditPage( CRenameFilesDialog* pParentDlg );
@@ -115,35 +124,35 @@ private:
 	// utl::IObserver interface (via IRenamePage)
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 
-	// IRenamePage interface
-	virtual void EnsureVisibleItem( const CRenameItem* pRenameItem ) override;
+	// ui::ITextInput interface
+	virtual ui::ITextInput::Result OnEditInput( IN OUT ui::CTextValidator& rValidator ) implement;
 
 	void SetupFileEdits( void );
+	void UpdateFileEdits( const std::vector<CRenameItem*>& selRenameItems );
 
-	bool InputDestPaths( void );		// validated results in m_newDestPaths
-	bool AnyChanges( void ) const;
-	bool SelectItem( const CRenameItem* pRenameItem );
-	bool SelectItemLine( int linePos );
-	bool SyncSelectItemLine( const CTextEdit& fromEdit, CTextEdit* pToEdit );
+	bool InputDestPaths( OUT std::vector<fs::CPath>& rNewDestPaths );		// validated results
+	bool AnyChanges( const std::vector<fs::CPath>& newDestPaths ) const;
+
+	bool SelectItems( const ui::CSelectionData<CRenameItem>& selData );
+	bool SyncSelectItemLine( const CTextListEditor& fromEdit, CTextListEditor* pToEdit );
 private:
-	std::vector<fs::CPath> m_newDestPaths;
+	std::auto_ptr<CDestFilenameAdapter> m_pDestAdapter;
 private:
 	// enum { IDD = IDD_REN_EDIT_PAGE };
 
 	CThemeStatic m_srcStatic, m_destStatic;
-	CTextEdit m_srcEdit;
-	CTextEditor m_destEditor;
+	CTextListEditor m_srcEdit;		// read-only
+	CTextListEditor m_destEdit;
 
 	CSyncScrolling m_syncScrolling;
-	CTextEdit::TLine m_lastCaretLinePos;
+protected:
+	// base overrides
+	virtual bool RestoreFocusControl( void ) override;
 
 	// generated stuff
-protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType );
-	afx_msg void OnEnChange_DestPaths( void );
-	afx_msg void OnEnKillFocus_DestPaths( void );
 	afx_msg void OnEnUserSelChange_SrcPaths( void );
 	afx_msg void OnEnUserSelChange_DestPaths( void );
 

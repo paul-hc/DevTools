@@ -190,50 +190,50 @@ void CStringTests::TestValueToString( void )
 void CStringTests::TestTrim( void )
 {
 	{
-		static const char srcText[] = "\t  ab c \t\t";
+		const char srcText[] = "\t  ab c \t\t";
 
 		std::string text;
 
-		str::Trim( text );
+		ASSERT_EQUAL( 0, str::Trim( text ) );
 		ASSERT_EQUAL( "", text );
 
-		str::TrimLeft( text = srcText );
+		ASSERT_EQUAL( 3, str::TrimLeft( text = srcText ) );
 		ASSERT_EQUAL( "ab c \t\t", text );
 
-		str::TrimRight( text = srcText );
+		ASSERT_EQUAL( 3, str::TrimRight( text = srcText ) );
 		ASSERT_EQUAL( "\t  ab c", text );
 
-		str::Trim( text = srcText );
+		ASSERT_EQUAL( 6, str::Trim( text = srcText ) );
 		ASSERT_EQUAL( "ab c", text );
 
-		str::Trim( text = srcText, srcText );		// entire text as whitespace
+		ASSERT_EQUAL( str::GetLength( srcText ), str::Trim( text = srcText, srcText ) );		// entire text as whitespace
 		ASSERT_EQUAL( "", text );
 
-		str::Trim( text = "C:/Users/Paul/AppData/Local/Temp/SliderTempClones" );
+		ASSERT_EQUAL( 0, str::Trim( text = "C:/Users/Paul/AppData/Local/Temp/SliderTempClones" ) );
 		ASSERT_EQUAL( "C:/Users/Paul/AppData/Local/Temp/SliderTempClones", text );
 	}
 
 	{
-		static const TCHAR srcText[] = _T("\t  ab c \t\t");
+		const TCHAR srcText[] = _T("\t  ab c \t\t");
 
 		std::tstring text;
 
-		str::Trim( text );
+		ASSERT_EQUAL( 0, str::Trim( text ) );
 		ASSERT_EQUAL( _T(""), text );
 
-		str::TrimLeft( text = srcText );
+		ASSERT_EQUAL( 3, str::TrimLeft( text = srcText ) );
 		ASSERT_EQUAL( _T("ab c \t\t"), text );
 
-		str::TrimRight( text = srcText );
+		ASSERT_EQUAL( 3, str::TrimRight( text = srcText ) );
 		ASSERT_EQUAL( _T("\t  ab c"), text );
 
-		str::Trim( text = srcText );
+		ASSERT_EQUAL( 6, str::Trim( text = srcText ) );
 		ASSERT_EQUAL( _T("ab c"), text );
 
-		str::Trim( text = srcText, srcText );		// entire text as whitespace
+		ASSERT_EQUAL( str::GetLength( srcText ), str::Trim( text = srcText, srcText ) );		// entire text as whitespace
 		ASSERT_EQUAL( _T(""), text );
 
-		str::Trim( text = _T("C:/Users/Paul/AppData/Local/Temp/SliderTempClones") );
+		ASSERT_EQUAL( 0, str::Trim( text = _T("C:/Users/Paul/AppData/Local/Temp/SliderTempClones") ) );
 		ASSERT_EQUAL( _T("C:/Users/Paul/AppData/Local/Temp/SliderTempClones"), text );
 	}
 }
@@ -767,6 +767,61 @@ void CStringTests::TestStringConversion( void )
 			ASSERT_EQUAL( 2, str::Replace<str::IgnoreCase>( &text, L"B,", L"", 2 ) );
 			ASSERT_EQUAL( "123B,4B,", text );
 		}
+	}
+
+	{
+		const char delims[] = ",;#";
+
+		std::string text;
+		ASSERT_EQUAL( 0, str::StripDelimiters( text, delims ) );
+		ASSERT_EQUAL( "", text );
+
+		text = "ab";
+		ASSERT_EQUAL( 0, str::StripDelimiters( text, delims ) );
+		ASSERT_EQUAL( "ab", text );
+
+		text = ",a,b,";
+		ASSERT_EQUAL( 3, str::StripDelimiters( text, delims ) );
+		ASSERT_EQUAL( "ab", text );
+
+		text = "a,b;;c##de#fg,,;#";
+		ASSERT_EQUAL( 10, str::StripDelimiters( text, delims ) );
+		ASSERT_EQUAL( "abcdefg", text );
+	}
+
+	{
+		const char delims[] = ",;#";
+
+		std::string text;
+		str::ReplaceDelimiters( text, delims, "" );
+		ASSERT_EQUAL( "", text );
+
+		text = "ab";
+		str::ReplaceDelimiters( text, delims, "" );
+		ASSERT_EQUAL( "ab", text );
+
+		text = "a,b;;c##de#fg,,;#";
+		str::ReplaceDelimiters( text, delims, "" );
+		ASSERT_EQUAL( "abcdefg", text );
+
+		text = "a,b;;c##de#fg,,;#";
+		str::ReplaceDelimiters( text, delims, "|" );
+		ASSERT_EQUAL( "a|b|c|de|fg|", text );
+	}
+
+	{
+		std::string text;
+
+		str::EnsureSingleSpace( text );
+		ASSERT_EQUAL( "", text );
+
+		text = "abcd";
+		str::EnsureSingleSpace( text );
+		ASSERT_EQUAL( "abcd", text );
+
+		text = " \tab  c \t d\t ";
+		str::EnsureSingleSpace( text );
+		ASSERT_EQUAL( " ab c d ", text );
 	}
 }
 

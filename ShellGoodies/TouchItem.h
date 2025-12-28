@@ -108,6 +108,12 @@ namespace multi
 
 namespace func
 {
+	struct AsSrcState
+	{
+		const fs::CFileState& operator()( const CTouchItem* pItem ) const { return pItem->GetSrcState(); }
+	};
+
+
 	typedef AsCreationTime TAsSrcCreationTime;
 	typedef AsModifyTime TAsSrcModifyTime;
 	typedef AsAccessTime TAsSrcAccessTime;

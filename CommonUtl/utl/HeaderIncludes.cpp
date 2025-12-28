@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "Algorithms.h"
+#include "CommonLength.h"
 #include "Resequence.h"
 #include "StdThread.h"
 #include "StringCvt.h"

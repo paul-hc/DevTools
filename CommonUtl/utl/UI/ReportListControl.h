@@ -26,6 +26,7 @@
 #endif
 
 
+class CFlagTags;
 class CListSelectionData;
 class CReportListCustomDraw;
 namespace ole { class CDataSource; }
@@ -255,9 +256,6 @@ public:
 
 	bool IsValidIndex( int index ) const { return index >= 0 && index < GetItemCount(); }
 
-	int GetTopIndex( void ) const;
-	void SetTopIndex( int topIndex );
-
 	enum MyHitTest { LVHT_MY_PASTEND = 0x00080000 };
 
 	int HitTest( CPoint point, UINT* pFlags = nullptr, TGroupId* pGroupId = nullptr ) const;
@@ -385,6 +383,9 @@ public:
 	template< typename Type >
 	Type* GetPtrAt( int index ) const { ASSERT( IsValidIndex( index ) ); return AsPtr<Type>( GetItemData( index ) ); }
 
+	template< typename Type >
+	Type* GetSafePtrAt( int index ) const { return index != -1 ? GetPtrAt<Type>( index ) : nullptr; }
+
 	bool SetPtrAt( int index, const void* pData ) { return SetItemData( index, (DWORD_PTR)pData ) != FALSE; }
 
 	utl::ISubject* GetSubjectAt( int index ) const;
@@ -394,9 +395,6 @@ public:
 
 	template< typename ObjectT >
 	void QueryObjectsSequence( std::vector<ObjectT*>& rObjects ) const;
-
-	template< typename ObjectT >
-	void QueryObjectsByIndex( std::vector<ObjectT*>& rObjects, const std::vector<int>& itemIndexes ) const;
 
 	bool DeleteAllItems( void );
 	void RemoveAllGroups( void );
@@ -415,10 +413,20 @@ public:
 	void DropMoveItems( int destIndex, const std::vector<int>& selIndexes );
 	bool ForceRearrangeItems( void );				// for icon view modes
 
-	int FindItemIndex( const std::tstring& itemText ) const;
-	int FindItemIndex( LPARAM lParam ) const;
 	int FindItemIndex( const void* pObject ) const { return FindItemIndex( (LPARAM)pObject ); }
 
+	int FindItemIndex( const std::tstring& itemText ) const;
+	int FindItemIndex( LPARAM lParam ) const;
+
+	template< typename PosT, typename ObjectT >
+	PosT FindItemPos( const ObjectT* pObject ) const { return static_cast<PosT>( FindItemIndex( pObject ) ); }
+
+	template< typename PosT, typename ObjectT >
+	void QueryItemIndexes( std::vector<PosT>& rIndexes, const std::vector<ObjectT*>& objects ) const;		// via FindItemIndex()
+
+	template< typename ObjectT, typename PosT >
+	void QueryObjectsByIndex( std::vector<ObjectT*>& rObjects, const std::vector<PosT>& itemIndexes ) const;
+public:
 	bool EnsureVisibleObject( const utl::ISubject* pObject );
 
 	void QueryItemsText( std::vector<std::tstring>& rItemsText, const std::vector<int>& indexes, int subItem = 0 ) const;
@@ -428,14 +436,16 @@ public:
 	// item state
 	bool HasItemState( int index, UINT stateMask ) const { return ( GetItemState( index, stateMask ) & stateMask ) != 0; }
 	bool HasItemStrictState( int index, UINT stateMask ) const { return stateMask == ( GetItemState( index, stateMask ) & stateMask ); }
-	int FindItemWithState( UINT stateMask ) const { return GetNextItem( -1, LVNI_ALL | stateMask ); }
-	bool HasItemWithState( UINT stateMask ) const { return GetNextItem( -1, LVNI_ALL | stateMask ) != -1; }
+	int FindItemWithState( UINT stateMask ) const { return GetNextItem( -1, stateMask ); }
+	bool HasItemWithState( UINT stateMask ) const { return GetNextItem( -1, stateMask ) != -1; }
 
 	static bool StateChanged( UINT newState, UINT oldState, UINT stateMask ) { return ( newState & stateMask ) != ( oldState & stateMask ); }
 	static bool IsStateChangeNotify( const NMLISTVIEW* pNmListView, UINT selMask );
 
 	static bool IsSelectionChangeNotify( const NMLISTVIEW* pNmListView, UINT selMask = LVIS_SELECTED | LVIS_FOCUSED ) { return IsStateChangeNotify( pNmListView, selMask ); }
 	static bool IsCheckStateChangeNotify( const NMLISTVIEW* pNmListView ) { return IsStateChangeNotify( pNmListView, LVIS_STATEIMAGEMASK ); }
+
+	bool IsSelectionCaretChangeNotify( const NMLISTVIEW* pNmListView ) const;	// non-static, optimized for minimal number of transitions, more useful
 
 	// check-box
 	bool GetToggleCheckSelItems( void ) const { return HasFlag( m_optionFlags, ToggleCheckSelItems ); }
@@ -487,40 +497,50 @@ private:
 	void NotifyCheckStatesChanged( void );
 	size_t ApplyCheckStateToSelectedItems( int toggledIndex, int checkState );
 public:
-	// CARET and SELECTION
+	enum ShowTopIndexMode { Vanilla, ScrollTwice, ScrollOnce, ScrollOffset };
+
+	// top item
+	int GetTopIndex( void ) const;
+	bool SetTopIndex( int topIndex, ShowTopIndexMode mode = ScrollTwice );
+
+	template< typename ObjectT > ObjectT* GetTopObjectAs( void ) const { return GetSafePtrAt<ObjectT>( GetTopIndex() ); }
+	bool SetTopObject( const void* pTopObject, ShowTopIndexMode mode = ScrollTwice );
+
+	// CARET
 	int GetCaretIndex( void ) const { return FindItemWithState( LVNI_FOCUSED ); }
 	bool SetCaretIndex( int index, bool doSet = true );
+	bool IsCaretAt( int index ) const { return HasItemState( index, LVNI_FOCUSED ); }
 
+	template< typename ObjectT > ObjectT* GetCaretAs( void ) const { return GetSafePtrAt<ObjectT>( GetCaretIndex() ); }
+	bool SetCaretObject( const void* pCaretObject, bool doSet = true );
+
+	// SELECTION
 	int GetCurSel( void ) const;
 	bool SetCurSel( int index, bool doSelect = true );		// caret and selection
 
+	template< typename ObjectT > ObjectT* GetSelected( void ) const { return GetSafePtrAt<ObjectT>( GetCurSel() ); }
+	bool Select( const void* pObject );
+
 	int GetSelCaretIndex( void ) const;						// if caret is not selected returns NULL, even if we have multiple selection (to allow NULL details when toggling an item unselected)
 
-	template< typename ObjectT >
-	ObjectT* GetCaretAs( void ) const;
-
 	bool AnySelected( UINT stateMask = LVIS_SELECTED ) const { return HasItemWithState( stateMask ); }
-	bool SingleSelected( void ) const;
+	bool IsSingleSelected( void ) const;
 
-	bool IsSelected( int index ) const { return HasItemState( index, LVIS_SELECTED ); }
-	bool SetSelected( int index, bool doSelect = true ) { return SetItemState( index, doSelect ? LVIS_SELECTED : 0, LVIS_SELECTED ) != FALSE; }
+	bool IsSelectedAt( int index ) const { return HasItemState( index, LVIS_SELECTED ); }
+	bool SetSelectedAt( int index, bool doSelect = true ) { return SetItemState( index, doSelect ? LVIS_SELECTED : 0, LVIS_SELECTED ) != FALSE; }
 
 	// multiple selection
-	bool GetSelection( std::vector<int>& rSelIndexes, int* pCaretIndex = nullptr, int* pTopIndex = nullptr ) const;
-	void SetSelection( const std::vector<int>& selIndexes, int caretIndex = -1 );
+	bool GetSelIndexes( std::vector<int>& rSelIndexes, int* pCaretIndex = nullptr, int* pTopIndex = nullptr ) const;
+	void SetSelIndexes( const std::vector<int>& selIndexes, int caretIndex = -1 );
 	void ClearSelection( void );
 	void SelectAll( void );
 
 	bool GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex ) const;
 	Range<int> GetSelIndexRange( void ) const;
+	bool IsSelContiguous( void ) const;
 
 	template< typename ObjectT >
-	ObjectT* GetSelected( void ) const;
-
-	bool Select( const void* pObject );
-
-	template< typename ObjectT >
-	bool QuerySelectionAs( std::vector<ObjectT*>& rSelObjects ) const;
+	bool QuerySelectionAs( OUT std::vector<ObjectT*>& rSelObjects, OUT OPTIONAL ObjectT** ppCaretItem = nullptr, OUT OPTIONAL ObjectT** ppTopVisibleItem = nullptr ) const;
 
 	template< typename ObjectT >
 	void SelectObjects( const std::vector<ObjectT*>& objects );
@@ -551,6 +571,9 @@ public:
 	// diff columns
 	template< typename MatchFunc >
 	void SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::TGetMatch()
+
+	template< typename MatchFunc >
+	void UpdateItemDiffColumnDest( int index, TColumn destColumn, MatchFunc getMatchFunc );			// call after Dest column text was updated for a given item
 protected:
 	const CDiffColumnPair* FindDiffColumnPair( TColumn column ) const;
 	bool IsDiffColumn( TColumn column ) const { return FindDiffColumnPair( column ) != nullptr; }
@@ -615,6 +638,12 @@ public:
 	void ExpandAllGroups( void );
 #endif //UTL_VISTA_GROUPS
 
+#ifdef _DEBUG
+	static const CFlagTags& GetTags_LV_Flags( void );
+	static const CFlagTags& GetTags_LV_State( void );
+#endif
+
+	static void TraceNotify( const NMLISTVIEW* pNmList );
 private:
 	bool UpdateCustomImagerBoundsSize( void );
 private:
@@ -813,15 +842,6 @@ public:
 	CWnd* m_pSrcWnd;
 	std::vector<int> m_selIndexes;
 };
-
-
-// CReportListControl inline code
-
-inline bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags /*= ListSourcesMask*/ ) const
-{
-	CListSelectionData selData( const_cast<CReportListControl*>( this ) );
-	return CacheSelectionData( pDataSource, sourceFlags, selData );
-}
 
 
 #endif // ReportListControl_h

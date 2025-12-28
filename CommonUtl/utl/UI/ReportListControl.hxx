@@ -18,14 +18,26 @@ void CReportListControl::QueryObjectsSequence( std::vector<ObjectT*>& rObjects )
 		rObjects.push_back( GetPtrAt<ObjectT>( i ) );
 }
 
-template< typename ObjectT >
-void CReportListControl::QueryObjectsByIndex( std::vector<ObjectT*>& rObjects, const std::vector<int>& itemIndexes ) const
+template< typename PosT, typename ObjectT >
+void CReportListControl::QueryItemIndexes( std::vector<PosT>& rIndexes, const std::vector<ObjectT*>& objects ) const
 {
-	rObjects.reserve( rObjects.size() + itemIndexes.size() );
+#ifdef IS_CPP_11
+	std::transform( objects.begin(), objects.end(), std::back_inserter( rIndexes ), [this]( const ObjectT* pObject ) { return FindItemPos<PosT>( pObject ); } );
+#else
+	for ( typename std::vector<ObjectT*>::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
+		rIndexes.push_back( FindItemPos<PosT>( *itObject ) );
+#endif
+}
 
-	for ( std::vector<int>::const_iterator itIndex = itemIndexes.begin(); itIndex != itemIndexes.end(); ++itIndex )
-		if ( ObjectT* pObject = GetPtrAt<ObjectT>( *itIndex ) )
-			rObjects.push_back( pObject );
+template< typename ObjectT, typename PosT >
+void CReportListControl::QueryObjectsByIndex( std::vector<ObjectT*>& rObjects, const std::vector<PosT>& itemIndexes ) const
+{
+#ifdef IS_CPP_11
+	std::transform( itemIndexes.begin(), itemIndexes.end(), std::back_inserter( rObjects ), [this]( PosT index ) { return GetPtrAt<ObjectT>( index ); } );
+#else
+	for ( typename std::vector<PosT>::const_iterator itIndex = itemIndexes.begin(); itIndex != itemIndexes.end(); ++itIndex )
+		rObjects.push_back( GetPtrAt<ObjectT>( *itIndex ) );
+#endif
 }
 
 template< typename ObjectT >
@@ -48,30 +60,24 @@ void CReportListControl::SetObjectsCheckedState( const std::vector<ObjectT*>* pO
 			ModifyCheckState( i, BST_UNCHECKED );
 }
 
-
 template< typename ObjectT >
-ObjectT* CReportListControl::GetCaretAs( void ) const
-{
-	int caretIndex = GetCaretIndex();
-	return caretIndex != -1 ? GetPtrAt<ObjectT>( caretIndex ) : nullptr;
-}
-
-template< typename ObjectT >
-ObjectT* CReportListControl::GetSelected( void ) const
-{
-	int selIndex = GetCurSel();
-	return selIndex != -1 ? GetPtrAt<ObjectT>( selIndex ) : nullptr;
-}
-
-template< typename ObjectT >
-bool CReportListControl::QuerySelectionAs( std::vector<ObjectT*>& rSelObjects ) const
+bool CReportListControl::QuerySelectionAs( OUT std::vector<ObjectT*>& rSelObjects,
+										   OUT OPTIONAL ObjectT** ppCaretItem /*= nullptr*/, OUT OPTIONAL ObjectT** ppTopVisibleItem /*= nullptr*/ ) const
 {
 	std::vector<int> selIndexes;
-	if ( !GetSelection( selIndexes ) )
-		return false;
+	int caretIndex = -1, topIndex = -1;
 
 	rSelObjects.clear();
+	if ( !GetSelIndexes( selIndexes, &caretIndex, &topIndex ) )
+		return false;
+
 	QueryObjectsByIndex( rSelObjects, selIndexes );
+
+	if ( ppCaretItem != nullptr )
+		*ppCaretItem = caretIndex != -1 ? GetPtrAt<ObjectT>( caretIndex ) : nullptr;
+
+	if ( ppCaretItem != nullptr )
+		*ppTopVisibleItem = topIndex != -1 ? GetPtrAt<ObjectT>( topIndex ) : nullptr;
 
 	return !rSelObjects.empty() && rSelObjects.size() == selIndexes.size();		// homogenous selection?
 }
@@ -88,7 +94,7 @@ void CReportListControl::SelectObjects( const std::vector<ObjectT*>& objects )
 	}
 
 	if ( !selIndexes.empty() )
-		SetSelection( selIndexes, selIndexes.front() );
+		SetSelIndexes( selIndexes, selIndexes.front() );
 	else
 		ClearSelection();
 }
@@ -108,6 +114,7 @@ void CReportListControl::QueryGroupItems( std::vector<ObjectT*>& rObjectItems, i
 template< typename MatchFunc >
 void CReportListControl::SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc )
 {
+	m_diffColumnPairs.clear();
 	m_diffColumnPairs.push_back( CDiffColumnPair( srcColumn, destColumn ) );
 
 	std::unordered_map<TRowKey, str::TMatchSequence>& rRowSequences = m_diffColumnPairs.back().m_rowSequences;
@@ -124,6 +131,22 @@ void CReportListControl::SetupDiffColumnPair( TColumn srcColumn, TColumn destCol
 		VERIFY( SetItemText( index, srcColumn, LPSTR_TEXTCALLBACK ) );
 		VERIFY( SetItemText( index, destColumn, LPSTR_TEXTCALLBACK ) );
 	}
+}
+
+template< typename MatchFunc >
+void CReportListControl::UpdateItemDiffColumnDest( int index, TColumn destColumn, MatchFunc getMatchFunc )
+{	// call after Dest column text was updated for a given item
+	CDiffColumnPair* pDiffColumnPair = const_cast<CReportListControl::CDiffColumnPair*>( FindDiffColumnPair( destColumn ) );
+	ASSERT_PTR( pDiffColumnPair );
+	ASSERT( pDiffColumnPair->m_destColumn == destColumn );
+
+	std::unordered_map<TRowKey, str::TMatchSequence>& rRowSequences = pDiffColumnPair->m_rowSequences;
+	str::TMatchSequence& rMatchSequence = rRowSequences[ MakeRowKeyAt( index ) ];
+
+	rMatchSequence.UpdateDestText( GetItemText( index, destColumn ).GetString(), getMatchFunc );
+
+	// replace with LPSTR_TEXTCALLBACK to allow custom draw without default sub-item draw interference (on CDDS_ITEMPOSTPAINT | CDDS_SUBITEM)
+	VERIFY( SetItemText( index, destColumn, LPSTR_TEXTCALLBACK ) );
 }
 
 

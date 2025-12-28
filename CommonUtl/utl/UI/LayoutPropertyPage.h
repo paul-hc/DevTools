@@ -52,7 +52,7 @@ public:
 	virtual void SetModified( bool changed );
 protected:
 	bool StoreFocusControl( void );
-	bool RestoreFocusControl( void );
+	virtual bool RestoreFocusControl( void );
 
 	virtual void OnIdleUpdateControls( void );
 private:

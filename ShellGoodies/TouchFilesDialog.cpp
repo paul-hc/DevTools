@@ -697,7 +697,7 @@ void CTouchFilesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pRes
 {
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 
-	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	if ( m_fileListCtrl.IsSelectionCaretChangeNotify( pNmList ) )
 	{
 		//UpdateFieldsFromSel( m_fileListCtrl.GetCurSel() );
 	}

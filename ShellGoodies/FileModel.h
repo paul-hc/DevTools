@@ -45,6 +45,8 @@ public:
 	const std::vector<fs::CPath>& GetSourcePaths( void ) const { return m_sourcePaths; }
 	bool IsSourceSingleFolder( void ) const;						// single selected directory as paste target?
 
+	const std::vector<fs::CPath>& GetSrcFolderPaths( void ) const { return m_srcFolderPaths; }
+
 	bool SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd );
 	void FetchFromStack( svc::StackType stackType );				// fetches data set from undo stack (macro command)
 
@@ -124,7 +126,8 @@ private:
 private:
 	svc::ICommandService* m_pCmdSvc;
 	std::vector<fs::CPath> m_sourcePaths;
-	fs::CPath m_commonParentPath;						// for paths in multiple directories
+	fs::CPath m_commonParentPath;					// for paths in multiple directories
+	std::vector<fs::CPath> m_srcFolderPaths;		// all folders referenced
 
 	persist ren::TSortingPair m_renameSorting;
 

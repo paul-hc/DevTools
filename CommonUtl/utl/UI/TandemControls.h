@@ -53,6 +53,7 @@ protected:
 	virtual bool OnMateCommand( UINT cmdId );
 protected:
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
+	afx_msg void OnWindowPosChanged( WINDOWPOS* pWndPos );
 
 	DECLARE_MESSAGE_MAP()
 };

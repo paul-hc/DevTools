@@ -10,7 +10,6 @@
 
 class CFileModel;
 class CPathItemBase;
-class CReportListControl;
 
 
 abstract class CFileEditorBaseDialog : public CBaseMainDialog

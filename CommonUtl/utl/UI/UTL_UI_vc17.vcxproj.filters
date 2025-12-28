@@ -719,6 +719,18 @@
     <ClInclude Include="test\ToolBarImagesTests.h">
       <Filter>Tests\UI TestDevice</Filter>
     </ClInclude>
+    <ClInclude Include="SelectionData.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectionData.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TextListEditor.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEdit_fwd.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1222,6 +1234,12 @@
     <ClCompile Include="test\ToolBarImagesTests.cpp">
       <Filter>Tests\UI TestDevice</Filter>
     </ClCompile>
+    <ClCompile Include="HeaderIncludes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextListEditor.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="utl_ui.rc">
@@ -1288,7 +1306,7 @@
     <None Include="res\TrackZoom.cur">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="cpp.hint" />
+    <None Include="..\cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

@@ -85,7 +85,7 @@ IMPLEMENT_OLECREATE(TextContent, "IDETools.TextContent", 0xe37fe177, 0xcbb7, 0x1
 
 BSTR TextContent::GetText( void )
 {
-	return str::AllocSysString( m_textContent );
+	return mfc::AllocSysString( m_textContent );
 }
 
 void TextContent::SetText( LPCTSTR lpszNewValue )
@@ -183,7 +183,7 @@ BSTR TextContent::Tokenize( LPCTSTR separatorCharSet )
 
 	m_currToken = _tcstok( &m_tokenizedBuffer.front(), m_tokenizedSeps.c_str() );
 
-	return str::AllocSysString( m_currToken );
+	return mfc::AllocSysString( m_currToken );
 }
 
 // Returns the next token (if any), otherwise an empty string.
@@ -193,7 +193,7 @@ BSTR TextContent::GetNextToken( void )
 	if ( !m_currToken.empty() )
 		m_currToken = _tcstok( nullptr, m_tokenizedSeps.c_str() );
 
-	return str::AllocSysString( m_currToken );
+	return mfc::AllocSysString( m_currToken );
 }
 
 long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTrimTrailingSpaces )

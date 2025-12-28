@@ -12,7 +12,7 @@ namespace path
 	struct CDelims
 	{
 	public:
-		static const std::tstring s_dirDelims;
+		static const std::tstring s_dirDelims;				// slashes
 		static const std::tstring s_hugePrefix;				// huge prefix syntax: path prefixed with "\\?\"
 		static const std::tstring s_wildcards;
 		static const std::tstring s_multiSpecDelims;
@@ -20,6 +20,9 @@ namespace path
 
 		static const TCHAR s_complexPathSep = '>';			// '>' character that separates the storage file path from the stream/storage embedded sub-path
 	};
+
+
+	enum { LONG_PATH = MAX_PATH * 2 };		// double the buffer size, just in case
 
 
 	// huge prefix syntax: path prefixed with "\\?\"
@@ -114,6 +117,7 @@ namespace path
 	SpecMatch MatchesPrefix( const TCHAR* pFilePath, const TCHAR* pPrefixOrSpec );
 
 	bool IsValid( const std::tstring& path );
+	bool IsValidFilename( const std::tstring& path );
 	const TCHAR* GetInvalidChars( void );
 	const TCHAR* GetReservedChars( void );
 
@@ -161,10 +165,10 @@ namespace path
 	// normal: backslashes only
 	bool IsWindows( const TCHAR* pPath );
 	std::tstring MakeWindows( const TCHAR* pPath );
-	inline std::tstring& Normalize( IN OUT std::tstring& rPath ) { return rPath = MakeWindows( rPath.c_str() ); }
+	bool Normalize( IN OUT std::tstring& rPath );
 
 	std::tstring MakeCanonical( const TCHAR* pPath );						// relative to absolute normalized: "X:/A\./B\..\C" -> "X:\A\C"
-	inline std::tstring& Canonicalize( IN OUT std::tstring& rPath ) { return rPath = MakeCanonical( rPath.c_str() ); }
+	bool Canonicalize( IN OUT std::tstring& rPath );
 
 	std::tstring Combine( const TCHAR* pDirPath, const TCHAR* pRightPath );	// canonic merge, pRightPath could be a relative path, name.ext, sub-dir path, or other combinations
 
@@ -579,6 +583,34 @@ namespace str
 		inline const TCHAR* GetCharPtr( const fs::CPath& filePath ) { return filePath.GetPtr(); }
 		inline size_t GetLength( const fs::CPath& filePath ) { return filePath.Get().length(); }
 	}
+
+	template< typename StringT >
+	size_t StripDelimiters( IN OUT StringT& rText, const typename StringT::value_type delimiters[] );	// FWD
+}
+
+
+namespace pred
+{
+	struct ValidatePath : public std::unary_function<fs::CPath, bool>
+	{
+		ValidatePath( void ) : m_invalidCount( 0 ), m_amendedCount( 0 ) {}
+
+		bool operator()( std::tstring& rFilePath );
+		bool operator()( fs::CPath& rFilePath ) { return operator()( rFilePath.Ref() ); }
+	public:
+		size_t m_invalidCount, m_amendedCount;
+	};
+
+
+	struct ValidateFilename : public std::unary_function<std::tstring, bool>
+	{
+		ValidateFilename( bool trimRight = true ) : m_trimRight( trimRight ), m_invalidCount( 0 ), m_amendedCount( 0 ) {}
+
+		bool operator()( std::tstring& rFilename );
+	public:
+		bool m_trimRight;			// can be false for FNAMEs (spaces before extension)
+		size_t m_invalidCount, m_amendedCount;
+	};
 }
 
 

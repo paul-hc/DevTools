@@ -10,7 +10,7 @@ enum PromptField { PF_None = -1, PF_Handle, PF_Class, PF_Caption, PF_ID, PF_Styl
 
 
 class CGeneralPage : public CLayoutPropertyPage
-				   , public IWndObserver
+	, public IWndObserver
 {
 	friend class CInfoEditBox;
 public:

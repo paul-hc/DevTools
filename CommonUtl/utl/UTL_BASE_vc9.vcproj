@@ -401,6 +401,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CommonLength.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Compare_fwd.h"
 				>
 			</File>
@@ -594,10 +598,6 @@
 			</File>
 			<File
 				RelativePath=".\StringCompare.h"
-				>
-			</File>
-			<File
-				RelativePath=".\StringCompare.hxx"
 				>
 			</File>
 			<File

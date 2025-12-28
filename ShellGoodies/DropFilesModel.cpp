@@ -8,9 +8,11 @@
 #include "utl/EnumTags.h"
 #include "utl/FileEnumerator.h"
 #include "utl/FileSystem.h"
+#include "utl/Guards.h"
 #include "utl/Logger.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
+#include "utl/Unique.h"
 #include "utl/UI/Clipboard.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/ShellTypes.h"
@@ -92,21 +94,22 @@ void CDropFilesModel::Init( const std::vector<fs::CPath>& dropPaths, DROPEFFECT 
 
 void CDropFilesModel::InitSrcFolders( void )
 {
-	// folders of drop source files
-	for ( std::vector<fs::CPath>::const_iterator itDropPath = m_dropPaths.begin(); itDropPath != m_dropPaths.end(); ++itDropPath )
-		if ( fs::IsValidDirectory( itDropPath->GetPtr() ) )
-			utl::AddUnique( m_srcFolderPaths, *itDropPath );
-		else
-			utl::AddUnique( m_srcFolderPaths, itDropPath->GetParentPath() );
+	REQUIRE( m_srcFolderPaths.empty() );
 
+	fs::QueryFolderPaths( m_srcFolderPaths, m_dropPaths );		// folders of drop source files
 	fs::SortPaths( m_srcFolderPaths );
 
-	for ( std::vector<fs::CPath>::const_iterator itSrcFolderPath = m_srcFolderPaths.begin(); itSrcFolderPath != m_srcFolderPaths.end(); ++itSrcFolderPath )
 	{
-		m_srcDeepFolderPaths.push_back( *itSrcFolderPath );
+		utl::CSectionGuard guard( str::Format( _T("CDropFilesModel::InitSrcFolders() - fs::EnumSubDirPaths: %d folders"), m_srcFolderPaths.size() ), true );
 
-		fs::EnumSubDirPaths( m_srcDeepFolderPaths, *itSrcFolderPath, _T("*"), fs::EF_Recurse );
+		for ( std::vector<fs::CPath>::const_iterator itSrcFolderPath = m_srcFolderPaths.begin(); itSrcFolderPath != m_srcFolderPaths.end(); ++itSrcFolderPath )
+		{
+			m_srcDeepFolderPaths.push_back( *itSrcFolderPath );
+
+			fs::EnumSubDirPaths( m_srcDeepFolderPaths, *itSrcFolderPath, _T("*"), fs::EF_Recurse );
+		}
 	}
+
 	fs::SortPaths( m_srcDeepFolderPaths );
 }
 
@@ -208,6 +211,7 @@ bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOw
 
 	std::vector<fs::CPath> newDropPaths;
 	DROPEFFECT newDropEffect = CClipboard::QueryDropFilePaths( newDropPaths );
+
 	if ( newDropEffect == m_dropEffect && newDropPaths == m_dropPaths )				// this was a long process: user did not do a new other copy & paste in the meantime?
 		CTextClipboard::CopyToLines( destPaths, pParentOwner->GetSafeHwnd() );		// clear clipboard after Paste, and add the destination paths as text
 
@@ -236,6 +240,7 @@ bool CDropFilesModel::PasteBackup( CWnd* pParentOwner )
 
 	std::vector<fs::CPath> newDropPaths;
 	DROPEFFECT newDropEffect = CClipboard::QueryDropFilePaths( newDropPaths );
+
 	if ( newDropEffect == m_dropEffect && newDropPaths == m_dropPaths )				// this was a long process: user did not do a new other copy & paste in the meantime?
 		CTextClipboard::CopyToLines( destPaths, pParentOwner->GetSafeHwnd() );		// clear clipboard after Paste, and add the destination paths as text
 

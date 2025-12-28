@@ -39,6 +39,19 @@ namespace func
 
 namespace utl
 {
+	template< typename EnumT >
+	inline EnumT MaxEnum( EnumT left, EnumT right )
+	{
+		return static_cast<EnumT>( std::max<int>( left, right ) );
+	}
+
+	template< typename EnumT >
+	inline EnumT MinEnum( EnumT left, EnumT right )
+	{
+		return static_cast<EnumT>( std::min<int>( left, right ) );
+	}
+
+
 	// va_list algorithms
 
 	template< typename ArgT >
@@ -60,45 +73,8 @@ namespace utl
 }
 
 
-// general algorithms
-
 namespace utl
 {
-	template< typename ContainerT, typename FuncT >
-	inline FuncT for_each( IN OUT ContainerT& rObjects, FuncT func )
-	{
-		return std::for_each( rObjects.begin(), rObjects.end(), func );
-	}
-
-	template< typename ContainerT, typename FuncT >
-	inline FuncT for_each( const ContainerT& objects, FuncT func )
-	{
-		return std::for_each( objects.begin(), objects.end(), func );
-	}
-
-
-	template< typename DiffT, typename IteratorT >
-	inline DiffT Distance( IteratorT itFirst, IteratorT itLast )
-	{
-		return static_cast<DiffT>( std::distance( itFirst, itLast ) );
-	}
-
-
-	// container bounds: works with std::list (not random iterator)
-
-	template< typename ContainerT >
-	inline const typename ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
-
-	template< typename ContainerT >
-	inline typename ContainerT::value_type& Front( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
-
-	template< typename ContainerT >
-	inline const typename ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
-
-	template< typename ContainerT >
-	inline typename ContainerT::value_type& Back( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
-
-
 	// reverse iterator based on forward position (mainly for unit testing)
 
 	template< typename ContainerT >

@@ -89,6 +89,54 @@ namespace str
 
 		return false;
 	}
+
+	template< typename StringT >
+	inline size_t StripDelimiters( IN OUT StringT& rText, const typename StringT::value_type delimiters[] )
+	{
+		ASSERT( !str::IsEmpty( delimiters ) );
+		size_t count = 0;
+
+		for ( size_t pos = 0;
+			  ( pos = rText.find_first_of( delimiters, pos ) ) != std::string::npos;
+			  ++count )
+		{
+			rText.erase( pos, 1 );
+		}
+
+		return count;
+	}
+
+
+	// search & replace
+
+	template< typename StringT >
+	size_t ReplaceDelimiters( IN OUT StringT& rText, const typename StringT::value_type delimiters[], const typename StringT::value_type* pNewDelimiters = nullptr )
+	{
+		ASSERT( !str::IsEmpty( delimiters ) );
+		size_t count = 0, replaceLen = str::GetLength( pNewDelimiters );
+
+		for ( size_t pos = 0;
+			  ( pos = rText.find_first_of( delimiters, pos ) ) != std::string::npos;
+			  pos += replaceLen )
+		{
+			size_t delimEndPos = rText.find_first_not_of( delimiters, pos );
+			if ( StringT::npos == delimEndPos )
+				delimEndPos = rText.length();
+
+			size_t delimCount = delimEndPos - pos;
+
+			rText.replace( pos, delimCount, pNewDelimiters );
+			count += delimCount;
+		}
+
+		return count;
+	}
+
+	template< typename StringT >
+	size_t EnsureSingleSpace( IN OUT StringT& rText )
+	{
+		return ReplaceDelimiters( rText, str::FromAnsi<StringT>( " \t" ).c_str(), str::FromAnsi<StringT>( " " ).c_str() );
+	}
 }
 
 
@@ -112,12 +160,6 @@ namespace str
 		std::replace( out.begin(), out.end(), StringT::value_type( ' ' ), StringT::value_type( NBSP ) );
 		return out;
 	}
-
-
-	// search & replace
-
-	size_t ReplaceDelimiters( IN OUT std::tstring& rText, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter );
-	size_t EnsureSingleSpace( IN OUT std::tstring& rText );
 }
 
 

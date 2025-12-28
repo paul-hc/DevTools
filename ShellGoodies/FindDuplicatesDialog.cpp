@@ -1095,7 +1095,7 @@ void CFindDuplicatesDialog::On_PickAsOriginalFolder( void )
 
 void CFindDuplicatesDialog::OnUpdate_PickAsOriginalFolder( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_dupsListCtrl.SingleSelected() );
+	pCmdUI->Enable( m_dupsListCtrl.IsSingleSelected() );
 }
 
 void CFindDuplicatesDialog::On_DemoteAsDuplicateFolder( void )
@@ -1133,7 +1133,7 @@ void CFindDuplicatesDialog::On_DemoteAsDuplicateFolder( void )
 
 void CFindDuplicatesDialog::OnUpdate_DemoteAsDuplicateFolder( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_dupsListCtrl.SingleSelected() );
+	pCmdUI->Enable( m_dupsListCtrl.IsSingleSelected() );
 }
 
 void CFindDuplicatesDialog::On_PushIgnoreFile( void )

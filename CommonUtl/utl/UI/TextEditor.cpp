@@ -13,15 +13,15 @@
 
 namespace hlp
 {
-	Range<size_t> GetSelectWordRange( const std::tstring& text, const Range<size_t>& sel )
+	Range<size_t> GetSelectWordRange( const std::tstring& text, const Range<size_t>& selRange )
 	{
-		ASSERT( sel.IsNormalized() );
-		ASSERT( sel.m_end <= text.length() );
-		Range<size_t> wordRange = sel;
+		ASSERT( selRange.IsNormalized() );
+		ASSERT( selRange.m_end <= text.length() );
+		Range<size_t> wordRange = selRange;
 
 		const std::locale& loc = str::GetUserLocale();
 
-		switch ( word::GetWordStatus( text, sel.m_start, loc ) )
+		switch ( word::GetWordStatus( text, selRange.m_start, loc ) )
 		{
 			case word::WordStart:
 			case word::Whitespace:
@@ -32,7 +32,7 @@ namespace hlp
 				break;
 		}
 		if ( !std::isalnum( text[ wordRange.m_start ], loc ) )
-			return sel;						// no word hit -> keep the original selection
+			return selRange;						// no word hit -> keep the original selection
 
 		wordRange.m_end = word::FindNextWordBreak( text, wordRange.m_start, loc );
 		return wordRange;
@@ -84,17 +84,55 @@ CTextEditor::~CTextEditor()
 
 CTextEditor::SelType CTextEditor::GetSelType( void ) const
 {
-	Range<int> sel = GetSelRange<int>();
-	if ( sel.IsEmpty() )
-		return SelEmpty;
+	Range<TCharPos> selRange = GetSelRange();
 
-	return sel.GetSpan<size_t>() == ui::GetWindowText( this ).length() ? SelAllText : SelSubText;
+	if ( selRange.IsEmpty() )
+		return SelEmpty;
+	if ( selRange.GetSpan<int>() == GetWindowTextLength() )
+		return SelAllText;
+
+	return SelSubText;
 }
 
 bool CTextEditor::HasSel( void ) const
 {
 	SelType selType = GetSelType();
 	return SelSubText == selType || SelAllText == selType;
+}
+
+bool CTextEditor::HandleWordSelection( UINT cmdId )
+{
+	std::tstring text = ui::GetWindowText( this );
+	if ( text.empty() )
+		return false;
+
+	Range<size_t> selRange = GetSelRangeAs<size_t>( true ), oldSelRange = selRange;
+
+	switch ( cmdId )
+	{
+		case ID_EDIT_WORD_LEFT:
+		case ID_EDIT_WORD_LEFT_EXTEND:
+			selRange.m_end = word::FindPrevWordBreak( text, selRange.m_end );
+
+			if ( cmdId != ID_EDIT_WORD_LEFT_EXTEND )
+				selRange.m_start = selRange.m_end;		// collapse selection at START
+			break;
+		case ID_EDIT_WORD_RIGHT:
+		case ID_EDIT_WORD_RIGHT_EXTEND:
+			selRange.m_end = word::FindNextWordBreak( text, selRange.m_end );
+
+			if ( cmdId != ID_EDIT_WORD_RIGHT_EXTEND )
+				selRange.m_start = selRange.m_end;		// collapse selection at END
+			break;
+		case ID_EDIT_WORD_SELECT:
+			selRange = hlp::GetSelectWordRange( text, selRange );
+			break;
+	}
+
+	static size_t s_cnt = 0; TRACE_( "-[%d] oldSelRange=[%d, %d] caret=%d at %s  ->  selRange=[%d, %d]", s_cnt++,
+		oldSelRange.m_start, oldSelRange.m_end, GetCaretCharPos(), oldSelRange.IsNormalized() ? "END" : "START", selRange.m_start, selRange.m_end );
+
+	return SetSelRange( selRange );
 }
 
 BOOL CTextEditor::PreTranslateMessage( MSG* pMsg )
@@ -127,86 +165,77 @@ void CTextEditor::OnLButtonDblClk( UINT flags, CPoint point )
 {
 	__super::OnLButtonDblClk( flags, point );
 
-	Range<size_t> sel = GetSelRange<int>();
+	Range<size_t> selRange = GetSelRangeAs<size_t>();
 	std::tstring selText = GetSelText();
 	str::TrimRight( selText );						// exclude trailing whitespace on word selection
 
-	sel.m_end = sel.m_start + selText.length();
-	SetSelRange( sel );
+	selRange.m_end = selRange.m_start + selText.length();
+	SetSelRange( selRange );
 }
 
 void CTextEditor::OnWordSelection( UINT cmdId )
 {
-	Range<size_t> sel = GetSelRange<int>();
-	std::tstring text = ui::GetWindowText( this );
-	if ( text.empty() )
-		return;
-
-	switch ( cmdId )
-	{
-		case ID_EDIT_WORD_LEFT:
-		case ID_EDIT_WORD_LEFT_EXTEND:
-			sel.m_start = word::FindPrevWordBreak( text, sel.m_start );
-			if ( cmdId != ID_EDIT_WORD_LEFT_EXTEND )
-				sel.m_end = sel.m_start;
-			break;
-		case ID_EDIT_WORD_RIGHT:
-		case ID_EDIT_WORD_RIGHT_EXTEND:
-			sel.m_end = word::FindNextWordBreak( text, sel.m_end );
-			if ( cmdId != ID_EDIT_WORD_RIGHT_EXTEND )
-				sel.m_start = sel.m_end;
-			break;
-		case ID_EDIT_WORD_SELECT:
-			sel = hlp::GetSelectWordRange( text, sel );
-			break;
-	}
-	SetSelRange( sel );
+	HandleWordSelection( cmdId );
 }
 
 void CTextEditor::OnChangeCase( UINT cmdId )
 {
-	Range<size_t> sel = GetSelRange<int>();
+	Range<size_t> selRange = GetSelRangeAs<size_t>();
+	bool caretAtStart = IsCaretAtSelStart();
 	std::tstring text = ui::GetWindowText( this );
-	if ( text.empty() || sel.m_start == text.length() )
+
+	if ( text.empty() || selRange.m_start == text.length() )
 	{
 		ui::BeepSignal();						// no text to consume
 		return;
 	}
 
-	switch ( GetSelType() )
+	TLineIndex topLineIndex = GetTopLineIndex();
+	SelType selType = GetSelType();
+
+	switch ( selType )
 	{
 		case SelEmpty:
 			// change case of current character and advance to next
-			++sel.m_end;
-			hlp::ChangeCase( text.begin() + sel.m_start, text.begin() + sel.m_end, cmdId );
-			sel.m_start = sel.m_end;
-			ui::SetWindowText( m_hWnd, text );
+			++selRange.m_end;
+			hlp::ChangeCase( text.begin() + selRange.m_start, text.begin() + selRange.m_end, cmdId );
+			selRange.m_start = selRange.m_end;
+			SetTextImpl( text );
 			SetModify();		// mark as dirty to enable dialog data exchange
 			break;
 		case SelSubText:
 		case SelAllText:
 		{
-			std::tstring subText = text.substr( sel.m_start, sel.GetSpan<size_t>() );
+			std::tstring subText = text.substr( selRange.m_start, selRange.GetSpan<size_t>() );
 			hlp::ChangeCase( subText.begin(), subText.end(), cmdId );
 			ReplaceSel( subText.c_str(), TRUE );
+			ENSURE( GetModify() );
 			break;
 		}
 	}
-	SetSelRange( sel );
+
+	if ( !selRange.IsEmpty() && caretAtStart )
+		selRange.SwapBounds();		// restore caret in the original direction
+
+	SetSelRange( selRange );
+	SetTopLineIndex( topLineIndex );
+
+	if ( selType != SelEmpty )
+		InvalidateFrame( FocusFrame );		// prevent focus frame disappearing
 }
 
 void CTextEditor::OnChangeNumber( UINT cmdId )
 {
-	Range<size_t> sel = GetSelRange<int>();
+	Range<size_t> selRange = GetSelRangeAs<size_t>();
 	std::tstring text = ui::GetWindowText( this );
 
-	if ( num::EnwrapNumericSequence( sel, text ) )							// find the entire digit sequence in the vicinity of selection
+	if ( num::EnwrapNumericSequence( selRange, text ) )							// find the entire digit sequence in the vicinity of selection
 	{
-		std::tstring numberText = text.substr( sel.m_start, sel.GetSpan<size_t>() );
+		std::tstring numberText = text.substr( selRange.m_start, selRange.GetSpan<size_t>() );
 		UINT number;
 		if ( num::ParseNumber( number, numberText ) )
 		{
-			SetSelRange( sel );
+			SetSelRange( selRange );
 			if ( hlp::ChangeNumber( number, cmdId ) )
 			{
 				size_t digitsWidth = numberText.length();
@@ -216,8 +245,8 @@ void CTextEditor::OnChangeNumber( UINT cmdId )
 					numberText = str::Format( _T("%u"), number );
 
 				ReplaceSel( numberText.c_str(), TRUE );
-				sel.m_end = sel.m_start + numberText.length();
-				SetSelRange( sel );
+				selRange.m_end = selRange.m_start + numberText.length();
+				SetSelRange( selRange );
 				return;
 			}
 		}

@@ -64,7 +64,7 @@ STDMETHODIMP CShellGoodiesCom::InterfaceSupportsErrorInfo( REFIID riid )
 
 // IShellExtInit interface implementation
 
-STDMETHODIMP CShellGoodiesCom::Initialize( LPCITEMIDLIST folderPidl, IDataObject* pSelFileObjects, HKEY hKeyProgId )
+STDMETHODIMP CShellGoodiesCom::Initialize( PCIDLIST_ABSOLUTE folderPidl, IDataObject* pSelFileObjects, HKEY hKeyProgId )
 {
 	folderPidl, hKeyProgId;
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
@@ -88,7 +88,7 @@ STDMETHODIMP CShellGoodiesCom::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
-	TRACE( _T(" CShellGoodiesCom::QueryContextMenu(): flags=0x%X {%s}\n"), flags, CShellMenuController::GetTags_ContextMenuFlags().FormatKey( flags ).c_str() );
+	TRACE_( _T(" CShellGoodiesCom::QueryContextMenu(): flags=0x%X {%s}\n"), flags, CShellMenuController::GetTags_ContextMenuFlags().FormatKey( flags ).c_str() );
 
 	// res\ShellGoodiesCom.rgs: this shell extension registers itself for both "*", "lnkfile" and "Directory" types as ContextMenuHandlers.
 	//		http://microsoft.public.platformsdk.shell.narkive.com/yr1YoK9e/obtaining-selected-shortcut-lnk-files-inside-ishellextinit-initialize
@@ -102,16 +102,16 @@ STDMETHODIMP CShellGoodiesCom::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 			//utl::CSectionGuard section( _T("CShellGoodiesCom::QueryContextMenu()") );
 
 			if ( m_pController->EnsureCopyDropFilesAsPaths() )
-				TRACE( _T(" CShellGoodiesCom::QueryContextMenu(): found files copied or cut on clipboard - also store their paths as text!\n") );
+				TRACE_( _T(" CShellGoodiesCom::QueryContextMenu(): found files copied or cut on clipboard - also store their paths as text!\n") );
 
 			UINT nextCmdId = m_pController->AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
 
-			TRACE( " CShellGoodiesCom::QueryContextMenu(): indexMenu=%d idCmdFirst=%d idCmdLast=%d  nextCmdId=%d  flags=0x%X\n", indexMenu, idCmdFirst, idCmdLast, nextCmdId, flags );
+			TRACE_( " CShellGoodiesCom::QueryContextMenu(): indexMenu=%d idCmdFirst=%d idCmdLast=%d  nextCmdId=%d  flags=0x%X\n", indexMenu, idCmdFirst, idCmdLast, nextCmdId, flags );
 			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, nextCmdId );
 		}
 	}
 
-	TRACE( _T(" ! CShellGoodiesCom::QueryContextMenu(): Ignoring add menu for flag: 0x%08X\n"), flags );
+	TRACE_( _T(" ! CShellGoodiesCom::QueryContextMenu(): Ignoring add menu for flag: 0x%08X\n"), flags );
 	return S_OK;
 }
 

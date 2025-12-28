@@ -27,10 +27,10 @@ std::auto_ptr<CMacroCommand> CFileService::MakeRenameCmds( const std::vector<CRe
 	std::set<fs::CPath> destToBeSet;
 
 	for ( std::vector<CRenameItem*>::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
-		if ( ( *itItem )->IsModified() )
+		if ( (*itItem)->IsModified() )
 		{
-			const fs::CPath& srcPath = ( *itItem )->GetSrcPath();
-			fs::CPath destPath = ( *itItem )->GetDestPath();
+			const fs::CPath& srcPath = (*itItem)->GetSrcPath();
+			fs::CPath destPath = (*itItem)->GetDestPath();
 
 			if ( ( destPath.FileExist() && destPath != srcPath ) ||			// collision with an existing file (not of this pair)?
 				 destToBeSet.find( destPath ) != destToBeSet.end() )		// collision with a future file?
@@ -61,8 +61,8 @@ std::auto_ptr<CMacroCommand> CFileService::MakeTouchCmds( const std::vector<CTou
 	std::auto_ptr<CMacroCommand> pBatchMacro( new cmd::CFileMacroCmd( cmd::TouchFile ) );
 
 	for ( std::vector<CTouchItem*>::const_iterator itItem = touchItems.begin(); itItem != touchItems.end(); ++itItem )
-		if ( ( *itItem )->IsModified() )
-			pBatchMacro->AddCmd( new CTouchFileCmd( ( *itItem )->GetSrcState(), ( *itItem )->GetDestState() ) );
+		if ( (*itItem)->IsModified() )
+			pBatchMacro->AddCmd( new CTouchFileCmd( (*itItem)->GetSrcState(), (*itItem)->GetDestState() ) );
 
 	return pBatchMacro;
 }
@@ -73,7 +73,7 @@ bool CFileService::IsDistinctWorkingSet( const std::vector<CRenameItem*>& rename
 	std::set<fs::CPath> srcPaths, destPaths;
 
 	for ( std::vector<CRenameItem*>::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
-		if ( !srcPaths.insert( ( *itItem )->GetSrcPath() ).second || !destPaths.insert( ( *itItem )->GetDestPath() ).second )
+		if ( !srcPaths.insert( (*itItem)->GetSrcPath() ).second || !destPaths.insert( (*itItem)->GetDestPath() ).second )
 			return false;		// SRC or DEST not unique in the working set
 
 	ENSURE( srcPaths.size() == destPaths.size() );

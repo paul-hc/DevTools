@@ -8,6 +8,7 @@
 #include "RenameItem.h"
 #include "TouchItem.h"
 #include "PathItemSorting.h"
+#include "Application.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
@@ -19,6 +20,7 @@
 #include "utl/TextClipboard.h"
 #include "utl/UI/ObjectCtrlBase.h"
 #include "utl/UI/ShellUtilities.h"
+#include "utl/UI/WndUtils.h"
 
 // for CFileModel::MakeFileEditor
 #include "RenameFilesDialog.h"
@@ -60,6 +62,7 @@ void CFileModel::Clear( void )
 {
 	m_sourcePaths.clear();
 	m_commonParentPath.Clear();
+	m_srcFolderPaths.clear();
 
 	utl::ClearOwningContainer( m_renameItems );
 	utl::ClearOwningContainer( m_touchItems );
@@ -71,22 +74,22 @@ void CFileModel::RegSave( void )
 	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortAscending, m_renameSorting.second );
 }
 
+
 size_t CFileModel::SetupFromDropInfo( HDROP hDropInfo )
 {
 	std::vector<fs::CPath> sourcePaths;
 	shell::QueryDroppedFiles( sourcePaths, hDropInfo );
 
-	if ( false )
-	{
-		if ( 1 == sourcePaths.size() )
-			if ( sourcePaths.front() == fs::CPath( _T( "C:\\download\\#\\images\\flowers\\1980 - Blizzard of Ozz\\cover.jpg" ) ) )
-			{	// DBG: simulate search results view with files in multiple folders: use test format="fld" to test duplicates (it depends on existing physical files):
-				str::Split( sourcePaths, _T("C:\\download\\#\\images\\flowers\\1981 - Diary of a Madman\\cover.jpg|C:\\download\\#\\images\\flowers\\1986 - The Ultimate Sin\\cover.jpg"), _T("|"), false );
-			}
-
-		// to test multiple paths:
-		//str::Split( sourcePaths, _T("C:\\dev\\DevTools\\CommonUtl\\DemoUtl\\DemoUtl.rc|C:\\dev\\DevTools\\CommonUtl\\utl\\utl_ui.rc|C:\\dev\\DevTools\\ShellGoodies\\ShellGoodies.rc"), _T("|") );
-	}
+	app::GetApp()->CheckReplaceSourcePaths( sourcePaths, _T("CFileModel::SetupFromDropInfo()") );		// allow advanced debugging
+	/*
+		- DBG example 1): simulate search results view with files in multiple folders: use test format="fld" to test duplicates (it depends on existing physical files):
+			C:\download\#\images\flowers\1981 - Diary of a Madman\cover.jpg
+			C:\download\#\images\flowers\1986 - The Ultimate Sin\cover.jpg
+		- DBG example 2): test multiple paths:
+			C:\dev\DevTools\CommonUtl\DemoUtl\DemoUtl.rc
+			C:\dev\DevTools\CommonUtl\utl\utl_ui.rc
+			C:\dev\DevTools\ShellGoodies\ShellGoodies.rc
+	*/
 
 	StoreSourcePaths( sourcePaths );
 	return m_sourcePaths.size();
@@ -102,7 +105,11 @@ void CFileModel::StoreSourcePaths( const ContainerT& sourcePaths )
 		m_sourcePaths.push_back( func::PathOf( *itSourcePath ) );
 
 	fs::SortPathsDirsFirst( m_sourcePaths );
+
+	//TRACE_ITEMS( m_sourcePaths, "CFileModel::m_sourcePaths", 50 );
+
 	m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
+	fs::QueryFolderPaths( m_srcFolderPaths, m_sourcePaths );		// folders of drop source files
 }
 
 bool CFileModel::IsSourceSingleFolder( void ) const
@@ -145,6 +152,7 @@ std::vector<CRenameItem*>& CFileModel::LazyInitRenameItems( void )
 	if ( m_renameItems.empty() )
 	{
 		ASSERT( !m_sourcePaths.empty() );
+		m_renameItems.reserve( m_sourcePaths.size() );
 
 		for ( std::vector<fs::CPath>::const_iterator itSource = m_sourcePaths.begin(); itSource != m_sourcePaths.end(); ++itSource )
 		{
@@ -223,34 +231,36 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 
 	static const CRuntimeException s_noDestExc( _T("No destination file paths available to paste.") );
 
-	std::vector<std::tstring> textPaths;
-	if ( !CTextClipboard::CanPasteText() || !CTextClipboard::PasteFromLines( textPaths, pWnd->GetSafeHwnd() ) )
+	std::vector<std::tstring> fileNames;
+
+	if ( !CTextClipboard::CanPasteText() || !CTextClipboard::PasteFromLines( fileNames, pWnd->GetSafeHwnd() ) )
 		throw s_noDestExc;
 
-	for ( std::vector<std::tstring>::iterator itPath = textPaths.begin(); itPath != textPaths.end(); )
+	size_t origCount = fileNames.size();
+	pred::ValidateFilename validateFunc( CGeneralOptions::Instance().m_trimFname );
+	std::pair<size_t, pred::ValidateFilename> resultPair = utl::RemoveIfPred( fileNames, validateFunc, utl::NegatePred );
+
+	if ( resultPair.first != 0 )
 	{
-		if ( CGeneralOptions::Instance().m_trimFname )
-			str::Trim( *itPath );
-
-		if ( itPath->empty() )
-			itPath = textPaths.erase( itPath );
-		else
-			++itPath;
+		TRACE_( "* CFileModel::MakeClipPasteDestPathsCmd(): ignoring %d invalid path out of %d paths!\n", resultPair.first, origCount ); origCount;
+		ui::BeepSignal( MB_ICONERROR );
 	}
+	else if ( resultPair.second.m_amendedCount != 0 )
+		ui::BeepSignal( MB_ICONWARNING );
 
-	if ( textPaths.empty() )
+	if ( fileNames.empty() )
 		throw s_noDestExc;
-	else if ( m_sourcePaths.size() != textPaths.size() )
+	else if ( m_sourcePaths.size() != fileNames.size() )
 		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."),
-											  textPaths.size(), m_sourcePaths.size() ) );
+											  fileNames.size(), m_sourcePaths.size() ) );
 
 	std::vector<fs::CPath> destPaths; destPaths.reserve( m_renameItems.size() );
 	bool anyChanges = false;
 
-	for ( size_t i = 0; i != textPaths.size(); ++i )
+	for ( size_t i = 0; i != fileNames.size(); ++i )
 	{
-		const CRenameItem* pRenameItem = m_renameItems[ i ];
-		fs::CPath newFilePath = pDisplayAdapter->ParsePath( textPaths[ i ], pRenameItem->GetSafeDestPath() );
+		const CRenameItem* pRenameItem = m_renameItems[i];
+		fs::CPath newFilePath = pDisplayAdapter->ParsePath( fileNames[i], pRenameItem->GetSafeDestPath() );
 
 		if ( newFilePath.Get() != pRenameItem->GetDestPath().Get() )		// case-sensitive string compare
 			anyChanges = true;

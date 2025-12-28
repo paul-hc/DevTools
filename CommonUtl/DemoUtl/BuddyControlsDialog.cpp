@@ -1,7 +1,6 @@
 
 #include "pch.h"
 #include "BuddyControlsDialog.h"
-//#include "utl/ContainerUtilities.h"
 #include "utl/FileStateEnumerator.h"
 #include "utl/FileSystem.h"
 #include "utl/FlagTags.h"
@@ -328,7 +327,7 @@ void CBuddyControlsDialog::OnLvnItemChanged_FileList( NMHDR* pNmHdr, LRESULT* pR
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0;
 
-	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	if ( m_fileListCtrl.IsSelectionCaretChangeNotify( pNmList ) )
 	{
 		m_progressCtrl.SetPos( m_fileListCtrl.GetCurSel() );
 

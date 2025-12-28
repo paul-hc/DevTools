@@ -68,7 +68,19 @@ namespace std
 	#ifdef USE_BOOST
 		using boost::movelib::unique_ptr;
 	#endif
-#endif
+
+	template< typename Type, size_t size >
+	inline const Type* begin( Type (&_array)[size] )
+	{
+		return _array;
+	}
+
+	template< typename Type, size_t size >
+	inline const Type* end( Type (&_array)[size] )
+	{
+		return _array + size;
+	}
+#endif // !IS_CPP_11
 
 
 #ifdef _UNICODE
@@ -106,10 +118,10 @@ namespace std
 
 #if _MSC_VER <= VS_2008		// MSVC++ 9.0 (Visual Studio 2008)
 
-template< typename BidItT >
-inline reverse_iterator<BidItT> make_reverse_iterator( BidItT it )
+template< typename BidIterT >
+inline reverse_iterator<BidIterT> make_reverse_iterator( BidIterT it )
 {	// missing in VC9
-	return reverse_iterator<BidItT>( it );
+	return reverse_iterator<BidIterT>( it );
 }
 
 #endif // VS_2008
@@ -120,6 +132,42 @@ inline reverse_iterator<BidItT> make_reverse_iterator( BidItT it )
 
 namespace utl
 {
+	__declspec(selectany) extern const size_t npos = std::tstring::npos;
+
+
+	// general algorithms
+
+	template< typename ContainerT, typename FuncT >
+	inline FuncT for_each( IN OUT ContainerT& rObjects, FuncT func )
+	{
+		return std::for_each( rObjects.begin(), rObjects.end(), func );
+	}
+
+	template< typename ContainerT, typename FuncT >
+	inline FuncT for_each( const ContainerT& objects, FuncT func )
+	{
+		return std::for_each( objects.begin(), objects.end(), func );
+	}
+
+
+	// copy items between containers using a conversion functor (unary)
+
+	template< typename DestContainerT, typename SrcContainerT, typename CvtFuncT >
+	inline void transform( const SrcContainerT& srcItems, OUT DestContainerT& rDestItems, CvtFuncT cvtFunc )
+	{
+		std::transform( srcItems.begin(), srcItems.end(), std::inserter( rDestItems, rDestItems.end() ), cvtFunc );
+	}
+
+	template< typename ContainerT, typename UnaryFuncT >
+	inline void generate( OUT ContainerT& rItems, UnaryFuncT genFunc )
+	{
+		std::generate( rItems.begin(), rItems.end(), genFunc );		// replace [first, last) with genFunc
+	}
+}
+
+
+namespace utl
+{
 	template< typename LeftT, typename RightT >
 	LeftT max( const LeftT& left, const RightT& right ) { return ( left < static_cast<LeftT>( right ) ) ? static_cast<LeftT>( right ) : left; }
 
@@ -127,11 +175,33 @@ namespace utl
 	LeftT min( const LeftT& left, const RightT& right ) { return ( static_cast<LeftT>( right ) < left ) ? static_cast<LeftT>( right ) : left; }
 
 
+	template< typename DiffT, typename IteratorT >
+	inline DiffT Distance( IteratorT itFirst, IteratorT itLast )
+	{
+		return static_cast<DiffT>( std::distance( itFirst, itLast ) );
+	}
+
+
 	template< typename ValueT >
 	inline std::pair<ValueT, ValueT> make_pair_single( const ValueT& value )		// return pair composed from single value
 	{
 		return std::pair<ValueT, ValueT>( value, value );
 	}
+
+
+	// container bounds: works with std::list (not random iterator)
+
+	template< typename ContainerT >
+	inline const typename ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
+
+	template< typename ContainerT >
+	inline typename ContainerT::value_type& Front( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
+
+	template< typename ContainerT >
+	inline const typename ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
+
+	template< typename ContainerT >
+	inline typename ContainerT::value_type& Back( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
 }
 
 

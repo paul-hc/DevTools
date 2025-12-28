@@ -192,7 +192,7 @@ BSTR CodeProcessor::ExtractTypeDescriptor( LPCTSTR functionImplLine, LPCTSTR doc
 
 	PROCESS_CODE( typeDescriptor, code::CFormatter::s_cancelTag, cppCodeFormatter.ExtractTypeDescriptor( functionImplLine, fs::CPath( docFileExt ) ) )
 
-	return str::AllocSysString( typeDescriptor );
+	return mfc::AllocSysString( typeDescriptor );
 }
 
 BSTR CodeProcessor::ImplementMethods( LPCTSTR methodPrototypes, LPCTSTR typeDescriptor, BOOL isInline )
@@ -208,7 +208,7 @@ BSTR CodeProcessor::ImplementMethods( LPCTSTR methodPrototypes, LPCTSTR typeDesc
 	PROCESS_CODE( newCodeText, methodPrototypes,
 				  cppCodeFormatter.ImplementMethodBlock( methodPrototypes, typeDescriptor, isInline != FALSE ) )
 
-	return str::AllocSysString( newCodeText );
+	return mfc::AllocSysString( newCodeText );
 }
 
 BSTR CodeProcessor::ToggleComment( LPCTSTR codeText )
@@ -279,7 +279,7 @@ BSTR CodeProcessor::AutoMakeCode( LPCTSTR codeText )
 	std::tstring newCodeText;
 
 	PROCESS_CODE( newCodeText, codeText, cppCodeFormatter.AutoMakeCode( codeText ) )
-	return str::AllocSysString( newCodeText );
+	return mfc::AllocSysString( newCodeText );
 }
 
 BSTR CodeProcessor::TokenizeText( LPCTSTR codeText )
@@ -293,5 +293,5 @@ BSTR CodeProcessor::TokenizeText( LPCTSTR codeText )
 	std::tstring newCodeText;
 
 	PROCESS_CODE( newCodeText, codeText, cppCodeFormatter.TokenizeText( codeText ) )
-	return str::AllocSysString( newCodeText );
+	return mfc::AllocSysString( newCodeText );
 }

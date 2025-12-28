@@ -24,6 +24,7 @@ private:
 	void TestStringFindLast( void );
 	void TestStringOccurenceCount( void );
 	void TestStringMatch( void );
+	void TestStringCommonLength( void );
 	void TestStringSorting( void );
 	void TestIntuitiveSort( void );
 	void TestIntuitiveSortPunctuation( void );

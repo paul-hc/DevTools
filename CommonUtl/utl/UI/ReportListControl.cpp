@@ -18,6 +18,7 @@
 #include "PostCall.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
+#include "utl/FlagTags.h"
 #include "utl/Serialization.h"
 
 #ifdef _DEBUG
@@ -412,59 +413,6 @@ bool CReportListControl::SetCompactIconSpacing( int iconEdgeWidth /*= IconViewEd
 	return true;
 }
 
-int CReportListControl::GetTopIndex( void ) const
-{
-	switch ( GetView() )
-	{
-		case LV_VIEW_DETAILS:
-		case LV_VIEW_LIST:
-			return __super::GetTopIndex();			// only works in report/list view mode
-		case LV_VIEW_ICON:
-		case LV_VIEW_SMALLICON:
-		case LV_VIEW_TILE:
-			break;
-		default: ASSERT( false );
-	}
-
-	UINT flags;
-	return HitTest( CPoint( 3, 3 ), &flags );
-}
-
-void CReportListControl::SetTopIndex( int topIndex )
-{
-	// scroll for the last item in the list, then to topIndex
-	int count = GetItemCount();
-	if ( count > 1 )
-	{
-		SetRedraw( FALSE );
-		EnsureVisible( count - 1, FALSE );
-		EnsureVisible( topIndex, FALSE );
-		SetRedraw( TRUE );
-		Invalidate();
-	}
-
-/* alternative impl:
-
-	int actualTopIndex = GetTopIndex();
-	int horzSpacing;
-	int lineHeight;
-	GetItemSpacing( TRUE, &horzSpacing, &lineHeight );
-
-	CSize scrollsize( 0, ( topIndex - actualTopIndex ) * lineHeight );
-	Scroll( scrollsize );
-
-OR:
-	EnsureVisible( topIndex, FALSE );
-	CRect itemRect;
-	if ( GetItemRect( topIndex, &itemRect, LVIR_BOUNDS ) )
-	{
-		CSize size( 0, itemRect.Height() * topIndex - GetTopIndex() );
-		if ( topIndex != GetTopIndex() )
-			Scroll( size );
-	}
-*/
-}
-
 int CReportListControl::HitTest( CPoint point, UINT* pFlags /*= nullptr*/, TGroupId* pGroupId /*= nullptr*/ ) const
 {
 	REQUIRE( nullptr == pGroupId || pFlags != nullptr );
@@ -812,7 +760,7 @@ void CReportListControl::QuerySelectedItemsText( std::vector<std::tstring>& rIte
 {
 	std::vector<int> selIndexes;
 	int caretIndex;
-	GetSelection( selIndexes, &caretIndex );
+	GetSelIndexes( selIndexes, &caretIndex );
 	QueryItemsText( rItemsText, selIndexes, subItem );
 }
 
@@ -833,6 +781,20 @@ bool CReportListControl::IsStateChangeNotify( const NMLISTVIEW* pNmListView, UIN
 	if ( HasFlag( pNmListView->uChanged, LVIF_STATE ) )										// item state has been changed?
 		if ( StateChanged( pNmListView->uNewState, pNmListView->uOldState, selMask ) )		// state changed according to the mask?
 			return true;
+
+	return false;
+}
+
+bool CReportListControl::IsSelectionCaretChangeNotify( const NMLISTVIEW* pNmListView ) const
+{	// non-static, optimized for minimal number of transitions, more useful
+	if ( !CReportListControl::IsSelectionChangeNotify( pNmListView, LVIS_SELECTED | LVIS_FOCUSED ) )
+		return false;
+
+	// caret changed in the sequence of LVN_ITEMCHANGED selection change?
+	//	- Skip transitory LVIS_SELECTED state changes, during which LVIS_FOCUSED caret is null.
+	//	- The LVIS_FOCUSED state change notify comes last.
+	if ( pNmListView->iItem != -1 && ( HasFlag( pNmListView->uNewState, LVIS_FOCUSED ) || IsCaretAt( pNmListView->iItem ) ) )
+		return true;
 
 	return false;
 }
@@ -1434,7 +1396,7 @@ bool CReportListControl::ModifyCheckState( int index, int checkState )
 int CReportListControl::GetObjectCheckState( const utl::ISubject* pObject ) const
 {
 	int index = FindItemIndex( pObject );
-	return index != -1 && GetCheckState( index );
+	return index != -1 ? GetCheckState( index ) : 0;
 }
 
 bool CReportListControl::ModifyObjectCheckState( const utl::ISubject* pObject, int checkState )
@@ -1512,7 +1474,7 @@ size_t CReportListControl::ApplyCheckStateToSelectedItems( int toggledIndex, int
 	size_t changedCount = 0;
 
 	if ( !m_applyingCheckStateToSelectedItems )
-		if ( IsSelected( toggledIndex ) && IsMultiSelectionList() )		// toggledIndex is part of multiple selection?
+		if ( IsSelectedAt( toggledIndex ) && IsMultiSelectionList() )		// toggledIndex is part of multiple selection?
 			if ( ui::IsCheckBoxState( checkState, m_pCheckStatePolicy ) )
 			{
 				CScopedInternalChange change( this );
@@ -1532,17 +1494,95 @@ size_t CReportListControl::ApplyCheckStateToSelectedItems( int toggledIndex, int
 	return changedCount;
 }
 
-bool CReportListControl::SetCaretIndex( int index, bool doSet /*= true*/ )
+
+int CReportListControl::GetTopIndex( void ) const
 {
-	if ( !SetItemState( index, doSet ? LVIS_FOCUSED : 0, LVIS_FOCUSED ) )
+	switch ( GetView() )
+	{
+		case LV_VIEW_DETAILS:
+		case LV_VIEW_LIST:
+			return __super::GetTopIndex();			// only works in report/list view mode
+		case LV_VIEW_ICON:
+		case LV_VIEW_SMALLICON:
+		case LV_VIEW_TILE:
+			break;
+		default: ASSERT( false );
+	}
+
+	UINT flags;
+	return HitTest( CPoint( 3, 3 ), &flags );
+}
+
+bool CReportListControl::SetTopIndex( int topIndex, ShowTopIndexMode mode /*= ScrollTwice*/ )
+{
+	// scroll for the last item in the list, then to topIndex
+	int count = GetItemCount();
+
+	if ( count <= 1 || -1 == topIndex || topIndex == GetTopIndex() )
 		return false;
 
-	if ( doSet )
+	switch ( mode )
+	{
+		case Vanilla:
+			EnsureVisible( topIndex, FALSE );		// ensure the actual top index visible
+			break;
+		case ScrollTwice:
+			SetRedraw( FALSE );
+			EnsureVisible( count - 1, FALSE );		// ensure last item visible, scrolling to the end
+			EnsureVisible( topIndex, FALSE );		// ensure the actual top index visible
+			SetRedraw( TRUE );
+			Invalidate();
+			break;
+		case ScrollOnce:
+		{	// alternative impl:
+			int actualTopIndex = GetTopIndex();
+			int horzSpacing;
+			int lineHeight;
+			GetItemSpacing( TRUE, &horzSpacing, &lineHeight );
+
+			CSize scrollsize( 0, ( topIndex - actualTopIndex ) * lineHeight );
+			Scroll( scrollsize );
+			break;
+		}
+		case ScrollOffset:
+		{	// OR:
+			EnsureVisible( topIndex, FALSE );
+			CRect itemRect;
+			if ( GetItemRect( topIndex, &itemRect, LVIR_BOUNDS ) )
+			{
+				CSize scrollsize( 0, itemRect.Height() * topIndex - GetTopIndex() );
+				Scroll( scrollsize );
+			}
+			break;
+		}
+	}
+	return true;
+}
+
+bool CReportListControl::SetTopObject( const void* pTopObject, ShowTopIndexMode mode /*= ScrollTwice*/ )
+{
+	int topIndex = FindItemIndex( pTopObject );
+	return topIndex != -1 && SetTopIndex( topIndex, mode );
+}
+
+
+bool CReportListControl::SetCaretIndex( int index, bool doSet /*= true*/ )
+{
+	if ( !SetItemState( index, doSet && index != -1 ? LVIS_FOCUSED : 0, LVIS_FOCUSED ) )
+		return false;
+
+	if ( doSet && index != -1 )
 		EnsureVisible( index, FALSE );
 	return true;
 }
 
-bool CReportListControl::SingleSelected( void ) const
+bool CReportListControl::SetCaretObject( const void* pCaretObject, bool doSet /*= true*/ )
+{
+	int caretIndex = pCaretObject != nullptr ? FindItemIndex( pCaretObject ) : -1;
+	return SetCaretIndex( caretIndex, doSet );		// -1 should reset the caret
+}
+
+bool CReportListControl::IsSingleSelected( void ) const
 {
 	int selCount = 0;
 	for ( POSITION pos = GetFirstSelectedItemPosition(); pos != nullptr && selCount < 2; ++selCount )
@@ -1594,7 +1634,7 @@ int CReportListControl::GetSelCaretIndex( void ) const
 	std::vector<int> selIndexes;
 	int caretIndex;
 
-	if ( GetSelection( selIndexes, &caretIndex ) )
+	if ( GetSelIndexes( selIndexes, &caretIndex ) )
 		if ( -1 == caretIndex )										// no caret?
 			return FindItemWithState( LVNI_SELECTED );
 		else if ( utl::Contains( selIndexes, caretIndex ) )			// caret is selected?
@@ -1603,7 +1643,7 @@ int CReportListControl::GetSelCaretIndex( void ) const
 	return -1;
 }
 
-bool CReportListControl::GetSelection( std::vector<int>& rSelIndexes, int* pCaretIndex /*= nullptr*/, int* pTopIndex /*= nullptr*/ ) const
+bool CReportListControl::GetSelIndexes( std::vector<int>& rSelIndexes, int* pCaretIndex /*= nullptr*/, int* pTopIndex /*= nullptr*/ ) const
 {
 	rSelIndexes.reserve( rSelIndexes.size() + GetSelectedCount() );
 
@@ -1623,7 +1663,7 @@ bool CReportListControl::GetSelection( std::vector<int>& rSelIndexes, int* pCare
 bool CReportListControl::GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex ) const
 {
 	std::vector<int> selIndexes;
-	if ( !GetSelection( selIndexes ) )
+	if ( !GetSelIndexes( selIndexes ) )
 	{
 		utl::AssignPtr( pMinSelIndex, -1 );
 		utl::AssignPtr( pMaxSelIndex, -1 );
@@ -1642,6 +1682,14 @@ Range<int> CReportListControl::GetSelIndexRange( void ) const
 	return selRange;
 }
 
+bool CReportListControl::IsSelContiguous( void ) const
+{
+	std::vector<int> selIndexes;
+
+	GetSelIndexes( selIndexes );
+	return utl::IsContiguous( selIndexes );
+}
+
 bool CReportListControl::Select( const void* pObject )
 {
 	int indexFound = FindItemIndex( pObject );
@@ -1652,7 +1700,7 @@ bool CReportListControl::Select( const void* pObject )
 			std::vector<int> selIndexes;
 			selIndexes.push_back( indexFound );
 
-			SetSelection( selIndexes, indexFound );
+			SetSelIndexes( selIndexes, indexFound );
 		}
 		else
 			ClearSelection();
@@ -1663,11 +1711,9 @@ bool CReportListControl::Select( const void* pObject )
 		return SetCurSel( indexFound );
 }
 
-void CReportListControl::SetSelection( const std::vector<int>& selIndexes, int caretIndex /*= -1*/ )
+void CReportListControl::SetSelIndexes( const std::vector<int>& selIndexes, int caretIndex /*= -1*/ )
 {
-	// clear the selection
-	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
-		SetItemState( i, 0, LVNI_SELECTED | LVNI_FOCUSED );
+	ClearSelection();
 
 	// select new items
 	for ( size_t i = 0; i != selIndexes.size(); ++i )
@@ -1686,13 +1732,7 @@ void CReportListControl::SetSelection( const std::vector<int>& selIndexes, int c
 
 void CReportListControl::ClearSelection( void )
 {
-	std::vector<int> selIndexes;
-	if ( GetSelection( selIndexes ) )
-	{
-		// clear the selection
-		for ( UINT i = 0; i != selIndexes.size(); ++i )
-			SetItemState( selIndexes[ i ], 0, LVNI_SELECTED );
-	}
+	SetItemState( -1, 0, LVIS_SELECTED );
 }
 
 void CReportListControl::SelectAll( void )
@@ -1705,7 +1745,7 @@ void CReportListControl::SelectAll( void )
 int CReportListControl::DeleteSelection( void )
 {
 	std::vector<int> selIndexes;
-	if ( !GetSelection( selIndexes ) )
+	if ( !GetSelIndexes( selIndexes ) )
 		return GetCaretIndex();
 
 	lv::CNmItemsRemoved removeNotify( this, selIndexes.front() );
@@ -1734,7 +1774,7 @@ void CReportListControl::MoveSelectionTo( seq::MoveTo moveTo )
 		CScopedInternalChange internalChange( this );
 
 		std::vector<int> selIndexes;
-		GetSelection( selIndexes );
+		GetSelIndexes( selIndexes );
 
 		CListCtrlSequence sequence( this );
 		seq::Resequence( sequence, selIndexes, moveTo );
@@ -1773,6 +1813,12 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 	}
 
 	return true;
+}
+
+bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags /*= ListSourcesMask*/ ) const
+{
+	CListSelectionData selData( const_cast<CReportListControl*>( this ) );
+	return CacheSelectionData( pDataSource, sourceFlags, selData );
 }
 
 std::tstring CReportListControl::FormatItemLine( int index ) const
@@ -1843,7 +1889,7 @@ std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::v
 std::auto_ptr<CImageList> CReportListControl::CreateDragImageSelection( CPoint* pFrameOrigin /*= nullptr*/ )
 {
 	std::vector<int> selIndexes;
-	GetSelection( selIndexes );
+	GetSelIndexes( selIndexes );
 	return CreateDragImageMulti( selIndexes, pFrameOrigin );
 }
 
@@ -2057,6 +2103,64 @@ void CReportListControl::ExpandAllGroups( void )
 
 #endif //UTL_VISTA_GROUPS
 
+#ifdef _DEBUG
+
+const CFlagTags& CReportListControl::GetTags_LV_Flags( void )
+{
+	static const CFlagTags::FlagDef s_flagDefs[] =
+	{
+		{ FLAG_TAG( LVIF_TEXT ) },
+		{ FLAG_TAG( LVIF_IMAGE ) },
+		{ FLAG_TAG( LVIF_PARAM ) },
+		{ FLAG_TAG( LVIF_STATE ) },
+		{ FLAG_TAG( LVIF_INDENT ) },
+		{ FLAG_TAG( LVIF_NORECOMPUTE ) },
+	#if (NTDDI_VERSION >= NTDDI_WINXP)
+		{ FLAG_TAG( LVIF_GROUPID ) },
+		{ FLAG_TAG( LVIF_COLUMNS ) },
+	#endif
+	#if (NTDDI_VERSION >= NTDDI_VISTA)
+		{ FLAG_TAG( LVIF_COLFMT ) }
+	#endif
+	};
+	static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
+	return s_tags;
+}
+
+const CFlagTags& CReportListControl::GetTags_LV_State( void )
+{
+	static const CFlagTags::FlagDef s_flagDefs[] =
+	{
+		{ FLAG_TAG( LVIS_FOCUSED ) },
+		{ FLAG_TAG( LVIS_SELECTED ) },
+		{ FLAG_TAG( LVIS_CUT ) },
+		{ FLAG_TAG( LVIS_DROPHILITED ) },
+		{ FLAG_TAG( LVIS_GLOW ) },
+		{ FLAG_TAG( LVIS_ACTIVATING ) }
+	};
+	static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
+	return s_tags;
+}
+
+#endif //_DEBUG
+
+
+void CReportListControl::TraceNotify( const NMLISTVIEW* pNmList )
+{
+#ifdef _DEBUG
+	static size_t count = 0;
+	utl::ISubject* pObject = AsSubject( pNmList->lParam );
+
+	TRACE_( _T(">> [%d] SelChange - NMLISTVIEW: iItem=%d, uNewState={%s}, uOldState={%s}, uChanged={%s}, lParam='%s'\n"), count++,
+		pNmList->iItem,
+		CReportListControl::GetTags_LV_State().FormatKey( pNmList->uNewState ).c_str(),
+		CReportListControl::GetTags_LV_State().FormatKey( pNmList->uOldState ).c_str(),
+		CReportListControl::GetTags_LV_Flags().FormatKey( pNmList->uChanged ).c_str(),
+		( pObject != nullptr ? dbg::GetSafeFileName( pObject ) : num::FormatNumber( pNmList->lParam ) ).c_str()
+	);
+#endif //_DEBUG
+}
+
 
 void CReportListControl::PreSubclassWindow( void )
 {
@@ -2253,7 +2357,7 @@ BOOL CReportListControl::OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 	*pResult = 0L;
 
 	if ( GetToggleCheckSelItems() )											// apply toggle to multi-selection?
-		if ( !IsInternalChange() || m_pNmToggling.get() != nullptr )			// user has toggled the check-state (directly or indirectly)?
+		if ( !IsInternalChange() || m_pNmToggling.get() != nullptr )		// user has toggled the check-state (directly or indirectly)?
 			if ( IsCheckStateChangeNotify( pListView ) )					// user has toggled the check-state?
 				ApplyCheckStateToSelectedItems( pListView->iItem, ui::CheckStateFromRaw( pListView->uNewState ) );		// apply check-state to selected items if toggled an item that is part of the multi-selection
 
@@ -2507,7 +2611,7 @@ void CReportListControl::OnMoveTo( UINT cmdId )
 void CReportListControl::OnUpdateMoveTo( CCmdUI* pCmdUI )
 {
 	std::vector<int> selIndexes;
-	GetSelection( selIndexes );
+	GetSelIndexes( selIndexes );
 
 	pCmdUI->Enable( seq::CanMoveSelection( GetItemCount(), selIndexes, lv::CmdIdToMoveTo( pCmdUI->m_nID ) ) );
 }
@@ -2554,7 +2658,7 @@ void CReportListControl::OnUpdateAnySelected( CCmdUI* pCmdUI )
 
 void CReportListControl::OnUpdateSingleSelected( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( SingleSelected() );
+	pCmdUI->Enable( IsSingleSelected() );
 }
 
 
@@ -2580,7 +2684,7 @@ namespace lv
 
 		if ( m_pListCtrl->GetItemCount() != 0 )
 		{
-			m_pListCtrl->GetSelection( m_selItems, &m_caretItem, &m_topVisibleItem );
+			m_pListCtrl->GetSelIndexes( m_selItems, &m_caretItem, &m_topVisibleItem );
 
 			if ( !useTopItem )
 				m_topVisibleItem = -1;
@@ -2593,7 +2697,7 @@ namespace lv
 		if ( m_pListCtrl != nullptr && m_pListCtrl->GetItemCount() != 0 )
 		{
 			//CScopedInternalChange internalChange( m_pListCtrl );
-			m_pListCtrl->SetSelection( m_selItems, m_caretItem );
+			m_pListCtrl->SetSelIndexes( m_selItems, m_caretItem );
 
 			if ( m_topVisibleItem != -1 )
 				m_pListCtrl->EnsureVisible( m_topVisibleItem, FALSE );
@@ -2676,7 +2780,7 @@ namespace lv
 			int caretIndex;
 			std::vector<int> selIndexes;
 
-			m_pListCtrl->GetSelection( selIndexes, &caretIndex );
+			m_pListCtrl->GetSelIndexes( selIndexes, &caretIndex );
 			m_pListCtrl->QueryItemsText( m_selItems, selIndexes );
 
 			if ( caretIndex != -1 )
@@ -2702,7 +2806,7 @@ namespace lv
 			std::sort( selIndexes.begin(), selIndexes.end() );
 
 			int caretIndex = !m_caretItem.empty() ? m_pListCtrl->FindItemIndex( m_caretItem ) : -1;
-			m_pListCtrl->SetSelection( selIndexes, caretIndex );
+			m_pListCtrl->SetSelIndexes( selIndexes, caretIndex );
 
 			if ( !m_topVisibleItem.empty() )
 			{
@@ -2863,7 +2967,7 @@ CListSelectionData::CListSelectionData( CReportListControl* pSrcListCtrl )
 	: ole::CTransferBlob( GetClipFormat() )
 	, m_pSrcWnd( pSrcListCtrl )
 {
-	safe_ptr( pSrcListCtrl )->GetSelection( m_selIndexes );
+	safe_ptr( pSrcListCtrl )->GetSelIndexes( m_selIndexes );
 }
 
 CLIPFORMAT CListSelectionData::GetClipFormat( void )

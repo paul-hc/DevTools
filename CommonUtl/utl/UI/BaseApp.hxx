@@ -2,6 +2,7 @@
 #include "utl/FileSystem.h"
 #include "utl/Logger.h"
 #include "utl/ResourcePool.h"
+#include "BaseApp.h"
 #include "AboutBox.h"
 #include "ImageStore.h"
 #include "CmdUpdate.h"

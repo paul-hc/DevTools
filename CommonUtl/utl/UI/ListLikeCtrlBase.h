@@ -46,14 +46,6 @@ public:
 
 	void SetTextEffectCallback( ui::ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
 
-	template< typename Type >
-	static Type* AsPtr( LPARAM data ) { return reinterpret_cast<Type*>( data ); }
-
-	template< typename Type >
-	static Type AsValue( LPARAM data ) { return reinterpret_cast<Type>( data ); }
-
-	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast<utl::ISubject*>( (utl::ISubject*)data ); }
-
 	// ICustomDrawControl interface
 	virtual CBaseCustomDrawImager* GetCustomDrawImager( void ) const;
 	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );

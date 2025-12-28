@@ -10,10 +10,13 @@ struct Range
 public:
 	Range( void ) : m_start(), m_end() {}		// reset to [0, 0]
 	Range( ValueT start, ValueT end ) : m_start( start ), m_end( end ) {}
-	explicit Range( ValueT startAndEnd ) : m_start( startAndEnd ), m_end( startAndEnd ) {}		// empty range constructor
+	explicit Range( ValueT startAndEnd ) : m_start( startAndEnd ), m_end( startAndEnd ) {}				// empty range constructor
 
-	template< typename U >
-	Range( const Range<U>& right ) : m_start( static_cast<ValueT>( right.m_start ) ), m_end( static_cast<ValueT>( right.m_end ) ) {}
+	template< typename SrcValueT >
+	Range( const Range<SrcValueT>& right ) : m_start( static_cast<ValueT>( right.m_start ) ), m_end( static_cast<ValueT>( right.m_end ) ) {}
+
+	template< typename SrcValueT >
+	Range( const std::pair<SrcValueT, SrcValueT>& pair ) : m_start( static_cast<ValueT>( pair.first ) ), m_end( static_cast<ValueT>( pair.second ) ) {}	// pair constructor
 
 	void SetRange( ValueT start, ValueT end ) { m_start = start; m_end = end; }
 	void SetEmptyRange( ValueT value ) { m_start = m_end = value; }
@@ -28,8 +31,11 @@ public:
 
 	bool IsNormalized( void ) const { return m_start <= m_end; }
 
-	template< typename U >
-	Range<U> AsRange( void ) const { return Range<U>( static_cast<U>( m_start ), static_cast<U>( m_end ) ); }
+	template< typename DestValueT >
+	Range<DestValueT> AsRange( void ) const { return Range<DestValueT>( static_cast<DestValueT>( m_start ), static_cast<DestValueT>( m_end ) ); }
+
+	template< typename DestValueT >
+	std::pair<DestValueT, DestValueT> AsPair( void ) const { return std::make_pair( static_cast<DestValueT>( m_start ), static_cast<DestValueT>( m_end ) ); }
 
 	Range<ValueT> GetNormalized( void ) const
 	{

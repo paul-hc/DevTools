@@ -161,7 +161,7 @@ int CFlagsListCtrl::FindGroupIdWithFlag( const CFlagInfo* pFlag ) const
 
 void CFlagsListCtrl::QueryCheckedFlagWorkingSet( std::vector<const CFlagInfo*>& rFlagSet, int index ) const
 {
-	if ( IsSelected( index ) )
+	if ( IsSelectedAt( index ) )
 		QuerySelectionAs( rFlagSet );
 	else
 		rFlagSet.push_back( GetPtrAt<CFlagInfo>( index ) );

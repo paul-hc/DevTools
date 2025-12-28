@@ -279,7 +279,7 @@ std::wostream& operator<<( std::wostream& os, const std::pair<Type1, Type2>& rPa
 namespace ut
 {
 	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText = nullptr );				// set a line of thext (pass NULL for using "name.ext")
-	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pAddText = nullptr, bool retainModifyTime = false );	// add another line of thext (pass NULL for using "name.ext")
+	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pAddText = nullptr, bool retainModifyTime = false );	// add another line of text (pass NULL for using "name.ext")
 
 	void StoreFileTextSize( const fs::CPath& filePath, size_t fileSize );
 

@@ -209,7 +209,7 @@ BSTR UserInterface::RegReadString( LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPC
 	if ( reg::OpenKey( &key, pKeyFullPath, KEY_READ ) )
 		stringValue = key.ReadStringValue( pValueName, pDefaultString );
 
-	return str::AllocSysString( stringValue );
+	return mfc::AllocSysString( stringValue );
 }
 
 long UserInterface::RegReadNumber( LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber )
@@ -301,5 +301,5 @@ BSTR UserInterface::LocateFile( LPCTSTR localDirPath )
 	if ( IDOK == dlg.DoModal() )
 		includeFilePath = dlg.m_selectedFilePath;
 
-	return str::AllocSysString( includeFilePath );
+	return mfc::AllocSysString( includeFilePath );
 }

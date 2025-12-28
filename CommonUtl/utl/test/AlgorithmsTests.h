@@ -29,6 +29,7 @@ private:
 	void TestUniquifyPaths( void );
 	void TestUniqueIndex( void );
 	void TestIsOrdered( void );
+	void TestIsContiguous( void );
 	void TestQuery( void );
 	void TestAssignment( void );
 	void TestInsert( void );

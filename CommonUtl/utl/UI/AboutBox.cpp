@@ -344,7 +344,7 @@ void CAboutBox::OnLvnItemChanged_ListItems( NMHDR* pNmHdr, LRESULT* pResult )
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0;
 
-	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	if ( m_pBuildInfoList->IsSelectionCaretChangeNotify( pNmList ) )
 		ui::UpdateControlUI( ::GetDlgItem( m_hWnd, IDC_ABOUT_EXPLORE_MODULE ) );
 }
 

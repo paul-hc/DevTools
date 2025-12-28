@@ -27,7 +27,7 @@ private:
 
 	// generated COM stuff
 public:
-	DECLARE_REGISTRY_RESOURCEID( IDR_SHELL_GOODIES_APP )		// REGISTRY resource
+	DECLARE_REGISTRY_RESOURCEID( IDR_SHELL_GOODIES_APP )		// REGISTRY resource: registrar script for this COM server
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
@@ -41,7 +41,7 @@ public:
 	STDMETHOD( InterfaceSupportsErrorInfo )( REFIID riid );
 
 	// IShellExtInit
-	STDMETHOD( Initialize )( LPCITEMIDLIST folderPidl, IDataObject* pSelFileObjects, HKEY hKeyProgId );
+	STDMETHOD( Initialize )( PCIDLIST_ABSOLUTE folderPidl, IDataObject* pSelFileObjects, HKEY hKeyProgId );
 
 	// IContextMenu
 	STDMETHOD( QueryContextMenu )( HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT flags );

@@ -60,6 +60,7 @@ class CDisplayFilenameAdapter : public ui::ISubjectAdapter
 public:
 	CDisplayFilenameAdapter( bool ignoreExtension ) : m_ignoreExtension( ignoreExtension ) {}
 
+	bool IsIgnoreExtension( void ) const { return m_ignoreExtension; }
 	void SetIgnoreExtension( bool ignoreExtension ) { m_ignoreExtension = ignoreExtension; }
 
 	// ui::ISubjectAdapter interface
@@ -77,6 +78,32 @@ private:
 	static std::tstring StripExtension( const TCHAR* pFilePath );
 private:
 	bool m_ignoreExtension;
+};
+
+
+class CSrcFilenameAdapter : public ui::ISubjectAdapter
+{
+public:
+	CSrcFilenameAdapter( const CDisplayFilenameAdapter* pDisplayAdapter ) : m_pDisplayAdapter( pDisplayAdapter ) { ASSERT_PTR( m_pDisplayAdapter ); }
+
+	// ui::ISubjectAdapter interface
+	virtual std::tstring FormatCode( const utl::ISubject* pSubject ) const;
+private:
+	const CDisplayFilenameAdapter* m_pDisplayAdapter;
+};
+
+
+class CDestFilenameAdapter : public ui::ISubjectAdapter
+{
+public:
+	CDestFilenameAdapter( const CDisplayFilenameAdapter* pDisplayAdapter ) : m_pDisplayAdapter( pDisplayAdapter ) { ASSERT_PTR( m_pDisplayAdapter ); }
+
+	// ui::ISubjectAdapter interface
+	virtual std::tstring FormatCode( const utl::ISubject* pSubject ) const;
+
+	fs::CPath ParseCode( const std::tstring& inputCode, const CRenameItem* pRenameItem ) const;
+private:
+	const CDisplayFilenameAdapter* m_pDisplayAdapter;
 };
 
 

@@ -93,7 +93,7 @@ namespace utl
 	{
 		ClearOwningContainer( rItemPtrs );		// delete existing items
 
-		typedef typename std::tr1::remove_pointer<typename PtrContainerT::value_type>::type TItem;
+		typedef typename std::remove_pointer<typename PtrContainerT::value_type>::type TItem;
 
 		rItemPtrs.reserve( count );
 		for ( size_t i = 0; i != count; ++i )
@@ -105,7 +105,7 @@ namespace utl
 	{
 		ClearOwningContainer( rItemPtrs );		// delete existing items
 
-		typedef typename std::tr1::remove_pointer<typename PtrContainerT::value_type>::type TItem;
+		typedef typename std::remove_pointer<typename PtrContainerT::value_type>::type TItem;
 
 		rItemPtrs.reserve( srcItemPtrs.size() );
 		for ( typename PtrContainerT::const_iterator itSrcItem = srcItemPtrs.begin(); itSrcItem != srcItemPtrs.end(); ++itSrcItem )

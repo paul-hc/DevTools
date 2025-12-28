@@ -42,7 +42,7 @@ private:
 class CBaseCustomDrawImager
 {
 protected:
-	CBaseCustomDrawImager( void ) {}
+	CBaseCustomDrawImager( void ) : m_transpImageIndex( -1 ) {}
 
 	void InitImageLists( const CSize& smallImageSize, const CSize& largeImageSize );
 public:

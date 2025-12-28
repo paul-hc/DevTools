@@ -463,7 +463,7 @@ bool CLayoutEngine::LayoutNormal( const layout::CDelta& delta )
 			if ( pCtrlState->ComputeLayout( ctrlRect, swpFlags, delta, m_collapsed ) )		// size or position changed?
 			{
 				::DeferWindowPos( hDWP, hCtrl, HWND_TOP, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(),
-								  swpFlags | SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE | SWP_NOCOPYBITS );
+								  swpFlags | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOCOPYBITS );
 
 				if ( ui::ILayoutFrame* pCtrlFrame = FindControlLayoutFrame( hCtrl ) )
 					ctrlLayoutFrames.push_back( pCtrlFrame );

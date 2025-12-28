@@ -461,7 +461,7 @@ void CItemsListPage::OnLvnItemChanged_Items( NMHDR* pNmHdr, LRESULT* pResult )
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0;
 
-	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	if ( m_listCtrl.IsSelectionCaretChangeNotify( pNmList ) )
 	{
 		int selIndex = m_listCtrl.GetCurSel();
 		if ( selIndex != -1 )
@@ -512,7 +512,7 @@ bool CItemsEditPage::InEditMode( void ) const
 bool CItemsEditPage::EditSelItem( void )
 {
 	std::tstring currLine = m_mlEdit.GetLineTextAt();
-	int startPos = m_mlEdit.LineIndex();
+	int startPos = m_mlEdit.LineToCharPos();
 	if ( startPos != -1 )
 		m_mlEdit.SetSel( startPos, startPos + static_cast<int>( currLine.length() ) );
 
@@ -535,21 +535,6 @@ bool CItemsEditPage::EditSelItem( void )
 	return m_pDialog->InputItem( selIndex, newItem );
 }
 
-Range<int> CItemsEditPage::GetLineRange( int linePos ) const
-{
-	Range<int> lineRange( m_mlEdit.LineIndex( linePos ) );
-	lineRange.m_end += m_mlEdit.LineLength( lineRange.m_start );
-	return lineRange;
-}
-
-Range<int> CItemsEditPage::SelectLine( int linePos )
-{
-	Range<int> lineRange = GetLineRange( linePos );
-	if ( lineRange.m_start != -1 )
-		m_mlEdit.SetSel( lineRange.m_start, lineRange.m_end );
-	return lineRange;
-}
-
 void CItemsEditPage::QueryEditItems( std::vector<std::tstring>& rItems ) const
 {
 	str::Split( rItems, m_mlEdit.GetText().c_str(), s_lineEnd );
@@ -568,7 +553,7 @@ void CItemsEditPage::OutputEdit( void )
 	int selIndex = m_pDialog->GetSelItemIndex();
 	if ( selIndex != -1 )
 	{
-		SelectLine( selIndex );
+		m_mlEdit.SelectLine( selIndex );
 	}
 }
 

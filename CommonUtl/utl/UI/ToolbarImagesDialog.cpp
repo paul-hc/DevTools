@@ -511,7 +511,7 @@ void CBaseImagesPage::OnLvnItemChanged_ImageListCtrl( NMHDR* pNmHdr, LRESULT* pR
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0;
 
-	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	if ( m_imageListCtrl.IsSelectionCaretChangeNotify( pNmList ) )
 	{
 		m_selItemIndex = m_imageListCtrl.GetCurSel();
 

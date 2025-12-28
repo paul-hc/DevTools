@@ -43,24 +43,36 @@ namespace func
 	};
 
 
-	template< typename SubType >
+	template< typename ObjectT >
 	struct As
 	{
-		template< typename ObjectT >
-		const SubType* operator()( const ObjectT* pObject ) const
+		template< typename BaseT >
+		const ObjectT* operator()( const BaseT* pObject ) const
 		{
-			return checked_static_cast<const SubType*>( pObject );
+			return checked_static_cast<const ObjectT*>( pObject );
+		}
+
+		template< typename BaseT >
+		ObjectT* operator()( BaseT* pObject ) const
+		{
+			return checked_static_cast<ObjectT*>( pObject );
 		}
 	};
 
 
-	template< typename SubType >
+	template< typename ObjectT >
 	struct DynamicAs
 	{
-		template< typename ObjectT >
-		const SubType* operator()( const ObjectT* pObject ) const
+		template< typename BaseT >
+		const ObjectT* operator()( const BaseT* pObject ) const
 		{
-			return dynamic_cast<const SubType*>( pObject );
+			return dynamic_cast<const ObjectT*>( pObject );
+		}
+
+		template< typename BaseT >
+		ObjectT* operator()( BaseT* pObject ) const
+		{
+			return dynamic_cast<ObjectT*>( pObject );
 		}
 	};
 
@@ -84,6 +96,33 @@ namespace func
 
 namespace pred
 {
+	template< typename PredT >
+	struct Not
+	{
+		explicit Not( const PredT& _pred ) : m_pred( _pred ) {}
+
+		template< typename ValueT >
+		bool operator()( const ValueT& value ) const
+		{
+			return !m_pred( value );
+		}
+
+		template< typename ValueT >
+		bool operator()( ValueT& rValue )
+		{
+			return !m_pred( rValue );
+		}
+	public:
+		PredT m_pred;
+	};
+
+	template< typename PredT >
+	inline Not<PredT> MakeNot( PredT _pred )
+	{
+		return Not<PredT>( _pred );
+	}
+
+
 	template< typename CmpValuesT >
 	struct CompareInOrder : public BaseComparator
 	{

@@ -105,7 +105,7 @@ void CListCtrlEditorFrame::OnUpdate_AnySelected( CCmdUI* pCmdUI )
 
 void CListCtrlEditorFrame::OnUpdate_SingleSelected( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !InInlineEditingMode() && m_pListCtrl->SingleSelected() );
+	pCmdUI->Enable( !InInlineEditingMode() && m_pListCtrl->IsSingleSelected() );
 }
 
 void CListCtrlEditorFrame::OnRemoveItem( void )

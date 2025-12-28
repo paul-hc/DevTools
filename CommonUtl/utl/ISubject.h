@@ -49,7 +49,11 @@ namespace utl
 		return pObject != nullptr ? pObject->GetDisplayCode() : str::GetEmpty();
 	}
 
+
 	inline int GetSafeTypeID( const IMessage* pMessage ) { return pMessage != nullptr ? pMessage->GetTypeID() : 0; }
+
+	template< typename CmdT >
+	const CmdT* GetSafeMatchCmd( const IMessage* pMessage, int cmdId ) { return cmdId == GetSafeTypeID( pMessage ) ? checked_static_cast<const CmdT*>( pMessage ) : nullptr; }
 }
 
 
@@ -123,6 +127,26 @@ namespace utl
 		MakeTextItemsList( text, objects.begin(), objects.end(), func::AsDisplayCode(), sep );
 		return text;
 	}
+}
+
+
+namespace dbg
+{
+#ifdef _DEBUG
+	const std::tstring GetSafeFileName( const utl::ISubject* pItem );
+
+	template< typename ItemContainerT >
+	std::tstring JoinFileNames( const ItemContainerT& items, const TCHAR sep[] = _T("|") )
+	{
+		return str::Join( items.begin(), items.end(), sep, GetSafeFileName );
+	}
+
+	template< typename ItemContainerT >
+	std::tstring FormatFileNames( const ItemContainerT& items )
+	{
+		return str::Format( _T("%d:{%s}"), items.size(), JoinFileNames( items ).c_str() );
+	}
+#endif
 }
 
 

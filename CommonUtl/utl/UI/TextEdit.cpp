@@ -8,12 +8,45 @@
 #include "WndUtils.h"
 #include "PostCall.h"
 #include "resource.h"
+#include "utl/Algorithms_fwd.h"
+#include "utl/CommonLength.h"
 #include "utl/TextClipboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+
+namespace ui
+{
+	// CTextValidator implementation
+
+	CTextValidator::CTextValidator( const CTextEdit* pEdit )
+		: m_pEdit( pEdit )
+		, m_inputText( safe_ptr( m_pEdit )->GetText() )
+		, m_itemCount( 1 )
+	{
+		if ( m_pEdit->IsMultiLine() )
+		{
+			str::SplitLines( m_lines, m_inputText.c_str(), CTextEdit::s_lineEnd );
+			m_itemCount = m_lines.size();
+		}
+	}
+
+	bool CTextValidator::StoreAmendedText( void )
+	{
+		std::tstring amendedText = str::Join( m_lines, CTextEdit::s_lineEnd );
+
+		if ( amendedText == m_inputText )
+			return false;
+
+		m_amendedText.swap( amendedText );
+		return true;
+	}
+}
+
+
+// CTextEdit implementation
 
 const TCHAR CTextEdit::s_lineEnd[] = _T("\r\n");
 
@@ -25,6 +58,7 @@ CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	, m_hookThumbTrack( true )
 	, m_visibleWhiteSpace( false )
 	, m_accel( IDR_EDIT_ACCEL )
+	, m_pTextInputCallback( nullptr )
 	, m_pSyncScrolling( nullptr )
 	, m_lastSelRange( 0, 0 )
 {
@@ -67,7 +101,7 @@ std::tstring CTextEdit::GetText( void ) const
 
 	if ( m_visibleWhiteSpace )
 		for ( int i = 0; i != COUNT_OF( s_whitespaces ); ++i )
-			str::Replace( text, s_whitespaces[ i ].m_pEdit, s_whitespaces[ i ].m_pText );
+			str::Replace( text, s_whitespaces[i].m_pEdit, s_whitespaces[i].m_pText );
 
 	return text;
 }
@@ -75,18 +109,54 @@ std::tstring CTextEdit::GetText( void ) const
 bool CTextEdit::SetText( const std::tstring& text )
 {
 	CScopedInternalChange internalChange( this );
+
 	SetModify( FALSE );
+	return SetTextImpl( text );
+}
+
+bool CTextEdit::SetTextImpl( const std::tstring& text )
+{
+	m_lastValidText = text;
 
 	if ( m_visibleWhiteSpace )
 	{
 		std::tstring editText = text;
 		for ( int i = 0; i != COUNT_OF( s_whitespaces ); ++i )
-			str::Replace( editText, s_whitespaces[ i ].m_pText, s_whitespaces[ i ].m_pEdit );
+			str::Replace( editText, s_whitespaces[i].m_pText, s_whitespaces[i].m_pEdit );
 
 		return ui::SetWindowText( m_hWnd, editText );
 	}
 
 	return ui::SetWindowText( m_hWnd, text );
+}
+
+bool CTextEdit::ReplaceText( const std::tstring& text, bool canUndo /*= true*/ )
+{
+	std::tstring oldText = GetText();
+
+	if ( text == oldText )
+		return false;
+
+	TLineIndex topLineIndex = GetTopLineIndex();
+
+	// a more functional method based on text selection/replacement, that doesn't break the Undo:
+	utl::CCommonLengths<std::tstring> common( oldText, text );
+	Range<TCharPos> oldMismatchSelRange = common.GetLeftMismatchRange<TCharPos>();
+	std::tstring newSelText = common.MakeRightMismatch();
+
+	SetSelRange( oldMismatchSelRange );
+	ReplaceSel( newSelText.c_str(), canUndo );
+	ENSURE( GetModify() );
+
+	SetSelRange( common.GetRightMismatchRange<TCharPos>() );		// select the new/changed core text
+
+	SetTopLineIndex( topLineIndex );
+	return false;
+}
+
+bool CTextEdit::RevertContents( void )
+{
+	return ReplaceText( m_lastValidText );
 }
 
 void CTextEdit::DDX_Text( CDataExchange* pDX, std::tstring& rValue, int ctrlId /*= 0*/ )
@@ -136,36 +206,207 @@ void CTextEdit::SetSel( TCharPos startChar, TCharPos endChar, BOOL noCaretScroll
 
 std::tstring CTextEdit::GetSelText( void ) const
 {
-	Range<int> sel;
-	GetSel( sel.m_start, sel.m_end );
-	return ui::GetWindowText( this ).substr( sel.m_start, sel.GetSpan<size_t>() );
+	Range<TCharPos> selRange = GetSelRange();
+
+	return m_lastValidText.substr( selRange.m_start, selRange.GetSpan<size_t>() );		// was ui::GetWindowText( this ).
 }
 
-Range<CTextEdit::TCharPos> CTextEdit::GetLineRange( TLine linePos ) const
+size_t CTextEdit::GetEffectiveLineCount( const std::tstring& text )
 {
-	Range<int> lineRange( LineIndex( linePos ) );
+	size_t lineCount = std::count( text.begin(), text.end(), '\n' ) + 1;
+
+	if ( !text.empty() && str::LastChar( text ) == '\n' )
+		--lineCount;		// ignore last empty line
+
+	return lineCount;
+}
+
+CTextEdit::TCharPos CTextEdit::GetCaretCharPos( TLineIndex* pCaretLineIndex /*= nullptr*/ ) const
+{
+	CPoint caretPoint = CWnd::GetCaretPos();		// in client coordinates
+	TCharPos caretPos = GetCharFromPoint( caretPoint, pCaretLineIndex );
+	return caretPos;
+}
+
+bool CTextEdit::SetCaretCharPos( TCharPos caretPos )
+{
+	CPoint caretPoint = CWnd::GetCaretPos();		// in client coordinates
+
+	if ( !utl::ModifyValue( caretPoint, GetCharPointTL( caretPos ) ) )
+		return false;		// caret not changed
+
+	CWnd::SetCaretPos( caretPoint );
+	return true;
+}
+
+CTextEdit::TCharPos CTextEdit::GetAnchorCharPos( TLineIndex* pAnchorLineIndex /*= nullptr*/ ) const
+{
+	TCharPos caretPos = GetCaretCharPos( pAnchorLineIndex );
+	Range<TCharPos> selRange = GetSelRange();
+
+	ASSERT( caretPos == selRange.m_start || caretPos == selRange.m_end );	// caret should be either START or END of selction
+
+	if ( selRange.IsEmpty() )
+		return caretPos;		// anchor is the caret when selection is empty
+
+	TCharPos anchorPos = ( caretPos == selRange.m_end ) ? selRange.m_start : selRange.m_end;
+
+	if ( pAnchorLineIndex != nullptr )
+		*pAnchorLineIndex = LineFromChar( anchorPos );
+
+	return anchorPos;
+}
+
+CTextEdit::TCharPos CTextEdit::GetCharFromPoint( const CPoint& clientPoint, TLineIndex* pLineIndex /*= nullptr*/ ) const
+{
+	int result = CharFromPos( clientPoint );
+
+	if ( pLineIndex != nullptr )
+		*pLineIndex = static_cast<TLineIndex>( HIWORD( result ) );
+
+	return static_cast<TCharPos>( LOWORD( result ) );
+}
+
+Range<CTextEdit::TCharPos> CTextEdit::GetLineRange( TLineIndex lineIndex ) const
+{
+	Range<TCharPos> lineRange( LineToCharPos( lineIndex ) );
+
 	lineRange.m_end += LineLength( lineRange.m_start );
 	return lineRange;
 }
 
-std::tstring CTextEdit::GetLineText( TLine linePos ) const
+std::tstring CTextEdit::GetLineText( TLineIndex lineIndex ) const
 {
 	// Note: careful with LineLength() - the 'nLine' parameter is the index of the first character on the line (TCharPos), not the line index
-	size_t length = GetLineRange( linePos ).GetSpan<size_t>();
+	size_t length = GetLineRange( lineIndex ).GetSpan<size_t>();
 	std::vector<TCHAR> lineBuffer( length + 1 );
 
-	size_t newLength = GetLine( linePos, ARRAY_SPAN_V( lineBuffer ) );
+	size_t newLength = GetLine( lineIndex, ARRAY_SPAN_V( lineBuffer ) );
 	ENSURE( length == newLength ); newLength;
-	lineBuffer[ length ] = _T('\0');
+	lineBuffer[length] = _T('\0');
 	return &lineBuffer.front();
+}
+
+bool CTextEdit::IsCaretAtSelStart( void ) const
+{
+	Range<TCharPos> selRange = GetSelRange();
+
+	return !selRange.IsEmpty() && GetCaretCharPos() == selRange.m_start;
+}
+
+Range<CTextEdit::TCharPos> CTextEdit::GetSelRange( bool swapIfCaretAtStart /*= false*/ ) const
+{
+	Range<TCharPos> selRange;
+
+	GetSel( selRange.m_start, selRange.m_end );
+	ASSERT( selRange.m_start <= selRange.m_end && selRange.m_start >= 0 );
+
+	if ( swapIfCaretAtStart && !selRange.IsEmpty() )
+	{
+		TCharPos caretPos = GetCaretCharPos();
+
+		if ( caretPos == selRange.m_start )
+			selRange.SwapBounds();			// invert the range to signal that caret is at start: [anchor, caret], e.g. for caret at 5, [5, 8] -> [8, 5]
+		else
+			ASSERT( caretPos == selRange.m_end );
+	}
+
+	return selRange;
+}
+
+bool CTextEdit::ClearSelection( bool collapseToEnd /*= true*/ )
+{
+	Range<TCharPos> selRange = GetSelRange();
+
+	if ( selRange.IsEmpty() )
+		return false;
+
+	if ( collapseToEnd )
+		selRange.m_start = selRange.m_end;
+	else
+		selRange.m_end = selRange.m_start;
+
+	return SetSelRange( selRange );		// collapse selection to END, which we assume as the caret
+}
+
+std::pair< Range<CTextEdit::TCharPos>, bool > CTextEdit::SelectLine( TLineIndex lineIndex )
+{
+	Range<CTextEdit::TCharPos> selRange = GetLineRange( lineIndex );
+
+	return std::make_pair( selRange, selRange.m_start != -1 && SetSelRange( selRange ) );
+}
+
+std::pair< Range<CTextEdit::TCharPos>, bool > CTextEdit::SelectLineRange( const Range<TLineIndex>& selLineRange )
+{
+	ASSERT( selLineRange.IsNormalized() );
+
+	Range<CTextEdit::TCharPos> selRange = GetLineRange( selLineRange.m_start );
+
+	if ( !selLineRange.IsEmpty() )
+		selRange.m_end = GetLineRange( selLineRange.m_end ).m_end;		// extend for multiple lines
+
+	return std::make_pair( selRange, selRange.m_start != -1 && selRange.m_end != -1 && SetSelRange( selRange ) );
+}
+
+Range<CTextEdit::TLineIndex> CTextEdit::LineRangeFromCharRange( const Range<TCharPos>& selRange, bool intuitiveSel /*= true*/ ) const
+{
+	ASSERT( selRange.IsNormalized() );
+
+	Range<TLineIndex> selLineRange( LineFromChar( selRange.m_start ), LineFromChar( selRange.m_end ) );
+
+	if ( intuitiveSel )
+		AdjustIntuitiveLineSelection( &selLineRange, selRange );
+
+	ENSURE( selLineRange.IsNormalized() );
+	//TRACE_( "+ CTextEdit::LineRangeFromCharRange(): selRange=(%d, %d)  selLineRange=(%d, %d)\n", selRange.m_start, selRange.m_end, selLineRange.m_start, selLineRange.m_end );
+	return selLineRange;
+}
+
+bool CTextEdit::AdjustIntuitiveLineSelection( IN OUT Range<TLineIndex>* pSelLineRange, const Range<TCharPos>& selRange ) const
+{	// returns true if line selection changed
+	ASSERT( selRange.IsNormalized() );
+	ASSERT( pSelLineRange != nullptr && pSelLineRange->IsNormalized() );
+
+	if ( pSelLineRange->IsEmpty() )
+		return false;		// nothing to adjust if selection is not multi-line
+
+	Range<TLineIndex> origSelLineRange = *pSelLineRange;
+
+	// Intuitive text selection - make selected lines based on what the user sees as selected:
+	//	- exclude caret from selection if either SelStart or SelEnd bounds are not at least partially text-selected in the corresponding bound lines.
+	//
+	Range<TCharPos> firstLineChRange = GetLineRange( pSelLineRange->m_start );
+	if ( selRange.m_start == firstLineChRange.m_end )			// SelStart on first line with no trailing overlap (right at line End)?
+		++pSelLineRange->m_start;
+
+	Range<TCharPos> lastLineChRange = GetLineRange( pSelLineRange->m_end );
+	if ( selRange.m_end == lastLineChRange.m_start )			// SelEnd on last line with no leading overlap (right on line Begin)?
+		--pSelLineRange->m_end;
+
+	if ( !pSelLineRange->IsNormalized() )						// SelStart on a line End and SelEnd at line Begin (empty text selection)?
+		pSelLineRange->SetEmptyRange( GetCaretLineIndex() );	// pick the caret line as selected
+
+	return *pSelLineRange != origSelLineRange;		// true if line selection changed
+}
+
+bool CTextEdit::SetTopLineIndex( TLineIndex topLineIndex )
+{
+	TLineIndex currTopLineIndex = GetTopLineIndex();
+
+	if ( topLineIndex < 0 || topLineIndex == currTopLineIndex )
+		return false;
+
+	LineScroll( topLineIndex - currTopLineIndex, 0 );		// scroll vertically RELATIVE to current top index!
+	//TRACE_( "+ CTextEdit::SetTopLineIndex(): topLineIndex=(%d)  newTopLineIndex=%d  currTopLineIndex=%d\n", topLineIndex, GetTopLineIndex(), currTopLineIndex );
+	return true;
 }
 
 CFont* CTextEdit::GetFixedFont( FontSize fontSize /*= Normal*/ )
 {
-	static CFont s_fixedFont[ 2 ];
-	if ( nullptr == s_fixedFont[ fontSize ].GetSafeHandle() )
-		ui::MakeStandardControlFont( s_fixedFont[ fontSize ], ui::CFontInfo( _T("Consolas"), ui::Regular, Normal == fontSize ? 100 : 120 ) );		// "Courier New"
-	return &s_fixedFont[ fontSize ];
+	static CFont s_fixedFont[2];
+	if ( nullptr == s_fixedFont[fontSize].GetSafeHandle() )
+		ui::MakeStandardControlFont( s_fixedFont[fontSize], ui::CFontInfo( _T("Consolas"), ui::Regular, Normal == fontSize ? 100 : 120 ) );		// "Courier New"
+	return &s_fixedFont[fontSize];
 }
 
 void CTextEdit::SetFixedFont( CWnd* pWnd )
@@ -184,6 +425,52 @@ bool CTextEdit::IsInternalChange( void ) const
 	return CInternalChange::IsInternalChange();
 }
 
+bool CTextEdit::ValidateText( ui::CTextValidator& rValidator ) implement
+{
+	static const TCHAR s_title[] = _T("Text Validation");
+
+	if ( HasInvalidText() )
+	{
+		RevertContents();
+		ui::ShowInfoTip( this, s_title, _T("Please input valid text!"), MB_ICONERROR );
+		return false;		// validation error
+	}
+
+	if ( IsMultiLine() && rValidator.HasLineMismatch() )
+	{	// invalid input: prohibit changing the number of items (lines)
+		RevertContents();
+
+		std::tstring message = str::Format( _T("Attempted to input %d lines!\nYou must input exactly %d lines of text."), rValidator.m_lines.size(), rValidator.m_itemCount );
+		ui::ShowInfoTip( this, s_title, message, MB_ICONERROR );
+		return false;		// validation error
+	}
+
+	if ( m_pTextInputCallback != nullptr )
+	{
+		ui::ITextInput::Result result = m_pTextInputCallback->OnEditInput( rValidator );
+
+		switch ( result )
+		{
+			case ui::ITextInput::Success:
+			case ui::ITextInput::Warning:
+				if ( rValidator.StoreAmendedText() )
+				{
+					ReplaceText( rValidator.m_amendedText );		// revert to valid amended text
+					result = ui::ITextInput::Warning;
+				}
+				if ( ui::ITextInput::Warning == result )
+					ui::ShowInfoTip( this, s_title, _T("Filtered input text."), MB_ICONWARNING );
+				break;
+			case ui::ITextInput::Error:
+				RevertContents();
+				ui::ShowInfoTip( this, s_title, _T("Input error!"), MB_ICONERROR );
+				return false;
+		}
+	}
+
+	return true;
+}
+
 void CTextEdit::OnValueChanged( void )
 {
 }
@@ -192,12 +479,14 @@ void CTextEdit::_WatchSelChange( void )
 {
 	if ( !IsInternalChange() )
 	{
-		Range<TCharPos> selRange = GetSelRange<TCharPos>();
+		Range<TCharPos> selRange = GetSelRange();
 
 		if ( selRange != m_lastSelRange )
 		{
 			m_lastSelRange = selRange;
-			ui::SendCommandToParent( m_hWnd, CTextEdit::EN_USERSELCHANGE );		// notify to parent of the selection change
+			ui::SendCommandToParent( m_hWnd, CTextEdit::EN_USER_SELCHANGE );		// notify to parent of the selection change
+
+			//TRACE_( "- m_lastSelRange=[%d, %d]\n", m_lastSelRange.m_start, m_lastSelRange.m_end );
 		}
 	}
 }
@@ -215,7 +504,7 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 	if ( WM_KEYDOWN == pMsg->message && m_hWnd == pMsg->hwnd )
 		if ( !ui::IsKeyPressed( VK_SHIFT ) )
 		{
-			Range<TCharPos> selRange = GetSelRange<TCharPos>();
+			Range<TCharPos> selRange = GetSelRange();
 			if ( !selRange.IsEmpty() )
 
 			// collapse selection in the direction of the key
@@ -253,6 +542,7 @@ BEGIN_MESSAGE_MAP( CTextEdit, TBaseClass )
 	ON_WM_GETDLGCODE()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
+	ON_MESSAGE( EM_REPLACESEL, OnEmReplaceSel )
 	ON_MESSAGE( WM_PASTE, OnPasteOrUndo )
 	ON_MESSAGE( WM_UNDO, OnPasteOrUndo )
 	ON_CONTROL_REFLECT_EX( EN_CHANGE, OnEnChange_Reflect )
@@ -303,6 +593,23 @@ void CTextEdit::OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 		ui::SendCommandToParent( m_hWnd, EN_VSCROLL );
 }
 
+LRESULT CTextEdit::OnEmReplaceSel( WPARAM wParam, LPARAM lParam )
+{
+	BOOL canUndo = (BOOL)wParam;
+	const TCHAR* pNewText = (const TCHAR*)lParam;
+	canUndo, pNewText;
+
+	LRESULT result;
+	{	// Supress internal EN_CHANGE notifications sent by "Edit" during CEdit::ReplaceSel().
+		// This is in order to prevent intermediate input validation errors during the transacted calls to EditML_DeleteText() and EditML_InsertText() calls.
+		CScopedInternalChange internalChange( this );
+		result = Default();
+	}
+
+	ui::SendCommandToParent( m_hWnd, EN_CHANGE );		// notify once at the end of replacing text transaction
+	return result;
+}
+
 LRESULT CTextEdit::OnPasteOrUndo( WPARAM, LPARAM )
 {
 	LRESULT result;
@@ -316,10 +623,16 @@ LRESULT CTextEdit::OnPasteOrUndo( WPARAM, LPARAM )
 
 BOOL CTextEdit::OnEnChange_Reflect( void )
 {
-	if ( IsInternalChange() ||		// doesn't propagate internal changes
-		 HasInvalidText() )			// ignore invalid input text (partial input)
+	if ( IsInternalChange() )		// don't propagate internal changes
 		return TRUE;				// skip parent routing
 
+	CScopedInternalChange pageChange( this );
+	ui::CTextValidator validator( this );
+
+	if ( !ValidateText( validator ) )
+		return TRUE;				// skip parent routing
+
+	m_lastValidText = GetText();
 	OnValueChanged();
 	return FALSE;					// continue routing
 }
@@ -348,10 +661,10 @@ BOOL CTextEdit::OnEnVScroll_Reflect( void )
 
 void CTextEdit::OnEditCopy( void )
 {
-	Range<int> selRange = GetSelRange<int>();
+	Range<TCharPos> selRange = GetSelRange();
 
 	if ( !selRange.IsEmpty() )
-		Copy();										// WM_COPY: copy the selected text
+		Copy();											// WM_COPY: copy the selected text
 	else
 		CTextClipboard::CopyText( GetText(), m_hWnd );	// copy the entire text
 }
@@ -389,7 +702,7 @@ void CTextEdit::OnSelectAll( void )
 
 void CTextEdit::OnUpdate_HasSel( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !GetSelRange<int>().IsEmpty() );
+	pCmdUI->Enable( !GetSelRange().IsEmpty() );
 }
 
 void CTextEdit::OnUpdate_Writeable( CCmdUI* pCmdUI )
@@ -399,5 +712,5 @@ void CTextEdit::OnUpdate_Writeable( CCmdUI* pCmdUI )
 
 void CTextEdit::OnUpdate_WriteableHasSel( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( IsWritable() && !GetSelRange<int>().IsEmpty() );
+	pCmdUI->Enable( IsWritable() && !GetSelRange().IsEmpty() );
 }

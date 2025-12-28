@@ -183,6 +183,7 @@
     <ClInclude Include="CacheLoader.hxx" />
     <ClInclude Include="CodeAlgorithms.h" />
     <ClInclude Include="Code_fwd.h" />
+    <ClInclude Include="CommonLength.h" />
     <ClInclude Include="CppVer.h" />
     <ClInclude Include="DebugTrace.h" />
     <ClInclude Include="Functional.h" />
@@ -416,6 +417,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="UTL Libraries.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

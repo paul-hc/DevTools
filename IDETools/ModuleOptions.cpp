@@ -85,7 +85,7 @@ IMPLEMENT_OLECREATE(ModuleOptions, "IDETools.ModuleOptions", 0x4064259a, 0x55dc,
 
 BSTR ModuleOptions::GetDeveloperName( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_developerName );
+	return mfc::AllocSysString( app::GetModuleSession().m_developerName );
 }
 
 void ModuleOptions::SetDeveloperName( LPCTSTR lpszNewValue )
@@ -95,7 +95,7 @@ void ModuleOptions::SetDeveloperName( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetCodeTemplateFile( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_codeSnippetsPath.Get() );
+	return mfc::AllocSysString( app::GetModuleSession().m_codeSnippetsPath.Get() );
 }
 
 void ModuleOptions::SetCodeTemplateFile( LPCTSTR lpszNewValue )
@@ -125,7 +125,7 @@ void ModuleOptions::SetMenuVertSplitCount( long nNewValue )
 
 BSTR ModuleOptions::GetSingleLineCommentToken( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_singleLineCommentToken );
+	return mfc::AllocSysString( app::GetModuleSession().m_singleLineCommentToken );
 }
 
 void ModuleOptions::SetSingleLineCommentToken( LPCTSTR lpszNewValue )
@@ -135,7 +135,7 @@ void ModuleOptions::SetSingleLineCommentToken( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetClassPrefix( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_classPrefix );
+	return mfc::AllocSysString( app::GetModuleSession().m_classPrefix );
 }
 
 void ModuleOptions::SetClassPrefix( LPCTSTR lpszNewValue )
@@ -145,7 +145,7 @@ void ModuleOptions::SetClassPrefix( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetStructPrefix( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_structPrefix );
+	return mfc::AllocSysString( app::GetModuleSession().m_structPrefix );
 }
 
 void ModuleOptions::SetStructPrefix( LPCTSTR lpszNewValue )
@@ -155,7 +155,7 @@ void ModuleOptions::SetStructPrefix( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetEnumPrefix( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_enumPrefix );
+	return mfc::AllocSysString( app::GetModuleSession().m_enumPrefix );
 }
 
 void ModuleOptions::SetEnumPrefix( LPCTSTR lpszNewValue )
@@ -205,7 +205,7 @@ void ModuleOptions::SetDuplicateLineMoveDown( BOOL bNewValue )
 
 BSTR ModuleOptions::GetBrowseInfoPath( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_browseInfoPath.Get() );
+	return mfc::AllocSysString( app::GetModuleSession().m_browseInfoPath.Get() );
 }
 
 void ModuleOptions::SetBrowseInfoPath( LPCTSTR lpszNewValue )
@@ -215,7 +215,7 @@ void ModuleOptions::SetBrowseInfoPath( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetAdditionalIncludePath( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_moreAdditionalIncludePath.Join() );
+	return mfc::AllocSysString( app::GetModuleSession().m_moreAdditionalIncludePath.Join() );
 }
 
 void ModuleOptions::SetAdditionalIncludePath( LPCTSTR lpszNewValue )
@@ -225,7 +225,7 @@ void ModuleOptions::SetAdditionalIncludePath( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetAdditionalAssocFolders( void )
 {
-	return str::AllocSysString( app::GetModuleSession().GetAdditionalAssocFolders() );
+	return mfc::AllocSysString( app::GetModuleSession().GetAdditionalAssocFolders() );
 }
 
 void ModuleOptions::SetAdditionalAssocFolders( LPCTSTR lpszNewValue )
@@ -245,17 +245,17 @@ BOOL ModuleOptions::GetReturnTypeOnSeparateLine( void )
 
 BSTR ModuleOptions::GetVStudioCommonDirPath( BOOL addTrailingSlash )
 {
-	return str::AllocSysString( ide::vs6::GetCommonDirPath( addTrailingSlash != FALSE ).Get() );
+	return mfc::AllocSysString( ide::vs6::GetCommonDirPath( addTrailingSlash != FALSE ).Get() );
 }
 
 BSTR ModuleOptions::GetVStudioMacrosDirPath( BOOL addTrailingSlash )
 {
-	return str::AllocSysString( ide::vs6::GetMacrosDirPath( addTrailingSlash != FALSE ).Get() );
+	return mfc::AllocSysString( ide::vs6::GetMacrosDirPath( addTrailingSlash != FALSE ).Get() );
 }
 
 BSTR ModuleOptions::GetVStudioVC98DirPath( BOOL addTrailingSlash )
 {
-	return str::AllocSysString( ide::vs6::GetVC98DirPath( addTrailingSlash != FALSE ).Get() );
+	return mfc::AllocSysString( ide::vs6::GetVC98DirPath( addTrailingSlash != FALSE ).Get() );
 }
 
 BOOL ModuleOptions::EditOptions( void )

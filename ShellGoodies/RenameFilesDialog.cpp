@@ -22,6 +22,7 @@
 #include "utl/RuntimeException.h"
 #include "utl/UI/BalloonMessageTip.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ShellDialogs.h"
 #include "utl/UI/SystemTray_fwd.h"
 #include "utl/UI/TaskDialog.h"
 #include "utl/UI/Thumbnailer.h"
@@ -32,6 +33,7 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/SelectionData.hxx"
 #include "utl/UI/TandemControls.hxx"
 
 
@@ -44,7 +46,6 @@ namespace reg
 	static const TCHAR entry_seqCount[] = _T("Sequence Count");
 	static const TCHAR entry_seqCountAutoAdvance[] = _T("Sequence Count Auto Advance");
 	static const TCHAR entry_ignoreExtension[] = _T("Ignore Extension");
-	static const TCHAR entry_listMultiSelMode[] = _T("File List Multi-Selection Mode");
 	static const TCHAR entry_changeCase[] = _T("Change Case");
 	static const TCHAR entry_delimiterSetHistory[] = _T("Delimiter Set History");
 	static const TCHAR entry_newDelimiterHistory[] = _T("New Delimiter History");
@@ -59,9 +60,11 @@ namespace layout
 	static CLayoutStyle styles[] =
 	{
 		{ IDC_FORMAT_COMBO, SizeX },
-		{ IDC_STRIP_BAR_2, MoveX },
 
 		{ IDC_FILES_SHEET, Size },
+		{ IDC_OUTCOME_INFO_STATUS, MoveY | SizeX },
+		{ IDC_CURR_FOLDER_STATIC, MoveY },
+		{ IDC_CURR_FOLDER_EDIT, MoveY | SizeX },
 
 		{ IDC_SOURCE_FILES_GROUP, MoveY },
 		{ IDC_COPY_SOURCE_PATHS_BUTTON, MoveY },
@@ -93,10 +96,10 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
 	, m_ignoreExtension( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, true ) != FALSE )
-	, m_listMultiSelMode( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_listMultiSelMode, false ) != FALSE )
 	, m_prevGenSeqCount( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCount, 1 ) )
 	, m_pDisplayFilenameAdapter( new CDisplayFilenameAdapter( m_ignoreExtension ) )
 	, m_formatCombo( ui::EditShinkHost_MateOnRight )
+	, m_fileListStatic( ui::EditShinkHost_MateOnRight )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
 	, m_delimiterSetCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_delimStatic( CThemeItem( L"EXPLORERBAR", vt::EBP_IEBARMENU, vt::EBM_NORMAL ) )
@@ -113,6 +116,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_filesSheet.AddPage( new CRenameSimpleListPage( this ) );
 	m_filesSheet.AddPage( new CRenameDetailsListPage( this ) );
 	m_filesSheet.AddPage( new CRenameEditPage( this ) );
+	m_filesSheet.AddObserver( this );		// route cmd::OnRenameListSelChanged notifications to this dialog
 
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
 	ClearFlag( m_delimiterSetCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty | ui::CItemContent::Trim );
@@ -135,10 +139,11 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 		.AddButton( ID_SEQ_COUNT_FIND_NEXT )
 		.AddSeparator()
 		.AddButton( ID_SEQ_COUNT_AUTO_ADVANCE );
-	m_fileListToolbar.GetStrip()
-		.AddButton( ID_TOGGLE_LIST_SELECTION_MODE )
-		.AddSeparator()
-		.AddButton( ID_RESET_LIST_SELECTION );
+	m_fileListStatic.GetMateToolbar()->GetStrip()
+		.AddButton( ID_CMD_RESET_DESTINATIONS );
+	m_currFolderEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_COPY )
+		.AddButton( ID_BROWSE_FOLDER );
 
 	m_sortOrderCombo.SetTags( &ren::ui::GetTags_UiSortBy() );
 	m_showExtButton.SetFrameMargins( -2, -2 );		// draw the frame outside of the button, in the dialog area
@@ -146,6 +151,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 
 CRenameFilesDialog::~CRenameFilesDialog()
 {
+	m_filesSheet.RemoveObserver( this );
 }
 
 bool CRenameFilesDialog::RenameFiles( void )
@@ -205,9 +211,7 @@ void CRenameFilesDialog::PostMakeDest( bool silent /*= false*/ ) override
 	else
 	{
 		if ( const CRenameItem* pFirstErrorItem = GetFirstErrorItem<CRenameItem>() )
-			for ( int i = 0; i != m_filesSheet.GetPageCount(); ++i )
-				if ( IRenamePage* pPage = m_filesSheet.GetCreatedPageAs<IRenamePage>( i ) )
-					pPage->EnsureVisibleItem( pFirstErrorItem );
+			SetCaretOnItem( pFirstErrorItem );
 
 		SwitchMode( EditMode );
 
@@ -244,35 +248,48 @@ void CRenameFilesDialog::PopStackTop( svc::StackType stackType ) override
 
 void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
 {
-	if ( m_hWnd != nullptr )
-	{
-		if ( m_pFileModel == pSubject )
-		{
-			if ( nullptr == m_pRenSvc.get() )
-				m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
-			else
-				m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
+	const cmd::CommandType cmdType = static_cast<cmd::CommandType>( utl::GetSafeTypeID( pMessage ) );
 
-			if ( CSortRenameItemsCmd* pSortCmd = dynamic_cast<CSortRenameItemsCmd*>( pMessage ) )
-			{
-				//if ( pSortCmd->m_pPage != nullptr )					// triggered by a list-ctrl, not internally?
-				//	m_sortOrderCombo.SetValue( ren::ui::FromSortingPair( pSortCmd->m_sorting ) );
+	if ( nullptr == m_hWnd )
+		return;
 
-				UpdateSortOrderCombo( pSortCmd->m_sorting );
+	if ( &m_filesSheet == pSubject )
+	{	// This is a "foreign" update from the child sheet for cross-pages commands.
+		// Do minimal handling, then return.
+		if ( cmd::OnRenameListSelChanged == cmdType )
+			UpdateFileListStatus();
 
-				if ( CommitFilesMode == m_mode && HasDestPaths() )
-					ChangeSeqCount( m_prevGenSeqCount );			// allow user to re-generate the dest sequence, by switching to EditMode
-			}
-		}
-
-		for ( int i = 0; i != m_filesSheet.GetPageCount(); ++i )
-			if ( utl::IObserver* pPage = m_filesSheet.GetCreatedPageAs<utl::IObserver>( i ) )
-				pPage->OnUpdate( pSubject, pMessage );
-
-		if ( m_pFileModel == pSubject )
-			if ( cmd::ChangeDestPaths == utl::GetSafeTypeID( pMessage ) )
-				PostMakeDest();
+		return;		// skip rounting sheet/page command notifications, since the child sheet has it's own obeservers
 	}
+
+	if ( m_pFileModel == pSubject )
+	{
+		if ( nullptr == m_pRenSvc.get() )
+			m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
+		else
+			m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
+
+		if ( const CSortRenameListCmd* pSortCmd = utl::GetSafeMatchCmd<CSortRenameListCmd>( pMessage, cmd::SortRenameList ) )
+		{
+			UpdateSortOrderCombo( pSortCmd->m_sorting );
+
+			if ( CommitFilesMode == m_mode && HasDestPaths() )
+				ChangeSeqCount( m_prevGenSeqCount );			// allow user to re-generate the dest sequence, by switching to EditMode
+		}
+	}
+
+	for ( int i = 0; i != m_filesSheet.GetPageCount(); ++i )
+		if ( utl::IObserver* pPage = m_filesSheet.GetCreatedPageAs<utl::IObserver>( i ) )
+			pPage->OnUpdate( pSubject, pMessage );
+
+	if ( m_pFileModel == pSubject )
+		switch ( cmdType )
+		{
+			case cmd::ChangeDestPaths:
+			case cmd::ChangeSelDestPaths:
+				PostMakeDest();
+				break;
+		}
 }
 
 void CRenameFilesDialog::ClearFileErrors( void ) override
@@ -291,10 +308,7 @@ void CRenameFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstri
 	if ( CRenameItem* pErrorItem = FindItemWithKey( srcPath ) )
 	{
 		utl::AddUnique( m_errorItems, pErrorItem );
-
-		for ( int i = 0; i != m_filesSheet.GetPageCount(); ++i )
-			if ( IRenamePage* pPage = m_filesSheet.GetCreatedPageAs<IRenamePage>( i ) )
-				pPage->EnsureVisibleItem( pErrorItem );
+		SetCaretOnItem( pErrorItem );
 	}
 }
 
@@ -315,12 +329,21 @@ void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, 
 		case IDC_CAPITALIZE_BUTTON:
 			if ( m_capitalizeButton.GetRhsPartRect().PtInRect( ui::GetCursorPos( m_capitalizeButton ) ) )
 			{
-				static const std::tstring details = str::Load( IDI_DETAILS );
-				rText = details;
+				static const std::tstring s_details = str::Load( IDI_DETAILS );
+				rText = s_details;
 			}
 			break;
 		case IDC_REPLACE_FILES_BUTTON:
 			rText = CReplaceDialog::FormatTooltipMessage();
+			break;
+		case IDC_CURR_FOLDER_STATIC:
+			rText = _T("Folder of the current file");
+			break;
+		case IDC_CURR_FOLDER_EDIT:
+			rText = utl::GetSafeCode( m_selData.GetCaretItem() );
+			break;
+		case ID_CMD_RESET_DESTINATIONS:
+			rText = str::Format( _T("Rollback to default destination the %d selected item(s)"), m_selData.GetSelItems().size() );
 			break;
 		default:
 			__super::QueryTooltipText( rText, cmdId, pTooltip );
@@ -330,6 +353,23 @@ void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, 
 void CRenameFilesDialog::UpdateFormatLabel( void )
 {
 	ui::SetDlgItemText( this, IDC_FORMAT_LABEL, str::Format( _T("&Template \"%s\":"), m_ignoreExtension ? _T("name") : _T("name.ext") ) );
+}
+
+void CRenameFilesDialog::UpdateFileListStatus( void )
+{
+	std::tstring message = str::Format( _T("Total: %d file(s) in %d folder(s)."), m_pFileModel->GetSourcePaths().size(), m_pFileModel->GetSrcFolderPaths().size() );
+
+	if ( size_t selCount = m_selData.GetSelItems().size() )
+		message += str::Format( _T("  Selected %d items(s)."), selCount );
+
+	m_fileListStatic.SetWindowText( message );
+
+	fs::CPath currFolderPath;
+
+	if ( CRenameItem* pCaretItem = m_selData.GetCaretItem() )
+		currFolderPath = pCaretItem->GetSrcPath().GetParentPath();
+
+	m_currFolderEdit.SetText( currFolderPath.Get() );
 }
 
 void CRenameFilesDialog::UpdateSortOrderCombo( const ren::TSortingPair& sorting )
@@ -410,6 +450,15 @@ std::tstring CRenameFilesDialog::GetSelFindWhat( void ) const
 	return str::GetEmpty();
 }
 
+bool CRenameFilesDialog::SetCaretOnItem( const CRenameItem* pRenameItem )
+{
+	if ( !m_selData.SetCaretItem( pRenameItem ) )
+		return false;		// no caret change
+
+	COnRenameListSelChangedCmd( &m_filesSheet, m_selData ).Execute();		// synchronize caret across pages
+	return true;
+}
+
 CPathFormatter CRenameFilesDialog::InputRenameFormatter( bool checkConsistent ) const
 {
 	fs::CPath renameFormat = m_pDisplayFilenameAdapter->ParseFilename( m_formatCombo.GetCurrentText(), fs::CPath( _T("null") ) );
@@ -447,11 +496,12 @@ bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter,
 	if ( !generator.GeneratePairs() )
 		return false;
 
-	ren::AssignPairsToItems( m_rRenameItems, renamePairs );
 	*pSeqCount = generator.GetSeqCount();
 
-	m_pFileModel->UpdateAllObservers( nullptr );
-	return true;
+	std::vector<fs::CPath> newDestPaths;
+	renamePairs.QueryDestPaths( std::back_inserter( newDestPaths ) );
+
+	return SafeExecuteCmd( new CChangeDestPathsCmd( m_pFileModel, newDestPaths, _T("Generate destination file paths from template format") ) );
 }
 
 void CRenameFilesDialog::AutoGenerateFiles( void )
@@ -493,7 +543,8 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
 	DDX_Control( pDX, IDC_SEQ_COUNT_EDIT, m_seqCountEdit );
 	m_seqCountToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
-	m_fileListToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignRight | V_AlignBottom );
+	DDX_Control( pDX, IDC_OUTCOME_INFO_STATUS, m_fileListStatic );
+	DDX_Control( pDX, IDC_CURR_FOLDER_EDIT, m_currFolderEdit );
 	DDX_Control( pDX, IDC_SHOW_EXTENSION_CHECK, m_showExtButton );
 	DDX_Control( pDX, IDC_SORT_ORDER_COMBO, m_sortOrderCombo );
 	DDX_Control( pDX, IDC_CAPITALIZE_BUTTON, m_capitalizeButton );
@@ -522,6 +573,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 		m_showExtButton.SetCheck( !m_ignoreExtension );			// checkbox has inverted logic
 		UpdateSortOrderCombo( m_pFileModel->GetRenameSorting() );
 		UpdateFormatLabel();
+		UpdateFileListStatus();
 
 		m_isInitialized = true;
 
@@ -560,15 +612,14 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_FIND_NEXT, OnUpdateSeqCountFindNext )
 	ON_COMMAND( ID_SEQ_COUNT_AUTO_ADVANCE, OnToggle_SeqCountAutoAdvance )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_AUTO_ADVANCE, OnUpdate_SeqCountAutoAdvance )
-	ON_COMMAND( ID_TOGGLE_LIST_SELECTION_MODE, OnToggle_ListSelectionMode )
-	ON_UPDATE_COMMAND_UI( ID_TOGGLE_LIST_SELECTION_MODE, OnUpdate_ListSelectionMode )
-	ON_COMMAND( ID_RESET_LIST_SELECTION, On_ResetListSelection )
-	ON_UPDATE_COMMAND_UI( ID_RESET_LIST_SELECTION, OnUpdate_ResetListSelection )
 	ON_BN_CLICKED( IDC_SHOW_EXTENSION_CHECK, OnToggle_ShowExtension )
 	ON_CBN_SELCHANGE( IDC_SORT_ORDER_COMBO, OnCbnSelChange_SortOrder )
+	ON_COMMAND( ID_CMD_RESET_DESTINATIONS, On_SelItems_ResetDestFile )
+	ON_UPDATE_COMMAND_UI( ID_CMD_RESET_DESTINATIONS, OnUpdate_SelItems_ResetDestFile )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestFiles )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
+	ON_UPDATE_COMMAND_UI( IDC_RESET_FILES_BUTTON, OnUpdate_ResetDestFiles )
 	ON_BN_CLICKED( IDC_CAPITALIZE_BUTTON, OnBnClicked_CapitalizeDestFiles )
 	ON_SBN_RIGHTCLICKED( IDC_CAPITALIZE_BUTTON, OnSbnRightClicked_CapitalizeOptions )
 	ON_BN_CLICKED( IDC_CHANGE_CASE_BUTTON, OnBnClicked_ChangeCase )
@@ -582,6 +633,9 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_COMMAND_RANGE( ID_REPLACE_ALL_DELIMS, ID_SPACE_TO_UNDERBAR, OnChangeDestPathsTool )
 	ON_COMMAND( ID_ENSURE_UNIFORM_ZERO_PADDING, OnEnsureUniformNumPadding )		// bottom-right pick DEST tool
 	ON_COMMAND( ID_GENERATE_NUMERIC_SEQUENCE, OnGenerateNumericSequence )
+
+	ON_COMMAND( ID_BROWSE_FOLDER, On_BrowseCurrFolder )
+	ON_UPDATE_COMMAND_UI( ID_BROWSE_FOLDER, OnUpdate_BrowseCurrFolder )
 END_MESSAGE_MAP()
 
 BOOL CRenameFilesDialog::OnInitDialog( void ) override
@@ -658,7 +712,6 @@ void CRenameFilesDialog::OnDestroy( void )
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, m_seqCountAutoAdvance );
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_changeCase, m_changeCaseButton.GetSelValue() );
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, m_ignoreExtension );
-	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_listMultiSelMode, m_listMultiSelMode );
 
 	__super::OnDestroy();
 }
@@ -746,22 +799,6 @@ void CRenameFilesDialog::OnUpdate_SeqCountAutoAdvance( CCmdUI* pCmdUI )
 	pCmdUI->SetCheck( m_seqCountAutoAdvance );
 }
 
-void CRenameFilesDialog::OnToggle_ListSelectionMode( void )
-{
-}
-
-void CRenameFilesDialog::OnUpdate_ListSelectionMode( CCmdUI* pCmdUI )
-{
-}
-
-void CRenameFilesDialog::On_ResetListSelection( void )
-{
-}
-
-void CRenameFilesDialog::OnUpdate_ResetListSelection( CCmdUI* pCmdUI )
-{
-}
-
 void CRenameFilesDialog::OnToggle_ShowExtension( void )
 {
 	m_ignoreExtension = BST_UNCHECKED == m_showExtButton.GetCheck();			// checkbox has inverted logic
@@ -778,7 +815,20 @@ void CRenameFilesDialog::OnCbnSelChange_SortOrder( void )
 	ren::TSortingPair sorting = ren::ui::ToSortingPair( m_sortOrderCombo.GetEnum<ren::ui::UiSortBy>() );
 
 	if ( sorting != m_pFileModel->GetRenameSorting() )
-		CSortRenameItemsCmd( m_pFileModel, nullptr, sorting ).Execute();
+		CSortRenameListCmd( m_pFileModel, nullptr, sorting ).Execute();
+}
+
+void CRenameFilesDialog::On_SelItems_ResetDestFile( void )
+{
+	CommitLocalEdits();
+
+	if ( !m_selData.GetSelItems().empty() )
+		SafeExecuteCmd( new CResetSelDestPathsCmd( m_pFileModel, m_selData.GetSelItems() ) );
+}
+
+void CRenameFilesDialog::OnUpdate_SelItems_ResetDestFile( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( !m_selData.GetSelItems().empty() );
 }
 
 void CRenameFilesDialog::OnBnClicked_CopySourceFiles( void )
@@ -804,6 +854,11 @@ void CRenameFilesDialog::OnBnClicked_ResetDestFiles( void )
 {
 	ClearFileErrors();
 	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
+}
+
+void CRenameFilesDialog::OnUpdate_ResetDestFiles( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( false );
 }
 
 void CRenameFilesDialog::OnBnClicked_CapitalizeDestFiles( void )
@@ -1050,4 +1105,19 @@ void CRenameFilesDialog::OnGenerateNumericSequence( void )
 	{
 		exc.ReportError();
 	}
+}
+
+void CRenameFilesDialog::On_BrowseCurrFolder( void )
+{
+	fs::CPath caretFilePath;
+
+	if ( CRenameItem* pCaretItem = m_selData.GetCaretItem() )
+		caretFilePath = pCaretItem->GetSrcPath();
+
+	shell::BrowseForFile( caretFilePath, this );
+}
+
+void CRenameFilesDialog::OnUpdate_BrowseCurrFolder( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_selData.GetCaretItem() != nullptr );
 }

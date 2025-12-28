@@ -201,3 +201,29 @@ std::tstring CDisplayFilenameAdapter::StripExtension( const TCHAR* pFilePath )
 
 	return std::tstring( pFilePath, std::distance( pFilePath, pExt ) );		// strip the extension
 }
+
+
+// CSrcFilenameAdapter implementation
+
+std::tstring CSrcFilenameAdapter::FormatCode( const utl::ISubject* pSubject ) const
+{
+	const CRenameItem* pRenameItem = checked_static_cast<const CRenameItem*>( pSubject );
+
+	return m_pDisplayAdapter->FormatFilename( pRenameItem->GetSrcPath(), pRenameItem->IsDirectory() );
+}
+
+
+// CDestFilenameAdapter implementation
+
+std::tstring CDestFilenameAdapter::FormatCode( const utl::ISubject* pSubject ) const
+{
+	const CRenameItem* pRenameItem = checked_static_cast<const CRenameItem*>( pSubject );
+
+	return m_pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath(), pRenameItem->IsDirectory() );
+}
+
+fs::CPath CDestFilenameAdapter::ParseCode( const std::tstring& inputCode, const CRenameItem* pRenameItem ) const
+{
+	ASSERT_PTR( pRenameItem );
+	return m_pDisplayAdapter->ParseFilename( inputCode, pRenameItem->GetSafeDestPath() );		// <dest_dir_path or src_dir_path>/filename
+}

@@ -266,9 +266,15 @@ namespace str
 	inline wchar_t* Copy( OUT wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
 
 
+	template< typename StringT >
+	inline StringT FromAnsi( const char* pAnsiText )
+	{	// fast conversion without Unicode characters that require encoding conversion
+		return StringT( pAnsiText, str::end( pAnsiText ) );
+	}
+
 	template< typename CharT >
-	std::basic_string<CharT>& AppendAnsi( std::basic_string<CharT>& rOutText, const char* pAnsiText )
-	{	// fast conversion without special local character that require encoding conversion
+	inline std::basic_string<CharT>& AppendAnsi( std::basic_string<CharT>& rOutText, const char* pAnsiText )
+	{	// fast conversion without Unicode characters that require encoding conversion
 		return rOutText.append( pAnsiText, str::end( pAnsiText ) );
 	}
 
@@ -574,74 +580,100 @@ namespace str
 
 namespace str
 {
-	template< typename CharT > const CharT* StdWhitespace( void );	// " \t\r\n"
-
-
 	template< typename CharT >
-	std::basic_string<CharT>& TrimLeft( IN OUT std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	const CharT* StdWhitespace( void );		// " \t\r\n"
+
+
+	template< typename StringT >
+	size_t TrimLeft( IN OUT StringT& rText, const typename StringT::value_type* pWhiteSpace = StdWhitespace<typename StringT::value_type>() )
 	{
 		size_t startPos = rText.find_first_not_of( pWhiteSpace );
+		size_t delCount = startPos;
 
 		if ( startPos != std::string::npos )
 			rText.erase( 0, startPos );
 		else
+		{
+			delCount = rText.size();
 			rText.clear();
+		}
 
-		return rText;
+		return delCount;
 	}
 
-	template< typename CharT >
-	std::basic_string<CharT>& TrimRight( IN OUT std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	template< typename StringT >
+	size_t TrimRight( IN OUT StringT& rText, const typename StringT::value_type* pWhiteSpace = StdWhitespace<typename StringT::value_type>() )
 	{
 		size_t endPos = rText.find_last_not_of( pWhiteSpace );
+		size_t delCount = rText.size();
 
 		if ( endPos != std::string::npos )
-			rText.erase( endPos + 1 );
+		{
+			delCount -= ++endPos;		// past the non-space
+			rText.erase( endPos );
+		}
 		else
 			rText.clear();
 
-		return rText;
+		return delCount;
 	}
 
-	template< typename CharT >
-	inline std::basic_string<CharT>& Trim( IN OUT std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	template< typename StringT >
+	inline size_t Trim( IN OUT StringT& rText, const typename StringT::value_type* pWhiteSpace = StdWhitespace<typename StringT::value_type>() )
 	{
-		TrimLeft( rText, pWhiteSpace );
-		return TrimRight( rText, pWhiteSpace );
+		return TrimLeft( rText, pWhiteSpace ) + TrimRight( rText, pWhiteSpace );
 	}
 
 
 	// trim copy
 
-	template< typename CharT >
-	std::basic_string<CharT> GetTrim( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	template< typename StringT >
+	StringT GetTrim( const StringT& rText, const typename StringT::value_type* pWhiteSpace = StdWhitespace<typename StringT::value_type>() )
 	{
-		std::basic_string<CharT> trimmed = rText;
+		StringT trimmed = rText;
 		return Trim( trimmed, pWhiteSpace );
 	}
 
-	template< typename CharT >
-	std::basic_string<CharT> GetTrimLeft( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	template< typename StringT >
+	StringT GetTrimLeft( const StringT& rText, const typename StringT::value_type* pWhiteSpace = StdWhitespace<typename StringT::value_type>() )
 	{
-		std::basic_string<CharT> trimmed = rText;
+		StringT trimmed = rText;
 		return TrimLeft( trimmed, pWhiteSpace );
 	}
 
-	template< typename CharT >
-	std::basic_string<CharT> GetTrimRight( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	template< typename StringT >
+	StringT GetTrimRight( const StringT& rText, const typename StringT::value_type* pWhiteSpace = StdWhitespace<typename StringT::value_type>() )
 	{
-		std::basic_string<CharT> trimmed = rText;
+		StringT trimmed = rText;
 		return TrimRight( trimmed, pWhiteSpace );
 	}
+}
+
+
+namespace func
+{
+	struct Trim
+	{
+		template< typename StringT >
+		StringT& operator()( StringT& rText ) const
+		{
+			return str::Trim( rText );
+		}
+	};
+}
 
 
 #ifdef _MFC_VER
+
+namespace mfc
+{
 	inline CStringA& Trim( IN OUT CStringA& rText ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
 	inline CStringW& Trim( IN OUT CStringW& rText ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
 
 	inline BSTR AllocSysString( const std::tstring& text ) { return CString( text.c_str() ).AllocSysString(); }
-#endif //_MFC_VER
 }
+
+#endif //_MFC_VER
 
 
 namespace str

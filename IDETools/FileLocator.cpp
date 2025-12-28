@@ -76,7 +76,7 @@ IMPLEMENT_OLECREATE( FileLocator, "IDETools.FileLocator", 0xa0580b96, 0x3350, 0x
 
 BSTR FileLocator::GetLocalDirPath( void )
 {
-	return str::AllocSysString( m_projCtx.GetLocalDirPath() );
+	return mfc::AllocSysString( m_projCtx.GetLocalDirPath() );
 }
 
 void FileLocator::SetLocalDirPath( LPCTSTR lpszNewValue )
@@ -86,7 +86,7 @@ void FileLocator::SetLocalDirPath( LPCTSTR lpszNewValue )
 
 BSTR FileLocator::GetLocalCurrentFile( void )
 {
-	return str::AllocSysString( m_projCtx.GetLocalCurrentFile() );
+	return mfc::AllocSysString( m_projCtx.GetLocalCurrentFile() );
 }
 
 void FileLocator::SetLocalCurrentFile( LPCTSTR lpszNewValue )
@@ -96,7 +96,7 @@ void FileLocator::SetLocalCurrentFile( LPCTSTR lpszNewValue )
 
 BSTR FileLocator::GetAssociatedProjectFile( void )
 {
-	return str::AllocSysString( m_projCtx.GetAssociatedProjectFile() );
+	return mfc::AllocSysString( m_projCtx.GetAssociatedProjectFile() );
 }
 
 void FileLocator::SetAssociatedProjectFile( LPCTSTR lpszNewValue )
@@ -106,7 +106,7 @@ void FileLocator::SetAssociatedProjectFile( LPCTSTR lpszNewValue )
 
 BSTR FileLocator::GetProjectActiveConfiguration( void )
 {
-	return str::AllocSysString( m_projCtx.GetProjectActiveConfiguration() );
+	return mfc::AllocSysString( m_projCtx.GetProjectActiveConfiguration() );
 }
 
 void FileLocator::SetProjectActiveConfiguration( LPCTSTR lpszNewValue )
@@ -117,7 +117,7 @@ void FileLocator::SetProjectActiveConfiguration( LPCTSTR lpszNewValue )
 BSTR FileLocator::GetProjectAdditionalIncludePath( void )
 {
 	// OBSOLETE:
-	return str::AllocSysString( std::tstring() );
+	return mfc::AllocSysString( std::tstring() );
 }
 
 void FileLocator::SetProjectAdditionalIncludePath( LPCTSTR lpszNewValue )
@@ -129,7 +129,7 @@ void FileLocator::SetProjectAdditionalIncludePath( LPCTSTR lpszNewValue )
 
 BSTR FileLocator::GetSelectedFiles( void )
 {
-	return str::AllocSysString( m_selectedFilesFlat );
+	return mfc::AllocSysString( m_selectedFilesFlat );
 }
 
 long FileLocator::GetSelectedCount( void )

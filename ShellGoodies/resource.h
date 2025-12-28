@@ -109,6 +109,8 @@
 #define IDC_SORT_ORDER_COMBO            1093
 #define IDC_FORMAT_LABEL                1094
 #define IDC_SORT_ORDER_STATIC           1095
+#define IDC_CURR_FOLDER_EDIT            1096
+#define IDC_CURR_FOLDER_STATIC          1097
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_REPLACE_FILES_TIP_FORMAT    5005
@@ -155,8 +157,7 @@
 #define ID_SEQ_COUNT_RESET              32812
 #define ID_SEQ_COUNT_FIND_NEXT          32813
 #define ID_SEQ_COUNT_AUTO_ADVANCE       32814
-#define ID_TOGGLE_LIST_SELECTION_MODE   32815
-#define ID_RESET_LIST_SELECTION         32816
+#define ID_TOGGLE_LIST_MULTI_SEL_MODE   32815
 #define ID_TOUCH_FILES                  32820
 #define ID_COPY_MODIFIED_DATE           32821
 #define ID_COPY_CREATED_DATE            32822
@@ -201,7 +202,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        119
 #define _APS_NEXT_COMMAND_VALUE         32857
-#define _APS_NEXT_CONTROL_VALUE         1096
+#define _APS_NEXT_CONTROL_VALUE         1098
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

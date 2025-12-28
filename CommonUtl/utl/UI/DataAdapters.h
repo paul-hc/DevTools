@@ -62,11 +62,9 @@ namespace ui
 }
 
 
-// WndUtils.h forward declarations
-
 namespace ui
 {
-	bool ShowInputError( CWnd* pCtrl, const std::tstring& message, UINT iconFlag /*= MB_ICONERROR*/ );
+	bool ShowInputError( CWnd* pCtrl, const std::tstring& message, UINT iconFlag, const TCHAR* pTitle );	// FWD: defined in WndUtils.h
 }
 
 // StringUtilities.h forward declarations

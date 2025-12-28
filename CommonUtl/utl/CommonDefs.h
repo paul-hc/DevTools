@@ -238,52 +238,52 @@ inline bool is_a( const BaseType* pObject )
 	return dynamic_cast<const Type*>( pObject ) != nullptr;
 }
 
-template< typename ToPtrType, typename FromPtrType >
-inline ToPtrType checked_static_cast( FromPtrType fromPtr )
+template< typename ToPtrT, typename FromPtrT >
+inline ToPtrT checked_static_cast( FromPtrT fromPtr )
 {
-	ASSERT( dynamic_cast<ToPtrType>( fromPtr ) == static_cast<ToPtrType>( fromPtr ) );		// checked in debug builds
-	return static_cast<ToPtrType>( fromPtr );
+	ASSERT( dynamic_cast<ToPtrT>( fromPtr ) == static_cast<ToPtrT>( fromPtr ) );		// checked in debug builds
+	return static_cast<ToPtrT>( fromPtr );
 }
 
-template< typename ToPtrType, typename FromPtrType >
-inline ToPtrType safe_static_cast( FromPtrType fromPtr )
+template< typename ToPtrT, typename FromPtrT >
+inline ToPtrT safe_static_cast( FromPtrT fromPtr )
 {
-	return safe_ptr( checked_static_cast<ToPtrType>( fromPtr ) );
+	return safe_ptr( checked_static_cast<ToPtrT>( fromPtr ) );
 }
 
 
-template< typename FieldType >
-inline bool HasFlag( FieldType field, unsigned int flag )
+template< typename FieldT >
+inline bool HasFlag( FieldT field, unsigned int flag )
 {
 	return ( field & flag ) != 0;
 }
 
-template< typename FieldType >
-inline bool EqFlag( FieldType field, unsigned int flag )
+template< typename FieldT >
+inline bool EqFlag( FieldT field, unsigned int flag )
 {
 	return flag == ( field & flag );
 }
 
-template< typename FieldType >
-inline bool EqMaskedValue( FieldType field, unsigned int mask, unsigned int value )
+template< typename FieldT >
+inline bool EqMaskedValue( FieldT field, unsigned int mask, unsigned int value )
 {
 	return value == ( field & mask );
 }
 
-template< typename FieldType >
-inline void ClearFlag( FieldType& rField, unsigned int flag )
+template< typename FieldT >
+inline void ClearFlag( FieldT& rField, unsigned int flag )
 {
 	rField &= ~flag;
 }
 
-template< typename FieldType >
-inline FieldType GetMasked( FieldType field, unsigned int mask, bool on )
+template< typename FieldT >
+inline FieldT GetMasked( FieldT field, unsigned int mask, bool on )
 {
 	return on ? ( field | mask ) : ( field & ~mask );
 }
 
-template< typename FieldType >
-inline void SetFlag( FieldType& rField, unsigned int flag, bool on = true )
+template< typename FieldT >
+inline void SetFlag( FieldT& rField, unsigned int flag, bool on = true )
 {
 	if ( on )
 		rField |= flag;
@@ -291,30 +291,30 @@ inline void SetFlag( FieldType& rField, unsigned int flag, bool on = true )
 		rField &= ~flag;
 }
 
-template< typename FieldType >
-inline FieldType MakeFlag( FieldType field, unsigned int flag, bool on = true )
+template< typename FieldT >
+inline FieldT MakeFlag( FieldT field, unsigned int flag, bool on = true )
 {
 	SetFlag( field, flag, on );
 	return field;
 }
 
-template< typename FieldType >
-inline void ToggleFlag( FieldType& rField, unsigned int flag )
+template< typename FieldT >
+inline void ToggleFlag( FieldT& rField, unsigned int flag )
 {
 	rField ^= flag;
 }
 
-template< typename FieldType >
-inline bool ModifyFlags( FieldType& rField, unsigned int clearFlags, unsigned int setFlags )
+template< typename FieldT >
+inline bool ModifyFlags( FieldT& rField, unsigned int clearFlags, unsigned int setFlags )
 {
-	FieldType oldField = rField;
+	FieldT oldField = rField;
 	rField &= ~clearFlags;
 	rField |= setFlags;
 	return rField != oldField;
 }
 
-template< typename FieldType >
-inline bool SetMaskedValue( FieldType& rField, unsigned int mask, unsigned int value )
+template< typename FieldT >
+inline bool SetMaskedValue( FieldT& rField, unsigned int mask, unsigned int value )
 {
 	return ModifyFlags( rField, mask, value & mask );
 }
@@ -329,20 +329,20 @@ inline unsigned int ToBitFlag( int exponent2 )
 	return 1 << exponent2;
 }
 
-template< typename FieldType >
-inline bool HasBitFlag( FieldType field, int exponent2 )
+template< typename FieldT >
+inline bool HasBitFlag( FieldT field, int exponent2 )
 {
 	return HasFlag( field, ToBitFlag( exponent2 ) );
 }
 
-template< typename FieldType >
-inline void ClearBitFlag( FieldType& rField, int exponent2 )
+template< typename FieldT >
+inline void ClearBitFlag( FieldT& rField, int exponent2 )
 {
 	ClearFlag( rField, ToBitFlag( exponent2 ) );
 }
 
-template< typename FieldType >
-inline void SetBitFlag( FieldType& rField, int exponent2, bool on = true )
+template< typename FieldT >
+inline void SetBitFlag( FieldT& rField, int exponent2, bool on = true )
 {
 	SetFlag( rField, ToBitFlag( exponent2 ), on );
 }
@@ -369,22 +369,39 @@ namespace num
 
 namespace utl
 {
-	__declspec(selectany) extern const size_t npos = std::tstring::npos;
-
-
 	template< typename ContainerT >
 	inline size_t GetLastPos( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return rItems.size() - 1; }
 
 
 	template< typename DestT, typename SrcT >
-	void StoreValueAs( DestT& rDestValue, const SrcT& srcValue )
+	void StoreValueAs( OUT DestT& rDestValue, const SrcT& srcValue )
 	{	// use as scalar assignment workaround for MFC framework changes across versions, e.g. with DestT as DWORD (version 1) and DWORD_PTR (version2)
 		rDestValue = reinterpret_cast<DestT>( srcValue );
 	}
 
+	template< typename ValueT >
+	inline bool ModifyValue( OUT ValueT& rValue, const ValueT& newValue )
+	{
+		if ( rValue == newValue )
+			return false;				// value not changed
 
-	template< typename ValueType >
-	inline void AssignPtr( ValueType* pField, const ValueType& value )
+		rValue = newValue;
+		return true;
+	}
+
+	template< typename ValueT >
+	inline bool ModifyPtr( OUT ValueT*& rPtr, const ValueT* pNewPtr )
+	{
+		if ( rPtr == pNewPtr )
+			return false;				// value not changed
+
+		rPtr = const_cast<ValueT*>( pNewPtr );
+		return true;
+	}
+
+
+	template< typename ValueT >
+	inline void AssignPtr( OUT ValueT* pField, const ValueT& value )
 	{
 		if ( pField != nullptr )
 			*pField = value;
@@ -400,15 +417,6 @@ namespace utl
 	inline unsigned int GetPlatformBits( void ) { return sizeof( void* ) * 8; }
 	inline unsigned int Is32bitPlatform( void ) { return 32 == GetPlatformBits(); }
 	inline unsigned int Is64bitPlatform( void ) { return 64 == GetPlatformBits(); }
-
-	template< typename ValueT >
-	inline bool ModifyValue( ValueT& rValue, const ValueT& newValue )
-	{
-		if ( rValue == newValue )
-			return false;				// value not changed
-		rValue = newValue;
-		return true;
-	}
 
 
 	// private copy constructor and copy assignment ensure derived classes cannot be copied.

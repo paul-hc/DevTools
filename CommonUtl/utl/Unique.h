@@ -72,6 +72,9 @@ namespace utl
 			// assume this index is maintained consistently!
 			//ASSERT( IsEmpty() );		// prevent inconsistent state: should start fresh
 
+			if ( pDestItems->empty() )
+				return 0;				// no items to uniquify
+
 			ContainerT uniqueItems;
 
 			for ( typename ContainerT::const_iterator itItem = pDestItems->begin(), itEnd = pDestItems->end(); itItem != itEnd; ++itItem )

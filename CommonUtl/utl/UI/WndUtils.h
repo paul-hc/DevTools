@@ -158,6 +158,10 @@ namespace ui
 
 	inline DWORD GetStyle( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::GetWindowLong( hWnd, GWL_STYLE ); }
 	inline DWORD GetStyleEx( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::GetWindowLong( hWnd, GWL_EXSTYLE ); }
+
+	inline bool HasStyle( HWND hWnd, DWORD style ) { return HasFlag( GetStyle( hWnd ), style ); }
+	inline bool HasStyleEx( HWND hWnd, DWORD styleEx ) { return HasFlag( GetStyleEx( hWnd ), styleEx ); }
+
 	inline bool IsDisabled( HWND hWnd ) { ASSERT_PTR( hWnd ); return HasFlag( GetStyle( hWnd ), WS_DISABLED ); }
 	inline bool IsVisible( HWND hWnd ) { ASSERT_PTR( hWnd ); return HasFlag( GetStyle( hWnd ), WS_VISIBLE ); }
 	inline bool IsWindowVisible( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::IsWindowVisible( hWnd ) != FALSE; }
@@ -301,6 +305,8 @@ namespace ui
 
 	std::tstring GetClassName( HWND hWnd );
 	bool IsEditBox( HWND hCtrl );
+	bool IsSingleLineEditBox( HWND hCtrl );
+	bool IsMultiLineEditBox( HWND hCtrl );
 	bool IsWriteableEditBox( HWND hCtrl );
 	bool IsComboWithEdit( HWND hCtrl );
 	bool IsGroupBox( HWND hWnd );
@@ -337,7 +343,8 @@ namespace ui
 	int ReportException( const std::exception& exc, UINT mbFlags = MB_OK | MB_ICONERROR );
 	int ReportException( const CException* pExc, UINT mbFlags = MB_OK | MB_ICONERROR );
 
-	bool ShowInputError( CWnd* pCtrl, const std::tstring& message, UINT iconFlag = MB_ICONERROR );		// returns false for convenience
+	bool ShowInfoTip( CWnd* pCtrl, const TCHAR* pTitle, const std::tstring& message, UINT iconFlag = MB_ICONWARNING );
+	bool ShowInputError( CWnd* pCtrl, const std::tstring& message, UINT iconFlag = MB_ICONERROR, const TCHAR* pTitle = nullptr );		// returns false for convenience
 
 	bool& RefAsyncApiEnabled( void );
 

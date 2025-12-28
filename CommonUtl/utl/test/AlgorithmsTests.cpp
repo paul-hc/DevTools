@@ -29,6 +29,29 @@ namespace pred
 			return 0 == ( number % NumberT( 2 ) );
 		}
 	};
+
+	struct IsOdd
+	{
+		template< typename NumberT >
+		bool operator()( NumberT number ) const
+		{
+			return ( number % NumberT( 2 ) ) != 0;
+		}
+	};
+
+
+	template< typename NumberT >
+	struct IsGreaterThan
+	{
+		IsGreaterThan( NumberT limit ) : m_limit( limit ) {}
+
+		bool operator()( NumberT number ) const
+		{
+			return number > m_limit;
+		}
+	public:
+		NumberT m_limit;
+	};
 }
 
 
@@ -90,6 +113,26 @@ void CAlgorithmsTests::TestStdAlgorithms( void )
 
 void CAlgorithmsTests::TestBasicUtils( void )
 {
+	// array iteration
+	{
+		const int myArray[] = { 1, 2, 3, 4, 5 };
+		const int* pStart = std::begin( myArray );
+		const int* pEnd = std::end( myArray );
+
+		std::ostringstream oss;
+		size_t pos = 0;
+
+		while ( pStart != pEnd )
+		{
+			if ( pos++ != 0 )
+				oss << ", ";
+
+			oss << *pStart++;
+		}
+
+		ASSERT_EQUAL( "1, 2, 3, 4, 5", oss.str() );
+	}
+
 	// REVERSE iteration - char[]
 	{
 		const char filePath[] = "C:\\my\\Tools/mine/ShellGoodies64.dll";
@@ -440,6 +483,23 @@ void CAlgorithmsTests::TestIsOrdered( void )
 	}
 }
 
+void CAlgorithmsTests::TestIsContiguous( void )
+{
+	{	// values
+		ASSERT( utl::IsContiguous( std::string( "" ) ) );
+		ASSERT( utl::IsContiguous( std::string( "0" ) ) );
+
+		// ascending
+		ASSERT( utl::IsContiguous( std::string( "01" ) ) );
+		ASSERT( utl::IsContiguous( std::string( "5678" ) ) );
+
+		// sparse
+		ASSERT( !utl::IsContiguous( std::string( "03" ) ) );
+		ASSERT( !utl::IsContiguous( std::string( "1567" ) ) );
+		ASSERT( !utl::IsContiguous( std::string( "1236878" ) ) );
+	}
+}
+
 void CAlgorithmsTests::TestQuery( void )
 {
 	std::vector<fs::CPath> paths;
@@ -467,7 +527,7 @@ void CAlgorithmsTests::TestAssignment( void )
 	{
 		std::set<std::tstring> files;
 
-		utl::InsertFrom( std::inserter( files, files.end() ), paths, func::tor::StringOf() );
+		utl::transform( paths, files, func::tor::StringOf() );
 		ASSERT_EQUAL( _T("f1,f2,f3"), str::Join( files, s_sep ) );
 	}
 
@@ -560,21 +620,47 @@ void CAlgorithmsTests::TestRemove( void )
 	}
 
 	{
-		std::vector<short> numbers( 10 );
-		std::generate( numbers.begin(), numbers.end(), func::GenNumSeq<short>( 1 ) );
-		ASSERT_EQUAL( "1,2,3,4,5,6,7,8,9,10", str::Join( numbers, sep ) );
+		std::vector<short> srcNumbers( 10 );
+		utl::generate( srcNumbers, func::GenNumSeq<short>( 1 ) );
+		ASSERT_EQUAL( "1,2,3,4,5,6,7,8,9,10", str::Join( srcNumbers, sep ) );
 
-		utl::RemoveIf( numbers, pred::IsEven() );
-		ASSERT_EQUAL( "1,3,5,7,9", str::Join( numbers, sep ) );
+		{
+			std::vector<short> numbers = srcNumbers;
 
-		utl::RemoveExisting( numbers, 5 );
-		ASSERT_EQUAL( "1,3,7,9", str::Join( numbers, sep ) );
+			utl::RemoveIf( numbers, pred::IsEven() );
+			ASSERT_EQUAL( "1,3,5,7,9", str::Join( numbers, sep ) );
 
-		ASSERT( !utl::RemoveValue( numbers, 10 ) );
-		ASSERT_EQUAL( "1,3,7,9", str::Join( numbers, sep ) );
+			utl::RemoveExisting( numbers, 5 );
+			ASSERT_EQUAL( "1,3,7,9", str::Join( numbers, sep ) );
 
-		ASSERT( utl::RemoveValue( numbers, 9 ) );
-		ASSERT_EQUAL( "1,3,7", str::Join( numbers, sep ) );
+			ASSERT( !utl::RemoveValue( numbers, 10 ) );
+			ASSERT_EQUAL( "1,3,7,9", str::Join( numbers, sep ) );
+
+			ASSERT( utl::RemoveValue( numbers, 9 ) );
+			ASSERT_EQUAL( "1,3,7", str::Join( numbers, sep ) );
+		}
+
+		{
+			std::vector<short> numbers = srcNumbers;
+
+			ASSERT( utl::Any( numbers, pred::IsEven() ) );
+
+			ASSERT_EQUAL( 5, utl::RemoveIfPred( numbers, pred::IsGreaterThan<short>( 5 ) ).first );
+			ASSERT_EQUAL( "1,2,3,4,5", str::Join( numbers, sep ) );
+			ASSERT( utl::Any( numbers, pred::IsEven() ) );
+			ASSERT( !utl::All( numbers, pred::IsOdd() ) );
+
+			ASSERT_EQUAL( 2, utl::RemoveIfPred( numbers, pred::IsEven() ).first );
+			ASSERT_EQUAL( "1,3,5", str::Join( numbers, sep ) );
+			ASSERT( !utl::Any( numbers, pred::IsEven() ) );
+			ASSERT( utl::All( numbers, pred::IsOdd() ) );
+
+			ASSERT_EQUAL( 3, utl::RemoveIfPred( numbers, pred::IsEven(), utl::NegatePred ).first );
+			ASSERT_EQUAL( "", str::Join( numbers, sep ) );
+			ASSERT( !utl::Any( numbers, pred::IsEven() ) );
+			ASSERT( !utl::All( numbers, pred::IsOdd() ) );
+		}
+
 	}
 
 	{
@@ -614,16 +700,16 @@ void CAlgorithmsTests::TestMixedTypes( void )
 	ASSERT_EQUAL( "0.5,0.7,1,3,5,2.5,4.5", ut::FormatPtrs( mixedNumbers, "," ) );
 
 	std::vector< ut::CMockValue<int>* > integers;
-	utl::QueryWithType< ut::CMockValue<int> >( integers, mixedNumbers );
+	utl::QueryWithType( integers, mixedNumbers );
 	ASSERT_EQUAL( "1,3,5", ut::FormatPtrs( integers, "," ) );
 
 	std::vector< ut::CMockValue<double>* > doubles;
-	utl::QueryWithType< ut::CMockValue<double> >( doubles, mixedNumbers );
+	utl::QueryWithType( doubles, mixedNumbers );
 	ASSERT_EQUAL( "0.5,0.7,2.5,4.5", ut::FormatPtrs( doubles, "," ) );
 
 	{
 		std::vector< ut::CMockValue<int>* > otherIntegers;
-		utl::AddWithType< ut::CMockValue<int> >( otherIntegers, mixedNumbers );
+		utl::AddWithType( otherIntegers, mixedNumbers );
 		ASSERT_EQUAL( "1,3,5", ut::FormatPtrs( otherIntegers, "," ) );
 	}
 
@@ -750,6 +836,7 @@ void CAlgorithmsTests::Run( void )
 	RUN_TEST( TestUniquifyPaths );
 	RUN_TEST( TestUniqueIndex );
 	RUN_TEST( TestIsOrdered );
+	RUN_TEST( TestIsContiguous );
 	RUN_TEST( TestQuery );
 	RUN_TEST( TestAssignment );
 	RUN_TEST( TestInsert );

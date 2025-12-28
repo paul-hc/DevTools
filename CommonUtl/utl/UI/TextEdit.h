@@ -6,12 +6,13 @@
 #include "InternalChange.h"
 #include "Range.h"
 #include "FrameHostCtrl.h"
+#include "TextEdit_fwd.h"
 
 
 class CSyncScrolling;
 
 
-#define ON_EN_USERSELCHANGE( id, memberFxn )	ON_CONTROL( CTextEdit::EN_USERSELCHANGE, id, memberFxn )
+#define ON_EN_USER_SELCHANGE( id, memberFxn )	ON_CONTROL( CTextEdit::EN_USER_SELCHANGE, id, memberFxn )
 
 
 // inhibits EN_CHANGE notifications on internal changes;
@@ -22,13 +23,20 @@ class CTextEdit : public CFrameHostCtrl<CEdit>
 {
 	typedef CFrameHostCtrl<CEdit> TBaseClass;
 
-	using TBaseClass::SetSel;		// hidden base methods
+	// hidden base methods
+	using TBaseClass::GetSel;
+	using TBaseClass::SetSel;
+	// multi-line hidden "overridden: methods
+	using TBaseClass::LineFromChar;
+	using TBaseClass::LineIndex;
+	using TBaseClass::LineLength;
 public:
 	CTextEdit( bool useFixedFont = true );
 	virtual ~CTextEdit();
 
-	enum NotifCode { EN_USERSELCHANGE = EN_CHANGE + 10 };
+	enum NotifCode { EN_USER_SELCHANGE = EN_CHANGE + 10 };
 
+	void SetTextInputCallback( ui::ITextInput* pTextInputCallback ) { m_pTextInputCallback = pTextInputCallback; }
 	void AddToSyncScrolling( CSyncScrolling* pSyncScrolling );
 
 	virtual bool HasInvalidText( void ) const;
@@ -38,6 +46,10 @@ public:
 	bool SetText( const std::tstring& text );
 	void DDX_Text( CDataExchange* pDX, std::tstring& rValue, int ctrlId = 0 );
 	void DDX_UiEscapeSeqs( CDataExchange* pDX, std::tstring& rValue, int ctrlId = 0 );
+
+	bool ReplaceText( const std::tstring& text, bool canUndo = true );
+
+	bool IsMultiLine( void ) const { return HasFlag( GetStyle(), ES_MULTILINE ); }
 
 	bool IsWritable( void ) const { return !HasFlag( GetStyle(), ES_READONLY ); }
 	bool SetWritable( bool writable ) { return writable != IsWritable() && SetReadOnly( !writable ) != FALSE; }
@@ -61,27 +73,63 @@ public:
 
 	std::tstring GetSelText( void ) const;
 
-	// multi-line edit
-	typedef int TCharPos;											// position of text character in edit's text
-	typedef int TLine;
+	// ignore last line if empty
+	size_t GetEffectiveLineCount( void ) const { return GetEffectiveLineCount( GetText() ); }
+	static size_t GetEffectiveLineCount( const std::tstring& text );
+public:
+	typedef int TCharPos;		// position of text character in edit's text
+	typedef int TLineIndex;		// 0-based line number
+
+	// client coordinates conversion
+	CPoint GetCharPointTL( TCharPos charPos ) const { return PosFromChar( charPos ); }
+	TCharPos GetCharFromPoint( const CPoint& clientPoint, TLineIndex* pLineIndex = nullptr ) const;
 
 	enum { CaretPos = -1 };
 
-	TLine GetCaretLineIndex( void ) const { return LineFromChar( CaretPos ); }
-	Range<TCharPos> GetLineRange( TLine linePos ) const;			// line startPos and endPos
-	std::tstring GetLineText( TLine linePos ) const;
+	// multi-line edit:
+
+	// base "overrides" in terms of line/char type aliases:
+	TLineIndex LineFromChar( TCharPos charPos = CaretPos ) const { return CEdit::LineFromChar( charPos ); }
+	TCharPos LineToCharPos( TLineIndex lineIndex = -1 ) const { return CEdit::LineIndex( lineIndex ); }
+	int LineLength( TLineIndex lineIndex = -1 ) const { return CEdit::LineLength( lineIndex ); }
+public:
+	// exact caret position (opposite to selection anchor)
+	TCharPos GetCaretCharPos( TLineIndex* pCaretLineIndex = nullptr ) const;
+	bool SetCaretCharPos( TCharPos caretPos );
+
+	TCharPos GetAnchorCharPos( TLineIndex* pAnchorLineIndex = nullptr ) const;		// selection anchor position (opposite to the caret)
+	TLineIndex GetCaretLineIndex( void ) const { return LineFromChar( CaretPos ); }
+
+	Range<TCharPos> GetLineRange( TLineIndex lineIndex ) const;			// line <startPos, endPos>
+	std::tstring GetLineText( TLineIndex lineIndex ) const;
 
 	Range<TCharPos> GetLineRangeAt( TCharPos charPos = CaretPos ) const { return GetLineRange( LineFromChar( charPos ) ); }
 	std::tstring GetLineTextAt( TCharPos charPos = CaretPos ) const { return GetLineText( LineFromChar( charPos ) ); }		// by default: text of line with the caret
 
 	// selection
-	template< typename IntType >
-	Range<IntType> GetSelRange( void ) const;
+	bool IsCaretAtSelStart( void ) const;
+	Range<TCharPos> GetSelRange( bool swapIfCaretAtStart = false ) const;
 
-	template< typename IntType >
-	void SetSelRange( const Range<IntType>& sel, bool noCaretScroll = false ) { SetSel( static_cast<TCharPos>( sel.m_start ), static_cast<TCharPos>( sel.m_end ), noCaretScroll ); }
+	template< typename NumericT >
+	Range<NumericT> GetSelRangeAs( bool swapIfCaretAtStart = false ) const { return GetSelRange( swapIfCaretAtStart ).AsRange<NumericT>(); }
+
+	template< typename NumericT >
+	bool SetSelRange( const Range<NumericT>& selRange, bool noCaretScroll = false );	// if range is inverted (not-normalized), the caret is placed to the START, otherwise to END
 
 	void SetSel( TCharPos startChar, TCharPos endChar, BOOL noCaretScroll = false );	// has to stay BOOL to avoid overload resolution with base method
+
+	// line selection
+	bool ClearSelection( bool collapseToEnd = true );
+	std::pair< Range<TCharPos>, bool > SelectLine( TLineIndex lineIndex );				// selects the entire line
+	std::pair< Range<TCharPos>, bool > SelectLineRange( const Range<TLineIndex>& selLineRange );
+
+	bool IsSelMultiLine( void ) const { return !GetSelLineRange().IsEmpty(); }
+	Range<TLineIndex> LineRangeFromCharRange( const Range<TCharPos>& selRange, bool intuitiveSel = true ) const;
+	Range<TLineIndex> GetSelLineRange( void ) const { return LineRangeFromCharRange( GetSelRange() ); }
+
+	// top index
+	TLineIndex GetTopLineIndex( void ) const { return CEdit::GetFirstVisibleLine(); }
+	bool SetTopLineIndex( TLineIndex topLineIndex );
 
 	enum FontSize { Normal, Large };
 	static CFont* GetFixedFont( FontSize fontSize = Normal );
@@ -92,7 +140,11 @@ public:
 	CScopedInternalChange MakeUserChange( void ) { return CScopedInternalChange( &m_userChange ); }
 protected:
 	bool IsInternalChange( void ) const;
+	bool SetTextImpl( const std::tstring& text );	// retains Modified state as is
+	bool RevertContents( void );				// kind of more targeted Undo()
+	bool AdjustIntuitiveLineSelection( IN OUT Range<TLineIndex>* pSelLineRange, const Range<TCharPos>& selRange ) const;		// returns true if line selection changed
 
+	virtual bool ValidateText( ui::CTextValidator& rValidator ) implement;
 	virtual void OnValueChanged( void );		// by the user
 private:
 	void _WatchSelChange( void );
@@ -104,7 +156,9 @@ private:
 	bool m_visibleWhiteSpace;
 	CAccelTable m_accel;
 
+	ui::ITextInput* m_pTextInputCallback;
 	CSyncScrolling* m_pSyncScrolling;
+	std::tstring m_lastValidText;
 	Range<TCharPos> m_lastSelRange;
 protected:
 	CInternalChange m_userChange;				// allow derived classes to force user change mode (when spinning, etc)
@@ -119,6 +173,7 @@ protected:
 	afx_msg UINT OnGetDlgCode( void );
 	afx_msg void OnHScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );
 	afx_msg void OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );
+	afx_msg LRESULT OnEmReplaceSel( WPARAM wParam, LPARAM lParam );
 	afx_msg LRESULT OnPasteOrUndo( WPARAM, LPARAM );
 	afx_msg BOOL OnEnChange_Reflect( void );
 	afx_msg BOOL OnEnKillFocus_Reflect( void );
@@ -139,15 +194,18 @@ protected:
 };
 
 
-// template code
+// CTextEdit template code
 
-template< typename IntType >
-Range<IntType> CTextEdit::GetSelRange( void ) const
+template< typename NumericT >
+bool CTextEdit::SetSelRange( const Range<NumericT>& selRange, bool noCaretScroll /*= false*/ )
 {
-	TCharPos startPos, endPos;
-	GetSel( startPos, endPos );
-	ASSERT( startPos <= endPos && startPos >= 0 );
-	return Range<IntType>( static_cast<IntType>( startPos ), static_cast<IntType>( endPos ) );
+	Range<TCharPos> chSelRange( selRange );
+
+	if ( chSelRange == GetSelRange() )
+		return false;
+
+	SetSel( chSelRange.m_start, chSelRange.m_end, noCaretScroll );
+	return true;
 }
 
 

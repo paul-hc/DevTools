@@ -305,6 +305,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\HeaderIncludes.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\pch.cpp"
 				>
 				<FileConfiguration
@@ -1622,6 +1626,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\SelectionData.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SelectionData.hxx"
+					>
+				</File>
+				<File
 					RelativePath=".\SpinEdit.cpp"
 					>
 				</File>
@@ -1674,11 +1686,51 @@
 					>
 				</File>
 				<File
+					RelativePath=".\TextEdit_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\TextEditor.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\TextEditor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextListEditor.cpp"
+					>
+					<FileConfiguration
+						Name="DebugU|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugU|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseU|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseU|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\TextListEditor.h"
 					>
 				</File>
 				<File
@@ -2050,6 +2102,10 @@
 				RelativePath=".\test\TestToolWnd.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="C++ 11 ignore"
+			>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"

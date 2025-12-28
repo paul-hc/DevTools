@@ -20,7 +20,7 @@ namespace multi
 
 
 class CTouchFilesDialog : public CFileEditorBaseDialog
-						, private ui::ITextEffectCallback
+	, private ui::ITextEffectCallback
 {
 public:
 	CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent );

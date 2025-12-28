@@ -61,6 +61,15 @@ public:
 	std::tstring FormatCode( const utl::ISubject* pSubject ) const { ASSERT_PTR( m_pSubjectAdapter ); return m_pSubjectAdapter->FormatCode( pSubject ); }
 
 	virtual bool IsInternalCmdId( int cmdId ) const;
+public:
+	template< typename Type >
+	static Type* AsPtr( LPARAM data ) { return reinterpret_cast<Type*>( data ); }
+
+	template< typename Type >
+	static Type AsValue( LPARAM data ) { return reinterpret_cast<Type>( data ); }
+
+	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast<utl::ISubject*>( (utl::ISubject*)data ); }
+	static inline utl::ISubject* AsSubject( LPARAM data ) { return dynamic_cast<utl::ISubject*>( (utl::ISubject*)data ); }
 protected:
 	bool HandleCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );		// must be called from control class' OnCmdMsg() method override
 	bool TranslateMessage( MSG* pMsg );

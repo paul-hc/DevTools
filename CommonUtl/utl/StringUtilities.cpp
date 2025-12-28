@@ -70,20 +70,6 @@ namespace str
 		return Truncate( rText, maxLen );
 	}
 
-
-	size_t ReplaceDelimiters( IN OUT std::tstring& rText, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter )
-	{
-		std::vector<std::tstring> items;
-		Tokenize( items, rText.c_str(), pDelimiters );
-		rText = Join( items, pNewDelimiter );
-		return items.size();
-	}
-
-	size_t EnsureSingleSpace( IN OUT std::tstring& rText )
-	{
-		return ReplaceDelimiters( rText, _T(" \t"), _T(" ") );
-	}
-
 } //namespace str
 
 

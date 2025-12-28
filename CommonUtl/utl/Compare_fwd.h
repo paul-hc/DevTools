@@ -20,7 +20,6 @@ namespace pred
 {
 	enum CompareResult { Less = -1, Equal, Greater };
 
-
 	template< typename DiffType >
 	inline CompareResult ToCompareResult( DiffType difference )
 	{
@@ -56,6 +55,19 @@ namespace pred
 
 	template<>
 	CompareResult Compare_Scalar<std::wstring>( const std::wstring& left, const std::wstring& right );		// by default sort std::string in natural order
+}
+
+
+namespace pred
+{
+	struct Equals
+	{
+		template< typename ValueT >
+		bool operator()( const ValueT& left, const ValueT& right ) const
+		{
+			return left == right;
+		}
+	};
 
 
 	// functor version

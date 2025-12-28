@@ -116,17 +116,30 @@ void CBaseHostToolbarCtrl<BaseCtrlT>::PreSubclassWindow( void )
 // message handlers
 
 BEGIN_TEMPLATE_MESSAGE_MAP( CBaseHostToolbarCtrl, BaseCtrlT, TBaseClass )
-	ON_WM_SIZE()
+	//ON_WM_SIZE()		// read the OnSize() note below
+	ON_WM_WINDOWPOSCHANGED()
 END_MESSAGE_MAP()
 
 template< typename BaseCtrlT >
 void CBaseHostToolbarCtrl<BaseCtrlT>::OnSize( UINT sizeType, int cx, int cy )
 {
+	// Avoid using ON_WM_SIZE(), since in layout dialogs can be laggy and leave trails of the mate control.
+	// Better handle the ON_WM_WINDOWPOSCHANGED() event, as the mate layout works best!
+	//
 	__super::OnSize( sizeType, cx, cy );
 
 	if ( !m_ignoreResize )
 		if ( SIZE_MAXIMIZED == sizeType || SIZE_RESTORED == sizeType )
 			LayoutMates();
+}
+
+template< typename BaseCtrlT >
+void CBaseHostToolbarCtrl<BaseCtrlT>::OnWindowPosChanged( WINDOWPOS* pWndPos )
+{
+	__super::OnWindowPosChanged( pWndPos );
+
+	if ( !m_ignoreResize )
+		LayoutMates();
 }
 
 template< typename BaseCtrlT >

@@ -20,6 +20,8 @@ public:
 	bool HasSelSubText( void ) const { return SelSubText == GetSelType(); }
 	bool HasSelAllText( void ) const { return SelAllText == GetSelType(); }
 	bool HasSel( void ) const;
+protected:
+	bool HandleWordSelection( UINT cmdId );
 private:
 	CAccelTable m_editorAccel;
 

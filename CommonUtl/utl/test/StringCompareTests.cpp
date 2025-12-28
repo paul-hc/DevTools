@@ -4,6 +4,7 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "StringCompare.h"
 #include "Algorithms.h"
+#include "CommonLength.h"
 #include "FlexPath.h"
 #include "test/StringCompareTests.h"
 
@@ -449,6 +450,150 @@ void CStringCompareTests::TestStringMatch( void )
 	ASSERT_EQUAL( str::MatchNotEqual, getMatchFunc( _T("Some"), _T("Text") ) );
 }
 
+void CStringCompareTests::TestStringCommonLength( void )
+{
+	// case sensitive:
+	{
+		// partial matchin strings
+		std::string left = "abcd012345xyz", right = "abcd_PQ_xyz";
+
+		ASSERT_EQUAL( 4, utl::FindLeadCommonLength( left, right ) );
+		ASSERT_EQUAL( 3, utl::FindTrailCommonLength( left, right ) );
+		{
+			utl::CCommonLengths<std::string> common( left, right );
+
+			ASSERT( !common.HasFullMatch() );
+			ASSERT( common.HasPartialMatch() );
+			ASSERT( !common.HasNoMatch() );
+
+			ASSERT_EQUAL( 4, common.m_leadLen );
+			ASSERT_EQUAL( 3, common.m_trailLen );
+			ASSERT_EQUAL( "012345", common.MakeLeftMismatch() );
+			ASSERT_EQUAL( "_PQ_", common.MakeRightMismatch() );
+
+			ASSERT_EQUAL( Range<short>( 4, 10 ), common.GetLeftMismatchRange<short>() );
+			ASSERT_EQUAL( Range<short>( 4, 8 ), common.GetRightMismatchRange<short>() );
+		}
+
+		// equal strings: full match
+		left = right;
+		ASSERT_EQUAL( left.length(), utl::FindLeadCommonLength( left, right ) );
+		ASSERT_EQUAL( right.length(), utl::FindTrailCommonLength(left, right));
+		{
+			utl::CCommonLengths<std::string> common( left, right );
+
+			ASSERT( common.HasFullMatch() );
+			ASSERT( !common.HasPartialMatch() );
+			ASSERT( !common.HasNoMatch() );
+
+			ASSERT_EQUAL( left.length(), common.m_leadLen );
+			ASSERT_EQUAL( 0, common.m_trailLen );
+			ASSERT_EQUAL( "", common.MakeLeftMismatch() );
+			ASSERT_EQUAL( "", common.MakeRightMismatch() );
+		}
+
+		// different strings: no match
+		left = "abc";
+		right = "wxyz";
+		ASSERT_EQUAL( 0, utl::FindLeadCommonLength( left, right ) );
+		ASSERT_EQUAL( 0, utl::FindTrailCommonLength( left, right ) );
+		{
+			utl::CCommonLengths<std::string> common( left, right );
+
+			ASSERT( !common.HasFullMatch() );
+			ASSERT( !common.HasPartialMatch() );
+			ASSERT( common.HasNoMatch() );
+
+			ASSERT_EQUAL( 0, common.m_leadLen );
+			ASSERT_EQUAL( 0, common.m_trailLen );
+			ASSERT_EQUAL( left, common.MakeLeftMismatch() );
+			ASSERT_EQUAL( right, common.MakeRightMismatch() );
+		}
+
+		// partial matchin strings with overlap
+		left = "abcd";
+		right = "abcdabcd";
+
+		ASSERT_EQUAL( 4, utl::FindLeadCommonLength( left, right ) );
+		ASSERT_EQUAL( 4, utl::FindTrailCommonLength( left, right ) );
+		{
+			utl::CCommonLengths<std::string> common( left, right );
+
+			ASSERT( !common.HasFullMatch() );
+			ASSERT( common.HasPartialMatch() );
+			ASSERT( !common.HasNoMatch() );
+
+			ASSERT_EQUAL( 4, common.m_leadLen );
+			ASSERT_EQUAL( 0, common.m_trailLen );
+			ASSERT_EQUAL( "", common.MakeLeftMismatch() );
+			ASSERT_EQUAL( "abcd", common.MakeRightMismatch() );
+
+			ASSERT_EQUAL( Range<short>( 4, 4 ), common.GetLeftMismatchRange<short>() );
+			ASSERT_EQUAL( Range<short>( 4, 8 ), common.GetRightMismatchRange<short>() );
+		}
+	}
+
+	// ignore case:
+	{
+		// partial matchin strings
+		std::string left = "aBcD012345xYz", right = "AbCd_PQ_XyZ";
+		pred::TCharEqualIgnoreCase eqNoCase;
+
+		ASSERT_EQUAL( 4, utl::FindLeadCommonLength( left, right, eqNoCase ) );
+		ASSERT_EQUAL( 3, utl::FindTrailCommonLength( left, right, eqNoCase ) );
+		{
+			utl::CCommonLengths<std::string, pred::TCharEqualIgnoreCase> common( left, right );
+
+			ASSERT( !common.HasFullMatch() );
+			ASSERT( common.HasPartialMatch() );
+			ASSERT( !common.HasNoMatch() );
+
+			ASSERT_EQUAL( 4, common.m_leadLen );
+			ASSERT_EQUAL( 3, common.m_trailLen );
+			ASSERT_EQUAL( "012345", common.MakeLeftMismatch() );
+			ASSERT_EQUAL( "_PQ_", common.MakeRightMismatch() );
+
+			ASSERT_EQUAL( Range<short>( 4, 10 ), common.GetLeftMismatchRange<short>() );
+			ASSERT_EQUAL( Range<short>( 4, 8 ), common.GetRightMismatchRange<short>() );
+		}
+
+		// equal strings: full match
+		left = right;
+		ASSERT_EQUAL( left.length(), utl::FindLeadCommonLength( left, right, eqNoCase ) );
+		ASSERT_EQUAL( right.length(), utl::FindTrailCommonLength( left, right, eqNoCase ) );
+		{
+			utl::CCommonLengths<std::string, pred::TCharEqualIgnoreCase> common( left, right );
+
+			ASSERT( common.HasFullMatch() );
+			ASSERT( !common.HasPartialMatch() );
+			ASSERT( !common.HasNoMatch() );
+
+			ASSERT_EQUAL( left.length(), common.m_leadLen );
+			ASSERT_EQUAL( 0, common.m_trailLen );
+			ASSERT_EQUAL( "", common.MakeLeftMismatch() );
+			ASSERT_EQUAL( "", common.MakeRightMismatch() );
+		}
+
+		// different strings: no match
+		left = "abc";
+		right = "wxyz";
+		ASSERT_EQUAL( 0, utl::FindLeadCommonLength( left, right, eqNoCase ) );
+		ASSERT_EQUAL( 0, utl::FindTrailCommonLength( left, right, eqNoCase ) );
+		{
+			utl::CCommonLengths<std::string, pred::TCharEqualIgnoreCase> common( left, right );
+
+			ASSERT( !common.HasFullMatch() );
+			ASSERT( !common.HasPartialMatch() );
+			ASSERT( common.HasNoMatch() );
+
+			ASSERT_EQUAL( 0, common.m_leadLen );
+			ASSERT_EQUAL( 0, common.m_trailLen );
+			ASSERT_EQUAL( left, common.MakeLeftMismatch() );
+			ASSERT_EQUAL( right, common.MakeRightMismatch() );
+		}
+	}
+}
+
 void CStringCompareTests::TestStringSorting( void )
 {
 	static const char s_src[] = "a,ab,abc,abcd,A-,AB-,ABC-,ABCD-";		// add trailing '-' to avoid arbitrary order on case-insensitive comparison
@@ -607,6 +752,7 @@ void CStringCompareTests::Run( void )
 	RUN_TEST( TestStringFindLast );
 	RUN_TEST( TestStringOccurenceCount );
 	RUN_TEST( TestStringMatch );
+	RUN_TEST( TestStringCommonLength );
 
 	RUN_TEST( TestStringSorting );
 	RUN_TEST( TestIntuitiveSort );

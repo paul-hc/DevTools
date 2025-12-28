@@ -207,7 +207,7 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 	ui::EnableControls( *this, ARRAY_SPAN( ctrlIds ), pSelectedCmd != nullptr );
 
 	std::vector<int> selIndexes;
-	m_commandsList.GetSelection( selIndexes );
+	m_commandsList.GetSelIndexes( selIndexes );
 	ui::EnableControl( *this, IDOK, !selIndexes.empty() );		// undo/redo acts strictly on selection
 }
 
@@ -295,7 +295,7 @@ void CCmdDashboardDialog::OnOK( void )
 	bool keepRunning = !ui::IsKeyPressed( VK_SHIFT );
 
 	std::vector<int> selIndexes;
-	m_commandsList.GetSelection( selIndexes );		// indexes sorted ascending
+	m_commandsList.GetSelIndexes( selIndexes );		// indexes sorted ascending
 	if ( selIndexes.empty() )
 		return;
 
@@ -346,7 +346,7 @@ void CCmdDashboardDialog::OnLvnItemChanged_CommandsList( NMHDR* pNmHdr, LRESULT*
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0;
 
-	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	if ( m_commandsList.IsSelectionCaretChangeNotify( pNmList ) )
 		UpdateSelCommand();
 }
 
@@ -393,9 +393,9 @@ void CCmdDashboardDialog::OnCmdList_SelectToTop( void )
 	{
 		std::vector<int> selIndexes( maxSelIndex + 1 );
 		for ( UINT i = 0; i != selIndexes.size(); ++i )
-			selIndexes[ i ] = i;
+			selIndexes[i] = i;
 
-		m_commandsList.SetSelection( selIndexes );
+		m_commandsList.SetSelIndexes( selIndexes );
 	}
 }
 
@@ -403,7 +403,7 @@ void CCmdDashboardDialog::OnUpdateCmdList_SelectToTop( CCmdUI* pCmdUI )
 {
 	bool enable = false;
 	std::vector<int> selIndexes;
-	if ( m_commandsList.GetSelection( selIndexes ) )
+	if ( m_commandsList.GetSelIndexes( selIndexes ) )
 		enable = !IsSelContiguousToTop( selIndexes );
 
 	pCmdUI->Enable( enable );

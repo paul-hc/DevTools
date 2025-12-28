@@ -25,7 +25,7 @@ namespace utl
 		typedef std::pair<Key, Value> value_type;
 		typedef KeyPred key_compare;
 
-		vector_map( void ) {}
+		vector_map( void ) : m_lessPred() {}
 		vector_map( const vector_map& right ) : base_type( right ) {}
 		explicit vector_map( const Container& container ) : base_type( container ) {}
 

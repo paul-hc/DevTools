@@ -130,7 +130,7 @@ namespace path
 			return matchFname && matchExt;
 		}
 	public:
-		TCHAR m_fname[ MAX_PATH ];		// "fname.ext" -> "fname"
+		TCHAR m_fname[ LONG_PATH ];		// "fname.ext" -> "fname"
 		TCHAR* m_pExtCore;				// "fname.ext" -> "ext"
 	};
 }
@@ -276,6 +276,13 @@ namespace path
 			!path.empty()
 			&& std::tstring::npos == path.find_first_of( GetInvalidChars() )
 			&& path.find_first_not_of( str::StdWhitespace<TCHAR>() ) != std::tstring::npos;
+	}
+
+	bool IsValidFilename( const std::tstring& path )
+	{
+		return
+			IsValid( path )
+			&& std::tstring::npos == path.find_first_of( CDelims::s_dirDelims.c_str() );
 	}
 
 	const TCHAR* GetInvalidChars( void )
@@ -520,20 +527,44 @@ namespace path
 		return windowsPath;
 	}
 
+	bool Normalize( IN OUT std::tstring& rPath )
+	{
+		std::tstring newPath = MakeWindows( rPath.c_str() );
+
+		if ( newPath == rPath )		// case compare
+			return false;
+
+		rPath.swap( newPath );
+		return true;
+	}
+
 	std::tstring MakeCanonical( const TCHAR* pPath )
 	{
 		std::tstring absolutePath = MakeWindows( pPath );		// PathCanonicalize works only with backslashes
-		TCHAR fullPath[ MAX_PATH ];
+		TCHAR fullPath[ LONG_PATH ];
+
 		if ( ::PathCanonicalize( fullPath, absolutePath.c_str() ) )
 			absolutePath = fullPath;
+
 		return absolutePath;
+	}
+
+	bool Canonicalize( IN OUT std::tstring& rPath )
+	{
+		std::tstring newPath = MakeCanonical( rPath.c_str() );
+
+		if ( newPath == rPath )		// case compare
+			return false;
+
+		rPath.swap( newPath );
+		return true;
 	}
 
 	std::tstring Combine( const TCHAR* pDirPath, const TCHAR* pRightPath )
 	{
 		std::tstring dirPath = MakeWindows( pDirPath ), rightPath = MakeWindows( pRightPath );		// PathCombine works only with backslashes
+		TCHAR fullPath[ LONG_PATH ];
 
-		TCHAR fullPath[ MAX_PATH ];
 		if ( nullptr == ::PathCombine( fullPath, dirPath.c_str(), rightPath.c_str() ) )
 			return _T("<bad PathCombine>");
 		return fullPath;
@@ -683,7 +714,7 @@ namespace path
 		NormalizeComplexPath( leftPath );
 		NormalizeComplexPath( rightPath );
 
-		TCHAR commonPrefix[ MAX_PATH ] = _T("");
+		TCHAR commonPrefix[ LONG_PATH ] = _T("");
 		::PathCommonPrefix( leftPath.c_str(), rightPath.c_str(), commonPrefix );
 
 		// restore the complex path separator if it's still part of the resulting common prefix
@@ -786,7 +817,7 @@ namespace fs
 
 	std::tstring CPathParts::MakeFullPath( const TCHAR* pDrive, const TCHAR* pDir, const TCHAR* pFname, const TCHAR* pExt )
 	{
-		TCHAR path[ MAX_PATH * 2 ];
+		TCHAR path[ path::LONG_PATH ];
 		_tmakepath( path, pDrive, pDir, pFname, pExt );
 		return path;
 	}
@@ -818,7 +849,7 @@ namespace fs
 
 	fs::CPath CPathParts::MakePath( void ) const
 	{
-		TCHAR path[ MAX_PATH * 2 ];
+		TCHAR path[ path::LONG_PATH ];
 		size_t sepPos = std::tstring::npos;
 
 		if ( !path::IsComplex( m_dir.c_str() ) )
@@ -989,7 +1020,7 @@ namespace fs
 
 	fs::CPath GetLongFilePath( const fs::CPath& filePath )
 	{
-		TCHAR longPath[ MAX_PATH ];
+		TCHAR longPath[ path::LONG_PATH ];
 		::GetLongPathName( filePath.GetPtr(), longPath, COUNT_OF( longPath ) );				// convert to long path
 
 		return fs::CPath( longPath );
@@ -1097,6 +1128,8 @@ namespace path
 
 namespace func
 {
+	// ToNaturalPathCharValue implementation
+
 	int ToNaturalPathCharValue::Translate( wchar_t charCode )
 	{
 		enum TranslatedCode		// natural order for punctuation characters
@@ -1127,5 +1160,45 @@ namespace func
 			case '>':	return AngularBraceE;
 		}
 		return charCode;
+	}
+}
+
+
+namespace pred
+{
+	// ValidatePath implementation
+
+	bool ValidatePath::operator()( std::tstring& rFilePath )
+	{
+		size_t delCount = str::Trim( rFilePath );
+
+		delCount += str::StripDelimiters( rFilePath, path::GetInvalidChars() );
+		if ( delCount != 0 )
+			++m_amendedCount;
+
+		if ( rFilePath.empty() )
+			++m_invalidCount;
+
+		return !rFilePath.empty();		// true if valid
+	}
+
+
+	// ValidateFilename implementation
+
+	bool ValidateFilename::operator()( std::tstring& rFilename )
+	{
+		size_t delCount = str::TrimLeft( rFilename );
+
+		if ( m_trimRight )
+			delCount += str::TrimRight( rFilename );
+
+		delCount += str::StripDelimiters( rFilename, path::GetReservedChars() );
+		if ( delCount != 0 )
+			++m_amendedCount;
+
+		if ( rFilename.empty() )
+			++m_invalidCount;
+
+		return !rFilename.empty();		// true if valid
 	}
 }

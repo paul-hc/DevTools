@@ -17,8 +17,8 @@ class CCommandItem;
 
 
 class CCmdDashboardDialog : public CLayoutDialog
-						  , private ui::ITextEffectCallback
-						  , private utl::noncopyable
+	, private ui::ITextEffectCallback
+	, private utl::noncopyable
 {
 public:
 	CCmdDashboardDialog( CFileModel* pFileModel, svc::StackType stackType, CWnd* pParent );

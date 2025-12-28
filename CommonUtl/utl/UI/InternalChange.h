@@ -36,8 +36,8 @@ private:
 
 struct CScopedInternalChange
 {
-	CScopedInternalChange( CInternalChange* pBaseCtrl )
-		: m_pBaseCtrl( pBaseCtrl )
+	CScopedInternalChange( CInternalChange* pBaseCtrl, bool condition = true )
+		: m_pBaseCtrl( condition ? pBaseCtrl : nullptr )
 	{
 		if ( m_pBaseCtrl != nullptr )		// allow for external conditional logic (possibly passing NULL)
 			m_pBaseCtrl->AddInternalChange();

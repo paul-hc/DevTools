@@ -131,8 +131,11 @@ void CDirectory::ListDir( std::wostream& os, const CTreeGuides& guideParts, cons
 					<< std::endl;
 
 			if ( !m_options.HasOptionFlag( app::SkipFileGroupLine ) )
-				if ( !str::TrimRight( fullPrefix ).empty() )		// remove trailing spaces on empty line
+			{
+				str::TrimRight( fullPrefix );		// remove trailing spaces on empty line
+				if ( !fullPrefix.empty() )
 					os << fullPrefix << std::endl;
+			}
 		}
 
 	for ( CPagePos subDirPos( found.m_subDirPaths ); !subDirPos.AtEnd(); ++subDirPos )
@@ -176,8 +179,11 @@ void CDirectory::ListTableFolder( std::wostream& os, const CTreeGuides& guidePar
 					<< std::endl;
 
 			if ( !m_options.HasOptionFlag( app::SkipFileGroupLine ) )
-				if ( !str::TrimRight( fullPrefix ).empty() )		// remove trailing spaces on empty line
+			{
+				str::TrimRight( fullPrefix );		// remove trailing spaces on empty line
+				if ( !fullPrefix.empty() )
 					os << fullPrefix << std::endl;
+			}
 		}
 	}
 

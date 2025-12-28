@@ -1,3 +1,7 @@
+C++ 11:
+======
+Starting with Dec 2025, ShellGoodies project uses C++ 11 features, so ShellGoodies_vc9.vcproj no longer compiles in VS2008!
+
 
 BUILD the shell extension:
 =========================
@@ -14,10 +18,8 @@ DEBUG the shell extension (ShellGoodies64.dll/ShellGoodies32.dll):
 - it doesn't lock the dll, you can set breakpoints in the code for Debug or Release builds.
 	Solution > ShellGoodies > Properties > Debugging:
 		a) Using Explorer++ (more advanced, it has Search, etc):
-			For 32-bit:
-				command: C:\my\Tools\Utils\Explorer++\v1.5.0\Explorer++32.exe
-			For 64-bit:
-				command: C:\my\Tools\Utils\Explorer++\v1.5.0\Explorer++64.exe
+			command (32-bit): C:\my\Tools\mine\Explorer++32.exe
+			command (64-bit): C:\my\Tools\mine\Explorer++64.exe
 		b) Using ExplorerBrowser:
 			For 32-bit:
 				command: $(MY_TOOLS_MINE)\ExplorerBrowser32.exe

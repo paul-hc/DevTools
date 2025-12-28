@@ -153,8 +153,8 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 		.AddButton( ID_ORDER_BY_DIMENSION_DESC )
 		.AddSeparator();		// visual separator from order combo
 
-	utl::InsertFrom( std::inserter( m_origFilePaths, m_origFilePaths.end() ), m_model.GetSearchModel()->GetPatterns(), func::AsCode() );
-	utl::InsertFrom( std::inserter( m_origFilePaths, m_origFilePaths.end() ), m_model.GetImagesModel().GetFileAttrs(), func::ToFilePath() );
+	utl::transform( m_model.GetSearchModel()->GetPatterns(), m_origFilePaths, func::AsCode() );
+	utl::transform( m_model.GetImagesModel().GetFileAttrs(), m_origFilePaths, func::ToFilePath() );
 }
 
 CAlbumSettingsDialog::~CAlbumSettingsDialog()
@@ -826,7 +826,7 @@ void CAlbumSettingsDialog::OnLVnItemChanged_FoundImages( NMHDR* pNmHdr, LRESULT*
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0;
 
-	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	if ( m_imagesListCtrl.IsSelectionCaretChangeNotify( pNmList ) )
 		UpdateCurrentFile();
 }
 

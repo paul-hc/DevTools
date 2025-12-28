@@ -12,6 +12,7 @@
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/SplitPushButton.h"
 #include "utl/UI/SpinEdit.h"
+#include "utl/UI/SelectionData.h"
 #include "utl/UI/TandemControls.h"
 #include "utl/UI/TextEdit.h"
 #include "utl/UI/ThemeStatic.h"
@@ -37,6 +38,8 @@ public:
 	bool HasDestPaths( void ) const;
 
 	CDisplayFilenameAdapter* GetDisplayFilenameAdapter( void ) { return m_pDisplayFilenameAdapter.get(); }
+	const ui::CSelectionData<CRenameItem>& GetSelData( void ) const { return m_selData; }
+	ui::CSelectionData<CRenameItem>& RefSelData( void ) { return m_selData; }
 protected:
 	// IFileEditor interface (partial)
 	virtual void PostMakeDest( bool silent = false ) override;
@@ -56,6 +59,7 @@ protected:
 private:
 	void UpdateFormatLabel( void );
 	void UpdateSortOrderCombo( const ren::TSortingPair& sorting );
+	void UpdateFileListStatus( void );
 	bool PromptRenameCustomSortOrder( void ) const;
 
 	void CommitLocalEdits( void );
@@ -68,6 +72,7 @@ private:
 	void MarkInvalidSrcItems( void );
 	std::tstring JoinErrorDestPaths( void ) const;
 	std::tstring GetSelFindWhat( void ) const;
+	bool SetCaretOnItem( const CRenameItem* pRenameItem );
 
 	CPathFormatter InputRenameFormatter( bool checkConsistent ) const;
 	bool IsFormatExtConsistent( void ) const;
@@ -82,11 +87,12 @@ private:
 	persist bool m_autoGenerate;
 	persist bool m_seqCountAutoAdvance;
 	persist bool m_ignoreExtension;				// "Show Extension" checkbox has inverted logic
-	persist bool m_listMultiSelMode;			// false: run file commands on all file list - true: run file commands on selected files
 	persist UINT m_prevGenSeqCount;				// used in certain cases to roll-back sequence advance on generation
 
 	std::auto_ptr<CDisplayFilenameAdapter> m_pDisplayFilenameAdapter;
 	std::auto_ptr<CPickDataset> m_pPickDataset;
+
+	ui::CSelectionData<CRenameItem> m_selData;
 private:
 	// enum { IDD = IDD_RENAME_FILES_DIALOG };
 	enum Page { ListSimplePage, ListDetailsPage, EditPage };
@@ -96,7 +102,8 @@ private:
 	persist CHostToolbarCtrl<CHistoryComboBox> m_formatCombo;
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
-	CDialogToolBar m_fileListToolbar;
+	CHostToolbarCtrl<CStatusStatic> m_fileListStatic;
+	CHostToolbarCtrl<CTextEdit> m_currFolderEdit;
 	CFrameHostCtrl<CButton> m_showExtButton;
 	CFrameHostCtrl<CEnumComboBox> m_sortOrderCombo;
 	CSplitPushButton m_capitalizeButton;
@@ -124,15 +131,15 @@ protected:
 	afx_msg void OnUpdateSeqCountFindNext( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_SeqCountAutoAdvance( void );
 	afx_msg void OnUpdate_SeqCountAutoAdvance( CCmdUI* pCmdUI );
-	afx_msg void OnToggle_ListSelectionMode( void );
-	afx_msg void OnUpdate_ListSelectionMode( CCmdUI* pCmdUI );
-	afx_msg void On_ResetListSelection( void );
-	afx_msg void OnUpdate_ResetListSelection( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_ShowExtension( void );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnCbnSelChange_SortOrder( void );
+
+	afx_msg void On_SelItems_ResetDestFile( void );
+	afx_msg void OnUpdate_SelItems_ResetDestFile( CCmdUI* pCmdUI );
 	afx_msg void OnBnClicked_PasteDestFiles( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
+	afx_msg void OnUpdate_ResetDestFiles( CCmdUI* pCmdUI );
 	afx_msg void OnBnClicked_CapitalizeDestFiles( void );
 	afx_msg void OnSbnRightClicked_CapitalizeOptions( void );
 	afx_msg void OnBnClicked_ChangeCase( void );
@@ -152,6 +159,9 @@ protected:
 	afx_msg void OnChangeDestPathsTool( UINT menuId );
 	afx_msg void OnEnsureUniformNumPadding( void );
 	afx_msg void OnGenerateNumericSequence( void );
+
+	afx_msg void On_BrowseCurrFolder( void );
+	afx_msg void OnUpdate_BrowseCurrFolder( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -874,6 +874,16 @@ namespace ui
 		return false;
 	}
 
+	bool IsSingleLineEditBox( HWND hCtrl )
+	{
+		return IsEditBox( hCtrl ) && !HasStyle( hCtrl, ES_MULTILINE );
+	}
+
+	bool IsMultiLineEditBox( HWND hCtrl )
+	{
+		return IsEditBox( hCtrl ) && HasStyle( hCtrl, ES_MULTILINE );
+	}
+
 	bool IsWriteableEditBox( HWND hCtrl )
 	{
 		if ( IsEditLikeCtrl( hCtrl ) )
@@ -996,30 +1006,58 @@ namespace ui
 	}
 
 
-	bool ShowInputError( CWnd* pCtrl, const std::tstring& message, UINT iconFlag /*= MB_ICONERROR*/ )
+	bool ShowInfoTip( CWnd* pCtrl, const TCHAR* pTitle, const std::tstring& message, UINT iconFlag /*= MB_ICONWARNING*/ )
+	{
+		return ShowInputError( pCtrl, message, iconFlag, pTitle );
+	}
+
+	bool ShowInputError( CWnd* pCtrl, const std::tstring& message, UINT iconFlag /*= MB_ICONERROR*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
 		ASSERT_PTR( pCtrl->GetSafeHwnd() );
 
-		static const TCHAR s_title[] = _T("Input Validation Error");
+		std::tstring title = pTitle != nullptr ? _T("Input Validation") : pTitle;
 		int ttiIcon = TTI_NONE;
 		enum { MB_IconMask = MB_ICONERROR | MB_ICONWARNING | MB_ICONINFORMATION | MB_ICONQUESTION };
 
 		switch ( iconFlag & MB_IconMask )
 		{
-			case MB_ICONERROR:			ttiIcon = TTI_ERROR_LARGE; break;
-			case MB_ICONWARNING:		ttiIcon = TTI_WARNING_LARGE; break;
-			case MB_ICONINFORMATION:	ttiIcon = TTI_INFO; break;
-			case MB_ICONQUESTION:		ttiIcon = TTI_NONE; break;
+			case MB_ICONERROR:
+				if ( nullptr == pTitle )
+					title += _T(" Error");
+				ttiIcon = TTI_ERROR_LARGE;
+				break;
+			case MB_ICONWARNING:
+				if ( nullptr == pTitle )
+					title += _T(" Warning");
+				ttiIcon = TTI_WARNING_LARGE;
+				break;
+			case MB_ICONINFORMATION:
+				if ( nullptr == pTitle )
+					title += _T(" Issue");
+				ttiIcon = TTI_INFO;
+				break;
+			case MB_ICONQUESTION:
+				if ( nullptr == pTitle )
+					title += _T("?");
+				ttiIcon = TTI_NONE;
+				break;
 			default: ASSERT( false );
 		}
 
+		bool isMultiLineEdit = false;
+
 		if ( CEdit* pEdit = dynamic_cast<CEdit*>( pCtrl ) )
-			pEdit->ShowBalloonTip( s_title,  message.c_str(), ttiIcon );
+		{
+			pEdit->ShowBalloonTip( title.c_str(), message.c_str(), ttiIcon);
+			isMultiLineEdit = HasFlag( pEdit->GetStyle(), ES_MULTILINE );
+		}
 		else
-			ui::ShowBalloonTip( pCtrl, s_title,  message.c_str(), (HICON)(intptr_t)ttiIcon );
+			ui::ShowBalloonTip( pCtrl, title.c_str(),  message.c_str(), (HICON)(intptr_t)ttiIcon );
 
 		TakeFocus( pCtrl->m_hWnd );
-		SelectAllText( pCtrl );
+
+		if ( !isMultiLineEdit )			// retain existing selection for multi-line edits
+			SelectAllText( pCtrl );
 
 		return BeepSignal( iconFlag );
 	}

@@ -25,6 +25,13 @@ namespace str
 		}
 
 		template< typename MatchFunc >							// could use str::TGetMatch(), path::TGetMatch(), etc
+		void UpdateDestText( const TString& destText, MatchFunc getMatchFunc )
+		{
+			m_textPair.second = destText;
+			ComputeMatchSeq( getMatchFunc );
+		}
+
+		template< typename MatchFunc >							// could use str::TGetMatch(), path::TGetMatch(), etc
 		void ComputeMatchSeq( MatchFunc getMatchFunc );
 	public:
 		std::pair<TString, TString> m_textPair;									// <SRC, DEST> text pair of subitems
