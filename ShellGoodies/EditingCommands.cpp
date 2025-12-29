@@ -69,6 +69,10 @@ CChangeDestPathsCmd::CChangeDestPathsCmd( CFileModel* pFileModel, std::vector<fs
 	ENSURE( m_srcPaths.size() == m_destPaths.size() );
 }
 
+CChangeDestPathsCmd::~CChangeDestPathsCmd()
+{
+}
+
 CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const override
 {
 	REQUIRE( m_srcPaths.size() == m_destPaths.size() );
@@ -185,11 +189,6 @@ bool CChangeDestFileStatesCmd::ToggleExecute( void ) override
 	return true;
 }
 
-size_t CChangeDestFileStatesCmd::GetFileCount( void ) const
-{
-	return m_srcStates.size();
-}
-
 void CChangeDestFileStatesCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const
 {
 	ASSERT( m_srcStates.size() == m_destStates.size() );
@@ -244,6 +243,10 @@ CChangeSelDestPathsCmd::CChangeSelDestPathsCmd( CFileModel* pFileModel, const st
 {
 	REQUIRE( !m_pFileModel->GetRenameItems().empty() );		// should be initialized
 	REQUIRE( m_selItems.size() == m_destPaths.size() );
+}
+
+CChangeSelDestPathsCmd::~CChangeSelDestPathsCmd()
+{
 }
 
 CBaseChangeDestCmd::ChangeType CChangeSelDestPathsCmd::EvalChange( void ) const override

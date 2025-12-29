@@ -38,6 +38,7 @@ class CChangeDestPathsCmd : public CBaseChangeDestCmd
 {
 public:
 	CChangeDestPathsCmd( CFileModel* pFileModel, std::vector<fs::CPath>& rNewDestPaths, const std::tstring& cmdTag = std::tstring() );
+	virtual ~CChangeDestPathsCmd();
 
 	// cmd::IFileDetailsCmd
 	virtual size_t GetFileCount( void ) const { return m_srcPaths.size(); }
@@ -61,7 +62,7 @@ public:
 	CChangeDestFileStatesCmd( CFileModel* pFileModel, std::vector<fs::CFileState>& rNewDestStates, const std::tstring& cmdTag = std::tstring() );
 
 	// cmd::IFileDetailsCmd
-	virtual size_t GetFileCount( void ) const;
+	virtual size_t GetFileCount( void ) const { return m_srcStates.size(); }
 	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
 private:
 	// base overrides
@@ -93,11 +94,12 @@ class CChangeSelDestPathsCmd : public CBaseChangeDestCmd
 {
 public:
 	CChangeSelDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems, const std::vector<fs::CPath>& newDestPaths, const std::tstring& cmdTag = std::tstring() );
+	virtual ~CChangeSelDestPathsCmd();
 
 	const std::vector<CRenameItem*>& GetSelItems( void ) const { return m_selItems; }
 
 	// cmd::IFileDetailsCmd
-	virtual size_t GetFileCount( void ) const { return 1; }
+	virtual size_t GetFileCount( void ) const { return m_selItems.size(); }
 	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
 private:
 	// base overrides
@@ -125,7 +127,7 @@ public:
 	CChangeSelDestFileStatesCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>& selItems, const std::vector<fs::CFileState>& newDestStates, const std::tstring& cmdTag = std::tstring() );
 
 	// cmd::IFileDetailsCmd
-	virtual size_t GetFileCount( void ) const { return 1; }
+	virtual size_t GetFileCount( void ) const { return m_selItems.size(); }
 	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
 private:
 	// base overrides

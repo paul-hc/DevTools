@@ -104,22 +104,22 @@ void CCmdDashboardDialog::BuildCmdItems( void )
 	m_cmdItems.reserve( cmdStack.size() );
 
 	// go in reverse order since stack top is at the back
-	for ( std::deque<utl::ICommand*>::const_reverse_iterator itCmdStack = cmdStack.rbegin(); itCmdStack != cmdStack.rend(); ++itCmdStack )
+	for ( std::deque<utl::ICommand*>::const_reverse_iterator itCmd = cmdStack.rbegin(); itCmd != cmdStack.rend(); ++itCmd )
 	{
 		m_cmdItems.push_back( CCommandItem() );
-		m_cmdItems.back().SetCmd( *itCmdStack );
+		m_cmdItems.back().SetCmd( *itCmd );
 	}
 }
 
 void CCmdDashboardDialog::SetupCommandList( void )
 {
-	//lv::TScopedStatus_ByText status( &m_commandsList );
+	BuildCmdItems();
 
-	CScopedLockRedraw freeze( &m_commandsList );
 	CScopedInternalChange internalChange( &m_commandsList );
+	//lv::TScopedStatus_ByText status( &m_commandsList );
+	CScopedLockRedraw freeze( &m_commandsList );
 
 	m_commandsList.DeleteAllItems();
-	BuildCmdItems();
 
 	for ( UINT index = 0; index != m_cmdItems.size(); ++index )
 	{

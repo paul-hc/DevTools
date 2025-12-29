@@ -25,8 +25,8 @@ public:
 	virtual bool UndoRedo( svc::StackType stackType ) implement;
 	virtual bool Execute( utl::ICommand* pCmd ) implement;
 
-	template< typename PredType >
-	void RemoveCommandsThat( PredType pred )
+	template< typename PredT >
+	void RemoveCommandsThat( PredT pred )
 	{
 		m_pCommandModel->RemoveCommandsThat( pred );
 		m_dirty = true;
