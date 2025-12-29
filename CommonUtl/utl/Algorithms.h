@@ -121,6 +121,26 @@ namespace utl
 		return itFound != itEnd;
 	}
 
+	template< typename ContainerT, typename SubSetContainerT >
+	bool ContainsSubSet( const ContainerT& items, const SubSetContainerT& subSetItems )
+	{
+		if ( subSetItems.size() > items.size() )
+			return false;
+
+	#ifdef IS_CPP_11
+		return std::all_of( subSetItems.begin(), subSetItems.end(),
+							[&]( const typename SubSetContainerT::value_type& subItem ) { return Contains( items, subItem ); }
+		);
+	#else
+		for ( SubSetContainerT::const_iterator itSubItem = subSetItems.begin(); itSubItem != subSetItems.end(); ++itSubItem )
+			if ( !Contains( items, subItem ) )
+				return false;
+
+		return true;
+	#endif
+	}
+
+
 	template< typename IteratorT, typename ValueT >
 	inline size_t FindPos( IteratorT itStart, IteratorT itEnd, const ValueT& value )
 	{

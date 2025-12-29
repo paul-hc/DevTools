@@ -34,11 +34,17 @@ protected:
 };
 
 
+class CRenameItem;
+
+
 class CChangeDestPathsCmd : public CBaseChangeDestCmd
 {
 public:
-	CChangeDestPathsCmd( CFileModel* pFileModel, std::vector<fs::CPath>& rNewDestPaths, const std::tstring& cmdTag = std::tstring() );
+	CChangeDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>* pSelItems, const std::vector<fs::CPath>& newDestPaths, const std::tstring& cmdTag = std::tstring() );
 	virtual ~CChangeDestPathsCmd();
+
+	bool HasSelItems( void ) const;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
+	std::vector<CRenameItem*> MakeSelItems( void ) const;
 
 	// cmd::IFileDetailsCmd
 	virtual size_t GetFileCount( void ) const { return m_srcPaths.size(); }
@@ -47,13 +53,24 @@ private:
 	// base overrides
 	virtual ChangeType EvalChange( void ) const override;
 	virtual bool ToggleExecute( void ) override;
+
+	CRenameItem* GetRenameItemAt( size_t posSrcPath ) const;
 private:
 	std::vector<fs::CPath> m_srcPaths;
 	std::vector<fs::CPath> m_destPaths;
 };
 
 
+namespace cmd
+{
+	CChangeDestPathsCmd* MakeResetDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems );
+}
+
+
 #include "utl/FileState.h"
+
+
+class CTouchItem;
 
 
 class CChangeDestFileStatesCmd : public CBaseChangeDestCmd
@@ -81,71 +98,6 @@ public:
 
 	// utl::IMessage overrides
 	virtual std::tstring Format( utl::Verbosity verbosity ) const override;			// override for special formatting
-};
-
-
-// selected items subset commands:
-
-class CRenameItem;
-class CTouchItem;
-
-
-class CChangeSelDestPathsCmd : public CBaseChangeDestCmd
-{
-public:
-	CChangeSelDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems, const std::vector<fs::CPath>& newDestPaths, const std::tstring& cmdTag = std::tstring() );
-	virtual ~CChangeSelDestPathsCmd();
-
-	const std::vector<CRenameItem*>& GetSelItems( void ) const { return m_selItems; }
-
-	// cmd::IFileDetailsCmd
-	virtual size_t GetFileCount( void ) const { return m_selItems.size(); }
-	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
-private:
-	// base overrides
-	virtual ChangeType EvalChange( void ) const override;
-	virtual bool ToggleExecute( void ) override;
-private:
-	// a subset of rename items in m_pFileModel:
-	std::vector<CRenameItem*> m_selItems;
-	std::vector<fs::CPath> m_destPaths;
-};
-
-
-class CResetSelDestPathsCmd : public CChangeSelDestPathsCmd
-{
-public:
-	CResetSelDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems );
-private:
-	std::vector<fs::CPath> MakeResetDestPaths( const std::vector<CRenameItem*>& selItems );
-};
-
-
-class CChangeSelDestFileStatesCmd : public CBaseChangeDestCmd
-{
-public:
-	CChangeSelDestFileStatesCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>& selItems, const std::vector<fs::CFileState>& newDestStates, const std::tstring& cmdTag = std::tstring() );
-
-	// cmd::IFileDetailsCmd
-	virtual size_t GetFileCount( void ) const { return m_selItems.size(); }
-	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
-private:
-	// base overrides
-	virtual ChangeType EvalChange( void ) const override;
-	virtual bool ToggleExecute( void ) override;
-private:
-	// a subset of rename items in m_pFileModel:
-	std::vector<CTouchItem*> m_selItems;
-	std::vector<fs::CFileState> m_destStates;
-};
-
-
-class CResetSelDestFileStatesCmd : public CChangeSelDestFileStatesCmd
-{
-public:
-	CResetSelDestFileStatesCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>& selItems );
-private:
-	std::vector<fs::CFileState> MakeResetDestStates( const std::vector<CTouchItem*>& selItems );
 };
 
 

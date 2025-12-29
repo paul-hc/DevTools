@@ -90,14 +90,14 @@ namespace func
 		rFilePaths.reserve( srcPathItems.size() );
 
 		for ( typename ItemContainerT::const_iterator itSrcItem = srcPathItems.begin(); itSrcItem != srcPathItems.end(); ++itSrcItem )
-			rFilePaths.push_back( ( *itSrcItem )->GetFilePath().Get() );
+			rFilePaths.push_back( (*itSrcItem)->GetFilePath().Get() );
 	}
 
 	template< typename ContainerT >
 	typename ContainerT::value_type FindItemWithPath( const ContainerT& items, const fs::CPath& filePath )
 	{
 		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
-			if ( ( *itItem )->GetFilePath() == filePath )
+			if ( (*itItem)->GetFilePath() == filePath )
 				return *itItem;
 
 		return ContainerT::value_type( nullptr );

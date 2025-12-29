@@ -56,7 +56,7 @@ private:
 	CDialogToolBar m_replaceToolbar;
 public:
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual void OnOK( void );
 protected:

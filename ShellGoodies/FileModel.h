@@ -7,6 +7,7 @@
 #include "utl/ICommand.h"
 #include "utl/UI/InternalChange.h"
 #include "Application_fwd.h"
+#include <unordered_map>
 
 
 class CRenameItem;
@@ -60,6 +61,9 @@ public:
 	const std::vector<CRenameItem*>& GetRenameItems( void ) const { return m_renameItems; }
 	const std::vector<CTouchItem*>& GetTouchItems( void ) const { return m_touchItems; }
 
+	CRenameItem* FindRenameItem( const fs::CPath& srcPath ) const;
+	CTouchItem* FindTouchItem( const fs::CPath& srcPath ) const;
+
 	void ResetDestinations( void );
 
 	IFileEditor* MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent );
@@ -67,11 +71,13 @@ public:
 	static bool HasFileEditor( cmd::CommandType cmdType );
 
 	// RENAME
-	template< typename FuncType >
-	utl::ICommand* MakeChangeDestPathsCmd( const FuncType& func, const std::tstring& cmdTag );
+	template< typename PathPartsFuncT >
+	utl::ICommand* MakeChangeDestPathsCmd( const PathPartsFuncT& pathPartsFunc, const std::tstring& cmdTag,
+										   const std::vector<CRenameItem*>* pSelItems = nullptr );
 
 	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter = nullptr ) const;
-	utl::ICommand* MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter ) throws_( CRuntimeException );
+	utl::ICommand* MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter,
+											  const std::vector<CRenameItem*>* pSelItems = nullptr ) throws_( CRuntimeException );
 
 	bool PromptExtensionChanges( const std::vector<fs::CPath>& destPaths ) const;
 
@@ -132,8 +138,11 @@ private:
 	persist ren::TSortingPair m_renameSorting;
 
 	// lazy init
+	typedef std::pair<CRenameItem*, CTouchItem*> TItemPair;
+
 	std::vector<CRenameItem*> m_renameItems;
 	std::vector<CTouchItem*> m_touchItems;
+	std::unordered_map<fs::CPath, TItemPair > m_srcPatchToItemsMap;
 public:
 	static const std::tstring section_filesSheet;
 
@@ -145,29 +154,31 @@ protected:
 
 // template code
 
-template< typename FuncType >
-utl::ICommand* CFileModel::MakeChangeDestPathsCmd( const FuncType& func, const std::tstring& cmdTag )
+template< typename PathPartsFuncT >
+utl::ICommand* CFileModel::MakeChangeDestPathsCmd( const PathPartsFuncT& pathPartsFunc, const std::tstring& cmdTag,
+												   const std::vector<CRenameItem*>* pSelItems /*= nullptr*/ )
 {
 	REQUIRE( !m_renameItems.empty() );		// initialized?
 
 	bool anyChanges = false;
-	std::vector<fs::CPath> destPaths; destPaths.reserve( m_renameItems.size() );
+	const std::vector<CRenameItem*>& renameItems = pSelItems != nullptr ? *pSelItems : m_renameItems;
+	std::vector<fs::CPath> destPaths; destPaths.reserve( renameItems.size() );
 
-	for ( std::vector<CRenameItem*>::const_iterator itItem = m_renameItems.begin(); itItem != m_renameItems.end(); ++itItem )
+	for ( std::vector<CRenameItem*>::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
 	{
 		fs::CPathParts destParts;
-		( *itItem )->SplitSafeDestPath( &destParts );							// for directories treat extension as part of the fname
+		(*itItem)->SplitSafeDestPath( &destParts );							// for directories treat extension as part of the fname
 
-		func( destParts );
+		pathPartsFunc( destParts );
 
 		destPaths.push_back( destParts.MakePath() );
 
-		if ( destPaths.back().Get() != ( *itItem )->GetDestPath().Get() )		// case-sensitive string compare
+		if ( destPaths.back().Get() != (*itItem)->GetDestPath().Get() )		// case-sensitive string compare
 			anyChanges = true;
 	}
 
 	if ( anyChanges )
-		return new CChangeDestPathsCmd( this, destPaths, cmdTag );
+		return new CChangeDestPathsCmd( this, pSelItems, destPaths, cmdTag );
 
 	return nullptr;
 }

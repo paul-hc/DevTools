@@ -84,10 +84,14 @@ void CBaseRenameListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMes
 
 	if ( m_pParentDlg->GetFileModel() == pSubject )
 	{
-		if ( const CChangeSelDestPathsCmd* pSelDestPathsCmd = utl::GetSafeMatchCmd<CChangeSelDestPathsCmd>( pMessage, cmd::ChangeSelDestPaths ) )
-			UpdateFileListViewItems( pSelDestPathsCmd->GetSelItems() );
-		else
-			SetupFileListView();
+		if ( const CChangeDestPathsCmd* pDestPathsCmd = utl::GetSafeMatchCmd<CChangeDestPathsCmd>( pMessage, cmd::ChangeDestPaths ) )
+			if ( pDestPathsCmd->HasSelItems() )
+			{
+				UpdateFileListViewItems( pDestPathsCmd->MakeSelItems() );
+				return;
+			}
+
+		SetupFileListView();
 	}
 	else if ( &CGeneralOptions::Instance() == pSubject )
 		CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
@@ -423,7 +427,7 @@ void CRenameEditPage::CommitLocalEdits( void )
 			{
 				CScopedInternalChange pageChange( this );
 
-				m_pParentDlg->SafeExecuteCmd( new CChangeDestPathsCmd( m_pParentDlg->GetFileModel(), newDestPaths, _T("Edit destination filenames manually") ) );
+				m_pParentDlg->SafeExecuteCmd( new CChangeDestPathsCmd( m_pParentDlg->GetFileModel(), nullptr, newDestPaths, _T("Edit destination filenames manually") ) );
 			}
 		}
 	}
@@ -500,10 +504,14 @@ void CRenameEditPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage
 
 	if ( m_pParentDlg->GetFileModel() == pSubject )
 	{
-		if ( const CChangeSelDestPathsCmd* pSelDestPathsCmd = utl::GetSafeMatchCmd<CChangeSelDestPathsCmd>( pMessage, cmd::ChangeSelDestPaths ) )
-			UpdateFileEdits( pSelDestPathsCmd->GetSelItems() );
-		else
-			SetupFileEdits();
+		if ( const CChangeDestPathsCmd* pDestPathsCmd = utl::GetSafeMatchCmd<CChangeDestPathsCmd>( pMessage, cmd::ChangeDestPaths ) )
+			if ( pDestPathsCmd->HasSelItems() )
+			{
+				UpdateFileEdits( pDestPathsCmd->MakeSelItems() );
+				return;
+			}
+
+		SetupFileEdits();
 	}
 	else if ( GetParentSheet() == pSubject )
 	{

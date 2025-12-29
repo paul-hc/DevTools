@@ -154,12 +154,13 @@ std::vector<CRenameItem*>& CFileModel::LazyInitRenameItems( void )
 		ASSERT( !m_sourcePaths.empty() );
 		m_renameItems.reserve( m_sourcePaths.size() );
 
-		for ( std::vector<fs::CPath>::const_iterator itSource = m_sourcePaths.begin(); itSource != m_sourcePaths.end(); ++itSource )
+		for ( std::vector<fs::CPath>::const_iterator itSrcPath = m_sourcePaths.begin(); itSrcPath != m_sourcePaths.end(); ++itSrcPath )
 		{
-			CRenameItem* pNewItem = new CRenameItem( *itSource );
+			CRenameItem* pNewItem = new CRenameItem( *itSrcPath );
 
 			//pNewItem->StripDisplayCode( m_commonParentPath );		// use always filename.ext for path diffs
 			m_renameItems.push_back( pNewItem );
+			m_srcPatchToItemsMap[ *itSrcPath ].first = pNewItem;
 		}
 
 		SortRenameItems();		// initial sort
@@ -174,12 +175,13 @@ std::vector<CTouchItem*>& CFileModel::LazyInitTouchItems( void )
 	{
 		ASSERT( !m_sourcePaths.empty() );
 
-		for ( std::vector<fs::CPath>::const_iterator itSource = m_sourcePaths.begin(); itSource != m_sourcePaths.end(); ++itSource )
+		for ( std::vector<fs::CPath>::const_iterator itSrcPath = m_sourcePaths.begin(); itSrcPath != m_sourcePaths.end(); ++itSrcPath )
 		{
-			CTouchItem* pNewItem = new CTouchItem( fs::CFileState::ReadFromFile( *itSource ) );
+			CTouchItem* pNewItem = new CTouchItem( fs::CFileState::ReadFromFile( *itSrcPath ) );
 
 			pNewItem->StripDisplayCode( m_commonParentPath );
 			m_touchItems.push_back( pNewItem );
+			m_srcPatchToItemsMap[ *itSrcPath ].second = pNewItem;
 		}
 	}
 
@@ -196,6 +198,18 @@ void CFileModel::UpdateAllObservers( utl::IMessage* pMessage )
 {
 	if ( !IsInternalChange() )
 		TSubject::UpdateAllObservers( pMessage );
+}
+
+CRenameItem* CFileModel::FindRenameItem( const fs::CPath& srcPath ) const
+{
+	const TItemPair* pItemsPair = utl::FindValuePtr( m_srcPatchToItemsMap, srcPath );
+	return pItemsPair != nullptr ? pItemsPair->first : nullptr;
+}
+
+CTouchItem* CFileModel::FindTouchItem( const fs::CPath& srcPath ) const
+{
+	const TItemPair* pItemsPair = utl::FindValuePtr( m_srcPatchToItemsMap, srcPath );
+	return pItemsPair != nullptr ? pItemsPair->second : nullptr;
 }
 
 void CFileModel::ResetDestinations( void )
@@ -225,12 +239,14 @@ bool CFileModel::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const 
 	return CTextClipboard::CopyToLines( sourcePaths, pWnd->GetSafeHwnd() );
 }
 
-utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter ) throws_( CRuntimeException )
+utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter,
+													  const std::vector<CRenameItem*>* pSelItems /*= nullptr*/ ) throws_( CRuntimeException )
 {
 	REQUIRE( !m_renameItems.empty() );		// initialized?
 
 	static const CRuntimeException s_noDestExc( _T("No destination file paths available to paste.") );
 
+	const std::vector<CRenameItem*>& renameItems = pSelItems != nullptr ? *pSelItems : m_renameItems;
 	std::vector<std::tstring> fileNames;
 
 	if ( !CTextClipboard::CanPasteText() || !CTextClipboard::PasteFromLines( fileNames, pWnd->GetSafeHwnd() ) )
@@ -250,16 +266,15 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 
 	if ( fileNames.empty() )
 		throw s_noDestExc;
-	else if ( m_sourcePaths.size() != fileNames.size() )
-		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."),
-											  fileNames.size(), m_sourcePaths.size() ) );
+	else if ( renameItems.size() != fileNames.size() )
+		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."), fileNames.size(), renameItems.size() ) );
 
-	std::vector<fs::CPath> destPaths; destPaths.reserve( m_renameItems.size() );
+	std::vector<fs::CPath> destPaths; destPaths.reserve( renameItems.size() );
 	bool anyChanges = false;
 
 	for ( size_t i = 0; i != fileNames.size(); ++i )
 	{
-		const CRenameItem* pRenameItem = m_renameItems[i];
+		const CRenameItem* pRenameItem = renameItems[i];
 		fs::CPath newFilePath = pDisplayAdapter->ParsePath( fileNames[i], pRenameItem->GetSafeDestPath() );
 
 		if ( newFilePath.Get() != pRenameItem->GetDestPath().Get() )		// case-sensitive string compare
@@ -274,7 +289,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 	if ( !PromptExtensionChanges( destPaths ) )
 		return nullptr;
 
-	return new CChangeDestPathsCmd( this, destPaths, _T("Paste destination file paths from clipboard") );
+	return new CChangeDestPathsCmd( this, pSelItems, destPaths, _T("Paste destination file paths from clipboard") );
 }
 
 bool CFileModel::PromptExtensionChanges( const std::vector<fs::CPath>& destPaths ) const

@@ -20,7 +20,6 @@ namespace cmd
 
 		// transient commands (not persistent)
 		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
-		ChangeSelDestPaths, ChangeSelDestFileStates,
 		EditOptions,
 		SortRenameList, OnRenameListSelChanged,
 

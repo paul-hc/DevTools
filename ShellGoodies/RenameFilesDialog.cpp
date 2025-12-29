@@ -288,13 +288,8 @@ void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMess
 			pPage->OnUpdate( pSubject, pMessage );
 
 	if ( m_pFileModel == pSubject )
-		switch ( cmdType )
-		{
-			case cmd::ChangeDestPaths:
-			case cmd::ChangeSelDestPaths:
-				PostMakeDest();
-				break;
-		}
+		if ( cmd::ChangeDestPaths == cmdType )
+			PostMakeDest();
 }
 
 void CRenameFilesDialog::ClearFileErrors( void ) override
@@ -508,7 +503,7 @@ bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter,
 	std::vector<fs::CPath> newDestPaths;
 	renamePairs.QueryDestPaths( std::back_inserter( newDestPaths ) );
 
-	return SafeExecuteCmd( new CChangeDestPathsCmd( m_pFileModel, newDestPaths, _T("Generate destination file paths from template format") ) );
+	return SafeExecuteCmd( new CChangeDestPathsCmd( m_pFileModel, nullptr, newDestPaths, _T("Generate destination file paths from template format") ) );
 }
 
 void CRenameFilesDialog::AutoGenerateFiles( void )
@@ -830,7 +825,7 @@ void CRenameFilesDialog::On_SelItems_ResetDestFile( void )
 	CommitLocalEdits();
 
 	if ( !m_selData.GetSelItems().empty() )
-		SafeExecuteCmd( new CResetSelDestPathsCmd( m_pFileModel, m_selData.GetSelItems() ) );
+		SafeExecuteCmd( cmd::MakeResetDestPathsCmd( m_pFileModel, m_selData.GetSelItems() ) );
 }
 
 void CRenameFilesDialog::OnUpdate_SelItems_ResetDestFile( CCmdUI* pCmdUI )
@@ -849,7 +844,7 @@ void CRenameFilesDialog::OnBnClicked_PasteDestFiles( void )
 	try
 	{
 		ClearFileErrors();
-		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestPathsCmd( this, m_pDisplayFilenameAdapter.get() ) );
+		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestPathsCmd( this, m_pDisplayFilenameAdapter.get(), nullptr ) );
 	}
 	catch ( CRuntimeException& exc )
 	{
