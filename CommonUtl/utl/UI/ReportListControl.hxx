@@ -114,7 +114,6 @@ void CReportListControl::QueryGroupItems( std::vector<ObjectT*>& rObjectItems, i
 template< typename MatchFunc >
 void CReportListControl::SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc )
 {
-	m_diffColumnPairs.clear();
 	m_diffColumnPairs.push_back( CDiffColumnPair( srcColumn, destColumn ) );
 
 	std::unordered_map<TRowKey, str::TMatchSequence>& rRowSequences = m_diffColumnPairs.back().m_rowSequences;

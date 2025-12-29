@@ -41,7 +41,7 @@ namespace layout
 	static CLayoutStyle styles[] =
 	{
 		{ IDC_FILE_TOUCH_LIST, Size },
-		{ IDC_SHOW_SOURCE_INFO_CHECK, MoveX },
+		{ IDC_SHOW_SRC_COLUMNS_CHECK, MoveX },
 
 		{ IDC_COPY_SOURCE_PATHS_BUTTON, MoveY },
 		{ IDC_PASTE_FILES_BUTTON, MoveY },
@@ -517,7 +517,7 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 	if ( firstInit )
 	{
 		OnUpdate( m_pFileModel, nullptr );
-		CheckDlgButton( IDC_SHOW_SOURCE_INFO_CHECK, VisibleAllSrcColumns() );
+		CheckDlgButton( IDC_SHOW_SRC_COLUMNS_CHECK, VisibleAllSrcColumns() );
 	}
 
 	__super::DoDataExchange( pDX );
@@ -532,7 +532,7 @@ BEGIN_MESSAGE_MAP( CTouchFilesDialog, CFileEditorBaseDialog )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestStates )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
-	ON_BN_CLICKED( IDC_SHOW_SOURCE_INFO_CHECK, OnBnClicked_ShowSrcColumns )
+	ON_BN_CLICKED( IDC_SHOW_SRC_COLUMNS_CHECK, OnBnClicked_ShowSrcColumns )
 	ON_COMMAND_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnCopyDateCell )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnUpdateSelListItem )
 	ON_COMMAND( ID_PUSH_TO_ATTRIBUTE_FIELDS, OnPushToAttributeFields )

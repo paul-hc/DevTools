@@ -58,7 +58,7 @@
 #define IDC_SKIP_NUMERIC_PREFIX_CHECK   1039
 #define IDC_PICK_RENAME_ACTIONS         1040
 #define IDC_FILE_TOUCH_LIST             1043
-#define IDC_SHOW_SOURCE_INFO_CHECK      1044
+#define IDC_SHOW_SRC_COLUMNS_CHECK      1044
 #define IDC_MODIFIED_DATE               1045
 #define IDC_CREATED_DATE                1046
 #define IDC_ACCESSED_DATE               1047
