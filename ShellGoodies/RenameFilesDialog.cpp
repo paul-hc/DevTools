@@ -177,14 +177,19 @@ bool CRenameFilesDialog::HasDestPaths( void ) const
 	return utl::Any( m_rRenameItems, std::mem_fun( &CRenameItem::HasDestPath ) );
 }
 
+const CEnumTags& CRenameFilesDialog::GetTags_Mode( void )
+{
+	static const CEnumTags s_modeTags( _T("&Make Names|Rena&me|Roll &Back|Roll &Fwd") );
+	return s_modeTags;
+}
+
 void CRenameFilesDialog::SwitchMode( Mode mode ) override
 {
 	m_mode = mode;
 	if ( nullptr == m_hWnd )
 		return;
 
-	static const CEnumTags modeTags( _T("&Make Names|Rena&me|Roll &Back|Roll &Fwd") );
-	UpdateOkButton( modeTags.FormatUi( m_mode ) );
+	UpdateOkButton( GetTags_Mode().FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
 	{
@@ -343,7 +348,9 @@ void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, 
 			rText = utl::GetSafeCode( m_selData.GetCaretItem() );
 			break;
 		case ID_CMD_RESET_DESTINATIONS:
-			rText = str::Format( _T("Rollback to default destination the %d selected item(s)"), m_selData.GetSelItems().size() );
+			rText = _T("Rollback to initial destination name");
+			if ( !m_selData.GetSelItems().empty() )
+				rText += str::Format( _T(": %d selected item(s)"), m_selData.GetSelItems().size() );
 			break;
 		default:
 			__super::QueryTooltipText( rText, cmdId, pTooltip );

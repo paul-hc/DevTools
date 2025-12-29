@@ -43,6 +43,8 @@ protected:
 
 	virtual void SwitchMode( Mode mode );
 private:
+	static const CEnumTags& GetTags_Mode( void );
+
 	void Construct( void );
 
 	bool TouchFiles( void );

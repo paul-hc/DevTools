@@ -388,6 +388,12 @@ bool CFindDuplicatesDialog::ExecuteDuplicatesCmd( utl::ICommand* pDupsCmd )
 	return SafeExecuteCmd( pDupsCmd );
 }
 
+const CEnumTags& CFindDuplicatesDialog::GetTags_Mode( void )
+{
+	static const CEnumTags s_modeTags( _T("&Search|Delete...|Roll &Back|Roll &Fwd") );
+	return s_modeTags;
+}
+
 void CFindDuplicatesDialog::SwitchMode( Mode mode )
 {
 	m_mode = mode;
@@ -395,8 +401,7 @@ void CFindDuplicatesDialog::SwitchMode( Mode mode )
 		return;
 
 	static const UINT s_okIconId[] = { ID_FIND_DUPLICATE_FILES, ID_DELETE_DUPLICATES, 0, 0 };
-	static const CEnumTags modeTags( _T("&Search|Delete...|Roll &Back|Roll &Fwd") );
-	UpdateOkButton( modeTags.FormatUi( m_mode ), s_okIconId[ m_mode ] );
+	UpdateOkButton( GetTags_Mode().FormatUi( m_mode ), s_okIconId[ m_mode ] );
 
 	static const UINT ctrlIds[] =
 	{

@@ -24,6 +24,7 @@ class CRenameItem;
 class CDisplayFilenameAdapter;
 class CRenameService;
 class CPickDataset;
+class CEnumTags;
 
 
 class CRenameFilesDialog : public CFileEditorBaseDialog
@@ -57,6 +58,8 @@ protected:
 
 	virtual void SwitchMode( Mode mode ) override;
 private:
+	static const CEnumTags& GetTags_Mode( void );
+
 	void UpdateFormatLabel( void );
 	void UpdateSortOrderCombo( const ren::TSortingPair& sorting );
 	void UpdateFileListStatus( void );

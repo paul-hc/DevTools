@@ -127,14 +127,19 @@ bool CTouchFilesDialog::TouchFiles( void )
 	return false;
 }
 
+const CEnumTags& CTouchFilesDialog::GetTags_Mode( void )
+{
+	static const CEnumTags s_modeTags( _T("&Store|&Touch|Roll &Back|Roll &Fwd") );
+	return s_modeTags;
+}
+
 void CTouchFilesDialog::SwitchMode( Mode mode )
 {
 	m_mode = mode;
 	if ( nullptr == m_hWnd )
 		return;
 
-	static const CEnumTags modeTags( _T("&Store|&Touch|Roll &Back|Roll &Fwd") );
-	UpdateOkButton( modeTags.FormatUi( m_mode ) );
+	UpdateOkButton( GetTags_Mode().FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
 	{

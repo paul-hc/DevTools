@@ -46,6 +46,8 @@ protected:
 
 	virtual void SwitchMode( Mode mode );
 private:
+	static const CEnumTags& GetTags_Mode( void );
+
 	bool DeleteDuplicateFiles( void );
 	bool MoveDuplicateFiles( void );
 	bool ExecuteDuplicatesCmd( utl::ICommand* pCmd );
