@@ -21,7 +21,7 @@ public:
 
 	std::tstring FormatExecTitle( utl::Verbosity verbosity = utl::Detailed ) const;
 
-	utl::ISubject* GetSubject( void ) const { return m_pSubject; }
+	virtual utl::ISubject* GetSubject( void ) const override { return m_pSubject; }
 	void SetSubject( utl::ISubject* pSubject ) { m_pSubject = pSubject; }		// for serializable commands
 
 	template< typename SubjectType >

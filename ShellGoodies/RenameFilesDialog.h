@@ -34,6 +34,8 @@ public:
 	virtual ~CRenameFilesDialog();
 
 	const std::vector<CRenameItem*>& GetRenameItems( void ) const { return m_rRenameItems; }
+	const std::vector<CRenameItem*>* GetCmdSelItems( void ) const;
+	const std::vector<CRenameItem*>& GetTargetRenameItems( void ) const;
 
 	bool IsInitialized( void ) const { return m_isInitialized; }
 	bool HasDestPaths( void ) const;
@@ -45,6 +47,7 @@ protected:
 	// IFileEditor interface (partial)
 	virtual void PostMakeDest( bool silent = false ) override;
 	virtual void PopStackTop( svc::StackType stackType ) override;
+	virtual void OnExecuteCmd( utl::ICommand* pCmd ) override;
 
 	// utl::IObserver interface (via IFileEditor)
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
@@ -62,6 +65,7 @@ private:
 
 	void UpdateFormatLabel( void );
 	void UpdateSortOrderCombo( const ren::TSortingPair& sorting );
+	void UpdateTargetScopeButton( void );
 	void UpdateFileListStatus( void );
 	bool PromptRenameCustomSortOrder( void ) const;
 
@@ -105,10 +109,12 @@ private:
 	persist CHostToolbarCtrl<CHistoryComboBox> m_formatCombo;
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
-	CHostToolbarCtrl<CStatusStatic> m_fileListStatic;
+	CLabelDivider m_filesLabelDivider;
+	CHostToolbarCtrl<CStatusStatic> m_fileStatsStatic;
 	CHostToolbarCtrl<CTextEdit> m_currFolderEdit;
 	CFrameHostCtrl<CButton> m_showExtButton;
 	CFrameHostCtrl<CEnumComboBox> m_sortOrderCombo;
+	CFrameHostCtrl<CButton> m_targetSelItemsButton;
 	CSplitPushButton m_capitalizeButton;
 	persist CEnumSplitButton m_changeCaseButton;
 	persist CHistoryComboBox m_delimiterSetCombo;
@@ -137,6 +143,7 @@ protected:
 	afx_msg void OnToggle_ShowExtension( void );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnCbnSelChange_SortOrder( void );
+	afx_msg void OnToggle_TargetSelItems( void );
 
 	afx_msg void On_SelItems_ResetDestFile( void );
 	afx_msg void OnUpdate_SelItems_ResetDestFile( CCmdUI* pCmdUI );

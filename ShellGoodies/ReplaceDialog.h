@@ -8,6 +8,7 @@
 
 
 interface IFileEditor;
+class CRenameItem;
 class CRenameService;
 class CPickDataset;
 
@@ -15,7 +16,7 @@ class CPickDataset;
 class CReplaceDialog : public CLayoutDialog
 {
 public:
-	CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc, const std::tstring& findWhat = str::GetEmpty() );
+	CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc, const std::tstring& findWhat = str::GetEmpty(), const std::vector<CRenameItem*>* pSelItems = nullptr );
 	virtual ~CReplaceDialog();
 
 	bool Execute( void );
@@ -38,6 +39,7 @@ private:
 private:
 	IFileEditor* m_pParentEditor;
 	const CRenameService* m_pRenSvc;
+	const std::vector<CRenameItem*>* m_pSelItems;
 
 	std::tstring m_findWhat;
 	std::tstring m_replaceWith;

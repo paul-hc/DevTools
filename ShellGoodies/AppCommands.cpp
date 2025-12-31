@@ -66,6 +66,22 @@ namespace cmd
 		return nullptr == pCmd;
 	}
 
+	bool HasSelItemsTarget( const utl::ICommand* pCmd )
+	{
+		if ( const cmd::IFileDetailsCmd* pFileCmd = dynamic_cast<const cmd::IFileDetailsCmd*>( pCmd ) )
+		{
+			if ( pFileCmd->HasSelItems() )
+				return true;
+		}
+		else if ( const CMacroCommand* pMacroCmd = dynamic_cast<const CMacroCommand*>( pCmd ) )
+		{	// recurse in sub-commands
+			const std::vector<utl::ICommand*>& subCommands = pMacroCmd->GetSubCommands();
+			return std::any_of( subCommands.begin(), subCommands.end(), &HasSelItemsTarget );
+		}
+
+		return false;
+	}
+
 
 	// command formatting
 

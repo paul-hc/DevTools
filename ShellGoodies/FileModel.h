@@ -79,7 +79,10 @@ public:
 	utl::ICommand* MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter,
 											  const std::vector<CRenameItem*>* pSelItems = nullptr ) throws_( CRuntimeException );
 
-	bool PromptExtensionChanges( const std::vector<fs::CPath>& destPaths ) const;
+	bool PromptExtensionChanges( const std::vector<CRenameItem*>& renameItems, const std::vector<fs::CPath>& destPaths ) const;
+
+	app::TargetScope GetTargetScope( void ) const { return m_targetScope; }
+	bool SetTargetScope( app::TargetScope targetScope ) { return utl::ModifyValue( m_targetScope, targetScope ); }
 
 	const ren::TSortingPair& GetRenameSorting( void ) const { return m_renameSorting; }
 	void SetRenameSorting( const ren::TSortingPair& renameSorting );
@@ -87,7 +90,7 @@ public:
 
 	// TOUCH
 	bool CopyClipSourceFileStates( CWnd* pWnd ) const;
-	utl::ICommand* MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_( CRuntimeException );
+	utl::ICommand* MakeClipPasteDestFileStatesCmd( CWnd* pWnd, const std::vector<CTouchItem*>* pSelItems = nullptr ) throws_( CRuntimeException );
 private:
 	static std::tstring FormatPath( const fs::CPath& filePath, fmt::PathFormat format, const CDisplayFilenameAdapter* pDisplayAdapter );
 
@@ -135,6 +138,7 @@ private:
 	fs::CPath m_commonParentPath;					// for paths in multiple directories
 	std::vector<fs::CPath> m_srcFolderPaths;		// all folders referenced
 
+	/*persist*/ app::TargetScope m_targetScope;
 	persist ren::TSortingPair m_renameSorting;
 
 	// lazy init

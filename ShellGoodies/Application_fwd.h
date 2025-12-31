@@ -12,6 +12,11 @@ namespace app
 	enum CustomColors { ColorErrorBk = color::PastelPink, ColorWarningText = color::SolidOrange };
 
 	svc::ICommandService* GetCmdSvc( void );
+
+
+	enum TargetScope { TargetAllItems, TargetSelectedItems };
+
+	const CEnumTags& GetTags_TargetScope( void );
 }
 
 
@@ -26,6 +31,12 @@ namespace ren
 	enum SortBy { RecordDefault = -1, SrcPath, SrcSize, SrcDateModify, DestPath, SrcPathDirsFirst = RecordDefault };
 
 	typedef std::pair<SortBy, bool> TSortingPair;
+}
+
+
+namespace reg
+{
+	extern const TCHAR section_Settings[];		// "Settings"
 }
 
 

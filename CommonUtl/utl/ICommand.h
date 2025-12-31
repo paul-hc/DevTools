@@ -18,6 +18,8 @@ namespace utl
 	interface ICommand : public IMessage
 		, public utl::IMemoryManaged
 	{
+		virtual utl::ISubject* GetSubject( void ) const = 0;
+
 		virtual bool Execute( void ) = 0;
 		virtual bool Unexecute( void ) = 0;
 		virtual bool IsUndoable( void ) const = 0;

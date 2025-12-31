@@ -37,18 +37,20 @@ protected:
 class CRenameItem;
 
 
+// editing rename items: change CRenameItem::m_destPath (doesn't do any file renaming)
+//
 class CChangeDestPathsCmd : public CBaseChangeDestCmd
 {
 public:
 	CChangeDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>* pSelItems, const std::vector<fs::CPath>& newDestPaths, const std::tstring& cmdTag = std::tstring() );
 	virtual ~CChangeDestPathsCmd();
 
-	bool HasSelItems( void ) const;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
 	std::vector<CRenameItem*> MakeSelItems( void ) const;
 
 	// cmd::IFileDetailsCmd
-	virtual size_t GetFileCount( void ) const { return m_srcPaths.size(); }
-	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
+	virtual bool HasSelItems( void ) const override;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
+	virtual size_t GetFileCount( void ) const override { return m_srcPaths.size(); }
+	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
 private:
 	// base overrides
 	virtual ChangeType EvalChange( void ) const override;
@@ -63,7 +65,7 @@ private:
 
 namespace cmd
 {
-	CChangeDestPathsCmd* MakeResetDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems );
+	CChangeDestPathsCmd* MakeResetSelDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems );
 }
 
 
@@ -73,18 +75,25 @@ namespace cmd
 class CTouchItem;
 
 
+// editing file states: change CTouchItem::m_destState (doesn't do any file operations)
+//
 class CChangeDestFileStatesCmd : public CBaseChangeDestCmd
 {
 public:
-	CChangeDestFileStatesCmd( CFileModel* pFileModel, std::vector<fs::CFileState>& rNewDestStates, const std::tstring& cmdTag = std::tstring() );
+	CChangeDestFileStatesCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>* pSelItems, const std::vector<fs::CFileState>& newDestStates, const std::tstring& cmdTag = std::tstring() );
+
+	std::vector<CTouchItem*> MakeSelItems( void ) const;
 
 	// cmd::IFileDetailsCmd
-	virtual size_t GetFileCount( void ) const { return m_srcStates.size(); }
-	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const;
+	virtual bool HasSelItems( void ) const override;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
+	virtual size_t GetFileCount( void ) const override { return m_srcStates.size(); }
+	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
 private:
 	// base overrides
 	virtual ChangeType EvalChange( void ) const override;
 	virtual bool ToggleExecute( void ) override;
+
+	CTouchItem* GetTouchItemAt( size_t posSrcState ) const;
 private:
 	std::vector<fs::CFileState> m_srcStates;
 	std::vector<fs::CFileState> m_destStates;

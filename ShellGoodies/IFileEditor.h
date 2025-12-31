@@ -20,6 +20,7 @@ interface IFileEditor : public utl::IMemoryManaged
 	virtual void PostMakeDest( bool silent = false ) = 0;
 
 	virtual void PopStackTop( svc::StackType stackType ) = 0;
+	virtual void OnExecuteCmd( utl::ICommand* pCmd ) = 0;
 };
 
 

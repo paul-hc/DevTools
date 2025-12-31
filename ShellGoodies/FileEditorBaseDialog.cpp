@@ -83,6 +83,9 @@ void CFileEditorBaseDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdI
 
 bool CFileEditorBaseDialog::SafeExecuteCmd( utl::ICommand* pCmd )
 {
+	ASSERT_PTR( pCmd );
+	OnExecuteCmd( pCmd );
+
 	return m_pFileModel->SafeExecuteCmd( this, pCmd );
 }
 

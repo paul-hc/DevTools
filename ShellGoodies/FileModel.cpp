@@ -35,6 +35,7 @@
 
 namespace reg
 {
+	static const TCHAR entry_targetScope[] = _T("TargetScope");
 	static const TCHAR entry_sortBy[] = _T("SortBy");
 	static const TCHAR entry_sortAscending[] = _T("SortAscending");
 }
@@ -44,10 +45,12 @@ const std::tstring CFileModel::section_filesSheet = _T("RenameDialog\\FilesSheet
 
 CFileModel::CFileModel( svc::ICommandService* pCmdSvc )
 	: m_pCmdSvc( pCmdSvc )
+	, m_targetScope( app::TargetAllItems )
 	, m_renameSorting( ren::RecordDefault, true )
 {
 	ASSERT_PTR( m_pCmdSvc );
 
+	//m_targetScope = static_cast<app::TargetScope>( AfxGetApp()->GetProfileInt( reg::section_Settings, reg::entry_targetScope, m_targetScope ) );
 	m_renameSorting.first = static_cast<ren::SortBy>( AfxGetApp()->GetProfileInt( section_filesSheet.c_str(), reg::entry_sortBy, m_renameSorting.first ) );
 	m_renameSorting.second = AfxGetApp()->GetProfileInt( section_filesSheet.c_str(), reg::entry_sortAscending, m_renameSorting.second ) != FALSE;
 }
@@ -70,6 +73,7 @@ void CFileModel::Clear( void )
 
 void CFileModel::RegSave( void )
 {
+	//AfxGetApp()->WriteProfileInt( reg::section_Settings, reg::entry_targetScope, m_targetScope );
 	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortBy, m_renameSorting.first );
 	AfxGetApp()->WriteProfileInt( section_filesSheet.c_str(), reg::entry_sortAscending, m_renameSorting.second );
 }
@@ -246,7 +250,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 
 	static const CRuntimeException s_noDestExc( _T("No destination file paths available to paste.") );
 
-	const std::vector<CRenameItem*>& renameItems = pSelItems != nullptr ? *pSelItems : m_renameItems;
+	const std::vector<CRenameItem*>& targetRenameItems = pSelItems != nullptr ? *pSelItems : m_renameItems;
 	std::vector<std::tstring> fileNames;
 
 	if ( !CTextClipboard::CanPasteText() || !CTextClipboard::PasteFromLines( fileNames, pWnd->GetSafeHwnd() ) )
@@ -266,15 +270,15 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 
 	if ( fileNames.empty() )
 		throw s_noDestExc;
-	else if ( renameItems.size() != fileNames.size() )
-		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."), fileNames.size(), renameItems.size() ) );
+	else if ( targetRenameItems.size() != fileNames.size() )
+		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."), fileNames.size(), targetRenameItems.size() ) );
 
-	std::vector<fs::CPath> destPaths; destPaths.reserve( renameItems.size() );
+	std::vector<fs::CPath> destPaths; destPaths.reserve( targetRenameItems.size() );
 	bool anyChanges = false;
 
 	for ( size_t i = 0; i != fileNames.size(); ++i )
 	{
-		const CRenameItem* pRenameItem = renameItems[i];
+		const CRenameItem* pRenameItem = targetRenameItems[i];
 		fs::CPath newFilePath = pDisplayAdapter->ParsePath( fileNames[i], pRenameItem->GetSafeDestPath() );
 
 		if ( newFilePath.Get() != pRenameItem->GetDestPath().Get() )		// case-sensitive string compare
@@ -286,26 +290,26 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 	if ( !anyChanges )
 		return nullptr;
 
-	if ( !PromptExtensionChanges( destPaths ) )
+	if ( !PromptExtensionChanges( targetRenameItems, destPaths ) )
 		return nullptr;
 
 	return new CChangeDestPathsCmd( this, pSelItems, destPaths, _T("Paste destination file paths from clipboard") );
 }
 
-bool CFileModel::PromptExtensionChanges( const std::vector<fs::CPath>& destPaths ) const
+bool CFileModel::PromptExtensionChanges( const std::vector<CRenameItem*>& renameItems, const std::vector<fs::CPath>& destPaths ) const
 {
-	ASSERT( m_renameItems.size() == destPaths.size() );
+	ASSERT( renameItems.size() == destPaths.size() );
 
 	size_t extChangeCount = 0;
 
-	for ( size_t i = 0; i != m_renameItems.size(); ++i )
-		if ( CDisplayFilenameAdapter::IsExtensionChange( m_renameItems[ i ]->GetSafeDestPath(), destPaths[ i ] ) )
+	for ( size_t i = 0; i != renameItems.size(); ++i )
+		if ( CDisplayFilenameAdapter::IsExtensionChange( renameItems[ i ]->GetSafeDestPath(), destPaths[ i ] ) )
 			++extChangeCount;
 
 	if ( extChangeCount != 0 )
 	{
 		std::tstring prefix = str::Format( _T("You are about to change the extension on %s files!\n\nDo you want to proceed?"),
-			m_renameItems.size() == extChangeCount ? _T("all") : num::FormatNumber( extChangeCount ).c_str() );
+										   renameItems.size() == extChangeCount ? _T("all") : num::FormatNumber( extChangeCount ).c_str() );
 
 		if ( ui::MessageBox( prefix, MB_ICONWARNING | MB_YESNO ) != IDYES )
 			return false;
@@ -350,7 +354,7 @@ bool CFileModel::CopyClipSourceFileStates( CWnd* pWnd ) const
 	return CTextClipboard::CopyToLines( sourcePaths, pWnd->GetSafeHwnd() );
 }
 
-utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_( CRuntimeException )
+utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd, const std::vector<CTouchItem*>* pSelItems /*= nullptr*/ ) throws_( CRuntimeException )
 {
 	REQUIRE( !m_touchItems.empty() );		// should be initialized
 
@@ -391,7 +395,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_(
 		destFileStates.push_back( newFileState );
 	}
 
-	return anyChanges ? new CChangeDestFileStatesCmd( this, destFileStates, _T("Paste destination file attribute states from clipboard") ) : nullptr;
+	return anyChanges ? new CChangeDestFileStatesCmd( this, pSelItems, destFileStates, _T("Paste destination file attribute states from clipboard") ) : nullptr;
 }
 
 

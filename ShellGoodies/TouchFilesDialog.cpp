@@ -109,6 +109,11 @@ void CTouchFilesDialog::Construct( void )
 	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_VOLUME_CHECK, CFile::volume ) );
 }
 
+const std::vector<CTouchItem*>* CTouchFilesDialog::GetCmdSelItems( void ) const
+{
+	return /*app::TargetSelectedItems == m_pFileModel->GetTargetScope() && !m_selData.GetSelItems().empty() ? &m_selData.GetSelItems() :*/ nullptr;
+}
+
 bool CTouchFilesDialog::TouchFiles( void )
 {
 	CFileService svc;
@@ -155,7 +160,7 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
 }
 
-void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
+void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ ) override
 {
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
@@ -164,7 +169,7 @@ void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 	SwitchMode( CommitFilesMode );
 }
 
-void CTouchFilesDialog::PopStackTop( svc::StackType stackType )
+void CTouchFilesDialog::PopStackTop( svc::StackType stackType ) override
 {
 	ASSERT( !IsRollMode() );
 
@@ -189,6 +194,12 @@ void CTouchFilesDialog::PopStackTop( svc::StackType stackType )
 	else
 		PopStackRunCrossEditor( stackType );		// end this dialog and execute the target dialog editor
 }
+
+void CTouchFilesDialog::OnExecuteCmd( utl::ICommand* pCmd )
+{
+	// TODO...
+}
+
 
 void CTouchFilesDialog::SetupDialog( void )
 {
@@ -327,7 +338,7 @@ utl::ICommand* CTouchFilesDialog::MakeChangeDestFileStatesCmd( void )
 		destFileStates.push_back( newFileState );
 	}
 
-	return anyChanges ? new CChangeDestFileStatesCmd( m_pFileModel, destFileStates ) : nullptr;
+	return anyChanges ? new CChangeDestFileStatesCmd( m_pFileModel, GetCmdSelItems(), destFileStates ) : nullptr;
 }
 
 bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const
@@ -339,7 +350,7 @@ bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const
 	return true;
 }
 
-void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
+void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
 {
 	pMessage;
 
@@ -359,7 +370,7 @@ void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 			CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 }
 
-void CTouchFilesDialog::ClearFileErrors( void )
+void CTouchFilesDialog::ClearFileErrors( void ) override
 {
 	m_errorItems.clear();
 
@@ -367,7 +378,7 @@ void CTouchFilesDialog::ClearFileErrors( void )
 		m_fileListCtrl.Invalidate();
 }
 
-void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg )
+void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override
 {
 	errMsg;
 
@@ -377,7 +388,7 @@ void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstrin
 	EnsureVisibleFirstError();
 }
 
-void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
+void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override
 {
 	pCtrl;
 	static const ui::CTextEffect s_modPathName( ui::Bold );
@@ -450,7 +461,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	}
 }
 
-void CTouchFilesDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const
+void CTouchFilesDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override
 {
 	rowKey, pCtrl;
 	switch ( subItem )
@@ -621,7 +632,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 	try
 	{
 		ClearFileErrors();
-		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( this ) );
+		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( this, GetCmdSelItems() ) );
 	}
 	catch ( CRuntimeException& e )
 	{

@@ -27,6 +27,7 @@
 #include "utl/UI/TaskDialog.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/VisualTheme.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "utl/UI/resource.h"
 
 #ifdef _DEBUG
@@ -61,6 +62,7 @@ namespace layout
 	{
 		{ IDC_FORMAT_COMBO, SizeX },
 
+		{ IDC_FILES_STATIC, SizeX },
 		{ IDC_FILES_SHEET, Size },
 		{ IDC_OUTCOME_INFO_STATUS, MoveY | SizeX },
 		{ IDC_CURR_FOLDER_STATIC, MoveY },
@@ -98,8 +100,9 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_ignoreExtension( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, true ) != FALSE )
 	, m_prevGenSeqCount( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCount, 1 ) )
 	, m_pDisplayFilenameAdapter( new CDisplayFilenameAdapter( m_ignoreExtension ) )
-	, m_formatCombo( ui::EditShinkHost_MateOnRight )
-	, m_fileListStatic( ui::EditShinkHost_MateOnRight )
+	, m_formatCombo( ui::EditShrinkHost_MateOnRight )
+	, m_filesLabelDivider( /*CLabelDivider::Instruction*/ )
+	, m_fileStatsStatic( ui::EditShrinkHost_MateOnRight )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
 	, m_delimiterSetCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_delimStatic( CThemeItem( L"EXPLORERBAR", vt::EBP_IEBARMENU, vt::EBM_NORMAL ) )
@@ -139,19 +142,35 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 		.AddButton( ID_SEQ_COUNT_FIND_NEXT )
 		.AddSeparator()
 		.AddButton( ID_SEQ_COUNT_AUTO_ADVANCE );
-	m_fileListStatic.GetMateToolbar()->GetStrip()
+
+	m_fileStatsStatic.GetMateToolbar()->GetStrip()
 		.AddButton( ID_CMD_RESET_DESTINATIONS );
+
 	m_currFolderEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_EDIT_COPY )
 		.AddButton( ID_BROWSE_FOLDER );
 
 	m_sortOrderCombo.SetTags( &ren::ui::GetTags_UiSortBy() );
-	m_showExtButton.SetFrameMargins( -2, -2 );		// draw the frame outside of the button, in the dialog area
+	m_showExtButton.SetFrameMargins( -2, -2 );			// draw the frame outside of the button, in the dialog area
+	m_targetSelItemsButton.SetFrameMargins( -3, -3 );	// draw the frame outside of the button, in the dialog area
 }
 
 CRenameFilesDialog::~CRenameFilesDialog()
 {
 	m_filesSheet.RemoveObserver( this );
+}
+
+const std::vector<CRenameItem*>* CRenameFilesDialog::GetCmdSelItems( void ) const
+{
+	return app::TargetSelectedItems == m_pFileModel->GetTargetScope() && !m_selData.GetSelItems().empty() ? &m_selData.GetSelItems() : nullptr;
+}
+
+const std::vector<CRenameItem*>& CRenameFilesDialog::GetTargetRenameItems( void ) const
+{
+	if ( const std::vector<CRenameItem*>* pSelItems = GetCmdSelItems() )
+		return *pSelItems;
+
+	return m_rRenameItems;
 }
 
 bool CRenameFilesDialog::RenameFiles( void )
@@ -251,6 +270,18 @@ void CRenameFilesDialog::PopStackTop( svc::StackType stackType ) override
 		PopStackRunCrossEditor( stackType );				// end this dialog and execute the target dialog editor
 }
 
+void CRenameFilesDialog::OnExecuteCmd( utl::ICommand* pCmd ) override
+{
+	if ( app::TargetSelectedItems == m_pFileModel->GetTargetScope() )
+		if ( cmd::HasSelItemsTarget( pCmd ) )
+			ui::FlashCtrlFrame( &m_targetSelItemsButton, app::ColorWarningText, 3 );
+
+	if ( m_pFileModel == pCmd->GetSubject() )
+		if ( m_pFileModel->GetRenameSorting().first != ren::RecordDefault )
+			ui::FlashCtrlFrame( &m_sortOrderCombo, app::ColorWarningText, 3 );
+}
+
+
 void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
 {
 	const cmd::CommandType cmdType = static_cast<cmd::CommandType>( utl::GetSafeTypeID( pMessage ) );
@@ -319,6 +350,9 @@ void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, 
 		case IDC_SORT_ORDER_COMBO:
 			rText = m_sortOrderCombo.GetTags()->FormatKey( m_sortOrderCombo.GetValue() );
 			break;
+		case IDC_TARGET_SEL_ITEMS_CHECK:
+			rText = app::GetTags_TargetScope().FormatKey( m_pFileModel->GetTargetScope() );
+			break;
 		case IDC_CHANGE_CASE_BUTTON:
 		{
 			static const std::vector<std::tstring> tooltips = str::LoadStrings( IDC_CHANGE_CASE_BUTTON );
@@ -343,9 +377,11 @@ void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, 
 			rText = utl::GetSafeCode( m_selData.GetCaretItem() );
 			break;
 		case ID_CMD_RESET_DESTINATIONS:
-			rText = _T("Rollback to initial destination name");
+			rText = _T("Reset to initial destination name");
 			if ( !m_selData.GetSelItems().empty() )
 				rText += str::Format( _T(": %d selected item(s)"), m_selData.GetSelItems().size() );
+			else
+				rText += str::Format( _T(" (no selected items)"), m_selData.GetSelItems().size() );
 			break;
 		default:
 			__super::QueryTooltipText( rText, cmdId, pTooltip );
@@ -364,7 +400,7 @@ void CRenameFilesDialog::UpdateFileListStatus( void )
 	if ( size_t selCount = m_selData.GetSelItems().size() )
 		message += str::Format( _T("  Selected %d items(s)."), selCount );
 
-	m_fileListStatic.SetWindowText( message );
+	m_fileStatsStatic.SetWindowText( message );
 
 	fs::CPath currFolderPath;
 
@@ -383,6 +419,11 @@ void CRenameFilesDialog::UpdateSortOrderCombo( const ren::TSortingPair& sorting 
 
 	m_sortOrderCombo.SetFrameColor( ren::ui::Default == sortBy ? CLR_NONE : app::ColorWarningText );
 	GetDlgItem( IDC_SORT_ORDER_STATIC )->Invalidate();
+}
+
+void CRenameFilesDialog::UpdateTargetScopeButton( void )
+{
+	m_targetSelItemsButton.SetFrameColor( app::TargetSelectedItems == m_pFileModel->GetTargetScope() ? app::ColorWarningText : CLR_NONE );
 }
 
 bool CRenameFilesDialog::PromptRenameCustomSortOrder( void ) const
@@ -426,9 +467,9 @@ CRenameItem* CRenameFilesDialog::FindItemWithKey( const fs::CPath& srcPath ) con
 
 void CRenameFilesDialog::MarkInvalidSrcItems( void )
 {
-	for ( std::vector<CRenameItem*>::const_iterator itRenameItem = m_rRenameItems.begin(); itRenameItem != m_rRenameItems.end(); ++itRenameItem )
-		if ( !( *itRenameItem )->GetSrcPath().FileExist() )
-			utl::AddUnique( m_errorItems, *itRenameItem );
+	for ( CRenameItem* pRenameItem: m_rRenameItems )
+		if ( !pRenameItem->GetSrcPath().FileExist() )
+			utl::AddUnique( m_errorItems, pRenameItem );
 }
 
 std::tstring CRenameFilesDialog::JoinErrorDestPaths( void ) const
@@ -489,10 +530,15 @@ bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter,
 	ASSERT_PTR( pSeqCount );
 	ASSERT_PTR( m_pRenSvc.get() );
 
+	const std::vector<CRenameItem*>& targetRenameItems = GetTargetRenameItems();
+
+	if ( targetRenameItems.empty() )
+		return false;
+
 	ClearFileErrors();
 
 	CPathRenamePairs renamePairs;
-	ren::MakePairsFromItems( &renamePairs, m_rRenameItems );
+	ren::MakePairsFromItems( &renamePairs, targetRenameItems );
 
 	CPathGenerator generator( &renamePairs, pathFormatter, *pSeqCount );
 	if ( !generator.GeneratePairs() )
@@ -503,7 +549,7 @@ bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter,
 	std::vector<fs::CPath> newDestPaths;
 	renamePairs.QueryDestPaths( std::back_inserter( newDestPaths ) );
 
-	return SafeExecuteCmd( new CChangeDestPathsCmd( m_pFileModel, nullptr, newDestPaths, _T("Generate destination file paths from template format") ) );
+	return SafeExecuteCmd( new CChangeDestPathsCmd( m_pFileModel, GetCmdSelItems(), newDestPaths, _T("Generate destination file paths from template format") ) );
 }
 
 void CRenameFilesDialog::AutoGenerateFiles( void )
@@ -545,10 +591,12 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
 	DDX_Control( pDX, IDC_SEQ_COUNT_EDIT, m_seqCountEdit );
 	m_seqCountToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
-	DDX_Control( pDX, IDC_OUTCOME_INFO_STATUS, m_fileListStatic );
+	DDX_Control( pDX, IDC_FILES_STATIC, m_filesLabelDivider );
+	DDX_Control( pDX, IDC_OUTCOME_INFO_STATUS, m_fileStatsStatic );
 	DDX_Control( pDX, IDC_CURR_FOLDER_EDIT, m_currFolderEdit );
 	DDX_Control( pDX, IDC_SHOW_EXTENSION_CHECK, m_showExtButton );
 	DDX_Control( pDX, IDC_SORT_ORDER_COMBO, m_sortOrderCombo );
+	DDX_Control( pDX, IDC_TARGET_SEL_ITEMS_CHECK, m_targetSelItemsButton );
 	DDX_Control( pDX, IDC_CAPITALIZE_BUTTON, m_capitalizeButton );
 	DDX_Control( pDX, IDC_CHANGE_CASE_BUTTON, m_changeCaseButton );
 	DDX_Control( pDX, IDC_DELIMITER_SET_COMBO, m_delimiterSetCombo );
@@ -574,6 +622,8 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 		m_seqCountEdit.SetNumericValue( m_prevGenSeqCount );
 		m_showExtButton.SetCheck( !m_ignoreExtension );			// checkbox has inverted logic
 		UpdateSortOrderCombo( m_pFileModel->GetRenameSorting() );
+		m_targetSelItemsButton.SetCheck( app::TargetSelectedItems == m_pFileModel->GetTargetScope() );
+		UpdateTargetScopeButton();
 		UpdateFormatLabel();
 		UpdateFileListStatus();
 
@@ -616,6 +666,7 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_AUTO_ADVANCE, OnUpdate_SeqCountAutoAdvance )
 	ON_BN_CLICKED( IDC_SHOW_EXTENSION_CHECK, OnToggle_ShowExtension )
 	ON_CBN_SELCHANGE( IDC_SORT_ORDER_COMBO, OnCbnSelChange_SortOrder )
+	ON_BN_CLICKED( IDC_TARGET_SEL_ITEMS_CHECK, OnToggle_TargetSelItems )
 	ON_COMMAND( ID_CMD_RESET_DESTINATIONS, On_SelItems_ResetDestFile )
 	ON_UPDATE_COMMAND_UI( ID_CMD_RESET_DESTINATIONS, OnUpdate_SelItems_ResetDestFile )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
@@ -674,8 +725,17 @@ void CRenameFilesDialog::OnOK( void ) override
 			}
 			else
 			{
-				ui::MessageBox( str::Format( IDS_INVALID_FORMAT, pathFormatter.GetFormat().GetPtr() ), MB_ICONERROR | MB_OK );
-				ui::TakeFocus( m_formatCombo );
+				if ( GetTargetRenameItems().empty() )
+				{
+					ui::MessageBox( _T("No items selected!\nPlease select the items to generate."), MB_ICONWARNING | MB_OK );
+					ui::FlashCtrlFrame( &m_targetSelItemsButton, app::ColorWarningText, 3 );
+				}
+				else
+				{
+					ui::MessageBox( str::Format( IDS_INVALID_FORMAT, pathFormatter.GetFormat().GetPtr() ), MB_ICONERROR | MB_OK );
+					ui::TakeFocus( m_formatCombo );
+					ui::FlashCtrlFrame( &m_formatCombo, app::ColorWarningText, 3 );
+				}
 			}
 			break;
 		}
@@ -820,12 +880,18 @@ void CRenameFilesDialog::OnCbnSelChange_SortOrder( void )
 		CSortRenameListCmd( m_pFileModel, nullptr, sorting ).Execute();
 }
 
+void CRenameFilesDialog::OnToggle_TargetSelItems( void )
+{
+	if ( m_pFileModel->SetTargetScope( BST_CHECKED == m_targetSelItemsButton.GetCheck() ? app::TargetSelectedItems : app::TargetAllItems ) )
+		UpdateTargetScopeButton();
+}
+
 void CRenameFilesDialog::On_SelItems_ResetDestFile( void )
 {
 	CommitLocalEdits();
 
 	if ( !m_selData.GetSelItems().empty() )
-		SafeExecuteCmd( cmd::MakeResetDestPathsCmd( m_pFileModel, m_selData.GetSelItems() ) );
+		SafeExecuteCmd( cmd::MakeResetSelDestPathsCmd( m_pFileModel, m_selData.GetSelItems() ) );
 }
 
 void CRenameFilesDialog::OnUpdate_SelItems_ResetDestFile( CCmdUI* pCmdUI )
@@ -844,7 +910,7 @@ void CRenameFilesDialog::OnBnClicked_PasteDestFiles( void )
 	try
 	{
 		ClearFileErrors();
-		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestPathsCmd( this, m_pDisplayFilenameAdapter.get(), nullptr ) );
+		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestPathsCmd( this, m_pDisplayFilenameAdapter.get(), GetCmdSelItems() ) );
 	}
 	catch ( CRuntimeException& exc )
 	{
@@ -868,7 +934,7 @@ void CRenameFilesDialog::OnBnClicked_CapitalizeDestFiles( void )
 	CommitLocalEdits();
 
 	CTitleCapitalizer capitalizer;
-	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::CapitalizeWords( &capitalizer ), _T("Title Case") ) );
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::CapitalizeWords( &capitalizer ), _T("Title Case"), GetCmdSelItems() ) );
 }
 
 void CRenameFilesDialog::OnSbnRightClicked_CapitalizeOptions( void )
@@ -893,12 +959,12 @@ void CRenameFilesDialog::OnBnClicked_ChangeCase( void )
 				return;
 	}
 
-	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::MakeCase( selCase ), cmdTag ) );
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::MakeCase( selCase ), cmdTag, GetCmdSelItems() ) );
 }
 
 void CRenameFilesDialog::OnBnClicked_ReplaceDestFiles( void )
 {
-	CReplaceDialog dlg( this, m_pRenSvc.get(), GetSelFindWhat() );
+	CReplaceDialog dlg( this, m_pRenSvc.get(), GetSelFindWhat(), GetCmdSelItems() );
 	dlg.Execute();
 }
 
@@ -914,7 +980,9 @@ void CRenameFilesDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 		return;
 	}
 
-	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ), str::Load( IDC_REPLACE_USER_DELIMS_BUTTON ) ) );
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ),
+														  str::Load( IDC_REPLACE_USER_DELIMS_BUTTON ),
+														  GetCmdSelItems() ) );
 }
 
 void CRenameFilesDialog::OnFieldChanged( void )
@@ -1044,32 +1112,33 @@ void CRenameFilesDialog::OnChangeDestPathsTool( UINT menuId )
 
 	utl::ICommand* pCmd = nullptr;
 	std::tstring cmdTag = str::Load( menuId );
+	const std::vector<CRenameItem*>* pSelItems = GetCmdSelItems();
 
 	switch ( menuId )
 	{
 		case ID_REPLACE_ALL_DELIMS:
-			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::GetAllDelimitersSet(), _T(" ") ), cmdTag );
+			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::GetAllDelimitersSet(), _T(" ") ), cmdTag, pSelItems );
 			break;
 		case ID_REPLACE_UNICODE_SYMBOLS:
-			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceMultiDelimiterSets( &text_tool::GetStdUnicodeToAnsiPairs() ), cmdTag );
+			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceMultiDelimiterSets( &text_tool::GetStdUnicodeToAnsiPairs() ), cmdTag, pSelItems );
 			break;
 		case ID_SINGLE_WHITESPACE:
-			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::SingleWhitespace(), cmdTag );
+			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::SingleWhitespace(), cmdTag, pSelItems );
 			break;
 		case ID_REMOVE_WHITESPACE:
-			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::RemoveWhitespace(), cmdTag );
+			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::RemoveWhitespace(), cmdTag, pSelItems );
 			break;
 		case ID_DASH_TO_SPACE:
-			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::s_dashes, _T(" ") ), cmdTag );
+			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::s_dashes, _T(" ") ), cmdTag, pSelItems );
 			break;
 		case ID_SPACE_TO_DASH:
-			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( _T(" "), _T("-") ), cmdTag );
+			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( _T(" "), _T("-") ), cmdTag, pSelItems );
 			break;
 		case ID_UNDERBAR_TO_SPACE:
-			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::s_underscores, _T(" ") ), cmdTag );
+			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::s_underscores, _T(" ") ), cmdTag, pSelItems );
 			break;
 		case ID_SPACE_TO_UNDERBAR:
-			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( _T(" "), _T("_") ), cmdTag );
+			pCmd = m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( _T(" "), _T("_") ), cmdTag, pSelItems );
 			break;
 		default:
 			ASSERT( false );
@@ -1083,11 +1152,11 @@ void CRenameFilesDialog::OnEnsureUniformNumPadding( void )
 	CommitLocalEdits();
 
 	std::vector<std::tstring> destFnames;
-	ren::QueryDestFnames( destFnames, m_rRenameItems );
+	ren::QueryDestFnames( destFnames, GetTargetRenameItems() );
 
 	num::EnsureUniformZeroPadding( destFnames );
 
-	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( destFnames.begin() ), str::Load( ID_ENSURE_UNIFORM_ZERO_PADDING ) ) );
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( destFnames.begin() ), str::Load( ID_ENSURE_UNIFORM_ZERO_PADDING ), GetCmdSelItems() ) );
 }
 
 void CRenameFilesDialog::OnGenerateNumericSequence( void )
@@ -1095,13 +1164,13 @@ void CRenameFilesDialog::OnGenerateNumericSequence( void )
 	CommitLocalEdits();
 
 	std::vector<std::tstring> destFnames;
-	ren::QueryDestFnames( destFnames, m_rRenameItems );
+	ren::QueryDestFnames( destFnames, GetTargetRenameItems() );
 
 	try
 	{
 		num::GenerateNumbersInSequence( destFnames );
 
-		SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( destFnames.begin() ), str::Load( ID_GENERATE_NUMERIC_SEQUENCE ) ) );
+		SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( destFnames.begin() ), str::Load( ID_GENERATE_NUMERIC_SEQUENCE ), GetCmdSelItems() ) );
 	}
 	catch ( CRuntimeException& exc )
 	{

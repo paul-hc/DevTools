@@ -83,13 +83,15 @@ CChangeDestPathsCmd::~CChangeDestPathsCmd()
 {
 }
 
-bool CChangeDestPathsCmd::HasSelItems( void ) const
+bool CChangeDestPathsCmd::HasSelItems( void ) const override
 {
 	return m_srcPaths.size() < m_pFileModel->GetRenameItems().size();
 }
 
 std::vector<CRenameItem*> CChangeDestPathsCmd::MakeSelItems( void ) const
 {
+	REQUIRE( HasSelItems() );
+
 	std::vector<CRenameItem*> selItems;
 
 	utl::transform( m_srcPaths, selItems, [this]( const fs::CPath& srcPath ) { return m_pFileModel->FindRenameItem( srcPath ); } );
@@ -141,7 +143,7 @@ bool CChangeDestPathsCmd::ToggleExecute( void ) override
 	return true;
 }
 
-void CChangeDestPathsCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const
+void CChangeDestPathsCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override
 {
 	ASSERT( m_srcPaths.size() == m_destPaths.size() );
 
@@ -165,30 +167,53 @@ CRenameItem* CChangeDestPathsCmd::GetRenameItemAt( size_t posSrcPath ) const
 
 namespace cmd
 {
-	CChangeDestPathsCmd* MakeResetDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems )
+	CChangeDestPathsCmd* MakeResetSelDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems )
 	{
 		std::vector<fs::CPath> newDestPaths;
 
 		utl::transform( selItems, newDestPaths, func::AsSrcPath() );
-		return new CChangeDestPathsCmd( pFileModel, &selItems, newDestPaths, str::Format( _T("Rollback %d selected items to original"), selItems.size() ) );
+		return new CChangeDestPathsCmd( pFileModel, &selItems, newDestPaths, str::Format( _T("Reset %d selected items to original"), selItems.size() ) );
 	}
 }
 
 
 // CChangeDestFileStatesCmd implementation
 
-CChangeDestFileStatesCmd::CChangeDestFileStatesCmd( CFileModel* pFileModel, std::vector<fs::CFileState>& rNewDestStates, const std::tstring& cmdTag /*= std::tstring()*/ )
+CChangeDestFileStatesCmd::CChangeDestFileStatesCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>* pSelItems, const std::vector<fs::CFileState>& newDestStates,
+													const std::tstring& cmdTag /*= std::tstring()*/ )
 	: CBaseChangeDestCmd( cmd::ChangeDestFileStates, pFileModel, cmdTag )
 {
 	REQUIRE( !m_pFileModel->GetTouchItems().empty() );		// should be initialized
-	REQUIRE( m_pFileModel->GetTouchItems().size() == rNewDestStates.size() );
 
-	m_srcStates.reserve( m_pFileModel->GetTouchItems().size() );
-	for ( std::vector<CTouchItem*>::const_iterator itItem = m_pFileModel->GetTouchItems().begin(); itItem != m_pFileModel->GetTouchItems().end(); ++itItem )
-		m_srcStates.push_back( ( *itItem )->GetSrcState() );
+	if ( nullptr == pSelItems )
+	{	// all files constructor
+		REQUIRE( m_pFileModel->GetTouchItems().size() == newDestStates.size() );
+		pSelItems = &m_pFileModel->GetTouchItems();
+	}
+	else
+	{	// selected files constructor
+		REQUIRE( !pSelItems->empty() && pSelItems->size() <= m_pFileModel->GetTouchItems().size() );
+		REQUIRE( pSelItems->size() == newDestStates.size() );
+		REQUIRE( utl::ContainsSubSet( m_pFileModel->GetTouchItems(), *pSelItems ) );
+	}
 
-	m_destStates.swap( rNewDestStates );
+	utl::transform( *pSelItems, m_srcStates, func::AsSrcState() );
 	ENSURE( m_srcStates.size() == m_destStates.size() );
+}
+
+bool CChangeDestFileStatesCmd::HasSelItems( void ) const override
+{
+	return m_srcStates.size() < m_pFileModel->GetTouchItems().size();
+}
+
+std::vector<CTouchItem*> CChangeDestFileStatesCmd::MakeSelItems( void ) const
+{
+	REQUIRE( HasSelItems() );
+
+	std::vector<CTouchItem*> selItems;
+
+	utl::transform( m_srcStates, selItems, [this]( const fs::CFileState& srcState ) { return m_pFileModel->FindTouchItem( srcState.m_fullPath ); } );
+	return selItems;
 }
 
 CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) const override
@@ -200,13 +225,13 @@ CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) cons
 
 	ChangeType changeType = Unchanged;
 
-	for ( size_t i = 0; i != m_pFileModel->GetTouchItems().size(); ++i )
+	for ( size_t pos = 0; pos != m_srcStates.size(); ++pos )
 	{
-		const CTouchItem* pTouchItem = m_pFileModel->GetTouchItems()[i];
+		const CTouchItem* pTouchItem = GetTouchItemAt( pos );
 
-		if ( pTouchItem->GetFilePath() != m_srcStates[i].m_fullPath )			// keys different?
+		if ( pTouchItem->GetFilePath() != m_srcStates[pos].m_fullPath )			// keys different?
 			return Expired;
-		else if ( pTouchItem->GetDestState() != m_destStates[i] )
+		else if ( pTouchItem->GetDestState() != m_destStates[pos] )
 			changeType = Changed;
 	}
 
@@ -219,11 +244,11 @@ bool CChangeDestFileStatesCmd::ToggleExecute( void ) override
 	switch ( changeType )
 	{
 		case Changed:
-			for ( size_t i = 0; i != m_pFileModel->GetTouchItems().size(); ++i )
+			for ( size_t pos = 0; pos != m_srcStates.size(); ++pos )
 			{
-				CTouchItem* pTouchItem = m_pFileModel->GetTouchItems()[i];
+				CTouchItem* pTouchItem = GetTouchItemAt( pos );
 
-				std::swap( pTouchItem->RefDestState(), m_destStates[i] );		// from now on m_destStates stores OldDestStates
+				std::swap( pTouchItem->RefDestState(), m_destStates[pos] );		// from now on m_destStates stores OldDestStates
 			}
 			break;
 		case Expired:
@@ -244,6 +269,16 @@ void CChangeDestFileStatesCmd::QueryDetailLines( std::vector<std::tstring>& rLin
 
 	for ( size_t i = 0; i != m_srcStates.size(); ++i )
 		rLines.push_back( fmt::FormatTouchEntry( m_srcStates[i], m_destStates[i] ) );
+}
+
+CTouchItem* CChangeDestFileStatesCmd::GetTouchItemAt( size_t posSrcState ) const
+{
+	REQUIRE( posSrcState < m_srcStates.size() );
+
+	if ( HasSelItems() )
+		return m_pFileModel->FindTouchItem( m_srcStates[ posSrcState ].m_fullPath );
+
+	return m_pFileModel->GetTouchItems()[ posSrcState ];
 }
 
 
@@ -267,7 +302,7 @@ CResetDestinationsCmd::CResetDestinationsCmd( CFileModel* pFileModel )
 		for ( std::vector<CTouchItem*>::const_iterator itTouchItem = pFileModel->GetTouchItems().begin(); itTouchItem != pFileModel->GetTouchItems().end(); ++itTouchItem )
 			destStates.push_back( ( *itTouchItem )->GetSrcState() );
 
-		AddCmd( new CChangeDestFileStatesCmd( pFileModel, destStates, m_userInfo ) );
+		AddCmd( new CChangeDestFileStatesCmd( pFileModel, nullptr, destStates, m_userInfo ) );
 	}
 }
 

@@ -25,23 +25,26 @@ class CTouchFilesDialog : public CFileEditorBaseDialog
 public:
 	CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CTouchFilesDialog();
+
+	const std::vector<CTouchItem*>* GetCmdSelItems( void ) const;
 protected:
 	// IFileEditor interface
-	virtual void PostMakeDest( bool silent = false );
-	virtual void PopStackTop( svc::StackType stackType );
+	virtual void PostMakeDest( bool silent = false ) override;
+	virtual void PopStackTop( svc::StackType stackType ) override;
+	virtual void OnExecuteCmd( utl::ICommand* pCmd ) override;
 
 	// utl::IObserver interface (via IFileEditor)
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
 
 	// cmd::IErrorObserver interface (via IFileEditor)
-	virtual void ClearFileErrors( void );
-	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
+	virtual void ClearFileErrors( void ) override;
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override;
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
-	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override;
+	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override;
 
-	virtual void SwitchMode( Mode mode );
+	virtual void SwitchMode( Mode mode ) override;
 private:
 	static const CEnumTags& GetTags_Mode( void );
 

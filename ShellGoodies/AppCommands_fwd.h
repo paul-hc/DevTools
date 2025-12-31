@@ -34,6 +34,7 @@ namespace cmd
 
 	interface IFileDetailsCmd
 	{
+		virtual bool HasSelItems( void ) const = 0;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
 		virtual size_t GetFileCount( void ) const = 0;
 		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const = 0;
 	};
@@ -42,6 +43,8 @@ namespace cmd
 	{
 		virtual bool IsValid( void ) const = 0;
 		virtual const CTime& GetTimestamp( void ) const = 0;
+
+		virtual bool HasSelItems( void ) const override { return false; }
 	};
 
 	interface IErrorObserver
@@ -56,6 +59,7 @@ namespace cmd
 {
 	bool IsPersistentCmd( const utl::ICommand* pCmd );		// some persistent commands are also editor-specific file action commands
 	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
+	bool HasSelItemsTarget( const utl::ICommand* pCmd );	// changing item destination on a sub-set of selected items?
 }
 
 

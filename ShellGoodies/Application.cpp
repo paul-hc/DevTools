@@ -15,6 +15,7 @@
 #endif
 
 #include "utl/UI/BaseApp.hxx"
+#include "Application_fwd.h"
 
 
 CApplication g_mfcApp;				// the global singleton MFC CWinApp
@@ -22,7 +23,7 @@ CApplication g_mfcApp;				// the global singleton MFC CWinApp
 
 namespace reg
 {
-	static const TCHAR section_Settings[] = _T("Settings");
+	const TCHAR section_Settings[] = _T("Settings");
 	static const TCHAR entry_useInputFileListPath[] = _T("UseInputFileListPath");
 }
 
@@ -48,6 +49,13 @@ namespace app
 	svc::ICommandService* GetCmdSvc( void )
 	{
 		return g_mfcApp.GetCommandService();
+	}
+
+	const CEnumTags& app::GetTags_TargetScope( void )
+	{
+		static const TCHAR s_keyTags[] = _T("Change all files (default)|Change only selected files");
+		static const CEnumTags s_tags( _T("All items (default)|Selected items"), s_keyTags );
+		return s_tags;
 	}
 }
 
