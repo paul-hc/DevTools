@@ -31,6 +31,8 @@ protected:
 	static CFont* GetMarlettFont( void );
 private:
 	void PaintImpl( CDC* pDC, const CRect& clientRect );
+protected:
+	DWORD m_origStyle;		// stored before modifying it to SS_OWNERDRAW
 private:
 	UINT m_dtFlags;
 

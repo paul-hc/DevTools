@@ -13,6 +13,7 @@
 CBufferedStatic::CBufferedStatic( void )
 	: CStatic()
 	, CContentFitBase( this )
+	, m_origStyle( UINT_MAX )
 	, m_dtFlags( UINT_MAX )
 {
 }
@@ -68,34 +69,39 @@ void CBufferedStatic::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
 
-	DWORD style = GetStyle();			// get prior to modify
+	m_origStyle = GetStyle();			// get prior to modify
 
 	if ( HasCustomFacet() )				// avoid making it owner drawn if themes are disabled
+	{
 		ModifyStyle( SS_TYPEMASK, SS_OWNERDRAW );
+		ModifyStyleEx( WS_EX_WINDOWEDGE | WS_EX_STATICEDGE | WS_EX_CLIENTEDGE | WS_EX_DLGMODALFRAME, 0, SWP_FRAMECHANGED | SWP_DRAWFRAME );		// clear any dialog-design border
+	}
 
 	if ( UINT_MAX == m_dtFlags )
 	{
 		m_dtFlags = DT_LEFT | DT_TOP /*| DT_NOPREFIX*/;
 
-		switch ( style & SS_TYPEMASK )
+		switch ( m_origStyle & SS_TYPEMASK )
 		{
 			case SS_CENTER:	m_dtFlags |= DT_CENTER; break;
 			case SS_RIGHT:	m_dtFlags |= DT_RIGHT; break;
 		}
 
-		switch ( style & SS_ELLIPSISMASK )
+		switch ( m_origStyle & SS_ELLIPSISMASK )
 		{
 			case SS_ENDELLIPSIS:	m_dtFlags |= DT_END_ELLIPSIS; break;
 			case SS_PATHELLIPSIS:	m_dtFlags |= DT_PATH_ELLIPSIS; break;
 			case SS_WORDELLIPSIS:	m_dtFlags |= DT_WORD_ELLIPSIS; break;
 		}
 
-		if ( HasFlag( style, SS_CENTERIMAGE ) )
+		if ( HasFlag( m_origStyle, SS_CENTERIMAGE ) )
 			m_dtFlags |= DT_VCENTER | DT_SINGLELINE;
 
-		if ( HasFlag( style, SS_NOPREFIX ) )
+		if ( HasFlag( m_origStyle, SS_NOPREFIX ) )
 			m_dtFlags |= DT_NOPREFIX;
 	}
+
+	OnContentChanged();		// if uses resize to fit the contents, do it now, before the layout initial rect is stored
 }
 
 void CBufferedStatic::DrawItem( DRAWITEMSTRUCT* pDrawItem )
@@ -116,6 +122,7 @@ void CBufferedStatic::DrawItem( DRAWITEMSTRUCT* pDrawItem )
 	CRect clientRect = pDrawItem->rcItem;
 	CDC* pDC = CDC::FromHandle( pDrawItem->hDC );
 	CMemoryDC memDC( *pDC, clientRect );					// minimize background flicker
+
 	PaintImpl( &memDC.GetDC(), clientRect );
 }
 

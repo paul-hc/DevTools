@@ -21,18 +21,19 @@ public:
 	bool SetState( State state );
 
 	// base overrides
-	virtual CSize ComputeIdealSize( void );
-	virtual CSize ComputeIdealTextSize( void );
+	virtual CSize ComputeIdealSize( void ) implement;
+	virtual CSize ComputeIdealTextSize( void ) override;
 protected:
 	CThemeItem::Status GetDrawStatus( void ) const;
 	CThemeItem* GetTextThemeItem( void );
 
 	// base overrides
-	virtual bool HasCustomFacet( void ) const;
-	virtual void Draw( CDC* pDC, const CRect& clientRect );
+	virtual bool HasCustomFacet( void ) const implement;
+	virtual void Draw( CDC* pDC, const CRect& clientRect ) implement;
 	virtual void DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus );
 
-	void DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::Status drawStatus, CDC* pDC, CRect& rRect, const std::tstring& text, UINT dtFlags,
+	CSize ComputeIdealTextSizeImpl( CDC* pDC );
+	void DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::Status drawStatus, CDC* pDC, IN OUT CRect* pRect, const std::tstring& text, UINT dtFlags,
 						   CFont* pFallbackFont = nullptr ) const;
 public:
 	CThemeItem m_bkgndItem;
@@ -68,6 +69,20 @@ public:
 	CRegularStatic( Style style = Static );
 
 	void SetStyle( Style style );
+};
+
+
+// a label static with a separator line (usually to fill the width of the dialog)
+//
+class CLabelDivider : public CRegularStatic
+{
+public:
+	CLabelDivider( Style style = Bold );
+protected:
+	// base overrides
+	virtual void Draw( CDC* pDC, const CRect& clientRect ) override;
+
+	enum Metrics { LineSpacingX = 7 };
 };
 
 
@@ -111,7 +126,7 @@ public:
 	void TrackMenu( CWnd* pTargetWnd, UINT menuId, int popupIndex, bool useCheckedBitmaps = false );
 protected:
 	// base overrides
-	virtual void DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus );
+	virtual void DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus ) override;
 private:
 	ui::PopupAlign m_popupAlign;
 

@@ -15,12 +15,13 @@ namespace ui
 	protected:
 		CContentFitBase( CWnd* pCtrl, int contentFitFlags = 0 );
 	public:
-		enum ContentFitFlags { FitHorizontally = 1 << 0, FitVertically = 1 << 1, FitAllowShrinking = 1 << 2 };
+		enum ContentFitFlags { FitWidth = 1 << 0, FitHeight = 1 << 1, FitAllowShrinking = 1 << 2 };
 
 		bool HasContentFitFlag( int contentFitFlag ) const { return HasFlag( m_contentFitFlags, contentFitFlag ); }
 		int GetContentFitFlags( void ) const { return m_contentFitFlags; }
 		void SetContentFitFlags( int contentFitFlags );
 
+		bool HasResizeToFit( void ) const { return m_contentFitFlags != 0; }
 		bool ResizeToFit( int fitFlags );
 
 		// overrideables

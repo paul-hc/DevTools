@@ -27,17 +27,17 @@ namespace ui
 			ResizeToFit( m_contentFitFlags );
 	}
 
-	bool CContentFitBase::ResizeToFit( int fitFlags /*= FitHorizontally*/ )
+	bool CContentFitBase::ResizeToFit( int fitFlags /*= FitWidth*/ )
 	{
 		CSize idealSize = ComputeIdealSize();
 		CRect ctrlRect = ui::GetControlRect( m_pCtrl->m_hWnd );
 
 		CSize deltaSize = idealSize - ctrlRect.Size();
 
-		if ( !HasFlag( fitFlags, FitHorizontally ) || ( deltaSize.cx < 0 && !HasFlag( fitFlags, FitAllowShrinking ) ) )
+		if ( !HasFlag( fitFlags, FitWidth ) || ( deltaSize.cx < 0 && !HasFlag( fitFlags, FitAllowShrinking ) ) )
 			deltaSize.cx = 0;
 
-		if ( !HasFlag( fitFlags, FitVertically ) || ( deltaSize.cy < 0 && !HasFlag( fitFlags, FitAllowShrinking ) ) )
+		if ( !HasFlag( fitFlags, FitHeight ) || ( deltaSize.cy < 0 && !HasFlag( fitFlags, FitAllowShrinking ) ) )
 			deltaSize.cy = 0;
 
 		if ( 0 == deltaSize.cx && 0 == deltaSize.cy )
@@ -47,7 +47,7 @@ namespace ui
 
 		DWORD style = m_pCtrl->GetStyle();
 
-		if ( HasFlag( fitFlags, FitHorizontally ) && deltaSize.cx != 0 )
+		if ( HasFlag( fitFlags, FitWidth ) && deltaSize.cx != 0 )
 			switch ( style & SS_TYPEMASK )
 			{
 				default:
@@ -72,7 +72,7 @@ namespace ui
 					break;
 			}
 
-		if ( HasFlag( fitFlags, FitVertically ) && deltaSize.cy != 0 )
+		if ( HasFlag( fitFlags, FitHeight ) && deltaSize.cy != 0 )
 			if ( HasFlag( style, SS_CENTERIMAGE ) )
 			{
 				int halfDeltaHeight = deltaSize.cy / 2 + ( deltaSize.cy % 2 );		// +1 for odd fitting height

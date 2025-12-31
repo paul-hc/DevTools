@@ -26,7 +26,7 @@ CThemeStatic::~CThemeStatic()
 {
 }
 
-bool CThemeStatic::HasCustomFacet( void ) const
+bool CThemeStatic::HasCustomFacet( void ) const implement
 {
 	return true;		// if !IsThemed() it may still have fallback drawing
 }
@@ -41,7 +41,18 @@ bool CThemeStatic::SetState( State state )
 	return true;
 }
 
-CSize CThemeStatic::ComputeIdealTextSize( void )
+CSize CThemeStatic::ComputeIdealSize( void ) implement
+{
+	return ComputeIdealTextSize();
+}
+
+CSize CThemeStatic::ComputeIdealTextSize( void ) override
+{
+	CClientDC clientDC( this );
+	return ComputeIdealTextSizeImpl( &clientDC );
+}
+
+CSize CThemeStatic::ComputeIdealTextSizeImpl( CDC* pDC )
 {
 	CRect textBounds;
 	GetClientRect( &textBounds );
@@ -49,10 +60,9 @@ CSize CThemeStatic::ComputeIdealTextSize( void )
 	if ( m_useText )
 	{
 		std::tstring text = ui::GetWindowText( this );
-		CClientDC clientDC( this );
 
 		textBounds.DeflateRect( m_textSpacing );
-		DrawFallbackText( GetTextThemeItem(), GetDrawStatus(), &clientDC, textBounds, text, GetDrawTextFlags() | DT_CALCRECT, GetFont() );		// compute whole text size (aligned to textBounds)
+		DrawFallbackText( GetTextThemeItem(), GetDrawStatus(), pDC, &textBounds, text, GetDrawTextFlags() | DT_CALCRECT, GetFont() );		// compute whole text size (aligned to textBounds)
 		textBounds.InflateRect( m_textSpacing );
 	}
 
@@ -60,13 +70,8 @@ CSize CThemeStatic::ComputeIdealTextSize( void )
 	return idealSize;
 }
 
-CSize CThemeStatic::ComputeIdealSize( void )
-{
-	return ComputeIdealTextSize();
-}
 
-
-void CThemeStatic::Draw( CDC* pDC, const CRect& clientRect )
+void CThemeStatic::Draw( CDC* pDC, const CRect& clientRect ) implement
 {
 	CThemeItem::Status drawStatus = GetDrawStatus();
 
@@ -87,22 +92,33 @@ void CThemeStatic::Draw( CDC* pDC, const CRect& clientRect )
 void CThemeStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus )
 {
 	if ( m_useText )
-		DrawFallbackText( GetTextThemeItem(), drawStatus, pDC, const_cast<CRect&>( textBounds ), ui::GetWindowText( this ), GetDrawTextFlags() );
+		DrawFallbackText( GetTextThemeItem(), drawStatus, pDC, const_cast<CRect*>( &textBounds ), ui::GetWindowText( this ), GetDrawTextFlags() );
 }
 
-void CThemeStatic::DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::Status drawStatus, CDC* pDC, CRect& rRect,
+void CThemeStatic::DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::Status drawStatus, CDC* pDC, IN OUT CRect* pRect,
 									 const std::tstring& text, UINT dtFlags, CFont* pFallbackFont /*= nullptr*/ ) const
 {
-	CRect anchorRect = rRect;
-	if ( nullptr == pTextTheme || !pTextTheme->DrawStatusText( drawStatus, *pDC, rRect, text.c_str(), dtFlags ) )
+	ASSERT_PTR( pRect );
+
+	if ( !pRect->IsRectEmpty() )
+		pRect->InflateRect( 0, 2, 0, 1 );		// bug fix: compensate for characters such as 'y' and 'g' being cut to the bottom
+
+	CRect anchorRect = *pRect;
+
+	if ( nullptr == pTextTheme || !pTextTheme->DrawStatusText( drawStatus, *pDC, *pRect, text.c_str(), dtFlags ) )
 	{
 		CScopedDrawText scopedDrawText( pDC, this, pFallbackFont != nullptr ? pFallbackFont : GetFont() );
-		pDC->DrawText( text.c_str(), (int)text.length(), &rRect, dtFlags );
+		pDC->DrawText( text.c_str(), (int)text.length(), pRect, dtFlags );
 	}
 
 	if ( HasFlag( dtFlags, DT_CALCRECT ) )
-		if ( !anchorRect.IsRectNull() && !rRect.IsRectEmpty() )
-			ui::AlignRect( rRect, anchorRect, ui::GetDrawTextAlignment( dtFlags ) );		// also align to initial anchor
+	{
+		if ( !pRect->IsRectEmpty() )
+			pRect->bottom += 2;		// bug fix: compensate for characters such as 'y' and 'g' being cut to the bottom
+
+		if ( !anchorRect.IsRectNull() && !pRect->IsRectEmpty() )
+			ui::AlignRect( *pRect, anchorRect, ui::GetDrawTextAlignment( dtFlags ) );		// also align to initial anchor
+	}
 }
 
 CThemeItem::Status CThemeStatic::GetDrawStatus( void ) const
@@ -188,6 +204,45 @@ void CRegularStatic::SetStyle( Style style )
 			m_textItem = CThemeItem( L"TEXTSTYLE", TEXT_HYPERLINKTEXT, TS_HYPERLINK_HOT );
 			break;
 	}
+}
+
+
+// CLabelDivider implementation
+
+CLabelDivider::CLabelDivider( Style style /*= Bold*/ )
+	: CRegularStatic( style )
+{
+}
+
+void CLabelDivider::Draw( CDC* pDC, const CRect& clientRect ) override
+{
+	__super::Draw( pDC, clientRect );
+
+	CPoint centrePoint = clientRect.CenterPoint();
+	CRect rectDivLine1( clientRect.left, centrePoint.y, clientRect.right, centrePoint.y + 2 ), rectDivLine2( 0, 0, 0, 0 );
+
+	CSize textSize = ComputeIdealTextSizeImpl( pDC );
+
+	switch ( m_origStyle & SS_TYPEMASK )
+	{
+		case SS_LEFT:
+			rectDivLine1.left += textSize.cx + LineSpacingX;
+			break;
+		case SS_CENTER:
+			rectDivLine2 = rectDivLine1;
+			rectDivLine1.right = centrePoint.x - textSize.cx / 2 - LineSpacingX;
+			rectDivLine2.left = centrePoint.x + textSize.cx / 2 + LineSpacingX;
+			break;
+		case SS_RIGHT:
+			rectDivLine1.right -= textSize.cx + LineSpacingX;
+			break;
+	}
+
+	if ( rectDivLine1.Width() > 1 )
+		pDC->DrawEdge( &rectDivLine1, EDGE_SUNKEN, BF_BOTTOM | BF_MIDDLE );
+
+	if ( rectDivLine2.Width() > 1 )
+		pDC->DrawEdge( &rectDivLine2, EDGE_SUNKEN, BF_BOTTOM | BF_MIDDLE );
 }
 
 
@@ -280,7 +335,7 @@ void CPickMenuStatic::SetPopupAlign( ui::PopupAlign popupAlign )
 	m_contentItem = CThemeItem::s_null;			// reset content item to display an arrow
 }
 
-void CPickMenuStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus )
+void CPickMenuStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus ) override
 {
 	if ( m_contentItem.IsThemed() )
 		return;				// use the themed content
@@ -311,10 +366,10 @@ void CPickMenuStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CTheme
 	CFont* pTextFont = GetFont();
 
 	// compute whole text size (aligned to textBounds)
-	DrawFallbackText( pTextTheme, drawStatus, pDC, wholeRect, wholeText, dtFlags | DT_CALCRECT, pTextFont );
+	DrawFallbackText( pTextTheme, drawStatus, pDC, &wholeRect, wholeText, dtFlags | DT_CALCRECT, pTextFont );
 
 	// draw whole text
-	DrawFallbackText( pTextTheme, drawStatus, pDC, wholeRect, wholeText, dtFlags, pTextFont );
+	DrawFallbackText( pTextTheme, drawStatus, pDC, &wholeRect, wholeText, dtFlags, pTextFont );
 
 	// draw arrow text
 	{
