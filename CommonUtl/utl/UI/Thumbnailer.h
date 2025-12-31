@@ -66,8 +66,8 @@ public:
 
 
 class CThumbnailer : public CShellThumbCache
-				   , public ui::ICustomImageDraw
-				   , private utl::noncopyable
+	, public ui::ICustomImageDraw
+	, private utl::noncopyable
 {
 public:
 	CThumbnailer( size_t cacheMaxSize = MaxSize );

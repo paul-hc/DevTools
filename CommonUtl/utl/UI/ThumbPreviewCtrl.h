@@ -11,7 +11,7 @@ class CWicDibSection;
 
 
 class CThumbPreviewCtrl : public CStatic
-						, public CObjectCtrlBase
+	, public CObjectCtrlBase
 {
 public:
 	CThumbPreviewCtrl( CThumbnailer* pThumbnailer );

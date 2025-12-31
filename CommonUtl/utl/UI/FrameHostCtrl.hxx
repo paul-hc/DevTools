@@ -21,7 +21,7 @@ void CFrameHostCtrl<BaseCtrl>::Refresh( void )
 template< typename BaseCtrl >
 bool CFrameHostCtrl<BaseCtrl>::SetFrameColor( COLORREF frameColor )
 {
-	if ( m_frameColor == frameColor )
+	if ( !utl::ModifyValue( m_frameColor, frameColor ) )
 		return false;
 
 	m_frameColor = frameColor;

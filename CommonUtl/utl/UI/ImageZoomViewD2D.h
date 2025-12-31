@@ -60,7 +60,7 @@ namespace d2d
 // scroll view with zomming that displays still or animated WIC images using Direct 2D rendering
 //
 abstract class CImageZoomViewD2D : public CBaseZoomView
-								 , public ui::IImageZoomView
+	, public ui::IImageZoomView
 {
 protected:
 	CImageZoomViewD2D( void );

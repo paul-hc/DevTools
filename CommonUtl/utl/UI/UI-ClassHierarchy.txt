@@ -1,0 +1,284 @@
+CBaseCustomDrawImager
+	CFileGlyphCustomDrawImager
+CBaseHostToolbarCtrl
+	CBaseItemContentCtrl
+		CItemContentEdit : CBaseItemContentCtrl<CTextEdit>
+		CItemContentHistoryCombo
+			CSearchPathHistoryCombo
+		CItemListEdit : CBaseItemContentCtrl<CTextEdit>
+CBaseItemContentCtrl
+	CItemContentEdit
+	CItemContentHistoryCombo
+		CSearchPathHistoryCombo
+	CItemListEdit
+CBaseMenuBuilder
+	CShellContextMenuBuilder
+	CSubMenuBuilder
+CBasePopupColorDialog<BaseDlg>
+	CColorPopupDialog
+	COfficeColorPopupDialog
+CBaseSplitButton
+	CPopupSplitButton
+		CEnumSplitButton
+	CSplitPushButton
+CBaseStockContentCtrl
+	CEnumComboBox
+	CStockValuesComboBox : CBaseStockContentCtrl<CComboBox>
+		CDurationComboBox
+		CZoomComboBox
+CBaseTrackMenuWnd
+	CBaseHostToolbarCtrl
+		CBaseItemContentCtrl
+			CItemContentEdit
+			CItemContentHistoryCombo
+			CItemListEdit
+	CDateTimeControl
+	CReportListControl : CBaseTrackMenuWnd<CListCtrl>, CListLikeCtrlBase, CListTraits
+		CPathItemListCtrl
+	CTreeControl : CBaseTrackMenuWnd<CTreeCtrl>, CListLikeCtrlBase
+CBaseZoomView : CScrollView(MFC), ui::IZoomView
+	CImageZoomViewD2D : ui::IImageZoomView
+CBitmapInfo
+	CDibSectionTraits
+CBufferedStatic : CStatic(MFC), ui::CContentFitBase
+	CThemeStatic
+		CDetailsButton
+		CHeadlineStatic
+		CLinkStatic
+		CPickMenuStatic
+		CRegularStatic
+			CClockStatic
+		CStatusStatic
+CClipboard : CTextClipboard(UTL)
+CColorStore
+	CColorRepository
+	CHalftoneRepository
+	CScratchColorStore
+CColorTable
+	CSystemColorTable
+		CRecentColorTable
+CDetailMateCtrl<BaseCtrl>
+	CDetailIconButton
+CDragListCtrl<BaseListCtrl> : BaseListCtrl, ole::IDropTargetEventsStub
+CFrameHostCtrl<BaseCtrl>
+	CHistoryComboBox : CFrameHostCtrl<CComboBox>, ui::IContentValidator
+		CItemContentHistoryCombo : CBaseItemContentCtrl<CHistoryComboBox>
+			CSearchPathHistoryCombo
+	CTextEdit : CFrameHostCtrl<CEdit(MFC)>, CInternalChange
+		CImageEdit
+		CItemContentEdit
+		CItemListEdit
+		CNumericEdit<Value>
+		CSpinEdit
+		CTextEditor
+			CTextListEditor
+CHostToolbarCtrl<BaseCtrlT>
+CIconButton : CButton(MFC)
+	CBaseSplitButton
+		CPopupSplitButton
+			CEnumSplitButton
+		CSplitPushButton
+	CDetailIconButton
+CInternalChange
+	CBaseZoomView : CScrollView(MFC), ui::IZoomView
+		CImageZoomViewD2D : CBaseZoomView, ui::IImageZoomView
+	CDateTimeControl : CBaseTrackMenuWnd<CDateTimeCtrl>
+	CObjectCtrlBase
+		CListLikeCtrlBase
+			CReportListControl : CBaseTrackMenuWnd<CListCtrl>, CListLikeCtrlBase, CListTraits
+				CPathItemListCtrl
+		CTextListEditor
+		CThumbPreviewCtrl : CStatic(MFC), CObjectCtrlBase
+			CTreeControl : CBaseTrackMenuWnd<CTreeCtrl>, CListLikeCtrlBase
+		CTextListEditor
+		CThumbPreviewCtrl : CStatic(MFC), CObjectCtrlBase
+	d2d::CRenderTarget
+		CBitmapRenderTarget
+		d2d::CDCRenderTarget
+		CDCRenderTarget
+		CHwndRenderTarget
+		d2d::CWindowRenderTarget
+			d2d::CImageRenderTarget
+CLayoutEngine
+	CPaneLayoutEngine
+CLayoutDialog : CDialogEx(MFC), CPopupDlgBase, ui::ILayoutEngine, ui::ICustomCmdInfo
+	CAboutBox
+	CBaseMainDialog
+	CItemListDialog
+	CPasswordDialog
+	CProgressDialog
+	CToolbarImagesDialog
+CLayoutFormView : CFormView(MFC), ui::ILayoutEngine, ui::ICustomCmdInfo
+CLayoutPaneDialog : CPaneDialog(MFC), ui::ILayoutEngine, ui::ICustomCmdInfo
+CLayoutBasePropertySheet : CPropertySheet(MFC), TSubject, ui::ICustomCmdInfo
+	CLayoutChildPropertySheet
+	CLayoutPropertySheet : CPopupDlgBase, ui::ILayoutEngine
+CLayoutPropertyPage : CPropertyPage(MFC), ui::ILayoutEngine, ui::ICustomCmdInfo
+	CBaseImagesPage
+		CBaseStoreImagesPage
+			CIconImagesPage
+			CStoreToolbarImagesPage
+	CItemsEditPage
+	CItemsListPage
+		CMfcToolbarImagesPage
+CLayoutStatic : CStatic(MFC), ui::ILayoutEngine, ui::ILayoutFrame
+CResizeFrameStatic : CStatic(MFC), ui::ILayoutFrame
+CListLikeCustomDrawBase
+	CReportListCustomDraw
+	CTreeControlCustomDraw
+CListTraits
+	CReportListControl : CBaseTrackMenuWnd<CListCtrl>, CListLikeCtrlBase, CListTraits
+	CReportListCustomDraw
+CMenuPickerButton : CMFCMenuButton(MFC)
+CSampleView : CScrollView(MFC)
+CSystemTray
+	CSystemTrayWnd : CWnd(MFC), CSystemTray
+	CSystemTrayWndHook : CWindowHook, CSystemTray
+CShellThumbCache
+	CThumbnailer : CShellThumbCache, ui::ICustomImageDraw
+		CGlyphThumbnailer
+CToolImageList
+	CToolStrip
+CWicBitmap : CErrorHandler
+	CWicImage
+		CWicAnimatedImage
+	CWicDibSection : CBitmap, CWicBitmap
+CWicImageCache
+wic::CBitmapDecoder
+wic::CBitmapOrigin
+wic::CImagingFactory
+
+
+ui::IBuddyCommandHandler
+	CBaseHostToolbarCtrl
+		...
+ui::IColorEditorHost
+	CColorPickerButton
+ui::IColorHost
+	ui::IColorEditorHost
+		CColorPickerButton
+ui::ICommandFrame
+	CListCtrlEditorFrame
+ui::IContentValidator
+	CHistoryComboBox
+		...
+ui::ICustomCmdInfo
+	CColorPickerButton
+	CDetailMateCtrl<BaseCtrl>
+		CDetailIconButton
+	CEnumSplitButton
+	CLayoutBasePropertySheet
+		...
+	CLayoutDialog
+		...
+	CLayoutFormView
+	CLayoutPaneDialog
+	CLayoutPropertyPage
+ui::ICustomImageDraw
+	CThumbnailer
+		CGlyphThumbnailer
+ui::ICustomPopupMenu
+	CColorMenuTrackingImpl
+ui::IImageProxy
+	CBitmapProxy
+	CColorBoxImage
+	CIconProxy
+	CImageListStripProxy
+ui::IImageStore
+	CImageStore
+	CImageStoresSvc
+ui::IImageZoomView
+	CImageZoomViewD2D
+		...
+ui::ILayoutEngine
+	CLayoutDialog : CDialogEx(MFC), CPopupDlgBase, ui::ILayoutEngine, ui::ICustomCmdInfo
+	CLayoutFormView : CFormView(MFC), ui::ILayoutEngine, ui::ICustomCmdInfo
+	CLayoutPaneDialog : CPaneDialog(MFC), ui::ILayoutEngine, ui::ICustomCmdInfo
+	CLayoutPropertyPage
+	CLayoutPropertySheet : CLayoutBasePropertySheet, CPopupDlgBase, ui::ILayoutEngine
+	CLayoutStatic
+ui::ILayoutFrame
+	CLayoutStatic
+	CResizeFrameStatic
+ui::ISampleCallback
+	CToolbarImagesDialog
+ui::ISpinTarget
+	CSpinEdit : CTextEdit
+ui::IStockTags
+	ui::CStockTags<ValueT>
+		ui::CDurationSecondsStockTags
+		ui::CZoomStockTags
+ui::ISubjectAdapter
+	ui::CCodeAdapter
+		ui::CDisplayCodeAdapter
+ui::ISystemTrayCallback
+	CBaseFrameWnd
+	CBaseMainDialog
+ui::ITextEffectCallback
+	CListLikeCtrlBase
+		CReportListControl
+		CTreeControl
+ui::IToolTipsHandler
+	mfc::CColorPopupMenu : CMFCColorPopupMenu
+ui::IUserReport
+	ui::CInteractiveMode
+	ui::CSilentMode
+ui::IValueAdapter<ValueT>
+	ui::CNumericAdapter<NumT>
+		ui::CNumericUnitAdapter<NumT>
+			ui::CPositivePercentageAdapter
+ui::IZoomView
+	CBaseZoomView
+		CImageZoomViewD2D
+
+
+From MFC bases:
+==============
+CStatic
+	CBufferedStatic
+	CLayoutStatic
+	CResizeFrameStatic
+	CResizeGripBar
+	CThumbPreviewCtrl : CStatic, CObjectCtrlBase
+	CTrackStatic
+CButton
+	CBitmapButton(MFC)
+	CIconButton
+	CMFCButton
+	CMFCColorPickerCtrl
+	CMFCToolBarButtonsListButton
+	CSplitButton(MFC)
+CSliderCtrl
+	mfc::CCustomSliderCtrl
+CView
+	CScrollView(MFC)
+		CSampleView
+CDocument
+	ui::CAdapterDocument
+CMFCButton : CButton(MFC)
+	CMFCColorButton(MFC)
+		CColorPickerButton : CMFCColorButton(MFC), ui::IColorEditorHost, ui::ICustomCmdInfo
+	CMFCMenuButton(MFC)
+		CMenuPickerButton
+CMFCColorPopupMenu : CMFCPopupMenu(MFC)
+	mfc::CColorPopupMenu
+CMFCPopupMenu : CMiniFrameWnd(MFC)
+	CMFCColorPopupMenu(MFC)
+	mfc::CColorGridPopupMenu
+	mfc::CTrackingPopupMenu
+CMFCToolBar : CMFCBaseToolBar(MFC)
+	CMFCPopupMenuBar : CMFCToolBar(MFC)
+	mfc::CColorGridBar
+	mfc::CFixedToolBar
+CMFCToolBarButton : CObject(MFC)
+	CMFCDropDownToolbarButton
+	CMFCToolBarComboBoxButton
+	CMFCToolBarEditBoxButton
+	CMFCToolBarMenuButton
+	mfc::CLabelButton
+	mfc::CSliderButton
+COleDataSource : CCmdTarget
+	COleServerItem::CItemDataSource(MFC)
+	ole::CDataSource
+CSpinButtonCtrl : CWnd
+	CSpinTargetButton

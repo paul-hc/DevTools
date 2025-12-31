@@ -1,0 +1,44 @@
+CAppTools : app::IAppTools
+	CConsoleApplication
+
+
+
+app::IAppTools
+	CAppTools
+		CConsoleApplication
+
+utl::IMessage
+	utl::ICommand
+		CBaseCommand
+			CCommand
+				CObjectCommand
+					CObjectPropertyCommand
+			CMacroCommand
+utl::ICommandExecutor
+	svc::ICommandService
+	CCommandModel : utl::ICommandExecutor, serial::ISerializable
+utl::ICounter
+	utl::CCounter
+utl::IMemoryManaged
+	io::ICharCodec
+		io::CVanillaCharCodec
+	utl::ICommand
+	pred::IComparator
+		pred::Comparator<Compare, ObjectType>
+		pred::PropertyComparator<ObjectType, GetPropFunc, Compare>
+	IRegistrySection
+		CIniFileRegistrySection
+	io::ITextEncoder
+		io::CVanillaTextEncoder
+	io::IWriter
+		io::CConsoleWriter
+		io::CFileWriter
+	---
+	utl::CAutoClearResource<ObjectType>
+	utl::CAutoPtrResource<Type>
+	io::CBaseEncodedBuffer
+	utl::CComPtrResource<ComPtrType>
+	io::CScopedRedirectStream::CRedirectStream<ProxyStreamT, DestStreamT>
+	utl::CResourcePool
+utl::IProgressHeader
+	svc::CNoProgressService : utl::IProgressHeader, utl::IProgressService

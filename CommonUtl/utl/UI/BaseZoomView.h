@@ -10,8 +10,8 @@
 // scroll view with zomming that displays scaled content of the original source object (e.g. image)
 //
 abstract class CBaseZoomView : public CScrollView
-							 , public CInternalChange
-							 , public ui::IZoomView
+	, public CInternalChange
+	, public ui::IZoomView
 {
 protected:
 	CBaseZoomView( ui::ImageScalingMode scalingMode, UINT zoomPct );

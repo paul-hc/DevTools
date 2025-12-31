@@ -16,7 +16,7 @@ CBaseHostToolbarCtrl<BaseCtrlT>::CBaseHostToolbarCtrl( void )
 	: TBaseClass()
 	, m_pParentWnd( nullptr )
 	, m_pMateToolbar( new CDialogToolBar() )
-	, m_tandemLayout( ui::EditShinkHost_MateOnRight, Spacing )
+	, m_tandemLayout( ui::EditShrinkHost_MateOnRight, Spacing )
 	, m_ignoreResize( false )
 {
 	m_pMateToolbar->SetEnableUnhandledCmds();		// enable detail buttons by default
@@ -155,7 +155,7 @@ bool CBaseHostToolbarCtrl<BaseCtrlT>::OnMateCommand( UINT cmdId )
 // CHostToolbarCtrl template code
 
 template< typename BaseCtrlT >
-CHostToolbarCtrl<BaseCtrlT>::CHostToolbarCtrl( ui::TTandemAlign tandemAlign /*= ui::EditShinkHost_MateOnRight*/ )
+CHostToolbarCtrl<BaseCtrlT>::CHostToolbarCtrl( ui::TTandemAlign tandemAlign /*= ui::EditShrinkHost_MateOnRight*/ )
 	: CBaseHostToolbarCtrl<BaseCtrlT>()
 {
 	this->RefTandemLayout().SetTandemAlign( tandemAlign );

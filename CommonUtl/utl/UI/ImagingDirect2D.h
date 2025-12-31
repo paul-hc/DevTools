@@ -51,9 +51,9 @@ namespace d2d
 
 
 	abstract class CRenderTarget : public IRenderHostWindow
-								 , public IDeviceComponent
-								 , protected CInternalChange
-								 , private utl::noncopyable
+		, public IDeviceComponent
+		, protected CInternalChange
+		, private utl::noncopyable
 	{
 	protected:
 		CRenderTarget( void ) {}

@@ -13,7 +13,7 @@ namespace ui
 {
 	// CTandemLayout implementation
 
-	const CTandemLayout CTandemLayout::s_mateOnRight( ui::EditShinkHost_MateOnRight, Spacing );
+	const CTandemLayout CTandemLayout::s_mateOnRight( ui::EditShrinkHost_MateOnRight, Spacing );
 
 	bool CTandemLayout::IsValidAlignment( void ) const
 	{

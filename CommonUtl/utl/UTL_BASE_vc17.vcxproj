@@ -417,6 +417,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="UTL Libraries.txt" />
+    <Text Include="UTL-ClassHierarchy.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

@@ -15,7 +15,7 @@ namespace ole { class CDropTarget; class CDataSource; }
 //
 template< typename BaseListCtrl >
 class CDragListCtrl : public BaseListCtrl
-					, public ole::IDropTargetEventsStub
+	, public ole::IDropTargetEventsStub
 {
 public:
 	CDragListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = lv::DefaultStyleEx );

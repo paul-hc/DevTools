@@ -38,7 +38,7 @@ namespace ui
 			TileMateMask	= H_TileMate | V_TileMate,
 
 			// predefined alignments
-			EditShinkHost_MateOnRight = H_AlignRight | V_AlignCenter | ui::H_ShrinkHost,	// tile to right, vertical centre, shrink host horizontally (typical edit/combobox alignment)
+			EditShrinkHost_MateOnRight = H_AlignRight | V_AlignCenter | ui::H_ShrinkHost,	// tile to right, vertical centre, shrink host horizontally (typical edit/combobox alignment)
 			ListHost_TileMateOnTopRight = H_AlignRight | V_AlignTop | ui::V_TileMate		// tile to right, top, no host shrinking (typical list control alignment)
 	};
 	typedef int TTandemAlign;		// combined values of ::Alignment and ui::TandemAlign

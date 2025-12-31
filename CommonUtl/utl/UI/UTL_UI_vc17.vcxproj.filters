@@ -1310,5 +1310,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="UI-ClassHierarchy.txt" />
   </ItemGroup>
 </Project>

@@ -65,7 +65,7 @@ template< typename BaseCtrlT >
 class CHostToolbarCtrl : public CBaseHostToolbarCtrl<BaseCtrlT>
 {
 public:
-	CHostToolbarCtrl( ui::TTandemAlign tandemAlign = ui::EditShinkHost_MateOnRight );
+	CHostToolbarCtrl( ui::TTandemAlign tandemAlign = ui::EditShrinkHost_MateOnRight );
 protected:
 	// interface IBuddyCommandHandler (may be overridden) - default implementation redirects handling to this host control
 	virtual bool OnBuddyCommand( UINT cmdId );
