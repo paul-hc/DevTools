@@ -124,6 +124,26 @@ void CScopedWindowBorder::RedrawBorder( void )
 
 // CFlashCtrlFrame implementation
 
+CFlashCtrlFrame::CFlashCtrlFrame( HWND hCtrl, COLORREF frameColor, unsigned int count /*= 2*/, int elapse /*= 300*/ )
+	: CTimerSequenceHook( hCtrl, this, EventId, count * 2, elapse )
+	, m_frameBrush( frameColor )
+	, m_frameOn( false )
+{
+	ASSERT( ui::IsChild( hCtrl ) );
+}
+
+CFlashCtrlFrame::~CFlashCtrlFrame()
+{
+}
+
+bool CFlashCtrlFrame::UnhookWindow( void ) override
+{
+	if ( HWND hCtrl = GetHwnd() )
+		ui::RedrawControl( hCtrl );		// need a final redraw to to restore the original frame, e.g. for controls with a frame (such as CFrameHostCtrl<Ctrl>)
+
+	return __super::UnhookWindow();
+}
+
 void CFlashCtrlFrame::OnSequenceStep( void )
 {
 	HWND hCtrl = GetHwnd();

@@ -107,16 +107,14 @@ private:
 #include "WindowTimer.h"
 
 
-class CFlashCtrlFrame : public CTimerSequenceHook, private ISequenceTimerCallback
+class CFlashCtrlFrame : public CTimerSequenceHook
+	, private ISequenceTimerCallback
 {
 public:
-	CFlashCtrlFrame( HWND hCtrl, COLORREF frameColor, unsigned int count = 2, int elapse = 300 )
-		: CTimerSequenceHook( hCtrl, this, EventId, count * 2, elapse )
-		, m_frameBrush( frameColor )
-		, m_frameOn( false )
-	{
-		ASSERT( ui::IsChild( hCtrl ) );
-	}
+	CFlashCtrlFrame( HWND hCtrl, COLORREF frameColor, unsigned int count = 2, int elapse = 300 );
+	virtual ~CFlashCtrlFrame();
+
+	virtual bool UnhookWindow( void ) override;
 private:
 	enum { EventId = 7777 };
 
