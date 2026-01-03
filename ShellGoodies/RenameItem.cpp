@@ -17,8 +17,8 @@ namespace ren
 		ASSERT_PTR( pOutRenamePairs );
 		pOutRenamePairs->Clear();
 
-		for ( std::vector<CRenameItem*>::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
-			pOutRenamePairs->AddPair( (*itItem)->GetSrcPath(), (*itItem)->GetDestPath() );
+		for ( const CRenameItem* pItem: renameItems )
+			pOutRenamePairs->AddPair( pItem->GetSrcPath(), pItem->GetDestPath() );
 
 		return pOutRenamePairs->GetPairs().size() == renameItems.size();			// all SRC keys unique?
 	}
@@ -27,11 +27,11 @@ namespace ren
 	{
 		REQUIRE( rOutRenameItems.empty() );
 
-		for ( CPathRenamePairs::const_iterator itPair = renamePairs.Begin(); itPair != renamePairs.End(); ++itPair )
+		for ( const fs::TPathPair& renPair: renamePairs.GetPairs() )
 		{
-			CRenameItem* pItem = new CRenameItem( itPair->first );
+			CRenameItem* pItem = new CRenameItem( renPair.first );
 
-			pItem->RefDestPath() = itPair->second;
+			pItem->RefDestPath() = renPair.second;
 			rOutRenameItems.push_back( pItem );
 		}
 	}
@@ -41,12 +41,12 @@ namespace ren
 		REQUIRE( items.size() == renamePairs.GetPairs().size() );
 
 		size_t pos = 0;
-		for ( CPathRenamePairs::const_iterator itPair = renamePairs.Begin(); itPair != renamePairs.End(); ++itPair, ++pos )
+		for ( const fs::TPathPair& renPair: renamePairs.GetPairs() )
 		{
-			CRenameItem* pItem = items[ pos ];
+			CRenameItem* pItem = items[ pos++ ];
 
-			if ( pItem->GetSrcPath() == itPair->first )			// both containers must share the same order
-				pItem->RefDestPath() = itPair->second;
+			if ( pItem->GetSrcPath() == renPair.first )			// both containers must share the same order
+				pItem->RefDestPath() = renPair.second;
 			else
 			{
 				ASSERT( false );
@@ -60,10 +60,11 @@ namespace ren
 		rDestFnames.clear();
 		rDestFnames.reserve( items.size() );
 
-		for ( std::vector<CRenameItem*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( const CRenameItem* pItem: items )
 		{
 			fs::CPathParts destParts;
-			( *itItem )->SplitSafeDestPath( &destParts );
+
+			pItem->SplitSafeDestPath( &destParts );
 			rDestFnames.push_back( destParts.m_fname );
 		}
 	}

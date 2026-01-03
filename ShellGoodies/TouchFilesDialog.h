@@ -4,8 +4,13 @@
 
 #include "utl/FileState.h"
 #include "utl/ISubject.h"
-#include "utl/UI/ReportListControl.h"
 #include "utl/UI/DateTimeControl.h"
+#include "utl/UI/FrameHostCtrl.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/SelectionData.h"
+#include "utl/UI/TandemControls.h"
+#include "utl/UI/TextEdit.h"
+#include "utl/UI/ThemeStatic.h"
 #include "FileEditorBaseDialog.h"
 
 
@@ -25,8 +30,6 @@ class CTouchFilesDialog : public CFileEditorBaseDialog
 public:
 	CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CTouchFilesDialog();
-
-	const std::vector<CTouchItem*>* GetCmdSelItems( void ) const;
 protected:
 	// IFileEditor interface
 	virtual void PostMakeDest( bool silent = false ) override;
@@ -40,12 +43,18 @@ protected:
 	virtual void ClearFileErrors( void ) override;
 	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override;
 
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+
 	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override;
 	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override;
 
 	virtual void SwitchMode( Mode mode ) override;
 private:
+	const std::vector<CTouchItem*>* GetCmdSelItems( void ) const;
+	const std::vector<CTouchItem*>& GetTargetItems( void ) const;
+
 	static const CEnumTags& GetTags_Mode( void );
 
 	void Construct( void );
@@ -58,10 +67,14 @@ private:
 	void AccumulateItemStates( const CTouchItem* pTouchItem );
 
 	// output
+	void UpdateTargetScopeButton( void );
+	void UpdateFileListStatus( void );
+
 	void SetupFileListView( void );
+	void UpdateFileListViewSelItems( void );
 
 	void UpdateFieldControls( void );
-	void UpdateFieldsFromSel( int selIndex );
+	void UpdateFieldsFromCaretItem();
 
 	// input
 	void InputFields( void );
@@ -73,14 +86,15 @@ private:
 	void MarkInvalidSrcItems( void );
 	void EnsureVisibleFirstError( void );
 
-	static fs::TimeField GetTimeField( UINT dtId );
+	static fs::TimeField GetTimeFieldFromId( UINT dtCtrlId );
 private:
 	const std::vector<CTouchItem*>& m_rTouchItems;
-	bool m_anyChanges;
+	ui::CSelectionData<CTouchItem> m_selData;
+	bool m_dirtyTouch;
 
 	// multiple states accumulators for edit fields
-	std::vector<multi::CDateTimeState> m_dateTimeStates;
-	std::vector<multi::CAttribCheckState> m_attribCheckStates;
+	std::vector<multi::CDateTimeState> m_dateTimeStates;			// fs::_TimeFieldCount
+	std::vector<multi::CAttribCheckState> m_attribCheckStates;		// attribute count: {READONLY, HIDDEN, etc}
 private:
 	// enum { IDD = IDD_TOUCH_FILES_DIALOG };
 	enum Column
@@ -93,6 +107,11 @@ private:
 	CReportListControl m_fileListCtrl;
 	CDateTimeControl m_modifiedDateCtrl, m_createdDateCtrl, m_accessedDateCtrl;
 
+	CLabelDivider m_filesLabelDivider;
+	CFrameHostCtrl<CButton> m_targetSelItemsButton;
+	CHostToolbarCtrl<CStatusStatic> m_fileStatsStatic;
+	CHostToolbarCtrl<CTextEdit> m_currFolderEdit;
+
 	// generated stuff
 public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
@@ -103,16 +122,23 @@ protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
+	afx_msg void OnToggle_TargetSelItems( void );
+	afx_msg void On_SelItems_ResetDestFile( void );
+
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnBnClicked_PasteDestStates( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnBnClicked_ShowSrcColumns( void );
-	afx_msg void OnCopyDateCell( UINT cmdId );
-	afx_msg void OnPushToAttributeFields( void );
-	afx_msg void OnPushToAllFields( void );
-	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
+	afx_msg void OnCopyDateField( UINT cmdId );
+
+	afx_msg void OnPushDateField( UINT cmdId );
+	afx_msg void OnPushAttributeFields( void );
+	afx_msg void OnPushAllFields( void );
+	afx_msg void OnUpdateListCaretItem( CCmdUI* pCmdUI );
+	afx_msg void OnUpdateListSelection( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_Attribute( UINT checkId );
 	afx_msg void OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnCopyTableText_TouchList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnDtnDateTimeChange( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()

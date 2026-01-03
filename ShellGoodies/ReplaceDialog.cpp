@@ -51,12 +51,11 @@ namespace layout
 }
 
 
-CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc, const std::tstring& findWhat /*= str::GetEmpty()*/,
-								const std::vector<CRenameItem*>* pSelItems /*= nullptr*/ )
+CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc, const std::vector<CRenameItem*> targetItems, const std::tstring& findWhat /*= str::GetEmpty()*/ )
 	: CLayoutDialog( IDD_REPLACE_DIALOG, pParentEditor->GetDialog() )
 	, m_pParentEditor( pParentEditor )
 	, m_pRenSvc( pRenSvc )
-	, m_pSelItems( pSelItems )
+	, m_targetItems( targetItems )
 	, m_findWhat( !findWhat.empty() ? findWhat : LoadFindWhat() )
 	, m_replaceWith( LoadReplaceWith() )
 	, m_matchCase( AfxGetApp()->GetProfileInt( reg::section, reg::entry_matchCase, true ) != FALSE )
@@ -161,7 +160,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 		func::ReplaceText replaceFunc( m_findWhat, m_replaceWith, m_matchCase, commit );
 		std::tstring cmdTag = str::Format( _T("Replace \"%s\" with \"%s\""), m_findWhat.c_str(), m_replaceWith.c_str() );
 
-		pReplaceCmd.reset( pFileModel->MakeChangeDestPathsCmd( replaceFunc, cmdTag, m_pSelItems ) );
+		pReplaceCmd.reset( pFileModel->MakeChangeDestPathsCmd( replaceFunc, m_targetItems, cmdTag ) );
 		if ( 0 == replaceFunc.m_matchCount )
 			return false;
 	}
@@ -172,7 +171,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 		func::ReplaceCharacters replaceFunc( m_findWhat, m_replaceWith, m_matchCase, commit );
 		std::tstring cmdTag = str::Format( _T("Replace characters '%s' with \"%s\""), m_findWhat.c_str(), m_replaceWith.c_str() );
 
-		pReplaceCmd.reset( pFileModel->MakeChangeDestPathsCmd( replaceFunc, cmdTag, m_pSelItems ) );
+		pReplaceCmd.reset( pFileModel->MakeChangeDestPathsCmd( replaceFunc, m_targetItems, cmdTag ) );
 		if ( 0 == replaceFunc.m_matchCount )
 			return false;
 	}

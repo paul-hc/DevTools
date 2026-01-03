@@ -8,7 +8,6 @@
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "AppCommands.h"
-#include "resource.h"
 #include "utl/Command.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
@@ -29,6 +28,7 @@
 #endif
 
 #include "utl/UI/ReportListControl.hxx"
+#include "utl/UI/SelectionData.hxx"
 
 
 namespace reg
@@ -40,8 +40,12 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
+		{ IDC_FILES_STATIC, SizeX },
 		{ IDC_FILE_TOUCH_LIST, Size },
 		{ IDC_SHOW_SRC_COLUMNS_CHECK, MoveX },
+		{ IDC_OUTCOME_INFO_STATUS, MoveY | SizeX },
+		{ IDC_CURR_FOLDER_STATIC, MoveY },
+		{ IDC_CURR_FOLDER_EDIT, MoveY | SizeX },
 
 		{ IDC_COPY_SOURCE_PATHS_BUTTON, MoveY },
 		{ IDC_PASTE_FILES_BUTTON, MoveY },
@@ -57,7 +61,9 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CFileEditorBaseDialog( pFileModel, cmd::TouchFile, IDD_TOUCH_FILES_DIALOG, pParent )
 	, m_rTouchItems( m_pFileModel->LazyInitTouchItems() )
 	, m_fileListCtrl( IDC_FILE_TOUCH_LIST )
-	, m_anyChanges( false )
+	, m_dirtyTouch( false )
+	, m_filesLabelDivider( CLabelDivider::Instruction )
+	, m_fileStatsStatic( ui::EditShrinkHost_MateOnRight )
 {
 	Construct();
 	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
@@ -68,11 +74,12 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	LoadDlgIcon( ID_TOUCH_FILES );
 
-	m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_GRIDLINES );
+	//m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_GRIDLINES );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
-	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, nullptr );				// let us track a custom menu
+	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, nullptr );	// let us track a custom menu
+	m_fileListCtrl.SetFormatTableFlags( lv::SelRowsDisplayVisibleColumns );		// copy table as selected rows, using visible columns in display order
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
@@ -88,6 +95,15 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_modifiedDateCtrl.SetNullFormat( s_mixedFormat );
 	m_createdDateCtrl.SetNullFormat( s_mixedFormat );
 	m_accessedDateCtrl.SetNullFormat( s_mixedFormat );
+
+	m_fileStatsStatic.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_COPY )
+		.AddButton( ID_CMD_RESET_DESTINATIONS );
+
+	m_currFolderEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_COPY )
+		.AddButton( ID_BROWSE_FOLDER );
+	m_targetSelItemsButton.SetFrameMargins( -3, -3 );	// draw the frame outside of the button, in the dialog area
 }
 
 CTouchFilesDialog::~CTouchFilesDialog()
@@ -111,7 +127,15 @@ void CTouchFilesDialog::Construct( void )
 
 const std::vector<CTouchItem*>* CTouchFilesDialog::GetCmdSelItems( void ) const
 {
-	return /*app::TargetSelectedItems == m_pFileModel->GetTargetScope() && !m_selData.GetSelItems().empty() ? &m_selData.GetSelItems() :*/ nullptr;
+	return app::TargetSelectedItems == m_pFileModel->GetTargetScope() && !m_selData.GetSelItems().empty() ? &m_selData.GetSelItems() : nullptr;
+}
+
+const std::vector<CTouchItem*>& CTouchFilesDialog::GetTargetItems( void ) const
+{
+	if ( const std::vector<CTouchItem*>* pSelItems = GetCmdSelItems() )
+		return *pSelItems;
+
+	return m_rTouchItems;
 }
 
 bool CTouchFilesDialog::TouchFiles( void )
@@ -154,8 +178,8 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), !IsRollMode() );
 
-	m_anyChanges = utl::Any( m_rTouchItems, std::mem_fun( &CTouchItem::IsModified ) );
-	ui::EnableControl( *this, IDOK, m_mode != CommitFilesMode || m_anyChanges );
+	m_dirtyTouch = utl::Any( m_rTouchItems, std::mem_fun( &CTouchItem::IsModified ) );
+	ui::EnableControl( *this, IDOK, m_mode != CommitFilesMode || m_dirtyTouch );
 
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
 }
@@ -197,7 +221,9 @@ void CTouchFilesDialog::PopStackTop( svc::StackType stackType ) override
 
 void CTouchFilesDialog::OnExecuteCmd( utl::ICommand* pCmd )
 {
-	// TODO...
+	if ( app::TargetSelectedItems == m_pFileModel->GetTargetScope() )
+		if ( cmd::HasSelItemsTarget( pCmd ) )
+			ui::FlashCtrlFrame( &m_targetSelItemsButton, app::ColorWarningText, 3 );
 }
 
 
@@ -206,6 +232,28 @@ void CTouchFilesDialog::SetupDialog( void )
 	AccumulateCommonStates();
 	SetupFileListView();							// fill in and select the found files list
 	UpdateFieldControls();
+}
+
+void CTouchFilesDialog::UpdateTargetScopeButton( void )
+{
+	m_targetSelItemsButton.SetFrameColor( app::TargetSelectedItems == m_pFileModel->GetTargetScope() ? app::ColorWarningText : CLR_NONE );
+}
+
+void CTouchFilesDialog::UpdateFileListStatus( void )
+{
+	std::tstring message = str::Format( _T("Total: %d file(s) in %d folder(s)."), m_pFileModel->GetSourcePaths().size(), m_pFileModel->GetSrcFolderPaths().size() );
+
+	if ( size_t selCount = m_selData.GetSelItems().size() )
+		message += str::Format( _T("  Selected %d items(s)."), selCount );
+
+	m_fileStatsStatic.SetWindowText( message );
+
+	fs::CPath currFolderPath;
+
+	if ( CTouchItem* pCaretItem = m_selData.GetCaretItem() )
+		currFolderPath = pCaretItem->GetSrcState().m_fullPath.GetParentPath();
+
+	m_currFolderEdit.SetText( currFolderPath.Get() );
 }
 
 void CTouchFilesDialog::SetupFileListView( void )
@@ -219,7 +267,7 @@ void CTouchFilesDialog::SetupFileListView( void )
 
 	for ( unsigned int pos = 0; pos != m_rTouchItems.size(); ++pos )
 	{
-		const CTouchItem* pTouchItem = m_rTouchItems[ pos ];
+		const CTouchItem* pTouchItem = m_rTouchItems[pos];
 
 		m_fileListCtrl.InsertObjectItem( pos, pTouchItem );		// PathName
 
@@ -242,6 +290,28 @@ void CTouchFilesDialog::SetupFileListView( void )
 	m_fileListCtrl.InitialSortList();		// store original order and sort by current criteria
 }
 
+void CTouchFilesDialog::UpdateFileListViewSelItems( void )
+{
+	path::TGetMatch getMatchFunc;
+
+	for ( CTouchItem* pTouchItem: m_selData.GetSelItems() )
+	{
+		int pos = m_fileListCtrl.FindItemIndex( pTouchItem );
+		ASSERT( pos != -1 );
+
+		m_fileListCtrl.SetSubItemText( pos, DestAttributes, fmt::FormatFileAttributes( pTouchItem->GetDestState().m_attributes ) );
+		m_fileListCtrl.SetSubItemText( pos, DestModifyTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_modifTime ) );
+		m_fileListCtrl.SetSubItemText( pos, DestCreationTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_creationTime ) );
+		m_fileListCtrl.SetSubItemText( pos, DestAccessTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_accessTime ) );
+
+		// IMP: update the Dest side of DiffColumn pairs!
+		m_fileListCtrl.UpdateItemDiffColumnDest( pos, DestAttributes, getMatchFunc );
+		m_fileListCtrl.UpdateItemDiffColumnDest( pos, DestModifyTime, getMatchFunc );
+		m_fileListCtrl.UpdateItemDiffColumnDest( pos, DestCreationTime, getMatchFunc );
+		m_fileListCtrl.UpdateItemDiffColumnDest( pos, DestAccessTime, getMatchFunc );
+	}
+}
+
 void CTouchFilesDialog::AccumulateCommonStates( void )
 {
 	ASSERT( !m_rTouchItems.empty() );
@@ -250,8 +320,8 @@ void CTouchFilesDialog::AccumulateCommonStates( void )
 	multi::SetInvalidAll( m_dateTimeStates );
 	multi::SetInvalidAll( m_attribCheckStates );
 
-	for ( size_t i = 0; i != m_rTouchItems.size(); ++i )
-		AccumulateItemStates( m_rTouchItems[ i ] );
+	for ( const CTouchItem* pTouchItem: m_rTouchItems )
+		AccumulateItemStates( pTouchItem );
 }
 
 void CTouchFilesDialog::AccumulateItemStates( const CTouchItem* pTouchItem )
@@ -262,28 +332,28 @@ void CTouchFilesDialog::AccumulateItemStates( const CTouchItem* pTouchItem )
 	m_dateTimeStates[ fs::ModifiedDate ].Accumulate( pTouchItem->GetDestState().m_modifTime );
 	m_dateTimeStates[ fs::AccessedDate ].Accumulate( pTouchItem->GetDestState().m_accessTime );
 
-	for ( std::vector<multi::CAttribCheckState>::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
-		itAttribState->Accumulate( pTouchItem->GetDestState().m_attributes );
+	for ( multi::CAttribCheckState& rAttribState: m_attribCheckStates )
+		rAttribState.Accumulate( pTouchItem->GetDestState().m_attributes );
 }
 
 void CTouchFilesDialog::UpdateFieldControls( void )
 {
 	// commit common values to field controls
-	for ( std::vector<multi::CDateTimeState>::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
-		itDateTimeState->UpdateCtrl( this );
+	for ( const multi::CDateTimeState& dateTimeState: m_dateTimeStates )
+		dateTimeState.UpdateCtrl( this );
 
-	for ( std::vector<multi::CAttribCheckState>::const_iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
-		itAttribState->UpdateCtrl( this );
+	for ( const multi::CAttribCheckState& attribState: m_attribCheckStates )
+		attribState.UpdateCtrl( this );
 }
 
-void CTouchFilesDialog::UpdateFieldsFromSel( int selIndex )
+void CTouchFilesDialog::UpdateFieldsFromCaretItem( void )
 {
-	if ( selIndex != -1 )
+	if ( const CTouchItem* pCaretItem = m_selData.GetCaretItem() )
 	{
 		multi::SetInvalidAll( m_dateTimeStates );
 		multi::SetInvalidAll( m_attribCheckStates );
 
-		AccumulateItemStates( m_fileListCtrl.GetPtrAt<CTouchItem>( selIndex ) );
+		AccumulateItemStates( pCaretItem );
 	}
 	else
 	{
@@ -296,11 +366,11 @@ void CTouchFilesDialog::UpdateFieldsFromSel( int selIndex )
 
 void CTouchFilesDialog::InputFields( void )
 {
-	for ( std::vector<multi::CDateTimeState>::iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
-		itDateTimeState->InputCtrl( this );
+	for ( multi::CDateTimeState& rDateTimeState: m_dateTimeStates )
+		rDateTimeState.InputCtrl( this );
 
-	for ( std::vector<multi::CAttribCheckState>::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
-		itAttribState->InputCtrl( this );
+	for ( multi::CAttribCheckState& rAttribState: m_attribCheckStates )
+		rAttribState.InputCtrl( this );
 }
 
 void CTouchFilesDialog::ApplyFields( void )
@@ -314,60 +384,65 @@ void CTouchFilesDialog::ApplyFields( void )
 
 utl::ICommand* CTouchFilesDialog::MakeChangeDestFileStatesCmd( void )
 {
+	const std::vector<CTouchItem*>& targetItems = GetTargetItems();
 	std::vector<fs::CFileState> destFileStates; destFileStates.reserve( m_rTouchItems.size() );
-	bool anyChanges = false;
+	bool anyChange = false;
 
 	// apply valid edits, i.e. if not null
-	for ( size_t i = 0; i != m_rTouchItems.size(); ++i )
+	for ( const CTouchItem* pTouchItem: targetItems )
 	{
-		const CTouchItem* pTouchItem = m_rTouchItems[ i ];
-
 		fs::CFileState newFileState = pTouchItem->GetDestState();
 
-		for ( std::vector<multi::CDateTimeState>::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
-			if ( itDateTimeState->CanApply() )
-				itDateTimeState->Apply( newFileState );
+		for ( const multi::CDateTimeState& dateTimeState: m_dateTimeStates )
+			if ( dateTimeState.CanApply() )
+			{
+				dateTimeState.Apply( newFileState );
+			}
 
-		for ( std::vector<multi::CAttribCheckState>::const_iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
-			if ( itAttribState->CanApply() )
-				itAttribState->Apply( newFileState );
-
-		if ( newFileState != pTouchItem->GetDestState() )
-			anyChanges = true;
+		for ( const multi::CAttribCheckState& attribState: m_attribCheckStates )
+			if ( attribState.CanApply() )
+			{
+				attribState.Apply( newFileState );
+			}
 
 		destFileStates.push_back( newFileState );
+
+		anyChange |= newFileState != pTouchItem->GetDestState();
 	}
 
-	return anyChanges ? new CChangeDestFileStatesCmd( m_pFileModel, GetCmdSelItems(), destFileStates ) : nullptr;
+	return anyChange ? new CChangeDestFileStatesCmd( m_pFileModel, &targetItems, destFileStates ) : nullptr;
 }
 
 bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const
 {
-	for ( int column = SrcAttributes; column <= SrcAccessTime; ++column )
-		if ( 0 == m_fileListCtrl.GetColumnWidth( column ) )
-			return false;
-
-	return true;
+	return m_fileListCtrl.IsColumnRangeVisible( SrcAttributes, SrcAccessTime );
 }
 
 void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
 {
-	pMessage;
+	const cmd::CommandType cmdType = static_cast<cmd::CommandType>( utl::GetSafeTypeID( pMessage ) ); cmdType;
 
-	if ( m_hWnd != nullptr )
-		if ( m_pFileModel == pSubject )
+	if ( nullptr == m_hWnd )
+		return;
+
+	if ( m_pFileModel == pSubject )
+	{
+		if ( nullptr == pMessage )
+			SetupDialog();		// initial dlg setup
+		else if ( const CChangeDestFileStatesCmd* pCmd = utl::GetSafeMatchCmd<CChangeDestFileStatesCmd>( pMessage, cmd::ChangeDestFileStates ) )
 		{
-			SetupDialog();
+			if ( pCmd->HasSelItems() )
+				UpdateFileListViewSelItems();
+			else
+				SetupDialog();
 
-			switch ( utl::GetSafeTypeID( pMessage ) )
-			{
-				case cmd::ChangeDestFileStates:
-					PostMakeDest();
-					break;
-			}
+			PostMakeDest();
 		}
-		else if ( &CGeneralOptions::Instance() == pSubject )
-			CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
+		else
+			ASSERT( false );		// any other command to handle?
+	}
+	else if ( &CGeneralOptions::Instance() == pSubject )
+		CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 }
 
 void CTouchFilesDialog::ClearFileErrors( void ) override
@@ -386,6 +461,42 @@ void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstrin
 		utl::AddUnique( m_errorItems, pErrorItem );
 
 	EnsureVisibleFirstError();
+}
+
+void CTouchFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+{
+	switch ( cmdId )
+	{
+		case IDC_TARGET_SEL_ITEMS_CHECK:
+			rText = app::GetTags_TargetScope().FormatKey( m_pFileModel->GetTargetScope() );
+			break;
+		case IDC_CURR_FOLDER_STATIC:
+			rText = _T("Folder of the current file");
+			break;
+		case IDC_CURR_FOLDER_EDIT:
+			rText = utl::GetSafeCode( m_selData.GetCaretItem() );
+			break;
+		case ID_CMD_RESET_DESTINATIONS:
+			rText = _T("Reset to initial destination name");
+			if ( !m_selData.GetSelItems().empty() )
+				rText += str::Format( _T(": %d selected item(s)"), m_selData.GetSelItems().size() );
+			else
+				rText += _T(" (no selected items)");
+			break;
+		case IDOK:
+			if ( !ui::IsDisabled( *GetDlgItem( IDOK ) ) )
+			{
+				rText = EditMode == m_mode ? _T("Store changes to") : _T("Touch file states for");
+
+				if ( EditMode == m_mode && app::TargetSelectedItems == m_pFileModel->GetTargetScope() && !m_selData.GetSelItems().empty() )
+					rText += str::Format( _T(": %d selected item(s)"), m_selData.GetSelItems().size() );
+				else
+					rText += _T(" all items");
+			}
+			break;
+		default:
+			__super::QueryTooltipText( rText, cmdId, pTooltip );
+	}
 }
 
 void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override
@@ -486,9 +597,9 @@ CTouchItem* CTouchFilesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
 
 void CTouchFilesDialog::MarkInvalidSrcItems( void )
 {
-	for ( std::vector<CTouchItem*>::const_iterator itTouchItem = m_rTouchItems.begin(); itTouchItem != m_rTouchItems.end(); ++itTouchItem )
-		if ( !( *itTouchItem )->GetFilePath().FileExist() )
-			utl::AddUnique( m_errorItems, *itTouchItem );
+	for ( CTouchItem* pTouchItem: m_rTouchItems )
+		if ( !pTouchItem->GetFilePath().FileExist() )
+			utl::AddUnique( m_errorItems, pTouchItem );
 }
 
 void CTouchFilesDialog::EnsureVisibleFirstError( void )
@@ -499,9 +610,9 @@ void CTouchFilesDialog::EnsureVisibleFirstError( void )
 	m_fileListCtrl.Invalidate();				// trigger some highlighting
 }
 
-fs::TimeField CTouchFilesDialog::GetTimeField( UINT dtId )
+fs::TimeField CTouchFilesDialog::GetTimeFieldFromId( UINT dtCtrlId )
 {
-	switch ( dtId )
+	switch ( dtCtrlId )
 	{
 		default: ASSERT( false );
 		case IDC_MODIFIED_DATE:	return fs::ModifiedDate;
@@ -526,6 +637,11 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_CREATED_DATE, m_createdDateCtrl );
 	DDX_Control( pDX, IDC_ACCESSED_DATE, m_accessedDateCtrl );
 
+	DDX_Control( pDX, IDC_FILES_STATIC, m_filesLabelDivider );
+	DDX_Control( pDX, IDC_OUTCOME_INFO_STATUS, m_fileStatsStatic );
+	DDX_Control( pDX, IDC_CURR_FOLDER_EDIT, m_currFolderEdit );
+	DDX_Control( pDX, IDC_TARGET_SEL_ITEMS_CHECK, m_targetSelItemsButton );
+
 	ui::DDX_ButtonIcon( pDX, IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY );
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
 	ui::DDX_ButtonIcon( pDX, IDC_RESET_FILES_BUTTON, ID_RESET_DEFAULT );
@@ -534,6 +650,10 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		OnUpdate( m_pFileModel, nullptr );
 		CheckDlgButton( IDC_SHOW_SRC_COLUMNS_CHECK, VisibleAllSrcColumns() );
+
+		m_targetSelItemsButton.SetCheck( app::TargetSelectedItems == m_pFileModel->GetTargetScope() );
+		UpdateTargetScopeButton();
+		UpdateFileListStatus();
 	}
 
 	__super::DoDataExchange( pDX );
@@ -545,18 +665,25 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 BEGIN_MESSAGE_MAP( CTouchFilesDialog, CFileEditorBaseDialog )
 	ON_WM_CONTEXTMENU()
 	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateUndoRedo )
+	ON_BN_CLICKED( IDC_TARGET_SEL_ITEMS_CHECK, OnToggle_TargetSelItems )
+	ON_COMMAND( ID_CMD_RESET_DESTINATIONS, On_SelItems_ResetDestFile )
+	ON_UPDATE_COMMAND_UI( ID_CMD_RESET_DESTINATIONS, OnUpdateListSelection )
+
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestStates )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
 	ON_BN_CLICKED( IDC_SHOW_SRC_COLUMNS_CHECK, OnBnClicked_ShowSrcColumns )
-	ON_COMMAND_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnCopyDateCell )
-	ON_UPDATE_COMMAND_UI_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnUpdateSelListItem )
-	ON_COMMAND( ID_PUSH_TO_ATTRIBUTE_FIELDS, OnPushToAttributeFields )
-	ON_UPDATE_COMMAND_UI( ID_PUSH_TO_ATTRIBUTE_FIELDS, OnUpdateSelListItem )
-	ON_COMMAND( ID_PUSH_TO_ALL_FIELDS, OnPushToAllFields )
-	ON_UPDATE_COMMAND_UI( ID_PUSH_TO_ALL_FIELDS, OnUpdateSelListItem )
+	ON_COMMAND_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnCopyDateField )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnUpdateListCaretItem )
+	ON_COMMAND_RANGE( ID_PUSH_MODIFIED_DATE, ID_PUSH_ACCESSED_DATE, OnPushDateField )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_PUSH_MODIFIED_DATE, ID_PUSH_ACCESSED_DATE, OnUpdateListSelection )
+	ON_COMMAND( ID_PUSH_ATTRIBUTE_FIELDS, OnPushAttributeFields )
+	ON_UPDATE_COMMAND_UI( ID_PUSH_ATTRIBUTE_FIELDS, OnUpdateListSelection )
+	ON_COMMAND( ID_PUSH_ALL_FIELDS, OnPushAllFields )
+	ON_UPDATE_COMMAND_UI( ID_PUSH_ALL_FIELDS, OnUpdateListCaretItem )
 	ON_COMMAND_RANGE( IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_VOLUME_CHECK, OnToggle_Attribute )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FILE_TOUCH_LIST, OnLvnItemChanged_TouchList )
+	ON_NOTIFY( lv::LVN_CopyTableText, IDC_FILE_TOUCH_LIST, OnLvnCopyTableText_TouchList )
 	ON_NOTIFY( DTN_DATETIMECHANGE, IDC_MODIFIED_DATE, OnDtnDateTimeChange )
 	ON_NOTIFY( DTN_DATETIMECHANGE, IDC_CREATED_DATE, OnDtnDateTimeChange )
 	ON_NOTIFY( DTN_DATETIMECHANGE, IDC_ACCESSED_DATE, OnDtnDateTimeChange )
@@ -582,8 +709,8 @@ void CTouchFilesDialog::OnOK( void )
 		{
 			cmd::CScopedErrorObserver observe( this );
 
-			if ( m_pCmdSvc->UndoRedo( RollBackMode == m_mode ? svc::Undo : svc::Redo ) ||
-				 PromptCloseDialog( PromptClose ) )
+			if ( m_pCmdSvc->UndoRedo( RollBackMode == m_mode ? svc::Undo : svc::Redo )
+				 || PromptCloseDialog( PromptClose ) )
 				__super::OnOK();
 			else
 				SwitchMode( EditMode );
@@ -621,9 +748,22 @@ void CTouchFilesDialog::OnFieldChanged( void )
 	SwitchMode( EditMode );
 }
 
+void CTouchFilesDialog::OnToggle_TargetSelItems( void )
+{
+	if ( m_pFileModel->SetTargetScope( BST_CHECKED == m_targetSelItemsButton.GetCheck() ? app::TargetSelectedItems : app::TargetAllItems ) )
+		UpdateTargetScopeButton();
+}
+
+void CTouchFilesDialog::On_SelItems_ResetDestFile( void )
+{
+	if ( !m_selData.GetSelItems().empty() )
+		SafeExecuteCmd( CChangeDestFileStatesCmd::MakeResetItemsCmd( m_pFileModel, m_selData.GetSelItems() ) );
+}
+
+
 void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )
 {
-	if ( !m_pFileModel->CopyClipSourceFileStates( this ) )
+	if ( !CFileModel::CopyClipSourceFileStates( this, GetTargetItems() ) )
 		AfxMessageBox( _T("Cannot copy source file states to clipboard!"), MB_ICONERROR | MB_OK );
 }
 
@@ -632,11 +772,11 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 	try
 	{
 		ClearFileErrors();
-		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( this, GetCmdSelItems() ) );
+		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( GetTargetItems(), this ) );
 	}
-	catch ( CRuntimeException& e )
+	catch ( CRuntimeException& exc )
 	{
-		e.ReportError();
+		exc.ReportError();
 	}
 }
 
@@ -650,16 +790,17 @@ void CTouchFilesDialog::OnBnClicked_ShowSrcColumns( void )
 {
 	if ( VisibleAllSrcColumns() )
 	{
-		for ( int column = SrcAttributes; column <= SrcAccessTime; ++column )
-			m_fileListCtrl.SetColumnWidth( column, 0 );		// hide column
+		for ( CListTraits::TColumn column = SrcAttributes; column <= SrcAccessTime; ++column )
+			m_fileListCtrl.ShowColumn( column, false );		// hide column
 	}
 	else
 		m_fileListCtrl.ResetColumnLayout();					// show all columns with default layout
 }
 
-void CTouchFilesDialog::OnCopyDateCell( UINT cmdId )
+void CTouchFilesDialog::OnCopyDateField( UINT cmdId )
 {
 	fs::TimeField dateField;
+
 	switch ( cmdId )
 	{
 		case ID_COPY_MODIFIED_DATE:	dateField = fs::ModifiedDate; break;
@@ -670,34 +811,73 @@ void CTouchFilesDialog::OnCopyDateCell( UINT cmdId )
 			return;
 	}
 
-	const CTouchItem* pTouchItem = m_fileListCtrl.GetPtrAt<CTouchItem>( m_fileListCtrl.GetCurSel() );
-	ASSERT_PTR( pTouchItem );
-	CTextClipboard::CopyText( time_utl::FormatTimestamp( pTouchItem->GetSrcState().GetTimeField( dateField ) ), m_hWnd );
+	const CTouchItem* pCaretItem = m_selData.GetCaretItem();
+	ASSERT_PTR( pCaretItem );
+
+	CTextClipboard::CopyText( time_utl::FormatTimestamp( pCaretItem->GetSrcState().GetTimeField( dateField ) ), m_hWnd );
 }
 
-void CTouchFilesDialog::OnPushToAttributeFields( void )
+void CTouchFilesDialog::OnPushDateField( UINT cmdId )
 {
-	BYTE attributes = m_fileListCtrl.GetPtrAt<CTouchItem>( m_fileListCtrl.GetCurSel() )->GetSrcState().m_attributes;
+	fs::TimeField dateField;
 
-	multi::SetInvalidAll( m_attribCheckStates );
-	for ( std::vector<multi::CAttribCheckState>::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
+	switch ( cmdId )
 	{
-		itAttribState->Accumulate( attributes );
-		itAttribState->UpdateCtrl( this );
+		case ID_PUSH_MODIFIED_DATE:	dateField = fs::ModifiedDate; break;
+		case ID_PUSH_CREATED_DATE:	dateField = fs::CreatedDate; break;
+		case ID_PUSH_ACCESSED_DATE:	dateField = fs::AccessedDate; break;
+		default:
+			ASSERT( false );
+			return;
+	}
+
+	const CTouchItem* pCaretItem = m_selData.GetCaretItem();
+	ASSERT_PTR( pCaretItem );
+
+	multi::CDateTimeState& rDateTimeState = m_dateTimeStates[ dateField ];
+	rDateTimeState.Reset( pCaretItem->GetDestState().GetTimeField( dateField ) );
+
+	if ( rDateTimeState.UpdateCtrl( this ) )
+		multi::FlashCtrlFrame( GetDlgItem( rDateTimeState.m_ctrlId ) );
+
+	OnFieldChanged();
+}
+
+void CTouchFilesDialog::OnPushAttributeFields( void )
+{
+	multi::SetInvalidAll( m_attribCheckStates );
+
+	for ( const CTouchItem* pSelItem : m_selData.GetSelItems() )
+	{
+		BYTE attributes = pSelItem->GetSrcState().m_attributes;
+
+		for ( multi::CAttribCheckState& rAttribState: m_attribCheckStates )
+			rAttribState.Accumulate( attributes );
+	}
+
+	for ( multi::CAttribCheckState& rAttribState : m_attribCheckStates )
+	{
+		if ( rAttribState.UpdateCtrl( this ) )
+			multi::FlashCtrlFrame( GetDlgItem( rAttribState.m_ctrlId ) );
 	}
 
 	OnFieldChanged();
 }
 
-void CTouchFilesDialog::OnPushToAllFields( void )
+void CTouchFilesDialog::OnPushAllFields( void )
 {
-	UpdateFieldsFromSel( m_fileListCtrl.GetCurSel() );
+	UpdateFieldsFromCaretItem();
 	OnFieldChanged();
 }
 
-void CTouchFilesDialog::OnUpdateSelListItem( CCmdUI* pCmdUI )
+void CTouchFilesDialog::OnUpdateListCaretItem( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_fileListCtrl.GetCurSel() != -1 );
+	pCmdUI->Enable( m_selData.GetCaretItem() != nullptr );
+}
+
+void CTouchFilesDialog::OnUpdateListSelection( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( !m_selData.GetSelItems().empty() );
 }
 
 void CTouchFilesDialog::OnToggle_Attribute( UINT checkId )
@@ -713,12 +893,25 @@ void CTouchFilesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pRes
 {
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 
+	ASSERT( !m_fileListCtrl.IsInternalChange() );		// filtered internally by CReportListControl
 	if ( m_fileListCtrl.IsSelectionCaretChangeNotify( pNmList ) )
 	{
-		//UpdateFieldsFromSel( m_fileListCtrl.GetCurSel() );
+		CReportListControl::TraceNotify( pNmList );
+
+		if ( m_selData.ReadList( &m_fileListCtrl ) )
+			UpdateFileListStatus();
 	}
 
 	*pResult = 0;
+}
+
+void CTouchFilesDialog::OnLvnCopyTableText_TouchList( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	lv::CNmCopyTableText* pNmInfo = (lv::CNmCopyTableText*)pNmHdr;
+	*pResult = 0L;		// do default handling
+
+	if ( ui::IsKeyPressed( VK_SHIFT ) )
+		pNmInfo->m_textRows.push_back( pNmInfo->m_pColumnSet->FormatHeaderRow() );		// copy header row if SHIFT is pressed
 }
 
 void CTouchFilesDialog::OnDtnDateTimeChange( NMHDR* pNmHdr, LRESULT* pResult )
@@ -730,7 +923,7 @@ void CTouchFilesDialog::OnDtnDateTimeChange( NMHDR* pNmHdr, LRESULT* pResult )
 	// Cannot break into the debugger due to a mouse hook set in CDateTimeCtrl implementation (Windows).
 	//	https://stackoverflow.com/questions/18621575/are-there-issues-with-dtn-datetimechange-breakpoints-and-the-date-time-picker-co
 
-	fs::TimeField field = GetTimeField( static_cast<UINT>( pNmHdr->idFrom ) );
+	fs::TimeField field = GetTimeFieldFromId( static_cast<UINT>( pNmHdr->idFrom ) );
 	CDateTimeControl* pCtrl = checked_static_cast<CDateTimeControl*>( FromHandle( pNmHdr->hwndFrom ) );
 	TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange for: %s = <%s>\n"), fs::GetTags_TimeField().FormatUi( field ).c_str(), time_utl::FormatTimestamp( pCtrl->GetDateTime() ).c_str() );
 #endif

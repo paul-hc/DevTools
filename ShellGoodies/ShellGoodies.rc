@@ -32,19 +32,19 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     RTEXT           "&Template <name.ext>:",IDC_FORMAT_LABEL,5,8,81,8
     COMBOBOX        IDC_FORMAT_COMBO,90,6,164,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    RTEXT           "&Sequence counter:",IDC_COUNTER_LABEL,17,25,62,8
+    RTEXT           "S&equence counter:",IDC_COUNTER_LABEL,17,25,62,8
     EDITTEXT        IDC_SEQ_COUNT_EDIT,90,24,53,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
     LTEXT           "<strip1_seqCount>",IDC_STRIP_BAR_1,145,24,46,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
-    CONTROL         "Show &Extension",IDC_SHOW_EXTENSION_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,90,41,67,10
+    CONTROL         "Show E&xtension",IDC_SHOW_EXTENSION_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,90,41,67,10
     LTEXT           "Sort &Order:",IDC_SORT_ORDER_STATIC,8,72,38,8
     COMBOBOX        IDC_SORT_ORDER_COMBO,48,70,77,158,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Change Only Selected Files",IDC_TARGET_SEL_ITEMS_CHECK,
+    CONTROL         "Change &Selected Files Only",IDC_TARGET_SEL_ITEMS_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,153,72,103,10
     LTEXT           "&Files to rename",IDC_FILES_STATIC,7,57,324,8,WS_BORDER | NOT WS_GROUP
     LTEXT           "<files-sheet>",IDC_FILES_SHEET,5,88,329,104,WS_BORDER
-    LTEXT           "",IDC_OUTCOME_INFO_STATUS,5,194,327,11,SS_NOPREFIX | SS_CENTERIMAGE | SS_ENDELLIPSIS
-    LTEXT           "F&older:",IDC_CURR_FOLDER_STATIC,5,209,24,8,SS_NOTIFY
-    EDITTEXT        IDC_CURR_FOLDER_EDIT,32,207,300,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "",IDC_OUTCOME_INFO_STATUS,5,194,327,11,SS_NOPREFIX | SS_CENTERIMAGE | SS_ENDELLIPSIS | WS_BORDER
+    LTEXT           "Fol&der:",IDC_CURR_FOLDER_STATIC,5,208,24,8,SS_NOTIFY
+    EDITTEXT        IDC_CURR_FOLDER_EDIT,32,208,302,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
     GROUPBOX        "Source files",IDC_SOURCE_FILES_GROUP,5,229,63,31,BS_LEFT | WS_GROUP
     PUSHBUTTON      "&Copy",IDC_COPY_SOURCE_PATHS_BUTTON,11,240,50,14,WS_GROUP
     PUSHBUTTON      "&Paste",IDC_PASTE_FILES_BUTTON,81,240,50,14
@@ -102,13 +102,18 @@ BEGIN
     CONTROL         "Archive",IDC_ATTRIB_ARCHIVE_CHECK,"Button",BS_AUTO3STATE | WS_TABSTOP,198,52,40,10
     CONTROL         "Directory",IDC_ATTRIB_DIRECTORY_CHECK,"Button",BS_AUTO3STATE | WS_DISABLED | WS_TABSTOP,264,16,44,10
     CONTROL         "Volume",IDC_ATTRIB_VOLUME_CHECK,"Button",BS_AUTO3STATE | WS_DISABLED | WS_TABSTOP,264,28,39,10
-    LTEXT           "&File status:",IDC_STATIC,5,70,36,8
-    CONTROL         "List1",IDC_FILE_TOUCH_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | WS_BORDER | WS_GROUP | WS_TABSTOP,5,81,383,123
+    CONTROL         "Change &Selected Files Only",IDC_TARGET_SEL_ITEMS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,84,103,10
+    CONTROL         "Sho&w Source Columns",IDC_SHOW_SRC_COLUMNS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,302,84,86,10
+    LTEXT           "&Files details",IDC_FILES_STATIC,5,72,383,8,WS_BORDER | NOT WS_GROUP
+    LTEXT           "",IDC_OUTCOME_INFO_STATUS,5,180,383,11,SS_NOPREFIX | SS_CENTERIMAGE | SS_ENDELLIPSIS | WS_BORDER
+    LTEXT           "Fol&der:",IDC_CURR_FOLDER_STATIC,5,194,24,8,SS_NOTIFY
+    EDITTEXT        IDC_CURR_FOLDER_EDIT,32,194,356,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    CONTROL         "List1",IDC_FILE_TOUCH_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | WS_BORDER | WS_GROUP | WS_TABSTOP,5,98,383,79
     DEFPUSHBUTTON   "OK",IDOK,338,8,50,14,WS_GROUP
     PUSHBUTTON      "Cancel",IDCANCEL,338,24,50,14
     LTEXT           "<btns>",IDC_TOOLBAR_PLACEHOLDER,338,43,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
-    CONTROL         "Show Source Columns",IDC_SHOW_SRC_COLUMNS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,302,69,86,10
-    PUSHBUTTON      "&Copy",IDC_COPY_SOURCE_PATHS_BUTTON,5,213,50,14,WS_GROUP
+    PUSHBUTTON      "Copy",IDC_COPY_SOURCE_PATHS_BUTTON,5,213,50,14,WS_GROUP
     PUSHBUTTON      "&Paste",IDC_PASTE_FILES_BUTTON,59,213,50,14
     PUSHBUTTON      "&Reset",IDC_RESET_FILES_BUTTON,113,213,50,14
 END
@@ -469,14 +474,20 @@ BEGIN
     END
     POPUP "<touch list selection>"
     BEGIN
-        MENUITEM "Copy &Path\tCtrl+C",          ID_EDIT_COPY
+        MENUITEM "Copy\tCtrl+C",                ID_EDIT_COPY
         MENUITEM SEPARATOR
-        MENUITEM "Copy Last &Modified Date",    ID_COPY_MODIFIED_DATE
-        MENUITEM "Copy &Created Date",          ID_COPY_CREATED_DATE
-        MENUITEM "Copy &Accessed Date",         ID_COPY_ACCESSED_DATE
+        MENUITEM "Copy Last Modified Date",     ID_COPY_MODIFIED_DATE
+        MENUITEM "Copy Created Date",           ID_COPY_CREATED_DATE
+        MENUITEM "Copy Accessed Date",          ID_COPY_ACCESSED_DATE
         MENUITEM SEPARATOR
-        MENUITEM "Push to Attributes",          ID_PUSH_TO_ATTRIBUTE_FIELDS
-        MENUITEM "Push to All",                 ID_PUSH_TO_ALL_FIELDS
+        MENUITEM "Set Last &Modified Date",     ID_PUSH_MODIFIED_DATE
+        MENUITEM "Set &Created Date",           ID_PUSH_CREATED_DATE
+        MENUITEM "Set &Accessed Date",          ID_PUSH_ACCESSED_DATE
+        MENUITEM SEPARATOR
+        MENUITEM "Set A&ttributes",             ID_PUSH_ATTRIBUTE_FIELDS
+        MENUITEM "Set A&ll",                    ID_PUSH_ALL_FIELDS
+        MENUITEM SEPARATOR
+        MENUITEM "&Select All\tCtrl+A",         ID_EDIT_SELECT_ALL
     END
     POPUP "<duplicates-list>"
     BEGIN
@@ -730,13 +741,13 @@ BEGIN
                             "Auto-fill pattern with the common sequence of the file names (common prefix or sub-string)"
     ID_FIND_DUPLICATE_FILES "Search selected folders for duplicate files"
     ID_CHECK_ALL_DUPLICATES "Check select duplicate files in all groups (to be deleted)\nCheck Select All Duplicates"
-    ID_UNCHECK_ALL_DUPLICATES "Uncheck all files\nUncheck All"
-    ID_KEEP_AS_ORIGINAL_FILE 
-                            "Retain the file as the original (not to be deleted)"
 END
 
 STRINGTABLE
 BEGIN
+    ID_UNCHECK_ALL_DUPLICATES "Uncheck all files\nUncheck All"
+    ID_KEEP_AS_ORIGINAL_FILE 
+                            "Retain the file as the original (not to be deleted)"
     ID_PICK_AS_ORIGINAL_FOLDER 
                             "Select all files in the parent folder as original files"
     ID_HIGHLIGHT_DUPLICATES "Highlight original and duplicate files"
@@ -744,11 +755,11 @@ BEGIN
     ID_DELETE_DUPLICATES    "Delete checked duplicate files to Recycle Bin"
     ID_MOVE_DUPLICATES      "Move checked duplicate files to the vault directory"
     ID_PASTE_DEEP_POPUP     "Paste deep folder image"
-    ID_OPEN_CMD_DASHBOARD   "Open the command dashboard dialog"
 END
 
 STRINGTABLE
 BEGIN
+    ID_OPEN_CMD_DASHBOARD   "Open the command dashboard dialog"
     ID_SELECT_TO_TOP        "Select all actions up to the top, starting with the current action"
     ID_EDIT_SEARCH_PATHS_LIST "Edit search paths\nEdit Search Paths"
     ID_EDIT_INGORE_PATHS_LIST "Edit paths to ignore\nEdit Ignore Paths"

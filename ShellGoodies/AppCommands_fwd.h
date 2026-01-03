@@ -29,6 +29,10 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void );
 
 
+	// command formatting
+	std::tstring FormatResetItemsTag( size_t selItemsSize, size_t allItemsSize );
+
+
 	enum FileFormat { BinaryFormat };
 
 

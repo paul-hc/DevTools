@@ -63,16 +63,15 @@ CChangeDestPathsCmd::CChangeDestPathsCmd( CFileModel* pFileModel, const std::vec
 	REQUIRE( !m_pFileModel->GetRenameItems().empty() );		// should be initialized
 
 	if ( nullptr == pSelItems )
-	{	// all files constructor
-		REQUIRE( m_pFileModel->GetRenameItems().size() == newDestPaths.size() );
-		pSelItems = &m_pFileModel->GetRenameItems();
-	}
+		pSelItems = &m_pFileModel->GetRenameItems();				// all items constructor (implicit)
+	else if ( pSelItems->size() == m_pFileModel->GetRenameItems().size() )
+		REQUIRE( *pSelItems == m_pFileModel->GetRenameItems() );	// all items constructor (explicit)
 	else
-	{	// selected files constructor
-		REQUIRE( !pSelItems->empty() && pSelItems->size() <= m_pFileModel->GetRenameItems().size() );
-		REQUIRE( pSelItems->size() == newDestPaths.size() );
+	{	// selected items constructor
+		REQUIRE( pSelItems->size() < m_pFileModel->GetRenameItems().size() );
 		REQUIRE( utl::ContainsSubSet( m_pFileModel->GetRenameItems(), *pSelItems ) );
 	}
+	REQUIRE( !pSelItems->empty() && pSelItems->size() == newDestPaths.size() );
 
 	utl::transform( *pSelItems, m_srcPaths, func::AsSrcPath() );
 
@@ -81,6 +80,14 @@ CChangeDestPathsCmd::CChangeDestPathsCmd( CFileModel* pFileModel, const std::vec
 
 CChangeDestPathsCmd::~CChangeDestPathsCmd()
 {
+}
+
+CChangeDestPathsCmd* CChangeDestPathsCmd::MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems )
+{
+	std::vector<fs::CPath> newDestPaths;
+
+	utl::transform( selItems, newDestPaths, func::AsSrcPath() );
+	return new CChangeDestPathsCmd( pFileModel, &selItems, newDestPaths, cmd::FormatResetItemsTag( selItems.size(), pFileModel->GetRenameItems().size() ) );
 }
 
 bool CChangeDestPathsCmd::HasSelItems( void ) const override
@@ -165,40 +172,36 @@ CRenameItem* CChangeDestPathsCmd::GetRenameItemAt( size_t posSrcPath ) const
 }
 
 
-namespace cmd
-{
-	CChangeDestPathsCmd* MakeResetSelDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems )
-	{
-		std::vector<fs::CPath> newDestPaths;
-
-		utl::transform( selItems, newDestPaths, func::AsSrcPath() );
-		return new CChangeDestPathsCmd( pFileModel, &selItems, newDestPaths, str::Format( _T("Reset %d selected items to original"), selItems.size() ) );
-	}
-}
-
-
 // CChangeDestFileStatesCmd implementation
 
 CChangeDestFileStatesCmd::CChangeDestFileStatesCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>* pSelItems, const std::vector<fs::CFileState>& newDestStates,
 													const std::tstring& cmdTag /*= std::tstring()*/ )
 	: CBaseChangeDestCmd( cmd::ChangeDestFileStates, pFileModel, cmdTag )
+	, m_destStates( newDestStates )
 {
 	REQUIRE( !m_pFileModel->GetTouchItems().empty() );		// should be initialized
 
 	if ( nullptr == pSelItems )
-	{	// all files constructor
-		REQUIRE( m_pFileModel->GetTouchItems().size() == newDestStates.size() );
-		pSelItems = &m_pFileModel->GetTouchItems();
-	}
+		pSelItems = &m_pFileModel->GetTouchItems();					// all items constructor (implicit)
+	else if ( pSelItems->size() == m_pFileModel->GetTouchItems().size() )
+		REQUIRE( *pSelItems == m_pFileModel->GetTouchItems() );		// all items constructor (explicit)
 	else
 	{	// selected files constructor
-		REQUIRE( !pSelItems->empty() && pSelItems->size() <= m_pFileModel->GetTouchItems().size() );
-		REQUIRE( pSelItems->size() == newDestStates.size() );
+		REQUIRE( !pSelItems->empty() && pSelItems->size() < m_pFileModel->GetTouchItems().size() );
 		REQUIRE( utl::ContainsSubSet( m_pFileModel->GetTouchItems(), *pSelItems ) );
 	}
+	REQUIRE( !pSelItems->empty() && pSelItems->size() == newDestStates.size() );
 
 	utl::transform( *pSelItems, m_srcStates, func::AsSrcState() );
 	ENSURE( m_srcStates.size() == m_destStates.size() );
+}
+
+CChangeDestFileStatesCmd* CChangeDestFileStatesCmd::MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>& selItems )
+{
+	std::vector<fs::CFileState> newDestStates;
+
+	utl::transform( selItems, newDestStates, func::AsSrcState() );
+	return new CChangeDestFileStatesCmd( pFileModel, &selItems, newDestStates, cmd::FormatResetItemsTag( selItems.size(), pFileModel->GetTouchItems().size() ) );
 }
 
 bool CChangeDestFileStatesCmd::HasSelItems( void ) const override
@@ -220,8 +223,9 @@ CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) cons
 {
 	REQUIRE( m_srcStates.size() == m_destStates.size() );
 
-	if ( m_destStates.size() != m_pFileModel->GetTouchItems().size() )
-		return Expired;
+	if ( !HasSelItems() )
+		if ( m_destStates.size() != m_pFileModel->GetTouchItems().size() )
+			return Expired;
 
 	ChangeType changeType = Unchanged;
 
@@ -285,25 +289,13 @@ CTouchItem* CChangeDestFileStatesCmd::GetTouchItemAt( size_t posSrcState ) const
 // CResetDestinationsCmd implementation
 
 CResetDestinationsCmd::CResetDestinationsCmd( CFileModel* pFileModel )
-	: CMacroCommand( _T("Reset"), cmd::ResetDestinations )
+	: CMacroCommand( _T("Reset macro"), cmd::ResetDestinations )
 {
 	if ( !pFileModel->GetRenameItems().empty() )		// lazy initialized?
-	{
-		std::vector<fs::CPath> destPaths; destPaths.reserve( pFileModel->GetRenameItems().size() );
-		for ( std::vector<CRenameItem*>::const_iterator itRenameItem = pFileModel->GetRenameItems().begin(); itRenameItem != pFileModel->GetRenameItems().end(); ++itRenameItem )
-			destPaths.push_back( ( *itRenameItem )->GetSrcPath() );		// DEST = SRC
-
-		AddCmd( new CChangeDestPathsCmd( pFileModel, nullptr, destPaths, m_userInfo ) );
-	}
+		AddCmd( CChangeDestPathsCmd::MakeResetItemsCmd( pFileModel, pFileModel->GetRenameItems() ) );
 
 	if ( !pFileModel->GetTouchItems().empty() )			// lazy initialized?
-	{
-		std::vector<fs::CFileState> destStates; destStates.reserve( pFileModel->GetTouchItems().size() );
-		for ( std::vector<CTouchItem*>::const_iterator itTouchItem = pFileModel->GetTouchItems().begin(); itTouchItem != pFileModel->GetTouchItems().end(); ++itTouchItem )
-			destStates.push_back( ( *itTouchItem )->GetSrcState() );
-
-		AddCmd( new CChangeDestFileStatesCmd( pFileModel, nullptr, destStates, m_userInfo ) );
-	}
+		AddCmd( CChangeDestFileStatesCmd::MakeResetItemsCmd( pFileModel, pFileModel->GetTouchItems() ) );
 }
 
 std::tstring CResetDestinationsCmd::Format( utl::Verbosity verbosity ) const override

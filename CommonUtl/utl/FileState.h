@@ -38,8 +38,9 @@ namespace fs
 		void WriteToFile( void ) const throws_( CFileException, mfc::CRuntimeException );
 
 		// time fields
-		const CTime& GetTimeField( TimeField field ) const;
-		void SetTimeField( const CTime& time, TimeField field ) { const_cast<CTime&>( GetTimeField( field ) ) = time; }
+		const CTime& GetTimeField( TimeField field ) const { return const_cast<CFileState*>( this )->RefTimeField( field ); }
+		bool SetTimeField( const CTime& time, TimeField field ) { return utl::ModifyValue( RefTimeField( field ), time ); }
+		CTime& RefTimeField( TimeField field );
 
 		enum ChecksumEvaluation { Compute, CacheCompute, AsIs };
 

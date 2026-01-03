@@ -3,6 +3,7 @@
 #include "TouchItem.h"
 #include "utl/FmtUtils.h"
 #include "utl/UI/DateTimeControl.h"
+#include "utl/UI/WndUtilsEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,6 +25,12 @@ CTouchItem::~CTouchItem()
 
 namespace multi
 {
+	void FlashCtrlFrame( CWnd* pCtrl )
+	{
+		ui::FlashCtrlFrame( pCtrl, ::GetSysColor( COLOR_MENUHILIGHT ), 3 );
+	}
+
+
 	// CDateTimeState implementation
 
 	const CTime CDateTimeState::s_invalid( -1 );
@@ -37,15 +44,18 @@ namespace multi
 				m_dateTimeState = CTime();				// switch to indeterminate
 	}
 
-	void CDateTimeState::UpdateCtrl( CWnd* pDlg ) const
+	bool CDateTimeState::UpdateCtrl( CWnd* pDlg ) const
 	{
 		REQUIRE( m_dateTimeState != s_invalid );		// accumulated?
 
 		CDateTimeControl* pDateTimeCtrl = checked_static_cast<CDateTimeControl*>( pDlg->GetDlgItem( m_ctrlId ) );
 		ASSERT_PTR( pDateTimeCtrl );
+		bool changed = m_dateTimeState != pDateTimeCtrl->GetDateTime();
 
 		CScopedInternalChange internalChange( pDateTimeCtrl );
 		VERIFY( pDateTimeCtrl->SetDateTime( m_dateTimeState ) );
+
+		return changed;
 	}
 
 	bool CDateTimeState::InputCtrl( CWnd* pDlg )
@@ -89,11 +99,13 @@ namespace multi
 		return true;
 	}
 
-	void CAttribCheckState::UpdateCtrl( CWnd* pDlg ) const
+	bool CAttribCheckState::UpdateCtrl( CWnd* pDlg ) const
 	{
 		REQUIRE( m_checkState != s_invalid );		// accumulated?
+		bool changed = m_checkState != GetChecked( pDlg );
 
 		pDlg->CheckDlgButton( m_ctrlId, m_checkState );
+		return changed;
 	}
 
 	bool CAttribCheckState::InputCtrl( CWnd* pDlg )
@@ -109,8 +121,8 @@ namespace multi
 	{
 		BYTE attributes = pTouchItem->GetDestState().m_attributes;		// start with existing value
 
-		for ( std::vector<multi::CAttribCheckState>::const_iterator itAttribState = attribCheckStates.begin(); itAttribState != attribCheckStates.end(); ++itAttribState )
-			itAttribState->ApplyToAttributes( attributes );
+		for ( const multi::CAttribCheckState& attribState: attribCheckStates )
+			attribState.ApplyToAttributes( attributes );
 
 		return attributes;
 	}

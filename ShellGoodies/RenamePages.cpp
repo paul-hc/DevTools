@@ -136,7 +136,7 @@ void CBaseRenameListPage::DoDataExchange( CDataExchange* pDX ) override
 	if ( firstInit )
 		if ( m_pParentDlg->IsInitialized() )						// not first time sheet creation? - prevent double init if this was the last active page
 		{
-			OnUpdate( m_pParentDlg->GetFileModel(), nullptr );			// initialize the page
+			OnUpdate( m_pParentDlg->GetFileModel(), nullptr );		// initialize the page
 
 			if ( nullptr == m_pParentDlg->GetFirstErrorItem<CRenameItem>() )
 			{
@@ -177,9 +177,7 @@ void CBaseRenameListPage::OnLvnItemChanged_RenameList( NMHDR* pNmHdr, LRESULT* p
 			ui::CSelectionData<CRenameItem>& rSelData = m_pParentDlg->RefSelData();
 
 			if ( rSelData.ReadList( &m_fileListCtrl ) )
-			{
 				COnRenameListSelChangedCmd( this, rSelData ).Execute();		// synchronize selection across pages
-			}
 		}
 
 	*pResult = 0;
@@ -206,7 +204,7 @@ void CRenameSimpleListPage::DoSetupFileListView( void ) override
 {
 	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
 
-	for ( unsigned int index = 0; index != m_pParentDlg->GetRenameItems().size(); ++index )
+	for ( unsigned int index = 0, count = m_pParentDlg->GetRenameItems().size(); index != count; ++index )
 	{
 		CRenameItem* pRenameItem = m_pParentDlg->GetRenameItems()[index];
 

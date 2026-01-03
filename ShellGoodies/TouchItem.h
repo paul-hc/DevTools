@@ -26,6 +26,9 @@ private:
 
 namespace multi
 {
+	void FlashCtrlFrame( CWnd* pCtrl );
+
+
 	// accumulates common values among multiple items, starting with an invalid value (uninitialized)
 
 	class CDateTimeState
@@ -37,9 +40,10 @@ namespace multi
 		void Clear( void ) { m_dateTimeState = CTime(); }
 		void SetInvalid( void ) { m_dateTimeState = s_invalid; }
 
+		bool Reset( const CTime& dateTime ) { return utl::ModifyValue( m_dateTimeState, dateTime ); }
 		void Accumulate( const CTime& dateTime );
 
-		void UpdateCtrl( CWnd* pDlg ) const;
+		bool UpdateCtrl( CWnd* pDlg ) const;
 		bool InputCtrl( CWnd* pDlg );
 
 		bool CanApply( void ) const { REQUIRE( m_dateTimeState != s_invalid ); return m_dateTimeState.GetTime() != 0; }
@@ -65,7 +69,7 @@ namespace multi
 		void Accumulate( BYTE attributes );
 		bool ApplyToAttributes( BYTE& rAttributes ) const;
 
-		void UpdateCtrl( CWnd* pDlg ) const;
+		bool UpdateCtrl( CWnd* pDlg ) const;
 		bool InputCtrl( CWnd* pDlg );
 		UINT GetChecked( CWnd* pDlg ) const { return pDlg->IsDlgButtonChecked( m_ctrlId ); }
 
@@ -95,9 +99,9 @@ namespace multi
 	template< typename ContainerT >
 	typename ContainerT::pointer FindWithCtrlId( ContainerT& rStates, UINT ctrlId )
 	{
-		for ( ContainerT::iterator itState = rStates.begin(); itState != rStates.end(); ++itState )
-			if ( itState->m_ctrlId == ctrlId )
-				return &*itState;
+		for ( typename ContainerT::value_type& rState: rStates )
+			if ( rState.m_ctrlId == ctrlId )
+				return &rState;
 
 		return nullptr;
 	}

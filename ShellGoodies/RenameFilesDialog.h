@@ -33,17 +33,18 @@ public:
 	CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CRenameFilesDialog();
 
-	const std::vector<CRenameItem*>& GetRenameItems( void ) const { return m_rRenameItems; }
-	const std::vector<CRenameItem*>* GetCmdSelItems( void ) const;
-	const std::vector<CRenameItem*>& GetTargetRenameItems( void ) const;
-
 	bool IsInitialized( void ) const { return m_isInitialized; }
 	bool HasDestPaths( void ) const;
 
 	CDisplayFilenameAdapter* GetDisplayFilenameAdapter( void ) { return m_pDisplayFilenameAdapter.get(); }
 	const ui::CSelectionData<CRenameItem>& GetSelData( void ) const { return m_selData; }
 	ui::CSelectionData<CRenameItem>& RefSelData( void ) { return m_selData; }
+
+	const std::vector<CRenameItem*>& GetRenameItems( void ) const { return m_rRenameItems; }
 protected:
+	const std::vector<CRenameItem*>* GetCmdSelItems( void ) const;
+	const std::vector<CRenameItem*>& GetTargetItems( void ) const;
+
 	// IFileEditor interface (partial)
 	virtual void PostMakeDest( bool silent = false ) override;
 	virtual void PopStackTop( svc::StackType stackType ) override;
@@ -144,9 +145,9 @@ protected:
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnCbnSelChange_SortOrder( void );
 	afx_msg void OnToggle_TargetSelItems( void );
-
 	afx_msg void On_SelItems_ResetDestFile( void );
-	afx_msg void OnUpdate_SelItems_ResetDestFile( CCmdUI* pCmdUI );
+	afx_msg void OnUpdateListSelection( CCmdUI* pCmdUI );
+
 	afx_msg void OnBnClicked_PasteDestFiles( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnUpdate_ResetDestFiles( CCmdUI* pCmdUI );

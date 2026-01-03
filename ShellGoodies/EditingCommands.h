@@ -45,6 +45,8 @@ public:
 	CChangeDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>* pSelItems, const std::vector<fs::CPath>& newDestPaths, const std::tstring& cmdTag = std::tstring() );
 	virtual ~CChangeDestPathsCmd();
 
+	static CChangeDestPathsCmd* MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems );
+
 	std::vector<CRenameItem*> MakeSelItems( void ) const;
 
 	// cmd::IFileDetailsCmd
@@ -63,12 +65,6 @@ private:
 };
 
 
-namespace cmd
-{
-	CChangeDestPathsCmd* MakeResetSelDestPathsCmd( CFileModel* pFileModel, const std::vector<CRenameItem*>& selItems );
-}
-
-
 #include "utl/FileState.h"
 
 
@@ -81,6 +77,8 @@ class CChangeDestFileStatesCmd : public CBaseChangeDestCmd
 {
 public:
 	CChangeDestFileStatesCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>* pSelItems, const std::vector<fs::CFileState>& newDestStates, const std::tstring& cmdTag = std::tstring() );
+
+	static CChangeDestFileStatesCmd* MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>& selItems );
 
 	std::vector<CTouchItem*> MakeSelItems( void ) const;
 

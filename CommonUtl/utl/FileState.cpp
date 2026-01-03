@@ -83,7 +83,7 @@ namespace fs
 			m_accessTime == right.m_accessTime;
 	}
 
-	const CTime& CFileState::GetTimeField( TimeField field ) const
+	CTime& CFileState::RefTimeField( TimeField field )
 	{
 		switch ( field )
 		{

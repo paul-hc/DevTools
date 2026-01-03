@@ -85,6 +85,12 @@ namespace cmd
 
 	// command formatting
 
+	std::tstring FormatResetItemsTag( size_t selItemsSize, size_t allItemsSize )
+	{
+		return selItemsSize < allItemsSize ? str::Format( _T("Reset %d selected items to original"), selItemsSize ) : _T("Reset all items to original");
+	}
+
+
 	const std::tstring& FormatCmdTag( const utl::ICommand* pCmd, utl::Verbosity verbosity )
 	{
 		ASSERT_PTR( pCmd );
