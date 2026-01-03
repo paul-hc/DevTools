@@ -50,6 +50,21 @@ namespace lv
 	};
 
 
+	enum FormatTableFlags
+	{
+		HeaderRow			= BIT_FLAG( 0 ),
+		SelRows				= BIT_FLAG( 1 ),
+		AllRows				= BIT_FLAG( 2 ),
+		DisplayColumns		= BIT_FLAG( 3 ),
+		OnlyVisibleColumns	= BIT_FLAG( 4 ),
+
+			SelRowsDisplayVisibleColumns = SelRows | DisplayColumns | OnlyVisibleColumns
+	};
+	typedef int TFormatTableFlags;
+
+	struct CColumnSet;
+
+
 	enum NotifyCode
 	{
 		// via WM_COMMAND:
@@ -60,11 +75,22 @@ namespace lv
 		LVN_CanSortByColumn = 1100,			// pass NMHDR; clients return TRUE if sorting is disabled for the clicked column (by default sorting is enabled on all columns)
 		LVN_CustomSortList,					// pass NMHDR; clients return TRUE if handled custom sorting, using current sorting criteria GetSortByColumn()
 		LVN_ListSorted,						// pass NMHDR
+		LVN_CopyTableText,					// pass lv::CNmCopyTableText; clients return TRUE if copy table is handled (otherwise default handling is done)
 		LVN_ToggleCheckState,				// pass lv::CNmToggleCheckState; client could return TRUE to reject default toggle
 		LVN_CheckStatesChanged,				// pass lv::CNmCheckStatesChanged
 		LVN_DropFiles,						// pass lv::CNmDropFiles
 		LVN_ItemsRemoved,					// pass lv::CNmItemsRemoved
 			_LastNotify						// derived classes may define new WM_NOTIFY notifications starting from this value
+	};
+
+
+	struct CNmCopyTableText
+	{
+		CNmCopyTableText( const CListCtrl* pListCtrl, CColumnSet* pColumnSet ) : m_nmHdr( pListCtrl, LVN_CopyTableText ), m_pColumnSet( pColumnSet ) { ASSERT_PTR( m_pColumnSet ); }
+	public:
+		ui::CNmHdr m_nmHdr;
+		IN OUT CColumnSet* m_pColumnSet;				// selected columns for table formatting
+		OUT std::vector<std::tstring> m_textRows;		// output text lines
 	};
 
 
@@ -74,7 +100,7 @@ namespace lv
 			: m_nmHdr( pListCtrl, lv::LVN_DropFiles ), m_dropPoint( dropPoint ), m_dropItemIndex( dropItemIndex ) {}
 	public:
 		ui::CNmHdr m_nmHdr;
-		CPoint m_dropPoint;							// client coordinates
+		CPoint m_dropPoint;						// client coordinates
 		int m_dropItemIndex;
 		std::vector<fs::CPath> m_filePaths;		// sorted
 	};
@@ -147,7 +173,8 @@ abstract class CListTraits			// defines types shared between CReportListControl 
 {
 public:
 	typedef LPARAM TRowKey;			// row keys are invariant to sorting; they represent item data (LPARAM), or fall back to index (int)
-	typedef int TColumn;
+	typedef int TColumn;			// list internal column position
+	typedef int TDisplayColumn;		// user order of the list column
 	typedef int TGroupId;
 
 	enum StdColumn { Code, EntireRecord = (TColumn)-1 };
@@ -221,8 +248,10 @@ public:
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
 
-	const TCHAR* GetTabularTextSep( void ) const { return m_pTabularSep; }
-	void SetTabularTextSep( const TCHAR* pTabularSep = _T("\t") ) { m_pTabularSep = pTabularSep; }
+	TCHAR GetTabularTextSep( void ) const { return m_tabularSep; }
+	void SetTabularTextSep( TCHAR tabularSep = _T('\t') ) { m_tabularSep = tabularSep; }
+
+	void SetFormatTableFlags( lv::TFormatTableFlags fmtTableFlags, TCHAR tabularSep = _T('\t') ) { m_fmtTableFlags = fmtTableFlags; SetTabularTextSep( tabularSep ); }
 
 	COLORREF GetActualTextColor( void ) const;
 public:
@@ -337,12 +366,14 @@ public:
 	// column layout
 	struct CColumnInfo
 	{
-		CColumnInfo( void ) : m_alignment( LVCFMT_LEFT ), m_defaultWidth( 0 ), m_minWidth( MinColumnWidth ) {}
+		CColumnInfo( void ) : m_alignment( LVCFMT_LEFT ), m_defaultWidth( 0 ), m_minWidth( MinColumnWidth ), m_lastVisibleWidth( 0 ) {}
 	public:
-		std::tstring m_label;
-		int m_alignment;
-		int m_defaultWidth;
-		int m_minWidth;
+		persist std::tstring m_label;
+		persist int m_alignment;
+		persist int m_defaultWidth;
+		persist int m_minWidth;
+
+		int m_lastVisibleWidth;		// saved when hiding the column
 	};
 
 	static void ParseColumnLayout( std::vector<CColumnInfo>& rColumnInfos, const std::vector<std::tstring>& columnSpecs );
@@ -356,8 +387,21 @@ public:
 	unsigned int GetColumnCount( void ) const;
 	void ResetColumnLayout( void );
 
+	const CColumnInfo& GetColumnInfo( TColumn column ) const { ASSERT( HasLayoutInfo() && column < (TColumn)GetColumnCount() ); return m_columnInfos[ column ]; }
+
 	int GetMinColumnWidth( TColumn column ) const { ASSERT( HasLayoutInfo() ); return m_columnInfos[ column ].m_minWidth; }
 	void SetMinColumnWidth( TColumn column, int minWidth ) { ASSERT( HasLayoutInfo() ); m_columnInfos[ column ].m_minWidth = minWidth; }
+
+	bool IsColumnVisible( TColumn column ) const { ASSERT( HasLayoutInfo() ); return GetColumnWidth( column ) != 0; }
+	bool ShowColumn( TColumn column, bool show = true );
+
+	bool IsColumnRangeVisible( TColumn firstColumn, TColumn lastColumn ) const;
+
+	// columns in display order:
+	bool GetDisplayColumnOrder( OUT std::vector<TColumn>& rDisplayColumns, bool onlyVisible = false ) const;
+
+	TDisplayColumn ToDisplayColumn( TColumn column ) const;
+	const CColumnInfo& GetDisplayColumnInfo( TColumn column ) const { return GetColumnInfo( ToDisplayColumn( column ) ); }
 private:
 	void InsertAllColumns( void );
 	void DeleteAllColumns( void );
@@ -370,7 +414,7 @@ protected:
 
 	virtual void SetupControl( void );
 	virtual bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const;
-	virtual std::tstring FormatItemLine( int index ) const;
+	virtual std::tstring FormatItemRow( int index ) const;
 
 	bool ResizeFlexColumns( void );
 
@@ -554,6 +598,7 @@ public:
 
 	bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags = ListSourcesMask ) const;		// for drag-drop or clipboard transfers
 	bool Copy( int sourceFlags = ListSourcesMask );						// creates a new COleDataSource object owned by the cliboard
+	bool CopyTable( lv::TFormatTableFlags fmtFlags = lv::SelRowsDisplayVisibleColumns, const TCHAR delim = '\t' ) const;
 
 	std::auto_ptr<CImageList> CreateDragImageMulti( const std::vector<int>& indexes, CPoint* pFrameOrigin = nullptr );
 	std::auto_ptr<CImageList> CreateDragImageSelection( CPoint* pFrameOrigin = nullptr );
@@ -666,11 +711,12 @@ private:
 	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
 	std::tstring m_regSection;
-	persist std::vector<CColumnInfo> m_columnInfos;
+	persist std::vector<CColumnInfo> m_columnInfos;			// in list internal order
 	std::vector<UINT> m_tileColumns;						// columns to be displayed as tile additional text (in gray)
 	int m_optionFlags;
 	bool m_subjectBased;									// objects stored as pointers are derived from utl::ISubject (polymorphic type)
-	const TCHAR* m_pTabularSep;								// NULL by default (copy Code column text); could be set to "\t" for a tab-separated copy to clipboard
+	TCHAR m_tabularSep;										// zero by default (copy Code column text); could be set to "\t" for a tab-separated copy to clipboard
+	lv::TFormatTableFlags m_fmtTableFlags;					// format clipboard copy via CopyTable() method
 
 	persist TColumn m_sortByColumn;
 	persist bool m_sortAscending;
@@ -776,6 +822,25 @@ namespace lv
 	typedef CScopedStatus<int> TScopedStatus_ByIndex;
 	typedef CScopedStatus<utl::ISubject*> TScopedStatus_ByObject;
 	typedef CScopedStatus<std::tstring> TScopedStatus_ByText;
+
+
+	struct CColumnSet
+	{
+		typedef CListTraits::TColumn TColumn;
+
+		CColumnSet( const CReportListControl* pListCtrl, TFormatTableFlags fmtFlags, const TCHAR delim = '\t' );
+
+		void Clear( void ) { m_columns.clear(); }
+		bool IsEmpty( void ) const { return m_columns.empty(); }
+
+		std::tstring FormatHeaderRow( void ) const;
+		std::tstring FormatItemRow( int rowIndex ) const;
+	private:
+		const CReportListControl* m_pListCtrl;
+	public:
+		const TCHAR m_delim;
+		std::vector<TColumn> m_columns;
+	};
 }
 
 

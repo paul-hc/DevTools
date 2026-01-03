@@ -20,6 +20,7 @@
 #include "utl/Algorithms.h"
 #include "utl/FlagTags.h"
 #include "utl/Serialization.h"
+#include "utl/TextClipboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -117,8 +118,9 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_listStyleEx( listStyleEx )
 	, m_optionFlags( SortInternally | PersistSorting | HighlightTextDiffsFrame )
 	, m_subjectBased( false )
-	, m_pTabularSep( nullptr )
-	, m_sortByColumn( -1 )			// no sorting by default
+	, m_tabularSep( '\0' )
+	, m_fmtTableFlags( 0 )
+	, m_sortByColumn( -1 )				// no sorting by default
 	, m_sortAscending( true )
 	, m_pComparePtrFunc( nullptr )		// use text compare by default
 	, m_pImageList( nullptr )
@@ -892,6 +894,71 @@ void CReportListControl::DeleteAllColumns( void )
 			VERIFY( DeleteColumn( i ) != -1 );
 }
 
+bool CReportListControl::ShowColumn( TColumn column, bool show /*= true*/ )
+{
+	if ( show == IsColumnVisible( column ) )
+		return false;
+
+	CColumnInfo& rColumnInfo = m_columnInfos[ column ];
+
+	if ( show )
+	{
+		ASSERT( rColumnInfo.m_lastVisibleWidth > 0 );
+		SetColumnWidth( column, rColumnInfo.m_lastVisibleWidth );
+	}
+	else
+	{
+		rColumnInfo.m_lastVisibleWidth = GetColumnWidth( column );		// save width before hiding the column
+		SetColumnWidth( column, 0 );		// hide column
+	}
+	return true;
+}
+
+bool CReportListControl::IsColumnRangeVisible( TColumn firstColumn, TColumn lastColumn ) const
+{
+	ASSERT( firstColumn < lastColumn );
+	ASSERT( lastColumn < (TColumn)GetColumnCount() );
+
+	for ( ; firstColumn <= lastColumn; ++firstColumn )
+		if ( !IsColumnVisible( firstColumn ) )
+			return false;
+
+	return true;
+}
+
+bool CReportListControl::GetDisplayColumnOrder( OUT std::vector<TColumn>& rDisplayColumns, bool onlyVisible /*= false*/ ) const
+{
+	int columnCount = GetColumnCount();
+	rDisplayColumns.resize( columnCount );
+
+	bool succeeded = GetColumnOrderArray( rDisplayColumns.data(), columnCount ) != FALSE;
+
+	if ( !succeeded )
+		utl::generate( rDisplayColumns, func::GenNumSeq<TColumn>( 0 ) );
+
+	if ( onlyVisible )
+	{
+		using std::placeholders::_1;
+
+		utl::RemoveIfPred( rDisplayColumns, std::bind( &CReportListControl::IsColumnVisible, this, _1 ), utl::NegatePred );
+	}
+
+	return succeeded;
+}
+
+CListTraits::TDisplayColumn CReportListControl::ToDisplayColumn( TColumn column ) const
+{
+	// input columns layout (width and order)
+	LVCOLUMN columnInfo;
+
+	ZeroMemory( &columnInfo, sizeof( columnInfo ) );
+	columnInfo.mask = LVCF_ORDER;
+
+	VERIFY( GetColumn( column, &columnInfo ) );
+
+	return columnInfo.iOrder;
+}
+
 void CReportListControl::InsertAllColumns( void )
 {
 	if ( !HasLayoutInfo() )
@@ -909,14 +976,17 @@ void CReportListControl::InsertAllColumns( void )
 
 	for ( UINT i = 0; i != m_columnInfos.size(); ++i )
 	{
-		columnInfo.pszText = (TCHAR*)m_columnInfos[ i ].m_label.c_str();
-		columnInfo.fmt = m_columnInfos[ i ].m_alignment;
 		columnInfo.iOrder = i;
 
-		int columnWidth = m_columnInfos[ i ].m_defaultWidth;
+		const CColumnInfo& layoutColInfo = m_columnInfos[ columnInfo.iOrder ];
+
+		columnInfo.pszText = (TCHAR*)layoutColInfo.m_label.c_str();
+		columnInfo.fmt = layoutColInfo.m_alignment;
+
+		int columnWidth = layoutColInfo.m_defaultWidth;
 
 		if ( ColumnWidth_AutoSize == columnWidth )
-			columnWidth = ColumnSpacing + GetStringWidth( m_columnInfos[ i ].m_label.c_str() );
+			columnWidth = ColumnSpacing + GetStringWidth( layoutColInfo.m_label.c_str() );
 		else if ( columnWidth < 0 )
 			columnWidth = LVSCW_AUTOSIZE_USEHEADER;
 
@@ -942,14 +1012,17 @@ void CReportListControl::SetupColumnLayout( const std::vector<std::tstring>* pRe
 
 	for ( UINT i = 0; i != m_columnInfos.size(); ++i )
 	{
-		columnInfo.pszText = (TCHAR*)m_columnInfos[ i ].m_label.c_str();
-		columnInfo.fmt = m_columnInfos[ i ].m_alignment;
 		columnInfo.iOrder = i;
 
-		int columnWidth = m_columnInfos[ i ].m_defaultWidth;
+		const CColumnInfo& layoutColInfo = m_columnInfos[ columnInfo.iOrder ];
+
+		columnInfo.pszText = (TCHAR*)layoutColInfo.m_label.c_str();
+		columnInfo.fmt = layoutColInfo.m_alignment;
+
+		int columnWidth = layoutColInfo.m_defaultWidth;
 
 		if ( ColumnWidth_AutoSize == columnWidth )
-			columnWidth = ColumnSpacing + GetStringWidth( m_columnInfos[ i ].m_label.c_str() );
+			columnWidth = ColumnSpacing + GetStringWidth( layoutColInfo.m_label.c_str() );
 		else if ( columnWidth < 0 )
 			columnWidth = LVSCW_AUTOSIZE_USEHEADER;		// will stretch it later
 
@@ -1075,6 +1148,9 @@ void CReportListControl::InputColumnLayout( std::vector<std::tstring>& rRegColum
 	for ( UINT i = 0; i != m_columnInfos.size(); ++i )
 	{
 		VERIFY( GetColumn( i, &columnInfo ) );
+
+		const CColumnInfo& layoutColInfo = m_columnInfos[ columnInfo.iOrder ]; layoutColInfo;
+
 		rRegColumnLayoutItems[ i ] = str::Format( s_fmtRegColumnLayout, columnInfo.cx, columnInfo.iOrder ).c_str();
 	}
 }
@@ -1799,10 +1875,10 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 	std::vector<std::tstring> textLines;
 	if ( HasFlag( sourceFlags, ds::ItemsText | ds::ShellFiles ) )
 		for ( std::vector<int>::const_iterator itSelIndex = selData.m_selIndexes.begin(); itSelIndex != selData.m_selIndexes.end(); ++itSelIndex )
-			textLines.push_back( FormatItemLine( *itSelIndex ) );
+			textLines.push_back( FormatItemRow( *itSelIndex ) );
 
 	if ( HasFlag( sourceFlags, ds::ItemsText ) )
-		ole_utl::CacheTextData( pDataSource, str::Join( textLines, _T("\r\n") ) );
+		ole_utl::CacheTextData( pDataSource, str::Join( textLines, CTextClipboard::s_lineEnd ) );
 
 	if ( HasFlag( sourceFlags, ds::ShellFiles ) )
 	{
@@ -1821,17 +1897,17 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 	return CacheSelectionData( pDataSource, sourceFlags, selData );
 }
 
-std::tstring CReportListControl::FormatItemLine( int index ) const
+std::tstring CReportListControl::FormatItemRow( int index ) const
 {
 	std::tstring lineText;
 	utl::ISubject* pObject = GetSubjectAt( index );
 
-	if ( !str::IsEmpty( m_pTabularSep ) )
+	if ( m_tabularSep != '\0' )
 	{
 		for ( unsigned int col = 0, count = GetColumnCount(); col != count; ++col )
 		{
 			if ( col != 0 )
-				lineText += m_pTabularSep;
+				lineText += m_tabularSep;
 
 			if ( Code == col && pObject != nullptr )
 				lineText += pObject->GetCode();
@@ -1859,6 +1935,48 @@ bool CReportListControl::Copy( int sourceFlags /*= ListSourcesMask*/ )
 		return true;
 	}
 	return false;
+}
+
+bool CReportListControl::CopyTable( lv::TFormatTableFlags fmtFlags /*= lv::SelRowsDisplayVisibleColumns*/, const TCHAR delim /*= '\t'*/ ) const
+{
+	ASSERT_PTR( GetSafeHwnd() );
+
+	lv::CColumnSet columnSet( this, fmtFlags, delim );
+	lv::CNmCopyTableText nmInfo( this, &columnSet );
+
+	if ( nmInfo.m_nmHdr.NotifyParent() )		// send lv::LVN_CopyTableText notification
+		return true;							// copy table handled by parent dialog
+
+	std::vector<std::tstring> textRows;
+	textRows.swap( nmInfo.m_textRows );			// copy the filled text rows filled by parent
+
+	if ( !columnSet.IsEmpty() )					// should continue with default filling of text rows?
+	{	// fill the text rows internally
+		if ( HasFlag( fmtFlags, lv::HeaderRow ) )
+			textRows.push_back( columnSet.FormatHeaderRow() );
+
+		if ( HasFlag( fmtFlags, lv::SelRows ) )
+		{
+			std::vector<int> selIndexes;
+			int caretIndex;
+
+			GetSelIndexes( selIndexes, &caretIndex );
+			if ( selIndexes.empty() && caretIndex != -1 )	// no selection, but there is caret?
+				selIndexes.push_back( caretIndex );			// use caret as selection
+
+			for ( std::vector<int>::const_iterator itRowIndex = selIndexes.begin(); itRowIndex != selIndexes.end(); ++itRowIndex )
+				textRows.push_back( columnSet.FormatItemRow( *itRowIndex ) );
+		}
+		else
+		{
+			ASSERT( HasFlag( fmtFlags, lv::AllRows ) );
+
+			for ( int rowIndex = 0, count = GetItemCount(); rowIndex != count; ++rowIndex )
+				textRows.push_back( columnSet.FormatItemRow( rowIndex ) );
+		}
+	}
+
+	return CTextClipboard::CopyToLines( textRows, GetSafeHwnd() );
 }
 
 std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::vector<int>& indexes, CPoint* pFrameOrigin /*= nullptr*/ )
@@ -2590,7 +2708,10 @@ void CReportListControl::OnUpdateResetColumnLayout( CCmdUI* pCmdUI )
 
 void CReportListControl::OnCopy( void )
 {
-	Copy();
+	if ( m_fmtTableFlags != 0 )
+		CopyTable( m_fmtTableFlags, m_tabularSep );
+	else
+		Copy();
 }
 
 void CReportListControl::OnSelectAll( void )
@@ -2820,6 +2941,57 @@ namespace lv
 	}
 
 } //namespace lv
+
+
+namespace lv
+{
+	// CColumnSet implementation
+
+	CColumnSet::CColumnSet( const CReportListControl* pListCtrl, TFormatTableFlags fmtFlags, const TCHAR delim /*= '\t'*/ )
+		: m_pListCtrl( pListCtrl )
+		, m_delim( delim )
+	{
+		if ( HasFlag( fmtFlags, DisplayColumns ) )
+			pListCtrl->GetDisplayColumnOrder( m_columns, HasFlag( fmtFlags, OnlyVisibleColumns ) );
+		else
+		{
+			m_columns.resize( pListCtrl->GetColumnCount() );
+			utl::generate( m_columns, func::GenNumSeq<TColumn>( 0 ) );
+		}
+	}
+
+	std::tstring CColumnSet::FormatHeaderRow( void ) const
+	{
+		std::tstring rowText;
+		size_t pos = 0;
+
+		// copy tab-separated header text
+		for ( std::vector<TColumn>::const_iterator itColumn = m_columns.begin(); itColumn != m_columns.end(); ++itColumn )
+		{
+			if ( pos++ != 0 )
+				rowText += m_delim;
+
+			rowText += m_pListCtrl->GetColumnInfo( *itColumn ).m_label;
+		}
+		return rowText;
+	}
+
+	std::tstring CColumnSet::FormatItemRow( int rowIndex ) const
+	{
+		std::tstring rowText;
+		size_t pos = 0;
+
+		// copy tab-separated header text
+		for ( std::vector<TColumn>::const_iterator itColumn = m_columns.begin(); itColumn != m_columns.end(); ++itColumn )
+		{
+			if ( pos++ != 0 )
+				rowText += m_delim;
+
+			rowText += m_pListCtrl->GetItemText( rowIndex, *itColumn ).GetString();
+		}
+		return rowText;
+	}
+}
 
 
 // CSelFlowSequence implementation

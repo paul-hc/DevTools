@@ -228,7 +228,7 @@ CAboutBox::CAboutBox( CWnd* pParent )
 	std::vector<std::tstring> columnSpecs;
 	str::Split( columnSpecs, _T("Property=85|Value=-1"), _T("|") );
 	m_pBuildInfoList->SetLayoutInfo( columnSpecs );
-	m_pBuildInfoList->SetTabularTextSep( _T("\t") );
+	m_pBuildInfoList->SetTabularTextSep();
 }
 
 CAboutBox::~CAboutBox()
