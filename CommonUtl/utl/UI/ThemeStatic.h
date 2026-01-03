@@ -77,12 +77,24 @@ public:
 class CLabelDivider : public CRegularStatic
 {
 public:
-	CLabelDivider( Style style = Bold );
+	enum EdgeType
+	{
+		AccentEdge	= EDGE_ETCHED,		// mid-dark (default)
+		SoftEdge	= EDGE_SUNKEN,		// group-box style
+		SharpEdge	= EDGE_BUMP,		// darker
+		HardEdge	= EDGE_RAISED		// hardest, rude
+	};
+
+	CLabelDivider( Style style = Bold, EdgeType edgeType = AccentEdge );
+
+	EdgeType GetEdgeType( void ) const { return static_cast<EdgeType>( m_edgeType ); }
+	void SetEdgeType( EdgeType edgeType );
 protected:
 	// base overrides
 	virtual void Draw( CDC* pDC, const CRect& clientRect ) override;
-
+private:
 	enum Metrics { LineSpacingX = 7 };
+	UINT m_edgeType;		// accented ? EDGE_ETCHED : EDGE_SUNKEN (default, group-box style)
 };
 
 

@@ -209,9 +209,17 @@ void CRegularStatic::SetStyle( Style style )
 
 // CLabelDivider implementation
 
-CLabelDivider::CLabelDivider( Style style /*= Bold*/ )
+CLabelDivider::CLabelDivider( Style style /*= Bold*/, EdgeType edgeType /*= AccentEdge*/ )
 	: CRegularStatic( style )
+	, m_edgeType( edgeType )
 {
+}
+
+void CLabelDivider::SetEdgeType( EdgeType edgeType )
+{
+	if ( utl::ModifyValue( m_edgeType, (UINT)edgeType ) )
+		if ( m_hWnd != nullptr )
+			Invalidate();
 }
 
 void CLabelDivider::Draw( CDC* pDC, const CRect& clientRect ) override
@@ -239,10 +247,10 @@ void CLabelDivider::Draw( CDC* pDC, const CRect& clientRect ) override
 	}
 
 	if ( rectDivLine1.Width() > 1 )
-		pDC->DrawEdge( &rectDivLine1, EDGE_SUNKEN, BF_BOTTOM | BF_MIDDLE );
+		pDC->DrawEdge( &rectDivLine1, m_edgeType, BF_BOTTOM | BF_MIDDLE );
 
 	if ( rectDivLine2.Width() > 1 )
-		pDC->DrawEdge( &rectDivLine2, EDGE_SUNKEN, BF_BOTTOM | BF_MIDDLE );
+		pDC->DrawEdge( &rectDivLine2, m_edgeType, BF_BOTTOM | BF_MIDDLE );
 }
 
 
