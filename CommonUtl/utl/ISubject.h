@@ -132,7 +132,6 @@ namespace utl
 
 namespace dbg
 {
-#ifdef _DEBUG
 	const std::tstring GetSafeFileName( const utl::ISubject* pItem );
 
 	template< typename ItemContainerT >
@@ -146,7 +145,6 @@ namespace dbg
 	{
 		return str::Format( _T("%d:{%s}"), items.size(), JoinFileNames( items ).c_str() );
 	}
-#endif
 }
 
 

@@ -2276,6 +2276,8 @@ void CReportListControl::TraceNotify( const NMLISTVIEW* pNmList )
 		CReportListControl::GetTags_LV_Flags().FormatKey( pNmList->uChanged ).c_str(),
 		( pObject != nullptr ? dbg::GetSafeFileName( pObject ) : num::FormatNumber( pNmList->lParam ) ).c_str()
 	);
+#else
+	pNmList;
 #endif //_DEBUG
 }
 
