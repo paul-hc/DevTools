@@ -41,6 +41,7 @@ namespace reg
 namespace reg
 {
 	void SplitEntryFullPath( TKeyPath* pOutSection, const std::tstring* pOutEntry, const TCHAR* pEntryFullPath );		// e.g. "Settings\\Options|Size" -> section="Settings\\Options", entry="Size"
+
 	bool WriteStringValue( HKEY hParentKey, const TKeyPath& keySubPath, const TCHAR* pValueName, const std::tstring& text )
 	{
 		CKey key;
@@ -60,7 +61,7 @@ namespace reg
 			parentKey.DeleteSubKey( keySubPath.GetFilenamePtr(), depth );
 	}
 
-	bool OpenKey( CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired /*= KEY_READ | KEY_WRITE*/ )
+	bool OpenKey( OUT CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired /*= KEY_READ | KEY_WRITE*/ )
 	{
 		ASSERT_PTR( pKey );
 		HKEY hHive;
@@ -73,7 +74,7 @@ namespace reg
 		return false;
 	}
 
-	bool CreateKey( CKey* pKey, const TCHAR* pKeyFullPath )
+	bool CreateKey( OUT CKey* pKey, const TCHAR* pKeyFullPath )
 	{
 		ASSERT_PTR( pKey );
 		HKEY hHive;
@@ -90,6 +91,12 @@ namespace reg
 	{
 		CKey key;
 		return OpenKey( &key, pKeyFullPath, samDesired );
+	}
+
+	bool KeyExist( HKEY hParentKey, const TKeyPath& keySubPath, REGSAM samDesired /*= KEY_READ*/ )
+	{
+		CKey key;
+		return key.Open( hParentKey, keySubPath.GetPtr(), samDesired );
 	}
 
 	bool IsKeyWritable( const TCHAR* pKeyFullPath, bool* pAccessDenied /*= nullptr*/ )
@@ -109,7 +116,7 @@ namespace reg
 
 	utl::CErrorCode CKey::s_lastError;
 
-	bool CKey::ParseFullPath( HKEY& rhHive, TKeyPath& rSubPath, const TCHAR* pKeyFullPath )
+	bool CKey::ParseFullPath( OUT HKEY& rhHive, OUT TKeyPath& rSubPath, const TCHAR* pKeyFullPath )
 	{
 		ASSERT( !str::IsEmpty( pKeyFullPath ) );
 		rhHive = nullptr;

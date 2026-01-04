@@ -196,6 +196,11 @@ namespace app
 		return shell::BrowseForFile( rFullPath, pParentWnd, browseMode, stgFilters.c_str(), flags );
 	}
 
+	bool UseDDE( void )
+	{	// PHC [4-Jan-2026]: use standard directory open instead of the legacy DDE registration
+		return false;
+	}
+
 } //namespace shell
 
 
@@ -219,6 +224,9 @@ CApplication::CApplication( void )
 	, m_pEventLogger( new CLogger( _T("%s-events") ) )
 {
 	// use AFX_IDS_APP_TITLE - same app registry key for 32/64 bit executables
+
+	m_bDeferShowOnFirstWindowPlacementLoad = true;		// delay showing the main frame until m_pMainFrame->ShowWindow() gets called
+	// m_bLoadWindowPlacement=TRUE by default
 
 	SetInteractive( false );		// using an app message loop
 
@@ -246,23 +254,35 @@ BOOL CApplication::InitInstance( void )
 	SetUseAppLook( app::Office_2007_Blue );
 	InitGlobals();
 
+	if (false)
+	{	// app startup debugging hook
+		static const bool ATTACH_TO_SLIDER_PROCESS_TO_START_DEBUGGING = false;		// prompt user to start debugging
+		ASSERT( ATTACH_TO_SLIDER_PROCESS_TO_START_DEBUGGING );
+	}
+
 	CWorkspace* pWorkspace = &CWorkspace::Instance();
 
 	pWorkspace->LoadSettings();
-	pWorkspace->ApplySettings();
-	LoadStdProfileSettings( CWorkspace::GetData().m_mruCount );		// load standard INI file options (including MRU)
-
-	CAppDocManager* pAppDocManager = new CAppDocManager();			// will register all document templates
-	ASSERT_NULL( m_pDocManager );
-	m_pDocManager = pAppDocManager;
-
-	m_pGdiPlusInit.reset( new CScopedGdiPlusInit() );		/// CRITICAL: this should not be called earlier, otherwise it breaks DDE open on Explorer side!
 
 	CCmdLineInfo cmdInfo( this );
 	cmdInfo.ParseAppSwitches();				// just our switches (ignore MFC arguments)
 
 	if ( ui::IsKeyPressed( VK_SHIFT ) )
 		cmdInfo.SetForceFlag( app::FullScreen | app::DocMaximize, true );
+
+	pWorkspace->ApplySettings();
+
+	LoadStdProfileSettings( CWorkspace::GetData().m_mruCount );		// load standard INI file options (including MRU)
+
+	CAppDocManager* pAppDocManager = new CAppDocManager();			// will register all document templates
+	ASSERT_NULL( m_pDocManager );
+	m_pDocManager = pAppDocManager;
+
+	/// CRITICAL: this should not be called earlier, otherwise it breaks DDE open on Explorer side!
+	// [4-Jan-2026] update: the DDE open no longer works with new Windows, it seems broken.
+	//	I replaced DDE open with straight open, which work for single file/directory in Explorer.
+	//	If multiple files are opened, it opens multiple Slider proceses.
+	m_pGdiPlusInit.reset( new CScopedGdiPlusInit() );
 
 	if ( HasFlag( m_runFlags, ShowHelp ) )
 	{
@@ -289,17 +309,20 @@ BOOL CApplication::InitInstance( void )
 	if ( !ProcessShellCommand( cmdInfo ) )
 		return FALSE;
 
-	if ( -1 == m_nCmdShow || SW_HIDE == m_nCmdShow )				// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
-		StoreCmdShow( SW_SHOWNORMAL );		// make the main frame visible
+	if ( -1 == m_nCmdShow || SW_HIDE == m_nCmdShow )	// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
+		StoreCmdShow( SW_SHOWNORMAL );				// make the main frame visible
 
 	// the main window has been initialized, so show and update it
-	m_pMainFrame->ShowWindow( m_nCmdShow );
+	if ( m_bDeferShowOnFirstWindowPlacementLoad )	// wnd placement SHOW was deferred?
+		m_pMainFrame->ShowWindow( m_nCmdShow );		// show main window for the first time
+
 	m_pMainFrame->UpdateWindow();
 
 	if ( HandleAppTests() )
 		return FALSE;
 
-	pWorkspace->LoadDocuments();			// load the documents saved in workspace
+	if ( cmdInfo.m_nShellCommand != CCommandLineInfo::FileOpen )	// not an explicit FileOpen?
+		pWorkspace->LoadDocuments();			// load the documents saved in workspace
 
 	// DDE open messages execution will follow, when entering the application message loop
 	return TRUE;
@@ -479,11 +502,11 @@ BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinAppEx> )
-	ON_COMMAND( ID_FILE_NEW, CBaseApp<CWinAppEx>::OnFileNew )
-	ON_COMMAND( ID_FILE_OPEN, CBaseApp<CWinAppEx>::OnFileOpen )
+BEGIN_MESSAGE_MAP( CApplication, TBaseClass )
+	ON_COMMAND( ID_FILE_NEW, TBaseClass::OnFileNew )
+	ON_COMMAND( ID_FILE_OPEN, TBaseClass::OnFileOpen )
 	ON_COMMAND( ID_FILE_OPEN_ALBUM_FOLDER, OnFileOpenAlbumFolder )
-	ON_COMMAND( ID_FILE_PRINT_SETUP, CBaseApp<CWinAppEx>::OnFilePrintSetup )
+	ON_COMMAND( ID_FILE_PRINT_SETUP, TBaseClass::OnFilePrintSetup )
 	ON_COMMAND( CM_CLEAR_TEMP_EMBEDDED_CLONES, OnClearTempEmbeddedClones )
 END_MESSAGE_MAP()
 
@@ -535,6 +558,17 @@ void CApplication::CCmdLineInfo::ParseParam( const TCHAR* pParam, BOOL isFlag, B
 		}
 
 	__super::ParseParam( pParam, isFlag, isLast );
+
+	if ( !isFlag && isLast )
+		if ( !m_strFileName.IsEmpty() )
+			if ( FileNothing == m_nShellCommand )
+			{
+				m_nShellCommand = FileOpen;			// open file/directory passed as non-DDE parameter
+				m_bShowSplash = false;
+
+				// maximize the single opened document when invoked from Explorer
+				SetFlag( CWorkspace::RefData().m_wkspFlags, wf::MdiMaximized );
+			}
 }
 
 bool CApplication::CCmdLineInfo::ParseSwitch( const TCHAR* pSwitch )
@@ -546,7 +580,7 @@ bool CApplication::CCmdLineInfo::ParseSwitch( const TCHAR* pSwitch )
 	else if ( arg::Equals( pSwitch, _T("SKIP_UI_TESTS") ) )
 		SetFlag( m_pApp->m_runFlags, SkipUiTests );
 	else
-		switch ( func::ToUpper()( pSwitch[ 0 ] ) )
+		switch ( func::ToUpper()( pSwitch[0] ) )
 		{
 			case _T('R'):	SetForceFlag( app::RegImgAdditionalExt, pSwitch[ 1 ] != _T('-') ); break;
 			case _T('F'):	SetForceFlag( app::FullScreen, pSwitch[ 1 ] != _T('-') ); break;

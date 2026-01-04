@@ -56,7 +56,7 @@ namespace shell
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath ) ||
 				 !key.WriteStringValue( nullptr, pVerbTag ) )				// default value of the key
 			{
-				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), verbPath.GetPtr(), reg::CKey::GetLastError().FormatError().c_str() );
+				TRACE( _T(" * RegisterShellVerb( '%s' ): ERROR: %s\n"), verbPath.GetPtr(), reg::CKey::GetLastError().FormatError().c_str() );
 				return false;
 			}
 		}
@@ -77,28 +77,42 @@ namespace shell
 				stream::Tag( cmdLine, MakeParam( 1 ), _T(" ") );
 			}
 
-			reg::CKey key;
-
 			subKeyPath = verbPath / _T("command");
-			if ( !key.Create( HKEY_CLASSES_ROOT, subKeyPath ) ||
+
+			reg::CKey key;
+			// Open (override) or Create (registration) the key
+			bool succeeded = key.Open( HKEY_CLASSES_ROOT, subKeyPath ) || key.Create( HKEY_CLASSES_ROOT, subKeyPath );
+
+			if ( !succeeded ||
 				 !key.WriteStringValue( nullptr, cmdLine ) )				// default value of the key
 			{
-				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), subKeyPath.GetPtr(), key.GetLastError().FormatError().c_str() );
+				TRACE( _T(" * RegisterShellVerb( '%s' ): ERROR: %s\n"), subKeyPath.GetPtr(), key.GetLastError().FormatError().c_str() );
 				return false;
 			}
 		}
 
+		static const TCHAR s_ddeSubkeyName[] = _T("ddeexec");
+
+		subKeyPath = verbPath / s_ddeSubkeyName;
 		if ( useDDE )
 		{
 			reg::CKey key;
 
-			subKeyPath = verbPath / _T("ddeexec");
-			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath / _T("ddeexec") ) ||
-				 !key.WriteStringValue( nullptr, pDdeCmd ) )				// default value of the key
+			if ( !key.Create( HKEY_CLASSES_ROOT, subKeyPath )
+				 || !key.WriteStringValue( nullptr, pDdeCmd ) )				// default value of the key
 			{
-				TRACE( _T(" * RegisterShellVerb( %s ): ERROR: %s\n"), subKeyPath.GetPtr(), key.GetLastError().FormatError().c_str() );
+				TRACE( _T(" * RegisterShellVerb( '%s' ): ERROR: %s\n"), subKeyPath.GetPtr(), key.GetLastError().FormatError().c_str() );
 				return false;
 			}
+		}
+		else
+		{	// cleanup legacy subkey "verbPath\ddeexec", if any
+			reg::CKey key;
+
+			if ( key.Open( HKEY_CLASSES_ROOT, verbPath.GetPtr(), KEY_READ ) )
+				if ( key.HasSubKey( s_ddeSubkeyName ) )
+					if ( !key.DeleteSubKey( s_ddeSubkeyName ) )
+						TRACE( _T(" * RegisterShellVerb( '%s' ): ERROR deleting old DDEEXEC subkey: %s\n"), subKeyPath.GetPtr(), key.GetLastError().FormatError().c_str() );
 		}
 
 		return true;

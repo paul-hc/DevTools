@@ -27,6 +27,7 @@
 
 namespace app
 {
+	static const TCHAR s_verb_Open[] = _T("open");
 	static const TCHAR s_verb_OpenWithSlider[] = _T("OpenWithSlider");
 	static const TCHAR s_verb_EnqueueInSlider[] = _T("EnqueueInSlider");
 
@@ -72,14 +73,14 @@ CAppDocManager::~CAppDocManager()
 {
 }
 
-void CAppDocManager::OnFileNew( void )
+void CAppDocManager::OnFileNew( void ) override
 {
 	ASSERT_PTR( m_pAlbumTemplate );
 
 	m_pAlbumTemplate->OpenDocumentFile( nullptr );
 }
 
-BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate )
+BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate ) override
 {
 	if ( app::CSharedDocTemplate* pSharedTemplate = dynamic_cast<app::CSharedDocTemplate*>( pTemplate ) )
 		return pSharedTemplate->PromptFileDialog( rFilePath, titleId, flags, static_cast<shell::BrowseMode>( openDlg ) );
@@ -87,7 +88,7 @@ BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD f
 	return app::PromptFileDialogImpl( rFilePath, app::CSliderFilters::Instance(), titleId, flags, openDlg );
 }
 
-void CAppDocManager::RegisterShellFileTypes( BOOL compatMode )
+void CAppDocManager::RegisterShellFileTypes( BOOL compatMode ) override
 {
 	{
 		CScopedValue<bool> scopedSingleExt( &app::CSharedDocTemplate::s_useSingleFilterExt, true );		// prevent creating multi-extension ".sld;.ias;.cid;.icf" registry key
@@ -96,6 +97,9 @@ void CAppDocManager::RegisterShellFileTypes( BOOL compatMode )
 
 	m_pAlbumTemplate->RegisterAdditionalDocExtensions();		// ".sld", ".ias", ".cid", ".icf"
 	m_pAlbumTemplate->RegisterAlbumShell_Directory( true );		// "HKEY_CLASSES_ROOT\Directory\shell\Slide &View"
+
+	if ( !app::UseDDE() )
+		m_pAlbumTemplate->OverrideAlbumRegistration();
 }
 
 /* Handlers sample (Windows 10 MyThinkPad): "<HANDLER>": "<EXT>"
@@ -139,13 +143,15 @@ void CAppDocManager::RegisterImageAdditionalShellExt( bool doRegister )
 	{
 		if ( shell::QueryHandlerName( handlerName, itImageExt->c_str() ) )		// valid indirect shell extension handler?
 			if ( uniqueHandlers.insert( handlerName ).second )					// first entry encountered?
-			{	// e.g. "Photoshop.BMPFile.10", "Paint.Picture", "rlefile", "giffile", "IcoFX.ico", "IcoFX.cur", "jpegfile", 
+			{	// e.g. "Photoshop.BMPFile.10", "Paint.Picture", "rlefile", "giffile", "IcoFX.ico", "IcoFX.cur", "jpegfile",
 				reg::TKeyPath openKeyPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), app::s_verb_OpenWithSlider );			// "<handler>\\shell\\OpenWithSlider"
 				reg::TKeyPath enqueueKeyPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), app::s_verb_EnqueueInSlider );		// "<handler>\\shell\\EnqueueInSlider" - obsolete
 
 				if ( doRegister )
 				{
-					if ( !shell::RegisterShellVerb( openKeyPath, app::GetModulePath(), _T("Open with &Slider"), shell::GetDdeOpenCmd() ) )
+					const TCHAR* pDdeCmd = app::UseDDE() ? shell::GetDdeOpenCmd() : nullptr;
+
+					if ( !shell::RegisterShellVerb( openKeyPath, app::GetModulePath(), _T("Open with &Slider"), pDdeCmd ) )
 						accessDenied = reg::CKey::IsLastError_AccessDenied();
 
 					//shell::RegisterShellVerb( enqueueKeyPath, app::GetModulePath(), _T("Enque&ue in Slider"), _T("[queue(\"%1\")]") );	// PHC 2023-07-05: remove the obsolete "[queue(\"%1\")" DDE command
@@ -162,7 +168,7 @@ void CAppDocManager::RegisterImageAdditionalShellExt( bool doRegister )
 	}
 
 	if ( accessDenied )
-		ui::MessageBox( _T("WARNING:\nCannot register Slider application as handler for the known image file types!\n\nYou must run the program as Administrator."), MB_OK | MB_ICONWARNING );
+		ui::MessageBox( _T("WARNING:\nCannot register Slider application as handler for the known image file types!\n\nYou must run the program as Administrator (elevated)."), MB_OK | MB_ICONWARNING );
 }
 
 bool CAppDocManager::IsAppRegisteredForImageExt( const TCHAR imageExt[] /*= _T(".bmp")*/ )
@@ -217,9 +223,9 @@ namespace app
 		m_pFilterStore->GetKnownExtensions().QueryAllExts( m_allExts );
 	}
 
-	BOOL CSharedDocTemplate::GetDocString( CString& rString, enum DocStringIndex index ) const
+	BOOL CSharedDocTemplate::GetDocString( CString& rString, enum DocStringIndex index ) const override
 	{
-		if ( !CMultiDocTemplate::GetDocString( rString, index ) )
+		if ( !__super::GetDocString( rString, index ) )
 			return false;
 
 		if ( filterExt == index )
@@ -231,9 +237,9 @@ namespace app
 		return true;
 	}
 
-	CDocTemplate::Confidence CSharedDocTemplate::MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch )
+	CDocTemplate::Confidence CSharedDocTemplate::MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch ) override
 	{
-		Confidence confidence = CMultiDocTemplate::MatchDocType( pPathName, rpDocMatch );
+		Confidence confidence = __super::MatchDocType( pPathName, rpDocMatch );
 
 		if ( yesAttemptForeign == confidence )
 			if ( m_pFilterStore->GetKnownExtensions().ContainsExt( pPathName ) )
@@ -275,7 +281,10 @@ namespace app
 		// skip first assuming is already registered
 		if ( m_allExts.size() > 1 )
 			for ( size_t i = 1; i != m_allExts.size(); ++i )
-				shell::RegisterAdditionalDocumentExt( m_allExts[ i ], docType );		// register all additional extensions
+			{
+				reg::TKeyPath docExtPath = m_allExts[i];
+				shell::RegisterAdditionalDocumentExt( docExtPath, docType );		// register all additional extensions
+			}
 	}
 
 
@@ -327,7 +336,7 @@ namespace app
 		return path::MatchExt( pFilePath, _T(".sld") );
 	}
 
-	void CAlbumDocTemplate::AlterSaveAsPath( CString& rFilePath ) const
+	void CAlbumDocTemplate::AlterSaveAsPath( CString& rFilePath ) const override
 	{
 		if ( fs::IsValidDirectory( rFilePath ) )				// most likely
 		{
@@ -337,7 +346,7 @@ namespace app
 		}
 	}
 
-	void CAlbumDocTemplate::RegisterAlbumShell_Directory( bool doRegister )
+	bool CAlbumDocTemplate::RegisterAlbumShell_Directory( bool doRegister )
 	{
 		// unregister any old Slider version 'Directory' entry - that's necessary since otherwise Explorer gets confused and invokes the old handler
 		reg::TKeyPath oldVerbPath = shell::MakeShellHandlerVerbPath( _T("Directory"), _T("Slide &View") );		// "Directory\\shell\\Slide &View"
@@ -345,12 +354,37 @@ namespace app
 			TRACE( _T(" Note: cleaned-up the old Slider shell registration: %s\n"), oldVerbPath.GetPtr() );
 
 		// register Slider as view for sliding images in 'Directory' file type handler:
-		reg::TKeyPath verbPath = shell::MakeShellHandlerVerbPath( _T("Directory"), _T("SlideView") );		// "Directory\\shell\\SlideView"
+		reg::TKeyPath verbPath = shell::MakeShellHandlerVerbPath( _T("Directory"), _T("SlideView") );			// "Directory\\shell\\SlideView"
 
 		if ( doRegister )
-			shell::RegisterShellVerb( verbPath, app::GetModulePath(), _T("Slide &View"), shell::GetDdeOpenCmd() );		// e.g. command="C:\My\Tools\mine\Slider.exe" "%1"
+		{
+			const TCHAR* pDdeCmd = app::UseDDE() ? shell::GetDdeOpenCmd() : nullptr;
+
+			return shell::RegisterShellVerb( verbPath, app::GetModulePath(), _T("Slide &View"), pDdeCmd );		// e.g. command="C:\My\Tools\mine\Slider.exe" "%1"
+		}
 		else
-			shell::UnregisterShellVerb( verbPath );
+			return shell::UnregisterShellVerb( verbPath );
+	}
+
+	bool CAlbumDocTemplate::OverrideAlbumRegistration( void )
+	{	// switch "SliderAlbum.Document\shell\open\command" from "/dde" to direct open.
+		//	- DDE seems to be broken for Slider program: for some reason no WM_DDE_INITIATE/WM_DDE_EXECUTE/WM_DDE_TERMINATE.
+		//	- This may be due to new security features in Windows, or an interference with GDI+ initialization versus threading model.
+		//		https://learn.microsoft.com/en-us/answers/questions/1166700/registered-file-association-no-longer-working-in-m
+		//		https://microsoft.public.vc.mfc.narkive.com/bBVNUhTz/more-dde-mfc-woes
+		//		https://stackoverflow.com/questions/7931173/dde-implementing-an-application-which-launches-correctly-via-shell-and-ddeexec
+		CString albumHandlerName;		// "SliderAlbum.Document" - aka FileTypeId
+
+		if ( !GetDocString( albumHandlerName, regFileTypeId ) )
+			return false;
+
+		reg::TKeyPath openVerbPath = shell::MakeShellHandlerVerbPath( albumHandlerName.GetString(), app::s_verb_Open );		// "SliderAlbum.Document\\shell\\open"
+
+		// In subkey "SliderAlbum.Document\shell\open\command", override the "(Default)" value:
+		//	- registered by MFC to '<short_bin_dir>\Slider64.exe /dde' in CDocManager::RegisterShellFileTypes().
+		//	- overrride value with '"<bin_dir>\Slider64.exe" "%1"', which is straight open, not using DDE.
+		//
+		return shell::RegisterShellVerb( openVerbPath, app::GetModulePath() );							// e.g. command="C:\My\Tools\mine\Slider.exe" "%1"
 	}
 
 } //namespace app

@@ -377,8 +377,6 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	OutputScalingMode( CWorkspace::GetData().m_scalingMode );
 
 
-
-
 	/*** OLD Toolbars ***/
 	ASSERT_PTR( pCS->hMenu );
 	ui::SetMenuImages( CMenu::FromHandle( pCS->hMenu ) );			// m_hMenuDefault not initialized yet, but will
@@ -386,7 +384,15 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	DragAcceptFiles();			// enable drag&drop open
 
 	if ( CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
-		pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
+	{
+		// Note:
+		//	With new MFC using CWinAppEx, main frame placement is automatically loaded on CWinAppEx::LoadState(), which calls CWinAppEx::ReloadWindowPlacement().
+		//	This is called from CMDIFrameWndEx::LoadFrame(), just after WM_CREATE is sent.
+		//	So we no longer need to duplicate restoring the window placement!
+
+		if ( false )
+			pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
+	}
 
 	return 0;
 }

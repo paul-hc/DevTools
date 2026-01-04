@@ -17,10 +17,11 @@ namespace reg
 	class CKey;
 
 
-	bool OpenKey( CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired = KEY_READ | KEY_WRITE );
-	bool CreateKey( CKey* pKey, const TCHAR* pKeyFullPath );
+	bool OpenKey( OUT CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired = KEY_READ | KEY_WRITE );
+	bool CreateKey( OUT CKey* pKey, const TCHAR* pKeyFullPath );
 
 	bool KeyExist( const TCHAR* pKeyFullPath, REGSAM samDesired = KEY_READ );
+	bool KeyExist( HKEY hParentKey, const TKeyPath& keySubPath, REGSAM samDesired = KEY_READ );
 	bool IsKeyWritable( const TCHAR* pKeyFullPath, bool* pAccessDenied = nullptr );
 }
 
@@ -74,7 +75,7 @@ namespace reg
 
 		bool Flush( void ) { return s_lastError.Store( m_key.Flush() ); }		// flush the key's data to disk - resource intensive!
 
-		static bool ParseFullPath( HKEY& rhHive, TKeyPath& rSubPath, const TCHAR* pKeyFullPath );		// full path includes registry hive (the root)
+		static bool ParseFullPath( OUT HKEY& rhHive, OUT TKeyPath& rSubPath, const TCHAR* pKeyFullPath );		// full path includes registry hive (the root)
 
 		void DeleteAll( void ) { DeleteAllValues(); DeleteAllSubKeys(); }
 

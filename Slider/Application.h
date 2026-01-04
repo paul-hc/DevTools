@@ -30,6 +30,7 @@ namespace app
 
 class CApplication : public CBaseApp<CWinAppEx>
 {
+	typedef CBaseApp<CWinAppEx> TBaseClass;
 public:
 	CApplication( void );
 	virtual ~CApplication();

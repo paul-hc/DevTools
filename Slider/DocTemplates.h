@@ -16,9 +16,9 @@ public:
 	~CAppDocManager();
 
 	// base overrides
-	virtual void OnFileNew( void );
-	virtual BOOL DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate );
-	virtual void RegisterShellFileTypes( BOOL compatMode );
+	virtual void OnFileNew( void ) override;
+	virtual BOOL DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate ) override;
+	virtual void RegisterShellFileTypes( BOOL compatMode ) override;
 
 	static void RegisterImageAdditionalShellExt( bool doRegister );
 	static bool IsAppRegisteredForImageExt( const TCHAR imageExt[] = _T(".bmp") );
@@ -43,8 +43,8 @@ namespace app
 		void SetFilterStore( const fs::CFilterStore* pFilterStore );
 	public:
 		// base overrides
-		virtual BOOL GetDocString( CString& rString, enum DocStringIndex index ) const;
-		virtual Confidence MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch );
+		virtual BOOL GetDocString( CString& rString, enum DocStringIndex index ) const override;
+		virtual Confidence MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch ) override;
 
 		const fs::CFilterStore* GetFilterStore( void ) const { return m_pFilterStore; }
 		const std::vector<std::tstring>& GetAllExts( void ) const { return m_allExts; }
@@ -85,10 +85,11 @@ namespace app
 		static OpenPathType GetOpenPathType( const TCHAR* pPath );
 		static bool IsSlideAlbumFile( const TCHAR* pFilePath );
 
-		void RegisterAlbumShell_Directory( bool doRegister );
+		bool OverrideAlbumRegistration( void );		// switch "SliderAlbum.Document\shell\open\command" from "/dde" to direct open
+		bool RegisterAlbumShell_Directory( bool doRegister );
 	protected:
 		// base overrides
-		virtual void AlterSaveAsPath( CString& rFilePath ) const;
+		virtual void AlterSaveAsPath( CString& rFilePath ) const override;
 	};
 }
 
