@@ -42,9 +42,9 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,153,72,103,10
     LTEXT           "&Files to rename",IDC_FILES_STATIC,7,57,324,8,WS_BORDER | NOT WS_GROUP
     LTEXT           "<files-sheet>",IDC_FILES_SHEET,5,88,329,104,WS_BORDER
-    LTEXT           "",IDC_OUTCOME_INFO_STATUS,5,194,327,11,SS_NOPREFIX | SS_CENTERIMAGE | SS_ENDELLIPSIS | WS_BORDER
-    LTEXT           "Fol&der:",IDC_CURR_FOLDER_STATIC,5,208,24,8,SS_NOTIFY
-    EDITTEXT        IDC_CURR_FOLDER_EDIT,32,208,302,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "<stats>",IDC_OUTCOME_INFO_STATUS,5,194,327,11,SS_NOPREFIX | SS_CENTERIMAGE | SS_ENDELLIPSIS | WS_BORDER
+    LTEXT           "&Location:",IDC_CURR_FOLDER_STATIC,5,210,30,8,SS_NOTIFY
+    EDITTEXT        IDC_CURR_FOLDER_EDIT,38,208,294,12,ES_AUTOHSCROLL | ES_READONLY
     GROUPBOX        "Source files",IDC_SOURCE_FILES_GROUP,5,229,63,31,BS_LEFT | WS_GROUP
     PUSHBUTTON      "&Copy",IDC_COPY_SOURCE_PATHS_BUTTON,11,240,50,14,WS_GROUP
     PUSHBUTTON      "&Paste",IDC_PASTE_FILES_BUTTON,81,240,50,14
@@ -106,10 +106,10 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,84,103,10
     CONTROL         "Sho&w Source Columns",IDC_SHOW_SRC_COLUMNS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,302,84,86,10
     LTEXT           "&Files details",IDC_FILES_STATIC,5,72,383,8,WS_BORDER | NOT WS_GROUP
-    LTEXT           "",IDC_OUTCOME_INFO_STATUS,5,180,383,11,SS_NOPREFIX | SS_CENTERIMAGE | SS_ENDELLIPSIS | WS_BORDER
-    LTEXT           "Fol&der:",IDC_CURR_FOLDER_STATIC,5,194,24,8,SS_NOTIFY
-    EDITTEXT        IDC_CURR_FOLDER_EDIT,32,194,356,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
     CONTROL         "List1",IDC_FILE_TOUCH_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | WS_BORDER | WS_GROUP | WS_TABSTOP,5,98,383,79
+    LTEXT           "<stats>",IDC_OUTCOME_INFO_STATUS,5,180,383,11,SS_NOPREFIX | SS_CENTERIMAGE | SS_ENDELLIPSIS | WS_BORDER
+    LTEXT           "&Location:",IDC_CURR_FOLDER_STATIC,5,196,30,8,SS_NOTIFY
+    EDITTEXT        IDC_CURR_FOLDER_EDIT,39,194,349,12,ES_AUTOHSCROLL | ES_READONLY
     DEFPUSHBUTTON   "OK",IDOK,338,8,50,14,WS_GROUP
     PUSHBUTTON      "Cancel",IDCANCEL,338,24,50,14
     LTEXT           "<btns>",IDC_TOOLBAR_PLACEHOLDER,338,43,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
@@ -377,7 +377,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "03-01-2026 20:48:04"
+            VALUE "BuildTimestamp", "05-01-2026 00:14:56"
             VALUE "Comments", "MultiSelItems|VC17.sln ATL wiz|reg_Directory|VC17 fixes|NewCmds+BinLog|CTrayIcon|Paste as Backup|Rename Shared Page Sorting/Selection|Rename File Details|New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|HighlightText"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
@@ -764,6 +764,7 @@ BEGIN
     ID_EDIT_SEARCH_PATHS_LIST "Edit search paths\nEdit Search Paths"
     ID_EDIT_INGORE_PATHS_LIST "Edit paths to ignore\nEdit Ignore Paths"
     ID_PASTE_AS_BACKUP      "Paste copied/cut files as a versioned backup file(s) in target folder"
+    ID_COPY_SEL_ITEMS       "Copy selected items text"
 END
 
 STRINGTABLE

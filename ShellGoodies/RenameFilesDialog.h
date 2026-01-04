@@ -145,6 +145,7 @@ protected:
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnCbnSelChange_SortOrder( void );
 	afx_msg void OnToggle_TargetSelItems( void );
+	afx_msg void On_SelItems_Copy( UINT cmdId );
 	afx_msg void On_SelItems_ResetDestFile( void );
 	afx_msg void OnUpdateListSelection( CCmdUI* pCmdUI );
 

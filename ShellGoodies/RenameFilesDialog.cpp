@@ -144,8 +144,10 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 		.AddButton( ID_SEQ_COUNT_AUTO_ADVANCE );
 
 	m_fileStatsStatic.GetMateToolbar()->GetStrip()
+		.AddButton( ID_COPY_SEL_ITEMS, ID_EDIT_COPY )
 		.AddButton( ID_CMD_RESET_DESTINATIONS );
 
+	m_currFolderEdit.SetUseFixedFont( false );
 	m_currFolderEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_EDIT_COPY )
 		.AddButton( ID_BROWSE_FOLDER );
@@ -381,7 +383,18 @@ void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, 
 			if ( !m_selData.GetSelItems().empty() )
 				rText += str::Format( _T(": %d selected item(s)"), m_selData.GetSelItems().size() );
 			else
-				rText += str::Format( _T(" (no selected items)"), m_selData.GetSelItems().size() );
+				rText += _T(" (no selected items)");
+			break;
+		case IDOK:
+			if ( !ui::IsDisabled( *GetDlgItem( IDOK ) ) )
+			{
+				rText = EditMode == m_mode ? _T("Generate filenames") : _T("Rename files for");
+
+				if ( EditMode == m_mode && app::TargetSelectedItems == m_pFileModel->GetTargetScope() && !m_selData.GetSelItems().empty() )
+					rText += str::Format( _T(": %d selected item(s)"), m_selData.GetSelItems().size() );
+				else
+					rText += _T(" all items");
+			}
 			break;
 		default:
 			__super::QueryTooltipText( rText, cmdId, pTooltip );
@@ -408,6 +421,7 @@ void CRenameFilesDialog::UpdateFileListStatus( void )
 		currFolderPath = pCaretItem->GetSrcPath().GetParentPath();
 
 	m_currFolderEdit.SetText( currFolderPath.Get() );
+	m_currFolderEdit.SelectAll();		// scroll to end to show deepest subfolder
 }
 
 void CRenameFilesDialog::UpdateSortOrderCombo( const ren::TSortingPair& sorting )
@@ -667,6 +681,8 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_BN_CLICKED( IDC_SHOW_EXTENSION_CHECK, OnToggle_ShowExtension )
 	ON_CBN_SELCHANGE( IDC_SORT_ORDER_COMBO, OnCbnSelChange_SortOrder )
 	ON_BN_CLICKED( IDC_TARGET_SEL_ITEMS_CHECK, OnToggle_TargetSelItems )
+	ON_COMMAND_RANGE( ID_COPY_SEL_ITEMS, ID_COPY_SEL_ITEMS, On_SelItems_Copy )
+	ON_UPDATE_COMMAND_UI( ID_COPY_SEL_ITEMS, OnUpdateListSelection )
 	ON_COMMAND( ID_CMD_RESET_DESTINATIONS, On_SelItems_ResetDestFile )
 	ON_UPDATE_COMMAND_UI( ID_CMD_RESET_DESTINATIONS, OnUpdateListSelection )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
@@ -884,6 +900,12 @@ void CRenameFilesDialog::OnToggle_TargetSelItems( void )
 {
 	if ( m_pFileModel->SetTargetScope( BST_CHECKED == m_targetSelItemsButton.GetCheck() ? app::TargetSelectedItems : app::TargetAllItems ) )
 		UpdateTargetScopeButton();
+}
+
+void CRenameFilesDialog::On_SelItems_Copy( UINT cmdId )
+{
+	if ( const IRenamePage* pRenamePage = dynamic_cast<const IRenamePage*>( m_filesSheet.GetActivePage() ) )
+		pRenamePage->OnParentCommand( cmdId );		// route the command in the active page
 }
 
 void CRenameFilesDialog::On_SelItems_ResetDestFile( void )

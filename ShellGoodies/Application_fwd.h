@@ -4,6 +4,7 @@
 
 
 class CEnumTags;
+interface IFileEditor;
 namespace svc { interface ICommandService; }
 
 
@@ -17,6 +18,9 @@ namespace app
 	enum TargetScope { TargetAllItems, TargetSelectedItems };
 
 	const CEnumTags& GetTags_TargetScope( void );
+
+
+	INT_PTR SafeExecuteDialog( IFileEditor* pFileEditor );
 }
 
 

@@ -357,7 +357,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 		// Note: CPathItemListCtrl::ResetShellContextMenu() that releases the hosted context menu (and this instance), leaving the UI with dangling pointers into m_pFileModel.
 		CComPtr<IContextMenu> pThisAlive( m_pContextMenu );		// keep this shell extension COM object alive to make the UI code re-entrant
 
-		pFileEditor->GetDialog()->DoModal();
+		app::SafeExecuteDialog( pFileEditor.get() );
 		pFileEditor.reset();							// delete the dialog here, before pThis goes out of scope
 		return true;
 	}

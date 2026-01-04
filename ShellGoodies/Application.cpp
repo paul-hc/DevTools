@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "AppCmdService.h"
 #include "GeneralOptions.h"
+#include "IFileEditor.h"
 #include "test/TextAlgorithmsTests.h"
 #include "test/RenameFilesTests.h"
 #include "utl/EnumTags.h"
@@ -56,6 +57,36 @@ namespace app
 		static const TCHAR s_keyTags[] = _T("Change all files (default)|Change only selected files");
 		static const CEnumTags s_tags( _T("All items (default)|Selected items"), s_keyTags );
 		return s_tags;
+	}
+
+
+	INT_PTR SafeExecuteDialog( IFileEditor* pFileEditor )
+	{	// prevent crashing File Explorer if an unexpected error is thrown
+		if ( CDialog* pEditorDialog = pFileEditor != nullptr ? pFileEditor->GetDialog() : nullptr )
+		{
+			try
+			{
+				return pEditorDialog->DoModal();
+			}
+			catch ( std::exception& exc )
+			{
+				app::ReportException( exc );
+			}
+			catch ( const CException* pExc )
+			{
+				app::ReportException( pExc );
+			}
+			catch ( int errorCode )
+			{
+				app::ReportError( str::Format( _T("Unexpected Exception - errorCode=%d"), errorCode ) );
+			}
+			catch ( ... )
+			{
+				app::ReportError( _T("Unexpected Exception...") );
+			}
+		}
+
+		return 0;
 	}
 }
 

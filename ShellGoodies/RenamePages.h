@@ -19,6 +19,7 @@ class CRenameItem;
 interface IRenamePage : public utl::IObserver
 {
 	virtual void InvalidateFiles( void ) {}
+	virtual bool OnParentCommand( UINT cmdId ) const = 0;
 };
 
 
@@ -55,6 +56,7 @@ public:
 private:
 	// IRenamePage interface
 	virtual void InvalidateFiles( void ) override;
+	virtual bool OnParentCommand( UINT cmdId ) const implement;
 
 	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override;
@@ -71,6 +73,7 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX ) override;
 protected:
 	afx_msg void OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnCopyTableText_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnItemChanged_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
@@ -126,6 +129,9 @@ private:
 
 	// ui::ITextInput interface
 	virtual ui::ITextInput::Result OnEditInput( IN OUT ui::CTextValidator& rValidator ) implement;
+
+	// IRenamePage interface
+	virtual bool OnParentCommand( UINT cmdId ) const implement;
 
 	void SetupFileEdits( void );
 	void UpdateFileEdits( const std::vector<CRenameItem*>& selRenameItems );

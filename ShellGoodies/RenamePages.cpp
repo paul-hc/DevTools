@@ -9,6 +9,7 @@
 #include "PathItemSorting.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
+#include "utl/TextClipboard.h"
 #include "utl/TimeUtils.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/UI/WndUtilsEx.h"
@@ -41,6 +42,7 @@ CBaseRenameListPage::CBaseRenameListPage( CRenameFilesDialog* pParentDlg, UINT l
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
 	m_fileListCtrl.SetPersistSorting( false );			// disable sorting persistence since CFileModel persists the shared sorting
+	m_fileListCtrl.SetFormatTableFlags( lv::SelRowsDisplayVisibleColumns );		// copy table as selected rows, using visible columns in display order
 
 	// display filenames depending on m_ignoreExtension
 	m_fileListCtrl.SetSubjectAdapter( m_pParentDlg->GetDisplayFilenameAdapter() );
@@ -116,6 +118,17 @@ void CBaseRenameListPage::InvalidateFiles( void )
 	m_fileListCtrl.Invalidate();
 }
 
+bool CBaseRenameListPage::OnParentCommand( UINT cmdId ) const implement
+{
+	switch ( cmdId )
+	{
+		case ID_COPY_SEL_ITEMS:
+			return m_fileListCtrl.CopyTable( lv::SelRowsDisplayVisibleColumns | ( ui::IsKeyPressed( VK_SHIFT ) ? lv::HeaderRow : 0 ) );
+	}
+
+	return false;
+}
+
 void CBaseRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override
 {
 	subItem, pCtrl;
@@ -153,6 +166,7 @@ void CBaseRenameListPage::DoDataExchange( CDataExchange* pDX ) override
 
 BEGIN_MESSAGE_MAP( CBaseRenameListPage, CBaseRenamePage )
 	ON_NOTIFY( lv::LVN_ListSorted, IDC_FILE_RENAME_LIST, OnLvnListSorted_RenameList )
+	ON_NOTIFY( lv::LVN_CopyTableText, IDC_FILE_TOUCH_LIST, OnLvnCopyTableText_RenameList )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FILE_RENAME_LIST, OnLvnItemChanged_RenameList )
 END_MESSAGE_MAP()
 
@@ -163,6 +177,15 @@ void CBaseRenameListPage::OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pR
 
 	if ( !m_fileListCtrl.IsInternalChange() )		// sorted by user?
 		CSortRenameListCmd( m_pParentDlg->GetFileModel(), &m_fileListCtrl, GetListSorting() ).Execute();		// fetch sorted items sequence into the file model, and notify observers
+}
+
+void CBaseRenameListPage::OnLvnCopyTableText_RenameList( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	lv::CNmCopyTableText* pNmInfo = (lv::CNmCopyTableText*)pNmHdr;
+	*pResult = 0L;		// continue default handling
+
+	if ( ui::IsKeyPressed( VK_SHIFT ) )
+		pNmInfo->m_textRows.push_back( pNmInfo->m_pColumnSet->FormatHeaderRow() );		// copy header row if SHIFT is pressed
 }
 
 void CBaseRenameListPage::OnLvnItemChanged_RenameList( NMHDR* pNmHdr, LRESULT* pResult )
@@ -204,7 +227,7 @@ void CRenameSimpleListPage::DoSetupFileListView( void ) override
 {
 	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
 
-	for ( unsigned int index = 0, count = m_pParentDlg->GetRenameItems().size(); index != count; ++index )
+	for ( unsigned int index = 0; index != m_pParentDlg->GetRenameItems().size(); ++index )
 	{
 		CRenameItem* pRenameItem = m_pParentDlg->GetRenameItems()[index];
 
@@ -537,6 +560,21 @@ ui::ITextInput::Result CRenameEditPage::OnEditInput( IN OUT ui::CTextValidator& 
 		return ui::ITextInput::Warning;		// amended filename
 
 	return ui::ITextInput::Success;
+}
+
+bool CRenameEditPage::OnParentCommand( UINT cmdId ) const implement
+{
+	switch ( cmdId )
+	{
+		case ID_COPY_SEL_ITEMS:
+		{
+			std::vector<std::tstring> selItemLines;
+			m_destEdit.QueryItemLines( selItemLines, m_pParentDlg->GetSelData().GetSelItems() );
+			return CTextClipboard::CopyToLines( selItemLines, m_hWnd );
+		}
+	}
+
+	return false;
 }
 
 bool CRenameEditPage::RestoreFocusControl( void )

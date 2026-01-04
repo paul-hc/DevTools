@@ -100,9 +100,11 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 		.AddButton( ID_EDIT_COPY )
 		.AddButton( ID_CMD_RESET_DESTINATIONS );
 
+	m_currFolderEdit.SetUseFixedFont( false );
 	m_currFolderEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_EDIT_COPY )
 		.AddButton( ID_BROWSE_FOLDER );
+
 	m_targetSelItemsButton.SetFrameMargins( -3, -3 );	// draw the frame outside of the button, in the dialog area
 }
 
@@ -254,6 +256,7 @@ void CTouchFilesDialog::UpdateFileListStatus( void )
 		currFolderPath = pCaretItem->GetSrcState().m_fullPath.GetParentPath();
 
 	m_currFolderEdit.SetText( currFolderPath.Get() );
+	m_currFolderEdit.SelectAll();		// scroll to end to show deepest subfolder
 }
 
 void CTouchFilesDialog::SetupFileListView( void )
@@ -908,7 +911,7 @@ void CTouchFilesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pRes
 void CTouchFilesDialog::OnLvnCopyTableText_TouchList( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	lv::CNmCopyTableText* pNmInfo = (lv::CNmCopyTableText*)pNmHdr;
-	*pResult = 0L;		// do default handling
+	*pResult = 0L;		// continue default handling
 
 	if ( ui::IsKeyPressed( VK_SHIFT ) )
 		pNmInfo->m_textRows.push_back( pNmInfo->m_pColumnSet->FormatHeaderRow() );		// copy header row if SHIFT is pressed

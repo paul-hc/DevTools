@@ -49,6 +49,9 @@ public:
 	// top visible item
 	template< typename ObjectT > ObjectT* GetTopItem( void ) const { return GetItemAt<ObjectT>( GetTopLineIndex() ); }
 	bool SetTopItem( const utl::ISubject* pTopObject );
+
+	template< typename StringT, typename ObjectT >
+	void QueryItemLines( OUT std::vector<StringT>& rItemLines, const std::vector<ObjectT*>& objects ) const;
 public:
 	void Clear( void ) { m_objects.clear(); UpdateItemsText(); }
 
@@ -130,6 +133,21 @@ bool CTextListEditor::SetSelItems( const std::vector<ObjectT*>& selObjects )
 
 	ENSURE( selLineRange.IsNormalized() );			// since selObjects is ordered
 	return SelectLineRange( selLineRange ).second;	// true if changed
+}
+
+template< typename StringT, typename ObjectT >
+void CTextListEditor::QueryItemLines( OUT std::vector<StringT>& rItemLines, const std::vector<ObjectT*>& objects ) const
+{
+	rItemLines.clear();
+	rItemLines.reserve( objects.size() );
+
+	for ( typename std::vector<ObjectT*>::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
+	{
+		TLineIndex lineIndex = FindItemLineIndex( *itObject );
+
+		if ( lineIndex != -1 )
+			rItemLines.push_back( GetLineText( lineIndex ) );
+	}
 }
 
 

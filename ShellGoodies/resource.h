@@ -200,13 +200,14 @@
 #define ID_EDIT_SEARCH_PATHS_LIST       32857
 #define ID_EDIT_INGORE_PATHS_LIST       32858
 #define ID_PASTE_AS_BACKUP              32859
+#define ID_COPY_SEL_ITEMS               32860
 
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        119
-#define _APS_NEXT_COMMAND_VALUE         32860
+#define _APS_NEXT_COMMAND_VALUE         32861
 #define _APS_NEXT_CONTROL_VALUE         1100
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
