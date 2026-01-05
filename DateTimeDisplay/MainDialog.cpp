@@ -187,11 +187,10 @@ void CMainDialog::EnableApplyButton( void )
 
 void CMainDialog::SetResultsText( const std::tstring& outputText )
 {
-	int startChar, endChar;
-	m_resultsEdit.GetSel( startChar, endChar );
+	Range<int> selRange = m_resultsEdit.GetSelRange();
 
 	ui::SetWindowText( m_resultsEdit, outputText );
-	m_resultsEdit.SetSel( startChar, endChar );
+	m_resultsEdit.SetSelRange( selRange );
 
 	m_syncScrolling.Synchronize( &m_inputEdit );			// sync v-scroll pos
 }
@@ -241,7 +240,7 @@ END_MESSAGE_MAP()
 
 LRESULT CMainDialog::OnKickIdle( WPARAM, LPARAM )
 {
-	m_inputEdit.GetSel( m_inputSel.m_start, m_inputSel.m_end );
+	m_inputSel = m_inputEdit.GetSelRange();
 	ReadInputSelLine();
 	return Default();
 }
