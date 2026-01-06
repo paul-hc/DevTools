@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "FileChecksumsDialog.h"
 #include "utl/Algorithms.h"
-#include "utl/IoBin.h"
 #include "utl/FileEnumerator.h"
 #include "utl/FileStateEnumerator.h"
 #include "utl/FileSystem.h"
@@ -15,11 +14,8 @@
 #include "resource.h"
 #include <fstream>
 
-#ifdef IS_CPP_11
-	// avoid dependency to a newer version of boost for this compiler
-#else
-	#define USE_BOOST_CRC
-#endif
+// undefine to avoid dependency to a newer version of boost for this compiler
+#define USE_BOOST_CRC
 #include "utl/Crc32.h"		// define func::ComputeBoostChecksum
 
 #ifdef _DEBUG
@@ -31,28 +27,12 @@
 
 namespace hlp
 {
-	UINT ComputeUtlFileStreamCrc32( const fs::CPath& filePath )
-	{
-		return io::bin::ReadFileStream_NoThrow( filePath, func::ComputeChecksum<utl::TCrc32Checksum>() ).m_checksum.GetResult();
-	}
-
-	UINT ComputeBoostFileStreamCrc32( const fs::CPath& filePath )
+	bool UseBoostCRC( void )
 	{
 	#ifdef USE_BOOST_CRC
-		return io::bin::ReadFileStream_NoThrow( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
+		return true;
 	#else
-		filePath;
-		return 0;
-	#endif
-	}
-
-	UINT ComputeBoostCFileCrc32( const fs::CPath& filePath )
-	{
-	#ifdef USE_BOOST_CRC
-		return io::bin::ReadCFile_NoThrow( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
-	#else
-		filePath;
-		return 0;
+		return false;
 	#endif
 	}
 }
@@ -60,7 +40,12 @@ namespace hlp
 
 struct CChecksumInfo
 {
-	CChecksumInfo( void  ) : m_crc32( 0 ), m_elapsedSecs( 0.0 ) {}
+	CChecksumInfo( void ) : m_crc32( UINT_MAX ), m_elapsedSecs( 0.0 ) {}
+
+	bool IsComputed( void ) const { return m_crc32 != UINT_MAX; }
+
+	std::tstring FormatCRC( void ) const { return IsComputed() ? str::Format( _T("%08X"), m_crc32 ) : str::GetEmpty(); }
+	std::tstring FormatElapsed( void ) const { return IsComputed() ? CTimer::FormatSeconds( m_elapsedSecs ) : str::GetEmpty(); }
 public:
 	UINT m_crc32;
 	double m_elapsedSecs;
@@ -72,19 +57,21 @@ class CFileChecksumItem : public CPathItemBase
 public:
 	CFileChecksumItem( const fs::CFileState& fileState )
 		: CPathItemBase( fileState.m_fullPath )
+		, m_isProxy( false )
 		, m_fileSize( fileState.m_fileSize )
 	{
 	}
 
-	CFileChecksumItem( const TCHAR tag[] )
+	CFileChecksumItem( const TCHAR tag[] )		// proxy constructor
 		: CPathItemBase( fs::CPath( tag ) )
+		, m_isProxy( true )
 		, m_fileSize( 0 )
 	{
-		m_utlIfs.m_crc32 = UINT_MAX;		// mark as proxy item
+		m_utl.m_crc32 = m_utlIfs.m_crc32 = m_boostCFile.m_crc32 = m_boostIfs.m_crc32 = 0;	// so that IsComputed() returns true
 	}
 
 	bool HasChecksums( void ) const { return m_utl.m_crc32 != 0; }
-	bool IsProxy( void ) const { return UINT_MAX == m_utlIfs.m_crc32; }
+	bool IsProxy( void ) const { return m_isProxy; }
 	void ComputeChecksums( void );
 
 	void ResetProxy( void )
@@ -104,6 +91,8 @@ public:
 
 		return *this;
 	}
+private:
+	const bool m_isProxy;
 public:
 	ULONGLONG m_fileSize;
 	CChecksumInfo m_utl;
@@ -122,24 +111,27 @@ void CFileChecksumItem::ComputeChecksums( void )
 
 	CTimer timer;
 	{
-		m_utl.m_crc32 = crc32::ComputeFileChecksum( GetFilePath() );
+		m_utl.m_crc32 = crc32::ComputeFileChecksum( GetFilePath(), io::ReadCFile );
 		m_utl.m_elapsedSecs = timer.ElapsedSeconds();
 	}
 	{
 		timer.Restart();
-		m_utlIfs.m_crc32 = hlp::ComputeUtlFileStreamCrc32( GetFilePath() );
+		m_utlIfs.m_crc32 = crc32::ComputeFileChecksum( GetFilePath(), io::ReadFileStream );
 		m_utlIfs.m_elapsedSecs = timer.ElapsedSeconds();
 	}
+
+#ifdef USE_BOOST_CRC
 	{
 		timer.Restart();
-		m_boostCFile.m_crc32 = hlp::ComputeBoostCFileCrc32( GetFilePath() );
+		m_boostCFile.m_crc32 = crc32::ComputeFileChecksum_Boost( GetFilePath(), io::ReadCFile );
 		m_boostCFile.m_elapsedSecs = timer.ElapsedSeconds();
 	}
 	{
 		timer.Restart();
-		m_boostIfs.m_crc32 = hlp::ComputeBoostFileStreamCrc32( GetFilePath() );
+		m_boostIfs.m_crc32 = crc32::ComputeFileChecksum_Boost( GetFilePath(), io::ReadCFile );
 		m_boostIfs.m_elapsedSecs = timer.ElapsedSeconds();
 	}
+#endif
 }
 
 
@@ -221,6 +213,30 @@ void CFileChecksumsDialog::SearchForFiles( void )
 	m_fileListCtrl.UpdateWindow();				// display found files on the spot if continuing with CRC32 evaluation
 }
 
+void CFileChecksumsDialog::CalculateChecksums( void )
+{
+	CWaitCursor wait;
+
+	utl::for_each( m_fileItems, std::mem_fn( &CFileChecksumItem::ComputeChecksums ) );
+
+	if ( !m_fileItems.empty() && m_fileItems.front()->HasChecksums() )
+	{	// insert/update the TOTALS proxy item
+		CFileChecksumItem* pTotalItem;
+
+		if ( m_fileItems.back()->IsProxy() )
+		{	// clear existing proxy item
+			pTotalItem = m_fileItems.back();
+			pTotalItem->ResetProxy();
+		}
+		else
+			m_fileItems.push_back( pTotalItem = new CFileChecksumItem( _T("TOTAL:") ) );	// add TOTALS proxy item at end
+
+		std::for_each( m_fileItems.begin(), --m_fileItems.end(), func::SumElapsed( pTotalItem ) );
+	}
+
+	SetupFileListView();
+}
+
 void CFileChecksumsDialog::SetupFileListView( void )
 {
 	int orgSel = m_fileListCtrl.GetCurSel();
@@ -231,7 +247,6 @@ void CFileChecksumsDialog::SetupFileListView( void )
 
 		m_fileListCtrl.DeleteAllItems();
 
-		std::tstring n_a = _T("<VC17_no_boost>"), textBoost_CFile_CRC32 = n_a, textBoost_ifs_CRC32 = n_a, textBoost_CFile_Elapsed = n_a, textBoost_ifs_Elapsed = n_a;
 		ui::CTextEffect disabled( ui::Regular, ::GetSysColor( COLOR_GRAYTEXT ) );
 
 		for ( unsigned int pos = 0; pos != m_fileItems.size(); ++pos )
@@ -240,34 +255,39 @@ void CFileChecksumsDialog::SetupFileListView( void )
 
 			m_fileListCtrl.InsertObjectItem( pos, pFileItem );		// FileName
 
+			m_fileListCtrl.SetSubItemText( pos, FileSize, num::FormatFileSizeAsPair( pFileItem->m_fileSize ) );
+
 			if ( !pFileItem->IsProxy() )
 			{
-			#ifdef USE_BOOST_CRC
-				textBoost_CFile_CRC32 = str::Format( _T("%08X"), pFileItem->m_boostCFile.m_crc32 );
-				textBoost_ifs_CRC32 = str::Format( _T("%08X"), pFileItem->m_boostIfs.m_crc32 );
-				textBoost_CFile_Elapsed = CTimer::FormatSeconds( pFileItem->m_boostCFile.m_elapsedSecs );
-				textBoost_ifs_Elapsed = CTimer::FormatSeconds( pFileItem->m_boostIfs.m_elapsedSecs );
-			#else
-				m_fileListCtrl.MarkCellAt( pos, BoostCFile_CRC32, disabled );
-				m_fileListCtrl.MarkCellAt( pos, BoostCFile_Elapsed, disabled );
-				m_fileListCtrl.MarkCellAt( pos, Boost_ifs_CRC32, disabled );
-				m_fileListCtrl.MarkCellAt( pos, Boost_ifs_Elapsed, disabled );
-			#endif
-
 				m_fileListCtrl.SetSubItemText( pos, DirPath, pFileItem->GetFilePath().GetParentPath().Get() );
-				m_fileListCtrl.SetSubItemText( pos, UTL_CRC32, str::Format( _T("%08X"), pFileItem->m_utl.m_crc32 ) );
-				m_fileListCtrl.SetSubItemText( pos, UTL_ifs_CRC32, str::Format( _T("%08X"), pFileItem->m_utlIfs.m_crc32 ) );
-				m_fileListCtrl.SetSubItemText( pos, BoostCFile_CRC32, textBoost_CFile_CRC32 );
-				m_fileListCtrl.SetSubItemText( pos, Boost_ifs_CRC32, textBoost_ifs_CRC32 );
+				m_fileListCtrl.SetSubItemText( pos, UTL_CRC32, pFileItem->m_utl.FormatCRC() );
+				m_fileListCtrl.SetSubItemText( pos, UTL_ifs_CRC32, pFileItem->m_utlIfs.FormatCRC() );
+
+				if ( hlp::UseBoostCRC() )
+				{
+					m_fileListCtrl.SetSubItemText( pos, BoostCFile_CRC32, pFileItem->m_boostCFile.FormatCRC() );
+					m_fileListCtrl.SetSubItemText( pos, Boost_ifs_CRC32, pFileItem->m_boostIfs.FormatCRC() );
+				}
 			}
 			else
 				m_fileListCtrl.MarkRowAt( pos, ui::CTextEffect( ui::Bold, color::Blue ) );
 
-			m_fileListCtrl.SetSubItemText( pos, FileSize, num::FormatFileSizeAsPair( pFileItem->m_fileSize ) );
-			m_fileListCtrl.SetSubItemText( pos, UTL_Elapsed, CTimer::FormatSeconds( pFileItem->m_utl.m_elapsedSecs ) );
-			m_fileListCtrl.SetSubItemText( pos, UTL_ifs_Elapsed, CTimer::FormatSeconds( pFileItem->m_utlIfs.m_elapsedSecs ) );
-			m_fileListCtrl.SetSubItemText( pos, BoostCFile_Elapsed, textBoost_CFile_Elapsed );
-			m_fileListCtrl.SetSubItemText( pos, Boost_ifs_Elapsed, textBoost_ifs_Elapsed );
+			m_fileListCtrl.SetSubItemText( pos, UTL_Elapsed, pFileItem->m_utl.FormatElapsed() );
+			m_fileListCtrl.SetSubItemText( pos, UTL_ifs_Elapsed, pFileItem->m_utlIfs.FormatElapsed() );
+
+			if ( hlp::UseBoostCRC() )
+			{
+				m_fileListCtrl.SetSubItemText( pos, BoostCFile_Elapsed, pFileItem->m_boostCFile.FormatElapsed() );
+				m_fileListCtrl.SetSubItemText( pos, Boost_ifs_Elapsed, pFileItem->m_boostIfs.FormatElapsed() );
+			}
+
+			if ( !hlp::UseBoostCRC() )
+			{
+				m_fileListCtrl.MarkCellAt( pos, BoostCFile_CRC32, disabled );
+				m_fileListCtrl.MarkCellAt( pos, BoostCFile_Elapsed, disabled );
+				m_fileListCtrl.MarkCellAt( pos, Boost_ifs_CRC32, disabled );
+				m_fileListCtrl.MarkCellAt( pos, Boost_ifs_Elapsed, disabled );
+			}
 		}
 	}
 
@@ -335,24 +355,5 @@ void CFileChecksumsDialog::OnBnClicked_CalculateChecksums( void )
 	if ( m_fileItems.empty() )
 		OnBnClicked_FindFiles();
 
-	CWaitCursor wait;
-
-	utl::for_each( m_fileItems, std::mem_fun( &CFileChecksumItem::ComputeChecksums ) );
-
-	if ( !m_fileItems.empty() && m_fileItems.front()->HasChecksums() )
-	{	// insert/update the TOTALS proxy item
-		CFileChecksumItem* pTotalItem;
-
-		if ( m_fileItems.back()->IsProxy() )
-		{	// clear existing proxy item
-			pTotalItem = m_fileItems.back();
-			pTotalItem->ResetProxy();
-		}
-		else
-			m_fileItems.push_back( pTotalItem = new CFileChecksumItem( _T("TOTAL:") ) );
-
-		std::for_each( m_fileItems.begin(), --m_fileItems.end(), func::SumElapsed( pTotalItem ) );
-	}
-
-	SetupFileListView();
+	CalculateChecksums();
 }

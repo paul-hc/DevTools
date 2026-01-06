@@ -26,7 +26,7 @@ namespace utl
 
 
 	// Algorithms and lookup table for computing Crc32 - Cyclic Redundancy Checksum
-	// Note: in release build it's actually faster than boost::crc_32_type::process_bytes() defined in <boost/crc.hpp>
+	// Note: in Release build it's actually faster than boost::crc_32_type::process_bytes() defined in <boost/crc.hpp>, and computes the same CRC32 checksum value.
 	//
 	class CCrc32
 	{
@@ -68,6 +68,8 @@ namespace func
 
 
 #include "Path.h"
+#include "IoBin.h"
+#include <fstream>		// for std::ifstream
 
 
 namespace crc32
@@ -86,7 +88,13 @@ namespace crc32
 	template< typename CharT >
 	UINT ComputeStringChecksum( const CharT* pText ) { return ComputeChecksum( pText, str::GetLength( pText ) ); }
 
-	UINT ComputeFileChecksum( const fs::CPath& filePath );		// returns 0 checksum on file error
+
+	// file CRC32:
+
+	inline UINT ComputeFileChecksum( const fs::CPath& filePath, io::FileReadMethod fileReadMethod = io::ReadCFile )		// returns 0 checksum on file error
+	{
+		return io::bin::ReadFile_NoThrow( filePath, func::ComputeChecksum<utl::TCrc32Checksum>(), fileReadMethod ).m_checksum.GetResult();
+	}
 }
 
 
@@ -141,6 +149,15 @@ namespace func
 	public:
 		ChecksumT m_checksum;
 	};
+}
+
+
+namespace crc32
+{
+	inline UINT ComputeFileChecksum_Boost( const fs::CPath& filePath, io::FileReadMethod fileReadMethod = io::ReadCFile )
+	{
+		return io::bin::ReadFile_NoThrow( filePath, func::ComputeBoostChecksum<>(), fileReadMethod ).m_checksum.checksum();
+	}
 }
 
 

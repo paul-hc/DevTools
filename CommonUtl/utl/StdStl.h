@@ -189,16 +189,33 @@ namespace utl
 	}
 
 
+	// vector/array data() - missing in C++ 98
+
+#ifdef IS_CPP_11
+	template< typename ContainerT >
+	inline const typename ContainerT::value_type* Data( const ContainerT& items ) { return items.data(); }
+
+	template< typename ContainerT >
+	inline typename ContainerT::value_type* Data( ContainerT& rItems ) { return rItems.data(); }
+#else
+	template< typename ContainerT >
+	inline const typename ContainerT::value_type* Data( const ContainerT& items ) { return !items.empty() ? &items.front() : NULL; }
+
+	template< typename ContainerT >
+	inline typename ContainerT::value_type* Data( ContainerT& rItems ) { return !rItems.empty() ? &rItems.front() : NULL; }
+#endif
+
+
 	// container bounds: works with std::list (not random iterator)
 
 	template< typename ContainerT >
-	inline const typename ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
+	inline const typename ContainerT::value_type& Front( const ContainerT& items ) { ASSERT( !items.empty() ); return *items.begin(); }
 
 	template< typename ContainerT >
 	inline typename ContainerT::value_type& Front( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
 
 	template< typename ContainerT >
-	inline const typename ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
+	inline const typename ContainerT::value_type& Back( const ContainerT& items ) { ASSERT( !items.empty() ); return *--items.end(); }
 
 	template< typename ContainerT >
 	inline typename ContainerT::value_type& Back( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }

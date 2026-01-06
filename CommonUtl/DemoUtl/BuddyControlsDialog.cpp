@@ -29,18 +29,22 @@ class CFileStateTimedItem : public CFileStateItem
 public:
 	CFileStateTimedItem( const fs::CFileState& fileState )
 		: CFileStateItem( fileState )
+		, m_isComputed( false )
 		, m_checksumElapsed( 0.0 )
 	{
 	}
 
 	CFileStateTimedItem( const TCHAR tag[] )
 		: CFileStateItem( fs::CFileState() )
+		, m_isComputed( false )
 		, m_checksumElapsed( 0.0 )
 	{
 		SetFilePath( fs::CPath( tag ) );		// set the proxy item tag
 	}
 
 	bool IsProxy( void ) const { return !GetState().IsValid(); }
+	bool IsComputed( void ) const { return m_isComputed; }
+
 	double GetChecksumElapsed( void ) const { return m_checksumElapsed; }
 
 	void ComputeChecksum( void )
@@ -50,6 +54,7 @@ public:
 			CTimer timer;
 			RefState().ComputeCrc32( fs::CFileState::CacheCompute );
 			m_checksumElapsed = timer.ElapsedSeconds();
+			m_isComputed = true;
 		}
 	}
 
@@ -57,6 +62,7 @@ public:
 	{
 		REQUIRE( IsProxy() );
 		RefState().m_fileSize = 0;
+		m_isComputed = false;
 		m_checksumElapsed = 0.0;
 	}
 
@@ -64,10 +70,12 @@ public:
 	{
 		RefState().m_fileSize += right.GetState().m_fileSize;
 		m_checksumElapsed += right.m_checksumElapsed;
+		m_isComputed |= right.m_isComputed;
 
 		return *this;
 	}
 private:
+	bool m_isComputed;
 	double m_checksumElapsed;
 };
 
@@ -302,7 +310,7 @@ void CBuddyControlsDialog::OnBnClicked_CalculateChecksums( void )
 
 	CWaitCursor wait;
 
-	utl::for_each( m_fileItems, std::mem_fun( &CFileStateTimedItem::ComputeChecksum ) );
+	utl::for_each( m_fileItems, std::mem_fn( &CFileStateTimedItem::ComputeChecksum ) );
 
 	if ( !m_fileItems.empty() )
 	{	// insert/update the TOTALS proxy item

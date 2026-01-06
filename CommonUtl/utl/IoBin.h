@@ -30,10 +30,11 @@ namespace io
 
 			if ( file.Open( srcFilePath.GetPtr(), CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite, &exc ) )
 			{
-				char buffer[ io::FileBlockSize ];
+				std::vector<char> buffer( io::FileBlockSize );
+				char* pBuffer = utl::Data( buffer );
 
-				for ( UINT readCount; ( readCount = file.Read( buffer, io::FileBlockSize ) ) != 0; )
-					blockFunc( buffer, readCount );
+				for ( UINT readCount; ( readCount = file.Read( pBuffer, io::FileBlockSize ) ) != 0; )
+					blockFunc( pBuffer, readCount );
 
 				file.Close();
 			}
@@ -51,10 +52,11 @@ namespace io
 
 			if ( ifs.is_open() )
 			{
-				char buffer[ io::FileBlockSize ];
+				std::vector<char> buffer( io::FileBlockSize );
+				char* pBuffer = utl::Data( buffer );
 
-				while ( ifs.read( buffer, COUNT_OF( buffer ) ) )
-					blockFunc( buffer, static_cast<size_t>( ifs.gcount() ) );
+				while ( ifs.read( pBuffer, COUNT_OF( buffer ) ) )
+					blockFunc( pBuffer, static_cast<size_t>( ifs.gcount() ) );
 			}
 			else
 				TRACE( _T(" * Cannot open file for reading: %s\n"), srcFilePath.GetPtr() );
@@ -101,6 +103,42 @@ namespace io
 			while ( ifs.read( buffer, COUNT_OF( buffer ) ) )
 				blockFunc( buffer, ifs.gcount() );
 
+			return blockFunc;
+		}
+	}
+
+
+	enum FileReadMethod
+	{
+		ReadCFile,			// via CFile: 5%-10% faster that the ifstream read version on average
+		ReadFileStream,		// via ifstream: slightly slower
+	};
+
+	namespace bin
+	{
+		// byte block reading algorithms not throwing exceptions
+
+		template< typename BlockFunc >
+		BlockFunc ReadFile_NoThrow( const fs::CPath& srcFilePath, BlockFunc blockFunc, io::FileReadMethod fileReadMethod ) throws_()
+		{
+			if ( io::ReadCFile == fileReadMethod )
+				return ReadCFile_NoThrow( srcFilePath, blockFunc );
+			else if ( io::ReadFileStream == fileReadMethod )
+				return ReadFileStream_NoThrow( srcFilePath, blockFunc );
+
+			ASSERT( false );		// read method?
+			return blockFunc;
+		}
+
+		template< typename BlockFunc >
+		BlockFunc ReadFile_Throw( const fs::CPath& srcFilePath, BlockFunc blockFunc, io::FileReadMethod fileReadMethod ) throws_( CRuntimeException )
+		{
+			if ( io::ReadCFile == fileReadMethod )
+				return ReadCFile( srcFilePath, blockFunc );
+			else if ( io::ReadFileStream == fileReadMethod )
+				return ReadFileStream( srcFilePath, blockFunc );
+
+			ASSERT( false );		// read method?
 			return blockFunc;
 		}
 	}

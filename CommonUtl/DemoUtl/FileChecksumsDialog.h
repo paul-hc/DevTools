@@ -17,6 +17,7 @@ public:
 	virtual ~CFileChecksumsDialog();
 private:
 	void SearchForFiles( void );
+	void CalculateChecksums( void );
 
 	// output
 	void SetupFileListView( void );

@@ -52,20 +52,6 @@ namespace utl
 }
 
 
-namespace crc32
-{
-	// CRC generator algorithms
-
-	UINT ComputeFileChecksum( const fs::CPath& filePath )
-	{
-		UINT checksum = io::bin::ReadCFile_NoThrow( filePath, func::ComputeChecksum<utl::TCrc32Checksum>() ).m_checksum.GetResult();
-
-		//TRACE( _T("crc32::ComputeFileChecksum(%s)=%08X\n"), filePath.GetPtr(), checksum );
-		return checksum;
-	}
-}
-
-
 namespace fs
 {
 	// CCrc32FileCache implementation
