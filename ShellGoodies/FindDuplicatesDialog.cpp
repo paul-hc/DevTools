@@ -142,7 +142,7 @@ namespace hlp
 	private:
 		void AugmentCheckedItems( void )
 		{
-			utl::RemoveIf( m_checkedDupItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );		// remove any new original items from the checked items
+			utl::RemoveIf( m_checkedDupItems, std::mem_fn( &CDuplicateFileItem::IsOriginalItem ) );		// remove any new original items from the checked items
 
 			for ( std::vector<CDuplicateFilesGroup*>::const_iterator itCheckedGroup = m_fullyCheckedGroups.begin(); itCheckedGroup != m_fullyCheckedGroups.end(); ++itCheckedGroup )
 			{
@@ -1034,7 +1034,7 @@ void CFindDuplicatesDialog::On_KeepAsOriginalFile( void )
 	{
 		hlp::CCheckedStateDupItems checkedState( &m_dupsListCtrl );
 
-		utl::RemoveIf( selItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );
+		utl::RemoveIf( selItems, std::mem_fn( &CDuplicateFileItem::IsOriginalItem ) );
 		{
 			std::vector<CDuplicateFilesGroup*> dupGroups;
 			hlp::QueryGroupsOfDupItems( dupGroups, selItems );
@@ -1043,7 +1043,7 @@ void CFindDuplicatesDialog::On_KeepAsOriginalFile( void )
 				if ( IsGroupFullyChecked( *itGroup ) )
 					checkedState.RegisterFullyCheckedGroup( *itGroup );		// to restore later group fully-checked state
 		}
-		std::for_each( selItems.begin(), selItems.end(), std::mem_fun( &CDuplicateFileItem::MakeOriginalItem ) );
+		std::for_each( selItems.begin(), selItems.end(), std::mem_fn( &CDuplicateFileItem::MakeOriginalItem ) );
 
 		if ( !selItems.empty() )
 		{
@@ -1062,7 +1062,7 @@ void CFindDuplicatesDialog::OnUpdate_KeepAsOriginalFile( CCmdUI* pCmdUI )
 	{
 		std::vector<CDuplicateFileItem*> selItems;
 		if ( m_dupsListCtrl.QuerySelectionAs( selItems ) )
-			if ( utl::Any( selItems, std::mem_fun( &CDuplicateFileItem::IsDuplicateItem ) ) )
+			if ( utl::Any( selItems, std::mem_fn( &CDuplicateFileItem::IsDuplicateItem ) ) )
 				enable = hlp::HasUniqueGroups( selItems );
 	}
 

@@ -180,7 +180,7 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), !IsRollMode() );
 
-	m_dirtyTouch = utl::Any( m_rTouchItems, std::mem_fun( &CTouchItem::IsModified ) );
+	m_dirtyTouch = utl::Any( m_rTouchItems, std::mem_fn( &CTouchItem::IsModified ) );
 	ui::EnableControl( *this, IDOK, m_mode != CommitFilesMode || m_dirtyTouch );
 
 	m_fileListCtrl.Invalidate();			// do some custom draw magic

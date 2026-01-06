@@ -115,7 +115,7 @@ CTrayIcon* CSystemTray::CreateTrayIcon( HICON hIcon, UINT trayIconId, const TCHA
 	CWnd* pPopupWnd = EnsurePopupWnd();
 	ASSERT_PTR( pPopupWnd->GetSafeHwnd() );
 
-	bool isMainIcon = visible && !utl::Any( m_icons, std::mem_fun( &CTrayIcon::IsMainIcon ) );
+	bool isMainIcon = visible && !utl::Any( m_icons, std::mem_fn( &CTrayIcon::IsMainIcon ) );
 	CTrayIcon* pTrayIcon = new CTrayIcon( this, trayIconId, isMainIcon );
 
 	if ( !pTrayIcon->Add( pPopupWnd, hIcon, pIconTipText, visible ) )
@@ -217,7 +217,7 @@ void CSystemTray::OnOwnerWndStatusChanged( void )
 
 void CSystemTray::HandleDestroy( void )
 {
-	utl::for_each( m_icons, std::mem_fun( &CTrayIcon::Delete ) );
+	utl::for_each( m_icons, std::mem_fn( &CTrayIcon::Delete ) );
 	m_icons.clear();
 }
 
@@ -252,12 +252,12 @@ bool CSystemTray::HandleTimer( UINT_PTR eventId )
 void CSystemTray::HandleSettingChange( UINT flags )
 {
 	if ( SPI_SETWORKAREA == flags )
-		utl::for_each( m_icons, std::mem_fun( &CTrayIcon::InstallPending ) );
+		utl::for_each( m_icons, std::mem_fn( &CTrayIcon::InstallPending ) );
 }
 
 void CSystemTray::HandleExplorerRestart( void )
 {	// called whenever the taskbar is created (eg after explorer crashes and restarts).
-	utl::for_each( m_icons, std::mem_fun( &CTrayIcon::InstallPending ) );
+	utl::for_each( m_icons, std::mem_fn( &CTrayIcon::InstallPending ) );
 }
 
 bool CSystemTray::HandleTrayIconNotify( WPARAM wParam, LPARAM lParam )

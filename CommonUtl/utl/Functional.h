@@ -8,7 +8,7 @@
 namespace func
 {
 	// unary functor adapter for setter (non-const) methods with 1 argument
-		// - for no arguments use: std::mem_fun( &ObjectT::SetMethod )
+		// - for no arguments use: std::mem_fn( &ObjectT::SetMethod )
 		// - for container ElementT* arguments use: std::bind( &ObjectT::AddMethod, pObject, _1 )	- where _1 refers to ElementT*
 
 	template< typename ResultT, typename ObjectT, typename Arg1T >

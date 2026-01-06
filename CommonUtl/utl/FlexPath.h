@@ -65,19 +65,19 @@ namespace path
 	template< typename PathT >
 	inline size_t FindComplexPathCount( const std::vector<PathT>& flexPaths )
 	{
-		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fun_ref( &fs::CPath::IsComplexPath ) );
+		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fn( &fs::CPath::IsComplexPath ) );
 	}
 
 	template< typename PathT >
 	inline size_t FindPhysicalPathCount( const std::vector<PathT>& flexPaths )
 	{
-		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fun_ref( &fs::CPath::IsPhysicalPath ) );
+		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fn( &fs::CPath::IsPhysicalPath ) );
 	}
 
 	template< typename PathT >
 	bool ExtractPhysicalPaths( OUT std::vector<fs::CPath>& rPhysicalPaths, IN OUT std::vector<PathT>& rFlexPaths )
 	{
-		typename std::vector<PathT>::iterator itRemove = std::remove_if( rFlexPaths.begin(), rFlexPaths.end(), std::mem_fun_ref( &fs::CPath::IsPhysicalPath ) );	// just move physical paths at the end
+		typename std::vector<PathT>::iterator itRemove = std::remove_if( rFlexPaths.begin(), rFlexPaths.end(), std::mem_fn( &fs::CPath::IsPhysicalPath ) );	// just move physical paths at the end
 
 		if ( (void*)&rPhysicalPaths != (void*)&rFlexPaths )
 			rPhysicalPaths.assign( itRemove, rFlexPaths.end() );

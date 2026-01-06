@@ -87,13 +87,13 @@ namespace multi
 	template< typename ContainerT >
 	typename void ClearAll( ContainerT& rStates )
 	{
-		std::for_each( rStates.begin(), rStates.end(), std::mem_fun_ref( &typename ContainerT::value_type::Clear ) );
+		std::for_each( rStates.begin(), rStates.end(), std::mem_fn( &typename ContainerT::value_type::Clear ) );
 	}
 
 	template< typename ContainerT >
 	typename void SetInvalidAll( ContainerT& rStates )
 	{
-		std::for_each( rStates.begin(), rStates.end(), std::mem_fun_ref( &typename ContainerT::value_type::SetInvalid ) );
+		std::for_each( rStates.begin(), rStates.end(), std::mem_fn( &typename ContainerT::value_type::SetInvalid ) );
 	}
 
 	template< typename ContainerT >

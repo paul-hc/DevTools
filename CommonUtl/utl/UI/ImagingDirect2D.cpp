@@ -86,12 +86,12 @@ namespace d2d
 
 	void CRenderTarget::DiscardDeviceResources( void )
 	{
-		utl::for_each( m_gadgets, std::mem_fun( &IGadgetComponent::DiscardDeviceResources ) );
+		utl::for_each( m_gadgets, std::mem_fn( &IGadgetComponent::DiscardDeviceResources ) );
 	}
 
 	bool CRenderTarget::CreateDeviceResources( void )
 	{
-		utl::for_each( m_gadgets, std::mem_fun( &IGadgetComponent::CreateDeviceResources ) );
+		utl::for_each( m_gadgets, std::mem_fn( &IGadgetComponent::CreateDeviceResources ) );
 		return true;
 	}
 

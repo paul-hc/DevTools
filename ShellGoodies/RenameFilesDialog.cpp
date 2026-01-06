@@ -195,7 +195,7 @@ bool CRenameFilesDialog::RenameFiles( void )
 
 bool CRenameFilesDialog::HasDestPaths( void ) const
 {
-	return utl::Any( m_rRenameItems, std::mem_fun( &CRenameItem::HasDestPath ) );
+	return utl::Any( m_rRenameItems, std::mem_fn( &CRenameItem::HasDestPath ) );
 }
 
 const CEnumTags& CRenameFilesDialog::GetTags_Mode( void )

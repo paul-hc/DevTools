@@ -221,7 +221,7 @@ namespace mfc
 	inline ButtonT* FindNotifyingMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, &CMFCToolBar::IsLastCommandFromButton ); }
 
 	template< typename ButtonT >
-	inline ButtonT* FindFocusedMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, std::mem_fun( &CMFCToolBarButton::HasFocus ) ); }
+	inline ButtonT* FindFocusedMatchingButton( UINT btnId ) { return FindMatchingButtonThat<ButtonT>( btnId, std::mem_fn( &CMFCToolBarButton::HasFocus ) ); }
 }
 
 

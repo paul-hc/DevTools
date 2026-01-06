@@ -88,12 +88,12 @@ CTextCell* CTextCell::DeepFindCell( const TCHAR* pCellPath ) const
 
 void CTextCell::QuerySubFolders( std::vector<CTextCell*>& rSubFolders ) const
 {
-	utl::QueryThat( rSubFolders, m_children, std::mem_fun( &CTextCell::IsFolder ) );
+	utl::QueryThat( rSubFolders, m_children, std::mem_fn( &CTextCell::IsFolder ) );
 }
 
 void CTextCell::QueryLeafs( std::vector<CTextCell*>& rLeafs ) const
 {
-	utl::QueryThat( rLeafs, m_children, std::mem_fun( &CTextCell::IsLeaf ) );
+	utl::QueryThat( rLeafs, m_children, std::mem_fn( &CTextCell::IsLeaf ) );
 }
 
 

@@ -931,7 +931,7 @@ bool CReportListControl::GetDisplayColumnOrder( OUT std::vector<TColumn>& rDispl
 	int columnCount = GetColumnCount();
 	rDisplayColumns.resize( columnCount );
 
-	bool succeeded = GetColumnOrderArray( rDisplayColumns.data(), columnCount ) != FALSE;
+	bool succeeded = GetColumnOrderArray( utl::Data( rDisplayColumns ), columnCount ) != FALSE;
 
 	if ( !succeeded )
 		utl::generate( rDisplayColumns, func::GenNumSeq<TColumn>( 0 ) );
