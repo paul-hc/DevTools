@@ -57,17 +57,21 @@ public:
 	virtual ui::ICustomImageDraw* GetRenderer( void ) const = 0;
 	virtual bool SetCurrGlyphGauge( ui::GlyphGauge currGlyphGauge ) = 0;
 private:
-	CImageList m_imageLists[ ui::_GlyphGaugeCount ];
+	CImageList m_imageLists[ ui::_GlyphGaugeCount ];	// [ui::SmallGlyph, ui::LargeGlyph] containing transparent images - to be painted over
 	int m_transpImageIndex;								// index of the transparent entry in the image list
 };
 
 
-// uses the shared CFileItemsThumbnailStore with dual thumbnailers for small and large thumbnails
+// uses the shared CFileItemsThumbnailStore (singleton) with dual thumbnailers for small and large thumbnails
 //
 class CFileGlyphCustomDrawImager : public CBaseCustomDrawImager
 {
+	// hidden base methods
+	using CBaseCustomDrawImager::GetImageList;
 public:
 	CFileGlyphCustomDrawImager( ui::GlyphGauge currGlyphGauge );
+
+	CImageList* GetImageList( void ) { return __super::GetImageList( m_currGlyphGauge ); }
 
 	// base overrides
 	virtual ui::ICustomImageDraw* GetRenderer( void ) const;

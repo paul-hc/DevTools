@@ -23,25 +23,34 @@ CImageEdit::~CImageEdit()
 void CImageEdit::SetImageList( CImageList* pImageList )
 {
 	m_pImageList = pImageList;
+
 	if ( m_pImageList != nullptr )
 		m_imageSize = gdi::GetImageIconSize( *m_pImageList );
 }
 
 bool CImageEdit::SetImageIndex( int imageIndex )
 {
-	if ( m_imageIndex == imageIndex )
+	if ( !utl::ModifyValue( m_imageIndex, imageIndex ) )
 		return false;
 
-	m_imageIndex = imageIndex;
-	if ( ( nullptr == m_pImageList ) == !m_imageNcRect.IsRectEmpty() )
-		ResizeNonClient();
-	else
-		ui::RedrawControl( m_hWnd );
+	if ( m_hWnd != nullptr )
+		UpdateControl();
+
 	return true;
+}
+
+void CImageEdit::UpdateControl( void )
+{
+	if ( m_hWnd != nullptr )
+		if ( (BOOL)HasValidImage() == m_imageNcRect.IsRectEmpty() )		// dirty non-client?
+			ResizeNonClient();
+		else
+			ui::RedrawControl( m_hWnd );
 }
 
 void CImageEdit::ResizeNonClient( void )
 {
+	// will send a WM_NCCALCSIZE
 	SetWindowPos( nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER );
 }
 
@@ -78,7 +87,7 @@ void CImageEdit::OnNcCalcSize( BOOL calcValidRects, NCCALCSIZE_PARAMS* pNcSp )
 			RECT* pClientNew = &pNcSp->rgrc[ 0 ];		// in parent's client coordinates
 
 			m_imageNcRect = *pClientNew;
-			m_imageNcRect.right = m_imageNcRect.left + m_imageSize.cx + ImageSpacing * 2 + ImageToTextGap;
+			m_imageNcRect.right = m_imageNcRect.left + m_imageSize.cx + ImageSpacing * 2 + ImageToTextGap - 1;
 			pClientNew->left = m_imageNcRect.right;
 		}
 		else
@@ -95,10 +104,10 @@ void CImageEdit::OnNcPaint( void )
 		CWnd* pParent = GetParent();
 
 		pParent->ClientToScreen( &ncRect );
-		ui::ScreenToNonClient( m_hWnd, ncRect ); // this edit non-client coordinates
+		ui::ScreenToNonClient( m_hWnd, ncRect );		// this edit non-client coordinates
 
 		CRect imageRect = CRect( ncRect.TopLeft(), m_imageSize );
-		imageRect.OffsetRect( ImageSpacing, 0 );
+		imageRect.OffsetRect( ImageSpacing + 1, 0 );
 
 		CWindowDC dc( this );
 		HBRUSH hBkBrush = (HBRUSH)pParent->SendMessage( IsWritable() ? WM_CTLCOLOREDIT : WM_CTLCOLORSTATIC, (WPARAM)dc.m_hDC, (LPARAM)m_hWnd );
@@ -116,7 +125,7 @@ LRESULT CImageEdit::OnNcHitTest( CPoint point )
 		GetParent()->ScreenToClient( &parentPoint );
 
 		if ( m_imageNcRect.PtInRect( parentPoint ) )
-			return HTOBJECT; // so that it will send a WM_NCLBUTTONDBLCLK
+			return HTOBJECT;		// so that it will send a WM_NCLBUTTONDBLCLK
 	}
 
 	return __super::OnNcHitTest( point );

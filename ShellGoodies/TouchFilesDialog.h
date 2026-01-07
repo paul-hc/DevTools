@@ -6,6 +6,7 @@
 #include "utl/ISubject.h"
 #include "utl/UI/DateTimeControl.h"
 #include "utl/UI/FrameHostCtrl.h"
+#include "utl/UI/PathItemEdit.h"
 #include "utl/UI/ReportListControl.h"
 #include "utl/UI/SelectionData.h"
 #include "utl/UI/TandemControls.h"
@@ -110,7 +111,7 @@ private:
 	CLabelDivider m_filesLabelDivider;
 	CFrameHostCtrl<CButton> m_targetSelItemsButton;
 	CHostToolbarCtrl<CStatusStatic> m_fileStatsStatic;
-	CHostToolbarCtrl<CTextEdit> m_currFolderEdit;
+	CHostToolbarCtrl<CPathItemEdit> m_currFolderEdit;
 
 	// generated stuff
 public:

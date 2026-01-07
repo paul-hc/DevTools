@@ -20,11 +20,10 @@ public:
 	virtual ~CPathItemListCtrl();
 
 	static CMenu& GetStdPathListPopupMenu( ListPopup popupType );
+	static fs::CPath AsPath( const utl::ISubject* pObject );		// expands environment variables ("%WIN_VAR%" and "$(VC_MACRO_VAR)")
 
 	COLORREF GetMissingFileColor( void ) const { return m_missingFileColor; }
 	void SetMissingFileColor( COLORREF missingFileColor ) { m_missingFileColor = missingFileColor; }
-
-	static fs::CPath AsPath( const utl::ISubject* pObject );		// expands environment variables ("%WIN_VAR%" and "$(VC_MACRO_VAR)")
 
 	// selection
 	template< typename PathType >

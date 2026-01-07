@@ -51,7 +51,8 @@ public:
 
 	bool IsMultiLine( void ) const { return HasFlag( GetStyle(), ES_MULTILINE ); }
 
-	bool IsWritable( void ) const { return !HasFlag( GetStyle(), ES_READONLY ); }
+	bool IsReadOnly( void ) const { return HasFlag( GetStyle(), ES_READONLY ); }
+	bool IsWritable( void ) const { return !IsReadOnly(); }
 	bool SetWritable( bool writable ) { return writable != IsWritable() && SetReadOnly( !writable ) != FALSE; }
 
 	bool UseFixedFont( void ) const { return m_useFixedFont; }

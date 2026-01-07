@@ -731,6 +731,9 @@
     <ClInclude Include="TextEdit_fwd.h">
       <Filter>UI\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="PathItemEdit.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1238,6 +1241,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextListEditor.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="PathItemEdit.cpp">
       <Filter>UI\Controls</Filter>
     </ClCompile>
   </ItemGroup>

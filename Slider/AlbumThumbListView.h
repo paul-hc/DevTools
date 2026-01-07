@@ -150,7 +150,7 @@ protected:
 	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
-	HBRUSH CtlColor( CDC* pDC, UINT ctlColor );
+	afx_msg HBRUSH CtlColor( CDC* pDC, UINT ctlColor );
 	afx_msg void OnDropFiles( HDROP hDropInfo );
 	afx_msg void OnSetFocus( CWnd* pOldWnd );
 	afx_msg void OnLButtonDown( UINT mkFlags, CPoint point );

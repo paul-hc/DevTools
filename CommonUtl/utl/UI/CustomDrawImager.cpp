@@ -86,10 +86,10 @@ void CFileItemsThumbnailStore::UnregisterControl( ICustomDrawControl* pCustomDra
 void CFileItemsThumbnailStore::UpdateControls( void )
 {
 	for ( std::vector<ICustomDrawControl*>::const_iterator itCustomDrawCtrl = m_customDrawCtrls.begin(); itCustomDrawCtrl != m_customDrawCtrls.end(); ++itCustomDrawCtrl )
-		if ( CBaseCustomDrawImager* pImager = ( *itCustomDrawCtrl )->GetCustomDrawImager() )
+		if ( CBaseCustomDrawImager* pImager = (*itCustomDrawCtrl)->GetCustomDrawImager() )
 			if ( ui::ICustomImageDraw* pRenderer = pImager->GetRenderer() )
 				if ( pRenderer == GetThumbnailer( ui::SmallGlyph ) || pRenderer == GetThumbnailer( ui::LargeGlyph ) )		// uses any of the file thumbnailers?
-					( *itCustomDrawCtrl )->SetCustomFileGlyphDraw();			// update the image lists
+					(*itCustomDrawCtrl)->SetCustomFileGlyphDraw();			// update the image lists
 }
 
 

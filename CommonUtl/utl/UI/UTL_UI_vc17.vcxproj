@@ -292,6 +292,7 @@
     <ClInclude Include="OleDropTarget.h" />
     <ClInclude Include="OleUtils.h" />
     <ClInclude Include="PasswordDialog.h" />
+    <ClInclude Include="PathItemEdit.h" />
     <ClInclude Include="PathItemListCtrl.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Pixel.h" />
@@ -486,6 +487,7 @@
     <ClCompile Include="OleDropTarget.cpp" />
     <ClCompile Include="OleUtils.cpp" />
     <ClCompile Include="PasswordDialog.cpp" />
+    <ClCompile Include="PathItemEdit.cpp" />
     <ClCompile Include="PathItemListCtrl.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>

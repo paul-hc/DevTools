@@ -10,6 +10,7 @@
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/EnumSplitButton.h"
 #include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/PathItemEdit.h"
 #include "utl/UI/SplitPushButton.h"
 #include "utl/UI/SpinEdit.h"
 #include "utl/UI/SelectionData.h"
@@ -112,7 +113,7 @@ private:
 	CDialogToolBar m_seqCountToolbar;
 	CLabelDivider m_filesLabelDivider;
 	CHostToolbarCtrl<CStatusStatic> m_fileStatsStatic;
-	CHostToolbarCtrl<CTextEdit> m_currFolderEdit;
+	CHostToolbarCtrl<CPathItemEdit> m_currFolderEdit;
 	CFrameHostCtrl<CButton> m_showExtButton;
 	CFrameHostCtrl<CEnumComboBox> m_sortOrderCombo;
 	CFrameHostCtrl<CButton> m_targetSelItemsButton;

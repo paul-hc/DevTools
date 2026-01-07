@@ -167,7 +167,8 @@ namespace layout
 		{ IDC_SEARCH_PATH_COMBO, pctSizeX( 50 ) },
 		{ IDC_GROUP_BOX_3, Size },
 		{ IDC_FILE_CHECKSUMS_LIST, Size },
-
+		{ IDC_SEL_FILE_STATIC, MoveY },
+		{ IDC_SEL_FILE_EDIT, MoveY | SizeX },
 		{ IDC_FIND_FILES_BUTTON, MoveX },
 		{ IDC_CALC_CHECKSUMS_BUTTON, MoveX },
 		{ IDOK, MoveX },
@@ -311,6 +312,7 @@ void CFileChecksumsDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_SEARCH_PATH_COMBO, m_searchPathCombo );
 	DDX_Control( pDX, IDC_FILE_CHECKSUMS_LIST, m_fileListCtrl );
+	DDX_Control( pDX, IDC_SEL_FILE_EDIT, m_selFileEdit );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -331,6 +333,7 @@ void CFileChecksumsDialog::DoDataExchange( CDataExchange* pDX )
 BEGIN_MESSAGE_MAP( CFileChecksumsDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_FIND_FILES_BUTTON, OnBnClicked_FindFiles )
 	ON_BN_CLICKED( IDC_CALC_CHECKSUMS_BUTTON, OnBnClicked_CalculateChecksums )
+	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FILE_CHECKSUMS_LIST, OnLvnItemChanged_FileList )
 END_MESSAGE_MAP()
 
 void CFileChecksumsDialog::OnOK( void )
@@ -356,4 +359,22 @@ void CFileChecksumsDialog::OnBnClicked_CalculateChecksums( void )
 		OnBnClicked_FindFiles();
 
 	CalculateChecksums();
+}
+
+void CFileChecksumsDialog::OnLvnItemChanged_FileList( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
+
+	ASSERT( !m_fileListCtrl.IsInternalChange() );		// filtered internally by CReportListControl
+	if ( m_fileListCtrl.IsSelectionCaretChangeNotify( pNmList ) )
+	{
+		fs::CPath selFilePath;
+
+		if ( const CFileChecksumItem* pCaretItem = m_fileListCtrl.GetCaretAs<CFileChecksumItem>() )
+			selFilePath = pCaretItem->GetFilePath();
+
+		m_selFileEdit.SetFilePath( selFilePath );
+	}
+
+	*pResult = 0;
 }

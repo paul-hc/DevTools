@@ -420,8 +420,7 @@ void CRenameFilesDialog::UpdateFileListStatus( void )
 	if ( CRenameItem* pCaretItem = m_selData.GetCaretItem() )
 		currFolderPath = pCaretItem->GetSrcPath().GetParentPath();
 
-	m_currFolderEdit.SetText( currFolderPath.Get() );
-	m_currFolderEdit.SelectAll();		// scroll to end to show deepest subfolder
+	m_currFolderEdit.SetFilePath( currFolderPath );
 }
 
 void CRenameFilesDialog::UpdateSortOrderCombo( const ren::TSortingPair& sorting )

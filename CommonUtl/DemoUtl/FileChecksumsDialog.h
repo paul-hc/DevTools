@@ -5,6 +5,7 @@
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/ItemContentHistoryCombo.h"
 #include "utl/UI/PathItemListCtrl.h"
+#include "utl/UI/PathItemEdit.h"
 
 
 class CFileChecksumItem;
@@ -31,6 +32,7 @@ private:
 
 	CItemContentHistoryCombo m_searchPathCombo;
 	CPathItemListCtrl m_fileListCtrl;
+	CPathItemEdit m_selFileEdit;
 
 	// generated stuff
 public:
@@ -42,6 +44,7 @@ protected:
 protected:
 	afx_msg void OnBnClicked_FindFiles( void );
 	afx_msg void OnBnClicked_CalculateChecksums( void );
+	afx_msg void OnLvnItemChanged_FileList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };

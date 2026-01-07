@@ -17,9 +17,11 @@ public:
 	int GetImageIndex( void ) const { return m_imageIndex; }
 	bool SetImageIndex( int imageIndex );
 
-	bool HasValidImage( void ) const { return m_pImageList != nullptr && m_imageIndex >= 0; }
+	virtual bool HasValidImage( void ) const { return m_pImageList != nullptr && m_imageIndex >= 0; }
 protected:
 	virtual void DrawImage( CDC* pDC, const CRect& imageRect );
+
+	void UpdateControl( void );
 private:
 	void ResizeNonClient( void );
 private:

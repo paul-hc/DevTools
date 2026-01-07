@@ -255,8 +255,7 @@ void CTouchFilesDialog::UpdateFileListStatus( void )
 	if ( CTouchItem* pCaretItem = m_selData.GetCaretItem() )
 		currFolderPath = pCaretItem->GetSrcState().m_fullPath.GetParentPath();
 
-	m_currFolderEdit.SetText( currFolderPath.Get() );
-	m_currFolderEdit.SelectAll();		// scroll to end to show deepest subfolder
+	m_currFolderEdit.SetFilePath( currFolderPath );
 }
 
 void CTouchFilesDialog::SetupFileListView( void )
