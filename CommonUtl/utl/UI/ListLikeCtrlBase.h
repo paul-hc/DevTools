@@ -2,6 +2,7 @@
 #define ListLikeCtrlBase_h
 #pragma once
 
+#include "InternalChange.h"
 #include "ObjectCtrlBase.h"
 #include "TextEffect.h"
 #include "CustomDrawImager_fwd.h"
@@ -32,8 +33,11 @@ namespace ui
 }
 
 
+// abstract base for CReportListControl, CTreeControl
+
 abstract class CListLikeCtrlBase
 	: public CObjectCtrlBase
+	, public CInternalChange
 	, public ICustomDrawControl
 	, protected ui::ITextEffectCallback
 {

@@ -37,14 +37,12 @@ namespace ui
 #include "utl/Path.h"
 #include "AccelTable.h"
 #include "CmdIdStore.h"
-#include "InternalChange.h"
 
 
 class CShellContextMenuHost;
 
 
-abstract class CObjectCtrlBase : public CInternalChange
-							   , private utl::noncopyable
+abstract class CObjectCtrlBase : private utl::noncopyable
 {
 protected:
 	CObjectCtrlBase( CWnd* pCtrl, UINT ctrlAccelId = 0 );

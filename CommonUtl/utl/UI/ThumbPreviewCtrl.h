@@ -14,7 +14,7 @@ class CThumbPreviewCtrl : public CStatic
 	, public CObjectCtrlBase
 {
 public:
-	CThumbPreviewCtrl( CThumbnailer* pThumbnailer );
+	CThumbPreviewCtrl( CThumbnailer* pThumbnailer );		// could be CFileItemsThumbnailStore::Instance().GetThumbnailer( ui::SmallGlyph )
 
 	const fs::CFlexPath& GetImagePath( void ) const { return m_imageFilePath; }
 	void SetImagePath( const fs::CFlexPath& imageFilePath, bool doRedraw = true );

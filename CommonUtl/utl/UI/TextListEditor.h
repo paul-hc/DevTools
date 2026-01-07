@@ -27,9 +27,6 @@ public:
 	bool UseLockedItemCount( void ) const { return m_useLockedItemCount; }
 	void SetUseLockedItemCount( bool useLockedItemCount = true ) { m_useLockedItemCount = useLockedItemCount; }
 
-	CInternalChange* GetInternalChange( void ) { return static_cast<CTextEditor*>( this ); }
-	bool IsInternalChange( void ) const { return const_cast<CTextListEditor*>( this )->GetInternalChange()->IsInternalChange(); }
-
 	size_t GetItemCount( void ) const override { return m_objects.size(); }
 
 	utl::ISubject* GetAt( size_t index ) const { return index < GetItemCount() ? m_objects[index] : nullptr; }
