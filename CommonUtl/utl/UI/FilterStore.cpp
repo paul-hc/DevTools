@@ -49,7 +49,7 @@ namespace fs
 
 		if ( m_knownExts.find( ext ) != m_knownExts.end() )		// extension already registered?
 		{
-			TRACE( _T(" Warning: ignoring extension '%s' that is already registered!\n"), ext.GetPtr() );
+			TRACE_FL( _T("\n Warning: ignoring extension '%s' that is already registered!\n"), ext.GetPtr() );
 			return false;
 		}
 

@@ -50,7 +50,7 @@ namespace ut
 		#ifdef IS_CPP_11
 			// note: avoid double tracing => _ASSERT_EXPR() will do the tracing
 		#else
-			TRACE( _T("%s\n"), msg.c_str() );
+			TRACE_FL( _T("%s\n"), msg.c_str() );
 		#endif
 
 			std::cerr << pFilePath << '(' << lineNumber << ") : " << msg << std::endl;
@@ -229,6 +229,23 @@ namespace ut
 			s_dirPath.Clear();
 		}
 		return s_dirPath;
+	}
+
+	const fs::TDirPath& GetShellLinksDirPath( void )
+	{
+		static fs::TDirPath s_stdShellLinksDirPath = GetTestDataDirPath() / fs::TDirPath( _T("shell_links") );
+		static bool s_init = false;
+
+		if ( !s_init )
+		{
+			s_init = true;
+			if ( !fs::IsValidDirectory( s_stdShellLinksDirPath.GetPtr() ) )
+			{
+				TRACE( _T("\n # Cannot find unit test shell_links directory path: %s #\nTODO: create directory %UTL_STD_SRC_IMAGE_PATH%\\shell_links"), s_stdShellLinksDirPath.GetPtr() );
+				s_stdShellLinksDirPath.Clear();
+			}
+		}
+		return s_stdShellLinksDirPath;
 	}
 
 	const fs::TDirPath& GetStdImageDirPath( void )

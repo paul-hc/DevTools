@@ -184,8 +184,8 @@ bool CApplication::CheckReplaceSourcePaths( std::vector<fs::CPath>& rOutSourcePa
 	if ( !UseInputSourcePaths() )
 		return false;
 
-	TRACE_( _T("# %s - Warning: Replacing %d Explorer source paths with %d file paths form the debug input file: '%s'\n"), pClientTag,
-			rOutSourcePaths.size(), m_inputSourcePaths.size(), m_inputFileListPath.GetFilenamePtr() );
+	TRACE( _T("# %s - Warning: Replacing %d Explorer source paths with %d file paths form the debug input file: '%s'\n"), pClientTag,
+		   rOutSourcePaths.size(), m_inputSourcePaths.size(), m_inputFileListPath.GetFilenamePtr() );
 
 	rOutSourcePaths = m_inputSourcePaths;		// DBG: override input files
 	return true;
@@ -214,7 +214,7 @@ bool CApplication::LoadInputFileListPaths( void )
 					if ( sourcePath.FileExist() )
 						m_inputSourcePaths.push_back( sourcePath );
 					else
-						TRACE_( _T(" Warning: ignoring non-existent input file path: '%s' at line %d\n"), sourcePath.GetPtr(), linePos + 1 );
+						TRACE( _T(" Warning: ignoring non-existent input file path: '%s' at line %d\n"), sourcePath.GetPtr(), linePos + 1 );
 				}
 			}
 		}
@@ -223,7 +223,7 @@ bool CApplication::LoadInputFileListPaths( void )
 	}
 
 	if ( UseInputSourcePaths() )
-		TRACE_( _T(" Warning: replacing Explorer selected files with input file list '%s' with fileCount=%d\n"), m_inputFileListPath.GetPtr(), m_inputSourcePaths.size() );
+		TRACE( _T(" Warning: replacing Explorer selected files with input file list '%s' with fileCount=%d\n"), m_inputFileListPath.GetPtr(), m_inputSourcePaths.size() );
 	else
 		m_inputFileListPath.Clear();
 

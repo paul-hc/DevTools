@@ -7,12 +7,19 @@
 #endif
 
 
+bool CTracing::m_disabled = false;				// by default enabled in Debug builds
+bool CTracing::m_hResultDisabled = false;		// by default enabled in Debug builds
+
+
 #ifdef _DEBUG
 
 namespace debug
 {
 	void TraceV( const char* pFormat, va_list args )
 	{
+		if ( CTracing::m_disabled )
+			return;
+
 		CStringA text;
 
 		text.FormatV( pFormat, args );
@@ -21,6 +28,9 @@ namespace debug
 
 	void TraceV( const wchar_t* pFormat, va_list args )
 	{
+		if ( CTracing::m_disabled )
+			return;
+
 		CStringW text;
 
 		text.FormatV( pFormat, args );

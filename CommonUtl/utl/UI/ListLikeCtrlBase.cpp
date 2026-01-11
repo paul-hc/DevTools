@@ -115,8 +115,8 @@ namespace dbg
 		static const CEnumTags enumTags( _T("CDDS_PREPAINT|CDDS_POSTPAINT|CDDS_PREERASE|CDDS_POSTERASE"), nullptr, -1, CDDS_PREPAINT );		// mask 0x0000000F
 		static const CFlagTags::FlagDef flagDefs[] =
 		{
-			{ CDDS_ITEM, _T("CDDS_ITEM") },
-			{ CDDS_SUBITEM, _T("CDDS_SUBITEM") }
+			{ FLAG_TAG( CDDS_ITEM ) },
+			{ FLAG_TAG( CDDS_SUBITEM ) }
 		};
 		static const CFlagTags flagTags( flagDefs, COUNT_OF( flagDefs ) );
 		static const TCHAR sep[] = _T(" | ");

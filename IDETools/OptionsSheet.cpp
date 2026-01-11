@@ -316,7 +316,7 @@ void CBscPathPage::SetupPathListBox( int selIndex /*= LB_ERR*/ )
 
 int CBscPathPage::MoveItemTo( int srcIndex, int destIndex, bool isDropped /*= false*/ )
 {
-	TRACE( _T(" # Dropped(): srcIndex=%d, destIndex=%d\n"), srcIndex, destIndex );
+	TRACE_FL( _T(" # Dropped(): srcIndex=%d, destIndex=%d\n"), srcIndex, destIndex );
 
 	CSearchPathItem movedItem = m_pathItems[ srcIndex ];
 

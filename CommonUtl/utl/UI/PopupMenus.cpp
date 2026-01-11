@@ -69,7 +69,7 @@ namespace mfc
 
 		if ( !pMenuBar->ImportFromMenu( m_hMenu, TRUE ) )
 		{
-			TRACE( "Can't import menu\n" );
+			TRACE_FL( ":\nCan't import menu\n" );
 			return FALSE;
 		}
 

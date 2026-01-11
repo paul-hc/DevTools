@@ -24,7 +24,7 @@ CFlagTags::CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= null
 
 CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags /*= std::tstring()*/ )
 {
-	ASSERT( count < MaxBits );
+	ASSERT( count <= MaxBits );
 
 	std::vector<std::tstring> srcUiTags;
 	str::Split( srcUiTags, uiTags.c_str(), m_listSep );

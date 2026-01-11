@@ -59,7 +59,7 @@ namespace io
 					blockFunc( pBuffer, static_cast<size_t>( ifs.gcount() ) );
 			}
 			else
-				TRACE( _T(" * Cannot open file for reading: %s\n"), srcFilePath.GetPtr() );
+				TRACE_FL( _T(" * Cannot open file for reading: %s\n"), srcFilePath.GetPtr() );
 
 			return blockFunc;
 		}

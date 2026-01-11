@@ -2269,7 +2269,7 @@ void CReportListControl::TraceNotify( const NMLISTVIEW* pNmList )
 	static size_t count = 0;
 	utl::ISubject* pObject = AsSubject( pNmList->lParam );
 
-	TRACE_( _T(">> [%d] SelChange - NMLISTVIEW: iItem=%d, uNewState={%s}, uOldState={%s}, uChanged={%s}, lParam='%s'\n"), count++,
+	TRACE( _T(">> [%d] SelChange - NMLISTVIEW: iItem=%d, uNewState={%s}, uOldState={%s}, uChanged={%s}, lParam='%s'\n"), count++,
 		pNmList->iItem,
 		CReportListControl::GetTags_LV_State().FormatKey( pNmList->uNewState ).c_str(),
 		CReportListControl::GetTags_LV_State().FormatKey( pNmList->uOldState ).c_str(),

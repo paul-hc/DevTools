@@ -1,7 +1,6 @@
 
 #include "pch.h"
 #include "TouchItem.h"
-#include "utl/FmtUtils.h"
 #include "utl/UI/DateTimeControl.h"
 #include "utl/UI/WndUtilsEx.h"
 

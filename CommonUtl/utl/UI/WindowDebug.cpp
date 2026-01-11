@@ -180,7 +180,7 @@ namespace dbg
 		if ( msgNotifyCode != WM_MOUSEMOVE )
 		{
 			m_preMsg = m_pTrayIcon->FormatState();
-			TRACE( _T("  Pre {%s}\n"), m_preMsg.c_str() );
+			TRACE_FL( _T(":\n  Pre {%s}\n"), m_preMsg.c_str() );
 		}
 	#else
 		msgNotifyCode;
@@ -194,7 +194,7 @@ namespace dbg
 		{
 			std::tstring postMsg = m_pTrayIcon->FormatState();
 			if ( postMsg != m_preMsg )
-				TRACE( _T("  Post {%s}\n"), postMsg.c_str() );
+				TRACE_FL( _T(":\n  Post {%s}\n"), postMsg.c_str() );
 		}
 	#endif
 	}

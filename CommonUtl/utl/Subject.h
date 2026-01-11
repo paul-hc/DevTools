@@ -61,7 +61,7 @@ public:
 		if ( itFound != m_observers.end() )
 			m_observers.erase( itFound );
 		else
-			TRACE( _T(" # Observer %s already removed from subject %s.\n"), str::GetTypeName( typeid( *pObserver ) ).c_str(), str::GetTypeName( typeid( *this ) ).c_str() );
+			TRACE_FL( _T(" # Observer %s already removed from subject %s.\n"), str::GetTypeName( typeid( *pObserver ) ).c_str(), str::GetTypeName( typeid( *this ) ).c_str() );
 	}
 
 	virtual void UpdateAllObservers( utl::IMessage* pMessage ) implement

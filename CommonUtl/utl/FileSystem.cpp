@@ -455,7 +455,7 @@ namespace fs
 		if ( !time_utl::IsValid( fileModifTime ) )				// probably file deleted -> expired
 			return ExpiredFileDeleted;
 
-		//TRACE( _T(" fileModifTime=%s  lastModifyTime=%s\n"), time_utl::FormatTimestamp( fileModifTime ).c_str(), time_utl::FormatTimestamp( lastModifyTime ).c_str() );
+		//TRACE_FL( _T(" fileModifTime=%s  lastModifyTime=%s\n"), time_utl::FormatTimestamp( fileModifTime ).c_str(), time_utl::FormatTimestamp( lastModifyTime ).c_str() );
 
 		if ( fileModifTime > lastModifyTime )
 			return ExpiredFileModified;

@@ -263,8 +263,8 @@ CString DspParser::GetAdditionalIncludePath( const TCHAR* activeConfiguration /*
 				foundFirstConfig = true;
 			else if ( useAnyConfig )
 			{
-				TRACE( _T("Specified configuration [%s] couldn't be found! Parsing the first configuration...\n"),
-					   activeConfiguration );
+				TRACE_FL( _T("Specified configuration [%s] couldn't be found! Parsing the first configuration...\n"),
+						  activeConfiguration );
 				m_file.SeekToBegin();
 			}
 			else

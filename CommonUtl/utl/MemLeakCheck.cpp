@@ -33,7 +33,7 @@ void CMemLeakCheck::Report( int lineNo /*= 0*/ ) const
 {
 	std::tstring message = FormatMessage( lineNo );
 	if ( !message.empty() )
-		TRACE( _T("\n %s\n"), message.c_str() );
+		TRACE_FL( _T("\n %s\n"), message.c_str() );
 }
 
 bool CMemLeakCheck::AssertReport( std::tstring& rMsg ) const

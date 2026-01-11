@@ -60,7 +60,7 @@ namespace fs
 		if ( itFound != m_cachedEntries.end() )
 			if ( itFound->second.first == pObject )
 			{
-				TRACE( _T("[?] Attempt to add an already cached thumbnail for: ") );
+				TRACE_FL( _T("[?] Attempt to add an already cached thumbnail for: ") );
 				TraceObject( pathKey, itFound->second.first, cache::CacheHit );
 				return false;			// skip caching already cached thumb
 			}

@@ -143,7 +143,7 @@ namespace fs
 				pathKey = m_queue.back();
 			}
 
-			TRACE( "Background dequeueing..." );
+			TRACE_FL( "Background dequeueing..." );
 			m_acquireFunc( pathKey );
 		}
 	}

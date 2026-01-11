@@ -33,7 +33,7 @@ namespace dbg
 }
 
 	#define TRACE_LAYOUT( methodName )\
-		TRACE_( T_CAT3("- CLayoutEngine::", methodName, "(%s - '%s'):  layCtrls=%d  m_flags=%02X {%s}  style={%s}\n"),\
+		TRACE( T_CAT3("- CLayoutEngine::", methodName, "(%s - '%s'):  layCtrls=%d  m_flags=%02X {%s}  style={%s}\n"),\
 			str::GetTypeName( typeid( *m_pDialog ) ).c_str(), ui::GetWindowText( m_pDialog ).c_str(),\
 			m_controlStates.size(),\
 			m_flags, dbg::GetTags_LayoutFlags().FormatKey( m_flags ).c_str(),\
@@ -230,7 +230,7 @@ void CLayoutEngine::SetupControlStates( void )
 		}
 
 	if ( !m_hiddenGroups.empty() )
-		TRACE_( "\tm_hiddenGroups count=%d\n", m_hiddenGroups.size() );
+		TRACE( "\tm_hiddenGroups count=%d\n", m_hiddenGroups.size() );
 }
 
 void CLayoutEngine::SetupGroupBoxState( HWND hGroupBox )

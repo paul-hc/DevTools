@@ -109,23 +109,27 @@
 
 
 #ifdef _DEBUG
-	namespace debug { class CTraceFileLine; }
-
-	#define TRACE_		debug::Trace										// "Message"
-	#define TRACE_FL	debug::CTraceFileLine( __FILE__, __LINE__ )			// e.g. "C:\dev\code\DevTools\CommonUtl\utl\Algorithms.h(35):  Message"
-	#define TRACE_FL2	debug::CTraceFileLine( __FILE__, __LINE__, 2 )		// e.g. "utl\Algorithms.h(35):  Message"
-	#define TRACE_FL3	debug::CTraceFileLine( __FILE__, __LINE__, 3 )		// e.g. "CommonUtl\utl\Algorithms.h(35):  Message"
-	#define TRACE_ITEMS debug::TraceStrings
+	namespace debug
+	{
+		// FWD:
+		class CTraceFileLine;
+		void Trace( const char* pFormat, ... );
+		void Trace( const wchar_t* pFormat, ... );
+	}
 
 	#if _MSC_VER >= VS_2015
 		#ifdef TRACE
 			#undef TRACE	// originally defined as ATLTRACE
 		#endif
 
-		#define TRACE	TRACE_FL	// bypass displaying the ATLTRACE overhead "atlTraceGeneral - "
-	#endif // VS_2008
+		#define TRACE		debug::Trace									// "Message"
+	#endif
+
+	#define TRACE_FL	debug::CTraceFileLine( __FILE__, __LINE__ )			// e.g. "C:\dev\code\DevTools\CommonUtl\utl\Algorithms.h(35):  Message"
+	#define TRACE_FL2	debug::CTraceFileLine( __FILE__, __LINE__, 2 )		// e.g. "utl\Algorithms.h(35):  Message"
+	#define TRACE_FL3	debug::CTraceFileLine( __FILE__, __LINE__, 3 )		// e.g. "CommonUtl\utl\Algorithms.h(35):  Message"
+	#define TRACE_ITEMS debug::TraceStrings
 #else
-	#define TRACE_ __noop
 	#define TRACE_FL __noop
 	#define TRACE_FL2 __noop
 	#define TRACE_FL3 __noop

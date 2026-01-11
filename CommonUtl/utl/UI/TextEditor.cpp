@@ -129,7 +129,7 @@ bool CTextEditor::HandleWordSelection( UINT cmdId )
 			break;
 	}
 
-	static size_t s_cnt = 0; TRACE_( "-[%d] oldSelRange=[%d, %d] caret=%d at %s  ->  selRange=[%d, %d]", s_cnt++,
+	static size_t s_cnt = 0; TRACE( "-[%d] oldSelRange=[%d, %d] caret=%d at %s  ->  selRange=[%d, %d]", s_cnt++,
 		oldSelRange.m_start, oldSelRange.m_end, GetCaretCharPos(), oldSelRange.IsNormalized() ? "END" : "START", selRange.m_start, selRange.m_end );
 
 	return SetSelRange( selRange );

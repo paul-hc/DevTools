@@ -102,7 +102,7 @@ int CRegistrySection::GetIntParameter( const TCHAR entryName[], int defaultValue
 	CRegistryEntry entry;
 	if ( GetParameter( entryName, entry ) )
 		if ( REG_SZ == entry.m_type )
-			TRACE( _T(" * Ignoring registry entry %s=%s - it was saved as REG_SZ, but now has changed to REG_DWORD\n"), entryName, entry.ValueAsString() );
+			TRACE_FL( _T(":\n * Ignoring registry entry %s=%s - it was saved as REG_SZ, but now has changed to REG_DWORD\n"), entryName, entry.ValueAsString() );
 		else
 		{
 			ASSERT( entry.m_type == REG_DWORD || entry.m_type == REG_DWORD_LITTLE_ENDIAN || entry.m_type == REG_DWORD_BIG_ENDIAN );
@@ -118,7 +118,7 @@ std::tstring CRegistrySection::GetStringParameter( const TCHAR entryName[], cons
 	CRegistryEntry entry;
 	if ( GetParameter( entryName, entry ) )
 		if ( REG_DWORD == entry.m_type )
-			TRACE( _T(" * Ignoring registry entry %s=%d - it was saved as REG_DWORD, but now has changed to REG_SZ\n"), entryName, entry.ValueAsDWORD() );
+			TRACE_FL( _T(":\n * Ignoring registry entry %s=%d - it was saved as REG_DWORD, but now has changed to REG_SZ\n"), entryName, entry.ValueAsDWORD() );
 		else
 		{
 			ASSERT( entry.m_type == REG_SZ || entry.m_type == REG_EXPAND_SZ || entry.m_type == REG_LINK );

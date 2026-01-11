@@ -38,17 +38,17 @@ private:
 			CCriticalSection cs;			// serialize cache access for thread safety
 
 			mt::CAutoLock lock1( &cs );
-			TRACE( _T(" CCriticalSection: aquire 1st lock...") );
+			TRACE_FL( _T(" CCriticalSection: aquire 1st lock...") );
 			{
 				mt::CAutoLock lock2( &cs );
-				TRACE( _T(" aquired nested lock!\n") );
+				TRACE_FL( _T(" aquired nested lock!\n") );
 			}
 		}
 
 		{	// STL locking:
 			std::mutex mtx;
 			std::lock_guard<std::mutex> lock1( mtx );
-			TRACE( _T(" std::mutex: aquire lock\n") );
+			TRACE_FL( _T(" std::mutex: aquire lock\n") );
 		}
 	}
 };

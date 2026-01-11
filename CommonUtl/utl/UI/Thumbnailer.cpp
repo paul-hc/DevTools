@@ -99,7 +99,7 @@ CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const TShellItemPair& imageP
 						return NewScaledThumb( wic::cvt::ToWicBitmap( hSharedBitmap ), imagePair.first, &thumbKey );
 				}
 				else
-					TRACE( _T("  for file: %s\n"), imagePair.first.GetPtr() );
+					TRACE_FL( _T(":\n  for file: %s\n"), imagePair.first.GetPtr() );
 			}
 		}
 
@@ -120,7 +120,7 @@ CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const TShellItemPair& image
 
 		// Note: even with SIIGBF_THUMBNAILONLY flag set in m_thumbExtractFlags, it doesn't force Explorer to generate the thumb!
 		// This may be caused to UAC user elevation issues.
-		TRACE( _T(" (!) Thumbnail not yet cached by Explorer for: %s"), imagePair.first.GetPtr() );
+		TRACE_FL( _T(":\n (!) Thumbnail not yet cached by Explorer for: %s"), imagePair.first.GetPtr() );
 	}
 
 	return nullptr;

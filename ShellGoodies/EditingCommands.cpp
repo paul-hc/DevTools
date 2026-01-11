@@ -350,9 +350,9 @@ bool COnRenameListSelChangedCmd::DoExecute( void ) override
 {
 #if defined( _DEBUG ) && 1
 	static int count = 0;
-	TRACE_( _T("# [%d] COnRenameListSelChangedCmd::DoExecute('%s')\n\tSelection change: caret='%s' selected=%s\n"), ++count,
-			GetUiTypeName( GetPage() ).c_str(), dbg::GetSafeFileName( m_selData.GetCaretItem() ).c_str(),
-			dbg::FormatFileNames( m_selData.GetSelItems() ).c_str() );
+	TRACE( _T("# [%d] COnRenameListSelChangedCmd::DoExecute('%s')\n\tSelection change: caret='%s' selected=%s\n"), ++count,
+		   GetUiTypeName( GetPage() ).c_str(), dbg::GetSafeFileName( m_selData.GetCaretItem() ).c_str(),
+		   dbg::FormatFileNames( m_selData.GetSelItems() ).c_str() );
 #endif
 
 	return true;
@@ -365,7 +365,7 @@ std::tstring COnRenameListSelChangedCmd::GetUiTypeName( const CBaseRenamePage* p
 
 void COnRenameListSelChangedCmd::dbgTraceSelData( const CBaseRenamePage* pPage ) const
 {
-	TRACE_( _T(" > OnUpdate() in %s: caret='%s' selected=%s\n"),
-			GetUiTypeName( pPage ).c_str(), dbg::GetSafeFileName( m_selData.GetCaretItem() ).c_str(),
-			dbg::FormatFileNames( m_selData.GetSelItems() ).c_str() );
+	TRACE( _T(" > OnUpdate() in %s: caret='%s' selected=%s\n"),
+		   GetUiTypeName( pPage ).c_str(), dbg::GetSafeFileName( m_selData.GetCaretItem() ).c_str(),
+		   dbg::FormatFileNames( m_selData.GetSelItems() ).c_str() );
 }

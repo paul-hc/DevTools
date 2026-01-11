@@ -24,7 +24,7 @@ fs::CFlexPath CBaseImageTestCase::MakeTestImageFilePath( SrcImage srcImage )
 
 	if ( !imagePath.IsEmpty() && !imagePath.FileExist() )
 	{
-		TRACE( _T("\n * Cannot find the local test image file: %s\n"), imagePath.GetPtr() );
+		TRACE_FL( _T(":\n * Cannot find the local test image file: %s\n"), imagePath.GetPtr() );
 		imagePath.Clear();
 	}
 	return imagePath;

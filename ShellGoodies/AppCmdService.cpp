@@ -87,7 +87,7 @@ bool CAppCmdService::UndoAt( size_t topPos )
 	}
 	catch ( CUserAbortedException& exc )
 	{	// cancelled by the user: retain status-quo
-		exc; TRACE( _T(" * Un-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+		exc; TRACE_FL( _T(":\n * Un-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
 
 		rUndoStack.insert( itCmd, pCmd.release() );		// put it back, ready for unexecution again
 	}
@@ -123,7 +123,7 @@ bool CAppCmdService::RedoAt( size_t topPos )
 	}
 	catch ( CUserAbortedException& exc )
 	{	// cancelled by the user: retain status-quo
-		exc; TRACE( _T(" * Re-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+		exc; TRACE_FL( _T(":\n * Re-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
 
 		rRedoStack.insert( itCmd, pCmd.release() );		// put it back, ready for re-execution again
 	}

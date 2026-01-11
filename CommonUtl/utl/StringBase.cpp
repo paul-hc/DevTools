@@ -15,7 +15,9 @@ namespace utl
 	{
 		pFuncName;
 		if ( !SUCCEEDED( hResult ) )
-			TRACE( " * %s: hResult=0x%08x: '%s' in function %s\n", FAILED( hResult ) ? "FAILED" : "ERROR", hResult, CStringA( _com_error( hResult ).ErrorMessage() ).GetString(), pFuncName );
+			if ( !CTracing::m_hResultDisabled )
+				TRACE( " * %s: hResult=0x%08x: '%s' in function %s\n", FAILED( hResult ) ? "FAILED" : "ERROR", hResult, CStringA( _com_error( hResult ).ErrorMessage() ).GetString(), pFuncName );
+
 		return hResult;
 	}
 }

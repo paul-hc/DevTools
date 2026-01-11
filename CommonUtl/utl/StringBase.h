@@ -151,6 +151,14 @@ namespace str
 
 
 	template< typename CharT >
+	inline const CharT* SafePtr( const CharT* pText )
+	{
+		const CharT empty[] = { '\0' };
+		return pText != nullptr ? pText : empty;
+	}
+
+
+	template< typename CharT >
 	inline CharT CharAt( const std::basic_string<CharT>& text, size_t pos ) { REQUIRE( pos <= text.length() ); return text.c_str()[ pos ]; }
 
 	template< typename StringT >

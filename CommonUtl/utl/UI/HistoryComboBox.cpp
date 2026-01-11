@@ -200,7 +200,7 @@ BOOL CHistoryComboBox::OnChanged_Reflect( void )
 
 void CHistoryComboBox::OnUpdateSelectedListItem( CCmdUI* pCmdUI )
 {
-	TRACE( _T("* GetCurSel()=%d dropSelIndex=%d\n"), GetCurSel(), GetCmdSelIndex() );
+	TRACE_FL( _T("\n* GetCurSel()=%d dropSelIndex=%d\n"), GetCurSel(), GetCmdSelIndex() );
 
 	pCmdUI->Enable( GetCmdSelIndex() != CB_ERR );
 }

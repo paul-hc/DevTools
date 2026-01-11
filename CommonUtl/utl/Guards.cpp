@@ -32,7 +32,7 @@ namespace utl
 	{
 		// report elapsed time at the end of scope so that it doesn't interfere with output tracing in the meantime
 		std::tstring text = str::Format( _T("@ %s... takes %s"), m_sectionName.c_str(), m_timer.FormatElapsedDuration( 3 ).c_str() );
-		TRACE_( _T(" %s\n"), text.c_str() );
+		TRACE( _T(" %s\n"), text.c_str() );
 
 		if ( m_pLogger != nullptr )
 			m_pLogger->Log( text.c_str() );
@@ -48,7 +48,7 @@ namespace utl
 
 		// log the message that it takes longer than the threshold
 		std::tstring message = str::Format( _T("@ Slow section for '%s': it takes %s"), m_context.c_str(), m_timer.FormatElapsedDuration( 3 ).c_str() );
-		TRACE_( _T(" %s\n"), message.c_str() );
+		TRACE( _T(" %s\n"), message.c_str() );
 
 		if ( CLogger* pLogger = app::GetLogger() )
 			pLogger->Log( message.c_str() );

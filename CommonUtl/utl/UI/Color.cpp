@@ -175,7 +175,7 @@ namespace ui
 				}
 		}
 
-		//TRACE( _T("Invalid System Colour literal '%s'\n"), pSysColorText );
+		//TRACE_FL( _T("Invalid System Colour literal '%s'\n"), pSysColorText );
 		return false;
 	}
 
@@ -196,7 +196,7 @@ namespace ui
 				}
 		}
 
-		//TRACE( _T("Invalid RGB colour literal '%s'\n"), pRgbColorText );
+		//TRACE_FL( _T("Invalid RGB colour literal '%s'\n"), pRgbColorText );
 		return false;
 	}
 
@@ -224,7 +224,7 @@ namespace ui
 				}
 		}
 
-		//TRACE( _T("Invalid HTML colour literal '%s'\n"), pHtmlColorText );
+		//TRACE_FL( _T("Invalid HTML colour literal '%s'\n"), pHtmlColorText );
 		return false;
 	}
 
@@ -243,7 +243,7 @@ namespace ui
 				}
 		}
 
-		//TRACE( _T("Invalid hex colour literal '%s'\n"), pHexColorText );
+		//TRACE_FL( _T("Invalid hex colour literal '%s'\n"), pHexColorText );
 		return false;
 	}
 

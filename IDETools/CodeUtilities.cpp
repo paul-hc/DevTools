@@ -129,7 +129,7 @@ namespace code
 			else
 				++cursor;
 
-		TRACE( _T("ERROR: Quoted string not closed at pos %d: [%s]\n"), openQuotePos, str + openQuotePos );
+		TRACE_FL( _T("ERROR: Quoted string not closed at pos %d: [%s]\n"), openQuotePos, str + openQuotePos );
 		return -1; // reached end of string, closing quote not found
 	}
 

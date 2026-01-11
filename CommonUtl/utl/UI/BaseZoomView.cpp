@@ -259,7 +259,7 @@ CSize CBaseZoomView::GetContentPointedPct( const CPoint* pClientPoint /*= nullpt
 		MulDiv( 100, point.x, m_contentRect.Width() ),
 		MulDiv( 100, point.y, m_contentRect.Height() ) );
 
-	TRACE( _T(" - pointed percentage (%d%%, %d%%)\n"), pointedPct.cx, pointedPct.cy );
+	TRACE_FL( _T(" - pointed percentage (%d%%, %d%%)\n"), pointedPct.cx, pointedPct.cy );
 	return pointedPct;						// percentage of pointed client point relative to content origin: (50%, 50%) for content center
 }
 

@@ -775,7 +775,7 @@ namespace ui
 		if ( state.m_enabled )
 			return true;
 
-		TRACE( "Warning: skip executing disabled command %d\n", cmdId );
+		TRACE_FL( ":\n Warning: skip executing disabled command %d\n", cmdId );
 		return false;
 	}
 

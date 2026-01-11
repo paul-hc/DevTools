@@ -358,7 +358,7 @@ Range<CTextEdit::TLineIndex> CTextEdit::LineRangeFromCharRange( const Range<TCha
 		AdjustIntuitiveLineSelection( &selLineRange, selRange );
 
 	ENSURE( selLineRange.IsNormalized() );
-	//TRACE_( "+ CTextEdit::LineRangeFromCharRange(): selRange=(%d, %d)  selLineRange=(%d, %d)\n", selRange.m_start, selRange.m_end, selLineRange.m_start, selLineRange.m_end );
+	//TRACE( "+ CTextEdit::LineRangeFromCharRange(): selRange=(%d, %d)  selLineRange=(%d, %d)\n", selRange.m_start, selRange.m_end, selLineRange.m_start, selLineRange.m_end );
 	return selLineRange;
 }
 
@@ -397,7 +397,7 @@ bool CTextEdit::SetTopLineIndex( TLineIndex topLineIndex )
 		return false;
 
 	LineScroll( topLineIndex - currTopLineIndex, 0 );		// scroll vertically RELATIVE to current top index!
-	//TRACE_( "+ CTextEdit::SetTopLineIndex(): topLineIndex=(%d)  newTopLineIndex=%d  currTopLineIndex=%d\n", topLineIndex, GetTopLineIndex(), currTopLineIndex );
+	//TRACE( "+ CTextEdit::SetTopLineIndex(): topLineIndex=(%d)  newTopLineIndex=%d  currTopLineIndex=%d\n", topLineIndex, GetTopLineIndex(), currTopLineIndex );
 	return true;
 }
 
@@ -486,7 +486,7 @@ void CTextEdit::_WatchSelChange( void )
 			m_lastSelRange = selRange;
 			ui::SendCommandToParent( m_hWnd, CTextEdit::EN_USER_SELCHANGE );		// notify to parent of the selection change
 
-			//TRACE_( "- m_lastSelRange=[%d, %d]\n", m_lastSelRange.m_start, m_lastSelRange.m_end );
+			//TRACE( "- m_lastSelRange=[%d, %d]\n", m_lastSelRange.m_start, m_lastSelRange.m_end );
 		}
 	}
 }

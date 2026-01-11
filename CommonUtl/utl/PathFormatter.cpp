@@ -58,7 +58,7 @@ namespace hlp
 					return str::Format( format.c_str(), num );
 				}
 		}
-		TRACE( _T("> bad printf format syntax in \"%s\"\n"), &*itStart );
+		TRACE_FL( _T("> bad printf format syntax in \"%s\"\n"), &*itStart );
 		return std::tstring();
 	}
 
@@ -94,7 +94,7 @@ namespace hlp
 					return !issSrc.fail();
 				}
 		}
-		TRACE( _T("> bad scanf format syntax in \"%s\"\n"), &*itStart );
+		TRACE_FL( _T("> bad scanf format syntax in \"%s\"\n"), &*itStart );
 		return false;
 	}
 }
@@ -195,7 +195,7 @@ fs::CPath CPathFormatter::FormatPath( const fs::CPath& srcPath, UINT seqCount, U
 	bool syntaxOk;
 	outFname = FormatPart( outFname, m_fnameFormat, seqCount, &syntaxOk );
 	if ( !syntaxOk )
-		TRACE( _T("> bad fname format syntax: '%s'\n"), m_fnameFormat.c_str() );
+		TRACE_FL( _T("> bad fname format syntax: '%s'\n"), m_fnameFormat.c_str() );
 
 	if ( dupCount > 1 )
 		outFname += str::Format( _T("_$(%d)"), dupCount );			// append dup count suffix
@@ -207,7 +207,7 @@ fs::CPath CPathFormatter::FormatPath( const fs::CPath& srcPath, UINT seqCount, U
 
 		outExt = FormatPart( outExt, m_extFormat, 0, &syntaxOk );	// no counter for extension
 		if ( !syntaxOk )
-			TRACE( _T("> bad extension format syntax: '%s'\n"), m_extFormat.c_str() );
+			TRACE_FL( _T("> bad extension format syntax: '%s'\n"), m_extFormat.c_str() );
 
 		hlp::PrependLeadingDot( outExt );
 	}
@@ -276,8 +276,8 @@ std::tstring CPathFormatter::FormatPart( const std::tstring& part, const std::ts
 				if ( itPart < itPartEnd )
 					output.push_back( *itPart++ );
 				else
-					TRACE( _T("> No source character for for wildcard '?' at position %d in source \"%s\"\n"),
-						   std::distance( part.begin(), itPart ), part.c_str() );
+					TRACE_FL( _T("> No source character for for wildcard '?' at position %d in source \"%s\"\n"),
+							  std::distance( part.begin(), itPart ), part.c_str() );
 				break;
 			default:
 				output.push_back( *itFmt );

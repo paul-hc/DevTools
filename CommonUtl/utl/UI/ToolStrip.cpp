@@ -42,7 +42,7 @@ CToolStrip& CToolStrip::AddButton( UINT buttonId, UINT iconId /*= (UINT)UseButto
 
 		if ( nullptr == hIcon )
 		{	// missing store icon: use a placeholder
-			TRACE( "(!) Missing image for toolstrip button: buttonId=%d,  iconId=%d\n", buttonId, iconId );
+			TRACE_FL( ":\n (!) Missing image for toolstrip button: buttonId=%d,  iconId=%d\n", buttonId, iconId );
 			hIcon = CIcon::GetUnknownIcon().GetHandle();
 		}
 	}
@@ -65,7 +65,7 @@ CToolStrip& CToolStrip::AddButton( UINT buttonId, HICON hIcon )
 		// (*) SPECIAL CASE: toolbar buttons that use controls must have a placeholder image associated; otherwise the image list gets shifted completely;
 		// To get rid of this warning, register a command alias for { buttonId, ID_EDIT_DETAILS }
 		//
-		TRACE( _T(" ** Missing image for button id %d (hex=0x%04X) - using the placeholder image IDI_UNKNOWN **\n"), buttonId, buttonId );
+		TRACE_FL( _T(":\n ** Missing image for button id %d (hex=0x%04X) - using the placeholder image IDI_UNKNOWN **\n"), buttonId, buttonId );
 		return AddButton( buttonId, CIcon::GetUnknownIcon().GetHandle() );
 	}
 

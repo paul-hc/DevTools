@@ -563,7 +563,7 @@ void CItemsEditPage::OnSelectedLinesChanged( void )
 	if ( selIndex != -1 )
 		m_pDialog->SetSelItemPos( selIndex );
 
-	TRACE( _T(" - ml-edit sel lines[%d]: {%d, %d}\n"), selIndex, m_selLineRange.m_start, m_selLineRange.m_end );
+	TRACE_FL( _T(" - ml-edit sel lines[%d]: {%d, %d}\n"), selIndex, m_selLineRange.m_start, m_selLineRange.m_end );
 }
 
 void CItemsEditPage::DoDataExchange( CDataExchange* pDX )

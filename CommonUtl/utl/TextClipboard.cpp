@@ -61,7 +61,7 @@ bool CTextClipboard::WriteData( UINT clipFormat, const void* pBuffer, size_t byt
 		::GlobalFree( hBuffer );		// free the memory on failure
 	}
 
-	TRACE( _T("Error on clipboard copy! Please retry.\n") );
+	TRACE_FL( _T("Error on clipboard copy! Please retry.\n") );
 	return false;
 }
 

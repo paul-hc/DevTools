@@ -108,7 +108,7 @@ bool CCommandModel::Execute( utl::ICommand* pCmd ) implement
 	catch ( CUserAbortedException& exc )
 	{	// cancelled by the user
 		exc;
-		TRACE( _T(" * Execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+		TRACE_FL( _T(" * Execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
 	}
 
 	delete pCmd;
@@ -142,7 +142,7 @@ bool CCommandModel::Undo( size_t stepCount /*= 1*/ )
 		}
 		catch ( CUserAbortedException& exc )
 		{	// cancelled by the user: retain status-quo
-			exc; TRACE( _T(" * Un-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+			exc; TRACE_FL( _T(" * Un-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
 
 			m_undoStack.push_back( pCmd.release() );		// put it back, ready for unexecution again
 		}
@@ -171,7 +171,7 @@ bool CCommandModel::Redo( size_t stepCount /*= 1*/ )
 		}
 		catch ( CUserAbortedException& exc )
 		{	// cancelled by the user: retain status-quo
-			exc; TRACE( _T(" * Re-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+			exc; TRACE_FL( _T(" * Re-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
 
 			m_redoStack.push_back( pCmd.release() );		// put it back, ready for re-execution again
 		}

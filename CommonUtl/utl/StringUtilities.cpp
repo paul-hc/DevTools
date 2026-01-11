@@ -109,7 +109,7 @@ namespace env
 	std::tstring ExpandStrings( const TCHAR* pSource )
 	{
 		ASSERT_PTR( pSource );
-		std::vector<TCHAR> expandedBuff( ::ExpandEnvironmentStrings( pSource, nullptr, 0 ) + 1 );						// allocate buffer
+		std::vector<TCHAR> expandedBuff( ::ExpandEnvironmentStrings( pSource, nullptr, 0 ) + 1 );					// allocate buffer
 
 		::ExpandEnvironmentStrings( pSource, &expandedBuff.front(), static_cast<DWORD>( expandedBuff.size() ) );	// expand vars
 		return &expandedBuff.front();

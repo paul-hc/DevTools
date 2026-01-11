@@ -24,7 +24,7 @@ CTraceTests& CTraceTests::Instance( void )
 void CTraceTests::TestTracing( void )
 {
 	// check Debug Output window for tracing results:
-	TRACE_( "\n" );
+	TRACE( "\n" );
 
 	{
 		ATLTRACE( "'ATLTRACE-a'\n" );
@@ -32,8 +32,6 @@ void CTraceTests::TestTracing( void )
 
 		TRACE( "'TRACE-a'\n" );
 		TRACE( L"'TRACE-w'\n" );
-		TRACE_( "'TRACE_-a'\n" );
-		TRACE_( L"'TRACE_-w'\n" );
 		TRACE_FL( "'TRACE_FL-a'\n" );
 		TRACE_FL( L"'TRACE_FL-w'\n" );
 		TRACE_FL2( "'TRACE_FL2-a'\n" );
@@ -62,25 +60,25 @@ void CTraceTests::TestTracing( void )
 
 	// TRACE with preprocessor operators: stringify and token-pasting:
 	{
-		TRACE_( "\nSTRINGIFY(Message): " );
-		TRACE_( STRINGIFY( Message ) );
+		TRACE( "\nSTRINGIFY(Message): " );
+		TRACE( STRINGIFY( Message ) );
 
-		TRACE_( "\nT_STRINGIFY(Message): " );
-		TRACE_( T_STRINGIFY( Message ) );
+		TRACE( "\nT_STRINGIFY(Message): " );
+		TRACE( T_STRINGIFY( Message ) );
 
-		TRACE_( "\nT_CAT2(Left, Right): " );
-		TRACE_( T_CAT2( STRINGIFY( Left ), STRINGIFY( Right ) ) );
+		TRACE( "\nT_CAT2(Left, Right): " );
+		TRACE( T_CAT2( STRINGIFY( Left ), STRINGIFY( Right ) ) );
 
-		TRACE_( "\nT_CAT3(Left, Mid, Right): " );
-		TRACE_( T_CAT3( STRINGIFY( Left ), STRINGIFY( Mid ), STRINGIFY( Right ) ) );
+		TRACE( "\nT_CAT3(Left, Mid, Right): " );
+		TRACE( T_CAT3( STRINGIFY( Left ), STRINGIFY( Mid ), STRINGIFY( Right ) ) );
 
-		TRACE_( "\nT_CAT2(\"Left\", \"Right\"): " );
-		TRACE_( T_CAT2( "Left", "Right" ) );
+		TRACE( "\nT_CAT2(\"Left\", \"Right\"): " );
+		TRACE( T_CAT2( "Left", "Right" ) );
 
-		TRACE_( "\nT_CAT3(\"Left\", \"Mid\", \"Right\"): " );
-		TRACE_( T_CAT3( "Left", "Mid", "Right" ) );
+		TRACE( "\nT_CAT3(\"Left\", \"Mid\", \"Right\"): " );
+		TRACE( T_CAT3( "Left", "Mid", "Right" ) );
 
-		TRACE_( "\n" );
+		TRACE( "\n" );
 	}
 }
 

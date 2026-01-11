@@ -212,7 +212,7 @@ void CDibPixels::ForEach( PixelFunc func )
 	}
 	catch ( ... )
 	{
-		TRACE( _T(" ** Pixel access failure at pos=%u; size=%u width=%u height=%u bpp=%u\n"), pos, m_bufferSize, m_width, m_height, m_bitsPerPixel );
+		TRACE_FL( _T("\n ** Pixel access failure at pos=%u; size=%u width=%u height=%u bpp=%u\n"), pos, m_bufferSize, m_width, m_height, m_bitsPerPixel );
 	}
 	ASSERT( false );	// memory access violation
 }

@@ -184,7 +184,7 @@ bool CLogger::CheckTruncate( void )
 	}
 	catch ( CException* pExc )
 	{
-		TRACE( _T("* C++ exception: %s\n"), mfc::CRuntimeException::MessageOf( *pExc ).c_str() );
+		TRACE_FL( _T("* C++ exception: %s\n"), mfc::CRuntimeException::MessageOf( *pExc ).c_str() );
 		pExc->Delete();
 	}
 

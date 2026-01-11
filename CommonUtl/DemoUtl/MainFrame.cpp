@@ -93,14 +93,14 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 	if ( !m_wndToolBar.CreateEx( this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC ) ||
 		 !m_wndToolBar.LoadToolStrip( IDR_MAINFRAME ) )
 	{
-		TRACE( "Failed to create toolbar\n" );
+		TRACE_FL( "Failed to create toolbar\n" );
 		return -1;	  // fail to create
 	}
 
 	if ( !m_wndStatusBar.Create( this ) ||
 		 !m_wndStatusBar.SetIndicators( ARRAY_SPAN( s_sbIndicators ) ) )
 	{
-		TRACE( "Failed to create status bar\n" );
+		TRACE_FL( "Failed to create status bar\n" );
 		return -1;	  // fail to create
 	}
 

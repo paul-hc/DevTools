@@ -5,6 +5,13 @@
 #include "StringBase.h"
 
 
+struct CTracing
+{
+	static bool m_disabled;				// by default enabled
+	static bool m_hResultDisabled;
+};
+
+
 #ifdef _DEBUG
 
 namespace debug

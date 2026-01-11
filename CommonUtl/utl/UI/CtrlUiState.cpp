@@ -317,14 +317,14 @@ void CTreeCtrlUiState::CTreeNode::ExpandTreeItem( CTreeCtrl& rTreeCtrl, HTREEITE
 
 	for ( std::vector<CTreeNode*>::const_iterator itExpandedChild = m_children.begin(); itExpandedChild != m_children.end(); ++itExpandedChild )
 	{
-		HTREEITEM hMatchingChildItem = ( *itExpandedChild )->m_item.FindInParent( rTreeCtrl, hTargetItem );
+		HTREEITEM hMatchingChildItem = (*itExpandedChild)->m_item.FindInParent( rTreeCtrl, hTargetItem );
 
 		if ( hMatchingChildItem != nullptr )
-			( *itExpandedChild )->ExpandTreeItem( rTreeCtrl, hMatchingChildItem );
+			(*itExpandedChild)->ExpandTreeItem( rTreeCtrl, hMatchingChildItem );
 		else
-			TRACE( _T(" * Couldn't restore expanded state for child node: '%s':%d\n"),
-				   ( *itExpandedChild )->m_item.m_text.GetString(),
-				   ( *itExpandedChild )->m_item.m_sameSiblingIndex );
+			TRACE_FL( _T(" * Couldn't restore expanded state for child node: '%s':%d\n"),
+					  (*itExpandedChild)->m_item.m_text.GetString(),
+					  (*itExpandedChild)->m_item.m_sameSiblingIndex );
 	}
 }
 
@@ -336,10 +336,10 @@ void CTreeCtrlUiState::CTreeNode::TraceNode( int nestingLevel /*= 0*/ )
 
 	std::tstring leadingSpaces( size_t( nestingLevel * 2 ), _T(' ') );
 
-	TRACE( _T("%s'%s':%d\n"), leadingSpaces.c_str(), (LPCTSTR)m_item.m_text, m_item.m_sameSiblingIndex );
+	TRACE_FL( _T("%s'%s':%d\n"), leadingSpaces.c_str(), (LPCTSTR)m_item.m_text, m_item.m_sameSiblingIndex );
 
 	for ( std::vector<CTreeNode*>::const_iterator itNode = m_children.begin(); itNode != m_children.end(); ++itNode )
-		( *itNode )->TraceNode( nestingLevel + 1 );
+		(*itNode)->TraceNode( nestingLevel + 1 );
 
 #else
 	nestingLevel;

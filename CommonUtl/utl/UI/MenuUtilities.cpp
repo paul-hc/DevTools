@@ -650,7 +650,7 @@ namespace ui
 
 							std::tstring indentPrefix( depth, _T(' ') );
 
-							TRACE( _T("%s- Invalid sub-menu item: hMenu=0x%08x  itemPos=%d  itemText='%s'  hSubMenu=0x%08x  depth=%d\n"), indentPrefix.c_str(), hMenu, i, text, hSubMenu, depth );
+							TRACE_FL( _T("\n%s- Invalid sub-menu item: hMenu=0x%08x  itemPos=%d  itemText='%s'  hSubMenu=0x%08x  depth=%d\n"), indentPrefix.c_str(), hMenu, i, text, hSubMenu, depth );
 							return false;
 						}
 					break;
@@ -876,7 +876,7 @@ namespace dbg
 		if ( info.GetMenuItemInfo( hMenu, itemPos ) )
 			TraceMenuItem( info, itemPos );
 		else
-			TRACE( _T("?? Invalid menu item: hMenu=0x%08x itemPos=%d\n"), hMenu, itemPos );
+			TRACE_FL( _T("\n?? Invalid menu item: hMenu=0x%08x itemPos=%d\n"), hMenu, itemPos );
 	#else
 		hMenu, itemPos;
 	#endif
@@ -900,7 +900,7 @@ namespace dbg
 		stream::Tag( text, FormatFlags( _T("State={%s}"), GetTags_MenuItemState(), itemInfo.fState ), s_flagsSep );	// state flags
 
 		std::tstring indentPrefix( indentLevel * 2, _T(' ') );
-		TRACE( _T("%s[%d] %s\n"), indentPrefix.c_str(), itemPos, text.c_str() );
+		TRACE_FL( _T("\n%s[%d] %s\n"), indentPrefix.c_str(), itemPos, text.c_str() );
 	#else
 		itemInfo, itemPos, indentLevel;
 	#endif

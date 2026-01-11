@@ -124,7 +124,7 @@ namespace mfc
 		}
 		else
 		{
-			TRACE( "\n ~ Warning: Could not find image for command ID %d (0x%04X).  Must load it with CMFCToolBar::AddToolBarForImageCollection( toolBarId ).\n", imageCmdId, imageCmdId );
+			TRACE_FL( "\n ~ Warning: Could not find image for command ID %d (0x%04X).  Must load it with CMFCToolBar::AddToolBarForImageCollection( toolBarId ).\n", imageCmdId, imageCmdId );
 			//ASSERT( false );
 		}
 

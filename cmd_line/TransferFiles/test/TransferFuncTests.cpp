@@ -47,7 +47,7 @@ int CTransferFuncTests::ExecuteProcess( utl::CProcessCmd& rProcess )
 	if ( m_debugChildProcs )
 		rProcess.AddParam( _T("-debug") );		// to debug command line parsing
 
-	TRACE( _T("Executing test process %s with command line:\n  %s\n"), rProcess.GetExePath().GetPtr(), rProcess.MakeCommandLine().c_str() );
+	TRACE_FL( _T("Executing test process %s with command line:\n  %s\n"), rProcess.GetExePath().GetPtr(), rProcess.MakeCommandLine().c_str() );
 	return rProcess.Execute();
 }
 

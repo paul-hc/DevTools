@@ -144,6 +144,7 @@ BSTR FileLocator::GetSelectedFile( long index )
 		result = m_selectedFiles[ index ].first.GetPtr();
 	else
 		TRACE( _T("FileLocator::GetSelectedFile(): invalid index: %d from valid range [0, %d]\n"), index, m_selectedFiles.size() );
+
 	return result.AllocSysString();
 }
 
