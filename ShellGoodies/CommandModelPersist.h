@@ -42,7 +42,7 @@ namespace cmd
 
 
 	class CBinaryLogSerializer : public CLogSerializer
-							   , private serial::IStreamable
+		, private serial::IStreamable
 	{
 	public:
 		CBinaryLogSerializer( CCommandModel* pCommandModel ) : CLogSerializer( pCommandModel ) {}

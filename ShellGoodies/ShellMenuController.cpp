@@ -30,7 +30,8 @@ const CShellMenuController::CMenuCmdInfo CShellMenuController::s_rootCommands[] 
 	{ Cmd_Separator },
 	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP },
 	{ Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM },
-	{ Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES },
+	{ Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the attributes and timestamp of selected files"), ID_TOUCH_FILES },
+	{ Cmd_EditShortcuts, _T("Edit S&hortcuts..."), _T("Edit selected shortcut files"), ID_EDIT_SHORTCUTS },
 	{ Cmd_FindDuplicates, _T("Find &Duplicates..."), _T("Find duplicate files in selected folders or files, and allow the deletion of duplicates"), ID_FIND_DUPLICATE_FILES },
 	{ Cmd_PasteAsBackup, _T("Paste as Bac&kup"), _T("Paste copied/cut files as a versioned backup file(s) in target folder"), ID_PASTE_AS_BACKUP },
 	{ Popup_PasteDeep, _T("Paste D&eep"), _T("Paste copied/cut files creating a deep folder"), ID_PASTE_DEEP_POPUP },
@@ -87,7 +88,7 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 
 	for ( int i = 0; i != COUNT_OF( s_rootCommands ); ++i )
 	{
-		const CMenuCmdInfo& cmdInfo = s_rootCommands[ i ];
+		const CMenuCmdInfo& cmdInfo = s_rootCommands[i];
 
 		if ( Cmd_Separator == cmdInfo.m_cmd )
 			menuBuilder.AddSeparator();
@@ -122,6 +123,10 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 						}
 						else
 							break;
+					case Cmd_EditShortcuts:
+						if ( !m_fileModel.HasOnlyShortcuts() )
+							break;		// ignore Cmd_EditShortcuts command if not all files are .link files
+						// fall-through
 					default:
 						menuBuilder.AddCmdItem( cmdInfo.m_cmd, itemText, pItemBitmap );
 				}
@@ -294,6 +299,9 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 			break;
 		case Cmd_TouchFiles:
 			pFileEditor.reset( m_fileModel.MakeFileEditor( cmd::TouchFile, pParentOwner ) );
+			break;
+		case Cmd_EditShortcuts:
+			pFileEditor.reset( m_fileModel.MakeFileEditor( cmd::EditShortcut, pParentOwner ) );
 			break;
 		case Cmd_FindDuplicates:
 			pFileEditor.reset( m_fileModel.MakeFileEditor( cmd::FindDuplicates, pParentOwner ) );

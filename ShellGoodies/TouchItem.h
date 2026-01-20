@@ -26,9 +26,6 @@ private:
 
 namespace multi
 {
-	void FlashCtrlFrame( CWnd* pCtrl );
-
-
 	// accumulates common values among multiple items, starting with an invalid value (uninitialized)
 
 	class CDateTimeState

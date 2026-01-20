@@ -319,6 +319,7 @@
     <ClInclude Include="DropFilesModel.h" />
     <ClInclude Include="EditingCommands.h" />
     <ClInclude Include="EditingCommands.hxx" />
+    <ClInclude Include="EditShortcutsDialog.h" />
     <ClInclude Include="FileEditorBaseDialog.h" />
     <ClInclude Include="FileGroupCommands.h" />
     <ClInclude Include="FileMacroCommands.h" />
@@ -344,6 +345,7 @@
     <ClInclude Include="ReplaceDialog.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShellGoodiesCom.h" />
+    <ClInclude Include="EditLinkItem.h" />
     <ClInclude Include="ShellMenuController.h" />
     <ClInclude Include="test\RenameFilesTests.h" />
     <ClInclude Include="test\TextAlgorithmsTests.h" />
@@ -372,6 +374,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="DropFilesModel.cpp" />
     <ClCompile Include="EditingCommands.cpp" />
+    <ClCompile Include="EditShortcutsDialog.cpp" />
     <ClCompile Include="FileEditorBaseDialog.cpp" />
     <ClCompile Include="FileGroupCommands.cpp" />
     <ClCompile Include="FileMacroCommands.cpp" />
@@ -411,6 +414,7 @@
     <ClCompile Include="RenameService.cpp" />
     <ClCompile Include="ReplaceDialog.cpp" />
     <ClCompile Include="ShellGoodiesCom.cpp" />
+    <ClCompile Include="EditLinkItem.cpp" />
     <ClCompile Include="ShellMenuController.cpp" />
     <ClCompile Include="test\RenameFilesTests.cpp" />
     <ClCompile Include="test\TextAlgorithmsTests.cpp" />

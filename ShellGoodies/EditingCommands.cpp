@@ -4,6 +4,7 @@
 #include "FileModel.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
+#include "EditLinkItem.h"
 #include "utl/Algorithms_fwd.h"
 #include "utl/FmtUtils.h"
 
@@ -209,16 +210,6 @@ bool CChangeDestFileStatesCmd::HasSelItems( void ) const override
 	return m_srcStates.size() < m_pFileModel->GetTouchItems().size();
 }
 
-std::vector<CTouchItem*> CChangeDestFileStatesCmd::MakeSelItems( void ) const
-{
-	REQUIRE( HasSelItems() );
-
-	std::vector<CTouchItem*> selItems;
-
-	utl::transform( m_srcStates, selItems, [this]( const fs::CFileState& srcState ) { return m_pFileModel->FindTouchItem( srcState.m_fullPath ); } );
-	return selItems;
-}
-
 CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) const override
 {
 	REQUIRE( m_srcStates.size() == m_destStates.size() );
@@ -286,9 +277,120 @@ CTouchItem* CChangeDestFileStatesCmd::GetTouchItemAt( size_t posSrcState ) const
 }
 
 
-// CResetDestinationsCmd implementation
+// CChangeDestShortcutsCmd implementation
 
-CResetDestinationsCmd::CResetDestinationsCmd( CFileModel* pFileModel )
+CChangeDestShortcutsCmd::CChangeDestShortcutsCmd( CFileModel* pFileModel, const std::vector<CEditLinkItem*>* pSelItems, const std::vector<shell::CShortcut>& newDestShortcuts,
+												  const std::tstring& cmdTag /*= std::tstring()*/ )
+	: CBaseChangeDestCmd( cmd::ChangeDestShortcuts, pFileModel, cmdTag )
+	, m_destShortcuts( newDestShortcuts )
+{
+	REQUIRE( !m_pFileModel->GetEditLinkItems().empty() );		// should be initialized
+
+	if ( nullptr == pSelItems )
+		pSelItems = &m_pFileModel->GetEditLinkItems();					// all items constructor (implicit)
+	else if ( pSelItems->size() == m_pFileModel->GetEditLinkItems().size() )
+		REQUIRE( *pSelItems == m_pFileModel->GetEditLinkItems() );		// all items constructor (explicit)
+	else
+	{	// selected files constructor
+		REQUIRE( !pSelItems->empty() && pSelItems->size() < m_pFileModel->GetEditLinkItems().size() );
+		REQUIRE( utl::ContainsSubSet( m_pFileModel->GetEditLinkItems(), *pSelItems ) );
+
+		utl::transform( *pSelItems, m_selLinkPaths, CPathItemBase::ToFilePath() );
+	}
+	REQUIRE( !pSelItems->empty() && pSelItems->size() == newDestShortcuts.size() );
+
+	utl::transform( *pSelItems, m_srcShortcuts, func::AsSrcShortcut() );
+	ENSURE( m_srcShortcuts.size() == m_destShortcuts.size() );
+}
+
+CChangeDestShortcutsCmd* CChangeDestShortcutsCmd::MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CEditLinkItem*>& selItems )
+{
+	std::vector<shell::CShortcut> newDestShortcuts;
+
+	utl::transform( selItems, newDestShortcuts, func::AsSrcShortcut() );
+	return new CChangeDestShortcutsCmd( pFileModel, &selItems, newDestShortcuts, cmd::FormatResetItemsTag( selItems.size(), pFileModel->GetEditLinkItems().size() ) );
+}
+
+bool CChangeDestShortcutsCmd::HasSelItems( void ) const override
+{
+	bool hasSelItems = m_srcShortcuts.size() < m_pFileModel->GetEditLinkItems().size();
+
+	ENSURE( !hasSelItems || m_selLinkPaths.size() == m_srcShortcuts.size() );
+	return hasSelItems;
+}
+
+CBaseChangeDestCmd::ChangeType CChangeDestShortcutsCmd::EvalChange( void ) const override
+{
+	REQUIRE( m_srcShortcuts.size() == m_destShortcuts.size() );
+
+	bool hasSelItems = HasSelItems();
+
+	if ( !hasSelItems )
+		if ( m_destShortcuts.size() != m_pFileModel->GetEditLinkItems().size() )
+			return Expired;
+
+	ChangeType changeType = Unchanged;
+
+	for ( size_t pos = 0; pos != m_srcShortcuts.size(); ++pos )
+	{
+		const CEditLinkItem* pEditLinkItem = GetEditLinkItemAt( pos );
+
+		if ( hasSelItems && pEditLinkItem->GetFilePath() != m_selLinkPaths.at( pos ) )		// keys different?
+			return Expired;
+		else if ( pEditLinkItem->GetDestShortcut() != m_destShortcuts[pos] )
+			changeType = Changed;
+	}
+
+	return changeType;
+}
+
+bool CChangeDestShortcutsCmd::ToggleExecute( void ) override
+{
+	ChangeType changeType = EvalChange();
+	switch ( changeType )
+	{
+		case Changed:
+			for ( size_t pos = 0; pos != m_srcShortcuts.size(); ++pos )
+			{
+				CEditLinkItem* pEditLinkItem = GetEditLinkItemAt( pos );
+
+				std::swap( pEditLinkItem->RefDestShortcut(), m_destShortcuts[pos] );		// from now on m_destShortcuts stores OldDestShortcuts
+			}
+			break;
+		case Expired:
+			return false;
+	}
+
+	NotifyObservers();
+	m_hasOldDests = !m_hasOldDests;				// m_dest..s swapped with OldDest..s
+	return true;
+}
+
+void CChangeDestShortcutsCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const
+{
+	ASSERT( m_srcShortcuts.size() == m_destShortcuts.size() );
+
+	rLines.clear();
+	rLines.reserve( m_srcShortcuts.size() );
+
+	for ( size_t i = 0; i != m_srcShortcuts.size(); ++i )
+		rLines.push_back( fmt::FormatEditLinkEntry( GetEditLinkItemAt( i )->GetFilePath(), m_srcShortcuts[i], m_destShortcuts[i] ) );
+}
+
+CEditLinkItem* CChangeDestShortcutsCmd::GetEditLinkItemAt( size_t posSrcShortcut ) const
+{
+	REQUIRE( posSrcShortcut < m_srcShortcuts.size() );
+
+	if ( HasSelItems() )
+		return m_pFileModel->FindEditLinkItem( m_selLinkPaths[ posSrcShortcut ] );
+
+	return m_pFileModel->GetEditLinkItems()[ posSrcShortcut ];
+}
+
+
+// CResetDestinationsMacroCmd implementation
+
+CResetDestinationsMacroCmd::CResetDestinationsMacroCmd( CFileModel* pFileModel )
 	: CMacroCommand( _T("Reset macro"), cmd::ResetDestinations )
 {
 	if ( !pFileModel->GetRenameItems().empty() )		// lazy initialized?
@@ -296,9 +398,12 @@ CResetDestinationsCmd::CResetDestinationsCmd( CFileModel* pFileModel )
 
 	if ( !pFileModel->GetTouchItems().empty() )			// lazy initialized?
 		AddCmd( CChangeDestFileStatesCmd::MakeResetItemsCmd( pFileModel, pFileModel->GetTouchItems() ) );
+
+	if ( !pFileModel->GetEditLinkItems().empty() )		// lazy initialized?
+		AddCmd( CChangeDestShortcutsCmd::MakeResetItemsCmd( pFileModel, pFileModel->GetEditLinkItems() ) );
 }
 
-std::tstring CResetDestinationsCmd::Format( utl::Verbosity verbosity ) const override
+std::tstring CResetDestinationsMacroCmd::Format( utl::Verbosity verbosity ) const override
 {
 	return GetSubCommands().front()->Format( verbosity );
 }

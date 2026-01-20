@@ -643,7 +643,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 		m_isInitialized = true;
 
 		if ( !HasDestPaths() && EditPage == m_filesSheet.GetActiveIndex() )
-			CResetDestinationsCmd( m_pFileModel ).Execute();	// this will call OnUpdate() for all observers
+			CResetDestinationsMacroCmd( m_pFileModel ).Execute();	// this will call OnUpdate() for all observers
 		else
 			OnUpdate( m_pFileModel, nullptr );					// initialize the dialog
 	}
@@ -942,7 +942,7 @@ void CRenameFilesDialog::OnBnClicked_PasteDestFiles( void )
 void CRenameFilesDialog::OnBnClicked_ResetDestFiles( void )
 {
 	ClearFileErrors();
-	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
+	SafeExecuteCmd( new CResetDestinationsMacroCmd( m_pFileModel ) );
 }
 
 void CRenameFilesDialog::OnUpdate_ResetDestFiles( CCmdUI* pCmdUI )

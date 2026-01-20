@@ -19,6 +19,8 @@ namespace app
 
 	const CEnumTags& GetTags_TargetScope( void );
 
+	void FlashCtrlFrame( CWnd* pCtrl );
+
 
 	INT_PTR SafeExecuteDialog( IFileEditor* pFileEditor );
 }

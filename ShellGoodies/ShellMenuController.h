@@ -35,7 +35,7 @@ private:
 	enum MenuCommand
 	{
 		Cmd_SendToCliboard,
-		Cmd_RenameFiles, Cmd_TouchFiles, Cmd_FindDuplicates,
+		Cmd_RenameFiles, Cmd_TouchFiles, Cmd_FindDuplicates, Cmd_EditShortcuts,
 		Cmd_Undo, Cmd_Redo,
 		Cmd_Dashboard,
 		Cmd_Options,

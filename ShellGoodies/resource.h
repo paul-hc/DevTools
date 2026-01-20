@@ -15,7 +15,9 @@
 #define IDD_REN_LIST_PAGE               115
 #define IDD_REN_EDIT_PAGE               116
 #define IDD_FIND_DUPLICATES_DIALOG      117
+#define IDD_TOUCH_FILES_DIALOG2         117
 #define IDD_CMD_DASHBOARD_DIALOG        118
+#define IDD_EDIT_SHORTCUTS_DIALOG       119
 #define IDC_FILE_RENAME_LIST            1000
 #define IDC_FORMAT_COMBO                1001
 #define IDC_SEQ_COUNT_EDIT              1002
@@ -113,6 +115,7 @@
 #define IDC_CURR_FOLDER_STATIC          1097
 #define IDC_FILES_STATIC                1098
 #define IDC_TARGET_SEL_ITEMS_CHECK      1099
+#define IDC_EDIT_SHORTCUTS_LIST         1100
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_REPLACE_FILES_TIP_FORMAT    5005
@@ -201,14 +204,15 @@
 #define ID_EDIT_INGORE_PATHS_LIST       32858
 #define ID_PASTE_AS_BACKUP              32859
 #define ID_COPY_SEL_ITEMS               32860
+#define ID_EDIT_SHORTCUTS               32861
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        119
-#define _APS_NEXT_COMMAND_VALUE         32861
-#define _APS_NEXT_CONTROL_VALUE         1100
+#define _APS_NEXT_RESOURCE_VALUE        121
+#define _APS_NEXT_COMMAND_VALUE         32862
+#define _APS_NEXT_CONTROL_VALUE         1101
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

@@ -7,6 +7,7 @@
 #include "IFileEditor.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
+#include "EditLinkItem.h"
 #include "PathItemSorting.h"
 #include "Application.h"
 #include "resource.h"
@@ -19,6 +20,7 @@
 #include "utl/StringRange.h"
 #include "utl/TextClipboard.h"
 #include "utl/UI/ObjectCtrlBase.h"
+#include "utl/UI/Shortcut.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/WndUtils.h"
 
@@ -26,6 +28,7 @@
 #include "RenameFilesDialog.h"
 #include "TouchFilesDialog.h"
 #include "FindDuplicatesDialog.h"
+#include "EditShortcutsDialog.h"
 #include "CmdDashboardDialog.h"
 
 #ifdef _DEBUG
@@ -45,6 +48,7 @@ const std::tstring CFileModel::section_filesSheet = _T("RenameDialog\\FilesSheet
 
 CFileModel::CFileModel( svc::ICommandService* pCmdSvc )
 	: m_pCmdSvc( pCmdSvc )
+	, m_hasOnlyShortcuts( false )
 	, m_targetScope( app::TargetAllItems )
 	, m_renameSorting( ren::RecordDefault, true )
 {
@@ -66,9 +70,11 @@ void CFileModel::Clear( void )
 	m_sourcePaths.clear();
 	m_commonParentPath.Clear();
 	m_srcFolderPaths.clear();
+	m_hasOnlyShortcuts = false;
 
 	utl::ClearOwningContainer( m_renameItems );
 	utl::ClearOwningContainer( m_touchItems );
+	utl::ClearOwningContainer( m_editLinkItems );
 }
 
 void CFileModel::RegSave( void )
@@ -109,6 +115,7 @@ void CFileModel::StoreSourcePaths( const ContainerT& sourcePaths )
 		m_sourcePaths.push_back( func::PathOf( srcPath ) );
 
 	fs::SortPathsDirsFirst( m_sourcePaths );
+	m_hasOnlyShortcuts = std::all_of( m_sourcePaths.begin(), m_sourcePaths.end(), pred::IsValidShortcutFile() );
 
 	//TRACE_ITEMS( m_sourcePaths, "CFileModel::m_sourcePaths", 50 );
 
@@ -164,7 +171,7 @@ std::vector<CRenameItem*>& CFileModel::LazyInitRenameItems( void )
 
 			//pNewItem->StripDisplayCode( m_commonParentPath );		// use always filename.ext for path diffs
 			m_renameItems.push_back( pNewItem );
-			m_srcPatchToItemsMap[ srcPath ].first = pNewItem;
+			m_srcPathToItemsMap[srcPath].m_pRenameItem = pNewItem;
 		}
 
 		SortRenameItems();		// initial sort
@@ -185,11 +192,30 @@ std::vector<CTouchItem*>& CFileModel::LazyInitTouchItems( void )
 
 			pNewItem->StripDisplayCode( m_commonParentPath );
 			m_touchItems.push_back( pNewItem );
-			m_srcPatchToItemsMap[ srcPath ].second = pNewItem;
+			m_srcPathToItemsMap[srcPath].m_pTouchItem = pNewItem;
 		}
 	}
 
 	return m_touchItems;
+}
+
+std::vector<CEditLinkItem*>& CFileModel::LazyInitEditLinkItems( void )
+{
+	if ( m_editLinkItems.empty() )
+	{
+		ASSERT( !m_sourcePaths.empty() );
+
+		for ( const fs::CPath& linkPath: m_sourcePaths )
+		{
+			CEditLinkItem* pNewItem = CEditLinkItem::LoadLinkItem( linkPath );
+
+			pNewItem->StripDisplayCode( m_commonParentPath );
+			m_editLinkItems.push_back( pNewItem );
+			m_srcPathToItemsMap[linkPath].m_pEditLinkItem = pNewItem;
+		}
+	}
+
+	return m_editLinkItems;
 }
 
 const std::tstring& CFileModel::GetCode( void ) const
@@ -206,20 +232,27 @@ void CFileModel::UpdateAllObservers( utl::IMessage* pMessage )
 
 CRenameItem* CFileModel::FindRenameItem( const fs::CPath& srcPath ) const
 {
-	const TItemPair* pItemsPair = utl::FindValuePtr( m_srcPatchToItemsMap, srcPath );
-	return pItemsPair != nullptr ? pItemsPair->first : nullptr;
+	const CItemTuple* pTuple = utl::FindValuePtr( m_srcPathToItemsMap, srcPath );
+	return pTuple != nullptr ? pTuple->m_pRenameItem : nullptr;
 }
 
 CTouchItem* CFileModel::FindTouchItem( const fs::CPath& srcPath ) const
 {
-	const TItemPair* pItemsPair = utl::FindValuePtr( m_srcPatchToItemsMap, srcPath );
-	return pItemsPair != nullptr ? pItemsPair->second : nullptr;
+	const CItemTuple* pTuple = utl::FindValuePtr( m_srcPathToItemsMap, srcPath );
+	return pTuple != nullptr ? pTuple->m_pTouchItem : nullptr;
+}
+
+CEditLinkItem* CFileModel::FindEditLinkItem( const fs::CPath& srcPath ) const
+{
+	const CItemTuple* pTuple = utl::FindValuePtr( m_srcPathToItemsMap, srcPath );
+	return pTuple != nullptr ? pTuple->m_pEditLinkItem : nullptr;
 }
 
 void CFileModel::ResetDestinations( void )
 {
 	utl::for_each( m_renameItems, func::ResetItem() );
 	utl::for_each( m_touchItems, func::ResetItem() );
+	utl::for_each( m_editLinkItems, func::ResetItem() );
 
 	UpdateAllObservers( nullptr );				// path items changed
 }
@@ -269,7 +302,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( const std::vector<CRenameI
 
 	if ( resultPair.first != 0 )
 	{
-		TRACE_( "* CFileModel::MakeClipPasteDestPathsCmd(): ignoring %d invalid path out of %d paths!\n", resultPair.first, origCount ); origCount;
+		TRACE( "* CFileModel::MakeClipPasteDestPathsCmd(): ignoring %d invalid path out of %d paths!\n", resultPair.first, origCount ); origCount;
 		ui::BeepSignal( MB_ICONERROR );
 	}
 	else if ( resultPair.second.m_amendedCount != 0 )
@@ -403,40 +436,64 @@ utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( const std::vector<CTo
 }
 
 
-// CFileModel::AddRenameItemFromCmd implementation
+// EDIT SHORTCUT
 
-void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
+bool CFileModel::CopyClipSourceShortcuts( CWnd* pWnd, const std::vector<CEditLinkItem*>& editLinkItems, ui::ISubjectAdapter* pItemAdapter )
 {
-	const CRenameFileCmd* pRenameCmd = checked_static_cast<const CRenameFileCmd*>( pCmd );
+	REQUIRE( !editLinkItems.empty() );		// should be initialized
+	ASSERT_PTR( pItemAdapter );
 
-	fs::CPath srcPath = pRenameCmd->m_srcPath, destPath = pRenameCmd->m_destPath;
-	if ( svc::Undo == m_stackType )
-		std::swap( srcPath, destPath );			// swap DEST and SRC for undo
+	std::vector<std::tstring> srcLines; srcLines.reserve( editLinkItems.size() );
 
-	CRenameItem* pRenameItem = new CRenameItem( srcPath );
-	pRenameItem->RefDestPath() = destPath;
+	for ( const CEditLinkItem* pLinkItem: editLinkItems )
+		srcLines.push_back( fmt::FormatClipShortcut( pItemAdapter->FormatCode( pLinkItem ), pLinkItem->GetSrcShortcut() ) );
 
-	m_pFileModel->m_sourcePaths.push_back( pRenameItem->GetFilePath() );
-	m_pFileModel->m_renameItems.push_back( pRenameItem );
+	return CTextClipboard::CopyToLines( srcLines, pWnd->GetSafeHwnd() );
 }
 
-
-// CFileModel::AddTouchItemFromCmd implementation
-
-void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
+utl::ICommand* CFileModel::MakeClipPasteDestShortcutsCmd( const std::vector<CEditLinkItem*>& editLinkItems, CWnd* pWnd ) throws_( CRuntimeException )
 {
-	const CTouchFileCmd* pTouchCmd = checked_static_cast<const CTouchFileCmd*>( pCmd );
+	REQUIRE( !editLinkItems.empty() );
 
-	fs::CFileState srcState = pTouchCmd->m_srcState, destState = pTouchCmd->m_destState;
-	if ( svc::Undo == m_stackType )
-		std::swap( srcState, destState );			// swap DEST and SRC for undo
+	std::vector<std::tstring> lines;
 
-	CTouchItem* pTouchItem = new CTouchItem( srcState );
-	pTouchItem->RefDestState() = destState;
+	if ( CTextClipboard::CanPasteText() )
+		CTextClipboard::PasteFromLines( lines, pWnd->GetSafeHwnd() );
 
-	m_pFileModel->m_sourcePaths.push_back( pTouchItem->GetFilePath() );
-	m_pFileModel->m_touchItems.push_back( pTouchItem );
+	for ( std::vector<std::tstring>::iterator itLine = lines.begin(); itLine != lines.end(); )
+	{
+		if ( CGeneralOptions::Instance().m_trimFname )
+			str::Trim( *itLine );
+
+		if ( itLine->empty() )
+			itLine = lines.erase( itLine );
+		else
+			++itLine;
+	}
+
+	if ( lines.empty() )
+		throw CRuntimeException( _T("No destination shortcut states available to paste.") );
+	else if ( editLinkItems.size() != lines.size() )
+		throw CRuntimeException( str::Format( _T("Destination shortcut state count of %d doesn't match source file count of %d."),
+											  lines.size(), editLinkItems.size() ) );
+
+	std::vector<shell::CShortcut> destShortcuts; destShortcuts.reserve( editLinkItems.size() );
+	bool anyChange = false;
+
+	for ( size_t i = 0; i != editLinkItems.size(); ++i )
+	{
+		const CEditLinkItem* pLinkItem = editLinkItems[i];
+
+		shell::CShortcut newShortcut;
+		fmt::ParseClipShortcut( newShortcut, lines[i].c_str(), &pLinkItem->GetFilePath() );
+
+		destShortcuts.push_back( newShortcut );
+		anyChange |= newShortcut != pLinkItem->GetDestShortcut();
+	}
+
+	return anyChange ? new CChangeDestShortcutsCmd( this, &editLinkItems, destShortcuts, _T("Paste destination shortcut states from clipboard") ) : nullptr;
 }
+
 
 bool CFileModel::HasFileEditor( cmd::CommandType cmdType )
 {
@@ -445,6 +502,7 @@ bool CFileModel::HasFileEditor( cmd::CommandType cmdType )
 		case cmd::RenameFile:
 		case cmd::ChangeDestPaths:
 		case cmd::TouchFile:
+		case cmd::EditShortcut:
 		case cmd::FindDuplicates:
 			return true;
 	}
@@ -460,6 +518,8 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 			return new CRenameFilesDialog( this, pParent );
 		case cmd::TouchFile:
 			return new CTouchFilesDialog( this, pParent );
+		case cmd::EditShortcut:
+			return new CEditShortcutsDialog( this, pParent );
 		case cmd::FindDuplicates:
 			return new CFindDuplicatesDialog( this, pParent );
 	}
@@ -503,3 +563,57 @@ std::pair<IFileEditor*, bool> CFileModel::HandleUndoRedo( svc::StackType stackTy
 
 BEGIN_MESSAGE_MAP( CFileModel, CCmdTarget )
 END_MESSAGE_MAP()
+
+
+// CFileModel::AddRenameItemFromCmd implementation
+
+void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
+{
+	const CRenameFileCmd* pRenameCmd = checked_static_cast<const CRenameFileCmd*>( pCmd );
+	fs::CPath srcPath = pRenameCmd->m_srcPath, destPath = pRenameCmd->m_destPath;
+
+	if ( svc::Undo == m_stackType )
+		std::swap( srcPath, destPath );			// swap DEST and SRC for undo
+
+	CRenameItem* pRenameItem = new CRenameItem( srcPath );
+	pRenameItem->RefDestPath() = destPath;
+
+	m_pFileModel->m_sourcePaths.push_back( pRenameItem->GetFilePath() );
+	m_pFileModel->m_renameItems.push_back( pRenameItem );
+}
+
+
+// CFileModel::AddTouchItemFromCmd implementation
+
+void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
+{
+	const CTouchFileCmd* pTouchCmd = checked_static_cast<const CTouchFileCmd*>( pCmd );
+	fs::CFileState srcState = pTouchCmd->m_srcState, destState = pTouchCmd->m_destState;
+
+	if ( svc::Undo == m_stackType )
+		std::swap( srcState, destState );			// swap DEST and SRC for undo
+
+	CTouchItem* pTouchItem = new CTouchItem( srcState );
+	pTouchItem->RefDestState() = destState;
+
+	m_pFileModel->m_sourcePaths.push_back( pTouchItem->GetFilePath() );
+	m_pFileModel->m_touchItems.push_back( pTouchItem );
+}
+
+
+// CFileModel::AddEditLinkFromCmd implementation
+
+void CFileModel::AddEditLinkFromCmd::operator()( const utl::ICommand* pCmd )
+{
+	const CEditLinkFileCmd* pEditLinkCmd = checked_static_cast<const CEditLinkFileCmd*>( pCmd );
+	shell::CShortcut srcShortcut = pEditLinkCmd->m_srcShortcut, destShortcut = pEditLinkCmd->m_destShortcut;
+
+	if ( svc::Undo == m_stackType )
+		std::swap( srcShortcut, destShortcut );			// swap DEST and SRC for undo
+
+	CEditLinkItem* pEditLinkItem = new CEditLinkItem( pEditLinkCmd->m_srcPath, srcShortcut );
+	pEditLinkItem->RefDestShortcut() = destShortcut;
+
+	m_pFileModel->m_sourcePaths.push_back( pEditLinkItem->GetFilePath() );
+	m_pFileModel->m_editLinkItems.push_back( pEditLinkItem );
+}

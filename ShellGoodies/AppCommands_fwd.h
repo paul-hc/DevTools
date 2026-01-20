@@ -17,9 +17,10 @@ namespace cmd
 		RenameFile = 100, TouchFile, FindDuplicates,
 		DeleteFiles, CopyFiles, PasteCopyFiles, MoveFiles, PasteMoveFiles, CreateFolders, PasteCreateFolders, PasteCreateDeepFolders,
 		CopyPasteFilesAsBackup, CutPasteFilesAsBackup,
+		EditShortcut,
 
 		// transient commands (not persistent)
-		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
+		ChangeDestPaths, ChangeDestFileStates, ResetDestinations, ChangeDestShortcuts,
 		EditOptions,
 		SortRenameList, OnRenameListSelChanged,
 

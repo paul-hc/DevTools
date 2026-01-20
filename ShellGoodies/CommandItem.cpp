@@ -47,6 +47,7 @@ CToolStrip& CCommandItem::GetCmdTypeStrip( void )
 		s_strip.AddButton( cmd::RenameFile, ID_RENAME_ITEM );
 		s_strip.AddButton( cmd::TouchFile, ID_TOUCH_FILES );
 		s_strip.AddButton( cmd::FindDuplicates, ID_FIND_DUPLICATE_FILES );
+		s_strip.AddButton( cmd::EditShortcut, ID_EDIT_SHORTCUTS );
 		s_strip.AddButton( cmd::DeleteFiles, ID_CMD_DELETE_FILES );
 		s_strip.AddButton( cmd::CopyFiles, ID_CMD_COPY_FILES );
 		s_strip.AddButton( cmd::PasteCopyFiles, ID_PASTE_DEEP_POPUP );

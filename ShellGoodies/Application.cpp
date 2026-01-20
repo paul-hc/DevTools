@@ -8,6 +8,7 @@
 #include "test/RenameFilesTests.h"
 #include "utl/EnumTags.h"
 #include "utl/UI/SystemTray.h"
+#include "utl/UI/WndUtilsEx.h"
 #include "resource.h"
 #include <fstream>
 
@@ -57,6 +58,11 @@ namespace app
 		static const TCHAR s_keyTags[] = _T("Change all files (default)|Change only selected files");
 		static const CEnumTags s_tags( _T("All items (default)|Selected items"), s_keyTags );
 		return s_tags;
+	}
+
+	void FlashCtrlFrame( CWnd* pCtrl )
+	{
+		ui::FlashCtrlFrame( pCtrl, ::GetSysColor( COLOR_MENUHILIGHT ), 3 );
 	}
 
 

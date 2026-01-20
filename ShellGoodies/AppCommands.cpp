@@ -33,11 +33,13 @@ namespace cmd
 			s_tags.AddTagPair( _T("Paste Create Deep Folders"), _T("PASTE_CREATE_DEEP_FOLDERS") );
 			s_tags.AddTagPair( _T("Copy and Paste Files as Backup"), _T("COPY_PASTE_FILES_AS_BACKUP") );
 			s_tags.AddTagPair( _T("Cut and Paste Files as Backup"), _T("CUT_PASTE_FILES_AS_BACKUP") );
+			s_tags.AddTagPair( _T("Edit Shortcuts"), _T("EDIT_SHORTCUTS") );
 
 			// transient commands
 			s_tags.AddTagPair( _T("Change Destination Paths"), _T("CHANGE_DEST_PATHS") );
 			s_tags.AddTagPair( _T("Change Destination File States"), _T("CHANGE_DEST_FILE_STATES") );
 			s_tags.AddTagPair( _T("Reset Destinations"), _T("RESET_DESTINATIONS") );
+			s_tags.AddTagPair( _T("Change Destination Shortcuts"), _T("CHANGE_DEST_SHORTCUTS") );
 			s_tags.AddTagPair( _T("Edit"), _T("EDIT") );
 			s_tags.AddTagPair( _T("SortRenameList") );
 			s_tags.AddTagPair( _T("OnRenameListSelChanged") );

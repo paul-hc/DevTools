@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "TouchItem.h"
 #include "utl/UI/DateTimeControl.h"
-#include "utl/UI/WndUtilsEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,12 +23,6 @@ CTouchItem::~CTouchItem()
 
 namespace multi
 {
-	void FlashCtrlFrame( CWnd* pCtrl )
-	{
-		ui::FlashCtrlFrame( pCtrl, ::GetSysColor( COLOR_MENUHILIGHT ), 3 );
-	}
-
-
 	// CDateTimeState implementation
 
 	const CTime CDateTimeState::s_invalid( -1 );

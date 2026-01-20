@@ -785,7 +785,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 void CTouchFilesDialog::OnBnClicked_ResetDestFiles( void )
 {
 	ClearFileErrors();
-	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
+	SafeExecuteCmd( new CResetDestinationsMacroCmd( m_pFileModel ) );
 }
 
 void CTouchFilesDialog::OnBnClicked_ShowSrcColumns( void )
@@ -840,7 +840,7 @@ void CTouchFilesDialog::OnPushDateField( UINT cmdId )
 	rDateTimeState.Reset( pCaretItem->GetDestState().GetTimeField( dateField ) );
 
 	if ( rDateTimeState.UpdateCtrl( this ) )
-		multi::FlashCtrlFrame( GetDlgItem( rDateTimeState.m_ctrlId ) );
+		app::FlashCtrlFrame( GetDlgItem( rDateTimeState.m_ctrlId ) );
 
 	OnFieldChanged();
 }
@@ -860,7 +860,7 @@ void CTouchFilesDialog::OnPushAttributeFields( void )
 	for ( multi::CAttribCheckState& rAttribState : m_attribCheckStates )
 	{
 		if ( rAttribState.UpdateCtrl( this ) )
-			multi::FlashCtrlFrame( GetDlgItem( rAttribState.m_ctrlId ) );
+			app::FlashCtrlFrame( GetDlgItem( rAttribState.m_ctrlId ) );
 	}
 
 	OnFieldChanged();

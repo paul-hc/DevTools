@@ -80,8 +80,6 @@ public:
 
 	static CChangeDestFileStatesCmd* MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>& selItems );
 
-	std::vector<CTouchItem*> MakeSelItems( void ) const;
-
 	// cmd::IFileDetailsCmd
 	virtual bool HasSelItems( void ) const override;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
 	virtual size_t GetFileCount( void ) const override { return m_srcStates.size(); }
@@ -98,10 +96,43 @@ private:
 };
 
 
-class CResetDestinationsCmd : public CMacroCommand		// macro of 2 commands to reset RenameItems and TouchItems
+#include "utl/ui/Shortcut.h"
+
+
+class CEditLinkItem;
+
+
+// editing shell shortcut links: change CEditLinkItem::m_destShortcut (doesn't do any file operations)
+//
+class CChangeDestShortcutsCmd : public CBaseChangeDestCmd
 {
 public:
-	CResetDestinationsCmd( CFileModel* pFileModel );
+	CChangeDestShortcutsCmd( CFileModel* pFileModel, const std::vector<CEditLinkItem*>* pSelItems, const std::vector<shell::CShortcut>& newDestShortcuts,
+							 const std::tstring& cmdTag = std::tstring() );
+
+	static CChangeDestShortcutsCmd* MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CEditLinkItem*>& selItems );
+
+	// cmd::IFileDetailsCmd
+	virtual bool HasSelItems( void ) const override;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
+	virtual size_t GetFileCount( void ) const override { return m_srcShortcuts.size(); }
+	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
+private:
+	// base overrides
+	virtual ChangeType EvalChange( void ) const override;
+	virtual bool ToggleExecute( void ) override;
+
+	CEditLinkItem* GetEditLinkItemAt( size_t posSrcShortcut ) const;
+private:
+	std::vector<fs::CPath> m_selLinkPaths;		// keys stored only for SelItems sub-set case
+	std::vector<shell::CShortcut> m_srcShortcuts;
+	std::vector<shell::CShortcut> m_destShortcuts;
+};
+
+
+class CResetDestinationsMacroCmd : public CMacroCommand		// macro of 3 commands to reset RenameItems and TouchItems
+{
+public:
+	CResetDestinationsMacroCmd( CFileModel* pFileModel );
 
 	// utl::IMessage overrides
 	virtual std::tstring Format( utl::Verbosity verbosity ) const override;			// override for special formatting

@@ -1,9 +1,11 @@
 
 #include "pch.h"
 #include "FileMacroCommands.h"
+#include "EditLinkItem.h"
 #include "utl/AppTools.h"
 #include "utl/ContainerOwnership.h"
 #include "utl/CommandModel.h"
+#include "utl/ErrorHandler.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/Logger.h"
@@ -387,5 +389,81 @@ void CTouchFileCmd::Serialize( CArchive& archive ) override
 		archive >> m_destState;
 
 		m_srcPath = m_srcState.m_fullPath;			// assign path (e.g. for exception messages)
+	}
+}
+
+
+// CEditLinkFileCmd implementation
+
+IMPLEMENT_SERIAL( CEditLinkFileCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+
+CEditLinkFileCmd::CEditLinkFileCmd( const fs::CPath& linkPath, const shell::CShortcut& srcShortcut, const shell::CShortcut& destShortcut )
+	: CBaseFileCmd( cmd::EditShortcut, linkPath )
+	, m_srcShortcut( srcShortcut )
+	, m_destShortcut( destShortcut )
+{
+}
+
+CEditLinkFileCmd::~CEditLinkFileCmd()
+{
+}
+
+std::tstring CEditLinkFileCmd::Format( utl::Verbosity verbosity ) const override
+{
+	std::tstring text;
+
+	if ( utl::DetailFields == verbosity )
+		text = __super::Format( utl::Brief );		// prepend "TOUCH" tag
+
+	stream::Tag( text, fmt::FormatEditLinkEntry( m_srcPath, m_srcShortcut, m_destShortcut ), _T(" ") );
+	return text;
+}
+
+bool CEditLinkFileCmd::Execute( void ) override
+{
+	if ( m_destShortcut != m_srcShortcut )
+	{
+		{
+			CScopedErrorHandler scopedHandler( utl::ThrowMode );	// throw on HRESULT error
+			CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( m_srcPath.GetPtr() );
+
+			m_destShortcut.WriteToLink( pShellLink );				// apply the changed fields
+			shell::SaveLinkToFile( m_srcPath.GetPtr(), pShellLink );
+		}
+
+		NotifyObservers();
+	}
+	return true;
+}
+
+std::auto_ptr<cmd::CBaseFileCmd> CEditLinkFileCmd::MakeUnexecuteCmd( void ) override
+{
+	cmd::CBaseFileCmd* pUnexecCmd = new CEditLinkFileCmd( m_srcPath, m_destShortcut, m_srcShortcut );
+
+	pUnexecCmd->SetOriginCmd( this );
+	return std::auto_ptr<cmd::CBaseFileCmd>( pUnexecCmd );
+}
+
+bool CEditLinkFileCmd::IsUndoable( void ) const override
+{
+	//return m_srcShortcut.FileExist() && m_srcShortcut != fs::CFileShortcut::ReadFromFile( m_srcShortcut.m_fullPath );
+	return true;		// let it unexecute with error rather than being skipped in UNDO
+}
+
+void CEditLinkFileCmd::Serialize( CArchive& archive ) override
+{
+	__super::Serialize( archive );
+
+	if ( archive.IsStoring() )
+	{
+		archive << __super::m_srcPath;
+		archive << m_srcShortcut;
+		archive << m_destShortcut;
+	}
+	else
+	{
+		archive >> m_srcPath;
+		archive >> m_srcShortcut;
+		archive >> m_destShortcut;
 	}
 }

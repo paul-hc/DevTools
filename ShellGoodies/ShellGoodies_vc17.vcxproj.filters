@@ -178,6 +178,12 @@
     <ClInclude Include="TitleCapitalizer.h">
       <Filter>Main Code\service</Filter>
     </ClInclude>
+    <ClInclude Include="EditShortcutsDialog.h">
+      <Filter>Main Code\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="EditLinkItem.h">
+      <Filter>Main Code\model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ShellGoodies.rc">
@@ -289,6 +295,12 @@
     </ClCompile>
     <ClCompile Include="gen\dlldata.c">
       <Filter>Generated Files\excluded</Filter>
+    </ClCompile>
+    <ClCompile Include="EditShortcutsDialog.cpp">
+      <Filter>Main Code\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="EditLinkItem.cpp">
+      <Filter>Main Code\model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -145,4 +145,30 @@ public:
 };
 
 
+#include "utl/ui/Shortcut.h"
+
+
+class CEditLinkFileCmd : public cmd::CBaseFileCmd
+{
+	DECLARE_SERIAL( CEditLinkFileCmd )
+
+	CEditLinkFileCmd( void ) {}
+public:
+	CEditLinkFileCmd( const fs::CPath& linkPath, const shell::CShortcut& srcShortcut, const shell::CShortcut& destShortcut );
+	virtual ~CEditLinkFileCmd();
+
+	// ICommand interface
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
+	virtual bool Execute( void ) override;
+	virtual bool IsUndoable( void ) const override;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override;
+
+	// base overrides
+	virtual void Serialize( CArchive& archive ) override;
+public:
+	persist shell::CShortcut m_srcShortcut;
+	persist shell::CShortcut m_destShortcut;
+};
+
+
 #endif // FileMacroCommands_h

@@ -607,7 +607,7 @@ void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override
 		{
 			// page lazy initialization on activation
 			if ( !m_pParentDlg->HasDestPaths() )
-				CResetDestinationsCmd( m_pParentDlg->GetFileModel() ).Execute();	// this will call OnUpdate() for all observers
+				CResetDestinationsMacroCmd( m_pParentDlg->GetFileModel() ).Execute();	// this will call OnUpdate() for all observers
 			else
 				OnUpdate( m_pParentDlg->GetFileModel(), nullptr );		// initialize the page
 		}

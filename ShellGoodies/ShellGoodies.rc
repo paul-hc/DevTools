@@ -243,6 +243,41 @@ BEGIN
     LTEXT           "<strip2>",IDC_STRIP_BAR_2,212,7,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
 END
 
+IDD_EDIT_SHORTCUTS_DIALOG DIALOGEX 0, 0, 393, 234
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Edit Shortcut Files"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Modify Dates",IDC_STATIC,5,5,177,60,BS_LEFT | WS_GROUP
+    RTEXT           "Last &Modified Date:",IDC_STATIC,11,17,62,8
+    CONTROL         "",IDC_MODIFIED_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,77,14,100,15
+    RTEXT           "&Created Date:",IDC_STATIC,26,33,47,8,NOT WS_GROUP
+    CONTROL         "",IDC_CREATED_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,77,30,100,15
+    RTEXT           "&Accessed Date:",IDC_STATIC,21,49,52,8,NOT WS_GROUP
+    CONTROL         "",IDC_ACCESSED_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,77,46,100,15
+    GROUPBOX        "Modify Attributes",IDC_STATIC,192,5,119,60,BS_LEFT | WS_GROUP
+    CONTROL         "Read Only",IDC_ATTRIB_READONLY_CHECK,"Button",BS_AUTO3STATE | WS_TABSTOP,198,16,49,10
+    CONTROL         "Hidden",IDC_ATTRIB_HIDDEN_CHECK,"Button",BS_AUTO3STATE | WS_TABSTOP,198,28,39,10
+    CONTROL         "System",IDC_ATTRIB_SYSTEM_CHECK,"Button",BS_AUTO3STATE | WS_TABSTOP,198,40,39,10
+    CONTROL         "Archive",IDC_ATTRIB_ARCHIVE_CHECK,"Button",BS_AUTO3STATE | WS_TABSTOP,198,52,40,10
+    CONTROL         "Directory",IDC_ATTRIB_DIRECTORY_CHECK,"Button",BS_AUTO3STATE | WS_DISABLED | WS_TABSTOP,264,16,44,10
+    CONTROL         "Volume",IDC_ATTRIB_VOLUME_CHECK,"Button",BS_AUTO3STATE | WS_DISABLED | WS_TABSTOP,264,28,39,10
+    CONTROL         "Change &Selected Files Only",IDC_TARGET_SEL_ITEMS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,84,103,10
+    CONTROL         "Sho&w Source Columns",IDC_SHOW_SRC_COLUMNS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,302,84,86,10
+    LTEXT           "&Files details",IDC_FILES_STATIC,5,72,383,8,WS_BORDER | NOT WS_GROUP
+    CONTROL         "List1",IDC_EDIT_SHORTCUTS_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | WS_BORDER | WS_GROUP | WS_TABSTOP,5,98,383,79
+    LTEXT           "<stats>",IDC_OUTCOME_INFO_STATUS,5,180,383,11,SS_NOPREFIX | SS_CENTERIMAGE | SS_ENDELLIPSIS | WS_BORDER
+    LTEXT           "&Location:",IDC_CURR_FOLDER_STATIC,5,196,30,8,SS_NOTIFY
+    EDITTEXT        IDC_CURR_FOLDER_EDIT,39,194,349,12,ES_AUTOHSCROLL | ES_READONLY
+    DEFPUSHBUTTON   "OK",IDOK,338,8,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,338,24,50,14
+    LTEXT           "<btns>",IDC_TOOLBAR_PLACEHOLDER,338,43,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    PUSHBUTTON      "Copy",IDC_COPY_SOURCE_PATHS_BUTTON,5,213,50,14,WS_GROUP
+    PUSHBUTTON      "&Paste",IDC_PASTE_FILES_BUTTON,59,213,50,14
+    PUSHBUTTON      "&Reset",IDC_RESET_FILES_BUTTON,113,213,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -322,6 +357,14 @@ BEGIN
         RIGHTMARGIN, 328
         TOPMARGIN, 7
         BOTTOMMARGIN, 166
+    END
+
+    IDD_EDIT_SHORTCUTS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 388
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 227
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -524,6 +567,7 @@ BEGIN
     BUTTON      ID_SEND_TO_CLIP
     BUTTON      ID_TOUCH_FILES
     BUTTON      ID_FIND_DUPLICATE_FILES
+    BUTTON      ID_EDIT_SHORTCUTS
     SEPARATOR
     BUTTON      ID_PASTE_AS_BACKUP
     BUTTON      ID_PASTE_DEEP_POPUP
@@ -655,6 +699,16 @@ BEGIN
     0
 END
 
+IDD_EDIT_SHORTCUTS_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_CMD_DASHBOARD_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -737,6 +791,7 @@ END
 
 STRINGTABLE
 BEGIN
+    ID_TOUCH_FILES          "Modify the attributes and timestamp of selected files"
     ID_AUTO_FILL_COMMON_SEQ_CK 
                             "Auto-fill pattern with the common sequence of the file names (common prefix or sub-string)"
     ID_FIND_DUPLICATE_FILES "Search selected folders for duplicate files"
@@ -765,6 +820,7 @@ BEGIN
     ID_EDIT_INGORE_PATHS_LIST "Edit paths to ignore\nEdit Ignore Paths"
     ID_PASTE_AS_BACKUP      "Paste copied/cut files as a versioned backup file(s) in target folder"
     ID_COPY_SEL_ITEMS       "Copy selected items text"
+    ID_EDIT_SHORTCUTS       "Edit selected shortcut files"
 END
 
 STRINGTABLE
@@ -800,6 +856,7 @@ STRINGTABLE
 BEGIN
     IDC_SHOW_EXTENSION_CHECK 
                             "Toggle file extension in the file list.  Note: the template format string should be consistent with extension visibility!"
+    IDC_EDIT_SHORTCUTS_LIST "Shortcut=-1/150|Target|Folder|Arguments|Icon Location|Hot Key|Show|Description|SRC Target|SRC Folder|SRC Arguments|SRC Icon Location|SRC Hot Key|SRC Show|SRC Description"
 END
 
 STRINGTABLE
