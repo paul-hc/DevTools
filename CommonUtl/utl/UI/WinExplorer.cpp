@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "WinExplorer.h"
 #include "ShellTypes.h"
+#include "ShellPidl.h"
 #include "FileSystem.h"
 
 #ifdef _DEBUG
@@ -48,7 +49,7 @@ namespace shell
 		return pDesktopFolder;
 	}
 
-	bool CWinExplorer::ParsePidl( PIDLIST_RELATIVE* pPidl, IShellFolder* pFolder, const TCHAR* pFnameExt ) const
+	bool CWinExplorer::ParseToPidl( OUT PIDLIST_RELATIVE* pPidl, IShellFolder* pFolder, const TCHAR* pFnameExt ) const
 	{
 		ASSERT_PTR( pPidl );
 		ASSERT_PTR( pFolder );
@@ -66,8 +67,9 @@ namespace shell
 		if ( fs::IsValidDirectory( pDirPath ) )
 			if ( CComPtr<IShellFolder> pDesktopFolder = GetDesktopFolder() )
 			{
-				CComHeapPtr<ITEMIDLIST> workDirPidl;
-				if ( ParsePidl( &workDirPidl, pDesktopFolder, pDirPath ) )
+				CComHeapPtr<ITEMIDLIST_RELATIVE> workDirPidl;
+
+				if ( ParseToPidl( &workDirPidl, pDesktopFolder, pDirPath ) )
 					Handle( pDesktopFolder->BindToObject( workDirPidl, nullptr, IID_PPV_ARGS( &pDirFolder ) ) );
 			}
 
@@ -134,20 +136,20 @@ namespace shell
 		{
 			fs::CPath folderPath = itemPaths.front().GetParentPath();
 
-			CPidl folderPidl;
-			if ( folderPidl.CreateAbsolute( folderPath.GetPtr() ) )
+			CPidlAbsolute folderPidl;
+			if ( folderPidl.CreateFromPath( folderPath.GetPtr() ) )
 			{
-				std::vector<LPITEMIDLIST> itemPidls; itemPidls.reserve( itemPaths.size() );
+				std::vector<PIDLIST_ABSOLUTE> itemPidls; itemPidls.reserve( itemPaths.size() );
 
 				for ( std::vector<fs::CPath>::const_iterator itItemPath = itemPaths.begin(); itItemPath != itemPaths.end(); ++itItemPath )
 					if ( folderPath == itItemPath->GetParentPath() )				// selectable in the same folder view?
 					{
-						CPidl itemPidl;
-						if ( itemPidl.CreateAbsolute( itItemPath->GetPtr() ) )		// works with absolute PIDL as well
+						CPidlAbsolute itemPidl;
+						if ( itemPidl.CreateFromPath( itItemPath->GetPtr() ) )		// works with absolute PIDL as well
 							itemPidls.push_back( itemPidl.Release() );
 					}
 
-				HR_OK( ::SHOpenFolderAndSelectItems( folderPidl.Get(), static_cast<UINT>( itemPidls.size() ), (LPCITEMIDLIST*)&itemPidls.front(), 0 ) );
+				HR_AUDIT( ::SHOpenFolderAndSelectItems( folderPidl.Get(), static_cast<UINT>( itemPidls.size() ), (PCUITEMID_CHILD_ARRAY)&itemPidls.front(), 0 ) );
 
 				selCount = itemPidls.size();
 				shell::ClearOwningPidls( itemPidls );

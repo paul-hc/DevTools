@@ -18,6 +18,22 @@
 #endif
 
 
+namespace utl
+{
+	// explicit instantiation for case-sensitive compare (pathname is to be changed when changing case)
+	//
+	template<>
+	bool ModifyValue<fs::CPath>( fs::CPath& rFilePath, const fs::CPath& newFilePath )
+	{
+		if ( rFilePath.Get() == newFilePath.Get() )		// case-sensitive compare
+			return false;		// value not changed
+
+		rFilePath = newFilePath;
+		return true;
+	}
+}
+
+
 namespace func
 {
 	// Translates characters to generate a natural order, useful for sorting paths and filenames.
@@ -206,15 +222,13 @@ namespace path
 			std::vector<TCHAR> wildcards;
 			str::QuickTokenize( wildcards, pWildSpec, multiSpecDelims.c_str() );		// multiple zero-terminated items
 
-			typedef const TCHAR* TConstIterator;
-
-			for ( TConstIterator pWild = &wildcards.front(), pEnd = &wildcards.back() + 1; pWild != pEnd; ++pWild )
-				if ( '\0' == *pWild )
-					++pWild;						// skip empty specs, e.g. in ";x;;y"
-				else if ( DoMatchFilenameWildcard( pFilename, pWild, multiSpecDelims ) )			// recursive call spec by spec
+			for ( std::vector<TCHAR>::const_iterator itWild = wildcards.begin(), itEnd = wildcards.end(); itWild != itEnd; ++itWild )
+				if ( '\0' == *itWild )
+					++itWild;			// skip empty specs, e.g. in ";x;;y"
+				else if ( DoMatchFilenameWildcard( pFilename, &*itWild, multiSpecDelims ) )			// recursive call spec by spec
 					return true;
 				else
-					pWild += str::GetLength( pWild );
+					itWild += str::GetLength( &*itWild );
 
 			return false;
 		}
@@ -512,6 +526,25 @@ namespace path
 		return dirPath;
 	}
 
+	const TCHAR* FindUpwardsRelativePath( const TCHAR* pSrcFilePath, size_t upLevel )
+	{	// for "C:\dev\code\DevTools\TestDataUtl\images\Dice.png", upLevel=2  ->  "TestDataUtl\images\Dice.png"
+		ASSERT_PTR( pSrcFilePath );
+
+		// reverse find past 2 path slashes to find the relative path from parent directory
+		//
+		typedef std::reverse_iterator<const TCHAR*> Tconst_reverse_iterator;
+
+		Tconst_reverse_iterator pStartR = std::make_reverse_iterator( str::end( pSrcFilePath ) );
+		Tconst_reverse_iterator pEndR = std::make_reverse_iterator( pSrcFilePath );
+
+		for ( size_t slashCount = upLevel; pStartR != pEndR && slashCount != 0; ++pStartR )
+			if ( IsSlash( *pStartR ) )
+				if ( 0 == --slashCount )
+					return &*pStartR + 1;		// after the second slash: parent directory + filename
+
+		return pSrcFilePath;
+	}
+
 
 	bool IsWindows( const TCHAR* pPath )
 	{
@@ -666,9 +699,9 @@ namespace path
 		std::tstring path = MakeWindows( pPath );
 		std::tstring prefix = MakeWindows( pPrefix );
 
-		typedef const TCHAR* TConstIterator;
-		TConstIterator itPath = path.c_str();
-		TConstIterator itPrefix = prefix.c_str();
+		typedef const TCHAR* Tconst_iterator;
+		Tconst_iterator itPath = path.c_str();
+		Tconst_iterator itPrefix = prefix.c_str();
 
 		Range<const TCHAR*> commonRange( itPath );
 
@@ -885,6 +918,16 @@ namespace fs
 		m_filePath = filePath;
 		str::Trim( m_filePath );
 		path::AutoHugePrefix( m_filePath );
+	}
+
+	CPath CPath::GetExpanded( void ) const
+	{
+		return CPath( env::ExpandStrings( GetPtr() ) );
+	}
+
+	bool CPath::Expand( void )
+	{
+		return utl::ModifyValue( m_filePath, env::ExpandStrings( GetPtr() ) );
 	}
 
 	size_t CPath::GetDepth( void ) const

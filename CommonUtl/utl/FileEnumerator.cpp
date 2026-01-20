@@ -56,7 +56,7 @@ namespace fs
 
 			if ( pEnumerator->HasEnumFlag( fs::EF_ResolveShellLinks ) )
 				if ( s_resolveShortcutProc != nullptr )				// links with UTL_UI.lib?
-					if ( fs::IsValidShellLink( nodeState.m_fullPath.GetPtr() ) )
+					if ( fs::HasShellLinkExt( nodeState.m_fullPath.GetPtr() ) )
 					{
 						fs::CPath linkTargetPath;
 

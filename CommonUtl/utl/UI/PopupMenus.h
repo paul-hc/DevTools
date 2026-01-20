@@ -61,7 +61,7 @@ namespace mfc
 		void SetChecked( bool checked = true );
 		void UpdateSelectedColor( COLORREF selColor ) { SetChecked( m_color == selColor ); }
 
-		static CToolBarColorButton* ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex = nullptr );
+		static CToolBarColorButton* ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT int* pIndex = nullptr );
 	private:
 		COLORREF m_color;
 
@@ -103,7 +103,7 @@ namespace mfc
 
 		enum NotifCode { CMBN_COLORSELECTED = CBN_SELCHANGE };		// note: notifications are suppressed during parent's UpdateData()
 
-		static CColorMenuButton* ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost, OUT OPTIONAL int* pIndex = nullptr );
+		static CColorMenuButton* ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost, OUT int* pIndex = nullptr );
 	protected:
 		CWnd* GetMessageWnd( void ) const;
 		const CColorEntry* FindClickedBarColorEntry( void ) const;

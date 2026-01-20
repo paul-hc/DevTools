@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "WicAnimatedImage.h"
 #include "ImagingDirect2D.h"
-#include "MfcUtilities.h"
+#include "ComUtils.h"
 #include "GdiCoords.h"
 
 #ifdef _DEBUG
@@ -44,17 +44,17 @@ bool CWicAnimatedImage::StoreGlobalMetadata( void )
 	if ( nullptr == pDecoderMetadata )
 		return false;
 
-	com::CPropVariant value;
+	com::CPropVariant prop;
 
-	if ( SUCCEEDED( pDecoderMetadata->GetMetadataByName( L"/logscrdesc/Width", &value ) ) )
-		value.GetWordAs( &m_gifSize.cx );
+	if ( SUCCEEDED( pDecoderMetadata->GetMetadataByName( L"/logscrdesc/Width", &prop ) ) )
+		prop.GetInt( &m_gifSize.cx );
 
-	if ( SUCCEEDED( pDecoderMetadata->GetMetadataByName( L"/logscrdesc/Height", &value ) ) )
-		value.GetWordAs( &m_gifSize.cy );
+	if ( SUCCEEDED( pDecoderMetadata->GetMetadataByName( L"/logscrdesc/Height", &prop ) ) )
+		prop.GetInt( &m_gifSize.cy );
 
 	UINT pixelAspectRatio = 0;
-	if ( SUCCEEDED( pDecoderMetadata->GetMetadataByName( L"/logscrdesc/PixelAspectRatio", &value ) ) )
-		value.GetByteAs( &pixelAspectRatio );
+	if ( SUCCEEDED( pDecoderMetadata->GetMetadataByName( L"/logscrdesc/PixelAspectRatio", &prop ) ) )
+		prop.GetUInt( &pixelAspectRatio );
 
 	if ( pixelAspectRatio != 0 )
 	{
@@ -100,7 +100,7 @@ bool CWicAnimatedImage::StoreBkgndColor( IWICMetadataQueryReader* pDecoderMetada
 
 	UINT bkgndIndex = 0;			// background color index
 	if ( SUCCEEDED( pDecoderMetadata->GetMetadataByName( L"/logscrdesc/BackgroundColorIndex", &value ) ) )
-		value.GetByteAs( &bkgndIndex );
+		value.GetUInt( &bkgndIndex );
 
 	// get the color from the palette
 	CComPtr<IWICPalette> pPalette;
@@ -141,21 +141,21 @@ void CWicAnimatedImage::CFrameMetadata::Store( IWICMetadataQueryReader* pMetadat
 	com::CPropVariant value;
 
 	if ( SUCCEEDED( pMetadataReader->GetMetadataByName( L"/imgdesc/Left", &value ) ) )
-		value.GetWordAs( &m_rect.left );
+		value.GetInt( &m_rect.left );
 
 	if ( SUCCEEDED( pMetadataReader->GetMetadataByName( L"/imgdesc/Top", &value ) ) )
-		value.GetWordAs( &m_rect.top );
+		value.GetInt( &m_rect.top );
 
 	if ( SUCCEEDED( pMetadataReader->GetMetadataByName( L"/imgdesc/Width", &value ) ) )
-		if ( value.GetWordAs( &m_rect.right ) )
+		if ( value.GetInt( &m_rect.right ) )
 			m_rect.right += m_rect.left;
 
 	if ( SUCCEEDED( pMetadataReader->GetMetadataByName( L"/imgdesc/Height", &value ) ) )
-		if ( value.GetWordAs( &m_rect.bottom ) )
+		if ( value.GetInt( &m_rect.bottom ) )
 			m_rect.bottom += m_rect.top;
 
 	if ( SUCCEEDED( pMetadataReader->GetMetadataByName( L"/grctlext/Delay", &value ) ) )
-		if ( value.GetWordAs( &m_frameDelay ) )
+		if ( value.GetInt( &m_frameDelay ) )
 		{
 			m_frameDelay *= 10;				// convert from 10 ms units to 1 ms units
 			m_frameDelay = std::max( (UINT)MinDelay, m_frameDelay );		// clamp up to ensure rendering for gif with very small or 0 delay
@@ -165,5 +165,5 @@ void CWicAnimatedImage::CFrameMetadata::Store( IWICMetadataQueryReader* pMetadat
 
 	m_frameDisposal = DM_Undefined;			// reset to default disposal method, assuming a non-animated gif
 	if ( SUCCEEDED( pMetadataReader->GetMetadataByName( L"/grctlext/Disposal", &value ) ) )
-		value.GetByteAs( &m_frameDisposal );
+		value.GetInt( &m_frameDisposal );
 }

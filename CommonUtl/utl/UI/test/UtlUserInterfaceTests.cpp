@@ -6,6 +6,8 @@
 #include "ColorTests.h"
 #include "ResourceTests.h"
 #include "SerializationTests.h"
+#include "ShellPidlTests.h"
+#include "ShortcutTests.h"
 #include "ShellFileSystemTests.h"
 
 #ifdef _DEBUG
@@ -17,10 +19,12 @@ namespace ut
 {
 	void RegisterUtlUserInterfaceTests( void )
 	{
-		// register UTL tests
+		// register UTL UI console tests
+		CShortcutTests::Instance();
 		CColorTests::Instance();
 		CResourceTests::Instance();
 		CSerializationTests::Instance();
+		CShellPidlTests::Instance();
 		CShellFileSystemTests::Instance();
 	}
 }

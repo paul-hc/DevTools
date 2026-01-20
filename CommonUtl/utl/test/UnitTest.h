@@ -301,6 +301,7 @@ namespace ut
 	const fs::TDirPath& GetTestDataDirPath( void ) throws_( CRuntimeException );	// %UTL_TESTDATA_PATH%
 	const fs::TDirPath& GetImageSourceDirPath( void );								// %UTL_THUMB_SRC_IMAGE_PATH%
 	const fs::TDirPath& GetDestImagesDirPath( void );								// %UTL_TESTDATA_PATH%\images
+	const fs::TDirPath& GetShellLinksDirPath( void );								// %UTL_TESTDATA_PATH%\shell_links
 	const fs::TDirPath& GetStdImageDirPath( void );									// %UTL_TESTDATA_PATH%\std_test_images
 	const fs::TDirPath& GetStdTestFilesDirPath( void );								// %UTL_TESTDATA_PATH%\std_test_files
 
@@ -328,7 +329,7 @@ namespace ut
 
 		static fs::TDirPath MakePoolDirPath( bool createDir = false );
 	private:
-		fs::TDirPath m_poolDirPath;								// temorary directory
+		fs::TDirPath m_poolDirPath;								// temporary directory
 		std::vector<fs::CPath> m_filePaths;
 		bool m_hasFileErrors;									// file creation errors
 	public:

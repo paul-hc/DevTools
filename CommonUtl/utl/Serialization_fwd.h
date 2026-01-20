@@ -3,6 +3,9 @@
 #pragma once
 
 
+class CArchive;
+
+
 namespace portable
 {
 	// serializable numeric types that are portable across 32 bit/64 bit (Win32/x64)

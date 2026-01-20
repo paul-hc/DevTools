@@ -13,7 +13,7 @@ namespace fs
 {
 	bool IsValidFile( const TCHAR* pFilePath );
 	bool IsValidDirectory( const TCHAR* pDirPath );
-	bool IsValidShellLink( const TCHAR* pFilePath );
+	bool HasShellLinkExt( const TCHAR* pFilePath );
 }
 
 

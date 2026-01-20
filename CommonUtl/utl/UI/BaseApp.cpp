@@ -6,7 +6,7 @@
 #include "EnumTags.h"
 #include "MenuUtilities.h"
 #include "RuntimeException.h"
-#include "ShellTypes.h"
+#include "Shortcut.h"
 #include "ProcessUtils.h"
 #include "ToolbarImagesDialog.h"
 #include "WindowDebug.h"
@@ -311,7 +311,7 @@ namespace app
 
 		nosy::CWinAppEx_* pWinAppEx = mfc::nosy_cast<nosy::CWinAppEx_>( pWinApp );
 
-		TRACE( _T("* Initializing MFC Ribbon resources for application '%s'\n"), pWinAppEx->m_pszAppName );
+		TRACE_FL( _T("* Initializing MFC Ribbon resources for application '%s'\n"), pWinAppEx->m_pszAppName );
 
 		// superseeds CWinAppEx::InitContextMenuManager()
 		if ( afxContextMenuManager != nullptr )

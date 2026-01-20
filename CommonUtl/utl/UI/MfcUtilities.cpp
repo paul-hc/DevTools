@@ -1,11 +1,11 @@
 
 #include "pch.h"
 #include "MfcUtilities.h"
-#include "Path.h"
-#include "Serialization.h"
 #include "WndUtils.h"
 #include "ListLikeCtrlBase.h"	// for is_a<CListLikeCtrlBase>()
 #include "ThemeStatic.h"		// for is_a<CStatusStatic>()
+#include "utl/Path.h"
+#include "utl/Serialization.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,7 +24,7 @@ namespace nosy
 
 namespace mfc
 {
-	const BYTE* GetFileBuffer( const CMemFile* pMemFile, OUT OPTIONAL size_t* pBufferSize /*= nullptr*/ )
+	const BYTE* GetFileBuffer( const CMemFile* pMemFile, OUT size_t* pBufferSize /*= nullptr*/ )
 	{
 		ASSERT_PTR( pMemFile );
 
@@ -168,7 +168,7 @@ namespace ui
 		m_bAutoDelete = false;						// use this document as auto variable
 	}
 
-	void CAdapterDocument::Serialize( CArchive& archive )
+	void CAdapterDocument::Serialize( CArchive& archive ) overrides( CObject )
 	{
 		if ( m_pStreamable != nullptr )
 		{
@@ -187,7 +187,7 @@ namespace ui
 			if ( OnOpenDocument( GetPathName() ) )
 				return true;
 			else
-				TRACE( _T(" * Error loading document adapter file: %s\n"), GetPathName().GetString() );
+				TRACE_FL( _T("\n * Error loading document adapter file: %s\n"), GetPathName().GetString() );
 
 		return false;
 	}
@@ -196,7 +196,7 @@ namespace ui
 	{
 		if ( !OnSaveDocument( GetPathName() ) )
 		{
-			TRACE( _T(" * Error saving document adapter file: %s\n"), GetPathName().GetString() );
+			TRACE_FL( _T("\n * Error saving document adapter file: %s\n"), GetPathName().GetString() );
 			return false;
 		}
 

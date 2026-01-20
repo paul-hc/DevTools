@@ -35,9 +35,9 @@ namespace fs
 		return ::PathIsDirectoryEmpty( pDirPath ) != FALSE;
 	}
 
-	bool IsValidShellLink( const TCHAR* pFilePath )
+	bool HasShellLinkExt( const TCHAR* pFilePath )
 	{
-		return IsValidFile( pFilePath ) && path::MatchExt( pFilePath, _T(".lnk") );
+		return path::MatchExt( pFilePath, _T(".lnk") );
 	}
 
 	bool IsValidStructuredStorage( const TCHAR* pDocFilePath )
@@ -89,19 +89,28 @@ namespace fs
 	fs::TDirPath GetModuleFilePath( HINSTANCE hInstance )
 	{
 		TCHAR modulePath[ MAX_PATH ];
-		::GetModuleFileName( hInstance, modulePath, COUNT_OF( modulePath ) );				// may return short path, depending on how it was invoked
+		::GetModuleFileName( hInstance, ARRAY_SPAN( modulePath ) );			// may return short path, depending on how it was invoked
 
 		TCHAR longModulePath[ MAX_PATH ];
-		::GetLongPathName( modulePath, longModulePath, COUNT_OF( longModulePath ) );		// convert to long path
+		::GetLongPathName( modulePath, ARRAY_SPAN( longModulePath ) );		// convert to long path
 
 		return fs::TDirPath( longModulePath );
 	}
 
 	fs::TDirPath GetTempDirPath( void )
 	{
+		TCHAR shortdirPath[ MAX_PATH ] = { '\0' };
+		::GetTempPath( MAX_PATH, shortdirPath );
+
+		if ( !str::IsEmpty( shortdirPath ) )
+		{
+			TCHAR* pTrailStr = shortdirPath + str::GetLength( shortdirPath ) - 1;
+			if ( path::IsSlash( *pTrailStr ) )
+				*pTrailStr = '\0';
+		}
+
 		TCHAR dirPath[ MAX_PATH ];
-		if ( 0 == ::GetTempPath( MAX_PATH, dirPath ) )
-			dirPath[ 0 ] = _T('\0');
+		::GetLongPathName( shortdirPath, ARRAY_SPAN( dirPath ) );		// convert to long path
 
 		return fs::TDirPath( dirPath );
 	}

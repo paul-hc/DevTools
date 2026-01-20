@@ -734,6 +734,24 @@
     <ClInclude Include="PathItemEdit.h">
       <Filter>UI\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="ShortcutItem.h">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClInclude>
+    <ClInclude Include="Shortcut.h">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ShortcutTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="ComUtils.h">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellPidl.h">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ShellPidlTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1245,6 +1263,24 @@
     </ClCompile>
     <ClCompile Include="PathItemEdit.cpp">
       <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ShortcutItem.cpp">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClCompile>
+    <ClCompile Include="Shortcut.cpp">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ShortcutTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="ComUtils.cpp">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellPidl.cpp">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ShellPidlTests.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

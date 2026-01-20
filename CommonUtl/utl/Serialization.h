@@ -7,6 +7,17 @@
 
 namespace serial
 {
+	inline void StreamArchive( CArchive& archive, serial::IStreamable* pStreamable ) throws_( CException* )
+	{
+		ASSERT_PTR( pStreamable );
+
+		if ( archive.IsStoring() )
+			pStreamable->Save( archive );
+		else
+			pStreamable->Load( archive );
+	}
+
+
 	// adapts a class that implements "void Serialize( CArchive& archive )" to a IStreamable interface
 	//
 	template< typename BaseClass >
@@ -167,7 +178,7 @@ namespace serial
 
 		// store each item in container
 		for ( typename PtrContainerT::const_iterator itItemPtr = rItemPtrs.begin(); itItemPtr != rItemPtrs.end(); ++itItemPtr )
-			( *itItemPtr )->Stream( archive );
+			(*itItemPtr)->Stream( archive );
 	}
 
 	template< typename PtrContainerT >

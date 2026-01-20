@@ -1,7 +1,7 @@
 
 #include "pch.h"
 #include "ShellDialogs.h"
-#include "ShellTypes.h"
+#include "ShellPidl.h"
 #include "FileSystem_fwd.h"
 #include "TreeControl.h"
 #include "utl/Algorithms.h"
@@ -74,7 +74,7 @@ namespace shell
 			bi.ulFlags |= BIF_DONTGOBELOWDOMAIN;		// could be slow network binding
 		bi.lpfn = impl::BrowseFolderCallback;
 
-		CPidl pidlFolder( ::SHBrowseForFolder( &bi ) );
+		CPidlAbsolute pidlFolder( ::SHBrowseForFolder( &bi ) );
 
 		if ( pDisplayedName != nullptr )
 			*pDisplayedName = displayName;
@@ -252,7 +252,7 @@ namespace shell
 					// it seems no longer necessary
 					// set the status window to the currently selected path
 					TCHAR dirPath[ MAX_PATH ];
-					if ( ::SHGetPathFromIDList( (LPITEMIDLIST)lParam, dirPath ) )
+					if ( ::SHGetPathFromIDList( (PCIDLIST_ABSOLUTE)lParam, dirPath ) )
 						SendMessage( hDlg, BFFM_SETSTATUSTEXT, 0, (LPARAM)dirPath );
 
 					if ( Initialized == s_browseFolderStatus )

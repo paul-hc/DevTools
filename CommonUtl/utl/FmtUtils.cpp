@@ -98,7 +98,7 @@ namespace fmt
 		return FormatBraces( impl::FormatFileState( fileState, NoPath, tagged ).c_str(), s_stateBraces );
 	}
 
-	bool ParseFileStateCore( fs::CFileState& rFileState, str::TStringRange& rTextRange )
+	bool ParseFileStateCore( OUT fs::CFileState& rFileState, str::TStringRange& rTextRange )
 	{
 		return
 			ParseBraces( rTextRange, s_stateBraces ) &&
@@ -111,7 +111,7 @@ namespace fmt
 		return std::tstring( FormatPath( fileState.m_fullPath, pathFormat ) ) + s_clipSep + FormatFileStateCore( fileState, tagged );
 	}
 
-	fs::CFileState& ParseClipFileState( fs::CFileState& rFileState, const std::tstring& text, const fs::CPath* pKeyPath /*= nullptr*/ ) throws_( CRuntimeException )
+	fs::CFileState& ParseClipFileState( OUT fs::CFileState& rFileState, const std::tstring& text, const fs::CPath* pKeyPath /*= nullptr*/ ) throws_( CRuntimeException )
 	{
 		str::TStringRange textRange( text );
 
@@ -150,7 +150,7 @@ namespace fmt
 		return srcPath.Get() + s_pairSep + relativeDestPath;
 	}
 
-	bool ParseRenameEntry( fs::CPath& rSrcPath, fs::CPath& rDestPath, const str::TStringRange& textRange )
+	bool ParseRenameEntry( OUT fs::CPath& rSrcPath, fs::CPath& rDestPath, const str::TStringRange& textRange )
 	{
 		Range<size_t> sepPos;
 		if ( textRange.Find( sepPos, s_pairSep ) )
@@ -191,7 +191,7 @@ namespace fmt
 		return srcState.m_fullPath.Get() + s_touchSep + FormatFileStateCore( srcState, tagged ) + s_pairSep + FormatFileStateCore( destState, tagged );
 	}
 
-	bool ParseTouchEntry( fs::CFileState& rSrcState, fs::CFileState& rDestState, const str::TStringRange& textRange )
+	bool ParseTouchEntry( OUT fs::CFileState& rSrcState, fs::CFileState& rDestState, const str::TStringRange& textRange )
 	{
 		Range<size_t> sepPos;
 		if ( textRange.Find( sepPos, s_touchSep ) )
@@ -355,5 +355,58 @@ namespace fmt
 			if ( !ParseFileState_Tagged( rFileState, text, pathFormat ) )
 				throw CRuntimeException( str::Format( _T("Invalid format for file status: %s"), text.c_str() ) );
 		}
+	}
+}
+
+
+#include <winuser.h>	// for ::GetKeyNameText(), ::MapVirtualKey()
+
+
+namespace fmt
+{
+	// Hot-Key formatting (locale aware, translated in local language)
+
+	std::tstring FormatKeyShortcut( WORD vkCode, WORD modifierFlags )
+	{
+		static const TCHAR s_plus[] = _T(" + ");
+		std::tstring keyName;
+
+		if ( vkCode != 0 || modifierFlags != 0 )
+		{
+			if ( HasFlag( modifierFlags, HOTKEYF_CONTROL ) )
+			{
+				keyName += FormatKeyName( VK_CONTROL, FALSE );
+				keyName += s_plus;
+			}
+
+			if ( HasFlag( modifierFlags, HOTKEYF_SHIFT ) )
+			{
+				keyName += FormatKeyName( VK_SHIFT, FALSE );
+				keyName += s_plus;
+			}
+
+			if ( HasFlag( modifierFlags, HOTKEYF_ALT ) )
+			{
+				keyName += FormatKeyName( VK_MENU, FALSE );
+				keyName += s_plus;
+			}
+
+			keyName += FormatKeyName( vkCode, HasFlag( modifierFlags, HOTKEYF_EXT ) );
+		}
+
+		return keyName;
+	}
+
+	std::tstring FormatKeyName( UINT vkCode, bool isExtendedKey /*= false*/ )
+	{
+		LONG scanCode = ::MapVirtualKey( vkCode, 0 ) << 16;
+
+		if ( isExtendedKey )
+			scanCode |= 0x01000000L;		// if it's an extended key, add the extended flag
+
+		TCHAR buffer[ 256 ];
+		VERIFY( ::GetKeyNameText( scanCode, ARRAY_SPAN( buffer ) ) != 0 );
+
+		return buffer;
 	}
 }

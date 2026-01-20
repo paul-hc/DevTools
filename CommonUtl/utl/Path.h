@@ -160,6 +160,7 @@ namespace path
 	bool HasTrailingSlash( const TCHAR* pPath );				// true for non-root paths with a trailing slash
 
 	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
+	const TCHAR* FindUpwardsRelativePath( const TCHAR* pSrcFilePath, size_t upLevel );
 
 
 	// normal: backslashes only
@@ -272,10 +273,17 @@ namespace fs
 		CPath MakeUnixPath( void ) const { return CPath( m_filePath, func::ToUnixPathChar() ); }
 		CPath MakeWindowsPath( void ) const { return CPath( m_filePath, func::ToWinPathChar() ); }
 
+		CPath GetExpanded( void ) const;
+		bool Expand( void );
+
 		size_t GetDepth( void ) const;		// count of path elements up to the root
 
 		bool HasParentPath( void ) const { return GetFilenamePtr() != GetPtr(); }		// has a directory path?
 		TDirPath GetParentPath( bool trailSlash = false ) const;						// always a directory path
+
+		TRelativePath FindUpwardsRelativePath( size_t upLevel ) const { return TRelativePath( path::FindUpwardsRelativePath( GetPtr(), upLevel ) ); }
+		const TCHAR* FindUpwardsRelativePathPtr( size_t upLevel ) const { return path::FindUpwardsRelativePath( GetPtr(), upLevel ); }
+
 		CPath& SetBackslash( bool trailSlash = true );
 
 		std::tstring GetFilename( void ) const { return GetFilenamePtr(); }
@@ -793,6 +801,13 @@ namespace path
 	{
 		std::for_each( rPaths.begin(), rPaths.end(), func::StripToFilename() );
 	}
+}
+
+
+namespace utl
+{
+	template<>
+	bool ModifyValue<fs::CPath>( fs::CPath& rFilePath, const fs::CPath& newFilePath );	// FWD: explicit instantiation for case-sensitive compare (pathname is to be changed when changing case)
 }
 
 

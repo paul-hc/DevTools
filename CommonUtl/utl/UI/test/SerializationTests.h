@@ -18,6 +18,7 @@ public:
 	virtual void Run( void );
 private:
 	void TestUnicodeString( void );
+	void TestSerializeScalars( void );
 };
 
 

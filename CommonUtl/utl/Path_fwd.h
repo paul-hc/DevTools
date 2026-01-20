@@ -6,11 +6,12 @@
 namespace fs
 {
 	class CPath;
-	class CFlexPath;	
+	class CFlexPath;
 
 
 	typedef CPath TFilePath;			// alias for file paths
 	typedef CPath TDirPath;				// alias for directory paths
+	typedef CPath TRelativePath;		// alias for relative paths
 	typedef CPath TPatternPath;			// alias for file path or directory paths with wildcards
 
 	typedef CPath TEmbeddedPath;

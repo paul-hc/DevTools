@@ -14,7 +14,7 @@ namespace shell
 	CComPtr<IContextMenu> MakeFilePathContextMenu( const std::tstring& filePath, HWND hWndOwner );
 
 	// context menu of child item(s)
-	CComPtr<IContextMenu> MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem, HWND hWndOwner );
+	CComPtr<IContextMenu> MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD pidlItem, HWND hWndOwner );
 	CComPtr<IContextMenu> MakeFolderItemsContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD_ARRAY pidlItemsArray, size_t itemCount, HWND hWndOwner );
 	CComPtr<IContextMenu> MakeItemContextMenu( IShellItem* pItem, HWND hWndOwner );
 

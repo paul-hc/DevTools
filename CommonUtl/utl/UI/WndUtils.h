@@ -335,7 +335,7 @@ namespace ui
 
 namespace ui
 {
-	inline int MessageBox( const std::tstring& message, UINT mbFlags = MB_OK ) { return ::AfxMessageBox( message.c_str(), mbFlags ); }
+	int MessageBox( const std::tstring& message, UINT mbFlags = MB_OK );
 
 	bool BeepSignal( UINT beep = MB_OK );														// returns false for convenience
 

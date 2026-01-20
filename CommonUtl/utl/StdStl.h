@@ -152,7 +152,7 @@ namespace utl
 
 	// copy items between containers using a conversion functor (unary)
 
-	template< typename DestContainerT, typename SrcContainerT, typename CvtFuncT >
+	template< typename SrcContainerT, typename DestContainerT, typename CvtFuncT >
 	inline void transform( const SrcContainerT& srcItems, OUT DestContainerT& rDestItems, CvtFuncT cvtFunc )
 	{
 		std::transform( srcItems.begin(), srcItems.end(), std::inserter( rDestItems, rDestItems.end() ), cvtFunc );
@@ -162,6 +162,19 @@ namespace utl
 	inline void generate( OUT ContainerT& rItems, UnaryFuncT genFunc )
 	{
 		std::generate( rItems.begin(), rItems.end(), genFunc );		// replace [first, last) with genFunc
+	}
+
+
+	template< typename ContainerT, typename PredT >
+	void sort( ContainerT& rItems, PredT _pred )
+	{
+		std::sort( rItems.begin(), rItems.end(), _pred );
+	}
+
+	template< typename ContainerT >
+	void sort( ContainerT& rItems )
+	{
+		std::sort( rItems.begin(), rItems.end() );
 	}
 }
 

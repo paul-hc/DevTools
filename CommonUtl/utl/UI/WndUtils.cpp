@@ -7,6 +7,7 @@
 #include "ImageStore.h"
 #include "ColorPopupDialogs.h"
 #include "utl/ContainerOwnership.h"
+#include "utl/ErrorHandler.h"
 #include "utl/Path.h"
 #include "utl/PathItemBase.h"
 #include "utl/RuntimeException.h"
@@ -976,6 +977,11 @@ namespace ui
 
 namespace ui
 {
+	int MessageBox( const std::tstring& message, UINT mbFlags /*= MB_OK*/ )
+	{
+		return ::AfxMessageBox( message.c_str(), mbFlags );
+	}
+
 	bool& RefAsyncApiEnabled( void )			// some modes require disabling of asynchronous API calls due to interference (e.g. CDesktopDC)
 	{
 		static bool s_asyncApiEnabled = true;
@@ -991,18 +997,18 @@ namespace ui
 
 	bool ReportError( const std::tstring& message, UINT mbFlags /*= MB_OK | MB_ICONERROR*/ )
 	{
-		MessageBox( message, mbFlags );
+		ui::MessageBox( CScopedErrorHandler::DecorateErrorMessage( message ), mbFlags );
 		return false;
 	}
 
 	int ReportException( const std::exception& exc, UINT mbFlags /*= MB_OK | MB_ICONERROR*/ )
 	{
-		return MessageBox( CRuntimeException::MessageOf( exc ), mbFlags );
+		return ui::MessageBox( CScopedErrorHandler::DecorateErrorMessage( CRuntimeException::MessageOf( exc ) ), mbFlags );
 	}
 
 	int ReportException( const CException* pExc, UINT mbFlags /*= MB_OK | MB_ICONERROR*/ )
 	{
-		return MessageBox( mfc::CRuntimeException::MessageOf( *pExc ), mbFlags );
+		return ui::MessageBox( CScopedErrorHandler::DecorateErrorMessage( mfc::CRuntimeException::MessageOf( *pExc ) ), mbFlags );
 	}
 
 
@@ -1015,7 +1021,7 @@ namespace ui
 	{
 		ASSERT_PTR( pCtrl->GetSafeHwnd() );
 
-		std::tstring title = pTitle != nullptr ? _T("Input Validation") : pTitle;
+		std::tstring title( pTitle != nullptr ? pTitle : _T("Input Validation") );
 		int ttiIcon = TTI_NONE;
 		enum { MB_IconMask = MB_ICONERROR | MB_ICONWARNING | MB_ICONINFORMATION | MB_ICONQUESTION };
 

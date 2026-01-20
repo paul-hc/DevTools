@@ -2,15 +2,15 @@
 #define ShellTypes_h
 #pragma once
 
-//#define STRICT_TYPED_ITEMIDS
+#define STRICT_TYPED_ITEMIDS
 #include <shlobj.h>
 #include <atlbase.h>
 #include "Path.h"
 
 
-namespace shell
+namespace utl
 {
-	bool ResolveShortcut( fs::CPath& rDestPath, const TCHAR* pShortcutLnkPath, CWnd* pWnd = nullptr );
+	size_t HashBytes( const void* pFirst, size_t count );	// FWD
 }
 
 
@@ -24,18 +24,25 @@ namespace shell
 	CComPtr<IShellItem> FindShellItem( const fs::CPath& fullPath );
 	CComPtr<IShellFolder2> ToShellFolder( IShellItem* pFolderItem );
 	CComPtr<IShellFolder2> GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem );
+
+	CComPtr<IBindCtx> CreateFileSysBindContext( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL );		// virtual bind context for FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY
 }
 
 
 namespace shell
 {
-	// shell properties
+	// shell file info (via SHFILEINFO)
+	SFGAOF GetFileSysAttributes( const TCHAR* pFilePath );
+	int GetFileSysImageIndex( const TCHAR* pFilePath );
+	HICON GetFileSysIcon( const TCHAR* pFilePath, UINT flags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
 
+
+	// shell properties
 	std::tstring GetString( STRRET* pStrRet, PCUITEMID_CHILD pidl = nullptr );
 
 
 	// IShellFolder properties
-	std::tstring GetDisplayName( IShellFolder* pFolder, PCUITEMID_CHILD pidl, SHGDNF flags );
+	std::tstring GetDisplayName( IShellFolder* pFolder, PCUITEMID_CHILD pidl, SHGDNF flags = SHGDN_NORMAL );
 
 	// IShellFolder2 properties
 	std::tstring GetStringDetail( IShellFolder2* pFolder, PCUITEMID_CHILD pidl, const PROPERTYKEY& propKey );
@@ -107,20 +114,38 @@ namespace shell
 		inline LPITEMIDLIST Allocate( size_t size ) { return static_cast<LPITEMIDLIST>( ::CoTaskMemAlloc( static_cast<ULONG>( size ) ) ); }
 		inline void Delete( LPITEMIDLIST pidl ) { ::CoTaskMemFree( pidl ); }
 
-		PIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] );		// itemFilename is normally a fname.ext; also works with a sub-path
-		fs::CPath GetAbsolutePath( PIDLIST_ABSOLUTE pidlAbsolute, GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT );
-		std::tstring GetName( LPCITEMIDLIST pidl, SIGDN nameType = SIGDN_NORMALDISPLAY );
+		template< typename PtrItemIdListT >
+		inline PtrItemIdListT CreateEmptyPidl( void )
+		{
+			PtrItemIdListT pidlEmpty = reinterpret_cast<PtrItemIdListT>( Allocate( sizeof(_SHITEMID::cb) ) );		// allocate 2 bytes for the null terminator: "_SHITEMID::USHORT cb;"
+			if ( pidlEmpty != nullptr )
+				pidlEmpty->mkid.cb = 0;		// set size to zero to mark it as empty
+			return pidlEmpty;
+		}
+
+		PIDLIST_RELATIVE CreateRelativePidl( IShellFolder* pParentFolder, const TCHAR* pRelPath );		// pRelPath is normally a fname.ext; also works with a relative path (sub-path)
+		inline PUITEMID_CHILD CreateChilePidl( IShellFolder* pParentFolder, const TCHAR* pFnameExt ) { return reinterpret_cast<PUITEMID_CHILD>( CreateRelativePidl( pParentFolder, pFnameExt ) ); }
+
+		// format pidl:
+		fs::CPath GetAbsolutePath( PCIDLIST_ABSOLUTE pidlAbsolute, GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT );
+		std::tstring GetName( PCIDLIST_ABSOLUTE pidl, SIGDN nameType = SIGDN_NORMALDISPLAY );
+
+		// parse to absolute pidl:
+		PIDLIST_ABSOLUTE ParseToPidl( const TCHAR* pPathOrName, IBindCtx* pBindCtx = nullptr );
+		PIDLIST_RELATIVE ParseToPidlRelative( const TCHAR* pRelPathOrName, IShellFolder* pParentFolder, IBindCtx* pBindCtx = nullptr );
+		PIDLIST_ABSOLUTE ParseToPidlAbsolute( const TCHAR* pRelPathOrName, IShellFolder* pParentFolder, IBindCtx* pBindCtx = nullptr );
 
 		inline bool IsNull( LPCITEMIDLIST pidl ) { return nullptr == pidl; }
 		inline bool IsEmpty( LPCITEMIDLIST pidl ) { return IsNull( pidl ) || 0 == pidl->mkid.cb; }
-		size_t GetCount( LPCITEMIDLIST pidl );
+		inline bool IsEmptyStrict( LPCITEMIDLIST pidl ) { return 0 == pidl->mkid.cb; }
+		size_t GetItemCount( LPCITEMIDLIST pidl );
 		size_t GetByteSize( LPCITEMIDLIST pidl );
 
-		LPCITEMIDLIST GetLastItem( LPCITEMIDLIST pidl );
-		LPCITEMIDLIST GetNextItem( LPCITEMIDLIST pidl );
+		LPCITEMIDLIST GetNextItem( LPCITEMIDLIST pidl );	// duplicate of ::ILNext()
+		LPCITEMIDLIST GetLastItem( LPCITEMIDLIST pidl );	// duplicate of ::ILFindLastID()
 
-		LPITEMIDLIST Copy( LPCITEMIDLIST pidl );
-		LPITEMIDLIST CopyFirstItem( LPCITEMIDLIST pidl );
+		LPITEMIDLIST Copy( LPCITEMIDLIST pidl );			// duplicate of ::ILClone(), ::ILCloneFull(), ::ILCloneChild()
+		LPITEMIDLIST CopyFirstItem( LPCITEMIDLIST pidl );	// duplicate of ::ILCloneFirst()
 
 		inline bool IsEqual( PCIDLIST_ABSOLUTE leftPidl, PCIDLIST_ABSOLUTE rightPidl ) { return ::ILIsEqual( leftPidl, rightPidl ) != FALSE; }
 		pred::CompareResult Compare( PCUIDLIST_RELATIVE leftPidl, PCUIDLIST_RELATIVE rightPidl, IShellFolder* pParentFolder = GetDesktopFolder() );
@@ -138,92 +163,6 @@ namespace shell
 }
 
 
-namespace shell
-{
-	// manages memory for a PIDL used in shell API; similar to CComHeapPtr<ITEMIDLIST> with PIDL specific functionality.
-	//
-	class CPidl
-	{
-	public:
-		CPidl( void ) : m_pidl( nullptr ) {}
-		CPidl( CPidl& rRight ) : m_pidl( rRight.Release() ) {}													// copy-move constructor
-		explicit CPidl( LPITEMIDLIST pidl ) : m_pidl( pidl ) {}													// takes ownership of pidl
-		explicit CPidl( LPCITEMIDLIST rootPidl, LPCITEMIDLIST dirPathPidl, LPCITEMIDLIST childPidl = nullptr );	// creates a copy with concatenation
-		~CPidl() { Delete(); }
-
-		bool IsNull( void ) const { return nullptr == m_pidl; }
-		bool IsEmpty( void ) const { return pidl::IsEmpty( m_pidl ); }						// note: desktop PIDL is empty (but not null)
-		size_t GetCount( void ) const { return pidl::GetCount( m_pidl ); }
-		size_t GetByteSize( void ) const { return pidl::GetByteSize( m_pidl ); }
-		size_t GetHash( void ) const;
-
-		LPITEMIDLIST Get( void ) const { return m_pidl; }
-
-		LPITEMIDLIST* operator&()
-		{
-			Delete();
-			return &m_pidl;
-		}
-
-		void Reset( LPITEMIDLIST pidl = nullptr )
-		{
-			Delete();
-			m_pidl = pidl;
-		}
-
-		LPITEMIDLIST Release( void )
-		{
-			LPITEMIDLIST pidl = m_pidl;
-			m_pidl = nullptr;
-			return pidl;
-		}
-
-		void Delete( void )
-		{
-			if ( m_pidl != nullptr )
-				pidl::Delete( Release() );
-		}
-
-		void AssignCopy( LPCITEMIDLIST pidl ) { Reset( pidl::Copy( pidl ) ); }
-
-		LPCITEMIDLIST GetNextItem( void ) const { return pidl::GetNextItem( m_pidl ); }
-		LPCITEMIDLIST GetLastItem( void ) const { return pidl::GetLastItem( m_pidl ); }
-
-		void Concatenate( LPCITEMIDLIST rightPidl );
-		void ConcatenateChild( LPCITEMIDLIST childPidl );
-		void RemoveLast( void );
-
-		// absolute PIDL compare
-		bool operator==( const CPidl& rightPidl ) const { return pidl::IsEqual( m_pidl, rightPidl.m_pidl ); }
-		bool operator!=( const CPidl& rightPidl ) const { return !operator==( rightPidl ); }
-
-		// relative PIDL compare
-		pred::CompareResult Compare( const CPidl& rightRelativePidl, IShellFolder* pParentFolder = GetDesktopFolder() ) { return pidl::Compare( m_pidl, rightRelativePidl.m_pidl, pParentFolder ); }
-
-		// advanced
-		bool CreateAbsolute( const TCHAR fullPath[] );								// ABSOLUTE pidl
-		bool CreateRelative( IShellFolder* pFolder, const TCHAR itemFilename[] );	// RELATIVE/CHILD pidl, depending on itemFilename being a sub-path or fname.ext
-
-		bool CreateFrom( IUnknown* pUnknown );										// ABSOLUTE pidl - most general, works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
-		bool CreateFromFolder( IShellFolder* pShellFolder );						// ABSOLUTE pidl - superseeded by CreateFrom()
-
-		CComPtr<IShellItem> FindItem( IShellFolder* pParentFolder = nullptr ) const;			// pass pParentFolder if PIDL is relative/child
-		CComPtr<IShellFolder> FindFolder( IShellFolder* pParentFolder = GetDesktopFolder() ) const;
-
-		fs::CPath GetAbsolutePath( GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT ) const { return pidl::GetAbsolutePath( m_pidl, optFlags ); }
-		std::tstring GetName( SIGDN nameType = SIGDN_NORMALDISPLAY ) const { return pidl::GetName( m_pidl, nameType ); }
-
-		bool WriteToStream( IStream* pStream ) const;
-		bool ReadFromStream( IStream* pStream );
-	private:
-		const BYTE* GetBuffer( void ) const { return pidl::impl::GetBuffer( m_pidl ); }
-		BYTE* GetBuffer( void ) { return pidl::impl::GetBuffer( m_pidl ); }
-	private:
-		LPITEMIDLIST m_pidl;
-	};
-}
-
-
 #include "Image_fwd.h"
 
 
@@ -233,9 +172,6 @@ namespace shell
 	std::tstring FormatKiloByteSize( UINT64 fileSize );
 
 	CImageList* GetSysImageList( ui::GlyphGauge glyphGauge );
-
-	int GetFileSysImageIndex( const TCHAR* filePath );
-	HICON GetFileSysIcon( const TCHAR* filePath, UINT flags = SHGFI_SMALLICON );			// returns a copy of the icon (client must delete it)
 
 
 	class CSysImageLists
@@ -247,7 +183,7 @@ namespace shell
 
 		CImageList* Get( ui::GlyphGauge glyphGauge );
 	private:
-		CImageList m_imageLists[ ui::_GlyphGaugeCount ];
+		CImageList m_imageLists[ ui::_GlyphGaugeCount ];	// image-lists are owned by Explorer!
 	};
 }
 
@@ -272,7 +208,7 @@ namespace shell
 					std::tstring relativePath = func::StringOf( *itFilePath );
 					path::StripPrefix( relativePath, commonDirPath.GetPtr() );
 
-					if ( PIDLIST_RELATIVE pidlRelative = pidl::GetRelativeItem( pCommonFolder, relativePath.c_str() ) )
+					if ( PIDLIST_RELATIVE pidlRelative = pidl::CreateRelativePidl( pCommonFolder, relativePath.c_str() ) )
 						rPidlItemsArray.push_back( pidlRelative );			// caller must free the pidl
 				}
 		}

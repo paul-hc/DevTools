@@ -29,7 +29,9 @@ private:
 	void TestStringSet( void );
 
 	void TestStringSplit( void );
+	void TestStringStreamSplit( void );
 	void TestStringTokenize( void );
+	void TestStringQuickTokenize( void );
 	void TestStringPrefixSuffix( void );
 	void TestStringConversion( void );
 	void TestStringLines( void );

@@ -6,55 +6,9 @@
 #include "utl/Timer.h"
 
 
-namespace com
-{
-	// wrapper for a PROPVARIANT value
-	//
-	class CPropVariant
-	{
-	public:
-		CPropVariant( void ) { ::PropVariantInit( &m_value ); }
-		~CPropVariant() { Clear(); }
-
-		const PROPVARIANT& Get( void ) const { return m_value; }
-		void Clear( void ) { ::PropVariantClear( &m_value ); }
-
-		PROPVARIANT* operator&( void ) { Clear(); return &m_value; }		// clear before passing variant to get new value
-
-		template< typename ValueType >
-		bool GetByteAs( ValueType* pValue )
-		{
-			if ( m_value.vt != VT_UI1 )
-				return false;
-			*pValue = static_cast<ValueType>( m_value.bVal );
-			return true;
-		}
-
-		template< typename ValueType >
-		bool GetWordAs( ValueType* pValue )
-		{
-			if ( m_value.vt != VT_UI2 )
-				return false;
-			*pValue = static_cast<ValueType>( m_value.uiVal );
-			return true;
-		}
-
-		bool GetBool( bool* pValue )
-		{
-			if ( m_value.vt != VT_BOOL )
-				return false;
-			*pValue = m_value.boolVal != FALSE;
-			return true;
-		}
-	private:
-		PROPVARIANT m_value;
-	};
-}
-
-
 namespace mfc
 {
-	const BYTE* GetFileBuffer( const CMemFile* pMemFile, OUT OPTIONAL size_t* pBufferSize = nullptr );
+	const BYTE* GetFileBuffer( const CMemFile* pMemFile, OUT size_t* pBufferSize = nullptr );
 }
 
 
@@ -183,7 +137,7 @@ namespace ui
 		virtual void ReportSaveLoadException( const TCHAR* pFilePath, CException* pExc, BOOL isSaving, UINT idDefaultPrompt );
 	protected:
 		// base overrides
-		virtual void Serialize( CArchive& archive );
+		virtual void Serialize( CArchive& archive ) overrides( CObject );
 	private:
 		serial::IStreamable* m_pStreamable;			// use either one or the other
 		CObject* m_pObject;

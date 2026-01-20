@@ -148,9 +148,6 @@
     <ClInclude Include="IUnknownImpl.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="IUnknownImpl.hxx">
-      <Filter>utl</Filter>
-    </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>utl</Filter>
     </ClInclude>

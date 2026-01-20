@@ -17,8 +17,6 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestShellPidl( void );
-	void TestShellRelativePidl( void );
 	void TestPathShellApi( void );
 	void TestPathExplorerSort( void );
 	void TestRecycler( void );

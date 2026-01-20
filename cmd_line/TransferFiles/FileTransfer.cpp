@@ -178,10 +178,10 @@ std::tstring CFileTransfer::FormatProtectedFileAttr( BYTE fileAttr )
 		{ CFile::hidden, _T("HIDDEN") },
 		{ CFile::system, _T("SYSTEM") }
 	};
-	static const CFlagTags protectedFileAttrTags( flagDefs, COUNT_OF( flagDefs ) );
+	static const CFlagTags s_protectedFileAttrTags( flagDefs, COUNT_OF( flagDefs ) );
 
 	std::tstring text;
-	stream::Tag( text, protectedFileAttrTags.FormatUi( fileAttr, _T("/") ), _T(" ") );
+	stream::Tag( text, s_protectedFileAttrTags.FormatUi( fileAttr, _T("/") ), _T(" ") );
 	return text;
 }
 

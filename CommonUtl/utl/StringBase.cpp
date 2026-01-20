@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "StringBase.h"
+#include "ErrorHandler.h"
 #include <comdef.h>			// _com_error
 #include <math.h>			// fabs()
 
@@ -15,8 +16,13 @@ namespace utl
 	{
 		pFuncName;
 		if ( !SUCCEEDED( hResult ) )
+		{
 			if ( !CTracing::m_hResultDisabled )
 				TRACE( " * %s: hResult=0x%08x: '%s' in function %s\n", FAILED( hResult ) ? "FAILED" : "ERROR", hResult, CStringA( _com_error( hResult ).ErrorMessage() ).GetString(), pFuncName );
+
+			if ( const CErrorHandler* pGlobalHandler = CScopedErrorHandler::GlobalHandler() )
+				pGlobalHandler->Handle( hResult );
+		}
 
 		return hResult;
 	}

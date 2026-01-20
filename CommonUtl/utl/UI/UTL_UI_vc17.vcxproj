@@ -206,6 +206,7 @@
     <ClInclude Include="ComboBoxEdit.h" />
     <ClInclude Include="CommandSvcHandler.h" />
     <ClInclude Include="CommonWinDefs.h" />
+    <ClInclude Include="ComUtils.h" />
     <ClInclude Include="ContentFitBase.h" />
     <ClInclude Include="ContextMenuMgr.h" />
     <ClInclude Include="ControlBar_fwd.h" />
@@ -328,9 +329,12 @@
     <ClInclude Include="ShellDragImager.h" />
     <ClInclude Include="ShellDropTip.h" />
     <ClInclude Include="ShellFileDialog.h" />
+    <ClInclude Include="Shortcut.h" />
+    <ClInclude Include="ShellPidl.h" />
     <ClInclude Include="ShellRegistryAssoc.h" />
     <ClInclude Include="ShellTypes.h" />
     <ClInclude Include="ShellUtilities.h" />
+    <ClInclude Include="ShortcutItem.h" />
     <ClInclude Include="SpinEdit.h" />
     <ClInclude Include="SpinTargetButton.h" />
     <ClInclude Include="SplitPushButton.h" />
@@ -351,6 +355,8 @@
     <ClInclude Include="test\ResourceTests.h" />
     <ClInclude Include="test\SerializationTests.h" />
     <ClInclude Include="test\ShellFileSystemTests.h" />
+    <ClInclude Include="test\ShortcutTests.h" />
+    <ClInclude Include="test\ShellPidlTests.h" />
     <ClInclude Include="test\TestToolWnd.h" />
     <ClInclude Include="test\ToolBarImagesTests.h" />
     <ClInclude Include="test\UtlUserInterfaceTests.h" />
@@ -420,6 +426,7 @@
     <ClCompile Include="ColorRepository.cpp" />
     <ClCompile Include="ComboBoxEdit.cpp" />
     <ClCompile Include="CommandSvcHandler.cpp" />
+    <ClCompile Include="ComUtils.cpp" />
     <ClCompile Include="ContentFitBase.cpp" />
     <ClCompile Include="ContextMenuMgr.cpp" />
     <ClCompile Include="ControlBar_fwd.cpp" />
@@ -520,9 +527,12 @@
     <ClCompile Include="ShellDragImager.cpp" />
     <ClCompile Include="ShellDropTip.cpp" />
     <ClCompile Include="ShellFileDialog.cpp" />
+    <ClCompile Include="Shortcut.cpp" />
+    <ClCompile Include="ShellPidl.cpp" />
     <ClCompile Include="ShellRegistryAssoc.cpp" />
     <ClCompile Include="ShellTypes.cpp" />
     <ClCompile Include="ShellUtilities.cpp" />
+    <ClCompile Include="ShortcutItem.cpp" />
     <ClCompile Include="SpinEdit.cpp" />
     <ClCompile Include="SpinTargetButton.cpp" />
     <ClCompile Include="SplitPushButton.cpp" />
@@ -536,6 +546,8 @@
     <ClCompile Include="test\ResourceTests.cpp" />
     <ClCompile Include="test\SerializationTests.cpp" />
     <ClCompile Include="test\ShellFileSystemTests.cpp" />
+    <ClCompile Include="test\ShortcutTests.cpp" />
+    <ClCompile Include="test\ShellPidlTests.cpp" />
     <ClCompile Include="test\TestToolWnd.cpp" />
     <ClCompile Include="test\ToolBarImagesTests.cpp" />
     <ClCompile Include="test\UtlUserInterfaceTests.cpp" />

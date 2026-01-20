@@ -20,7 +20,7 @@ namespace shell
 		// IShellFolder
 		CComPtr<IShellFolder> GetDesktopFolder( void ) const;
 
-		bool ParsePidl( PIDLIST_RELATIVE* pPidl, IShellFolder* pFolder, const TCHAR* pFnameExt ) const;
+		bool ParseToPidl( OUT PIDLIST_RELATIVE* pPidl, IShellFolder* pFolder, const TCHAR* pFnameExt ) const;
 
 		CComPtr<IShellFolder> FindShellFolder( const TCHAR* pDirPath ) const;		// no trailing backslash, please
 
@@ -50,11 +50,11 @@ namespace shell
 		ASSERT_PTR( pFolder );
 		CComPtr<Interface> pInterface;
 
-		CComHeapPtr<ITEMIDLIST> pidlFile;
-		if ( ParsePidl( &pidlFile, pFolder, pFnameExt ) )
+		CComHeapPtr<ITEMIDLIST_RELATIVE> filePidl;
+		if ( ParseToPidl( &filePidl, pFolder, pFnameExt ) )
 		{
-			LPITEMIDLIST p_pidlFile = pidlFile;			// (!) pointer to pointer
-			Handle( pFolder->GetUIObjectOf( nullptr, 1, (PCUITEMID_CHILD_ARRAY)&p_pidlFile, __uuidof( Interface ), nullptr, (void**)&pInterface ) );
+			PCUIDLIST_RELATIVE pFilePidl = filePidl;			// (!) pointer to pointer
+			Handle( pFolder->GetUIObjectOf( nullptr, 1, (PCUITEMID_CHILD_ARRAY)&pFilePidl, __uuidof( Interface ), nullptr, (void**)&pInterface ) );
 		}
 		return pInterface;
 	}

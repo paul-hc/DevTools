@@ -93,11 +93,19 @@ void CFmtUtilsTests::TestTouchEntry( void )
 	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|29-11-2017 14:10:00||29-11-2017 14:30:00} -> {RH|29-11-2017 14:15:00||29-11-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState, false ) );
 }
 
+void CFmtUtilsTests::TestFormatKeyShortcut( void )
+{
+	ASSERT_EQUAL( _T(""), fmt::FormatKeyShortcut( 0, 0 ) );
+	ASSERT_EQUAL( _T("Ctrl + X"), fmt::FormatKeyShortcut( 'X', HOTKEYF_CONTROL ) );
+	ASSERT_EQUAL( _T("Ctrl + Shift + Alt + M"), fmt::FormatKeyShortcut( 'M', HOTKEYF_CONTROL | HOTKEYF_SHIFT | HOTKEYF_ALT ) );
+}
+
 
 void CFmtUtilsTests::Run( void )
 {
 	RUN_TEST( TestFileState );
 	RUN_TEST( TestTouchEntry );
+	RUN_TEST( TestFormatKeyShortcut );
 }
 
 

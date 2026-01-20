@@ -635,6 +635,28 @@ void CStringTests::TestStringSplit( void )
 	}
 }
 
+void CStringTests::TestStringStreamSplit( void )
+{
+	const char src[] = ",,apple,grape,plum,,";
+
+	std::istringstream iss( src );
+	std::string token;
+	std::string output;
+	size_t count = 0;
+
+	while ( std::getline( iss, token, ',' ) )
+		if ( !token.empty() )
+		{
+			if ( count++ != 0 )
+				output += '|';
+
+			output += token;
+		}
+
+	ASSERT_EQUAL( "apple|grape|plum", output );
+	ASSERT_EQUAL( 3, count );
+}
+
 void CStringTests::TestStringTokenize( void )
 {
 	static const TCHAR seps[] = _T(";,\n \t");
@@ -642,6 +664,47 @@ void CStringTests::TestStringTokenize( void )
 	ASSERT_EQUAL( 0, str::Tokenize( tokens, _T(""), seps ) );
 	ASSERT_EQUAL( 6, str::Tokenize( tokens, _T("\n\t,apple,grape;plum pear\tkiwi\nbanana \n\t"), seps ) );
 	ASSERT_EQUAL( _T("apple|grape|plum|pear|kiwi|banana"), str::Join( tokens, _T("|") ) );
+}
+
+namespace ut
+{
+	struct AppendToken
+	{
+		AppendToken( OUT std::string* pOutput, const char* pSep, bool skipEmpty = true )
+			: m_pOutput( pOutput ), m_pSep( pSep ), m_skipEmpty( skipEmpty ), m_count( 0 ) { ASSERT_PTR( pOutput ); ASSERT_PTR( pSep ); }
+
+		void operator()( const char* pToken )
+		{
+			if ( m_skipEmpty && '\0' == *pToken )
+				return;
+
+			if ( !m_skipEmpty || !m_pOutput->empty() )
+				*m_pOutput += m_pSep;
+
+			*m_pOutput += pToken;
+			++m_count;
+		}
+	private:
+		std::string* m_pOutput;
+		const char* m_pSep;
+		bool m_skipEmpty;
+	public:
+		size_t m_count;
+	};
+}
+
+void CStringTests::TestStringQuickTokenize( void )
+{
+	const char delims[] = ";,\n \t";
+	const char src[] = "\n\t,apple,grape;plum pear\tkiwi\nbanana \n\t";
+	std::string output;
+
+	ASSERT_EQUAL( 6, str::ForEachToken( src, delims, ut::AppendToken( &output, "|" ) ).m_count );
+	ASSERT_EQUAL( "apple|grape|plum|pear|kiwi|banana", output );
+
+	output.clear();
+	ASSERT_EQUAL( 12, str::ForEachToken( src, delims, ut::AppendToken( &output, "|", false ) ).m_count );
+	ASSERT_EQUAL( "||||apple|grape|plum|pear|kiwi|banana|||", output );
 }
 
 void CStringTests::TestStringPrefixSuffix( void )
@@ -1229,7 +1292,9 @@ void CStringTests::Run( void )
 	RUN_TEST( TestStringSet );
 
 	RUN_TEST( TestStringSplit );
+	RUN_TEST( TestStringStreamSplit );
 	RUN_TEST( TestStringTokenize );
+	RUN_TEST( TestStringQuickTokenize );
 	RUN_TEST( TestStringPrefixSuffix );
 	RUN_TEST( TestStringConversion );
 	RUN_TEST( TestStringLines );

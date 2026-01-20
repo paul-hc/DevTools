@@ -373,6 +373,9 @@ namespace num
 
 namespace utl
 {
+	enum Ownership { COPY, MOVE };
+
+
 	template< typename ContainerT >
 	inline size_t GetLastPos( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return rItems.size() - 1; }
 

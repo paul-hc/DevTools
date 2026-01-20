@@ -234,7 +234,6 @@
     <ClInclude Include="IRegistrySection.h" />
     <ClInclude Include="ISubject.h" />
     <ClInclude Include="IUnknownImpl.h" />
-    <ClInclude Include="IUnknownImpl.hxx" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="LongestCommonDuplicate.h" />
     <ClInclude Include="LongestCommonSubsequence.h" />

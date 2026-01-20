@@ -4,7 +4,6 @@
 #ifdef USE_UT		// no UT code in release builds
 #include "test/ShellFileSystemTests.h"
 #include "Recycler.h"
-#include "ShellTypes.h"
 #include "ShellUtilities.h"
 #include "ShellContextMenuHost.h"
 #include "WinExplorer.h"
@@ -36,114 +35,6 @@ CShellFileSystemTests& CShellFileSystemTests::Instance( void )
 {
 	static CShellFileSystemTests s_testCase;
 	return s_testCase;
-}
-
-void CShellFileSystemTests::TestShellPidl( void )
-{
-	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
-	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
-
-	CComPtr<IShellFolder> pDesktopFolder = shell::GetDesktopFolder();
-	ASSERT_PTR( pDesktopFolder );
-
-	shell::CPidl desktopPidl;
-	ASSERT( desktopPidl.CreateFromFolder( pDesktopFolder ) );
-	fs::TDirPath desktopPath = desktopPidl.GetAbsolutePath();
-
-	shell::CPidl poolDirPidl;
-	ASSERT( poolDirPidl.IsEmpty() );
-	ASSERT( poolDirPidl.CreateAbsolute( poolDirPath.GetPtr() ) );
-	ASSERT( !poolDirPidl.IsEmpty() );
-	ASSERT_EQUAL( poolDirPath, poolDirPidl.GetAbsolutePath() );
-
-	{
-		shell::CPidl poolDirPidl2;
-		poolDirPidl2.AssignCopy( poolDirPidl.Get() );
-		ASSERT( poolDirPidl == poolDirPidl2 );				// absolute compare
-	}
-
-	CComPtr<IShellFolder> pPoolFolder = poolDirPidl.FindFolder();
-	ASSERT_PTR( pPoolFolder );
-
-	shell::CPidl pidl;
-	{
-		ASSERT( pidl.CreateFrom( pDesktopFolder ) );
-		ASSERT_EQUAL( desktopPath, pidl.GetAbsolutePath() );
-
-		ASSERT( pidl.CreateFrom( pPoolFolder ) );
-		ASSERT_EQUAL( poolDirPath, pidl.GetAbsolutePath() );
-	}
-
-	{
-		const fs::CPath& filePath = pool.GetFilePaths()[ 0 ];
-
-		shell::CPidl filePidl;
-		ASSERT( filePidl.CreateAbsolute( filePath.GetPtr() ) );
-		ASSERT( filePidl.GetCount() > 1 );
-		ASSERT_EQUAL( filePath, filePidl.GetAbsolutePath() );
-		ASSERT_EQUAL( _T("fa.txt"), filePidl.GetName() );		// filePath.GetFilename()
-
-		{	// last item ID
-			shell::CPidl lastPidl;
-			lastPidl.AssignCopy( filePidl.GetLastItem() );
-			ASSERT_EQUAL( _T("fa.txt"), lastPidl.GetName() );
-		}
-
-		{	// child PIDL
-			shell::CPidl itemPidl;
-			ASSERT( itemPidl.CreateRelative( pPoolFolder, filePath.GetFilenamePtr() ) );
-			ASSERT_EQUAL( 1, itemPidl.GetCount() );
-			ASSERT_EQUAL( desktopPath / itemPidl.GetName(), itemPidl.GetAbsolutePath() );		// strangely, for child PIDLs the desktop directory is implicitly prepended
-			ASSERT_EQUAL( _T("fa.txt"), itemPidl.GetName() );		// filePath.GetFilename()
-
-			// shell item from child PIDL relative to parent folder
-			CComPtr<IShellItem> pChildFileItem = itemPidl.FindItem( pPoolFolder );
-			ASSERT_PTR( pChildFileItem );
-			ASSERT_EQUAL( filePath, shell::CWinExplorer().GetItemPath( pChildFileItem ) );
-
-			ASSERT( pidl.CreateFrom( pChildFileItem ) );
-			ASSERT_EQUAL( filePath, pidl.GetAbsolutePath() );
-		}
-
-		{	// shell item
-			CComPtr<IShellItem> pFileItem = filePidl.FindItem();
-			ASSERT_PTR( pFileItem );
-			fs::CPath itemPath = shell::CWinExplorer().GetItemPath( pFileItem );
-			ASSERT_EQUAL( filePath, itemPath );
-
-			ASSERT( pidl.CreateFrom( pFileItem ) );
-			ASSERT_EQUAL( filePath, pidl.GetAbsolutePath() );
-		}
-
-		// copy-move
-		shell::CPidl copyPidl = filePidl;
-		ASSERT( filePidl.IsNull() );
-		ASSERT( !copyPidl.IsEmpty() );
-		ASSERT_EQUAL( filePath, copyPidl.GetAbsolutePath() );
-	}
-
-	{	// relative PIDL
-		static const TCHAR s_relFilePath[] = _T("d1\\fb.txt");		// relative to pool folder
-
-		shell::CPidl relativePidl;
-		ASSERT( relativePidl.CreateRelative( pPoolFolder, s_relFilePath ) );
-		ASSERT_EQUAL( 2, relativePidl.GetCount() );
-		ASSERT_EQUAL( _T("fb.txt"), relativePidl.GetName() );		// don't know how to find the actual relative path
-	}
-}
-
-void CShellFileSystemTests::TestShellRelativePidl( void )
-{
-	ut::CTempFilePool pool( _T("a.txt|d1\\b.txt|d2\\sub3\\c.txt") );
-
-	std::vector<PIDLIST_RELATIVE> pidlItemsArray;
-	CComPtr<IShellFolder> pCommonFolder = shell::MakeRelativePidlArray( pidlItemsArray, pool.GetFilePaths() );
-	ASSERT_PTR( pCommonFolder );
-
-	ASSERT_EQUAL( 3, pidlItemsArray.size() );
-	ASSERT_EQUAL( pool.GetFilePaths()[ 0 ].GetFilename(), shell::pidl::GetName( pidlItemsArray[ 0 ] ) );
-
-	shell::ClearOwningPidls( pidlItemsArray );
 }
 
 void CShellFileSystemTests::TestPathShellApi( void )
@@ -253,8 +144,6 @@ void CShellFileSystemTests::TestMultiFileContextMenu( void )
 
 void CShellFileSystemTests::Run( void )
 {
-	RUN_TEST( TestShellPidl );
-	RUN_TEST( TestShellRelativePidl );
 	RUN_TEST( TestPathShellApi );
 	RUN_TEST( TestPathExplorerSort );
 	RUN_TEST( TestRecycler );

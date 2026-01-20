@@ -7,6 +7,18 @@
 #include "Path.h"
 
 
+// generic archive streamer
+
+template< typename Type >
+inline CArchive& operator&( CArchive& archive, Type& rValue )
+{
+	if ( archive.IsStoring() )
+		return archive << rValue;
+	else
+		return archive >> rValue;
+}
+
+
 // custom types archive insertors/extractors
 
 inline CArchive& operator<<( CArchive& archive, const fs::CPath& path )
@@ -14,7 +26,7 @@ inline CArchive& operator<<( CArchive& archive, const fs::CPath& path )
 	return archive << path.Get();
 }
 
-inline CArchive& operator>>( CArchive& archive, fs::CPath& rPath )
+inline CArchive& operator>>( CArchive& archive, OUT fs::CPath& rPath )
 {
 	std::tstring filePath;
 	archive >> filePath;
@@ -30,7 +42,7 @@ inline CArchive& operator<<( CArchive& archive, const Range<Type>& range )
 }
 
 template< typename Type >
-inline CArchive& operator>>( CArchive& archive, Range<Type>& rRange )
+inline CArchive& operator>>( CArchive& archive, OUT Range<Type>& rRange )
 {
 	return archive >> rRange.m_start >> rRange.m_end;
 }
@@ -38,16 +50,7 @@ inline CArchive& operator>>( CArchive& archive, Range<Type>& rRange )
 
 // custom types archive streamers
 
-template< typename Type >
-inline CArchive& operator&( CArchive& archive, Type& rValue )
-{
-	if ( archive.IsStoring() )
-		return archive << rValue;
-	else
-		return archive >> rValue;
-}
-
-inline CArchive& operator&( CArchive& archive, bool& rBoolean )
+inline CArchive& operator&( CArchive& archive, IN OUT bool& rBoolean )
 {
 	// backwards compatibility: serialize bool as BOOL
 	if ( archive.IsStoring() )
@@ -61,7 +64,7 @@ inline CArchive& operator&( CArchive& archive, bool& rBoolean )
 	return archive;
 }
 
-inline CArchive& operator&( CArchive& archive, FILETIME& rFileTime )
+inline CArchive& operator&( CArchive& archive, IN OUT FILETIME& rFileTime )
 {
 	// avoid conflict with operator<<( CArchive&, COleDateTime )
 	if ( archive.IsStoring() )
@@ -70,12 +73,13 @@ inline CArchive& operator&( CArchive& archive, FILETIME& rFileTime )
 		return archive >> rFileTime.dwLowDateTime >> rFileTime.dwHighDateTime;
 }
 
-inline CArchive& operator&( CArchive& archive, std::wstring* pWideStr )
+inline CArchive& operator&( CArchive& archive, IN OUT std::wstring* pWideStr )
 {
 	if ( archive.IsStoring() )
 		archive << pWideStr;
 	else
 		archive >> pWideStr;
+
 	return archive;
 }
 

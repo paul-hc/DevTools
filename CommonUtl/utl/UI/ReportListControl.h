@@ -584,7 +584,7 @@ public:
 	bool IsSelContiguous( void ) const;
 
 	template< typename ObjectT >
-	bool QuerySelectionAs( OUT std::vector<ObjectT*>& rSelObjects, OUT OPTIONAL ObjectT** ppCaretItem = nullptr, OUT OPTIONAL ObjectT** ppTopVisibleItem = nullptr ) const;
+	bool QuerySelectionAs( OUT std::vector<ObjectT*>& rSelObjects, OUT ObjectT** ppCaretItem = nullptr, OUT ObjectT** ppTopVisibleItem = nullptr ) const;
 
 	template< typename ObjectT >
 	void SelectObjects( const std::vector<ObjectT*>& objects );

@@ -6,3 +6,4 @@
 #define implement
 #define implements(__VA_ARGS__)
 #define throws_(__VA_ARGS__)
+#define persist

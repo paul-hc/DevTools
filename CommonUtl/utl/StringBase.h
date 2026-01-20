@@ -899,25 +899,56 @@ namespace str
 	}
 
 
+	// fast string tokenization:
+
 	template< typename CharT >
-	void QuickSplit( OUT std::vector<CharT>& rItems, const CharT* pSource, CharT sepCh )
-	{
-		// build a vector copy of source characters replacing all sepCh with '\0'
-		rItems.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// copy the EOS char
-		for ( typename std::vector<CharT>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
-			if ( sepCh == *itItem )
+	void QuickTokenize( OUT std::vector<CharT>& rTokens, const CharT* pSource, CharT delimCh )
+	{	// build a vector copy of source characters replacing all delimCh with '\0'
+		rTokens.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// copy the EOS char
+		for ( typename std::vector<CharT>::iterator itItem = rTokens.begin(); itItem != rTokens.end(); ++itItem )
+			if ( delimCh == *itItem )
 				*itItem = 0;
 	}
 
 	template< typename CharT >
-	void QuickTokenize( OUT std::vector<CharT>& rItems, const CharT* pSource, const CharT* pSepTokens )
-	{
-		const CharT* pSepEnd = str::end( pSepTokens );
-		// build a vector copy of source characters replacing any chars in pSepTokens with '\0'
-		rItems.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// copy the EOS char
-		for ( typename std::vector<CharT>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
-			if ( std::find( pSepTokens, pSepEnd, *itItem ) != pSepEnd )				// any sep token
+	void QuickTokenize( OUT std::vector<CharT>& rTokens, const CharT* pSource, const CharT* pDelims )
+	{	// build a vector copy of source characters replacing any chars in pDelims with '\0'
+		const CharT* pSepEnd = str::end( pDelims );
+
+		rTokens.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// plus the EOS char
+		for ( typename std::vector<CharT>::iterator itItem = rTokens.begin(); itItem != rTokens.end(); ++itItem )
+			if ( std::find( pDelims, pSepEnd, *itItem ) != pSepEnd )				// any sep token
 				*itItem = 0;
+	}
+
+	template< typename CharT, typename FuncT >
+	FuncT ForEachToken( const CharT* pSource, CharT delimCh, FuncT fn )
+	{
+		std::vector<CharT> tokens;
+		QuickTokenize( tokens, pSource, delimCh );
+
+		for ( typename std::vector<CharT>::const_iterator itToken = tokens.begin(), itEnd = tokens.end(); itToken != itEnd; ++itToken )
+		{
+			fn( &*itToken );
+			itToken += str::GetLength( &*itToken );
+		}
+
+		return fn;
+	}
+
+	template< typename CharT, typename FuncT >
+	FuncT ForEachToken( const CharT* pSource, const CharT* pDelims, FuncT fn )
+	{
+		std::vector<CharT> tokens;
+		QuickTokenize( tokens, pSource, pDelims );
+
+		for ( typename std::vector<CharT>::const_iterator itToken = tokens.begin(), itEnd = tokens.end(); itToken != itEnd; ++itToken )
+		{
+			fn( &*itToken );
+			itToken += str::GetLength( &*itToken );
+		}
+
+		return fn;
 	}
 
 

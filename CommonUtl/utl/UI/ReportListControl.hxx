@@ -62,7 +62,7 @@ void CReportListControl::SetObjectsCheckedState( const std::vector<ObjectT*>* pO
 
 template< typename ObjectT >
 bool CReportListControl::QuerySelectionAs( OUT std::vector<ObjectT*>& rSelObjects,
-										   OUT OPTIONAL ObjectT** ppCaretItem /*= nullptr*/, OUT OPTIONAL ObjectT** ppTopVisibleItem /*= nullptr*/ ) const
+										   OUT ObjectT** ppCaretItem /*= nullptr*/, OUT ObjectT** ppTopVisibleItem /*= nullptr*/ ) const
 {
 	std::vector<int> selIndexes;
 	int caretIndex = -1, topIndex = -1;

@@ -38,6 +38,48 @@ private:
 };
 
 
+class CScopedErrorHandler
+{
+public:
+	CScopedErrorHandler( utl::ErrorHandling handlingMode, const std::tstring& titleContext = str::GetEmpty() )
+		: m_pOldHandler( s_pCurrHandler )
+	{
+		s_pCurrHandler = HandlerInstance( handlingMode );		// store the new global error handler
+
+		if ( !titleContext.empty() )
+		{
+			s_oldTitleContext = s_titleContext;
+			s_titleContext = titleContext;
+		}
+	}
+
+	CScopedErrorHandler( const std::tstring& titleContext )		// no scoped error handling, just set a scoped title context for the current operation
+		: m_pOldHandler( s_pCurrHandler )
+	{
+		s_oldTitleContext = s_titleContext;
+		s_titleContext = titleContext;
+	}
+
+	~CScopedErrorHandler()
+	{
+		s_pCurrHandler = m_pOldHandler;		// restore the original global error handler
+
+		if ( !s_oldTitleContext.empty() )
+			s_titleContext = s_oldTitleContext;
+	}
+
+	static const CErrorHandler* GlobalHandler( void ) { return s_pCurrHandler; }
+	static std::tstring DecorateErrorMessage( const std::tstring& errorMsg );			// decorates with s_titleContext (if any)
+private:
+	static const CErrorHandler* HandlerInstance( utl::ErrorHandling handlingMode );		// returns one of the three singletons
+private:
+	const CErrorHandler* m_pOldHandler;
+	std::tstring s_oldTitleContext;					// the title context of the operation that may throw an exception: will be added to ui::ReportException()
+
+	static const CErrorHandler* s_pCurrHandler;		// global error handler (NULL by default)
+	static std::tstring s_titleContext;				// the title context of the operation that may throw an exception: will be added to ui::ReportException (empty by default)
+};
+
 
 class CScopedErrorHandling
 {

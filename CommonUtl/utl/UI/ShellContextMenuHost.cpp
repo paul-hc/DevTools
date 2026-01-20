@@ -28,7 +28,7 @@ namespace shell
 		return MakeAbsoluteContextMenu( pidlItem, hWndOwner );
 	}
 
-	CComPtr<IContextMenu> MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem, HWND hWndOwner )
+	CComPtr<IContextMenu> MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD pidlItem, HWND hWndOwner )
 	{
 		ASSERT_PTR( pParentFolder );
 

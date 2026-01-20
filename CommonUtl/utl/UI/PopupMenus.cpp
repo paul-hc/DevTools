@@ -142,7 +142,7 @@ namespace mfc
 		mfc::ToolBarButton_SetStyleFlag( this, TBBS_CHECKED, checked );
 	}
 
-	CToolBarColorButton* CToolBarColorButton::ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT OPTIONAL int* pIndex /*= nullptr*/ )
+	CToolBarColorButton* CToolBarColorButton::ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, COLORREF color, OUT int* pIndex /*= nullptr*/ )
 	{
 		ASSERT_PTR( pToolBar->GetSafeHwnd() );
 		int index = pToolBar->CommandToIndex( btnId );
@@ -313,7 +313,7 @@ namespace mfc
 	}
 
 	CColorMenuButton* CColorMenuButton::ReplaceBarButton( CMFCToolBar* pToolBar, UINT btnId, const CColorTable* pColorTable, ui::IColorEditorHost* pEditorHost,
-														  OUT OPTIONAL int* pIndex /*= nullptr*/ )
+														  OUT int* pIndex /*= nullptr*/ )
 	{
 		ASSERT_PTR( pToolBar->GetSafeHwnd() );
 		ASSERT_PTR( pColorTable );

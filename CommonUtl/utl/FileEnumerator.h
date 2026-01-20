@@ -27,7 +27,7 @@ namespace fs
 	fs::CPath MakeUniqueHashedFilename( const fs::CPath& filePath, const TCHAR fmtHashSuffix[] = _T("_%08X") );											// with hash suffix
 
 	// late binding to shell::ResolveShortcut defined in UTL_UI.lib
-	typedef bool (*TResolveShortcutProc)( fs::CPath& rDestPath, const TCHAR* pShortcutLnkPath, CWnd* pWnd );
+	typedef bool (*TResolveShortcutProc)( fs::CPath& rDestPath, const TCHAR* pLnkPath, CWnd* pWnd );	// FWD
 
 	void StoreResolveShortcutProc( TResolveShortcutProc resolveShortcutProc );
 }

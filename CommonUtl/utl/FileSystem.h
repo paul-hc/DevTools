@@ -12,11 +12,12 @@ namespace fs
 	bool IsValidDirectory( const TCHAR* pDirPath );
 	bool IsValidEmptyDirectory( const TCHAR* pDirPath );
 
-	bool IsValidShellLink( const TCHAR* pFilePath );
-	bool IsValidStructuredStorage( const TCHAR* pDocFilePath );			// a compound document file that exists?
+	bool IsValidStructuredStorage( const TCHAR* pDocFilePath );		// a compound document file that exists?
 
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
 	bool IsProtectedFile( const TCHAR* pFilePath );
+
+	bool HasShellLinkExt( const TCHAR* pFilePath );					// a ".lnk" file - not very reliable, use shell::IsValidShortcutFile() to test link file existence
 
 	void QueryFolderPaths( OUT std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths );		// unique paths
 

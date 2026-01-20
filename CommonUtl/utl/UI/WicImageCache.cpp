@@ -3,7 +3,6 @@
 #include "WicImageCache.h"
 #include "WicImage.h"
 #include "FlagTags.h"
-#include "MfcUtilities.h"
 #include <functional>
 
 #ifdef _DEBUG

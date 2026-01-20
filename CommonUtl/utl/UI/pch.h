@@ -7,6 +7,8 @@
 
 #include "utl/utl_base.h"			// UTL_BASE library classes
 
+#define STRICT_TYPED_ITEMIDS		// better type safety for IDLists
+
 #include <afxwin.h>					// MFC core and standard components
 #include <afxext.h>					// MFC extensions
 #include <afxcmn.h>					// MFC support for Windows Common Controls

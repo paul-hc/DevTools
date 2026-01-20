@@ -1,6 +1,8 @@
 
 #include "pch.h"
 #include "ShellTypes.h"
+#include "utl/Algorithms_fwd.h"
+#include "utl/IUnknownImpl.h"
 #include "utl/StdHashValue.h"
 #include <atlcomtime.h>		// for COleDateTime
 
@@ -9,60 +11,16 @@
 #endif
 
 
-// verbatim from <src/mfc/afximpl.h>
-class AFX_COM
-{
-public:
-	HRESULT CreateInstance( REFCLSID rclsid, LPUNKNOWN pUnkOuter, REFIID riid, LPVOID* ppv );
-	HRESULT GetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv );
-};
-
-
-namespace shell
-{
-	bool ResolveShortcut( fs::CPath& rDestPath, const TCHAR* pShortcutLnkPath, CWnd* pWnd /*= nullptr*/ )
-	{
-		if ( nullptr == pWnd )
-			pWnd = AfxGetMainWnd();
-
-		SHFILEINFO linkInfo;
-
-		if ( 0 == ::SHGetFileInfo( pShortcutLnkPath, 0, &linkInfo, sizeof( linkInfo ), SHGFI_ATTRIBUTES ) ||
-			 !::HasFlag( linkInfo.dwAttributes, SFGAO_LINK ) ||
-			 nullptr == pWnd->GetSafeHwnd() )
-			return false;
-
-		AFX_COM com;
-		CComPtr<IShellLink> pShellLink;
-
-		if ( !HR_OK( com.CreateInstance( CLSID_ShellLink, nullptr, IID_IShellLink, (LPVOID*)&pShellLink ) ) || pShellLink == nullptr )
-			return false;
-
-		if ( CComQIPtr<IPersistFile> pPersistFile = pShellLink.p )
-			if ( HR_OK( pPersistFile->Load( pShortcutLnkPath, STGM_READ ) ) )
-				if ( HR_OK( pShellLink->Resolve( pWnd->GetSafeHwnd(), SLR_ANY_MATCH ) ) )		// resolve the link; this may post UI to find the link
-				{
-					TCHAR destPath[ MAX_PATH ];
-
-					pShellLink->GetPath( ARRAY_SPAN( destPath ), nullptr, 0 );
-					rDestPath.Set( destPath );
-					return true;
-				}
-
-		return false;
-	}
-}
-
-
 namespace shell
 {
 	CComPtr<IShellFolder> GetDesktopFolder( void )
 	{
 		CComPtr<IShellFolder> pDesktopFolder;
-		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
-			return pDesktopFolder;
 
-		return nullptr;
+		if ( !HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
+			return nullptr;
+
+		return pDesktopFolder;
 	}
 
 	CComPtr<IShellFolder> FindShellFolder( const TCHAR* pDirPath )
@@ -71,7 +29,7 @@ namespace shell
 
 		if ( CComPtr<IShellFolder> pDesktopFolder = GetDesktopFolder() )
 		{
-			CComHeapPtr<ITEMIDLIST> pidlFolder( static_cast<ITEMIDLIST_RELATIVE*>( pidl::GetRelativeItem( pDesktopFolder, pDirPath ) ) );
+			CComHeapPtr<ITEMIDLIST_RELATIVE> pidlFolder( static_cast<ITEMIDLIST_RELATIVE*>( pidl::CreateRelativePidl( pDesktopFolder, pDirPath ) ) );
 			if ( pidlFolder.m_pData != nullptr )
 				HR_AUDIT( pDesktopFolder->BindToObject( pidlFolder, nullptr, IID_PPV_ARGS( &pDirFolder ) ) );
 		}
@@ -119,6 +77,92 @@ namespace shell
 
 namespace shell
 {
+	// Implements IFileSystemBindData interface, used to setup a bind context for a file that may not exist in the file system.
+	//
+	class CVirtualFileSysBindData : public utl::IUnknownImpl<IFileSystemBindData>
+	{
+	protected:
+		CVirtualFileSysBindData( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL )
+		{
+			utl::ZeroStruct( &m_findData );
+			m_findData.dwFileAttributes = fileAttribute;
+		}
+	public:
+		static CComPtr<IFileSystemBindData> CreateInstance( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL )		// could be FILE_ATTRIBUTE_DIRECTORY
+		{
+			CComPtr<IFileSystemBindData> pFileSysBindData;
+
+			pFileSysBindData.Attach( new CVirtualFileSysBindData( fileAttribute ) );
+			return pFileSysBindData;
+		}
+
+		// IFileSystemBindData interface:
+		IFACEMETHODIMP SetFindData( const WIN32_FIND_DATAW* pFindData ) { m_findData = *pFindData; return S_OK; }
+		IFACEMETHODIMP GetFindData( OUT WIN32_FIND_DATAW* pDestFindData ) { *pDestFindData = m_findData; return S_OK; }
+	private:
+		WIN32_FIND_DATA m_findData;
+	};
+
+
+	CComPtr<IBindCtx> CreateFileSysBindContext( DWORD fileAttribute /*= FILE_ATTRIBUTE_NORMAL*/ )
+	{	// allows parsing of virtual paths, that don't exist physically (e.g. a deleted file), to be validated later on.
+		CComPtr<IBindCtx> pBindContext;
+		BIND_OPTS bindOpts = { sizeof( bindOpts ), 0, STGM_CREATE, 0 };		// Gemini says that STGM_READ would suffice; the default is STGM_READWRITE
+
+		if ( HR_OK( ::CreateBindCtx( 0, &pBindContext ) ) )
+			if ( HR_OK( pBindContext->SetBindOptions( &bindOpts ) ) )
+				// create our manual bind data object
+				if ( CComPtr<IFileSystemBindData> pFileSysBindData = CVirtualFileSysBindData::CreateInstance( fileAttribute ) )
+					// register it so that ::SHParseDisplayName can see the virtual (non-existing) metadata
+					if ( HR_OK( pBindContext->RegisterObjectParam( const_cast<LPOLESTR>( STR_FILE_SYS_BIND_DATA ), pFileSysBindData ) ) )
+						return pBindContext;
+
+		return nullptr;
+	}
+}
+
+
+namespace shell
+{
+	// shell file info (via SHFILEINFO):
+
+	SFGAOF GetFileSysAttributes( const TCHAR* pFilePath )
+	{
+		SHFILEINFO fileInfo;
+		utl::ZeroStruct( &fileInfo );
+
+		if ( 0 == ::SHGetFileInfo( pFilePath, 0, &fileInfo, sizeof( fileInfo ), SHGFI_ATTRIBUTES ) )
+			return 0;
+
+		return fileInfo.dwAttributes;
+	}
+
+	int GetFileSysImageIndex( const TCHAR* pFilePath )
+	{
+		SHFILEINFO fileInfo;
+		utl::ZeroStruct( &fileInfo );
+
+		if ( 0 == ::SHGetFileInfo( pFilePath, 0, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX ) )
+			return -1;
+
+		return fileInfo.iIcon;
+	}
+
+	HICON GetFileSysIcon( const TCHAR* pFilePath, UINT flags /*= SHGFI_SMALLICON*/ )
+	{
+		SHFILEINFO fileInfo;
+		utl::ZeroStruct( &fileInfo );
+
+		if ( 0 == ::SHGetFileInfo( pFilePath, 0, &fileInfo, sizeof( fileInfo ), SHGFI_ICON | flags ) )
+			return nullptr;
+
+		return fileInfo.hIcon;
+	}
+}
+
+
+namespace shell
+{
 	std::tstring GetString( STRRET* pStrRet, PCUITEMID_CHILD pidl /*= nullptr*/ )
 	{
 		ASSERT_PTR( pStrRet );
@@ -132,7 +176,7 @@ namespace shell
 
 	// IShellFolder properties
 
-	std::tstring GetDisplayName( IShellFolder* pFolder, PCUITEMID_CHILD pidl, SHGDNF flags )
+	std::tstring GetDisplayName( IShellFolder* pFolder, PCUITEMID_CHILD pidl, SHGDNF flags /*= SHGDN_NORMAL*/ )
 	{
 		STRRET strRet;
 		if ( SUCCEEDED( pFolder->GetDisplayNameOf( pidl, flags, &strRet ) ) )
@@ -239,7 +283,7 @@ namespace shell
 			PCUITEMID_CHILD pidlItem;				// pidl relative to parent folder (not allocated)
 
 			if ( HR_OK( ::SHBindToParent( pidlAbs, IID_IShellFolder, (void**)&pParentFolder, &pidlItem ) ) )
-				rPidlItemsArray.push_back( pidl::Copy( pidlItem ) );			// copy relative pidl to pidlArray (caller must delete them)
+				rPidlItemsArray.push_back( ::ILCloneChild( pidlItem ) );			// copy relative pidl to pidlArray (caller must delete them)
 
 			if ( pFirstParentFolder == nullptr )
 				pFirstParentFolder = pParentFolder;
@@ -247,26 +291,53 @@ namespace shell
 
 		return pFirstParentFolder;
 	}
+}
 
 
+namespace shell
+{
 	namespace pidl
 	{
-		PIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
+		PIDLIST_RELATIVE CreateRelativePidl( IShellFolder* pParentFolder, const TCHAR* pRelPath )
 		{
-			ASSERT_PTR( pFolder );
-			ASSERT( !str::IsEmpty( itemFilename ) );
+			ASSERT_PTR( pParentFolder );
+			ASSERT( !str::IsEmpty( pRelPath ) );
 
 			TCHAR displayName[ MAX_PATH * 2 ];
-			_tcscpy( displayName, itemFilename );
+			_tcscpy( displayName, pRelPath );
 
 			PIDLIST_RELATIVE childItemPidl = nullptr;
-			if ( HR_OK( pFolder->ParseDisplayName( nullptr, nullptr, displayName, nullptr, &childItemPidl, nullptr ) ) )
-				return childItemPidl;			// allocated, client must free
+			if ( HR_OK( pParentFolder->ParseDisplayName( nullptr, nullptr, displayName, nullptr, &childItemPidl, nullptr ) ) )
+				return childItemPidl;			// allocated, caller must free
 
 			return nullptr;
 		}
 
-		std::tstring GetName( LPCITEMIDLIST pidl, SIGDN nameType /*= SIGDN_NORMALDISPLAY*/ )
+		/* Pidl name formatting examples:
+			Pidl on "C:\\dev\\code\\DevTools\\TestDataUtl\\images\\Dice.png":
+				SIGDN_NORMALDISPLAY:			"Dice.png"
+				SIGDN_PARENTRELATIVEPARSING:	"Dice.png"
+				SIGDN_DESKTOPABSOLUTEPARSING:	"C:\\dev\\code\\DevTools\\TestDataUtl\\images\\Dice.png"
+				SIGDN_PARENTRELATIVEEDITING:	"Dice.png"
+				SIGDN_DESKTOPABSOLUTEEDITING:	"C:\\dev\\code\\DevTools\\TestDataUtl\\images\\Dice.png"
+				SIGDN_URL:						"file:///C:/dev/code/DevTools/TestDataUtl/images/Dice.png"
+				SIGDN_PARENTRELATIVEFORADDRESSBAR:	"Dice.png"
+				SIGDN_PARENTRELATIVE:			"Dice.png"
+				SIGDN_PARENTRELATIVEFORUI:		"Dice.png"
+
+			Pidl on "Control Panel > Region":
+				SIGDN_NORMALDISPLAY:			"Region"
+				SIGDN_PARENTRELATIVEPARSING:	"::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"
+				SIGDN_DESKTOPABSOLUTEPARSING:	"::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"
+				SIGDN_PARENTRELATIVEEDITING:	"Region"
+				SIGDN_DESKTOPABSOLUTEEDITING:	"Control Panel\\All Control Panel Items\\Region"
+				SIGDN_URL:						""	hResult=E_NOTIMPL
+				SIGDN_PARENTRELATIVEFORADDRESSBAR: "Region"
+				SIGDN_PARENTRELATIVE:			"Region"
+				SIGDN_PARENTRELATIVEFORUI:		"Region"
+		*/
+
+		std::tstring GetName( PCIDLIST_ABSOLUTE pidl, SIGDN nameType /*= SIGDN_NORMALDISPLAY*/ )
 		{
 			ASSERT_PTR( pidl );
 			std::tstring name;
@@ -280,14 +351,16 @@ namespace shell
 			return name;
 		}
 
-		fs::CPath GetAbsolutePath( PIDLIST_ABSOLUTE pidlAbsolute, GPFIDL_FLAGS optFlags /*= GPFIDL_DEFAULT*/ )
+		fs::CPath GetAbsolutePath( PCIDLIST_ABSOLUTE pidlAbsolute, GPFIDL_FLAGS optFlags /*= GPFIDL_DEFAULT*/ )
 		{
 			fs::CPath fullPath;
+
 			if ( !IsNull( pidlAbsolute ) )
 			{
-				TCHAR buffFullPath[ MAX_PATH * 2 ];
-				if ( ::SHGetPathFromIDListEx( pidlAbsolute, buffFullPath, _countof( buffFullPath ), optFlags ) )
-					fullPath.Set( buffFullPath );
+				TCHAR buffer[ MAX_PATH * 2 ];
+
+				if ( ::SHGetPathFromIDListEx( pidlAbsolute, ARRAY_SPAN( buffer ), optFlags ) )
+					fullPath.Set( buffer );
 			}
 			else
 				ASSERT( false );
@@ -295,7 +368,63 @@ namespace shell
 			return fullPath;
 		}
 
-		size_t GetCount( LPCITEMIDLIST pidl )
+
+		// This performs the same function as SHSimpleIDListFromPath(), which is deprecated.
+		//
+		// pFullPathOrName: could be either a file/folder path, or a display name formatted with SIGDN_DESKTOPABSOLUTEPARSING.
+		//	Examples:
+		//		"C:\dev\code\DevTools\TestDataUtl\images\Dice.png"
+		//		"::{26EE0668-A00A-44D7-9371-BEB064C98683}\0\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"
+		//			- display name formatted with SIGDN_DESKTOPABSOLUTEPARSING,
+		//			  corresponding to "Control Panel\All Control Panel Items\Region" (SIGDN_DESKTOPABSOLUTEEDITING).
+		// pBindCtx: pass the bind context created with shell::CreateFileSysBindContext() to parse virtual path items (non-existent in the file system).
+		//
+		PIDLIST_ABSOLUTE ParseToPidl( const TCHAR* pPathOrName, IBindCtx* pBindCtx /*= nullptr*/ )
+		{
+			PIDLIST_ABSOLUTE pidlAbs = nullptr;
+
+			// This will parse non-existent files and Control Panel apps correctly.
+			// For non-existent files/folders pass a pBindCtx created with CreateFileSysBindContext()
+			if ( !HR_OK( ::SHParseDisplayName( pPathOrName, pBindCtx, &pidlAbs, 0, nullptr ) ) )
+				return nullptr;
+
+			return pidlAbs;
+		}
+
+		PIDLIST_RELATIVE ParseToPidlRelative( const TCHAR* pRelPathOrName, IShellFolder* pParentFolder, IBindCtx* pBindCtx /*= nullptr*/ )
+		{
+			PIDLIST_RELATIVE pidlRel = nullptr;
+
+			if ( nullptr == pParentFolder )
+				return reinterpret_cast<PIDLIST_RELATIVE>( ParseToPidl( pRelPathOrName, pBindCtx ) );
+
+			if ( !HR_OK( pParentFolder->ParseDisplayName( nullptr, pBindCtx, const_cast<LPWSTR>( pRelPathOrName ), nullptr, &pidlRel, nullptr ) ) )
+				return nullptr;
+
+			return pidlRel;
+		}
+
+		PIDLIST_ABSOLUTE ParseToPidlAbsolute( const TCHAR* pRelPathOrName, IShellFolder* pParentFolder, IBindCtx* pBindCtx /*= nullptr*/ )
+		{
+			CComHeapPtr<ITEMIDLIST_RELATIVE> pidlRel;
+
+			pidlRel.Attach( ParseToPidlRelative( pRelPathOrName, pParentFolder, pBindCtx ) );
+			if ( pidlRel != nullptr )
+			{
+				// convert to absolute pidl:
+				CComHeapPtr<ITEMIDLIST_ABSOLUTE> parentPidlAbs;
+				if ( HR_OK( ::SHGetIDListFromObject( pParentFolder, &parentPidlAbs ) ) )
+				{
+					PIDLIST_ABSOLUTE pidlAbs = ::ILCombine( parentPidlAbs, pidlRel.m_pData );
+					return pidlAbs;
+				}
+			}
+
+			return nullptr;
+		}
+
+
+		size_t GetItemCount( LPCITEMIDLIST pidl )
 		{
 			UINT count = 0;
 
@@ -307,21 +436,26 @@ namespace shell
 		}
 
 		size_t GetByteSize( LPCITEMIDLIST pidl )
-		{
+		{	// AKA ::ILGetSize for non-null pidls
 			size_t size = 0;
 
 			if ( pidl != nullptr )
 			{
+			#if (1)
+				size = ::ILGetSize( reinterpret_cast<PCUIDLIST_RELATIVE>( pidl ) );
+			#else
+				// manual computation
 				for ( ; pidl->mkid.cb > 0; pidl = GetNextItem( pidl ) )
 					size += pidl->mkid.cb;
 
 				size += sizeof( WORD );		// add the size of the NULL terminating ITEMIDLIST
+			#endif
 			}
 			return size;
 		}
 
 		LPCITEMIDLIST GetNextItem( LPCITEMIDLIST pidl )
-		{
+		{	// AKA ::ILNext()
 			LPITEMIDLIST nextPidl = nullptr;
 			if ( pidl != nullptr )
 				nextPidl = (LPITEMIDLIST)( impl::GetBuffer( pidl ) + pidl->mkid.cb );
@@ -330,7 +464,7 @@ namespace shell
 		}
 
 		LPCITEMIDLIST GetLastItem( LPCITEMIDLIST pidl )
-		{
+		{	// AKA ::ILFindLastID()
 			// Get the PIDL of the last item in the list
 			LPCITEMIDLIST lastPidl = nullptr;
 			if ( pidl != nullptr )
@@ -341,14 +475,14 @@ namespace shell
 		}
 
 		LPITEMIDLIST Copy( LPCITEMIDLIST pidl )
-		{
+		{	// AKA ::ILClone(), ::ILCloneFull(), ::ILCloneChild()
 			LPITEMIDLIST targetPidl = nullptr;
 
 			if ( pidl != nullptr )
 			{
 				size_t size = GetByteSize( pidl );
 
-				targetPidl = Allocate( size );				// allocate the new pidl
+				targetPidl = pidl::Allocate( size );			// allocate the new pidl
 				if ( targetPidl != nullptr )
 					::CopyMemory( targetPidl, pidl, size );		// copy the source to the target
 			}
@@ -357,14 +491,14 @@ namespace shell
 		}
 
 		LPITEMIDLIST CopyFirstItem( LPCITEMIDLIST pidl )
-		{
+		{	// AKA ::ILCloneFirst()
 			LPITEMIDLIST targetPidl = nullptr;
 
 			if ( pidl != nullptr )
 			{
 				size_t size = pidl->mkid.cb + sizeof( WORD );
 
-				targetPidl = Allocate( size );				// allocate the new pidl
+				targetPidl = Allocate( size );					// allocate the new pidl
 				if ( targetPidl != nullptr )
 				{
 					::CopyMemory( targetPidl, pidl, size );		// copy the source to the target
@@ -387,164 +521,35 @@ namespace shell
 
 namespace shell
 {
-	CPidl::CPidl( LPCITEMIDLIST rootPidl, LPCITEMIDLIST dirPathPidl, LPCITEMIDLIST childPidl /*= nullptr*/ )
-	{
-		AssignCopy( rootPidl );
-		Concatenate( dirPathPidl );
-
-		if ( childPidl != nullptr )
-			ConcatenateChild( childPidl );
-	}
-
-	size_t CPidl::GetHash( void ) const
-	{
-		if ( IsEmpty() )
-			return 0;
-
-		const BYTE* pBytes = GetBuffer();
-
-		return utl::HashBytes( pBytes, GetByteSize() );
-	}
-
-	void CPidl::Concatenate( LPCITEMIDLIST rightPidl )
-	{
-		if ( IsNull() )
-			AssignCopy( rightPidl );
-		else if ( !pidl::IsNull( rightPidl ) )
-		{
-			size_t oldSize = GetByteSize() - sizeof( WORD );
-			size_t rightSize = pidl::GetByteSize( rightPidl );
-
-			LPITEMIDLIST newPidl = pidl::Allocate( oldSize + rightSize );
-			if ( newPidl != nullptr )
-			{
-				::CopyMemory( newPidl, m_pidl, oldSize );
-				::CopyMemory( ( (LPBYTE)newPidl ) + oldSize, rightPidl, rightSize );
-			}
-			Reset( newPidl );
-		}
-	}
-
-	void CPidl::ConcatenateChild( LPCITEMIDLIST childPidl )
-	{
-		if ( IsNull() )
-			AssignCopy( childPidl );
-		else if ( !pidl::IsNull( childPidl ) )
-		{
-			size_t oldSize = GetByteSize() - sizeof( WORD );
-			size_t childSize = childPidl->mkid.cb;
-
-			LPITEMIDLIST pidlNew = pidl::Allocate( oldSize + childSize + sizeof( WORD ) );
-			if ( pidlNew != nullptr )
-			{
-				::CopyMemory( pidlNew, m_pidl, oldSize );
-				::CopyMemory( ((LPBYTE)pidlNew) + oldSize, childPidl, childSize );
-				pidl::impl::SetTerminator( pidlNew, oldSize + childSize );
-			}
-			Reset( pidlNew );
-		}
-	}
-
-	void CPidl::RemoveLast( void )
-	{
-		if ( LPITEMIDLIST lastPidl = const_cast<LPITEMIDLIST>( pidl::GetLastItem( m_pidl ) ) )
-			lastPidl->mkid.cb = 0;
-	}
-
-
-	// CPidl advanced
-
-	bool CPidl::CreateAbsolute( const TCHAR fullPath[] )
-	{
-		ASSERT( !str::IsEmpty( fullPath ) );
-		Reset( ::ILCreateFromPath( fullPath ) );
-		return !IsNull();
-
-		/*	equivalent implementation:
-		if ( HR_OK( GetDesktopFolder()->ParseDisplayName( nullptr, nullptr, const_cast<TCHAR* >( fullPath ), nullptr, &m_pidl, nullptr ) ) )
-			return true;
-		Delete();
-		return false; */
-	}
-
-	bool CPidl::CreateRelative( IShellFolder* pFolder, const TCHAR itemFilename[] )
-	{
-		Reset( pidl::GetRelativeItem( pFolder, itemFilename ) );
-		return !IsNull();
-	}
-
-	bool CPidl::CreateFrom( IUnknown* pUnknown )
-	{
-		ASSERT_PTR( pUnknown );
-
-		return HR_OK( ::SHGetIDListFromObject( pUnknown, &*this ) );
-	}
-
-	bool CPidl::CreateFromFolder( IShellFolder* pShellFolder )
-	{
-		CComQIPtr<IPersistFolder2> pFolder( pShellFolder );
-		if ( pFolder != nullptr )
-			if ( HR_OK( pFolder->GetCurFolder( &*this ) ) )
-				return true;
-
-		Delete();
-		return false;
-	}
-
-	CComPtr<IShellItem> CPidl::FindItem( IShellFolder* pParentFolder ) const
-	{
-		CComPtr<IShellItem> pShellItem;
-
-		if ( pParentFolder != nullptr )
-		{
-			if ( HR_OK( ::SHCreateItemWithParent( nullptr, pParentFolder, m_pidl, IID_PPV_ARGS( &pShellItem ) ) ) )
-				return pShellItem;
-		}
-		else
-		{
-			if ( HR_OK( ::SHCreateItemFromParsingName( GetAbsolutePath().GetPtr(), nullptr, IID_PPV_ARGS( &pShellItem ) ) ) )
-				return pShellItem;
-		}
-
-		return nullptr;
-	}
-
-	CComPtr<IShellFolder> CPidl::FindFolder( IShellFolder* pParentFolder /*= GetDesktopFolder()*/ ) const
-	{
-		ASSERT_PTR( pParentFolder );
-
-		CComPtr<IShellFolder> pShellFolder;
-		if ( HR_OK( pParentFolder->BindToObject( m_pidl, nullptr, IID_PPV_ARGS( &pShellFolder ) ) ) )
-			return pShellFolder;
-
-		return nullptr;
-	}
-
-	bool CPidl::WriteToStream( IStream* pStream ) const
-	{
+	bool WriteToStream( IStream* pStream, IN LPCITEMIDLIST pidl )
+	{	// superseeded by ::ILSaveToStream()
+		UINT size = static_cast<UINT>( shell::pidl::GetByteSize( pidl ) );
 		ULONG bytesWritten = 0;
-		UINT size = static_cast<UINT>( GetByteSize() );
 
 		if ( HR_OK( pStream->Write( &size, sizeof( size ), &bytesWritten ) ) )
-			if ( HR_OK( pStream->Write( Get(), size, &bytesWritten ) ) )
+			if ( nullptr == pidl || HR_OK( pStream->Write( pidl, size, &bytesWritten ) ) )
 				return true;
 
 		return false;
 	}
 
-	bool CPidl::ReadFromStream( IStream* pStream )
-	{
-		ULONG bytesRead = 0;
+	bool ReadFromStream( IStream* pStream, OUT LPITEMIDLIST* pPidl )
+	{	// superseeded by ::ILLoadFromStreamEx()
 		UINT size = 0;
+		ULONG bytesRead = 0;
 
+		*pPidl = nullptr;
 		if ( HR_OK( pStream->Read( &size, sizeof( size ), &bytesRead ) ) )
-		{
-			LPITEMIDLIST pidl = (LPITEMIDLIST)_alloca( size + 1 );   // +1 because of possible NULL pidl; alloc fails otherwise
-			if ( !HR_OK( pStream->Read( pidl, size, &bytesRead ) ) )
-				return false;
+			if ( size != 0 )
+			{
+				CComHeapPtr<ITEMIDLIST> newPidl;
+				newPidl.AllocateBytes( size );
 
-			AssignCopy( 0 == bytesRead ? nullptr : pidl );
-		}
+				if ( !HR_OK( pStream->Read( newPidl, size, &bytesRead ) ) )
+					return false;
+
+				*pPidl = newPidl.Detach();
+			}
 
 		return size == bytesRead;
 	}
@@ -556,14 +561,14 @@ namespace shell
 	std::tstring FormatByteSize( UINT64 fileSize )
 	{
 		TCHAR buffer[ 32 ];
-		::StrFormatByteSize64( fileSize, buffer, COUNT_OF( buffer ) );
+		::StrFormatByteSize64( fileSize, ARRAY_SPAN( buffer ) );
 		return buffer;
 	}
 
 	std::tstring FormatKiloByteSize( UINT64 fileSize )
 	{
 		TCHAR buffer[ 32 ];
-		::StrFormatKBSize( fileSize, buffer, COUNT_OF( buffer ) );
+		::StrFormatKBSize( fileSize, ARRAY_SPAN( buffer ) );
 		return buffer;
 	}
 
@@ -571,20 +576,6 @@ namespace shell
 	CImageList* GetSysImageList( ui::GlyphGauge glyphGauge )
 	{
 		return CSysImageLists::Instance().Get( glyphGauge );
-	}
-
-	int GetFileSysImageIndex( const TCHAR* filePath )
-	{
-		SHFILEINFO fileInfo;
-		::SHGetFileInfo( filePath, 0, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX );
-		return fileInfo.iIcon;
-	}
-
-	HICON GetFileSysIcon( const TCHAR* filePath, UINT flags /*= SHGFI_SMALLICON*/ )
-	{
-		SHFILEINFO fileInfo;
-		::SHGetFileInfo( filePath, 0, &fileInfo, sizeof( fileInfo ), SHGFI_ICON | flags );
-		return fileInfo.hIcon;
 	}
 
 

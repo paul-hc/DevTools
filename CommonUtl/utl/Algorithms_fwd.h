@@ -39,6 +39,23 @@ namespace func
 
 namespace utl
 {
+	template< typename StructT >
+	inline StructT* ZeroStruct( OUT StructT* pStruct )
+	{
+		ASSERT_PTR( pStruct );
+		::memset( pStruct, 0, sizeof( StructT ) );
+		return pStruct;
+	}
+
+	template< typename StructT >
+	inline StructT* ZeroWinStruct( OUT StructT* pStruct )		// for Win32 structures with 'cbSize' data-member
+	{
+		ZeroStruct( pStruct );
+		pStruct->cbSize = sizeof( StructT );
+		return pStruct;
+	}
+
+
 	template< typename EnumT >
 	inline EnumT MaxEnum( EnumT left, EnumT right )
 	{

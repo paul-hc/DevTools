@@ -186,23 +186,35 @@ bool CApplication::HasCommandLineOptions( void )
 		dlg.DoModal();
 		return true;
 	}
-	else if ( app::HasCommandLineOption( _T("diffs") ) )			// "-diffs"
+	else if ( app::HasCommandLineOption( _T("diffs") ) )	// "-diffs"
 	{
 		CFileListDialog dlg( nullptr );
 		m_pMainWnd = &dlg;
 		dlg.DoModal();
 		return true;
 	}
-	else if ( app::HasCommandLineOption( _T("td") ) )			// "-td"
+	else if ( app::HasCommandLineOption( _T("td") ) )		// "-td"
 	{
 		CTestTaskDialog dlg( nullptr );
 		m_pMainWnd = &dlg;
 		dlg.DoModal();
 		return true;
 	}
-	else if ( app::HasCommandLineOption( _T("ut") ) )				// "-ut"
+	else if ( app::HasCommandLineOption( _T("ut") ) )		// "-ut"
 	{
 		OnRunUnitTests();
+		return true;
+	}
+	else if ( app::HasCommandLineOption( _T("?|h") ) )		// "-?" or "-h"
+	{
+		static const TCHAR s_usageFmt[] = _T("%s command-line options:\n\n\
+    [-image=<img_path>]  Open the image in Image Dialog.\n\
+    [-diffs]             Study diffs in FileListDialog.\n\
+    [-td]                Open the TaskDialog.\n\
+    [-ut]                Run the unit tests and exit.\n\
+    [-?] or [-h]         Display usage help.\n\
+");
+		ui::MessageBox( str::Format( s_usageFmt, app::GetModulePath().GetFilenamePtr() ) );
 		return true;
 	}
 

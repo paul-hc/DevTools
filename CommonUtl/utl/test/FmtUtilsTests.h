@@ -20,6 +20,7 @@ public:
 private:
 	void TestFileState( void );
 	void TestTouchEntry( void );
+	void TestFormatKeyShortcut( void );
 };
 
 

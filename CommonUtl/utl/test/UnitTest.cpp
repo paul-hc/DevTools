@@ -316,7 +316,7 @@ namespace ut
 
 	fs::TDirPath CTempFilePool::MakePoolDirPath( bool createDir /*= false*/ )
 	{
-		return MakeTempUt_DirPath( fs::TDirPath( _T("_UT") ), createDir );
+		return MakeTempUt_DirPath( fs::TDirPath( _T("_OUT") ), createDir );
 	}
 
 	bool CTempFilePool::DeleteAllFiles( void )
