@@ -23,7 +23,6 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/IUnknownImpl.hxx"
 #include "utl/Serialization.hxx"
 
 
