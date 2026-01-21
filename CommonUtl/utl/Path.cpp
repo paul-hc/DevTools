@@ -57,6 +57,7 @@ namespace path
 {
 	const std::tstring CDelims::s_dirDelims( _T("\\/") );
 	const std::tstring CDelims::s_hugePrefix( _T("\\\\?\\") );		// "\\?\" without the C escape sequences
+	const std::tstring CDelims::s_guidPrefix( _T("::{") );			// e.g. "::{26EE0668-A00A-44D7-9371-BEB064C98683}"
 	const std::tstring CDelims::s_wildcards( _T("*?") );
 	const std::tstring CDelims::s_multiSpecDelims( _T(";,") );
 	const std::tstring CDelims::s_fmtNumSuffix( _T("_[%d]") );
@@ -284,20 +285,35 @@ namespace path
 	}
 
 
-	bool IsValid( const std::tstring& path )
+	bool IsValidBasePath( const std::tstring& strPath )
 	{
 		return
-			!path.empty()
-			&& std::tstring::npos == path.find_first_of( GetInvalidChars() )
-			&& path.find_first_not_of( str::StdWhitespace<TCHAR>() ) != std::tstring::npos;
+			!strPath.empty()
+			&& std::tstring::npos == strPath.find_first_of( GetInvalidChars() )
+			&& strPath.find_first_not_of( str::StdWhitespace<TCHAR>() ) != std::tstring::npos;
 	}
 
-	bool IsValidFilename( const std::tstring& path )
+	bool IsValidPath( const std::tstring& strPath )
 	{
 		return
-			IsValid( path )
-			&& std::tstring::npos == path.find_first_of( CDelims::s_dirDelims.c_str() );
+			IsValidBasePath( strPath )
+			&& !str::HasPrefix( strPath.c_str(), CDelims::s_guidPrefix.c_str(), CDelims::s_guidPrefix.length() );
 	}
+
+	bool IsValidFilename( const std::tstring& strPath )
+	{
+		return
+			IsValidBasePath( strPath )
+			&& std::tstring::npos == strPath.find_first_of( CDelims::s_dirDelims.c_str() );
+	}
+
+	bool IsValidGuidPath( const std::tstring& strPath )
+	{
+		return
+			IsValidBasePath( strPath )
+			&& str::HasPrefix( strPath.c_str(), CDelims::s_guidPrefix.c_str(), CDelims::s_guidPrefix.length() );
+	}
+
 
 	const TCHAR* GetInvalidChars( void )
 	{

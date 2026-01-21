@@ -220,8 +220,9 @@ namespace shell
 		if ( SUCCEEDED( pItem->GetDisplayName( sigdn, &name ) ) )
 			return name.m_pData;
 
-		return std::tstring();
+		return str::GetEmpty();
 	}
+
 
 	std::tstring GetStringProperty( IShellItem2* pItem, const PROPERTYKEY& propKey )
 	{
@@ -276,7 +277,7 @@ namespace shell
 
 		for ( size_t i = 0; i != filePaths.size(); ++i )
 		{
-			CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlAbs( static_cast<ITEMIDLIST_ABSOLUTE*>( ::ILCreateFromPath( filePaths[ i ].c_str() ) ) );
+			CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlAbs( static_cast<ITEMIDLIST_ABSOLUTE*>( ::ILCreateFromPath( filePaths[i].c_str() ) ) );
 				// on 64 bit: the cast prevents warning C4090: 'argument' : different '__unaligned' qualifiers
 
 			CComPtr<IShellFolder> pParentFolder;

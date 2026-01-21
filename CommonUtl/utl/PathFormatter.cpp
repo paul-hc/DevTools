@@ -142,7 +142,7 @@ bool CPathFormatter::IsValidFormat( void ) const
 	return
 		m_isNumericFormat
 		|| m_isWildcardFormat
-		|| path::IsValid( m_format.Get() );		// even non-numeric or non-wildcard formats could yield unique results with files in distinct directories (no name collisions)
+		|| path::IsValidPath( m_format.Get() );		// even non-numeric or non-wildcard formats could yield unique results with files in distinct directories (no name collisions)
 }
 
 bool CPathFormatter::IsConsistent( void ) const

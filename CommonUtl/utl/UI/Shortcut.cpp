@@ -208,6 +208,41 @@ namespace shell
 #endif //USE_UT
 
 
+	// CIconLocation implementation
+
+	std::tstring CIconLocation::Format( void ) const
+	{
+		if ( IsEmpty() )
+			return str::GetEmpty();
+
+		return str::Format( _T("%s:%d"), m_path.GetPtr(), m_index );
+	}
+
+	bool CIconLocation::Parse( const std::tstring& text )
+	{
+		if ( !text.empty() )
+		{
+			size_t posSep = text.find( ':' );
+
+			if ( posSep != std::tstring::npos )
+			{
+				fs::CPath iconPath = text.substr( 0, posSep );
+
+				if ( path::IsValidPath( iconPath.GetPtr() ) )
+				{
+					const TCHAR* pIndex = text.c_str() + posSep + 1;
+
+					m_path.Swap( iconPath );
+					m_index = num::StringToInteger<int>( pIndex, nullptr, 10 );
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+
 	// CShortcut implementation
 
 	CShortcut::CShortcut( IN IShellLink* pShellLink )
@@ -316,6 +351,23 @@ namespace shell
 			m_linkDataFlags == right.m_linkDataFlags;
 	}
 
+	CShortcut::TFields CShortcut::GetDiffFields( const CShortcut& right ) const
+	{
+		TFields diffFields = 0;
+
+		SetFlag( diffFields, TargetPath, m_targetPath != right.m_targetPath );
+		SetFlag( diffFields, TargetPidl, m_targetPidl != right.m_targetPidl );
+		SetFlag( diffFields, WorkDirPath, m_workDirPath != right.m_workDirPath );
+		SetFlag( diffFields, Arguments, m_arguments != right.m_arguments );
+		SetFlag( diffFields, Description, m_description != right.m_description );
+		SetFlag( diffFields, IconLocation, m_iconLocation != right.m_iconLocation );
+		SetFlag( diffFields, HotKey, m_hotKey != right.m_hotKey );
+		SetFlag( diffFields, ShowCmd, m_showCmd != right.m_showCmd );
+		SetFlag( diffFields, LinkDataFlags, m_linkDataFlags != right.m_linkDataFlags );
+
+		return diffFields;
+	}
+
 	bool CShortcut::SetTargetPidl( PIDLIST_ABSOLUTE pidl, utl::Ownership ownership /*= utl::MOVE*/ )
 	{
 		if ( utl::COPY == ownership )
@@ -336,6 +388,46 @@ namespace shell
 		return true;
 	}
 
+	std::tstring CShortcut::FormatTarget( SIGDN pidlFmt /*= SIGDN_DESKTOPABSOLUTEEDITING*/ ) const
+	{	// display the relevant Target as either Path (file system) or PIDL (shell special object, e.g. Control Panel apps):
+		if ( IsTargetFileSys() )
+			return m_targetPath.Get();
+		else if ( IsTargetNonFileSys() )
+			return m_targetPidl.GetName( pidlFmt );		// e.g. "Control Panel\\All Control Panel Items\\Region"
+
+		return str::GetEmpty();
+	}
+
+	bool CShortcut::StoreTarget( const std::tstring& targetPathOrName, SIGDN pidlFmt /*= SIGDN_DESKTOPABSOLUTEEDITING*/ )
+	{
+		bool changed = false;
+
+		if ( path::IsValidPath( targetPathOrName ) )
+		{
+			changed = SetTargetPath( targetPathOrName );
+			if ( changed )
+				changed |= SetTargetPidl( ::ILCreateFromPath( targetPathOrName.c_str() ) );
+		}
+		else if ( path::IsValidGuidPath( targetPathOrName ) )
+		{
+			if ( SIGDN_DESKTOPABSOLUTEPARSING == pidlFmt )
+				changed |= SetTargetPidl( shell::pidl::ParseToPidl( targetPathOrName.c_str(), shell::CreateFileSysBindContext( FILE_ATTRIBUTE_NORMAL ) ) );
+			else
+			{
+				ASSERT( false );	// assume the pidl string was formatted as SIGDN_DESKTOPABSOLUTEEDITING, which is user-readable but not parsable
+				TRACE( _T("! CShortcut::StoreTarget(): ignoring input PIDL string '%s' since it's not parsable\n"), targetPathOrName.c_str() );
+			}
+		}
+		else
+		{
+			ASSERT( targetPathOrName.empty() );
+			changed |= SetTargetPath( targetPathOrName );
+			changed |= SetTargetPidl( nullptr );
+		}
+
+		return changed;
+	}
+
 	void CShortcut::Save( OUT CArchive& archive ) const
 	{
 		archive
@@ -350,23 +442,6 @@ namespace shell
 			>> m_iconLocation.m_path >> m_iconLocation.m_index >> m_hotKey >> m_showCmd >> m_linkDataFlags;
 	}
 
-	CShortcut::TFields CShortcut::GetDiffFields( const CShortcut& right ) const
-	{
-		TFields diffFields = 0;
-
-		SetFlag( diffFields, TargetPath, m_targetPath != right.m_targetPath );
-		SetFlag( diffFields, TargetPidl, m_targetPidl != right.m_targetPidl );
-		SetFlag( diffFields, WorkDirPath, m_workDirPath != right.m_workDirPath );
-		SetFlag( diffFields, Arguments, m_arguments != right.m_arguments );
-		SetFlag( diffFields, Description, m_description != right.m_description );
-		SetFlag( diffFields, IconLocation, m_iconLocation != right.m_iconLocation );
-		SetFlag( diffFields, HotKey, m_hotKey != right.m_hotKey );
-		SetFlag( diffFields, ShowCmd, m_showCmd != right.m_showCmd );
-		SetFlag( diffFields, LinkDataFlags, m_linkDataFlags != right.m_linkDataFlags );
-
-		return diffFields;
-	}
-
 #ifdef USE_UT
 	const CFlagTags& CShortcut::GetTags_Fields( void )
 	{
@@ -379,7 +454,8 @@ namespace shell
 			{ FLAG_TAG( Description ) },
 			{ FLAG_TAG( IconLocation ) },
 			{ FLAG_TAG( HotKey ) },
-			{ FLAG_TAG( ShowCmd ) }
+			{ FLAG_TAG( ShowCmd ) },
+			{ FLAG_TAG( LinkDataFlags ) }
 		};
 
 		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
@@ -409,107 +485,7 @@ namespace fmt
 	}
 
 
-	std::tstring FormatTarget( const shell::CShortcut& shortcut )
-	{	// display the relevant Target as either Path or Pidl:
-		if ( shortcut.IsTargetFileBased() )
-			return shortcut.GetTargetPath().Get();
-		else
-		{
-			// SIGDN_DESKTOPABSOLUTEEDITING looks more readable than SIGDN_DESKTOPABSOLUTEPARSING, but it cannot be parsed-back in Paste.
-			// So we'll use SIGDN_DESKTOPABSOLUTEPARSING, which will be a GUID path for special folders:
-			//	SIGDN_DESKTOPABSOLUTEPARSING="::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"
-			//	rather than SIGDN_DESKTOPABSOLUTEEDITING="Control Panel\\All Control Panel Items\\Region".
-			return shortcut.GetTargetPidl().GetName( SIGDN_DESKTOPABSOLUTEPARSING );
-		}
-	}
-
-	void ParseTarget( OUT shell::CShortcut& rShortcut, const std::tstring& pathOrName ) throws_( CRuntimeException )
-	{
-		if ( path::IsValid( pathOrName ) )
-			rShortcut.SetTargetPath( pathOrName );
-		else if ( !pathOrName.empty() )
-			rShortcut.SetTargetPidl( shell::pidl::ParseToPidl( pathOrName.c_str(), shell::CreateFileSysBindContext( FILE_ATTRIBUTE_NORMAL ) ) );
-		else
-			throw CRuntimeException( str::Format( _T("Empty shortcut target") ) );
-	}
-
-
-	std::tstring FormatIconLocation( const shell::CIconLocation& icon )
-	{
-		if ( icon.IsEmpty() )
-			return str::GetEmpty();
-
-		return str::Format( _T("%s (%d)"), icon.m_path.GetPtr(), icon.m_index );
-	}
-
-	bool ParseIconLocation( OUT shell::CIconLocation& rIconLoc, const std::tstring& text )
-	{
-		if ( !text.empty() )
-		{
-			static const std::tstring s_sep = _T(" (");
-			size_t posSep = text.find_last_of( s_sep );
-
-			if ( posSep != std::tstring::npos )
-			{
-				fs::CPath iconPath = text.substr( 0, posSep );
-
-				if ( path::IsValid( iconPath.GetPtr() ) )
-				{
-					rIconLoc.m_path.Swap( iconPath );
-					rIconLoc.m_index = num::StringToInteger<int>( text.c_str() + posSep + s_sep.length(), nullptr, 10 );
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-
-	std::tstring FormatHotKey( WORD hotKey )
-	{
-		return FormatKeyShortcut( LOBYTE( hotKey ), HIBYTE( hotKey ) );
-	}
-
-	void ParseHotKey( OUT WORD& rHotKey, const std::tstring& text )
-	{	// no-op really: not practical to parse a hot-key string
-		rHotKey, text;
-	}
-
-
-	const std::tstring& FormatShowCmd( int showCmd )
-	{
-		switch ( showCmd )
-		{
-			case SW_SHOWNORMAL:
-			case SW_SHOWMINIMIZED:
-			case SW_SHOWMAXIMIZED:
-				return fmt::GetTags_ShowCmd().FormatUi( showCmd );
-			default:
-				ASSERT( false );
-				return str::GetEmpty();
-		}
-	}
-
-	void ParseShowCmd( OUT int& rShowCmd, const std::tstring& text )
-	{
-		rShowCmd = fmt::GetTags_ShowCmd().ParseUi( text );
-	}
-
-
-	std::tstring FormatLinkDataFlags( DWORD linkDataFlags, DWORD filterMask /*= SLDF_RUNAS_USER*/ )
-	{
-		return GetTags_ShellLinkDataFlags_Clip().FormatKey( linkDataFlags & filterMask );
-	}
-
-	void ParseLinkDataFlags( OUT DWORD& rLinkDataFlags, const std::tstring& text, DWORD filterMask /*= SLDF_RUNAS_USER*/ ) throws_( CRuntimeException )
-	{
-		int linkDataFlags = 0;
-		GetTags_ShellLinkDataFlags_Clip().ParseKey( &linkDataFlags, text );
-
-		::SetMaskedValue( rLinkDataFlags, filterMask, linkDataFlags );
-	}
-
+	// clipboard output/input
 
 	enum ClipField { LinkName, Target, Arguments, WorkDirPath, Description, IconLocation, HotKey, ShowCmd, LinkDataFlags, _FieldCount };
 
@@ -522,16 +498,16 @@ namespace fmt
 		fields[ Arguments ] = shortcut.GetArguments();
 		fields[ WorkDirPath ] = shortcut.GetWorkDirPath().Get();
 		fields[ Description ] = shortcut.GetDescription();
-		fields[ IconLocation ] = fmt::FormatIconLocation( shortcut.GetIconLocation() );
-		fields[ HotKey ] = fmt::FormatHotKey( shortcut.GetHotKey() );
-		fields[ ShowCmd ] = fmt::FormatShowCmd( shortcut.GetShowCmd() );
-		fields[ LinkDataFlags ] = fmt::FormatLinkDataFlags( shortcut.GetLinkDataFlags() );
+		fields[ IconLocation ] = shortcut.GetIconLocation().Format();
+		fields[ HotKey ] = fmt::FormatHotKeyValue( shortcut );
+		fields[ ShowCmd ] = fmt::FormatShowCmd( shortcut );
+		fields[ LinkDataFlags ] = fmt::FormatLinkDataFlags( shortcut );
 
 		const TCHAR pSep[] = { sepCh, '\0' };
 		return str::Join( fields, pSep );
 	}
 
-	shell::CShortcut& ParseClipShortcut( OUT shell::CShortcut& rShortcut, const TCHAR* pLine, const fs::CPath* pKeyPath /*= nullptr*/, TCHAR sepCh /*= '\t'*/ ) throws_( CRuntimeException )
+	bool ParseClipShortcut( OUT shell::CShortcut& rShortcut, const TCHAR* pLine, TCHAR sepCh /*= '\t'*/ ) throws_( CRuntimeException )
 	{
 		std::vector<std::tstring> fields;
 		const TCHAR pSep[] = { sepCh, '\0' };
@@ -541,33 +517,124 @@ namespace fmt
 		if ( fields.size() < _FieldCount )
 		{
 			std::tstring errorMsg = str::Format( _T("Invalid number of fields pasted: expecting %d, actual %d"), fields.size(), _FieldCount );
-			if ( pKeyPath != nullptr )
-				errorMsg += str::Format( _T(" - file: '%s'"), pKeyPath->GetFilenamePtr() );
+			if ( !fields.empty() )
+				errorMsg += str::Format( _T(" - file: '%s'"), fields[ LinkName ].c_str() );
+
 			throw CRuntimeException( errorMsg );
 		}
 
-		ParseTarget( rShortcut, fields[ Target ] );
+		bool changed = false;
 
-		rShortcut.SetArguments( fields[ Arguments ] );
-		rShortcut.SetWorkDirPath( fields[ WorkDirPath ] );
-		rShortcut.SetDescription( fields[ Description ] );
+		changed |= ParseTarget( rShortcut, fields[ Target ] );
+		changed |= rShortcut.SetArguments( fields[ Arguments ] );
+		changed |= rShortcut.SetWorkDirPath( fields[ WorkDirPath ] );
+		changed |= rShortcut.SetDescription( fields[ Description ] );
+		changed |= ParseIconLocation( rShortcut, fields[ IconLocation ] );
+		changed |= ParseHotKeyValue( rShortcut, fields[ HotKey ] );
+		changed |= ParseShowCmd( rShortcut, fields[ ShowCmd ] );
+		changed |= ParseLinkDataFlags( rShortcut, fields[ LinkDataFlags ] );
 
+		return changed;
+	}
+
+
+	// field output/input
+
+	std::tstring FormatTarget( const shell::CShortcut& shortcut )
+	{
+		return shortcut.FormatTarget( SIGDN_DESKTOPABSOLUTEPARSING );
+	}
+
+	bool ParseTarget( OUT shell::CShortcut& rShortcut, const std::tstring& targetPathOrName ) throws_( CRuntimeException )
+	{
+		if ( targetPathOrName.empty() )
+			throw CRuntimeException( _T("Empty shortcut target") );
+
+		return rShortcut.StoreTarget( targetPathOrName, SIGDN_DESKTOPABSOLUTEPARSING );
+	}
+
+
+	std::tstring FormatIconLocation( const shell::CShortcut& shortcut )
+	{
+		return shortcut.GetIconLocation().Format();
+	}
+
+	bool ParseIconLocation( OUT shell::CShortcut& rShortcut, const std::tstring& text )
+	{
 		shell::CIconLocation iconLocation;
-		if ( ParseIconLocation( iconLocation, fields[ IconLocation ] ) )
-			rShortcut.SetIconLocation( iconLocation );
+		return iconLocation.Parse( text ) && rShortcut.SetIconLocation( iconLocation );
+	}
 
-		WORD hotKey = rShortcut.GetHotKey();
-		ParseHotKey( hotKey, fields[ HotKey ] );		// no-op really
-		rShortcut.SetHotKey( hotKey );
 
-		int showCmd = rShortcut.GetShowCmd();
-		ParseShowCmd( showCmd, fields[ ShowCmd ] );
-		rShortcut.SetShowCmd( showCmd );
+	std::tstring FormatHotKey( WORD hotKey )
+	{
+		return fmt::FormatKeyShortcut( LOBYTE( hotKey ), HIBYTE( hotKey ) );
+	}
 
-		DWORD linkDataFlags = rShortcut.GetLinkDataFlags();
-		ParseLinkDataFlags( linkDataFlags, fields[ LinkDataFlags ] );
-		rShortcut.SetLinkDataFlags( linkDataFlags );
+	std::tstring FormatHotKeyValue( const shell::CShortcut& shortcut )
+	{
+		WORD hotKey = shortcut.GetHotKey();
+		return str::Format( _T("%04X (%s)"), hotKey, fmt::FormatKeyShortcut( LOBYTE( hotKey ), HIBYTE( hotKey ) ).c_str() );
+	}
 
-		return rShortcut;
+	bool ParseHotKeyValue( OUT shell::CShortcut& rShortcut, const std::tstring& text )
+	{	// no-op really: not practical to parse a hot-key string
+		UINT hotKey = 0;
+
+		if ( _stscanf( text.c_str(), _T( "%04X" ), &hotKey ) != 1 )
+		{
+			TRACE( _T("- Invalid HotKey field: '%s'\n"), text.c_str() );
+			return false;
+		}
+
+		return rShortcut.SetHotKey( static_cast<WORD>( hotKey ) );
+	}
+
+
+	const std::tstring& FormatShowCmd( const shell::CShortcut& shortcut )
+	{
+		switch ( shortcut.GetShowCmd() )
+		{
+			case SW_SHOWNORMAL:
+			case SW_SHOWMINIMIZED:
+			case SW_SHOWMAXIMIZED:
+				return fmt::GetTags_ShowCmd().FormatUi( shortcut.GetShowCmd() );
+			default:
+				ASSERT( false );
+				return str::GetEmpty();
+		}
+	}
+
+	bool ParseShowCmd( OUT shell::CShortcut& rShortcut, const std::tstring& text )
+	{
+		return rShortcut.SetShowCmd( fmt::GetTags_ShowCmd().ParseUi( text ) );
+	}
+
+
+	std::tstring FormatLinkDataFlags( const shell::CShortcut& shortcut )
+	{
+		return str::Format( _T("%08X"), shortcut.GetLinkDataFlags() );
+	}
+
+	bool ParseLinkDataFlags( OUT shell::CShortcut& rShortcut, const std::tstring& text ) throws_( CRuntimeException )
+	{
+		DWORD linkDataFlags = 0;
+
+		if ( _stscanf( text.c_str(), _T("%08X"), &linkDataFlags ) != 1 )
+			throw CRuntimeException( str::Format( _T("Invalid LinkDataFlags field: '%s'"), text.c_str() ) );
+
+		return rShortcut.SetLinkDataFlags( linkDataFlags );
+	}
+
+	std::tstring FormatLinkDataFlagTags( DWORD linkDataFlags, DWORD filterMask /*= SLDF_RUNAS_USER*/ )
+	{
+		return GetTags_ShellLinkDataFlags_Clip().FormatKey( linkDataFlags & filterMask );
+	}
+
+	void ParseLinkDataFlagTags( OUT DWORD& rLinkDataFlags, const std::tstring& text, DWORD filterMask /*= SLDF_RUNAS_USER*/ ) throws_( CRuntimeException )
+	{
+		int linkDataFlags = 0;
+		GetTags_ShellLinkDataFlags_Clip().ParseKey( &linkDataFlags, text );
+		::SetMaskedValue( rLinkDataFlags, filterMask, linkDataFlags );
 	}
 }

@@ -111,20 +111,20 @@ void CShortcutTests::TestValidLinks( void )
 
 		ASSERT( !shortcut.IsTargetEmpty() );
 		ASSERT( shortcut.IsTargetValid() );
-		ASSERT( shortcut.IsTargetFileBased() );
+		ASSERT( shortcut.IsTargetFileSys() );
 
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPath().FindUpwardsRelativePath(3));
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath(3));
-		ASSERT_EQUAL( _T("TestDataUtl\\images"), shortcut.GetWorkDirPath().FindUpwardsRelativePath(2));
-		ASSERT_EQUAL( _T("-h"), shortcut.GetArguments ());
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images"), shortcut.GetWorkDirPath().FindUpwardsRelativePath( 2 ) );
+		ASSERT_EQUAL( _T("-h"), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Shortcut to PNG file"), shortcut.GetDescription() );
-		ASSERT_EQUAL( _T(""), shortcut.GetIconLocation().m_path );
-		ASSERT_EQUAL( 0, shortcut.GetIconLocation().m_index );
+		ASSERT_EQUAL( _T("%SystemRoot%\\System32\\SHELL32.dll"), shortcut.GetIconLocation().m_path );
+		ASSERT_EQUAL( 139, shortcut.GetIconLocation().m_index );
 		ASSERT_EQUAL( 'M', LOBYTE( shortcut.GetHotKey() ) );
 		ASSERT_EQUAL( HOTKEYF_CONTROL | HOTKEYF_SHIFT | HOTKEYF_ALT, HIBYTE( shortcut.GetHotKey() ) );
 		ASSERT_EQUAL( SW_SHOWNORMAL, shortcut.GetShowCmd() );
 
-		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_LINK_INFO | SLDF_HAS_NAME | SLDF_HAS_RELPATH | SLDF_HAS_WORKINGDIR | SLDF_HAS_ARGS | SLDF_UNICODE | SLDF_ENABLE_TARGET_METADATA,
+		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_LINK_INFO | SLDF_HAS_NAME | SLDF_HAS_RELPATH | SLDF_HAS_WORKINGDIR | SLDF_HAS_ARGS | SLDF_HAS_ICONLOCATION | SLDF_UNICODE | SLDF_ENABLE_TARGET_METADATA,
 					  shortcut.GetLinkDataFlags() );
 		//TRACE( _T("\nlinkPath='%s' - SHELL_LINK_DATA_FLAGS={%s}\n"), linkPath.GetPtr(), shell::GetTags_ShellLinkDataFlags().FormatKey( shortcut.GetLinkDataFlags() ).c_str() );
 
@@ -155,17 +155,21 @@ void CShortcutTests::TestValidLinks( void )
 
 		ASSERT( !shortcut.IsTargetEmpty() );
 		ASSERT( shortcut.IsTargetValid() );
-		ASSERT( shortcut.IsTargetFileBased() );
+		ASSERT( shortcut.IsTargetFileSys() );
 
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\Dice.png"), shortcut.GetTargetPath() );
 		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images"), shortcut.GetWorkDirPath() );
 		ASSERT_EQUAL( _T("--help"), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Shortcut to PNG file using environment variable"), shortcut.GetDescription() );
-		ASSERT_EQUAL( _T("%SystemRoot%\\System32\\SHELL32.dll"), shortcut.GetIconLocation().m_path );
-		ASSERT_EQUAL( 22, shortcut.GetIconLocation().m_index );
+		ASSERT_EQUAL( _T(""), shortcut.GetIconLocation().m_path );
+		ASSERT_EQUAL( 0, shortcut.GetIconLocation().m_index );
 		ASSERT_EQUAL( 0, shortcut.GetHotKey() );
 		ASSERT_EQUAL( SW_SHOWMAXIMIZED, shortcut.GetShowCmd() );
+
+		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_LINK_INFO | SLDF_HAS_NAME | SLDF_HAS_RELPATH | SLDF_HAS_WORKINGDIR | SLDF_HAS_ARGS | SLDF_UNICODE | SLDF_HAS_EXP_SZ | SLDF_ENABLE_TARGET_METADATA,
+					  shortcut.GetLinkDataFlags() );
+		//TRACE( _T("\nlinkPath='%s' - SHELL_LINK_DATA_FLAGS={%s}\n"), linkPath.GetPtr(), shell::GetTags_ShellLinkDataFlags().FormatKey( shortcut.GetLinkDataFlags() ).c_str() );
 	}
 	// "Control Panel > Region":
 	if ( MakeTestLinkPath( &linkPath, Region_CPL ) )
@@ -177,9 +181,12 @@ void CShortcutTests::TestValidLinks( void )
 
 		ASSERT( !shortcut.IsTargetEmpty() );
 		ASSERT( shortcut.IsTargetValid() );
-		ASSERT( !shortcut.IsTargetFileBased() );
+		ASSERT( !shortcut.IsTargetFileSys() );
 
 		ASSERT_EQUAL( _T(""), shortcut.GetTargetPath() );
+		ASSERT_EQUAL( _T(""), shortcut.GetTargetPidl().ToPath().Get() );
+			ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), shortcut.GetTargetPidl().GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
+			ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items\\Region"), shortcut.GetTargetPidl().GetName( SIGDN_DESKTOPABSOLUTEEDITING ) );
 		ASSERT_EQUAL( _T(""), shortcut.GetWorkDirPath() );
 		ASSERT_EQUAL( _T(""), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Shortcut to Control Panel: Region"), shortcut.GetDescription() );
@@ -187,6 +194,10 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT_EQUAL( 0, shortcut.GetIconLocation().m_index );
 		ASSERT_EQUAL( 0, shortcut.GetHotKey() );
 		ASSERT_EQUAL( SW_SHOWNORMAL, shortcut.GetShowCmd() );
+
+		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_NAME | SLDF_UNICODE | SLDF_ENABLE_TARGET_METADATA,
+					  shortcut.GetLinkDataFlags() );
+		//TRACE( _T("\nlinkPath='%s' - SHELL_LINK_DATA_FLAGS={%s}\n"), linkPath.GetPtr(), shell::GetTags_ShellLinkDataFlags().FormatKey( shortcut.GetLinkDataFlags() ).c_str() );
 
 		// pidl name
 		{
@@ -214,10 +225,10 @@ void CShortcutTests::TestValidLinks( void )
 
 		ASSERT( !shortcut.IsTargetEmpty() );
 		ASSERT( shortcut.IsTargetValid() );
-		ASSERT( shortcut.IsTargetFileBased() );
+		ASSERT( shortcut.IsTargetFileSys() );
 
 		ASSERT_EQUAL( _T("%SYSTEMROOT%\\System32\\resmon.exe"), shortcut.GetTargetPath() );
-		ASSERT_EQUAL( _T("Windows\\System32\\resmon.exe"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath(3));	// evaluated env. var.
+		ASSERT_EQUAL( _T("Windows\\System32\\resmon.exe"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
 		ASSERT_EQUAL( _T("%SYSTEMROOT%\\System32"), shortcut.GetWorkDirPath() );
 		ASSERT_EQUAL( _T("/H"), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Shortcut to Resource Monitor using environment variable"), shortcut.GetDescription() );
@@ -257,9 +268,9 @@ void CShortcutTests::TestBrokenLinks( void )
 		ASSERT( !shortcut.IsTargetEmpty() );
 		ASSERT( !shortcut.IsTargetValid() );
 
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPath().FindUpwardsRelativePath(3));
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath(3));	// evaluated env. var.
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\NA"), shortcut.GetWorkDirPath().FindUpwardsRelativePath(3));
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\NA"), shortcut.GetWorkDirPath().FindUpwardsRelativePath( 3 ) );
 		ASSERT_EQUAL( _T(""), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Broken shortcut to PNG file"), shortcut.GetDescription() );
 		ASSERT_EQUAL( _T(""), shortcut.GetIconLocation().m_path );
@@ -292,10 +303,10 @@ void CShortcutTests::TestBrokenLinks( void )
 
 		ASSERT( !shortcut.IsTargetEmpty() );
 		ASSERT( !shortcut.IsTargetValid() );
-		ASSERT( shortcut.IsTargetFileBased() );
+		ASSERT( shortcut.IsTargetFileSys() );
 
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\Dice_NA.png"), shortcut.GetTargetPath() );
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath(3));	// evaluated env. var.
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\NA"), shortcut.GetWorkDirPath() );
 		ASSERT_EQUAL( _T(""), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Broken shortcut to PNG file using environment variable"), shortcut.GetDescription() );
@@ -377,12 +388,84 @@ void CShortcutTests::TestCreateLinkFile( void )
 		shortcut.Reset( pShellLink );	// fill-in the loaded fields
 
 		ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );	// updated to a physical path (expanded environemnt variables)
-		ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath(3));	// evaluated env. var.
+		ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
 		//ASSERT_EQUAL( _T("C:\\Windows\\system32\\CharMap.exe"), shortcut.GetTargetPath() );		// specific path for local OS install
 		ASSERT_EQUAL( description, shortcut.GetDescription() );
 	}
 
 	ut::TraceFileProperties( newLinkPath.GetPtr() );
+}
+
+void CShortcutTests::TestFormatParseLink( void )
+{
+	fs::CPath linkPath;
+
+	if ( MakeTestLinkPath( &linkPath, Dice_png ) )
+	{
+		shell::CShortcut shortcut( shell::LoadLinkFromFile( linkPath.GetPtr() ) );
+
+		ASSERT( shortcut.IsTargetFileSys() );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );
+
+		// field I/O
+		{
+			std::tstring fieldText;
+			shell::CShortcut destShortcut;
+
+			fieldText = shortcut.FormatTarget();
+			ASSERT_EQUAL_STR( _T("TestDataUtl\\images\\Dice.png"), path::FindUpwardsRelativePath( fieldText.c_str(), 3 ) );
+			destShortcut.StoreTarget( fieldText );
+			ASSERT( destShortcut.GetTargetPath() == shortcut.GetTargetPath() );
+			ASSERT( destShortcut.GetTargetPidl() == shortcut.GetTargetPidl() );
+
+			ASSERT_EQUAL( _T("%SystemRoot%\\System32\\SHELL32.dll:139"), fieldText = fmt::FormatIconLocation( shortcut ) );
+			ASSERT( fmt::ParseIconLocation( destShortcut, fieldText ) );
+			ASSERT( destShortcut.GetIconLocation() == shortcut.GetIconLocation() );
+
+			ASSERT_EQUAL( _T("074D (Ctrl + Shift + Alt + M)"), fieldText = fmt::FormatHotKeyValue( shortcut ) );
+			ASSERT( fmt::ParseHotKeyValue( destShortcut, fieldText ) );
+			ASSERT( destShortcut.GetHotKey() == shortcut.GetHotKey() );
+
+			ASSERT_EQUAL( _T("Normal Window"), fieldText = fmt::FormatShowCmd( shortcut ) );
+			ASSERT( fmt::ParseShowCmd( destShortcut, fieldText ) );
+			ASSERT( destShortcut.GetShowCmd() == shortcut.GetShowCmd() );
+
+			ASSERT_EQUAL( _T("000800FF"), fieldText = fmt::FormatLinkDataFlags( shortcut ) );
+			ASSERT( fmt::ParseLinkDataFlags( destShortcut, fieldText ) );
+			ASSERT( destShortcut.GetLinkDataFlags() == shortcut.GetLinkDataFlags() );
+		}
+
+		// clipboard I/O
+		{
+			shell::CShortcut destShortcut;
+			std::tstring line = fmt::FormatClipShortcut( linkPath.GetFilename(), shortcut );
+
+			fmt::ParseClipShortcut( destShortcut, line.c_str() );
+
+			ASSERT( destShortcut == shortcut );
+			TRACE( _T("Diff fields: {%s}\n"), shell::CShortcut::GetTags_Fields().FormatKey( shortcut.GetDiffFields( destShortcut ) ).c_str() );
+		}
+	}
+
+	// "Control Panel > Region":
+	if ( MakeTestLinkPath( &linkPath, Region_CPL ) )
+	{
+		shell::CShortcut shortcut( shell::LoadLinkFromFile( linkPath.GetPtr() ) );
+
+		ASSERT( shortcut.IsTargetNonFileSys() );
+		ASSERT_EQUAL( _T(""), shortcut.GetTargetPath() );
+		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), shortcut.GetTargetPidl().GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
+		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items\\Region"), shortcut.GetTargetPidl().GetName( SIGDN_DESKTOPABSOLUTEEDITING ) );
+
+		shell::CShortcut destShortcut;
+		std::tstring line = fmt::FormatClipShortcut( linkPath.GetFilename(), shortcut );
+
+		fmt::ParseClipShortcut( destShortcut, line.c_str() );
+
+		ASSERT( destShortcut == shortcut );
+		//TRACE( _T("Diff fields: {%s}\n"), shell::CShortcut::GetTags_Fields().FormatKey( shortcut.GetDiffFields( destShortcut ) ).c_str() );
+	}
 }
 
 
@@ -457,6 +540,7 @@ void CShortcutTests::Run( void )
 	RUN_TEST( TestBrokenLinks );
 	RUN_TEST( TestSaveLinkFile );
 	RUN_TEST( TestCreateLinkFile );
+	RUN_TEST( TestFormatParseLink );
 	RUN_TEST( TestLinkProperties );
 	RUN_TEST( TestEnumLinkProperties );
 }

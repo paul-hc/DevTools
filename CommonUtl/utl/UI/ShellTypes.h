@@ -55,54 +55,13 @@ namespace shell
 	inline fs::CPath GetFilePath( IShellItem* pItem ) { return GetDisplayName( pItem, SIGDN_FILESYSPATH ); }
 	inline fs::CPath GetRecycledPath( IShellItem* pRecycledItem ) { return GetFilePath( pRecycledItem ); }
 
+	inline bool IsGuidPath( const std::tstring& strPath ) { return path::IsValidGuidPath( strPath ); }
+
 	// IShellItem2 properties
 	std::tstring GetStringProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
 	CTime GetDateTimeProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
 	DWORD GetFileAttributesProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
 	ULONGLONG GetFileSizeProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
-}
-
-
-namespace func
-{
-	struct DeleteComHeap		// works with PIDLIST_ABSOLUTE, PIDLIST_RELATIVE, PITEMID_CHILD, etc
-	{
-		void operator()( void* pHeapPtr ) const
-		{
-			::CoTaskMemFree( pHeapPtr );
-		}
-	};
-
-	typedef DeleteComHeap TDeletePidl;
-}
-
-
-namespace shell
-{
-	template< typename PathContainerT >
-	CComPtr<IShellFolder> MakeRelativePidlArray( std::vector<PIDLIST_RELATIVE>& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
-
-	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector<CComPtrIShellItem2>, std::vector<IShellItem*>, etc
-	void MakeAbsolutePidlArray( std::vector<PIDLIST_ABSOLUTE>& rPidlVector, const ShellItemContainerT& shellItems );
-
-	template< typename ContainerT >
-	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector<LPITEMIDLIST>
-	{
-		std::for_each( rPidls.begin(), rPidls.end(), func::TDeletePidl() );
-		rPidls.clear();
-	}
-
-	template< typename ShellItemContainerT >
-	void QueryFilePaths( std::vector<fs::CPath>& rFilePaths, const ShellItemContainerT& shellItems, SIGDN sigdn = SIGDN_FILESYSPATH )
-	{
-		rFilePaths.reserve( rFilePaths.size() + shellItems.size() );
-
-		for ( typename ShellItemContainerT::const_iterator itShellItem = shellItems.begin(); itShellItem != shellItems.end(); ++itShellItem )
-			rFilePaths.push_back( shell::GetDisplayName( *itShellItem, sigdn ) );
-	}
-
-	template< typename ShellItemContainerT >
-	CComPtr<IShellItemArray> MakeShellItemArray( const ShellItemContainerT& shellItems );
 }
 
 
@@ -160,6 +119,49 @@ namespace shell
 			inline void SetTerminator( LPITEMIDLIST pidl, size_t size ) { *GetTerminator( pidl, size ) = 0; }
 		}
 	}
+}
+
+
+namespace func
+{
+	struct DeleteComHeap		// works with PIDLIST_ABSOLUTE, PIDLIST_RELATIVE, PITEMID_CHILD, etc
+	{
+		void operator()( void* pHeapPtr ) const
+		{
+			::CoTaskMemFree( pHeapPtr );
+		}
+	};
+
+	typedef DeleteComHeap TDeletePidl;
+}
+
+
+namespace shell
+{
+	template< typename PathContainerT >
+	CComPtr<IShellFolder> MakeRelativePidlArray( std::vector<PIDLIST_RELATIVE>& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
+
+	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector<CComPtrIShellItem2>, std::vector<IShellItem*>, etc
+	void MakeAbsolutePidlArray( std::vector<PIDLIST_ABSOLUTE>& rPidlVector, const ShellItemContainerT& shellItems );
+
+	template< typename ContainerT >
+	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector<LPITEMIDLIST>
+	{
+		std::for_each( rPidls.begin(), rPidls.end(), func::TDeletePidl() );
+		rPidls.clear();
+	}
+
+	template< typename ShellItemContainerT >
+	void QueryFilePaths( std::vector<fs::CPath>& rFilePaths, const ShellItemContainerT& shellItems, SIGDN sigdn = SIGDN_FILESYSPATH )
+	{
+		rFilePaths.reserve( rFilePaths.size() + shellItems.size() );
+
+		for ( typename ShellItemContainerT::const_iterator itShellItem = shellItems.begin(); itShellItem != shellItems.end(); ++itShellItem )
+			rFilePaths.push_back( shell::GetDisplayName( *itShellItem, sigdn ) );
+	}
+
+	template< typename ShellItemContainerT >
+	CComPtr<IShellItemArray> MakeShellItemArray( const ShellItemContainerT& shellItems );
 }
 
 

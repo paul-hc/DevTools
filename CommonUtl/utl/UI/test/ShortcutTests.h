@@ -23,6 +23,7 @@ private:
 	void TestBrokenLinks( void );
 	void TestSaveLinkFile( void );
 	void TestCreateLinkFile( void );
+	void TestFormatParseLink( void );
 
 	void TestLinkProperties( void );
 	void TestEnumLinkProperties( void );

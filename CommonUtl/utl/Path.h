@@ -14,6 +14,7 @@ namespace path
 	public:
 		static const std::tstring s_dirDelims;				// slashes
 		static const std::tstring s_hugePrefix;				// huge prefix syntax: path prefixed with "\\?\"
+		static const std::tstring s_guidPrefix;				// GUID prefix syntax: "::{26EE0668-A00A-44D7-9371-BEB064C98683}" - shell DESKTOPABSOLUTEPARSING display name
 		static const std::tstring s_wildcards;
 		static const std::tstring s_multiSpecDelims;
 		static const std::tstring s_fmtNumSuffix;			// suffix "_[%d]"
@@ -116,8 +117,10 @@ namespace path
 
 	SpecMatch MatchesPrefix( const TCHAR* pFilePath, const TCHAR* pPrefixOrSpec );
 
-	bool IsValid( const std::tstring& path );
-	bool IsValidFilename( const std::tstring& path );
+	bool IsValidPath( const std::tstring& strPath );		// drive/directory/file path
+	bool IsValidFilename( const std::tstring& strPath );	// filename only
+	bool IsValidGuidPath( const std::tstring& strPath );	// GUID prefix syntax: "::{26EE0668-A00A-44D7-9371-BEB064C98683}" - shell DESKTOPABSOLUTEPARSING display name
+
 	const TCHAR* GetInvalidChars( void );
 	const TCHAR* GetReservedChars( void );
 
@@ -258,7 +261,7 @@ namespace fs
 		void Clear( void ) { m_filePath.clear(); }
 		void Swap( CPath& rOther ) { m_filePath.swap( rOther.m_filePath ); }
 
-		bool IsValid( void ) const { return path::IsValid( m_filePath ); }
+		bool IsValid( void ) const { return path::IsValidPath( m_filePath ); }
 		bool IsComplexPath( void ) const { return path::IsComplex( GetPtr() ); }
 		bool IsPhysicalPath( void ) const { return !IsComplexPath(); }
 

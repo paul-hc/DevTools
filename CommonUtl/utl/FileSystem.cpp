@@ -175,7 +175,7 @@ namespace fs
 	{
 		std::tstring dirPath = path::MakeWindows( pDirPath );
 		path::SetBackslash( dirPath, false );
-		if ( !path::IsValid( dirPath ) )
+		if ( !path::IsValidPath( dirPath ) )
 			return false;
 
 		// skip the root path and create successive subdirectories

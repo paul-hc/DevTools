@@ -173,15 +173,15 @@ void CPathTests::TestPathUtilities( void )
 	ASSERT_EQUAL( _T("X:\\A\\B\\subdir\\file.txt"), path::Combine( _T("X:/A/B"), _T("subdir/file.txt") ) );
 
 	{
-		ASSERT( !path::IsValid( _T("") ) );
-		ASSERT( path::IsValid( _T("a") ) );
-		ASSERT( path::IsValid( _T(".txt") ) );
-		ASSERT( path::IsValid( _T("X:\\dir/file") ) );
-		ASSERT( path::IsValid( _T("X:\\dir/file.ext") ) );
-		ASSERT( path::IsValid( _T("X:\\dir/.ext") ) );
-		ASSERT( !path::IsValid( _T("X:\\file?.txt") ) );
-		ASSERT( !path::IsValid( _T("X:\\file*.txt") ) );
-		ASSERT( !path::IsValid( _T("X:\\file|.txt") ) );
+		ASSERT( !path::IsValidPath( _T("") ) );
+		ASSERT( path::IsValidPath( _T("a") ) );
+		ASSERT( path::IsValidPath( _T(".txt") ) );
+		ASSERT( path::IsValidPath( _T("X:\\dir/file") ) );
+		ASSERT( path::IsValidPath( _T("X:\\dir/file.ext") ) );
+		ASSERT( path::IsValidPath( _T("X:\\dir/.ext") ) );
+		ASSERT( !path::IsValidPath( _T("X:\\file?.txt") ) );
+		ASSERT( !path::IsValidPath( _T("X:\\file*.txt") ) );
+		ASSERT( !path::IsValidPath( _T("X:\\file|.txt") ) );
 	}
 
 	{

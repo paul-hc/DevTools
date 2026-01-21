@@ -315,7 +315,7 @@ namespace ut
 		CTempFilePool( const TCHAR* pFlatPaths = nullptr );
 		~CTempFilePool();
 
-		bool IsValidDir( void ) const { return path::IsValid( m_poolDirPath.Get() ) && fs::IsValidDirectory( m_poolDirPath.GetPtr() ); }
+		bool IsValidDir( void ) const { return path::IsValidPath( m_poolDirPath.Get() ) && fs::IsValidDirectory( m_poolDirPath.GetPtr() ); }
 		bool IsValidPool( void ) const { return IsValidDir() && !m_filePaths.empty() && !m_hasFileErrors; }
 		const fs::TDirPath& GetPoolDirPath( void ) const { return m_poolDirPath; }
 
