@@ -37,12 +37,12 @@ DROPEFFECT CClipboard::QueryDropFilePaths( std::vector<fs::CPath>& rSrcPaths )
 	CComPtr<IDataObject> pDataObject;
 
 	if ( ::IsClipboardFormatAvailable( CF_HDROP ) )
-		if ( SUCCEEDED( ::OleGetClipboard( &pDataObject ) ) )
+		if ( HR_OK( ::OleGetClipboard( &pDataObject ) ) )
 		{
 			FORMATETC format = { CF_HDROP, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 			STGMEDIUM stgMedium = { 0 };	// defend against buggy data object
 
-			if ( SUCCEEDED( pDataObject->GetData( &format, &stgMedium ) ) )		// transfer the data
+			if ( HR_OK( pDataObject->GetData( &format, &stgMedium ) ) )		// transfer the data
 			{
 				HDROP hDropInfo = (HDROP)stgMedium.hGlobal;
 				shell::QueryDroppedFiles( rSrcPaths, hDropInfo );

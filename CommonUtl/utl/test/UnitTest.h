@@ -320,6 +320,7 @@ namespace ut
 		const fs::TDirPath& GetPoolDirPath( void ) const { return m_poolDirPath; }
 
 		const std::vector<fs::CPath>& GetFilePaths( void ) const { return m_filePaths; }
+		const fs::CPath& GetFilePathAt( size_t pos ) const { return m_filePaths.at( pos ); }
 		fs::CPath QualifyPath( const TCHAR* pRelativePath ) const { return m_poolDirPath / fs::CPath( pRelativePath ); }
 
 		size_t SplitQualifyPaths( std::vector<fs::CPath>& rFullPaths, const TCHAR relFilePaths[] ) const;

@@ -190,7 +190,7 @@ namespace d2d
 		m_pFrameComposeRT->Clear( m_pAnimImage->GetBkgndColor() );
 		m_pFrameComposeRT->PopAxisAlignedClip();			// remove the clipping
 
-		return SUCCEEDED( m_pFrameComposeRT->EndDraw() );
+		return HR_OK( m_pFrameComposeRT->EndDraw() );
 	}
 
 	RenderResult CAnimatedFrameComposer::DrawBitmap( const CViewCoords& coords, const CBitmapCoords& bmpCoords )
