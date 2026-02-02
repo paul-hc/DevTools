@@ -2,39 +2,8 @@
 #define ObjectCtrlBase_h
 #pragma once
 
-#include "ISubject.h"
-
-
-namespace ui
-{
-	interface ISubjectAdapter
-	{
-		virtual std::tstring FormatCode( const utl::ISubject* pSubject ) const = 0;
-	};
-
-
-	class CCodeAdapter : public ui::ISubjectAdapter
-	{
-	public:
-		static ui::ISubjectAdapter* Instance( void );
-
-		// ui::ISubjectAdapter interface
-		virtual std::tstring FormatCode( const utl::ISubject* pSubject ) const;
-	};
-
-
-	class CDisplayCodeAdapter : public ui::CCodeAdapter
-	{
-	public:
-		static ui::ISubjectAdapter* Instance( void );
-
-		// ui::ISubjectAdapter interface
-		virtual std::tstring FormatCode( const utl::ISubject* pSubject ) const;
-	};
-}
-
-
 #include "utl/Path.h"
+#include "SubjectAdapter.h"
 #include "AccelTable.h"
 #include "CmdIdStore.h"
 
@@ -79,13 +48,13 @@ public:
 	bool UseShellContextMenu( void ) const { return m_shCtxStyle != NoShellMenu; }
 	void SetShellContextMenuStyle( ShellContextMenuStyle shCtxStyle, UINT shCtxQueryFlags = UINT_MAX );
 
-	bool IsShellMenuCmd( int cmdId ) const;
+	//bool IsShellMenuCmd( int cmdId ) const;
 
-	bool ShellInvokeDefaultVerb( const std::vector<fs::CPath>& filePaths );
-	bool ShellInvokeProperties( const std::vector<fs::CPath>& filePaths );
+	bool ShellInvokeDefaultVerb( const std::vector<shell::TPath>& shellPaths );
+	bool ShellInvokeProperties( const std::vector<shell::TPath>& shellPaths );
 protected:
-	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector<fs::CPath>& filePaths );
-	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const fs::CPath& filePath ) { return MakeContextMenuHost( pSrcPopupMenu, std::vector<fs::CPath>( 1, filePath ) ); }
+	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector<shell::TPath>& shellPaths );
+	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const shell::TPath& shellPath );
 
 	bool DoTrackContextMenu( CMenu* pPopupMenu, const CPoint& screenPos );
 	void ResetShellContextMenu( void );

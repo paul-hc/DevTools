@@ -1,10 +1,11 @@
 
 #include "pch.h"
 #include "ShellContextMenuHost.h"
+#include "ShellPidl.h"
 #include "MenuUtilities.h"
 #include "WndUtils.h"
 #include "WindowHook.h"
-#include "utl/Algorithms.h"
+#include "utl/Algorithms_fwd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -13,19 +14,23 @@
 
 namespace shell
 {
+	CComPtr<IContextMenu> MakeFilePathContextMenu( const TCHAR* pShellPath, HWND hWndOwner )
+	{
+		CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlItem;
+
+		pidlItem.Attach( shell::pidl::ParseToPidl( pShellPath ) );
+		return MakeAbsoluteContextMenu( pidlItem, hWndOwner );
+	}
+
 	CComPtr<IContextMenu> MakeAbsoluteContextMenu( PCIDLIST_ABSOLUTE pidlAbs, HWND hWndOwner )
 	{
 		CComPtr<IShellFolder> pParentFolder;
-		PCUITEMID_CHILD pidlItem;			// no ownership (no allocation)
-		::SHBindToParent( pidlAbs, IID_IShellFolder, (void**)&pParentFolder, &pidlItem );		// absolute pidl: get its parent folder and its relative PIDL
+		PCUITEMID_CHILD pidlItemRef;		// no ownership (no allocation)
 
-		return MakeFolderItemContextMenu( pParentFolder, pidlItem, hWndOwner );
-	}
+		if ( !HR_OK( ::SHBindToParent( pidlAbs, IID_PPV_ARGS( &pParentFolder ), &pidlItemRef ) ) )		// absolute pidl: get its parent folder and its relative PIDL
+			return nullptr;
 
-	CComPtr<IContextMenu> MakeFilePathContextMenu( const std::tstring& filePath, HWND hWndOwner )
-	{
-		CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlItem( static_cast<ITEMIDLIST_ABSOLUTE*>( ::ILCreateFromPath( filePath.c_str() ) ) );	// 64 bit: prevent warning C4090: 'argument' : different '__unaligned' qualifiers
-		return MakeAbsoluteContextMenu( pidlItem, hWndOwner );
+		return MakeFolderItemContextMenu( pParentFolder, pidlItemRef, hWndOwner );
 	}
 
 	CComPtr<IContextMenu> MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD pidlItem, HWND hWndOwner )
@@ -33,7 +38,9 @@ namespace shell
 		ASSERT_PTR( pParentFolder );
 
 		CComPtr<IContextMenu> pCtxMenu;
-		HR_AUDIT( pParentFolder->GetUIObjectOf( hWndOwner, 1, &pidlItem, __uuidof( IContextMenu ), nullptr, (void**)&pCtxMenu ) );
+		if ( !HR_OK( pParentFolder->GetUIObjectOf( hWndOwner, 1, &pidlItem, __uuidof( IContextMenu ), nullptr, (void**)&pCtxMenu ) ) )
+			return nullptr;
+
 		return pCtxMenu;
 	}
 
@@ -49,7 +56,7 @@ namespace shell
 	}
 
 	CComPtr<IContextMenu> MakeFolderItemsContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD_ARRAY pidlItemsArray, size_t itemCount, HWND hWndOwner )
-	{
+	{	// obsoleted by class shell::CFolderRelativePidls - kept only for reference
 		ASSERT_PTR( pParentFolder );
 
 		CComPtr<IContextMenu> pCtxMenu;
@@ -224,10 +231,10 @@ std::tstring CShellContextMenuHost::GetItemVerb( int cmdId ) const
 
 	TCHAR verb[ MAX_PATH ];
 	if ( cmdId > 0 )
-		if ( SUCCEEDED( m_pContextMenu->GetCommandString( ToVerbIndex( cmdId ), GCS_VERBW, nullptr, (char*)verb, _countof( verb ) ) ) )
+		if ( HR_OK( m_pContextMenu->GetCommandString( ToVerbIndex( cmdId ), GCS_VERBW, nullptr, (char*)verb, _countof( verb ) ) ) )
 			return verb;
 
-	return std::tstring();
+	return str::GetEmpty();
 }
 
 bool CShellContextMenuHost::InvokeVerb( const char* pVerb )
@@ -326,11 +333,11 @@ LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc2( HWND hWnd, UINT me
 		case WM_DRAWITEM:			// return value: if an application processes this message, it should return TRUE
 		case WM_MEASUREITEM:		// return value: if an application processes this message, it should return TRUE
 			if ( 0 == wParam )		// menu-related message?
-				if ( SUCCEEDED( m_pContextMenu2->HandleMenuMsg( message, wParam, lParam ) ) )
+				if ( HR_OK( m_pContextMenu2->HandleMenuMsg( message, wParam, lParam ) ) )
 					return TRUE;	// message was handled
 			break;
 		case WM_INITMENUPOPUP:		// return value: if an application processes this message, it should return 0
-			if ( SUCCEEDED( m_pContextMenu2->HandleMenuMsg( message, wParam, lParam ) ) )
+			if ( HR_OK( m_pContextMenu2->HandleMenuMsg( message, wParam, lParam ) ) )
 				return FALSE;		// message was handled
 			break;
 	}
@@ -347,18 +354,18 @@ LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc3( HWND hWnd, UINT me
 	switch ( message )
 	{
 		case WM_MENUCHAR:			// handled only by IContextMenu3
-			if ( SUCCEEDED( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
+			if ( HR_OK( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
 				return lResult;		// return value is important!
 			break;
 		case WM_DRAWITEM:			// return value: if an application processes this message, it should return TRUE
 		case WM_MEASUREITEM:
 			if ( 0 == wParam )		// menu-related message?
-				if ( SUCCEEDED( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
+				if ( HR_OK( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
 					if ( TRUE == lResult )		// message was handled?
 						return lResult;
 			break;
 		case WM_INITMENUPOPUP:		// return value: if an application processes this message, it should return 0
-			if ( SUCCEEDED( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
+			if ( HR_OK( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
 				if ( 0 == lResult )				// message was handled?
 					return lResult;
 	}
@@ -384,8 +391,18 @@ LRESULT CALLBACK CShellContextMenuHost::CTrackingHook::HookWndProc3( HWND hWnd, 
 class CExplorerSubMenuHook : public CWindowHook
 {
 public:
-	CExplorerSubMenuHook( CShellLazyContextMenuHost* pLazyHost, CWnd* pWndOwner ) : CWindowHook( false ), m_pLazyHost( pLazyHost ) { HookWindow( pWndOwner->GetSafeHwnd() ); }
-	virtual ~CExplorerSubMenuHook() { if ( IsHooked() ) UnhookWindow(); }
+	CExplorerSubMenuHook( CShellLazyContextMenuHost* pLazyHost, CWnd* pWndOwner )
+		: CWindowHook( false )
+		, m_pLazyHost( pLazyHost )
+	{
+		HookWindow( pWndOwner->GetSafeHwnd() );
+	}
+
+	virtual ~CExplorerSubMenuHook()
+	{
+		if ( IsHooked() )
+			UnhookWindow();
+	}
 protected:
 	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
 private:
@@ -409,9 +426,8 @@ LRESULT CExplorerSubMenuHook::WindowProc( UINT message, WPARAM wParam, LPARAM lP
 
 // CShellLazyContextMenuHost implementation
 
-CShellLazyContextMenuHost::CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector<fs::CPath>& filePaths, UINT queryFlags /*= CMF_NORMAL*/ )
-	: CShellContextMenuHost( pWndOwner )
-	, m_filePaths( filePaths )
+CShellLazyContextMenuHost::CShellLazyContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu /*= nullptr*/, UINT queryFlags /*= CMF_NORMAL*/ )
+	: CShellContextMenuHost( pWndOwner, pContextMenu )
 	, m_queryFlags( queryFlags )
 	, m_isLazyInit( false )
 {
@@ -449,10 +465,16 @@ bool CShellLazyContextMenuHost::LazyInit( void )
 
 	TRACE( _T(" (!) LazyInit() on Explorer sub-menu.\n") );
 	CWaitCursor wait;
-	if ( CComPtr<IContextMenu> pContextMenu = shell::MakeFilePathsContextMenu( m_filePaths, m_pWndOwner->GetSafeHwnd() ) )
-	{
-		Reset( pContextMenu );
 
+	if ( !IsValid() )
+	{
+		ASSERT( !m_shellPaths.empty() );		// if IContextMenu* was not passed on constructor, the source file paths are required for lazy init
+		if ( CComPtr<IContextMenu> pContextMenu = shell::MakeFilePathsContextMenu( m_shellPaths, m_pWndOwner->GetSafeHwnd() ) )
+			Reset( pContextMenu );
+	}
+
+	if ( IsValid() )
+	{
 		if ( MakePopupMenu( m_queryFlags ) )
 			m_pTrackingHook.reset( new CTrackingHook( m_pWndOwner->GetSafeHwnd(), Get() ) );
 

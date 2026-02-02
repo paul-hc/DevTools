@@ -74,11 +74,14 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 	LoadDlgIcon( ID_TOUCH_FILES );
 
+	ui::LoadPopupMenu( &m_listPopupMenu_OnSelection, IDR_CONTEXT_MENU, popup::TouchList );
+
 	//m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_GRIDLINES );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
-	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, nullptr );	// let us track a custom menu
+	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, &m_listPopupMenu_OnSelection );	// let us plug in our custom menu
+	m_fileListCtrl.SetTrackMenuTarget( this );		// firstly handle our custom commands in this dialog
 	m_fileListCtrl.SetFormatTableFlags( lv::SelRowsDisplayVisibleColumns );		// copy table as selected rows, using visible columns in display order
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 
@@ -255,7 +258,7 @@ void CTouchFilesDialog::UpdateFileListStatus( void )
 	if ( CTouchItem* pCaretItem = m_selData.GetCaretItem() )
 		currFolderPath = pCaretItem->GetSrcState().m_fullPath.GetParentPath();
 
-	m_currFolderEdit.SetFilePath( currFolderPath );
+	m_currFolderEdit.SetShellPath( currFolderPath );
 }
 
 void CTouchFilesDialog::SetupFileListView( void )
@@ -665,7 +668,6 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CTouchFilesDialog, CFileEditorBaseDialog )
-	ON_WM_CONTEXTMENU()
 	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateUndoRedo )
 	ON_BN_CLICKED( IDC_TARGET_SEL_ITEMS_CHECK, OnToggle_TargetSelItems )
 	ON_COMMAND( ID_CMD_RESET_DESTINATIONS, On_SelItems_ResetDestFile )
@@ -719,17 +721,6 @@ void CTouchFilesDialog::OnOK( void )
 			break;
 		}
 	}
-}
-
-void CTouchFilesDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
-{
-	if ( &m_fileListCtrl == pWnd )
-	{
-		ui::TrackContextMenu( IDR_CONTEXT_MENU, popup::TouchList, this, screenPos );
-		return;					// supress rising WM_CONTEXTMENU to the parent
-	}
-
-	__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CTouchFilesDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )

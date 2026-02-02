@@ -373,7 +373,7 @@ void CFileChecksumsDialog::OnLvnItemChanged_FileList( NMHDR* pNmHdr, LRESULT* pR
 		if ( const CFileChecksumItem* pCaretItem = m_fileListCtrl.GetCaretAs<CFileChecksumItem>() )
 			selFilePath = pCaretItem->GetFilePath();
 
-		m_selFileEdit.SetFilePath( selFilePath );
+		m_selFileEdit.SetShellPath( selFilePath );
 	}
 
 	*pResult = 0;

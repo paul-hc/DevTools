@@ -22,15 +22,15 @@ namespace shell
 
 		bool ParseToPidl( OUT PIDLIST_RELATIVE* pPidl, IShellFolder* pFolder, const TCHAR* pFnameExt ) const;
 
-		CComPtr<IShellFolder> FindShellFolder( const TCHAR* pDirPath ) const;		// no trailing backslash, please
+		CComPtr<IShellFolder> MakeShellFolder( const TCHAR* pDirPath ) const;		// no trailing backslash, please
 
 		template< typename Interface >
 		CComPtr<Interface> BindFileTo( IShellFolder* pFolder, const TCHAR* pFnameExt ) const;
 
 		// IShellItem
-		CComPtr<IShellItem> FindShellItem( const fs::CPath& filePath ) const;		// works with shortcuts only if you pass the link path "shortcut.lnk"
-		std::tstring GetItemDisplayName( IShellItem* pShellItem, SIGDN nameType = SIGDN_FILESYSPATH ) const;
-		fs::CPath GetItemPath( IShellItem* pShellItem ) const { return GetItemDisplayName( pShellItem, SIGDN_FILESYSPATH ); }
+		CComPtr<IShellItem> MakeShellItem( const shell::TPath& shellPath ) const;	// works with shortcuts only if you pass the link path "shortcut.lnk"
+		std::tstring GetItemDisplayName( IShellItem* pShellItem, SIGDN nameType = SIGDN_DESKTOPABSOLUTEPARSING /*SIGDN_FILESYSPATH*/ ) const;
+		fs::CPath GetItemPath( IShellItem* pShellItem ) const { return GetItemDisplayName( pShellItem, SIGDN_DESKTOPABSOLUTEPARSING /*SIGDN_FILESYSPATH*/ ); }
 
 		// caller must delete the bitmap
 		HBITMAP ExtractThumbnail( const fs::CPath& filePath, const CSize& boundsSize, DWORD flags = 0 ) const;		// IEIFLAG_ASPECT corrupts the original aspect ratio, forcing to boundsSize

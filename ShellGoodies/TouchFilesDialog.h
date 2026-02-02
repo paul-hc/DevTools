@@ -7,7 +7,7 @@
 #include "utl/UI/DateTimeControl.h"
 #include "utl/UI/FrameHostCtrl.h"
 #include "utl/UI/PathItemEdit.h"
-#include "utl/UI/ReportListControl.h"
+#include "utl/UI/PathItemListCtrl.h"
 #include "utl/UI/SelectionData.h"
 #include "utl/UI/TandemControls.h"
 #include "utl/UI/TextEdit.h"
@@ -105,13 +105,15 @@ private:
 		SrcAttributes, SrcModifyTime, SrcCreationTime, SrcAccessTime
 	};
 
-	CReportListControl m_fileListCtrl;
+	CPathItemListCtrl m_fileListCtrl;
 	CDateTimeControl m_modifiedDateCtrl, m_createdDateCtrl, m_accessedDateCtrl;
 
 	CLabelDivider m_filesLabelDivider;
 	CFrameHostCtrl<CButton> m_targetSelItemsButton;
 	CHostToolbarCtrl<CStatusStatic> m_fileStatsStatic;
 	CHostToolbarCtrl<CPathItemEdit> m_currFolderEdit;
+
+	CMenu m_listPopupMenu_OnSelection;
 
 	// generated stuff
 public:
@@ -120,7 +122,6 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	virtual void OnOK( void );
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
 	afx_msg void OnToggle_TargetSelItems( void );

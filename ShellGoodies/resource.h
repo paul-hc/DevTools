@@ -116,6 +116,14 @@
 #define IDC_FILES_STATIC                1098
 #define IDC_TARGET_SEL_ITEMS_CHECK      1099
 #define IDC_EDIT_SHORTCUTS_LIST         1100
+#define IDC_TARGET_PATH_EDIT            1101
+#define IDC_ARGUMENTS_EDIT              1102
+#define IDC_WORK_DIR_EDIT               1103
+#define IDC_HOT_KEY_CTRL                1104
+#define IDC_SHOW_CMD_COMBO              1105
+#define IDC_DESCRIPTION_EDIT            1106
+#define IDC_RUN_AS_ADMIN_CHECK          1107
+#define IDC_RUN_IN_SEPARATE_MEM_SPACE_CHECK 1108
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_REPLACE_FILES_TIP_FORMAT    5005
@@ -210,9 +218,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        121
+#define _APS_NEXT_RESOURCE_VALUE        122
 #define _APS_NEXT_COMMAND_VALUE         32862
-#define _APS_NEXT_CONTROL_VALUE         1101
+#define _APS_NEXT_CONTROL_VALUE         1109
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

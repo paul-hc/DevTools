@@ -40,6 +40,11 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
+		{ IDC_TARGET_PATH_EDIT, SizeX },
+		{ IDC_ARGUMENTS_EDIT, SizeX },
+		{ IDC_WORK_DIR_EDIT, SizeX },
+		{ IDC_DESCRIPTION_EDIT, SizeX },
+
 		{ IDC_FILES_STATIC, SizeX },
 		{ IDC_EDIT_SHORTCUTS_LIST, Size },
 		{ IDC_SHOW_SRC_COLUMNS_CHECK, MoveX },
@@ -64,6 +69,7 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 	, m_dirty( false )
 	, m_filesLabelDivider( CLabelDivider::Instruction )
 	, m_fileStatsStatic( ui::EditShrinkHost_MateOnRight )
+	, m_showCmdCombo( &fmt::GetTags_ShowCmd() )
 {
 	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
 	m_mode = CommitFilesMode;
@@ -77,7 +83,8 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
-	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, nullptr );	// let us track a custom menu
+//	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, ... );	// let us track a custom menu
+//	m_fileListCtrl.SetTrackMenuTarget( this );		// firstly handle our custom commands in this dialog
 	m_fileListCtrl.SetFormatTableFlags( lv::SelRowsDisplayVisibleColumns );		// copy table as selected rows, using visible columns in display order
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 
@@ -97,7 +104,17 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 		.AddButton( ID_EDIT_COPY )
 		.AddButton( ID_CMD_RESET_DESTINATIONS );
 
+	m_targetPathEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_COPY )
+		.AddButton( ID_BROWSE_FOLDER );
+
+	m_workDirEdit.SetUseDirPath( true );
+	m_workDirEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_COPY )
+		.AddButton( ID_BROWSE_FOLDER );
+
 	m_currFolderEdit.SetUseFixedFont( false );
+	m_currFolderEdit.SetUseDirPath( true );
 	m_currFolderEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_EDIT_COPY )
 		.AddButton( ID_BROWSE_FOLDER );
@@ -157,9 +174,9 @@ void CEditShortcutsDialog::SwitchMode( Mode mode )
 
 	static const UINT ctrlIds[] =
 	{
-		IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON, IDC_RESET_FILES_BUTTON,
+		IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON, IDC_RESET_FILES_BUTTON/*,
 		IDC_MODIFIED_DATE, IDC_CREATED_DATE, IDC_ACCESSED_DATE,
-		IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK
+		IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK*/
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), !IsRollMode() );
 
@@ -237,7 +254,7 @@ void CEditShortcutsDialog::UpdateFileListStatus( void )
 	if ( CEditLinkItem* pCaretItem = m_selData.GetCaretItem() )
 		currFolderPath = pCaretItem->GetFilePath().GetParentPath();
 
-	m_currFolderEdit.SetFilePath( currFolderPath );
+	m_currFolderEdit.SetShellPath( currFolderPath );
 }
 
 void CEditShortcutsDialog::SetupFileListView( void )
@@ -261,9 +278,9 @@ void CEditShortcutsDialog::SetupFileListView( void )
 			m_fileListCtrl.SetSubItemText( pos, D_Target, fmt::FormatTarget( destShortcut ) );
 			m_fileListCtrl.SetSubItemText( pos, D_Folder, destShortcut.GetWorkDirPath().Get() );
 			m_fileListCtrl.SetSubItemText( pos, D_Arguments, destShortcut.GetArguments() );
-			m_fileListCtrl.SetSubItemText( pos, D_IconLocation, fmt::FormatIconLocation( destShortcut.GetIconLocation() ) );
+			m_fileListCtrl.SetSubItemText( pos, D_IconLocation, fmt::FormatIconLocation( destShortcut ) );
 			m_fileListCtrl.SetSubItemText( pos, D_HotKey, fmt::FormatHotKey( destShortcut.GetHotKey() ) );
-			m_fileListCtrl.SetSubItemText( pos, D_ShowCmd, fmt::FormatShowCmd( destShortcut.GetShowCmd() ) );
+			m_fileListCtrl.SetSubItemText( pos, D_ShowCmd, fmt::FormatShowCmd( destShortcut ) );
 			m_fileListCtrl.SetSubItemText( pos, D_Description, destShortcut.GetDescription() );
 		}
 		{
@@ -272,9 +289,9 @@ void CEditShortcutsDialog::SetupFileListView( void )
 			m_fileListCtrl.SetSubItemText( pos, S_Target, fmt::FormatTarget( srcShortcut ) );
 			m_fileListCtrl.SetSubItemText( pos, S_Folder, srcShortcut.GetWorkDirPath().Get() );
 			m_fileListCtrl.SetSubItemText( pos, S_Arguments, srcShortcut.GetArguments() );
-			m_fileListCtrl.SetSubItemText( pos, S_IconLocation, fmt::FormatIconLocation( srcShortcut.GetIconLocation() ) );
+			m_fileListCtrl.SetSubItemText( pos, S_IconLocation, fmt::FormatIconLocation( srcShortcut ) );
 			m_fileListCtrl.SetSubItemText( pos, S_HotKey, fmt::FormatHotKey( srcShortcut.GetHotKey() ) );
-			m_fileListCtrl.SetSubItemText( pos, S_ShowCmd, fmt::FormatShowCmd( srcShortcut.GetShowCmd() ) );
+			m_fileListCtrl.SetSubItemText( pos, S_ShowCmd, fmt::FormatShowCmd( srcShortcut ) );
 			m_fileListCtrl.SetSubItemText( pos, S_Description, srcShortcut.GetDescription() );
 		}
 	}
@@ -305,9 +322,9 @@ void CEditShortcutsDialog::UpdateFileListViewSelItems( void )
 		m_fileListCtrl.SetSubItemText( pos, D_Target, fmt::FormatTarget( destShortcut ) );
 		m_fileListCtrl.SetSubItemText( pos, D_Folder, destShortcut.GetWorkDirPath().Get() );
 		m_fileListCtrl.SetSubItemText( pos, D_Arguments, destShortcut.GetWorkDirPath().Get() );
-		m_fileListCtrl.SetSubItemText( pos, D_IconLocation, fmt::FormatIconLocation( destShortcut.GetIconLocation() ) );
+		m_fileListCtrl.SetSubItemText( pos, D_IconLocation, fmt::FormatIconLocation( destShortcut ) );
 		m_fileListCtrl.SetSubItemText( pos, D_HotKey, fmt::FormatHotKey( destShortcut.GetHotKey() ) );
-		m_fileListCtrl.SetSubItemText( pos, D_ShowCmd, fmt::FormatShowCmd( destShortcut.GetShowCmd() ) );
+		m_fileListCtrl.SetSubItemText( pos, D_ShowCmd, fmt::FormatShowCmd( destShortcut ) );
 		m_fileListCtrl.SetSubItemText( pos, D_Description, destShortcut.GetDescription() );
 
 		// IMP: update the Dest side of DiffColumn pairs!
@@ -319,6 +336,31 @@ void CEditShortcutsDialog::UpdateFileListViewSelItems( void )
 		m_fileListCtrl.UpdateItemDiffColumnDest( pos, D_ShowCmd, getMatchFunc );
 		m_fileListCtrl.UpdateItemDiffColumnDest( pos, D_Description, getMatchFunc );
 	}
+}
+
+bool CEditShortcutsDialog::UpdateDetailFields( void )
+{
+	CEditLinkItem* pCaretItem = m_selData.GetCaretItem();
+	if ( nullptr == pCaretItem )
+		return false;
+
+	const shell::CShortcut& destShortcut = pCaretItem->GetDestShortcut();
+
+	if ( destShortcut.IsTargetNonFileSys() )
+		m_targetPathEdit.SetPidl( destShortcut.GetTargetPidl() );
+	else
+		m_targetPathEdit.SetShellPath( destShortcut.GetTargetPath() );
+
+	m_targetPathEdit.SetReadOnly( destShortcut.IsTargetNonFileSys() );
+
+	m_argumentsEdit.SetText( destShortcut.GetArguments() );
+	m_workDirEdit.SetShellPath( destShortcut.GetWorkDirPath() );
+	m_descriptionEdit.SetText( destShortcut.GetDescription() );
+	WORD hotKey = destShortcut.GetHotKey();
+	m_hotKeyCtrl.SetHotKey( LOBYTE( hotKey ), HIBYTE( hotKey ) );
+	m_showCmdCombo.SetValue( destShortcut.GetShowCmd() );
+
+	return true;
 }
 
 void CEditShortcutsDialog::UpdateFieldControls( void )
@@ -613,6 +655,14 @@ void CEditShortcutsDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_EDIT_SHORTCUTS_LIST, m_fileListCtrl );
 
+	DDX_Control( pDX, IDC_TARGET_PATH_EDIT, m_targetPathEdit );
+	DDX_Control( pDX, IDC_ARGUMENTS_EDIT, m_argumentsEdit );
+	DDX_Control( pDX, IDC_WORK_DIR_EDIT, m_workDirEdit );
+	DDX_Control( pDX, IDC_DESCRIPTION_EDIT, m_descriptionEdit );
+	DDX_Control( pDX, IDC_HOT_KEY_CTRL, m_hotKeyCtrl );
+	DDX_Control( pDX, IDC_SHOW_CMD_COMBO, m_showCmdCombo );
+	// IDC_RUN_AS_ADMIN_CHECK, IDC_RUN_IN_SEPARATE_MEM_SPACE_CHECK
+
 	DDX_Control( pDX, IDC_FILES_STATIC, m_filesLabelDivider );
 	DDX_Control( pDX, IDC_OUTCOME_INFO_STATUS, m_fileStatsStatic );
 	DDX_Control( pDX, IDC_CURR_FOLDER_EDIT, m_currFolderEdit );
@@ -639,7 +689,6 @@ void CEditShortcutsDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CEditShortcutsDialog, CFileEditorBaseDialog )
-	ON_WM_CONTEXTMENU()
 	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateUndoRedo )
 	ON_BN_CLICKED( IDC_TARGET_SEL_ITEMS_CHECK, OnToggle_TargetSelItems )
 	ON_COMMAND( ID_CMD_RESET_DESTINATIONS, On_SelItems_ResetDestFile )
@@ -683,17 +732,6 @@ void CEditShortcutsDialog::OnOK( void )
 			break;
 		}
 	}
-}
-
-void CEditShortcutsDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
-{
-	if ( &m_fileListCtrl == pWnd )
-	{
-		ui::TrackContextMenu( IDR_CONTEXT_MENU, popup::TouchList, this, screenPos );
-		return;					// supress rising WM_CONTEXTMENU to the parent
-	}
-
-	__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CEditShortcutsDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
@@ -783,7 +821,10 @@ void CEditShortcutsDialog::OnLvnItemChanged_LinkList( NMHDR* pNmHdr, LRESULT* pR
 		CReportListControl::TraceNotify( pNmList );
 
 		if ( m_selData.ReadList( &m_fileListCtrl ) )
+		{
 			UpdateFileListStatus();
+			UpdateDetailFields();
+		}
 	}
 
 	*pResult = 0;

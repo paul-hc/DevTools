@@ -113,9 +113,9 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT( shortcut.IsTargetValid() );
 		ASSERT( shortcut.IsTargetFileSys() );
 
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );
-		ASSERT_EQUAL( _T("TestDataUtl\\images"), shortcut.GetWorkDirPath().FindUpwardsRelativePath( 2 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPath().GetRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images"), shortcut.GetWorkDirPath().GetRelativePath( 2 ) );
 		ASSERT_EQUAL( _T("-h"), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Shortcut to PNG file"), shortcut.GetDescription() );
 		ASSERT_EQUAL( _T("%SystemRoot%\\System32\\SHELL32.dll"), shortcut.GetIconLocation().m_path );
@@ -132,7 +132,7 @@ void CShortcutTests::TestValidLinks( void )
 
 		// pidl name
 		{
-			const shell::CPidlAbsCp& targetPidl = shortcut.GetTargetPidl();
+			const shell::CPidlAbsolute& targetPidl = shortcut.GetTargetPidl();
 
 			ASSERT_EQUAL( _T("Dice.png"), targetPidl.GetName( SIGDN_NORMALDISPLAY ) );
 			ASSERT_EQUAL( _T("Dice.png"), targetPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
@@ -158,7 +158,7 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT( shortcut.IsTargetFileSys() );
 
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\Dice.png"), shortcut.GetTargetPath() );
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images"), shortcut.GetWorkDirPath() );
 		ASSERT_EQUAL( _T("--help"), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Shortcut to PNG file using environment variable"), shortcut.GetDescription() );
@@ -184,7 +184,7 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT( !shortcut.IsTargetFileSys() );
 
 		ASSERT_EQUAL( _T(""), shortcut.GetTargetPath() );
-		ASSERT_EQUAL( _T(""), shortcut.GetTargetPidl().ToPath().Get() );
+		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), shortcut.GetTargetPidl().ToShellPath().Get() );
 			ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), shortcut.GetTargetPidl().GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
 			ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items\\Region"), shortcut.GetTargetPidl().GetName( SIGDN_DESKTOPABSOLUTEEDITING ) );
 		ASSERT_EQUAL( _T(""), shortcut.GetWorkDirPath() );
@@ -201,7 +201,7 @@ void CShortcutTests::TestValidLinks( void )
 
 		// pidl name
 		{
-			const shell::CPidlAbsCp& targetPidl = shortcut.GetTargetPidl();
+			const shell::CPidlAbsolute& targetPidl = shortcut.GetTargetPidl();
 
 			ASSERT_EQUAL( _T("Region"), targetPidl.GetName( SIGDN_NORMALDISPLAY ) );
 			ASSERT_EQUAL( _T("::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), targetPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
@@ -228,7 +228,7 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT( shortcut.IsTargetFileSys() );
 
 		ASSERT_EQUAL( _T("%SYSTEMROOT%\\System32\\resmon.exe"), shortcut.GetTargetPath() );
-		ASSERT_EQUAL( _T("Windows\\System32\\resmon.exe"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
+		ASSERT_EQUAL( _T("Windows\\System32\\resmon.exe"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
 		ASSERT_EQUAL( _T("%SYSTEMROOT%\\System32"), shortcut.GetWorkDirPath() );
 		ASSERT_EQUAL( _T("/H"), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Shortcut to Resource Monitor using environment variable"), shortcut.GetDescription() );
@@ -239,7 +239,7 @@ void CShortcutTests::TestValidLinks( void )
 
 		// pidl name
 		{
-			const shell::CPidlAbsCp& targetPidl = shortcut.GetTargetPidl();
+			const shell::CPidlAbsolute& targetPidl = shortcut.GetTargetPidl();
 
 			ASSERT_EQUAL( _T("resmon.exe"), targetPidl.GetName( SIGDN_NORMALDISPLAY ) );
 			ASSERT_EQUAL( _T("resmon.exe"), targetPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
@@ -268,9 +268,9 @@ void CShortcutTests::TestBrokenLinks( void )
 		ASSERT( !shortcut.IsTargetEmpty() );
 		ASSERT( !shortcut.IsTargetValid() );
 
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\NA"), shortcut.GetWorkDirPath().FindUpwardsRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPath().GetRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\NA"), shortcut.GetWorkDirPath().GetRelativePath( 3 ) );
 		ASSERT_EQUAL( _T(""), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Broken shortcut to PNG file"), shortcut.GetDescription() );
 		ASSERT_EQUAL( _T(""), shortcut.GetIconLocation().m_path );
@@ -280,7 +280,7 @@ void CShortcutTests::TestBrokenLinks( void )
 
 		// pidl name
 		{
-			const shell::CPidlAbsCp& targetPidl = shortcut.GetTargetPidl();
+			const shell::CPidlAbsolute& targetPidl = shortcut.GetTargetPidl();
 
 			ASSERT_EQUAL( _T("Dice_NA.png"), targetPidl.GetName( SIGDN_NORMALDISPLAY ) );
 			ASSERT_EQUAL( _T("Dice_NA.png"), targetPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
@@ -306,7 +306,7 @@ void CShortcutTests::TestBrokenLinks( void )
 		ASSERT( shortcut.IsTargetFileSys() );
 
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\Dice_NA.png"), shortcut.GetTargetPath() );
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\NA"), shortcut.GetWorkDirPath() );
 		ASSERT_EQUAL( _T(""), shortcut.GetArguments() );
 		ASSERT_EQUAL( _T("Broken shortcut to PNG file using environment variable"), shortcut.GetDescription() );
@@ -325,7 +325,7 @@ void CShortcutTests::TestSaveLinkFile( void )
 	CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( linkPath.GetPtr() );
 	shell::CShortcut srcShortcut( pShellLink );
 	ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\Dice.png"), srcShortcut.GetTargetPath() );
-	ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shell::GetLinkTargetPath( pShellLink, 0 ).FindUpwardsRelativePath( 3 ) );		// updated to a physical path (expanded environemnt variables)
+	ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shell::GetLinkTargetPath( pShellLink, 0 ).GetRelativePath( 3 ) );		// updated to a physical path (expanded environemnt variables)
 	ASSERT_EQUAL( _T("--help"), srcShortcut.GetArguments() );
 
 	// save the link to itself: should fail since the .lnk file is read-only
@@ -374,7 +374,7 @@ void CShortcutTests::TestCreateLinkFile( void )
 
 	shortcut.Reset( pShellLink );	// fill-in the resolved fields
 
-	ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );		// updated to a physical path (expanded environemnt variables)
+	ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPath().GetRelativePath( 3 ) );		// updated to a physical path (expanded environemnt variables)
 	ASSERT_EQUAL( description, shortcut.GetDescription() );
 
 	ut::CTempFilePool pool;		// empty, just create the temp directory (with auto files cleanup)
@@ -387,8 +387,8 @@ void CShortcutTests::TestCreateLinkFile( void )
 
 		shortcut.Reset( pShellLink );	// fill-in the loaded fields
 
-		ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );	// updated to a physical path (expanded environemnt variables)
-		ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );	// evaluated env. var.
+		ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPath().GetRelativePath( 3 ) );	// updated to a physical path (expanded environemnt variables)
+		ASSERT_EQUAL( _T("Windows\\system32\\CharMap.exe"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
 		//ASSERT_EQUAL( _T("C:\\Windows\\system32\\CharMap.exe"), shortcut.GetTargetPath() );		// specific path for local OS install
 		ASSERT_EQUAL( description, shortcut.GetDescription() );
 	}
@@ -405,8 +405,8 @@ void CShortcutTests::TestFormatParseLink( void )
 		shell::CShortcut shortcut( shell::LoadLinkFromFile( linkPath.GetPtr() ) );
 
 		ASSERT( shortcut.IsTargetFileSys() );
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPath().FindUpwardsRelativePath( 3 ) );
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToPath().FindUpwardsRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPath().GetRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );
 
 		// field I/O
 		{
@@ -414,7 +414,7 @@ void CShortcutTests::TestFormatParseLink( void )
 			shell::CShortcut destShortcut;
 
 			fieldText = shortcut.FormatTarget();
-			ASSERT_EQUAL_STR( _T("TestDataUtl\\images\\Dice.png"), path::FindUpwardsRelativePath( fieldText.c_str(), 3 ) );
+			ASSERT_EQUAL_STR( _T("TestDataUtl\\images\\Dice.png"), path::GetRelativePath( fieldText.c_str(), 3 ) );
 			destShortcut.StoreTarget( fieldText );
 			ASSERT( destShortcut.GetTargetPath() == shortcut.GetTargetPath() );
 			ASSERT( destShortcut.GetTargetPidl() == shortcut.GetTargetPidl() );
@@ -499,13 +499,13 @@ void CShortcutTests::TestLinkProperties( void )
 	if ( HR_OK( pPropertyStore->GetValue( PKEY_Link_TargetParsingPath, &prop ) ) )
 	{	// VT_LPWSTR
 		ASSERT( prop.GetFilePath( &filePath ) );
-		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), filePath.FindUpwardsRelativePath( 3 ) );
+		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), filePath.GetRelativePath( 3 ) );
 	}
 	if ( HR_OK( pPropertyStore->GetValue( PKEY_Link_TargetSFGAOFlags, &prop ) ) )
 	{	// VT_UI4
-		ULONG SFGAO_flags;
-		ASSERT( prop.GetUInt( &SFGAO_flags ) );
-		ASSERT_EQUAL( _T("SFGAO_CANCOPY|SFGAO_CANMOVE|SFGAO_CANLINK|SFGAO_CANRENAME|SFGAO_CANDELETE|SFGAO_HASPROPSHEET"), shell::GetTags_SFGAO_Flags().FormatUi(SFGAO_flags ) );
+		ULONG sfgaoFlags;
+		ASSERT( prop.GetUInt( &sfgaoFlags ) );
+		ASSERT_EQUAL( _T("SFGAO_CANCOPY|SFGAO_CANMOVE|SFGAO_CANLINK|SFGAO_CANRENAME|SFGAO_CANDELETE|SFGAO_HASPROPSHEET"), shell::GetTags_SFGAO_Flags().FormatUi( sfgaoFlags ) );
 	}
 
 	// empty properties:

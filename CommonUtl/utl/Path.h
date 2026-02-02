@@ -120,6 +120,7 @@ namespace path
 	bool IsValidPath( const std::tstring& strPath );		// drive/directory/file path
 	bool IsValidFilename( const std::tstring& strPath );	// filename only
 	bool IsValidGuidPath( const std::tstring& strPath );	// GUID prefix syntax: "::{26EE0668-A00A-44D7-9371-BEB064C98683}" - shell DESKTOPABSOLUTEPARSING display name
+	bool HasEnvironVar( const std::tstring& strPath );		// contains expandable "%envVar%" or "$(envVar)" substrings?
 
 	const TCHAR* GetInvalidChars( void );
 	const TCHAR* GetReservedChars( void );
@@ -128,6 +129,7 @@ namespace path
 	bool IsRelative( const TCHAR* pPath );
 	bool IsDirectory( const TCHAR* pPath );
 	bool IsFilename( const TCHAR* pPath );				// "basefilename[.ext]"
+	bool IsGuidPath( const TCHAR* pShellPath );			// has a GUID prefix syntax? "::{26EE0668-A00A-44D7-9371-BEB064C98683}" - shell DESKTOPABSOLUTEPARSING display name
 
 	bool HasDirectory( const TCHAR* pPath );
 
@@ -163,7 +165,7 @@ namespace path
 	bool HasTrailingSlash( const TCHAR* pPath );				// true for non-root paths with a trailing slash
 
 	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
-	const TCHAR* FindUpwardsRelativePath( const TCHAR* pSrcFilePath, size_t upLevel );
+	const TCHAR* GetRelativePath( const TCHAR* pSrcFilePath, size_t upLevel );		// upLevel=1 for "filename.ext", upLevel=2 for "subdir\filename.ext", etc
 
 
 	// normal: backslashes only
@@ -195,7 +197,8 @@ namespace path
 
 	std::tstring FindCommonPrefix( const TCHAR* pLeftPath, const TCHAR* pRightPath );	// "C:\win" for "C:\win\desktop\temp.txt" and "c:\win\tray\sample.txt"
 	std::tstring StripCommonPrefix( const TCHAR* pFullPath, const TCHAR* pDirPath );	// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win\system"
-	bool StripPrefix( IN OUT std::tstring& rPath, const TCHAR* pPrefix );				// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win"
+	bool StripPrefix( IN OUT std::tstring& rStrPath, const TCHAR* pPrefix );			// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win"
+	bool StripPrefix( IN OUT fs::CPath& rPath, const fs::TDirPath& dirPath );			// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win"
 }
 
 
@@ -264,6 +267,7 @@ namespace fs
 		bool IsValid( void ) const { return path::IsValidPath( m_filePath ); }
 		bool IsComplexPath( void ) const { return path::IsComplex( GetPtr() ); }
 		bool IsPhysicalPath( void ) const { return !IsComplexPath(); }
+		bool IsGuidPath( void ) const { return path::IsValidGuidPath( Get() ); }
 
 		const std::tstring& Get( void ) const { return m_filePath; }
 		std::tstring& Ref( void ) { return m_filePath; }
@@ -276,16 +280,19 @@ namespace fs
 		CPath MakeUnixPath( void ) const { return CPath( m_filePath, func::ToUnixPathChar() ); }
 		CPath MakeWindowsPath( void ) const { return CPath( m_filePath, func::ToWinPathChar() ); }
 
-		CPath GetExpanded( void ) const;
+		bool HasEnvironVar( void ) const { return path::HasEnvironVar( m_filePath ); }
+		CPath GetExpanded( void ) const;	// expand enviroment variables
 		bool Expand( void );
+
+		bool StripPrefix( const fs::TDirPath& dirPath ) { return path::StripPrefix( m_filePath, dirPath.GetPtr() ); }
 
 		size_t GetDepth( void ) const;		// count of path elements up to the root
 
 		bool HasParentPath( void ) const { return GetFilenamePtr() != GetPtr(); }		// has a directory path?
 		TDirPath GetParentPath( bool trailSlash = false ) const;						// always a directory path
 
-		TRelativePath FindUpwardsRelativePath( size_t upLevel ) const { return TRelativePath( path::FindUpwardsRelativePath( GetPtr(), upLevel ) ); }
-		const TCHAR* FindUpwardsRelativePathPtr( size_t upLevel ) const { return path::FindUpwardsRelativePath( GetPtr(), upLevel ); }
+		TRelativePath GetRelativePath( size_t upLevel ) const { return TRelativePath( path::GetRelativePath( GetPtr(), upLevel ) ); }
+		const TCHAR* GetRelativePathPtr( size_t upLevel ) const { return path::GetRelativePath( GetPtr(), upLevel ); }
 
 		CPath& SetBackslash( bool trailSlash = true );
 
@@ -511,8 +518,8 @@ namespace pred
 			return fs::FileExist( pFilePath );
 		}
 
-		template< typename PathKey >
-		bool operator()( const PathKey& pathKey ) const
+		template< typename PathT >
+		bool operator()( const PathT& pathKey ) const
 		{
 			return func::PathOf( pathKey ).FileExist();
 		}
@@ -524,6 +531,16 @@ namespace pred
 		bool operator()( const std::tstring& path ) const
 		{
 			return fs::FileExist( path.c_str() );
+		}
+	};
+
+
+	struct IsGuidPath
+	{
+		template< typename PathT >
+		bool operator()( const PathT& filePath ) const
+		{
+			return path::IsGuidPath( str::traits::GetCharPtr( filePath ) );
 		}
 	};
 }
@@ -567,9 +584,10 @@ namespace fs
 
 namespace path
 {
-	fs::CPath StripWildcards( const fs::TPatternPath& patternPath );
+	inline bool StripPrefix( IN OUT fs::CPath& rPath, const fs::TDirPath& dirPath ) { return StripPrefix( rPath.Ref(), dirPath.GetPtr() ); }
 
 	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::TDirPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
+	fs::CPath StripWildcards( const fs::TPatternPath& patternPath );
 }
 
 
@@ -750,7 +768,8 @@ namespace path
 			typename ContainerT::const_iterator it = paths.begin();
 			const fs::TDirPath dirPath = func::PathOf( *it ).GetParentPath();
 
-			for ( ; it != paths.end(); ++it )
+			// start from the next item to find the common dir prefix
+			while ( ++it != paths.end() )
 				if ( func::PathOf( *it ).GetParentPath() != dirPath )
 					return true;
 		}
@@ -767,7 +786,8 @@ namespace path
 			typename ContainerT::const_iterator it = paths.begin();
 			commonPrefix = func::PathOf( *it ).GetParentPath().Get();
 
-			for ( ; it != paths.end(); ++it )
+			// start from the next item to find the common prefix
+			while ( ++it != paths.end() )
 			{
 				commonPrefix = path::FindCommonPrefix( commonPrefix.c_str(), func::PathOf( *it ).GetParentPath().GetPtr() );
 				if ( commonPrefix.empty() )

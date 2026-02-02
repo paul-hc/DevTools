@@ -5,7 +5,7 @@
 #include "test/ShellFileSystemTests.h"
 #include "Recycler.h"
 #include "ShellUtilities.h"
-#include "ShellContextMenuHost.h"
+#include "ShellPidl.h"
 #include "WinExplorer.h"
 #include "StringUtilities.h"
 
@@ -16,6 +16,8 @@
 
 namespace ut
 {
+	int TrackContextMenu( IContextMenu* pCtxMenu );		// FWD: defined in ShellPidlTests.cpp
+
 	size_t ShellDeleteFiles( const ut::CTempFilePool& pool, const TCHAR relFilePaths[] )
 	{
 		std::vector<fs::CPath> fullPaths;
@@ -126,19 +128,35 @@ void CShellFileSystemTests::TestMultiFileContextMenu( void )
 
 	for ( std::vector<fs::CPath>::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 	{
-		shellItems.push_back( shell::FindShellItem( *itFilePath ) );
+		shellItems.push_back( shell::MakeShellItem( itFilePath->GetPtr() ) );
 		ASSERT( shellItems.back() != nullptr );
 	}
 
-	CComPtr<IContextMenu> pContextMenu;
-	if ( true )
-		pContextMenu = shell::MakeItemsContextMenu( shellItems, nullptr );
-	else	//	for files in same folder - fails for DIR\\file3.txt
 	{
-		CComPtr<IShellItemArray> pShellItemArray = shell::MakeShellItemArray( shellItems );
-		ASSERT( HR_OK( pShellItemArray->BindToHandler( nullptr, BHID_SFUIObject, IID_PPV_ARGS( &pContextMenu ) ) ) );
+		CComPtr<IContextMenu> pContextMenu;
+
+		pContextMenu = shell::MakeItemsContextMenu( shellItems, nullptr );
+		ASSERT_PTR( pContextMenu );
+
+		//ut::TrackContextMenu( pContextMenu );
 	}
-	ASSERT_PTR( pContextMenu );
+
+	if (0)
+	{	// for files in same folder: binding fails for "DIR\file3.txt", so it doesn't work for heterogenous parent directory items
+		CComPtr<IShellItemArray> pShellItemArray = shell::MakeShellItemArray( shellItems );
+		CComPtr<IContextMenu> pContextMenu;
+
+		if ( !HR_OK( pShellItemArray->BindToHandler( nullptr, BHID_SFUIObject, IID_PPV_ARGS( &pContextMenu ) ) ) )
+			ASSERT( false );
+
+		CComPtr<IBindCtx> pBindCtx = shell::CreateFileSysBindContext();
+		if ( !HR_OK( pShellItemArray->BindToHandler( pBindCtx, BHID_SFUIObject, IID_PPV_ARGS( &pContextMenu ) ) ) )
+			ASSERT( false );
+
+		ASSERT_PTR( pContextMenu );
+
+		ut::TrackContextMenu( pContextMenu );
+	}
 }
 
 

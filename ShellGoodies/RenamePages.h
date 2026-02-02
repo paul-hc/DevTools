@@ -4,7 +4,7 @@
 
 #include "utl/ISubject.h"
 #include "utl/UI/LayoutPropertyPage.h"
-#include "utl/UI/ReportListControl.h"
+#include "utl/UI/PathItemListCtrl.h"
 #include "utl/UI/SelectionData.h"
 #include "utl/UI/SyncScrolling.h"
 #include "utl/UI/ThemeStatic.h"
@@ -66,7 +66,7 @@ private:
 protected:
 	// enum { IDD = IDD_REN_LIST_PAGE };
 
-	CReportListControl m_fileListCtrl;
+	CPathItemListCtrl m_fileListCtrl;
 
 	// generated stuff
 protected:

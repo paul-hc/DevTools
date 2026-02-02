@@ -2,44 +2,22 @@
 #define ShellContextMenuHost_h
 #pragma once
 
+#include "Path_fwd.h"
 #include "ui_fwd.h"
-#include "ShellTypes.h"
 #include "CmdIdStore.h"
+#include <shobjidl_core.h>		// for IContextMenu
 
 
 namespace shell
 {
 	// context menu of absolute item(s)
+	CComPtr<IContextMenu> MakeFilePathContextMenu( const TCHAR* pShellPath, HWND hWndOwner );
 	CComPtr<IContextMenu> MakeAbsoluteContextMenu( PCIDLIST_ABSOLUTE pidlAbs, HWND hWndOwner );
-	CComPtr<IContextMenu> MakeFilePathContextMenu( const std::tstring& filePath, HWND hWndOwner );
 
 	// context menu of child item(s)
 	CComPtr<IContextMenu> MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD pidlItem, HWND hWndOwner );
 	CComPtr<IContextMenu> MakeFolderItemsContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD_ARRAY pidlItemsArray, size_t itemCount, HWND hWndOwner );
 	CComPtr<IContextMenu> MakeItemContextMenu( IShellItem* pItem, HWND hWndOwner );
-
-	template< typename PathContainerT >
-	CComPtr<IContextMenu> MakeFilePathsContextMenu( const PathContainerT& filePaths, HWND hWndOwner )
-	{
-		CComPtr<IContextMenu> pCtxMenu;
-
-		std::vector<PIDLIST_RELATIVE> pidlItemsArray;
-		if ( CComPtr<IShellFolder> pParentFolder = MakeRelativePidlArray( pidlItemsArray, filePaths ) )
-			if ( !pidlItemsArray.empty() )		// may be empty if a single file was deleted/renamed during the lifetime of filePaths
-				pCtxMenu = MakeFolderItemsContextMenu( &*pParentFolder, (PCUITEMID_CHILD_ARRAY)&pidlItemsArray.front(), pidlItemsArray.size(), hWndOwner );
-
-		ClearOwningPidls( pidlItemsArray );
-		return pCtxMenu;
-	}
-
-	template< typename ShellItemContainerT >
-	CComPtr<IContextMenu> MakeItemsContextMenu( const ShellItemContainerT& shellItems, HWND hWndOwner )
-	{
-		std::vector<fs::CPath> filePaths;
-		shell::QueryFilePaths( filePaths, shellItems );
-
-		return shell::MakeFilePathsContextMenu( filePaths, hWndOwner );
-	}
 
 	bool InvokeCommandByVerb( IContextMenu* pContextMenu, const char* pVerb, CWnd* pWndOwner );
 	bool InvokeDefaultVerb( IContextMenu* pContextMenu, CWnd* pWndOwner );
@@ -134,8 +112,10 @@ class CShellLazyContextMenuHost : public CShellContextMenuHost
 {
 	friend class CExplorerSubMenuHook;
 public:
-	CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector<fs::CPath>& filePaths, UINT queryFlags = CMF_NORMAL );
+	CShellLazyContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu = nullptr, UINT queryFlags = CMF_NORMAL );
 	virtual ~CShellLazyContextMenuHost();
+
+	void StoreShellPaths( const std::vector<shell::TPath>& shellPaths ) { REQUIRE( !m_isLazyInit ); m_shellPaths = shellPaths; }
 
 	// base overrides
 	virtual int TrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags = TPM_RETURNCMD | TPM_RIGHTBUTTON );
@@ -143,9 +123,9 @@ protected:
 	virtual bool IsLazyUninit( void ) const;
 	bool LazyInit( void );
 private:
-	std::vector<fs::CPath> m_filePaths;
 	UINT m_queryFlags;
 	bool m_isLazyInit;
+	OPTIONAL std::vector<shell::TPath> m_shellPaths;				// paths to query the context menu on lazy init, unless the object is build with an existing context menu
 	std::auto_ptr<CExplorerSubMenuHook> m_pExplorerSubMenuHook;		// for lazy init: monitors when "Explorer" sub-menu gets expanded first time
 	std::auto_ptr<CTrackingHook> m_pTrackingHook;
 };

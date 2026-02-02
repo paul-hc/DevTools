@@ -43,7 +43,7 @@ namespace func
 
 	struct Dest_AsTargetPidl
 	{
-		const shell::CPidlAbsCp& operator()( const CEditLinkItem* pItem ) const { return pItem->GetDestShortcut().GetTargetPidl(); }
+		const shell::CPidlAbsolute& operator()( const CEditLinkItem* pItem ) const { return pItem->GetDestShortcut().GetTargetPidl(); }
 	};
 
 	struct Dest_AsWorkDirPath

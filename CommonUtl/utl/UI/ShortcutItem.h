@@ -31,7 +31,7 @@ namespace func
 
 	struct AsTargetPidl
 	{
-		const shell::CPidlAbsCp& operator()( const CShortcutItem* pItem ) const { return pItem->GetShortcut().GetTargetPidl(); }
+		const shell::CPidlAbsolute& operator()( const CShortcutItem* pItem ) const { return pItem->GetShortcut().GetTargetPidl(); }
 	};
 
 	struct AsWorkDirPath

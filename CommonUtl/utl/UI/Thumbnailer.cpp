@@ -7,6 +7,7 @@
 #include "ImagingWic.h"
 #include "StreamStdTypes.h"
 #include "StructuredStorage.h"
+#include "ShellPidl.h"
 #include "GdiCoords.h"
 #include "TimeUtils.h"
 #include "BaseApp.h"
@@ -64,10 +65,10 @@ bool CShellThumbCache::SetBoundsSize( const CSize& boundsSize )
 	return true;
 }
 
-CComPtr<IShellItem> CShellThumbCache::FindShellItem( const fs::CFlexPath& filePath ) const
+CComPtr<IShellItem> CShellThumbCache::MakeShellItem( const fs::CFlexPath& filePath ) const
 {
 	if ( !filePath.IsComplexPath() )
-		return m_shellExplorer.FindShellItem( filePath );
+		return m_shellExplorer.MakeShellItem( filePath );
 	return nullptr;
 }
 
@@ -255,7 +256,7 @@ CCachedThumbBitmap* CThumbnailer::AcquireThumbnail( const fs::CFlexPath& srcImag
 
 	if ( nullptr == pThumb )
 	{
-		imagePair.second = FindShellItem( srcImagePath );		// bind to the actual shell item
+		imagePair.second = MakeShellItem( srcImagePath );		// bind to the actual shell item
 		pThumb = ExtractThumb( imagePair );
 
 		if ( pThumb != nullptr && nullptr == imagePair.second )		// externally produced?
@@ -335,7 +336,24 @@ bool CThumbnailer::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const
 				pThumbnail->Draw( pDC, itemImageRect, ui::ShrinkFit );
 				return true;
 			}
+
+		if ( const CPathPidlItem* pPathPidlItem = dynamic_cast<const CPathPidlItem*>( pSubject ) )
+			if ( pPathPidlItem->IsSpecialPidl() )
+			{
+				UINT iconFlag = shell::GetSysIconSizeFlag( GetBoundsSize().cy );
+				std::pair<CImageList*, int> imagePair = pPathPidlItem->GetPidl().GetSysImageIndex( iconFlag );
+
+				if ( imagePair.first != nullptr )
+				{
+					CRect iconRect( CPoint( 0, 0 ), GetBoundsSize() );
+
+					ui::CenterRect( iconRect, itemImageRect );
+					imagePair.first->Draw( pDC, imagePair.second, iconRect.TopLeft(), ILD_TRANSPARENT );
+					return true;
+				}
+			}
 	}
+
 	return false;
 }
 

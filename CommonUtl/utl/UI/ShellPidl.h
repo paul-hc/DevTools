@@ -17,8 +17,7 @@ namespace shell
 	{
 	protected:
 		CBasePidl( void ) : m_pidl( nullptr ) {}
-		CBasePidl( CBasePidl& rRight ) : m_pidl( rRight.Release() ) {}		// copy-move constructor
-		explicit CBasePidl( PtrItemIdListT pidl ) : m_pidl( pidl ) {}		// take ownership of pidl
+		explicit CBasePidl( PtrItemIdListT pidl ) : m_pidl( pidl ) {}			// take ownership of pidl (MOVE)
 	public:
 		~CBasePidl() { Reset(); }
 
@@ -29,10 +28,11 @@ namespace shell
 		bool IsNull( void ) const { return nullptr == m_pidl; }
 		bool IsAligned( void ) const { return ::ILIsAligned( m_pidl ); }		// ITEMIDLIST pointer could be aligned/unaligned
 		bool HasValue( void ) const { return !pidl::IsEmpty( m_pidl ); }		// neither Null nor Empty
+		bool IsSpecialPidl( void ) const { return pidl::IsSpecialPidl( m_pidl ); }
 
 		// Empty referrs to Desktop folder, e.g. for "C:\Users\<UserName>\Desktop"
 		bool IsEmpty( void ) const { return pidl::IsEmptyStrict( m_pidl ); }	// Note: desktop PIDL is empty (but not null)
-		void SetEmpty( void ) { Reset( pidl::CreateEmptyPidl<PtrItemIdListT>() ); }
+		void SetEmpty( void ) { Reset( pidl::CreateEmptyPidl<PtrItemIdListT>() ); }		// i.e. desktop PIDL
 
 		size_t GetItemCount( void ) const { return pidl::GetItemCount( m_pidl ); }
 		size_t GetByteSize( void ) const { return pidl::GetByteSize( m_pidl ); }
@@ -40,8 +40,8 @@ namespace shell
 
 		PtrItemIdListT& Ref( void ) { Reset(); return m_pidl; }
 		PtrConstItemIdListT Get( void ) const { return m_pidl; }
-		void Set( PtrItemIdListT pidl, utl::Ownership ownership ) { utl::COPY == ownership ? AssignCopy( pidl ) : Reset( pidl ); }
 
+		operator PtrConstItemIdListT( void ) const { return m_pidl; }
 		PtrItemIdListT* operator&() { Reset(); return &m_pidl; }
 
 		void Reset( PtrItemIdListT pidl = nullptr )
@@ -65,15 +65,16 @@ namespace shell
 		bool operator==( const CBasePidl& rightPidl ) const { return ::ILIsEqual( AsAbsolute(), rightPidl.AsAbsolute() ); }
 		bool operator!=( const CBasePidl& rightPidl ) const { return !operator==( rightPidl ); }
 
+		shell::TPath ToShellPath( void ) const { return pidl::GetShellPath( AsAbsolute() ); }
 		std::tstring GetName( SIGDN nameType ) const { return pidl::GetName( AsAbsolute(), nameType ); }
-		std::tstring GetFnameExt( void ) const { return pidl::GetName( AsAbsolute(), SIGDN_NORMALDISPLAY ); }
-		fs::CPath ToPath( GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT ) const { return pidl::GetAbsolutePath( AsAbsolute(), optFlags ); }
+		std::tstring GetFilename( void ) const { return pidl::GetName( AsAbsolute(), SIGDN_NORMALDISPLAY ); }
+		std::tstring GetEditingName( void ) const { return GetName( SIGDN_DESKTOPABSOLUTEEDITING ); }
 
 		PUIDLIST_RELATIVE GetNextItem( void ) const { return ::ILNext( m_pidl ); }
 		PUITEMID_CHILD GetLastItem( void ) const { return ::ILFindLastID( AsRelative() ); }
 
 		void Combine( PCUIDLIST_RELATIVE rightPidlRel ) { Reset( ::ILCombine( Get(), rightPidlRel ) ); }	// works for PCUIDLIST_RELATIVE/PCUITEMID_CHILD
-		void RemoveLast( void ) { ::ILRemoveLastID( m_pidl ); }
+		bool RemoveLast( void ) { return ::ILRemoveLastID( m_pidl ) != FALSE; }		// transforms pidl to parent pidl
 
 		bool WriteToStream( OUT IStream* pStream ) const { return HR_OK( ::ILSaveToStream( pStream, m_pidl ) ); }
 		bool ReadFromStream( IN IStream* pStream ) { return HR_OK( ::ILLoadFromStreamEx( pStream, &Ref() ) ); }
@@ -90,7 +91,7 @@ namespace shell
 			CComPtr<IShellItem> pShellItem;
 			HRESULT hResult = pParentFolder != nullptr
 				? ::SHCreateItemWithParent( nullptr, pParentFolder, AsChild(), IID_PPV_ARGS( &pShellItem ) )
-				: ::SHCreateItemFromParsingName( ToPath().GetPtr(), nullptr, IID_PPV_ARGS( &pShellItem ) );
+				: ::SHCreateItemFromParsingName( ToShellPath().GetPtr(), nullptr, IID_PPV_ARGS( &pShellItem ) );
 
 			return HR_OK( hResult ) ? pShellItem : nullptr;
 		}
@@ -105,35 +106,38 @@ namespace shell
 	};
 
 
+	class CPidlChild;
+
+
 	class CPidlAbsolute : public CBasePidl<ITEMIDLIST_ABSOLUTE, PIDLIST_ABSOLUTE, PCIDLIST_ABSOLUTE>
 	{
 		typedef CBasePidl<ITEMIDLIST_ABSOLUTE, PIDLIST_ABSOLUTE, PCIDLIST_ABSOLUTE> TBasePidl;
 	public:
 		CPidlAbsolute( void ) {}
-		CPidlAbsolute( CPidlAbsolute& rRight ) : TBasePidl( rRight ) {}				// MOVE constructor
-		explicit CPidlAbsolute( PIDLIST_ABSOLUTE pidl, utl::Ownership ownership = utl::MOVE ) { Set( pidl, ownership ); }			// take ownership of pidl by default
+		CPidlAbsolute( const CPidlAbsolute& right ) : TBasePidl( ::ILCloneFull( right.Get() ) ) {}			// copy constructor
+		CPidlAbsolute( const TCHAR* pShellPath, DWORD fileAttribute = 0 ) { CreateFromShellPath( pShellPath, fileAttribute ); }
+		CPidlAbsolute( IUnknown* pShellItf ) { CreateFrom( pShellItf ); }
+		explicit CPidlAbsolute( PIDLIST_ABSOLUTE pidl ) : TBasePidl( pidl ) {}			// take ownership of pidl (MOVE)
+
 		explicit CPidlAbsolute( PIDLIST_ABSOLUTE rootPidl, PCUIDLIST_RELATIVE dirPathPidl, PCUITEMID_CHILD childPidl = nullptr );	// creates a copy with concatenation
 
-		bool CreateFromPath( const TCHAR* pFullPath ) { Reset( ::ILCreateFromPath( pFullPath ) ); return !IsNull(); }
+		CPidlAbsolute& operator=( const CPidlAbsolute& right );		// copy assignment
+
+		bool CreateFromShellPath( const TCHAR* pShellPath, DWORD fileAttribute = 0 );		// preferred, more general method; pass FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY for inexistent paths
+		bool CreateFromPath( const TCHAR* pFullPath ) { Reset( pidl::CreateFromPath( pFullPath ) ); return !IsNull(); }
+
+		SFGAOF GetAttributes( void ) const;
+		std::pair<CImageList*, int> GetSysImageIndex( UINT iconFlag = SHGFI_SMALLICON ) const;		// no ownership of the image list
+
+		bool GetParentPidl( OUT CPidlAbsolute& rParentPidl ) const;
+		PIDLIST_ABSOLUTE GetParentPidl( void ) const;				// caller must free the parent PIDL
+
+		bool GetChildPidl( OUT CPidlChild& rChildPidl ) const;
+		PUITEMID_CHILD GetChildPidl( void ) const;					// caller must free the parent PIDL
 
 		// advanced
-		bool CreateFrom( IUnknown* pUnknown );					// most general, works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
-		bool CreateFromFolder( IShellFolder* pShellFolder );	// ABSOLUTE pidl - superseeded by CreateFrom()
-	};
-
-
-	class CPidlAbsCp : public CPidlAbsolute		// copyable PIDL
-	{
-	public:
-		CPidlAbsCp( void ) {}
-		CPidlAbsCp( const CPidlAbsCp& right ) : CPidlAbsolute( ::ILCloneFull( right.Get() ) ) {}	// COPY constructor
-		explicit CPidlAbsCp( PIDLIST_ABSOLUTE pidl, utl::Ownership ownership = utl::MOVE ) : CPidlAbsolute( pidl, ownership ) {}	// optionally MOVE/COPY the pidl
-
-		CPidlAbsCp& operator=( const CPidlAbsCp& right )	// COPY assignment
-		{
-			Reset( ::ILCloneFull( right.Get() ) );
-			return *this;
-		}
+		bool CreateFrom( IUnknown* pShellItf );						// most general, works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
+		bool CreateFromFolder( IShellFolder* pShellFolder );		// ABSOLUTE pidl - superseeded by CreateFrom()
 	};
 
 
@@ -142,12 +146,14 @@ namespace shell
 		typedef CBasePidl<ITEMIDLIST_RELATIVE, PUIDLIST_RELATIVE, PCUIDLIST_RELATIVE> TBasePidl;
 	public:
 		CPidlRelative( void ) {}
-		CPidlRelative( CPidlRelative& rRight ) : TBasePidl( rRight ) {}				// copy-move constructor
-		explicit CPidlRelative( PIDLIST_RELATIVE pidl, utl::Ownership ownership = utl::MOVE ) { Set( pidl, ownership ); }		// take ownership of pidl by default
+		CPidlRelative( const CPidlRelative& right ) : TBasePidl( ::ILClone( right.Get() ) ) {}	// move constructor
+		explicit CPidlRelative( PIDLIST_RELATIVE pidl ) : TBasePidl( pidl ) {}					// take ownership of pidl (MOVE)
 
-		fs::TRelativePath ToRelativePath( IShellFolder* pFolder ) const { return shell::GetDisplayName( pFolder, AsChild() ); }
+		CPidlRelative& operator=( const CPidlRelative& right );		// copy assignment
 
-		bool CreateRelative( IShellFolder* pFolder, const TCHAR* pRelPath ) { Reset( pidl::CreateRelativePidl( pFolder, pRelPath ) ); return !IsNull(); }
+		std::tstring ToFilename( IShellFolder* pFolder ) const { return shell::GetFolderChildDisplayName( pFolder, AsChild() ); }	// doesn't work for deep relative paths!
+
+		bool CreateRelative( IShellFolder* pFolder, const TCHAR* pRelPath ) { Reset( pidl::ParseToRelativePidl( pFolder, pRelPath ) ); return !IsNull(); }
 
 		// relative PIDL compare
 		pred::CompareResult Compare( const CPidlRelative& rightPidlRel, IShellFolder* pParentFolder = GetDesktopFolder() ) const
@@ -172,23 +178,93 @@ namespace shell
 	public:
 		CPidlChild( void ) {}
 		CPidlChild( const CPidlChild& right ) : TBasePidl( ::ILCloneChild( right.Get() ) ) {}	// COPY constructor
-		explicit CPidlChild( PUITEMID_CHILD pidl, utl::Ownership ownership = utl::MOVE ) { Set( pidl, ownership ); }	// take ownership of pidl by default
+		explicit CPidlChild( PUITEMID_CHILD pidl ) : TBasePidl( pidl ) {}						// take ownership of pidl (MOVE)
 
-		bool CreateChild( IShellFolder* pFolder, const TCHAR* pFnameExt ) { Reset( pidl::CreateChilePidl( pFolder, pFnameExt ) ); return !IsNull(); }
+		CPidlChild& operator=( const CPidlChild& right );		// copy assignment
+
+		bool CreateChild( IShellFolder* pFolder, const TCHAR* pFilename ) { Reset( pidl::ParseToChildPidl( pFolder, pFilename ) ); return !IsNull(); }
 		bool CreateChild( const TCHAR* pFullPath );
-
-		// COPY assignment
-		CPidlChild& operator=( const CPidlChild& right ) { Reset( ::ILCloneChild( right.Get() ) ); return *this; }
 
 		// child PIDL compare
 		pred::CompareResult Compare( const CPidlRelative& rightPidlRel, IShellFolder* pParentFolder ) const { return pidl::Compare( Get(), rightPidlRel.Get(), pParentFolder ); }
 		bool Equals( const CPidlRelative& rightPidlRel, IShellFolder* pParentFolder ) const { return pred::Equal == Compare( rightPidlRel, pParentFolder ); }
+
+		// Note: name conversion methods GetName(), GetFilename(), ToPath() work only for file-system child PIDLs,
+		// but not for GUID based child PIDLs, such as a Control Panel applet.
+		// Use IShellItem or IShellFolder interfaces for name conversions of the CP applets.
+	};
+
+
+	// binds an IShellFolder and relative PIDLs corresponding to a set of shell paths that share a common ancestor folder
+	//
+	class CFolderRelativePidls : private utl::noncopyable
+	{
+	public:
+		CFolderRelativePidls( void ) {}
+		~CFolderRelativePidls() { Clear(); }
+
+		bool IsEmpty( void ) const { return m_relativePidls.empty(); }
+		void Clear( void );
+
+		template< typename PathContainerT >
+		bool Build( const PathContainerT& shellPaths )		// e.g. vector<shell::TPath>, vector<std::tstring>, vector<const TCHAR*>
+		{
+			Clear();
+			m_relativePaths.assign( shellPaths.begin(), shellPaths.end() );		// copy as absolute shell paths, later-on strip m_ancestorPath to convert to relative paths
+			return MakeRelativePidls();
+		}
+
+		const shell::TPath& GetAncestorPath( void ) const { return m_ancestorPath; }
+		const std::vector<shell::TRelativePath>& GetRelativePaths( void ) const { return m_relativePaths; }
+
+		const std::vector<PIDLIST_ABSOLUTE>& GetAbsolutePidls( void ) const { return m_absolutePidls; }
+		const std::vector<PIDLIST_RELATIVE>& GetRelativePidls( void ) const { return m_relativePidls; }
+
+		IShellFolder* GetAncestorFolder( void ) const { return m_pAncestorFolder; }
+		PCUITEMID_CHILD_ARRAY GetChildPidlArray( void ) const { return pidl::AsPidlArray<PCUITEMID_CHILD_ARRAY>( m_relativePidls ); }
+		PCIDLIST_ABSOLUTE_ARRAY GetAbsolutePidlArray( void ) const { return pidl::AsPidlArray<PCIDLIST_ABSOLUTE_ARRAY>( m_absolutePidls ); }
+
+		CComPtr<IContextMenu> MakeContextMenu( HWND hWndOwner ) const;
+		CComPtr<IShellItemArray> CreateShellItemArray( void ) const;
+
+		// unit testing
+		shell::TPath GetRelativePathAt( size_t posRelPidl ) const;
+	private:
+		bool MakeRelativePidls( void );
+	private:
+		shell::TPath m_ancestorPath;
+		std::vector<shell::TRelativePath> m_relativePaths;
+
+		CComPtr<IShellFolder> m_pAncestorFolder;
+		std::vector<PIDLIST_RELATIVE> m_relativePidls;		// with ownership
+		std::vector<PIDLIST_ABSOLUTE> m_absolutePidls;		// with ownership
 	};
 }
 
 
-// PIDL serialization:
+namespace shell
+{
+	// IContextMenu helpers on multiple selected files/items
 
+	template< typename PathContainerT >
+	CComPtr<IContextMenu> MakeFilePathsContextMenu( const PathContainerT& shellPaths, HWND hWndOwner )
+	{	// for mixed file system or virtual folder paths having a common ancestor folder (at least Desktop folder)
+		shell::CFolderRelativePidls multiPidls;
+		return multiPidls.Build( shellPaths ) ? multiPidls.MakeContextMenu( hWndOwner ) : nullptr;
+	}
+
+	template< typename ShellItemContainerT >
+	CComPtr<IContextMenu> MakeItemsContextMenu( const ShellItemContainerT& shellItems, HWND hWndOwner )
+	{
+		std::vector<shell::TPath> shellPaths;
+		shell::QueryShellPaths( shellPaths, shellItems );
+
+		return shell::MakeFilePathsContextMenu( shellPaths, hWndOwner );
+	}
+}
+
+
+// PIDL serialization:
 
 class CArchive;
 
@@ -208,6 +284,39 @@ inline CArchive& operator>>( CArchive& archive, OUT shell::CBasePidl<ItemIdListT
 {
 	return archive >> reinterpret_cast<LPITEMIDLIST&>( rPidl.Ref() );
 }
+
+
+#include "utl/PathItemBase.h"
+
+
+class CPathPidlItem : public CPathItemBase
+{
+	// hidden base methods
+	using CPathItemBase::SetFilePath;		// call SetShellPath() instead
+public:
+	CPathPidlItem( bool useDirPath = false );
+
+	void SetUseDirPath( bool useDirPath ) { m_fileAttribute = useDirPath ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL; }
+
+	bool IsEmpty( void ) const { return GetFilePath().IsEmpty() && m_specialPidl.IsNull(); }
+	bool IsFilePath( void ) const { return !GetFilePath().IsEmpty() && m_specialPidl.IsNull(); }
+	bool IsSpecialPidl( void ) const { return !m_specialPidl.IsNull(); }
+
+	const shell::TPath& GetShellPath( void ) const { return GetFilePath(); }
+	const shell::CPidlAbsolute& GetPidl( void ) const { return m_specialPidl; }
+
+	void SetShellPath( const shell::TPath& shellPath ) override;
+	void SetPidl( const shell::CPidlAbsolute& pidl );
+
+	bool ObjectExist( void ) const;
+
+	// I/O that uses SIGDN_DESKTOPABSOLUTEPARSING for pidl
+	std::tstring FormatPhysical( void ) const;
+	bool ParsePhysical( const std::tstring& shellPath );
+private:
+	DWORD m_fileAttribute;					// for non-existent fise-system paths
+	shell::CPidlAbsolute m_specialPidl;		// mutually exclusive with CPathItemBase::m_filePath, only for known folder PIDLs
+};
 
 
 #endif // ShellPidl_h

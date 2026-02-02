@@ -59,7 +59,7 @@ CMenu* CPathItemListCtrl::GetPopupMenu( ListPopup popupType )
 
 	if ( pSrcPopupMenu != nullptr && OnSelection == popupType && UseShellContextMenu() )
 	{
-		std::vector<fs::CPath> selFilePaths;
+		std::vector<shell::TPath> selFilePaths;
 		if ( QuerySelectedItemPaths( selFilePaths ) )
 			if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, selFilePaths ) )
 				return pContextPopup;

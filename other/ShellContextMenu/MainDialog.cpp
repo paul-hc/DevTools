@@ -65,7 +65,7 @@ CMainDialog::~CMainDialog()
 void CMainDialog::ReadDirectory( const std::tstring& dirPath )
 {
 	m_currDirPath = dirPath;
-	m_currDirImageIndex = shell::GetFileSysImageIndex( m_currDirPath.c_str() );
+	m_currDirImageIndex = shell::GetFileSysImageIndex( m_currDirPath.c_str() ).second;
 
 	utl::ClearOwningContainer( m_items );
 	QueryDirectoryItems( m_items, m_currDirPath );

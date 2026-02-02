@@ -116,47 +116,6 @@ namespace shell
 
 #ifdef USE_UT
 
-	const CFlagTags& GetTags_SFGAO_Flags( void )
-	{
-		static const CFlagTags::FlagDef s_flagDefs[] =
-		{
-			{ FLAG_TAG( SFGAO_CANCOPY ) },
-			{ FLAG_TAG( SFGAO_CANMOVE ) },
-			{ FLAG_TAG( SFGAO_CANLINK ) },
-			{ FLAG_TAG( SFGAO_STORAGE ) },
-			{ FLAG_TAG( SFGAO_CANRENAME ) },
-			{ FLAG_TAG( SFGAO_CANDELETE ) },
-			{ FLAG_TAG( SFGAO_HASPROPSHEET ) },
-			{ FLAG_TAG( SFGAO_DROPTARGET ) },
-			{ FLAG_TAG( SFGAO_PLACEHOLDER ) },
-			{ FLAG_TAG( SFGAO_SYSTEM ) },
-			{ FLAG_TAG( SFGAO_ENCRYPTED ) },
-			{ FLAG_TAG( SFGAO_ISSLOW ) },
-			{ FLAG_TAG( SFGAO_GHOSTED ) },
-			{ FLAG_TAG( SFGAO_LINK ) },
-			{ FLAG_TAG( SFGAO_SHARE ) },
-			{ FLAG_TAG( SFGAO_READONLY ) },
-			{ FLAG_TAG( SFGAO_HIDDEN ) },
-			{ FLAG_TAG( SFGAO_FILESYSANCESTOR ) },
-			{ FLAG_TAG( SFGAO_FOLDER ) },
-			{ FLAG_TAG( SFGAO_FILESYSTEM ) },
-			{ FLAG_TAG( SFGAO_HASSUBFOLDER ) },
-			{ FLAG_TAG( SFGAO_CONTENTSMASK ) },
-			{ FLAG_TAG( SFGAO_VALIDATE ) },
-			{ FLAG_TAG( SFGAO_REMOVABLE ) },
-			{ FLAG_TAG( SFGAO_COMPRESSED ) },
-			{ FLAG_TAG( SFGAO_BROWSABLE ) },
-			{ FLAG_TAG( SFGAO_NONENUMERATED ) },
-			{ FLAG_TAG( SFGAO_NEWCONTENT ) },
-			{ FLAG_TAG( SFGAO_CANMONIKER ) },
-			{ FLAG_TAG( SFGAO_HASSTORAGE ) },
-			{ FLAG_TAG( SFGAO_STREAM ) },
-			{ FLAG_TAG( SFGAO_STORAGEANCESTOR ) }
-		};
-		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
-		return s_tags;
-	}
-
 	const CFlagTags& GetTags_ShellLinkDataFlags( void )
 	{
 		static const CFlagTags::FlagDef s_flagDefs[] =
@@ -368,15 +327,15 @@ namespace shell
 		return diffFields;
 	}
 
-	bool CShortcut::SetTargetPidl( PIDLIST_ABSOLUTE pidl, utl::Ownership ownership /*= utl::MOVE*/ )
+	bool CShortcut::SetTargetPidl( PIDLIST_ABSOLUTE pidl )
 	{
-		if ( utl::COPY == ownership )
-			if ( shell::pidl::IsEqual( pidl, m_targetPidl.Get() ) )
-				return false;
+		bool changed = !shell::pidl::IsEqual( pidl, m_targetPidl.Get() );
 
-		m_targetPidl.Set( pidl, ownership );
-		SetFlag( m_changedFields, TargetPidl );
-		return true;
+		m_targetPidl.Reset( pidl );
+		if ( changed )
+			SetFlag( m_changedFields, TargetPidl );
+
+		return changed;
 	}
 
 	bool CShortcut::ModifyLinkDataFlags( DWORD clearFlags, DWORD setFlags )
@@ -398,30 +357,30 @@ namespace shell
 		return str::GetEmpty();
 	}
 
-	bool CShortcut::StoreTarget( const std::tstring& targetPathOrName, SIGDN pidlFmt /*= SIGDN_DESKTOPABSOLUTEEDITING*/ )
+	bool CShortcut::StoreTarget( const std::tstring& targetShellPath, SIGDN pidlFmt /*= SIGDN_DESKTOPABSOLUTEPARSING*/ )
 	{
 		bool changed = false;
 
-		if ( path::IsValidPath( targetPathOrName ) )
+		if ( path::IsValidPath( targetShellPath ) )
 		{
-			changed = SetTargetPath( targetPathOrName );
+			changed = SetTargetPath( targetShellPath );
 			if ( changed )
-				changed |= SetTargetPidl( ::ILCreateFromPath( targetPathOrName.c_str() ) );
+				changed |= SetTargetPidl( shell::pidl::ParseToPidlFileSys( targetShellPath.c_str() ) );
 		}
-		else if ( path::IsValidGuidPath( targetPathOrName ) )
+		else if ( path::IsValidGuidPath( targetShellPath ) )
 		{
 			if ( SIGDN_DESKTOPABSOLUTEPARSING == pidlFmt )
-				changed |= SetTargetPidl( shell::pidl::ParseToPidl( targetPathOrName.c_str(), shell::CreateFileSysBindContext( FILE_ATTRIBUTE_NORMAL ) ) );
+				changed |= SetTargetPidl( shell::pidl::ParseToPidlFileSys( targetShellPath.c_str() ) );
 			else
 			{
 				ASSERT( false );	// assume the pidl string was formatted as SIGDN_DESKTOPABSOLUTEEDITING, which is user-readable but not parsable
-				TRACE( _T("! CShortcut::StoreTarget(): ignoring input PIDL string '%s' since it's not parsable\n"), targetPathOrName.c_str() );
+				TRACE( _T("! CShortcut::StoreTarget(): ignoring input PIDL string '%s' since it's not parsable\n"), targetShellPath.c_str() );
 			}
 		}
 		else
 		{
-			ASSERT( targetPathOrName.empty() );
-			changed |= SetTargetPath( targetPathOrName );
+			ASSERT( targetShellPath.empty() );
+			changed |= SetTargetPath( targetShellPath );
 			changed |= SetTargetPidl( nullptr );
 		}
 

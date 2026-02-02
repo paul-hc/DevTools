@@ -344,6 +344,7 @@
     <ClInclude Include="StdManifest.h" />
     <ClInclude Include="StockValuesComboBox.h" />
     <ClInclude Include="StockValuesComboBox.hxx" />
+    <ClInclude Include="SubjectAdapter.h" />
     <ClInclude Include="SyncScrolling.h" />
     <ClInclude Include="SystemTray.h" />
     <ClInclude Include="SystemTray_fwd.h" />
@@ -538,6 +539,7 @@
     <ClCompile Include="SplitPushButton.cpp" />
     <ClCompile Include="StatusProgressService.cpp" />
     <ClCompile Include="StockValuesComboBox.cpp" />
+    <ClCompile Include="SubjectAdapter.cpp" />
     <ClCompile Include="SyncScrolling.cpp" />
     <ClCompile Include="SystemTray.cpp" />
     <ClCompile Include="TaskDialog.cpp" />

@@ -1,47 +1,16 @@
 
 #include "pch.h"
 #include "ObjectCtrlBase.h"
+#include "ShellPidl.h"
 #include "ShellContextMenuHost.h"
 #include "MenuUtilities.h"
 #include "PostCall.h"
 #include "WndUtils.h"
-#include "utl/Path.h"
 #include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-namespace ui
-{
-	// CCodeAdapter implementation
-
-	ui::ISubjectAdapter* CCodeAdapter::Instance( void )
-	{
-		static CCodeAdapter codeAdapter;
-		return &codeAdapter;
-	}
-
-	std::tstring CCodeAdapter::FormatCode( const utl::ISubject* pSubject ) const
-	{
-		return utl::GetSafeCode( pSubject );
-	}
-
-
-	// CDisplayCodeAdapter implementation
-
-	ui::ISubjectAdapter* CDisplayCodeAdapter::Instance( void )
-	{
-		static CDisplayCodeAdapter displayCodeAdapter;
-		return &displayCodeAdapter;
-	}
-
-	std::tstring CDisplayCodeAdapter::FormatCode( const utl::ISubject* pSubject ) const
-	{
-		return utl::GetSafeDisplayCode( pSubject );
-	}
-}
 
 
 CObjectCtrlBase::CObjectCtrlBase( CWnd* pCtrl, UINT ctrlAccelId /*= 0*/ )
@@ -104,23 +73,24 @@ void CObjectCtrlBase::SetShellContextMenuStyle( ShellContextMenuStyle shCtxStyle
 		m_shCtxQueryFlags = shCtxQueryFlags;
 }
 
-CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector<fs::CPath>& filePaths )
+CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector<shell::TPath>& shellPaths )
 {
-	REQUIRE( !filePaths.empty() );
+	REQUIRE( !shellPaths.empty() );
 	ASSERT_NULL( m_pShellMenuHost.get() );
 
 	if ( ExplorerSubMenu == m_shCtxStyle && nullptr == pSrcPopupMenu )
 		m_shCtxStyle = ShellMenuLast;
 
-	CComPtr<IContextMenu> pContextMenu = shell::MakeFilePathsContextMenu( filePaths, m_pCtrl->m_hWnd );
-	if ( pContextMenu == nullptr )
+	CComPtr<IContextMenu> pContextMenu = shell::MakeFilePathsContextMenu( shellPaths, m_pCtrl->m_hWnd );
+
+	if ( nullptr == pContextMenu )
 		return nullptr;
 
 	CMenu* pContextPopup = CMenu::FromHandle( ui::CloneMenu( pSrcPopupMenu != nullptr ? pSrcPopupMenu->GetSafeHmenu() : ::CreatePopupMenu() ) );
 
 	if ( ExplorerSubMenu == m_shCtxStyle )
 	{
-		m_pShellMenuHost.reset( new CShellLazyContextMenuHost( m_pTrackMenuTarget, filePaths, CMF_EXPLORE ) );	// lazy query the IContextMenu when expanding the "Explorer" sub-menu
+		m_pShellMenuHost.reset( new CShellLazyContextMenuHost( m_pTrackMenuTarget, pContextMenu, CMF_EXPLORE ) );	// lazy query the IContextMenu when expanding the "Explorer" sub-menu
 
 		pContextPopup->AppendMenu( MF_BYPOSITION, MF_SEPARATOR );
 		pContextPopup->AppendMenu( MF_BYPOSITION | MF_POPUP, (UINT_PTR)m_pShellMenuHost->GetPopupMenu()->GetSafeHmenu(), _T("E&xplorer") );
@@ -149,6 +119,16 @@ CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::ve
 	return nullptr;
 }
 
+CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const shell::TPath& shellPath )
+{
+	if ( shellPath.IsEmpty() )
+		return nullptr;
+
+	std::vector<shell::TPath> shellPaths( 1, shellPath );
+
+	return MakeContextMenuHost( pSrcPopupMenu, shellPaths );
+}
+
 bool CObjectCtrlBase::DoTrackContextMenu( CMenu* pPopupMenu, const CPoint& screenPos )
 {
 	ASSERT_PTR( pPopupMenu->GetSafeHmenu() );
@@ -169,22 +149,22 @@ void CObjectCtrlBase::ResetShellContextMenu( void )
 	m_pShellMenuHost.reset();
 }
 
-bool CObjectCtrlBase::ShellInvokeDefaultVerb( const std::vector<fs::CPath>& filePaths )
+bool CObjectCtrlBase::ShellInvokeDefaultVerb( const std::vector<shell::TPath>& shellPaths )
 {
-	REQUIRE( !filePaths.empty() );
+	REQUIRE( !shellPaths.empty() );
 
 	CShellContextMenuHost contextMenu( m_pCtrl );
-	contextMenu.Reset( shell::MakeFilePathsContextMenu( filePaths, m_pCtrl->m_hWnd ) );
+	contextMenu.Reset( shell::MakeFilePathsContextMenu( shellPaths, m_pCtrl->m_hWnd ) );
 
 	return contextMenu.InvokeDefaultVerb();
 }
 
-bool CObjectCtrlBase::ShellInvokeProperties( const std::vector<fs::CPath>& filePaths )
+bool CObjectCtrlBase::ShellInvokeProperties( const std::vector<shell::TPath>& shellPaths )
 {
-	REQUIRE( !filePaths.empty() );
+	REQUIRE( !shellPaths.empty() );
 
 	CShellContextMenuHost contextMenu( m_pCtrl );
-	contextMenu.Reset( shell::MakeFilePathsContextMenu( filePaths, m_pCtrl->m_hWnd ) );
+	contextMenu.Reset( shell::MakeFilePathsContextMenu( shellPaths, m_pCtrl->m_hWnd ) );
 
 	if ( contextMenu.MakePopupMenu( CMF_NORMAL ) )
 		if ( contextMenu.InvokeVerb( "properties" ) )

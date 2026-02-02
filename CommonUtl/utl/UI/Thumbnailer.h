@@ -44,7 +44,7 @@ public:
 	bool IsValidShellCache( void ) const { return m_pShellThumbCache != nullptr; }
 	void ReleaseShellCache( void );
 
-	CComPtr<IShellItem> FindShellItem( const fs::CFlexPath& filePath ) const;
+	CComPtr<IShellItem> MakeShellItem( const fs::CFlexPath& filePath ) const;
 
 	CCachedThumbBitmap* ExtractThumb( const TShellItemPair& imagePair );
 	CCachedThumbBitmap* GenerateThumb( const TShellItemPair& imagePair );

@@ -8,6 +8,12 @@
 #include "test/UnitTest.h"
 
 
+namespace ut
+{
+	int TrackContextMenu( IContextMenu* pCtxMenu );
+}
+
+
 class CShellPidlTests : public ut::CConsoleTestCase
 {
 	CShellPidlTests( void );
@@ -19,7 +25,10 @@ public:
 private:
 	void TestNullAndEmptyPidl( void );
 	void TestShellPidl( void );
-	void TestShellRelativePidl( void );
+	void TestFolderRelativePidls( void );
+	void TestPidlType( void );
+	void TestParentPidl( void );
+	void TestCommonAncestorPidl( void );
 };
 
 

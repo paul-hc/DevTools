@@ -2,14 +2,9 @@
 #define PathItemListCtrl_h
 #pragma once
 
+#include "utl/Path.h"
 #include "ReportListControl.h"
-#include "Path.h"
-
-
-namespace ui
-{
-	inline ui::ISubjectAdapter* GetFullPathAdapter( void ) { return ui::CCodeAdapter::Instance(); }
-}
+#include "SubjectAdapter.h"
 
 
 // List control made of path items that implement utl::ISubject, typically CPathItemBase

@@ -23,4 +23,11 @@ namespace fs
 }
 
 
+namespace shell
+{
+	typedef fs::CPath TPath;		// alias for a SHELL PATH, which is either a file-system path (fs::CPath) or a GUID path (e.g. Control Panel folder, applet, etc)
+	typedef TPath TRelativePath;	// alias for a relative SHELL PATH
+}
+
+
 #endif // Path_fwd_h

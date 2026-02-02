@@ -485,7 +485,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestShortcutsCmd( const std::vector<CEdi
 		const CEditLinkItem* pLinkItem = editLinkItems[i];
 
 		shell::CShortcut newShortcut;
-		fmt::ParseClipShortcut( newShortcut, lines[i].c_str(), &pLinkItem->GetFilePath() );
+		fmt::ParseClipShortcut( newShortcut, lines[i].c_str() );
 
 		destShortcuts.push_back( newShortcut );
 		anyChange |= newShortcut != pLinkItem->GetDestShortcut();

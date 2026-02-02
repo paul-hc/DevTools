@@ -61,7 +61,7 @@ namespace shell
 		return Handle( pFolder->ParseDisplayName( nullptr, nullptr, displayName, nullptr, pPidl, nullptr ) );
 	}
 
-	CComPtr<IShellFolder> CWinExplorer::FindShellFolder( const TCHAR* pDirPath ) const
+	CComPtr<IShellFolder> CWinExplorer::MakeShellFolder( const TCHAR* pDirPath ) const
 	{
 		CComPtr<IShellFolder> pDirFolder;
 		if ( fs::IsValidDirectory( pDirPath ) )
@@ -77,14 +77,14 @@ namespace shell
 	}
 
 
-	CComPtr<IShellItem> CWinExplorer::FindShellItem( const fs::CPath& fullPath ) const
+	CComPtr<IShellItem> CWinExplorer::MakeShellItem( const shell::TPath& shellPath ) const
 	{
 		CComPtr<IShellItem> pShellItem;
-		Handle( ::SHCreateItemFromParsingName( fullPath.GetPtr(), nullptr, IID_PPV_ARGS( &pShellItem ) ) );
+		Handle( ::SHCreateItemFromParsingName( shellPath.GetPtr(), nullptr, IID_PPV_ARGS( &pShellItem ) ) );
 		return pShellItem;
 	}
 
-	std::tstring CWinExplorer::GetItemDisplayName( IShellItem* pShellItem, SIGDN nameType /*= SIGDN_FILESYSPATH*/ ) const
+	std::tstring CWinExplorer::GetItemDisplayName( IShellItem* pShellItem, SIGDN nameType /*= SIGDN_DESKTOPABSOLUTEPARSING (was SIGDN_FILESYSPATH)*/ ) const
 	{
 		ASSERT_PTR( pShellItem );
 
@@ -98,7 +98,7 @@ namespace shell
 
 	HBITMAP CWinExplorer::ExtractThumbnail( const fs::CPath& filePath, const CSize& boundsSize, DWORD flags /*= 0*/ ) const
 	{
-		CComPtr<IShellFolder> pDirFolder = FindShellFolder( filePath.GetParentPath().GetPtr() );
+		CComPtr<IShellFolder> pDirFolder = MakeShellFolder( filePath.GetParentPath().GetPtr() );
 		if ( pDirFolder != nullptr )
 		{
 			CComPtr<IExtractImage> pExtractImage = BindFileTo<IExtractImage>( pDirFolder, filePath.GetFilenamePtr() );

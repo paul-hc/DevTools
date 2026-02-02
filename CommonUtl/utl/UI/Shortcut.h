@@ -32,7 +32,6 @@ namespace shell
 	bool ResolveShortcut( OUT fs::CPath& rTargetPath, const TCHAR* pLnkPath, CWnd* pWnd = nullptr );
 
 #ifdef USE_UT
-	const CFlagTags& GetTags_SFGAO_Flags( void );
 	const CFlagTags& GetTags_ShellLinkDataFlags( void );
 #endif
 }
@@ -76,7 +75,7 @@ namespace shell
 		bool operator!=( const CShortcut& right ) const { return !operator==( right ); }
 
 		const fs::CPath& GetTargetPath( void ) const { return m_targetPath; }
-		const shell::CPidlAbsCp& GetTargetPidl( void ) const { return m_targetPidl; }
+		const shell::CPidlAbsolute& GetTargetPidl( void ) const { return m_targetPidl; }
 		const fs::CPath& GetWorkDirPath( void ) const { return m_workDirPath; }
 		const std::tstring& GetArguments( void ) const { return m_arguments; }
 		const std::tstring& GetDescription( void ) const { return m_description; }
@@ -109,7 +108,7 @@ namespace shell
 		TFields GetDiffFields( const CShortcut& right ) const;		// evaluate fields that are different from 'right'
 
 		bool SetTargetPath( const fs::CPath& targetPath ) { return AssignField( m_targetPath, targetPath, TargetPath ); }
-		bool SetTargetPidl( PIDLIST_ABSOLUTE pidl, utl::Ownership ownership = utl::MOVE );
+		bool SetTargetPidl( PIDLIST_ABSOLUTE pidl );				// take ownership
 		bool SetWorkDirPath( const fs::CPath& workDirPath ) { return AssignField( m_workDirPath, workDirPath, WorkDirPath ); }
 		bool SetArguments( const std::tstring& arguments ) { return AssignField( m_arguments, arguments, Arguments ); }
 		bool SetDescription( const std::tstring& description ) { return AssignField( m_description, description, Description ); }
@@ -121,7 +120,7 @@ namespace shell
 
 		// taget as either PATH (file system) or PIDL (non file system)
 		std::tstring FormatTarget( SIGDN pidlFmt = SIGDN_DESKTOPABSOLUTEEDITING ) const;		// SIGDN_DESKTOPABSOLUTEEDITING is for UI display
-		bool StoreTarget( const std::tstring& targetPathOrName, SIGDN pidlFmt = SIGDN_DESKTOPABSOLUTEEDITING );
+		bool StoreTarget( const std::tstring& targetShellPath, SIGDN pidlFmt = SIGDN_DESKTOPABSOLUTEPARSING );		// ShellPath: FileOrGuidPath
 
 		// persistence
 		friend inline CArchive& operator<<( CArchive& archive, const CShortcut& shortcut ) { shortcut.Save( archive ); return archive; }
@@ -145,7 +144,7 @@ namespace shell
 		}
 	private:
 		fs::CPath m_targetPath;
-		shell::CPidlAbsCp m_targetPidl;
+		shell::CPidlAbsolute m_targetPidl;
 		fs::CPath m_workDirPath;
 		std::tstring m_arguments;
 		std::tstring m_description;

@@ -752,6 +752,9 @@
     <ClInclude Include="test\ShellPidlTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="SubjectAdapter.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1281,6 +1284,9 @@
     </ClCompile>
     <ClCompile Include="test\ShellPidlTests.cpp">
       <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="SubjectAdapter.cpp">
+      <Filter>UI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

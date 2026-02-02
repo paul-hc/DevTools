@@ -311,7 +311,12 @@ namespace path
 	{
 		return
 			IsValidBasePath( strPath )
-			&& str::HasPrefix( strPath.c_str(), CDelims::s_guidPrefix.c_str(), CDelims::s_guidPrefix.length() );
+			&& IsGuidPath( strPath.c_str() );
+	}
+
+	bool HasEnvironVar( const std::tstring& strPath )
+	{	// contains expandable "%envVar%" or "$(envVar)" substrings?
+		return env::HasAnyVariable( strPath );
 	}
 
 
@@ -349,6 +354,11 @@ namespace path
 	{
 		ASSERT_PTR( pPath );
 		return ::PathIsFileSpec( CWindowsPath( pPath ) ) != FALSE;
+	}
+
+	bool IsGuidPath( const TCHAR* pShellPath )
+	{
+		return !str::IsEmpty( pShellPath ) && str::HasPrefix( pShellPath, CDelims::s_guidPrefix.c_str(), CDelims::s_guidPrefix.length() );
 	}
 
 	bool HasDirectory( const TCHAR* pPath )
@@ -542,7 +552,7 @@ namespace path
 		return dirPath;
 	}
 
-	const TCHAR* FindUpwardsRelativePath( const TCHAR* pSrcFilePath, size_t upLevel )
+	const TCHAR* GetRelativePath( const TCHAR* pSrcFilePath, size_t upLevel )
 	{	// for "C:\dev\code\DevTools\TestDataUtl\images\Dice.png", upLevel=2  ->  "TestDataUtl\images\Dice.png"
 		ASSERT_PTR( pSrcFilePath );
 
@@ -792,20 +802,20 @@ namespace path
 		return restPath;
 	}
 
-	bool StripPrefix( std::tstring& rPath, const TCHAR* pPrefix )
+	bool StripPrefix( std::tstring& rStrPath, const TCHAR* pPrefix )
 	{
 		if ( str::IsEmpty( pPrefix ) )
 			return true;					// nothing to strip, not an error
 
 		if ( size_t prefixLen = str::GetLength( pPrefix ) )
-			if ( pred::Equal == CompareEquivalent( rPath.c_str(), pPrefix, prefixLen ) )
+			if ( pred::Equal == CompareEquivalent( rStrPath.c_str(), pPrefix, prefixLen ) )
 			{
-				TCHAR chNext = rPath.c_str()[ prefixLen ];
+				TCHAR chNext = rStrPath.c_str()[ prefixLen ];
 
 				if ( IsSlash( chNext ) || CDelims::s_complexPathSep == chNext )
 					++prefixLen;			// cut leading slash or '>'
 
-				rPath.erase( 0, prefixLen );
+				rStrPath.erase( 0, prefixLen );
 				return true;				// changed
 			}
 
@@ -938,7 +948,7 @@ namespace fs
 
 	CPath CPath::GetExpanded( void ) const
 	{
-		return CPath( env::ExpandStrings( GetPtr() ) );
+		return CPath( env::ExpandPaths( GetPtr() ) );
 	}
 
 	bool CPath::Expand( void )

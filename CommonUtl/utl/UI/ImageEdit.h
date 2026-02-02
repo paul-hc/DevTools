@@ -21,7 +21,7 @@ public:
 protected:
 	virtual void DrawImage( CDC* pDC, const CRect& imageRect );
 
-	void UpdateControl( void );
+	virtual void UpdateControl( void );
 private:
 	void ResizeNonClient( void );
 private:

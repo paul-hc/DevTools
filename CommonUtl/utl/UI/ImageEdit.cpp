@@ -33,9 +33,7 @@ bool CImageEdit::SetImageIndex( int imageIndex )
 	if ( !utl::ModifyValue( m_imageIndex, imageIndex ) )
 		return false;
 
-	if ( m_hWnd != nullptr )
-		UpdateControl();
-
+	UpdateControl();
 	return true;
 }
 
@@ -64,8 +62,7 @@ void CImageEdit::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
 
-	if ( m_pImageList != nullptr )
-		ResizeNonClient();
+	UpdateControl();
 }
 
 

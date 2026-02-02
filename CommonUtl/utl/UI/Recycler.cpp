@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "Recycler.h"
+#include "ShellPidl.h"
 #include "ShellContextMenuHost.h"
 #include "utl/Algorithms.h"
 #include "utl/ContainerOwnership.h"
@@ -65,13 +66,13 @@ namespace shell
 	CComPtr<IEnumShellItems> CRecycler::GetEnumItems( void ) const
 	{
 		CComPtr<IEnumShellItems> pEnumItems;
-		if ( HR_OK( m_pRecyclerItem->BindToHandler( nullptr, BHID_EnumItems, IID_PPV_ARGS( &pEnumItems ) ) ) )
-			return pEnumItems;
+		if ( !HR_OK( m_pRecyclerItem->BindToHandler( nullptr, BHID_EnumItems, IID_PPV_ARGS( &pEnumItems ) ) ) )
+			return nullptr;
 
-		return nullptr;
+		return pEnumItems;
 	}
 
-	void CRecycler::QueryRecycledItems( std::vector<IShellItem2*>& rRecycledItems, const TCHAR* pOrigPrefixOrSpec, path::SpecMatch minMatch /*= path::Match_Any*/ ) const
+	void CRecycler::QueryRecycledItems( OUT std::vector<IShellItem2*>& rRecycledItems, const TCHAR* pOrigPrefixOrSpec, path::SpecMatch minMatch /*= path::Match_Any*/ ) const
 	{
 		// pOrigPrefixOrSpec could be:
 		//	"" or NULL - no filter, return all recycled items
@@ -99,7 +100,7 @@ namespace shell
 			rRecycledItems.push_back( itItem->first );
 	}
 
-	void CRecycler::QueryMultiRecycledItems( std::vector<IShellItem2*>& rRecycledItems, const std::vector<fs::CPath>& delFilePaths ) const
+	void CRecycler::QueryMultiRecycledItems( OUT std::vector<IShellItem2*>& rRecycledItems, const std::vector<fs::CPath>& delFilePaths ) const
 	{
 		REQUIRE( rRecycledItems.empty() );						// any previous items must have been released by caller
 		rRecycledItems.resize( delFilePaths.size() );			// reset to NULL all recycled items (corresponding to each file in delFilePaths)
@@ -141,24 +142,28 @@ namespace shell
 		}
 	}
 
-	IShellItem2* CRecycler::FindRecycledItem( const fs::CPath& delFilePath ) const
+	CComPtr<IShellItem2> CRecycler::FindRecycledItem( const fs::CPath& delFilePath ) const
 	{
+		std::vector<fs::CPath> delFilePaths( 1, delFilePath );
 		std::vector<IShellItem2*> recycledItems;
-		QueryMultiRecycledItems( recycledItems, std::vector<fs::CPath>( 1, delFilePath ) );
-		ASSERT( 1 == recycledItems.size() );
 
-		return recycledItems.front();
+		QueryMultiRecycledItems( recycledItems, delFilePaths );
+		ENSURE( recycledItems.size() <= 1 );
+
+		CComPtr<IShellItem2> pRecycledItem;
+
+		if ( !recycledItems.empty() )
+			pRecycledItem.Attach( recycledItems.front() );
+
+		return pRecycledItem;
 	}
 
 	bool CRecycler::UndeleteFile( const fs::CPath& delFilePath, CWnd* pWndOwner )
 	{
-		bool succeeded = false;
-		if ( IShellItem2* pRecycledItem = FindRecycledItem( delFilePath ) )
-		{
-			succeeded = UndeleteItem( pRecycledItem, pWndOwner );
-			pRecycledItem->Release();		// release previously AddRef-ed item interface
-		}
-		return succeeded;
+		if ( CComPtr<IShellItem2> pRecycledItem = FindRecycledItem( delFilePath ) )
+			return UndeleteItem( pRecycledItem, pWndOwner );
+
+		return false;
 	}
 
 	size_t CRecycler::UndeleteMultiFiles( const std::vector<fs::CPath>& delFilePaths, CWnd* pWndOwner, std::vector<fs::CPath>* pErrorFilePaths /*= nullptr*/ )
@@ -238,6 +243,7 @@ namespace shell
 		ASSERT_PTR( pRecycledItem );
 		if ( CComPtr<IContextMenu> pContextMenu = shell::MakeItemContextMenu( pRecycledItem, pWndOwner->GetSafeHwnd() ) )
 			return Undelete( pContextMenu, pWndOwner );
+
 		return false;
 	}
 

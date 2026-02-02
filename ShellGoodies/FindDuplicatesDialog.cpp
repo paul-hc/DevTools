@@ -247,7 +247,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 
 	m_dupsListCtrl.SetPopupMenu( CReportListControl::Nowhere, &GetDupListPopupMenu( CReportListControl::Nowhere ) );
 	m_dupsListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetDupListPopupMenu( CReportListControl::OnSelection ) );
-	m_dupsListCtrl.SetTrackMenuTarget( this );
+	m_dupsListCtrl.SetTrackMenuTarget( this );		// firstly handle our custom commands in this dialog
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_dupsListCtrl );
 
 	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewPropertyComparator<CDuplicateFileItem, pred::TCompareNameExt>( CDuplicateFileItem::ToNameExt() ) );

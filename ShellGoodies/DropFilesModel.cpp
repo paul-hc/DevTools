@@ -133,7 +133,7 @@ void CDropFilesModel::InitDeepPasteFolders( void )
 
 void CDropFilesModel::RegisterFolderImage( const fs::CPath& folderPath )
 {
-	if ( HICON hFolderIcon = shell::GetFileSysIcon( folderPath.GetPtr(), SHGFI_SMALLICON ) )
+	if ( HICON hFolderIcon = shell::ExtractFileSysIcon( folderPath.GetPtr(), SHGFI_SMALLICON ) )
 		m_pImageStore->RegisterIcon( BaseImageId + static_cast<UINT>( m_relFolderPathSeq.size() - 1 ), CIcon::LoadNewIcon( hFolderIcon ) );		// match the folder index
 }
 
