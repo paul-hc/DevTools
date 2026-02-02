@@ -167,7 +167,7 @@ namespace env
 {
 	// environment variables
 
-	bool HasAnyVariable( const std::tstring& source );
+	bool HasAnyVariable( const std::tstring& source );			// contains expandable "%envVar%" or "$(envVar)" substrings?
 
 	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue = nullptr );
 	bool SetVariableValue( const TCHAR varName[], const TCHAR* pValue );

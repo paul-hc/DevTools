@@ -101,8 +101,9 @@ namespace ut
 		oss << pTestCaseName << "::" << pTestMethod;
 
 		if ( qualifyGraphicTest && is_a<CGraphicTestCase>( pTestCase ) )
-			oss << " (graphic) : ";
+			oss << " (graphic)";
 
+		oss << " : ";
 		return oss.str();
 	}
 }

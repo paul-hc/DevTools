@@ -3,12 +3,11 @@
 #pragma once
 
 
-#define FLAG_TAG( flag )  flag, _T(#flag)
-	// pair to be used in static initializer lists: { MyFlag, _T("MyFlag") }
+#define FLAG_TAG( flag )  flag, _T(#flag)		// pair to be used in static initializer lists: { MyFlag, _T("MyFlag") }
 
 
 // formatter of bit field flags with values in sequence: 2^0, 2^1, ... 2^31
-
+//
 class CFlagTags
 {
 public:
@@ -22,7 +21,7 @@ public:
 	CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags = nullptr );
 
 	// for sparse individual flags; uiTags follows the same order
-	CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags = std::tstring() );
+	CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags = str::GetEmpty() );
 
 	~CFlagTags();
 
@@ -31,10 +30,10 @@ public:
 	const std::vector<std::tstring>& GetUiTags( void ) const { return m_uiTags; }
 
 	std::tstring FormatKey( int flags, const TCHAR* pSep = m_tagSep ) const { return Format( flags, m_keyTags, pSep ); }
-	void ParseKey( int* pFlags, const std::tstring& text, const TCHAR* pSep = m_tagSep ) const { Parse( pFlags, text, m_keyTags, pSep, str::Case ); }
+	void ParseKey( OUT int* pFlags, const std::tstring& text, const TCHAR* pSep = m_tagSep ) const { Parse( pFlags, text, m_keyTags, pSep, str::Case ); }
 
 	std::tstring FormatUi( int flags, const TCHAR* pSep = m_tagSep ) const { return Format( flags, m_uiTags, pSep ); }
-	void ParseUi( int* pFlags, const std::tstring& text, const TCHAR* pSep = m_tagSep ) const { Parse( pFlags, text, m_uiTags, pSep, str::IgnoreCase ); }
+	void ParseUi( OUT int* pFlags, const std::tstring& text, const TCHAR* pSep = m_tagSep ) const { Parse( pFlags, text, m_uiTags, pSep, str::IgnoreCase ); }
 
 	enum TagType { KeyTag, UiTag };
 
@@ -46,7 +45,7 @@ private:
 	int LookupBitPos( unsigned int flag ) const { int pos = FindBitPos( flag ); ENSURE( pos < (int)m_uiTags.size() ); return pos; }
 
 	static std::tstring Format( int flags, const std::vector<std::tstring>& tags, const TCHAR* pSep );
-	static void Parse( int* pFlags, const std::tstring& text, const std::vector<std::tstring>& tags, const TCHAR* pSep, str::CaseType caseType );
+	static void Parse( OUT int* pFlags, const std::tstring& text, const std::vector<std::tstring>& tags, const TCHAR* pSep, str::CaseType caseType );
 	static bool Contains( const std::vector<std::tstring>& strings, const std::tstring& value, str::CaseType caseType );
 private:
 	enum { MaxBits = 8 * sizeof( int ) };
@@ -57,6 +56,60 @@ private:
 public:
 	static const TCHAR m_listSep[];
 	static const TCHAR m_tagSep[];
+};
+
+
+#include <unordered_map>
+
+#define VALUE_TAG( value )  value, _T(#value)		// pair to be used in static initializer lists: { MyValue, _T("MyFlag") }
+
+
+// formatter of value with tags
+//
+class CValueTags
+{
+public:
+	struct ValueDef
+	{
+		long m_value;
+		const TCHAR* m_pKeyTag;
+	};
+
+	CValueTags( const ValueDef valueDefs[], unsigned int count, const TCHAR* pUiTags = nullptr );
+
+	const std::tstring& FormatKey( long value ) const { return Format( value, KeyTag ); }
+	const std::tstring& FormatUi( long value ) const { return Format( value, UiTag ); }
+
+	template< typename ValueT >
+	bool ParseKey( OUT ValueT* pValue, const std::tstring& text ) const
+	{
+		long value = 0;
+		if ( !Parse( &value, text, KeyTag ) )
+			return false;
+
+		*pValue = static_cast<ValueT>( value );
+		return true;
+	}
+
+	template< typename ValueT >
+	bool ParseUi( OUT ValueT* pValue, const std::tstring& text ) const
+	{
+		long value = 0;
+		if ( !Parse( &value, text, UiTag ) )
+			return false;
+
+		*pValue = static_cast<ValueT>( value );
+		return true;
+	}
+private:
+	typedef std::pair<std::tstring, std::tstring> TKeyUiTags;
+	enum TagType { KeyTag, UiTag };
+
+	const TKeyUiTags& LookupTags( long value ) const;
+	const std::tstring& Format( long value, TagType tagType ) const;
+	bool Parse( OUT long* pValue, const std::tstring& text, TagType tagType ) const;
+private:
+	std::unordered_map<long, TKeyUiTags> m_valueTags;
 };
 
 

@@ -57,7 +57,7 @@ public:
 	virtual ui::ICustomImageDraw* GetRenderer( void ) const = 0;
 	virtual bool SetCurrGlyphGauge( ui::GlyphGauge currGlyphGauge ) = 0;
 private:
-	CImageList m_imageLists[ ui::_GlyphGaugeCount ];	// [ui::SmallGlyph, ui::LargeGlyph] containing transparent images - to be painted over
+	CImageList m_imageLists[ ui::_GlyphGaugeCount ];	// [ui::SmallGlyph, ui::LargeGlyph] containing 1 transparent image, to be painted over
 	int m_transpImageIndex;								// index of the transparent entry in the image list
 };
 

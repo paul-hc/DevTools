@@ -212,10 +212,10 @@ namespace utl
 	inline typename ContainerT::value_type* Data( ContainerT& rItems ) { return rItems.data(); }
 #else
 	template< typename ContainerT >
-	inline const typename ContainerT::value_type* Data( const ContainerT& items ) { return !items.empty() ? &items.front() : NULL; }
+	inline const typename ContainerT::value_type* Data( const ContainerT& items ) { return !items.empty() ? &items.front() : nullptr; }
 
 	template< typename ContainerT >
-	inline typename ContainerT::value_type* Data( ContainerT& rItems ) { return !rItems.empty() ? &rItems.front() : NULL; }
+	inline typename ContainerT::value_type* Data( ContainerT& rItems ) { return !rItems.empty() ? &rItems.front() : nullptr; }
 #endif
 
 

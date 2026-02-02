@@ -2,11 +2,14 @@
 #include "pch.h"
 #include "FlagTags.h"
 #include "StringUtilities.h"
+#include "Algorithms.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+
+// CFlagTags implementation
 
 const TCHAR CFlagTags::m_listSep[] = _T("|");
 const TCHAR CFlagTags::m_tagSep[] = _T("|");
@@ -22,7 +25,7 @@ CFlagTags::CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= null
 	ENSURE( m_keyTags.empty() || m_keyTags.size() == m_uiTags.size() );
 }
 
-CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags /*= std::tstring()*/ )
+CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags /*= str::GetEmpty()*/ )
 {
 	ASSERT( count <= MaxBits );
 
@@ -124,7 +127,7 @@ int CFlagTags::FindBitPos( unsigned int flag )
 const std::tstring& CFlagTags::LookupTag( TagType tag, int flag ) const
 {
 	int pos = LookupBitPos( flag );
-	return KeyTag == tag ? m_keyTags[ pos ] : m_uiTags[ pos ];
+	return KeyTag == tag ? m_keyTags[pos] : m_uiTags[pos];
 }
 
 int CFlagTags::FindFlag( TagType tag, const std::tstring& flagOn ) const
@@ -132,8 +135,64 @@ int CFlagTags::FindFlag( TagType tag, const std::tstring& flagOn ) const
 	const std::vector<std::tstring>& tags = KeyTag == tag ? m_keyTags : m_uiTags;
 
 	for ( size_t i = 0; i != tags.size(); ++i )
-		if ( str::EqualString<str::IgnoreCase>( tags[ i ], flagOn ) )
+		if ( str::EqualString<str::IgnoreCase>( tags[i], flagOn ) )
 			return ToBitFlag( static_cast<int>( i ) );
 
 	return -1;
+}
+
+
+// CValueTags implementation
+
+CValueTags::CValueTags( const ValueDef valueDefs[], unsigned int count, const TCHAR* pUiTags /*= nullptr*/ )
+{
+	std::vector<std::tstring> uiTags;
+
+	if ( pUiTags != nullptr )
+		str::Split( uiTags, pUiTags, CFlagTags::m_listSep );
+
+	ASSERT( uiTags.empty() || uiTags.size() == count );
+
+	for ( size_t i = 0; i != count; ++i )
+	{
+		m_valueTags[ valueDefs[i].m_value ] = TKeyUiTags( valueDefs[i].m_pKeyTag, !uiTags.empty() ? uiTags[i] : str::GetEmpty() );
+	}
+}
+
+const CValueTags::TKeyUiTags& CValueTags::LookupTags( long value ) const
+{
+	if ( const CValueTags::TKeyUiTags* pKeyUiTags = utl::FindValuePtr( m_valueTags, value ) )
+		return *pKeyUiTags;
+
+	static const TKeyUiTags s_missing( _T("?"), _T("?") );
+	return s_missing;
+}
+
+const std::tstring& CValueTags::Format( long value, TagType tagType ) const
+{
+	const CValueTags::TKeyUiTags& keyUiTags = LookupTags( value );
+
+	if ( UiTag == tagType && !keyUiTags.second.empty() )
+		return keyUiTags.second;		// UI tag
+
+	return keyUiTags.first;				// key tag
+}
+
+bool CValueTags::Parse( OUT long* pValue, const std::tstring& text, TagType tagType ) const
+{
+	using namespace str::ignore_case;
+
+	for ( std::unordered_map<long, TKeyUiTags>::const_iterator itMap = m_valueTags.begin(); itMap != m_valueTags.end(); ++itMap )
+	{
+		const CValueTags::TKeyUiTags& keyUiTags = itMap->second;
+		const std::tstring& tag = UiTag == tagType && !keyUiTags.second.empty() ? keyUiTags.second : keyUiTags.first;
+
+		if ( text == tag )
+		{
+			*pValue = itMap->first;
+			return true;
+		}
+	}
+
+	return false;
 }

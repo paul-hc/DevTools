@@ -736,7 +736,7 @@ private:
 
 	std::list<CDiffColumnPair> m_diffColumnPairs;
 
-	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
+	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking in one of the pre-defined zones in the list
 	std::auto_ptr<CLabelEdit> m_pLabelEdit;					// stores the label info during inline editing
 
 	ui::ICommandFrame* m_pFrameEditor;						// for frame editor command handling mode

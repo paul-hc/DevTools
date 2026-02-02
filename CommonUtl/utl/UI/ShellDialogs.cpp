@@ -44,7 +44,7 @@ namespace shell
 	}
 
 
-	bool BrowseForFolder( fs::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= nullptr*/,
+	bool BrowseForFolder( OUT fs::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= nullptr*/,
 						  BrowseFlags flags /*= BF_FileSystem*/, const TCHAR* pTitle /*= nullptr*/, bool useNetwork /*= false*/ )
 	{
 		bool isOk = false;
@@ -97,7 +97,7 @@ namespace shell
 	}
 
 
-	bool BrowseForFile( fs::CPath& rFilePath, CWnd* pParentWnd, BrowseMode browseMode /*= FileOpen*/,
+	bool BrowseForFile( OUT fs::CPath& rFilePath, CWnd* pParentWnd, BrowseMode browseMode /*= FileOpen*/,
 						const TCHAR* pFileFilter /*= nullptr*/, DWORD flags /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
 		impl::CScopedFileDialog scopedDlg( pFileFilter );
@@ -106,7 +106,7 @@ namespace shell
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
 
-	bool PickFolder( fs::TDirPath& rFilePath, CWnd* pParentWnd,
+	bool PickFolder( OUT fs::TDirPath& rFilePath, CWnd* pParentWnd,
 					 FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
 		impl::CScopedFileDialog scopedDlg( nullptr );
@@ -123,7 +123,7 @@ namespace shell
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
 
-	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= nullptr*/ )
+	bool BrowseAutoPath( OUT fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= nullptr*/ )
 	{
 		fs::CPath path;
 		std::tstring wildSpec;
@@ -174,7 +174,7 @@ namespace shell
 			return pDlg;
 		}
 
-		bool RunFileDialog( fs::CPath& rFilePath, CFileDialog* pFileDialog )
+		bool RunFileDialog( OUT fs::CPath& rFilePath, CFileDialog* pFileDialog )
 		{
 			ASSERT_PTR( pFileDialog );
 			if ( pFileDialog->DoModal() != IDOK )
