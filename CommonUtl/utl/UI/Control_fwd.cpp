@@ -56,10 +56,10 @@ namespace ui
 				custTandemAlign |= V_TileMate;
 		}
 
-		if ( HasFlag( custTandemAlign, H_TileMate ) )
+		if ( HasFlag( custTandemAlign, H_TileMate ) && rMateRect.Width() != 0 )
 			tileRect.InflateRect( rMateRect.Width() + m_spacing.cx, 0 );
 
-		if ( HasFlag( custTandemAlign, V_TileMate ) )
+		if ( HasFlag( custTandemAlign, V_TileMate ) && rMateRect.Height() != 0 )
 			tileRect.InflateRect( 0, rMateRect.Height() + m_spacing.cy );
 
 		ui::AlignRect( rMateRect, tileRect, m_tandemAlign );
@@ -67,7 +67,7 @@ namespace ui
 
 	void CTandemLayout::ShrinkHostRect( CRect& rHostRect, const CSize& mateSize ) const
 	{
-		if ( HasFlag( m_tandemAlign, H_ShrinkHost ) )
+		if ( HasFlag( m_tandemAlign, H_ShrinkHost ) && mateSize.cx != 0 )		// offset by spacing only if we have a mate width
 			switch ( m_tandemAlign & HorizontalMask )
 			{
 				case H_AlignLeft:
@@ -78,7 +78,7 @@ namespace ui
 					break;
 			}
 
-		if ( HasFlag( m_tandemAlign, V_ShrinkHost ) )
+		if ( HasFlag( m_tandemAlign, V_ShrinkHost ) && mateSize.cy != 0 )		// offset by spacing only if we have a mate height
 			switch ( m_tandemAlign & VerticalMask )
 			{
 				case V_AlignTop:
