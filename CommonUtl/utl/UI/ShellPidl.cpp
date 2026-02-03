@@ -188,6 +188,8 @@ namespace shell
 
 	bool CFolderRelativePidls::MakeRelativePidls( void )
 	{
+		utl::for_each( m_relativePaths, func::ExpandPath() );				// expand all input shell paths
+
 		const std::vector<shell::TPath>& shellPaths = m_relativePaths;		// initially the absolute shell paths are stored
 
 		if ( shellPaths.empty() )
