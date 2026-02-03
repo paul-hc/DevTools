@@ -112,6 +112,10 @@ namespace shell
 	class CPidlAbsolute : public CBasePidl<ITEMIDLIST_ABSOLUTE, PIDLIST_ABSOLUTE, PCIDLIST_ABSOLUTE>
 	{
 		typedef CBasePidl<ITEMIDLIST_ABSOLUTE, PIDLIST_ABSOLUTE, PCIDLIST_ABSOLUTE> TBasePidl;
+
+		// hidden base methods
+		using TBasePidl::IsEmpty;
+		using TBasePidl::SetEmpty;
 	public:
 		CPidlAbsolute( void ) {}
 		CPidlAbsolute( const CPidlAbsolute& right ) : TBasePidl( ::ILCloneFull( right.Get() ) ) {}			// copy constructor
@@ -123,8 +127,12 @@ namespace shell
 
 		CPidlAbsolute& operator=( const CPidlAbsolute& right );		// copy assignment
 
-		bool CreateFromShellPath( const TCHAR* pShellPath, DWORD fileAttribute = 0 );		// preferred, more general method; pass FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY for inexistent paths
-		bool CreateFromPath( const TCHAR* pFullPath ) { Reset( pidl::CreateFromPath( pFullPath ) ); return !IsNull(); }
+		bool CreateFromShellPath( const TCHAR* pShellPath, DWORD fileAttribute = 0 );	// preferred, more general method; pass FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY for inexistent paths
+		bool CreateFromPath( const TCHAR* pExistingShellPath ) { Reset( pidl::CreateFromPath( pExistingShellPath ) ); return !IsNull(); }
+
+		// desktop PIDL is empty (but not null)
+		bool IsDesktop( void ) const { return IsEmpty(); }
+		void CreateDesktop( void ) { SetEmpty(); }
 
 		SFGAOF GetAttributes( void ) const;
 		std::pair<CImageList*, int> GetSysImageIndex( UINT iconFlag = SHGFI_SMALLICON ) const;		// no ownership of the image list

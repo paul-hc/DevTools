@@ -9,12 +9,12 @@
 
 namespace mt
 {
-	CScopedInitializeCom::CScopedInitializeCom( void )
+	CScopedInitializeCom::CScopedInitializeCom( DWORD coInit /*= COINIT_APARTMENTTHREADED*/ )
 		: m_comInitialized( false )
 	{
 		HRESULT hResult =
 		#if ( ( _WIN32_WINNT >= 0x0400 ) || defined( _WIN32_DCOM ) )	// DCOM
-			::CoInitializeEx( nullptr, COINIT_MULTITHREADED );
+			::CoInitializeEx( nullptr, coInit );
 		#else
 			::CoInitialize( nullptr );
 		#endif

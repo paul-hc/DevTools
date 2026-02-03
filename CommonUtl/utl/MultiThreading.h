@@ -21,7 +21,7 @@ namespace mt
 	class CScopedInitializeCom
 	{
 	public:
-		CScopedInitializeCom( void );
+		CScopedInitializeCom( DWORD coInit = COINIT_APARTMENTTHREADED );
 		~CScopedInitializeCom() { Uninitialize(); }
 
 		void Uninitialize( void );

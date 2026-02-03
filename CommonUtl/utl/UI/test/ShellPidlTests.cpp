@@ -87,24 +87,28 @@ void CShellPidlTests::TestNullAndEmptyPidl( void )
 		shell::CPidlAbsolute pidl;
 
 		ASSERT( pidl.IsNull() );
-		pidl.SetEmpty();
-		ASSERT( pidl.IsEmpty() );
+		pidl.CreateDesktop();
+		ASSERT( pidl.IsDesktop() );
 		ASSERT( !pidl.HasValue() );
 		ASSERT_EQUAL( _T("Desktop"), pidl.ToShellPath().GetFilename() );
 
 		ASSERT( pidl.CreateFromPath( tempDirPath.GetPtr() ) );
-		ASSERT( !pidl.IsEmpty() );
+		ASSERT( !pidl.IsDesktop() );
 		ASSERT( pidl.HasValue() );
 		ASSERT_EQUAL( tempDirPath, pidl.ToShellPath() );
 
 		{
-			shell::CPidlAbsolute pidl2;
+			shell::CPidlAbsolute pidl2, pidl3;
 
-			ASSERT( pidl2.CreateFromShellPath( tempDirPath.GetPtr() ) );
+			{
+				ASSERT( pidl2.CreateFromShellPath( tempDirPath.GetPtr() ) );
+				ASSERT( pidl3.CreateFromShellPath( tempDirPath.GetPtr(), FILE_ATTRIBUTE_NORMAL ) );
 
-			ASSERT_EQUAL( pidl.ToShellPath(), pidl2.ToShellPath() );
-			// CreateFromPath() and CreateFromShellPath() created different PIDs (bitwise), but are equivalent in parsing name:
-			ASSERT( pidl != pidl2 );
+				ASSERT_EQUAL( pidl.ToShellPath(), pidl2.ToShellPath() );
+				ASSERT_EQUAL( pidl.ToShellPath(), pidl3.ToShellPath() );
+				ASSERT( pidl != pidl2 );	// CreateFromPath() and CreateFromShellPath(path, 0 ) created different PIDs (bitwise), but are equivalent in parsing name
+				ASSERT( pidl == pidl3 );	// with FILE_ATTRIBUTE_NORMAL: identical bitwise
+			}
 		}
 
 		{
@@ -130,14 +134,35 @@ void CShellPidlTests::TestNullAndEmptyPidl( void )
 		shell::CPidlAbsolute desktopPidl;
 
 		ASSERT( desktopPidl.CreateFromFolder( pDesktopFolder ) );
-		ASSERT( desktopPidl.IsEmpty() );		// Desktop == empty
+		ASSERT( desktopPidl.IsDesktop() );		// Desktop == empty
 
 		shell::CPidlAbsolute desktopPidl2;
 
-		ASSERT( desktopPidl2.CreateFrom( pDesktopFolder ) );
-		ASSERT( desktopPidl2.IsEmpty() );		// Desktop == empty
+		desktopPidl2.CreateDesktop();
+		ASSERT( desktopPidl2.IsDesktop() );		// Desktop == empty
 		ASSERT( desktopPidl == desktopPidl2 );
 	}
+}
+
+void CShellPidlTests::TestCreateFromPath( void )
+{
+	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
+
+	shell::CPidlAbsolute pidl;
+
+	ASSERT( pidl.CreateFromPath( pool.GetFilePathAt( 0 ).GetPtr() ) );
+	ASSERT_EQUAL( _T("fa.txt"), pidl.GetFilename() );
+
+	ASSERT( pidl.CreateFromPath( pool.GetFilePathAt( 1 ).GetPtr() ) );
+	ASSERT_EQUAL( _T("d1\\fb.txt"), pidl.ToShellPath().GetRelativePath( 2 ) );
+
+	ASSERT( pidl.CreateFromPath( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}") ) );
+	ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items\\Region"), pidl.GetEditingName() );
+
+	// non-existent file: it fails
+	fs::CPath naFilePath = pool.GetPoolDirPath() / _T("NA.txt");
+	ASSERT( !pidl.CreateFromPath( naFilePath.GetPtr() ) );
+	ASSERT( pidl.IsNull() );
 }
 
 void CShellPidlTests::TestShellPidl( void )
@@ -155,12 +180,12 @@ void CShellPidlTests::TestShellPidl( void )
 	shell::CPidlAbsolute poolDirPidl;
 	{
 		ASSERT( poolDirPidl.IsNull() );
-		poolDirPidl.SetEmpty();
-		ASSERT( poolDirPidl.IsEmpty() );
+		poolDirPidl.CreateDesktop();
+		ASSERT( poolDirPidl.IsDesktop() );
 		ASSERT( !poolDirPidl.HasValue() );
 
 		ASSERT( poolDirPidl.CreateFromShellPath( poolDirPath.GetPtr() ) );
-		ASSERT( !poolDirPidl.IsEmpty() );
+		ASSERT( !poolDirPidl.IsDesktop() );
 		ASSERT( poolDirPidl.HasValue() );
 		ASSERT_EQUAL( poolDirPath, poolDirPidl.ToShellPath() );
 	}
@@ -230,7 +255,7 @@ void CShellPidlTests::TestShellPidl( void )
 		shell::CPidlAbsolute copyPidl = filePidl;	// copy assignment
 
 		ASSERT( !pidl.IsNull() && copyPidl.Get() != filePidl.Get() );
-		ASSERT( !copyPidl.IsEmpty() );
+		ASSERT( !copyPidl.IsDesktop() );
 		ASSERT_EQUAL( filePath, copyPidl.ToShellPath() );
 	}
 
@@ -651,7 +676,7 @@ void CShellPidlTests::TestCommonAncestorPidl( void )
 		shell::CPidlAbsolute fileSystemPidl( pool.GetFilePathAt( 0 ).GetPtr() );
 
 		ancestorPidl.Reset( shell::pidl::GetCommonAncestor( fileSystemPidl, cpRegionPidl ) );
-		ASSERT( ancestorPidl.IsEmpty() );
+		ASSERT( ancestorPidl.IsDesktop() );
 		ASSERT_EQUAL( _T("Desktop"), ancestorPidl.ToShellPath().GetFilename() );		// "C:\Users\Paul\Desktop"
 		ASSERT_EQUAL( _T("Desktop"), ancestorPidl.GetEditingName() );
 
@@ -679,6 +704,7 @@ void CShellPidlTests::TestCommonAncestorPidl( void )
 void CShellPidlTests::Run( void )
 {
 	RUN_TEST( TestNullAndEmptyPidl );
+	RUN_TEST( TestCreateFromPath );
 	RUN_TEST( TestShellPidl );
 	RUN_TEST( TestFolderRelativePidls );
 	RUN_TEST( TestPidlType );

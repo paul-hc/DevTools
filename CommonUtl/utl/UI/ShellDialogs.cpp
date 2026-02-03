@@ -5,6 +5,7 @@
 #include "FileSystem_fwd.h"
 #include "TreeControl.h"
 #include "utl/Algorithms.h"
+#include "utl/MultiThreading.h"
 #include <unordered_map>
 
 #ifdef _DEBUG
@@ -35,6 +36,45 @@ namespace shell
 		};
 
 
+		CComPtr<IFileOpenDialog> GetFileOpenDialog( CFileDialog* pFileDlg )
+		{
+			ASSERT_PTR( pFileDlg );
+			CComPtr<IFileOpenDialog> pFileOpenDialog;
+
+			if ( s_useVistaStyle )
+				pFileOpenDialog.Attach( pFileDlg->GetIFileOpenDialog() );
+
+			return pFileOpenDialog;
+		}
+
+		bool GetFirstShellPath( OUT shell::TPath& rShellPath, IShellItemArray* pSelItems )
+		{
+			ASSERT_PTR( pSelItems );
+
+			DWORD itemCount = 0;
+			if ( HR_OK( pSelItems->GetCount( &itemCount ) ) && itemCount != 0 )
+			{
+				CComPtr<IShellItem> pFirstItem;
+				if ( HR_OK( pSelItems->GetItemAt( 0, &pFirstItem ) ) )
+				{
+					rShellPath = shell::GetItemShellPath( pFirstItem );
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool GetFirstShellPath( OUT shell::TPath& rShellPath, CFileDialog* pFileDlg )
+		{
+			ASSERT_PTR( pFileDlg );
+
+			CComPtr<IShellItemArray> pSelItems;
+			pSelItems.Attach( pFileDlg->GetResults() );
+
+			return pSelItems != nullptr && GetFirstShellPath( rShellPath, pSelItems );
+		}
+
+
 		// BrowseForFolder callback
 
 		static TCHAR s_initFolderPath[ MAX_PATH ];
@@ -44,7 +84,7 @@ namespace shell
 	}
 
 
-	bool BrowseForFolder( OUT fs::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= nullptr*/,
+	bool BrowseForFolder( OUT shell::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= nullptr*/,
 						  BrowseFlags flags /*= BF_FileSystem*/, const TCHAR* pTitle /*= nullptr*/, bool useNetwork /*= false*/ )
 	{
 		bool isOk = false;
@@ -74,23 +114,24 @@ namespace shell
 			bi.ulFlags |= BIF_DONTGOBELOWDOMAIN;		// could be slow network binding
 		bi.lpfn = impl::BrowseFolderCallback;
 
-		CPidlAbsolute pidlFolder( ::SHBrowseForFolder( &bi ) );
+		CPidlAbsolute folderPidl( ::SHBrowseForFolder( &bi ) );
 
 		if ( pDisplayedName != nullptr )
 			*pDisplayedName = displayName;
 
-		if ( !pidlFolder.IsEmpty() )
+		if ( !folderPidl.IsNull() )		// was !folderPidl.IsEmpty()
 		{
-			if ( ::SHGetPathFromIDList( pidlFolder.Get(), impl::s_initFolderPath ) )
-			{
-				rFolderPath.Set( impl::s_initFolderPath );
+			rFolderPath = folderPidl.ToShellPath();
+			if ( !rFolderPath.IsEmpty() )
 				isOk = true;
-			}
 			else if ( flags == BF_Computers || flags == BF_All || flags == BF_AllIncludeFiles )
 			{
 				rFolderPath.Set( displayName );
 				isOk = true;
 			}
+
+			if ( isOk )
+				str::Copy( impl::s_initFolderPath, rFolderPath.Get() );
 		}
 
 		return isOk;
@@ -106,21 +147,48 @@ namespace shell
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
 
-	bool PickFolder( OUT fs::TDirPath& rFilePath, CWnd* pParentWnd,
+	bool PickFolder( OUT fs::TDirPath& rFolderPath, CWnd* pParentWnd,
 					 FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
-		impl::CScopedFileDialog scopedDlg( nullptr );
+		mt::CScopedInitializeCom scopedCom;		// Vista-style file dialogs require COM initialization
 
-		scopedDlg.StoreDialog( impl::MakeFileDialog( rFilePath, pParentWnd, FileOpen, std::tstring(), 0, pTitle ) );		// no filter for picking folders
+		DWORD ofnFlags = OFN_PATHMUSTEXIST;
+		std::tstring wildPattern;
 
-		if ( shell::s_useVistaStyle )				// prevent MFC assertion in CFileDialog
-			if ( IFileOpenDialog* pFileOpenDialog = scopedDlg.m_pFileDlg->GetIFileOpenDialog() )
+		if ( path::ContainsWildcards( rFolderPath.GetFilenamePtr() ) )
+		{
+			SetFlag( ofnFlags, OFN_NOVALIDATE );		// allow wildcards in return string
+			wildPattern = rFolderPath.GetFilenamePtr();
+
+			if ( nullptr == pTitle )
+				pTitle = _T("Select Folder Pattern");
+		}
+
+		CFolderPickerDialog folderDlg( rFolderPath.GetPtr(), ofnFlags, pParentWnd, 0, true );
+
+		if ( pTitle != nullptr )
+			folderDlg.m_ofn.lpstrTitle = pTitle;
+
+		if ( options != 0 )
+			if ( CComPtr<IFileOpenDialog> pFileOpenDialog = impl::GetFileOpenDialog( &folderDlg ) )
 			{
-				pFileOpenDialog->SetOptions( FOS_PICKFOLDERS | options );
-				pFileOpenDialog->Release();			// ** cannot use CComPtrIFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion any way, shape or form
+				FILEOPENDIALOGOPTIONS origOptions;
+				if ( HR_OK( pFileOpenDialog->GetOptions( &origOptions ) ) )
+					if ( !HR_OK( pFileOpenDialog->SetOptions( origOptions | options ) ) )
+						TRACE( "# Warning: couldn't modify FILEOPENDIALOGOPTIONS options in PickFolder() dialog!\n" );
 			}
 
-		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
+		if ( folderDlg.DoModal() != IDOK )
+			return false;
+
+		if ( !impl::GetFirstShellPath( rFolderPath, &folderDlg ) )
+			return false;
+
+		if ( !path::ContainsWildcards( rFolderPath.GetFilenamePtr() ) )		// no returned pattern? - actually that's not possible
+			if ( !wildPattern.empty() )
+				rFolderPath /= wildPattern;		// restore the original wildcard pattern
+
+		return true;
 	}
 
 	bool BrowseAutoPath( OUT fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= nullptr*/ )
@@ -251,9 +319,11 @@ namespace shell
 				{
 					// it seems no longer necessary
 					// set the status window to the currently selected path
-					TCHAR dirPath[ MAX_PATH ];
-					if ( ::SHGetPathFromIDList( (PCIDLIST_ABSOLUTE)lParam, dirPath ) )
-						SendMessage( hDlg, BFFM_SETSTATUSTEXT, 0, (LPARAM)dirPath );
+					PCIDLIST_ABSOLUTE folderPidl = (PCIDLIST_ABSOLUTE)lParam;
+					shell::TPath folderPath = shell::pidl::GetShellPath( folderPidl );
+
+					if ( !folderPath.IsEmpty() )
+						SendMessage( hDlg, BFFM_SETSTATUSTEXT, 0, (LPARAM)folderPath.GetPtr() );
 
 					if ( Initialized == s_browseFolderStatus )
 					{

@@ -173,13 +173,19 @@ namespace shell
 		return nullptr;
 	}
 
+	bool RequiresFileSysBindContext( const TCHAR* pShellPath )
+	{
+		return
+			path::IsGuidPath( pShellPath )		// parsing GUID paths to PIDL require a bind context
+			|| !fs::FileExist( pShellPath );	// inexistent file/directory paths require a proxy bind context
+	}
+
 	CComPtr<IBindCtx> AutoFileSysBindContext( const TCHAR* pShellPath, IBindCtx* pBindCtx /*= nullptr*/ )
 	{
 		ASSERT_PTR( pShellPath );
 
 		if ( AUTO_BIND_CTX == pBindCtx || AUTO_FOLDER_BIND_CTX == pBindCtx )
-			if ( path::IsGuidPath( pShellPath )			// parsing GUID paths to PIDL require a bind context
-				 || !fs::FileExist( pShellPath ) )		// inexistent file/directory paths require a proxy bind context
+			if ( RequiresFileSysBindContext( pShellPath ) )
 				return CreateFileSysBindContext( AUTO_FOLDER_BIND_CTX == pBindCtx ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL );
 			else
 				return nullptr;
@@ -550,6 +556,32 @@ namespace shell
 		}
 
 
+		PIDLIST_ABSOLUTE CreateFromPath( const TCHAR* pExistingShellPath )
+		{
+			if ( path::HasEnvironVar( pExistingShellPath ) )
+				return CreateFromPath( shell::TPath::GetExpanded( pExistingShellPath ).GetPtr() );	// recurse with expaned path
+
+			PIDLIST_ABSOLUTE pidlAbs = nullptr;
+
+			// handle for uniform behaviour on 32/64 builds:
+		#ifdef _WIN64
+			// 64-bit build: succeeds for any existing file-system path or GUID path (virtual folder)
+			pidlAbs = ::ILCreateFromPath( pExistingShellPath );
+		#else
+			// 32-bit build: succeeds for any existing file-system path, but it fails for GUID path (virtual folder)
+			if ( path::IsGuidPath( pExistingShellPath ) )
+			{
+				pidlAbs = ParseToPidlFileSys( pExistingShellPath );
+				ENSURE( nullptr == ::ILCreateFromPath( pExistingShellPath ) );
+			}
+			else
+				pidlAbs = ::ILCreateFromPath( pExistingShellPath );
+		#endif // !_WIN64
+
+			return pidlAbs;
+		}
+
+		// Similar with CreateFromPath(), but also works for non-existen file system paths.
 		// This performs the same function as ::SHSimpleIDListFromPath(), which is deprecated.
 		//
 		// pShellPath: could be either a file/folder path, or a GuidPath (display name formatted with SIGDN_DESKTOPABSOLUTEPARSING).
@@ -562,15 +594,14 @@ namespace shell
 		//
 		PIDLIST_ABSOLUTE ParseToPidl( const TCHAR* pShellPath, IBindCtx* pBindCtx /*= nullptr*/ )
 		{
-			PIDLIST_ABSOLUTE pidlAbs = nullptr;
-			shell::TPath expandedShellPath( pShellPath );
+			if ( path::HasEnvironVar( pShellPath ) )
+				return ParseToPidl( shell::TPath::GetExpanded( pShellPath ).GetPtr(), pBindCtx );	// recurse with expaned path
 
-			if ( expandedShellPath.HasEnvironVar() )
-				expandedShellPath.Expand();
+			PIDLIST_ABSOLUTE pidlAbs = nullptr;
 
 			// This can parse non-existent files and Control Panel apps correctly.
 			// For non-existent files/folders pass a pBindCtx created with CreateFileSysBindContext()
-			if ( !HR_OK( ::SHParseDisplayName( expandedShellPath.GetPtr(), pBindCtx, &pidlAbs, 0, nullptr ) ) )
+			if ( !HR_OK( ::SHParseDisplayName( pShellPath, pBindCtx, &pidlAbs, 0, nullptr ) ) )
 				return nullptr;
 
 			return pidlAbs;
@@ -578,6 +609,9 @@ namespace shell
 
 		PIDLIST_ABSOLUTE ParseToPidlFileSys( const TCHAR* pShellPath, DWORD fileAttribute /*= FILE_ATTRIBUTE_NORMAL*/ )
 		{	// parses inexistent paths via shell::CreateFileSysBindContext()
+			if ( 0 == fileAttribute && RequiresFileSysBindContext( pShellPath ) )
+				fileAttribute = FILE_ATTRIBUTE_NORMAL;
+
 			return shell::pidl::ParseToPidl( pShellPath, fileAttribute != 0 ? shell::CreateFileSysBindContext( fileAttribute ) : nullptr );
 		}
 

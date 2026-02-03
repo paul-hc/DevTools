@@ -24,6 +24,7 @@ public:
 	virtual void Run( void );
 private:
 	void TestNullAndEmptyPidl( void );
+	void TestCreateFromPath( void );
 	void TestShellPidl( void );
 	void TestFolderRelativePidls( void );
 	void TestPidlType( void );

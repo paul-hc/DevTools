@@ -40,6 +40,7 @@ namespace shell
 
 	CComPtr<IBindCtx> CreateFileSysBindContext( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL );			// virtual bind context for FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY
 
+	bool RequiresFileSysBindContext( const TCHAR* pShellPath );
 	CComPtr<IBindCtx> AutoFileSysBindContext( const TCHAR* pShellPath, IBindCtx* pBindCtx = AUTO_BIND_CTX );	// adapted to the pShellPath type
 }
 
@@ -71,7 +72,7 @@ namespace shell
 	// IShellItem properties
 	std::tstring GetItemDisplayName( IShellItem* pItem, SIGDN nameType );
 	inline std::tstring GetItemName( IShellItem* pItem ) { return GetItemDisplayName( pItem, SIGDN_NORMALDISPLAY ); }
-	inline shell::TPath GetItemShellPath( IShellItem* pItem ) { return GetItemDisplayName( pItem, SIGDN_DESKTOPABSOLUTEPARSING /*SIGDN_FILESYSPATH*/ ); }
+	inline shell::TPath GetItemShellPath( IShellItem* pItem ) { return GetItemDisplayName( pItem, SIGDN_DESKTOPABSOLUTEPARSING ); }
 	inline fs::CPath GetItemFileSysPath( IShellItem* pItem ) { return GetItemDisplayName( pItem, SIGDN_FILESYSPATH ); }		// useful for CRecycler
 
 	// IShellItem2 properties
@@ -121,13 +122,13 @@ namespace shell
 			return pidlEmpty;
 		}
 
-		// format pidl:
+		// format PIDL:
 		std::tstring GetName( PCIDLIST_ABSOLUTE pidl, SIGDN nameType = SIGDN_NORMALDISPLAY );
 		shell::TPath GetShellPath( PCIDLIST_ABSOLUTE pidlAbsolute );											// shell path: either file-system or GUID - aka SIGDN_DESKTOPABSOLUTEPARSING
 		fs::CPath GetAbsolutePath( PCIDLIST_ABSOLUTE pidlAbsolute, GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT );	// file-system path only
 
-		// for strictly file path
-		inline PIDLIST_ABSOLUTE CreateFromPath( const TCHAR* pFullPath ) { return ::ILCreateFromPath( pFullPath ); }
+		// for existing shell paths (file-system + GUID paths)
+		PIDLIST_ABSOLUTE CreateFromPath( const TCHAR* pExistingShellPath );
 
 		// shell path: FilePath or GuidPath - parse to PIDL (caller must free the pidl) - expands any environment variables:
 		PIDLIST_ABSOLUTE ParseToPidl( const TCHAR* pShellPath, IBindCtx* pBindCtx = nullptr );
