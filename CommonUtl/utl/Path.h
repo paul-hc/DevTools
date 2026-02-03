@@ -120,6 +120,8 @@ namespace path
 	bool IsValidPath( const std::tstring& strPath );		// drive/directory/file path
 	bool IsValidFilename( const std::tstring& strPath );	// filename only
 	bool IsValidGuidPath( const std::tstring& strPath );	// GUID prefix syntax: "::{26EE0668-A00A-44D7-9371-BEB064C98683}" - shell DESKTOPABSOLUTEPARSING display name
+
+	bool HasEnvironVarPtr( const TCHAR* pFilePath );		// contains expandable "%envVar%" or "$(envVar)" substrings?
 	bool HasEnvironVar( const std::tstring& strPath );		// contains expandable "%envVar%" or "$(envVar)" substrings?
 
 	const TCHAR* GetInvalidChars( void );
@@ -280,9 +282,11 @@ namespace fs
 		CPath MakeUnixPath( void ) const { return CPath( m_filePath, func::ToUnixPathChar() ); }
 		CPath MakeWindowsPath( void ) const { return CPath( m_filePath, func::ToWinPathChar() ); }
 
+		// expand enviroment variables
 		bool HasEnvironVar( void ) const { return path::HasEnvironVar( m_filePath ); }
-		CPath GetExpanded( void ) const;	// expand enviroment variables
 		bool Expand( void );
+		CPath GetExpanded( void ) const;
+		static CPath GetExpanded( const TCHAR* pPath );
 
 		bool StripPrefix( const fs::TDirPath& dirPath ) { return path::StripPrefix( m_filePath, dirPath.GetPtr() ); }
 
@@ -422,7 +426,7 @@ namespace func
 		template< typename PathT >
 		void operator()( PathT& rPath ) const
 		{
-			rPath.Set( env::ExpandPaths( rPath.GetPtr() ) );
+			rPath.Expand();
 		}
 	};
 }

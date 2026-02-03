@@ -75,6 +75,23 @@ namespace str
 
 namespace env
 {
+	bool HasAnyVariablePtr( const TCHAR* pSource )
+	{
+		const TCHAR* pFound;
+
+		if ( pSource != nullptr )
+			if ( ( pFound = _tcschr( pSource, _T('%') ) ) != nullptr )
+			{
+				return _tcschr( pFound + 1 + 1, _T('%') ) != nullptr;		// found closing for non-empty "%EnvVar%"?
+			}
+			else if ( ( pFound = _tcsstr( pSource, _T("$(") ) ) != nullptr )
+			{
+				return _tcschr( pFound + 2 + 1, _T(')') ) != nullptr;		// found closing for non-empty "$(EnvVar)"?
+			}
+
+		return false;
+	}
+
 	bool HasAnyVariable( const std::tstring& source )
 	{
 		static const str::CEnclosedParser<TCHAR> s_envParser( _T("%|$("), _T("%|)") );

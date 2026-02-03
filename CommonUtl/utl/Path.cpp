@@ -314,6 +314,11 @@ namespace path
 			&& IsGuidPath( strPath.c_str() );
 	}
 
+	bool HasEnvironVarPtr( const TCHAR* pFilePath )
+	{	// contains expandable "%envVar%" or "$(envVar)" substrings?
+		return env::HasAnyVariablePtr( pFilePath );
+	}
+
 	bool HasEnvironVar( const std::tstring& strPath )
 	{	// contains expandable "%envVar%" or "$(envVar)" substrings?
 		return env::HasAnyVariable( strPath );
@@ -946,14 +951,19 @@ namespace fs
 		path::AutoHugePrefix( m_filePath );
 	}
 
+	bool CPath::Expand( void )
+	{
+		return utl::ModifyValue( m_filePath, env::ExpandStrings( GetPtr() ) );
+	}
+
 	CPath CPath::GetExpanded( void ) const
 	{
 		return CPath( env::ExpandPaths( GetPtr() ) );
 	}
 
-	bool CPath::Expand( void )
+	CPath CPath::GetExpanded( const TCHAR* pPath )
 	{
-		return utl::ModifyValue( m_filePath, env::ExpandStrings( GetPtr() ) );
+		return env::ExpandStrings( pPath );
 	}
 
 	size_t CPath::GetDepth( void ) const

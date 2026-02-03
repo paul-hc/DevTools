@@ -74,21 +74,41 @@ void CEnvironmentTests::TestQueryEnclosedIdentifiers( void )
 
 void CEnvironmentTests::TestEnvironVariables( void )
 {
-	ASSERT( !env::HasAnyVariable( _T("") ) );
-	ASSERT( !env::HasAnyVariable( _T("%%") ) );			// empty identifier
-	ASSERT( !env::HasAnyVariable( _T("$()") ) );		// empty identifier
+	// const TCHAR* ptr:
+	{
+		ASSERT( !env::HasAnyVariablePtr( _T("") ) );
+		ASSERT( !env::HasAnyVariablePtr( _T("%%") ) );		// empty identifier
+		ASSERT( !env::HasAnyVariablePtr( _T("$()") ) );		// empty identifier
 
-	ASSERT( env::HasAnyVariable( _T("%MY_TOOLS%") ) );
-	ASSERT( env::HasAnyVariable( _T("lead_%MY_TOOLS%_trail") ) );
-	ASSERT( env::HasAnyVariable( _T("lead_$(MY_TOOLS)_trail") ) );
+		ASSERT( env::HasAnyVariablePtr( _T("%MY_TOOLS%") ) );
+		ASSERT( env::HasAnyVariablePtr( _T("lead_%MY_TOOLS%_trail") ) );
+		ASSERT( env::HasAnyVariablePtr( _T("lead_$(MY_TOOLS)_trail") ) );
 
-	// not enclosed:
-	ASSERT( !env::HasAnyVariable( _T("%MY_TOOLS") ) );
-	ASSERT( !env::HasAnyVariable( _T("MY_TOOLS%") ) );
-	ASSERT( !env::HasAnyVariable( _T("&(MY_TOOLS") ) );
-	ASSERT( !env::HasAnyVariable( _T("MY_TOOLS)") ) );
+		// not enclosed:
+		ASSERT( !env::HasAnyVariablePtr( _T("%MY_TOOLS") ) );
+		ASSERT( !env::HasAnyVariablePtr( _T("MY_TOOLS%") ) );
+		ASSERT( !env::HasAnyVariablePtr( _T("&(MY_TOOLS") ) );
+		ASSERT( !env::HasAnyVariablePtr( _T("MY_TOOLS)") ) );
+	}
 
-	ASSERT( !env::HasAnyVariable( _T("%MY_TOO.LS%") ) );	// invalid identifier
+	// std::tstring:
+	{
+		ASSERT( !env::HasAnyVariable( _T("") ) );
+		ASSERT( !env::HasAnyVariable( _T("%%") ) );			// empty identifier
+		ASSERT( !env::HasAnyVariable( _T("$()") ) );		// empty identifier
+
+		ASSERT( env::HasAnyVariable( _T("%MY_TOOLS%") ) );
+		ASSERT( env::HasAnyVariable( _T("lead_%MY_TOOLS%_trail") ) );
+		ASSERT( env::HasAnyVariable( _T("lead_$(MY_TOOLS)_trail") ) );
+
+		// not enclosed:
+		ASSERT( !env::HasAnyVariable( _T("%MY_TOOLS") ) );
+		ASSERT( !env::HasAnyVariable( _T("MY_TOOLS%") ) );
+		ASSERT( !env::HasAnyVariable( _T("&(MY_TOOLS") ) );
+		ASSERT( !env::HasAnyVariable( _T("MY_TOOLS)") ) );
+
+		ASSERT( !env::HasAnyVariable( _T("%MY_TOO.LS%") ) );	// invalid identifier
+	}
 
 	{
 		// set 2 environment variables in this process
