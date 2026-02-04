@@ -31,9 +31,7 @@ namespace shell
 	bool ResolveLink( OUT fs::CPath& rTargetPath, IShellLink* pShellLink, CWnd* pWnd = nullptr, DWORD rFlags = 0 );
 	bool ResolveShortcut( OUT fs::CPath& rTargetPath, const TCHAR* pLnkPath, CWnd* pWnd = nullptr );
 
-#ifdef USE_UT
-	const CFlagTags& GetTags_ShellLinkDataFlags( void );
-#endif
+	const CFlagTags& GetTags_ShellLinkDataFlags( void );	// debug-only tags
 }
 
 
@@ -126,9 +124,7 @@ namespace shell
 		friend inline CArchive& operator<<( CArchive& archive, const CShortcut& shortcut ) { shortcut.Save( archive ); return archive; }
 		friend inline CArchive& operator>>( CArchive& archive, OUT CShortcut& rShortcut ) { rShortcut.Load( archive ); return archive; }
 
-	#ifdef USE_UT
-		static const CFlagTags& GetTags_Fields( void );
-	#endif
+		static const CFlagTags& GetTags_Fields( void );		// debug-only tags
 	protected:
 		void Save( OUT CArchive& archive ) const;
 		void Load( IN CArchive& archive );

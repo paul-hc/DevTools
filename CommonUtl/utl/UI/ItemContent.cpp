@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "ItemContent.h"
 #include "ShellDialogs.h"
+#include "ShellTypes.h"
 #include "StringCompare.h"
 #include "StringUtilities.h"
 #include "resource.h"
@@ -57,9 +58,9 @@ namespace ui
 			case ui::FilePath:
 				return fs::IsValidFile( path.GetPtr() );
 			case ui::DirPath:
-				return fs::IsValidDirectory( actualPath.GetPtr() );
+				return actualPath.IsGuidPath() ? shell::ShellFolderExist( actualPath.GetPtr() ) : fs::IsValidDirectory( actualPath.GetPtr() );
 			case ui::MixedPath:
-				return fs::FileExist( actualPath.GetPtr() );
+				return actualPath.ShellItemExist();
 			default:
 				ASSERT( false );
 				return false;

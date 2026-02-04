@@ -20,6 +20,7 @@ namespace fs
 		s_resolveShortcutProc = resolveShortcutProc;
 	}
 
+
 	bool IsDots( const fs::CPath& filePath )
 	{
 		const TCHAR* pFilename = filePath.GetFilenamePtr();
@@ -109,6 +110,7 @@ namespace fs
 					break;
 				case fs::ValidFile:
 					ASSERT( false );		// should've been handled by the if statement
+				case fs::GuidPath:
 				case fs::InvalidPattern:
 					return result;
 			}

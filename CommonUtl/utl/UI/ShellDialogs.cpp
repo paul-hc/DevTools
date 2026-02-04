@@ -5,12 +5,14 @@
 #include "FileSystem_fwd.h"
 #include "TreeControl.h"
 #include "utl/Algorithms.h"
+#include "utl/FlagTags.h"
 #include "utl/MultiThreading.h"
 #include <unordered_map>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
 
 namespace shell
 {
@@ -32,7 +34,7 @@ namespace shell
 			std::auto_ptr<CFileDialog> m_pFileDlg;							// Vista style dialog requires COM initialization (done in CFileDialog)
 
 			static const TCHAR s_allFilesFilter[];
-			static std::unordered_map<std::tstring, int> s_selFilterMap;		// filter text to selected filter index
+			static std::unordered_map<std::tstring, int> s_selFilterMap;	// filter text to selected filter index
 		};
 
 
@@ -47,7 +49,7 @@ namespace shell
 			return pFileOpenDialog;
 		}
 
-		bool GetFirstShellPath( OUT shell::TPath& rShellPath, IShellItemArray* pSelItems )
+		bool GetFirstItemShellPath( OUT shell::TPath& rShellPath, IShellItemArray* pSelItems )
 		{
 			ASSERT_PTR( pSelItems );
 
@@ -64,14 +66,12 @@ namespace shell
 			return false;
 		}
 
-		bool GetFirstShellPath( OUT shell::TPath& rShellPath, CFileDialog* pFileDlg )
+		bool GetFirstItemShellPath( OUT shell::TPath& rShellPath, CFileDialog* pFileDlg )
 		{
-			ASSERT_PTR( pFileDlg );
-
 			CComPtr<IShellItemArray> pSelItems;
 			pSelItems.Attach( pFileDlg->GetResults() );
 
-			return pSelItems != nullptr && GetFirstShellPath( rShellPath, pSelItems );
+			return pSelItems != nullptr && GetFirstItemShellPath( rShellPath, pSelItems );
 		}
 
 
@@ -141,54 +141,69 @@ namespace shell
 	bool BrowseForFile( OUT fs::CPath& rFilePath, CWnd* pParentWnd, BrowseMode browseMode /*= FileOpen*/,
 						const TCHAR* pFileFilter /*= nullptr*/, DWORD flags /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
+		CScopedInitializeCom scopedCom;			// Vista-style file dialogs require COM initialization in main thread
+
 		impl::CScopedFileDialog scopedDlg( pFileFilter );
 
 		scopedDlg.StoreDialog( impl::MakeFileDialog( rFilePath, pParentWnd, browseMode, scopedDlg.m_fileFilter, flags, pTitle ) );
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
 
-	bool PickFolder( OUT fs::TDirPath& rFolderPath, CWnd* pParentWnd,
-					 FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
+
+	bool PickFolder( OUT shell::TDirPath& rFolderShellPath, CWnd* pParentWnd, FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
-		mt::CScopedInitializeCom scopedCom;		// Vista-style file dialogs require COM initialization
+		CScopedInitializeCom scopedCom;			// Vista-style file dialogs require COM initialization in main thread
 
 		DWORD ofnFlags = OFN_PATHMUSTEXIST;
+		fs::TDirPath folderBrowsePath;			// browseable folder path, adjusted to exclude wildcards
 		std::tstring wildPattern;
+		const TCHAR* pFolderFileSys;
 
-		if ( path::ContainsWildcards( rFolderPath.GetFilenamePtr() ) )
+		// cut the wildcard pattern, since it breaks the dialog's behaviour (simple OK doesn't work anymore)
+		if ( fs::GuidPath == fs::SplitPatternPath( &folderBrowsePath, &wildPattern, rFolderShellPath ) )		// split into folder path and wildcard pattern
 		{
-			SetFlag( ofnFlags, OFN_NOVALIDATE );		// allow wildcards in return string
-			wildPattern = rFolderPath.GetFilenamePtr();
-
-			if ( nullptr == pTitle )
-				pTitle = _T("Select Folder Pattern");
+			pFolderFileSys = nullptr;			// will select by folder item via PIDL
+			options |= FOS_ALLNONSTORAGEITEMS;	// allow browsing of virtual folders
 		}
+		else
+			pFolderFileSys = folderBrowsePath.GetPtr();
 
-		CFolderPickerDialog folderDlg( rFolderPath.GetPtr(), ofnFlags, pParentWnd, 0, true );
+		CFolderPickerDialog folderDlg( pFolderFileSys, ofnFlags, pParentWnd, 0, true );
 
 		if ( pTitle != nullptr )
 			folderDlg.m_ofn.lpstrTitle = pTitle;
 
-		if ( options != 0 )
-			if ( CComPtr<IFileOpenDialog> pFileOpenDialog = impl::GetFileOpenDialog( &folderDlg ) )
+		if ( CComPtr<IFileOpenDialog> pFileOpenDialog = impl::GetFileOpenDialog( &folderDlg ) )
+		{
+			FILEOPENDIALOGOPTIONS newOptions;
+			if ( HR_OK( pFileOpenDialog->GetOptions( &newOptions ) ) )
 			{
-				FILEOPENDIALOGOPTIONS origOptions;
-				if ( HR_OK( pFileOpenDialog->GetOptions( &origOptions ) ) )
-					if ( !HR_OK( pFileOpenDialog->SetOptions( origOptions | options ) ) )
-						TRACE( "# Warning: couldn't modify FILEOPENDIALOGOPTIONS options in PickFolder() dialog!\n" );
+				newOptions |= options;
+					TRACE( _T("- PickFolder OFN flags={%s}\n"), GetTags_OFN_Flags().FormatKey( folderDlg.GetOFN().Flags ).c_str() );
+					TRACE( _T("- PickFolder FILEOPENDIALOGOPTIONS={%s}\n"), GetTags_FILEOPENDIALOGOPTIONS().FormatKey( newOptions ).c_str() );
+
+				if ( options != 0 )
+					if ( !HR_OK( pFileOpenDialog->SetOptions( newOptions ) ) )
+						TRACE( "# Warning: error modifying FILEOPENDIALOGOPTIONS options in PickFolder() dialog!\n" );
 			}
 
-		if ( folderDlg.DoModal() != IDOK )
-			return false;
+			if ( folderBrowsePath.IsGuidPath() )
+				if ( CComPtr<IShellItem> pFolderItem = shell::MakeShellItem( folderBrowsePath.GetPtr() ) )
+					if ( !HR_OK( pFileOpenDialog->SetFolder( pFolderItem ) ) )
+						TRACE( "# Warning: error selecting initial virtual folder in PickFolder() dialog!\n" );
+		}
 
-		if ( !impl::GetFirstShellPath( rFolderPath, &folderDlg ) )
-			return false;
+		if ( IDOK == folderDlg.DoModal() )
+			if ( impl::GetFirstItemShellPath( folderBrowsePath, &folderDlg ) )
+			{
+				if ( !wildPattern.empty() )
+					folderBrowsePath /= wildPattern;		// restore the original wildcard pattern
 
-		if ( !path::ContainsWildcards( rFolderPath.GetFilenamePtr() ) )		// no returned pattern? - actually that's not possible
-			if ( !wildPattern.empty() )
-				rFolderPath /= wildPattern;		// restore the original wildcard pattern
+				utl::ModifyValue( rFolderShellPath, folderBrowsePath );
+				return true;
+			}
 
-		return true;
+		return false;
 	}
 
 	bool BrowseAutoPath( OUT fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= nullptr*/ )
@@ -342,5 +357,89 @@ namespace shell
 			}
 			return 0;
 		}
+	}
+}
+
+
+namespace shell
+{
+	const CFlagTags& GetTags_OFN_Flags( void )
+	{
+		static const CFlagTags::FlagDef s_flagDefs[] =
+		{
+		#ifdef _DEBUG
+			{ FLAG_TAG( OFN_READONLY ) },
+			{ FLAG_TAG( OFN_OVERWRITEPROMPT ) },
+			{ FLAG_TAG( OFN_HIDEREADONLY ) },
+			{ FLAG_TAG( OFN_NOCHANGEDIR ) },
+			{ FLAG_TAG( OFN_SHOWHELP ) },
+			{ FLAG_TAG( OFN_ENABLEHOOK ) },
+			{ FLAG_TAG( OFN_ENABLETEMPLATE ) },
+			{ FLAG_TAG( OFN_ENABLETEMPLATEHANDLE ) },
+			{ FLAG_TAG( OFN_NOVALIDATE ) },
+			{ FLAG_TAG( OFN_ALLOWMULTISELECT ) },
+			{ FLAG_TAG( OFN_EXTENSIONDIFFERENT ) },
+			{ FLAG_TAG( OFN_PATHMUSTEXIST ) },
+			{ FLAG_TAG( OFN_FILEMUSTEXIST ) },
+			{ FLAG_TAG( OFN_CREATEPROMPT ) },
+			{ FLAG_TAG( OFN_SHAREAWARE ) },
+			{ FLAG_TAG( OFN_NOREADONLYRETURN ) },
+			{ FLAG_TAG( OFN_NOTESTFILECREATE ) },
+			{ FLAG_TAG( OFN_NONETWORKBUTTON ) },
+			{ FLAG_TAG( OFN_NOLONGNAMES ) },
+		#if ( WINVER >= 0x0400 )
+			{ FLAG_TAG( OFN_EXPLORER ) },
+			{ FLAG_TAG( OFN_NODEREFERENCELINKS ) },
+			{ FLAG_TAG( OFN_LONGNAMES ) },
+			{ FLAG_TAG( OFN_ENABLEINCLUDENOTIFY ) },
+			{ FLAG_TAG( OFN_ENABLESIZING ) },
+		#endif // WINVER >= 0x0400
+		#if ( _WIN32_WINNT >= 0x0500 )
+			{ FLAG_TAG( OFN_DONTADDTORECENT ) },
+			{ FLAG_TAG( OFN_FORCESHOWHIDDEN ) },
+		#endif // _WIN32_WINNT >= 0x0500
+
+		#else
+			NULL_TAG
+		#endif //_DEBUG
+		};
+		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
+		return s_tags;
+	}
+
+	const CFlagTags& GetTags_FILEOPENDIALOGOPTIONS( void )
+	{
+		static const CFlagTags::FlagDef s_flagDefs[] =
+		{
+		#ifdef _DEBUG
+			{ FLAG_TAG( FOS_OVERWRITEPROMPT ) },
+			{ FLAG_TAG( FOS_STRICTFILETYPES ) },
+			{ FLAG_TAG( FOS_NOCHANGEDIR ) },
+			{ FLAG_TAG( FOS_PICKFOLDERS ) },
+			{ FLAG_TAG( FOS_FORCEFILESYSTEM ) },
+			{ FLAG_TAG( FOS_ALLNONSTORAGEITEMS ) },
+			{ FLAG_TAG( FOS_NOVALIDATE ) },
+			{ FLAG_TAG( FOS_ALLOWMULTISELECT ) },
+			{ FLAG_TAG( FOS_PATHMUSTEXIST ) },
+			{ FLAG_TAG( FOS_FILEMUSTEXIST ) },
+			{ FLAG_TAG( FOS_CREATEPROMPT ) },
+			{ FLAG_TAG( FOS_SHAREAWARE ) },
+			{ FLAG_TAG( FOS_NOREADONLYRETURN ) },
+			{ FLAG_TAG( FOS_NOTESTFILECREATE ) },
+			{ FLAG_TAG( FOS_HIDEMRUPLACES ) },
+			{ FLAG_TAG( FOS_HIDEPINNEDPLACES ) },
+			{ FLAG_TAG( FOS_NODEREFERENCELINKS ) },
+			{ FLAG_TAG( FOS_OKBUTTONNEEDSINTERACTION ) },
+			{ FLAG_TAG( FOS_DONTADDTORECENT ) },
+			{ FLAG_TAG( FOS_FORCESHOWHIDDEN ) },
+			{ FLAG_TAG( FOS_DEFAULTNOMINIMODE ) },
+			{ FLAG_TAG( FOS_FORCEPREVIEWPANEON ) },
+			{ FLAG_TAG( (FILEOPENDIALOGOPTIONS)FOS_SUPPORTSTREAMABLEITEMS ) }		// aka DWORD
+		#else
+			NULL_TAG
+		#endif //_DEBUG
+		};
+		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
+		return s_tags;
 	}
 }

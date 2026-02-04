@@ -283,6 +283,14 @@ namespace num
 
 	inline std::tstring FormatDouble( double value, unsigned int precision, const std::locale& loc = GetEmptyLocale() ) { return FormatNumber( GetRounded( value, precision ), loc ); }
 
+	template< typename ValueT >
+	std::tstring FormatBinaryNumber( ValueT value )
+	{
+		TCHAR buffer[ 128 ];
+		_ui64tot( value, buffer, 2 );
+		return buffer;
+	}
+
 
 	template< typename ValueT >
 	bool ParseNumber( OUT ValueT& rNumber, const std::tstring& text, size_t* pSkipLength = nullptr, const std::locale& loc = GetEmptyLocale() )

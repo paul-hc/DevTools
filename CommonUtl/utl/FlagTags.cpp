@@ -21,13 +21,20 @@ CFlagTags::CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= null
 	if ( pKeyTags != nullptr )
 		str::Split( m_keyTags, pKeyTags, m_listSep );
 
-	ENSURE( !m_uiTags.empty() );
+	//ENSURE( !m_uiTags.empty() );		// allow empty debug-only tags
 	ENSURE( m_keyTags.empty() || m_keyTags.size() == m_uiTags.size() );
 }
 
 CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags /*= str::GetEmpty()*/ )
 {
+	ASSERT_PTR( flagDefs );
 	ASSERT( count <= MaxBits );
+
+	if ( flagDefs[ 0 ].IsNull() )		// placeholder for empty tags (debug-only tags)?
+	{
+		ASSERT( 1 == count );
+		return;		// no tags, will format the hex value
+	}
 
 	std::vector<std::tstring> srcUiTags;
 	str::Split( srcUiTags, uiTags.c_str(), m_listSep );
@@ -71,7 +78,10 @@ int CFlagTags::GetFlagsMask( void ) const
 
 std::tstring CFlagTags::Format( int flags, const std::vector<std::tstring>& tags, const TCHAR* pSep )
 {
-	ASSERT( !tags.empty() );
+	if ( tags.empty() )
+	{	// debug-only tags: format to hex/bin if tags are empty
+		return str::Format( _T("0x%08X  %s"), flags, num::FormatBinaryNumber( flags ).c_str() );
+	}
 
 	std::vector<std::tstring> flagsOn; flagsOn.reserve( tags.size() );
 
@@ -146,6 +156,12 @@ int CFlagTags::FindFlag( TagType tag, const std::tstring& flagOn ) const
 
 CValueTags::CValueTags( const ValueDef valueDefs[], unsigned int count, const TCHAR* pUiTags /*= nullptr*/ )
 {
+	if ( valueDefs[ 0 ].IsNull() )		// placeholder for empty tags (debug-only tags)?
+	{
+		ASSERT( 1 == count );
+		return;		// no tags, will format the numeric value
+	}
+
 	std::vector<std::tstring> uiTags;
 
 	if ( pUiTags != nullptr )
@@ -170,6 +186,13 @@ const CValueTags::TKeyUiTags& CValueTags::LookupTags( long value ) const
 
 const std::tstring& CValueTags::Format( long value, TagType tagType ) const
 {
+	if ( IsEmpty() )
+	{	// debug-only tags: format to hex/bin if tags are empty
+		static std::tstring s_numValue;
+		s_numValue = str::Format( _T("%d  0x%08X"), value, value );
+		return s_numValue;
+	}
+
 	const CValueTags::TKeyUiTags& keyUiTags = LookupTags( value );
 
 	if ( UiTag == tagType && !keyUiTags.second.empty() )

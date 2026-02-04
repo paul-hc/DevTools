@@ -4,6 +4,7 @@
 
 
 #define FLAG_TAG( flag )  flag, _T(#flag)		// pair to be used in static initializer lists: { MyFlag, _T("MyFlag") }
+#define NULL_TAG  0, nullptr					// placeholder for CFlagTags::FlagDef single array element that means empty tags (for debug-only tags)
 
 
 // formatter of bit field flags with values in sequence: 2^0, 2^1, ... 2^31
@@ -13,6 +14,8 @@ class CFlagTags
 public:
 	struct FlagDef
 	{
+		bool IsNull( void ) const { return nullptr == m_pKeyTag; }
+	public:
 		unsigned long m_flag;
 		const TCHAR* m_pKeyTag;
 	};
@@ -24,6 +27,8 @@ public:
 	CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags = str::GetEmpty() );
 
 	~CFlagTags();
+
+	bool IsEmpty( void ) const { return m_uiTags.empty() && m_keyTags.empty(); }
 
 	int GetFlagsMask( void ) const;
 	const std::vector<std::tstring>& GetKeyTags( void ) const { return m_keyTags; }
@@ -71,11 +76,15 @@ class CValueTags
 public:
 	struct ValueDef
 	{
+		bool IsNull( void ) const { return nullptr == m_pKeyTag; }
+	public:
 		long m_value;
 		const TCHAR* m_pKeyTag;
 	};
 
 	CValueTags( const ValueDef valueDefs[], unsigned int count, const TCHAR* pUiTags = nullptr );
+
+	bool IsEmpty( void ) const { return m_valueTags.empty(); }
 
 	const std::tstring& FormatKey( long value ) const { return Format( value, KeyTag ); }
 	const std::tstring& FormatUi( long value ) const { return Format( value, UiTag ); }

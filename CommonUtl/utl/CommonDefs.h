@@ -296,7 +296,13 @@ inline void SetFlag( FieldT& rField, unsigned int flag, bool on = true )
 }
 
 template< typename FieldT >
-inline FieldT MakeFlag( FieldT field, unsigned int flag, bool on = true )
+inline FieldT MakeFlag( FieldT flag, bool on )
+{
+	return on ? flag : 0;
+}
+
+template< typename FieldT >
+inline FieldT CombineFlag( FieldT field, unsigned int flag, bool on = true )
 {
 	SetFlag( field, flag, on );
 	return field;

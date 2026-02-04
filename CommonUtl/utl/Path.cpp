@@ -3,6 +3,7 @@
 #include "Path.h"
 #include "FileState.h"
 #include "FileSystem.h"
+#include "FileEnumerator.h"			// for fs::FindFirstFile
 #include "Crc32.h"
 #include "Algorithms.h"
 #include "StdHashValue.h"
@@ -31,6 +32,12 @@ namespace utl
 		rFilePath = newFilePath;
 		return true;
 	}
+}
+
+
+namespace shell
+{
+	TShellItemExistProc g_pShellItemExistProc = &path::IsGuidPath;		// good default function while not linking to UTL_UI.lib and the Shell API
 }
 
 
@@ -837,6 +844,14 @@ namespace fs
 		return !str::IsEmpty( pFilePath ) && 0 == ::_taccess( pFilePath, accessMode );
 	}
 
+	bool ShellItemExist( const TCHAR* pShellPath, AccessMode accessMode /*= Exist*/ )		// generalization for shell paths: if a GUID path, try to instantiate the IShellItem - to use must link to UTL_UI.lib to
+	{
+		if ( path::IsGuidPath( pShellPath ) )
+			return shell::g_pShellItemExistProc( pShellPath );
+
+		return FileExist( pShellPath, accessMode );
+	}
+
 
 	// CPathParts implementation
 
@@ -946,9 +961,12 @@ namespace fs
 
 	void CPath::Set( const std::tstring& filePath )
 	{
-		m_filePath = filePath;
-		str::Trim( m_filePath );
-		path::AutoHugePrefix( m_filePath );
+		if ( &filePath != &m_filePath )
+		{
+			m_filePath = filePath;
+			str::Trim( m_filePath );
+			path::AutoHugePrefix( m_filePath );
+		}
 	}
 
 	bool CPath::Expand( void )
@@ -1057,11 +1075,48 @@ namespace fs
 		m_filePath = parts.MakePath().Get();
 	}
 
+	CPath& CPath::operator=( const CPath& right )
+	{
+		if ( &right != this )
+			m_filePath = right.m_filePath;
+
+		return *this;
+	}
+
 	CPath& CPath::operator/=( const CPath& right )
 	{
 		if ( &right != this )
 			Set( path::Combine( GetPtr(), right.GetPtr() ) );
+
 		return *this;
+	}
+
+
+	CPath CPath::FindFirstMatch( bool recurse /*= true*/ ) const
+	{
+		if ( HasWildcardPattern() )
+		{
+			fs::TDirPath parentPath = GetParentPath();
+
+			if ( IsGuidPath() )
+				if ( parentPath.ShellItemExist() )
+					return parentPath;		// quick & dirt shortcut to find a
+
+			return fs::FindFirstFile( GetParentPath(), GetFilenamePtr(), fs::TEnumFlags::MakeFlag( fs::EF_Recurse, recurse ) );
+		}
+
+		return *this;
+	}
+
+	bool CPath::FileMatchExist( AccessMode accessMode /*= Exist*/ ) const
+	{
+		if ( HasWildcardPattern() )
+		{
+			fs::CPath firstMatchPath = FindFirstMatch();
+			return !firstMatchPath.IsEmpty() && firstMatchPath.ShellItemExist( accessMode );
+		}
+
+		return ShellItemExist( accessMode );
 	}
 
 	bool CPath::LocateFile( CFileFind& rFindFile ) const
@@ -1106,22 +1161,28 @@ namespace fs
 	}
 
 
-	fs::PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::TPatternPath& patternPath )
+	fs::PatternResult SplitPatternPath( OUT fs::TDirPath* pPath, OUT OPTIONAL std::tstring* pWildSpec, const fs::TPatternPath& patternPath )
 	{
-		REQUIRE( pPath != nullptr && pWildSpec != nullptr );
+		ASSERT_PTR( pPath );
 
-		if ( path::ContainsWildcards( patternPath.GetFilenamePtr() ) )
+		if ( patternPath.HasWildcardPattern() )
 		{
+			if ( pWildSpec != nullptr )
+				*pWildSpec = patternPath.GetFilename();
+
 			*pPath = patternPath.GetParentPath();
-			*pWildSpec = patternPath.GetFilename();
 		}
 		else
 		{
+			if ( pWildSpec != nullptr )
+				pWildSpec->clear();
+
 			*pPath = patternPath;
-			pWildSpec->clear();
 		}
 
-		if ( fs::IsValidFile( pPath->GetPtr() ) )
+		if ( pPath->IsGuidPath() )
+			return fs::GuidPath;
+		else if ( fs::IsValidFile( pPath->GetPtr() ) )
 			return fs::ValidFile;
 		else if ( fs::IsValidDirectory( pPath->GetPtr() ) )
 			return fs::ValidDirectory;

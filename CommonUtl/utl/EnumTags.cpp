@@ -28,6 +28,16 @@ CEnumTags::~CEnumTags()
 {
 }
 
+void CEnumTags::Construct( const std::tstring& uiTags, const TCHAR* pKeyTags )
+{
+	str::Split( m_uiTags, uiTags.c_str(), m_listSep );
+	if ( pKeyTags != nullptr )
+		str::Split( m_keyTags, pKeyTags, m_listSep );
+
+	//ENSURE( !m_uiTags.empty() );		// allow empty debug-only tags
+	ENSURE( m_keyTags.empty() || m_keyTags.size() == m_uiTags.size() );		// key tags: all or none defined
+}
+
 CEnumTags& CEnumTags::AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag /*= nullptr*/ )
 {
 	ASSERT_PTR( uiTag );
@@ -37,16 +47,6 @@ CEnumTags& CEnumTags::AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag /*= 
 
 	ENSURE( m_keyTags.empty() || m_keyTags.size() == m_uiTags.size() );		// key tags: all or none defined
 	return *this;
-}
-
-void CEnumTags::Construct( const std::tstring& uiTags, const TCHAR* pKeyTags )
-{
-	str::Split( m_uiTags, uiTags.c_str(), m_listSep );
-	if ( pKeyTags != nullptr )
-		str::Split( m_keyTags, pKeyTags, m_listSep );
-
-	ENSURE( !m_uiTags.empty() );
-	ENSURE( m_keyTags.empty() || m_keyTags.size() == m_uiTags.size() );		// key tags: all or none defined
 }
 
 bool CEnumTags::ContainsValue( int value ) const
@@ -64,6 +64,13 @@ size_t CEnumTags::TagIndex( int value, const std::vector<std::tstring>& tags ) c
 
 const std::tstring& CEnumTags::_Format( int value, const std::vector<std::tstring>& tags ) const
 {
+	if ( tags.empty() )
+	{	// debug-only tags: format to hex/bin if tags are empty
+		static std::tstring s_numValue;
+		s_numValue = num::FormatNumber( value );
+		return s_numValue;
+	}
+
 	return tags[ TagIndex( value, tags ) ];
 }
 

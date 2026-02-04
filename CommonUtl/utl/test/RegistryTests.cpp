@@ -74,6 +74,8 @@ void CRegistryTests::TestKey( void )
 	const fs::CPath s_test( _T("UTL-Test") );
 
 	{	// set-up
+		CScopedInitializeCom scopedCom;
+
 		reg::CKey key;
 		ASSERT( key.Create( HKEY_CURRENT_USER, s_rootPath / s_test ) );
 		key.DeleteAll();

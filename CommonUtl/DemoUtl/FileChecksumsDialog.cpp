@@ -160,11 +160,13 @@ namespace reg
 
 namespace layout
 {
+	enum { ComboPct = 80, RightPct = 100 - ComboPct };
+
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_GROUP_BOX_1, pctSizeX( 50 ) },
-		{ IDC_GROUP_BOX_2, pctMoveX( 50 ) | pctSizeX( 50 ) },
-		{ IDC_SEARCH_PATH_COMBO, pctSizeX( 50 ) },
+		{ IDC_GROUP_BOX_1, pctSizeX( ComboPct ) },
+		{ IDC_GROUP_BOX_2, pctMoveX( ComboPct ) | pctSizeX( RightPct ) },
+		{ IDC_SEARCH_PATH_COMBO, pctSizeX( ComboPct ) },
 		{ IDC_GROUP_BOX_3, Size },
 		{ IDC_FILE_CHECKSUMS_LIST, Size },
 		{ IDC_SEL_FILE_STATIC, MoveY },

@@ -8,6 +8,7 @@
 #include "RuntimeException.h"
 #include "Shortcut.h"
 #include "ProcessUtils.h"
+#include "ShellTypes.h"
 #include "ToolbarImagesDialog.h"
 #include "WindowDebug.h"
 #include "resource.h"
@@ -302,6 +303,7 @@ namespace app
 	{
 		// inject UTL_UI.lib code into UTL_BASE.lib:
 		fs::StoreResolveShortcutProc( &shell::ResolveShortcut );
+		shell::g_pShellItemExistProc = &shell::ShellItemExist;
 	}
 
 	bool InitMfcControlBars( CWinApp* pWinApp )

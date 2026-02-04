@@ -209,7 +209,9 @@ namespace fs
 	enum AccessMode { Exist = 0, Write = 2, Read = 4, ReadWrite = 6 };
 
 	bool FileExist( const TCHAR* pFilePath, AccessMode accessMode = Exist );
-	bool IsValidDirectory( const TCHAR* pDirPath );
+	bool ShellItemExist( const TCHAR* pShellPath, AccessMode accessMode = Exist );		// generalization for shell paths: if a GUID path, try to instantiate the IShellItem - to use must link to UTL_UI.lib to
+
+	bool IsValidDirectory( const TCHAR* pDirPath );		// FWD
 
 
 	struct CPathParts
@@ -269,7 +271,7 @@ namespace fs
 		bool IsValid( void ) const { return path::IsValidPath( m_filePath ); }
 		bool IsComplexPath( void ) const { return path::IsComplex( GetPtr() ); }
 		bool IsPhysicalPath( void ) const { return !IsComplexPath(); }
-		bool IsGuidPath( void ) const { return path::IsValidGuidPath( Get() ); }
+		bool IsGuidPath( void ) const { return path::IsGuidPath( GetPtr() ); }
 
 		const std::tstring& Get( void ) const { return m_filePath; }
 		std::tstring& Ref( void ) { return m_filePath; }
@@ -323,6 +325,8 @@ namespace fs
 		void Normalize( void ) { path::Normalize( m_filePath ); }
 		void Canonicalize( void ) { path::Canonicalize( m_filePath ); }
 
+		CPath& operator=( const CPath& right );
+
 		CPath operator/( const CPath& right ) const { return CPath( path::Combine( GetStart(), right.GetStart() ) ); }
 		CPath operator/( const TCHAR* pRight ) const { return CPath( path::Combine( GetStart(), path::GetStart( pRight ) ) ); }
 
@@ -338,6 +342,12 @@ namespace fs
 		bool Equals( const CPath& right ) const { return path::Equals( GetStart(), right.GetStart() ); }
 
 		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( m_filePath.c_str(), accessMode ); }
+		bool ShellItemExist( AccessMode accessMode = Exist ) const { return fs::ShellItemExist( m_filePath.c_str(), accessMode ); }
+
+		// search pattern
+		bool HasWildcardPattern( void ) const { return path::ContainsWildcards( GetFilenamePtr() ); }
+		CPath FindFirstMatch( bool recurse = true ) const;
+		bool FileMatchExist( AccessMode accessMode = Exist ) const;		// if this contains a search pattern, it checks for a first matching file
 
 		bool LocateFile( CFileFind& rFindFile ) const;
 		CPath LocateExistingFile( void ) const;
@@ -351,11 +361,11 @@ namespace fs
 	fs::CPath GetShortFilePath( const fs::CPath& filePath );
 	fs::CPath GetLongFilePath( const fs::CPath& filePath );
 
+
 	// pattern path utils (potentially with wildcards):
+	enum PatternResult { ValidFile, ValidDirectory, GuidPath, InvalidPattern };
 
-	enum PatternResult { ValidFile, ValidDirectory, InvalidPattern };
-
-	PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::TPatternPath& patternPath );	// a valid file or valid directory path with a wildcards?
+	PatternResult SplitPatternPath( OUT fs::TDirPath* pPath, OUT OPTIONAL std::tstring* pWildSpec, const fs::TPatternPath& patternPath );	// a valid file or valid directory path with a wildcards?
 }
 
 

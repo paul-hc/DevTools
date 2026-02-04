@@ -5,6 +5,7 @@
 #include "TextEditor.h"
 #include "ItemListDialog.h"
 #include "MenuUtilities.h"
+#include "ShellPidl.h"
 #include "WndUtils.h"
 #include "resource.h"
 
@@ -57,6 +58,7 @@ void CHistoryComboBox::LoadHistory( const TCHAR* pSection, const TCHAR* pEntry, 
 	m_pEntry = pEntry;
 
 	ui::LoadHistoryCombo( *this, m_pSection, m_pEntry, pDefaultText, m_pItemSep );
+	UpdateContentStateFrame();
 }
 
 std::tstring CHistoryComboBox::GetCurrentText( void ) const
@@ -90,6 +92,33 @@ int CHistoryComboBox::GetCmdSelIndex( void ) const
 	return CB_ERR;
 }
 
+void CHistoryComboBox::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const implement
+{
+	cmdId, pTooltip;
+
+	if ( GetItemContent().IsPathContent() )		// virtual call (for sub-classes that manage their own ui::CItemContent object)
+	{
+		fs::CPath filePath( ui::GetComboSelText( *this ) );
+		filePath.Expand();
+
+		if ( filePath.IsGuidPath() )
+		{
+			std::tstring wildPattern;
+			fs::SplitPatternPath( &filePath, &wildPattern, filePath );		// split into folder path and wildcard pattern
+
+			shell::CPidlAbsolute itemPidl( filePath.GetPtr() );
+			if ( !itemPidl.IsNull() )
+			{	// display the friendly editing name
+				filePath = itemPidl.GetEditingName();
+				filePath /= wildPattern;
+				rText = filePath.Get();
+			}
+		}
+		else
+			rText = filePath.Get();
+	}
+}
+
 void CHistoryComboBox::ValidateContent( void )
 {
 	ui::SendCommandToParent( m_hWnd, HCN_VALIDATEITEMS );		// give parent a chance to cleanup invalid items
@@ -104,9 +133,29 @@ void CHistoryComboBox::ValidateContent( void )
 		ui::WriteComboItems( *this, newItems );
 }
 
+bool CHistoryComboBox::UpdateContentStateFrame( void )
+{
+	bool validContent = true;
+
+	if ( GetItemContent().IsPathContent() )		// virtual call (for sub-classes that manage their own ui::CItemContent object)
+	{
+		fs::CPath filePath( ui::GetComboSelText( *this ) );
+
+		if ( !filePath.IsEmpty() )		// content initialized?
+		{
+			validContent = filePath.FileMatchExist();
+			SetFrameColor( validContent ? CLR_NONE : color::ScarletRed );
+		}
+	}
+
+	return validContent;
+}
+
 void CHistoryComboBox::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
+
+	//ModifyStyle( 0, CBS_AUTOHSCROLL );		// doesn't work after creation, must set in the .rc file!
 
 	COMBOBOXINFO cbInfo = { sizeof( COMBOBOXINFO ) };
 	if ( GetComboBoxInfo( &cbInfo ) )
@@ -117,6 +166,7 @@ void CHistoryComboBox::PreSubclassWindow( void )
 				m_pEdit.reset( new CTextEditor() );
 
 			m_pEdit->SubclassWindow( cbInfo.hwndItem );
+			//m_pEdit->ModifyStyle( 0, ES_AUTOHSCROLL );		// doesn't work after creation, must set in the .rc file!
 		}
 
 		if ( cbInfo.hwndList != nullptr && nullptr == m_pDropList.get() )
@@ -189,12 +239,7 @@ void CHistoryComboBox::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 
 BOOL CHistoryComboBox::OnChanged_Reflect( void )
 {
-	if ( GetItemContent().IsPathContent() )		// virtual call (for sub-classes that manage their own ui::CItemContent object)
-	{
-		fs::CPath filePath( ui::GetComboSelText( *this ) );
-
-		SetFrameColor( filePath.FileExist() ? CLR_NONE : color::ScarletRed );
-	}
+	UpdateContentStateFrame();
 	return FALSE;					// continue routing
 }
 

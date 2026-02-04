@@ -15,6 +15,18 @@
 
 namespace shell
 {
+	bool ShellFolderExist( const TCHAR* pFolderShellPath )
+	{
+		return !str::IsEmpty( pFolderShellPath ) && MakeShellFolder( pFolderShellPath ) != nullptr;
+	}
+
+	bool ShellItemExist( const TCHAR* pFolderShellPath )
+	{
+		CComPtr<IShellItem> pShellItem = MakeShellItem( pFolderShellPath );
+		return pShellItem != nullptr;
+	}
+
+
 	CComPtr<IShellFolder> GetDesktopFolder( void )
 	{
 		CComPtr<IShellFolder> pDesktopFolder;
@@ -26,6 +38,18 @@ namespace shell
 	}
 
 	CComPtr<IShellFolder> MakeShellFolder( const TCHAR* pFolderShellPath )
+	{
+		CPidlAbsolute folderPidl( pFolderShellPath );
+		CComPtr<IShellFolder> pShellFolder;
+
+		if ( !folderPidl.IsNull() )
+			if ( HR_OK( ::SHBindToObject( nullptr, folderPidl, nullptr, IID_PPV_ARGS( &pShellFolder ) ) ) )		// bind to the ancestor IShellFolder
+				return pShellFolder;
+
+		return nullptr;
+	}
+
+	CComPtr<IShellFolder> MakeShellFolder_Desktop( const TCHAR* pFolderShellPath )
 	{
 		CComPtr<IShellFolder> pDirFolder;
 
@@ -367,12 +391,11 @@ namespace shell
 	}
 
 
-#ifdef USE_UT
-
 	const CFlagTags& GetTags_SFGAO_Flags( void )
 	{
 		static const CFlagTags::FlagDef s_flagDefs[] =
 		{
+		#ifdef _DEBUG
 			{ FLAG_TAG( SFGAO_CANCOPY ) },
 			{ FLAG_TAG( SFGAO_CANMOVE ) },
 			{ FLAG_TAG( SFGAO_CANLINK ) },
@@ -405,12 +428,13 @@ namespace shell
 			{ FLAG_TAG( SFGAO_HASSTORAGE ) },
 			{ FLAG_TAG( SFGAO_STREAM ) },
 			{ FLAG_TAG( SFGAO_STORAGEANCESTOR ) }
+		#else
+			NULL_TAG
+		#endif
 		};
 		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
 		return s_tags;
 	}
-
-#endif
 }
 
 

@@ -16,6 +16,7 @@ namespace utl
 		CFlagSet( const CFlagSet& src ) : m_flags( src.m_flags ) {}
 
 		static CFlagSet Make( UnderlyingT flags ) { CFlagSet flagSet; flagSet.m_flags |= flags; return flagSet; }
+		static CFlagSet MakeFlag( EnumT flag, bool on ) { CFlagSet flagSet; flagSet.Set( flag, on ); return flagSet; }
 
 		UnderlyingT Value( void ) const { return m_flags; }
 

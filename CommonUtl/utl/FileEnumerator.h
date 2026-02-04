@@ -26,8 +26,8 @@ namespace fs
 	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] = path::CDelims::s_fmtNumSuffix.c_str() ) throws_( CRuntimeException );	// with numeric suffix
 	fs::CPath MakeUniqueHashedFilename( const fs::CPath& filePath, const TCHAR fmtHashSuffix[] = _T("_%08X") );											// with hash suffix
 
-	// late binding to shell::ResolveShortcut defined in UTL_UI.lib
-	typedef bool (*TResolveShortcutProc)( fs::CPath& rDestPath, const TCHAR* pLnkPath, CWnd* pWnd );	// FWD
+	// late binding to shell::ResolveShortcut defined in UTL_UI.lib:
+	typedef bool (*TResolveShortcutProc)( fs::CPath& rDestPath, const TCHAR* pLnkPath, CWnd* pWnd );
 
 	void StoreResolveShortcutProc( TResolveShortcutProc resolveShortcutProc );
 }

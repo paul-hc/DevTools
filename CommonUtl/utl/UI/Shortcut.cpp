@@ -114,12 +114,12 @@ namespace shell
 		return pShellLink != nullptr && ResolveLink( rTargetPath, pShellLink, pWnd );
 	}
 
-#ifdef USE_UT
 
 	const CFlagTags& GetTags_ShellLinkDataFlags( void )
 	{
 		static const CFlagTags::FlagDef s_flagDefs[] =
 		{
+		#ifdef _DEBUG
 			{ FLAG_TAG( SLDF_HAS_ID_LIST ) },			// Shell link saved with ID list
 			{ FLAG_TAG( SLDF_HAS_LINK_INFO ) },			// Shell link saved with LinkInfo
 			{ FLAG_TAG( SLDF_HAS_NAME ) },
@@ -159,12 +159,14 @@ namespace shell
 		#endif
 			{ FLAG_TAG( (DWORD)SLDF_RESERVED ) }			// Reserved-- so we can use the low word as an index value in the future
 		#endif
+
+		#else
+			NULL_TAG
+		#endif //_DEBUG
 		};
 		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
 		return s_tags;
 	}
-
-#endif //USE_UT
 
 
 	// CIconLocation implementation
@@ -401,11 +403,12 @@ namespace shell
 			>> m_iconLocation.m_path >> m_iconLocation.m_index >> m_hotKey >> m_showCmd >> m_linkDataFlags;
 	}
 
-#ifdef USE_UT
+
 	const CFlagTags& CShortcut::GetTags_Fields( void )
 	{
 		static const CFlagTags::FlagDef s_flagDefs[] =
 		{
+		#ifdef _DEBUG
 			{ FLAG_TAG( TargetPath ) },
 			{ FLAG_TAG( TargetPidl ) },
 			{ FLAG_TAG( WorkDirPath ) },
@@ -415,12 +418,14 @@ namespace shell
 			{ FLAG_TAG( HotKey ) },
 			{ FLAG_TAG( ShowCmd ) },
 			{ FLAG_TAG( LinkDataFlags ) }
+		#else
+			NULL_TAG
+		#endif //_DEBUG
 		};
 
 		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
 		return s_tags;
 	}
-#endif //USE_UT
 }
 
 

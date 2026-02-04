@@ -17,7 +17,7 @@ namespace fs
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
 	bool IsProtectedFile( const TCHAR* pFilePath );
 
-	bool HasShellLinkExt( const TCHAR* pFilePath );					// a ".lnk" file - not very reliable, use shell::IsValidShortcutFile() to test link file existence
+	bool HasShellLinkExt( const TCHAR* pFilePath );			// a ".lnk" file - not very reliable, use shell::IsValidShortcutFile() to test link file existence
 
 	void QueryFolderPaths( OUT std::vector<fs::TDirPath>& rFolderPaths, const std::vector<fs::CPath>& filePaths );		// unique paths
 

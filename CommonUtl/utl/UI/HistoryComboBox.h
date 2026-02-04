@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ui_fwd.h"
+#include "Dialog_fwd.h"		// for ui::ICustomCmdInfo interface
 #include "AccelTable.h"
 #include "ItemContent.h"
 #include "FrameHostCtrl.h"
@@ -16,7 +17,8 @@ class CTextEditor;
 
 
 class CHistoryComboBox : public CFrameHostCtrl<CComboBox>
-					   , public ui::IContentValidator
+	, public ui::IContentValidator
+	, public ui::ICustomCmdInfo
 {
 	typedef CFrameHostCtrl<CComboBox> TBaseClass;
 public:
@@ -48,6 +50,11 @@ public:
 
 	// ui::IContentValidator interface
 	virtual void ValidateContent( void );
+protected:
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const implement;
+
+	virtual bool UpdateContentStateFrame( void );
 private:
 	int GetCmdSelIndex( void ) const;
 protected:

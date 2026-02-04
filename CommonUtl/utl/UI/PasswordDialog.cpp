@@ -51,7 +51,7 @@ void CPasswordDialog::RecreateEditCtrls( void )
 	bool showPassword = IsDlgButtonChecked( IDC_SHOW_PASSWORD_CHECK ) != FALSE;
 	DWORD editStyle = m_passwordEdit.GetStyle();
 
-	if ( !utl::ModifyValue( editStyle, MakeFlag( editStyle, ES_PASSWORD, !showPassword ) ) )
+	if ( !utl::ModifyValue( editStyle, CombineFlag( editStyle, ES_PASSWORD, !showPassword ) ) )
 		return;
 
 	ui::RecreateControl( &m_passwordEdit, editStyle );

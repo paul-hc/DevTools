@@ -107,12 +107,10 @@ namespace com
 		return propCanonicalName;
 	}
 
-	bool GetPropKeyFromCanonicalName( OUT PROPERTYKEY* pOutPropKey, const TCHAR* pCanonicalName )
+	bool GetPropKeyFromCanonicalName( OUT PROPERTYKEY* pPropKey, const TCHAR* pCanonicalName )
 	{
-		ASSERT_PTR( pOutPropKey );
-		PROPERTYKEY propKey;
-
-		return HR_OK( ::PSGetPropertyKeyFromName( pCanonicalName, &propKey ) );
+		ASSERT_PTR( pPropKey );
+		return HR_OK( ::PSGetPropertyKeyFromName( pCanonicalName, pPropKey ) );
 	}
 
 	std::tstring FormatPropDisplayValue( const PROPERTYKEY& propKey, const PROPVARIANT& propValue, PROPDESC_FORMAT_FLAGS fmtFlags /*= PDFF_DEFAULT*/ )

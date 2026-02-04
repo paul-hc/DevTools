@@ -69,6 +69,7 @@ namespace shell
 		std::tstring GetName( SIGDN nameType ) const { return pidl::GetName( AsAbsolute(), nameType ); }
 		std::tstring GetFilename( void ) const { return pidl::GetName( AsAbsolute(), SIGDN_NORMALDISPLAY ); }
 		std::tstring GetEditingName( void ) const { return GetName( SIGDN_DESKTOPABSOLUTEEDITING ); }
+		std::tstring GetParsingName( void ) const { return GetName( SIGDN_DESKTOPABSOLUTEPARSING ); }	// equivalent to ToShellPath()
 
 		PUIDLIST_RELATIVE GetNextItem( void ) const { return ::ILNext( m_pidl ); }
 		PUITEMID_CHILD GetLastItem( void ) const { return ::ILFindLastID( AsRelative() ); }

@@ -23,10 +23,14 @@ namespace utl
 
 namespace shell
 {
+	bool ShellFolderExist( const TCHAR* pShellPath );
+	bool ShellItemExist( const TCHAR* pShellPath );
+
 	// shell folder
 	CComPtr<IShellFolder> GetDesktopFolder( void );
 
-	CComPtr<IShellFolder> MakeShellFolder( const TCHAR* pFolderShellPath );
+	CComPtr<IShellFolder> MakeShellFolder( const TCHAR* pFolderShellPath );				// absolute: empty path defaults to 'This PC' folder
+	CComPtr<IShellFolder> MakeShellFolder_Desktop( const TCHAR* pFolderShellPath );		// relative: empty path defaults to 'Desktop' folder
 	PIDLIST_ABSOLUTE MakeFolderPidl( IShellFolder* pFolder );
 	std::tstring GetFolderName( IShellFolder* pFolder, SIGDN nameType = SIGDN_NORMALDISPLAY );
 	shell::TPath GetFolderPath( IShellFolder* pFolder );
@@ -36,7 +40,6 @@ namespace shell
 	CComPtr<IShellFolder2> ToShellFolder( IShellItem* pFolderItem );
 	CComPtr<IShellFolder2> GetParentFolderAndPidl( OUT PITEMID_CHILD* pPidlItem, IShellItem* pShellItem );
 	PIDLIST_ABSOLUTE MakeItemPidl( IShellItem* pShellItem );
-
 
 	CComPtr<IBindCtx> CreateFileSysBindContext( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL );			// virtual bind context for FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY
 
@@ -81,9 +84,7 @@ namespace shell
 	DWORD GetFileAttributesProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
 	ULONGLONG GetFileSizeProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
 
-#ifdef USE_UT
-	const CFlagTags& GetTags_SFGAO_Flags( void );
-#endif
+	const CFlagTags& GetTags_SFGAO_Flags( void );	// debug-only tags
 }
 
 

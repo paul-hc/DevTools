@@ -152,7 +152,7 @@ namespace fs
 		std::vector<std::tstring> subDirs;
 		str::Tokenize( subDirs, pDirSubPath, path::CDelims::s_dirDelims.c_str() );
 
-		DWORD openExistingMode = ::MakeFlag( mode, STGM_CREATE, false );
+		DWORD openExistingMode = ::CombineFlag( mode, STGM_CREATE, false );
 		bool succeeded = true;
 
 		for ( std::vector<std::tstring>::const_iterator itSubDir = subDirs.begin(); itSubDir != subDirs.end(); ++itSubDir )

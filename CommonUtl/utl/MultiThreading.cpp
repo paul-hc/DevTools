@@ -7,33 +7,30 @@
 #endif
 
 
-namespace mt
+CScopedInitializeCom::CScopedInitializeCom( DWORD coInit /*= COINIT_APARTMENTTHREADED*/ )
+	: m_comInitialized( false )
 {
-	CScopedInitializeCom::CScopedInitializeCom( DWORD coInit /*= COINIT_APARTMENTTHREADED*/ )
-		: m_comInitialized( false )
-	{
-		HRESULT hResult =
-		#if ( ( _WIN32_WINNT >= 0x0400 ) || defined( _WIN32_DCOM ) )	// DCOM
-			::CoInitializeEx( nullptr, coInit );
-		#else
-			::CoInitialize( nullptr );
-		#endif
+	HRESULT hResult =
+#if ( ( _WIN32_WINNT >= 0x0400 ) || defined( _WIN32_DCOM ) )	// DCOM
+		::CoInitializeEx( nullptr, coInit );
+#else
+		::CoInitialize( nullptr );
+#endif
 
-		if ( HR_OK( hResult ) )
-			m_comInitialized = true;
-		else
-			// ignore RPC_E_CHANGED_MODE if CLR is loaded. Error is due to CLR initializing COM and InitializeCOM trying to initialize COM with different flags
-			if ( hResult != RPC_E_CHANGED_MODE || nullptr == GetModuleHandle( _T("Mscoree.dll") ) )
-				return;
-	}
+	if ( HR_OK( hResult ) )
+		m_comInitialized = true;
+	else
+		// ignore RPC_E_CHANGED_MODE if CLR is loaded. Error is due to CLR initializing COM and InitializeCOM trying to initialize COM with different flags
+		if ( hResult != RPC_E_CHANGED_MODE || nullptr == GetModuleHandle( _T("Mscoree.dll") ) )
+			return;
+}
 
-	void CScopedInitializeCom::Uninitialize( void )
+void CScopedInitializeCom::Uninitialize( void )
+{
+	if ( m_comInitialized )
 	{
-		if ( m_comInitialized )
-		{
-			::CoUninitialize();
-			m_comInitialized = false;
-		}
+		::CoUninitialize();
+		m_comInitialized = false;
 	}
 }
 
