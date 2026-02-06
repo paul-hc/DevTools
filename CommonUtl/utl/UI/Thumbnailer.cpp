@@ -219,10 +219,14 @@ const CFlagTags& CThumbnailer::GetTags_CacheStatusFlags( void )
 {
 	static const CFlagTags::FlagDef flagDefs[] =
 	{
-		{ CacheHit, _T("") },				// silent on cache hits (not the interesting case)
-		{ CacheRemoveExpired, _T("(-) remove expired") },
-		{ CacheExtract, _T("(+) extract from cache") },
-		{ Generate, _T("(++) generate") }
+	#ifdef _DEBUG
+		FLAG_TAG_KEY( CacheHit, "" ),				// silent on cache hits (not the interesting case)
+		FLAG_TAG_KEY( CacheRemoveExpired, "(-) remove expired" ),
+		FLAG_TAG_KEY( CacheExtract, "(+) extract from cache" ),
+		FLAG_TAG_KEY( Generate, "(++) generate" )
+	#else
+		NULL_TAG
+	#endif
 	};
 	static const CFlagTags tags( flagDefs, COUNT_OF( flagDefs ) );
 	return tags;

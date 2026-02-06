@@ -5,9 +5,9 @@
 #include "ImageStore.h"
 #include "WndUtils.h"
 #include "utl/Algorithms.h"
+#include "FlagTags.h"
 
 #ifdef _DEBUG
-#include "FlagTags.h"
 #define new DEBUG_NEW
 #endif
 
@@ -781,17 +781,13 @@ namespace ui
 
 		return true;
 	}
-}
 
-
-namespace dbg
-{
-	#ifdef _DEBUG
 
 	const CFlagTags& GetTags_MenuItemType( void )
 	{
 		static const CFlagTags::FlagDef s_flagDefs[] =
 		{
+		#ifdef _DEBUG
 			{ FLAG_TAG( MFT_BITMAP ) },
 			{ FLAG_TAG( MFT_MENUBARBREAK ) },
 			{ FLAG_TAG( MFT_MENUBREAK ) },
@@ -800,9 +796,12 @@ namespace dbg
 			{ FLAG_TAG( MFT_SEPARATOR ) },
 			{ FLAG_TAG( MFT_RIGHTORDER ) },
 			{ FLAG_TAG( MFT_RIGHTJUSTIFY ) }
+		#else
+			NULL_TAG
+		#endif
 		};
 
-		static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
+		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
 		return s_tags;
 	}
 
@@ -810,27 +809,20 @@ namespace dbg
 	{
 		static const CFlagTags::FlagDef s_flagDefs[] =
 		{
+		#ifdef _DEBUG
 			{ FLAG_TAG( MF_GRAYED ) },			// MFS_GRAYED is messy: MF_GRAYED | MF_DISABLED
 			{ FLAG_TAG( MF_DISABLED ) },		// MFS_DISABLED is messy: MFS_GRAYED
 			{ FLAG_TAG( MFS_CHECKED ) },
 			{ FLAG_TAG( MFS_HILITE ) },
 			{ FLAG_TAG( MFS_DEFAULT ) }
+		#else
+			NULL_TAG
+		#endif
 		};
 
-		static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
+		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
 		return s_tags;
 	}
-
-	std::tstring FormatFlags( const TCHAR fmt[], const CFlagTags& tags, int flags )
-	{
-		std::tstring coreText = tags.FormatUi( flags );
-		if ( coreText.empty() )
-			return coreText;			// skip 0 flags
-
-		return str::Format( fmt, coreText.c_str() );
-	}
-
-	#endif //_DEBUG
 }
 
 
@@ -885,7 +877,7 @@ namespace dbg
 	void TraceMenuItem( const ui::MENUITEMINFO_BUFF& itemInfo, int itemPos, unsigned int indentLevel /*= 0*/ )
 	{
 	#ifdef _DEBUG
-		static const TCHAR s_space[] = _T(", "), s_fieldSep[] = _T(", "), s_flagsSep[] = _T("   ");
+		static const TCHAR s_space[] = _T(", "), s_fieldSep[] = _T(", ");
 		std::tstring text;
 
 		if ( itemInfo.IsSubMenu() )
@@ -896,8 +888,8 @@ namespace dbg
 		if ( itemInfo.IsCommand() )
 			stream::Tag( text, str::Format( _T("\"%s\""), itemInfo.dwTypeData ), s_fieldSep );		// text
 
-		stream::Tag( text, FormatFlags( _T("Type={%s}"), GetTags_MenuItemType(), itemInfo.fType ), s_flagsSep );				// type flags
-		stream::Tag( text, FormatFlags( _T("State={%s}"), GetTags_MenuItemState(), itemInfo.fState ), s_flagsSep );	// state flags
+		text += str::Format( _T("   Type={%s}"), ui::GetTags_MenuItemType().FormatKey( itemInfo.fType ).c_str() );		// type flags
+		text += str::Format( _T("   State={%s}"), ui::GetTags_MenuItemState().FormatKey( itemInfo.fState ).c_str() );	// state flags
 
 		std::tstring indentPrefix( indentLevel * 2, _T(' ') );
 		TRACE_FL( _T("\n%s[%d] %s\n"), indentPrefix.c_str(), itemPos, text.c_str() );

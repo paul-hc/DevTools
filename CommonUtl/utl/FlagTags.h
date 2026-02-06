@@ -3,8 +3,25 @@
 #pragma once
 
 
-#define FLAG_TAG( flag )  flag, _T(#flag)		// pair to be used in static initializer lists: { MyFlag, _T("MyFlag") }
-#define NULL_TAG  0, nullptr					// placeholder for CFlagTags::FlagDef single array element that means empty tags (for debug-only tags)
+// macros for CFlagTags::FlagDef static initializer lists:
+
+#define FLAG_TAG( flag ) \
+	flag, _T(#flag), nullptr			// { MyFlag, _T("MyFlag"), nullptr }
+
+#define FLAG_AS_TAG( type, flag ) \
+	(type)flag, _T(#flag), nullptr		// { (type)MyFlag, _T("MyFlag"), nullptr }
+
+#define FLAG_TAG_KEY_UI( flag, strKeyTag, strUiTag ) \
+	flag, _T(strKeyTag), _T(strUiTag)	// { MyFlag, _T("MyKeyFlag"), _T("strUiTag") }
+
+#define FLAG_TAG_KEY( flag, strKeyTag ) \
+	flag, _T(strKeyTag), nullptr		// { MyFlag, _T("strKeyTag"), nullptr }
+
+#define FLAG_TAG_UI( flag, strUiTag ) \
+	flag, _T(#flag), _T(strUiTag)		// { MyFlag, _T("MyFlag"), _T("strUiTag") }
+
+#define NULL_TAG \
+	0, nullptr, nullptr					// placeholder for single array element that evaluate to empty tags (for debug-only tags)
 
 
 // formatter of bit field flags with values in sequence: 2^0, 2^1, ... 2^31
@@ -18,13 +35,14 @@ public:
 	public:
 		unsigned long m_flag;
 		const TCHAR* m_pKeyTag;
+		const TCHAR* m_pUiTag;
 	};
 
 	// for contiguous flags starting with 0b1
 	CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags = nullptr );
 
-	// for sparse individual flags; uiTags follows the same order
-	CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags = str::GetEmpty() );
+	// for sparse individual flags with both KeyTag and optional UiTag
+	CFlagTags( const FlagDef flagDefs[], unsigned int count );
 
 	~CFlagTags();
 

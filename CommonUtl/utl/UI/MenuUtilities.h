@@ -6,6 +6,9 @@
 #include <afxcontextmenumanager.h>		// for afxContextMenuManager
 
 
+class CFlagTags;
+
+
 namespace ui
 {
 	interface IImageStore;
@@ -226,6 +229,10 @@ namespace ui
 
 		bool HasText( void ) const { return EqMaskedValue( fType, BaseTypeMask, MFT_STRING ); }
 	};
+
+
+	const CFlagTags& GetTags_MenuItemType( void );
+	const CFlagTags& GetTags_MenuItemState( void );
 }
 
 

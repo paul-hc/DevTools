@@ -407,12 +407,11 @@ const CShellMenuController::CMenuCmdInfo* CShellMenuController::FindCmd( MenuCom
 }
 
 
-#ifdef _DEBUG
-
 const CFlagTags& CShellMenuController::GetTags_ContextMenuFlags( void )
 {
 	static const CFlagTags::FlagDef flagDefs[] =
 	{
+	#ifdef _DEBUG
 		{ FLAG_TAG( CMF_DEFAULTONLY ) },
 		{ FLAG_TAG( CMF_VERBSONLY ) },
 		{ FLAG_TAG( CMF_EXPLORE ) },
@@ -426,9 +425,10 @@ const CFlagTags& CShellMenuController::GetTags_ContextMenuFlags( void )
 		{ FLAG_TAG( CMF_OPTIMIZEFORINVOKE ) },
 		{ FLAG_TAG( CMF_SYNCCASCADEMENU ) },
 		{ FLAG_TAG( CMF_DONOTPICKDEFAULT ) }
+	#else
+		NULL_TAG
+	#endif //_DEBUG
 	};
 	static const CFlagTags s_tags( ARRAY_SPAN( flagDefs ) );
 	return s_tags;
 }
-
-#endif //_DEBUG

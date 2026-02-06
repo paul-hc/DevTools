@@ -37,7 +37,7 @@ namespace dbg
 			FLAG_TAG( WS_GROUP ),
 			FLAG_TAG( WS_TABSTOP )
 		};
-		static const CFlagTags s_styleTags( s_styleFlags, COUNT_OF( s_styleFlags ) );
+		static const CFlagTags s_styleTags( ARRAY_SPAN( s_styleFlags ) );
 		return s_styleTags;
 	}
 
@@ -70,7 +70,7 @@ namespace dbg
 			FLAG_TAG( WS_EX_COMPOSITED ),
 			FLAG_TAG( WS_EX_NOACTIVATE )
 		};
-		static const CFlagTags s_stleExTags( s_stleExFlags, COUNT_OF( s_stleExFlags ) );
+		static const CFlagTags s_stleExTags( ARRAY_SPAN( s_stleExFlags ) );
 		return s_stleExTags;
 	}
 }

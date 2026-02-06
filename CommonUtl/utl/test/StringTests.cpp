@@ -1098,16 +1098,23 @@ void CStringTests::TestFlagTags( void )
 
 	// sparse tags
 	{
-		static const CFlagTags::FlagDef flagDefs[] =
+		static const CFlagTags::FlagDef s_flagKeyDefs[] =
 		{
-			{ FILE_ATTRIBUTE_READONLY, _T("RO") },
-			{ FILE_ATTRIBUTE_HIDDEN, _T("H") },
-			{ FILE_ATTRIBUTE_SYSTEM, _T("S") }
+			FLAG_TAG_KEY( FILE_ATTRIBUTE_READONLY, "RO" ),
+			FLAG_TAG_KEY( FILE_ATTRIBUTE_HIDDEN, "H" ),
+			FLAG_TAG_KEY( FILE_ATTRIBUTE_SYSTEM, "S" )
+		};
+
+		static const CFlagTags::FlagDef s_flagKeyUiDefs[] =
+		{
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_READONLY, "RO", "ReadOnly" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_HIDDEN, "H", "Hidden" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_SYSTEM, "S", "System" )
 		};
 
 		// key tags == UI tags
 		{
-			CFlagTags faTags( flagDefs, COUNT_OF( flagDefs ) );
+			CFlagTags faTags( ARRAY_SPAN( s_flagKeyDefs ) );
 			ASSERT_EQUAL( FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM, faTags.GetFlagsMask() );
 			ASSERT_EQUAL( CFlagTags::FindBitPos( FILE_ATTRIBUTE_SYSTEM ) + 1, faTags.GetUiTags().size() );
 
@@ -1123,7 +1130,7 @@ void CStringTests::TestFlagTags( void )
 
 		// key tags != UI tags
 		{
-			CFlagTags faTags( flagDefs, COUNT_OF( flagDefs ), _T("ReadOnly|Hidden|System") );
+			CFlagTags faTags( ARRAY_SPAN( s_flagKeyUiDefs ) );
 			ASSERT_EQUAL( faTags.GetKeyTags().size(), faTags.GetUiTags().size() );
 			ASSERT( faTags.GetKeyTags() != faTags.GetUiTags() );
 			ASSERT_EQUAL( _T("Hidden|System"), faTags.FormatUi( FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_TEMPORARY ) );

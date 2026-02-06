@@ -2241,7 +2241,7 @@ const CFlagTags& CReportListControl::GetTags_LV_Flags( void )
 		{ FLAG_TAG( LVIF_COLFMT ) }
 	#endif
 	};
-	static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
+	static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
 	return s_tags;
 }
 
@@ -2256,7 +2256,7 @@ const CFlagTags& CReportListControl::GetTags_LV_State( void )
 		{ FLAG_TAG( LVIS_GLOW ) },
 		{ FLAG_TAG( LVIS_ACTIVATING ) }
 	};
-	static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
+	static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
 	return s_tags;
 }
 

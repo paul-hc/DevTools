@@ -25,7 +25,7 @@ CFlagTags::CFlagTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= null
 	ENSURE( m_keyTags.empty() || m_keyTags.size() == m_uiTags.size() );
 }
 
-CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::tstring& uiTags /*= str::GetEmpty()*/ )
+CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count )
 {
 	ASSERT_PTR( flagDefs );
 	ASSERT( count <= MaxBits );
@@ -36,19 +36,19 @@ CFlagTags::CFlagTags( const FlagDef flagDefs[], unsigned int count, const std::t
 		return;		// no tags, will format the hex value
 	}
 
-	std::vector<std::tstring> srcUiTags;
-	str::Split( srcUiTags, uiTags.c_str(), m_listSep );
-	ASSERT( srcUiTags.empty() || srcUiTags.size() == count );
-
 	m_keyTags.resize( MaxBits );
 	m_uiTags.resize( MaxBits );
 
 	int maxPos = 0;
 	for ( unsigned int i = 0; i != count; ++i )
 	{
-		int pos = FindBitPos( flagDefs[ i ].m_flag );
-		m_keyTags[ pos ] = flagDefs[ i ].m_pKeyTag;
-		m_uiTags[ pos ] = !srcUiTags.empty() ? srcUiTags[ i ] : m_keyTags[ pos ];
+		const FlagDef& flag = flagDefs[i];
+		ASSERT( flag.m_pKeyTag != nullptr || flag.m_pUiTag != nullptr );
+
+		int pos = FindBitPos( flag.m_flag );
+		m_keyTags[ pos ] = flag.m_pKeyTag != nullptr ? flag.m_pKeyTag : flag.m_pUiTag;
+		m_uiTags[ pos ] = flag.m_pUiTag != nullptr ? flag.m_pUiTag : flag.m_pKeyTag;
+
 		maxPos = std::max<int>( pos, maxPos );
 	}
 

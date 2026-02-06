@@ -199,25 +199,23 @@ namespace fs
 	{
 		static const CFlagTags::FlagDef s_flagDefs[] =
 		{
-			{ FILE_ATTRIBUTE_READONLY, _T("R") },		// CFile::readOnly
-			{ FILE_ATTRIBUTE_HIDDEN, _T("H") },			// CFile::hidden
-			{ FILE_ATTRIBUTE_SYSTEM, _T("S") },			// CFile::system
-			{ CFile::volume, _T("V") },
-			{ FILE_ATTRIBUTE_DIRECTORY, _T("D") },		// CFile::directory
-			{ FILE_ATTRIBUTE_ARCHIVE, _T("A") },		// CFile::archive
-			{ FILE_ATTRIBUTE_DEVICE, _T("d") },
-			{ FILE_ATTRIBUTE_NORMAL, _T("N") },
-			{ FILE_ATTRIBUTE_TEMPORARY, _T("t") },
-			{ FILE_ATTRIBUTE_SPARSE_FILE, _T("s") },
-			{ FILE_ATTRIBUTE_REPARSE_POINT, _T("r") },
-			{ FILE_ATTRIBUTE_COMPRESSED, _T("c") },
-			{ FILE_ATTRIBUTE_OFFLINE, _T("o") },
-			{ FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, _T("n") },
-			{ FILE_ATTRIBUTE_ENCRYPTED, _T("e") },
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_READONLY, "R", "READ-ONLY" ),		// CFile::readOnly
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_HIDDEN, "H", "HIDDEN" ),			// CFile::hidden
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_SYSTEM, "S", "SYSTEM" ),			// CFile::system
+			FLAG_TAG_KEY_UI( CFile::volume, "V", "VOLUME" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_DIRECTORY, "D", "DIRECTORY" ),		// CFile::directory
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_ARCHIVE, "A", "ARCHIVE" ),			// CFile::archive
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_DEVICE, "d", "Device" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_NORMAL, "N", "NORMAL" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_TEMPORARY, "t", "Temporary" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_SPARSE_FILE, "s", "Sparse File" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_REPARSE_POINT, "r", "Reparse Point" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_COMPRESSED, "c", "Compressed" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_OFFLINE, "o", "Offline" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, "n", "Not Content Indexed" ),
+			FLAG_TAG_KEY_UI( FILE_ATTRIBUTE_ENCRYPTED, "e", "Encrypted" )
 		};
-		static const std::tstring s_uiTags = _T("READ-ONLY|HIDDEN|SYSTEM|VOLUME|DIRECTORY|ARCHIVE|Device|NORMAL|Temporary|Sparse File|Reparse Point|Compressed|Offline|Not Content Indexed|Encrypted");
-
-		static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ), s_uiTags );
+		static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
 
 		return s_tags;
 	}

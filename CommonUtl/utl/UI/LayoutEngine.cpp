@@ -23,9 +23,13 @@ namespace dbg
 	{
 		static const CFlagTags::FlagDef flagDefs[] =
 		{
-			{ CLayoutEngine::SmoothGroups, _T("SmoothGroups") },
-			{ CLayoutEngine::GroupsVisible, _T("GroupsVisible") },
-			{ CLayoutEngine::UseDoubleBuffer, _T("UseDoubleBuffer") }
+		#ifdef _DEBUG
+			FLAG_TAG_KEY( CLayoutEngine::SmoothGroups, "SmoothGroups" ),
+			FLAG_TAG_KEY( CLayoutEngine::GroupsVisible, "GroupsVisible" ),
+			FLAG_TAG_KEY( CLayoutEngine::UseDoubleBuffer, "UseDoubleBuffer" )
+		#else
+			NULL_TAG
+		#endif
 		};
 		static const CFlagTags s_tags( ARRAY_SPAN( flagDefs ) );
 		return s_tags;
