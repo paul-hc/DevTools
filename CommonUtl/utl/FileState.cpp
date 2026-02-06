@@ -16,10 +16,51 @@
 
 #define EDITABLE_ATTRIBUTE_MASK ( FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NORMAL )
 
+// ULARGE_INTEGER conversion
+#define MAKE_UINT64( low, hi )	( static_cast<UINT64>( low ) | static_cast<UINT64>( hi ) << 32 )
+#define LO_DWORD( largeUInt )	static_cast<DWORD>( largeUInt & 0xFFFFFFFF )
+#define HI_DWORD( largeUInt )   static_cast<DWORD>( ( largeUInt >> 32 ) & 0xFFFFFFFF )
+
 
 namespace fs
 {
+	CTime FromFileTime( FILETIME fileTime )
+	{
+		if ( !CTime::IsValidFILETIME( fileTime ) )
+			return CTime();
+
+		return CTime( fileTime );
+	}
+
+
 	// CFileState implementation
+
+	CFileState::CFileState( void )
+		: m_fileSize( 0 )
+		, m_attributes( s_invalidAttributes )
+		, m_crc32( 0 )
+	{
+	}
+
+	CFileState::CFileState( const fs::CPath& fullPath )
+		: m_fileSize( 0 )
+		, m_attributes( s_invalidAttributes )
+		, m_crc32( 0 )
+	{
+		Retrieve( fullPath );
+	}
+
+	CFileState::CFileState( const WIN32_FILE_ATTRIBUTE_DATA& fileAttrData, const TCHAR* pFullPath )
+		: m_fullPath( pFullPath )
+	{	// built from ::GetFileAttributesEx()
+		SetFrom( fileAttrData );
+	}
+
+	CFileState::CFileState( const WIN32_FIND_DATA& findData )
+	{
+		m_fullPath.Set( findData.cFileName );
+		SetFrom( findData );
+	}
 
 	CFileState::CFileState( const ::CFileStatus* pMfcFileStatus )
 		: m_fullPath( pMfcFileStatus->m_szFullName )
@@ -41,6 +82,44 @@ namespace fs
 		foundFile.GetCreationTime( m_creationTime );
 		foundFile.GetLastWriteTime( m_modifTime );
 		foundFile.GetLastAccessTime( m_accessTime );
+	}
+
+	void CFileState::Set( const WIN32_FILE_ATTRIBUTE_DATA& fileAttrData, const TCHAR* pFullPath )
+	{
+		m_fullPath.Set( pFullPath );
+		SetFrom( fileAttrData );
+	}
+
+	void CFileState::Set( const WIN32_FIND_DATA& findData )
+	{
+		m_fullPath.Set( findData.cFileName );
+		SetFrom( findData );
+		m_crc32 = 0;
+	}
+
+	bool CFileState::Retrieve( const fs::CPath& fullPath )
+	{
+		WIN32_FILE_ATTRIBUTE_DATA fileAttrData;
+
+		*this = CFileState();
+		m_fullPath = fullPath;
+
+		if ( 0 == ::GetFileAttributesEx( m_fullPath.GetPtr(), GetFileExInfoStandard, &fileAttrData ) )
+			return false;
+
+		SetFrom( fileAttrData );
+		return true;
+	}
+
+	template< typename Win32AttrDataT >
+	void CFileState::SetFrom( const Win32AttrDataT& src )
+	{
+		m_fileSize = MAKE_UINT64( src.nFileSizeLow, src.nFileSizeHigh );
+		m_attributes = static_cast<BYTE>( src.dwFileAttributes );		// store only the CFile::Attribute enum values (low-byte), and discard higher ones
+		m_creationTime = FromFileTime( src.ftCreationTime );
+		m_modifTime = FromFileTime( src.ftLastWriteTime );
+		m_accessTime = FromFileTime( src.ftLastAccessTime );
+		m_crc32 = 0;
 	}
 
 	CFileState CFileState::ReadFromFile( const fs::CPath& path )

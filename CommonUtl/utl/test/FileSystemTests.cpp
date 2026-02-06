@@ -341,6 +341,21 @@ bool CFileSystemTests::TestFileAndDirectoryState( void )
 		fs::CFileState fileState = fs::CFileState::ReadFromFile( filePath );
 		ASSERT_EQUAL( CFile::archive, fileState.m_attributes );
 
+		{	// check the WIN32_FILE_ATTRIBUTE_DATA construction via ::GetFileAttributesEx()
+			fs::CFileState fileState2( filePath );
+			ASSERT( fileState2.IsValid() );
+			ASSERT_EQUAL( fileState, fileState2 );
+
+			fs::CFileState fileState3;
+			ASSERT( fileState3.Retrieve( filePath ) );
+			ASSERT_EQUAL( fileState, fileState3 );
+
+			fs::CPath naFilePath = filePath.Get() + _T("_NA");		// non-existing file
+			ASSERT( !fileState2.Retrieve( naFilePath ) );
+			ASSERT( !fileState2.IsValid() );
+			ASSERT( fileState2 != fileState );
+		}
+
 		fs::CFileState newFileState;
 
 		SetFlag( fileState.m_attributes, CFile::readOnly );

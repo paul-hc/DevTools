@@ -22,7 +22,7 @@ namespace shell
 		if ( SFGAOF sfgaofFlags = GetSfgaofFlags( pFolderShellPath ) )
 			if ( HasFlag( sfgaofFlags, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
 			{
-				TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+				//TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
 				return true;
 			}
 
@@ -33,7 +33,7 @@ namespace shell
 	{
 		if ( SFGAOF sfgaofFlags = GetSfgaofFlags( pShellPath ) )
 		{
-			TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+			//TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
 			return true;
 		}
 
@@ -159,7 +159,7 @@ namespace shell
 
 		CComPtr<IShellItem> pShellItem;
 
-		if ( !HR_OK( ::SHCreateItemFromParsingName( pShellPath, CShared::GetGuidPathBindCtx( pShellPath ), IID_PPV_ARGS( &pShellItem ) ) ) )
+		if ( !HR_OK( ::SHCreateItemFromParsingName( pShellPath, CShared::AutoGuidPathBindCtx( pShellPath ), IID_PPV_ARGS( &pShellItem ) ) ) )
 			return nullptr;
 
 		return pShellItem;
@@ -217,8 +217,8 @@ namespace shell
 		}
 
 		// IFileSystemBindData interface:
-		IFACEMETHODIMP SetFindData( const WIN32_FIND_DATAW* pFindData ) { m_findData = *pFindData; return S_OK; }
-		IFACEMETHODIMP GetFindData( OUT WIN32_FIND_DATAW* pDestFindData ) { *pDestFindData = m_findData; return S_OK; }
+		IFACEMETHODIMP SetFindData( const WIN32_FIND_DATA* pFindData ) { m_findData = *pFindData; return S_OK; }
+		IFACEMETHODIMP GetFindData( OUT WIN32_FIND_DATA* pDestFindData ) { *pDestFindData = m_findData; return S_OK; }
 	private:
 		WIN32_FIND_DATA m_findData;
 	};
@@ -298,7 +298,7 @@ namespace shell
 		return nullptr;
 	}
 
-	IBindCtx* CShared::GetProxyFilePathBindCtx( const TCHAR* pShellPath )
+	IBindCtx* CShared::AutoProxyFilePathBindCtx( const TCHAR* pShellPath )
 	{
 		ASSERT_PTR( pShellPath );
 
@@ -311,7 +311,7 @@ namespace shell
 		return nullptr;
 	}
 
-	IBindCtx* CShared::GetGuidPathBindCtx( const TCHAR* pShellPath )
+	IBindCtx* CShared::AutoGuidPathBindCtx( const TCHAR* pShellPath )
 	{
 		if ( IsRunningUnderWow64() )
 			if ( IsGuidPath( pShellPath ) )
@@ -626,7 +626,7 @@ namespace shell
 			ASSERT( !str::IsEmpty( pRelShellPath ) );
 
 			PIDLIST_RELATIVE childItemPidl = nullptr;
-			if ( !HR_OK( pParentFolder->ParseDisplayName( nullptr, pBindCtx != nullptr ? pBindCtx : CShared::GetProxyFilePathBindCtx( pRelShellPath ),
+			if ( !HR_OK( pParentFolder->ParseDisplayName( nullptr, pBindCtx != nullptr ? pBindCtx : CShared::AutoProxyFilePathBindCtx( pRelShellPath ),
 														  const_cast<LPWSTR>( pRelShellPath ), nullptr, &childItemPidl, nullptr ) ) )
 				return nullptr;
 
@@ -711,7 +711,7 @@ namespace shell
 
 		#if !defined(_WIN64)
 			if ( nullptr == pidlAbs )		// possibly a WOW64 redirector error?
-				pidlAbs = ParseToPidl( pExistingShellPath, CShared::GetGuidPathBindCtx( pExistingShellPath ) );		// use custom bind context only for GUID paths
+				pidlAbs = ParseToPidl( pExistingShellPath, CShared::AutoGuidPathBindCtx( pExistingShellPath ) );		// use custom bind context only for GUID paths
 		#endif
 
 			return pidlAbs;

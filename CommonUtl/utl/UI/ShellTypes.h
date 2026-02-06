@@ -59,7 +59,7 @@ namespace shell
 
 	// custom bind contexts:
 
-	CComPtr<IBindCtx> CreateFileSysBindContext( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL );			// virtual bind context for FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY
+	CComPtr<IBindCtx> CreateFileSysBindContext( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL );		// custom bind context using STR_FILE_SYS_BIND_DATA
 
 	class CShared
 	{
@@ -71,8 +71,8 @@ namespace shell
 
 		// semantic shared resources:
 		static IBindCtx* GetFileSysBindCtx( DWORD fileAttribute );				// FILE_ATTRIBUTE_NORMAL, FILE_ATTRIBUTE_DIRECTORY, or 0 (Wow64)
-		static IBindCtx* GetProxyFilePathBindCtx( const TCHAR* pShellPath );	// works for non-existent file system paths
-		static IBindCtx* GetGuidPathBindCtx( const TCHAR* pShellPath );			// works for GUID paths, workaround WOW64 redirector parsing errors
+		static IBindCtx* AutoProxyFilePathBindCtx( const TCHAR* pShellPath );	// works for non-existent file system paths
+		static IBindCtx* AutoGuidPathBindCtx( const TCHAR* pShellPath );		// works for GUID paths, workaround WOW64 redirector parsing errors
 	};
 }
 

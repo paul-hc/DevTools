@@ -12,11 +12,18 @@ namespace fs
 {
 	struct CFileState
 	{
-		CFileState( void ) : m_fileSize( 0 ), m_attributes( s_invalidAttributes ), m_crc32( 0 ) {}
+		CFileState( void );
+		CFileState( const fs::CPath& fullPath );	// quick construction via ::GetFileAttributesEx() using WIN32_FILE_ATTRIBUTE_DATA
+		CFileState( const WIN32_FILE_ATTRIBUTE_DATA& fileAttrData, const TCHAR* pFullPath );
+		CFileState( const WIN32_FIND_DATA& findData );
 		CFileState( const ::CFileStatus* pMfcFileStatus );
 		CFileState( const CFileFind& foundFile );
 
 		void Clear( void ) { *this = CFileState(); }
+
+		void Set( const WIN32_FILE_ATTRIBUTE_DATA& fileAttrData, const TCHAR* pFullPath );
+		void Set( const WIN32_FIND_DATA& findData );
+		bool Retrieve( const fs::CPath& fullPath );
 
 		bool IsEmpty( void ) const { return m_fullPath.IsEmpty(); }
 		bool IsValid( void ) const { return !IsEmpty() && m_attributes != s_invalidAttributes; }
@@ -60,6 +67,9 @@ namespace fs
 		void ModifyFileTimes( const ::CFileStatus& mfcFileStatus, bool isDirectory ) const throws_( CFileException );
 
 		void ThrowLastError( DWORD osLastError = ::GetLastError() ) const throws_( CFileException ) { CFileException::ThrowOsError( osLastError, m_fullPath.GetPtr() ); }
+
+		template< typename Win32AttrDataT >				// WIN32_FILE_ATTRIBUTE_DATA/WIN32_FIND_DATA
+		void SetFrom( const Win32AttrDataT& src );		// both structs share a common field definition (kind of inheritance)
 	public:
 		CPath m_fullPath;
 		UINT64 m_fileSize;
