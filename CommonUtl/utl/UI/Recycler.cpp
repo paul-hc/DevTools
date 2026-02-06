@@ -40,25 +40,20 @@ namespace shell
 	const PROPERTYKEY CRecycler::PK_OriginalLocation = { PSGUID_DISPLACED, PID_DISPLACED_FROM };
 	const PROPERTYKEY CRecycler::PK_DateDeleted = { PSGUID_DISPLACED, PID_DISPLACED_DATE };
 
-	CComPtr<IShellItem2> CRecycler::GetRecycleBinShellItem( void )
-	{
-		CComPtr<IShellItem2> pRecycleBinItem;
-		if ( HR_OK( ::SHGetKnownFolderItem( FOLDERID_RecycleBinFolder, KF_FLAG_DEFAULT, nullptr, IID_PPV_ARGS( &pRecycleBinItem ) ) ) )
-			return pRecycleBinItem;
 
-		return nullptr;
+	CRecycler::CRecycler( void )
+	{
+		if ( !shell::MakeKnownFolderItem( m_pRecyclerItem, FOLDERID_RecycleBinFolder ) )
+			ASSERT( false );
 	}
 
 	CComPtr<IShellFolder2> CRecycler::GetRecycleBinFolder( void )
 	{
 		CComPtr<IShellFolder2> pRecycleBinFolder;
-		if ( CComPtr<IShellFolder> pDesktop = GetDesktopFolder() )
-		{
-			CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlRecycleBin;
-			if ( HR_OK( ::SHGetSpecialFolderLocation( nullptr /*m_hWnd*/, CSIDL_BITBUCKET, &pidlRecycleBin ) ) )
-				if ( HR_OK( pDesktop->BindToObject( pidlRecycleBin, nullptr, IID_PPV_ARGS( &pRecycleBinFolder ) ) ) )
-					return pRecycleBinFolder;
-		}
+		CPidlAbsolute recycleBinPidl( FOLDERID_RecycleBinFolder );
+
+		if ( !recycleBinPidl.IsNull() && !recycleBinPidl.MakeShellFolder( pRecycleBinFolder ) )
+			return pRecycleBinFolder;
 
 		return nullptr;
 	}

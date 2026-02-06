@@ -25,9 +25,11 @@ public:
 private:
 	void TestNullAndEmptyPidl( void );
 	void TestCreateFromPath( void );
-	void TestShellPidl( void );
+	void TestPidlBasics( void );
 	void TestFolderRelativePidls( void );
-	void TestPidlType( void );
+	void TestPidl_FileSystem( void );
+	void TestPidl_FileSystemNonExistent( void );
+	void TestPidl_GuidSpecial( void );
 	void TestParentPidl( void );
 	void TestCommonAncestorPidl( void );
 };

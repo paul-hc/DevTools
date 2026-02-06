@@ -27,8 +27,8 @@ namespace shell
 {
 	typedef fs::CPath TPath;			// alias for a SHELL PATH, which is either a file-system path (fs::CPath) or a GUID path (e.g. Control Panel folder, applet, etc)
 	typedef TPath TRelativePath;		// alias for a relative SHELL PATH
-	typedef TPath TDirPath;				// alias for directory paths
-
+	typedef TPath TFolderPath;			// alias for virtual folder shell paths
+	typedef TPath TPatternPath;			// alias for file path or folder paths with wildcards
 
 	// late binding to shell::ShellItemExist defined in UTL_UI.lib:
 	typedef bool (*TShellItemExistProc)( const TCHAR* pShellPath );

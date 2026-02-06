@@ -3,10 +3,12 @@
 #include "ShellTypes.h"
 #include "ShellPidl.h"
 #include "utl/Algorithms_fwd.h"
+#include "utl/AppTools.h"		// for IsRunningUnderWow64()
+#include "utl/ResourcePool.h"	// for app::GetSharedResources
 #include "utl/FlagTags.h"
 #include "utl/IUnknownImpl.h"
 #include "utl/StdHashValue.h"
-#include <atlcomtime.h>		// for COleDateTime
+#include <atlcomtime.h>			// for COleDateTime
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,13 +19,49 @@ namespace shell
 {
 	bool ShellFolderExist( const TCHAR* pFolderShellPath )
 	{
-		return !str::IsEmpty( pFolderShellPath ) && MakeShellFolder( pFolderShellPath ) != nullptr;
+		if ( SFGAOF sfgaofFlags = GetSfgaofFlags( pFolderShellPath ) )
+			if ( HasFlag( sfgaofFlags, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
+			{
+				TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+				return true;
+			}
+
+		return false;
 	}
 
-	bool ShellItemExist( const TCHAR* pFolderShellPath )
+	bool ShellItemExist( const TCHAR* pShellPath )
 	{
-		CComPtr<IShellItem> pShellItem = MakeShellItem( pFolderShellPath );
-		return pShellItem != nullptr;
+		if ( SFGAOF sfgaofFlags = GetSfgaofFlags( pShellPath ) )
+		{
+			TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+			return true;
+		}
+
+		return false;
+	}
+
+
+	bool ShellFolderExist( PCIDLIST_ABSOLUTE pidl )
+	{
+		if ( SFGAOF sfgaofFlags = pidl::GetPidlSfgaofFlags( pidl ) )
+			if ( HasFlag( sfgaofFlags, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
+			{
+				TRACE( _T( " - ShellFolderExist(): PIDL  SFGAOF={%s}\n" ), GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+				return true;
+			}
+
+		return false;
+	}
+
+	bool ShellItemExist( PCIDLIST_ABSOLUTE pidl )
+	{
+		if ( SFGAOF sfgaofFlags = pidl::GetPidlSfgaofFlags( pidl ) )
+		{
+			TRACE( _T( " - ShellItemExist(): PIDL  SFGAOF={%s}\n" ), GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+			return true;
+		}
+
+		return false;
 	}
 
 
@@ -43,25 +81,39 @@ namespace shell
 		CComPtr<IShellFolder> pShellFolder;
 
 		if ( !folderPidl.IsNull() )
-			if ( HR_OK( ::SHBindToObject( nullptr, folderPidl, nullptr, IID_PPV_ARGS( &pShellFolder ) ) ) )		// bind to the ancestor IShellFolder
+			if ( HR_OK( ::SHBindToObject( nullptr, folderPidl, nullptr, IID_PPV_ARGS( &pShellFolder ) ) ) )
 				return pShellFolder;
 
 		return nullptr;
 	}
 
-	CComPtr<IShellFolder> MakeShellFolder_Desktop( const TCHAR* pFolderShellPath )
+	CComPtr<IShellFolder> MakeShellFolder_DesktopRel( const TCHAR* pFolderShellPath )
 	{
 		CComPtr<IShellFolder> pDirFolder;
 
 		if ( CComPtr<IShellFolder> pDesktopFolder = GetDesktopFolder() )
 		{
-			CComHeapPtr<ITEMIDLIST_RELATIVE> folderRelPidl;
+			CComHeapPtr<ITEMIDLIST_RELATIVE> folderPidlRel;
 
-			folderRelPidl.Attach( pidl::ParseToRelativePidl( pDesktopFolder, pFolderShellPath ) );
-			if ( folderRelPidl.m_pData != nullptr )
-				if ( HR_OK( pDesktopFolder->BindToObject( folderRelPidl, nullptr, IID_PPV_ARGS( &pDirFolder ) ) ) )
+			folderPidlRel.Attach( pidl::ParseToRelativePidl( pDesktopFolder, pFolderShellPath ) );
+			if ( folderPidlRel.m_pData != nullptr )
+				if ( HR_OK( pDesktopFolder->BindToObject( folderPidlRel, nullptr, IID_PPV_ARGS( &pDirFolder ) ) ) )
 					return pDirFolder;
 		}
+
+		return nullptr;
+	}
+
+	CComPtr<IShellFolder2> ToShellFolder( IUnknown* pShellItf )
+	{
+		ASSERT_PTR( pShellItf );
+
+		CComPtr<IShellFolder2> pShellFolder;
+		CComHeapPtr<ITEMIDLIST_ABSOLUTE> folderPidlAbs;
+
+		if ( HR_OK( ::SHGetIDListFromObject( pShellItf, &folderPidlAbs ) ) )
+			if ( HR_OK( ::SHBindToObject( nullptr, folderPidlAbs, nullptr, IID_PPV_ARGS( &pShellFolder ) ) ) )		// bind to the IShellFolder2
+				return pShellFolder;
 
 		return nullptr;
 	}
@@ -107,25 +159,10 @@ namespace shell
 
 		CComPtr<IShellItem> pShellItem;
 
-		if ( !HR_OK( ::SHCreateItemFromParsingName( pShellPath, nullptr, IID_PPV_ARGS( &pShellItem ) ) ) )
+		if ( !HR_OK( ::SHCreateItemFromParsingName( pShellPath, CShared::GetGuidPathBindCtx( pShellPath ), IID_PPV_ARGS( &pShellItem ) ) ) )
 			return nullptr;
 
 		return pShellItem;
-	}
-
-	CComPtr<IShellFolder2> ToShellFolder( IShellItem* pFolderItem )
-	{
-		ASSERT_PTR( pFolderItem );
-
-		CComPtr<IShellFolder2> pShellFolder;
-
-		CComHeapPtr<ITEMIDLIST_ABSOLUTE> folderAbsPidl;
-		if ( HR_OK( ::SHGetIDListFromObject( pFolderItem, &folderAbsPidl ) ) )
-			if ( CComPtr<IShellFolder> pDesktopFolder = GetDesktopFolder() )
-				if ( HR_OK( pDesktopFolder->BindToObject( folderAbsPidl, nullptr, IID_PPV_ARGS( &pShellFolder ) ) ) )
-					return pShellFolder;
-
-		return pShellFolder;
 	}
 
 	CComPtr<IShellFolder2> GetParentFolderAndPidl( OUT PITEMID_CHILD* pPidlItem, IShellItem* pShellItem )
@@ -154,6 +191,12 @@ namespace shell
 
 namespace shell
 {
+	bool IsRunningUnderWow64( void )
+	{
+		return CAppTools::Instance()->IsRunningUnderWow64();
+	}
+
+
 	// Implements IFileSystemBindData interface, used to setup a bind context for a file that may not exist in the file system.
 	//
 	class CProxyFileSysBindData : public utl::IUnknownImpl<IFileSystemBindData>
@@ -197,24 +240,84 @@ namespace shell
 		return nullptr;
 	}
 
-	bool RequiresFileSysBindContext( const TCHAR* pShellPath )
+
+	// CShared implementation
+
+	IBindCtx* CShared::GetFileBindCtx( void )
 	{
-		return
-			path::IsGuidPath( pShellPath )		// parsing GUID paths to PIDL require a bind context
-			|| !fs::FileExist( pShellPath );	// inexistent file/directory paths require a proxy bind context
+		static CComPtr<IBindCtx> s_pFileBindCtx;
+		if ( nullptr == s_pFileBindCtx )
+		{
+			s_pFileBindCtx = CreateFileSysBindContext( FILE_ATTRIBUTE_NORMAL );
+			app::GetSharedResources().AddComPtr( s_pFileBindCtx );			// will release the CComPtr singleton in ExitInstance()
+		}
+		return s_pFileBindCtx;
 	}
 
-	CComPtr<IBindCtx> AutoFileSysBindContext( const TCHAR* pShellPath, IBindCtx* pBindCtx /*= nullptr*/ )
+	IBindCtx* CShared::GetDirectoryBindCtx( void )
+	{
+		static CComPtr<IBindCtx> s_pDirectoryBindCtx;
+		if ( nullptr == s_pDirectoryBindCtx )
+		{
+			s_pDirectoryBindCtx = CreateFileSysBindContext( FILE_ATTRIBUTE_DIRECTORY );
+			app::GetSharedResources().AddComPtr( s_pDirectoryBindCtx );		// will release the CComPtr singleton in ExitInstance()
+		}
+		return s_pDirectoryBindCtx;
+	}
+
+	/*
+		File System Redirection (WOW64):
+		When a 32-bit application runs on a 64-bit OS, Windows uses a File System Redirector to map calls intended for %windir%\System32 to %windir%\SysWOW64.
+
+		Control Panel Applets: many applets (like Region) are implemented via .cpl or .dll files located in the System32 directory.
+		The Failure: When SHCreateItemFromParsingName() is called in 32-bit mode, the Shell attempts to resolve the underlying file.
+		Because of redirection, it looks in SysWOW64.
+		If the specific 64-bit applet's parsing logic isn't mirrored or correctly registered in the 32-bit hive/folder, the parsing fails.
+
+		By passing an IBindCtx with STR_FILE_SYS_BIND_DATA, we are providing the Shell with pre-verified file metadata (via a WIN32_FIND_DATA structure).
+		This tells the Shell: "I already know this item exists; here are its attributes."
+		This allows the parser to bypass the standard disk-probing phase (which is where the redirection/missing-file error occurs),
+		and proceed directly to creating the IShellItem based on the provided data.
+	*/
+	IBindCtx* CShared::GetWow64BindCtx( void )
+	{	// shared bind context to be used for parsing GUID paths when 32 bit process runs under WOW64 redirector
+		if ( IsRunningUnderWow64() )
+			return GetFileBindCtx();
+
+		return nullptr;
+	}
+
+	IBindCtx* CShared::GetFileSysBindCtx( DWORD fileAttribute )
+	{
+		if ( FILE_ATTRIBUTE_NORMAL == fileAttribute )
+			return GetFileBindCtx();
+
+		if ( FILE_ATTRIBUTE_DIRECTORY == fileAttribute )
+			return GetDirectoryBindCtx();
+
+		return nullptr;
+	}
+
+	IBindCtx* CShared::GetProxyFilePathBindCtx( const TCHAR* pShellPath )
 	{
 		ASSERT_PTR( pShellPath );
 
-		if ( AUTO_BIND_CTX == pBindCtx || AUTO_FOLDER_BIND_CTX == pBindCtx )
-			if ( RequiresFileSysBindContext( pShellPath ) )
-				return CreateFileSysBindContext( AUTO_FOLDER_BIND_CTX == pBindCtx ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL );
-			else
-				return nullptr;
+		if ( IBindCtx* pWow64BindCtx = GetWow64BindCtx() )
+			return pWow64BindCtx;
 
-		return pBindCtx;
+		if ( !IsGuidPath( pShellPath ) && !fs::FileExist( pShellPath ) )		// inexistent file/directory paths require a proxy bind context
+			return GetFileBindCtx();
+
+		return nullptr;
+	}
+
+	IBindCtx* CShared::GetGuidPathBindCtx( const TCHAR* pShellPath )
+	{
+		if ( IsRunningUnderWow64() )
+			if ( IsGuidPath( pShellPath ) )
+				return GetFileBindCtx();		// STR_FILE_SYS_BIND_DATA bind context is required to workaround WOW64 redirector parsing errors (missing WOW64 registry keys, etc)
+
+		return nullptr;
 	}
 }
 
@@ -223,24 +326,42 @@ namespace shell
 {
 	// shell file info (via SHFILEINFO):
 
-	SFGAOF GetFileSysAttributes( const TCHAR* pFilePath, UINT moreFlags /*= 0*/ )
+	SFGAOF GetSfgaofFlags( const TCHAR* pShellPath )
 	{
+		if ( path::HasEnvironVarPtr( pShellPath ) )
+			return GetSfgaofFlags( shell::TPath::GetExpanded( pShellPath ).GetPtr() );		// recurse with expaned path
+
+		if ( IsGuidPath( pShellPath ) )
+		{
+			CPidlAbsolute pidl( pShellPath );
+			return !pidl.IsNull() ? pidl.GetSfgaofFlags() : 0;
+		}
+
+		return GetRawSfgaofFlags( pShellPath );
+	}
+
+	SFGAOF GetRawSfgaofFlags( const TCHAR* pPathOrPidl, UINT moreFlags /*= 0*/ )
+	{
+		ASSERT_PTR( pPathOrPidl );
+
 		SHFILEINFO fileInfo;
 		utl::ZeroStruct( &fileInfo );
 
-		if ( 0 == ::SHGetFileInfo( pFilePath, 0, &fileInfo, sizeof( fileInfo ), SHGFI_ATTRIBUTES | moreFlags ) )
+		if ( 0 == ::SHGetFileInfo( pPathOrPidl, 0, &fileInfo, sizeof( fileInfo ), SHGFI_ATTRIBUTES | moreFlags ) )
 			return 0;
 
-		return fileInfo.dwAttributes;
+		return static_cast<SFGAOF>( fileInfo.dwAttributes );
 	}
 
-	std::pair<CImageList*, int> GetFileSysImageIndex( const TCHAR* pFilePath, UINT iconFlags /*= SHGFI_SMALLICON*/ )
+	std::pair<CImageList*, int> GetFileSysImageIndex( const TCHAR* pPathOrPidl, UINT iconFlags /*= SHGFI_SMALLICON*/ )
 	{
+		ASSERT_PTR( pPathOrPidl );
+
 		SHFILEINFO fileInfo;
 		utl::ZeroStruct( &fileInfo );
 		std::pair<CImageList*, int> imagePair( nullptr, -1 );
 
-		if ( HIMAGELIST hSysImageList = (HIMAGELIST)::SHGetFileInfo( pFilePath, 0, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX | iconFlags ) )
+		if ( HIMAGELIST hSysImageList = (HIMAGELIST)::SHGetFileInfo( pPathOrPidl, 0, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX | iconFlags ) )
 		{
 			ENSURE( fileInfo.iIcon >= 0 );
 			imagePair.first = CImageList::FromHandle( hSysImageList );
@@ -250,12 +371,14 @@ namespace shell
 		return imagePair;
 	}
 
-	HICON ExtractFileSysIcon( const TCHAR* pFilePath, UINT iconFlags /*= SHGFI_SMALLICON*/ )
+	HICON ExtractFileSysIcon( const TCHAR* pPathOrPidl, UINT iconFlags /*= SHGFI_SMALLICON*/ )
 	{
+		ASSERT_PTR( pPathOrPidl );
+
 		SHFILEINFO fileInfo;
 		utl::ZeroStruct( &fileInfo );
 
-		if ( 0 == ::SHGetFileInfo( pFilePath, 0, &fileInfo, sizeof( fileInfo ), SHGFI_ICON | iconFlags ) )
+		if ( 0 == ::SHGetFileInfo( pPathOrPidl, 0, &fileInfo, sizeof( fileInfo ), SHGFI_ICON | iconFlags ) )
 			return nullptr;
 
 		return fileInfo.hIcon;
@@ -417,7 +540,6 @@ namespace shell
 			{ FLAG_TAG( SFGAO_FOLDER ) },
 			{ FLAG_TAG( SFGAO_FILESYSTEM ) },
 			{ FLAG_TAG( SFGAO_HASSUBFOLDER ) },
-			{ FLAG_TAG( SFGAO_CONTENTSMASK ) },
 			{ FLAG_TAG( SFGAO_VALIDATE ) },
 			{ FLAG_TAG( SFGAO_REMOVABLE ) },
 			{ FLAG_TAG( SFGAO_COMPRESSED ) },
@@ -442,7 +564,7 @@ namespace shell
 {
 	PIDLIST_ABSOLUTE MakePidl( const shell::TPath& shellPath, DWORD fileAttribute /*= FILE_ATTRIBUTE_NORMAL*/ )
 	{
-		// parses inexistent paths via shell::CreateFileSysBindContext() if fileAttribute = FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY
+		// parses inexistent paths if fileAttribute = FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY
 		return shell::pidl::ParseToPidlFileSys( shellPath.GetPtr(), fileAttribute  );
 	}
 
@@ -465,29 +587,26 @@ namespace shell
 
 	namespace pidl
 	{
-		bool IsSpecialPidl( LPCITEMIDLIST pidl )
+		bool IsSpecialPidl( PCIDLIST_ABSOLUTE pidl )
 		{
 			ASSERT_PTR( pidl );
-			SHFILEINFO fileInfo;
-			utl::ZeroStruct( &fileInfo );
 
-			if ( ::SHGetFileInfo( (LPCWSTR)pidl, 0, &fileInfo, sizeof( fileInfo ), SHGFI_PIDL | SHGFI_ATTRIBUTES ) != 0 )
-				if ( !HasFlag( fileInfo.dwAttributes, SFGAO_FILESYSTEM ) )		// PIDL refers to a virtual object OR a special shell namespace directory (e.g., Control Panel, Recycle Bin)
-				{
-					std::tstring parsingName = shell::pidl::GetName( reinterpret_cast<PCIDLIST_ABSOLUTE>( pidl ), SIGDN_DESKTOPABSOLUTEPARSING );
-
-					// example: parsingName="::{26EE0668-A00A-44D7-9371-BEB064C98683}\0" for PIDL "Control Panel\\All Control Panel Items"
-					if ( path::IsValidGuidPath( parsingName ) )
-						return true;
+			if ( SFGAOF sfgaofFlags = GetPidlSfgaofFlags( pidl ) )
+				if ( !HasFlag( sfgaofFlags, SFGAO_FILESYSTEM ) && HasFlag( sfgaofFlags, SFGAO_FOLDER | SFGAO_CANLINK ) )
+				{	// PIDL refers to a special shell namespace folder (e.g., Control Panel, Recycle Bin), or a Control Panel applet.
+					//	SFGAO_FOLDER:	"::{26EE0668-A00A-44D7-9371-BEB064C98683}\0" for PIDL to folder "Control Panel\All Control Panel Items"
+					//	SFGAO_CANLINK:	"::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}" for Region applet in Control Panel
+					ASSERT( IsGuidPath( pidl::GetShellPath( pidl ) ) );
+					return true;
 				}
 
 			return false;
 		}
 
 
-		SFGAOF GetPidlAttributes( PCIDLIST_ABSOLUTE pidl )
+		SFGAOF GetPidlSfgaofFlags( PCIDLIST_ABSOLUTE pidl )
 		{
-			return shell::GetFileSysAttributes( (LPCTSTR)pidl, SHGFI_PIDL );
+			return shell::GetRawSfgaofFlags( (LPCTSTR)pidl, SHGFI_PIDL );
 		}
 
 		std::pair<CImageList*, int> GetPidlImageIndex( PCIDLIST_ABSOLUTE pidl, UINT iconFlags /*= SHGFI_SMALLICON*/ )
@@ -506,10 +625,9 @@ namespace shell
 			ASSERT_PTR( pParentFolder );
 			ASSERT( !str::IsEmpty( pRelShellPath ) );
 
-			CComPtr<IBindCtx> pBindContext = AutoFileSysBindContext( pRelShellPath, pBindCtx );
-
 			PIDLIST_RELATIVE childItemPidl = nullptr;
-			if ( !HR_OK( pParentFolder->ParseDisplayName( nullptr, pBindContext, const_cast<LPWSTR>( pRelShellPath ), nullptr, &childItemPidl, nullptr ) ) )
+			if ( !HR_OK( pParentFolder->ParseDisplayName( nullptr, pBindCtx != nullptr ? pBindCtx : CShared::GetProxyFilePathBindCtx( pRelShellPath ),
+														  const_cast<LPWSTR>( pRelShellPath ), nullptr, &childItemPidl, nullptr ) ) )
 				return nullptr;
 
 			return childItemPidl;			// allocated, caller must free
@@ -566,7 +684,7 @@ namespace shell
 		{
 			fs::CPath fullPath;
 
-			if ( !IsNull( pidlAbsolute ) )
+			if ( pidlAbsolute != nullptr )
 			{
 				TCHAR buffer[ MAX_PATH * 2 ];
 
@@ -582,25 +700,19 @@ namespace shell
 
 		PIDLIST_ABSOLUTE CreateFromPath( const TCHAR* pExistingShellPath )
 		{
-			if ( path::HasEnvironVar( pExistingShellPath ) )
+			if ( path::HasEnvironVarPtr( pExistingShellPath ) )
 				return CreateFromPath( shell::TPath::GetExpanded( pExistingShellPath ).GetPtr() );	// recurse with expaned path
 
-			PIDLIST_ABSOLUTE pidlAbs = nullptr;
+			PIDLIST_ABSOLUTE pidlAbs = ::ILCreateFromPath( pExistingShellPath );
 
-			// handle for uniform behaviour on 32/64 builds:
-		#ifdef _WIN64
-			// 64-bit build: succeeds for any existing file-system path or GUID path (virtual folder)
-			pidlAbs = ::ILCreateFromPath( pExistingShellPath );
-		#else
-			// 32-bit build: succeeds for any existing file-system path, but it fails for GUID path (virtual folder)
-			if ( path::IsGuidPath( pExistingShellPath ) )
-			{
-				pidlAbs = ParseToPidlFileSys( pExistingShellPath );
-				ENSURE( nullptr == ::ILCreateFromPath( pExistingShellPath ) );
-			}
-			else
-				pidlAbs = ::ILCreateFromPath( pExistingShellPath );
-		#endif // !_WIN64
+			// Handle for uniform behaviour on 32/64 builds:
+			//	64-bit build: succeeds for any existing file-system path or GUID path.
+			//	32-bit build: succeeds for any existing file-system path, but it fails for GUID path due to WOW64 redirector errors.
+
+		#if !defined(_WIN64)
+			if ( nullptr == pidlAbs )		// possibly a WOW64 redirector error?
+				pidlAbs = ParseToPidl( pExistingShellPath, CShared::GetGuidPathBindCtx( pExistingShellPath ) );		// use custom bind context only for GUID paths
+		#endif
 
 			return pidlAbs;
 		}
@@ -614,17 +726,16 @@ namespace shell
 		//		"::{26EE0668-A00A-44D7-9371-BEB064C98683}\0\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"
 		//			- display name formatted with SIGDN_DESKTOPABSOLUTEPARSING,
 		//			  corresponding to "Control Panel\All Control Panel Items\Region" (SIGDN_DESKTOPABSOLUTEEDITING).
-		// pBindCtx: pass the bind context created with shell::CreateFileSysBindContext() to parse virtual path items (non-existent in the file system).
+		// pBindCtx: pass the bind context shell::CShared::GetFileBindCtx() to parse inexistent file system paths.
 		//
 		PIDLIST_ABSOLUTE ParseToPidl( const TCHAR* pShellPath, IBindCtx* pBindCtx /*= nullptr*/ )
 		{
-			if ( path::HasEnvironVar( pShellPath ) )
+			if ( path::HasEnvironVarPtr( pShellPath ) )
 				return ParseToPidl( shell::TPath::GetExpanded( pShellPath ).GetPtr(), pBindCtx );	// recurse with expaned path
 
 			PIDLIST_ABSOLUTE pidlAbs = nullptr;
 
-			// This can parse non-existent files and Control Panel apps correctly.
-			// For non-existent files/folders pass a pBindCtx created with CreateFileSysBindContext()
+			// This can parse non-existent files and Control Panel apps correctly with a proper pBindCtx.
 			if ( !HR_OK( ::SHParseDisplayName( pShellPath, pBindCtx, &pidlAbs, 0, nullptr ) ) )
 				return nullptr;
 
@@ -633,10 +744,12 @@ namespace shell
 
 		PIDLIST_ABSOLUTE ParseToPidlFileSys( const TCHAR* pShellPath, DWORD fileAttribute /*= FILE_ATTRIBUTE_NORMAL*/ )
 		{	// parses inexistent paths via shell::CreateFileSysBindContext()
-			if ( 0 == fileAttribute && RequiresFileSysBindContext( pShellPath ) )
-				fileAttribute = FILE_ATTRIBUTE_NORMAL;
+			if ( 0 == fileAttribute )
+				if ( IsGuidPath( pShellPath )				// parsing GUID paths to PIDL require a bind context
+					 || !fs::FileExist( pShellPath ) )		// inexistent file/directory paths require a proxy bind context
+					fileAttribute = FILE_ATTRIBUTE_NORMAL;
 
-			return shell::pidl::ParseToPidl( pShellPath, fileAttribute != 0 ? shell::CreateFileSysBindContext( fileAttribute ) : nullptr );
+			return shell::pidl::ParseToPidl( pShellPath, CShared::GetFileSysBindCtx( fileAttribute ) );
 		}
 
 		PIDLIST_RELATIVE ParseToPidlRelative( const TCHAR* pRelShellPath, IShellFolder* pParentFolder, IBindCtx* pBindCtx /*= nullptr*/ )

@@ -59,3 +59,18 @@ CAppTools::~CAppTools()
 	ASSERT( this == s_pAppTools );
 	s_pAppTools = nullptr;
 }
+
+bool CAppTools::IsRunningUnderWow64( void ) const implement
+{	// WOW64 (Windows on Windows 64-bit) - is this a 32-bit process running on Windows 64-bit (using WOW64 redirection)?
+	static BOOL s_isWow64 = FALSE;
+#if defined(_WIN32) && !defined(_WIN64)
+	static bool s_isInit = false;
+
+	if ( !s_isInit )
+	{	// IsWow64Process is available on Windows XP SP2 and later
+		::IsWow64Process( ::GetCurrentProcess(), &s_isWow64 );
+		s_isInit = true;
+	}
+#endif
+	return s_isWow64 != FALSE;
+}

@@ -58,20 +58,21 @@ namespace shell
 	class CShortcut
 	{
 	public:
-		CShortcut( void ) : m_hotKey( 0 ), m_showCmd( SW_HIDE ), m_changedFields( 0 ), m_linkDataFlags( 0 ) {}
+		CShortcut( void );
 		CShortcut( IN IShellLink* pShellLink );
 
 		void Reset( IN IShellLink* pShellLink = nullptr );
 		bool WriteToLink( OUT IShellLink* pDestShellLink ) const;		// uses m_changedFields to pick fields to update
 
-		bool IsTargetEmpty( void ) const { return !IsTargetFileSys() && !m_targetPidl.HasValue(); }
-		bool IsTargetValid( void ) const;
+		bool HasTarget( void ) const { return !m_targetPath.IsEmpty() || !m_targetPidl.IsNull(); }
 		bool IsTargetFileSys( void ) const { return !m_targetPath.IsEmpty(); }
 		bool IsTargetNonFileSys( void ) const { return m_targetPath.IsEmpty() && !m_targetPidl.IsNull(); }
+		bool IsValidTarget( void ) const;
 
 		bool operator==( const CShortcut& right ) const;
 		bool operator!=( const CShortcut& right ) const { return !operator==( right ); }
 
+		DWORD GetLinkDataFlags( void ) const { return m_linkDataFlags; }
 		const fs::CPath& GetTargetPath( void ) const { return m_targetPath; }
 		const shell::CPidlAbsolute& GetTargetPidl( void ) const { return m_targetPidl; }
 		const fs::CPath& GetWorkDirPath( void ) const { return m_workDirPath; }
@@ -80,22 +81,21 @@ namespace shell
 		const CIconLocation& GetIconLocation( void ) const { return m_iconLocation; }
 		WORD GetHotKey( void ) const { return m_hotKey; }
 		int GetShowCmd( void ) const { return m_showCmd; }
-		DWORD GetLinkDataFlags( void ) const { return m_linkDataFlags; }
 
 		bool IsRunAsAdmin( void ) const { return HasFlag( m_linkDataFlags, SLDF_RUNAS_USER ); }
 		bool IsRunInSepMemSpace( void ) const { return HasFlag( m_linkDataFlags, SLDF_RUN_IN_SEPARATE ); }
 
 		enum Fields
 		{
-			TargetPath		= BIT_FLAG( 0 ),	// exclusive with TargetPidl
-			TargetPidl		= BIT_FLAG( 1 ),	// exclusive with TargetPath
-			WorkDirPath		= BIT_FLAG( 2 ),
-			Arguments		= BIT_FLAG( 3 ),
-			Description		= BIT_FLAG( 4 ),
-			IconLocation	= BIT_FLAG( 5 ),
-			HotKey			= BIT_FLAG( 6 ),
-			ShowCmd			= BIT_FLAG( 7 ),
-			LinkDataFlags	= BIT_FLAG( 8 )
+			LinkDataFlags	= BIT_FLAG( 0 ),
+			TargetPath		= BIT_FLAG( 1 ),	// exclusive with TargetPidl
+			TargetPidl		= BIT_FLAG( 2 ),	// exclusive with TargetPath
+			WorkDirPath		= BIT_FLAG( 3 ),
+			Arguments		= BIT_FLAG( 4 ),
+			Description		= BIT_FLAG( 5 ),
+			IconLocation	= BIT_FLAG( 6 ),
+			HotKey			= BIT_FLAG( 7 ),
+			ShowCmd			= BIT_FLAG( 8 )
 		};
 		typedef int TFields;
 
@@ -105,6 +105,7 @@ namespace shell
 
 		TFields GetDiffFields( const CShortcut& right ) const;		// evaluate fields that are different from 'right'
 
+		bool SetLinkDataFlags( DWORD linkDataFlags ) { return AssignField( m_linkDataFlags, linkDataFlags, LinkDataFlags ); }
 		bool SetTargetPath( const fs::CPath& targetPath ) { return AssignField( m_targetPath, targetPath, TargetPath ); }
 		bool SetTargetPidl( PIDLIST_ABSOLUTE pidl );				// take ownership
 		bool SetWorkDirPath( const fs::CPath& workDirPath ) { return AssignField( m_workDirPath, workDirPath, WorkDirPath ); }
@@ -113,7 +114,6 @@ namespace shell
 		bool SetIconLocation( const CIconLocation& iconLocation ) { return AssignField( m_iconLocation, iconLocation, IconLocation ); }
 		bool SetHotKey( WORD hotKey ) { return AssignField( m_hotKey, hotKey, HotKey ); }
 		bool SetShowCmd( int showCmd ) { return AssignField( m_showCmd, showCmd, ShowCmd ); }
-		bool SetLinkDataFlags( DWORD linkDataFlags ) { return AssignField( m_linkDataFlags, linkDataFlags, LinkDataFlags ); }
 		bool ModifyLinkDataFlags( DWORD clearFlags, DWORD setFlags );
 
 		// taget as either PATH (file system) or PIDL (non file system)
@@ -139,6 +139,7 @@ namespace shell
 			return true;
 		}
 	private:
+		DWORD m_linkDataFlags;			// SHELL_LINK_DATA_FLAGS (IShellLinkDataList data)
 		fs::CPath m_targetPath;
 		shell::CPidlAbsolute m_targetPidl;
 		fs::CPath m_workDirPath;
@@ -147,9 +148,6 @@ namespace shell
 		CIconLocation m_iconLocation;
 		WORD m_hotKey;					// LOBYTE = vkCode, HIBYTE = modifierFlags
 		int m_showCmd;
-
-		// IShellLinkDataList data
-		DWORD m_linkDataFlags;			// SHELL_LINK_DATA_FLAGS
 
 		// transient
 		mutable TFields m_changedFields;

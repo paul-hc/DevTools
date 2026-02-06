@@ -109,9 +109,9 @@ void CShortcutTests::TestValidLinks( void )
 		CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( linkPath.GetPtr() );
 		shell::CShortcut shortcut( pShellLink );
 
-		ASSERT( !shortcut.IsTargetEmpty() );
-		ASSERT( shortcut.IsTargetValid() );
+		ASSERT( shortcut.HasTarget() );
 		ASSERT( shortcut.IsTargetFileSys() );
+		ASSERT( shortcut.IsValidTarget() );
 
 		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPath().GetRelativePath( 3 ) );
 		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );
@@ -124,7 +124,8 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT_EQUAL( HOTKEYF_CONTROL | HOTKEYF_SHIFT | HOTKEYF_ALT, HIBYTE( shortcut.GetHotKey() ) );
 		ASSERT_EQUAL( SW_SHOWNORMAL, shortcut.GetShowCmd() );
 
-		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_LINK_INFO | SLDF_HAS_NAME | SLDF_HAS_RELPATH | SLDF_HAS_WORKINGDIR | SLDF_HAS_ARGS | SLDF_HAS_ICONLOCATION | SLDF_UNICODE | SLDF_ENABLE_TARGET_METADATA,
+		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_LINK_INFO | SLDF_HAS_NAME | SLDF_HAS_RELPATH | SLDF_HAS_WORKINGDIR | SLDF_HAS_ARGS | SLDF_HAS_ICONLOCATION |
+					  SLDF_UNICODE | SLDF_ENABLE_TARGET_METADATA,
 					  shortcut.GetLinkDataFlags() );
 		//TRACE( _T("\nlinkPath='%s' - SHELL_LINK_DATA_FLAGS={%s}\n"), linkPath.GetPtr(), shell::GetTags_ShellLinkDataFlags().FormatKey( shortcut.GetLinkDataFlags() ).c_str() );
 
@@ -153,9 +154,9 @@ void CShortcutTests::TestValidLinks( void )
 		CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( linkPath.GetPtr() );
 		shell::CShortcut shortcut( pShellLink );
 
-		ASSERT( !shortcut.IsTargetEmpty() );
-		ASSERT( shortcut.IsTargetValid() );
+		ASSERT( shortcut.HasTarget() );
 		ASSERT( shortcut.IsTargetFileSys() );
+		ASSERT( shortcut.IsValidTarget() );
 
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\Dice.png"), shortcut.GetTargetPath() );
 		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
@@ -179,9 +180,9 @@ void CShortcutTests::TestValidLinks( void )
 		CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( linkPath.GetPtr() );
 		shell::CShortcut shortcut( pShellLink );
 
-		ASSERT( !shortcut.IsTargetEmpty() );
-		ASSERT( shortcut.IsTargetValid() );
+		ASSERT( shortcut.HasTarget() );
 		ASSERT( !shortcut.IsTargetFileSys() );
+		ASSERT( shortcut.IsValidTarget() );
 
 		ASSERT_EQUAL( _T(""), shortcut.GetTargetPath() );
 		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), shortcut.GetTargetPidl().ToShellPath().Get() );
@@ -223,9 +224,9 @@ void CShortcutTests::TestValidLinks( void )
 		CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( linkPath.GetPtr() );
 		shell::CShortcut shortcut( pShellLink );
 
-		ASSERT( !shortcut.IsTargetEmpty() );
-		ASSERT( shortcut.IsTargetValid() );
+		ASSERT( shortcut.HasTarget() );
 		ASSERT( shortcut.IsTargetFileSys() );
+		ASSERT( shortcut.IsValidTarget() );
 
 		ASSERT_EQUAL( _T("%SYSTEMROOT%\\System32\\resmon.exe"), shortcut.GetTargetPath() );
 		ASSERT_EQUAL( _T("Windows\\System32\\resmon.exe"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
@@ -265,8 +266,9 @@ void CShortcutTests::TestBrokenLinks( void )
 		CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( linkPath.GetPtr() );
 		shell::CShortcut shortcut( pShellLink );
 
-		ASSERT( !shortcut.IsTargetEmpty() );
-		ASSERT( !shortcut.IsTargetValid() );
+		ASSERT( shortcut.HasTarget() );
+		ASSERT( shortcut.IsTargetFileSys() );
+		ASSERT( !shortcut.IsValidTarget() );
 
 		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPath().GetRelativePath( 3 ) );
 		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
@@ -301,9 +303,9 @@ void CShortcutTests::TestBrokenLinks( void )
 		CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( linkPath.GetPtr() );
 		shell::CShortcut shortcut( pShellLink );
 
-		ASSERT( !shortcut.IsTargetEmpty() );
-		ASSERT( !shortcut.IsTargetValid() );
+		ASSERT( shortcut.HasTarget() );
 		ASSERT( shortcut.IsTargetFileSys() );
+		ASSERT( !shortcut.IsValidTarget() );
 
 		ASSERT_EQUAL( _T("%UTL_TESTDATA_PATH%\\images\\Dice_NA.png"), shortcut.GetTargetPath() );
 		ASSERT_EQUAL( _T("TestDataUtl\\images\\Dice_NA.png"), shortcut.GetTargetPidl().ToShellPath().GetRelativePath( 3 ) );	// evaluated env. var.
@@ -505,7 +507,7 @@ void CShortcutTests::TestLinkProperties( void )
 	{	// VT_UI4
 		ULONG sfgaoFlags;
 		ASSERT( prop.GetUInt( &sfgaoFlags ) );
-		ASSERT_EQUAL( _T("SFGAO_CANCOPY|SFGAO_CANMOVE|SFGAO_CANLINK|SFGAO_CANRENAME|SFGAO_CANDELETE|SFGAO_HASPROPSHEET"), shell::GetTags_SFGAO_Flags().FormatUi( sfgaoFlags ) );
+		ASSERT_EQUAL( _T("SFGAO_CANCOPY|SFGAO_CANMOVE|SFGAO_CANLINK|SFGAO_CANRENAME|SFGAO_CANDELETE|SFGAO_HASPROPSHEET"), shell::GetTags_SFGAO_Flags().FormatKey( sfgaoFlags ) );
 	}
 
 	// empty properties:

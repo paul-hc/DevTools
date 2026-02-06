@@ -17,7 +17,7 @@ public:
 	const shell::CShortcut& GetSrcShortcut( void ) const { return GetShortcut(); }
 	const shell::CShortcut& GetDestShortcut( void ) const { return m_destShortcut; }
 
-	bool IsModified( void ) const { return m_destShortcut.IsTargetValid() && m_destShortcut != GetSrcShortcut(); }
+	bool IsModified( void ) const { return m_destShortcut.IsValidTarget() && m_destShortcut != GetSrcShortcut(); }
 
 	shell::CShortcut& RefDestShortcut( void ) { return m_destShortcut; }
 	void Reset( void ) { m_destShortcut = GetSrcShortcut(); }

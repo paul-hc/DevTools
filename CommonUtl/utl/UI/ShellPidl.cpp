@@ -67,16 +67,15 @@ namespace shell
 		return !IsNull();
 	}
 
+	bool CPidlAbsolute::CreateKnownFolder( const KNOWNFOLDERID& knownFolderGuid, KNOWN_FOLDER_FLAG flag /*= KF_FLAG_DEFAULT*/ )
+	{
+		return HR_OK( ::SHGetKnownFolderIDList( knownFolderGuid, flag, nullptr, &Ref() ) );
+	}
+
 	bool CPidlAbsolute::CreateFrom( IUnknown* pShellItf )
 	{	// most general, works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
 		ASSERT_PTR( pShellItf );
 		return HR_OK( ::SHGetIDListFromObject( pShellItf, &Ref() ) );
-	}
-
-	SFGAOF CPidlAbsolute::GetAttributes( void ) const
-	{
-		ASSERT( !IsNull() );
-		return pidl::GetPidlAttributes( Get() );
 	}
 
 	std::pair<CImageList*, int> CPidlAbsolute::GetSysImageIndex( UINT iconFlag /*= SHGFI_SMALLICON*/ ) const
@@ -261,6 +260,47 @@ namespace shell
 			return nullptr;
 
 		return pShellItemArray;
+	}
+}
+
+
+#include "utl/FileEnumerator.h"
+
+namespace shell
+{
+	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
+
+	void EnumFiles( OUT fs::IEnumerator* pEnumerator, const shell::TPath& folderShellPath, const TCHAR* pWildSpec /*= _T( "*.*" )*/ )
+	{
+		;
+	}
+
+	fs::PatternResult SearchEnumFiles( OUT fs::IEnumerator* pEnumerator, const fs::TPatternPath& searchPath )
+	{
+		fs::TDirPath dirPath;
+		std::tstring wildSpec = _T("*");
+		fs::PatternResult result;
+
+		if ( fs::IsValidFile( searchPath.GetPtr() ) )
+		{
+			dirPath = searchPath.GetParentPath();
+			wildSpec = searchPath.GetFilename();
+			result = fs::ValidFile;
+		}
+		else
+			switch ( result = fs::SplitPatternPath( &dirPath, &wildSpec, searchPath ) )
+			{
+				case fs::ValidDirectory:
+					break;
+				case fs::ValidFile:
+					ASSERT( false );		// should've been handled by the if statement
+				case fs::GuidPath:
+				case fs::InvalidPattern:
+					return result;
+			}
+
+		fs::EnumFiles( pEnumerator, dirPath, wildSpec.c_str() );
+		return result;
 	}
 }
 

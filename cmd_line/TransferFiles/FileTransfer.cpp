@@ -174,11 +174,11 @@ std::tstring CFileTransfer::FormatProtectedFileAttr( BYTE fileAttr )
 {
 	static const CFlagTags::FlagDef flagDefs[] =
 	{
-		{ CFile::readOnly, _T("READ-ONLY") },
-		{ CFile::hidden, _T("HIDDEN") },
-		{ CFile::system, _T("SYSTEM") }
+		FLAG_TAG_KEY( CFile::readOnly, "READ-ONLY" ),
+		FLAG_TAG_KEY( CFile::hidden, "HIDDEN" ),
+		FLAG_TAG_KEY( CFile::system, "SYSTEM" )
 	};
-	static const CFlagTags s_protectedFileAttrTags( flagDefs, COUNT_OF( flagDefs ) );
+	static const CFlagTags s_protectedFileAttrTags( ARRAY_SPAN( flagDefs ) );
 
 	std::tstring text;
 	stream::Tag( text, s_protectedFileAttrTags.FormatUi( fileAttr, _T("/") ), _T(" ") );

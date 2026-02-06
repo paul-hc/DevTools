@@ -23,6 +23,7 @@ namespace app
 	{
 		virtual bool IsConsoleApp( void ) const = 0;
 		virtual bool IsInteractive( void ) const = 0;
+		virtual bool IsRunningUnderWow64( void ) const = 0;			// WOW64 (Windows on Windows 64-bit) - is this a 32-bit process running on Windows 64-bit (using WOW64 redirection)?
 		virtual CLogger& GetLogger( void ) = 0;
 		virtual utl::CResourcePool& GetSharedResources( void ) = 0;
 		virtual CImageStore* GetSharedImageStore( void ) = 0;
@@ -49,6 +50,9 @@ public:
 	static CAppTools* Instance( void ) { ASSERT_PTR( s_pAppTools ); return s_pAppTools; }
 
 	const fs::CPath& GetModulePath( void ) const { return m_modulePath; }
+
+	// IAppTools interface (partial)
+	virtual bool IsRunningUnderWow64( void ) const implement;		// WOW64 (Windows on Windows 64-bit) - is this a 32-bit process running on Windows 64-bit (using WOW64)?
 
 	// main() result code:
 	static int GetMainResultCode( void ) { return s_mainResultCode; }

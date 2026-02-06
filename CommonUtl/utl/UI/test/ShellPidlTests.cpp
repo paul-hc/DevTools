@@ -5,6 +5,7 @@
 #include "test/ShellPidlTests.h"
 #include "ShellPidl.h"
 #include "ShellContextMenuHost.h"
+#include "utl/FileState.h"
 #include "utl/FlagTags.h"
 #include "utl/TextClipboard.h"
 
@@ -89,12 +90,10 @@ void CShellPidlTests::TestNullAndEmptyPidl( void )
 		ASSERT( pidl.IsNull() );
 		pidl.CreateDesktop();
 		ASSERT( pidl.IsDesktop() );
-		ASSERT( !pidl.HasValue() );
 		ASSERT_EQUAL( _T("Desktop"), pidl.ToShellPath().GetFilename() );
 
 		ASSERT( pidl.CreateFromPath( tempDirPath.GetPtr() ) );
 		ASSERT( !pidl.IsDesktop() );
-		ASSERT( pidl.HasValue() );
 		ASSERT_EQUAL( tempDirPath, pidl.ToShellPath() );
 
 		{
@@ -165,7 +164,7 @@ void CShellPidlTests::TestCreateFromPath( void )
 	ASSERT( pidl.IsNull() );
 }
 
-void CShellPidlTests::TestShellPidl( void )
+void CShellPidlTests::TestPidlBasics( void )
 {
 	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
 	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
@@ -182,11 +181,9 @@ void CShellPidlTests::TestShellPidl( void )
 		ASSERT( poolDirPidl.IsNull() );
 		poolDirPidl.CreateDesktop();
 		ASSERT( poolDirPidl.IsDesktop() );
-		ASSERT( !poolDirPidl.HasValue() );
 
 		ASSERT( poolDirPidl.CreateFromShellPath( poolDirPath.GetPtr() ) );
 		ASSERT( !poolDirPidl.IsDesktop() );
-		ASSERT( poolDirPidl.HasValue() );
 		ASSERT_EQUAL( poolDirPath, poolDirPidl.ToShellPath() );
 	}
 
@@ -319,9 +316,9 @@ void CShellPidlTests::TestFolderRelativePidls( void )
 		shellPaths.push_back( cpRegionPidl.ToShellPath() );
 
 		shell::CFolderRelativePidls multiPidls;
-		multiPidls.Build( shellPaths );			// single virtual folder
+		multiPidls.Build( shellPaths );			// single GUID folder
 
-		// "Control Panel" single virtual folder:
+		// "Control Panel" single GUID folder:
 		{
 			ASSERT( !multiPidls.IsEmpty() );
 			ASSERT_EQUAL( 1, multiPidls.GetAbsolutePidls().size() );
@@ -339,7 +336,7 @@ void CShellPidlTests::TestFolderRelativePidls( void )
 		shellPaths.push_back( cpUserAccountsPidl.ToShellPath() );
 
 		multiPidls.Build( shellPaths );
-		// "Control Panel" virtual folders:
+		// "Control Panel" GUID folders:
 		{
 			ASSERT( !multiPidls.IsEmpty() );
 			ASSERT_EQUAL( 2, multiPidls.GetAbsolutePidls().size() );
@@ -350,12 +347,12 @@ void CShellPidlTests::TestFolderRelativePidls( void )
 			ASSERT_EQUAL( _T("::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), multiPidls.GetRelativePathAt( 0 ) );
 			ASSERT_EQUAL( _T("::{60632754-C523-4B62-B45C-4172DA012619}"), multiPidls.GetRelativePathAt( 1 ) );
 
-			// With 2 virtual folders multiple selection, 'Open' verb in the context menu opens just the first virtual folder, twice!
-			// So it can't run the verbs on multiple virtual folders.
+			// With 2 GUID folders multiple selection, 'Open' verb in the context menu opens just the first GUID folder, twice!
+			// So it can't run the verbs on multiple GUID folders.
 			//ut::TrackContextMenu( multiPidls.MakeContextMenu( nullptr ) );
 		}
 
-		// mixed file system and "Control Panel" virtual folders:
+		// mixed file system and "Control Panel" GUID folders:
 		shellPaths.insert( shellPaths.end(), pool.GetFilePaths().begin(), pool.GetFilePaths().end() );
 		multiPidls.Build( shellPaths );
 		{
@@ -382,87 +379,241 @@ void CShellPidlTests::TestFolderRelativePidls( void )
 	}
 }
 
-void CShellPidlTests::TestPidlType( void )
+void CShellPidlTests::TestPidl_FileSystem( void )
 {
 	ut::CTempFilePool pool( _T("a.txt|d1\\b.txt") );
 
-	// file (file-system):
+	// 1. pool directory (file-system):
+	ASSERT( shell::ShellFolderExist( pool.GetPoolDirPath().GetPtr() ) );
+	ASSERT( shell::ShellItemExist( pool.GetPoolDirPath().GetPtr() ) );
+
+	// 2. file (file-system):
 	{
 		const fs::CPath& filePath = pool.GetFilePaths()[0];
+		ASSERT_EQUAL( _T("a.txt"), filePath.GetFilename() );
 		ASSERT( fs::IsValidFile( filePath.GetPtr() ) );
 
 		shell::CPidlAbsolute filePidl;
 
 		ASSERT( filePidl.CreateFromShellPath( filePath.GetPtr() ) );
 		ASSERT( !filePidl.IsSpecialPidl() );
+		ASSERT( !shell::ShellFolderExist( filePidl ) );
+		ASSERT( shell::ShellItemExist( filePidl ) );
+
+		ASSERT_EQUAL( FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, ::GetFileAttributes( filePath.GetPtr() ) );
 
 		ASSERT_EQUAL( _T("SFGAO_CANCOPY|SFGAO_CANMOVE|SFGAO_CANLINK|SFGAO_CANRENAME|SFGAO_CANDELETE|SFGAO_HASPROPSHEET|SFGAO_DROPTARGET|SFGAO_STREAM|SFGAO_FILESYSTEM"),
-					  shell::GetTags_SFGAO_Flags().FormatUi( filePidl.GetAttributes() ) );
+					  shell::GetTags_SFGAO_Flags().FormatKey( filePidl.GetSfgaofFlags() ) );
+
+		{
+			ASSERT( !fs::IsValidDirectory( filePath.GetPtr() ) );
+			ASSERT( !shell::ShellFolderExist( filePath.GetPtr() ) );
+			ASSERT( shell::ShellItemExist( filePath.GetPtr() ) );
+
+			ASSERT_EQUAL( SFGAO_CANCOPY | SFGAO_CANMOVE | SFGAO_CANLINK | SFGAO_CANRENAME | SFGAO_CANDELETE | SFGAO_HASPROPSHEET | SFGAO_DROPTARGET | SFGAO_STREAM | SFGAO_FILESYSTEM,
+						  shell::GetRawSfgaofFlags( filePath.GetPtr() ) );
+
+			CComPtr<IShellItem> pItem = shell::MakeShellItem( filePath.GetPtr() );
+			ASSERT_PTR( pItem );
+
+			CComPtr<IShellFolder> pFolder = shell::MakeShellFolder( filePath.GetPtr() );
+			ASSERT_NULL( pFolder );
+			ASSERT_NULL( shell::ToShellFolder( pItem ) );
+		}
 	}
 
-	// directory (file-system):
+	// 3. directory (file-system):
 	{
 		fs::TDirPath dirPath = pool.GetFilePaths()[1].GetParentPath();
+		ASSERT_EQUAL( _T("d1"), dirPath.GetFilename() );
 		ASSERT( fs::IsValidDirectory( dirPath.GetPtr() ) );
+		ASSERT( shell::ShellFolderExist( dirPath.GetPtr() ) );
+		ASSERT( shell::ShellItemExist( dirPath.GetPtr() ) );
 
 		shell::CPidlAbsolute dirPidl;
 
 		ASSERT( dirPidl.CreateFromPath( dirPath.GetPtr() ) );
 		ASSERT( !dirPidl.IsSpecialPidl() );
+		ASSERT( shell::ShellFolderExist( dirPidl ) );
+		ASSERT( shell::ShellItemExist( dirPidl ) );
 
-		ASSERT_EQUAL( _T("SFGAO_CANCOPY|SFGAO_CANMOVE|SFGAO_CANLINK|SFGAO_STORAGE|SFGAO_CANRENAME|SFGAO_CANDELETE|SFGAO_HASPROPSHEET|SFGAO_DROPTARGET")
-					  _T("|SFGAO_STORAGEANCESTOR|SFGAO_FILESYSANCESTOR|SFGAO_FOLDER|SFGAO_FILESYSTEM"),
-					  shell::GetTags_SFGAO_Flags().FormatUi( dirPidl.GetAttributes() ) );
-	}
+		ASSERT_EQUAL( SFGAO_CANCOPY | SFGAO_CANMOVE | SFGAO_CANLINK | SFGAO_STORAGE | SFGAO_CANRENAME | SFGAO_CANDELETE | SFGAO_HASPROPSHEET | SFGAO_DROPTARGET |
+					  SFGAO_STORAGEANCESTOR | SFGAO_FILESYSANCESTOR | SFGAO_FOLDER | SFGAO_FILESYSTEM,
+					  dirPidl.GetSfgaofFlags() );
 
-	// non-existent file (file-system, virtual file):
-	{
-		fs::CPath virtualFilePath = pool.GetFilePaths()[0].GetParentPath() / _T("NA.txt");
-		ASSERT( !fs::IsValidFile( virtualFilePath.GetPtr() ) && !fs::IsValidDirectory( virtualFilePath.GetPtr() ) );
-
-		shell::CPidlAbsolute virtualFilePidl( virtualFilePath.GetPtr(), FILE_ATTRIBUTE_NORMAL );
-
-		ASSERT( !virtualFilePidl.IsNull() );
-		ASSERT( !virtualFilePidl.IsSpecialPidl() );
-
-		ASSERT_EQUAL( _T(""), shell::GetTags_SFGAO_Flags().FormatUi( virtualFilePidl.GetAttributes() ) );
-	}
-
-	// non-existent directory (file-system, virtual file):
-	{
-		fs::TDirPath virtualDirPath = pool.GetFilePaths()[0].GetParentPath() / _T("NA_DIR");
-		ASSERT( !fs::IsValidFile( virtualDirPath.GetPtr() ) && !fs::IsValidDirectory( virtualDirPath.GetPtr() ) );
-
-		shell::CPidlAbsolute virtualDirPidl( virtualDirPath.GetPtr(), FILE_ATTRIBUTE_DIRECTORY );
-
-		ASSERT( !virtualDirPidl.IsNull() );
-		ASSERT( !virtualDirPidl.IsSpecialPidl() );
-
-		ASSERT_EQUAL( _T(""), shell::GetTags_SFGAO_Flags().FormatUi( virtualDirPidl.GetAttributes() ) );
-	}
-
-	// "Control Panel" special folder (non file-system, valid PIDL):
-	{
-		shell::CPidlAbsolute controlPanelPidl;
-
-		ASSERT( HR_OK( ::SHGetKnownFolderIDList( FOLDERID_ControlPanelFolder, 0, nullptr, &controlPanelPidl ) ) );
-		ASSERT( !controlPanelPidl.IsNull() );
-		ASSERT( controlPanelPidl.IsSpecialPidl() );
-
-		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), controlPanelPidl.GetName( SIGDN_DESKTOPABSOLUTEEDITING ) );
-		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), controlPanelPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
 		{
-			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelPidl.GetName( SIGDN_NORMALDISPLAY ) );
-			ASSERT_EQUAL( _T("0"), controlPanelPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
-			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelPidl.GetName( SIGDN_PARENTRELATIVEEDITING ) );
-			//ASSERT_EQUAL( _T(""), controlPanelPidl.GetName( SIGDN_FILESYSPATH ) );	// E_INVALIDARG - hResult=0x80070057: 'The parameter is incorrect.'
-			//ASSERT_EQUAL( _T(""), controlPanelPidl.GetName( SIGDN_URL ) );			// E_NOTIMPL - hResult=0x80004001: 'Not implemented'
-			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelPidl.GetName( SIGDN_PARENTRELATIVEFORADDRESSBAR ) );
-			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelPidl.GetName( SIGDN_PARENTRELATIVE ) );
+			ASSERT( fs::IsValidDirectory( dirPath.GetPtr() ) );
+			ASSERT( shell::ShellFolderExist( dirPath.GetPtr() ) );
+			ASSERT( shell::ShellItemExist( dirPath.GetPtr() ) );
+
+			ASSERT_EQUAL( FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, ::GetFileAttributes( dirPath.GetPtr() ) );
+			//ASSERT_EQUAL( _T("?"), fs::CFileState::GetTags_FileAttributes().FormatUi( ::GetFileAttributes( dirPath.GetPtr() ) ) );
+
+			ASSERT_EQUAL( SFGAO_CANCOPY | SFGAO_CANMOVE | SFGAO_CANLINK | SFGAO_STORAGE | SFGAO_CANRENAME | SFGAO_CANDELETE | SFGAO_HASPROPSHEET | SFGAO_DROPTARGET |
+						  SFGAO_STORAGEANCESTOR | SFGAO_FILESYSANCESTOR | SFGAO_FOLDER | SFGAO_FILESYSTEM,
+						  shell::GetRawSfgaofFlags( dirPath.GetPtr() ) );
+
+			CComPtr<IShellItem> pItem = shell::MakeShellItem( dirPath.GetPtr() );
+			ASSERT_PTR( pItem );
+
+			CComPtr<IShellFolder> pFolder = shell::MakeShellFolder( dirPath.GetPtr() );
+			ASSERT_PTR( pFolder );
+			ASSERT_EQUAL( shell::GetFolderPath( pFolder ), shell::GetFolderPath( shell::ToShellFolder( pItem ) ) );
+
+			ASSERT_EQUAL( _T("d1"), shell::GetFolderPath( pFolder ).GetFilename() );
+		}
+	}
+}
+
+void CShellPidlTests::TestPidl_FileSystemNonExistent( void )
+{
+	fs::TDirPath poolDirPath = ut::CTempFilePool::MakePoolDirPath();
+
+	// 1. non-existent file (file-system):
+	{
+		fs::CPath naFilePath = poolDirPath / _T("NA.txt");
+		ASSERT( !fs::IsValidFile( naFilePath.GetPtr() ) && !fs::IsValidDirectory( naFilePath.GetPtr() ) );
+		ASSERT( !shell::ShellFolderExist( naFilePath.GetPtr() ) );
+		ASSERT( !shell::ShellItemExist( naFilePath.GetPtr() ) );
+
+		shell::CPidlAbsolute naFilePidl( naFilePath.GetPtr(), FILE_ATTRIBUTE_NORMAL );
+
+		ASSERT( !naFilePidl.IsNull() );
+		ASSERT( !naFilePidl.IsSpecialPidl() );
+
+		ASSERT_EQUAL( _T(""), shell::GetTags_SFGAO_Flags().FormatKey( naFilePidl.GetSfgaofFlags() ) );
+
+		ASSERT_EQUAL( INVALID_FILE_ATTRIBUTES, ::GetFileAttributes( naFilePath.GetPtr() ) );
+
+		{
+			ASSERT( !fs::IsValidDirectory( naFilePath.GetPtr() ) );
+			ASSERT( !shell::ShellFolderExist( naFilePath.GetPtr() ) );
+			ASSERT( !shell::ShellItemExist( naFilePath.GetPtr() ) );
+
+			ASSERT_EQUAL( 0, shell::GetRawSfgaofFlags( naFilePath.GetPtr() ) );
+
+			ASSERT_NULL( shell::MakeShellItem( naFilePath.GetPtr() ) );
+			ASSERT_NULL( shell::MakeShellFolder( naFilePath.GetPtr() ) );
+		}
+	}
+
+	// 2. non-existent directory (file-system):
+	{
+		fs::TDirPath naDirPath = poolDirPath / _T("NA_DIR");
+		ASSERT( !fs::IsValidFile( naDirPath.GetPtr() ) && !fs::IsValidDirectory( naDirPath.GetPtr() ) );
+		ASSERT( !shell::ShellFolderExist( naDirPath.GetPtr() ) );
+		ASSERT( !shell::ShellItemExist( naDirPath.GetPtr() ) );
+
+		shell::CPidlAbsolute naDirPidl( naDirPath.GetPtr(), FILE_ATTRIBUTE_DIRECTORY );
+
+		ASSERT( !naDirPidl.IsNull() );
+		ASSERT( !naDirPidl.IsSpecialPidl() );
+
+		ASSERT_EQUAL( INVALID_FILE_ATTRIBUTES, ::GetFileAttributes( naDirPath.GetPtr() ) );
+		ASSERT_EQUAL( 0, naDirPidl.GetSfgaofFlags() );
+
+		{
+			ASSERT( !fs::IsValidDirectory( naDirPath.GetPtr() ) );
+			ASSERT( !shell::ShellFolderExist( naDirPath.GetPtr() ) );
+			ASSERT( !shell::ShellItemExist( naDirPath.GetPtr() ) );
+
+			ASSERT_EQUAL( 0, shell::GetRawSfgaofFlags( naDirPath.GetPtr() ) );
+
+			ASSERT_NULL( shell::MakeShellItem( naDirPath.GetPtr() ) );
+			ASSERT_NULL( shell::MakeShellFolder( naDirPath.GetPtr() ) );
+		}
+	}
+}
+
+void CShellPidlTests::TestPidl_GuidSpecial( void )
+{
+	// 1. "Control Panel" special folder (non file-system, valid PIDL):
+	{
+		shell::CPidlAbsolute controlPanelAllPidl( FOLDERID_ControlPanelFolder );
+
+		ASSERT( !controlPanelAllPidl.IsNull() );
+		ASSERT( controlPanelAllPidl.IsSpecialPidl() );
+		ASSERT( shell::ShellFolderExist( controlPanelAllPidl ) );
+		ASSERT( shell::ShellItemExist( controlPanelAllPidl ) );
+
+		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), controlPanelAllPidl.GetEditingName() );
+		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), controlPanelAllPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
+		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), controlPanelAllPidl.ToShellPath() );
+		{
+			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelAllPidl.GetName( SIGDN_NORMALDISPLAY ) );
+			ASSERT_EQUAL( _T("0"), controlPanelAllPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelAllPidl.GetName( SIGDN_PARENTRELATIVEEDITING ) );
+			//ASSERT_EQUAL( _T(""), controlPanelAllPidl.GetName( SIGDN_FILESYSPATH ) );	// E_INVALIDARG - hResult=0x80070057: 'The parameter is incorrect.'
+			//ASSERT_EQUAL( _T(""), controlPanelAllPidl.GetName( SIGDN_URL ) );			// E_NOTIMPL - hResult=0x80004001: 'Not implemented'
+			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelAllPidl.GetName( SIGDN_PARENTRELATIVEFORADDRESSBAR ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelAllPidl.GetName( SIGDN_PARENTRELATIVE ) );
 		}
 
-		ASSERT_EQUAL( _T("SFGAO_CANLINK|SFGAO_FOLDER|SFGAO_CONTENTSMASK"),
-					  shell::GetTags_SFGAO_Flags().FormatUi( controlPanelPidl.GetAttributes() ) );
+		ASSERT_EQUAL( SFGAO_CANLINK | SFGAO_FOLDER | SFGAO_HASSUBFOLDER, controlPanelAllPidl.GetSfgaofFlags() );
+
+		{
+			shell::TFolderPath folderPath = controlPanelAllPidl.ToShellPath();
+
+			ASSERT( !fs::IsValidFile( folderPath.GetPtr() ) );
+			ASSERT( !fs::IsValidDirectory( folderPath.GetPtr() ) );
+			ASSERT( shell::ShellFolderExist( folderPath.GetPtr() ) );
+			ASSERT( shell::ShellItemExist( folderPath.GetPtr() ) );
+			ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), folderPath );
+
+			ASSERT_EQUAL( SFGAO_CANLINK | SFGAO_FOLDER | SFGAO_HASSUBFOLDER, shell::GetSfgaofFlags( folderPath.GetPtr() ) );
+
+			CComPtr<IShellItem> pItem = shell::MakeShellItem( folderPath.GetPtr() );
+			ASSERT_PTR( pItem );
+
+			CComPtr<IShellFolder> pFolder = shell::MakeShellFolder( folderPath.GetPtr() );
+			ASSERT_PTR( pFolder );
+			ASSERT_EQUAL( shell::GetFolderPath( pFolder ), shell::GetFolderPath( shell::ToShellFolder( pItem ) ) );
+
+			ASSERT_EQUAL( _T("All Control Panel Items"), shell::GetFolderName( pFolder ) );
+			ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), shell::GetFolderName( pFolder, SIGDN_DESKTOPABSOLUTEEDITING ) );
+			ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), shell::GetFolderPath( pFolder ) );
+		}
+	}
+
+	// 2. "Control Panel" Region applet (non file-system, not folder, valid PIDL):
+	{
+		shell::CPidlAbsolute cpRegionPidl( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}") );
+
+		ASSERT( !cpRegionPidl.IsNull() );
+		ASSERT( cpRegionPidl.IsSpecialPidl() );
+		ASSERT( !shell::ShellFolderExist( cpRegionPidl ) );		// not a folder
+		ASSERT( shell::ShellItemExist( cpRegionPidl ) );		// an applet
+
+		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), cpRegionPidl.ToShellPath() );
+		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items\\Region"), cpRegionPidl.GetEditingName() );
+
+		ASSERT_EQUAL( SFGAO_CANLINK, cpRegionPidl.GetSfgaofFlags() );
+
+		{
+			ASSERT_EQUAL( _T("Region"), cpRegionPidl.GetName( SIGDN_NORMALDISPLAY ) );
+			ASSERT_EQUAL( _T("::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), cpRegionPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
+			ASSERT_EQUAL( _T("Region"), cpRegionPidl.GetName( SIGDN_PARENTRELATIVEEDITING ) );
+			ASSERT_EQUAL( _T("Region"), cpRegionPidl.GetName( SIGDN_PARENTRELATIVEFORADDRESSBAR ) );
+			ASSERT_EQUAL( _T("Region"), cpRegionPidl.GetName( SIGDN_PARENTRELATIVE ) );
+		}
+
+		{
+			shell::TFolderPath cpAppletPath = cpRegionPidl.ToShellPath();
+
+			ASSERT( !fs::IsValidFile( cpAppletPath.GetPtr() ) );
+			ASSERT( !fs::IsValidDirectory( cpAppletPath.GetPtr() ) );
+			ASSERT( !shell::ShellFolderExist( cpAppletPath.GetPtr() ) );
+			ASSERT( shell::ShellItemExist( cpAppletPath.GetPtr() ) );
+
+			ASSERT_EQUAL( SFGAO_CANLINK, shell::GetSfgaofFlags( cpAppletPath.GetPtr() ) );
+
+			CComPtr<IShellItem> pItem = shell::MakeShellItem( cpAppletPath.GetPtr() );
+			ASSERT_PTR( pItem );
+
+			CComPtr<IShellFolder> pFolder = shell::MakeShellFolder( cpAppletPath.GetPtr() );
+			ASSERT_NULL( pFolder );
+			ASSERT_NULL( shell::ToShellFolder( pItem ) );
+		}
 	}
 }
 
@@ -532,8 +683,11 @@ void CShellPidlTests::TestParentPidl( void )
 
 		ASSERT( cpRegionPidl.IsSpecialPidl() );
 		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), cpRegionPidl.ToShellPath() );
-		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items\\Region"), cpRegionPidl.GetName( SIGDN_DESKTOPABSOLUTEEDITING ) );
+		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items\\Region"), cpRegionPidl.GetEditingName() );
 		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), cpRegionPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
+
+		ASSERT_EQUAL( _T("SFGAO_CANLINK"),
+					  shell::GetTags_SFGAO_Flags().FormatKey( cpRegionPidl.GetSfgaofFlags() ) );
 
 			// Note: name conversion methods GetName(), GetFilename(), ToShellPath() work only for file-system child PIDLs,
 			// but not for GUID based child PIDLs, such as a Control Panel applet.
@@ -543,17 +697,20 @@ void CShellPidlTests::TestParentPidl( void )
 
 		ASSERT( cpRegionPidl.GetParentPidl( parentPidl ) );
 		ASSERT( parentPidl.IsSpecialPidl() );
-		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), parentPidl.GetName( SIGDN_DESKTOPABSOLUTEEDITING ) );
+		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), parentPidl.GetEditingName() );
 		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), parentPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
+
+		ASSERT_EQUAL( _T("SFGAO_CANLINK|SFGAO_FOLDER|SFGAO_HASSUBFOLDER"),
+					  shell::GetTags_SFGAO_Flags().FormatKey( parentPidl.GetSfgaofFlags() ) );
 
 		ASSERT( parentPidl.GetParentPidl( parentPidl ) );
 		ASSERT( parentPidl.IsSpecialPidl() );
-		ASSERT_EQUAL( _T("Control Panel"), parentPidl.GetName( SIGDN_DESKTOPABSOLUTEEDITING ) );
+		ASSERT_EQUAL( _T("Control Panel"), parentPidl.GetEditingName() );
 		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}"), parentPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
 
 		ASSERT( parentPidl.GetParentPidl( parentPidl ) );
 		ASSERT( !parentPidl.IsSpecialPidl() );			// root PIDL, which is not a special (GUID) PIDL
-		ASSERT_EQUAL( _T("Desktop"), parentPidl.GetName( SIGDN_DESKTOPABSOLUTEEDITING ) );
+		ASSERT_EQUAL( _T("Desktop"), parentPidl.GetEditingName() );
 		//ASSERT_EQUAL( _T("C:\\Users\\Paul\\Desktop"), parentPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );		// local-dependent
 
 		ASSERT( !parentPidl.GetParentPidl( parentPidl ) );		// no parent of Desktop root
@@ -705,9 +862,11 @@ void CShellPidlTests::Run( void )
 {
 	RUN_TEST( TestNullAndEmptyPidl );
 	RUN_TEST( TestCreateFromPath );
-	RUN_TEST( TestShellPidl );
+	RUN_TEST( TestPidlBasics );
 	RUN_TEST( TestFolderRelativePidls );
-	RUN_TEST( TestPidlType );
+	RUN_TEST( TestPidl_FileSystem );
+	RUN_TEST( TestPidl_FileSystemNonExistent );
+	RUN_TEST( TestPidl_GuidSpecial );
 	RUN_TEST( TestParentPidl );
 	RUN_TEST( TestCommonAncestorPidl );
 }

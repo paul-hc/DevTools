@@ -20,7 +20,7 @@ namespace shell
 {
 	bool IsValidShortcutFile( const TCHAR* pLnkPath )
 	{
-		return ::HasFlag( shell::GetFileSysAttributes( pLnkPath ), SFGAO_LINK );
+		return ::HasFlag( shell::GetRawSfgaofFlags( pLnkPath ), SFGAO_LINK );
 	}
 
 	CComPtr<IShellLink> CreateShellLink( void )
@@ -121,10 +121,10 @@ namespace shell
 		{
 		#ifdef _DEBUG
 			{ FLAG_TAG( SLDF_HAS_ID_LIST ) },			// Shell link saved with ID list
-			{ FLAG_TAG( SLDF_HAS_LINK_INFO ) },			// Shell link saved with LinkInfo
-			{ FLAG_TAG( SLDF_HAS_NAME ) },
-			{ FLAG_TAG( SLDF_HAS_RELPATH ) },
-			{ FLAG_TAG( SLDF_HAS_WORKINGDIR ) },
+			{ FLAG_TAG( SLDF_HAS_LINK_INFO ) },			// link saved with LinkInfo used by .lnk files to locate the target if the targets's path has changed.
+			{ FLAG_TAG( SLDF_HAS_NAME ) },				// link has a name.
+			{ FLAG_TAG( SLDF_HAS_RELPATH ) },			// link has a relative path.
+			{ FLAG_TAG( SLDF_HAS_WORKINGDIR ) },		// link has a working directory.
 			{ FLAG_TAG( SLDF_HAS_ARGS ) },
 			{ FLAG_TAG( SLDF_HAS_ICONLOCATION ) },
 			{ FLAG_TAG( SLDF_UNICODE ) },				// the strings are unicode
@@ -157,7 +157,7 @@ namespace shell
 		#endif
 		#endif
 		#endif
-			{ FLAG_TAG( (DWORD)SLDF_RESERVED ) }			// Reserved-- so we can use the low word as an index value in the future
+			{ FLAG_AS_TAG( DWORD, SLDF_RESERVED ) }			// Reserved-- so we can use the low word as an index value in the future
 		#endif
 
 		#else
@@ -206,6 +206,14 @@ namespace shell
 
 	// CShortcut implementation
 
+	CShortcut::CShortcut( void )
+		: m_linkDataFlags( 0 )
+		, m_hotKey( 0 )
+		, m_showCmd( SW_HIDE )
+		, m_changedFields( 0 )
+	{
+	}
+
 	CShortcut::CShortcut( IN IShellLink* pShellLink )
 	{
 		ASSERT_PTR( pShellLink );
@@ -222,27 +230,27 @@ namespace shell
 			if ( !HR_OK( pDataList->GetFlags( &m_linkDataFlags ) ) )
 				m_linkDataFlags = 0;
 
-		int bufferSize = INFOTIPSIZE;			// 1024: max size for GetArguments()
-		std::vector<TCHAR> buffer( bufferSize );
+		enum { BufferSize = INFOTIPSIZE };			// 1024: max size for GetArguments()
+		std::vector<TCHAR> buffer( BufferSize );
 		TCHAR* pBuffer = utl::Data( buffer );
 
-		if ( HR_OK( pShellLink->GetPath( pBuffer, bufferSize, nullptr, SLGP_RAWPATH ) ) )		// possible to err with E_NOTIMPL, or INPLACE_S_TRUNCATED?!
+		if ( HR_OK( pShellLink->GetPath( pBuffer, BufferSize, nullptr, SLGP_RAWPATH ) ) )		// possible to err with E_NOTIMPL, or INPLACE_S_TRUNCATED?!
 			m_targetPath.Set( pBuffer );
-		else if ( HR_OK( pShellLink->GetPath( pBuffer, bufferSize, nullptr, 0 ) ) )
+		else if ( HR_OK( pShellLink->GetPath( pBuffer, BufferSize, nullptr, 0 ) ) )
 			m_targetPath.Set( pBuffer );
 
 		HR_AUDIT( pShellLink->GetIDList( &m_targetPidl.Ref() ) );
 
-		if ( HR_OK( pShellLink->GetWorkingDirectory( pBuffer, bufferSize ) ) )
+		if ( HR_OK( pShellLink->GetWorkingDirectory( pBuffer, BufferSize ) ) )
 			m_workDirPath.Set( pBuffer );
 
-		if ( HR_OK( pShellLink->GetArguments( pBuffer, bufferSize ) ) )
+		if ( HR_OK( pShellLink->GetArguments( pBuffer, BufferSize ) ) )
 			m_arguments = pBuffer;
 
-		if ( HR_OK( pShellLink->GetDescription( pBuffer, bufferSize ) ) )
+		if ( HR_OK( pShellLink->GetDescription( pBuffer, BufferSize ) ) )
 			m_description = pBuffer;
 
-		if ( HR_OK( pShellLink->GetIconLocation( pBuffer, bufferSize, &m_iconLocation.m_index ) ) )
+		if ( HR_OK( pShellLink->GetIconLocation( pBuffer, BufferSize, &m_iconLocation.m_index ) ) )
 			m_iconLocation.m_path.Set( pBuffer );
 
 		if ( !HR_OK( pShellLink->GetHotkey( &m_hotKey ) ) )
@@ -287,20 +295,20 @@ namespace shell
 		return succeeded;
 	}
 
-	bool CShortcut::IsTargetValid( void ) const
+	bool CShortcut::IsValidTarget( void ) const
 	{
-		if ( IsTargetEmpty() )
-			return false;
+		if ( HasTarget() )
+			return IsTargetNonFileSys()
+				? shell::ShellItemExist( m_targetPidl )
+				: shell::ShellItemExist( m_targetPath.GetPtr() );
 
-		if ( !m_targetPath.IsEmpty() )
-			return env::HasAnyVariable( m_targetPath.Get() ) ? m_targetPath.GetExpanded().FileExist() : m_targetPath.FileExist();
-
-		return true;
+		return false;
 	}
 
 	bool CShortcut::operator==( const CShortcut& right ) const
 	{
 		return
+			m_linkDataFlags == right.m_linkDataFlags &&
 			m_targetPath.Get() == right.m_targetPath.Get() &&		// case-sensitive compare
 			m_targetPidl == right.m_targetPidl &&
 			m_workDirPath.Get() == right.m_workDirPath.Get() &&		// case-sensitive compare
@@ -308,14 +316,14 @@ namespace shell
 			m_description == right.m_description &&
 			m_hotKey == right.m_hotKey &&
 			m_iconLocation == right.m_iconLocation &&
-			m_showCmd == right.m_showCmd &&
-			m_linkDataFlags == right.m_linkDataFlags;
+			m_showCmd == right.m_showCmd;
 	}
 
 	CShortcut::TFields CShortcut::GetDiffFields( const CShortcut& right ) const
 	{
 		TFields diffFields = 0;
 
+		SetFlag( diffFields, LinkDataFlags, m_linkDataFlags != right.m_linkDataFlags );
 		SetFlag( diffFields, TargetPath, m_targetPath != right.m_targetPath );
 		SetFlag( diffFields, TargetPidl, m_targetPidl != right.m_targetPidl );
 		SetFlag( diffFields, WorkDirPath, m_workDirPath != right.m_workDirPath );
@@ -324,7 +332,6 @@ namespace shell
 		SetFlag( diffFields, IconLocation, m_iconLocation != right.m_iconLocation );
 		SetFlag( diffFields, HotKey, m_hotKey != right.m_hotKey );
 		SetFlag( diffFields, ShowCmd, m_showCmd != right.m_showCmd );
-		SetFlag( diffFields, LinkDataFlags, m_linkDataFlags != right.m_linkDataFlags );
 
 		return diffFields;
 	}
@@ -392,15 +399,15 @@ namespace shell
 	void CShortcut::Save( OUT CArchive& archive ) const
 	{
 		archive
-			<< m_targetPath << m_targetPidl << m_workDirPath << m_arguments << m_description
-			<< m_iconLocation.m_path << m_iconLocation.m_index << m_hotKey << m_showCmd << m_linkDataFlags;
+			<< m_linkDataFlags << m_targetPath << m_targetPidl << m_workDirPath << m_arguments << m_description
+			<< m_iconLocation.m_path << m_iconLocation.m_index << m_hotKey << m_showCmd;
 	}
 
 	void CShortcut::Load( IN CArchive& archive )
 	{
 		archive
-			>> m_targetPath >> m_targetPidl >> m_workDirPath >> m_arguments >> m_description
-			>> m_iconLocation.m_path >> m_iconLocation.m_index >> m_hotKey >> m_showCmd >> m_linkDataFlags;
+			>> m_linkDataFlags >> m_targetPath >> m_targetPidl >> m_workDirPath >> m_arguments >> m_description
+			>> m_iconLocation.m_path >> m_iconLocation.m_index >> m_hotKey >> m_showCmd;
 	}
 
 
@@ -441,8 +448,8 @@ namespace fmt
 	{
 		static const CFlagTags::FlagDef s_flagDefs[] =
 		{
-			{ SLDF_RUN_IN_SEPARATE, _T("Run in separate memory space") },
-			{ SLDF_RUNAS_USER, _T("Run as Admin") }
+			FLAG_TAG_KEY( SLDF_RUN_IN_SEPARATE, "Run in separate memory space" ),
+			FLAG_TAG_KEY( SLDF_RUNAS_USER, "Run as Admin" )
 		};
 		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
 		return s_tags;

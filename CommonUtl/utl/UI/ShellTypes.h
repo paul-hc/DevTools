@@ -17,46 +17,73 @@ namespace utl
 }
 
 
-#define AUTO_BIND_CTX			reinterpret_cast<IBindCtx*>( -1 )
-#define AUTO_FOLDER_BIND_CTX	reinterpret_cast<IBindCtx*>( -2 )
-
-
 namespace shell
 {
-	bool ShellFolderExist( const TCHAR* pShellPath );
-	bool ShellItemExist( const TCHAR* pShellPath );
+	bool ShellFolderExist( const TCHAR* pFolderShellPath );		// expands any environment variables
+	bool ShellItemExist( const TCHAR* pShellPath );				// expands any environment variables
+
+	bool ShellFolderExist( PCIDLIST_ABSOLUTE pidl );
+	bool ShellItemExist( PCIDLIST_ABSOLUTE pidl );
 
 	// shell folder
 	CComPtr<IShellFolder> GetDesktopFolder( void );
 
 	CComPtr<IShellFolder> MakeShellFolder( const TCHAR* pFolderShellPath );				// absolute: empty path defaults to 'This PC' folder
-	CComPtr<IShellFolder> MakeShellFolder_Desktop( const TCHAR* pFolderShellPath );		// relative: empty path defaults to 'Desktop' folder
+	CComPtr<IShellFolder> MakeShellFolder_DesktopRel( const TCHAR* pFolderShellPath );	// relative: empty path defaults to 'Desktop' folder
+	CComPtr<IShellFolder2> ToShellFolder( IUnknown* pShellItf );	// most general: works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
 	PIDLIST_ABSOLUTE MakeFolderPidl( IShellFolder* pFolder );
 	std::tstring GetFolderName( IShellFolder* pFolder, SIGDN nameType = SIGDN_NORMALDISPLAY );
 	shell::TPath GetFolderPath( IShellFolder* pFolder );
 
+
 	// shell item
 	CComPtr<IShellItem> MakeShellItem( const TCHAR* pShellPath );
-	CComPtr<IShellFolder2> ToShellFolder( IShellItem* pFolderItem );
 	CComPtr<IShellFolder2> GetParentFolderAndPidl( OUT PITEMID_CHILD* pPidlItem, IShellItem* pShellItem );
 	PIDLIST_ABSOLUTE MakeItemPidl( IShellItem* pShellItem );
 
-	CComPtr<IBindCtx> CreateFileSysBindContext( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL );			// virtual bind context for FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY
-
-	bool RequiresFileSysBindContext( const TCHAR* pShellPath );
-	CComPtr<IBindCtx> AutoFileSysBindContext( const TCHAR* pShellPath, IBindCtx* pBindCtx = AUTO_BIND_CTX );	// adapted to the pShellPath type
+	template< typename IShellItemT >
+	bool MakeKnownFolderItem( OUT CComPtr<IShellItemT>& rpItem, const KNOWNFOLDERID& knownFolderGuid, KNOWN_FOLDER_FLAG flag = KF_FLAG_DEFAULT )
+	{
+		return HR_OK( ::SHGetKnownFolderItem( knownFolderGuid, flag, nullptr, IID_PPV_ARGS( &rpItem ) ) );
+	}
 }
 
 
 namespace shell
 {
-	template< typename PathT >
-	bool IsGuidPath( const PathT& shellPath ) { return path::IsValidGuidPath( func::StringOf( shellPath ) ); }
+	bool IsRunningUnderWow64( void );
 
+	template< typename PathT >		// TCharPtr/std::tstring/fs::CPath
+	bool IsGuidPath( const PathT& shellPath ) { return path::IsGuidPath( str::traits::GetCharPtr( shellPath ) ); }
+
+
+	// custom bind contexts:
+
+	CComPtr<IBindCtx> CreateFileSysBindContext( DWORD fileAttribute = FILE_ATTRIBUTE_NORMAL );			// virtual bind context for FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY
+
+	class CShared
+	{
+	public:
+		// lazy init shared resources:
+		static IBindCtx* GetFileBindCtx( void );			// for FILE_ATTRIBUTE_NORMAL attribute
+		static IBindCtx* GetDirectoryBindCtx( void );		// for FILE_ATTRIBUTE_DIRECTORY attribute
+		static IBindCtx* GetWow64BindCtx( void );			// shared bind context required for parsing GUID paths when 32 bit process runs under WOW 64 redirector
+
+		// semantic shared resources:
+		static IBindCtx* GetFileSysBindCtx( DWORD fileAttribute );				// FILE_ATTRIBUTE_NORMAL, FILE_ATTRIBUTE_DIRECTORY, or 0 (Wow64)
+		static IBindCtx* GetProxyFilePathBindCtx( const TCHAR* pShellPath );	// works for non-existent file system paths
+		static IBindCtx* GetGuidPathBindCtx( const TCHAR* pShellPath );			// works for GUID paths, workaround WOW64 redirector parsing errors
+	};
+}
+
+
+namespace shell
+{
 	// shell file info (via SHFILEINFO)
-	SFGAOF GetFileSysAttributes( const TCHAR* pFilePath, UINT moreFlags = 0 );
-	std::pair<CImageList*, int> GetFileSysImageIndex( const TCHAR* pFilePath, UINT iconFlags = SHGFI_SMALLICON );	// CImageList is a shared shell temporary object (no ownership)
-	HICON ExtractFileSysIcon( const TCHAR* pFilePath, UINT flags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
+	SFGAOF GetSfgaofFlags( const TCHAR* pShellPath );		// expands environment variables and resolves shell paths
+	SFGAOF GetRawSfgaofFlags( const TCHAR* pPathOrPidl, UINT moreFlags = 0 );
+	std::pair<CImageList*, int> GetFileSysImageIndex( const TCHAR* pPathOrPidl, UINT iconFlags = SHGFI_SMALLICON );		// CImageList is a shared shell temporary object (no ownership)
+	HICON ExtractFileSysIcon( const TCHAR* pPathOrPidl, UINT flags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
 
 	UINT GetSysIconSizeFlag( int iconDimension );
 
@@ -108,9 +135,9 @@ namespace shell
 		inline LPITEMIDLIST Allocate( size_t size ) { return static_cast<LPITEMIDLIST>( ::CoTaskMemAlloc( static_cast<ULONG>( size ) ) ); }
 		inline void Delete( LPITEMIDLIST pidl ) { ::CoTaskMemFree( pidl ); }
 
-		bool IsSpecialPidl( LPCITEMIDLIST pidl );		// refers to a special shell namespace directory; pidl could be Absolute/Relative
+		bool IsSpecialPidl( PCIDLIST_ABSOLUTE pidl );		// refers to a special shell namespace folder; pidl could be Absolute/Relative
 
-		SFGAOF GetPidlAttributes( PCIDLIST_ABSOLUTE pidl );
+		SFGAOF GetPidlSfgaofFlags( PCIDLIST_ABSOLUTE pidl );
 		std::pair<CImageList*, int> GetPidlImageIndex( PCIDLIST_ABSOLUTE pidl, UINT iconFlags = SHGFI_SMALLICON );	// CImageList is a shared shell temporary object (no ownership)
 		HICON ExtractPidlIcon( PCIDLIST_ABSOLUTE pidl, UINT iconFlags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
 
@@ -140,9 +167,7 @@ namespace shell
 		PIDLIST_RELATIVE ParseToRelativePidl( IShellFolder* pParentFolder, const TCHAR* pRelShellPath, IBindCtx* pBindCtx = nullptr );	// pRelShellPath is normally a fname.ext, but it also works with a deep relative path.
 		PITEMID_CHILD ParseToChildPidl( IShellFolder* pParentFolder, const TCHAR* pFilename, IBindCtx* pBindCtx = nullptr );
 
-		inline bool IsNull( LPCITEMIDLIST pidl ) { return nullptr == pidl; }
-		inline bool IsEmpty( LPCITEMIDLIST pidl ) { return IsNull( pidl ) || 0 == pidl->mkid.cb; }
-		inline bool IsEmptyStrict( LPCITEMIDLIST pidl ) { return 0 == pidl->mkid.cb; }
+		inline bool IsEmpty( LPCITEMIDLIST pidl ) { return 0 == pidl->mkid.cb; }		// aka Desktop absolute PIDL
 		size_t GetItemCount( LPCITEMIDLIST pidl );
 		size_t GetByteSize( LPCITEMIDLIST pidl );
 
@@ -167,10 +192,10 @@ namespace shell
 
 		namespace impl
 		{
-			inline BYTE* GetBuffer( LPITEMIDLIST pidl ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast<BYTE*>( pidl ); }
-			inline const BYTE* GetBuffer( LPCITEMIDLIST pidl ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast<const BYTE*>( pidl ); }
+			inline BYTE* GetBuffer( LPITEMIDLIST pidl ) { ASSERT_PTR( pidl ); return reinterpret_cast<BYTE*>( pidl ); }
+			inline const BYTE* GetBuffer( LPCITEMIDLIST pidl ) { ASSERT_PTR( pidl ); return reinterpret_cast<const BYTE*>( pidl ); }
 
-			inline WORD* GetTerminator( LPITEMIDLIST pidl, size_t size ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast<WORD*>( GetBuffer( pidl ) + size ); }
+			inline WORD* GetTerminator( LPITEMIDLIST pidl, size_t size ) { ASSERT_PTR( pidl ); return reinterpret_cast<WORD*>( GetBuffer( pidl ) + size ); }
 			inline void SetTerminator( LPITEMIDLIST pidl, size_t size ) { *GetTerminator( pidl, size ) = 0; }
 		}
 	}

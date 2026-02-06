@@ -27,11 +27,9 @@ namespace shell
 
 		bool IsNull( void ) const { return nullptr == m_pidl; }
 		bool IsAligned( void ) const { return ::ILIsAligned( m_pidl ); }		// ITEMIDLIST pointer could be aligned/unaligned
-		bool HasValue( void ) const { return !pidl::IsEmpty( m_pidl ); }		// neither Null nor Empty
-		bool IsSpecialPidl( void ) const { return pidl::IsSpecialPidl( m_pidl ); }
 
 		// Empty referrs to Desktop folder, e.g. for "C:\Users\<UserName>\Desktop"
-		bool IsEmpty( void ) const { return pidl::IsEmptyStrict( m_pidl ); }	// Note: desktop PIDL is empty (but not null)
+		bool IsEmpty( void ) const { return pidl::IsEmpty( m_pidl ); }			// desktop PIDL is empty (but not null)
 		void SetEmpty( void ) { Reset( pidl::CreateEmptyPidl<PtrItemIdListT>() ); }		// i.e. desktop PIDL
 
 		size_t GetItemCount( void ) const { return pidl::GetItemCount( m_pidl ); }
@@ -121,6 +119,7 @@ namespace shell
 		CPidlAbsolute( void ) {}
 		CPidlAbsolute( const CPidlAbsolute& right ) : TBasePidl( ::ILCloneFull( right.Get() ) ) {}			// copy constructor
 		CPidlAbsolute( const TCHAR* pShellPath, DWORD fileAttribute = 0 ) { CreateFromShellPath( pShellPath, fileAttribute ); }
+		CPidlAbsolute( const KNOWNFOLDERID& knownFolderGuid, KNOWN_FOLDER_FLAG flag = KF_FLAG_DEFAULT ) { CreateKnownFolder( knownFolderGuid, flag ); }
 		CPidlAbsolute( IUnknown* pShellItf ) { CreateFrom( pShellItf ); }
 		explicit CPidlAbsolute( PIDLIST_ABSOLUTE pidl ) : TBasePidl( pidl ) {}			// take ownership of pidl (MOVE)
 
@@ -130,12 +129,15 @@ namespace shell
 
 		bool CreateFromShellPath( const TCHAR* pShellPath, DWORD fileAttribute = 0 );	// preferred, more general method; pass FILE_ATTRIBUTE_NORMAL or FILE_ATTRIBUTE_DIRECTORY for inexistent paths
 		bool CreateFromPath( const TCHAR* pExistingShellPath ) { Reset( pidl::CreateFromPath( pExistingShellPath ) ); return !IsNull(); }
+		bool CreateKnownFolder( const KNOWNFOLDERID& knownFolderGuid, KNOWN_FOLDER_FLAG flag = KF_FLAG_DEFAULT );
 
 		// desktop PIDL is empty (but not null)
 		bool IsDesktop( void ) const { return IsEmpty(); }
 		void CreateDesktop( void ) { SetEmpty(); }
 
-		SFGAOF GetAttributes( void ) const;
+		bool IsSpecialPidl( void ) const { return pidl::IsSpecialPidl( Get() ); }
+
+		SFGAOF GetSfgaofFlags( void ) const { return pidl::GetPidlSfgaofFlags( Get() ); }
 		std::pair<CImageList*, int> GetSysImageIndex( UINT iconFlag = SHGFI_SMALLICON ) const;		// no ownership of the image list
 
 		bool GetParentPidl( OUT CPidlAbsolute& rParentPidl ) const;
@@ -147,6 +149,13 @@ namespace shell
 		// advanced
 		bool CreateFrom( IUnknown* pShellItf );						// most general, works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
 		bool CreateFromFolder( IShellFolder* pShellFolder );		// ABSOLUTE pidl - superseeded by CreateFrom()
+
+		template< typename IShellFolderT >
+		bool MakeShellFolder( OUT CComPtr<IShellFolderT>& rpFolder )
+		{
+			ASSERT( !IsNull() );
+			return HR_OK( ::SHBindToObject( nullptr, Get(), nullptr, IID_PPV_ARGS( &rpFolder ) ) );
+		}
 	};
 
 
@@ -270,6 +279,15 @@ namespace shell
 
 		return shell::MakeFilePathsContextMenu( shellPaths, hWndOwner );
 	}
+}
+
+
+namespace shell
+{
+	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
+
+	void EnumFiles( OUT fs::IEnumerator* pEnumerator, const shell::TPath& folderShellPath, const TCHAR* pWildSpec = _T("*.*") );
+	fs::PatternResult SearchEnumFiles( OUT fs::IEnumerator* pEnumerator, const fs::TPatternPath& searchPath );
 }
 
 

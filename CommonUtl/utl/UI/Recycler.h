@@ -11,9 +11,8 @@ namespace shell
 	class CRecycler
 	{
 	public:
-		CRecycler( void ) : m_pRecyclerItem( GetRecycleBinShellItem() ) { ASSERT_PTR( m_pRecyclerItem ); }
+		CRecycler( void );
 
-		static CComPtr<IShellItem2> GetRecycleBinShellItem( void );
 		static CComPtr<IShellFolder2> GetRecycleBinFolder( void );
 
 		IShellItem2* GetItem( void ) const { return m_pRecyclerItem; }
