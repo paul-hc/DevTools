@@ -22,7 +22,7 @@ namespace shell
 		if ( SFGAOF sfgaofFlags = GetSfgaofFlags( pFolderShellPath ) )
 			if ( HasFlag( sfgaofFlags, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
 			{
-				//TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+				TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
 				return true;
 			}
 
@@ -33,7 +33,7 @@ namespace shell
 	{
 		if ( SFGAOF sfgaofFlags = GetSfgaofFlags( pShellPath ) )
 		{
-			//TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+			TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
 			return true;
 		}
 
