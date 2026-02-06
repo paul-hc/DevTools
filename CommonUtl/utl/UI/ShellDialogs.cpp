@@ -77,19 +77,21 @@ namespace shell
 
 		// BrowseForFolder callback
 
-		static TCHAR s_initFolderPath[ MAX_PATH ];
-		static enum BrowseFolderStatus { Done, Initialized } s_browseFolderStatus = Done;
+		enum BrowseFolderStatus { Done, Initialized };
+
+		static BrowseFolderStatus s_browseFolderStatus = Done;
+		static fs::TDirPath s_initDirPath;
 
 		int CALLBACK BrowseFolderCallback( HWND hDlg, UINT msg, LPARAM lParam, LPARAM data );
 	}
 
 
-	bool BrowseForFolder( OUT shell::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= nullptr*/,
+	bool BrowseForFolder( OUT shell::TFolderPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= nullptr*/,
 						  BrowseFlags flags /*= BF_FileSystem*/, const TCHAR* pTitle /*= nullptr*/, bool useNetwork /*= false*/ )
 	{
 		bool isOk = false;
 
-		str::Copy( impl::s_initFolderPath, rFolderPath.Get() );
+		impl::s_initDirPath = rFolderPath;
 
 		TCHAR displayName[ MAX_PATH ] = _T("");
 		BROWSEINFO bi;
@@ -131,7 +133,7 @@ namespace shell
 			}
 
 			if ( isOk )
-				str::Copy( impl::s_initFolderPath, rFolderPath.Get() );
+				impl::s_initDirPath = rFolderPath;
 		}
 
 		return isOk;
@@ -150,25 +152,25 @@ namespace shell
 	}
 
 
-	bool PickFolder( OUT shell::TDirPath& rFolderShellPath, CWnd* pParentWnd, FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
+	bool PickFolder( OUT shell::TFolderPath& rFolderShellPath, CWnd* pParentWnd, FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= nullptr*/ )
 	{
 		CScopedInitializeCom scopedCom;			// Vista-style file dialogs require COM initialization in main thread
 
 		DWORD ofnFlags = OFN_PATHMUSTEXIST;
-		fs::TDirPath folderBrowsePath;			// browseable folder path, adjusted to exclude wildcards
+		shell::TFolderPath folderBrowsePath;	// browseable folder path, excluding wildcards
 		std::tstring wildPattern;
-		const TCHAR* pFolderFileSys;
+		const TCHAR* pDirPath;
 
 		// cut the wildcard pattern, since it breaks the dialog's behaviour (simple OK doesn't work anymore)
 		if ( fs::GuidPath == fs::SplitPatternPath( &folderBrowsePath, &wildPattern, rFolderShellPath ) )		// split into folder path and wildcard pattern
 		{
-			pFolderFileSys = nullptr;			// will select by folder item via PIDL
+			pDirPath = nullptr;					// will select by folder item via PIDL
 			options |= FOS_ALLNONSTORAGEITEMS;	// allow browsing of virtual folders
 		}
 		else
-			pFolderFileSys = folderBrowsePath.GetPtr();
+			pDirPath = folderBrowsePath.GetPtr();
 
-		CFolderPickerDialog folderDlg( pFolderFileSys, ofnFlags, pParentWnd, 0, true );
+		CFolderPickerDialog folderDlg( pDirPath, ofnFlags, pParentWnd, 0, true );
 
 		if ( pTitle != nullptr )
 			folderDlg.m_ofn.lpstrTitle = pTitle;
@@ -326,8 +328,8 @@ namespace shell
 			switch( msg )
 			{
 				case BFFM_INITIALIZED:
-					if ( !str::IsEmpty( s_initFolderPath ) )
-						SendMessage( hDlg, BFFM_SETSELECTION, TRUE, (LPARAM)s_initFolderPath );
+					if ( !s_initDirPath.IsEmpty() )
+						SendMessage( hDlg, BFFM_SETSELECTION, TRUE, (LPARAM)s_initDirPath.GetPtr() );
 					s_browseFolderStatus = Initialized;
 					break;
 				case BFFM_SELCHANGED:
@@ -434,7 +436,7 @@ namespace shell
 			{ FLAG_TAG( FOS_FORCESHOWHIDDEN ) },
 			{ FLAG_TAG( FOS_DEFAULTNOMINIMODE ) },
 			{ FLAG_TAG( FOS_FORCEPREVIEWPANEON ) },
-			{ FLAG_TAG( (FILEOPENDIALOGOPTIONS)FOS_SUPPORTSTREAMABLEITEMS ) }		// aka DWORD
+			{ FLAG_AS_TAG( FILEOPENDIALOGOPTIONS, FOS_SUPPORTSTREAMABLEITEMS ) }		// aka DWORD
 		#else
 			NULL_TAG
 		#endif //_DEBUG
