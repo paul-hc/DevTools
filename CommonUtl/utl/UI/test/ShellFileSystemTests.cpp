@@ -170,7 +170,7 @@ void CShellFileSystemTests::TestEnumShellItems( void )
 	ASSERT( cpAllItemsFolderPidl.GetParentPidl( cpRootFolderPidl ) );			// go to parent "::{26EE0668-A00A-44D7-9371-BEB064C98683}"
 	ASSERT_EQUAL( _T("Control Panel"), cpRootFolderPidl.GetEditingName() );
 
-	const shell::TFolderPath cpRootFolderPath = cpRootFolderPidl.ToShellPath();
+	const shell::TFolderPath cpRootPath = cpRootFolderPidl.ToShellPath();
 
 	// "Control Panel" root, no recursion:
 	{
@@ -178,7 +178,7 @@ void CShellFileSystemTests::TestEnumShellItems( void )
 		fs::CPathEnumerator found( noFlags );
 		shell::CEnumContext enumCtx;
 
-		enumCtx.SearchEnumItems( &found, cpRootFolderPath );
+		enumCtx.SearchEnumItems( &found, cpRootPath );
 		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );		// no leaf items
 		ASSERT_EQUAL( _T("\
 Control Panel\\All Control Panel Items\n\
@@ -193,7 +193,8 @@ Control Panel\\User Accounts"),
 					  ut::JoinEditingNames( found.m_subDirPaths ) );
 	}
 
-	// "Control Panel\All Control Panel Items" root, no recursion:
+	// "Control Panel\All Control Panel Items" folder, no recursion:
+	if ( !shell::IsRunningUnderWow64() )	// works only in 64-bit, and yields empty results on 32-bit under WOW64 (different structure on 32-bit)
 	{
 		fs::TEnumFlags recurse( fs::EF_Recurse );
 		fs::CPathEnumerator found( recurse );
