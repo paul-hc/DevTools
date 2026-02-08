@@ -93,30 +93,21 @@ namespace fs
 
 	fs::PatternResult SearchEnumFiles( OUT IEnumerator* pEnumerator, const fs::TPatternPath& searchPath )
 	{
-		fs::TDirPath dirPath;
-		std::tstring wildSpec = _T("*");
-		fs::PatternResult result;
+		CSearchPatternParts parts;
 
-		if ( fs::IsValidFile( searchPath.GetPtr() ) )
+		parts.Split( searchPath );
+
+		switch ( parts.m_result )
 		{
-			dirPath = searchPath.GetParentPath();
-			wildSpec = searchPath.GetFilename();
-			result = fs::ValidFile;
+			case fs::ValidDirectory:
+				fs::EnumFiles( pEnumerator, parts.m_dirPath, parts.m_wildSpec.c_str() );
+				break;
+			case fs::ValidFile:
+				ASSERT( false );		// should've been handled by the if statement
+				break;
 		}
-		else
-			switch ( result = fs::SplitPatternPath( &dirPath, &wildSpec, searchPath ) )
-			{
-				case fs::ValidDirectory:
-					break;
-				case fs::ValidFile:
-					ASSERT( false );		// should've been handled by the if statement
-				case fs::GuidPath:
-				case fs::InvalidPattern:
-					return result;
-			}
 
-		fs::EnumFiles( pEnumerator, dirPath, wildSpec.c_str() );
-		return result;
+		return parts.m_result;
 	}
 
 

@@ -29,11 +29,13 @@ namespace shell
 	CComPtr<IShellFolder> GetDesktopFolder( void );
 
 	CComPtr<IShellFolder> MakeShellFolder( const TCHAR* pFolderShellPath );				// absolute: empty path defaults to 'This PC' folder
+	CComPtr<IShellFolder> MakeShellFolder( PCIDLIST_ABSOLUTE folderPidl );
 	CComPtr<IShellFolder> MakeShellFolder_DesktopRel( const TCHAR* pFolderShellPath );	// relative: empty path defaults to 'Desktop' folder
 	CComPtr<IShellFolder2> ToShellFolder( IUnknown* pShellItf );	// most general: works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
 	PIDLIST_ABSOLUTE MakeFolderPidl( IShellFolder* pFolder );
 	std::tstring GetFolderName( IShellFolder* pFolder, SIGDN nameType = SIGDN_NORMALDISPLAY );
 	shell::TPath GetFolderPath( IShellFolder* pFolder );
+	SFGAOF GetItemAttributes( IShellFolder* pFolder, PCUITEMID_CHILD childPidl, SFGAOF desiredAttrMask );
 
 
 	// shell item
@@ -55,6 +57,15 @@ namespace shell
 
 	template< typename PathT >		// TCharPtr/std::tstring/fs::CPath
 	bool IsGuidPath( const PathT& shellPath ) { return path::IsGuidPath( str::traits::GetCharPtr( shellPath ) ); }
+
+	template< typename PathT >		// TCharPtr/std::tstring/fs::CPath
+	bool HasFileSysEnvironVarPtr( const PathT& shellPath )
+	{
+		const TCHAR* pShellPath = str::traits::GetCharPtr( shellPath );
+		return
+			!path::IsGuidPath( pShellPath ) &&			// prevent infinite recursion for some deep GUID paths that contain "%...%" sub-strings
+			path::HasEnvironVarPtr( pShellPath );		// contains expandable "%envVar%" or "$(envVar)" substrings?
+	}
 
 
 	// custom bind contexts:
@@ -80,8 +91,8 @@ namespace shell
 namespace shell
 {
 	// shell file info (via SHFILEINFO)
-	SFGAOF GetSfgaofFlags( const TCHAR* pShellPath );		// expands environment variables and resolves shell paths
-	SFGAOF GetRawSfgaofFlags( const TCHAR* pPathOrPidl, UINT moreFlags = 0 );
+	SFGAOF GetShellAttributes( const TCHAR* pShellPath );	// expands environment variables and resolves shell paths
+	SFGAOF GetRawShellAttributes( const TCHAR* pPathOrPidl, UINT moreFlags = 0 );
 	std::pair<CImageList*, int> GetFileSysImageIndex( const TCHAR* pPathOrPidl, UINT iconFlags = SHGFI_SMALLICON );		// CImageList is a shared shell temporary object (no ownership)
 	HICON ExtractFileSysIcon( const TCHAR* pPathOrPidl, UINT flags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
 
@@ -89,10 +100,12 @@ namespace shell
 
 	// shell properties
 	std::tstring GetString( STRRET* pStrRet, PCUITEMID_CHILD pidl = nullptr );
+	bool GetString( OUT std::tstring& rText, STRRET* pStrRet, PCUITEMID_CHILD pidl = nullptr );
 
 
 	// IShellFolder properties
-	std::tstring GetFolderChildDisplayName( IShellFolder* pFolder, PCUITEMID_CHILD pidl, SHGDNF flags = SHGDN_NORMAL );
+	std::tstring GetFolderChildName( IShellFolder* pParentFolder, PCUITEMID_CHILD pidl, SHGDNF flags = SHGDN_NORMAL );
+	bool GetFolderChildName( OUT std::tstring& rDisplayName, IShellFolder* pParentFolder, PCUITEMID_CHILD pidl, SHGDNF flags = SHGDN_NORMAL );
 
 	// IShellFolder2 properties
 	std::tstring GetStringDetail( IShellFolder2* pFolder, PCUITEMID_CHILD pidl, const PROPERTYKEY& propKey );
@@ -137,7 +150,7 @@ namespace shell
 
 		bool IsSpecialPidl( PCIDLIST_ABSOLUTE pidl );		// refers to a special shell namespace folder; pidl could be Absolute/Relative
 
-		SFGAOF GetPidlSfgaofFlags( PCIDLIST_ABSOLUTE pidl );
+		SFGAOF GetPidlShellAttributes( PCIDLIST_ABSOLUTE pidl );
 		std::pair<CImageList*, int> GetPidlImageIndex( PCIDLIST_ABSOLUTE pidl, UINT iconFlags = SHGFI_SMALLICON );	// CImageList is a shared shell temporary object (no ownership)
 		HICON ExtractPidlIcon( PCIDLIST_ABSOLUTE pidl, UINT iconFlags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
 

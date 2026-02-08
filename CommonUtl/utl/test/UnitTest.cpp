@@ -368,7 +368,7 @@ namespace ut
 		return str::Join( enumerator.m_filePaths, ut::CTempFilePool::m_sep );
 	}
 
-	std::tstring JoinSubDirs( const fs::CPathEnumerator& enumerator )
+	std::tstring JoinSubDirs( const fs::CBaseEnumerator& enumerator )
 	{
 		return str::Join( enumerator.m_subDirPaths, ut::CTempFilePool::m_sep );
 	}

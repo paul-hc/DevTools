@@ -21,6 +21,7 @@ private:
 	void TestPathExplorerSort( void );
 	void TestRecycler( void );
 	void TestMultiFileContextMenu( void );
+	void TestEnumShellItems( void );
 };
 
 

@@ -162,7 +162,7 @@ namespace shell
 		const TCHAR* pDirPath;
 
 		// cut the wildcard pattern, since it breaks the dialog's behaviour (simple OK doesn't work anymore)
-		if ( fs::GuidPath == fs::SplitPatternPath( &folderBrowsePath, &wildPattern, rFolderShellPath ) )		// split into folder path and wildcard pattern
+		if ( fs::GuidPath == fs::CSearchPatternParts::SplitPattern( &folderBrowsePath, &wildPattern, rFolderShellPath ) )		// split into folder path and wildcard pattern
 		{
 			pDirPath = nullptr;					// will select by folder item via PIDL
 			options |= FOS_ALLNONSTORAGEITEMS;	// allow browsing of virtual folders
@@ -210,10 +210,9 @@ namespace shell
 
 	bool BrowseAutoPath( OUT fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= nullptr*/ )
 	{
-		fs::CPath path;
-		std::tstring wildSpec;
+		fs::CSearchPatternParts patternParts;
 
-		if ( fs::ValidFile == fs::SplitPatternPath( &path, &wildSpec, rFilePath ) )
+		if ( fs::ValidFile == patternParts.Split( rFilePath ) )
 			return BrowseForFile( rFilePath, pParent, FileBrowse, pFileFilter );
 
 		return PickFolder( rFilePath, pParent );

@@ -104,7 +104,7 @@ namespace shell
 
 	bool CPidlAbsolute::GetChildPidl( OUT CPidlChild& rChildPidl ) const
 	{
-		ASSERT( !ToShellPath().IsGuidPath() );		// child PIDL makes sense only for file-system PIDLs; it doesn't work for special GUID PIDLs
+		//ASSERT( !ToShellPath().IsGuidPath() );		// child PIDL makes sense only for file-system PIDLs; it doesn't work for special GUID PIDLs
 
 		REQUIRE( !IsNull() );
 
@@ -171,6 +171,22 @@ namespace shell
 		return !IsNull();
 	}
 
+	std::tstring CPidlChild::GetParsingName( IShellFolder* pParentFolder ) const
+	{
+		std::tstring editingName;
+
+		GetFolderChildName( editingName, pParentFolder, Get(), SHGDN_INFOLDER | SHGDN_FORPARSING );
+		return editingName;
+	}
+
+	std::tstring CPidlChild::GetEditingName( IShellFolder* pParentFolder ) const
+	{
+		std::tstring editingName;
+
+		GetFolderChildName( editingName, pParentFolder, Get(), SHGDN_INFOLDER | SHGDN_FOREDITING );
+		return editingName;
+	}
+
 
 	// CFolderRelativePidls implementation
 
@@ -231,7 +247,7 @@ namespace shell
 		ASSERT_PTR( m_pAncestorFolder );
 
 		PCUITEMID_CHILD childPidl = reinterpret_cast<PCUITEMID_CHILD>( m_relativePidls[ posRelPidl ] );
-		shell::TPath leafRelativePath = shell::GetFolderChildDisplayName( m_pAncestorFolder, childPidl, SHGDN_FORPARSING );		// returns full path if SHGDN_INFOLDER is not specified
+		shell::TPath leafRelativePath = shell::GetFolderChildName( m_pAncestorFolder, childPidl, SHGDN_FORPARSING );		// returns full path if SHGDN_INFOLDER is not specified
 
 		leafRelativePath.StripPrefix( m_ancestorPath );
 		return leafRelativePath;
@@ -260,47 +276,6 @@ namespace shell
 			return nullptr;
 
 		return pShellItemArray;
-	}
-}
-
-
-#include "utl/FileEnumerator.h"
-
-namespace shell
-{
-	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
-
-	void EnumFiles( OUT fs::IEnumerator* pEnumerator, const shell::TPath& folderShellPath, const TCHAR* pWildSpec /*= _T( "*.*" )*/ )
-	{
-		;
-	}
-
-	fs::PatternResult SearchEnumFiles( OUT fs::IEnumerator* pEnumerator, const fs::TPatternPath& searchPath )
-	{
-		fs::TDirPath dirPath;
-		std::tstring wildSpec = _T("*");
-		fs::PatternResult result;
-
-		if ( fs::IsValidFile( searchPath.GetPtr() ) )
-		{
-			dirPath = searchPath.GetParentPath();
-			wildSpec = searchPath.GetFilename();
-			result = fs::ValidFile;
-		}
-		else
-			switch ( result = fs::SplitPatternPath( &dirPath, &wildSpec, searchPath ) )
-			{
-				case fs::ValidDirectory:
-					break;
-				case fs::ValidFile:
-					ASSERT( false );		// should've been handled by the if statement
-				case fs::GuidPath:
-				case fs::InvalidPattern:
-					return result;
-			}
-
-		fs::EnumFiles( pEnumerator, dirPath, wildSpec.c_str() );
-		return result;
 	}
 }
 

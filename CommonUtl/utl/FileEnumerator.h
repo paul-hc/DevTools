@@ -123,7 +123,7 @@ namespace fs
 		utl::CCounter m_depthCounter;				// counts recursion depth
 	private:
 		mutable std::unordered_set<fs::CPath> m_uniquePaths;	// files + sub-directories found
-		mutable std::set<fs::CPath> m_ignoredPaths;			// files + sub-dirs ignored or filtered-out
+		mutable std::set<fs::CPath> m_ignoredPaths;	// files + sub-dirs ignored or filtered-out
 	public:
 		std::vector<fs::TDirPath> m_subDirPaths;	// found sub-directories
 	};

@@ -365,7 +365,19 @@ namespace fs
 	// pattern path utils (potentially with wildcards):
 	enum PatternResult { ValidFile, ValidDirectory, GuidPath, InvalidPattern };
 
-	PatternResult SplitPatternPath( OUT fs::TDirPath* pPath, OUT OPTIONAL std::tstring* pWildSpec, const fs::TPatternPath& patternPath );	// a valid file or valid directory path with a wildcards?
+	struct CSearchPatternParts
+	{
+		CSearchPatternParts( void );
+
+		PatternResult Split( const shell::TPatternPath& searchShellPath );
+
+		// a valid file or valid directory path with a wildcards?
+		static PatternResult SplitPattern( OUT fs::TDirPath* pDirPath, OUT OPTIONAL std::tstring* pWildSpec, const shell::TPatternPath& searchShellPath );
+	public:
+		fs::TDirPath m_dirPath;
+		std::tstring m_wildSpec;
+		PatternResult m_result;
+	};
 }
 
 

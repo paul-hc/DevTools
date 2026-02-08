@@ -20,7 +20,7 @@ namespace shell
 {
 	bool IsValidShortcutFile( const TCHAR* pLnkPath )
 	{
-		return ::HasFlag( shell::GetRawSfgaofFlags( pLnkPath ), SFGAO_LINK );
+		return ::HasFlag( shell::GetRawShellAttributes( pLnkPath ), SFGAO_LINK );
 	}
 
 	CComPtr<IShellLink> CreateShellLink( void )

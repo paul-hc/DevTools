@@ -137,7 +137,7 @@ namespace shell
 
 		bool IsSpecialPidl( void ) const { return pidl::IsSpecialPidl( Get() ); }
 
-		SFGAOF GetSfgaofFlags( void ) const { return pidl::GetPidlSfgaofFlags( Get() ); }
+		SFGAOF GetShellAttributes( void ) const { return pidl::GetPidlShellAttributes( Get() ); }
 		std::pair<CImageList*, int> GetSysImageIndex( UINT iconFlag = SHGFI_SMALLICON ) const;		// no ownership of the image list
 
 		bool GetParentPidl( OUT CPidlAbsolute& rParentPidl ) const;
@@ -169,7 +169,7 @@ namespace shell
 
 		CPidlRelative& operator=( const CPidlRelative& right );		// copy assignment
 
-		std::tstring ToFilename( IShellFolder* pFolder ) const { return shell::GetFolderChildDisplayName( pFolder, AsChild() ); }	// doesn't work for deep relative paths!
+		std::tstring ToFilename( IShellFolder* pFolder ) const { return shell::GetFolderChildName( pFolder, AsChild() ); }	// doesn't work for deep relative paths!
 
 		bool CreateRelative( IShellFolder* pFolder, const TCHAR* pRelPath ) { Reset( pidl::ParseToRelativePidl( pFolder, pRelPath ) ); return !IsNull(); }
 
@@ -186,30 +186,36 @@ namespace shell
 	};
 
 
-	class CPidlChild : public CBasePidl<ITEMID_CHILD, PUITEMID_CHILD, PCUITEMID_CHILD>
+	class CPidlChild : public CBasePidl<ITEMID_CHILD, PITEMID_CHILD, PCUITEMID_CHILD>
 	{
-		typedef CBasePidl<ITEMID_CHILD, PUITEMID_CHILD, PCUITEMID_CHILD> TBasePidl;
+		typedef CBasePidl<ITEMID_CHILD, PITEMID_CHILD, PCUITEMID_CHILD> TBasePidl;
 
 		// hidden base methods
 		using TBasePidl::Combine;
 		using TBasePidl::RemoveLast;
+		// call IShellFolder methods instead (otherwise the child PIDL is considered as relative to Desktop, which is the wrong assumed parent)
+		using TBasePidl::ToShellPath;
+		using TBasePidl::GetName;
+		using TBasePidl::GetFilename;
+		using TBasePidl::GetEditingName;
+		using TBasePidl::GetParsingName;
 	public:
 		CPidlChild( void ) {}
 		CPidlChild( const CPidlChild& right ) : TBasePidl( ::ILCloneChild( right.Get() ) ) {}	// COPY constructor
-		explicit CPidlChild( PUITEMID_CHILD pidl ) : TBasePidl( pidl ) {}						// take ownership of pidl (MOVE)
+		explicit CPidlChild( PITEMID_CHILD pidl ) : TBasePidl( pidl ) {}						// take ownership of pidl (MOVE)
 
 		CPidlChild& operator=( const CPidlChild& right );		// copy assignment
 
 		bool CreateChild( IShellFolder* pFolder, const TCHAR* pFilename ) { Reset( pidl::ParseToChildPidl( pFolder, pFilename ) ); return !IsNull(); }
 		bool CreateChild( const TCHAR* pFullPath );
 
+		// IFolder child names
+		std::tstring GetParsingName( IShellFolder* pParentFolder ) const;
+		std::tstring GetEditingName( IShellFolder* pParentFolder ) const;
+
 		// child PIDL compare
 		pred::CompareResult Compare( const CPidlRelative& rightPidlRel, IShellFolder* pParentFolder ) const { return pidl::Compare( Get(), rightPidlRel.Get(), pParentFolder ); }
 		bool Equals( const CPidlRelative& rightPidlRel, IShellFolder* pParentFolder ) const { return pred::Equal == Compare( rightPidlRel, pParentFolder ); }
-
-		// Note: name conversion methods GetName(), GetFilename(), ToPath() work only for file-system child PIDLs,
-		// but not for GUID based child PIDLs, such as a Control Panel applet.
-		// Use IShellItem or IShellFolder interfaces for name conversions of the CP applets.
 	};
 
 
@@ -279,15 +285,6 @@ namespace shell
 
 		return shell::MakeFilePathsContextMenu( shellPaths, hWndOwner );
 	}
-}
-
-
-namespace shell
-{
-	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
-
-	void EnumFiles( OUT fs::IEnumerator* pEnumerator, const shell::TPath& folderShellPath, const TCHAR* pWildSpec = _T("*.*") );
-	fs::PatternResult SearchEnumFiles( OUT fs::IEnumerator* pEnumerator, const fs::TPatternPath& searchPath );
 }
 
 

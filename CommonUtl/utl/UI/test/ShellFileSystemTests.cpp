@@ -3,7 +3,9 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/ShellFileSystemTests.h"
+#include "test/UnitTestUI.h"
 #include "Recycler.h"
+#include "ShellEnumerator.h"
 #include "ShellUtilities.h"
 #include "ShellPidl.h"
 #include "WinExplorer.h"
@@ -16,8 +18,6 @@
 
 namespace ut
 {
-	int TrackContextMenu( IContextMenu* pCtxMenu );		// FWD: defined in ShellPidlTests.cpp
-
 	size_t ShellDeleteFiles( const ut::CTempFilePool& pool, const TCHAR relFilePaths[] )
 	{
 		std::vector<fs::CPath> fullPaths;
@@ -25,6 +25,8 @@ namespace ut
 
 		return shell::DeleteFiles( fullPaths, AfxGetMainWnd(), FOF_ALLOWUNDO | FOF_SILENT | FOF_NOCONFIRMATION );
 	}
+
+	static const fs::TEnumFlags s_recurse( fs::EF_Recurse );
 }
 
 
@@ -159,6 +161,78 @@ void CShellFileSystemTests::TestMultiFileContextMenu( void )
 	}
 }
 
+void CShellFileSystemTests::TestEnumShellItems( void )
+{
+	shell::CPidlAbsolute cpAllItemsFolderPidl( FOLDERID_ControlPanelFolder );	// initial set to "::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"
+	ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), cpAllItemsFolderPidl.GetEditingName() );
+
+	shell::CPidlAbsolute cpRootFolderPidl;
+	ASSERT( cpAllItemsFolderPidl.GetParentPidl( cpRootFolderPidl ) );			// go to parent "::{26EE0668-A00A-44D7-9371-BEB064C98683}"
+	ASSERT_EQUAL( _T("Control Panel"), cpRootFolderPidl.GetEditingName() );
+
+	const shell::TFolderPath cpRootFolderPath = cpRootFolderPidl.ToShellPath();
+
+	// "Control Panel" root, no recursion:
+	{
+		fs::TEnumFlags noFlags;
+		fs::CPathEnumerator found( noFlags );
+		shell::CEnumContext enumCtx;
+
+		enumCtx.SearchEnumItems( &found, cpRootFolderPath );
+		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );		// no leaf items
+		ASSERT_EQUAL( _T("\
+Control Panel\\All Control Panel Items\n\
+Control Panel\\Appearance and Personalization\n\
+Control Panel\\Clock and Region\n\
+Control Panel\\Ease of Access\n\
+Control Panel\\Hardware and Sound\n\
+Control Panel\\Network and Internet\n\
+Control Panel\\Programs\n\
+Control Panel\\System and Security\n\
+Control Panel\\User Accounts"),
+					  ut::JoinEditingNames( found.m_subDirPaths ) );
+	}
+
+	// "Control Panel\All Control Panel Items" root, no recursion:
+	{
+		fs::TEnumFlags recurse( fs::EF_Recurse );
+		fs::CPathEnumerator found( recurse );
+		shell::CEnumContext enumCtx;
+
+		found.RefOptions().m_maxDepthLevel = 0;				// restrict recursion as deeper search yields way too many results
+
+		enumCtx.EnumFolderItems( &found, cpAllItemsFolderPidl );	// folder PIDL
+		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );		// no leaf items
+
+		//TRACE( _T( "\n%s\n" ), ut::JoinEditingNames( found.m_subDirPaths, cpAllItemsFolderPidl.GetEditingName() ).c_str() );
+		ASSERT_EQUAL( _T("\
+AutoPlay\n\
+Backup and Restore (Windows 7)\n\
+BitLocker Drive Encryption\n\
+Credential Manager\n\
+Default Programs\n\
+Devices and Printers\n\
+Ease of Access Center\n\
+File History\n\
+::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\Fonts\n\
+Network and Sharing Center\n\
+Power Options\n\
+Programs and Features\n\
+Recovery\n\
+RemoteApp and Desktop Connections\n\
+Security and Maintenance\n\
+Speech Recognition\n\
+Storage Spaces\n\
+Sync Center\n\
+System\n\
+Troubleshooting\n\
+User Accounts\n\
+Windows Defender Firewall\n\
+Windows Tools"),
+					  ut::JoinEditingNames( found.m_subDirPaths, cpAllItemsFolderPidl.GetEditingName() ) );
+	}
+}
+
 
 void CShellFileSystemTests::Run( void )
 {
@@ -166,6 +240,7 @@ void CShellFileSystemTests::Run( void )
 	RUN_TEST( TestPathExplorerSort );
 	RUN_TEST( TestRecycler );
 	RUN_TEST( TestMultiFileContextMenu );
+	RUN_TEST( TestEnumShellItems );
 }
 
 

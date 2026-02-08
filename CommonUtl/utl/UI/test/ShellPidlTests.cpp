@@ -3,71 +3,15 @@
 
 #ifdef USE_UT		// no UT code in release builds
 #include "test/ShellPidlTests.h"
+#include "test/UnitTestUI.h"
 #include "ShellPidl.h"
-#include "ShellContextMenuHost.h"
 #include "utl/FileState.h"
 #include "utl/FlagTags.h"
-#include "utl/TextClipboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
-namespace ut
-{
-	static const CValueTags& GetTags_SIGDN( void )
-	{
-		static const CValueTags::ValueDef s_valueDefs[] =
-		{
-			{ VALUE_TAG( SIGDN_NORMALDISPLAY ) },
-			{ VALUE_TAG( SIGDN_PARENTRELATIVEPARSING ) },
-			{ VALUE_TAG( SIGDN_DESKTOPABSOLUTEPARSING ) },
-			{ VALUE_TAG( SIGDN_PARENTRELATIVEEDITING ) },
-			{ VALUE_TAG( SIGDN_DESKTOPABSOLUTEEDITING ) },
-			{ VALUE_TAG( SIGDN_FILESYSPATH ) },
-			{ VALUE_TAG( SIGDN_URL ) },
-			{ VALUE_TAG( SIGDN_PARENTRELATIVEFORADDRESSBAR ) },
-			{ VALUE_TAG( SIGDN_PARENTRELATIVE ) },
-			{ VALUE_TAG( SIGDN_PARENTRELATIVEFORUI ) }
-		};
-
-		static const CValueTags s_tags( ARRAY_SPAN( s_valueDefs ) );
-		return s_tags;
-	}
-
-	void TracePidlNames( LPCITEMIDLIST pidl )
-	{
-		static const SIGDN sigdnType[] =
-		{
-			SIGDN_NORMALDISPLAY, SIGDN_PARENTRELATIVEPARSING, SIGDN_DESKTOPABSOLUTEPARSING, SIGDN_PARENTRELATIVEEDITING, SIGDN_DESKTOPABSOLUTEEDITING,
-			SIGDN_FILESYSPATH, SIGDN_URL, SIGDN_PARENTRELATIVEFORADDRESSBAR, SIGDN_PARENTRELATIVE, SIGDN_PARENTRELATIVEFORUI
-		};
-
-		TRACE( "\n" );
-		for ( size_t i = 0; i != COUNT_OF( sigdnType ); ++i )
-			TRACE( _T("%s:\t\"%s\"\n"),
-				   GetTags_SIGDN().FormatKey( sigdnType[i] ).c_str(),
-				   shell::pidl::GetName(reinterpret_cast<PCIDLIST_ABSOLUTE>( pidl ), sigdnType[i] ).c_str() );
-	}
-
-	int TrackContextMenu( IContextMenu* pCtxMenu )
-	{
-		int cmdId = 0;
-
-		if ( pCtxMenu != nullptr )
-		{
-			CTextClipboard::CMessageWnd msgWnd;
-			CShellContextMenuHost menuHost( CWnd::FromHandle( msgWnd.GetWnd() ), pCtxMenu );
-
-			cmdId = menuHost.TrackMenu( CPoint( 300, 100 ) );
-		}
-		else
-			ASSERT( false );
-
-		return cmdId;
-	}
-}
 
 CShellPidlTests::CShellPidlTests( void )
 {
@@ -216,12 +160,6 @@ void CShellPidlTests::TestPidlBasics( void )
 		ASSERT_EQUAL( filePath, filePidl.ToShellPath() );
 		ASSERT_EQUAL( _T("fa.txt"), filePidl.GetFilename() );		// filePath.GetFilename()
 		ASSERT_EQUAL( _T("temp_ut\\_OUT\\fa.txt"), filePidl.ToShellPath().GetRelativePath( 3 ) );
-
-		{	// last item ID
-			shell::CPidlChild lastPidl;
-			lastPidl.AssignCopy( filePidl.GetLastItem() );
-			ASSERT_EQUAL( _T("fa.txt"), lastPidl.GetFilename() );
-		}
 
 		{	// child PIDL
 			shell::CPidlRelative itemPidl;
@@ -382,10 +320,11 @@ void CShellPidlTests::TestFolderRelativePidls( void )
 void CShellPidlTests::TestPidl_FileSystem( void )
 {
 	ut::CTempFilePool pool( _T("a.txt|d1\\b.txt") );
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	// 1. pool directory (file-system):
-	ASSERT( shell::ShellFolderExist( pool.GetPoolDirPath().GetPtr() ) );
-	ASSERT( shell::ShellItemExist( pool.GetPoolDirPath().GetPtr() ) );
+	ASSERT( shell::ShellFolderExist( poolDirPath.GetPtr() ) );
+	ASSERT( shell::ShellItemExist( poolDirPath.GetPtr() ) );
 
 	// 2. file (file-system):
 	{
@@ -403,7 +342,7 @@ void CShellPidlTests::TestPidl_FileSystem( void )
 		ASSERT_EQUAL( FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, ::GetFileAttributes( filePath.GetPtr() ) );
 
 		ASSERT_EQUAL( _T("SFGAO_CANCOPY|SFGAO_CANMOVE|SFGAO_CANLINK|SFGAO_CANRENAME|SFGAO_CANDELETE|SFGAO_HASPROPSHEET|SFGAO_DROPTARGET|SFGAO_STREAM|SFGAO_FILESYSTEM"),
-					  shell::GetTags_SFGAO_Flags().FormatKey( filePidl.GetSfgaofFlags() ) );
+					  shell::GetTags_SFGAO_Flags().FormatKey( filePidl.GetShellAttributes() ) );
 
 		{
 			ASSERT( !fs::IsValidDirectory( filePath.GetPtr() ) );
@@ -411,7 +350,7 @@ void CShellPidlTests::TestPidl_FileSystem( void )
 			ASSERT( shell::ShellItemExist( filePath.GetPtr() ) );
 
 			ASSERT_EQUAL( SFGAO_CANCOPY | SFGAO_CANMOVE | SFGAO_CANLINK | SFGAO_CANRENAME | SFGAO_CANDELETE | SFGAO_HASPROPSHEET | SFGAO_DROPTARGET | SFGAO_STREAM | SFGAO_FILESYSTEM,
-						  shell::GetRawSfgaofFlags( filePath.GetPtr() ) );
+						  shell::GetRawShellAttributes( filePath.GetPtr() ) );
 
 			CComPtr<IShellItem> pItem = shell::MakeShellItem( filePath.GetPtr() );
 			ASSERT_PTR( pItem );
@@ -419,6 +358,20 @@ void CShellPidlTests::TestPidl_FileSystem( void )
 			CComPtr<IShellFolder> pFolder = shell::MakeShellFolder( filePath.GetPtr() );
 			ASSERT_NULL( pFolder );
 			ASSERT_NULL( shell::ToShellFolder( pItem ) );
+		}
+		{	// name in parent folder/child pidl
+			CComPtr<IShellFolder> pParentFolder = shell::MakeShellFolder( filePath.GetParentPath().GetPtr() );
+			ASSERT_PTR( pParentFolder );
+
+			shell::CPidlChild childPidl;
+			ASSERT( filePidl.GetChildPidl( childPidl ) );
+			ASSERT_EQUAL( _T("a.txt"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_NORMAL ) );
+			ASSERT_EQUAL( _T("a.txt"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_INFOLDER | SHGDN_FORPARSING ) );
+			ASSERT_EQUAL( _T("a.txt"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_INFOLDER | SHGDN_FOREDITING ) );
+			ASSERT_EQUAL( _T("a.txt"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_FORADDRESSBAR ) );
+
+			ASSERT_EQUAL( _T("a.txt"), childPidl.GetParsingName( pParentFolder ) );
+			ASSERT_EQUAL( _T("a.txt"), childPidl.GetEditingName( pParentFolder ) );
 		}
 	}
 
@@ -439,7 +392,7 @@ void CShellPidlTests::TestPidl_FileSystem( void )
 
 		ASSERT_EQUAL( SFGAO_CANCOPY | SFGAO_CANMOVE | SFGAO_CANLINK | SFGAO_STORAGE | SFGAO_CANRENAME | SFGAO_CANDELETE | SFGAO_HASPROPSHEET | SFGAO_DROPTARGET |
 					  SFGAO_STORAGEANCESTOR | SFGAO_FILESYSANCESTOR | SFGAO_FOLDER | SFGAO_FILESYSTEM,
-					  dirPidl.GetSfgaofFlags() );
+					  dirPidl.GetShellAttributes() );
 
 		{
 			ASSERT( fs::IsValidDirectory( dirPath.GetPtr() ) );
@@ -451,7 +404,7 @@ void CShellPidlTests::TestPidl_FileSystem( void )
 
 			ASSERT_EQUAL( SFGAO_CANCOPY | SFGAO_CANMOVE | SFGAO_CANLINK | SFGAO_STORAGE | SFGAO_CANRENAME | SFGAO_CANDELETE | SFGAO_HASPROPSHEET | SFGAO_DROPTARGET |
 						  SFGAO_STORAGEANCESTOR | SFGAO_FILESYSANCESTOR | SFGAO_FOLDER | SFGAO_FILESYSTEM,
-						  shell::GetRawSfgaofFlags( dirPath.GetPtr() ) );
+						  shell::GetRawShellAttributes( dirPath.GetPtr() ) );
 
 			CComPtr<IShellItem> pItem = shell::MakeShellItem( dirPath.GetPtr() );
 			ASSERT_PTR( pItem );
@@ -461,6 +414,20 @@ void CShellPidlTests::TestPidl_FileSystem( void )
 			ASSERT_EQUAL( shell::GetFolderPath( pFolder ), shell::GetFolderPath( shell::ToShellFolder( pItem ) ) );
 
 			ASSERT_EQUAL( _T("d1"), shell::GetFolderPath( pFolder ).GetFilename() );
+		}
+		{	// name in parent folder/child pidl
+			CComPtr<IShellFolder> pParentFolder = shell::MakeShellFolder( dirPath.GetParentPath().GetPtr() );
+			ASSERT_PTR( pParentFolder );
+
+			shell::CPidlChild childPidl;
+			ASSERT( dirPidl.GetChildPidl( childPidl ) );
+			ASSERT_EQUAL( _T("d1"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_NORMAL ) );
+			ASSERT_EQUAL( _T("d1"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_INFOLDER | SHGDN_FORPARSING ) );
+			ASSERT_EQUAL( _T("d1"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_INFOLDER | SHGDN_FOREDITING ) );
+			ASSERT_EQUAL( _T("d1"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_FORADDRESSBAR ) );
+
+			ASSERT_EQUAL( _T("d1"), childPidl.GetParsingName( pParentFolder ) );
+			ASSERT_EQUAL( _T("d1"), childPidl.GetEditingName( pParentFolder ) );
 		}
 	}
 }
@@ -481,7 +448,7 @@ void CShellPidlTests::TestPidl_FileSystemNonExistent( void )
 		ASSERT( !naFilePidl.IsNull() );
 		ASSERT( !naFilePidl.IsSpecialPidl() );
 
-		ASSERT_EQUAL( _T(""), shell::GetTags_SFGAO_Flags().FormatKey( naFilePidl.GetSfgaofFlags() ) );
+		ASSERT_EQUAL( _T(""), shell::GetTags_SFGAO_Flags().FormatKey( naFilePidl.GetShellAttributes() ) );
 
 		ASSERT_EQUAL( INVALID_FILE_ATTRIBUTES, ::GetFileAttributes( naFilePath.GetPtr() ) );
 
@@ -490,7 +457,7 @@ void CShellPidlTests::TestPidl_FileSystemNonExistent( void )
 			ASSERT( !shell::ShellFolderExist( naFilePath.GetPtr() ) );
 			ASSERT( !shell::ShellItemExist( naFilePath.GetPtr() ) );
 
-			ASSERT_EQUAL( 0, shell::GetRawSfgaofFlags( naFilePath.GetPtr() ) );
+			ASSERT_EQUAL( 0, shell::GetRawShellAttributes( naFilePath.GetPtr() ) );
 
 			ASSERT_NULL( shell::MakeShellItem( naFilePath.GetPtr() ) );
 			ASSERT_NULL( shell::MakeShellFolder( naFilePath.GetPtr() ) );
@@ -510,14 +477,14 @@ void CShellPidlTests::TestPidl_FileSystemNonExistent( void )
 		ASSERT( !naDirPidl.IsSpecialPidl() );
 
 		ASSERT_EQUAL( INVALID_FILE_ATTRIBUTES, ::GetFileAttributes( naDirPath.GetPtr() ) );
-		ASSERT_EQUAL( 0, naDirPidl.GetSfgaofFlags() );
+		ASSERT_EQUAL( 0, naDirPidl.GetShellAttributes() );
 
 		{
 			ASSERT( !fs::IsValidDirectory( naDirPath.GetPtr() ) );
 			ASSERT( !shell::ShellFolderExist( naDirPath.GetPtr() ) );
 			ASSERT( !shell::ShellItemExist( naDirPath.GetPtr() ) );
 
-			ASSERT_EQUAL( 0, shell::GetRawSfgaofFlags( naDirPath.GetPtr() ) );
+			ASSERT_EQUAL( 0, shell::GetRawShellAttributes( naDirPath.GetPtr() ) );
 
 			ASSERT_NULL( shell::MakeShellItem( naDirPath.GetPtr() ) );
 			ASSERT_NULL( shell::MakeShellFolder( naDirPath.GetPtr() ) );
@@ -529,38 +496,37 @@ void CShellPidlTests::TestPidl_GuidSpecial( void )
 {
 	// 1. "Control Panel" special folder (non file-system, valid PIDL):
 	{
-		shell::CPidlAbsolute controlPanelAllPidl( FOLDERID_ControlPanelFolder );
+		shell::CPidlAbsolute cpAllPidl( FOLDERID_ControlPanelFolder );
 
-		ASSERT( !controlPanelAllPidl.IsNull() );
-		ASSERT( controlPanelAllPidl.IsSpecialPidl() );
-		ASSERT( shell::ShellFolderExist( controlPanelAllPidl ) );
-		ASSERT( shell::ShellItemExist( controlPanelAllPidl ) );
+		ASSERT( !cpAllPidl.IsNull() );
+		ASSERT( cpAllPidl.IsSpecialPidl() );
+		ASSERT( shell::ShellFolderExist( cpAllPidl ) );
+		ASSERT( shell::ShellItemExist( cpAllPidl ) );
 
-		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), controlPanelAllPidl.GetEditingName() );
-		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), controlPanelAllPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
-		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), controlPanelAllPidl.ToShellPath() );
+		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), cpAllPidl.GetEditingName() );
+		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), cpAllPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
+		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), cpAllPidl.ToShellPath() );
 		{
-			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelAllPidl.GetName( SIGDN_NORMALDISPLAY ) );
-			ASSERT_EQUAL( _T("0"), controlPanelAllPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
-			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelAllPidl.GetName( SIGDN_PARENTRELATIVEEDITING ) );
-			//ASSERT_EQUAL( _T(""), controlPanelAllPidl.GetName( SIGDN_FILESYSPATH ) );	// E_INVALIDARG - hResult=0x80070057: 'The parameter is incorrect.'
-			//ASSERT_EQUAL( _T(""), controlPanelAllPidl.GetName( SIGDN_URL ) );			// E_NOTIMPL - hResult=0x80004001: 'Not implemented'
-			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelAllPidl.GetName( SIGDN_PARENTRELATIVEFORADDRESSBAR ) );
-			ASSERT_EQUAL( _T("All Control Panel Items"), controlPanelAllPidl.GetName( SIGDN_PARENTRELATIVE ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), cpAllPidl.GetName( SIGDN_NORMALDISPLAY ) );
+			ASSERT_EQUAL( _T("0"), cpAllPidl.GetName( SIGDN_PARENTRELATIVEPARSING ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), cpAllPidl.GetName( SIGDN_PARENTRELATIVEEDITING ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), cpAllPidl.GetName( SIGDN_PARENTRELATIVEFORADDRESSBAR ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), cpAllPidl.GetName( SIGDN_PARENTRELATIVE ) );
+			//ASSERT_EQUAL( _T(""), cpAllPidl.GetName( SIGDN_FILESYSPATH ) );	// E_INVALIDARG - hResult=0x80070057: 'The parameter is incorrect.'
+			//ASSERT_EQUAL( _T(""), cpAllPidl.GetName( SIGDN_URL ) );			// E_NOTIMPL - hResult=0x80004001: 'Not implemented'
 		}
 
-		ASSERT_EQUAL( SFGAO_CANLINK | SFGAO_FOLDER | SFGAO_HASSUBFOLDER, controlPanelAllPidl.GetSfgaofFlags() );
+		ASSERT_EQUAL( SFGAO_CANLINK | SFGAO_FOLDER | SFGAO_HASSUBFOLDER, cpAllPidl.GetShellAttributes() );
 
+		shell::TFolderPath folderPath = cpAllPidl.ToShellPath();
 		{
-			shell::TFolderPath folderPath = controlPanelAllPidl.ToShellPath();
-
 			ASSERT( !fs::IsValidFile( folderPath.GetPtr() ) );
 			ASSERT( !fs::IsValidDirectory( folderPath.GetPtr() ) );
 			ASSERT( shell::ShellFolderExist( folderPath.GetPtr() ) );
 			ASSERT( shell::ShellItemExist( folderPath.GetPtr() ) );
 			ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), folderPath );
 
-			ASSERT_EQUAL( SFGAO_CANLINK | SFGAO_FOLDER | SFGAO_HASSUBFOLDER, shell::GetSfgaofFlags( folderPath.GetPtr() ) );
+			ASSERT_EQUAL( SFGAO_CANLINK | SFGAO_FOLDER | SFGAO_HASSUBFOLDER, shell::GetShellAttributes( folderPath.GetPtr() ) );
 
 			CComPtr<IShellItem> pItem = shell::MakeShellItem( folderPath.GetPtr() );
 			ASSERT_PTR( pItem );
@@ -572,6 +538,20 @@ void CShellPidlTests::TestPidl_GuidSpecial( void )
 			ASSERT_EQUAL( _T("All Control Panel Items"), shell::GetFolderName( pFolder ) );
 			ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), shell::GetFolderName( pFolder, SIGDN_DESKTOPABSOLUTEEDITING ) );
 			ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), shell::GetFolderPath( pFolder ) );
+		}
+		{	// name in parent folder/child pidl
+			CComPtr<IShellFolder> pParentFolder = shell::MakeShellFolder( folderPath.GetParentPath().GetPtr() );
+			ASSERT_PTR( pParentFolder );
+
+			shell::CPidlChild childPidl;
+			ASSERT( cpAllPidl.GetChildPidl( childPidl ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_NORMAL ) );
+			ASSERT_EQUAL( _T("0"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_INFOLDER | SHGDN_FORPARSING ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_INFOLDER | SHGDN_FOREDITING ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_FORADDRESSBAR ) );
+
+			ASSERT_EQUAL( _T("0"), childPidl.GetParsingName( pParentFolder ) );
+			ASSERT_EQUAL( _T("All Control Panel Items"), childPidl.GetEditingName( pParentFolder ) );
 		}
 	}
 
@@ -587,7 +567,7 @@ void CShellPidlTests::TestPidl_GuidSpecial( void )
 		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), cpRegionPidl.ToShellPath() );
 		ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items\\Region"), cpRegionPidl.GetEditingName() );
 
-		ASSERT_EQUAL( SFGAO_CANLINK, cpRegionPidl.GetSfgaofFlags() );
+		ASSERT_EQUAL( SFGAO_CANLINK, cpRegionPidl.GetShellAttributes() );
 
 		{
 			ASSERT_EQUAL( _T("Region"), cpRegionPidl.GetName( SIGDN_NORMALDISPLAY ) );
@@ -597,15 +577,14 @@ void CShellPidlTests::TestPidl_GuidSpecial( void )
 			ASSERT_EQUAL( _T("Region"), cpRegionPidl.GetName( SIGDN_PARENTRELATIVE ) );
 		}
 
+		shell::TFolderPath cpAppletPath = cpRegionPidl.ToShellPath();
 		{
-			shell::TFolderPath cpAppletPath = cpRegionPidl.ToShellPath();
-
 			ASSERT( !fs::IsValidFile( cpAppletPath.GetPtr() ) );
 			ASSERT( !fs::IsValidDirectory( cpAppletPath.GetPtr() ) );
 			ASSERT( !shell::ShellFolderExist( cpAppletPath.GetPtr() ) );
 			ASSERT( shell::ShellItemExist( cpAppletPath.GetPtr() ) );
 
-			ASSERT_EQUAL( SFGAO_CANLINK, shell::GetSfgaofFlags( cpAppletPath.GetPtr() ) );
+			ASSERT_EQUAL( SFGAO_CANLINK, shell::GetShellAttributes( cpAppletPath.GetPtr() ) );
 
 			CComPtr<IShellItem> pItem = shell::MakeShellItem( cpAppletPath.GetPtr() );
 			ASSERT_PTR( pItem );
@@ -613,6 +592,20 @@ void CShellPidlTests::TestPidl_GuidSpecial( void )
 			CComPtr<IShellFolder> pFolder = shell::MakeShellFolder( cpAppletPath.GetPtr() );
 			ASSERT_NULL( pFolder );
 			ASSERT_NULL( shell::ToShellFolder( pItem ) );
+		}
+		{	// name in parent folder/child pidl
+			CComPtr<IShellFolder> pParentFolder = shell::MakeShellFolder( cpAppletPath.GetParentPath().GetPtr() );
+			ASSERT_PTR( pParentFolder );
+
+			shell::CPidlChild childPidl;
+			ASSERT( cpRegionPidl.GetChildPidl( childPidl ) );
+			ASSERT_EQUAL( _T("Region"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_NORMAL ) );
+			ASSERT_EQUAL( _T("::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_INFOLDER | SHGDN_FORPARSING ) );
+			ASSERT_EQUAL( _T("Region"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_INFOLDER | SHGDN_FOREDITING ) );
+			ASSERT_EQUAL( _T("Region"), shell::GetFolderChildName( pParentFolder, childPidl, SHGDN_FORADDRESSBAR ) );
+
+			ASSERT_EQUAL( _T("::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), childPidl.GetParsingName( pParentFolder ) );
+			ASSERT_EQUAL( _T("Region"), childPidl.GetEditingName( pParentFolder ) );
 		}
 	}
 }
@@ -634,18 +627,21 @@ void CShellPidlTests::TestParentPidl( void )
 		shell::CPidlAbsolute parentPidl;
 		shell::CPidlChild childPidl;
 
+		CComPtr<IShellFolder> pParentFolder = shell::MakeShellFolder( b_txtFilePath.GetParentPath().GetPtr() );
+		ASSERT_PTR( pParentFolder );
+
 		ASSERT( b_txtPidl.GetParentPidl( parentPidl ) );
 		ASSERT_EQUAL( _T("temp_ut\\_OUT\\d1"), parentPidl.ToShellPath().GetRelativePath( 3 ) );
 		ASSERT( b_txtPidl.GetChildPidl( childPidl ) );
-		ASSERT_EQUAL( _T("b.txt"), childPidl.GetFilename() );
+		ASSERT_EQUAL( _T("b.txt"), childPidl.GetParsingName( pParentFolder ) );
 
 		ASSERT( parentPidl.GetChildPidl( childPidl ) );
-		ASSERT_EQUAL( _T("d1"), childPidl.GetFilename() );
+		ASSERT_EQUAL( _T("d1"), childPidl.GetParsingName( pParentFolder ) );
 		ASSERT( parentPidl.GetParentPidl( parentPidl ) );
 		ASSERT_EQUAL( _T("temp_ut\\_OUT"), parentPidl.ToShellPath().GetRelativePath( 2 ) );
 
 		ASSERT( parentPidl.GetChildPidl( childPidl ) );
-		ASSERT_EQUAL( _T("_OUT"), childPidl.GetFilename() );
+		ASSERT_EQUAL( _T("_OUT"), childPidl.GetParsingName( pParentFolder ) );
 		ASSERT( parentPidl.GetParentPidl( parentPidl ) );
 		ASSERT_EQUAL( _T("temp_ut"), parentPidl.ToShellPath().GetRelativePath( 1 ) );
 
@@ -687,7 +683,7 @@ void CShellPidlTests::TestParentPidl( void )
 		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}"), cpRegionPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
 
 		ASSERT_EQUAL( _T("SFGAO_CANLINK"),
-					  shell::GetTags_SFGAO_Flags().FormatKey( cpRegionPidl.GetSfgaofFlags() ) );
+					  shell::GetTags_SFGAO_Flags().FormatKey( cpRegionPidl.GetShellAttributes() ) );
 
 			// Note: name conversion methods GetName(), GetFilename(), ToShellPath() work only for file-system child PIDLs,
 			// but not for GUID based child PIDLs, such as a Control Panel applet.
@@ -701,7 +697,7 @@ void CShellPidlTests::TestParentPidl( void )
 		ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), parentPidl.GetName( SIGDN_DESKTOPABSOLUTEPARSING ) );
 
 		ASSERT_EQUAL( _T("SFGAO_CANLINK|SFGAO_FOLDER|SFGAO_HASSUBFOLDER"),
-					  shell::GetTags_SFGAO_Flags().FormatKey( parentPidl.GetSfgaofFlags() ) );
+					  shell::GetTags_SFGAO_Flags().FormatKey( parentPidl.GetShellAttributes() ) );
 
 		ASSERT( parentPidl.GetParentPidl( parentPidl ) );
 		ASSERT( parentPidl.IsSpecialPidl() );

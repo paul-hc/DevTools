@@ -19,10 +19,10 @@ namespace shell
 {
 	bool ShellFolderExist( const TCHAR* pFolderShellPath )
 	{
-		if ( SFGAOF sfgaofFlags = GetSfgaofFlags( pFolderShellPath ) )
-			if ( HasFlag( sfgaofFlags, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
+		if ( SFGAOF shAttribs = GetShellAttributes( pFolderShellPath ) )
+			if ( HasFlag( shAttribs, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
 			{
-				TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+				TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 				return true;
 			}
 
@@ -31,9 +31,9 @@ namespace shell
 
 	bool ShellItemExist( const TCHAR* pShellPath )
 	{
-		if ( SFGAOF sfgaofFlags = GetSfgaofFlags( pShellPath ) )
+		if ( SFGAOF shAttribs = GetShellAttributes( pShellPath ) )
 		{
-			TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+			TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 			return true;
 		}
 
@@ -43,10 +43,10 @@ namespace shell
 
 	bool ShellFolderExist( PCIDLIST_ABSOLUTE pidl )
 	{
-		if ( SFGAOF sfgaofFlags = pidl::GetPidlSfgaofFlags( pidl ) )
-			if ( HasFlag( sfgaofFlags, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
+		if ( SFGAOF shAttribs = pidl::GetPidlShellAttributes( pidl ) )
+			if ( HasFlag( shAttribs, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
 			{
-				TRACE( _T( " - ShellFolderExist(): PIDL  SFGAOF={%s}\n" ), GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+				TRACE( _T( " - ShellFolderExist(): PIDL  SFGAOF={%s}\n" ), GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 				return true;
 			}
 
@@ -55,9 +55,9 @@ namespace shell
 
 	bool ShellItemExist( PCIDLIST_ABSOLUTE pidl )
 	{
-		if ( SFGAOF sfgaofFlags = pidl::GetPidlSfgaofFlags( pidl ) )
+		if ( SFGAOF shAttribs = pidl::GetPidlShellAttributes( pidl ) )
 		{
-			TRACE( _T( " - ShellItemExist(): PIDL  SFGAOF={%s}\n" ), GetTags_SFGAO_Flags().FormatKey( sfgaofFlags ).c_str() );
+			TRACE( _T( " - ShellItemExist(): PIDL  SFGAOF={%s}\n" ), GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 			return true;
 		}
 
@@ -78,13 +78,22 @@ namespace shell
 	CComPtr<IShellFolder> MakeShellFolder( const TCHAR* pFolderShellPath )
 	{
 		CPidlAbsolute folderPidl( pFolderShellPath );
-		CComPtr<IShellFolder> pShellFolder;
 
 		if ( !folderPidl.IsNull() )
-			if ( HR_OK( ::SHBindToObject( nullptr, folderPidl, nullptr, IID_PPV_ARGS( &pShellFolder ) ) ) )
-				return pShellFolder;
+			return MakeShellFolder( folderPidl );
 
 		return nullptr;
+	}
+
+	CComPtr<IShellFolder> MakeShellFolder( PCIDLIST_ABSOLUTE folderPidl )
+	{
+		ASSERT_PTR( folderPidl );
+		CComPtr<IShellFolder> pShellFolder;
+
+		if ( !HR_OK( ::SHBindToObject( nullptr, folderPidl, nullptr, IID_PPV_ARGS( &pShellFolder ) ) ) )
+			return nullptr;
+
+		return pShellFolder;
 	}
 
 	CComPtr<IShellFolder> MakeShellFolder_DesktopRel( const TCHAR* pFolderShellPath )
@@ -150,6 +159,18 @@ namespace shell
 			folderShellPath = folderPidl.ToShellPath();
 
 		return folderShellPath;
+	}
+
+	SFGAOF GetItemAttributes( IShellFolder* pFolder, PCUITEMID_CHILD childPidl, SFGAOF desiredAttrMask )
+	{
+		ASSERT( pFolder != nullptr && childPidl != nullptr );
+
+		SFGAOF shAttribs = desiredAttrMask;
+
+		if ( !HR_OK( pFolder->GetAttributesOf( 1, (PCUITEMID_CHILD_ARRAY)&childPidl, &shAttribs ) ) )		// shAttribs: both IN and OUT
+			return 0;
+
+		return shAttribs;
 	}
 
 
@@ -247,7 +268,7 @@ namespace shell
 	{
 		static CComPtr<IBindCtx> s_pFileBindCtx;
 		if ( nullptr == s_pFileBindCtx )
-		{
+		{	// lazy init
 			s_pFileBindCtx = CreateFileSysBindContext( FILE_ATTRIBUTE_NORMAL );
 			app::GetSharedResources().AddComPtr( s_pFileBindCtx );			// will release the CComPtr singleton in ExitInstance()
 		}
@@ -258,7 +279,7 @@ namespace shell
 	{
 		static CComPtr<IBindCtx> s_pDirectoryBindCtx;
 		if ( nullptr == s_pDirectoryBindCtx )
-		{
+		{	// lazy init
 			s_pDirectoryBindCtx = CreateFileSysBindContext( FILE_ATTRIBUTE_DIRECTORY );
 			app::GetSharedResources().AddComPtr( s_pDirectoryBindCtx );		// will release the CComPtr singleton in ExitInstance()
 		}
@@ -326,21 +347,21 @@ namespace shell
 {
 	// shell file info (via SHFILEINFO):
 
-	SFGAOF GetSfgaofFlags( const TCHAR* pShellPath )
+	SFGAOF GetShellAttributes( const TCHAR* pShellPath )
 	{
-		if ( path::HasEnvironVarPtr( pShellPath ) )
-			return GetSfgaofFlags( shell::TPath::GetExpanded( pShellPath ).GetPtr() );		// recurse with expaned path
+		if ( shell::HasFileSysEnvironVarPtr( pShellPath ) )
+			return GetShellAttributes( shell::TPath::GetExpanded( pShellPath ).GetPtr() );		// recurse with expaned path
 
 		if ( IsGuidPath( pShellPath ) )
 		{
 			CPidlAbsolute pidl( pShellPath );
-			return !pidl.IsNull() ? pidl.GetSfgaofFlags() : 0;
+			return !pidl.IsNull() ? pidl.GetShellAttributes() : 0;
 		}
 
-		return GetRawSfgaofFlags( pShellPath );
+		return GetRawShellAttributes( pShellPath );
 	}
 
-	SFGAOF GetRawSfgaofFlags( const TCHAR* pPathOrPidl, UINT moreFlags /*= 0*/ )
+	SFGAOF GetRawShellAttributes( const TCHAR* pPathOrPidl, UINT moreFlags /*= 0*/ )
 	{
 		ASSERT_PTR( pPathOrPidl );
 
@@ -412,15 +433,43 @@ namespace shell
 		return text.m_pData;
 	}
 
+	bool GetString( OUT std::tstring& rText, STRRET* pStrRet, PCUITEMID_CHILD pidl /*= nullptr*/ )
+	{
+		ASSERT_PTR( pStrRet );
+
+		CComHeapPtr<TCHAR> text;
+		if ( !HR_OK( ::StrRetToStr( pStrRet, pidl, &text ) ) )
+		{
+			rText.clear();
+			return false;
+		}
+
+		rText = text.m_pData;
+		return true;
+	}
+
+
 	// IShellFolder properties
 
-	std::tstring GetFolderChildDisplayName( IShellFolder* pFolder, PCUITEMID_CHILD pidl, SHGDNF flags /*= SHGDN_NORMAL*/ )
+	std::tstring GetFolderChildName( IShellFolder* pParentFolder, PCUITEMID_CHILD pidl, SHGDNF flags /*= SHGDN_NORMAL*/ )
 	{
 		STRRET strRet;
-		if ( !HR_OK( pFolder->GetDisplayNameOf( pidl, flags, &strRet ) ) )
+		if ( !HR_OK( pParentFolder->GetDisplayNameOf( pidl, flags, &strRet ) ) )
 			return str::GetEmpty();
 
 		return GetString( &strRet, pidl );
+	}
+
+	bool GetFolderChildName( OUT std::tstring& rDisplayName, IShellFolder* pParentFolder, PCUITEMID_CHILD pidl, SHGDNF flags )
+	{
+		STRRET strRet;
+		if ( !HR_OK( pParentFolder->GetDisplayNameOf( pidl, flags, &strRet ) ) )
+		{
+			rDisplayName.clear();
+			return false;
+		}
+
+		return GetString( rDisplayName, &strRet, pidl );
 	}
 
 	std::tstring GetStringDetail( IShellFolder2* pFolder, PCUITEMID_CHILD pidl, const PROPERTYKEY& propKey )
@@ -591,8 +640,8 @@ namespace shell
 		{
 			ASSERT_PTR( pidl );
 
-			if ( SFGAOF sfgaofFlags = GetPidlSfgaofFlags( pidl ) )
-				if ( !HasFlag( sfgaofFlags, SFGAO_FILESYSTEM ) && HasFlag( sfgaofFlags, SFGAO_FOLDER | SFGAO_CANLINK ) )
+			if ( SFGAOF shAttribs = GetPidlShellAttributes( pidl ) )
+				if ( !HasFlag( shAttribs, SFGAO_FILESYSTEM ) && HasFlag( shAttribs, SFGAO_FOLDER | SFGAO_CANLINK ) )
 				{	// PIDL refers to a special shell namespace folder (e.g., Control Panel, Recycle Bin), or a Control Panel applet.
 					//	SFGAO_FOLDER:	"::{26EE0668-A00A-44D7-9371-BEB064C98683}\0" for PIDL to folder "Control Panel\All Control Panel Items"
 					//	SFGAO_CANLINK:	"::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}" for Region applet in Control Panel
@@ -604,9 +653,9 @@ namespace shell
 		}
 
 
-		SFGAOF GetPidlSfgaofFlags( PCIDLIST_ABSOLUTE pidl )
+		SFGAOF GetPidlShellAttributes( PCIDLIST_ABSOLUTE pidl )
 		{
-			return shell::GetRawSfgaofFlags( (LPCTSTR)pidl, SHGFI_PIDL );
+			return shell::GetRawShellAttributes( (LPCTSTR)pidl, SHGFI_PIDL );
 		}
 
 		std::pair<CImageList*, int> GetPidlImageIndex( PCIDLIST_ABSOLUTE pidl, UINT iconFlags /*= SHGFI_SMALLICON*/ )
@@ -700,7 +749,7 @@ namespace shell
 
 		PIDLIST_ABSOLUTE CreateFromPath( const TCHAR* pExistingShellPath )
 		{
-			if ( path::HasEnvironVarPtr( pExistingShellPath ) )
+			if ( shell::HasFileSysEnvironVarPtr( pExistingShellPath ) )
 				return CreateFromPath( shell::TPath::GetExpanded( pExistingShellPath ).GetPtr() );	// recurse with expaned path
 
 			PIDLIST_ABSOLUTE pidlAbs = ::ILCreateFromPath( pExistingShellPath );
@@ -730,7 +779,7 @@ namespace shell
 		//
 		PIDLIST_ABSOLUTE ParseToPidl( const TCHAR* pShellPath, IBindCtx* pBindCtx /*= nullptr*/ )
 		{
-			if ( path::HasEnvironVarPtr( pShellPath ) )
+			if ( shell::HasFileSysEnvironVarPtr( pShellPath ) )
 				return ParseToPidl( shell::TPath::GetExpanded( pShellPath ).GetPtr(), pBindCtx );	// recurse with expaned path
 
 			PIDLIST_ABSOLUTE pidlAbs = nullptr;

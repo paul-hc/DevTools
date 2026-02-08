@@ -1155,39 +1155,73 @@ namespace fs
 	fs::CPath GetLongFilePath( const fs::CPath& filePath )
 	{
 		TCHAR longPath[ path::LONG_PATH ];
-		::GetLongPathName( filePath.GetPtr(), longPath, COUNT_OF( longPath ) );				// convert to long path
+		::GetLongPathName( filePath.GetPtr(), ARRAY_SPAN( longPath ) );		// convert to long path
 
 		return fs::CPath( longPath );
 	}
 
 
-	fs::PatternResult SplitPatternPath( OUT fs::TDirPath* pPath, OUT OPTIONAL std::tstring* pWildSpec, const fs::TPatternPath& patternPath )
+	// CSearchPatternParts implementation
+
+	CSearchPatternParts::CSearchPatternParts( void )
+		: m_wildSpec( _T("*") )
+		, m_result( InvalidPattern )
 	{
-		ASSERT_PTR( pPath );
+	}
 
-		if ( patternPath.HasWildcardPattern() )
+	fs::PatternResult CSearchPatternParts::Split( const shell::TPatternPath& searchShellPath )
+	{
+		*this = CSearchPatternParts();
+
+		DWORD attribs = ::GetFileAttributes( searchShellPath.GetPtr() );
+
+		if ( attribs != INVALID_FILE_ATTRIBUTES )
 		{
-			if ( pWildSpec != nullptr )
-				*pWildSpec = patternPath.GetFilename();
-
-			*pPath = patternPath.GetParentPath();
+			if ( HasFlag( attribs, FILE_ATTRIBUTE_DIRECTORY ) )
+			{	// pattern is directory/folder
+				m_dirPath = searchShellPath;
+				m_result = ValidDirectory;
+			}
+			else if ( HasFlag( attribs, FILE_ATTRIBUTE_NORMAL ) )
+			{	// pattern is file/applet
+				m_dirPath = searchShellPath.GetParentPath();
+				m_wildSpec = searchShellPath.GetFilename();
+				m_result = ValidFile;
+			}
+		}
+		else if ( searchShellPath.HasWildcardPattern() )
+		{
+			m_dirPath = searchShellPath.GetParentPath();
+			m_wildSpec = searchShellPath.GetFilename();
 		}
 		else
 		{
-			if ( pWildSpec != nullptr )
-				pWildSpec->clear();
-
-			*pPath = patternPath;
+			m_dirPath = searchShellPath;
+			m_wildSpec.clear();
 		}
 
-		if ( pPath->IsGuidPath() )
-			return fs::GuidPath;
-		else if ( fs::IsValidFile( pPath->GetPtr() ) )
-			return fs::ValidFile;
-		else if ( fs::IsValidDirectory( pPath->GetPtr() ) )
-			return fs::ValidDirectory;
+		if ( InvalidPattern == m_result && 0 == attribs )
+			if ( m_dirPath.IsGuidPath() )
+				m_result = GuidPath;
+			else
+			{
+				attribs = ::GetFileAttributes( m_dirPath.GetPtr() );
+				if ( attribs != INVALID_FILE_ATTRIBUTES )
+					m_result = HasFlag( attribs, FILE_ATTRIBUTE_DIRECTORY ) ? ValidDirectory : ValidFile;
+			}
 
-		return fs::InvalidPattern;
+		return m_result;
+	}
+
+	fs::PatternResult CSearchPatternParts::SplitPattern( OUT fs::TDirPath* pDirPath, OUT OPTIONAL std::tstring* pWildSpec, const shell::TPatternPath& searchShellPath )
+	{
+		CSearchPatternParts parts;
+
+		parts.Split( searchShellPath );
+
+		*pDirPath = parts.m_dirPath;
+		utl::AssignPtr( pWildSpec, parts.m_wildSpec );
+		return parts.m_result;
 	}
 }
 

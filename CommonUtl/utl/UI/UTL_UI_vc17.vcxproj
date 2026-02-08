@@ -328,6 +328,7 @@
     <ClInclude Include="ShellDialogs_fwd.h" />
     <ClInclude Include="ShellDragImager.h" />
     <ClInclude Include="ShellDropTip.h" />
+    <ClInclude Include="ShellEnumerator.h" />
     <ClInclude Include="ShellFileDialog.h" />
     <ClInclude Include="Shortcut.h" />
     <ClInclude Include="ShellPidl.h" />
@@ -359,6 +360,7 @@
     <ClInclude Include="test\ShortcutTests.h" />
     <ClInclude Include="test\ShellPidlTests.h" />
     <ClInclude Include="test\TestToolWnd.h" />
+    <ClInclude Include="test\UnitTestUI.h" />
     <ClInclude Include="test\ToolBarImagesTests.h" />
     <ClInclude Include="test\UtlUserInterfaceTests.h" />
     <ClInclude Include="test\WicImageTests.h" />
@@ -527,6 +529,7 @@
     <ClCompile Include="ShellDialogs.cpp" />
     <ClCompile Include="ShellDragImager.cpp" />
     <ClCompile Include="ShellDropTip.cpp" />
+    <ClCompile Include="ShellEnumerator.cpp" />
     <ClCompile Include="ShellFileDialog.cpp" />
     <ClCompile Include="Shortcut.cpp" />
     <ClCompile Include="ShellPidl.cpp" />
@@ -551,6 +554,7 @@
     <ClCompile Include="test\ShortcutTests.cpp" />
     <ClCompile Include="test\ShellPidlTests.cpp" />
     <ClCompile Include="test\TestToolWnd.cpp" />
+    <ClCompile Include="test\UnitTestUI.cpp" />
     <ClCompile Include="test\ToolBarImagesTests.cpp" />
     <ClCompile Include="test\UtlUserInterfaceTests.cpp" />
     <ClCompile Include="test\WicImageTests.cpp" />

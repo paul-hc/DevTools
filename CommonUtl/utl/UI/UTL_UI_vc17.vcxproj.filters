@@ -755,6 +755,12 @@
     <ClInclude Include="SubjectAdapter.h">
       <Filter>UI\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="ShellEnumerator.h">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClInclude>
+    <ClInclude Include="test\UnitTestUI.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1287,6 +1293,12 @@
     </ClCompile>
     <ClCompile Include="SubjectAdapter.cpp">
       <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellEnumerator.cpp">
+      <Filter>UI\Shell Explorer API</Filter>
+    </ClCompile>
+    <ClCompile Include="test\UnitTestUI.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

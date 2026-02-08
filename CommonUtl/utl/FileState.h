@@ -73,7 +73,7 @@ namespace fs
 	public:
 		CPath m_fullPath;
 		UINT64 m_fileSize;
-		BYTE m_attributes;			// CFile::Attribute enum values (low-byte)
+		BYTE m_attributes;			// CFile::Attribute enum values (low-byte of DWORD fileAttributes)
 		CTime m_creationTime;		// creation time of file
 		CTime m_modifTime;			// last modification time of file
 		CTime m_accessTime;			// last access time of file
