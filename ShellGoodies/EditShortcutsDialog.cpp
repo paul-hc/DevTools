@@ -106,7 +106,7 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 
 	m_targetPathEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_EDIT_COPY )
-		.AddButton( ID_BROWSE_FOLDER );
+		.AddButton( ID_BROWSE_FILE );
 
 	m_workDirEdit.SetUseDirPath( true );
 	m_workDirEdit.GetMateToolbar()->GetStrip()

@@ -18,6 +18,7 @@ CPathItemEdit::CPathItemEdit( bool useDirPath /*= false*/ )
 	, CObjectCtrlBase( this )
 	, m_useDirPath( false )
 	, m_pCustomImager( new CFileGlyphCustomDrawImager( ui::SmallGlyph ) )
+	, m_pathContent( ui::MixedPath )
 {
 	SetSubjectAdapter( ui::CPathPidlAdapter::InstanceUI() );
 	SetImageList( m_pCustomImager->GetImageList() );
@@ -133,6 +134,8 @@ BEGIN_MESSAGE_MAP( CPathItemEdit, CImageEdit )
 	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_FOLDERS, OnUpdateHasAny )
 	ON_COMMAND( ID_FILE_PROPERTIES, OnFileProperties )
 	ON_UPDATE_COMMAND_UI( ID_FILE_PROPERTIES, OnUpdateHasAny )
+	ON_COMMAND_RANGE( ID_BROWSE_FILE, ID_BROWSE_FOLDER, OnBrowsePath )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_BROWSE_FILE, ID_BROWSE_FOLDER, OnUpdateAlways )
 END_MESSAGE_MAP()
 
 void CPathItemEdit::OnContextMenu( CWnd* pWnd, CPoint screenPos )
@@ -205,6 +208,14 @@ void CPathItemEdit::OnFileProperties( void )
 	ShellInvokeProperties( filePaths );
 }
 
+void CPathItemEdit::OnBrowsePath( UINT cmdId )
+{
+	shell::TPath newShellPath = m_pathContent.EditItem( GetShellPath().GetPtr(), this, cmdId );
+
+	if ( !newShellPath.IsEmpty() )
+		SetShellPath( newShellPath );
+}
+
 void CPathItemEdit::OnUpdateHasPath( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( m_pathItem.IsFilePath() );
@@ -213,4 +224,9 @@ void CPathItemEdit::OnUpdateHasPath( CCmdUI* pCmdUI )
 void CPathItemEdit::OnUpdateHasAny( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( !m_pathItem.IsEmpty() );
+}
+
+void CPathItemEdit::OnUpdateAlways( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable();
 }

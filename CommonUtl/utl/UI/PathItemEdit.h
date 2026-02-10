@@ -4,6 +4,7 @@
 
 #include "ImageEdit.h"
 #include "InternalChange.h"
+#include "ItemContent.h"
 #include "ObjectCtrlBase.h"
 #include "ShellPidl.h"
 #include "Dialog_fwd.h"		// for ui::ICustomCmdInfo interface
@@ -28,6 +29,9 @@ public:
 	void SetShellPath( const shell::TPath& shellPath );
 	void SetPidl( const shell::CPidlAbsolute& pidl );
 
+	const ui::CItemContent& GetContent( void ) const { return m_pathContent; }
+	ui::CItemContent& RefContent( void ) { return m_pathContent; }
+
 	// base overrides
 	virtual bool HasValidImage( void ) const override;
 protected:
@@ -42,6 +46,7 @@ private:
 	bool m_useDirPath;
 	CPathPidlItem m_pathItem;
 	fs::CPath m_evalFilePath;		// path with expanded environment varialed (if any)
+	ui::CItemContent m_pathContent;
 
 	std::auto_ptr<CFileGlyphCustomDrawImager> m_pCustomImager;
 
@@ -56,8 +61,10 @@ protected:
 	afx_msg void OnCopyFilename( void );
 	afx_msg void OnCopyFolder( void );
 	afx_msg void OnFileProperties( void );
+	afx_msg void OnBrowsePath( UINT cmdId );
 	afx_msg void OnUpdateHasPath( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateHasAny( CCmdUI* pCmdUI );
+	afx_msg void OnUpdateAlways( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
