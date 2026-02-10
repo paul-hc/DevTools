@@ -19,68 +19,8 @@ namespace shell
 		{
 			// set up rNodeState partially:
 			rNodeState.m_fullPath = shellPath;
-
-			rNodeState.m_attributes = HasFlag( nodeAttribs, SFGAO_FOLDER ) ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL;
-			SetFlag( rNodeState.m_attributes, FILE_ATTRIBUTE_READONLY, HasFlag( nodeAttribs, SFGAO_READONLY ) );
-			SetFlag( rNodeState.m_attributes, FILE_ATTRIBUTE_HIDDEN, HasFlag( nodeAttribs, SFGAO_HIDDEN ) );
-			SetFlag( rNodeState.m_attributes, FILE_ATTRIBUTE_SYSTEM, HasFlag( nodeAttribs, SFGAO_SYSTEM ) );
+			rNodeState.m_attributes = static_cast<BYTE>( shell::ToFileAttributes( nodeAttribs ) );
 		}
-	}
-
-
-	// CSearchPatternParts implementation
-
-	CSearchPatternParts::CSearchPatternParts( void )
-		: m_wildSpec( _T("*") )
-		, m_result( InvalidPattern )
-		, m_isFileSystem( false )
-	{
-	}
-
-	ShellPatternResult CSearchPatternParts::Split( const shell::TPatternPath& searchShellPath )
-	{
-		*this = CSearchPatternParts();
-
-		SFGAOF shAttribs = GetShellAttributes( searchShellPath.GetPtr() );
-
-		if ( shAttribs != 0 )
-		{
-			if ( HasFlag( shAttribs, SFGAO_FOLDER ) )
-			{	// pattern is directory/folder
-				m_folderPath = searchShellPath;
-				m_result = ValidFolder;
-			}
-			else if ( HasFlag( shAttribs, SFGAO_CANLINK ) )
-			{	// pattern is file/applet
-				m_folderPath = searchShellPath.GetParentPath();
-				m_wildSpec = searchShellPath.GetFilename();
-				m_result = ValidItem;
-			}
-
-			m_isFileSystem = HasFlag( shAttribs, SFGAO_FILESYSTEM );
-		}
-		else if ( searchShellPath.HasWildcardPattern() )
-		{
-			m_folderPath = searchShellPath.GetParentPath();
-			m_wildSpec = searchShellPath.GetFilename();
-		}
-		else
-		{
-			m_folderPath = searchShellPath;
-			m_wildSpec.clear();
-		}
-
-		if ( InvalidPattern == m_result && 0 == shAttribs )
-		{
-			shAttribs = GetShellAttributes( m_folderPath.GetPtr() );
-			if ( shAttribs != 0 )
-			{
-				m_result = HasFlag( shAttribs, SFGAO_FOLDER ) ? ValidFolder : ValidItem;
-				m_isFileSystem = HasFlag( shAttribs, SFGAO_FILESYSTEM );
-			}
-		}
-
-		return m_result;
 	}
 }
 
@@ -101,20 +41,16 @@ namespace shell
 
 	ShellPatternResult CEnumContext::SearchEnumItems( OUT fs::IEnumerator* pEnumerator, const shell::TPatternPath& searchShellPath ) const
 	{
-		shell::CSearchPatternParts parts;
+		shell::CPatternParts parts( fs::SearchMode );
 
-		parts.Split( searchShellPath );
-
-		switch ( parts.m_result )
+		switch ( parts.Split( searchShellPath ) )
 		{
 			case shell::ValidFolder:
-				if ( parts.m_isFileSystem )
-					fs::EnumFiles( pEnumerator, parts.m_folderPath, parts.m_wildSpec.c_str() );
-				else
-					EnumFolderItems( pEnumerator, parts.m_folderPath, parts.m_wildSpec.c_str() );
-				break;
 			case shell::ValidItem:
-				ASSERT( false );		// should've been handled by the if statement
+				if ( parts.m_isFileSystem )
+					fs::EnumFiles( pEnumerator, parts.m_path, parts.m_wildSpec.c_str() );
+				else
+					EnumFolderItems( pEnumerator, parts.m_path, parts.m_wildSpec.c_str() );
 				break;
 		}
 

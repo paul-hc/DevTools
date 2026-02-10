@@ -20,11 +20,11 @@ namespace shell
 	bool ShellFolderExist( const TCHAR* pFolderShellPath )
 	{
 		if ( SFGAOF shAttribs = GetShellAttributes( pFolderShellPath ) )
+		{
+			//TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 			if ( HasFlag( shAttribs, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
-			{
-				TRACE( _T( " - ShellFolderExist(): '%s'  SFGAOF={%s}\n" ), pFolderShellPath, GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 				return true;
-			}
+		}
 
 		return false;
 	}
@@ -33,11 +33,22 @@ namespace shell
 	{
 		if ( SFGAOF shAttribs = GetShellAttributes( pShellPath ) )
 		{
-			TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
+			//TRACE( _T( " - ShellItemExist(): '%s'  SFGAOF={%s}\n" ), pShellPath, GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 			return true;
 		}
 
 		return false;
+	}
+
+	DWORD GetShellFileAttributes( const TCHAR* pShellPath )
+	{
+		if ( SFGAOF shAttribs = GetShellAttributes( pShellPath ) )
+			if ( HasFlag( shAttribs, SFGAO_FILESYSTEM ) )
+				return ::GetFileAttributes( pShellPath );
+			else
+				return shell::ToFileAttributes( shAttribs );
+
+		return INVALID_FILE_ATTRIBUTES;
 	}
 
 
@@ -45,10 +56,7 @@ namespace shell
 	{
 		if ( SFGAOF shAttribs = pidl::GetPidlShellAttributes( pidl ) )
 			if ( HasFlag( shAttribs, SFGAO_FOLDER ) )		// file system directory or special shell namespace folder (e.g., Control Panel, Recycle Bin)
-			{
-				TRACE( _T( " - ShellFolderExist(): PIDL  SFGAOF={%s}\n" ), GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 				return true;
-			}
 
 		return false;
 	}
@@ -56,15 +64,154 @@ namespace shell
 	bool ShellItemExist( PCIDLIST_ABSOLUTE pidl )
 	{
 		if ( SFGAOF shAttribs = pidl::GetPidlShellAttributes( pidl ) )
-		{
-			TRACE( _T( " - ShellItemExist(): PIDL  SFGAOF={%s}\n" ), GetTags_SFGAO_Flags().FormatKey( shAttribs ).c_str() );
 			return true;
-		}
 
 		return false;
 	}
 
+	DWORD GetShellFileAttributes( PCIDLIST_ABSOLUTE pidl )
+	{
+		DWORD fileAttributes = INVALID_FILE_ATTRIBUTES;
 
+		if ( SFGAOF shAttribs = pidl::GetPidlShellAttributes( pidl ) )
+			if ( HasFlag( shAttribs, SFGAO_FILESYSTEM ) )
+				fileAttributes = ::GetFileAttributes( pidl::GetShellPath( pidl ).GetPtr() );
+			else
+				fileAttributes = shell::ToFileAttributes( shAttribs );
+
+		return fileAttributes;
+	}
+
+
+	const CFlagTags& GetTags_SFGAO_Flags( void )
+	{
+		static const CFlagTags::FlagDef s_flagDefs[] =
+		{
+		#ifdef _DEBUG
+			{ FLAG_TAG( SFGAO_CANCOPY ) },
+			{ FLAG_TAG( SFGAO_CANMOVE ) },
+			{ FLAG_TAG( SFGAO_CANLINK ) },
+			{ FLAG_TAG( SFGAO_STORAGE ) },
+			{ FLAG_TAG( SFGAO_CANRENAME ) },
+			{ FLAG_TAG( SFGAO_CANDELETE ) },
+			{ FLAG_TAG( SFGAO_HASPROPSHEET ) },
+			{ FLAG_TAG( SFGAO_DROPTARGET ) },
+			{ FLAG_TAG( SFGAO_PLACEHOLDER ) },
+			{ FLAG_TAG( SFGAO_SYSTEM ) },
+			{ FLAG_TAG( SFGAO_ENCRYPTED ) },
+			{ FLAG_TAG( SFGAO_ISSLOW ) },
+			{ FLAG_TAG( SFGAO_GHOSTED ) },
+			{ FLAG_TAG( SFGAO_LINK ) },
+			{ FLAG_TAG( SFGAO_SHARE ) },
+			{ FLAG_TAG( SFGAO_READONLY ) },
+			{ FLAG_TAG( SFGAO_HIDDEN ) },
+			{ FLAG_TAG( SFGAO_FILESYSANCESTOR ) },
+			{ FLAG_TAG( SFGAO_FOLDER ) },
+			{ FLAG_TAG( SFGAO_FILESYSTEM ) },
+			{ FLAG_TAG( SFGAO_HASSUBFOLDER ) },
+			{ FLAG_TAG( SFGAO_VALIDATE ) },
+			{ FLAG_TAG( SFGAO_REMOVABLE ) },
+			{ FLAG_TAG( SFGAO_COMPRESSED ) },
+			{ FLAG_TAG( SFGAO_BROWSABLE ) },
+			{ FLAG_TAG( SFGAO_NONENUMERATED ) },
+			{ FLAG_TAG( SFGAO_NEWCONTENT ) },
+			{ FLAG_TAG( SFGAO_CANMONIKER ) },
+			{ FLAG_TAG( SFGAO_HASSTORAGE ) },
+			{ FLAG_TAG( SFGAO_STREAM ) },
+			{ FLAG_TAG( SFGAO_STORAGEANCESTOR ) }
+		#else
+			NULL_TAG
+		#endif
+		};
+		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
+		return s_tags;
+	}
+
+
+	// CPatternParts implementation
+
+	CPatternParts::CPatternParts( fs::SplitMode splitMode )
+		: m_splitMode( splitMode )
+		, m_result( InvalidPattern )
+		, m_isFileSystem( false )
+	{
+	}
+
+	ShellPatternResult CPatternParts::Split( const shell::TPatternPath& searchShellPath )
+	{
+		m_result = InvalidPattern;
+		m_isFileSystem = false;
+
+		bool hasWildcard = searchShellPath.HasWildcards();
+		SFGAOF shAttribs = hasWildcard ? 0 : GetShellAttributes( searchShellPath.GetPtr() );
+
+		if ( shAttribs != 0 )
+		{
+			if ( HasFlag( shAttribs, SFGAO_FOLDER ) )
+			{	// pattern is directory/folder
+				m_path = searchShellPath;
+				m_wildSpec.clear();
+				m_result = ValidFolder;
+			}
+			else if ( HasFlag( shAttribs, SFGAO_CANLINK ) )
+			{	// pattern is file/applet
+				if ( fs::SearchMode == m_splitMode )
+				{
+					m_path = searchShellPath.GetParentPath();
+					m_wildSpec = searchShellPath.GetFilename();
+				}
+				else
+				{
+					ASSERT( fs::BrowseMode == m_splitMode );
+					m_path = searchShellPath;
+					m_wildSpec.clear();
+				}
+				m_result = ValidItem;
+			}
+
+			m_isFileSystem = HasFlag( shAttribs, SFGAO_FILESYSTEM );
+		}
+		else if ( hasWildcard )
+		{
+			m_path = searchShellPath.GetParentPath();
+			m_wildSpec = searchShellPath.GetFilename();
+		}
+		else
+		{
+			m_path = searchShellPath;
+			m_wildSpec.clear();
+		}
+
+		if ( InvalidPattern == m_result && 0 == shAttribs )
+		{
+			shAttribs = GetShellAttributes( m_path.GetPtr() );
+			if ( shAttribs != 0 )
+			{
+				m_result = HasFlag( shAttribs, SFGAO_FOLDER ) ? ValidFolder : ValidItem;
+				m_isFileSystem = HasFlag( shAttribs, SFGAO_FILESYSTEM );
+			}
+		}
+
+		return m_result;
+	}
+
+	ShellPatternResult CPatternParts::SplitPattern( OUT shell::TPath* pPath, OUT OPTIONAL std::tstring* pWildSpec, const shell::TPatternPath& searchShellPath, fs::SplitMode splitMode )
+	{
+		CPatternParts parts( splitMode );
+
+		parts.Split( searchShellPath );
+
+		pPath->Swap( parts.m_path );
+		if ( pWildSpec != nullptr )
+			pWildSpec->swap( parts.m_wildSpec );
+
+		return parts.m_result;
+	}
+}
+
+
+namespace shell
+{
 	CComPtr<IShellFolder> GetDesktopFolder( void )
 	{
 		CComPtr<IShellFolder> pDesktopFolder;
@@ -347,10 +494,24 @@ namespace shell
 {
 	// shell file info (via SHFILEINFO):
 
+	DWORD ToFileAttributes( SFGAOF shAttribs )
+	{
+		if ( 0 == shAttribs )
+			return INVALID_FILE_ATTRIBUTES;
+
+		DWORD fileAttributes = HasFlag( shAttribs, SFGAO_FOLDER ) ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL;
+
+		SetFlag( fileAttributes, FILE_ATTRIBUTE_READONLY, HasFlag( shAttribs, SFGAO_READONLY ) );
+		SetFlag( fileAttributes, FILE_ATTRIBUTE_HIDDEN, HasFlag( shAttribs, SFGAO_HIDDEN ) );
+		SetFlag( fileAttributes, FILE_ATTRIBUTE_SYSTEM, HasFlag( shAttribs, SFGAO_SYSTEM ) );
+
+		return fileAttributes;
+	}
+
 	SFGAOF GetShellAttributes( const TCHAR* pShellPath )
 	{
-		if ( shell::HasFileSysEnvironVarPtr( pShellPath ) )
-			return GetShellAttributes( shell::TPath::GetExpanded( pShellPath ).GetPtr() );		// recurse with expaned path
+		if ( path::HasEnvironVar( pShellPath ) )
+			return GetShellAttributes( shell::TPath::Expand( pShellPath ).GetPtr() );		// recurse with expaned path
 
 		if ( IsGuidPath( pShellPath ) )
 		{
@@ -548,63 +709,69 @@ namespace shell
 	}
 
 
-	void QueryShellItemArrayPaths( OUT std::vector<shell::TPath>& rFilePaths, IShellItemArray* pSrcShellItemArray )
+	// IShellItemArray utils
+
+	void QueryShellItemArrayPaths( OUT std::vector<shell::TPath>& rShellPaths, IN IShellItemArray* pItemArray )
 	{
-		ASSERT_PTR( pSrcShellItemArray );
+		ASSERT_PTR( pItemArray );
+		rShellPaths.clear();
 
 		DWORD itemCount;
-		if ( HR_OK( pSrcShellItemArray->GetCount( &itemCount ) ) )
+		if ( HR_OK( pItemArray->GetCount( &itemCount ) ) )
 			for ( DWORD i = 0; i != itemCount; ++i )
 			{
-				CComPtr<IShellItem> pShellItem;
-				if ( HR_OK( pSrcShellItemArray->GetItemAt( i, &pShellItem ) ) )
-					rFilePaths.push_back( shell::GetItemShellPath( pShellItem ) );
+				CComPtr<IShellItem> pItem;
+
+				if ( HR_OK( pItemArray->GetItemAt( i, &pItem ) ) )
+					rShellPaths.push_back( shell::GetItemShellPath( pItem ) );
 			}
 	}
 
-
-	const CFlagTags& GetTags_SFGAO_Flags( void )
+	void QueryShellItemArrayEnumPaths( OUT std::vector<shell::TPath>& rShellPaths, IN IShellItemArray* pItemArray )
 	{
-		static const CFlagTags::FlagDef s_flagDefs[] =
+		rShellPaths.clear();
+
+		if ( CComPtr<IEnumShellItems> pEnumItems = GetEnumShellItemArray( pItemArray ) )
+			QueryEnumShellItemsPaths( rShellPaths, pEnumItems );
+	}
+
+	bool GetFirstItemShellPath( OUT shell::TPath& rShellPath, IShellItemArray* pItemArray )
+	{
+		ASSERT_PTR( pItemArray );
+
+		DWORD itemCount = 0;
+		if ( HR_OK( pItemArray->GetCount( &itemCount ) ) && itemCount != 0 )
 		{
-		#ifdef _DEBUG
-			{ FLAG_TAG( SFGAO_CANCOPY ) },
-			{ FLAG_TAG( SFGAO_CANMOVE ) },
-			{ FLAG_TAG( SFGAO_CANLINK ) },
-			{ FLAG_TAG( SFGAO_STORAGE ) },
-			{ FLAG_TAG( SFGAO_CANRENAME ) },
-			{ FLAG_TAG( SFGAO_CANDELETE ) },
-			{ FLAG_TAG( SFGAO_HASPROPSHEET ) },
-			{ FLAG_TAG( SFGAO_DROPTARGET ) },
-			{ FLAG_TAG( SFGAO_PLACEHOLDER ) },
-			{ FLAG_TAG( SFGAO_SYSTEM ) },
-			{ FLAG_TAG( SFGAO_ENCRYPTED ) },
-			{ FLAG_TAG( SFGAO_ISSLOW ) },
-			{ FLAG_TAG( SFGAO_GHOSTED ) },
-			{ FLAG_TAG( SFGAO_LINK ) },
-			{ FLAG_TAG( SFGAO_SHARE ) },
-			{ FLAG_TAG( SFGAO_READONLY ) },
-			{ FLAG_TAG( SFGAO_HIDDEN ) },
-			{ FLAG_TAG( SFGAO_FILESYSANCESTOR ) },
-			{ FLAG_TAG( SFGAO_FOLDER ) },
-			{ FLAG_TAG( SFGAO_FILESYSTEM ) },
-			{ FLAG_TAG( SFGAO_HASSUBFOLDER ) },
-			{ FLAG_TAG( SFGAO_VALIDATE ) },
-			{ FLAG_TAG( SFGAO_REMOVABLE ) },
-			{ FLAG_TAG( SFGAO_COMPRESSED ) },
-			{ FLAG_TAG( SFGAO_BROWSABLE ) },
-			{ FLAG_TAG( SFGAO_NONENUMERATED ) },
-			{ FLAG_TAG( SFGAO_NEWCONTENT ) },
-			{ FLAG_TAG( SFGAO_CANMONIKER ) },
-			{ FLAG_TAG( SFGAO_HASSTORAGE ) },
-			{ FLAG_TAG( SFGAO_STREAM ) },
-			{ FLAG_TAG( SFGAO_STORAGEANCESTOR ) }
-		#else
-			NULL_TAG
-		#endif
-		};
-		static const CFlagTags s_tags( ARRAY_SPAN( s_flagDefs ) );
-		return s_tags;
+			CComPtr<IShellItem> pFirstItem;
+			if ( HR_OK( pItemArray->GetItemAt( 0, &pFirstItem ) ) )
+			{
+				rShellPath = shell::GetItemShellPath( pFirstItem );
+				return true;
+			}
+		}
+		return false;
+	}
+
+	CComPtr<IEnumShellItems> GetEnumShellItemArray( IShellItemArray* pItemArray )
+	{
+		ASSERT_PTR( pItemArray );
+
+		CComPtr<IEnumShellItems> pEnumItems;
+
+		if ( !HR_OK( pItemArray->EnumItems( &pEnumItems ) ) )
+			return nullptr;
+
+		return pEnumItems;
+	}
+
+	void QueryEnumShellItemsPaths( OUT std::vector<shell::TPath>& rShellPaths, IEnumShellItems* pEnumItems )
+	{
+		ASSERT_PTR( pEnumItems );
+		rShellPaths.clear();
+
+		ULONG fetchedCount;
+		for ( CComPtr<IShellItem> pItem; S_OK == pEnumItems->Next( 1, &pItem, &fetchedCount ) && fetchedCount != 0; pItem = nullptr )
+			rShellPaths.push_back( shell::GetItemShellPath( pItem ) );
 	}
 }
 
@@ -749,8 +916,8 @@ namespace shell
 
 		PIDLIST_ABSOLUTE CreateFromPath( const TCHAR* pExistingShellPath )
 		{
-			if ( shell::HasFileSysEnvironVarPtr( pExistingShellPath ) )
-				return CreateFromPath( shell::TPath::GetExpanded( pExistingShellPath ).GetPtr() );	// recurse with expaned path
+			if ( path::HasEnvironVar( pExistingShellPath ) )
+				return CreateFromPath( shell::TPath::Expand( pExistingShellPath ).GetPtr() );	// recurse with expaned path
 
 			PIDLIST_ABSOLUTE pidlAbs = ::ILCreateFromPath( pExistingShellPath );
 
@@ -779,8 +946,8 @@ namespace shell
 		//
 		PIDLIST_ABSOLUTE ParseToPidl( const TCHAR* pShellPath, IBindCtx* pBindCtx /*= nullptr*/ )
 		{
-			if ( shell::HasFileSysEnvironVarPtr( pShellPath ) )
-				return ParseToPidl( shell::TPath::GetExpanded( pShellPath ).GetPtr(), pBindCtx );	// recurse with expaned path
+			if ( path::HasEnvironVar( pShellPath ) )
+				return ParseToPidl( shell::TPath::Expand( pShellPath ).GetPtr(), pBindCtx );	// recurse with expaned path
 
 			PIDLIST_ABSOLUTE pidlAbs = nullptr;
 

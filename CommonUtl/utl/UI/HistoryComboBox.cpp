@@ -104,7 +104,7 @@ void CHistoryComboBox::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CT
 		if ( filePath.IsGuidPath() )
 		{
 			std::tstring wildPattern;
-			fs::CSearchPatternParts::SplitPattern( &filePath, &wildPattern, filePath );		// split into folder path and wildcard pattern
+			fs::CPatternParts::SplitPattern( &filePath, &wildPattern, filePath, fs::BrowseMode );		// split into folder path and wildcard pattern
 
 			shell::CPidlAbsolute itemPidl( filePath.GetPtr() );
 			if ( !itemPidl.IsNull() )

@@ -163,12 +163,23 @@ namespace str
 }
 
 
+#include "Range.h"
+
+
 namespace env
 {
 	// environment variables
 
-	bool HasAnyVariablePtr( const TCHAR* pSource );				// contains expandable "%envVar%" or "$(envVar)" substrings?
-	bool HasAnyVariable( const std::tstring& source );			// contains expandable "%envVar%" or "$(envVar)" substrings?
+	namespace impl
+	{
+		bool HasAnyVariablePtr( const TCHAR* pSource );				// low level impl: contains expandable "%envVar%" or "$(envVar)" substrings (but no GUID path false positive)?
+		bool HasAnyVariableStr( const std::tstring& source );		// string version, don't use, for illustration: contains expandable "%envVar%" or "$(envVar)" substrings?
+	}
+
+	Range<const TCHAR*> FindVariableRange( const TCHAR* pSource );
+
+	template< typename StringyT >		// TCharPtr/std::tstring/fs::CPath
+	bool HasAnyVariable( const StringyT& src ) { return impl::HasAnyVariablePtr( str::traits::GetCharPtr( src ) ); }
 
 	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue = nullptr );
 	bool SetVariableValue( const TCHAR varName[], const TCHAR* pValue );
@@ -177,7 +188,7 @@ namespace env
 	std::tstring ExpandPaths( const TCHAR* pSource );			// expand "%WIN_VAR%" and "$(VC_MACRO_VAR)" - Windows and Visual Studio style environment variables
 	size_t AddExpandedPaths( IN OUT std::vector<fs::CPath>& rEvalPaths, const TCHAR* pSource, const TCHAR delim[] = _T(";") );		// add unique to rPaths
 
-	std::tstring UnExpandPaths( const std::tstring& expanded, const std::tstring& text );
+	std::tstring UnExpandPaths( const std::tstring& expanded, const std::tstring& srcUnexpanded );
 }
 
 

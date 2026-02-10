@@ -23,6 +23,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestShellApi( void );
 	void TestNullAndEmptyPidl( void );
 	void TestCreateFromPath( void );
 	void TestPidlBasics( void );

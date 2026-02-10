@@ -8,21 +8,6 @@
 
 namespace shell
 {
-	enum ShellPatternResult { ValidItem, ValidFolder, InvalidPattern };
-
-	struct CSearchPatternParts
-	{
-		CSearchPatternParts( void );
-
-		ShellPatternResult Split( const shell::TPatternPath& searchShellPath );
-	public:
-		shell::TFolderPath m_folderPath;
-		std::tstring m_wildSpec;
-		ShellPatternResult m_result;
-		bool m_isFileSystem;
-	};
-
-
 	// shell directory/folder path enumeration:
 
 	enum EnumFlags

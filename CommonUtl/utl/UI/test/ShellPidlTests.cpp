@@ -24,6 +24,29 @@ CShellPidlTests& CShellPidlTests::Instance( void )
 	return s_testCase;
 }
 
+void CShellPidlTests::TestShellApi( void )
+{
+	shell::CPidlAbsolute cpAllPidl( FOLDERID_ControlPanelFolder );
+	ASSERT_EQUAL( _T("Control Panel\\All Control Panel Items"), cpAllPidl.GetEditingName() );
+
+	const shell::TFolderPath cpAllPath = cpAllPidl.ToShellPath();
+	ASSERT_EQUAL( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0"), cpAllPath );
+
+	{	// make sure no temporary strings are created during the template function call
+		bool result;
+		const TCHAR* pGuidPath = cpAllPath.GetPtr();
+		result = shell::IsGuidPath( pGuidPath );
+		ASSERT( result );
+
+		std::tstring strGuidPath = cpAllPath.Get();
+		result = shell::IsGuidPath( strGuidPath );
+		ASSERT( result );
+
+		result = shell::IsGuidPath( cpAllPath );
+		ASSERT( result );
+	}
+}
+
 void CShellPidlTests::TestNullAndEmptyPidl( void )
 {
 	fs::TDirPath tempDirPath = fs::GetTempDirPath();
@@ -856,6 +879,7 @@ void CShellPidlTests::TestCommonAncestorPidl( void )
 
 void CShellPidlTests::Run( void )
 {
+	RUN_TEST( TestShellApi );
 	RUN_TEST( TestNullAndEmptyPidl );
 	RUN_TEST( TestCreateFromPath );
 	RUN_TEST( TestPidlBasics );

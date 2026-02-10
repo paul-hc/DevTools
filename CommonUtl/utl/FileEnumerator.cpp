@@ -93,17 +93,13 @@ namespace fs
 
 	fs::PatternResult SearchEnumFiles( OUT IEnumerator* pEnumerator, const fs::TPatternPath& searchPath )
 	{
-		CSearchPatternParts parts;
+		CPatternParts parts( SearchMode );
 
-		parts.Split( searchPath );
-
-		switch ( parts.m_result )
+		switch ( parts.Split( searchPath ) )
 		{
 			case fs::ValidDirectory:
-				fs::EnumFiles( pEnumerator, parts.m_dirPath, parts.m_wildSpec.c_str() );
-				break;
 			case fs::ValidFile:
-				ASSERT( false );		// should've been handled by the if statement
+				fs::EnumFiles( pEnumerator, parts.m_path, parts.m_wildSpec.c_str() );
 				break;
 		}
 

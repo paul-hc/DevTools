@@ -88,6 +88,15 @@ namespace path
 }
 
 
+namespace env
+{
+	namespace impl
+	{
+		bool HasAnyVariablePtr( const TCHAR* pSource );		// FWD
+	}
+}
+
+
 namespace path
 {
 	// path API
@@ -121,8 +130,8 @@ namespace path
 	bool IsValidFilename( const std::tstring& strPath );	// filename only
 	bool IsValidGuidPath( const std::tstring& strPath );	// GUID prefix syntax: "::{26EE0668-A00A-44D7-9371-BEB064C98683}" - shell DESKTOPABSOLUTEPARSING display name
 
-	bool HasEnvironVarPtr( const TCHAR* pFilePath );		// contains expandable "%envVar%" or "$(envVar)" substrings?
-	bool HasEnvironVar( const std::tstring& strPath );		// contains expandable "%envVar%" or "$(envVar)" substrings?
+	template< typename PathT >		// TCharPtr/std::tstring/fs::CPath
+	bool HasEnvironVar( const PathT& filePath ) { return env::impl::HasAnyVariablePtr( str::traits::GetCharPtr( filePath ) ); }		// contains expandable "%envVar%" or "$(envVar)" substrings?
 
 	const TCHAR* GetInvalidChars( void );
 	const TCHAR* GetReservedChars( void );
@@ -284,11 +293,13 @@ namespace fs
 		CPath MakeUnixPath( void ) const { return CPath( m_filePath, func::ToUnixPathChar() ); }
 		CPath MakeWindowsPath( void ) const { return CPath( m_filePath, func::ToWinPathChar() ); }
 
-		// expand enviroment variables
+		// expand/unexpand enviroment variables
 		bool HasEnvironVar( void ) const { return path::HasEnvironVar( m_filePath ); }
 		bool Expand( void );
+		bool Unexpand( const fs::CPath& srcUnexpanded );
 		CPath GetExpanded( void ) const;
-		static CPath GetExpanded( const TCHAR* pPath );
+		static CPath Expand( const TCHAR* pPath );
+		static CPath Unexpand( const fs::CPath& expanded, const fs::CPath& srcUnexpanded );
 
 		bool StripPrefix( const fs::TDirPath& dirPath ) { return path::StripPrefix( m_filePath, dirPath.GetPtr() ); }
 
@@ -345,7 +356,9 @@ namespace fs
 		bool ShellItemExist( AccessMode accessMode = Exist ) const { return fs::ShellItemExist( m_filePath.c_str(), accessMode ); }
 
 		// search pattern
-		bool HasWildcardPattern( void ) const { return path::ContainsWildcards( GetFilenamePtr() ); }
+		bool HasWildcards( void ) const { return path::ContainsWildcards( GetFilenamePtr() ); }
+		bool StripWildcards( void );
+		static CPath StripWildcards( const TCHAR* pPath );
 		CPath FindFirstMatch( bool recurse = true ) const;
 		bool FileMatchExist( AccessMode accessMode = Exist ) const;		// if this contains a search pattern, it checks for a first matching file
 
@@ -364,17 +377,21 @@ namespace fs
 
 	// pattern path utils (potentially with wildcards):
 	enum PatternResult { ValidFile, ValidDirectory, GuidPath, InvalidPattern };
+	enum SplitMode { SearchMode, BrowseMode };
 
-	struct CSearchPatternParts
+	struct CPatternParts
 	{
-		CSearchPatternParts( void );
+		CPatternParts( SplitMode splitMode );
 
 		PatternResult Split( const shell::TPatternPath& searchShellPath );
 
 		// a valid file or valid directory path with a wildcards?
-		static PatternResult SplitPattern( OUT fs::TDirPath* pDirPath, OUT OPTIONAL std::tstring* pWildSpec, const shell::TPatternPath& searchShellPath );
+		static PatternResult SplitPattern( OUT fs::CPath* pPath, OUT OPTIONAL std::tstring* pWildSpec, const shell::TPatternPath& searchShellPath,
+										   SplitMode splitMode );
+	private:
+		SplitMode m_splitMode;
 	public:
-		fs::TDirPath m_dirPath;
+		fs::CPath m_path;			// SearchMode: dir path, ForBrowsing: file path
 		std::tstring m_wildSpec;
 		PatternResult m_result;
 	};

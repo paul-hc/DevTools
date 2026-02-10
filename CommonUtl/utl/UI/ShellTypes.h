@@ -13,7 +13,7 @@ class CFlagTags;
 
 namespace utl
 {
-	size_t HashBytes( const void* pFirst, size_t count );	// FWD
+	size_t HashBytes( const void* pFirst, size_t count );		// FWD
 }
 
 
@@ -21,10 +21,38 @@ namespace shell
 {
 	bool ShellFolderExist( const TCHAR* pFolderShellPath );		// expands any environment variables
 	bool ShellItemExist( const TCHAR* pShellPath );				// expands any environment variables
+	DWORD GetShellFileAttributes( const TCHAR* pShellPath );	// SFGAOF translated to file attributes (FILE_ATTRIBUTE_NORMAL, etc)
 
 	bool ShellFolderExist( PCIDLIST_ABSOLUTE pidl );
 	bool ShellItemExist( PCIDLIST_ABSOLUTE pidl );
+	DWORD GetShellFileAttributes( PCIDLIST_ABSOLUTE pidl );		// SFGAOF translated to file attributes (FILE_ATTRIBUTE_NORMAL, etc)
 
+	const CFlagTags& GetTags_SFGAO_Flags( void );	// debug-only tags
+
+
+	enum ShellPatternResult { ValidItem, ValidFolder, InvalidPattern };
+
+	struct CPatternParts
+	{
+		CPatternParts( fs::SplitMode splitMode );
+
+		ShellPatternResult Split( const shell::TPatternPath& searchShellPath );
+
+		// a valid file or valid directory path with a wildcards?
+		static ShellPatternResult SplitPattern( OUT shell::TPath* pPath, OUT OPTIONAL std::tstring* pWildSpec, const shell::TPatternPath& searchShellPath, fs::SplitMode splitMode );
+	private:
+		fs::SplitMode m_splitMode;
+	public:
+		shell::TPath m_path;			// SearchMode: shell::TFolderPath, ForBrowsing: file path
+		std::tstring m_wildSpec;
+		ShellPatternResult m_result;
+		bool m_isFileSystem;
+	};
+}
+
+
+namespace shell
+{
 	// shell folder
 	CComPtr<IShellFolder> GetDesktopFolder( void );
 
@@ -58,15 +86,6 @@ namespace shell
 	template< typename PathT >		// TCharPtr/std::tstring/fs::CPath
 	bool IsGuidPath( const PathT& shellPath ) { return path::IsGuidPath( str::traits::GetCharPtr( shellPath ) ); }
 
-	template< typename PathT >		// TCharPtr/std::tstring/fs::CPath
-	bool HasFileSysEnvironVarPtr( const PathT& shellPath )
-	{
-		const TCHAR* pShellPath = str::traits::GetCharPtr( shellPath );
-		return
-			!path::IsGuidPath( pShellPath ) &&			// prevent infinite recursion for some deep GUID paths that contain "%...%" sub-strings
-			path::HasEnvironVarPtr( pShellPath );		// contains expandable "%envVar%" or "$(envVar)" substrings?
-	}
-
 
 	// custom bind contexts:
 
@@ -90,6 +109,8 @@ namespace shell
 
 namespace shell
 {
+	DWORD ToFileAttributes( SFGAOF shAttribs );				// translates SFGAOF to file attributes
+
 	// shell file info (via SHFILEINFO)
 	SFGAOF GetShellAttributes( const TCHAR* pShellPath );	// expands environment variables and resolves shell paths
 	SFGAOF GetRawShellAttributes( const TCHAR* pPathOrPidl, UINT moreFlags = 0 );
@@ -115,6 +136,7 @@ namespace shell
 	// IShellItem properties
 	std::tstring GetItemDisplayName( IShellItem* pItem, SIGDN nameType );
 	inline std::tstring GetItemName( IShellItem* pItem ) { return GetItemDisplayName( pItem, SIGDN_NORMALDISPLAY ); }
+	inline std::tstring GetEditingName( IShellItem* pItem ) { return GetItemDisplayName( pItem, SIGDN_DESKTOPABSOLUTEEDITING ); }
 	inline shell::TPath GetItemShellPath( IShellItem* pItem ) { return GetItemDisplayName( pItem, SIGDN_DESKTOPABSOLUTEPARSING ); }
 	inline fs::CPath GetItemFileSysPath( IShellItem* pItem ) { return GetItemDisplayName( pItem, SIGDN_FILESYSPATH ); }		// useful for CRecycler
 
@@ -124,7 +146,16 @@ namespace shell
 	DWORD GetFileAttributesProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
 	ULONGLONG GetFileSizeProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
 
-	const CFlagTags& GetTags_SFGAO_Flags( void );	// debug-only tags
+	// IShellItemArray utils
+	void QueryShellItemArrayPaths( OUT std::vector<shell::TPath>& rShellPaths, IN IShellItemArray* pItemArray );
+	void QueryShellItemArrayEnumPaths( OUT std::vector<shell::TPath>& rShellPaths, IN IShellItemArray* pItemArray );
+	bool GetFirstItemShellPath( OUT shell::TPath& rShellPath, IShellItemArray* pItemArray );
+
+	CComPtr<IEnumShellItems> GetEnumShellItemArray( IShellItemArray* pItemArray );
+	void QueryEnumShellItemsPaths( OUT std::vector<shell::TPath>& rShellPaths, IEnumShellItems* pEnumItems );
+
+	template< typename ShellItemContainerT >
+	CComPtr<IShellItemArray> MakeShellItemArray( const ShellItemContainerT& shellItems );		// FWD, implemented below
 }
 
 
@@ -258,11 +289,6 @@ namespace shell
 		rShellPaths.reserve( rShellPaths.size() + shellItems.size() );
 		utl::transform( shellItems, rShellPaths, &shell::GetItemShellPath );		// SIGDN_DESKTOPABSOLUTEPARSING
 	}
-
-
-	// IShellItemArray to path conversion
-
-	void QueryShellItemArrayPaths( OUT std::vector<shell::TPath>& rFilePaths, IShellItemArray* pSrcShellItemArray );
 
 	template< typename ShellItemContainerT >
 	CComPtr<IShellItemArray> MakeShellItemArray( const ShellItemContainerT& shellItems )

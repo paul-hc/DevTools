@@ -321,16 +321,6 @@ namespace path
 			&& IsGuidPath( strPath.c_str() );
 	}
 
-	bool HasEnvironVarPtr( const TCHAR* pFilePath )
-	{	// contains expandable "%envVar%" or "$(envVar)" substrings?
-		return env::HasAnyVariablePtr( pFilePath );
-	}
-
-	bool HasEnvironVar( const std::tstring& strPath )
-	{	// contains expandable "%envVar%" or "$(envVar)" substrings?
-		return env::HasAnyVariable( strPath );
-	}
-
 
 	const TCHAR* GetInvalidChars( void )
 	{
@@ -971,17 +961,35 @@ namespace fs
 
 	bool CPath::Expand( void )
 	{
-		return utl::ModifyValue( m_filePath, env::ExpandStrings( GetPtr() ) );
+		return !IsGuidPath() && utl::ModifyValue( m_filePath, env::ExpandPaths( GetPtr() ) );
+	}
+
+	CPath CPath::Expand( const TCHAR* pPath )
+	{
+		if ( path::IsGuidPath( pPath ) )
+			return CPath( pPath );
+
+		return env::ExpandPaths( pPath );
+	}
+
+	bool CPath::Unexpand( const fs::CPath& srcUnexpanded )
+	{
+		return !IsGuidPath() && utl::ModifyValue( m_filePath, env::UnExpandPaths( m_filePath, srcUnexpanded.Get() ) );
+	}
+
+	CPath CPath::Unexpand( const fs::CPath& expanded, const fs::CPath& srcUnexpanded )
+	{
+		fs::CPath encodedPath = expanded;
+		encodedPath.Unexpand( srcUnexpanded );
+		return encodedPath;
 	}
 
 	CPath CPath::GetExpanded( void ) const
 	{
-		return CPath( env::ExpandPaths( GetPtr() ) );
-	}
+		if ( IsGuidPath() )
+			return *this;
 
-	CPath CPath::GetExpanded( const TCHAR* pPath )
-	{
-		return env::ExpandStrings( pPath );
+		return CPath( env::ExpandPaths( GetPtr() ) );
 	}
 
 	size_t CPath::GetDepth( void ) const
@@ -1092,9 +1100,26 @@ namespace fs
 	}
 
 
+	bool CPath::StripWildcards( void )
+	{
+		if ( !HasWildcards() )
+			return false;
+
+		*this = GetParentPath();
+		return true;
+	}
+
+	CPath CPath::StripWildcards( const TCHAR* pPath )
+	{
+		if ( !path::ContainsWildcards( path::FindFilename( pPath ) ) )
+			return CPath( pPath );
+
+		return path::GetParentPath( pPath );
+	}
+
 	CPath CPath::FindFirstMatch( bool recurse /*= true*/ ) const
 	{
-		if ( HasWildcardPattern() )
+		if ( HasWildcards() )
 		{
 			fs::TDirPath parentPath = GetParentPath();
 
@@ -1110,7 +1135,7 @@ namespace fs
 
 	bool CPath::FileMatchExist( AccessMode accessMode /*= Exist*/ ) const
 	{
-		if ( HasWildcardPattern() )
+		if ( HasWildcards() )
 		{
 			fs::CPath firstMatchPath = FindFirstMatch();
 			return !firstMatchPath.IsEmpty() && firstMatchPath.ShellItemExist( accessMode );
@@ -1161,51 +1186,62 @@ namespace fs
 	}
 
 
-	// CSearchPatternParts implementation
+	// CPatternParts implementation
 
-	CSearchPatternParts::CSearchPatternParts( void )
-		: m_wildSpec( _T("*") )
+	CPatternParts::CPatternParts( SplitMode splitMode )
+		: m_splitMode( splitMode )
 		, m_result( InvalidPattern )
 	{
 	}
 
-	fs::PatternResult CSearchPatternParts::Split( const shell::TPatternPath& searchShellPath )
+	fs::PatternResult CPatternParts::Split( const shell::TPatternPath& searchShellPath )
 	{
-		*this = CSearchPatternParts();
+		m_result = InvalidPattern;
 
-		DWORD attribs = ::GetFileAttributes( searchShellPath.GetPtr() );
+		bool hasWildcard = searchShellPath.HasWildcards();
+		DWORD attribs = hasWildcard ? INVALID_FILE_ATTRIBUTES : ::GetFileAttributes( searchShellPath.GetPtr() );
 
 		if ( attribs != INVALID_FILE_ATTRIBUTES )
 		{
 			if ( HasFlag( attribs, FILE_ATTRIBUTE_DIRECTORY ) )
 			{	// pattern is directory/folder
-				m_dirPath = searchShellPath;
+				m_path = searchShellPath;
+				m_wildSpec.clear();
 				m_result = ValidDirectory;
 			}
-			else if ( HasFlag( attribs, FILE_ATTRIBUTE_NORMAL ) )
+			else
 			{	// pattern is file/applet
-				m_dirPath = searchShellPath.GetParentPath();
-				m_wildSpec = searchShellPath.GetFilename();
+				if ( SearchMode == m_splitMode )
+				{
+					m_path = searchShellPath.GetParentPath();
+					m_wildSpec = searchShellPath.GetFilename();
+				}
+				else
+				{
+					ASSERT( BrowseMode == m_splitMode );
+					m_path = searchShellPath;
+					m_wildSpec.clear();
+				}
 				m_result = ValidFile;
 			}
 		}
-		else if ( searchShellPath.HasWildcardPattern() )
+		else if ( hasWildcard )
 		{
-			m_dirPath = searchShellPath.GetParentPath();
+			m_path = searchShellPath.GetParentPath();
 			m_wildSpec = searchShellPath.GetFilename();
 		}
 		else
 		{
-			m_dirPath = searchShellPath;
+			m_path = searchShellPath;
 			m_wildSpec.clear();
 		}
 
-		if ( InvalidPattern == m_result && 0 == attribs )
-			if ( m_dirPath.IsGuidPath() )
+		if ( InvalidPattern == m_result && INVALID_FILE_ATTRIBUTES == attribs )
+			if ( m_path.IsGuidPath() )
 				m_result = GuidPath;
 			else
 			{
-				attribs = ::GetFileAttributes( m_dirPath.GetPtr() );
+				attribs = ::GetFileAttributes( m_path.GetPtr() );
 				if ( attribs != INVALID_FILE_ATTRIBUTES )
 					m_result = HasFlag( attribs, FILE_ATTRIBUTE_DIRECTORY ) ? ValidDirectory : ValidFile;
 			}
@@ -1213,14 +1249,16 @@ namespace fs
 		return m_result;
 	}
 
-	fs::PatternResult CSearchPatternParts::SplitPattern( OUT fs::TDirPath* pDirPath, OUT OPTIONAL std::tstring* pWildSpec, const shell::TPatternPath& searchShellPath )
+	fs::PatternResult CPatternParts::SplitPattern( OUT fs::CPath* pPath, OUT OPTIONAL std::tstring* pWildSpec, const shell::TPatternPath& searchShellPath, SplitMode splitMode )
 	{
-		CSearchPatternParts parts;
+		CPatternParts parts( splitMode );
 
 		parts.Split( searchShellPath );
 
-		*pDirPath = parts.m_dirPath;
-		utl::AssignPtr( pWildSpec, parts.m_wildSpec );
+		pPath->Swap( parts.m_path );
+		if ( pWildSpec != nullptr )
+			pWildSpec->swap( parts.m_wildSpec );
+
 		return parts.m_result;
 	}
 }

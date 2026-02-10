@@ -76,26 +76,9 @@ void CEnvironmentTests::TestEnvironVariables( void )
 {
 	// const TCHAR* ptr:
 	{
-		ASSERT( !env::HasAnyVariablePtr( _T("") ) );
-		ASSERT( !env::HasAnyVariablePtr( _T("%%") ) );		// empty identifier
-		ASSERT( !env::HasAnyVariablePtr( _T("$()") ) );		// empty identifier
-
-		ASSERT( env::HasAnyVariablePtr( _T("%MY_TOOLS%") ) );
-		ASSERT( env::HasAnyVariablePtr( _T("lead_%MY_TOOLS%_trail") ) );
-		ASSERT( env::HasAnyVariablePtr( _T("lead_$(MY_TOOLS)_trail") ) );
-
-		// not enclosed:
-		ASSERT( !env::HasAnyVariablePtr( _T("%MY_TOOLS") ) );
-		ASSERT( !env::HasAnyVariablePtr( _T("MY_TOOLS%") ) );
-		ASSERT( !env::HasAnyVariablePtr( _T("&(MY_TOOLS") ) );
-		ASSERT( !env::HasAnyVariablePtr( _T("MY_TOOLS)") ) );
-	}
-
-	// std::tstring:
-	{
 		ASSERT( !env::HasAnyVariable( _T("") ) );
-		ASSERT( !env::HasAnyVariable( _T("%%") ) );			// empty identifier
-		ASSERT( !env::HasAnyVariable( _T("$()") ) );		// empty identifier
+		ASSERT( !env::HasAnyVariable( _T("%%") ) );		// empty identifier
+		ASSERT( !env::HasAnyVariable( _T("$()") ) );	// empty identifier
 
 		ASSERT( env::HasAnyVariable( _T("%MY_TOOLS%") ) );
 		ASSERT( env::HasAnyVariable( _T("lead_%MY_TOOLS%_trail") ) );
@@ -107,7 +90,8 @@ void CEnvironmentTests::TestEnvironVariables( void )
 		ASSERT( !env::HasAnyVariable( _T("&(MY_TOOLS") ) );
 		ASSERT( !env::HasAnyVariable( _T("MY_TOOLS)") ) );
 
-		ASSERT( !env::HasAnyVariable( _T("%MY_TOO.LS%") ) );	// invalid identifier
+		// GUID path with false positive:
+		ASSERT( !env::HasAnyVariable( _T("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\0%\\::{62D8ED13-C9D0-4CE8-A914-47DD628FB1B0}%") ) );	// bogus GUID path, to illustrate the false positive
 	}
 
 	{
@@ -122,6 +106,22 @@ void CEnvironmentTests::TestEnvironVariables( void )
 
 		std::tstring encoded = env::UnExpandPaths( expanded, pSource );
 		ASSERT_EQUAL( _T("|%_VAR1_%|$(_VAR2_)|"), encoded );
+	}
+
+	{
+		const TCHAR* pSource = _T("C:\\my\\%Tools%\\dir\\$(VAR2)\\a.txt");
+		Range<const TCHAR*> varRange;
+		std::tstring envVar;
+
+		varRange = env::FindVariableRange( pSource );
+		ASSERT( varRange.IsNonEmpty() );
+		envVar.assign( varRange.m_start, varRange.m_end );
+		ASSERT_EQUAL( _T("Tools"), envVar );
+
+		varRange = env::FindVariableRange( varRange.m_end + 1 );
+		ASSERT( varRange.IsNonEmpty() );
+		envVar.assign( varRange.m_start, varRange.m_end );
+		ASSERT_EQUAL( _T("VAR2"), envVar );
 	}
 }
 

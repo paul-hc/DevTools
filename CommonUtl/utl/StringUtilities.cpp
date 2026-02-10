@@ -75,37 +75,57 @@ namespace str
 
 namespace env
 {
-	bool HasAnyVariablePtr( const TCHAR* pSource )
+	namespace impl
 	{
-		const TCHAR* pFound;
+		bool HasAnyVariablePtr( const TCHAR* pSource )
+		{
+			Range<const TCHAR*> varRange = FindVariableRange( pSource );
 
-		if ( pSource != nullptr )
-			if ( ( pFound = _tcschr( pSource, _T('%') ) ) != nullptr )
-			{
-				return _tcschr( pFound + 1 + 1, _T('%') ) != nullptr;		// found closing for non-empty "%EnvVar%"?
-			}
-			else if ( ( pFound = _tcsstr( pSource, _T("$(") ) ) != nullptr )
-			{
-				return _tcschr( pFound + 2 + 1, _T(')') ) != nullptr;		// found closing for non-empty "$(EnvVar)"?
-			}
+			return varRange.IsNonEmpty();
+		}
 
-		return false;
+		bool HasAnyVariableStr( const std::tstring& source )
+		{
+			static const str::CEnclosedParser<TCHAR> s_envParser( _T("%|$("), _T("%|)") );
+
+			str::CEnclosedParser<TCHAR>::TSepMatchPos sepMatchPos;
+			str::CEnclosedParser<TCHAR>::TSpecPair specBounds = s_envParser.FindItemSpec( &sepMatchPos, source );
+
+			return specBounds.first != utl::npos && !s_envParser.GetItemRange( sepMatchPos, specBounds ).IsEmpty();
+		}
 	}
 
-	bool HasAnyVariable( const std::tstring& source )
+
+	Range<const TCHAR*> FindVariableRange( const TCHAR* pSource )
 	{
-		static const str::CEnclosedParser<TCHAR> s_envParser( _T("%|$("), _T("%|)") );
+		ASSERT_PTR( pSource );
 
-		str::CEnclosedParser<TCHAR>::TSepMatchPos sepMatchPos;
-		str::CEnclosedParser<TCHAR>::TSpecPair specBounds = s_envParser.FindItemSpec( &sepMatchPos, source );
+		Range<const TCHAR*> varRange( nullptr ), nullRange( nullptr );
 
-		return specBounds.first != utl::npos && !s_envParser.GetItemRange( sepMatchPos, specBounds ).IsEmpty();
+		if ( ( varRange.m_start = _tcschr( pSource, _T('%') ) ) != nullptr )
+			varRange.m_end = _tcschr( ++varRange.m_start, _T('%') );			// find closing "%EnvVar%"
+		else if ( ( varRange.m_start = _tcsstr( pSource, _T("$(") ) ) != nullptr )
+			varRange.m_end = _tcschr( varRange.m_start += 2, _T(')') );			// find closing "$(EnvVar)"
+
+		if ( nullptr == varRange.m_end || varRange.IsEmpty() )		// not found or empty variable name?
+			return nullRange;
+
+		ENSURE( varRange.IsNonEmpty() );
+
+		// some deep GUID paths contain more than 2 '%' with slashes in between - they look like environment variables, but they are not
+		const TCHAR* pCurr = varRange.m_start;
+
+		while ( pCurr != varRange.m_end )
+			if ( path::IsSlash( *pCurr++ ) )
+				return nullRange;			// not an environment variable (false positive)
+
+		return varRange;
 	}
 
 	std::tstring GetVariableValue( const TCHAR varName[], const TCHAR* pDefaultValue /*= nullptr*/ )
 	{
 		REQUIRE( !str::IsEmpty( varName ) );
-		std::vector<TCHAR> valueBuff( ::GetEnvironmentVariable( varName, nullptr, 0 ) + 1 );				// allocate buffer
+		std::vector<TCHAR> valueBuff( ::GetEnvironmentVariable( varName, nullptr, 0 ) + 1 );		// allocate buffer
 
 		::GetEnvironmentVariable( varName, &valueBuff.front(), static_cast<DWORD>( valueBuff.size() ) );
 
@@ -171,19 +191,23 @@ namespace env
 		}
 	}
 
-	std::tstring UnExpandPaths( const std::tstring& expanded, const std::tstring& text )
+	std::tstring UnExpandPaths( const std::tstring& expanded, const std::tstring& srcUnexpanded )
 	{
 		std::vector<std::tstring> varNameSpecs;
-		impl::QueryEnvVariableNames( varNameSpecs, text );
+		impl::QueryEnvVariableNames( varNameSpecs, srcUnexpanded );
 
 		std::vector<std::tstring> values;
 		impl::QueryEnvVariableValues( values, varNameSpecs );
-		ENSURE( varNameSpecs.size() == values.size() );
 
 		std::tstring encoded = expanded;
 
-		for ( unsigned int i = 0; i != varNameSpecs.size(); ++i )
-			str::Replace( encoded, values[ i ].c_str(), varNameSpecs[ i ].c_str() );
+		if ( varNameSpecs.size() == values.size() )
+		{
+			for ( size_t i = 0; i != varNameSpecs.size(); ++i )
+				str::Replace( encoded, values[i].c_str(), varNameSpecs[i].c_str() );
+		}
+		else
+			ASSERT( false );		// srcUnexpanded doesn't match the contents of expanded
 
 		return encoded;
 	}

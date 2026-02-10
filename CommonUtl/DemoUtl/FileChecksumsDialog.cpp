@@ -190,7 +190,7 @@ CFileChecksumsDialog::CFileChecksumsDialog( CWnd* pParent )
 	RegisterCtrlLayout( ARRAY_SPAN( layout::styles ) );
 
 	m_searchPathCombo.SetEnsurePathExist();
-	//SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
+	//ClearFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
