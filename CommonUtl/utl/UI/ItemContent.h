@@ -2,6 +2,8 @@
 #define ItemContent_h
 #pragma once
 
+#include "utl/Path_fwd.h"
+
 
 class CEnumTags;
 
@@ -42,7 +44,7 @@ namespace ui
 		bool IsPathContent( void ) const { return ui::FilePath == m_type || ui::DirPath == m_type || ui::MixedPath == m_type; }
 		bool IsValidPathItem( const std::tstring& pathItem ) const;
 	private:
-		bool BrowseMixedPath( fs::CPath& rNewItem, CWnd* pParent, UINT cmdId ) const;
+		bool BrowseMixedPath( shell::TPath& rNewItem, CWnd* pParent, UINT cmdId ) const;
 	public:
 		ui::ContentType m_type;
 		const TCHAR* m_pFileFilter;

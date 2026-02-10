@@ -92,7 +92,7 @@ namespace ui
 		if ( ui::String == m_type )
 			return str::GetEmpty();
 
-		fs::CPath newItem( env::ExpandPaths( pItem ) );
+		fs::CPath newItem = fs::CPath::Expand( pItem );
 		bool picked = false;
 
 		switch ( m_type )
@@ -113,7 +113,7 @@ namespace ui
 			return str::GetEmpty();
 
 		if ( IsPathContent() )
-			newItem = env::UnExpandPaths( newItem.Get(), pItem );
+			newItem.Unexpand( fs::CPath( pItem ) );
 
 		if ( HasFlag( m_itemsFlags, Trim ) )
 			str::Trim( newItem.Ref() );
@@ -121,15 +121,25 @@ namespace ui
 		return newItem.Get();
 	}
 
-	bool CItemContent::BrowseMixedPath( fs::CPath& rNewItem, CWnd* pParent, UINT cmdId ) const
+	bool CItemContent::BrowseMixedPath( shell::TPath& rNewItem, CWnd* pParent, UINT cmdId ) const
 	{
 		switch ( cmdId )
 		{
 			case ID_BROWSE_FILE:
+			{
+				if ( rNewItem.IsGuidPath() )
+				{
+					//if ( shell::ShellFolderExist( fs::CPath::StripWildcards( rNewItem.GetPtr() ).GetPtr() ) )
+					//	break;		// force picking a folder instead
+					return shell::PickFolder( rNewItem, pParent );
+				}
+
 				return shell::BrowseForFile( rNewItem, pParent, shell::FileBrowse, m_pFileFilter );
+			}
 			case ID_BROWSE_FOLDER:
 				return shell::PickFolder( rNewItem, pParent );
 		}
+
 		return shell::BrowseAutoPath( rNewItem, pParent, m_pFileFilter );		// choose the browse file/folder based on current path
 	}
 
