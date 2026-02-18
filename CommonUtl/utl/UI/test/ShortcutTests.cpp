@@ -123,6 +123,7 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT_EQUAL( 'M', LOBYTE( shortcut.GetHotKey() ) );
 		ASSERT_EQUAL( HOTKEYF_CONTROL | HOTKEYF_SHIFT | HOTKEYF_ALT, HIBYTE( shortcut.GetHotKey() ) );
 		ASSERT_EQUAL( SW_SHOWNORMAL, shortcut.GetShowCmd() );
+		ASSERT( !shortcut.IsRunAsAdmin() );
 
 		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_LINK_INFO | SLDF_HAS_NAME | SLDF_HAS_RELPATH | SLDF_HAS_WORKINGDIR | SLDF_HAS_ARGS | SLDF_HAS_ICONLOCATION |
 					  SLDF_UNICODE | SLDF_ENABLE_TARGET_METADATA,
@@ -167,6 +168,7 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT_EQUAL( 0, shortcut.GetIconLocation().m_index );
 		ASSERT_EQUAL( 0, shortcut.GetHotKey() );
 		ASSERT_EQUAL( SW_SHOWMAXIMIZED, shortcut.GetShowCmd() );
+		ASSERT( !shortcut.IsRunAsAdmin() );
 
 		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_LINK_INFO | SLDF_HAS_NAME | SLDF_HAS_RELPATH | SLDF_HAS_WORKINGDIR | SLDF_HAS_ARGS | SLDF_UNICODE | SLDF_HAS_EXP_SZ | SLDF_ENABLE_TARGET_METADATA,
 					  shortcut.GetLinkDataFlags() );
@@ -195,6 +197,7 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT_EQUAL( 0, shortcut.GetIconLocation().m_index );
 		ASSERT_EQUAL( 0, shortcut.GetHotKey() );
 		ASSERT_EQUAL( SW_SHOWNORMAL, shortcut.GetShowCmd() );
+		ASSERT( !shortcut.IsRunAsAdmin() );
 
 		ASSERT_EQUAL( SLDF_HAS_ID_LIST | SLDF_HAS_NAME | SLDF_UNICODE | SLDF_ENABLE_TARGET_METADATA,
 					  shortcut.GetLinkDataFlags() );
@@ -237,6 +240,7 @@ void CShortcutTests::TestValidLinks( void )
 		ASSERT_EQUAL( 0, shortcut.GetIconLocation().m_index );
 		ASSERT_EQUAL( 0, shortcut.GetHotKey() );
 		ASSERT_EQUAL( SW_SHOWNORMAL, shortcut.GetShowCmd() );
+		ASSERT( shortcut.IsRunAsAdmin() );
 
 		// pidl name
 		{

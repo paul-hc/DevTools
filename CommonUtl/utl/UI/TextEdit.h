@@ -49,6 +49,10 @@ public:
 
 	bool ReplaceText( const std::tstring& text, bool canUndo = true );
 
+	bool HasPlaceholderTag( void ) const;		// current text is the placeholder tag?
+	const std::tstring& GetPlaceholderTag( void ) const { return m_placeholderTag; }
+	void SetPlaceholderTag( const std::tstring& placeholderTag ) { m_placeholderTag = placeholderTag; }
+
 	bool IsMultiLine( void ) const { return HasFlag( GetStyle(), ES_MULTILINE ); }
 
 	bool IsReadOnly( void ) const { return HasFlag( GetStyle(), ES_READONLY ); }
@@ -142,27 +146,29 @@ public:
 protected:
 	bool IsInternalChange( void ) const;
 	bool SetTextImpl( const std::tstring& text );	// retains Modified state as is
-	bool RevertContents( void );				// kind of more targeted Undo()
+	bool RevertContents( void );			// kind of more targeted Undo()
 	bool AdjustIntuitiveLineSelection( IN OUT Range<TLineIndex>* pSelLineRange, const Range<TCharPos>& selRange ) const;		// returns true if line selection changed
 
 	virtual bool ValidateText( ui::CTextValidator& rValidator ) implement;
-	virtual void OnValueChanged( void );		// by the user
+	virtual void OnValueChanged( void );	// by the user
+	virtual COLORREF GetCustomTextColor( void ) const;	// override to allow customize text color (depending on text state, etc)
 private:
 	void _WatchSelChange( void );
 private:
 	bool m_useFixedFont;
-	bool m_keepSelOnFocus;						// true: keep old selection when focused; false: select all text when focused (default)
-	bool m_usePasteTransact;					// true: supress EN_CHANGE during WM_PASTE/WM_UNDO input, and send one EN_CHANGE after text pasted
-	bool m_hookThumbTrack;						// true: track thumb track scrolling events (edit controls don't send EN_VSCROLL on thumb track scrolling)
+	bool m_keepSelOnFocus;					// true: keep old selection when focused; false: select all text when focused (default)
+	bool m_usePasteTransact;				// true: supress EN_CHANGE during WM_PASTE/WM_UNDO input, and send one EN_CHANGE after text pasted
+	bool m_hookThumbTrack;					// true: track thumb track scrolling events (edit controls don't send EN_VSCROLL on thumb track scrolling)
 	bool m_visibleWhiteSpace;
 	CAccelTable m_accel;
+	std::tstring m_placeholderTag;			// optional: prevents color highlighting if current text is this tag, e.g. "<different options>"
 
 	ui::ITextInput* m_pTextInputCallback;
 	CSyncScrolling* m_pSyncScrolling;
 	std::tstring m_lastValidText;
 	Range<TCharPos> m_lastSelRange;
 protected:
-	CInternalChange m_userChange;				// allow derived classes to force user change mode (when spinning, etc)
+	CInternalChange m_userChange;			// allow derived classes to force user change mode (when spinning, etc)
 public:
 	static const TCHAR s_lineEnd[];
 
@@ -172,6 +178,7 @@ public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg UINT OnGetDlgCode( void );
+	afx_msg HBRUSH CtlColor( CDC* pDC, UINT ctlColor );
 	afx_msg void OnHScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );
 	afx_msg void OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );
 	afx_msg LRESULT OnEmReplaceSel( WPARAM wParam, LPARAM lParam );

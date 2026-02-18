@@ -37,11 +37,12 @@ public:
 protected:
 	virtual void UpdateControl( void ) override;
 	virtual void DrawImage( CDC* pDC, const CRect& imageRect ) override;
-
-	CMenu* GetPopupMenu( void );
+	virtual COLORREF GetCustomTextColor( void ) const overrides(CTextEdit);
 
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const implement;
+
+	CMenu* GetPopupMenu( void );
 private:
 	bool m_useDirPath;
 	CPathPidlItem m_pathItem;
@@ -56,7 +57,6 @@ public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
-	afx_msg HBRUSH CtlColor( CDC* pDC, UINT ctlColor );
 	virtual void OnEditCopy( void ) override;
 	afx_msg void OnCopyFilename( void );
 	afx_msg void OnCopyFolder( void );

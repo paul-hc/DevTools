@@ -116,14 +116,25 @@
 #define IDC_FILES_STATIC                1098
 #define IDC_TARGET_SEL_ITEMS_CHECK      1099
 #define IDC_EDIT_SHORTCUTS_LIST         1100
-#define IDC_TARGET_PATH_EDIT            1101
-#define IDC_ARGUMENTS_EDIT              1102
-#define IDC_WORK_DIR_EDIT               1103
-#define IDC_HOT_KEY_CTRL                1104
-#define IDC_SHOW_CMD_COMBO              1105
-#define IDC_DESCRIPTION_EDIT            1106
-#define IDC_RUN_AS_ADMIN_CHECK          1107
-#define IDC_RUN_IN_SEPARATE_MEM_SPACE_CHECK 1108
+#define IDC_LINK_DETAILS_STATIC         1101
+#define IDC_TARGET_PATH_STATIC          1102
+#define IDC_TARGET_PATH_EDIT            1103
+#define IDC_ARGUMENTS_STATIC            1104
+#define IDC_ARGUMENTS_EDIT              1105
+#define IDC_WORK_DIR_STATIC             1106
+#define IDC_WORK_DIR_EDIT               1107
+#define IDC_DESCRIPTION_STATIC          1108
+#define IDC_DESCRIPTION_EDIT            1109
+#define IDC_HOT_KEY_STATIC              1110
+#define IDC_HOT_KEY_CTRL                1111
+#define IDC_SHOW_CMD_STATIC             1112
+#define IDC_SHOW_CMD_COMBO              1113
+#define IDC_ICON_LOCATION_STATIC        1114
+#define IDC_ICON_LOCATION_EDIT          1115
+#define IDC_SHORTCUT_ICON_STATIC        1116
+#define IDC_CHANGE_ICON_BUTTON          1117
+#define IDC_SH_RUN_AS_ADMIN_CHECK       1118
+#define IDC_SH_UNICODE_CHECK            1119
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_REPLACE_FILES_TIP_FORMAT    5005
@@ -215,12 +226,12 @@
 #define ID_EDIT_SHORTCUTS               32861
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        122
 #define _APS_NEXT_COMMAND_VALUE         32862
-#define _APS_NEXT_CONTROL_VALUE         1109
+#define _APS_NEXT_CONTROL_VALUE         1122
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

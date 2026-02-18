@@ -12,10 +12,20 @@
 #include "utl/UI/TextEditor.h"
 #include "utl/UI/ThemeStatic.h"
 #include "FileEditorBaseDialog.h"
+#include "EditLinkItem.h"
 
 
 class CEditLinkItem;
 class CEnumTags;
+struct CFieldState;
+
+namespace multi
+{
+	class CPathValue;
+	class CStringValue;
+	class CHotKeyValue;
+	class CEnumValue;
+}
 
 
 class CEditShortcutsDialog : public CFileEditorBaseDialog
@@ -54,16 +64,22 @@ private:
 	bool ModifyShortcuts( void );
 	void SetupDialog( void );
 
+	// data
+	void AccumulateCommonValues( void );
+	void AccumulateShortcutValues( const shell::CShortcut& destShortcut );
+
 	// output
 	void UpdateTargetScopeButton( void );
 	void UpdateFileListStatus( void );
 
 	void SetupFileListView( void );
 	void UpdateFileListViewSelItems( void );
-	bool UpdateDetailFields( void );
+	void UpdateDetailFields( void );
 
 	void UpdateFieldControls( void );
 	void UpdateFieldsFromCaretItem();
+
+	void FetchFieldState( OUT CFieldState& rState, const CEditLinkItem* pLinkItem, int subItem ) const;
 
 	// input
 	void InputFields( void );
@@ -74,8 +90,6 @@ private:
 	CEditLinkItem* FindItemWithKey( const fs::CPath& keyPath ) const;
 	void MarkInvalidSrcItems( void );
 	void EnsureVisibleFirstError( void );
-
-	//static fs::TimeField GetTimeFieldFromId( UINT dtCtrlId );
 private:
 	const std::vector<CEditLinkItem*>& m_rEditLinkItems;
 	ui::CSelectionData<CEditLinkItem> m_selData;
@@ -85,23 +99,38 @@ private:
 	enum Column
 	{
 		LinkName,
-		D_Target, D_Folder, D_Arguments, D_IconLocation, D_HotKey, D_ShowCmd, D_Description,
-		S_Target, S_Folder, S_Arguments, S_IconLocation, S_HotKey, S_ShowCmd, S_Description
+		D_Target, D_WorkDir, D_Arguments, D_IconLocation, D_HotKey, D_ShowCmd, D_Description,
+		S_Target, S_WorkDir, S_Arguments, S_IconLocation, S_HotKey, S_ShowCmd, S_Description
 	};
 
 	CPathItemListCtrl m_fileListCtrl;
-
-	CHostToolbarCtrl<CPathItemEdit> m_targetPathEdit;
-	CTextEditor m_argumentsEdit;
-	CHostToolbarCtrl<CPathItemEdit> m_workDirEdit;
-	CTextEditor m_descriptionEdit;
-	CHotKeyCtrl m_hotKeyCtrl;
-	CEnumComboBox m_showCmdCombo;
 
 	CLabelDivider m_filesLabelDivider;
 	CFrameHostCtrl<CButton> m_targetSelItemsButton;
 	CHostToolbarCtrl<CStatusStatic> m_fileStatsStatic;
 	CHostToolbarCtrl<CPathItemEdit> m_currFolderEdit;
+
+	CLabelDivider m_detailsLabelDivider;
+	CHostToolbarCtrl<CPathItemEdit> m_targetPathEdit;
+	CHostToolbarCtrl<CTextEditor> m_argumentsEdit;
+	CHostToolbarCtrl<CPathItemEdit> m_workDirEdit;
+	CHostToolbarCtrl<CTextEditor> m_descriptionEdit;
+	CHotKeyCtrl m_hotKeyCtrl;
+	CEnumComboBox m_showCmdCombo;
+
+	CHostToolbarCtrl<CImageEdit> m_iconLocationEdit;
+	CStatic m_shortcutIconStatic;
+private:
+	// multiple/single value-state accumulators for dest shortcut fields
+	multi::CPathValue m_targetValue;
+	multi::CPathValue m_workDirValue;
+	multi::CStringValue m_argumentsValue;
+	multi::CStringValue m_descriptionValue;
+	multi::CHotKeyValue m_hotKeyValue;
+	multi::CEnumValue m_showCmdValue;
+	multi::CFlagCheckState m_runAsAdminFlag;
+	multi::CFlagCheckState m_unicodeFlag;
+	single::CIconLocationValue m_iconLocValue;
 
 	// generated stuff
 public:
@@ -119,7 +148,7 @@ protected:
 	afx_msg void OnBnClicked_PasteDestShortcuts( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnBnClicked_ShowSrcColumns( void );
-
+	afx_msg void OnBnClicked_ChangeIcon( void );
 	afx_msg void OnUpdateListCaretItem( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateListSelection( CCmdUI* pCmdUI );
 	afx_msg void OnLvnItemChanged_LinkList( NMHDR* pNmHdr, LRESULT* pResult );

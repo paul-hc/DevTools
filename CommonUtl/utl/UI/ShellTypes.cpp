@@ -535,6 +535,21 @@ namespace shell
 		return static_cast<SFGAOF>( fileInfo.dwAttributes );
 	}
 
+
+	std::pair<CImageList*, int> GetShellSysImageIndex( const TCHAR* pShellPath, UINT iconFlags /*= SHGFI_SMALLICON*/ )
+	{
+		if ( path::HasEnvironVar( pShellPath ) )
+			return GetShellSysImageIndex( shell::TPath::Expand( pShellPath ).GetPtr(), iconFlags );		// recurse with expaned path
+
+		if ( IsGuidPath( pShellPath ) )
+		{
+			CPidlAbsolute pidl( pShellPath );
+			return !pidl.IsNull() ? pidl::GetPidlImageIndex( pidl, iconFlags ) : std::pair<CImageList*, int>( nullptr, -1 );
+		}
+
+		return GetFileSysImageIndex( pShellPath, iconFlags );
+	}
+
 	std::pair<CImageList*, int> GetFileSysImageIndex( const TCHAR* pPathOrPidl, UINT iconFlags /*= SHGFI_SMALLICON*/ )
 	{
 		ASSERT_PTR( pPathOrPidl );
@@ -551,6 +566,20 @@ namespace shell
 		}
 
 		return imagePair;
+	}
+
+	HICON ExtractShellIcon( const TCHAR* pShellPath, UINT iconFlags /*= SHGFI_SMALLICON*/ )
+	{
+		if ( path::HasEnvironVar( pShellPath ) )
+			return ExtractShellIcon( shell::TPath::Expand( pShellPath ).GetPtr(), iconFlags );		// recurse with expaned path
+
+		if ( IsGuidPath( pShellPath ) )
+		{
+			CPidlAbsolute pidl( pShellPath );
+			return !pidl.IsNull() ? pidl::ExtractPidlIcon( pidl, iconFlags ) : nullptr;
+		}
+
+		return ExtractFileSysIcon( pShellPath, iconFlags );
 	}
 
 	HICON ExtractFileSysIcon( const TCHAR* pPathOrPidl, UINT iconFlags /*= SHGFI_SMALLICON*/ )

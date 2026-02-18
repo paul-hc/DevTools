@@ -75,7 +75,7 @@ namespace shell
 		DWORD GetLinkDataFlags( void ) const { return m_linkDataFlags; }
 		const fs::CPath& GetTargetPath( void ) const { return m_targetPath; }
 		const shell::CPidlAbsolute& GetTargetPidl( void ) const { return m_targetPidl; }
-		const fs::CPath& GetWorkDirPath( void ) const { return m_workDirPath; }
+		const fs::TDirPath& GetWorkDirPath( void ) const { return m_workDirPath; }
 		const std::tstring& GetArguments( void ) const { return m_arguments; }
 		const std::tstring& GetDescription( void ) const { return m_description; }
 		const CIconLocation& GetIconLocation( void ) const { return m_iconLocation; }
@@ -84,6 +84,8 @@ namespace shell
 
 		bool IsRunAsAdmin( void ) const { return HasFlag( m_linkDataFlags, SLDF_RUNAS_USER ); }
 		bool IsRunInSepMemSpace( void ) const { return HasFlag( m_linkDataFlags, SLDF_RUN_IN_SEPARATE ); }
+
+		shell::TPath GetTargetShellPath( void ) const;
 
 		enum Fields
 		{
@@ -106,9 +108,9 @@ namespace shell
 		TFields GetDiffFields( const CShortcut& right ) const;		// evaluate fields that are different from 'right'
 
 		bool SetLinkDataFlags( DWORD linkDataFlags ) { return AssignField( m_linkDataFlags, linkDataFlags, LinkDataFlags ); }
-		bool SetTargetPath( const fs::CPath& targetPath ) { return AssignField( m_targetPath, targetPath, TargetPath ); }
+		bool SetTargetPath( const shell::TPath& targetPath ) { return AssignField( m_targetPath, targetPath, TargetPath ); }
 		bool SetTargetPidl( PIDLIST_ABSOLUTE pidl );				// take ownership
-		bool SetWorkDirPath( const fs::CPath& workDirPath ) { return AssignField( m_workDirPath, workDirPath, WorkDirPath ); }
+		bool SetWorkDirPath( const fs::TDirPath& workDirPath ) { return AssignField( m_workDirPath, workDirPath, WorkDirPath ); }
 		bool SetArguments( const std::tstring& arguments ) { return AssignField( m_arguments, arguments, Arguments ); }
 		bool SetDescription( const std::tstring& description ) { return AssignField( m_description, description, Description ); }
 		bool SetIconLocation( const CIconLocation& iconLocation ) { return AssignField( m_iconLocation, iconLocation, IconLocation ); }
@@ -140,9 +142,9 @@ namespace shell
 		}
 	private:
 		DWORD m_linkDataFlags;			// SHELL_LINK_DATA_FLAGS (IShellLinkDataList data)
-		fs::CPath m_targetPath;
+		shell::TPath m_targetPath;
 		shell::CPidlAbsolute m_targetPidl;
-		fs::CPath m_workDirPath;
+		fs::TDirPath m_workDirPath;
 		std::tstring m_arguments;
 		std::tstring m_description;
 		CIconLocation m_iconLocation;

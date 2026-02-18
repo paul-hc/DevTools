@@ -154,6 +154,11 @@ bool CTextEdit::ReplaceText( const std::tstring& text, bool canUndo /*= true*/ )
 	return false;
 }
 
+bool CTextEdit::HasPlaceholderTag( void ) const
+{	// current text is the placeholder tag?
+	return !m_placeholderTag.empty() && m_placeholderTag == GetText();
+}
+
 bool CTextEdit::RevertContents( void )
 {
 	return ReplaceText( m_lastValidText );
@@ -475,6 +480,11 @@ void CTextEdit::OnValueChanged( void )
 {
 }
 
+COLORREF CTextEdit::GetCustomTextColor( void ) const
+{
+	return CLR_NONE;
+}
+
 void CTextEdit::_WatchSelChange( void )
 {
 	if ( !IsInternalChange() )
@@ -540,6 +550,7 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 
 BEGIN_MESSAGE_MAP( CTextEdit, TBaseClass )
 	ON_WM_GETDLGCODE()
+	ON_WM_CTLCOLOR_REFLECT()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_MESSAGE( EM_REPLACESEL, OnEmReplaceSel )
@@ -575,6 +586,32 @@ UINT CTextEdit::OnGetDlgCode( void )
 	if ( !IsInternalChange() )
 		ui::PostCall( this, &CTextEdit::_WatchSelChange );
 	return code;
+}
+
+HBRUSH CTextEdit::CtlColor( CDC* pDC, UINT ctlColor )
+{
+	ctlColor;
+
+	bool readOnly = IsReadOnly();
+	COLORREF textColor = CLR_NONE;
+
+	if ( HasPlaceholderTag() )
+		textColor = ::GetSysColor( COLOR_SCROLLBAR );	// ~ group-box frame color
+	else
+		textColor = GetCustomTextColor();				// allow custom color highlight
+
+	if ( CLR_NONE == textColor && !readOnly )
+		return nullptr;		// no color customization
+
+	COLORREF bkColor = ::GetSysColor( readOnly ? COLOR_BTNFACE : COLOR_WINDOW );		// gray background if read-only in both dialogs and property pages
+	HBRUSH hBkBrush = ::GetSysColorBrush( readOnly ? COLOR_BTNFACE : COLOR_WINDOW );
+
+	pDC->SetBkColor( bkColor );
+
+	if ( textColor != CLR_NONE )
+		pDC->SetTextColor( textColor );
+
+	return hBkBrush;
 }
 
 void CTextEdit::OnHScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )

@@ -2,7 +2,10 @@
 #define ShellPidl_h
 #pragma once
 
-#define STRICT_TYPED_ITEMIDS
+#ifndef STRICT_TYPED_ITEMIDS
+#error You must #include "utl/UI/utl_ui.h" or define STRICT_TYPED_ITEMIDS in the PCH file, before including shell API headers."
+#endif
+
 #include <shobjidl_core.h>		// for SHGetIDListFromObject()
 #include <shlobj_core.h>		// for ILClone(), etc
 #include "ShellTypes.h"
@@ -338,8 +341,8 @@ public:
 	std::tstring FormatPhysical( void ) const;
 	bool ParsePhysical( const std::tstring& shellPath );
 private:
-	DWORD m_fileAttribute;					// for non-existent fise-system paths
-	shell::CPidlAbsolute m_specialPidl;		// mutually exclusive with CPathItemBase::m_filePath, only for known folder PIDLs
+	DWORD m_fileAttribute;					// for non-existent file-system paths
+	shell::CPidlAbsolute m_specialPidl;		// GUID path, only for known folder PIDLs
 };
 
 

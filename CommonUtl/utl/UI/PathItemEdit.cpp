@@ -70,6 +70,21 @@ void CPathItemEdit::DrawImage( CDC* pDC, const CRect& imageRect ) override
 		pRenderer->DrawItemImage( pDC, &m_pathItem, imageRect );
 }
 
+COLORREF CPathItemEdit::GetCustomTextColor( void ) const overrides(CTextEdit)
+{
+	if ( !m_pathItem.ObjectExist() )
+		return color::ScarletRed;		// error text color: file does not exist
+	else if ( m_pathItem.IsFilePath() )
+	{
+		if ( fs::IsValidDirectory( m_evalFilePath.GetPtr() ) )
+			return ::GetSysColor( COLOR_HIGHLIGHT );	// directory text color
+	}
+	else if ( m_pathItem.IsSpecialPidl() )
+		return color::Teal;			// special PIDL text color
+
+	return __super::GetCustomTextColor();
+}
+
 void CPathItemEdit::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const implement
 {
 	cmdId, pTooltip;
@@ -127,7 +142,6 @@ BOOL CPathItemEdit::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINF
 
 BEGIN_MESSAGE_MAP( CPathItemEdit, CImageEdit )
 	ON_WM_CONTEXTMENU()
-	ON_WM_CTLCOLOR_REFLECT()
 	ON_COMMAND( ID_ITEM_COPY_FILENAMES, OnCopyFilename )
 	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_FILENAMES, OnUpdateHasAny )
 	ON_COMMAND( ID_ITEM_COPY_FOLDERS, OnCopyFolder )
@@ -143,37 +157,6 @@ void CPathItemEdit::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	pWnd;
 	if ( CMenu* pPopupMenu = GetPopupMenu() )
 		DoTrackContextMenu( pPopupMenu, screenPos );
-}
-
-HBRUSH CPathItemEdit::CtlColor( CDC* pDC, UINT ctlColor )
-{
-	ctlColor;
-
-	bool readOnly = IsReadOnly();
-	COLORREF textColor = CLR_NONE;
-
-	if ( !m_pathItem.ObjectExist() )
-		textColor = color::ScarletRed;		// error text color: file does not exist
-	else if ( m_pathItem.IsFilePath() )
-	{
-		if ( fs::IsValidDirectory( m_evalFilePath.GetPtr() ) )
-			textColor = ::GetSysColor( COLOR_HIGHLIGHT );	// directory text color
-	}
-	else if ( m_pathItem.IsSpecialPidl() )
-		textColor = color::Teal;			// special PIDL text color
-
-	if ( CLR_NONE == textColor && !readOnly )
-		return nullptr;		// no color customization
-
-	COLORREF bkColor = ::GetSysColor( readOnly ? COLOR_BTNFACE : COLOR_WINDOW );
-	HBRUSH hBkBrush = ::GetSysColorBrush( readOnly ? COLOR_BTNFACE : COLOR_WINDOW );
-
-	pDC->SetBkColor( bkColor );
-
-	if ( textColor != CLR_NONE )
-		pDC->SetTextColor( textColor );
-
-	return hBkBrush;
 }
 
 void CPathItemEdit::OnEditCopy( void ) override
@@ -211,9 +194,15 @@ void CPathItemEdit::OnFileProperties( void )
 void CPathItemEdit::OnBrowsePath( UINT cmdId )
 {
 	shell::TPath newShellPath = m_pathContent.EditItem( GetShellPath().GetPtr(), this, cmdId );
+	bool modify = newShellPath != GetShellPath();
 
 	if ( !newShellPath.IsEmpty() )
+	{
 		SetShellPath( newShellPath );
+
+		if ( modify )
+			SetModify();
+	}
 }
 
 void CPathItemEdit::OnUpdateHasPath( CCmdUI* pCmdUI )

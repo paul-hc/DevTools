@@ -2,7 +2,10 @@
 #define ShellTypes_h
 #pragma once
 
-#define STRICT_TYPED_ITEMIDS
+#ifndef STRICT_TYPED_ITEMIDS
+	#error You must #include "utl/UI/utl_ui.h" or define STRICT_TYPED_ITEMIDS in the PCH file, before including shell API headers."
+#endif
+
 #include <shlobj.h>
 #include <atlbase.h>
 #include "Path.h"
@@ -114,8 +117,12 @@ namespace shell
 	// shell file info (via SHFILEINFO)
 	SFGAOF GetShellAttributes( const TCHAR* pShellPath );	// expands environment variables and resolves shell paths
 	SFGAOF GetRawShellAttributes( const TCHAR* pPathOrPidl, UINT moreFlags = 0 );
+
+	std::pair<CImageList*, int> GetShellSysImageIndex( const TCHAR* pShellPath, UINT iconFlags = SHGFI_SMALLICON );		// CImageList is a shared shell temporary object (no ownership)
 	std::pair<CImageList*, int> GetFileSysImageIndex( const TCHAR* pPathOrPidl, UINT iconFlags = SHGFI_SMALLICON );		// CImageList is a shared shell temporary object (no ownership)
-	HICON ExtractFileSysIcon( const TCHAR* pPathOrPidl, UINT flags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
+
+	HICON ExtractShellIcon( const TCHAR* pShellPath, UINT iconFlags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
+	HICON ExtractFileSysIcon( const TCHAR* pPathOrPidl, UINT iconFlags = SHGFI_SMALLICON );		// returns a copy of the icon (caller must delete it)
 
 	UINT GetSysIconSizeFlag( int iconDimension );
 

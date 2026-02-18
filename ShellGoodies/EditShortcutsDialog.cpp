@@ -1,7 +1,6 @@
 
 #include "pch.h"
 #include "EditShortcutsDialog.h"
-#include "EditLinkItem.h"
 #include "FileModel.h"
 #include "FileService.h"
 #include "EditingCommands.h"
@@ -29,6 +28,7 @@
 
 #include "utl/UI/ReportListControl.hxx"
 #include "utl/UI/SelectionData.hxx"
+#include "utl/UI/TandemControls.hxx"
 
 
 namespace reg
@@ -40,11 +40,6 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_TARGET_PATH_EDIT, SizeX },
-		{ IDC_ARGUMENTS_EDIT, SizeX },
-		{ IDC_WORK_DIR_EDIT, SizeX },
-		{ IDC_DESCRIPTION_EDIT, SizeX },
-
 		{ IDC_FILES_STATIC, SizeX },
 		{ IDC_EDIT_SHORTCUTS_LIST, Size },
 		{ IDC_SHOW_SRC_COLUMNS_CHECK, MoveX },
@@ -56,9 +51,30 @@ namespace layout
 		{ IDC_PASTE_FILES_BUTTON, MoveY },
 		{ IDC_RESET_FILES_BUTTON, MoveY },
 
-		{ IDOK, MoveX },
-		{ IDCANCEL, MoveX },
-		{ IDC_TOOLBAR_PLACEHOLDER, MoveX }
+		{ IDC_LINK_DETAILS_STATIC, MoveY | SizeX },
+		{ IDC_TARGET_PATH_STATIC, MoveY },
+		{ IDC_TARGET_PATH_EDIT, MoveY | SizeX },
+		{ IDC_ARGUMENTS_STATIC, MoveY },
+		{ IDC_ARGUMENTS_EDIT, MoveY | SizeX },
+		{ IDC_WORK_DIR_STATIC, MoveY },
+		{ IDC_WORK_DIR_EDIT, MoveY | SizeX },
+		{ IDC_DESCRIPTION_STATIC, MoveY },
+		{ IDC_DESCRIPTION_EDIT, MoveY | SizeX },
+		{ IDC_HOT_KEY_STATIC, MoveY },
+		{ IDC_HOT_KEY_CTRL, MoveY },
+		{ IDC_SHOW_CMD_STATIC, MoveY },
+		{ IDC_SHOW_CMD_COMBO, MoveY },
+		{ IDC_GROUP_BOX_1, MoveY },
+		{ IDC_SH_RUN_AS_ADMIN_CHECK, MoveY },
+		{ IDC_SH_UNICODE_CHECK, MoveY },
+		{ IDC_ICON_LOCATION_STATIC, MoveY },
+		{ IDC_SHORTCUT_ICON_STATIC, MoveY },
+		{ IDC_ICON_LOCATION_EDIT, MoveY | SizeX },
+		{ IDC_CHANGE_ICON_BUTTON, Move },
+
+		{ IDOK, MoveY | MoveX },
+		{ IDCANCEL, MoveY | MoveX },
+		{ IDC_TOOLBAR_PLACEHOLDER, MoveY | MoveX }
 	};
 }
 
@@ -69,7 +85,19 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 	, m_dirty( false )
 	, m_filesLabelDivider( CLabelDivider::Instruction )
 	, m_fileStatsStatic( ui::EditShrinkHost_MateOnRight )
+
+	, m_detailsLabelDivider( CLabelDivider::Instruction )
 	, m_showCmdCombo( &fmt::GetTags_ShowCmd() )
+
+	, m_targetValue( &m_targetPathEdit )
+	, m_workDirValue( &m_workDirEdit )
+	, m_argumentsValue( &m_argumentsEdit )
+	, m_descriptionValue( &m_descriptionEdit )
+	, m_hotKeyValue( &m_hotKeyCtrl )
+	, m_showCmdValue( &m_showCmdCombo )
+	, m_runAsAdminFlag( SLDF_RUNAS_USER, this, IDC_SH_RUN_AS_ADMIN_CHECK )
+	, m_unicodeFlag( SLDF_UNICODE, this, IDC_SH_UNICODE_CHECK, false )		// not editable
+	, m_iconLocValue( &m_iconLocationEdit, &m_shortcutIconStatic )
 {
 	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
 	m_mode = CommitFilesMode;
@@ -91,7 +119,7 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( LinkName, pred::NewComparator( pred::TCompareDisplayCode() ) );
 	//m_fileListCtrl.AddColumnCompare( D_Target, pred::NewPropertyComparator<CEditLinkItem>( func::Dest_AsTargetPath() ) );
-	//m_fileListCtrl.AddColumnCompare( D_Folder, pred::NewPropertyComparator<CEditLinkItem>( func::Dest_AsWorkDirPath() ) );
+	//m_fileListCtrl.AddColumnCompare( D_WorkDir, pred::NewPropertyComparator<CEditLinkItem>( func::Dest_AsWorkDirPath() ) );
 	//m_fileListCtrl.AddColumnCompare( D_Arguments, pred::NewPropertyComparator<CEditLinkItem>( func::Dest_AsArguments() ) );
 	//m_fileListCtrl.AddColumnCompare( D_IconLocation, pred::NewPropertyComparator<CEditLinkItem>( func::Dest_AsIconLocation() ) );
 	//m_fileListCtrl.AddColumnCompare( HotKey, pred::NewPropertyComparator<CEditLinkItem>( func::Dest_AsHotKey() ) );
@@ -104,20 +132,34 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 		.AddButton( ID_EDIT_COPY )
 		.AddButton( ID_CMD_RESET_DESTINATIONS );
 
-	m_targetPathEdit.GetMateToolbar()->GetStrip()
-		.AddButton( ID_EDIT_COPY )
-		.AddButton( ID_BROWSE_FILE );
-
-	m_workDirEdit.SetUseDirPath( true );
-	m_workDirEdit.GetMateToolbar()->GetStrip()
-		.AddButton( ID_EDIT_COPY )
-		.AddButton( ID_BROWSE_FOLDER );
-
 	m_currFolderEdit.SetUseFixedFont( false );
 	m_currFolderEdit.SetUseDirPath( true );
 	m_currFolderEdit.GetMateToolbar()->GetStrip()
-		.AddButton( ID_EDIT_COPY )
-		.AddButton( ID_BROWSE_FOLDER );
+		.AddButton( ID_BROWSE_FOLDER )
+		.AddButton( ID_EDIT_COPY );
+
+	m_targetPathEdit.SetPlaceholderTag( multi::GetMultipleValueTag() );
+	m_targetPathEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_BROWSE_FILE )
+		.AddButton( ID_EDIT_COPY );
+
+	m_argumentsEdit.SetPlaceholderTag( multi::GetMultipleValueTag() );
+	m_argumentsEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_COPY );
+
+	m_workDirEdit.SetUseDirPath( true );
+	m_workDirEdit.SetPlaceholderTag( multi::GetMultipleValueTag() );
+	m_workDirEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_BROWSE_FOLDER )
+		.AddButton( ID_EDIT_COPY );
+
+	m_descriptionEdit.SetPlaceholderTag( multi::GetMultipleValueTag() );
+	m_descriptionEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_COPY );
+
+	m_iconLocationEdit.GetMateToolbar()->GetStrip()
+		.AddButton( IDC_CHANGE_ICON_BUTTON, ID_EDIT_DETAILS )
+		.AddButton( ID_EDIT_COPY );
 
 	m_targetSelItemsButton.SetFrameMargins( -3, -3 );	// draw the frame outside of the button, in the dialog area
 }
@@ -160,7 +202,7 @@ bool CEditShortcutsDialog::ModifyShortcuts( void )
 
 const CEnumTags& CEditShortcutsDialog::GetTags_Mode( void )
 {
-	static const CEnumTags s_modeTags( _T("&Store|&Touch|Roll &Back|Roll &Fwd") );
+	static const CEnumTags s_modeTags( _T("S&tore|&Save|Roll &Back|Roll &Fwd") );
 	return s_modeTags;
 }
 
@@ -276,7 +318,7 @@ void CEditShortcutsDialog::SetupFileListView( void )
 			const shell::CShortcut& destShortcut = pLinkItem->GetDestShortcut();
 
 			m_fileListCtrl.SetSubItemText( pos, D_Target, fmt::FormatTarget( destShortcut ) );
-			m_fileListCtrl.SetSubItemText( pos, D_Folder, destShortcut.GetWorkDirPath().Get() );
+			m_fileListCtrl.SetSubItemText( pos, D_WorkDir, destShortcut.GetWorkDirPath().Get() );
 			m_fileListCtrl.SetSubItemText( pos, D_Arguments, destShortcut.GetArguments() );
 			m_fileListCtrl.SetSubItemText( pos, D_IconLocation, fmt::FormatIconLocation( destShortcut ) );
 			m_fileListCtrl.SetSubItemText( pos, D_HotKey, fmt::FormatHotKey( destShortcut.GetHotKey() ) );
@@ -287,7 +329,7 @@ void CEditShortcutsDialog::SetupFileListView( void )
 			const shell::CShortcut& srcShortcut = pLinkItem->GetDestShortcut();
 
 			m_fileListCtrl.SetSubItemText( pos, S_Target, fmt::FormatTarget( srcShortcut ) );
-			m_fileListCtrl.SetSubItemText( pos, S_Folder, srcShortcut.GetWorkDirPath().Get() );
+			m_fileListCtrl.SetSubItemText( pos, S_WorkDir, srcShortcut.GetWorkDirPath().Get() );
 			m_fileListCtrl.SetSubItemText( pos, S_Arguments, srcShortcut.GetArguments() );
 			m_fileListCtrl.SetSubItemText( pos, S_IconLocation, fmt::FormatIconLocation( srcShortcut ) );
 			m_fileListCtrl.SetSubItemText( pos, S_HotKey, fmt::FormatHotKey( srcShortcut.GetHotKey() ) );
@@ -299,7 +341,7 @@ void CEditShortcutsDialog::SetupFileListView( void )
 	str::TGetMatch getMatchFunc;
 
 	m_fileListCtrl.SetupDiffColumnPair( S_Target, D_Target, getMatchFunc );
-	m_fileListCtrl.SetupDiffColumnPair( S_Folder, D_Folder, getMatchFunc );
+	m_fileListCtrl.SetupDiffColumnPair( S_WorkDir, D_WorkDir, getMatchFunc );
 	m_fileListCtrl.SetupDiffColumnPair( S_Arguments, D_Arguments, getMatchFunc );
 	m_fileListCtrl.SetupDiffColumnPair( S_IconLocation, D_IconLocation, getMatchFunc );
 	m_fileListCtrl.SetupDiffColumnPair( S_HotKey, D_HotKey, getMatchFunc );
@@ -313,14 +355,14 @@ void CEditShortcutsDialog::UpdateFileListViewSelItems( void )
 {
 	path::TGetMatch getMatchFunc;
 
-	for ( CEditLinkItem* pLinkItem: m_selData.GetSelItems() )
+	for ( CEditLinkItem* pLinkItem : m_selData.GetSelItems() )
 	{
 		const shell::CShortcut& destShortcut = pLinkItem->GetDestShortcut();
 		int pos = m_fileListCtrl.FindItemIndex( pLinkItem );
 		ASSERT( pos != -1 );
 
 		m_fileListCtrl.SetSubItemText( pos, D_Target, fmt::FormatTarget( destShortcut ) );
-		m_fileListCtrl.SetSubItemText( pos, D_Folder, destShortcut.GetWorkDirPath().Get() );
+		m_fileListCtrl.SetSubItemText( pos, D_WorkDir, destShortcut.GetWorkDirPath().Get() );
 		m_fileListCtrl.SetSubItemText( pos, D_Arguments, destShortcut.GetWorkDirPath().Get() );
 		m_fileListCtrl.SetSubItemText( pos, D_IconLocation, fmt::FormatIconLocation( destShortcut ) );
 		m_fileListCtrl.SetSubItemText( pos, D_HotKey, fmt::FormatHotKey( destShortcut.GetHotKey() ) );
@@ -329,7 +371,7 @@ void CEditShortcutsDialog::UpdateFileListViewSelItems( void )
 
 		// IMP: update the Dest side of DiffColumn pairs!
 		m_fileListCtrl.UpdateItemDiffColumnDest( pos, D_Target, getMatchFunc );
-		m_fileListCtrl.UpdateItemDiffColumnDest( pos, D_Folder, getMatchFunc );
+		m_fileListCtrl.UpdateItemDiffColumnDest( pos, D_WorkDir, getMatchFunc );
 		m_fileListCtrl.UpdateItemDiffColumnDest( pos, D_Arguments, getMatchFunc );
 		m_fileListCtrl.UpdateItemDiffColumnDest( pos, D_IconLocation, getMatchFunc );
 		m_fileListCtrl.UpdateItemDiffColumnDest( pos, D_HotKey, getMatchFunc );
@@ -338,38 +380,65 @@ void CEditShortcutsDialog::UpdateFileListViewSelItems( void )
 	}
 }
 
-bool CEditShortcutsDialog::UpdateDetailFields( void )
+void CEditShortcutsDialog::UpdateDetailFields( void )
 {
-	CEditLinkItem* pCaretItem = m_selData.GetCaretItem();
-	if ( nullptr == pCaretItem )
-		return false;
+	AccumulateCommonValues();
 
-	const shell::CShortcut& destShortcut = pCaretItem->GetDestShortcut();
+	m_targetValue.UpdateCtrl();
+	m_argumentsValue.UpdateCtrl();
+	m_workDirValue.UpdateCtrl();
+	m_descriptionValue.UpdateCtrl();
+	m_hotKeyValue.UpdateCtrl();
+	m_showCmdValue.UpdateCtrl();
+	m_runAsAdminFlag.UpdateCtrl();
+	m_unicodeFlag.UpdateCtrl();
+}
 
-	if ( destShortcut.IsTargetNonFileSys() )
-		m_targetPathEdit.SetPidl( destShortcut.GetTargetPidl() );
+void CEditShortcutsDialog::AccumulateCommonValues( void )
+{
+	ASSERT( !m_rEditLinkItems.empty() );
+
+	// accumulate common values among multiple items, starting with an invalid value, i.e. uninitialized
+	m_targetValue.Clear();
+	m_workDirValue.Clear();
+	m_argumentsValue.Clear();
+	m_descriptionValue.Clear();
+	m_hotKeyValue.Clear();
+	m_showCmdValue.Clear();
+	m_runAsAdminFlag.Clear();
+	m_unicodeFlag.Clear();
+
+	for ( const CEditLinkItem* pLinkItem : m_selData.GetSelItems() )
+		AccumulateShortcutValues( pLinkItem->GetDestShortcut() );
+
+	if ( CEditLinkItem* pCaretItem = m_selData.GetCaretItem() )
+	{
+		const shell::CShortcut& destShortcut = pCaretItem->GetDestShortcut();
+		m_iconLocValue.Set( destShortcut.GetIconLocation(), pCaretItem->GetFilePath() /*destShortcut.GetTargetShellPath()*/ );
+	}
 	else
-		m_targetPathEdit.SetShellPath( destShortcut.GetTargetPath() );
+		m_iconLocValue.Clear();
+}
 
-	m_targetPathEdit.SetReadOnly( destShortcut.IsTargetNonFileSys() );
-
-	m_argumentsEdit.SetText( destShortcut.GetArguments() );
-	m_workDirEdit.SetShellPath( destShortcut.GetWorkDirPath() );
-	m_descriptionEdit.SetText( destShortcut.GetDescription() );
-	WORD hotKey = destShortcut.GetHotKey();
-	m_hotKeyCtrl.SetHotKey( LOBYTE( hotKey ), HIBYTE( hotKey ) );
-	m_showCmdCombo.SetValue( destShortcut.GetShowCmd() );
-
-	return true;
+void CEditShortcutsDialog::AccumulateShortcutValues( const shell::CShortcut& destShortcut )
+{
+	m_targetValue.Accumulate( destShortcut.GetTargetShellPath() );
+	m_workDirValue.Accumulate( destShortcut.GetWorkDirPath() );
+	m_argumentsValue.Accumulate( destShortcut.GetArguments() );
+	m_descriptionValue.Accumulate( destShortcut.GetDescription() );
+	m_hotKeyValue.Accumulate( destShortcut.GetHotKey() );
+	m_showCmdValue.Accumulate( destShortcut.GetShowCmd() );
+	m_runAsAdminFlag.AccumulateFlags( destShortcut.GetLinkDataFlags() );
+	m_unicodeFlag.AccumulateFlags( destShortcut.GetLinkDataFlags() );
 }
 
 void CEditShortcutsDialog::UpdateFieldControls( void )
 {
 	// commit common values to field controls
-/*	for ( const multi::CDateTimeState& dateTimeState: m_dateTimeStates )
+/*	for ( const multi::CDateTimeState& dateTimeState : m_dateTimeStates )
 		dateTimeState.UpdateCtrl( this );
 
-	for ( const multi::CAttribCheckState& attribState: m_attribCheckStates )
+	for ( const multi::CAttribCheckState& attribState : m_attribCheckStates )
 		attribState.UpdateCtrl( this );*/
 }
 
@@ -387,10 +456,10 @@ void CEditShortcutsDialog::UpdateFieldsFromCaretItem( void )
 
 void CEditShortcutsDialog::InputFields( void )
 {
-/*	for ( multi::CDateTimeState& rDateTimeState: m_dateTimeStates )
+/*	for ( multi::CDateTimeState& rDateTimeState : m_dateTimeStates )
 		rDateTimeState.InputCtrl( this );
 
-	for ( multi::CAttribCheckState& rAttribState: m_attribCheckStates )
+	for ( multi::CAttribCheckState& rAttribState : m_attribCheckStates )
 		rAttribState.InputCtrl( this );*/
 }
 
@@ -410,17 +479,17 @@ utl::ICommand* CEditShortcutsDialog::MakeChangeDestShortcutsCmd( void )
 	bool anyChange = false;
 
 	// apply valid edits, i.e. if not null
-	for ( const CEditLinkItem* pLinkItem: targetItems )
+	for ( const CEditLinkItem* pLinkItem : targetItems )
 	{
 /*		shell::CShortcut newFileState = pLinkItem->GetDestState();
 
-		for ( const multi::CDateTimeState& dateTimeState: m_dateTimeStates )
+		for ( const multi::CDateTimeState& dateTimeState : m_dateTimeStates )
 			if ( dateTimeState.CanApply() )
 			{
 				dateTimeState.Apply( newFileState );
 			}
 
-		for ( const multi::CAttribCheckState& attribState: m_attribCheckStates )
+		for ( const multi::CAttribCheckState& attribState : m_attribCheckStates )
 			if ( attribState.CanApply() )
 			{
 				attribState.Apply( newFileState );
@@ -515,8 +584,75 @@ void CEditShortcutsDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId
 					rText += _T(" all items");
 			}
 			break;
+		case IDC_SH_RUN_AS_ADMIN_CHECK:
+			if ( m_runAsAdminFlag.IsMultipleValue() )
+				rText = multi::GetTags_MultiValueState().FormatUi( multi::MultipleValue );
+			break;
+		case IDC_SH_UNICODE_CHECK:
+			if ( m_unicodeFlag.IsMultipleValue() )
+				rText = multi::GetTags_MultiValueState().FormatUi( multi::MultipleValue );
+			break;
 		default:
 			__super::QueryTooltipText( rText, cmdId, pTooltip );
+	}
+}
+
+struct CFieldState
+{
+	CFieldState( void ) : m_isModified( false ), m_isSrc( false ), m_isInvalid( false ) {}
+public:
+	bool m_isModified;
+	bool m_isSrc;
+	bool m_isInvalid;
+};
+
+void CEditShortcutsDialog::FetchFieldState( OUT CFieldState& rState, const CEditLinkItem* pLinkItem, int subItem ) const
+{
+	shell::CShortcut::TFields dirtyFields = pLinkItem->GetDestShortcut().GetDiffFields( pLinkItem->GetSrcShortcut() );
+
+	switch ( subItem )
+	{
+		case LinkName:
+			rState.m_isModified = pLinkItem->IsModified();
+			break;
+		case S_Target:
+			rState.m_isSrc = true;		// fall-through
+		case D_Target:
+			rState.m_isModified = HasFlag( dirtyFields, shell::CShortcut::TargetPath | shell::CShortcut::TargetPidl );
+			rState.m_isInvalid = pLinkItem->HasInvalidTarget( rState.m_isSrc );
+			break;
+		case S_WorkDir:
+			rState.m_isSrc = true;		// fall-through
+		case D_WorkDir:
+			rState.m_isModified = HasFlag( dirtyFields, shell::CShortcut::WorkDirPath );
+			rState.m_isInvalid = pLinkItem->HasInvalidWorkDir( rState.m_isSrc );
+			break;
+		case S_Arguments:
+			rState.m_isSrc = true;		// fall-through
+		case D_Arguments:
+			rState.m_isModified = HasFlag( dirtyFields, shell::CShortcut::Arguments );
+			break;
+		case S_IconLocation:
+			rState.m_isSrc = true;		// fall-through
+		case D_IconLocation:
+			rState.m_isModified = HasFlag( dirtyFields, shell::CShortcut::IconLocation );
+			rState.m_isInvalid = pLinkItem->HasInvalidIcon( rState.m_isSrc );
+			break;
+		case S_HotKey:
+			rState.m_isSrc = true;		// fall-through
+		case D_HotKey:
+			rState.m_isModified = HasFlag( dirtyFields, shell::CShortcut::HotKey );
+			break;
+		case S_ShowCmd:
+			rState.m_isSrc = true;		// fall-through
+		case D_ShowCmd:
+			rState.m_isModified = HasFlag( dirtyFields, shell::CShortcut::ShowCmd );
+			break;
+		case S_Description:
+			rState.m_isSrc = true;		// fall-through
+		case D_Description:
+			rState.m_isModified = HasFlag( dirtyFields, shell::CShortcut::Description );
+			break;
 	}
 }
 
@@ -527,55 +663,24 @@ void CEditShortcutsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	static const ui::CTextEffect s_modDest( ui::Regular, CReportListControl::s_mismatchDestTextColor );
 	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_deleteSrcTextColor );
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
+	static const ui::CTextEffect s_invalidBk( ui::Regular, CLR_NONE, color::LightPastelPink );		// lighter than s_errorBk
 
 	const CEditLinkItem* pLinkItem = CReportListControl::AsPtr<CEditLinkItem>( rowKey );
-	shell::CShortcut::TFields dirtyFields = pLinkItem->GetDestShortcut().GetDiffFields( pLinkItem->GetSrcShortcut() );
+	CFieldState fieldState;
+
+	FetchFieldState( fieldState, pLinkItem, subItem );
 
 	const ui::CTextEffect* pTextEffect = nullptr;
-	bool isModified = false, isSrc = false;
 
-	switch ( subItem )
+	if ( LinkName == subItem )
 	{
-		case LinkName:
-			isModified = pLinkItem->IsModified();
-			if ( isModified )
-				pTextEffect = &s_modLinkName;
-			break;
-		case S_Target:
-			isSrc = true;		// fall-through
-		case D_Target:
-			isModified = HasFlag( dirtyFields, shell::CShortcut::TargetPath || shell::CShortcut::TargetPidl );
-			break;
-		case S_Folder:
-			isSrc = true;		// fall-through
-		case D_Folder:
-			isModified = HasFlag( dirtyFields, shell::CShortcut::WorkDirPath );
-			break;
-		case S_Arguments:
-			isSrc = true;		// fall-through
-		case D_Arguments:
-			isModified = HasFlag( dirtyFields, shell::CShortcut::Arguments );
-			break;
-		case S_IconLocation:
-			isSrc = true;		// fall-through
-		case D_IconLocation:
-			isModified = HasFlag( dirtyFields, shell::CShortcut::IconLocation );
-			break;
-		case S_HotKey:
-			isSrc = true;		// fall-through
-		case D_HotKey:
-			isModified = HasFlag( dirtyFields, shell::CShortcut::HotKey );
-			break;
-		case S_ShowCmd:
-			isSrc = true;		// fall-through
-		case D_ShowCmd:
-			isModified = HasFlag( dirtyFields, shell::CShortcut::ShowCmd );
-			break;
-		case S_Description:
-			isSrc = true;		// fall-through
-		case D_Description:
-			isModified = HasFlag( dirtyFields, shell::CShortcut::Description );
-			break;
+		if ( fieldState.m_isModified )
+			pTextEffect = &s_modLinkName;
+	}
+	else
+	{
+		if ( fieldState.m_isInvalid )
+			rTextEffect |= s_invalidBk;		// mark invalid fileds by error background, since text color is modified by diffs display
 	}
 
 	if ( utl::Contains( m_errorItems, pLinkItem ) )
@@ -583,8 +688,8 @@ void CEditShortcutsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 
 	if ( pTextEffect != nullptr )
 		rTextEffect |= *pTextEffect;
-	else if ( isModified )
-		rTextEffect |= isSrc ? s_modSrc : s_modDest;
+	else if ( fieldState.m_isModified )
+		rTextEffect |= fieldState.m_isSrc ? s_modSrc : s_modDest;
 
 	if ( EditMode == m_mode )
 	{
@@ -617,6 +722,8 @@ void CEditShortcutsDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, 
 	if ( LinkName == subItem )
 		return;
 
+	static const ui::CTextEffect s_invalidText( ui::Regular, color::ScarletRed );
+
 	ClearFlag( rEffects.m_rNotEqual.m_fontEffect, ui::Bold );		// line-up field columns nicely
 	//rEffects.m_rNotEqual.m_frameFillTraits.Init( color::Green, 20, 10 );
 }
@@ -629,7 +736,7 @@ CEditLinkItem* CEditShortcutsDialog::FindItemWithKey( const fs::CPath& keyPath )
 
 void CEditShortcutsDialog::MarkInvalidSrcItems( void )
 {
-	for ( CEditLinkItem* pTouchItem: m_rEditLinkItems )
+	for ( CEditLinkItem* pTouchItem : m_rEditLinkItems )
 		if ( !pTouchItem->GetFilePath().FileExist() )
 			utl::AddUnique( m_errorItems, pTouchItem );
 }
@@ -655,14 +762,6 @@ void CEditShortcutsDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_EDIT_SHORTCUTS_LIST, m_fileListCtrl );
 
-	DDX_Control( pDX, IDC_TARGET_PATH_EDIT, m_targetPathEdit );
-	DDX_Control( pDX, IDC_ARGUMENTS_EDIT, m_argumentsEdit );
-	DDX_Control( pDX, IDC_WORK_DIR_EDIT, m_workDirEdit );
-	DDX_Control( pDX, IDC_DESCRIPTION_EDIT, m_descriptionEdit );
-	DDX_Control( pDX, IDC_HOT_KEY_CTRL, m_hotKeyCtrl );
-	DDX_Control( pDX, IDC_SHOW_CMD_COMBO, m_showCmdCombo );
-	// IDC_RUN_AS_ADMIN_CHECK, IDC_RUN_IN_SEPARATE_MEM_SPACE_CHECK
-
 	DDX_Control( pDX, IDC_FILES_STATIC, m_filesLabelDivider );
 	DDX_Control( pDX, IDC_OUTCOME_INFO_STATUS, m_fileStatsStatic );
 	DDX_Control( pDX, IDC_CURR_FOLDER_EDIT, m_currFolderEdit );
@@ -672,6 +771,17 @@ void CEditShortcutsDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
 	ui::DDX_ButtonIcon( pDX, IDC_RESET_FILES_BUTTON, ID_RESET_DEFAULT );
 
+	DDX_Control( pDX, IDC_LINK_DETAILS_STATIC, m_detailsLabelDivider );
+	DDX_Control( pDX, IDC_TARGET_PATH_EDIT, m_targetPathEdit );
+	DDX_Control( pDX, IDC_ARGUMENTS_EDIT, m_argumentsEdit );
+	DDX_Control( pDX, IDC_WORK_DIR_EDIT, m_workDirEdit );
+	DDX_Control( pDX, IDC_DESCRIPTION_EDIT, m_descriptionEdit );
+	DDX_Control( pDX, IDC_HOT_KEY_CTRL, m_hotKeyCtrl );
+	DDX_Control( pDX, IDC_SHOW_CMD_COMBO, m_showCmdCombo );
+	DDX_Control( pDX, IDC_ICON_LOCATION_EDIT, m_iconLocationEdit );
+	DDX_Control( pDX, IDC_SHORTCUT_ICON_STATIC, m_shortcutIconStatic );
+	// IDC_SH_RUN_AS_ADMIN_CHECK, IDC_SH_UNICODE_CHECK
+
 	if ( firstInit )
 	{
 		OnUpdate( m_pFileModel, nullptr );
@@ -680,6 +790,7 @@ void CEditShortcutsDialog::DoDataExchange( CDataExchange* pDX )
 		m_targetSelItemsButton.SetCheck( app::TargetSelectedItems == m_pFileModel->GetTargetScope() );
 		UpdateTargetScopeButton();
 		UpdateFileListStatus();
+		UpdateDetailFields();
 	}
 
 	__super::DoDataExchange( pDX );
@@ -698,6 +809,8 @@ BEGIN_MESSAGE_MAP( CEditShortcutsDialog, CFileEditorBaseDialog )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestShortcuts )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
 	ON_BN_CLICKED( IDC_SHOW_SRC_COLUMNS_CHECK, OnBnClicked_ShowSrcColumns )
+	ON_BN_CLICKED( IDC_CHANGE_ICON_BUTTON, OnBnClicked_ChangeIcon )
+	ON_UPDATE_COMMAND_UI( IDC_CHANGE_ICON_BUTTON, OnUpdateListCaretItem )
 	ON_UPDATE_COMMAND_UI( ID_PUSH_ATTRIBUTE_FIELDS, OnUpdateListSelection )
 	ON_UPDATE_COMMAND_UI( ID_PUSH_ALL_FIELDS, OnUpdateListCaretItem )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_EDIT_SHORTCUTS_LIST, OnLvnItemChanged_LinkList )
@@ -790,6 +903,14 @@ void CEditShortcutsDialog::OnBnClicked_ResetDestFiles( void )
 	SafeExecuteCmd( new CResetDestinationsMacroCmd( m_pFileModel ) );
 }
 
+void CEditShortcutsDialog::OnBnClicked_ChangeIcon( void )
+{
+	CEditLinkItem* pCaretItem = m_selData.GetCaretItem();
+	ASSERT_PTR( pCaretItem );
+
+	m_iconLocValue.PickIcon();
+}
+
 void CEditShortcutsDialog::OnBnClicked_ShowSrcColumns( void )
 {
 	if ( VisibleAllSrcColumns() )
@@ -818,7 +939,7 @@ void CEditShortcutsDialog::OnLvnItemChanged_LinkList( NMHDR* pNmHdr, LRESULT* pR
 	ASSERT( !m_fileListCtrl.IsInternalChange() );		// filtered internally by CReportListControl
 	if ( m_fileListCtrl.IsSelectionCaretChangeNotify( pNmList ) )
 	{
-		CReportListControl::TraceNotify( pNmList );
+		//CReportListControl::TraceNotify( pNmList );
 
 		if ( m_selData.ReadList( &m_fileListCtrl ) )
 		{

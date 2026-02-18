@@ -299,7 +299,7 @@ void CTouchFilesDialog::UpdateFileListViewSelItems( void )
 {
 	path::TGetMatch getMatchFunc;
 
-	for ( CTouchItem* pTouchItem: m_selData.GetSelItems() )
+	for ( CTouchItem* pTouchItem : m_selData.GetSelItems() )
 	{
 		int pos = m_fileListCtrl.FindItemIndex( pTouchItem );
 		ASSERT( pos != -1 );
@@ -325,7 +325,7 @@ void CTouchFilesDialog::AccumulateCommonStates( void )
 	multi::SetInvalidAll( m_dateTimeStates );
 	multi::SetInvalidAll( m_attribCheckStates );
 
-	for ( const CTouchItem* pTouchItem: m_rTouchItems )
+	for ( const CTouchItem* pTouchItem : m_rTouchItems )
 		AccumulateItemStates( pTouchItem );
 }
 
@@ -337,17 +337,17 @@ void CTouchFilesDialog::AccumulateItemStates( const CTouchItem* pTouchItem )
 	m_dateTimeStates[ fs::ModifiedDate ].Accumulate( pTouchItem->GetDestState().m_modifTime );
 	m_dateTimeStates[ fs::AccessedDate ].Accumulate( pTouchItem->GetDestState().m_accessTime );
 
-	for ( multi::CAttribCheckState& rAttribState: m_attribCheckStates )
+	for ( multi::CAttribCheckState& rAttribState : m_attribCheckStates )
 		rAttribState.Accumulate( pTouchItem->GetDestState().m_attributes );
 }
 
 void CTouchFilesDialog::UpdateFieldControls( void )
 {
 	// commit common values to field controls
-	for ( const multi::CDateTimeState& dateTimeState: m_dateTimeStates )
+	for ( const multi::CDateTimeState& dateTimeState : m_dateTimeStates )
 		dateTimeState.UpdateCtrl( this );
 
-	for ( const multi::CAttribCheckState& attribState: m_attribCheckStates )
+	for ( const multi::CAttribCheckState& attribState : m_attribCheckStates )
 		attribState.UpdateCtrl( this );
 }
 
@@ -371,10 +371,10 @@ void CTouchFilesDialog::UpdateFieldsFromCaretItem( void )
 
 void CTouchFilesDialog::InputFields( void )
 {
-	for ( multi::CDateTimeState& rDateTimeState: m_dateTimeStates )
+	for ( multi::CDateTimeState& rDateTimeState : m_dateTimeStates )
 		rDateTimeState.InputCtrl( this );
 
-	for ( multi::CAttribCheckState& rAttribState: m_attribCheckStates )
+	for ( multi::CAttribCheckState& rAttribState : m_attribCheckStates )
 		rAttribState.InputCtrl( this );
 }
 
@@ -394,17 +394,17 @@ utl::ICommand* CTouchFilesDialog::MakeChangeDestFileStatesCmd( void )
 	bool anyChange = false;
 
 	// apply valid edits, i.e. if not null
-	for ( const CTouchItem* pTouchItem: targetItems )
+	for ( const CTouchItem* pTouchItem : targetItems )
 	{
 		fs::CFileState newFileState = pTouchItem->GetDestState();
 
-		for ( const multi::CDateTimeState& dateTimeState: m_dateTimeStates )
+		for ( const multi::CDateTimeState& dateTimeState : m_dateTimeStates )
 			if ( dateTimeState.CanApply() )
 			{
 				dateTimeState.Apply( newFileState );
 			}
 
-		for ( const multi::CAttribCheckState& attribState: m_attribCheckStates )
+		for ( const multi::CAttribCheckState& attribState : m_attribCheckStates )
 			if ( attribState.CanApply() )
 			{
 				attribState.Apply( newFileState );
@@ -602,7 +602,7 @@ CTouchItem* CTouchFilesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
 
 void CTouchFilesDialog::MarkInvalidSrcItems( void )
 {
-	for ( CTouchItem* pTouchItem: m_rTouchItems )
+	for ( CTouchItem* pTouchItem : m_rTouchItems )
 		if ( !pTouchItem->GetFilePath().FileExist() )
 			utl::AddUnique( m_errorItems, pTouchItem );
 }

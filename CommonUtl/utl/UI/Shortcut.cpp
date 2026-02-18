@@ -305,6 +305,14 @@ namespace shell
 		return false;
 	}
 
+	shell::TPath CShortcut::GetTargetShellPath( void ) const
+	{
+		if ( IsTargetNonFileSys() )
+			return m_targetPidl.ToShellPath();
+
+		return m_targetPath;
+	}
+
 	bool CShortcut::operator==( const CShortcut& right ) const
 	{
 		return
