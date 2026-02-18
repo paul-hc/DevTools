@@ -74,7 +74,7 @@ const std::tstring& CEnumTags::_Format( int value, const std::vector<std::tstrin
 	return tags[ TagIndex( value, tags ) ];
 }
 
-bool CEnumTags::_Parse( int& rValue, const std::tstring& text, const std::vector<std::tstring>& tags ) const
+bool CEnumTags::_Parse( OUT int& rValue, const std::tstring& text, const std::vector<std::tstring>& tags ) const
 {
 	ASSERT( !tags.empty() );
 

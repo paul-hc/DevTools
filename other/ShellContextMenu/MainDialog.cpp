@@ -8,8 +8,7 @@
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ShellContextMenuHost.h"
-#include "utl/UI/ShellTypes.h"
-#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ShellPidl.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -47,7 +46,7 @@ CMainDialog::CMainDialog( void )
 	, m_currDirImageIndex( -1 )
 	, m_fileListCtrl( IDC_FILE_LIST )
 {
-	RegisterCtrlLayout( layout::s_styles, COUNT_OF( layout::s_styles ) );
+	RegisterCtrlLayout( ARRAY_SPAN( layout::s_styles ) );
 	m_regSection = reg::section_dialog;
 	m_fileListCtrl.SetSection( reg::section_fileList );
 	m_fileListCtrl.SetUseExternalImages();

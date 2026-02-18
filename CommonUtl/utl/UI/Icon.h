@@ -31,6 +31,7 @@ public:
 
 	HICON GetHandle( void ) const { return m_hIcon; }
 	CIcon& SetHandle( HICON hIcon, bool hasAlpha );
+	void StoreIcon( HICON hIcon );		// evaluates icon info, similar with LoadNewIcon( HICON hIcon )
 
 	bool HasAlpha( void ) const { return IsValid() && m_hasAlpha; }			// based on a 32 bit per pixel image
 	void SetHasAlpha( bool hasAlpha );

@@ -1,33 +1,8 @@
-#ifndef ImageProxy_h
-#define ImageProxy_h
+#ifndef ImageProxies_h
+#define ImageProxies_h
 #pragma once
 
-
-enum
-{
-	AutoImage = -2,		// lookup the image
-	NoImage = -1,		// no image specified
-
-	NoOverlayMask = 0	// no overlay image specified
-};
-
-
-namespace ui
-{
-	interface IImageProxy : public utl::IMemoryManaged
-	{
-		virtual bool IsEmpty( void ) const = 0;
-		virtual const CSize& GetSize( void ) const = 0;
-		virtual void SizeToText( CDC* /*pDC*/ ) {}
-
-		virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const = 0;
-		virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const = 0;
-
-		// implemented methods
-		virtual bool HasTransparency( void ) const { return false; }
-		virtual void FillBackground( CDC* pDC, const CPoint& pos, COLORREF bkColor ) const;
-	};
-}
+#include "IImageProxy.h"
 
 
 class CDibSectionTraits;
@@ -62,9 +37,12 @@ class CIcon;
 
 
 class CIconProxy : public ui::IImageProxy
+	, private utl::noncopyable
 {
 public:
-	CIconProxy( const CIcon* pIcon = nullptr );
+	CIconProxy( const CIcon* pIcon = nullptr );		// no ownership
+	CIconProxy( HICON hIcon );						// with ownership
+	virtual ~CIconProxy();
 
 	// ui::IImageProxy interface
 	virtual bool IsEmpty( void ) const override { return nullptr == m_pIcon; }
@@ -75,7 +53,8 @@ public:
 private:
 	void CreateMonochromeMask( CDC* pMemoryDC, CDC* pMonoDC ) const;
 private:
-	const CIcon* m_pIcon;		// no ownership
+	CIcon* m_pIcon;
+	bool m_hasOwnership;
 };
 
 
@@ -83,9 +62,22 @@ private:
 //
 struct CImageListProxy : public ui::IImageProxy
 {
-	CImageListProxy( CImageList* pImageList = nullptr, int index = NoImage, int overlayMask = NoOverlayMask );
+	CImageListProxy( CImageList* pImageList = nullptr, int imageIndex = NoImage, int overlayMask = NoOverlayMask );
 
-	void Reset( CImageList* pImageList, int index );
+	void Reset( CImageList* pImageList, int imageIndex );
+
+	CImageList* GetImageList( void ) const { return m_pImageList; }
+	void SetImageList( CImageList* pImageList );
+
+	int GetImageIndex( void ) const { return m_imageIndex; }
+	bool SetImageIndex( int imageIndex ) { return utl::ModifyValue( m_imageIndex, imageIndex ); }
+
+	// ui::IImageProxy interface
+	virtual bool IsEmpty( void ) const  override { return nullptr == m_pImageList || m_imageIndex < 0; }
+	virtual const CSize& GetSize( void ) const override { return m_imageSize; }
+	virtual bool HasTransparency( void ) const override { return true; }
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
 
 	// overlay
 	bool HasOverlayMask( void ) const { return m_overlayMask > NoOverlayMask; }
@@ -94,20 +86,13 @@ struct CImageListProxy : public ui::IImageProxy
 	bool HasExternalOverlay( void ) const { ASSERT( nullptr == m_pExternalOverlay || !m_pExternalOverlay->IsEmpty() ); return m_pExternalOverlay != nullptr; }
 	const CImageListProxy* GetExternalOverlay( void ) const { return m_pExternalOverlay; }
 	void SetExternalOverlay( const CImageListProxy* pExternalOverlay ) { m_pExternalOverlay = pExternalOverlay; }
-
-	// ui::IImageProxy interface
-	virtual bool IsEmpty( void ) const  override { return nullptr == m_pImageList || m_index < 0; }
-	virtual const CSize& GetSize( void ) const override { return m_imageSize; }
-	virtual bool HasTransparency( void ) const override { return true; }
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
 private:
 	void DrawDisabledImpl( CDC* pDC, const CPoint& pos, UINT style ) const;
 	void DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT style ) const;
-public:
-	CImageList* m_pImageList;
-	int m_index;
 private:
+	CImageList* m_pImageList;					// no ownership
+	int m_imageIndex;
+
 	int m_overlayMask;							// one-based index of the overlay mask (1->4 in the same image list)
 	const CImageListProxy* m_pExternalOverlay;	// external overlay, could belong to a different image list
 	CSize m_imageSize;
@@ -130,7 +115,7 @@ public:
 	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
 	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
 private:
-	CImageList* m_pImageList;
+	CImageList* m_pImageList;					// no ownership
 	int m_imageCount;
 	CSize m_imageSize;
 	CSize m_stripSize;
@@ -159,4 +144,4 @@ private:
 };
 
 
-#endif // ImageProxy_h
+#endif // ImageProxies_h

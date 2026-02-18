@@ -1,6 +1,6 @@
 
 #include "pch.h"
-#include "ImageProxy.h"
+#include "ImageProxies.h"
 #include "DibDraw.h"
 #include "Icon.h"
 #include "Color.h"
@@ -144,8 +144,21 @@ void CBitmapProxy::CreateMonochromeMask( CDC* pMemDC, CDC* pMonoDC ) const
 // CIconProxy implementation
 
 CIconProxy::CIconProxy( const CIcon* pIcon /*= nullptr*/ )
-	: m_pIcon( pIcon )
+	: m_pIcon( const_cast<CIcon*>( pIcon ) )
+	, m_hasOwnership( false )
 {
+}
+
+CIconProxy::CIconProxy( HICON hIcon )
+	: m_pIcon( CIcon::LoadNewIcon( hIcon ) )
+	, m_hasOwnership( true )
+{
+}
+
+CIconProxy::~CIconProxy()
+{
+	if ( m_hasOwnership )
+		delete m_pIcon;
 }
 
 const CSize& CIconProxy::GetSize( void ) const override
@@ -168,28 +181,36 @@ void CIconProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpCol
 
 // CImageListProxy implementation
 
-CImageListProxy::CImageListProxy( CImageList* pImageList /*= nullptr*/, int index /*= NoImage*/, int overlayMask /*= NoOverlayMask*/ )
-	: m_pImageList( pImageList )
-	, m_index( index )
+CImageListProxy::CImageListProxy( CImageList* pImageList /*= nullptr*/, int imageIndex /*= NoImage*/, int overlayMask /*= NoOverlayMask*/ )
+	: m_pImageList( nullptr )
+	, m_imageIndex( imageIndex )
 	, m_overlayMask( NoOverlayMask )
 	, m_pExternalOverlay( nullptr )
 	, m_imageSize( 0, 0 )
 {
 	SetOverlayMask( overlayMask );		// do some validation
+	SetImageList( pImageList );
 }
 
-void CImageListProxy::Reset( CImageList* pImageList, int index )
+void CImageListProxy::Reset( CImageList* pImageList, int imageIndex )
+{
+	SetImageList( pImageList );
+	m_imageIndex = imageIndex;
+}
+
+void CImageListProxy::SetImageList( CImageList* pImageList )
 {
 	m_pImageList = pImageList;
-	m_index = index;
-	m_imageSize = gdi::GetImageIconSize( m_pImageList->GetSafeHandle() );
+
+	if ( m_pImageList != nullptr )
+		m_imageSize = gdi::GetImageIconSize( m_pImageList->GetSafeHandle() );
 }
 
 void CImageListProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
 {
 	ASSERT( !IsEmpty() );
 
-	VERIFY( const_cast<CImageList*>( m_pImageList )->Draw( pDC, m_index, pos, ILD_TRANSPARENT | INDEXTOOVERLAYMASK( m_overlayMask ) ) );
+	VERIFY( const_cast<CImageList*>( m_pImageList )->Draw( pDC, m_imageIndex, pos, ILD_TRANSPARENT | INDEXTOOVERLAYMASK( m_overlayMask ) ) );
 
 	if ( HasExternalOverlay() )
 		m_pExternalOverlay->Draw( pDC, pos, ILD_TRANSPARENT );
@@ -208,7 +229,7 @@ void CImageListProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*tran
 void CImageListProxy::DrawDisabledImpl( CDC* pDC, const CPoint& pos, UINT style ) const
 {
 	ASSERT( !IsEmpty() );
-	gdi::DrawDisabledImage( pDC, *m_pImageList, m_imageSize, m_index, pos, m_imageSize, style );
+	gdi::DrawDisabledImage( pDC, *m_pImageList, m_imageSize, m_imageIndex, pos, m_imageSize, style );
 }
 
 void CImageListProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT style ) const
@@ -218,7 +239,7 @@ void CImageListProxy::DrawDisabledImpl_old( CDC* pDC, const CPoint& pos, UINT st
 	CDC memDC;
 	if ( !memDC.CreateCompatibleDC( pDC ) )
 	{
-		CIcon icon( m_pImageList->ExtractIcon( m_index ), m_imageSize );
+		CIcon icon( m_pImageList->ExtractIcon( m_imageIndex ), m_imageSize );
 		icon.DrawDisabled( *pDC, pos );
 		return;
 	}

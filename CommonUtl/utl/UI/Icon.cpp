@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "Icon.h"
 #include "Imaging.h"
-#include "ImageProxy.h"
+#include "ImageProxies.h"
 #include "GroupIconRes.h"
 #include "DibSection.h"
 #include "resource.h"
@@ -169,6 +169,22 @@ CIcon& CIcon::SetHandle( HICON hIcon, bool hasAlpha /*= true*/ )
 	m_hIcon = hIcon;
 	SetHasAlpha( hasAlpha );
 	return *this;
+}
+
+void CIcon::StoreIcon( HICON hIcon )
+{
+	if ( hIcon != m_hIcon )
+		Clear();
+
+	m_hIcon = hIcon;
+
+	if ( m_hIcon != nullptr )
+	{
+		CIconInfo iconInfo( hIcon );
+
+		m_size = iconInfo.m_size;
+		SetHasAlpha( iconInfo.HasAlpha() );
+	}
 }
 
 void CIcon::SetHasAlpha( bool hasAlpha )

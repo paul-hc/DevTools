@@ -20,6 +20,8 @@ public:
 	void DDX_EnumValue( CDataExchange* pDX, int ctrlId, EnumType& rValue );
 
 	bool HasValidValue( void ) const { return GetCurSel() != -1; }
+	bool IsValidValue( int value ) const;
+
 	int GetValue( void ) const;
 	bool SetValue( int value );
 

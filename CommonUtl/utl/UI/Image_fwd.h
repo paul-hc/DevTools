@@ -55,7 +55,7 @@ namespace ui
 
 	enum ImageFileFormat { BitmapFormat, JpegFormat, TiffFormat, GifFormat, PngFormat, WmpFormat, IconFormat, UnknownImageFormat };
 
-	ImageFileFormat FindImageFileFormat( const TCHAR imageFilePath[] );
+	ImageFileFormat FindImageFileFormat( const TCHAR* pImageFilePath );
 
 
 	enum GlyphGauge { SmallGlyph, LargeGlyph, _GlyphGaugeCount };
@@ -199,9 +199,9 @@ namespace ui
 
 namespace gdi
 {
-	ui::CImageListInfo CreateImageList( CImageList* pOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK );	// countOrGrowBy - if positive: actual count, if negative: growBy
+	ui::CImageListInfo CreateImageList( OUT CImageList* pOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK );	// countOrGrowBy - if positive: actual count, if negative: growBy
 
-	inline ui::CImageListInfo CreateEmptyImageList( CImageList* pOutImageList, const CIconSize& imageSize, int growBy = 5, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK )
+	inline ui::CImageListInfo CreateEmptyImageList( OUT CImageList* pOutImageList, const CIconSize& imageSize, int growBy = 5, TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK )
 	{
 		return CreateImageList( pOutImageList, imageSize, -growBy, ilFlags );
 	}
@@ -215,15 +215,15 @@ namespace res
 	HICON LoadIcon( const CIconId& iconId, UINT fuLoad = LR_DEFAULTCOLOR );
 
 	// image-list from bitmap: loads strip from whichever comes first - PNG:32bpp with alpha (if found), or BMP:4/8/24bpp
-	ui::CImageListInfo LoadImageListDIB( CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor = CLR_NONE,
+	ui::CImageListInfo LoadImageListDIB( OUT CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor = CLR_NONE,
 										 int imageCount = -1, bool disabledEffect = false );
 
 	// image-list from an icon-strip of custom size and multiple images.
 	//	- just for illustration, so not really used since non-square icons ar non standard!
-	ui::CImageListInfo _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId );
+	ui::CImageListInfo _LoadImageListIconStrip( OUT CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId );
 
 	// image-list from individual icons
-	ui::CImageListInfo LoadImageListIcons( CImageList* pOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize = SmallIcon,
+	ui::CImageListInfo LoadImageListIcons( OUT CImageList* pOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize = SmallIcon,
 										   TImageListFlags ilFlags = ILC_COLOR32 | ILC_MASK );
 }
 

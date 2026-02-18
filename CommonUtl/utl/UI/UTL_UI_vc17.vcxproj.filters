@@ -473,7 +473,7 @@
     <ClInclude Include="ImagePathKey.h">
       <Filter>UI\Imaging</Filter>
     </ClInclude>
-    <ClInclude Include="ImageProxy.h">
+    <ClInclude Include="ImageProxies.h">
       <Filter>UI\Imaging</Filter>
     </ClInclude>
     <ClInclude Include="ImageStore.h">
@@ -760,6 +760,9 @@
     </ClInclude>
     <ClInclude Include="test\UnitTestUI.h">
       <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="IImageProxy.h">
+      <Filter>UI\Imaging</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1063,7 +1066,7 @@
     <ClCompile Include="Image_fwd.cpp">
       <Filter>UI\Imaging</Filter>
     </ClCompile>
-    <ClCompile Include="ImageProxy.cpp">
+    <ClCompile Include="ImageProxies.cpp">
       <Filter>UI\Imaging</Filter>
     </ClCompile>
     <ClCompile Include="ImageStore.cpp">

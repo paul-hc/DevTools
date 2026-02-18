@@ -5,7 +5,7 @@
 #include "ImagingGdiPlus.h"
 #include "ImagingWic.h"
 #include "Imaging.h"
-#include "ImageProxy.h"
+#include "ImageProxies.h"
 #include "Path.h"
 #include "WndUtils.h"
 #include <afxglobals.h>				// GetGlobalData()

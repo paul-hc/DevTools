@@ -4,7 +4,7 @@
 #include "DibSection.h"
 #include "DibPixels.h"
 #include "GdiCoords.h"
-#include "ImageProxy.h"
+#include "ImageProxies.h"
 #include "EnumTags.h"
 
 #ifdef _DEBUG

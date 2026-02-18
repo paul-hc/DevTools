@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include "ImageEdit.h"
+#include "ImageProxies.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -9,9 +10,6 @@
 
 CImageEdit::CImageEdit( void )
 	: CTextEdit( false )			// no fixed font
-	, m_pImageList( nullptr )
-	, m_imageIndex( -1 )
-	, m_imageSize( 0, 0 )
 	, m_imageNcRect( 0, 0, 0, 0 )
 {
 }
@@ -20,17 +18,52 @@ CImageEdit::~CImageEdit()
 {
 }
 
+bool CImageEdit::HasValidImage( void ) const
+{
+	return m_pImageProxy.get() != nullptr && !m_pImageProxy->IsEmpty();
+}
+
+bool CImageEdit::SetImageProxy( ui::IImageProxy* pImageProxy )
+{
+	if ( pImageProxy == m_pImageProxy.get() )
+		return false;
+
+	m_pImageProxy.reset( pImageProxy );
+
+	UpdateControl();
+	return true;
+}
+
 void CImageEdit::SetImageList( CImageList* pImageList )
 {
-	m_pImageList = pImageList;
+	if ( pImageList != nullptr )
+	{
+		if ( nullptr == m_pImageProxy.get() || !is_a<CImageListProxy>( m_pImageProxy.get() ) )
+			m_pImageProxy.reset( new CImageListProxy( pImageList ) );
+		else
+			GetImageProxyAs<CImageListProxy>()->SetImageList( pImageList );
+	}
+	else
+		m_pImageProxy.reset();
+}
 
-	if ( m_pImageList != nullptr )
-		m_imageSize = gdi::GetImageIconSize( *m_pImageList );
+int CImageEdit::GetImageIndex( void ) const
+{
+	const CImageListProxy* pImageListProxy = GetImageProxyAs<CImageListProxy>();
+
+	ASSERT_PTR( pImageListProxy );
+	return pImageListProxy->GetImageIndex();
 }
 
 bool CImageEdit::SetImageIndex( int imageIndex )
 {
-	if ( !utl::ModifyValue( m_imageIndex, imageIndex ) )
+	if ( nullptr == m_pImageProxy.get() )
+		m_pImageProxy.reset( new CImageListProxy() );		// create an empty proxy, with no image list
+
+	CImageListProxy* pImageListProxy = GetImageProxyAs<CImageListProxy>();
+
+	ASSERT_PTR( pImageListProxy );
+	if ( !pImageListProxy->SetImageIndex( imageIndex ) )
 		return false;
 
 	UpdateControl();
@@ -54,8 +87,8 @@ void CImageEdit::ResizeNonClient( void )
 
 void CImageEdit::DrawImage( CDC* pDC, const CRect& imageRect )
 {
-	ASSERT_PTR( m_pImageList );
-	m_pImageList->DrawEx( pDC, m_imageIndex, imageRect.TopLeft(), imageRect.Size(), CLR_NONE, pDC->GetBkColor(), ILD_TRANSPARENT );
+	ASSERT( HasValidImage() );
+	m_pImageProxy->Draw( pDC, imageRect.TopLeft() );
 }
 
 void CImageEdit::PreSubclassWindow( void )
@@ -82,9 +115,10 @@ void CImageEdit::OnNcCalcSize( BOOL calcValidRects, NCCALCSIZE_PARAMS* pNcSp )
 		if ( HasValidImage() )
 		{
 			RECT* pClientNew = &pNcSp->rgrc[ 0 ];		// in parent's client coordinates
+			const CSize& imageSize = m_pImageProxy->GetSize();
 
 			m_imageNcRect = *pClientNew;
-			m_imageNcRect.right = m_imageNcRect.left + m_imageSize.cx + ImageSpacing * 2 + ImageToTextGap - 1;
+			m_imageNcRect.right = m_imageNcRect.left + imageSize.cx + ImageSpacing * 2 + ImageToTextGap - 1;
 			pClientNew->left = m_imageNcRect.right;
 		}
 		else
@@ -103,7 +137,7 @@ void CImageEdit::OnNcPaint( void )
 		pParent->ClientToScreen( &ncRect );
 		ui::ScreenToNonClient( m_hWnd, ncRect );		// this edit non-client coordinates
 
-		CRect imageRect = CRect( ncRect.TopLeft(), m_imageSize );
+		CRect imageRect = CRect( ncRect.TopLeft(), m_pImageProxy->GetSize() );
 		imageRect.OffsetRect( ImageSpacing + 1, 0 );
 
 		CWindowDC dc( this );

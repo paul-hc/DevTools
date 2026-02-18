@@ -40,9 +40,9 @@ namespace ui
 		return s_tags;
 	}
 
-	ImageFileFormat FindImageFileFormat( const TCHAR imageFilePath[] )
+	ImageFileFormat FindImageFileFormat( const TCHAR* pImageFilePath )
 	{
-		const TCHAR* pExt = path::FindExt( imageFilePath );
+		const TCHAR* pExt = path::FindExt( pImageFilePath );
 
 		if ( str::Equals<str::IgnoreCase>( _T(".bmp"), pExt ) ||
 			 str::Equals<str::IgnoreCase>( _T(".dib"), pExt ) ||
@@ -140,7 +140,7 @@ namespace ui
 
 namespace gdi
 {
-	ui::CImageListInfo CreateImageList( CImageList* pOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
+	ui::CImageListInfo CreateImageList( OUT CImageList* pOutImageList, const CIconSize& imageSize, int countOrGrowBy, TImageListFlags ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
 	{
 		int imageCount = 0, growBy = 0;
 
@@ -165,7 +165,7 @@ namespace res
 		return (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, fuLoad );
 	}
 
-	ui::CImageListInfo LoadImageListDIB( CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor /*= CLR_NONE*/,
+	ui::CImageListInfo LoadImageListDIB( OUT CImageList* pOutImageList, UINT bitmapId, COLORREF transpColor /*= CLR_NONE*/,
 										 int imageCount /*= -1*/, bool disabledEffect /*= false*/ )
 	{
 		// Use PNG only with 32bpp (alpha channel). PNG 24bpp breaks image list transparency (DIB issues?).
@@ -196,7 +196,7 @@ namespace res
 		return imageListInfo;
 	}
 
-	ui::CImageListInfo _LoadImageListIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId )
+	ui::CImageListInfo _LoadImageListIconStrip( OUT CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId )
 	{
 		// load a strip from a custom size icon with multiple images; image count is inferred by strip_width/strip_height ratio.
 		ASSERT_PTR( pOutImageList );
@@ -236,7 +236,7 @@ namespace res
 		return ui::CImageListInfo( imageCount, imageSize, imageListFlags );
 	}
 
-	ui::CImageListInfo LoadImageListIcons( CImageList* pOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
+	ui::CImageListInfo LoadImageListIcons( OUT CImageList* pOutImageList, const UINT iconIds[], size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,
 										   TImageListFlags ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
 	{
 		ASSERT_PTR( iconIds );

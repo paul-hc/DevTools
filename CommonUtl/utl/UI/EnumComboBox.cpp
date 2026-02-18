@@ -31,13 +31,19 @@ void CEnumComboBox::InitStockContent( void ) override
 	ui::WriteComboItems( *this, m_pEnumTags->GetUiTags() );
 }
 
+bool CEnumComboBox::IsValidValue( int value ) const
+{
+	ASSERT_PTR( m_pEnumTags );
+	return value >= 0 && value < (int)m_pEnumTags->GetUiTags().size();
+}
+
 int CEnumComboBox::GetValue( void ) const
 {
 	int selIndex = GetCurSel();
-	if ( -1 == selIndex )
+	if ( CB_ERR == selIndex )
 	{
 		ASSERT( HasValidValue() );
-		return -1;
+		return CB_ERR;
 	}
 
 	return m_pEnumTags->GetSelValue<int>( selIndex );
@@ -48,8 +54,7 @@ bool CEnumComboBox::SetValue( int value )
 	if ( HasValidValue() && value == GetValue() )
 		return false;
 
-	VERIFY( SetCurSel( m_pEnumTags->GetTagIndex( value ) ) != CB_ERR );
-	return true;
+	return SetCurSel( m_pEnumTags->GetTagIndex( value ) ) != CB_ERR;
 }
 
 void CEnumComboBox::PreSubclassWindow( void )

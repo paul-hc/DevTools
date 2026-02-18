@@ -3,6 +3,7 @@
 #pragma once
 
 #include "TextEdit.h"
+#include "IImageProxy.h"
 
 
 class CImageEdit : public CTextEdit
@@ -11,13 +12,19 @@ public:
 	CImageEdit( void );
 	virtual ~CImageEdit();
 
-	CImageList* GetImageList( void ) const { return m_pImageList; }
+	ui::IImageProxy* GetImageProxy( void ) const { return m_pImageProxy.get(); }
+	bool SetImageProxy( ui::IImageProxy* pImageProxy );
+
+	template< typename ImageProxyT >
+	ImageProxyT* GetImageProxyAs( void ) const { return checked_static_cast<ImageProxyT*>( m_pImageProxy.get() ); }
+
+	// image list
 	void SetImageList( CImageList* pImageList );
 
-	int GetImageIndex( void ) const { return m_imageIndex; }
+	int GetImageIndex( void ) const;
 	bool SetImageIndex( int imageIndex );
 
-	virtual bool HasValidImage( void ) const { return m_pImageList != nullptr && m_imageIndex >= 0; }
+	virtual bool HasValidImage( void ) const;
 protected:
 	virtual void DrawImage( CDC* pDC, const CRect& imageRect );
 
@@ -25,9 +32,7 @@ protected:
 private:
 	void ResizeNonClient( void );
 private:
-	CImageList* m_pImageList;
-	int m_imageIndex;
-	CSize m_imageSize;
+	std::auto_ptr<ui::IImageProxy> m_pImageProxy;
 	CRect m_imageNcRect;
 
 	enum { ImageSpacing = 0, ImageToTextGap = 2 };

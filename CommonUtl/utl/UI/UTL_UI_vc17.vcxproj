@@ -245,12 +245,13 @@
     <ClInclude Include="Icon.h" />
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="IconGroup.h" />
+    <ClInclude Include="IImageProxy.h" />
     <ClInclude Include="IImageZoomView.h" />
     <ClInclude Include="ImageCommandLookup.h" />
     <ClInclude Include="ImageEdit.h" />
     <ClInclude Include="ImageInfoGadget.h" />
     <ClInclude Include="ImagePathKey.h" />
-    <ClInclude Include="ImageProxy.h" />
+    <ClInclude Include="ImageProxies.h" />
     <ClInclude Include="ImageStore.h" />
     <ClInclude Include="ImageStore_fwd.h" />
     <ClInclude Include="ImageZoomViewD2D.h" />
@@ -460,7 +461,7 @@
     <ClCompile Include="ImageCommandLookup.cpp" />
     <ClCompile Include="ImageEdit.cpp" />
     <ClCompile Include="ImageInfoGadget.cpp" />
-    <ClCompile Include="ImageProxy.cpp" />
+    <ClCompile Include="ImageProxies.cpp" />
     <ClCompile Include="ImageStore.cpp" />
     <ClCompile Include="ImageZoomViewD2D.cpp" />
     <ClCompile Include="Image_fwd.cpp" />

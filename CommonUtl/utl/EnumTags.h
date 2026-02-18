@@ -23,17 +23,17 @@ public:
 	int ParseKey( const std::tstring& text ) const { int value; _Parse( value, text, GetFallbackKeyTags() ); return value; }
 
 	template< typename EnumType >
-	bool ParseUiAs( EnumType& rValue, const std::tstring& text ) const { return _Parse( (int&)rValue, text, m_uiTags ); }
+	bool ParseUiAs( OUT EnumType& rValue, const std::tstring& text ) const { return _Parse( (int&)rValue, text, m_uiTags ); }
 
 	template< typename EnumType >
-	bool ParseKeyAs( EnumType& rValue, const std::tstring& text ) const { return _Parse( (int&)rValue, text, GetFallbackKeyTags() ); }
+	bool ParseKeyAs( OUT EnumType& rValue, const std::tstring& text ) const { return _Parse( (int&)rValue, text, GetFallbackKeyTags() ); }
 
 	enum TagType { UiTag, KeyTag };
 
 	const std::tstring& Format( int value, TagType tagType ) const { return _Format( value, GetTagsBy( tagType ) ); }
 
 	template< typename EnumType >
-	bool ParseAs( EnumType& rValue, const std::tstring& text, TagType tagType ) const { return UiTag == tagType ? ParseUiAs<EnumType>( rValue, text ) : ParseKeyAs<EnumType>( rValue, text ); }
+	bool ParseAs( OUT EnumType& rValue, const std::tstring& text, TagType tagType ) const { return UiTag == tagType ? ParseUiAs<EnumType>( rValue, text ) : ParseKeyAs<EnumType>( rValue, text ); }
 
 	const std::tstring& LookupTag( TagType tag, int flag ) const;
 
@@ -54,7 +54,7 @@ public:
 private:
 	void Construct( const std::tstring& uiTags, const TCHAR* pKeyTags );
 	size_t TagIndex( int value, const std::vector<std::tstring>& tags ) const;
-	bool _Parse( int& rValue, const std::tstring& text, const std::vector<std::tstring>& tags ) const;
+	bool _Parse( OUT int& rValue, const std::tstring& text, const std::vector<std::tstring>& tags ) const;
 
 	const std::vector<std::tstring>& GetFallbackKeyTags( void ) const { return !m_keyTags.empty() ? m_keyTags : m_uiTags; }
 	const std::vector<std::tstring>& GetTagsBy( TagType tagType ) const { return UiTag == tagType ? m_uiTags : GetFallbackKeyTags(); }
