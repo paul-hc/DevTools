@@ -42,13 +42,13 @@ namespace ui
 	{
 		ASSERT_PTR( pListCtrl->GetSafeHwnd() );
 
-		const CSelectionData oldSelItems = *this;
+		const CSelectionData oldSelData = *this;
 
 		pListCtrl->QuerySelectionAs( m_selItems );
 		m_pCaretItem = pListCtrl->GetCaretAs<ObjectT>();
 		m_pTopVisibleItem = pListCtrl->GetTopObjectAs<ObjectT>();
 
-		return *this != oldSelItems;		// true if changed
+		return *this != oldSelData;		// true if changed
 	}
 
 	template< typename ObjectT >

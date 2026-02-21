@@ -48,6 +48,12 @@ bool CPathItemEdit::HasValidImage( void ) const override
 	return m_pathItem.ObjectExist();
 }
 
+bool CPathItemEdit::SetMultiValuesMode( void ) override
+{	// switch to MultiValues contents mode
+	SetShellPath( GetMultiValueTag() );		// hide the image in multiple mode
+	return true;
+}
+
 void CPathItemEdit::UpdateControl( void ) override
 {
 	m_evalFilePath = GetShellPath().GetExpanded();
@@ -72,15 +78,18 @@ void CPathItemEdit::DrawImage( CDC* pDC, const CRect& imageRect ) override
 
 COLORREF CPathItemEdit::GetCustomTextColor( void ) const overrides(CTextEdit)
 {
-	if ( !m_pathItem.ObjectExist() )
+	shell::TPath currPath = GetModify()
+		? fs::CPath::Expand( GetText().c_str() )	// modified: current text takes precedence
+		: m_evalFilePath;							// m_evalFilePath (m_pathItem) is in sync with current text
+
+	DWORD fileAttribs = shell::GetShellFileAttributes( currPath.GetPtr() );
+
+	if ( INVALID_FILE_ATTRIBUTES == fileAttribs )
 		return color::ScarletRed;		// error text color: file does not exist
-	else if ( m_pathItem.IsFilePath() )
-	{
-		if ( fs::IsValidDirectory( m_evalFilePath.GetPtr() ) )
-			return ::GetSysColor( COLOR_HIGHLIGHT );	// directory text color
-	}
-	else if ( m_pathItem.IsSpecialPidl() )
-		return color::Teal;			// special PIDL text color
+	else if ( currPath.IsGuidPath() )
+		return color::Teal;				// special PIDL text color
+	else if ( HasFlag( fileAttribs, FILE_ATTRIBUTE_DIRECTORY ) )
+		return ::GetSysColor( COLOR_HIGHLIGHT );	// directory text color
 
 	return __super::GetCustomTextColor();
 }

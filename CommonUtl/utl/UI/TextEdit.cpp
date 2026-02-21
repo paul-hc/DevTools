@@ -154,9 +154,14 @@ bool CTextEdit::ReplaceText( const std::tstring& text, bool canUndo /*= true*/ )
 	return false;
 }
 
-bool CTextEdit::HasPlaceholderTag( void ) const
-{	// current text is the placeholder tag?
-	return !m_placeholderTag.empty() && m_placeholderTag == GetText();
+bool CTextEdit::InMultiValuesMode( void ) const implement
+{
+	return GetText() == GetMultiValueTag();
+}
+
+bool CTextEdit::SetMultiValuesMode( void )
+{	// switch to MultiValues contents mode
+	return SetText( GetMultiValueTag() );
 }
 
 bool CTextEdit::RevertContents( void )
@@ -595,7 +600,7 @@ HBRUSH CTextEdit::CtlColor( CDC* pDC, UINT ctlColor )
 	bool readOnly = IsReadOnly();
 	COLORREF textColor = CLR_NONE;
 
-	if ( HasPlaceholderTag() )
+	if ( InMultiValuesMode() )
 		textColor = ::GetSysColor( COLOR_SCROLLBAR );	// ~ group-box frame color
 	else
 		textColor = GetCustomTextColor();				// allow custom color highlight

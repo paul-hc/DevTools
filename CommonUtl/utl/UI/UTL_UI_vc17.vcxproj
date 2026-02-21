@@ -242,6 +242,7 @@
     <ClInclude Include="GpUtilities.h" />
     <ClInclude Include="GroupIconRes.h" />
     <ClInclude Include="HistoryComboBox.h" />
+    <ClInclude Include="HotKeyCtrlEx.h" />
     <ClInclude Include="Icon.h" />
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="IconGroup.h" />
@@ -285,6 +286,8 @@
     <ClInclude Include="MenuPickerButton.h" />
     <ClInclude Include="MenuUtilities.h" />
     <ClInclude Include="MfcUtilities.h" />
+    <ClInclude Include="MultiValueBase.h" />
+    <ClInclude Include="MultiValueState.h" />
     <ClInclude Include="MultiZone.h" />
     <ClInclude Include="NumericEdit.h" />
     <ClInclude Include="ObjectCtrlBase.h" />
@@ -455,6 +458,7 @@
     <ClCompile Include="GroupIconRes.cpp" />
     <ClCompile Include="HeaderIncludes.cpp" />
     <ClCompile Include="HistoryComboBox.cpp" />
+    <ClCompile Include="HotKeyCtrlEx.cpp" />
     <ClCompile Include="Icon.cpp" />
     <ClCompile Include="IconButton.cpp" />
     <ClCompile Include="IconGroup.cpp" />
@@ -490,6 +494,8 @@
     <ClCompile Include="MenuPickerButton.cpp" />
     <ClCompile Include="MenuUtilities.cpp" />
     <ClCompile Include="MfcUtilities.cpp" />
+    <ClCompile Include="MultiValueBase.cpp" />
+    <ClCompile Include="MultiValueState.cpp" />
     <ClCompile Include="MultiZone.cpp" />
     <ClCompile Include="ObjectCtrlBase.cpp" />
     <ClCompile Include="OleDataSource.cpp" />

@@ -3,8 +3,10 @@
 #pragma once
 
 #include "utl/ISubject.h"
+#include "utl/UI/MultiValueState.h"
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/FrameHostCtrl.h"
+#include "utl/UI/HotKeyCtrlEx.h"
 #include "utl/UI/PathItemEdit.h"
 #include "utl/UI/PathItemListCtrl.h"
 #include "utl/UI/SelectionData.h"
@@ -18,14 +20,6 @@
 class CEditLinkItem;
 class CEnumTags;
 struct CFieldState;
-
-namespace multi
-{
-	class CPathValue;
-	class CStringValue;
-	class CHotKeyValue;
-	class CEnumValue;
-}
 
 
 class CEditShortcutsDialog : public CFileEditorBaseDialog
@@ -115,7 +109,7 @@ private:
 	CHostToolbarCtrl<CTextEditor> m_argumentsEdit;
 	CHostToolbarCtrl<CPathItemEdit> m_workDirEdit;
 	CHostToolbarCtrl<CTextEditor> m_descriptionEdit;
-	CHotKeyCtrl m_hotKeyCtrl;
+	CHotKeyCtrlEx m_hotKeyCtrl;
 	CEnumComboBox m_showCmdCombo;
 
 	CHostToolbarCtrl<CImageEdit> m_iconLocationEdit;

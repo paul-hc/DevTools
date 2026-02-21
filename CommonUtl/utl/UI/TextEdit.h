@@ -4,9 +4,10 @@
 
 #include "AccelTable.h"
 #include "InternalChange.h"
-#include "Range.h"
+#include "MultiValueBase.h"
 #include "FrameHostCtrl.h"
 #include "TextEdit_fwd.h"
+#include "utl/Range.h"
 
 
 class CSyncScrolling;
@@ -20,6 +21,7 @@ class CSyncScrolling;
 
 class CTextEdit : public CFrameHostCtrl<CEdit>
 	, public CInternalChange
+	, public ui::CMultiValueBase
 {
 	typedef CFrameHostCtrl<CEdit> TBaseClass;
 
@@ -49,15 +51,14 @@ public:
 
 	bool ReplaceText( const std::tstring& text, bool canUndo = true );
 
-	bool HasPlaceholderTag( void ) const;		// current text is the placeholder tag?
-	const std::tstring& GetPlaceholderTag( void ) const { return m_placeholderTag; }
-	void SetPlaceholderTag( const std::tstring& placeholderTag ) { m_placeholderTag = placeholderTag; }
-
 	bool IsMultiLine( void ) const { return HasFlag( GetStyle(), ES_MULTILINE ); }
 
 	bool IsReadOnly( void ) const { return HasFlag( GetStyle(), ES_READONLY ); }
 	bool IsWritable( void ) const { return !IsReadOnly(); }
 	bool SetWritable( bool writable ) { return writable != IsWritable() && SetReadOnly( !writable ) != FALSE; }
+
+	virtual bool InMultiValuesMode( void ) const implement;		// ui::CMultiValueBase implementation
+	virtual bool SetMultiValuesMode( void );
 
 	bool UseFixedFont( void ) const { return m_useFixedFont; }
 	void SetUseFixedFont( bool useFixedFont = true ) { ASSERT_NULL( m_hWnd ); m_useFixedFont = useFixedFont; }
@@ -161,7 +162,6 @@ private:
 	bool m_hookThumbTrack;					// true: track thumb track scrolling events (edit controls don't send EN_VSCROLL on thumb track scrolling)
 	bool m_visibleWhiteSpace;
 	CAccelTable m_accel;
-	std::tstring m_placeholderTag;			// optional: prevents color highlighting if current text is this tag, e.g. "<different options>"
 
 	ui::ITextInput* m_pTextInputCallback;
 	CSyncScrolling* m_pSyncScrolling;

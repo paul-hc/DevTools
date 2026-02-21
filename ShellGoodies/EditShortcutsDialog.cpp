@@ -126,8 +126,6 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 	//m_fileListCtrl.AddColumnCompare( ShowCmd, pred::NewPropertyComparator<CEditLinkItem>( func::Dest_AsShowCmd() ) );
 	//m_fileListCtrl.AddColumnCompare( D_Description, pred::NewPropertyComparator<CEditLinkItem>( func::Dest_AsDescription() ) );
 
-	static const TCHAR s_mixedFormat[] = _T("'(multiple values)'");
-
 	m_fileStatsStatic.GetMateToolbar()->GetStrip()
 		.AddButton( ID_EDIT_COPY )
 		.AddButton( ID_CMD_RESET_DESTINATIONS );
@@ -138,22 +136,18 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 		.AddButton( ID_BROWSE_FOLDER )
 		.AddButton( ID_EDIT_COPY );
 
-	m_targetPathEdit.SetPlaceholderTag( multi::GetMultipleValueTag() );
 	m_targetPathEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_BROWSE_FILE )
 		.AddButton( ID_EDIT_COPY );
 
-	m_argumentsEdit.SetPlaceholderTag( multi::GetMultipleValueTag() );
 	m_argumentsEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_EDIT_COPY );
 
 	m_workDirEdit.SetUseDirPath( true );
-	m_workDirEdit.SetPlaceholderTag( multi::GetMultipleValueTag() );
 	m_workDirEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_BROWSE_FOLDER )
 		.AddButton( ID_EDIT_COPY );
 
-	m_descriptionEdit.SetPlaceholderTag( multi::GetMultipleValueTag() );
 	m_descriptionEdit.GetMateToolbar()->GetStrip()
 		.AddButton( ID_EDIT_COPY );
 

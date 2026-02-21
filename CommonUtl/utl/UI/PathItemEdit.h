@@ -34,6 +34,7 @@ public:
 
 	// base overrides
 	virtual bool HasValidImage( void ) const override;
+	virtual bool SetMultiValuesMode( void ) override;
 protected:
 	virtual void UpdateControl( void ) override;
 	virtual void DrawImage( CDC* pDC, const CRect& imageRect ) override;

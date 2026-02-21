@@ -764,6 +764,15 @@
     <ClInclude Include="IImageProxy.h">
       <Filter>UI\Imaging</Filter>
     </ClInclude>
+    <ClInclude Include="HotKeyCtrlEx.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiValueState.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiValueBase.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\BaseImageTestCase.cpp">
@@ -1302,6 +1311,15 @@
     </ClCompile>
     <ClCompile Include="test\UnitTestUI.cpp">
       <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="HotKeyCtrlEx.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiValueState.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiValueBase.cpp">
+      <Filter>UI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
