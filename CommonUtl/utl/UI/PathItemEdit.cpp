@@ -31,16 +31,40 @@ CPathItemEdit::~CPathItemEdit()
 {
 }
 
-void CPathItemEdit::SetShellPath( const shell::TPath& shellPath )
+bool CPathItemEdit::SetShellPath( const shell::TPath& shellPath )
 {
+	if ( shellPath == GetShellPath() )
+		return false;
+
 	m_pathItem.SetShellPath( shellPath );
 	UpdateControl();
+	return true;
 }
 
-void CPathItemEdit::SetPidl( const shell::CPidlAbsolute& pidl )
+bool CPathItemEdit::SetPidl( const shell::CPidlAbsolute& pidl )
 {
+	if ( pidl == GetPidl() )
+		return false;
+
 	m_pathItem.SetPidl( pidl );
 	UpdateControl();
+	return true;
+}
+
+bool CPathItemEdit::InputShellPath( void )
+{
+	if ( IsReadOnly() || !GetModify() )
+		return false;				// avoid input: it could be a GUID path (display text is different then parsing text)
+
+	// input current text if edit is Writable and Modified
+	shell::TPath newShellPath( GetText() );
+
+	if ( newShellPath == GetShellPath() )
+		return false;
+
+	m_pathItem.SetShellPath( newShellPath );
+	m_evalFilePath = GetShellPath().GetExpanded();
+	return true;			// path has changed
 }
 
 bool CPathItemEdit::HasValidImage( void ) const override
@@ -48,9 +72,14 @@ bool CPathItemEdit::HasValidImage( void ) const override
 	return m_pathItem.ObjectExist();
 }
 
-bool CPathItemEdit::SetMultiValuesMode( void ) override
+bool CPathItemEdit::SetMultiValuesMode( bool multiValuesMode /*= true*/ ) override
 {	// switch to MultiValues contents mode
-	SetShellPath( GetMultiValueTag() );		// hide the image in multiple mode
+	if ( !__super::SetMultiValuesMode( multiValuesMode ) )
+		return false;
+
+	if ( InMultiValuesMode() )
+		SetShellPath( shell::TPath() );		// hide the image in multiple mode
+
 	return true;
 }
 
@@ -226,5 +255,5 @@ void CPathItemEdit::OnUpdateHasAny( CCmdUI* pCmdUI )
 
 void CPathItemEdit::OnUpdateAlways( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable();
+	pCmdUI->Enable( !ui::IsDisabled( m_hWnd ) && IsWritable() );
 }

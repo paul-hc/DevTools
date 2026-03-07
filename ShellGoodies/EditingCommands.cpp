@@ -16,6 +16,22 @@
 #include "EditingCommands.hxx"
 
 
+namespace cmd
+{
+	bool IsChangeDestCmd( const utl::ICommand* pCmd )
+	{
+		if ( is_a<CBaseChangeDestCmd>( pCmd ) )
+			return true;
+
+		if ( const CMacroCommand* pMacroCmd = dynamic_cast<const CMacroCommand*>( pCmd ) )
+			if ( utl::Any( pMacroCmd->GetSubCommands(), pred::IsChangeDestCmd() ) )		// recurse for CResetDestinationsMacroCmd macro
+				return true;
+
+		return false;
+	}
+}
+
+
 // CBaseChangeDestCmd implementation
 
 CBaseChangeDestCmd::CBaseChangeDestCmd( cmd::CommandType cmdType, CFileModel* pFileModel, const std::tstring& cmdTag )

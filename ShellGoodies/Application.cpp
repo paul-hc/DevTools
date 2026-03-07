@@ -157,7 +157,7 @@ void CApplication::OnInitAppResources( void ) override
 	CGeneralOptions::Instance().LoadFromRegistry();
 
 	m_pCmdSvc.reset( new CAppCmdService() );
-	m_pCmdSvc->LoadCommandModel();
+	m_pCmdSvc->LoadCommandModel();	// load commands persisted in ShellGoodies32_undo.dat
 
 	LoadInputFileListPaths();		// load the specified file list to replace the HDROP selected files from Explorer
 }

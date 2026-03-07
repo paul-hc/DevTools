@@ -17,7 +17,7 @@ public:
 	const shell::CShortcut& GetSrcShortcut( void ) const { return GetShortcut(); }
 	const shell::CShortcut& GetDestShortcut( void ) const { return m_destShortcut; }
 
-	bool IsModified( void ) const { return m_destShortcut.IsValidTarget() && m_destShortcut != GetSrcShortcut(); }
+	bool IsModified( void ) const { return m_destShortcut.HasTarget() && m_destShortcut != GetSrcShortcut(); }
 
 	shell::CShortcut& RefDestShortcut( void ) { return m_destShortcut; }
 	void Reset( void ) { m_destShortcut = GetSrcShortcut(); }
@@ -90,10 +90,11 @@ namespace single
 	class CIconLocationValue : private utl::noncopyable
 	{
 	public:
-		CIconLocationValue( CImageEdit* pImageEdit, CStatic* pLargeIconStatic ) : m_pImageEdit( pImageEdit ), m_pLargeIconStatic( pLargeIconStatic ) {}
+		CIconLocationValue( CImageEdit* pImageEdit, CStatic* pLargeIconStatic );
 		~CIconLocationValue();
 
 		bool IsNullValue( void ) const { return m_iconLocation.IsEmpty() && m_linkPath.IsEmpty(); }
+		bool IsModified( void ) const { return m_modified; }
 
 		void Clear( void );
 
@@ -107,6 +108,7 @@ namespace single
 
 		shell::CIconLocation m_iconLocation;
 		fs::CPath m_linkPath;					// fallback for the icon, if not customized
+		bool m_modified;
 
 		CIcon m_smallIcon, m_largeIcon;
 	};

@@ -30,7 +30,7 @@ public:
 	bool IsThemePartDefined( int partId, int stateId ) const { return IsValid() && ::IsThemePartDefined( m_hTheme, partId, stateId ) != FALSE; }
 	bool IsThemeBackgroundPartiallyTransparent( int partId, int stateId ) const { return IsValid() && ::IsThemeBackgroundPartiallyTransparent( m_hTheme, partId, stateId ) != FALSE; }
 
-	COLORREF GetThemeColor( int partId, int stateId, int propId ) const;
+	COLORREF GetThemeColor( int partId, int stateId, int propId, COLORREF defaultColor = CLR_NONE ) const;
 	bool GetThemePartSize( OUT CSize* pPartSize, HDC hdc, int partId, int stateId, THEMESIZE themeSize = TS_DRAW, const RECT* pRect = nullptr ) const;
 	bool GetThemeTextExtent( OUT RECT* pExtentRect, HDC hdc, int partId, int stateId, const wchar_t* pText, DWORD textFlags,
 							 const RECT* pBoundingRect = nullptr ) const;

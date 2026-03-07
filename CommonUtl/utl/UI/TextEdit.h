@@ -44,6 +44,7 @@ public:
 	virtual bool HasInvalidText( void ) const;
 	virtual bool NormalizeText( void );
 
+	bool HasEmptyText( void ) const { return 0 == GetWindowTextLength(); }
 	std::tstring GetText( void ) const;
 	bool SetText( const std::tstring& text );
 	void DDX_Text( CDataExchange* pDX, std::tstring& rValue, int ctrlId = 0 );
@@ -58,7 +59,7 @@ public:
 	bool SetWritable( bool writable ) { return writable != IsWritable() && SetReadOnly( !writable ) != FALSE; }
 
 	virtual bool InMultiValuesMode( void ) const implement;		// ui::CMultiValueBase implementation
-	virtual bool SetMultiValuesMode( void );
+	virtual bool SetMultiValuesMode( bool multiValuesMode = true );
 
 	bool UseFixedFont( void ) const { return m_useFixedFont; }
 	void SetUseFixedFont( bool useFixedFont = true ) { ASSERT_NULL( m_hWnd ); m_useFixedFont = useFixedFont; }
@@ -163,6 +164,7 @@ private:
 	bool m_visibleWhiteSpace;
 	CAccelTable m_accel;
 
+	bool m_multiValuesMode;
 	ui::ITextInput* m_pTextInputCallback;
 	CSyncScrolling* m_pSyncScrolling;
 	std::tstring m_lastValidText;
@@ -178,6 +180,7 @@ public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg UINT OnGetDlgCode( void );
+	afx_msg void OnPaint( void );
 	afx_msg HBRUSH CtlColor( CDC* pDC, UINT ctlColor );
 	afx_msg void OnHScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );
 	afx_msg void OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );

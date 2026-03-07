@@ -4,11 +4,13 @@
 #include "FileModel.h"
 #include "GeneralOptions.h"
 #include "OptionsSheet.h"
-#include "Application_fwd.h"
+//#include "Application_fwd.h"
+#include "Application.h"
 #include "AppCommands.h"
 #include "resource.h"
 #include "utl/Algorithms.h"
 #include "utl/EnumTags.h"
+#include "utl/CommandModel.h"
 #include "utl/UI/ReportListControl.h"
 #include "utl/UI/Icon.h"
 #include "utl/UI/WndUtils.h"
@@ -40,6 +42,10 @@ CFileEditorBaseDialog::CFileEditorBaseDialog( CFileModel* pFileModel, cmd::Comma
 
 CFileEditorBaseDialog::~CFileEditorBaseDialog()
 {
+	// prevent dangling editing commands (created by this dialog) by deleting them
+	CCommandModel* pCommandModel = app::GetApp()->RefCommandModel();
+	pCommandModel->RemoveCommandsThat( pred::IsChangeDestCmd() );
+
 	m_pFileModel->RemoveObserver( this );
 	CGeneralOptions::Instance().RemoveObserver( this );
 }
@@ -113,7 +119,7 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 	CWnd* pParent = GetParent();
 
 	std::pair<IFileEditor*, bool> editorPair = m_pFileModel->HandleUndoRedo( stackType, pParent );
-	if ( nullptr == editorPair.first )				// we've got no editor to undo/redo?
+	if ( nullptr == editorPair.first )			// we've got no editor to undo/redo?
 	{
 		if ( editorPair.second )				// command handled?
 			SwitchMode( EditMode );				// signal the dirty state of this editor

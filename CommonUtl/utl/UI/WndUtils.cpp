@@ -793,6 +793,27 @@ namespace ui
 		return pCmdTarget->OnCmdMsg( cmdId, CN_COMMAND, nullptr, nullptr ) != FALSE;
 	}
 
+	bool PostCommandToParent( HWND hCtrl, int notifCode /*= BN_CLICKED*/, PostMode postMode /*= ui::PostCoalesce*/ )
+	{
+		ASSERT_PTR( hCtrl );
+
+		int ctrlId = ui::ToIntCmdId( ::GetDlgCtrlID( hCtrl ) );
+		HWND hDlg = ::GetParent( hCtrl );
+
+		ASSERT_PTR( hDlg );
+
+		if ( PostCoalesce == postMode )
+		{
+			MSG msg;
+
+			if ( ::PeekMessage( &msg, hDlg, WM_COMMAND, WM_COMMAND, PM_NOREMOVE ) )		// message is already in the queue for this window?
+				if ( notifCode == HIWORD( msg.wParam ) && ctrlId == LOWORD( msg.wParam ) && hCtrl == (HWND)msg.lParam )		// same notification message?
+					return false;		// coalesced the notification: skip duplicating it
+		}
+
+		return ::PostMessage( hDlg, WM_COMMAND, MAKEWPARAM( ctrlId, notifCode ), (LPARAM)hCtrl ) != FALSE;
+	}
+
 
 	HBRUSH SendCtlColor( HWND hWnd, HDC hDC, UINT message /*= WM_CTLCOLORSTATIC*/ )
 	{

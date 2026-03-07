@@ -18,12 +18,15 @@ namespace multi
 			: m_invalidValue( invalidValue )
 			, m_value( m_invalidValue )
 			, m_state( NullValue )
+			, m_modified( false )
 		{
 		}
 	public:
 		bool IsNullValue( void ) const { return NullValue == m_state; }
 		bool IsSharedValue( void ) const { return SharedValue == m_state; }
 		bool IsMultipleValue( void ) const { return MultipleValue == m_state; }
+
+		bool IsModified( void ) const { return m_modified; }
 
 		const ValueT& GetValue( void ) const { REQUIRE( IsSharedValue() ); return m_value; }
 		MultiValueState GetState( void ) const { return m_state; }
@@ -51,6 +54,7 @@ namespace multi
 
 		ValueT m_value;
 		MultiValueState m_state;
+		bool m_modified;			// m_value changed on input?
 	};
 
 
@@ -92,10 +96,18 @@ namespace multi
 	class CPathValue : public CCtrlValueState<shell::TPath, CPathItemEdit>
 	{
 	public:
-		CPathValue( CPathItemEdit* pCtrl ) : CCtrlValueState<shell::TPath, CPathItemEdit>( pCtrl ) {}
+		CPathValue( CPathItemEdit* pCtrl ) : CCtrlValueState<shell::TPath, CPathItemEdit>( pCtrl ), m_anyGuidPath( false ) {}
+
+		void Clear( void ) { __super::Clear(); m_anyGuidPath = false; }
+		void Accumulate( const shell::TPath& value ) { __super::Accumulate( value ); m_anyGuidPath |= value.IsGuidPath(); }
+
+		bool AnyGuidPath( void ) const { return m_anyGuidPath; }
+		void SetAnyGuidPath( void );		// inherit the GUID property from another field value
 
 		bool UpdateCtrl( void ) const;
 		bool InputCtrl( void );
+	private:
+		bool m_anyGuidPath;
 	};
 
 
@@ -132,6 +144,9 @@ namespace multi
 		{
 			ASSERT( flag != 0 );
 		}
+
+		bool HasValidValue( void ) const { return IsSharedValue() && m_value != BST_INDETERMINATE; }
+		bool IsChecked( void ) const { ASSERT( HasValidValue() ); return BST_CHECKED == m_value; }
 
 		void AccumulateFlags( UINT flags ) { __super::Accumulate( HasFlag( flags, m_flag ) ? BST_CHECKED : BST_UNCHECKED ); }
 

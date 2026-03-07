@@ -75,6 +75,13 @@ namespace single
 {
 	// CIconLocationValue implementation
 
+	CIconLocationValue::CIconLocationValue( CImageEdit* pImageEdit, CStatic* pLargeIconStatic )
+		: m_pImageEdit( pImageEdit )
+		, m_pLargeIconStatic( pLargeIconStatic )
+		, m_modified( false )
+	{
+	}
+
 	CIconLocationValue::~CIconLocationValue()
 	{
 	}
@@ -88,6 +95,8 @@ namespace single
 			if ( m_pLargeIconStatic != nullptr )
 				ui::EnableWindow( m_pLargeIconStatic->GetSafeHwnd(), !IsNullValue() );
 		}
+
+		m_modified = false;
 	}
 
 	bool CIconLocationValue::Set( const shell::CIconLocation& iconLocation, const fs::CPath& linkPath )
@@ -145,6 +154,10 @@ namespace single
 			return false;
 
 		iconLocation.m_path.Set( iconPath );
-		return Set( iconLocation, m_linkPath );
+		if ( !Set( iconLocation, m_linkPath ) )
+			return false;
+
+		m_modified = true;
+		return true;
 	}
 }

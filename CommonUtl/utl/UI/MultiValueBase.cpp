@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "MultiValueBase.h"
 #include "ScopedGdi.h"
+#include "VisualTheme.h"
 #include "WndUtils.h"
 #include "utl/EnumTags.h"
 
@@ -42,16 +43,48 @@ namespace ui
 		pCtrl->GetClientRect( &rect );
 
 		if ( hBkBrush != nullptr )
-			ui::FillRect( *pDC, rect, ::GetSysColorBrush( COLOR_WINDOW ) );
+			ui::FillRect( *pDC, rect, hBkBrush );
 
-		CScopedGdi<CFont> scopedFont( pDC, pCtrl->GetParent()->GetFont() );
-		COLORREF oldTextColor = pDC->SetTextColor( ::GetSysColor( COLOR_SCROLLBAR ) );
+		CFont* pOldFont = pDC->SelectObject( pCtrl->GetParent()->GetFont() );
+		COLORREF oldTextColor = pDC->SetTextColor( ::GetSysColor( COLOR_GRAYTEXT ) );
 		int oldBkMode = pDC->SetBkMode( TRANSPARENT );
 
 		rect.left += HorizEdge;
 		pDC->DrawText( m_multiValueTag.c_str(), (int)m_multiValueTag.size(), &rect, dtFmt );
 
 		pDC->SetTextColor( oldTextColor );
+		pDC->SetBkMode( oldBkMode );
+		pDC->SelectObject( pOldFont );
+	}
+
+	void CMultiValueBase::DrawEditCueBanner( CDC* pDC, const CEdit* pEdit, UINT dtFmt /*= TextFmt*/ )
+	{	// draws only the cue banner text, assuming the borders and background have been painted by sending WM_ERASEBKGND and WM_PRINTCLIENT messages.
+		ASSERT_PTR( pEdit->GetSafeHwnd() );
+
+		COLORREF cueTextColor = ::GetSysColor( COLOR_GRAYTEXT );
+		CRect textRect;
+
+		pEdit->GetRect( &textRect );
+
+		CVisualTheme theme( L"EDIT", pEdit->GetSafeHwnd() );
+		CFont* pOldFont = pDC->SelectObject( pEdit->GetFont() );
+		int oldBkMode = pDC->SetBkMode( TRANSPARENT );
+
+		if ( theme.IsThemed() )
+		{
+			cueTextColor = theme.GetThemeColor( EP_EDITTEXT, ETS_CUEBANNER, TMT_TEXTCOLOR, cueTextColor );		// fallback to disabled text (gray) default
+			pDC->SetTextColor( cueTextColor );
+
+			// draw the cue banner text
+			theme.DrawThemeText( pDC->GetSafeHdc(), EP_EDITTEXT, ETS_CUEBANNER, textRect, GetMultiValueTag().c_str(), dtFmt );
+		}
+		else
+		{	// non-themed classic fallback
+			pDC->SetTextColor( cueTextColor );
+			pDC->DrawText( GetMultiValueTag().c_str(), -1, &textRect, dtFmt );
+		}
+
+		pDC->SelectObject( pOldFont );
 		pDC->SetBkMode( oldBkMode );
 	}
 }

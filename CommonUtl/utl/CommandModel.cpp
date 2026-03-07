@@ -68,18 +68,20 @@ void CCommandModel::Clear( void )
 	utl::ClearOwningContainer( m_redoStack );
 }
 
-void CCommandModel::RemoveExpiredCommands( size_t maxSize )
+size_t CCommandModel::RemoveExpiredCommands( size_t maxSize )
 {
 	ASSERT( maxSize > 1 );
 
 	// UNDO takes 2/3 and REDO 1/3 of the history size. We expire oldest commands (at front of stack).
 
 	const size_t redoMaxSize = utl::min( m_redoStack.size(), utl::max( maxSize / 3, 1 ) );
+	size_t count = 0;
 
 	while ( m_redoStack.size() > redoMaxSize )
 	{
 		delete m_redoStack.front();
 		m_redoStack.pop_front();
+		++count;
 	}
 
 	const size_t undoMaxSize = maxSize - redoMaxSize;
@@ -88,7 +90,10 @@ void CCommandModel::RemoveExpiredCommands( size_t maxSize )
 	{
 		delete m_undoStack.front();
 		m_undoStack.pop_front();
+		++count;
 	}
+
+	return count;
 }
 
 bool CCommandModel::Execute( utl::ICommand* pCmd ) implement

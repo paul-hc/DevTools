@@ -69,7 +69,7 @@ private:
 
 	// output
 	void UpdateTargetScopeButton( void );
-	void UpdateFileListStatus( void );
+	void UpdateFileListStats( void );
 
 	void SetupFileListView( void );
 	void UpdateFileListViewSelItems( void );

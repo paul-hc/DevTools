@@ -22,6 +22,7 @@ public:
 
 	svc::ICommandService* GetCommandService( void ) const;
 	const CCommandModel* GetCommandModel( void ) const;
+	CCommandModel* RefCommandModel( void ) { return const_cast<CCommandModel*>( GetCommandModel() ); }
 	CTrayIcon* GetMessageTrayIcon( void );				// lazy initialization
 
 	// advanced debugging:

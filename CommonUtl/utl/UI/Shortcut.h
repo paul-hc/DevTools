@@ -82,9 +82,6 @@ namespace shell
 		WORD GetHotKey( void ) const { return m_hotKey; }
 		int GetShowCmd( void ) const { return m_showCmd; }
 
-		bool IsRunAsAdmin( void ) const { return HasFlag( m_linkDataFlags, SLDF_RUNAS_USER ); }
-		bool IsRunInSepMemSpace( void ) const { return HasFlag( m_linkDataFlags, SLDF_RUN_IN_SEPARATE ); }
-
 		shell::TPath GetTargetShellPath( void ) const;
 
 		enum Fields
@@ -102,8 +99,10 @@ namespace shell
 		typedef int TFields;
 
 		bool IsDirty( void ) const { return m_changedFields != 0; }
-		TFields GetChangedFields( void ) const { return m_changedFields; }
 		void ClearChangedFields( void ) { m_changedFields = 0; }
+
+		TFields GetChangedFields( void ) const { return m_changedFields; }
+		bool SetChangedFields( TFields changedFields ) { return utl::ModifyValue( m_changedFields, changedFields ); }
 
 		TFields GetDiffFields( const CShortcut& right ) const;		// evaluate fields that are different from 'right'
 
@@ -116,11 +115,14 @@ namespace shell
 		bool SetIconLocation( const CIconLocation& iconLocation ) { return AssignField( m_iconLocation, iconLocation, IconLocation ); }
 		bool SetHotKey( WORD hotKey ) { return AssignField( m_hotKey, hotKey, HotKey ); }
 		bool SetShowCmd( int showCmd ) { return AssignField( m_showCmd, showCmd, ShowCmd ); }
-		bool ModifyLinkDataFlags( DWORD clearFlags, DWORD setFlags );
 
 		// taget as either PATH (file system) or PIDL (non file system)
 		std::tstring FormatTarget( SIGDN pidlFmt = SIGDN_DESKTOPABSOLUTEEDITING ) const;		// SIGDN_DESKTOPABSOLUTEEDITING is for UI display
 		bool StoreTarget( const std::tstring& targetShellPath, SIGDN pidlFmt = SIGDN_DESKTOPABSOLUTEPARSING );		// ShellPath: FileOrGuidPath
+
+		bool IsRunAsAdmin( void ) const { return HasFlag( m_linkDataFlags, SLDF_RUNAS_USER ); }
+		bool IsRunInSepMemSpace( void ) const { return HasFlag( m_linkDataFlags, SLDF_RUN_IN_SEPARATE ); }
+		bool SetLinkDataFlag( SHELL_LINK_DATA_FLAGS linkDataFlag, bool on = true );
 
 		// persistence
 		friend inline CArchive& operator<<( CArchive& archive, const CShortcut& shortcut ) { shortcut.Save( archive ); return archive; }

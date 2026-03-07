@@ -27,6 +27,7 @@ namespace ui
 		enum Metrics { HorizEdge = 4, TextFmt = DT_SINGLELINE | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX };
 
 		void DrawMultiValueText( CDC* pDC, const CWnd* pCtrl, HBRUSH hBkBrush = ::GetSysColorBrush( COLOR_WINDOW ), UINT dtFmt = TextFmt );
+		void DrawEditCueBanner( CDC* pDC, const CEdit* pEdit, UINT dtFmt = TextFmt );
 	public:
 		const std::tstring& GetMultiValueTag( void ) const { return m_multiValueTag; }
 		void SetMultiValueTag( const std::tstring& multiValueTag ) { m_multiValueTag = multiValueTag; }

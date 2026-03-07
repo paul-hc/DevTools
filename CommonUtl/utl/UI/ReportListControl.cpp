@@ -109,6 +109,7 @@ static ACCEL s_keys[] =
 };
 
 const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d");
+int CReportListControl::s_dbgCount = 0;
 
 
 CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
@@ -1537,14 +1538,6 @@ void CReportListControl::SetItemCheckState( int index, int checkState )
 	SetCheckState( index, checkState );
 }
 
-void CReportListControl::NotifyCheckStatesChanged( void )
-{
-	ASSERT_PTR( m_pNmToggling.get() );
-
-	m_pNmToggling->m_nmHdr.NotifyParent();
-	m_pNmToggling.reset();
-}
-
 size_t CReportListControl::ApplyCheckStateToSelectedItems( int toggledIndex, int checkState )
 {
 	size_t changedCount = 0;
@@ -1568,6 +1561,15 @@ size_t CReportListControl::ApplyCheckStateToSelectedItems( int toggledIndex, int
 			}
 
 	return changedCount;
+}
+
+void CReportListControl::NotifyCheckStatesChanged( void )
+{
+	ASSERT_PTR( m_pNmToggling.get() );
+
+	TRACE( _T(">> [%d] CReportListControl::NotifyCheckStatesChanged: via PostMessage.\n"), s_dbgCount++ );
+	m_pNmToggling->m_nmHdr.NotifyParent();
+	m_pNmToggling.reset();
 }
 
 
@@ -2266,10 +2268,9 @@ const CFlagTags& CReportListControl::GetTags_LV_State( void )
 void CReportListControl::TraceNotify( const NMLISTVIEW* pNmList )
 {
 #ifdef _DEBUG
-	static size_t count = 0;
 	utl::ISubject* pObject = AsSubject( pNmList->lParam );
 
-	TRACE( _T(">> [%d] SelChange - NMLISTVIEW: iItem=%d, uNewState={%s}, uOldState={%s}, uChanged={%s}, lParam='%s'\n"), count++,
+	TRACE( _T(">> [%d] SelChange - NMLISTVIEW: iItem=%d, uNewState={%s}, uOldState={%s}, uChanged={%s}, lParam='%s'\n"), s_dbgCount++,
 		pNmList->iItem,
 		CReportListControl::GetTags_LV_State().FormatKey( pNmList->uNewState ).c_str(),
 		CReportListControl::GetTags_LV_State().FormatKey( pNmList->uOldState ).c_str(),
@@ -2473,13 +2474,27 @@ BOOL CReportListControl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 
 BOOL CReportListControl::OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NMLISTVIEW* pListView = (NMLISTVIEW*)pNmHdr;
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0L;
 
-	if ( GetToggleCheckSelItems() )											// apply toggle to multi-selection?
-		if ( !IsInternalChange() || m_pNmToggling.get() != nullptr )		// user has toggled the check-state (directly or indirectly)?
-			if ( IsCheckStateChangeNotify( pListView ) )					// user has toggled the check-state?
-				ApplyCheckStateToSelectedItems( pListView->iItem, ui::CheckStateFromRaw( pListView->uNewState ) );		// apply check-state to selected items if toggled an item that is part of the multi-selection
+	if ( !IsInternalChange() )		// user selection change?
+	{
+		if ( IsSelectionChangeNotify( pNmList ) )									// user has toggled the check-state?
+		{
+			//TraceNotify( pNmList );
+
+			// Use PostMessage with coalescing logic:
+			//	- delayed notification for the item, after LVN_ITEMCHANGED has been send by the list for all items involved (multiple times for a group of radio buttons).
+
+			ui::PostCommandToParent( m_hWnd, lv::LVN_SelCaretChanged, ui::PostCoalesce );	// coalesce (merge) multiple notification messages into a single message
+		}
+
+		if ( IsCheckStateChangeNotify( pNmList ) )								// user has toggled the check-state?
+			if ( GetToggleCheckSelItems() && m_pNmToggling.get() != nullptr )	// apply toggle to multi-selection, in toggling?
+			{	// apply check-state to selected items if toggled an item that is part of the multi-selection
+				ApplyCheckStateToSelectedItems( pNmList->iItem, ui::CheckStateFromRaw( pNmList->uNewState ) );
+			}
+	}
 
 	return IsInternalChange();		// don't raise the notification to list's parent during an internal change
 }

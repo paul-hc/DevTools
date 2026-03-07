@@ -85,7 +85,7 @@ namespace cmd
 		virtual void RecordMessage( const std::tstring& coreMessage, app::MsgType msgType ) override;
 	private:
 		UserFeedback HandleFileError( CException* pExc, const fs::CPath& srcPath );
-		static std::tstring ExtractMessage( CException* pExc, const fs::CPath& srcPath );
+		static std::tstring ExtractMessage( CException* pExc );
 	public:
 		abstract persist fs::CPath m_srcPath;	// persistent for some commands
 	private:

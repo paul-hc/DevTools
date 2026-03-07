@@ -63,6 +63,7 @@ namespace cmd
 namespace cmd
 {
 	bool IsPersistentCmd( const utl::ICommand* pCmd );		// some persistent commands are also editor-specific file action commands
+	bool IsChangeDestCmd( const utl::ICommand* pCmd );		// editing commands bound in lifetime to a given editing dialog
 	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
 	bool HasSelItemsTarget( const utl::ICommand* pCmd );	// changing item destination on a sub-set of selected items?
 }
@@ -77,6 +78,16 @@ namespace pred
 		bool operator()( const utl::ICommand* pCmd ) const
 		{
 			return cmd::IsPersistentCmd( pCmd );
+		}
+	};
+
+	struct IsChangeDestCmd
+	{
+		typedef utl::ICommand* argument_type;		// required by std::not1()
+
+		bool operator()( const utl::ICommand* pCmd ) const
+		{
+			return cmd::IsChangeDestCmd( pCmd );
 		}
 	};
 

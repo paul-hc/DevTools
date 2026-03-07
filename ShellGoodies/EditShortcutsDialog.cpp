@@ -111,7 +111,6 @@ CEditShortcutsDialog::CEditShortcutsDialog( CFileModel* pFileModel, CWnd* pParen
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
-//	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, ... );	// let us track a custom menu
 //	m_fileListCtrl.SetTrackMenuTarget( this );		// firstly handle our custom commands in this dialog
 	m_fileListCtrl.SetFormatTableFlags( lv::SelRowsDisplayVisibleColumns );		// copy table as selected rows, using visible columns in display order
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
@@ -200,6 +199,11 @@ const CEnumTags& CEditShortcutsDialog::GetTags_Mode( void )
 	return s_modeTags;
 }
 
+void CEditShortcutsDialog::OnChangedDetailField( void )
+{
+	SwitchMode( EditMode );
+}
+
 void CEditShortcutsDialog::SwitchMode( Mode mode )
 {
 	m_mode = mode;
@@ -210,9 +214,7 @@ void CEditShortcutsDialog::SwitchMode( Mode mode )
 
 	static const UINT ctrlIds[] =
 	{
-		IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON, IDC_RESET_FILES_BUTTON/*,
-		IDC_MODIFIED_DATE, IDC_CREATED_DATE, IDC_ACCESSED_DATE,
-		IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK*/
+		IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON, IDC_RESET_FILES_BUTTON
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), !IsRollMode() );
 
@@ -237,20 +239,20 @@ void CEditShortcutsDialog::PopStackTop( svc::StackType stackType ) override
 
 	if ( utl::ICommand* pTopCmd = PeekCmdForDialog( stackType ) )		// comand that is target for this dialog editor?
 	{
-		bool isTouchMacro = cmd::EditShortcut == pTopCmd->GetTypeID();
+		bool isSaveShortcutMacro = cmd::EditShortcut == pTopCmd->GetTypeID();
 
 		ClearFileErrors();
 
-		if ( isTouchMacro )
+		if ( isSaveShortcutMacro )
 			m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
 		else
 			m_pCmdSvc->UndoRedo( stackType );
 
 		MarkInvalidSrcItems();
 
-		if ( isTouchMacro )						// file command?
+		if ( isSaveShortcutMacro )							// file command?
 			SwitchMode( svc::Undo == stackType ? RollBackMode : RollForwardMode );
-		else if ( IsNativeCmd( pTopCmd ) )		// file state editing command?
+		else if ( IsNativeCmd( pTopCmd ) )					// file state editing command?
 			SwitchMode( CommitFilesMode );
 	}
 	else
@@ -268,7 +270,6 @@ void CEditShortcutsDialog::OnExecuteCmd( utl::ICommand* pCmd )
 void CEditShortcutsDialog::SetupDialog( void )
 {
 	SetupFileListView();							// fill in and select the found files list
-	UpdateFieldControls();
 }
 
 void CEditShortcutsDialog::UpdateTargetScopeButton( void )
@@ -276,7 +277,7 @@ void CEditShortcutsDialog::UpdateTargetScopeButton( void )
 	m_targetSelItemsButton.SetFrameColor( app::TargetSelectedItems == m_pFileModel->GetTargetScope() ? app::ColorWarningText : CLR_NONE );
 }
 
-void CEditShortcutsDialog::UpdateFileListStatus( void )
+void CEditShortcutsDialog::UpdateFileListStats( void )
 {
 	std::tstring message = str::Format( _T("Total: %d file(s) in %d folder(s)."), m_pFileModel->GetSourcePaths().size(), m_pFileModel->GetSrcFolderPaths().size() );
 
@@ -386,6 +387,24 @@ void CEditShortcutsDialog::UpdateDetailFields( void )
 	m_showCmdValue.UpdateCtrl();
 	m_runAsAdminFlag.UpdateCtrl();
 	m_unicodeFlag.UpdateCtrl();
+
+	static const UINT detailLabelIds[] =
+	{
+		IDC_TARGET_PATH_STATIC, IDC_ARGUMENTS_STATIC, IDC_WORK_DIR_STATIC, IDC_DESCRIPTION_STATIC,
+		IDC_HOT_KEY_STATIC, IDC_SHOW_CMD_STATIC
+	};
+	ui::EnableControls( *this, detailLabelIds, COUNT_OF( detailLabelIds ), !m_selData.GetSelItems().empty() && !IsRollMode() );
+	ui::EnableControl( *this, IDC_ICON_LOCATION_STATIC, m_selData.GetCaretItem() != nullptr && !IsRollMode() );
+
+	if ( IsRollMode() )
+	{	// disable input in Roll-Back/Forward mode
+		static const UINT detailFileldIds[] =
+		{
+			IDC_TARGET_PATH_EDIT, IDC_ARGUMENTS_EDIT, IDC_WORK_DIR_EDIT, IDC_DESCRIPTION_EDIT, IDC_HOT_KEY_CTRL, IDC_SHOW_CMD_COMBO,
+			IDC_GROUP_BOX_1, IDC_SH_RUN_AS_ADMIN_CHECK, IDC_SHORTCUT_ICON_STATIC, IDC_ICON_LOCATION_EDIT
+		};
+		ui::EnableControls( *this, detailFileldIds, COUNT_OF( detailFileldIds ), false );
+	}
 }
 
 void CEditShortcutsDialog::AccumulateCommonValues( void )
@@ -402,16 +421,22 @@ void CEditShortcutsDialog::AccumulateCommonValues( void )
 	m_runAsAdminFlag.Clear();
 	m_unicodeFlag.Clear();
 
-	for ( const CEditLinkItem* pLinkItem : m_selData.GetSelItems() )
-		AccumulateShortcutValues( pLinkItem->GetDestShortcut() );
+	m_iconLocValue.Clear();
 
-	if ( CEditLinkItem* pCaretItem = m_selData.GetCaretItem() )
+	//if ( !IsRollMode() )
 	{
-		const shell::CShortcut& destShortcut = pCaretItem->GetDestShortcut();
-		m_iconLocValue.Set( destShortcut.GetIconLocation(), pCaretItem->GetFilePath() /*destShortcut.GetTargetShellPath()*/ );
+		for ( const CEditLinkItem* pLinkItem : m_selData.GetSelItems() )
+			AccumulateShortcutValues( pLinkItem->GetDestShortcut() );
+
+		if ( m_targetValue.AnyGuidPath() )		// at least a target is a GUID path
+			m_workDirValue.SetAnyGuidPath();	// disable working directory
+
+		if ( CEditLinkItem* pCaretItem = m_selData.GetCaretItem() )
+		{
+			const shell::CShortcut& destShortcut = pCaretItem->GetDestShortcut();
+			m_iconLocValue.Set( destShortcut.GetIconLocation(), pCaretItem->GetFilePath() );		// pass link path for default icon
+		}
 	}
-	else
-		m_iconLocValue.Clear();
 }
 
 void CEditShortcutsDialog::AccumulateShortcutValues( const shell::CShortcut& destShortcut )
@@ -426,37 +451,6 @@ void CEditShortcutsDialog::AccumulateShortcutValues( const shell::CShortcut& des
 	m_unicodeFlag.AccumulateFlags( destShortcut.GetLinkDataFlags() );
 }
 
-void CEditShortcutsDialog::UpdateFieldControls( void )
-{
-	// commit common values to field controls
-/*	for ( const multi::CDateTimeState& dateTimeState : m_dateTimeStates )
-		dateTimeState.UpdateCtrl( this );
-
-	for ( const multi::CAttribCheckState& attribState : m_attribCheckStates )
-		attribState.UpdateCtrl( this );*/
-}
-
-void CEditShortcutsDialog::UpdateFieldsFromCaretItem( void )
-{
-	if ( const CEditLinkItem* pCaretItem = m_selData.GetCaretItem() )
-	{
-	}
-	else
-	{
-	}
-
-	UpdateFieldControls();
-}
-
-void CEditShortcutsDialog::InputFields( void )
-{
-/*	for ( multi::CDateTimeState& rDateTimeState : m_dateTimeStates )
-		rDateTimeState.InputCtrl( this );
-
-	for ( multi::CAttribCheckState& rAttribState : m_attribCheckStates )
-		rAttribState.InputCtrl( this );*/
-}
-
 void CEditShortcutsDialog::ApplyFields( void )
 {
 	if ( utl::ICommand* pCmd = MakeChangeDestShortcutsCmd() )
@@ -468,33 +462,59 @@ void CEditShortcutsDialog::ApplyFields( void )
 
 utl::ICommand* CEditShortcutsDialog::MakeChangeDestShortcutsCmd( void )
 {
-	const std::vector<CEditLinkItem*>& targetItems = GetTargetItems();
-	std::vector<shell::CShortcut> destShortcuts; destShortcuts.reserve( m_rEditLinkItems.size() );
-	bool anyChange = false;
+	OUT std::vector<CEditLinkItem*> targetItems;
+	OUT std::vector<shell::CShortcut> destShortcuts;
 
-	// apply valid edits, i.e. if not null
-	for ( const CEditLinkItem* pLinkItem : targetItems )
+	const CEditLinkItem* pCaretItem = m_selData.GetCaretItem();
+
+	// apply valid inputs (shared values on multiple selection)
+	for ( CEditLinkItem* pSelLinkItem : m_selData.GetSelItems() )
 	{
-/*		shell::CShortcut newFileState = pLinkItem->GetDestState();
+		shell::CShortcut newShortcut = pSelLinkItem->GetDestShortcut();
+		bool changed = false;
 
-		for ( const multi::CDateTimeState& dateTimeState : m_dateTimeStates )
-			if ( dateTimeState.CanApply() )
+		if ( m_targetValue.IsModified() && m_targetValue.IsSharedValue() )
+			if ( m_targetValue.GetValue().IsGuidPath() == newShortcut.IsTargetNonFileSys() )
+				changed |= newShortcut.StoreTarget( m_targetValue.GetValue().Get(), SIGDN_DESKTOPABSOLUTEPARSING );
+			else
+				ASSERT( false );	// incompatible dest Target type?
+
+		if ( m_workDirValue.IsModified() && m_workDirValue.IsSharedValue() )
+			changed |= newShortcut.SetWorkDirPath( m_workDirValue.GetValue() );
+
+		if ( m_argumentsValue.IsModified() && m_argumentsValue.IsSharedValue() )
+			changed |= newShortcut.SetArguments( m_argumentsValue.GetValue() );
+
+		if ( m_descriptionValue.IsModified() && m_descriptionValue.IsSharedValue() )
+			changed |= newShortcut.SetDescription( m_descriptionValue.GetValue() );
+
+		if ( m_hotKeyValue.IsModified() && m_hotKeyValue.IsSharedValue() )
+			changed |= newShortcut.SetHotKey( m_hotKeyValue.GetValue() );
+
+		if ( m_showCmdValue.IsModified() && m_showCmdValue.IsSharedValue() )
+			changed |= newShortcut.SetShowCmd( m_showCmdValue.GetValue() );
+
+		if ( m_runAsAdminFlag.IsModified() && m_runAsAdminFlag.IsSharedValue() && m_runAsAdminFlag.HasValidValue() )
+			changed |= newShortcut.SetLinkDataFlag( SLDF_RUNAS_USER, m_runAsAdminFlag.IsChecked() );
+
+		if ( pSelLinkItem == pCaretItem )
+			if ( m_iconLocValue.IsModified() )
 			{
-				dateTimeState.Apply( newFileState );
+				ASSERT( m_selData.IsCaretSelected() );		// from cmd update on IDC_CHANGE_ICON_BUTTON
+				changed |= newShortcut.SetIconLocation( m_iconLocValue.Get() );
 			}
 
-		for ( const multi::CAttribCheckState& attribState : m_attribCheckStates )
-			if ( attribState.CanApply() )
-			{
-				attribState.Apply( newFileState );
-			}
-
-		destShortcuts.push_back( newFileState );
-
-		anyChange |= newFileState != pLinkItem->GetDestState();*/
+		if ( newShortcut != pSelLinkItem->GetDestShortcut() )
+		{
+			ASSERT( changed );
+			targetItems.push_back( pSelLinkItem );
+			destShortcuts.push_back( newShortcut );
+		}
 	}
 
-	return anyChange ? new CChangeDestShortcutsCmd( m_pFileModel, &targetItems, destShortcuts ) : nullptr;
+	ENSURE( targetItems.size() == destShortcuts.size() );
+
+	return !targetItems.empty() ? new CChangeDestShortcutsCmd( m_pFileModel, &targetItems, destShortcuts ) : nullptr;
 }
 
 bool CEditShortcutsDialog::VisibleAllSrcColumns( void ) const
@@ -567,17 +587,6 @@ void CEditShortcutsDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId
 			else
 				rText += _T(" (no selected items)");
 			break;
-		case IDOK:
-			if ( !ui::IsDisabled( *GetDlgItem( IDOK ) ) )
-			{
-				rText = EditMode == m_mode ? _T("Store changes to") : _T("Touch file states for");
-
-				if ( EditMode == m_mode && app::TargetSelectedItems == m_pFileModel->GetTargetScope() && !m_selData.GetSelItems().empty() )
-					rText += str::Format( _T(": %d selected item(s)"), m_selData.GetSelItems().size() );
-				else
-					rText += _T(" all items");
-			}
-			break;
 		case IDC_SH_RUN_AS_ADMIN_CHECK:
 			if ( m_runAsAdminFlag.IsMultipleValue() )
 				rText = multi::GetTags_MultiValueState().FormatUi( multi::MultipleValue );
@@ -585,6 +594,22 @@ void CEditShortcutsDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId
 		case IDC_SH_UNICODE_CHECK:
 			if ( m_unicodeFlag.IsMultipleValue() )
 				rText = multi::GetTags_MultiValueState().FormatUi( multi::MultipleValue );
+			break;
+		case IDC_ICON_LOCATION_EDIT:
+			rText = _T("Icon applies only to focused (caret) item.");
+			break;
+		case IDOK:
+			if ( !ui::IsDisabled( *GetDlgItem( IDOK ) ) )
+				switch ( m_mode )
+				{
+					case EditMode:
+						rText = str::Format( _T("Store changed details to: %d selected item(s)"), m_selData.GetSelItems().size() );
+						break;
+					case CommitFilesMode:
+						rText = _T("Save the changed shortcut files");
+						break;
+				}
+
 			break;
 		default:
 			__super::QueryTooltipText( rText, cmdId, pTooltip );
@@ -730,9 +755,9 @@ CEditLinkItem* CEditShortcutsDialog::FindItemWithKey( const fs::CPath& keyPath )
 
 void CEditShortcutsDialog::MarkInvalidSrcItems( void )
 {
-	for ( CEditLinkItem* pTouchItem : m_rEditLinkItems )
-		if ( !pTouchItem->GetFilePath().FileExist() )
-			utl::AddUnique( m_errorItems, pTouchItem );
+	for ( CEditLinkItem* pLinkItem : m_rEditLinkItems )
+		if ( !pLinkItem->GetFilePath().FileExist() )
+			utl::AddUnique( m_errorItems, pLinkItem );
 }
 
 void CEditShortcutsDialog::EnsureVisibleFirstError( void )
@@ -783,7 +808,7 @@ void CEditShortcutsDialog::DoDataExchange( CDataExchange* pDX )
 
 		m_targetSelItemsButton.SetCheck( app::TargetSelectedItems == m_pFileModel->GetTargetScope() );
 		UpdateTargetScopeButton();
-		UpdateFileListStatus();
+		UpdateFileListStats();
 		UpdateDetailFields();
 	}
 
@@ -795,20 +820,23 @@ void CEditShortcutsDialog::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CEditShortcutsDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateUndoRedo )
-	ON_BN_CLICKED( IDC_TARGET_SEL_ITEMS_CHECK, OnToggle_TargetSelItems )
-	ON_COMMAND( ID_CMD_RESET_DESTINATIONS, On_SelItems_ResetDestFile )
+	ON_BN_CLICKED( IDC_TARGET_SEL_ITEMS_CHECK, OnBnClicked_TargetSelItems )
+	ON_BN_CLICKED( IDC_SHOW_SRC_COLUMNS_CHECK, OnBnClicked_ShowSrcColumns )
+	ON_COMMAND( ID_CMD_RESET_DESTINATIONS, On_ResetDestSelShortcuts )
 	ON_UPDATE_COMMAND_UI( ID_CMD_RESET_DESTINATIONS, OnUpdateListSelection )
 
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestShortcuts )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
-	ON_BN_CLICKED( IDC_SHOW_SRC_COLUMNS_CHECK, OnBnClicked_ShowSrcColumns )
-	ON_BN_CLICKED( IDC_CHANGE_ICON_BUTTON, OnBnClicked_ChangeIcon )
-	ON_UPDATE_COMMAND_UI( IDC_CHANGE_ICON_BUTTON, OnUpdateListCaretItem )
-	ON_UPDATE_COMMAND_UI( ID_PUSH_ATTRIBUTE_FIELDS, OnUpdateListSelection )
-	ON_UPDATE_COMMAND_UI( ID_PUSH_ALL_FIELDS, OnUpdateListCaretItem )
+
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_EDIT_SHORTCUTS_LIST, OnLvnItemChanged_LinkList )
+	ON_CONTROL( lv::LVN_SelCaretChanged, IDC_EDIT_SHORTCUTS_LIST, OnLvnSelCaretChanged_LinkList )
 	ON_NOTIFY( lv::LVN_CopyTableText, IDC_EDIT_SHORTCUTS_LIST, OnLvnCopyTableText_LinkList )
+	ON_CONTROL_RANGE( EN_CHANGE, IDC_TARGET_PATH_EDIT, IDC_HOT_KEY_CTRL, OnEnChange_DetailField )
+	ON_CBN_SELCHANGE( IDC_SHOW_CMD_COMBO, OnCbnSelChange_ShowCmd )
+	ON_BN_CLICKED( IDC_SH_RUN_AS_ADMIN_CHECK, OnBnClicked_RunAsAdmin )
+	ON_BN_CLICKED( IDC_CHANGE_ICON_BUTTON, OnBnClicked_ChangeIcon )
+	ON_UPDATE_COMMAND_UI( IDC_CHANGE_ICON_BUTTON, OnUpdate_ChangeIcon )
 END_MESSAGE_MAP()
 
 void CEditShortcutsDialog::OnOK( void )
@@ -816,7 +844,6 @@ void CEditShortcutsDialog::OnOK( void )
 	switch ( m_mode )
 	{
 		case EditMode:
-			InputFields();
 			ApplyFields();
 			PostMakeDest();
 			break;
@@ -859,13 +886,24 @@ void CEditShortcutsDialog::OnFieldChanged( void )
 	SwitchMode( EditMode );
 }
 
-void CEditShortcutsDialog::OnToggle_TargetSelItems( void )
+void CEditShortcutsDialog::OnBnClicked_TargetSelItems( void )
 {
 	if ( m_pFileModel->SetTargetScope( BST_CHECKED == m_targetSelItemsButton.GetCheck() ? app::TargetSelectedItems : app::TargetAllItems ) )
 		UpdateTargetScopeButton();
 }
 
-void CEditShortcutsDialog::On_SelItems_ResetDestFile( void )
+void CEditShortcutsDialog::OnBnClicked_ShowSrcColumns( void )
+{
+	if ( VisibleAllSrcColumns() )
+	{
+		for ( CListTraits::TColumn column = S_Target; column <= S_Description; ++column )
+			m_fileListCtrl.ShowColumn( column, false );		// hide column
+	}
+	else
+		m_fileListCtrl.ResetColumnLayout();					// show all columns with default layout
+}
+
+void CEditShortcutsDialog::On_ResetDestSelShortcuts( void )
 {
 	if ( !m_selData.GetSelItems().empty() )
 		SafeExecuteCmd( CChangeDestShortcutsCmd::MakeResetItemsCmd( m_pFileModel, m_selData.GetSelItems() ) );
@@ -897,30 +935,6 @@ void CEditShortcutsDialog::OnBnClicked_ResetDestFiles( void )
 	SafeExecuteCmd( new CResetDestinationsMacroCmd( m_pFileModel ) );
 }
 
-void CEditShortcutsDialog::OnBnClicked_ChangeIcon( void )
-{
-	CEditLinkItem* pCaretItem = m_selData.GetCaretItem();
-	ASSERT_PTR( pCaretItem );
-
-	m_iconLocValue.PickIcon();
-}
-
-void CEditShortcutsDialog::OnBnClicked_ShowSrcColumns( void )
-{
-	if ( VisibleAllSrcColumns() )
-	{
-		for ( CListTraits::TColumn column = S_Target; column <= S_Description; ++column )
-			m_fileListCtrl.ShowColumn( column, false );		// hide column
-	}
-	else
-		m_fileListCtrl.ResetColumnLayout();					// show all columns with default layout
-}
-
-void CEditShortcutsDialog::OnUpdateListCaretItem( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable( m_selData.GetCaretItem() != nullptr );
-}
-
 void CEditShortcutsDialog::OnUpdateListSelection( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( !m_selData.GetSelItems().empty() );
@@ -930,19 +944,35 @@ void CEditShortcutsDialog::OnLvnItemChanged_LinkList( NMHDR* pNmHdr, LRESULT* pR
 {
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 
-	ASSERT( !m_fileListCtrl.IsInternalChange() );		// filtered internally by CReportListControl
-	if ( m_fileListCtrl.IsSelectionCaretChangeNotify( pNmList ) )
+	ASSERT( !m_fileListCtrl.IsInternalChange() );				// filtered internally by CReportListControl
+	if ( m_fileListCtrl.IsSelectionChangeNotify( pNmList ) )	// IsSelectionCaretChangeNotify() skips updates when reducing the selection
 	{
 		//CReportListControl::TraceNotify( pNmList );
 
-		if ( m_selData.ReadList( &m_fileListCtrl ) )
-		{
-			UpdateFileListStatus();
-			UpdateDetailFields();
-		}
+		// do nothing here, handle selection change in OnLvnSelCaretChanged_LinkList() via lv::LVN_SelCaretChanged notification
 	}
 
 	*pResult = 0;
+}
+
+void CEditShortcutsDialog::OnLvnSelCaretChanged_LinkList( void )
+{
+	//TRACE( _T(">> [%d] CEditShortcutsDialog::OnLvnSelCaretChanged_LinkList: via PostMessage.\n"), CReportListControl::s_dbgCount++ );
+
+	ui::CSelectionData<CEditLinkItem> newSelData = m_selData;	// protect existing selection in order to give user a chance to commit the pending changes
+
+	if ( newSelData.ReadList( &m_fileListCtrl ) )
+	{
+		if ( IsDirty() )
+			if ( IDYES == AfxMessageBox( _T("Do you want to store the changes you've made in the detail fields?"), MB_YESNO | MB_ICONQUESTION ) )
+				OnOK();		// ApplyFields(), exit EditMode to CommitFilesMode (disabled)
+			else
+				SwitchMode( CommitFilesMode );
+
+		m_selData = newSelData;		// act on the new user selection
+		UpdateFileListStats();
+		UpdateDetailFields();
+	}
 }
 
 void CEditShortcutsDialog::OnLvnCopyTableText_LinkList( NMHDR* pNmHdr, LRESULT* pResult )
@@ -952,4 +982,61 @@ void CEditShortcutsDialog::OnLvnCopyTableText_LinkList( NMHDR* pNmHdr, LRESULT* 
 
 	if ( ui::IsKeyPressed( VK_SHIFT ) )
 		pNmInfo->m_textRows.push_back( pNmInfo->m_pColumnSet->FormatHeaderRow() );		// copy header row if SHIFT is pressed
+}
+
+void CEditShortcutsDialog::OnEnChange_DetailField( UINT ctrlId )
+{
+	switch ( ctrlId )
+	{
+		case IDC_TARGET_PATH_EDIT:
+			if ( !m_targetValue.InputCtrl() )
+				return;
+			break;
+		case IDC_WORK_DIR_EDIT:
+			if ( !m_workDirValue.InputCtrl() )
+				return;
+			break;
+		case IDC_ARGUMENTS_EDIT:
+			if ( !m_argumentsValue.InputCtrl() )
+				return;
+			break;
+		case IDC_DESCRIPTION_EDIT:
+			if ( !m_descriptionValue.InputCtrl() )
+				return;
+			break;
+		case IDC_HOT_KEY_CTRL:
+			if ( !m_hotKeyValue.InputCtrl() )
+				return;
+			break;
+		default:
+			ASSERT( false );
+			return;
+	}
+	OnChangedDetailField();
+}
+
+void CEditShortcutsDialog::OnCbnSelChange_ShowCmd( void )
+{
+	if ( m_showCmdValue.InputCtrl() )
+		OnChangedDetailField();
+}
+
+void CEditShortcutsDialog::OnBnClicked_RunAsAdmin( void )
+{
+	if ( m_runAsAdminFlag.InputCtrl() )
+		OnChangedDetailField();
+}
+
+void CEditShortcutsDialog::OnBnClicked_ChangeIcon( void )
+{
+	CEditLinkItem* pCaretItem = m_selData.GetCaretItem();
+	ASSERT_PTR( pCaretItem );
+
+	if ( m_iconLocValue.PickIcon() )
+		OnChangedDetailField();
+}
+
+void CEditShortcutsDialog::OnUpdate_ChangeIcon( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_selData.IsCaretSelected() );
 }

@@ -38,12 +38,14 @@ void CVisualTheme::Close( void )
 	}
 }
 
-COLORREF CVisualTheme::GetThemeColor( int partId, int stateId, int propId ) const
+COLORREF CVisualTheme::GetThemeColor( int partId, int stateId, int propId, COLORREF defaultColor /*= CLR_NONE*/ ) const
 {
 	COLORREF color;
+
 	if ( IsValid() && HR_OK( ::GetThemeColor( m_hTheme, partId, stateId, propId, &color ) ) )
 		return color;
-	return CLR_NONE;
+
+	return defaultColor;
 }
 
 bool CVisualTheme::GetThemePartSize( OUT CSize* pPartSize, HDC hdc, int partId, int stateId, THEMESIZE themeSize /*= TS_DRAW*/, const RECT* pRect /*= nullptr*/ ) const

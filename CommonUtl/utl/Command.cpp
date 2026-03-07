@@ -144,7 +144,7 @@ bool CMacroCommand::Execute( void ) implement
 	bool succeded = !m_subCommands.empty();
 
 	for ( std::vector<utl::ICommand*>::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
-		if ( !( *itSubCmd )->Execute() )
+		if ( !(*itSubCmd)->Execute() )
 			succeded = false;
 
 	return succeded;
@@ -155,7 +155,7 @@ bool CMacroCommand::Unexecute( void ) implement
 	bool succeded = !m_subCommands.empty();
 
 	for ( std::vector<utl::ICommand*>::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
-		if ( !( *itSubCmd )->Unexecute() )
+		if ( !(*itSubCmd)->Unexecute() )
 			succeded = false;
 
 	return succeded;
@@ -164,7 +164,7 @@ bool CMacroCommand::Unexecute( void ) implement
 bool CMacroCommand::IsUndoable( void ) const implement
 {
 	for ( std::vector<utl::ICommand*>::const_iterator itSubCmd = m_subCommands.begin(); itSubCmd != m_subCommands.end(); ++itSubCmd )
-		if ( ( *itSubCmd )->IsUndoable() )
+		if ( (*itSubCmd)->IsUndoable() )
 			return true;
 
 	return false;

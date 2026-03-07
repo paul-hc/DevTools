@@ -49,7 +49,7 @@ public:
 
 	std::vector<CRenameItem*> MakeSelItems( void ) const;
 
-	// cmd::IFileDetailsCmd
+	// cmd::IFileDetailsCmd interface
 	virtual bool HasSelItems( void ) const override;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
 	virtual size_t GetFileCount( void ) const override { return m_srcPaths.size(); }
 	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;

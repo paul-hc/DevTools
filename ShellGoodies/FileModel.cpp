@@ -147,10 +147,12 @@ void CFileModel::FetchFromStack( svc::StackType stackType )
 		{
 			case cmd::RenameFile:	utl::for_each( pFileMacroCmd->GetSubCommands(), AddRenameItemFromCmd( this, stackType ) ); break;
 			case cmd::TouchFile:	utl::for_each( pFileMacroCmd->GetSubCommands(), AddTouchItemFromCmd( this, stackType ) ); break;
+			case cmd::EditShortcut:	utl::for_each( pFileMacroCmd->GetSubCommands(), AddEditLinkFromCmd( this, stackType ) ); break;
 		}
 		m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
 		//utl::for_each( m_renameItems, func::StripDisplayCode( m_commonParentPath ) );		// use always filename.ext for path diffs
 		utl::for_each( m_touchItems, func::StripDisplayCode( m_commonParentPath ) );
+		utl::for_each( m_editLinkItems, func::StripDisplayCode( m_commonParentPath ) );
 
 		UpdateAllObservers( nullptr );				// items changed
 	}

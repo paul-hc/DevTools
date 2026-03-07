@@ -68,7 +68,7 @@ private:
 	void UpdateFormatLabel( void );
 	void UpdateSortOrderCombo( const ren::TSortingPair& sorting );
 	void UpdateTargetScopeButton( void );
-	void UpdateFileListStatus( void );
+	void UpdateFileListStats( void );
 	bool PromptRenameCustomSortOrder( void ) const;
 
 	void CommitLocalEdits( void );

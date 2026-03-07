@@ -72,7 +72,7 @@ std::auto_ptr<CMacroCommand> CFileService::MakeEditLinkCmds( const std::vector<C
 {
 	std::auto_ptr<CMacroCommand> pBatchMacro( new cmd::CFileMacroCmd( cmd::EditShortcut ) );
 
-	for ( const CEditLinkItem* pItem: editLinkItems )
+	for ( const CEditLinkItem* pItem : editLinkItems )
 		if ( pItem->IsModified() )
 			pBatchMacro->AddCmd( new CEditLinkFileCmd( pItem->GetFilePath(), pItem->GetSrcShortcut(), pItem->GetDestShortcut() ) );
 

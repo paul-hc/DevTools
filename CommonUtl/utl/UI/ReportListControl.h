@@ -68,7 +68,8 @@ namespace lv
 	enum NotifyCode
 	{
 		// via WM_COMMAND:
-		LVN_ItemsReorder = 1000,
+		LVN_SelCaretChanged = 1000,			// posted, coalesced, follows the multiple LVN_ITEMCHANGED notifications sequence, when the user changes selection/caret (non-internal changes)
+		LVN_ItemsReorder,
 			_LastCmd,						// derived classes may define new WM_COMMAND notifications starting from this value
 
 		// via WM_NOTIFY:
@@ -538,8 +539,8 @@ private:
 
 	void ToggleCheckState( int index, int newCheckState );
 	void SetItemCheckState( int index, int checkState );
-	void NotifyCheckStatesChanged( void );
 	size_t ApplyCheckStateToSelectedItems( int toggledIndex, int checkState );
+	void NotifyCheckStatesChanged( void );
 public:
 	enum ShowTopIndexMode { Vanilla, ScrollTwice, ScrollOnce, ScrollOffset };
 
@@ -755,6 +756,8 @@ public:
 	static const COLORREF s_mismatchDestTextColor = color::Blue;
 private:
 	static const TCHAR s_fmtRegColumnLayout[];
+public:
+	static int s_dbgCount;
 
 	// generated stuff
 public:

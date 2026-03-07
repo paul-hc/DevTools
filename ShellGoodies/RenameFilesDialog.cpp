@@ -295,7 +295,7 @@ void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMess
 	{	// This is a "foreign" update from the child sheet for cross-pages commands.
 		// Do minimal handling, then return.
 		if ( cmd::OnRenameListSelChanged == cmdType )
-			UpdateFileListStatus();
+			UpdateFileListStats();
 
 		return;		// skip rounting sheet/page command notifications, since the child sheet has it's own obeservers
 	}
@@ -406,7 +406,7 @@ void CRenameFilesDialog::UpdateFormatLabel( void )
 	ui::SetDlgItemText( this, IDC_FORMAT_LABEL, str::Format( _T("&Template \"%s\":"), m_ignoreExtension ? _T("name") : _T("name.ext") ) );
 }
 
-void CRenameFilesDialog::UpdateFileListStatus( void )
+void CRenameFilesDialog::UpdateFileListStats( void )
 {
 	std::tstring message = str::Format( _T("Total: %d file(s) in %d folder(s)."), m_pFileModel->GetSourcePaths().size(), m_pFileModel->GetSrcFolderPaths().size() );
 
@@ -638,7 +638,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
 		m_targetSelItemsButton.SetCheck( app::TargetSelectedItems == m_pFileModel->GetTargetScope() );
 		UpdateTargetScopeButton();
 		UpdateFormatLabel();
-		UpdateFileListStatus();
+		UpdateFileListStats();
 
 		m_isInitialized = true;
 

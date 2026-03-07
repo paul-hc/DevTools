@@ -50,6 +50,9 @@ protected:
 
 	virtual void SwitchMode( Mode mode ) override;
 private:
+	bool IsDirty( void ) const { return EditMode == m_mode; }		// it only gets dirty by switching to EditMode in a content changed notification
+	void OnChangedDetailField( void );
+private:
 	const std::vector<CEditLinkItem*>* GetCmdSelItems( void ) const;
 	const std::vector<CEditLinkItem*>& GetTargetItems( void ) const;
 
@@ -64,19 +67,15 @@ private:
 
 	// output
 	void UpdateTargetScopeButton( void );
-	void UpdateFileListStatus( void );
+	void UpdateFileListStats( void );
 
 	void SetupFileListView( void );
 	void UpdateFileListViewSelItems( void );
 	void UpdateDetailFields( void );
 
-	void UpdateFieldControls( void );
-	void UpdateFieldsFromCaretItem();
-
 	void FetchFieldState( OUT CFieldState& rState, const CEditLinkItem* pLinkItem, int subItem ) const;
 
 	// input
-	void InputFields( void );
 	void ApplyFields( void );
 	utl::ICommand* MakeChangeDestShortcutsCmd( void );
 	bool VisibleAllSrcColumns( void ) const;
@@ -115,7 +114,7 @@ private:
 	CHostToolbarCtrl<CImageEdit> m_iconLocationEdit;
 	CStatic m_shortcutIconStatic;
 private:
-	// multiple/single value-state accumulators for dest shortcut fields
+	// selection-dependent data: multiple/single value-state accumulators for dest shortcut fields
 	multi::CPathValue m_targetValue;
 	multi::CPathValue m_workDirValue;
 	multi::CStringValue m_argumentsValue;
@@ -124,6 +123,7 @@ private:
 	multi::CEnumValue m_showCmdValue;
 	multi::CFlagCheckState m_runAsAdminFlag;
 	multi::CFlagCheckState m_unicodeFlag;
+	// caret-dependent data
 	single::CIconLocationValue m_iconLocValue;
 
 	// generated stuff
@@ -135,18 +135,23 @@ protected:
 	virtual void OnOK( void );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
-	afx_msg void OnToggle_TargetSelItems( void );
-	afx_msg void On_SelItems_ResetDestFile( void );
+	afx_msg void OnBnClicked_TargetSelItems( void );
+	afx_msg void OnBnClicked_ShowSrcColumns( void );
+	afx_msg void On_ResetDestSelShortcuts( void );
 
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnBnClicked_PasteDestShortcuts( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
-	afx_msg void OnBnClicked_ShowSrcColumns( void );
-	afx_msg void OnBnClicked_ChangeIcon( void );
-	afx_msg void OnUpdateListCaretItem( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateListSelection( CCmdUI* pCmdUI );
+
 	afx_msg void OnLvnItemChanged_LinkList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnSelCaretChanged_LinkList( void );
 	afx_msg void OnLvnCopyTableText_LinkList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnEnChange_DetailField( UINT ctrlId );
+	afx_msg void OnCbnSelChange_ShowCmd( void );
+	afx_msg void OnBnClicked_RunAsAdmin( void );
+	afx_msg void OnBnClicked_ChangeIcon( void );
+	afx_msg void OnUpdate_ChangeIcon( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

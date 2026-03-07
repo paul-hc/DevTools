@@ -52,7 +52,8 @@ namespace serial
 		utl::ClearOwningContainer( rObjects );			// delete existing owned objects
 		rObjects.resize( archive.ReadCount() );			// ReadCount() for backwards compatibility
 
-		for ( typename PtrContainerT::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
+		size_t pos = 0;
+		for ( typename PtrContainerT::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr, ++pos )
 		{
 			CObject* pSerialObject = nullptr;
 			archive >> pSerialObject;

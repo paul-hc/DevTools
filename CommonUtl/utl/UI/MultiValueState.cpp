@@ -19,10 +19,15 @@ namespace multi
 	bool CStringValue::UpdateCtrl( void ) const
 	{
 		ASSERT_PTR( m_pCtrl );
-		const std::tstring* pText = m_state != MultipleValue ? &m_value : &GetMultipleValueTag();
 
-		ui::EnableWindow( m_pCtrl->GetSafeHwnd(), !IsNullValue() );
-		return m_pCtrl->SetText( *pText );
+		bool changed = ui::EnableWindow( m_pCtrl->GetSafeHwnd(), !IsNullValue() );
+
+		changed |= m_pCtrl->SetMultiValuesMode( MultipleValue == m_state );
+
+		if ( !IsMultipleValue() )
+			changed |= m_pCtrl->SetText( m_value );
+
+		return changed;
 	}
 
 	bool CStringValue::InputCtrl( void )
@@ -33,12 +38,19 @@ namespace multi
 			return false;
 
 		m_value = m_pCtrl->GetText();
-		m_state = !m_value.empty() ? SharedValue : NullValue;
+		m_state = SharedValue;	//!m_value.empty() ? SharedValue : NullValue
+		m_modified = true;
 		return true;
 	}
 
 
 	// CPathValue implementation
+
+	void CPathValue::SetAnyGuidPath( void )
+	{
+		m_anyGuidPath = true;
+		__super::Clear();		// switch to NullValue
+	}
 
 	bool CPathValue::UpdateCtrl( void ) const
 	{
@@ -46,16 +58,11 @@ namespace multi
 
 		bool changed = ui::EnableWindow( m_pCtrl->GetSafeHwnd(), !IsNullValue() );
 
-		if ( !IsNullValue() )
-			changed |= m_pCtrl->SetWritable( MultipleValue == m_state || ( SharedValue == m_state && !m_value.IsEmpty() && !m_value.IsGuidPath() ) );
+		changed |= m_pCtrl->SetWritable( !IsNullValue() && !m_anyGuidPath );
+		changed |= m_pCtrl->SetMultiValuesMode( MultipleValue == m_state );
 
-		if ( MultipleValue == m_state )
-			changed |= m_pCtrl->SetMultiValuesMode();
-		else
-		{
-			changed |= m_value != m_pCtrl->GetShellPath();
-			m_pCtrl->SetShellPath( m_value );
-		}
+		if ( !IsMultipleValue() )
+			changed |= m_pCtrl->SetShellPath( m_value );
 
 		return changed;
 	}
@@ -67,8 +74,14 @@ namespace multi
 		if ( ui::IsDisabled( m_pCtrl->GetSafeHwnd() ) || !m_pCtrl->GetModify() || m_pCtrl->InMultiValuesMode() )
 			return false;
 
+		if ( m_anyGuidPath && IsMultipleValue() )
+			return false;
+
+		m_pCtrl->InputShellPath();
+
 		m_value = m_pCtrl->GetShellPath();
-		m_state = !m_value.IsEmpty() ? SharedValue : NullValue;
+		m_state = SharedValue;		//!m_value.IsEmpty() ? SharedValue : NullValue;
+		m_modified = true;
 		return true;
 	}
 
@@ -117,6 +130,7 @@ namespace multi
 
 		m_value = selIndex;
 		m_state = SharedValue;
+		m_modified = true;
 		return true;
 	}
 
@@ -151,6 +165,7 @@ namespace multi
 
 		m_value = newValue;
 		m_state = SharedValue;		// MultipleValue -> SharedValue
+		m_modified = true;
 		return true;
 	}
 
@@ -185,7 +200,11 @@ namespace multi
 			return false;
 
 		m_value = checkState;
-		//m_state = SharedValue;
+		if ( BST_UNCHECKED == m_value || BST_CHECKED == m_value )
+		{
+			m_state = SharedValue;
+			m_modified = true;
+		}
 		return true;
 	}
 }

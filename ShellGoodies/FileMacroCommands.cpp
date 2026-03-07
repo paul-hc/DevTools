@@ -240,13 +240,15 @@ namespace cmd
 
 	UserFeedback CBaseFileCmd::HandleFileError( CException* pExc, const fs::CPath& srcPath )
 	{
-		std::tstring errMsg = ExtractMessage( pExc, srcPath );
+		std::tstring errMsg = ExtractMessage( pExc );
 
 		if ( s_pErrorObserver != nullptr )
 			s_pErrorObserver->OnFileError( srcPath, errMsg );
 
+		std::tstring userMessage = errMsg + _T("\r\n") + srcPath.Get();
 		UserFeedback feedback;
-		switch ( AfxMessageBox( errMsg.c_str(), MB_ICONWARNING | MB_ABORTRETRYIGNORE ) )
+
+		switch ( AfxMessageBox( userMessage.c_str(), MB_ICONWARNING | MB_ABORTRETRYIGNORE ) )
 		{
 			default: ASSERT( false );
 			case IDRETRY:	return Retry;				// no logging on retry, give it another chance to fix the problem
@@ -258,13 +260,11 @@ namespace cmd
 		return feedback;
 	}
 
-	std::tstring CBaseFileCmd::ExtractMessage( CException* pExc, const fs::CPath& srcPath )
+	std::tstring CBaseFileCmd::ExtractMessage( CException* pExc )
 	{
 		std::tstring message = mfc::CRuntimeException::MessageOf( *pExc );
 		pExc->Delete();
-
-		if ( !srcPath.FileExist() )
-			return str::Format( _T("Cannot find file: %s"), srcPath.GetPtr() );
+		str::Trim( message );
 		return message;
 	}
 }
@@ -421,12 +421,14 @@ std::tstring CEditLinkFileCmd::Format( utl::Verbosity verbosity ) const override
 
 bool CEditLinkFileCmd::Execute( void ) override
 {
-	if ( m_destShortcut != m_srcShortcut )
+	if ( shell::CShortcut::TFields diffFields = m_destShortcut.GetDiffFields( m_srcShortcut ) )
 	{
+		ASSERT( m_destShortcut != m_srcShortcut );
 		{
 			CScopedErrorHandler scopedHandler( utl::ThrowMode );	// throw on HRESULT error
 			CComPtr<IShellLink> pShellLink = shell::LoadLinkFromFile( m_srcPath.GetPtr() );
 
+			m_destShortcut.SetChangedFields( diffFields );			// store the Write mask for changed fields
 			m_destShortcut.WriteToLink( pShellLink );				// apply the changed fields
 			shell::SaveLinkToFile( m_srcPath.GetPtr(), pShellLink );
 		}
@@ -446,7 +448,6 @@ std::auto_ptr<cmd::CBaseFileCmd> CEditLinkFileCmd::MakeUnexecuteCmd( void ) over
 
 bool CEditLinkFileCmd::IsUndoable( void ) const override
 {
-	//return m_srcShortcut.FileExist() && m_srcShortcut != fs::CFileShortcut::ReadFromFile( m_srcShortcut.m_fullPath );
 	return true;		// let it unexecute with error rather than being skipped in UNDO
 }
 

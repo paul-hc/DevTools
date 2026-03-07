@@ -264,18 +264,19 @@ namespace ui
 	inline void SendCommandToParent( HWND hCtrl, int notifCode = BN_CLICKED )
 	{
 		ASSERT( hCtrl != nullptr && ::GetParent( hCtrl ) != nullptr );
-		::SendMessage( ::GetParent( hCtrl ),
-					   WM_COMMAND, MAKEWPARAM( ::GetDlgCtrlID( hCtrl ), notifCode ),
+		::SendMessage( ::GetParent( hCtrl ), WM_COMMAND,
+					   MAKEWPARAM( ::GetDlgCtrlID( hCtrl ), notifCode ),
 					   (LPARAM)hCtrl );
 	}
 
-	inline void PostCommandToParent( HWND hCtrl, int notifCode = BN_CLICKED )
+	enum PostMode
 	{
-		ASSERT( hCtrl != nullptr && ::GetParent( hCtrl ) != nullptr );
-		::PostMessage( ::GetParent( hCtrl ),
-					   WM_COMMAND, MAKEWPARAM( ::GetDlgCtrlID( hCtrl ), notifCode ),
-					   (LPARAM)hCtrl );
-	}
+		PostCoalesce,		// coalesce (merge) multiple notification messages into a single one
+		PostMultiple		// allow posting duplicate notification events in the message queue
+	};
+
+	bool PostCommandToParent( HWND hCtrl, int notifCode = BN_CLICKED, PostMode postMode = ui::PostCoalesce );
+
 
 	inline LRESULT SendNotifyToParent( HWND hCtrl, int notifCode, NMHDR* pNmHdr )
 	{

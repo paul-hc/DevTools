@@ -6,7 +6,7 @@
 #include "Application_fwd.h"
 
 
-class CAppCmdService : public CCommandService
+class CAppCmdService : public CCommandService		// managed by CApplication, lazy init on CApplication::OnInitAppResources()
 {
 public:
 	CAppCmdService( void );

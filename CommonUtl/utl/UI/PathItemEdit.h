@@ -26,15 +26,16 @@ public:
 	const shell::TPath& GetShellPath( void ) const { return m_pathItem.GetShellPath(); }
 	const shell::CPidlAbsolute& GetPidl( void ) const { return m_pathItem.GetPidl(); }
 
-	void SetShellPath( const shell::TPath& shellPath );
-	void SetPidl( const shell::CPidlAbsolute& pidl );
+	bool SetShellPath( const shell::TPath& shellPath );
+	bool SetPidl( const shell::CPidlAbsolute& pidl );
+	bool InputShellPath( void );		// input current text if Writable and Modified
 
 	const ui::CItemContent& GetContent( void ) const { return m_pathContent; }
 	ui::CItemContent& RefContent( void ) { return m_pathContent; }
 
 	// base overrides
 	virtual bool HasValidImage( void ) const override;
-	virtual bool SetMultiValuesMode( void ) override;
+	virtual bool SetMultiValuesMode( bool multiValuesMode = true ) override;
 protected:
 	virtual void UpdateControl( void ) override;
 	virtual void DrawImage( CDC* pDC, const CRect& imageRect ) override;

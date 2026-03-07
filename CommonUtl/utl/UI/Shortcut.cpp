@@ -355,13 +355,12 @@ namespace shell
 		return changed;
 	}
 
-	bool CShortcut::ModifyLinkDataFlags( DWORD clearFlags, DWORD setFlags )
+	bool CShortcut::SetLinkDataFlag( SHELL_LINK_DATA_FLAGS linkDataFlag, bool on /*= true*/ )
 	{
-		if ( !::ModifyFlags( m_linkDataFlags, clearFlags, setFlags ) )
-			return false;
+		DWORD linkDataFlags = m_linkDataFlags;
 
-		::SetFlag( m_linkDataFlags, LinkDataFlags );
-		return true;
+		SetFlag( linkDataFlags, linkDataFlag, on );
+		return SetLinkDataFlags( linkDataFlags );
 	}
 
 	std::tstring CShortcut::FormatTarget( SIGDN pidlFmt /*= SIGDN_DESKTOPABSOLUTEEDITING*/ ) const

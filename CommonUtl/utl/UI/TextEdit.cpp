@@ -58,6 +58,7 @@ CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	, m_hookThumbTrack( true )
 	, m_visibleWhiteSpace( false )
 	, m_accel( IDR_EDIT_ACCEL )
+	, m_multiValuesMode( false )
 	, m_pTextInputCallback( nullptr )
 	, m_pSyncScrolling( nullptr )
 	, m_lastSelRange( 0, 0 )
@@ -156,12 +157,24 @@ bool CTextEdit::ReplaceText( const std::tstring& text, bool canUndo /*= true*/ )
 
 bool CTextEdit::InMultiValuesMode( void ) const implement
 {
-	return GetText() == GetMultiValueTag();
+	//REQUIRE( !m_multiValuesMode || HasEmptyText() );		// it fails in certain trasitory states...
+	return m_multiValuesMode;
 }
 
-bool CTextEdit::SetMultiValuesMode( void )
+bool CTextEdit::SetMultiValuesMode( bool multiValuesMode /*= true*/ )
 {	// switch to MultiValues contents mode
-	return SetText( GetMultiValueTag() );
+	if ( !utl::ModifyValue( m_multiValuesMode, multiValuesMode ) )
+		return false;
+
+	if ( m_multiValuesMode )
+	{
+		SetText( str::GetEmpty() );
+		SetCueBanner( GetMultiValueTag().c_str(), true );
+	}
+	else
+		SetCueBanner( str::GetEmpty().c_str(), false );
+
+	return true;
 }
 
 bool CTextEdit::RevertContents( void )
@@ -483,6 +496,9 @@ bool CTextEdit::ValidateText( ui::CTextValidator& rValidator ) implement
 
 void CTextEdit::OnValueChanged( void )
 {
+	if ( InMultiValuesMode() )
+		if ( !m_lastValidText.empty() )
+			SetMultiValuesMode( false );		// text entered: exit MultiValuesMode
 }
 
 COLORREF CTextEdit::GetCustomTextColor( void ) const
@@ -555,6 +571,7 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 
 BEGIN_MESSAGE_MAP( CTextEdit, TBaseClass )
 	ON_WM_GETDLGCODE()
+	ON_WM_PAINT()
 	ON_WM_CTLCOLOR_REFLECT()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
@@ -593,6 +610,22 @@ UINT CTextEdit::OnGetDlgCode( void )
 	return code;
 }
 
+void CTextEdit::OnPaint( void )
+{
+	if ( InMultiValuesMode() && IsReadOnly() )
+	{	// draw the cue banner in read-only mode (not rendered by default in Windows)
+		CPaintDC dc( this );
+
+		// let Windows edit class draw the background and borders
+		DefWindowProc( WM_ERASEBKGND, (WPARAM)dc.GetSafeHdc(), 0 );
+		DefWindowProc( WM_PRINTCLIENT, (WPARAM)dc.GetSafeHdc(), PRF_CLIENT );
+
+		DrawEditCueBanner( &dc, this );
+	}
+	else
+		__super::OnPaint();
+}
+
 HBRUSH CTextEdit::CtlColor( CDC* pDC, UINT ctlColor )
 {
 	ctlColor;
@@ -600,10 +633,8 @@ HBRUSH CTextEdit::CtlColor( CDC* pDC, UINT ctlColor )
 	bool readOnly = IsReadOnly();
 	COLORREF textColor = CLR_NONE;
 
-	if ( InMultiValuesMode() )
-		textColor = ::GetSysColor( COLOR_SCROLLBAR );	// ~ group-box frame color
-	else
-		textColor = GetCustomTextColor();				// allow custom color highlight
+	if ( !InMultiValuesMode() )
+		textColor = GetCustomTextColor();		// allow custom color highlight
 
 	if ( CLR_NONE == textColor && !readOnly )
 		return nullptr;		// no color customization

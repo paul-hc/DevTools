@@ -244,7 +244,7 @@ void CTouchFilesDialog::UpdateTargetScopeButton( void )
 	m_targetSelItemsButton.SetFrameColor( app::TargetSelectedItems == m_pFileModel->GetTargetScope() ? app::ColorWarningText : CLR_NONE );
 }
 
-void CTouchFilesDialog::UpdateFileListStatus( void )
+void CTouchFilesDialog::UpdateFileListStats( void )
 {
 	std::tstring message = str::Format( _T("Total: %d file(s) in %d folder(s)."), m_pFileModel->GetSourcePaths().size(), m_pFileModel->GetSrcFolderPaths().size() );
 
@@ -658,7 +658,7 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 
 		m_targetSelItemsButton.SetCheck( app::TargetSelectedItems == m_pFileModel->GetTargetScope() );
 		UpdateTargetScopeButton();
-		UpdateFileListStatus();
+		UpdateFileListStats();
 	}
 
 	__super::DoDataExchange( pDX );
@@ -892,7 +892,7 @@ void CTouchFilesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pRes
 		CReportListControl::TraceNotify( pNmList );
 
 		if ( m_selData.ReadList( &m_fileListCtrl ) )
-			UpdateFileListStatus();
+			UpdateFileListStats();
 	}
 
 	*pResult = 0;

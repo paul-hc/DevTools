@@ -69,7 +69,8 @@ void CHotKeyCtrlEx::OnPaint( void )
 	{
 		CPaintDC dc( this );
 
-		DrawMultiValueText( &dc, this, ::GetSysColorBrush( COLOR_WINDOW ) );
+		DefWindowProc( WM_ERASEBKGND, (WPARAM)dc.GetSafeHdc(), 0 );		// let Windows edit class draw the background
+		DrawMultiValueText( &dc, this, nullptr/*::GetSysColorBrush( COLOR_WINDOW )*/ );
 	}
 	else
 		__super::OnPaint();

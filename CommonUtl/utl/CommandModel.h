@@ -35,8 +35,8 @@ namespace func
 
 
 class CCommandModel : public utl::ICommandExecutor
-					, public serial::ISerializable
-					, private utl::noncopyable
+	, public serial::ISerializable
+	, private utl::noncopyable
 {
 	friend struct CScopedExecMode;
 public:
@@ -77,10 +77,10 @@ public:
 	void ReHostCommands( HostT* pHost );			// called after loading, to update the host interface pointer (parent) of each persistent command
 
 	// commands removal
-	void RemoveExpiredCommands( size_t maxSize );
+	size_t RemoveExpiredCommands( size_t maxSize );
 
 	template< typename PredT >
-	void RemoveCommandsThat( PredT pred );
+	size_t RemoveCommandsThat( PredT pred );
 private:
 	template< typename PredT >
 	static void RemoveStackCommandsThat( std::deque<utl::ICommand*>& rStack, PredT pred );
@@ -118,10 +118,13 @@ void CCommandModel::RemoveStackCommandsThat( std::deque<utl::ICommand*>& rStack,
 }
 
 template< typename PredT >
-inline void CCommandModel::RemoveCommandsThat( PredT pred )
+inline size_t CCommandModel::RemoveCommandsThat( PredT pred )
 {
+	size_t oldSize = m_undoStack.size() + m_redoStack.size();
+
 	RemoveStackCommandsThat( m_undoStack, pred );
 	RemoveStackCommandsThat( m_redoStack, pred );
+	return oldSize - ( m_undoStack.size() + m_redoStack.size() );		// removed count
 }
 
 
