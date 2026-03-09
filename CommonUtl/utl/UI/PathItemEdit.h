@@ -34,11 +34,11 @@ public:
 	ui::CItemContent& RefContent( void ) { return m_pathContent; }
 
 	// base overrides
-	virtual bool HasValidImage( void ) const override;
-	virtual bool SetMultiValuesMode( bool multiValuesMode = true ) override;
+	virtual bool HasValidImage( void ) const override_;
+	virtual bool SetMultiValuesMode( bool multiValuesMode = true ) override_;
 protected:
-	virtual void UpdateControl( void ) override;
-	virtual void DrawImage( CDC* pDC, const CRect& imageRect ) override;
+	virtual void UpdateControl( void ) override_;
+	virtual void DrawImage( CDC* pDC, const CRect& imageRect ) override_;
 	virtual COLORREF GetCustomTextColor( void ) const overrides(CTextEdit);
 
 	// ui::ICustomCmdInfo interface
@@ -59,7 +59,7 @@ public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
-	virtual void OnEditCopy( void ) override;
+	virtual void OnEditCopy( void ) override_;
 	afx_msg void OnCopyFilename( void );
 	afx_msg void OnCopyFolder( void );
 	afx_msg void OnFileProperties( void );

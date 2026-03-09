@@ -27,7 +27,7 @@ CImageFileEnumerator::~CImageFileEnumerator()
 {
 }
 
-void CImageFileEnumerator::Clear( void ) override
+void CImageFileEnumerator::Clear( void ) override_
 {
 	__super::Clear();
 
@@ -140,7 +140,7 @@ void CImageFileEnumerator::PushMany( const std::vector<CFileAttr*>& fileAttrs )
 		Push( *itFileAttr );
 }
 
-void CImageFileEnumerator::OnAddFileInfo( const fs::CFileState& fileState ) override
+void CImageFileEnumerator::OnAddFileInfo( const fs::CFileState& fileState ) override_
 {
 	if ( app::IsAlbumFile( fileState.m_fullPath.GetPtr() ) )		// found a catalog storage?
 	{
@@ -151,7 +151,7 @@ void CImageFileEnumerator::OnAddFileInfo( const fs::CFileState& fileState ) over
 		Push( new CFileAttr( fileState ) );
 }
 
-void CImageFileEnumerator::AddFoundFile( const fs::CPath& filePath ) override
+void CImageFileEnumerator::AddFoundFile( const fs::CPath& filePath ) override_
 {
 	if ( app::IsAlbumFile( filePath.GetPtr() ) )
 	{

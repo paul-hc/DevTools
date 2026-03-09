@@ -31,7 +31,7 @@ IImageView* CChildFrame::GetImageView( void ) const
 	return m_pImageView;
 }
 
-void CChildFrame::ActivateFrame( int cmdShow ) override
+void CChildFrame::ActivateFrame( int cmdShow ) override_
 {
 	if ( -1 == cmdShow )
 	{
@@ -54,7 +54,7 @@ BOOL CChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext ) 
 	return m_pImageView != nullptr;
 }
 
-BOOL CChildFrame::PreTranslateMessage( MSG* pMsg ) override
+BOOL CChildFrame::PreTranslateMessage( MSG* pMsg ) override_
 {
 	return
 		__super::PreTranslateMessage( pMsg ) ||

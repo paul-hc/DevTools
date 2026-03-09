@@ -204,7 +204,7 @@ const CEnumTags& CRenameFilesDialog::GetTags_Mode( void )
 	return s_modeTags;
 }
 
-void CRenameFilesDialog::SwitchMode( Mode mode ) override
+void CRenameFilesDialog::SwitchMode( Mode mode ) override_
 {
 	m_mode = mode;
 	if ( nullptr == m_hWnd )
@@ -223,7 +223,7 @@ void CRenameFilesDialog::SwitchMode( Mode mode ) override
 	ui::EnableControl( *this, IDOK, m_mode != CommitFilesMode || HasDestPaths() );
 }
 
-void CRenameFilesDialog::PostMakeDest( bool silent /*= false*/ ) override
+void CRenameFilesDialog::PostMakeDest( bool silent /*= false*/ ) override_
 {
 	// note: the list is set-up on OnUpdate()
 
@@ -246,7 +246,7 @@ void CRenameFilesDialog::PostMakeDest( bool silent /*= false*/ ) override
 	}
 }
 
-void CRenameFilesDialog::PopStackTop( svc::StackType stackType ) override
+void CRenameFilesDialog::PopStackTop( svc::StackType stackType ) override_
 {
 	ASSERT( !IsRollMode() );
 
@@ -272,7 +272,7 @@ void CRenameFilesDialog::PopStackTop( svc::StackType stackType ) override
 		PopStackRunCrossEditor( stackType );				// end this dialog and execute the target dialog editor
 }
 
-void CRenameFilesDialog::OnExecuteCmd( utl::ICommand* pCmd ) override
+void CRenameFilesDialog::OnExecuteCmd( utl::ICommand* pCmd ) override_
 {
 	if ( app::TargetSelectedItems == m_pFileModel->GetTargetScope() )
 		if ( cmd::HasSelItemsTarget( pCmd ) )
@@ -284,7 +284,7 @@ void CRenameFilesDialog::OnExecuteCmd( utl::ICommand* pCmd ) override
 }
 
 
-void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
+void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_
 {
 	const cmd::CommandType cmdType = static_cast<cmd::CommandType>( utl::GetSafeTypeID( pMessage ) );
 
@@ -325,7 +325,7 @@ void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMess
 			PostMakeDest();
 }
 
-void CRenameFilesDialog::ClearFileErrors( void ) override
+void CRenameFilesDialog::ClearFileErrors( void ) override_
 {
 	m_errorItems.clear();
 
@@ -334,7 +334,7 @@ void CRenameFilesDialog::ClearFileErrors( void ) override
 			pPage->InvalidateFiles();
 }
 
-void CRenameFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override
+void CRenameFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override_
 {
 	errMsg;
 
@@ -345,7 +345,7 @@ void CRenameFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstri
 	}
 }
 
-void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CRenameFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_
 {
 	switch ( cmdId )
 	{
@@ -595,7 +595,7 @@ void CRenameFilesDialog::ReplaceFormatEditText( const std::tstring& text )
 	}
 }
 
-void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override
+void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX ) override_
 {
 	const bool firstInit = nullptr == m_filesSheet.m_hWnd;
 
@@ -706,7 +706,7 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI( ID_BROWSE_FOLDER, OnUpdate_BrowseCurrFolder )
 END_MESSAGE_MAP()
 
-BOOL CRenameFilesDialog::OnInitDialog( void ) override
+BOOL CRenameFilesDialog::OnInitDialog( void ) override_
 {
 	BOOL focusDefault = __super::OnInitDialog();
 
@@ -716,7 +716,7 @@ BOOL CRenameFilesDialog::OnInitDialog( void ) override
 	return focusDefault;
 }
 
-void CRenameFilesDialog::OnOK( void ) override
+void CRenameFilesDialog::OnOK( void ) override_
 {
 	CommitLocalEdits();
 

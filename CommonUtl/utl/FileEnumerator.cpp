@@ -325,14 +325,14 @@ namespace fs
 	}
 
 
-	void CBaseEnumerator::OnAddFileInfo( const fs::CFileState& fileState ) override
+	void CBaseEnumerator::OnAddFileInfo( const fs::CFileState& fileState ) override_
 	{	// note: we should not chain this method to m_pChainEnum!
 		REQUIRE( !HasEnumFlag( fs::EF_IgnoreFiles ) );	// should've been filtered by now
 
 		__super::OnAddFileInfo( fileState );
 	}
 
-	void CBaseEnumerator::AddFoundFile( const fs::CPath& filePath ) override
+	void CBaseEnumerator::AddFoundFile( const fs::CPath& filePath ) override_
 	{
 		REQUIRE( !HasEnumFlag( fs::EF_IgnoreFiles ) );	// should've been filtered by now
 
@@ -340,7 +340,7 @@ namespace fs
 			m_pChainEnum->AddFoundFile( filePath );
 	}
 
-	bool CBaseEnumerator::AddFoundSubDir( const fs::TDirPath& subDirPath ) override
+	bool CBaseEnumerator::AddFoundSubDir( const fs::TDirPath& subDirPath ) override_
 	{
 		fs::CPath _subDirPath = subDirPath;
 
@@ -356,7 +356,7 @@ namespace fs
 		return true;
 	}
 
-	bool CBaseEnumerator::CanIncludeNode( const fs::CFileState& nodeState ) const override
+	bool CBaseEnumerator::CanIncludeNode( const fs::CFileState& nodeState ) const override_
 	{
 		if ( nodeState.IsDirectory() )			// regular file?
 		{
@@ -389,12 +389,12 @@ namespace fs
 		return !MustStop();
 	}
 
-	bool CBaseEnumerator::MustStop( void ) const override
+	bool CBaseEnumerator::MustStop( void ) const override_
 	{
 		return GetFileCount() >= m_options.m_maxFiles;
 	}
 
-	bool CBaseEnumerator::CanRecurse( void ) const override
+	bool CBaseEnumerator::CanRecurse( void ) const override_
 	{
 		return HasEnumFlag( fs::EF_Recurse ) && m_depthCounter.GetCount() < m_options.m_maxDepthLevel;
 	}
@@ -404,13 +404,13 @@ namespace fs
 {
 	// CPathEnumerator implementation
 
-	void CPathEnumerator::Clear( void ) override
+	void CPathEnumerator::Clear( void ) override_
 	{
 		__super::Clear();
 		m_filePaths.clear();
 	}
 
-	void CPathEnumerator::AddFoundFile( const fs::CPath& filePath ) override
+	void CPathEnumerator::AddFoundFile( const fs::CPath& filePath ) override_
 	{
 		fs::CPath _filePath = filePath;
 

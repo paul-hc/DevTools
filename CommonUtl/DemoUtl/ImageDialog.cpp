@@ -487,7 +487,7 @@ void CImageDialog::ShowPixelInfo( const CPoint& pos, COLORREF color, CWnd* pCtrl
 	ui::SetDlgItemText( m_hWnd, IDC_PIXEL_INFO_STATIC, text );
 }
 
-void CImageDialog::DoDataExchange( CDataExchange* pDX ) override
+void CImageDialog::DoDataExchange( CDataExchange* pDX ) override_
 {
 	bool firstInit = nullptr == m_imagePathCombo.m_hWnd;
 
@@ -578,7 +578,7 @@ BEGIN_MESSAGE_MAP( CImageDialog, CLayoutDialog )
 	ON_BN_CLICKED( ID_REFRESH, OnRedrawSample )
 END_MESSAGE_MAP()
 
-void CImageDialog::OnOK( void ) override
+void CImageDialog::OnOK( void ) override_
 {
 	// Notifications are disabled for the focused control during UpdateData() by MFC.
 	// Save history combos just before UpdateData( DialogSaveChanges ), so that HCN_VALIDATEITEMS notifications are received.
@@ -587,7 +587,7 @@ void CImageDialog::OnOK( void ) override
 	__super::OnOK();
 }
 
-void CImageDialog::OnDestroy( void )  override
+void CImageDialog::OnDestroy( void )  override_
 {
 	AfxGetApp()->WriteProfileInt( reg::section_dlg, reg::entry_bkColor, m_pBkColorPicker->GetColor() );
 

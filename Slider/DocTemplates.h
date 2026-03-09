@@ -16,9 +16,9 @@ public:
 	~CAppDocManager();
 
 	// base overrides
-	virtual void OnFileNew( void ) override;
-	virtual BOOL DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate ) override;
-	virtual void RegisterShellFileTypes( BOOL compatMode ) override;
+	virtual void OnFileNew( void ) override_;
+	virtual BOOL DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate ) override_;
+	virtual void RegisterShellFileTypes( BOOL compatMode ) override_;
 
 	static void RegisterImageAdditionalShellExt( bool doRegister );
 	static bool IsAppRegisteredForImageExt( const TCHAR imageExt[] = _T(".bmp") );
@@ -43,8 +43,8 @@ namespace app
 		void SetFilterStore( const fs::CFilterStore* pFilterStore );
 	public:
 		// base overrides
-		virtual BOOL GetDocString( CString& rString, enum DocStringIndex index ) const override;
-		virtual Confidence MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch ) override;
+		virtual BOOL GetDocString( CString& rString, enum DocStringIndex index ) const override_;
+		virtual Confidence MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch ) override_;
 
 		const fs::CFilterStore* GetFilterStore( void ) const { return m_pFilterStore; }
 		const std::vector<std::tstring>& GetAllExts( void ) const { return m_allExts; }
@@ -89,7 +89,7 @@ namespace app
 		bool RegisterAlbumShell_Directory( bool doRegister );
 	protected:
 		// base overrides
-		virtual void AlterSaveAsPath( CString& rFilePath ) const override;
+		virtual void AlterSaveAsPath( CString& rFilePath ) const override_;
 	};
 }
 

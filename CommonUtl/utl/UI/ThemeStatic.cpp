@@ -46,7 +46,7 @@ CSize CThemeStatic::ComputeIdealSize( void ) implement
 	return ComputeIdealTextSize();
 }
 
-CSize CThemeStatic::ComputeIdealTextSize( void ) override
+CSize CThemeStatic::ComputeIdealTextSize( void ) override_
 {
 	CClientDC clientDC( this );
 	return ComputeIdealTextSizeImpl( &clientDC );
@@ -222,7 +222,7 @@ void CLabelDivider::SetEdgeType( EdgeType edgeType )
 			Invalidate();
 }
 
-void CLabelDivider::Draw( CDC* pDC, const CRect& clientRect ) override
+void CLabelDivider::Draw( CDC* pDC, const CRect& clientRect ) override_
 {
 	__super::Draw( pDC, clientRect );
 
@@ -343,7 +343,7 @@ void CPickMenuStatic::SetPopupAlign( ui::PopupAlign popupAlign )
 	m_contentItem = CThemeItem::s_null;			// reset content item to display an arrow
 }
 
-void CPickMenuStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus ) override
+void CPickMenuStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus ) override_
 {
 	if ( m_contentItem.IsThemed() )
 		return;				// use the themed content

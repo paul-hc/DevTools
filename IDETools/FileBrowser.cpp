@@ -273,7 +273,7 @@ void CFolderOptions::SetSubSection( const TCHAR* pSubSection )
 		LoadAll();
 }
 
-void CFolderOptions::LoadAll( void ) override
+void CFolderOptions::LoadAll( void ) override_
 {
 	std::tstring origSortOrderText = m_fileSortOrder.GetOrderText();
 
@@ -349,7 +349,7 @@ BEGIN_MESSAGE_MAP( CFolderOptions, CRegistryOptions )
 	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdateResetSortOrder )
 END_MESSAGE_MAP()
 
-void CFolderOptions::OnUpdateOption( CCmdUI* pCmdUI ) override
+void CFolderOptions::OnUpdateOption( CCmdUI* pCmdUI ) override_
 {
 	__super::OnUpdateOption( pCmdUI );
 
@@ -736,7 +736,7 @@ bool CFileBrowser::IsFileCmd( UINT cmdId )
 	return cmdId >= CM_FILEBROWSER_FILEITEM && cmdId <= CM_FILEBROWSER_FILEITEM_LAST;
 }
 
-BOOL CFileBrowser::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
+BOOL CFileBrowser::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_
 {
 	if ( m_options.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 	{

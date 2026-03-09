@@ -83,15 +83,15 @@ namespace fs
 		CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = nullptr );
 	public:
 		// IEnumerator interface (partial)
-		virtual const TEnumFlags& GetEnumFlags( void ) const override { return m_options.m_enumFlags; }
+		virtual const TEnumFlags& GetEnumFlags( void ) const override_ { return m_options.m_enumFlags; }
 	protected:
-		virtual void OnAddFileInfo( const fs::CFileState& fileState ) override;		// no chaining via m_pChainEnum
-		virtual void AddFoundFile( const fs::CPath& filePath ) = 0 override;		// has implementation
-		virtual bool AddFoundSubDir( const fs::TDirPath& subDirPath ) override;
-		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const override;
-		virtual bool CanRecurse( void ) const override;
-		virtual bool MustStop( void ) const override;
-		virtual utl::ICounter* GetDepthCounter( void ) override { return &m_depthCounter; }
+		virtual void OnAddFileInfo( const fs::CFileState& fileState ) override_;		// no chaining via m_pChainEnum
+		virtual void AddFoundFile( const fs::CPath& filePath ) = 0 override_;		// has implementation
+		virtual bool AddFoundSubDir( const fs::TDirPath& subDirPath ) override_;
+		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const override_;
+		virtual bool CanRecurse( void ) const override_;
+		virtual bool MustStop( void ) const override_;
+		virtual utl::ICounter* GetDepthCounter( void ) override_ { return &m_depthCounter; }
 
 		bool PassFileFilter( const fs::CFileState& fileState ) const;
 
@@ -139,11 +139,11 @@ namespace fs
 		CPathEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = nullptr ) : CBaseEnumerator( enumFlags, pChainEnum ) {}
 
 		// base overrides
-		virtual size_t GetFileCount( void ) const override { return m_filePaths.size(); }
-		virtual void Clear( void ) override;
+		virtual size_t GetFileCount( void ) const override_ { return m_filePaths.size(); }
+		virtual void Clear( void ) override_;
 	protected:
 		// IEnumerator interface
-		virtual void AddFoundFile( const fs::CPath& filePath ) override;
+		virtual void AddFoundFile( const fs::CPath& filePath ) override_;
 	public:
 		std::vector<fs::CPath> m_filePaths;
 	};

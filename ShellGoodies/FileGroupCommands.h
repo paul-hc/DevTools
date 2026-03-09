@@ -28,18 +28,18 @@ namespace cmd
 		void SetParentOwner( CWnd* pParentOwner ) { m_pParentOwner = pParentOwner; }
 
 		// base overrides
-		virtual std::tstring Format( utl::Verbosity verbosity ) const override;
-		virtual bool IsUndoable( void ) const override;
+		virtual std::tstring Format( utl::Verbosity verbosity ) const override_;
+		virtual bool IsUndoable( void ) const override_;
 
 		// cmd::IPersistentCmd
-		virtual bool IsValid( void ) const override;
-		virtual const CTime& GetTimestamp( void ) const override;
+		virtual bool IsValid( void ) const override_;
+		virtual const CTime& GetTimestamp( void ) const override_;
 
 		// cmd::IFileDetailsCmd
-		virtual size_t GetFileCount( void ) const override;
-		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
+		virtual size_t GetFileCount( void ) const override_;
+		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override_;
 
-		virtual void Serialize( CArchive& archive ) override;
+		virtual void Serialize( CArchive& archive ) override_;
 	protected:
 		virtual std::tstring GetDestHeaderInfo( void ) const;
 
@@ -114,12 +114,12 @@ namespace cmd
 		bool QueryDestFilePaths( std::vector<fs::CPath>& rDestFilePaths ) const;
 
 		// base overrides
-		virtual void Serialize( CArchive& archive ) override;
-		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
+		virtual void Serialize( CArchive& archive ) override_;
+		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override_;
 
 		// ICommand interface
 	protected:
-		virtual std::tstring GetDestHeaderInfo( void ) const override;
+		virtual std::tstring GetDestHeaderInfo( void ) const override_;
 
 		void MakeDestFilePaths( std::vector<fs::CPath>& rDestFilePaths, const std::vector<fs::CPath>& srcFilePaths ) const;
 		static void AppendFilePairLines( std::vector<std::tstring>& rLines, const std::vector<fs::CPath>& srcFilePaths, const std::vector<fs::CPath>& destFilePaths );
@@ -148,12 +148,12 @@ namespace cmd
 		bool QueryDestFilePaths( std::vector<fs::CPath>& rDestFilePaths ) const;
 
 		// base overrides
-		virtual void Serialize( CArchive& archive ) override;
-		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
+		virtual void Serialize( CArchive& archive ) override_;
+		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override_;
 
 		// ICommand interface
 	protected:
-		virtual std::tstring GetDestHeaderInfo( void ) const override;
+		virtual std::tstring GetDestHeaderInfo( void ) const override_;
 
 		void MakeDestFilePaths( std::vector<fs::CPath>& rDestFilePaths, const std::vector<fs::CPath>& srcFilePaths ) const;
 
@@ -182,8 +182,8 @@ public:
 	virtual ~CDeleteFilesCmd();
 
 	// ICommand interface
-	virtual bool Execute( void ) override;
-	virtual bool Unexecute( void ) override;
+	virtual bool Execute( void ) override_;
+	virtual bool Unexecute( void ) override_;
 private:
 	struct CUndeleteFilesCmd : public cmd::CBaseFileGroupCmd
 	{
@@ -194,8 +194,8 @@ private:
 		}
 
 		// ICommand interface
-		virtual bool Execute( void ) override;
-		virtual bool IsUndoable( void ) const override { return false; }
+		virtual bool Execute( void ) override_;
+		virtual bool IsUndoable( void ) const override_ { return false; }
 	};
 };
 
@@ -214,8 +214,8 @@ public:
 	static CCopyFilesCmd* MakePasteCmd( const std::vector<fs::CPath>& srcFilePaths, const fs::TDirPath& destDirPath );
 
 	// ICommand interface
-	virtual bool Execute( void ) override;
-	virtual bool Unexecute( void ) override;
+	virtual bool Execute( void ) override_;
+	virtual bool Unexecute( void ) override_;
 };
 
 
@@ -233,8 +233,8 @@ public:
 	static CMoveFilesCmd* MakePasteCmd( const std::vector<fs::CPath>& srcFilePaths, const fs::TDirPath& destDirPath );
 
 	// ICommand interface
-	virtual bool Execute( void ) override;
-	virtual bool Unexecute( void ) override;
+	virtual bool Execute( void ) override_;
+	virtual bool Unexecute( void ) override_;
 };
 
 
@@ -254,8 +254,8 @@ public:
 	const std::vector<fs::CPath>& GetSrcFolderPaths( void ) const { return GetSrcFilePaths(); }
 
 	// ICommand interface
-	virtual bool Execute( void ) override;
-	virtual bool Unexecute( void ) override;
+	virtual bool Execute( void ) override_;
+	virtual bool Unexecute( void ) override_;
 };
 
 
@@ -271,11 +271,11 @@ public:
 	virtual ~CCopyPasteFilesAsBackupCmd();
 
 	// ICommand interface
-	virtual bool Execute( void ) override;
-	virtual bool Unexecute( void ) override;
+	virtual bool Execute( void ) override_;
+	virtual bool Unexecute( void ) override_;
 protected:
 	// base overrides
-	virtual fs::CPath DoMakeDestFilePath( const fs::CPath& srcFilePath ) const override { return MakeBackupDestFilePath( srcFilePath ); }
+	virtual fs::CPath DoMakeDestFilePath( const fs::CPath& srcFilePath ) const override_ { return MakeBackupDestFilePath( srcFilePath ); }
 };
 
 
@@ -292,11 +292,11 @@ public:
 	virtual ~CCutPasteFilesAsBackupCmd();
 
 	// ICommand interface
-	virtual bool Execute( void ) override;
-	virtual bool Unexecute( void ) override;
+	virtual bool Execute( void ) override_;
+	virtual bool Unexecute( void ) override_;
 protected:
 	// base overrides
-	virtual fs::CPath DoMakeDestFilePath( const fs::CPath& srcFilePath ) const override { return MakeBackupDestFilePath( srcFilePath ); }
+	virtual fs::CPath DoMakeDestFilePath( const fs::CPath& srcFilePath ) const override_ { return MakeBackupDestFilePath( srcFilePath ); }
 };
 
 

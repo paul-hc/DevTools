@@ -117,7 +117,7 @@ void CTimerSequenceHook::Stop( void )
 	UnhookWindow();			// unhook, delete this
 }
 
-LRESULT CTimerSequenceHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
+LRESULT CTimerSequenceHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_
 {
 	if ( WM_TIMER == message )
 		if ( m_eventId == wParam )

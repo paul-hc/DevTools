@@ -37,22 +37,22 @@ namespace cmd
 	{
 	}
 
-	bool CBaseFileGroupCmd::IsValid( void ) const override
+	bool CBaseFileGroupCmd::IsValid( void ) const override_
 	{
 		return true;
 	}
 
-	const CTime& CBaseFileGroupCmd::GetTimestamp( void ) const override
+	const CTime& CBaseFileGroupCmd::GetTimestamp( void ) const override_
 	{
 		return m_timestamp;
 	}
 
-	size_t CBaseFileGroupCmd::GetFileCount( void ) const override
+	size_t CBaseFileGroupCmd::GetFileCount( void ) const override_
 	{
 		return m_filePaths.size();
 	}
 
-	void CBaseFileGroupCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override
+	void CBaseFileGroupCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override_
 	{
 		AddActualCmdDetail( rLines );
 		utl::Append( rLines, m_filePaths, func::tor::StringOf() );
@@ -66,7 +66,7 @@ namespace cmd
 			m_timestamp = pOriginCmd->GetTimestamp();		// copy the origin's timestamp
 	}
 
-	std::tstring CBaseFileGroupCmd::Format( utl::Verbosity verbosity ) const override
+	std::tstring CBaseFileGroupCmd::Format( utl::Verbosity verbosity ) const override_
 	{
 		CBaseFileGroupCmd* pCmd = GetReportingCmdAs<CBaseFileGroupCmd>();
 		std::tstring text = cmd::FormatCmdTag( pCmd, verbosity );
@@ -92,7 +92,7 @@ namespace cmd
 		return true;
 	}
 
-	void CBaseFileGroupCmd::Serialize( CArchive& archive ) override
+	void CBaseFileGroupCmd::Serialize( CArchive& archive ) override_
 	{
 		__super::Serialize( archive );
 
@@ -100,7 +100,7 @@ namespace cmd
 		serial::SerializeValues( archive, m_filePaths );
 	}
 
-	bool CBaseFileGroupCmd::IsUndoable( void ) const override
+	bool CBaseFileGroupCmd::IsUndoable( void ) const override_
 	{
 		return true;		// let it unexecute with error rather than being skipped in UNDO
 	}
@@ -247,7 +247,7 @@ namespace cmd
 		return workingSet.IsValid();
 	}
 
-	void CBaseDeepTransferFilesCmd::Serialize( CArchive& archive ) override
+	void CBaseDeepTransferFilesCmd::Serialize( CArchive& archive ) override_
 	{
 		__super::Serialize( archive );
 
@@ -257,7 +257,7 @@ namespace cmd
 		archive & m_topDestDirPath;
 	}
 
-	void CBaseDeepTransferFilesCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override
+	void CBaseDeepTransferFilesCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override_
 	{
 		std::vector<fs::CPath> destFilePaths;
 		MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
@@ -266,7 +266,7 @@ namespace cmd
 		AppendFilePairLines( rLines, GetSrcFilePaths(), destFilePaths );
 	}
 
-	std::tstring CBaseDeepTransferFilesCmd::GetDestHeaderInfo( void ) const override
+	std::tstring CBaseDeepTransferFilesCmd::GetDestHeaderInfo( void ) const override_
 	{
 		return str::Format( _T("-> %s"), m_destDirPath.GetPtr() );
 	}
@@ -319,7 +319,7 @@ namespace cmd
 		return workingSet.IsValid();
 	}
 
-	void CBaseShallowTransferFilesCmd::Serialize( CArchive& archive ) override
+	void CBaseShallowTransferFilesCmd::Serialize( CArchive& archive ) override_
 	{
 		__super::Serialize( archive );
 
@@ -327,13 +327,13 @@ namespace cmd
 		serial::SerializeValues( archive, m_destFilePaths );
 	}
 
-	void CBaseShallowTransferFilesCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override
+	void CBaseShallowTransferFilesCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override_
 	{
 		AddActualCmdDetail( rLines );
 		AppendFilePairLines( rLines, GetSrcFilePaths(), m_destFilePaths );
 	}
 
-	std::tstring CBaseShallowTransferFilesCmd::GetDestHeaderInfo( void ) const override
+	std::tstring CBaseShallowTransferFilesCmd::GetDestHeaderInfo( void ) const override_
 	{
 		return str::Format( _T("-> %s"), m_destDirPath.GetPtr() );
 	}
@@ -381,7 +381,7 @@ CDeleteFilesCmd::~CDeleteFilesCmd()
 {
 }
 
-bool CDeleteFilesCmd::Execute( void ) override
+bool CDeleteFilesCmd::Execute( void ) override_
 {
 	CWorkingSet workingSet( this, m_fileAccessMode );
 
@@ -394,7 +394,7 @@ bool CDeleteFilesCmd::Execute( void ) override
 	return HandleExecuteResult( workingSet );
 }
 
-bool CDeleteFilesCmd::Unexecute( void ) override
+bool CDeleteFilesCmd::Unexecute( void ) override_
 {
 	CUndeleteFilesCmd undoCmd( GetFilePaths() );
 	undoCmd.SetOriginCmd( this );
@@ -411,7 +411,7 @@ bool CDeleteFilesCmd::Unexecute( void ) override
 
 // CDeleteFilesCmd::CUndeleteFilesCmd implementation
 
-bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void ) override
+bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void ) override_
 {
 	std::vector<fs::CPath> errorFilePaths;
 	size_t restoredCount = shell::UndeleteFiles( GetFilePaths(), GetParentOwner(), &errorFilePaths );
@@ -443,7 +443,7 @@ CCopyFilesCmd* CCopyFilesCmd::MakePasteCmd( const std::vector<fs::CPath>& srcFil
 	return SetCommandType( new CCopyFilesCmd( srcFilePaths, destDirPath ), cmd::PasteCopyFiles );
 }
 
-bool CCopyFilesCmd::Execute( void ) override
+bool CCopyFilesCmd::Execute( void ) override_
 {
 	CWorkingSet workingSet( this, m_fileAccessMode );
 
@@ -459,7 +459,7 @@ bool CCopyFilesCmd::Execute( void ) override
 	return HandleExecuteResult( workingSet );
 }
 
-bool CCopyFilesCmd::Unexecute( void ) override
+bool CCopyFilesCmd::Unexecute( void ) override_
 {
 	std::vector<fs::CPath> destFilePaths;
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
@@ -506,7 +506,7 @@ CMoveFilesCmd* CMoveFilesCmd::MakePasteCmd( const std::vector<fs::CPath>& srcFil
 	return SetCommandType( new CMoveFilesCmd( srcFilePaths, destDirPath ), cmd::PasteMoveFiles );
 }
 
-bool CMoveFilesCmd::Execute( void ) override
+bool CMoveFilesCmd::Execute( void ) override_
 {
 	CWorkingSet workingSet( this, m_fileAccessMode );
 
@@ -522,7 +522,7 @@ bool CMoveFilesCmd::Execute( void ) override
 	return HandleExecuteResult( workingSet );
 }
 
-bool CMoveFilesCmd::Unexecute( void ) override
+bool CMoveFilesCmd::Unexecute( void ) override_
 {
 	std::vector<fs::CPath> destFilePaths;
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
@@ -571,7 +571,7 @@ CCreateFoldersCmd::~CCreateFoldersCmd()
 {
 }
 
-bool CCreateFoldersCmd::Execute( void ) override
+bool CCreateFoldersCmd::Execute( void ) override_
 {
 	CWorkingSet workingSet( this, m_fileAccessMode );
 
@@ -605,7 +605,7 @@ bool CCreateFoldersCmd::Execute( void ) override
 	return HandleExecuteResult( workingSet );
 }
 
-bool CCreateFoldersCmd::Unexecute( void ) override
+bool CCreateFoldersCmd::Unexecute( void ) override_
 {
 	std::vector<fs::CPath> destFolderPaths;
 	MakeDestFilePaths( destFolderPaths, GetSrcFolderPaths() );
@@ -640,7 +640,7 @@ CCopyPasteFilesAsBackupCmd::CCopyPasteFilesAsBackupCmd( const std::vector<fs::CP
 	: cmd::CBaseShallowTransferFilesCmd( cmd::CopyPasteFilesAsBackup, srcFilePaths, destDirPath )
 {
 	m_fileAccessMode = fs::ReadWrite;
-	SetFlag( m_opFlags, FOF_NOCONFIRMATION );		// no need to bother the user on backup - the intent is to override files
+	SetFlag( m_opFlags, FOF_NOCONFIRMATION );		// no need to bother the user on backup - the intent is to override_ files
 
 	// object fully constructed (can call virtual methods): initialize DEST paths
 	MakeDestFilePaths( m_destFilePaths, srcFilePaths );
@@ -650,12 +650,12 @@ CCopyPasteFilesAsBackupCmd::~CCopyPasteFilesAsBackupCmd()
 {
 }
 
-bool CCopyPasteFilesAsBackupCmd::Execute( void ) override
+bool CCopyPasteFilesAsBackupCmd::Execute( void ) override_
 {
 	CWorkingSet workingSet( GetSrcFilePaths(), m_destFilePaths, m_fileAccessMode );
 
 	if ( workingSet.IsValid() )
-		if ( shell::CopyFiles( workingSet.m_currFilePaths, workingSet.m_currDestFilePaths, GetParentOwner(), m_opFlags ) )		// undoable copy files, no override prompt
+		if ( shell::CopyFiles( workingSet.m_currFilePaths, workingSet.m_currDestFilePaths, GetParentOwner(), m_opFlags ) )		// undoable copy files, no override_ prompt
 			workingSet.m_succeeded = true;
 		else if ( shell::AnyOperationAborted() )
 			throw CUserAbortedException();			// go silent if cancelled by user
@@ -663,7 +663,7 @@ bool CCopyPasteFilesAsBackupCmd::Execute( void ) override
 	return HandleExecuteResult( workingSet );
 }
 
-bool CCopyPasteFilesAsBackupCmd::Unexecute( void ) override
+bool CCopyPasteFilesAsBackupCmd::Unexecute( void ) override_
 {
 	CDeleteFilesCmd undoCmd( m_destFilePaths );		// delete destination files
 
@@ -683,7 +683,7 @@ CCutPasteFilesAsBackupCmd::CCutPasteFilesAsBackupCmd( const std::vector<fs::CPat
 	: cmd::CBaseShallowTransferFilesCmd( cmd::CutPasteFilesAsBackup, srcFilePaths, destDirPath )
 {
 	m_fileAccessMode = fs::ReadWrite;
-	SetFlag( m_opFlags, FOF_NOCONFIRMATION );		// no need to bother the user on backup - the intent is to override files
+	SetFlag( m_opFlags, FOF_NOCONFIRMATION );		// no need to bother the user on backup - the intent is to override_ files
 
 	// object fully constructed (can call virtual methods): initialize DEST paths
 	MakeDestFilePaths( m_destFilePaths, srcFilePaths );
@@ -699,7 +699,7 @@ CCutPasteFilesAsBackupCmd::~CCutPasteFilesAsBackupCmd()
 {
 }
 
-bool CCutPasteFilesAsBackupCmd::Execute( void ) override
+bool CCutPasteFilesAsBackupCmd::Execute( void ) override_
 {
 	CWorkingSet workingSet( GetSrcFilePaths(), m_destFilePaths, m_fileAccessMode );
 
@@ -712,7 +712,7 @@ bool CCutPasteFilesAsBackupCmd::Execute( void ) override
 	return HandleExecuteResult( workingSet );
 }
 
-bool CCutPasteFilesAsBackupCmd::Unexecute( void ) override
+bool CCutPasteFilesAsBackupCmd::Unexecute( void ) override_
 {
 	const std::vector<fs::CPath>& srcFilePaths = GetSrcFilePaths();
 	fs::TDirPath srcCommonDirPath( path::ExtractCommonParentPath( srcFilePaths ) );

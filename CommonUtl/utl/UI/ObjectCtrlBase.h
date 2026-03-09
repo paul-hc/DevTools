@@ -38,7 +38,7 @@ public:
 	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast<utl::ISubject*>( (utl::ISubject*)data ); }
 	static inline utl::ISubject* AsSubject( LPARAM data ) { return dynamic_cast<utl::ISubject*>( (utl::ISubject*)data ); }
 protected:
-	bool HandleCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );		// must be called from control class' OnCmdMsg() method override
+	bool HandleCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );		// must be called from control class' OnCmdMsg() method override_
 	bool TranslateMessage( MSG* pMsg );
 
 	// shell context menu hosting/tracking

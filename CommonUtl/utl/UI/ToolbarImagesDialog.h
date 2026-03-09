@@ -166,7 +166,7 @@ public:
 	CStoreToolbarImagesPage( ui::IImageStore* pImageStore = nullptr );
 	virtual ~CStoreToolbarImagesPage();
 protected:
-	virtual void AddListItems( void ) override;
+	virtual void AddListItems( void ) override_;
 private:
 	typedef std::pair< std::tstring, std::vector<CBaseImageItem*> > TToolbarGroupPair;		// <groupName, imageItems>
 

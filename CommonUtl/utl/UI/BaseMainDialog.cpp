@@ -51,7 +51,7 @@ void CBaseMainDialog::ShowAll( bool show )
 	}
 }
 
-void CBaseMainDialog::PostRestorePlacement( int showCmd, bool restoreToMaximized ) override
+void CBaseMainDialog::PostRestorePlacement( int showCmd, bool restoreToMaximized ) override_
 {
 	if ( UseSysTrayMinimize() )
 		if ( SW_SHOWMINIMIZED == showCmd )
@@ -72,17 +72,17 @@ void CBaseMainDialog::PostRestorePlacement( int showCmd, bool restoreToMaximized
 			}
 }
 
-CWnd* CBaseMainDialog::GetOwnerWnd( void ) override
+CWnd* CBaseMainDialog::GetOwnerWnd( void ) override_
 {
 	return this;
 }
 
-CMenu* CBaseMainDialog::GetTrayIconContextMenu( void ) override
+CMenu* CBaseMainDialog::GetTrayIconContextMenu( void ) override_
 {
 	return UseSysTrayMinimize() ? &m_trayPopupMenu : nullptr;
 }
 
-bool CBaseMainDialog::OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override
+bool CBaseMainDialog::OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override_
 {
 	msgNotifyCode, trayIconId, screenPos;
 	return false;
@@ -107,7 +107,7 @@ BEGIN_MESSAGE_MAP( CBaseMainDialog, CLayoutDialog )
 	ON_UPDATE_COMMAND_UI( ID_APP_MINIMIZE, OnUpdateAppMinimize )
 END_MESSAGE_MAP()
 
-BOOL CBaseMainDialog::OnInitDialog( void ) override
+BOOL CBaseMainDialog::OnInitDialog( void ) override_
 {
 	const std::tstring& appNameSuffix = DYNAMIC_CAST_BASE_APP( GetAppNameSuffix() );
 

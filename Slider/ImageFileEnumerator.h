@@ -28,12 +28,12 @@ public:
 	const ui::CIssueStore& GetIssueStore( void ) const { return m_issueStore; }
 
 	// base overrides
-	virtual size_t GetFileCount( void ) const override { return m_foundImages.GetFileAttrs().size(); }
-	virtual void Clear( void ) override;
+	virtual size_t GetFileCount( void ) const override_ { return m_foundImages.GetFileAttrs().size(); }
+	virtual void Clear( void ) override_;
 private:
 	// fs::IEnumerator interface (files only)
-	virtual void OnAddFileInfo( const fs::CFileState& fileState ) override;
-	virtual void AddFoundFile( const fs::CPath& filePath ) override;
+	virtual void OnAddFileInfo( const fs::CFileState& fileState ) override_;
+	virtual void AddFoundFile( const fs::CPath& filePath ) override_;
 
 	bool PassFilter( const CFileAttr& fileAttr ) const;
 	bool Push( CFileAttr* pFileAttr );

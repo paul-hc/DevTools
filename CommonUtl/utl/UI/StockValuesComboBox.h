@@ -28,7 +28,7 @@ public:
 	void DDX_Value( CDataExchange* pDX, ValueT& rValue, int comboId );
 protected:
 	// base overrides
-	virtual void InitStockContent( void ) override;
+	virtual void InitStockContent( void ) override_;
 
 	template< typename ValueT >
 	typename const ui::CStockTags<ValueT>* GetTagsAs( void ) const { return checked_static_cast< const ui::CStockTags<ValueT>* >( m_pStockTags ); }

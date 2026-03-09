@@ -20,12 +20,12 @@ protected:
 	virtual bool ToggleExecute( void ) = 0;
 public:
 	// utl::IMessage overrides
-	virtual std::tstring Format( utl::Verbosity verbosity ) const override;			// override for special formatting
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override_;			// override for special formatting
 
 	// ICommand overrides
-	virtual bool Execute( void ) override;
-	virtual bool Unexecute( void ) override;
-	virtual bool IsUndoable( void ) const override;
+	virtual bool Execute( void ) override_;
+	virtual bool Unexecute( void ) override_;
+	virtual bool IsUndoable( void ) const override_;
 private:
 	std::tstring m_cmdTag;
 protected:
@@ -50,13 +50,13 @@ public:
 	std::vector<CRenameItem*> MakeSelItems( void ) const;
 
 	// cmd::IFileDetailsCmd interface
-	virtual bool HasSelItems( void ) const override;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
-	virtual size_t GetFileCount( void ) const override { return m_srcPaths.size(); }
-	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
+	virtual bool HasSelItems( void ) const override_;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
+	virtual size_t GetFileCount( void ) const override_ { return m_srcPaths.size(); }
+	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override_;
 private:
 	// base overrides
-	virtual ChangeType EvalChange( void ) const override;
-	virtual bool ToggleExecute( void ) override;
+	virtual ChangeType EvalChange( void ) const override_;
+	virtual bool ToggleExecute( void ) override_;
 
 	CRenameItem* GetRenameItemAt( size_t posSrcPath ) const;
 private:
@@ -81,13 +81,13 @@ public:
 	static CChangeDestFileStatesCmd* MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CTouchItem*>& selItems );
 
 	// cmd::IFileDetailsCmd
-	virtual bool HasSelItems( void ) const override;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
-	virtual size_t GetFileCount( void ) const override { return m_srcStates.size(); }
-	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
+	virtual bool HasSelItems( void ) const override_;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
+	virtual size_t GetFileCount( void ) const override_ { return m_srcStates.size(); }
+	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override_;
 private:
 	// base overrides
-	virtual ChangeType EvalChange( void ) const override;
-	virtual bool ToggleExecute( void ) override;
+	virtual ChangeType EvalChange( void ) const override_;
+	virtual bool ToggleExecute( void ) override_;
 
 	CTouchItem* GetTouchItemAt( size_t posSrcState ) const;
 private:
@@ -113,13 +113,13 @@ public:
 	static CChangeDestShortcutsCmd* MakeResetItemsCmd( CFileModel* pFileModel, const std::vector<CEditLinkItem*>& selItems );
 
 	// cmd::IFileDetailsCmd
-	virtual bool HasSelItems( void ) const override;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
-	virtual size_t GetFileCount( void ) const override { return m_srcShortcuts.size(); }
-	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
+	virtual bool HasSelItems( void ) const override_;		// true: acts on a a subset of rename items - false: acts on all m_pFileModel->GetRenameItems()
+	virtual size_t GetFileCount( void ) const override_ { return m_srcShortcuts.size(); }
+	virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override_;
 private:
 	// base overrides
-	virtual ChangeType EvalChange( void ) const override;
-	virtual bool ToggleExecute( void ) override;
+	virtual ChangeType EvalChange( void ) const override_;
+	virtual bool ToggleExecute( void ) override_;
 
 	CEditLinkItem* GetEditLinkItemAt( size_t posSrcShortcut ) const;
 private:
@@ -135,7 +135,7 @@ public:
 	CResetDestinationsMacroCmd( CFileModel* pFileModel );
 
 	// utl::IMessage overrides
-	virtual std::tstring Format( utl::Verbosity verbosity ) const override;			// override for special formatting
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override_;			// override for special formatting
 };
 
 
@@ -151,7 +151,7 @@ public:
 	}
 protected:
 	// base overrides
-	virtual bool DoExecute( void ) override
+	virtual bool DoExecute( void ) override_
 	{
 		m_oldValue = *m_pObject;
 		*m_pObject = m_value;
@@ -160,7 +160,7 @@ protected:
 		return true;
 	}
 
-	virtual bool Unexecute( void ) override
+	virtual bool Unexecute( void ) override_
 	{
 		return CEditOptionsCmd( m_pObject, m_oldValue ).Execute();
 	}
@@ -182,9 +182,9 @@ protected:
 	}
 
 	// base overrides
-	virtual bool Unexecute( void ) override { ASSERT( false ); return false; }
+	virtual bool Unexecute( void ) override_ { ASSERT( false ); return false; }
 public:
-	virtual bool Execute( void ) override;		// scoped page internal change during execution
+	virtual bool Execute( void ) override_;		// scoped page internal change during execution
 
 	CBaseRenamePage* GetPage( void ) const { return m_pPage; }
 private:
@@ -204,7 +204,7 @@ public:
 	CSortRenameListCmd( CFileModel* pFileModel, CReportListControl* pFileListCtrl, const ren::TSortingPair& sorting );
 protected:
 	// base overrides
-	virtual bool DoExecute( void ) override;
+	virtual bool DoExecute( void ) override_;
 private:
 	CReportListControl* m_pFileListCtrl;		// the listCtrl that was just sorted by user (clicked on colum header)
 public:
@@ -231,8 +231,8 @@ public:
 	void dbgTraceSelData( const CBaseRenamePage* pPage ) const;
 protected:
 	// base overrides
-	virtual bool DoExecute( void ) override;
-	virtual bool Unexecute( void ) override { ASSERT( false ); return false; }
+	virtual bool DoExecute( void ) override_;
+	virtual bool Unexecute( void ) override_ { ASSERT( false ); return false; }
 private:
 	std::tstring GetUiTypeName( const CBaseRenamePage* pPage ) const;
 private:

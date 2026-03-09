@@ -73,14 +73,14 @@ CAppDocManager::~CAppDocManager()
 {
 }
 
-void CAppDocManager::OnFileNew( void ) override
+void CAppDocManager::OnFileNew( void ) override_
 {
 	ASSERT_PTR( m_pAlbumTemplate );
 
 	m_pAlbumTemplate->OpenDocumentFile( nullptr );
 }
 
-BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate ) override
+BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate ) override_
 {
 	if ( app::CSharedDocTemplate* pSharedTemplate = dynamic_cast<app::CSharedDocTemplate*>( pTemplate ) )
 		return pSharedTemplate->PromptFileDialog( rFilePath, titleId, flags, static_cast<shell::BrowseMode>( openDlg ) );
@@ -88,7 +88,7 @@ BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD f
 	return app::PromptFileDialogImpl( rFilePath, app::CSliderFilters::Instance(), titleId, flags, openDlg );
 }
 
-void CAppDocManager::RegisterShellFileTypes( BOOL compatMode ) override
+void CAppDocManager::RegisterShellFileTypes( BOOL compatMode ) override_
 {
 	{
 		CScopedValue<bool> scopedSingleExt( &app::CSharedDocTemplate::s_useSingleFilterExt, true );		// prevent creating multi-extension ".sld;.ias;.cid;.icf" registry key
@@ -223,7 +223,7 @@ namespace app
 		m_pFilterStore->GetKnownExtensions().QueryAllExts( m_allExts );
 	}
 
-	BOOL CSharedDocTemplate::GetDocString( CString& rString, enum DocStringIndex index ) const override
+	BOOL CSharedDocTemplate::GetDocString( CString& rString, enum DocStringIndex index ) const override_
 	{
 		if ( !__super::GetDocString( rString, index ) )
 			return false;
@@ -237,7 +237,7 @@ namespace app
 		return true;
 	}
 
-	CDocTemplate::Confidence CSharedDocTemplate::MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch ) override
+	CDocTemplate::Confidence CSharedDocTemplate::MatchDocType( LPCTSTR pPathName, CDocument*& rpDocMatch ) override_
 	{
 		Confidence confidence = __super::MatchDocType( pPathName, rpDocMatch );
 
@@ -336,7 +336,7 @@ namespace app
 		return path::MatchExt( pFilePath, _T(".sld") );
 	}
 
-	void CAlbumDocTemplate::AlterSaveAsPath( CString& rFilePath ) const override
+	void CAlbumDocTemplate::AlterSaveAsPath( CString& rFilePath ) const override_
 	{
 		if ( fs::IsValidDirectory( rFilePath ) )				// most likely
 		{
@@ -380,7 +380,7 @@ namespace app
 
 		reg::TKeyPath openVerbPath = shell::MakeShellHandlerVerbPath( albumHandlerName.GetString(), app::s_verb_Open );		// "SliderAlbum.Document\\shell\\open"
 
-		// In subkey "SliderAlbum.Document\shell\open\command", override the "(Default)" value:
+		// In subkey "SliderAlbum.Document\shell\open\command", override_ the "(Default)" value:
 		//	- registered by MFC to '<short_bin_dir>\Slider64.exe /dde' in CDocManager::RegisterShellFileTypes().
 		//	- overrride value with '"<bin_dir>\Slider64.exe" "%1"', which is straight open, not using DDE.
 		//

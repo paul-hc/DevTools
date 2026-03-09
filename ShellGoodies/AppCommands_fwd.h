@@ -49,7 +49,7 @@ namespace cmd
 		virtual bool IsValid( void ) const = 0;
 		virtual const CTime& GetTimestamp( void ) const = 0;
 
-		virtual bool HasSelItems( void ) const override { return false; }
+		virtual bool HasSelItems( void ) const override_ { return false; }
 	};
 
 	interface IErrorObserver

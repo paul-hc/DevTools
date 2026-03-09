@@ -174,7 +174,7 @@ namespace mfc
 		archive & m_optionFlags;
 	}
 
-	void CLabelButton::CopyFrom( const CMFCToolBarButton& src ) override
+	void CLabelButton::CopyFrom( const CMFCToolBarButton& src ) override_
 	{
 		__super::CopyFrom( src );
 
@@ -205,7 +205,7 @@ namespace mfc
 
 	void CLabelButton::OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
 							   BOOL bHorz /*= TRUE*/, BOOL /*bCustomizeMode = FALSE*/, BOOL bHighlight /*= FALSE*/,
-							   BOOL bDrawBorder /*= TRUE*/,	BOOL /*bGrayDisabledButtons = TRUE*/ ) override
+							   BOOL bDrawBorder /*= TRUE*/,	BOOL /*bGrayDisabledButtons = TRUE*/ ) override_
 	{
 		CScopedGdi<CFont> scFont( pDC, GetFont() );
 		CScopedValue<UINT> scStyle( &m_nStyle );		// display as enabled while drawing
@@ -254,7 +254,7 @@ namespace mfc
 		archive & m_optionFlags;
 	}
 
-	void CEditBoxButton::CopyFrom( const CMFCToolBarButton& src ) override
+	void CEditBoxButton::CopyFrom( const CMFCToolBarButton& src ) override_
 	{
 		__super::CopyFrom( src );
 

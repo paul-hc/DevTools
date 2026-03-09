@@ -30,7 +30,7 @@ CWnd* CMenuPickerButton::GetTargetWnd( void ) const
 	return m_pTargetWnd != nullptr ? m_pTargetWnd : const_cast<CMenuPickerButton*>( this );
 }
 
-void CMenuPickerButton::OnShowMenu( void ) override
+void CMenuPickerButton::OnShowMenu( void ) override_
 {
 	__super::OnShowMenu();
 }

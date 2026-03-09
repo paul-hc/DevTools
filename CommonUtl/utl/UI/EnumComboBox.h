@@ -39,7 +39,7 @@ protected:
 	using CComboBox::SetCurSel;
 protected:
 	// base overrides
-	virtual void InitStockContent( void ) override;
+	virtual void InitStockContent( void ) override_;
 private:
 	const CEnumTags* m_pEnumTags;
 

@@ -46,7 +46,7 @@ protected:
 	CBaseRenameListPage( CRenameFilesDialog* pParentDlg, UINT listLayoutId );
 
 	// utl::IObserver interface (via IRenamePage)
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_;
 
 	virtual void DoSetupFileListView( void ) = 0;
 	virtual void DoUpdateFileListViewItems( const std::vector<CRenameItem*>& selItems ) = 0;
@@ -55,11 +55,11 @@ public:
 	virtual ~CBaseRenameListPage();
 private:
 	// IRenamePage interface
-	virtual void InvalidateFiles( void ) override;
+	virtual void InvalidateFiles( void ) override_;
 	virtual bool OnParentCommand( UINT cmdId ) const implement;
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override_;
 
 	void SetupFileListView( void );
 	void UpdateFileListViewItems( const std::vector<CRenameItem*>& selItems );
@@ -70,7 +70,7 @@ protected:
 
 	// generated stuff
 protected:
-	virtual void DoDataExchange( CDataExchange* pDX ) override;
+	virtual void DoDataExchange( CDataExchange* pDX ) override_;
 protected:
 	afx_msg void OnLvnListSorted_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnCopyTableText_RenameList( NMHDR* pNmHdr, LRESULT* pResult );
@@ -85,10 +85,10 @@ class CRenameSimpleListPage : public CBaseRenameListPage
 public:
 	CRenameSimpleListPage( CRenameFilesDialog* pParentDlg );
 protected:
-	virtual void DoSetupFileListView( void ) override;
-	virtual void DoUpdateFileListViewItems( const std::vector<CRenameItem*>& selItems ) override;
-	virtual ren::TSortingPair GetListSorting( void ) const override;
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+	virtual void DoSetupFileListView( void ) override_;
+	virtual void DoUpdateFileListViewItems( const std::vector<CRenameItem*>& selItems ) override_;
+	virtual ren::TSortingPair GetListSorting( void ) const override_;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_;
 private:
 	enum Column { SrcPath, DestPath };
 
@@ -102,10 +102,10 @@ class CRenameDetailsListPage : public CBaseRenameListPage
 public:
 	CRenameDetailsListPage( CRenameFilesDialog* pParentDlg );
 protected:
-	virtual void DoSetupFileListView( void ) override;
-	virtual void DoUpdateFileListViewItems( const std::vector<CRenameItem*>& selItems ) override;
-	virtual ren::TSortingPair GetListSorting( void ) const override;
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+	virtual void DoSetupFileListView( void ) override_;
+	virtual void DoUpdateFileListViewItems( const std::vector<CRenameItem*>& selItems ) override_;
+	virtual ren::TSortingPair GetListSorting( void ) const override_;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_;
 };
 
 
@@ -125,7 +125,7 @@ public:
 	void CommitLocalEdits( void );
 private:
 	// utl::IObserver interface (via IRenamePage)
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_;
 
 	// ui::ITextInput interface
 	virtual ui::ITextInput::Result OnEditInput( IN OUT ui::CTextValidator& rValidator ) implement;
@@ -153,7 +153,7 @@ private:
 	CSyncScrolling m_syncScrolling;
 protected:
 	// base overrides
-	virtual bool RestoreFocusControl( void ) override;
+	virtual bool RestoreFocusControl( void ) override_;
 
 	// generated stuff
 	virtual void DoDataExchange( CDataExchange* pDX );

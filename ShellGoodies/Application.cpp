@@ -114,7 +114,7 @@ CApplication::~CApplication()
 {
 }
 
-BOOL CApplication::InitInstance( void ) override
+BOOL CApplication::InitInstance( void ) override_
 {
 	// called once when the user right-clicks on selected files in Explorer for the first time.
 	AfxSetResourceHandle( m_hInstance );
@@ -123,7 +123,7 @@ BOOL CApplication::InitInstance( void ) override
 	return __super::InitInstance();
 }
 
-int CApplication::ExitInstance( void ) override
+int CApplication::ExitInstance( void ) override_
 {
 	if ( IsInitAppResources() )
 	{
@@ -138,7 +138,7 @@ int CApplication::ExitInstance( void ) override
 	return __super::ExitInstance();
 }
 
-void CApplication::OnInitAppResources( void ) override
+void CApplication::OnInitAppResources( void ) override_
 {
 	__super::OnInitAppResources();
 

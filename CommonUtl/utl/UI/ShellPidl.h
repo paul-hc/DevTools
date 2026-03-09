@@ -332,7 +332,7 @@ public:
 	const shell::TPath& GetShellPath( void ) const { return GetFilePath(); }
 	const shell::CPidlAbsolute& GetPidl( void ) const { return m_specialPidl; }
 
-	void SetShellPath( const shell::TPath& shellPath ) override;
+	void SetShellPath( const shell::TPath& shellPath ) override_;
 	void SetPidl( const shell::CPidlAbsolute& pidl );
 
 	bool ObjectExist( void ) const;

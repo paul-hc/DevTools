@@ -25,7 +25,7 @@ namespace ut
 	protected:
 		void Kill( void );
 
-		virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
+		virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_;
 	private:
 		double m_maxSeconds;
 		CWindowTimer m_progressTimer;

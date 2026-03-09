@@ -761,7 +761,7 @@ CPaneLayoutEngine::~CPaneLayoutEngine()
 {
 }
 
-void CPaneLayoutEngine::Reset( void ) override
+void CPaneLayoutEngine::Reset( void ) override_
 {
 	__super::Reset();
 
@@ -769,7 +769,7 @@ void CPaneLayoutEngine::Reset( void ) override
 	m_pMasterLayout = nullptr;
 }
 
-void CPaneLayoutEngine::GetClientRectangle( OUT CRect* pClientRect ) const override
+void CPaneLayoutEngine::GetClientRectangle( OUT CRect* pClientRect ) const override_
 {
 	ASSERT_PTR( m_pLayoutFrame );
 

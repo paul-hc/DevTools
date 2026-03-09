@@ -43,9 +43,9 @@ private:
 
 	// generated stuff
 public:
-    virtual BOOL InitInstance( void ) override;
-    virtual int ExitInstance( void ) override;
-	virtual void OnInitAppResources( void ) override;
+    virtual BOOL InitInstance( void ) override_;
+    virtual int ExitInstance( void ) override_;
+	virtual void OnInitAppResources( void ) override_;
 protected:
 	DECLARE_MESSAGE_MAP()
 };

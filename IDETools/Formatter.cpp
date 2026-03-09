@@ -1012,7 +1012,7 @@ namespace code
 			_T("friend"),
 			_T("explicit"),
 			_T("mutable"),
-			//_T("override"),
+			//_T("override_"),
 			_T("final"),
 			_T("afx_msg"),
 			_T("public:"),

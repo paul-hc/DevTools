@@ -38,7 +38,7 @@ bool CBufferedStatic::SetWindowText( const std::tstring& text )
 	return true;
 }
 
-UINT CBufferedStatic::GetDrawTextFlags( void ) const
+UINT CBufferedStatic::GetDrawTextFlags( void ) const override_
 {
 	return m_dtFlags;
 }

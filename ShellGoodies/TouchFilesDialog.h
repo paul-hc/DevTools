@@ -33,25 +33,25 @@ public:
 	virtual ~CTouchFilesDialog();
 protected:
 	// IFileEditor interface
-	virtual void PostMakeDest( bool silent = false ) override;
-	virtual void PopStackTop( svc::StackType stackType ) override;
-	virtual void OnExecuteCmd( utl::ICommand* pCmd ) override;
+	virtual void PostMakeDest( bool silent = false ) override_;
+	virtual void PopStackTop( svc::StackType stackType ) override_;
+	virtual void OnExecuteCmd( utl::ICommand* pCmd ) override_;
 
 	// utl::IObserver interface (via IFileEditor)
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_;
 
 	// cmd::IErrorObserver interface (via IFileEditor)
-	virtual void ClearFileErrors( void ) override;
-	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override;
+	virtual void ClearFileErrors( void ) override_;
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override_;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_;
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override;
-	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override_;
+	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override_;
 
-	virtual void SwitchMode( Mode mode ) override;
+	virtual void SwitchMode( Mode mode ) override_;
 private:
 	const std::vector<CTouchItem*>* GetCmdSelItems( void ) const;
 	const std::vector<CTouchItem*>& GetTargetItems( void ) const;

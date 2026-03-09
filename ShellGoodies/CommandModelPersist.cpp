@@ -60,25 +60,25 @@ namespace cmd
 
 	// CBinaryLogSerializer implementation
 
-	bool CBinaryLogSerializer::Save( const fs::CPath& undoLogPath ) override
+	bool CBinaryLogSerializer::Save( const fs::CPath& undoLogPath ) override_
 	{
 		ui::CAdapterDocument doc( this, undoLogPath.Get() );
 		return doc.Save();
 	}
 
-	bool CBinaryLogSerializer::Load( const fs::CPath& undoLogPath ) override
+	bool CBinaryLogSerializer::Load( const fs::CPath& undoLogPath ) override_
 	{
 		ui::CAdapterDocument doc( this, undoLogPath.Get() );
 		return doc.Load();
 	}
 
-	void CBinaryLogSerializer::Save( CArchive& archive ) override throws_( CException* )
+	void CBinaryLogSerializer::Save( CArchive& archive ) override_ throws_( CException* )
 	{
 		SaveStack( archive, svc::Undo, m_pCommandModel->GetUndoStack() );
 		SaveStack( archive, svc::Redo, m_pCommandModel->GetRedoStack() );
 	}
 
-	void CBinaryLogSerializer::Load( CArchive& archive ) override throws_( CException* )
+	void CBinaryLogSerializer::Load( CArchive& archive ) override_ throws_( CException* )
 	{
 		std::deque<utl::ICommand*> undoStack, redoStack;
 		LoadStack( archive, undoStack );

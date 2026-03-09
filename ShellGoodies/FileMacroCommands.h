@@ -28,19 +28,19 @@ namespace cmd
 		CFileMacroCmd( CommandType subCmdType, const CTime& timestamp = CTime::GetCurrentTime() );
 
 		// base overrides
-		virtual std::tstring Format( utl::Verbosity verbosity ) const override;
-		virtual bool Execute( void ) override;
-		virtual bool Unexecute( void ) override;
+		virtual std::tstring Format( utl::Verbosity verbosity ) const override_;
+		virtual bool Execute( void ) override_;
+		virtual bool Unexecute( void ) override_;
 
 		// cmd::IPersistentCmd
-		virtual bool IsValid( void ) const override;
-		virtual const CTime& GetTimestamp( void ) const override;
+		virtual bool IsValid( void ) const override_;
+		virtual const CTime& GetTimestamp( void ) const override_;
 
 		// cmd::IFileDetailsCmd
-		virtual size_t GetFileCount( void ) const override;
-		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override;
+		virtual size_t GetFileCount( void ) const override_;
+		virtual void QueryDetailLines( std::vector<std::tstring>& rLines ) const override_;
 
-		virtual void Serialize( CArchive& archive ) override;
+		virtual void Serialize( CArchive& archive ) override_;
 	private:
 		enum CmdMode { ExecuteMode, UnexecuteMode };
 
@@ -79,10 +79,10 @@ namespace cmd
 		void SetExecMessage( const TMessagePair& execMessage ) { m_execMessage = execMessage; }
 
 		// base overrides
-		virtual bool Unexecute( void ) override;
+		virtual bool Unexecute( void ) override_;
 		virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) = 0;
 	protected:
-		virtual void RecordMessage( const std::tstring& coreMessage, app::MsgType msgType ) override;
+		virtual void RecordMessage( const std::tstring& coreMessage, app::MsgType msgType ) override_;
 	private:
 		UserFeedback HandleFileError( CException* pExc, const fs::CPath& srcPath );
 		static std::tstring ExtractMessage( CException* pExc );
@@ -107,13 +107,13 @@ public:
 	virtual ~CRenameFileCmd();
 
 	// ICommand interface
-	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
-	virtual bool Execute( void ) override;
-	virtual bool IsUndoable( void ) const override;
-	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override;
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override_;
+	virtual bool Execute( void ) override_;
+	virtual bool IsUndoable( void ) const override_;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override_;
 
 	// base overrides
-	virtual void Serialize( CArchive& archive ) override;
+	virtual void Serialize( CArchive& archive ) override_;
 public:
 	persist fs::CPath m_destPath;
 };
@@ -132,13 +132,13 @@ public:
 	virtual ~CTouchFileCmd();
 
 	// ICommand interface
-	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
-	virtual bool Execute( void ) override;
-	virtual bool IsUndoable( void ) const override;
-	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override;
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override_;
+	virtual bool Execute( void ) override_;
+	virtual bool IsUndoable( void ) const override_;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override_;
 
 	// base overrides
-	virtual void Serialize( CArchive& archive ) override;
+	virtual void Serialize( CArchive& archive ) override_;
 public:
 	persist fs::CFileState m_srcState;
 	persist fs::CFileState m_destState;
@@ -158,13 +158,13 @@ public:
 	virtual ~CEditLinkFileCmd();
 
 	// ICommand interface
-	virtual std::tstring Format( utl::Verbosity verbosity ) const override;
-	virtual bool Execute( void ) override;
-	virtual bool IsUndoable( void ) const override;
-	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override;
+	virtual std::tstring Format( utl::Verbosity verbosity ) const override_;
+	virtual bool Execute( void ) override_;
+	virtual bool IsUndoable( void ) const override_;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) override_;
 
 	// base overrides
-	virtual void Serialize( CArchive& archive ) override;
+	virtual void Serialize( CArchive& archive ) override_;
 public:
 	persist shell::CShortcut m_srcShortcut;
 	persist shell::CShortcut m_destShortcut;

@@ -39,7 +39,7 @@ private:
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	virtual void OnFieldModified( void );			// base override
+	virtual void OnFieldModified( void ) override_;
 	afx_msg void OnBnClicked_ResetDefaultAll( void );
 	afx_msg void OnBnClicked_OpenCmdDashboard( void );
 
@@ -82,7 +82,7 @@ private:
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	virtual void OnFieldModified( void );			// base override
+	virtual void OnFieldModified( void ) override_;
 	afx_msg void OnBnClicked_ResetDefaultAll( void );
 
 	DECLARE_MESSAGE_MAP()

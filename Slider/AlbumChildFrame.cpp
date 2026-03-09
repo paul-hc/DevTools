@@ -38,7 +38,7 @@ CAlbumChildFrame::~CAlbumChildFrame()
 {
 }
 
-IImageView* CAlbumChildFrame::GetImageView( void ) const override
+IImageView* CAlbumChildFrame::GetImageView( void ) const override_
 {
 	return m_pAlbumImageView;
 }

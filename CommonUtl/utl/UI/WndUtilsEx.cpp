@@ -69,7 +69,7 @@ CNonClientDraw::~CNonClientDraw()
 		UnhookWindow();
 }
 
-LRESULT CNonClientDraw::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
+LRESULT CNonClientDraw::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_
 {
 	LRESULT result = CWindowHook::WindowProc( message, wParam, lParam );
 	if ( WM_NCPAINT == message && m_pCallback != nullptr )
@@ -136,7 +136,7 @@ CFlashCtrlFrame::~CFlashCtrlFrame()
 {
 }
 
-bool CFlashCtrlFrame::UnhookWindow( void ) override
+bool CFlashCtrlFrame::UnhookWindow( void ) override_
 {
 	if ( HWND hCtrl = GetHwnd() )
 		ui::RedrawControl( hCtrl );		// need a final redraw to to restore the original frame, e.g. for controls with a frame (such as CFrameHostCtrl<Ctrl>)

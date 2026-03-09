@@ -93,7 +93,7 @@ std::pair<HMENU, UINT> CTrackMenuWnd::FindMenuItemFromPoint( const CPoint& scree
 	return std::pair<HMENU, UINT>( nullptr, 0 );
 }
 
-BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
+BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_
 {
 	BOOL handled = m_pCmdTarget != nullptr && m_pCmdTarget->OnCmdMsg( id, code, pExtra, pHandlerInfo );
 

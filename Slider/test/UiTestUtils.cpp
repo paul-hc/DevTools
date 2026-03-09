@@ -56,7 +56,7 @@ namespace ut
 		UnhookWindow();
 	}
 
-	LRESULT CTestStatusProgress::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
+	LRESULT CTestStatusProgress::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_
 	{
 		if ( WM_TIMER == message )
 			if ( m_progressTimer.IsHit( wParam ) )

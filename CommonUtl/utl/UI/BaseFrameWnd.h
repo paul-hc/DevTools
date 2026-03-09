@@ -24,9 +24,9 @@ public:
 	bool ShowAppWindow( int cmdShow );
 protected:
 	// ui::ISystemTrayCallback interface
-	virtual CWnd* GetOwnerWnd( void ) override { return this; }
-	virtual CMenu* GetTrayIconContextMenu( void ) override;
-	virtual bool OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override;
+	virtual CWnd* GetOwnerWnd( void ) override_ { return this; }
+	virtual CMenu* GetTrayIconContextMenu( void ) override_;
+	virtual bool OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override_;
 
 	void SaveWindowPlacement( void );
 	bool LoadWindowPlacement( CREATESTRUCT* pCreateStruct );
@@ -39,7 +39,7 @@ protected:
 
 	// generated stuff
 protected:
-	virtual BOOL PreCreateWindow( CREATESTRUCT& rCreateStruct ) override;
+	virtual BOOL PreCreateWindow( CREATESTRUCT& rCreateStruct ) override_;
 protected:
 	afx_msg void OnClose( void );
 	afx_msg void OnAppRestore( void );

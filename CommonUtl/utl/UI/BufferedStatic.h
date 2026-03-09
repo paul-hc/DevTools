@@ -18,7 +18,7 @@ public:
 	std::tstring GetWindowText( void ) const;
 	bool SetWindowText( const std::tstring& text );
 
-	virtual UINT GetDrawTextFlags( void ) const;		// base override
+	virtual UINT GetDrawTextFlags( void ) const override_;		// base override
 	void SetDrawTextFlags( UINT dtFlags ) { m_dtFlags = dtFlags; }
 protected:
 	bool UseMouseInput( void ) const { return HasFlag( GetStyle(), SS_NOTIFY ); }

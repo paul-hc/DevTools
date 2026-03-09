@@ -68,7 +68,7 @@ BOOL CMainFrame::PreCreateWindow( CREATESTRUCT& cs )
 	return __super::PreCreateWindow( cs );
 }
 
-BOOL CMainFrame::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
+BOOL CMainFrame::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_
 {
 	if ( m_pDemoSysTray.get() != nullptr )
 		if ( m_pDemoSysTray->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )

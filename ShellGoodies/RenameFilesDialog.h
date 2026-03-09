@@ -47,21 +47,21 @@ protected:
 	const std::vector<CRenameItem*>& GetTargetItems( void ) const;
 
 	// IFileEditor interface (partial)
-	virtual void PostMakeDest( bool silent = false ) override;
-	virtual void PopStackTop( svc::StackType stackType ) override;
-	virtual void OnExecuteCmd( utl::ICommand* pCmd ) override;
+	virtual void PostMakeDest( bool silent = false ) override_;
+	virtual void PopStackTop( svc::StackType stackType ) override_;
+	virtual void OnExecuteCmd( utl::ICommand* pCmd ) override_;
 
 	// utl::IObserver interface (via IFileEditor)
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override;
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_;
 
 	// cmd::IErrorObserver interface (via IFileEditor)
-	virtual void ClearFileErrors( void ) override;
-	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override;
+	virtual void ClearFileErrors( void ) override_;
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override_;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_;
 
-	virtual void SwitchMode( Mode mode ) override;
+	virtual void SwitchMode( Mode mode ) override_;
 private:
 	static const CEnumTags& GetTags_Mode( void );
 
@@ -126,10 +126,10 @@ private:
 
 	// generated stuff
 protected:
-	virtual void DoDataExchange( CDataExchange* pDX ) override;
-	virtual BOOL OnInitDialog( void ) override;
+	virtual void DoDataExchange( CDataExchange* pDX ) override_;
+	virtual BOOL OnInitDialog( void ) override_;
 protected:
-	virtual void OnOK( void ) override;
+	virtual void OnOK( void ) override_;
 	afx_msg void OnDestroy( void );
 	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColorType );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );

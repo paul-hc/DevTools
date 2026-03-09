@@ -50,22 +50,22 @@ CFileEditorBaseDialog::~CFileEditorBaseDialog()
 	CGeneralOptions::Instance().RemoveObserver( this );
 }
 
-CFileModel* CFileEditorBaseDialog::GetFileModel( void ) const override
+CFileModel* CFileEditorBaseDialog::GetFileModel( void ) const override_
 {
 	return m_pFileModel;
 }
 
-CDialog* CFileEditorBaseDialog::GetDialog( void ) override
+CDialog* CFileEditorBaseDialog::GetDialog( void ) override_
 {
 	return this;
 }
 
-bool CFileEditorBaseDialog::IsRollMode( void ) const override
+bool CFileEditorBaseDialog::IsRollMode( void ) const override_
 {
 	return RollBackMode == m_mode || RollForwardMode == m_mode;
 }
 
-void CFileEditorBaseDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CFileEditorBaseDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_
 {
 	switch ( cmdId )
 	{
@@ -181,7 +181,7 @@ bool CFileEditorBaseDialog::IsErrorItem( const CPathItemBase* pItem ) const
 	return utl::Contains( m_errorItems, pItem );
 }
 
-void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX ) override
+void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX ) override_
 {
 	const bool firstInit = nullptr == m_okButton.m_hWnd;
 
@@ -205,7 +205,7 @@ BEGIN_MESSAGE_MAP( CFileEditorBaseDialog, CBaseMainDialog )
 	ON_UPDATE_COMMAND_UI( ID_OPTIONS, OnUpdateOptions )
 END_MESSAGE_MAP()
 
-BOOL CFileEditorBaseDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
+BOOL CFileEditorBaseDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_
 {
 	return
 		m_pFileModel->OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||

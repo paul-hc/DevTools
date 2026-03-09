@@ -27,7 +27,7 @@ public:
 	bool UseLockedItemCount( void ) const { return m_useLockedItemCount; }
 	void SetUseLockedItemCount( bool useLockedItemCount = true ) { m_useLockedItemCount = useLockedItemCount; }
 
-	size_t GetItemCount( void ) const override { return m_objects.size(); }
+	size_t GetItemCount( void ) const override_ { return m_objects.size(); }
 
 	utl::ISubject* GetAt( size_t index ) const { return index < GetItemCount() ? m_objects[index] : nullptr; }
 	template< typename ObjectT > ObjectT* GetItemAt( size_t index ) const { return checked_static_cast<ObjectT*>( GetAt( index ) ); }
@@ -76,7 +76,7 @@ private:
 
 protected:
 	// base overrides
-	virtual bool ValidateText( ui::CTextValidator& rValidator ) override;
+	virtual bool ValidateText( ui::CTextValidator& rValidator ) override_;
 };
 
 

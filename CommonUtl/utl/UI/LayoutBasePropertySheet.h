@@ -62,7 +62,7 @@ public:
 	CToolTipCtrl* GetSheetTooltip( void ) const { return m_pTooltipCtrl.get(); }
 
 	// utl::ISubject interface (partial)
-	virtual const std::tstring& GetCode( void ) const override { return m_titleCode; }
+	virtual const std::tstring& GetCode( void ) const override_ { return m_titleCode; }
 
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
@@ -99,9 +99,9 @@ public:
 
 	// generated stuff
 public:
-	virtual void BuildPropPageArray( void ) override;
-	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
-	virtual BOOL OnInitDialog( void ) override;
+	virtual void BuildPropPageArray( void ) override_;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override_;
+	virtual BOOL OnInitDialog( void ) override_;
 protected:
 	virtual void OnDestroy( void );
 	virtual void OnSize( UINT sizeType, int cx, int cy );

@@ -21,7 +21,7 @@ CBasePostCall::~CBasePostCall()
 {
 }
 
-LRESULT CBasePostCall::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
+LRESULT CBasePostCall::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_
 {
 	if ( WM_DELAYED_CALL == message )
 		if ( (void*)wParam == this )		// is this our call in a multiple posted sequence?

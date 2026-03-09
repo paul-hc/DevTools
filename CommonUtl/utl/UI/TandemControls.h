@@ -100,7 +100,7 @@ public:
 
 	ui::CItemContent& RefContent( void ) { return m_content; }
 
-	virtual const ui::CItemContent& GetItemContent( void ) const override { return m_content; }
+	virtual const ui::CItemContent& GetItemContent( void ) const override_ { return m_content; }
 	virtual void SetContentType( ui::ContentType type );
 	void SetFileFilter( const TCHAR* pFileFilter );
 	void SetEnsurePathExist( void ) { SetFlag( m_content.m_itemsFlags, ui::CItemContent::EnsurePathExist ); }

@@ -24,12 +24,12 @@ public:
 	void ShowAll( bool show );
 protected:
 	// base overrides
-	virtual void PostRestorePlacement( int showCmd, bool restoreToMaximized ) override;
+	virtual void PostRestorePlacement( int showCmd, bool restoreToMaximized ) override_;
 private:
 	// ui::ISystemTrayCallback interface
-	virtual CWnd* GetOwnerWnd( void ) override;
-	virtual CMenu* GetTrayIconContextMenu( void ) override;
-	virtual bool OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override;
+	virtual CWnd* GetOwnerWnd( void ) override_;
+	virtual CMenu* GetTrayIconContextMenu( void ) override_;
+	virtual bool OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override_;
 
 	void _Minimize( bool restoreToMaximized );
 protected:
@@ -40,7 +40,7 @@ public:
 
 	// generated stuff
 protected:
-	virtual BOOL OnInitDialog( void ) override;
+	virtual BOOL OnInitDialog( void ) override_;
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnPaint( void );
 	afx_msg HCURSOR OnQueryDragIcon( void );

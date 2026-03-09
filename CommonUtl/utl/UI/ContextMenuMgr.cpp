@@ -79,7 +79,7 @@ namespace mfc
 	}
 
 
-	CMFCPopupMenu* CContextMenuMgr::ShowPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bOwnMessage /*= FALSE*/, BOOL bAutoDestroy /*= TRUE*/, BOOL bRightAlign /*= FALSE*/ ) override
+	CMFCPopupMenu* CContextMenuMgr::ShowPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bOwnMessage /*= FALSE*/, BOOL bAutoDestroy /*= TRUE*/, BOOL bRightAlign /*= FALSE*/ ) override_
 	{
 		// hMenuPopup is optional if we have m_pNewTrackingPopup set up
 
@@ -128,7 +128,7 @@ namespace mfc
 		return m_pTrackingPopupMenu;
 	}
 
-	UINT CContextMenuMgr::TrackPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bRightAlign /*= FALSE*/ ) override
+	UINT CContextMenuMgr::TrackPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bRightAlign /*= FALSE*/ ) override_
 	{
 		UINT selCmdId = __super::TrackPopupMenu( hMenuPopup, x, y, pWndOwner, bRightAlign );
 

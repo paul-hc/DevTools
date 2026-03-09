@@ -393,7 +393,7 @@ void CColorPickerButton::NotifyMatchingPickers( ChangedField field )
 				}
 }
 
-void CColorPickerButton::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CColorPickerButton::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_
 {
 	cmdId, pTooltip;
 	std::tstring text;
@@ -590,7 +590,7 @@ void CColorPickerButton::OnDraw( CDC* pDC, const CRect& rect, UINT uiState ) ove
 	__super::OnDraw( pDC, rect, uiState );
 }
 
-void CColorPickerButton::PreSubclassWindow( void ) override
+void CColorPickerButton::PreSubclassWindow( void ) override_
 {
 	__super::PreSubclassWindow();
 
@@ -600,7 +600,7 @@ void CColorPickerButton::PreSubclassWindow( void ) override
 	LoadFromRegistry();
 }
 
-BOOL CColorPickerButton::PreTranslateMessage( MSG* pMsg ) override
+BOOL CColorPickerButton::PreTranslateMessage( MSG* pMsg ) override_
 {
 	if ( m_accel.Translate( pMsg, this->m_hWnd ) )
 		return TRUE;
@@ -608,7 +608,7 @@ BOOL CColorPickerButton::PreTranslateMessage( MSG* pMsg ) override
 	return __super::PreTranslateMessage( pMsg );
 }
 
-BOOL CColorPickerButton::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
+BOOL CColorPickerButton::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_
 {
 	if ( TrackingMenuColorTables == m_trackingMode )
 		if ( m_pMenuImpl->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )

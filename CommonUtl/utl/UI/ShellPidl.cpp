@@ -289,7 +289,7 @@ CPathPidlItem::CPathPidlItem( bool useDirPath /*= false*/ )
 	SetUseDirPath( useDirPath );
 }
 
-void CPathPidlItem::SetShellPath( const shell::TPath& shellPath ) override
+void CPathPidlItem::SetShellPath( const shell::TPath& shellPath ) override_
 {
 	SetFilePath( shellPath );
 

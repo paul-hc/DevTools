@@ -404,13 +404,13 @@ public:
 			UnhookWindow();
 	}
 protected:
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_;
 private:
 	CShellLazyContextMenuHost* m_pLazyHost;
 };
 
 
-LRESULT CExplorerSubMenuHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
+LRESULT CExplorerSubMenuHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_
 {
 	if ( WM_INITMENUPOPUP == message )
 		if ( (HMENU)wParam == m_pLazyHost->GetPopupMenu()->GetSafeHmenu() )

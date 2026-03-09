@@ -15,13 +15,13 @@ CBaseFrameWnd<BaseWndT>::~CBaseFrameWnd()
 }
 
 template< typename BaseWndT >
-CMenu* CBaseFrameWnd<BaseWndT>::GetTrayIconContextMenu( void ) override
+CMenu* CBaseFrameWnd<BaseWndT>::GetTrayIconContextMenu( void ) override_
 {
 	return UseSysTrayMinimize() ? &m_trayPopupMenu : nullptr;
 }
 
 template< typename BaseWndT >
-bool CBaseFrameWnd<BaseWndT>::OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override
+bool CBaseFrameWnd<BaseWndT>::OnTrayIconNotify( UINT msgNotifyCode, UINT trayIconId, const CPoint& screenPos ) override_
 {
 	msgNotifyCode, trayIconId, screenPos;
 	return false;
@@ -71,7 +71,7 @@ bool CBaseFrameWnd<BaseWndT>::ShowAppWindow( int cmdShow )
 }
 
 template< typename BaseWndT >
-BOOL CBaseFrameWnd<BaseWndT>::PreCreateWindow( CREATESTRUCT& cs ) override
+BOOL CBaseFrameWnd<BaseWndT>::PreCreateWindow( CREATESTRUCT& cs ) override_
 {
 	if ( !str::IsEmpty( cs.lpszName ) )		// called twice during frame creation: skip fist time when cs.lpszName is nullptr
 	{

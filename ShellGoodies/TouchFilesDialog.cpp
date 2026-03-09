@@ -189,7 +189,7 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
 }
 
-void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ ) override
+void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ ) override_
 {
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
@@ -198,7 +198,7 @@ void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ ) override
 	SwitchMode( CommitFilesMode );
 }
 
-void CTouchFilesDialog::PopStackTop( svc::StackType stackType ) override
+void CTouchFilesDialog::PopStackTop( svc::StackType stackType ) override_
 {
 	ASSERT( !IsRollMode() );
 
@@ -423,7 +423,7 @@ bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const
 	return m_fileListCtrl.IsColumnRangeVisible( SrcAttributes, SrcAccessTime );
 }
 
-void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
+void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_
 {
 	const cmd::CommandType cmdType = static_cast<cmd::CommandType>( utl::GetSafeTypeID( pMessage ) ); cmdType;
 
@@ -450,7 +450,7 @@ void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 		CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 }
 
-void CTouchFilesDialog::ClearFileErrors( void ) override
+void CTouchFilesDialog::ClearFileErrors( void ) override_
 {
 	m_errorItems.clear();
 
@@ -458,7 +458,7 @@ void CTouchFilesDialog::ClearFileErrors( void ) override
 		m_fileListCtrl.Invalidate();
 }
 
-void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override
+void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override_
 {
 	errMsg;
 
@@ -468,7 +468,7 @@ void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstrin
 	EnsureVisibleFirstError();
 }
 
-void CTouchFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CTouchFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_
 {
 	switch ( cmdId )
 	{
@@ -504,7 +504,7 @@ void CTouchFilesDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, C
 	}
 }
 
-void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override
+void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override_
 {
 	pCtrl;
 	static const ui::CTextEffect s_modPathName( ui::Bold );
@@ -577,7 +577,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	}
 }
 
-void CTouchFilesDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override
+void CTouchFilesDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override_
 {
 	rowKey, pCtrl;
 	switch ( subItem )

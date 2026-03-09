@@ -126,7 +126,7 @@ bool CTextListEditor::UpdateItemIndexesText( const std::vector<size_t>& objectIn
 	return changed;			// text changed
 }
 
-bool CTextListEditor::ValidateText( ui::CTextValidator& rValidator ) override
+bool CTextListEditor::ValidateText( ui::CTextValidator& rValidator ) override_
 {
 	if ( m_useLockedItemCount )
 		rValidator.m_itemCount = GetItemCount();	// store the locked item count (desired)

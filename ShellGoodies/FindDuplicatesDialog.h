@@ -33,7 +33,7 @@ protected:
 	// IFileEditor interface
 	virtual void PostMakeDest( bool silent = false );
 	virtual void PopStackTop( svc::StackType stackType );
-	virtual void OnExecuteCmd( utl::ICommand* pCmd ) override { pCmd; }
+	virtual void OnExecuteCmd( utl::ICommand* pCmd ) override_ { pCmd; }
 
 	// utl::IObserver interface (via IFileEditor)
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );

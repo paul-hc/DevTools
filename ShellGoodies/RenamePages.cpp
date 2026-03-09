@@ -76,7 +76,7 @@ void CBaseRenameListPage::UpdateFileListViewItems( const std::vector<CRenameItem
 	DoUpdateFileListViewItems( selItems );
 }
 
-void CBaseRenameListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
+void CBaseRenameListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_
 {
 	const cmd::CommandType cmdType = static_cast<cmd::CommandType>( utl::GetSafeTypeID( pMessage ) ); cmdType;
 	ASSERT_PTR( m_hWnd );
@@ -129,7 +129,7 @@ bool CBaseRenameListPage::OnParentCommand( UINT cmdId ) const implement
 	return false;
 }
 
-void CBaseRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override
+void CBaseRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override_
 {
 	subItem, pCtrl;
 
@@ -140,7 +140,7 @@ void CBaseRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPA
 		rTextEffect.Combine( s_errorBk );
 }
 
-void CBaseRenameListPage::DoDataExchange( CDataExchange* pDX ) override
+void CBaseRenameListPage::DoDataExchange( CDataExchange* pDX ) override_
 {
 	bool firstInit = nullptr == m_fileListCtrl.m_hWnd;
 
@@ -223,7 +223,7 @@ CRenameSimpleListPage::CRenameSimpleListPage( CRenameFilesDialog* pParentDlg )
 	m_fileListCtrl.StoreSortByColumn( listSorting.first, listSorting.second );
 }
 
-void CRenameSimpleListPage::DoSetupFileListView( void ) override
+void CRenameSimpleListPage::DoSetupFileListView( void ) override_
 {
 	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
 
@@ -253,12 +253,12 @@ void CRenameSimpleListPage::DoUpdateFileListViewItems( const std::vector<CRename
 	}
 }
 
-ren::TSortingPair CRenameSimpleListPage::GetListSorting( void ) const override
+ren::TSortingPair CRenameSimpleListPage::GetListSorting( void ) const override_
 {
 	return FromListSorting( m_fileListCtrl.GetSortByColumn() );
 }
 
-void CRenameSimpleListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
+void CRenameSimpleListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_
 {
 	if ( !IsInternalChange() )
 		if ( CSortRenameListCmd* pSortCmd = dynamic_cast<CSortRenameListCmd*>( pMessage ) )
@@ -322,7 +322,7 @@ CRenameDetailsListPage::CRenameDetailsListPage( CRenameFilesDialog* pParentDlg )
 	m_fileListCtrl.StoreSortByColumn( listSorting.first, listSorting.second );
 }
 
-void CRenameDetailsListPage::DoSetupFileListView( void ) override
+void CRenameDetailsListPage::DoSetupFileListView( void ) override_
 {
 	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
 
@@ -354,13 +354,13 @@ void CRenameDetailsListPage::DoUpdateFileListViewItems( const std::vector<CRenam
 	}
 }
 
-ren::TSortingPair CRenameDetailsListPage::GetListSorting( void ) const override
+ren::TSortingPair CRenameDetailsListPage::GetListSorting( void ) const override_
 {
 	std::pair<int, bool> sorting = m_fileListCtrl.GetSortByColumn();
 	return ren::TSortingPair( static_cast<ren::SortBy>( sorting.first ), sorting.second );
 }
 
-void CRenameDetailsListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
+void CRenameDetailsListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_
 {
 	if ( !IsInternalChange() )
 		if ( const CSortRenameListCmd* pSortCmd = utl::GetSafeMatchCmd<CSortRenameListCmd>( pMessage, cmd::SortRenameList ) )
@@ -515,7 +515,7 @@ bool CRenameEditPage::SyncSelectItemLine( const CTextListEditor& fromEdit, CText
 	return false;
 }
 
-void CRenameEditPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
+void CRenameEditPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_
 {
 	const cmd::CommandType cmdType = static_cast<cmd::CommandType>( utl::GetSafeTypeID( pMessage ) ); cmdType;
 	ASSERT_PTR( m_hWnd );
@@ -585,7 +585,7 @@ bool CRenameEditPage::RestoreFocusControl( void )
 	return __super::RestoreFocusControl();
 }
 
-void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override
+void CRenameEditPage::DoDataExchange( CDataExchange* pDX ) override_
 {
 	bool firstInit = nullptr == m_srcEdit.m_hWnd;
 

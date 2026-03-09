@@ -117,7 +117,7 @@ namespace ui
 		}
 
 		// base overrides
-		virtual std::tstring FormatValue( NumT value ) const override { return num::FormatNumber( value, this->m_loc ) + m_pSuffix; }
+		virtual std::tstring FormatValue( NumT value ) const override_ { return num::FormatNumber( value, this->m_loc ) + m_pSuffix; }
 	private:
 		const TCHAR* m_pSuffix;
 	};

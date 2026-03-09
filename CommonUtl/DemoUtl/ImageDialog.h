@@ -127,10 +127,10 @@ public:
 	BYTE m_disabledAlpha;
 	TPercent m_contrastPct;
 protected:
-	virtual void DoDataExchange( CDataExchange* pDX ) override;
-	virtual void OnOK( void ) override;
-	virtual void OnCancel( void ) override { OnOK(); }
-	virtual void OnDestroy( void ) override;
+	virtual void DoDataExchange( CDataExchange* pDX ) override_;
+	virtual void OnOK( void ) override_;
+	virtual void OnCancel( void ) override_ { OnOK(); }
+	virtual void OnDestroy( void ) override_;
 protected:
 	// message map functions
 	afx_msg void OnDropFiles( HDROP hDropInfo );
@@ -170,7 +170,7 @@ public:
 
 	void Reset( void ) { SetPixelInfo( CLR_NONE, CPoint( -1, -1 ), this ); }
 
-	virtual void SetPixelInfo( COLORREF color, const CPoint& pos, CWnd* pCtrl ) override { pCtrl; m_pos = pos; SetColor( color ); }
+	virtual void SetPixelInfo( COLORREF color, const CPoint& pos, CWnd* pCtrl ) override_ { pCtrl; m_pos = pos; SetColor( color ); }
 private:
 	CPoint m_pos;
 };
@@ -182,7 +182,7 @@ public:
 	CColorBoardSample( const CColorBoard* pColorBoard, ui::ISampleCallback* pRoutePixelInfo )
 		: CColorSample( pRoutePixelInfo ), m_pColorBoard( pColorBoard ) { ASSERT_PTR( m_pColorBoard ); }
 protected:
-	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) override;
+	virtual bool RenderSample( CDC* pDC, const CRect& boundsRect, CWnd* pCtrl ) override_;
 private:
 	const CColorBoard* m_pColorBoard;
 };

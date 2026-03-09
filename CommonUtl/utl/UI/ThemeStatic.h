@@ -22,7 +22,7 @@ public:
 
 	// base overrides
 	virtual CSize ComputeIdealSize( void ) implement;
-	virtual CSize ComputeIdealTextSize( void ) override;
+	virtual CSize ComputeIdealTextSize( void ) override_;
 protected:
 	CThemeItem::Status GetDrawStatus( void ) const;
 	CThemeItem* GetTextThemeItem( void );
@@ -91,7 +91,7 @@ public:
 	void SetEdgeType( EdgeType edgeType );
 protected:
 	// base overrides
-	virtual void Draw( CDC* pDC, const CRect& clientRect ) override;
+	virtual void Draw( CDC* pDC, const CRect& clientRect ) override_;
 private:
 	enum Metrics { LineSpacingX = 7 };
 	UINT m_edgeType;		// accented ? EDGE_ETCHED : EDGE_SUNKEN (default, group-box style)
@@ -138,7 +138,7 @@ public:
 	void TrackMenu( CWnd* pTargetWnd, UINT menuId, int popupIndex, bool useCheckedBitmaps = false );
 protected:
 	// base overrides
-	virtual void DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus ) override;
+	virtual void DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus ) override_;
 private:
 	ui::PopupAlign m_popupAlign;
 

@@ -280,7 +280,7 @@ struct CToolbarImageItem : public CBaseImageItem
 		return true;
 	}
 
-	virtual bool RenderSample( CDC* pDC, const CRect& rect, bool stretch, bool drawDisabled = false, BYTE alphaSrc = 255 ) const override
+	virtual bool RenderSample( CDC* pDC, const CRect& rect, bool stretch, bool drawDisabled = false, BYTE alphaSrc = 255 ) const override_
 	{
 		CAfxDrawState drawState;
 
@@ -330,7 +330,7 @@ struct CIconImageItem : public CBaseImageItem
 		return true;
 	}
 
-	virtual bool RenderSample( CDC* pDC, const CRect& rect, bool stretch, bool drawDisabled = false, BYTE alphaSrc = 255 ) const override
+	virtual bool RenderSample( CDC* pDC, const CRect& rect, bool stretch, bool drawDisabled = false, BYTE alphaSrc = 255 ) const override_
 	{
 		stretch, alphaSrc;
 		m_pIcon->DrawStretch( *pDC, rect, !drawDisabled );
@@ -649,7 +649,7 @@ CStoreToolbarImagesPage::~CStoreToolbarImagesPage()
 {
 }
 
-void CStoreToolbarImagesPage::AddListItems( void ) override
+void CStoreToolbarImagesPage::AddListItems( void ) override_
 {
 	CScopedLockRedraw freeze( &m_imageListCtrl );
 

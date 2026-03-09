@@ -25,7 +25,7 @@ namespace mfc
 
 
 	// App singleton that stores all custom toolbar button pointers that must be re-bound when CToolBar::LoadState() - deserializing.
-	// The custom button class must override CMyCustomButton::OnChangeParentWnd() and rebind the pointer data-members, e.g. "CEnumTags* m_pEnumTags".
+	// The custom button class must override_ CMyCustomButton::OnChangeParentWnd() and rebind the pointer data-members, e.g. "CEnumTags* m_pEnumTags".
 	// IMP: the client code is repsonsible that stored pointers must be valid during the lifetime of custom buttons!
 
 	class CToolbarButtonsRefBinder
@@ -82,9 +82,9 @@ namespace mfc
 		virtual BOOL OnUpdateToolTip( CWnd* pWndParent, int buttonIndex, CToolTipCtrl& wndToolTip, CString& rTipText );
 		virtual SIZE OnCalculateSize( CDC* pDC, const CSize& sizeDefault, BOOL horz );
 		virtual void OnDraw( CDC* pDC, const CRect& rect, CMFCToolBarImages* pImages,
-							 BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE, BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) override;
+							 BOOL bHorz = TRUE, BOOL bCustomizeMode = FALSE, BOOL bHighlight = FALSE, BOOL bDrawBorder = TRUE, BOOL bGrayDisabledButtons = TRUE ) override_;
 	protected:
-		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
+		virtual void CopyFrom( const CMFCToolBarButton& src ) override_;
 
 		CFont* GetFont( void ) const;
 	private:
@@ -114,7 +114,7 @@ namespace mfc
 		virtual void OnGlobalFontsChanged( void );
 		virtual BOOL OnUpdateToolTip( CWnd* pWndParent, int buttonIndex, CToolTipCtrl& wndToolTip, CString& rTipText );
 	protected:
-		virtual void CopyFrom( const CMFCToolBarButton& src ) override;
+		virtual void CopyFrom( const CMFCToolBarButton& src ) override_;
 
 		void OnOptionFlagsChanged( void );
 	private:

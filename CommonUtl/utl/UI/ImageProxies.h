@@ -17,11 +17,11 @@ public:
 	const CDibSectionTraits* GetDibSectionTraits( void ) const { return m_pDibTraits.get(); }
 
 	// ui::IImageProxy interface
-	virtual bool IsEmpty( void ) const override { return nullptr == m_hBitmapList || m_index < 0; }
-	virtual const CSize& GetSize( void ) const override { return m_size; }
-	virtual bool HasTransparency( void ) const override;
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual bool IsEmpty( void ) const override_ { return nullptr == m_hBitmapList || m_index < 0; }
+	virtual const CSize& GetSize( void ) const override_ { return m_size; }
+	virtual bool HasTransparency( void ) const override_;
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override_;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override_;
 private:
 	void Init( void );
 	void CreateMonochromeMask( CDC* pMemoryDC, CDC* pMonoDC ) const;
@@ -45,11 +45,11 @@ public:
 	virtual ~CIconProxy();
 
 	// ui::IImageProxy interface
-	virtual bool IsEmpty( void ) const override { return nullptr == m_pIcon; }
-	virtual const CSize& GetSize( void ) const override;
-	virtual bool HasTransparency( void ) const override { return true; }
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual bool IsEmpty( void ) const override_ { return nullptr == m_pIcon; }
+	virtual const CSize& GetSize( void ) const override_;
+	virtual bool HasTransparency( void ) const override_ { return true; }
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override_;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override_;
 private:
 	void CreateMonochromeMask( CDC* pMemoryDC, CDC* pMonoDC ) const;
 private:
@@ -73,11 +73,11 @@ struct CImageListProxy : public ui::IImageProxy
 	bool SetImageIndex( int imageIndex ) { return utl::ModifyValue( m_imageIndex, imageIndex ); }
 
 	// ui::IImageProxy interface
-	virtual bool IsEmpty( void ) const  override { return nullptr == m_pImageList || m_imageIndex < 0; }
-	virtual const CSize& GetSize( void ) const override { return m_imageSize; }
-	virtual bool HasTransparency( void ) const override { return true; }
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual bool IsEmpty( void ) const  override_ { return nullptr == m_pImageList || m_imageIndex < 0; }
+	virtual const CSize& GetSize( void ) const override_ { return m_imageSize; }
+	virtual bool HasTransparency( void ) const override_ { return true; }
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override_;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override_;
 
 	// overlay
 	bool HasOverlayMask( void ) const { return m_overlayMask > NoOverlayMask; }
@@ -109,11 +109,11 @@ public:
 	const CSize& GetImageSize( void ) const { return m_imageSize; }
 
 	// ui::IImageProxy interface
-	virtual bool IsEmpty( void ) const  override { return nullptr == m_pImageList; }
-	virtual const CSize& GetSize( void ) const override { return m_stripSize; }
-	virtual bool HasTransparency( void ) const override { return true; }
-	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
-	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override;
+	virtual bool IsEmpty( void ) const  override_ { return nullptr == m_pImageList; }
+	virtual const CSize& GetSize( void ) const override_ { return m_stripSize; }
+	virtual bool HasTransparency( void ) const override_ { return true; }
+	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override_;
+	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const override_;
 private:
 	CImageList* m_pImageList;					// no ownership
 	int m_imageCount;
@@ -131,9 +131,9 @@ public:
 	virtual ~CColorBoxImage();
 
 	// ui::IImageProxy interface
-	virtual bool IsEmpty( void ) const override { return false; }
-	virtual const CSize& GetSize( void ) const override { return m_size; }
-	virtual void SizeToText( CDC* pDC ) override;
+	virtual bool IsEmpty( void ) const override_ { return false; }
+	virtual const CSize& GetSize( void ) const override_ { return m_size; }
+	virtual void SizeToText( CDC* pDC ) override_;
 	virtual void Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const;
 	virtual void DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor = CLR_NONE ) const;
 private:

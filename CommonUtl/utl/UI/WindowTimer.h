@@ -50,7 +50,7 @@ public:
 	void Start( HWND hWnd, int eventId, UINT elapseMs, size_t seqCount = 1 );
 	void Stop( void );
 protected:
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_;
 private:
 	ISequenceTimerCallback* m_pCallback;
 	UINT_PTR m_eventId;

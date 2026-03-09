@@ -43,7 +43,7 @@
 
 
 #define abstract			// class not instantiable
-#define override			// method suffix to indicate a base override - note: replaces the CLR override keyword
+#define override_			// method suffix to indicate a base override
 #define overrides( ... )	// annotates the base class that virtual method overrides
 #define implement			// method suffix to indicate an interface method is implemented
 #define implements( ... )	// annotates the interface that virtual method implements

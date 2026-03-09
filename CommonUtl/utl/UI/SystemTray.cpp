@@ -372,7 +372,7 @@ CWnd* CSystemTrayWndHook::EnsurePopupWnd( void )
 	return pPopupWnd;
 }
 
-LRESULT CSystemTrayWndHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override
+LRESULT CSystemTrayWndHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_
 {
 	switch ( message )
 	{

@@ -30,15 +30,15 @@ public:
 	bool HasHelpButton( void ) const { return HasFlag( m_psh.dwFlags, PSH_HASHELP ); }
 
 	// ui::ILayoutEngine interface
-	virtual CLayoutEngine& GetLayoutEngine( void ) override;
-	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override;
-	virtual bool HasControlLayout( void ) const override;
+	virtual CLayoutEngine& GetLayoutEngine( void ) override_;
+	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override_;
+	virtual bool HasControlLayout( void ) const override_;
 
 	// base overrides
-	virtual void LoadFromRegistry( void ) override;
-	virtual void SaveToRegistry( void ) override;
-	virtual bool IsSheetModified( void ) const override;
-	virtual void LayoutSheet( void ) override;
+	virtual void LoadFromRegistry( void ) override_;
+	virtual void SaveToRegistry( void ) override_;
+	virtual bool IsSheetModified( void ) const override_;
+	virtual void LayoutSheet( void ) override_;
 protected:
 	virtual void OnIdleUpdateControls( void );
 private:
@@ -63,15 +63,15 @@ public:
 
 	// generated stuff
 public:
-	virtual void BuildPropPageArray( void ) override;
-	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
-	virtual BOOL OnInitDialog( void ) override;
+	virtual void BuildPropPageArray( void ) override_;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override_;
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_;
+	virtual BOOL OnInitDialog( void ) override_;
 protected:
-	virtual void PreSubclassWindow( void ) override;
-	virtual void PostNcDestroy( void ) override;
+	virtual void PreSubclassWindow( void ) override_;
+	virtual void PostNcDestroy( void ) override_;
 protected:
-	virtual void OnDestroy( void ) override;
+	virtual void OnDestroy( void ) override_;
 	afx_msg BOOL OnNcCreate( CREATESTRUCT* pCreate );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );

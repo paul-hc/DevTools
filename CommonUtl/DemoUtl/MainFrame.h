@@ -24,7 +24,7 @@ protected:
 	// generated stuff
 public:
 	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_;
 protected:
 	afx_msg int OnCreate( LPCREATESTRUCT lpCreateStruct );
 	afx_msg LRESULT OnIdleUpdateCmdUI( WPARAM wParam, LPARAM lParam );

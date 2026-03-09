@@ -48,12 +48,12 @@ namespace cmd
 		CBinaryLogSerializer( CCommandModel* pCommandModel ) : CLogSerializer( pCommandModel ) {}
 
 		// base overrides
-		virtual bool Save( const fs::CPath& undoLogPath ) override;
-		virtual bool Load( const fs::CPath& undoLogPath ) override;
+		virtual bool Save( const fs::CPath& undoLogPath ) override_;
+		virtual bool Load( const fs::CPath& undoLogPath ) override_;
 	private:
 		// serial::IStreamable interface
-		virtual void Save( CArchive& archive ) override throws_( CException* );
-		virtual void Load( CArchive& archive ) override throws_( CException* );
+		virtual void Save( CArchive& archive ) override_ throws_( CException* );
+		virtual void Load( CArchive& archive ) override_ throws_( CException* );
 
 		static void SaveStack( CArchive& archive, svc::StackType section, const std::deque<utl::ICommand*>& cmdStack );
 		static void LoadStack( CArchive& archive, std::deque<utl::ICommand*>& rCmdStack );

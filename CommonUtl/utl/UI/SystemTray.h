@@ -86,9 +86,9 @@ public:
 	CSystemTrayWnd( void );
 	virtual ~CSystemTrayWnd();
 
-	virtual CWnd* GetPopupWnd( void ) override { return this; }
+	virtual CWnd* GetPopupWnd( void ) override_ { return this; }
 protected:
-	virtual CWnd* EnsurePopupWnd( void ) override;		// creates the popup window
+	virtual CWnd* EnsurePopupWnd( void ) override_;		// creates the popup window
 
 	// generated stuff
 protected:
@@ -114,12 +114,12 @@ public:
 	CSystemTrayWndHook( bool autoDelete = false );
 	virtual ~CSystemTrayWndHook();
 
-	virtual CWnd* GetPopupWnd( void ) override;
+	virtual CWnd* GetPopupWnd( void ) override_;
 protected:
-	virtual CWnd* EnsurePopupWnd( void ) override;		// hooks the popup window
+	virtual CWnd* EnsurePopupWnd( void ) override_;		// hooks the popup window
 
 	// base overrides
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_;
 };
 
 

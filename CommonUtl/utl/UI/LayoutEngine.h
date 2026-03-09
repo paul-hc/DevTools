@@ -148,9 +148,9 @@ public:
 	bool ShowPaneControls( bool show = true );
 
 	// base overrides
-	virtual void Reset( void ) override;
+	virtual void Reset( void ) override_;
 protected:
-	virtual void GetClientRectangle( OUT CRect* pClientRect ) const override;
+	virtual void GetClientRectangle( OUT CRect* pClientRect ) const override_;
 private:
 	using CLayoutEngine::Initialize;	// hidden base method
 

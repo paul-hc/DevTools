@@ -40,12 +40,12 @@ public:
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 
 	// ui::ILayoutEngine interface
-	virtual CLayoutEngine& GetLayoutEngine( void ) override;
-	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override;
-	virtual bool HasControlLayout( void ) const override;
+	virtual CLayoutEngine& GetLayoutEngine( void ) override_;
+	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override_;
+	virtual bool HasControlLayout( void ) const override_;
 
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_;
 
 	// overridables
 	virtual void LoadFromRegistry( void );
@@ -70,15 +70,15 @@ protected:
 
 	// generated stuff
 protected:
-	virtual void PreSubclassWindow( void ) override;
-	virtual void PostNcDestroy( void ) override;
-	virtual void DoDataExchange( CDataExchange* pDX ) override;
-	virtual void OnOK( void ) override;
-	virtual void OnCancel( void ) override;
+	virtual void PreSubclassWindow( void ) override_;
+	virtual void PostNcDestroy( void ) override_;
+	virtual void DoDataExchange( CDataExchange* pDX ) override_;
+	virtual void OnOK( void ) override_;
+	virtual void OnCancel( void ) override_;
 public:
-	virtual BOOL DestroyWindow( void ) override;
-	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
+	virtual BOOL DestroyWindow( void ) override_;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override_;
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_;
 protected:
 	virtual void OnDestroy( void );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );

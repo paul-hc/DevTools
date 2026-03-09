@@ -44,12 +44,12 @@ public:
 	CMenu& GetContextMenu( void ) { return m_contextMenu; }
 
 	void StoreImageList( CImageList* pImageList );
-	CImageList* SetImageList( CImageList* pImageList, int imageType );		// pseudo-override
+	CImageList* SetImageList( CImageList* pImageList, int imageType );		// pseudo-override_
 
 	bool Copy( void );
 
 	// custom imager
-	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );		// ICustomDrawControl base override
+	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );		// ICustomDrawControl base override_
 	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize = CSize( 0, 0 ) );
 
 	// item image

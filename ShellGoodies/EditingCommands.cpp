@@ -43,7 +43,7 @@ CBaseChangeDestCmd::CBaseChangeDestCmd( cmd::CommandType cmdType, CFileModel* pF
 	SetSubject( m_pFileModel );
 }
 
-std::tstring CBaseChangeDestCmd::Format( utl::Verbosity verbosity ) const override
+std::tstring CBaseChangeDestCmd::Format( utl::Verbosity verbosity ) const override_
 {
 	if ( !m_cmdTag.empty() )
 		return m_cmdTag;
@@ -51,12 +51,12 @@ std::tstring CBaseChangeDestCmd::Format( utl::Verbosity verbosity ) const overri
 	return __super::Format( verbosity );
 }
 
-bool CBaseChangeDestCmd::Execute( void ) override
+bool CBaseChangeDestCmd::Execute( void ) override_
 {
 	return ToggleExecute();
 }
 
-bool CBaseChangeDestCmd::Unexecute( void ) override
+bool CBaseChangeDestCmd::Unexecute( void ) override_
 {
 	// Since Execute() toggles between m_destPaths and OldDestPaths, calling the second time has the effect of Unexecute().
 	// This assumes that this command is always executed through the command model for UNDO/REDO.
@@ -64,7 +64,7 @@ bool CBaseChangeDestCmd::Unexecute( void ) override
 	return ToggleExecute();
 }
 
-bool CBaseChangeDestCmd::IsUndoable( void ) const override
+bool CBaseChangeDestCmd::IsUndoable( void ) const override_
 {
 	return Changed == EvalChange();
 }
@@ -107,7 +107,7 @@ CChangeDestPathsCmd* CChangeDestPathsCmd::MakeResetItemsCmd( CFileModel* pFileMo
 	return new CChangeDestPathsCmd( pFileModel, &selItems, newDestPaths, cmd::FormatResetItemsTag( selItems.size(), pFileModel->GetRenameItems().size() ) );
 }
 
-bool CChangeDestPathsCmd::HasSelItems( void ) const override
+bool CChangeDestPathsCmd::HasSelItems( void ) const override_
 {
 	return m_srcPaths.size() < m_pFileModel->GetRenameItems().size();
 }
@@ -122,7 +122,7 @@ std::vector<CRenameItem*> CChangeDestPathsCmd::MakeSelItems( void ) const
 	return selItems;
 }
 
-CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const override
+CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const override_
 {
 	REQUIRE( m_srcPaths.size() == m_destPaths.size() );
 
@@ -145,7 +145,7 @@ CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const ove
 	return changeType;
 }
 
-bool CChangeDestPathsCmd::ToggleExecute( void ) override
+bool CChangeDestPathsCmd::ToggleExecute( void ) override_
 {
 	ChangeType changeType = EvalChange();
 	switch ( changeType )
@@ -167,7 +167,7 @@ bool CChangeDestPathsCmd::ToggleExecute( void ) override
 	return true;
 }
 
-void CChangeDestPathsCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override
+void CChangeDestPathsCmd::QueryDetailLines( std::vector<std::tstring>& rLines ) const override_
 {
 	ASSERT( m_srcPaths.size() == m_destPaths.size() );
 
@@ -221,12 +221,12 @@ CChangeDestFileStatesCmd* CChangeDestFileStatesCmd::MakeResetItemsCmd( CFileMode
 	return new CChangeDestFileStatesCmd( pFileModel, &selItems, newDestStates, cmd::FormatResetItemsTag( selItems.size(), pFileModel->GetTouchItems().size() ) );
 }
 
-bool CChangeDestFileStatesCmd::HasSelItems( void ) const override
+bool CChangeDestFileStatesCmd::HasSelItems( void ) const override_
 {
 	return m_srcStates.size() < m_pFileModel->GetTouchItems().size();
 }
 
-CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) const override
+CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) const override_
 {
 	REQUIRE( m_srcStates.size() == m_destStates.size() );
 
@@ -249,7 +249,7 @@ CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) cons
 	return changeType;
 }
 
-bool CChangeDestFileStatesCmd::ToggleExecute( void ) override
+bool CChangeDestFileStatesCmd::ToggleExecute( void ) override_
 {
 	ChangeType changeType = EvalChange();
 	switch ( changeType )
@@ -327,7 +327,7 @@ CChangeDestShortcutsCmd* CChangeDestShortcutsCmd::MakeResetItemsCmd( CFileModel*
 	return new CChangeDestShortcutsCmd( pFileModel, &selItems, newDestShortcuts, cmd::FormatResetItemsTag( selItems.size(), pFileModel->GetEditLinkItems().size() ) );
 }
 
-bool CChangeDestShortcutsCmd::HasSelItems( void ) const override
+bool CChangeDestShortcutsCmd::HasSelItems( void ) const override_
 {
 	bool hasSelItems = m_srcShortcuts.size() < m_pFileModel->GetEditLinkItems().size();
 
@@ -335,7 +335,7 @@ bool CChangeDestShortcutsCmd::HasSelItems( void ) const override
 	return hasSelItems;
 }
 
-CBaseChangeDestCmd::ChangeType CChangeDestShortcutsCmd::EvalChange( void ) const override
+CBaseChangeDestCmd::ChangeType CChangeDestShortcutsCmd::EvalChange( void ) const override_
 {
 	REQUIRE( m_srcShortcuts.size() == m_destShortcuts.size() );
 
@@ -360,7 +360,7 @@ CBaseChangeDestCmd::ChangeType CChangeDestShortcutsCmd::EvalChange( void ) const
 	return changeType;
 }
 
-bool CChangeDestShortcutsCmd::ToggleExecute( void ) override
+bool CChangeDestShortcutsCmd::ToggleExecute( void ) override_
 {
 	ChangeType changeType = EvalChange();
 	switch ( changeType )
@@ -419,7 +419,7 @@ CResetDestinationsMacroCmd::CResetDestinationsMacroCmd( CFileModel* pFileModel )
 		AddCmd( CChangeDestShortcutsCmd::MakeResetItemsCmd( pFileModel, pFileModel->GetEditLinkItems() ) );
 }
 
-std::tstring CResetDestinationsMacroCmd::Format( utl::Verbosity verbosity ) const override
+std::tstring CResetDestinationsMacroCmd::Format( utl::Verbosity verbosity ) const override_
 {
 	return GetSubCommands().front()->Format( verbosity );
 }
@@ -437,7 +437,7 @@ CSortRenameListCmd::CSortRenameListCmd( CFileModel* pFileModel, CReportListContr
 {
 }
 
-bool CSortRenameListCmd::DoExecute( void ) override
+bool CSortRenameListCmd::DoExecute( void ) override_
 {
 	if ( m_pFileListCtrl != nullptr )		// invoked by sorted list?
 	{	// fetch new rename items order
@@ -467,7 +467,7 @@ COnRenameListSelChangedCmd::COnRenameListSelChangedCmd( CLayoutBasePropertySheet
 {
 }
 
-bool COnRenameListSelChangedCmd::DoExecute( void ) override
+bool COnRenameListSelChangedCmd::DoExecute( void ) override_
 {
 #if defined( _DEBUG ) && 1
 	static int count = 0;

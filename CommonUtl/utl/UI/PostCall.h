@@ -19,7 +19,7 @@ private:
 	bool PostCall( CWnd* pWnd );
 
 	// base overrides
-	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override;
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam ) override_;
 private:
 	static const UINT WM_DELAYED_CALL;
 };

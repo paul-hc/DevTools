@@ -27,8 +27,8 @@ private:
 protected:
 	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext ) overrides(CFrameWnd);
 public:
-	virtual void ActivateFrame( int cmdShow = -1 ) override;
-	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
+	virtual void ActivateFrame( int cmdShow = -1 ) override_;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override_;
 protected:
 	afx_msg void OnDestroy( void );
 	afx_msg void OnWindowPosChanging( WINDOWPOS* pWndPos );

@@ -224,7 +224,7 @@ void CEditShortcutsDialog::SwitchMode( Mode mode )
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
 }
 
-void CEditShortcutsDialog::PostMakeDest( bool silent /*= false*/ ) override
+void CEditShortcutsDialog::PostMakeDest( bool silent /*= false*/ ) override_
 {
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
@@ -233,7 +233,7 @@ void CEditShortcutsDialog::PostMakeDest( bool silent /*= false*/ ) override
 	SwitchMode( CommitFilesMode );
 }
 
-void CEditShortcutsDialog::PopStackTop( svc::StackType stackType ) override
+void CEditShortcutsDialog::PopStackTop( svc::StackType stackType ) override_
 {
 	ASSERT( !IsRollMode() );
 
@@ -522,7 +522,7 @@ bool CEditShortcutsDialog::VisibleAllSrcColumns( void ) const
 	return m_fileListCtrl.IsColumnRangeVisible( S_Target, S_Description );
 }
 
-void CEditShortcutsDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override
+void CEditShortcutsDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage ) override_
 {
 	const cmd::CommandType cmdType = static_cast<cmd::CommandType>( utl::GetSafeTypeID( pMessage ) ); cmdType;
 
@@ -549,7 +549,7 @@ void CEditShortcutsDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMe
 		CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 }
 
-void CEditShortcutsDialog::ClearFileErrors( void ) override
+void CEditShortcutsDialog::ClearFileErrors( void ) override_
 {
 	m_errorItems.clear();
 
@@ -557,7 +557,7 @@ void CEditShortcutsDialog::ClearFileErrors( void ) override
 		m_fileListCtrl.Invalidate();
 }
 
-void CEditShortcutsDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override
+void CEditShortcutsDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) override_
 {
 	errMsg;
 
@@ -567,7 +567,7 @@ void CEditShortcutsDialog::OnFileError( const fs::CPath& srcPath, const std::tst
 	EnsureVisibleFirstError();
 }
 
-void CEditShortcutsDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override
+void CEditShortcutsDialog::QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_
 {
 	switch ( cmdId )
 	{
@@ -675,7 +675,7 @@ void CEditShortcutsDialog::FetchFieldState( OUT CFieldState& rState, const CEdit
 	}
 }
 
-void CEditShortcutsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override
+void CEditShortcutsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const override_
 {
 	pCtrl;
 	static const ui::CTextEffect s_modLinkName( ui::Bold );
@@ -735,7 +735,7 @@ void CEditShortcutsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	}
 }
 
-void CEditShortcutsDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override
+void CEditShortcutsDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const override_
 {
 	rowKey, pCtrl;
 	if ( LinkName == subItem )
@@ -829,8 +829,7 @@ BEGIN_MESSAGE_MAP( CEditShortcutsDialog, CFileEditorBaseDialog )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestShortcuts )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
 
-	ON_NOTIFY( LVN_ITEMCHANGED, IDC_EDIT_SHORTCUTS_LIST, OnLvnItemChanged_LinkList )
-	ON_CONTROL( lv::LVN_SelCaretChanged, IDC_EDIT_SHORTCUTS_LIST, OnLvnSelCaretChanged_LinkList )
+	ON_CONTROL( lv::LVN_SelCaretChanged, IDC_EDIT_SHORTCUTS_LIST, OnLvnSelCaretChanged_LinkList )		// posted, coalesced after LVN_ITEMCHANGED notification sequences
 	ON_NOTIFY( lv::LVN_CopyTableText, IDC_EDIT_SHORTCUTS_LIST, OnLvnCopyTableText_LinkList )
 	ON_CONTROL_RANGE( EN_CHANGE, IDC_TARGET_PATH_EDIT, IDC_HOT_KEY_CTRL, OnEnChange_DetailField )
 	ON_CBN_SELCHANGE( IDC_SHOW_CMD_COMBO, OnCbnSelChange_ShowCmd )
@@ -938,21 +937,6 @@ void CEditShortcutsDialog::OnBnClicked_ResetDestFiles( void )
 void CEditShortcutsDialog::OnUpdateListSelection( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( !m_selData.GetSelItems().empty() );
-}
-
-void CEditShortcutsDialog::OnLvnItemChanged_LinkList( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
-
-	ASSERT( !m_fileListCtrl.IsInternalChange() );				// filtered internally by CReportListControl
-	if ( m_fileListCtrl.IsSelectionChangeNotify( pNmList ) )	// IsSelectionCaretChangeNotify() skips updates when reducing the selection
-	{
-		//CReportListControl::TraceNotify( pNmList );
-
-		// do nothing here, handle selection change in OnLvnSelCaretChanged_LinkList() via lv::LVN_SelCaretChanged notification
-	}
-
-	*pResult = 0;
 }
 
 void CEditShortcutsDialog::OnLvnSelCaretChanged_LinkList( void )

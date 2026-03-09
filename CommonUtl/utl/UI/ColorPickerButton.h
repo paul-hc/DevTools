@@ -106,7 +106,7 @@ private:
 	static std::vector<CColorPickerButton*> s_instances;	// for color table notifications
 protected:
 	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override;
+	virtual void QueryTooltipText( OUT std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const override_;
 
 	// base overrides:
 	virtual void UpdateColor( COLORREF color ) overrides(CMFCColorButton);
@@ -115,9 +115,9 @@ protected:
 
 	// generated stuff
 public:
-	virtual void PreSubclassWindow( void ) override;
-	virtual BOOL PreTranslateMessage( MSG* pMsg ) override;
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override;
+	virtual void PreSubclassWindow( void ) override_;
+	virtual BOOL PreTranslateMessage( MSG* pMsg ) override_;
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_;
 protected:
 	afx_msg void OnDestroy( void );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );

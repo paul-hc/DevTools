@@ -67,12 +67,12 @@ bool CPathItemEdit::InputShellPath( void )
 	return true;			// path has changed
 }
 
-bool CPathItemEdit::HasValidImage( void ) const override
+bool CPathItemEdit::HasValidImage( void ) const override_
 {
 	return m_pathItem.ObjectExist();
 }
 
-bool CPathItemEdit::SetMultiValuesMode( bool multiValuesMode /*= true*/ ) override
+bool CPathItemEdit::SetMultiValuesMode( bool multiValuesMode /*= true*/ ) override_
 {	// switch to MultiValues contents mode
 	if ( !__super::SetMultiValuesMode( multiValuesMode ) )
 		return false;
@@ -83,7 +83,7 @@ bool CPathItemEdit::SetMultiValuesMode( bool multiValuesMode /*= true*/ ) overri
 	return true;
 }
 
-void CPathItemEdit::UpdateControl( void ) override
+void CPathItemEdit::UpdateControl( void ) override_
 {
 	m_evalFilePath = GetShellPath().GetExpanded();
 
@@ -96,7 +96,7 @@ void CPathItemEdit::UpdateControl( void ) override
 	__super::UpdateControl();
 }
 
-void CPathItemEdit::DrawImage( CDC* pDC, const CRect& imageRect ) override
+void CPathItemEdit::DrawImage( CDC* pDC, const CRect& imageRect ) override_
 {
 	// don't bother drawing the transparent image
 	//__super::DrawImage( pDC, imageRect );
@@ -197,7 +197,7 @@ void CPathItemEdit::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 		DoTrackContextMenu( pPopupMenu, screenPos );
 }
 
-void CPathItemEdit::OnEditCopy( void ) override
+void CPathItemEdit::OnEditCopy( void ) override_
 {
 	if ( m_pathItem.IsSpecialPidl() )
 		CTextClipboard::CopyText( GetShellPath().Get(), m_hWnd );	// copy the GUID path

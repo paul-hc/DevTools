@@ -75,22 +75,22 @@ bool CLayoutPropertySheet::CreateModeless( CWnd* pParent /*= nullptr*/, DWORD st
 	return __super::Create( pParent, style, styleEx ) != FALSE;
 }
 
-CLayoutEngine& CLayoutPropertySheet::GetLayoutEngine( void ) override
+CLayoutEngine& CLayoutPropertySheet::GetLayoutEngine( void ) override_
 {
 	return *m_pLayoutEngine;
 }
 
-void CLayoutPropertySheet::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override
+void CLayoutPropertySheet::RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count ) override_
 {
 	m_pLayoutEngine->RegisterCtrlLayout( layoutStyles, count );
 }
 
-bool CLayoutPropertySheet::HasControlLayout( void ) const override
+bool CLayoutPropertySheet::HasControlLayout( void ) const override_
 {
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
-void CLayoutPropertySheet::BuildPropPageArray( void ) override
+void CLayoutPropertySheet::BuildPropPageArray( void ) override_
 {
 	if ( !m_resizable )
 		m_resizable = AnyPageResizable();
@@ -98,7 +98,7 @@ void CLayoutPropertySheet::BuildPropPageArray( void ) override
 	__super::BuildPropPageArray();
 }
 
-void CLayoutPropertySheet::LoadFromRegistry( void ) override
+void CLayoutPropertySheet::LoadFromRegistry( void ) override_
 {
 	__super::LoadFromRegistry();
 
@@ -131,7 +131,7 @@ void CLayoutPropertySheet::LoadFromRegistry( void ) override
 	m_pSheetPlacement.reset( new CLayoutPlacement( placement ) );
 }
 
-void CLayoutPropertySheet::SaveToRegistry( void ) override
+void CLayoutPropertySheet::SaveToRegistry( void ) override_
 {
 	__super::SaveToRegistry();
 
@@ -301,7 +301,7 @@ void CLayoutPropertySheet::OnIdleUpdateControls( void )
 {
 }
 
-bool CLayoutPropertySheet::IsSheetModified( void ) const override
+bool CLayoutPropertySheet::IsSheetModified( void ) const override_
 {
 	if ( nullptr == m_hWnd )
 		return false;				// window not yet created
@@ -309,7 +309,7 @@ bool CLayoutPropertySheet::IsSheetModified( void ) const override
 	return m_alwaysModified || __super::IsSheetModified();
 }
 
-void CLayoutPropertySheet::LayoutSheet( void ) override
+void CLayoutPropertySheet::LayoutSheet( void ) override_
 {
 	if ( IsIconic() )
 		return;
@@ -320,7 +320,7 @@ void CLayoutPropertySheet::LayoutSheet( void ) override
 	__super::LayoutSheet();
 }
 
-void CLayoutPropertySheet::PreSubclassWindow( void ) override
+void CLayoutPropertySheet::PreSubclassWindow( void ) override_
 {
 	CLayoutBasePropertySheet::PreSubclassWindow();
 
@@ -331,7 +331,7 @@ void CLayoutPropertySheet::PreSubclassWindow( void ) override
 	}
 }
 
-void CLayoutPropertySheet::PostNcDestroy( void ) override
+void CLayoutPropertySheet::PostNcDestroy( void ) override_
 {
 	CLayoutBasePropertySheet::PostNcDestroy();
 
@@ -339,14 +339,14 @@ void CLayoutPropertySheet::PostNcDestroy( void ) override
 		delete this;
 }
 
-BOOL CLayoutPropertySheet::PreTranslateMessage( MSG* pMsg ) override
+BOOL CLayoutPropertySheet::PreTranslateMessage( MSG* pMsg ) override_
 {
 	return
 		__super::PreTranslateMessage( pMsg ) ||				// handle base first because it must relay tooltip events
 		m_accelPool.TranslateAccels( pMsg, m_hWnd );
 }
 
-BOOL CLayoutPropertySheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override
+BOOL CLayoutPropertySheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo ) override_
 {
 	return
 		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
@@ -370,7 +370,7 @@ BEGIN_MESSAGE_MAP( CLayoutPropertySheet, CLayoutBasePropertySheet )
 	ON_MESSAGE( WM_KICKIDLE, OnKickIdle )
 END_MESSAGE_MAP()
 
-void CLayoutPropertySheet::OnDestroy( void ) override
+void CLayoutPropertySheet::OnDestroy( void ) override_
 {
 	if ( m_modeless )
 		CPopupWndPool::Instance()->RemoveWindow( this );
@@ -378,7 +378,7 @@ void CLayoutPropertySheet::OnDestroy( void ) override
 	CLayoutBasePropertySheet::OnDestroy();
 }
 
-BOOL CLayoutPropertySheet::OnInitDialog( void ) override
+BOOL CLayoutPropertySheet::OnInitDialog( void ) override_
 {
 	BOOL result = __super::OnInitDialog();
 

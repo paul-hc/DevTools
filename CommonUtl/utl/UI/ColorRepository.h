@@ -148,7 +148,7 @@ public:
 protected:
 	// base overrides
 	virtual void OnTableChanged( void ) overrides(CColorTable);
-	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const override;
+	virtual ui::TDisplayColor EncodeRawColor( COLORREF rawColor ) const override_;
 private:
 	UINT m_taggedGridColumns;					// used for display in CColorGridBar named colors grid
 	std::unordered_map<COLORREF, ui::TDisplayColor> m_displaySysColors;		// raw -> unique encoded colors, to disambiguate selected color in MFC color bars

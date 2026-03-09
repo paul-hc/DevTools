@@ -215,7 +215,7 @@ void CLayoutBasePropertySheet::LayoutPages( const CRect& rPageRect )
 			RegisterTabTooltips();								// tab items may get repositioned on different lines
 }
 
-void CLayoutBasePropertySheet::BuildPropPageArray( void ) override
+void CLayoutBasePropertySheet::BuildPropPageArray( void ) override_
 {
 	LoadFromRegistry();				// before window creation
 	__super::BuildPropPageArray();
@@ -342,7 +342,7 @@ void CLayoutBasePropertySheet::OnChangesApplied( void )
 {
 }
 
-BOOL CLayoutBasePropertySheet::PreTranslateMessage( MSG* pMsg ) override
+BOOL CLayoutBasePropertySheet::PreTranslateMessage( MSG* pMsg ) override_
 {
 	if ( GetSheetTooltip() != nullptr )
 		m_pTooltipCtrl->RelayEvent( pMsg );
@@ -360,7 +360,7 @@ BEGIN_MESSAGE_MAP( CLayoutBasePropertySheet, CPropertySheet )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
 END_MESSAGE_MAP()
 
-BOOL CLayoutBasePropertySheet::OnInitDialog( void ) override
+BOOL CLayoutBasePropertySheet::OnInitDialog( void ) override_
 {
 	BOOL result = __super::OnInitDialog();
 

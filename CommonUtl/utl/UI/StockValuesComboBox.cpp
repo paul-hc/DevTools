@@ -27,7 +27,7 @@ void CStockValuesComboBox::SetTags( const ui::IStockTags* pStockTags )
 		InitStockContent();
 }
 
-void CStockValuesComboBox::InitStockContent( void ) override
+void CStockValuesComboBox::InitStockContent( void ) override_
 {
 	std::vector<std::tstring> tags;
 	m_pStockTags->QueryStockTags( tags );

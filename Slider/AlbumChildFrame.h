@@ -24,7 +24,7 @@ protected:
 	virtual ~CAlbumChildFrame();
 public:
 	// base overrides
-	virtual IImageView* GetImageView( void ) const override;		// could be either CImageView or CAlbumImageView (but not CAlbumThumbListView!)
+	virtual IImageView* GetImageView( void ) const override_;		// could be either CImageView or CAlbumImageView (but not CAlbumThumbListView!)
 
 	// view panes
 	CAlbumThumbListView* GetThumbView( void ) const { return safe_ptr( m_pThumbsListView ); }

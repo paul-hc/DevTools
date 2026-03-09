@@ -5,7 +5,7 @@
 
 
 template< typename SubjectType >
-bool CBaseRenamePageObjectCommand<SubjectType>::Execute( void ) override
+bool CBaseRenamePageObjectCommand<SubjectType>::Execute( void ) override_
 {
 	CScopedInternalChange pageChanging( m_pPage );
 

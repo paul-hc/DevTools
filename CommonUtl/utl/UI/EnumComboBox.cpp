@@ -23,7 +23,7 @@ CEnumComboBox::~CEnumComboBox()
 {
 }
 
-void CEnumComboBox::InitStockContent( void ) override
+void CEnumComboBox::InitStockContent( void ) override_
 {
 	ASSERT_PTR( m_pEnumTags );
 	ASSERT( !HasFlag( GetStyle(), CBS_SORT ) );			// auto-sorting combos don't work with enumerations

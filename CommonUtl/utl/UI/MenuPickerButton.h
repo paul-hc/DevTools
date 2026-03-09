@@ -18,7 +18,7 @@ private:
 
 	// base overrides:
 protected:
-	virtual void OnShowMenu( void ) override;
+	virtual void OnShowMenu( void ) override_;
 
 	// generated stuff
 protected:

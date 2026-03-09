@@ -23,8 +23,8 @@ namespace mfc
 
 		// base overrides
 	public:
-		virtual CMFCPopupMenu* ShowPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bOwnMessage = FALSE, BOOL bAutoDestroy = TRUE, BOOL bRightAlign = FALSE ) override;
-		virtual UINT TrackPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bRightAlign = FALSE ) override;
+		virtual CMFCPopupMenu* ShowPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bOwnMessage = FALSE, BOOL bAutoDestroy = TRUE, BOOL bRightAlign = FALSE ) override_;
+		virtual UINT TrackPopupMenu( HMENU hMenuPopup, int x, int y, CWnd* pWndOwner, BOOL bRightAlign = FALSE ) override_;
 	private:
 		std::auto_ptr<CMFCPopupMenu> m_pNewTrackingPopup;
 		CMFCPopupMenu* m_pTrackingPopupMenu;		// temporary set during tracking

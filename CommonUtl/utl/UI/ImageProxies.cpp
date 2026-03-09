@@ -57,12 +57,12 @@ void CBitmapProxy::Init( void )
 	}
 }
 
-bool CBitmapProxy::HasTransparency( void ) const override
+bool CBitmapProxy::HasTransparency( void ) const override_
 {
 	return m_pDibTraits.get() != nullptr &&m_pDibTraits->HasAlphaChannel();
 }
 
-void CBitmapProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= CLR_NONE*/ ) const override
+void CBitmapProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= CLR_NONE*/ ) const override_
 {
 	ASSERT( !IsEmpty() );
 
@@ -88,7 +88,7 @@ void CBitmapProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= C
 	}
 }
 
-void CBitmapProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= CLR_NONE*/ ) const override
+void CBitmapProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF transpColor /*= CLR_NONE*/ ) const override_
 {
 	transpColor;
 	ASSERT( !IsEmpty() );
@@ -161,18 +161,18 @@ CIconProxy::~CIconProxy()
 		delete m_pIcon;
 }
 
-const CSize& CIconProxy::GetSize( void ) const override
+const CSize& CIconProxy::GetSize( void ) const override_
 {
 	return m_pIcon->GetSize();
 }
 
-void CIconProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+void CIconProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override_
 {
 	if ( m_pIcon != nullptr )
 		m_pIcon->Draw( *pDC, pos );
 }
 
-void CIconProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+void CIconProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override_
 {
 	if ( m_pIcon != nullptr )
 		m_pIcon->Draw( *pDC, pos, false );
@@ -206,7 +206,7 @@ void CImageListProxy::SetImageList( CImageList* pImageList )
 		m_imageSize = gdi::GetImageIconSize( m_pImageList->GetSafeHandle() );
 }
 
-void CImageListProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+void CImageListProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override_
 {
 	ASSERT( !IsEmpty() );
 
@@ -216,7 +216,7 @@ void CImageListProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor 
 		m_pExternalOverlay->Draw( pDC, pos, ILD_TRANSPARENT );
 }
 
-void CImageListProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+void CImageListProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override_
 {
 	ASSERT( !IsEmpty() );
 
@@ -332,7 +332,7 @@ CImageListStripProxy::CImageListStripProxy( const CImageList* pImageList )
 	ASSERT_PTR( m_pImageList );
 }
 
-void CImageListStripProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+void CImageListStripProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override_
 {
 	ASSERT( !IsEmpty() );
 
@@ -343,7 +343,7 @@ void CImageListStripProxy::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpC
 		VERIFY( pImageList->Draw( pDC, i, imagePos, ILD_TRANSPARENT ) );
 }
 
-void CImageListStripProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+void CImageListStripProxy::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override_
 {
 	ASSERT( !IsEmpty() );
 
@@ -367,7 +367,7 @@ CColorBoxImage::~CColorBoxImage()
 {
 }
 
-void CColorBoxImage::SizeToText( CDC* pDC ) override
+void CColorBoxImage::SizeToText( CDC* pDC ) override_
 {
 	if ( AutoTextSize == m_size.cx || AutoTextSize == m_size.cy )
 	{
@@ -381,12 +381,12 @@ void CColorBoxImage::SizeToText( CDC* pDC ) override
 	}
 }
 
-void CColorBoxImage::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+void CColorBoxImage::Draw( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override_
 {
 	DrawImpl( pDC, pos, true );
 }
 
-void CColorBoxImage::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override
+void CColorBoxImage::DrawDisabled( CDC* pDC, const CPoint& pos, COLORREF /*transpColor = CLR_NONE*/ ) const override_
 {
 	DrawImpl( pDC, pos, false );
 }
