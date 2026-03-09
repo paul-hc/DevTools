@@ -35,7 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "other", "other", "{235DC59E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UTL Framework", "UTL Framework", "{1B83F45B-AD10-4749-8116-495C531E3163}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpyFindWindow", "..\..\SpyFindWindow\SpyFindWindow_vc17.vcxproj", "{29B94E56-D65F-4D7D-B971-B6AD91192D9A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpyFindWindow", "..\..\other\SpyFindWindow\SpyFindWindow_vc17.vcxproj", "{29B94E56-D65F-4D7D-B971-B6AD91192D9A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_main", "_main", "{6ED30EE2-183B-4774-867D-4D5951217903}"
 EndProject
