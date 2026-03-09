@@ -38,7 +38,8 @@
 
 #ifndef IS_CPP_11
 	#define nullptr NULL
-	#define final			// don't override a method/don't subclass a class
+	#define final			// pre-C++ 11: don't override a method/don't subclass a class
+	#define override		// pre-C++ 11: method suffix to indicate a base override
 #endif
 
 
@@ -51,9 +52,6 @@
 #define rebound				// non-persistent pointer data-member that needs special rebinding after loading persistent object state
 #define throws_( ... )
 #define throws_cond( ... )	// throws conditionally, depending on a specific parameter
-
-//#define _out_				// output function parameter - better use OUT (defined in <minwindef.h>)
-//#define _in_out_			// input and output function parameter - better use IN OUT (defined in <minwindef.h>)
 
 
 #define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
